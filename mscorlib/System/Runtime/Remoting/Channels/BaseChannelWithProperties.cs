@@ -15,12 +15,11 @@ namespace System.Runtime.Remoting.Channels
 				{
 					return base.Properties;
 				}
-				IDictionary[] array = new IDictionary[]
+				return new AggregateDictionary(new IDictionary[]
 				{
 					base.Properties,
 					this.SinksWithProperties.Properties
-				};
-				return new AggregateDictionary(array);
+				});
 			}
 		}
 

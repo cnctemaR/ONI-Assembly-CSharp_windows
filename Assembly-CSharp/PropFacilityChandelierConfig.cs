@@ -7,9 +7,9 @@ public class PropFacilityChandelierConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityChandelier", SETITEMS.FACILITY_CHANDELIER.NAME, SETITEMS.FACILITY_CHANDELIER.DESC, 50f, Assets.GetAnim("gravitas_chandelier_kanim"), "off", Grid.SceneLayer.Building, 4, 4, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityChandelier", global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYCHANDELIER.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYCHANDELIER.DESC, 50f, Assets.GetAnim("gravitas_chandelier_kanim"), "off", Grid.SceneLayer.Building, 5, 7, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Steel);
 		component.Temperature = 294.15f;
 		return gameObject;
 	}

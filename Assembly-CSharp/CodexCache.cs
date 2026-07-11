@@ -19,13 +19,13 @@ public static class CodexCache
 		CodexCache.entries = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		string text = CodexCache.FormatLinkID("creatures");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator.GenerateCreatureEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Hatch").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui")));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator.GenerateCreatureEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Hatch").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
 		text = CodexCache.FormatLinkID("plants");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("PrickleFlower").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui")));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("PrickleFlower").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
 		text = CodexCache.FormatLinkID("food");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.FOOD, CodexEntryGenerator.GenerateFoodEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("CookedMeat").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui")));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.FOOD, CodexEntryGenerator.GenerateFoodEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("CookedMeat").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
 		text = CodexCache.FormatLinkID("buildings");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BUILDINGS, CodexEntryGenerator.GenerateBuildingEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Generator").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui")));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BUILDINGS, CodexEntryGenerator.GenerateBuildingEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Generator").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
 		text = CodexCache.FormatLinkID("tech");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TECH, CodexEntryGenerator.GenerateTechEntries(), Assets.GetSprite("hud_research")));
 		text = CodexCache.FormatLinkID("roles");
@@ -132,13 +132,8 @@ public static class CodexCache
 			{
 				if (subEntry.lockedContentContainer != null)
 				{
-					foreach (ContentContainer contentContainer in subEntry.contentContainers)
-					{
-						if (!string.IsNullOrEmpty(contentContainer.lockID))
-						{
-							break;
-						}
-					}
+					subEntry.lockedContentContainer.content.Clear();
+					subEntry.contentContainers.Remove(subEntry.lockedContentContainer);
 				}
 			}
 		}
@@ -262,7 +257,7 @@ public static class CodexCache
 		{
 			try
 			{
-				entry.icon = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(entry.iconPrefabID).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui");
+				entry.icon = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(entry.iconPrefabID).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false);
 			}
 			catch
 			{
@@ -339,13 +334,23 @@ public static class CodexCache
 		List<CodexEntry> list = new List<CodexEntry>();
 		string text = ((!(folder == string.Empty)) ? Path.Combine(CodexCache.baseEntryPath, folder) : CodexCache.baseEntryPath);
 		string[] files = Directory.GetFiles(text, "*.yaml");
+		WorkItemCollection<CodexCache.CollectEntryWorkItem, object> workItemCollection = new WorkItemCollection<CodexCache.CollectEntryWorkItem, object>();
 		foreach (string text2 in files)
 		{
-			CodexEntry codexEntry = YamlIO<CodexEntry>.LoadFile(text2);
-			if (codexEntry != null)
+			workItemCollection.Add(new CodexCache.CollectEntryWorkItem
 			{
-				codexEntry.category = folder.ToUpper();
-				list.Add(codexEntry);
+				path = text2
+			});
+		}
+		GlobalJobManager.Run(workItemCollection);
+		string text3 = folder.ToUpper();
+		for (int j = 0; j < workItemCollection.Count; j++)
+		{
+			CodexEntry asset = workItemCollection.GetWorkItem(j).asset;
+			if (asset != null)
+			{
+				asset.category = text3;
+				list.Add(asset);
 			}
 		}
 		list.Sort((CodexEntry x, CodexEntry y) => x.title.CompareTo(y.title));
@@ -357,12 +362,21 @@ public static class CodexCache
 		List<SubEntry> list = new List<SubEntry>();
 		string text = ((!(folder == string.Empty)) ? Path.Combine(CodexCache.baseEntryPath, folder) : CodexCache.baseEntryPath);
 		string[] files = Directory.GetFiles(text, "*.yaml", SearchOption.AllDirectories);
+		WorkItemCollection<CodexCache.CollectSubEntryWorkItem, object> workItemCollection = new WorkItemCollection<CodexCache.CollectSubEntryWorkItem, object>();
 		foreach (string text2 in files)
 		{
-			SubEntry subEntry = YamlIO<SubEntry>.LoadFile(text2);
-			if (subEntry != null)
+			workItemCollection.Add(new CodexCache.CollectSubEntryWorkItem
 			{
-				list.Add(subEntry);
+				path = text2
+			});
+		}
+		GlobalJobManager.Run(workItemCollection);
+		for (int j = 0; j < workItemCollection.Count; j++)
+		{
+			SubEntry asset = workItemCollection.GetWorkItem(j).asset;
+			if (asset != null)
+			{
+				list.Add(asset);
 			}
 		}
 		list.Sort((SubEntry x, SubEntry y) => x.title.CompareTo(y.title));
@@ -372,4 +386,28 @@ public static class CodexCache
 	private static string baseEntryPath;
 
 	public static Dictionary<string, CodexEntry> entries;
+
+	private struct CollectEntryWorkItem : IWorkItem<object>
+	{
+		public void Run(object shared_data)
+		{
+			this.asset = YamlIO<CodexEntry>.LoadFile(this.path);
+		}
+
+		public string path;
+
+		public CodexEntry asset;
+	}
+
+	private struct CollectSubEntryWorkItem : IWorkItem<object>
+	{
+		public void Run(object shared_data)
+		{
+			this.asset = YamlIO<SubEntry>.LoadFile(this.path);
+		}
+
+		public string path;
+
+		public SubEntry asset;
+	}
 }

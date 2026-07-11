@@ -73,11 +73,12 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		private void PlayHitAnimation()
 		{
 			string text = null;
-			if (this.animController.CurrentAnim != null)
+			KBatchedAnimController kbatchedAnimController = base.smi.Get<KBatchedAnimController>();
+			if (kbatchedAnimController.CurrentAnim != null)
 			{
-				text = this.animController.CurrentAnim.name;
+				text = kbatchedAnimController.CurrentAnim.name;
 			}
-			KAnim.PlayMode playMode = this.animController.PlayMode;
+			KAnim.PlayMode playMode = kbatchedAnimController.PlayMode;
 			if (text != null)
 			{
 				if (text.Contains("hit"))
@@ -139,10 +140,10 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			{
 				text2 = "hit_ladder";
 			}
-			this.animController.Play(text2, KAnim.PlayMode.Once, 1f, 0f);
+			kbatchedAnimController.Play(text2, KAnim.PlayMode.Once, 1f, 0f);
 			if (text != null)
 			{
-				this.animController.Queue(text, playMode, 1f, 0f);
+				kbatchedAnimController.Queue(text, playMode, 1f, 0f);
 			}
 		}
 

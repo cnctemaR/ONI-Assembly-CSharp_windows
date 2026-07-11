@@ -5,20 +5,6 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaDocumentation : XmlSchemaObject
 	{
-		[XmlAnyElement]
-		[XmlText]
-		public XmlNode[] Markup
-		{
-			get
-			{
-				return this.markup;
-			}
-			set
-			{
-				this.markup = value;
-			}
-		}
-
 		[XmlAttribute("source", DataType = "anyURI")]
 		public string Source
 		{
@@ -41,67 +27,30 @@ namespace System.Xml.Schema
 			}
 			set
 			{
-				this.language = value;
+				this.language = (string)XmlSchemaDocumentation.languageType.Datatype.ParseValue(value, null, null);
 			}
 		}
 
-		internal static XmlSchemaDocumentation Read(XmlSchemaReader reader, ValidationEventHandler h, out bool skip)
+		[XmlText]
+		[XmlAnyElement]
+		public XmlNode[] Markup
 		{
-			skip = false;
-			XmlSchemaDocumentation xmlSchemaDocumentation = new XmlSchemaDocumentation();
-			reader.MoveToElement();
-			if (reader.NamespaceURI != "http://www.w3.org/2001/XMLSchema" || reader.LocalName != "documentation")
+			get
 			{
-				XmlSchemaObject.error(h, "Should not happen :1: XmlSchemaDocumentation.Read, name=" + reader.Name, null);
-				reader.Skip();
-				return null;
+				return this.markup;
 			}
-			xmlSchemaDocumentation.LineNumber = reader.LineNumber;
-			xmlSchemaDocumentation.LinePosition = reader.LinePosition;
-			xmlSchemaDocumentation.SourceUri = reader.BaseURI;
-			while (reader.MoveToNextAttribute())
+			set
 			{
-				if (reader.Name == "source")
-				{
-					xmlSchemaDocumentation.source = reader.Value;
-				}
-				else if (reader.Name == "xml:lang")
-				{
-					xmlSchemaDocumentation.language = reader.Value;
-				}
-				else
-				{
-					XmlSchemaObject.error(h, reader.Name + " is not a valid attribute for documentation", null);
-				}
+				this.markup = value;
 			}
-			reader.MoveToElement();
-			if (reader.IsEmptyElement)
-			{
-				xmlSchemaDocumentation.Markup = new XmlNode[0];
-				return xmlSchemaDocumentation;
-			}
-			XmlDocument xmlDocument = new XmlDocument();
-			xmlDocument.AppendChild(xmlDocument.ReadNode(reader));
-			XmlNode firstChild = xmlDocument.FirstChild;
-			if (firstChild != null && firstChild.ChildNodes != null)
-			{
-				xmlSchemaDocumentation.Markup = new XmlNode[firstChild.ChildNodes.Count];
-				for (int i = 0; i < firstChild.ChildNodes.Count; i++)
-				{
-					xmlSchemaDocumentation.Markup[i] = firstChild.ChildNodes[i];
-				}
-			}
-			if (reader.NodeType == XmlNodeType.Element || reader.NodeType == XmlNodeType.EndElement)
-			{
-				skip = true;
-			}
-			return xmlSchemaDocumentation;
 		}
+
+		private string source;
 
 		private string language;
 
 		private XmlNode[] markup;
 
-		private string source;
+		private static XmlSchemaSimpleType languageType = DatatypeImplementation.GetSimpleTypeFromXsdType(new XmlQualifiedName("language", "http://www.w3.org/2001/XMLSchema"));
 	}
 }

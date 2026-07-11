@@ -6,38 +6,17 @@ namespace System.Data.SqlClient
 {
 	[ListBindable(false)]
 	[Serializable]
-	public sealed class SqlErrorCollection : IEnumerable, ICollection
+	public sealed class SqlErrorCollection : ICollection, IEnumerable
 	{
 		internal SqlErrorCollection()
 		{
-		}
-
-		internal SqlErrorCollection(byte theClass, int lineNumber, string message, int number, string procedure, string server, string source, byte state)
-		{
-			this.Add(theClass, lineNumber, message, number, procedure, server, source, state);
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.list.IsSynchronized;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this.list.SyncRoot;
-			}
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.list.Count;
+				throw null;
 			}
 		}
 
@@ -45,36 +24,37 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return (SqlError)this.list[index];
+				throw null;
 			}
 		}
 
-		internal void Add(SqlError error)
+		bool ICollection.IsSynchronized
 		{
-			this.list.Add(error);
+			get
+			{
+				throw null;
+			}
 		}
 
-		internal void Add(byte theClass, int lineNumber, string message, int number, string procedure, string server, string source, byte state)
+		object ICollection.SyncRoot
 		{
-			SqlError sqlError = new SqlError(theClass, lineNumber, message, number, procedure, server, source, state);
-			this.Add(sqlError);
+			get
+			{
+				throw null;
+			}
 		}
 
 		public void CopyTo(Array array, int index)
 		{
-			this.list.CopyTo(array, index);
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this.list.GetEnumerator();
 		}
 
 		public void CopyTo(SqlError[] array, int index)
 		{
-			this.list.CopyTo(array, index);
 		}
 
-		private ArrayList list = new ArrayList();
+		public IEnumerator GetEnumerator()
+		{
+			throw null;
+		}
 	}
 }

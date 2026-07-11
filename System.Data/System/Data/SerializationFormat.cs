@@ -4,7 +4,7 @@ namespace System.Data
 {
 	public enum SerializationFormat
 	{
-		Xml,
-		Binary
+		Binary = 1,
+		Xml = 0
 	}
 }

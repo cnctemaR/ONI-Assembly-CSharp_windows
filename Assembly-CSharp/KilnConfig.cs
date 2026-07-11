@@ -24,7 +24,6 @@ public class KilnConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.ExhaustKilowattsWhenActive = 16f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		return buildingDef;
 	}
@@ -52,10 +51,13 @@ public class KilnConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement(tag, num)
 		};
-		ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Kiln", tag), array, array2);
+		string text = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag);
+		string text2 = ComplexRecipeManager.MakeRecipeID("Kiln", array, array2);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Clay).name, ElementLoader.FindElementByHash(SimHashes.Ceramic).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("Kiln") };
+		ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
 		Tag tag4 = SimHashes.RefinedCarbon.CreateTag();
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
@@ -65,10 +67,13 @@ public class KilnConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement(tag4, num)
 		};
-		complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("Kiln", tag4), array3, array4);
+		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag4);
+		string text4 = ComplexRecipeManager.MakeRecipeID("Kiln", array3, array4);
+		complexRecipe = new ComplexRecipe(text4, array3, array4);
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Carbon).name, ElementLoader.FindElementByHash(SimHashes.RefinedCarbon).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("Kiln") };
+		ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
 		Prioritizable.AddRef(go);
 	}
 

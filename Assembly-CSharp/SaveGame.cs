@@ -18,6 +18,11 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public static void DestroyInstance()
+	{
+		SaveGame.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		SaveGame.Instance = this;
@@ -58,7 +63,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 275206U;
+		header.buildVersion = 279457U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);

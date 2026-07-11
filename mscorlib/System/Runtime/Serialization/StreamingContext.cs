@@ -9,49 +9,43 @@ namespace System.Runtime.Serialization
 	{
 		public StreamingContext(StreamingContextStates state)
 		{
-			this.state = state;
-			this.additional = null;
+			this = new StreamingContext(state, null);
 		}
 
 		public StreamingContext(StreamingContextStates state, object additional)
 		{
-			this.state = state;
-			this.additional = additional;
+			this.m_state = state;
+			this.m_additionalContext = additional;
 		}
 
 		public object Context
 		{
 			get
 			{
-				return this.additional;
+				return this.m_additionalContext;
 			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is StreamingContext && (((StreamingContext)obj).m_additionalContext == this.m_additionalContext && ((StreamingContext)obj).m_state == this.m_state);
+		}
+
+		public override int GetHashCode()
+		{
+			return (int)this.m_state;
 		}
 
 		public StreamingContextStates State
 		{
 			get
 			{
-				return this.state;
+				return this.m_state;
 			}
 		}
 
-		public override bool Equals(object obj)
-		{
-			if (!(obj is StreamingContext))
-			{
-				return false;
-			}
-			StreamingContext streamingContext = (StreamingContext)obj;
-			return streamingContext.state == this.state && streamingContext.additional == this.additional;
-		}
+		internal object m_additionalContext;
 
-		public override int GetHashCode()
-		{
-			return (int)this.state;
-		}
-
-		private StreamingContextStates state;
-
-		private object additional;
+		internal StreamingContextStates m_state;
 	}
 }

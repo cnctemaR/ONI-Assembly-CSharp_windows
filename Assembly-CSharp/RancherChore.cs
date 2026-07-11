@@ -115,6 +115,8 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 
 		private static void RanchCreature(RancherChore.RancherChoreStates.Instance smi)
 		{
+			KPrefabID component = smi.ranchStation.targetRanchable.GetComponent<KPrefabID>();
+			smi.sm.rancher.Get(smi).Trigger(937885943, component.PrefabTag.Name);
 			smi.ranchStation.RanchCreature();
 		}
 

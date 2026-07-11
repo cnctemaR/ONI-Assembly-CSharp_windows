@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 
@@ -17,21 +18,22 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 	{
 		base.OnStartWork(worker);
 		base.GetComponent<KAnimControllerBase>().Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
-		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.gameObject);
-		if (roomOfBuilding != null)
+		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
+		if (roomOfGameObject != null)
 		{
-			RoomType roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
-			if (roomType.category == Db.Get().RoomTypeCategories.Bathroom)
+			RoomType roomType = roomOfGameObject.roomType;
+			foreach (KeyValuePair<string, string> keyValuePair in ToiletWorkableUse.roomEffects)
 			{
-				worker.GetComponent<Effects>().Add("ProperBathroom", true);
+				if (keyValuePair.Key == roomType.Id)
+				{
+					worker.GetComponent<Effects>().Add(keyValuePair.Value, true);
+				}
+				else
+				{
+					worker.GetComponent<Effects>().Remove(keyValuePair.Value);
+				}
 			}
 		}
-	}
-
-	protected override void OnStopWork(Worker worker)
-	{
-		base.OnStopWork(worker);
-		base.GetComponent<KAnimControllerBase>().Play(Workable.DefaultPstWorkAnim, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -44,4 +46,10 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 
 	[Serialize]
 	public int timesUsed;
+
+	private static Dictionary<string, string> roomEffects = new Dictionary<string, string>
+	{
+		{ "Latrine", "RoomLatrine" },
+		{ "PlumbedBathroom", "RoomBathroom" }
+	};
 }

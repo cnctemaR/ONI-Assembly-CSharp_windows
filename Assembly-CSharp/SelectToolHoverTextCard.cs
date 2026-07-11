@@ -250,7 +250,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				RoomType roomType = null;
 				if (room != null)
 				{
-					roomType = Db.Get().RoomTypes.GetRoomType(room);
+					roomType = room.roomType;
 					text2 = roomType.Name;
 				}
 				else
@@ -588,6 +588,14 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 	{
 		bool flag = true;
 		if (OverlayScreen.Instance == null)
+		{
+			return flag;
+		}
+		if (selectable == null)
+		{
+			return false;
+		}
+		if (selectable.GetComponent<KPrefabID>() == null)
 		{
 			return flag;
 		}

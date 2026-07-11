@@ -8,8 +8,12 @@ namespace System.Reflection
 	[Serializable]
 	public struct CustomAttributeTypedArgument
 	{
-		internal CustomAttributeTypedArgument(Type argumentType, object value)
+		public CustomAttributeTypedArgument(Type argumentType, object value)
 		{
+			if (argumentType == null)
+			{
+				throw new ArgumentNullException("argumentType");
+			}
 			this.argumentType = argumentType;
 			this.value = value;
 			if (value is Array)
@@ -23,6 +27,16 @@ namespace System.Reflection
 				}
 				this.value = new ReadOnlyCollection<CustomAttributeTypedArgument>(array2);
 			}
+		}
+
+		public CustomAttributeTypedArgument(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			this.argumentType = value.GetType();
+			this.value = value;
 		}
 
 		public Type ArgumentType
@@ -43,7 +57,7 @@ namespace System.Reflection
 
 		public override string ToString()
 		{
-			string text = ((this.value == null) ? string.Empty : this.value.ToString());
+			string text = ((this.value != null) ? this.value.ToString() : string.Empty);
 			if (this.argumentType == typeof(string))
 			{
 				return "\"" + text + "\"";
@@ -66,12 +80,16 @@ namespace System.Reflection
 				return false;
 			}
 			CustomAttributeTypedArgument customAttributeTypedArgument = (CustomAttributeTypedArgument)obj;
-			return (customAttributeTypedArgument.argumentType != this.argumentType || this.value == null) ? (customAttributeTypedArgument.value == null) : this.value.Equals(customAttributeTypedArgument.value);
+			if (!(customAttributeTypedArgument.argumentType == this.argumentType) || this.value == null)
+			{
+				return customAttributeTypedArgument.value == null;
+			}
+			return this.value.Equals(customAttributeTypedArgument.value);
 		}
 
 		public override int GetHashCode()
 		{
-			return (this.argumentType.GetHashCode() << 16) + ((this.value == null) ? 0 : this.value.GetHashCode());
+			return (this.argumentType.GetHashCode() << 16) + ((this.value != null) ? this.value.GetHashCode() : 0);
 		}
 
 		public static bool operator ==(CustomAttributeTypedArgument left, CustomAttributeTypedArgument right)

@@ -33,7 +33,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 			BuildingDef def = Assets.GetBuildingDef(buildingInfo.id);
 			if (def.ShowInBuildMenu && !def.Deprecated)
 			{
-				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(def.Name, new BuildMenuBuildingsScreen.UserData(def, PlanScreen.RequirementsState.Tech), def.HotKey, () => def.GetUISprite("ui"));
+				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(def.Name, new BuildMenuBuildingsScreen.UserData(def, PlanScreen.RequirementsState.Tech), def.HotKey, () => def.GetUISprite("ui", false));
 				list.Add(toggleInfo);
 			}
 		}
@@ -118,7 +118,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 			return;
 		}
 		Image image = toggle.bgImage.GetComponentsInChildren<Image>()[1];
-		Sprite uisprite = def.GetUISprite("ui");
+		Sprite uisprite = def.GetUISprite("ui", false);
 		image.sprite = uisprite;
 		image.SetNativeSize();
 		image.rectTransform().sizeDelta /= 4f;

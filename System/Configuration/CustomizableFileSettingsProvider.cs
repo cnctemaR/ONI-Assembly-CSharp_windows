@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
@@ -11,7 +12,7 @@ namespace System.Configuration
 {
 	internal class CustomizableFileSettingsProvider : SettingsProvider, IApplicationSettingsProvider
 	{
-		public override void Initialize(string name, global::System.Collections.Specialized.NameValueCollection config)
+		public override void Initialize(string name, NameValueCollection config)
 		{
 			base.Initialize(name, config);
 		}
@@ -98,12 +99,12 @@ namespace System.Configuration
 					CustomizableFileSettingsProvider.isCompany = false;
 					return;
 				}
-				CustomizableFileSettingsProvider.isVersionRevision = (CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)8U) != (UserConfigLocationOption)0U;
-				CustomizableFileSettingsProvider.isVersionBuild = CustomizableFileSettingsProvider.isVersionRevision | ((CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)4U) != (UserConfigLocationOption)0U);
-				CustomizableFileSettingsProvider.isVersionMinor = CustomizableFileSettingsProvider.isVersionBuild | ((CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)2U) != (UserConfigLocationOption)0U);
-				CustomizableFileSettingsProvider.isVersionMajor = CustomizableFileSettingsProvider.IsVersionMinor | ((CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)1U) != (UserConfigLocationOption)0U);
-				CustomizableFileSettingsProvider.isCompany = (CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)16U) != (UserConfigLocationOption)0U;
-				CustomizableFileSettingsProvider.isProduct = (CustomizableFileSettingsProvider.userConfig & UserConfigLocationOption.Product) != (UserConfigLocationOption)0U;
+				CustomizableFileSettingsProvider.isVersionRevision = (CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)8U) > (UserConfigLocationOption)0U;
+				CustomizableFileSettingsProvider.isVersionBuild = CustomizableFileSettingsProvider.isVersionRevision | ((CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)4U) > (UserConfigLocationOption)0U);
+				CustomizableFileSettingsProvider.isVersionMinor = CustomizableFileSettingsProvider.isVersionBuild | ((CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)2U) > (UserConfigLocationOption)0U);
+				CustomizableFileSettingsProvider.isVersionMajor = CustomizableFileSettingsProvider.IsVersionMinor | ((CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)1U) > (UserConfigLocationOption)0U);
+				CustomizableFileSettingsProvider.isCompany = (CustomizableFileSettingsProvider.userConfig & (UserConfigLocationOption)16U) > (UserConfigLocationOption)0U;
+				CustomizableFileSettingsProvider.isProduct = (CustomizableFileSettingsProvider.userConfig & UserConfigLocationOption.Product) > (UserConfigLocationOption)0U;
 			}
 		}
 
@@ -208,18 +209,22 @@ namespace System.Configuration
 				assembly = Assembly.GetCallingAssembly();
 			}
 			AssemblyCompanyAttribute[] array = (AssemblyCompanyAttribute[])assembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute), true);
-			if (array != null && array.Length > 0)
+			if (array != null && array.Length != 0)
 			{
 				return array[0].Company;
 			}
 			MethodInfo entryPoint = assembly.EntryPoint;
-			Type type = ((entryPoint == null) ? null : entryPoint.DeclaringType);
-			if (type != null && !string.IsNullOrEmpty(type.Namespace))
+			Type type = ((entryPoint != null) ? entryPoint.DeclaringType : null);
+			if (!(type != null) || string.IsNullOrEmpty(type.Namespace))
 			{
-				int num = type.Namespace.IndexOf('.');
-				return (num >= 0) ? type.Namespace.Substring(0, num) : type.Namespace;
+				return "Program";
 			}
-			return "Program";
+			int num = type.Namespace.IndexOf('.');
+			if (num >= 0)
+			{
+				return type.Namespace.Substring(0, num);
+			}
+			return type.Namespace;
 		}
 
 		private static string GetProductName()
@@ -230,7 +235,7 @@ namespace System.Configuration
 				assembly = Assembly.GetCallingAssembly();
 			}
 			byte[] publicKeyToken = assembly.GetName().GetPublicKeyToken();
-			return string.Format("{0}_{1}_{2}", AppDomain.CurrentDomain.FriendlyName, (publicKeyToken == null) ? "Url" : "StrongName", CustomizableFileSettingsProvider.GetEvidenceHash());
+			return string.Format("{0}_{1}_{2}", AppDomain.CurrentDomain.FriendlyName, (publicKeyToken != null && publicKeyToken.Length != 0) ? "StrongName" : "Url", CustomizableFileSettingsProvider.GetEvidenceHash());
 		}
 
 		private static string GetEvidenceHash()
@@ -241,8 +246,13 @@ namespace System.Configuration
 				assembly = Assembly.GetCallingAssembly();
 			}
 			byte[] publicKeyToken = assembly.GetName().GetPublicKeyToken();
-			byte[] array = SHA1.Create().ComputeHash((publicKeyToken == null) ? Encoding.UTF8.GetBytes(assembly.EscapedCodeBase) : publicKeyToken);
-			return Convert.ToBase64String(array);
+			byte[] array = SHA1.Create().ComputeHash((publicKeyToken != null && publicKeyToken.Length != 0) ? publicKeyToken : Encoding.UTF8.GetBytes(assembly.EscapedCodeBase));
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (byte b in array)
+			{
+				stringBuilder.AppendFormat("{0:x2}", b);
+			}
+			return stringBuilder.ToString();
 		}
 
 		private static string GetProductVersion()
@@ -265,19 +275,19 @@ namespace System.Configuration
 			{
 				return;
 			}
-			if (CustomizableFileSettingsProvider.ProductName == string.Empty)
+			if (CustomizableFileSettingsProvider.ProductName == "")
 			{
 				CustomizableFileSettingsProvider.ProductName = CustomizableFileSettingsProvider.GetProductName();
 			}
-			if (CustomizableFileSettingsProvider.CompanyName == string.Empty)
+			if (CustomizableFileSettingsProvider.CompanyName == "")
 			{
 				CustomizableFileSettingsProvider.CompanyName = CustomizableFileSettingsProvider.GetCompanyName();
 			}
-			if (CustomizableFileSettingsProvider.ForceVersion == string.Empty)
+			if (CustomizableFileSettingsProvider.ForceVersion == "")
 			{
 				CustomizableFileSettingsProvider.ProductVersion = CustomizableFileSettingsProvider.GetProductVersion().Split(new char[] { '.' });
 			}
-			if (CustomizableFileSettingsProvider.userRoamingBasePath == string.Empty)
+			if (CustomizableFileSettingsProvider.userRoamingBasePath == "")
 			{
 				CustomizableFileSettingsProvider.userRoamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 			}
@@ -285,7 +295,7 @@ namespace System.Configuration
 			{
 				CustomizableFileSettingsProvider.userRoamingPath = CustomizableFileSettingsProvider.userRoamingBasePath;
 			}
-			if (CustomizableFileSettingsProvider.userLocalBasePath == string.Empty)
+			if (CustomizableFileSettingsProvider.userLocalBasePath == "")
 			{
 				CustomizableFileSettingsProvider.userLocalPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 			}
@@ -308,13 +318,13 @@ namespace System.Configuration
 						assembly = Assembly.GetCallingAssembly();
 					}
 					byte[] publicKeyToken = assembly.GetName().GetPublicKeyToken();
-					CustomizableFileSettingsProvider.ProductName = string.Format("{0}_{1}_{2}", CustomizableFileSettingsProvider.ProductName, (publicKeyToken == null) ? "Url" : "StrongName", CustomizableFileSettingsProvider.GetEvidenceHash());
+					CustomizableFileSettingsProvider.ProductName = string.Format("{0}_{1}_{2}", CustomizableFileSettingsProvider.ProductName, (publicKeyToken != null) ? "StrongName" : "Url", CustomizableFileSettingsProvider.GetEvidenceHash());
 				}
 				CustomizableFileSettingsProvider.userRoamingPath = Path.Combine(CustomizableFileSettingsProvider.userRoamingPath, CustomizableFileSettingsProvider.ProductName);
 				CustomizableFileSettingsProvider.userLocalPath = Path.Combine(CustomizableFileSettingsProvider.userLocalPath, CustomizableFileSettingsProvider.ProductName);
 			}
 			string text;
-			if (CustomizableFileSettingsProvider.ForceVersion == string.Empty)
+			if (CustomizableFileSettingsProvider.ForceVersion == "")
 			{
 				if (CustomizableFileSettingsProvider.isVersionRevision)
 				{
@@ -340,7 +350,7 @@ namespace System.Configuration
 				}
 				else
 				{
-					text = string.Empty;
+					text = "";
 				}
 			}
 			else
@@ -351,11 +361,11 @@ namespace System.Configuration
 			string text3 = CustomizableFileSettingsProvider.PrevVersionPath(CustomizableFileSettingsProvider.userLocalPath, text);
 			CustomizableFileSettingsProvider.userRoamingPath = Path.Combine(CustomizableFileSettingsProvider.userRoamingPath, text);
 			CustomizableFileSettingsProvider.userLocalPath = Path.Combine(CustomizableFileSettingsProvider.userLocalPath, text);
-			if (text2 != string.Empty)
+			if (text2 != "")
 			{
 				CustomizableFileSettingsProvider.userRoamingPathPrevVersion = Path.Combine(CustomizableFileSettingsProvider.userRoamingPath, text2);
 			}
-			if (text3 != string.Empty)
+			if (text3 != "")
 			{
 				CustomizableFileSettingsProvider.userLocalPathPrevVersion = Path.Combine(CustomizableFileSettingsProvider.userLocalPath, text3);
 			}
@@ -363,17 +373,16 @@ namespace System.Configuration
 
 		private static string PrevVersionPath(string dirName, string currentVersion)
 		{
-			string text = string.Empty;
+			string text = "";
 			if (!Directory.Exists(dirName))
 			{
 				return text;
 			}
-			DirectoryInfo directoryInfo = new DirectoryInfo(dirName);
-			foreach (DirectoryInfo directoryInfo2 in directoryInfo.GetDirectories())
+			foreach (DirectoryInfo directoryInfo in new DirectoryInfo(dirName).GetDirectories())
 			{
-				if (string.Compare(currentVersion, directoryInfo2.Name, StringComparison.Ordinal) > 0 && string.Compare(text, directoryInfo2.Name, StringComparison.Ordinal) < 0)
+				if (string.Compare(currentVersion, directoryInfo.Name, StringComparison.Ordinal) > 0 && string.Compare(text, directoryInfo.Name, StringComparison.Ordinal) < 0)
 				{
-					text = directoryInfo2.Name;
+					text = directoryInfo.Name;
 				}
 			}
 			return text;
@@ -487,7 +496,7 @@ namespace System.Configuration
 			}
 			string text = configPath;
 			string fileName;
-			while ((fileName = Path.GetFileName(text)) != string.Empty)
+			while ((fileName = Path.GetFileName(text)) != "")
 			{
 				if (!CustomizableFileSettingsProvider.CheckFileName(fileName))
 				{
@@ -518,6 +527,26 @@ namespace System.Configuration
 			}
 		}
 
+		private string StripXmlHeader(string serializedValue)
+		{
+			if (serializedValue == null)
+			{
+				return string.Empty;
+			}
+			XmlElement xmlElement = new XmlDocument().CreateElement("value");
+			xmlElement.InnerXml = serializedValue;
+			foreach (object obj in xmlElement.ChildNodes)
+			{
+				XmlNode xmlNode = (XmlNode)obj;
+				if (xmlNode.NodeType == XmlNodeType.XmlDeclaration)
+				{
+					xmlElement.RemoveChild(xmlNode);
+					break;
+				}
+			}
+			return xmlElement.InnerXml;
+		}
+
 		private void SaveProperties(ExeConfigurationFileMap exeMap, SettingsPropertyValueCollection collection, ConfigurationUserLevel level, SettingsContext context, bool checkUserLevel)
 		{
 			Configuration configuration = ConfigurationManager.OpenMappedExeConfiguration(exeMap, level);
@@ -527,48 +556,49 @@ namespace System.Configuration
 			{
 				userSettingsGroup = new UserSettingsGroup();
 				configuration.SectionGroups.Add("userSettings", userSettingsGroup);
-				ApplicationSettingsBase currentSettings = context.CurrentSettings;
-				ClientSettingsSection clientSettingsSection = new ClientSettingsSection();
-				userSettingsGroup.Sections.Add(((currentSettings == null) ? typeof(ApplicationSettingsBase) : currentSettings.GetType()).FullName, clientSettingsSection);
+			}
+			ApplicationSettingsBase currentSettings = context.CurrentSettings;
+			string text = this.NormalizeInvalidXmlChars(((currentSettings != null) ? currentSettings.GetType() : typeof(ApplicationSettingsBase)).FullName);
+			ClientSettingsSection clientSettingsSection = userSettingsGroup.Sections.Get(text) as ClientSettingsSection;
+			if (clientSettingsSection == null)
+			{
+				clientSettingsSection = new ClientSettingsSection();
+				userSettingsGroup.Sections.Add(text, clientSettingsSection);
 			}
 			bool flag2 = false;
-			foreach (object obj in userSettingsGroup.Sections)
+			if (clientSettingsSection == null)
 			{
-				ConfigurationSection configurationSection = (ConfigurationSection)obj;
-				ClientSettingsSection clientSettingsSection2 = configurationSection as ClientSettingsSection;
-				if (clientSettingsSection2 != null)
+				return;
+			}
+			foreach (object obj in collection)
+			{
+				SettingsPropertyValue settingsPropertyValue = (SettingsPropertyValue)obj;
+				if ((!checkUserLevel || settingsPropertyValue.Property.Attributes.Contains(typeof(SettingsManageabilityAttribute)) == flag) && !settingsPropertyValue.Property.Attributes.Contains(typeof(ApplicationScopedSettingAttribute)))
 				{
-					foreach (object obj2 in collection)
+					flag2 = true;
+					SettingElement settingElement = clientSettingsSection.Settings.Get(settingsPropertyValue.Name);
+					if (settingElement == null)
 					{
-						SettingsPropertyValue settingsPropertyValue = (SettingsPropertyValue)obj2;
-						if (!checkUserLevel || settingsPropertyValue.Property.Attributes.Contains(typeof(SettingsManageabilityAttribute)) == flag)
-						{
-							flag2 = true;
-							SettingElement settingElement = clientSettingsSection2.Settings.Get(settingsPropertyValue.Name);
-							if (settingElement == null)
-							{
-								settingElement = new SettingElement(settingsPropertyValue.Name, settingsPropertyValue.Property.SerializeAs);
-								clientSettingsSection2.Settings.Add(settingElement);
-							}
-							if (settingElement.Value.ValueXml == null)
-							{
-								settingElement.Value.ValueXml = new XmlDocument().CreateElement("value");
-							}
-							switch (settingsPropertyValue.Property.SerializeAs)
-							{
-							case SettingsSerializeAs.String:
-								settingElement.Value.ValueXml.InnerText = settingsPropertyValue.SerializedValue as string;
-								break;
-							case SettingsSerializeAs.Xml:
-								settingElement.Value.ValueXml.InnerXml = (settingsPropertyValue.SerializedValue as string) ?? string.Empty;
-								break;
-							case SettingsSerializeAs.Binary:
-								settingElement.Value.ValueXml.InnerText = ((settingsPropertyValue.SerializedValue == null) ? string.Empty : Convert.ToBase64String(settingsPropertyValue.SerializedValue as byte[]));
-								break;
-							default:
-								throw new NotImplementedException();
-							}
-						}
+						settingElement = new SettingElement(settingsPropertyValue.Name, settingsPropertyValue.Property.SerializeAs);
+						clientSettingsSection.Settings.Add(settingElement);
+					}
+					if (settingElement.Value.ValueXml == null)
+					{
+						settingElement.Value.ValueXml = new XmlDocument().CreateElement("value");
+					}
+					switch (settingsPropertyValue.Property.SerializeAs)
+					{
+					case SettingsSerializeAs.String:
+						settingElement.Value.ValueXml.InnerText = settingsPropertyValue.SerializedValue as string;
+						break;
+					case SettingsSerializeAs.Xml:
+						settingElement.Value.ValueXml.InnerXml = this.StripXmlHeader(settingsPropertyValue.SerializedValue as string);
+						break;
+					case SettingsSerializeAs.Binary:
+						settingElement.Value.ValueXml.InnerText = ((settingsPropertyValue.SerializedValue != null) ? Convert.ToBase64String(settingsPropertyValue.SerializedValue as byte[]) : string.Empty);
+						break;
+					default:
+						throw new NotImplementedException();
 					}
 				}
 			}
@@ -576,6 +606,17 @@ namespace System.Configuration
 			{
 				configuration.Save(ConfigurationSaveMode.Minimal, true);
 			}
+		}
+
+		private string NormalizeInvalidXmlChars(string str)
+		{
+			char[] array = new char[] { '+' };
+			if (str == null || str.IndexOfAny(array) == -1)
+			{
+				return str;
+			}
+			str = str.Replace("+", "_x002B_");
+			return str;
 		}
 
 		private void LoadPropertyValue(SettingsPropertyCollection collection, SettingElement element, bool allowOverwrite)
@@ -593,7 +634,7 @@ namespace System.Configuration
 				switch (settingsPropertyValue.Property.SerializeAs)
 				{
 				case SettingsSerializeAs.String:
-					settingsPropertyValue.SerializedValue = element.Value.ValueXml.InnerText;
+					settingsPropertyValue.SerializedValue = element.Value.ValueXml.InnerText.Trim();
 					break;
 				case SettingsSerializeAs.Xml:
 					settingsPropertyValue.SerializedValue = element.Value.ValueXml.InnerXml;
@@ -617,14 +658,13 @@ namespace System.Configuration
 			}
 			catch (ArgumentException ex)
 			{
-				throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, "Failed to load value for '{0}'.", new object[] { element.Name }), ex);
+				throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture, "Failed to load value for '{0}'.", element.Name), ex);
 			}
 		}
 
 		private void LoadProperties(ExeConfigurationFileMap exeMap, SettingsPropertyCollection collection, ConfigurationUserLevel level, string sectionGroupName, bool allowOverwrite, string groupName)
 		{
-			Configuration configuration = ConfigurationManager.OpenMappedExeConfiguration(exeMap, level);
-			ConfigurationSectionGroup sectionGroup = configuration.GetSectionGroup(sectionGroupName);
+			ConfigurationSectionGroup sectionGroup = ConfigurationManager.OpenMappedExeConfiguration(exeMap, level).GetSectionGroup(sectionGroupName);
 			if (sectionGroup != null)
 			{
 				foreach (object obj in sectionGroup.Sections)
@@ -635,12 +675,16 @@ namespace System.Configuration
 						ClientSettingsSection clientSettingsSection = configurationSection as ClientSettingsSection;
 						if (clientSettingsSection != null)
 						{
-							foreach (object obj2 in clientSettingsSection.Settings)
+							using (IEnumerator enumerator2 = clientSettingsSection.Settings.GetEnumerator())
 							{
-								SettingElement settingElement = (SettingElement)obj2;
-								this.LoadPropertyValue(collection, settingElement, allowOverwrite);
+								while (enumerator2.MoveNext())
+								{
+									object obj2 = enumerator2.Current;
+									SettingElement settingElement = (SettingElement)obj2;
+									this.LoadPropertyValue(collection, settingElement, allowOverwrite);
+								}
+								break;
 							}
-							break;
 						}
 					}
 				}
@@ -653,32 +697,28 @@ namespace System.Configuration
 			if (CustomizableFileSettingsProvider.UserLocalFullPath == CustomizableFileSettingsProvider.UserRoamingFullPath)
 			{
 				this.SaveProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoaming, context, false);
+				return;
 			}
-			else
-			{
-				this.SaveProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoaming, context, true);
-				this.SaveProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoamingAndLocal, context, true);
-			}
+			this.SaveProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoaming, context, true);
+			this.SaveProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoamingAndLocal, context, true);
 		}
 
 		public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context, SettingsPropertyCollection collection)
 		{
 			this.CreateExeMap();
-			if (this.values == null)
+			this.values = new SettingsPropertyValueCollection();
+			string text = context["GroupName"] as string;
+			text = this.NormalizeInvalidXmlChars(text);
+			this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.None, "applicationSettings", false, text);
+			this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.None, "userSettings", false, text);
+			this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoaming, "userSettings", true, text);
+			this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoamingAndLocal, "userSettings", true, text);
+			foreach (object obj in collection)
 			{
-				this.values = new SettingsPropertyValueCollection();
-				string text = context["GroupName"] as string;
-				this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.None, "applicationSettings", false, text);
-				this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.None, "userSettings", false, text);
-				this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoaming, "userSettings", true, text);
-				this.LoadProperties(this.exeMapCurrent, collection, ConfigurationUserLevel.PerUserRoamingAndLocal, "userSettings", true, text);
-				foreach (object obj in collection)
+				SettingsProperty settingsProperty = (SettingsProperty)obj;
+				if (this.values[settingsProperty.Name] == null)
 				{
-					SettingsProperty settingsProperty = (SettingsProperty)obj;
-					if (this.values[settingsProperty.Name] == null)
-					{
-						this.values.Add(new SettingsPropertyValue(settingsProperty));
-					}
+					this.values.Add(new SettingsPropertyValue(settingsProperty));
 				}
 			}
 			return this.values;
@@ -712,7 +752,7 @@ namespace System.Configuration
 					{
 					}
 				}
-				if (CustomizableFileSettingsProvider.PrevUserLocalFullPath != string.Empty && CustomizableFileSettingsProvider.PrevUserRoamingFullPath != string.Empty)
+				if (CustomizableFileSettingsProvider.PrevUserLocalFullPath != "" && CustomizableFileSettingsProvider.PrevUserRoamingFullPath != "")
 				{
 					this.exeMapPrev = new ExeConfigurationFileMap();
 					this.exeMapPrev.ExeConfigFilename = assembly.Location + ".config";
@@ -729,14 +769,14 @@ namespace System.Configuration
 
 		public void Reset(SettingsContext context)
 		{
-			SettingsPropertyCollection settingsPropertyCollection = new SettingsPropertyCollection();
-			this.GetPropertyValues(context, settingsPropertyCollection);
-			foreach (object obj in this.values)
+			if (this.values != null)
 			{
-				SettingsPropertyValue settingsPropertyValue = (SettingsPropertyValue)obj;
-				settingsPropertyValue.PropertyValue = settingsPropertyValue.Reset();
+				foreach (object obj in this.values)
+				{
+					SettingsPropertyValue settingsPropertyValue = (SettingsPropertyValue)obj;
+					this.values[settingsPropertyValue.Name].PropertyValue = settingsPropertyValue.Reset();
+				}
 			}
-			this.SetPropertyValues(context, this.values);
 		}
 
 		public void Upgrade(SettingsContext context, SettingsPropertyCollection properties)
@@ -750,45 +790,45 @@ namespace System.Configuration
 
 		private static Type webConfigurationFileMapType;
 
-		private static string userRoamingPath = string.Empty;
+		private static string userRoamingPath = "";
 
-		private static string userLocalPath = string.Empty;
+		private static string userLocalPath = "";
 
-		private static string userRoamingPathPrevVersion = string.Empty;
+		private static string userRoamingPathPrevVersion = "";
 
-		private static string userLocalPathPrevVersion = string.Empty;
+		private static string userLocalPathPrevVersion = "";
 
 		private static string userRoamingName = "user.config";
 
 		private static string userLocalName = "user.config";
 
-		private static string userRoamingBasePath = string.Empty;
+		private static string userRoamingBasePath = "";
 
-		private static string userLocalBasePath = string.Empty;
+		private static string userLocalBasePath = "";
 
-		private static string CompanyName = string.Empty;
+		private static string CompanyName = "";
 
-		private static string ProductName = string.Empty;
+		private static string ProductName = "";
 
-		private static string ForceVersion = string.Empty;
+		private static string ForceVersion = "";
 
 		private static string[] ProductVersion;
 
-		private static bool isVersionMajor;
+		private static bool isVersionMajor = false;
 
-		private static bool isVersionMinor;
+		private static bool isVersionMinor = false;
 
-		private static bool isVersionBuild;
+		private static bool isVersionBuild = false;
 
-		private static bool isVersionRevision;
+		private static bool isVersionRevision = false;
 
 		private static bool isCompany = true;
 
 		private static bool isProduct = true;
 
-		private static bool isEvidence;
+		private static bool isEvidence = false;
 
-		private static bool userDefine;
+		private static bool userDefine = false;
 
 		private static UserConfigLocationOption userConfig = UserConfigLocationOption.Company_Product;
 

@@ -14,5 +14,5 @@ public struct ValueArrayHandle
 
 	public int handle;
 
-	public static ValueArrayHandle Invalid = new ValueArrayHandle(-1);
+	public static readonly ValueArrayHandle Invalid = new ValueArrayHandle(-1);
 }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
+	[StructLayout(LayoutKind.Sequential)]
 	internal class FieldOnTypeBuilderInst : FieldInfo
 	{
-		public FieldOnTypeBuilderInst(MonoGenericClass instantiation, FieldBuilder fb)
+		public FieldOnTypeBuilderInst(TypeBuilderInstantiation instantiation, FieldInfo fb)
 		{
 			this.instantiation = instantiation;
 			this.fb = fb;
@@ -52,11 +54,7 @@ namespace System.Reflection.Emit
 
 		public override string ToString()
 		{
-			if (!((ModuleBuilder)this.instantiation.generic_type.Module).assemblyb.IsCompilerContext)
-			{
-				return this.fb.FieldType.ToString() + " " + this.Name;
-			}
-			return this.FieldType.ToString() + " " + this.Name;
+			return this.fb.FieldType.ToString() + " " + this.Name;
 		}
 
 		public override FieldAttributes Attributes
@@ -79,11 +77,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				if (!((ModuleBuilder)this.instantiation.generic_type.Module).assemblyb.IsCompilerContext)
-				{
-					throw new InvalidOperationException();
-				}
-				return this.fb.MetadataToken;
+				throw new InvalidOperationException();
 			}
 		}
 
@@ -91,11 +85,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				if (!((ModuleBuilder)this.instantiation.generic_type.Module).assemblyb.IsCompilerContext)
-				{
-					throw new NotSupportedException();
-				}
-				return this.instantiation.InflateType(this.fb.FieldType);
+				throw new NotSupportedException();
 			}
 		}
 
@@ -109,8 +99,13 @@ namespace System.Reflection.Emit
 			throw new NotSupportedException();
 		}
 
-		internal MonoGenericClass instantiation;
+		internal FieldInfo RuntimeResolve()
+		{
+			return this.instantiation.RuntimeResolve().GetField(this.fb);
+		}
 
-		internal FieldBuilder fb;
+		internal TypeBuilderInstantiation instantiation;
+
+		internal FieldInfo fb;
 	}
 }

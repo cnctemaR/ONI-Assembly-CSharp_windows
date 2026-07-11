@@ -18,7 +18,7 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		get
 		{
-			return (!this.isRelocating) ? this.building.Def.CraftRecipe : this.building.Def.RelocateRecipe;
+			return this.building.Def.CraftRecipe;
 		}
 	}
 
@@ -36,6 +36,11 @@ public class Constructable : Workable, ISaveLoadable
 			}
 			value.CopyTo(this.selectedElements, 0);
 		}
+	}
+
+	public override string GetConversationTopic()
+	{
+		return this.building.Def.PrefabID;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -149,7 +154,7 @@ public class Constructable : Workable, ISaveLoadable
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
 		int num = Grid.PosToCell(base.transform.GetLocalPosition());
-		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.initialTemperature, this.isRelocating, true);
+		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.initialTemperature, true);
 		gameObject.transform.rotation = base.transform.rotation;
 		Rotatable component2 = gameObject.GetComponent<Rotatable>();
 		if (component2 != null)
@@ -202,7 +207,7 @@ public class Constructable : Workable, ISaveLoadable
 		Prioritizable.AddRef(base.gameObject);
 		this.synchronizeAnims = false;
 		this.multitoolContext = "build";
-		this.multitoolHitEffectTag = "fx_build_splash";
+		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
 	}
 
 	protected override void OnSpawn()
@@ -529,7 +534,7 @@ public class Constructable : Workable, ISaveLoadable
 					Diggable diggable = Diggable.GetDiggable(offset_cell);
 					if (diggable == null)
 					{
-						diggable = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), Grid.SceneLayer.Move, Folder.Placers, null, 0).GetComponent<Diggable>();
+						diggable = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), Grid.SceneLayer.Move, null, 0).GetComponent<Diggable>();
 						diggable.gameObject.SetActive(true);
 						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
 						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
@@ -567,7 +572,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			ChoreType build = Db.Get().ChoreTypes.Build;
 			Tag[] array = this.choreTags;
-			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)
@@ -720,9 +725,6 @@ public class Constructable : Workable, ISaveLoadable
 	private bool hasUnreachableDigs;
 
 	private bool finished;
-
-	[Serialize]
-	public bool isRelocating;
 
 	public bool isDiggingRequired = true;
 

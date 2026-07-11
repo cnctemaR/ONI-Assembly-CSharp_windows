@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{565A657F-F71B-4118-8F5C-0A791C4C78F1}</ProjectGuid>
+    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC261}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Posix</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net20</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -60,13 +60,19 @@
     <Compile Include="Unix\FileSpecialAttributes.cs" />
     <Compile Include="Unix\FileTypes.cs" />
     <Compile Include="Unix\Native\AccessModes.cs" />
+    <Compile Include="Unix\Native\AtFlags.cs" />
     <Compile Include="Unix\Native\blkcnt_tAttribute.cs" />
     <Compile Include="Unix\Native\blksize_tAttribute.cs" />
     <Compile Include="Unix\Native\CdeclFunction.cs" />
+    <Compile Include="Unix\Native\Cmsghdr.cs" />
     <Compile Include="Unix\Native\ConfstrName.cs" />
     <Compile Include="Unix\Native\dev_tAttribute.cs" />
     <Compile Include="Unix\Native\DirectoryNotifyFlags.cs" />
     <Compile Include="Unix\Native\Dirent.cs" />
+    <Compile Include="Unix\Native\EpollEvent.cs" />
+    <Compile Include="Unix\Native\EpollEvents.cs" />
+    <Compile Include="Unix\Native\EpollFlags.cs" />
+    <Compile Include="Unix\Native\EpollOp.cs" />
     <Compile Include="Unix\Native\Errno.cs" />
     <Compile Include="Unix\Native\FcntlCommand.cs" />
     <Compile Include="Unix\Native\FileNameMarshaler.cs" />
@@ -78,14 +84,20 @@
     <Compile Include="Unix\Native\Fstab.cs" />
     <Compile Include="Unix\Native\gid_tAttribute.cs" />
     <Compile Include="Unix\Native\Group.cs" />
+    <Compile Include="Unix\Native\In6Addr.cs" />
+    <Compile Include="Unix\Native\InAddr.cs" />
     <Compile Include="Unix\Native\ino_tAttribute.cs" />
+    <Compile Include="Unix\Native\Iovec.cs" />
+    <Compile Include="Unix\Native\Linger.cs" />
     <Compile Include="Unix\Native\LockfCommand.cs" />
     <Compile Include="Unix\Native\LockType.cs" />
+    <Compile Include="Unix\Native\MessageFlags.cs" />
     <Compile Include="Unix\Native\MlockallFlags.cs" />
     <Compile Include="Unix\Native\MmapFlags.cs" />
     <Compile Include="Unix\Native\MmapProts.cs" />
     <Compile Include="Unix\Native\MountFlags.cs" />
     <Compile Include="Unix\Native\MremapFlags.cs" />
+    <Compile Include="Unix\Native\Msghdr.cs" />
     <Compile Include="Unix\Native\MsyncFlags.cs" />
     <Compile Include="Unix\Native\NativeConvert.cs" />
     <Compile Include="Unix\Native\nlink_tAttribute.cs" />
@@ -100,9 +112,16 @@
     <Compile Include="Unix\Native\PosixMadviseAdvice.cs" />
     <Compile Include="Unix\Native\RealTimeSignum.cs" />
     <Compile Include="Unix\Native\SeekFlags.cs" />
+    <Compile Include="Unix\Native\ShutdownOption.cs" />
     <Compile Include="Unix\Native\SignalAction.cs" />
     <Compile Include="Unix\Native\SignalHandler.cs" />
     <Compile Include="Unix\Native\Signum.cs" />
+    <Compile Include="Unix\Native\Sockaddr.cs" />
+    <Compile Include="Unix\Native\SockaddrIn.cs" />
+    <Compile Include="Unix\Native\SockaddrIn6.cs" />
+    <Compile Include="Unix\Native\SockaddrStorage.cs" />
+    <Compile Include="Unix\Native\SockaddrType.cs" />
+    <Compile Include="Unix\Native\SockaddrUn.cs" />
     <Compile Include="Unix\Native\Stat.cs" />
     <Compile Include="Unix\Native\Statvfs.cs" />
     <Compile Include="Unix\Native\Stdlib.cs" />
@@ -117,12 +136,21 @@
     <Compile Include="Unix\Native\Timezone.cs" />
     <Compile Include="Unix\Native\time_tAttribute.cs" />
     <Compile Include="Unix\Native\uid_tAttribute.cs" />
+    <Compile Include="Unix\Native\UnixAddressFamily.cs" />
+    <Compile Include="Unix\Native\UnixSocketControlMessage.cs" />
+    <Compile Include="Unix\Native\UnixSocketFlags.cs" />
+    <Compile Include="Unix\Native\UnixSocketOptionName.cs" />
+    <Compile Include="Unix\Native\UnixSocketProtocol.cs" />
+    <Compile Include="Unix\Native\UnixSocketType.cs" />
     <Compile Include="Unix\Native\Utimbuf.cs" />
     <Compile Include="Unix\Native\Utsname.cs" />
     <Compile Include="Unix\Native\WaitOptions.cs" />
     <Compile Include="Unix\Native\XattrFlags.cs" />
     <Compile Include="Unix\Native\XPrintfFunctions.cs" />
+    <Compile Include="Unix\Native\_SockaddrDynamic.cs" />
+    <Compile Include="Unix\Native\_SockaddrHeader.cs" />
     <Compile Include="Unix\PeerCred.cs" />
+    <Compile Include="Unix\PeerCredData.cs" />
     <Compile Include="Unix\StdioFileStream.cs" />
     <Compile Include="Unix\UnixClient.cs" />
     <Compile Include="Unix\UnixDirectoryInfo.cs" />
@@ -147,11 +175,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F3}</Project>
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC263}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78FA}</Project>
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC268}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

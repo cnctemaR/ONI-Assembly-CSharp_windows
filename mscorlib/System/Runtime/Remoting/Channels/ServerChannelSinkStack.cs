@@ -6,7 +6,7 @@ using System.Runtime.Remoting.Messaging;
 namespace System.Runtime.Remoting.Channels
 {
 	[ComVisible(true)]
-	public class ServerChannelSinkStack : IServerResponseChannelSinkStack, IServerChannelSinkStack
+	public class ServerChannelSinkStack : IServerChannelSinkStack, IServerResponseChannelSinkStack
 	{
 		public Stream GetResponseStream(IMessage msg, ITransportHeaders headers)
 		{

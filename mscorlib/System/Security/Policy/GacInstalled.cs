@@ -6,24 +6,8 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class GacInstalled : IBuiltInEvidence, IIdentityPermissionFactory
+	public sealed class GacInstalled : EvidenceBase, IIdentityPermissionFactory, IBuiltInEvidence
 	{
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return 1;
-		}
-
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return position;
-		}
-
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			buffer[position] = '\t';
-			return position + 1;
-		}
-
 		public object Copy()
 		{
 			return new GacInstalled();
@@ -49,6 +33,22 @@ namespace System.Security.Policy
 			SecurityElement securityElement = new SecurityElement(base.GetType().FullName);
 			securityElement.AddAttribute("version", "1");
 			return securityElement.ToString();
+		}
+
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			return 1;
+		}
+
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return position;
+		}
+
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			buffer[position] = '\t';
+			return position + 1;
 		}
 	}
 }

@@ -8,7 +8,7 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class PrincipalPermission : IPermission, ISecurityEncodable, IBuiltInPermission, IUnrestrictedPermission
+	public sealed class PrincipalPermission : IPermission, ISecurityEncodable, IUnrestrictedPermission, IBuiltInPermission
 	{
 		public PrincipalPermission(PermissionState state)
 		{
@@ -35,11 +35,6 @@ namespace System.Security.Permissions
 		internal PrincipalPermission(ArrayList principals)
 		{
 			this.principals = (ArrayList)principals.Clone();
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 8;
 		}
 
 		public IPermission Copy()
@@ -156,7 +151,11 @@ namespace System.Security.Permissions
 					}
 				}
 			}
-			return (principalPermission2.principals.Count <= 0) ? null : principalPermission2;
+			if (principalPermission2.principals.Count <= 0)
+			{
+				return null;
+			}
+			return principalPermission2;
 		}
 
 		public bool IsSubsetOf(IPermission target)
@@ -302,6 +301,11 @@ namespace System.Security.Permissions
 			return base.GetHashCode();
 		}
 
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 8;
+		}
+
 		private PrincipalPermission Cast(IPermission target)
 		{
 			if (target == null)
@@ -329,29 +333,24 @@ namespace System.Security.Permissions
 			}
 			if (se.Tag != "Permission")
 			{
-				string text = string.Format(Locale.GetText("Invalid tag {0}"), se.Tag);
-				throw new ArgumentException(text, parameterName);
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid tag {0}"), se.Tag), parameterName);
 			}
 			int num = minimumVersion;
-			string text2 = se.Attribute("version");
-			if (text2 != null)
+			string text = se.Attribute("version");
+			if (text != null)
 			{
 				try
 				{
-					num = int.Parse(text2);
+					num = int.Parse(text);
 				}
 				catch (Exception ex)
 				{
-					string text3 = Locale.GetText("Couldn't parse version from '{0}'.");
-					text3 = string.Format(text3, text2);
-					throw new ArgumentException(text3, parameterName, ex);
+					throw new ArgumentException(string.Format(Locale.GetText("Couldn't parse version from '{0}'."), text), parameterName, ex);
 				}
 			}
 			if (num < minimumVersion || num > maximumVersion)
 			{
-				string text4 = Locale.GetText("Unknown version '{0}', expected versions between ['{1}','{2}'].");
-				text4 = string.Format(text4, num, minimumVersion, maximumVersion);
-				throw new ArgumentException(text4, parameterName);
+				throw new ArgumentException(string.Format(Locale.GetText("Unknown version '{0}', expected versions between ['{1}','{2}']."), num, minimumVersion, maximumVersion), parameterName);
 			}
 			return num;
 		}

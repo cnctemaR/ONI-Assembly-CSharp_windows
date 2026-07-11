@@ -17,6 +17,11 @@ public class Messenger : KMonoBehaviour
 		return this.messages.GetEnumerator();
 	}
 
+	public static void DestroyInstance()
+	{
+		Messenger.Instance = null;
+	}
+
 	public SerializedList<Message> Messages
 	{
 		get

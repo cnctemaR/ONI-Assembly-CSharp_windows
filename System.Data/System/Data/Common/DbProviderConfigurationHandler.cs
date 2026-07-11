@@ -9,7 +9,7 @@ namespace System.Data.Common
 		[MonoTODO]
 		public virtual object Create(object parent, object configContext, XmlNode section)
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 	}
 }

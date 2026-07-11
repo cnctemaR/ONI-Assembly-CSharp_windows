@@ -15,8 +15,7 @@ namespace Mono.Security
 		{
 			ASN1 asn = new ASN1(48);
 			asn.Add(ASN1Convert.FromOid(oid));
-			ASN1 asn2 = asn.Add(new ASN1(49));
-			asn2.Add(value);
+			asn.Add(new ASN1(49)).Add(value);
 			return asn;
 		}
 
@@ -718,22 +717,31 @@ namespace Mono.Security
 
 			internal string OidToName(string oid)
 			{
-				switch (oid)
+				if (oid == "1.3.14.3.2.26")
 				{
-				case "1.3.14.3.2.26":
 					return "SHA1";
-				case "1.2.840.113549.2.2":
-					return "MD2";
-				case "1.2.840.113549.2.5":
-					return "MD5";
-				case "2.16.840.1.101.3.4.1":
-					return "SHA256";
-				case "2.16.840.1.101.3.4.2":
-					return "SHA384";
-				case "2.16.840.1.101.3.4.3":
-					return "SHA512";
 				}
-				return oid;
+				if (oid == "1.2.840.113549.2.2")
+				{
+					return "MD2";
+				}
+				if (oid == "1.2.840.113549.2.5")
+				{
+					return "MD5";
+				}
+				if (oid == "2.16.840.1.101.3.4.1")
+				{
+					return "SHA256";
+				}
+				if (oid == "2.16.840.1.101.3.4.2")
+				{
+					return "SHA384";
+				}
+				if (!(oid == "2.16.840.1.101.3.4.3"))
+				{
+					return oid;
+				}
+				return "SHA512";
 			}
 
 			internal ASN1 GetASN1()
@@ -755,8 +763,7 @@ namespace Mono.Security
 					{
 						ASN1 asn4 = PKCS7.Attribute("1.2.840.113549.1.9.3", asn3[0]);
 						this.signerInfo.AuthenticatedAttributes.Add(asn4);
-						HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.hashAlgorithm);
-						byte[] array2 = hashAlgorithm.ComputeHash(asn3[1][0].Value);
+						byte[] array2 = HashAlgorithm.Create(this.hashAlgorithm).ComputeHash(asn3[1][0].Value);
 						ASN1 asn5 = new ASN1(48);
 						ASN1 asn6 = PKCS7.Attribute("1.2.840.113549.1.9.4", asn5.Add(new ASN1(4, array2)));
 						this.signerInfo.AuthenticatedAttributes.Add(asn6);
@@ -765,8 +772,7 @@ namespace Mono.Security
 					{
 						RSAPKCS1SignatureFormatter rsapkcs1SignatureFormatter = new RSAPKCS1SignatureFormatter(this.signerInfo.Key);
 						rsapkcs1SignatureFormatter.SetHashAlgorithm(this.hashAlgorithm);
-						HashAlgorithm hashAlgorithm2 = HashAlgorithm.Create(this.hashAlgorithm);
-						byte[] array3 = hashAlgorithm2.ComputeHash(asn3[1][0].Value);
+						byte[] array3 = HashAlgorithm.Create(this.hashAlgorithm).ComputeHash(asn3[1][0].Value);
 						this.signerInfo.Signature = rsapkcs1SignatureFormatter.CreateSignature(array3);
 					}
 					this.signed = true;
@@ -1021,6 +1027,7 @@ namespace Mono.Security
 				if (this.authenticatedAttributes.Count > 0)
 				{
 					asn2 = asn.Add(new ASN1(160));
+					this.authenticatedAttributes.Sort(new PKCS7.SortedSet());
 					foreach (object obj in this.authenticatedAttributes)
 					{
 						ASN1 asn3 = (ASN1)obj;
@@ -1036,14 +1043,14 @@ namespace Mono.Security
 						rsapkcs1SignatureFormatter.SetHashAlgorithm(this.hashAlgorithm);
 						byte[] bytes = asn2.GetBytes();
 						bytes[0] = 49;
-						HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.hashAlgorithm);
-						byte[] array2 = hashAlgorithm.ComputeHash(bytes);
+						byte[] array2 = HashAlgorithm.Create(this.hashAlgorithm).ComputeHash(bytes);
 						this.signature = rsapkcs1SignatureFormatter.CreateSignature(array2);
 					}
 					asn.Add(new ASN1(4, this.signature));
 					if (this.unauthenticatedAttributes.Count > 0)
 					{
 						ASN1 asn4 = asn.Add(new ASN1(161));
+						this.unauthenticatedAttributes.Sort(new PKCS7.SortedSet());
 						foreach (object obj2 in this.unauthenticatedAttributes)
 						{
 							ASN1 asn5 = (ASN1)obj2;
@@ -1083,6 +1090,61 @@ namespace Mono.Security
 			private byte[] serial;
 
 			private byte[] ski;
+		}
+
+		internal class SortedSet : IComparer
+		{
+			public int Compare(object x, object y)
+			{
+				if (x == null)
+				{
+					if (y != null)
+					{
+						return -1;
+					}
+					return 0;
+				}
+				else
+				{
+					if (y == null)
+					{
+						return 1;
+					}
+					ASN1 asn = x as ASN1;
+					ASN1 asn2 = y as ASN1;
+					if (asn == null || asn2 == null)
+					{
+						throw new ArgumentException(Locale.GetText("Invalid objects."));
+					}
+					byte[] bytes = asn.GetBytes();
+					byte[] bytes2 = asn2.GetBytes();
+					int num = 0;
+					while (num < bytes.Length && num != bytes2.Length)
+					{
+						if (bytes[num] != bytes2[num])
+						{
+							if (bytes[num] >= bytes2[num])
+							{
+								return 1;
+							}
+							return -1;
+						}
+						else
+						{
+							num++;
+						}
+					}
+					if (bytes.Length > bytes2.Length)
+					{
+						return 1;
+					}
+					if (bytes.Length < bytes2.Length)
+					{
+						return -1;
+					}
+					return 0;
+				}
+			}
 		}
 	}
 }

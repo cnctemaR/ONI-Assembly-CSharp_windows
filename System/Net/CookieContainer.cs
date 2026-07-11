@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net.NetworkInformation;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace System.Net
 {
@@ -11,15 +13,21 @@ namespace System.Net
 	{
 		public CookieContainer()
 		{
+			string domainName = IPGlobalProperties.InternalGetIPGlobalProperties().DomainName;
+			if (domainName != null && domainName.Length > 1)
+			{
+				this.m_fqdnMyDomain = "." + domainName;
+			}
 		}
 
 		public CookieContainer(int capacity)
+			: this()
 		{
 			if (capacity <= 0)
 			{
-				throw new ArgumentException("Must be greater than zero", "Capacity");
+				throw new ArgumentException(global::SR.GetString("The specified value must be greater than 0."), "Capacity");
 			}
-			this.capacity = capacity;
+			this.m_maxCookies = capacity;
 		}
 
 		public CookieContainer(int capacity, int perDomainCapacity, int maxCookieSize)
@@ -27,37 +35,42 @@ namespace System.Net
 		{
 			if (perDomainCapacity != 2147483647 && (perDomainCapacity <= 0 || perDomainCapacity > capacity))
 			{
-				throw new ArgumentOutOfRangeException("perDomainCapacity", string.Format("PerDomainCapacity must be greater than {0} and less than {1}.", 0, capacity));
+				throw new ArgumentOutOfRangeException("perDomainCapacity", global::SR.GetString("'{0}' has to be greater than '{1}' and less than '{2}'.", new object[] { "PerDomainCapacity", 0, capacity }));
 			}
+			this.m_maxCookiesPerDomain = perDomainCapacity;
 			if (maxCookieSize <= 0)
 			{
-				throw new ArgumentException("Must be greater than zero", "MaxCookieSize");
+				throw new ArgumentException(global::SR.GetString("The specified value must be greater than 0."), "MaxCookieSize");
 			}
-			this.perDomainCapacity = perDomainCapacity;
-			this.maxCookieSize = maxCookieSize;
-		}
-
-		public int Count
-		{
-			get
-			{
-				return (this.cookies != null) ? this.cookies.Count : 0;
-			}
+			this.m_maxCookieSize = maxCookieSize;
 		}
 
 		public int Capacity
 		{
 			get
 			{
-				return this.capacity;
+				return this.m_maxCookies;
 			}
 			set
 			{
-				if (value < 0 || (value < this.perDomainCapacity && this.perDomainCapacity != 2147483647))
+				if (value <= 0 || (value < this.m_maxCookiesPerDomain && this.m_maxCookiesPerDomain != 2147483647))
 				{
-					throw new ArgumentOutOfRangeException("value", string.Format("Capacity must be greater than {0} and less than {1}.", 0, this.perDomainCapacity));
+					throw new ArgumentOutOfRangeException("value", global::SR.GetString("'{0}' has to be greater than '{1}' and less than '{2}'.", new object[] { "Capacity", 0, this.m_maxCookiesPerDomain }));
 				}
-				this.capacity = value;
+				if (value < this.m_maxCookies)
+				{
+					this.m_maxCookies = value;
+					this.AgeCookies(null);
+				}
+				this.m_maxCookies = value;
+			}
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this.m_count;
 			}
 		}
 
@@ -65,7 +78,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.maxCookieSize;
+				return this.m_maxCookieSize;
 			}
 			set
 			{
@@ -73,7 +86,7 @@ namespace System.Net
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
-				this.maxCookieSize = value;
+				this.m_maxCookieSize = value;
 			}
 		}
 
@@ -81,15 +94,20 @@ namespace System.Net
 		{
 			get
 			{
-				return this.perDomainCapacity;
+				return this.m_maxCookiesPerDomain;
 			}
 			set
 			{
-				if (value != 2147483647 && (value <= 0 || value > this.capacity))
+				if (value <= 0 || (value > this.m_maxCookies && value != 2147483647))
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
-				this.perDomainCapacity = value;
+				if (value < this.m_maxCookiesPerDomain)
+				{
+					this.m_maxCookiesPerDomain = value;
+					this.AgeCookies(null);
+				}
+				this.m_maxCookiesPerDomain = value;
 			}
 		}
 
@@ -101,94 +119,265 @@ namespace System.Net
 			}
 			if (cookie.Domain.Length == 0)
 			{
-				throw new ArgumentException("Cookie domain not set.", "cookie.Domain");
+				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string."), "cookie.Domain");
 			}
-			if (cookie.Value.Length > this.maxCookieSize)
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append(cookie.Secure ? Uri.UriSchemeHttps : Uri.UriSchemeHttp).Append(Uri.SchemeDelimiter);
+			if (!cookie.DomainImplicit && cookie.Domain[0] == '.')
 			{
-				throw new CookieException("value is larger than MaxCookieSize.");
+				stringBuilder.Append("0");
 			}
-			this.AddCookie(new Cookie(cookie.Name, cookie.Value)
+			stringBuilder.Append(cookie.Domain);
+			if (cookie.PortList != null)
 			{
-				Path = ((cookie.Path.Length != 0) ? cookie.Path : "/"),
-				Domain = cookie.Domain,
-				ExactDomain = cookie.ExactDomain,
-				Version = cookie.Version
-			});
+				stringBuilder.Append(":").Append(cookie.PortList[0]);
+			}
+			stringBuilder.Append(cookie.Path);
+			Uri uri;
+			if (!Uri.TryCreate(stringBuilder.ToString(), UriKind.Absolute, out uri))
+			{
+				throw new CookieException(global::SR.GetString("The '{0}'='{1}' part of the cookie is invalid.", new object[] { "Domain", cookie.Domain }));
+			}
+			Cookie cookie2 = cookie.Clone();
+			cookie2.VerifySetDefaults(cookie2.Variant, uri, this.IsLocalDomain(uri.Host), this.m_fqdnMyDomain, true, true);
+			this.Add(cookie2, true);
 		}
 
-		private void AddCookie(Cookie cookie)
+		private void AddRemoveDomain(string key, PathList value)
 		{
-			if (this.cookies == null)
+			object syncRoot = this.m_domainTable.SyncRoot;
+			lock (syncRoot)
 			{
-				this.cookies = new CookieCollection();
-			}
-			if (this.cookies.Count >= this.capacity)
-			{
-				this.RemoveOldest(null);
-			}
-			if (this.cookies.Count >= this.perDomainCapacity && this.CountDomain(cookie.Domain) >= this.perDomainCapacity)
-			{
-				this.RemoveOldest(cookie.Domain);
-			}
-			Cookie cookie2 = new Cookie(cookie.Name, cookie.Value);
-			cookie2.Path = ((cookie.Path.Length != 0) ? cookie.Path : "/");
-			cookie2.Domain = cookie.Domain;
-			cookie2.ExactDomain = cookie.ExactDomain;
-			cookie2.Version = cookie.Version;
-			cookie2.Expires = cookie.Expires;
-			cookie2.CommentUri = cookie.CommentUri;
-			cookie2.Comment = cookie.Comment;
-			cookie2.Discard = cookie.Discard;
-			cookie2.HttpOnly = cookie.HttpOnly;
-			cookie2.Secure = cookie.Secure;
-			this.cookies.Add(cookie2);
-			this.CheckExpiration();
-		}
-
-		private int CountDomain(string domain)
-		{
-			int num = 0;
-			foreach (object obj in this.cookies)
-			{
-				Cookie cookie = (Cookie)obj;
-				if (CookieContainer.CheckDomain(domain, cookie.Domain, true))
+				if (value == null)
 				{
-					num++;
+					this.m_domainTable.Remove(key);
+				}
+				else
+				{
+					this.m_domainTable[key] = value;
 				}
 			}
-			return num;
 		}
 
-		private void RemoveOldest(string domain)
+		internal void Add(Cookie cookie, bool throwOnError)
 		{
-			int num = 0;
-			DateTime dateTime = DateTime.MaxValue;
-			for (int i = 0; i < this.cookies.Count; i++)
+			if (cookie.Value.Length <= this.m_maxCookieSize)
 			{
-				Cookie cookie = this.cookies[i];
-				if (cookie.TimeStamp < dateTime && (domain == null || domain == cookie.Domain))
+				try
 				{
-					dateTime = cookie.TimeStamp;
-					num = i;
+					object obj = this.m_domainTable.SyncRoot;
+					PathList pathList;
+					lock (obj)
+					{
+						pathList = (PathList)this.m_domainTable[cookie.DomainKey];
+						if (pathList == null)
+						{
+							pathList = new PathList();
+							this.AddRemoveDomain(cookie.DomainKey, pathList);
+						}
+					}
+					int cookiesCount = pathList.GetCookiesCount();
+					obj = pathList.SyncRoot;
+					CookieCollection cookieCollection;
+					lock (obj)
+					{
+						cookieCollection = (CookieCollection)pathList[cookie.Path];
+						if (cookieCollection == null)
+						{
+							cookieCollection = new CookieCollection();
+							pathList[cookie.Path] = cookieCollection;
+						}
+					}
+					if (cookie.Expired)
+					{
+						CookieCollection cookieCollection2 = cookieCollection;
+						lock (cookieCollection2)
+						{
+							int num = cookieCollection.IndexOf(cookie);
+							if (num != -1)
+							{
+								cookieCollection.RemoveAt(num);
+								this.m_count--;
+							}
+							goto IL_0194;
+						}
+					}
+					if (cookiesCount < this.m_maxCookiesPerDomain || this.AgeCookies(cookie.DomainKey))
+					{
+						if (this.m_count < this.m_maxCookies || this.AgeCookies(null))
+						{
+							CookieCollection cookieCollection2 = cookieCollection;
+							lock (cookieCollection2)
+							{
+								this.m_count += cookieCollection.InternalAdd(cookie, true);
+							}
+						}
+					}
+					IL_0194:;
 				}
-			}
-			this.cookies.List.RemoveAt(num);
-		}
-
-		private void CheckExpiration()
-		{
-			if (this.cookies == null)
-			{
+				catch (Exception ex)
+				{
+					if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+					{
+						throw;
+					}
+					if (throwOnError)
+					{
+						throw new CookieException(global::SR.GetString("An error occurred when adding a cookie to the container."), ex);
+					}
+				}
 				return;
 			}
-			for (int i = this.cookies.Count - 1; i >= 0; i--)
+			if (throwOnError)
 			{
-				Cookie cookie = this.cookies[i];
-				if (cookie.Expired)
+				throw new CookieException(global::SR.GetString("The value size of the cookie is '{0}'. This exceeds the configured maximum size, which is '{1}'.", new object[]
 				{
-					this.cookies.List.RemoveAt(i);
+					cookie.ToString(),
+					this.m_maxCookieSize
+				}));
+			}
+		}
+
+		private bool AgeCookies(string domain)
+		{
+			if (this.m_maxCookies == 0 || this.m_maxCookiesPerDomain == 0)
+			{
+				this.m_domainTable = new Hashtable();
+				this.m_count = 0;
+				return false;
+			}
+			int num = 0;
+			DateTime dateTime = DateTime.MaxValue;
+			CookieCollection cookieCollection = null;
+			int num2 = 0;
+			int num3 = 0;
+			float num4 = 1f;
+			if (this.m_count > this.m_maxCookies)
+			{
+				num4 = (float)this.m_maxCookies / (float)this.m_count;
+			}
+			object syncRoot = this.m_domainTable.SyncRoot;
+			CookieCollection cookieCollection5;
+			lock (syncRoot)
+			{
+				foreach (object obj in this.m_domainTable)
+				{
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+					PathList pathList;
+					if (domain == null)
+					{
+						string text = (string)dictionaryEntry.Key;
+						pathList = (PathList)dictionaryEntry.Value;
+					}
+					else
+					{
+						pathList = (PathList)this.m_domainTable[domain];
+					}
+					num2 = 0;
+					object obj2 = pathList.SyncRoot;
+					lock (obj2)
+					{
+						foreach (object obj3 in pathList.Values)
+						{
+							CookieCollection cookieCollection2 = (CookieCollection)obj3;
+							num3 = this.ExpireCollection(cookieCollection2);
+							num += num3;
+							this.m_count -= num3;
+							num2 += cookieCollection2.Count;
+							DateTime dateTime2;
+							if (cookieCollection2.Count > 0 && (dateTime2 = cookieCollection2.TimeStamp(CookieCollection.Stamp.Check)) < dateTime)
+							{
+								cookieCollection = cookieCollection2;
+								dateTime = dateTime2;
+							}
+						}
+					}
+					int num5 = Math.Min((int)((float)num2 * num4), Math.Min(this.m_maxCookiesPerDomain, this.m_maxCookies) - 1);
+					if (num2 > num5)
+					{
+						obj2 = pathList.SyncRoot;
+						Array array;
+						Array array2;
+						lock (obj2)
+						{
+							array = Array.CreateInstance(typeof(CookieCollection), pathList.Count);
+							array2 = Array.CreateInstance(typeof(DateTime), pathList.Count);
+							foreach (object obj4 in pathList.Values)
+							{
+								CookieCollection cookieCollection3 = (CookieCollection)obj4;
+								array2.SetValue(cookieCollection3.TimeStamp(CookieCollection.Stamp.Check), num3);
+								array.SetValue(cookieCollection3, num3);
+								num3++;
+							}
+						}
+						Array.Sort(array2, array);
+						num3 = 0;
+						for (int i = 0; i < array.Length; i++)
+						{
+							CookieCollection cookieCollection4 = (CookieCollection)array.GetValue(i);
+							cookieCollection5 = cookieCollection4;
+							lock (cookieCollection5)
+							{
+								while (num2 > num5 && cookieCollection4.Count > 0)
+								{
+									cookieCollection4.RemoveAt(0);
+									num2--;
+									this.m_count--;
+									num++;
+								}
+							}
+							if (num2 <= num5)
+							{
+								break;
+							}
+						}
+						if (num2 > num5 && domain != null)
+						{
+							return false;
+						}
+					}
 				}
 			}
+			if (domain != null)
+			{
+				return true;
+			}
+			if (num != 0)
+			{
+				return true;
+			}
+			if (dateTime == DateTime.MaxValue)
+			{
+				return false;
+			}
+			cookieCollection5 = cookieCollection;
+			lock (cookieCollection5)
+			{
+				while (this.m_count >= this.m_maxCookies && cookieCollection.Count > 0)
+				{
+					cookieCollection.RemoveAt(0);
+					this.m_count--;
+				}
+			}
+			return true;
+		}
+
+		private int ExpireCollection(CookieCollection cc)
+		{
+			int num;
+			lock (cc)
+			{
+				int count = cc.Count;
+				for (int i = count - 1; i >= 0; i--)
+				{
+					if (cc[i].Expired)
+					{
+						cc.RemoveAt(i);
+					}
+				}
+				num = count - cc.Count;
+			}
+			return num;
 		}
 
 		public void Add(CookieCollection cookies)
@@ -204,38 +393,66 @@ namespace System.Net
 			}
 		}
 
-		private void Cook(global::System.Uri uri, Cookie cookie)
+		internal bool IsLocalDomain(string host)
 		{
-			if (CookieContainer.IsNullOrEmpty(cookie.Name))
+			int num = host.IndexOf('.');
+			if (num == -1)
 			{
-				throw new CookieException("Invalid cookie: name");
+				return true;
 			}
-			if (cookie.Value == null)
+			if (host == "127.0.0.1" || host == "::1" || host == "0:0:0:0:0:0:0:1")
 			{
-				throw new CookieException("Invalid cookie: value");
+				return true;
 			}
-			if (uri != null && cookie.Domain.Length == 0)
+			if (string.Compare(this.m_fqdnMyDomain, 0, host, num, this.m_fqdnMyDomain.Length, StringComparison.OrdinalIgnoreCase) == 0)
 			{
-				cookie.Domain = uri.Host;
+				return true;
 			}
-			if (cookie.Version == 0 && CookieContainer.IsNullOrEmpty(cookie.Path))
+			string[] array = host.Split(new char[] { '.' });
+			if (array != null && array.Length == 4 && array[0] == "127")
 			{
-				if (uri != null)
+				int i = 1;
+				while (i < 4)
 				{
-					cookie.Path = uri.AbsolutePath;
+					switch (array[i].Length)
+					{
+					case 1:
+						break;
+					case 2:
+						goto IL_00C3;
+					case 3:
+						if (array[i][2] >= '0' && array[i][2] <= '9')
+						{
+							goto IL_00C3;
+						}
+						goto IL_00FF;
+					default:
+						goto IL_00FF;
+					}
+					IL_00DD:
+					if (array[i][0] >= '0' && array[i][0] <= '9')
+					{
+						i++;
+						continue;
+					}
+					break;
+					IL_00C3:
+					if (array[i][1] >= '0' && array[i][1] <= '9')
+					{
+						goto IL_00DD;
+					}
+					break;
 				}
-				else
+				IL_00FF:
+				if (i == 4)
 				{
-					cookie.Path = "/";
+					return true;
 				}
 			}
-			if (cookie.Port.Length == 0 && uri != null && !uri.IsDefaultPort)
-			{
-				cookie.Port = "\"" + uri.Port.ToString() + "\"";
-			}
+			return false;
 		}
 
-		public void Add(global::System.Uri uri, Cookie cookie)
+		public void Add(Uri uri, Cookie cookie)
 		{
 			if (uri == null)
 			{
@@ -245,14 +462,12 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("cookie");
 			}
-			if (!cookie.Expired)
-			{
-				this.Cook(uri, cookie);
-				this.AddCookie(cookie);
-			}
+			Cookie cookie2 = cookie.Clone();
+			cookie2.VerifySetDefaults(cookie2.Variant, uri, this.IsLocalDomain(uri.Host), this.m_fqdnMyDomain, true, true);
+			this.Add(cookie2, true);
 		}
 
-		public void Add(global::System.Uri uri, CookieCollection cookies)
+		public void Add(Uri uri, CookieCollection cookies)
 		{
 			if (uri == null)
 			{
@@ -262,109 +477,259 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("cookies");
 			}
+			bool flag = this.IsLocalDomain(uri.Host);
 			foreach (object obj in cookies)
 			{
-				Cookie cookie = (Cookie)obj;
-				if (!cookie.Expired)
+				Cookie cookie = ((Cookie)obj).Clone();
+				cookie.VerifySetDefaults(cookie.Variant, uri, flag, this.m_fqdnMyDomain, true, true);
+				this.Add(cookie, true);
+			}
+		}
+
+		internal CookieCollection CookieCutter(Uri uri, string headerName, string setCookieHeader, bool isThrow)
+		{
+			CookieCollection cookieCollection = new CookieCollection();
+			CookieVariant cookieVariant = CookieVariant.Unknown;
+			if (headerName == null)
+			{
+				cookieVariant = CookieVariant.Rfc2109;
+			}
+			else
+			{
+				for (int i = 0; i < CookieContainer.HeaderInfo.Length; i++)
 				{
-					this.Cook(uri, cookie);
-					this.AddCookie(cookie);
+					if (string.Compare(headerName, CookieContainer.HeaderInfo[i].Name, StringComparison.OrdinalIgnoreCase) == 0)
+					{
+						cookieVariant = CookieContainer.HeaderInfo[i].Variant;
+					}
 				}
 			}
-		}
-
-		public string GetCookieHeader(global::System.Uri uri)
-		{
-			if (uri == null)
+			bool flag = this.IsLocalDomain(uri.Host);
+			try
 			{
-				throw new ArgumentNullException("uri");
+				CookieParser cookieParser = new CookieParser(setCookieHeader);
+				for (;;)
+				{
+					Cookie cookie = cookieParser.Get();
+					if (cookie == null)
+					{
+						goto IL_00B0;
+					}
+					if (ValidationHelper.IsBlankString(cookie.Name))
+					{
+						if (isThrow)
+						{
+							break;
+						}
+					}
+					else if (cookie.VerifySetDefaults(cookieVariant, uri, flag, this.m_fqdnMyDomain, true, isThrow))
+					{
+						cookieCollection.InternalAdd(cookie, true);
+					}
+				}
+				throw new CookieException(global::SR.GetString("Cookie format error."));
+				IL_00B0:;
 			}
-			CookieCollection cookieCollection = this.GetCookies(uri);
-			if (cookieCollection.Count == 0)
+			catch (Exception ex)
 			{
-				return string.Empty;
+				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
+				{
+					throw;
+				}
+				if (isThrow)
+				{
+					throw new CookieException(global::SR.GetString("An error occurred when parsing the Cookie header for Uri '{0}'.", new object[] { uri.AbsoluteUri }), ex);
+				}
 			}
-			StringBuilder stringBuilder = new StringBuilder();
 			foreach (object obj in cookieCollection)
 			{
-				Cookie cookie = (Cookie)obj;
-				stringBuilder.Append(cookie.ToString(uri));
-				stringBuilder.Append("; ");
+				Cookie cookie2 = (Cookie)obj;
+				this.Add(cookie2, isThrow);
 			}
-			if (stringBuilder.Length > 0)
-			{
-				stringBuilder.Length -= 2;
-			}
-			return stringBuilder.ToString();
+			return cookieCollection;
 		}
 
-		private static bool CheckDomain(string domain, string host, bool exact)
-		{
-			if (domain.Length == 0)
-			{
-				return false;
-			}
-			if (exact)
-			{
-				return string.Compare(host, domain, true, CultureInfo.InvariantCulture) == 0;
-			}
-			if (!CultureInfo.InvariantCulture.CompareInfo.IsSuffix(host, domain, CompareOptions.IgnoreCase))
-			{
-				return false;
-			}
-			if (domain[0] == '.')
-			{
-				return true;
-			}
-			int num = host.Length - domain.Length - 1;
-			return num >= 0 && host[num] == '.';
-		}
-
-		public CookieCollection GetCookies(global::System.Uri uri)
+		public CookieCollection GetCookies(Uri uri)
 		{
 			if (uri == null)
 			{
 				throw new ArgumentNullException("uri");
 			}
-			this.CheckExpiration();
+			return this.InternalGetCookies(uri);
+		}
+
+		internal CookieCollection InternalGetCookies(Uri uri)
+		{
+			bool flag = uri.Scheme == Uri.UriSchemeHttps;
+			int port = uri.Port;
 			CookieCollection cookieCollection = new CookieCollection();
-			if (this.cookies == null)
+			List<string> list = new List<string>();
+			List<string> list2 = new List<string>();
+			string host = uri.Host;
+			list.Add(host);
+			list.Add("." + host);
+			int num = host.IndexOf('.');
+			if (num == -1)
 			{
-				return cookieCollection;
-			}
-			foreach (object obj in this.cookies)
-			{
-				Cookie cookie = (Cookie)obj;
-				string domain = cookie.Domain;
-				if (CookieContainer.CheckDomain(domain, uri.Host, cookie.ExactDomain))
+				if (this.m_fqdnMyDomain != null && this.m_fqdnMyDomain.Length != 0)
 				{
-					if (cookie.Port.Length <= 0 || cookie.Ports == null || uri.Port == -1 || Array.IndexOf<int>(cookie.Ports, uri.Port) != -1)
+					list.Add(host + this.m_fqdnMyDomain);
+					list.Add(this.m_fqdnMyDomain);
+				}
+			}
+			else
+			{
+				list.Add(host.Substring(num));
+				if (host.Length > 2)
+				{
+					int num2 = host.LastIndexOf('.', host.Length - 2);
+					if (num2 > 0)
 					{
-						string path = cookie.Path;
-						string absolutePath = uri.AbsolutePath;
-						if (path != string.Empty && path != "/" && absolutePath != path)
+						num2 = host.LastIndexOf('.', num2 - 1);
+					}
+					if (num2 != -1)
+					{
+						while (num < num2 && (num = host.IndexOf('.', num + 1)) != -1)
 						{
-							if (!absolutePath.StartsWith(path))
-							{
-								continue;
-							}
-							if (path[path.Length - 1] != '/' && absolutePath.Length > path.Length && absolutePath[path.Length] != '/')
-							{
-								continue;
-							}
-						}
-						if (!cookie.Secure || !(uri.Scheme != "https"))
-						{
-							cookieCollection.Add(cookie);
+							list2.Add(host.Substring(num));
 						}
 					}
 				}
 			}
-			cookieCollection.Sort();
+			this.BuildCookieCollectionFromDomainMatches(uri, flag, port, cookieCollection, list, false);
+			this.BuildCookieCollectionFromDomainMatches(uri, flag, port, cookieCollection, list2, true);
 			return cookieCollection;
 		}
 
-		public void SetCookies(global::System.Uri uri, string cookieHeader)
+		private void BuildCookieCollectionFromDomainMatches(Uri uri, bool isSecure, int port, CookieCollection cookies, List<string> domainAttribute, bool matchOnlyPlainCookie)
+		{
+			for (int i = 0; i < domainAttribute.Count; i++)
+			{
+				bool flag = false;
+				bool flag2 = false;
+				object obj = this.m_domainTable.SyncRoot;
+				PathList pathList;
+				lock (obj)
+				{
+					pathList = (PathList)this.m_domainTable[domainAttribute[i]];
+				}
+				if (pathList != null)
+				{
+					obj = pathList.SyncRoot;
+					lock (obj)
+					{
+						foreach (object obj2 in pathList)
+						{
+							DictionaryEntry dictionaryEntry = (DictionaryEntry)obj2;
+							string text = (string)dictionaryEntry.Key;
+							if (uri.AbsolutePath.StartsWith(CookieParser.CheckQuoted(text)))
+							{
+								flag = true;
+								CookieCollection cookieCollection = (CookieCollection)dictionaryEntry.Value;
+								cookieCollection.TimeStamp(CookieCollection.Stamp.Set);
+								this.MergeUpdateCollections(cookies, cookieCollection, port, isSecure, matchOnlyPlainCookie);
+								if (text == "/")
+								{
+									flag2 = true;
+								}
+							}
+							else if (flag)
+							{
+								break;
+							}
+						}
+					}
+					if (!flag2)
+					{
+						CookieCollection cookieCollection2 = (CookieCollection)pathList["/"];
+						if (cookieCollection2 != null)
+						{
+							cookieCollection2.TimeStamp(CookieCollection.Stamp.Set);
+							this.MergeUpdateCollections(cookies, cookieCollection2, port, isSecure, matchOnlyPlainCookie);
+						}
+					}
+					if (pathList.Count == 0)
+					{
+						this.AddRemoveDomain(domainAttribute[i], null);
+					}
+				}
+			}
+		}
+
+		private void MergeUpdateCollections(CookieCollection destination, CookieCollection source, int port, bool isSecure, bool isPlainOnly)
+		{
+			lock (source)
+			{
+				for (int i = 0; i < source.Count; i++)
+				{
+					bool flag2 = false;
+					Cookie cookie = source[i];
+					if (cookie.Expired)
+					{
+						source.RemoveAt(i);
+						this.m_count--;
+						i--;
+					}
+					else
+					{
+						if (!isPlainOnly || cookie.Variant == CookieVariant.Plain)
+						{
+							if (cookie.PortList != null)
+							{
+								int[] portList = cookie.PortList;
+								for (int j = 0; j < portList.Length; j++)
+								{
+									if (portList[j] == port)
+									{
+										flag2 = true;
+										break;
+									}
+								}
+							}
+							else
+							{
+								flag2 = true;
+							}
+						}
+						if (cookie.Secure && !isSecure)
+						{
+							flag2 = false;
+						}
+						if (flag2)
+						{
+							destination.InternalAdd(cookie, false);
+						}
+					}
+				}
+			}
+		}
+
+		public string GetCookieHeader(Uri uri)
+		{
+			if (uri == null)
+			{
+				throw new ArgumentNullException("uri");
+			}
+			string text;
+			return this.GetCookieHeader(uri, out text);
+		}
+
+		internal string GetCookieHeader(Uri uri, out string optCookie2)
+		{
+			CookieCollection cookieCollection = this.InternalGetCookies(uri);
+			string text = string.Empty;
+			string text2 = string.Empty;
+			foreach (object obj in cookieCollection)
+			{
+				Cookie cookie = (Cookie)obj;
+				text = text + text2 + cookie.ToString();
+				text2 = "; ";
+			}
+			optCookie2 = (cookieCollection.IsOtherVersionSeen ? ("$Version=" + 1.ToString(NumberFormatInfo.InvariantInfo)) : string.Empty);
+			return text;
+		}
+
+		public void SetCookies(Uri uri, string cookieHeader)
 		{
 			if (uri == null)
 			{
@@ -374,150 +739,31 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("cookieHeader");
 			}
-			if (cookieHeader.Length == 0)
-			{
-				return;
-			}
-			string[] array = cookieHeader.Split(new char[] { ',' });
-			for (int i = 0; i < array.Length; i++)
-			{
-				string text = array[i];
-				if (array.Length > i + 1 && global::System.Text.RegularExpressions.Regex.IsMatch(array[i], ".*expires\\s*=\\s*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)", global::System.Text.RegularExpressions.RegexOptions.IgnoreCase) && global::System.Text.RegularExpressions.Regex.IsMatch(array[i + 1], "\\s\\d{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\\d{4} \\d{2}:\\d{2}:\\d{2} GMT", global::System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-				{
-					text = new StringBuilder(text).Append(",").Append(array[++i]).ToString();
-				}
-				try
-				{
-					Cookie cookie = CookieContainer.Parse(text);
-					if (cookie.Path.Length == 0)
-					{
-						cookie.Path = uri.AbsolutePath;
-					}
-					else if (!uri.AbsolutePath.StartsWith(cookie.Path))
-					{
-						string text2 = string.Format("'Path'='{0}' is invalid with URI", cookie.Path);
-						throw new CookieException(text2);
-					}
-					if (cookie.Domain.Length == 0)
-					{
-						cookie.Domain = uri.Host;
-						cookie.ExactDomain = true;
-					}
-					this.AddCookie(cookie);
-				}
-				catch (Exception ex)
-				{
-					string text3 = string.Format("Could not parse cookies for '{0}'.", uri);
-					throw new CookieException(text3, ex);
-				}
-			}
+			this.CookieCutter(uri, null, cookieHeader, true);
 		}
-
-		private static Cookie Parse(string s)
-		{
-			string[] array = s.Split(new char[] { ';' });
-			Cookie cookie = new Cookie();
-			int i = 0;
-			while (i < array.Length)
-			{
-				int num = array[i].IndexOf('=');
-				string text;
-				string text2;
-				if (num == -1)
-				{
-					text = array[i].Trim();
-					text2 = string.Empty;
-				}
-				else
-				{
-					text = array[i].Substring(0, num).Trim();
-					text2 = array[i].Substring(num + 1).Trim();
-				}
-				string text3 = text.ToLower(CultureInfo.InvariantCulture);
-				if (text3 == null)
-				{
-					goto IL_01C4;
-				}
-				if (CookieContainer.<>f__switch$map9 == null)
-				{
-					CookieContainer.<>f__switch$map9 = new Dictionary<string, int>(8)
-					{
-						{ "path", 0 },
-						{ "$path", 0 },
-						{ "domain", 1 },
-						{ "$domain", 1 },
-						{ "expires", 2 },
-						{ "$expires", 2 },
-						{ "httponly", 3 },
-						{ "secure", 4 }
-					};
-				}
-				int num2;
-				if (!CookieContainer.<>f__switch$map9.TryGetValue(text3, out num2))
-				{
-					goto IL_01C4;
-				}
-				switch (num2)
-				{
-				case 0:
-					if (cookie.Path.Length == 0)
-					{
-						cookie.Path = text2;
-					}
-					break;
-				case 1:
-					if (cookie.Domain.Length == 0)
-					{
-						cookie.Domain = text2;
-						cookie.ExactDomain = false;
-					}
-					break;
-				case 2:
-					if (cookie.Expires == DateTime.MinValue)
-					{
-						cookie.Expires = DateTime.SpecifyKind(DateTime.ParseExact(text2, "ddd, dd-MMM-yyyy HH:mm:ss G\\MT", CultureInfo.InvariantCulture), DateTimeKind.Utc);
-					}
-					break;
-				case 3:
-					cookie.HttpOnly = true;
-					break;
-				case 4:
-					cookie.Secure = true;
-					break;
-				default:
-					goto IL_01C4;
-				}
-				IL_01E8:
-				i++;
-				continue;
-				IL_01C4:
-				if (cookie.Name.Length == 0)
-				{
-					cookie.Name = text;
-					cookie.Value = text2;
-				}
-				goto IL_01E8;
-			}
-			return cookie;
-		}
-
-		private static bool IsNullOrEmpty(string s)
-		{
-			return s == null || s.Length == 0;
-		}
-
-		public const int DefaultCookieLengthLimit = 4096;
 
 		public const int DefaultCookieLimit = 300;
 
 		public const int DefaultPerDomainCookieLimit = 20;
 
-		private int capacity = 300;
+		public const int DefaultCookieLengthLimit = 4096;
 
-		private int perDomainCapacity = 20;
+		private static readonly HeaderVariantInfo[] HeaderInfo = new HeaderVariantInfo[]
+		{
+			new HeaderVariantInfo("Set-Cookie", CookieVariant.Rfc2109),
+			new HeaderVariantInfo("Set-Cookie2", CookieVariant.Rfc2965)
+		};
 
-		private int maxCookieSize = 4096;
+		private Hashtable m_domainTable = new Hashtable();
 
-		private CookieCollection cookies;
+		private int m_maxCookieSize = 4096;
+
+		private int m_maxCookies = 300;
+
+		private int m_maxCookiesPerDomain = 20;
+
+		private int m_count;
+
+		private string m_fqdnMyDomain = string.Empty;
 	}
 }

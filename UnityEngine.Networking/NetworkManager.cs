@@ -491,7 +491,7 @@ namespace UnityEngine.Networking
 				}
 				this.m_PlayerPrefab = null;
 			}
-			if (this.m_ConnectionConfig.MinUpdateTimeout <= 0U)
+			if (this.m_ConnectionConfig != null && this.m_ConnectionConfig.MinUpdateTimeout <= 0U)
 			{
 				if (LogFilter.logError)
 				{
@@ -919,7 +919,7 @@ namespace UnityEngine.Networking
 
 		private void CleanupNetworkIdentities()
 		{
-			foreach (NetworkIdentity networkIdentity in Object.FindObjectsOfType<NetworkIdentity>())
+			foreach (NetworkIdentity networkIdentity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
 			{
 				networkIdentity.MarkForReset();
 			}
@@ -1017,7 +1017,13 @@ namespace UnityEngine.Networking
 		{
 			if (LogFilter.logDebug)
 			{
-				Debug.Log("RegisterStartPosition:" + start);
+				Debug.Log(string.Concat(new object[]
+				{
+					"RegisterStartPosition: (",
+					start.gameObject.name,
+					") ",
+					start.position
+				}));
 			}
 			NetworkManager.s_StartPositions.Add(start);
 		}
@@ -1026,7 +1032,13 @@ namespace UnityEngine.Networking
 		{
 			if (LogFilter.logDebug)
 			{
-				Debug.Log("UnRegisterStartPosition:" + start);
+				Debug.Log(string.Concat(new object[]
+				{
+					"UnRegisterStartPosition: (",
+					start.gameObject.name,
+					") ",
+					start.position
+				}));
 			}
 			NetworkManager.s_StartPositions.Remove(start);
 		}

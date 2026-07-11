@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security;
 using System.Security.Cryptography;
 using Mono.Security.Cryptography;
@@ -176,22 +175,46 @@ namespace Mono.Security.Authenticode
 			this.signedHash = content[0][1][1];
 			int length = this.signedHash.Length;
 			HashAlgorithm hashAlgorithm;
-			if (length != 16)
+			if (length <= 20)
 			{
-				if (length != 20)
+				if (length == 16)
 				{
-					this.reason = 5;
-					base.Close();
-					return false;
+					hashAlgorithm = MD5.Create();
+					this.hash = base.GetHash(hashAlgorithm);
+					goto IL_0167;
 				}
-				hashAlgorithm = HashAlgorithm.Create("SHA1");
-				this.hash = base.GetHash(hashAlgorithm);
+				if (length == 20)
+				{
+					hashAlgorithm = SHA1.Create();
+					this.hash = base.GetHash(hashAlgorithm);
+					goto IL_0167;
+				}
 			}
 			else
 			{
-				hashAlgorithm = HashAlgorithm.Create("MD5");
-				this.hash = base.GetHash(hashAlgorithm);
+				if (length == 32)
+				{
+					hashAlgorithm = SHA256.Create();
+					this.hash = base.GetHash(hashAlgorithm);
+					goto IL_0167;
+				}
+				if (length == 48)
+				{
+					hashAlgorithm = SHA384.Create();
+					this.hash = base.GetHash(hashAlgorithm);
+					goto IL_0167;
+				}
+				if (length == 64)
+				{
+					hashAlgorithm = SHA512.Create();
+					this.hash = base.GetHash(hashAlgorithm);
+					goto IL_0167;
+				}
 			}
+			this.reason = 5;
+			base.Close();
+			return false;
+			IL_0167:
 			base.Close();
 			if (!this.signedHash.CompareValue(this.hash))
 			{
@@ -200,8 +223,7 @@ namespace Mono.Security.Authenticode
 			byte[] value = content[0].Value;
 			hashAlgorithm.Initialize();
 			byte[] array = hashAlgorithm.ComputeHash(value);
-			bool flag = this.VerifySignature(signedData, array, hashAlgorithm);
-			return flag && this.reason == 0;
+			return this.VerifySignature(signedData, array, hashAlgorithm) && this.reason == 0;
 		}
 
 		private bool CompareIssuerSerial(string issuer, byte[] serial, X509Certificate x509)
@@ -229,25 +251,27 @@ namespace Mono.Security.Authenticode
 		{
 			string text = null;
 			ASN1 asn = null;
-			int i = 0;
-			while (i < sd.SignerInfo.AuthenticatedAttributes.Count)
+			for (int i = 0; i < sd.SignerInfo.AuthenticatedAttributes.Count; i++)
 			{
 				ASN1 asn2 = (ASN1)sd.SignerInfo.AuthenticatedAttributes[i];
 				string text2 = ASN1Convert.ToOid(asn2[0]);
-				string text3 = text2;
-				switch (text3)
+				if (!(text2 == "1.2.840.113549.1.9.3"))
 				{
-				case "1.2.840.113549.1.9.3":
-					text = ASN1Convert.ToOid(asn2[1][0]);
-					break;
-				case "1.2.840.113549.1.9.4":
-					asn = asn2[1][0];
-					break;
+					if (!(text2 == "1.2.840.113549.1.9.4"))
+					{
+						if (!(text2 == "1.3.6.1.4.1.311.2.1.11") && !(text2 == "1.3.6.1.4.1.311.2.1.12"))
+						{
+						}
+					}
+					else
+					{
+						asn = asn2[1][0];
+					}
 				}
-				IL_00F1:
-				i++;
-				continue;
-				goto IL_00F1;
+				else
+				{
+					text = ASN1Convert.ToOid(asn2[1][0]);
+				}
 			}
 			if (text != "1.3.6.1.4.1.311.2.1.4")
 			{
@@ -261,7 +285,7 @@ namespace Mono.Security.Authenticode
 			{
 				return false;
 			}
-			string text4 = CryptoConfig.MapNameToOID(ha.ToString());
+			string text3 = CryptoConfig.MapNameToOID(ha.ToString());
 			ASN1 asn3 = new ASN1(49);
 			foreach (object obj in sd.SignerInfo.AuthenticatedAttributes)
 			{
@@ -278,8 +302,7 @@ namespace Mono.Security.Authenticode
 				if (this.CompareIssuerSerial(issuerName, serialNumber, x509Certificate) && x509Certificate.PublicKey.Length > signature.Length >> 3)
 				{
 					this.signingCertificate = x509Certificate;
-					RSACryptoServiceProvider rsacryptoServiceProvider = (RSACryptoServiceProvider)x509Certificate.RSA;
-					if (rsacryptoServiceProvider.VerifyHash(array, text4, signature))
+					if (((RSACryptoServiceProvider)x509Certificate.RSA).VerifyHash(array, text3, signature))
 					{
 						this.signerChain.LoadCertificates(this.coll);
 						this.trustedRoot = this.signerChain.Build(x509Certificate);
@@ -293,32 +316,15 @@ namespace Mono.Security.Authenticode
 			}
 			else
 			{
-				int j = 0;
-				while (j < sd.SignerInfo.UnauthenticatedAttributes.Count)
+				for (int j = 0; j < sd.SignerInfo.UnauthenticatedAttributes.Count; j++)
 				{
 					ASN1 asn5 = (ASN1)sd.SignerInfo.UnauthenticatedAttributes[j];
-					string text5 = ASN1Convert.ToOid(asn5[0]);
-					string text3 = text5;
-					if (text3 != null)
+					string text4 = ASN1Convert.ToOid(asn5[0]);
+					if (text4 == "1.2.840.113549.1.9.6")
 					{
-						if (AuthenticodeDeformatter.<>f__switch$map8 == null)
-						{
-							AuthenticodeDeformatter.<>f__switch$map8 = new Dictionary<string, int>(1) { { "1.2.840.113549.1.9.6", 0 } };
-						}
-						int num;
-						if (AuthenticodeDeformatter.<>f__switch$map8.TryGetValue(text3, out num))
-						{
-							if (num == 0)
-							{
-								PKCS7.SignerInfo signerInfo = new PKCS7.SignerInfo(asn5[1]);
-								this.trustedTimestampRoot = this.VerifyCounterSignature(signerInfo, signature);
-							}
-						}
+						PKCS7.SignerInfo signerInfo = new PKCS7.SignerInfo(asn5[1]);
+						this.trustedTimestampRoot = this.VerifyCounterSignature(signerInfo, signature);
 					}
-					IL_035D:
-					j++;
-					continue;
-					goto IL_035D;
 				}
 			}
 			return this.trustedRoot && this.trustedTimestampRoot;
@@ -326,34 +332,34 @@ namespace Mono.Security.Authenticode
 
 		private bool VerifyCounterSignature(PKCS7.SignerInfo cs, byte[] signature)
 		{
-			if (cs.Version != 1)
+			if (cs.Version > 1)
 			{
 				return false;
 			}
 			string text = null;
 			ASN1 asn = null;
-			int i = 0;
-			while (i < cs.AuthenticatedAttributes.Count)
+			for (int i = 0; i < cs.AuthenticatedAttributes.Count; i++)
 			{
 				ASN1 asn2 = (ASN1)cs.AuthenticatedAttributes[i];
 				string text2 = ASN1Convert.ToOid(asn2[0]);
-				string text3 = text2;
-				switch (text3)
+				if (!(text2 == "1.2.840.113549.1.9.3"))
 				{
-				case "1.2.840.113549.1.9.3":
-					text = ASN1Convert.ToOid(asn2[1][0]);
-					break;
-				case "1.2.840.113549.1.9.4":
-					asn = asn2[1][0];
-					break;
-				case "1.2.840.113549.1.9.5":
-					this.timestamp = ASN1Convert.ToDateTime(asn2[1][0]);
-					break;
+					if (!(text2 == "1.2.840.113549.1.9.4"))
+					{
+						if (text2 == "1.2.840.113549.1.9.5")
+						{
+							this.timestamp = ASN1Convert.ToDateTime(asn2[1][0]);
+						}
+					}
+					else
+					{
+						asn = asn2[1][0];
+					}
 				}
-				IL_00FC:
-				i++;
-				continue;
-				goto IL_00FC;
+				else
+				{
+					text = ASN1Convert.ToOid(asn2[1][0]);
+				}
 			}
 			if (text != "1.2.840.113549.1.7.1")
 			{
@@ -363,20 +369,41 @@ namespace Mono.Security.Authenticode
 			{
 				return false;
 			}
-			string text4 = null;
+			string text3 = null;
 			int length = asn.Length;
-			if (length != 16)
+			if (length <= 20)
 			{
-				if (length == 20)
+				if (length != 16)
 				{
-					text4 = "SHA1";
+					if (length == 20)
+					{
+						text3 = "SHA1";
+					}
+				}
+				else
+				{
+					text3 = "MD5";
+				}
+			}
+			else if (length != 32)
+			{
+				if (length != 48)
+				{
+					if (length == 64)
+					{
+						text3 = "SHA512";
+					}
+				}
+				else
+				{
+					text3 = "SHA384";
 				}
 			}
 			else
 			{
-				text4 = "MD5";
+				text3 = "SHA256";
 			}
-			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(text4);
+			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(text3);
 			if (!asn.CompareValue(hashAlgorithm.ComputeHash(signature)))
 			{
 				return false;

@@ -73,11 +73,11 @@ public class BrushTool : InterfaceTool
 		base.OnPrefabInit();
 		if (this.visualizer != null)
 		{
-			this.visualizer = Util.KInstantiate(this.visualizer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			this.visualizer = Util.KInstantiate(this.visualizer, null, null);
 		}
 		if (this.areaVisualizer != null)
 		{
-			this.areaVisualizer = Util.KInstantiate(this.areaVisualizer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			this.areaVisualizer = Util.KInstantiate(this.areaVisualizer, null, null);
 			this.areaVisualizer.SetActive(false);
 			this.areaVisualizer.transform.parent = base.transform;
 			Renderer component = this.areaVisualizer.GetComponent<Renderer>();

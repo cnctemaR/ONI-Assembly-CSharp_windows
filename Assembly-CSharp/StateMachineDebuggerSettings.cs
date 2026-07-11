@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 public class StateMachineDebuggerSettings : ScriptableObject
@@ -22,14 +21,11 @@ public class StateMachineDebuggerSettings : ScriptableObject
 
 	private void Initialize()
 	{
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		foreach (Type type in App.GetCurrentDomainTypes())
 		{
-			foreach (Type type in assembly.GetTypes())
+			if (typeof(StateMachine).IsAssignableFrom(type))
 			{
-				if (typeof(StateMachine).IsAssignableFrom(type))
-				{
-					this.CreateEntry(type);
-				}
+				this.CreateEntry(type);
 			}
 		}
 		this.entries.RemoveAll((StateMachineDebuggerSettings.Entry x) => x.type == null);

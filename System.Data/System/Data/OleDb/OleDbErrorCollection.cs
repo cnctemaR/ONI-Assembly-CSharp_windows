@@ -6,33 +6,17 @@ namespace System.Data.OleDb
 {
 	[ListBindable(false)]
 	[Serializable]
-	public sealed class OleDbErrorCollection : IEnumerable, ICollection
+	public sealed class OleDbErrorCollection : ICollection, IEnumerable
 	{
 		internal OleDbErrorCollection()
 		{
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this.items.SyncRoot;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.items.IsSynchronized;
-			}
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.items.Count;
+				throw null;
 			}
 		}
 
@@ -40,42 +24,37 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				return (OleDbError)this.items[index];
+				throw null;
 			}
 		}
 
-		internal void Add(OleDbError error)
+		bool ICollection.IsSynchronized
 		{
-			this.items.Add(error);
+			get
+			{
+				throw null;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				throw null;
+			}
 		}
 
 		public void CopyTo(Array array, int index)
 		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (index < array.GetLowerBound(0) || index > array.GetUpperBound(0))
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			if (array.IsFixedSize || index + this.Count > array.GetUpperBound(0))
-			{
-				throw new ArgumentException("array");
-			}
-			((OleDbError[])this.items.ToArray()).CopyTo(array, index);
 		}
 
 		public void CopyTo(OleDbError[] array, int index)
 		{
-			this.items.CopyTo(array, index);
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return this.items.GetEnumerator();
+			throw null;
 		}
-
-		private ArrayList items;
 	}
 }

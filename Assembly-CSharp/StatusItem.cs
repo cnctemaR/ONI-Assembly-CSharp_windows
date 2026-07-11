@@ -4,25 +4,16 @@ using UnityEngine.UI;
 
 public class StatusItem : Resource
 {
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, bool showWorldIcon = true, int status_overlays = 63486)
-		: base(id, Strings.Get(string.Concat(new string[]
-		{
-			"STRINGS.",
-			prefix,
-			".STATUSITEMS.",
-			id.ToUpper(),
-			".NAME"
-		})))
+	private StatusItem(string id, string composed_prefix)
+		: base(id, Strings.Get(composed_prefix + ".NAME"))
 	{
-		this.prefix = prefix;
-		string text = Strings.Get(string.Concat(new string[]
-		{
-			"STRINGS.",
-			prefix,
-			".STATUSITEMS.",
-			id.ToUpper(),
-			".TOOLTIP"
-		}));
+		this.composedPrefix = composed_prefix;
+		this.tooltipText = Strings.Get(composed_prefix + ".TOOLTIP");
+	}
+
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, bool showWorldIcon = true, int status_overlays = 63486)
+		: this(id, "STRINGS." + prefix + ".STATUSITEMS." + id.ToUpper())
+	{
 		if (icon_type != StatusItem.IconType.Info)
 		{
 			if (icon_type != StatusItem.IconType.Exclamation)
@@ -43,7 +34,6 @@ public class StatusItem : Resource
 		this.iconName = icon;
 		this.notificationType = notification_type;
 		this.sprite = Assets.GetTintedSprite(icon);
-		this.tooltipText = text;
 		this.iconType = icon_type;
 		this.allowMultiples = allow_multiples;
 		this.render_overlay = render_overlay;
@@ -115,15 +105,8 @@ public class StatusItem : Resource
 		}
 		else
 		{
-			DebugUtil.Assert(this.prefix != null, "When adding a notification, either set the status prefix or specify strings!");
-			this.notificationText = Strings.Get(string.Concat(new string[]
-			{
-				"STRINGS.",
-				this.prefix,
-				".STATUSITEMS.",
-				this.Id.ToUpper(),
-				".NOTIFICATION_NAME"
-			}));
+			DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!");
+			this.notificationText = Strings.Get(this.composedPrefix + ".NOTIFICATION_NAME");
 		}
 		if (notification_tooltip != null)
 		{
@@ -131,15 +114,8 @@ public class StatusItem : Resource
 		}
 		else
 		{
-			DebugUtil.Assert(this.prefix != null, "When adding a notification, either set the status prefix or specify strings!");
-			this.notificationTooltipText = Strings.Get(string.Concat(new string[]
-			{
-				"STRINGS.",
-				this.prefix,
-				".STATUSITEMS.",
-				this.Id.ToUpper(),
-				".NOTIFICATION_TOOLTIP"
-			}));
+			DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!");
+			this.notificationTooltipText = Strings.Get(this.composedPrefix + ".NOTIFICATION_TOOLTIP");
 		}
 	}
 
@@ -337,7 +313,7 @@ public class StatusItem : Resource
 
 	public int status_overlays;
 
-	private string prefix;
+	private string composedPrefix;
 
 	private bool showShowWorldIcon = true;
 

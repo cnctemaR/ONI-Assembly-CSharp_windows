@@ -9,9 +9,9 @@ namespace System.Data
 	public enum PropertyAttributes
 	{
 		NotSupported = 0,
-		Required = 1,
 		Optional = 2,
 		Read = 512,
+		Required = 1,
 		Write = 1024
 	}
 }

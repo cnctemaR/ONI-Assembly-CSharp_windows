@@ -1,36 +1,38 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class UInt32Converter : BaseNumberConverter
 	{
-		public UInt32Converter()
-		{
-			this.InnerType = typeof(uint);
-		}
-
-		internal override bool SupportHex
+		internal override Type TargetType
 		{
 			get
 			{
-				return true;
+				return typeof(uint);
 			}
 		}
 
-		internal override string ConvertToString(object value, NumberFormatInfo format)
+		internal override object FromString(string value, int radix)
 		{
-			return ((uint)value).ToString("G", format);
+			return Convert.ToUInt32(value, radix);
 		}
 
-		internal override object ConvertFromString(string value, NumberFormatInfo format)
+		internal override object FromString(string value, NumberFormatInfo formatInfo)
 		{
-			return uint.Parse(value, NumberStyles.Integer, format);
+			return uint.Parse(value, NumberStyles.Integer, formatInfo);
 		}
 
-		internal override object ConvertFromString(string value, int fromBase)
+		internal override object FromString(string value, CultureInfo culture)
 		{
-			return Convert.ToUInt32(value, fromBase);
+			return uint.Parse(value, culture);
+		}
+
+		internal override string ToString(object value, NumberFormatInfo formatInfo)
+		{
+			return ((uint)value).ToString("G", formatInfo);
 		}
 	}
 }

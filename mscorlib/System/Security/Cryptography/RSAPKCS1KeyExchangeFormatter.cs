@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -13,19 +12,11 @@ namespace System.Security.Cryptography
 
 		public RSAPKCS1KeyExchangeFormatter(AsymmetricAlgorithm key)
 		{
-			this.SetRSAKey(key);
-		}
-
-		public RandomNumberGenerator Rng
-		{
-			get
+			if (key == null)
 			{
-				return this.random;
+				throw new ArgumentNullException("key");
 			}
-			set
-			{
-				this.random = value;
-			}
+			this._rsaKey = (RSA)key;
 		}
 
 		public override string Parameters
@@ -36,22 +27,63 @@ namespace System.Security.Cryptography
 			}
 		}
 
+		public RandomNumberGenerator Rng
+		{
+			get
+			{
+				return this.RngValue;
+			}
+			set
+			{
+				this.RngValue = value;
+			}
+		}
+
+		public override void SetKey(AsymmetricAlgorithm key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			this._rsaKey = (RSA)key;
+			this._rsaOverridesEncrypt = null;
+		}
+
 		public override byte[] CreateKeyExchange(byte[] rgbData)
 		{
 			if (rgbData == null)
 			{
 				throw new ArgumentNullException("rgbData");
 			}
-			if (this.rsa == null)
+			if (this._rsaKey == null)
 			{
-				string text = Locale.GetText("No RSA key specified");
-				throw new CryptographicUnexpectedOperationException(text);
+				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("No asymmetric key object has been associated with this formatter object."));
 			}
-			if (this.random == null)
+			byte[] array;
+			if (this.OverridesEncrypt)
 			{
-				this.random = RandomNumberGenerator.Create();
+				array = this._rsaKey.Encrypt(rgbData, RSAEncryptionPadding.Pkcs1);
 			}
-			return PKCS1.Encrypt_v15(this.rsa, this.random, rgbData);
+			else
+			{
+				int num = this._rsaKey.KeySize / 8;
+				if (rgbData.Length + 11 > num)
+				{
+					throw new CryptographicException(Environment.GetResourceString("The data to be encrypted exceeds the maximum for this modulus of {0} bytes.", new object[] { num - 11 }));
+				}
+				byte[] array2 = new byte[num];
+				if (this.RngValue == null)
+				{
+					this.RngValue = RandomNumberGenerator.Create();
+				}
+				this.Rng.GetNonZeroBytes(array2);
+				array2[0] = 0;
+				array2[1] = 2;
+				array2[num - rgbData.Length - 1] = 0;
+				Buffer.InternalBlockCopy(rgbData, 0, array2, num - rgbData.Length, rgbData.Length);
+				array = this._rsaKey.EncryptValue(array2);
+			}
+			return array;
 		}
 
 		public override byte[] CreateKeyExchange(byte[] rgbData, Type symAlgType)
@@ -59,22 +91,26 @@ namespace System.Security.Cryptography
 			return this.CreateKeyExchange(rgbData);
 		}
 
-		private void SetRSAKey(AsymmetricAlgorithm key)
+		private bool OverridesEncrypt
 		{
-			if (key == null)
+			get
 			{
-				throw new ArgumentNullException("key");
+				if (this._rsaOverridesEncrypt == null)
+				{
+					this._rsaOverridesEncrypt = new bool?(Utils.DoesRsaKeyOverride(this._rsaKey, "Encrypt", new Type[]
+					{
+						typeof(byte[]),
+						typeof(RSAEncryptionPadding)
+					}));
+				}
+				return this._rsaOverridesEncrypt.Value;
 			}
-			this.rsa = (RSA)key;
 		}
 
-		public override void SetKey(AsymmetricAlgorithm key)
-		{
-			this.SetRSAKey(key);
-		}
+		private RandomNumberGenerator RngValue;
 
-		private RSA rsa;
+		private RSA _rsaKey;
 
-		private RandomNumberGenerator random;
+		private bool? _rsaOverridesEncrypt;
 	}
 }

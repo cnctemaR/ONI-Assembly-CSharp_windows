@@ -11,23 +11,19 @@ namespace System.Data.Common
 		{
 		}
 
+		protected DbException(SerializationInfo info, StreamingContext context)
+		{
+		}
+
 		protected DbException(string message)
-			: base(message)
 		{
 		}
 
 		protected DbException(string message, Exception innerException)
-			: base(message, innerException)
 		{
 		}
 
-		protected DbException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
-
-		protected DbException(string message, int errorcode)
-			: base(message, errorcode)
+		protected DbException(string message, int errorCode)
 		{
 		}
 	}

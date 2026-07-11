@@ -13,7 +13,7 @@ public class ToggleSoundPlayer : WidgetSoundPlayer
 		return this.toggle_widget_sound_events;
 	}
 
-	public static string[] default_values = new string[] { "HUD_Click", "HUD_Click_Deselect", "HUD_Mouseover", "Negative" };
+	public static readonly string[] default_values = new string[] { "HUD_Click", "HUD_Click_Deselect", "HUD_Mouseover", "Negative" };
 
 	public Func<bool> AcceptClickCondition;
 

@@ -8,9 +8,8 @@ namespace System.Xml.XPath
 		String,
 		Boolean,
 		NodeSet,
-		[MonoFIX("MS.NET: 1")]
-		Navigator,
-		Any,
+		Navigator = 1,
+		Any = 5,
 		Error
 	}
 }

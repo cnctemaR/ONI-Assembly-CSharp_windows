@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.IO;
-using System.Security.Permissions;
 using System.Text;
 
 namespace System.CodeDom.Compiler
@@ -10,111 +8,77 @@ namespace System.CodeDom.Compiler
 	{
 		CompilerResults ICodeCompiler.CompileAssemblyFromDom(CompilerParameters options, CodeCompileUnit e)
 		{
-			return this.FromDom(options, e);
-		}
-
-		CompilerResults ICodeCompiler.CompileAssemblyFromDomBatch(CompilerParameters options, CodeCompileUnit[] ea)
-		{
-			return this.FromDomBatch(options, ea);
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			CompilerResults compilerResults;
+			try
+			{
+				compilerResults = this.FromDom(options, e);
+			}
+			finally
+			{
+				options.TempFiles.SafeDelete();
+			}
+			return compilerResults;
 		}
 
 		CompilerResults ICodeCompiler.CompileAssemblyFromFile(CompilerParameters options, string fileName)
 		{
-			return this.FromFile(options, fileName);
-		}
-
-		CompilerResults ICodeCompiler.CompileAssemblyFromFileBatch(CompilerParameters options, string[] fileNames)
-		{
-			return this.FromFileBatch(options, fileNames);
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			CompilerResults compilerResults;
+			try
+			{
+				compilerResults = this.FromFile(options, fileName);
+			}
+			finally
+			{
+				options.TempFiles.SafeDelete();
+			}
+			return compilerResults;
 		}
 
 		CompilerResults ICodeCompiler.CompileAssemblyFromSource(CompilerParameters options, string source)
 		{
-			return this.FromSource(options, source);
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			CompilerResults compilerResults;
+			try
+			{
+				compilerResults = this.FromSource(options, source);
+			}
+			finally
+			{
+				options.TempFiles.SafeDelete();
+			}
+			return compilerResults;
 		}
 
 		CompilerResults ICodeCompiler.CompileAssemblyFromSourceBatch(CompilerParameters options, string[] sources)
 		{
-			return this.FromSourceBatch(options, sources);
-		}
-
-		protected abstract string CompilerName { get; }
-
-		protected abstract string FileExtension { get; }
-
-		protected abstract string CmdArgsFromParameters(CompilerParameters options);
-
-		protected virtual CompilerResults FromDom(CompilerParameters options, CodeCompileUnit e)
-		{
-			return this.FromDomBatch(options, new CodeCompileUnit[] { e });
-		}
-
-		protected virtual CompilerResults FromDomBatch(CompilerParameters options, CodeCompileUnit[] ea)
-		{
-			string[] array = new string[ea.Length];
-			int num = 0;
 			if (options == null)
 			{
-				options = new CompilerParameters();
+				throw new ArgumentNullException("options");
 			}
-			global::System.Collections.Specialized.StringCollection referencedAssemblies = options.ReferencedAssemblies;
-			foreach (CodeCompileUnit codeCompileUnit in ea)
+			CompilerResults compilerResults;
+			try
 			{
-				array[num] = Path.ChangeExtension(Path.GetTempFileName(), this.FileExtension);
-				FileStream fileStream = new FileStream(array[num], FileMode.OpenOrCreate);
-				StreamWriter streamWriter = new StreamWriter(fileStream);
-				if (codeCompileUnit.ReferencedAssemblies != null)
-				{
-					foreach (string text in codeCompileUnit.ReferencedAssemblies)
-					{
-						if (!referencedAssemblies.Contains(text))
-						{
-							referencedAssemblies.Add(text);
-						}
-					}
-				}
-				((ICodeGenerator)this).GenerateCodeFromCompileUnit(codeCompileUnit, streamWriter, new CodeGeneratorOptions());
-				streamWriter.Close();
-				fileStream.Close();
-				num++;
+				compilerResults = this.FromSourceBatch(options, sources);
 			}
-			return this.Compile(options, array, false);
-		}
-
-		protected virtual CompilerResults FromFile(CompilerParameters options, string fileName)
-		{
-			return this.FromFileBatch(options, new string[] { fileName });
-		}
-
-		protected virtual CompilerResults FromFileBatch(CompilerParameters options, string[] fileNames)
-		{
-			return this.Compile(options, fileNames, true);
-		}
-
-		protected virtual CompilerResults FromSource(CompilerParameters options, string source)
-		{
-			return this.FromSourceBatch(options, new string[] { source });
-		}
-
-		protected virtual CompilerResults FromSourceBatch(CompilerParameters options, string[] sources)
-		{
-			string[] array = new string[sources.Length];
-			int num = 0;
-			foreach (string text in sources)
+			finally
 			{
-				array[num] = Path.ChangeExtension(Path.GetTempFileName(), this.FileExtension);
-				FileStream fileStream = new FileStream(array[num], FileMode.OpenOrCreate);
-				StreamWriter streamWriter = new StreamWriter(fileStream);
-				streamWriter.Write(text);
-				streamWriter.Close();
-				fileStream.Close();
-				num++;
+				options.TempFiles.SafeDelete();
 			}
-			return this.Compile(options, array, false);
+			return compilerResults;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
-		private CompilerResults Compile(CompilerParameters options, string[] fileNames, bool keepFiles)
+		CompilerResults ICodeCompiler.CompileAssemblyFromFileBatch(CompilerParameters options, string[] fileNames)
 		{
 			if (options == null)
 			{
@@ -124,58 +88,200 @@ namespace System.CodeDom.Compiler
 			{
 				throw new ArgumentNullException("fileNames");
 			}
-			options.TempFiles = new TempFileCollection();
-			foreach (string text in fileNames)
+			CompilerResults compilerResults;
+			try
 			{
-				options.TempFiles.AddFile(text, keepFiles);
+				for (int i = 0; i < fileNames.Length; i++)
+				{
+					File.OpenRead(fileNames[i]).Dispose();
+				}
+				compilerResults = this.FromFileBatch(options, fileNames);
 			}
-			options.TempFiles.KeepFiles = keepFiles;
-			string empty = string.Empty;
-			string empty2 = string.Empty;
-			string text2 = this.CompilerName + " " + this.CmdArgsFromParameters(options);
-			CompilerResults compilerResults = new CompilerResults(new TempFileCollection());
-			compilerResults.NativeCompilerReturnValue = Executor.ExecWaitWithCapture(text2, options.TempFiles, ref empty, ref empty2);
-			string[] array = empty.Split(Environment.NewLine.ToCharArray());
-			foreach (string text3 in array)
+			finally
 			{
-				this.ProcessCompilerOutputLine(compilerResults, text3);
-			}
-			if (compilerResults.Errors.Count == 0)
-			{
-				compilerResults.PathToAssembly = options.OutputAssembly;
+				options.TempFiles.SafeDelete();
 			}
 			return compilerResults;
 		}
 
-		[global::System.MonoTODO]
+		CompilerResults ICodeCompiler.CompileAssemblyFromDomBatch(CompilerParameters options, CodeCompileUnit[] ea)
+		{
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			CompilerResults compilerResults;
+			try
+			{
+				compilerResults = this.FromDomBatch(options, ea);
+			}
+			finally
+			{
+				options.TempFiles.SafeDelete();
+			}
+			return compilerResults;
+		}
+
+		protected abstract string FileExtension { get; }
+
+		protected abstract string CompilerName { get; }
+
+		protected virtual CompilerResults FromDom(CompilerParameters options, CodeCompileUnit e)
+		{
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			return this.FromDomBatch(options, new CodeCompileUnit[] { e });
+		}
+
+		protected virtual CompilerResults FromFile(CompilerParameters options, string fileName)
+		{
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			if (fileName == null)
+			{
+				throw new ArgumentNullException("fileName");
+			}
+			File.OpenRead(fileName).Dispose();
+			return this.FromFileBatch(options, new string[] { fileName });
+		}
+
+		protected virtual CompilerResults FromSource(CompilerParameters options, string source)
+		{
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			return this.FromSourceBatch(options, new string[] { source });
+		}
+
+		protected virtual CompilerResults FromDomBatch(CompilerParameters options, CodeCompileUnit[] ea)
+		{
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			if (ea == null)
+			{
+				throw new ArgumentNullException("ea");
+			}
+			string[] array = new string[ea.Length];
+			for (int i = 0; i < ea.Length; i++)
+			{
+				if (ea[i] != null)
+				{
+					this.ResolveReferencedAssemblies(options, ea[i]);
+					array[i] = options.TempFiles.AddExtension(i + this.FileExtension);
+					using (FileStream fileStream = new FileStream(array[i], FileMode.Create, FileAccess.Write, FileShare.Read))
+					{
+						using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+						{
+							((ICodeGenerator)this).GenerateCodeFromCompileUnit(ea[i], streamWriter, base.Options);
+							streamWriter.Flush();
+						}
+					}
+				}
+			}
+			return this.FromFileBatch(options, array);
+		}
+
+		private void ResolveReferencedAssemblies(CompilerParameters options, CodeCompileUnit e)
+		{
+			if (e.ReferencedAssemblies.Count > 0)
+			{
+				foreach (string text in e.ReferencedAssemblies)
+				{
+					if (!options.ReferencedAssemblies.Contains(text))
+					{
+						options.ReferencedAssemblies.Add(text);
+					}
+				}
+			}
+		}
+
+		protected virtual CompilerResults FromFileBatch(CompilerParameters options, string[] fileNames)
+		{
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			if (fileNames == null)
+			{
+				throw new ArgumentNullException("fileNames");
+			}
+			throw new PlatformNotSupportedException();
+		}
+
+		protected abstract void ProcessCompilerOutputLine(CompilerResults results, string line);
+
+		protected abstract string CmdArgsFromParameters(CompilerParameters options);
+
 		protected virtual string GetResponseFileCmdArgs(CompilerParameters options, string cmdArgs)
 		{
-			throw new NotImplementedException();
+			string text = options.TempFiles.AddExtension("cmdline");
+			using (FileStream fileStream = new FileStream(text, FileMode.Create, FileAccess.Write, FileShare.Read))
+			{
+				using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+				{
+					streamWriter.Write(cmdArgs);
+					streamWriter.Flush();
+				}
+			}
+			return "@\"" + text + "\"";
+		}
+
+		protected virtual CompilerResults FromSourceBatch(CompilerParameters options, string[] sources)
+		{
+			if (options == null)
+			{
+				throw new ArgumentNullException("options");
+			}
+			if (sources == null)
+			{
+				throw new ArgumentNullException("sources");
+			}
+			string[] array = new string[sources.Length];
+			for (int i = 0; i < sources.Length; i++)
+			{
+				string text = options.TempFiles.AddExtension(i + this.FileExtension);
+				using (FileStream fileStream = new FileStream(text, FileMode.Create, FileAccess.Write, FileShare.Read))
+				{
+					using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+					{
+						streamWriter.Write(sources[i]);
+						streamWriter.Flush();
+					}
+				}
+				array[i] = text;
+			}
+			return this.FromFileBatch(options, array);
 		}
 
 		protected static string JoinStringArray(string[] sa, string separator)
 		{
+			if (sa == null || sa.Length == 0)
+			{
+				return string.Empty;
+			}
+			if (sa.Length == 1)
+			{
+				return "\"" + sa[0] + "\"";
+			}
 			StringBuilder stringBuilder = new StringBuilder();
-			int num = sa.Length;
-			if (num > 1)
+			for (int i = 0; i < sa.Length - 1; i++)
 			{
-				for (int i = 0; i < num - 1; i++)
-				{
-					stringBuilder.Append("\"");
-					stringBuilder.Append(sa[i]);
-					stringBuilder.Append("\"");
-					stringBuilder.Append(separator);
-				}
+				stringBuilder.Append('"');
+				stringBuilder.Append(sa[i]);
+				stringBuilder.Append('"');
+				stringBuilder.Append(separator);
 			}
-			if (num > 0)
-			{
-				stringBuilder.Append("\"");
-				stringBuilder.Append(sa[num - 1]);
-				stringBuilder.Append("\"");
-			}
+			stringBuilder.Append('"');
+			stringBuilder.Append(sa[sa.Length - 1]);
+			stringBuilder.Append('"');
 			return stringBuilder.ToString();
 		}
-
-		protected abstract void ProcessCompilerOutputLine(CompilerResults results, string line);
 	}
 }

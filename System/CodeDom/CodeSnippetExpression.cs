@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeSnippetExpression : CodeExpression
 	{
@@ -14,30 +11,21 @@ namespace System.CodeDom
 
 		public CodeSnippetExpression(string value)
 		{
-			this.value = value;
+			this.Value = value;
 		}
 
 		public string Value
 		{
 			get
 			{
-				if (this.value == null)
-				{
-					return string.Empty;
-				}
-				return this.value;
+				return this._value ?? string.Empty;
 			}
 			set
 			{
-				this.value = value;
+				this._value = value;
 			}
 		}
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private string value;
+		private string _value;
 	}
 }

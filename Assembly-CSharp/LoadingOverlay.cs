@@ -26,6 +26,11 @@ public class LoadingOverlay : KModalScreen
 		}
 	}
 
+	public static void DestroyInstance()
+	{
+		LoadingOverlay.instance = null;
+	}
+
 	public static void Load(global::System.Action cb)
 	{
 		GameObject gameObject = GameObject.Find("/SceneInitializerFE/FrontEndManager");

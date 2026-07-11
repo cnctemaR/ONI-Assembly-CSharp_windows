@@ -14,18 +14,16 @@ namespace System.Configuration
 			{
 				xmlNode = section.Attributes.RemoveNamedItem("file");
 			}
-			global::System.Collections.Specialized.NameValueCollection nameValueCollection = ConfigHelper.GetNameValueCollection(parent as global::System.Collections.Specialized.NameValueCollection, section, "key", "value");
+			NameValueCollection nameValueCollection = ConfigHelper.GetNameValueCollection(parent as NameValueCollection, section, "key", "value");
 			if (xmlNode != null && xmlNode.Value != string.Empty)
 			{
-				string text = ((IConfigXmlNode)section).Filename;
-				text = Path.GetFullPath(text);
-				string text2 = Path.Combine(Path.GetDirectoryName(text), xmlNode.Value);
-				if (!File.Exists(text2))
+				string text = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(((IConfigXmlNode)section).Filename)), xmlNode.Value);
+				if (!File.Exists(text))
 				{
 					return nameValueCollection;
 				}
 				ConfigXmlDocument configXmlDocument = new ConfigXmlDocument();
-				configXmlDocument.Load(text2);
+				configXmlDocument.Load(text);
 				if (configXmlDocument.DocumentElement.Name != section.Name)
 				{
 					throw new ConfigurationException("Invalid root element", configXmlDocument.DocumentElement);

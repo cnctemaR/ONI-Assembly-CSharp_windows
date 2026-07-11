@@ -7,17 +7,17 @@ namespace System.Runtime.InteropServices
 	{
 		public VariantWrapper(object obj)
 		{
-			this._wrappedObject = obj;
+			this.m_WrappedObject = obj;
 		}
 
 		public object WrappedObject
 		{
 			get
 			{
-				return this._wrappedObject;
+				return this.m_WrappedObject;
 			}
 		}
 
-		private object _wrappedObject;
+		private object m_WrappedObject;
 	}
 }

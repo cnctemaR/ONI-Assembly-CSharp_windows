@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class KInputController : IInputHandler
@@ -12,7 +13,7 @@ public class KInputController : IInputHandler
 		this.IsGamepad = is_gamepad;
 		this.mAxis = new float[4];
 		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[209];
+		this.mActionState = new bool[229];
 		this.mScrollState = new bool[2];
 		this.inputHandler = new KInputHandler(this, this);
 	}
@@ -157,7 +158,6 @@ public class KInputController : IInputHandler
 			this.UpdateScrollStates();
 			this.UpdateAxis();
 			this.UpdateModifiers();
-			bool flag = this.mActiveModifiers != Modifier.None;
 			foreach (KInputController.KeyDef keyDef in this.mKeyDefs)
 			{
 				int mKeyCode = (int)keyDef.mKeyCode;
@@ -167,11 +167,8 @@ public class KInputController : IInputHandler
 					{
 						if (this.GetKeyDown(keyDef.mKeyCode))
 						{
-							if (keyDef.mModifier == Modifier.None && !flag)
-							{
-								this.QueueButtonEvent(keyDef, true);
-							}
-							else if (keyDef.mModifier != Modifier.None && (this.mActiveModifiers & keyDef.mModifier) != Modifier.None)
+							bool flag = this.mActiveModifiers == keyDef.mModifier;
+							if (flag)
 							{
 								this.QueueButtonEvent(keyDef, true);
 							}
@@ -296,13 +293,14 @@ public class KInputController : IInputHandler
 		private Modifier mModifier;
 	}
 
+	[DebuggerDisplay("Key: {mKeyCode} Mod: {mModifier}")]
 	public class KeyDef
 	{
 		public KeyDef(KKeyCode key_code, Modifier modifier)
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[209];
+			this.mActionFlags = new bool[229];
 		}
 
 		public KKeyCode mKeyCode;

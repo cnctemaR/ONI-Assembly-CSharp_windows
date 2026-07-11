@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.Net
 {
@@ -11,12 +12,7 @@ namespace System.Net
 		}
 
 		public WebException(string message)
-			: base(message)
-		{
-		}
-
-		protected WebException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+			: this(message, null)
 		{
 		}
 
@@ -26,52 +22,86 @@ namespace System.Net
 		}
 
 		public WebException(string message, WebExceptionStatus status)
-			: base(message)
+			: this(message, null, status, null)
 		{
-			this.status = status;
 		}
 
-		internal WebException(string message, Exception innerException, WebExceptionStatus status)
-			: base(message, innerException)
+		internal WebException(string message, WebExceptionStatus status, WebExceptionInternalStatus internalStatus, Exception innerException)
+			: this(message, innerException, status, null, internalStatus)
 		{
-			this.status = status;
 		}
 
 		public WebException(string message, Exception innerException, WebExceptionStatus status, WebResponse response)
-			: base(message, innerException)
+			: this(message, null, innerException, status, response)
 		{
-			this.status = status;
-			this.response = response;
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		internal WebException(string message, string data, Exception innerException, WebExceptionStatus status, WebResponse response)
+			: base(message + ((data != null) ? (": '" + data + "'") : ""), innerException)
 		{
-			base.GetObjectData(info, context);
+			this.m_Status = status;
+			this.m_Response = response;
 		}
 
-		public WebResponse Response
+		internal WebException(string message, Exception innerException, WebExceptionStatus status, WebResponse response, WebExceptionInternalStatus internalStatus)
+			: this(message, null, innerException, status, response, internalStatus)
 		{
-			get
-			{
-				return this.response;
-			}
+		}
+
+		internal WebException(string message, string data, Exception innerException, WebExceptionStatus status, WebResponse response, WebExceptionInternalStatus internalStatus)
+			: base(message + ((data != null) ? (": '" + data + "'") : ""), innerException)
+		{
+			this.m_Status = status;
+			this.m_Response = response;
+			this.m_InternalStatus = internalStatus;
+		}
+
+		protected WebException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
+		{
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			this.GetObjectData(serializationInfo, streamingContext);
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			base.GetObjectData(serializationInfo, streamingContext);
 		}
 
 		public WebExceptionStatus Status
 		{
 			get
 			{
-				return this.status;
+				return this.m_Status;
 			}
 		}
 
-		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		public WebResponse Response
 		{
-			base.GetObjectData(serializationInfo, streamingContext);
+			get
+			{
+				return this.m_Response;
+			}
 		}
 
-		private WebResponse response;
+		internal WebExceptionInternalStatus InternalStatus
+		{
+			get
+			{
+				return this.m_InternalStatus;
+			}
+		}
 
-		private WebExceptionStatus status = WebExceptionStatus.UnknownError;
+		private WebExceptionStatus m_Status = WebExceptionStatus.UnknownError;
+
+		private WebResponse m_Response;
+
+		[NonSerialized]
+		private WebExceptionInternalStatus m_InternalStatus;
 	}
 }

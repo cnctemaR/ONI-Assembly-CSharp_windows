@@ -17,6 +17,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public static PlayerController Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		PlayerController.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		PlayerController.Instance = this;

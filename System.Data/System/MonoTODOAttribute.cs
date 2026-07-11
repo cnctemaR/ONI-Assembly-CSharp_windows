@@ -11,17 +11,14 @@ namespace System
 
 		public MonoTODOAttribute(string comment)
 		{
-			this.comment = comment;
 		}
 
 		public string Comment
 		{
 			get
 			{
-				return this.comment;
+				throw null;
 			}
 		}
-
-		private string comment;
 	}
 }

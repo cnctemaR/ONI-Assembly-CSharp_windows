@@ -72,6 +72,10 @@ namespace System.Configuration
 			}
 			set
 			{
+				if (value == null)
+				{
+					value = string.Empty;
+				}
 				this.config_source = value;
 			}
 		}
@@ -114,7 +118,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				return this.is_declared;
+				return false;
 			}
 		}
 
@@ -123,7 +127,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				return this.is_locked;
+				return false;
 			}
 		}
 
@@ -194,6 +198,10 @@ namespace System.Configuration
 			}
 			set
 			{
+				if (value == null || value.Length == 0)
+				{
+					throw new ArgumentException("Value cannot be null or empty.");
+				}
 				this.type_name = value;
 			}
 		}
@@ -213,13 +221,13 @@ namespace System.Configuration
 			return this.raw_xml;
 		}
 
-		public void ProtectSection(string provider)
+		public void ProtectSection(string protectionProvider)
 		{
-			this.protection_provider = ProtectedConfiguration.GetProvider(provider, true);
+			this.protection_provider = ProtectedConfiguration.GetProvider(protectionProvider, true);
 		}
 
 		[MonoTODO]
-		public void ForceDeclaration(bool require)
+		public void ForceDeclaration(bool force)
 		{
 		}
 
@@ -239,9 +247,9 @@ namespace System.Configuration
 			this.protection_provider = null;
 		}
 
-		public void SetRawXml(string xml)
+		public void SetRawXml(string rawXml)
 		{
-			this.raw_xml = xml;
+			this.raw_xml = rawXml;
 		}
 
 		[MonoTODO]
@@ -266,13 +274,9 @@ namespace System.Configuration
 
 		private bool require_permission;
 
-		private string config_source;
+		private string config_source = string.Empty;
 
 		private bool force_update;
-
-		private bool is_declared;
-
-		private bool is_locked;
 
 		private string name;
 

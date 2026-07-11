@@ -6,27 +6,22 @@ namespace System.Net
 	[Serializable]
 	public abstract class EndPoint
 	{
-		public virtual global::System.Net.Sockets.AddressFamily AddressFamily
+		public virtual AddressFamily AddressFamily
 		{
 			get
 			{
-				throw EndPoint.NotImplemented();
+				throw ExceptionHelper.PropertyNotImplementedException;
 			}
-		}
-
-		public virtual EndPoint Create(SocketAddress address)
-		{
-			throw EndPoint.NotImplemented();
 		}
 
 		public virtual SocketAddress Serialize()
 		{
-			throw EndPoint.NotImplemented();
+			throw ExceptionHelper.MethodNotImplementedException;
 		}
 
-		private static Exception NotImplemented()
+		public virtual EndPoint Create(SocketAddress socketAddress)
 		{
-			return new NotImplementedException();
+			throw ExceptionHelper.MethodNotImplementedException;
 		}
 	}
 }

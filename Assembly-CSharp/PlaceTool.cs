@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class PlaceTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		PlaceTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		PlaceTool.Instance = this;
@@ -15,9 +20,8 @@ public class PlaceTool : DragTool
 		base.OnActivateTool();
 		GameObject prefab = Assets.GetPrefab(this.previewTag);
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
-		Folder folder = Folder.Placers;
 		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(prefab, sceneLayer, folder, null, num);
+		this.visualizer = GameUtil.KInstantiate(prefab, sceneLayer, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -25,7 +29,6 @@ public class PlaceTool : DragTool
 			component.isMovable = true;
 		}
 		this.visualizer.SetActive(true);
-		this.visualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Placers).transform;
 		this.ShowToolTip();
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = null;

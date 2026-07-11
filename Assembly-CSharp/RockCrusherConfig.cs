@@ -24,7 +24,6 @@ public class RockCrusherConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.SelfHeatKilowattsWhenActive = 16f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
 		return buildingDef;
@@ -53,11 +52,14 @@ public class RockCrusherConfig : IBuildingConfig
 			{
 				new ComplexRecipe.RecipeElement(tag, 100f)
 			};
-			complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", element.tag), array, array2);
+			string text = ComplexRecipeManager.MakeObsoleteRecipeID("RockCrusher", element.tag);
+			string text2 = ComplexRecipeManager.MakeRecipeID("RockCrusher", array, array2);
+			complexRecipe = new ComplexRecipe(text2, array, array2);
 			complexRecipe.time = 40f;
 			complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION, element.name, tag.ProperName());
 			complexRecipe.useResultAsDescription = true;
 			complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
+			ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
 		}
 		List<Element> list2 = ElementLoader.elements.FindAll((Element e) => e.IsSolid && e.HasTag(GameTags.Metal));
 		foreach (Element element2 in list2)
@@ -75,13 +77,17 @@ public class RockCrusherConfig : IBuildingConfig
 					new ComplexRecipe.RecipeElement(lowTempTransition.tag, 50f),
 					new ComplexRecipe.RecipeElement(tag, 50f)
 				};
-				complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", lowTempTransition.tag), array3, array4);
+				string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("RockCrusher", lowTempTransition.tag);
+				string text4 = ComplexRecipeManager.MakeRecipeID("RockCrusher", array3, array4);
+				complexRecipe = new ComplexRecipe(text4, array3, array4);
 				complexRecipe.time = 40f;
 				complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.METAL_RECIPE_DESCRIPTION, lowTempTransition.name, element2.name);
 				complexRecipe.useResultAsDescription = true;
 				complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
+				ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
 			}
 		}
+		Element element3 = ElementLoader.FindElementByHash(SimHashes.Lime);
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("EggShell", 5f)
@@ -90,11 +96,14 @@ public class RockCrusherConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Lime).tag, 5f)
 		};
-		complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", ElementLoader.FindElementByHash(SimHashes.Lime).tag), array5, array6);
+		string text5 = ComplexRecipeManager.MakeObsoleteRecipeID("RockCrusher", element3.tag);
+		string text6 = ComplexRecipeManager.MakeRecipeID("RockCrusher", array5, array6);
+		complexRecipe = new ComplexRecipe(text6, array5, array6);
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.LIME_RECIPE_DESCRIPTION, SimHashes.Lime.CreateTag().ProperName(), "EggShell".ToTag().ProperName());
 		complexRecipe.useResultAsDescription = true;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
+		ComplexRecipeManager.Get().AddObsoleteIDMapping(text5, text6);
 		Prioritizable.AddRef(go);
 	}
 

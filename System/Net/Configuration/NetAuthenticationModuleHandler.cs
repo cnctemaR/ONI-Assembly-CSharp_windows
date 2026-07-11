@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace System.Net.Configuration
 {
-	internal class NetAuthenticationModuleHandler : global::System.Configuration.IConfigurationSectionHandler
+	internal class NetAuthenticationModuleHandler : IConfigurationSectionHandler
 	{
 		public virtual object Create(object parent, object configContext, XmlNode section)
 		{
@@ -12,8 +12,7 @@ namespace System.Net.Configuration
 			{
 				HandlersUtil.ThrowException("Unrecognized attribute", section);
 			}
-			XmlNodeList childNodes = section.ChildNodes;
-			foreach (object obj in childNodes)
+			foreach (object obj in section.ChildNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
 				XmlNodeType nodeType = xmlNode.NodeType;
@@ -62,8 +61,7 @@ namespace System.Net.Configuration
 			IAuthenticationModule authenticationModule = null;
 			try
 			{
-				Type type = Type.GetType(typeName, true);
-				authenticationModule = (IAuthenticationModule)Activator.CreateInstance(type);
+				authenticationModule = (IAuthenticationModule)Activator.CreateInstance(Type.GetType(typeName, true));
 			}
 			catch (Exception ex)
 			{

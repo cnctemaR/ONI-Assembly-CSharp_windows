@@ -207,10 +207,10 @@ public class Clinic : Workable, IEffectDescriptor
 				component.Unassign();
 			});
 			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Clinic.ClinicSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.AssigneeChanged, this.unoperational, null)
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.Heal, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.HealCritical, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.RestDueToDisease, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect))
-				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.SleepDueToDisease, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect));
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.Heal, smi.master, null, null, true, null, null, null, false, null, false, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.HealCritical, smi.master, null, null, true, null, null, null, false, null, false, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.RestDueToDisease, smi.master, null, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect))
+				.ToggleRecurringChore((Clinic.ClinicSM.Instance smi) => new WorkChore<Clinic>(Db.Get().ChoreTypes.SleepDueToDisease, smi.master, null, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect));
 			this.operational.idle.WorkableStartTransition((Clinic.ClinicSM.Instance smi) => smi.master, this.operational.healing);
 			this.operational.healing.DefaultState(this.operational.healing.undoctored).WorkableStopTransition((Clinic.ClinicSM.Instance smi) => smi.GetComponent<Clinic>(), this.operational.idle).Enter(delegate(Clinic.ClinicSM.Instance smi)
 			{
@@ -338,7 +338,7 @@ public class Clinic : Workable, IEffectDescriptor
 			{
 				if (base.master.IsValidEffect(base.master.doctoredHealthEffect) || base.master.IsValidEffect(base.master.doctoredDiseaseEffect))
 				{
-					this.doctorChore = new WorkChore<DoctorChoreWorkable>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
+					this.doctorChore = new WorkChore<DoctorChoreWorkable>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
 					WorkChore<DoctorChoreWorkable> workChore = this.doctorChore;
 					workChore.onComplete = (Action<Chore>)Delegate.Combine(workChore.onComplete, new Action<Chore>(delegate(Chore chore)
 					{

@@ -98,7 +98,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Broken";
 
-				public static LocString TOOLTIP = UI.HORIZONTAL_BR_RULE + "This building received damage from {DamageInfo}";
+				public static LocString TOOLTIP = "Broken" + UI.HORIZONTAL_BR_RULE + "This building received damage from {DamageInfo}\n\nIt will not function until it receives repairs";
 			}
 
 			public class CHANGEDOORCONTROLSTATE
@@ -934,6 +934,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This pump must be submerged in gas to work";
 			}
 
+			public class PIPEMAYMELT
+			{
+				public static LocString NAME = "High Melt Risk";
+
+				public static LocString TOOLTIP = "This pipe is in danger of melting at the current temperature";
+			}
+
 			public class ELEMENTEMITTEROUTPUT
 			{
 				public static LocString NAME = "Emitting {ElementTypes}: {FlowRate}";
@@ -1521,37 +1528,37 @@ namespace STRINGS
 
 			public class SPACENOTVISIBLE
 			{
-				public static LocString NAME = "Space Not Visible";
+				public static LocString NAME = "Insufficient Visibility";
 
-				public static LocString TOOLTIP = "This detector must be able to see the sky in order to detect anything.";
+				public static LocString TOOLTIP = "An obscured view of the sky is preventing this scanner from collecting data\n\nMake sure the area about the dish is clear";
 			}
 
 			public class DETECTORQUALITY
 			{
-				public static LocString NAME = "Dish Quality: {Quality}";
+				public static LocString NAME = "Scan Quality: {Quality}";
 
-				public static LocString TOOLTIP = "This detector dish is currently scanning at {Quality} effectiveness.\n\nLow quality may be due to:\n    • Interference from nearby heavy machinery\n    • Rock or tiles obstructing a wide view of the sky";
+				public static LocString TOOLTIP = "This scanner dish is currently scanning at {Quality} effectiveness\n\nDecreased scan quality may be due to:\n    • Interference from nearby heavy machinery\n    • Rock or tile obstructing the dish's view of the sky";
 			}
 
 			public class NETWORKQUALITY
 			{
-				public static LocString NAME = "Detector Network Quality: {TotalQuality}";
+				public static LocString NAME = "Scan Network Quality: {TotalQuality}";
 
-				public static LocString TOOLTIP = "Your detector network is scanning at {TotalQuality} effectiveness, and will detect meteor showers {WorstTime} to {BestTime} before they strike.\n\nAdd more detectors and ensure they are each scanning effectively for best results.";
+				public static LocString TOOLTIP = "Your scanner network is scanning at {TotalQuality} effectiveness, and will detect meteor showers {WorstTime} to {BestTime} before they strike\n\nBuild multiple detectors and ensure they're each scanning effectively for the best results";
 			}
 
 			public class DETECTORSCANNING
 			{
 				public static LocString NAME = "Scanning";
 
-				public static LocString TOOLTIP = "This detector is currently peering in to the sky to find objects of interest.";
+				public static LocString TOOLTIP = "This scanner is currently scouring space for anything of interest";
 			}
 
 			public class INCOMINGMETEORS
 			{
 				public static LocString NAME = "Incoming Meteors";
 
-				public static LocString TOOLTIP = "There are high speed objects approaching!";
+				public static LocString TOOLTIP = "Warning!\n\nHigh velocity objects on approach!";
 			}
 		}
 

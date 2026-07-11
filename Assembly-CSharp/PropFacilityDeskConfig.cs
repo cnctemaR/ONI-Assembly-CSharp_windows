@@ -7,10 +7,11 @@ public class PropFacilityDeskConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityDesk", SETITEMS.FACILITY_DESK.NAME, SETITEMS.FACILITY_DESK.DESC, 50f, Assets.GetAnim("gravitas_desk_kanim"), "off", Grid.SceneLayer.Building, 4, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityDesk", global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYDESK.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYDESK.DESC, 50f, Assets.GetAnim("gravitas_desk_kanim"), "off", Grid.SceneLayer.Building, 4, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Granite);
 		component.Temperature = 294.15f;
+		gameObject.AddOrGet<LoreBearer>();
 		return gameObject;
 	}
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
-using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -14,68 +13,78 @@ namespace System.Xml.Serialization
 		public SoapAttributes(ICustomAttributeProvider provider)
 		{
 			object[] customAttributes = provider.GetCustomAttributes(false);
-			foreach (object obj in customAttributes)
+			for (int i = 0; i < customAttributes.Length; i++)
 			{
-				if (obj is SoapAttributeAttribute)
-				{
-					this.soapAttribute = (SoapAttributeAttribute)obj;
-				}
-				else if (obj is DefaultValueAttribute)
-				{
-					this.soapDefaultValue = ((DefaultValueAttribute)obj).Value;
-				}
-				else if (obj is SoapElementAttribute)
-				{
-					this.soapElement = (SoapElementAttribute)obj;
-				}
-				else if (obj is SoapEnumAttribute)
-				{
-					this.soapEnum = (SoapEnumAttribute)obj;
-				}
-				else if (obj is SoapIgnoreAttribute)
+				if (customAttributes[i] is SoapIgnoreAttribute || customAttributes[i] is ObsoleteAttribute)
 				{
 					this.soapIgnore = true;
+					break;
 				}
-				else if (obj is SoapTypeAttribute)
+				if (customAttributes[i] is SoapElementAttribute)
 				{
-					this.soapType = (SoapTypeAttribute)obj;
+					this.soapElement = (SoapElementAttribute)customAttributes[i];
+				}
+				else if (customAttributes[i] is SoapAttributeAttribute)
+				{
+					this.soapAttribute = (SoapAttributeAttribute)customAttributes[i];
+				}
+				else if (customAttributes[i] is SoapTypeAttribute)
+				{
+					this.soapType = (SoapTypeAttribute)customAttributes[i];
+				}
+				else if (customAttributes[i] is SoapEnumAttribute)
+				{
+					this.soapEnum = (SoapEnumAttribute)customAttributes[i];
+				}
+				else if (customAttributes[i] is DefaultValueAttribute)
+				{
+					this.soapDefaultValue = ((DefaultValueAttribute)customAttributes[i]).Value;
 				}
 			}
-		}
-
-		public SoapAttributeAttribute SoapAttribute
-		{
-			get
+			if (this.soapIgnore)
 			{
-				return this.soapAttribute;
-			}
-			set
-			{
-				this.soapAttribute = value;
+				this.soapElement = null;
+				this.soapAttribute = null;
+				this.soapType = null;
+				this.soapEnum = null;
+				this.soapDefaultValue = null;
 			}
 		}
 
-		public object SoapDefaultValue
+		internal SoapAttributeFlags SoapFlags
 		{
 			get
 			{
-				return this.soapDefaultValue;
-			}
-			set
-			{
-				this.soapDefaultValue = value;
+				SoapAttributeFlags soapAttributeFlags = (SoapAttributeFlags)0;
+				if (this.soapElement != null)
+				{
+					soapAttributeFlags |= SoapAttributeFlags.Element;
+				}
+				if (this.soapAttribute != null)
+				{
+					soapAttributeFlags |= SoapAttributeFlags.Attribute;
+				}
+				if (this.soapEnum != null)
+				{
+					soapAttributeFlags |= SoapAttributeFlags.Enum;
+				}
+				if (this.soapType != null)
+				{
+					soapAttributeFlags |= SoapAttributeFlags.Type;
+				}
+				return soapAttributeFlags;
 			}
 		}
 
-		public SoapElementAttribute SoapElement
+		public SoapTypeAttribute SoapType
 		{
 			get
 			{
-				return this.soapElement;
+				return this.soapType;
 			}
 			set
 			{
-				this.soapElement = value;
+				this.soapType = value;
 			}
 		}
 
@@ -103,63 +112,52 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public SoapTypeAttribute SoapType
+		public SoapElementAttribute SoapElement
 		{
 			get
 			{
-				return this.soapType;
+				return this.soapElement;
 			}
 			set
 			{
-				this.soapType = value;
+				this.soapElement = value;
 			}
 		}
 
-		internal void AddKeyHash(StringBuilder sb)
+		public SoapAttributeAttribute SoapAttribute
 		{
-			sb.Append("SA ");
-			if (this.soapIgnore)
+			get
 			{
-				sb.Append('i');
+				return this.soapAttribute;
 			}
-			if (this.soapAttribute != null)
+			set
 			{
-				this.soapAttribute.AddKeyHash(sb);
+				this.soapAttribute = value;
 			}
-			if (this.soapElement != null)
-			{
-				this.soapElement.AddKeyHash(sb);
-			}
-			if (this.soapEnum != null)
-			{
-				this.soapEnum.AddKeyHash(sb);
-			}
-			if (this.soapType != null)
-			{
-				this.soapType.AddKeyHash(sb);
-			}
-			if (this.soapDefaultValue == null)
-			{
-				sb.Append("n");
-			}
-			else if (!(this.soapDefaultValue is DBNull))
-			{
-				string text = XmlCustomFormatter.ToXmlString(TypeTranslator.GetTypeData(this.soapDefaultValue.GetType()), this.soapDefaultValue);
-				sb.Append("v" + text);
-			}
-			sb.Append("|");
 		}
 
-		private SoapAttributeAttribute soapAttribute;
-
-		private object soapDefaultValue = DBNull.Value;
-
-		private SoapElementAttribute soapElement;
-
-		private SoapEnumAttribute soapEnum;
+		public object SoapDefaultValue
+		{
+			get
+			{
+				return this.soapDefaultValue;
+			}
+			set
+			{
+				this.soapDefaultValue = value;
+			}
+		}
 
 		private bool soapIgnore;
 
 		private SoapTypeAttribute soapType;
+
+		private SoapElementAttribute soapElement;
+
+		private SoapAttributeAttribute soapAttribute;
+
+		private SoapEnumAttribute soapEnum;
+
+		private object soapDefaultValue;
 	}
 }

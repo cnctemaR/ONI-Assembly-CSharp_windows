@@ -5,7 +5,7 @@ public class RepairableStorageProxy : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(RepairableStorageProxy.ID, RepairableStorageProxy.ID);
+		GameObject gameObject = EntityTemplates.CreateEntity(RepairableStorageProxy.ID, RepairableStorageProxy.ID, true);
 		gameObject.AddOrGet<Storage>();
 		return gameObject;
 	}

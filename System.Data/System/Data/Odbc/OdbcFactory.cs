@@ -7,59 +7,45 @@ namespace System.Data.Odbc
 {
 	public sealed class OdbcFactory : DbProviderFactory
 	{
-		private OdbcFactory()
+		internal OdbcFactory()
 		{
-		}
-
-		static OdbcFactory()
-		{
-			object obj = OdbcFactory.lockStatic;
-			lock (obj)
-			{
-				if (OdbcFactory.Instance == null)
-				{
-					OdbcFactory.Instance = new OdbcFactory();
-				}
-			}
-		}
-
-		public override DbConnection CreateConnection()
-		{
-			return new OdbcConnection();
 		}
 
 		public override DbCommand CreateCommand()
 		{
-			return new OdbcCommand();
+			throw null;
 		}
 
 		public override DbCommandBuilder CreateCommandBuilder()
 		{
-			return new OdbcCommandBuilder();
+			throw null;
+		}
+
+		public override DbConnection CreateConnection()
+		{
+			throw null;
 		}
 
 		public override DbConnectionStringBuilder CreateConnectionStringBuilder()
 		{
-			return new OdbcConnectionStringBuilder();
+			throw null;
 		}
 
 		public override DbDataAdapter CreateDataAdapter()
 		{
-			return new OdbcDataAdapter();
+			throw null;
 		}
 
 		public override DbParameter CreateParameter()
 		{
-			return new OdbcParameter();
+			throw null;
 		}
 
 		public override CodeAccessPermission CreatePermission(PermissionState state)
 		{
-			return new OdbcPermission(state);
+			throw null;
 		}
 
 		public static readonly OdbcFactory Instance;
-
-		private static readonly object lockStatic = new object();
 	}
 }

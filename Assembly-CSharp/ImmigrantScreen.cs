@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class ImmigrantScreen : CharacterSelectionController
 {
+	public static void DestroyInstance()
+	{
+		ImmigrantScreen.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

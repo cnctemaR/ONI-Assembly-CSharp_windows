@@ -1,22 +1,26 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class DoWorkEventArgs : CancelEventArgs
 	{
 		public DoWorkEventArgs(object argument)
 		{
-			this.arg = argument;
+			this.argument = argument;
 		}
 
+		[SRDescription("Argument passed into the worker handler from BackgroundWorker.RunWorkerAsync.")]
 		public object Argument
 		{
 			get
 			{
-				return this.arg;
+				return this.argument;
 			}
 		}
 
+		[SRDescription("Result from the worker function.")]
 		public object Result
 		{
 			get
@@ -29,8 +33,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		private object arg;
-
 		private object result;
+
+		private object argument;
 	}
 }

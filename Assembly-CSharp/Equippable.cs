@@ -131,7 +131,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 			}
 			base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.GetPosition() + Vector3.up / 2f);
 		}
-		base.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
+		base.transform.parent = null;
 		if (this.def.OnUnequipCallBack != null)
 		{
 			this.def.OnUnequipCallBack(this);

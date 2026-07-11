@@ -44,6 +44,15 @@ public class FetchManagerUpdater
 					{
 						pickup.freshness = int.MaxValue;
 					}
+					Edible edible = pickupable.edible;
+					if (edible != null)
+					{
+						pickup.quality = edible.GetQuality();
+					}
+					else
+					{
+						pickup.quality = 5;
+					}
 					FetchManagerUpdater.Pickups[FetchManagerUpdater.PickupCount++] = pickup;
 				}
 			}
@@ -75,12 +84,13 @@ public class FetchManagerUpdater
 		TagBits tagBits2 = b.Pickupable.KPrefabID.GetTagBits() & FetchManagerUpdater.disallowedTagMask;
 		bool flag = tagBits.AreEqual(tagBits2);
 		bool flag2 = a.masterPriority == b.masterPriority;
-		if (!flag || !flag2)
+		bool flag3 = a.quality == b.quality;
+		if (!flag || !flag2 || !flag3)
 		{
 			return false;
 		}
-		bool flag3 = a.PathCost <= b.PathCost;
-		return flag3 || a.freshness <= b.freshness;
+		bool flag4 = a.PathCost <= b.PathCost;
+		return flag4 || a.freshness <= b.freshness;
 	}
 
 	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, Storage destination)
@@ -135,18 +145,27 @@ public class FetchManagerUpdater
 
 	public static void FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, float required_amount, ref Pickupable workable)
 	{
-		workable = null;
+		FetchManagerUpdater.Pickup pickup = new FetchManagerUpdater.Pickup
+		{
+			PathCost = ushort.MaxValue,
+			quality = int.MinValue
+		};
 		int num = int.MaxValue;
 		for (int i = 0; i < FetchManagerUpdater.PickupCount; i++)
 		{
-			FetchManagerUpdater.Pickup pickup = FetchManagerUpdater.Pickups[i];
-			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup.Pickupable.KPrefabID, pickup.Pickupable.storage, pickup.Pickupable.UnreservedAmount, pickup.Pickupable.MinTakeAmount, required_amount, tag_bits, required_tags, forbid_tags, destination);
-			if (flag && (int)pickup.PathCost < num)
+			FetchManagerUpdater.Pickup pickup2 = FetchManagerUpdater.Pickups[i];
+			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup2.Pickupable.KPrefabID, pickup2.Pickupable.storage, pickup2.Pickupable.UnreservedAmount, pickup2.Pickupable.MinTakeAmount, required_amount, tag_bits, required_tags, forbid_tags, destination);
+			if (flag)
 			{
-				workable = pickup.Pickupable;
-				num = (int)pickup.PathCost;
+				int num2 = (int)pickup2.PathCost + (5 - pickup2.quality) * 50;
+				if (num2 < num)
+				{
+					pickup = pickup2;
+					num = num2;
+				}
 			}
 		}
+		workable = pickup.Pickupable;
 	}
 
 	public static void FreeResources()
@@ -162,9 +181,9 @@ public class FetchManagerUpdater
 
 	private static int PickupCount;
 
-	private static FetchManagerUpdater.PickupComparer Comparer = new FetchManagerUpdater.PickupComparer();
+	private static readonly FetchManagerUpdater.PickupComparer Comparer = new FetchManagerUpdater.PickupComparer();
 
-	private static TagBits disallowedTagMask = ~new TagBits(new Tag[]
+	private static readonly TagBits disallowedTagMask = ~new TagBits(new Tag[]
 	{
 		GameTags.Stored,
 		GameTags.Preserved,
@@ -183,6 +202,8 @@ public class FetchManagerUpdater
 		public int masterPriority;
 
 		public int freshness;
+
+		public int quality;
 	}
 
 	private class PickupComparer : IComparer<FetchManagerUpdater.Pickup>
@@ -201,6 +222,10 @@ public class FetchManagerUpdater
 			if (a.PathCost != b.PathCost)
 			{
 				return (int)(a.PathCost - b.PathCost);
+			}
+			if (a.quality != b.quality)
+			{
+				return a.quality - b.quality;
 			}
 			return a.freshness - b.freshness;
 		}

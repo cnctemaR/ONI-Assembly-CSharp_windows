@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class MinionGroupProber : KMonoBehaviour, IGroupProber
 {
+	public static void DestroyInstance()
+	{
+		MinionGroupProber.Instance = null;
+	}
+
 	public static MinionGroupProber Get()
 	{
 		return MinionGroupProber.Instance;

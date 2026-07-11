@@ -49,7 +49,6 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		this.statusItemNeed = Db.Get().BuildingStatusItems.NeedSeed;
 		this.statusItemNoneAvailable = Db.Get().BuildingStatusItems.NoAvailableSeed;
 		this.statusItemAwaitingDelivery = Db.Get().BuildingStatusItems.AwaitingSeedDelivery;
-		this.cropRef = new Ref<Growing>();
 		this.plantRef = new Ref<KPrefabID>();
 		this.destroyEntityOnDeposit = true;
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
@@ -129,15 +128,11 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 
 	protected override void OnSpawn()
 	{
-		base.OnSpawn();
-		if (this.cropRef.Get() != null && this.plantRef.Get() == null)
-		{
-			this.plantRef.Set(this.cropRef.Get<KPrefabID>());
-		}
 		if (this.plant != null)
 		{
 			this.RegisterWithPlant(this.plant.gameObject);
 		}
+		base.OnSpawn();
 		this.autoReplaceEntity = false;
 		Components.PlantablePlots.Add(this);
 		Prioritizable component = base.GetComponent<Prioritizable>();
@@ -174,7 +169,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 			return null;
 		}
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(this), Grid.SceneLayer.BuildingBack);
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(component.PlantID), vector, Grid.SceneLayer.BuildingBack, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(component.PlantID), vector, Grid.SceneLayer.BuildingBack, null, 0);
 		gameObject.SetActive(true);
 		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
 		this.plantRef.Set(component2);
@@ -201,6 +196,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 
 	private void RegisterWithPlant(GameObject plant)
 	{
+		base.occupyingObject = plant;
 		plant.Trigger(1309017699, this.storage);
 		ReceptacleMonitor component = plant.GetComponent<ReceptacleMonitor>();
 		if (component)
@@ -268,7 +264,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		}
 		if (plantableSeed != null)
 		{
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(plantableSeed.PreviewID), Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
+			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(plantableSeed.PreviewID), Grid.SceneLayer.Front, null, 0);
 			this.plantPreview = gameObject.GetComponent<EntityPreview>();
 			gameObject.transform.SetPosition(Vector3.zero);
 			gameObject.transform.SetParent(base.gameObject.transform, false);
@@ -327,9 +323,6 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;
-
-	[Serialize]
-	private Ref<Growing> cropRef;
 
 	[Serialize]
 	private Ref<KPrefabID> plantRef;

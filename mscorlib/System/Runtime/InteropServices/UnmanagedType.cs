@@ -40,6 +40,12 @@ namespace System.Runtime.InteropServices
 		LPArray = 42,
 		LPStruct,
 		CustomMarshaler,
-		Error
+		Error,
+		[ComVisible(false)]
+		IInspectable,
+		[ComVisible(false)]
+		HString,
+		[ComVisible(false)]
+		LPUTF8Str
 	}
 }

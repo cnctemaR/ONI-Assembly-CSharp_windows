@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Threading
 {
@@ -9,21 +10,22 @@ namespace System.Threading
 	public sealed class ThreadAbortException : SystemException
 	{
 		private ThreadAbortException()
-			: base("Thread was being aborted")
+			: base(Exception.GetMessageFromNativeResources(Exception.ExceptionMessageKind.ThreadAbort))
 		{
-			base.HResult = -2146233040;
+			base.SetErrorCode(-2146233040);
 		}
 
-		private ThreadAbortException(SerializationInfo info, StreamingContext sc)
-			: base(info, sc)
+		internal ThreadAbortException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 
 		public object ExceptionState
 		{
+			[SecuritySafeCritical]
 			get
 			{
-				return Thread.CurrentThread.GetAbortExceptionState();
+				return Thread.CurrentThread.AbortReason;
 			}
 		}
 	}

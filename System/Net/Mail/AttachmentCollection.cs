@@ -11,9 +11,9 @@ namespace System.Net.Mail
 
 		public void Dispose()
 		{
-			for (int i = 0; i < this.Count; i++)
+			for (int i = 0; i < base.Count; i++)
 			{
-				this[i].Dispose();
+				base[i].Dispose();
 			}
 		}
 

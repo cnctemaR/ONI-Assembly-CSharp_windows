@@ -18,56 +18,69 @@ public class Def : ScriptableObject
 		}
 	}
 
-	public static Tuple<Sprite, Color> GetUISprite(object item, string animName = "ui")
+	public static global::Tuple<Sprite, Color> GetUISprite(object item, string animName = "ui", bool centered = false)
 	{
 		if (item is Substance)
 		{
-			return Def.GetUISprite(ElementLoader.FindElementByHash((item as Substance).elementID), "ui");
+			return Def.GetUISprite(ElementLoader.FindElementByHash((item as Substance).elementID), animName, centered);
 		}
 		if (item is Element)
 		{
 			if ((item as Element).IsSolid)
 			{
-				return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName), Color.white);
+				return new global::Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName, centered), Color.white);
 			}
 			if ((item as Element).IsLiquid)
 			{
-				return new Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.debugColour);
+				return new global::Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.debugColour);
 			}
 			if ((item as Element).IsGas)
 			{
-				return new Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.debugColour);
+				return new global::Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.debugColour);
 			}
-			return new Tuple<Sprite, Color>(null, Color.clear);
+			return new global::Tuple<Sprite, Color>(null, Color.clear);
 		}
 		else if (item is GameObject)
 		{
-			if (ElementLoader.GetElement((item as GameObject).PrefabID()) != null)
+			GameObject gameObject = item as GameObject;
+			if (ElementLoader.GetElement(gameObject.PrefabID()) != null)
 			{
-				return Def.GetUISprite(ElementLoader.GetElement((item as GameObject).PrefabID()), "ui");
+				return Def.GetUISprite(ElementLoader.GetElement(gameObject.PrefabID()), animName, centered);
 			}
-			CreatureBrain component = (item as GameObject).GetComponent<CreatureBrain>();
+			CreatureBrain component = gameObject.GetComponent<CreatureBrain>();
 			if (component != null)
 			{
 				animName = component.symbolPrefix + "ui";
 			}
-			return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as GameObject).GetComponent<KBatchedAnimController>().AnimFiles[0], animName), Color.white);
+			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+			if (component2)
+			{
+				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered);
+				return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (!(uispriteFromMultiObjectAnim != null)) ? Color.clear : Color.white);
+			}
+			if (gameObject.GetComponent<Building>() != null)
+			{
+				Sprite uisprite = gameObject.GetComponent<Building>().Def.GetUISprite(animName, centered);
+				return new global::Tuple<Sprite, Color>(uisprite, (!(uisprite != null)) ? Color.clear : Color.white);
+			}
+			global::Debug.LogWarningFormat("Can't get sprite for type {0} (no KBatchedAnimController)", new object[] { item.ToString() });
+			return null;
 		}
 		else
 		{
 			if (item is string)
 			{
-				return Def.GetUISprite((item as string).ToTag(), "ui");
+				return Def.GetUISprite((item as string).ToTag(), animName, centered);
 			}
 			if (item is Tag)
 			{
 				if (ElementLoader.GetElement((Tag)item) != null)
 				{
-					return Def.GetUISprite(ElementLoader.GetElement((Tag)item), "ui");
+					return Def.GetUISprite(ElementLoader.GetElement((Tag)item), animName, centered);
 				}
 				if (Assets.GetPrefab((Tag)item) != null)
 				{
-					return Def.GetUISprite(Assets.GetPrefab((Tag)item), "ui");
+					return Def.GetUISprite(Assets.GetPrefab((Tag)item), animName, centered);
 				}
 			}
 			global::Debug.LogErrorFormat("Can't get sprite for type {0}", new object[] { item.ToString() });
@@ -75,25 +88,22 @@ public class Def : ScriptableObject
 		}
 	}
 
-	private static Sprite GetUISpriteFromMultiObjectAnim(Tuple<KAnimFile, string> animFileAndStateName)
+	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile animFile, string animName = "ui", bool centered = false)
 	{
-		if (Def.knownUISprites.ContainsKey(animFileAndStateName.first) && Def.knownUISprites[animFileAndStateName.first].ContainsKey(animFileAndStateName.second))
+		global::Tuple<KAnimFile, string, bool> tuple = new global::Tuple<KAnimFile, string, bool>(animFile, animName, centered);
+		if (Def.knownUISprites.ContainsKey(tuple))
 		{
-			return Def.knownUISprites[animFileAndStateName.first][animFileAndStateName.second];
+			return Def.knownUISprites[tuple];
 		}
-		if (animFileAndStateName.first == null)
+		if (animFile == null)
 		{
-			Output.LogWarning(new object[] { animFileAndStateName.second, "missing Anim File" });
+			Output.LogWarning(new object[] { animName, "missing Anim File" });
 			return null;
 		}
-		if (animFileAndStateName.first == null)
-		{
-			return null;
-		}
-		KAnimFileData data = animFileAndStateName.first.GetData();
+		KAnimFileData data = animFile.GetData();
 		if (data == null)
 		{
-			Output.LogWarning(new object[] { animFileAndStateName.second, "KAnimFileData is null" });
+			Output.LogWarning(new object[] { animName, "KAnimFileData is null" });
 			return null;
 		}
 		if (data.build == null)
@@ -104,14 +114,14 @@ public class Def : ScriptableObject
 		for (int i = 0; i < data.animCount; i++)
 		{
 			KAnim.Anim anim = data.GetAnim(i);
-			if (anim.name == animFileAndStateName.second)
+			if (anim.name == animName)
 			{
 				frame = anim.GetFrame(data.batchTag, 0);
 			}
 		}
 		if (!frame.IsValid())
 		{
-			Output.LogWarning(new object[] { string.Format("missing '{0}' anim in '{1}'", animFileAndStateName.second, animFileAndStateName.first) });
+			Output.LogWarning(new object[] { string.Format("missing '{0}' anim in '{1}'", animName, animFile) });
 			return null;
 		}
 		if (data.elementCount == 0)
@@ -119,18 +129,18 @@ public class Def : ScriptableObject
 			return null;
 		}
 		KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
-		KAnimHashedString kanimHashedString = new KAnimHashedString(animFileAndStateName.second);
+		KAnimHashedString kanimHashedString = new KAnimHashedString(animName);
 		frameElement = data.FindAnimFrameElement(kanimHashedString);
 		KAnim.Build.Symbol symbol = data.build.GetSymbol(frameElement.symbol);
 		if (symbol == null)
 		{
-			Output.LogWarning(new object[] { animFileAndStateName.second, "placeSymbol [", frameElement.symbol, "] is missing" });
+			Output.LogWarning(new object[] { animName, "placeSymbol [", frameElement.symbol, "] is missing" });
 			return null;
 		}
 		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frameElement.frame).symbolFrame;
 		if (symbolFrame == null)
 		{
-			Output.LogWarning(new object[] { animFileAndStateName.second, "SymbolFrame [", frameElement.frame, "] is missing" });
+			Output.LogWarning(new object[] { animName, "SymbolFrame [", frameElement.frame, "] is missing" });
 			return null;
 		}
 		Texture2D texture = data.build.GetTexture(0);
@@ -151,27 +161,21 @@ public class Def : ScriptableObject
 		{
 			num4 = 100f / (num3 / (float)num);
 		}
-		Sprite sprite = Sprite.Create(texture, rect, new Vector2(0f, 0f), num4, 0U, SpriteMeshType.FullRect);
-		sprite.name = texture.name + ":" + frameElement.frame.ToString();
-		if (Def.knownUISprites.ContainsKey(animFileAndStateName.first))
+		Sprite sprite = Sprite.Create(texture, rect, (!centered) ? Vector2.zero : new Vector2(0.5f, 0.5f), num4, 0U, SpriteMeshType.FullRect);
+		sprite.name = string.Format("{0}:{1}:{2}:{3}", new object[]
 		{
-			Def.knownUISprites[animFileAndStateName.first].Add(animFileAndStateName.second, sprite);
-		}
-		else
-		{
-			Def.knownUISprites.Add(animFileAndStateName.first, new Dictionary<string, Sprite> { { animFileAndStateName.second, sprite } });
-		}
+			texture.name,
+			animName,
+			frameElement.frame.ToString(),
+			centered
+		});
+		Def.knownUISprites[tuple] = sprite;
 		return sprite;
-	}
-
-	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile AnimFile, string animName = "ui")
-	{
-		return Def.GetUISpriteFromMultiObjectAnim(new Tuple<KAnimFile, string>(AnimFile, animName));
 	}
 
 	public string PrefabID;
 
 	public Tag Tag;
 
-	private static Dictionary<KAnimFile, Dictionary<string, Sprite>> knownUISprites = new Dictionary<KAnimFile, Dictionary<string, Sprite>>();
+	private static Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite> knownUISprites = new Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite>();
 }

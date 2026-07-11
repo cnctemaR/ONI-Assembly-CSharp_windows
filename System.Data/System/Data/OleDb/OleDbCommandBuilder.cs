@@ -11,9 +11,7 @@ namespace System.Data.OleDb
 		}
 
 		public OleDbCommandBuilder(OleDbDataAdapter adapter)
-			: this()
 		{
-			this.adapter = adapter;
 		}
 
 		[DefaultValue(null)]
@@ -21,120 +19,100 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				return this.adapter;
+				throw null;
 			}
 			set
 			{
-				this.adapter = value;
 			}
 		}
 
-		protected override void ApplyParameterInfo(DbParameter dbParameter, DataRow row, StatementType statementType, bool whereClause)
+		protected override void ApplyParameterInfo(DbParameter parameter, DataRow datarow, StatementType statementType, bool whereClause)
 		{
-			OleDbParameter oleDbParameter = (OleDbParameter)dbParameter;
-			oleDbParameter.Size = int.Parse(row["ColumnSize"].ToString());
-			if (row["NumericPrecision"] != DBNull.Value)
-			{
-				oleDbParameter.Precision = byte.Parse(row["NumericPrecision"].ToString());
-			}
-			if (row["NumericScale"] != DBNull.Value)
-			{
-				oleDbParameter.Scale = byte.Parse(row["NumericScale"].ToString());
-			}
-			oleDbParameter.DbType = (DbType)((int)row["ProviderType"]);
 		}
 
 		[MonoTODO]
 		public static void DeriveParameters(OleDbCommand command)
 		{
-			if (command.CommandType != CommandType.StoredProcedure)
-			{
-				throw new InvalidOperationException("You can perform this operation only on CommandTye StoredProcedure");
-			}
-			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
 		public new OleDbCommand GetDeleteCommand()
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		[MonoTODO]
 		public new OleDbCommand GetDeleteCommand(bool useColumnsForParameterNames)
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		[MonoTODO]
 		public new OleDbCommand GetInsertCommand()
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		[MonoTODO]
 		public new OleDbCommand GetInsertCommand(bool useColumnsForParameterNames)
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
-		protected override string GetParameterName(int position)
+		protected override string GetParameterName(int parameterOrdinal)
 		{
-			return string.Format("@p{0}", position);
+			throw null;
 		}
 
 		protected override string GetParameterName(string parameterName)
 		{
-			return string.Format("@{0}", parameterName);
+			throw null;
 		}
 
-		protected override string GetParameterPlaceholder(int position)
+		protected override string GetParameterPlaceholder(int parameterOrdinal)
 		{
-			return this.GetParameterName(position);
+			throw null;
 		}
 
 		[MonoTODO]
 		public new OleDbCommand GetUpdateCommand()
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		[MonoTODO]
 		public new OleDbCommand GetUpdateCommand(bool useColumnsForParameterNames)
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		[MonoTODO]
 		public override string QuoteIdentifier(string unquotedIdentifier)
 		{
-			return base.QuoteIdentifier(unquotedIdentifier);
+			throw null;
 		}
 
 		[MonoTODO]
 		public string QuoteIdentifier(string unquotedIdentifier, OleDbConnection connection)
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		[MonoTODO]
 		protected override void SetRowUpdatingHandler(DbDataAdapter adapter)
 		{
-			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
 		public override string UnquoteIdentifier(string quotedIdentifier)
 		{
-			return base.UnquoteIdentifier(quotedIdentifier);
+			throw null;
 		}
 
 		[MonoTODO]
 		public string UnquoteIdentifier(string quotedIdentifier, OleDbConnection connection)
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
-
-		private OleDbDataAdapter adapter;
 	}
 }

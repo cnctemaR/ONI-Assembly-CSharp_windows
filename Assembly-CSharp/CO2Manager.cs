@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class CO2Manager : KMonoBehaviour, ISim33ms
 {
+	public static void DestroyInstance()
+	{
+		CO2Manager.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		CO2Manager.instance = this;
@@ -15,14 +20,14 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 
 	private GameObject InstantiateCO2()
 	{
-		GameObject gameObject = GameUtil.KInstantiate(this.prefab, Grid.SceneLayer.Front, Folder.FX, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(this.prefab, Grid.SceneLayer.Front, null, 0);
 		gameObject.SetActive(false);
 		return gameObject;
 	}
 
 	private GameObject InstantiateBreath()
 	{
-		GameObject gameObject = GameUtil.KInstantiate(this.breathPrefab, Grid.SceneLayer.Front, Folder.FX, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(this.breathPrefab, Grid.SceneLayer.Front, null, 0);
 		gameObject.SetActive(false);
 		return gameObject;
 	}

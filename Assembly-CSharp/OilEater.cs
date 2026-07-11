@@ -8,7 +8,6 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.smi.animController.randomiseLoopedOffset = true;
 		base.smi.StartSM();
 	}
 
@@ -69,7 +68,7 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, main).Enter(delegate(OilEater.StatesInstance smi)
 			{
-				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
+				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 				smi.master.Trigger(1623392196, null);
 				smi.master.GetComponent<KBatchedAnimController>().StopAndClear();
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());

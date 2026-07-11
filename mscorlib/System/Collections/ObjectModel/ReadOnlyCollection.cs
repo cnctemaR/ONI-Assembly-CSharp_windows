@@ -1,56 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System.Collections.ObjectModel
 {
+	[DebuggerTypeProxy(typeof(Mscorlib_CollectionDebugView<>))]
+	[DebuggerDisplay("Count = {Count}")]
 	[ComVisible(false)]
 	[Serializable]
-	public class ReadOnlyCollection<T> : IEnumerable, ICollection, IList, ICollection<T>, IList<T>, IEnumerable<T>
+	public class ReadOnlyCollection<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection, IReadOnlyList<T>, IReadOnlyCollection<T>
 	{
 		public ReadOnlyCollection(IList<T> list)
 		{
 			if (list == null)
 			{
-				throw new ArgumentNullException("list");
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.list);
 			}
 			this.list = list;
 		}
 
-		void ICollection<T>.Add(T item)
-		{
-			throw new NotSupportedException();
-		}
-
-		void ICollection<T>.Clear()
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList<T>.Insert(int index, T item)
-		{
-			throw new NotSupportedException();
-		}
-
-		bool ICollection<T>.Remove(T item)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList<T>.RemoveAt(int index)
-		{
-			throw new NotSupportedException();
-		}
-
-		T IList<T>.this[int index]
+		public int Count
 		{
 			get
 			{
-				return this[index];
+				return this.list.Count;
 			}
-			set
+		}
+
+		public T this[int index]
+		{
+			get
 			{
-				throw new NotSupportedException();
+				return this.list[index];
+			}
+		}
+
+		public bool Contains(T value)
+		{
+			return this.list.Contains(value);
+		}
+
+		public void CopyTo(T[] array, int index)
+		{
+			this.list.CopyTo(array, index);
+		}
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			return this.list.GetEnumerator();
+		}
+
+		public int IndexOf(T value)
+		{
+			return this.list.IndexOf(value);
+		}
+
+		protected IList<T> Items
+		{
+			get
+			{
+				return this.list;
 			}
 		}
 
@@ -62,53 +73,47 @@ namespace System.Collections.ObjectModel
 			}
 		}
 
-		void ICollection.CopyTo(Array array, int index)
+		T IList<T>.this[int index]
 		{
-			((ICollection)this.list).CopyTo(array, index);
+			get
+			{
+				return this.list[index];
+			}
+			set
+			{
+				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			}
+		}
+
+		void ICollection<T>.Add(T value)
+		{
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+		}
+
+		void ICollection<T>.Clear()
+		{
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+		}
+
+		void IList<T>.Insert(int index, T value)
+		{
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+		}
+
+		bool ICollection<T>.Remove(T value)
+		{
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			return false;
+		}
+
+		void IList<T>.RemoveAt(int index)
+		{
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.list.GetEnumerator();
-		}
-
-		int IList.Add(object value)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList.Clear()
-		{
-			throw new NotSupportedException();
-		}
-
-		bool IList.Contains(object value)
-		{
-			return Collection<T>.IsValidItem(value) && this.list.Contains((T)((object)value));
-		}
-
-		int IList.IndexOf(object value)
-		{
-			if (Collection<T>.IsValidItem(value))
-			{
-				return this.list.IndexOf((T)((object)value));
-			}
-			return -1;
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList.Remove(object value)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList.RemoveAt(int index)
-		{
-			throw new NotSupportedException();
 		}
 
 		bool ICollection.IsSynchronized
@@ -123,7 +128,72 @@ namespace System.Collections.ObjectModel
 		{
 			get
 			{
-				return this;
+				if (this._syncRoot == null)
+				{
+					ICollection collection = this.list as ICollection;
+					if (collection != null)
+					{
+						this._syncRoot = collection.SyncRoot;
+					}
+					else
+					{
+						Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
+					}
+				}
+				return this._syncRoot;
+			}
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			if (array == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+			}
+			if (array.Rank != 1)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankMultiDimNotSupported);
+			}
+			if (array.GetLowerBound(0) != 0)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_NonZeroLowerBound);
+			}
+			if (index < 0)
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.arrayIndex, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+			}
+			if (array.Length - index < this.Count)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			T[] array2 = array as T[];
+			if (array2 != null)
+			{
+				this.list.CopyTo(array2, index);
+				return;
+			}
+			Type elementType = array.GetType().GetElementType();
+			Type typeFromHandle = typeof(T);
+			if (!elementType.IsAssignableFrom(typeFromHandle) && !typeFromHandle.IsAssignableFrom(elementType))
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+			}
+			object[] array3 = array as object[];
+			if (array3 == null)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
+			}
+			int count = this.list.Count;
+			try
+			{
+				for (int i = 0; i < count; i++)
+				{
+					array3[index++] = this.list[i];
+				}
+			}
+			catch (ArrayTypeMismatchException)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArrayType);
 			}
 		}
 
@@ -151,54 +221,58 @@ namespace System.Collections.ObjectModel
 			}
 			set
 			{
-				throw new NotSupportedException();
+				ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 			}
 		}
 
-		public bool Contains(T value)
+		int IList.Add(object value)
 		{
-			return this.list.Contains(value);
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+			return -1;
 		}
 
-		public void CopyTo(T[] array, int index)
+		void IList.Clear()
 		{
-			this.list.CopyTo(array, index);
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 		}
 
-		public IEnumerator<T> GetEnumerator()
+		private static bool IsCompatibleObject(object value)
 		{
-			return this.list.GetEnumerator();
+			return value is T || (value == null && default(T) == null);
 		}
 
-		public int IndexOf(T value)
+		bool IList.Contains(object value)
 		{
-			return this.list.IndexOf(value);
+			return ReadOnlyCollection<T>.IsCompatibleObject(value) && this.Contains((T)((object)value));
 		}
 
-		public int Count
+		int IList.IndexOf(object value)
 		{
-			get
+			if (ReadOnlyCollection<T>.IsCompatibleObject(value))
 			{
-				return this.list.Count;
+				return this.IndexOf((T)((object)value));
 			}
+			return -1;
 		}
 
-		protected IList<T> Items
+		void IList.Insert(int index, object value)
 		{
-			get
-			{
-				return this.list;
-			}
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 		}
 
-		public T this[int index]
+		void IList.Remove(object value)
 		{
-			get
-			{
-				return this.list[index];
-			}
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
 		}
 
 		private IList<T> list;
+
+		[NonSerialized]
+		private object _syncRoot;
 	}
 }

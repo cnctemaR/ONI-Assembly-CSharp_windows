@@ -113,13 +113,13 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 	public class GenericInstance : StateMachine.Instance
 	{
 		public GenericInstance(MasterType master)
-			: base((StateMachine)((object)StateMachineManager.Instance.CreateStateMachine<StateMachineType>()), master)
+			: base((StateMachine)((object)Singleton<StateMachineManager>.Instance.CreateStateMachine<StateMachineType>()), master)
 		{
 			this.master = master;
 			this.stateStack = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance.StackEntry[this.stateMachine.GetMaxDepth()];
 			for (int i = 0; i < this.stateStack.Length; i++)
 			{
-				this.stateStack[i].schedulerGroup = StateMachineManager.Instance.CreateSchedulerGroup();
+				this.stateStack[i].schedulerGroup = Singleton<StateMachineManager>.Instance.CreateSchedulerGroup();
 			}
 			this.sm = (StateMachineType)((object)this.stateMachine);
 			this.dataTable = new object[base.GetStateMachine().dataTableSize];
@@ -199,10 +199,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 				for (int i = 0; i < this.stateStack.Length; i++)
 				{
-					if (this.stateStack[i].state != null)
-					{
-						this.stateStack[i].state.FreeResources();
-					}
 					if (this.stateStack[i].schedulerGroup != null)
 					{
 						this.stateStack[i].schedulerGroup.FreeResources();
@@ -254,30 +250,32 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			}
 			if (state.transitions != null)
 			{
-				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition in state.transitions)
+				foreach (StateMachine.BaseTransition baseTransition in state.transitions)
 				{
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition)baseTransition;
 					this.PushTransition(transition);
 				}
 			}
 			if (state.parameterTransitions != null)
 			{
-				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition in state.parameterTransitions)
+				foreach (StateMachine.ParameterTransition parameterTransition in state.parameterTransitions)
 				{
-					parameterTransition.Register(this.smi);
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition2 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition;
+					parameterTransition2.Register(this.smi);
 				}
 			}
 			if (state.updateActions != null)
 			{
-				for (int l = 0; l < state.updateActions.Length; l++)
+				for (int i = 0; i < state.updateActions.Count; i++)
 				{
-					StateMachine.UpdateAction updateAction = state.updateActions[l];
+					StateMachine.UpdateAction updateAction = state.updateActions[i];
 					int updateTableIdx = updateAction.updateTableIdx;
 					int nextBucketIdx = updateAction.nextBucketIdx;
 					updateAction.nextBucketIdx = (updateAction.nextBucketIdx + 1) % updateAction.buckets.Length;
 					UpdateBucketWithUpdater<StateMachineInstanceType> updateBucketWithUpdater = (UpdateBucketWithUpdater<StateMachineInstanceType>)updateAction.buckets[nextBucketIdx];
 					this.smi.updateTable[updateTableIdx].bucket = updateBucketWithUpdater;
-					this.smi.updateTable[updateTableIdx].handle = updateBucketWithUpdater.Add(this.smi, StateMachineUpdater.instance.GetFrameTime(updateAction.updateRate, updateBucketWithUpdater.frame), (UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater)updateAction.updater);
-					state.updateActions[l] = updateAction;
+					this.smi.updateTable[updateTableIdx].handle = updateBucketWithUpdater.Add(this.smi, Singleton<StateMachineUpdater>.Instance.GetFrameTime(updateAction.updateRate, updateBucketWithUpdater.frame), (UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater)updateAction.updater);
+					state.updateActions[i] = updateAction;
 				}
 			}
 			this.stateEnterTime = Time.time;
@@ -285,8 +283,9 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			this.currentSchedulerGroup = this.stateStack[this.stackSize - 1].schedulerGroup;
 			if (state.transitions != null)
 			{
-				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition2 in state.transitions)
+				foreach (StateMachine.BaseTransition baseTransition2 in state.transitions)
 				{
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition2 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition)baseTransition2;
 					if (num != this.gotoId)
 					{
 						return;
@@ -296,13 +295,14 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			}
 			if (state.parameterTransitions != null)
 			{
-				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition2 in state.parameterTransitions)
+				foreach (StateMachine.ParameterTransition parameterTransition3 in state.parameterTransitions)
 				{
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition4 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition3;
 					if (num != this.gotoId)
 					{
 						return;
 					}
-					parameterTransition2.Evaluate(this.smi);
+					parameterTransition4.Evaluate(this.smi);
 				}
 			}
 			if (num != this.gotoId)
@@ -316,14 +316,14 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			}
 		}
 
-		private void ExecuteActions(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine.Action[] actions)
+		private void ExecuteActions(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, List<StateMachine.Action> actions)
 		{
 			if (actions == null)
 			{
 				return;
 			}
 			int num = this.gotoId;
-			for (int i = 0; i < actions.Length; i++)
+			for (int i = 0; i < actions.Count; i++)
 			{
 				if (num != this.gotoId)
 				{
@@ -375,21 +375,22 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			StateMachine.BaseState state = stackEntry.state;
 			if (state.parameterTransitions != null)
 			{
-				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition in state.parameterTransitions)
+				foreach (StateMachine.ParameterTransition parameterTransition in state.parameterTransitions)
 				{
-					parameterTransition.Unregister(this.smi);
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition2 = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition)parameterTransition;
+					parameterTransition2.Unregister(this.smi);
 				}
 			}
 			if (state.transitions != null)
 			{
-				for (int j = 0; j < state.transitions.Length; j++)
+				for (int i = 0; i < state.transitions.Count; i++)
 				{
 					this.PopTransition((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state);
 				}
 			}
 			if (state.events != null)
 			{
-				for (int k = 0; k < state.events.Length; k++)
+				for (int j = 0; j < state.events.Count; j++)
 				{
 					this.PopEvent();
 				}
@@ -411,7 +412,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public override SchedulerHandle Schedule(float time, Action<object> callback, object callback_data = null)
 		{
-			return StateMachineManager.Instance.Schedule(this.GetCurrentState().longName, time, callback, callback_data, this.currentSchedulerGroup);
+			return Singleton<StateMachineManager>.Instance.Schedule(this.GetCurrentState().longName, time, callback, callback_data, this.currentSchedulerGroup);
 		}
 
 		public override void StartSM()

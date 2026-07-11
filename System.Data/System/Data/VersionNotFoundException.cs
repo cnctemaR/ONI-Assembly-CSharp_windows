@@ -7,22 +7,18 @@ namespace System.Data
 	public class VersionNotFoundException : DataException
 	{
 		public VersionNotFoundException()
-			: base(Locale.GetText("This DataRow has been deleted"))
-		{
-		}
-
-		public VersionNotFoundException(string s)
-			: base(s)
 		{
 		}
 
 		protected VersionNotFoundException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 
-		public VersionNotFoundException(string message, Exception inner)
-			: base(message, inner)
+		public VersionNotFoundException(string s)
+		{
+		}
+
+		public VersionNotFoundException(string message, Exception innerException)
 		{
 		}
 	}

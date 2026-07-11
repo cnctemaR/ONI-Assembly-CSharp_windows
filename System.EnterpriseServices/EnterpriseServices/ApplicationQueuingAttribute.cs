@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices
 {
-	[ComVisible(false)]
 	[AttributeUsage(AttributeTargets.Assembly)]
+	[ComVisible(false)]
 	public sealed class ApplicationQueuingAttribute : Attribute
 	{
 		public ApplicationQueuingAttribute()

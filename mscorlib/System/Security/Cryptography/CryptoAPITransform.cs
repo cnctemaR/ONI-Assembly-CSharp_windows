@@ -5,17 +5,11 @@ using System.Security.Permissions;
 namespace System.Security.Cryptography
 {
 	[ComVisible(true)]
-	public sealed class CryptoAPITransform : IDisposable, ICryptoTransform
+	public sealed class CryptoAPITransform : ICryptoTransform, IDisposable
 	{
 		internal CryptoAPITransform()
 		{
 			this.m_disposed = false;
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		public bool CanReuseTransform
@@ -44,7 +38,7 @@ namespace System.Security.Cryptography
 
 		public IntPtr KeyHandle
 		{
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 			get
 			{
 				return IntPtr.Zero;
@@ -59,6 +53,12 @@ namespace System.Security.Cryptography
 			}
 		}
 
+		public void Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
 		public void Clear()
 		{
 			this.Dispose(false);
@@ -68,9 +68,6 @@ namespace System.Security.Cryptography
 		{
 			if (!this.m_disposed)
 			{
-				if (disposing)
-				{
-				}
 				this.m_disposed = true;
 			}
 		}

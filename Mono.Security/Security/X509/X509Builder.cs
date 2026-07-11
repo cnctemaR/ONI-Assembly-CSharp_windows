@@ -16,21 +16,60 @@ namespace Mono.Security.X509
 		protected string GetOid(string hashName)
 		{
 			string text = hashName.ToLower(CultureInfo.InvariantCulture);
-			switch (text)
+			uint num = global::<PrivateImplementationDetails>.ComputeStringHash(text);
+			if (num <= 2393554675U)
 			{
-			case "md2":
-				return "1.2.840.113549.1.1.2";
-			case "md4":
-				return "1.2.840.113549.1.1.3";
-			case "md5":
-				return "1.2.840.113549.1.1.4";
-			case "sha1":
-				return "1.2.840.113549.1.1.5";
-			case "sha256":
-				return "1.2.840.113549.1.1.11";
-			case "sha384":
-				return "1.2.840.113549.1.1.12";
-			case "sha512":
+				if (num != 2070555668U)
+				{
+					if (num != 2376777056U)
+					{
+						if (num == 2393554675U)
+						{
+							if (text == "md5")
+							{
+								return "1.2.840.113549.1.1.4";
+							}
+						}
+					}
+					else if (text == "md4")
+					{
+						return "1.2.840.113549.1.1.3";
+					}
+				}
+				else if (text == "sha1")
+				{
+					return "1.2.840.113549.1.1.5";
+				}
+			}
+			else if (num <= 2631153146U)
+			{
+				if (num != 2477442770U)
+				{
+					if (num == 2631153146U)
+					{
+						if (text == "sha256")
+						{
+							return "1.2.840.113549.1.1.11";
+						}
+					}
+				}
+				else if (text == "md2")
+				{
+					return "1.2.840.113549.1.1.2";
+				}
+			}
+			else if (num != 2694049387U)
+			{
+				if (num == 2700614742U)
+				{
+					if (text == "sha384")
+					{
+						return "1.2.840.113549.1.1.12";
+					}
+				}
+			}
+			else if (text == "sha512")
+			{
 				return "1.2.840.113549.1.1.13";
 			}
 			throw new NotSupportedException("Unknown hash algorithm " + hashName);
@@ -47,11 +86,9 @@ namespace Mono.Security.X509
 				if (this.hashName == null)
 				{
 					this.hashName = "SHA1";
+					return;
 				}
-				else
-				{
-					this.hashName = value;
-				}
+				this.hashName = value;
 			}
 		}
 
@@ -83,8 +120,7 @@ namespace Mono.Security.X509
 		{
 			string oid = this.GetOid(this.hashName);
 			ASN1 asn = this.ToBeSigned(oid);
-			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.hashName);
-			byte[] array = hashAlgorithm.ComputeHash(asn.GetBytes());
+			byte[] array = HashAlgorithm.Create(this.hashName).ComputeHash(asn.GetBytes());
 			RSAPKCS1SignatureFormatter rsapkcs1SignatureFormatter = new RSAPKCS1SignatureFormatter(key);
 			rsapkcs1SignatureFormatter.SetHashAlgorithm(this.hashName);
 			byte[] array2 = rsapkcs1SignatureFormatter.CreateSignature(array);

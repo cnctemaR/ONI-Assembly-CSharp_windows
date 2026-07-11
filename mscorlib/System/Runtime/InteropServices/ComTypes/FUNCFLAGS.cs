@@ -4,7 +4,7 @@ namespace System.Runtime.InteropServices.ComTypes
 {
 	[Flags]
 	[Serializable]
-	public enum FUNCFLAGS
+	public enum FUNCFLAGS : short
 	{
 		FUNCFLAG_FRESTRICTED = 1,
 		FUNCFLAG_FSOURCE = 2,

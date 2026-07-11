@@ -1,66 +1,215 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Dynamic.Utils;
 using System.Reflection;
-using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
-	public sealed class BinaryExpression : Expression
+	[DebuggerTypeProxy(typeof(Expression.BinaryExpressionProxy))]
+	public class BinaryExpression : Expression
 	{
-		internal BinaryExpression(ExpressionType node_type, Type type, Expression left, Expression right)
-			: base(node_type, type)
+		internal BinaryExpression(Expression left, Expression right)
 		{
-			this.left = left;
-			this.right = right;
+			this.Left = left;
+			this.Right = right;
 		}
 
-		internal BinaryExpression(ExpressionType node_type, Type type, Expression left, Expression right, MethodInfo method)
-			: base(node_type, type)
-		{
-			this.left = left;
-			this.right = right;
-			this.method = method;
-		}
-
-		internal BinaryExpression(ExpressionType node_type, Type type, Expression left, Expression right, bool lift_to_null, bool is_lifted, MethodInfo method, LambdaExpression conversion)
-			: base(node_type, type)
-		{
-			this.left = left;
-			this.right = right;
-			this.method = method;
-			this.conversion = conversion;
-			this.lift_to_null = lift_to_null;
-			this.is_lifted = is_lifted;
-		}
-
-		public Expression Left
+		public override bool CanReduce
 		{
 			get
 			{
-				return this.left;
+				return BinaryExpression.IsOpAssignment(this.NodeType);
 			}
 		}
 
-		public Expression Right
+		private static bool IsOpAssignment(ExpressionType op)
 		{
-			get
-			{
-				return this.right;
-			}
+			return op - ExpressionType.AddAssign <= 13;
 		}
+
+		public Expression Right { get; }
+
+		public Expression Left { get; }
 
 		public MethodInfo Method
 		{
 			get
 			{
-				return this.method;
+				return this.GetMethod();
 			}
+		}
+
+		internal virtual MethodInfo GetMethod()
+		{
+			return null;
+		}
+
+		public BinaryExpression Update(Expression left, LambdaExpression conversion, Expression right)
+		{
+			if (left == this.Left && right == this.Right && conversion == this.Conversion)
+			{
+				return this;
+			}
+			if (!this.IsReferenceComparison)
+			{
+				return Expression.MakeBinary(this.NodeType, left, right, this.IsLiftedToNull, this.Method, conversion);
+			}
+			if (this.NodeType == ExpressionType.Equal)
+			{
+				return Expression.ReferenceEqual(left, right);
+			}
+			return Expression.ReferenceNotEqual(left, right);
+		}
+
+		public override Expression Reduce()
+		{
+			if (!BinaryExpression.IsOpAssignment(this.NodeType))
+			{
+				return this;
+			}
+			ExpressionType nodeType = this.Left.NodeType;
+			if (nodeType == ExpressionType.MemberAccess)
+			{
+				return this.ReduceMember();
+			}
+			if (nodeType != ExpressionType.Index)
+			{
+				return this.ReduceVariable();
+			}
+			return this.ReduceIndex();
+		}
+
+		private static ExpressionType GetBinaryOpFromAssignmentOp(ExpressionType op)
+		{
+			switch (op)
+			{
+			case ExpressionType.AddAssign:
+				return ExpressionType.Add;
+			case ExpressionType.AndAssign:
+				return ExpressionType.And;
+			case ExpressionType.DivideAssign:
+				return ExpressionType.Divide;
+			case ExpressionType.ExclusiveOrAssign:
+				return ExpressionType.ExclusiveOr;
+			case ExpressionType.LeftShiftAssign:
+				return ExpressionType.LeftShift;
+			case ExpressionType.ModuloAssign:
+				return ExpressionType.Modulo;
+			case ExpressionType.MultiplyAssign:
+				return ExpressionType.Multiply;
+			case ExpressionType.OrAssign:
+				return ExpressionType.Or;
+			case ExpressionType.PowerAssign:
+				return ExpressionType.Power;
+			case ExpressionType.RightShiftAssign:
+				return ExpressionType.RightShift;
+			case ExpressionType.SubtractAssign:
+				return ExpressionType.Subtract;
+			case ExpressionType.AddAssignChecked:
+				return ExpressionType.AddChecked;
+			case ExpressionType.MultiplyAssignChecked:
+				return ExpressionType.MultiplyChecked;
+			case ExpressionType.SubtractAssignChecked:
+				return ExpressionType.SubtractChecked;
+			default:
+				throw ContractUtils.Unreachable;
+			}
+		}
+
+		private Expression ReduceVariable()
+		{
+			Expression expression = Expression.MakeBinary(BinaryExpression.GetBinaryOpFromAssignmentOp(this.NodeType), this.Left, this.Right, false, this.Method);
+			LambdaExpression conversion = this.GetConversion();
+			if (conversion != null)
+			{
+				expression = Expression.Invoke(conversion, expression);
+			}
+			return Expression.Assign(this.Left, expression);
+		}
+
+		private Expression ReduceMember()
+		{
+			MemberExpression memberExpression = (MemberExpression)this.Left;
+			if (memberExpression.Expression == null)
+			{
+				return this.ReduceVariable();
+			}
+			ParameterExpression parameterExpression = Expression.Variable(memberExpression.Expression.Type, "temp1");
+			Expression expression = Expression.Assign(parameterExpression, memberExpression.Expression);
+			Expression expression2 = Expression.MakeBinary(BinaryExpression.GetBinaryOpFromAssignmentOp(this.NodeType), Expression.MakeMemberAccess(parameterExpression, memberExpression.Member), this.Right, false, this.Method);
+			LambdaExpression conversion = this.GetConversion();
+			if (conversion != null)
+			{
+				expression2 = Expression.Invoke(conversion, expression2);
+			}
+			ParameterExpression parameterExpression2 = Expression.Variable(expression2.Type, "temp2");
+			expression2 = Expression.Assign(parameterExpression2, expression2);
+			Expression expression3 = Expression.Assign(Expression.MakeMemberAccess(parameterExpression, memberExpression.Member), parameterExpression2);
+			Expression expression4 = parameterExpression2;
+			return Expression.Block(new TrueReadOnlyCollection<ParameterExpression>(new ParameterExpression[] { parameterExpression, parameterExpression2 }), new TrueReadOnlyCollection<Expression>(new Expression[] { expression, expression2, expression3, expression4 }));
+		}
+
+		private Expression ReduceIndex()
+		{
+			IndexExpression indexExpression = (IndexExpression)this.Left;
+			ArrayBuilder<ParameterExpression> arrayBuilder = new ArrayBuilder<ParameterExpression>(indexExpression.ArgumentCount + 2);
+			ArrayBuilder<Expression> arrayBuilder2 = new ArrayBuilder<Expression>(indexExpression.ArgumentCount + 3);
+			ParameterExpression parameterExpression = Expression.Variable(indexExpression.Object.Type, "tempObj");
+			arrayBuilder.UncheckedAdd(parameterExpression);
+			arrayBuilder2.UncheckedAdd(Expression.Assign(parameterExpression, indexExpression.Object));
+			int argumentCount = indexExpression.ArgumentCount;
+			ArrayBuilder<Expression> arrayBuilder3 = new ArrayBuilder<Expression>(argumentCount);
+			for (int i = 0; i < argumentCount; i++)
+			{
+				Expression argument = indexExpression.GetArgument(i);
+				ParameterExpression parameterExpression2 = Expression.Variable(argument.Type, "tempArg" + i);
+				arrayBuilder.UncheckedAdd(parameterExpression2);
+				arrayBuilder3.UncheckedAdd(parameterExpression2);
+				arrayBuilder2.UncheckedAdd(Expression.Assign(parameterExpression2, argument));
+			}
+			IndexExpression indexExpression2 = Expression.MakeIndex(parameterExpression, indexExpression.Indexer, arrayBuilder3.ToReadOnly<Expression>());
+			Expression expression = Expression.MakeBinary(BinaryExpression.GetBinaryOpFromAssignmentOp(this.NodeType), indexExpression2, this.Right, false, this.Method);
+			LambdaExpression conversion = this.GetConversion();
+			if (conversion != null)
+			{
+				expression = Expression.Invoke(conversion, expression);
+			}
+			ParameterExpression parameterExpression3 = Expression.Variable(expression.Type, "tempValue");
+			arrayBuilder.UncheckedAdd(parameterExpression3);
+			arrayBuilder2.UncheckedAdd(Expression.Assign(parameterExpression3, expression));
+			arrayBuilder2.UncheckedAdd(Expression.Assign(indexExpression2, parameterExpression3));
+			return Expression.Block(arrayBuilder.ToReadOnly<ParameterExpression>(), arrayBuilder2.ToReadOnly<Expression>());
+		}
+
+		public LambdaExpression Conversion
+		{
+			get
+			{
+				return this.GetConversion();
+			}
+		}
+
+		internal virtual LambdaExpression GetConversion()
+		{
+			return null;
 		}
 
 		public bool IsLifted
 		{
 			get
 			{
-				return this.is_lifted;
+				if (this.NodeType == ExpressionType.Coalesce || this.NodeType == ExpressionType.Assign)
+				{
+					return false;
+				}
+				if (this.Left.Type.IsNullableType())
+				{
+					MethodInfo method = this.GetMethod();
+					return method == null || !TypeUtils.AreEquivalent(method.GetParametersCached()[0].ParameterType.GetNonRefType(), this.Left.Type);
+				}
+				return false;
 			}
 		}
 
@@ -68,696 +217,71 @@ namespace System.Linq.Expressions
 		{
 			get
 			{
-				return this.lift_to_null;
+				return this.IsLifted && this.Type.IsNullableType();
 			}
 		}
 
-		public LambdaExpression Conversion
+		protected internal override Expression Accept(ExpressionVisitor visitor)
+		{
+			return visitor.VisitBinary(this);
+		}
+
+		internal static BinaryExpression Create(ExpressionType nodeType, Expression left, Expression right, Type type, MethodInfo method, LambdaExpression conversion)
+		{
+			if (conversion != null)
+			{
+				return new CoalesceConversionBinaryExpression(left, right, conversion);
+			}
+			if (method != null)
+			{
+				return new MethodBinaryExpression(nodeType, left, right, type, method);
+			}
+			if (type == typeof(bool))
+			{
+				return new LogicalBinaryExpression(nodeType, left, right);
+			}
+			return new SimpleBinaryExpression(nodeType, left, right, type);
+		}
+
+		internal bool IsLiftedLogical
 		{
 			get
 			{
-				return this.conversion;
+				Type type = this.Left.Type;
+				Type type2 = this.Right.Type;
+				MethodInfo method = this.GetMethod();
+				ExpressionType nodeType = this.NodeType;
+				return (nodeType == ExpressionType.AndAlso || nodeType == ExpressionType.OrElse) && TypeUtils.AreEquivalent(type2, type) && type.IsNullableType() && method != null && TypeUtils.AreEquivalent(method.ReturnType, type.GetNonNullableType());
 			}
 		}
 
-		private void EmitArrayAccess(EmitContext ec)
+		internal bool IsReferenceComparison
 		{
-			this.left.Emit(ec);
-			this.right.Emit(ec);
-			ec.ig.Emit(OpCodes.Ldelem, base.Type);
+			get
+			{
+				Type type = this.Left.Type;
+				Type type2 = this.Right.Type;
+				MethodInfo method = this.GetMethod();
+				ExpressionType nodeType = this.NodeType;
+				return (nodeType == ExpressionType.Equal || nodeType == ExpressionType.NotEqual) && method == null && !type.IsValueType && !type2.IsValueType;
+			}
 		}
 
-		private void EmitLogicalBinary(EmitContext ec)
+		internal Expression ReduceUserdefinedLifted()
 		{
-			ExpressionType nodeType = base.NodeType;
-			if (nodeType != ExpressionType.And)
+			ParameterExpression parameterExpression = Expression.Parameter(this.Left.Type, "left");
+			ParameterExpression parameterExpression2 = Expression.Parameter(this.Right.Type, "right");
+			string text = ((this.NodeType == ExpressionType.AndAlso) ? "op_False" : "op_True");
+			MethodInfo booleanOperator = TypeUtils.GetBooleanOperator(this.Method.DeclaringType, text);
+			return Expression.Block(new TrueReadOnlyCollection<ParameterExpression>(new ParameterExpression[] { parameterExpression }), new TrueReadOnlyCollection<Expression>(new Expression[]
 			{
-				if (nodeType != ExpressionType.AndAlso)
+				Expression.Assign(parameterExpression, this.Left),
+				Expression.Condition(Expression.Property(parameterExpression, "HasValue"), Expression.Condition(Expression.Call(booleanOperator, Expression.Call(parameterExpression, "GetValueOrDefault", null, Array.Empty<Expression>())), parameterExpression, Expression.Block(new TrueReadOnlyCollection<ParameterExpression>(new ParameterExpression[] { parameterExpression2 }), new TrueReadOnlyCollection<Expression>(new Expression[]
 				{
-					if (nodeType == ExpressionType.Or)
-					{
-						goto IL_002A;
-					}
-					if (nodeType != ExpressionType.OrElse)
-					{
-						return;
-					}
-				}
-				if (!this.IsLifted)
-				{
-					this.EmitLogicalShortCircuit(ec);
-				}
-				else
-				{
-					this.EmitLiftedLogicalShortCircuit(ec);
-				}
-				return;
-			}
-			IL_002A:
-			if (!this.IsLifted)
-			{
-				this.EmitLogical(ec);
-			}
-			else if (base.Type == typeof(bool?))
-			{
-				this.EmitLiftedLogical(ec);
-			}
-			else
-			{
-				this.EmitLiftedArithmeticBinary(ec);
-			}
+					Expression.Assign(parameterExpression2, this.Right),
+					Expression.Condition(Expression.Property(parameterExpression2, "HasValue"), Expression.Convert(Expression.Call(this.Method, Expression.Call(parameterExpression, "GetValueOrDefault", null, Array.Empty<Expression>()), Expression.Call(parameterExpression2, "GetValueOrDefault", null, Array.Empty<Expression>())), this.Type), Expression.Constant(null, this.Type))
+				}))), Expression.Constant(null, this.Type))
+			}));
 		}
-
-		private void EmitLogical(EmitContext ec)
-		{
-			this.EmitNonLiftedBinary(ec);
-		}
-
-		private void EmitLiftedLogical(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			bool flag = base.NodeType == ExpressionType.And;
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			LocalBuilder localBuilder2 = ec.EmitStored(this.right);
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			Label label3 = ig.DefineLabel();
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ig.Emit(OpCodes.Brtrue, label);
-			ec.EmitNullableGetValueOrDefault(localBuilder2);
-			ig.Emit(OpCodes.Brtrue, label2);
-			ec.EmitNullableHasValue(localBuilder);
-			ig.Emit(OpCodes.Brfalse, label);
-			ig.MarkLabel(label2);
-			ec.EmitLoad((!flag) ? localBuilder2 : localBuilder);
-			ig.Emit(OpCodes.Br, label3);
-			ig.MarkLabel(label);
-			ec.EmitLoad((!flag) ? localBuilder : localBuilder2);
-			ig.MarkLabel(label3);
-		}
-
-		private void EmitLogicalShortCircuit(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			bool flag = base.NodeType == ExpressionType.AndAlso;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			ec.Emit(this.left);
-			ig.Emit((!flag) ? OpCodes.Brtrue : OpCodes.Brfalse, label);
-			ec.Emit(this.right);
-			ig.Emit(OpCodes.Br, label2);
-			ig.MarkLabel(label);
-			ig.Emit((!flag) ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
-			ig.MarkLabel(label2);
-		}
-
-		private MethodInfo GetFalseOperator()
-		{
-			return Expression.GetFalseOperator(this.left.Type.GetNotNullableType());
-		}
-
-		private MethodInfo GetTrueOperator()
-		{
-			return Expression.GetTrueOperator(this.left.Type.GetNotNullableType());
-		}
-
-		private void EmitUserDefinedLogicalShortCircuit(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			bool flag = base.NodeType == ExpressionType.AndAlso;
-			Label label = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			ec.EmitLoad(localBuilder);
-			ig.Emit(OpCodes.Dup);
-			ec.EmitCall((!flag) ? this.GetTrueOperator() : this.GetFalseOperator());
-			ig.Emit(OpCodes.Brtrue, label);
-			ec.Emit(this.right);
-			ec.EmitCall(this.method);
-			ig.MarkLabel(label);
-		}
-
-		private void EmitLiftedLogicalShortCircuit(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			bool flag = base.NodeType == ExpressionType.AndAlso;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			Label label3 = ig.DefineLabel();
-			Label label4 = ig.DefineLabel();
-			Label label5 = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			ec.EmitNullableHasValue(localBuilder);
-			ig.Emit(OpCodes.Brfalse, label);
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ig.Emit(OpCodes.Ldc_I4_0);
-			ig.Emit(OpCodes.Ceq);
-			ig.Emit((!flag) ? OpCodes.Brfalse : OpCodes.Brtrue, label2);
-			ig.MarkLabel(label);
-			LocalBuilder localBuilder2 = ec.EmitStored(this.right);
-			ec.EmitNullableHasValue(localBuilder2);
-			ig.Emit(OpCodes.Brfalse_S, label3);
-			ec.EmitNullableGetValueOrDefault(localBuilder2);
-			ig.Emit(OpCodes.Ldc_I4_0);
-			ig.Emit(OpCodes.Ceq);
-			ig.Emit((!flag) ? OpCodes.Brfalse : OpCodes.Brtrue, label2);
-			ec.EmitNullableHasValue(localBuilder);
-			ig.Emit(OpCodes.Brfalse, label3);
-			ig.Emit((!flag) ? OpCodes.Ldc_I4_0 : OpCodes.Ldc_I4_1);
-			ig.Emit(OpCodes.Br_S, label4);
-			ig.MarkLabel(label2);
-			ig.Emit((!flag) ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
-			ig.MarkLabel(label4);
-			ec.EmitNullableNew(base.Type);
-			ig.Emit(OpCodes.Br, label5);
-			ig.MarkLabel(label3);
-			LocalBuilder localBuilder3 = ig.DeclareLocal(base.Type);
-			ec.EmitNullableInitialize(localBuilder3);
-			ig.MarkLabel(label5);
-		}
-
-		private void EmitCoalesce(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			bool flag = localBuilder.LocalType.IsNullable();
-			if (flag)
-			{
-				ec.EmitNullableHasValue(localBuilder);
-			}
-			else
-			{
-				ec.EmitLoad(localBuilder);
-			}
-			ig.Emit(OpCodes.Brfalse, label2);
-			if (flag && !base.Type.IsNullable())
-			{
-				ec.EmitNullableGetValue(localBuilder);
-			}
-			else
-			{
-				ec.EmitLoad(localBuilder);
-			}
-			ig.Emit(OpCodes.Br, label);
-			ig.MarkLabel(label2);
-			ec.Emit(this.right);
-			ig.MarkLabel(label);
-		}
-
-		private void EmitConvertedCoalesce(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			if (localBuilder.LocalType.IsNullable())
-			{
-				ec.EmitNullableHasValue(localBuilder);
-			}
-			else
-			{
-				ec.EmitLoad(localBuilder);
-			}
-			ig.Emit(OpCodes.Brfalse, label2);
-			ec.Emit(this.conversion);
-			ec.EmitLoad(localBuilder);
-			ig.Emit(OpCodes.Callvirt, this.conversion.Type.GetInvokeMethod());
-			ig.Emit(OpCodes.Br, label);
-			ig.MarkLabel(label2);
-			ec.Emit(this.right);
-			ig.MarkLabel(label);
-		}
-
-		private static bool IsInt32OrInt64(Type type)
-		{
-			return type == typeof(int) || type == typeof(long);
-		}
-
-		private static bool IsSingleOrDouble(Type type)
-		{
-			return type == typeof(float) || type == typeof(double);
-		}
-
-		private void EmitBinaryOperator(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			bool flag = Expression.IsUnsigned(this.left.Type);
-			ExpressionType nodeType = base.NodeType;
-			switch (nodeType)
-			{
-			case ExpressionType.Divide:
-				ig.Emit((!flag) ? OpCodes.Div : OpCodes.Div_Un);
-				break;
-			case ExpressionType.Equal:
-				ig.Emit(OpCodes.Ceq);
-				break;
-			case ExpressionType.ExclusiveOr:
-				ig.Emit(OpCodes.Xor);
-				break;
-			case ExpressionType.GreaterThan:
-				ig.Emit((!flag) ? OpCodes.Cgt : OpCodes.Cgt_Un);
-				break;
-			case ExpressionType.GreaterThanOrEqual:
-				if (flag || BinaryExpression.IsSingleOrDouble(this.left.Type))
-				{
-					ig.Emit(OpCodes.Clt_Un);
-				}
-				else
-				{
-					ig.Emit(OpCodes.Clt);
-				}
-				ig.Emit(OpCodes.Ldc_I4_0);
-				ig.Emit(OpCodes.Ceq);
-				break;
-			default:
-				switch (nodeType)
-				{
-				case ExpressionType.Add:
-					ig.Emit(OpCodes.Add);
-					break;
-				case ExpressionType.AddChecked:
-					if (BinaryExpression.IsInt32OrInt64(this.left.Type))
-					{
-						ig.Emit(OpCodes.Add_Ovf);
-					}
-					else
-					{
-						ig.Emit((!flag) ? OpCodes.Add : OpCodes.Add_Ovf_Un);
-					}
-					break;
-				case ExpressionType.And:
-					ig.Emit(OpCodes.And);
-					break;
-				default:
-					throw new InvalidOperationException(string.Format("Internal error: BinaryExpression contains non-Binary nodetype {0}", base.NodeType));
-				}
-				break;
-			case ExpressionType.LeftShift:
-			case ExpressionType.RightShift:
-				ig.Emit(OpCodes.Ldc_I4, (this.left.Type != typeof(int)) ? 63 : 31);
-				ig.Emit(OpCodes.And);
-				if (base.NodeType == ExpressionType.RightShift)
-				{
-					ig.Emit((!flag) ? OpCodes.Shr : OpCodes.Shr_Un);
-				}
-				else
-				{
-					ig.Emit(OpCodes.Shl);
-				}
-				break;
-			case ExpressionType.LessThan:
-				ig.Emit((!flag) ? OpCodes.Clt : OpCodes.Clt_Un);
-				break;
-			case ExpressionType.LessThanOrEqual:
-				if (flag || BinaryExpression.IsSingleOrDouble(this.left.Type))
-				{
-					ig.Emit(OpCodes.Cgt_Un);
-				}
-				else
-				{
-					ig.Emit(OpCodes.Cgt);
-				}
-				ig.Emit(OpCodes.Ldc_I4_0);
-				ig.Emit(OpCodes.Ceq);
-				break;
-			case ExpressionType.Modulo:
-				ig.Emit((!flag) ? OpCodes.Rem : OpCodes.Rem_Un);
-				break;
-			case ExpressionType.Multiply:
-				ig.Emit(OpCodes.Mul);
-				break;
-			case ExpressionType.MultiplyChecked:
-				if (BinaryExpression.IsInt32OrInt64(this.left.Type))
-				{
-					ig.Emit(OpCodes.Mul_Ovf);
-				}
-				else
-				{
-					ig.Emit((!flag) ? OpCodes.Mul : OpCodes.Mul_Ovf_Un);
-				}
-				break;
-			case ExpressionType.NotEqual:
-				ig.Emit(OpCodes.Ceq);
-				ig.Emit(OpCodes.Ldc_I4_0);
-				ig.Emit(OpCodes.Ceq);
-				break;
-			case ExpressionType.Or:
-				ig.Emit(OpCodes.Or);
-				break;
-			case ExpressionType.Power:
-				ig.Emit(OpCodes.Call, typeof(Math).GetMethod("Pow"));
-				break;
-			case ExpressionType.Subtract:
-				ig.Emit(OpCodes.Sub);
-				break;
-			case ExpressionType.SubtractChecked:
-				if (BinaryExpression.IsInt32OrInt64(this.left.Type))
-				{
-					ig.Emit(OpCodes.Sub_Ovf);
-				}
-				else
-				{
-					ig.Emit((!flag) ? OpCodes.Sub : OpCodes.Sub_Ovf_Un);
-				}
-				break;
-			}
-		}
-
-		private bool IsLeftLiftedBinary()
-		{
-			return this.left.Type.IsNullable() && !this.right.Type.IsNullable();
-		}
-
-		private void EmitLeftLiftedToNullBinary(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			ec.EmitNullableHasValue(localBuilder);
-			ig.Emit(OpCodes.Brfalse, label);
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ec.Emit(this.right);
-			this.EmitBinaryOperator(ec);
-			ec.EmitNullableNew(base.Type);
-			ig.Emit(OpCodes.Br, label2);
-			ig.MarkLabel(label);
-			LocalBuilder localBuilder2 = ig.DeclareLocal(base.Type);
-			ec.EmitNullableInitialize(localBuilder2);
-			ig.MarkLabel(label2);
-		}
-
-		private void EmitLiftedArithmeticBinary(EmitContext ec)
-		{
-			if (this.IsLeftLiftedBinary())
-			{
-				this.EmitLeftLiftedToNullBinary(ec);
-			}
-			else
-			{
-				this.EmitLiftedToNullBinary(ec);
-			}
-		}
-
-		private void EmitLiftedToNullBinary(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			LocalBuilder localBuilder2 = ec.EmitStored(this.right);
-			LocalBuilder localBuilder3 = ig.DeclareLocal(base.Type);
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			ec.EmitNullableHasValue(localBuilder);
-			ec.EmitNullableHasValue(localBuilder2);
-			ig.Emit(OpCodes.And);
-			ig.Emit(OpCodes.Brtrue, label);
-			ec.EmitNullableInitialize(localBuilder3);
-			ig.Emit(OpCodes.Br, label2);
-			ig.MarkLabel(label);
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ec.EmitNullableGetValueOrDefault(localBuilder2);
-			this.EmitBinaryOperator(ec);
-			ec.EmitNullableNew(localBuilder3.LocalType);
-			ig.MarkLabel(label2);
-		}
-
-		private void EmitLiftedRelationalBinary(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			LocalBuilder localBuilder2 = ec.EmitStored(this.right);
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ec.EmitNullableGetValueOrDefault(localBuilder2);
-			ExpressionType expressionType = base.NodeType;
-			if (expressionType != ExpressionType.Equal && expressionType != ExpressionType.NotEqual)
-			{
-				this.EmitBinaryOperator(ec);
-				ig.Emit(OpCodes.Brfalse, label);
-			}
-			else
-			{
-				ig.Emit(OpCodes.Bne_Un, label);
-			}
-			ec.EmitNullableHasValue(localBuilder);
-			ec.EmitNullableHasValue(localBuilder2);
-			expressionType = base.NodeType;
-			if (expressionType != ExpressionType.Equal)
-			{
-				if (expressionType != ExpressionType.NotEqual)
-				{
-					ig.Emit(OpCodes.And);
-				}
-				else
-				{
-					ig.Emit(OpCodes.Ceq);
-					ig.Emit(OpCodes.Ldc_I4_0);
-					ig.Emit(OpCodes.Ceq);
-				}
-			}
-			else
-			{
-				ig.Emit(OpCodes.Ceq);
-			}
-			ig.Emit(OpCodes.Br, label2);
-			ig.MarkLabel(label);
-			ig.Emit((base.NodeType != ExpressionType.NotEqual) ? OpCodes.Ldc_I4_0 : OpCodes.Ldc_I4_1);
-			ig.MarkLabel(label2);
-		}
-
-		private void EmitArithmeticBinary(EmitContext ec)
-		{
-			if (!this.IsLifted)
-			{
-				this.EmitNonLiftedBinary(ec);
-			}
-			else
-			{
-				this.EmitLiftedArithmeticBinary(ec);
-			}
-		}
-
-		private void EmitNonLiftedBinary(EmitContext ec)
-		{
-			ec.Emit(this.left);
-			ec.Emit(this.right);
-			this.EmitBinaryOperator(ec);
-		}
-
-		private void EmitRelationalBinary(EmitContext ec)
-		{
-			if (!this.IsLifted)
-			{
-				this.EmitNonLiftedBinary(ec);
-			}
-			else if (this.IsLiftedToNull)
-			{
-				this.EmitLiftedToNullBinary(ec);
-			}
-			else
-			{
-				this.EmitLiftedRelationalBinary(ec);
-			}
-		}
-
-		private void EmitLiftedUserDefinedOperator(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			Label label3 = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			LocalBuilder localBuilder2 = ec.EmitStored(this.right);
-			ec.EmitNullableHasValue(localBuilder);
-			ec.EmitNullableHasValue(localBuilder2);
-			ExpressionType nodeType = base.NodeType;
-			if (nodeType != ExpressionType.Equal)
-			{
-				if (nodeType != ExpressionType.NotEqual)
-				{
-					ig.Emit(OpCodes.And);
-					ig.Emit(OpCodes.Brfalse, label2);
-				}
-				else
-				{
-					ig.Emit(OpCodes.Bne_Un, label);
-					ec.EmitNullableHasValue(localBuilder);
-					ig.Emit(OpCodes.Brfalse, label2);
-				}
-			}
-			else
-			{
-				ig.Emit(OpCodes.Bne_Un, label2);
-				ec.EmitNullableHasValue(localBuilder);
-				ig.Emit(OpCodes.Brfalse, label);
-			}
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ec.EmitNullableGetValueOrDefault(localBuilder2);
-			ec.EmitCall(this.method);
-			ig.Emit(OpCodes.Br, label3);
-			ig.MarkLabel(label);
-			ig.Emit(OpCodes.Ldc_I4_1);
-			ig.Emit(OpCodes.Br, label3);
-			ig.MarkLabel(label2);
-			ig.Emit(OpCodes.Ldc_I4_0);
-			ig.Emit(OpCodes.Br, label3);
-			ig.MarkLabel(label3);
-		}
-
-		private void EmitLiftedToNullUserDefinedOperator(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			LocalBuilder localBuilder2 = ec.EmitStored(this.right);
-			ec.EmitNullableHasValue(localBuilder);
-			ec.EmitNullableHasValue(localBuilder2);
-			ig.Emit(OpCodes.And);
-			ig.Emit(OpCodes.Brfalse, label);
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ec.EmitNullableGetValueOrDefault(localBuilder2);
-			ec.EmitCall(this.method);
-			ec.EmitNullableNew(base.Type);
-			ig.Emit(OpCodes.Br, label2);
-			ig.MarkLabel(label);
-			LocalBuilder localBuilder3 = ig.DeclareLocal(base.Type);
-			ec.EmitNullableInitialize(localBuilder3);
-			ig.MarkLabel(label2);
-		}
-
-		private void EmitUserDefinedLiftedLogicalShortCircuit(EmitContext ec)
-		{
-			ILGenerator ig = ec.ig;
-			bool flag = base.NodeType == ExpressionType.AndAlso;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			Label label3 = ig.DefineLabel();
-			Label label4 = ig.DefineLabel();
-			LocalBuilder localBuilder = ec.EmitStored(this.left);
-			ec.EmitNullableHasValue(localBuilder);
-			ig.Emit(OpCodes.Brfalse, (!flag) ? label : label3);
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ec.EmitCall((!flag) ? this.GetTrueOperator() : this.GetFalseOperator());
-			ig.Emit(OpCodes.Brtrue, label2);
-			ig.MarkLabel(label);
-			LocalBuilder localBuilder2 = ec.EmitStored(this.right);
-			ec.EmitNullableHasValue(localBuilder2);
-			ig.Emit(OpCodes.Brfalse, label3);
-			ec.EmitNullableGetValueOrDefault(localBuilder);
-			ec.EmitNullableGetValueOrDefault(localBuilder2);
-			ec.EmitCall(this.method);
-			ec.EmitNullableNew(base.Type);
-			ig.Emit(OpCodes.Br, label4);
-			ig.MarkLabel(label2);
-			ec.EmitLoad(localBuilder);
-			ig.Emit(OpCodes.Br, label4);
-			ig.MarkLabel(label3);
-			LocalBuilder localBuilder3 = ig.DeclareLocal(base.Type);
-			ec.EmitNullableInitialize(localBuilder3);
-			ig.MarkLabel(label4);
-		}
-
-		private void EmitUserDefinedOperator(EmitContext ec)
-		{
-			if (!this.IsLifted)
-			{
-				ExpressionType expressionType = base.NodeType;
-				if (expressionType != ExpressionType.AndAlso && expressionType != ExpressionType.OrElse)
-				{
-					this.left.Emit(ec);
-					this.right.Emit(ec);
-					ec.EmitCall(this.method);
-				}
-				else
-				{
-					this.EmitUserDefinedLogicalShortCircuit(ec);
-				}
-			}
-			else if (this.IsLiftedToNull)
-			{
-				ExpressionType expressionType = base.NodeType;
-				if (expressionType != ExpressionType.AndAlso && expressionType != ExpressionType.OrElse)
-				{
-					this.EmitLiftedToNullUserDefinedOperator(ec);
-				}
-				else
-				{
-					this.EmitUserDefinedLiftedLogicalShortCircuit(ec);
-				}
-			}
-			else
-			{
-				this.EmitLiftedUserDefinedOperator(ec);
-			}
-		}
-
-		internal override void Emit(EmitContext ec)
-		{
-			if (this.method != null)
-			{
-				this.EmitUserDefinedOperator(ec);
-				return;
-			}
-			switch (base.NodeType)
-			{
-			case ExpressionType.Add:
-			case ExpressionType.AddChecked:
-			case ExpressionType.Divide:
-			case ExpressionType.ExclusiveOr:
-			case ExpressionType.LeftShift:
-			case ExpressionType.Modulo:
-			case ExpressionType.Multiply:
-			case ExpressionType.MultiplyChecked:
-			case ExpressionType.Power:
-			case ExpressionType.RightShift:
-			case ExpressionType.Subtract:
-			case ExpressionType.SubtractChecked:
-				this.EmitArithmeticBinary(ec);
-				return;
-			case ExpressionType.And:
-			case ExpressionType.AndAlso:
-			case ExpressionType.Or:
-			case ExpressionType.OrElse:
-				this.EmitLogicalBinary(ec);
-				return;
-			case ExpressionType.ArrayIndex:
-				this.EmitArrayAccess(ec);
-				return;
-			case ExpressionType.Coalesce:
-				if (this.conversion != null)
-				{
-					this.EmitConvertedCoalesce(ec);
-				}
-				else
-				{
-					this.EmitCoalesce(ec);
-				}
-				return;
-			case ExpressionType.Equal:
-			case ExpressionType.GreaterThan:
-			case ExpressionType.GreaterThanOrEqual:
-			case ExpressionType.LessThan:
-			case ExpressionType.LessThanOrEqual:
-			case ExpressionType.NotEqual:
-				this.EmitRelationalBinary(ec);
-				return;
-			}
-			throw new NotSupportedException(base.NodeType.ToString());
-		}
-
-		private Expression left;
-
-		private Expression right;
-
-		private LambdaExpression conversion;
-
-		private MethodInfo method;
-
-		private bool lift_to_null;
-
-		private bool is_lifted;
 	}
 }

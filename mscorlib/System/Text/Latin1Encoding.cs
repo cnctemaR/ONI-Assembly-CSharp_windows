@@ -1,14 +1,282 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Text
 {
 	[Serializable]
-	internal class Latin1Encoding : Encoding
+	internal class Latin1Encoding : EncodingNLS, ISerializable
 	{
 		public Latin1Encoding()
 			: base(28591)
 		{
+		}
+
+		internal Latin1Encoding(SerializationInfo info, StreamingContext context)
+			: base(28591)
+		{
+			base.DeserializeEncoding(info, context);
+		}
+
+		[SecurityCritical]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.SerializeEncoding(info, context);
+			info.AddValue("CodePageEncoding+maxCharSize", 1);
+			info.AddValue("CodePageEncoding+m_codePage", this.CodePage);
+			info.AddValue("CodePageEncoding+dataItem", null);
+		}
+
+		[SecurityCritical]
+		internal unsafe override int GetByteCount(char* chars, int charCount, EncoderNLS encoder)
+		{
+			char c = '\0';
+			EncoderReplacementFallback encoderReplacementFallback;
+			if (encoder != null)
+			{
+				c = encoder.charLeftOver;
+				encoderReplacementFallback = encoder.Fallback as EncoderReplacementFallback;
+			}
+			else
+			{
+				encoderReplacementFallback = base.EncoderFallback as EncoderReplacementFallback;
+			}
+			if (encoderReplacementFallback != null && encoderReplacementFallback.MaxCharCount == 1)
+			{
+				if (c > '\0')
+				{
+					charCount++;
+				}
+				return charCount;
+			}
+			int num = 0;
+			char* ptr = chars + charCount;
+			EncoderFallbackBuffer encoderFallbackBuffer = null;
+			if (c > '\0')
+			{
+				encoderFallbackBuffer = encoder.FallbackBuffer;
+				encoderFallbackBuffer.InternalInitialize(chars, ptr, encoder, false);
+				encoderFallbackBuffer.InternalFallback(c, ref chars);
+			}
+			char c2;
+			while ((c2 = ((encoderFallbackBuffer == null) ? '\0' : encoderFallbackBuffer.InternalGetNextChar())) != '\0' || chars < ptr)
+			{
+				if (c2 == '\0')
+				{
+					c2 = *chars;
+					chars++;
+				}
+				if (c2 > 'ÿ')
+				{
+					if (encoderFallbackBuffer == null)
+					{
+						if (encoder == null)
+						{
+							encoderFallbackBuffer = this.encoderFallback.CreateFallbackBuffer();
+						}
+						else
+						{
+							encoderFallbackBuffer = encoder.FallbackBuffer;
+						}
+						encoderFallbackBuffer.InternalInitialize(ptr - charCount, ptr, encoder, false);
+					}
+					encoderFallbackBuffer.InternalFallback(c2, ref chars);
+				}
+				else
+				{
+					num++;
+				}
+			}
+			return num;
+		}
+
+		[SecurityCritical]
+		internal unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS encoder)
+		{
+			char c = '\0';
+			EncoderReplacementFallback encoderReplacementFallback;
+			if (encoder != null)
+			{
+				c = encoder.charLeftOver;
+				encoderReplacementFallback = encoder.Fallback as EncoderReplacementFallback;
+			}
+			else
+			{
+				encoderReplacementFallback = base.EncoderFallback as EncoderReplacementFallback;
+			}
+			char* ptr = chars + charCount;
+			byte* ptr2 = bytes;
+			char* ptr3 = chars;
+			if (encoderReplacementFallback != null && encoderReplacementFallback.MaxCharCount == 1)
+			{
+				char c2 = encoderReplacementFallback.DefaultString[0];
+				if (c2 <= 'ÿ')
+				{
+					if (c > '\0')
+					{
+						if (byteCount == 0)
+						{
+							base.ThrowBytesOverflow(encoder, true);
+						}
+						*(bytes++) = (byte)c2;
+						byteCount--;
+					}
+					if (byteCount < charCount)
+					{
+						base.ThrowBytesOverflow(encoder, byteCount < 1);
+						ptr = chars + byteCount;
+					}
+					while (chars < ptr)
+					{
+						char c3 = *(chars++);
+						if (c3 > 'ÿ')
+						{
+							*(bytes++) = (byte)c2;
+						}
+						else
+						{
+							*(bytes++) = (byte)c3;
+						}
+					}
+					if (encoder != null)
+					{
+						encoder.charLeftOver = '\0';
+						encoder.m_charsUsed = (int)((long)(chars - ptr3));
+					}
+					return (int)((long)(bytes - ptr2));
+				}
+			}
+			byte* ptr4 = bytes + byteCount;
+			EncoderFallbackBuffer encoderFallbackBuffer = null;
+			if (c > '\0')
+			{
+				encoderFallbackBuffer = encoder.FallbackBuffer;
+				encoderFallbackBuffer.InternalInitialize(chars, ptr, encoder, true);
+				encoderFallbackBuffer.InternalFallback(c, ref chars);
+				if ((long)encoderFallbackBuffer.Remaining > (long)(ptr4 - bytes))
+				{
+					base.ThrowBytesOverflow(encoder, true);
+				}
+			}
+			char c4;
+			while ((c4 = ((encoderFallbackBuffer == null) ? '\0' : encoderFallbackBuffer.InternalGetNextChar())) != '\0' || chars < ptr)
+			{
+				if (c4 == '\0')
+				{
+					c4 = *chars;
+					chars++;
+				}
+				if (c4 > 'ÿ')
+				{
+					if (encoderFallbackBuffer == null)
+					{
+						if (encoder == null)
+						{
+							encoderFallbackBuffer = this.encoderFallback.CreateFallbackBuffer();
+						}
+						else
+						{
+							encoderFallbackBuffer = encoder.FallbackBuffer;
+						}
+						encoderFallbackBuffer.InternalInitialize(ptr - charCount, ptr, encoder, true);
+					}
+					encoderFallbackBuffer.InternalFallback(c4, ref chars);
+					if ((long)encoderFallbackBuffer.Remaining > (long)(ptr4 - bytes))
+					{
+						chars--;
+						encoderFallbackBuffer.InternalReset();
+						base.ThrowBytesOverflow(encoder, chars == ptr3);
+						break;
+					}
+				}
+				else
+				{
+					if (bytes >= ptr4)
+					{
+						if (encoderFallbackBuffer == null || !encoderFallbackBuffer.bFallingBack)
+						{
+							chars--;
+						}
+						base.ThrowBytesOverflow(encoder, chars == ptr3);
+						break;
+					}
+					*bytes = (byte)c4;
+					bytes++;
+				}
+			}
+			if (encoder != null)
+			{
+				if (encoderFallbackBuffer != null && !encoderFallbackBuffer.bUsedEncoder)
+				{
+					encoder.charLeftOver = '\0';
+				}
+				encoder.m_charsUsed = (int)((long)(chars - ptr3));
+			}
+			return (int)((long)(bytes - ptr2));
+		}
+
+		[SecurityCritical]
+		internal unsafe override int GetCharCount(byte* bytes, int count, DecoderNLS decoder)
+		{
+			return count;
+		}
+
+		[SecurityCritical]
+		internal unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount, DecoderNLS decoder)
+		{
+			if (charCount < byteCount)
+			{
+				base.ThrowCharsOverflow(decoder, charCount < 1);
+				byteCount = charCount;
+			}
+			byte* ptr = bytes + byteCount;
+			while (bytes < ptr)
+			{
+				*chars = (char)(*bytes);
+				chars++;
+				bytes++;
+			}
+			if (decoder != null)
+			{
+				decoder.m_bytesUsed = byteCount;
+			}
+			return byteCount;
+		}
+
+		public override int GetMaxByteCount(int charCount)
+		{
+			if (charCount < 0)
+			{
+				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Non-negative number required."));
+			}
+			long num = (long)charCount + 1L;
+			if (base.EncoderFallback.MaxCharCount > 1)
+			{
+				num *= (long)base.EncoderFallback.MaxCharCount;
+			}
+			if (num > 2147483647L)
+			{
+				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
+			}
+			return (int)num;
+		}
+
+		public override int GetMaxCharCount(int byteCount)
+		{
+			if (byteCount < 0)
+			{
+				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Non-negative number required."));
+			}
+			long num = (long)byteCount;
+			if (base.DecoderFallback.MaxCharCount > 1)
+			{
+				num *= (long)base.DecoderFallback.MaxCharCount;
+			}
+			if (num > 2147483647L)
+			{
+				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Too many bytes. The resulting number of chars is larger than what can be returned as an int."));
+			}
+			return (int)num;
 		}
 
 		public override bool IsSingleByte
@@ -24,359 +292,74 @@ namespace System.Text
 			return form == NormalizationForm.FormC;
 		}
 
-		public override int GetByteCount(char[] chars, int index, int count)
+		internal override char[] GetBestFitUnicodeToBytesData()
 		{
-			if (chars == null)
-			{
-				throw new ArgumentNullException("chars");
-			}
-			if (index < 0 || index > chars.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", Encoding._("ArgRange_Array"));
-			}
-			if (count < 0 || count > chars.Length - index)
-			{
-				throw new ArgumentOutOfRangeException("count", Encoding._("ArgRange_Array"));
-			}
-			return count;
+			return Latin1Encoding.arrayCharBestFit;
 		}
 
-		public override int GetByteCount(string s)
+		private static readonly char[] arrayCharBestFit = new char[]
 		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			return s.Length;
-		}
-
-		public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
-		{
-			EncoderFallbackBuffer encoderFallbackBuffer = null;
-			char[] array = null;
-			return this.GetBytes(chars, charIndex, charCount, bytes, byteIndex, ref encoderFallbackBuffer, ref array);
-		}
-
-		private int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex, ref EncoderFallbackBuffer buffer, ref char[] fallback_chars)
-		{
-			if (chars == null)
-			{
-				throw new ArgumentNullException("chars");
-			}
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (charIndex < 0 || charIndex > chars.Length)
-			{
-				throw new ArgumentOutOfRangeException("charIndex", Encoding._("ArgRange_Array"));
-			}
-			if (charCount < 0 || charCount > chars.Length - charIndex)
-			{
-				throw new ArgumentOutOfRangeException("charCount", Encoding._("ArgRange_Array"));
-			}
-			if (byteIndex < 0 || byteIndex > bytes.Length)
-			{
-				throw new ArgumentOutOfRangeException("byteIndex", Encoding._("ArgRange_Array"));
-			}
-			if (bytes.Length - byteIndex < charCount)
-			{
-				throw new ArgumentException(Encoding._("Arg_InsufficientSpace"));
-			}
-			int num = charCount;
-			while (num-- > 0)
-			{
-				char c = chars[charIndex++];
-				if (c < 'Ā')
-				{
-					bytes[byteIndex++] = (byte)c;
-				}
-				else if (c >= '！' && c <= '～')
-				{
-					bytes[byteIndex++] = (byte)(c - 'ﻠ');
-				}
-				else
-				{
-					if (buffer == null)
-					{
-						buffer = base.EncoderFallback.CreateFallbackBuffer();
-					}
-					if (char.IsSurrogate(c) && num > 1 && char.IsSurrogate(chars[charIndex]))
-					{
-						buffer.Fallback(c, chars[charIndex], charIndex++ - 1);
-					}
-					else
-					{
-						buffer.Fallback(c, charIndex - 1);
-					}
-					if (fallback_chars == null || fallback_chars.Length < buffer.Remaining)
-					{
-						fallback_chars = new char[buffer.Remaining];
-					}
-					for (int i = 0; i < fallback_chars.Length; i++)
-					{
-						fallback_chars[i] = buffer.GetNextChar();
-					}
-					byteIndex += this.GetBytes(fallback_chars, 0, fallback_chars.Length, bytes, byteIndex, ref buffer, ref fallback_chars);
-				}
-			}
-			return charCount;
-		}
-
-		public override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
-		{
-			EncoderFallbackBuffer encoderFallbackBuffer = null;
-			char[] array = null;
-			return this.GetBytes(s, charIndex, charCount, bytes, byteIndex, ref encoderFallbackBuffer, ref array);
-		}
-
-		private int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex, ref EncoderFallbackBuffer buffer, ref char[] fallback_chars)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (charIndex < 0 || charIndex > s.Length)
-			{
-				throw new ArgumentOutOfRangeException("charIndex", Encoding._("ArgRange_StringIndex"));
-			}
-			if (charCount < 0 || charCount > s.Length - charIndex)
-			{
-				throw new ArgumentOutOfRangeException("charCount", Encoding._("ArgRange_StringRange"));
-			}
-			if (byteIndex < 0 || byteIndex > bytes.Length)
-			{
-				throw new ArgumentOutOfRangeException("byteIndex", Encoding._("ArgRange_Array"));
-			}
-			if (bytes.Length - byteIndex < charCount)
-			{
-				throw new ArgumentException(Encoding._("Arg_InsufficientSpace"));
-			}
-			int num = charCount;
-			while (num-- > 0)
-			{
-				char c = s[charIndex++];
-				if (c < 'Ā')
-				{
-					bytes[byteIndex++] = (byte)c;
-				}
-				else if (c >= '！' && c <= '～')
-				{
-					bytes[byteIndex++] = (byte)(c - 'ﻠ');
-				}
-				else
-				{
-					if (buffer == null)
-					{
-						buffer = base.EncoderFallback.CreateFallbackBuffer();
-					}
-					if (char.IsSurrogate(c) && num > 1 && char.IsSurrogate(s[charIndex]))
-					{
-						buffer.Fallback(c, s[charIndex], charIndex++ - 1);
-					}
-					else
-					{
-						buffer.Fallback(c, charIndex - 1);
-					}
-					if (fallback_chars == null || fallback_chars.Length < buffer.Remaining)
-					{
-						fallback_chars = new char[buffer.Remaining];
-					}
-					for (int i = 0; i < fallback_chars.Length; i++)
-					{
-						fallback_chars[i] = buffer.GetNextChar();
-					}
-					byteIndex += this.GetBytes(fallback_chars, 0, fallback_chars.Length, bytes, byteIndex, ref buffer, ref fallback_chars);
-				}
-			}
-			return charCount;
-		}
-
-		public override int GetCharCount(byte[] bytes, int index, int count)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (index < 0 || index > bytes.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", Encoding._("ArgRange_Array"));
-			}
-			if (count < 0 || count > bytes.Length - index)
-			{
-				throw new ArgumentOutOfRangeException("count", Encoding._("ArgRange_Array"));
-			}
-			return count;
-		}
-
-		public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (chars == null)
-			{
-				throw new ArgumentNullException("chars");
-			}
-			if (byteIndex < 0 || byteIndex > bytes.Length)
-			{
-				throw new ArgumentOutOfRangeException("byteIndex", Encoding._("ArgRange_Array"));
-			}
-			if (byteCount < 0 || byteCount > bytes.Length - byteIndex)
-			{
-				throw new ArgumentOutOfRangeException("byteCount", Encoding._("ArgRange_Array"));
-			}
-			if (charIndex < 0 || charIndex > chars.Length)
-			{
-				throw new ArgumentOutOfRangeException("charIndex", Encoding._("ArgRange_Array"));
-			}
-			if (chars.Length - charIndex < byteCount)
-			{
-				throw new ArgumentException(Encoding._("Arg_InsufficientSpace"));
-			}
-			int num = byteCount;
-			while (num-- > 0)
-			{
-				chars[charIndex++] = (char)bytes[byteIndex++];
-			}
-			return byteCount;
-		}
-
-		public override int GetMaxByteCount(int charCount)
-		{
-			if (charCount < 0)
-			{
-				throw new ArgumentOutOfRangeException("charCount", Encoding._("ArgRange_NonNegative"));
-			}
-			return charCount;
-		}
-
-		public override int GetMaxCharCount(int byteCount)
-		{
-			if (byteCount < 0)
-			{
-				throw new ArgumentOutOfRangeException("byteCount", Encoding._("ArgRange_NonNegative"));
-			}
-			return byteCount;
-		}
-
-		public unsafe override string GetString(byte[] bytes, int index, int count)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			if (index < 0 || index > bytes.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", Encoding._("ArgRange_Array"));
-			}
-			if (count < 0 || count > bytes.Length - index)
-			{
-				throw new ArgumentOutOfRangeException("count", Encoding._("ArgRange_Array"));
-			}
-			if (count == 0)
-			{
-				return string.Empty;
-			}
-			fixed (byte* ptr = (ref bytes != null && bytes.Length != 0 ? ref bytes[0] : ref *null))
-			{
-				string text = string.InternalAllocateStr(count);
-				fixed (string text2 = text)
-				{
-					fixed (char* ptr2 = text2 + RuntimeHelpers.OffsetToStringData / 2)
-					{
-						byte* ptr3 = ptr + index;
-						byte* ptr4 = ptr3 + count;
-						char* ptr5 = ptr2;
-						while (ptr3 < ptr4)
-						{
-							*(ptr5++) = (char)(*(ptr3++));
-						}
-						text2 = null;
-						return text;
-					}
-				}
-			}
-		}
-
-		public override string GetString(byte[] bytes)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes");
-			}
-			return this.GetString(bytes, 0, bytes.Length);
-		}
-
-		public override string BodyName
-		{
-			get
-			{
-				return "iso-8859-1";
-			}
-		}
-
-		public override string EncodingName
-		{
-			get
-			{
-				return "Western European (ISO)";
-			}
-		}
-
-		public override string HeaderName
-		{
-			get
-			{
-				return "iso-8859-1";
-			}
-		}
-
-		public override bool IsBrowserDisplay
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		public override bool IsBrowserSave
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		public override bool IsMailNewsDisplay
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		public override bool IsMailNewsSave
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		public override string WebName
-		{
-			get
-			{
-				return "iso-8859-1";
-			}
-		}
-
-		internal const int ISOLATIN_CODE_PAGE = 28591;
+			'Ā', 'A', 'ā', 'a', 'Ă', 'A', 'ă', 'a', 'Ą', 'A',
+			'ą', 'a', 'Ć', 'C', 'ć', 'c', 'Ĉ', 'C', 'ĉ', 'c',
+			'Ċ', 'C', 'ċ', 'c', 'Č', 'C', 'č', 'c', 'Ď', 'D',
+			'ď', 'd', 'Đ', 'D', 'đ', 'd', 'Ē', 'E', 'ē', 'e',
+			'Ĕ', 'E', 'ĕ', 'e', 'Ė', 'E', 'ė', 'e', 'Ę', 'E',
+			'ę', 'e', 'Ě', 'E', 'ě', 'e', 'Ĝ', 'G', 'ĝ', 'g',
+			'Ğ', 'G', 'ğ', 'g', 'Ġ', 'G', 'ġ', 'g', 'Ģ', 'G',
+			'ģ', 'g', 'Ĥ', 'H', 'ĥ', 'h', 'Ħ', 'H', 'ħ', 'h',
+			'Ĩ', 'I', 'ĩ', 'i', 'Ī', 'I', 'ī', 'i', 'Ĭ', 'I',
+			'ĭ', 'i', 'Į', 'I', 'į', 'i', 'İ', 'I', 'ı', 'i',
+			'Ĵ', 'J', 'ĵ', 'j', 'Ķ', 'K', 'ķ', 'k', 'Ĺ', 'L',
+			'ĺ', 'l', 'Ļ', 'L', 'ļ', 'l', 'Ľ', 'L', 'ľ', 'l',
+			'Ł', 'L', 'ł', 'l', 'Ń', 'N', 'ń', 'n', 'Ņ', 'N',
+			'ņ', 'n', 'Ň', 'N', 'ň', 'n', 'Ō', 'O', 'ō', 'o',
+			'Ŏ', 'O', 'ŏ', 'o', 'Ő', 'O', 'ő', 'o', 'Œ', 'O',
+			'œ', 'o', 'Ŕ', 'R', 'ŕ', 'r', 'Ŗ', 'R', 'ŗ', 'r',
+			'Ř', 'R', 'ř', 'r', 'Ś', 'S', 'ś', 's', 'Ŝ', 'S',
+			'ŝ', 's', 'Ş', 'S', 'ş', 's', 'Š', 'S', 'š', 's',
+			'Ţ', 'T', 'ţ', 't', 'Ť', 'T', 'ť', 't', 'Ŧ', 'T',
+			'ŧ', 't', 'Ũ', 'U', 'ũ', 'u', 'Ū', 'U', 'ū', 'u',
+			'Ŭ', 'U', 'ŭ', 'u', 'Ů', 'U', 'ů', 'u', 'Ű', 'U',
+			'ű', 'u', 'Ų', 'U', 'ų', 'u', 'Ŵ', 'W', 'ŵ', 'w',
+			'Ŷ', 'Y', 'ŷ', 'y', 'Ÿ', 'Y', 'Ź', 'Z', 'ź', 'z',
+			'Ż', 'Z', 'ż', 'z', 'Ž', 'Z', 'ž', 'z', 'ƀ', 'b',
+			'Ɖ', 'D', 'Ƒ', 'F', 'ƒ', 'f', 'Ɨ', 'I', 'ƚ', 'l',
+			'Ɵ', 'O', 'Ơ', 'O', 'ơ', 'o', 'ƫ', 't', 'Ʈ', 'T',
+			'Ư', 'U', 'ư', 'u', 'ƶ', 'z', 'Ǎ', 'A', 'ǎ', 'a',
+			'Ǐ', 'I', 'ǐ', 'i', 'Ǒ', 'O', 'ǒ', 'o', 'Ǔ', 'U',
+			'ǔ', 'u', 'Ǖ', 'U', 'ǖ', 'u', 'Ǘ', 'U', 'ǘ', 'u',
+			'Ǚ', 'U', 'ǚ', 'u', 'Ǜ', 'U', 'ǜ', 'u', 'Ǟ', 'A',
+			'ǟ', 'a', 'Ǥ', 'G', 'ǥ', 'g', 'Ǧ', 'G', 'ǧ', 'g',
+			'Ǩ', 'K', 'ǩ', 'k', 'Ǫ', 'O', 'ǫ', 'o', 'Ǭ', 'O',
+			'ǭ', 'o', 'ǰ', 'j', 'ɡ', 'g', 'ʹ', '\'', 'ʺ', '"',
+			'ʼ', '\'', '\u02c4', '^', 'ˆ', '^', 'ˈ', '\'', 'ˉ', '?',
+			'ˊ', '?', 'ˋ', '`', 'ˍ', '_', '\u02da', '?', '\u02dc', '~',
+			'\u0300', '`', '\u0302', '^', '\u0303', '~', '\u030e', '"', '\u0331', '_',
+			'\u0332', '_', '\u2000', ' ', '\u2001', ' ', '\u2002', ' ', '\u2003', ' ',
+			'\u2004', ' ', '\u2005', ' ', '\u2006', ' ', '‐', '-', '‑', '-',
+			'–', '-', '—', '-', '‘', '\'', '’', '\'', '‚', ',',
+			'“', '"', '”', '"', '„', '"', '†', '?', '‡', '?',
+			'•', '.', '…', '.', '‰', '?', '′', '\'', '‵', '`',
+			'‹', '<', '›', '>', '™', 'T', '！', '!', '＂', '"',
+			'＃', '#', '＄', '$', '％', '%', '＆', '&', '＇', '\'',
+			'（', '(', '）', ')', '＊', '*', '＋', '+', '，', ',',
+			'－', '-', '．', '.', '／', '/', '０', '0', '１', '1',
+			'２', '2', '３', '3', '４', '4', '５', '5', '６', '6',
+			'７', '7', '８', '8', '９', '9', '：', ':', '；', ';',
+			'＜', '<', '＝', '=', '＞', '>', '？', '?', '＠', '@',
+			'Ａ', 'A', 'Ｂ', 'B', 'Ｃ', 'C', 'Ｄ', 'D', 'Ｅ', 'E',
+			'Ｆ', 'F', 'Ｇ', 'G', 'Ｈ', 'H', 'Ｉ', 'I', 'Ｊ', 'J',
+			'Ｋ', 'K', 'Ｌ', 'L', 'Ｍ', 'M', 'Ｎ', 'N', 'Ｏ', 'O',
+			'Ｐ', 'P', 'Ｑ', 'Q', 'Ｒ', 'R', 'Ｓ', 'S', 'Ｔ', 'T',
+			'Ｕ', 'U', 'Ｖ', 'V', 'Ｗ', 'W', 'Ｘ', 'X', 'Ｙ', 'Y',
+			'Ｚ', 'Z', '［', '[', '＼', '\\', '］', ']', '\uff3e', '^',
+			'\uff3f', '_', '\uff40', '`', 'ａ', 'a', 'ｂ', 'b', 'ｃ', 'c',
+			'ｄ', 'd', 'ｅ', 'e', 'ｆ', 'f', 'ｇ', 'g', 'ｈ', 'h',
+			'ｉ', 'i', 'ｊ', 'j', 'ｋ', 'k', 'ｌ', 'l', 'ｍ', 'm',
+			'ｎ', 'n', 'ｏ', 'o', 'ｐ', 'p', 'ｑ', 'q', 'ｒ', 'r',
+			'ｓ', 's', 'ｔ', 't', 'ｕ', 'u', 'ｖ', 'v', 'ｗ', 'w',
+			'ｘ', 'x', 'ｙ', 'y', 'ｚ', 'z', '｛', '{', '｜', '|',
+			'｝', '}', '～', '~'
+		};
 	}
 }

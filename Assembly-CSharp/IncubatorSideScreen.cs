@@ -43,7 +43,7 @@ public class IncubatorSideScreen : ReceptacleSideScreen
 			}
 		}
 		KBatchedAnimController component2 = prefab.GetComponent<KBatchedAnimController>();
-		return Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], text);
+		return Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], text, false);
 	}
 
 	public DescriptorPanel RequirementsDescriptorPanel;

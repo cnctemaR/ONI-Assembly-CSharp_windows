@@ -14,6 +14,8 @@ namespace TUNING
 
 		public static List<Tag> BAGABLE_CREATURES = new List<Tag> { GameTags.BagableCreature };
 
+		public static List<Tag> SWIMMING_CREATURES = new List<Tag> { GameTags.SwimmingCreature };
+
 		public static List<Tag> NOT_EDIBLE_SOLIDS = new List<Tag>
 		{
 			GameTags.Alloy,

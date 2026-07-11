@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public AutomationProxyAttribute(bool val)
 		{
-			this.val = val;
+			this._val = val;
 		}
 
 		public bool Value
 		{
 			get
 			{
-				return this.val;
+				return this._val;
 			}
 		}
 
-		private bool val;
+		internal bool _val;
 	}
 }

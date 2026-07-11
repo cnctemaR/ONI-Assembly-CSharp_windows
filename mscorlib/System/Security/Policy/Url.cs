@@ -8,7 +8,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class Url : IBuiltInEvidence, IIdentityPermissionFactory
+	public sealed class Url : EvidenceBase, IIdentityPermissionFactory, IBuiltInEvidence
 	{
 		public Url(string name)
 			: this(name, false)
@@ -17,24 +17,7 @@ namespace System.Security.Policy
 
 		internal Url(string name, bool validated)
 		{
-			this.origin_url = ((!validated) ? this.Prepare(name) : name);
-		}
-
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return ((!verbose) ? 1 : 3) + this.origin_url.Length;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return 0;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			return 0;
+			this.origin_url = (validated ? name : this.Prepare(name));
 		}
 
 		public object Copy()
@@ -93,6 +76,23 @@ namespace System.Security.Policy
 			}
 		}
 
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			return (verbose ? 3 : 1) + this.origin_url.Length;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return 0;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			return 0;
+		}
+
 		private string Prepare(string url)
 		{
 			if (url == null)
@@ -103,20 +103,18 @@ namespace System.Security.Policy
 			{
 				throw new FormatException(Locale.GetText("Invalid (empty) Url"));
 			}
-			int num = url.IndexOf(Uri.SchemeDelimiter);
-			if (num > 0)
+			if (url.IndexOf(Uri.SchemeDelimiter) > 0)
 			{
 				if (url.StartsWith("file://"))
 				{
 					url = "file://" + url.Substring(7);
 				}
-				Uri uri = new Uri(url, false, false);
-				url = uri.ToString();
+				url = new Uri(url, false, false).ToString();
 			}
-			int num2 = url.Length - 1;
-			if (url[num2] == '/')
+			int num = url.Length - 1;
+			if (url[num] == '/')
 			{
-				url = url.Substring(0, num2);
+				url = url.Substring(0, num);
 			}
 			return url;
 		}

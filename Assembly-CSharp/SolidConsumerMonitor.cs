@@ -108,8 +108,9 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			{
 				return;
 			}
-			Storage[] components = target.GetComponents<Storage>();
-			foreach (Storage storage in components)
+			ListPool<Storage, SolidConsumerMonitor>.PooledList pooledList = ListPool<Storage, SolidConsumerMonitor>.Allocate();
+			target.GetComponents<Storage>(pooledList);
+			foreach (Storage storage in pooledList)
 			{
 				if (!(storage == null))
 				{
@@ -122,6 +123,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 					}
 				}
 			}
+			pooledList.Recycle();
 		}
 
 		public GameObject GetResult()

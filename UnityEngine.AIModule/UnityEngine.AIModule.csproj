@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC271}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine</RootNamespace>
+    <AssemblyName>UnityEngine.AIModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="AI\NavMesh.cs" />
+    <Compile Include="AI\NavMeshAgent.cs" />
+    <Compile Include="AI\NavMeshBuildDebugFlags.cs" />
+    <Compile Include="AI\NavMeshBuildDebugSettings.cs" />
+    <Compile Include="AI\NavMeshBuilder.cs" />
+    <Compile Include="AI\NavMeshBuildMarkup.cs" />
+    <Compile Include="AI\NavMeshBuildSettings.cs" />
+    <Compile Include="AI\NavMeshBuildSource.cs" />
+    <Compile Include="AI\NavMeshBuildSourceShape.cs" />
+    <Compile Include="AI\NavMeshCollectGeometry.cs" />
+    <Compile Include="AI\NavMeshData.cs" />
+    <Compile Include="AI\NavMeshDataInstance.cs" />
+    <Compile Include="AI\NavMeshHit.cs" />
+    <Compile Include="AI\NavMeshLinkData.cs" />
+    <Compile Include="AI\NavMeshLinkInstance.cs" />
+    <Compile Include="AI\NavMeshObstacle.cs" />
+    <Compile Include="AI\NavMeshObstacleShape.cs" />
+    <Compile Include="AI\NavMeshPath.cs" />
+    <Compile Include="AI\NavMeshPathStatus.cs" />
+    <Compile Include="AI\NavMeshQueryFilter.cs" />
+    <Compile Include="AI\NavMeshTriangulation.cs" />
+    <Compile Include="AI\ObstacleAvoidanceType.cs" />
+    <Compile Include="AI\OffMeshLink.cs" />
+    <Compile Include="AI\OffMeshLinkData.cs" />
+    <Compile Include="AI\OffMeshLinkType.cs" />
+    <Compile Include="Experimental\AI\NavMeshLocation.cs" />
+    <Compile Include="Experimental\AI\NavMeshPolyTypes.cs" />
+    <Compile Include="Experimental\AI\NavMeshQuery.cs" />
+    <Compile Include="Experimental\AI\NavMeshWorld.cs" />
+    <Compile Include="Experimental\AI\PathQueryStatus.cs" />
+    <Compile Include="Experimental\AI\PolygonId.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC27B}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC291}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

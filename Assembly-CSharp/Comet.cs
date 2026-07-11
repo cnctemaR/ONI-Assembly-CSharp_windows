@@ -12,7 +12,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 	{
 		base.OnPrefabInit();
 		this.remainingTileDamage = this.totalTileDamage;
-		this.loopingSounds = base.gameObject.AddComponent<LoopingSounds>();
+		this.loopingSounds = base.gameObject.GetComponent<LoopingSounds>();
 		this.flyingSound = GlobalAssets.GetSound("Meteor_LP", false);
 	}
 
@@ -115,34 +115,54 @@ public class Comet : KMonoBehaviour, ISim33ms
 		if (this.addTiles + this.dissimilarElementAddTiles > 0)
 		{
 			float num7 = 1f - (pos.y - (float)this.addTilesMinHeight) / (float)(this.addTilesMaxHeight - this.addTilesMinHeight);
-			float num8 = Mathf.Min((float)this.addTiles, Mathf.Clamp((float)this.addTiles * num7, 1f, (float)this.addTiles));
+			int num8 = Mathf.Min(this.addTiles, Mathf.Clamp(Mathf.RoundToInt((float)this.addTiles * num7), 1, this.addTiles));
 			if (Grid.Element[cell] != element)
 			{
-				num8 += (float)this.dissimilarElementAddTiles;
+				num8 += this.dissimilarElementAddTiles;
 			}
-			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
-			int num9 = ((cell % 2 != 0) ? (-1) : 1);
-			int num10 = 0;
-			int num11 = 0;
-			while ((float)num11 < num8)
+			HashSetPool<int, Comet>.PooledHashSet pooledHashSet = HashSetPool<int, Comet>.Allocate();
+			HashSetPool<int, Comet>.PooledHashSet pooledHashSet2 = HashSetPool<int, Comet>.Allocate();
+			QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
+			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 			{
-				for (int l = 0; l < Comet.additiveCells.Length; l++)
+				cell = cell,
+				depth = 0
+			});
+			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = prev_cell,
+				depth = 0
+			});
+			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = Grid.OffsetCell(cell, new CellOffset(-1, 0)),
+				depth = 0
+			});
+			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
+			{
+				cell = Grid.OffsetCell(cell, new CellOffset(1, 0)),
+				depth = 0
+			});
+			GameUtil.FloodFillConditional(pooledQueue, new Func<int, bool>(this.SpawnTilesCellTest), pooledHashSet2, pooledHashSet, 10);
+			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
+			foreach (int num9 in pooledHashSet)
+			{
+				component.Spawn(num9, element, num2, num6, byte.MaxValue, 0);
+				num8--;
+				if (num8 <= 0)
 				{
-					CellOffset cellOffset = Comet.additiveCells[(num11 + l + num10) % Comet.additiveCells.Length];
-					int num12 = Grid.OffsetCell(prev_cell, new CellOffset(cellOffset.x * num9, cellOffset.y));
-					if (Grid.IsValidCell(num12))
-					{
-						if (!Grid.Solid[num12])
-						{
-							component.Spawn(num12, element, num2, num6, byte.MaxValue, 0);
-							num10 = l + 1;
-							break;
-						}
-					}
+					break;
 				}
-				num11++;
 			}
+			pooledHashSet.Recycle();
+			pooledHashSet2.Recycle();
+			pooledQueue.Recycle();
 		}
+	}
+
+	private bool SpawnTilesCellTest(int cell)
+	{
+		return Grid.IsValidCell(cell) && !Grid.Solid[cell];
 	}
 
 	[ContextMenu("DamageTiles")]
@@ -412,7 +432,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	public Vector2 elementReplaceTileTemperatureRange = new Vector2(800f, 1000f);
 
-	public Vector2I explosionOreCount = new Vector2I(2, 4);
+	public Vector2I explosionOreCount = new Vector2I(0, 0);
 
 	public float explosionMass;
 
@@ -447,29 +467,6 @@ public class Comet : KMonoBehaviour, ISim33ms
 	private List<GameObject> damagedEntities = new List<GameObject>();
 
 	private List<int> destroyedCells = new List<int>();
-
-	private static CellOffset[] additiveCells = new CellOffset[]
-	{
-		new CellOffset(-1, -1),
-		new CellOffset(1, -1),
-		new CellOffset(0, -1),
-		new CellOffset(1, 0),
-		new CellOffset(-1, 0),
-		new CellOffset(0, 0),
-		new CellOffset(-1, 1),
-		new CellOffset(1, 1),
-		new CellOffset(0, 1),
-		new CellOffset(2, -2),
-		new CellOffset(-2, -2),
-		new CellOffset(-2, -1),
-		new CellOffset(2, -1),
-		new CellOffset(2, 0),
-		new CellOffset(-2, 0),
-		new CellOffset(-2, 1),
-		new CellOffset(2, 1),
-		new CellOffset(2, 2),
-		new CellOffset(-2, 2)
-	};
 
 	private const float MAX_DISTANCE_TEST = 6f;
 }

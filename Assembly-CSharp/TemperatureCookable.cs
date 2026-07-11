@@ -15,7 +15,7 @@ public class TemperatureCookable : KMonoBehaviour, ISim1000ms
 	{
 		Vector3 position = base.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(this.cookedID), Folder.Loot, position);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(this.cookedID), position);
 		gameObject.SetActive(true);
 		KSelectable component = base.gameObject.GetComponent<KSelectable>();
 		if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component)

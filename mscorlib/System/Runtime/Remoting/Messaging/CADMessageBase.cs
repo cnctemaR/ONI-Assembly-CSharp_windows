@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Reflection;
 using System.Runtime.Remoting.Channels;
 using System.Threading;
 
@@ -7,31 +8,67 @@ namespace System.Runtime.Remoting.Messaging
 {
 	internal class CADMessageBase
 	{
+		public CADMessageBase(IMethodMessage msg)
+		{
+			CADMethodRef cadmethodRef = new CADMethodRef(msg);
+			this.serializedMethod = CADSerializer.SerializeObject(cadmethodRef).GetBuffer();
+		}
+
+		internal MethodBase GetMethod()
+		{
+			return ((CADMethodRef)CADSerializer.DeserializeObjectSafe(this.serializedMethod)).Resolve();
+		}
+
+		protected static Type[] GetSignature(MethodBase methodBase, bool load)
+		{
+			ParameterInfo[] parameters = methodBase.GetParameters();
+			Type[] array = new Type[parameters.Length];
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				if (load)
+				{
+					array[i] = Type.GetType(parameters[i].ParameterType.AssemblyQualifiedName, true);
+				}
+				else
+				{
+					array[i] = parameters[i].ParameterType;
+				}
+			}
+			return array;
+		}
+
 		internal static int MarshalProperties(IDictionary dict, ref ArrayList args)
 		{
 			int num = 0;
-			MethodDictionary methodDictionary = dict as MethodDictionary;
-			if (methodDictionary != null)
+			MessageDictionary messageDictionary = dict as MessageDictionary;
+			if (messageDictionary != null)
 			{
-				if (methodDictionary.HasInternalProperties)
+				if (!messageDictionary.HasUserData())
 				{
-					IDictionary internalProperties = methodDictionary.InternalProperties;
-					if (internalProperties != null)
+					return num;
+				}
+				IDictionary internalDictionary = messageDictionary.InternalDictionary;
+				if (internalDictionary == null)
+				{
+					return num;
+				}
+				using (IDictionaryEnumerator dictionaryEnumerator = internalDictionary.GetEnumerator())
+				{
+					while (dictionaryEnumerator.MoveNext())
 					{
-						foreach (object obj in internalProperties)
+						object obj = dictionaryEnumerator.Current;
+						DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+						if (args == null)
 						{
-							DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-							if (args == null)
-							{
-								args = new ArrayList();
-							}
-							args.Add(dictionaryEntry);
-							num++;
+							args = new ArrayList();
 						}
+						args.Add(dictionaryEntry);
+						num++;
 					}
+					return num;
 				}
 			}
-			else if (dict != null)
+			if (dict != null)
 			{
 				foreach (object obj2 in dict)
 				{
@@ -73,13 +110,9 @@ namespace System.Runtime.Remoting.Messaging
 				return arg;
 			}
 			MarshalByRefObject marshalByRefObject = arg as MarshalByRefObject;
-			if (marshalByRefObject != null)
+			if (marshalByRefObject != null && !RemotingServices.IsTransparentProxy(marshalByRefObject))
 			{
-				if (!RemotingServices.IsTransparentProxy(marshalByRefObject))
-				{
-					ObjRef objRef = RemotingServices.Marshal(marshalByRefObject);
-					return new CADObjRef(objRef, Thread.GetDomainID());
-				}
+				return new CADObjRef(RemotingServices.Marshal(marshalByRefObject), Thread.GetDomainID());
 			}
 			if (args == null)
 			{
@@ -103,12 +136,7 @@ namespace System.Runtime.Remoting.Messaging
 			CADObjRef cadobjRef = arg as CADObjRef;
 			if (cadobjRef != null)
 			{
-				string text = string.Copy(cadobjRef.TypeName);
-				string text2 = string.Copy(cadobjRef.URI);
-				int sourceDomain = cadobjRef.SourceDomain;
-				ChannelInfo channelInfo = new ChannelInfo(new CrossAppDomainData(sourceDomain));
-				ObjRef objRef = new ObjRef(text, text2, channelInfo);
-				return RemotingServices.Unmarshal(objRef);
+				return RemotingServices.Unmarshal(cadobjRef.objref.DeserializeInTheCurrentDomain(cadobjRef.SourceDomain, cadobjRef.TypeInfo));
 			}
 			if (arg is Array)
 			{
@@ -256,5 +284,7 @@ namespace System.Runtime.Remoting.Messaging
 		protected int _propertyCount;
 
 		protected CADArgHolder _callContext;
+
+		internal byte[] serializedMethod;
 	}
 }

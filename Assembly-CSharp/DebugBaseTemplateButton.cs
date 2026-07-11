@@ -9,6 +9,11 @@ public class DebugBaseTemplateButton : KScreen
 {
 	public static DebugBaseTemplateButton Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		DebugBaseTemplateButton.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -565,11 +570,11 @@ public class DebugBaseTemplateButton : KScreen
 	{
 		if (!this.SelectedCells.Contains(cell))
 		{
-			GameObject gameObject = Util.KInstantiate(this.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			GameObject gameObject = Util.KInstantiate(this.Placer, null, null);
 			Grid.Objects[cell, 7] = gameObject;
 			Vector3 vector = Grid.CellToPosCBC(cell, this.visualizerLayer);
-			float depthBias = InterfaceTool.DepthBias;
-			vector.z += depthBias;
+			float num = -0.15f;
+			vector.z += num;
 			gameObject.transform.SetPosition(vector);
 			this.SelectedCells.Add(cell);
 		}

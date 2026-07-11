@@ -10,19 +10,19 @@ namespace System.Security.Cryptography.Pkcs
 			this.enumerator = enumerable.GetEnumerator();
 		}
 
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.enumerator.Current;
-			}
-		}
-
 		public CmsRecipient Current
 		{
 			get
 			{
 				return (CmsRecipient)this.enumerator.Current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.enumerator.Current;
 			}
 		}
 

@@ -18,12 +18,10 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			GameUtil.massUnit = (GameUtil.MassUnit)KPlayerPrefs.GetInt("MassUnit");
 		}
-		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
-		RecipeManager.Destroy();
+		RecipeManager.DestroyInstance();
 		RecipeManager.Get();
 		Assets.AnimMaterial = this.AnimMaterialAsset;
 		Assets.Prefabs = new List<KPrefabID>(this.PrefabAssets.Where<KPrefabID>((KPrefabID x) => x != null));
-		Assets.RegionPrefabs.Clear();
 		Assets.PrefabsByTag.Clear();
 		Assets.PrefabsByAdditionalTags.Clear();
 		Assets.CountableTags.Clear();
@@ -33,10 +31,11 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.Textures = this.TextureAssets.Where<Texture2D>((Texture2D x) => x != null).ToArray<Texture2D>();
 		Assets.TextureAtlases = this.TextureAtlasAssets.Where<TextureAtlas>((TextureAtlas x) => x != null).ToArray<TextureAtlas>();
 		Assets.BlockTileDecorInfos = this.BlockTileDecorInfoAssets.Where<BlockTileDecorInfo>((BlockTileDecorInfo x) => x != null).ToArray<BlockTileDecorInfo>();
-		Assets.Controllers = this.BuildingControllers.Where<RuntimeAnimatorController>((RuntimeAnimatorController x) => x != null).ToArray<RuntimeAnimatorController>();
 		Assets.Anims = this.AnimAssets.Where<KAnimFile>((KAnimFile x) => x != null).ToArray<KAnimFile>();
 		Assets.UIPrefabs = this.UIPrefabAssets;
 		Assets.DebugFont = this.DebugFontAsset;
+		AsyncLoadManager<IGlobalAsyncLoader>.Run();
+		GameAudioSheets.Get().Initialize();
 		this.SubstanceListHookup();
 		Assets.BuildingDefs = new BuildingDef[0];
 		foreach (KPrefabID kprefabID in this.PrefabAssets)
@@ -55,6 +54,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 				Assets.AnimTable[hashedString] = kanimFile;
 			}
 		}
+		Singleton<StateMachineUpdater>.CreateInstance();
+		Singleton<StateMachineManager>.CreateInstance();
 		LegacyModMain.Load();
 	}
 
@@ -89,8 +90,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	private void SubstanceListHookup()
 	{
 		Hashtable hashtable = new Hashtable();
-		ElementsAudio.Instance.LoadData(this.elementAudio.text);
-		ElementLoader.Load(ref hashtable, this.simElementsSolidsFile.text, this.simElementsLiquidsFile.text, this.simElementsGasesFile.text, this.substanceTable);
+		ElementsAudio.Instance.LoadData(AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<ElementAudioFileLoader>.Get().entries);
+		ElementLoader.Load(ref hashtable, AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<SolidFileLoader>.Get().entries, AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<LiquidFileLoader>.Get().entries, AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<GasFileLoader>.Get().entries, this.substanceTable);
 		Assets.SubstanceTable = this.substanceTable;
 	}
 
@@ -175,16 +176,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		return texture2D;
 	}
 
-	public static void AddRegionPrefab(KPrefabID prefab)
-	{
-		if (prefab == null)
-		{
-			return;
-		}
-		Assets.RegionPrefabs.Add(prefab.gameObject);
-		Assets.AddPrefab(prefab);
-	}
-
 	public static void AddPrefab(KPrefabID prefab)
 	{
 		if (prefab == null)
@@ -220,6 +211,16 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			on_add(kprefabID);
 		}
+	}
+
+	public static void UnregisterOnAddPrefab(Action<KPrefabID> on_add)
+	{
+		Assets.OnAddPrefab = (Action<KPrefabID>)Delegate.Remove(Assets.OnAddPrefab, on_add);
+	}
+
+	public static void ClearOnAddPrefab()
+	{
+		Assets.OnAddPrefab = null;
 	}
 
 	public static GameObject GetPrefab(Tag tag)
@@ -300,18 +301,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		return null;
 	}
 
-	public static RuntimeAnimatorController GetController(string name)
-	{
-		foreach (RuntimeAnimatorController runtimeAnimatorController in Assets.Controllers)
-		{
-			if (runtimeAnimatorController.name == name)
-			{
-				return runtimeAnimatorController;
-			}
-		}
-		return null;
-	}
-
 	public static Material GetMaterial(string name)
 	{
 		foreach (Material material in Assets.Materials)
@@ -381,8 +370,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private static HashSet<Tag> CountableTags = new HashSet<Tag>();
 
-	public static List<GameObject> RegionPrefabs = new List<GameObject>();
-
 	public Sprite[] SpriteAssets;
 
 	public static Sprite[] Sprites;
@@ -410,10 +397,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static BlockTileDecorInfo[] BlockTileDecorInfos;
 
 	public BlockTileDecorInfo[] BlockTileDecorInfoAssets;
-
-	public RuntimeAnimatorController[] BuildingControllers;
-
-	public static RuntimeAnimatorController[] Controllers;
 
 	public Material AnimMaterialAsset;
 
@@ -448,16 +431,19 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static SubstanceTable SubstanceTable;
 
 	[SerializeField]
-	private TextAsset simElementsSolidsFile;
+	public TextAsset simElementsSolidsFile;
 
 	[SerializeField]
-	private TextAsset simElementsLiquidsFile;
+	public TextAsset simElementsLiquidsFile;
 
 	[SerializeField]
-	private TextAsset simElementsGasesFile;
+	public TextAsset simElementsGasesFile;
 
 	[SerializeField]
-	private TextAsset elementAudio;
+	public TextAsset elementAudio;
+
+	[SerializeField]
+	public TextAsset personalitiesFile;
 
 	public LogicModeUI logicModeUIData;
 
@@ -470,8 +456,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static Assets instance;
 
 	private static Dictionary<string, string> simpleSoundEventNames = new Dictionary<string, string>();
-
-	public Assets.PlacementOverrideData[] PlacementOverrides;
 
 	[Serializable]
 	public struct UIPrefabData
@@ -533,13 +517,5 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		public GameObject PrioritizeRowWidget;
 
 		public GameObject PrioritizeRowHeaderWidget;
-	}
-
-	[Serializable]
-	public struct PlacementOverrideData
-	{
-		public Tag Building;
-
-		public Tag[] DestroyOnPlaceBuildings;
 	}
 }

@@ -7,6 +7,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInstance>, ISaveLoadable
 {
+	public static void DestroyInstance()
+	{
+		GameFlowManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		GameFlowManager.Instance = this;

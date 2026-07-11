@@ -28,7 +28,7 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 
 	public bool IsInCorrectRoom()
 	{
-		return this.room != null && Db.Get().RoomTypes.GetRoomType(this.room).Id == this.requiredRoomType;
+		return this.room != null && this.room.roomType.Id == this.requiredRoomType;
 	}
 
 	public bool SufficientBuildLocation(int cell)
@@ -51,7 +51,7 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 	private void OnUpdateRoom(object data)
 	{
 		this.room = (Room)data;
-		if (this.room == null || Db.Get().RoomTypes.GetRoomType(this.room).Id != this.requiredRoomType)
+		if (this.room == null || this.room.roomType.Id != this.requiredRoomType)
 		{
 			switch (this.requirement)
 			{

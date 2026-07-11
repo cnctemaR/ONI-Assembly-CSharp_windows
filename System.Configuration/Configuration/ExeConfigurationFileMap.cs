@@ -6,9 +6,9 @@ namespace System.Configuration
 	{
 		public ExeConfigurationFileMap()
 		{
-			this.exeConfigFilename = string.Empty;
-			this.localUserConfigFilename = string.Empty;
-			this.roamingUserConfigFilename = string.Empty;
+			this.exeConfigFilename = "";
+			this.localUserConfigFilename = "";
+			this.roamingUserConfigFilename = "";
 		}
 
 		public string ExeConfigFilename

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using Delaunay.Geo;
 using Ionic.Zlib;
 using Klei;
 using Klei.AI;
@@ -15,6 +13,11 @@ using UnityEngine;
 public class SaveLoader : KMonoBehaviour
 {
 	public bool loadedFromSave { get; private set; }
+
+	public static void DestroyInstance()
+	{
+		SaveLoader.Instance = null;
+	}
 
 	public static SaveLoader Instance { get; private set; }
 
@@ -472,12 +475,6 @@ public class SaveLoader : KMonoBehaviour
 			SaveGame.Header header;
 			this.GameInfo = SaveGame.GetHeader(reader, out header);
 			this.LoadedHeader = header;
-			Manager.assemblies = new Assembly[]
-			{
-				typeof(WorldGen).Assembly,
-				typeof(Polygon).Assembly,
-				typeof(Vector2).Assembly
-			};
 			if (this.GameInfo.saveMajorVersion == 7 && this.GameInfo.saveMinorVersion < 4)
 			{
 				Helper.SetTypeInfoMask((SerializationTypeInfo)191);
@@ -765,17 +762,6 @@ public class SaveLoader : KMonoBehaviour
 
 	[NonSerialized]
 	public SaveManager saveManager;
-
-	public TextAsset simElementsSolidsFile;
-
-	public TextAsset simElementsLiquidsFile;
-
-	public TextAsset simElementsGasesFile;
-
-	[SerializeField]
-	private TextAsset elementAudio;
-
-	public TextAsset worldGenSettingsFile;
 
 	private const string CorruptFileSuffix = "_";
 

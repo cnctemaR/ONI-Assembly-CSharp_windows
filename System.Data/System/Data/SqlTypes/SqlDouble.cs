@@ -7,66 +7,18 @@ namespace System.Data.SqlTypes
 {
 	[XmlSchemaProvider("GetXsdType")]
 	[Serializable]
-	public struct SqlDouble : IXmlSerializable, IComparable, INullable
+	public struct SqlDouble : INullable, IComparable, IXmlSerializable
 	{
 		public SqlDouble(double value)
 		{
-			this.value = value;
-			this.notNull = true;
-		}
-
-		XmlSchema IXmlSerializable.GetSchema()
-		{
-			return null;
-		}
-
-		void IXmlSerializable.ReadXml(XmlReader reader)
-		{
-			if (reader == null)
-			{
-				return;
-			}
-			switch (reader.ReadState)
-			{
-			case ReadState.Error:
-			case ReadState.EndOfFile:
-			case ReadState.Closed:
-				return;
-			default:
-				reader.MoveToContent();
-				if (reader.EOF)
-				{
-					return;
-				}
-				reader.Read();
-				if (reader.NodeType == XmlNodeType.EndElement)
-				{
-					return;
-				}
-				if (reader.Value.Length > 0)
-				{
-					if (string.Compare("Null", reader.Value) == 0)
-					{
-						this.notNull = false;
-						return;
-					}
-					this.value = double.Parse(reader.Value);
-					this.notNull = true;
-				}
-				return;
-			}
-		}
-
-		void IXmlSerializable.WriteXml(XmlWriter writer)
-		{
-			writer.WriteString(this.ToString());
+			throw null;
 		}
 
 		public bool IsNull
 		{
 			get
 			{
-				return !this.notNull;
+				throw null;
 			}
 		}
 
@@ -74,373 +26,269 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				if (this.IsNull)
-				{
-					throw new SqlNullValueException();
-				}
-				return this.value;
+				throw null;
 			}
 		}
 
 		public static SqlDouble Add(SqlDouble x, SqlDouble y)
 		{
-			return x + y;
-		}
-
-		public int CompareTo(object value)
-		{
-			if (value == null)
-			{
-				return 1;
-			}
-			if (!(value is SqlDouble))
-			{
-				throw new ArgumentException(Locale.GetText("Value is not a System.Data.SqlTypes.SqlDouble"));
-			}
-			return this.CompareTo((SqlDouble)value);
+			throw null;
 		}
 
 		public int CompareTo(SqlDouble value)
 		{
-			if (value.IsNull)
-			{
-				return 1;
-			}
-			return this.value.CompareTo(value.Value);
+			throw null;
+		}
+
+		public int CompareTo(object value)
+		{
+			throw null;
 		}
 
 		public static SqlDouble Divide(SqlDouble x, SqlDouble y)
 		{
-			return x / y;
-		}
-
-		public override bool Equals(object value)
-		{
-			if (!(value is SqlDouble))
-			{
-				return false;
-			}
-			if (this.IsNull)
-			{
-				return ((SqlDouble)value).IsNull;
-			}
-			return !((SqlDouble)value).IsNull && (bool)(this == (SqlDouble)value);
+			throw null;
 		}
 
 		public static SqlBoolean Equals(SqlDouble x, SqlDouble y)
 		{
-			return x == y;
+			throw null;
+		}
+
+		public override bool Equals(object value)
+		{
+			throw null;
 		}
 
 		public override int GetHashCode()
 		{
-			long num = (long)this.value;
-			return (int)(num ^ (num >> 32));
-		}
-
-		public static SqlBoolean GreaterThan(SqlDouble x, SqlDouble y)
-		{
-			return x > y;
-		}
-
-		public static SqlBoolean GreaterThanOrEqual(SqlDouble x, SqlDouble y)
-		{
-			return x >= y;
-		}
-
-		public static SqlBoolean LessThan(SqlDouble x, SqlDouble y)
-		{
-			return x < y;
-		}
-
-		public static SqlBoolean LessThanOrEqual(SqlDouble x, SqlDouble y)
-		{
-			return x <= y;
-		}
-
-		public static SqlDouble Multiply(SqlDouble x, SqlDouble y)
-		{
-			return x * y;
-		}
-
-		public static SqlBoolean NotEquals(SqlDouble x, SqlDouble y)
-		{
-			return x != y;
-		}
-
-		public static SqlDouble Parse(string s)
-		{
-			return new SqlDouble(double.Parse(s));
-		}
-
-		public static SqlDouble Subtract(SqlDouble x, SqlDouble y)
-		{
-			return x - y;
-		}
-
-		public SqlBoolean ToSqlBoolean()
-		{
-			return (SqlBoolean)this;
-		}
-
-		public SqlByte ToSqlByte()
-		{
-			return (SqlByte)this;
-		}
-
-		public SqlDecimal ToSqlDecimal()
-		{
-			return (SqlDecimal)this;
-		}
-
-		public SqlInt16 ToSqlInt16()
-		{
-			return (SqlInt16)this;
-		}
-
-		public SqlInt32 ToSqlInt32()
-		{
-			return (SqlInt32)this;
-		}
-
-		public SqlInt64 ToSqlInt64()
-		{
-			return (SqlInt64)this;
-		}
-
-		public SqlMoney ToSqlMoney()
-		{
-			return (SqlMoney)this;
-		}
-
-		public SqlSingle ToSqlSingle()
-		{
-			return (SqlSingle)this;
-		}
-
-		public SqlString ToSqlString()
-		{
-			return (SqlString)this;
-		}
-
-		public override string ToString()
-		{
-			if (!this.notNull)
-			{
-				return "Null";
-			}
-			return this.value.ToString();
+			throw null;
 		}
 
 		public static XmlQualifiedName GetXsdType(XmlSchemaSet schemaSet)
 		{
-			if (schemaSet != null && schemaSet.Count == 0)
-			{
-				XmlSchema xmlSchema = new XmlSchema();
-				XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
-				xmlSchemaComplexType.Name = "double";
-				xmlSchema.Items.Add(xmlSchemaComplexType);
-				schemaSet.Add(xmlSchema);
-			}
-			return new XmlQualifiedName("double", "http://www.w3.org/2001/XMLSchema");
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThan(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThanOrEqual(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThan(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThanOrEqual(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlDouble Multiply(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean NotEquals(SqlDouble x, SqlDouble y)
+		{
+			throw null;
 		}
 
 		public static SqlDouble operator +(SqlDouble x, SqlDouble y)
 		{
-			double num = x.Value + y.Value;
-			if (double.IsInfinity(num))
-			{
-				throw new OverflowException();
-			}
-			return new SqlDouble(num);
+			throw null;
 		}
 
 		public static SqlDouble operator /(SqlDouble x, SqlDouble y)
 		{
-			double num = x.Value / y.Value;
-			if (double.IsInfinity(num) && y.Value == 0.0)
-			{
-				throw new DivideByZeroException();
-			}
-			return new SqlDouble(num);
+			throw null;
 		}
 
 		public static SqlBoolean operator ==(SqlDouble x, SqlDouble y)
 		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value == y.Value);
-		}
-
-		public static SqlBoolean operator >(SqlDouble x, SqlDouble y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value > y.Value);
-		}
-
-		public static SqlBoolean operator >=(SqlDouble x, SqlDouble y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value >= y.Value);
-		}
-
-		public static SqlBoolean operator !=(SqlDouble x, SqlDouble y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value != y.Value);
-		}
-
-		public static SqlBoolean operator <(SqlDouble x, SqlDouble y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value < y.Value);
-		}
-
-		public static SqlBoolean operator <=(SqlDouble x, SqlDouble y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value <= y.Value);
-		}
-
-		public static SqlDouble operator *(SqlDouble x, SqlDouble y)
-		{
-			double num = x.Value * y.Value;
-			if (double.IsInfinity(num))
-			{
-				throw new OverflowException();
-			}
-			return new SqlDouble(num);
-		}
-
-		public static SqlDouble operator -(SqlDouble x, SqlDouble y)
-		{
-			double num = x.Value - y.Value;
-			if (double.IsInfinity(num))
-			{
-				throw new OverflowException();
-			}
-			return new SqlDouble(num);
-		}
-
-		public static SqlDouble operator -(SqlDouble x)
-		{
-			return new SqlDouble(-x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlDouble(SqlBoolean x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble((double)x.ByteValue);
+			throw null;
 		}
 
 		public static explicit operator double(SqlDouble x)
 		{
-			return x.Value;
+			throw null;
 		}
 
 		public static explicit operator SqlDouble(SqlString x)
 		{
-			return SqlDouble.Parse(x.Value);
+			throw null;
 		}
 
-		public static implicit operator SqlDouble(double x)
+		public static SqlBoolean operator >(SqlDouble x, SqlDouble y)
 		{
-			return new SqlDouble(x);
+			throw null;
+		}
+
+		public static SqlBoolean operator >=(SqlDouble x, SqlDouble y)
+		{
+			throw null;
 		}
 
 		public static implicit operator SqlDouble(SqlByte x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble((double)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlDouble(SqlDecimal x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble(x.ToDouble());
+			throw null;
 		}
 
 		public static implicit operator SqlDouble(SqlInt16 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble((double)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlDouble(SqlInt32 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble((double)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlDouble(SqlInt64 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble((double)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlDouble(SqlMoney x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble((double)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlDouble(SqlSingle x)
 		{
-			if (x.IsNull)
-			{
-				return SqlDouble.Null;
-			}
-			return new SqlDouble((double)x.Value);
+			throw null;
 		}
 
-		private double value;
+		public static implicit operator SqlDouble(double x)
+		{
+			throw null;
+		}
 
-		private bool notNull;
+		public static SqlBoolean operator !=(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
 
-		public static readonly SqlDouble MaxValue = new SqlDouble(double.MaxValue);
+		public static SqlBoolean operator <(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
 
-		public static readonly SqlDouble MinValue = new SqlDouble(double.MinValue);
+		public static SqlBoolean operator <=(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlDouble operator *(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlDouble operator -(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		public static SqlDouble operator -(SqlDouble x)
+		{
+			throw null;
+		}
+
+		public static SqlDouble Parse(string s)
+		{
+			throw null;
+		}
+
+		public static SqlDouble Subtract(SqlDouble x, SqlDouble y)
+		{
+			throw null;
+		}
+
+		XmlSchema IXmlSerializable.GetSchema()
+		{
+			throw null;
+		}
+
+		void IXmlSerializable.ReadXml(XmlReader reader)
+		{
+		}
+
+		void IXmlSerializable.WriteXml(XmlWriter writer)
+		{
+		}
+
+		public SqlBoolean ToSqlBoolean()
+		{
+			throw null;
+		}
+
+		public SqlByte ToSqlByte()
+		{
+			throw null;
+		}
+
+		public SqlDecimal ToSqlDecimal()
+		{
+			throw null;
+		}
+
+		public SqlInt16 ToSqlInt16()
+		{
+			throw null;
+		}
+
+		public SqlInt32 ToSqlInt32()
+		{
+			throw null;
+		}
+
+		public SqlInt64 ToSqlInt64()
+		{
+			throw null;
+		}
+
+		public SqlMoney ToSqlMoney()
+		{
+			throw null;
+		}
+
+		public SqlSingle ToSqlSingle()
+		{
+			throw null;
+		}
+
+		public SqlString ToSqlString()
+		{
+			throw null;
+		}
+
+		public override string ToString()
+		{
+			throw null;
+		}
+
+		public static readonly SqlDouble MaxValue;
+
+		public static readonly SqlDouble MinValue;
 
 		public static readonly SqlDouble Null;
 
-		public static readonly SqlDouble Zero = new SqlDouble(0.0);
+		public static readonly SqlDouble Zero;
 	}
 }

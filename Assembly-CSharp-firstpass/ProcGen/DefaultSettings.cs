@@ -8,7 +8,6 @@ namespace ProcGen
 	{
 		public DefaultSettings()
 		{
-			this.baseData = new BaseLocation();
 			this.data = new Dictionary<string, object>();
 		}
 

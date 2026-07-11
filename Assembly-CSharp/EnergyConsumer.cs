@@ -211,7 +211,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	[Serialize]
 	protected float circuitOverloadTime;
 
-	public static Operational.Flag PoweredFlag = new Operational.Flag("powered", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag PoweredFlag = new Operational.Flag("powered", Operational.Flag.Type.Requirement);
 
 	private Dictionary<string, float> lastTimeSoundPlayed = new Dictionary<string, float>();
 

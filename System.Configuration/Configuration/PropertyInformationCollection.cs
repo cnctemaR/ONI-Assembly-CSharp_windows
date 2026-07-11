@@ -64,7 +64,9 @@ namespace System.Configuration
 
 			public bool MoveNext()
 			{
-				return ++this.position < this.collection.Count;
+				int num = this.position + 1;
+				this.position = num;
+				return num < this.collection.Count;
 			}
 
 			public void Reset()

@@ -42,6 +42,11 @@ public class RedAlertManager : GameStateMachine<RedAlertManager, RedAlertManager
 			RedAlertManager.Instance.instance = this;
 		}
 
+		public static void DestroyInstance()
+		{
+			RedAlertManager.Instance.instance = null;
+		}
+
 		public static RedAlertManager.Instance Get()
 		{
 			return RedAlertManager.Instance.instance;

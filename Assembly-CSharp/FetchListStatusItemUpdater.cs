@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class FetchListStatusItemUpdater : KMonoBehaviour, IRender1000ms
 {
+	public static void DestroyInstance()
+	{
+		FetchListStatusItemUpdater.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

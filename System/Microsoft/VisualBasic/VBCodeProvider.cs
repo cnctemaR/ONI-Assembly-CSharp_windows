@@ -4,20 +4,24 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Security.Permissions;
+using System.Reflection;
 
 namespace Microsoft.VisualBasic
 {
-	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
-	public class VBCodeProvider : global::System.CodeDom.Compiler.CodeDomProvider
+	public class VBCodeProvider : CodeDomProvider
 	{
 		public VBCodeProvider()
 		{
+			this._generator = new VBCodeGenerator();
 		}
 
 		public VBCodeProvider(IDictionary<string, string> providerOptions)
 		{
+			if (providerOptions == null)
+			{
+				throw new ArgumentNullException("providerOptions");
+			}
+			this._generator = new VBCodeGenerator(providerOptions);
 		}
 
 		public override string FileExtension
@@ -28,35 +32,44 @@ namespace Microsoft.VisualBasic
 			}
 		}
 
-		public override global::System.CodeDom.Compiler.LanguageOptions LanguageOptions
+		public override LanguageOptions LanguageOptions
 		{
 			get
 			{
-				return global::System.CodeDom.Compiler.LanguageOptions.CaseInsensitive;
+				return LanguageOptions.CaseInsensitive;
 			}
 		}
 
-		[Obsolete("Use CodeDomProvider class")]
-		public override global::System.CodeDom.Compiler.ICodeCompiler CreateCompiler()
+		[Obsolete("Callers should not use the ICodeGenerator interface and should instead use the methods directly on the CodeDomProvider class.")]
+		public override ICodeGenerator CreateGenerator()
 		{
-			return new VBCodeCompiler();
+			return this._generator;
 		}
 
-		[Obsolete("Use CodeDomProvider class")]
-		public override global::System.CodeDom.Compiler.ICodeGenerator CreateGenerator()
+		[Obsolete("Callers should not use the ICodeCompiler interface and should instead use the methods directly on the CodeDomProvider class.")]
+		public override ICodeCompiler CreateCompiler()
 		{
-			return new VBCodeGenerator();
+			return this._generator;
 		}
 
-		public override global::System.ComponentModel.TypeConverter GetConverter(Type type)
+		public override TypeConverter GetConverter(Type type)
 		{
-			return global::System.ComponentModel.TypeDescriptor.GetConverter(type);
+			if (type == typeof(MemberAttributes))
+			{
+				return VBMemberAttributeConverter.Default;
+			}
+			if (!(type == typeof(TypeAttributes)))
+			{
+				return base.GetConverter(type);
+			}
+			return VBTypeAttributeConverter.Default;
 		}
 
-		[global::System.MonoTODO]
-		public override void GenerateCodeFromMember(global::System.CodeDom.CodeTypeMember member, TextWriter writer, global::System.CodeDom.Compiler.CodeGeneratorOptions options)
+		public override void GenerateCodeFromMember(CodeTypeMember member, TextWriter writer, CodeGeneratorOptions options)
 		{
-			throw new NotImplementedException();
+			this._generator.GenerateCodeFromMember(member, writer, options);
 		}
+
+		private VBCodeGenerator _generator;
 	}
 }

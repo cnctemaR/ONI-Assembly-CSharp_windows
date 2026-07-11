@@ -7,6 +7,11 @@ public class Traces : KMonoBehaviour
 {
 	public static Traces Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		Traces.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		Traces.Instance = this;

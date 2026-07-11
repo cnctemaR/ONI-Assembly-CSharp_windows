@@ -4,6 +4,12 @@ namespace System.Data
 {
 	public interface IDataRecord
 	{
+		int FieldCount { get; }
+
+		object this[int i] { get; }
+
+		object this[string name] { get; }
+
 		bool GetBoolean(int i);
 
 		byte GetByte(int i);
@@ -47,11 +53,5 @@ namespace System.Data
 		int GetValues(object[] values);
 
 		bool IsDBNull(int i);
-
-		int FieldCount { get; }
-
-		object this[string name] { get; }
-
-		object this[int i] { get; }
 	}
 }

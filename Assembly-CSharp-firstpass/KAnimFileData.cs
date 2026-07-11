@@ -30,6 +30,14 @@ public class KAnimFileData
 				return null;
 			}
 			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag);
+			if (batchGroupData == null)
+			{
+				global::Debug.LogErrorFormat("[{0}] No such batch group [{1}]", new object[]
+				{
+					this.name,
+					this.batchTag.ToString()
+				});
+			}
 			return batchGroupData.GetBuild(this.buildIndex);
 		}
 	}
@@ -47,6 +55,14 @@ public class KAnimFileData
 	public KAnim.Anim.FrameElement GetAnimFrameElement(int index)
 	{
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag);
+		if (batchGroupData == null)
+		{
+			global::Debug.LogErrorFormat("[{0}] No such batch group [{1}]", new object[]
+			{
+				this.name,
+				this.animBatchTag.ToString()
+			});
+		}
 		return batchGroupData.GetFrameElement(this.firstElementIndex + index);
 	}
 

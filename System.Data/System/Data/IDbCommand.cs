@@ -4,20 +4,6 @@ namespace System.Data
 {
 	public interface IDbCommand : IDisposable
 	{
-		void Cancel();
-
-		IDbDataParameter CreateParameter();
-
-		int ExecuteNonQuery();
-
-		IDataReader ExecuteReader();
-
-		IDataReader ExecuteReader(CommandBehavior behavior);
-
-		object ExecuteScalar();
-
-		void Prepare();
-
 		string CommandText { get; set; }
 
 		int CommandTimeout { get; set; }
@@ -31,5 +17,19 @@ namespace System.Data
 		IDbTransaction Transaction { get; set; }
 
 		UpdateRowSource UpdatedRowSource { get; set; }
+
+		void Cancel();
+
+		IDbDataParameter CreateParameter();
+
+		int ExecuteNonQuery();
+
+		IDataReader ExecuteReader();
+
+		IDataReader ExecuteReader(CommandBehavior behavior);
+
+		object ExecuteScalar();
+
+		void Prepare();
 	}
 }

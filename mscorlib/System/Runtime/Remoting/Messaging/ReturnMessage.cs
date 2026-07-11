@@ -6,13 +6,12 @@ using System.Runtime.InteropServices;
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	public class ReturnMessage : IInternalMessage, IMessage, IMethodMessage, IMethodReturnMessage
+	public class ReturnMessage : IMethodReturnMessage, IMethodMessage, IMessage, IInternalMessage
 	{
 		public ReturnMessage(object ret, object[] outArgs, int outArgsCount, LogicalCallContext callCtx, IMethodCallMessage mcm)
 		{
 			this._returnValue = ret;
 			this._args = outArgs;
-			this._outArgsCount = outArgsCount;
 			this._callCtx = callCtx;
 			if (mcm != null)
 			{
@@ -36,30 +35,6 @@ namespace System.Runtime.Remoting.Messaging
 			this._args = new object[0];
 		}
 
-		string IInternalMessage.Uri
-		{
-			get
-			{
-				return this.Uri;
-			}
-			set
-			{
-				this.Uri = value;
-			}
-		}
-
-		Identity IInternalMessage.TargetIdentity
-		{
-			get
-			{
-				return this._targetIdentity;
-			}
-			set
-			{
-				this._targetIdentity = value;
-			}
-		}
-
 		public int ArgCount
 		{
 			get
@@ -80,7 +55,7 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			get
 			{
-				return this._methodBase != null && (this._methodBase.CallingConvention | CallingConventions.VarArgs) != (CallingConventions)0;
+				return !(this._methodBase == null) && (this._methodBase.CallingConvention | CallingConventions.VarArgs) > (CallingConventions)0;
 			}
 		}
 
@@ -169,6 +144,18 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		string IInternalMessage.Uri
+		{
+			get
+			{
+				return this.Uri;
+			}
+			set
+			{
+				this.Uri = value;
+			}
+		}
+
 		public object GetArg(int argNum)
 		{
 			return this._args[argNum];
@@ -245,11 +232,31 @@ namespace System.Runtime.Remoting.Messaging
 			return this._inArgInfo.GetInOutArgName(index);
 		}
 
+		Identity IInternalMessage.TargetIdentity
+		{
+			get
+			{
+				return this._targetIdentity;
+			}
+			set
+			{
+				this._targetIdentity = value;
+			}
+		}
+
+		bool IInternalMessage.HasProperties()
+		{
+			return this._properties != null;
+		}
+
+		internal bool HasProperties()
+		{
+			return this._properties != null;
+		}
+
 		private object[] _outArgs;
 
 		private object[] _args;
-
-		private int _outArgsCount;
 
 		private LogicalCallContext _callCtx;
 

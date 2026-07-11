@@ -7,22 +7,18 @@ namespace System.Data
 	public class MissingPrimaryKeyException : DataException
 	{
 		public MissingPrimaryKeyException()
-			: base(Locale.GetText("This table has no primary key"))
-		{
-		}
-
-		public MissingPrimaryKeyException(string s)
-			: base(s)
-		{
-		}
-
-		public MissingPrimaryKeyException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		{
+		}
+
+		public MissingPrimaryKeyException(string s)
+		{
+		}
+
+		public MissingPrimaryKeyException(string message, Exception innerException)
 		{
 		}
 	}

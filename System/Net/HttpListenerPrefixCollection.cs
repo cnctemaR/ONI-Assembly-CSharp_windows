@@ -4,16 +4,11 @@ using System.Collections.Generic;
 
 namespace System.Net
 {
-	public class HttpListenerPrefixCollection : IEnumerable, ICollection<string>, IEnumerable<string>
+	public class HttpListenerPrefixCollection : ICollection<string>, IEnumerable<string>, IEnumerable
 	{
 		internal HttpListenerPrefixCollection(HttpListener listener)
 		{
 			this.listener = listener;
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.prefixes.GetEnumerator();
 		}
 
 		public int Count
@@ -84,6 +79,11 @@ namespace System.Net
 		}
 
 		public IEnumerator<string> GetEnumerator()
+		{
+			return this.prefixes.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.prefixes.GetEnumerator();
 		}

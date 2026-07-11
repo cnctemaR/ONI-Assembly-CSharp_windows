@@ -18,22 +18,16 @@ namespace System.IO
 
 		public bool IsMatch(string text, bool ignorecase)
 		{
-			if (this.hasWildcard)
-			{
-				return this.Match(this.ops, text, 0);
-			}
-			bool flag = string.Compare(this.pattern, text, ignorecase) == 0;
-			if (flag)
+			if (!this.hasWildcard && string.Compare(this.pattern, text, ignorecase) == 0)
 			{
 				return true;
 			}
-			int num = text.LastIndexOf('/');
-			if (num == -1)
+			string fileName = Path.GetFileName(text);
+			if (!this.hasWildcard)
 			{
-				return false;
+				return string.Compare(this.pattern, fileName, ignorecase) == 0;
 			}
-			num++;
-			return num != text.Length && string.Compare(this.pattern, text.Substring(num), ignorecase) == 0;
+			return this.Match(this.ops, fileName, 0);
 		}
 
 		public bool IsMatch(string text)
@@ -70,7 +64,13 @@ namespace System.IO
 				SearchPattern2.Op op2;
 				if (c != '*')
 				{
-					if (c != '?')
+					if (c == '?')
+					{
+						op2 = new SearchPattern2.Op(SearchPattern2.OpCode.AnyChar);
+						i++;
+						this.hasWildcard = true;
+					}
+					else
 					{
 						op2 = new SearchPattern2.Op(SearchPattern2.OpCode.ExactString);
 						int num = pattern.IndexOfAny(SearchPattern2.WildcardChars, i);
@@ -84,12 +84,6 @@ namespace System.IO
 							op2.Argument = op2.Argument.ToLower();
 						}
 						i = num;
-					}
-					else
-					{
-						op2 = new SearchPattern2.Op(SearchPattern2.OpCode.AnyChar);
-						i++;
-						this.hasWildcard = true;
 					}
 				}
 				else
@@ -111,11 +105,9 @@ namespace System.IO
 			if (op == null)
 			{
 				this.ops = new SearchPattern2.Op(SearchPattern2.OpCode.End);
+				return;
 			}
-			else
-			{
-				op.Next = new SearchPattern2.Op(SearchPattern2.OpCode.End);
-			}
+			op.Next = new SearchPattern2.Op(SearchPattern2.OpCode.End);
 		}
 
 		private bool Match(SearchPattern2.Op op, string text, int ptr)

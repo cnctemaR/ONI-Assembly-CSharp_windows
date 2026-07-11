@@ -71,12 +71,6 @@ public static class Debug
 		Console.Out.Write(global::Debug.TimeStamp() + "[WARNING] " + string.Format(format, args) + "\n");
 	}
 
-	public static void LogErrorParams(params object[] objs)
-	{
-		string text = global::Debug.BuildString(objs);
-		global::Debug.LogError(text, null);
-	}
-
 	public static void LogError(object obj, global::UnityEngine.Object context = null)
 	{
 		if (context == null)
@@ -110,16 +104,6 @@ public static class Debug
 	}
 
 	[Conditional("UNITY_EDITOR")]
-	public static void AssertFormat(bool condition, string format, params object[] args)
-	{
-	}
-
-	[Conditional("UNITY_EDITOR")]
-	public static void AssertFormat(bool condition, global::UnityEngine.Object context, string format, params object[] args)
-	{
-	}
-
-	[Conditional("UNITY_EDITOR")]
 	public static void DrawLine(Vector3 start, Vector3 end, Color color = default(Color), float duration = 0f, bool depthTest = true)
 	{
 		global::UnityEngine.Debug.DrawLine(start, end, color, duration, depthTest);
@@ -129,20 +113,5 @@ public static class Debug
 	public static void DrawRay(Vector3 start, Vector3 dir, Color color = default(Color), float duration = 0f, bool depthTest = true)
 	{
 		global::UnityEngine.Debug.DrawRay(start, dir, color, duration, depthTest);
-	}
-
-	public static string BuildString(object[] objs)
-	{
-		string text = string.Empty;
-		if (objs.Length > 0)
-		{
-			text = ((objs[0] == null) ? "null" : objs[0].ToString());
-			for (int i = 1; i < objs.Length; i++)
-			{
-				object obj = objs[i];
-				text = text + " " + ((obj == null) ? "null" : obj.ToString());
-			}
-		}
-		return text;
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete]
+	[Obsolete("Use System.Runtime.InteropServices.ComTypes.VARDESC instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 	public struct VARDESC
 	{
@@ -21,10 +21,10 @@ namespace System.Runtime.InteropServices
 		public struct DESCUNION
 		{
 			[FieldOffset(0)]
-			public IntPtr lpvarValue;
+			public int oInst;
 
 			[FieldOffset(0)]
-			public int oInst;
+			public IntPtr lpvarValue;
 		}
 	}
 }

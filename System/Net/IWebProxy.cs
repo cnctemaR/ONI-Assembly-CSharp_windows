@@ -4,10 +4,10 @@ namespace System.Net
 {
 	public interface IWebProxy
 	{
+		Uri GetProxy(Uri destination);
+
+		bool IsBypassed(Uri host);
+
 		ICredentials Credentials { get; set; }
-
-		global::System.Uri GetProxy(global::System.Uri destination);
-
-		bool IsBypassed(global::System.Uri host);
 	}
 }

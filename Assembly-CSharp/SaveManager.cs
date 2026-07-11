@@ -19,14 +19,10 @@ public class SaveManager : KMonoBehaviour
 		Assets.RegisterOnAddPrefab(new Action<KPrefabID>(this.OnAddPrefab));
 	}
 
-	public new void OnDestroy()
+	protected override void OnCleanUp()
 	{
-		foreach (GameObject gameObject in this.disabledVisualizerPrefabMap.Values)
-		{
-			global::UnityEngine.Object.DestroyImmediate(gameObject);
-		}
-		this.disabledVisualizerPrefabMap.Clear();
-		base.OnDestroy();
+		base.OnCleanUp();
+		Assets.UnregisterOnAddPrefab(new Action<KPrefabID>(this.OnAddPrefab));
 	}
 
 	private void OnAddPrefab(KPrefabID prefab)
@@ -37,17 +33,6 @@ public class SaveManager : KMonoBehaviour
 		}
 		Tag saveLoadTag = prefab.GetSaveLoadTag();
 		this.prefabMap[saveLoadTag] = prefab.gameObject;
-		bool flag = prefab.gameObject.GetComponent<KAnimControllerBase>() != null;
-		bool flag2 = prefab.gameObject.GetComponent<Pickupable>() != null;
-		if (!prefab.gameObject.activeSelf && flag && flag2)
-		{
-			GameObject gameObject = Util.KInstantiate(prefab.gameObject, null, null);
-			KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
-			component.enabled = false;
-			gameObject.transform.parent = prefab.gameObject.transform.parent;
-			gameObject.name += "_noanim";
-			this.disabledVisualizerPrefabMap[saveLoadTag] = gameObject;
-		}
 	}
 
 	public Dictionary<Tag, List<SaveLoadRoot>> GetLists()
@@ -105,12 +90,12 @@ public class SaveManager : KMonoBehaviour
 		saveLoadRootList.Remove(root);
 	}
 
-	public GameObject GetPrefab(Tag tag, bool get_disabled_visualizer)
+	public GameObject GetPrefab(Tag tag)
 	{
-		Dictionary<Tag, GameObject> dictionary = ((!get_disabled_visualizer) ? this.prefabMap : this.disabledVisualizerPrefabMap);
-		if (dictionary.ContainsKey(tag))
+		GameObject gameObject = null;
+		if (this.prefabMap.TryGetValue(tag, out gameObject))
 		{
-			return dictionary[tag];
+			return gameObject;
 		}
 		Output.Log(new object[]
 		{
@@ -289,8 +274,6 @@ public class SaveManager : KMonoBehaviour
 	public const int SAVE_MINOR_VERSION = 4;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
-
-	private Dictionary<Tag, GameObject> disabledVisualizerPrefabMap = new Dictionary<Tag, GameObject>();
 
 	private Dictionary<Tag, List<SaveLoadRoot>> sceneObjects = new Dictionary<Tag, List<SaveLoadRoot>>();
 

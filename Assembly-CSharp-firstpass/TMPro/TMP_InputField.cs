@@ -2118,10 +2118,13 @@ namespace TMPro
 				if (this.stringPositionInternal > 0)
 				{
 					this.stringPositionInternal = Math.Min(this.stringPositionInternal, this.m_Text.Length);
-					this.m_Text = this.text.Remove(this.stringPositionInternal - 1, 1);
-					int num = this.stringPositionInternal - 1;
-					this.stringPositionInternal = num;
-					this.stringSelectPositionInternal = num;
+					if (this.m_Text.Length > 0)
+					{
+						this.m_Text = this.text.Remove(this.stringPositionInternal - 1, 1);
+						int num = this.stringPositionInternal - 1;
+						this.stringPositionInternal = num;
+						this.stringSelectPositionInternal = num;
+					}
 					this.m_isLastKeyBackspace = true;
 					this.SendOnValueChangedAndUpdateLabel();
 				}

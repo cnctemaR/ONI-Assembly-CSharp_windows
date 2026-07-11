@@ -316,7 +316,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 
 		private Chore CreateUseChore(LiquidCooledFan.StatesInstance smi)
 		{
-			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 
 		public LiquidCooledFan.States.Workable workable;

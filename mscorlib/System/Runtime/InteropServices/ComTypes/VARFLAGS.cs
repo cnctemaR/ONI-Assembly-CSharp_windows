@@ -4,7 +4,7 @@ namespace System.Runtime.InteropServices.ComTypes
 {
 	[Flags]
 	[Serializable]
-	public enum VARFLAGS
+	public enum VARFLAGS : short
 	{
 		VARFLAG_FREADONLY = 1,
 		VARFLAG_FSOURCE = 2,

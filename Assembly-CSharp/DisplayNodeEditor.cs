@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using LibNoiseDotNet.Graphics.Tools.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise.Builder;
 using NodeEditorFramework;
@@ -121,8 +120,6 @@ public class DisplayNodeEditor : BaseNodeEditor
 	{
 		if (WorldGen.Settings == null)
 		{
-			Hashtable hashtable = new Hashtable();
-			ElementLoader.Load(ref hashtable, this.simElementsSolidsFile.text, this.simElementsLiquidsFile.text, this.simElementsGasesFile.text, this.substanceTable);
 			WorldGen.LoadSettings();
 		}
 	}
@@ -166,14 +163,6 @@ public class DisplayNodeEditor : BaseNodeEditor
 	private string[] biomeOptions;
 
 	private string[] featureOptions;
-
-	public TextAsset simElementsSolidsFile;
-
-	public TextAsset simElementsLiquidsFile;
-
-	public TextAsset simElementsGasesFile;
-
-	public SubstanceTable substanceTable;
 
 	public enum DisplayType
 	{

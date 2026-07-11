@@ -19,7 +19,8 @@ namespace Klei
 		public static T LoadFile(string filename)
 		{
 			string text = File.ReadAllText(filename);
-			T t = YamlIO<T>.Parse(text);
+			text = text.Replace("\t", "    ");
+			T t = YamlIO<T>.Parse(text, filename);
 			if (t == null)
 			{
 				Debug.LogWarning("Exception while loading yaml file [" + filename + "]", null);
@@ -27,10 +28,11 @@ namespace Klei
 			return t;
 		}
 
-		public static T Parse(string readText)
+		public static T Parse(string readText, string filename)
 		{
 			try
 			{
+				readText = readText.Replace("\t", "    ");
 				DeserializerBuilder deserializerBuilder = new DeserializerBuilder();
 				deserializerBuilder.IgnoreUnmatchedProperties();
 				Deserializer deserializer = deserializerBuilder.Build();

@@ -86,7 +86,7 @@ public class EntombedItemVisualizer : KMonoBehaviour
 
 	private GameObject InstantiateEntombedObject()
 	{
-		GameObject gameObject = GameUtil.KInstantiate(this.entombedItemPrefab, Grid.SceneLayer.FXFront, Folder.FX, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(this.entombedItemPrefab, Grid.SceneLayer.FXFront, null, 0);
 		gameObject.SetActive(false);
 		return gameObject;
 	}

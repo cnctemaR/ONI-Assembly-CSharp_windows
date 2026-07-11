@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace System.ComponentModel
 {
@@ -7,39 +8,41 @@ namespace System.ComponentModel
 	{
 		public TypeConverterAttribute()
 		{
-			this.converter_type = string.Empty;
-		}
-
-		public TypeConverterAttribute(string typeName)
-		{
-			this.converter_type = typeName;
+			this.typeName = string.Empty;
 		}
 
 		public TypeConverterAttribute(Type type)
 		{
-			this.converter_type = type.AssemblyQualifiedName;
+			this.typeName = type.AssemblyQualifiedName;
 		}
 
-		public override bool Equals(object obj)
+		public TypeConverterAttribute(string typeName)
 		{
-			return obj is TypeConverterAttribute && ((TypeConverterAttribute)obj).ConverterTypeName == this.converter_type;
-		}
-
-		public override int GetHashCode()
-		{
-			return this.converter_type.GetHashCode();
+			typeName.ToUpper(CultureInfo.InvariantCulture);
+			this.typeName = typeName;
 		}
 
 		public string ConverterTypeName
 		{
 			get
 			{
-				return this.converter_type;
+				return this.typeName;
 			}
 		}
 
-		public static readonly TypeConverterAttribute Default = new TypeConverterAttribute();
+		public override bool Equals(object obj)
+		{
+			TypeConverterAttribute typeConverterAttribute = obj as TypeConverterAttribute;
+			return typeConverterAttribute != null && typeConverterAttribute.ConverterTypeName == this.typeName;
+		}
 
-		private string converter_type;
+		public override int GetHashCode()
+		{
+			return this.typeName.GetHashCode();
+		}
+
+		private string typeName;
+
+		public static readonly TypeConverterAttribute Default = new TypeConverterAttribute();
 	}
 }

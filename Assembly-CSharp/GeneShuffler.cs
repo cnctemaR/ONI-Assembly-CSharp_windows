@@ -161,7 +161,7 @@ public class GeneShuffler : Workable
 		this.chore = new WorkChore<Workable>(geneShuffle, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, true, anim, false, true, true, PriorityScreen.PriorityClass.emergency, 0, false);
+		}, null, null, true, null, false, true, anim, false, true, true, PriorityScreen.PriorityClass.emergency, 0, false);
 		this.chore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
 		this.chore.AddPrecondition(ChorePreconditions.instance.IsOperational, this.assignable.gameObject.GetComponent<Operational>());
 	}

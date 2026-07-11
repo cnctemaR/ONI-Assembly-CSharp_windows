@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class CancelTool : FilteredDragTool
 {
+	public static void DestroyInstance()
+	{
+		CancelTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

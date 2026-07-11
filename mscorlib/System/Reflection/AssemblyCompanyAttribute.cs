@@ -9,17 +9,17 @@ namespace System.Reflection
 	{
 		public AssemblyCompanyAttribute(string company)
 		{
-			this.name = company;
+			this.m_company = company;
 		}
 
 		public string Company
 		{
 			get
 			{
-				return this.name;
+				return this.m_company;
 			}
 		}
 
-		private string name;
+		private string m_company;
 	}
 }

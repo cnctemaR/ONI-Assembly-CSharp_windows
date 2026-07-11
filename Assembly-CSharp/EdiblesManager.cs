@@ -4,6 +4,11 @@ using TUNING;
 
 public class EdiblesManager : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		EdiblesManager.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		EdiblesManager.instance = this;

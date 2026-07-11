@@ -12,6 +12,7 @@ namespace System.Reflection
 		ILOnly = 1,
 		Required32Bit = 2,
 		PE32Plus = 4,
-		Unmanaged32Bit = 8
+		Unmanaged32Bit = 8,
+		Preferred32Bit = 16
 	}
 }

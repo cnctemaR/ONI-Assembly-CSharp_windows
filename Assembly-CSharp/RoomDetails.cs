@@ -7,7 +7,7 @@ public class RoomDetails
 	{
 		string text = string.Empty;
 		text = text + "<b>" + ROOMS.DETAILS.HEADER + "</b>";
-		RoomType roomType = Db.Get().RoomTypes.GetRoomType(room);
+		RoomType roomType = room.roomType;
 		foreach (RoomDetails.Detail detail in roomType.display_details)
 		{
 			text = text + "\n    • " + detail.resolve_string_function(room);
@@ -15,7 +15,7 @@ public class RoomDetails
 		return text;
 	}
 
-	public static RoomDetails.Detail AVERAGE_TEMPERATURE = new RoomDetails.Detail(delegate(Room room)
+	public static readonly RoomDetails.Detail AVERAGE_TEMPERATURE = new RoomDetails.Detail(delegate(Room room)
 	{
 		float num = 0f;
 		if (num == 0f)
@@ -25,7 +25,7 @@ public class RoomDetails
 		return string.Format(ROOMS.DETAILS.AVERAGE_TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 	});
 
-	public static RoomDetails.Detail AVERAGE_ATMO_MASS = new RoomDetails.Detail(delegate(Room room)
+	public static readonly RoomDetails.Detail AVERAGE_ATMO_MASS = new RoomDetails.Detail(delegate(Room room)
 	{
 		float num2 = 0f;
 		float num3 = 0f;
@@ -40,7 +40,7 @@ public class RoomDetails
 		return string.Format(ROOMS.DETAILS.AVERAGE_ATMO_MASS.NAME, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	});
 
-	public static RoomDetails.Detail ASSIGNED_TO = new RoomDetails.Detail(delegate(Room room)
+	public static readonly RoomDetails.Detail ASSIGNED_TO = new RoomDetails.Detail(delegate(Room room)
 	{
 		string text = string.Empty;
 		foreach (KPrefabID kprefabID in room.GetPrimaryEntities())
@@ -70,13 +70,13 @@ public class RoomDetails
 		return string.Format(ROOMS.DETAILS.ASSIGNED_TO.NAME, text);
 	});
 
-	public static RoomDetails.Detail SIZE = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.SIZE.NAME, room.cavity.numCells));
+	public static readonly RoomDetails.Detail SIZE = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.SIZE.NAME, room.cavity.numCells));
 
-	public static RoomDetails.Detail BUILDING_COUNT = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.BUILDING_COUNT.NAME, room.buildings.Count));
+	public static readonly RoomDetails.Detail BUILDING_COUNT = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.BUILDING_COUNT.NAME, room.buildings.Count));
 
-	public static RoomDetails.Detail CREATURE_COUNT = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.CREATURE_COUNT.NAME, room.cavity.creatures.Count));
+	public static readonly RoomDetails.Detail CREATURE_COUNT = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.CREATURE_COUNT.NAME, room.cavity.creatures.Count));
 
-	public static RoomDetails.Detail EFFECT = new RoomDetails.Detail((Room room) => Db.Get().RoomTypes.GetRoomType(room).effect);
+	public static readonly RoomDetails.Detail EFFECT = new RoomDetails.Detail((Room room) => room.roomType.effect);
 
 	public class Detail
 	{

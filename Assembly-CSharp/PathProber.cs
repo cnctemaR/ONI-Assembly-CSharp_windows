@@ -13,7 +13,7 @@ public class PathProber : KMonoBehaviour
 	{
 		if (max_probing_radius != 0)
 		{
-			this.PathGrid = new PathGrid(max_probing_radius, max_probing_radius, true, nav_types);
+			this.PathGrid = new PathGrid(max_probing_radius * 2, max_probing_radius * 2, true, nav_types);
 		}
 		else
 		{

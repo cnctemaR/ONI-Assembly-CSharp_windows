@@ -8,11 +8,17 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 		default_state = this.satisfied;
 		base.serializable = true;
 		this.satisfied.Transition(this.hungry, (CalorieMonitor.Instance smi) => smi.IsHungry(), UpdateRate.SIM_200ms);
-		this.hungry.DefaultState(this.hungry.normal).Transition(this.satisfied, (CalorieMonitor.Instance smi) => smi.IsSatisfied(), UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Hungry, null)
-			.ToggleThought(Db.Get().Thoughts.Starving, null)
-			.ToggleUrge(Db.Get().Urges.Eat);
-		this.hungry.normal.Transition(this.hungry.starving, (CalorieMonitor.Instance smi) => smi.IsStarving(), UpdateRate.SIM_200ms).ToggleStatusItem(Db.Get().DuplicantStatusItems.Hungry, null);
-		this.hungry.starving.Transition(this.hungry.normal, (CalorieMonitor.Instance smi) => !smi.IsStarving(), UpdateRate.SIM_200ms).Transition(this.depleted, (CalorieMonitor.Instance smi) => smi.IsDepleted(), UpdateRate.SIM_200ms).ToggleStatusItem(Db.Get().DuplicantStatusItems.Starving, null);
+		this.hungry.DefaultState(this.hungry.normal).Transition(this.satisfied, (CalorieMonitor.Instance smi) => smi.IsSatisfied(), UpdateRate.SIM_200ms).EventTransition(GameHashes.BeginChore, this.eating, (CalorieMonitor.Instance smi) => smi.IsEating());
+		this.hungry.working.EventTransition(GameHashes.ScheduleBlocksChanged, this.hungry.normal, (CalorieMonitor.Instance smi) => smi.IsEatTime()).Transition(this.hungry.starving, (CalorieMonitor.Instance smi) => smi.IsStarving(), UpdateRate.SIM_200ms).ToggleStatusItem(Db.Get().DuplicantStatusItems.Hungry, null);
+		this.hungry.normal.EventTransition(GameHashes.ScheduleBlocksChanged, this.hungry.working, (CalorieMonitor.Instance smi) => !smi.IsEatTime()).Transition(this.hungry.starving, (CalorieMonitor.Instance smi) => smi.IsStarving(), UpdateRate.SIM_200ms).ToggleStatusItem(Db.Get().DuplicantStatusItems.Hungry, null)
+			.ToggleUrge(Db.Get().Urges.Eat)
+			.ToggleExpression(Db.Get().Expressions.Hungry, null)
+			.ToggleThought(Db.Get().Thoughts.Starving, null);
+		this.hungry.starving.Transition(this.hungry.normal, (CalorieMonitor.Instance smi) => !smi.IsStarving(), UpdateRate.SIM_200ms).Transition(this.depleted, (CalorieMonitor.Instance smi) => smi.IsDepleted(), UpdateRate.SIM_200ms).ToggleStatusItem(Db.Get().DuplicantStatusItems.Starving, null)
+			.ToggleUrge(Db.Get().Urges.Eat)
+			.ToggleExpression(Db.Get().Expressions.Hungry, null)
+			.ToggleThought(Db.Get().Thoughts.Starving, null);
+		this.eating.EventTransition(GameHashes.EndChore, this.satisfied, (CalorieMonitor.Instance smi) => !smi.IsEating());
 		this.depleted.ToggleTag(GameTags.CaloriesDepleted).Enter(delegate(CalorieMonitor.Instance smi)
 		{
 			smi.Kill();
@@ -23,12 +29,16 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 
 	public CalorieMonitor.HungryState hungry;
 
+	public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State eating;
+
 	public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State incapacitated;
 
 	public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State depleted;
 
 	public class HungryState : GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State
 	{
+		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State working;
+
 		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State normal;
 
 		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State starving;
@@ -47,9 +57,15 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 			return this.calories.value / this.calories.GetMax();
 		}
 
+		public bool IsEatTime()
+		{
+			Schedulable component = base.master.GetComponent<Schedulable>();
+			return component.IsAllowed(Db.Get().ScheduleBlockTypes.Eat);
+		}
+
 		public bool IsHungry()
 		{
-			return this.GetCalories0to1() < 0.5f;
+			return this.GetCalories0to1() < 0.825f;
 		}
 
 		public bool IsStarving()
@@ -59,7 +75,13 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 
 		public bool IsSatisfied()
 		{
-			return this.GetCalories0to1() > 0.6f;
+			return this.GetCalories0to1() > 0.95f;
+		}
+
+		public bool IsEating()
+		{
+			ChoreDriver component = base.master.GetComponent<ChoreDriver>();
+			return component.HasChore() && component.GetCurrentChore().choreType.urge == Db.Get().Urges.Eat;
 		}
 
 		public bool IsDepleted()

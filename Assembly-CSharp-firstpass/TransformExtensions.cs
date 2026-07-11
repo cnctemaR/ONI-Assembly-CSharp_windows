@@ -11,7 +11,10 @@ public static class TransformExtensions
 	public static Vector3 SetPosition(this Transform transform, Vector3 position)
 	{
 		transform.position = position;
-		CellChangeMonitor.Instance.MarkDirty(transform);
+		if (Singleton<CellChangeMonitor>.Instance != null)
+		{
+			Singleton<CellChangeMonitor>.Instance.MarkDirty(transform);
+		}
 		return position;
 	}
 
@@ -23,7 +26,10 @@ public static class TransformExtensions
 	public static Vector3 SetLocalPosition(this Transform transform, Vector3 position)
 	{
 		transform.localPosition = position;
-		CellChangeMonitor.Instance.MarkDirty(transform);
+		if (Singleton<CellChangeMonitor>.Instance != null)
+		{
+			Singleton<CellChangeMonitor>.Instance.MarkDirty(transform);
+		}
 		return position;
 	}
 }

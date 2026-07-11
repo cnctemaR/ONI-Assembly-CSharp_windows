@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
+	[Obsolete("The IDispatchImplAttribute is deprecated.", false)]
 	[ComVisible(true)]
-	[Obsolete]
 	[Serializable]
 	public enum IDispatchImplType
 	{

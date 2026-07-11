@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class RecipeManager
 {
@@ -12,7 +13,7 @@ public class RecipeManager
 		return RecipeManager._Instance;
 	}
 
-	public static void Destroy()
+	public static void DestroyInstance()
 	{
 		RecipeManager._Instance = null;
 	}
@@ -22,7 +23,7 @@ public class RecipeManager
 		this.recipes.Add(recipe);
 		if (recipe.FabricationVisualizer != null)
 		{
-			recipe.FabricationVisualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
+			global::UnityEngine.Object.DontDestroyOnLoad(recipe.FabricationVisualizer);
 		}
 	}
 

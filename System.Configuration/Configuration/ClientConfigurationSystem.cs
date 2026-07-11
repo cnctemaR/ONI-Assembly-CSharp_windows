@@ -6,24 +6,6 @@ namespace System.Configuration
 {
 	internal class ClientConfigurationSystem : IInternalConfigSystem
 	{
-		object IInternalConfigSystem.GetSection(string configKey)
-		{
-			ConfigurationSection section = this.Configuration.GetSection(configKey);
-			return (section == null) ? null : section.GetRuntimeObject();
-		}
-
-		void IInternalConfigSystem.RefreshConfig(string sectionName)
-		{
-		}
-
-		bool IInternalConfigSystem.SupportsUserConfig
-		{
-			get
-			{
-				return false;
-			}
-		}
-
 		private Configuration Configuration
 		{
 			get
@@ -41,6 +23,28 @@ namespace System.Configuration
 					}
 				}
 				return this.cfg;
+			}
+		}
+
+		object IInternalConfigSystem.GetSection(string configKey)
+		{
+			ConfigurationSection section = this.Configuration.GetSection(configKey);
+			if (section == null)
+			{
+				return null;
+			}
+			return section.GetRuntimeObject();
+		}
+
+		void IInternalConfigSystem.RefreshConfig(string sectionName)
+		{
+		}
+
+		bool IInternalConfigSystem.SupportsUserConfig
+		{
+			get
+			{
+				return false;
 			}
 		}
 

@@ -4,6 +4,11 @@ public class AmbientSoundManager : KMonoBehaviour
 {
 	public static AmbientSoundManager Instance { get; private set; }
 
+	public static void Destroy()
+	{
+		AmbientSoundManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		AmbientSoundManager.Instance = this;

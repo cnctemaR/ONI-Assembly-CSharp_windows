@@ -25,7 +25,11 @@ public class KAnimFile : ScriptableObject
 	{
 		if (this.data == null)
 		{
-			this.data = KGlobalAnimParser.Get().Load(this);
+			KGlobalAnimParser kglobalAnimParser = KGlobalAnimParser.Get();
+			if (kglobalAnimParser != null)
+			{
+				this.data = kglobalAnimParser.Load(this);
+			}
 		}
 		return this.data;
 	}

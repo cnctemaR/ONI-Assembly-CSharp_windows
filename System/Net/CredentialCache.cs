@@ -3,76 +3,17 @@ using System.Collections;
 
 namespace System.Net
 {
-	public class CredentialCache : IEnumerable, ICredentials, ICredentialsByHost
+	public class CredentialCache : ICredentials, ICredentialsByHost, IEnumerable
 	{
-		public CredentialCache()
-		{
-			this.cache = new Hashtable();
-			this.cacheForHost = new Hashtable();
-		}
-
-		[global::System.MonoTODO("Need EnvironmentPermission implementation first")]
-		public static ICredentials DefaultCredentials
+		internal bool IsDefaultInCache
 		{
 			get
 			{
-				return CredentialCache.empty;
+				return this.m_NumbDefaultCredInCache != 0;
 			}
 		}
 
-		public static NetworkCredential DefaultNetworkCredentials
-		{
-			get
-			{
-				return CredentialCache.empty;
-			}
-		}
-
-		public NetworkCredential GetCredential(global::System.Uri uriPrefix, string authType)
-		{
-			int num = -1;
-			NetworkCredential networkCredential = null;
-			if (uriPrefix == null || authType == null)
-			{
-				return null;
-			}
-			string text = uriPrefix.AbsolutePath;
-			text = text.Substring(0, text.LastIndexOf('/'));
-			IDictionaryEnumerator enumerator = this.cache.GetEnumerator();
-			while (enumerator.MoveNext())
-			{
-				CredentialCache.CredentialCacheKey credentialCacheKey = enumerator.Key as CredentialCache.CredentialCacheKey;
-				if (credentialCacheKey.Length > num)
-				{
-					if (string.Compare(credentialCacheKey.AuthType, authType, true) == 0)
-					{
-						global::System.Uri uriPrefix2 = credentialCacheKey.UriPrefix;
-						if (!(uriPrefix2.Scheme != uriPrefix.Scheme))
-						{
-							if (uriPrefix2.Port == uriPrefix.Port)
-							{
-								if (!(uriPrefix2.Host != uriPrefix.Host))
-								{
-									if (text.StartsWith(credentialCacheKey.AbsPath))
-									{
-										num = credentialCacheKey.Length;
-										networkCredential = (NetworkCredential)enumerator.Value;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			return networkCredential;
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this.cache.Values.GetEnumerator();
-		}
-
-		public void Add(global::System.Uri uriPrefix, string authType, NetworkCredential cred)
+		public void Add(Uri uriPrefix, string authType, NetworkCredential cred)
 		{
 			if (uriPrefix == null)
 			{
@@ -82,45 +23,17 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("authType");
 			}
-			this.cache.Add(new CredentialCache.CredentialCacheKey(uriPrefix, authType), cred);
-		}
-
-		public void Remove(global::System.Uri uriPrefix, string authType)
-		{
-			if (uriPrefix == null)
+			if (cred is SystemNetworkCredential)
 			{
-				throw new ArgumentNullException("uriPrefix");
+				throw new ArgumentException(global::SR.GetString("Default credentials cannot be supplied for the {0} authentication scheme.", new object[] { authType }), "authType");
 			}
-			if (authType == null)
+			this.m_version++;
+			CredentialKey credentialKey = new CredentialKey(uriPrefix, authType);
+			this.cache.Add(credentialKey, cred);
+			if (cred is SystemNetworkCredential)
 			{
-				throw new ArgumentNullException("authType");
+				this.m_NumbDefaultCredInCache++;
 			}
-			this.cache.Remove(new CredentialCache.CredentialCacheKey(uriPrefix, authType));
-		}
-
-		public NetworkCredential GetCredential(string host, int port, string authenticationType)
-		{
-			NetworkCredential networkCredential = null;
-			if (host == null || port < 0 || authenticationType == null)
-			{
-				return null;
-			}
-			IDictionaryEnumerator enumerator = this.cacheForHost.GetEnumerator();
-			while (enumerator.MoveNext())
-			{
-				CredentialCache.CredentialCacheForHostKey credentialCacheForHostKey = enumerator.Key as CredentialCache.CredentialCacheForHostKey;
-				if (string.Compare(credentialCacheForHostKey.AuthType, authenticationType, true) == 0)
-				{
-					if (!(credentialCacheForHostKey.Host != host))
-					{
-						if (credentialCacheForHostKey.Port == port)
-						{
-							networkCredential = (NetworkCredential)enumerator.Value;
-						}
-					}
-				}
-			}
-			return networkCredential;
 		}
 
 		public void Add(string host, int port, string authenticationType, NetworkCredential credential)
@@ -129,164 +42,208 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("host");
 			}
+			if (authenticationType == null)
+			{
+				throw new ArgumentNullException("authenticationType");
+			}
+			if (host.Length == 0)
+			{
+				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
+			}
 			if (port < 0)
 			{
 				throw new ArgumentOutOfRangeException("port");
 			}
-			if (authenticationType == null)
+			if (credential is SystemNetworkCredential)
 			{
-				throw new ArgumentOutOfRangeException("authenticationType");
+				throw new ArgumentException(global::SR.GetString("Default credentials cannot be supplied for the {0} authentication scheme.", new object[] { authenticationType }), "authenticationType");
 			}
-			this.cacheForHost.Add(new CredentialCache.CredentialCacheForHostKey(host, port, authenticationType), credential);
+			this.m_version++;
+			CredentialHostKey credentialHostKey = new CredentialHostKey(host, port, authenticationType);
+			this.cacheForHosts.Add(credentialHostKey, credential);
+			if (credential is SystemNetworkCredential)
+			{
+				this.m_NumbDefaultCredInCache++;
+			}
+		}
+
+		public void Remove(Uri uriPrefix, string authType)
+		{
+			if (uriPrefix == null || authType == null)
+			{
+				return;
+			}
+			this.m_version++;
+			CredentialKey credentialKey = new CredentialKey(uriPrefix, authType);
+			if (this.cache[credentialKey] is SystemNetworkCredential)
+			{
+				this.m_NumbDefaultCredInCache--;
+			}
+			this.cache.Remove(credentialKey);
 		}
 
 		public void Remove(string host, int port, string authenticationType)
 		{
-			if (host == null)
+			if (host == null || authenticationType == null)
 			{
 				return;
+			}
+			if (port < 0)
+			{
+				return;
+			}
+			this.m_version++;
+			CredentialHostKey credentialHostKey = new CredentialHostKey(host, port, authenticationType);
+			if (this.cacheForHosts[credentialHostKey] is SystemNetworkCredential)
+			{
+				this.m_NumbDefaultCredInCache--;
+			}
+			this.cacheForHosts.Remove(credentialHostKey);
+		}
+
+		public NetworkCredential GetCredential(Uri uriPrefix, string authType)
+		{
+			if (uriPrefix == null)
+			{
+				throw new ArgumentNullException("uriPrefix");
+			}
+			if (authType == null)
+			{
+				throw new ArgumentNullException("authType");
+			}
+			int num = -1;
+			NetworkCredential networkCredential = null;
+			IDictionaryEnumerator enumerator = this.cache.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				CredentialKey credentialKey = (CredentialKey)enumerator.Key;
+				if (credentialKey.Match(uriPrefix, authType))
+				{
+					int uriPrefixLength = credentialKey.UriPrefixLength;
+					if (uriPrefixLength > num)
+					{
+						num = uriPrefixLength;
+						networkCredential = (NetworkCredential)enumerator.Value;
+					}
+				}
+			}
+			return networkCredential;
+		}
+
+		public NetworkCredential GetCredential(string host, int port, string authenticationType)
+		{
+			if (host == null)
+			{
+				throw new ArgumentNullException("host");
 			}
 			if (authenticationType == null)
 			{
-				return;
+				throw new ArgumentNullException("authenticationType");
 			}
-			this.cacheForHost.Remove(new CredentialCache.CredentialCacheForHostKey(host, port, authenticationType));
+			if (host.Length == 0)
+			{
+				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "host" }));
+			}
+			if (port < 0)
+			{
+				throw new ArgumentOutOfRangeException("port");
+			}
+			NetworkCredential networkCredential = null;
+			IDictionaryEnumerator enumerator = this.cacheForHosts.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				if (((CredentialHostKey)enumerator.Key).Match(host, port, authenticationType))
+				{
+					networkCredential = (NetworkCredential)enumerator.Value;
+				}
+			}
+			return networkCredential;
 		}
 
-		private static NetworkCredential empty = new NetworkCredential(string.Empty, string.Empty, string.Empty);
-
-		private Hashtable cache;
-
-		private Hashtable cacheForHost;
-
-		private class CredentialCacheKey
+		public IEnumerator GetEnumerator()
 		{
-			internal CredentialCacheKey(global::System.Uri uriPrefix, string authType)
-			{
-				this.uriPrefix = uriPrefix;
-				this.authType = authType;
-				this.absPath = uriPrefix.AbsolutePath;
-				this.absPath = this.absPath.Substring(0, this.absPath.LastIndexOf('/'));
-				this.len = uriPrefix.AbsoluteUri.Length;
-				this.hash = uriPrefix.GetHashCode() + authType.GetHashCode();
-			}
-
-			public int Length
-			{
-				get
-				{
-					return this.len;
-				}
-			}
-
-			public string AbsPath
-			{
-				get
-				{
-					return this.absPath;
-				}
-			}
-
-			public global::System.Uri UriPrefix
-			{
-				get
-				{
-					return this.uriPrefix;
-				}
-			}
-
-			public string AuthType
-			{
-				get
-				{
-					return this.authType;
-				}
-			}
-
-			public override int GetHashCode()
-			{
-				return this.hash;
-			}
-
-			public override bool Equals(object obj)
-			{
-				CredentialCache.CredentialCacheKey credentialCacheKey = obj as CredentialCache.CredentialCacheKey;
-				return credentialCacheKey != null && this.hash == credentialCacheKey.hash;
-			}
-
-			public override string ToString()
-			{
-				return string.Concat(new object[] { this.absPath, " : ", this.authType, " : len=", this.len });
-			}
-
-			private global::System.Uri uriPrefix;
-
-			private string authType;
-
-			private string absPath;
-
-			private int len;
-
-			private int hash;
+			return new CredentialCache.CredentialEnumerator(this, this.cache, this.cacheForHosts, this.m_version);
 		}
 
-		private class CredentialCacheForHostKey
+		public static ICredentials DefaultCredentials
 		{
-			internal CredentialCacheForHostKey(string host, int port, string authType)
+			get
 			{
-				this.host = host;
-				this.port = port;
-				this.authType = authType;
-				this.hash = host.GetHashCode() + port.GetHashCode() + authType.GetHashCode();
+				return SystemNetworkCredential.defaultCredential;
+			}
+		}
+
+		public static NetworkCredential DefaultNetworkCredentials
+		{
+			get
+			{
+				return SystemNetworkCredential.defaultCredential;
+			}
+		}
+
+		private Hashtable cache = new Hashtable();
+
+		private Hashtable cacheForHosts = new Hashtable();
+
+		internal int m_version;
+
+		private int m_NumbDefaultCredInCache;
+
+		private class CredentialEnumerator : IEnumerator
+		{
+			internal CredentialEnumerator(CredentialCache cache, Hashtable table, Hashtable hostTable, int version)
+			{
+				this.m_cache = cache;
+				this.m_array = new ICredentials[table.Count + hostTable.Count];
+				table.Values.CopyTo(this.m_array, 0);
+				hostTable.Values.CopyTo(this.m_array, table.Count);
+				this.m_version = version;
 			}
 
-			public string Host
+			object IEnumerator.Current
 			{
 				get
 				{
-					return this.host;
+					if (this.m_index < 0 || this.m_index >= this.m_array.Length)
+					{
+						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+					}
+					if (this.m_version != this.m_cache.m_version)
+					{
+						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					}
+					return this.m_array[this.m_index];
 				}
 			}
 
-			public int Port
+			bool IEnumerator.MoveNext()
 			{
-				get
+				if (this.m_version != this.m_cache.m_version)
 				{
-					return this.port;
+					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
 				}
-			}
-
-			public string AuthType
-			{
-				get
+				int num = this.m_index + 1;
+				this.m_index = num;
+				if (num < this.m_array.Length)
 				{
-					return this.authType;
+					return true;
 				}
+				this.m_index = this.m_array.Length;
+				return false;
 			}
 
-			public override int GetHashCode()
+			void IEnumerator.Reset()
 			{
-				return this.hash;
+				this.m_index = -1;
 			}
 
-			public override bool Equals(object obj)
-			{
-				CredentialCache.CredentialCacheForHostKey credentialCacheForHostKey = obj as CredentialCache.CredentialCacheForHostKey;
-				return credentialCacheForHostKey != null && this.hash == credentialCacheForHostKey.hash;
-			}
+			private CredentialCache m_cache;
 
-			public override string ToString()
-			{
-				return this.host + " : " + this.authType;
-			}
+			private ICredentials[] m_array;
 
-			private string host;
+			private int m_index = -1;
 
-			private int port;
-
-			private string authType;
-
-			private int hash;
+			private int m_version;
 		}
 	}
 }

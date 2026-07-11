@@ -19,17 +19,16 @@ namespace Mono.Security
 		public static ASN1 FromInt32(int value)
 		{
 			byte[] bytes = BitConverterLE.GetBytes(value);
-			Array.Reverse(bytes);
+			Array.Reverse<byte>(bytes);
 			int num = 0;
 			while (num < bytes.Length && bytes[num] == 0)
 			{
 				num++;
 			}
 			ASN1 asn = new ASN1(2);
-			int num2 = num;
-			if (num2 != 0)
+			if (num != 0)
 			{
-				if (num2 != 4)
+				if (num != 4)
 				{
 					byte[] array = new byte[4 - num];
 					Buffer.BlockCopy(bytes, num, array, 0, array.Length);
@@ -138,9 +137,7 @@ namespace Mono.Security
 				text2 = "yyMMddHHmmZ";
 				break;
 			case 13:
-			{
-				int num = (int)Convert.ToInt16(text.Substring(0, 2), CultureInfo.InvariantCulture);
-				if (num >= 50)
+				if (Convert.ToInt16(text.Substring(0, 2), CultureInfo.InvariantCulture) >= 50)
 				{
 					text = "19" + text;
 				}
@@ -150,15 +147,13 @@ namespace Mono.Security
 				}
 				text2 = "yyyyMMddHHmmssZ";
 				break;
-			}
 			case 15:
 				text2 = "yyyyMMddHHmmssZ";
 				break;
 			case 17:
 			{
-				int num = (int)Convert.ToInt16(text.Substring(0, 2), CultureInfo.InvariantCulture);
-				string text3 = ((num < 50) ? "20" : "19");
-				char c = ((text[12] != '+') ? '+' : '-');
+				string text3 = ((Convert.ToInt16(text.Substring(0, 2), CultureInfo.InvariantCulture) >= 50) ? "19" : "20");
+				char c = ((text[12] == '+') ? '-' : '+');
 				text = string.Format("{0}{1}{2}{3}{4}:{5}{6}", new object[]
 				{
 					text3,

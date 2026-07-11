@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class SelectTool : InterfaceTool
 {
+	public static void DestroyInstance()
+	{
+		SelectTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		this.defaultLayerMask = 1 | LayerMask.GetMask(new string[] { "World", "Pickupable", "Place", "PlaceWithDepth", "BlockSelection", "Construction", "Selection" });
@@ -206,11 +211,16 @@ public class SelectTool : InterfaceTool
 		pooledList.Recycle();
 	}
 
+	private static bool is_component_null(SelectTool.Intersection intersection)
+	{
+		return !intersection.component;
+	}
+
 	private T GetObjectUnderCursor<T>(bool cycleSelection, Func<T, bool> condition = null, Component previous_selection = null) where T : MonoBehaviour
 	{
 		this.intersections.Clear();
 		this.GetObjectUnderCursor2D<T>(this.intersections, condition, this.layerMask);
-		this.intersections.RemoveAll(SelectTool.is_component_null);
+		this.intersections.RemoveAll(new Predicate<SelectTool.Intersection>(SelectTool.is_component_null));
 		if (this.intersections.Count <= 0)
 		{
 			this.prevIntersectionGroup.Clear();
@@ -393,8 +403,6 @@ public class SelectTool : InterfaceTool
 	private HashSet<Component> prevIntersectionGroup = new HashSet<Component>();
 
 	private HashSet<Component> curIntersectionGroup = new HashSet<Component>();
-
-	private static Predicate<SelectTool.Intersection> is_component_null = (SelectTool.Intersection intersection) => !intersection.component;
 
 	private KSelectable delayedNextSelection;
 

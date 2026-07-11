@@ -26,7 +26,6 @@ public class CanvasConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.SceneLayer = Grid.SceneLayer.Paintings;
 		buildingDef.Overheatable = false;
-		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.ViewMode = SimViewMode.Decor;

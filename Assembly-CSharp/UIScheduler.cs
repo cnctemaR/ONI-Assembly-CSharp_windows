@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class UIScheduler : KMonoBehaviour, IScheduler
 {
+	public static void DestroyInstance()
+	{
+		UIScheduler.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		UIScheduler.Instance = this;

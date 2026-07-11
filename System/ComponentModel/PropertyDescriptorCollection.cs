@@ -1,18 +1,26 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Specialized;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	public class PropertyDescriptorCollection : IDictionary, IList, ICollection, IEnumerable
+	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
+	public class PropertyDescriptorCollection : ICollection, IEnumerable, IList, IDictionary
 	{
 		public PropertyDescriptorCollection(PropertyDescriptor[] properties)
 		{
-			this.properties = new ArrayList();
+			this.properties = properties;
 			if (properties == null)
 			{
-				return;
+				this.properties = new PropertyDescriptor[0];
+				this.propCount = 0;
 			}
-			this.properties.AddRange(properties);
+			else
+			{
+				this.propCount = properties.Length;
+			}
+			this.propsOwned = true;
 		}
 
 		public PropertyDescriptorCollection(PropertyDescriptor[] properties, bool readOnly)
@@ -21,27 +29,318 @@ namespace System.ComponentModel
 			this.readOnly = readOnly;
 		}
 
-		private PropertyDescriptorCollection()
+		private PropertyDescriptorCollection(PropertyDescriptor[] properties, int propCount, string[] namedSort, IComparer comparer)
 		{
+			this.propsOwned = false;
+			if (namedSort != null)
+			{
+				this.namedSort = (string[])namedSort.Clone();
+			}
+			this.comparer = comparer;
+			this.properties = properties;
+			this.propCount = propCount;
+			this.needSort = true;
 		}
 
-		int IList.Add(object value)
+		public int Count
 		{
-			return this.Add((PropertyDescriptor)value);
+			get
+			{
+				return this.propCount;
+			}
+		}
+
+		public virtual PropertyDescriptor this[int index]
+		{
+			get
+			{
+				if (index >= this.propCount)
+				{
+					throw new IndexOutOfRangeException();
+				}
+				this.EnsurePropsOwned();
+				return this.properties[index];
+			}
+		}
+
+		public virtual PropertyDescriptor this[string name]
+		{
+			get
+			{
+				return this.Find(name, false);
+			}
+		}
+
+		public int Add(PropertyDescriptor value)
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			this.EnsureSize(this.propCount + 1);
+			PropertyDescriptor[] array = this.properties;
+			int num = this.propCount;
+			this.propCount = num + 1;
+			array[num] = value;
+			return this.propCount - 1;
+		}
+
+		public void Clear()
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			this.propCount = 0;
+			this.cachedFoundProperties = null;
+		}
+
+		public bool Contains(PropertyDescriptor value)
+		{
+			return this.IndexOf(value) >= 0;
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			this.EnsurePropsOwned();
+			Array.Copy(this.properties, 0, array, index, this.Count);
+		}
+
+		private void EnsurePropsOwned()
+		{
+			if (!this.propsOwned)
+			{
+				this.propsOwned = true;
+				if (this.properties != null)
+				{
+					PropertyDescriptor[] array = new PropertyDescriptor[this.Count];
+					Array.Copy(this.properties, 0, array, 0, this.Count);
+					this.properties = array;
+				}
+			}
+			if (this.needSort)
+			{
+				this.needSort = false;
+				this.InternalSort(this.namedSort);
+			}
+		}
+
+		private void EnsureSize(int sizeNeeded)
+		{
+			if (sizeNeeded <= this.properties.Length)
+			{
+				return;
+			}
+			if (this.properties == null || this.properties.Length == 0)
+			{
+				this.propCount = 0;
+				this.properties = new PropertyDescriptor[sizeNeeded];
+				return;
+			}
+			this.EnsurePropsOwned();
+			PropertyDescriptor[] array = new PropertyDescriptor[Math.Max(sizeNeeded, this.properties.Length * 2)];
+			Array.Copy(this.properties, 0, array, 0, this.propCount);
+			this.properties = array;
+		}
+
+		public virtual PropertyDescriptor Find(string name, bool ignoreCase)
+		{
+			PropertyDescriptor propertyDescriptor2;
+			lock (this)
+			{
+				PropertyDescriptor propertyDescriptor = null;
+				if (this.cachedFoundProperties == null || this.cachedIgnoreCase != ignoreCase)
+				{
+					this.cachedIgnoreCase = ignoreCase;
+					this.cachedFoundProperties = new HybridDictionary(ignoreCase);
+				}
+				object obj = this.cachedFoundProperties[name];
+				if (obj != null)
+				{
+					propertyDescriptor2 = (PropertyDescriptor)obj;
+				}
+				else
+				{
+					for (int i = 0; i < this.propCount; i++)
+					{
+						if (ignoreCase)
+						{
+							if (string.Equals(this.properties[i].Name, name, StringComparison.OrdinalIgnoreCase))
+							{
+								this.cachedFoundProperties[name] = this.properties[i];
+								propertyDescriptor = this.properties[i];
+								break;
+							}
+						}
+						else if (this.properties[i].Name.Equals(name))
+						{
+							this.cachedFoundProperties[name] = this.properties[i];
+							propertyDescriptor = this.properties[i];
+							break;
+						}
+					}
+					propertyDescriptor2 = propertyDescriptor;
+				}
+			}
+			return propertyDescriptor2;
+		}
+
+		public int IndexOf(PropertyDescriptor value)
+		{
+			return Array.IndexOf<PropertyDescriptor>(this.properties, value, 0, this.propCount);
+		}
+
+		public void Insert(int index, PropertyDescriptor value)
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			this.EnsureSize(this.propCount + 1);
+			if (index < this.propCount)
+			{
+				Array.Copy(this.properties, index, this.properties, index + 1, this.propCount - index);
+			}
+			this.properties[index] = value;
+			this.propCount++;
+		}
+
+		public void Remove(PropertyDescriptor value)
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			int num = this.IndexOf(value);
+			if (num != -1)
+			{
+				this.RemoveAt(num);
+			}
+		}
+
+		public void RemoveAt(int index)
+		{
+			if (this.readOnly)
+			{
+				throw new NotSupportedException();
+			}
+			if (index < this.propCount - 1)
+			{
+				Array.Copy(this.properties, index + 1, this.properties, index, this.propCount - index - 1);
+			}
+			this.properties[this.propCount - 1] = null;
+			this.propCount--;
+		}
+
+		public virtual PropertyDescriptorCollection Sort()
+		{
+			return new PropertyDescriptorCollection(this.properties, this.propCount, this.namedSort, this.comparer);
+		}
+
+		public virtual PropertyDescriptorCollection Sort(string[] names)
+		{
+			return new PropertyDescriptorCollection(this.properties, this.propCount, names, this.comparer);
+		}
+
+		public virtual PropertyDescriptorCollection Sort(string[] names, IComparer comparer)
+		{
+			return new PropertyDescriptorCollection(this.properties, this.propCount, names, comparer);
+		}
+
+		public virtual PropertyDescriptorCollection Sort(IComparer comparer)
+		{
+			return new PropertyDescriptorCollection(this.properties, this.propCount, this.namedSort, comparer);
+		}
+
+		protected void InternalSort(string[] names)
+		{
+			if (this.properties == null || this.properties.Length == 0)
+			{
+				return;
+			}
+			this.InternalSort(this.comparer);
+			if (names != null && names.Length != 0)
+			{
+				ArrayList arrayList = new ArrayList(this.properties);
+				int num = 0;
+				int num2 = this.properties.Length;
+				for (int i = 0; i < names.Length; i++)
+				{
+					for (int j = 0; j < num2; j++)
+					{
+						PropertyDescriptor propertyDescriptor = (PropertyDescriptor)arrayList[j];
+						if (propertyDescriptor != null && propertyDescriptor.Name.Equals(names[i]))
+						{
+							this.properties[num++] = propertyDescriptor;
+							arrayList[j] = null;
+							break;
+						}
+					}
+				}
+				for (int k = 0; k < num2; k++)
+				{
+					if (arrayList[k] != null)
+					{
+						this.properties[num++] = (PropertyDescriptor)arrayList[k];
+					}
+				}
+			}
+		}
+
+		protected void InternalSort(IComparer sorter)
+		{
+			if (sorter == null)
+			{
+				TypeDescriptor.SortDescriptorArray(this);
+				return;
+			}
+			Array.Sort(this.properties, sorter);
+		}
+
+		public virtual IEnumerator GetEnumerator()
+		{
+			this.EnsurePropsOwned();
+			if (this.properties.Length != this.propCount)
+			{
+				PropertyDescriptor[] array = new PropertyDescriptor[this.propCount];
+				Array.Copy(this.properties, 0, array, 0, this.propCount);
+				return array.GetEnumerator();
+			}
+			return this.properties.GetEnumerator();
+		}
+
+		int ICollection.Count
+		{
+			get
+			{
+				return this.Count;
+			}
+		}
+
+		bool ICollection.IsSynchronized
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return null;
+			}
 		}
 
 		void IDictionary.Add(object key, object value)
 		{
-			if (!(value is PropertyDescriptor))
+			PropertyDescriptor propertyDescriptor = value as PropertyDescriptor;
+			if (propertyDescriptor == null)
 			{
 				throw new ArgumentException("value");
 			}
-			this.Add((PropertyDescriptor)value);
-		}
-
-		void IList.Clear()
-		{
-			this.Clear();
+			this.Add(propertyDescriptor);
 		}
 
 		void IDictionary.Clear()
@@ -49,14 +348,127 @@ namespace System.ComponentModel
 			this.Clear();
 		}
 
-		bool IList.Contains(object value)
+		bool IDictionary.Contains(object key)
 		{
-			return this.Contains((PropertyDescriptor)value);
+			return key is string && this[(string)key] != null;
 		}
 
-		bool IDictionary.Contains(object value)
+		IDictionaryEnumerator IDictionary.GetEnumerator()
 		{
-			return this.Contains((PropertyDescriptor)value);
+			return new PropertyDescriptorCollection.PropertyDescriptorEnumerator(this);
+		}
+
+		bool IDictionary.IsFixedSize
+		{
+			get
+			{
+				return this.readOnly;
+			}
+		}
+
+		bool IDictionary.IsReadOnly
+		{
+			get
+			{
+				return this.readOnly;
+			}
+		}
+
+		object IDictionary.this[object key]
+		{
+			get
+			{
+				if (key is string)
+				{
+					return this[(string)key];
+				}
+				return null;
+			}
+			set
+			{
+				if (this.readOnly)
+				{
+					throw new NotSupportedException();
+				}
+				if (value != null && !(value is PropertyDescriptor))
+				{
+					throw new ArgumentException("value");
+				}
+				int num = -1;
+				if (key is int)
+				{
+					num = (int)key;
+					if (num < 0 || num >= this.propCount)
+					{
+						throw new IndexOutOfRangeException();
+					}
+				}
+				else
+				{
+					if (!(key is string))
+					{
+						throw new ArgumentException("key");
+					}
+					for (int i = 0; i < this.propCount; i++)
+					{
+						if (this.properties[i].Name.Equals((string)key))
+						{
+							num = i;
+							break;
+						}
+					}
+				}
+				if (num == -1)
+				{
+					this.Add((PropertyDescriptor)value);
+					return;
+				}
+				this.EnsurePropsOwned();
+				this.properties[num] = (PropertyDescriptor)value;
+				if (this.cachedFoundProperties != null && key is string)
+				{
+					this.cachedFoundProperties[key] = value;
+				}
+			}
+		}
+
+		ICollection IDictionary.Keys
+		{
+			get
+			{
+				string[] array = new string[this.propCount];
+				for (int i = 0; i < this.propCount; i++)
+				{
+					array[i] = this.properties[i].Name;
+				}
+				return array;
+			}
+		}
+
+		ICollection IDictionary.Values
+		{
+			get
+			{
+				if (this.properties.Length != this.propCount)
+				{
+					PropertyDescriptor[] array = new PropertyDescriptor[this.propCount];
+					Array.Copy(this.properties, 0, array, 0, this.propCount);
+					return array;
+				}
+				return (ICollection)this.properties.Clone();
+			}
+		}
+
+		void IDictionary.Remove(object key)
+		{
+			if (key is string)
+			{
+				PropertyDescriptor propertyDescriptor = this[(string)key];
+				if (propertyDescriptor != null)
+				{
+					((IList)this).Remove(propertyDescriptor);
+				}
+			}
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -64,10 +476,19 @@ namespace System.ComponentModel
 			return this.GetEnumerator();
 		}
 
-		[global::System.MonoTODO]
-		IDictionaryEnumerator IDictionary.GetEnumerator()
+		int IList.Add(object value)
 		{
-			throw new NotImplementedException();
+			return this.Add((PropertyDescriptor)value);
+		}
+
+		void IList.Clear()
+		{
+			this.Clear();
+		}
+
+		bool IList.Contains(object value)
+		{
+			return this.Contains((PropertyDescriptor)value);
 		}
 
 		int IList.IndexOf(object value)
@@ -80,9 +501,20 @@ namespace System.ComponentModel
 			this.Insert(index, (PropertyDescriptor)value);
 		}
 
-		void IDictionary.Remove(object value)
+		bool IList.IsReadOnly
 		{
-			this.Remove((PropertyDescriptor)value);
+			get
+			{
+				return this.readOnly;
+			}
+		}
+
+		bool IList.IsFixedSize
+		{
+			get
+			{
+				return this.readOnly;
+			}
 		}
 
 		void IList.Remove(object value)
@@ -95,122 +527,11 @@ namespace System.ComponentModel
 			this.RemoveAt(index);
 		}
 
-		bool IDictionary.IsFixedSize
-		{
-			get
-			{
-				return ((IList)this).IsFixedSize;
-			}
-		}
-
-		bool IList.IsFixedSize
-		{
-			get
-			{
-				return this.readOnly;
-			}
-		}
-
-		bool IDictionary.IsReadOnly
-		{
-			get
-			{
-				return ((IList)this).IsReadOnly;
-			}
-		}
-
-		bool IList.IsReadOnly
-		{
-			get
-			{
-				return this.readOnly;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		int ICollection.Count
-		{
-			get
-			{
-				return this.Count;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		ICollection IDictionary.Keys
-		{
-			get
-			{
-				string[] array = new string[this.properties.Count];
-				int num = 0;
-				foreach (object obj in this.properties)
-				{
-					PropertyDescriptor propertyDescriptor = (PropertyDescriptor)obj;
-					array[num++] = propertyDescriptor.Name;
-				}
-				return array;
-			}
-		}
-
-		ICollection IDictionary.Values
-		{
-			get
-			{
-				return (ICollection)this.properties.Clone();
-			}
-		}
-
-		object IDictionary.this[object key]
-		{
-			get
-			{
-				if (!(key is string))
-				{
-					return null;
-				}
-				return this[(string)key];
-			}
-			set
-			{
-				if (this.readOnly)
-				{
-					throw new NotSupportedException();
-				}
-				if (!(key is string) || !(value is PropertyDescriptor))
-				{
-					throw new ArgumentException();
-				}
-				int num = this.properties.IndexOf(value);
-				if (num == -1)
-				{
-					this.Add((PropertyDescriptor)value);
-				}
-				else
-				{
-					this.properties[num] = value;
-				}
-			}
-		}
-
 		object IList.this[int index]
 		{
 			get
 			{
-				return this.properties[index];
+				return this[index];
 			}
 			set
 			{
@@ -218,239 +539,97 @@ namespace System.ComponentModel
 				{
 					throw new NotSupportedException();
 				}
-				this.properties[index] = value;
-			}
-		}
-
-		public int Add(PropertyDescriptor value)
-		{
-			if (this.readOnly)
-			{
-				throw new NotSupportedException();
-			}
-			this.properties.Add(value);
-			return this.properties.Count - 1;
-		}
-
-		public void Clear()
-		{
-			if (this.readOnly)
-			{
-				throw new NotSupportedException();
-			}
-			this.properties.Clear();
-		}
-
-		public bool Contains(PropertyDescriptor value)
-		{
-			return this.properties.Contains(value);
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			this.properties.CopyTo(array, index);
-		}
-
-		public virtual PropertyDescriptor Find(string name, bool ignoreCase)
-		{
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-			for (int i = 0; i < this.properties.Count; i++)
-			{
-				PropertyDescriptor propertyDescriptor = (PropertyDescriptor)this.properties[i];
-				if (ignoreCase)
+				if (index >= this.propCount)
 				{
-					if (string.Compare(name, propertyDescriptor.Name, StringComparison.OrdinalIgnoreCase) == 0)
-					{
-						return propertyDescriptor;
-					}
+					throw new IndexOutOfRangeException();
 				}
-				else if (string.Compare(name, propertyDescriptor.Name, StringComparison.Ordinal) == 0)
+				if (value != null && !(value is PropertyDescriptor))
 				{
-					return propertyDescriptor;
+					throw new ArgumentException("value");
 				}
-			}
-			return null;
-		}
-
-		public virtual IEnumerator GetEnumerator()
-		{
-			return this.properties.GetEnumerator();
-		}
-
-		public int IndexOf(PropertyDescriptor value)
-		{
-			return this.properties.IndexOf(value);
-		}
-
-		public void Insert(int index, PropertyDescriptor value)
-		{
-			if (this.readOnly)
-			{
-				throw new NotSupportedException();
-			}
-			this.properties.Insert(index, value);
-		}
-
-		public void Remove(PropertyDescriptor value)
-		{
-			if (this.readOnly)
-			{
-				throw new NotSupportedException();
-			}
-			this.properties.Remove(value);
-		}
-
-		public void RemoveAt(int index)
-		{
-			if (this.readOnly)
-			{
-				throw new NotSupportedException();
-			}
-			this.properties.RemoveAt(index);
-		}
-
-		private PropertyDescriptorCollection CloneCollection()
-		{
-			return new PropertyDescriptorCollection
-			{
-				properties = (ArrayList)this.properties.Clone()
-			};
-		}
-
-		public virtual PropertyDescriptorCollection Sort()
-		{
-			PropertyDescriptorCollection propertyDescriptorCollection = this.CloneCollection();
-			propertyDescriptorCollection.InternalSort(null);
-			return propertyDescriptorCollection;
-		}
-
-		public virtual PropertyDescriptorCollection Sort(IComparer comparer)
-		{
-			PropertyDescriptorCollection propertyDescriptorCollection = this.CloneCollection();
-			propertyDescriptorCollection.InternalSort(comparer);
-			return propertyDescriptorCollection;
-		}
-
-		public virtual PropertyDescriptorCollection Sort(string[] order)
-		{
-			PropertyDescriptorCollection propertyDescriptorCollection = this.CloneCollection();
-			propertyDescriptorCollection.InternalSort(order);
-			return propertyDescriptorCollection;
-		}
-
-		public virtual PropertyDescriptorCollection Sort(string[] order, IComparer comparer)
-		{
-			PropertyDescriptorCollection propertyDescriptorCollection = this.CloneCollection();
-			if (order != null)
-			{
-				ArrayList arrayList = propertyDescriptorCollection.ExtractItems(order);
-				propertyDescriptorCollection.InternalSort(comparer);
-				arrayList.AddRange(propertyDescriptorCollection.properties);
-				propertyDescriptorCollection.properties = arrayList;
-			}
-			else
-			{
-				propertyDescriptorCollection.InternalSort(comparer);
-			}
-			return propertyDescriptorCollection;
-		}
-
-		protected void InternalSort(IComparer ic)
-		{
-			if (ic == null)
-			{
-				ic = MemberDescriptor.DefaultComparer;
-			}
-			this.properties.Sort(ic);
-		}
-
-		protected void InternalSort(string[] order)
-		{
-			if (order != null)
-			{
-				ArrayList arrayList = this.ExtractItems(order);
-				this.InternalSort(null);
-				arrayList.AddRange(this.properties);
-				this.properties = arrayList;
-			}
-			else
-			{
-				this.InternalSort(null);
-			}
-		}
-
-		private ArrayList ExtractItems(string[] names)
-		{
-			ArrayList arrayList = new ArrayList(this.properties.Count);
-			object[] array = new object[names.Length];
-			for (int i = 0; i < this.properties.Count; i++)
-			{
-				PropertyDescriptor propertyDescriptor = (PropertyDescriptor)this.properties[i];
-				int num = Array.IndexOf<string>(names, propertyDescriptor.Name);
-				if (num != -1)
-				{
-					array[num] = propertyDescriptor;
-					this.properties.RemoveAt(i);
-					i--;
-				}
-			}
-			foreach (object obj in array)
-			{
-				if (obj != null)
-				{
-					arrayList.Add(obj);
-				}
-			}
-			return arrayList;
-		}
-
-		internal PropertyDescriptorCollection Filter(Attribute[] attributes)
-		{
-			ArrayList arrayList = new ArrayList();
-			foreach (object obj in this.properties)
-			{
-				PropertyDescriptor propertyDescriptor = (PropertyDescriptor)obj;
-				if (propertyDescriptor.Attributes.Contains(attributes))
-				{
-					arrayList.Add(propertyDescriptor);
-				}
-			}
-			PropertyDescriptor[] array = new PropertyDescriptor[arrayList.Count];
-			arrayList.CopyTo(array);
-			return new PropertyDescriptorCollection(array, true);
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.properties.Count;
-			}
-		}
-
-		public virtual PropertyDescriptor this[string s]
-		{
-			get
-			{
-				return this.Find(s, false);
-			}
-		}
-
-		public virtual PropertyDescriptor this[int index]
-		{
-			get
-			{
-				return (PropertyDescriptor)this.properties[index];
+				this.EnsurePropsOwned();
+				this.properties[index] = (PropertyDescriptor)value;
 			}
 		}
 
 		public static readonly PropertyDescriptorCollection Empty = new PropertyDescriptorCollection(null, true);
 
-		private ArrayList properties;
+		private IDictionary cachedFoundProperties;
+
+		private bool cachedIgnoreCase;
+
+		private PropertyDescriptor[] properties;
+
+		private int propCount;
+
+		private string[] namedSort;
+
+		private IComparer comparer;
+
+		private bool propsOwned = true;
+
+		private bool needSort;
 
 		private bool readOnly;
+
+		private class PropertyDescriptorEnumerator : IDictionaryEnumerator, IEnumerator
+		{
+			public PropertyDescriptorEnumerator(PropertyDescriptorCollection owner)
+			{
+				this.owner = owner;
+			}
+
+			public object Current
+			{
+				get
+				{
+					return this.Entry;
+				}
+			}
+
+			public DictionaryEntry Entry
+			{
+				get
+				{
+					PropertyDescriptor propertyDescriptor = this.owner[this.index];
+					return new DictionaryEntry(propertyDescriptor.Name, propertyDescriptor);
+				}
+			}
+
+			public object Key
+			{
+				get
+				{
+					return this.owner[this.index].Name;
+				}
+			}
+
+			public object Value
+			{
+				get
+				{
+					return this.owner[this.index].Name;
+				}
+			}
+
+			public bool MoveNext()
+			{
+				if (this.index < this.owner.Count - 1)
+				{
+					this.index++;
+					return true;
+				}
+				return false;
+			}
+
+			public void Reset()
+			{
+				this.index = -1;
+			}
+
+			private PropertyDescriptorCollection owner;
+
+			private int index = -1;
+		}
 	}
 }

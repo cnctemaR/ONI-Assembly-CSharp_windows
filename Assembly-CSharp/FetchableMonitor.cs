@@ -30,10 +30,10 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 
 	public new class Instance : GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public Instance(Pickupable pickupable)
+			: base(pickupable)
 		{
-			this.pickupable = base.GetComponent<Pickupable>();
+			this.pickupable = pickupable;
 			this.equippable = base.GetComponent<Equippable>();
 		}
 

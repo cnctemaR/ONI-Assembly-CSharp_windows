@@ -27,6 +27,16 @@ namespace System.Reflection.Emit
 			return this.tokValue == obj.tokValue;
 		}
 
+		public static bool operator ==(SignatureToken a, SignatureToken b)
+		{
+			return object.Equals(a, b);
+		}
+
+		public static bool operator !=(SignatureToken a, SignatureToken b)
+		{
+			return !object.Equals(a, b);
+		}
+
 		public override int GetHashCode()
 		{
 			return this.tokValue;
@@ -40,18 +50,8 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		public static bool operator ==(SignatureToken a, SignatureToken b)
-		{
-			return object.Equals(a, b);
-		}
-
-		public static bool operator !=(SignatureToken a, SignatureToken b)
-		{
-			return !object.Equals(a, b);
-		}
-
 		internal int tokValue;
 
-		public static readonly SignatureToken Empty = default(SignatureToken);
+		public static readonly SignatureToken Empty;
 	}
 }

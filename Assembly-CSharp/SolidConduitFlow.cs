@@ -671,11 +671,7 @@ public class SolidConduitFlow : IConduitFlow
 		Pickupable pickupable = this.RemovePickupable(cell);
 		if (pickupable)
 		{
-			GameObject folder = SceneOrganizer.Instance.GetFolder(Folder.Loot);
-			if (folder != null)
-			{
-				pickupable.transform.parent = folder.transform;
-			}
+			pickupable.transform.parent = null;
 		}
 	}
 
@@ -683,11 +679,7 @@ public class SolidConduitFlow : IConduitFlow
 	{
 		if (pickupable)
 		{
-			GameObject folder = SceneOrganizer.Instance.GetFolder(Folder.Loot);
-			if (folder != null)
-			{
-				pickupable.transform.parent = folder.transform;
-			}
+			pickupable.transform.parent = null;
 		}
 	}
 
@@ -1234,11 +1226,7 @@ public class SolidConduitFlow : IConduitFlow
 				Pickupable pickupable = manager.GetPickupable(contents.pickupableHandle);
 				if (pickupable != null)
 				{
-					GameObject folder = SceneOrganizer.Instance.GetFolder(Folder.Loot);
-					if (folder != null)
-					{
-						pickupable.transform.parent = folder.transform;
-					}
+					pickupable.transform.parent = null;
 					Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.SolidConduitContents);
 					pickupable.transform.SetPosition(vector);
 					KBatchedAnimController component = pickupable.GetComponent<KBatchedAnimController>();

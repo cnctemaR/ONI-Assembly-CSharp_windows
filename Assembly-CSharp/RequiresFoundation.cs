@@ -79,7 +79,7 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 		}
 	}
 
-	public static Operational.Flag solidFoundation = new Operational.Flag("solid_foundation", Operational.Flag.Type.Functional);
+	public static readonly Operational.Flag solidFoundation = new Operational.Flag("solid_foundation", Operational.Flag.Type.Functional);
 
 	public struct Data
 	{

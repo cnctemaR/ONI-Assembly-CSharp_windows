@@ -462,6 +462,22 @@ public class GroundRenderer : KMonoBehaviour
 			this.elementChunks.Clear();
 		}
 
+		private static void InsertSorted(Element element, Element[] array, int size)
+		{
+			int num = (int)element.id;
+			for (int i = 0; i < size; i++)
+			{
+				Element element2 = array[i];
+				if (element2.id > (SimHashes)num)
+				{
+					array[i] = element;
+					element = element2;
+					num = (int)element2.id;
+				}
+			}
+			array[size] = element;
+		}
+
 		public void Rebuild(GroundMasks.BiomeMaskData[] biomeMasks, Dictionary<SimHashes, GroundRenderer.Materials> materials)
 		{
 			foreach (GroundRenderer.ElementChunk elementChunk in this.elementChunks)
@@ -491,10 +507,9 @@ public class GroundRenderer : KMonoBehaviour
 					GroundRenderer.WorldChunk.substances[2] = ((!Grid.RenderedByWorld[num7] || !GroundRenderer.WorldChunk.elements[2].IsSolid) ? (-1) : GroundRenderer.WorldChunk.elements[2].substance.idx);
 					GroundRenderer.WorldChunk.substances[3] = ((!Grid.RenderedByWorld[num8] || !GroundRenderer.WorldChunk.elements[3].IsSolid) ? (-1) : GroundRenderer.WorldChunk.elements[3].substance.idx);
 					GroundRenderer.WorldChunk.uniqueElements[0] = GroundRenderer.WorldChunk.elements[0];
-					GroundRenderer.WorldChunk.uniqueElements[1] = GroundRenderer.WorldChunk.elements[1];
-					GroundRenderer.WorldChunk.uniqueElements[2] = GroundRenderer.WorldChunk.elements[2];
-					GroundRenderer.WorldChunk.uniqueElements[3] = GroundRenderer.WorldChunk.elements[3];
-					Array.Sort<Element>(GroundRenderer.WorldChunk.uniqueElements);
+					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[1], GroundRenderer.WorldChunk.uniqueElements, 1);
+					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[2], GroundRenderer.WorldChunk.uniqueElements, 2);
+					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[3], GroundRenderer.WorldChunk.uniqueElements, 3);
 					int num9 = -1;
 					int num10 = i * Grid.WidthInCells + j;
 					int biomeIdx = GroundRenderer.WorldChunk.GetBiomeIdx(num10);

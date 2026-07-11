@@ -8,7 +8,7 @@ public class Gradient<T>
 		this.content = content;
 	}
 
-	public T content { get; private set; }
+	public T content { get; protected set; }
 
 	public float bandSize { get; protected set; }
 

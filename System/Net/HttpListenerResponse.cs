@@ -12,11 +12,6 @@ namespace System.Net
 			this.context = context;
 		}
 
-		void IDisposable.Dispose()
-		{
-			this.Close(true);
-		}
-
 		internal bool ForceCloseChunked
 		{
 			get
@@ -247,128 +242,7 @@ namespace System.Net
 					throw new ProtocolViolationException("StatusCode must be between 100 and 999.");
 				}
 				this.status_code = value;
-				this.status_description = HttpListenerResponse.GetStatusDescription(value);
-			}
-		}
-
-		internal static string GetStatusDescription(int code)
-		{
-			switch (code)
-			{
-			case 400:
-				return "Bad Request";
-			case 401:
-				return "Unauthorized";
-			case 402:
-				return "Payment Required";
-			case 403:
-				return "Forbidden";
-			case 404:
-				return "Not Found";
-			case 405:
-				return "Method Not Allowed";
-			case 406:
-				return "Not Acceptable";
-			case 407:
-				return "Proxy Authentication Required";
-			case 408:
-				return "Request Timeout";
-			case 409:
-				return "Conflict";
-			case 410:
-				return "Gone";
-			case 411:
-				return "Length Required";
-			case 412:
-				return "Precondition Failed";
-			case 413:
-				return "Request Entity Too Large";
-			case 414:
-				return "Request-Uri Too Long";
-			case 415:
-				return "Unsupported Media Type";
-			case 416:
-				return "Requested Range Not Satisfiable";
-			case 417:
-				return "Expectation Failed";
-			default:
-				switch (code)
-				{
-				case 200:
-					return "OK";
-				case 201:
-					return "Created";
-				case 202:
-					return "Accepted";
-				case 203:
-					return "Non-Authoritative Information";
-				case 204:
-					return "No Content";
-				case 205:
-					return "Reset Content";
-				case 206:
-					return "Partial Content";
-				case 207:
-					return "Multi-Status";
-				default:
-					switch (code)
-					{
-					case 300:
-						return "Multiple Choices";
-					case 301:
-						return "Moved Permanently";
-					case 302:
-						return "Found";
-					case 303:
-						return "See Other";
-					case 304:
-						return "Not Modified";
-					case 305:
-						return "Use Proxy";
-					default:
-						switch (code)
-						{
-						case 500:
-							return "Internal Server Error";
-						case 501:
-							return "Not Implemented";
-						case 502:
-							return "Bad Gateway";
-						case 503:
-							return "Service Unavailable";
-						case 504:
-							return "Gateway Timeout";
-						case 505:
-							return "Http Version Not Supported";
-						default:
-							switch (code)
-							{
-							case 100:
-								return "Continue";
-							case 101:
-								return "Switching Protocols";
-							case 102:
-								return "Processing";
-							default:
-								return string.Empty;
-							}
-							break;
-						case 507:
-							return "Insufficient Storage";
-						}
-						break;
-					case 307:
-						return "Temporary Redirect";
-					}
-					break;
-				}
-				break;
-			case 422:
-				return "Unprocessable Entity";
-			case 423:
-				return "Locked";
-			case 424:
-				return "Failed Dependency";
+				this.status_description = HttpStatusDescription.Get(value);
 			}
 		}
 
@@ -382,6 +256,11 @@ namespace System.Net
 			{
 				this.status_description = value;
 			}
+		}
+
+		void IDisposable.Dispose()
+		{
+			this.Close(true);
 		}
 
 		public void Abort()
@@ -399,7 +278,7 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("name");
 			}
-			if (name == string.Empty)
+			if (name == "")
 			{
 				throw new ArgumentException("'name' cannot be empty", "name");
 			}
@@ -425,7 +304,7 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("name");
 			}
-			if (name == string.Empty)
+			if (name == "")
 			{
 				throw new ArgumentException("'name' cannot be empty", "name");
 			}
@@ -491,15 +370,9 @@ namespace System.Net
 			foreach (object obj in this.cookies)
 			{
 				Cookie cookie2 = (Cookie)obj;
-				if (!(name != cookie2.Name))
+				if (!(name != cookie2.Name) && !(domain != cookie2.Domain) && path == cookie2.Path)
 				{
-					if (!(domain != cookie2.Domain))
-					{
-						if (path == cookie2.Path)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
 			}
 			return false;
@@ -514,7 +387,7 @@ namespace System.Net
 			}
 			if (this.content_type != null)
 			{
-				if (this.content_encoding != null && this.content_type.IndexOf("charset=") == -1)
+				if (this.content_encoding != null && this.content_type.IndexOf("charset=", StringComparison.Ordinal) == -1)
 				{
 					string webName = this.content_encoding.WebName;
 					this.headers.SetInternal("Content-Type", this.content_type + "; charset=" + webName);
@@ -553,24 +426,33 @@ namespace System.Net
 			bool flag = this.status_code == 400 || this.status_code == 408 || this.status_code == 411 || this.status_code == 413 || this.status_code == 414 || this.status_code == 500 || this.status_code == 503;
 			if (!flag)
 			{
-				flag = this.context.Request.Headers["connection"] == "close";
-				flag |= protocolVersion <= HttpVersion.Version10;
+				flag = !this.context.Request.KeepAlive;
 			}
 			if (!this.keep_alive || flag)
 			{
 				this.headers.SetInternal("Connection", "close");
+				flag = true;
 			}
 			if (this.chunked)
 			{
 				this.headers.SetInternal("Transfer-Encoding", "chunked");
 			}
-			int chunkedUses = this.context.Connection.ChunkedUses;
-			if (chunkedUses >= 100)
+			int reuses = this.context.Connection.Reuses;
+			if (reuses >= 100)
 			{
 				this.force_close_chunked = true;
 				if (!flag)
 				{
 					this.headers.SetInternal("Connection", "close");
+					flag = true;
+				}
+			}
+			if (!flag)
+			{
+				this.headers.SetInternal("Keep-Alive", string.Format("timeout=15,max={0}", 100 - reuses));
+				if (this.context.Request.ProtocolVersion <= HttpVersion.Version10)
+				{
+					this.headers.SetInternal("Connection", "keep-alive");
 				}
 			}
 			if (this.location != null)
@@ -582,12 +464,12 @@ namespace System.Net
 				foreach (object obj in this.cookies)
 				{
 					Cookie cookie = (Cookie)obj;
-					this.headers.SetInternal("Set-Cookie", cookie.ToClientString());
+					this.headers.SetInternal("Set-Cookie", HttpListenerResponse.CookieToClientString(cookie));
 				}
 			}
-			StreamWriter streamWriter = new StreamWriter(ms, @default);
+			StreamWriter streamWriter = new StreamWriter(ms, @default, 256);
 			streamWriter.Write("HTTP/{0} {1} {2}\r\n", this.version, this.status_code, this.status_description);
-			string text = this.headers.ToStringMultiValue();
+			string text = HttpListenerResponse.FormatHeaders(this.headers);
 			streamWriter.Write(text);
 			streamWriter.Flush();
 			int num = @default.GetPreamble().Length;
@@ -597,6 +479,79 @@ namespace System.Net
 			}
 			ms.Position = (long)num;
 			this.HeadersSent = true;
+		}
+
+		private static string FormatHeaders(WebHeaderCollection headers)
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			for (int i = 0; i < headers.Count; i++)
+			{
+				string key = headers.GetKey(i);
+				if (WebHeaderCollection.AllowMultiValues(key))
+				{
+					foreach (string text in headers.GetValues(i))
+					{
+						stringBuilder.Append(key).Append(": ").Append(text)
+							.Append("\r\n");
+					}
+				}
+				else
+				{
+					stringBuilder.Append(key).Append(": ").Append(headers.Get(i))
+						.Append("\r\n");
+				}
+			}
+			return stringBuilder.Append("\r\n").ToString();
+		}
+
+		private static string CookieToClientString(Cookie cookie)
+		{
+			if (cookie.Name.Length == 0)
+			{
+				return string.Empty;
+			}
+			StringBuilder stringBuilder = new StringBuilder(64);
+			if (cookie.Version > 0)
+			{
+				stringBuilder.Append("Version=").Append(cookie.Version).Append(";");
+			}
+			stringBuilder.Append(cookie.Name).Append("=").Append(cookie.Value);
+			if (cookie.Path != null && cookie.Path.Length != 0)
+			{
+				stringBuilder.Append(";Path=").Append(HttpListenerResponse.QuotedString(cookie, cookie.Path));
+			}
+			if (cookie.Domain != null && cookie.Domain.Length != 0)
+			{
+				stringBuilder.Append(";Domain=").Append(HttpListenerResponse.QuotedString(cookie, cookie.Domain));
+			}
+			if (cookie.Port != null && cookie.Port.Length != 0)
+			{
+				stringBuilder.Append(";Port=").Append(cookie.Port);
+			}
+			return stringBuilder.ToString();
+		}
+
+		private static string QuotedString(Cookie cookie, string value)
+		{
+			if (cookie.Version == 0 || HttpListenerResponse.IsToken(value))
+			{
+				return value;
+			}
+			return "\"" + value.Replace("\"", "\\\"") + "\"";
+		}
+
+		private static bool IsToken(string value)
+		{
+			int length = value.Length;
+			for (int i = 0; i < length; i++)
+			{
+				char c = value[i];
+				if (c < ' ' || c >= '\u007f' || HttpListenerResponse.tspecials.IndexOf(c) != -1)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public void SetCookie(Cookie cookie)
@@ -651,6 +606,10 @@ namespace System.Net
 
 		internal bool HeadersSent;
 
+		internal object headers_lock = new object();
+
 		private bool force_close_chunked;
+
+		private static string tspecials = "()<>@,;:\\\"/[]?={} \t";
 	}
 }

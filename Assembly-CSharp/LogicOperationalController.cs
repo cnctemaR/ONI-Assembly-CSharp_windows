@@ -51,7 +51,7 @@ public class LogicOperationalController : KMonoBehaviour
 
 	public int unNetworkedValue = 1;
 
-	private static Operational.Flag logicOperationalFlag = new Operational.Flag("LogicOperational", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag logicOperationalFlag = new Operational.Flag("LogicOperational", Operational.Flag.Type.Requirement);
 
 	private static StatusItem infoStatusItem;
 

@@ -2,13 +2,8 @@
 
 namespace UnityEngine
 {
-	public enum ProceduralLoadingBehavior
+	internal enum ProceduralLoadingBehavior
 	{
-		DoNothing,
-		Generate,
-		BakeAndKeep,
-		BakeAndDiscard,
-		Cache,
-		DoNothingAndCache
+
 	}
 }

@@ -7,20 +7,20 @@ public class BloomEffect : MonoBehaviour
 	{
 		get
 		{
-			if (BloomEffect.m_Material == null)
+			if (this.m_Material == null)
 			{
-				BloomEffect.m_Material = new Material(this.blurShader);
-				BloomEffect.m_Material.hideFlags = HideFlags.DontSave;
+				this.m_Material = new Material(this.blurShader);
+				this.m_Material.hideFlags = HideFlags.DontSave;
 			}
-			return BloomEffect.m_Material;
+			return this.m_Material;
 		}
 	}
 
 	protected void OnDisable()
 	{
-		if (BloomEffect.m_Material)
+		if (this.m_Material)
 		{
-			global::UnityEngine.Object.DestroyImmediate(BloomEffect.m_Material);
+			global::UnityEngine.Object.DestroyImmediate(this.m_Material);
 		}
 	}
 
@@ -98,5 +98,5 @@ public class BloomEffect : MonoBehaviour
 
 	public Shader blurShader;
 
-	private static Material m_Material;
+	private Material m_Material;
 }

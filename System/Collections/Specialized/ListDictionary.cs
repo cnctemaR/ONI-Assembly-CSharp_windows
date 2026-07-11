@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace System.Collections.Specialized
 {
@@ -7,102 +8,84 @@ namespace System.Collections.Specialized
 	{
 		public ListDictionary()
 		{
-			this.count = 0;
-			this.version = 0;
-			this.comparer = null;
-			this.head = null;
 		}
 
 		public ListDictionary(IComparer comparer)
-			: this()
 		{
 			this.comparer = comparer;
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
+		public object this[object key]
 		{
-			return new ListDictionary.DictionaryNodeEnumerator(this);
-		}
-
-		private ListDictionary.DictionaryNode FindEntry(object key)
-		{
-			if (key == null)
+			get
 			{
-				throw new ArgumentNullException("key", "Attempted lookup for a null key.");
-			}
-			ListDictionary.DictionaryNode dictionaryNode = this.head;
-			if (this.comparer == null)
-			{
-				while (dictionaryNode != null)
+				if (key == null)
 				{
-					if (key.Equals(dictionaryNode.key))
+					throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+				}
+				ListDictionary.DictionaryNode dictionaryNode = this.head;
+				if (this.comparer == null)
+				{
+					while (dictionaryNode != null)
+					{
+						object key2 = dictionaryNode.key;
+						if (key2 != null && key2.Equals(key))
+						{
+							return dictionaryNode.value;
+						}
+						dictionaryNode = dictionaryNode.next;
+					}
+				}
+				else
+				{
+					while (dictionaryNode != null)
+					{
+						object key3 = dictionaryNode.key;
+						if (key3 != null && this.comparer.Compare(key3, key) == 0)
+						{
+							return dictionaryNode.value;
+						}
+						dictionaryNode = dictionaryNode.next;
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if (key == null)
+				{
+					throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+				}
+				this.version++;
+				ListDictionary.DictionaryNode dictionaryNode = null;
+				ListDictionary.DictionaryNode next;
+				for (next = this.head; next != null; next = next.next)
+				{
+					object key2 = next.key;
+					if ((this.comparer == null) ? key2.Equals(key) : (this.comparer.Compare(key2, key) == 0))
 					{
 						break;
 					}
-					dictionaryNode = dictionaryNode.next;
+					dictionaryNode = next;
 				}
-			}
-			else
-			{
-				while (dictionaryNode != null)
+				if (next != null)
 				{
-					if (this.comparer.Compare(key, dictionaryNode.key) == 0)
-					{
-						break;
-					}
-					dictionaryNode = dictionaryNode.next;
+					next.value = value;
+					return;
 				}
-			}
-			return dictionaryNode;
-		}
-
-		private ListDictionary.DictionaryNode FindEntry(object key, out ListDictionary.DictionaryNode prev)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key", "Attempted lookup for a null key.");
-			}
-			ListDictionary.DictionaryNode dictionaryNode = this.head;
-			prev = null;
-			if (this.comparer == null)
-			{
-				while (dictionaryNode != null)
+				ListDictionary.DictionaryNode dictionaryNode2 = new ListDictionary.DictionaryNode();
+				dictionaryNode2.key = key;
+				dictionaryNode2.value = value;
+				if (dictionaryNode != null)
 				{
-					if (key.Equals(dictionaryNode.key))
-					{
-						break;
-					}
-					prev = dictionaryNode;
-					dictionaryNode = dictionaryNode.next;
+					dictionaryNode.next = dictionaryNode2;
 				}
-			}
-			else
-			{
-				while (dictionaryNode != null)
+				else
 				{
-					if (this.comparer.Compare(key, dictionaryNode.key) == 0)
-					{
-						break;
-					}
-					prev = dictionaryNode;
-					dictionaryNode = dictionaryNode.next;
+					this.head = dictionaryNode2;
 				}
+				this.count++;
 			}
-			return dictionaryNode;
-		}
-
-		private void AddImpl(object key, object value, ListDictionary.DictionaryNode prev)
-		{
-			if (prev == null)
-			{
-				this.head = new ListDictionary.DictionaryNode(key, value, this.head);
-			}
-			else
-			{
-				prev.next = new ListDictionary.DictionaryNode(key, value, prev.next);
-			}
-			this.count++;
-			this.version++;
 		}
 
 		public int Count
@@ -110,6 +93,30 @@ namespace System.Collections.Specialized
 			get
 			{
 				return this.count;
+			}
+		}
+
+		public ICollection Keys
+		{
+			get
+			{
+				return new ListDictionary.NodeKeyValueCollection(this, true);
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public bool IsFixedSize
+		{
+			get
+			{
+				return false;
 			}
 		}
 
@@ -125,78 +132,11 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return this;
-			}
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array", "Array cannot be null.");
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", "index is less than 0");
-			}
-			if (index > array.Length)
-			{
-				throw new IndexOutOfRangeException("index is too large");
-			}
-			if (this.Count > array.Length - index)
-			{
-				throw new ArgumentException("Not enough room in the array");
-			}
-			foreach (object obj in this)
-			{
-				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-				array.SetValue(dictionaryEntry, index++);
-			}
-		}
-
-		public bool IsFixedSize
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public object this[object key]
-		{
-			get
-			{
-				ListDictionary.DictionaryNode dictionaryNode = this.FindEntry(key);
-				return (dictionaryNode != null) ? dictionaryNode.value : null;
-			}
-			set
-			{
-				ListDictionary.DictionaryNode dictionaryNode2;
-				ListDictionary.DictionaryNode dictionaryNode = this.FindEntry(key, out dictionaryNode2);
-				if (dictionaryNode != null)
+				if (this._syncRoot == null)
 				{
-					dictionaryNode.value = value;
+					Interlocked.CompareExchange(ref this._syncRoot, new object(), null);
 				}
-				else
-				{
-					this.AddImpl(key, value, dictionaryNode2);
-				}
-			}
-		}
-
-		public ICollection Keys
-		{
-			get
-			{
-				return new ListDictionary.DictionaryNodeCollection(this, true);
+				return this._syncRoot;
 			}
 		}
 
@@ -204,117 +144,147 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return new ListDictionary.DictionaryNodeCollection(this, false);
+				return new ListDictionary.NodeKeyValueCollection(this, false);
 			}
 		}
 
 		public void Add(object key, object value)
 		{
-			ListDictionary.DictionaryNode dictionaryNode2;
-			ListDictionary.DictionaryNode dictionaryNode = this.FindEntry(key, out dictionaryNode2);
+			if (key == null)
+			{
+				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+			}
+			this.version++;
+			ListDictionary.DictionaryNode dictionaryNode = null;
+			for (ListDictionary.DictionaryNode next = this.head; next != null; next = next.next)
+			{
+				object key2 = next.key;
+				if ((this.comparer == null) ? key2.Equals(key) : (this.comparer.Compare(key2, key) == 0))
+				{
+					throw new ArgumentException(global::SR.GetString("An item with the same key has already been added. Key: {0}"));
+				}
+				dictionaryNode = next;
+			}
+			ListDictionary.DictionaryNode dictionaryNode2 = new ListDictionary.DictionaryNode();
+			dictionaryNode2.key = key;
+			dictionaryNode2.value = value;
 			if (dictionaryNode != null)
 			{
-				throw new ArgumentException("key", "Duplicate key in add.");
+				dictionaryNode.next = dictionaryNode2;
 			}
-			this.AddImpl(key, value, dictionaryNode2);
+			else
+			{
+				this.head = dictionaryNode2;
+			}
+			this.count++;
 		}
 
 		public void Clear()
 		{
-			this.head = null;
 			this.count = 0;
+			this.head = null;
 			this.version++;
 		}
 
 		public bool Contains(object key)
 		{
-			return this.FindEntry(key) != null;
+			if (key == null)
+			{
+				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+			}
+			for (ListDictionary.DictionaryNode next = this.head; next != null; next = next.next)
+			{
+				object key2 = next.key;
+				if ((this.comparer == null) ? key2.Equals(key) : (this.comparer.Compare(key2, key) == 0))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", global::SR.GetString("Non-negative number required."));
+			}
+			if (array.Length - index < this.count)
+			{
+				throw new ArgumentException(global::SR.GetString("Insufficient space in the target location to copy the information."));
+			}
+			for (ListDictionary.DictionaryNode next = this.head; next != null; next = next.next)
+			{
+				array.SetValue(new DictionaryEntry(next.key, next.value), index);
+				index++;
+			}
 		}
 
 		public IDictionaryEnumerator GetEnumerator()
 		{
-			return new ListDictionary.DictionaryNodeEnumerator(this);
+			return new ListDictionary.NodeEnumerator(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new ListDictionary.NodeEnumerator(this);
 		}
 
 		public void Remove(object key)
 		{
-			ListDictionary.DictionaryNode dictionaryNode2;
-			ListDictionary.DictionaryNode dictionaryNode = this.FindEntry(key, out dictionaryNode2);
-			if (dictionaryNode == null)
+			if (key == null)
+			{
+				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
+			}
+			this.version++;
+			ListDictionary.DictionaryNode dictionaryNode = null;
+			ListDictionary.DictionaryNode next;
+			for (next = this.head; next != null; next = next.next)
+			{
+				object key2 = next.key;
+				if ((this.comparer == null) ? key2.Equals(key) : (this.comparer.Compare(key2, key) == 0))
+				{
+					break;
+				}
+				dictionaryNode = next;
+			}
+			if (next == null)
 			{
 				return;
 			}
-			if (dictionaryNode2 == null)
+			if (next == this.head)
 			{
-				this.head = dictionaryNode.next;
+				this.head = next.next;
 			}
 			else
 			{
-				dictionaryNode2.next = dictionaryNode.next;
+				dictionaryNode.next = next.next;
 			}
-			dictionaryNode.value = null;
 			this.count--;
-			this.version++;
 		}
-
-		private int count;
-
-		private int version;
 
 		private ListDictionary.DictionaryNode head;
 
+		private int version;
+
+		private int count;
+
 		private IComparer comparer;
 
-		[Serializable]
-		private class DictionaryNode
+		[NonSerialized]
+		private object _syncRoot;
+
+		private class NodeEnumerator : IDictionaryEnumerator, IEnumerator
 		{
-			public DictionaryNode(object key, object value, ListDictionary.DictionaryNode next)
+			public NodeEnumerator(ListDictionary list)
 			{
-				this.key = key;
-				this.value = value;
-				this.next = next;
-			}
-
-			public object key;
-
-			public object value;
-
-			public ListDictionary.DictionaryNode next;
-		}
-
-		private class DictionaryNodeEnumerator : IEnumerator, IDictionaryEnumerator
-		{
-			public DictionaryNodeEnumerator(ListDictionary dict)
-			{
-				this.dict = dict;
-				this.version = dict.version;
-				this.Reset();
-			}
-
-			private void FailFast()
-			{
-				if (this.version != this.dict.version)
-				{
-					throw new InvalidOperationException("The ListDictionary's contents changed after this enumerator was instantiated.");
-				}
-			}
-
-			public bool MoveNext()
-			{
-				this.FailFast();
-				if (this.current == null && !this.isAtStart)
-				{
-					return false;
-				}
-				this.current = ((!this.isAtStart) ? this.current.next : this.dict.head);
-				this.isAtStart = false;
-				return this.current != null;
-			}
-
-			public void Reset()
-			{
-				this.FailFast();
-				this.isAtStart = true;
+				this.list = list;
+				this.version = list.version;
+				this.start = true;
 				this.current = null;
 			}
 
@@ -326,25 +296,15 @@ namespace System.Collections.Specialized
 				}
 			}
 
-			private ListDictionary.DictionaryNode DictionaryNode
-			{
-				get
-				{
-					this.FailFast();
-					if (this.current == null)
-					{
-						throw new InvalidOperationException("Enumerator is positioned before the collection's first element or after the last element.");
-					}
-					return this.current;
-				}
-			}
-
 			public DictionaryEntry Entry
 			{
 				get
 				{
-					object key = this.DictionaryNode.key;
-					return new DictionaryEntry(key, this.current.value);
+					if (this.current == null)
+					{
+						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+					}
+					return new DictionaryEntry(this.current.key, this.current.value);
 				}
 			}
 
@@ -352,7 +312,11 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					return this.DictionaryNode.key;
+					if (this.current == null)
+					{
+						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+					}
+					return this.current.key;
 				}
 			}
 
@@ -360,36 +324,90 @@ namespace System.Collections.Specialized
 			{
 				get
 				{
-					return this.DictionaryNode.value;
+					if (this.current == null)
+					{
+						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+					}
+					return this.current.value;
 				}
 			}
 
-			private ListDictionary dict;
+			public bool MoveNext()
+			{
+				if (this.version != this.list.version)
+				{
+					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+				}
+				if (this.start)
+				{
+					this.current = this.list.head;
+					this.start = false;
+				}
+				else if (this.current != null)
+				{
+					this.current = this.current.next;
+				}
+				return this.current != null;
+			}
 
-			private bool isAtStart;
+			public void Reset()
+			{
+				if (this.version != this.list.version)
+				{
+					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+				}
+				this.start = true;
+				this.current = null;
+			}
+
+			private ListDictionary list;
 
 			private ListDictionary.DictionaryNode current;
 
 			private int version;
+
+			private bool start;
 		}
 
-		private class DictionaryNodeCollection : ICollection, IEnumerable
+		private class NodeKeyValueCollection : ICollection, IEnumerable
 		{
-			public DictionaryNodeCollection(ListDictionary dict, bool isKeyList)
+			public NodeKeyValueCollection(ListDictionary list, bool isKeys)
 			{
-				this.dict = dict;
-				this.isKeyList = isKeyList;
+				this.list = list;
+				this.isKeys = isKeys;
 			}
 
-			public int Count
+			void ICollection.CopyTo(Array array, int index)
 			{
-				get
+				if (array == null)
 				{
-					return this.dict.Count;
+					throw new ArgumentNullException("array");
+				}
+				if (index < 0)
+				{
+					throw new ArgumentOutOfRangeException("index", global::SR.GetString("Non-negative number required."));
+				}
+				for (ListDictionary.DictionaryNode dictionaryNode = this.list.head; dictionaryNode != null; dictionaryNode = dictionaryNode.next)
+				{
+					array.SetValue(this.isKeys ? dictionaryNode.key : dictionaryNode.value, index);
+					index++;
 				}
 			}
 
-			public bool IsSynchronized
+			int ICollection.Count
+			{
+				get
+				{
+					int num = 0;
+					for (ListDictionary.DictionaryNode dictionaryNode = this.list.head; dictionaryNode != null; dictionaryNode = dictionaryNode.next)
+					{
+						num++;
+					}
+					return num;
+				}
+			}
+
+			bool ICollection.IsSynchronized
 			{
 				get
 				{
@@ -397,77 +415,98 @@ namespace System.Collections.Specialized
 				}
 			}
 
-			public object SyncRoot
+			object ICollection.SyncRoot
 			{
 				get
 				{
-					return this.dict.SyncRoot;
+					return this.list.SyncRoot;
 				}
 			}
 
-			public void CopyTo(Array array, int index)
+			IEnumerator IEnumerable.GetEnumerator()
 			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array", "Array cannot be null.");
-				}
-				if (index < 0)
-				{
-					throw new ArgumentOutOfRangeException("index", "index is less than 0");
-				}
-				if (index > array.Length)
-				{
-					throw new IndexOutOfRangeException("index is too large");
-				}
-				if (this.Count > array.Length - index)
-				{
-					throw new ArgumentException("Not enough room in the array");
-				}
-				foreach (object obj in this)
-				{
-					array.SetValue(obj, index++);
-				}
+				return new ListDictionary.NodeKeyValueCollection.NodeKeyValueEnumerator(this.list, this.isKeys);
 			}
 
-			public IEnumerator GetEnumerator()
+			private ListDictionary list;
+
+			private bool isKeys;
+
+			private class NodeKeyValueEnumerator : IEnumerator
 			{
-				return new ListDictionary.DictionaryNodeCollection.DictionaryNodeCollectionEnumerator(this.dict.GetEnumerator(), this.isKeyList);
-			}
-
-			private ListDictionary dict;
-
-			private bool isKeyList;
-
-			private class DictionaryNodeCollectionEnumerator : IEnumerator
-			{
-				public DictionaryNodeCollectionEnumerator(IDictionaryEnumerator inner, bool isKeyList)
+				public NodeKeyValueEnumerator(ListDictionary list, bool isKeys)
 				{
-					this.inner = inner;
-					this.isKeyList = isKeyList;
+					this.list = list;
+					this.isKeys = isKeys;
+					this.version = list.version;
+					this.start = true;
+					this.current = null;
 				}
 
 				public object Current
 				{
 					get
 					{
-						return (!this.isKeyList) ? this.inner.Value : this.inner.Key;
+						if (this.current == null)
+						{
+							throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						}
+						if (!this.isKeys)
+						{
+							return this.current.value;
+						}
+						return this.current.key;
 					}
 				}
 
 				public bool MoveNext()
 				{
-					return this.inner.MoveNext();
+					if (this.version != this.list.version)
+					{
+						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					}
+					if (this.start)
+					{
+						this.current = this.list.head;
+						this.start = false;
+					}
+					else if (this.current != null)
+					{
+						this.current = this.current.next;
+					}
+					return this.current != null;
 				}
 
 				public void Reset()
 				{
-					this.inner.Reset();
+					if (this.version != this.list.version)
+					{
+						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					}
+					this.start = true;
+					this.current = null;
 				}
 
-				private IDictionaryEnumerator inner;
+				private ListDictionary list;
 
-				private bool isKeyList;
+				private ListDictionary.DictionaryNode current;
+
+				private int version;
+
+				private bool isKeys;
+
+				private bool start;
 			}
+		}
+
+		[Serializable]
+		private class DictionaryNode
+		{
+			public object key;
+
+			public object value;
+
+			public ListDictionary.DictionaryNode next;
 		}
 	}
 }

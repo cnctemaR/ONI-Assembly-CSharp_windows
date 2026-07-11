@@ -5,7 +5,7 @@ namespace System.Runtime.Remoting.Messaging
 	[Serializable]
 	internal class CallContextRemotingData : ICloneable
 	{
-		public string LogicalCallID
+		internal string LogicalCallID
 		{
 			get
 			{
@@ -17,11 +17,19 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
+		internal bool HasInfo
+		{
+			get
+			{
+				return this._logicalCallID != null;
+			}
+		}
+
 		public object Clone()
 		{
 			return new CallContextRemotingData
 			{
-				_logicalCallID = this._logicalCallID
+				LogicalCallID = this.LogicalCallID
 			};
 		}
 

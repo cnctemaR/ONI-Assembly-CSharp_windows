@@ -7,41 +7,24 @@ namespace System
 	{
 		public ConsoleKeyInfo(char keyChar, ConsoleKey key, bool shift, bool alt, bool control)
 		{
-			this.key = key;
-			this.keychar = keyChar;
-			this.modifiers = (ConsoleModifiers)0;
-			this.SetModifiers(shift, alt, control);
-		}
-
-		internal ConsoleKeyInfo(ConsoleKeyInfo other)
-		{
-			this.key = other.key;
-			this.keychar = other.keychar;
-			this.modifiers = other.modifiers;
-		}
-
-		internal void SetKey(ConsoleKey key)
-		{
-			this.key = key;
-		}
-
-		internal void SetKeyChar(char keyChar)
-		{
-			this.keychar = keyChar;
-		}
-
-		internal void SetModifiers(bool shift, bool alt, bool control)
-		{
-			this.modifiers = ((!shift) ? ((ConsoleModifiers)0) : ConsoleModifiers.Shift);
-			this.modifiers |= ((!alt) ? ((ConsoleModifiers)0) : ConsoleModifiers.Alt);
-			this.modifiers |= ((!control) ? ((ConsoleModifiers)0) : ConsoleModifiers.Control);
-		}
-
-		public ConsoleKey Key
-		{
-			get
+			if (key < (ConsoleKey)0 || key > (ConsoleKey)255)
 			{
-				return this.key;
+				throw new ArgumentOutOfRangeException("key", Environment.GetResourceString("Console key values must be between 0 and 255."));
+			}
+			this._keyChar = keyChar;
+			this._key = key;
+			this._mods = (ConsoleModifiers)0;
+			if (shift)
+			{
+				this._mods |= ConsoleModifiers.Shift;
+			}
+			if (alt)
+			{
+				this._mods |= ConsoleModifiers.Alt;
+			}
+			if (control)
+			{
+				this._mods |= ConsoleModifiers.Control;
 			}
 		}
 
@@ -49,7 +32,15 @@ namespace System
 		{
 			get
 			{
-				return this.keychar;
+				return this._keyChar;
+			}
+		}
+
+		public ConsoleKey Key
+		{
+			get
+			{
+				return this._key;
 			}
 		}
 
@@ -57,7 +48,7 @@ namespace System
 		{
 			get
 			{
-				return this.modifiers;
+				return this._mods;
 			}
 		}
 
@@ -68,12 +59,7 @@ namespace System
 
 		public bool Equals(ConsoleKeyInfo obj)
 		{
-			return this.key == obj.key && obj.keychar == this.keychar && obj.modifiers == this.modifiers;
-		}
-
-		public override int GetHashCode()
-		{
-			return this.key.GetHashCode() ^ this.keychar.GetHashCode() ^ this.modifiers.GetHashCode();
+			return obj._keyChar == this._keyChar && obj._key == this._key && obj._mods == this._mods;
 		}
 
 		public static bool operator ==(ConsoleKeyInfo a, ConsoleKeyInfo b)
@@ -83,15 +69,18 @@ namespace System
 
 		public static bool operator !=(ConsoleKeyInfo a, ConsoleKeyInfo b)
 		{
-			return !a.Equals(b);
+			return !(a == b);
 		}
 
-		internal static ConsoleKeyInfo Empty = new ConsoleKeyInfo('\0', (ConsoleKey)0, false, false, false);
+		public override int GetHashCode()
+		{
+			return (int)((ConsoleModifiers)this._keyChar | this._mods);
+		}
 
-		private ConsoleKey key;
+		private char _keyChar;
 
-		private char keychar;
+		private ConsoleKey _key;
 
-		private ConsoleModifiers modifiers;
+		private ConsoleModifiers _mods;
 	}
 }

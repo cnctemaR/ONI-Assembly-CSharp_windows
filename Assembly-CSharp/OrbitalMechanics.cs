@@ -67,7 +67,7 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 				GameObject prefab = Assets.GetPrefab(orbitData.prefabTag);
 				bool flag;
 				Vector3 vector = this.CalculatePos(ref orbitData, time, out flag);
-				GameObject gameObject2 = Util.KInstantiate(prefab, Folder.Entities, vector);
+				GameObject gameObject2 = Util.KInstantiate(prefab, vector);
 				gameObject2.SetActive(true);
 				this.orbitingObjects[j] = gameObject2;
 			}

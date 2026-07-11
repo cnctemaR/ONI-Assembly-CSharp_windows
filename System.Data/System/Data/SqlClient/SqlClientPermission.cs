@@ -10,40 +10,28 @@ namespace System.Data.SqlClient
 	{
 		[Obsolete("Use SqlClientPermission(PermissionState.None)", true)]
 		public SqlClientPermission()
-			: this(PermissionState.None)
+			: base(null)
 		{
 		}
 
 		public SqlClientPermission(PermissionState state)
-			: base(state)
+			: base(null)
 		{
 		}
 
 		[Obsolete("Use SqlClientPermission(PermissionState.None)", true)]
 		public SqlClientPermission(PermissionState state, bool allowBlankPassword)
-			: base(state)
-		{
-			base.AllowBlankPassword = allowBlankPassword;
-		}
-
-		internal SqlClientPermission(DBDataPermission permission)
-			: base(permission)
+			: base(null)
 		{
 		}
 
-		internal SqlClientPermission(DBDataPermissionAttribute attribute)
-			: base(attribute)
+		public override void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior)
 		{
 		}
 
 		public override IPermission Copy()
 		{
-			return new SqlClientPermission(this);
-		}
-
-		public override void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior)
-		{
-			base.Add(connectionString, restrictions, behavior);
+			throw null;
 		}
 	}
 }

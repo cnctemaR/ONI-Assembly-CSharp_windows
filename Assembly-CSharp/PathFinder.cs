@@ -251,7 +251,7 @@ public class PathFinder
 
 	public static PathGrid PathGrid;
 
-	private static Func<int, bool> allowPathfindingFloodFillCb = delegate(int cell)
+	private static readonly Func<int, bool> allowPathfindingFloodFillCb = delegate(int cell)
 	{
 		if (Grid.Solid[cell])
 		{

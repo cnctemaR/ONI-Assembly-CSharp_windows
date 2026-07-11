@@ -13,7 +13,7 @@ public class PacuConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = PacuConfig.CreatePacu("Pacu", CREATURES.SPECIES.PACU.NAME, CREATURES.SPECIES.PACU.DESC, "pacu_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuEgg", CREATURES.SPECIES.PACU.EGG_NAME, CREATURES.SPECIES.PACU.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_BASE, PacuConfig.EGG_SORT_ORDER, false, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuEgg", CREATURES.SPECIES.PACU.EGG_NAME, CREATURES.SPECIES.PACU.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_BASE, 500, false, true, false, 0.75f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -31,5 +31,5 @@ public class PacuConfig : IEntityConfig
 
 	public const string EGG_ID = "PacuEgg";
 
-	public static int EGG_SORT_ORDER = 500;
+	public const int EGG_SORT_ORDER = 500;
 }

@@ -95,7 +95,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 		}
 	}
 
-	public static Operational.Flag PumpableFlag = new Operational.Flag("vent", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag PumpableFlag = new Operational.Flag("vent", Operational.Flag.Type.Requirement);
 
 	[MyCmpReq]
 	private Operational operational;

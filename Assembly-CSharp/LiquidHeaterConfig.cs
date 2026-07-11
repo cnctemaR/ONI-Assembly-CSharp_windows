@@ -25,7 +25,6 @@ public class LiquidHeaterConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 4000f;
 		buildingDef.SelfHeatKilowattsWhenActive = 64f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "SolidMetal";
 		buildingDef.OverheatTemperature = 398.15f;
 		return buildingDef;

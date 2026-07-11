@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Security.AccessControl;
 using System.Security.Permissions;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.IO
@@ -12,19 +14,19 @@ namespace System.IO
 	{
 		[Obsolete("Use FileStream(SafeFileHandle handle, FileAccess access) instead")]
 		public FileStream(IntPtr handle, FileAccess access)
-			: this(handle, access, true, 8192, false)
+			: this(handle, access, true, 4096, false, false)
 		{
 		}
 
 		[Obsolete("Use FileStream(SafeFileHandle handle, FileAccess access) instead")]
 		public FileStream(IntPtr handle, FileAccess access, bool ownsHandle)
-			: this(handle, access, ownsHandle, 8192, false)
+			: this(handle, access, ownsHandle, 4096, false, false)
 		{
 		}
 
 		[Obsolete("Use FileStream(SafeFileHandle handle, FileAccess access, int bufferSize) instead")]
 		public FileStream(IntPtr handle, FileAccess access, bool ownsHandle, int bufferSize)
-			: this(handle, access, ownsHandle, bufferSize, false)
+			: this(handle, access, ownsHandle, bufferSize, false, false)
 		{
 		}
 
@@ -34,67 +36,30 @@ namespace System.IO
 		{
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
-		internal FileStream(IntPtr handle, FileAccess access, bool ownsHandle, int bufferSize, bool isAsync, bool noBuffering)
+		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		internal FileStream(IntPtr handle, FileAccess access, bool ownsHandle, int bufferSize, bool isAsync, bool isConsoleWrapper)
 		{
 			this.name = "[Unknown]";
 			base..ctor();
-			this.handle = MonoIO.InvalidHandle;
-			if (handle == this.handle)
+			if (handle == MonoIO.InvalidHandle)
 			{
 				throw new ArgumentException("handle", Locale.GetText("Invalid."));
 			}
-			if (access < FileAccess.Read || access > FileAccess.ReadWrite)
-			{
-				throw new ArgumentOutOfRangeException("access");
-			}
-			MonoIOError monoIOError;
-			MonoFileType fileType = MonoIO.GetFileType(handle, out monoIOError);
-			if (monoIOError != MonoIOError.ERROR_SUCCESS)
-			{
-				throw MonoIO.GetException(this.name, monoIOError);
-			}
-			if (fileType == MonoFileType.Unknown)
-			{
-				throw new IOException("Invalid handle.");
-			}
-			if (fileType == MonoFileType.Disk)
-			{
-				this.canseek = true;
-			}
-			else
-			{
-				this.canseek = false;
-			}
-			this.handle = handle;
-			this.access = access;
-			this.owner = ownsHandle;
-			this.async = isAsync;
-			this.anonymous = false;
-			this.InitBuffer(bufferSize, noBuffering);
-			if (this.canseek)
-			{
-				this.buf_start = MonoIO.Seek(handle, 0L, SeekOrigin.Current, out monoIOError);
-				if (monoIOError != MonoIOError.ERROR_SUCCESS)
-				{
-					throw MonoIO.GetException(this.name, monoIOError);
-				}
-			}
-			this.append_startpos = 0L;
+			this.Init(new SafeFileHandle(handle, false), access, ownsHandle, bufferSize, isAsync, isConsoleWrapper);
 		}
 
 		public FileStream(string path, FileMode mode)
-			: this(path, mode, (mode != FileMode.Append) ? FileAccess.ReadWrite : FileAccess.Write, FileShare.Read, 8192, false, FileOptions.None)
+			: this(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, FileShare.Read, 4096, false, FileOptions.None)
 		{
 		}
 
 		public FileStream(string path, FileMode mode, FileAccess access)
-			: this(path, mode, access, (access != FileAccess.Write) ? FileShare.Read : FileShare.None, 8192, false, false)
+			: this(path, mode, access, (access == FileAccess.Write) ? FileShare.None : FileShare.Read, 4096, false, false)
 		{
 		}
 
 		public FileStream(string path, FileMode mode, FileAccess access, FileShare share)
-			: this(path, mode, access, share, 8192, false, FileOptions.None)
+			: this(path, mode, access, share, 4096, false, FileOptions.None)
 		{
 		}
 
@@ -104,7 +69,7 @@ namespace System.IO
 		}
 
 		public FileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, bool useAsync)
-			: this(path, mode, access, share, bufferSize, useAsync, FileOptions.None)
+			: this(path, mode, access, share, bufferSize, useAsync ? FileOptions.Asynchronous : FileOptions.None)
 		{
 		}
 
@@ -114,7 +79,7 @@ namespace System.IO
 		}
 
 		public FileStream(SafeFileHandle handle, FileAccess access)
-			: this(handle, access, 8192, false)
+			: this(handle, access, 4096, false)
 		{
 		}
 
@@ -123,29 +88,32 @@ namespace System.IO
 		{
 		}
 
-		[MonoLimitation("Need to use SafeFileHandle instead of underlying handle")]
 		public FileStream(SafeFileHandle handle, FileAccess access, int bufferSize, bool isAsync)
-			: this(handle.DangerousGetHandle(), access, false, bufferSize, isAsync)
 		{
-			this.safeHandle = handle;
+			this.name = "[Unknown]";
+			base..ctor();
+			this.Init(handle, access, false, bufferSize, isAsync, false);
 		}
 
+		[MonoLimitation("This ignores the rights parameter")]
 		public FileStream(string path, FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options)
+			: this(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, share, bufferSize, false, options)
 		{
-			this.name = "[Unknown]";
-			base..ctor();
-			throw new NotImplementedException();
 		}
 
+		[MonoLimitation("This ignores the rights and fileSecurity parameters")]
 		public FileStream(string path, FileMode mode, FileSystemRights rights, FileShare share, int bufferSize, FileOptions options, FileSecurity fileSecurity)
+			: this(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, share, bufferSize, false, options)
 		{
-			this.name = "[Unknown]";
-			base..ctor();
-			throw new NotImplementedException();
+		}
+
+		internal FileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options, string msgPath, bool bFromProxy, bool useLongPath = false, bool checkHost = false)
+			: this(path, mode, access, share, bufferSize, false, options)
+		{
 		}
 
 		internal FileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, bool isAsync, bool anonymous)
-			: this(path, mode, access, share, bufferSize, anonymous, (!isAsync) ? FileOptions.None : FileOptions.Asynchronous)
+			: this(path, mode, access, share, bufferSize, anonymous, isAsync ? FileOptions.Asynchronous : FileOptions.None)
 		{
 		}
 
@@ -161,6 +129,7 @@ namespace System.IO
 			{
 				throw new ArgumentException("Path is empty");
 			}
+			this.anonymous = anonymous;
 			share &= ~FileShare.Inheritable;
 			if (bufferSize <= 0)
 			{
@@ -182,10 +151,10 @@ namespace System.IO
 			{
 				throw new ArgumentException("Name has invalid chars");
 			}
+			path = Path.InsecureGetFullPath(path);
 			if (Directory.Exists(path))
 			{
-				string text = Locale.GetText("Access to the path '{0}' is denied.");
-				throw new UnauthorizedAccessException(string.Format(text, this.GetSecureFileName(path, false)));
+				throw new UnauthorizedAccessException(string.Format(Locale.GetText("Access to the path '{0}' is denied."), this.GetSecureFileName(path, false)));
 			}
 			if (mode == FileMode.Append && (access & FileAccess.Read) == FileAccess.Read)
 			{
@@ -193,63 +162,44 @@ namespace System.IO
 			}
 			if ((access & FileAccess.Write) == (FileAccess)0 && mode != FileMode.Open && mode != FileMode.OpenOrCreate)
 			{
-				string text2 = Locale.GetText("Combining FileMode: {0} with FileAccess: {1} is invalid.");
-				throw new ArgumentException(string.Format(text2, access, mode));
+				throw new ArgumentException(string.Format(Locale.GetText("Combining FileMode: {0} with FileAccess: {1} is invalid."), access, mode));
 			}
-			string text3;
-			if (Path.DirectorySeparatorChar != '/' && path.IndexOf('/') >= 0)
+			string directoryName = Path.GetDirectoryName(path);
+			if (directoryName.Length > 0 && !Directory.Exists(Path.GetFullPath(directoryName)))
 			{
-				text3 = Path.GetDirectoryName(Path.GetFullPath(path));
-			}
-			else
-			{
-				text3 = Path.GetDirectoryName(path);
-			}
-			if (text3.Length > 0)
-			{
-				string fullPath = Path.GetFullPath(text3);
-				if (!Directory.Exists(fullPath))
-				{
-					string text4 = Locale.GetText("Could not find a part of the path \"{0}\".");
-					string text5 = ((!anonymous) ? Path.GetFullPath(path) : text3);
-					throw new DirectoryNotFoundException(string.Format(text4, text5));
-				}
-			}
-			if (access == FileAccess.Read && mode != FileMode.Create && mode != FileMode.OpenOrCreate && mode != FileMode.CreateNew && !File.Exists(path))
-			{
-				string text6 = Locale.GetText("Could not find file \"{0}\".");
-				string secureFileName = this.GetSecureFileName(path);
-				throw new FileNotFoundException(string.Format(text6, secureFileName), secureFileName);
+				string text = Locale.GetText("Could not find a part of the path \"{0}\".");
+				string text2 = (anonymous ? directoryName : Path.GetFullPath(path));
+				throw new DirectoryNotFoundException(string.Format(text, text2));
 			}
 			if (!anonymous)
 			{
 				this.name = path;
 			}
 			MonoIOError monoIOError;
-			this.handle = MonoIO.Open(path, mode, access, share, options, out monoIOError);
-			if (this.handle == MonoIO.InvalidHandle)
+			IntPtr intPtr = MonoIO.Open(path, mode, access, share, options, out monoIOError);
+			if (intPtr == MonoIO.InvalidHandle)
 			{
 				throw MonoIO.GetException(this.GetSecureFileName(path), monoIOError);
 			}
+			this.safeHandle = new SafeFileHandle(intPtr, false);
 			this.access = access;
 			this.owner = true;
-			this.anonymous = anonymous;
-			if (MonoIO.GetFileType(this.handle, out monoIOError) == MonoFileType.Disk)
+			if (MonoIO.GetFileType(this.safeHandle, out monoIOError) == MonoFileType.Disk)
 			{
 				this.canseek = true;
-				this.async = (options & FileOptions.Asynchronous) != FileOptions.None;
+				this.async = (options & FileOptions.Asynchronous) > FileOptions.None;
 			}
 			else
 			{
 				this.canseek = false;
 				this.async = false;
 			}
-			if (access == FileAccess.Read && this.canseek && bufferSize == 8192)
+			if (access == FileAccess.Read && this.canseek && bufferSize == 4096)
 			{
 				long length = this.Length;
 				if ((long)bufferSize > length)
 				{
-					bufferSize = (int)((length >= 1000L) ? length : 1000L);
+					bufferSize = (int)((length < 1000L) ? 1000L : length);
 				}
 			}
 			this.InitBuffer(bufferSize, false);
@@ -257,11 +207,58 @@ namespace System.IO
 			{
 				this.Seek(0L, SeekOrigin.End);
 				this.append_startpos = this.Position;
+				return;
+			}
+			this.append_startpos = 0L;
+		}
+
+		private void Init(SafeFileHandle safeHandle, FileAccess access, bool ownsHandle, int bufferSize, bool isAsync, bool isConsoleWrapper)
+		{
+			if (!isConsoleWrapper && safeHandle.IsInvalid)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Invalid handle."), "handle");
+			}
+			if (access < FileAccess.Read || access > FileAccess.ReadWrite)
+			{
+				throw new ArgumentOutOfRangeException("access");
+			}
+			if (!isConsoleWrapper && bufferSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
+			}
+			MonoIOError monoIOError;
+			MonoFileType fileType = MonoIO.GetFileType(safeHandle, out monoIOError);
+			if (monoIOError != MonoIOError.ERROR_SUCCESS)
+			{
+				throw MonoIO.GetException(this.name, monoIOError);
+			}
+			if (fileType == MonoFileType.Unknown)
+			{
+				throw new IOException("Invalid handle.");
+			}
+			if (fileType == MonoFileType.Disk)
+			{
+				this.canseek = true;
 			}
 			else
 			{
-				this.append_startpos = 0L;
+				this.canseek = false;
 			}
+			this.safeHandle = safeHandle;
+			this.ExposeHandle();
+			this.access = access;
+			this.owner = ownsHandle;
+			this.async = isAsync;
+			this.anonymous = false;
+			if (this.canseek)
+			{
+				this.buf_start = MonoIO.Seek(safeHandle, 0L, SeekOrigin.Current, out monoIOError);
+				if (monoIOError != MonoIOError.ERROR_SUCCESS)
+				{
+					throw MonoIO.GetException(this.name, monoIOError);
+				}
+			}
+			this.append_startpos = 0L;
 		}
 
 		public override bool CanRead
@@ -308,7 +305,7 @@ namespace System.IO
 		{
 			get
 			{
-				if (this.handle == MonoIO.InvalidHandle)
+				if (this.safeHandle.IsClosed)
 				{
 					throw new ObjectDisposedException("Stream has been closed");
 				}
@@ -318,7 +315,7 @@ namespace System.IO
 				}
 				this.FlushBufferIfDirty();
 				MonoIOError monoIOError;
-				long length = MonoIO.GetLength(this.handle, out monoIOError);
+				long length = MonoIO.GetLength(this.safeHandle, out monoIOError);
 				if (monoIOError != MonoIOError.ERROR_SUCCESS)
 				{
 					throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
@@ -331,7 +328,7 @@ namespace System.IO
 		{
 			get
 			{
-				if (this.handle == MonoIO.InvalidHandle)
+				if (this.safeHandle.IsClosed)
 				{
 					throw new ObjectDisposedException("Stream has been closed");
 				}
@@ -339,21 +336,23 @@ namespace System.IO
 				{
 					throw new NotSupportedException("The stream does not support seeking");
 				}
-				return this.buf_start + (long)this.buf_offset;
+				if (!this.isExposed)
+				{
+					return this.buf_start + (long)this.buf_offset;
+				}
+				MonoIOError monoIOError;
+				long num = MonoIO.Seek(this.safeHandle, 0L, SeekOrigin.Current, out monoIOError);
+				if (monoIOError != MonoIOError.ERROR_SUCCESS)
+				{
+					throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
+				}
+				return num;
 			}
 			set
 			{
-				if (this.handle == MonoIO.InvalidHandle)
-				{
-					throw new ObjectDisposedException("Stream has been closed");
-				}
-				if (!this.CanSeek)
-				{
-					throw new NotSupportedException("The stream does not support seeking");
-				}
 				if (value < 0L)
 				{
-					throw new ArgumentOutOfRangeException("Attempt to set the position to a negative value");
+					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Non-negative number required."));
 				}
 				this.Seek(value, SeekOrigin.Begin);
 			}
@@ -362,37 +361,43 @@ namespace System.IO
 		[Obsolete("Use SafeFileHandle instead")]
 		public virtual IntPtr Handle
 		{
-			[PermissionSet(SecurityAction.InheritanceDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
-			[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
+			[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 			get
 			{
-				return this.handle;
+				IntPtr intPtr = this.safeHandle.DangerousGetHandle();
+				if (!this.isExposed)
+				{
+					this.ExposeHandle();
+				}
+				return intPtr;
 			}
 		}
 
 		public virtual SafeFileHandle SafeFileHandle
 		{
-			[PermissionSet(SecurityAction.InheritanceDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
-			[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
+			[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 			get
 			{
-				SafeFileHandle safeFileHandle;
-				if (this.safeHandle != null)
+				if (!this.isExposed)
 				{
-					safeFileHandle = this.safeHandle;
+					this.ExposeHandle();
 				}
-				else
-				{
-					safeFileHandle = new SafeFileHandle(this.handle, this.owner);
-				}
-				this.FlushBuffer();
-				return safeFileHandle;
+				return this.safeHandle;
 			}
+		}
+
+		private void ExposeHandle()
+		{
+			this.isExposed = true;
+			this.FlushBuffer();
+			this.InitBuffer(0, true);
 		}
 
 		public override int ReadByte()
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -410,9 +415,12 @@ namespace System.IO
 						return -1;
 					}
 				}
-				return (int)this.buf[this.buf_offset++];
+				byte[] array = this.buf;
+				int num = this.buf_offset;
+				this.buf_offset = num + 1;
+				return array[num];
 			}
-			if (this.ReadData(this.handle, this.buf, 0, 1) == 0)
+			if (this.ReadData(this.safeHandle, this.buf, 0, 1) == 0)
 			{
 				return -1;
 			}
@@ -421,7 +429,7 @@ namespace System.IO
 
 		public override void WriteByte(byte value)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -441,7 +449,10 @@ namespace System.IO
 				this.FlushBuffer();
 				return;
 			}
-			this.buf[this.buf_offset++] = value;
+			byte[] array = this.buf;
+			int num = this.buf_offset;
+			this.buf_offset = num + 1;
+			array[num] = value;
 			if (this.buf_offset > this.buf_length)
 			{
 				this.buf_length = this.buf_offset;
@@ -451,7 +462,7 @@ namespace System.IO
 
 		public override int Read([In] [Out] byte[] array, int offset, int count)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -490,31 +501,30 @@ namespace System.IO
 
 		private int ReadInternal(byte[] dest, int offset, int count)
 		{
-			int num = 0;
-			int num2 = this.ReadSegment(dest, offset, count);
-			num += num2;
-			count -= num2;
-			if (count == 0)
+			int num = this.ReadSegment(dest, offset, count);
+			if (num == count)
 			{
-				return num;
+				return count;
 			}
+			int num2 = num;
+			count -= num;
 			if (count > this.buf_size)
 			{
 				this.FlushBuffer();
-				num2 = this.ReadData(this.handle, dest, offset + num, count);
-				this.buf_start += (long)num2;
+				num = this.ReadData(this.safeHandle, dest, offset + num, count);
+				this.buf_start += (long)num;
 			}
 			else
 			{
 				this.RefillBuffer();
-				num2 = this.ReadSegment(dest, offset + num, count);
+				num = this.ReadSegment(dest, offset + num2, count);
 			}
-			return num + num2;
+			return num2 + num;
 		}
 
 		public override IAsyncResult BeginRead(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -542,8 +552,7 @@ namespace System.IO
 			{
 				return base.BeginRead(array, offset, numBytes, userCallback, stateObject);
 			}
-			FileStream.ReadDelegate readDelegate = new FileStream.ReadDelegate(this.ReadInternal);
-			return readDelegate.BeginInvoke(array, offset, numBytes, userCallback, stateObject);
+			return new FileStream.ReadDelegate(this.ReadInternal).BeginInvoke(array, offset, numBytes, userCallback, stateObject);
 		}
 
 		public override int EndRead(IAsyncResult asyncResult)
@@ -571,7 +580,7 @@ namespace System.IO
 
 		public override void Write(byte[] array, int offset, int count)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -609,11 +618,20 @@ namespace System.IO
 			if (count > this.buf_size)
 			{
 				this.FlushBuffer();
+				if (this.CanSeek && !this.isExposed)
+				{
+					MonoIOError monoIOError;
+					MonoIO.Seek(this.safeHandle, this.buf_start, SeekOrigin.Begin, out monoIOError);
+					if (monoIOError != MonoIOError.ERROR_SUCCESS)
+					{
+						throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
+					}
+				}
 				int i = count;
 				while (i > 0)
 				{
 					MonoIOError monoIOError;
-					int num = MonoIO.Write(this.handle, src, offset, i, out monoIOError);
+					int num = MonoIO.Write(this.safeHandle, src, offset, i, out monoIOError);
 					if (monoIOError != MonoIOError.ERROR_SUCCESS)
 					{
 						throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
@@ -622,27 +640,25 @@ namespace System.IO
 					offset += num;
 				}
 				this.buf_start += (long)count;
+				return;
 			}
-			else
+			int num2 = 0;
+			while (count > 0)
 			{
-				int num2 = 0;
-				while (count > 0)
+				int num3 = this.WriteSegment(src, offset + num2, count);
+				num2 += num3;
+				count -= num3;
+				if (count == 0)
 				{
-					int num3 = this.WriteSegment(src, offset + num2, count);
-					num2 += num3;
-					count -= num3;
-					if (count == 0)
-					{
-						break;
-					}
-					this.FlushBuffer();
+					break;
 				}
+				this.FlushBuffer();
 			}
 		}
 
 		public override IAsyncResult BeginWrite(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -674,16 +690,7 @@ namespace System.IO
 			fileStreamAsyncResult.BytesRead = -1;
 			fileStreamAsyncResult.Count = numBytes;
 			fileStreamAsyncResult.OriginalCount = numBytes;
-			if (this.buf_dirty)
-			{
-				MemoryStream memoryStream = new MemoryStream();
-				this.FlushBuffer(memoryStream);
-				memoryStream.Write(array, offset, numBytes);
-				offset = 0;
-				numBytes = (int)memoryStream.Length;
-			}
-			FileStream.WriteDelegate writeDelegate = new FileStream.WriteDelegate(this.WriteInternal);
-			return writeDelegate.BeginInvoke(array, offset, numBytes, userCallback, stateObject);
+			return new FileStream.WriteDelegate(this.WriteInternal).BeginInvoke(array, offset, numBytes, userCallback, stateObject);
 		}
 
 		public override void EndWrite(IAsyncResult asyncResult)
@@ -712,7 +719,7 @@ namespace System.IO
 
 		public override long Seek(long offset, SeekOrigin origin)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -745,7 +752,7 @@ namespace System.IO
 			}
 			this.FlushBuffer();
 			MonoIOError monoIOError;
-			this.buf_start = MonoIO.Seek(this.handle, num, SeekOrigin.Begin, out monoIOError);
+			this.buf_start = MonoIO.Seek(this.safeHandle, num, SeekOrigin.Begin, out monoIOError);
 			if (monoIOError != MonoIOError.ERROR_SUCCESS)
 			{
 				throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
@@ -755,7 +762,7 @@ namespace System.IO
 
 		public override void SetLength(long value)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -771,9 +778,9 @@ namespace System.IO
 			{
 				throw new ArgumentOutOfRangeException("value is less than 0");
 			}
-			this.Flush();
+			this.FlushBuffer();
 			MonoIOError monoIOError;
-			MonoIO.SetLength(this.handle, value, out monoIOError);
+			MonoIO.SetLength(this.safeHandle, value, out monoIOError);
 			if (monoIOError != MonoIOError.ERROR_SUCCESS)
 			{
 				throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
@@ -786,16 +793,30 @@ namespace System.IO
 
 		public override void Flush()
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
 			this.FlushBuffer();
 		}
 
+		public virtual void Flush(bool flushToDisk)
+		{
+			if (this.safeHandle.IsClosed)
+			{
+				throw new ObjectDisposedException("Stream has been closed");
+			}
+			this.FlushBuffer();
+			if (flushToDisk)
+			{
+				MonoIOError monoIOError;
+				MonoIO.Flush(this.safeHandle, out monoIOError);
+			}
+		}
+
 		public virtual void Lock(long position, long length)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -807,12 +828,8 @@ namespace System.IO
 			{
 				throw new ArgumentOutOfRangeException("length must not be negative");
 			}
-			if (this.handle == MonoIO.InvalidHandle)
-			{
-				throw new ObjectDisposedException("Stream has been closed");
-			}
 			MonoIOError monoIOError;
-			MonoIO.Lock(this.handle, position, length, out monoIOError);
+			MonoIO.Lock(this.safeHandle, position, length, out monoIOError);
 			if (monoIOError != MonoIOError.ERROR_SUCCESS)
 			{
 				throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
@@ -821,7 +838,7 @@ namespace System.IO
 
 		public virtual void Unlock(long position, long length)
 		{
-			if (this.handle == MonoIO.InvalidHandle)
+			if (this.safeHandle.IsClosed)
 			{
 				throw new ObjectDisposedException("Stream has been closed");
 			}
@@ -834,7 +851,7 @@ namespace System.IO
 				throw new ArgumentOutOfRangeException("length must not be negative");
 			}
 			MonoIOError monoIOError;
-			MonoIO.Unlock(this.handle, position, length, out monoIOError);
+			MonoIO.Unlock(this.safeHandle, position, length, out monoIOError);
 			if (monoIOError != MonoIOError.ERROR_SUCCESS)
 			{
 				throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
@@ -849,35 +866,42 @@ namespace System.IO
 		protected override void Dispose(bool disposing)
 		{
 			Exception ex = null;
-			if (this.handle != MonoIO.InvalidHandle)
+			if (this.safeHandle != null && !this.safeHandle.IsClosed)
 			{
 				try
 				{
 					this.FlushBuffer();
 				}
-				catch (Exception ex2)
+				catch (Exception ex)
 				{
-					ex = ex2;
 				}
 				if (this.owner)
 				{
 					MonoIOError monoIOError;
-					MonoIO.Close(this.handle, out monoIOError);
+					MonoIO.Close(this.safeHandle.DangerousGetHandle(), out monoIOError);
 					if (monoIOError != MonoIOError.ERROR_SUCCESS)
 					{
 						throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
 					}
-					this.handle = MonoIO.InvalidHandle;
+					this.safeHandle.DangerousRelease();
 				}
 			}
 			this.canseek = false;
 			this.access = (FileAccess)0;
-			if (disposing)
+			if (disposing && this.buf != null)
 			{
+				if (this.buf.Length == 4096 && FileStream.buf_recycle == null)
+				{
+					object obj = FileStream.buf_recycle_lock;
+					lock (obj)
+					{
+						if (FileStream.buf_recycle == null)
+						{
+							FileStream.buf_recycle = this.buf;
+						}
+					}
+				}
 				this.buf = null;
-			}
-			if (disposing)
-			{
 				GC.SuppressFinalize(this);
 			}
 			if (ex != null)
@@ -888,23 +912,51 @@ namespace System.IO
 
 		public FileSecurity GetAccessControl()
 		{
-			throw new NotImplementedException();
+			if (this.safeHandle.IsClosed)
+			{
+				throw new ObjectDisposedException("Stream has been closed");
+			}
+			return new FileSecurity(this.SafeFileHandle, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
 		}
 
 		public void SetAccessControl(FileSecurity fileSecurity)
 		{
-			throw new NotImplementedException();
+			if (this.safeHandle.IsClosed)
+			{
+				throw new ObjectDisposedException("Stream has been closed");
+			}
+			if (fileSecurity == null)
+			{
+				throw new ArgumentNullException("fileSecurity");
+			}
+			fileSecurity.PersistModifications(this.SafeFileHandle);
+		}
+
+		public override Task FlushAsync(CancellationToken cancellationToken)
+		{
+			if (this.safeHandle.IsClosed)
+			{
+				throw new ObjectDisposedException("Stream has been closed");
+			}
+			return base.FlushAsync(cancellationToken);
+		}
+
+		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			return base.ReadAsync(buffer, offset, count, cancellationToken);
+		}
+
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			return base.WriteAsync(buffer, offset, count, cancellationToken);
 		}
 
 		private int ReadSegment(byte[] dest, int dest_offset, int count)
 		{
-			if (count > this.buf_length - this.buf_offset)
-			{
-				count = this.buf_length - this.buf_offset;
-			}
+			count = Math.Min(count, this.buf_length - this.buf_offset);
 			if (count > 0)
 			{
-				Buffer.BlockCopy(this.buf, this.buf_offset, dest, dest_offset, count);
+				Buffer.InternalBlockCopy(this.buf, this.buf_offset, dest, dest_offset, count);
 				this.buf_offset += count;
 			}
 			return count;
@@ -929,31 +981,31 @@ namespace System.IO
 			return count;
 		}
 
-		private void FlushBuffer(Stream st)
+		private void FlushBuffer()
 		{
 			if (this.buf_dirty)
 			{
-				if (this.CanSeek)
+				if (this.CanSeek && !this.isExposed)
 				{
 					MonoIOError monoIOError;
-					MonoIO.Seek(this.handle, this.buf_start, SeekOrigin.Begin, out monoIOError);
+					MonoIO.Seek(this.safeHandle, this.buf_start, SeekOrigin.Begin, out monoIOError);
 					if (monoIOError != MonoIOError.ERROR_SUCCESS)
 					{
 						throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
 					}
 				}
-				if (st == null)
+				int i = this.buf_length;
+				int num = 0;
+				while (i > 0)
 				{
 					MonoIOError monoIOError;
-					MonoIO.Write(this.handle, this.buf, 0, this.buf_length, out monoIOError);
+					int num2 = MonoIO.Write(this.safeHandle, this.buf, num, this.buf_length, out monoIOError);
 					if (monoIOError != MonoIOError.ERROR_SUCCESS)
 					{
 						throw MonoIO.GetException(this.GetSecureFileName(this.name), monoIOError);
 					}
-				}
-				else
-				{
-					st.Write(this.buf, 0, this.buf_length);
+					i -= num2;
+					num += num2;
 				}
 			}
 			this.buf_start += (long)this.buf_offset;
@@ -961,29 +1013,24 @@ namespace System.IO
 			this.buf_dirty = false;
 		}
 
-		private void FlushBuffer()
-		{
-			this.FlushBuffer(null);
-		}
-
 		private void FlushBufferIfDirty()
 		{
 			if (this.buf_dirty)
 			{
-				this.FlushBuffer(null);
+				this.FlushBuffer();
 			}
 		}
 
 		private void RefillBuffer()
 		{
-			this.FlushBuffer(null);
-			this.buf_length = this.ReadData(this.handle, this.buf, 0, this.buf_size);
+			this.FlushBuffer();
+			this.buf_length = this.ReadData(this.safeHandle, this.buf, 0, this.buf_size);
 		}
 
-		private int ReadData(IntPtr handle, byte[] buf, int offset, int count)
+		private int ReadData(SafeHandle safeHandle, byte[] buf, int offset, int count)
 		{
 			MonoIOError monoIOError;
-			int num = MonoIO.Read(handle, buf, offset, count, out monoIOError);
+			int num = MonoIO.Read(safeHandle, buf, offset, count, out monoIOError);
 			if (monoIOError == MonoIOError.ERROR_BROKEN_PIPE)
 			{
 				num = 0;
@@ -999,9 +1046,9 @@ namespace System.IO
 			return num;
 		}
 
-		private void InitBuffer(int size, bool noBuffering)
+		private void InitBuffer(int size, bool isZeroSize)
 		{
-			if (noBuffering)
+			if (isZeroSize)
 			{
 				size = 0;
 				this.buf = new byte[1];
@@ -1012,29 +1059,68 @@ namespace System.IO
 				{
 					throw new ArgumentOutOfRangeException("bufferSize", "Positive number required.");
 				}
-				if (size < 8)
+				size = Math.Max(size, 8);
+				if (size <= 4096 && FileStream.buf_recycle != null)
 				{
-					size = 8;
+					object obj = FileStream.buf_recycle_lock;
+					lock (obj)
+					{
+						if (FileStream.buf_recycle != null)
+						{
+							this.buf = FileStream.buf_recycle;
+							FileStream.buf_recycle = null;
+						}
+					}
 				}
-				this.buf = new byte[size];
+				if (this.buf == null)
+				{
+					this.buf = new byte[size];
+				}
+				else
+				{
+					Array.Clear(this.buf, 0, size);
+				}
 			}
 			this.buf_size = size;
-			this.buf_start = 0L;
-			this.buf_offset = (this.buf_length = 0);
-			this.buf_dirty = false;
 		}
 
 		private string GetSecureFileName(string filename)
 		{
-			return (!this.anonymous) ? Path.GetFullPath(filename) : Path.GetFileName(filename);
+			if (!this.anonymous)
+			{
+				return Path.GetFullPath(filename);
+			}
+			return Path.GetFileName(filename);
 		}
 
 		private string GetSecureFileName(string filename, bool full)
 		{
-			return (!this.anonymous) ? ((!full) ? filename : Path.GetFullPath(filename)) : Path.GetFileName(filename);
+			if (this.anonymous)
+			{
+				return Path.GetFileName(filename);
+			}
+			if (!full)
+			{
+				return filename;
+			}
+			return Path.GetFullPath(filename);
 		}
 
-		internal const int DefaultBufferSize = 8192;
+		internal const int DefaultBufferSize = 4096;
+
+		private static byte[] buf_recycle;
+
+		private static readonly object buf_recycle_lock = new object();
+
+		private byte[] buf;
+
+		private string name;
+
+		private SafeFileHandle safeHandle;
+
+		private bool isExposed;
+
+		private long append_startpos;
 
 		private FileAccess access;
 
@@ -1044,11 +1130,9 @@ namespace System.IO
 
 		private bool canseek;
 
-		private long append_startpos;
-
 		private bool anonymous;
 
-		private byte[] buf;
+		private bool buf_dirty;
 
 		private int buf_size;
 
@@ -1056,15 +1140,7 @@ namespace System.IO
 
 		private int buf_offset;
 
-		private bool buf_dirty;
-
 		private long buf_start;
-
-		private string name;
-
-		private IntPtr handle;
-
-		private SafeFileHandle safeHandle;
 
 		private delegate int ReadDelegate(byte[] buffer, int offset, int count);
 

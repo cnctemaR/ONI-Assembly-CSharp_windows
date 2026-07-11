@@ -6,15 +6,13 @@ namespace System.Data
 	{
 		public DataRowChangeEventArgs(DataRow row, DataRowAction action)
 		{
-			this.row = row;
-			this.action = action;
 		}
 
 		public DataRowAction Action
 		{
 			get
 			{
-				return this.action;
+				throw null;
 			}
 		}
 
@@ -22,12 +20,8 @@ namespace System.Data
 		{
 			get
 			{
-				return this.row;
+				throw null;
 			}
 		}
-
-		private DataRow row;
-
-		private DataRowAction action;
 	}
 }

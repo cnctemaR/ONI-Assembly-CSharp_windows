@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class RunWorkerCompletedEventArgs : AsyncCompletedEventArgs
 	{
 		public RunWorkerCompletedEventArgs(object result, Exception error, bool cancelled)
@@ -19,13 +21,13 @@ namespace System.ComponentModel
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new object UserState
 		{
 			get
 			{
-				return null;
+				return base.UserState;
 			}
 		}
 

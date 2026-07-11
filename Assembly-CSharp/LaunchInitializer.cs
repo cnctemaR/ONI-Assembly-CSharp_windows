@@ -6,32 +6,37 @@ using UnityEngine;
 
 public class LaunchInitializer : MonoBehaviour
 {
-	private void Awake()
+	private void Update()
 	{
+		if (this.numWaitFrames > Time.renderedFrameCount)
+		{
+			return;
+		}
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		LaunchInitializer.ApplyCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: CU-" + 275206U.ToString(), null);
+		global::Debug.Log("Development Build: EU-" + 279457U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)
 		{
-			if (this.SpawnPrefabs[i] != null)
+			GameObject gameObject = this.SpawnPrefabs[i];
+			if (gameObject != null)
 			{
-				Util.KInstantiate(this.SpawnPrefabs[i], base.gameObject, null);
+				Util.KInstantiate(gameObject, base.gameObject, null);
 			}
 		}
 		LaunchInitializer.DeleteLingeringFiles();
+		base.enabled = false;
 	}
 
 	private static void DeleteLingeringFiles()
 	{
-		string[] array = new string[] { "fmod.log", "load_stats_0.json" };
+		string[] array = new string[] { "fmod.log", "load_stats_0.json", "OxygenNotIncluded_Data/output_log.txt" };
 		string directoryName = Path.GetDirectoryName(Application.dataPath);
 		foreach (string text in array)
 		{
 			string text2 = Path.Combine(directoryName, text);
-			global::Debug.Log(text2, null);
 			try
 			{
 				if (File.Exists(text2))
@@ -54,7 +59,10 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "CU";
+	public const string BUILD_PREFIX = "EU";
 
 	public GameObject[] SpawnPrefabs;
+
+	[SerializeField]
+	private int numWaitFrames = 1;
 }

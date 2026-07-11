@@ -18,7 +18,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 		{
 			this.ToggleOpen(true);
 		});
-		this.SetInteractable(false);
+		this.SetInteractable(this.anyDiscovered);
 		this.SetActiveColor(false);
 	}
 
@@ -115,14 +115,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 
 	private void Hover(bool is_hovering)
 	{
-		if (is_hovering)
-		{
-			this.Background.color = this.BackgroundHoverColor;
-		}
-		else
-		{
-			this.Background.color = new Color(0f, 0f, 0f, 0f);
-		}
+		this.Background.color = ((!is_hovering) ? new Color(0f, 0f, 0f, 0f) : this.BackgroundHoverColor);
 		List<Pickupable> list = null;
 		if (WorldInventory.Instance != null)
 		{
@@ -139,14 +132,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 				KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
 				if (!(component == null))
 				{
-					if (is_hovering)
-					{
-						component.HighlightColour = this.highlightColour;
-					}
-					else
-					{
-						component.HighlightColour = Color.black;
-					}
+					component.HighlightColour = ((!is_hovering) ? Color.black : this.highlightColour);
 				}
 			}
 		}
@@ -255,14 +241,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 			keyValuePair.Value.UpdateValue();
 		}
 		this.SetActiveColor(num > 0f);
-		if (!this.anyDiscovered)
-		{
-			this.SetInteractable(false);
-		}
-		else
-		{
-			this.SetInteractable(true);
-		}
+		this.SetInteractable(this.anyDiscovered);
 	}
 
 	private string OnTooltip()

@@ -5,6 +5,11 @@ public class GameScreenManager : KMonoBehaviour
 {
 	public static GameScreenManager Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		GameScreenManager.Instance = null;
+	}
+
 	public static Color[] UIColors
 	{
 		get

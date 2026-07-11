@@ -12,7 +12,6 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		this.smi = new EatChore.StatesInstance(this);
 		this.showAvailabilityInHoverText = false;
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Eat);
 		base.AddPrecondition(EatChore.EdibleIsNotNull, null);
 	}
 
@@ -58,7 +57,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		base.Begin(context);
 	}
 
-	public static Chore.Precondition EdibleIsNotNull = new Chore.Precondition
+	public static readonly Chore.Precondition EdibleIsNotNull = new Chore.Precondition
 	{
 		id = "EdibleIsNotNull",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.EDIBLE_IS_NOT_NULL,
@@ -108,11 +107,6 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			base.sm.locator.Set(null, this);
 		}
 
-		public bool IsInterrupted()
-		{
-			return true && !base.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Eat);
-		}
-
 		public void SetZ(GameObject go, float z)
 		{
 			Vector3 position = go.transform.GetPosition();
@@ -120,7 +114,33 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			go.transform.SetPosition(position);
 		}
 
+		public void ApplyRoomEffects()
+		{
+			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.sm.messstation.Get(base.smi).gameObject);
+			if (roomOfGameObject != null)
+			{
+				RoomType roomType = roomOfGameObject.roomType;
+				foreach (KeyValuePair<string, string> keyValuePair in EatChore.StatesInstance.roomEffects)
+				{
+					if (keyValuePair.Key == roomType.Id)
+					{
+						base.sm.eater.Get(base.smi).gameObject.GetComponent<Effects>().Add(keyValuePair.Value, true);
+					}
+					else
+					{
+						base.sm.eater.Get(base.smi).gameObject.GetComponent<Effects>().Remove(keyValuePair.Value);
+					}
+				}
+			}
+		}
+
 		private int locatorCell;
+
+		private static Dictionary<string, string> roomEffects = new Dictionary<string, string>
+		{
+			{ "MessHall", "RoomMessHall" },
+			{ "GreatHall", "RoomGreatHall" }
+		};
 	}
 
 	public class States : GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore>
@@ -135,22 +155,14 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			}).EventHandler(GameHashes.AssignablesChanged, delegate(EatChore.StatesInstance smi)
 			{
 				smi.UpdateMessStation();
-			}).EventTransition(GameHashes.ScheduleChanged, this.interruptedbyschedule, (EatChore.StatesInstance smi) => smi.IsInterrupted());
+			});
 			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.eatatmessstation, null);
 			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null);
 			this.eatatmessstation.moveto.InitializeStates(this.eater, this.messstation, this.eatatmessstation.eat, this.eatonfloorstate, null, null);
 			this.eatatmessstation.eat.ToggleAnims("anim_eat_table_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null).Enter(delegate(EatChore.StatesInstance smi)
 			{
 				smi.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
-				Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(this.messstation.Get(smi).gameObject);
-				if (roomOfBuilding != null)
-				{
-					RoomType roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
-					if (roomType == Db.Get().RoomTypes.MessHall)
-					{
-						this.eater.Get(smi).gameObject.GetComponent<Effects>().Add("EatInMessHall", true);
-					}
-				}
+				smi.ApplyRoomEffects();
 			})
 				.Exit(delegate(EatChore.StatesInstance smi)
 				{

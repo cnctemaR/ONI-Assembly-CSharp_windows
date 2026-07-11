@@ -6,40 +6,32 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.satisfied.Transition(this.needstopee, (BladderMonitor.Instance smi) => smi.NeedsToPee(), UpdateRate.SIM_200ms);
-		this.needstopee.ToggleUrge(Db.Get().Urges.Pee).EventTransition(GameHashes.BeginChore, this.needstopee.peeing, (BladderMonitor.Instance smi) => smi.IsPeeing()).DefaultState(this.needstopee.holdingitin)
-			.ToggleThought(Db.Get().Thoughts.FullBladder, null)
-			.ToggleExpression(Db.Get().Expressions.FullBladder, null)
-			.ToggleStateMachine((BladderMonitor.Instance smi) => new ToiletMonitor.Instance(smi.master))
-			.ToggleStateMachine((BladderMonitor.Instance smi) => new PeeChoreMonitor.Instance(smi.master));
-		this.needstopee.holdingitin.ToggleEffect("FullBladder").DefaultState(this.needstopee.holdingitin.nobathrooms).Update("check bathrooms", delegate(BladderMonitor.Instance smi, float dt)
-		{
-			smi.CheckBathrooms();
-		}, UpdateRate.SIM_1000ms, false)
-			.OnSignal(this.noBathrooms, this.needstopee.holdingitin.nobathrooms)
-			.OnSignal(this.hasBathrooms, this.needstopee.holdingitin.hasbathrooms);
-		this.needstopee.peeing.EventTransition(GameHashes.EndChore, this.satisfied, (BladderMonitor.Instance smi) => !smi.IsPeeing());
-		this.needstopee.holdingitin.nobathrooms.ToggleStatusItem(Db.Get().DuplicantStatusItems.NoToilets, null);
+		this.satisfied.Transition(this.urgentwant, (BladderMonitor.Instance smi) => smi.NeedsToPee(), UpdateRate.SIM_200ms).Transition(this.breakwant, (BladderMonitor.Instance smi) => smi.WantsToPee(), UpdateRate.SIM_200ms);
+		this.urgentwant.InitializeStates(this.satisfied).ToggleThought(Db.Get().Thoughts.FullBladder, null).ToggleExpression(Db.Get().Expressions.FullBladder, null)
+			.ToggleStateMachine((BladderMonitor.Instance smi) => new PeeChoreMonitor.Instance(smi.master))
+			.ToggleEffect("FullBladder");
+		this.breakwant.InitializeStates(this.satisfied);
+		this.breakwant.wanting.Transition(this.urgentwant, (BladderMonitor.Instance smi) => smi.NeedsToPee(), UpdateRate.SIM_200ms).EventTransition(GameHashes.ScheduleBlocksChanged, this.satisfied, (BladderMonitor.Instance smi) => !smi.WantsToPee());
+		this.breakwant.peeing.ToggleThought(Db.Get().Thoughts.BreakBladder, null);
 	}
 
 	public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public BladderMonitor.NeedsToPeeState needstopee;
+	public BladderMonitor.WantsToPeeStates urgentwant;
 
-	public StateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.Signal noBathrooms;
+	public BladderMonitor.WantsToPeeStates breakwant;
 
-	public StateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.Signal hasBathrooms;
-
-	public class BathroomsState : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State
+	public class WantsToPeeStates : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State nobathrooms;
+		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State InitializeStates(GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State donePeeingState)
+		{
+			base.DefaultState(this.wanting).ToggleUrge(Db.Get().Urges.Pee).ToggleStateMachine((BladderMonitor.Instance smi) => new ToiletMonitor.Instance(smi.master));
+			this.wanting.EventTransition(GameHashes.BeginChore, this.peeing, (BladderMonitor.Instance smi) => smi.IsPeeing());
+			this.peeing.EventTransition(GameHashes.EndChore, donePeeingState, (BladderMonitor.Instance smi) => !smi.IsPeeing());
+			return this;
+		}
 
-		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State hasbathrooms;
-	}
-
-	public class NeedsToPeeState : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State
-	{
-		public BladderMonitor.BathroomsState holdingitin;
+		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State wanting;
 
 		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State peeing;
 	}
@@ -65,8 +57,13 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 				Debug.LogWarning("How is my gameObject null?", null);
 				return false;
 			}
-			StaminaMonitor.Instance smi = base.smi.master.gameObject.GetSMI<StaminaMonitor.Instance>();
-			return (smi == null || !smi.IsSleeping()) && this.bladder.value >= 100f;
+			KPrefabID component = base.master.GetComponent<KPrefabID>();
+			return !component.HasTag(GameTags.Asleep) && this.bladder.value >= 100f;
+		}
+
+		public bool WantsToPee()
+		{
+			return this.NeedsToPee() || (this.IsPeeTime() && this.bladder.value >= 40f);
 		}
 
 		public bool IsPeeing()
@@ -74,16 +71,10 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 			return this.choreDriver.HasChore() && this.choreDriver.GetCurrentChore().SatisfiesUrge(Db.Get().Urges.Pee);
 		}
 
-		public void CheckBathrooms()
+		public bool IsPeeTime()
 		{
-			if (Components.Toilets.Count > 0)
-			{
-				base.sm.hasBathrooms.Trigger(this);
-			}
-			else
-			{
-				base.sm.noBathrooms.Trigger(this);
-			}
+			Schedulable component = base.master.GetComponent<Schedulable>();
+			return component.IsAllowed(Db.Get().ScheduleBlockTypes.Hygiene);
 		}
 
 		private AmountInstance bladder;

@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices.ComTypes
 {
+	[Guid("00020401-0000-0000-C000-000000000046")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("00020401-0000-0000-c000-000000000046")]
 	[ComImport]
 	public interface ITypeInfo
 	{
@@ -15,13 +15,13 @@ namespace System.Runtime.InteropServices.ComTypes
 
 		void GetVarDesc(int index, out IntPtr ppVarDesc);
 
-		void GetNames(int memid, [MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 2)] [Out] string[] rgBstrNames, int cMaxNames, out int pcNames);
+		void GetNames(int memid, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] [Out] string[] rgBstrNames, int cMaxNames, out int pcNames);
 
 		void GetRefTypeOfImplType(int index, out int href);
 
 		void GetImplTypeFlags(int index, out IMPLTYPEFLAGS pImplTypeFlags);
 
-		void GetIDsOfNames([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeConst = 0, SizeParamIndex = 1)] [In] string[] rgszNames, int cNames, [MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 1)] [Out] int[] pMemId);
+		void GetIDsOfNames([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 1)] [In] string[] rgszNames, int cNames, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] [Out] int[] pMemId);
 
 		void Invoke([MarshalAs(UnmanagedType.IUnknown)] object pvInstance, int memid, short wFlags, ref DISPPARAMS pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, out int puArgErr);
 

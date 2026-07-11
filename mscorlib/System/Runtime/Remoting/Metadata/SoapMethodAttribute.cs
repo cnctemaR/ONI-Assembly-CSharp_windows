@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Remoting.Metadata
 {
-	[AttributeUsage(AttributeTargets.Method)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Method)]
 	public sealed class SoapMethodAttribute : SoapAttribute
 	{
 		public string ResponseXmlElementName

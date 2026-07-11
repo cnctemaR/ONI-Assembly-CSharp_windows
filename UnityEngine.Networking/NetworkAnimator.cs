@@ -39,21 +39,39 @@ namespace UnityEngine.Networking
 			return (this.m_ParameterSendBits & (1U << index)) != 0U;
 		}
 
+		private bool sendMessagesAllowed
+		{
+			get
+			{
+				if (base.isServer)
+				{
+					if (!base.localPlayerAuthority)
+					{
+						return true;
+					}
+					if (base.netIdentity != null && base.netIdentity.clientAuthorityOwner == null)
+					{
+						return true;
+					}
+				}
+				return base.hasAuthority;
+			}
+		}
+
 		internal void ResetParameterOptions()
 		{
 			Debug.Log("ResetParameterOptions");
 			this.m_ParameterSendBits = 0U;
 		}
 
-		public override void OnStartAuthority()
-		{
-			this.m_ParameterWriter = new NetworkWriter();
-		}
-
 		private void FixedUpdate()
 		{
-			if (this.m_ParameterWriter != null)
+			if (this.sendMessagesAllowed)
 			{
+				if (this.m_ParameterWriter == null)
+				{
+					this.m_ParameterWriter = new NetworkWriter();
+				}
 				this.CheckSendRate();
 				int num;
 				float num2;
@@ -66,14 +84,7 @@ namespace UnityEngine.Networking
 					this.m_ParameterWriter.SeekZero();
 					this.WriteParameters(this.m_ParameterWriter, false);
 					animationMessage.parameters = this.m_ParameterWriter.ToArray();
-					if (base.hasAuthority && ClientScene.readyConnection != null)
-					{
-						ClientScene.readyConnection.Send(40, animationMessage);
-					}
-					else if (base.isServer && !base.localPlayerAuthority)
-					{
-						NetworkServer.SendToReady(base.gameObject, 40, animationMessage);
-					}
+					this.SendMessage(40, animationMessage);
 				}
 			}
 		}
@@ -121,7 +132,7 @@ namespace UnityEngine.Networking
 
 		private void CheckSendRate()
 		{
-			if (this.GetNetworkSendInterval() != 0f && this.m_SendTimer < Time.time)
+			if (this.sendMessagesAllowed && this.GetNetworkSendInterval() != 0f && this.m_SendTimer < Time.time)
 			{
 				this.m_SendTimer = Time.time + this.GetNetworkSendInterval();
 				AnimationParametersMessage animationParametersMessage = new AnimationParametersMessage();
@@ -129,14 +140,19 @@ namespace UnityEngine.Networking
 				this.m_ParameterWriter.SeekZero();
 				this.WriteParameters(this.m_ParameterWriter, true);
 				animationParametersMessage.parameters = this.m_ParameterWriter.ToArray();
-				if (base.hasAuthority && ClientScene.readyConnection != null)
-				{
-					ClientScene.readyConnection.Send(41, animationParametersMessage);
-				}
-				else if (base.isServer && !base.localPlayerAuthority)
-				{
-					NetworkServer.SendToReady(base.gameObject, 41, animationParametersMessage);
-				}
+				this.SendMessage(41, animationParametersMessage);
+			}
+		}
+
+		private void SendMessage(short type, MessageBase msg)
+		{
+			if (base.isServer)
+			{
+				NetworkServer.SendToReady(base.gameObject, type, msg);
+			}
+			else if (ClientScene.readyConnection != null)
+			{
+				ClientScene.readyConnection.Send(type, msg);
 			}
 		}
 

@@ -5,7 +5,7 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class KeyContainerPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
+	public sealed class KeyContainerPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
 	{
 		public KeyContainerPermission(PermissionState state)
 		{
@@ -25,16 +25,12 @@ namespace System.Security.Permissions
 			this.SetFlags(flags);
 			if (accessList != null)
 			{
+				this._accessEntries = new KeyContainerPermissionAccessEntryCollection();
 				foreach (KeyContainerPermissionAccessEntry keyContainerPermissionAccessEntry in accessList)
 				{
 					this._accessEntries.Add(keyContainerPermissionAccessEntry);
 				}
 			}
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 16;
 		}
 
 		public KeyContainerPermissionAccessEntryCollection AccessEntries
@@ -71,11 +67,9 @@ namespace System.Security.Permissions
 			if (CodeAccessPermission.IsUnrestricted(securityElement))
 			{
 				this._flags = KeyContainerPermissionFlags.AllFlags;
+				return;
 			}
-			else
-			{
-				this._flags = (KeyContainerPermissionFlags)((int)Enum.Parse(typeof(KeyContainerPermissionFlags), securityElement.Attribute("Flags")));
-			}
+			this._flags = (KeyContainerPermissionFlags)Enum.Parse(typeof(KeyContainerPermissionFlags), securityElement.Attribute("Flags"));
 		}
 
 		[MonoTODO("(2.0)")]
@@ -134,12 +128,16 @@ namespace System.Security.Permissions
 			return new KeyContainerPermission(this._flags | keyContainerPermission._flags, array);
 		}
 
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 16;
+		}
+
 		private void SetFlags(KeyContainerPermissionFlags flags)
 		{
-			if ((flags & KeyContainerPermissionFlags.AllFlags) != KeyContainerPermissionFlags.NoFlags)
+			if ((flags & KeyContainerPermissionFlags.AllFlags) == KeyContainerPermissionFlags.NoFlags)
 			{
-				string text = string.Format(Locale.GetText("Invalid enum {0}"), flags);
-				throw new ArgumentException(text, "KeyContainerPermissionFlags");
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), flags), "KeyContainerPermissionFlags");
 			}
 			this._flags = flags;
 		}
@@ -158,10 +156,10 @@ namespace System.Security.Permissions
 			return keyContainerPermission;
 		}
 
-		private const int version = 1;
-
 		private KeyContainerPermissionAccessEntryCollection _accessEntries;
 
 		private KeyContainerPermissionFlags _flags;
+
+		private const int version = 1;
 	}
 }

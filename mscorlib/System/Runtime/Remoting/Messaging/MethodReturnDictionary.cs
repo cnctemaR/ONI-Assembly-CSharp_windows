@@ -2,7 +2,7 @@
 
 namespace System.Runtime.Remoting.Messaging
 {
-	internal class MethodReturnDictionary : MethodDictionary
+	internal class MethodReturnDictionary : MessageDictionary
 	{
 		public MethodReturnDictionary(IMethodReturnMessage message)
 			: base(message)
@@ -10,11 +10,9 @@ namespace System.Runtime.Remoting.Messaging
 			if (message.Exception == null)
 			{
 				base.MethodKeys = MethodReturnDictionary.InternalReturnKeys;
+				return;
 			}
-			else
-			{
-				base.MethodKeys = MethodReturnDictionary.InternalExceptionKeys;
-			}
+			base.MethodKeys = MethodReturnDictionary.InternalExceptionKeys;
 		}
 
 		public static string[] InternalReturnKeys = new string[] { "__Uri", "__MethodName", "__TypeName", "__MethodSignature", "__OutArgs", "__Return", "__CallContext" };

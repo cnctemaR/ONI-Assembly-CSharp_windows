@@ -191,9 +191,9 @@ public static class TemplateLoader
 				{
 					Substance substance = ElementLoader.FindElementByHash(storageItem.element).substance;
 					gameObject2 = substance.SpawnResource(Vector3.zero, storageItem.units, storageItem.temperature, Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, false, false);
-					goto IL_0506;
+					goto IL_0505;
 				}
-				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Ore, Folder.Entities);
+				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Ore);
 				if (gameObject2 == null)
 				{
 					global::Debug.LogWarning("Null prefab for " + id2, null);
@@ -209,21 +209,21 @@ public static class TemplateLoader
 					if (smi != null)
 					{
 						smi.RotValue = storageItem.rottable.rotAmount;
-						goto IL_0506;
+						goto IL_0505;
 					}
-					goto IL_0506;
+					goto IL_0505;
 				}
-				IL_053D:
+				IL_052F:
 				l++;
 				continue;
-				IL_0506:
+				IL_0505:
 				GameObject gameObject3 = component6.Store(gameObject2, true, true, true, false);
 				if (gameObject3 != null)
 				{
 					gameObject3.GetComponent<Pickupable>().OnStore(component6);
+					goto IL_052F;
 				}
-				gameObject2.GetComponent<SavedObject>().inStorage = true;
-				goto IL_053D;
+				goto IL_052F;
 			}
 		}
 		if (prefab.connections != 0)
@@ -321,7 +321,7 @@ public static class TemplateLoader
 		{
 			return null;
 		}
-		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, Grid.SceneLayer.Ore, Folder.Entities);
+		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, Grid.SceneLayer.Ore);
 		if (gameObject == null)
 		{
 			global::Debug.LogWarning("Null prefab for " + prefab.id, null);
@@ -362,7 +362,7 @@ public static class TemplateLoader
 		{
 			sceneLayer = component.sceneLayer;
 		}
-		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, sceneLayer, Folder.Entities);
+		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, sceneLayer);
 		if (gameObject == null)
 		{
 			global::Debug.LogWarning("Null prefab for " + prefab.id, null);

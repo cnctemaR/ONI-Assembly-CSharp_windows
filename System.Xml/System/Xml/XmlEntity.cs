@@ -1,71 +1,23 @@
 ﻿using System;
-using Mono.Xml;
 
 namespace System.Xml
 {
-	public class XmlEntity : XmlNode, IHasXmlChildNode
+	public class XmlEntity : XmlNode
 	{
-		internal XmlEntity(string name, string NDATA, string publicId, string systemId, XmlDocument doc)
+		internal XmlEntity(string name, string strdata, string publicId, string systemId, string notationName, XmlDocument doc)
 			: base(doc)
 		{
 			this.name = doc.NameTable.Add(name);
-			this.NDATA = NDATA;
 			this.publicId = publicId;
 			this.systemId = systemId;
-			this.baseUri = doc.BaseURI;
+			this.notationName = notationName;
+			this.unparsedReplacementStr = strdata;
+			this.childrenFoliating = false;
 		}
 
-		XmlLinkedNode IHasXmlChildNode.LastLinkedChild
+		public override XmlNode CloneNode(bool deep)
 		{
-			get
-			{
-				if (this.lastLinkedChild != null)
-				{
-					return this.lastLinkedChild;
-				}
-				if (!this.contentAlreadySet)
-				{
-					this.contentAlreadySet = true;
-					this.SetEntityContent();
-				}
-				return this.lastLinkedChild;
-			}
-			set
-			{
-				this.lastLinkedChild = value;
-			}
-		}
-
-		public override string BaseURI
-		{
-			get
-			{
-				return this.baseUri;
-			}
-		}
-
-		public override string InnerText
-		{
-			get
-			{
-				return base.InnerText;
-			}
-			set
-			{
-				throw new InvalidOperationException("This operation is not supported.");
-			}
-		}
-
-		public override string InnerXml
-		{
-			get
-			{
-				return base.InnerXml;
-			}
-			set
-			{
-				throw new InvalidOperationException("This operation is not supported.");
-			}
+			throw new InvalidOperationException(Res.GetString("'Entity' and 'Notation' nodes cannot be cloned."));
 		}
 
 		public override bool IsReadOnly
@@ -73,14 +25,6 @@ namespace System.Xml
 			get
 			{
 				return true;
-			}
-		}
-
-		public override string LocalName
-		{
-			get
-			{
-				return this.name;
 			}
 		}
 
@@ -92,31 +36,61 @@ namespace System.Xml
 			}
 		}
 
+		public override string LocalName
+		{
+			get
+			{
+				return this.name;
+			}
+		}
+
+		public override string InnerText
+		{
+			get
+			{
+				return base.InnerText;
+			}
+			set
+			{
+				throw new InvalidOperationException(Res.GetString("The 'InnerText' of an 'Entity' node is read-only and cannot be set."));
+			}
+		}
+
+		internal override bool IsContainer
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		internal override XmlLinkedNode LastNode
+		{
+			get
+			{
+				if (this.lastChild == null && !this.childrenFoliating)
+				{
+					this.childrenFoliating = true;
+					new XmlLoader().ExpandEntity(this);
+				}
+				return this.lastChild;
+			}
+			set
+			{
+				this.lastChild = value;
+			}
+		}
+
+		internal override bool IsValidChildType(XmlNodeType type)
+		{
+			return type == XmlNodeType.Text || type == XmlNodeType.Element || type == XmlNodeType.ProcessingInstruction || type == XmlNodeType.Comment || type == XmlNodeType.CDATA || type == XmlNodeType.Whitespace || type == XmlNodeType.SignificantWhitespace || type == XmlNodeType.EntityReference;
+		}
+
 		public override XmlNodeType NodeType
 		{
 			get
 			{
 				return XmlNodeType.Entity;
-			}
-		}
-
-		public string NotationName
-		{
-			get
-			{
-				if (this.NDATA == null)
-				{
-					return null;
-				}
-				return this.NDATA;
-			}
-		}
-
-		public override string OuterXml
-		{
-			get
-			{
-				return string.Empty;
 			}
 		}
 
@@ -136,62 +110,69 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlNode CloneNode(bool deep)
+		public string NotationName
 		{
-			throw new InvalidOperationException("This operation is not supported.");
+			get
+			{
+				return this.notationName;
+			}
 		}
 
-		public override void WriteContentTo(XmlWriter w)
+		public override string OuterXml
 		{
+			get
+			{
+				return string.Empty;
+			}
+		}
+
+		public override string InnerXml
+		{
+			get
+			{
+				return string.Empty;
+			}
+			set
+			{
+				throw new InvalidOperationException(Res.GetString("Cannot set the 'InnerXml' for the current node because it is either read-only or cannot have children."));
+			}
 		}
 
 		public override void WriteTo(XmlWriter w)
 		{
 		}
 
-		private void SetEntityContent()
+		public override void WriteContentTo(XmlWriter w)
 		{
-			if (this.lastLinkedChild != null)
+		}
+
+		public override string BaseURI
+		{
+			get
 			{
-				return;
-			}
-			XmlDocumentType documentType = this.OwnerDocument.DocumentType;
-			if (documentType == null)
-			{
-				return;
-			}
-			DTDEntityDeclaration dtdentityDeclaration = documentType.DTD.EntityDecls[this.name];
-			if (dtdentityDeclaration == null)
-			{
-				return;
-			}
-			XmlNamespaceManager xmlNamespaceManager = base.ConstructNamespaceManager();
-			XmlParserContext xmlParserContext = new XmlParserContext(this.OwnerDocument.NameTable, xmlNamespaceManager, (documentType == null) ? null : documentType.DTD, this.BaseURI, this.XmlLang, this.XmlSpace, null);
-			XmlTextReader xmlTextReader = new XmlTextReader(dtdentityDeclaration.EntityValue, XmlNodeType.Element, xmlParserContext);
-			xmlTextReader.XmlResolver = this.OwnerDocument.Resolver;
-			for (;;)
-			{
-				XmlNode xmlNode = this.OwnerDocument.ReadNode(xmlTextReader);
-				if (xmlNode == null)
-				{
-					break;
-				}
-				base.InsertBefore(xmlNode, null, false, false);
+				return this.baseURI;
 			}
 		}
 
-		private string name;
-
-		private string NDATA;
+		internal void SetBaseURI(string inBaseURI)
+		{
+			this.baseURI = inBaseURI;
+		}
 
 		private string publicId;
 
 		private string systemId;
 
-		private string baseUri;
+		private string notationName;
 
-		private XmlLinkedNode lastLinkedChild;
+		private string name;
 
-		private bool contentAlreadySet;
+		private string unparsedReplacementStr;
+
+		private string baseURI;
+
+		private XmlLinkedNode lastChild;
+
+		private bool childrenFoliating;
 	}
 }

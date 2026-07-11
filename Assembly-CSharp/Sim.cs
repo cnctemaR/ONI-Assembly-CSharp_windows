@@ -103,10 +103,18 @@ public static class Sim
 		{
 			Sim.DLLReportMessageMessage* ptr = (Sim.DLLReportMessageMessage*)(void*)data;
 			string text = "SimMessage: " + Marshal.PtrToStringAnsi(ptr->message);
-			string text2 = Marshal.PtrToStringAnsi(ptr->file);
-			int line = ptr->line;
-			string text3 = text2 + ":" + line;
-			KCrashReporter.ReportDLLCrash(text, text3, null);
+			string text2;
+			if (ptr->callstack != IntPtr.Zero)
+			{
+				text2 = Marshal.PtrToStringAnsi(ptr->callstack);
+			}
+			else
+			{
+				string text3 = Marshal.PtrToStringAnsi(ptr->file);
+				int line = ptr->line;
+				text2 = text3 + ":" + line;
+			}
+			KCrashReporter.ReportDLLCrash(text, text2, null);
 			return 0;
 		}
 		if (message_id != 0)
@@ -173,6 +181,8 @@ public static class Sim
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct DLLReportMessageMessage
 	{
+		public IntPtr callstack;
+
 		public IntPtr message;
 
 		public IntPtr file;
@@ -306,6 +316,7 @@ public static class Sim
 				this.colour = (uint)(((int)color.a << 24) | ((int)color.b << 16) | ((int)color.g << 8) | (int)color.r);
 			}
 			this.sublimateFX = e.sublimateFX;
+			this.lightAbsorptionFactor = e.lightAbsorptionFactor;
 			this.defaultValues = e.defaultValues;
 		}
 
@@ -338,6 +349,7 @@ public static class Sim
 			writer.Write(this.pack1);
 			writer.Write(this.colour);
 			writer.Write((int)this.sublimateFX);
+			writer.Write(this.lightAbsorptionFactor);
 			this.defaultValues.Write(writer);
 		}
 
@@ -395,6 +407,8 @@ public static class Sim
 
 		public SpawnFXHashes sublimateFX;
 
+		public float lightAbsorptionFactor;
+
 		public Sim.PhysicsData defaultValues;
 	}
 
@@ -423,7 +437,7 @@ public static class Sim
 
 		private float reservedAccumulatedError;
 
-		public static Sim.DiseaseCell Invalid = new Sim.DiseaseCell
+		public static readonly Sim.DiseaseCell Invalid = new Sim.DiseaseCell
 		{
 			diseaseIdx = byte.MaxValue,
 			elementCount = 0

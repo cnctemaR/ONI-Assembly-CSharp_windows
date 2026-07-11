@@ -5,6 +5,12 @@ namespace System.Configuration
 {
 	public sealed class ProviderSettings : ConfigurationElement
 	{
+		static ProviderSettings()
+		{
+			ProviderSettings.properties.Add(ProviderSettings.nameProp);
+			ProviderSettings.properties.Add(ProviderSettings.typeProp);
+		}
+
 		public ProviderSettings()
 		{
 		}
@@ -13,12 +19,6 @@ namespace System.Configuration
 		{
 			this.Name = name;
 			this.Type = type;
-		}
-
-		static ProviderSettings()
-		{
-			ProviderSettings.properties.Add(ProviderSettings.nameProp);
-			ProviderSettings.properties.Add(ProviderSettings.typeProp);
 		}
 
 		protected override bool OnDeserializeUnrecognizedAttribute(string name, string value)
@@ -44,17 +44,15 @@ namespace System.Configuration
 			if (providerSettings != null && providerSettings.parameters != null)
 			{
 				this.parameters = new ConfigNameValueCollection(providerSettings.parameters);
+				return;
 			}
-			else
-			{
-				this.parameters = null;
-			}
+			this.parameters = null;
 		}
 
 		[MonoTODO]
-		protected internal override void Unmerge(ConfigurationElement source, ConfigurationElement parent, ConfigurationSaveMode updateMode)
+		protected internal override void Unmerge(ConfigurationElement sourceElement, ConfigurationElement parentElement, ConfigurationSaveMode saveMode)
 		{
-			base.Unmerge(source, parent, updateMode);
+			base.Unmerge(sourceElement, parentElement, saveMode);
 		}
 
 		[ConfigurationProperty("name", Options = ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey)]

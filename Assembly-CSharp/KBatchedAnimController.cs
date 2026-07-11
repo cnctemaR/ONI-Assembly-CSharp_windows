@@ -509,8 +509,12 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			this.ConfigureUpdateListener();
 		}
-		CellChangeMonitor.Instance.RegisterMovementStateChanged(base.transform, new Action<Transform, bool>(KBatchedAnimController.OnMovementStateChanged));
-		this.moving = CellChangeMonitor.Instance.IsMoving(base.transform);
+		CellChangeMonitor instance = Singleton<CellChangeMonitor>.Instance;
+		if (instance != null)
+		{
+			instance.RegisterMovementStateChanged(base.transform, new Action<Transform, bool>(KBatchedAnimController.OnMovementStateChanged));
+			this.moving = instance.IsMoving(base.transform);
+		}
 		this.symbolOverrideController = base.GetComponent<SymbolOverrideController>();
 		this.SetDirty();
 	}
@@ -579,8 +583,16 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			return;
 		}
-		CellChangeMonitor.Instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KBatchedAnimController.OnMovementStateChanged));
-		KBatchedAnimUpdater.instance.UpdateUnregister(this);
+		CellChangeMonitor instance = Singleton<CellChangeMonitor>.Instance;
+		if (instance != null)
+		{
+			instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KBatchedAnimController.OnMovementStateChanged));
+		}
+		KBatchedAnimUpdater instance2 = Singleton<KBatchedAnimUpdater>.Instance;
+		if (instance2 != null)
+		{
+			instance2.UpdateUnregister(this);
+		}
 		this.isVisible = false;
 		this.DeRegister();
 		this.stopped = true;
@@ -600,7 +612,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	{
 		if (this.symbolOverrideController != null)
 		{
-			if (this.symbolOverrideControllerVersion != this.symbolOverrideController.version)
+			if (this.symbolOverrideControllerVersion != this.symbolOverrideController.version || this.symbolOverrideController.applySymbolOverridesEveryFrame)
 			{
 				this.symbolOverrideControllerVersion = this.symbolOverrideController.version;
 				this.symbolOverrideController.ApplyOverrides();
@@ -649,11 +661,11 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		bool flag = (this.IsActive() && !this.suspendUpdates && this.isVisible) || this.moving || this.visibilityType == KAnimControllerBase.VisibilityType.Always;
 		if (flag)
 		{
-			KBatchedAnimUpdater.instance.UpdateRegister(this);
+			Singleton<KBatchedAnimUpdater>.Instance.UpdateRegister(this);
 		}
 		else
 		{
-			KBatchedAnimUpdater.instance.UpdateUnregister(this);
+			Singleton<KBatchedAnimUpdater>.Instance.UpdateUnregister(this);
 		}
 	}
 
@@ -701,14 +713,14 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	private void RegisterVisibilityListener()
 	{
 		DebugUtil.Assert(!this.visibilityListenerRegistered, "Assert!");
-		KBatchedAnimUpdater.instance.VisibilityRegister(this);
+		Singleton<KBatchedAnimUpdater>.Instance.VisibilityRegister(this);
 		this.visibilityListenerRegistered = true;
 	}
 
 	private void UnregisterVisibilityListener()
 	{
 		DebugUtil.Assert(this.visibilityListenerRegistered, "Assert!");
-		KBatchedAnimUpdater.instance.VisibilityUnregister(this);
+		Singleton<KBatchedAnimUpdater>.Instance.VisibilityUnregister(this);
 		this.visibilityListenerRegistered = false;
 	}
 

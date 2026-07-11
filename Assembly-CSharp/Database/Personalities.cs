@@ -1,17 +1,15 @@
 ﻿using System;
 using Klei.AI;
-using UnityEngine;
 
 namespace Database
 {
 	public class Personalities : ResourceSet<Personality>
 	{
-		public Personalities(TextAsset file)
+		public Personalities()
 		{
-			ResourceLoader<Personalities.PersonalityInfo> resourceLoader = new ResourceLoader<Personalities.PersonalityInfo>(file);
-			foreach (Personalities.PersonalityInfo personalityInfo in resourceLoader)
+			foreach (Personalities.PersonalityInfo personalityInfo in AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<Personalities.PersonalityLoader>.Get().entries)
 			{
-				Personality personality = new Personality(personalityInfo.Name.ToUpper(), Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.Gender.ToUpper(), personalityInfo.StressTrait, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())));
+				Personality personality = new Personality(personalityInfo.Name.ToUpper(), Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.Gender.ToUpper(), personalityInfo.PersonalityType, personalityInfo.StressTrait, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())));
 				base.Add(personality);
 			}
 		}
@@ -30,11 +28,24 @@ namespace Database
 			Klei.AI.Attribute attribute = Db.Get().Attributes.TryGet(attribute_name);
 			if (attribute == null)
 			{
-				global::Debug.LogWarning("Attribute does not exist: " + attribute_name, null);
+				Debug.LogWarning("Attribute does not exist: " + attribute_name, null);
 			}
 			else
 			{
 				personality.SetAttribute(attribute, value);
+			}
+		}
+
+		private class PersonalityLoader : AsyncCsvLoader<Personalities.PersonalityLoader, Personalities.PersonalityInfo>
+		{
+			public PersonalityLoader()
+				: base(Assets.instance.personalitiesFile)
+			{
+			}
+
+			public override void Run()
+			{
+				base.Run();
 			}
 		}
 
@@ -53,6 +64,8 @@ namespace Database
 			public int Body;
 
 			public string Gender;
+
+			public string PersonalityType;
 
 			public string StressTrait;
 

@@ -6,18 +6,6 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal abstract class Context
 	{
-		public Context(SecurityProtocolType securityProtocolType)
-		{
-			this.SecurityProtocol = securityProtocolType;
-			this.compressionMethod = SecurityCompressionType.None;
-			this.serverSettings = new TlsServerSettings();
-			this.clientSettings = new TlsClientSettings();
-			this.handshakeMessages = new TlsStream();
-			this.sessionId = null;
-			this.handshakeState = HandshakeState.None;
-			this.random = RandomNumberGenerator.Create();
-		}
-
 		public bool AbbreviatedHandshake
 		{
 			get
@@ -41,6 +29,8 @@ namespace Mono.Security.Protocol.Tls
 				this.protocolNegotiated = value;
 			}
 		}
+
+		public bool ChangeCipherSpecDone { get; set; }
 
 		public SecurityProtocolType SecurityProtocol
 		{
@@ -75,22 +65,31 @@ namespace Mono.Security.Protocol.Tls
 			get
 			{
 				SecurityProtocolType securityProtocolType = this.SecurityProtocol;
-				if (securityProtocolType != SecurityProtocolType.Default)
+				if (securityProtocolType <= SecurityProtocolType.Ssl2)
 				{
-					if (securityProtocolType != SecurityProtocolType.Ssl2)
+					if (securityProtocolType != SecurityProtocolType.Default)
 					{
-						if (securityProtocolType == SecurityProtocolType.Ssl3)
+						if (securityProtocolType != SecurityProtocolType.Ssl2)
 						{
-							return 768;
+							goto IL_0034;
 						}
-						if (securityProtocolType == SecurityProtocolType.Tls)
-						{
-							return 769;
-						}
+						goto IL_0034;
 					}
-					throw new NotSupportedException("Unsupported security protocol type");
+				}
+				else
+				{
+					if (securityProtocolType == SecurityProtocolType.Ssl3)
+					{
+						return 768;
+					}
+					if (securityProtocolType != SecurityProtocolType.Tls)
+					{
+						goto IL_0034;
+					}
 				}
 				return 769;
+				IL_0034:
+				throw new NotSupportedException("Unsupported security protocol type");
 			}
 		}
 
@@ -346,6 +345,18 @@ namespace Mono.Security.Protocol.Tls
 			}
 		}
 
+		public Context(SecurityProtocolType securityProtocolType)
+		{
+			this.SecurityProtocol = securityProtocolType;
+			this.compressionMethod = SecurityCompressionType.None;
+			this.serverSettings = new TlsServerSettings();
+			this.clientSettings = new TlsClientSettings();
+			this.handshakeMessages = new TlsStream();
+			this.sessionId = null;
+			this.handshakeState = HandshakeState.None;
+			this.random = RandomNumberGenerator.Create();
+		}
+
 		public int GetUnixTime()
 		{
 			return (int)((DateTime.UtcNow.Ticks - 621355968000000000L) / 10000000L);
@@ -417,33 +428,33 @@ namespace Mono.Security.Protocol.Tls
 				this.serverWriteIV = null;
 			}
 			this.handshakeMessages.Reset();
-			if (this.securityProtocol != SecurityProtocolType.Ssl3)
-			{
-			}
+			SecurityProtocolType securityProtocolType = this.securityProtocol;
 		}
 
-		public SecurityProtocolType DecodeProtocolCode(short code)
+		public SecurityProtocolType DecodeProtocolCode(short code, bool allowFallback = false)
 		{
 			if (code == 768)
 			{
 				return SecurityProtocolType.Ssl3;
 			}
-			if (code != 769)
+			if (code == 769)
 			{
-				throw new NotSupportedException("Unsupported security protocol type");
+				return SecurityProtocolType.Tls;
 			}
-			return SecurityProtocolType.Tls;
+			if (allowFallback && code > 769)
+			{
+				return SecurityProtocolType.Tls;
+			}
+			throw new NotSupportedException("Unsupported security protocol type");
 		}
 
 		public void ChangeProtocol(short protocol)
 		{
-			SecurityProtocolType securityProtocolType = this.DecodeProtocolCode(protocol);
+			SecurityProtocolType securityProtocolType = this.DecodeProtocolCode(protocol, false);
 			if ((securityProtocolType & this.SecurityProtocolFlags) == securityProtocolType || (this.SecurityProtocolFlags & SecurityProtocolType.Default) == SecurityProtocolType.Default)
 			{
 				this.SecurityProtocol = securityProtocolType;
-				this.SupportedCiphers.Clear();
-				this.SupportedCiphers = null;
-				this.SupportedCiphers = CipherSuiteFactory.GetSupportedCiphers(securityProtocolType);
+				this.SupportedCiphers = CipherSuiteFactory.GetSupportedCiphers(this is ServerContext, securityProtocolType);
 				return;
 			}
 			throw new TlsException(AlertDescription.ProtocolVersion, "Incorrect protocol version received from server");

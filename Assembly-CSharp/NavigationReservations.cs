@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class NavigationReservations : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		NavigationReservations.Instance = null;
+	}
+
 	public int GetOccupancyCount(int cell)
 	{
 		if (this.cellOccupancyDensity.ContainsKey(cell))

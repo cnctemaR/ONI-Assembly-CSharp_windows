@@ -7,7 +7,7 @@ public static class RoomConstraints
 	public static string RoomCriteriaString(Room room)
 	{
 		string text = string.Empty;
-		RoomType roomType = Db.Get().RoomTypes.GetRoomType(room);
+		RoomType roomType = room.roomType;
 		if (roomType != Db.Get().RoomTypes.Neutral)
 		{
 			text = text + "<b>" + ROOMS.CRITERIA.HEADER + "</b>";
@@ -93,11 +93,19 @@ public static class RoomConstraints
 		return text;
 	}
 
+	public static RoomConstraints.Constraint CEILING_HEIGHT_4 = new RoomConstraints.Constraint(null, (Room room) => 1 + room.cavity.maxY - room.cavity.minY >= 4, 1, string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.NAME, "4"), string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.DESCRIPTION, "4"), null);
+
+	public static RoomConstraints.Constraint CEILING_HEIGHT_6 = new RoomConstraints.Constraint(null, (Room room) => 1 + room.cavity.maxY - room.cavity.minY >= 6, 1, string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.NAME, "6"), string.Format(ROOMS.CRITERIA.CEILING_HEIGHT.DESCRIPTION, "6"), null);
+
 	public static RoomConstraints.Constraint MINIMUM_SIZE_12 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells >= 12, 1, string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.NAME, "12"), string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.DESCRIPTION, "12"), null);
+
+	public static RoomConstraints.Constraint MINIMUM_SIZE_32 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells >= 32, 1, string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.NAME, "32"), string.Format(ROOMS.CRITERIA.MINIMUM_SIZE.DESCRIPTION, "32"), null);
 
 	public static RoomConstraints.Constraint MAXIMUM_SIZE_64 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells <= 64, 1, string.Format(ROOMS.CRITERIA.MAXIMUM_SIZE.NAME, "64"), string.Format(ROOMS.CRITERIA.MAXIMUM_SIZE.DESCRIPTION, "64"), null);
 
 	public static RoomConstraints.Constraint MAXIMUM_SIZE_96 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells <= 96, 1, string.Format(ROOMS.CRITERIA.MAXIMUM_SIZE.NAME, "96"), string.Format(ROOMS.CRITERIA.MAXIMUM_SIZE.DESCRIPTION, "96"), null);
+
+	public static RoomConstraints.Constraint MAXIMUM_SIZE_120 = new RoomConstraints.Constraint(null, (Room room) => room.cavity.numCells <= 120, 1, string.Format(ROOMS.CRITERIA.MAXIMUM_SIZE.NAME, "120"), string.Format(ROOMS.CRITERIA.MAXIMUM_SIZE.DESCRIPTION, "120"), null);
 
 	public static RoomConstraints.Constraint NO_INDUSTRIAL_MACHINERY = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
@@ -111,7 +119,9 @@ public static class RoomConstraints
 		return true;
 	}, 1, ROOMS.CRITERIA.NO_INDUSTRIAL_MACHINERY.NAME, ROOMS.CRITERIA.NO_INDUSTRIAL_MACHINERY.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint LUXURY_BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.LuxuryBed), null, 1, ROOMS.CRITERIA.LUXURY_BED_SINGLE.NAME, ROOMS.CRITERIA.LUXURY_BED_SINGLE.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.LUXURY_BED_SINGLE });
 
 	public static RoomConstraints.Constraint BED_MULTIPLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 2, ROOMS.CRITERIA.BED_MULTIPLE.NAME, ROOMS.CRITERIA.BED_MULTIPLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.BED_SINGLE });
 
@@ -123,7 +133,7 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint DECORATIVE_ITEM = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration), null, 1, ROOMS.CRITERIA.DECORATIVE_ITEM.NAME, ROOMS.CRITERIA.DECORATIVE_ITEM.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint CLINIC = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.CLINIC.NAME, ROOMS.CRITERIA.CLINIC.DESCRIPTION, null);
+	public static RoomConstraints.Constraint DECORATIVE_ITEM_20 = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(GameTags.Decoration) && bc.HasTag(RoomConstraints.ConstraintTags.Decor20), null, 1, string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM_N.NAME, "20"), string.Format(ROOMS.CRITERIA.DECORATIVE_ITEM_N.DESCRIPTION, "20"), null);
 
 	public static RoomConstraints.Constraint POWER_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.PowerStation), null, 1, ROOMS.CRITERIA.POWER_STATION.NAME, ROOMS.CRITERIA.POWER_STATION.DESCRIPTION, null);
 
@@ -141,7 +151,7 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint MASSAGE_TABLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MassageTable), null, 1, ROOMS.CRITERIA.MASSAGE_TABLE.NAME, ROOMS.CRITERIA.MASSAGE_TABLE.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint MESS_STATION_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MessTable), null, 1, ROOMS.CRITERIA.MESS_STATION_SINGLE.NAME, ROOMS.CRITERIA.MESS_STATION_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint MESS_STATION_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MessTable), null, 1, ROOMS.CRITERIA.MESS_STATION_SINGLE.NAME, ROOMS.CRITERIA.MESS_STATION_SINGLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.REC_BUILDING });
 
 	public static RoomConstraints.Constraint MESS_STATION_MULTIPLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.MessTable), null, 2, ROOMS.CRITERIA.MESS_STATION_MULTIPLE.NAME, ROOMS.CRITERIA.MESS_STATION_MULTIPLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.MESS_STATION_SINGLE });
 
@@ -149,13 +159,28 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint TOILET = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Toilet), null, 1, ROOMS.CRITERIA.TOILET.NAME, ROOMS.CRITERIA.TOILET.DESCRIPTION, null);
 
+	public static RoomConstraints.Constraint FLUSH_TOILET = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.FlushToilet), null, 1, ROOMS.CRITERIA.FLUSH_TOILET.NAME, ROOMS.CRITERIA.FLUSH_TOILET.DESCRIPTION, null);
+
 	public static RoomConstraints.Constraint WASH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.WashStation), null, 1, ROOMS.CRITERIA.WASH_STATION.NAME, ROOMS.CRITERIA.WASH_STATION.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint ADVANCED_WASH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.AdvancedWashStation), null, 1, ROOMS.CRITERIA.ADVANCED_WASH_STATION.NAME, ROOMS.CRITERIA.ADVANCED_WASH_STATION.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint CLINIC = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.CLINIC.NAME, ROOMS.CRITERIA.CLINIC.DESCRIPTION, new List<RoomConstraints.Constraint>
+	{
+		RoomConstraints.TOILET,
+		RoomConstraints.FLUSH_TOILET,
+		RoomConstraints.MESS_STATION_SINGLE
+	});
 
 	public static class ConstraintTags
 	{
 		public static Tag Bed = "Bed".ToTag();
 
+		public static Tag LuxuryBed = "LuxuryBed".ToTag();
+
 		public static Tag Toilet = "Toilet".ToTag();
+
+		public static Tag FlushToilet = "FlushToilet".ToTag();
 
 		public static Tag MessTable = "MessTable".ToTag();
 
@@ -164,6 +189,8 @@ public static class RoomConstraints
 		public static Tag FoodStorage = "FoodStorage".ToTag();
 
 		public static Tag WashStation = "WashStation".ToTag();
+
+		public static Tag AdvancedWashStation = "AdvancedWashStation".ToTag();
 
 		public static Tag ResearchStation = "ResearchStation".ToTag();
 
@@ -186,6 +213,8 @@ public static class RoomConstraints
 		public static Tag RecBuilding = "RecBuilding".ToTag();
 
 		public static Tag MachineShop = "MachineShop".ToTag();
+
+		public static Tag Decor20 = "Decor20".ToTag();
 	}
 
 	public class Constraint

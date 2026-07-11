@@ -6,7 +6,7 @@ namespace System.Transactions
 	[Serializable]
 	public class TransactionException : SystemException
 	{
-		protected TransactionException()
+		public TransactionException()
 		{
 		}
 

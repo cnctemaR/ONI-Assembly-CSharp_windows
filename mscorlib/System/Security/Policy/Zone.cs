@@ -9,36 +9,15 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class Zone : IBuiltInEvidence, IIdentityPermissionFactory
+	public sealed class Zone : EvidenceBase, IIdentityPermissionFactory, IBuiltInEvidence
 	{
 		public Zone(SecurityZone zone)
 		{
 			if (!Enum.IsDefined(typeof(SecurityZone), zone))
 			{
-				string text = string.Format(Locale.GetText("Invalid zone {0}."), zone);
-				throw new ArgumentException(text, "zone");
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid zone {0}."), zone), "zone");
 			}
 			this.zone = zone;
-		}
-
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return 3;
-		}
-
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			int num = (int)buffer[position++];
-			num += (int)buffer[position++];
-			return position;
-		}
-
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			buffer[position++] = '\u0003';
-			buffer[position++] = (char)(this.zone >> 16);
-			buffer[position++] = (char)(this.zone & (SecurityZone)65535);
-			return position;
 		}
 
 		public SecurityZone SecurityZone
@@ -71,7 +50,15 @@ namespace System.Security.Policy
 			{
 				return new Zone(securityZone);
 			}
-			Uri uri = new Uri(url);
+			Uri uri = null;
+			try
+			{
+				uri = new Uri(url);
+			}
+			catch
+			{
+				return new Zone(securityZone);
+			}
 			if (securityZone == SecurityZone.NoZone)
 			{
 				if (uri.IsFile)
@@ -118,6 +105,26 @@ namespace System.Security.Policy
 			securityElement.AddAttribute("version", "1");
 			securityElement.AddChild(new SecurityElement("Zone", this.zone.ToString()));
 			return securityElement.ToString();
+		}
+
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			return 3;
+		}
+
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			char c = buffer[position++];
+			char c2 = buffer[position++];
+			return position;
+		}
+
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			buffer[position++] = '\u0003';
+			buffer[position++] = (char)(this.zone >> 16);
+			buffer[position++] = (char)(this.zone & (SecurityZone)65535);
+			return position;
 		}
 
 		private SecurityZone zone;

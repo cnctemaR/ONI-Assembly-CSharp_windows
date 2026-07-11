@@ -104,11 +104,16 @@ internal class UpdateObjectCountParameter : LoopingSoundParameterUpdater
 		}
 	}
 
+	public static void Clear()
+	{
+		UpdateObjectCountParameter.settings.Clear();
+	}
+
 	private List<UpdateObjectCountParameter.Entry> entries = new List<UpdateObjectCountParameter.Entry>();
 
 	private static Dictionary<HashedString, UpdateObjectCountParameter.Settings> settings = new Dictionary<HashedString, UpdateObjectCountParameter.Settings>();
 
-	private static HashedString parameterHash = "objectCount";
+	private static readonly HashedString parameterHash = "objectCount";
 
 	private struct Entry
 	{

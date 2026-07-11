@@ -6,7 +6,6 @@ namespace System
 	internal class MonoInternalNoteAttribute : MonoTODOAttribute
 	{
 		public MonoInternalNoteAttribute(string comment)
-			: base(comment)
 		{
 		}
 	}

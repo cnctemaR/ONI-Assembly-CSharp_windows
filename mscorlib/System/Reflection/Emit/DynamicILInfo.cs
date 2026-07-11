@@ -10,12 +10,16 @@ namespace System.Reflection.Emit
 		{
 		}
 
-		[MonoTODO]
+		internal DynamicILInfo(DynamicMethod method)
+		{
+			this.method = method;
+		}
+
 		public DynamicMethod DynamicMethod
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return this.method;
 			}
 		}
 
@@ -25,34 +29,31 @@ namespace System.Reflection.Emit
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		public int GetTokenFor(DynamicMethod method)
 		{
-			throw new NotImplementedException();
+			return this.method.GetILGenerator().TokenGenerator.GetToken(method, false);
 		}
 
-		[MonoTODO]
 		public int GetTokenFor(RuntimeFieldHandle field)
 		{
-			throw new NotImplementedException();
+			return this.method.GetILGenerator().TokenGenerator.GetToken(FieldInfo.GetFieldFromHandle(field), false);
 		}
 
-		[MonoTODO]
 		public int GetTokenFor(RuntimeMethodHandle method)
 		{
-			throw new NotImplementedException();
+			MethodBase methodFromHandle = MethodBase.GetMethodFromHandle(method);
+			return this.method.GetILGenerator().TokenGenerator.GetToken(methodFromHandle, false);
 		}
 
-		[MonoTODO]
 		public int GetTokenFor(RuntimeTypeHandle type)
 		{
-			throw new NotImplementedException();
+			Type typeFromHandle = Type.GetTypeFromHandle(type);
+			return this.method.GetILGenerator().TokenGenerator.GetToken(typeFromHandle, false);
 		}
 
-		[MonoTODO]
 		public int GetTokenFor(string literal)
 		{
-			throw new NotImplementedException();
+			return this.method.GetILGenerator().TokenGenerator.GetToken(literal);
 		}
 
 		[MonoTODO]
@@ -62,16 +63,28 @@ namespace System.Reflection.Emit
 		}
 
 		[MonoTODO]
-		public void SetCode(byte[] code, int maxStackSize)
+		public int GetTokenFor(RuntimeFieldHandle field, RuntimeTypeHandle contextType)
 		{
 			throw new NotImplementedException();
 		}
 
+		public void SetCode(byte[] code, int maxStackSize)
+		{
+			if (code == null)
+			{
+				throw new ArgumentNullException("code");
+			}
+			this.method.GetILGenerator().SetCode(code, maxStackSize);
+		}
+
 		[CLSCompliant(false)]
-		[MonoTODO]
 		public unsafe void SetCode(byte* code, int codeSize, int maxStackSize)
 		{
-			throw new NotImplementedException();
+			if (code == null)
+			{
+				throw new ArgumentNullException("code");
+			}
+			this.method.GetILGenerator().SetCode(code, codeSize, maxStackSize);
 		}
 
 		[MonoTODO]
@@ -93,11 +106,16 @@ namespace System.Reflection.Emit
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
 		[CLSCompliant(false)]
 		public unsafe void SetLocalSignature(byte* localSignature, int signatureSize)
 		{
-			throw new NotImplementedException();
+			byte[] array = new byte[signatureSize];
+			for (int i = 0; i < signatureSize; i++)
+			{
+				array[i] = localSignature[i];
+			}
 		}
+
+		private DynamicMethod method;
 	}
 }

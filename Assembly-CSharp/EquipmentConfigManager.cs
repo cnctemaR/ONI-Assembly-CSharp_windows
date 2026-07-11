@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class EquipmentConfigManager : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		EquipmentConfigManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

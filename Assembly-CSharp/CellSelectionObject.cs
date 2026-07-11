@@ -47,7 +47,7 @@ public class CellSelectionObject : KMonoBehaviour
 
 	private void Update()
 	{
-		if (!this.isAppFocused)
+		if (!this.isAppFocused || SelectTool.Instance == null)
 		{
 			return;
 		}

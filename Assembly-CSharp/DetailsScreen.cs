@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class DetailsScreen : KTabMenu
 {
+	public static void DestroyInstance()
+	{
+		DetailsScreen.Instance = null;
+	}
+
 	public GameObject target { get; private set; }
 
 	public override float GetSortKey()
@@ -395,7 +400,7 @@ public class DetailsScreen : KTabMenu
 		Building component2 = component.GetComponent<Building>();
 		if (component2)
 		{
-			Sprite uisprite = component2.Def.GetUISprite("ui");
+			Sprite uisprite = component2.Def.GetUISprite("ui", false);
 			if (uisprite != null)
 			{
 				this.TabTitle.portrait.SetPortrait(uisprite);
@@ -412,21 +417,21 @@ public class DetailsScreen : KTabMenu
 		if (component4 != null)
 		{
 			KBatchedAnimController component5 = component4.GetComponent<KBatchedAnimController>();
-			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component5.AnimFiles[0], "ui");
+			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component5.AnimFiles[0], "ui", false);
 			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim);
 			return;
 		}
 		PrimaryElement component6 = target.GetComponent<PrimaryElement>();
 		if (component6 != null)
 		{
-			this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component6.ElementID).substance.anim, "ui"));
+			this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component6.ElementID).substance.anim, "ui", false));
 			return;
 		}
 		CellSelectionObject component7 = target.GetComponent<CellSelectionObject>();
 		if (component7 != null)
 		{
 			string text = ((!component7.element.IsSolid) ? component7.element.substance.name : "ui");
-			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component7.element.substance.anim, text);
+			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component7.element.substance.anim, text, false);
 			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim2);
 			return;
 		}

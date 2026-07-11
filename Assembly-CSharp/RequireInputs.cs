@@ -166,9 +166,9 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 
 	public bool visualizeRequirements = true;
 
-	private static Operational.Flag inputConnectedFlag = new Operational.Flag("inputConnected", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag inputConnectedFlag = new Operational.Flag("inputConnected", Operational.Flag.Type.Requirement);
 
-	private static Operational.Flag pipesHaveMass = new Operational.Flag("pipesHaveMass", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag pipesHaveMass = new Operational.Flag("pipesHaveMass", Operational.Flag.Type.Requirement);
 
 	private Guid wireConnectedStatusItem;
 

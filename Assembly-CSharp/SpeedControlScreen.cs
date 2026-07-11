@@ -9,6 +9,11 @@ public class SpeedControlScreen : KScreen
 {
 	public static SpeedControlScreen Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		SpeedControlScreen.Instance = null;
+	}
+
 	public bool IsPaused
 	{
 		get

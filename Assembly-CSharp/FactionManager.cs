@@ -2,6 +2,11 @@
 
 public class FactionManager : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		FactionManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

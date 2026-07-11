@@ -19,7 +19,7 @@ public class Claustrophobic : StateMachineComponent<Claustrophobic.StatesInstanc
 			{
 				return true;
 			}
-			if (Grid.IsValidCell(Grid.CellRight(num2)) && Grid.IsValidCell(Grid.CellLeft(num2)) && Grid.Solid[Grid.CellLeft(num2)] && Grid.IsValidCell(Grid.CellRight(num2)))
+			if (Grid.IsValidCell(Grid.CellRight(num2)) && Grid.IsValidCell(Grid.CellLeft(num2)) && Grid.Solid[Grid.CellRight(num2)] && Grid.Solid[Grid.CellLeft(num2)])
 			{
 				return true;
 			}

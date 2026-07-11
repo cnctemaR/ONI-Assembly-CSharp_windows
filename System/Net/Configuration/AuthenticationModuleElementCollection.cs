@@ -6,12 +6,12 @@ namespace System.Net.Configuration
 	[ConfigurationCollection(typeof(AuthenticationModuleElement), CollectionType = ConfigurationElementCollectionType.AddRemoveClearMap)]
 	public sealed class AuthenticationModuleElementCollection : ConfigurationElementCollection
 	{
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public AuthenticationModuleElementCollection()
 		{
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public AuthenticationModuleElement this[int index]
 		{
 			get
@@ -24,7 +24,7 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public AuthenticationModuleElement this[string name]
 		{
 			get
@@ -52,7 +52,7 @@ namespace System.Net.Configuration
 			return new AuthenticationModuleElement();
 		}
 
-		[global::System.MonoTODO("argument exception?")]
+		[MonoTODO("argument exception?")]
 		protected override object GetElementKey(ConfigurationElement element)
 		{
 			if (!(element is AuthenticationModuleElement))

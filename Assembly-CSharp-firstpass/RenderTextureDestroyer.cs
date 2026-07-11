@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class RenderTextureDestroyer : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		RenderTextureDestroyer.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		RenderTextureDestroyer.Instance = this;

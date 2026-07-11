@@ -9,18 +9,21 @@ namespace System.Reflection
 	public class InvalidFilterCriteriaException : ApplicationException
 	{
 		public InvalidFilterCriteriaException()
-			: base(Locale.GetText("Filter Criteria is not valid."))
+			: base(Environment.GetResourceString("Specified filter criteria was invalid."))
 		{
+			base.SetErrorCode(-2146232831);
 		}
 
 		public InvalidFilterCriteriaException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2146232831);
 		}
 
 		public InvalidFilterCriteriaException(string message, Exception inner)
 			: base(message, inner)
 		{
+			base.SetErrorCode(-2146232831);
 		}
 
 		protected InvalidFilterCriteriaException(SerializationInfo info, StreamingContext context)

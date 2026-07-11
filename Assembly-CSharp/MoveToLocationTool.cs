@@ -3,11 +3,16 @@ using UnityEngine;
 
 public class MoveToLocationTool : InterfaceTool
 {
+	public static void DestroyInstance()
+	{
+		MoveToLocationTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		MoveToLocationTool.Instance = this;
-		this.visualizer = Util.KInstantiate(this.visualizer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+		this.visualizer = Util.KInstantiate(this.visualizer, null, null);
 	}
 
 	public void Activate(Navigator navigator)

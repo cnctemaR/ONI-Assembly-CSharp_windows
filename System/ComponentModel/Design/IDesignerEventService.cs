@@ -4,6 +4,10 @@ namespace System.ComponentModel.Design
 {
 	public interface IDesignerEventService
 	{
+		IDesignerHost ActiveDesigner { get; }
+
+		DesignerCollection Designers { get; }
+
 		event ActiveDesignerEventHandler ActiveDesignerChanged;
 
 		event DesignerEventHandler DesignerCreated;
@@ -11,9 +15,5 @@ namespace System.ComponentModel.Design
 		event DesignerEventHandler DesignerDisposed;
 
 		event EventHandler SelectionChanged;
-
-		IDesignerHost ActiveDesigner { get; }
-
-		DesignerCollection Designers { get; }
 	}
 }

@@ -85,6 +85,8 @@ public class GameTags
 
 	public static readonly Tag BagableCreature = TagManager.Create("BagableCreature");
 
+	public static readonly Tag SwimmingCreature = TagManager.Create("SwimmingCreature");
+
 	public static readonly Tag Spawner = TagManager.Create("Spawner");
 
 	public static readonly Tag FullyIncubated = TagManager.Create("FullyIncubated");
@@ -255,11 +257,19 @@ public class GameTags
 
 	public static readonly Tag Idle = TagManager.Create("Idle");
 
+	public static readonly Tag AllowSpeech = TagManager.Create("AllowSpeech");
+
+	public static readonly Tag AlwaysConverse = TagManager.Create("AlwaysConverse");
+
 	public static readonly Tag HasDebugDestination = TagManager.Create("HasDebugDestination");
 
 	public static readonly Tag DupeBrain = TagManager.Create("DupeBrain");
 
 	public static readonly Tag CreatureBrain = TagManager.Create("CreatureBrain");
+
+	public static readonly Tag Asleep = TagManager.Create("Asleep");
+
+	public static readonly Tag HoldingBreath = TagManager.Create("HoldingBreath");
 
 	public static readonly Tag Operational = TagManager.Create("Operational");
 
@@ -284,6 +294,8 @@ public class GameTags
 	public static readonly Tag MassChunk = TagManager.Create("MassChunk");
 
 	public static readonly Tag UnitChunk = TagManager.Create("UnitChunk");
+
+	public static readonly Tag NotAPrefab = TagManager.Create("NotAPrefab");
 
 	public static readonly Tag MinionSelectPreview = TagManager.Create("MinionSelectPreview");
 
@@ -333,7 +345,11 @@ public class GameTags
 		GameTags.CookingIngredient
 	};
 
-	public static TagSet OtherEntityTags = new TagSet { GameTags.BagableCreature };
+	public static TagSet OtherEntityTags = new TagSet
+	{
+		GameTags.BagableCreature,
+		GameTags.SwimmingCreature
+	};
 
 	public static TagSet AllCategories = new TagSet(new TagSet[]
 	{

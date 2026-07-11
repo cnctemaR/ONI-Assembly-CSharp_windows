@@ -14,7 +14,9 @@ public static class BasePacuConfig
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		float num2 = (warnLowTemp + warnHighTemp) / 2f;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, description, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
-		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.Swimmer);
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		component.AddPrefabTag(GameTags.SwimmingCreature);
+		component.AddPrefabTag(GameTags.Creatures.Swimmer);
 		Trait trait = Db.Get().CreateTrait(base_trait_id, name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, PacuTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -PacuTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
@@ -24,9 +26,9 @@ public static class BasePacuConfig
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 1, false, true, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
 		if (is_baby)
 		{
-			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
-			component.animWidth = 0.5f;
-			component.animHeight = 0.5f;
+			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+			component2.animWidth = 0.5f;
+			component2.animHeight = 0.5f;
 		}
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
 			.Add(new TrappedStates.Def(), true)

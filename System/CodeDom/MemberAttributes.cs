@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[Serializable]
 	public enum MemberAttributes
 	{
 		Abstract = 1,
@@ -12,9 +9,7 @@ namespace System.CodeDom
 		Static,
 		Override,
 		Const,
-		ScopeMask = 15,
-		New,
-		VTableMask = 240,
+		New = 16,
 		Overloaded = 256,
 		Assembly = 4096,
 		FamilyAndAssembly = 8192,
@@ -22,6 +17,8 @@ namespace System.CodeDom
 		FamilyOrAssembly = 16384,
 		Private = 20480,
 		Public = 24576,
-		AccessMask = 61440
+		AccessMask = 61440,
+		ScopeMask = 15,
+		VTableMask = 240
 	}
 }

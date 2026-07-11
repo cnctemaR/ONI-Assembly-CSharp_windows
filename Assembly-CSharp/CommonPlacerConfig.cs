@@ -6,11 +6,9 @@ public class CommonPlacerConfig
 {
 	public GameObject CreatePrefab(string id, string name, Material default_material)
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(id, name);
+		GameObject gameObject = EntityTemplates.CreateEntity(id, name, true);
 		gameObject.layer = LayerMask.NameToLayer("PlaceWithDepth");
-		SaveLoadRoot saveLoadRoot = gameObject.AddOrGet<SaveLoadRoot>();
-		saveLoadRoot.folder = Folder.Placers;
-		gameObject.AddOrGet<SavedObject>();
+		gameObject.AddOrGet<SaveLoadRoot>();
 		gameObject.AddOrGet<StateMachineController>();
 		Prioritizable prioritizable = gameObject.AddOrGet<Prioritizable>();
 		prioritizable.iconOffset = new Vector2(0.3f, 0.32f);

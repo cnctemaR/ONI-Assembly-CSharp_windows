@@ -109,7 +109,7 @@ public class World : KMonoBehaviour
 		this.groundRenderer.Render(visibleArea.Min, visibleArea.Max);
 		Vector2I vector2I;
 		Vector2I vector2I2;
-		KBatchedAnimUpdater.instance.GetVisibleArea(out vector2I, out vector2I2);
+		Singleton<KBatchedAnimUpdater>.Instance.GetVisibleArea(out vector2I, out vector2I2);
 		KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
 		KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
 		KAnimBatchManager.Instance().Render();

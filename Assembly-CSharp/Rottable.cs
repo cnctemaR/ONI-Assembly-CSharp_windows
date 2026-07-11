@@ -28,7 +28,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, false);
 		this.Spoiled.Enter(delegate(Rottable.Instance smi)
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(smi.master.gameObject), 0, 0, "RotPile", Grid.SceneLayer.Ore, Folder.Entities);
+			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(smi.master.gameObject), 0, 0, "RotPile", Grid.SceneLayer.Ore);
 			gameObject.gameObject.GetComponent<KSelectable>().SetName(UI.GAMEOBJECTEFFECTS.ROTTEN + " " + smi.master.gameObject.GetProperName());
 			gameObject.transform.SetPosition(smi.master.transform.GetPosition());
 			gameObject.GetComponent<PrimaryElement>().Mass = smi.master.GetComponent<PrimaryElement>().Mass;
@@ -158,7 +158,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 
 	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Spoiled;
 
-	private static Rottable.RotCB rotCB = new Rottable.RotCB();
+	private static readonly Rottable.RotCB rotCB = new Rottable.RotCB();
 
 	public static Dictionary<int, Rottable.RotAtmosphereQuality> AtmosphereModifier = new Dictionary<int, Rottable.RotAtmosphereQuality>
 	{

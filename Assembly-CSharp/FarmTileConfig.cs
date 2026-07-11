@@ -25,7 +25,6 @@ public class FarmTileConfig : IBuildingConfig
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingBack;
-		buildingDef.MaterialCategory = MATERIALS.FARMABLE;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;

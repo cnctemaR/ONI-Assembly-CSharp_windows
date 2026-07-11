@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[Guid("73386977-D6FD-11D2-BED5-00C04F79E3AE")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("73386977-D6FD-11D2-BED5-00C04F79E3AE")]
 	[ComImport]
 	public interface ICollectData
 	{

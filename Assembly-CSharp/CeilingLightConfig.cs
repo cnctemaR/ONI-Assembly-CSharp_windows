@@ -22,7 +22,6 @@ public class CeilingLightConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 10f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		buildingDef.ViewMode = SimViewMode.Light;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
 	}

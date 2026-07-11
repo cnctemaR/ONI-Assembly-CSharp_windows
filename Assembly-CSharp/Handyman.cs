@@ -12,7 +12,7 @@ public class Handyman : RoleConfig
 		base.roleGroup = "Basekeeping";
 		base.hat = Game.Instance.roleManager.GetHat(Handyman.ID);
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };
-		base.perks = new RolePerk[] { RoleManager.rolePerks.IncreaseStrengthSmall };
+		base.perks = new RolePerk[] { RoleManager.rolePerks.IncreaseStrengthGroundskeeper };
 	}
 
 	public override void InitRequirements()

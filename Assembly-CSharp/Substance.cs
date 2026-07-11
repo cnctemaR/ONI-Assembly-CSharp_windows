@@ -38,7 +38,7 @@ public class Substance
 		}
 		if (gameObject == null)
 		{
-			gameObject = GameUtil.KInstantiate(Assets.GetPrefab(GameTagExtensions.Create(this.elementID)), Grid.SceneLayer.Ore, Folder.Loot, null, 0);
+			gameObject = GameUtil.KInstantiate(Assets.GetPrefab(GameTagExtensions.Create(this.elementID)), Grid.SceneLayer.Ore, null, 0);
 			primaryElement = gameObject.GetComponent<PrimaryElement>();
 			primaryElement.Mass = mass;
 		}

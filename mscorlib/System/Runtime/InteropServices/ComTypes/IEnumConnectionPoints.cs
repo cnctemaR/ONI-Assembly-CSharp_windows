@@ -2,13 +2,13 @@
 
 namespace System.Runtime.InteropServices.ComTypes
 {
-	[Guid("b196b285-bab4-101a-b69c-00aa00341d07")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("B196B285-BAB4-101A-B69C-00AA00341D07")]
 	[ComImport]
 	public interface IEnumConnectionPoints
 	{
 		[PreserveSig]
-		int Next(int celt, [MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 0)] [Out] IConnectionPoint[] rgelt, IntPtr pceltFetched);
+		int Next(int celt, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] [Out] IConnectionPoint[] rgelt, IntPtr pceltFetched);
 
 		[PreserveSig]
 		int Skip(int celt);

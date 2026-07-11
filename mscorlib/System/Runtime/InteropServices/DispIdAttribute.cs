@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public DispIdAttribute(int dispId)
 		{
-			this.id = dispId;
+			this._val = dispId;
 		}
 
 		public int Value
 		{
 			get
 			{
-				return this.id;
+				return this._val;
 			}
 		}
 
-		private int id;
+		internal int _val;
 	}
 }

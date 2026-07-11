@@ -9,7 +9,7 @@ namespace System.Security.Policy
 	{
 		public static IApplicationTrustManager ApplicationTrustManager
 		{
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPolicy\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
 			get
 			{
 				if (ApplicationSecurityManager._appTrustManager == null)
@@ -33,18 +33,15 @@ namespace System.Security.Policy
 		}
 
 		[MonoTODO("Missing application manifest support")]
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPolicy = true, ControlEvidence = true)]
 		public static bool DetermineApplicationTrust(ActivationContext activationContext, TrustManagerContext context)
 		{
 			if (activationContext == null)
 			{
 				throw new NullReferenceException("activationContext");
 			}
-			ApplicationTrust applicationTrust = ApplicationSecurityManager.ApplicationTrustManager.DetermineApplicationTrust(activationContext, context);
-			return applicationTrust.IsApplicationTrustedToRun;
+			return ApplicationSecurityManager.ApplicationTrustManager.DetermineApplicationTrust(activationContext, context).IsApplicationTrustedToRun;
 		}
-
-		private const string config = "ApplicationTrust.config";
 
 		private static IApplicationTrustManager _appTrustManager;
 

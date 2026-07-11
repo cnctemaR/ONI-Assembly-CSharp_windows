@@ -26,7 +26,7 @@ public class KComponentSpawn : MonoBehaviour, ISim200ms, ISim33ms
 		this.comps.Sim200ms(dt);
 	}
 
-	private void OnApplicationQuit()
+	private void OnDestroy()
 	{
 		this.comps.Shutdown();
 	}

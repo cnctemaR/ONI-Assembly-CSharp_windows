@@ -9,17 +9,17 @@ namespace System.Reflection
 	{
 		public AssemblyKeyNameAttribute(string keyName)
 		{
-			this.name = keyName;
+			this.m_keyName = keyName;
 		}
 
 		public string KeyName
 		{
 			get
 			{
-				return this.name;
+				return this.m_keyName;
 			}
 		}
 
-		private string name;
+		private string m_keyName;
 	}
 }

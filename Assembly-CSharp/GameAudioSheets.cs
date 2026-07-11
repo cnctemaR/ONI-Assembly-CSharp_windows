@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameAudioSheets : AudioSheets
@@ -8,9 +9,21 @@ public class GameAudioSheets : AudioSheets
 		if (GameAudioSheets._Instance == null)
 		{
 			GameAudioSheets._Instance = Resources.Load<GameAudioSheets>("GameAudioSheets");
-			GameAudioSheets._Instance.Initialize();
 		}
 		return GameAudioSheets._Instance;
+	}
+
+	public override void Initialize()
+	{
+		this.validFileNames.Add("game_triggered");
+		foreach (KAnimFile kanimFile in Assets.instance.AnimAssets)
+		{
+			if (!(kanimFile == null))
+			{
+				this.validFileNames.Add(kanimFile.name);
+			}
+		}
+		base.Initialize();
 	}
 
 	protected override AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval)
@@ -86,8 +99,48 @@ public class GameAudioSheets : AudioSheets
 		{
 			return new CountedSoundEvent(file_name, sound_name, frame, true, false, min_interval, false);
 		}
+		if (type == "PhonoboxSoundEvent")
+		{
+			return new PhonoboxSoundEvent(file_name, sound_name, frame, min_interval);
+		}
 		return null;
 	}
 
 	private static GameAudioSheets _Instance;
+
+	private HashSet<HashedString> validFileNames = new HashSet<HashedString>();
+
+	private class SingleAudioSheetLoader : AsyncLoader
+	{
+		public override void Run()
+		{
+			this.sheet.soundInfos = new ResourceLoader<AudioSheet.SoundInfo>(this.text, this.name).resources.ToArray();
+		}
+
+		public AudioSheet sheet;
+
+		public string text;
+
+		public string name;
+	}
+
+	private class GameAudioSheetLoader : GlobalAsyncLoader<GameAudioSheets.GameAudioSheetLoader>
+	{
+		public override void CollectLoaders(List<AsyncLoader> loaders)
+		{
+			foreach (AudioSheet audioSheet in GameAudioSheets.Get().sheets)
+			{
+				loaders.Add(new GameAudioSheets.SingleAudioSheetLoader
+				{
+					sheet = audioSheet,
+					text = audioSheet.asset.text,
+					name = audioSheet.asset.name
+				});
+			}
+		}
+
+		public override void Run()
+		{
+		}
+	}
 }

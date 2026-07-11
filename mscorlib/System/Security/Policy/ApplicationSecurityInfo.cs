@@ -13,7 +13,6 @@ namespace System.Security.Policy
 			{
 				throw new ArgumentNullException("activationContext");
 			}
-			this._context = activationContext;
 		}
 
 		public Evidence ApplicationEvidence
@@ -83,8 +82,6 @@ namespace System.Security.Policy
 				this._deployid = value;
 			}
 		}
-
-		private ActivationContext _context;
 
 		private Evidence _evidence;
 

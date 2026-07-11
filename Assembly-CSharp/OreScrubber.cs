@@ -107,7 +107,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 	private class ScrubOreReactable : WorkableReactable
 	{
 		public ScrubOreReactable(Workable workable, ChoreType chore_type, WorkableReactable.AllowedDirection allowed_direction = WorkableReactable.AllowedDirection.Any)
-			: base(workable, chore_type, allowed_direction)
+			: base(workable, "ScrubOre", chore_type, allowed_direction)
 		{
 		}
 

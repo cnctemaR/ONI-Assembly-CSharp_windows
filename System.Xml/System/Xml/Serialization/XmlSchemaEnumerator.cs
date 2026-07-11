@@ -5,33 +5,13 @@ using System.Xml.Schema;
 
 namespace System.Xml.Serialization
 {
-	[MonoTODO]
 	public class XmlSchemaEnumerator : IEnumerator<XmlSchema>, IDisposable, IEnumerator
 	{
 		public XmlSchemaEnumerator(XmlSchemas list)
 		{
-			this.e = list.GetEnumerator();
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.Current;
-			}
-		}
-
-		void IEnumerator.Reset()
-		{
-			this.e.Reset();
-		}
-
-		public XmlSchema Current
-		{
-			get
-			{
-				return (XmlSchema)this.e.Current;
-			}
+			this.list = list;
+			this.idx = -1;
+			this.end = list.Count - 1;
 		}
 
 		public void Dispose()
@@ -40,9 +20,39 @@ namespace System.Xml.Serialization
 
 		public bool MoveNext()
 		{
-			return this.e.MoveNext();
+			if (this.idx >= this.end)
+			{
+				return false;
+			}
+			this.idx++;
+			return true;
 		}
 
-		private IEnumerator e;
+		public XmlSchema Current
+		{
+			get
+			{
+				return this.list[this.idx];
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return this.list[this.idx];
+			}
+		}
+
+		void IEnumerator.Reset()
+		{
+			this.idx = -1;
+		}
+
+		private XmlSchemas list;
+
+		private int idx;
+
+		private int end;
 	}
 }

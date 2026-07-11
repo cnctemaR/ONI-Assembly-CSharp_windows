@@ -72,15 +72,15 @@ namespace System.Configuration
 			}
 		}
 
-		public const string TimeSpanMaxValue = "10675199.02:48:05.4775807";
-
-		public const string TimeSpanMinValue = "-10675199.02:48:05.4775808";
-
 		private bool excludeRange;
 
 		private string maxValueString = "10675199.02:48:05.4775807";
 
 		private string minValueString = "-10675199.02:48:05.4775808";
+
+		public const string TimeSpanMaxValue = "10675199.02:48:05.4775807";
+
+		public const string TimeSpanMinValue = "-10675199.02:48:05.4775808";
 
 		private ConfigurationValidatorBase instance;
 	}

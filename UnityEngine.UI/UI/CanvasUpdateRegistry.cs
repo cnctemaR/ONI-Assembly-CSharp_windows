@@ -65,6 +65,7 @@ namespace UnityEngine.UI
 
 		private void PerformUpdate()
 		{
+			UISystemProfilerApi.BeginSample(UISystemProfilerApi.SampleType.Layout);
 			this.CleanInvalidItems();
 			this.m_PerformingLayoutUpdate = true;
 			this.m_LayoutRebuildQueue.Sort(CanvasUpdateRegistry.s_SortLayoutFunction);
@@ -118,6 +119,7 @@ namespace UnityEngine.UI
 			}
 			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Clear();
 			this.m_PerformingGraphicUpdate = false;
+			UISystemProfilerApi.EndSample(UISystemProfilerApi.SampleType.Layout);
 		}
 
 		private static int ParentCount(Transform child)

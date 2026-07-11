@@ -143,16 +143,6 @@ public class KIconButtonMenu : KScreen
 			}
 		}
 		this.Update();
-		for (int l = 0; l < this.buttons.Count - 1; l++)
-		{
-			for (int m = l + 1; m < this.buttons.Count; m++)
-			{
-				if (this.buttons[l].shortcutKey != global::Action.NumActions && this.buttons[l].shortcutKey == this.buttons[m].shortcutKey)
-				{
-					Output.LogWarning(new object[] { this.buttons[l].text + " has the same shortcut key as " + this.buttons[m].text });
-				}
-			}
-		}
 	}
 
 	public override void OnKeyDown(KButtonEvent e)

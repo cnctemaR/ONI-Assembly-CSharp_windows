@@ -7,13 +7,13 @@ namespace System.Data
 	[Flags]
 	public enum DataViewRowState
 	{
-		None = 0,
-		Unchanged = 2,
 		Added = 4,
+		CurrentRows = 22,
 		Deleted = 8,
 		ModifiedCurrent = 16,
-		CurrentRows = 22,
 		ModifiedOriginal = 32,
-		OriginalRows = 42
+		None = 0,
+		OriginalRows = 42,
+		Unchanged = 2
 	}
 }

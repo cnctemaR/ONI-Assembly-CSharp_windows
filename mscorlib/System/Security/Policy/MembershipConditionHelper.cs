@@ -12,22 +12,19 @@ namespace System.Security.Policy
 			}
 			if (se.Tag != MembershipConditionHelper.XmlTag)
 			{
-				string text = string.Format(Locale.GetText("Invalid tag {0}, expected {1}."), se.Tag, MembershipConditionHelper.XmlTag);
-				throw new ArgumentException(text, parameterName);
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid tag {0}, expected {1}."), se.Tag, MembershipConditionHelper.XmlTag), parameterName);
 			}
 			int num = minimumVersion;
-			string text2 = se.Attribute("version");
-			if (text2 != null)
+			string text = se.Attribute("version");
+			if (text != null)
 			{
 				try
 				{
-					num = int.Parse(text2);
+					num = int.Parse(text);
 				}
 				catch (Exception ex)
 				{
-					string text3 = Locale.GetText("Couldn't parse version from '{0}'.");
-					text3 = string.Format(text3, text2);
-					throw new ArgumentException(text3, parameterName, ex);
+					throw new ArgumentException(string.Format(Locale.GetText("Couldn't parse version from '{0}'."), text), parameterName, ex);
 				}
 			}
 			return num;

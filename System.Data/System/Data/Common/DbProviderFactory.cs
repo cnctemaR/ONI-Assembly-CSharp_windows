@@ -6,57 +6,52 @@ namespace System.Data.Common
 {
 	public abstract class DbProviderFactory
 	{
-		private NotImplementedException CreateNotImplementedException()
-		{
-			return new NotImplementedException();
-		}
-
 		public virtual bool CanCreateDataSourceEnumerator
 		{
 			get
 			{
-				throw this.CreateNotImplementedException();
+				throw null;
 			}
 		}
 
 		public virtual DbCommand CreateCommand()
 		{
-			throw this.CreateNotImplementedException();
+			throw null;
 		}
 
 		public virtual DbCommandBuilder CreateCommandBuilder()
 		{
-			throw this.CreateNotImplementedException();
+			throw null;
 		}
 
 		public virtual DbConnection CreateConnection()
 		{
-			throw this.CreateNotImplementedException();
-		}
-
-		public virtual DbDataAdapter CreateDataAdapter()
-		{
-			throw this.CreateNotImplementedException();
-		}
-
-		public virtual DbDataSourceEnumerator CreateDataSourceEnumerator()
-		{
-			throw this.CreateNotImplementedException();
-		}
-
-		public virtual DbParameter CreateParameter()
-		{
-			throw this.CreateNotImplementedException();
-		}
-
-		public virtual CodeAccessPermission CreatePermission(PermissionState state)
-		{
-			throw this.CreateNotImplementedException();
+			throw null;
 		}
 
 		public virtual DbConnectionStringBuilder CreateConnectionStringBuilder()
 		{
-			throw this.CreateNotImplementedException();
+			throw null;
+		}
+
+		public virtual DbDataAdapter CreateDataAdapter()
+		{
+			throw null;
+		}
+
+		public virtual DbDataSourceEnumerator CreateDataSourceEnumerator()
+		{
+			throw null;
+		}
+
+		public virtual DbParameter CreateParameter()
+		{
+			throw null;
+		}
+
+		public virtual CodeAccessPermission CreatePermission(PermissionState state)
+		{
+			throw null;
 		}
 	}
 }

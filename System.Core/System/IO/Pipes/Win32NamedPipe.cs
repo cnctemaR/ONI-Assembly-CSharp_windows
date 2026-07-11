@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
@@ -30,8 +28,7 @@ namespace System.IO.Pipes
 					}
 					array = new byte[array.Length * 10];
 				}
-				int lastWin32Error = Marshal.GetLastWin32Error();
-				throw new Win32Exception(lastWin32Error);
+				throw Win32PipeError.GetException();
 			}
 		}
 

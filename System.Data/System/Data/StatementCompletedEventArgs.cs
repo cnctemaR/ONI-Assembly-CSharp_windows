@@ -6,17 +6,14 @@ namespace System.Data
 	{
 		public StatementCompletedEventArgs(int recordCount)
 		{
-			this.recordCount = recordCount;
 		}
 
 		public int RecordCount
 		{
 			get
 			{
-				return this.recordCount;
+				throw null;
 			}
 		}
-
-		private int recordCount;
 	}
 }

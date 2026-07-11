@@ -4,6 +4,12 @@ namespace System.Data
 {
 	public interface IDataAdapter
 	{
+		MissingMappingAction MissingMappingAction { get; set; }
+
+		MissingSchemaAction MissingSchemaAction { get; set; }
+
+		ITableMappingCollection TableMappings { get; }
+
 		int Fill(DataSet dataSet);
 
 		DataTable[] FillSchema(DataSet dataSet, SchemaType schemaType);
@@ -11,11 +17,5 @@ namespace System.Data
 		IDataParameter[] GetFillParameters();
 
 		int Update(DataSet dataSet);
-
-		MissingMappingAction MissingMappingAction { get; set; }
-
-		MissingSchemaAction MissingSchemaAction { get; set; }
-
-		ITableMappingCollection TableMappings { get; }
 	}
 }

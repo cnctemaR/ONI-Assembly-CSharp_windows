@@ -6,13 +6,12 @@ namespace System.Security.AccessControl
 	public sealed class CryptoKeyAccessRule : AccessRule
 	{
 		public CryptoKeyAccessRule(IdentityReference identity, CryptoKeyRights cryptoKeyRights, AccessControlType type)
-			: base(identity, 0, false, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Allow)
+			: base(identity, (int)cryptoKeyRights, false, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Allow)
 		{
-			this.rights = cryptoKeyRights;
 		}
 
 		public CryptoKeyAccessRule(string identity, CryptoKeyRights cryptoKeyRights, AccessControlType type)
-			: this(new SecurityIdentifier(identity), cryptoKeyRights, type)
+			: this(new NTAccount(identity), cryptoKeyRights, type)
 		{
 		}
 
@@ -20,10 +19,8 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.rights;
+				return (CryptoKeyRights)base.AccessMask;
 			}
 		}
-
-		private CryptoKeyRights rights;
 	}
 }

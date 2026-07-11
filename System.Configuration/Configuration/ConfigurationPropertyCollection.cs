@@ -11,11 +11,6 @@ namespace System.Configuration
 			this.collection = new List<ConfigurationProperty>();
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			((ICollection)this.collection).CopyTo(array, index);
-		}
-
 		public int Count
 		{
 			get
@@ -57,6 +52,10 @@ namespace System.Configuration
 
 		public void Add(ConfigurationProperty property)
 		{
+			if (property == null)
+			{
+				throw new ArgumentNullException("property");
+			}
 			this.collection.Add(property);
 		}
 
@@ -69,6 +68,11 @@ namespace System.Configuration
 		public void CopyTo(ConfigurationProperty[] array, int index)
 		{
 			this.collection.CopyTo(array, index);
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			((ICollection)this.collection).CopyTo(array, index);
 		}
 
 		public IEnumerator GetEnumerator()

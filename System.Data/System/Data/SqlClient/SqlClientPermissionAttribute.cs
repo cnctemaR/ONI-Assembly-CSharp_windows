@@ -10,13 +10,13 @@ namespace System.Data.SqlClient
 	public sealed class SqlClientPermissionAttribute : DBDataPermissionAttribute
 	{
 		public SqlClientPermissionAttribute(SecurityAction action)
-			: base(action)
+			: base((SecurityAction)0)
 		{
 		}
 
 		public override IPermission CreatePermission()
 		{
-			return new SqlClientPermission(this);
+			throw null;
 		}
 	}
 }

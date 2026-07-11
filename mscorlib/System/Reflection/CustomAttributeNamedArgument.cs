@@ -7,10 +7,16 @@ namespace System.Reflection
 	[Serializable]
 	public struct CustomAttributeNamedArgument
 	{
-		internal CustomAttributeNamedArgument(MemberInfo memberInfo, object typedArgument)
+		public CustomAttributeNamedArgument(MemberInfo memberInfo, object value)
 		{
 			this.memberInfo = memberInfo;
-			this.typedArgument = (CustomAttributeTypedArgument)typedArgument;
+			this.typedArgument = (CustomAttributeTypedArgument)value;
+		}
+
+		public CustomAttributeNamedArgument(MemberInfo memberInfo, CustomAttributeTypedArgument typedArgument)
+		{
+			this.memberInfo = memberInfo;
+			this.typedArgument = typedArgument;
 		}
 
 		public MemberInfo MemberInfo
@@ -26,6 +32,22 @@ namespace System.Reflection
 			get
 			{
 				return this.typedArgument;
+			}
+		}
+
+		public bool IsField
+		{
+			get
+			{
+				return this.memberInfo.MemberType == MemberTypes.Field;
+			}
+		}
+
+		public string MemberName
+		{
+			get
+			{
+				return this.memberInfo.Name;
 			}
 		}
 

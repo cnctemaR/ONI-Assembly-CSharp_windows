@@ -69,19 +69,7 @@ namespace UnityEngine.UI
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				switch (platform)
-				{
-				case RuntimePlatform.IPhonePlayer:
-				case RuntimePlatform.Android:
-					break;
-				default:
-					if (platform != RuntimePlatform.TizenPlayer && platform != RuntimePlatform.tvOS)
-					{
-						return true;
-					}
-					break;
-				}
-				return this.m_HideMobileInput;
+				return (platform != RuntimePlatform.Android && platform != RuntimePlatform.IPhonePlayer && platform != RuntimePlatform.tvOS) || this.m_HideMobileInput;
 			}
 			set
 			{
@@ -201,9 +189,21 @@ namespace UnityEngine.UI
 			}
 			set
 			{
+				if (this.m_TextComponent != null)
+				{
+					this.m_TextComponent.UnregisterDirtyVerticesCallback(new UnityAction(this.MarkGeometryAsDirty));
+					this.m_TextComponent.UnregisterDirtyVerticesCallback(new UnityAction(this.UpdateLabel));
+					this.m_TextComponent.UnregisterDirtyMaterialCallback(new UnityAction(this.UpdateCaretMaterial));
+				}
 				if (SetPropertyUtility.SetClass<Text>(ref this.m_TextComponent, value))
 				{
 					this.EnforceTextHOverflow();
+					if (this.m_TextComponent != null)
+					{
+						this.m_TextComponent.RegisterDirtyVerticesCallback(new UnityAction(this.MarkGeometryAsDirty));
+						this.m_TextComponent.RegisterDirtyVerticesCallback(new UnityAction(this.UpdateLabel));
+						this.m_TextComponent.RegisterDirtyMaterialCallback(new UnityAction(this.UpdateCaretMaterial));
+					}
 				}
 			}
 		}
@@ -326,6 +326,10 @@ namespace UnityEngine.UI
 				if (SetPropertyUtility.SetStruct<int>(ref this.m_CharacterLimit, Math.Max(0, value)))
 				{
 					this.UpdateLabel();
+					if (this.m_Keyboard != null)
+					{
+						this.m_Keyboard.characterLimit = value;
+					}
 				}
 			}
 		}
@@ -377,6 +381,14 @@ namespace UnityEngine.UI
 				{
 					this.SetToCustom();
 				}
+			}
+		}
+
+		public TouchScreenKeyboard touchScreenKeyboard
+		{
+			get
+			{
+				return this.m_Keyboard;
 			}
 		}
 
@@ -743,7 +755,7 @@ namespace UnityEngine.UI
 			if (!this.InPlaceEditing() && this.isFocused)
 			{
 				this.AssignPositioningIfNeeded();
-				if (this.m_Keyboard == null || this.m_Keyboard.done)
+				if (this.m_Keyboard == null || this.m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
 				{
 					if (this.m_Keyboard != null)
 					{
@@ -751,7 +763,7 @@ namespace UnityEngine.UI
 						{
 							this.text = this.m_Keyboard.text;
 						}
-						if (this.m_Keyboard.wasCanceled)
+						if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
 						{
 							this.m_WasCanceled = true;
 						}
@@ -816,13 +828,17 @@ namespace UnityEngine.UI
 							this.SendOnValueChangedAndUpdateLabel();
 						}
 					}
-					else if (this.m_Keyboard.canGetSelection)
+					else if (this.m_HideMobileInput && this.m_Keyboard.canSetSelection)
+					{
+						this.m_Keyboard.selection = new RangeInt(this.caretPositionInternal, this.caretSelectPositionInternal - this.caretPositionInternal);
+					}
+					else if (this.m_Keyboard.canGetSelection && !this.m_HideMobileInput)
 					{
 						this.UpdateCaretFromKeyboard();
 					}
-					if (this.m_Keyboard.done)
+					if (this.m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
 					{
-						if (this.m_Keyboard.wasCanceled)
+						if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
 						{
 							this.m_WasCanceled = true;
 						}
@@ -947,7 +963,7 @@ namespace UnityEngine.UI
 
 		private bool MayDrag(PointerEventData eventData)
 		{
-			return this.IsActive() && this.IsInteractable() && eventData.button == PointerEventData.InputButton.Left && this.m_TextComponent != null && this.m_Keyboard == null;
+			return this.IsActive() && this.IsInteractable() && eventData.button == PointerEventData.InputButton.Left && this.m_TextComponent != null && (this.m_Keyboard == null || this.m_HideMobileInput);
 		}
 
 		public virtual void OnBeginDrag(PointerEventData eventData)
@@ -1571,6 +1587,7 @@ namespace UnityEngine.UI
 
 		private void SendOnValueChanged()
 		{
+			UISystemProfilerApi.AddMarker("InputField.value", this);
 			if (this.onValueChanged != null)
 			{
 				this.onValueChanged.Invoke(this.text);
@@ -1579,6 +1596,7 @@ namespace UnityEngine.UI
 
 		protected void SendOnSubmit()
 		{
+			UISystemProfilerApi.AddMarker("InputField.onSubmit", this);
 			if (this.onEndEdit != null)
 			{
 				this.onEndEdit.Invoke(this.m_Text);
@@ -1608,7 +1626,7 @@ namespace UnityEngine.UI
 
 		protected virtual void Append(char input)
 		{
-			if (!this.m_ReadOnly)
+			if (!this.m_ReadOnly && this.text.Length < 16382)
 			{
 				if (this.InPlaceEditing())
 				{
@@ -2175,7 +2193,7 @@ namespace UnityEngine.UI
 					{
 						TouchScreenKeyboard.hideInput = this.shouldHideMobileInput;
 					}
-					this.m_Keyboard = ((this.inputType != InputField.InputType.Password) ? TouchScreenKeyboard.Open(this.m_Text, this.keyboardType, this.inputType == InputField.InputType.AutoCorrect, this.multiLine) : TouchScreenKeyboard.Open(this.m_Text, this.keyboardType, false, this.multiLine, true));
+					this.m_Keyboard = ((this.inputType != InputField.InputType.Password) ? TouchScreenKeyboard.Open(this.m_Text, this.keyboardType, this.inputType == InputField.InputType.AutoCorrect, this.multiLine, false, false, "", this.characterLimit) : TouchScreenKeyboard.Open(this.m_Text, this.keyboardType, false, this.multiLine, true, false, "", this.characterLimit));
 					this.MoveTextEnd(false);
 				}
 				else
@@ -2224,13 +2242,13 @@ namespace UnityEngine.UI
 					{
 						this.text = this.m_OriginalText;
 					}
+					this.SendOnSubmit();
 					if (this.m_Keyboard != null)
 					{
 						this.m_Keyboard.active = false;
 						this.m_Keyboard = null;
 					}
 					this.m_CaretPosition = (this.m_CaretSelectPosition = 0);
-					this.SendOnSubmit();
 					this.input.imeCompositionMode = IMECompositionMode.Auto;
 				}
 				this.MarkGeometryAsDirty();
@@ -2585,6 +2603,8 @@ namespace UnityEngine.UI
 		private const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 
 		private Event m_ProcessingEvent = new Event();
+
+		private const int k_MaxTextLength = 16382;
 
 		public enum ContentType
 		{

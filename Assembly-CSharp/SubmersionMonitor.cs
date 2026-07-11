@@ -18,7 +18,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 		base.OnSpawn();
 		this.OnMove();
 		this.CheckDry();
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "SubmersionMonitor.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "SubmersionMonitor.OnSpawn");
 	}
 
 	private void OnMove()
@@ -52,7 +52,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 
 	protected override void OnCleanUp()
 	{
-		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();

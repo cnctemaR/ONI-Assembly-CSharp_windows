@@ -53,13 +53,22 @@ public class GlassForgeConfig : IBuildingConfig
 		conduitDispenser.conduitType = ConduitType.Liquid;
 		conduitDispenser.elementFilter = null;
 		conduitDispenser.alwaysDispense = true;
-		ComplexRecipe.RecipeElement recipeElement = new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Sand).tag, 100f);
-		ComplexRecipe.RecipeElement recipeElement2 = new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.MoltenGlass).tag, 25f);
-		ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("GlassForge", recipeElement.material), new ComplexRecipe.RecipeElement[] { recipeElement }, new ComplexRecipe.RecipeElement[] { recipeElement2 });
+		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Sand).tag, 100f)
+		};
+		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.MoltenGlass).tag, 25f)
+		};
+		string text = ComplexRecipeManager.MakeObsoleteRecipeID("GlassForge", array[0].material);
+		string text2 = ComplexRecipeManager.MakeRecipeID("GlassForge", array, array2);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
 		complexRecipe.time = 40f;
 		complexRecipe.useResultAsDescription = true;
-		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.GLASSFORGE.RECIPE_DESCRIPTION, ElementLoader.GetElement(recipeElement2.material).name, ElementLoader.GetElement(recipeElement.material).name);
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.GLASSFORGE.RECIPE_DESCRIPTION, ElementLoader.GetElement(array2[0].material).name, ElementLoader.GetElement(array[0].material).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("GlassForge") };
+		ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
 		Prioritizable.AddRef(go);
 	}
 
@@ -78,7 +87,7 @@ public class GlassForgeConfig : IBuildingConfig
 
 	private const float INPUT_KG = 100f;
 
-	public static CellOffset outPipeOffset = new CellOffset(1, 3);
+	public static readonly CellOffset outPipeOffset = new CellOffset(1, 3);
 
 	private static readonly List<Storage.StoredItemModifier> RefineryStoredItemModifiers = new List<Storage.StoredItemModifier>
 	{

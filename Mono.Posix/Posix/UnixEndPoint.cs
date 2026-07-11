@@ -15,7 +15,7 @@ namespace Mono.Posix
 			{
 				throw new ArgumentNullException("filename");
 			}
-			if (filename == string.Empty)
+			if (filename == "")
 			{
 				throw new ArgumentException("Cannot be empty.", "filename");
 			}
@@ -49,8 +49,7 @@ namespace Mono.Posix
 			{
 				array[i] = socketAddress[i + 2];
 			}
-			string @string = Encoding.Default.GetString(array);
-			return new UnixEndPoint(@string);
+			return new UnixEndPoint(Encoding.Default.GetString(array));
 		}
 
 		public override SocketAddress Serialize()

@@ -5,19 +5,10 @@ using System.ComponentModel;
 namespace System.Data
 {
 	[Editor("Microsoft.VSDesigner.Data.Design.DataViewSettingsCollectionEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-	public class DataViewSettingCollection : IEnumerable, ICollection
+	public class DataViewSettingCollection : ICollection, IEnumerable
 	{
-		internal DataViewSettingCollection(DataViewManager manager)
+		internal DataViewSettingCollection()
 		{
-			this.settingList = new ArrayList();
-			if (manager.DataSet != null)
-			{
-				foreach (object obj in manager.DataSet.Tables)
-				{
-					DataTable dataTable = (DataTable)obj;
-					this.settingList.Add(new DataViewSetting(manager, dataTable));
-				}
-			}
 		}
 
 		[Browsable(false)]
@@ -25,7 +16,7 @@ namespace System.Data
 		{
 			get
 			{
-				return this.settingList.Count;
+				throw null;
 			}
 		}
 
@@ -34,7 +25,7 @@ namespace System.Data
 		{
 			get
 			{
-				return this.settingList.IsReadOnly;
+				throw null;
 			}
 		}
 
@@ -43,7 +34,7 @@ namespace System.Data
 		{
 			get
 			{
-				return this.settingList.IsSynchronized;
+				throw null;
 			}
 		}
 
@@ -51,35 +42,10 @@ namespace System.Data
 		{
 			get
 			{
-				for (int i = 0; i < this.settingList.Count; i++)
-				{
-					DataViewSetting dataViewSetting = (DataViewSetting)this.settingList[i];
-					if (dataViewSetting.Table == table)
-					{
-						return dataViewSetting;
-					}
-				}
-				return null;
+				throw null;
 			}
 			set
 			{
-				this[table] = value;
-			}
-		}
-
-		public virtual DataViewSetting this[string tableName]
-		{
-			get
-			{
-				for (int i = 0; i < this.settingList.Count; i++)
-				{
-					DataViewSetting dataViewSetting = (DataViewSetting)this.settingList[i];
-					if (dataViewSetting.Table.TableName == tableName)
-					{
-						return dataViewSetting;
-					}
-				}
-				return null;
 			}
 		}
 
@@ -87,11 +53,18 @@ namespace System.Data
 		{
 			get
 			{
-				return (DataViewSetting)this.settingList[index];
+				throw null;
 			}
 			set
 			{
-				this.settingList[index] = value;
+			}
+		}
+
+		public virtual DataViewSetting this[string tableName]
+		{
+			get
+			{
+				throw null;
 			}
 		}
 
@@ -100,25 +73,21 @@ namespace System.Data
 		{
 			get
 			{
-				return this.settingList.SyncRoot;
+				throw null;
 			}
 		}
 
 		public void CopyTo(Array ar, int index)
 		{
-			this.settingList.CopyTo(ar, index);
 		}
 
 		public void CopyTo(DataViewSetting[] ar, int index)
 		{
-			this.settingList.CopyTo(ar, index);
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return this.settingList.GetEnumerator();
+			throw null;
 		}
-
-		private readonly ArrayList settingList;
 	}
 }

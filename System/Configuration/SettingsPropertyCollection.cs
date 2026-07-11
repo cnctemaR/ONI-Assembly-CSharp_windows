@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.Configuration
 {
-	public class SettingsPropertyCollection : ICollection, IEnumerable, ICloneable
+	public class SettingsPropertyCollection : ICloneable, ICollection, IEnumerable
 	{
 		public SettingsPropertyCollection()
 		{

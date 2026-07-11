@@ -3,52 +3,96 @@ using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
+using System.Security.Permissions;
+using System.Threading;
 
 namespace System.Collections
 {
+	[DebuggerTypeProxy(typeof(Hashtable.HashtableDebugView))]
 	[ComVisible(true)]
-	[DebuggerTypeProxy(typeof(CollectionDebuggerView))]
-	[DebuggerDisplay("Count={Count}")]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public class Hashtable : IEnumerable, ICloneable, ISerializable, ICollection, IDictionary, IDeserializationCallback
+	public class Hashtable : IDictionary, ICollection, IEnumerable, ISerializable, IDeserializationCallback, ICloneable
 	{
+		[Obsolete("Please use EqualityComparer property.")]
+		protected IHashCodeProvider hcp
+		{
+			get
+			{
+				if (this._keycomparer is CompatibleComparer)
+				{
+					return ((CompatibleComparer)this._keycomparer).HashCodeProvider;
+				}
+				if (this._keycomparer == null)
+				{
+					return null;
+				}
+				throw new ArgumentException(Environment.GetResourceString("The usage of IKeyComparer and IHashCodeProvider/IComparer interfaces cannot be mixed; use one or the other."));
+			}
+			set
+			{
+				if (this._keycomparer is CompatibleComparer)
+				{
+					CompatibleComparer compatibleComparer = (CompatibleComparer)this._keycomparer;
+					this._keycomparer = new CompatibleComparer(compatibleComparer.Comparer, value);
+					return;
+				}
+				if (this._keycomparer == null)
+				{
+					this._keycomparer = new CompatibleComparer(null, value);
+					return;
+				}
+				throw new ArgumentException(Environment.GetResourceString("The usage of IKeyComparer and IHashCodeProvider/IComparer interfaces cannot be mixed; use one or the other."));
+			}
+		}
+
+		[Obsolete("Please use KeyComparer properties.")]
+		protected IComparer comparer
+		{
+			get
+			{
+				if (this._keycomparer is CompatibleComparer)
+				{
+					return ((CompatibleComparer)this._keycomparer).Comparer;
+				}
+				if (this._keycomparer == null)
+				{
+					return null;
+				}
+				throw new ArgumentException(Environment.GetResourceString("The usage of IKeyComparer and IHashCodeProvider/IComparer interfaces cannot be mixed; use one or the other."));
+			}
+			set
+			{
+				if (this._keycomparer is CompatibleComparer)
+				{
+					CompatibleComparer compatibleComparer = (CompatibleComparer)this._keycomparer;
+					this._keycomparer = new CompatibleComparer(value, compatibleComparer.HashCodeProvider);
+					return;
+				}
+				if (this._keycomparer == null)
+				{
+					this._keycomparer = new CompatibleComparer(value, null);
+					return;
+				}
+				throw new ArgumentException(Environment.GetResourceString("The usage of IKeyComparer and IHashCodeProvider/IComparer interfaces cannot be mixed; use one or the other."));
+			}
+		}
+
+		protected IEqualityComparer EqualityComparer
+		{
+			get
+			{
+				return this._keycomparer;
+			}
+		}
+
+		internal Hashtable(bool trash)
+		{
+		}
+
 		public Hashtable()
 			: this(0, 1f)
-		{
-		}
-
-		[Obsolete("Please use Hashtable(int, float, IEqualityComparer) instead")]
-		public Hashtable(int capacity, float loadFactor, IHashCodeProvider hcp, IComparer comparer)
-		{
-			if (capacity < 0)
-			{
-				throw new ArgumentOutOfRangeException("capacity", "negative capacity");
-			}
-			if (loadFactor < 0.1f || loadFactor > 1f || float.IsNaN(loadFactor))
-			{
-				throw new ArgumentOutOfRangeException("loadFactor", "load factor");
-			}
-			if (capacity == 0)
-			{
-				capacity++;
-			}
-			this.loadFactor = 0.75f * loadFactor;
-			double num = (double)((float)capacity / this.loadFactor);
-			if (num > 2147483647.0)
-			{
-				throw new ArgumentException("Size is too big");
-			}
-			int num2 = (int)num;
-			num2 = Hashtable.ToPrime(num2);
-			this.SetTable(new Hashtable.Slot[num2], new int[num2]);
-			this.hcp = hcp;
-			this.comparer = comparer;
-			this.inUse = 0;
-			this.modificationCount = 0;
-		}
-
-		public Hashtable(int capacity, float loadFactor)
-			: this(capacity, loadFactor, null, null)
 		{
 		}
 
@@ -57,79 +101,60 @@ namespace System.Collections
 		{
 		}
 
-		internal Hashtable(Hashtable source)
+		public Hashtable(int capacity, float loadFactor)
 		{
-			this.inUse = source.inUse;
-			this.loadFactor = source.loadFactor;
-			this.table = (Hashtable.Slot[])source.table.Clone();
-			this.hashes = (int[])source.hashes.Clone();
-			this.threshold = source.threshold;
-			this.hcpRef = source.hcpRef;
-			this.comparerRef = source.comparerRef;
-			this.equalityComparer = source.equalityComparer;
-		}
-
-		[Obsolete("Please use Hashtable(int, IEqualityComparer) instead")]
-		public Hashtable(int capacity, IHashCodeProvider hcp, IComparer comparer)
-			: this(capacity, 1f, hcp, comparer)
-		{
-		}
-
-		[Obsolete("Please use Hashtable(IDictionary, float, IEqualityComparer) instead")]
-		public Hashtable(IDictionary d, float loadFactor, IHashCodeProvider hcp, IComparer comparer)
-			: this((d == null) ? 0 : d.Count, loadFactor, hcp, comparer)
-		{
-			if (d == null)
+			if (capacity < 0)
 			{
-				throw new ArgumentNullException("dictionary");
+				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("Non-negative number required."));
 			}
-			IDictionaryEnumerator enumerator = d.GetEnumerator();
-			while (enumerator.MoveNext())
+			if (loadFactor < 0.1f || loadFactor > 1f)
 			{
-				this.Add(enumerator.Key, enumerator.Value);
+				throw new ArgumentOutOfRangeException("loadFactor", Environment.GetResourceString("Load factor needs to be between 0.1 and 1.0.", new object[] { 0.1, 1.0 }));
 			}
+			this.loadFactor = 0.72f * loadFactor;
+			double num = (double)((float)capacity / this.loadFactor);
+			if (num > 2147483647.0)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Hashtable's capacity overflowed and went negative. Check load factor, capacity and the current size of the table."));
+			}
+			int num2 = ((num > 3.0) ? HashHelpers.GetPrime((int)num) : 3);
+			this.buckets = new Hashtable.bucket[num2];
+			this.loadsize = (int)(this.loadFactor * (float)num2);
+			this.isWriterInProgress = false;
 		}
 
-		public Hashtable(IDictionary d, float loadFactor)
-			: this(d, loadFactor, null, null)
+		[Obsolete("Please use Hashtable(int, float, IEqualityComparer) instead.")]
+		public Hashtable(int capacity, float loadFactor, IHashCodeProvider hcp, IComparer comparer)
+			: this(capacity, loadFactor)
 		{
+			if (hcp == null && comparer == null)
+			{
+				this._keycomparer = null;
+				return;
+			}
+			this._keycomparer = new CompatibleComparer(comparer, hcp);
 		}
 
-		public Hashtable(IDictionary d)
-			: this(d, 1f)
+		public Hashtable(int capacity, float loadFactor, IEqualityComparer equalityComparer)
+			: this(capacity, loadFactor)
 		{
+			this._keycomparer = equalityComparer;
 		}
 
-		[Obsolete("Please use Hashtable(IDictionary, IEqualityComparer) instead")]
-		public Hashtable(IDictionary d, IHashCodeProvider hcp, IComparer comparer)
-			: this(d, 1f, hcp, comparer)
-		{
-		}
-
-		[Obsolete("Please use Hashtable(IEqualityComparer) instead")]
+		[Obsolete("Please use Hashtable(IEqualityComparer) instead.")]
 		public Hashtable(IHashCodeProvider hcp, IComparer comparer)
-			: this(1, 1f, hcp, comparer)
+			: this(0, 1f, hcp, comparer)
 		{
-		}
-
-		protected Hashtable(SerializationInfo info, StreamingContext context)
-		{
-			this.serializationInfo = info;
-		}
-
-		public Hashtable(IDictionary d, IEqualityComparer equalityComparer)
-			: this(d, 1f, equalityComparer)
-		{
-		}
-
-		public Hashtable(IDictionary d, float loadFactor, IEqualityComparer equalityComparer)
-			: this(d, loadFactor)
-		{
-			this.equalityComparer = equalityComparer;
 		}
 
 		public Hashtable(IEqualityComparer equalityComparer)
-			: this(1, 1f, equalityComparer)
+			: this(0, 1f, equalityComparer)
+		{
+		}
+
+		[Obsolete("Please use Hashtable(int, IEqualityComparer) instead.")]
+		public Hashtable(int capacity, IHashCodeProvider hcp, IComparer comparer)
+			: this(capacity, 1f, hcp, comparer)
 		{
 		}
 
@@ -138,72 +163,380 @@ namespace System.Collections
 		{
 		}
 
-		public Hashtable(int capacity, float loadFactor, IEqualityComparer equalityComparer)
-			: this(capacity, loadFactor)
+		public Hashtable(IDictionary d)
+			: this(d, 1f)
 		{
-			this.equalityComparer = equalityComparer;
+		}
+
+		public Hashtable(IDictionary d, float loadFactor)
+			: this(d, loadFactor, null)
+		{
+		}
+
+		[Obsolete("Please use Hashtable(IDictionary, IEqualityComparer) instead.")]
+		public Hashtable(IDictionary d, IHashCodeProvider hcp, IComparer comparer)
+			: this(d, 1f, hcp, comparer)
+		{
+		}
+
+		public Hashtable(IDictionary d, IEqualityComparer equalityComparer)
+			: this(d, 1f, equalityComparer)
+		{
+		}
+
+		[Obsolete("Please use Hashtable(IDictionary, float, IEqualityComparer) instead.")]
+		public Hashtable(IDictionary d, float loadFactor, IHashCodeProvider hcp, IComparer comparer)
+			: this((d != null) ? d.Count : 0, loadFactor, hcp, comparer)
+		{
+			if (d == null)
+			{
+				throw new ArgumentNullException("d", Environment.GetResourceString("Dictionary cannot be null."));
+			}
+			IDictionaryEnumerator enumerator = d.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				this.Add(enumerator.Key, enumerator.Value);
+			}
+		}
+
+		public Hashtable(IDictionary d, float loadFactor, IEqualityComparer equalityComparer)
+			: this((d != null) ? d.Count : 0, loadFactor, equalityComparer)
+		{
+			if (d == null)
+			{
+				throw new ArgumentNullException("d", Environment.GetResourceString("Dictionary cannot be null."));
+			}
+			IDictionaryEnumerator enumerator = d.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				this.Add(enumerator.Key, enumerator.Value);
+			}
+		}
+
+		protected Hashtable(SerializationInfo info, StreamingContext context)
+		{
+			HashHelpers.SerializationInfoTable.Add(this, info);
+		}
+
+		private uint InitHash(object key, int hashsize, out uint seed, out uint incr)
+		{
+			uint num = (uint)(this.GetHash(key) & int.MaxValue);
+			seed = num;
+			incr = 1U + seed * 101U % (uint)(hashsize - 1);
+			return num;
+		}
+
+		public virtual void Add(object key, object value)
+		{
+			this.Insert(key, value, true);
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public virtual void Clear()
+		{
+			if (this.count == 0 && this.occupancy == 0)
+			{
+				return;
+			}
+			Thread.BeginCriticalRegion();
+			this.isWriterInProgress = true;
+			for (int i = 0; i < this.buckets.Length; i++)
+			{
+				this.buckets[i].hash_coll = 0;
+				this.buckets[i].key = null;
+				this.buckets[i].val = null;
+			}
+			this.count = 0;
+			this.occupancy = 0;
+			this.UpdateVersion();
+			this.isWriterInProgress = false;
+			Thread.EndCriticalRegion();
+		}
+
+		public virtual object Clone()
+		{
+			Hashtable.bucket[] array = this.buckets;
+			Hashtable hashtable = new Hashtable(this.count, this._keycomparer);
+			hashtable.version = this.version;
+			hashtable.loadFactor = this.loadFactor;
+			hashtable.count = 0;
+			int i = array.Length;
+			while (i > 0)
+			{
+				i--;
+				object key = array[i].key;
+				if (key != null && key != array)
+				{
+					hashtable[key] = array[i].val;
+				}
+			}
+			return hashtable;
+		}
+
+		public virtual bool Contains(object key)
+		{
+			return this.ContainsKey(key);
+		}
+
+		public virtual bool ContainsKey(object key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+			}
+			Hashtable.bucket[] array = this.buckets;
+			uint num2;
+			uint num3;
+			uint num = this.InitHash(key, array.Length, out num2, out num3);
+			int num4 = 0;
+			int num5 = (int)(num2 % (uint)array.Length);
+			for (;;)
+			{
+				Hashtable.bucket bucket = array[num5];
+				if (bucket.key == null)
+				{
+					break;
+				}
+				if ((long)(bucket.hash_coll & 2147483647) == (long)((ulong)num) && this.KeyEquals(bucket.key, key))
+				{
+					return true;
+				}
+				num5 = (int)(((long)num5 + (long)((ulong)num3)) % (long)((ulong)array.Length));
+				if (bucket.hash_coll >= 0 || ++num4 >= array.Length)
+				{
+					return false;
+				}
+			}
+			return false;
+		}
+
+		public virtual bool ContainsValue(object value)
+		{
+			if (value == null)
+			{
+				int num = this.buckets.Length;
+				while (--num >= 0)
+				{
+					if (this.buckets[num].key != null && this.buckets[num].key != this.buckets && this.buckets[num].val == null)
+					{
+						return true;
+					}
+				}
+			}
+			else
+			{
+				int num2 = this.buckets.Length;
+				while (--num2 >= 0)
+				{
+					object val = this.buckets[num2].val;
+					if (val != null && val.Equals(value))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		private void CopyKeys(Array array, int arrayIndex)
+		{
+			Hashtable.bucket[] array2 = this.buckets;
+			int num = array2.Length;
+			while (--num >= 0)
+			{
+				object key = array2[num].key;
+				if (key != null && key != this.buckets)
+				{
+					array.SetValue(key, arrayIndex++);
+				}
+			}
+		}
+
+		private void CopyEntries(Array array, int arrayIndex)
+		{
+			Hashtable.bucket[] array2 = this.buckets;
+			int num = array2.Length;
+			while (--num >= 0)
+			{
+				object key = array2[num].key;
+				if (key != null && key != this.buckets)
+				{
+					DictionaryEntry dictionaryEntry = new DictionaryEntry(key, array2[num].val);
+					array.SetValue(dictionaryEntry, arrayIndex++);
+				}
+			}
+		}
+
+		public virtual void CopyTo(Array array, int arrayIndex)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array", Environment.GetResourceString("Array cannot be null."));
+			}
+			if (array.Rank != 1)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+			}
+			if (arrayIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("arrayIndex", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (array.Length - arrayIndex < this.Count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Destination array is not long enough to copy all the items in the collection. Check array index and length."));
+			}
+			this.CopyEntries(array, arrayIndex);
+		}
+
+		internal virtual KeyValuePairs[] ToKeyValuePairsArray()
+		{
+			KeyValuePairs[] array = new KeyValuePairs[this.count];
+			int num = 0;
+			Hashtable.bucket[] array2 = this.buckets;
+			int num2 = array2.Length;
+			while (--num2 >= 0)
+			{
+				object key = array2[num2].key;
+				if (key != null && key != this.buckets)
+				{
+					array[num++] = new KeyValuePairs(key, array2[num2].val);
+				}
+			}
+			return array;
+		}
+
+		private void CopyValues(Array array, int arrayIndex)
+		{
+			Hashtable.bucket[] array2 = this.buckets;
+			int num = array2.Length;
+			while (--num >= 0)
+			{
+				object key = array2[num].key;
+				if (key != null && key != this.buckets)
+				{
+					array.SetValue(array2[num].val, arrayIndex++);
+				}
+			}
+		}
+
+		public virtual object this[object key]
+		{
+			get
+			{
+				if (key == null)
+				{
+					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+				}
+				Hashtable.bucket[] array = this.buckets;
+				uint num2;
+				uint num3;
+				uint num = this.InitHash(key, array.Length, out num2, out num3);
+				int num4 = 0;
+				int num5 = (int)(num2 % (uint)array.Length);
+				Hashtable.bucket bucket;
+				for (;;)
+				{
+					int num6 = 0;
+					int num7;
+					do
+					{
+						num7 = this.version;
+						bucket = array[num5];
+						if (++num6 % 8 == 0)
+						{
+							Thread.Sleep(1);
+						}
+					}
+					while (this.isWriterInProgress || num7 != this.version);
+					if (bucket.key == null)
+					{
+						break;
+					}
+					if ((long)(bucket.hash_coll & 2147483647) == (long)((ulong)num) && this.KeyEquals(bucket.key, key))
+					{
+						goto Block_7;
+					}
+					num5 = (int)(((long)num5 + (long)((ulong)num3)) % (long)((ulong)array.Length));
+					if (bucket.hash_coll >= 0 || ++num4 >= array.Length)
+					{
+						goto IL_00D2;
+					}
+				}
+				return null;
+				Block_7:
+				return bucket.val;
+				IL_00D2:
+				return null;
+			}
+			set
+			{
+				this.Insert(key, value, false);
+			}
+		}
+
+		private void expand()
+		{
+			int num = HashHelpers.ExpandPrime(this.buckets.Length);
+			this.rehash(num, false);
+		}
+
+		private void rehash()
+		{
+			this.rehash(this.buckets.Length, false);
+		}
+
+		private void UpdateVersion()
+		{
+			this.version++;
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		private void rehash(int newsize, bool forceNewHashCode)
+		{
+			this.occupancy = 0;
+			Hashtable.bucket[] array = new Hashtable.bucket[newsize];
+			for (int i = 0; i < this.buckets.Length; i++)
+			{
+				Hashtable.bucket bucket = this.buckets[i];
+				if (bucket.key != null && bucket.key != this.buckets)
+				{
+					int num = (forceNewHashCode ? this.GetHash(bucket.key) : bucket.hash_coll) & int.MaxValue;
+					this.putEntry(array, bucket.key, bucket.val, num);
+				}
+			}
+			Thread.BeginCriticalRegion();
+			this.isWriterInProgress = true;
+			this.buckets = array;
+			this.loadsize = (int)(this.loadFactor * (float)newsize);
+			this.UpdateVersion();
+			this.isWriterInProgress = false;
+			Thread.EndCriticalRegion();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return new Hashtable.Enumerator(this, Hashtable.EnumeratorMode.ENTRY_MODE);
+			return new Hashtable.HashtableEnumerator(this, 3);
 		}
 
-		[Obsolete("Please use EqualityComparer property.")]
-		protected IComparer comparer
+		public virtual IDictionaryEnumerator GetEnumerator()
 		{
-			get
-			{
-				return this.comparerRef;
-			}
-			set
-			{
-				this.comparerRef = value;
-			}
+			return new Hashtable.HashtableEnumerator(this, 3);
 		}
 
-		[Obsolete("Please use EqualityComparer property.")]
-		protected IHashCodeProvider hcp
+		protected virtual int GetHash(object key)
 		{
-			get
+			if (this._keycomparer != null)
 			{
-				return this.hcpRef;
+				return this._keycomparer.GetHashCode(key);
 			}
-			set
-			{
-				this.hcpRef = value;
-			}
+			return key.GetHashCode();
 		}
 
-		protected IEqualityComparer EqualityComparer
-		{
-			get
-			{
-				return this.equalityComparer;
-			}
-		}
-
-		public virtual int Count
-		{
-			get
-			{
-				return this.inUse;
-			}
-		}
-
-		public virtual bool IsSynchronized
+		public virtual bool IsReadOnly
 		{
 			get
 			{
 				return false;
-			}
-		}
-
-		public virtual object SyncRoot
-		{
-			get
-			{
-				return this;
 			}
 		}
 
@@ -215,7 +548,7 @@ namespace System.Collections
 			}
 		}
 
-		public virtual bool IsReadOnly
+		public virtual bool IsSynchronized
 		{
 			get
 			{
@@ -223,15 +556,32 @@ namespace System.Collections
 			}
 		}
 
+		protected virtual bool KeyEquals(object item, object key)
+		{
+			if (this.buckets == item)
+			{
+				return false;
+			}
+			if (item == key)
+			{
+				return true;
+			}
+			if (this._keycomparer != null)
+			{
+				return this._keycomparer.Equals(item, key);
+			}
+			return item != null && item.Equals(key);
+		}
+
 		public virtual ICollection Keys
 		{
 			get
 			{
-				if (this.hashKeys == null)
+				if (this.keys == null)
 				{
-					this.hashKeys = new Hashtable.HashKeys(this);
+					this.keys = new Hashtable.KeyCollection(this);
 				}
-				return this.hashKeys;
+				return this.keys;
 			}
 		}
 
@@ -239,244 +589,199 @@ namespace System.Collections
 		{
 			get
 			{
-				if (this.hashValues == null)
+				if (this.values == null)
 				{
-					this.hashValues = new Hashtable.HashValues(this);
+					this.values = new Hashtable.ValueCollection(this);
 				}
-				return this.hashValues;
+				return this.values;
 			}
 		}
 
-		public virtual object this[object key]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		private void Insert(object key, object nvalue, bool add)
 		{
-			get
+			if (key == null)
 			{
-				if (key == null)
+				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+			}
+			if (this.count >= this.loadsize)
+			{
+				this.expand();
+			}
+			else if (this.occupancy > this.loadsize && this.count > 100)
+			{
+				this.rehash();
+			}
+			uint num2;
+			uint num3;
+			uint num = this.InitHash(key, this.buckets.Length, out num2, out num3);
+			int num4 = 0;
+			int num5 = -1;
+			int num6 = (int)(num2 % (uint)this.buckets.Length);
+			for (;;)
+			{
+				if (num5 == -1 && this.buckets[num6].key == this.buckets && this.buckets[num6].hash_coll < 0)
 				{
-					throw new ArgumentNullException("key", "null key");
+					num5 = num6;
 				}
-				Hashtable.Slot[] array = this.table;
-				int[] array2 = this.hashes;
-				uint num = (uint)array.Length;
-				int num2 = this.GetHash(key) & int.MaxValue;
-				uint num3 = (uint)num2;
-				uint num4 = (uint)(((num2 >> 5) + 1) % (int)(num - 1U) + 1);
-				for (uint num5 = num; num5 > 0U; num5 -= 1U)
+				if (this.buckets[num6].key == null || (this.buckets[num6].key == this.buckets && ((long)this.buckets[num6].hash_coll & (long)((ulong)(-2147483648))) == 0L))
 				{
-					num3 %= num;
-					Hashtable.Slot slot = array[(int)((UIntPtr)num3)];
-					int num6 = array2[(int)((UIntPtr)num3)];
-					object key2 = slot.key;
-					if (key2 == null)
-					{
-						break;
-					}
-					if (key2 == key || ((num6 & 2147483647) == num2 && this.KeyEquals(key, key2)))
-					{
-						return slot.value;
-					}
-					if ((num6 & -2147483648) == 0)
-					{
-						break;
-					}
-					num3 += num4;
+					break;
 				}
-				return null;
+				if ((long)(this.buckets[num6].hash_coll & 2147483647) == (long)((ulong)num) && this.KeyEquals(this.buckets[num6].key, key))
+				{
+					goto Block_12;
+				}
+				if (num5 == -1 && this.buckets[num6].hash_coll >= 0)
+				{
+					Hashtable.bucket[] array = this.buckets;
+					int num7 = num6;
+					array[num7].hash_coll = array[num7].hash_coll | int.MinValue;
+					this.occupancy++;
+				}
+				num6 = (int)(((long)num6 + (long)((ulong)num3)) % (long)((ulong)this.buckets.Length));
+				if (++num4 >= this.buckets.Length)
+				{
+					goto Block_16;
+				}
 			}
-			set
+			if (num5 != -1)
 			{
-				this.PutImpl(key, value, true);
+				num6 = num5;
 			}
+			Thread.BeginCriticalRegion();
+			this.isWriterInProgress = true;
+			this.buckets[num6].val = nvalue;
+			this.buckets[num6].key = key;
+			Hashtable.bucket[] array2 = this.buckets;
+			int num8 = num6;
+			array2[num8].hash_coll = array2[num8].hash_coll | (int)num;
+			this.count++;
+			this.UpdateVersion();
+			this.isWriterInProgress = false;
+			Thread.EndCriticalRegion();
+			return;
+			Block_12:
+			if (add)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'", new object[]
+				{
+					this.buckets[num6].key,
+					key
+				}));
+			}
+			Thread.BeginCriticalRegion();
+			this.isWriterInProgress = true;
+			this.buckets[num6].val = nvalue;
+			this.UpdateVersion();
+			this.isWriterInProgress = false;
+			Thread.EndCriticalRegion();
+			return;
+			Block_16:
+			if (num5 != -1)
+			{
+				Thread.BeginCriticalRegion();
+				this.isWriterInProgress = true;
+				this.buckets[num5].val = nvalue;
+				this.buckets[num5].key = key;
+				Hashtable.bucket[] array3 = this.buckets;
+				int num9 = num5;
+				array3[num9].hash_coll = array3[num9].hash_coll | (int)num;
+				this.count++;
+				this.UpdateVersion();
+				this.isWriterInProgress = false;
+				Thread.EndCriticalRegion();
+				return;
+			}
+			throw new InvalidOperationException(Environment.GetResourceString("Hashtable insert failed. Load factor too high. The most common cause is multiple threads writing to the Hashtable simultaneously."));
 		}
 
-		public virtual void CopyTo(Array array, int arrayIndex)
+		private void putEntry(Hashtable.bucket[] newBuckets, object key, object nvalue, int hashcode)
 		{
-			if (array == null)
+			uint num = (uint)(1 + hashcode * 101 % (newBuckets.Length - 1));
+			int num2 = hashcode % newBuckets.Length;
+			while (newBuckets[num2].key != null && newBuckets[num2].key != this.buckets)
 			{
-				throw new ArgumentNullException("array");
+				if (newBuckets[num2].hash_coll >= 0)
+				{
+					int num3 = num2;
+					newBuckets[num3].hash_coll = newBuckets[num3].hash_coll | int.MinValue;
+					this.occupancy++;
+				}
+				num2 = (int)(((long)num2 + (long)((ulong)num)) % (long)((ulong)newBuckets.Length));
 			}
-			if (arrayIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("arrayIndex");
-			}
-			if (array.Rank > 1)
-			{
-				throw new ArgumentException("array is multidimensional");
-			}
-			if (array.Length > 0 && arrayIndex >= array.Length)
-			{
-				throw new ArgumentException("arrayIndex is equal to or greater than array.Length");
-			}
-			if (arrayIndex + this.inUse > array.Length)
-			{
-				throw new ArgumentException("Not enough room from arrayIndex to end of array for this Hashtable");
-			}
-			IDictionaryEnumerator enumerator = this.GetEnumerator();
-			int num = arrayIndex;
-			while (enumerator.MoveNext())
-			{
-				array.SetValue(enumerator.Entry, num++);
-			}
-		}
-
-		public virtual void Add(object key, object value)
-		{
-			this.PutImpl(key, value, false);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public virtual void Clear()
-		{
-			for (int i = 0; i < this.table.Length; i++)
-			{
-				this.table[i].key = null;
-				this.table[i].value = null;
-				this.hashes[i] = 0;
-			}
-			this.inUse = 0;
-			this.modificationCount++;
-		}
-
-		public virtual bool Contains(object key)
-		{
-			return this.Find(key) >= 0;
-		}
-
-		public virtual IDictionaryEnumerator GetEnumerator()
-		{
-			return new Hashtable.Enumerator(this, Hashtable.EnumeratorMode.ENTRY_MODE);
+			newBuckets[num2].val = nvalue;
+			newBuckets[num2].key = key;
+			int num4 = num2;
+			newBuckets[num4].hash_coll = newBuckets[num4].hash_coll | hashcode;
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public virtual void Remove(object key)
 		{
-			int num = this.Find(key);
-			if (num >= 0)
+			if (key == null)
 			{
-				Hashtable.Slot[] array = this.table;
-				int num2 = this.hashes[num];
-				num2 &= int.MinValue;
-				this.hashes[num] = num2;
-				array[num].key = ((num2 == 0) ? null : Hashtable.KeyMarker.Removed);
-				array[num].value = null;
-				this.inUse--;
-				this.modificationCount++;
+				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
 			}
-		}
-
-		public virtual bool ContainsKey(object key)
-		{
-			return this.Contains(key);
-		}
-
-		public virtual bool ContainsValue(object value)
-		{
-			int num = this.table.Length;
-			Hashtable.Slot[] array = this.table;
-			if (value == null)
+			uint num2;
+			uint num3;
+			uint num = this.InitHash(key, this.buckets.Length, out num2, out num3);
+			int num4 = 0;
+			int num5 = (int)(num2 % (uint)this.buckets.Length);
+			for (;;)
 			{
-				for (int i = 0; i < num; i++)
+				Hashtable.bucket bucket = this.buckets[num5];
+				if ((long)(bucket.hash_coll & 2147483647) == (long)((ulong)num) && this.KeyEquals(bucket.key, key))
 				{
-					Hashtable.Slot slot = array[i];
-					if (slot.key != null && slot.key != Hashtable.KeyMarker.Removed && slot.value == null)
-					{
-						return true;
-					}
+					break;
 				}
+				num5 = (int)(((long)num5 + (long)((ulong)num3)) % (long)((ulong)this.buckets.Length));
+				if (bucket.hash_coll >= 0 || ++num4 >= this.buckets.Length)
+				{
+					return;
+				}
+			}
+			Thread.BeginCriticalRegion();
+			this.isWriterInProgress = true;
+			Hashtable.bucket[] array = this.buckets;
+			int num6 = num5;
+			array[num6].hash_coll = array[num6].hash_coll & int.MinValue;
+			if (this.buckets[num5].hash_coll != 0)
+			{
+				this.buckets[num5].key = this.buckets;
 			}
 			else
 			{
-				for (int j = 0; j < num; j++)
+				this.buckets[num5].key = null;
+			}
+			this.buckets[num5].val = null;
+			this.count--;
+			this.UpdateVersion();
+			this.isWriterInProgress = false;
+			Thread.EndCriticalRegion();
+		}
+
+		public virtual object SyncRoot
+		{
+			get
+			{
+				if (this._syncRoot == null)
 				{
-					Hashtable.Slot slot2 = array[j];
-					if (slot2.key != null && slot2.key != Hashtable.KeyMarker.Removed && value.Equals(slot2.value))
-					{
-						return true;
-					}
+					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
 				}
+				return this._syncRoot;
 			}
-			return false;
 		}
 
-		public virtual object Clone()
+		public virtual int Count
 		{
-			return new Hashtable(this);
+			get
+			{
+				return this.count;
+			}
 		}
 
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			info.AddValue("LoadFactor", this.loadFactor);
-			info.AddValue("Version", this.modificationCount);
-			if (this.equalityComparer != null)
-			{
-				info.AddValue("KeyComparer", this.equalityComparer);
-			}
-			else
-			{
-				info.AddValue("Comparer", this.comparerRef);
-			}
-			if (this.hcpRef != null)
-			{
-				info.AddValue("HashCodeProvider", this.hcpRef);
-			}
-			info.AddValue("HashSize", this.table.Length);
-			object[] array = new object[this.inUse];
-			this.CopyToArray(array, 0, Hashtable.EnumeratorMode.KEY_MODE);
-			object[] array2 = new object[this.inUse];
-			this.CopyToArray(array2, 0, Hashtable.EnumeratorMode.VALUE_MODE);
-			info.AddValue("Keys", array);
-			info.AddValue("Values", array2);
-			info.AddValue("equalityComparer", this.equalityComparer);
-		}
-
-		[MonoTODO("Serialize equalityComparer")]
-		public virtual void OnDeserialization(object sender)
-		{
-			if (this.serializationInfo == null)
-			{
-				return;
-			}
-			this.loadFactor = (float)this.serializationInfo.GetValue("LoadFactor", typeof(float));
-			this.modificationCount = (int)this.serializationInfo.GetValue("Version", typeof(int));
-			try
-			{
-				this.equalityComparer = (IEqualityComparer)this.serializationInfo.GetValue("KeyComparer", typeof(object));
-			}
-			catch
-			{
-			}
-			if (this.equalityComparer == null)
-			{
-				this.comparerRef = (IComparer)this.serializationInfo.GetValue("Comparer", typeof(object));
-			}
-			try
-			{
-				this.hcpRef = (IHashCodeProvider)this.serializationInfo.GetValue("HashCodeProvider", typeof(object));
-			}
-			catch
-			{
-			}
-			int num = (int)this.serializationInfo.GetValue("HashSize", typeof(int));
-			object[] array = (object[])this.serializationInfo.GetValue("Keys", typeof(object[]));
-			object[] array2 = (object[])this.serializationInfo.GetValue("Values", typeof(object[]));
-			if (array.Length != array2.Length)
-			{
-				throw new SerializationException("Keys and values of uneven size");
-			}
-			num = Hashtable.ToPrime(num);
-			this.SetTable(new Hashtable.Slot[num], new int[num]);
-			for (int i = 0; i < array.Length; i++)
-			{
-				this.Add(array[i], array2[i]);
-			}
-			this.AdjustThreshold();
-			this.serializationInfo = null;
-		}
-
+		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static Hashtable Synchronized(Hashtable table)
 		{
 			if (table == null)
@@ -486,468 +791,214 @@ namespace System.Collections
 			return new Hashtable.SyncHashtable(table);
 		}
 
-		protected virtual int GetHash(object key)
+		[SecurityCritical]
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			if (this.equalityComparer != null)
+			if (info == null)
 			{
-				return this.equalityComparer.GetHashCode(key);
+				throw new ArgumentNullException("info");
 			}
-			if (this.hcpRef == null)
+			object syncRoot = this.SyncRoot;
+			lock (syncRoot)
 			{
-				return key.GetHashCode();
-			}
-			return this.hcpRef.GetHashCode(key);
-		}
-
-		protected virtual bool KeyEquals(object item, object key)
-		{
-			if (key == Hashtable.KeyMarker.Removed)
-			{
-				return false;
-			}
-			if (this.equalityComparer != null)
-			{
-				return this.equalityComparer.Equals(item, key);
-			}
-			if (this.comparerRef == null)
-			{
-				return item.Equals(key);
-			}
-			return this.comparerRef.Compare(item, key) == 0;
-		}
-
-		private void AdjustThreshold()
-		{
-			int num = this.table.Length;
-			this.threshold = (int)((float)num * this.loadFactor);
-			if (this.threshold >= num)
-			{
-				this.threshold = num - 1;
-			}
-		}
-
-		private void SetTable(Hashtable.Slot[] table, int[] hashes)
-		{
-			if (table == null)
-			{
-				throw new ArgumentNullException("table");
-			}
-			this.table = table;
-			this.hashes = hashes;
-			this.AdjustThreshold();
-		}
-
-		private int Find(object key)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key", "null key");
-			}
-			Hashtable.Slot[] array = this.table;
-			int[] array2 = this.hashes;
-			uint num = (uint)array.Length;
-			int num2 = this.GetHash(key) & int.MaxValue;
-			uint num3 = (uint)num2;
-			uint num4 = (uint)(((num2 >> 5) + 1) % (int)(num - 1U) + 1);
-			for (uint num5 = num; num5 > 0U; num5 -= 1U)
-			{
-				num3 %= num;
-				Hashtable.Slot slot = array[(int)((UIntPtr)num3)];
-				int num6 = array2[(int)((UIntPtr)num3)];
-				object key2 = slot.key;
-				if (key2 == null)
+				int num = this.version;
+				info.AddValue("LoadFactor", this.loadFactor);
+				info.AddValue("Version", this.version);
+				IEqualityComparer keycomparer = this._keycomparer;
+				if (keycomparer == null)
 				{
-					break;
+					info.AddValue("Comparer", null, typeof(IComparer));
+					info.AddValue("HashCodeProvider", null, typeof(IHashCodeProvider));
 				}
-				if (key2 == key || ((num6 & 2147483647) == num2 && this.KeyEquals(key, key2)))
+				else if (keycomparer is CompatibleComparer)
 				{
-					return (int)num3;
-				}
-				if ((num6 & -2147483648) == 0)
-				{
-					break;
-				}
-				num3 += num4;
-			}
-			return -1;
-		}
-
-		private void Rehash()
-		{
-			int num = this.table.Length;
-			uint num2 = (uint)Hashtable.ToPrime((num << 1) | 1);
-			Hashtable.Slot[] array = new Hashtable.Slot[num2];
-			Hashtable.Slot[] array2 = this.table;
-			int[] array3 = new int[num2];
-			int[] array4 = this.hashes;
-			for (int i = 0; i < num; i++)
-			{
-				Hashtable.Slot slot = array2[i];
-				if (slot.key != null)
-				{
-					int num3 = array4[i] & int.MaxValue;
-					uint num4 = (uint)num3;
-					uint num5 = (uint)(((num3 >> 5) + 1) % (int)(num2 - 1U) + 1);
-					uint num6 = num4 % num2;
-					while (array[(int)((UIntPtr)num6)].key != null)
-					{
-						array3[(int)((UIntPtr)num6)] |= int.MinValue;
-						num4 += num5;
-						num6 = num4 % num2;
-					}
-					array[(int)((UIntPtr)num6)].key = slot.key;
-					array[(int)((UIntPtr)num6)].value = slot.value;
-					array3[(int)((UIntPtr)num6)] |= num3;
-				}
-			}
-			this.modificationCount++;
-			this.SetTable(array, array3);
-		}
-
-		private void PutImpl(object key, object value, bool overwrite)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key", "null key");
-			}
-			if (this.inUse >= this.threshold)
-			{
-				this.Rehash();
-			}
-			uint num = (uint)this.table.Length;
-			int num2 = this.GetHash(key) & int.MaxValue;
-			uint num3 = (uint)num2;
-			uint num4 = ((num3 >> 5) + 1U) % (num - 1U) + 1U;
-			Hashtable.Slot[] array = this.table;
-			int[] array2 = this.hashes;
-			int num5 = -1;
-			int num6 = 0;
-			while ((long)num6 < (long)((ulong)num))
-			{
-				int num7 = (int)(num3 % num);
-				Hashtable.Slot slot = array[num7];
-				int num8 = array2[num7];
-				if (num5 == -1 && slot.key == Hashtable.KeyMarker.Removed && (num8 & -2147483648) != 0)
-				{
-					num5 = num7;
-				}
-				if (slot.key == null || (slot.key == Hashtable.KeyMarker.Removed && (num8 & -2147483648) == 0))
-				{
-					if (num5 == -1)
-					{
-						num5 = num7;
-					}
-					break;
-				}
-				if ((num8 & 2147483647) == num2 && this.KeyEquals(key, slot.key))
-				{
-					if (overwrite)
-					{
-						array[num7].value = value;
-						this.modificationCount++;
-						return;
-					}
-					throw new ArgumentException("Key duplication when adding: " + key);
+					CompatibleComparer compatibleComparer = keycomparer as CompatibleComparer;
+					info.AddValue("Comparer", compatibleComparer.Comparer, typeof(IComparer));
+					info.AddValue("HashCodeProvider", compatibleComparer.HashCodeProvider, typeof(IHashCodeProvider));
 				}
 				else
 				{
-					if (num5 == -1)
-					{
-						array2[num7] |= int.MinValue;
-					}
-					num3 += num4;
-					num6++;
+					info.AddValue("KeyComparer", keycomparer, typeof(IEqualityComparer));
 				}
-			}
-			if (num5 != -1)
-			{
-				array[num5].key = key;
-				array[num5].value = value;
-				array2[num5] |= num2;
-				this.inUse++;
-				this.modificationCount++;
+				info.AddValue("HashSize", this.buckets.Length);
+				object[] array = new object[this.count];
+				object[] array2 = new object[this.count];
+				this.CopyKeys(array, 0);
+				this.CopyValues(array2, 0);
+				info.AddValue("Keys", array, typeof(object[]));
+				info.AddValue("Values", array2, typeof(object[]));
+				if (this.version != num)
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+				}
 			}
 		}
 
-		private void CopyToArray(Array arr, int i, Hashtable.EnumeratorMode mode)
+		public virtual void OnDeserialization(object sender)
 		{
-			IEnumerator enumerator = new Hashtable.Enumerator(this, mode);
+			if (this.buckets != null)
+			{
+				return;
+			}
+			SerializationInfo serializationInfo;
+			HashHelpers.SerializationInfoTable.TryGetValue(this, out serializationInfo);
+			if (serializationInfo == null)
+			{
+				throw new SerializationException(Environment.GetResourceString("OnDeserialization method was called while the object was not being deserialized."));
+			}
+			int num = 0;
+			IComparer comparer = null;
+			IHashCodeProvider hashCodeProvider = null;
+			object[] array = null;
+			object[] array2 = null;
+			SerializationInfoEnumerator enumerator = serializationInfo.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				object obj = enumerator.Current;
-				arr.SetValue(obj, i++);
-			}
-		}
-
-		internal static bool TestPrime(int x)
-		{
-			if ((x & 1) != 0)
-			{
-				int num = (int)Math.Sqrt((double)x);
-				for (int i = 3; i < num; i += 2)
+				string name = enumerator.Name;
+				uint num2 = <PrivateImplementationDetails>.ComputeStringHash(name);
+				if (num2 <= 1613443821U)
 				{
-					if (x % i == 0)
+					if (num2 != 891156946U)
 					{
-						return false;
+						if (num2 != 1228509323U)
+						{
+							if (num2 == 1613443821U)
+							{
+								if (name == "Keys")
+								{
+									array = (object[])serializationInfo.GetValue("Keys", typeof(object[]));
+								}
+							}
+						}
+						else if (name == "KeyComparer")
+						{
+							this._keycomparer = (IEqualityComparer)serializationInfo.GetValue("KeyComparer", typeof(IEqualityComparer));
+						}
+					}
+					else if (name == "Comparer")
+					{
+						comparer = (IComparer)serializationInfo.GetValue("Comparer", typeof(IComparer));
 					}
 				}
-				return true;
-			}
-			return x == 2;
-		}
-
-		internal static int CalcPrime(int x)
-		{
-			for (int i = (x & -2) - 1; i < 2147483647; i += 2)
-			{
-				if (Hashtable.TestPrime(i))
+				else if (num2 <= 2484309429U)
 				{
-					return i;
-				}
-			}
-			return x;
-		}
-
-		internal static int ToPrime(int x)
-		{
-			for (int i = 0; i < Hashtable.primeTbl.Length; i++)
-			{
-				if (x <= Hashtable.primeTbl[i])
-				{
-					return Hashtable.primeTbl[i];
-				}
-			}
-			return Hashtable.CalcPrime(x);
-		}
-
-		private const int CHAIN_MARKER = -2147483648;
-
-		private int inUse;
-
-		private int modificationCount;
-
-		private float loadFactor;
-
-		private Hashtable.Slot[] table;
-
-		private int[] hashes;
-
-		private int threshold;
-
-		private Hashtable.HashKeys hashKeys;
-
-		private Hashtable.HashValues hashValues;
-
-		private IHashCodeProvider hcpRef;
-
-		private IComparer comparerRef;
-
-		private SerializationInfo serializationInfo;
-
-		private IEqualityComparer equalityComparer;
-
-		private static readonly int[] primeTbl = new int[]
-		{
-			11, 19, 37, 73, 109, 163, 251, 367, 557, 823,
-			1237, 1861, 2777, 4177, 6247, 9371, 14057, 21089, 31627, 47431,
-			71143, 106721, 160073, 240101, 360163, 540217, 810343, 1215497, 1823231, 2734867,
-			4102283, 6153409, 9230113, 13845163
-		};
-
-		[Serializable]
-		internal struct Slot
-		{
-			internal object key;
-
-			internal object value;
-		}
-
-		[Serializable]
-		internal class KeyMarker : IObjectReference
-		{
-			public object GetRealObject(StreamingContext context)
-			{
-				return Hashtable.KeyMarker.Removed;
-			}
-
-			public static readonly Hashtable.KeyMarker Removed = new Hashtable.KeyMarker();
-		}
-
-		private enum EnumeratorMode
-		{
-			KEY_MODE,
-			VALUE_MODE,
-			ENTRY_MODE
-		}
-
-		[Serializable]
-		private sealed class Enumerator : IEnumerator, IDictionaryEnumerator
-		{
-			public Enumerator(Hashtable host, Hashtable.EnumeratorMode mode)
-			{
-				this.host = host;
-				this.stamp = host.modificationCount;
-				this.size = host.table.Length;
-				this.mode = mode;
-				this.Reset();
-			}
-
-			public Enumerator(Hashtable host)
-				: this(host, Hashtable.EnumeratorMode.KEY_MODE)
-			{
-			}
-
-			private void FailFast()
-			{
-				if (this.host.modificationCount != this.stamp)
-				{
-					throw new InvalidOperationException(Hashtable.Enumerator.xstr);
-				}
-			}
-
-			public void Reset()
-			{
-				this.FailFast();
-				this.pos = -1;
-				this.currentKey = null;
-				this.currentValue = null;
-			}
-
-			public bool MoveNext()
-			{
-				this.FailFast();
-				if (this.pos < this.size)
-				{
-					while (++this.pos < this.size)
+					if (num2 != 2370642523U)
 					{
-						Hashtable.Slot slot = this.host.table[this.pos];
-						if (slot.key != null && slot.key != Hashtable.KeyMarker.Removed)
+						if (num2 == 2484309429U)
 						{
-							this.currentKey = slot.key;
-							this.currentValue = slot.value;
-							return true;
+							if (name == "HashCodeProvider")
+							{
+								hashCodeProvider = (IHashCodeProvider)serializationInfo.GetValue("HashCodeProvider", typeof(IHashCodeProvider));
+							}
+						}
+					}
+					else if (name == "Values")
+					{
+						array2 = (object[])serializationInfo.GetValue("Values", typeof(object[]));
+					}
+				}
+				else if (num2 != 3356145248U)
+				{
+					if (num2 == 3483216242U)
+					{
+						if (name == "LoadFactor")
+						{
+							this.loadFactor = serializationInfo.GetSingle("LoadFactor");
 						}
 					}
 				}
-				this.currentKey = null;
-				this.currentValue = null;
-				return false;
-			}
-
-			public DictionaryEntry Entry
-			{
-				get
+				else if (name == "HashSize")
 				{
-					if (this.currentKey == null)
-					{
-						throw new InvalidOperationException();
-					}
-					this.FailFast();
-					return new DictionaryEntry(this.currentKey, this.currentValue);
+					num = serializationInfo.GetInt32("HashSize");
 				}
 			}
-
-			public object Key
+			this.loadsize = (int)(this.loadFactor * (float)num);
+			if (this._keycomparer == null && (comparer != null || hashCodeProvider != null))
 			{
-				get
-				{
-					if (this.currentKey == null)
-					{
-						throw new InvalidOperationException();
-					}
-					this.FailFast();
-					return this.currentKey;
-				}
+				this._keycomparer = new CompatibleComparer(comparer, hashCodeProvider);
 			}
-
-			public object Value
+			this.buckets = new Hashtable.bucket[num];
+			if (array == null)
 			{
-				get
-				{
-					if (this.currentKey == null)
-					{
-						throw new InvalidOperationException();
-					}
-					this.FailFast();
-					return this.currentValue;
-				}
+				throw new SerializationException(Environment.GetResourceString("The Keys for this Hashtable are missing."));
 			}
-
-			public object Current
+			if (array2 == null)
 			{
-				get
-				{
-					if (this.currentKey == null)
-					{
-						throw new InvalidOperationException();
-					}
-					switch (this.mode)
-					{
-					case Hashtable.EnumeratorMode.KEY_MODE:
-						return this.currentKey;
-					case Hashtable.EnumeratorMode.VALUE_MODE:
-						return this.currentValue;
-					case Hashtable.EnumeratorMode.ENTRY_MODE:
-						return new DictionaryEntry(this.currentKey, this.currentValue);
-					default:
-						throw new Exception("should never happen");
-					}
-				}
+				throw new SerializationException(Environment.GetResourceString("The values for this dictionary are missing."));
 			}
-
-			private Hashtable host;
-
-			private int stamp;
-
-			private int pos;
-
-			private int size;
-
-			private Hashtable.EnumeratorMode mode;
-
-			private object currentKey;
-
-			private object currentValue;
-
-			private static readonly string xstr = "Hashtable.Enumerator: snapshot out of sync.";
+			if (array.Length != array2.Length)
+			{
+				throw new SerializationException(Environment.GetResourceString("The keys and values arrays have different sizes."));
+			}
+			for (int i = 0; i < array.Length; i++)
+			{
+				if (array[i] == null)
+				{
+					throw new SerializationException(Environment.GetResourceString("One of the serialized keys is null."));
+				}
+				this.Insert(array[i], array2[i], true);
+			}
+			this.version = serializationInfo.GetInt32("Version");
+			HashHelpers.SerializationInfoTable.Remove(this);
 		}
 
-		[DebuggerTypeProxy(typeof(CollectionDebuggerView))]
-		[DebuggerDisplay("Count={Count}")]
-		[Serializable]
-		private class HashKeys : IEnumerable, ICollection
+		internal const int HashPrime = 101;
+
+		private const int InitialSize = 3;
+
+		private const string LoadFactorName = "LoadFactor";
+
+		private const string VersionName = "Version";
+
+		private const string ComparerName = "Comparer";
+
+		private const string HashCodeProviderName = "HashCodeProvider";
+
+		private const string HashSizeName = "HashSize";
+
+		private const string KeysName = "Keys";
+
+		private const string ValuesName = "Values";
+
+		private const string KeyComparerName = "KeyComparer";
+
+		private Hashtable.bucket[] buckets;
+
+		private int count;
+
+		private int occupancy;
+
+		private int loadsize;
+
+		private float loadFactor;
+
+		private volatile int version;
+
+		private volatile bool isWriterInProgress;
+
+		private ICollection keys;
+
+		private ICollection values;
+
+		private IEqualityComparer _keycomparer;
+
+		private object _syncRoot;
+
+		private struct bucket
 		{
-			public HashKeys(Hashtable host)
-			{
-				if (host == null)
-				{
-					throw new ArgumentNullException();
-				}
-				this.host = host;
-			}
+			public object key;
 
-			public virtual int Count
-			{
-				get
-				{
-					return this.host.Count;
-				}
-			}
+			public object val;
 
-			public virtual bool IsSynchronized
-			{
-				get
-				{
-					return this.host.IsSynchronized;
-				}
-			}
+			public int hash_coll;
+		}
 
-			public virtual object SyncRoot
+		[Serializable]
+		private class KeyCollection : ICollection, IEnumerable
+		{
+			internal KeyCollection(Hashtable hashtable)
 			{
-				get
-				{
-					return this.host.SyncRoot;
-				}
+				this._hashtable = hashtable;
 			}
 
 			public virtual void CopyTo(Array array, int arrayIndex)
@@ -958,54 +1009,29 @@ namespace System.Collections
 				}
 				if (array.Rank != 1)
 				{
-					throw new ArgumentException("array");
+					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
 				}
 				if (arrayIndex < 0)
 				{
-					throw new ArgumentOutOfRangeException("arrayIndex");
+					throw new ArgumentOutOfRangeException("arrayIndex", Environment.GetResourceString("Non-negative number required."));
 				}
-				if (array.Length - arrayIndex < this.Count)
+				if (array.Length - arrayIndex < this._hashtable.count)
 				{
-					throw new ArgumentException("not enough space");
+					throw new ArgumentException(Environment.GetResourceString("Destination array is not long enough to copy all the items in the collection. Check array index and length."));
 				}
-				this.host.CopyToArray(array, arrayIndex, Hashtable.EnumeratorMode.KEY_MODE);
+				this._hashtable.CopyKeys(array, arrayIndex);
 			}
 
 			public virtual IEnumerator GetEnumerator()
 			{
-				return new Hashtable.Enumerator(this.host, Hashtable.EnumeratorMode.KEY_MODE);
-			}
-
-			private Hashtable host;
-		}
-
-		[DebuggerTypeProxy(typeof(CollectionDebuggerView))]
-		[DebuggerDisplay("Count={Count}")]
-		[Serializable]
-		private class HashValues : IEnumerable, ICollection
-		{
-			public HashValues(Hashtable host)
-			{
-				if (host == null)
-				{
-					throw new ArgumentNullException();
-				}
-				this.host = host;
-			}
-
-			public virtual int Count
-			{
-				get
-				{
-					return this.host.Count;
-				}
+				return new Hashtable.HashtableEnumerator(this._hashtable, 1);
 			}
 
 			public virtual bool IsSynchronized
 			{
 				get
 				{
-					return this.host.IsSynchronized;
+					return this._hashtable.IsSynchronized;
 				}
 			}
 
@@ -1013,8 +1039,27 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.host.SyncRoot;
+					return this._hashtable.SyncRoot;
 				}
+			}
+
+			public virtual int Count
+			{
+				get
+				{
+					return this._hashtable.count;
+				}
+			}
+
+			private Hashtable _hashtable;
+		}
+
+		[Serializable]
+		private class ValueCollection : ICollection, IEnumerable
+		{
+			internal ValueCollection(Hashtable hashtable)
+			{
+				this._hashtable = hashtable;
 			}
 
 			public virtual void CopyTo(Array array, int arrayIndex)
@@ -1025,59 +1070,105 @@ namespace System.Collections
 				}
 				if (array.Rank != 1)
 				{
-					throw new ArgumentException("array");
+					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
 				}
 				if (arrayIndex < 0)
 				{
-					throw new ArgumentOutOfRangeException("arrayIndex");
+					throw new ArgumentOutOfRangeException("arrayIndex", Environment.GetResourceString("Non-negative number required."));
 				}
-				if (array.Length - arrayIndex < this.Count)
+				if (array.Length - arrayIndex < this._hashtable.count)
 				{
-					throw new ArgumentException("not enough space");
+					throw new ArgumentException(Environment.GetResourceString("Destination array is not long enough to copy all the items in the collection. Check array index and length."));
 				}
-				this.host.CopyToArray(array, arrayIndex, Hashtable.EnumeratorMode.VALUE_MODE);
+				this._hashtable.CopyValues(array, arrayIndex);
 			}
 
 			public virtual IEnumerator GetEnumerator()
 			{
-				return new Hashtable.Enumerator(this.host, Hashtable.EnumeratorMode.VALUE_MODE);
+				return new Hashtable.HashtableEnumerator(this._hashtable, 2);
 			}
 
-			private Hashtable host;
+			public virtual bool IsSynchronized
+			{
+				get
+				{
+					return this._hashtable.IsSynchronized;
+				}
+			}
+
+			public virtual object SyncRoot
+			{
+				get
+				{
+					return this._hashtable.SyncRoot;
+				}
+			}
+
+			public virtual int Count
+			{
+				get
+				{
+					return this._hashtable.count;
+				}
+			}
+
+			private Hashtable _hashtable;
 		}
 
 		[Serializable]
 		private class SyncHashtable : Hashtable, IEnumerable
 		{
-			public SyncHashtable(Hashtable host)
+			internal SyncHashtable(Hashtable table)
+				: base(false)
 			{
-				if (host == null)
-				{
-					throw new ArgumentNullException();
-				}
-				this.host = host;
+				this._table = table;
 			}
 
 			internal SyncHashtable(SerializationInfo info, StreamingContext context)
+				: base(info, context)
 			{
-				this.host = (Hashtable)info.GetValue("ParentTable", typeof(Hashtable));
+				this._table = (Hashtable)info.GetValue("ParentTable", typeof(Hashtable));
+				if (this._table == null)
+				{
+					throw new SerializationException(Environment.GetResourceString("Insufficient state to return the real object."));
+				}
 			}
 
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return new Hashtable.Enumerator(this.host, Hashtable.EnumeratorMode.ENTRY_MODE);
-			}
-
+			[SecurityCritical]
 			public override void GetObjectData(SerializationInfo info, StreamingContext context)
 			{
-				info.AddValue("ParentTable", this.host);
+				if (info == null)
+				{
+					throw new ArgumentNullException("info");
+				}
+				object syncRoot = this._table.SyncRoot;
+				lock (syncRoot)
+				{
+					info.AddValue("ParentTable", this._table, typeof(Hashtable));
+				}
 			}
 
 			public override int Count
 			{
 				get
 				{
-					return this.host.Count;
+					return this._table.Count;
+				}
+			}
+
+			public override bool IsReadOnly
+			{
+				get
+				{
+					return this._table.IsReadOnly;
+				}
+			}
+
+			public override bool IsFixedSize
+			{
+				get
+				{
+					return this._table.IsFixedSize;
 				}
 			}
 
@@ -1089,41 +1180,114 @@ namespace System.Collections
 				}
 			}
 
+			public override object this[object key]
+			{
+				get
+				{
+					return this._table[key];
+				}
+				set
+				{
+					object syncRoot = this._table.SyncRoot;
+					lock (syncRoot)
+					{
+						this._table[key] = value;
+					}
+				}
+			}
+
 			public override object SyncRoot
 			{
 				get
 				{
-					return this.host.SyncRoot;
+					return this._table.SyncRoot;
 				}
 			}
 
-			public override bool IsFixedSize
+			public override void Add(object key, object value)
 			{
-				get
+				object syncRoot = this._table.SyncRoot;
+				lock (syncRoot)
 				{
-					return this.host.IsFixedSize;
+					this._table.Add(key, value);
 				}
 			}
 
-			public override bool IsReadOnly
+			public override void Clear()
 			{
-				get
+				object syncRoot = this._table.SyncRoot;
+				lock (syncRoot)
 				{
-					return this.host.IsReadOnly;
+					this._table.Clear();
 				}
+			}
+
+			public override bool Contains(object key)
+			{
+				return this._table.Contains(key);
+			}
+
+			public override bool ContainsKey(object key)
+			{
+				if (key == null)
+				{
+					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+				}
+				return this._table.ContainsKey(key);
+			}
+
+			public override bool ContainsValue(object key)
+			{
+				object syncRoot = this._table.SyncRoot;
+				bool flag2;
+				lock (syncRoot)
+				{
+					flag2 = this._table.ContainsValue(key);
+				}
+				return flag2;
+			}
+
+			public override void CopyTo(Array array, int arrayIndex)
+			{
+				object syncRoot = this._table.SyncRoot;
+				lock (syncRoot)
+				{
+					this._table.CopyTo(array, arrayIndex);
+				}
+			}
+
+			public override object Clone()
+			{
+				object syncRoot = this._table.SyncRoot;
+				object obj;
+				lock (syncRoot)
+				{
+					obj = Hashtable.Synchronized((Hashtable)this._table.Clone());
+				}
+				return obj;
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return this._table.GetEnumerator();
+			}
+
+			public override IDictionaryEnumerator GetEnumerator()
+			{
+				return this._table.GetEnumerator();
 			}
 
 			public override ICollection Keys
 			{
 				get
 				{
-					ICollection collection = null;
-					object syncRoot = this.host.SyncRoot;
+					object syncRoot = this._table.SyncRoot;
+					ICollection keys;
 					lock (syncRoot)
 					{
-						collection = this.host.Keys;
+						keys = this._table.Keys;
 					}
-					return collection;
+					return keys;
 				}
 			}
 
@@ -1131,96 +1295,186 @@ namespace System.Collections
 			{
 				get
 				{
-					ICollection collection = null;
-					object syncRoot = this.host.SyncRoot;
+					object syncRoot = this._table.SyncRoot;
+					ICollection values;
 					lock (syncRoot)
 					{
-						collection = this.host.Values;
+						values = this._table.Values;
 					}
-					return collection;
+					return values;
 				}
-			}
-
-			public override object this[object key]
-			{
-				get
-				{
-					return this.host[key];
-				}
-				set
-				{
-					object syncRoot = this.host.SyncRoot;
-					lock (syncRoot)
-					{
-						this.host[key] = value;
-					}
-				}
-			}
-
-			public override void CopyTo(Array array, int arrayIndex)
-			{
-				this.host.CopyTo(array, arrayIndex);
-			}
-
-			public override void Add(object key, object value)
-			{
-				object syncRoot = this.host.SyncRoot;
-				lock (syncRoot)
-				{
-					this.host.Add(key, value);
-				}
-			}
-
-			public override void Clear()
-			{
-				object syncRoot = this.host.SyncRoot;
-				lock (syncRoot)
-				{
-					this.host.Clear();
-				}
-			}
-
-			public override bool Contains(object key)
-			{
-				return this.host.Find(key) >= 0;
-			}
-
-			public override IDictionaryEnumerator GetEnumerator()
-			{
-				return new Hashtable.Enumerator(this.host, Hashtable.EnumeratorMode.ENTRY_MODE);
 			}
 
 			public override void Remove(object key)
 			{
-				object syncRoot = this.host.SyncRoot;
+				object syncRoot = this._table.SyncRoot;
 				lock (syncRoot)
 				{
-					this.host.Remove(key);
+					this._table.Remove(key);
 				}
 			}
 
-			public override bool ContainsKey(object key)
+			public override void OnDeserialization(object sender)
 			{
-				return this.host.Contains(key);
 			}
 
-			public override bool ContainsValue(object value)
+			internal override KeyValuePairs[] ToKeyValuePairsArray()
 			{
-				return this.host.ContainsValue(value);
+				return this._table.ToKeyValuePairsArray();
 			}
 
-			public override object Clone()
+			protected Hashtable _table;
+		}
+
+		[Serializable]
+		private class HashtableEnumerator : IDictionaryEnumerator, IEnumerator, ICloneable
+		{
+			internal HashtableEnumerator(Hashtable hashtable, int getObjRetType)
 			{
-				object syncRoot = this.host.SyncRoot;
-				object obj;
-				lock (syncRoot)
+				this.hashtable = hashtable;
+				this.bucket = hashtable.buckets.Length;
+				this.version = hashtable.version;
+				this.current = false;
+				this.getObjectRetType = getObjRetType;
+			}
+
+			public object Clone()
+			{
+				return base.MemberwiseClone();
+			}
+
+			public virtual object Key
+			{
+				get
 				{
-					obj = new Hashtable.SyncHashtable((Hashtable)this.host.Clone());
+					if (!this.current)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+					}
+					return this.currentKey;
 				}
-				return obj;
 			}
 
-			private Hashtable host;
+			public virtual bool MoveNext()
+			{
+				if (this.version != this.hashtable.version)
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+				}
+				while (this.bucket > 0)
+				{
+					this.bucket--;
+					object key = this.hashtable.buckets[this.bucket].key;
+					if (key != null && key != this.hashtable.buckets)
+					{
+						this.currentKey = key;
+						this.currentValue = this.hashtable.buckets[this.bucket].val;
+						this.current = true;
+						return true;
+					}
+				}
+				this.current = false;
+				return false;
+			}
+
+			public virtual DictionaryEntry Entry
+			{
+				get
+				{
+					if (!this.current)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+					}
+					return new DictionaryEntry(this.currentKey, this.currentValue);
+				}
+			}
+
+			public virtual object Current
+			{
+				get
+				{
+					if (!this.current)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+					}
+					if (this.getObjectRetType == 1)
+					{
+						return this.currentKey;
+					}
+					if (this.getObjectRetType == 2)
+					{
+						return this.currentValue;
+					}
+					return new DictionaryEntry(this.currentKey, this.currentValue);
+				}
+			}
+
+			public virtual object Value
+			{
+				get
+				{
+					if (!this.current)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
+					}
+					return this.currentValue;
+				}
+			}
+
+			public virtual void Reset()
+			{
+				if (this.version != this.hashtable.version)
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+				}
+				this.current = false;
+				this.bucket = this.hashtable.buckets.Length;
+				this.currentKey = null;
+				this.currentValue = null;
+			}
+
+			private Hashtable hashtable;
+
+			private int bucket;
+
+			private int version;
+
+			private bool current;
+
+			private int getObjectRetType;
+
+			private object currentKey;
+
+			private object currentValue;
+
+			internal const int Keys = 1;
+
+			internal const int Values = 2;
+
+			internal const int DictEntry = 3;
+		}
+
+		internal class HashtableDebugView
+		{
+			public HashtableDebugView(Hashtable hashtable)
+			{
+				if (hashtable == null)
+				{
+					throw new ArgumentNullException("hashtable");
+				}
+				this.hashtable = hashtable;
+			}
+
+			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+			public KeyValuePairs[] Items
+			{
+				get
+				{
+					return this.hashtable.ToKeyValuePairsArray();
+				}
+			}
+
+			private Hashtable hashtable;
 		}
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using Mono.Security.Cryptography;
 
@@ -35,21 +34,10 @@ namespace Mono.Security.Protocol.Tls
 
 		public override void SetHashAlgorithm(string strName)
 		{
-			if (strName != null)
+			if (strName == "MD5SHA1")
 			{
-				if (RSASslSignatureFormatter.<>f__switch$map16 == null)
-				{
-					RSASslSignatureFormatter.<>f__switch$map16 = new Dictionary<string, int>(1) { { "MD5SHA1", 0 } };
-				}
-				int num;
-				if (RSASslSignatureFormatter.<>f__switch$map16.TryGetValue(strName, out num))
-				{
-					if (num == 0)
-					{
-						this.hash = new MD5SHA1();
-						return;
-					}
-				}
+				this.hash = new MD5SHA1();
+				return;
 			}
 			this.hash = HashAlgorithm.Create(strName);
 		}

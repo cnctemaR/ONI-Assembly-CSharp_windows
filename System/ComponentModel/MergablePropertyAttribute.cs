@@ -7,38 +7,43 @@ namespace System.ComponentModel
 	{
 		public MergablePropertyAttribute(bool allowMerge)
 		{
-			this.mergable = allowMerge;
+			this.allowMerge = allowMerge;
 		}
 
 		public bool AllowMerge
 		{
 			get
 			{
-				return this.mergable;
+				return this.allowMerge;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is MergablePropertyAttribute && (obj == this || ((MergablePropertyAttribute)obj).AllowMerge == this.mergable);
+			if (obj == this)
+			{
+				return true;
+			}
+			MergablePropertyAttribute mergablePropertyAttribute = obj as MergablePropertyAttribute;
+			return mergablePropertyAttribute != null && mergablePropertyAttribute.AllowMerge == this.allowMerge;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.mergable.GetHashCode();
+			return base.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.mergable == MergablePropertyAttribute.Default.AllowMerge;
+			return this.Equals(MergablePropertyAttribute.Default);
 		}
 
-		private bool mergable;
-
-		public static readonly MergablePropertyAttribute Default = new MergablePropertyAttribute(true);
+		public static readonly MergablePropertyAttribute Yes = new MergablePropertyAttribute(true);
 
 		public static readonly MergablePropertyAttribute No = new MergablePropertyAttribute(false);
 
-		public static readonly MergablePropertyAttribute Yes = new MergablePropertyAttribute(true);
+		public static readonly MergablePropertyAttribute Default = MergablePropertyAttribute.Yes;
+
+		private bool allowMerge;
 	}
 }

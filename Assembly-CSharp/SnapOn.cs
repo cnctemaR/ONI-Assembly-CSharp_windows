@@ -44,7 +44,7 @@ public class SnapOn : KMonoBehaviour
 				if (!context.IsValid || !snapPoint.context.IsValid || context == snapPoint.context)
 				{
 					SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
-					component.RemoveSymbolOverride(snapPoint.overrideSymbol, 4);
+					component.RemoveSymbolOverride(snapPoint.overrideSymbol, 5);
 					this.kanimController.SetSymbolVisiblity(snapPoint.overrideSymbol, false);
 					break;
 				}
@@ -64,7 +64,7 @@ public class SnapOn : KMonoBehaviour
 		}
 		KAnim.Build.Symbol symbol = SnapOn.GetSymbol(kanimFile, text);
 		SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
-		component.AddSymbolOverride(point.overrideSymbol, symbol, 4);
+		component.AddSymbolOverride(point.overrideSymbol, symbol, 5);
 		this.kanimController.SetSymbolVisiblity(point.overrideSymbol, true);
 	}
 

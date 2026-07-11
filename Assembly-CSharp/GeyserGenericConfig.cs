@@ -14,9 +14,8 @@ public class GeyserGenericConfig : IMultiEntityConfig
 		{
 			list.Add(this.CreateGeyser(geyserPrefabParams.id, geyserPrefabParams.anim, geyserPrefabParams.width, geyserPrefabParams.height, Strings.Get(geyserPrefabParams.nameStringKey), Strings.Get(geyserPrefabParams.descStringKey), geyserPrefabParams.geyserType.idHash));
 		}
-		GameObject gameObject = EntityTemplates.CreateEntity("GeyserGeneric", "Random Geyser Spawner");
+		GameObject gameObject = EntityTemplates.CreateEntity("GeyserGeneric", "Random Geyser Spawner", true);
 		gameObject.AddOrGet<SaveLoadRoot>();
-		gameObject.AddOrGet<SavedObject>();
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.prefabInitFn += delegate(GameObject inst)
 		{
@@ -32,7 +31,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 			num = num + (int)inst.transform.GetPosition().x + (int)inst.transform.GetPosition().y;
 			global::System.Random random = new global::System.Random(num);
 			int num2 = random.Next(0, configs.Count);
-			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(configs[num2].id), inst.transform.GetPosition(), Grid.SceneLayer.BuildingBack, Folder.Entities, null, 0);
+			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(configs[num2].id), inst.transform.GetPosition(), Grid.SceneLayer.BuildingBack, null, 0);
 			gameObject2.SetActive(true);
 			inst.DeleteObject();
 		};

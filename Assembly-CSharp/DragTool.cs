@@ -48,11 +48,11 @@ public class DragTool : InterfaceTool
 		base.OnPrefabInit();
 		if (this.visualizer != null)
 		{
-			this.visualizer = global::Util.KInstantiate(this.visualizer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			this.visualizer = global::Util.KInstantiate(this.visualizer, null, null);
 		}
 		if (this.areaVisualizer != null)
 		{
-			this.areaVisualizer = global::Util.KInstantiate(this.areaVisualizer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			this.areaVisualizer = global::Util.KInstantiate(this.areaVisualizer, null, null);
 			this.areaVisualizer.SetActive(false);
 			this.areaVisualizer.transform.parent = base.transform;
 			Renderer component = this.areaVisualizer.GetComponent<Renderer>();
@@ -177,7 +177,8 @@ public class DragTool : InterfaceTool
 	{
 		if (this.dragging)
 		{
-			if (Input.GetKey((KeyCode)Global.Instance.GetInputManager().GetDefaultController().GetInputForAction(global::Action.DragStraight)))
+			KInputController defaultController = Global.Instance.GetInputManager().GetDefaultController();
+			if (defaultController.IsActive(global::Action.DragStraight))
 			{
 				Vector3 vector = cursorPos - this.downPos;
 				if ((this.canChangeDragAxis || this.dragAxis == DragTool.DragAxis.Invalid) && vector.sqrMagnitude > 0.707f)

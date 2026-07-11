@@ -9,52 +9,13 @@ public class CavityInfo
 		this.dirty = true;
 	}
 
-	public Room room { get; private set; }
-
-	public void SetRoom(Room room)
-	{
-		this.room = room;
-		if (room != null)
-		{
-			room.cavity = this;
-		}
-	}
-
 	public void AddBuilding(KPrefabID bc)
 	{
 		this.buildings.Add(bc);
 		this.dirty = true;
 	}
 
-	public void RemoveBuilding(KPrefabID bc)
-	{
-		this.buildings.Remove(bc);
-		this.dirty = true;
-	}
-
-	public void ReleaseResources()
-	{
-		if (this.room == null)
-		{
-			return;
-		}
-		foreach (KPrefabID kprefabID in this.room.buildings)
-		{
-			if (!(kprefabID == null))
-			{
-				kprefabID.Trigger(144050788, null);
-				Assignable component = kprefabID.GetComponent<Assignable>();
-				if (component != null && component.assignee == this.room)
-				{
-					component.Unassign();
-				}
-			}
-		}
-	}
-
 	public HandleVector<int>.Handle handle;
-
-	public bool hasDoor;
 
 	public bool dirty;
 
@@ -67,6 +28,8 @@ public class CavityInfo
 	public int minX;
 
 	public int minY;
+
+	public Room room;
 
 	public List<KPrefabID> buildings = new List<KPrefabID>();
 

@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	public class NestedContainer : Container, IDisposable, IContainer, INestedContainer
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
+	public class NestedContainer : Container, INestedContainer, IContainer, IDisposable
 	{
 		public NestedContainer(IComponent owner)
 		{
@@ -26,15 +29,20 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this._owner.Site is INestedSite)
+				string text = null;
+				if (this._owner != null && this._owner.Site != null)
 				{
-					return ((INestedSite)this._owner.Site).FullName;
+					INestedSite nestedSite = this._owner.Site as INestedSite;
+					if (nestedSite != null)
+					{
+						text = nestedSite.FullName;
+					}
+					else
+					{
+						text = this._owner.Site.Name;
+					}
 				}
-				if (this._owner == null || this._owner.Site == null)
-				{
-					return null;
-				}
-				return this._owner.Site.Name;
+				return text;
 			}
 		}
 
@@ -47,15 +55,6 @@ namespace System.ComponentModel
 			return new NestedContainer.Site(component, this, name);
 		}
 
-		protected override object GetService(Type service)
-		{
-			if (service == typeof(INestedContainer))
-			{
-				return this;
-			}
-			return base.GetService(service);
-		}
-
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing)
@@ -65,27 +64,36 @@ namespace System.ComponentModel
 			base.Dispose(disposing);
 		}
 
+		protected override object GetService(Type service)
+		{
+			if (service == typeof(INestedContainer))
+			{
+				return this;
+			}
+			return base.GetService(service);
+		}
+
 		private void OnOwnerDisposed(object sender, EventArgs e)
 		{
-			this.Dispose();
+			base.Dispose();
 		}
 
 		private IComponent _owner;
 
-		private class Site : IServiceProvider, INestedSite, ISite
+		private class Site : INestedSite, ISite, IServiceProvider
 		{
-			public Site(IComponent component, NestedContainer container, string name)
+			internal Site(IComponent component, NestedContainer container, string name)
 			{
-				this._component = component;
-				this._nestedContainer = container;
-				this._siteName = name;
+				this.component = component;
+				this.container = container;
+				this.name = name;
 			}
 
 			public IComponent Component
 			{
 				get
 				{
-					return this._component;
+					return this.component;
 				}
 			}
 
@@ -93,27 +101,25 @@ namespace System.ComponentModel
 			{
 				get
 				{
-					return this._nestedContainer;
+					return this.container;
 				}
+			}
+
+			public object GetService(Type service)
+			{
+				if (!(service == typeof(ISite)))
+				{
+					return this.container.GetService(service);
+				}
+				return this;
 			}
 
 			public bool DesignMode
 			{
 				get
 				{
-					return this._nestedContainer.Owner != null && this._nestedContainer.Owner.Site != null && this._nestedContainer.Owner.Site.DesignMode;
-				}
-			}
-
-			public string Name
-			{
-				get
-				{
-					return this._siteName;
-				}
-				set
-				{
-					this._siteName = value;
+					IComponent owner = this.container.Owner;
+					return owner != null && owner.Site != null && owner.Site.DesignMode;
 				}
 			}
 
@@ -121,32 +127,41 @@ namespace System.ComponentModel
 			{
 				get
 				{
-					if (this._siteName == null)
+					if (this.name != null)
 					{
-						return null;
+						string ownerName = this.container.OwnerName;
+						string text = this.name;
+						if (ownerName != null)
+						{
+							text = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", ownerName, text);
+						}
+						return text;
 					}
-					if (this._nestedContainer.OwnerName == null)
-					{
-						return this._siteName;
-					}
-					return this._nestedContainer.OwnerName + "." + this._siteName;
+					return this.name;
 				}
 			}
 
-			public virtual object GetService(Type service)
+			public string Name
 			{
-				if (service == typeof(ISite))
+				get
 				{
-					return this;
+					return this.name;
 				}
-				return this._nestedContainer.GetService(service);
+				set
+				{
+					if (value == null || this.name == null || !value.Equals(this.name))
+					{
+						this.container.ValidateName(this.component, value);
+						this.name = value;
+					}
+				}
 			}
 
-			private IComponent _component;
+			private IComponent component;
 
-			private NestedContainer _nestedContainer;
+			private NestedContainer container;
 
-			private string _siteName;
+			private string name;
 		}
 	}
 }

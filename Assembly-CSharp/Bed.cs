@@ -40,15 +40,29 @@ public class Bed : Workable, IEffectDescriptor
 				this.targetWorker.GetComponent<Effects>().Add(text, false);
 			}
 		}
-		RoomType roomType = null;
-		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.gameObject);
-		if (roomOfBuilding != null)
+		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
+		if (roomOfGameObject == null)
 		{
-			roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
+			return;
 		}
-		if (roomType == Db.Get().RoomTypes.Barracks)
+		RoomType roomType = roomOfGameObject.roomType;
+		foreach (KeyValuePair<string, string> keyValuePair in Bed.roomSleepingEffects)
 		{
-			this.targetWorker.GetComponent<Effects>().Add("BarracksStamina", false);
+			if (keyValuePair.Key == roomType.Id)
+			{
+				this.targetWorker.GetComponent<Effects>().Add(keyValuePair.Value, false);
+			}
+		}
+		foreach (KeyValuePair<string, string> keyValuePair2 in Bed.roomEffects)
+		{
+			if (keyValuePair2.Key == roomType.Id)
+			{
+				this.targetWorker.GetComponent<Effects>().Add(keyValuePair2.Value, true);
+			}
+			else
+			{
+				this.targetWorker.GetComponent<Effects>().Remove(keyValuePair2.Value);
+			}
 		}
 	}
 
@@ -65,8 +79,10 @@ public class Bed : Workable, IEffectDescriptor
 				this.targetWorker.GetComponent<Effects>().Remove(text);
 			}
 		}
-		this.targetWorker.GetComponent<Effects>().Remove("BarracksStamina");
-		this.targetWorker.GetComponent<Effects>().Remove("BedroomStamina");
+		foreach (KeyValuePair<string, string> keyValuePair in Bed.roomSleepingEffects)
+		{
+			this.targetWorker.GetComponent<Effects>().Remove(keyValuePair.Value);
+		}
 		this.targetWorker = null;
 	}
 
@@ -116,4 +132,16 @@ public class Bed : Workable, IEffectDescriptor
 	private Worker targetWorker;
 
 	public string[] effects;
+
+	private static Dictionary<string, string> roomSleepingEffects = new Dictionary<string, string>
+	{
+		{ "Barracks", "BarracksStamina" },
+		{ "Bedroom", "BedroomStamina" }
+	};
+
+	private static Dictionary<string, string> roomEffects = new Dictionary<string, string>
+	{
+		{ "Barracks", "RoomBarracks" },
+		{ "Bedroom", "RoomBedroom" }
+	};
 }

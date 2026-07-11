@@ -5,6 +5,11 @@ public class NavPathDrawer : KMonoBehaviour
 {
 	public static NavPathDrawer Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		NavPathDrawer.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		Shader shader = Shader.Find("Lines/Colored Blended");

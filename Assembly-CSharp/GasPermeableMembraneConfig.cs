@@ -24,7 +24,6 @@ public class GasPermeableMembraneConfig : IBuildingConfig
 		buildingDef.IsFoundation = true;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;

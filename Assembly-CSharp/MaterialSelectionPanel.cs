@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class MaterialSelectionPanel : KScreen
 {
+	public static void ClearStatics()
+	{
+		MaterialSelectionPanel.elementsWithTag.Clear();
+	}
+
 	public Element CurrentSelectedElement
 	{
 		get

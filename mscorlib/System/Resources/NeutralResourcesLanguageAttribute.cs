@@ -3,34 +3,39 @@ using System.Runtime.InteropServices;
 
 namespace System.Resources
 {
-	[AttributeUsage(AttributeTargets.Assembly)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 	public sealed class NeutralResourcesLanguageAttribute : Attribute
 	{
 		public NeutralResourcesLanguageAttribute(string cultureName)
 		{
 			if (cultureName == null)
 			{
-				throw new ArgumentNullException("culture is null");
+				throw new ArgumentNullException("cultureName");
 			}
-			this.culture = cultureName;
+			this._culture = cultureName;
+			this._fallbackLoc = UltimateResourceFallbackLocation.MainAssembly;
 		}
 
 		public NeutralResourcesLanguageAttribute(string cultureName, UltimateResourceFallbackLocation location)
 		{
 			if (cultureName == null)
 			{
-				throw new ArgumentNullException("culture is null");
+				throw new ArgumentNullException("cultureName");
 			}
-			this.culture = cultureName;
-			this.loc = location;
+			if (!Enum.IsDefined(typeof(UltimateResourceFallbackLocation), location))
+			{
+				throw new ArgumentException(Environment.GetResourceString("The NeutralResourcesLanguageAttribute specifies an invalid or unrecognized ultimate resource fallback location: \"{0}\".", new object[] { location }));
+			}
+			this._culture = cultureName;
+			this._fallbackLoc = location;
 		}
 
 		public string CultureName
 		{
 			get
 			{
-				return this.culture;
+				return this._culture;
 			}
 		}
 
@@ -38,12 +43,12 @@ namespace System.Resources
 		{
 			get
 			{
-				return this.loc;
+				return this._fallbackLoc;
 			}
 		}
 
-		private string culture;
+		private string _culture;
 
-		private UltimateResourceFallbackLocation loc;
+		private UltimateResourceFallbackLocation _fallbackLoc;
 	}
 }

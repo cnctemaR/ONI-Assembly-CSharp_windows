@@ -2,8 +2,7 @@
 
 namespace System.Security
 {
-	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
-	[MonoTODO("Only supported by the runtime when CoreCLR is enabled")]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
 	public sealed class SecuritySafeCriticalAttribute : Attribute
 	{
 	}

@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class SandboxHeatTool : BrushTool
 {
+	public static void DestroyInstance()
+	{
+		SandboxHeatTool.instance = null;
+	}
+
 	private SandboxSettings settings
 	{
 		get

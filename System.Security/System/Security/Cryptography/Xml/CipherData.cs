@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -21,19 +19,32 @@ namespace System.Security.Cryptography.Xml
 			this.CipherReference = cipherReference;
 		}
 
+		private bool CacheValid
+		{
+			get
+			{
+				return this._cachedXml != null;
+			}
+		}
+
 		public CipherReference CipherReference
 		{
 			get
 			{
-				return this.cipherReference;
+				return this._cipherReference;
 			}
 			set
 			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
 				if (this.CipherValue != null)
 				{
 					throw new CryptographicException("A Cipher Data element should have either a CipherValue or a CipherReference element.");
 				}
-				this.cipherReference = value;
+				this._cipherReference = value;
+				this._cachedXml = null;
 			}
 		}
 
@@ -41,100 +52,89 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this.cipherValue;
+				return this._cipherValue;
 			}
 			set
 			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
 				if (this.CipherReference != null)
 				{
 					throw new CryptographicException("A Cipher Data element should have either a CipherValue or a CipherReference element.");
 				}
-				this.cipherValue = value;
+				this._cipherValue = (byte[])value.Clone();
+				this._cachedXml = null;
 			}
 		}
 
 		public XmlElement GetXml()
 		{
-			return this.GetXml(new XmlDocument());
+			if (this.CacheValid)
+			{
+				return this._cachedXml;
+			}
+			return this.GetXml(new XmlDocument
+			{
+				PreserveWhitespace = true
+			});
 		}
 
 		internal XmlElement GetXml(XmlDocument document)
 		{
-			if (this.CipherReference == null && this.CipherValue == null)
-			{
-				throw new CryptographicException("A Cipher Data element should have either a CipherValue or a CipherReference element.");
-			}
 			XmlElement xmlElement = document.CreateElement("CipherData", "http://www.w3.org/2001/04/xmlenc#");
-			if (this.CipherReference != null)
-			{
-				xmlElement.AppendChild(document.ImportNode(this.cipherReference.GetXml(), true));
-			}
 			if (this.CipherValue != null)
 			{
 				XmlElement xmlElement2 = document.CreateElement("CipherValue", "http://www.w3.org/2001/04/xmlenc#");
-				StreamReader streamReader = new StreamReader(new CryptoStream(new MemoryStream(this.cipherValue), new ToBase64Transform(), CryptoStreamMode.Read));
-				xmlElement2.InnerText = streamReader.ReadToEnd();
-				streamReader.Close();
+				xmlElement2.AppendChild(document.CreateTextNode(Convert.ToBase64String(this.CipherValue)));
 				xmlElement.AppendChild(xmlElement2);
+			}
+			else
+			{
+				if (this.CipherReference == null)
+				{
+					throw new CryptographicException("A Cipher Data element should have either a CipherValue or a CipherReference element.");
+				}
+				xmlElement.AppendChild(this.CipherReference.GetXml(document));
 			}
 			return xmlElement;
 		}
 
 		public void LoadXml(XmlElement value)
 		{
-			this.CipherReference = null;
-			this.CipherValue = null;
 			if (value == null)
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (value.LocalName != "CipherData" || value.NamespaceURI != "http://www.w3.org/2001/04/xmlenc#")
+			XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(value.OwnerDocument.NameTable);
+			xmlNamespaceManager.AddNamespace("enc", "http://www.w3.org/2001/04/xmlenc#");
+			XmlNode xmlNode = value.SelectSingleNode("enc:CipherValue", xmlNamespaceManager);
+			XmlNode xmlNode2 = value.SelectSingleNode("enc:CipherReference", xmlNamespaceManager);
+			if (xmlNode != null)
 			{
-				throw new CryptographicException("Malformed Cipher Data element.");
-			}
-			foreach (object obj in value.ChildNodes)
-			{
-				XmlNode xmlNode = (XmlNode)obj;
-				if (!(xmlNode is XmlWhitespace))
+				if (xmlNode2 != null)
 				{
-					string localName = xmlNode.LocalName;
-					if (localName != null)
-					{
-						if (CipherData.<>f__switch$map1 == null)
-						{
-							CipherData.<>f__switch$map1 = new Dictionary<string, int>(2)
-							{
-								{ "CipherReference", 0 },
-								{ "CipherValue", 1 }
-							};
-						}
-						int num;
-						if (CipherData.<>f__switch$map1.TryGetValue(localName, out num))
-						{
-							if (num != 0)
-							{
-								if (num == 1)
-								{
-									this.CipherValue = Convert.FromBase64String(xmlNode.InnerText);
-								}
-							}
-							else
-							{
-								this.cipherReference = new CipherReference();
-								this.cipherReference.LoadXml((XmlElement)xmlNode);
-							}
-						}
-					}
+					throw new CryptographicException("A Cipher Data element should have either a CipherValue or a CipherReference element.");
 				}
+				this._cipherValue = Convert.FromBase64String(Utils.DiscardWhiteSpaces(xmlNode.InnerText));
 			}
-			if (this.CipherReference == null && this.CipherValue == null)
+			else
 			{
-				throw new CryptographicException("A Cipher Data element should have either a CipherValue or a CipherReference element.");
+				if (xmlNode2 == null)
+				{
+					throw new CryptographicException("A Cipher Data element should have either a CipherValue or a CipherReference element.");
+				}
+				this._cipherReference = new CipherReference();
+				this._cipherReference.LoadXml((XmlElement)xmlNode2);
 			}
+			this._cachedXml = value;
 		}
 
-		private byte[] cipherValue;
+		private XmlElement _cachedXml;
 
-		private CipherReference cipherReference;
+		private CipherReference _cipherReference;
+
+		private byte[] _cipherValue;
 	}
 }

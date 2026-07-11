@@ -28,7 +28,6 @@ public class TilePOIConfig : IBuildingConfig
 		buildingDef.IsFoundation = true;
 		buildingDef.UseStructureTemperature = false;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
@@ -61,7 +60,7 @@ public class TilePOIConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.AddComponent<SimTemperatureTransfer>();
-		go.GetComponent<Deconstructable>().allowDeconstruction = false;
+		go.GetComponent<Deconstructable>().allowDeconstruction = true;
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

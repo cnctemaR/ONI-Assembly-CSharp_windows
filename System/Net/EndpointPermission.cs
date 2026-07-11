@@ -131,12 +131,9 @@ namespace System.Net
 				{
 					return false;
 				}
-				if (num != 256)
+				if (num != 256 && num != num2 && num2 != 256)
 				{
-					if (num != num2 && num2 != 256)
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 			return true;
@@ -273,11 +270,11 @@ namespace System.Net
 				}
 				if (num == 256)
 				{
-					array3[i << 1] = ((num2 != 256) ? (string.Empty + num2) : "*");
+					array3[i << 1] = ((num2 == 256) ? "*" : (string.Empty + num2));
 				}
 				else if (num2 == 256)
 				{
-					array3[i << 1] = ((num != 256) ? (string.Empty + num) : "*");
+					array3[i << 1] = ((num == 256) ? "*" : (string.Empty + num));
 				}
 				else
 				{
@@ -313,7 +310,11 @@ namespace System.Net
 				}
 				num = checked(num * 10 + (int)(c - '0'));
 			}
-			return (num > 255) ? (-1) : num;
+			if (num > 255)
+			{
+				return -1;
+			}
+			return num;
 		}
 
 		internal void Resolve()
@@ -352,20 +353,20 @@ namespace System.Net
 				try
 				{
 					this.addresses = Dns.GetHostAddresses(this.hostname);
+					goto IL_00A3;
 				}
-				catch (global::System.Net.Sockets.SocketException)
+				catch (SocketException)
 				{
+					goto IL_00A3;
 				}
 			}
-			else
+			this.hasWildcard = flag2;
+			if (!flag2)
 			{
-				this.hasWildcard = flag2;
-				if (!flag2)
-				{
-					this.addresses = new IPAddress[1];
-					this.addresses[0] = IPAddress.Parse(this.hostname);
-				}
+				this.addresses = new IPAddress[1];
+				this.addresses[0] = IPAddress.Parse(this.hostname);
 			}
+			IL_00A3:
 			this.resolved = true;
 		}
 

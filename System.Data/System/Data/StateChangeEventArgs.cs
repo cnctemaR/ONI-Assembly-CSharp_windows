@@ -6,15 +6,13 @@ namespace System.Data
 	{
 		public StateChangeEventArgs(ConnectionState originalState, ConnectionState currentState)
 		{
-			this.originalState = originalState;
-			this.currentState = currentState;
 		}
 
 		public ConnectionState CurrentState
 		{
 			get
 			{
-				return this.currentState;
+				throw null;
 			}
 		}
 
@@ -22,12 +20,8 @@ namespace System.Data
 		{
 			get
 			{
-				return this.originalState;
+				throw null;
 			}
 		}
-
-		private ConnectionState originalState;
-
-		private ConnectionState currentState;
 	}
 }

@@ -3,22 +3,23 @@ using System.ComponentModel;
 
 namespace System.Net
 {
-	public class UploadStringCompletedEventArgs : global::System.ComponentModel.AsyncCompletedEventArgs
+	public class UploadStringCompletedEventArgs : AsyncCompletedEventArgs
 	{
-		internal UploadStringCompletedEventArgs(string result, Exception error, bool cancelled, object userState)
-			: base(error, cancelled, userState)
+		internal UploadStringCompletedEventArgs(string result, Exception exception, bool cancelled, object userToken)
+			: base(exception, cancelled, userToken)
 		{
-			this.result = result;
+			this.m_Result = result;
 		}
 
 		public string Result
 		{
 			get
 			{
-				return this.result;
+				base.RaiseExceptionIfNecessary();
+				return this.m_Result;
 			}
 		}
 
-		private string result;
+		private string m_Result;
 	}
 }

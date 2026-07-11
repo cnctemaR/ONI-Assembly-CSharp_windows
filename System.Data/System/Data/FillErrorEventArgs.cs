@@ -6,19 +6,16 @@ namespace System.Data
 	{
 		public FillErrorEventArgs(DataTable dataTable, object[] values)
 		{
-			this.data_table = dataTable;
-			this.values = values;
 		}
 
 		public bool Continue
 		{
 			get
 			{
-				return this.f_continue;
+				throw null;
 			}
 			set
 			{
-				this.f_continue = value;
 			}
 		}
 
@@ -26,7 +23,7 @@ namespace System.Data
 		{
 			get
 			{
-				return this.data_table;
+				throw null;
 			}
 		}
 
@@ -34,11 +31,10 @@ namespace System.Data
 		{
 			get
 			{
-				return this.errors;
+				throw null;
 			}
 			set
 			{
-				this.errors = value;
 			}
 		}
 
@@ -46,16 +42,8 @@ namespace System.Data
 		{
 			get
 			{
-				return this.values;
+				throw null;
 			}
 		}
-
-		private DataTable data_table;
-
-		private object[] values;
-
-		private Exception errors;
-
-		private bool f_continue;
 	}
 }

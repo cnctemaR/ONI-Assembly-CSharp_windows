@@ -2,10 +2,11 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
-using System.Text;
+using System.Security;
 
 namespace System
 {
@@ -13,98 +14,62 @@ namespace System
 	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[Serializable]
+	[StructLayout(LayoutKind.Sequential)]
 	public class Exception : ISerializable, _Exception
 	{
+		private void Init()
+		{
+			this._message = null;
+			this._stackTrace = null;
+			this._dynamicMethods = null;
+			this.HResult = -2146233088;
+			this._safeSerializationManager = new SafeSerializationManager();
+		}
+
 		public Exception()
 		{
+			this.Init();
 		}
 
 		public Exception(string message)
 		{
-			this.message = message;
+			this.Init();
+			this._message = message;
 		}
 
+		public Exception(string message, Exception innerException)
+		{
+			this.Init();
+			this._message = message;
+			this._innerException = innerException;
+		}
+
+		[SecuritySafeCritical]
 		protected Exception(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
 			{
 				throw new ArgumentNullException("info");
 			}
-			this.class_name = info.GetString("ClassName");
-			this.message = info.GetString("Message");
-			this.help_link = info.GetString("HelpURL");
-			this.stack_trace = info.GetString("StackTraceString");
+			this._className = info.GetString("ClassName");
+			this._message = info.GetString("Message");
+			this._data = (IDictionary)info.GetValueNoThrow("Data", typeof(IDictionary));
+			this._innerException = (Exception)info.GetValue("InnerException", typeof(Exception));
+			this._helpURL = info.GetString("HelpURL");
+			this._stackTraceString = info.GetString("StackTraceString");
 			this._remoteStackTraceString = info.GetString("RemoteStackTraceString");
-			this.remote_stack_index = info.GetInt32("RemoteStackIndex");
-			this.hresult = info.GetInt32("HResult");
-			this.source = info.GetString("Source");
-			this.inner_exception = (Exception)info.GetValue("InnerException", typeof(Exception));
-			try
+			this._remoteStackIndex = info.GetInt32("RemoteStackIndex");
+			this.HResult = info.GetInt32("HResult");
+			this._source = info.GetString("Source");
+			this._safeSerializationManager = info.GetValueNoThrow("SafeSerializationManager", typeof(SafeSerializationManager)) as SafeSerializationManager;
+			if (this._className == null || this.HResult == 0)
 			{
-				this._data = (IDictionary)info.GetValue("Data", typeof(IDictionary));
+				throw new SerializationException(Environment.GetResourceString("Insufficient state to return the real object."));
 			}
-			catch (SerializationException)
+			if (context.State == StreamingContextStates.CrossAppDomain)
 			{
-			}
-		}
-
-		public Exception(string message, Exception innerException)
-		{
-			this.inner_exception = innerException;
-			this.message = message;
-		}
-
-		public Exception InnerException
-		{
-			get
-			{
-				return this.inner_exception;
-			}
-		}
-
-		public virtual string HelpLink
-		{
-			get
-			{
-				return this.help_link;
-			}
-			set
-			{
-				this.help_link = value;
-			}
-		}
-
-		protected int HResult
-		{
-			get
-			{
-				return this.hresult;
-			}
-			set
-			{
-				this.hresult = value;
-			}
-		}
-
-		internal void SetMessage(string s)
-		{
-			this.message = s;
-		}
-
-		internal void SetStackTrace(string s)
-		{
-			this.stack_trace = s;
-		}
-
-		private string ClassName
-		{
-			get
-			{
-				if (this.class_name == null)
-				{
-					this.class_name = this.GetType().ToString();
-				}
-				return this.class_name;
+				this._remoteStackTraceString += this._stackTraceString;
+				this._stackTraceString = null;
 			}
 		}
 
@@ -112,101 +77,111 @@ namespace System
 		{
 			get
 			{
-				if (this.message == null)
+				if (this._message == null)
 				{
-					this.message = string.Format(Locale.GetText("Exception of type '{0}' was thrown."), this.ClassName);
+					if (this._className == null)
+					{
+						this._className = this.GetClassName();
+					}
+					return Environment.GetResourceString("Exception of type '{0}' was thrown.", new object[] { this._className });
 				}
-				return this.message;
+				return this._message;
 			}
 		}
 
-		public virtual string Source
+		public virtual IDictionary Data
 		{
+			[SecuritySafeCritical]
 			get
 			{
-				if (this.source == null)
+				if (this._data == null)
 				{
-					StackTrace stackTrace = new StackTrace(this, true);
-					if (stackTrace.FrameCount > 0)
+					if (Exception.IsImmutableAgileException(this))
 					{
-						StackFrame frame = stackTrace.GetFrame(0);
-						if (stackTrace != null)
-						{
-							MethodBase method = frame.GetMethod();
-							if (method != null)
-							{
-								this.source = method.DeclaringType.Assembly.UnprotectedGetName().Name;
-							}
-						}
+						this._data = new EmptyReadOnlyDictionaryInternal();
+					}
+					else
+					{
+						this._data = new ListDictionaryInternal();
 					}
 				}
-				return this.source;
-			}
-			set
-			{
-				this.source = value;
+				return this._data;
 			}
 		}
 
-		public virtual string StackTrace
+		private static bool IsImmutableAgileException(Exception e)
+		{
+			return false;
+		}
+
+		[FriendAccessAllowed]
+		internal void AddExceptionDataForRestrictedErrorInfo(string restrictedError, string restrictedErrorReference, string restrictedCapabilitySid, object restrictedErrorObject, bool hasrestrictedLanguageErrorObject = false)
+		{
+			IDictionary data = this.Data;
+			if (data != null)
+			{
+				data.Add("RestrictedDescription", restrictedError);
+				data.Add("RestrictedErrorReference", restrictedErrorReference);
+				data.Add("RestrictedCapabilitySid", restrictedCapabilitySid);
+				data.Add("__RestrictedErrorObject", (restrictedErrorObject == null) ? null : new Exception.__RestrictedErrorObject(restrictedErrorObject));
+				data.Add("__HasRestrictedLanguageErrorObject", hasrestrictedLanguageErrorObject);
+			}
+		}
+
+		internal bool TryGetRestrictedLanguageErrorObject(out object restrictedErrorObject)
+		{
+			restrictedErrorObject = null;
+			if (this.Data != null && this.Data.Contains("__HasRestrictedLanguageErrorObject"))
+			{
+				if (this.Data.Contains("__RestrictedErrorObject"))
+				{
+					Exception.__RestrictedErrorObject _RestrictedErrorObject = this.Data["__RestrictedErrorObject"] as Exception.__RestrictedErrorObject;
+					if (_RestrictedErrorObject != null)
+					{
+						restrictedErrorObject = _RestrictedErrorObject.RealErrorObject;
+					}
+				}
+				return (bool)this.Data["__HasRestrictedLanguageErrorObject"];
+			}
+			return false;
+		}
+
+		private string GetClassName()
+		{
+			if (this._className == null)
+			{
+				this._className = this.GetType().ToString();
+			}
+			return this._className;
+		}
+
+		public virtual Exception GetBaseException()
+		{
+			Exception ex = this.InnerException;
+			Exception ex2 = this;
+			while (ex != null)
+			{
+				ex2 = ex;
+				ex = ex.InnerException;
+			}
+			return ex2;
+		}
+
+		public Exception InnerException
 		{
 			get
 			{
-				if (this.stack_trace == null)
-				{
-					if (this.trace_ips == null)
-					{
-						return null;
-					}
-					StackTrace stackTrace = new StackTrace(this, 0, true, true);
-					StringBuilder stringBuilder = new StringBuilder();
-					string text = string.Format("{0}  {1} ", Environment.NewLine, Locale.GetText("at"));
-					string text2 = Locale.GetText("<unknown method>");
-					for (int i = 0; i < stackTrace.FrameCount; i++)
-					{
-						StackFrame frame = stackTrace.GetFrame(i);
-						if (i == 0)
-						{
-							stringBuilder.AppendFormat("  {0} ", Locale.GetText("at"));
-						}
-						else
-						{
-							stringBuilder.Append(text);
-						}
-						if (frame.GetMethod() == null)
-						{
-							string internalMethodName = frame.GetInternalMethodName();
-							if (internalMethodName != null)
-							{
-								stringBuilder.Append(internalMethodName);
-							}
-							else
-							{
-								stringBuilder.AppendFormat("<0x{0:x5}> {1}", frame.GetNativeOffset(), text2);
-							}
-						}
-						else
-						{
-							this.GetFullNameForStackTrace(stringBuilder, frame.GetMethod());
-							if (frame.GetILOffset() == -1)
-							{
-								stringBuilder.AppendFormat(" <0x{0:x5}> ", frame.GetNativeOffset());
-							}
-							else
-							{
-								stringBuilder.AppendFormat(" [0x{0:x5}] ", frame.GetILOffset());
-							}
-							stringBuilder.AppendFormat("in {0}:{1} ", frame.GetSecureFileName(), frame.GetFileLineNumber());
-						}
-					}
-					this.stack_trace = stringBuilder.ToString();
-				}
-				return this.stack_trace;
+				return this._innerException;
 			}
 		}
+
+		[SecurityCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IRuntimeMethodInfo GetMethodFromStackTrace(object stackTrace);
 
 		public MethodBase TargetSite
 		{
+			[SecuritySafeCritical]
 			get
 			{
 				StackTrace stackTrace = new StackTrace(this, true);
@@ -218,122 +193,258 @@ namespace System
 			}
 		}
 
-		public virtual IDictionary Data
+		public virtual string StackTrace
 		{
 			get
 			{
-				if (this._data == null)
-				{
-					this._data = new Hashtable();
-				}
-				return this._data;
+				return this.GetStackTrace(true);
 			}
 		}
 
-		public virtual Exception GetBaseException()
+		private string GetStackTrace(bool needFileInfo)
 		{
-			for (Exception innerException = this.inner_exception; innerException != null; innerException = innerException.InnerException)
+			string text = this._stackTraceString;
+			string text2 = this._remoteStackTraceString;
+			if (!needFileInfo)
 			{
-				if (innerException.InnerException == null)
-				{
-					return innerException;
-				}
+				text = this.StripFileInfo(text, false);
+				text2 = this.StripFileInfo(text2, true);
 			}
-			return this;
+			if (text != null)
+			{
+				return text2 + text;
+			}
+			if (this._stackTrace == null)
+			{
+				return text2;
+			}
+			string stackTrace = Environment.GetStackTrace(this, needFileInfo);
+			return text2 + stackTrace;
 		}
 
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[FriendAccessAllowed]
+		internal void SetErrorCode(int hr)
+		{
+			this.HResult = hr;
+		}
+
+		public virtual string HelpLink
+		{
+			get
+			{
+				return this._helpURL;
+			}
+			set
+			{
+				this._helpURL = value;
+			}
+		}
+
+		public virtual string Source
+		{
+			get
+			{
+				if (this._source == null)
+				{
+					StackTrace stackTrace = new StackTrace(this, true);
+					if (stackTrace.FrameCount > 0)
+					{
+						MethodBase method = stackTrace.GetFrame(0).GetMethod();
+						if (method != null)
+						{
+							this._source = method.DeclaringType.Assembly.GetName().Name;
+						}
+					}
+				}
+				return this._source;
+			}
+			set
+			{
+				this._source = value;
+			}
+		}
+
+		public override string ToString()
+		{
+			return this.ToString(true, true);
+		}
+
+		private string ToString(bool needFileLineInfo, bool needMessage)
+		{
+			string text = (needMessage ? this.Message : null);
+			string text2;
+			if (text == null || text.Length <= 0)
+			{
+				text2 = this.GetClassName();
+			}
+			else
+			{
+				text2 = this.GetClassName() + ": " + text;
+			}
+			if (this._innerException != null)
+			{
+				text2 = string.Concat(new string[]
+				{
+					text2,
+					" ---> ",
+					this._innerException.ToString(needFileLineInfo, needMessage),
+					Environment.NewLine,
+					"   ",
+					Environment.GetResourceString("--- End of inner exception stack trace ---")
+				});
+			}
+			string stackTrace = this.GetStackTrace(needFileLineInfo);
+			if (stackTrace != null)
+			{
+				text2 = text2 + Environment.NewLine + stackTrace;
+			}
+			return text2;
+		}
+
+		protected event EventHandler<SafeSerializationEventArgs> SerializeObjectState
+		{
+			add
+			{
+				this._safeSerializationManager.SerializeObjectState += value;
+			}
+			remove
+			{
+				this._safeSerializationManager.SerializeObjectState -= value;
+			}
+		}
+
+		[SecurityCritical]
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
 			{
 				throw new ArgumentNullException("info");
 			}
-			info.AddValue("ClassName", this.ClassName);
-			info.AddValue("Message", this.message);
-			info.AddValue("InnerException", this.inner_exception);
-			info.AddValue("HelpURL", this.help_link);
-			info.AddValue("StackTraceString", this.StackTrace);
-			info.AddValue("RemoteStackTraceString", this._remoteStackTraceString);
-			info.AddValue("RemoteStackIndex", this.remote_stack_index);
-			info.AddValue("HResult", this.hresult);
-			info.AddValue("Source", this.Source);
-			info.AddValue("ExceptionMethod", null);
+			string text = this._stackTraceString;
+			if (this._stackTrace != null && text == null)
+			{
+				text = Environment.GetStackTrace(this, true);
+			}
+			if (this._source == null)
+			{
+				this._source = this.Source;
+			}
+			info.AddValue("ClassName", this.GetClassName(), typeof(string));
+			info.AddValue("Message", this._message, typeof(string));
 			info.AddValue("Data", this._data, typeof(IDictionary));
+			info.AddValue("InnerException", this._innerException, typeof(Exception));
+			info.AddValue("HelpURL", this._helpURL, typeof(string));
+			info.AddValue("StackTraceString", text, typeof(string));
+			info.AddValue("RemoteStackTraceString", this._remoteStackTraceString, typeof(string));
+			info.AddValue("RemoteStackIndex", this._remoteStackIndex, typeof(int));
+			info.AddValue("ExceptionMethod", null);
+			info.AddValue("HResult", this.HResult);
+			info.AddValue("Source", this._source, typeof(string));
+			if (this._safeSerializationManager != null && this._safeSerializationManager.IsActive)
+			{
+				info.AddValue("SafeSerializationManager", this._safeSerializationManager, typeof(SafeSerializationManager));
+				this._safeSerializationManager.CompleteSerialization(this, info, context);
+			}
 		}
 
-		public override string ToString()
+		internal Exception PrepForRemoting()
 		{
-			StringBuilder stringBuilder = new StringBuilder(this.ClassName);
-			stringBuilder.Append(": ").Append(this.Message);
-			if (this._remoteStackTraceString != null)
+			string text;
+			if (this._remoteStackIndex == 0)
 			{
-				stringBuilder.Append(this._remoteStackTraceString);
+				text = string.Concat(new object[]
+				{
+					Environment.NewLine,
+					"Server stack trace: ",
+					Environment.NewLine,
+					this.StackTrace,
+					Environment.NewLine,
+					Environment.NewLine,
+					"Exception rethrown at [",
+					this._remoteStackIndex,
+					"]: ",
+					Environment.NewLine
+				});
 			}
-			if (this.inner_exception != null)
+			else
 			{
-				stringBuilder.Append(" ---> ").Append(this.inner_exception.ToString());
-				stringBuilder.Append(Environment.NewLine);
-				stringBuilder.Append(Locale.GetText("  --- End of inner exception stack trace ---"));
+				text = string.Concat(new object[]
+				{
+					this.StackTrace,
+					Environment.NewLine,
+					Environment.NewLine,
+					"Exception rethrown at [",
+					this._remoteStackIndex,
+					"]: ",
+					Environment.NewLine
+				});
 			}
-			if (this.StackTrace != null)
-			{
-				stringBuilder.Append(Environment.NewLine).Append(this.StackTrace);
-			}
-			return stringBuilder.ToString();
-		}
-
-		internal Exception FixRemotingException()
-		{
-			string text = ((this.remote_stack_index != 0) ? Locale.GetText("{1}{0}{0}Exception rethrown at [{2}]: {0}") : Locale.GetText("{0}{0}Server stack trace: {0}{1}{0}{0}Exception rethrown at [{2}]: {0}"));
-			string text2 = string.Format(text, Environment.NewLine, this.StackTrace, this.remote_stack_index);
-			this._remoteStackTraceString = text2;
-			this.remote_stack_index++;
-			this.stack_trace = null;
+			this._remoteStackTraceString = text;
+			this._remoteStackIndex++;
 			return this;
 		}
 
-		internal void GetFullNameForStackTrace(StringBuilder sb, MethodBase mi)
+		[OnDeserialized]
+		private void OnDeserialized(StreamingContext context)
 		{
-			ParameterInfo[] parameters = mi.GetParameters();
-			sb.Append(mi.DeclaringType.ToString());
-			sb.Append(".");
-			sb.Append(mi.Name);
-			if (mi.IsGenericMethod)
+			this._stackTrace = null;
+			if (this._safeSerializationManager == null)
 			{
-				Type[] genericArguments = mi.GetGenericArguments();
-				sb.Append("[");
-				for (int i = 0; i < genericArguments.Length; i++)
-				{
-					if (i > 0)
-					{
-						sb.Append(",");
-					}
-					sb.Append(genericArguments[i].Name);
-				}
-				sb.Append("]");
+				this._safeSerializationManager = new SafeSerializationManager();
+				return;
 			}
-			sb.Append(" (");
-			for (int j = 0; j < parameters.Length; j++)
+			this._safeSerializationManager.CompleteDeserialization(this);
+		}
+
+		internal void InternalPreserveStackTrace()
+		{
+			string stackTrace = this.StackTrace;
+			if (stackTrace != null && stackTrace.Length > 0)
 			{
-				if (j > 0)
-				{
-					sb.Append(", ");
-				}
-				Type parameterType = parameters[j].ParameterType;
-				if (parameterType.IsClass && parameterType.Namespace != string.Empty)
-				{
-					sb.Append(parameterType.Namespace);
-					sb.Append(".");
-				}
-				sb.Append(parameterType.Name);
-				if (parameters[j].Name != null)
-				{
-					sb.Append(" ");
-					sb.Append(parameters[j].Name);
-				}
+				this._remoteStackTraceString = stackTrace + Environment.NewLine;
 			}
-			sb.Append(")");
+			this._stackTrace = null;
+			this._stackTraceString = null;
+		}
+
+		internal string RemoteStackTrace
+		{
+			get
+			{
+				return this._remoteStackTraceString;
+			}
+		}
+
+		private string StripFileInfo(string stackTrace, bool isRemoteStackTrace)
+		{
+			return stackTrace;
+		}
+
+		[SecuritySafeCritical]
+		internal void RestoreExceptionDispatchInfo(ExceptionDispatchInfo exceptionDispatchInfo)
+		{
+			this.captured_traces = (StackTrace[])exceptionDispatchInfo.BinaryStackTraceArray;
+			this._stackTrace = null;
+			this._stackTraceString = null;
+		}
+
+		public int HResult
+		{
+			get
+			{
+				return this._HResult;
+			}
+			protected set
+			{
+				this._HResult = value;
+			}
+		}
+
+		[SecurityCritical]
+		internal virtual string InternalToString()
+		{
+			bool flag = true;
+			return this.ToString(flag, true);
 		}
 
 		public new Type GetType()
@@ -341,26 +452,115 @@ namespace System
 			return base.GetType();
 		}
 
-		private IntPtr[] trace_ips;
+		internal bool IsTransient
+		{
+			[SecuritySafeCritical]
+			get
+			{
+				return Exception.nIsTransient(this._HResult);
+			}
+		}
 
-		private Exception inner_exception;
+		[SecurityCritical]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool nIsTransient(int hr);
 
-		internal string message;
+		[SecuritySafeCritical]
+		internal static string GetMessageFromNativeResources(Exception.ExceptionMessageKind kind)
+		{
+			switch (kind)
+			{
+			case Exception.ExceptionMessageKind.ThreadAbort:
+				return "";
+			case Exception.ExceptionMessageKind.ThreadInterrupted:
+				return "";
+			case Exception.ExceptionMessageKind.OutOfMemory:
+				return "Out of memory";
+			default:
+				return "";
+			}
+		}
 
-		private string help_link;
+		internal void SetMessage(string s)
+		{
+			this._message = s;
+		}
 
-		private string class_name;
+		internal void SetStackTrace(string s)
+		{
+			this._stackTraceString = s;
+		}
 
-		private string stack_trace;
+		internal Exception FixRemotingException()
+		{
+			string text = string.Format((this._remoteStackIndex == 0) ? Locale.GetText("{0}{0}Server stack trace: {0}{1}{0}{0}Exception rethrown at [{2}]: {0}") : Locale.GetText("{1}{0}{0}Exception rethrown at [{2}]: {0}"), Environment.NewLine, this.StackTrace, this._remoteStackIndex);
+			this._remoteStackTraceString = text;
+			this._remoteStackIndex++;
+			this._stackTraceString = null;
+			return this;
+		}
+
+		[OptionalField]
+		private static object s_EDILock = new object();
+
+		private string _className;
+
+		internal string _message;
+
+		private IDictionary _data;
+
+		private Exception _innerException;
+
+		private string _helpURL;
+
+		private object _stackTrace;
+
+		private string _stackTraceString;
 
 		private string _remoteStackTraceString;
 
-		private int remote_stack_index;
+		private int _remoteStackIndex;
 
-		internal int hresult = -2146233088;
+		private object _dynamicMethods;
 
-		private string source;
+		internal int _HResult;
 
-		private IDictionary _data;
+		private string _source;
+
+		[OptionalField(VersionAdded = 4)]
+		private SafeSerializationManager _safeSerializationManager;
+
+		internal StackTrace[] captured_traces;
+
+		private IntPtr[] native_trace_ips;
+
+		private const int _COMPlusExceptionCode = -532462766;
+
+		[Serializable]
+		internal class __RestrictedErrorObject
+		{
+			internal __RestrictedErrorObject(object errorObject)
+			{
+				this._realErrorObject = errorObject;
+			}
+
+			public object RealErrorObject
+			{
+				get
+				{
+					return this._realErrorObject;
+				}
+			}
+
+			[NonSerialized]
+			private object _realErrorObject;
+		}
+
+		internal enum ExceptionMessageKind
+		{
+			ThreadAbort = 1,
+			ThreadInterrupted,
+			OutOfMemory
+		}
 	}
 }

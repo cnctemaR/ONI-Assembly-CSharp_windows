@@ -6,14 +6,13 @@ using System.Runtime.Remoting.Contexts;
 
 namespace System.Runtime.Remoting.Proxies
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class)]
+	[ComVisible(true)]
 	public class ProxyAttribute : Attribute, IContextAttribute
 	{
 		public virtual MarshalByRefObject CreateInstance(Type serverType)
 		{
-			RemotingProxy remotingProxy = new RemotingProxy(serverType, ChannelServices.CrossContextUrl, null);
-			return (MarshalByRefObject)remotingProxy.GetTransparentProxy();
+			return (MarshalByRefObject)new RemotingProxy(serverType, ChannelServices.CrossContextUrl, null).GetTransparentProxy();
 		}
 
 		public virtual RealProxy CreateProxy(ObjRef objRef, Type serverType, object serverObject, Context serverContext)

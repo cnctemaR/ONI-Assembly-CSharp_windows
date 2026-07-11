@@ -78,10 +78,10 @@ namespace Mono.Globalization.Unicode
 		internal void AppendKana(byte category, byte lv1, byte lv2, byte lv3, bool isSmallKana, byte markType, bool isKatakana, bool isHalfWidth)
 		{
 			this.AppendNormal(category, lv1, lv2, lv3);
-			this.AppendBufferPrimitive((!isSmallKana) ? 228 : 196, ref this.l4sb, ref this.l4s);
+			this.AppendBufferPrimitive(isSmallKana ? 196 : 228, ref this.l4sb, ref this.l4s);
 			this.AppendBufferPrimitive(markType, ref this.l4tb, ref this.l4t);
-			this.AppendBufferPrimitive((!isKatakana) ? 228 : 196, ref this.l4kb, ref this.l4k);
-			this.AppendBufferPrimitive((!isHalfWidth) ? 228 : 196, ref this.l4wb, ref this.l4w);
+			this.AppendBufferPrimitive(isKatakana ? 196 : 228, ref this.l4kb, ref this.l4k);
+			this.AppendBufferPrimitive(isHalfWidth ? 196 : 228, ref this.l4wb, ref this.l4w);
 		}
 
 		internal void AppendNormal(byte category, byte lv1, byte lv2, byte lv3)
@@ -101,8 +101,15 @@ namespace Mono.Globalization.Unicode
 			}
 			if (this.processLevel2 && category == 1 && this.l1 > 0)
 			{
-				lv2 += this.l2b[--this.l2];
-				lv3 = this.l3b[--this.l3];
+				byte b = lv2;
+				byte[] array = this.l2b;
+				int num = this.l2 - 1;
+				this.l2 = num;
+				lv2 = b + array[num];
+				byte[] array2 = this.l3b;
+				num = this.l3 - 1;
+				this.l3 = num;
+				lv3 = array2[num];
 			}
 			if (category != 1)
 			{
@@ -127,12 +134,15 @@ namespace Mono.Globalization.Unicode
 
 		private void AppendBufferPrimitive(byte value, ref byte[] buf, ref int bidx)
 		{
-			buf[bidx++] = value;
+			byte[] array = buf;
+			int num = bidx;
+			bidx = num + 1;
+			array[num] = value;
 			if (bidx == buf.Length)
 			{
-				byte[] array = new byte[bidx * 2];
-				Array.Copy(buf, array, buf.Length);
-				buf = array;
+				byte[] array2 = new byte[bidx * 2];
+				Array.Copy(buf, array2, buf.Length);
+				buf = array2;
 			}
 		}
 
@@ -158,17 +168,18 @@ namespace Mono.Globalization.Unicode
 
 		public SortKey GetResult()
 		{
+			if (this.source.Length == 0)
+			{
+				return new SortKey(this.lcid, this.source, new byte[0], this.options, 0, 0, 0, 0, 0, 0, 0, 0);
+			}
 			if (this.frenchSort && !this.frenchSorted && this.l2b != null)
 			{
-				int i;
-				for (i = 0; i < this.l2b.Length; i++)
+				int num = 0;
+				while (num < this.l2b.Length && this.l2b[num] != 0)
 				{
-					if (this.l2b[i] == 0)
-					{
-						break;
-					}
+					num++;
 				}
-				Array.Reverse(this.l2b, 0, i);
+				Array.Reverse<byte>(this.l2b, 0, num);
 				this.frenchSorted = true;
 			}
 			this.l2 = this.GetOptimizedLength(this.l2b, this.l2, 2);
@@ -179,68 +190,52 @@ namespace Mono.Globalization.Unicode
 			this.l4k = this.GetOptimizedLength(this.l4kb, this.l4k, 228);
 			this.l4w = this.GetOptimizedLength(this.l4wb, this.l4w, 228);
 			this.l5 = this.GetOptimizedLength(this.l5b, this.l5, 2);
-			int num = this.l1 + this.l2 + this.l3 + this.l5 + 5;
-			int num2 = this.l4s + this.l4t + this.l4k + this.l4w;
+			int num2 = this.l1 + this.l2 + this.l3 + this.l5 + 5;
+			int num3 = this.l4s + this.l4t + this.l4k + this.l4w;
 			if (flag)
 			{
-				num += num2 + 4;
+				num2 += num3 + 4;
 			}
-			byte[] array = new byte[num];
+			byte[] array = new byte[num2];
 			Array.Copy(this.l1b, array, this.l1);
 			array[this.l1] = 1;
-			int num3 = this.l1 + 1;
+			int num4 = this.l1 + 1;
 			if (this.l2 > 0)
 			{
-				Array.Copy(this.l2b, 0, array, num3, this.l2);
+				Array.Copy(this.l2b, 0, array, num4, this.l2);
 			}
-			num3 += this.l2;
-			array[num3++] = 1;
+			num4 += this.l2;
+			array[num4++] = 1;
 			if (this.l3 > 0)
 			{
-				Array.Copy(this.l3b, 0, array, num3, this.l3);
+				Array.Copy(this.l3b, 0, array, num4, this.l3);
 			}
-			num3 += this.l3;
-			array[num3++] = 1;
+			num4 += this.l3;
+			array[num4++] = 1;
 			if (flag)
 			{
-				Array.Copy(this.l4sb, 0, array, num3, this.l4s);
-				num3 += this.l4s;
-				array[num3++] = byte.MaxValue;
-				Array.Copy(this.l4tb, 0, array, num3, this.l4t);
-				num3 += this.l4t;
-				array[num3++] = 2;
-				Array.Copy(this.l4kb, 0, array, num3, this.l4k);
-				num3 += this.l4k;
-				array[num3++] = byte.MaxValue;
-				Array.Copy(this.l4wb, 0, array, num3, this.l4w);
-				num3 += this.l4w;
-				array[num3++] = byte.MaxValue;
+				Array.Copy(this.l4sb, 0, array, num4, this.l4s);
+				num4 += this.l4s;
+				array[num4++] = byte.MaxValue;
+				Array.Copy(this.l4tb, 0, array, num4, this.l4t);
+				num4 += this.l4t;
+				array[num4++] = 2;
+				Array.Copy(this.l4kb, 0, array, num4, this.l4k);
+				num4 += this.l4k;
+				array[num4++] = byte.MaxValue;
+				Array.Copy(this.l4wb, 0, array, num4, this.l4w);
+				num4 += this.l4w;
+				array[num4++] = byte.MaxValue;
 			}
-			array[num3++] = 1;
+			array[num4++] = 1;
 			if (this.l5 > 0)
 			{
-				Array.Copy(this.l5b, 0, array, num3, this.l5);
+				Array.Copy(this.l5b, 0, array, num4, this.l5);
 			}
-			num3 += this.l5;
-			array[num3++] = 0;
+			num4 += this.l5;
+			array[num4++] = 0;
 			return new SortKey(this.lcid, this.source, array, this.options, this.l1, this.l2, this.l3, this.l4s, this.l4t, this.l4k, this.l4w, this.l5);
 		}
-
-		private int l1;
-
-		private int l2;
-
-		private int l3;
-
-		private int l4s;
-
-		private int l4t;
-
-		private int l4k;
-
-		private int l4w;
-
-		private int l5;
 
 		private byte[] l1b;
 
@@ -260,14 +255,30 @@ namespace Mono.Globalization.Unicode
 
 		private string source;
 
+		private int l1;
+
+		private int l2;
+
+		private int l3;
+
+		private int l4s;
+
+		private int l4t;
+
+		private int l4k;
+
+		private int l4w;
+
+		private int l5;
+
+		private int lcid;
+
+		private CompareOptions options;
+
 		private bool processLevel2;
 
 		private bool frenchSort;
 
 		private bool frenchSorted;
-
-		private int lcid;
-
-		private CompareOptions options;
 	}
 }

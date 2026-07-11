@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System
 {
@@ -9,34 +10,33 @@ namespace System
 	public class ArgumentNullException : ArgumentException
 	{
 		public ArgumentNullException()
-			: base(Locale.GetText("Argument cannot be null."))
+			: base(Environment.GetResourceString("Value cannot be null."))
 		{
-			base.HResult = -2147467261;
+			base.SetErrorCode(-2147467261);
 		}
 
 		public ArgumentNullException(string paramName)
-			: base(Locale.GetText("Argument cannot be null."), paramName)
+			: base(Environment.GetResourceString("Value cannot be null."), paramName)
 		{
-			base.HResult = -2147467261;
-		}
-
-		public ArgumentNullException(string paramName, string message)
-			: base(message, paramName)
-		{
-			base.HResult = -2147467261;
+			base.SetErrorCode(-2147467261);
 		}
 
 		public ArgumentNullException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.HResult = -2147467261;
+			base.SetErrorCode(-2147467261);
 		}
 
+		public ArgumentNullException(string paramName, string message)
+			: base(message, paramName)
+		{
+			base.SetErrorCode(-2147467261);
+		}
+
+		[SecurityCritical]
 		protected ArgumentNullException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		private const int Result = -2147467261;
 	}
 }

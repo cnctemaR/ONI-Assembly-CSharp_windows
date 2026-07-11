@@ -5,19 +5,19 @@ namespace System.Diagnostics
 {
 	public class InstanceDataCollection : DictionaryBase
 	{
-		[Obsolete("Use InstanceDataCollectionCollection indexer instead.")]
-		public InstanceDataCollection(string counterName)
-		{
-			InstanceDataCollection.CheckNull(counterName, "counterName");
-			this.counterName = counterName;
-		}
-
 		private static void CheckNull(object value, string name)
 		{
 			if (value == null)
 			{
 				throw new ArgumentNullException(name);
 			}
+		}
+
+		[Obsolete("Use InstanceDataCollectionCollection indexer instead.")]
+		public InstanceDataCollection(string counterName)
+		{
+			InstanceDataCollection.CheckNull(counterName, "counterName");
+			this.counterName = counterName;
 		}
 
 		public string CounterName

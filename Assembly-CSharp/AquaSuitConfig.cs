@@ -25,7 +25,7 @@ public class AquaSuitConfig : IEquipmentConfig
 		string text2 = "suit_water_slow_kanim";
 		string snapon = global::TUNING.EQUIPMENT.SUITS.SNAPON;
 		string text3 = "body_water_slow_kanim";
-		int num3 = 5;
+		int num3 = 6;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, snapon, text3, num3, list2, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
@@ -39,6 +39,7 @@ public class AquaSuitConfig : IEquipmentConfig
 		suitTank.underwaterSupport = true;
 		suitTank.element = "Oxygen";
 		suitTank.amount = 11f;
+		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Clothes);
 	}
 
 	public const string ID = "Aqua_Suit";

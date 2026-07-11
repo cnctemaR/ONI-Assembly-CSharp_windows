@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -247,7 +248,7 @@ public class ChorePreconditions
 		{
 			ScheduleBlockType scheduleBlockType = (ScheduleBlockType)data;
 			Schedulable schedulable = context.consumerState.schedulable;
-			return false || schedulable.IsAllowed(scheduleBlockType);
+			return false || !schedulable || schedulable.IsAllowed(scheduleBlockType);
 		};
 		this.IsScheduledTime = precondition15;
 		Chore.Precondition precondition16 = default(Chore.Precondition);
@@ -424,6 +425,79 @@ public class ChorePreconditions
 			return context.consumerState.consumer.RunBehaviourPrecondition(tag2);
 		};
 		this.CheckBehaviourPrecondition = precondition33;
+		Chore.Precondition precondition34 = default(Chore.Precondition);
+		precondition34.id = "CanDoWorkerPrioritizable";
+		precondition34.description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_DO_RECREATION;
+		precondition34.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			if (context.consumerState.consumer == null)
+			{
+				return false;
+			}
+			IWorkerPrioritizable workerPrioritizable = data as IWorkerPrioritizable;
+			if (workerPrioritizable == null)
+			{
+				return false;
+			}
+			int num2 = 0;
+			if (workerPrioritizable.GetWorkerPriority(context.consumerState.worker, out num2))
+			{
+				context.consumerPriority += num2;
+				return true;
+			}
+			return false;
+		};
+		this.CanDoWorkerPrioritizable = precondition34;
+		Chore.Precondition precondition35 = default(Chore.Precondition);
+		precondition35.id = "IsExclusivelyAvailableWithOtherChores";
+		precondition35.description = DUPLICANTS.CHORES.PRECONDITIONS.EXCLUSIVELY_AVAILABLE;
+		precondition35.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			List<Chore> list = (List<Chore>)data;
+			foreach (Chore chore in list)
+			{
+				if (chore != context.chore && chore.driver != null)
+				{
+					return false;
+				}
+			}
+			return true;
+		};
+		this.IsExclusivelyAvailableWithOtherChores = precondition35;
+		Chore.Precondition precondition36 = default(Chore.Precondition);
+		precondition36.id = "IsBladderFull";
+		precondition36.description = DUPLICANTS.CHORES.PRECONDITIONS.BLADDER_FULL;
+		precondition36.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			BladderMonitor.Instance smi3 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
+			return smi3 != null && smi3.NeedsToPee();
+		};
+		this.IsBladderFull = precondition36;
+		Chore.Precondition precondition37 = default(Chore.Precondition);
+		precondition37.id = "IsBladderNotFull";
+		precondition37.description = DUPLICANTS.CHORES.PRECONDITIONS.BLADDER_NOT_FULL;
+		precondition37.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			BladderMonitor.Instance smi4 = context.consumerState.gameObject.GetSMI<BladderMonitor.Instance>();
+			return smi4 == null || !smi4.NeedsToPee();
+		};
+		this.IsBladderNotFull = precondition37;
+		Chore.Precondition precondition38 = default(Chore.Precondition);
+		precondition38.id = "NoDeadBodies";
+		precondition38.description = DUPLICANTS.CHORES.PRECONDITIONS.NO_DEAD_BODIES;
+		precondition38.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return Components.LiveMinionIdentities.Count == Components.MinionIdentities.Count;
+		};
+		this.NoDeadBodies = precondition38;
+		Chore.Precondition precondition39 = default(Chore.Precondition);
+		precondition39.id = "ValidMourningSite";
+		precondition39.description = DUPLICANTS.CHORES.PRECONDITIONS.VALID_MOURNING_SITE;
+		precondition39.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return MournChore.FindGraveToMournAt() != null;
+		};
+		this.ValidMourningSite = precondition39;
 		base..ctor();
 	}
 
@@ -437,6 +511,11 @@ public class ChorePreconditions
 			}
 			return ChorePreconditions._instance;
 		}
+	}
+
+	public static void DestroyInstance()
+	{
+		ChorePreconditions._instance = null;
 	}
 
 	private static ChorePreconditions _instance;
@@ -506,4 +585,16 @@ public class ChorePreconditions
 	public Chore.Precondition HasTag;
 
 	public Chore.Precondition CheckBehaviourPrecondition;
+
+	public Chore.Precondition CanDoWorkerPrioritizable;
+
+	public Chore.Precondition IsExclusivelyAvailableWithOtherChores;
+
+	public Chore.Precondition IsBladderFull;
+
+	public Chore.Precondition IsBladderNotFull;
+
+	public Chore.Precondition NoDeadBodies;
+
+	public Chore.Precondition ValidMourningSite;
 }

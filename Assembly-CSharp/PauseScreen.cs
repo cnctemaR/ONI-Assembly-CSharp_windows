@@ -22,6 +22,11 @@ public class PauseScreen : KModalButtonMenu
 		}
 	}
 
+	public static void DestroyInstance()
+	{
+		PauseScreen.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		this.keepMenuOpen = true;

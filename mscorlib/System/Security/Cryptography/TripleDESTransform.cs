@@ -14,8 +14,7 @@ namespace System.Security.Cryptography
 			}
 			if (TripleDES.IsWeakKey(key))
 			{
-				string text = Locale.GetText("This is a known weak key.");
-				throw new CryptographicException(text);
+				throw new CryptographicException(Locale.GetText("This is a known weak key."));
 			}
 			byte[] array = new byte[8];
 			byte[] array2 = new byte[8];
@@ -36,13 +35,11 @@ namespace System.Security.Cryptography
 				this.E1 = new DESTransform(des, true, array, iv);
 				this.D2 = new DESTransform(des, false, array2, iv);
 				this.E3 = new DESTransform(des, true, array3, iv);
+				return;
 			}
-			else
-			{
-				this.D1 = new DESTransform(des, false, array3, iv);
-				this.E2 = new DESTransform(des, true, array2, iv);
-				this.D3 = new DESTransform(des, false, array, iv);
-			}
+			this.D1 = new DESTransform(des, false, array3, iv);
+			this.E2 = new DESTransform(des, true, array2, iv);
+			this.D3 = new DESTransform(des, false, array, iv);
 		}
 
 		protected override void ECB(byte[] input, byte[] output)

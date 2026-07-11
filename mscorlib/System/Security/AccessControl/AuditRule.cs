@@ -8,13 +8,9 @@ namespace System.Security.AccessControl
 		protected AuditRule(IdentityReference identity, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags auditFlags)
 			: base(identity, accessMask, isInherited, inheritanceFlags, propagationFlags)
 		{
-			if (!(identity is SecurityIdentifier))
+			if (auditFlags != ((AuditFlags.Success | AuditFlags.Failure) & auditFlags))
 			{
-				throw new ArgumentException("identity");
-			}
-			if (accessMask == 0)
-			{
-				throw new ArgumentOutOfRangeException();
+				throw new ArgumentException("Invalid audit flags.", "auditFlags");
 			}
 			this.auditFlags = auditFlags;
 		}

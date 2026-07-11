@@ -233,7 +233,7 @@ public abstract class Chore
 		this.driver = null;
 	}
 
-	protected virtual void Succeed(string reason)
+	protected void Succeed(string reason)
 	{
 		if (!this.RemoveFromProvider())
 		{
@@ -398,6 +398,7 @@ public abstract class Chore
 				this.personalPriority = consumer_state.consumer.GetPersonalPriority(chore.choreType);
 				this.priority = 0;
 				this.priorityMod = chore.priorityMod;
+				this.consumerPriority = 0;
 				this.interruptPriority = 0;
 				this.cost = 0;
 				this.chore = chore;
@@ -414,6 +415,7 @@ public abstract class Chore
 				this.masterPriority = chore.masterPriority;
 				this.priority = 0;
 				this.priorityMod = chore.priorityMod;
+				this.consumerPriority = 0;
 				this.interruptPriority = 0;
 				this.cost = 0;
 				this.chore = chore;
@@ -492,6 +494,11 @@ public abstract class Chore
 				{
 					return num5;
 				}
+				int num6 = this.consumerPriority - obj.consumerPriority;
+				if (num6 != 0)
+				{
+					return num6;
+				}
 				return obj.cost - this.cost;
 			}
 
@@ -532,6 +539,8 @@ public abstract class Chore
 			public int interruptPriority;
 
 			public int cost;
+
+			public int consumerPriority;
 
 			public Chore chore;
 

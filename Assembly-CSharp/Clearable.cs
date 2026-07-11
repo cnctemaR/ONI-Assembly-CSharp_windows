@@ -19,7 +19,7 @@ public class Clearable : Workable, ISaveLoadable
 	{
 		base.OnSpawn();
 		Prioritizable component = base.GetComponent<Prioritizable>();
-		if (component != null)
+		if (component != null && base.GetComponent<Health>() == null)
 		{
 			component.showIcon = false;
 		}

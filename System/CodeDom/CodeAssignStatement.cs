@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeAssignStatement : CodeStatement
 	{
@@ -14,41 +11,12 @@ namespace System.CodeDom
 
 		public CodeAssignStatement(CodeExpression left, CodeExpression right)
 		{
-			this.left = left;
-			this.right = right;
+			this.Left = left;
+			this.Right = right;
 		}
 
-		public CodeExpression Left
-		{
-			get
-			{
-				return this.left;
-			}
-			set
-			{
-				this.left = value;
-			}
-		}
+		public CodeExpression Left { get; set; }
 
-		public CodeExpression Right
-		{
-			get
-			{
-				return this.right;
-			}
-			set
-			{
-				this.right = value;
-			}
-		}
-
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private CodeExpression left;
-
-		private CodeExpression right;
+		public CodeExpression Right { get; set; }
 	}
 }

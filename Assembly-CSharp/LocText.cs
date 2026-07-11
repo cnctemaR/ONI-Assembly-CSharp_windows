@@ -58,6 +58,11 @@ public class LocText : TextMeshProUGUI
 			setTextStyleSetting.SetStyle(this.textStyleSetting);
 		}
 		this.textLinkHandler = base.GetComponent<TextLinkHandler>();
+	}
+
+	private new void Start()
+	{
+		base.Start();
 		this.RefreshLinkHandler();
 	}
 

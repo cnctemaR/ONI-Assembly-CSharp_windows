@@ -6,24 +6,24 @@ namespace System.Runtime.InteropServices
 	[ComVisible(true)]
 	public sealed class TypeLibTypeAttribute : Attribute
 	{
-		public TypeLibTypeAttribute(short flags)
-		{
-			this.flags = (TypeLibTypeFlags)flags;
-		}
-
 		public TypeLibTypeAttribute(TypeLibTypeFlags flags)
 		{
-			this.flags = flags;
+			this._val = flags;
+		}
+
+		public TypeLibTypeAttribute(short flags)
+		{
+			this._val = (TypeLibTypeFlags)flags;
 		}
 
 		public TypeLibTypeFlags Value
 		{
 			get
 			{
-				return this.flags;
+				return this._val;
 			}
 		}
 
-		private TypeLibTypeFlags flags;
+		internal TypeLibTypeFlags _val;
 	}
 }

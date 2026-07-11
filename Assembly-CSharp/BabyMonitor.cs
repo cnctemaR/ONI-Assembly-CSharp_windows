@@ -12,7 +12,7 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 		this.root.Enter(new StateMachine<BabyMonitor, BabyMonitor.Instance, IStateMachineTarget, BabyMonitor.Def>.State.Callback(BabyMonitor.AddBabyEffect));
 		this.baby.Transition(this.spawnadult, new StateMachine<BabyMonitor, BabyMonitor.Instance, IStateMachineTarget, BabyMonitor.Def>.Transition.ConditionCallback(BabyMonitor.IsReadyToSpawnAdult), UpdateRate.SIM_4000ms);
 		this.spawnadult.ToggleBehaviour(GameTags.Creatures.Behaviours.GrowUpBehaviour, (BabyMonitor.Instance smi) => true, null);
-		this.babyEffect = new Effect("IsABaby", CREATURES.MODIFIERS.BABY.NAME, CREATURES.MODIFIERS.BABY.TOOLTIP, 0f, true, false, false);
+		this.babyEffect = new Effect("IsABaby", CREATURES.MODIFIERS.BABY.NAME, CREATURES.MODIFIERS.BABY.TOOLTIP, 0f, true, false, false, null, 0f);
 		this.babyEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -0.9f, CREATURES.MODIFIERS.BABY.NAME, true, false, true));
 		this.babyEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 5f, CREATURES.MODIFIERS.BABY.NAME, false, false, true));
 	}
@@ -55,7 +55,7 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 		{
 			Vector3 position = base.smi.transform.GetPosition();
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.Creatures);
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(base.smi.def.adultPrefab), Folder.Creatures, position);
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(base.smi.def.adultPrefab), position);
 			gameObject.SetActive(true);
 			gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("growup_pst");
 			foreach (AmountInstance amountInstance in base.gameObject.GetAmounts())

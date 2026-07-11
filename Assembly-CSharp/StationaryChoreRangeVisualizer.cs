@@ -10,13 +10,13 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 		base.Subscribe(-1503271301, new Action<object>(this.OnSelect));
 		if (this.movable)
 		{
-			CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "StationaryChoreRangeVisualizer.OnSpawn");
+			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "StationaryChoreRangeVisualizer.OnSpawn");
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
-		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		base.Unsubscribe(-1503271301, new Action<object>(this.OnSelect));
 		this.ClearVisualizers();
 		base.OnCleanUp();
@@ -27,10 +27,12 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 		bool flag = (bool)data;
 		if (flag)
 		{
+			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_form", false), base.transform.position);
 			this.UpdateVisualizers();
 		}
 		else
 		{
+			SoundEvent.PlayOneShot(GlobalAssets.GetSound("RadialGrid_disappear", false), base.transform.position);
 			this.ClearVisualizers();
 		}
 	}
@@ -91,7 +93,7 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 
 	private KBatchedAnimController CreateEffect(int cell)
 	{
-		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect(StationaryChoreRangeVisualizer.AnimName, Grid.CellToPosCCC(cell, Grid.SceneLayer.Background), SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.Background, true);
+		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect(StationaryChoreRangeVisualizer.AnimName, Grid.CellToPosCCC(cell, Grid.SceneLayer.Background), null, false, Grid.SceneLayer.Background, true);
 		kbatchedAnimController.destroyOnAnimComplete = false;
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
 		kbatchedAnimController.gameObject.SetActive(true);

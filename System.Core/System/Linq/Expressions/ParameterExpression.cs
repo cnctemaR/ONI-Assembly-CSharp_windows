@@ -1,59 +1,110 @@
 ﻿using System;
-using System.Reflection.Emit;
+using System.Diagnostics;
+using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
 {
-	public sealed class ParameterExpression : Expression
+	[DebuggerTypeProxy(typeof(Expression.ParameterExpressionProxy))]
+	public class ParameterExpression : Expression
 	{
-		internal ParameterExpression(Type type, string name)
-			: base(ExpressionType.Parameter, type)
+		internal ParameterExpression(string name)
 		{
-			this.name = name;
+			this.Name = name;
 		}
 
-		public string Name
+		internal static ParameterExpression Make(Type type, string name, bool isByRef)
+		{
+			if (isByRef)
+			{
+				return new ByRefParameterExpression(type, name);
+			}
+			if (!type.IsEnum)
+			{
+				switch (type.GetTypeCode())
+				{
+				case TypeCode.Object:
+					if (type == typeof(object))
+					{
+						return new ParameterExpression(name);
+					}
+					if (type == typeof(Exception))
+					{
+						return new PrimitiveParameterExpression<Exception>(name);
+					}
+					if (type == typeof(object[]))
+					{
+						return new PrimitiveParameterExpression<object[]>(name);
+					}
+					break;
+				case TypeCode.Boolean:
+					return new PrimitiveParameterExpression<bool>(name);
+				case TypeCode.Char:
+					return new PrimitiveParameterExpression<char>(name);
+				case TypeCode.SByte:
+					return new PrimitiveParameterExpression<sbyte>(name);
+				case TypeCode.Byte:
+					return new PrimitiveParameterExpression<byte>(name);
+				case TypeCode.Int16:
+					return new PrimitiveParameterExpression<short>(name);
+				case TypeCode.UInt16:
+					return new PrimitiveParameterExpression<ushort>(name);
+				case TypeCode.Int32:
+					return new PrimitiveParameterExpression<int>(name);
+				case TypeCode.UInt32:
+					return new PrimitiveParameterExpression<uint>(name);
+				case TypeCode.Int64:
+					return new PrimitiveParameterExpression<long>(name);
+				case TypeCode.UInt64:
+					return new PrimitiveParameterExpression<ulong>(name);
+				case TypeCode.Single:
+					return new PrimitiveParameterExpression<float>(name);
+				case TypeCode.Double:
+					return new PrimitiveParameterExpression<double>(name);
+				case TypeCode.Decimal:
+					return new PrimitiveParameterExpression<decimal>(name);
+				case TypeCode.DateTime:
+					return new PrimitiveParameterExpression<DateTime>(name);
+				case TypeCode.String:
+					return new PrimitiveParameterExpression<string>(name);
+				}
+			}
+			return new TypedParameterExpression(type, name);
+		}
+
+		public override Type Type
 		{
 			get
 			{
-				return this.name;
+				return typeof(object);
 			}
 		}
 
-		private void EmitLocalParameter(EmitContext ec, int position)
+		public sealed override ExpressionType NodeType
 		{
-			ec.ig.Emit(OpCodes.Ldarg, position);
+			get
+			{
+				return ExpressionType.Parameter;
+			}
 		}
 
-		private void EmitHoistedLocal(EmitContext ec, int level, int position)
+		public string Name { get; }
+
+		public bool IsByRef
 		{
-			ec.EmitScope();
-			for (int i = 0; i < level; i++)
+			get
 			{
-				ec.EmitParentScope();
+				return this.GetIsByRef();
 			}
-			ec.EmitLoadLocals();
-			ec.ig.Emit(OpCodes.Ldc_I4, position);
-			ec.ig.Emit(OpCodes.Ldelem, typeof(object));
-			ec.EmitLoadStrongBoxValue(base.Type);
 		}
 
-		internal override void Emit(EmitContext ec)
+		internal virtual bool GetIsByRef()
 		{
-			int num = -1;
-			if (ec.IsLocalParameter(this, ref num))
-			{
-				this.EmitLocalParameter(ec, num);
-				return;
-			}
-			int num2 = 0;
-			if (ec.IsHoistedLocal(this, ref num2, ref num))
-			{
-				this.EmitHoistedLocal(ec, num2, num);
-				return;
-			}
-			throw new InvalidOperationException("Parameter out of scope");
+			return false;
 		}
 
-		private string name;
+		protected internal override Expression Accept(ExpressionVisitor visitor)
+		{
+			return visitor.VisitParameter(this);
+		}
 	}
 }

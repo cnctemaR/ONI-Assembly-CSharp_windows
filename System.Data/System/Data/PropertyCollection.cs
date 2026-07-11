@@ -12,7 +12,6 @@ namespace System.Data
 		}
 
 		protected PropertyCollection(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 	}

@@ -5,21 +5,11 @@ using System.Runtime.InteropServices;
 namespace System.Security.Policy
 {
 	[ComVisible(true)]
-	public sealed class ApplicationTrustCollection : IEnumerable, ICollection
+	public sealed class ApplicationTrustCollection : ICollection, IEnumerable
 	{
 		internal ApplicationTrustCollection()
 		{
 			this._list = new ArrayList();
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this._list.CopyTo(array, index);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new ApplicationTrustEnumerator(this);
 		}
 
 		public int Count
@@ -125,6 +115,11 @@ namespace System.Security.Policy
 			this._list.CopyTo(array, index);
 		}
 
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this._list.CopyTo(array, index);
+		}
+
 		public ApplicationTrustCollection Find(ApplicationIdentity applicationIdentity, ApplicationVersionMatch versionMatch)
 		{
 			if (applicationIdentity == null)
@@ -161,6 +156,11 @@ namespace System.Security.Policy
 			return new ApplicationTrustEnumerator(this);
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new ApplicationTrustEnumerator(this);
+		}
+
 		public void Remove(ApplicationTrust trust)
 		{
 			if (trust == null)
@@ -176,8 +176,7 @@ namespace System.Security.Policy
 
 		public void Remove(ApplicationIdentity applicationIdentity, ApplicationVersionMatch versionMatch)
 		{
-			ApplicationTrustCollection applicationTrustCollection = this.Find(applicationIdentity, versionMatch);
-			foreach (ApplicationTrust applicationTrust in applicationTrustCollection)
+			foreach (ApplicationTrust applicationTrust in this.Find(applicationIdentity, versionMatch))
 			{
 				this.RemoveAllInstances(applicationTrust);
 			}

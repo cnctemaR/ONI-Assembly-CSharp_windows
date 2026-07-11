@@ -18,11 +18,6 @@ namespace System.Security.Permissions
 			this.SecurityZone = zone;
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 14;
-		}
-
 		public override IPermission Copy()
 		{
 			return new ZoneIdentityPermission(this.zone);
@@ -43,27 +38,24 @@ namespace System.Security.Permissions
 			ZoneIdentityPermission zoneIdentityPermission = this.Cast(target);
 			if (zoneIdentityPermission == null)
 			{
-				IPermission permission2;
+				if (this.zone != SecurityZone.NoZone)
+				{
+					return this.Copy();
+				}
+				return null;
+			}
+			else
+			{
+				if (this.zone == zoneIdentityPermission.zone || zoneIdentityPermission.zone == SecurityZone.NoZone)
+				{
+					return this.Copy();
+				}
 				if (this.zone == SecurityZone.NoZone)
 				{
-					IPermission permission = null;
-					permission2 = permission;
+					return zoneIdentityPermission.Copy();
 				}
-				else
-				{
-					permission2 = this.Copy();
-				}
-				return permission2;
+				throw new ArgumentException(Locale.GetText("Union impossible"));
 			}
-			if (this.zone == zoneIdentityPermission.zone || zoneIdentityPermission.zone == SecurityZone.NoZone)
-			{
-				return this.Copy();
-			}
-			if (this.zone == SecurityZone.NoZone)
-			{
-				return zoneIdentityPermission.Copy();
-			}
-			throw new ArgumentException(Locale.GetText("Union impossible"));
 		}
 
 		public override IPermission Intersect(IPermission target)
@@ -87,11 +79,9 @@ namespace System.Security.Permissions
 			if (text == null)
 			{
 				this.zone = SecurityZone.NoZone;
+				return;
 			}
-			else
-			{
-				this.zone = (SecurityZone)((int)Enum.Parse(typeof(SecurityZone), text));
-			}
+			this.zone = (SecurityZone)Enum.Parse(typeof(SecurityZone), text);
 		}
 
 		public override SecurityElement ToXml()
@@ -114,11 +104,15 @@ namespace System.Security.Permissions
 			{
 				if (!Enum.IsDefined(typeof(SecurityZone), value))
 				{
-					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
-					throw new ArgumentException(text, "SecurityZone");
+					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "SecurityZone");
 				}
 				this.zone = value;
 			}
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 14;
 		}
 
 		private ZoneIdentityPermission Cast(IPermission target)

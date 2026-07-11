@@ -14,20 +14,20 @@ namespace ProcGen
 		public string name { get; set; }
 
 		[StringEnumConverter]
-		public SampleDescriber.PointSelectionMethod selectMethod { get; private set; }
+		public SampleDescriber.PointSelectionMethod selectMethod { get; protected set; }
 
-		public MinMax density { get; private set; }
+		public MinMax density { get; protected set; }
 
-		public float avoidRadius { get; private set; }
+		public float avoidRadius { get; protected set; }
 
 		[StringEnumConverter]
-		public PointGenerator.SampleBehaviour sampleBehaviour { get; private set; }
+		public PointGenerator.SampleBehaviour sampleBehaviour { get; protected set; }
 
-		public bool doAvoidPoints { get; private set; }
+		public bool doAvoidPoints { get; protected set; }
 
-		public bool dontRelaxChildren { get; private set; }
+		public bool dontRelaxChildren { get; protected set; }
 
-		public MinMax blobSize { get; private set; }
+		public MinMax blobSize { get; protected set; }
 
 		public enum PointSelectionMethod
 		{
@@ -51,17 +51,17 @@ namespace ProcGen
 				this.diseaseAmountOverride = diseaseAmountOverride;
 			}
 
-			public float? massOverride { get; private set; }
+			public float? massOverride { get; protected set; }
 
-			public float? massMultiplier { get; private set; }
+			public float? massMultiplier { get; protected set; }
 
-			public float? temperatureOverride { get; private set; }
+			public float? temperatureOverride { get; protected set; }
 
-			public float? temperatureMultiplier { get; private set; }
+			public float? temperatureMultiplier { get; protected set; }
 
-			public string diseaseOverride { get; private set; }
+			public string diseaseOverride { get; protected set; }
 
-			public int? diseaseAmountOverride { get; private set; }
+			public int? diseaseAmountOverride { get; protected set; }
 		}
 	}
 }

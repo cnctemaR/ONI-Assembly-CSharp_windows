@@ -14,23 +14,23 @@ public class ResourceLoader<T> where T : Resource, new()
 		this.Load(file);
 	}
 
+	public ResourceLoader(string text, string name)
+	{
+		this.Load(text, name);
+	}
+
 	public IEnumerator<T> GetEnumerator()
 	{
 		return this.resources.GetEnumerator();
 	}
 
-	public virtual void Load(TextAsset file)
+	public void Load(string text, string name)
 	{
-		if (file == null)
-		{
-			global::Debug.LogWarning("Missing resource file of type: " + typeof(T).Name, null);
-			return;
-		}
-		string[,] array = CSVReader.SplitCsvGrid(file.text, file.name);
+		string[,] array = CSVReader.SplitCsvGrid(text, name);
 		int length = array.GetLength(1);
 		for (int i = 1; i < length; i++)
 		{
-			if (array[0, i] != null && !(array[0, i] == string.Empty))
+			if (!string.IsNullOrWhiteSpace(array[0, i]))
 			{
 				T t = new T();
 				CSVUtil.ParseData<T>(t, array, i);
@@ -40,6 +40,16 @@ public class ResourceLoader<T> where T : Resource, new()
 				}
 			}
 		}
+	}
+
+	public virtual void Load(TextAsset file)
+	{
+		if (file == null)
+		{
+			global::Debug.LogWarning("Missing resource file of type: " + typeof(T).Name, null);
+			return;
+		}
+		this.Load(file.text, file.name);
 	}
 
 	public List<T> resources = new List<T>();

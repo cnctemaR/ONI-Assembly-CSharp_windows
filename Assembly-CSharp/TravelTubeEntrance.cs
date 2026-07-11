@@ -54,7 +54,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.TubeConnectionsChanged(connections);
 		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[32], new Action<object>(this.TubeChanged));
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		this.meter = new MeterController(this, Meter.Offset.Infront, new string[0]);
+		this.meter = new MeterController(this, Meter.Offset.Infront, Array.Empty<string>());
 		this.CreateNewWaitReactable();
 		Grid.HasTubeEntrance[Grid.PosToCell(this)] = true;
 		base.smi.StartSM();
@@ -288,7 +288,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private const float RECHARGE_TIME = 10f;
 
-	private static Operational.Flag tubeConnected = new Operational.Flag("tubeConnected", Operational.Flag.Type.Functional);
+	private static readonly Operational.Flag tubeConnected = new Operational.Flag("tubeConnected", Operational.Flag.Type.Functional);
 
 	private GameScenePartitionerEntry tubeChangedEntry;
 
@@ -297,7 +297,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	private class LaunchReactable : WorkableReactable
 	{
 		public LaunchReactable(Workable workable, TravelTubeEntrance entrance)
-			: base(workable, Db.Get().ChoreTypes.TravelTubeEntrance, WorkableReactable.AllowedDirection.Any)
+			: base(workable, "LaunchReactable", Db.Get().ChoreTypes.TravelTubeEntrance, WorkableReactable.AllowedDirection.Any)
 		{
 			this.entrance = entrance;
 		}
@@ -318,7 +318,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	private class WaitReactable : Reactable
 	{
 		public WaitReactable(TravelTubeEntrance entrance)
-			: base(entrance.gameObject, Db.Get().ChoreTypes.TravelTubeEntrance, 2, 1, false)
+			: base(entrance.gameObject, "WaitReactable", Db.Get().ChoreTypes.TravelTubeEntrance, 2, 1, false, 0f, 0f, float.PositiveInfinity)
 		{
 			this.entrance = entrance;
 			this.preventChoreInterruption = false;

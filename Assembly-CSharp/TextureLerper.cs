@@ -42,7 +42,6 @@ public class TextureLerper
 		int mask = LayerMask.GetMask(new string[] { "RTT" });
 		this.cameraGO = new GameObject();
 		this.cameraGO.name = "TextureLerper_" + name;
-		this.cameraGO.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Lerpers).transform;
 		this.textureCam = this.cameraGO.AddComponent<Camera>();
 		this.textureCam.transform.SetPosition(new Vector3((float)TextureLerper.offsetCounter + 0.5f, 0.5f, 0f));
 		this.textureCam.clearFlags = CameraClearFlags.Nothing;

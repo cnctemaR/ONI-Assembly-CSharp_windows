@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class BuildQueue : KButtonMenu
@@ -34,6 +35,7 @@ public class BuildQueue : KButtonMenu
 
 	private void Update()
 	{
+		this.allocatedMaterials.Clear();
 		int i = 0;
 		if (this.fabricator != null)
 		{
@@ -42,6 +44,36 @@ public class BuildQueue : KButtonMenu
 			{
 				BuildQueueButton componentInChildren = this.buttonObjects[i].GetComponentInChildren<BuildQueueButton>();
 				componentInChildren.SetOrder(buildQueueOrder);
+				bool flag = true;
+				string text = string.Empty;
+				foreach (KeyValuePair<Tag, float> keyValuePair in buildQueueOrder.GetMaterialRequirements())
+				{
+					float num = keyValuePair.Value - WorldInventory.Instance.GetAmount(keyValuePair.Key);
+					for (int j = 0; j < this.availableMaterialStorages.Count; j++)
+					{
+						num -= this.availableMaterialStorages[j].GetAmountAvailable(keyValuePair.Key);
+					}
+					if (this.allocatedMaterials.ContainsKey(keyValuePair.Key))
+					{
+						num += this.allocatedMaterials[keyValuePair.Key];
+					}
+					if (num > 0f)
+					{
+						flag = false;
+						text += string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.QUEUED_MISSING_INGREDIENTS_TOOLTIP, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), keyValuePair.Key.ProperName());
+					}
+					if (this.allocatedMaterials.ContainsKey(keyValuePair.Key))
+					{
+						Dictionary<Tag, float> dictionary;
+						Tag key;
+						(dictionary = this.allocatedMaterials)[key = keyValuePair.Key] = dictionary[key] + keyValuePair.Value;
+					}
+					else
+					{
+						this.allocatedMaterials.Add(keyValuePair.Key, keyValuePair.Value);
+					}
+				}
+				componentInChildren.SetAvailability(buildQueueOrder.Result.ProperName(), flag, text);
 				i++;
 				if (i >= 6)
 				{
@@ -75,12 +107,21 @@ public class BuildQueue : KButtonMenu
 
 	public void SetFabricator(IHasBuildQueue fabricator)
 	{
+		this.availableMaterialStorages.Clear();
 		this.fabricator = fabricator;
 		if (!base.gameObject.activeInHierarchy)
 		{
 			base.gameObject.SetActive(true);
 		}
 		this.RefreshButtons();
+	}
+
+	public void AddAvailableMaterialStorage(Storage storage)
+	{
+		if (!this.availableMaterialStorages.Contains(storage))
+		{
+			this.availableMaterialStorages.Add(storage);
+		}
 	}
 
 	protected override void OnDeactivate()
@@ -98,4 +139,8 @@ public class BuildQueue : KButtonMenu
 	private IHasBuildQueue fabricator;
 
 	private int prevLength;
+
+	private Dictionary<Tag, float> allocatedMaterials = new Dictionary<Tag, float>();
+
+	public List<Storage> availableMaterialStorages = new List<Storage>();
 }

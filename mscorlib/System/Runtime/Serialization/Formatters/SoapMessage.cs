@@ -8,30 +8,6 @@ namespace System.Runtime.Serialization.Formatters
 	[Serializable]
 	public class SoapMessage : ISoapMessage
 	{
-		public Header[] Headers
-		{
-			get
-			{
-				return this.headers;
-			}
-			set
-			{
-				this.headers = value;
-			}
-		}
-
-		public string MethodName
-		{
-			get
-			{
-				return this.methodName;
-			}
-			set
-			{
-				this.methodName = value;
-			}
-		}
-
 		public string[] ParamNames
 		{
 			get
@@ -41,18 +17,6 @@ namespace System.Runtime.Serialization.Formatters
 			set
 			{
 				this.paramNames = value;
-			}
-		}
-
-		public Type[] ParamTypes
-		{
-			get
-			{
-				return this.paramTypes;
-			}
-			set
-			{
-				this.paramTypes = value;
 			}
 		}
 
@@ -68,6 +32,30 @@ namespace System.Runtime.Serialization.Formatters
 			}
 		}
 
+		public Type[] ParamTypes
+		{
+			get
+			{
+				return this.paramTypes;
+			}
+			set
+			{
+				this.paramTypes = value;
+			}
+		}
+
+		public string MethodName
+		{
+			get
+			{
+				return this.methodName;
+			}
+			set
+			{
+				this.methodName = value;
+			}
+		}
+
 		public string XmlNameSpace
 		{
 			get
@@ -80,16 +68,28 @@ namespace System.Runtime.Serialization.Formatters
 			}
 		}
 
-		private Header[] headers;
+		public Header[] Headers
+		{
+			get
+			{
+				return this.headers;
+			}
+			set
+			{
+				this.headers = value;
+			}
+		}
 
-		private string methodName;
+		internal string[] paramNames;
 
-		private string[] paramNames;
+		internal object[] paramValues;
 
-		private Type[] paramTypes;
+		internal Type[] paramTypes;
 
-		private object[] paramValues;
+		internal string methodName;
 
-		private string xmlNameSpace;
+		internal string xmlNameSpace;
+
+		internal Header[] headers;
 	}
 }

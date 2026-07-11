@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class VisibilityTester : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		VisibilityTester.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		VisibilityTester.Instance = this;

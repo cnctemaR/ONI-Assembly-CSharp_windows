@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class TopLeftControlScreen : KScreen
 {
+	public static void DestroyInstance()
+	{
+		TopLeftControlScreen.Instance = null;
+	}
+
 	protected override void OnActivate()
 	{
 		base.OnActivate();

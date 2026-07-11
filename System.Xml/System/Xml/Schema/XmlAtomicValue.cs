@@ -1,140 +1,68 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Xml.XPath;
 
 namespace System.Xml.Schema
 {
-	[MonoTODO]
 	public sealed class XmlAtomicValue : XPathItem, ICloneable
 	{
-		internal XmlAtomicValue(bool value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(DateTime value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(decimal value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(double value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(int value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(long value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(float value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(string value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		internal XmlAtomicValue(object value, XmlSchemaType xmlType)
-		{
-			this.Init(value, xmlType);
-		}
-
-		object ICloneable.Clone()
-		{
-			return this.Clone();
-		}
-
-		private void Init(bool value, XmlSchemaType xmlType)
+		internal XmlAtomicValue(XmlSchemaType xmlType, bool value)
 		{
 			if (xmlType == null)
 			{
 				throw new ArgumentNullException("xmlType");
 			}
-			this.xmlTypeCode = XmlTypeCode.Boolean;
-			this.booleanValue = value;
-			this.schemaType = xmlType;
+			this.xmlType = xmlType;
+			this.clrType = TypeCode.Boolean;
+			this.unionVal.boolVal = value;
 		}
 
-		private void Init(DateTime value, XmlSchemaType xmlType)
+		internal XmlAtomicValue(XmlSchemaType xmlType, DateTime value)
 		{
 			if (xmlType == null)
 			{
 				throw new ArgumentNullException("xmlType");
 			}
-			this.xmlTypeCode = XmlTypeCode.DateTime;
-			this.dateTimeValue = value;
-			this.schemaType = xmlType;
+			this.xmlType = xmlType;
+			this.clrType = TypeCode.DateTime;
+			this.unionVal.dtVal = value;
 		}
 
-		private void Init(decimal value, XmlSchemaType xmlType)
+		internal XmlAtomicValue(XmlSchemaType xmlType, double value)
 		{
 			if (xmlType == null)
 			{
 				throw new ArgumentNullException("xmlType");
 			}
-			this.xmlTypeCode = XmlTypeCode.Decimal;
-			this.decimalValue = value;
-			this.schemaType = xmlType;
+			this.xmlType = xmlType;
+			this.clrType = TypeCode.Double;
+			this.unionVal.dblVal = value;
 		}
 
-		private void Init(double value, XmlSchemaType xmlType)
+		internal XmlAtomicValue(XmlSchemaType xmlType, int value)
 		{
 			if (xmlType == null)
 			{
 				throw new ArgumentNullException("xmlType");
 			}
-			this.xmlTypeCode = XmlTypeCode.Double;
-			this.doubleValue = value;
-			this.schemaType = xmlType;
+			this.xmlType = xmlType;
+			this.clrType = TypeCode.Int32;
+			this.unionVal.i32Val = value;
 		}
 
-		private void Init(int value, XmlSchemaType xmlType)
+		internal XmlAtomicValue(XmlSchemaType xmlType, long value)
 		{
 			if (xmlType == null)
 			{
 				throw new ArgumentNullException("xmlType");
 			}
-			this.xmlTypeCode = XmlTypeCode.Int;
-			this.intValue = value;
-			this.schemaType = xmlType;
+			this.xmlType = xmlType;
+			this.clrType = TypeCode.Int64;
+			this.unionVal.i64Val = value;
 		}
 
-		private void Init(long value, XmlSchemaType xmlType)
-		{
-			if (xmlType == null)
-			{
-				throw new ArgumentNullException("xmlType");
-			}
-			this.xmlTypeCode = XmlTypeCode.Long;
-			this.longValue = value;
-			this.schemaType = xmlType;
-		}
-
-		private void Init(float value, XmlSchemaType xmlType)
-		{
-			if (xmlType == null)
-			{
-				throw new ArgumentNullException("xmlType");
-			}
-			this.xmlTypeCode = XmlTypeCode.Float;
-			this.floatValue = value;
-			this.schemaType = xmlType;
-		}
-
-		private void Init(string value, XmlSchemaType xmlType)
+		internal XmlAtomicValue(XmlSchemaType xmlType, string value)
 		{
 			if (value == null)
 			{
@@ -144,12 +72,11 @@ namespace System.Xml.Schema
 			{
 				throw new ArgumentNullException("xmlType");
 			}
-			this.xmlTypeCode = XmlTypeCode.String;
-			this.stringValue = value;
-			this.schemaType = xmlType;
+			this.xmlType = xmlType;
+			this.objVal = value;
 		}
 
-		private void Init(object value, XmlSchemaType xmlType)
+		internal XmlAtomicValue(XmlSchemaType xmlType, string value, IXmlNamespaceResolver nsResolver)
 		{
 			if (value == null)
 			{
@@ -159,152 +86,56 @@ namespace System.Xml.Schema
 			{
 				throw new ArgumentNullException("xmlType");
 			}
-			switch (Type.GetTypeCode(value.GetType()))
+			this.xmlType = xmlType;
+			this.objVal = value;
+			if (nsResolver != null && (this.xmlType.TypeCode == XmlTypeCode.QName || this.xmlType.TypeCode == XmlTypeCode.Notation))
 			{
-			case TypeCode.Boolean:
-				this.Init((bool)value, xmlType);
-				return;
-			case TypeCode.Int16:
-			case TypeCode.UInt16:
-			case TypeCode.Int32:
-				this.Init((int)value, xmlType);
-				return;
-			case TypeCode.UInt32:
-			case TypeCode.Int64:
-				this.Init((long)value, xmlType);
-				return;
-			case TypeCode.Single:
-				this.Init((float)value, xmlType);
-				return;
-			case TypeCode.Double:
-				this.Init((double)value, xmlType);
-				return;
-			case TypeCode.Decimal:
-				this.Init((decimal)value, xmlType);
-				return;
-			case TypeCode.DateTime:
-				this.Init((DateTime)value, xmlType);
-				return;
-			case TypeCode.String:
-				this.Init((string)value, xmlType);
-				return;
+				string prefixFromQName = this.GetPrefixFromQName(value);
+				this.nsPrefix = new XmlAtomicValue.NamespacePrefixForQName(prefixFromQName, nsResolver.LookupNamespace(prefixFromQName));
 			}
-			ICollection collection = value as ICollection;
-			if (collection != null && collection.Count == 1)
+		}
+
+		internal XmlAtomicValue(XmlSchemaType xmlType, object value)
+		{
+			if (value == null)
 			{
-				if (collection is IList)
-				{
-					this.Init(((IList)collection)[0], xmlType);
-				}
-				else
-				{
-					IEnumerator enumerator = collection.GetEnumerator();
-					if (!enumerator.MoveNext())
-					{
-						return;
-					}
-					if (enumerator.Current is DictionaryEntry)
-					{
-						DictionaryEntry dictionaryEntry = (DictionaryEntry)enumerator.Current;
-						this.Init(dictionaryEntry.Value, xmlType);
-					}
-					else
-					{
-						this.Init(enumerator.Current, xmlType);
-					}
-				}
-				return;
+				throw new ArgumentNullException("value");
 			}
-			XmlAtomicValue xmlAtomicValue = value as XmlAtomicValue;
-			if (xmlAtomicValue != null)
+			if (xmlType == null)
 			{
-				XmlTypeCode xmlTypeCode = xmlAtomicValue.xmlTypeCode;
-				switch (xmlTypeCode)
-				{
-				case XmlTypeCode.String:
-					this.Init(xmlAtomicValue.stringValue, xmlType);
-					return;
-				case XmlTypeCode.Boolean:
-					this.Init(xmlAtomicValue.booleanValue, xmlType);
-					return;
-				case XmlTypeCode.Decimal:
-					this.Init(xmlAtomicValue.decimalValue, xmlType);
-					return;
-				case XmlTypeCode.Float:
-					this.Init(xmlAtomicValue.floatValue, xmlType);
-					return;
-				case XmlTypeCode.Double:
-					this.Init(xmlAtomicValue.doubleValue, xmlType);
-					return;
-				default:
-					if (xmlTypeCode == XmlTypeCode.Long)
-					{
-						this.Init(xmlAtomicValue.longValue, xmlType);
-						return;
-					}
-					if (xmlTypeCode == XmlTypeCode.Int)
-					{
-						this.Init(xmlAtomicValue.intValue, xmlType);
-						return;
-					}
-					this.objectValue = xmlAtomicValue.objectValue;
-					break;
-				case XmlTypeCode.DateTime:
-					this.Init(xmlAtomicValue.dateTimeValue, xmlType);
-					return;
-				}
+				throw new ArgumentNullException("xmlType");
 			}
-			this.objectValue = value;
-			this.schemaType = xmlType;
+			this.xmlType = xmlType;
+			this.objVal = value;
+		}
+
+		internal XmlAtomicValue(XmlSchemaType xmlType, object value, IXmlNamespaceResolver nsResolver)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (xmlType == null)
+			{
+				throw new ArgumentNullException("xmlType");
+			}
+			this.xmlType = xmlType;
+			this.objVal = value;
+			if (nsResolver != null && (this.xmlType.TypeCode == XmlTypeCode.QName || this.xmlType.TypeCode == XmlTypeCode.Notation))
+			{
+				string @namespace = (this.objVal as XmlQualifiedName).Namespace;
+				this.nsPrefix = new XmlAtomicValue.NamespacePrefixForQName(nsResolver.LookupPrefix(@namespace), @namespace);
+			}
 		}
 
 		public XmlAtomicValue Clone()
 		{
-			return new XmlAtomicValue(this, this.schemaType);
+			return this;
 		}
 
-		public override object ValueAs(Type type, IXmlNamespaceResolver nsResolver)
+		object ICloneable.Clone()
 		{
-			XmlTypeCode xmlTypeCode = XmlAtomicValue.XmlTypeCodeFromRuntimeType(type, false);
-			switch (xmlTypeCode)
-			{
-			case XmlTypeCode.Long:
-			case XmlTypeCode.UnsignedInt:
-				return this.ValueAsLong;
-			case XmlTypeCode.Int:
-			case XmlTypeCode.Short:
-			case XmlTypeCode.UnsignedShort:
-				return this.ValueAsInt;
-			default:
-				switch (xmlTypeCode)
-				{
-				case XmlTypeCode.String:
-					return this.Value;
-				case XmlTypeCode.Boolean:
-					return this.ValueAsBoolean;
-				default:
-					if (xmlTypeCode == XmlTypeCode.Item)
-					{
-						return this.TypedValue;
-					}
-					if (xmlTypeCode != XmlTypeCode.QName)
-					{
-						throw new NotImplementedException();
-					}
-					return XmlQualifiedName.Parse(this.Value, nsResolver, true);
-				case XmlTypeCode.Float:
-				case XmlTypeCode.Double:
-					return this.ValueAsDouble;
-				case XmlTypeCode.DateTime:
-					return this.ValueAsDateTime;
-				}
-				break;
-			}
-		}
-
-		public override string ToString()
-		{
-			return this.Value;
+			return this;
 		}
 
 		public override bool IsNode
@@ -315,353 +146,11 @@ namespace System.Xml.Schema
 			}
 		}
 
-		internal XmlTypeCode ResolvedTypeCode
+		public override XmlSchemaType XmlType
 		{
 			get
 			{
-				if (this.schemaType != XmlSchemaComplexType.AnyType)
-				{
-					return this.schemaType.TypeCode;
-				}
-				return this.xmlTypeCode;
-			}
-		}
-
-		public override object TypedValue
-		{
-			get
-			{
-				XmlTypeCode resolvedTypeCode = this.ResolvedTypeCode;
-				switch (resolvedTypeCode)
-				{
-				case XmlTypeCode.String:
-					return this.Value;
-				case XmlTypeCode.Boolean:
-					return this.ValueAsBoolean;
-				default:
-					if (resolvedTypeCode == XmlTypeCode.Long)
-					{
-						return this.ValueAsLong;
-					}
-					if (resolvedTypeCode != XmlTypeCode.Int)
-					{
-						return this.objectValue;
-					}
-					return this.ValueAsInt;
-				case XmlTypeCode.Float:
-				case XmlTypeCode.Double:
-					return this.ValueAsDouble;
-				case XmlTypeCode.DateTime:
-					return this.ValueAsDateTime;
-				}
-			}
-		}
-
-		public override string Value
-		{
-			get
-			{
-				XmlTypeCode resolvedTypeCode = this.ResolvedTypeCode;
-				switch (resolvedTypeCode)
-				{
-				case XmlTypeCode.NonPositiveInteger:
-				case XmlTypeCode.NegativeInteger:
-				case XmlTypeCode.Long:
-				case XmlTypeCode.NonNegativeInteger:
-				case XmlTypeCode.UnsignedLong:
-				case XmlTypeCode.PositiveInteger:
-					this.stringValue = XQueryConvert.IntegerToString(this.ValueAsLong);
-					break;
-				case XmlTypeCode.Int:
-				case XmlTypeCode.Short:
-				case XmlTypeCode.Byte:
-				case XmlTypeCode.UnsignedInt:
-				case XmlTypeCode.UnsignedShort:
-				case XmlTypeCode.UnsignedByte:
-					this.stringValue = XQueryConvert.IntToString(this.ValueAsInt);
-					break;
-				default:
-				{
-					switch (resolvedTypeCode)
-					{
-					case XmlTypeCode.AnyAtomicType:
-						break;
-					default:
-						if (resolvedTypeCode != XmlTypeCode.None && resolvedTypeCode != XmlTypeCode.Item)
-						{
-							goto IL_0218;
-						}
-						break;
-					case XmlTypeCode.String:
-						return this.stringValue;
-					case XmlTypeCode.Boolean:
-						this.stringValue = XQueryConvert.BooleanToString(this.ValueAsBoolean);
-						goto IL_0218;
-					case XmlTypeCode.Float:
-					case XmlTypeCode.Double:
-						this.stringValue = XQueryConvert.DoubleToString(this.ValueAsDouble);
-						goto IL_0218;
-					case XmlTypeCode.DateTime:
-						this.stringValue = XQueryConvert.DateTimeToString(this.ValueAsDateTime);
-						goto IL_0218;
-					}
-					XmlTypeCode xmlTypeCode = XmlAtomicValue.XmlTypeCodeFromRuntimeType(this.objectValue.GetType(), false);
-					switch (xmlTypeCode)
-					{
-					case XmlTypeCode.String:
-						this.stringValue = (string)this.objectValue;
-						break;
-					case XmlTypeCode.Boolean:
-						this.stringValue = XQueryConvert.BooleanToString((bool)this.objectValue);
-						break;
-					case XmlTypeCode.Decimal:
-						this.stringValue = XQueryConvert.DecimalToString((decimal)this.objectValue);
-						break;
-					case XmlTypeCode.Float:
-						this.stringValue = XQueryConvert.FloatToString((float)this.objectValue);
-						break;
-					case XmlTypeCode.Double:
-						this.stringValue = XQueryConvert.DoubleToString((double)this.objectValue);
-						break;
-					default:
-						if (xmlTypeCode != XmlTypeCode.Long)
-						{
-							if (xmlTypeCode == XmlTypeCode.Int)
-							{
-								this.stringValue = XQueryConvert.IntToString((int)this.objectValue);
-							}
-						}
-						else
-						{
-							this.stringValue = XQueryConvert.IntegerToString((long)this.objectValue);
-						}
-						break;
-					case XmlTypeCode.DateTime:
-						this.stringValue = XQueryConvert.DateTimeToString((DateTime)this.objectValue);
-						break;
-					}
-					break;
-				}
-				}
-				IL_0218:
-				if (this.stringValue != null)
-				{
-					return this.stringValue;
-				}
-				if (this.objectValue != null)
-				{
-					throw new InvalidCastException(string.Format("Conversion from runtime type {0} to {1} is not supported", this.objectValue.GetType(), XmlTypeCode.String));
-				}
-				throw new InvalidCastException(string.Format("Conversion from schema type {0} (type code {1}, resolved type code {2}) to {3} is not supported.", new object[]
-				{
-					this.schemaType.QualifiedName,
-					this.xmlTypeCode,
-					this.ResolvedTypeCode,
-					XmlTypeCode.String
-				}));
-			}
-		}
-
-		public override bool ValueAsBoolean
-		{
-			get
-			{
-				XmlTypeCode xmlTypeCode = this.xmlTypeCode;
-				switch (xmlTypeCode)
-				{
-				case XmlTypeCode.AnyAtomicType:
-					break;
-				default:
-					if (xmlTypeCode != XmlTypeCode.None && xmlTypeCode != XmlTypeCode.Item)
-					{
-						if (xmlTypeCode == XmlTypeCode.Long)
-						{
-							return XQueryConvert.IntegerToBoolean(this.longValue);
-						}
-						if (xmlTypeCode != XmlTypeCode.Int)
-						{
-							goto IL_00BE;
-						}
-						return XQueryConvert.IntToBoolean(this.intValue);
-					}
-					break;
-				case XmlTypeCode.String:
-					return XQueryConvert.StringToBoolean(this.stringValue);
-				case XmlTypeCode.Boolean:
-					return this.booleanValue;
-				case XmlTypeCode.Decimal:
-					return XQueryConvert.DecimalToBoolean(this.decimalValue);
-				case XmlTypeCode.Float:
-					return XQueryConvert.FloatToBoolean(this.floatValue);
-				case XmlTypeCode.Double:
-					return XQueryConvert.DoubleToBoolean(this.doubleValue);
-				}
-				if (this.objectValue is bool)
-				{
-					return (bool)this.objectValue;
-				}
-				IL_00BE:
-				throw new InvalidCastException(string.Format("Conversion from {0} to {1} is not supported", this.schemaType.QualifiedName, XmlSchemaSimpleType.XsBoolean.QualifiedName));
-			}
-		}
-
-		public override DateTime ValueAsDateTime
-		{
-			get
-			{
-				XmlTypeCode xmlTypeCode = this.xmlTypeCode;
-				switch (xmlTypeCode)
-				{
-				case XmlTypeCode.AnyAtomicType:
-					break;
-				default:
-					if (xmlTypeCode != XmlTypeCode.None && xmlTypeCode != XmlTypeCode.Item)
-					{
-						if (xmlTypeCode != XmlTypeCode.DateTime)
-						{
-							goto IL_006A;
-						}
-						return this.dateTimeValue;
-					}
-					break;
-				case XmlTypeCode.String:
-					return XQueryConvert.StringToDateTime(this.stringValue);
-				}
-				if (this.objectValue is DateTime)
-				{
-					return (DateTime)this.objectValue;
-				}
-				IL_006A:
-				throw new InvalidCastException(string.Format("Conversion from {0} to {1} is not supported", this.schemaType.QualifiedName, XmlSchemaSimpleType.XsDateTime.QualifiedName));
-			}
-		}
-
-		public override double ValueAsDouble
-		{
-			get
-			{
-				XmlTypeCode xmlTypeCode = this.xmlTypeCode;
-				switch (xmlTypeCode)
-				{
-				case XmlTypeCode.AnyAtomicType:
-					break;
-				default:
-					if (xmlTypeCode != XmlTypeCode.None && xmlTypeCode != XmlTypeCode.Item)
-					{
-						if (xmlTypeCode == XmlTypeCode.Long)
-						{
-							return XQueryConvert.IntegerToDouble(this.longValue);
-						}
-						if (xmlTypeCode != XmlTypeCode.Int)
-						{
-							goto IL_00BE;
-						}
-						return XQueryConvert.IntToDouble(this.intValue);
-					}
-					break;
-				case XmlTypeCode.String:
-					return XQueryConvert.StringToDouble(this.stringValue);
-				case XmlTypeCode.Boolean:
-					return XQueryConvert.BooleanToDouble(this.booleanValue);
-				case XmlTypeCode.Decimal:
-					return XQueryConvert.DecimalToDouble(this.decimalValue);
-				case XmlTypeCode.Float:
-					return XQueryConvert.FloatToDouble(this.floatValue);
-				case XmlTypeCode.Double:
-					return this.doubleValue;
-				}
-				if (this.objectValue is double)
-				{
-					return (double)this.objectValue;
-				}
-				IL_00BE:
-				throw new InvalidCastException(string.Format("Conversion from {0} to {1} is not supported", this.schemaType.QualifiedName, XmlSchemaSimpleType.XsDouble.QualifiedName));
-			}
-		}
-
-		public override int ValueAsInt
-		{
-			get
-			{
-				XmlTypeCode xmlTypeCode = this.xmlTypeCode;
-				switch (xmlTypeCode)
-				{
-				case XmlTypeCode.AnyAtomicType:
-					break;
-				default:
-					if (xmlTypeCode != XmlTypeCode.None && xmlTypeCode != XmlTypeCode.Item)
-					{
-						if (xmlTypeCode == XmlTypeCode.Long)
-						{
-							return XQueryConvert.IntegerToInt(this.longValue);
-						}
-						if (xmlTypeCode != XmlTypeCode.Int)
-						{
-							goto IL_00BE;
-						}
-						return this.intValue;
-					}
-					break;
-				case XmlTypeCode.String:
-					return XQueryConvert.StringToInt(this.stringValue);
-				case XmlTypeCode.Boolean:
-					return XQueryConvert.BooleanToInt(this.booleanValue);
-				case XmlTypeCode.Decimal:
-					return XQueryConvert.DecimalToInt(this.decimalValue);
-				case XmlTypeCode.Float:
-					return XQueryConvert.FloatToInt(this.floatValue);
-				case XmlTypeCode.Double:
-					return XQueryConvert.DoubleToInt(this.doubleValue);
-				}
-				if (this.objectValue is int)
-				{
-					return (int)this.objectValue;
-				}
-				IL_00BE:
-				throw new InvalidCastException(string.Format("Conversion from {0} to {1} is not supported", this.schemaType.QualifiedName, XmlSchemaSimpleType.XsInt.QualifiedName));
-			}
-		}
-
-		public override long ValueAsLong
-		{
-			get
-			{
-				XmlTypeCode xmlTypeCode = this.xmlTypeCode;
-				switch (xmlTypeCode)
-				{
-				case XmlTypeCode.AnyAtomicType:
-					break;
-				default:
-					if (xmlTypeCode != XmlTypeCode.None && xmlTypeCode != XmlTypeCode.Item)
-					{
-						if (xmlTypeCode == XmlTypeCode.Long)
-						{
-							return this.longValue;
-						}
-						if (xmlTypeCode != XmlTypeCode.Int)
-						{
-							goto IL_00C0;
-						}
-						return (long)XQueryConvert.IntegerToInt((long)this.intValue);
-					}
-					break;
-				case XmlTypeCode.String:
-					return XQueryConvert.StringToInteger(this.stringValue);
-				case XmlTypeCode.Boolean:
-					return XQueryConvert.BooleanToInteger(this.booleanValue);
-				case XmlTypeCode.Decimal:
-					return XQueryConvert.DecimalToInteger(this.decimalValue);
-				case XmlTypeCode.Float:
-					return XQueryConvert.FloatToInteger(this.floatValue);
-				case XmlTypeCode.Double:
-					return XQueryConvert.DoubleToInteger(this.doubleValue);
-				}
-				if (this.objectValue is long)
-				{
-					return (long)this.objectValue;
-				}
-				IL_00C0:
-				throw new InvalidCastException(string.Format("Conversion from {0} to {1} is not supported", this.schemaType.QualifiedName, XmlSchemaSimpleType.XsLong.QualifiedName));
+				return this.xmlType;
 			}
 		}
 
@@ -669,114 +158,408 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.schemaType.Datatype.ValueType;
+				return this.xmlType.Datatype.ValueType;
 			}
 		}
 
-		public override XmlSchemaType XmlType
+		public override object TypedValue
 		{
 			get
 			{
-				return this.schemaType;
-			}
-		}
-
-		internal static Type RuntimeTypeFromXmlTypeCode(XmlTypeCode typeCode)
-		{
-			switch (typeCode)
-			{
-			case XmlTypeCode.Long:
-				return typeof(long);
-			case XmlTypeCode.Int:
-				return typeof(int);
-			case XmlTypeCode.Short:
-				return typeof(short);
-			default:
-				switch (typeCode)
+				XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+				if (this.objVal == null)
 				{
-				case XmlTypeCode.String:
-					return typeof(string);
-				case XmlTypeCode.Boolean:
-					return typeof(bool);
-				case XmlTypeCode.Decimal:
-					return typeof(decimal);
-				case XmlTypeCode.Float:
-					return typeof(float);
-				case XmlTypeCode.Double:
-					return typeof(double);
-				default:
-					if (typeCode != XmlTypeCode.Item)
+					TypeCode typeCode = this.clrType;
+					if (typeCode <= TypeCode.Int32)
 					{
-						throw new NotSupportedException(string.Format("XQuery internal error: Cannot infer Runtime Type from XmlTypeCode {0}.", typeCode));
+						if (typeCode == TypeCode.Boolean)
+						{
+							return valueConverter.ChangeType(this.unionVal.boolVal, this.ValueType);
+						}
+						if (typeCode == TypeCode.Int32)
+						{
+							return valueConverter.ChangeType(this.unionVal.i32Val, this.ValueType);
+						}
 					}
-					return typeof(object);
-				case XmlTypeCode.DateTime:
-					return typeof(DateTime);
+					else
+					{
+						if (typeCode == TypeCode.Int64)
+						{
+							return valueConverter.ChangeType(this.unionVal.i64Val, this.ValueType);
+						}
+						if (typeCode == TypeCode.Double)
+						{
+							return valueConverter.ChangeType(this.unionVal.dblVal, this.ValueType);
+						}
+						if (typeCode == TypeCode.DateTime)
+						{
+							return valueConverter.ChangeType(this.unionVal.dtVal, this.ValueType);
+						}
+					}
 				}
-				break;
-			case XmlTypeCode.UnsignedInt:
-				return typeof(uint);
-			case XmlTypeCode.UnsignedShort:
-				return typeof(ushort);
+				return valueConverter.ChangeType(this.objVal, this.ValueType, this.nsPrefix);
 			}
 		}
 
-		internal static XmlTypeCode XmlTypeCodeFromRuntimeType(Type cliType, bool raiseError)
+		public override bool ValueAsBoolean
 		{
-			switch (Type.GetTypeCode(cliType))
+			get
 			{
-			case TypeCode.Object:
-				return XmlTypeCode.Item;
-			case TypeCode.Boolean:
-				return XmlTypeCode.Boolean;
-			case TypeCode.Int16:
-				return XmlTypeCode.Short;
-			case TypeCode.UInt16:
-				return XmlTypeCode.UnsignedShort;
-			case TypeCode.Int32:
-				return XmlTypeCode.Int;
-			case TypeCode.UInt32:
-				return XmlTypeCode.UnsignedInt;
-			case TypeCode.Int64:
-				return XmlTypeCode.Long;
-			case TypeCode.Single:
-				return XmlTypeCode.Float;
-			case TypeCode.Double:
-				return XmlTypeCode.Double;
-			case TypeCode.Decimal:
-				return XmlTypeCode.Decimal;
-			case TypeCode.DateTime:
-				return XmlTypeCode.DateTime;
-			case TypeCode.String:
-				return XmlTypeCode.String;
+				XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+				if (this.objVal == null)
+				{
+					TypeCode typeCode = this.clrType;
+					if (typeCode <= TypeCode.Int32)
+					{
+						if (typeCode == TypeCode.Boolean)
+						{
+							return this.unionVal.boolVal;
+						}
+						if (typeCode == TypeCode.Int32)
+						{
+							return valueConverter.ToBoolean(this.unionVal.i32Val);
+						}
+					}
+					else
+					{
+						if (typeCode == TypeCode.Int64)
+						{
+							return valueConverter.ToBoolean(this.unionVal.i64Val);
+						}
+						if (typeCode == TypeCode.Double)
+						{
+							return valueConverter.ToBoolean(this.unionVal.dblVal);
+						}
+						if (typeCode == TypeCode.DateTime)
+						{
+							return valueConverter.ToBoolean(this.unionVal.dtVal);
+						}
+					}
+				}
+				return valueConverter.ToBoolean(this.objVal);
 			}
-			if (raiseError)
-			{
-				throw new NotSupportedException(string.Format("XQuery internal error: Cannot infer XmlTypeCode from Runtime Type {0}", cliType));
-			}
-			return XmlTypeCode.None;
 		}
 
-		private bool booleanValue;
+		public override DateTime ValueAsDateTime
+		{
+			get
+			{
+				XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+				if (this.objVal == null)
+				{
+					TypeCode typeCode = this.clrType;
+					if (typeCode <= TypeCode.Int32)
+					{
+						if (typeCode == TypeCode.Boolean)
+						{
+							return valueConverter.ToDateTime(this.unionVal.boolVal);
+						}
+						if (typeCode == TypeCode.Int32)
+						{
+							return valueConverter.ToDateTime(this.unionVal.i32Val);
+						}
+					}
+					else
+					{
+						if (typeCode == TypeCode.Int64)
+						{
+							return valueConverter.ToDateTime(this.unionVal.i64Val);
+						}
+						if (typeCode == TypeCode.Double)
+						{
+							return valueConverter.ToDateTime(this.unionVal.dblVal);
+						}
+						if (typeCode == TypeCode.DateTime)
+						{
+							return this.unionVal.dtVal;
+						}
+					}
+				}
+				return valueConverter.ToDateTime(this.objVal);
+			}
+		}
 
-		private DateTime dateTimeValue;
+		public override double ValueAsDouble
+		{
+			get
+			{
+				XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+				if (this.objVal == null)
+				{
+					TypeCode typeCode = this.clrType;
+					if (typeCode <= TypeCode.Int32)
+					{
+						if (typeCode == TypeCode.Boolean)
+						{
+							return valueConverter.ToDouble(this.unionVal.boolVal);
+						}
+						if (typeCode == TypeCode.Int32)
+						{
+							return valueConverter.ToDouble(this.unionVal.i32Val);
+						}
+					}
+					else
+					{
+						if (typeCode == TypeCode.Int64)
+						{
+							return valueConverter.ToDouble(this.unionVal.i64Val);
+						}
+						if (typeCode == TypeCode.Double)
+						{
+							return this.unionVal.dblVal;
+						}
+						if (typeCode == TypeCode.DateTime)
+						{
+							return valueConverter.ToDouble(this.unionVal.dtVal);
+						}
+					}
+				}
+				return valueConverter.ToDouble(this.objVal);
+			}
+		}
 
-		private decimal decimalValue;
+		public override int ValueAsInt
+		{
+			get
+			{
+				XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+				if (this.objVal == null)
+				{
+					TypeCode typeCode = this.clrType;
+					if (typeCode <= TypeCode.Int32)
+					{
+						if (typeCode == TypeCode.Boolean)
+						{
+							return valueConverter.ToInt32(this.unionVal.boolVal);
+						}
+						if (typeCode == TypeCode.Int32)
+						{
+							return this.unionVal.i32Val;
+						}
+					}
+					else
+					{
+						if (typeCode == TypeCode.Int64)
+						{
+							return valueConverter.ToInt32(this.unionVal.i64Val);
+						}
+						if (typeCode == TypeCode.Double)
+						{
+							return valueConverter.ToInt32(this.unionVal.dblVal);
+						}
+						if (typeCode == TypeCode.DateTime)
+						{
+							return valueConverter.ToInt32(this.unionVal.dtVal);
+						}
+					}
+				}
+				return valueConverter.ToInt32(this.objVal);
+			}
+		}
 
-		private double doubleValue;
+		public override long ValueAsLong
+		{
+			get
+			{
+				XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+				if (this.objVal == null)
+				{
+					TypeCode typeCode = this.clrType;
+					if (typeCode <= TypeCode.Int32)
+					{
+						if (typeCode == TypeCode.Boolean)
+						{
+							return valueConverter.ToInt64(this.unionVal.boolVal);
+						}
+						if (typeCode == TypeCode.Int32)
+						{
+							return valueConverter.ToInt64(this.unionVal.i32Val);
+						}
+					}
+					else
+					{
+						if (typeCode == TypeCode.Int64)
+						{
+							return this.unionVal.i64Val;
+						}
+						if (typeCode == TypeCode.Double)
+						{
+							return valueConverter.ToInt64(this.unionVal.dblVal);
+						}
+						if (typeCode == TypeCode.DateTime)
+						{
+							return valueConverter.ToInt64(this.unionVal.dtVal);
+						}
+					}
+				}
+				return valueConverter.ToInt64(this.objVal);
+			}
+		}
 
-		private int intValue;
+		public override object ValueAs(Type type, IXmlNamespaceResolver nsResolver)
+		{
+			XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+			if (type == typeof(XPathItem) || type == typeof(XmlAtomicValue))
+			{
+				return this;
+			}
+			if (this.objVal == null)
+			{
+				TypeCode typeCode = this.clrType;
+				if (typeCode <= TypeCode.Int32)
+				{
+					if (typeCode == TypeCode.Boolean)
+					{
+						return valueConverter.ChangeType(this.unionVal.boolVal, type);
+					}
+					if (typeCode == TypeCode.Int32)
+					{
+						return valueConverter.ChangeType(this.unionVal.i32Val, type);
+					}
+				}
+				else
+				{
+					if (typeCode == TypeCode.Int64)
+					{
+						return valueConverter.ChangeType(this.unionVal.i64Val, type);
+					}
+					if (typeCode == TypeCode.Double)
+					{
+						return valueConverter.ChangeType(this.unionVal.dblVal, type);
+					}
+					if (typeCode == TypeCode.DateTime)
+					{
+						return valueConverter.ChangeType(this.unionVal.dtVal, type);
+					}
+				}
+			}
+			return valueConverter.ChangeType(this.objVal, type, nsResolver);
+		}
 
-		private long longValue;
+		public override string Value
+		{
+			get
+			{
+				XmlValueConverter valueConverter = this.xmlType.ValueConverter;
+				if (this.objVal == null)
+				{
+					TypeCode typeCode = this.clrType;
+					if (typeCode <= TypeCode.Int32)
+					{
+						if (typeCode == TypeCode.Boolean)
+						{
+							return valueConverter.ToString(this.unionVal.boolVal);
+						}
+						if (typeCode == TypeCode.Int32)
+						{
+							return valueConverter.ToString(this.unionVal.i32Val);
+						}
+					}
+					else
+					{
+						if (typeCode == TypeCode.Int64)
+						{
+							return valueConverter.ToString(this.unionVal.i64Val);
+						}
+						if (typeCode == TypeCode.Double)
+						{
+							return valueConverter.ToString(this.unionVal.dblVal);
+						}
+						if (typeCode == TypeCode.DateTime)
+						{
+							return valueConverter.ToString(this.unionVal.dtVal);
+						}
+					}
+				}
+				return valueConverter.ToString(this.objVal, this.nsPrefix);
+			}
+		}
 
-		private object objectValue;
+		public override string ToString()
+		{
+			return this.Value;
+		}
 
-		private float floatValue;
+		private string GetPrefixFromQName(string value)
+		{
+			int num2;
+			int num = ValidateNames.ParseQName(value, 0, out num2);
+			if (num == 0 || num != value.Length)
+			{
+				return null;
+			}
+			if (num2 != 0)
+			{
+				return value.Substring(0, num2);
+			}
+			return string.Empty;
+		}
 
-		private string stringValue;
+		private XmlSchemaType xmlType;
 
-		private XmlSchemaType schemaType;
+		private object objVal;
 
-		private XmlTypeCode xmlTypeCode;
+		private TypeCode clrType;
+
+		private XmlAtomicValue.Union unionVal;
+
+		private XmlAtomicValue.NamespacePrefixForQName nsPrefix;
+
+		[StructLayout(LayoutKind.Explicit, Size = 8)]
+		private struct Union
+		{
+			[FieldOffset(0)]
+			public bool boolVal;
+
+			[FieldOffset(0)]
+			public double dblVal;
+
+			[FieldOffset(0)]
+			public long i64Val;
+
+			[FieldOffset(0)]
+			public int i32Val;
+
+			[FieldOffset(0)]
+			public DateTime dtVal;
+		}
+
+		private class NamespacePrefixForQName : IXmlNamespaceResolver
+		{
+			public NamespacePrefixForQName(string prefix, string ns)
+			{
+				this.ns = ns;
+				this.prefix = prefix;
+			}
+
+			public string LookupNamespace(string prefix)
+			{
+				if (prefix == this.prefix)
+				{
+					return this.ns;
+				}
+				return null;
+			}
+
+			public string LookupPrefix(string namespaceName)
+			{
+				if (this.ns == namespaceName)
+				{
+					return this.prefix;
+				}
+				return null;
+			}
+
+			public IDictionary<string, string> GetNamespacesInScope(XmlNamespaceScope scope)
+			{
+				Dictionary<string, string> dictionary = new Dictionary<string, string>(1);
+				dictionary[this.prefix] = this.ns;
+				return dictionary;
+			}
+
+			public string prefix;
+
+			public string ns;
+		}
 	}
 }

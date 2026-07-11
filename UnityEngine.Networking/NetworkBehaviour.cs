@@ -100,6 +100,14 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		internal NetworkIdentity netIdentity
+		{
+			get
+			{
+				return this.myView;
+			}
+		}
+
 		private NetworkIdentity myView
 		{
 			get

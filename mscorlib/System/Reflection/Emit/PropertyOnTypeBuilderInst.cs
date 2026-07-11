@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
+	[StructLayout(LayoutKind.Sequential)]
 	internal class PropertyOnTypeBuilderInst : PropertyInfo
 	{
-		internal PropertyOnTypeBuilderInst(MonoGenericClass instantiation, PropertyInfo prop)
+		internal PropertyOnTypeBuilderInst(TypeBuilderInstantiation instantiation, PropertyInfo prop)
 		{
 			this.instantiation = instantiation;
 			this.prop = prop;
@@ -110,7 +112,7 @@ namespace System.Reflection.Emit
 			{
 				return getMethod.GetParameters();
 			}
-			return new ParameterInfo[0];
+			return EmptyArray<ParameterInfo>.Value;
 		}
 
 		public override MethodInfo GetSetMethod(bool nonPublic)
@@ -153,7 +155,7 @@ namespace System.Reflection.Emit
 			throw new NotSupportedException();
 		}
 
-		private MonoGenericClass instantiation;
+		private TypeBuilderInstantiation instantiation;
 
 		private PropertyInfo prop;
 	}

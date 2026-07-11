@@ -18,6 +18,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 		this.UpdateLogicCircuit();
 		this.UpdateVisualState(true);
 		this.wasOn = this.switchedOn;
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 	}
 
 	public void Sim200ms(float dt)
@@ -49,7 +50,8 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 
 	private void UpdateLogicCircuit()
 	{
-		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
+		bool flag = this.switchedOn && base.GetComponent<Operational>().IsOperational;
+		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!flag) ? 0 : 1);
 	}
 
 	private void UpdateVisualState(bool force = false)
@@ -66,6 +68,12 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 	private void OnElementSelected(Tag element_tag)
 	{
 		this.desiredElementIdx = ElementLoader.GetElementIndex(element_tag);
+	}
+
+	private void OnOperationalChanged(object data)
+	{
+		this.UpdateLogicCircuit();
+		this.UpdateVisualState(false);
 	}
 
 	private bool wasOn;

@@ -7,14 +7,15 @@ namespace System.Security.Cryptography
 	[Serializable]
 	public struct RSAParameters
 	{
+		public byte[] Exponent;
+
+		public byte[] Modulus;
+
 		[NonSerialized]
 		public byte[] P;
 
 		[NonSerialized]
 		public byte[] Q;
-
-		[NonSerialized]
-		public byte[] D;
 
 		[NonSerialized]
 		public byte[] DP;
@@ -25,8 +26,7 @@ namespace System.Security.Cryptography
 		[NonSerialized]
 		public byte[] InverseQ;
 
-		public byte[] Modulus;
-
-		public byte[] Exponent;
+		[NonSerialized]
+		public byte[] D;
 	}
 }

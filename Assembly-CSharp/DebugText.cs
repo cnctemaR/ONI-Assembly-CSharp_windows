@@ -5,6 +5,11 @@ using UnityEngine.UI;
 
 public class DebugText : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		DebugText.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		DebugText.Instance = this;

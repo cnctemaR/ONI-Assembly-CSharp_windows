@@ -1,23 +1,39 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Dynamic.Utils;
+using System.Linq.Expressions.Compiler;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
-	public class LambdaExpression : Expression
+	[DebuggerTypeProxy(typeof(Expression.LambdaExpressionProxy))]
+	public abstract class LambdaExpression : Expression, IParameterProvider
 	{
-		internal LambdaExpression(Type delegateType, Expression body, ReadOnlyCollection<ParameterExpression> parameters)
-			: base(ExpressionType.Lambda, delegateType)
+		internal LambdaExpression(Expression body)
 		{
-			this.body = body;
-			this.parameters = parameters;
+			this._body = body;
 		}
 
-		public Expression Body
+		public sealed override Type Type
 		{
 			get
 			{
-				return this.body;
+				return this.TypeCore;
+			}
+		}
+
+		internal abstract Type TypeCore { get; }
+
+		internal abstract Type PublicType { get; }
+
+		public sealed override ExpressionType NodeType
+		{
+			get
+			{
+				return ExpressionType.Lambda;
 			}
 		}
 
@@ -25,44 +41,127 @@ namespace System.Linq.Expressions
 		{
 			get
 			{
-				return this.parameters;
+				return this.GetOrMakeParameters();
 			}
 		}
 
-		private void EmitPopIfNeeded(EmitContext ec)
+		public string Name
 		{
-			if (this.GetReturnType() == typeof(void) && this.body.Type != typeof(void))
+			get
 			{
-				ec.ig.Emit(OpCodes.Pop);
+				return this.NameCore;
 			}
 		}
 
-		internal override void Emit(EmitContext ec)
+		internal virtual string NameCore
 		{
-			ec.EmitCreateDelegate(this);
+			get
+			{
+				return null;
+			}
 		}
 
-		internal void EmitBody(EmitContext ec)
+		public Expression Body
 		{
-			this.body.Emit(ec);
-			this.EmitPopIfNeeded(ec);
-			ec.ig.Emit(OpCodes.Ret);
+			get
+			{
+				return this._body;
+			}
 		}
 
-		internal Type GetReturnType()
+		public Type ReturnType
 		{
-			return base.Type.GetInvokeMethod().ReturnType;
+			get
+			{
+				return this.Type.GetInvokeMethod().ReturnType;
+			}
+		}
+
+		public bool TailCall
+		{
+			get
+			{
+				return this.TailCallCore;
+			}
+		}
+
+		internal virtual bool TailCallCore
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		[ExcludeFromCodeCoverage]
+		internal virtual ReadOnlyCollection<ParameterExpression> GetOrMakeParameters()
+		{
+			throw ContractUtils.Unreachable;
+		}
+
+		[ExcludeFromCodeCoverage]
+		ParameterExpression IParameterProvider.GetParameter(int index)
+		{
+			return this.GetParameter(index);
+		}
+
+		[ExcludeFromCodeCoverage]
+		internal virtual ParameterExpression GetParameter(int index)
+		{
+			throw ContractUtils.Unreachable;
+		}
+
+		[ExcludeFromCodeCoverage]
+		int IParameterProvider.ParameterCount
+		{
+			get
+			{
+				return this.ParameterCount;
+			}
+		}
+
+		[ExcludeFromCodeCoverage]
+		internal virtual int ParameterCount
+		{
+			get
+			{
+				throw ContractUtils.Unreachable;
+			}
 		}
 
 		public Delegate Compile()
 		{
-			CompilationContext compilationContext = new CompilationContext();
-			compilationContext.AddCompilationUnit(this);
-			return compilationContext.CreateDelegate();
+			return this.Compile(false);
 		}
 
-		private Expression body;
+		public Delegate Compile(bool preferInterpretation)
+		{
+			return LambdaCompiler.Compile(this);
+		}
 
-		private ReadOnlyCollection<ParameterExpression> parameters;
+		public void CompileToMethod(MethodBuilder method)
+		{
+			ContractUtils.RequiresNotNull(method, "method");
+			ContractUtils.Requires(method.IsStatic, "method");
+			if (method.DeclaringType as TypeBuilder == null)
+			{
+				throw Error.MethodBuilderDoesNotHaveTypeBuilder();
+			}
+			LambdaCompiler.Compile(this, method);
+		}
+
+		internal abstract LambdaExpression Accept(StackSpiller spiller);
+
+		public Delegate Compile(DebugInfoGenerator debugInfoGenerator)
+		{
+			return this.Compile();
+		}
+
+		public void CompileToMethod(MethodBuilder method, DebugInfoGenerator debugInfoGenerator)
+		{
+			this.CompileToMethod(method);
+		}
+
+		private readonly Expression _body;
 	}
 }

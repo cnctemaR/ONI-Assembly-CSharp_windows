@@ -1,35 +1,35 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_MethodInfo))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_MethodInfo))]
+	[ComVisible(true)]
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	[Serializable]
 	public abstract class MethodInfo : MethodBase, _MethodInfo
 	{
-		void _MethodInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		public static bool operator ==(MethodInfo left, MethodInfo right)
 		{
-			throw new NotImplementedException();
+			return left == right || (left != null && right != null && !(left is RuntimeMethodInfo) && !(right is RuntimeMethodInfo) && left.Equals(right));
 		}
 
-		void _MethodInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		public static bool operator !=(MethodInfo left, MethodInfo right)
 		{
-			throw new NotImplementedException();
+			return !(left == right);
 		}
 
-		void _MethodInfo.GetTypeInfoCount(out uint pcTInfo)
+		public override bool Equals(object obj)
 		{
-			throw new NotImplementedException();
+			return base.Equals(obj);
 		}
 
-		void _MethodInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		public override int GetHashCode()
 		{
-			throw new NotImplementedException();
+			return base.GetHashCode();
 		}
-
-		public abstract MethodInfo GetBaseDefinition();
 
 		public override MemberTypes MemberType
 		{
@@ -43,50 +43,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				return null;
-			}
-		}
-
-		public abstract ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
-
-		[ComVisible(true)]
-		public virtual MethodInfo GetGenericMethodDefinition()
-		{
-			throw new NotSupportedException();
-		}
-
-		public virtual MethodInfo MakeGenericMethod(params Type[] typeArguments)
-		{
-			throw new NotSupportedException(base.GetType().ToString());
-		}
-
-		[ComVisible(true)]
-		public override Type[] GetGenericArguments()
-		{
-			return Type.EmptyTypes;
-		}
-
-		public override bool IsGenericMethod
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public override bool IsGenericMethodDefinition
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public override bool ContainsGenericParameters
-		{
-			get
-			{
-				return false;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -94,13 +51,69 @@ namespace System.Reflection
 		{
 			get
 			{
-				throw new NotSupportedException();
+				throw new NotImplementedException();
 			}
 		}
 
-		virtual Type System.Runtime.InteropServices._MethodInfo.GetType()
+		public abstract ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
+
+		public abstract MethodInfo GetBaseDefinition();
+
+		[ComVisible(true)]
+		public override Type[] GetGenericArguments()
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Derived classes must provide an implementation."));
+		}
+
+		[ComVisible(true)]
+		public virtual MethodInfo GetGenericMethodDefinition()
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Derived classes must provide an implementation."));
+		}
+
+		public virtual MethodInfo MakeGenericMethod(params Type[] typeArguments)
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Derived classes must provide an implementation."));
+		}
+
+		public virtual Delegate CreateDelegate(Type delegateType)
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Derived classes must provide an implementation."));
+		}
+
+		public virtual Delegate CreateDelegate(Type delegateType, object target)
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Derived classes must provide an implementation."));
+		}
+
+		Type _MethodInfo.GetType()
 		{
 			return base.GetType();
+		}
+
+		void _MethodInfo.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal virtual MethodInfo GetBaseMethod()
+		{
+			return this;
 		}
 	}
 }

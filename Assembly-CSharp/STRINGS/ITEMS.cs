@@ -375,7 +375,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Egg Shell";
 
-				public static LocString DESC = "Can be crushed to produce " + ELEMENTS.LIME.NAME;
+				public static LocString DESC = "Can be crushed to produce " + ELEMENTS.LIME.NAME + ".";
 			}
 		}
 	}

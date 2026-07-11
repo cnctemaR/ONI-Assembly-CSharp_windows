@@ -16,8 +16,8 @@ namespace TemplateClasses
 			this.location_x = loc_x;
 			this.location_y = loc_y;
 			this.element = SimHashes.Oxygen;
-			this.temperature = WorldGen.Settings.GetDefaultFloat("StartAreaTemperatureOffset");
-			this.mass = WorldGen.Settings.GetDefaultFloat("StartAreaPressureMultiplier");
+			this.temperature = WorldGen.Settings.GetFloatSetting("StartAreaTemperatureOffset");
+			this.mass = WorldGen.Settings.GetFloatSetting("StartAreaPressureMultiplier");
 			this.diseaseName = null;
 			this.diseaseCount = 0;
 		}

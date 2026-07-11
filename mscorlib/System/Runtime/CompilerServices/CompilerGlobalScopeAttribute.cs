@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[AttributeUsage(AttributeTargets.Class)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Class)]
 	[Serializable]
 	public class CompilerGlobalScopeAttribute : Attribute
 	{

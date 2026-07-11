@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{565A657F-F71B-4118-8F5C-0A791C4C78EB}</ProjectGuid>
+    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC25E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>I18N</RootNamespace>
     <AssemblyName>I18N</AssemblyName>

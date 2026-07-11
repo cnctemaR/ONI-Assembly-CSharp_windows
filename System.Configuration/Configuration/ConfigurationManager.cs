@@ -14,7 +14,7 @@ namespace System.Configuration
 		{
 			object[] array = a.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
 			string text;
-			if (array != null && array.Length > 0)
+			if (array != null && array.Length != 0)
 			{
 				text = ((AssemblyProductAttribute)array[0]).Product;
 			}
@@ -27,7 +27,7 @@ namespace System.Configuration
 			string text2 = stringBuilder.ToString();
 			array = a.GetCustomAttributes(typeof(AssemblyVersionAttribute), false);
 			string text3;
-			if (array != null && array.Length > 0)
+			if (array != null && array.Length != 0)
 			{
 				text3 = ((AssemblyVersionAttribute)array[0]).Version;
 			}
@@ -47,18 +47,15 @@ namespace System.Configuration
 				{
 					if (userLevel != ConfigurationUserLevel.PerUserRoamingAndLocal)
 					{
-						goto IL_0104;
+						goto IL_00EA;
 					}
+					exeConfigurationFileMap.LocalUserConfigFilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ConfigurationManager.GetAssemblyInfo(calling_assembly));
+					exeConfigurationFileMap.LocalUserConfigFilename = Path.Combine(exeConfigurationFileMap.LocalUserConfigFilename, "user.config");
 				}
-				else
-				{
-					exeConfigurationFileMap.RoamingUserConfigFilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigurationManager.GetAssemblyInfo(calling_assembly));
-					exeConfigurationFileMap.RoamingUserConfigFilename = Path.Combine(exeConfigurationFileMap.RoamingUserConfigFilename, "user.config");
-				}
-				exeConfigurationFileMap.LocalUserConfigFilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ConfigurationManager.GetAssemblyInfo(calling_assembly));
-				exeConfigurationFileMap.LocalUserConfigFilename = Path.Combine(exeConfigurationFileMap.LocalUserConfigFilename, "user.config");
+				exeConfigurationFileMap.RoamingUserConfigFilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ConfigurationManager.GetAssemblyInfo(calling_assembly));
+				exeConfigurationFileMap.RoamingUserConfigFilename = Path.Combine(exeConfigurationFileMap.RoamingUserConfigFilename, "user.config");
 			}
-			else if (exePath == null || exePath.Length == 0)
+			if (exePath == null || exePath.Length == 0)
 			{
 				exeConfigurationFileMap.ExeConfigFilename = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
 			}
@@ -75,7 +72,7 @@ namespace System.Configuration
 				}
 				exeConfigurationFileMap.ExeConfigFilename = exePath + ".config";
 			}
-			IL_0104:
+			IL_00EA:
 			return ConfigurationManager.ConfigurationFactory.Create(typeof(ExeConfigurationHost), new object[] { exeConfigurationFileMap, userLevel });
 		}
 
@@ -145,13 +142,11 @@ namespace System.Configuration
 			}
 		}
 
-		[MonoTODO]
 		public static ConnectionStringSettingsCollection ConnectionStrings
 		{
 			get
 			{
-				ConnectionStringsSection connectionStringsSection = (ConnectionStringsSection)ConfigurationManager.GetSection("connectionStrings");
-				return connectionStringsSection.ConnectionStrings;
+				return ((ConnectionStringsSection)ConfigurationManager.GetSection("connectionStrings")).ConnectionStrings;
 			}
 		}
 
@@ -165,23 +160,12 @@ namespace System.Configuration
 			IInternalConfigSystem internalConfigSystem2;
 			lock (obj)
 			{
-				string text = newSystem.GetType().ToString();
-				if (string.Compare(text, "System.Web.Configuration.HttpConfigurationSystem", StringComparison.OrdinalIgnoreCase) == 0)
-				{
-					ConfigurationManager.systemWebInUse = true;
-				}
-				else
-				{
-					ConfigurationManager.systemWebInUse = false;
-				}
 				IInternalConfigSystem internalConfigSystem = ConfigurationManager.configSystem;
 				ConfigurationManager.configSystem = newSystem;
 				internalConfigSystem2 = internalConfigSystem;
 			}
 			return internalConfigSystem2;
 		}
-
-		private static bool systemWebInUse;
 
 		private static InternalConfigurationFactory configFactory = new InternalConfigurationFactory();
 

@@ -497,22 +497,22 @@ namespace UnityEngine.UI
 			}
 			if (this.activeSprite != null && (this.hasBorder || this.activeSprite.packed || this.activeSprite.texture.wrapMode != TextureWrapMode.Repeat))
 			{
-				int num5;
-				int num6;
+				long num5;
+				long num6;
 				if (this.m_FillCenter)
 				{
-					num5 = (int)Math.Ceiling((double)((num3 - x) / num));
-					num6 = (int)Math.Ceiling((double)((num4 - y) / num2));
-					int num7;
+					num5 = (long)Math.Ceiling((double)((num3 - x) / num));
+					num6 = (long)Math.Ceiling((double)((num4 - y) / num2));
+					double num7;
 					if (this.hasBorder)
 					{
-						num7 = (num5 + 2) * (num6 + 2) * 4;
+						num7 = ((double)num5 + 2.0) * ((double)num6 + 2.0) * 4.0;
 					}
 					else
 					{
-						num7 = num5 * num6 * 4;
+						num7 = (double)(num5 * num6) * 4.0;
 					}
-					if (num7 > 65000)
+					if (num7 > 65000.0)
 					{
 						Debug.LogError("Too many sprite tiles on Image \"" + base.name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
 						double num8 = 16250.0;
@@ -532,86 +532,86 @@ namespace UnityEngine.UI
 							num10 -= 2.0;
 							num11 -= 2.0;
 						}
-						num5 = (int)Math.Floor(num10);
-						num6 = (int)Math.Floor(num11);
+						num5 = (long)Math.Floor(num10);
+						num6 = (long)Math.Floor(num11);
 						num = (num3 - x) / (float)num5;
 						num2 = (num4 - y) / (float)num6;
 					}
 				}
 				else if (this.hasBorder)
 				{
-					num5 = (int)Math.Ceiling((double)((num3 - x) / num));
-					num6 = (int)Math.Ceiling((double)((num4 - y) / num2));
-					int num12 = (num6 + num5 + 2) * 2 * 4;
-					if (num12 > 65000)
+					num5 = (long)Math.Ceiling((double)((num3 - x) / num));
+					num6 = (long)Math.Ceiling((double)((num4 - y) / num2));
+					double num12 = ((double)(num6 + num5) + 2.0) * 2.0 * 4.0;
+					if (num12 > 65000.0)
 					{
 						Debug.LogError("Too many sprite tiles on Image \"" + base.name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
 						double num13 = 16250.0;
 						double num14 = (double)num5 / (double)num6;
 						double num15 = (num13 - 4.0) / (2.0 * (1.0 + num14));
 						double num16 = num15 * num14;
-						num5 = (int)Math.Floor(num15);
-						num6 = (int)Math.Floor(num16);
+						num5 = (long)Math.Floor(num15);
+						num6 = (long)Math.Floor(num16);
 						num = (num3 - x) / (float)num5;
 						num2 = (num4 - y) / (float)num6;
 					}
 				}
 				else
 				{
-					num5 = (num6 = 0);
+					num5 = (num6 = 0L);
 				}
 				if (this.m_FillCenter)
 				{
-					for (int i = 0; i < num6; i++)
+					for (long num17 = 0L; num17 < num6; num17 += 1L)
 					{
-						float num17 = y + (float)i * num2;
-						float num18 = y + (float)(i + 1) * num2;
-						if (num18 > num4)
+						float num18 = y + (float)num17 * num2;
+						float num19 = y + (float)(num17 + 1L) * num2;
+						if (num19 > num4)
 						{
-							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num17) / (num18 - num17);
-							num18 = num4;
+							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num18) / (num19 - num18);
+							num19 = num4;
 						}
 						vector7.x = vector6.x;
-						for (int j = 0; j < num5; j++)
+						for (long num20 = 0L; num20 < num5; num20 += 1L)
 						{
-							float num19 = x + (float)j * num;
-							float num20 = x + (float)(j + 1) * num;
-							if (num20 > num3)
+							float num21 = x + (float)num20 * num;
+							float num22 = x + (float)(num20 + 1L) * num;
+							if (num22 > num3)
 							{
-								vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num19) / (num20 - num19);
-								num20 = num3;
+								vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num21) / (num22 - num21);
+								num22 = num3;
 							}
-							Image.AddQuad(toFill, new Vector2(num19, num17) + pixelAdjustedRect.position, new Vector2(num20, num18) + pixelAdjustedRect.position, this.color, vector5, vector7);
+							Image.AddQuad(toFill, new Vector2(num21, num18) + pixelAdjustedRect.position, new Vector2(num22, num19) + pixelAdjustedRect.position, this.color, vector5, vector7);
 						}
 					}
 				}
 				if (this.hasBorder)
 				{
 					vector7 = vector6;
-					for (int k = 0; k < num6; k++)
+					for (long num23 = 0L; num23 < num6; num23 += 1L)
 					{
-						float num21 = y + (float)k * num2;
-						float num22 = y + (float)(k + 1) * num2;
-						if (num22 > num4)
+						float num24 = y + (float)num23 * num2;
+						float num25 = y + (float)(num23 + 1L) * num2;
+						if (num25 > num4)
 						{
-							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num21) / (num22 - num21);
-							num22 = num4;
+							vector7.y = vector5.y + (vector6.y - vector5.y) * (num4 - num24) / (num25 - num24);
+							num25 = num4;
 						}
-						Image.AddQuad(toFill, new Vector2(0f, num21) + pixelAdjustedRect.position, new Vector2(x, num22) + pixelAdjustedRect.position, this.color, new Vector2(vector.x, vector5.y), new Vector2(vector5.x, vector7.y));
-						Image.AddQuad(toFill, new Vector2(num3, num21) + pixelAdjustedRect.position, new Vector2(pixelAdjustedRect.width, num22) + pixelAdjustedRect.position, this.color, new Vector2(vector6.x, vector5.y), new Vector2(vector.z, vector7.y));
+						Image.AddQuad(toFill, new Vector2(0f, num24) + pixelAdjustedRect.position, new Vector2(x, num25) + pixelAdjustedRect.position, this.color, new Vector2(vector.x, vector5.y), new Vector2(vector5.x, vector7.y));
+						Image.AddQuad(toFill, new Vector2(num3, num24) + pixelAdjustedRect.position, new Vector2(pixelAdjustedRect.width, num25) + pixelAdjustedRect.position, this.color, new Vector2(vector6.x, vector5.y), new Vector2(vector.z, vector7.y));
 					}
 					vector7 = vector6;
-					for (int l = 0; l < num5; l++)
+					for (long num26 = 0L; num26 < num5; num26 += 1L)
 					{
-						float num23 = x + (float)l * num;
-						float num24 = x + (float)(l + 1) * num;
-						if (num24 > num3)
+						float num27 = x + (float)num26 * num;
+						float num28 = x + (float)(num26 + 1L) * num;
+						if (num28 > num3)
 						{
-							vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num23) / (num24 - num23);
-							num24 = num3;
+							vector7.x = vector5.x + (vector6.x - vector5.x) * (num3 - num27) / (num28 - num27);
+							num28 = num3;
 						}
-						Image.AddQuad(toFill, new Vector2(num23, 0f) + pixelAdjustedRect.position, new Vector2(num24, y) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector.y), new Vector2(vector7.x, vector5.y));
-						Image.AddQuad(toFill, new Vector2(num23, num4) + pixelAdjustedRect.position, new Vector2(num24, pixelAdjustedRect.height) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector6.y), new Vector2(vector7.x, vector.w));
+						Image.AddQuad(toFill, new Vector2(num27, 0f) + pixelAdjustedRect.position, new Vector2(num28, y) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector.y), new Vector2(vector7.x, vector5.y));
+						Image.AddQuad(toFill, new Vector2(num27, num4) + pixelAdjustedRect.position, new Vector2(num28, pixelAdjustedRect.height) + pixelAdjustedRect.position, this.color, new Vector2(vector5.x, vector6.y), new Vector2(vector7.x, vector.w));
 					}
 					Image.AddQuad(toFill, new Vector2(0f, 0f) + pixelAdjustedRect.position, new Vector2(x, y) + pixelAdjustedRect.position, this.color, new Vector2(vector.x, vector.y), new Vector2(vector5.x, vector5.y));
 					Image.AddQuad(toFill, new Vector2(num3, 0f) + pixelAdjustedRect.position, new Vector2(pixelAdjustedRect.width, y) + pixelAdjustedRect.position, this.color, new Vector2(vector6.x, vector.y), new Vector2(vector.z, vector5.y));

@@ -18,7 +18,7 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("annotation", Type = typeof(XmlSchemaAnnotation))]
+		[XmlElement("annotation", typeof(XmlSchemaAnnotation))]
 		public XmlSchemaAnnotation Annotation
 		{
 			get
@@ -36,24 +36,41 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				if (this.unhandledAttributeList != null)
-				{
-					this.unhandledAttributes = (XmlAttribute[])this.unhandledAttributeList.ToArray(typeof(XmlAttribute));
-					this.unhandledAttributeList = null;
-				}
-				return this.unhandledAttributes;
+				return this.moreAttributes;
 			}
 			set
 			{
-				this.unhandledAttributes = value;
-				this.unhandledAttributeList = null;
+				this.moreAttributes = value;
 			}
 		}
 
-		private XmlSchemaAnnotation annotation;
+		[XmlIgnore]
+		internal override string IdAttribute
+		{
+			get
+			{
+				return this.Id;
+			}
+			set
+			{
+				this.Id = value;
+			}
+		}
+
+		internal override void SetUnhandledAttributes(XmlAttribute[] moreAttributes)
+		{
+			this.moreAttributes = moreAttributes;
+		}
+
+		internal override void AddAnnotation(XmlSchemaAnnotation annotation)
+		{
+			this.annotation = annotation;
+		}
 
 		private string id;
 
-		private XmlAttribute[] unhandledAttributes;
+		private XmlSchemaAnnotation annotation;
+
+		private XmlAttribute[] moreAttributes;
 	}
 }

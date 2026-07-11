@@ -68,7 +68,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	{
 		base.OnSpawn(h);
 		FallerComponent data = base.GetData(h);
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(data.transform, data.cellChangedCB, "FallerComponent.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(data.transform, data.cellChangedCB, "FallerComponent.OnSpawn");
 	}
 
 	private void OnCleanUpImmediate(HandleVector<int>.Handle h)
@@ -81,7 +81,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		}
 		if (data.cellChangedCB != null)
 		{
-			CellChangeMonitor.Instance.UnregisterCellChangedHandler(data.transformInstanceId, data.cellChangedCB);
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(data.transformInstanceId, data.cellChangedCB);
 			data.cellChangedCB = null;
 		}
 		if (GameComps.Gravities.Has(data.transform.gameObject))

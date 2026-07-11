@@ -2,9 +2,20 @@
 using System.Collections.Generic;
 using Klei;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 public class PropertyTextures : KMonoBehaviour, ISim200ms
 {
+	public static void DestroyInstance()
+	{
+		ShaderReloader.Unregister(new global::System.Action(PropertyTextures.instance.OnShadersReloaded));
+		PropertyTextures.externalFlowTex = IntPtr.Zero;
+		PropertyTextures.externalLiquidTex = IntPtr.Zero;
+		PropertyTextures.externalExposedToSunlight = IntPtr.Zero;
+		PropertyTextures.externalSolidDigAmountTex = IntPtr.Zero;
+		PropertyTextures.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		PropertyTextures.instance = this;
@@ -80,7 +91,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			Texture texture;
 			if (textureProperties.updatedExternally)
 			{
-				this.externallyUpdatedTextures[i] = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, false);
+				this.externallyUpdatedTextures[i] = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, TextureUtil.TextureFormatToGraphicsFormat(textureProperties.textureFormat), TextureCreationFlags.None);
 				texture = this.externallyUpdatedTextures[i];
 			}
 			else
@@ -145,7 +156,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			int num2 = Math.Min(i + num - 1, y1);
 			this.workItems.Add(new PropertyTextures.WorkItem(texture_region, x0, i, x1, num2, update_texture_cb));
 		}
-		App.instance.jobManager.Run(this.workItems);
+		GlobalJobManager.Run(this.workItems);
 	}
 
 	private void UpdateProperty(ref PropertyTextures.TextureProperties p, int x0, int y0, int x1, int y1)
@@ -372,14 +383,14 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				Element element = Grid.Element[num];
 				if (element.IsGas)
 				{
-					region.SetBytes(j, i, byte.MaxValue, element.substance.colour.r, element.substance.colour.g, element.substance.colour.b);
+					region.SetBytes(j, i, element.substance.colour.r, element.substance.colour.g, element.substance.colour.b, byte.MaxValue);
 				}
 				else if (element.IsLiquid)
 				{
 					int num2 = Grid.CellAbove(num);
 					if (Grid.IsValidCell(num2))
 					{
-						region.SetBytes(j, i, byte.MaxValue, element.substance.colour.r, element.substance.colour.g, element.substance.colour.b);
+						region.SetBytes(j, i, element.substance.colour.r, element.substance.colour.g, element.substance.colour.b, byte.MaxValue);
 					}
 					else
 					{
@@ -627,7 +638,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		new PropertyTextures.TextureProperties
 		{
 			simProperty = PropertyTextures.Property.Liquid,
-			textureFormat = TextureFormat.ARGB32,
+			textureFormat = TextureFormat.RGBA32,
 			filterMode = FilterMode.Point,
 			updateEveryFrame = true,
 			updatedExternally = true,
@@ -657,7 +668,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		new PropertyTextures.TextureProperties
 		{
 			simProperty = PropertyTextures.Property.GasColour,
-			textureFormat = TextureFormat.ARGB32,
+			textureFormat = TextureFormat.RGBA32,
 			filterMode = FilterMode.Bilinear,
 			updateEveryFrame = false,
 			updatedExternally = false,

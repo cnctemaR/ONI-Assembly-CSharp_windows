@@ -13,15 +13,14 @@ public class FlowerVaseConfig : IBuildingConfig
 		int num3 = 10;
 		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
-		string[] farmable = MATERIALS.FARMABLE;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.Decor;
-		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
 		return buildingDef;

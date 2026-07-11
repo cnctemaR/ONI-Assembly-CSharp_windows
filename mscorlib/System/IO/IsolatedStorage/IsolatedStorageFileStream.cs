@@ -9,48 +9,7 @@ namespace System.IO.IsolatedStorage
 	[ComVisible(true)]
 	public class IsolatedStorageFileStream : FileStream
 	{
-		public IsolatedStorageFileStream(string path, FileMode mode)
-			: this(path, mode, (mode != FileMode.Append) ? FileAccess.ReadWrite : FileAccess.Write, FileShare.Read, 8192, null)
-		{
-		}
-
-		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access)
-			: this(path, mode, access, (access != FileAccess.Write) ? FileShare.Read : FileShare.None, 8192, null)
-		{
-		}
-
-		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share)
-			: this(path, mode, access, share, 8192, null)
-		{
-		}
-
-		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize)
-			: this(path, mode, access, share, bufferSize, null)
-		{
-		}
-
-		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Unrestricted=\"true\"/>\n</PermissionSet>\n")]
-		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, IsolatedStorageFile isf)
-			: base(IsolatedStorageFileStream.CreateIsolatedPath(isf, path, mode), mode, access, share, bufferSize, false, true)
-		{
-		}
-
-		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, IsolatedStorageFile isf)
-			: this(path, mode, access, share, 8192, isf)
-		{
-		}
-
-		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, IsolatedStorageFile isf)
-			: this(path, mode, access, (access != FileAccess.Write) ? FileShare.Read : FileShare.None, 8192, isf)
-		{
-		}
-
-		public IsolatedStorageFileStream(string path, FileMode mode, IsolatedStorageFile isf)
-			: this(path, mode, (mode != FileMode.Append) ? FileAccess.ReadWrite : FileAccess.Write, FileShare.Read, 8192, isf)
-		{
-		}
-
-		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.ReflectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"TypeInformation\"/>\n</PermissionSet>\n")]
+		[ReflectionPermission(SecurityAction.Assert, TypeInformation = true)]
 		private static string CreateIsolatedPath(IsolatedStorageFile isf, string path, FileMode mode)
 		{
 			if (path == null)
@@ -63,8 +22,15 @@ namespace System.IO.IsolatedStorage
 			}
 			if (isf == null)
 			{
-				StackFrame stackFrame = new StackFrame(3);
-				isf = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly, IsolatedStorageFile.GetDomainIdentityFromEvidence(AppDomain.CurrentDomain.Evidence), IsolatedStorageFile.GetAssemblyIdentityFromEvidence(stackFrame.GetMethod().ReflectedType.Assembly.UnprotectedGetEvidence()));
+				isf = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly, IsolatedStorageFile.GetDomainIdentityFromEvidence(AppDomain.CurrentDomain.Evidence), IsolatedStorageFile.GetAssemblyIdentityFromEvidence(new StackFrame(3).GetMethod().ReflectedType.Assembly.UnprotectedGetEvidence()));
+			}
+			if (isf.IsDisposed)
+			{
+				throw new ObjectDisposedException("IsolatedStorageFile");
+			}
+			if (isf.IsClosed)
+			{
+				throw new InvalidOperationException("Storage needs to be open for this operation.");
 			}
 			FileInfo fileInfo = new FileInfo(isf.Root);
 			if (!fileInfo.Directory.Exists)
@@ -77,19 +43,58 @@ namespace System.IO.IsolatedStorage
 				path = path.Remove(0, pathRoot.Length);
 			}
 			string text = Path.Combine(isf.Root, path);
-			string text2 = Path.GetFullPath(text);
-			text2 = Path.GetFullPath(text);
-			if (!text2.StartsWith(isf.Root))
+			Path.GetFullPath(text);
+			if (!Path.GetFullPath(text).StartsWith(isf.Root))
 			{
 				throw new IsolatedStorageException();
 			}
 			fileInfo = new FileInfo(text);
 			if (!fileInfo.Directory.Exists)
 			{
-				string text3 = Locale.GetText("Could not find a part of the path \"{0}\".");
-				throw new DirectoryNotFoundException(string.Format(text3, path));
+				throw new DirectoryNotFoundException(string.Format(Locale.GetText("Could not find a part of the path \"{0}\"."), path));
 			}
 			return text;
+		}
+
+		public IsolatedStorageFileStream(string path, FileMode mode)
+			: this(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, FileShare.Read, 4096, null)
+		{
+		}
+
+		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access)
+			: this(path, mode, access, (access == FileAccess.Write) ? FileShare.None : FileShare.Read, 4096, null)
+		{
+		}
+
+		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+			: this(path, mode, access, share, 4096, null)
+		{
+		}
+
+		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize)
+			: this(path, mode, access, share, bufferSize, null)
+		{
+		}
+
+		[FileIOPermission(SecurityAction.Assert, Unrestricted = true)]
+		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, IsolatedStorageFile isf)
+			: base(IsolatedStorageFileStream.CreateIsolatedPath(isf, path, mode), mode, access, share, bufferSize, false, true)
+		{
+		}
+
+		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, FileShare share, IsolatedStorageFile isf)
+			: this(path, mode, access, share, 4096, isf)
+		{
+		}
+
+		public IsolatedStorageFileStream(string path, FileMode mode, FileAccess access, IsolatedStorageFile isf)
+			: this(path, mode, access, (access == FileAccess.Write) ? FileShare.None : FileShare.Read, 4096, isf)
+		{
+		}
+
+		public IsolatedStorageFileStream(string path, FileMode mode, IsolatedStorageFile isf)
+			: this(path, mode, (mode == FileMode.Append) ? FileAccess.Write : FileAccess.ReadWrite, FileShare.Read, 4096, isf)
+		{
 		}
 
 		public override bool CanRead
@@ -118,7 +123,7 @@ namespace System.IO.IsolatedStorage
 
 		public override SafeFileHandle SafeFileHandle
 		{
-			[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 			get
 			{
 				throw new IsolatedStorageException(Locale.GetText("Information is restricted"));
@@ -128,7 +133,7 @@ namespace System.IO.IsolatedStorage
 		[Obsolete("Use SafeFileHandle - once available")]
 		public override IntPtr Handle
 		{
-			[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
+			[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
 			get
 			{
 				throw new IsolatedStorageException(Locale.GetText("Information is restricted"));
@@ -186,6 +191,11 @@ namespace System.IO.IsolatedStorage
 		public override void Flush()
 		{
 			base.Flush();
+		}
+
+		public override void Flush(bool flushToDisk)
+		{
+			base.Flush(flushToDisk);
 		}
 
 		public override int Read(byte[] buffer, int offset, int count)

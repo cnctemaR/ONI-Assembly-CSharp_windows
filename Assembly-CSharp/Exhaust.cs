@@ -143,7 +143,7 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 	[MyCmpGet]
 	private PrimaryElement exhaustPE;
 
-	private static Operational.Flag canExhaust = new Operational.Flag("canExhaust", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag canExhaust = new Operational.Flag("canExhaust", Operational.Flag.Type.Requirement);
 
 	private bool isAnimating;
 

@@ -3,77 +3,29 @@ using System.ComponentModel;
 
 namespace System.Data.Common
 {
-	public abstract class DbCommand : Component, IDisposable, IDbCommand
+	public abstract class DbCommand : Component, IDbCommand, IDisposable
 	{
-		IDbConnection IDbCommand.Connection
-		{
-			get
-			{
-				return this.Connection;
-			}
-			set
-			{
-				this.Connection = (DbConnection)value;
-			}
-		}
-
-		IDataParameterCollection IDbCommand.Parameters
-		{
-			get
-			{
-				return this.Parameters;
-			}
-		}
-
-		IDbTransaction IDbCommand.Transaction
-		{
-			get
-			{
-				return this.Transaction;
-			}
-			set
-			{
-				this.Transaction = (DbTransaction)value;
-			}
-		}
-
-		IDbDataParameter IDbCommand.CreateParameter()
-		{
-			return this.CreateParameter();
-		}
-
-		IDataReader IDbCommand.ExecuteReader()
-		{
-			return this.ExecuteReader();
-		}
-
-		IDataReader IDbCommand.ExecuteReader(CommandBehavior behavior)
-		{
-			return this.ExecuteReader(behavior);
-		}
-
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue("")]
+		[RefreshProperties(RefreshProperties.All)]
 		public abstract string CommandText { get; set; }
 
 		public abstract int CommandTimeout { get; set; }
 
-		[RefreshProperties(RefreshProperties.All)]
 		[DefaultValue(CommandType.Text)]
+		[RefreshProperties(RefreshProperties.All)]
 		public abstract CommandType CommandType { get; set; }
 
+		[Browsable(false)]
 		[DefaultValue(null)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
 		public DbConnection Connection
 		{
 			get
 			{
-				return this.DbConnection;
+				throw null;
 			}
 			set
 			{
-				this.DbConnection = value;
 			}
 		}
 
@@ -83,34 +35,63 @@ namespace System.Data.Common
 
 		protected abstract DbTransaction DbTransaction { get; set; }
 
-		[DefaultValue(true)]
 		[Browsable(false)]
+		[DefaultValue(true)]
 		[DesignOnly(true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public abstract bool DesignTimeVisible { get; set; }
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public DbParameterCollection Parameters
 		{
 			get
 			{
-				return this.DbParameterCollection;
+				throw null;
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[DefaultValue(null)]
+		IDbConnection IDbCommand.Connection
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
+
+		IDataParameterCollection IDbCommand.Parameters
+		{
+			get
+			{
+				throw null;
+			}
+		}
+
+		IDbTransaction IDbCommand.Transaction
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
+
 		[Browsable(false)]
+		[DefaultValue(null)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public DbTransaction Transaction
 		{
 			get
 			{
-				return this.DbTransaction;
+				throw null;
 			}
 			set
 			{
-				this.DbTransaction = value;
 			}
 		}
 
@@ -123,7 +104,7 @@ namespace System.Data.Common
 
 		public DbParameter CreateParameter()
 		{
-			return this.CreateDbParameter();
+			throw null;
 		}
 
 		protected abstract DbDataReader ExecuteDbDataReader(CommandBehavior behavior);
@@ -132,16 +113,31 @@ namespace System.Data.Common
 
 		public DbDataReader ExecuteReader()
 		{
-			return this.ExecuteDbDataReader(CommandBehavior.Default);
+			throw null;
 		}
 
 		public DbDataReader ExecuteReader(CommandBehavior behavior)
 		{
-			return this.ExecuteDbDataReader(behavior);
+			throw null;
 		}
 
 		public abstract object ExecuteScalar();
 
 		public abstract void Prepare();
+
+		IDbDataParameter IDbCommand.CreateParameter()
+		{
+			throw null;
+		}
+
+		IDataReader IDbCommand.ExecuteReader()
+		{
+			throw null;
+		}
+
+		IDataReader IDbCommand.ExecuteReader(CommandBehavior behavior)
+		{
+			throw null;
+		}
 	}
 }

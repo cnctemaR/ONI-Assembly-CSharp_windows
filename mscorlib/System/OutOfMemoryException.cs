@@ -9,28 +9,26 @@ namespace System
 	public class OutOfMemoryException : SystemException
 	{
 		public OutOfMemoryException()
-			: base(Locale.GetText("Out of memory."))
+			: base(Exception.GetMessageFromNativeResources(Exception.ExceptionMessageKind.OutOfMemory))
 		{
-			base.HResult = -2147024882;
+			base.SetErrorCode(-2147024882);
 		}
 
 		public OutOfMemoryException(string message)
 			: base(message)
 		{
-			base.HResult = -2147024882;
+			base.SetErrorCode(-2147024882);
 		}
 
 		public OutOfMemoryException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.HResult = -2147024882;
+			base.SetErrorCode(-2147024882);
 		}
 
 		protected OutOfMemoryException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		private const int Result = -2147024882;
 	}
 }

@@ -10,16 +10,6 @@ namespace System.Configuration
 {
 	internal abstract class InternalConfigurationHost : IInternalConfigHost
 	{
-		string IInternalConfigHost.DecryptSection(string encryptedXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedSection)
-		{
-			return protectedSection.DecryptSection(encryptedXml, protectionProvider);
-		}
-
-		string IInternalConfigHost.EncryptSection(string clearXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedSection)
-		{
-			return protectedSection.EncryptSection(clearXml, protectionProvider);
-		}
-
 		public virtual object CreateConfigurationContext(string configPath, string locationSubPath)
 		{
 			return null;
@@ -35,6 +25,16 @@ namespace System.Configuration
 			File.Delete(streamName);
 		}
 
+		string IInternalConfigHost.DecryptSection(string encryptedXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedSection)
+		{
+			return protectedSection.DecryptSection(encryptedXml, protectionProvider);
+		}
+
+		string IInternalConfigHost.EncryptSection(string clearXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedSection)
+		{
+			return protectedSection.EncryptSection(clearXml, protectionProvider);
+		}
+
 		public virtual string GetConfigPathFromLocationSubPath(string configPath, string locationSubPath)
 		{
 			return configPath;
@@ -43,6 +43,10 @@ namespace System.Configuration
 		public virtual Type GetConfigType(string typeName, bool throwOnError)
 		{
 			Type type = Type.GetType(typeName);
+			if (type == null)
+			{
+				type = Type.GetType(typeName + ",System");
+			}
 			if (type == null && throwOnError)
 			{
 				throw new ConfigurationErrorsException("Type '" + typeName + "' not found.");
@@ -142,6 +146,9 @@ namespace System.Configuration
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string get_bundled_machine_config();
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string get_bundled_app_config();
+
 		public virtual Stream OpenStreamForRead(string streamName)
 		{
 			if (string.CompareOrdinal(streamName, RuntimeEnvironment.SystemConfigurationFile) == 0)
@@ -152,9 +159,17 @@ namespace System.Configuration
 					return new MemoryStream(Encoding.UTF8.GetBytes(bundled_machine_config));
 				}
 			}
+			if (string.CompareOrdinal(streamName, AppDomain.CurrentDomain.SetupInformation.ConfigurationFile) == 0)
+			{
+				string bundled_app_config = InternalConfigurationHost.get_bundled_app_config();
+				if (bundled_app_config != null)
+				{
+					return new MemoryStream(Encoding.UTF8.GetBytes(bundled_app_config));
+				}
+			}
 			if (!File.Exists(streamName))
 			{
-				throw new ConfigurationException("File '" + streamName + "' not found");
+				return null;
 			}
 			return new FileStream(streamName, FileMode.Open, FileAccess.Read);
 		}
@@ -167,7 +182,7 @@ namespace System.Configuration
 		public virtual Stream OpenStreamForWrite(string streamName, string templateStreamName, ref object writeContext)
 		{
 			string directoryName = Path.GetDirectoryName(streamName);
-			if (!Directory.Exists(directoryName))
+			if (!string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName))
 			{
 				Directory.CreateDirectory(directoryName);
 			}

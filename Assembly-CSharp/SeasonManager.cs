@@ -124,7 +124,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	private GameObject SpawnBombard(string prefab)
 	{
 		Vector3 vector = new Vector3(global::UnityEngine.Random.value * (float)Grid.WidthInCells, 1.2f * (float)Grid.HeightInCells, Grid.GetLayerZ(Grid.SceneLayer.FXFront));
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(prefab), vector, Quaternion.identity, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, true, 0);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(prefab), vector, Quaternion.identity, null, null, true, 0);
 		gameObject.SetActive(true);
 		return gameObject;
 	}

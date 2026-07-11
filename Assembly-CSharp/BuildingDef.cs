@@ -67,7 +67,7 @@ public class BuildingDef : Def
 				}
 			}
 		}
-		GameObject gameObject = GameUtil.KInstantiate(obj, pos, this.SceneLayer, Folder.Buildings, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(obj, pos, this.SceneLayer, null, 0);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.ElementID = selected_elements[0].id;
 		component.Temperature = temperature;
@@ -77,18 +77,10 @@ public class BuildingDef : Def
 		return gameObject;
 	}
 
-	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Element> selected_elements, float temperature, bool relocated, bool playsound = true)
+	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Element> selected_elements, float temperature, bool playsound = true)
 	{
 		Vector3 vector = Grid.CellToPosCBC(cell, this.SceneLayer);
-		GameObject gameObject;
-		if (relocated)
-		{
-			gameObject = this.Create(vector, resource_storage, selected_elements, this.RelocateRecipe, temperature, this.BuildingComplete);
-		}
-		else
-		{
-			gameObject = this.Create(vector, resource_storage, selected_elements, this.CraftRecipe, temperature, this.BuildingComplete);
-		}
+		GameObject gameObject = this.Create(vector, resource_storage, selected_elements, this.CraftRecipe, temperature, this.BuildingComplete);
 		Rotatable component = gameObject.GetComponent<Rotatable>();
 		if (component != null)
 		{
@@ -112,30 +104,29 @@ public class BuildingDef : Def
 		return gameObject;
 	}
 
-	public GameObject TryPlace(GameObject src_go, Vector3 pos, Orientation orientation, IList<Element> selected_elements, int layer = 0, bool relocated = false)
+	public GameObject TryPlace(GameObject src_go, Vector3 pos, Orientation orientation, IList<Element> selected_elements, int layer = 0)
 	{
 		GameObject gameObject = null;
 		string text;
 		if (this.IsValidPlaceLocation(src_go, pos, orientation, out text))
 		{
-			gameObject = this.Instantiate(pos, orientation, selected_elements, layer, relocated);
+			gameObject = this.Instantiate(pos, orientation, selected_elements, layer);
 		}
 		return gameObject;
 	}
 
-	public GameObject Instantiate(Vector3 pos, Orientation orientation, IList<Element> selected_elements, int layer = 0, bool relocated = false)
+	public GameObject Instantiate(Vector3 pos, Orientation orientation, IList<Element> selected_elements, int layer = 0)
 	{
-		float depthBias = InterfaceTool.DepthBias;
-		pos.z += depthBias;
-		GameObject gameObject = ((!relocated) ? this.BuildingUnderConstruction : this.BuildingUnderRelocation);
+		float num = -0.15f;
+		pos.z += num;
+		GameObject buildingUnderConstruction = this.BuildingUnderConstruction;
 		Vector3 vector = pos;
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
-		Folder folder = Folder.Placers;
-		GameObject gameObject2 = GameUtil.KInstantiate(gameObject, vector, sceneLayer, folder, null, layer);
-		gameObject2.GetComponent<PrimaryElement>().ElementID = selected_elements[0].id;
-		gameObject2.GetComponent<Constructable>().SelectedElements = selected_elements;
-		gameObject2.SetActive(true);
-		return gameObject2;
+		GameObject gameObject = GameUtil.KInstantiate(buildingUnderConstruction, vector, sceneLayer, null, layer);
+		gameObject.GetComponent<PrimaryElement>().ElementID = selected_elements[0].id;
+		gameObject.GetComponent<Constructable>().SelectedElements = selected_elements;
+		gameObject.SetActive(true);
+		return gameObject;
 	}
 
 	private bool IsAreaClear(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer, out string fail_reason)
@@ -668,9 +659,9 @@ public class BuildingDef : Def
 		return true;
 	}
 
-	public Sprite GetUISprite(string animName = "ui")
+	public Sprite GetUISprite(string animName = "ui", bool centered = false)
 	{
-		return Def.GetUISpriteFromMultiObjectAnim(this.AnimFiles[0], animName);
+		return Def.GetUISpriteFromMultiObjectAnim(this.AnimFiles[0], animName, centered);
 	}
 
 	public void GetExtents(bool is_rotated, Vector3 pos, out Vector2I min, out Vector2I max)
@@ -710,11 +701,6 @@ public class BuildingDef : Def
 
 	public void PostProcess()
 	{
-		this.RelocateRecipe = new Recipe();
-		this.RelocateRecipe.Ingredients = new List<Recipe.Ingredient>
-		{
-			new Recipe.Ingredient(this.PrefabID + "Package", 1f)
-		};
 		string name = this.BuildingComplete.PrefabID().Name;
 		string name2 = this.Name;
 		this.CraftRecipe = new Recipe(name, 1f, (SimHashes)0, name2, null, 0);
@@ -734,7 +720,7 @@ public class BuildingDef : Def
 		}
 		if (!this.Deprecated)
 		{
-			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, Sprite>(this.GetUISprite));
+			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite));
 		}
 	}
 
@@ -897,8 +883,6 @@ public class BuildingDef : Def
 
 	public Recipe CraftRecipe;
 
-	public Recipe RelocateRecipe;
-
 	public Sprite UISprite;
 
 	public bool isKAnimTile;
@@ -936,8 +920,6 @@ public class BuildingDef : Def
 	public GameObject BuildingPreview;
 
 	public GameObject BuildingUnderConstruction;
-
-	public GameObject BuildingUnderRelocation;
 
 	public CellOffset[] PlacementOffsets;
 

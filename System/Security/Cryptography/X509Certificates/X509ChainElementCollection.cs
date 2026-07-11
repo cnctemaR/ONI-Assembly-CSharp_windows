@@ -10,16 +10,6 @@ namespace System.Security.Cryptography.X509Certificates
 			this._list = new ArrayList();
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this._list.CopyTo(array, index);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new X509ChainElementEnumerator(this._list);
-		}
-
 		public int Count
 		{
 			get
@@ -57,7 +47,17 @@ namespace System.Security.Cryptography.X509Certificates
 			this._list.CopyTo(array, index);
 		}
 
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this._list.CopyTo(array, index);
+		}
+
 		public X509ChainElementEnumerator GetEnumerator()
+		{
+			return new X509ChainElementEnumerator(this._list);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new X509ChainElementEnumerator(this._list);
 		}

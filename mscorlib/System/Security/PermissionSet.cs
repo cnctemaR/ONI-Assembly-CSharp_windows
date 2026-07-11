@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Permissions;
 using System.Security.Policy;
 using System.Text;
-using System.Threading;
 
 namespace System.Security
 {
-	[MonoTODO("CAS support is experimental (and unsupported).")]
 	[ComVisible(true)]
-	[PermissionSet(SecurityAction.InheritanceDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.StrongNameIdentityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                PublicKeyBlob=\"002400000480000094000000060200000024000052534131000400000100010007D1FA57C4AED9F0A32E84AA0FAEFD0DE9E8FD6AEC8F87FB03766C834C99921EB23BE79AD9D5DCC1DD9AD236132102900B723CF980957FC4E177108FC607774F29E8320E92EA05ECE4E821C0A5EFE8F1645C4C0C93C1AB99285D622CAA652C1DFAD63D745D6F2DE5F17E5EAF0FC4963D261C8A12436518206DC093344D5AD293\"/>\n</PermissionSet>\n")]
+	[MonoTODO("CAS support is experimental (and unsupported).")]
+	[StrongNameIdentityPermission(SecurityAction.InheritanceDemand, PublicKey = "002400000480000094000000060200000024000052534131000400000100010007D1FA57C4AED9F0A32E84AA0FAEFD0DE9E8FD6AEC8F87FB03766C834C99921EB23BE79AD9D5DCC1DD9AD236132102900B723CF980957FC4E177108FC607774F29E8320E92EA05ECE4E821C0A5EFE8F1645C4C0C93C1AB99285D622CAA652C1DFAD63D745D6F2DE5F17E5EAF0FC4963D261C8A12436518206DC093344D5AD293")]
 	[Serializable]
-	public class PermissionSet : IEnumerable, ICollection, IDeserializationCallback, ISecurityEncodable, IStackWalk
+	public class PermissionSet : ISecurityEncodable, ICollection, IEnumerable, IStackWalk, IDeserializationCallback
 	{
 		internal PermissionSet()
 		{
@@ -64,11 +61,6 @@ namespace System.Security
 			}
 		}
 
-		[MonoTODO("may not be required")]
-		void IDeserializationCallback.OnDeserialization(object sender)
-		{
-		}
-
 		public IPermission AddPermission(IPermission perm)
 		{
 			if (perm == null || this._readOnly)
@@ -89,7 +81,7 @@ namespace System.Security
 		}
 
 		[MonoTODO("CAS support is experimental (and unsupported). Imperative mode is not implemented.")]
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"Assertion\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, Assertion = true)]
 		public void Assert()
 		{
 			int num = this.Count;
@@ -146,45 +138,41 @@ namespace System.Security
 
 		public void Demand()
 		{
+			if (this.IsEmpty())
+			{
+				return;
+			}
+			int count = this.list.Count;
+			if (this._ignored == null || this._ignored.Length != count)
+			{
+				this._ignored = new bool[count];
+			}
+			bool flag = this.IsUnrestricted();
+			for (int i = 0; i < count; i++)
+			{
+				IPermission permission = (IPermission)this.list[i];
+				if (permission.GetType().IsSubclassOf(typeof(CodeAccessPermission)))
+				{
+					this._ignored[i] = false;
+					flag = true;
+				}
+				else
+				{
+					this._ignored[i] = true;
+					permission.Demand();
+				}
+			}
+			if (flag && SecurityManager.SecurityEnabled)
+			{
+				this.CasOnlyDemand(this._declsec ? 5 : 3);
+			}
 		}
 
 		internal void CasOnlyDemand(int skip)
 		{
-			Assembly assembly = null;
-			AppDomain appDomain = null;
 			if (this._ignored == null)
 			{
 				this._ignored = new bool[this.list.Count];
-			}
-			ArrayList stack = SecurityFrame.GetStack(skip);
-			if (stack != null && stack.Count > 0)
-			{
-				SecurityFrame securityFrame = (SecurityFrame)stack[0];
-				assembly = securityFrame.Assembly;
-				appDomain = securityFrame.Domain;
-				foreach (object obj in stack)
-				{
-					SecurityFrame securityFrame2 = (SecurityFrame)obj;
-					if (this.ProcessFrame(securityFrame2, ref assembly, ref appDomain) && this.AllIgnored())
-					{
-						return;
-					}
-				}
-				SecurityFrame securityFrame3 = (SecurityFrame)stack[stack.Count - 1];
-				this.CheckAssembly(assembly, securityFrame3);
-				this.CheckAppDomain(appDomain, securityFrame3);
-			}
-			CompressedStack compressedStack = Thread.CurrentThread.GetCompressedStack();
-			if (compressedStack != null && !compressedStack.IsEmpty())
-			{
-				foreach (object obj2 in compressedStack.List)
-				{
-					SecurityFrame securityFrame4 = (SecurityFrame)obj2;
-					if (this.ProcessFrame(securityFrame4, ref assembly, ref appDomain) && this.AllIgnored())
-					{
-						break;
-					}
-				}
 			}
 		}
 
@@ -195,12 +183,14 @@ namespace System.Security
 			{
 				return;
 			}
-			foreach (object obj in this.list)
+			using (IEnumerator enumerator = this.list.GetEnumerator())
 			{
-				IPermission permission = (IPermission)obj;
-				if (permission is IStackWalk)
+				while (enumerator.MoveNext())
 				{
-					throw new NotSupportedException("Currently only declarative Deny are supported.");
+					if (((IPermission)enumerator.Current) is IStackWalk)
+					{
+						throw new NotSupportedException("Currently only declarative Deny are supported.");
+					}
 				}
 			}
 		}
@@ -213,8 +203,7 @@ namespace System.Security
 			}
 			if (et.Tag != "PermissionSet")
 			{
-				string text = string.Format("Invalid tag {0} expected {1}", et.Tag, "PermissionSet");
-				throw new ArgumentException(text, "et");
+				throw new ArgumentException(string.Format("Invalid tag {0} expected {1}", et.Tag, "PermissionSet"), "et");
 			}
 			this.list.Clear();
 			if (CodeAccessPermission.IsUnrestricted(et))
@@ -228,16 +217,16 @@ namespace System.Security
 				foreach (object obj in et.Children)
 				{
 					SecurityElement securityElement = (SecurityElement)obj;
-					string text2 = securityElement.Attribute("class");
-					if (text2 == null)
+					string text = securityElement.Attribute("class");
+					if (text == null)
 					{
 						throw new ArgumentException(Locale.GetText("No permission class is specified."));
 					}
 					if (this.Resolver != null)
 					{
-						text2 = this.Resolver.ResolveClassName(text2);
+						text = this.Resolver.ResolveClassName(text);
 					}
-					this.list.Add(PermissionBuilder.Create(text2, securityElement));
+					this.list.Add(PermissionBuilder.Create(text, securityElement));
 				}
 			}
 		}
@@ -293,12 +282,14 @@ namespace System.Security
 			{
 				return;
 			}
-			foreach (object obj in this.list)
+			using (IEnumerator enumerator = this.list.GetEnumerator())
 			{
-				IPermission permission = (IPermission)obj;
-				if (permission is IStackWalk)
+				while (enumerator.MoveNext())
 				{
-					throw new NotSupportedException("Currently only declarative Deny are supported.");
+					if (((IPermission)enumerator.Current) is IStackWalk)
+					{
+						throw new NotSupportedException("Currently only declarative Deny are supported.");
+					}
 				}
 			}
 		}
@@ -307,12 +298,14 @@ namespace System.Security
 		{
 			if (this.list.Count > 0)
 			{
-				foreach (object obj in this.list)
+				using (IEnumerator enumerator = this.list.GetEnumerator())
 				{
-					IPermission permission = (IPermission)obj;
-					if (!permission.GetType().IsSubclassOf(typeof(CodeAccessPermission)))
+					while (enumerator.MoveNext())
 					{
-						return true;
+						if (!((IPermission)enumerator.Current).GetType().IsSubclassOf(typeof(CodeAccessPermission)))
+						{
+							return true;
+						}
 					}
 				}
 				return false;
@@ -345,34 +338,17 @@ namespace System.Security
 				{
 					using (MemoryStream memoryStream = new MemoryStream(inData))
 					{
-						BinaryFormatter binaryFormatter = new BinaryFormatter();
-						permissionSet = (PermissionSet)binaryFormatter.Deserialize(memoryStream);
+						permissionSet = (PermissionSet)new BinaryFormatter().Deserialize(memoryStream);
 						memoryStream.Close();
 					}
 					string text = permissionSet.ToString();
-					if (outFormat != null)
+					if (outFormat == "XML" || outFormat == "XMLASCII")
 					{
-						if (PermissionSet.<>f__switch$map2B == null)
-						{
-							PermissionSet.<>f__switch$map2B = new Dictionary<string, int>(3)
-							{
-								{ "XML", 0 },
-								{ "XMLASCII", 0 },
-								{ "XMLUNICODE", 1 }
-							};
-						}
-						int num;
-						if (PermissionSet.<>f__switch$map2B.TryGetValue(outFormat, out num))
-						{
-							if (num == 0)
-							{
-								return Encoding.ASCII.GetBytes(text);
-							}
-							if (num == 1)
-							{
-								return Encoding.Unicode.GetBytes(text);
-							}
-						}
+						return Encoding.ASCII.GetBytes(text);
+					}
+					if (outFormat == "XMLUNICODE")
+					{
+						return Encoding.Unicode.GetBytes(text);
 					}
 				}
 			}
@@ -385,48 +361,30 @@ namespace System.Security
 				if (outFormat == "BINARY")
 				{
 					string text2 = null;
-					if (inFormat != null)
+					if (!(inFormat == "XML") && !(inFormat == "XMLASCII"))
 					{
-						if (PermissionSet.<>f__switch$map2C == null)
+						if (inFormat == "XMLUNICODE")
 						{
-							PermissionSet.<>f__switch$map2C = new Dictionary<string, int>(3)
-							{
-								{ "XML", 0 },
-								{ "XMLASCII", 0 },
-								{ "XMLUNICODE", 1 }
-							};
+							text2 = Encoding.Unicode.GetString(inData);
 						}
-						int num;
-						if (PermissionSet.<>f__switch$map2C.TryGetValue(inFormat, out num))
-						{
-							if (num != 0)
-							{
-								if (num == 1)
-								{
-									text2 = Encoding.Unicode.GetString(inData);
-								}
-							}
-							else
-							{
-								text2 = Encoding.ASCII.GetString(inData);
-							}
-						}
+					}
+					else
+					{
+						text2 = Encoding.ASCII.GetString(inData);
 					}
 					if (text2 != null)
 					{
 						permissionSet = new PermissionSet(PermissionState.None);
 						permissionSet.FromXml(SecurityElement.FromString(text2));
 						MemoryStream memoryStream2 = new MemoryStream();
-						BinaryFormatter binaryFormatter2 = new BinaryFormatter();
-						binaryFormatter2.Serialize(memoryStream2, permissionSet);
+						new BinaryFormatter().Serialize(memoryStream2, permissionSet);
 						memoryStream2.Close();
 						return memoryStream2.ToArray();
 					}
 				}
 				else if (outFormat.StartsWith("XML"))
 				{
-					string text3 = string.Format(Locale.GetText("Can't convert from {0} to {1}"), inFormat, outFormat);
-					throw new XmlSyntaxException(text3);
+					throw new XmlSyntaxException(string.Format(Locale.GetText("Can't convert from {0} to {1}"), inFormat, outFormat));
 				}
 			}
 			throw new SerializationException(string.Format(Locale.GetText("Unknown output format {0}."), outFormat));
@@ -507,12 +465,14 @@ namespace System.Security
 			{
 				return true;
 			}
-			foreach (object obj in this.list)
+			using (IEnumerator enumerator = this.list.GetEnumerator())
 			{
-				IPermission permission = (IPermission)obj;
-				if (!permission.IsSubsetOf(null))
+				while (enumerator.MoveNext())
 				{
-					return false;
+					if (!((IPermission)enumerator.Current).IsSubsetOf(null))
+					{
+						return false;
+					}
 				}
 			}
 			return true;
@@ -553,7 +513,7 @@ namespace System.Security
 			}
 			else
 			{
-				this.state = ((!unrestrictedPermission.IsUnrestricted()) ? PermissionState.None : this.state);
+				this.state = (unrestrictedPermission.IsUnrestricted() ? this.state : PermissionState.None);
 			}
 			this.RemovePermission(perm.GetType());
 			this.list.Add(perm);
@@ -646,6 +606,11 @@ namespace System.Security
 			}
 		}
 
+		[MonoTODO("may not be required")]
+		void IDeserializationCallback.OnDeserialization(object sender)
+		{
+		}
+
 		[ComVisible(false)]
 		public override bool Equals(object obj)
 		{
@@ -690,7 +655,11 @@ namespace System.Security
 		[ComVisible(false)]
 		public override int GetHashCode()
 		{
-			return (this.list.Count != 0) ? base.GetHashCode() : ((int)this.state);
+			if (this.list.Count != 0)
+			{
+				return base.GetHashCode();
+			}
+			return (int)this.state;
 		}
 
 		public static void RevertAssert()
@@ -731,71 +700,11 @@ namespace System.Security
 			return true;
 		}
 
-		internal bool ProcessFrame(SecurityFrame frame, ref Assembly current, ref AppDomain domain)
-		{
-			if (this.IsUnrestricted())
-			{
-				if (frame.Deny != null)
-				{
-					CodeAccessPermission.ThrowSecurityException(this, "Deny", frame, SecurityAction.Demand, null);
-				}
-				else if (frame.PermitOnly != null && !frame.PermitOnly.IsUnrestricted())
-				{
-					CodeAccessPermission.ThrowSecurityException(this, "PermitOnly", frame, SecurityAction.Demand, null);
-				}
-			}
-			if (frame.HasStackModifiers)
-			{
-				for (int i = 0; i < this.list.Count; i++)
-				{
-					CodeAccessPermission codeAccessPermission = (CodeAccessPermission)this.list[i];
-					if (codeAccessPermission.ProcessFrame(frame))
-					{
-						this._ignored[i] = true;
-						if (this.AllIgnored())
-						{
-							return true;
-						}
-					}
-				}
-			}
-			if (frame.Assembly != current)
-			{
-				this.CheckAssembly(current, frame);
-				current = frame.Assembly;
-			}
-			if (frame.Domain != domain)
-			{
-				this.CheckAppDomain(domain, frame);
-				domain = frame.Domain;
-			}
-			return false;
-		}
-
-		internal void CheckAssembly(Assembly a, SecurityFrame frame)
-		{
-			IPermission permission = SecurityManager.CheckPermissionSet(a, this, false);
-			if (permission != null)
-			{
-				CodeAccessPermission.ThrowSecurityException(this, "Demand failed assembly permissions checks.", frame, SecurityAction.Demand, permission);
-			}
-		}
-
-		internal void CheckAppDomain(AppDomain domain, SecurityFrame frame)
-		{
-			IPermission permission = SecurityManager.CheckPermissionSet(domain, this);
-			if (permission != null)
-			{
-				CodeAccessPermission.ThrowSecurityException(this, "Demand failed appdomain permissions checks.", frame, SecurityAction.Demand, permission);
-			}
-		}
-
 		internal static PermissionSet CreateFromBinaryFormat(byte[] data)
 		{
 			if (data == null || data[0] != 46 || data.Length < 2)
 			{
-				string text = Locale.GetText("Invalid data in 2.0 metadata format.");
-				throw new SecurityException(text);
+				throw new SecurityException(Locale.GetText("Invalid data in 2.0 metadata format."));
 			}
 			int num = 1;
 			int num2 = PermissionSet.ReadEncodedInt(data, ref num);
@@ -805,8 +714,7 @@ namespace System.Security
 				IPermission permission = PermissionSet.ProcessAttribute(data, ref num);
 				if (permission == null)
 				{
-					string text2 = Locale.GetText("Unsupported data found in 2.0 metadata format.");
-					throw new SecurityException(text2);
+					throw new SecurityException(Locale.GetText("Unsupported data found in 2.0 metadata format."));
 				}
 				permissionSet.AddPermission(permission);
 			}
@@ -849,7 +757,9 @@ namespace System.Security
 			int num2 = PermissionSet.ReadEncodedInt(data, ref position);
 			for (int i = 0; i < num2; i++)
 			{
-				byte b = data[position++];
+				int num3 = position;
+				position = num3 + 1;
+				byte b = data[num3];
 				bool flag;
 				if (b != 83)
 				{
@@ -864,43 +774,49 @@ namespace System.Security
 					flag = false;
 				}
 				bool flag2 = false;
-				byte b2 = data[position++];
+				num3 = position;
+				position = num3 + 1;
+				byte b2 = data[num3];
 				if (b2 == 29)
 				{
 					flag2 = true;
-					b2 = data[position++];
+					num3 = position;
+					position = num3 + 1;
+					b2 = data[num3];
 				}
-				int num3 = PermissionSet.ReadEncodedInt(data, ref position);
-				string string2 = Encoding.UTF8.GetString(data, position, num3);
-				position += num3;
-				int num4 = 1;
+				int num4 = PermissionSet.ReadEncodedInt(data, ref position);
+				string string2 = Encoding.UTF8.GetString(data, position, num4);
+				position += num4;
+				int num5 = 1;
 				if (flag2)
 				{
-					num4 = BitConverter.ToInt32(data, position);
+					num5 = BitConverter.ToInt32(data, position);
 					position += 4;
 				}
 				object[] array = null;
-				for (int j = 0; j < num4; j++)
+				for (int j = 0; j < num5; j++)
 				{
-					if (flag2)
-					{
-					}
-					b = b2;
 					object obj;
-					switch (b)
+					switch (b2)
 					{
 					case 2:
-						obj = Convert.ToBoolean(data[position++]);
+						num3 = position;
+						position = num3 + 1;
+						obj = Convert.ToBoolean(data[num3]);
 						break;
 					case 3:
 						obj = Convert.ToChar(data[position]);
 						position += 2;
 						break;
 					case 4:
-						obj = Convert.ToSByte(data[position++]);
+						num3 = position;
+						position = num3 + 1;
+						obj = Convert.ToSByte(data[num3]);
 						break;
 					case 5:
-						obj = Convert.ToByte(data[position++]);
+						num3 = position;
+						position = num3 + 1;
+						obj = Convert.ToByte(data[num3]);
 						break;
 					case 6:
 						obj = Convert.ToInt16(data[position]);
@@ -939,9 +855,9 @@ namespace System.Security
 						string text = null;
 						if (data[position] != 255)
 						{
-							int num5 = PermissionSet.ReadEncodedInt(data, ref position);
-							text = Encoding.UTF8.GetString(data, position, num5);
-							position += num5;
+							int num6 = PermissionSet.ReadEncodedInt(data, ref position);
+							text = Encoding.UTF8.GetString(data, position, num6);
+							position += num6;
 						}
 						else
 						{
@@ -952,25 +868,23 @@ namespace System.Security
 					}
 					default:
 					{
-						if (b != 80)
+						if (b2 != 80)
 						{
 							return null;
 						}
-						int num6 = PermissionSet.ReadEncodedInt(data, ref position);
-						obj = Type.GetType(Encoding.UTF8.GetString(data, position, num6));
-						position += num6;
+						int num7 = PermissionSet.ReadEncodedInt(data, ref position);
+						obj = Type.GetType(Encoding.UTF8.GetString(data, position, num7));
+						position += num7;
 						break;
 					}
 					}
 					if (flag)
 					{
-						PropertyInfo property = type.GetProperty(string2);
-						property.SetValue(securityAttribute, obj, array);
+						type.GetProperty(string2).SetValue(securityAttribute, obj, array);
 					}
 					else
 					{
-						FieldInfo field = type.GetField(string2);
-						field.SetValue(securityAttribute, obj);
+						type.GetField(string2).SetValue(securityAttribute, obj);
 					}
 				}
 			}

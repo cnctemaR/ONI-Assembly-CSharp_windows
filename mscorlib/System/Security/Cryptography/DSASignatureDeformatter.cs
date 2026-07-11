@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
@@ -8,48 +9,55 @@ namespace System.Security.Cryptography
 	{
 		public DSASignatureDeformatter()
 		{
+			this._oid = CryptoConfig.MapNameToOID("SHA1", OidGroup.HashAlgorithm);
 		}
 
 		public DSASignatureDeformatter(AsymmetricAlgorithm key)
+			: this()
 		{
-			this.SetKey(key);
-		}
-
-		public override void SetHashAlgorithm(string strName)
-		{
-			if (strName == null)
+			if (key == null)
 			{
-				throw new ArgumentNullException("strName");
+				throw new ArgumentNullException("key");
 			}
-			try
-			{
-				SHA1.Create(strName);
-			}
-			catch (InvalidCastException)
-			{
-				throw new CryptographicUnexpectedOperationException(Locale.GetText("DSA requires SHA1"));
-			}
+			this._dsaKey = (DSA)key;
 		}
 
 		public override void SetKey(AsymmetricAlgorithm key)
 		{
-			if (key != null)
+			if (key == null)
 			{
-				this.dsa = (DSA)key;
-				return;
+				throw new ArgumentNullException("key");
 			}
-			throw new ArgumentNullException("key");
+			this._dsaKey = (DSA)key;
+		}
+
+		public override void SetHashAlgorithm(string strName)
+		{
+			if (CryptoConfig.MapNameToOID(strName, OidGroup.HashAlgorithm) != this._oid)
+			{
+				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("This operation is not supported for this class."));
+			}
 		}
 
 		public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature)
 		{
-			if (this.dsa == null)
+			if (rgbHash == null)
 			{
-				throw new CryptographicUnexpectedOperationException(Locale.GetText("missing key"));
+				throw new ArgumentNullException("rgbHash");
 			}
-			return this.dsa.VerifySignature(rgbHash, rgbSignature);
+			if (rgbSignature == null)
+			{
+				throw new ArgumentNullException("rgbSignature");
+			}
+			if (this._dsaKey == null)
+			{
+				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("No asymmetric key object has been associated with this formatter object."));
+			}
+			return this._dsaKey.VerifySignature(rgbHash, rgbSignature);
 		}
 
-		private DSA dsa;
+		private DSA _dsaKey;
+
+		private string _oid;
 	}
 }

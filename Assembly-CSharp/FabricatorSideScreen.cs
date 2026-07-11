@@ -31,6 +31,8 @@ public class FabricatorSideScreen : SideScreenContent
 			return;
 		}
 		this.queue.SetFabricator(component);
+		this.queue.AddAvailableMaterialStorage(component.inStorage);
+		this.queue.AddAvailableMaterialStorage(component.buildStorage);
 		this.Initialize(component);
 	}
 
@@ -69,9 +71,13 @@ public class FabricatorSideScreen : SideScreenContent
 		while (i < array.Length)
 		{
 			Recipe recipe = array[i];
+			if (!recipe.Result.IsValid)
+			{
+				global::Debug.LogErrorFormat("Cant proceed without a recipe end product! [{0}]", new object[] { recipe.Name });
+			}
 			if (!target.hideRecipesUndiscoveredIngredients)
 			{
-				goto IL_0130;
+				goto IL_0159;
 			}
 			bool flag = false;
 			foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
@@ -84,17 +90,21 @@ public class FabricatorSideScreen : SideScreenContent
 			}
 			if (!flag)
 			{
-				goto IL_0130;
+				goto IL_0159;
 			}
-			IL_027C:
+			IL_02D9:
 			i++;
 			continue;
-			IL_0130:
+			IL_0159:
 			GameObject prefab = Assets.GetPrefab(recipe.Result);
 			KToggle newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 			newToggle.GetComponentInChildren<LocText>().text = recipe.Name;
 			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
-			Sprite sprite = ((!(recipe.Icon == null)) ? recipe.Icon : Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui"));
+			if (component.AnimFiles == null || component.AnimFiles.Length == 0)
+			{
+				global::Debug.LogErrorFormat("Missing UI sprite anim files for {0}", new object[] { recipe.Name });
+			}
+			Sprite sprite = ((!(recipe.Icon == null)) ? recipe.Icon : Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false));
 			if (sprite == null)
 			{
 				sprite = this.elementPlaceholderSpr;
@@ -114,7 +124,7 @@ public class FabricatorSideScreen : SideScreenContent
 			}
 			this.recipeMap.Add(newToggle, recipe);
 			this.recipeToggles.Add(newToggle);
-			goto IL_027C;
+			goto IL_02D9;
 		}
 		if (this.recipeToggles.Count > 0)
 		{

@@ -335,20 +335,20 @@ namespace UnityEngine.Networking
 				{
 					if (transformSyncMode == NetworkTransform.TransformSyncMode.SyncRigidbody3D)
 					{
-						if (!this.m_RigidBody3D)
+						if (!this.m_RigidBody3D && !(this.m_RigidBody3D = base.GetComponent<Rigidbody>()))
 						{
 							flag = true;
 							type = typeof(Rigidbody);
 						}
 					}
 				}
-				else if (!this.m_RigidBody2D)
+				else if (!this.m_RigidBody2D && !(this.m_RigidBody2D = base.GetComponent<Rigidbody2D>()))
 				{
 					flag = true;
 					type = typeof(Rigidbody2D);
 				}
 			}
-			else if (!this.m_CharacterController)
+			else if (!this.m_CharacterController && !(this.m_CharacterController = base.GetComponent<CharacterController>()))
 			{
 				flag = true;
 				type = typeof(CharacterController);
@@ -1080,7 +1080,7 @@ namespace UnityEngine.Networking
 			{
 				if (LogFilter.logError)
 				{
-					Debug.LogError("HandleTransform no gameObject");
+					Debug.LogError("Received NetworkTransform data for GameObject that doesn't exist");
 				}
 			}
 			else

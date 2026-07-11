@@ -59,7 +59,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 				this.fertility.deltaAttribute.Add(new AttributeModifier(this.fertility.deltaAttribute.Id, 33.333332f, null, false, false, true));
 			}
 			float num = 100f / (def.baseFertileCycles * 600f);
-			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false);
+			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, 0f);
 			this.fertileEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num, CREATURES.MODIFIERS.BASE_FERTILITY.NAME, false, false, true));
 			this.breedingChances = new List<FertilityMonitor.BreedingChance>();
 			if (def.initialBreedingWeights != null)
@@ -127,7 +127,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 				}
 			}
 			GameObject prefab = Assets.GetPrefab(invalid);
-			GameObject gameObject = Util.KInstantiate(prefab, Folder.Creatures, position);
+			GameObject gameObject = Util.KInstantiate(prefab, position);
 			this.egg = gameObject;
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
 			string text = "egg01";

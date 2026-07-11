@@ -33,9 +33,7 @@ namespace System.Runtime.Remoting.Lifetime
 		{
 			foreach (object obj in this.registered_objects.Values)
 			{
-				MarshalByRefObject marshalByRefObject = (MarshalByRefObject)obj;
-				ILease lease = marshalByRefObject.GetLifetimeService() as ILease;
-				lease.Unregister(this);
+				(((MarshalByRefObject)obj).GetLifetimeService() as ILease).Unregister(this);
 			}
 			this.registered_objects.Clear();
 		}
@@ -77,8 +75,7 @@ namespace System.Runtime.Remoting.Lifetime
 			{
 				return;
 			}
-			ILease lease = obj.GetLifetimeService() as ILease;
-			lease.Unregister(this);
+			(obj.GetLifetimeService() as ILease).Unregister(this);
 			this.registered_objects.Remove(obj);
 		}
 

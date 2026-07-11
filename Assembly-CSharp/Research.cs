@@ -7,6 +7,11 @@ using STRINGS;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Research : KMonoBehaviour, ISaveLoadable
 {
+	public static void DestroyInstance()
+	{
+		Research.Instance = null;
+	}
+
 	public bool IsBeingResearched(Tech tech)
 	{
 		return this.activeResearch != null && tech != null && this.activeResearch.tech == tech;
@@ -26,10 +31,8 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			this.globalPointInventory = new ResearchPointInventory();
 		}
 		base.Subscribe(-1523247426, new Action<object>(this.OnRolesUpdated));
-		Components.Cmps<ResearchCenter> researchCenters = Components.ResearchCenters;
-		researchCenters.OnAdd = (Action<ResearchCenter>)Delegate.Combine(researchCenters.OnAdd, new Action<ResearchCenter>(this.CheckResearchBuildings));
-		Components.Cmps<ResearchCenter> researchCenters2 = Components.ResearchCenters;
-		researchCenters2.OnRemove = (Action<ResearchCenter>)Delegate.Combine(researchCenters2.OnRemove, new Action<ResearchCenter>(this.CheckResearchBuildings));
+		Components.ResearchCenters.OnAdd += new Action<ResearchCenter>(this.CheckResearchBuildings);
+		Components.ResearchCenters.OnRemove += new Action<ResearchCenter>(this.CheckResearchBuildings);
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
 			ResearchCenter component = kprefabID.GetComponent<ResearchCenter>();
@@ -223,10 +226,8 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
-		Components.Cmps<ResearchCenter> researchCenters = Components.ResearchCenters;
-		researchCenters.OnAdd = (Action<ResearchCenter>)Delegate.Remove(researchCenters.OnAdd, new Action<ResearchCenter>(this.CheckResearchBuildings));
-		Components.Cmps<ResearchCenter> researchCenters2 = Components.ResearchCenters;
-		researchCenters2.OnRemove = (Action<ResearchCenter>)Delegate.Remove(researchCenters2.OnRemove, new Action<ResearchCenter>(this.CheckResearchBuildings));
+		Components.ResearchCenters.OnAdd -= new Action<ResearchCenter>(this.CheckResearchBuildings);
+		Components.ResearchCenters.OnRemove -= new Action<ResearchCenter>(this.CheckResearchBuildings);
 		base.OnCleanUp();
 	}
 

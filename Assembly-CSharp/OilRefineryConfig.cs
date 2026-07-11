@@ -24,7 +24,6 @@ public class OilRefineryConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
 		buildingDef.SelfHeatKilowattsWhenActive = 8f;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);

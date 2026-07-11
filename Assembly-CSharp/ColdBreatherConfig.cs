@@ -12,6 +12,7 @@ public class ColdBreatherConfig : IEntityConfig
 		gameObject.AddOrGet<ReceptacleMonitor>();
 		gameObject.AddOrGet<EntombVulnerable>();
 		gameObject.AddOrGet<WiltCondition>();
+		gameObject.AddOrGet<Prioritizable>();
 		gameObject.AddOrGet<Uprootable>();
 		gameObject.AddOrGet<UprootedMonitor>();
 		gameObject.AddOrGet<DrowningMonitor>();
@@ -21,6 +22,7 @@ public class ColdBreatherConfig : IEntityConfig
 		ColdBreather coldBreather = gameObject.AddOrGet<ColdBreather>();
 		coldBreather.deltaEmitTemperature = -5f;
 		coldBreather.emitOffsetCell = new Vector3(0f, 1f);
+		gameObject.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
 		Storage storage = BuildingTemplates.CreateDefaultStorage(gameObject, false);
 		storage.showInUI = false;
 		ElementConsumer elementConsumer = gameObject.AddOrGet<ElementConsumer>();

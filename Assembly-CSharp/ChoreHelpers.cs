@@ -5,11 +5,19 @@ public static class ChoreHelpers
 {
 	public static GameObject CreateLocator(string name, Vector3 pos)
 	{
-		GameObject gameObject = new GameObject(name);
-		KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
-		kprefabID.PrefabTag = ChoreHelpers.LocatorTag;
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(ApproachableLocator.ID), null, null);
+		gameObject.name = name;
 		gameObject.transform.SetPosition(pos);
-		gameObject.AddComponent<Approachable>();
+		gameObject.gameObject.SetActive(true);
+		return gameObject;
+	}
+
+	public static GameObject CreateSleepLocator(Vector3 pos)
+	{
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(SleepLocator.ID), null, null);
+		gameObject.name = "SLeepLocator";
+		gameObject.transform.SetPosition(pos);
+		gameObject.gameObject.SetActive(true);
 		return gameObject;
 	}
 
@@ -20,6 +28,4 @@ public static class ChoreHelpers
 			locator.gameObject.DeleteObject();
 		}
 	}
-
-	private static Tag LocatorTag = TagManager.Create("Locator");
 }

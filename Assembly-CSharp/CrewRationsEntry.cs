@@ -31,7 +31,7 @@ public class CrewRationsEntry : CrewListEntry
 			{
 				this.currentStressText.text = amountInstance.GetValueString();
 				this.currentStressText.GetComponent<ToolTip>().toolTip = amountInstance.GetTooltip();
-				this.stressTrendImage.SetValue(amountInstance, new Func<AmountInstance, string>(amountInstance.amount.GetTooltip));
+				this.stressTrendImage.SetValue(amountInstance);
 			}
 			else if (amountInstance.amount == Db.Get().Amounts.Calories)
 			{

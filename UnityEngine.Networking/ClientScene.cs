@@ -148,7 +148,17 @@ namespace UnityEngine.Networking
 				unetView = view
 			};
 			ClientScene.s_LocalPlayers[(int)playerControllerId] = playerController;
-			ClientScene.s_ReadyConnection.SetPlayerController(playerController);
+			if (ClientScene.s_ReadyConnection == null)
+			{
+				if (LogFilter.logWarn)
+				{
+					Debug.LogWarning("No ready connection found for setting player controller during InternalAddPlayer");
+				}
+			}
+			else
+			{
+				ClientScene.s_ReadyConnection.SetPlayerController(playerController);
+			}
 		}
 
 		public static bool AddPlayer(short playerControllerId)

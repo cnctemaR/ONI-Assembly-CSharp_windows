@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPriorityManager
 {
+	public static void DestroyInstance()
+	{
+		Immigration.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		this.bImmigrantAvailable = false;

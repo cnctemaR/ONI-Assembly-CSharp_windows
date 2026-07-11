@@ -21,7 +21,7 @@ public class FishDeliveryPointConfig : IBuildingConfig
 		Storage storage = go.AddOrGet<Storage>();
 		storage.allowItemRemoval = false;
 		storage.showDescriptor = true;
-		storage.storageFilters = STORAGEFILTERS.BAGABLE_CREATURES;
+		storage.storageFilters = STORAGEFILTERS.SWIMMING_CREATURES;
 		storage.workAnims = new HashedString[]
 		{
 			new HashedString("place"),
@@ -30,6 +30,7 @@ public class FishDeliveryPointConfig : IBuildingConfig
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
+		storage.allowSettingOnlyFetchMarkedItems = false;
 		CreatureDeliveryPoint creatureDeliveryPoint = go.AddOrGet<CreatureDeliveryPoint>();
 		creatureDeliveryPoint.deliveryOffsets = new CellOffset[]
 		{

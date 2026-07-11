@@ -10,13 +10,19 @@ public class MemorySnapshot
 {
 	public MemorySnapshot()
 	{
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		foreach (Type type in App.GetCurrentDomainTypes())
 		{
-			MemorySnapshot.LoadStatics(assembly, this.statics);
+			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
+			{
+				if (fieldInfo.IsStatic)
+				{
+					this.statics.Add(fieldInfo);
+				}
+			}
 		}
-		foreach (FieldInfo fieldInfo in this.statics)
+		foreach (FieldInfo fieldInfo2 in this.statics)
 		{
-			MemorySnapshot.CountField(fieldInfo, null, this.types, this.walked, this.fieldCounts, this.detailTypeCount, null, null, null, null, fieldInfo.DeclaringType);
+			MemorySnapshot.CountField(fieldInfo2, null, this.types, this.walked, this.fieldCounts, this.detailTypeCount, null, null, null, null, fieldInfo2.DeclaringType);
 		}
 		foreach (global::UnityEngine.Object @object in Resources.FindObjectsOfTypeAll(typeof(global::UnityEngine.Object)))
 		{
@@ -168,28 +174,14 @@ public class MemorySnapshot
 				{
 					obj2 = field.GetValue(obj);
 				}
-				string text = field.DeclaringType.FullName + "." + field.Name;
+				string text = field.DeclaringType.ToString() + "." + field.Name;
 				MemorySnapshot.CountReference(field.FieldType, obj2, types, walked, field_counts, detailTypeCount, text, parent_3, parent_2, parent_1, parent_0, field.DeclaringType);
 			}
 			catch
 			{
 				obj2 = null;
-				string text2 = field.DeclaringType.FullName + "." + field.Name;
+				string text2 = field.DeclaringType.ToString() + "." + field.Name;
 				MemorySnapshot.CountReference(field.FieldType, obj2, types, walked, field_counts, detailTypeCount, text2, parent_3, parent_2, parent_1, parent_0, field.DeclaringType);
-			}
-		}
-	}
-
-	public static void LoadStatics(Assembly assembly, List<FieldInfo> statics)
-	{
-		foreach (Type type in assembly.GetTypes())
-		{
-			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
-			{
-				if (fieldInfo.IsStatic)
-				{
-					statics.Add(fieldInfo);
-				}
 			}
 		}
 	}
@@ -301,46 +293,46 @@ public class MemorySnapshot
 			{
 				return string.Concat(new string[]
 				{
-					this.parent4.FullName,
+					this.parent4.ToString(),
 					"--",
-					this.parent3.FullName,
+					this.parent3.ToString(),
 					"--",
-					this.parent2.FullName,
+					this.parent2.ToString(),
 					"--",
-					this.parent1.FullName,
+					this.parent1.ToString(),
 					"--",
-					this.parent0.FullName
+					this.parent0.ToString()
 				});
 			}
 			if (this.parent3 != null)
 			{
 				return string.Concat(new string[]
 				{
-					this.parent3.FullName,
+					this.parent3.ToString(),
 					"--",
-					this.parent2.FullName,
+					this.parent2.ToString(),
 					"--",
-					this.parent1.FullName,
+					this.parent1.ToString(),
 					"--",
-					this.parent0.FullName
+					this.parent0.ToString()
 				});
 			}
 			if (this.parent2 != null)
 			{
 				return string.Concat(new string[]
 				{
-					this.parent2.FullName,
+					this.parent2.ToString(),
 					"--",
-					this.parent1.FullName,
+					this.parent1.ToString(),
 					"--",
-					this.parent0.FullName
+					this.parent0.ToString()
 				});
 			}
 			if (this.parent1 != null)
 			{
-				return this.parent1.FullName + "--" + this.parent0.FullName;
+				return this.parent1.ToString() + "--" + this.parent0.ToString();
 			}
-			return this.parent0.FullName;
+			return this.parent0.ToString();
 		}
 
 		public Type parent0;

@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class StampTool : InterfaceTool
 {
+	public static void DestroyInstance()
+	{
+		StampTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -38,6 +43,14 @@ public class StampTool : InterfaceTool
 	private void Stamp(Vector2 pos)
 	{
 		if (!this.ready)
+		{
+			return;
+		}
+		int num = Grid.OffsetCell(Grid.PosToCell(pos), Mathf.FloorToInt(-this.stampTemplate.info.size.X / 2f), 0);
+		int num2 = Grid.OffsetCell(Grid.PosToCell(pos), Mathf.FloorToInt(this.stampTemplate.info.size.X / 2f), 0);
+		int num3 = Grid.OffsetCell(Grid.PosToCell(pos), 0, 1 + Mathf.FloorToInt(-this.stampTemplate.info.size.Y / 2f));
+		int num4 = Grid.OffsetCell(Grid.PosToCell(pos), 0, 1 + Mathf.FloorToInt(this.stampTemplate.info.size.Y / 2f));
+		if (!Grid.IsValidBuildingCell(num) || !Grid.IsValidBuildingCell(num2) || !Grid.IsValidBuildingCell(num4) || !Grid.IsValidBuildingCell(num3))
 		{
 			return;
 		}
@@ -134,11 +147,11 @@ public class StampTool : InterfaceTool
 		{
 			if (!list.Contains(num2) && Grid.Objects[num2, 6] == null)
 			{
-				GameObject gameObject2 = Util.KInstantiate(this.PlacerPrefab, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+				GameObject gameObject2 = Util.KInstantiate(this.PlacerPrefab, null, null);
 				Grid.Objects[num2, 6] = gameObject2;
 				Vector3 vector = Grid.CellToPosCBC(num2, this.visualizerLayer);
-				float depthBias = InterfaceTool.DepthBias;
-				vector.z += depthBias;
+				float num3 = -0.15f;
+				vector.z += num3;
 				gameObject2.transform.SetPosition(vector);
 			}
 		}

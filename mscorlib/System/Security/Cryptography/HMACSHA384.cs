@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -8,34 +7,47 @@ namespace System.Security.Cryptography
 	public class HMACSHA384 : HMAC
 	{
 		public HMACSHA384()
-			: this(KeyBuilder.Key(8))
+			: this(Utils.GenerateRandom(128))
 		{
-			this.ProduceLegacyHmacValues = HMACSHA384.legacy_mode;
 		}
 
+		[SecuritySafeCritical]
 		public HMACSHA384(byte[] key)
 		{
-			this.ProduceLegacyHmacValues = HMACSHA384.legacy_mode;
-			base.HashName = "SHA384";
+			this.m_hashName = "SHA384";
+			this.m_hash1 = HMAC.GetHashAlgorithmWithFipsFallback(() => new SHA384Managed(), () => HashAlgorithm.Create("System.Security.Cryptography.SHA384CryptoServiceProvider"));
+			this.m_hash2 = HMAC.GetHashAlgorithmWithFipsFallback(() => new SHA384Managed(), () => HashAlgorithm.Create("System.Security.Cryptography.SHA384CryptoServiceProvider"));
 			this.HashSizeValue = 384;
-			this.Key = key;
+			base.BlockSizeValue = this.BlockSize;
+			base.InitializeKey(key);
+		}
+
+		private int BlockSize
+		{
+			get
+			{
+				if (!this.m_useLegacyBlockSize)
+				{
+					return 128;
+				}
+				return 64;
+			}
 		}
 
 		public bool ProduceLegacyHmacValues
 		{
 			get
 			{
-				return this.legacy;
+				return this.m_useLegacyBlockSize;
 			}
 			set
 			{
-				this.legacy = value;
-				base.BlockSizeValue = ((!this.legacy) ? 128 : 64);
+				this.m_useLegacyBlockSize = value;
+				base.BlockSizeValue = this.BlockSize;
+				base.InitializeKey(this.KeyValue);
 			}
 		}
 
-		private static bool legacy_mode = Environment.GetEnvironmentVariable("legacyHMACMode") == "1";
-
-		private bool legacy;
+		private bool m_useLegacyBlockSize = Utils._ProduceLegacyHmacValues();
 	}
 }

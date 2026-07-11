@@ -7,22 +7,18 @@ namespace System.Data
 	public class DeletedRowInaccessibleException : DataException
 	{
 		public DeletedRowInaccessibleException()
-			: base(Locale.GetText("This DataRow has been deleted"))
-		{
-		}
-
-		public DeletedRowInaccessibleException(string s)
-			: base(s)
-		{
-		}
-
-		public DeletedRowInaccessibleException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		{
+		}
+
+		public DeletedRowInaccessibleException(string s)
+		{
+		}
+
+		public DeletedRowInaccessibleException(string message, Exception innerException)
 		{
 		}
 	}

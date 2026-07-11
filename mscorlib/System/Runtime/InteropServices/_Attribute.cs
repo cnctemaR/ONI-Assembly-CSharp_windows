@@ -4,8 +4,8 @@ namespace System.Runtime.InteropServices
 {
 	[TypeLibImportClass(typeof(Attribute))]
 	[ComVisible(true)]
-	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[CLSCompliant(false)]
 	[Guid("917B14D0-2D9E-38B8-92A9-381ACF52F7C0")]
 	public interface _Attribute
 	{

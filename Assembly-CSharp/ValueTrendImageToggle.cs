@@ -5,9 +5,8 @@ using UnityEngine.UI;
 
 public class ValueTrendImageToggle : MonoBehaviour
 {
-	public void SetValue(AmountInstance ainstance, Func<AmountInstance, string> tooltip_func)
+	public void SetValue(AmountInstance ainstance)
 	{
-		this.tooltip.toolTip = tooltip_func(ainstance);
 		float delta = ainstance.GetDelta();
 		Sprite sprite = null;
 		if (ainstance.paused || delta == 0f)
@@ -60,6 +59,4 @@ public class ValueTrendImageToggle : MonoBehaviour
 	public Sprite Down_Three;
 
 	public Sprite Zero;
-
-	public ToolTip tooltip;
 }

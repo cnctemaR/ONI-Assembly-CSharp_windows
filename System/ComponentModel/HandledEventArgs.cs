@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class HandledEventArgs : EventArgs
 	{
 		public HandledEventArgs()
+			: this(false)
 		{
-			this.handled = false;
 		}
 
 		public HandledEventArgs(bool defaultHandledValue)

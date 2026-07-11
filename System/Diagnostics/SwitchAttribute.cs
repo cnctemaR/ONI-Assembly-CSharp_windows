@@ -1,35 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Reflection;
 
 namespace System.Diagnostics
 {
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Event)]
-	[global::System.MonoLimitation("This attribute is not considered in trace support.")]
 	public sealed class SwitchAttribute : Attribute
 	{
 		public SwitchAttribute(string switchName, Type switchType)
 		{
-			if (switchName == null)
-			{
-				throw new ArgumentNullException("switchName");
-			}
-			if (switchType == null)
-			{
-				throw new ArgumentNullException("switchType");
-			}
-			this.name = switchName;
-			this.type = switchType;
-		}
-
-		public static SwitchAttribute[] GetAll(Assembly assembly)
-		{
-			object[] customAttributes = assembly.GetCustomAttributes(typeof(SwitchAttribute), false);
-			SwitchAttribute[] array = new SwitchAttribute[customAttributes.Length];
-			for (int i = 0; i < customAttributes.Length; i++)
-			{
-				array[i] = (SwitchAttribute)customAttributes[i];
-			}
-			return array;
+			this.SwitchName = switchName;
+			this.SwitchType = switchType;
 		}
 
 		public string SwitchName
@@ -40,27 +21,15 @@ namespace System.Diagnostics
 			}
 			set
 			{
-				if (this.name == null)
+				if (value == null)
 				{
 					throw new ArgumentNullException("value");
+				}
+				if (value.Length == 0)
+				{
+					throw new ArgumentException(global::SR.GetString("Argument {0} cannot be null or zero-length.", new object[] { "value" }), "value");
 				}
 				this.name = value;
-			}
-		}
-
-		public string SwitchDescription
-		{
-			get
-			{
-				return this.desc;
-			}
-			set
-			{
-				if (this.desc == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				this.desc = value;
 			}
 		}
 
@@ -72,7 +41,7 @@ namespace System.Diagnostics
 			}
 			set
 			{
-				if (this.type == null)
+				if (value == null)
 				{
 					throw new ArgumentNullException("value");
 				}
@@ -80,10 +49,60 @@ namespace System.Diagnostics
 			}
 		}
 
-		private string name;
+		public string SwitchDescription
+		{
+			get
+			{
+				return this.description;
+			}
+			set
+			{
+				this.description = value;
+			}
+		}
 
-		private string desc = string.Empty;
+		public static SwitchAttribute[] GetAll(Assembly assembly)
+		{
+			if (assembly == null)
+			{
+				throw new ArgumentNullException("assembly");
+			}
+			ArrayList arrayList = new ArrayList();
+			object[] customAttributes = assembly.GetCustomAttributes(typeof(SwitchAttribute), false);
+			arrayList.AddRange(customAttributes);
+			Type[] types = assembly.GetTypes();
+			for (int i = 0; i < types.Length; i++)
+			{
+				SwitchAttribute.GetAllRecursive(types[i], arrayList);
+			}
+			SwitchAttribute[] array = new SwitchAttribute[arrayList.Count];
+			arrayList.CopyTo(array, 0);
+			return array;
+		}
+
+		private static void GetAllRecursive(Type type, ArrayList switchAttribs)
+		{
+			SwitchAttribute.GetAllRecursive(type, switchAttribs);
+			MemberInfo[] members = type.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+			for (int i = 0; i < members.Length; i++)
+			{
+				if (!(members[i] is Type))
+				{
+					SwitchAttribute.GetAllRecursive(members[i], switchAttribs);
+				}
+			}
+		}
+
+		private static void GetAllRecursive(MemberInfo member, ArrayList switchAttribs)
+		{
+			object[] customAttributes = member.GetCustomAttributes(typeof(SwitchAttribute), false);
+			switchAttribs.AddRange(customAttributes);
+		}
 
 		private Type type;
+
+		private string name;
+
+		private string description;
 	}
 }

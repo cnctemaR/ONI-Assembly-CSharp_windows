@@ -15,7 +15,7 @@ namespace System.Runtime.Remoting.Messaging
 		public ConstructionCall(IMessage m)
 			: base(m)
 		{
-			this._activationTypeName = this.TypeName;
+			this._activationTypeName = base.TypeName;
 			this._isContextOk = true;
 		}
 
@@ -114,25 +114,32 @@ namespace System.Runtime.Remoting.Messaging
 
 		internal override void InitMethodProperty(string key, object value)
 		{
-			switch (key)
+			if (key == "__Activator")
 			{
-			case "__Activator":
 				this._activator = (IActivator)value;
 				return;
-			case "__CallSiteActivationAttributes":
+			}
+			if (key == "__CallSiteActivationAttributes")
+			{
 				this._activationAttributes = (object[])value;
 				return;
-			case "__ActivationType":
+			}
+			if (key == "__ActivationType")
+			{
 				this._activationType = (Type)value;
 				return;
-			case "__ContextProperties":
+			}
+			if (key == "__ContextProperties")
+			{
 				this._contextProperties = (IList)value;
 				return;
-			case "__ActivationTypeName":
-				this._activationTypeName = (string)value;
+			}
+			if (!(key == "__ActivationTypeName"))
+			{
+				base.InitMethodProperty(key, value);
 				return;
 			}
-			base.InitMethodProperty(key, value);
+			this._activationTypeName = (string)value;
 		}
 
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)

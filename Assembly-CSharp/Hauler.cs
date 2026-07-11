@@ -15,7 +15,7 @@ public class Hauler : RoleConfig
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };
 		base.perks = new RolePerk[]
 		{
-			RoleManager.rolePerks.IncreaseStrengthSmall,
+			RoleManager.rolePerks.IncreaseStrengthGofer,
 			RoleManager.rolePerks.IncreaseCarryAmountSmall
 		};
 	}

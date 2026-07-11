@@ -21,8 +21,7 @@ public class KAnimBatchGroup
 			this.maxGroupSize = 60;
 		}
 		this.SetupMeshData();
-		this.InitBuild();
-		this.InitAnim();
+		this.InitBuildAndAnimTex();
 	}
 
 	public static void FinalizeTextureCache()
@@ -49,6 +48,7 @@ public class KAnimBatchGroup
 		IL_0075:
 		material.name = "Material:" + this.batchID.ToString();
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
+		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)this.data.animDataStartOffset);
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD, (float)this.data.symbolFrameInstances.Count);
 		return material;
 	}
@@ -68,28 +68,25 @@ public class KAnimBatchGroup
 
 	public HashedString batchID { get; private set; }
 
-	public KAnimBatchGroup.DataType dataType { get; private set; }
-
-	public void SetDataType(KAnimBatchGroup.DataType type)
-	{
-		this.dataType = type;
-	}
-
 	public KBatchGroupData data { get; private set; }
 
-	public KAnimBatchGroup.KAnimBatchTextureCache.Entry animDataTex { get; private set; }
+	public KAnimBatchGroup.KAnimBatchTextureCache.Entry buildAndAnimTex { get; private set; }
 
 	public bool InitOK
 	{
 		get
 		{
-			return this.float4sPerSide > 0 || this.dataType == KAnimBatchGroup.DataType.AnimOnly;
+			return this.float4sPerSide > 0;
 		}
 	}
 
 	public void FreeResources()
 	{
-		KAnimBatchGroup.cache.Free(this.buildTex);
+		if (this.buildAndAnimTex != null)
+		{
+			KAnimBatchGroup.cache.Free(this.buildAndAnimTex);
+			this.buildAndAnimTex = null;
+		}
 		for (int i = 0; i < 5; i++)
 		{
 			if (this.materials[i] != null)
@@ -102,11 +99,6 @@ public class KAnimBatchGroup
 		{
 			global::UnityEngine.Object.Destroy(this.mesh);
 			this.mesh = null;
-		}
-		if (this.animDataTex != null)
-		{
-			KAnimBatchGroup.cache.Free(this.animDataTex);
-			this.animDataTex = null;
 		}
 		if (this.data != null)
 		{
@@ -129,12 +121,14 @@ public class KAnimBatchGroup
 		this.float4sPerSide = KAnimBatchGroup.GetBestTextureSize(num);
 	}
 
-	private void InitAnim()
+	private float GetBuildDataSize()
 	{
-		if (this.dataType == KAnimBatchGroup.DataType.DontRender)
-		{
-			return;
-		}
+		int num = this.data.GetBuildSymbolFrameCount() * 16;
+		return (float)num / 4f;
+	}
+
+	private float GetAnimDataSize()
+	{
 		int num = 4;
 		List<KAnim.Anim.Frame> animFrames = this.data.GetAnimFrames();
 		if (animFrames.Count == 0)
@@ -148,30 +142,27 @@ public class KAnimBatchGroup
 			List<KAnim.Anim.FrameElement> animFrameElements = this.data.GetAnimFrameElements();
 			num += animFrameElements.Count * 16;
 		}
-		float num2 = (float)num / 4f;
-		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize(num2);
-		this.animDataTex = null;
-		this.animDataTex = KAnimBatchGroup.cache.Get(bestTextureSize, KAnimBatchGroup.ShaderProperty_animTex, KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_SIZE);
-		this.animDataTex.name = "AnimData:" + this.batchID.ToString();
-		this.data.WriteAnimData(this.animDataTex.floats);
-		this.animDataTex.LoadRawTextureData();
-		this.animDataTex.Apply();
+		return (float)num / 4f;
 	}
 
-	public void InitBuild()
+	public void InitBuildAndAnimTex()
 	{
-		if (this.dataType == KAnimBatchGroup.DataType.DontRender)
+		float num = this.GetBuildDataSize() + this.GetAnimDataSize();
+		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize(num);
+		this.buildAndAnimTex = KAnimBatchGroup.cache.Get(bestTextureSize, KAnimBatchGroup.ShaderProperty_buildAndAnimTex, KAnimBatchGroup.ShaderProperty_BUILD_AND_ANIM_TEXTURE_SIZE);
+		this.buildAndAnimTex.name = "BuildAndAnimData:" + this.batchID.ToString();
+		if (num > (float)(this.buildAndAnimTex.width * this.buildAndAnimTex.height))
 		{
-			return;
+			global::Debug.LogErrorFormat("Texture is the wrong size! {0} <= {1}", new object[]
+			{
+				num,
+				this.buildAndAnimTex.width * this.buildAndAnimTex.height
+			});
 		}
-		int num = this.data.GetBuildSymbolFrameCount() * 16;
-		float num2 = (float)num / 4f;
-		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize(num2);
-		this.buildTex = KAnimBatchGroup.cache.Get(bestTextureSize, KAnimBatchGroup.ShaderProperty_buildTex, KAnimBatchGroup.ShaderProperty_BUILD_TEXTURE_SIZE);
-		this.buildTex.name = "BuildData:" + this.batchID.ToString();
-		this.data.WriteBuildData(this.data.symbolFrameInstances, this.buildTex.floats);
-		this.buildTex.LoadRawTextureData();
-		this.buildTex.Apply();
+		int num2 = this.data.WriteBuildData(this.data.symbolFrameInstances, this.buildAndAnimTex.floats);
+		this.data.WriteAnimData(num2, this.buildAndAnimTex.floats);
+		this.buildAndAnimTex.LoadRawTextureData();
+		this.buildAndAnimTex.Apply();
 	}
 
 	private Mesh BuildMesh(int numQuads)
@@ -228,9 +219,9 @@ public class KAnimBatchGroup
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry CreateTexture()
 	{
-		if (this.dataType == KAnimBatchGroup.DataType.DontRender)
+		if (this.float4sPerSide <= 0)
 		{
-			return null;
+			global::Debug.LogErrorFormat("Need to init AnimBatchGroup [{0}] first!", new object[] { this.batchID });
 		}
 		return this.CreateTexture("InstanceData:" + this.batchID.ToString(), this.float4sPerSide, KAnimBatchGroup.ShaderProperty_instanceTex, KAnimBatchGroup.ShaderProperty_INSTANCE_TEXTURE_SIZE);
 	}
@@ -242,14 +233,11 @@ public class KAnimBatchGroup
 
 	public void GetDataTextures(MaterialPropertyBlock matProperties, KAnimBatch.AtlasList atlases)
 	{
-		if (this.animDataTex != null)
+		if (this.buildAndAnimTex != null)
 		{
-			this.animDataTex.SetTextureAndSize(matProperties);
+			this.buildAndAnimTex.SetTextureAndSize(matProperties);
 		}
-		if (this.buildTex != null)
-		{
-			this.buildTex.SetTextureAndSize(matProperties);
-		}
+		matProperties.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)this.data.animDataStartOffset);
 		for (int i = 0; i < this.data.textures.Count; i++)
 		{
 			atlases.Add(this.data.textures[i]);
@@ -258,9 +246,9 @@ public class KAnimBatchGroup
 
 	public static int ShaderProperty_SYMBOLS_PER_BUILD = Shader.PropertyToID("SYMBOLS_PER_BUILD");
 
-	public static int ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD = Shader.PropertyToID("SYMBOL_OVERRIDES_PER_BUILD");
+	public static int ShaderProperty_ANIM_TEXTURE_START_OFFSET = Shader.PropertyToID("ANIM_TEXTURE_START_OFFSET");
 
-	public KAnimBatchGroup.KAnimBatchTextureCache.Entry buildTex;
+	public static int ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD = Shader.PropertyToID("SYMBOL_OVERRIDES_PER_BUILD");
 
 	private static KAnimBatchGroup.KAnimBatchTextureCache cache = new KAnimBatchGroup.KAnimBatchTextureCache();
 
@@ -268,17 +256,13 @@ public class KAnimBatchGroup
 
 	private int float4sPerSide;
 
-	private static int ShaderProperty_ANIM_TEXTURE_SIZE = Shader.PropertyToID("ANIM_TEXTURE_SIZE");
+	private static int ShaderProperty_BUILD_AND_ANIM_TEXTURE_SIZE = Shader.PropertyToID("BUILD_AND_ANIM_TEXTURE_SIZE");
 
-	private static int ShaderProperty_animTex = Shader.PropertyToID("animTex");
+	private static int ShaderProperty_buildAndAnimTex = Shader.PropertyToID("buildAndAnimTex");
 
 	private static int ShaderProperty_INSTANCE_TEXTURE_SIZE = Shader.PropertyToID("INSTANCE_TEXTURE_SIZE");
 
 	private static int ShaderProperty_instanceTex = Shader.PropertyToID("instanceTex");
-
-	private static int ShaderProperty_BUILD_TEXTURE_SIZE = Shader.PropertyToID("BUILD_TEXTURE_SIZE");
-
-	private static int ShaderProperty_buildTex = Shader.PropertyToID("buildTex");
 
 	private Material[] materials;
 
@@ -466,13 +450,5 @@ public class KAnimBatchGroup
 		UI,
 		Overlay,
 		NumMaterials
-	}
-
-	public enum DataType
-	{
-		Default,
-		UI,
-		DontRender,
-		AnimOnly
 	}
 }

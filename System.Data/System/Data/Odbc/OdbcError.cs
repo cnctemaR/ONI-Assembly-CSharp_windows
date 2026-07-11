@@ -5,26 +5,15 @@ namespace System.Data.Odbc
 	[Serializable]
 	public sealed class OdbcError
 	{
-		internal OdbcError(OdbcConnection connection)
+		internal OdbcError()
 		{
-			this._nativeerror = 1;
-			this._source = connection.SafeDriver;
-			this._message = "Error in " + this._source;
-			this._state = string.Empty;
-		}
-
-		internal OdbcError(string message, string state, int nativeerror)
-		{
-			this._message = message;
-			this._state = state;
-			this._nativeerror = nativeerror;
 		}
 
 		public string Message
 		{
 			get
 			{
-				return this._message;
+				throw null;
 			}
 		}
 
@@ -32,7 +21,7 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return this._nativeerror;
+				throw null;
 			}
 		}
 
@@ -40,7 +29,7 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return this._source;
+				throw null;
 			}
 		}
 
@@ -48,26 +37,13 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return this._state;
+				throw null;
 			}
 		}
 
 		public override string ToString()
 		{
-			return this.Message;
+			throw null;
 		}
-
-		internal void SetSource(string source)
-		{
-			this._source = source;
-		}
-
-		private readonly string _message;
-
-		private string _source;
-
-		private readonly string _state;
-
-		private readonly int _nativeerror;
 	}
 }

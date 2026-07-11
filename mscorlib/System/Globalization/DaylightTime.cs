@@ -7,6 +7,10 @@ namespace System.Globalization
 	[Serializable]
 	public class DaylightTime
 	{
+		private DaylightTime()
+		{
+		}
+
 		public DaylightTime(DateTime start, DateTime end, TimeSpan delta)
 		{
 			this.m_start = start;
@@ -38,10 +42,10 @@ namespace System.Globalization
 			}
 		}
 
-		private DateTime m_start;
+		internal DateTime m_start;
 
-		private DateTime m_end;
+		internal DateTime m_end;
 
-		private TimeSpan m_delta;
+		internal TimeSpan m_delta;
 	}
 }

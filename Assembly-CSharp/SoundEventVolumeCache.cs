@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class SoundEventVolumeCache
+public class SoundEventVolumeCache : Singleton<SoundEventVolumeCache>
 {
 	public static SoundEventVolumeCache instance
 	{

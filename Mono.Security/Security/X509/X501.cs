@@ -172,39 +172,176 @@ namespace Mono.Security.X509
 		private static X520.AttributeTypeAndValue GetAttributeFromOid(string attributeType)
 		{
 			string text = attributeType.ToUpper(CultureInfo.InvariantCulture).Trim();
-			string text2 = text;
-			switch (text2)
+			uint num = global::<PrivateImplementationDetails>.ComputeStringHash(text);
+			if (num <= 3255563174U)
 			{
-			case "C":
-				return new X520.CountryName();
-			case "O":
-				return new X520.OrganizationName();
-			case "OU":
-				return new X520.OrganizationalUnitName();
-			case "CN":
-				return new X520.CommonName();
-			case "L":
-				return new X520.LocalityName();
-			case "S":
-			case "ST":
-				return new X520.StateOrProvinceName();
-			case "E":
-				return new X520.EmailAddress();
-			case "DC":
-				return new X520.DomainComponent();
-			case "UID":
-				return new X520.UserId();
-			case "DNQUALIFIER":
-				return new X520.DnQualifier();
-			case "T":
-				return new X520.Title();
-			case "SN":
-				return new X520.Surname();
-			case "G":
-				return new X520.GivenName();
-			case "I":
-				return new X520.Initial();
+				if (num <= 1795334850U)
+				{
+					if (num != 902722544U)
+					{
+						if (num != 1627558660U)
+						{
+							if (num != 1795334850U)
+							{
+								goto IL_0281;
+							}
+							if (!(text == "ST"))
+							{
+								goto IL_0281;
+							}
+						}
+						else
+						{
+							if (!(text == "SN"))
+							{
+								goto IL_0281;
+							}
+							return new X520.Surname();
+						}
+					}
+					else
+					{
+						if (!(text == "DC"))
+						{
+							goto IL_0281;
+						}
+						return new X520.DomainComponent();
+					}
+				}
+				else if (num <= 2161779444U)
+				{
+					if (num != 2078582897U)
+					{
+						if (num != 2161779444U)
+						{
+							goto IL_0281;
+						}
+						if (!(text == "CN"))
+						{
+							goto IL_0281;
+						}
+						return new X520.CommonName();
+					}
+					else
+					{
+						if (!(text == "OU"))
+						{
+							goto IL_0281;
+						}
+						return new X520.OrganizationalUnitName();
+					}
+				}
+				else if (num != 3222007936U)
+				{
+					if (num != 3255563174U)
+					{
+						goto IL_0281;
+					}
+					if (!(text == "G"))
+					{
+						goto IL_0281;
+					}
+					return new X520.GivenName();
+				}
+				else
+				{
+					if (!(text == "E"))
+					{
+						goto IL_0281;
+					}
+					return new X520.EmailAddress();
+				}
 			}
+			else if (num <= 3423339364U)
+			{
+				if (num <= 3373006507U)
+				{
+					if (num != 3322673650U)
+					{
+						if (num != 3373006507U)
+						{
+							goto IL_0281;
+						}
+						if (!(text == "L"))
+						{
+							goto IL_0281;
+						}
+						return new X520.LocalityName();
+					}
+					else
+					{
+						if (!(text == "C"))
+						{
+							goto IL_0281;
+						}
+						return new X520.CountryName();
+					}
+				}
+				else if (num != 3389784126U)
+				{
+					if (num != 3423339364U)
+					{
+						goto IL_0281;
+					}
+					if (!(text == "I"))
+					{
+						goto IL_0281;
+					}
+					return new X520.Initial();
+				}
+				else
+				{
+					if (!(text == "O"))
+					{
+						goto IL_0281;
+					}
+					return new X520.OrganizationName();
+				}
+			}
+			else if (num <= 3591115554U)
+			{
+				if (num != 3507227459U)
+				{
+					if (num != 3591115554U)
+					{
+						goto IL_0281;
+					}
+					if (!(text == "S"))
+					{
+						goto IL_0281;
+					}
+				}
+				else
+				{
+					if (!(text == "T"))
+					{
+						goto IL_0281;
+					}
+					return new X520.Title();
+				}
+			}
+			else if (num != 3751961261U)
+			{
+				if (num != 4293667421U)
+				{
+					goto IL_0281;
+				}
+				if (!(text == "DNQUALIFIER"))
+				{
+					goto IL_0281;
+				}
+				return new X520.DnQualifier();
+			}
+			else
+			{
+				if (!(text == "UID"))
+				{
+					goto IL_0281;
+				}
+				return new X520.UserId();
+			}
+			return new X520.StateOrProvinceName();
+			IL_0281:
 			if (text.StartsWith("OID."))
 			{
 				return new X520.Oid(text.Substring(4));
@@ -221,8 +358,7 @@ namespace Mono.Security.X509
 			bool flag;
 			try
 			{
-				ASN1 asn = ASN1Convert.FromOid(oid);
-				flag = asn.Tag == 6;
+				flag = ASN1Convert.FromOid(oid).Tag == 6;
 			}
 			catch
 			{
@@ -240,15 +376,13 @@ namespace Mono.Security.X509
 			int num = value.IndexOf('=', pos);
 			if (num == -1)
 			{
-				string text = Locale.GetText("No attribute found.");
-				throw new FormatException(text);
+				throw new FormatException(Locale.GetText("No attribute found."));
 			}
-			string text2 = value.Substring(pos, num - pos);
-			X520.AttributeTypeAndValue attributeFromOid = X501.GetAttributeFromOid(text2);
+			string text = value.Substring(pos, num - pos);
+			X520.AttributeTypeAndValue attributeFromOid = X501.GetAttributeFromOid(text);
 			if (attributeFromOid == null)
 			{
-				string text3 = Locale.GetText("Unknown attribute '{0}'.");
-				throw new FormatException(string.Format(text3, text2));
+				throw new FormatException(string.Format(Locale.GetText("Unknown attribute '{0}'."), text));
 			}
 			pos = num + 1;
 			return attributeFromOid;
@@ -267,12 +401,18 @@ namespace Mono.Security.X509
 		private static string ReadHex(string value, ref int pos)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(value[pos++]);
+			StringBuilder stringBuilder2 = stringBuilder;
+			int num = pos;
+			pos = num + 1;
+			stringBuilder2.Append(value[num]);
 			stringBuilder.Append(value[pos]);
 			if (pos < value.Length - 4 && value[pos + 1] == '\\' && X501.IsHex(value[pos + 2]))
 			{
 				pos += 2;
-				stringBuilder.Append(value[pos++]);
+				StringBuilder stringBuilder3 = stringBuilder;
+				num = pos;
+				pos = num + 1;
+				stringBuilder3.Append(value[num]);
 				stringBuilder.Append(value[pos]);
 			}
 			byte[] array = CryptoConvert.FromHex(stringBuilder.ToString());
@@ -282,27 +422,38 @@ namespace Mono.Security.X509
 		private static int ReadEscaped(StringBuilder sb, string value, int pos)
 		{
 			char c = value[pos];
-			switch (c)
+			if (c <= '+')
 			{
-			case ';':
-			case '<':
-			case '=':
-			case '>':
-				break;
-			default:
-				if (c != '"' && c != '#' && c != '+' && c != ',' && c != '\\')
+				if (c != '"' && c != '#' && c != '+')
 				{
-					if (pos >= value.Length - 2)
-					{
-						string text = Locale.GetText("Malformed escaped value '{0}'.");
-						throw new FormatException(string.Format(text, value.Substring(pos)));
-					}
-					sb.Append(X501.ReadHex(value, ref pos));
-					return pos;
+					goto IL_0051;
 				}
-				break;
+			}
+			else if (c != ',')
+			{
+				switch (c)
+				{
+				case ';':
+				case '<':
+				case '=':
+				case '>':
+					break;
+				default:
+					if (c != '\\')
+					{
+						goto IL_0051;
+					}
+					break;
+				}
 			}
 			sb.Append(value[pos]);
+			return pos;
+			IL_0051:
+			if (pos >= value.Length - 2)
+			{
+				throw new FormatException(string.Format(Locale.GetText("Malformed escaped value '{0}'."), value.Substring(pos)));
+			}
+			sb.Append(X501.ReadHex(value, ref pos));
 			return pos;
 		}
 
@@ -323,8 +474,7 @@ namespace Mono.Security.X509
 				sb.Append(value[pos]);
 				pos++;
 			}
-			string text = Locale.GetText("Malformed quoted value '{0}'.");
-			throw new FormatException(string.Format(text, value.Substring(num)));
+			throw new FormatException(string.Format(Locale.GetText("Malformed quoted value '{0}'."), value.Substring(num)));
 		}
 
 		private static string ReadValue(string value, ref int pos)
@@ -334,44 +484,58 @@ namespace Mono.Security.X509
 			while (pos < value.Length)
 			{
 				char c = value[pos];
-				switch (c)
+				if (c <= '+')
 				{
-				case ';':
-				case '<':
-				case '=':
-				case '>':
-				{
-					string text = Locale.GetText("Malformed value '{0}' contains '{1}' outside quotes.");
-					throw new FormatException(string.Format(text, value.Substring(num), value[pos]));
-				}
-				default:
 					if (c != '"')
 					{
-						if (c == '#' || c == '+')
+						if (c != '#' && c != '+')
 						{
-							throw new NotImplementedException();
+							goto IL_00B7;
 						}
-						if (c == ',')
-						{
-							pos++;
-							return stringBuilder.ToString();
-						}
-						if (c != '\\')
-						{
-							stringBuilder.Append(value[pos]);
-						}
-						else
-						{
-							pos = X501.ReadEscaped(stringBuilder, value, ++pos);
-						}
+						throw new NotImplementedException();
 					}
 					else
 					{
-						pos = X501.ReadQuoted(stringBuilder, value, ++pos);
+						StringBuilder stringBuilder2 = stringBuilder;
+						int num2 = pos + 1;
+						pos = num2;
+						pos = X501.ReadQuoted(stringBuilder2, value, num2);
 					}
-					pos++;
-					break;
 				}
+				else
+				{
+					if (c == ',')
+					{
+						pos++;
+						return stringBuilder.ToString();
+					}
+					switch (c)
+					{
+					case ';':
+					case '<':
+					case '=':
+					case '>':
+						throw new FormatException(string.Format(Locale.GetText("Malformed value '{0}' contains '{1}' outside quotes."), value.Substring(num), value[pos]));
+					default:
+					{
+						if (c != '\\')
+						{
+							goto IL_00B7;
+						}
+						StringBuilder stringBuilder3 = stringBuilder;
+						int num2 = pos + 1;
+						pos = num2;
+						pos = X501.ReadEscaped(stringBuilder3, value, num2);
+						break;
+					}
+					}
+				}
+				IL_00C6:
+				pos++;
+				continue;
+				IL_00B7:
+				stringBuilder.Append(value[pos]);
+				goto IL_00C6;
 			}
 			return stringBuilder.ToString();
 		}

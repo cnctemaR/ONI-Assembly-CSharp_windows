@@ -26,7 +26,6 @@ public class LiquidFilterConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
-		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 0);

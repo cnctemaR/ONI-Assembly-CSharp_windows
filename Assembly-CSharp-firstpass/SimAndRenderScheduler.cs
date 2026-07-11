@@ -26,6 +26,11 @@ public class SimAndRenderScheduler
 		}
 	}
 
+	public static void DestroyInstance()
+	{
+		SimAndRenderScheduler._instance = null;
+	}
+
 	private UpdateRate[] GetImplementedInterfaces(Type type)
 	{
 		UpdateRate[] array = null;
@@ -120,18 +125,18 @@ public class SimAndRenderScheduler
 			int num = 1;
 			if (load_balance)
 			{
-				num = StateMachineUpdater.instance.GetFrameCount(update_rate);
+				num = Singleton<StateMachineUpdater>.Instance.GetFrameCount(update_rate);
 			}
 			entry.buckets = new StateMachineUpdater.BaseUpdateBucket[num];
 			for (int i = 0; i < num; i++)
 			{
 				entry.buckets[i] = new UpdateBucketWithUpdater<SimUpdateType>(name);
-				StateMachineUpdater.instance.AddBucket(update_rate, entry.buckets[i]);
+				Singleton<StateMachineUpdater>.Instance.AddBucket(update_rate, entry.buckets[i]);
 			}
 		}
 		UpdateBucketWithUpdater<SimUpdateType> updateBucketWithUpdater = (UpdateBucketWithUpdater<SimUpdateType>)entry.buckets[entry.nextBucketIdx];
 		SimAndRenderScheduler.Handle handle = default(SimAndRenderScheduler.Handle);
-		handle.handle = updateBucketWithUpdater.Add(updater, StateMachineUpdater.instance.GetFrameTime(update_rate, updateBucketWithUpdater.frame), bucket_updater);
+		handle.handle = updateBucketWithUpdater.Add(updater, Singleton<StateMachineUpdater>.Instance.GetFrameTime(update_rate, updateBucketWithUpdater.frame), bucket_updater);
 		handle.bucket = updateBucketWithUpdater;
 		entry.nextBucketIdx = (entry.nextBucketIdx + 1) % entry.buckets.Length;
 		this.bucketTable[name] = entry;

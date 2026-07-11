@@ -78,13 +78,17 @@ public class MetalRefineryConfig : IBuildingConfig
 				{
 					new ComplexRecipe.RecipeElement(lowTempTransition.tag, 100f)
 				};
-				complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MetalRefinery", element.tag), array, array2);
+				string text = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element.tag);
+				string text2 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array, array2);
+				complexRecipe = new ComplexRecipe(text2, array, array2);
 				complexRecipe.time = 40f;
 				complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name);
 				complexRecipe.useResultAsDescription = true;
 				complexRecipe.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
+				ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
 			}
 		}
+		Element element2 = ElementLoader.FindElementByHash(SimHashes.Steel);
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Iron).tag, 70f),
@@ -95,11 +99,14 @@ public class MetalRefineryConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Steel).tag, 100f)
 		};
-		complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MetalRefinery", ElementLoader.FindElementByHash(SimHashes.Steel).tag), array3, array4);
+		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element2.tag);
+		string text4 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array3, array4);
+		complexRecipe = new ComplexRecipe(text4, array3, array4);
 		complexRecipe.time = 40f;
 		complexRecipe.useResultAsDescription = true;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Steel).name, ElementLoader.FindElementByHash(SimHashes.Iron).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
+		ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
 		Prioritizable.AddRef(go);
 	}
 

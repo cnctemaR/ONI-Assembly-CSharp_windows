@@ -8,6 +8,9 @@ namespace UnityEngine.UI
 	{
 		protected GraphicRegistry()
 		{
+			GC.KeepAlive(new Dictionary<Graphic, int>());
+			GC.KeepAlive(new Dictionary<ICanvasElement, int>());
+			GC.KeepAlive(new Dictionary<IClipper, int>());
 		}
 
 		public static GraphicRegistry instance

@@ -50,7 +50,7 @@ public class Diggable : Workable
 		{
 			choreType = Db.Get().ChoreTypes.GetByHash(this.choreTypeIdHash);
 		}
-		this.chore = new WorkChore<Diggable>(choreType, this, null, this.choreTags, true, null, null, null, true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		this.chore = new WorkChore<Diggable>(choreType, this, null, this.choreTags, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);
@@ -127,7 +127,7 @@ public class Diggable : Workable
 				}
 			}
 			return flag;
-		}, GameUtil.FloodFillVisited, null);
+		}, GameUtil.FloodFillVisited, null, 10000);
 		GameUtil.FloodFillVisited.Clear();
 		if (any_buildables)
 		{
@@ -291,6 +291,11 @@ public class Diggable : Workable
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		return Grid.Element[num];
+	}
+
+	public override string GetConversationTopic()
+	{
+		return this.GetTargetElement().tag.Name;
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -508,10 +513,10 @@ public class Diggable : Workable
 	[SerializeField]
 	public MeshRenderer materialDisplay;
 
-	private static List<Tuple<string, Tag>> lasersForHardness = new List<Tuple<string, Tag>>
+	private static List<global::Tuple<string, Tag>> lasersForHardness = new List<global::Tuple<string, Tag>>
 	{
-		new Tuple<string, Tag>("dig", "fx_dig_splash"),
-		new Tuple<string, Tag>("specialistdig", "fx_dig_splash")
+		new global::Tuple<string, Tag>("dig", "fx_dig_splash"),
+		new global::Tuple<string, Tag>("specialistdig", "fx_dig_splash")
 	};
 
 	private int handle;

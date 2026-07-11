@@ -7,89 +7,28 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public abstract class HashAlgorithm : IDisposable, ICryptoTransform
 	{
-		protected HashAlgorithm()
-		{
-			this.disposed = false;
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		public virtual bool CanTransformMultipleBlocks
+		public virtual int HashSize
 		{
 			get
 			{
-				return true;
+				return this.HashSizeValue;
 			}
 		}
 
-		public virtual bool CanReuseTransform
+		public virtual byte[] Hash
 		{
 			get
 			{
-				return true;
+				if (this.m_bDisposed)
+				{
+					throw new ObjectDisposedException(null);
+				}
+				if (this.State != 0)
+				{
+					throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("Hash must be finalized before the hash value is retrieved."));
+				}
+				return (byte[])this.HashValue.Clone();
 			}
-		}
-
-		public void Clear()
-		{
-			this.Dispose(true);
-		}
-
-		public byte[] ComputeHash(byte[] buffer)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			return this.ComputeHash(buffer, 0, buffer.Length);
-		}
-
-		public byte[] ComputeHash(byte[] buffer, int offset, int count)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("HashAlgorithm");
-			}
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			if (offset < 0)
-			{
-				throw new ArgumentOutOfRangeException("offset", "< 0");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentException("count", "< 0");
-			}
-			if (offset > buffer.Length - count)
-			{
-				throw new ArgumentException("offset + count", Locale.GetText("Overflow"));
-			}
-			this.HashCore(buffer, offset, count);
-			this.HashValue = this.HashFinal();
-			this.Initialize();
-			return this.HashValue;
-		}
-
-		public byte[] ComputeHash(Stream inputStream)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("HashAlgorithm");
-			}
-			byte[] array = new byte[4096];
-			for (int i = inputStream.Read(array, 0, 4096); i > 0; i = inputStream.Read(array, 0, 4096))
-			{
-				this.HashCore(array, 0, i);
-			}
-			this.HashValue = this.HashFinal();
-			this.Initialize();
-			return this.HashValue;
 		}
 
 		public static HashAlgorithm Create()
@@ -102,35 +41,73 @@ namespace System.Security.Cryptography
 			return (HashAlgorithm)CryptoConfig.CreateFromName(hashName);
 		}
 
-		public virtual byte[] Hash
+		public byte[] ComputeHash(Stream inputStream)
 		{
-			get
+			if (this.m_bDisposed)
 			{
-				if (this.HashValue == null)
+				throw new ObjectDisposedException(null);
+			}
+			byte[] array = new byte[4096];
+			int num;
+			do
+			{
+				num = inputStream.Read(array, 0, 4096);
+				if (num > 0)
 				{
-					throw new CryptographicUnexpectedOperationException(Locale.GetText("No hash value computed."));
+					this.HashCore(array, 0, num);
 				}
-				return this.HashValue;
 			}
+			while (num > 0);
+			this.HashValue = this.HashFinal();
+			byte[] array2 = (byte[])this.HashValue.Clone();
+			this.Initialize();
+			return array2;
 		}
 
-		protected abstract void HashCore(byte[] array, int ibStart, int cbSize);
-
-		protected abstract byte[] HashFinal();
-
-		public virtual int HashSize
+		public byte[] ComputeHash(byte[] buffer)
 		{
-			get
+			if (this.m_bDisposed)
 			{
-				return this.HashSizeValue;
+				throw new ObjectDisposedException(null);
 			}
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer");
+			}
+			this.HashCore(buffer, 0, buffer.Length);
+			this.HashValue = this.HashFinal();
+			byte[] array = (byte[])this.HashValue.Clone();
+			this.Initialize();
+			return array;
 		}
 
-		public abstract void Initialize();
-
-		protected virtual void Dispose(bool disposing)
+		public byte[] ComputeHash(byte[] buffer, int offset, int count)
 		{
-			this.disposed = true;
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer");
+			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0 || count > buffer.Length)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
+			}
+			if (buffer.Length - count < offset)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (this.m_bDisposed)
+			{
+				throw new ObjectDisposedException(null);
+			}
+			this.HashCore(buffer, offset, count);
+			this.HashValue = this.HashFinal();
+			byte[] array = (byte[])this.HashValue.Clone();
+			this.Initialize();
+			return array;
 		}
 
 		public virtual int InputBlockSize
@@ -149,6 +126,22 @@ namespace System.Security.Cryptography
 			}
 		}
 
+		public virtual bool CanTransformMultipleBlocks
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public virtual bool CanReuseTransform
+		{
+			get
+			{
+				return true;
+			}
+		}
+
 		public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
 		{
 			if (inputBuffer == null)
@@ -157,29 +150,23 @@ namespace System.Security.Cryptography
 			}
 			if (inputOffset < 0)
 			{
-				throw new ArgumentOutOfRangeException("inputOffset", "< 0");
+				throw new ArgumentOutOfRangeException("inputOffset", Environment.GetResourceString("Non-negative number required."));
 			}
-			if (inputCount < 0)
+			if (inputCount < 0 || inputCount > inputBuffer.Length)
 			{
-				throw new ArgumentException("inputCount");
+				throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
 			}
-			if (inputOffset < 0 || inputOffset > inputBuffer.Length - inputCount)
+			if (inputBuffer.Length - inputCount < inputOffset)
 			{
-				throw new ArgumentException("inputBuffer");
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			if (outputBuffer != null)
+			if (this.m_bDisposed)
 			{
-				if (outputOffset < 0)
-				{
-					throw new ArgumentOutOfRangeException("outputOffset", "< 0");
-				}
-				if (outputOffset > outputBuffer.Length - inputCount)
-				{
-					throw new ArgumentException("outputOffset + inputCount", Locale.GetText("Overflow"));
-				}
+				throw new ObjectDisposedException(null);
 			}
+			this.State = 1;
 			this.HashCore(inputBuffer, inputOffset, inputCount);
-			if (outputBuffer != null)
+			if (outputBuffer != null && (inputBuffer != outputBuffer || inputOffset != outputOffset))
 			{
 				Buffer.BlockCopy(inputBuffer, inputOffset, outputBuffer, outputOffset, inputCount);
 			}
@@ -192,28 +179,74 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("inputBuffer");
 			}
-			if (inputCount < 0)
+			if (inputOffset < 0)
 			{
-				throw new ArgumentException("inputCount");
+				throw new ArgumentOutOfRangeException("inputOffset", Environment.GetResourceString("Non-negative number required."));
 			}
-			if (inputOffset > inputBuffer.Length - inputCount)
+			if (inputCount < 0 || inputCount > inputBuffer.Length)
 			{
-				throw new ArgumentException("inputOffset + inputCount", Locale.GetText("Overflow"));
+				throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
 			}
-			byte[] array = new byte[inputCount];
-			Buffer.BlockCopy(inputBuffer, inputOffset, array, 0, inputCount);
+			if (inputBuffer.Length - inputCount < inputOffset)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (this.m_bDisposed)
+			{
+				throw new ObjectDisposedException(null);
+			}
 			this.HashCore(inputBuffer, inputOffset, inputCount);
 			this.HashValue = this.HashFinal();
-			this.Initialize();
+			byte[] array;
+			if (inputCount != 0)
+			{
+				array = new byte[inputCount];
+				Buffer.InternalBlockCopy(inputBuffer, inputOffset, array, 0, inputCount);
+			}
+			else
+			{
+				array = EmptyArray<byte>.Value;
+			}
+			this.State = 0;
 			return array;
 		}
 
-		protected internal byte[] HashValue;
+		public void Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		public void Clear()
+		{
+			((IDisposable)this).Dispose();
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (this.HashValue != null)
+				{
+					Array.Clear(this.HashValue, 0, this.HashValue.Length);
+				}
+				this.HashValue = null;
+				this.m_bDisposed = true;
+			}
+		}
+
+		public abstract void Initialize();
+
+		protected abstract void HashCore(byte[] array, int ibStart, int cbSize);
+
+		protected abstract byte[] HashFinal();
 
 		protected int HashSizeValue;
 
+		protected internal byte[] HashValue;
+
 		protected int State;
 
-		private bool disposed;
+		private bool m_bDisposed;
 	}
 }

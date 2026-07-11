@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public CoClassAttribute(Type coClass)
 		{
-			this.klass = coClass;
+			this._CoClass = coClass;
 		}
 
 		public Type CoClass
 		{
 			get
 			{
-				return this.klass;
+				return this._CoClass;
 			}
 		}
 
-		private Type klass;
+		internal Type _CoClass;
 	}
 }

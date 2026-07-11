@@ -7,7 +7,7 @@ public class MinionSelectPreviewConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(MinionSelectPreviewConfig.ID, MinionSelectPreviewConfig.ID);
+		GameObject gameObject = EntityTemplates.CreateEntity(MinionSelectPreviewConfig.ID, MinionSelectPreviewConfig.ID, true);
 		RectTransform rectTransform = gameObject.AddOrGet<RectTransform>();
 		rectTransform.anchorMin = new Vector2(0f, 0f);
 		rectTransform.anchorMax = new Vector2(1f, 1f);

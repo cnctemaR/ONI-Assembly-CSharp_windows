@@ -7,6 +7,7 @@ namespace System.Net
 		None,
 		Status,
 		Headers,
-		Content
+		Content,
+		Aborted
 	}
 }

@@ -79,7 +79,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		base.OnSpawn();
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		Element element = component.Element;
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "SimTemperatureTransfer.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "SimTemperatureTransfer.OnSpawn");
 		if (component.Element.HasTag(GameTags.Special) || element.specificHeatCapacity == 0f)
 		{
 			base.enabled = false;
@@ -125,7 +125,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
 		this.SimUnregister();
 		base.OnForcedCleanUp();
 	}

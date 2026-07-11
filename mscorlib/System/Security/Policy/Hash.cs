@@ -11,7 +11,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class Hash : ISerializable, IBuiltInEvidence
+	public sealed class Hash : EvidenceBase, ISerializable, IBuiltInEvidence
 	{
 		public Hash(Assembly assembly)
 		{
@@ -31,23 +31,6 @@ namespace System.Security.Policy
 			this.data = (byte[])info.GetValue("RawData", typeof(byte[]));
 		}
 
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return (!verbose) ? 0 : 5;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return 0;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			return 0;
-		}
-
 		public byte[] MD5
 		{
 			get
@@ -58,8 +41,7 @@ namespace System.Security.Policy
 				}
 				if (this.assembly == null && this._sha1 != null)
 				{
-					string text = Locale.GetText("No assembly data. This instance was initialized with an MSHA1 digest value.");
-					throw new SecurityException(text);
+					throw new SecurityException(Locale.GetText("No assembly data. This instance was initialized with an MSHA1 digest value."));
 				}
 				HashAlgorithm hashAlgorithm = global::System.Security.Cryptography.MD5.Create();
 				this._md5 = this.GenerateHash(hashAlgorithm);
@@ -77,8 +59,7 @@ namespace System.Security.Policy
 				}
 				if (this.assembly == null && this._md5 != null)
 				{
-					string text = Locale.GetText("No assembly data. This instance was initialized with an MD5 digest value.");
-					throw new SecurityException(text);
+					throw new SecurityException(Locale.GetText("No assembly data. This instance was initialized with an MD5 digest value."));
 				}
 				HashAlgorithm hashAlgorithm = global::System.Security.Cryptography.SHA1.Create();
 				this._sha1 = this.GenerateHash(hashAlgorithm);
@@ -118,13 +99,12 @@ namespace System.Security.Policy
 			return securityElement.ToString();
 		}
 
-		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Unrestricted=\"true\"/>\n</PermissionSet>\n")]
+		[FileIOPermission(SecurityAction.Assert, Unrestricted = true)]
 		private byte[] GetData()
 		{
 			if (this.assembly == null && this.data == null)
 			{
-				string text = Locale.GetText("No assembly data.");
-				throw new SecurityException(text);
+				throw new SecurityException(Locale.GetText("No assembly data."));
 			}
 			if (this.data == null)
 			{
@@ -133,6 +113,27 @@ namespace System.Security.Policy
 				fileStream.Read(this.data, 0, (int)fileStream.Length);
 			}
 			return this.data;
+		}
+
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			if (!verbose)
+			{
+				return 0;
+			}
+			return 5;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return 0;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			return 0;
 		}
 
 		public static Hash CreateMD5(byte[] md5)

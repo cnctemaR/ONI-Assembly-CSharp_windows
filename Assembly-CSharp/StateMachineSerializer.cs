@@ -129,6 +129,16 @@ public class StateMachineSerializer
 		return list;
 	}
 
+	private static string TrimAssemblyInfo(string type_name)
+	{
+		int num = type_name.IndexOf("[[");
+		if (num != -1)
+		{
+			return type_name.Substring(0, num);
+		}
+		return type_name;
+	}
+
 	private bool Restore(StateMachineSerializer.Entry entry, StateMachine.Instance smi)
 	{
 		if (entry.version != smi.GetStateMachine().version)
@@ -156,6 +166,7 @@ public class StateMachineSerializer
 			int num2 = this.entryData.ReadInt32();
 			int position = this.entryData.Position;
 			string text = this.entryData.ReadKleiString();
+			text = text.Replace("Version=2.0.0.0", "Version=4.0.0.0");
 			string text2 = this.entryData.ReadKleiString();
 			foreach (StateMachine.Parameter.Context context in parameterContexts)
 			{

@@ -6,7 +6,7 @@ namespace System.Data.Odbc
 	public sealed class OdbcRowUpdatedEventArgs : RowUpdatedEventArgs
 	{
 		public OdbcRowUpdatedEventArgs(DataRow row, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-			: base(row, command, statementType, tableMapping)
+			: base(null, null, StatementType.Select, null)
 		{
 		}
 
@@ -14,7 +14,7 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return (OdbcCommand)base.Command;
+				throw null;
 			}
 		}
 	}

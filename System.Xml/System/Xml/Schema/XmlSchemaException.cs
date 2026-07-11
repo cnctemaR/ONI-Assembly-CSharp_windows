@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Globalization;
+using System.Resources;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -8,67 +8,150 @@ namespace System.Xml.Schema
 	[Serializable]
 	public class XmlSchemaException : SystemException
 	{
+		protected XmlSchemaException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+			this.res = (string)info.GetValue("res", typeof(string));
+			this.args = (string[])info.GetValue("args", typeof(string[]));
+			this.sourceUri = (string)info.GetValue("sourceUri", typeof(string));
+			this.lineNumber = (int)info.GetValue("lineNumber", typeof(int));
+			this.linePosition = (int)info.GetValue("linePosition", typeof(int));
+			string text = null;
+			foreach (SerializationEntry serializationEntry in info)
+			{
+				if (serializationEntry.Name == "version")
+				{
+					text = (string)serializationEntry.Value;
+				}
+			}
+			if (text == null)
+			{
+				this.message = XmlSchemaException.CreateMessage(this.res, this.args);
+				return;
+			}
+			this.message = null;
+		}
+
+		[SecurityPermission(SecurityAction.LinkDemand, SerializationFormatter = true)]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.GetObjectData(info, context);
+			info.AddValue("res", this.res);
+			info.AddValue("args", this.args);
+			info.AddValue("sourceUri", this.sourceUri);
+			info.AddValue("lineNumber", this.lineNumber);
+			info.AddValue("linePosition", this.linePosition);
+			info.AddValue("version", "2.0");
+		}
+
 		public XmlSchemaException()
-			: this("A schema error occured.", null)
+			: this(null)
 		{
 		}
 
 		public XmlSchemaException(string message)
-			: this(message, null)
+			: this(message, null, 0, 0)
 		{
-		}
-
-		protected XmlSchemaException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			this.hasLineInfo = info.GetBoolean("hasLineInfo");
-			this.lineNumber = info.GetInt32("lineNumber");
-			this.linePosition = info.GetInt32("linePosition");
-			this.sourceUri = info.GetString("sourceUri");
-			this.sourceObj = info.GetValue("sourceObj", typeof(XmlSchemaObject)) as XmlSchemaObject;
-		}
-
-		public XmlSchemaException(string message, Exception innerException, int lineNumber, int linePosition)
-			: this(message, lineNumber, linePosition, null, null, innerException)
-		{
-		}
-
-		internal XmlSchemaException(string message, int lineNumber, int linePosition, XmlSchemaObject sourceObject, string sourceUri, Exception innerException)
-			: base(XmlSchemaException.GetMessage(message, sourceUri, lineNumber, linePosition, sourceObject), innerException)
-		{
-			this.hasLineInfo = true;
-			this.lineNumber = lineNumber;
-			this.linePosition = linePosition;
-			this.sourceObj = sourceObject;
-			this.sourceUri = sourceUri;
-		}
-
-		internal XmlSchemaException(string message, object sender, string sourceUri, XmlSchemaObject sourceObject, Exception innerException)
-			: base(XmlSchemaException.GetMessage(message, sourceUri, sender, sourceObject), innerException)
-		{
-			IXmlLineInfo xmlLineInfo = sender as IXmlLineInfo;
-			if (xmlLineInfo != null && xmlLineInfo.HasLineInfo())
-			{
-				this.hasLineInfo = true;
-				this.lineNumber = xmlLineInfo.LineNumber;
-				this.linePosition = xmlLineInfo.LinePosition;
-			}
-			this.sourceObj = sourceObject;
-		}
-
-		internal XmlSchemaException(string message, XmlSchemaObject sourceObject, Exception innerException)
-			: base(XmlSchemaException.GetMessage(message, null, 0, 0, sourceObject), innerException)
-		{
-			this.hasLineInfo = true;
-			this.lineNumber = sourceObject.LineNumber;
-			this.linePosition = sourceObject.LinePosition;
-			this.sourceObj = sourceObject;
-			this.sourceUri = sourceObject.SourceUri;
 		}
 
 		public XmlSchemaException(string message, Exception innerException)
-			: base(XmlSchemaException.GetMessage(message, null, 0, 0, null), innerException)
+			: this(message, innerException, 0, 0)
 		{
+		}
+
+		public XmlSchemaException(string message, Exception innerException, int lineNumber, int linePosition)
+			: this((message == null) ? "A schema error occurred." : "{0}", new string[] { message }, innerException, null, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaException(string res, string[] args)
+			: this(res, args, null, null, 0, 0, null)
+		{
+		}
+
+		internal XmlSchemaException(string res, string arg)
+			: this(res, new string[] { arg }, null, null, 0, 0, null)
+		{
+		}
+
+		internal XmlSchemaException(string res, string arg, string sourceUri, int lineNumber, int linePosition)
+			: this(res, new string[] { arg }, null, sourceUri, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaException(string res, string sourceUri, int lineNumber, int linePosition)
+			: this(res, null, null, sourceUri, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaException(string res, string[] args, string sourceUri, int lineNumber, int linePosition)
+			: this(res, args, null, sourceUri, lineNumber, linePosition, null)
+		{
+		}
+
+		internal XmlSchemaException(string res, XmlSchemaObject source)
+			: this(res, null, source)
+		{
+		}
+
+		internal XmlSchemaException(string res, string arg, XmlSchemaObject source)
+			: this(res, new string[] { arg }, source)
+		{
+		}
+
+		internal XmlSchemaException(string res, string[] args, XmlSchemaObject source)
+			: this(res, args, null, source.SourceUri, source.LineNumber, source.LinePosition, source)
+		{
+		}
+
+		internal XmlSchemaException(string res, string[] args, Exception innerException, string sourceUri, int lineNumber, int linePosition, XmlSchemaObject source)
+			: base(XmlSchemaException.CreateMessage(res, args), innerException)
+		{
+			base.HResult = -2146231999;
+			this.res = res;
+			this.args = args;
+			this.sourceUri = sourceUri;
+			this.lineNumber = lineNumber;
+			this.linePosition = linePosition;
+			this.sourceSchemaObject = source;
+		}
+
+		internal static string CreateMessage(string res, string[] args)
+		{
+			string text;
+			try
+			{
+				text = Res.GetString(res, args);
+			}
+			catch (MissingManifestResourceException)
+			{
+				text = "UNKNOWN(" + res + ")";
+			}
+			return text;
+		}
+
+		internal string GetRes
+		{
+			get
+			{
+				return this.res;
+			}
+		}
+
+		internal string[] Args
+		{
+			get
+			{
+				return this.args;
+			}
+		}
+
+		public string SourceUri
+		{
+			get
+			{
+				return this.sourceUri;
+			}
 		}
 
 		public int LineNumber
@@ -91,74 +174,60 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.sourceObj;
+				return this.sourceSchemaObject;
 			}
 		}
 
-		public string SourceUri
+		internal void SetSource(string sourceUri, int lineNumber, int linePosition)
 		{
-			get
-			{
-				return this.sourceUri;
-			}
+			this.sourceUri = sourceUri;
+			this.lineNumber = lineNumber;
+			this.linePosition = linePosition;
 		}
 
-		private static string GetMessage(string message, string sourceUri, object sender, XmlSchemaObject sourceObj)
+		internal void SetSchemaObject(XmlSchemaObject source)
 		{
-			IXmlLineInfo xmlLineInfo = sender as IXmlLineInfo;
-			if (xmlLineInfo == null)
-			{
-				return XmlSchemaException.GetMessage(message, sourceUri, 0, 0, sourceObj);
-			}
-			return XmlSchemaException.GetMessage(message, sourceUri, xmlLineInfo.LineNumber, xmlLineInfo.LinePosition, sourceObj);
+			this.sourceSchemaObject = source;
 		}
 
-		private static string GetMessage(string message, string sourceUri, int lineNumber, int linePosition, XmlSchemaObject sourceObj)
+		internal void SetSource(XmlSchemaObject source)
 		{
-			string text = "XmlSchema error: " + message;
-			if (lineNumber > 0)
-			{
-				text += string.Format(CultureInfo.InvariantCulture, " XML {0} Line {1}, Position {2}.", new object[]
-				{
-					(sourceUri == null || !(sourceUri != string.Empty)) ? string.Empty : ("URI: " + sourceUri + " ."),
-					lineNumber,
-					linePosition
-				});
-			}
-			if (sourceObj != null)
-			{
-				text += string.Format(CultureInfo.InvariantCulture, " Related schema item SourceUri: {0}, Line {1}, Position {2}.", new object[] { sourceObj.SourceUri, sourceObj.LineNumber, sourceObj.LinePosition });
-			}
-			return text;
+			this.sourceSchemaObject = source;
+			this.sourceUri = source.SourceUri;
+			this.lineNumber = source.LineNumber;
+			this.linePosition = source.LinePosition;
+		}
+
+		internal void SetResourceId(string resourceId)
+		{
+			this.res = resourceId;
 		}
 
 		public override string Message
 		{
 			get
 			{
+				if (this.message != null)
+				{
+					return this.message;
+				}
 				return base.Message;
 			}
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("hasLineInfo", this.hasLineInfo);
-			info.AddValue("lineNumber", this.lineNumber);
-			info.AddValue("linePosition", this.linePosition);
-			info.AddValue("sourceUri", this.sourceUri);
-			info.AddValue("sourceObj", this.sourceObj);
-		}
+		private string res;
 
-		private bool hasLineInfo;
+		private string[] args;
+
+		private string sourceUri;
 
 		private int lineNumber;
 
 		private int linePosition;
 
-		private XmlSchemaObject sourceObj;
+		[NonSerialized]
+		private XmlSchemaObject sourceSchemaObject;
 
-		private string sourceUri;
+		private string message;
 	}
 }

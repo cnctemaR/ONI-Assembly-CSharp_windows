@@ -5,146 +5,17 @@ namespace System.Collections
 {
 	[ComVisible(true)]
 	[Serializable]
-	public abstract class DictionaryBase : IEnumerable, ICollection, IDictionary
+	public abstract class DictionaryBase : IDictionary, ICollection, IEnumerable
 	{
-		protected DictionaryBase()
-		{
-			this.hashtable = new Hashtable();
-		}
-
-		bool IDictionary.IsFixedSize
+		protected Hashtable InnerHashtable
 		{
 			get
 			{
-				return false;
-			}
-		}
-
-		bool IDictionary.IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		object IDictionary.this[object key]
-		{
-			get
-			{
-				object obj = this.hashtable[key];
-				this.OnGet(key, obj);
-				return obj;
-			}
-			set
-			{
-				this.OnValidate(key, value);
-				object obj = this.hashtable[key];
-				this.OnSet(key, obj, value);
-				this.hashtable[key] = value;
-				try
+				if (this.hashtable == null)
 				{
-					this.OnSetComplete(key, obj, value);
+					this.hashtable = new Hashtable();
 				}
-				catch
-				{
-					this.hashtable[key] = obj;
-					throw;
-				}
-			}
-		}
-
-		ICollection IDictionary.Keys
-		{
-			get
-			{
-				return this.hashtable.Keys;
-			}
-		}
-
-		ICollection IDictionary.Values
-		{
-			get
-			{
-				return this.hashtable.Values;
-			}
-		}
-
-		void IDictionary.Add(object key, object value)
-		{
-			this.OnValidate(key, value);
-			this.OnInsert(key, value);
-			this.hashtable.Add(key, value);
-			try
-			{
-				this.OnInsertComplete(key, value);
-			}
-			catch
-			{
-				this.hashtable.Remove(key);
-				throw;
-			}
-		}
-
-		void IDictionary.Remove(object key)
-		{
-			if (!this.hashtable.Contains(key))
-			{
-				return;
-			}
-			object obj = this.hashtable[key];
-			this.OnValidate(key, obj);
-			this.OnRemove(key, obj);
-			this.hashtable.Remove(key);
-			try
-			{
-				this.OnRemoveComplete(key, obj);
-			}
-			catch
-			{
-				this.hashtable[key] = obj;
-				throw;
-			}
-		}
-
-		bool IDictionary.Contains(object key)
-		{
-			return this.hashtable.Contains(key);
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.hashtable.IsSynchronized;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this.hashtable.SyncRoot;
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.hashtable.GetEnumerator();
-		}
-
-		public void Clear()
-		{
-			this.OnClear();
-			this.hashtable.Clear();
-			this.OnClearComplete();
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.hashtable.Count;
+				return this.hashtable;
 			}
 		}
 
@@ -156,60 +27,165 @@ namespace System.Collections
 			}
 		}
 
-		protected Hashtable InnerHashtable
+		public int Count
 		{
 			get
 			{
-				return this.hashtable;
+				if (this.hashtable != null)
+				{
+					return this.hashtable.Count;
+				}
+				return 0;
+			}
+		}
+
+		bool IDictionary.IsReadOnly
+		{
+			get
+			{
+				return this.InnerHashtable.IsReadOnly;
+			}
+		}
+
+		bool IDictionary.IsFixedSize
+		{
+			get
+			{
+				return this.InnerHashtable.IsFixedSize;
+			}
+		}
+
+		bool ICollection.IsSynchronized
+		{
+			get
+			{
+				return this.InnerHashtable.IsSynchronized;
+			}
+		}
+
+		ICollection IDictionary.Keys
+		{
+			get
+			{
+				return this.InnerHashtable.Keys;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return this.InnerHashtable.SyncRoot;
+			}
+		}
+
+		ICollection IDictionary.Values
+		{
+			get
+			{
+				return this.InnerHashtable.Values;
 			}
 		}
 
 		public void CopyTo(Array array, int index)
 		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index must be possitive");
-			}
-			if (array.Rank > 1)
-			{
-				throw new ArgumentException("array is multidimensional");
-			}
-			int length = array.Length;
-			if (index > length)
-			{
-				throw new ArgumentException("index is larger than array size");
-			}
-			if (index + this.Count > length)
-			{
-				throw new ArgumentException("Copy will overlflow array");
-			}
-			this.DoCopy(array, index);
+			this.InnerHashtable.CopyTo(array, index);
 		}
 
-		private void DoCopy(Array array, int index)
+		object IDictionary.this[object key]
 		{
-			foreach (object obj in this.hashtable)
+			get
 			{
-				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-				array.SetValue(dictionaryEntry, index++);
+				object obj = this.InnerHashtable[key];
+				this.OnGet(key, obj);
+				return obj;
+			}
+			set
+			{
+				this.OnValidate(key, value);
+				bool flag = true;
+				object obj = this.InnerHashtable[key];
+				if (obj == null)
+				{
+					flag = this.InnerHashtable.Contains(key);
+				}
+				this.OnSet(key, obj, value);
+				this.InnerHashtable[key] = value;
+				try
+				{
+					this.OnSetComplete(key, obj, value);
+				}
+				catch
+				{
+					if (flag)
+					{
+						this.InnerHashtable[key] = obj;
+					}
+					else
+					{
+						this.InnerHashtable.Remove(key);
+					}
+					throw;
+				}
+			}
+		}
+
+		bool IDictionary.Contains(object key)
+		{
+			return this.InnerHashtable.Contains(key);
+		}
+
+		void IDictionary.Add(object key, object value)
+		{
+			this.OnValidate(key, value);
+			this.OnInsert(key, value);
+			this.InnerHashtable.Add(key, value);
+			try
+			{
+				this.OnInsertComplete(key, value);
+			}
+			catch
+			{
+				this.InnerHashtable.Remove(key);
+				throw;
+			}
+		}
+
+		public void Clear()
+		{
+			this.OnClear();
+			this.InnerHashtable.Clear();
+			this.OnClearComplete();
+		}
+
+		void IDictionary.Remove(object key)
+		{
+			if (this.InnerHashtable.Contains(key))
+			{
+				object obj = this.InnerHashtable[key];
+				this.OnValidate(key, obj);
+				this.OnRemove(key, obj);
+				this.InnerHashtable.Remove(key);
+				try
+				{
+					this.OnRemoveComplete(key, obj);
+				}
+				catch
+				{
+					this.InnerHashtable.Add(key, obj);
+					throw;
+				}
 			}
 		}
 
 		public IDictionaryEnumerator GetEnumerator()
 		{
-			return this.hashtable.GetEnumerator();
+			return this.InnerHashtable.GetEnumerator();
 		}
 
-		protected virtual void OnClear()
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-		}
-
-		protected virtual void OnClearComplete()
-		{
+			return this.InnerHashtable.GetEnumerator();
 		}
 
 		protected virtual object OnGet(object key, object currentValue)
@@ -217,19 +193,15 @@ namespace System.Collections
 			return currentValue;
 		}
 
-		protected virtual void OnInsert(object key, object value)
-		{
-		}
-
-		protected virtual void OnInsertComplete(object key, object value)
-		{
-		}
-
 		protected virtual void OnSet(object key, object oldValue, object newValue)
 		{
 		}
 
-		protected virtual void OnSetComplete(object key, object oldValue, object newValue)
+		protected virtual void OnInsert(object key, object value)
+		{
+		}
+
+		protected virtual void OnClear()
 		{
 		}
 
@@ -237,11 +209,23 @@ namespace System.Collections
 		{
 		}
 
-		protected virtual void OnRemoveComplete(object key, object value)
+		protected virtual void OnValidate(object key, object value)
 		{
 		}
 
-		protected virtual void OnValidate(object key, object value)
+		protected virtual void OnSetComplete(object key, object oldValue, object newValue)
+		{
+		}
+
+		protected virtual void OnInsertComplete(object key, object value)
+		{
+		}
+
+		protected virtual void OnClearComplete()
+		{
+		}
+
+		protected virtual void OnRemoveComplete(object key, object value)
 		{
 		}
 

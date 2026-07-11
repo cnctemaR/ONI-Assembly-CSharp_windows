@@ -145,6 +145,11 @@ namespace Klei.AI
 			}
 		}
 
+		public string GetDescription()
+		{
+			return string.Format(DUPLICANTS.ATTRIBUTES.VALUE, this.Name, this.GetFormattedValue());
+		}
+
 		public string GetFormattedValue()
 		{
 			IAttributeFormatter formatter = this.Attribute.formatter;
@@ -157,7 +162,7 @@ namespace Klei.AI
 
 		public string GetAttributeValueTooltip()
 		{
-			string text = string.Format(DUPLICANTS.ATTRIBUTES.VALUE, this.Name, this.GetFormattedValue());
+			string text = this.GetDescription();
 			if (this.GetBaseValue() != 0f)
 			{
 				text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, this.GetBaseValue());
@@ -198,5 +203,7 @@ namespace Klei.AI
 		public global::System.Action OnDirty;
 
 		public List<AttributeModifier> Modifiers = new List<AttributeModifier>();
+
+		public bool hide;
 	}
 }

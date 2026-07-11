@@ -2,21 +2,13 @@
 
 namespace System.Data.Common
 {
-	public abstract class DbTransaction : MarshalByRefObject, IDisposable, IDbTransaction
+	public abstract class DbTransaction : MarshalByRefObject, IDbTransaction, IDisposable
 	{
-		IDbConnection IDbTransaction.Connection
-		{
-			get
-			{
-				return this.Connection;
-			}
-		}
-
 		public DbConnection Connection
 		{
 			get
 			{
-				return this.DbConnection;
+				throw null;
 			}
 		}
 
@@ -24,17 +16,24 @@ namespace System.Data.Common
 
 		public abstract IsolationLevel IsolationLevel { get; }
 
-		public abstract void Commit();
+		IDbConnection IDbTransaction.Connection
+		{
+			get
+			{
+				throw null;
+			}
+		}
 
-		public abstract void Rollback();
+		public abstract void Commit();
 
 		public void Dispose()
 		{
-			this.Dispose(true);
 		}
 
 		protected virtual void Dispose(bool disposing)
 		{
 		}
+
+		public abstract void Rollback();
 	}
 }

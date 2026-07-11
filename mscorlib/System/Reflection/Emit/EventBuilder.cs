@@ -4,8 +4,9 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Emit
 {
 	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_EventBuilder))]
+	[ComVisible(true)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class EventBuilder : _EventBuilder
 	{
 		internal EventBuilder(TypeBuilder tb, string eventName, EventAttributes eventAttrs, Type eventType)
@@ -15,26 +16,6 @@ namespace System.Reflection.Emit
 			this.type = eventType;
 			this.typeb = tb;
 			this.table_idx = this.get_next_table_index(this, 20, true);
-		}
-
-		void _EventBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		internal int get_next_table_index(object obj, int table, bool inc)
@@ -104,8 +85,7 @@ namespace System.Reflection.Emit
 				throw new ArgumentNullException("customBuilder");
 			}
 			this.RejectIfCreated();
-			string fullName = customBuilder.Ctor.ReflectedType.FullName;
-			if (fullName == "System.Runtime.CompilerServices.SpecialNameAttribute")
+			if (customBuilder.Ctor.ReflectedType.FullName == "System.Runtime.CompilerServices.SpecialNameAttribute")
 			{
 				this.attrs |= EventAttributes.SpecialName;
 				return;
@@ -116,12 +96,10 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
+				return;
 			}
-			else
-			{
-				this.cattrs = new CustomAttributeBuilder[1];
-				this.cattrs[0] = customBuilder;
-			}
+			this.cattrs = new CustomAttributeBuilder[1];
+			this.cattrs[0] = customBuilder;
 		}
 
 		[ComVisible(true)]
@@ -144,6 +122,26 @@ namespace System.Reflection.Emit
 			{
 				throw new InvalidOperationException("Type definition of the method is complete.");
 			}
+		}
+
+		void _EventBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
 		}
 
 		internal string name;

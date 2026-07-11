@@ -21,11 +21,9 @@ namespace System.Security.Cryptography.Pkcs
 			if (signerIdentifierType == SubjectIdentifierType.Unknown)
 			{
 				this._signer = SubjectIdentifierType.IssuerAndSerialNumber;
+				return;
 			}
-			else
-			{
-				this._signer = signerIdentifierType;
-			}
+			this._signer = signerIdentifierType;
 		}
 
 		public CmsSigner(SubjectIdentifierType signerIdentifierType, X509Certificate2 certificate)

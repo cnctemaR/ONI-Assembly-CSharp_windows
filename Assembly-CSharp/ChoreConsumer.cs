@@ -571,17 +571,21 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			snapshot.Clear();
 			snapshot.succeededContexts.AddRange(this.succeededContexts);
 			snapshot.failedContexts.AddRange(this.failedContexts);
+			snapshot.doFailedContextsNeedSorting = true;
 		}
 
 		public void Clear()
 		{
 			this.succeededContexts.Clear();
 			this.failedContexts.Clear();
+			this.doFailedContextsNeedSorting = true;
 		}
 
 		public List<Chore.Precondition.Context> succeededContexts = new List<Chore.Precondition.Context>();
 
 		public List<Chore.Precondition.Context> failedContexts = new List<Chore.Precondition.Context>();
+
+		public bool doFailedContextsNeedSorting = true;
 	}
 
 	private struct PriorityInfo

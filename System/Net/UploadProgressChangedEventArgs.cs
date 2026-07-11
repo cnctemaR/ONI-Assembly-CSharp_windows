@@ -3,22 +3,22 @@ using System.ComponentModel;
 
 namespace System.Net
 {
-	public class UploadProgressChangedEventArgs : global::System.ComponentModel.ProgressChangedEventArgs
+	public class UploadProgressChangedEventArgs : ProgressChangedEventArgs
 	{
-		internal UploadProgressChangedEventArgs(long bytesReceived, long totalBytesToReceive, long bytesSent, long totalBytesToSend, int progressPercentage, object userState)
-			: base(progressPercentage, userState)
+		internal UploadProgressChangedEventArgs(int progressPercentage, object userToken, long bytesSent, long totalBytesToSend, long bytesReceived, long totalBytesToReceive)
+			: base(progressPercentage, userToken)
 		{
-			this.received = bytesReceived;
-			this.total_recv = totalBytesToReceive;
-			this.sent = bytesSent;
-			this.total_send = totalBytesToSend;
+			this.m_BytesReceived = bytesReceived;
+			this.m_TotalBytesToReceive = totalBytesToReceive;
+			this.m_BytesSent = bytesSent;
+			this.m_TotalBytesToSend = totalBytesToSend;
 		}
 
 		public long BytesReceived
 		{
 			get
 			{
-				return this.received;
+				return this.m_BytesReceived;
 			}
 		}
 
@@ -26,7 +26,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.total_recv;
+				return this.m_TotalBytesToReceive;
 			}
 		}
 
@@ -34,7 +34,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.sent;
+				return this.m_BytesSent;
 			}
 		}
 
@@ -42,16 +42,16 @@ namespace System.Net
 		{
 			get
 			{
-				return this.total_send;
+				return this.m_TotalBytesToSend;
 			}
 		}
 
-		private long received;
+		private long m_BytesReceived;
 
-		private long sent;
+		private long m_TotalBytesToReceive;
 
-		private long total_recv;
+		private long m_BytesSent;
 
-		private long total_send;
+		private long m_TotalBytesToSend;
 	}
 }

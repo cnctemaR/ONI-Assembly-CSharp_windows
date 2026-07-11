@@ -73,7 +73,7 @@ public class BuildingHP : Workable
 		base.OnPrefabInit();
 		base.SetWorkTime(10f);
 		this.multitoolContext = "build";
-		this.multitoolHitEffectTag = "fx_build_splash";
+		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
 	}
 
 	protected override void OnSpawn()
@@ -341,10 +341,10 @@ public class BuildingHP : Workable
 
 		private Chore CreateRepairChore(BuildingHP.SMInstance smi)
 		{
-			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 
-		private static Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);
+		private static readonly Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);
 
 		public GameStateMachine<BuildingHP.States, BuildingHP.SMInstance, BuildingHP, object>.State damaged;
 

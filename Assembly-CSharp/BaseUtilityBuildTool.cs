@@ -26,9 +26,8 @@ public class BaseUtilityBuildTool : DragTool
 		GameObject buildingPreview = this.def.BuildingPreview;
 		Vector3 vector = cursorPos;
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
-		Folder folder = Folder.Placers;
 		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, folder, null, num);
+		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -331,11 +330,11 @@ public class BaseUtilityBuildTool : DragTool
 				string text;
 				if ((DebugHandler.InstantBuildMode || (Game.Instance.SandboxModeActive && SandboxToolParameterMenu.instance.settings.InstantBuild)) && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral, out text))
 				{
-					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, false, true);
+					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, true);
 				}
 				else
 				{
-					gameObject = this.def.TryPlace(null, vector, Orientation.Neutral, this.selectedElements, 0, false);
+					gameObject = this.def.TryPlace(null, vector, Orientation.Neutral, this.selectedElements, 0);
 					if (gameObject != null)
 					{
 						if (!this.def.MaterialsAvailable(this.selectedElements) && !DebugHandler.InstantBuildMode)
@@ -386,7 +385,7 @@ public class BaseUtilityBuildTool : DragTool
 					{
 						Constructable component5 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
 						component5.IsReplacementTile = true;
-						gameObject = this.def.Instantiate(vector, Orientation.Neutral, this.selectedElements, 0, false);
+						gameObject = this.def.Instantiate(vector, Orientation.Neutral, this.selectedElements, 0);
 						component5.IsReplacementTile = false;
 						if (!this.def.MaterialsAvailable(this.selectedElements) && !DebugHandler.InstantBuildMode)
 						{

@@ -2,9 +2,9 @@
 
 namespace Mono.Unix.Native
 {
-	[CLSCompliant(false)]
 	[Flags]
 	[Map]
+	[CLSCompliant(false)]
 	public enum SyslogOptions
 	{
 		LOG_PID = 1,

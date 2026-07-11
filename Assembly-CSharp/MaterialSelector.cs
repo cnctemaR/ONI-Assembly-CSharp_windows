@@ -152,7 +152,7 @@ public class MaterialSelector : KScreen
 			Image image = gameObject.GetComponentsInChildren<Image>()[1];
 			locText2.text = Util.FormatWholeNumber(WorldInventory.Instance.GetAmount(keyValuePair.Value.tag));
 			locText.text = Util.FormatWholeNumber(this.activeMass);
-			image.sprite = Def.GetUISpriteFromMultiObjectAnim(keyValuePair.Value.substance.anim, "ui");
+			image.sprite = Def.GetUISpriteFromMultiObjectAnim(keyValuePair.Value.substance.anim, "ui", false);
 			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(keyValuePair.Value.tag) || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive);
 			this.SetToggleBGImage(keyValuePair.Key);
 			Tag tag = keyValuePair.Value.tag;

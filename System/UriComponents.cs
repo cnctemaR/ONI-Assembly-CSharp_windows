@@ -13,13 +13,14 @@ namespace System
 		Query = 32,
 		Fragment = 64,
 		StrongPort = 128,
+		NormalizedHost = 256,
 		KeepDelimiter = 1073741824,
+		SerializationInfoString = -2147483648,
+		AbsoluteUri = 127,
 		HostAndPort = 132,
 		StrongAuthority = 134,
-		AbsoluteUri = 127,
-		PathAndQuery = 48,
-		HttpRequestUrl = 61,
 		SchemeAndServer = 13,
-		SerializationInfoString = -2147483648
+		HttpRequestUrl = 61,
+		PathAndQuery = 48
 	}
 }

@@ -39,19 +39,6 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.Subscribe(279163026, new Action<object>(this.OnControlStateChanged));
 	}
 
-	[OnDeserialized]
-	private void OnDeserialized()
-	{
-		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
-		{
-			if (keyValuePair.Key != null)
-			{
-				GameObject gameObject = keyValuePair.Key.Get().gameObject;
-				this.permissions[gameObject] = keyValuePair.Value;
-			}
-		}
-	}
-
 	[OnSerializing]
 	private void OnSerializing()
 	{
@@ -66,9 +53,31 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	[OnSerialized]
+	private void OnSerialized()
+	{
+		this.savedPermissions = null;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (this.savedPermissions != null)
+		{
+			foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
+			{
+				if (keyValuePair.Key != null)
+				{
+					KPrefabID kprefabID = keyValuePair.Key.Get();
+					if (kprefabID != null)
+					{
+						GameObject gameObject = kprefabID.gameObject;
+						this.permissions[gameObject] = keyValuePair.Value;
+					}
+				}
+			}
+			this.savedPermissions = null;
+		}
 		this.SetStatusItem();
 	}
 

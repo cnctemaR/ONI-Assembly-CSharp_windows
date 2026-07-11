@@ -11,7 +11,6 @@ public abstract class StateMachine
 	public StateMachine()
 	{
 		this.name = base.GetType().FullName;
-		this.debugSettings = StateMachineDebuggerSettings.Get().CreateEntry(base.GetType());
 	}
 
 	public virtual void FreeResources()
@@ -44,15 +43,14 @@ public abstract class StateMachine
 
 	public void InitializeStateMachine()
 	{
+		this.debugSettings = StateMachineDebuggerSettings.Get().CreateEntry(base.GetType());
 		StateMachine.BaseState baseState = null;
-		this.CreateStates(this);
-		this.BindStates();
 		this.InitializeStates(out baseState);
 		DebugUtil.Assert(baseState != null, "Assert!");
 		this.defaultState = baseState;
 	}
 
-	private void CreateStates(object state_machine)
+	public void CreateStates(object state_machine)
 	{
 		Type type = state_machine.GetType();
 		FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
@@ -142,7 +140,7 @@ public abstract class StateMachine
 	{
 		public StateMachine.Instance CreateSMI(IStateMachineTarget master)
 		{
-			return StateMachineManager.Instance.CreateSMIFromDef(master, this);
+			return Singleton<StateMachineManager>.Instance.CreateSMIFromDef(master, this);
 		}
 
 		public Type GetStateMachineType()
@@ -439,7 +437,7 @@ public abstract class StateMachine
 			this.events = null;
 			if (this.transitions != null)
 			{
-				for (int i = 0; i < this.transitions.Length; i++)
+				for (int i = 0; i < this.transitions.Count; i++)
 				{
 					this.transitions[i].Clear();
 				}
@@ -481,17 +479,17 @@ public abstract class StateMachine
 
 		public StateMachine.BaseState defaultState;
 
-		public StateEvent[] events;
+		public List<StateEvent> events;
 
-		public StateMachine.BaseTransition[] transitions;
+		public List<StateMachine.BaseTransition> transitions;
 
-		public StateMachine.ParameterTransition[] parameterTransitions;
+		public List<StateMachine.ParameterTransition> parameterTransitions;
 
-		public StateMachine.UpdateAction[] updateActions;
+		public List<StateMachine.UpdateAction> updateActions;
 
-		public StateMachine.Action[] enterActions;
+		public List<StateMachine.Action> enterActions;
 
-		public StateMachine.Action[] exitActions;
+		public List<StateMachine.Action> exitActions;
 
 		public StateMachine.BaseState[] branch;
 

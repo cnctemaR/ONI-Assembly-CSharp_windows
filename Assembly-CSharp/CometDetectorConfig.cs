@@ -16,7 +16,7 @@ public class CometDetectorConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.Overheatable = false;

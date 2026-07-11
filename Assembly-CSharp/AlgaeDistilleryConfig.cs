@@ -25,7 +25,6 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
@@ -61,7 +60,7 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.2f, SimHashes.Algae, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.4f, SimHashes.DirtyWater, 303.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.40000004f, SimHashes.DirtyWater, 303.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
 		Prioritizable.AddRef(go);
 	}
@@ -94,7 +93,7 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 
 	public const float ALGAE_PER_SECOND = 0.2f;
 
-	public const float DIRTY_WATER_RATIO = 2f;
+	public const float DIRTY_WATER_PER_SECOND = 0.40000004f;
 
 	public const float OUTPUT_TEMP = 303.15f;
 

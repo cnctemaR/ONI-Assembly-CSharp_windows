@@ -15,8 +15,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		}
 		set
 		{
-			base.smi.sm.flushes.Set(value, base.smi);
 			this._flushesUsed = value;
+			base.smi.sm.flushes.Set(value, base.smi);
 		}
 	}
 
@@ -79,7 +79,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 	private void SpawnMonster()
 	{
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), base.smi.transform.GetPosition(), Grid.SceneLayer.Creatures, SceneOrganizer.Instance.GetFolder(Folder.Creatures), null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), base.smi.transform.GetPosition(), Grid.SceneLayer.Creatures, null, 0);
 		gameObject.SetActive(true);
 	}
 
@@ -182,6 +182,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		public StatesInstance(Toilet master)
 			: base(master)
 		{
+			this.activeUseChores = new List<Chore>();
 		}
 
 		public bool IsSoiled
@@ -220,7 +221,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 				this.cleanChore.Cancel("dupe");
 			}
 			ToiletWorkableClean component = base.master.GetComponent<ToiletWorkableClean>();
-			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, null, true, new Action<Chore>(this.OnCleanComplete), null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
+			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, null, true, new Action<Chore>(this.OnCleanComplete), null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
 		}
 
 		public void CancelCleanChore()
@@ -253,6 +254,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 		public Chore cleanChore;
 
+		public List<Chore> activeUseChores;
+
 		public float monsterSpawnTime = 1200f;
 	}
 
@@ -264,7 +267,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			this.root.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => !smi.HasDirt()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
 			this.needsdirt.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => smi.HasDirt());
 			this.ready.DefaultState(this.ready.idle).ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet)
-				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUseChore), null)
+				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
+				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateBreakUseChore), null)
 				.ToggleTag(GameTags.Usable);
 			this.ready.idle.WorkableStartTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.inuse);
 			this.ready.inuse.WorkableStopTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.idle).WorkableCompleteTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.flush);
@@ -310,12 +314,31 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			this.notoperational.EventTransition(GameHashes.OperationalChanged, this.needsdirt, (Toilet.StatesInstance smi) => smi.Get<Operational>().IsOperational).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable);
 		}
 
-		private Chore CreateUseChore(Toilet.StatesInstance smi)
+		private Chore CreateUrgentUseChore(Toilet.StatesInstance smi)
 		{
-			WorkChore<ToiletWorkableUse> workChore = new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
-			workChore.AddPrecondition(ChorePreconditions.instance.IsOperational, smi.gameObject.GetComponent<Operational>());
-			workChore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, smi.gameObject.GetComponent<Assignable>());
+			Chore chore = this.CreateUseChore(smi, Db.Get().ChoreTypes.Pee);
+			chore.AddPrecondition(ChorePreconditions.instance.IsBladderFull, null);
+			return chore;
+		}
+
+		private Chore CreateBreakUseChore(Toilet.StatesInstance smi)
+		{
+			Chore chore = this.CreateUseChore(smi, Db.Get().ChoreTypes.BreakPee);
+			chore.AddPrecondition(ChorePreconditions.instance.IsBladderNotFull, null);
+			return chore;
+		}
+
+		private Chore CreateUseChore(Toilet.StatesInstance smi, ChoreType choreType)
+		{
+			WorkChore<ToiletWorkableUse> workChore = new WorkChore<ToiletWorkableUse>(choreType, smi.master, null, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
+			smi.activeUseChores.Add(workChore);
+			WorkChore<ToiletWorkableUse> workChore2 = workChore;
+			workChore2.onExit = (Action<Chore>)Delegate.Combine(workChore2.onExit, new Action<Chore>(delegate(Chore exiting_chore)
+			{
+				smi.activeUseChores.Remove(exiting_chore);
+			}));
 			workChore.AddPrecondition(ChorePreconditions.instance.IsPreferredAssignableOrUrgentBladder, smi.master.GetComponent<Assignable>());
+			workChore.AddPrecondition(ChorePreconditions.instance.IsExclusivelyAvailableWithOtherChores, smi.activeUseChores);
 			return workChore;
 		}
 

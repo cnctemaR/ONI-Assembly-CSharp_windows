@@ -7,22 +7,18 @@ namespace System.Data
 	public class RowNotInTableException : DataException
 	{
 		public RowNotInTableException()
-			: base(Locale.GetText("This DataRow is not in this DataTable"))
-		{
-		}
-
-		public RowNotInTableException(string s)
-			: base(s)
-		{
-		}
-
-		public RowNotInTableException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		protected RowNotInTableException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		{
+		}
+
+		public RowNotInTableException(string s)
+		{
+		}
+
+		public RowNotInTableException(string message, Exception innerException)
 		{
 		}
 	}

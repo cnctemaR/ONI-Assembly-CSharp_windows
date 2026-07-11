@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeMethodInvokeExpression : CodeExpression
 	{
@@ -14,13 +11,13 @@ namespace System.CodeDom
 
 		public CodeMethodInvokeExpression(CodeMethodReferenceExpression method, params CodeExpression[] parameters)
 		{
-			this.method = method;
+			this._method = method;
 			this.Parameters.AddRange(parameters);
 		}
 
 		public CodeMethodInvokeExpression(CodeExpression targetObject, string methodName, params CodeExpression[] parameters)
 		{
-			this.method = new CodeMethodReferenceExpression(targetObject, methodName);
+			this._method = new CodeMethodReferenceExpression(targetObject, methodName);
 			this.Parameters.AddRange(parameters);
 		}
 
@@ -28,37 +25,21 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.method == null)
+				CodeMethodReferenceExpression codeMethodReferenceExpression;
+				if ((codeMethodReferenceExpression = this._method) == null)
 				{
-					this.method = new CodeMethodReferenceExpression();
+					codeMethodReferenceExpression = (this._method = new CodeMethodReferenceExpression());
 				}
-				return this.method;
+				return codeMethodReferenceExpression;
 			}
 			set
 			{
-				this.method = value;
+				this._method = value;
 			}
 		}
 
-		public CodeExpressionCollection Parameters
-		{
-			get
-			{
-				if (this.parameters == null)
-				{
-					this.parameters = new CodeExpressionCollection();
-				}
-				return this.parameters;
-			}
-		}
+		public CodeExpressionCollection Parameters { get; } = new CodeExpressionCollection();
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private CodeMethodReferenceExpression method;
-
-		private CodeExpressionCollection parameters;
+		private CodeMethodReferenceExpression _method;
 	}
 }

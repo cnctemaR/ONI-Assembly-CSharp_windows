@@ -13,54 +13,60 @@ public class VoiceSoundEvent : SoundEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		MinionIdentity component = behaviour.GetComponent<MinionIdentity>();
-		if (component == null || (base.name.Contains("state") && Time.time - component.timeLastSpoke < this.intervalBetweenSpeaking))
+		VoiceSoundEvent.PlayVoice(base.name, behaviour.controller, this.intervalBetweenSpeaking, base.looping);
+	}
+
+	public static EventInstance PlayVoice(string name, KBatchedAnimController controller, float interval_between_speaking, bool looping)
+	{
+		EventInstance eventInstance = default(EventInstance);
+		MinionIdentity component = controller.GetComponent<MinionIdentity>();
+		if (component == null || (name.Contains("state") && Time.time - component.timeLastSpoke < interval_between_speaking))
 		{
-			return;
+			return eventInstance;
 		}
-		if (base.name.Contains(":"))
+		if (name.Contains(":"))
 		{
-			string[] array = base.name.Split(new char[] { ':' });
+			string[] array = name.Split(new char[] { ':' });
 			float num = float.Parse(array[1]);
 			float num2 = (float)global::UnityEngine.Random.Range(0, 100);
 			if (num2 > num)
 			{
-				return;
+				return eventInstance;
 			}
 		}
-		Worker component2 = behaviour.GetComponent<Worker>();
-		string assetName = this.GetAssetName(component2);
+		Worker component2 = controller.GetComponent<Worker>();
+		string assetName = VoiceSoundEvent.GetAssetName(name, component2);
 		StaminaMonitor.Instance smi = component2.GetSMI<StaminaMonitor.Instance>();
-		if (!base.name.Contains("sleep_") && smi != null && smi.IsSleeping())
+		if (!name.Contains("sleep_") && smi != null && smi.IsSleeping())
 		{
-			return;
+			return eventInstance;
 		}
 		Vector3 position = component2.transform.GetPosition();
 		string sound = GlobalAssets.GetSound(assetName, true);
-		if (!SoundEvent.ShouldPlaySound(behaviour, sound, base.looping, false))
+		if (!SoundEvent.ShouldPlaySound(controller, sound, looping, false))
 		{
-			return;
+			return eventInstance;
 		}
 		if (sound != null)
 		{
-			if (base.looping)
+			if (looping)
 			{
-				LoopingSounds component3 = behaviour.GetComponent<LoopingSounds>();
+				LoopingSounds component3 = controller.GetComponent<LoopingSounds>();
 				if (component3 == null)
 				{
-					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
+					global::Debug.Log(controller.name + " is missing LoopingSounds component. ", null);
 				}
 				else if (!component3.StartSound(sound))
 				{
-					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
+					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, controller.name) });
 				}
 			}
 			else
 			{
-				EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);
+				eventInstance = SoundEvent.BeginOneShot(sound, position);
 				if (sound.Contains("sleep_"))
 				{
-					Traits component4 = behaviour.GetComponent<Traits>();
+					Traits component4 = controller.GetComponent<Traits>();
 					if (component4.HasTrait("Snorer"))
 					{
 						eventInstance.setParameterValue("snoring", 1f);
@@ -74,9 +80,10 @@ public class VoiceSoundEvent : SoundEvent
 		{
 			global::Debug.LogWarning("Missing voice sound: " + assetName, null);
 		}
+		return eventInstance;
 	}
 
-	private string GetAssetName(Component cmp)
+	private static string GetAssetName(string name, Component cmp)
 	{
 		string text = "F01";
 		if (cmp != null)
@@ -87,10 +94,10 @@ public class VoiceSoundEvent : SoundEvent
 				text = component.GetVoiceId();
 			}
 		}
-		string text2 = base.name;
-		if (base.name.Contains(":"))
+		string text2 = name;
+		if (name.Contains(":"))
 		{
-			string[] array = base.name.Split(new char[] { ':' });
+			string[] array = name.Split(new char[] { ':' });
 			text2 = array[0];
 		}
 		return StringFormatter.Combine("DupVoc_", text, "_", text2);
@@ -103,7 +110,7 @@ public class VoiceSoundEvent : SoundEvent
 			LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 			if (component != null)
 			{
-				string assetName = this.GetAssetName(component);
+				string assetName = VoiceSoundEvent.GetAssetName(base.name, component);
 				string sound = GlobalAssets.GetSound(assetName, true);
 				component.StopSound(sound);
 			}

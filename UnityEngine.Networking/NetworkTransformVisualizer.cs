@@ -153,6 +153,7 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		[Tooltip("The prefab to use for the visualization object.")]
 		[SerializeField]
 		private GameObject m_VisualizerPrefab;
 

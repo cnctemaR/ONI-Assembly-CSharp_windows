@@ -10,8 +10,8 @@ namespace System
 	{
 		public UnhandledExceptionEventArgs(object exception, bool isTerminating)
 		{
-			this.exception = exception;
-			this.m_isTerminating = isTerminating;
+			this._Exception = exception;
+			this._IsTerminating = isTerminating;
 		}
 
 		public object ExceptionObject
@@ -19,7 +19,7 @@ namespace System
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			get
 			{
-				return this.exception;
+				return this._Exception;
 			}
 		}
 
@@ -28,12 +28,12 @@ namespace System
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 			get
 			{
-				return this.m_isTerminating;
+				return this._IsTerminating;
 			}
 		}
 
-		private object exception;
+		private object _Exception;
 
-		private bool m_isTerminating;
+		private bool _IsTerminating;
 	}
 }

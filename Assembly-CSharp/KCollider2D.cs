@@ -25,14 +25,14 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		CellChangeMonitor.Instance.RegisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
+		Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
 		this.MarkDirty(true);
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		CellChangeMonitor.Instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
+		Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(base.transform, new Action<Transform, bool>(KCollider2D.OnMovementStateChanged));
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
@@ -40,7 +40,7 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 		}
 	}
 
-	protected void MarkDirty(bool force = false)
+	public void MarkDirty(bool force = false)
 	{
 		bool flag = force || this.partitionerEntry != null;
 		if (!flag)
@@ -48,7 +48,7 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 			return;
 		}
 		Extents extents = this.GetExtents();
-		if (this.cachedExtents.x == extents.x && this.cachedExtents.y == extents.y && this.cachedExtents.width == extents.width && this.cachedExtents.height == extents.height)
+		if (!force && this.cachedExtents.x == extents.x && this.cachedExtents.y == extents.y && this.cachedExtents.width == extents.width && this.cachedExtents.height == extents.height)
 		{
 			return;
 		}

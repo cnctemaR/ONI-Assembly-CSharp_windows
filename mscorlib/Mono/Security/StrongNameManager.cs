@@ -123,9 +123,8 @@ namespace Mono.Security
 							}
 							else
 							{
-								string text4 = (string)element.assemblies[text2];
-								string text5 = text4 + "," + text3;
-								element.assemblies[text2] = text5;
+								string text4 = (string)element.assemblies[text2] + "," + text3;
+								element.assemblies[text2] = text4;
 							}
 						}
 					}

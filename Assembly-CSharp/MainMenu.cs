@@ -54,9 +54,39 @@ public class MainMenu : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
+		global::Debug.Log("-- MAIN MENU -- ", null);
 		base.OnSpawn();
 		Canvas.ForceUpdateCanvases();
 		this.ShowLanguageConfirmation();
+		string savePrefix = SaveLoader.GetSavePrefix();
+		try
+		{
+			string text = Path.Combine(savePrefix, "__SPCCHK");
+			using (FileStream fileStream = File.OpenWrite(text))
+			{
+				byte[] array = new byte[1024];
+				for (int i = 0; i < 15360; i++)
+				{
+					fileStream.Write(array, 0, array.Length);
+				}
+			}
+			File.Delete(text);
+		}
+		catch (Exception ex)
+		{
+			string text2;
+			if (ex is IOException)
+			{
+				text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, savePrefix);
+			}
+			else
+			{
+				text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, savePrefix);
+			}
+			string text3 = string.Format(text2, savePrefix);
+			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null);
+		}
 		if (GenericGameSettings.instance.autoResumeGame)
 		{
 			this.ResumeGame();
@@ -154,14 +184,14 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 275206U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 279457U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
 				string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(latestSaveFile);
 				if (!string.IsNullOrEmpty(gameInfo.baseName))
 				{
-					this.Button_ResumeGame.GetComponentsInChildren<LocText>()[1].text = string.Format(UI.FRONTEND.MAINMENU.RESUMEBUTTON_BASENAME, gameInfo.baseName, gameInfo.numberOfCycles);
+					this.Button_ResumeGame.GetComponentsInChildren<LocText>()[1].text = string.Format(UI.FRONTEND.MAINMENU.RESUMEBUTTON_BASENAME, gameInfo.baseName, gameInfo.numberOfCycles + 1);
 				}
 				else
 				{
@@ -225,14 +255,17 @@ public class MainMenu : KMonoBehaviour
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupeAudio;
-			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, null, null, null, null, null);
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO, delegate
+			{
+				Application.OpenURL("http://support.kleientertainment.com/customer/en/portal/articles/2947881-no-audio-when-playing-oxygen-not-included");
+			}, null, null, null);
 		}
 	}
 
 	private void CheckDoubleBoundKeys()
 	{
 		string text = string.Empty;
-		List<BindingEntry> list = new List<BindingEntry>();
+		HashSet<BindingEntry> hashSet = new HashSet<BindingEntry>();
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			if (GameInputMapping.KeyBindings[i].mKeyCode != KKeyCode.Mouse1)
@@ -241,27 +274,27 @@ public class MainMenu : KMonoBehaviour
 				{
 					if (i != j)
 					{
-						if (!list.Contains(GameInputMapping.KeyBindings[j]))
+						BindingEntry bindingEntry = GameInputMapping.KeyBindings[j];
+						if (!hashSet.Contains(bindingEntry))
 						{
-							BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
-							BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[j];
-							if (bindingEntry.mKeyCode != KKeyCode.None && bindingEntry.mKeyCode == bindingEntry2.mKeyCode && bindingEntry.mModifier == bindingEntry2.mModifier && bindingEntry.mRebindable && bindingEntry2.mRebindable)
+							BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[i];
+							if (bindingEntry2.mKeyCode != KKeyCode.None && bindingEntry2.mKeyCode == bindingEntry.mKeyCode && bindingEntry2.mModifier == bindingEntry.mModifier && bindingEntry2.mRebindable && bindingEntry.mRebindable)
 							{
 								string mGroup = GameInputMapping.KeyBindings[i].mGroup;
 								string mGroup2 = GameInputMapping.KeyBindings[j].mGroup;
 								if (mGroup == "Root" || mGroup2 == "Root" || mGroup == mGroup2)
 								{
-									if (!(mGroup == "Root") || !bindingEntry2.mIgnoreRootConflics)
+									if (!(mGroup == "Root") || !bindingEntry.mIgnoreRootConflics)
 									{
-										if (!(mGroup2 == "Root") || !bindingEntry.mIgnoreRootConflics)
+										if (!(mGroup2 == "Root") || !bindingEntry2.mIgnoreRootConflics)
 										{
 											string text2 = text;
-											text = string.Concat(new object[] { text2, "\n\n", bindingEntry.mAction, ": <b>", bindingEntry.mKeyCode, "</b>\n", bindingEntry2.mAction, ": <b>", bindingEntry2.mKeyCode, "</b>" });
-											BindingEntry bindingEntry3 = bindingEntry;
+											text = string.Concat(new object[] { text2, "\n\n", bindingEntry2.mAction, ": <b>", bindingEntry2.mKeyCode, "</b>\n", bindingEntry.mAction, ": <b>", bindingEntry.mKeyCode, "</b>" });
+											BindingEntry bindingEntry3 = bindingEntry2;
 											bindingEntry3.mKeyCode = KKeyCode.None;
 											bindingEntry3.mModifier = Modifier.None;
 											GameInputMapping.KeyBindings[i] = bindingEntry3;
-											bindingEntry3 = bindingEntry2;
+											bindingEntry3 = bindingEntry;
 											bindingEntry3.mKeyCode = KKeyCode.None;
 											bindingEntry3.mModifier = Modifier.None;
 											GameInputMapping.KeyBindings[j] = bindingEntry3;
@@ -272,7 +305,7 @@ public class MainMenu : KMonoBehaviour
 						}
 					}
 				}
-				list.Add(GameInputMapping.KeyBindings[i]);
+				hashSet.Add(GameInputMapping.KeyBindings[i]);
 			}
 		}
 		if (text != string.Empty)

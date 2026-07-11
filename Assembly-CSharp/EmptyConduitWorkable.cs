@@ -12,7 +12,7 @@ public class EmptyConduitWorkable : Workable
 		base.SetWorkTime(float.PositiveInfinity);
 		this.faceTargetWhenWorking = true;
 		this.multitoolContext = "build";
-		this.multitoolHitEffectTag = "fx_build_splash";
+		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
 		base.Subscribe(2127324410, new Action<object>(this.OnEmptyConduitCancelled));
 		if (EmptyConduitWorkable.emptyLiquidConduitStatusItem == null)
 		{
@@ -108,7 +108,7 @@ public class EmptyConduitWorkable : Workable
 	private void CreateWorkChore()
 	{
 		base.GetComponent<Prioritizable>().AddRef();
-		this.chore = new WorkChore<EmptyConduitWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		this.chore = new WorkChore<EmptyConduitWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanDoPlumbing.id);
 		this.elapsedTime = 0f;
 		this.emptiedPipe = false;

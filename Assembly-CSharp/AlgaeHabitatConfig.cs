@@ -21,7 +21,6 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
-		buildingDef.MaterialCategory = MATERIALS.FARMABLE;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
@@ -73,7 +72,6 @@ public class AlgaeHabitatConfig : IBuildingConfig
 			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0)
 		};
 		ElementConverter elementConverter2 = go.AddComponent<ElementConverter>();
-		new ElementConverter.OutputElement(0.29033333f, SimHashes.DirtyWater, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0);
 		elementConverter2.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.29033333f, SimHashes.DirtyWater, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0)
@@ -93,6 +91,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		passiveElementConsumer.storeOnConsume = true;
 		passiveElementConsumer.capacityKG = 360f;
 		passiveElementConsumer.showInStatusPanel = false;
+		go.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
 		go.AddOrGet<AnimTileable>();
 		Prioritizable.AddRef(go);
 	}

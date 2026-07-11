@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class ResourceCategoryScreen : KScreen
 {
+	public static void DestroyInstance()
+	{
+		ResourceCategoryScreen.Instance = null;
+	}
+
 	protected override void OnActivate()
 	{
 		base.OnActivate();
@@ -16,7 +21,6 @@ public class ResourceCategoryScreen : KScreen
 		{
 			ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(GameTags.Miscellaneous, GameUtil.MeasureUnit.mass);
 			this.DisplayedCategories.Add(GameTags.Miscellaneous, resourceCategoryHeader);
-			resourceCategoryHeader.gameObject.SetActive(false);
 		}
 		this.DisplayedCategoryKeys = this.DisplayedCategories.Keys.ToArray<Tag>();
 	}
@@ -27,7 +31,6 @@ public class ResourceCategoryScreen : KScreen
 		{
 			ResourceCategoryHeader resourceCategoryHeader = this.NewCategoryHeader(tag, measure);
 			this.DisplayedCategories.Add(tag, resourceCategoryHeader);
-			resourceCategoryHeader.gameObject.SetActive(false);
 		}
 	}
 
@@ -40,11 +43,12 @@ public class ResourceCategoryScreen : KScreen
 		for (int i = 0; i < 1; i++)
 		{
 			Tag tag = this.DisplayedCategoryKeys[this.categoryUpdatePacer];
-			if (WorldInventory.Instance.IsDiscovered(tag) && !this.DisplayedCategories[tag].gameObject.activeInHierarchy)
+			ResourceCategoryHeader resourceCategoryHeader = this.DisplayedCategories[tag];
+			if (WorldInventory.Instance.IsDiscovered(tag) && !resourceCategoryHeader.gameObject.activeInHierarchy)
 			{
-				this.DisplayedCategories[tag].gameObject.SetActive(true);
+				resourceCategoryHeader.gameObject.SetActive(true);
 			}
-			this.DisplayedCategories[tag].UpdateContents();
+			resourceCategoryHeader.UpdateContents();
 			this.categoryUpdatePacer = (this.categoryUpdatePacer + 1) % this.DisplayedCategoryKeys.Length;
 		}
 		if (MeterScreen.Instance != null && !MeterScreen.Instance.StartValuesSet)
@@ -55,7 +59,7 @@ public class ResourceCategoryScreen : KScreen
 
 	private ResourceCategoryHeader NewCategoryHeader(Tag categoryTag, GameUtil.MeasureUnit measure)
 	{
-		GameObject gameObject = Util.KInstantiateUI(this.Prefab_CategoryBar, this.CategoryContainer.gameObject, true);
+		GameObject gameObject = Util.KInstantiateUI(this.Prefab_CategoryBar, this.CategoryContainer.gameObject, false);
 		gameObject.name = "CategoryHeader_" + categoryTag.Name;
 		ResourceCategoryHeader component = gameObject.GetComponent<ResourceCategoryHeader>();
 		component.SetTag(categoryTag, measure);
@@ -77,8 +81,6 @@ public class ResourceCategoryScreen : KScreen
 	public static ResourceCategoryScreen Instance;
 
 	public GameObject Prefab_CategoryBar;
-
-	public GameObject Prefab_MaterialDisplay;
 
 	public Transform CategoryContainer;
 

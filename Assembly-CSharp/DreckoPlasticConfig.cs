@@ -49,7 +49,7 @@ public class DreckoPlasticConfig : IEntityConfig
 		float num = 90f;
 		float num2 = 30f;
 		int egg_SORT_ORDER = DreckoPlasticConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject2, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_PLASTIC, egg_SORT_ORDER, true, false, true);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject2, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_PLASTIC, egg_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

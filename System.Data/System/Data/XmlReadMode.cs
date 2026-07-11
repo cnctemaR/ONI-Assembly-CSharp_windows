@@ -5,11 +5,11 @@ namespace System.Data
 	public enum XmlReadMode
 	{
 		Auto,
-		ReadSchema,
-		IgnoreSchema,
+		DiffGram = 4,
+		Fragment,
+		IgnoreSchema = 2,
 		InferSchema,
-		DiffGram,
 		InferTypedSchema = 6,
-		Fragment = 5
+		ReadSchema = 1
 	}
 }

@@ -16,12 +16,12 @@ namespace Database
 			this.conveyorOverlay = this.AddTechItem("ConveyorOverlay", RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.NAME, RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.DESC, this.GetSpriteFnBuilder("overlay_conveyor"));
 		}
 
-		private Func<string, Sprite> GetSpriteFnBuilder(string spriteName)
+		private Func<string, bool, Sprite> GetSpriteFnBuilder(string spriteName)
 		{
-			return (string anim) => Assets.GetSprite(spriteName);
+			return (string anim, bool centered) => Assets.GetSprite(spriteName);
 		}
 
-		public TechItem AddTechItem(string id, string name, string description, Func<string, Sprite> getUISprite)
+		public TechItem AddTechItem(string id, string name, string description, Func<string, bool, Sprite> getUISprite)
 		{
 			if (base.TryGet(id) != null)
 			{

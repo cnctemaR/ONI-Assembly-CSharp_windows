@@ -20,12 +20,14 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<EntombVulnerable>();
 		gameObject.AddOrGet<DrowningMonitor>();
+		gameObject.AddOrGet<Prioritizable>();
 		gameObject.AddOrGet<Uprootable>();
 		gameObject.AddOrGet<UprootedMonitor>();
 		gameObject.AddOrGet<Harvestable>();
 		SeedProducer seedProducer = gameObject.AddOrGet<SeedProducer>();
 		seedProducer.Configure("BasicForagePlant", SeedProducer.ProductionType.DigOnly, 1);
 		gameObject.AddOrGet<BasicForagePlantPlanted>();
+		gameObject.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
 		return gameObject;
 	}
 

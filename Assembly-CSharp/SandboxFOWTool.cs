@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class SandboxFOWTool : BrushTool
 {
+	public static void DestroyInstance()
+	{
+		SandboxFOWTool.instance = null;
+	}
+
 	private SandboxSettings settings
 	{
 		get

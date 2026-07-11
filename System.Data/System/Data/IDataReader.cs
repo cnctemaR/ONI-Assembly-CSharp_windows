@@ -2,8 +2,14 @@
 
 namespace System.Data
 {
-	public interface IDataReader : IDisposable, IDataRecord
+	public interface IDataReader : IDataRecord, IDisposable
 	{
+		int Depth { get; }
+
+		bool IsClosed { get; }
+
+		int RecordsAffected { get; }
+
 		void Close();
 
 		DataTable GetSchemaTable();
@@ -11,11 +17,5 @@ namespace System.Data
 		bool NextResult();
 
 		bool Read();
-
-		int Depth { get; }
-
-		bool IsClosed { get; }
-
-		int RecordsAffected { get; }
 	}
 }

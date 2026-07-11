@@ -23,11 +23,6 @@ public class Brain : KMonoBehaviour
 		{
 			this.onPreUpdate();
 		}
-		int instanceID = base.gameObject.GetInstanceID();
-		if (instanceID == Brain.stopID)
-		{
-			Output.Log(new object[] { "Break" });
-		}
 		if (this.IsRunning())
 		{
 			this.UpdateChores();
@@ -88,6 +83,4 @@ public class Brain : KMonoBehaviour
 	private bool running;
 
 	private bool suspend;
-
-	private static int stopID = -1;
 }

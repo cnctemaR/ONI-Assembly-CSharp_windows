@@ -25,7 +25,6 @@ public class CO2ScrubberConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
-		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
@@ -75,6 +74,7 @@ public class CO2ScrubberConfig : IBuildingConfig
 		conduitDispenser.conduitType = ConduitType.Liquid;
 		conduitDispenser.invertElementFilter = true;
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
+		go.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

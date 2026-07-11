@@ -13,12 +13,43 @@ public class BuildMenu : KScreen
 
 	public static BuildMenu Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		BuildMenu.Instance = null;
+	}
+
+	public static bool UseHotkeyBuildMenu()
+	{
+		int @int = KPlayerPrefs.GetInt("ENABLE_HOTKEY_BUILD_MENU");
+		return @int != 0;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.ConsumeMouseScroll = true;
 		this.initTime = KTime.Instance.UnscaledGameTime;
-		base.gameObject.SetActive(false);
+		bool flag = BuildMenu.UseHotkeyBuildMenu();
+		if (flag)
+		{
+			BuildMenu.Instance = this;
+			this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, base.gameObject, true);
+			this.productInfoScreen.rectTransform().pivot = new Vector2(0f, 0f);
+			this.productInfoScreen.onElementsFullySelected = new global::System.Action(this.OnRecipeElementsFullySelected);
+			this.productInfoScreen.Show(false);
+			this.buildingsScreen = global::Util.KInstantiateUI<BuildMenuBuildingsScreen>(this.buildingsMenuPrefab.gameObject, base.gameObject, true);
+			BuildMenuBuildingsScreen buildMenuBuildingsScreen = this.buildingsScreen;
+			buildMenuBuildingsScreen.onBuildingSelected = (Action<BuildingDef>)Delegate.Combine(buildMenuBuildingsScreen.onBuildingSelected, new Action<BuildingDef>(this.OnBuildingSelected));
+			this.buildingsScreen.Show(false);
+			Game.Instance.Subscribe(288942073, new Action<object>(this.OnUIClear));
+			Game.Instance.Subscribe(-1190690038, new Action<object>(this.OnBuildToolDeactivated));
+			this.Initialize();
+			this.rectTransform().anchoredPosition = Vector2.zero;
+		}
+		else
+		{
+			base.gameObject.SetActive(flag);
+		}
 	}
 
 	private void Initialize()
@@ -340,6 +371,11 @@ public class BuildMenu : KScreen
 
 	private void OnBuildingSelected(BuildingDef def)
 	{
+		if (this.selecting)
+		{
+			return;
+		}
+		this.selecting = true;
 		this.selectedBuilding = def;
 		this.buildingsScreen.SetHasFocus(false);
 		foreach (KeyValuePair<BuildMenu.Category, BuildMenuCategoriesScreen> keyValuePair in this.submenus)
@@ -363,6 +399,7 @@ public class BuildMenu : KScreen
 		{
 			this.productInfoScreen.Close();
 		}
+		this.selecting = false;
 	}
 
 	private void OnCategoryClicked(BuildMenu.Category new_category, int depth)
@@ -482,6 +519,8 @@ public class BuildMenu : KScreen
 		return this.productInfoScreen.materialSelectionPanel.PriorityScreen.GetLastSelectedPriority();
 	}
 
+	public const string ENABLE_HOTKEY_BUILD_MENU_KEY = "ENABLE_HOTKEY_BUILD_MENU";
+
 	[SerializeField]
 	private BuildMenuCategoriesScreen categoriesMenuPrefab;
 
@@ -503,6 +542,8 @@ public class BuildMenu : KScreen
 
 	private Stack<KIconToggleMenu> submenuStack = new Stack<KIconToggleMenu>();
 
+	private bool selecting;
+
 	[SerializeField]
 	private Vector2 rootMenuOffset = Vector2.zero;
 
@@ -518,7 +559,291 @@ public class BuildMenu : KScreen
 	[SerializeField]
 	private Vector2 buildingsMenuOffset = Vector2.zero;
 
-	private static readonly BuildMenu.DisplayInfo OrderedBuildings = new BuildMenu.DisplayInfo(BuildMenu.Category.INVALID, "none", global::Action.NumActions, KKeyCode.None, null);
+	public static readonly BuildMenu.DisplayInfo OrderedBuildings = new BuildMenu.DisplayInfo(BuildMenu.Category.ROOT, "icon_category_base", global::Action.NumActions, KKeyCode.None, new BuildMenu.DisplayInfo[]
+	{
+		new BuildMenu.DisplayInfo(BuildMenu.Category.Base, "icon_category_base", global::Action.Plan1, KKeyCode.None, new BuildMenu.DisplayInfo[]
+		{
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Tiles, "icon_category_base", global::Action.BuildCategoryTiles, KKeyCode.T, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("Tile", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("GasPermeableMembrane", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("MeshTile", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("InsulationTile", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("PlasticTile", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("MetalTile", global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("GlassTile", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("BunkerTile", global::Action.BuildMenuKeyB)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Ladders, "icon_category_base", global::Action.BuildCategoryLadders, KKeyCode.A, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("Ladder", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("LadderFast", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("FirePole", global::Action.BuildMenuKeyF)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Doors, "icon_category_base", global::Action.BuildCategoryDoors, KKeyCode.D, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("Door", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("ManualPressureDoor", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("PressureDoor", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("BunkerDoor", global::Action.BuildMenuKeyB)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Storage, "icon_category_base", global::Action.BuildCategoryStorage, KKeyCode.S, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("StorageLocker", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("RationBox", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("Refrigerator", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("StorageLockerSmart", global::Action.BuildMenuKeyA)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Research, "icon_category_misc", global::Action.BuildCategoryResearch, KKeyCode.R, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("ResearchCenter", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("AdvancedResearchCenter", global::Action.BuildMenuKeyS)
+			})
+		}),
+		new BuildMenu.DisplayInfo(BuildMenu.Category.FoodAndAgriculture, "icon_category_food", global::Action.Plan2, KKeyCode.None, new BuildMenu.DisplayInfo[]
+		{
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Farming, "icon_category_food", global::Action.BuildCategoryFarming, KKeyCode.F, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("PlanterBox", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("FarmTile", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("HydroponicFarm", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("Compost", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("FertilizerMaker", global::Action.BuildMenuKeyR)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Cooking, "icon_category_food", global::Action.BuildCategoryCooking, KKeyCode.C, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("MicrobeMusher", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("CookingStation", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("EggCracker", global::Action.BuildMenuKeyE)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Ranching, "icon_category_food", global::Action.BuildCategoryRanching, KKeyCode.R, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("CreatureDeliveryPoint", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("FishDeliveryPoint", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("CreatureFeeder", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("FishFeeder", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("RanchStation", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("ShearingStation", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("EggIncubator", global::Action.BuildMenuKeyI),
+				new BuildMenu.BuildingInfo("CreatureTrap", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("FishTrap", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("AirborneCreatureLure", global::Action.BuildMenuKeyL)
+			})
+		}),
+		new BuildMenu.DisplayInfo(BuildMenu.Category.HealthAndHappiness, "icon_category_medical", global::Action.Plan3, KKeyCode.None, new BuildMenu.DisplayInfo[]
+		{
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Medical, "icon_category_medical", global::Action.BuildCategoryMedical, KKeyCode.C, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("Apothecary", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("MedicalCot", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("MedicalBed", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("MassageTable", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("Grave", global::Action.BuildMenuKeyR)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Hygiene, "icon_category_medical", global::Action.BuildCategoryHygiene, KKeyCode.E, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("Outhouse", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("FlushToilet", global::Action.BuildMenuKeyV),
+				new BuildMenu.BuildingInfo(ShowerConfig.ID, global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("WashBasin", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("WashSink", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("HandSanitizer", global::Action.BuildMenuKeyA)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Furniture, "icon_category_furniture", global::Action.BuildCategoryFurniture, KKeyCode.F, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo(BedConfig.ID, global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo(LuxuryBedConfig.ID, global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("DiningTable", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("FloorLamp", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("CeilingLight", global::Action.BuildMenuKeyT)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Decor, "icon_category_furniture", global::Action.BuildCategoryDecor, KKeyCode.D, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("FlowerVase", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("Canvas", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("Sculpture", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("IceSculpture", global::Action.BuildMenuKeyE)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Recreation, "icon_category_medical", global::Action.BuildCategoryRecreation, KKeyCode.R, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("WaterCooler", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("ArcadeMachine", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("Phonobox", global::Action.BuildMenuKeyP),
+				new BuildMenu.BuildingInfo("EspressoMachine", global::Action.BuildMenuKeyE)
+			})
+		}),
+		new BuildMenu.DisplayInfo(BuildMenu.Category.Infrastructure, "icon_category_utilities", global::Action.Plan4, KKeyCode.None, new BuildMenu.DisplayInfo[]
+		{
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Wires, "icon_category_electrical", global::Action.BuildCategoryWires, KKeyCode.W, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("Wire", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("WireBridge", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("HighWattageWire", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("WireBridgeHighWattage", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("WireRefined", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("WireRefinedBridge", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("WireRefinedHighWattage", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("WireRefinedBridgeHighWattage", global::Action.BuildMenuKeyA)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Generators, "icon_category_electrical", global::Action.BuildCategoryGenerators, KKeyCode.G, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("ManualGenerator", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("Generator", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("HydrogenGenerator", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("MethaneGenerator", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("PetroleumGenerator", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("SteamTurbine", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("SolarPanel", global::Action.BuildMenuKeyS)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.PowerControl, "icon_category_electrical", global::Action.BuildCategoryPowerControl, KKeyCode.R, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("Battery", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("BatteryMedium", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("BatterySmart", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("PowerTransformerSmall", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("PowerTransformer", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo(SwitchConfig.ID, global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo(TemperatureControlledSwitchConfig.ID, global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo(PressureSwitchLiquidConfig.ID, global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo(PressureSwitchGasConfig.ID, global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo(LogicPowerRelayConfig.ID, global::Action.BuildMenuKeyX)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Pipes, "icon_category_plumbing", global::Action.BuildCategoryPipes, KKeyCode.E, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("LiquidConduit", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("LiquidConduitBridge", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("InsulatedLiquidConduit", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("LiquidConduitRadiant", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("GasConduit", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("GasConduitBridge", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("InsulatedGasConduit", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("GasConduitRadiant", global::Action.BuildMenuKeyR)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.PlumbingStructures, "icon_category_plumbing", global::Action.BuildCategoryPlumbingStructures, KKeyCode.B, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("LiquidPumpingStation", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("BottleEmptier", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("LiquidPump", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("LiquidMiniPump", global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("LiquidValve", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("LiquidLogicValve", global::Action.BuildMenuKeyL),
+				new BuildMenu.BuildingInfo("LiquidVent", global::Action.BuildMenuKeyV),
+				new BuildMenu.BuildingInfo("LiquidFilter", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("LiquidConduitPreferentialFlow", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("LiquidConduitOverflow", global::Action.BuildMenuKeyR)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.VentilationStructures, "icon_category_ventilation", global::Action.BuildCategoryVentilationStructures, KKeyCode.V, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("GasPump", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("GasMiniPump", global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("GasValve", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("GasLogicValve", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("GasVent", global::Action.BuildMenuKeyV),
+				new BuildMenu.BuildingInfo("GasVentHighPressure", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("GasFilter", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("GasConduitPreferentialFlow", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("GasConduitOverflow", global::Action.BuildMenuKeyR)
+			})
+		}),
+		new BuildMenu.DisplayInfo(BuildMenu.Category.Industrial, "icon_category_refinery", global::Action.Plan5, KKeyCode.None, new BuildMenu.DisplayInfo[]
+		{
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Oxygen, "icon_category_oxygen", global::Action.BuildCategoryOxygen, KKeyCode.X, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("MineralDeoxidizer", global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("AlgaeHabitat", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("AirFilter", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("CO2Scrubber", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("Electrolyzer", global::Action.BuildMenuKeyE)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Utilities, "icon_category_utilities", global::Action.BuildCategoryUtilities, KKeyCode.T, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("SpaceHeater", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("LiquidHeater", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("LiquidCooledFan", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("AirConditioner", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("LiquidConditioner", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("OreScrubber", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("ThermalBlock", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("ExteriorWall", global::Action.BuildMenuKeyW)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Refining, "icon_category_refinery", global::Action.BuildCategoryRefining, KKeyCode.R, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("WaterPurifier", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("AlgaeDistillery", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("RockCrusher", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("Kiln", global::Action.BuildMenuKeyZ),
+				new BuildMenu.BuildingInfo("OilWellCap", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("OilRefinery", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("Polymerizer", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("MetalRefinery", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("GlassForge", global::Action.BuildMenuKeyF)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Equipment, "icon_category_misc", global::Action.BuildCategoryEquipment, KKeyCode.S, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("RoleStation", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("FarmStation", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("PowerControlStation", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("ClothingFabricator", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("SuitFabricator", global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("SuitMarker", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("SuitLocker", global::Action.BuildMenuKeyD)
+			})
+		}),
+		new BuildMenu.DisplayInfo(BuildMenu.Category.Logistics, "icon_category_ventilation", global::Action.Plan6, KKeyCode.None, new BuildMenu.DisplayInfo[]
+		{
+			new BuildMenu.DisplayInfo(BuildMenu.Category.TravelTubes, "icon_category_ventilation", global::Action.BuildCategoryTravelTubes, KKeyCode.T, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("TravelTube", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("TravelTubeEntrance", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("TravelTubeWallBridge", global::Action.BuildMenuKeyB)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.Conveyance, "icon_category_ventilation", global::Action.BuildCategoryConveyance, KKeyCode.C, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("SolidTransferArm", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("SolidConduit", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("SolidConduitInbox", global::Action.BuildMenuKeyI),
+				new BuildMenu.BuildingInfo("SolidConduitOutbox", global::Action.BuildMenuKeyO),
+				new BuildMenu.BuildingInfo("SolidConduitBridge", global::Action.BuildMenuKeyB)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.LogicWiring, "icon_category_automation", global::Action.BuildCategoryLogicWiring, KKeyCode.W, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("LogicWire", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("LogicWireBridge", global::Action.BuildMenuKeyB)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.LogicGates, "icon_category_automation", global::Action.BuildCategoryLogicGates, KKeyCode.G, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo("LogicGateAND", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("LogicGateOR", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("LogicGateXOR", global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("LogicGateNOT", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("LogicGateBUFFER", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("LogicGateFILTER", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo(LogicMemoryConfig.ID, global::Action.BuildMenuKeyV)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.LogicSwitches, "icon_category_automation", global::Action.BuildCategoryLogicSwitches, KKeyCode.S, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo(LogicSwitchConfig.ID, global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo(LogicPressureSensorGasConfig.ID, global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo(LogicPressureSensorLiquidConfig.ID, global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo(LogicTemperatureSensorConfig.ID, global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo(LogicTimeOfDaySensorConfig.ID, global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo(LogicDiseaseSensorConfig.ID, global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo(LogicElementSensorGasConfig.ID, global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("FloorSwitch", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("Checkpoint", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo(CometDetectorConfig.ID, global::Action.BuildMenuKeyR)
+			}),
+			new BuildMenu.DisplayInfo(BuildMenu.Category.ConduitSensors, "icon_category_automation", global::Action.BuildCategoryLogicConduits, KKeyCode.X, new BuildMenu.BuildingInfo[]
+			{
+				new BuildMenu.BuildingInfo(LiquidConduitTemperatureSensorConfig.ID, global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo(LiquidConduitDiseaseSensorConfig.ID, global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo(LiquidConduitElementSensorConfig.ID, global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo(GasConduitTemperatureSensorConfig.ID, global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo(GasConduitDiseaseSensorConfig.ID, global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo(GasConduitElementSensorConfig.ID, global::Action.BuildMenuKeyS)
+			})
+		})
+	});
 
 	private Dictionary<BuildMenu.Category, List<BuildingDef>> categorizedBuildingMap;
 

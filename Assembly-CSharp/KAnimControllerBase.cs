@@ -695,6 +695,12 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			KAnim.Anim anim = data.GetAnim(i);
 			if (anim.animFile.hashName != data.hashName)
 			{
+				global::Debug.LogErrorFormat("How did we get an anim from another file? [{0}] != [{1}] for anim [{2}]", new object[]
+				{
+					data.name,
+					anim.animFile.name,
+					i
+				});
 			}
 			this.anims[anim.hash] = new KAnimControllerBase.AnimLookupData
 			{

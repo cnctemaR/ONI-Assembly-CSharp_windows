@@ -22,14 +22,19 @@ namespace System.Configuration
 		protected internal override void DeserializeElement(XmlReader reader, bool serializeCollectionKey)
 		{
 			base.DeserializeElement(reader, serializeCollectionKey);
-			if (this.File != string.Empty)
+			if (this.File != "")
 			{
 				try
 				{
-					Stream stream = global::System.IO.File.OpenRead(this.File);
-					XmlReader xmlReader = new ConfigXmlTextReader(stream, this.File);
+					string text = this.File;
+					if (!Path.IsPathRooted(text))
+					{
+						text = Path.Combine(Path.GetDirectoryName(base.Configuration.FilePath), text);
+					}
+					FileStream fileStream = global::System.IO.File.OpenRead(text);
+					XmlReader xmlReader = new ConfigXmlTextReader(fileStream, text);
 					base.DeserializeElement(xmlReader, serializeCollectionKey);
-					stream.Close();
+					fileStream.Close();
 				}
 				catch
 				{
@@ -47,11 +52,11 @@ namespace System.Configuration
 		}
 
 		[MonoTODO]
-		protected internal override string SerializeSection(ConfigurationElement parent, string name, ConfigurationSaveMode mode)
+		protected internal override string SerializeSection(ConfigurationElement parentElement, string name, ConfigurationSaveMode saveMode)
 		{
-			if (this.File == string.Empty)
+			if (this.File == "")
 			{
-				return base.SerializeSection(parent, name, mode);
+				return base.SerializeSection(parentElement, name, saveMode);
 			}
 			throw new NotImplementedException();
 		}
@@ -103,8 +108,8 @@ namespace System.Configuration
 
 		private static ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection();
 
-		private static readonly ConfigurationProperty _propFile = new ConfigurationProperty("file", typeof(string), string.Empty, new StringConverter(), null, ConfigurationPropertyOptions.None);
+		private static readonly ConfigurationProperty _propFile = new ConfigurationProperty("file", typeof(string), "", new StringConverter(), null, ConfigurationPropertyOptions.None);
 
-		private static readonly ConfigurationProperty _propSettings = new ConfigurationProperty(string.Empty, typeof(KeyValueConfigurationCollection), null, null, null, ConfigurationPropertyOptions.IsDefaultCollection);
+		private static readonly ConfigurationProperty _propSettings = new ConfigurationProperty("", typeof(KeyValueConfigurationCollection), null, null, null, ConfigurationPropertyOptions.IsDefaultCollection);
 	}
 }

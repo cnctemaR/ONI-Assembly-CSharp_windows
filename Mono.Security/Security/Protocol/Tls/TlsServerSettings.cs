@@ -105,12 +105,10 @@ namespace Mono.Security.Protocol.Tls
 			if (this.certificates == null || this.certificates.Count == 0)
 			{
 				this.certificateRSA = null;
+				return;
 			}
-			else
-			{
-				this.certificateRSA = new RSAManaged(this.certificates[0].RSA.KeySize);
-				this.certificateRSA.ImportParameters(this.certificates[0].RSA.ExportParameters(false));
-			}
+			this.certificateRSA = new RSAManaged(this.certificates[0].RSA.KeySize);
+			this.certificateRSA.ImportParameters(this.certificates[0].RSA.ExportParameters(false));
 		}
 
 		private X509CertificateCollection certificates;

@@ -27,7 +27,7 @@ public class AcousticDisturbance
 					if (AcousticDisturbance.cellsInRange.Contains(num5) && minionIdentity.GetSMI<StaminaMonitor.Instance>().IsSleeping())
 					{
 						minionIdentity.Trigger(-527751701, data);
-						minionIdentity.Trigger(1338475637, data);
+						minionIdentity.Trigger(-2105031705, data);
 					}
 				}
 			}
@@ -47,8 +47,9 @@ public class AcousticDisturbance
 
 	private static void SpawnEffect(object data)
 	{
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Paintings;
 		int num = (int)data;
-		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("radialgrid_kanim", Grid.CellToPosCCC(num, Grid.SceneLayer.Background), SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.Background, false);
+		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("radialgrid_kanim", Grid.CellToPosCCC(num, sceneLayer), null, false, sceneLayer, false);
 		kbatchedAnimController.destroyOnAnimComplete = false;
 		kbatchedAnimController.Play(AcousticDisturbance.PreAnims, KAnim.PlayMode.Loop);
 		GameScheduler.Instance.Schedule("radialgrid_loop", AcousticDisturbance.duration, new Action<object>(AcousticDisturbance.DestroyEffect), kbatchedAnimController, null);

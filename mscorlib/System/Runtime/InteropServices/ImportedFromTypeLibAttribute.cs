@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public ImportedFromTypeLibAttribute(string tlbFile)
 		{
-			this.TlbFile = tlbFile;
+			this._val = tlbFile;
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this.TlbFile;
+				return this._val;
 			}
 		}
 
-		private string TlbFile;
+		internal string _val;
 	}
 }

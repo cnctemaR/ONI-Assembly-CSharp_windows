@@ -45,16 +45,14 @@ namespace System.Net
 			if (access == NetworkAccess.Accept)
 			{
 				this.m_acceptList.Add(endpointPermission);
+				return;
 			}
-			else
-			{
-				this.m_connectList.Add(endpointPermission);
-			}
+			this.m_connectList.Add(endpointPermission);
 		}
 
 		public override IPermission Copy()
 		{
-			return new SocketPermission((!this.m_noRestriction) ? PermissionState.None : PermissionState.Unrestricted)
+			return new SocketPermission(this.m_noRestriction ? PermissionState.Unrestricted : PermissionState.None)
 			{
 				m_connectList = (ArrayList)this.m_connectList.Clone(),
 				m_acceptList = (ArrayList)this.m_acceptList.Clone()
@@ -74,36 +72,31 @@ namespace System.Net
 			}
 			if (this.m_noRestriction)
 			{
-				IPermission permission2;
-				if (this.IntersectEmpty(socketPermission))
+				if (!this.IntersectEmpty(socketPermission))
 				{
-					IPermission permission = null;
-					permission2 = permission;
+					return socketPermission.Copy();
 				}
-				else
-				{
-					permission2 = socketPermission.Copy();
-				}
-				return permission2;
+				return null;
 			}
-			if (socketPermission.m_noRestriction)
+			else if (socketPermission.m_noRestriction)
 			{
-				IPermission permission3;
-				if (this.IntersectEmpty(this))
+				if (!this.IntersectEmpty(this))
 				{
-					IPermission permission = null;
-					permission3 = permission;
+					return this.Copy();
 				}
-				else
-				{
-					permission3 = this.Copy();
-				}
-				return permission3;
+				return null;
 			}
-			SocketPermission socketPermission2 = new SocketPermission(PermissionState.None);
-			this.Intersect(this.m_connectList, socketPermission.m_connectList, socketPermission2.m_connectList);
-			this.Intersect(this.m_acceptList, socketPermission.m_acceptList, socketPermission2.m_acceptList);
-			return (!this.IntersectEmpty(socketPermission2)) ? socketPermission2 : null;
+			else
+			{
+				SocketPermission socketPermission2 = new SocketPermission(PermissionState.None);
+				this.Intersect(this.m_connectList, socketPermission.m_connectList, socketPermission2.m_connectList);
+				this.Intersect(this.m_acceptList, socketPermission.m_acceptList, socketPermission2.m_acceptList);
+				if (!this.IntersectEmpty(socketPermission2))
+				{
+					return socketPermission2;
+				}
+				return null;
+			}
 		}
 
 		private bool IntersectEmpty(SocketPermission permission)
@@ -216,7 +209,7 @@ namespace System.Net
 				SecurityElement securityElement2 = new SecurityElement("ENDPOINT");
 				securityElement2.AddAttribute("host", endpointPermission.Hostname);
 				securityElement2.AddAttribute("transport", endpointPermission.Transport.ToString());
-				securityElement2.AddAttribute("port", (endpointPermission.Port != -1) ? endpointPermission.Port.ToString() : "All");
+				securityElement2.AddAttribute("port", (endpointPermission.Port == -1) ? "All" : endpointPermission.Port.ToString());
 				securityElement.AddChild(securityElement2);
 			}
 			root.AddChild(securityElement);
@@ -244,8 +237,7 @@ namespace System.Net
 			this.m_noRestriction = false;
 			this.m_connectList = new ArrayList();
 			this.m_acceptList = new ArrayList();
-			ArrayList children = securityElement.Children;
-			foreach (object obj in children)
+			foreach (object obj in securityElement.Children)
 			{
 				SecurityElement securityElement2 = (SecurityElement)obj;
 				if (securityElement2.Tag == "ConnectAccess")
@@ -267,7 +259,7 @@ namespace System.Net
 				if (!(securityElement.Tag != "ENDPOINT"))
 				{
 					string text = securityElement.Attribute("host");
-					TransportType transportType = (TransportType)((int)Enum.Parse(typeof(TransportType), securityElement.Attribute("transport"), true));
+					TransportType transportType = (TransportType)Enum.Parse(typeof(TransportType), securityElement.Attribute("transport"), true);
 					string text2 = securityElement.Attribute("port");
 					int num;
 					if (text2 == "All")
@@ -304,12 +296,12 @@ namespace System.Net
 			return socketPermission2;
 		}
 
-		public const int AllPorts = -1;
-
 		private ArrayList m_acceptList = new ArrayList();
 
 		private ArrayList m_connectList = new ArrayList();
 
 		private bool m_noRestriction;
+
+		public const int AllPorts = -1;
 	}
 }

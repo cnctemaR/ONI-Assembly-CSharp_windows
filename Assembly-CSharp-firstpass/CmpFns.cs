@@ -12,17 +12,17 @@ public class CmpFns
 		this.mRequireFn = this.GetMethod("RequireComponent", array);
 	}
 
-	public static Component FindComponent<T>(KMonoBehaviour c) where T : KMonoBehaviour
+	public static Component FindComponent<T>(MonoBehaviour c) where T : Component
 	{
 		return c.FindComponent<T>();
 	}
 
-	public static Component RequireComponent<T>(KMonoBehaviour c) where T : KMonoBehaviour
+	public static Component RequireComponent<T>(MonoBehaviour c) where T : Component
 	{
 		return c.RequireComponent<T>();
 	}
 
-	public static Component FindOrAddComponent<T>(KMonoBehaviour c) where T : KMonoBehaviour
+	public static Component FindOrAddComponent<T>(MonoBehaviour c) where T : Component
 	{
 		return c.FindOrAddComponent<T>();
 	}
@@ -30,7 +30,19 @@ public class CmpFns
 	private Func<KMonoBehaviour, Component> GetMethod(string name, Type[] type_array)
 	{
 		MethodInfo method = typeof(CmpFns).GetMethod(name);
-		MethodInfo methodInfo = method.MakeGenericMethod(type_array);
+		MethodInfo methodInfo = null;
+		try
+		{
+			methodInfo = method.MakeGenericMethod(type_array);
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogError(ex, null);
+			foreach (Type type in type_array)
+			{
+				global::Debug.Log(type, null);
+			}
+		}
 		return (Func<KMonoBehaviour, Component>)Delegate.CreateDelegate(typeof(Func<KMonoBehaviour, Component>), methodInfo);
 	}
 

@@ -117,6 +117,7 @@ namespace UnityEngine.UI
 				{
 					this.m_Value = Mathf.Clamp(value, 0, this.options.Count - 1);
 					this.RefreshShownValue();
+					UISystemProfilerApi.AddMarker("Dropdown.value", this);
 					this.m_OnValueChanged.Invoke(this.m_Value);
 				}
 			}
@@ -134,6 +135,12 @@ namespace UnityEngine.UI
 			{
 				this.m_Template.gameObject.SetActive(false);
 			}
+		}
+
+		protected override void Start()
+		{
+			base.Start();
+			this.RefreshShownValue();
 		}
 
 		public void RefreshShownValue()

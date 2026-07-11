@@ -21,7 +21,6 @@ public class GraveConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
-		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		return buildingDef;
@@ -29,9 +28,16 @@ public class GraveConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		GraveConfig.STORAGE_OVERRIDE_ANIM_FILES = new KAnimFile[] { Assets.GetAnim("anim_bury_dupe_kanim") };
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
 		storage.SetDefaultStoredItemModifiers(GraveConfig.StorageModifiers);
+		storage.overrideAnims = GraveConfig.STORAGE_OVERRIDE_ANIM_FILES;
+		storage.workAnims = GraveConfig.STORAGE_WORK_ANIMS;
+		storage.workPstAnim = GraveConfig.STORAGE_PST_ANIM;
+		storage.synchronizeAnims = false;
+		storage.useGunForDelivery = false;
+		storage.workAnimPlayMode = KAnim.PlayMode.Once;
 		go.AddOrGet<Grave>();
 		Prioritizable.AddRef(go);
 	}
@@ -42,6 +48,12 @@ public class GraveConfig : IBuildingConfig
 	}
 
 	public const string ID = "Grave";
+
+	private static KAnimFile[] STORAGE_OVERRIDE_ANIM_FILES;
+
+	private static readonly HashedString[] STORAGE_WORK_ANIMS = new HashedString[] { "working_pre" };
+
+	private static readonly HashedString STORAGE_PST_ANIM = HashedString.Invalid;
 
 	private static readonly List<Storage.StoredItemModifier> StorageModifiers = new List<Storage.StoredItemModifier>
 	{

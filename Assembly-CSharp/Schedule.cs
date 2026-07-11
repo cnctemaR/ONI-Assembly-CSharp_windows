@@ -1,62 +1,167 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Schedule : ISaveLoadable
+public class Schedule : ISaveLoadable, IListableOption
 {
-	public Schedule(int time_slots)
+	public Schedule(string name, List<ScheduleGroup> defaultGroups)
 	{
-		this.blocks = new List<ScheduleBlockType>[time_slots];
-		for (int i = 0; i < this.blocks.Length; i++)
+		this.name = name;
+		this.blocks = new List<ScheduleBlock>(24);
+		this.assigned = new List<Ref<Schedulable>>();
+		this.alarm = true;
+		this.tones = this.GenerateTones();
+		int num = 0;
+		for (int i = 0; i < defaultGroups.Count; i++)
 		{
-			this.blocks[i] = new List<ScheduleBlockType>();
-		}
-	}
-
-	public void Add(int idx, ScheduleBlockType type)
-	{
-		if (!this.blocks[idx].Contains(type))
-		{
-			this.blocks[idx].Add(type);
-			if (this.onChanged != null)
+			ScheduleGroup scheduleGroup = defaultGroups[i];
+			for (int j = 0; j < scheduleGroup.defaultSegments; j++)
 			{
-				this.onChanged();
+				this.blocks.Add(new ScheduleBlock(scheduleGroup.Name, scheduleGroup.allowedTypes, scheduleGroup.alarm));
+				num++;
 			}
 		}
 	}
 
-	public void Remove(int idx, ScheduleBlockType type)
+	string IListableOption.GetProperName()
 	{
-		if (this.blocks[idx].Remove(type) && this.onChanged != null)
+		return this.name;
+	}
+
+	public int[] GenerateTones()
+	{
+		int minToneIndex = TuningData<ScheduleManager.Tuning>.Get().minToneIndex;
+		int maxToneIndex = TuningData<ScheduleManager.Tuning>.Get().maxToneIndex;
+		int firstLastToneSpacing = TuningData<ScheduleManager.Tuning>.Get().firstLastToneSpacing;
+		int[] array = new int[4];
+		array[0] = global::UnityEngine.Random.Range(minToneIndex, maxToneIndex - firstLastToneSpacing + 1);
+		array[1] = global::UnityEngine.Random.Range(minToneIndex, maxToneIndex + 1);
+		array[2] = global::UnityEngine.Random.Range(minToneIndex, maxToneIndex + 1);
+		array[3] = global::UnityEngine.Random.Range(array[0] + firstLastToneSpacing, maxToneIndex + 1);
+		return array;
+	}
+
+	public List<Ref<Schedulable>> GetAssigned()
+	{
+		if (this.assigned == null)
 		{
-			this.onChanged();
+			this.assigned = new List<Ref<Schedulable>>();
+		}
+		return this.assigned;
+	}
+
+	public int[] GetTones()
+	{
+		if (this.tones == null)
+		{
+			this.tones = this.GenerateTones();
+		}
+		return this.tones;
+	}
+
+	public void SetGroup(int idx, ScheduleGroup group)
+	{
+		this.blocks[idx] = new ScheduleBlock(group.Name, group.allowedTypes, group.alarm);
+		this.Changed();
+	}
+
+	private void Changed()
+	{
+		foreach (Ref<Schedulable> @ref in this.GetAssigned())
+		{
+			@ref.Get().OnScheduleChanged(this);
+		}
+		if (this.onChanged != null)
+		{
+			this.onChanged(this);
 		}
 	}
 
-	public List<ScheduleBlockType>[] GetBlocks()
+	public List<ScheduleBlock> GetBlocks()
 	{
 		return this.blocks;
 	}
 
-	[OnSerializing]
-	private void OnSerialize()
+	public ScheduleBlock GetBlock(int idx)
 	{
+		return this.blocks[idx];
 	}
 
-	[OnDeserialized]
-	private void OnDeserialized()
+	public void Assign(Schedulable schedulable)
 	{
-		if (this.savedBlocks != null)
+		if (!this.IsAssigned(schedulable))
 		{
+			this.GetAssigned().Add(new Ref<Schedulable>(schedulable));
 		}
+		this.Changed();
 	}
 
-	private List<ScheduleBlockType>[] blocks;
+	public void Unassign(Schedulable schedulable)
+	{
+		for (int i = 0; i < this.GetAssigned().Count; i++)
+		{
+			if (this.GetAssigned()[i].Get() == schedulable)
+			{
+				this.GetAssigned().RemoveAt(i);
+				break;
+			}
+		}
+		this.Changed();
+	}
+
+	public bool IsAssigned(Schedulable schedulable)
+	{
+		foreach (Ref<Schedulable> @ref in this.GetAssigned())
+		{
+			if (@ref.Get() == schedulable)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool AreScheduleTypesIdentical(List<ScheduleBlockType> a, List<ScheduleBlockType> b)
+	{
+		if (a.Count != b.Count)
+		{
+			return false;
+		}
+		foreach (ScheduleBlockType scheduleBlockType in a)
+		{
+			bool flag = false;
+			foreach (ScheduleBlockType scheduleBlockType2 in b)
+			{
+				if (scheduleBlockType.IdHash == scheduleBlockType2.IdHash)
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
 	[Serialize]
-	private List<ResourceRef<ScheduleBlockType>>[] savedBlocks;
+	private List<ScheduleBlock> blocks;
 
-	public global::System.Action onChanged;
+	[Serialize]
+	private List<Ref<Schedulable>> assigned;
+
+	[Serialize]
+	public string name;
+
+	[Serialize]
+	public bool alarm;
+
+	[Serialize]
+	private int[] tones;
+
+	public Action<Schedule> onChanged;
 }

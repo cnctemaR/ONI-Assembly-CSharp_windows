@@ -22,7 +22,6 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.TemperatureMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);

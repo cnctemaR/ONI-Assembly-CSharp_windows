@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -23,14 +22,9 @@ namespace System.Xml.Serialization
 			return base.List.Add(attribute);
 		}
 
-		public bool Contains(XmlArrayItemAttribute attribute)
+		public void Insert(int index, XmlArrayItemAttribute attribute)
 		{
-			return base.List.Contains(attribute);
-		}
-
-		public void CopyTo(XmlArrayItemAttribute[] array, int index)
-		{
-			base.List.CopyTo(array, index);
+			base.List.Insert(index, attribute);
 		}
 
 		public int IndexOf(XmlArrayItemAttribute attribute)
@@ -38,9 +32,9 @@ namespace System.Xml.Serialization
 			return base.List.IndexOf(attribute);
 		}
 
-		public void Insert(int index, XmlArrayItemAttribute attribute)
+		public bool Contains(XmlArrayItemAttribute attribute)
 		{
-			base.List.Insert(index, attribute);
+			return base.List.Contains(attribute);
 		}
 
 		public void Remove(XmlArrayItemAttribute attribute)
@@ -48,18 +42,9 @@ namespace System.Xml.Serialization
 			base.List.Remove(attribute);
 		}
 
-		internal void AddKeyHash(StringBuilder sb)
+		public void CopyTo(XmlArrayItemAttribute[] array, int index)
 		{
-			if (this.Count == 0)
-			{
-				return;
-			}
-			sb.Append("XAIAS ");
-			for (int i = 0; i < this.Count; i++)
-			{
-				this[i].AddKeyHash(sb);
-			}
-			sb.Append('|');
+			base.List.CopyTo(array, index);
 		}
 	}
 }

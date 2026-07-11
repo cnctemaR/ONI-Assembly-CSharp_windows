@@ -24,7 +24,6 @@ public class EggCracker : KMonoBehaviour
 
 	private void OnWorkableEvent(Workable.WorkableEvent e)
 	{
-		Output.LogWithObj(base.gameObject, new object[] { "OnWorkableEvent", e });
 		if (e == Workable.WorkableEvent.WorkStarted)
 		{
 			Refinery.MachineOrder currentMachineOrder = this.refinery.CurrentMachineOrder;

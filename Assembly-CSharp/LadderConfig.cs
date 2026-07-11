@@ -21,7 +21,6 @@ public class LadderConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
-		buildingDef.MaterialCategory = MATERIALS.ALL_MINERALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;

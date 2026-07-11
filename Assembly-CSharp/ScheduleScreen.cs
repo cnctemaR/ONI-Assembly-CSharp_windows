@@ -1,103 +1,187 @@
 ﻿using System;
-using STRINGS;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class ScheduleScreen : KScreen
 {
-	protected override void OnSpawn()
+	public override float GetSortKey()
 	{
-		base.OnSpawn();
-		this.schedule = ScheduleManager.Instance.GetSchedule();
-		this.entries = new ScheduleScreenColumnEntry[this.schedule.GetBlocks().Length, Db.Get().ScheduleBlockTypes.Count];
-		ScheduleScreenToggle component = global::UnityEngine.Object.Instantiate<ScheduleScreenToggle>(this.togglePrefab).GetComponent<ScheduleScreenToggle>();
-		component.GetComponent<RectTransform>().SetParent(this.togglesRoot);
-		component.toggle.onClick += delegate
-		{
-			this.isTogglingOn = true;
-			this.isToggleSet = true;
-		};
-		component.text.text = UI.SCHEDULESCREEN.ALLOWED;
-		ScheduleScreenToggle component2 = global::UnityEngine.Object.Instantiate<ScheduleScreenToggle>(this.togglePrefab).GetComponent<ScheduleScreenToggle>();
-		component2.GetComponent<RectTransform>().SetParent(this.togglesRoot);
-		component2.toggle.onClick += delegate
-		{
-			this.isTogglingOn = false;
-			this.isToggleSet = true;
-		};
-		component2.text.text = UI.SCHEDULESCREEN.DENIED;
-		for (int i = 0; i < Db.Get().ScheduleBlockTypes.Count; i++)
-		{
-			ScheduleBlockType block_type = Db.Get().ScheduleBlockTypes[i];
-			RectTransform component3 = global::UnityEngine.Object.Instantiate<ScheduleScreenColumn>(this.columnPrefab).GetComponent<RectTransform>();
-			component3.SetParent(this.scheduleRoot);
-			component3.GetComponent<ScheduleScreenColumn>().header.text = block_type.Name;
-			for (int j = 0; j < this.schedule.GetBlocks().Length; j++)
-			{
-				RectTransform component4 = global::UnityEngine.Object.Instantiate<ScheduleScreenColumnEntry>(this.columnEntryPrefab).GetComponent<RectTransform>();
-				component4.SetParent(component3);
-				this.entries[j, i] = component4.GetComponent<ScheduleScreenColumnEntry>();
-				int i_iter = i;
-				int j_iter = j;
-				ScheduleScreenColumnEntry scheduleScreenColumnEntry = this.entries[j, i];
-				scheduleScreenColumnEntry.onLeftClick = (global::System.Action)Delegate.Combine(scheduleScreenColumnEntry.onLeftClick, new global::System.Action(delegate
-				{
-					if (this.isToggleSet)
-					{
-						this.SetColumnEntry(j_iter, i_iter, block_type, this.isTogglingOn);
-					}
-				}));
-				this.SetColumnEntry(j, i, block_type, this.schedule.GetBlocks()[j].Contains(block_type));
-			}
-		}
-		this.columnPrefab.gameObject.SetActive(false);
-		this.columnEntryPrefab.gameObject.SetActive(false);
-		this.togglePrefab.gameObject.SetActive(false);
-		this.bodyText.text = UI.SCHEDULESCREEN.SELECTHELP;
+		return 100f;
 	}
 
-	private void SetColumnEntry(int i, int j, ScheduleBlockType block_type, bool is_allowed)
+	protected override void OnPrefabInit()
 	{
-		if (is_allowed)
+		this.ConsumeMouseScroll = true;
+		this.entries = new List<ScheduleScreenEntry>();
+		this.paintStyles = new Dictionary<string, ColorStyleSetting>();
+		this.paintStyles["Hygene"] = this.hygene_color;
+		this.paintStyles["Worktime"] = this.work_color;
+		this.paintStyles["Recreation"] = this.recreation_color;
+		this.paintStyles["Sleep"] = this.sleep_color;
+	}
+
+	protected override void OnSpawn()
+	{
+		this.paintButtons = new List<SchedulePaintButton>();
+		foreach (ScheduleGroup scheduleGroup in Db.Get().ScheduleGroups.allGroups)
 		{
-			this.entries[i, j].image.color = this.allowedColor;
-			this.schedule.Add(i, block_type);
+			this.AddPaintButton(scheduleGroup);
+		}
+		this.OnPaintButtonClick(this.paintButtons[0]);
+		foreach (Schedule schedule in ScheduleManager.Instance.GetSchedules())
+		{
+			this.AddScheduleEntry(schedule);
+		}
+		this.addScheduleButton.onClick += this.OnAddScheduleClick;
+		this.closeButton.onClick += delegate
+		{
+			ManagementMenu.Instance.CloseAll();
+		};
+		ScheduleManager.Instance.onSchedulesChanged += this.OnSchedulesChanged;
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		ScheduleManager.Instance.onSchedulesChanged -= this.OnSchedulesChanged;
+	}
+
+	protected override void OnShow(bool show)
+	{
+		base.OnShow(show);
+		if (show)
+		{
+			base.Activate();
+		}
+	}
+
+	private void AddPaintButton(ScheduleGroup group)
+	{
+		SchedulePaintButton schedulePaintButton = Util.KInstantiateUI<SchedulePaintButton>(this.paintButtonPrefab.gameObject, this.paintButtonContainer, true);
+		schedulePaintButton.SetGroup(group, this.paintStyles, new Action<SchedulePaintButton>(this.OnPaintButtonClick));
+		this.paintButtons.Add(schedulePaintButton);
+	}
+
+	private void OnAddScheduleClick()
+	{
+		ScheduleManager.Instance.AddSchedule(Db.Get().ScheduleGroups.allGroups, null);
+	}
+
+	private void OnPaintButtonClick(SchedulePaintButton clicked)
+	{
+		foreach (SchedulePaintButton schedulePaintButton in this.paintButtons)
+		{
+			if (schedulePaintButton == clicked)
+			{
+				schedulePaintButton.toggle.Select();
+				schedulePaintButton.toggle.isOn = true;
+			}
+			else
+			{
+				schedulePaintButton.toggle.Deselect();
+				schedulePaintButton.toggle.isOn = false;
+			}
+		}
+		this.selectedPaint = clicked;
+	}
+
+	private void OnBlockClicked(ScheduleScreenEntry entry, ScheduleBlockButton button)
+	{
+		entry.schedule.SetGroup(button.idx, this.selectedPaint.group);
+	}
+
+	private void AddScheduleEntry(Schedule schedule)
+	{
+		ScheduleScreenEntry scheduleScreenEntry = Util.KInstantiateUI<ScheduleScreenEntry>(this.scheduleEntryPrefab.gameObject, this.scheduleEntryContainer, true);
+		scheduleScreenEntry.Setup(schedule, this.paintStyles, new Action<ScheduleScreenEntry, ScheduleBlockButton>(this.OnBlockClicked));
+		this.entries.Add(scheduleScreenEntry);
+	}
+
+	private void OnSchedulesChanged(List<Schedule> schedules)
+	{
+		foreach (ScheduleScreenEntry scheduleScreenEntry in this.entries)
+		{
+			Util.KDestroyGameObject(scheduleScreenEntry);
+		}
+		this.entries.Clear();
+		foreach (Schedule schedule in schedules)
+		{
+			this.AddScheduleEntry(schedule);
+		}
+	}
+
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (this.CheckBlockedInput())
+		{
+			if (!e.Consumed)
+			{
+				e.Consumed = true;
+			}
 		}
 		else
 		{
-			this.entries[i, j].image.color = this.deniedColor;
-			this.schedule.Remove(i, block_type);
+			base.OnKeyDown(e);
 		}
 	}
 
-	[SerializeField]
-	private RectTransform scheduleRoot;
+	private bool CheckBlockedInput()
+	{
+		bool flag = false;
+		if (global::UnityEngine.EventSystems.EventSystem.current != null)
+		{
+			GameObject currentSelectedGameObject = global::UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
+			if (currentSelectedGameObject != null)
+			{
+				foreach (ScheduleScreenEntry scheduleScreenEntry in this.entries)
+				{
+					if (currentSelectedGameObject == scheduleScreenEntry.GetNameInputField())
+					{
+						flag = true;
+						break;
+					}
+				}
+			}
+		}
+		return flag;
+	}
 
 	[SerializeField]
-	private RectTransform togglesRoot;
+	private SchedulePaintButton paintButtonPrefab;
 
 	[SerializeField]
-	private ScheduleScreenToggle togglePrefab;
+	private GameObject paintButtonContainer;
 
 	[SerializeField]
-	private ScheduleScreenColumn columnPrefab;
+	private ScheduleScreenEntry scheduleEntryPrefab;
 
 	[SerializeField]
-	private ScheduleScreenColumnEntry columnEntryPrefab;
+	private GameObject scheduleEntryContainer;
 
 	[SerializeField]
-	private LocText bodyText;
+	private KButton addScheduleButton;
 
 	[SerializeField]
-	private Color allowedColor;
+	private KButton closeButton;
 
 	[SerializeField]
-	private Color deniedColor;
+	private ColorStyleSetting hygene_color;
 
-	private Schedule schedule;
+	[SerializeField]
+	private ColorStyleSetting work_color;
 
-	private ScheduleScreenColumnEntry[,] entries;
+	[SerializeField]
+	private ColorStyleSetting recreation_color;
 
-	private bool isTogglingOn;
+	[SerializeField]
+	private ColorStyleSetting sleep_color;
 
-	private bool isToggleSet;
+	private Dictionary<string, ColorStyleSetting> paintStyles;
+
+	private List<ScheduleScreenEntry> entries;
+
+	private List<SchedulePaintButton> paintButtons;
+
+	private SchedulePaintButton selectedPaint;
 }

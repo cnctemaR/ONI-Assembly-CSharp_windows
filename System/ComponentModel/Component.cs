@@ -3,73 +3,43 @@ using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[DesignerCategory("Component")]
 	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	public class Component : MarshalByRefObject, IDisposable, IComponent
+	[DesignerCategory("Component")]
+	public class Component : MarshalByRefObject, IComponent, IDisposable
 	{
-		public Component()
+		~Component()
 		{
-			this.event_handlers = null;
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		[Browsable(false)]
-		public event EventHandler Disposed
-		{
-			add
-			{
-				this.Events.AddHandler(this.disposedEvent, value);
-			}
-			remove
-			{
-				this.Events.RemoveHandler(this.disposedEvent, value);
-			}
+			this.Dispose(false);
 		}
 
 		protected virtual bool CanRaiseEvents
 		{
 			get
 			{
-				return false;
+				return true;
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
-		public virtual ISite Site
+		internal bool CanRaiseEventsInternal
 		{
 			get
 			{
-				return this.mySite;
-			}
-			set
-			{
-				this.mySite = value;
+				return this.CanRaiseEvents;
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
-		public IContainer Container
+		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		public event EventHandler Disposed
 		{
-			get
+			add
 			{
-				if (this.mySite == null)
-				{
-					return null;
-				}
-				return this.mySite.Container;
+				this.Events.AddHandler(Component.EventDisposed, value);
 			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
-		protected bool DesignMode
-		{
-			get
+			remove
 			{
-				return this.mySite != null && this.mySite.DesignMode;
+				this.Events.RemoveHandler(Component.EventDisposed, value);
 			}
 		}
 
@@ -77,17 +47,26 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.event_handlers == null)
+				if (this.events == null)
 				{
-					this.event_handlers = new EventHandlerList();
+					this.events = new EventHandlerList(this);
 				}
-				return this.event_handlers;
+				return this.events;
 			}
 		}
 
-		~Component()
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public virtual ISite Site
 		{
-			this.Dispose(false);
+			get
+			{
+				return this.site;
+			}
+			set
+			{
+				this.site = value;
+			}
 		}
 
 		public void Dispose()
@@ -96,44 +75,78 @@ namespace System.ComponentModel
 			GC.SuppressFinalize(this);
 		}
 
-		protected virtual void Dispose(bool release_all)
+		protected virtual void Dispose(bool disposing)
 		{
-			if (release_all)
+			if (disposing)
 			{
-				if (this.mySite != null && this.mySite.Container != null)
+				lock (this)
 				{
-					this.mySite.Container.Remove(this);
+					if (this.site != null && this.site.Container != null)
+					{
+						this.site.Container.Remove(this);
+					}
+					if (this.events != null)
+					{
+						EventHandler eventHandler = (EventHandler)this.events[Component.EventDisposed];
+						if (eventHandler != null)
+						{
+							eventHandler(this, EventArgs.Empty);
+						}
+					}
 				}
-				EventHandler eventHandler = (EventHandler)this.Events[this.disposedEvent];
-				if (eventHandler != null)
+			}
+		}
+
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public IContainer Container
+		{
+			get
+			{
+				ISite site = this.site;
+				if (site != null)
 				{
-					eventHandler(this, EventArgs.Empty);
+					return site.Container;
 				}
+				return null;
 			}
 		}
 
 		protected virtual object GetService(Type service)
 		{
-			if (this.mySite != null)
+			ISite site = this.site;
+			if (site != null)
 			{
-				return this.mySite.GetService(service);
+				return site.GetService(service);
 			}
 			return null;
 		}
 
-		public override string ToString()
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		protected bool DesignMode
 		{
-			if (this.mySite == null)
+			get
 			{
-				return base.GetType().ToString();
+				ISite site = this.site;
+				return site != null && site.DesignMode;
 			}
-			return string.Format("{0} [{1}]", this.mySite.Name, base.GetType().ToString());
 		}
 
-		private EventHandlerList event_handlers;
+		public override string ToString()
+		{
+			ISite site = this.site;
+			if (site != null)
+			{
+				return site.Name + " [" + base.GetType().FullName + "]";
+			}
+			return base.GetType().FullName;
+		}
 
-		private ISite mySite;
+		private static readonly object EventDisposed = new object();
 
-		private object disposedEvent = new object();
+		private ISite site;
+
+		private EventHandlerList events;
 	}
 }

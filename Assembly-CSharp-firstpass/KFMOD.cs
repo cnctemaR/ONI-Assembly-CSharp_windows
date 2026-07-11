@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
@@ -23,7 +22,7 @@ public class KFMOD
 		catch (Exception ex)
 		{
 			KFMOD.didFmodInitializeSuccessfully = false;
-			if (ex.GetType() != typeof(SystemNotInitializedException))
+			if (!(ex.GetType() == typeof(SystemNotInitializedException)))
 			{
 				throw ex;
 			}
@@ -160,27 +159,26 @@ public class KFMOD
 
 	private static void CollectParameterUpdaters()
 	{
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		foreach (Type type in App.GetCurrentDomainTypes())
 		{
-			foreach (Type type in assembly.GetTypes())
+			if (!type.IsAbstract)
 			{
-				if (!type.IsAbstract)
+				bool flag = false;
+				Type type2 = type.BaseType;
+				while (type2 != null)
 				{
-					bool flag = false;
-					for (Type type2 = type.BaseType; type2 != null; type2 = type2.BaseType)
+					if (type2 == typeof(OneShotSoundParameterUpdater))
 					{
-						if (type2 == typeof(OneShotSoundParameterUpdater))
-						{
-							flag = true;
-							break;
-						}
+						flag = true;
+						break;
 					}
-					if (flag)
-					{
-						OneShotSoundParameterUpdater oneShotSoundParameterUpdater = (OneShotSoundParameterUpdater)Activator.CreateInstance(type);
-						DebugUtil.Assert(!KFMOD.parameterUpdaters.ContainsKey(oneShotSoundParameterUpdater.parameter), "Assert!");
-						KFMOD.parameterUpdaters[oneShotSoundParameterUpdater.parameter] = oneShotSoundParameterUpdater;
-					}
+					type2 = type2.BaseType;
+				}
+				if (flag)
+				{
+					OneShotSoundParameterUpdater oneShotSoundParameterUpdater = (OneShotSoundParameterUpdater)Activator.CreateInstance(type);
+					DebugUtil.Assert(!KFMOD.parameterUpdaters.ContainsKey(oneShotSoundParameterUpdater.parameter), "Assert!");
+					KFMOD.parameterUpdaters[oneShotSoundParameterUpdater.parameter] = oneShotSoundParameterUpdater;
 				}
 			}
 		}

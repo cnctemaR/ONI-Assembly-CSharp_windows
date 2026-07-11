@@ -20,7 +20,6 @@ public class HeadquartersConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER5, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.BaseTimeUntilRepair = 400f;
 		buildingDef.ShowInBuildMenu = false;
@@ -33,7 +32,20 @@ public class HeadquartersConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.AddOrGet<LoreBearer>();
 		go.AddOrGet<Telepad>();
+		SocialGatheringPoint socialGatheringPoint = go.AddOrGet<SocialGatheringPoint>();
+		socialGatheringPoint.choreOffsets = new CellOffset[]
+		{
+			new CellOffset(-1, 0),
+			new CellOffset(-2, 0),
+			new CellOffset(2, 0),
+			new CellOffset(3, 0),
+			new CellOffset(0, 0),
+			new CellOffset(1, 0)
+		};
+		socialGatheringPoint.choreCount = 4;
+		socialGatheringPoint.basePriority = RELAXATION.PRIORITY.TIER0;
 		Light2D light2D = go.AddOrGet<Light2D>();
 		light2D.Color = LIGHT2D.HEADQUARTERS_COLOR;
 		light2D.Range = 5f;

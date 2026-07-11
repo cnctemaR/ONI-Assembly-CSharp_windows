@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class DeconstructTool : FilteredDragTool
 {
+	public static void DestroyInstance()
+	{
+		DeconstructTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

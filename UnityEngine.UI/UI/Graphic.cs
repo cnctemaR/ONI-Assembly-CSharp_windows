@@ -155,12 +155,11 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				RectTransform rectTransform;
-				if ((rectTransform = this.m_RectTransform) == null)
+				if (object.ReferenceEquals(this.m_RectTransform, null))
 				{
-					rectTransform = (this.m_RectTransform = base.GetComponent<RectTransform>());
+					this.m_RectTransform = base.GetComponent<RectTransform>();
 				}
-				return rectTransform;
+				return this.m_RectTransform;
 			}
 		}
 
@@ -202,11 +201,11 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				if (this.m_CanvasRender == null)
+				if (object.ReferenceEquals(this.m_CanvasRenderer, null))
 				{
-					this.m_CanvasRender = base.GetComponent<CanvasRenderer>();
+					this.m_CanvasRenderer = base.GetComponent<CanvasRenderer>();
 				}
-				return this.m_CanvasRender;
+				return this.m_CanvasRenderer;
 			}
 		}
 
@@ -297,6 +296,14 @@ namespace UnityEngine.UI
 						GraphicRegistry.RegisterGraphicForCanvas(this.canvas, this);
 					}
 				}
+			}
+		}
+
+		public virtual void OnCullingChanged()
+		{
+			if (!this.canvasRenderer.cull && (this.m_VertsDirty || this.m_MaterialDirty))
+			{
+				CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 			}
 		}
 
@@ -622,7 +629,7 @@ namespace UnityEngine.UI
 		private RectTransform m_RectTransform;
 
 		[NonSerialized]
-		private CanvasRenderer m_CanvasRender;
+		private CanvasRenderer m_CanvasRenderer;
 
 		[NonSerialized]
 		private Canvas m_Canvas;

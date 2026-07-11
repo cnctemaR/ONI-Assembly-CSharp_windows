@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -9,23 +8,35 @@ namespace System.Security.Cryptography
 	{
 		public RSAOAEPKeyExchangeFormatter()
 		{
-			this.rsa = null;
 		}
 
 		public RSAOAEPKeyExchangeFormatter(AsymmetricAlgorithm key)
 		{
-			this.SetKey(key);
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			this._rsaKey = (RSA)key;
 		}
 
 		public byte[] Parameter
 		{
 			get
 			{
-				return this.param;
+				if (this.ParameterValue != null)
+				{
+					return (byte[])this.ParameterValue.Clone();
+				}
+				return null;
 			}
 			set
 			{
-				this.param = value;
+				if (value != null)
+				{
+					this.ParameterValue = (byte[])value.Clone();
+					return;
+				}
+				this.ParameterValue = null;
 			}
 		}
 
@@ -41,27 +52,36 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.random;
+				return this.RngValue;
 			}
 			set
 			{
-				this.random = value;
+				this.RngValue = value;
 			}
 		}
 
+		public override void SetKey(AsymmetricAlgorithm key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			this._rsaKey = (RSA)key;
+			this._rsaOverridesEncrypt = null;
+		}
+
+		[SecuritySafeCritical]
 		public override byte[] CreateKeyExchange(byte[] rgbData)
 		{
-			if (this.random == null)
+			if (this._rsaKey == null)
 			{
-				this.random = RandomNumberGenerator.Create();
+				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("No asymmetric key object has been associated with this formatter object."));
 			}
-			if (this.rsa == null)
+			if (this.OverridesEncrypt)
 			{
-				string text = Locale.GetText("No RSA key specified");
-				throw new CryptographicUnexpectedOperationException(text);
+				return this._rsaKey.Encrypt(rgbData, RSAEncryptionPadding.OaepSHA1);
 			}
-			SHA1 sha = SHA1.Create();
-			return PKCS1.Encrypt_OAEP(this.rsa, sha, this.random, rgbData);
+			return Utils.RsaOaepEncrypt(this._rsaKey, SHA1.Create(), new PKCS1MaskGenerationMethod(), RandomNumberGenerator.Create(), rgbData);
 		}
 
 		public override byte[] CreateKeyExchange(byte[] rgbData, Type symAlgType)
@@ -69,15 +89,28 @@ namespace System.Security.Cryptography
 			return this.CreateKeyExchange(rgbData);
 		}
 
-		public override void SetKey(AsymmetricAlgorithm key)
+		private bool OverridesEncrypt
 		{
-			this.rsa = (RSA)key;
+			get
+			{
+				if (this._rsaOverridesEncrypt == null)
+				{
+					this._rsaOverridesEncrypt = new bool?(Utils.DoesRsaKeyOverride(this._rsaKey, "Encrypt", new Type[]
+					{
+						typeof(byte[]),
+						typeof(RSAEncryptionPadding)
+					}));
+				}
+				return this._rsaOverridesEncrypt.Value;
+			}
 		}
 
-		private RSA rsa;
+		private byte[] ParameterValue;
 
-		private RandomNumberGenerator random;
+		private RSA _rsaKey;
 
-		private byte[] param;
+		private bool? _rsaOverridesEncrypt;
+
+		private RandomNumberGenerator RngValue;
 	}
 }

@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class CancelEventArgs : EventArgs
 	{
 		public CancelEventArgs()
+			: this(false)
 		{
-			this.cancel = false;
 		}
 
 		public CancelEventArgs(bool cancel)

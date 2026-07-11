@@ -5,7 +5,7 @@ namespace System.Data.Sql
 {
 	public sealed class SqlDataSourceEnumerator : DbDataSourceEnumerator
 	{
-		private SqlDataSourceEnumerator()
+		internal SqlDataSourceEnumerator()
 		{
 		}
 
@@ -14,14 +14,14 @@ namespace System.Data.Sql
 		{
 			get
 			{
-				throw new NotImplementedException();
+				throw null;
 			}
 		}
 
 		[MonoTODO]
 		public override DataTable GetDataSources()
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 	}
 }

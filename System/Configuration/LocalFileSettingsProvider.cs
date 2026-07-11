@@ -10,19 +10,19 @@ namespace System.Configuration
 			this.impl = new CustomizableFileSettingsProvider();
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public SettingsPropertyValue GetPreviousVersion(SettingsContext context, SettingsProperty property)
 		{
 			return this.impl.GetPreviousVersion(context, property);
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context, SettingsPropertyCollection properties)
 		{
 			return this.impl.GetPropertyValues(context, properties);
 		}
 
-		public override void Initialize(string name, global::System.Collections.Specialized.NameValueCollection values)
+		public override void Initialize(string name, NameValueCollection values)
 		{
 			if (name == null)
 			{
@@ -35,19 +35,19 @@ namespace System.Configuration
 			base.Initialize(name, values);
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public void Reset(SettingsContext context)
 		{
 			this.impl.Reset(context);
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection values)
 		{
 			this.impl.SetPropertyValues(context, values);
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public void Upgrade(SettingsContext context, SettingsPropertyCollection properties)
 		{
 			this.impl.Upgrade(context, properties);

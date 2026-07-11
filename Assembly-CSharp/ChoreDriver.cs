@@ -20,11 +20,30 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 
 	public void SetChore(Chore.Precondition.Context context)
 	{
-		if (base.smi.GetCurrentChore() != context.chore)
+		Chore currentChore = base.smi.GetCurrentChore();
+		if (currentChore != context.chore)
 		{
 			this.StopChore();
-			this.context = context;
-			base.smi.sm.nextChore.Set(context.chore, base.smi);
+			if (context.chore.IsValid())
+			{
+				this.context = context;
+				base.smi.sm.nextChore.Set(context.chore, base.smi);
+			}
+			else
+			{
+				string text = "Null";
+				string text2 = "Null";
+				if (currentChore != null)
+				{
+					text = currentChore.GetType().Name;
+				}
+				if (context.chore != null)
+				{
+					text2 = context.chore.GetType().Name;
+				}
+				string text3 = string.Concat(new string[] { "Stopping chore ", text, " to start ", text2, " but stopping the first chore cancelled the second one." });
+				Debug.LogWarning(text3, null);
+			}
 		}
 	}
 

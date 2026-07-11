@@ -30,8 +30,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		base.OnSpawn();
 		Components.Telepads.Add(this);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
-		this.meter.gameObject.SetActive(false);
-		this.meter.gameObject.SetActive(true);
+		this.meter.gameObject.GetComponent<KBatchedAnimController>().SetDirty();
 		base.smi.StartSM();
 	}
 
@@ -80,7 +79,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		}
 		for (int i = 0; i < num2; i++)
 		{
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
 			starting_stats.Apply(gameObject);

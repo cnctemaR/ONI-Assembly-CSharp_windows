@@ -13,7 +13,7 @@ public class Room : IAssignableIdentity
 
 	public string GetProperName()
 	{
-		return Db.Get().RoomTypes.GetRoomType(this).Name;
+		return this.roomType.Name;
 	}
 
 	public List<Ownables> GetOwners()
@@ -47,7 +47,7 @@ public class Room : IAssignableIdentity
 	public List<KPrefabID> GetPrimaryEntities()
 	{
 		this.primary_buildings.Clear();
-		RoomType roomType = Db.Get().RoomTypes.GetRoomType(this);
+		RoomType roomType = this.roomType;
 		if (roomType.primary_constraint != null)
 		{
 			foreach (KPrefabID kprefabID in this.buildings)
@@ -78,6 +78,8 @@ public class Room : IAssignableIdentity
 	}
 
 	public CavityInfo cavity;
+
+	public RoomType roomType;
 
 	private List<KPrefabID> primary_buildings = new List<KPrefabID>();
 

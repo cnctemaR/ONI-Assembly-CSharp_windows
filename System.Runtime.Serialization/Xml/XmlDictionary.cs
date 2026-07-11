@@ -1,112 +1,121 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace System.Xml
 {
 	public class XmlDictionary : IXmlDictionary
 	{
-		public XmlDictionary()
-		{
-			this.dict = new Dictionary<string, XmlDictionaryString>();
-			this.list = new List<XmlDictionaryString>();
-		}
-
-		public XmlDictionary(int capacity)
-		{
-			this.dict = new Dictionary<string, XmlDictionaryString>(capacity);
-			this.list = new List<XmlDictionaryString>(capacity);
-		}
-
-		private XmlDictionary(bool isReadOnly)
-			: this(1)
-		{
-			this.is_readonly = isReadOnly;
-		}
-
 		public static IXmlDictionary Empty
 		{
 			get
 			{
+				if (XmlDictionary.empty == null)
+				{
+					XmlDictionary.empty = new XmlDictionary.EmptyDictionary();
+				}
 				return XmlDictionary.empty;
 			}
 		}
 
-		public virtual XmlDictionaryString Add(string value)
+		public XmlDictionary()
 		{
-			if (this.is_readonly)
-			{
-				throw new InvalidOperationException();
-			}
-			XmlDictionaryString xmlDictionaryString;
-			if (this.dict.TryGetValue(value, out xmlDictionaryString))
-			{
-				return xmlDictionaryString;
-			}
-			xmlDictionaryString = new XmlDictionaryString(this, value, this.dict.Count);
-			this.dict.Add(value, xmlDictionaryString);
-			this.list.Add(xmlDictionaryString);
-			return xmlDictionaryString;
+			this.lookup = new Dictionary<string, XmlDictionaryString>();
+			this.strings = null;
+			this.nextId = 0;
 		}
 
-		public virtual bool TryLookup(int key, out XmlDictionaryString result)
+		public XmlDictionary(int capacity)
 		{
-			if (key < 0 || this.dict.Count <= key)
+			this.lookup = new Dictionary<string, XmlDictionaryString>(capacity);
+			this.strings = new XmlDictionaryString[capacity];
+			this.nextId = 0;
+		}
+
+		public virtual XmlDictionaryString Add(string value)
+		{
+			XmlDictionaryString xmlDictionaryString;
+			if (!this.lookup.TryGetValue(value, out xmlDictionaryString))
 			{
-				result = null;
-				return false;
+				if (this.strings == null)
+				{
+					this.strings = new XmlDictionaryString[4];
+				}
+				else if (this.nextId == this.strings.Length)
+				{
+					int num = this.nextId * 2;
+					if (num == 0)
+					{
+						num = 4;
+					}
+					Array.Resize<XmlDictionaryString>(ref this.strings, num);
+				}
+				xmlDictionaryString = new XmlDictionaryString(this, value, this.nextId);
+				this.strings[this.nextId] = xmlDictionaryString;
+				this.lookup.Add(value, xmlDictionaryString);
+				this.nextId++;
 			}
-			result = this.list[key];
-			return true;
+			return xmlDictionaryString;
 		}
 
 		public virtual bool TryLookup(string value, out XmlDictionaryString result)
 		{
-			if (value == null)
+			return this.lookup.TryGetValue(value, out result);
+		}
+
+		public virtual bool TryLookup(int key, out XmlDictionaryString result)
+		{
+			if (key < 0 || key >= this.nextId)
 			{
-				throw new ArgumentNullException();
+				result = null;
+				return false;
 			}
-			return this.dict.TryGetValue(value, out result);
+			result = this.strings[key];
+			return true;
 		}
 
 		public virtual bool TryLookup(XmlDictionaryString value, out XmlDictionaryString result)
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException();
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("value"));
 			}
 			if (value.Dictionary != this)
 			{
 				result = null;
 				return false;
 			}
-			for (int i = 0; i < this.list.Count; i++)
-			{
-				if (object.ReferenceEquals(this.list[i], value))
-				{
-					result = value;
-					return true;
-				}
-			}
-			result = null;
-			return false;
+			result = value;
+			return true;
 		}
 
-		private static XmlDictionary empty = new XmlDictionary(true);
+		private static IXmlDictionary empty;
 
-		private readonly bool is_readonly;
+		private Dictionary<string, XmlDictionaryString> lookup;
 
-		private Dictionary<string, XmlDictionaryString> dict;
+		private XmlDictionaryString[] strings;
 
-		private List<XmlDictionaryString> list;
+		private int nextId;
 
-		internal class EmptyDictionary : XmlDictionary
+		private class EmptyDictionary : IXmlDictionary
 		{
-			public EmptyDictionary()
-				: base(1)
+			public bool TryLookup(string value, out XmlDictionaryString result)
 			{
+				result = null;
+				return false;
 			}
 
-			public static readonly XmlDictionary.EmptyDictionary Instance = new XmlDictionary.EmptyDictionary();
+			public bool TryLookup(int key, out XmlDictionaryString result)
+			{
+				result = null;
+				return false;
+			}
+
+			public bool TryLookup(XmlDictionaryString value, out XmlDictionaryString result)
+			{
+				result = null;
+				return false;
+			}
 		}
 	}
 }

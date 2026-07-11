@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 
 namespace System.Security.Principal
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class WindowsPrincipal : IPrincipal
+	public class WindowsPrincipal : ClaimsPrincipal
 	{
 		public WindowsPrincipal(WindowsIdentity ntIdentity)
 		{
@@ -17,7 +18,7 @@ namespace System.Security.Principal
 			this._identity = ntIdentity;
 		}
 
-		public virtual IIdentity Identity
+		public override IIdentity Identity
 		{
 			get
 			{
@@ -27,7 +28,7 @@ namespace System.Security.Principal
 
 		public virtual bool IsInRole(int rid)
 		{
-			if (WindowsPrincipal.IsPosix)
+			if (Environment.IsUnix)
 			{
 				return WindowsPrincipal.IsMemberOfGroupId(this.Token, (IntPtr)rid);
 			}
@@ -67,13 +68,13 @@ namespace System.Security.Principal
 			return this.IsInRole(text);
 		}
 
-		public virtual bool IsInRole(string role)
+		public override bool IsInRole(string role)
 		{
 			if (role == null)
 			{
 				return false;
 			}
-			if (WindowsPrincipal.IsPosix)
+			if (Environment.IsUnix)
 			{
 				return WindowsPrincipal.IsMemberOfGroupName(this.Token, role);
 			}
@@ -94,16 +95,16 @@ namespace System.Security.Principal
 
 		public virtual bool IsInRole(WindowsBuiltInRole role)
 		{
-			if (!WindowsPrincipal.IsPosix)
+			if (!Environment.IsUnix)
 			{
 				return this.IsInRole((int)role);
 			}
-			if (role != WindowsBuiltInRole.Administrator)
+			if (role == WindowsBuiltInRole.Administrator)
 			{
-				return false;
+				string text = "root";
+				return this.IsInRole(text);
 			}
-			string text = "root";
-			return this.IsInRole(text);
+			return false;
 		}
 
 		[MonoTODO("not implemented")]
@@ -111,15 +112,6 @@ namespace System.Security.Principal
 		public virtual bool IsInRole(SecurityIdentifier sid)
 		{
 			throw new NotImplementedException();
-		}
-
-		private static bool IsPosix
-		{
-			get
-			{
-				int platform = (int)Environment.Platform;
-				return platform == 128 || platform == 4 || platform == 6;
-			}
 		}
 
 		private IntPtr Token

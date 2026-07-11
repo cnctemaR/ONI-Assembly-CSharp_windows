@@ -188,6 +188,10 @@ public static class SimMessages
 		int num2 = Grid.XYToCell(extents.x + extents.width, extents.y + extents.height);
 		if (!Grid.IsValidCell(num2))
 		{
+			Debug.LogErrorFormat("Invalid Cell [{0}] Extents [{1},{2}] [{3},{4}]", new object[] { num2, extents.x, extents.y, extents.width, extents.height });
+		}
+		if (!Grid.IsValidCell(num2))
+		{
 			return;
 		}
 		SimMessages.AddBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.AddBuildingHeatExchangeMessage[checked(1 * sizeof(SimMessages.AddBuildingHeatExchangeMessage))];

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FileHelpers;
-using UnityEngine;
 
 public static class Strings
 {
@@ -105,65 +103,6 @@ public static class Strings
 		Strings.RootTable.Add(0, value);
 	}
 
-	public static void Add(TextAsset[] tables)
-	{
-		if (tables != null)
-		{
-			FileHelperEngine fileHelperEngine = new FileHelperEngine(typeof(Strings.StringKeyConfig));
-			foreach (TextAsset textAsset in tables)
-			{
-				if (textAsset != null)
-				{
-					Strings.StringKeyConfig[] array = (Strings.StringKeyConfig[])fileHelperEngine.ReadString(textAsset.text);
-					if (array.Length != 0)
-					{
-						Strings.StringKeyConfig stringKeyConfig = array[0];
-						bool flag = stringKeyConfig.name != "NOHEADERS";
-						for (int j = 0; j < array.Length; j++)
-						{
-							if (!flag || j != 0)
-							{
-								Strings.StringKeyConfig stringKeyConfig2 = array[j];
-								if (flag)
-								{
-									for (int k = 0; k < stringKeyConfig2.values.Length; k++)
-									{
-										List<string> list = new List<string>();
-										list.Add(textAsset.name);
-										if (stringKeyConfig2.name != null && !(stringKeyConfig2.name == string.Empty) && !stringKeyConfig2.name.Contains(" "))
-										{
-											list.Add(stringKeyConfig2.name);
-											if (stringKeyConfig.name != null && !(stringKeyConfig.name == string.Empty) && !stringKeyConfig.name.Contains(" "))
-											{
-												list.Add(stringKeyConfig.values[k]);
-												if (stringKeyConfig2.values[k] != null && !(stringKeyConfig2.values[k] == string.Empty))
-												{
-													list.Add(stringKeyConfig2.values[k]);
-													Strings.Add(list.ToArray());
-												}
-											}
-										}
-									}
-								}
-								else
-								{
-									List<string> list2 = new List<string>();
-									list2.Add(textAsset.name);
-									if (stringKeyConfig2.name != null && !(stringKeyConfig2.name == string.Empty) && !stringKeyConfig2.name.Contains(" "))
-									{
-										list2.Add(stringKeyConfig2.name);
-										list2.Add(stringKeyConfig2.values[0]);
-										Strings.Add(list2.ToArray());
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	public static void PrintTable()
 	{
 		Strings.RootTable.Print(string.Empty);
@@ -172,19 +111,4 @@ public static class Strings
 	private static StringTable RootTable = new StringTable();
 
 	private static HashSet<string> invalidKeys = new HashSet<string>();
-
-	[DelimitedRecord(",")]
-	[IgnoreEmptyLines]
-	public class StringKeyConfig
-	{
-		[FieldOrder(1)]
-		[FieldOptional]
-		public string name;
-
-		[FieldOrder(2)]
-		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
-		[FieldNullValue(typeof(string), "")]
-		[FieldOptional]
-		public string[] values;
-	}
 }

@@ -2,7 +2,7 @@
 
 namespace System.Reflection.Emit
 {
-	internal class OpCodeNames
+	internal static class OpCodeNames
 	{
 		// Note: this type is marked as 'beforefieldinit'.
 		static OpCodeNames()

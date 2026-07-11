@@ -15,7 +15,7 @@ public class HierarchyReferences : KMonoBehaviour
 		return false;
 	}
 
-	public SpecifiedType GetReference<SpecifiedType>(string name) where SpecifiedType : MonoBehaviour
+	public SpecifiedType GetReference<SpecifiedType>(string name) where SpecifiedType : Component
 	{
 		foreach (ElementReference elementReference in this.references)
 		{
@@ -25,14 +25,14 @@ public class HierarchyReferences : KMonoBehaviour
 				{
 					return (SpecifiedType)((object)elementReference.behaviour);
 				}
-				global::Debug.LogError(string.Format("Behavior is not specified type", new object[0]), null);
+				global::Debug.LogError(string.Format("Behavior is not specified type", Array.Empty<object>()), null);
 			}
 		}
 		global::Debug.LogError(string.Format("Could not find UI reference '{0}' or convert to specified type)", name), null);
 		return (SpecifiedType)((object)null);
 	}
 
-	public MonoBehaviour GetReference(string name)
+	public Component GetReference(string name)
 	{
 		foreach (ElementReference elementReference in this.references)
 		{

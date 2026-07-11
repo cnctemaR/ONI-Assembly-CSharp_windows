@@ -23,8 +23,7 @@ namespace System.Runtime.InteropServices
 			StackTrace stackTrace = new StackTrace(false);
 			while (i < stackTrace.FrameCount)
 			{
-				StackFrame frame = stackTrace.GetFrame(i);
-				MethodBase method = frame.GetMethod();
+				MethodBase method = stackTrace.GetFrame(i).GetMethod();
 				if (method.MemberType == MemberTypes.Constructor && method.IsStatic)
 				{
 					ExtensibleClassFactory.hashtable.Add(method.DeclaringType, callback);
@@ -35,6 +34,6 @@ namespace System.Runtime.InteropServices
 			throw new InvalidOperationException("RegisterObjectCreationCallback must be called from .cctor of class derived from ComImport type.");
 		}
 
-		private static Hashtable hashtable = new Hashtable();
+		private static readonly Hashtable hashtable = new Hashtable();
 	}
 }

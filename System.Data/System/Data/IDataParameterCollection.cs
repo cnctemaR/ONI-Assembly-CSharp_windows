@@ -3,14 +3,14 @@ using System.Collections;
 
 namespace System.Data
 {
-	public interface IDataParameterCollection : IList, IEnumerable, ICollection
+	public interface IDataParameterCollection : ICollection, IEnumerable, IList
 	{
-		void RemoveAt(string parameterName);
-
-		int IndexOf(string parameterName);
+		object this[string parameterName] { get; set; }
 
 		bool Contains(string parameterName);
 
-		object this[string parameterName] { get; set; }
+		int IndexOf(string parameterName);
+
+		void RemoveAt(string parameterName);
 	}
 }

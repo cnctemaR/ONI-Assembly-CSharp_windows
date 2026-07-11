@@ -80,7 +80,7 @@ namespace System.IO
 		{
 			try
 			{
-				return base.ReadToEnd();
+				return this.driver.ReadToEnd();
 			}
 			catch (IOException)
 			{

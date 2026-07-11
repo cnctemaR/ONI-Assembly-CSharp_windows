@@ -6,7 +6,7 @@ namespace System.Data.OleDb
 	public sealed class OleDbRowUpdatedEventArgs : RowUpdatedEventArgs
 	{
 		public OleDbRowUpdatedEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-			: base(dataRow, command, statementType, tableMapping)
+			: base(null, null, StatementType.Select, null)
 		{
 		}
 
@@ -14,7 +14,7 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				return (OleDbCommand)base.Command;
+				throw null;
 			}
 		}
 	}

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class CharConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -10,40 +12,35 @@ namespace System.ComponentModel
 			return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 		}
 
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		{
+			if (destinationType == typeof(string) && value is char && (char)value == '\0')
+			{
+				return "";
+			}
+			return base.ConvertTo(context, culture, value, destinationType);
+		}
+
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			string text = value as string;
-			if (text == null)
+			if (!(value is string))
 			{
 				return base.ConvertFrom(context, culture, value);
 			}
+			string text = (string)value;
 			if (text.Length > 1)
 			{
 				text = text.Trim();
 			}
-			if (text.Length > 1)
-			{
-				throw new FormatException(string.Format("String {0} is not a valid Char: it has to be less than or equal to one char long.", text));
-			}
-			if (text.Length == 0)
+			if (text == null || text.Length <= 0)
 			{
 				return '\0';
 			}
+			if (text.Length != 1)
+			{
+				throw new FormatException(global::SR.GetString("{0} is not a valid value for {1}.", new object[] { text, "Char" }));
+			}
 			return text[0];
-		}
-
-		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
-		{
-			if (destinationType != typeof(string) || value == null || !(value is char))
-			{
-				return base.ConvertTo(context, culture, value, destinationType);
-			}
-			char c = (char)value;
-			if (c == '\0')
-			{
-				return string.Empty;
-			}
-			return new string(c, 1);
 		}
 	}
 }

@@ -165,7 +165,7 @@ namespace System.Net
 				httpStreamAsyncResult.Count = count;
 				httpStreamAsyncResult.Callback = cback;
 				httpStreamAsyncResult.State = state;
-				httpStreamAsyncResult.SynchRead = num;
+				httpStreamAsyncResult.SynchRead = Math.Max(0, num);
 				httpStreamAsyncResult.Complete();
 				return httpStreamAsyncResult;
 			}

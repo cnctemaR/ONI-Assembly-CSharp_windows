@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class SandboxFloodTool : FloodTool
 {
+	public static void DestroyInstance()
+	{
+		SandboxFloodTool.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

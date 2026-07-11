@@ -1,38 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
-public class StateMachineManager : IScheduler
+public class StateMachineManager : Singleton<StateMachineManager>, IScheduler
 {
-	public StateMachineManager()
-	{
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-		{
-			foreach (Type type in assembly.GetTypes())
-			{
-				if (!type.IsAbstract && !type.IsGenericTypeDefinition && typeof(StateMachine).IsAssignableFrom(type))
-				{
-					StateMachine stateMachine = (StateMachine)Activator.CreateInstance(type);
-					stateMachine.InitializeStateMachine();
-					this.stateMachines[type] = stateMachine;
-				}
-			}
-		}
-	}
-
-	public static StateMachineManager Instance
-	{
-		get
-		{
-			return Singleton<StateMachineManager>.Instance;
-		}
-	}
-
-	public static void Destroy()
-	{
-		Singleton<StateMachineManager>.Destroy();
-	}
-
 	public void RegisterScheduler(Scheduler scheduler)
 	{
 		this.scheduler = scheduler;
@@ -54,6 +24,8 @@ public class StateMachineManager : IScheduler
 		if (!this.stateMachines.TryGetValue(type, out stateMachine))
 		{
 			stateMachine = (StateMachine)Activator.CreateInstance(type);
+			stateMachine.CreateStates(stateMachine);
+			stateMachine.BindStates();
 			stateMachine.InitializeStateMachine();
 			this.stateMachines[type] = stateMachine;
 		}
@@ -65,18 +37,36 @@ public class StateMachineManager : IScheduler
 		return (T)((object)this.CreateStateMachine(typeof(T)));
 	}
 
+	public static void ResetParameters()
+	{
+		for (int i = 0; i < StateMachineManager.parameters.Length; i++)
+		{
+			StateMachineManager.parameters[i] = null;
+		}
+	}
+
 	public StateMachine.Instance CreateSMIFromDef(IStateMachineTarget master, StateMachine.BaseDef def)
 	{
 		StateMachineManager.parameters[0] = master;
 		StateMachineManager.parameters[1] = def;
-		StateMachine stateMachine = StateMachineManager.Instance.CreateStateMachine(def.GetStateMachineType());
+		StateMachine stateMachine = Singleton<StateMachineManager>.Instance.CreateStateMachine(def.GetStateMachineType());
 		Type stateMachineInstanceType = stateMachine.GetStateMachineInstanceType();
 		return (StateMachine.Instance)Activator.CreateInstance(stateMachineInstanceType, StateMachineManager.parameters);
 	}
 
-	private Scheduler scheduler;
+	public void Clear()
+	{
+		if (this.scheduler != null)
+		{
+			this.scheduler.FreeResources();
+		}
+		if (this.stateMachines != null)
+		{
+			this.stateMachines.Clear();
+		}
+	}
 
-	private float elapsedTime;
+	private Scheduler scheduler;
 
 	private Dictionary<Type, StateMachine> stateMachines = new Dictionary<Type, StateMachine>();
 

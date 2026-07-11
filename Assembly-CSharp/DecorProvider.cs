@@ -12,6 +12,14 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 	{
 		this.splat.Clear();
 		this.splat = new DecorProvider.Splat(this);
+		if (this.decor.GetTotalValue() >= 20f)
+		{
+			base.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Decor20);
+		}
+		else
+		{
+			base.GetComponent<KPrefabID>().RemoveTag(RoomConstraints.ConstraintTags.Decor20);
+		}
 	}
 
 	public float GetDecorForCell(int cell)
@@ -57,7 +65,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		}
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component != null && component.isMovable;
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "DecorProvider.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "DecorProvider.OnSpawn");
 		AttributeInstance attributeInstance = this.decor;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.decorRadius;
@@ -94,7 +102,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			attributeInstance.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance.OnDirty, this.refreshCallback);
 			AttributeInstance attributeInstance2 = this.decorRadius;
 			attributeInstance2.OnDirty = (global::System.Action)Delegate.Remove(attributeInstance2.OnDirty, this.refreshCallback);
-			CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		}
 		this.splat.Clear();
 	}

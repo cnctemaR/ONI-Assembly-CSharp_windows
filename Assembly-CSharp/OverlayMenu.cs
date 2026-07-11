@@ -4,6 +4,11 @@ using STRINGS;
 
 public class OverlayMenu : KIconToggleMenu
 {
+	public static void DestroyInstance()
+	{
+		OverlayMenu.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

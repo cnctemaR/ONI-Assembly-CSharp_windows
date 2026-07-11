@@ -1,29 +1,45 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Reactable : ISim1000ms
+public abstract class Reactable
 {
-	public Reactable(GameObject gameObject, ChoreType chore_type, int range_width = 15, int range_height = 8, bool follow_transform = false)
+	public Reactable(GameObject gameObject, HashedString id, ChoreType chore_type, int range_width = 15, int range_height = 8, bool follow_transform = false, float min_reactable_time = 0f, float min_reactor_time = 0f, float max_trigger_time = float.PositiveInfinity)
 	{
 		this.rangeHeight = range_height;
 		this.rangeWidth = range_width;
+		this.id = id;
 		this.gameObject = gameObject;
 		this.choreType = chore_type;
+		this.minReactableTime = min_reactable_time;
+		this.minReactorTime = min_reactor_time;
+		this.maxTriggerTime = max_trigger_time;
+		this.creationTime = GameClock.Instance.GetTime();
 		this.UpdateLocation();
 		if (follow_transform)
 		{
-			SimAndRenderScheduler.instance.Add(this, false);
+			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(gameObject.transform, new global::System.Action(this.UpdateLocation), "Reactable follow transform");
+		}
+	}
+
+	public bool IsReacting
+	{
+		get
+		{
+			return this.reactor != null;
 		}
 	}
 
 	public void Begin(GameObject reactor)
 	{
 		this.reactor = reactor;
+		this.lastTriggerTime = GameClock.Instance.GetTime();
 		this.InternalBegin();
 	}
 
 	public void End()
 	{
+		this.InternalEnd();
 		if (this.reactor != null)
 		{
 			GameObject gameObject = this.reactor;
@@ -42,13 +58,40 @@ public abstract class Reactable : ISim1000ms
 
 	public bool CanBegin(GameObject reactor, Navigator.ActiveTransition transition)
 	{
+		if (GameClock.Instance.GetTime() - this.lastTriggerTime < this.minReactableTime)
+		{
+			return false;
+		}
 		ChoreConsumer component = reactor.GetComponent<ChoreConsumer>();
 		if (component == null)
 		{
 			return false;
 		}
 		Chore currentChore = component.choreDriver.GetCurrentChore();
-		return currentChore != null && this.choreType.priority > currentChore.choreType.priority && this.InternalCanBegin(reactor, transition);
+		if (currentChore == null)
+		{
+			return false;
+		}
+		if (this.choreType.priority <= currentChore.choreType.priority)
+		{
+			return false;
+		}
+		if (this.additionalPreconditions != null)
+		{
+			foreach (Reactable.ReactablePrecondition reactablePrecondition in this.additionalPreconditions)
+			{
+				if (!reactablePrecondition(reactor, transition))
+				{
+					return false;
+				}
+			}
+		}
+		return this.InternalCanBegin(reactor, transition);
+	}
+
+	public bool IsExpired()
+	{
+		return GameClock.Instance.GetTime() - this.creationTime > this.maxTriggerTime;
 	}
 
 	public abstract bool InternalCanBegin(GameObject reactor, Navigator.ActiveTransition transition);
@@ -65,7 +108,7 @@ public abstract class Reactable : ISim1000ms
 	{
 		this.End();
 		this.InternalCleanup();
-		SimAndRenderScheduler.instance.Remove(this);
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(this.gameObject.transform, new global::System.Action(this.UpdateLocation));
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
@@ -93,9 +136,21 @@ public abstract class Reactable : ISim1000ms
 		}
 	}
 
+	public Reactable AddPrecondition(Reactable.ReactablePrecondition precondition)
+	{
+		if (this.additionalPreconditions == null)
+		{
+			this.additionalPreconditions = new List<Reactable.ReactablePrecondition>();
+		}
+		this.additionalPreconditions.Add(precondition);
+		return this;
+	}
+
 	private GameScenePartitionerEntry partitionerEntry;
 
 	protected GameObject gameObject;
+
+	public HashedString id;
 
 	public bool preventChoreInterruption = true;
 
@@ -105,9 +160,23 @@ public abstract class Reactable : ISim1000ms
 
 	private int rangeHeight;
 
+	public float minReactableTime;
+
+	public float minReactorTime;
+
+	public float maxTriggerTime = float.PositiveInfinity;
+
+	private float lastTriggerTime = -2.1474836E+09f;
+
+	private float creationTime;
+
 	protected GameObject reactor;
 
 	private ChoreType choreType;
 
 	protected LoggerFSS log;
+
+	private List<Reactable.ReactablePrecondition> additionalPreconditions;
+
+	public delegate bool ReactablePrecondition(GameObject go, Navigator.ActiveTransition transition);
 }

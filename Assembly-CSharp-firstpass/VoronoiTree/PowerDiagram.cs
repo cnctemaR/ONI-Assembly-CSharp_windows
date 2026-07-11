@@ -21,6 +21,14 @@ namespace VoronoiTree
 			int num = 0;
 			while (enumerator.MoveNext())
 			{
+				if (!this.bounds.Contains(enumerator.Current.position))
+				{
+					global::Debug.LogErrorFormat("Cant feed points [{0}] to powerdiagram that are outside its area [{1}] ", new object[]
+					{
+						enumerator.Current.id,
+						enumerator.Current.position
+					});
+				}
 				if (this.bounds.Contains(enumerator.Current.position))
 				{
 					this.AddSite(enumerator.Current);

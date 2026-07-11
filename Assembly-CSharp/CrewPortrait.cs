@@ -6,6 +6,8 @@ using UnityEngine.UI;
 [Serializable]
 public class CrewPortrait : KMonoBehaviour
 {
+	public IAssignableIdentity identityObject { get; private set; }
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -32,21 +34,35 @@ public class CrewPortrait : KMonoBehaviour
 
 	private void OnRoleChanged(object data)
 	{
+		if (this.controller == null)
+		{
+			return;
+		}
 		CrewPortrait.RefreshHat(this.identityObject, this.controller);
 	}
 
 	private void RegisterEvents()
 	{
+		if (this.areEventsRegistered)
+		{
+			return;
+		}
 		KMonoBehaviour kmonoBehaviour = this.identityObject as KMonoBehaviour;
 		if (kmonoBehaviour == null)
 		{
 			return;
 		}
 		kmonoBehaviour.Subscribe(540773776, new Action<object>(this.OnRoleChanged));
+		this.areEventsRegistered = true;
 	}
 
 	private void UnregisterEvents()
 	{
+		if (!this.areEventsRegistered)
+		{
+			return;
+		}
+		this.areEventsRegistered = false;
 		KMonoBehaviour kmonoBehaviour = this.identityObject as KMonoBehaviour;
 		if (kmonoBehaviour == null)
 		{
@@ -243,8 +259,6 @@ public class CrewPortrait : KMonoBehaviour
 		}
 	}
 
-	public IAssignableIdentity identityObject;
-
 	public Image targetImage;
 
 	public bool startTransparent;
@@ -265,6 +279,8 @@ public class CrewPortrait : KMonoBehaviour
 	public bool useDefaultExpression = true;
 
 	private bool requiresRefresh;
+
+	private bool areEventsRegistered;
 
 	private static readonly HashedString snapTo_neck = new HashedString("snapTo_neck");
 

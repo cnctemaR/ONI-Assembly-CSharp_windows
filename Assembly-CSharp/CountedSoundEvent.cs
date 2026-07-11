@@ -66,7 +66,7 @@ public class CountedSoundEvent : SoundEvent
 		{
 			return;
 		}
-		if (!SoundEvent.ShouldPlaySound(behaviour, base.sound, base.looping, this.isDynamic))
+		if (!SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
 		{
 			return;
 		}

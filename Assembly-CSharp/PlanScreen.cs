@@ -11,6 +11,11 @@ public class PlanScreen : KIconToggleMenu
 {
 	public static PlanScreen Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		PlanScreen.Instance = null;
+	}
+
 	public static Dictionary<PlanScreen.PlanCategory, string> IconNameMap
 	{
 		get
@@ -35,13 +40,20 @@ public class PlanScreen : KIconToggleMenu
 
 	protected override void OnPrefabInit()
 	{
-		base.OnPrefabInit();
-		this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, this.recipeInfoScreenParent, true);
-		this.productInfoScreen.rectTransform().pivot = new Vector2(0f, 0f);
-		this.productInfoScreen.rectTransform().SetLocalPosition(new Vector3(280f, 0f, 0f));
-		this.productInfoScreen.onElementsFullySelected = new global::System.Action(this.OnRecipeElementsFullySelected);
-		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
-		Game.Instance.Subscribe(1174281782, new Action<object>(this.OnActiveToolChanged));
+		if (BuildMenu.UseHotkeyBuildMenu())
+		{
+			base.gameObject.SetActive(false);
+		}
+		else
+		{
+			base.OnPrefabInit();
+			this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, this.recipeInfoScreenParent, true);
+			this.productInfoScreen.rectTransform().pivot = new Vector2(0f, 0f);
+			this.productInfoScreen.rectTransform().SetLocalPosition(new Vector3(280f, 0f, 0f));
+			this.productInfoScreen.onElementsFullySelected = new global::System.Action(this.OnRecipeElementsFullySelected);
+			Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
+			Game.Instance.Subscribe(1174281782, new Action<object>(this.OnActiveToolChanged));
+		}
 		this.buildingGroupsRoot.gameObject.SetActive(false);
 	}
 
@@ -49,15 +61,22 @@ public class PlanScreen : KIconToggleMenu
 	{
 		base.OnSpawn();
 		this.initTime = KTime.Instance.UnscaledGameTime;
-		PlanScreen.Instance = this;
-		base.onSelect += this.OnClickCategory;
-		this.Refresh();
-		foreach (KToggle ktoggle in this.toggles)
+		if (BuildMenu.UseHotkeyBuildMenu())
 		{
-			ktoggle.group = base.GetComponent<ToggleGroup>();
+			base.gameObject.SetActive(false);
 		}
-		this.GetBuildableStates(true);
-		Game.Instance.Subscribe(288942073, new Action<object>(this.OnUIClear));
+		else
+		{
+			PlanScreen.Instance = this;
+			base.onSelect += this.OnClickCategory;
+			this.Refresh();
+			foreach (KToggle ktoggle in this.toggles)
+			{
+				ktoggle.group = base.GetComponent<ToggleGroup>();
+			}
+			this.GetBuildableStates(true);
+			Game.Instance.Subscribe(288942073, new Action<object>(this.OnUIClear));
+		}
 	}
 
 	public void Refresh()
@@ -545,7 +564,7 @@ public class PlanScreen : KIconToggleMenu
 			return;
 		}
 		Image image = toggle.bgImage.GetComponentsInChildren<Image>()[1];
-		Sprite uisprite = def.GetUISprite("ui");
+		Sprite uisprite = def.GetUISprite("ui", false);
 		if (uisprite == null)
 		{
 			uisprite = this.defaultBuildingIconSprite;

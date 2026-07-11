@@ -15,10 +15,19 @@ namespace System.Configuration
 			if (!string.IsNullOrEmpty(path))
 			{
 				char c = path[0];
-				if (c == '.' || c == '/' || c == ' ' || c == '\\')
+				if (c <= '.')
 				{
-					throw new ConfigurationErrorsException("<location> path attribute must be a relative virtual path.  It cannot start with any of ' ' '.' '/' or '\\'.");
+					if (c != ' ' && c != '.')
+					{
+						goto IL_003C;
+					}
 				}
+				else if (c != '/' && c != '\\')
+				{
+					goto IL_003C;
+				}
+				throw new ConfigurationErrorsException("<location> path attribute must be a relative virtual path.  It cannot start with any of ' ' '.' '/' or '\\'.");
+				IL_003C:
 				path = path.TrimEnd(ConfigurationLocation.pathTrimChars);
 			}
 			this.path = path;
@@ -84,6 +93,10 @@ namespace System.Configuration
 
 		internal void SetParentConfiguration(Configuration parent)
 		{
+			if (this.parentResolved)
+			{
+				return;
+			}
 			this.parentResolved = true;
 			this.parent = parent;
 			if (this.configuration != null)

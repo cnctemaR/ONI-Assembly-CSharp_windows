@@ -41,11 +41,11 @@ namespace System.Security.Cryptography.X509Certificates
 			get
 			{
 				AsnDecodeStatus status = this._status;
-				if (status != AsnDecodeStatus.Ok && status != AsnDecodeStatus.InformationNotAvailable)
+				if (status == AsnDecodeStatus.Ok || status == AsnDecodeStatus.InformationNotAvailable)
 				{
-					throw new CryptographicException("Badly encoded extension.");
+					return this._certificateAuthority;
 				}
-				return this._certificateAuthority;
+				throw new CryptographicException("Badly encoded extension.");
 			}
 		}
 
@@ -54,11 +54,11 @@ namespace System.Security.Cryptography.X509Certificates
 			get
 			{
 				AsnDecodeStatus status = this._status;
-				if (status != AsnDecodeStatus.Ok && status != AsnDecodeStatus.InformationNotAvailable)
+				if (status == AsnDecodeStatus.Ok || status == AsnDecodeStatus.InformationNotAvailable)
 				{
-					throw new CryptographicException("Badly encoded extension.");
+					return this._hasPathLengthConstraint;
 				}
-				return this._hasPathLengthConstraint;
+				throw new CryptographicException("Badly encoded extension.");
 			}
 		}
 
@@ -67,11 +67,11 @@ namespace System.Security.Cryptography.X509Certificates
 			get
 			{
 				AsnDecodeStatus status = this._status;
-				if (status != AsnDecodeStatus.Ok && status != AsnDecodeStatus.InformationNotAvailable)
+				if (status == AsnDecodeStatus.Ok || status == AsnDecodeStatus.InformationNotAvailable)
 				{
-					throw new CryptographicException("Badly encoded extension.");
+					return this._pathLengthConstraint;
 				}
-				return this._pathLengthConstraint;
+				throw new CryptographicException("Badly encoded extension.");
 			}
 		}
 
@@ -115,9 +115,9 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			try
 			{
-				ASN1 asn = new ASN1(extension);
+				Mono.Security.ASN1 asn = new Mono.Security.ASN1(extension);
 				int num = 0;
-				ASN1 asn2 = asn[num++];
+				Mono.Security.ASN1 asn2 = asn[num++];
 				if (asn2 != null && asn2.Tag == 1)
 				{
 					this._certificateAuthority = asn2.Value[0] == byte.MaxValue;
@@ -126,7 +126,7 @@ namespace System.Security.Cryptography.X509Certificates
 				if (asn2 != null && asn2.Tag == 2)
 				{
 					this._hasPathLengthConstraint = true;
-					this._pathLengthConstraint = ASN1Convert.ToInt32(asn2);
+					this._pathLengthConstraint = Mono.Security.ASN1Convert.ToInt32(asn2);
 				}
 			}
 			catch
@@ -138,20 +138,20 @@ namespace System.Security.Cryptography.X509Certificates
 
 		internal byte[] Encode()
 		{
-			ASN1 asn = new ASN1(48);
+			Mono.Security.ASN1 asn = new Mono.Security.ASN1(48);
 			if (this._certificateAuthority)
 			{
-				asn.Add(new ASN1(1, new byte[] { byte.MaxValue }));
+				asn.Add(new Mono.Security.ASN1(1, new byte[] { byte.MaxValue }));
 			}
 			if (this._hasPathLengthConstraint)
 			{
 				if (this._pathLengthConstraint == 0)
 				{
-					asn.Add(new ASN1(2, new byte[1]));
+					asn.Add(new Mono.Security.ASN1(2, new byte[1]));
 				}
 				else
 				{
-					asn.Add(ASN1Convert.FromInt32(this._pathLengthConstraint));
+					asn.Add(Mono.Security.ASN1Convert.FromInt32(this._pathLengthConstraint));
 				}
 			}
 			return asn.GetBytes();

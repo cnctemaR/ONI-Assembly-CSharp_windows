@@ -57,7 +57,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		Crop.CropVal cropVal = this.cropVal;
 		if (!string.IsNullOrEmpty(cropVal.cropId))
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), 0, 0, cropVal.cropId, Grid.SceneLayer.Ore, Folder.Entities);
+			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), 0, 0, cropVal.cropId, Grid.SceneLayer.Ore);
 			if (gameObject != null)
 			{
 				float num = 0.75f;

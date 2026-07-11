@@ -11,6 +11,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new EmoteMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SneezeMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new DecorMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new IncapacitationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new IdleMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new RationMonitor.Instance(smi.master))
@@ -35,7 +36,9 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SuitWearer.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master));
+			.ToggleStateMachine((RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new MingleMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new MournMonitor.Instance(smi.master));
 		this.dead.ToggleStateMachine((RationalAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).ToggleBrain("dead").Enter("RefreshUserMenu", delegate(RationalAi.Instance smi)
 		{
 			smi.RefreshUserMenu();
@@ -57,6 +60,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 		{
 			ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 			component.AddUrge(Db.Get().Urges.EmoteHighPriority);
+			component.AddUrge(Db.Get().Urges.EmoteIdle);
 		}
 
 		public void RefreshUserMenu()

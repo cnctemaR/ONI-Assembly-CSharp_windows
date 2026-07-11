@@ -27,6 +27,11 @@ public class BuildingCellVisualizerResources : ScriptableObject
 
 	public int iconLayer { get; set; }
 
+	public static void DestroyInstance()
+	{
+		BuildingCellVisualizerResources._Instance = null;
+	}
+
 	public static BuildingCellVisualizerResources Instance()
 	{
 		if (BuildingCellVisualizerResources._Instance == null)

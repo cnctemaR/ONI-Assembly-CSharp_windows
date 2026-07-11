@@ -58,18 +58,6 @@ public class BatchSet
 
 	public void Add(KAnimConverter.IAnimConverter controller)
 	{
-		if (this.group.dataType == KAnimBatchGroup.DataType.DontRender || this.group.dataType == KAnimBatchGroup.DataType.AnimOnly)
-		{
-			global::Debug.LogWarning(string.Concat(new object[]
-			{
-				"Cant add [",
-				controller.GetName(),
-				"] to group [",
-				this.group.batchID,
-				"]"
-			}), null);
-			return;
-		}
 		int layer = controller.GetLayer();
 		if (layer != this.key.layer)
 		{

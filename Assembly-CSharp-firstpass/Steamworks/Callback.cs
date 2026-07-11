@@ -117,7 +117,7 @@ namespace Steamworks
 				m_GetCallbackSizeBytes = new CCallbackBaseVTable.GetCallbackSizeBytesDel(this.OnGetCallbackSizeBytes)
 			};
 			this.m_pVTable = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CCallbackBaseVTable)));
-			Marshal.StructureToPtr(this.VTable, this.m_pVTable, false);
+			Marshal.StructureToPtr<CCallbackBaseVTable>(this.VTable, this.m_pVTable, false);
 			this.m_CCallbackBase = new CCallbackBase
 			{
 				m_vfptr = this.m_pVTable,

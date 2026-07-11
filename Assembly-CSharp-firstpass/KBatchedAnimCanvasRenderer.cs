@@ -129,13 +129,8 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 				},
 				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
 				{
-					textureId = Shader.PropertyToID("animTex"),
-					sizeId = Shader.PropertyToID("ANIM_TEXTURE_SIZE")
-				},
-				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
-				{
-					textureId = Shader.PropertyToID("buildTex"),
-					sizeId = Shader.PropertyToID("BUILD_TEXTURE_SIZE")
+					textureId = Shader.PropertyToID("buildAndAnimTex"),
+					sizeId = Shader.PropertyToID("BUILD_AND_ANIM_TEXTURE_SIZE")
 				},
 				new KBatchedAnimCanvasRenderer.TextureToCopyEntry
 				{
@@ -176,6 +171,7 @@ public class KBatchedAnimCanvasRenderer : MonoBehaviour, IMaskable
 			}
 		}
 		this.uiMat.SetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING, this.batch.matProperties.GetFloat(KAnimBatch.ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING));
+		this.uiMat.SetFloat(KAnimBatch.ShaderProperty_ANIM_TEXTURE_START_OFFSET, this.batch.matProperties.GetFloat(KAnimBatch.ShaderProperty_ANIM_TEXTURE_START_OFFSET));
 	}
 
 	private void LateUpdate()

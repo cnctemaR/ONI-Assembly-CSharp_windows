@@ -8,6 +8,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 {
+	public static void DestroyInstance()
+	{
+		GameClock.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		GameClock.Instance = this;

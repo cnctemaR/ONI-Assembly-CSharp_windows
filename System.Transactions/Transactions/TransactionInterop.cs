@@ -12,25 +12,25 @@ namespace System.Transactions
 		}
 
 		[MonoTODO]
-		public static byte[] GetExportCookie(Transaction transaction, byte[] exportCookie)
+		public static byte[] GetExportCookie(Transaction transaction, byte[] whereabouts)
 		{
 			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
-		public static Transaction GetTransactionFromDtcTransaction(IDtcTransaction dtc)
+		public static Transaction GetTransactionFromDtcTransaction(IDtcTransaction transactionNative)
 		{
 			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
-		public static Transaction GetTransactionFromExportCookie(byte[] exportCookie)
+		public static Transaction GetTransactionFromExportCookie(byte[] cookie)
 		{
 			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
-		public static Transaction GetTransactionFromTransmitterPropagationToken(byte[] token)
+		public static Transaction GetTransactionFromTransmitterPropagationToken(byte[] propagationToken)
 		{
 			throw new NotImplementedException();
 		}
@@ -46,5 +46,7 @@ namespace System.Transactions
 		{
 			throw new NotImplementedException();
 		}
+
+		public static readonly Guid PromoterTypeDtc = new Guid("14229753-FFE1-428D-82B7-DF73045CB8DA");
 	}
 }

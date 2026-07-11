@@ -1,120 +1,122 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
 	public abstract class NetworkInterface
 	{
-		[DllImport("libc")]
-		private static extern int uname(IntPtr buf);
-
-		[global::System.MonoTODO("Only works on Linux and Windows")]
 		public static NetworkInterface[] GetAllNetworkInterfaces()
 		{
-			if (NetworkInterface.runningOnUnix)
-			{
-				bool flag = false;
-				IntPtr intPtr = Marshal.AllocHGlobal(8192);
-				if (NetworkInterface.uname(intPtr) == 0)
-				{
-					string text = Marshal.PtrToStringAnsi(intPtr);
-					if (text == "Darwin")
-					{
-						flag = true;
-					}
-				}
-				Marshal.FreeHGlobal(intPtr);
-				try
-				{
-					if (flag)
-					{
-						return MacOsNetworkInterface.ImplGetAllNetworkInterfaces();
-					}
-					return LinuxNetworkInterface.ImplGetAllNetworkInterfaces();
-				}
-				catch (SystemException ex)
-				{
-					throw ex;
-				}
-				catch
-				{
-					return new NetworkInterface[0];
-				}
-			}
-			if (Environment.OSVersion.Version >= NetworkInterface.windowsVer51)
-			{
-				return Win32NetworkInterface2.ImplGetAllNetworkInterfaces();
-			}
-			return new NetworkInterface[0];
+			return SystemNetworkInterface.GetNetworkInterfaces();
 		}
 
-		[global::System.MonoTODO("Always returns true")]
 		public static bool GetIsNetworkAvailable()
 		{
-			return true;
+			return SystemNetworkInterface.InternalGetIsNetworkAvailable();
 		}
 
-		internal static string ReadLine(string path)
-		{
-			string text;
-			using (FileStream fileStream = File.OpenRead(path))
-			{
-				using (StreamReader streamReader = new StreamReader(fileStream))
-				{
-					text = streamReader.ReadLine();
-				}
-			}
-			return text;
-		}
-
-		[global::System.MonoTODO("Only works on Linux. Returns 0 on other systems.")]
 		public static int LoopbackInterfaceIndex
 		{
 			get
 			{
-				if (NetworkInterface.runningOnUnix)
-				{
-					try
-					{
-						return UnixNetworkInterface.IfNameToIndex("lo");
-					}
-					catch
-					{
-						return 0;
-					}
-					return 0;
-				}
-				return 0;
+				return SystemNetworkInterface.InternalLoopbackInterfaceIndex;
 			}
 		}
 
-		public abstract IPInterfaceProperties GetIPProperties();
+		public static int IPv6LoopbackInterfaceIndex
+		{
+			get
+			{
+				return SystemNetworkInterface.InternalIPv6LoopbackInterfaceIndex;
+			}
+		}
 
-		public abstract IPv4InterfaceStatistics GetIPv4Statistics();
+		public virtual string Id
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract PhysicalAddress GetPhysicalAddress();
+		public virtual string Name
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract bool Supports(NetworkInterfaceComponent networkInterfaceComponent);
+		public virtual string Description
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract string Description { get; }
+		public virtual IPInterfaceProperties GetIPProperties()
+		{
+			throw new NotImplementedException();
+		}
 
-		public abstract string Id { get; }
+		public virtual IPv4InterfaceStatistics GetIPv4Statistics()
+		{
+			throw new NotImplementedException();
+		}
 
-		public abstract bool IsReceiveOnly { get; }
+		public virtual IPInterfaceStatistics GetIPStatistics()
+		{
+			throw new NotImplementedException();
+		}
 
-		public abstract string Name { get; }
+		public virtual OperationalStatus OperationalStatus
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract NetworkInterfaceType NetworkInterfaceType { get; }
+		public virtual long Speed
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract OperationalStatus OperationalStatus { get; }
+		public virtual bool IsReceiveOnly
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract long Speed { get; }
+		public virtual bool SupportsMulticast
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract bool SupportsMulticast { get; }
+		public virtual PhysicalAddress GetPhysicalAddress()
+		{
+			throw new NotImplementedException();
+		}
 
-		private static Version windowsVer51 = new Version(5, 1);
+		public virtual NetworkInterfaceType NetworkInterfaceType
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-		internal static readonly bool runningOnUnix = Environment.OSVersion.Platform == PlatformID.Unix;
+		public virtual bool Supports(NetworkInterfaceComponent networkInterfaceComponent)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

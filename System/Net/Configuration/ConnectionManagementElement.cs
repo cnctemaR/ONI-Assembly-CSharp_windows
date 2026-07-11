@@ -5,6 +5,12 @@ namespace System.Net.Configuration
 {
 	public sealed class ConnectionManagementElement : ConfigurationElement
 	{
+		static ConnectionManagementElement()
+		{
+			ConnectionManagementElement.properties.Add(ConnectionManagementElement.addressProp);
+			ConnectionManagementElement.properties.Add(ConnectionManagementElement.maxConnectionProp);
+		}
+
 		public ConnectionManagementElement()
 		{
 		}
@@ -13,12 +19,6 @@ namespace System.Net.Configuration
 		{
 			this.Address = address;
 			this.MaxConnection = maxConnection;
-		}
-
-		static ConnectionManagementElement()
-		{
-			ConnectionManagementElement.properties.Add(ConnectionManagementElement.addressProp);
-			ConnectionManagementElement.properties.Add(ConnectionManagementElement.maxConnectionProp);
 		}
 
 		[ConfigurationProperty("address", Options = ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey)]
@@ -34,7 +34,7 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[ConfigurationProperty("maxconnection", DefaultValue = "1", Options = ConfigurationPropertyOptions.IsRequired)]
+		[ConfigurationProperty("maxconnection", DefaultValue = "6", Options = ConfigurationPropertyOptions.IsRequired)]
 		public int MaxConnection
 		{
 			get

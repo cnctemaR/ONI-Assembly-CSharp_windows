@@ -5,34 +5,15 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_SignatureHelper))]
+	[ClassInterface(ClassInterfaceType.None)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class SignatureHelper : _SignatureHelper
 	{
 		internal SignatureHelper(ModuleBuilder module, SignatureHelper.SignatureHelperType type)
 		{
 			this.type = type;
 			this.module = module;
-		}
-
-		void _SignatureHelper.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _SignatureHelper.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _SignatureHelper.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _SignatureHelper.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		public static SignatureHelper GetFieldSigHelper(Module mod)
@@ -89,6 +70,18 @@ namespace System.Reflection.Emit
 			throw new NotImplementedException();
 		}
 
+		[MonoTODO("Not implemented")]
+		public static SignatureHelper GetPropertySigHelper(Module mod, Type returnType, Type[] requiredReturnTypeCustomModifiers, Type[] optionalReturnTypeCustomModifiers, Type[] parameterTypes, Type[][] requiredParameterTypeCustomModifiers, Type[][] optionalParameterTypeCustomModifiers)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO("Not implemented")]
+		public static SignatureHelper GetPropertySigHelper(Module mod, CallingConventions callingConvention, Type returnType, Type[] requiredReturnTypeCustomModifiers, Type[] optionalReturnTypeCustomModifiers, Type[] parameterTypes, Type[][] requiredParameterTypeCustomModifiers, Type[][] optionalParameterTypeCustomModifiers)
+		{
+			throw new NotImplementedException();
+		}
+
 		private static int AppendArray(ref Type[] array, Type t)
 		{
 			if (array != null)
@@ -106,7 +99,7 @@ namespace System.Reflection.Emit
 
 		private static void AppendArrayAt(ref Type[][] array, Type[] t, int pos)
 		{
-			int num = Math.Max(pos, (array != null) ? array.Length : 0);
+			int num = Math.Max(pos, (array == null) ? 0 : array.Length);
 			Type[][] array2 = new Type[num + 1][];
 			if (array != null)
 			{
@@ -143,7 +136,7 @@ namespace System.Reflection.Emit
 			}
 			if (custom_modifiers.Length != n)
 			{
-				throw new ArgumentException(Locale.GetText(string.Format("Custom modifiers length `{0}' does not match the size of the arguments", new object[0])));
+				throw new ArgumentException(Locale.GetText(string.Format("Custom modifiers length `{0}' does not match the size of the arguments", Array.Empty<object>())));
 			}
 			foreach (Type[] array in custom_modifiers)
 			{
@@ -174,7 +167,7 @@ namespace System.Reflection.Emit
 			SignatureHelper.ValidateCustomModifier(arguments.Length, optionalCustomModifiers, "optionalCustomModifiers");
 			for (int i = 0; i < arguments.Length; i++)
 			{
-				this.AddArgument(arguments[i], (requiredCustomModifiers == null) ? null : requiredCustomModifiers[i], (optionalCustomModifiers == null) ? null : optionalCustomModifiers[i]);
+				this.AddArgument(arguments[i], (requiredCustomModifiers != null) ? requiredCustomModifiers[i] : null, (optionalCustomModifiers != null) ? optionalCustomModifiers[i] : null);
 			}
 		}
 
@@ -207,12 +200,6 @@ namespace System.Reflection.Emit
 			{
 				SignatureHelper.AppendArrayAt(ref this.modopts, optionalCustomModifiers, num);
 			}
-		}
-
-		[MonoTODO("Not implemented")]
-		public static SignatureHelper GetPropertySigHelper(Module mod, Type returnType, Type[] requiredReturnTypeCustomModifiers, Type[] optionalReturnTypeCustomModifiers, Type[] parameterTypes, Type[][] requiredParameterTypeCustomModifiers, Type[][] optionalParameterTypeCustomModifiers)
-		{
-			throw new NotImplementedException();
 		}
 
 		public void AddArgument(Type clsArgument)
@@ -253,7 +240,7 @@ namespace System.Reflection.Emit
 				{
 					if (array2 != null)
 					{
-						goto IL_0052;
+						goto IL_0032;
 					}
 				}
 				else
@@ -262,12 +249,12 @@ namespace System.Reflection.Emit
 					{
 						return false;
 					}
-					goto IL_0052;
+					goto IL_0032;
 				}
-				IL_00AB:
+				IL_0083:
 				i++;
 				continue;
-				IL_0052:
+				IL_0032:
 				if (array.Length != array2.Length)
 				{
 					return false;
@@ -278,7 +265,7 @@ namespace System.Reflection.Emit
 					Type type2 = array2[j];
 					if (type == null)
 					{
-						if (type2 != null)
+						if (!(type2 == null))
 						{
 							return false;
 						}
@@ -295,7 +282,7 @@ namespace System.Reflection.Emit
 						}
 					}
 				}
-				goto IL_00AB;
+				goto IL_0083;
 			}
 			return true;
 		}
@@ -349,16 +336,17 @@ namespace System.Reflection.Emit
 
 		public byte[] GetSignature()
 		{
+			TypeBuilder.ResolveUserTypes(this.arguments);
 			SignatureHelper.SignatureHelperType signatureHelperType = this.type;
 			if (signatureHelperType == SignatureHelper.SignatureHelperType.HELPER_FIELD)
 			{
 				return this.get_signature_field();
 			}
-			if (signatureHelperType != SignatureHelper.SignatureHelperType.HELPER_LOCAL)
+			if (signatureHelperType == SignatureHelper.SignatureHelperType.HELPER_LOCAL)
 			{
-				throw new NotImplementedException();
+				return this.get_signature_local();
 			}
-			return this.get_signature_local();
+			throw new NotImplementedException();
 		}
 
 		public override string ToString()
@@ -403,6 +391,26 @@ namespace System.Reflection.Emit
 				}
 			}
 			return signatureHelper;
+		}
+
+		void _SignatureHelper.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _SignatureHelper.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _SignatureHelper.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _SignatureHelper.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
 		}
 
 		private ModuleBuilder module;

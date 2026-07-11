@@ -18,22 +18,22 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 		if (RelaxationPoint.stressReductionEffect == null)
 		{
 			RelaxationPoint.stressReductionEffect = this.CreateEffect();
-			RelaxationPoint.roomBonusEffect = this.CreateRoomBonusEffect();
+			RelaxationPoint.roomStressReductionEffect = this.CreateRoomEffect();
 		}
 	}
 
 	public Effect CreateEffect()
 	{
-		Effect effect = new Effect("StressReduction", DUPLICANTS.MODIFIERS.STRESSREDUCTION.NAME, DUPLICANTS.MODIFIERS.STRESSREDUCTION.TOOLTIP, 0f, true, false, false);
+		Effect effect = new Effect("StressReduction", DUPLICANTS.MODIFIERS.STRESSREDUCTION.NAME, DUPLICANTS.MODIFIERS.STRESSREDUCTION.TOOLTIP, 0f, true, false, false, null, 0f);
 		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.MODIFIERS.STRESSREDUCTION.NAME, false, false, true);
 		effect.Add(attributeModifier);
 		return effect;
 	}
 
-	public Effect CreateRoomBonusEffect()
+	public Effect CreateRoomEffect()
 	{
-		Effect effect = new Effect("RoomRelaxationEffect", DUPLICANTS.MODIFIERS.ROOM_RELAXATION_EFFECT.NAME, DUPLICANTS.MODIFIERS.ROOM_RELAXATION_EFFECT.TOOLTIP, 0f, true, false, false);
-		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.MODIFIERS.ROOM_RELAXATION_EFFECT.NAME, false, false, true);
+		Effect effect = new Effect("RoomRelaxationEffect", DUPLICANTS.MODIFIERS.STRESSREDUCTION_CLINIC.NAME, DUPLICANTS.MODIFIERS.STRESSREDUCTION_CLINIC.TOOLTIP, 0f, true, false, false, null, 0f);
+		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.roomStressModificationValue / 600f, DUPLICANTS.MODIFIERS.STRESSREDUCTION_CLINIC.NAME, false, false, true);
 		effect.Add(attributeModifier);
 		return effect;
 	}
@@ -49,10 +49,13 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		worker.GetComponent<Effects>().Add(RelaxationPoint.stressReductionEffect, false);
-		if (this.roomTracker != null && this.roomTracker.room != null && Db.Get().RoomTypes.GetRoomType(this.roomTracker.room) == Db.Get().RoomTypes.RecRoom)
+		if (this.roomTracker != null && this.roomTracker.room != null && this.roomTracker.room.roomType == Db.Get().RoomTypes.MassageClinic)
 		{
-			worker.GetComponent<Effects>().Add(RelaxationPoint.roomBonusEffect, false);
+			worker.GetComponent<Effects>().Add(RelaxationPoint.roomStressReductionEffect, false);
+		}
+		else
+		{
+			worker.GetComponent<Effects>().Add(RelaxationPoint.stressReductionEffect, false);
 		}
 	}
 
@@ -70,7 +73,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	protected override void OnStopWork(Worker worker)
 	{
 		worker.GetComponent<Effects>().Remove(RelaxationPoint.stressReductionEffect);
-		worker.GetComponent<Effects>().Remove(RelaxationPoint.roomBonusEffect);
+		worker.GetComponent<Effects>().Remove(RelaxationPoint.roomStressReductionEffect);
 		base.OnStopWork(worker);
 	}
 
@@ -81,7 +84,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -101,13 +104,13 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	public float stressModificationValue;
 
-	public float roomBonusValue;
+	public float roomStressModificationValue;
 
 	private RelaxationPoint.RelaxationPointSM.Instance smi;
 
 	private static Effect stressReductionEffect;
 
-	private static Effect roomBonusEffect;
+	private static Effect roomStressReductionEffect;
 
 	public class RelaxationPointSM : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint>
 	{

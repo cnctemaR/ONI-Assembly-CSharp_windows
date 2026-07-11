@@ -27,6 +27,7 @@ public class CreatureDeliveryPointConfig : IBuildingConfig
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
+		storage.allowSettingOnlyFetchMarkedItems = false;
 		go.AddOrGet<CreatureDeliveryPoint>();
 		go.AddOrGet<TreeFilterable>();
 	}

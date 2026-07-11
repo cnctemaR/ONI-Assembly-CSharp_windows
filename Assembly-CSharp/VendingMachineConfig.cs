@@ -7,7 +7,7 @@ public class VendingMachineConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("VendingMachine", SETITEMS.VENDINGMACHINE.NAME, SETITEMS.VENDINGMACHINE.DESC, 100f, Assets.GetAnim("vendingmachine_kanim"), "on", Grid.SceneLayer.Building, 2, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("VendingMachine", global::STRINGS.BUILDINGS.PREFABS.VENDINGMACHINE.NAME, global::STRINGS.BUILDINGS.PREFABS.VENDINGMACHINE.DESC, 100f, Assets.GetAnim("vendingmachine_kanim"), "on", Grid.SceneLayer.Building, 2, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;

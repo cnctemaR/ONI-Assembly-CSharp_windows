@@ -83,7 +83,8 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			}, UpdateRate.SIM_200ms, false);
 			this.approach.InitializeStates(this.recoverer, this.locator, this.remove_suit, null, null, null);
 			this.remove_suit.GoTo(this.recover);
-			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null).ToggleTag(GameTags.RecoveringBreath)
+			this.recover.ToggleAnims("anim_emotes_default_kanim", 0f).DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null)
+				.ToggleTag(GameTags.RecoveringBreath)
 				.TriggerOnEnter(GameHashes.BeginBreathRecovery, null)
 				.TriggerOnExit(GameHashes.EndBreathRecovery);
 			this.recover.pre.PlayAnim("breathe_pre").OnAnimQueueComplete(this.recover.loop);

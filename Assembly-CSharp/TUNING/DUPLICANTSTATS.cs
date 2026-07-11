@@ -8,6 +8,8 @@ namespace TUNING
 	{
 		public const float DEFAULT_MASS = 30f;
 
+		public const float PEE_FUSE_TIME = 120f;
+
 		public const float PEE_PER_FLOOR_PEE = 2f;
 
 		public const float PEE_PER_TOILET_PEE = 6.7f;
@@ -36,6 +38,14 @@ namespace TUNING
 
 		public const float STANDARD_STRESS_BONUS = -0.033333335f;
 
+		public const float STRESS_ABOVE_EXPECTATIONS_QOL = -0.016666668f;
+
+		public const float STRESS_BELOW_EXPECTATIONS_QOL = 0.008333334f;
+
+		public const float MAX_STRESS_QOL = 0.041666668f;
+
+		public const float MIN_STRESS_QOL = -0.041666668f;
+
 		public const float STRESS_BELOW_EXPECTATIONS_FOOD = 0.25f;
 
 		public const float STRESS_ABOVE_EXPECTATIONS_FOOD = -0.5f;
@@ -46,9 +56,9 @@ namespace TUNING
 
 		public const float RECOVER_BREATH_DELTA = 3f;
 
-		public static string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art", "Ranching" };
+		public static readonly string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art", "Ranching" };
 
-		public static string[] ROLLED_ATTRIBUTES = new string[] { "Athletics" };
+		public static readonly string[] ROLLED_ATTRIBUTES = new string[] { "Athletics" };
 
 		public static int ROLLED_ATTRIBUTE_MAX = 5;
 
@@ -72,9 +82,9 @@ namespace TUNING
 
 		public static int MAX_TRAITS = 4;
 
-		public static List<string> CONTRACTEDTRAITS_HEALING = new List<string> { "IrritableBowel", "Aggressive", "SlowLearner", "WeakImmuneSystem", "Snorer", "CantDig" };
+		public static readonly List<string> CONTRACTEDTRAITS_HEALING = new List<string> { "IrritableBowel", "Aggressive", "SlowLearner", "WeakImmuneSystem", "Snorer", "CantDig" };
 
-		public static List<DUPLICANTSTATS.TraitVal> CONGENITALTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		public static readonly List<DUPLICANTSTATS.TraitVal> CONGENITALTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -103,7 +113,7 @@ namespace TUNING
 			}
 		};
 
-		public static List<DUPLICANTSTATS.TraitVal> BADTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		public static readonly List<DUPLICANTSTATS.TraitVal> BADTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -215,7 +225,7 @@ namespace TUNING
 			}
 		};
 
-		public static List<DUPLICANTSTATS.TraitVal> STRESSTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		public static readonly List<DUPLICANTSTATS.TraitVal> STRESSTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -235,7 +245,7 @@ namespace TUNING
 			}
 		};
 
-		public static List<DUPLICANTSTATS.TraitVal> GENESHUFFLERTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		public static readonly List<DUPLICANTSTATS.TraitVal> GENESHUFFLERTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -255,7 +265,7 @@ namespace TUNING
 			}
 		};
 
-		public static List<DUPLICANTSTATS.TraitVal> GOODTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		public static readonly List<DUPLICANTSTATS.TraitVal> GOODTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -306,6 +316,13 @@ namespace TUNING
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
+				id = "NightOwl",
+				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				mutuallyExclusiveTraits = new List<string> { "EarlyBird" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
 				id = "MoleHands",
 				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
@@ -335,6 +352,21 @@ namespace TUNING
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
+				id = "SimpleTastes",
+				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				mutuallyExclusiveTraits = new List<string> { "Foodie" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Foodie",
+				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				mutuallyExclusiveTraits = new List<string> { "SimpleTastes" },
+				requiredNonPositiveAptitudes = new List<HashedString> { "Cooking" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
 				id = "BedsideManner",
 				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
@@ -342,7 +374,7 @@ namespace TUNING
 			}
 		};
 
-		public static List<DUPLICANTSTATS.TraitVal> NEEDTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		public static readonly List<DUPLICANTSTATS.TraitVal> NEEDTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -406,9 +438,11 @@ namespace TUNING
 
 			public const float BLADDER_INCREASE_PER_SECOND = 0.16666667f;
 
-			public const float DECOR_EXPECTATION = -35f;
+			public const float DECOR_EXPECTATION = 0f;
 
-			public const float FOOD_QUALITY_EXPECTATION = -1f;
+			public const float FOOD_QUALITY_EXPECTATION = 0f;
+
+			public const float RECREATION_EXPECTATION = 2f;
 
 			public const float MAX_PROFESSION_DECOR_EXPECTATION = 75f;
 
@@ -429,6 +463,15 @@ namespace TUNING
 			public const float CARRY_CAPACITY = 200f;
 
 			public const float HIT_POINTS = 100f;
+		}
+
+		public class CALORIES
+		{
+			public const float SATISFIED_THRESHOLD = 0.95f;
+
+			public const float HUNGRY_THRESHOLD = 0.825f;
+
+			public const float STARVING_THRESHOLD = 0.25f;
 		}
 
 		public class TEMPERATURE
@@ -596,7 +639,7 @@ namespace TUNING
 				return DUPLICANTSTATS.DISTRIBUTIONS.TYPES[global::UnityEngine.Random.Range(0, DUPLICANTSTATS.DISTRIBUTIONS.TYPES.Count)];
 			}
 
-			public static List<int[]> TYPES = new List<int[]>
+			public static readonly List<int[]> TYPES = new List<int[]>
 			{
 				new int[] { 5, 4, 4, 3, 3, 2, 1 },
 				new int[] { 5, 3, 2, 1 },

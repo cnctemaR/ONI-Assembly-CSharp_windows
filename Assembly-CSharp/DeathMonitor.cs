@@ -23,10 +23,11 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 				Messenger.Instance.QueueMessage(deathMessage);
 			}
 		}).GoTo(this.dead);
-		this.dead.defaultState = this.dead.ground.TriggerOnEnter(GameHashes.Died, null).ToggleTag(GameTags.Dead).Enter(delegate(DeathMonitor.Instance smi)
-		{
-			smi.ApplyDeath();
-		});
+		this.dead.defaultState = this.dead.ground.TriggerOnEnter(GameHashes.Died, null).ToggleTag(GameTags.Dead).ToggleAnims("anim_emotes_default_kanim", 0f)
+			.Enter(delegate(DeathMonitor.Instance smi)
+			{
+				smi.ApplyDeath();
+			});
 		this.dead.ground.Enter(delegate(DeathMonitor.Instance smi)
 		{
 			Death death2 = this.death.Get(smi);
@@ -44,10 +45,10 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 		});
 		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f).Enter("ApplyDeath", delegate(DeathMonitor.Instance smi)
 		{
-			smi.animController.Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
+			smi.Get<KBatchedAnimController>().Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
 		}).Exit(delegate(DeathMonitor.Instance smi)
 		{
-			smi.animController.ClearQueue();
+			smi.Get<KBatchedAnimController>().ClearQueue();
 		})
 			.EventTransition(GameHashes.OnUnstored, this.dead.ground, null);
 	}

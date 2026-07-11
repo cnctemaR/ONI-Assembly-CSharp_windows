@@ -152,6 +152,14 @@ namespace System.Security.Cryptography.X509Certificates
 				this.enumerator = ((IEnumerable)mappings).GetEnumerator();
 			}
 
+			public X509Certificate Current
+			{
+				get
+				{
+					return (X509Certificate)this.enumerator.Current;
+				}
+			}
+
 			object IEnumerator.Current
 			{
 				get
@@ -168,14 +176,6 @@ namespace System.Security.Cryptography.X509Certificates
 			void IEnumerator.Reset()
 			{
 				this.enumerator.Reset();
-			}
-
-			public X509Certificate Current
-			{
-				get
-				{
-					return (X509Certificate)this.enumerator.Current;
-				}
 			}
 
 			public bool MoveNext()

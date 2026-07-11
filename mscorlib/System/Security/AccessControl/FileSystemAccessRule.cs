@@ -11,18 +11,22 @@ namespace System.Security.AccessControl
 		}
 
 		public FileSystemAccessRule(string identity, FileSystemRights fileSystemRights, AccessControlType type)
-			: this(new SecurityIdentifier(identity), fileSystemRights, InheritanceFlags.None, PropagationFlags.None, type)
+			: this(new NTAccount(identity), fileSystemRights, InheritanceFlags.None, PropagationFlags.None, type)
 		{
 		}
 
 		public FileSystemAccessRule(IdentityReference identity, FileSystemRights fileSystemRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
-			: base(identity, (int)fileSystemRights, false, inheritanceFlags, propagationFlags, type)
+			: this(identity, fileSystemRights, false, inheritanceFlags, propagationFlags, type)
 		{
-			this.rights = fileSystemRights;
+		}
+
+		internal FileSystemAccessRule(IdentityReference identity, FileSystemRights fileSystemRights, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
+			: base(identity, (int)fileSystemRights, isInherited, inheritanceFlags, propagationFlags, type)
+		{
 		}
 
 		public FileSystemAccessRule(string identity, FileSystemRights fileSystemRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
-			: this(new SecurityIdentifier(identity), fileSystemRights, inheritanceFlags, propagationFlags, type)
+			: this(new NTAccount(identity), fileSystemRights, inheritanceFlags, propagationFlags, type)
 		{
 		}
 
@@ -30,10 +34,8 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return this.rights;
+				return (FileSystemRights)base.AccessMask;
 			}
 		}
-
-		private FileSystemRights rights;
 	}
 }

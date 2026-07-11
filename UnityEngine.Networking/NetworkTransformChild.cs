@@ -163,25 +163,28 @@ namespace UnityEngine.Networking
 					return;
 				}
 			}
-			this.m_ChildIndex = uint.MaxValue;
-			NetworkTransformChild[] components = this.m_Root.GetComponents<NetworkTransformChild>();
-			uint num = 0U;
-			while ((ulong)num < (ulong)((long)components.Length))
+			if (this.m_Root != null)
 			{
-				if (components[(int)((UIntPtr)num)] == this)
+				this.m_ChildIndex = uint.MaxValue;
+				NetworkTransformChild[] components = this.m_Root.GetComponents<NetworkTransformChild>();
+				uint num = 0U;
+				while ((ulong)num < (ulong)((long)components.Length))
 				{
-					this.m_ChildIndex = num;
-					break;
+					if (components[(int)((UIntPtr)num)] == this)
+					{
+						this.m_ChildIndex = num;
+						break;
+					}
+					num += 1U;
 				}
-				num += 1U;
-			}
-			if (this.m_ChildIndex == 4294967295U)
-			{
-				if (LogFilter.logError)
+				if (this.m_ChildIndex == 4294967295U)
 				{
-					Debug.LogError("NetworkTransformChild component must be a child in the same hierarchy");
+					if (LogFilter.logError)
+					{
+						Debug.LogError("NetworkTransformChild component must be a child in the same hierarchy");
+					}
+					this.m_Target = null;
 				}
-				this.m_Target = null;
 			}
 			if (this.m_SendInterval < 0f)
 			{
@@ -438,7 +441,7 @@ namespace UnityEngine.Networking
 			{
 				if (LogFilter.logError)
 				{
-					Debug.LogError("HandleChildTransform no gameObject");
+					Debug.LogError("Received NetworkTransformChild data for GameObject that doesn't exist");
 				}
 			}
 			else

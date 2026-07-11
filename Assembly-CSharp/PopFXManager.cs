@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class PopFXManager : KScreen
 {
+	public static void DestroyInstance()
+	{
+		PopFXManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -21,8 +26,8 @@ public class PopFXManager : KScreen
 		}
 		for (int i = 0; i < 20; i++)
 		{
-			PopFX popFX = this.SpawnFX(this.sprite_Plus, string.Empty, null, Vector3.zero, 1.5f, false, true);
-			popFX.Recycle();
+			PopFX popFX = this.CreatePopFX();
+			this.Pool.Add(popFX);
 		}
 	}
 
@@ -64,9 +69,8 @@ public class PopFXManager : KScreen
 		}
 		else
 		{
-			GameObject gameObject = Util.KInstantiate(this.Prefab_PopFX, base.gameObject, "Pooled_PopFX");
-			gameObject.transform.localScale = Vector3.one;
-			popFX = gameObject.GetComponent<PopFX>();
+			popFX = this.CreatePopFX();
+			popFX.gameObject.SetActive(true);
 			popFX.Spawn(icon, text, target_transform, offset, lifetime, track_target);
 		}
 		return popFX;
@@ -75,6 +79,13 @@ public class PopFXManager : KScreen
 	public PopFX SpawnFX(Sprite icon, string text, Transform target_transform, float lifetime = 1.5f, bool track_target = false)
 	{
 		return this.SpawnFX(icon, text, target_transform, Vector3.zero, lifetime, track_target, false);
+	}
+
+	private PopFX CreatePopFX()
+	{
+		GameObject gameObject = Util.KInstantiate(this.Prefab_PopFX, base.gameObject, "Pooled_PopFX");
+		gameObject.transform.localScale = Vector3.one;
+		return gameObject.GetComponent<PopFX>();
 	}
 
 	public void RecycleFX(PopFX fx)

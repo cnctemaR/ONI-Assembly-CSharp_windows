@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Serialization;
 using Klei;
 using KSerialization;
 using STRINGS;
@@ -51,7 +52,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		if (this.useGunForDelivery && worker.usesMultiTool)
 		{
 			Workable.AnimInfo anim = base.GetAnim(worker);
-			anim.smi = new MultitoolController.Instance(this, worker, "store", EffectPrefabs.Instance.PickupEffect);
+			anim.smi = new MultitoolController.Instance(this, worker, "store", Assets.GetPrefab(EffectConfigs.OreAbsorbId));
 			return anim;
 		}
 		return base.GetAnim(worker);
@@ -72,6 +73,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.synchronizeAnims = false;
 	}
 
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		if (!this.allowSettingOnlyFetchMarkedItems)
+		{
+			this.onlyFetchMarkedItems = false;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.SetWorkTime(1.5f);
@@ -82,6 +92,11 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			{
 				EventSystem.Trigger(gameObject, 856640610, this);
 			}
+		}
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			component.SetSymbolVisiblity("sweep", this.onlyFetchMarkedItems);
 		}
 	}
 
@@ -390,23 +405,19 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	private void MakeWorldActive(GameObject go)
 	{
-		GameObject folder = SceneOrganizer.Instance.GetFolder(Folder.Loot);
-		if (folder != null)
+		go.transform.parent = null;
+		base.Trigger(-1697596308, go);
+		EventSystem.Trigger(go, 856640610, null);
+		this.ApplyStoredItemModifiers(go, false, false);
+		if (go != null)
 		{
-			go.transform.parent = folder.transform;
-			base.Trigger(-1697596308, go);
-			EventSystem.Trigger(go, 856640610, null);
-			this.ApplyStoredItemModifiers(go, false, false);
-			if (go != null)
+			PrimaryElement component = go.GetComponent<PrimaryElement>();
+			if (component != null && component.KeepZeroMassObject)
 			{
-				PrimaryElement component = go.GetComponent<PrimaryElement>();
-				if (component != null && component.KeepZeroMassObject)
+				component.KeepZeroMassObject = false;
+				if (component.Mass <= 0f)
 				{
-					component.KeepZeroMassObject = false;
-					if (component.Mass <= 0f)
-					{
-						Util.KDestroyGameObject(go);
-					}
+					Util.KDestroyGameObject(go);
 				}
 			}
 		}
@@ -732,6 +743,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		{
 			this.onlyFetchMarkedItems = is_set;
 			base.Trigger(644822890, null);
+			base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("sweep", is_set);
 		}
 	}
 
@@ -1006,10 +1018,16 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			float realtimeSinceStartup2 = Time.realtimeSinceStartup;
 			string text = reader.ReadKleiString();
 			Tag tag = TagManager.Create(text);
-			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader, true);
+			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader);
 			num += Time.realtimeSinceStartup - realtimeSinceStartup2;
 			if (saveLoadRoot != null)
 			{
+				KBatchedAnimController component = saveLoadRoot.GetComponent<KBatchedAnimController>();
+				if (component != null)
+				{
+					component.enabled = false;
+				}
+				saveLoadRoot.SetRegistered(false);
 				float realtimeSinceStartup3 = Time.realtimeSinceStartup;
 				GameObject gameObject = this.Store(saveLoadRoot.gameObject, true, true, false, true);
 				num2 += Time.realtimeSinceStartup - realtimeSinceStartup3;
@@ -1101,6 +1119,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	protected float maxKGPerItem = float.MaxValue;
 
 	private bool endOfLife;
+
+	public bool allowSettingOnlyFetchMarkedItems = true;
 
 	[Serialize]
 	private bool onlyFetchMarkedItems;

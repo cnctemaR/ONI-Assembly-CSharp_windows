@@ -5,9 +5,9 @@ public class DustCometConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(DustCometConfig.ID, DustCometConfig.ID);
+		GameObject gameObject = EntityTemplates.CreateEntity(DustCometConfig.ID, DustCometConfig.ID, true);
 		gameObject.AddOrGet<SaveLoadRoot>();
-		gameObject.AddOrGet<SavedObject>();
+		gameObject.AddOrGet<LoopingSounds>();
 		Comet comet = gameObject.AddOrGet<Comet>();
 		comet.massRange = new Vector2(0.2f, 0.5f);
 		comet.temperatureRange = new Vector2(223.15f, 253.15f);

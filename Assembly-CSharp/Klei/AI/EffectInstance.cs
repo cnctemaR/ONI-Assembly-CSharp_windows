@@ -22,6 +22,61 @@ namespace Klei.AI
 					component.AddStatusItem(this.statusItem, this);
 				}
 			}
+			if (effect.triggerFloatingText && PopFXManager.Instance != null)
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, effect.Name, game_object.transform, 1.5f, false);
+			}
+			if (!string.IsNullOrEmpty(effect.emoteAnim))
+			{
+				ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
+				if (smi != null)
+				{
+					if (effect.emoteCooldown < 0f)
+					{
+						SelfEmoteReactable selfEmoteReactable = (SelfEmoteReactable)new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, 100000f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+						{
+							anim = "react"
+						});
+						if (effect.emotePreconditions != null)
+						{
+							foreach (Reactable.ReactablePrecondition reactablePrecondition in effect.emotePreconditions)
+							{
+								selfEmoteReactable.AddPrecondition(reactablePrecondition);
+							}
+						}
+						smi.AddOneshotReactable(selfEmoteReactable);
+					}
+					else
+					{
+						this.reactable = new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, effect.emoteCooldown, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+						{
+							anim = "react"
+						});
+						if (effect.emotePreconditions != null)
+						{
+							foreach (Reactable.ReactablePrecondition reactablePrecondition2 in effect.emotePreconditions)
+							{
+								this.reactable.AddPrecondition(reactablePrecondition2);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public override void OnCleanUp()
+		{
+			if (this.statusItem != null)
+			{
+				KSelectable component = base.gameObject.GetComponent<KSelectable>();
+				component.RemoveStatusItem(this.statusItem, false);
+				this.statusItem = null;
+			}
+			if (this.reactable != null)
+			{
+				this.reactable.Cleanup();
+				this.reactable = null;
+			}
 		}
 
 		public float GetTimeRemaining()
@@ -32,12 +87,6 @@ namespace Klei.AI
 		public bool IsExpired()
 		{
 			return this.effect.duration > 0f && this.timeRemaining <= 0f;
-		}
-
-		public void Remove()
-		{
-			base.gameObject.GetComponent<Effects>().Remove(this.effect);
-			base.gameObject.GetComponent<KSelectable>().RemoveStatusItem(this.statusItem, false);
 		}
 
 		private void ConfigureStatusItem()
@@ -75,5 +124,7 @@ namespace Klei.AI
 		public StatusItem statusItem;
 
 		public float timeRemaining;
+
+		public Reactable reactable;
 	}
 }

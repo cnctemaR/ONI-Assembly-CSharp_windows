@@ -6,11 +6,8 @@ using KSerialization;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 {
-	public static SolidConduitSerializer Instance { get; private set; }
-
 	protected override void OnPrefabInit()
 	{
-		SolidConduitSerializer.Instance = this;
 	}
 
 	protected override void OnSpawn()
@@ -73,7 +70,7 @@ public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 			int num2 = reader.ReadInt32();
 			string text = reader.ReadKleiString();
 			Tag tag = TagManager.Create(text);
-			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader, false);
+			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader);
 			if (saveLoadRoot != null)
 			{
 				Pickupable component = saveLoadRoot.GetComponent<Pickupable>();

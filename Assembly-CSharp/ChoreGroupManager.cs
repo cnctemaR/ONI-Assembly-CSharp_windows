@@ -5,6 +5,11 @@ using KSerialization;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ChoreGroupManager : KMonoBehaviour, ISaveLoadable
 {
+	public static void DestroyInstance()
+	{
+		ChoreGroupManager.instance = null;
+	}
+
 	public List<Tag> DefaultForbiddenTagsList
 	{
 		get

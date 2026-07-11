@@ -5,6 +5,11 @@ public class EntityPrefabs : KMonoBehaviour
 {
 	public static EntityPrefabs Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		EntityPrefabs.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		EntityPrefabs.Instance = this;

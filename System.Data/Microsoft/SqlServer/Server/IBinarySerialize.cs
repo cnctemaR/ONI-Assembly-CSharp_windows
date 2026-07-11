@@ -7,6 +7,6 @@ namespace Microsoft.SqlServer.Server
 	{
 		void Read(BinaryReader r);
 
-		void Write(BinaryWriter r);
+		void Write(BinaryWriter w);
 	}
 }

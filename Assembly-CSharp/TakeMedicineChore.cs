@@ -27,7 +27,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 
 	private MedicinalPill medicine;
 
-	public static Chore.Precondition CanCure = new Chore.Precondition
+	public static readonly Chore.Precondition CanCure = new Chore.Precondition
 	{
 		id = "CanCure",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_CURE,
@@ -38,7 +38,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		}
 	};
 
-	public static Chore.Precondition IsConsumptionPermitted = new Chore.Precondition
+	public static readonly Chore.Precondition IsConsumptionPermitted = new Chore.Precondition
 	{
 		id = "IsConsumptionPermitted",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_CONSUMPTION_PERMITTED,

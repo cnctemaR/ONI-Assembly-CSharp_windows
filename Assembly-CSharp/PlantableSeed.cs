@@ -48,7 +48,7 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection
 		if (this.TestSuitableGround(num, false))
 		{
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.BuildingFront);
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.PlantID), vector, Grid.SceneLayer.BuildingFront, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
+			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.PlantID), vector, Grid.SceneLayer.BuildingFront, null, 0);
 			gameObject.SetActive(true);
 			Pickupable component = base.GetComponent<Pickupable>();
 			Pickupable pickupable = component.Take(1f);

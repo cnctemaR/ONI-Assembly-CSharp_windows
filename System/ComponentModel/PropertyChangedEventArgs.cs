@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class PropertyChangedEventArgs : EventArgs
 	{
-		public PropertyChangedEventArgs(string name)
+		public PropertyChangedEventArgs(string propertyName)
 		{
-			this.propertyName = name;
+			this.propertyName = propertyName;
 		}
 
 		public virtual string PropertyName
@@ -17,6 +19,6 @@ namespace System.ComponentModel
 			}
 		}
 
-		private string propertyName;
+		private readonly string propertyName;
 	}
 }

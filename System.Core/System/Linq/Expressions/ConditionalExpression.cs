@@ -1,60 +1,75 @@
 ﻿using System;
-using System.Reflection.Emit;
+using System.Diagnostics;
 
 namespace System.Linq.Expressions
 {
-	public sealed class ConditionalExpression : Expression
+	[DebuggerTypeProxy(typeof(Expression.ConditionalExpressionProxy))]
+	public class ConditionalExpression : Expression
 	{
-		internal ConditionalExpression(Expression test, Expression if_true, Expression if_false)
-			: base(ExpressionType.Conditional, if_true.Type)
+		internal ConditionalExpression(Expression test, Expression ifTrue)
 		{
-			this.test = test;
-			this.if_true = if_true;
-			this.if_false = if_false;
+			this.Test = test;
+			this.IfTrue = ifTrue;
 		}
 
-		public Expression Test
+		internal static ConditionalExpression Make(Expression test, Expression ifTrue, Expression ifFalse, Type type)
+		{
+			if (ifTrue.Type != type || ifFalse.Type != type)
+			{
+				return new FullConditionalExpressionWithType(test, ifTrue, ifFalse, type);
+			}
+			if (ifFalse is DefaultExpression && ifFalse.Type == typeof(void))
+			{
+				return new ConditionalExpression(test, ifTrue);
+			}
+			return new FullConditionalExpression(test, ifTrue, ifFalse);
+		}
+
+		public sealed override ExpressionType NodeType
 		{
 			get
 			{
-				return this.test;
+				return ExpressionType.Conditional;
 			}
 		}
 
-		public Expression IfTrue
+		public override Type Type
 		{
 			get
 			{
-				return this.if_true;
+				return this.IfTrue.Type;
 			}
 		}
+
+		public Expression Test { get; }
+
+		public Expression IfTrue { get; }
 
 		public Expression IfFalse
 		{
 			get
 			{
-				return this.if_false;
+				return this.GetFalse();
 			}
 		}
 
-		internal override void Emit(EmitContext ec)
+		internal virtual Expression GetFalse()
 		{
-			ILGenerator ig = ec.ig;
-			Label label = ig.DefineLabel();
-			Label label2 = ig.DefineLabel();
-			this.test.Emit(ec);
-			ig.Emit(OpCodes.Brfalse, label);
-			this.if_true.Emit(ec);
-			ig.Emit(OpCodes.Br, label2);
-			ig.MarkLabel(label);
-			this.if_false.Emit(ec);
-			ig.MarkLabel(label2);
+			return Utils.Empty;
 		}
 
-		private Expression test;
+		protected internal override Expression Accept(ExpressionVisitor visitor)
+		{
+			return visitor.VisitConditional(this);
+		}
 
-		private Expression if_true;
-
-		private Expression if_false;
+		public ConditionalExpression Update(Expression test, Expression ifTrue, Expression ifFalse)
+		{
+			if (test == this.Test && ifTrue == this.IfTrue && ifFalse == this.IfFalse)
+			{
+				return this;
+			}
+			return Expression.Condition(test, ifTrue, ifFalse, this.Type);
+		}
 	}
 }

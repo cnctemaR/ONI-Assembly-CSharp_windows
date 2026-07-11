@@ -7,43 +7,23 @@ namespace System.Data.SqlTypes
 {
 	[XmlSchemaProvider("GetXsdType")]
 	[Serializable]
-	public struct SqlSingle : IXmlSerializable, IComparable, INullable
+	public struct SqlSingle : INullable, IComparable, IXmlSerializable
 	{
 		public SqlSingle(double value)
 		{
-			this.value = (float)value;
-			this.notNull = true;
+			throw null;
 		}
 
 		public SqlSingle(float value)
 		{
-			this.value = value;
-			this.notNull = true;
-		}
-
-		[MonoTODO]
-		XmlSchema IXmlSerializable.GetSchema()
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		void IXmlSerializable.ReadXml(XmlReader reader)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		void IXmlSerializable.WriteXml(XmlWriter writer)
-		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		public bool IsNull
 		{
 			get
 			{
-				return !this.notNull;
+				throw null;
 			}
 		}
 
@@ -51,379 +31,272 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				if (this.IsNull)
-				{
-					throw new SqlNullValueException();
-				}
-				return this.value;
+				throw null;
 			}
 		}
 
 		public static SqlSingle Add(SqlSingle x, SqlSingle y)
 		{
-			return x + y;
-		}
-
-		public int CompareTo(object value)
-		{
-			if (value == null)
-			{
-				return 1;
-			}
-			if (!(value is SqlSingle))
-			{
-				throw new ArgumentException(Locale.GetText("Value is not a System.Data.SqlTypes.SqlSingle"));
-			}
-			return this.CompareSqlSingle((SqlSingle)value);
+			throw null;
 		}
 
 		public int CompareTo(SqlSingle value)
 		{
-			return this.CompareSqlSingle(value);
+			throw null;
 		}
 
-		private int CompareSqlSingle(SqlSingle value)
+		public int CompareTo(object value)
 		{
-			if (value.IsNull)
-			{
-				return 1;
-			}
-			return this.value.CompareTo(value.Value);
+			throw null;
 		}
 
 		public static SqlSingle Divide(SqlSingle x, SqlSingle y)
 		{
-			return x / y;
-		}
-
-		public override bool Equals(object value)
-		{
-			if (!(value is SqlSingle))
-			{
-				return false;
-			}
-			if (this.IsNull)
-			{
-				return ((SqlSingle)value).IsNull;
-			}
-			return !((SqlSingle)value).IsNull && (bool)(this == (SqlSingle)value);
+			throw null;
 		}
 
 		public static SqlBoolean Equals(SqlSingle x, SqlSingle y)
 		{
-			return x == y;
+			throw null;
+		}
+
+		public override bool Equals(object value)
+		{
+			throw null;
 		}
 
 		public override int GetHashCode()
 		{
-			long num = (long)this.value;
-			return (int)(num ^ (num >> 32));
-		}
-
-		public static SqlBoolean GreaterThan(SqlSingle x, SqlSingle y)
-		{
-			return x > y;
-		}
-
-		public static SqlBoolean GreaterThanOrEqual(SqlSingle x, SqlSingle y)
-		{
-			return x >= y;
-		}
-
-		public static SqlBoolean LessThan(SqlSingle x, SqlSingle y)
-		{
-			return x < y;
-		}
-
-		public static SqlBoolean LessThanOrEqual(SqlSingle x, SqlSingle y)
-		{
-			return x <= y;
-		}
-
-		public static SqlSingle Multiply(SqlSingle x, SqlSingle y)
-		{
-			return x * y;
-		}
-
-		public static SqlBoolean NotEquals(SqlSingle x, SqlSingle y)
-		{
-			return x != y;
-		}
-
-		public static SqlSingle Parse(string s)
-		{
-			return new SqlSingle(float.Parse(s));
-		}
-
-		public static SqlSingle Subtract(SqlSingle x, SqlSingle y)
-		{
-			return x - y;
-		}
-
-		public SqlBoolean ToSqlBoolean()
-		{
-			return (SqlBoolean)this;
-		}
-
-		public SqlByte ToSqlByte()
-		{
-			return (SqlByte)this;
-		}
-
-		public SqlDecimal ToSqlDecimal()
-		{
-			return (SqlDecimal)this;
-		}
-
-		public SqlDouble ToSqlDouble()
-		{
-			return this;
-		}
-
-		public SqlInt16 ToSqlInt16()
-		{
-			return (SqlInt16)this;
-		}
-
-		public SqlInt32 ToSqlInt32()
-		{
-			return (SqlInt32)this;
-		}
-
-		public SqlInt64 ToSqlInt64()
-		{
-			return (SqlInt64)this;
-		}
-
-		public SqlMoney ToSqlMoney()
-		{
-			return (SqlMoney)this;
-		}
-
-		public SqlString ToSqlString()
-		{
-			return (SqlString)this;
-		}
-
-		public override string ToString()
-		{
-			if (!this.notNull)
-			{
-				return "Null";
-			}
-			return this.value.ToString();
+			throw null;
 		}
 
 		public static XmlQualifiedName GetXsdType(XmlSchemaSet schemaSet)
 		{
-			return new XmlQualifiedName("float", "http://www.w3.org/2001/XMLSchema");
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThan(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThanOrEqual(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThan(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThanOrEqual(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlSingle Multiply(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean NotEquals(SqlSingle x, SqlSingle y)
+		{
+			throw null;
 		}
 
 		public static SqlSingle operator +(SqlSingle x, SqlSingle y)
 		{
-			float num = x.Value + y.Value;
-			if (float.IsInfinity(num))
-			{
-				throw new OverflowException();
-			}
-			return new SqlSingle(num);
+			throw null;
 		}
 
 		public static SqlSingle operator /(SqlSingle x, SqlSingle y)
 		{
-			float num = x.Value / y.Value;
-			if (float.IsInfinity(num) && (double)y.Value == 0.0)
-			{
-				throw new DivideByZeroException();
-			}
-			return new SqlSingle(x.Value / y.Value);
+			throw null;
 		}
 
 		public static SqlBoolean operator ==(SqlSingle x, SqlSingle y)
 		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value == y.Value);
-		}
-
-		public static SqlBoolean operator >(SqlSingle x, SqlSingle y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value > y.Value);
-		}
-
-		public static SqlBoolean operator >=(SqlSingle x, SqlSingle y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value >= y.Value);
-		}
-
-		public static SqlBoolean operator !=(SqlSingle x, SqlSingle y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value != y.Value);
-		}
-
-		public static SqlBoolean operator <(SqlSingle x, SqlSingle y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value < y.Value);
-		}
-
-		public static SqlBoolean operator <=(SqlSingle x, SqlSingle y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value <= y.Value);
-		}
-
-		public static SqlSingle operator *(SqlSingle x, SqlSingle y)
-		{
-			float num = x.Value * y.Value;
-			if (float.IsInfinity(num))
-			{
-				throw new OverflowException();
-			}
-			return new SqlSingle(num);
-		}
-
-		public static SqlSingle operator -(SqlSingle x, SqlSingle y)
-		{
-			float num = x.Value - y.Value;
-			if (float.IsInfinity(num))
-			{
-				throw new OverflowException();
-			}
-			return new SqlSingle(num);
-		}
-
-		public static SqlSingle operator -(SqlSingle x)
-		{
-			return new SqlSingle(-x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlSingle(SqlBoolean x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return new SqlSingle((float)x.ByteValue);
+			throw null;
 		}
 
 		public static explicit operator SqlSingle(SqlDouble x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			float num = (float)x.Value;
-			if (float.IsInfinity(num))
-			{
-				throw new OverflowException();
-			}
-			return new SqlSingle(num);
+			throw null;
 		}
 
 		public static explicit operator float(SqlSingle x)
 		{
-			return x.Value;
+			throw null;
 		}
 
 		public static explicit operator SqlSingle(SqlString x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return SqlSingle.Parse(x.Value);
+			throw null;
 		}
 
-		public static implicit operator SqlSingle(float x)
+		public static SqlBoolean operator >(SqlSingle x, SqlSingle y)
 		{
-			return new SqlSingle(x);
+			throw null;
+		}
+
+		public static SqlBoolean operator >=(SqlSingle x, SqlSingle y)
+		{
+			throw null;
 		}
 
 		public static implicit operator SqlSingle(SqlByte x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return new SqlSingle((float)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlSingle(SqlDecimal x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return new SqlSingle((float)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlSingle(SqlInt16 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return new SqlSingle((float)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlSingle(SqlInt32 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return new SqlSingle((float)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlSingle(SqlInt64 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return new SqlSingle((float)x.Value);
+			throw null;
 		}
 
 		public static implicit operator SqlSingle(SqlMoney x)
 		{
-			if (x.IsNull)
-			{
-				return SqlSingle.Null;
-			}
-			return new SqlSingle((float)x.Value);
+			throw null;
 		}
 
-		private float value;
+		public static implicit operator SqlSingle(float x)
+		{
+			throw null;
+		}
 
-		private bool notNull;
+		public static SqlBoolean operator !=(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
 
-		public static readonly SqlSingle MaxValue = new SqlSingle(float.MaxValue);
+		public static SqlBoolean operator <(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
 
-		public static readonly SqlSingle MinValue = new SqlSingle(float.MinValue);
+		public static SqlBoolean operator <=(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlSingle operator *(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlSingle operator -(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		public static SqlSingle operator -(SqlSingle x)
+		{
+			throw null;
+		}
+
+		public static SqlSingle Parse(string s)
+		{
+			throw null;
+		}
+
+		public static SqlSingle Subtract(SqlSingle x, SqlSingle y)
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		XmlSchema IXmlSerializable.GetSchema()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		void IXmlSerializable.ReadXml(XmlReader reader)
+		{
+		}
+
+		[MonoTODO]
+		void IXmlSerializable.WriteXml(XmlWriter writer)
+		{
+		}
+
+		public SqlBoolean ToSqlBoolean()
+		{
+			throw null;
+		}
+
+		public SqlByte ToSqlByte()
+		{
+			throw null;
+		}
+
+		public SqlDecimal ToSqlDecimal()
+		{
+			throw null;
+		}
+
+		public SqlDouble ToSqlDouble()
+		{
+			throw null;
+		}
+
+		public SqlInt16 ToSqlInt16()
+		{
+			throw null;
+		}
+
+		public SqlInt32 ToSqlInt32()
+		{
+			throw null;
+		}
+
+		public SqlInt64 ToSqlInt64()
+		{
+			throw null;
+		}
+
+		public SqlMoney ToSqlMoney()
+		{
+			throw null;
+		}
+
+		public SqlString ToSqlString()
+		{
+			throw null;
+		}
+
+		public override string ToString()
+		{
+			throw null;
+		}
+
+		public static readonly SqlSingle MaxValue;
+
+		public static readonly SqlSingle MinValue;
 
 		public static readonly SqlSingle Null;
 
-		public static readonly SqlSingle Zero = new SqlSingle(0f);
+		public static readonly SqlSingle Zero;
 	}
 }

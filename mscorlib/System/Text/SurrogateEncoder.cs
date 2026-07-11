@@ -1,36 +1,34 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System.Text
 {
 	[Serializable]
 	internal sealed class SurrogateEncoder : ISerializable, IObjectReference
 	{
-		private SurrogateEncoder(SerializationInfo info, StreamingContext context)
+		internal SurrogateEncoder(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
 			{
 				throw new ArgumentNullException("info");
 			}
-			this.encoding = (Encoding)info.GetValue("m_encoding", typeof(Encoding));
+			this.realEncoding = (Encoding)info.GetValue("m_encoding", typeof(Encoding));
 		}
 
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			throw new ArgumentException("This class cannot be serialized.");
-		}
-
+		[SecurityCritical]
 		public object GetRealObject(StreamingContext context)
 		{
-			if (this.realObject == null)
-			{
-				this.realObject = this.encoding.GetEncoder();
-			}
-			return this.realObject;
+			return this.realEncoding.GetEncoder();
 		}
 
-		private Encoding encoding;
+		[SecurityCritical]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			throw new ArgumentException(Environment.GetResourceString("Internal error in the runtime."));
+		}
 
-		private Encoder realObject;
+		[NonSerialized]
+		private Encoding realEncoding;
 	}
 }

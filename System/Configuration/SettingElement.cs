@@ -4,6 +4,13 @@ namespace System.Configuration
 {
 	public sealed class SettingElement : ConfigurationElement
 	{
+		static SettingElement()
+		{
+			SettingElement.properties.Add(SettingElement.name_prop);
+			SettingElement.properties.Add(SettingElement.serialize_as_prop);
+			SettingElement.properties.Add(SettingElement.value_prop);
+		}
+
 		public SettingElement()
 		{
 		}
@@ -12,13 +19,6 @@ namespace System.Configuration
 		{
 			this.Name = name;
 			this.SerializeAs = serializeAs;
-		}
-
-		static SettingElement()
-		{
-			SettingElement.properties.Add(SettingElement.name_prop);
-			SettingElement.properties.Add(SettingElement.serialize_as_prop);
-			SettingElement.properties.Add(SettingElement.value_prop);
 		}
 
 		[ConfigurationProperty("name", DefaultValue = "", Options = ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey)]
@@ -52,7 +52,11 @@ namespace System.Configuration
 		{
 			get
 			{
-				return (SettingsSerializeAs)((base[SettingElement.serialize_as_prop] == null) ? 0 : ((int)base[SettingElement.serialize_as_prop]));
+				if (base[SettingElement.serialize_as_prop] == null)
+				{
+					return SettingsSerializeAs.String;
+				}
+				return (SettingsSerializeAs)base[SettingElement.serialize_as_prop];
 			}
 			set
 			{
@@ -68,9 +72,9 @@ namespace System.Configuration
 			}
 		}
 
-		public override bool Equals(object o)
+		public override bool Equals(object settings)
 		{
-			SettingElement settingElement = o as SettingElement;
+			SettingElement settingElement = settings as SettingElement;
 			return settingElement != null && (settingElement.SerializeAs == this.SerializeAs && settingElement.Value == this.Value) && settingElement.Name == this.Name;
 		}
 

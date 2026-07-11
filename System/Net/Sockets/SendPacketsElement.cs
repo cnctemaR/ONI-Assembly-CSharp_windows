@@ -4,36 +4,8 @@ namespace System.Net.Sockets
 {
 	public class SendPacketsElement
 	{
-		public SendPacketsElement(byte[] buffer)
-			: this(buffer, 0, (buffer == null) ? 0 : buffer.Length)
+		private SendPacketsElement()
 		{
-		}
-
-		public SendPacketsElement(byte[] buffer, int offset, int count)
-			: this(buffer, offset, count, false)
-		{
-		}
-
-		public SendPacketsElement(byte[] buffer, int offset, int count, bool endOfPacket)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			int num = buffer.Length;
-			if (offset < 0 || offset >= num)
-			{
-				throw new ArgumentOutOfRangeException("offset");
-			}
-			if (count < 0 || offset + count >= num)
-			{
-				throw new ArgumentOutOfRangeException("count");
-			}
-			this.Buffer = buffer;
-			this.Offset = offset;
-			this.Count = count;
-			this.EndOfPacket = endOfPacket;
-			this.FilePath = null;
 		}
 
 		public SendPacketsElement(string filepath)
@@ -52,21 +24,101 @@ namespace System.Net.Sockets
 			{
 				throw new ArgumentNullException("filepath");
 			}
-			this.Buffer = null;
-			this.Offset = offset;
-			this.Count = count;
-			this.EndOfPacket = endOfPacket;
-			this.FilePath = filepath;
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count");
+			}
+			this.Initialize(filepath, null, offset, count, endOfPacket);
 		}
 
-		public byte[] Buffer { get; private set; }
+		public SendPacketsElement(byte[] buffer)
+			: this(buffer, 0, (buffer != null) ? buffer.Length : 0, false)
+		{
+		}
 
-		public int Count { get; private set; }
+		public SendPacketsElement(byte[] buffer, int offset, int count)
+			: this(buffer, offset, count, false)
+		{
+		}
 
-		public bool EndOfPacket { get; private set; }
+		public SendPacketsElement(byte[] buffer, int offset, int count, bool endOfPacket)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer");
+			}
+			if (offset < 0 || offset > buffer.Length)
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+			if (count < 0 || count > buffer.Length - offset)
+			{
+				throw new ArgumentOutOfRangeException("count");
+			}
+			this.Initialize(null, buffer, offset, count, endOfPacket);
+		}
 
-		public string FilePath { get; private set; }
+		private void Initialize(string filePath, byte[] buffer, int offset, int count, bool endOfPacket)
+		{
+			this.m_FilePath = filePath;
+			this.m_Buffer = buffer;
+			this.m_Offset = offset;
+			this.m_Count = count;
+			this.m_endOfPacket = endOfPacket;
+		}
 
-		public int Offset { get; private set; }
+		public string FilePath
+		{
+			get
+			{
+				return this.m_FilePath;
+			}
+		}
+
+		public byte[] Buffer
+		{
+			get
+			{
+				return this.m_Buffer;
+			}
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this.m_Count;
+			}
+		}
+
+		public int Offset
+		{
+			get
+			{
+				return this.m_Offset;
+			}
+		}
+
+		public bool EndOfPacket
+		{
+			get
+			{
+				return this.m_endOfPacket;
+			}
+		}
+
+		internal string m_FilePath;
+
+		internal byte[] m_Buffer;
+
+		internal int m_Offset;
+
+		internal int m_Count;
+
+		private bool m_endOfPacket;
 	}
 }

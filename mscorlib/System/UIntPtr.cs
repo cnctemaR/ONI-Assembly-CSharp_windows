@@ -4,8 +4,8 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[Serializable]
 	public struct UIntPtr : ISerializable
 	{
@@ -27,15 +27,6 @@ namespace System
 		public unsafe UIntPtr(void* value)
 		{
 			this._pointer = value;
-		}
-
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			info.AddValue("pointer", this._pointer);
 		}
 
 		public override bool Equals(object obj)
@@ -71,15 +62,20 @@ namespace System
 
 		public override string ToString()
 		{
+			if (UIntPtr.Size >= 8)
+			{
+				return this._pointer.ToString();
+			}
 			return this._pointer.ToString();
 		}
 
-		public unsafe static int Size
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			get
+			if (info == null)
 			{
-				return sizeof(void*);
+				throw new ArgumentNullException("info");
 			}
+			info.AddValue("pointer", this._pointer);
 		}
 
 		public static bool operator ==(UIntPtr value1, UIntPtr value2)
@@ -122,6 +118,34 @@ namespace System
 		public static explicit operator UIntPtr(uint value)
 		{
 			return new UIntPtr(value);
+		}
+
+		public unsafe static int Size
+		{
+			get
+			{
+				return sizeof(void*);
+			}
+		}
+
+		public unsafe static UIntPtr Add(UIntPtr pointer, int offset)
+		{
+			return (UIntPtr)((void*)((byte*)(void*)pointer + offset));
+		}
+
+		public unsafe static UIntPtr Subtract(UIntPtr pointer, int offset)
+		{
+			return (UIntPtr)((void*)((byte*)(void*)pointer - offset));
+		}
+
+		public unsafe static UIntPtr operator +(UIntPtr pointer, int offset)
+		{
+			return (UIntPtr)((void*)((byte*)(void*)pointer + offset));
+		}
+
+		public unsafe static UIntPtr operator -(UIntPtr pointer, int offset)
+		{
+			return (UIntPtr)((void*)((byte*)(void*)pointer - offset));
 		}
 
 		public static readonly UIntPtr Zero = new UIntPtr(0U);

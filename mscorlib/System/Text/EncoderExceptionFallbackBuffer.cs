@@ -4,22 +4,27 @@ namespace System.Text
 {
 	public sealed class EncoderExceptionFallbackBuffer : EncoderFallbackBuffer
 	{
-		public override int Remaining
-		{
-			get
-			{
-				return 0;
-			}
-		}
-
 		public override bool Fallback(char charUnknown, int index)
 		{
-			throw new EncoderFallbackException(charUnknown, index);
+			throw new EncoderFallbackException(Environment.GetResourceString("Unable to translate Unicode character \\\\u{0:X4} at index {1} to specified code page.", new object[]
+			{
+				(int)charUnknown,
+				index
+			}), charUnknown, index);
 		}
 
 		public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
 		{
-			throw new EncoderFallbackException(charUnknownHigh, charUnknownLow, index);
+			if (!char.IsHighSurrogate(charUnknownHigh))
+			{
+				throw new ArgumentOutOfRangeException("charUnknownHigh", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 55296, 56319 }));
+			}
+			if (!char.IsLowSurrogate(charUnknownLow))
+			{
+				throw new ArgumentOutOfRangeException("charUnknownLow", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 56320, 57343 }));
+			}
+			int num = char.ConvertToUtf32(charUnknownHigh, charUnknownLow);
+			throw new EncoderFallbackException(Environment.GetResourceString("Unable to translate Unicode character \\\\u{0:X4} at index {1} to specified code page.", new object[] { num, index }), charUnknownHigh, charUnknownLow, index);
 		}
 
 		public override char GetNextChar()
@@ -30,6 +35,14 @@ namespace System.Text
 		public override bool MovePrevious()
 		{
 			return false;
+		}
+
+		public override int Remaining
+		{
+			get
+			{
+				return 0;
+			}
 		}
 	}
 }

@@ -7,5 +7,7 @@ namespace System.Runtime.Remoting.Messaging
 		Identity TargetIdentity { get; set; }
 
 		string Uri { get; set; }
+
+		bool HasProperties();
 	}
 }

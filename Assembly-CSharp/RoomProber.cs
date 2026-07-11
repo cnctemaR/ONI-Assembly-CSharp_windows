@@ -4,27 +4,13 @@ using UnityEngine;
 
 public class RoomProber : ISim1000ms
 {
-	public bool isBuilderDirty()
-	{
-		return this.builderDirty;
-	}
-
-	public void MarkBuilderDirty()
-	{
-		this.builderDirty = true;
-	}
-
-	public void Init()
+	public RoomProber()
 	{
 		this.CellCavityID = new HandleVector<int>.Handle[Grid.CellCount];
+		this.floodFiller = new RoomProber.CavityFloodFiller(this.CellCavityID);
 		for (int i = 0; i < this.CellCavityID.Length; i++)
 		{
-			this.CellCavityID[i] = HandleVector<int>.InvalidHandle;
-		}
-		this.floodFiller = new RoomProber.CavityFloodFiller(this.CellCavityID);
-		for (int j = 0; j < this.CellCavityID.Length; j++)
-		{
-			this.solidChanges.Add(j);
+			this.solidChanges.Add(i);
 		}
 		this.ProcessSolidChanges();
 		this.RefreshRooms();
@@ -44,7 +30,7 @@ public class RoomProber : ISim1000ms
 		if (cavityForCell != null)
 		{
 			this.solidChanges.Add(cell);
-			this.MarkBuilderDirty();
+			this.dirty = true;
 		}
 	}
 
@@ -55,7 +41,7 @@ public class RoomProber : ISim1000ms
 			return;
 		}
 		this.solidChanges.Add(cell);
-		this.MarkBuilderDirty();
+		this.dirty = true;
 	}
 
 	private CavityInfo CreateNewCavity()
@@ -120,7 +106,10 @@ public class RoomProber : ISim1000ms
 		foreach (HandleVector<int>.Handle handle3 in this.releasedIDs)
 		{
 			CavityInfo data = this.cavityInfos.GetData(handle3);
-			data.ReleaseResources();
+			if (data.room != null)
+			{
+				this.ClearRoom(data.room);
+			}
 			this.cavityInfos.Free(handle3);
 		}
 		this.RebuildDirtyCavities(this.visitedCells);
@@ -166,126 +155,42 @@ public class RoomProber : ISim1000ms
 
 	public void Sim1000ms(float dt)
 	{
-		if (this.builderDirty)
+		if (this.dirty)
 		{
 			this.ProcessSolidChanges();
 			this.RefreshRooms();
 		}
 	}
 
-	public void ClearRoom(Room room)
+	private void CreateRoom(CavityInfo cavity)
 	{
-		if (room == null)
-		{
-			return;
-		}
-		foreach (KPrefabID kprefabID in room.buildings)
-		{
-			if (!(kprefabID == null))
-			{
-				kprefabID.Trigger(144050788, null);
-				Assignable component = kprefabID.GetComponent<Assignable>();
-				if (component != null && component.assignee == room)
-				{
-					component.Unassign();
-				}
-			}
-		}
+		Room room = new Room();
+		room.cavity = cavity;
+		cavity.room = room;
+		this.rooms.Add(room);
+		room.roomType = Db.Get().RoomTypes.GetRoomType(room);
+		this.AssignBuildingsToRoom(room);
+	}
+
+	private void ClearRoom(Room room)
+	{
+		this.UnassignBuildingsToRoom(room);
 		room.CleanUp();
-		room.cavity.SetRoom(null);
-	}
-
-	public void AddDoor(Door door, ICollection<int> door_cells, ICollection<int> adjacent_cells)
-	{
-		this.doors.Add(door);
-		foreach (int num in door_cells)
-		{
-			this.SolidChangedEvent(num, false);
-		}
-		foreach (int num2 in adjacent_cells)
-		{
-			this.SolidChangedEvent(num2, false);
-		}
-		this.RefreshDoors();
-	}
-
-	public void RemoveDoor(Door door)
-	{
-		this.doors.Remove(door);
-		foreach (CellOffset cellOffset in door.GetComponent<OccupyArea>().OccupiedCellsOffsets)
-		{
-			this.SolidChangedEvent(Grid.OffsetCell(Grid.PosToCell(door), cellOffset), false);
-		}
-	}
-
-	public void RefreshDoors()
-	{
-		foreach (CavityInfo cavityInfo in this.cavityInfos.GetDataList())
-		{
-			cavityInfo.hasDoor = false;
-		}
-		foreach (Door door in this.doors)
-		{
-			if (door.GetComponent<Rotatable>().IsRotated)
-			{
-				foreach (int num in door.GetComponent<Building>().PlacementCells)
-				{
-					int num2 = Grid.CellAbove(num);
-					if (Grid.IsValidCell(num2))
-					{
-						this.SetHasDoor(this.CellCavityID[num2], true);
-					}
-					int num3 = Grid.CellBelow(num);
-					if (Grid.IsValidCell(num3))
-					{
-						this.SetHasDoor(this.CellCavityID[num3], true);
-					}
-				}
-			}
-			else
-			{
-				foreach (int num4 in door.GetComponent<Building>().PlacementCells)
-				{
-					int num5 = Grid.CellLeft(num4);
-					if (Grid.IsValidCell(num5))
-					{
-						this.SetHasDoor(this.CellCavityID[num5], true);
-					}
-					int num6 = Grid.CellRight(num4);
-					if (Grid.IsValidCell(num6))
-					{
-						this.SetHasDoor(this.CellCavityID[num6], true);
-					}
-				}
-			}
-		}
-	}
-
-	private void SetHasDoor(HandleVector<int>.Handle id, bool value)
-	{
-		if (!id.IsValid())
-		{
-			return;
-		}
-		CavityInfo data = this.cavityInfos.GetData(id);
-		data.hasDoor = value;
+		this.rooms.Remove(room);
 	}
 
 	private void RefreshRooms()
 	{
-		this.RefreshDoors();
 		foreach (CavityInfo cavityInfo in this.cavityInfos.GetDataList())
 		{
 			if (cavityInfo.dirty)
 			{
-				this.ClearRoom(cavityInfo.room);
 				if (cavityInfo.numCells > 0)
 				{
-					if (cavityInfo.numCells <= RoomProber.MaxRoomSize && cavityInfo.hasDoor)
+					if (cavityInfo.numCells <= RoomProber.MaxRoomSize)
 					{
-						this.rooms.Add(this.BuildRoom(cavityInfo));
+						this.CreateRoom(cavityInfo);
 					}
-					this.AssignBuildingsToRoom(cavityInfo.room);
 					foreach (KPrefabID kprefabID in cavityInfo.buildings)
 					{
 						kprefabID.Trigger(144050788, cavityInfo.room);
@@ -294,16 +199,12 @@ public class RoomProber : ISim1000ms
 				cavityInfo.dirty = false;
 			}
 		}
-		this.builderDirty = false;
+		this.dirty = false;
 	}
 
 	private void AssignBuildingsToRoom(Room room)
 	{
-		if (room == null)
-		{
-			return;
-		}
-		RoomType roomType = Db.Get().RoomTypes.GetRoomType(room);
+		RoomType roomType = room.roomType;
 		if (roomType == Db.Get().RoomTypes.Neutral)
 		{
 			return;
@@ -318,31 +219,13 @@ public class RoomProber : ISim1000ms
 		}
 	}
 
-	private void UnassignBuildingsFromRooms()
+	private void UnassignBuildingsToRoom(Room room)
 	{
-		foreach (CavityInfo cavityInfo in this.cavityInfos.GetDataList())
-		{
-			if (cavityInfo.room != null)
-			{
-				RoomType roomType = Db.Get().RoomTypes.GetRoomType(cavityInfo.room);
-				if (roomType != Db.Get().RoomTypes.Neutral)
-				{
-					this.UnassignBuildingsFromRoom(cavityInfo.room);
-				}
-			}
-		}
-	}
-
-	private void UnassignBuildingsFromRoom(Room room)
-	{
-		if (room == null)
-		{
-			return;
-		}
 		foreach (KPrefabID kprefabID in room.buildings)
 		{
 			if (!(kprefabID == null))
 			{
+				kprefabID.Trigger(144050788, null);
 				Assignable component = kprefabID.GetComponent<Assignable>();
 				if (component != null && component.assignee == room)
 				{
@@ -352,20 +235,13 @@ public class RoomProber : ISim1000ms
 		}
 	}
 
-	private Room BuildRoom(CavityInfo cavity)
+	public Room GetRoomOfGameObject(GameObject go)
 	{
-		Room room = new Room();
-		cavity.SetRoom(room);
-		return room;
-	}
-
-	public Room GetRoomOfBuilding(GameObject bc)
-	{
-		if (bc == null)
+		if (go == null)
 		{
 			return null;
 		}
-		int num = Grid.PosToCell(bc);
+		int num = Grid.PosToCell(go);
 		if (!Grid.IsValidCell(num))
 		{
 			return null;
@@ -380,10 +256,10 @@ public class RoomProber : ISim1000ms
 
 	public bool IsInRoomType(GameObject go, RoomType checkType)
 	{
-		Room roomOfBuilding = this.GetRoomOfBuilding(go);
-		if (roomOfBuilding != null)
+		Room roomOfGameObject = this.GetRoomOfGameObject(go);
+		if (roomOfGameObject != null)
 		{
-			RoomType roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
+			RoomType roomType = roomOfGameObject.roomType;
 			return checkType == roomType;
 		}
 		return false;
@@ -409,17 +285,15 @@ public class RoomProber : ISim1000ms
 		return this.GetCavityInfo(handle);
 	}
 
-	private bool builderDirty = true;
+	public static int MaxRoomSize = 128;
 
 	public List<Room> rooms = new List<Room>();
-
-	private List<Door> doors = new List<Door>();
-
-	public static int MaxRoomSize = 128;
 
 	private KCompactedVector<CavityInfo> cavityInfos = new KCompactedVector<CavityInfo>(1024);
 
 	private HandleVector<int>.Handle[] CellCavityID;
+
+	private bool dirty = true;
 
 	private HashSet<int> solidChanges = new HashSet<int>();
 

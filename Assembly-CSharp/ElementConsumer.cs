@@ -16,6 +16,11 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		}
 	}
 
+	public static void ClearInstanceMap()
+	{
+		ElementConsumer.handleInstanceMap.Clear();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

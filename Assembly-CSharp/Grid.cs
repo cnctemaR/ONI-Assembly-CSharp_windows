@@ -369,9 +369,9 @@ public class Grid
 
 	public static void SetSolid(int cell, bool solid, CellSolidEvent ev)
 	{
-		Grid.BitFields[cell] = (ushort)((byte)(Grid.BitFields[cell] & 65503));
+		Grid.BitFields[cell] = Grid.BitFields[cell] & 65503;
 		ushort[] bitFields = Grid.BitFields;
-		bitFields[cell] |= (ushort)((!solid) ? 0 : 32);
+		bitFields[cell] |= ((!solid) ? 0 : 32);
 	}
 
 	public unsafe static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
@@ -455,7 +455,7 @@ public class Grid
 				num2 &= 65303;
 				num2 |= ((!element.IsSolid) ? 0 : 96);
 				num2 |= ((element.substance == null || !element.substance.renderedByWorld || !(Grid.Objects[num, 9] == null)) ? 0 : 128);
-				Grid.BitFields[num] = (ushort)((byte)num2);
+				Grid.BitFields[num] = (ushort)num2;
 			}
 		}
 	}
@@ -557,6 +557,81 @@ public class Grid
 	public static bool IsVisible(int cell)
 	{
 		return Grid.Visible[cell] > 0 || !PropertyTextures.IsFogOfWarEnabled;
+	}
+
+	public static bool IsPhysicallyAccessible(int x, int y, int x2, int y2, bool all_tiles_block = false, bool blocking_tile_visible = false)
+	{
+		int num = x;
+		int num2 = y;
+		int num3 = x2 - x;
+		int num4 = y2 - y;
+		int num5 = 0;
+		int num6 = 0;
+		int num7 = 0;
+		int num8 = 0;
+		if (num3 < 0)
+		{
+			num5 = -1;
+		}
+		else if (num3 > 0)
+		{
+			num5 = 1;
+		}
+		if (num4 < 0)
+		{
+			num6 = -1;
+		}
+		else if (num4 > 0)
+		{
+			num6 = 1;
+		}
+		if (num3 < 0)
+		{
+			num7 = -1;
+		}
+		else if (num3 > 0)
+		{
+			num7 = 1;
+		}
+		int num9 = Math.Abs(num3);
+		int num10 = Math.Abs(num4);
+		if (num9 <= num10)
+		{
+			num9 = Math.Abs(num4);
+			num10 = Math.Abs(num3);
+			if (num4 < 0)
+			{
+				num8 = -1;
+			}
+			else if (num4 > 0)
+			{
+				num8 = 1;
+			}
+			num7 = 0;
+		}
+		int num11 = num9 >> 1;
+		for (int i = 0; i <= num9; i++)
+		{
+			int num12 = Grid.XYToCell(x, y);
+			bool flag = ((!all_tiles_block) ? Grid.Element[num12].IsSolid : Grid.Solid[num12]);
+			if ((x != num || y != num2) && flag)
+			{
+				return blocking_tile_visible && x == x2 && y == y2;
+			}
+			num11 += num10;
+			if (num11 >= num9)
+			{
+				num11 -= num9;
+				x += num5;
+				y += num6;
+			}
+			else
+			{
+				x += num7;
+				y += num8;
+			}
+		}
+		return true;
 	}
 
 	public static readonly CellOffset[] DefaultOffset = new CellOffset[] { default(CellOffset) };
@@ -921,9 +996,9 @@ public class Grid
 			}
 			set
 			{
-				Grid.BitFields[i] = (ushort)((byte)(Grid.BitFields[i] & 65519));
+				Grid.BitFields[i] = Grid.BitFields[i] & 65519;
 				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= (ushort)((!value) ? 0 : 16);
+				bitFields[i] |= ((!value) ? 0 : 16);
 			}
 		}
 	}

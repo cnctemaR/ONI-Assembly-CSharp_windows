@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeTryCatchFinallyStatement : CodeStatement
 	{
@@ -25,51 +22,10 @@ namespace System.CodeDom
 			this.FinallyStatements.AddRange(finallyStatements);
 		}
 
-		public CodeStatementCollection FinallyStatements
-		{
-			get
-			{
-				if (this.finallyStatements == null)
-				{
-					this.finallyStatements = new CodeStatementCollection();
-				}
-				return this.finallyStatements;
-			}
-		}
+		public CodeStatementCollection TryStatements { get; } = new CodeStatementCollection();
 
-		public CodeStatementCollection TryStatements
-		{
-			get
-			{
-				if (this.tryStatements == null)
-				{
-					this.tryStatements = new CodeStatementCollection();
-				}
-				return this.tryStatements;
-			}
-		}
+		public CodeCatchClauseCollection CatchClauses { get; } = new CodeCatchClauseCollection();
 
-		public CodeCatchClauseCollection CatchClauses
-		{
-			get
-			{
-				if (this.catchClauses == null)
-				{
-					this.catchClauses = new CodeCatchClauseCollection();
-				}
-				return this.catchClauses;
-			}
-		}
-
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private CodeStatementCollection tryStatements;
-
-		private CodeStatementCollection finallyStatements;
-
-		private CodeCatchClauseCollection catchClauses;
+		public CodeStatementCollection FinallyStatements { get; } = new CodeStatementCollection();
 	}
 }

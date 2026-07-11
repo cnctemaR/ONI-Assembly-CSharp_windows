@@ -14,19 +14,33 @@ namespace UnityEngine.UI
 		{
 		}
 
+		private Canvas Canvas
+		{
+			get
+			{
+				if (this.m_Canvas == null)
+				{
+					List<Canvas> list = ListPool<Canvas>.Get();
+					base.gameObject.GetComponentsInParent<Canvas>(false, list);
+					if (list.Count > 0)
+					{
+						this.m_Canvas = list[list.Count - 1];
+					}
+					else
+					{
+						this.m_Canvas = null;
+					}
+					ListPool<Canvas>.Release(list);
+				}
+				return this.m_Canvas;
+			}
+		}
+
 		public Rect canvasRect
 		{
 			get
 			{
-				Canvas canvas = null;
-				List<Canvas> list = ListPool<Canvas>.Get();
-				base.gameObject.GetComponentsInParent<Canvas>(false, list);
-				if (list.Count > 0)
-				{
-					canvas = list[list.Count - 1];
-				}
-				ListPool<Canvas>.Release(list);
-				return this.m_VertexClipper.GetCanvasRect(this.rectTransform, canvas);
+				return this.m_VertexClipper.GetCanvasRect(this.rectTransform, this.Canvas);
 			}
 		}
 
@@ -65,32 +79,52 @@ namespace UnityEngine.UI
 			return !base.isActiveAndEnabled || RectTransformUtility.RectangleContainsScreenPoint(this.rectTransform, sp, eventCamera);
 		}
 
+		private Rect rootCanvasRect
+		{
+			get
+			{
+				this.rectTransform.GetWorldCorners(this.m_Corners);
+				if (!object.ReferenceEquals(this.Canvas, null))
+				{
+					Canvas rootCanvas = this.Canvas.rootCanvas;
+					for (int i = 0; i < 4; i++)
+					{
+						this.m_Corners[i] = rootCanvas.transform.InverseTransformPoint(this.m_Corners[i]);
+					}
+				}
+				return new Rect(this.m_Corners[0].x, this.m_Corners[0].y, this.m_Corners[2].x - this.m_Corners[0].x, this.m_Corners[2].y - this.m_Corners[0].y);
+			}
+		}
+
 		public virtual void PerformClipping()
 		{
-			if (this.m_ShouldRecalculateClipRects)
+			if (!object.ReferenceEquals(this.Canvas, null))
 			{
-				MaskUtilities.GetRectMasksForClip(this, this.m_Clippers);
-				this.m_ShouldRecalculateClipRects = false;
-			}
-			bool flag = true;
-			Rect rect = Clipping.FindCullAndClipWorldRect(this.m_Clippers, out flag);
-			bool flag2 = rect != this.m_LastClipRectCanvasSpace;
-			if (flag2 || this.m_ForceClip)
-			{
+				if (this.m_ShouldRecalculateClipRects)
+				{
+					MaskUtilities.GetRectMasksForClip(this, this.m_Clippers);
+					this.m_ShouldRecalculateClipRects = false;
+				}
+				bool flag = true;
+				Rect rect = Clipping.FindCullAndClipWorldRect(this.m_Clippers, out flag);
+				RenderMode renderMode = this.Canvas.rootCanvas.renderMode;
+				bool flag2 = (renderMode == RenderMode.ScreenSpaceCamera || renderMode == RenderMode.ScreenSpaceOverlay) && !rect.Overlaps(this.rootCanvasRect, true);
+				bool flag3 = rect != this.m_LastClipRectCanvasSpace;
+				bool forceClip = this.m_ForceClip;
 				foreach (IClippable clippable in this.m_ClipTargets)
 				{
-					clippable.SetClipRect(rect, flag);
+					if (flag3 || forceClip)
+					{
+						clippable.SetClipRect(rect, flag);
+					}
+					MaskableGraphic maskableGraphic = clippable as MaskableGraphic;
+					if (!(maskableGraphic != null) || maskableGraphic.canvasRenderer.hasMoved || flag3)
+					{
+						clippable.Cull((!flag2) ? rect : Rect.zero, !flag2 && flag);
+					}
 				}
 				this.m_LastClipRectCanvasSpace = rect;
-				this.m_LastValidClipRect = flag;
-			}
-			foreach (IClippable clippable2 in this.m_ClipTargets)
-			{
-				MaskableGraphic maskableGraphic = clippable2 as MaskableGraphic;
-				if (!(maskableGraphic != null) || maskableGraphic.canvasRenderer.hasMoved || flag2)
-				{
-					clippable2.Cull(this.m_LastClipRectCanvasSpace, this.m_LastValidClipRect);
-				}
+				this.m_ForceClip = false;
 			}
 		}
 
@@ -126,6 +160,7 @@ namespace UnityEngine.UI
 
 		protected override void OnCanvasHierarchyChanged()
 		{
+			this.m_Canvas = null;
 			base.OnCanvasHierarchyChanged();
 			this.m_ShouldRecalculateClipRects = true;
 		}
@@ -149,9 +184,11 @@ namespace UnityEngine.UI
 		private Rect m_LastClipRectCanvasSpace;
 
 		[NonSerialized]
-		private bool m_LastValidClipRect;
+		private bool m_ForceClip;
 
 		[NonSerialized]
-		private bool m_ForceClip;
+		private Canvas m_Canvas;
+
+		private Vector3[] m_Corners = new Vector3[4];
 	}
 }

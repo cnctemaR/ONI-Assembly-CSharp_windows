@@ -34,5 +34,45 @@ namespace System.Configuration
 			}
 			return null;
 		}
+
+		internal ConfigurationLocation FindBest(string location)
+		{
+			if (string.IsNullOrEmpty(location))
+			{
+				return null;
+			}
+			ConfigurationLocation configurationLocation = null;
+			int length = location.Length;
+			int num = 0;
+			foreach (object obj in base.InnerList)
+			{
+				ConfigurationLocation configurationLocation2 = (ConfigurationLocation)obj;
+				string path = configurationLocation2.Path;
+				if (!string.IsNullOrEmpty(path))
+				{
+					int length2 = path.Length;
+					if (location.StartsWith(path, StringComparison.OrdinalIgnoreCase))
+					{
+						if (length == length2)
+						{
+							return configurationLocation2;
+						}
+						if (length <= length2 || location[length2] == '/')
+						{
+							if (configurationLocation == null)
+							{
+								configurationLocation = configurationLocation2;
+							}
+							else if (num < length2)
+							{
+								configurationLocation = configurationLocation2;
+								num = length2;
+							}
+						}
+					}
+				}
+			}
+			return configurationLocation;
+		}
 	}
 }

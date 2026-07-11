@@ -3,7 +3,7 @@
 namespace UnityEngine.Networking
 {
 	[Serializable]
-	public struct NetworkInstanceId
+	public struct NetworkInstanceId : IEquatable<NetworkInstanceId>
 	{
 		public NetworkInstanceId(uint value)
 		{
@@ -22,7 +22,12 @@ namespace UnityEngine.Networking
 
 		public override bool Equals(object obj)
 		{
-			return obj is NetworkInstanceId && this == (NetworkInstanceId)obj;
+			return obj is NetworkInstanceId && this.Equals((NetworkInstanceId)obj);
+		}
+
+		public bool Equals(NetworkInstanceId other)
+		{
+			return this == other;
 		}
 
 		public static bool operator ==(NetworkInstanceId c1, NetworkInstanceId c2)

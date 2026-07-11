@@ -11,6 +11,11 @@ public class WorkItemCollection<WorkItemType, SharedDataType> : IWorkItemCollect
 		}
 	}
 
+	public WorkItemType GetWorkItem(int idx)
+	{
+		return this.items[idx];
+	}
+
 	public void Add(WorkItemType work_item)
 	{
 		this.items.Add(work_item);
@@ -20,6 +25,7 @@ public class WorkItemCollection<WorkItemType, SharedDataType> : IWorkItemCollect
 	{
 		WorkItemType workItemType = this.items[work_item_idx];
 		workItemType.Run(this.sharedData);
+		this.items[work_item_idx] = workItemType;
 	}
 
 	public void Reset(SharedDataType shared_data)

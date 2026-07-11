@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class HoverTextScreen : KScreen
 {
+	public static void DestroyInstance()
+	{
+		HoverTextScreen.Instance = null;
+	}
+
 	protected override void OnActivate()
 	{
 		base.OnActivate();

@@ -4,12 +4,24 @@ namespace System.Transactions
 {
 	public class TransactionEventArgs : EventArgs
 	{
+		public TransactionEventArgs()
+		{
+		}
+
+		internal TransactionEventArgs(Transaction transaction)
+			: this()
+		{
+			this.transaction = transaction;
+		}
+
 		public Transaction Transaction
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return this.transaction;
 			}
 		}
+
+		private Transaction transaction;
 	}
 }

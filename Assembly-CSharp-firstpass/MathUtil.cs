@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 public static class MathUtil
@@ -112,7 +111,6 @@ public static class MathUtil
 		return Vector2.Distance(vector, point);
 	}
 
-	[StructLayout(LayoutKind.Sequential, Size = 1)]
 	public struct MinMax
 	{
 		public MinMax(float min, float max)

@@ -25,6 +25,8 @@ public class Tinkerable : Workable
 		tinkerable.multitoolContext = "powertinker";
 		tinkerable.multitoolHitEffectTag = "fx_powertinker_splash";
 		tinkerable.shouldShowRolePerkStatusItem = false;
+		prefab.AddOrGet<Storage>();
+		prefab.AddOrGet<Effects>();
 		KPrefabID component = prefab.GetComponent<KPrefabID>();
 		component.prefabInitFn += delegate(GameObject inst)
 		{
@@ -53,6 +55,8 @@ public class Tinkerable : Workable
 		tinkerable.multitoolContext = "tend";
 		tinkerable.multitoolHitEffectTag = "fx_tend_splash";
 		tinkerable.shouldShowRolePerkStatusItem = false;
+		prefab.AddOrGet<Storage>();
+		prefab.AddOrGet<Effects>();
 		KPrefabID component = prefab.GetComponent<KPrefabID>();
 		component.prefabInitFn += delegate(GameObject inst)
 		{
@@ -77,6 +81,8 @@ public class Tinkerable : Workable
 		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.MachineTinker.IdHash;
 		tinkerable.choreTypeFetch = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		tinkerable.shouldShowRolePerkStatusItem = false;
+		prefab.AddOrGet<Storage>();
+		prefab.AddOrGet<Effects>();
 		return tinkerable;
 	}
 
@@ -131,7 +137,7 @@ public class Tinkerable : Workable
 			base.SetWorkTime(this.workTime);
 			if (this.HasMaterial())
 			{
-				this.chore = new WorkChore<Tinkerable>(Db.Get().ChoreTypes.GetByHash(this.choreTypeTinker), this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+				this.chore = new WorkChore<Tinkerable>(Db.Get().ChoreTypes.GetByHash(this.choreTypeTinker), this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 				if (component != null)
 				{
 					this.chore.AddPrecondition(ChorePreconditions.instance.IsFunctional, component);
@@ -227,10 +233,10 @@ public class Tinkerable : Workable
 
 	private Chore chore;
 
-	[MyCmpAdd]
+	[MyCmpGet]
 	private Storage storage;
 
-	[MyCmpAdd]
+	[MyCmpGet]
 	private Effects effects;
 
 	[MyCmpGet]

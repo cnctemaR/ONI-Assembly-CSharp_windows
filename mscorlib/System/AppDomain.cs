@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
@@ -8,6 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
@@ -22,56 +22,32 @@ using Mono.Security;
 
 namespace System
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_AppDomain))]
 	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class AppDomain : MarshalByRefObject, _AppDomain, IEvidenceFactory
 	{
+		internal static bool IsAppXModel()
+		{
+			return false;
+		}
+
+		internal static bool IsAppXDesignMode()
+		{
+			return false;
+		}
+
+		internal static void CheckReflectionOnlyLoadSupported()
+		{
+		}
+
+		internal static void CheckLoadFromSupported()
+		{
+		}
+
 		private AppDomain()
 		{
-		}
-
-		[method: PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
-		public event AssemblyLoadEventHandler AssemblyLoad;
-
-		[method: PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
-		public event ResolveEventHandler AssemblyResolve;
-
-		[method: PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
-		public event EventHandler DomainUnload;
-
-		[method: PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
-		public event EventHandler ProcessExit;
-
-		[method: PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
-		public event ResolveEventHandler ResourceResolve;
-
-		[method: PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
-		public event ResolveEventHandler TypeResolve;
-
-		[method: PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
-		public event UnhandledExceptionEventHandler UnhandledException;
-
-		public event ResolveEventHandler ReflectionOnlyAssemblyResolve;
-
-		void _AppDomain.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AppDomain.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AppDomain.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AppDomain.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -89,8 +65,7 @@ namespace System
 		{
 			get
 			{
-				AppDomainSetup setup = this.getSetup();
-				return new AppDomainSetup(setup);
+				return new AppDomainSetup(this.getSetup());
 			}
 		}
 
@@ -199,14 +174,17 @@ namespace System
 			{
 				if (AppDomain._principal == null)
 				{
-					switch (this._principalPolicy)
+					PrincipalPolicy principalPolicy = this._principalPolicy;
+					if (principalPolicy != PrincipalPolicy.UnauthenticatedPrincipal)
 					{
-					case PrincipalPolicy.UnauthenticatedPrincipal:
+						if (principalPolicy == PrincipalPolicy.WindowsPrincipal)
+						{
+							AppDomain._principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+						}
+					}
+					else
+					{
 						AppDomain._principal = new GenericPrincipal(new GenericIdentity(string.Empty, string.Empty), null);
-						break;
-					case PrincipalPolicy.WindowsPrincipal:
-						AppDomain._principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-						break;
 					}
 				}
 				return AppDomain._principal;
@@ -218,6 +196,19 @@ namespace System
 			get
 			{
 				return this._granted;
+			}
+		}
+
+		public PermissionSet PermissionSet
+		{
+			get
+			{
+				PermissionSet permissionSet;
+				if ((permissionSet = this._granted) == null)
+				{
+					permissionSet = (this._granted = new PermissionSet(PermissionState.Unrestricted));
+				}
+				return permissionSet;
 			}
 		}
 
@@ -256,7 +247,7 @@ namespace System
 		}
 
 		[Obsolete("AppDomain.AppendPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void AppendPrivatePath(string path)
 		{
 			if (path == null || path.Length == 0)
@@ -273,20 +264,20 @@ namespace System
 			text = text.Trim();
 			if (text[text.Length - 1] != Path.PathSeparator)
 			{
-				text += Path.PathSeparator;
+				text += Path.PathSeparator.ToString();
 			}
 			setupInformationNoCopy.PrivateBinPath = text + path;
 		}
 
 		[Obsolete("AppDomain.ClearPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead.")]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void ClearPrivatePath()
 		{
 			this.SetupInformationNoCopy.PrivateBinPath = string.Empty;
 		}
 
 		[Obsolete("Use AppDomainSetup.ShadowCopyDirectories")]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void ClearShadowCopyPath()
 		{
 			this.SetupInformationNoCopy.ShadowCopyDirectories = string.Empty;
@@ -300,6 +291,26 @@ namespace System
 		public ObjectHandle CreateComInstanceFrom(string assemblyFile, string typeName, byte[] hashValue, AssemblyHashAlgorithm hashAlgorithm)
 		{
 			return Activator.CreateComInstanceFrom(assemblyFile, typeName, hashValue, hashAlgorithm);
+		}
+
+		internal ObjectHandle InternalCreateInstanceWithNoSecurity(string assemblyName, string typeName)
+		{
+			return this.CreateInstance(assemblyName, typeName);
+		}
+
+		internal ObjectHandle InternalCreateInstanceWithNoSecurity(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
+		{
+			return this.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
+		}
+
+		internal ObjectHandle InternalCreateInstanceFromWithNoSecurity(string assemblyName, string typeName)
+		{
+			return this.CreateInstanceFrom(assemblyName, typeName);
+		}
+
+		internal ObjectHandle InternalCreateInstanceFromWithNoSecurity(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
+		{
+			return this.CreateInstanceFrom(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
 		}
 
 		public ObjectHandle CreateInstance(string assemblyName, string typeName)
@@ -320,6 +331,7 @@ namespace System
 			return Activator.CreateInstance(assemblyName, typeName, activationAttributes);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
 		{
 			if (assemblyName == null)
@@ -332,19 +344,70 @@ namespace System
 		public object CreateInstanceAndUnwrap(string assemblyName, string typeName)
 		{
 			ObjectHandle objectHandle = this.CreateInstance(assemblyName, typeName);
-			return (objectHandle == null) ? null : objectHandle.Unwrap();
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
 		}
 
 		public object CreateInstanceAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
 		{
 			ObjectHandle objectHandle = this.CreateInstance(assemblyName, typeName, activationAttributes);
-			return (objectHandle == null) ? null : objectHandle.Unwrap();
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
 		{
 			ObjectHandle objectHandle = this.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
-			return (objectHandle == null) ? null : objectHandle.Unwrap();
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
+		}
+
+		public ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
+		{
+			if (assemblyName == null)
+			{
+				throw new ArgumentNullException("assemblyName");
+			}
+			return Activator.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, null);
+		}
+
+		public object CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
+		{
+			ObjectHandle objectHandle = this.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes);
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
+		}
+
+		public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
+		{
+			if (assemblyFile == null)
+			{
+				throw new ArgumentNullException("assemblyFile");
+			}
+			return Activator.CreateInstanceFrom(assemblyFile, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, null);
+		}
+
+		public object CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
+		{
+			ObjectHandle objectHandle = this.CreateInstanceFrom(assemblyFile, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes);
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
 		}
 
 		public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
@@ -365,6 +428,7 @@ namespace System
 			return Activator.CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
 		{
 			if (assemblyFile == null)
@@ -377,19 +441,32 @@ namespace System
 		public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName)
 		{
 			ObjectHandle objectHandle = this.CreateInstanceFrom(assemblyName, typeName);
-			return (objectHandle == null) ? null : objectHandle.Unwrap();
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
 		}
 
 		public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName, object[] activationAttributes)
 		{
 			ObjectHandle objectHandle = this.CreateInstanceFrom(assemblyName, typeName, activationAttributes);
-			return (objectHandle == null) ? null : objectHandle.Unwrap();
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public object CreateInstanceFromAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
 		{
 			ObjectHandle objectHandle = this.CreateInstanceFrom(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
-			return (objectHandle == null) ? null : objectHandle.Unwrap();
+			if (objectHandle == null)
+			{
+				return null;
+			}
+			return objectHandle.Unwrap();
 		}
 
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access)
@@ -397,6 +474,7 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, null, null, null, null, null, false);
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, Evidence evidence)
 		{
 			return this.DefineDynamicAssembly(name, access, null, evidence, null, null, null, false);
@@ -407,31 +485,37 @@ namespace System
 			return this.DefineDynamicAssembly(name, access, dir, null, null, null, null, false);
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, evidence, null, null, null, false);
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, null, null, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, Evidence evidence, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, null, evidence, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, null, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions)
 		{
 			return this.DefineDynamicAssembly(name, access, dir, evidence, requiredPermissions, optionalPermissions, refusedPermissions, false);
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions, bool isSynchronized)
 		{
 			if (name == null)
@@ -444,6 +528,7 @@ namespace System
 			return assemblyBuilder;
 		}
 
+		[Obsolete("Declarative security for assembly level is no longer enforced")]
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, Evidence evidence, PermissionSet requiredPermissions, PermissionSet optionalPermissions, PermissionSet refusedPermissions, bool isSynchronized, IEnumerable<CustomAttributeBuilder> assemblyAttributes)
 		{
 			AssemblyBuilder assemblyBuilder = this.DefineDynamicAssembly(name, access, dir, evidence, requiredPermissions, optionalPermissions, refusedPermissions, isSynchronized);
@@ -460,6 +545,17 @@ namespace System
 		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, IEnumerable<CustomAttributeBuilder> assemblyAttributes)
 		{
 			return this.DefineDynamicAssembly(name, access, null, null, null, null, null, false, assemblyAttributes);
+		}
+
+		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, string dir, bool isSynchronized, IEnumerable<CustomAttributeBuilder> assemblyAttributes)
+		{
+			return this.DefineDynamicAssembly(name, access, dir, null, null, null, null, isSynchronized, assemblyAttributes);
+		}
+
+		[MonoLimitation("The argument securityContextSource is ignored")]
+		public AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, IEnumerable<CustomAttributeBuilder> assemblyAttributes, SecurityContextSource securityContextSource)
+		{
+			return this.DefineDynamicAssembly(name, access, assemblyAttributes);
 		}
 
 		internal AssemblyBuilder DefineInternalDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access)
@@ -480,20 +576,35 @@ namespace System
 			return this.ExecuteAssembly(assemblyFile, null, null);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public int ExecuteAssembly(string assemblyFile, Evidence assemblySecurity)
 		{
 			return this.ExecuteAssembly(assemblyFile, assemblySecurity, null);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public int ExecuteAssembly(string assemblyFile, Evidence assemblySecurity, string[] args)
 		{
 			Assembly assembly = Assembly.LoadFrom(assemblyFile, assemblySecurity);
 			return this.ExecuteAssemblyInternal(assembly, args);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public int ExecuteAssembly(string assemblyFile, Evidence assemblySecurity, string[] args, byte[] hashValue, AssemblyHashAlgorithm hashAlgorithm)
 		{
 			Assembly assembly = Assembly.LoadFrom(assemblyFile, assemblySecurity, hashValue, hashAlgorithm);
+			return this.ExecuteAssemblyInternal(assembly, args);
+		}
+
+		public int ExecuteAssembly(string assemblyFile, string[] args)
+		{
+			Assembly assembly = Assembly.LoadFrom(assemblyFile, null);
+			return this.ExecuteAssemblyInternal(assembly, args);
+		}
+
+		public int ExecuteAssembly(string assemblyFile, string[] args, byte[] hashValue, AssemblyHashAlgorithm hashAlgorithm)
+		{
+			Assembly assembly = Assembly.LoadFrom(assemblyFile, null, hashValue, hashAlgorithm);
 			return this.ExecuteAssemblyInternal(assembly, args);
 		}
 
@@ -552,6 +663,7 @@ namespace System
 			return assembly;
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public Assembly Load(AssemblyName assemblyRef, Evidence assemblySecurity)
 		{
 			if (assemblyRef == null)
@@ -595,7 +707,7 @@ namespace System
 				{
 					throw new FileNotFoundException(null, assemblyRef.Name);
 				}
-				if (assemblyRef.Version != new Version() && assemblyRef.Version != name.Version)
+				if (assemblyRef.Version != null && assemblyRef.Version != new Version(0, 0, 0, 0) && assemblyRef.Version != name.Version)
 				{
 					throw new FileNotFoundException(null, assemblyRef.Name);
 				}
@@ -604,7 +716,7 @@ namespace System
 					throw new FileNotFoundException(null, assemblyRef.Name);
 				}
 				byte[] publicKeyToken = assemblyRef.GetPublicKeyToken();
-				if (publicKeyToken != null)
+				if (publicKeyToken != null && publicKeyToken.Length != 0)
 				{
 					byte[] publicKeyToken2 = name.GetPublicKeyToken();
 					if (publicKeyToken2 == null || publicKeyToken.Length != publicKeyToken2.Length)
@@ -628,6 +740,7 @@ namespace System
 			return this.Load(assemblyString, null, false);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public Assembly Load(string assemblyString, Evidence assemblySecurity)
 		{
 			return this.Load(assemblyString, assemblySecurity, false);
@@ -664,6 +777,7 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Assembly LoadAssemblyRaw(byte[] rawAssembly, byte[] rawSymbolStore, Evidence securityEvidence, bool refonly);
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public Assembly Load(byte[] rawAssembly, byte[] rawSymbolStore, Evidence securityEvidence)
 		{
 			return this.Load(rawAssembly, rawSymbolStore, securityEvidence, false);
@@ -680,7 +794,8 @@ namespace System
 			return assembly;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPolicy\"/>\n</PermissionSet>\n")]
+		[Obsolete("AppDomain policy levels are obsolete")]
+		[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
 		public void SetAppDomainPolicy(PolicyLevel domainPolicy)
 		{
 			if (domainPolicy == null)
@@ -700,13 +815,13 @@ namespace System
 		}
 
 		[Obsolete("Use AppDomainSetup.SetCachePath")]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void SetCachePath(string path)
 		{
 			this.SetupInformationNoCopy.CachePath = path;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public void SetPrincipalPolicy(PrincipalPolicy policy)
 		{
 			if (this.IsFinalizingForUnload())
@@ -718,20 +833,20 @@ namespace System
 		}
 
 		[Obsolete("Use AppDomainSetup.ShadowCopyFiles")]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void SetShadowCopyFiles()
 		{
 			this.SetupInformationNoCopy.ShadowCopyFiles = "true";
 		}
 
 		[Obsolete("Use AppDomainSetup.ShadowCopyDirectories")]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void SetShadowCopyPath(string path)
 		{
 			this.SetupInformationNoCopy.ShadowCopyDirectories = path;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
 		public void SetThreadPrincipal(IPrincipal principal)
 		{
 			if (principal == null)
@@ -857,7 +972,7 @@ namespace System
 		private static extern AppDomain createDomain(string friendlyName, AppDomainSetup info);
 
 		[MonoLimitation("Currently it does not allow the setup in the other domain")]
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlAppDomain = true)]
 		public static AppDomain CreateDomain(string friendlyName, Evidence securityInfo, AppDomainSetup info)
 		{
 			if (friendlyName == null)
@@ -898,6 +1013,11 @@ namespace System
 			{
 				info.ConfigurationFile = "[I don't have a config file]";
 			}
+			if (info.AppDomainInitializer != null && !info.AppDomainInitializer.Method.IsStatic)
+			{
+				throw new ArgumentException("Non-static methods cannot be invoked as an appdomain initializer");
+			}
+			info.SerializeNonPrimitives();
 			AppDomain appDomain = (AppDomain)RemotingServices.GetDomainProxy(AppDomain.createDomain(friendlyName, info));
 			if (securityInfo == null)
 			{
@@ -916,10 +1036,6 @@ namespace System
 			}
 			if (info.AppDomainInitializer != null)
 			{
-				if (!info.AppDomainInitializer.Method.IsStatic)
-				{
-					throw new ArgumentException("Non-static methods cannot be invoked as an appdomain initializer");
-				}
 				AppDomain.Loader loader = new AppDomain.Loader(info.AppDomainInitializer.Method.DeclaringType.Assembly.Location);
 				appDomain.DoCallBack(new CrossAppDomainDelegate(loader.Load));
 				AppDomain.Initializer initializer = new AppDomain.Initializer(info.AppDomainInitializer, info.AppDomainInitializerArguments);
@@ -939,7 +1055,7 @@ namespace System
 			{
 				throw new ArgumentNullException("info");
 			}
-			info.ApplicationTrust = new ApplicationTrust(grantSet, fullTrustAssemblies ?? new global::System.Security.Policy.StrongName[0]);
+			info.ApplicationTrust = new ApplicationTrust(grantSet, fullTrustAssemblies ?? EmptyArray<global::System.Security.Policy.StrongName>.Value);
 			return AppDomain.CreateDomain(friendlyName, securityInfo, info);
 		}
 
@@ -976,7 +1092,7 @@ namespace System
 		}
 
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.MayFail)]
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Demand, ControlAppDomain = true)]
 		public static void Unload(AppDomain domain)
 		{
 			if (domain == null)
@@ -986,18 +1102,18 @@ namespace System
 			AppDomain.InternalUnload(domain.getDomainID());
 		}
 
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetData(string name, object data);
 
-		[MonoTODO]
+		[MonoLimitation("The permission field is ignored")]
 		public void SetData(string name, object data, IPermission permission)
 		{
-			throw new NotImplementedException();
+			this.SetData(name, data);
 		}
 
 		[Obsolete("Use AppDomainSetup.DynamicBase")]
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlAppDomain\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
 		public void SetDynamicBase(string path)
 		{
 			this.SetupInformationNoCopy.DynamicBase = path;
@@ -1050,7 +1166,7 @@ namespace System
 			this.AssemblyLoad(this, new AssemblyLoadEventArgs(assembly));
 		}
 
-		private Assembly DoAssemblyResolve(string name, bool refonly)
+		private Assembly DoAssemblyResolve(string name, Assembly requestingAssembly, bool refonly)
 		{
 			ResolveEventHandler resolveEventHandler;
 			if (refonly)
@@ -1065,39 +1181,37 @@ namespace System
 			{
 				return null;
 			}
-			Hashtable hashtable;
+			Dictionary<string, object> dictionary;
 			if (refonly)
 			{
-				hashtable = AppDomain.assembly_resolve_in_progress_refonly;
-				if (hashtable == null)
+				dictionary = AppDomain.assembly_resolve_in_progress_refonly;
+				if (dictionary == null)
 				{
-					hashtable = new Hashtable();
-					AppDomain.assembly_resolve_in_progress_refonly = hashtable;
+					dictionary = new Dictionary<string, object>();
+					AppDomain.assembly_resolve_in_progress_refonly = dictionary;
 				}
 			}
 			else
 			{
-				hashtable = AppDomain.assembly_resolve_in_progress;
-				if (hashtable == null)
+				dictionary = AppDomain.assembly_resolve_in_progress;
+				if (dictionary == null)
 				{
-					hashtable = new Hashtable();
-					AppDomain.assembly_resolve_in_progress = hashtable;
+					dictionary = new Dictionary<string, object>();
+					AppDomain.assembly_resolve_in_progress = dictionary;
 				}
 			}
-			string text = (string)hashtable[name];
-			if (text != null)
+			if (dictionary.ContainsKey(name))
 			{
 				return null;
 			}
-			hashtable[name] = name;
+			dictionary[name] = null;
 			Assembly assembly2;
 			try
 			{
 				Delegate[] invocationList = resolveEventHandler.GetInvocationList();
-				foreach (Delegate @delegate in invocationList)
+				for (int i = 0; i < invocationList.Length; i++)
 				{
-					ResolveEventHandler resolveEventHandler2 = (ResolveEventHandler)@delegate;
-					Assembly assembly = resolveEventHandler2(this, new ResolveEventArgs(name));
+					Assembly assembly = ((ResolveEventHandler)invocationList[i])(this, new ResolveEventArgs(name, requestingAssembly));
 					if (assembly != null)
 					{
 						return assembly;
@@ -1107,7 +1221,7 @@ namespace System
 			}
 			finally
 			{
-				hashtable.Remove(name);
+				dictionary.Remove(name);
 			}
 			return assembly2;
 		}
@@ -1127,24 +1241,23 @@ namespace System
 			{
 				text = (string)name_or_tb;
 			}
-			Hashtable hashtable = AppDomain.type_resolve_in_progress;
-			if (hashtable == null)
+			Dictionary<string, object> dictionary = AppDomain.type_resolve_in_progress;
+			if (dictionary == null)
 			{
-				hashtable = new Hashtable();
-				AppDomain.type_resolve_in_progress = hashtable;
+				dictionary = (AppDomain.type_resolve_in_progress = new Dictionary<string, object>());
 			}
-			if (hashtable.Contains(text))
+			if (dictionary.ContainsKey(text))
 			{
 				return null;
 			}
-			hashtable[text] = text;
+			dictionary[text] = null;
 			Assembly assembly2;
 			try
 			{
-				foreach (Delegate @delegate in this.TypeResolve.GetInvocationList())
+				Delegate[] invocationList = this.TypeResolve.GetInvocationList();
+				for (int i = 0; i < invocationList.Length; i++)
 				{
-					ResolveEventHandler resolveEventHandler = (ResolveEventHandler)@delegate;
-					Assembly assembly = resolveEventHandler(this, new ResolveEventArgs(text));
+					Assembly assembly = ((ResolveEventHandler)invocationList[i])(this, new ResolveEventArgs(text));
 					if (assembly != null)
 					{
 						return assembly;
@@ -1154,9 +1267,27 @@ namespace System
 			}
 			finally
 			{
-				hashtable.Remove(text);
+				dictionary.Remove(text);
 			}
 			return assembly2;
+		}
+
+		internal Assembly DoResourceResolve(string name, Assembly requesting)
+		{
+			if (this.ResourceResolve == null)
+			{
+				return null;
+			}
+			Delegate[] invocationList = this.ResourceResolve.GetInvocationList();
+			for (int i = 0; i < invocationList.Length; i++)
+			{
+				Assembly assembly = ((ResolveEventHandler)invocationList[i])(this, new ResolveEventArgs(name, requesting));
+				if (assembly != null)
+				{
+					return assembly;
+				}
+			}
+			return null;
 		}
 
 		private void DoDomainUnload()
@@ -1167,10 +1298,20 @@ namespace System
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void DoUnhandledException(Exception e);
+
+		internal void DoUnhandledException(UnhandledExceptionEventArgs args)
+		{
+			if (this.UnhandledException != null)
+			{
+				this.UnhandledException(this, args);
+			}
+		}
+
 		internal byte[] GetMarshalledDomainObjRef()
 		{
-			ObjRef objRef = RemotingServices.Marshal(AppDomain.CurrentDomain, null, typeof(AppDomain));
-			return CADSerializer.SerializeObject(objRef).GetBuffer();
+			return CADSerializer.SerializeObject(RemotingServices.Marshal(AppDomain.CurrentDomain, null, typeof(AppDomain))).GetBuffer();
 		}
 
 		internal void ProcessMessageInDomain(byte[] arrRequest, CADMethodCallMessage cadMsg, out byte[] arrResponse, out CADMethodReturnMessage cadMrm)
@@ -1189,10 +1330,49 @@ namespace System
 			if (cadMrm == null)
 			{
 				arrResponse = CADSerializer.SerializeMessage(message2).GetBuffer();
+				return;
 			}
-			else
+			arrResponse = null;
+		}
+
+		[method: SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
+		public event AssemblyLoadEventHandler AssemblyLoad;
+
+		[method: SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
+		public event ResolveEventHandler AssemblyResolve;
+
+		[method: SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
+		public event EventHandler DomainUnload;
+
+		[method: SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
+		public event EventHandler ProcessExit;
+
+		[method: SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
+		public event ResolveEventHandler ResourceResolve;
+
+		[method: SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
+		public event ResolveEventHandler TypeResolve;
+
+		[method: SecurityPermission(SecurityAction.LinkDemand, ControlAppDomain = true)]
+		public event UnhandledExceptionEventHandler UnhandledException;
+
+		public event EventHandler<FirstChanceExceptionEventArgs> FirstChanceException;
+
+		[MonoTODO]
+		public bool IsHomogenous
+		{
+			get
 			{
-				arrResponse = null;
+				return true;
+			}
+		}
+
+		[MonoTODO]
+		public bool IsFullyTrusted
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -1203,6 +1383,8 @@ namespace System
 				return this._domain_manager;
 			}
 		}
+
+		public event ResolveEventHandler ReflectionOnlyAssemblyResolve;
 
 		public ActivationContext ActivationContext
 		{
@@ -1257,26 +1439,41 @@ namespace System
 			return this.ExecuteAssemblyByName(assemblyName, null, null);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public int ExecuteAssemblyByName(string assemblyName, Evidence assemblySecurity)
 		{
 			return this.ExecuteAssemblyByName(assemblyName, assemblySecurity, null);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public int ExecuteAssemblyByName(string assemblyName, Evidence assemblySecurity, params string[] args)
 		{
 			Assembly assembly = Assembly.Load(assemblyName, assemblySecurity);
 			return this.ExecuteAssemblyInternal(assembly, args);
 		}
 
+		[Obsolete("Use an overload that does not take an Evidence parameter")]
 		public int ExecuteAssemblyByName(AssemblyName assemblyName, Evidence assemblySecurity, params string[] args)
 		{
 			Assembly assembly = Assembly.Load(assemblyName, assemblySecurity);
 			return this.ExecuteAssemblyInternal(assembly, args);
 		}
 
+		public int ExecuteAssemblyByName(string assemblyName, params string[] args)
+		{
+			Assembly assembly = Assembly.Load(assemblyName, null);
+			return this.ExecuteAssemblyInternal(assembly, args);
+		}
+
+		public int ExecuteAssemblyByName(AssemblyName assemblyName, params string[] args)
+		{
+			Assembly assembly = Assembly.Load(assemblyName, null);
+			return this.ExecuteAssemblyInternal(assembly, args);
+		}
+
 		public bool IsDefaultAppDomain()
 		{
-			return object.ReferenceEquals(this, AppDomain.DefaultDomain);
+			return this == AppDomain.DefaultDomain;
 		}
 
 		public Assembly[] ReflectionOnlyGetAssemblies()
@@ -1284,9 +1481,91 @@ namespace System
 			return this.GetAssemblies(true);
 		}
 
-		object System._AppDomain.GetLifetimeService()
+		void _AppDomain.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
 		{
-			return base.GetLifetimeService();
+			throw new NotImplementedException();
+		}
+
+		void _AppDomain.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AppDomain.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AppDomain.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool? IsCompatibilitySwitchSet(string value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			return new bool?(this.compatibility_switch != null && this.compatibility_switch.Contains(value));
+		}
+
+		internal void SetCompatibilitySwitch(string value)
+		{
+			if (this.compatibility_switch == null)
+			{
+				this.compatibility_switch = new List<string>();
+			}
+			this.compatibility_switch.Add(value);
+		}
+
+		[MonoTODO("Currently always returns false")]
+		public static bool MonitoringIsEnabled
+		{
+			get
+			{
+				return false;
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		[MonoTODO]
+		public long MonitoringSurvivedMemorySize
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		[MonoTODO]
+		public static long MonitoringSurvivedProcessMemorySize
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		[MonoTODO]
+		public long MonitoringTotalAllocatedMemorySize
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		[MonoTODO]
+		public TimeSpan MonitoringTotalProcessorTime
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		private IntPtr _mono_app_domain;
@@ -1294,13 +1573,13 @@ namespace System
 		private static string _process_guid;
 
 		[ThreadStatic]
-		private static Hashtable type_resolve_in_progress;
+		private static Dictionary<string, object> type_resolve_in_progress;
 
 		[ThreadStatic]
-		private static Hashtable assembly_resolve_in_progress;
+		private static Dictionary<string, object> assembly_resolve_in_progress;
 
 		[ThreadStatic]
-		private static Hashtable assembly_resolve_in_progress_refonly;
+		private static Dictionary<string, object> assembly_resolve_in_progress_refonly;
 
 		private Evidence _evidence;
 
@@ -1318,6 +1597,8 @@ namespace System
 		private ActivationContext _activation;
 
 		private ApplicationIdentity _applicationIdentity;
+
+		private List<string> compatibility_switch;
 
 		[Serializable]
 		private class Loader

@@ -34,10 +34,7 @@ internal class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Ins
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.originalSpeed;
 		});
-		this.ranch.move.getontable.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.PlayGroomingPreAnim)).Enter("FaceRight", delegate(RanchedStates.Instance smi)
-		{
-			smi.GetComponent<Facing>().Face(smi.transform.GetPosition().x + 1f);
-		}).OnAnimQueueComplete(this.ranch.move.waitforranchertobeready);
+		this.ranch.move.getontable.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.GetOnTable)).OnAnimQueueComplete(this.ranch.move.waitforranchertobeready);
 		this.ranch.move.waitforranchertobeready.Enter("SetCreatureAtRanchingStation", delegate(RanchedStates.Instance smi)
 		{
 			smi.GetRanchStation().Trigger(-1357116271, null);
@@ -70,8 +67,14 @@ internal class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Ins
 		smi.Get<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Creatures);
 	}
 
-	private static void PlayGroomingPreAnim(RanchedStates.Instance smi)
+	private static void GetOnTable(RanchedStates.Instance smi)
 	{
+		Navigator navigator = smi.Get<Navigator>();
+		if (navigator.IsValidNavType(NavType.Floor))
+		{
+			navigator.SetCurrentNavType(NavType.Floor);
+		}
+		smi.Get<Facing>().SetFacing(false);
 		smi.Get<KBatchedAnimController>().Queue(RanchedStates.GetRanchStation(smi).def.ranchedPreAnim, KAnim.PlayMode.Once, 1f, 0f);
 	}
 

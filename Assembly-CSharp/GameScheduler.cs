@@ -3,10 +3,15 @@ using UnityEngine;
 
 public class GameScheduler : KMonoBehaviour, IScheduler
 {
+	public static void DestroyInstance()
+	{
+		GameScheduler.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		GameScheduler.Instance = this;
-		StateMachineManager.Instance.RegisterScheduler(this.scheduler);
+		Singleton<StateMachineManager>.Instance.RegisterScheduler(this.scheduler);
 	}
 
 	public SchedulerHandle Schedule(string name, float time, Action<object> callback, object callback_data = null, SchedulerGroup group = null)

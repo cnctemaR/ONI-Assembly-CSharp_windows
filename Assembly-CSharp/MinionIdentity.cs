@@ -16,6 +16,12 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	[Serialize]
 	public string nameStringKey { get; set; }
 
+	public static void DestroyStatics()
+	{
+		MinionIdentity.maleNameList = null;
+		MinionIdentity.femaleNameList = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		if (this.name == null)
@@ -184,6 +190,10 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	public void Sim1000ms(float dt)
 	{
+		if (this == null)
+		{
+			return;
+		}
 		if (!base.GetComponent<Navigator>().IsMoving())
 		{
 			return;

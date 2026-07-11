@@ -21,7 +21,7 @@ public class Repairable : Workable
 		this.showProgressBar = false;
 		this.faceTargetWhenWorking = true;
 		this.multitoolContext = "build";
-		this.multitoolHitEffectTag = "fx_build_splash";
+		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
 	}
 
 	protected override void OnSpawn()
@@ -224,7 +224,7 @@ public class Repairable : Workable
 
 	private float timeSpentRepairing;
 
-	private static Operational.Flag repairedFlag = new Operational.Flag("repaired", Operational.Flag.Type.Functional);
+	private static readonly Operational.Flag repairedFlag = new Operational.Flag("repaired", Operational.Flag.Type.Functional);
 
 	public class SMInstance : GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.GameInstance
 	{
@@ -324,7 +324,7 @@ public class Repairable : Workable
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
 			Deconstructable component = smi.master.GetComponent<Deconstructable>();
 			if (component != null)
 			{
@@ -349,7 +349,7 @@ public class Repairable : Workable
 
 		public GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State repaired;
 
-		public static Chore.Precondition IsNotBeingAttacked = new Chore.Precondition
+		public static readonly Chore.Precondition IsNotBeingAttacked = new Chore.Precondition
 		{
 			id = "IsNotBeingAttacked",
 			description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NOT_BEING_ATTACKED,
@@ -365,7 +365,7 @@ public class Repairable : Workable
 			}
 		};
 
-		public static Chore.Precondition IsNotAngry = new Chore.Precondition
+		public static readonly Chore.Precondition IsNotAngry = new Chore.Precondition
 		{
 			id = "IsNotAngry",
 			description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NOT_ANGRY,

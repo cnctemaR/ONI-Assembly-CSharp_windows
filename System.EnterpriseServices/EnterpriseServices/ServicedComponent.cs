@@ -10,24 +10,6 @@ namespace System.EnterpriseServices
 		}
 
 		[MonoTODO]
-		string IRemoteDispatch.RemoteDispatchAutoDone(string s)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		string IRemoteDispatch.RemoteDispatchNotAutoDone(string s)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		void IServicedComponentInfo.GetComponentInfo(ref int infoMask, out string[] infoArray)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
 		protected internal virtual void Activate()
 		{
 			throw new NotImplementedException();
@@ -65,6 +47,24 @@ namespace System.EnterpriseServices
 
 		[MonoTODO]
 		public static void DisposeObject(ServicedComponent sc)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		string IRemoteDispatch.RemoteDispatchAutoDone(string s)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		string IRemoteDispatch.RemoteDispatchNotAutoDone(string s)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		void IServicedComponentInfo.GetComponentInfo(ref int infoMask, out string[] infoArray)
 		{
 			throw new NotImplementedException();
 		}

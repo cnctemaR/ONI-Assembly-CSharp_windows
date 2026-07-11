@@ -12,77 +12,83 @@ namespace System.CodeDom.Compiler
 
 		public CompilerErrorCollection(CompilerErrorCollection value)
 		{
-			base.InnerList.AddRange(value.InnerList);
+			this.AddRange(value);
 		}
 
 		public CompilerErrorCollection(CompilerError[] value)
 		{
-			base.InnerList.AddRange(value);
-		}
-
-		public int Add(CompilerError value)
-		{
-			return base.InnerList.Add(value);
-		}
-
-		public void AddRange(CompilerError[] value)
-		{
-			base.InnerList.AddRange(value);
-		}
-
-		public void AddRange(CompilerErrorCollection value)
-		{
-			base.InnerList.AddRange(value.InnerList);
-		}
-
-		public bool Contains(CompilerError value)
-		{
-			return base.InnerList.Contains(value);
-		}
-
-		public void CopyTo(CompilerError[] array, int index)
-		{
-			base.InnerList.CopyTo(array, index);
-		}
-
-		public int IndexOf(CompilerError value)
-		{
-			return base.InnerList.IndexOf(value);
-		}
-
-		public void Insert(int index, CompilerError value)
-		{
-			base.InnerList.Insert(index, value);
-		}
-
-		public void Remove(CompilerError value)
-		{
-			base.InnerList.Remove(value);
+			this.AddRange(value);
 		}
 
 		public CompilerError this[int index]
 		{
 			get
 			{
-				return (CompilerError)base.InnerList[index];
+				return (CompilerError)base.List[index];
 			}
 			set
 			{
-				base.InnerList[index] = value;
+				base.List[index] = value;
 			}
+		}
+
+		public int Add(CompilerError value)
+		{
+			return base.List.Add(value);
+		}
+
+		public void AddRange(CompilerError[] value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			for (int i = 0; i < value.Length; i++)
+			{
+				this.Add(value[i]);
+			}
+		}
+
+		public void AddRange(CompilerErrorCollection value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			int count = value.Count;
+			for (int i = 0; i < count; i++)
+			{
+				this.Add(value[i]);
+			}
+		}
+
+		public bool Contains(CompilerError value)
+		{
+			return base.List.Contains(value);
+		}
+
+		public void CopyTo(CompilerError[] array, int index)
+		{
+			base.List.CopyTo(array, index);
 		}
 
 		public bool HasErrors
 		{
 			get
 			{
-				foreach (object obj in base.InnerList)
+				if (base.Count > 0)
 				{
-					CompilerError compilerError = (CompilerError)obj;
-					if (!compilerError.IsWarning)
+					using (IEnumerator enumerator = base.GetEnumerator())
 					{
-						return true;
+						while (enumerator.MoveNext())
+						{
+							if (!((CompilerError)enumerator.Current).IsWarning)
+							{
+								return true;
+							}
+						}
 					}
+					return false;
 				}
 				return false;
 			}
@@ -92,16 +98,37 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				foreach (object obj in base.InnerList)
+				if (base.Count > 0)
 				{
-					CompilerError compilerError = (CompilerError)obj;
-					if (compilerError.IsWarning)
+					using (IEnumerator enumerator = base.GetEnumerator())
 					{
-						return true;
+						while (enumerator.MoveNext())
+						{
+							if (((CompilerError)enumerator.Current).IsWarning)
+							{
+								return true;
+							}
+						}
 					}
+					return false;
 				}
 				return false;
 			}
+		}
+
+		public int IndexOf(CompilerError value)
+		{
+			return base.List.IndexOf(value);
+		}
+
+		public void Insert(int index, CompilerError value)
+		{
+			base.List.Insert(index, value);
+		}
+
+		public void Remove(CompilerError value)
+		{
+			base.List.Remove(value);
 		}
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -13,26 +12,6 @@ namespace System.Reflection
 	[Serializable]
 	public abstract class FieldInfo : MemberInfo, _FieldInfo
 	{
-		void _FieldInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldInfo.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
 		public abstract FieldAttributes Attributes { get; }
 
 		public abstract RuntimeFieldHandle FieldHandle { get; }
@@ -53,7 +32,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				return (this.Attributes & FieldAttributes.Literal) != FieldAttributes.PrivateScope;
+				return (this.Attributes & FieldAttributes.Literal) > FieldAttributes.PrivateScope;
 			}
 		}
 
@@ -61,7 +40,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				return (this.Attributes & FieldAttributes.Static) != FieldAttributes.PrivateScope;
+				return (this.Attributes & FieldAttributes.Static) > FieldAttributes.PrivateScope;
 			}
 		}
 
@@ -69,7 +48,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				return (this.Attributes & FieldAttributes.InitOnly) != FieldAttributes.PrivateScope;
+				return (this.Attributes & FieldAttributes.InitOnly) > FieldAttributes.PrivateScope;
 			}
 		}
 
@@ -187,29 +166,19 @@ namespace System.Reflection
 		}
 
 		[CLSCompliant(false)]
-		[MonoTODO("Not implemented")]
 		public virtual object GetValueDirect(TypedReference obj)
 		{
-			throw new NotImplementedException();
+			throw new NotSupportedException(Environment.GetResourceString("This non-CLS method is not implemented."));
 		}
 
 		[CLSCompliant(false)]
-		[MonoTODO("Not implemented")]
 		public virtual void SetValueDirect(TypedReference obj, object value)
 		{
-			throw new NotImplementedException();
+			throw new NotSupportedException(Environment.GetResourceString("This non-CLS method is not implemented."));
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnmanagedMarshal GetUnmanagedMarshal();
-
-		internal virtual UnmanagedMarshal UMarshal
-		{
-			get
-			{
-				return this.GetUnmanagedMarshal();
-			}
-		}
+		private extern MarshalAsAttribute get_marshal_info();
 
 		internal object[] GetPseudoCustomAttributes()
 		{
@@ -222,8 +191,8 @@ namespace System.Reflection
 			{
 				num++;
 			}
-			UnmanagedMarshal umarshal = this.UMarshal;
-			if (umarshal != null)
+			MarshalAsAttribute marshal_info = this.get_marshal_info();
+			if (marshal_info != null)
 			{
 				num++;
 			}
@@ -241,9 +210,9 @@ namespace System.Reflection
 			{
 				array[num++] = new FieldOffsetAttribute(this.GetFieldOffset());
 			}
-			if (umarshal != null)
+			if (marshal_info != null)
 			{
-				array[num++] = umarshal.ToMarshalAsAttribute();
+				array[num++] = marshal_info;
 			}
 			return array;
 		}
@@ -276,9 +245,73 @@ namespace System.Reflection
 			throw new NotSupportedException("This non-CLS method is not implemented.");
 		}
 
-		virtual Type System.Runtime.InteropServices._FieldInfo.GetType()
+		public override bool Equals(object obj)
+		{
+			return obj == this;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public static bool operator ==(FieldInfo left, FieldInfo right)
+		{
+			return left == right || (!((left == null) ^ (right == null)) && left.Equals(right));
+		}
+
+		public static bool operator !=(FieldInfo left, FieldInfo right)
+		{
+			return left != right && (((left == null) ^ (right == null)) || !left.Equals(right));
+		}
+
+		public virtual bool IsSecurityCritical
+		{
+			get
+			{
+				throw new NotSupportedException();
+			}
+		}
+
+		public virtual bool IsSecuritySafeCritical
+		{
+			get
+			{
+				throw new NotSupportedException();
+			}
+		}
+
+		public virtual bool IsSecurityTransparent
+		{
+			get
+			{
+				throw new NotSupportedException();
+			}
+		}
+
+		void _FieldInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		Type _FieldInfo.GetType()
 		{
 			return base.GetType();
+		}
+
+		void _FieldInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldInfo.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

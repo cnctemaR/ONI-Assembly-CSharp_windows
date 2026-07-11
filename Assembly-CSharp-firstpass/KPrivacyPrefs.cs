@@ -56,7 +56,7 @@ public class KPrivacyPrefs : YamlIO<KPrivacyPrefs>
 			if (File.Exists(path))
 			{
 				string text = File.ReadAllText(path);
-				KPrivacyPrefs._instance = YamlIO<KPrivacyPrefs>.Parse(text);
+				KPrivacyPrefs._instance = YamlIO<KPrivacyPrefs>.Parse(text, path);
 				if (KPrivacyPrefs._instance == null)
 				{
 					KPrivacyPrefs.LogError("Exception while loading privacy prefs:" + path);

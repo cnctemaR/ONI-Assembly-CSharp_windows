@@ -24,7 +24,6 @@ public class POIDoorInternalConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Invincible = true;
 		buildingDef.IsFoundation = true;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
@@ -54,7 +53,7 @@ public class POIDoorInternalConfig : IBuildingConfig
 		Door component2 = go.GetComponent<Door>();
 		component2.hasComplexUserControls = false;
 		component.controlEnabled = false;
-		go.GetComponent<Deconstructable>().allowDeconstruction = false;
+		go.GetComponent<Deconstructable>().allowDeconstruction = true;
 		KBatchedAnimController component3 = go.GetComponent<KBatchedAnimController>();
 		component3.initialAnim = "closed";
 	}

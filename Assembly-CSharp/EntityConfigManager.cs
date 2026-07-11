@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class EntityConfigManager : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		EntityConfigManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		EntityConfigManager.Instance = this;

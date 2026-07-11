@@ -126,7 +126,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 				this.attackTarget.Get(smi).Subscribe(1088554450, new Action<object>(smi.master.OnTargetMoved));
 				if (this.attackTarget != null && smi.master.multiTool == null)
 				{
-					smi.master.multiTool = new MultitoolController.Instance(this.attackTarget.Get(smi).GetComponent<Workable>(), smi.master.GetComponent<Worker>(), "attack", EffectPrefabs.Instance.AttackEffect);
+					smi.master.multiTool = new MultitoolController.Instance(this.attackTarget.Get(smi).GetComponent<Workable>(), smi.master.GetComponent<Worker>(), "attack", Assets.GetPrefab(EffectConfigs.AttackSplashId));
 					smi.master.multiTool.StartSM();
 				}
 				this.attackTarget.Get(smi).Subscribe(1969584890, new Action<object>(smi.master.OnTargetDestroyed));

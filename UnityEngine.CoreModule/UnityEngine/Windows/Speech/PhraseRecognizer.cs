@@ -1,0 +1,151 @@
+﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
+using UnityEngine.Scripting;
+
+namespace UnityEngine.Windows.Speech
+{
+	/// <summary>
+	///   <para>A common base class for both keyword recognizer and grammar recognizer.</para>
+	/// </summary>
+	public abstract class PhraseRecognizer : IDisposable
+	{
+		internal PhraseRecognizer()
+		{
+		}
+
+		[NativeThrows]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		protected static extern IntPtr CreateFromKeywords(object self, string[] keywords, ConfidenceLevel minimumConfidence);
+
+		[NativeThrows]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		protected static extern IntPtr CreateFromGrammarFile(object self, string grammarFilePath, ConfidenceLevel minimumConfidence);
+
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Start_Internal(IntPtr recognizer);
+
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Stop_Internal(IntPtr recognizer);
+
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsRunning_Internal(IntPtr recognizer);
+
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Destroy(IntPtr recognizer);
+
+		[ThreadSafe]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DestroyThreaded(IntPtr recognizer);
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public event PhraseRecognizer.PhraseRecognizedDelegate OnPhraseRecognized;
+
+		~PhraseRecognizer()
+		{
+			if (this.m_Recognizer != IntPtr.Zero)
+			{
+				PhraseRecognizer.DestroyThreaded(this.m_Recognizer);
+				this.m_Recognizer = IntPtr.Zero;
+				GC.SuppressFinalize(this);
+			}
+		}
+
+		/// <summary>
+		///   <para>Makes the phrase recognizer start listening to phrases.</para>
+		/// </summary>
+		public void Start()
+		{
+			if (!(this.m_Recognizer == IntPtr.Zero))
+			{
+				PhraseRecognizer.Start_Internal(this.m_Recognizer);
+			}
+		}
+
+		/// <summary>
+		///   <para>Stops the phrase recognizer from listening to phrases.</para>
+		/// </summary>
+		public void Stop()
+		{
+			if (!(this.m_Recognizer == IntPtr.Zero))
+			{
+				PhraseRecognizer.Stop_Internal(this.m_Recognizer);
+			}
+		}
+
+		/// <summary>
+		///   <para>Disposes the resources used by phrase recognizer.</para>
+		/// </summary>
+		public void Dispose()
+		{
+			if (this.m_Recognizer != IntPtr.Zero)
+			{
+				PhraseRecognizer.Destroy(this.m_Recognizer);
+				this.m_Recognizer = IntPtr.Zero;
+			}
+			GC.SuppressFinalize(this);
+		}
+
+		/// <summary>
+		///   <para>Tells whether the phrase recognizer is listening for phrases.</para>
+		/// </summary>
+		public bool IsRunning
+		{
+			get
+			{
+				return this.m_Recognizer != IntPtr.Zero && PhraseRecognizer.IsRunning_Internal(this.m_Recognizer);
+			}
+		}
+
+		[RequiredByNativeCode]
+		private void InvokePhraseRecognizedEvent(string text, ConfidenceLevel confidence, SemanticMeaning[] semanticMeanings, long phraseStartFileTime, long phraseDurationTicks)
+		{
+			PhraseRecognizer.PhraseRecognizedDelegate onPhraseRecognized = this.OnPhraseRecognized;
+			if (onPhraseRecognized != null)
+			{
+				onPhraseRecognized(new PhraseRecognizedEventArgs(text, confidence, semanticMeanings, DateTime.FromFileTime(phraseStartFileTime), TimeSpan.FromTicks(phraseDurationTicks)));
+			}
+		}
+
+		[RequiredByNativeCode]
+		private unsafe static SemanticMeaning[] MarshalSemanticMeaning(IntPtr keys, IntPtr values, IntPtr valueSizes, int valueCount)
+		{
+			SemanticMeaning[] array = new SemanticMeaning[valueCount];
+			int num = 0;
+			for (int i = 0; i < valueCount; i++)
+			{
+				uint num2 = *(uint*)((byte*)(void*)valueSizes + (IntPtr)i * 4);
+				SemanticMeaning semanticMeaning = new SemanticMeaning
+				{
+					key = new string(*(IntPtr*)((byte*)(void*)keys + (IntPtr)i * (IntPtr)sizeof(char*))),
+					values = new string[num2]
+				};
+				int num3 = 0;
+				while ((long)num3 < (long)((ulong)num2))
+				{
+					semanticMeaning.values[num3] = new string(*(IntPtr*)((byte*)(void*)values + (IntPtr)(num + num3) * (IntPtr)sizeof(char*)));
+					num3++;
+				}
+				array[i] = semanticMeaning;
+				num += (int)num2;
+			}
+			return array;
+		}
+
+		protected IntPtr m_Recognizer;
+
+		/// <summary>
+		///   <para>Delegate for OnPhraseRecognized event.</para>
+		/// </summary>
+		/// <param name="args">Information about a phrase recognized event.</param>
+		public delegate void PhraseRecognizedDelegate(PhraseRecognizedEventArgs args);
+	}
+}

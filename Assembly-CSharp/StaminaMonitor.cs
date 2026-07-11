@@ -74,11 +74,6 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 			return flag;
 		}
 
-		public bool IsNightTime()
-		{
-			return TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night;
-		}
-
 		public bool ShouldExitSleep()
 		{
 			if (this.schedulable.IsAllowed(Db.Get().ScheduleBlockTypes.Sleep))

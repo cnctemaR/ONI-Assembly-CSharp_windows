@@ -6,10 +6,10 @@ namespace System.Security.Cryptography
 	{
 		public DSASignatureDescription()
 		{
-			base.DeformatterAlgorithm = "System.Security.Cryptography.DSASignatureDeformatter";
+			base.KeyAlgorithm = "System.Security.Cryptography.DSACryptoServiceProvider";
 			base.DigestAlgorithm = "System.Security.Cryptography.SHA1CryptoServiceProvider";
 			base.FormatterAlgorithm = "System.Security.Cryptography.DSASignatureFormatter";
-			base.KeyAlgorithm = "System.Security.Cryptography.DSACryptoServiceProvider";
+			base.DeformatterAlgorithm = "System.Security.Cryptography.DSASignatureDeformatter";
 		}
 	}
 }

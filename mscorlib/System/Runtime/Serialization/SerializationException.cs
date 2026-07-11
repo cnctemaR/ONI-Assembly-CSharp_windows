@@ -8,23 +8,28 @@ namespace System.Runtime.Serialization
 	public class SerializationException : SystemException
 	{
 		public SerializationException()
-			: base("An error occurred during (de)serialization")
+			: base(SerializationException._nullMessage)
 		{
+			base.SetErrorCode(-2146233076);
 		}
 
 		public SerializationException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2146233076);
 		}
 
 		public SerializationException(string message, Exception innerException)
 			: base(message, innerException)
 		{
+			base.SetErrorCode(-2146233076);
 		}
 
 		protected SerializationException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private static string _nullMessage = Environment.GetResourceString("Serialization error.");
 	}
 }

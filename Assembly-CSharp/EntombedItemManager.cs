@@ -27,6 +27,10 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 		{
 			return false;
 		}
+		if (!Grid.Solid[num])
+		{
+			return false;
+		}
 		if (Grid.Objects[num, 9] != null)
 		{
 			return false;

@@ -163,11 +163,12 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 		{
 			this.smi = smi;
 			this.massPerBall = mass_per_ball;
-			this.anim = GameUtil.KInstantiate(Assets.GetPrefab("FishFeederBot"), smi.transform.GetPosition(), Grid.SceneLayer.Front, Folder.Buildings, null, 0).GetComponent<KBatchedAnimController>();
+			this.anim = GameUtil.KInstantiate(Assets.GetPrefab("FishFeederBot"), smi.transform.GetPosition(), Grid.SceneLayer.Front, null, 0).GetComponent<KBatchedAnimController>();
 			this.anim.transform.SetParent(smi.transform);
 			this.anim.gameObject.SetActive(true);
 			this.anim.SetSceneLayer(Grid.SceneLayer.Building);
 			this.anim.Play("ball", KAnim.PlayMode.Once, 1f, 0f);
+			this.anim.Stop();
 			foreach (HashedString hashedString in ball_symbols)
 			{
 				this.anim.SetSymbolVisiblity(hashedString, false);

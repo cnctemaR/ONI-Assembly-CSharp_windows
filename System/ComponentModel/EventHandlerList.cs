@@ -1,95 +1,108 @@
 ﻿using System;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public sealed class EventHandlerList : IDisposable
 	{
+		public EventHandlerList()
+		{
+		}
+
+		internal EventHandlerList(Component parent)
+		{
+			this.parent = parent;
+		}
+
 		public Delegate this[object key]
 		{
 			get
 			{
-				if (key == null)
+				EventHandlerList.ListEntry listEntry = null;
+				if (this.parent == null || this.parent.CanRaiseEventsInternal)
 				{
-					return this.null_entry;
+					listEntry = this.Find(key);
 				}
-				ListEntry listEntry = this.FindEntry(key);
 				if (listEntry != null)
 				{
-					return listEntry.value;
+					return listEntry.handler;
 				}
 				return null;
 			}
 			set
 			{
-				this.AddHandler(key, value);
+				EventHandlerList.ListEntry listEntry = this.Find(key);
+				if (listEntry != null)
+				{
+					listEntry.handler = value;
+					return;
+				}
+				this.head = new EventHandlerList.ListEntry(key, value, this.head);
 			}
 		}
 
 		public void AddHandler(object key, Delegate value)
 		{
-			if (key == null)
+			EventHandlerList.ListEntry listEntry = this.Find(key);
+			if (listEntry != null)
 			{
-				this.null_entry = Delegate.Combine(this.null_entry, value);
+				listEntry.handler = Delegate.Combine(listEntry.handler, value);
 				return;
 			}
-			ListEntry listEntry = this.FindEntry(key);
-			if (listEntry == null)
-			{
-				listEntry = new ListEntry();
-				listEntry.key = key;
-				listEntry.value = null;
-				listEntry.next = this.entries;
-				this.entries = listEntry;
-			}
-			listEntry.value = Delegate.Combine(listEntry.value, value);
+			this.head = new EventHandlerList.ListEntry(key, value, this.head);
 		}
 
 		public void AddHandlers(EventHandlerList listToAddFrom)
 		{
-			if (listToAddFrom == null)
+			for (EventHandlerList.ListEntry next = listToAddFrom.head; next != null; next = next.next)
 			{
-				return;
+				this.AddHandler(next.key, next.handler);
 			}
-			for (ListEntry next = listToAddFrom.entries; next != null; next = next.next)
-			{
-				this.AddHandler(next.key, next.value);
-			}
-		}
-
-		public void RemoveHandler(object key, Delegate value)
-		{
-			if (key == null)
-			{
-				this.null_entry = Delegate.Remove(this.null_entry, value);
-				return;
-			}
-			ListEntry listEntry = this.FindEntry(key);
-			if (listEntry == null)
-			{
-				return;
-			}
-			listEntry.value = Delegate.Remove(listEntry.value, value);
 		}
 
 		public void Dispose()
 		{
-			this.entries = null;
+			this.head = null;
 		}
 
-		private ListEntry FindEntry(object key)
+		private EventHandlerList.ListEntry Find(object key)
 		{
-			for (ListEntry next = this.entries; next != null; next = next.next)
+			EventHandlerList.ListEntry next = this.head;
+			while (next != null && next.key != key)
 			{
-				if (next.key == key)
-				{
-					return next;
-				}
+				next = next.next;
 			}
-			return null;
+			return next;
 		}
 
-		private ListEntry entries;
+		public void RemoveHandler(object key, Delegate value)
+		{
+			EventHandlerList.ListEntry listEntry = this.Find(key);
+			if (listEntry != null)
+			{
+				listEntry.handler = Delegate.Remove(listEntry.handler, value);
+			}
+		}
 
-		private Delegate null_entry;
+		private EventHandlerList.ListEntry head;
+
+		private Component parent;
+
+		private sealed class ListEntry
+		{
+			public ListEntry(object key, Delegate handler, EventHandlerList.ListEntry next)
+			{
+				this.next = next;
+				this.key = key;
+				this.handler = handler;
+			}
+
+			internal EventHandlerList.ListEntry next;
+
+			internal object key;
+
+			internal Delegate handler;
+		}
 	}
 }

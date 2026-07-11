@@ -18,6 +18,7 @@ public class Baggable : KMonoBehaviour
 		pickupable.trackOnPickup = false;
 		pickupable.useGunforPickup = false;
 		pickupable.synchronizeAnims = false;
+		pickupable.SetWorkTime(3f);
 		if (this.mustStandOntopOfTrapForPickup)
 		{
 			pickupable.SetOffsets(new CellOffset[]

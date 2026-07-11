@@ -70,7 +70,7 @@ public class FilteredStorage
 		{
 			return;
 		}
-		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, new string[0]);
+		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Array.Empty<string>());
 	}
 
 	public void CleanUp()
@@ -233,9 +233,9 @@ public class FilteredStorage
 
 	private MeterController logicMeter;
 
-	public static Color32 FILTER_TINT = Color.white;
+	public static readonly Color32 FILTER_TINT = Color.white;
 
-	public static Color32 NO_FILTER_TINT = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
+	public static readonly Color32 NO_FILTER_TINT = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
 
 	public Color32 filterTint = FilteredStorage.FILTER_TINT;
 

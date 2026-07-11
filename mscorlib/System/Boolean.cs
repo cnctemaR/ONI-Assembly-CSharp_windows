@@ -1,90 +1,47 @@
 ﻿using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct Boolean : IConvertible, IComparable, IComparable<bool>, IEquatable<bool>
+	public struct Boolean : IComparable, IConvertible, IComparable<bool>, IEquatable<bool>
 	{
-		object IConvertible.ToType(Type targetType, IFormatProvider provider)
+		public override int GetHashCode()
 		{
-			if (targetType == null)
+			if (!this)
 			{
-				throw new ArgumentNullException("targetType");
+				return 0;
 			}
-			return Convert.ToType(this, targetType, provider, false);
+			return 1;
 		}
 
-		bool IConvertible.ToBoolean(IFormatProvider provider)
+		public override string ToString()
 		{
-			return this;
+			if (!this)
+			{
+				return "False";
+			}
+			return "True";
 		}
 
-		byte IConvertible.ToByte(IFormatProvider provider)
+		public string ToString(IFormatProvider provider)
 		{
-			return Convert.ToByte(this);
+			if (!this)
+			{
+				return "False";
+			}
+			return "True";
 		}
 
-		char IConvertible.ToChar(IFormatProvider provider)
+		public override bool Equals(object obj)
 		{
-			throw new InvalidCastException();
+			return obj is bool && this == (bool)obj;
 		}
 
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
+		public bool Equals(bool obj)
 		{
-			throw new InvalidCastException();
-		}
-
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
-		{
-			return Convert.ToDecimal(this);
-		}
-
-		double IConvertible.ToDouble(IFormatProvider provider)
-		{
-			return Convert.ToDouble(this);
-		}
-
-		short IConvertible.ToInt16(IFormatProvider provider)
-		{
-			return Convert.ToInt16(this);
-		}
-
-		int IConvertible.ToInt32(IFormatProvider provider)
-		{
-			return Convert.ToInt32(this);
-		}
-
-		long IConvertible.ToInt64(IFormatProvider provider)
-		{
-			return Convert.ToInt64(this);
-		}
-
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
-		{
-			return Convert.ToSByte(this);
-		}
-
-		float IConvertible.ToSingle(IFormatProvider provider)
-		{
-			return Convert.ToSingle(this);
-		}
-
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
-		{
-			return Convert.ToUInt16(this);
-		}
-
-		uint IConvertible.ToUInt32(IFormatProvider provider)
-		{
-			return Convert.ToUInt32(this);
-		}
-
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
-		{
-			return Convert.ToUInt64(this);
+			return this == obj;
 		}
 
 		public int CompareTo(object obj)
@@ -95,24 +52,17 @@ namespace System
 			}
 			if (!(obj is bool))
 			{
-				throw new ArgumentException(Locale.GetText("Object is not a Boolean."));
+				throw new ArgumentException(Environment.GetResourceString("Object must be of type Boolean."));
 			}
-			bool flag = (bool)obj;
-			if (this && !flag)
+			if (this == (bool)obj)
 			{
-				return 1;
+				return 0;
 			}
-			return (this != flag) ? (-1) : 0;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj == null || !(obj is bool))
+			if (!this)
 			{
-				return false;
+				return -1;
 			}
-			bool flag = (bool)obj;
-			return (!this) ? (!flag) : flag;
+			return 1;
 		}
 
 		public int CompareTo(bool value)
@@ -121,17 +71,11 @@ namespace System
 			{
 				return 0;
 			}
-			return this ? 1 : (-1);
-		}
-
-		public bool Equals(bool obj)
-		{
-			return this == obj;
-		}
-
-		public override int GetHashCode()
-		{
-			return (!this) ? 0 : 1;
+			if (!this)
+			{
+				return -1;
+			}
+			return 1;
 		}
 
 		public static bool Parse(string value)
@@ -140,16 +84,12 @@ namespace System
 			{
 				throw new ArgumentNullException("value");
 			}
-			value = value.Trim();
-			if (string.Compare(value, bool.TrueString, true, CultureInfo.InvariantCulture) == 0)
+			bool flag = false;
+			if (!bool.TryParse(value, out flag))
 			{
-				return true;
+				throw new FormatException(Environment.GetResourceString("String was not recognized as a valid Boolean."));
 			}
-			if (string.Compare(value, bool.FalseString, true, CultureInfo.InvariantCulture) == 0)
-			{
-				return false;
-			}
-			throw new FormatException(Locale.GetText("Value is not equivalent to either TrueString or FalseString."));
+			return flag;
 		}
 
 		public static bool TryParse(string value, out bool result)
@@ -159,18 +99,49 @@ namespace System
 			{
 				return false;
 			}
-			value = value.Trim();
-			if (string.Compare(value, bool.TrueString, true, CultureInfo.InvariantCulture) == 0)
+			if ("True".Equals(value, StringComparison.OrdinalIgnoreCase))
 			{
 				result = true;
 				return true;
 			}
-			return string.Compare(value, bool.FalseString, true, CultureInfo.InvariantCulture) == 0;
+			if ("False".Equals(value, StringComparison.OrdinalIgnoreCase))
+			{
+				result = false;
+				return true;
+			}
+			value = bool.TrimWhiteSpaceAndNull(value);
+			if ("True".Equals(value, StringComparison.OrdinalIgnoreCase))
+			{
+				result = true;
+				return true;
+			}
+			if ("False".Equals(value, StringComparison.OrdinalIgnoreCase))
+			{
+				result = false;
+				return true;
+			}
+			return false;
 		}
 
-		public override string ToString()
+		private static string TrimWhiteSpaceAndNull(string value)
 		{
-			return (!this) ? bool.FalseString : bool.TrueString;
+			int i = 0;
+			int num = value.Length - 1;
+			char c = '\0';
+			while (i < value.Length)
+			{
+				if (!char.IsWhiteSpace(value[i]) && value[i] != c)
+				{
+					IL_0052:
+					while (num >= i && (char.IsWhiteSpace(value[num]) || value[num] == c))
+					{
+						num--;
+					}
+					return value.Substring(i, num - i + 1);
+				}
+				i++;
+			}
+			goto IL_0052;
 		}
 
 		public TypeCode GetTypeCode()
@@ -178,15 +149,93 @@ namespace System
 			return TypeCode.Boolean;
 		}
 
-		public string ToString(IFormatProvider provider)
+		bool IConvertible.ToBoolean(IFormatProvider provider)
 		{
-			return this.ToString();
+			return this;
 		}
 
-		public static readonly string FalseString = "False";
+		char IConvertible.ToChar(IFormatProvider provider)
+		{
+			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Boolean", "Char" }));
+		}
+
+		sbyte IConvertible.ToSByte(IFormatProvider provider)
+		{
+			return Convert.ToSByte(this);
+		}
+
+		byte IConvertible.ToByte(IFormatProvider provider)
+		{
+			return Convert.ToByte(this);
+		}
+
+		short IConvertible.ToInt16(IFormatProvider provider)
+		{
+			return Convert.ToInt16(this);
+		}
+
+		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		{
+			return Convert.ToUInt16(this);
+		}
+
+		int IConvertible.ToInt32(IFormatProvider provider)
+		{
+			return Convert.ToInt32(this);
+		}
+
+		uint IConvertible.ToUInt32(IFormatProvider provider)
+		{
+			return Convert.ToUInt32(this);
+		}
+
+		long IConvertible.ToInt64(IFormatProvider provider)
+		{
+			return Convert.ToInt64(this);
+		}
+
+		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		{
+			return Convert.ToUInt64(this);
+		}
+
+		float IConvertible.ToSingle(IFormatProvider provider)
+		{
+			return Convert.ToSingle(this);
+		}
+
+		double IConvertible.ToDouble(IFormatProvider provider)
+		{
+			return Convert.ToDouble(this);
+		}
+
+		decimal IConvertible.ToDecimal(IFormatProvider provider)
+		{
+			return Convert.ToDecimal(this);
+		}
+
+		DateTime IConvertible.ToDateTime(IFormatProvider provider)
+		{
+			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Boolean", "DateTime" }));
+		}
+
+		object IConvertible.ToType(Type type, IFormatProvider provider)
+		{
+			return Convert.DefaultToType(this, type, provider);
+		}
+
+		private bool m_value;
+
+		internal const int True = 1;
+
+		internal const int False = 0;
+
+		internal const string TrueLiteral = "True";
+
+		internal const string FalseLiteral = "False";
 
 		public static readonly string TrueString = "True";
 
-		internal bool m_value;
+		public static readonly string FalseString = "False";
 	}
 }

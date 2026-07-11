@@ -98,9 +98,9 @@ public class HandleVector<T>
 	{
 		byte b = this.versions[index];
 		this.versions[index] = b;
-		HandleVector<T>.Handle handle;
-		handle.index = ((int)b << 24) | index;
-		return handle;
+		HandleVector<T>.Handle invalidHandle = HandleVector<T>.InvalidHandle;
+		invalidHandle.index = ((int)b << 24) | index;
+		return invalidHandle;
 	}
 
 	public void UnpackHandle(HandleVector<T>.Handle handle, out byte version, out int index)
@@ -131,10 +131,7 @@ public class HandleVector<T>
 		return b == this.versions[num];
 	}
 
-	public static readonly HandleVector<T>.Handle InvalidHandle = new HandleVector<T>.Handle
-	{
-		index = -1
-	};
+	public static readonly HandleVector<T>.Handle InvalidHandle = HandleVector<T>.Handle.InvalidHandle;
 
 	protected Stack<HandleVector<T>.Handle> freeHandles;
 
@@ -145,57 +142,66 @@ public class HandleVector<T>
 	[DebuggerDisplay("{index}")]
 	public struct Handle : IComparable<HandleVector<T>.Handle>, IEquatable<HandleVector<T>.Handle>
 	{
+		public int index
+		{
+			get
+			{
+				return this._index - 1;
+			}
+			set
+			{
+				this._index = value + 1;
+			}
+		}
+
 		public bool IsValid()
 		{
-			return this.index != -1;
+			return this._index != 0;
 		}
 
 		public void Clear()
 		{
-			this.index = -1;
+			this._index = 0;
 		}
 
 		public int CompareTo(HandleVector<T>.Handle obj)
 		{
-			if (this.index < obj.index)
-			{
-				return -1;
-			}
-			if (this.index > obj.index)
-			{
-				return 1;
-			}
-			return 0;
+			return this._index - obj._index;
 		}
 
 		public override bool Equals(object obj)
 		{
 			HandleVector<T>.Handle handle = (HandleVector<T>.Handle)obj;
-			return this.index == handle.index;
+			return this._index == handle._index;
 		}
 
 		public bool Equals(HandleVector<T>.Handle other)
 		{
-			return this.index == other.index;
+			return this._index == other._index;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.index;
+			return this._index;
 		}
 
 		public static bool operator ==(HandleVector<T>.Handle x, HandleVector<T>.Handle y)
 		{
-			return x.index == y.index;
+			return x._index == y._index;
 		}
 
 		public static bool operator !=(HandleVector<T>.Handle x, HandleVector<T>.Handle y)
 		{
-			return x.index != y.index;
+			return x._index != y._index;
 		}
 
-		public const int InvalidIndex = -1;
+		private const int InvalidIndex = 0;
 
-		public int index;
+		private int _index;
+
+		public static readonly HandleVector<T>.Handle InvalidHandle = new HandleVector<T>.Handle
+		{
+			_index = 0
+		};
 	}
 }

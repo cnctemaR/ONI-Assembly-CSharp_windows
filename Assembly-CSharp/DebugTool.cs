@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class DebugTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		DebugTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

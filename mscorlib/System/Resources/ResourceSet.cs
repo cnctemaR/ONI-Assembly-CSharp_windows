@@ -1,20 +1,37 @@
 ﻿using System;
 using System.Collections;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
+using System.Security;
 
 namespace System.Resources
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class ResourceSet : IEnumerable, IDisposable
+	public class ResourceSet : IDisposable, IEnumerable
 	{
 		protected ResourceSet()
 		{
-			this.Table = new Hashtable();
-			this.resources_read = true;
+			this.CommonInit();
+		}
+
+		internal ResourceSet(bool junk)
+		{
+		}
+
+		public ResourceSet(string fileName)
+		{
+			this.Reader = new ResourceReader(fileName);
+			this.CommonInit();
+			this.ReadResources();
+		}
+
+		[SecurityCritical]
+		public ResourceSet(Stream stream)
+		{
+			this.Reader = new ResourceReader(stream);
+			this.CommonInit();
+			this.ReadResources();
 		}
 
 		public ResourceSet(IResourceReader reader)
@@ -23,54 +40,40 @@ namespace System.Resources
 			{
 				throw new ArgumentNullException("reader");
 			}
-			this.Table = new Hashtable();
 			this.Reader = reader;
+			this.CommonInit();
+			this.ReadResources();
 		}
 
-		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
-		public ResourceSet(Stream stream)
+		private void CommonInit()
 		{
 			this.Table = new Hashtable();
-			this.Reader = new ResourceReader(stream);
-		}
-
-		internal ResourceSet(UnmanagedMemoryStream stream)
-		{
-			this.Table = new Hashtable();
-			this.Reader = new ResourceReader(stream);
-		}
-
-		public ResourceSet(string fileName)
-		{
-			this.Table = new Hashtable();
-			this.Reader = new ResourceReader(fileName);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
 		}
 
 		public virtual void Close()
 		{
-			this.Dispose();
+			this.Dispose(true);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				IResourceReader reader = this.Reader;
+				this.Reader = null;
+				if (reader != null)
+				{
+					reader.Close();
+				}
+			}
+			this.Reader = null;
+			this._caseInsensitiveTable = null;
+			this.Table = null;
 		}
 
 		public void Dispose()
 		{
 			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (disposing && this.Reader != null)
-			{
-				this.Reader.Close();
-			}
-			this.Reader = null;
-			this.Table = null;
-			this.disposed = true;
 		}
 
 		public virtual Type GetDefaultReader()
@@ -86,122 +89,126 @@ namespace System.Resources
 		[ComVisible(false)]
 		public virtual IDictionaryEnumerator GetEnumerator()
 		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("ResourceSet is closed.");
-			}
-			this.ReadResources();
-			return this.Table.GetEnumerator();
+			return this.GetEnumeratorHelper();
 		}
 
-		private object GetObjectInternal(string name, bool ignoreCase)
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumeratorHelper();
+		}
+
+		private IDictionaryEnumerator GetEnumeratorHelper()
+		{
+			Hashtable table = this.Table;
+			if (table == null)
+			{
+				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed resource set."));
+			}
+			return table.GetEnumerator();
+		}
+
+		public virtual string GetString(string name)
+		{
+			object objectInternal = this.GetObjectInternal(name);
+			string text;
+			try
+			{
+				text = (string)objectInternal;
+			}
+			catch (InvalidCastException)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("Resource '{0}' was not a String - call GetObject instead.", new object[] { name }));
+			}
+			return text;
+		}
+
+		public virtual string GetString(string name, bool ignoreCase)
+		{
+			object obj = this.GetObjectInternal(name);
+			string text;
+			try
+			{
+				text = (string)obj;
+			}
+			catch (InvalidCastException)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("Resource '{0}' was not a String - call GetObject instead.", new object[] { name }));
+			}
+			if (text != null || !ignoreCase)
+			{
+				return text;
+			}
+			obj = this.GetCaseInsensitiveObjectInternal(name);
+			string text2;
+			try
+			{
+				text2 = (string)obj;
+			}
+			catch (InvalidCastException)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("Resource '{0}' was not a String - call GetObject instead.", new object[] { name }));
+			}
+			return text2;
+		}
+
+		public virtual object GetObject(string name)
+		{
+			return this.GetObjectInternal(name);
+		}
+
+		public virtual object GetObject(string name, bool ignoreCase)
+		{
+			object objectInternal = this.GetObjectInternal(name);
+			if (objectInternal != null || !ignoreCase)
+			{
+				return objectInternal;
+			}
+			return this.GetCaseInsensitiveObjectInternal(name);
+		}
+
+		protected virtual void ReadResources()
+		{
+			IDictionaryEnumerator enumerator = this.Reader.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				object value = enumerator.Value;
+				this.Table.Add(enumerator.Key, value);
+			}
+		}
+
+		private object GetObjectInternal(string name)
 		{
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
 			}
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("ResourceSet is closed.");
-			}
-			this.ReadResources();
-			object obj = this.Table[name];
-			if (obj != null)
-			{
-				return obj;
-			}
-			if (ignoreCase)
-			{
-				foreach (object obj2 in this.Table)
-				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj2;
-					string text = (string)dictionaryEntry.Key;
-					if (string.Compare(text, name, true, CultureInfo.InvariantCulture) == 0)
-					{
-						return dictionaryEntry.Value;
-					}
-				}
-			}
-			return null;
-		}
-
-		public virtual object GetObject(string name)
-		{
-			return this.GetObjectInternal(name, false);
-		}
-
-		public virtual object GetObject(string name, bool ignoreCase)
-		{
-			return this.GetObjectInternal(name, ignoreCase);
-		}
-
-		private string GetStringInternal(string name, bool ignoreCase)
-		{
-			object @object = this.GetObject(name, ignoreCase);
-			if (@object == null)
-			{
-				return null;
-			}
-			string text = @object as string;
-			if (text == null)
-			{
-				throw new InvalidOperationException(string.Format("Resource '{0}' is not a String. Use GetObject instead.", name));
-			}
-			return text;
-		}
-
-		public virtual string GetString(string name)
-		{
-			return this.GetStringInternal(name, false);
-		}
-
-		public virtual string GetString(string name, bool ignoreCase)
-		{
-			return this.GetStringInternal(name, ignoreCase);
-		}
-
-		protected virtual void ReadResources()
-		{
-			if (this.resources_read)
-			{
-				return;
-			}
-			if (this.Reader == null)
-			{
-				throw new ObjectDisposedException("ResourceSet is closed.");
-			}
 			Hashtable table = this.Table;
-			lock (table)
+			if (table == null)
 			{
-				if (!this.resources_read)
-				{
-					IDictionaryEnumerator enumerator = this.Reader.GetEnumerator();
-					enumerator.Reset();
-					while (enumerator.MoveNext())
-					{
-						this.Table.Add(enumerator.Key, enumerator.Value);
-					}
-					this.resources_read = true;
-				}
+				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed resource set."));
 			}
+			return table[name];
 		}
 
-		internal UnmanagedMemoryStream GetStream(string name, bool ignoreCase)
+		private object GetCaseInsensitiveObjectInternal(string name)
 		{
-			if (this.Reader == null)
+			Hashtable table = this.Table;
+			if (table == null)
 			{
-				throw new ObjectDisposedException("ResourceSet is closed.");
+				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a closed resource set."));
 			}
-			IDictionaryEnumerator enumerator = this.Reader.GetEnumerator();
-			enumerator.Reset();
-			while (enumerator.MoveNext())
+			Hashtable hashtable = this._caseInsensitiveTable;
+			if (hashtable == null)
 			{
-				if (string.Compare(name, (string)enumerator.Key, ignoreCase) == 0)
+				hashtable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+				IDictionaryEnumerator enumerator = table.GetEnumerator();
+				while (enumerator.MoveNext())
 				{
-					return ((ResourceReader.ResourceEnumerator)enumerator).ValueAsStream;
+					hashtable.Add(enumerator.Key, enumerator.Value);
 				}
+				this._caseInsensitiveTable = hashtable;
 			}
-			return null;
+			return hashtable[name];
 		}
 
 		[NonSerialized]
@@ -209,9 +216,6 @@ namespace System.Resources
 
 		protected Hashtable Table;
 
-		private bool resources_read;
-
-		[NonSerialized]
-		private bool disposed;
+		private Hashtable _caseInsensitiveTable;
 	}
 }

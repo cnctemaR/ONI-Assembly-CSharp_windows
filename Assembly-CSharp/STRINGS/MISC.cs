@@ -32,7 +32,9 @@ namespace STRINGS
 
 			public static LocString CRUSHABLE = "Crushable";
 
-			public static LocString BAGABLECREATURE = "Critters";
+			public static LocString BAGABLECREATURE = "Critter";
+
+			public static LocString SWIMMINGCREATURE = "Aquatic Critter";
 
 			public static LocString LIFE = "Life";
 
@@ -144,7 +146,7 @@ namespace STRINGS
 
 			public static LocString TRANSPARENT = "Transparent";
 
-			public static LocString FARMINGMATERIAL = "Fertilizers";
+			public static LocString FARMINGMATERIAL = "Fertilizer";
 
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
 
@@ -206,9 +208,9 @@ namespace STRINGS
 
 			public class SPACE
 			{
-				public static LocString NAME = "Exposed to Space";
+				public static LocString NAME = "Space exposure";
 
-				public static LocString TOOLTIP = "This region is exposed to the vacuum of space and will result in the loss of gas and liquid resources.";
+				public static LocString TOOLTIP = "This region is exposed to the vacuum of space and will result in the loss of gas and liquid resources";
 			}
 
 			public class OXYROCKINACTIVE
@@ -918,7 +920,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Damage: Overheated";
 
-				public static LocString TOOLTIP = "Excessive heat is damaging these buildings:\n";
+				public static LocString TOOLTIP = "Extreme heat is damaging these buildings:\n";
 			}
 
 			public class BUILDINGCOLLAPSE
@@ -1121,6 +1123,13 @@ namespace STRINGS
 				public static LocString SUFFIX = " - {0} raised to {1}";
 			}
 
+			public class SCHEDULE_CHANGED
+			{
+				public static LocString NAME = "Schedule Clock: {1}!";
+
+				public static LocString TOOLTIP = "Duplicants on the {0} have started their {1} block:";
+			}
+
 			public class GENESHUFFLER
 			{
 				public static LocString NAME = "Genes Shuffled";
@@ -1276,7 +1285,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "ALERT - Surface Breach";
 
-				public static LocString TOOLTIP = "Amazingly, my Duplicants have broken through to the surface of the asteroid.\n\nI should be careful; the region is extremely inhospitable and I could easily lose resources to the vaccuum of space.";
+				public static LocString TOOLTIP = "Amazing!\n\nMy Duplicants have managed to breach the surface of the asteroid.\n\nI should be careful; the region is extremely inhospitable and I could easily lose resources to the vaccuum of space.";
 			}
 		}
 

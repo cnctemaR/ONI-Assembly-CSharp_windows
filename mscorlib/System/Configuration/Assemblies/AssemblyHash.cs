@@ -3,31 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace System.Configuration.Assemblies
 {
-	[ComVisible(true)]
 	[Obsolete]
+	[ComVisible(true)]
 	[Serializable]
 	public struct AssemblyHash : ICloneable
 	{
-		[Obsolete]
-		public AssemblyHash(AssemblyHashAlgorithm algorithm, byte[] value)
-		{
-			this._algorithm = algorithm;
-			if (value != null)
-			{
-				this._value = (byte[])value.Clone();
-			}
-			else
-			{
-				this._value = null;
-			}
-		}
-
-		[Obsolete]
-		public AssemblyHash(byte[] value)
-		{
-			this = new AssemblyHash(AssemblyHashAlgorithm.SHA1, value);
-		}
-
 		[Obsolete]
 		public AssemblyHashAlgorithm Algorithm
 		{
@@ -39,6 +19,24 @@ namespace System.Configuration.Assemblies
 			{
 				this._algorithm = value;
 			}
+		}
+
+		[Obsolete]
+		public AssemblyHash(AssemblyHashAlgorithm algorithm, byte[] value)
+		{
+			this._algorithm = algorithm;
+			if (value != null)
+			{
+				this._value = (byte[])value.Clone();
+				return;
+			}
+			this._value = null;
+		}
+
+		[Obsolete]
+		public AssemblyHash(byte[] value)
+		{
+			this = new AssemblyHash(AssemblyHashAlgorithm.SHA1, value);
 		}
 
 		[Obsolete]

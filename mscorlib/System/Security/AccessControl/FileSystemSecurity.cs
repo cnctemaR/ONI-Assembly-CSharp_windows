@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 namespace System.Security.AccessControl
@@ -12,6 +13,11 @@ namespace System.Security.AccessControl
 
 		internal FileSystemSecurity(bool isContainer, string name, AccessControlSections includeSections)
 			: base(isContainer, ResourceType.FileObject, name, includeSections)
+		{
+		}
+
+		internal FileSystemSecurity(bool isContainer, SafeHandle handle, AccessControlSections includeSections)
+			: base(isContainer, ResourceType.FileObject, handle, includeSections)
 		{
 		}
 
@@ -39,82 +45,69 @@ namespace System.Security.AccessControl
 			}
 		}
 
-		[MonoTODO]
 		public sealed override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
 		{
-			return new FileSystemAccessRule(identityReference, (FileSystemRights)accessMask, inheritanceFlags, propagationFlags, type);
+			return new FileSystemAccessRule(identityReference, (FileSystemRights)accessMask, isInherited, inheritanceFlags, propagationFlags, type);
 		}
 
-		[MonoTODO]
 		public void AddAccessRule(FileSystemAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.AddAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public bool RemoveAccessRule(FileSystemAccessRule rule)
 		{
-			throw new NotImplementedException();
+			return base.RemoveAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAccessRuleAll(FileSystemAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleAll(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAccessRuleSpecific(FileSystemAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleSpecific(rule);
 		}
 
-		[MonoTODO]
 		public void ResetAccessRule(FileSystemAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.ResetAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public void SetAccessRule(FileSystemAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public sealed override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
 		{
-			return new FileSystemAuditRule(identityReference, (FileSystemRights)accessMask, inheritanceFlags, propagationFlags, flags);
+			return new FileSystemAuditRule(identityReference, (FileSystemRights)accessMask, isInherited, inheritanceFlags, propagationFlags, flags);
 		}
 
-		[MonoTODO]
 		public void AddAuditRule(FileSystemAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.AddAuditRule(rule);
 		}
 
-		[MonoTODO]
 		public bool RemoveAuditRule(FileSystemAuditRule rule)
 		{
-			throw new NotImplementedException();
+			return base.RemoveAuditRule(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAuditRuleAll(FileSystemAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAuditRuleAll(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAuditRuleSpecific(FileSystemAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAuditRuleSpecific(rule);
 		}
 
-		[MonoTODO]
 		public void SetAuditRule(FileSystemAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAuditRule(rule);
 		}
 	}
 }

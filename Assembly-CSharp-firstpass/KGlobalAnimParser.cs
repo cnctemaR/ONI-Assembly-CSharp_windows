@@ -14,18 +14,26 @@ public class KGlobalAnimParser
 		}
 	}
 
+	public static void CreateInstance()
+	{
+		Singleton<KGlobalAnimParser>.CreateInstance();
+	}
+
 	public static KGlobalAnimParser Get()
 	{
 		return KGlobalAnimParser.instance;
 	}
 
-	public static void Destroy()
+	public static void DestroyInstance()
 	{
-		KGlobalAnimParser.instance.commandFiles.Clear();
-		KGlobalAnimParser.instance.commandFiles = null;
-		KGlobalAnimParser.instance.files.Clear();
-		KGlobalAnimParser.instance.files = null;
-		Singleton<KGlobalAnimParser>.Destroy();
+		if (KGlobalAnimParser.instance != null)
+		{
+			KGlobalAnimParser.instance.commandFiles.Clear();
+			KGlobalAnimParser.instance.commandFiles = null;
+			KGlobalAnimParser.instance.files.Clear();
+			KGlobalAnimParser.instance.files = null;
+		}
+		Singleton<KGlobalAnimParser>.DestroyInstance();
 	}
 
 	public KAnimFileData GetFile(KAnimFile anim_file)
@@ -85,7 +93,6 @@ public class KGlobalAnimParser
 		animFile.firstAnimIndex = data.anims.Count;
 		animFile.animBatchTag = data.groupID;
 		data.animIndex.Add(fileNameHash, data.anims.Count);
-		data.animFrameIndex.Add(fileNameHash, data.animFrames.Count);
 		animFile.firstElementIndex = data.frameElements.Count;
 		for (int i = 0; i < num2; i++)
 		{
@@ -146,7 +153,7 @@ public class KGlobalAnimParser
 					frameElement.transform.m10 = num16;
 					frameElement.transform.m11 = num18;
 					frameElement.transform.m12 = num20;
-					int symbolIndex = data.GetSymbolIndex(frameElement.symbol, fileNameHash);
+					int symbolIndex = data.GetSymbolIndex(frameElement.symbol);
 					if (symbolIndex == -1)
 					{
 						num10++;
@@ -154,6 +161,7 @@ public class KGlobalAnimParser
 					}
 					else
 					{
+						frameElement.symbolIdx = symbolIndex;
 						data.frameElements.Add(frameElement);
 						animFile.elementCount++;
 					}
@@ -195,6 +203,10 @@ public class KGlobalAnimParser
 			}
 		}
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(data.groupID);
+		if (group == null)
+		{
+			global::Debug.LogErrorFormat("[{1}] Failed to get group [{0}]", new object[] { data.groupID, fileNameHash.DebuggerDisplay });
+		}
 		int num2 = reader.ReadInt32();
 		int num3 = reader.ReadInt32();
 		KAnim.Build build = data.AddNewBuildFile(fileNameHash);
@@ -234,6 +246,17 @@ public class KGlobalAnimParser
 				symbolFrame.sourceFrameNum = reader.ReadInt32();
 				symbolFrame.duration = reader.ReadInt32();
 				symbolFrameInstance.buildImageIdx = data.textureStartIndex[fileNameHash] + reader.ReadInt32();
+				if (symbolFrameInstance.buildImageIdx >= textures.Count + data.textureStartIndex[fileNameHash])
+				{
+					global::Debug.LogErrorFormat("{0} Symbol: [{1}] tex count: [{2}] buildImageIdx: [{3}] group total [{4}]", new object[]
+					{
+						fileNameHash.ToString(),
+						symbol.hash,
+						textures.Count,
+						symbolFrameInstance.buildImageIdx,
+						data.textureStartIndex[fileNameHash]
+					});
+				}
 				symbolFrameInstance.symbolIdx = data.GetSymbolCount();
 				num5 = Math.Max(symbolFrame.sourceFrameNum + symbolFrame.duration, num5);
 				float num6 = reader.ReadSingle();
@@ -358,7 +381,7 @@ public class KGlobalAnimParser
 	{
 		if (!condition)
 		{
-			throw new InvalidDataException(message);
+			throw new Exception(message);
 		}
 	}
 
@@ -369,7 +392,7 @@ public class KGlobalAnimParser
 		{
 			if (array[i] != header[i])
 			{
-				throw new InvalidDataException("Expected " + header);
+				throw new Exception("Expected " + header);
 			}
 		}
 	}

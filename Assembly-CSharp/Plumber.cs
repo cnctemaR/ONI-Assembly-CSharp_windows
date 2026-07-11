@@ -14,7 +14,7 @@ public class Plumber : RoleConfig
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };
 		base.perks = new RolePerk[]
 		{
-			RoleManager.rolePerks.IncreaseStrengthSmall,
+			RoleManager.rolePerks.IncreaseStrengthPlumber,
 			RoleManager.rolePerks.CanDoPlumbing
 		};
 	}

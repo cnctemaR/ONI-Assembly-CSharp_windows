@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security;
+using System.Security.Permissions;
 
 namespace System.Runtime.InteropServices
 {
@@ -6,19 +8,28 @@ namespace System.Runtime.InteropServices
 	[Serializable]
 	public sealed class BStrWrapper
 	{
+		[SecuritySafeCritical]
+		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 		public BStrWrapper(string value)
 		{
-			this._value = value;
+			this.m_WrappedObject = value;
+		}
+
+		[SecuritySafeCritical]
+		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public BStrWrapper(object value)
+		{
+			this.m_WrappedObject = (string)value;
 		}
 
 		public string WrappedObject
 		{
 			get
 			{
-				return this._value;
+				return this.m_WrappedObject;
 			}
 		}
 
-		private string _value;
+		private string m_WrappedObject;
 	}
 }

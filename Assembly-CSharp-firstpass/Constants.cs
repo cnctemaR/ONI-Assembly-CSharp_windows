@@ -5,27 +5,25 @@ public static class Constants
 {
 	public const float GlobalTimeScale = 1f;
 
-	public const float HOURS = 3600f;
-
 	public const float MINUTES = 60f;
 
 	public const float SECONDS_PER_CYCLE = 600f;
 
-	public const float PER_DAY_TO_PER_CYCLE = 144f;
+	public const int ScheduleBlocksPerCycle = 24;
 
-	public const float PER_CYCLE_TO_PER_DAY = 0.0069444445f;
+	public const int NIGHT_BLOCKS = 3;
+
+	public const int DAY_BLOCKS = 21;
 
 	public const float SecondsPerScheduleBlock = 25f;
 
-	public const float DaytimeDurationInSeconds = 525f;
-
 	public const float NightimeDurationInSeconds = 75f;
+
+	public const float DaytimeDurationInSeconds = 525f;
 
 	public const float DaytimeDurationInPercentage = 0.875f;
 
 	public const float StartTimeInSeconds = 50f;
-
-	public const int ScheduleBlocksPerCycle = 24;
 
 	public const float CircuitOverloadTime = 6f;
 

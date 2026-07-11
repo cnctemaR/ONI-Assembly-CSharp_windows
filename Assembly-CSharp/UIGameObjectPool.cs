@@ -63,7 +63,12 @@ public class UIGameObjectPool
 	{
 		if (!this.activeElements.Contains(element))
 		{
-			string text = ((!this.freeElements.Contains(element)) ? "The element provided does not belong to this pool" : "The element provided is already inactive");
+			string text = ((!this.freeElements.Contains(element)) ? (element.name + ": The element provided does not belong to this pool") : (element.name + ": The element provided is already inactive"));
+			element.SetActive(false);
+			if (this.disabledElementParent != null)
+			{
+				element.transform.SetParent(this.disabledElementParent);
+			}
 			global::Debug.LogError(text, null);
 			return;
 		}

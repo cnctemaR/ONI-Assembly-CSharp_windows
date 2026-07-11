@@ -94,7 +94,7 @@ namespace Mono.Unix
 
 		public override bool Equals(object obj)
 		{
-			return obj != null && base.GetType() == obj.GetType() && this.group.Equals(((UnixGroupInfo)obj).group);
+			return obj != null && !(base.GetType() != obj.GetType()) && this.group.Equals(((UnixGroupInfo)obj).group);
 		}
 
 		public override string ToString()

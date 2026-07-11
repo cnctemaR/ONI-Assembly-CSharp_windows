@@ -35,7 +35,7 @@ public class Butcherable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		this.OnRefreshUserMenu(null);
 	}
 
@@ -94,7 +94,7 @@ public class Butcherable : Workable, ISaveLoadable
 		}
 		for (int i = 0; i < this.Drops.Length; i++)
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.Drops[i], Grid.SceneLayer.Ore, Folder.Entities);
+			GameObject gameObject = Scenario.SpawnPrefab(this.GetDropSpawnLocation(), 0, 0, this.Drops[i], Grid.SceneLayer.Ore);
 			gameObject.SetActive(true);
 			Edible component2 = gameObject.GetComponent<Edible>();
 			if (component2)

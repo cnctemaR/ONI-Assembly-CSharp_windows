@@ -5,7 +5,7 @@ using System.Runtime.Remoting.Messaging;
 
 namespace System.Runtime.Remoting.Channels
 {
-	internal class ServerDispatchSink : IChannelSinkBase, IServerChannelSink
+	internal class ServerDispatchSink : IServerChannelSink, IChannelSinkBase
 	{
 		public IServerChannelSink NextChannelSink
 		{

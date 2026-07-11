@@ -128,6 +128,13 @@ public class ImageToggleState : KMonoBehaviour
 		}
 	}
 
+	public void SetColorStyle(ColorStyleSetting style)
+	{
+		this.colorStyleSetting = style;
+		this.RefreshColorStyle();
+		this.ResetColor();
+	}
+
 	public void ResetColor()
 	{
 		switch (this.currentState)

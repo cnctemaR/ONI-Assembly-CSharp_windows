@@ -8,12 +8,19 @@ public class Unlocks : MonoBehaviour
 {
 	private void Awake()
 	{
+		foreach (KeyValuePair<string, string[]> keyValuePair in this.lockCollections)
+		{
+			foreach (string text in keyValuePair.Value)
+			{
+				this.defaultLocked.Add(text, true);
+			}
+		}
 		this.LoadLocks();
 	}
 
 	public bool IsLocked(string lockID)
 	{
-		return this.locked.ContainsKey(lockID) && this.locked[lockID];
+		return !string.IsNullOrEmpty(lockID) && this.locked.ContainsKey(lockID) && this.locked[lockID];
 	}
 
 	public void Unlock(string lockID)
@@ -24,6 +31,7 @@ public class Unlocks : MonoBehaviour
 		}
 		this.locked[lockID] = false;
 		Unlocks.SaveUnlocks(this.locked);
+		Game.Instance.Trigger(1594320620, lockID);
 	}
 
 	public void UnlockOne(string[] lockIDs)
@@ -119,19 +127,70 @@ public class Unlocks : MonoBehaviour
 		}
 	}
 
+	public bool UnlockNext(string collectionID)
+	{
+		string text = string.Empty;
+		foreach (string text2 in this.lockCollections[collectionID])
+		{
+			bool flag = this.locked[text2];
+			if (flag)
+			{
+				text = text2;
+				break;
+			}
+		}
+		if (text != string.Empty)
+		{
+			this.Unlock(text);
+			return true;
+		}
+		return false;
+	}
+
 	public Dictionary<string, bool> locked = new Dictionary<string, bool>();
 
 	public Dictionary<string, bool> defaultLocked = new Dictionary<string, bool>
 	{
-		{ "puft_lore", true },
-		{ "hatch_lore", true },
-		{ "drecko_lore", true },
-		{ "shinebug_lore", true },
-		{ "glom_lore", true },
-		{ "pacu_lore", true },
 		{ "poi_surface_facillity_1", true },
 		{ "poi_surface_facillity_2", true },
 		{ "poi_surface_facillity_3", true },
 		{ "poi_surface_facillity_4", true }
+	};
+
+	public Dictionary<string, string[]> lockCollections = new Dictionary<string, string[]>
+	{
+		{
+			"critters",
+			new string[]
+			{
+				"critter_Puft_studied", "critter_alpha_puft", "critter_squeaky_puft", "critter_dense_puft", "critter_Hatch_studied", "critter_sage_hatch", "critter_stone_hatch", "critter_smooth_hatch", "critter_Drecko_studied", "critter_plastic_drecko",
+				"critter_LightBug_studied", "critter_orange_shinebug", "critter_pink_shinebug", "critter_blue_shinebug", "critter_purple_shinebug", "critter_black_shinebug", "critter_white_shinebug", "critter_Glom_studied", "critter_Oilfloater_studied", "critter_molten_slickster",
+				"critter_longhair_slickster", "critter_Pacu_studied", "critter_tropical_pacu", "critter_gulpfish"
+			}
+		},
+		{
+			"emails",
+			new string[]
+			{
+				"email_researchgiant", "email_preliminarycalculations", "email_atomiconrecruitment", "email_security2", "email_dinner1", "email_newemployee", "email_security3", "email_pens", "email_pens2", "email_memorychip",
+				"email_arthistoryrequest", "email_AIcontrol", "email_AIcontrol2", "email_AIcontrol3", "email_AIcontrol4"
+			}
+		},
+		{
+			"journals",
+			new string[] { "journal_cleanup", "journal_employeeprocessing", "journal_sunflowerseeds", "journal_magazine", "journal_pipedream", "journal_spittingimage" }
+		},
+		{
+			"researchnotes",
+			new string[] { "notes_clonedrats", "notes_hibiscus3", "notes_geneticooze", "notes_memoryimplantation" }
+		},
+		{
+			"misc",
+			new string[] { "misc_mailroometiquette", "misc_unattendedcultures", "misc_newsecurity", "misc_politerequest", "misc_casualfriday", "misc_bringyourkidtowork", "misc_dishbot" }
+		},
+		{
+			"special_set_items",
+			new string[] { "display_prop1", "display_prop2", "display_prop3", "pod_evacuation" }
+		}
 	};
 }

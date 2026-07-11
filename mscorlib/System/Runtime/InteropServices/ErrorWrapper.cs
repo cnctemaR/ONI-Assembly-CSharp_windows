@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security;
+using System.Security.Permissions;
 
 namespace System.Runtime.InteropServices
 {
@@ -6,33 +8,35 @@ namespace System.Runtime.InteropServices
 	[Serializable]
 	public sealed class ErrorWrapper
 	{
-		public ErrorWrapper(Exception e)
-		{
-			this.errorCode = Marshal.GetHRForException(e);
-		}
-
 		public ErrorWrapper(int errorCode)
 		{
-			this.errorCode = errorCode;
+			this.m_ErrorCode = errorCode;
 		}
 
 		public ErrorWrapper(object errorCode)
 		{
-			if (errorCode.GetType() != typeof(int))
+			if (!(errorCode is int))
 			{
-				throw new ArgumentException("errorCode has to be an int type");
+				throw new ArgumentException(Environment.GetResourceString("Object must be of type Int32."), "errorCode");
 			}
-			this.errorCode = (int)errorCode;
+			this.m_ErrorCode = (int)errorCode;
+		}
+
+		[SecuritySafeCritical]
+		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public ErrorWrapper(Exception e)
+		{
+			this.m_ErrorCode = Marshal.GetHRForException(e);
 		}
 
 		public int ErrorCode
 		{
 			get
 			{
-				return this.errorCode;
+				return this.m_ErrorCode;
 			}
 		}
 
-		private int errorCode;
+		private int m_ErrorCode;
 	}
 }

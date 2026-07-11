@@ -22,7 +22,6 @@ public class FloorLampConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 8f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		buildingDef.ViewMode = SimViewMode.Light;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
 	}

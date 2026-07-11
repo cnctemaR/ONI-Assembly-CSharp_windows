@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{565A657F-F71B-4118-8F5C-0A791C4C78F9}</ProjectGuid>
+    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC267}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data</RootNamespace>
     <AssemblyName>System.Data</AssemblyName>
@@ -14,8 +14,6 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="Consts.cs" />
-    <Compile Include="Locale.cs" />
     <Compile Include="Microsoft\SqlServer\Server\DataAccessKind.cs" />
     <Compile Include="Microsoft\SqlServer\Server\Format.cs" />
     <Compile Include="Microsoft\SqlServer\Server\IBinarySerialize.cs" />
@@ -31,78 +29,25 @@
     <Compile Include="Microsoft\SqlServer\Server\SqlUserDefinedTypeAttribute.cs" />
     <Compile Include="Microsoft\SqlServer\Server\SystemDataAccessKind.cs" />
     <Compile Include="Microsoft\SqlServer\Server\TriggerAction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Aggregation.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\AggregationFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\ArithmeticOperation.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\BaseExpression.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\BinaryExpression.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\BinaryOpExpression.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\BoolOperation.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\ColumnReference.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Comparison.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\ConcatFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\ConvertFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\IExpression.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\IifFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\In.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\IsNullFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\LenFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Like.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Literal.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Negation.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Negative.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Numeric.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Operation.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Parser.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\ReferencedTable.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\StringFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\SubstringFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Token.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\Tokenizer.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\TrimFunction.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\UnaryExpression.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\yydebug\yyDebug.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\yydebug\yyDebugSimple.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\yyParser\yyException.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\yyParser\yyInput.cs" />
-    <Compile Include="Mono\Data\SqlExpressions\yyParser\yyUnexpectedEof.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\Data\AcceptRejectRule.cs" />
-    <Compile Include="System\Data\ClassCodeDomProviderOptions.cs" />
-    <Compile Include="System\Data\ClassGeneratorOptions.cs" />
-    <Compile Include="System\Data\ClassICodeGeneratorOptions.cs" />
-    <Compile Include="System\Data\CodeDomNamingMethod.cs" />
-    <Compile Include="System\Data\CodeNamingMethod.cs" />
-    <Compile Include="System\Data\ColumnTypeConverter.cs" />
     <Compile Include="System\Data\CommandBehavior.cs" />
     <Compile Include="System\Data\CommandType.cs" />
-    <Compile Include="System\Data\Common\BitDataContainer.cs" />
-    <Compile Include="System\Data\Common\ByteDataContainer.cs" />
     <Compile Include="System\Data\Common\CatalogLocation.cs" />
-    <Compile Include="System\Data\Common\CharDataContainer.cs" />
     <Compile Include="System\Data\Common\DataAdapter.cs" />
     <Compile Include="System\Data\Common\DataColumnMapping.cs" />
     <Compile Include="System\Data\Common\DataColumnMappingCollection.cs" />
-    <Compile Include="System\Data\Common\DataColumnMappingConverter.cs" />
-    <Compile Include="System\Data\Common\DataContainer.cs" />
     <Compile Include="System\Data\Common\DataTableMapping.cs" />
     <Compile Include="System\Data\Common\DataTableMappingCollection.cs" />
-    <Compile Include="System\Data\Common\DataTableMappingConverter.cs" />
-    <Compile Include="System\Data\Common\DateTimeDataContainer.cs" />
     <Compile Include="System\Data\Common\DbCommand.cs" />
     <Compile Include="System\Data\Common\DbCommandBuilder.cs" />
-    <Compile Include="System\Data\Common\DBComparerFactory.cs" />
     <Compile Include="System\Data\Common\DbConnection.cs" />
-    <Compile Include="System\Data\Common\DbConnectionOptions.cs" />
-    <Compile Include="System\Data\Common\DbConnectionString.cs" />
     <Compile Include="System\Data\Common\DbConnectionStringBuilder.cs" />
-    <Compile Include="System\Data\Common\DbConnectionStringBuilderHelper.cs" />
     <Compile Include="System\Data\Common\DbDataAdapter.cs" />
     <Compile Include="System\Data\Common\DBDataPermission.cs" />
     <Compile Include="System\Data\Common\DBDataPermissionAttribute.cs" />
     <Compile Include="System\Data\Common\DbDataReader.cs" />
     <Compile Include="System\Data\Common\DbDataRecord.cs" />
-    <Compile Include="System\Data\Common\DbDataRecordImpl.cs" />
     <Compile Include="System\Data\Common\DbDataSourceEnumerator.cs" />
     <Compile Include="System\Data\Common\DbEnumerator.cs" />
     <Compile Include="System\Data\Common\DbException.cs" />
@@ -116,51 +61,25 @@
     <Compile Include="System\Data\Common\DbProviderFactory.cs" />
     <Compile Include="System\Data\Common\DbProviderSpecificTypePropertyAttribute.cs" />
     <Compile Include="System\Data\Common\DbTransaction.cs" />
-    <Compile Include="System\Data\Common\DbTypes.cs" />
-    <Compile Include="System\Data\Common\DecimalDataContainer.cs" />
-    <Compile Include="System\Data\Common\DoubleDataContainer.cs" />
-    <Compile Include="System\Data\Common\ExceptionHelper.cs" />
-    <Compile Include="System\Data\Common\FieldNameLookup.cs" />
     <Compile Include="System\Data\Common\GroupByBehavior.cs" />
     <Compile Include="System\Data\Common\IdentifierCase.cs" />
-    <Compile Include="System\Data\Common\Index.cs" />
-    <Compile Include="System\Data\Common\Int16DataContainer.cs" />
-    <Compile Include="System\Data\Common\Int32DataContainer.cs" />
-    <Compile Include="System\Data\Common\Int64DataContainer.cs" />
-    <Compile Include="System\Data\Common\Key.cs" />
-    <Compile Include="System\Data\Common\ObjectDataContainer.cs" />
-    <Compile Include="System\Data\Common\PermissionHelper.cs" />
-    <Compile Include="System\Data\Common\RecordCache.cs" />
     <Compile Include="System\Data\Common\RowUpdatedEventArgs.cs" />
     <Compile Include="System\Data\Common\RowUpdatingEventArgs.cs" />
-    <Compile Include="System\Data\Common\SByteDataContainer.cs" />
-    <Compile Include="System\Data\Common\SchemaInfo.cs" />
     <Compile Include="System\Data\Common\SchemaTableColumn.cs" />
     <Compile Include="System\Data\Common\SchemaTableOptionalColumn.cs" />
-    <Compile Include="System\Data\Common\SingleDataContainer.cs" />
-    <Compile Include="System\Data\Common\StringDataContainer.cs" />
     <Compile Include="System\Data\Common\SupportedJoinOperators.cs" />
-    <Compile Include="System\Data\Common\UInt16DataContainer.cs" />
-    <Compile Include="System\Data\Common\UInt32DataContainer.cs" />
-    <Compile Include="System\Data\Common\UInt64DataContainer.cs" />
     <Compile Include="System\Data\ConflictOption.cs" />
     <Compile Include="System\Data\ConnectionState.cs" />
     <Compile Include="System\Data\Constraint.cs" />
     <Compile Include="System\Data\ConstraintCollection.cs" />
-    <Compile Include="System\Data\ConstraintConverter.cs" />
     <Compile Include="System\Data\ConstraintException.cs" />
-    <Compile Include="System\Data\ConstraintStructure.cs" />
-    <Compile Include="System\Data\CustomDataClassGenerator.cs" />
-    <Compile Include="System\Data\DataCategoryAttribute.cs" />
     <Compile Include="System\Data\DataColumn.cs" />
     <Compile Include="System\Data\DataColumnChangeEventArgs.cs" />
     <Compile Include="System\Data\DataColumnChangeEventHandler.cs" />
     <Compile Include="System\Data\DataColumnCollection.cs" />
-    <Compile Include="System\Data\DataColumnPropertyDescriptor.cs" />
     <Compile Include="System\Data\DataException.cs" />
     <Compile Include="System\Data\DataRelation.cs" />
     <Compile Include="System\Data\DataRelationCollection.cs" />
-    <Compile Include="System\Data\DataRelationPropertyDescriptor.cs" />
     <Compile Include="System\Data\DataRow.cs" />
     <Compile Include="System\Data\DataRowAction.cs" />
     <Compile Include="System\Data\DataRowBuilder.cs" />
@@ -179,33 +98,20 @@
     <Compile Include="System\Data\DataTableCollection.cs" />
     <Compile Include="System\Data\DataTableNewRowEventArgs.cs" />
     <Compile Include="System\Data\DataTableNewRowEventHandler.cs" />
-    <Compile Include="System\Data\DataTablePropertyDescriptor.cs" />
     <Compile Include="System\Data\DataTableReader.cs" />
-    <Compile Include="System\Data\DataTableTypeConverter.cs" />
     <Compile Include="System\Data\DataView.cs" />
     <Compile Include="System\Data\DataViewManager.cs" />
-    <Compile Include="System\Data\DataViewManagerListItemTypeDescriptor.cs" />
     <Compile Include="System\Data\DataViewRowState.cs" />
     <Compile Include="System\Data\DataViewSetting.cs" />
     <Compile Include="System\Data\DataViewSettingCollection.cs" />
-    <Compile Include="System\Data\DbCommandInfo.cs" />
     <Compile Include="System\Data\DBConcurrencyException.cs" />
-    <Compile Include="System\Data\DbSourceMethodInfo.cs" />
     <Compile Include="System\Data\DbType.cs" />
-    <Compile Include="System\Data\DefaultValueTypeConverter.cs" />
-    <Compile Include="System\Data\DelegateColumnValueChange.cs" />
-    <Compile Include="System\Data\DelegateConstraintNameChange.cs" />
-    <Compile Include="System\Data\DelegateValidateRemoveConstraint.cs" />
     <Compile Include="System\Data\DeletedRowInaccessibleException.cs" />
-    <Compile Include="System\Data\Doublet.cs" />
     <Compile Include="System\Data\DuplicateNameException.cs" />
-    <Compile Include="System\Data\ElementMappingType.cs" />
     <Compile Include="System\Data\EvaluateException.cs" />
     <Compile Include="System\Data\FillErrorEventArgs.cs" />
     <Compile Include="System\Data\FillErrorEventHandler.cs" />
     <Compile Include="System\Data\ForeignKeyConstraint.cs" />
-    <Compile Include="System\Data\GenerateMethodsType.cs" />
-    <Compile Include="System\Data\Generator.cs" />
     <Compile Include="System\Data\IColumnMapping.cs" />
     <Compile Include="System\Data\IColumnMappingCollection.cs" />
     <Compile Include="System\Data\IDataAdapter.cs" />
@@ -222,7 +128,6 @@
     <Compile Include="System\Data\InternalDataCollectionBase.cs" />
     <Compile Include="System\Data\InvalidConstraintException.cs" />
     <Compile Include="System\Data\InvalidExpressionException.cs" />
-    <Compile Include="System\Data\ISafeDataRecord.cs" />
     <Compile Include="System\Data\IsolationLevel.cs" />
     <Compile Include="System\Data\ITableMapping.cs" />
     <Compile Include="System\Data\ITableMappingCollection.cs" />
@@ -231,66 +136,34 @@
     <Compile Include="System\Data\MappingType.cs" />
     <Compile Include="System\Data\MergeFailedEventArgs.cs" />
     <Compile Include="System\Data\MergeFailedEventHandler.cs" />
-    <Compile Include="System\Data\MergeManager.cs" />
     <Compile Include="System\Data\MissingMappingAction.cs" />
     <Compile Include="System\Data\MissingPrimaryKeyException.cs" />
     <Compile Include="System\Data\MissingSchemaAction.cs" />
-    <Compile Include="System\Data\Node.cs" />
     <Compile Include="System\Data\NoNullAllowedException.cs" />
-    <Compile Include="System\Data\Odbc\FieldIdentifier.cs" />
-    <Compile Include="System\Data\Odbc\libodbc.cs" />
-    <Compile Include="System\Data\Odbc\NativeBuffer.cs" />
-    <Compile Include="System\Data\Odbc\OdbcCategoryAttribute.cs" />
-    <Compile Include="System\Data\Odbc\OdbcColumn.cs" />
     <Compile Include="System\Data\Odbc\OdbcCommand.cs" />
     <Compile Include="System\Data\Odbc\OdbcCommandBuilder.cs" />
     <Compile Include="System\Data\Odbc\OdbcConnection.cs" />
-    <Compile Include="System\Data\Odbc\OdbcConnectionAttribute.cs" />
     <Compile Include="System\Data\Odbc\OdbcConnectionStringBuilder.cs" />
     <Compile Include="System\Data\Odbc\OdbcDataAdapter.cs" />
     <Compile Include="System\Data\Odbc\OdbcDataReader.cs" />
-    <Compile Include="System\Data\Odbc\OdbcDescriptionAttribute.cs" />
-    <Compile Include="System\Data\Odbc\OdbcEnv.cs" />
     <Compile Include="System\Data\Odbc\OdbcError.cs" />
     <Compile Include="System\Data\Odbc\OdbcErrorCollection.cs" />
     <Compile Include="System\Data\Odbc\OdbcException.cs" />
     <Compile Include="System\Data\Odbc\OdbcFactory.cs" />
-    <Compile Include="System\Data\Odbc\OdbcHandleType.cs" />
-    <Compile Include="System\Data\Odbc\OdbcInfo.cs" />
     <Compile Include="System\Data\Odbc\OdbcInfoMessageEventArgs.cs" />
     <Compile Include="System\Data\Odbc\OdbcInfoMessageEventHandler.cs" />
-    <Compile Include="System\Data\Odbc\OdbcInputOutputDirection.cs" />
-    <Compile Include="System\Data\Odbc\OdbcIsolationLevel.cs" />
-    <Compile Include="System\Data\Odbc\OdbcLengthIndicator.cs" />
     <Compile Include="System\Data\Odbc\OdbcMetaDataCollectionNames.cs" />
     <Compile Include="System\Data\Odbc\OdbcMetaDataColumnNames.cs" />
     <Compile Include="System\Data\Odbc\OdbcParameter.cs" />
     <Compile Include="System\Data\Odbc\OdbcParameterCollection.cs" />
-    <Compile Include="System\Data\Odbc\OdbcParameterConverter.cs" />
     <Compile Include="System\Data\Odbc\OdbcPermission.cs" />
     <Compile Include="System\Data\Odbc\OdbcPermissionAttribute.cs" />
-    <Compile Include="System\Data\Odbc\OdbcReturn.cs" />
     <Compile Include="System\Data\Odbc\OdbcRowUpdatedEventArgs.cs" />
     <Compile Include="System\Data\Odbc\OdbcRowUpdatedEventHandler.cs" />
     <Compile Include="System\Data\Odbc\OdbcRowUpdatingEventArgs.cs" />
     <Compile Include="System\Data\Odbc\OdbcRowUpdatingEventHandler.cs" />
-    <Compile Include="System\Data\Odbc\OdbcTimestamp.cs" />
     <Compile Include="System\Data\Odbc\OdbcTransaction.cs" />
     <Compile Include="System\Data\Odbc\OdbcType.cs" />
-    <Compile Include="System\Data\Odbc\OdbcTypeConverter.cs" />
-    <Compile Include="System\Data\Odbc\OdbcTypeMap.cs" />
-    <Compile Include="System\Data\Odbc\SQL_C_TYPE.cs" />
-    <Compile Include="System\Data\Odbc\SQL_TYPE.cs" />
-    <Compile Include="System\Data\OleDb\GdaCommandOptions.cs" />
-    <Compile Include="System\Data\OleDb\GdaCommandType.cs" />
-    <Compile Include="System\Data\OleDb\GdaConnectionOptions.cs" />
-    <Compile Include="System\Data\OleDb\GdaDate.cs" />
-    <Compile Include="System\Data\OleDb\GdaList.cs" />
-    <Compile Include="System\Data\OleDb\GdaTime.cs" />
-    <Compile Include="System\Data\OleDb\GdaTimestamp.cs" />
-    <Compile Include="System\Data\OleDb\GdaTransactionIsolation.cs" />
-    <Compile Include="System\Data\OleDb\GdaValueType.cs" />
-    <Compile Include="System\Data\OleDb\libgda.cs" />
     <Compile Include="System\Data\OleDb\OleDbCommand.cs" />
     <Compile Include="System\Data\OleDb\OleDbCommandBuilder.cs" />
     <Compile Include="System\Data\OleDb\OleDbConnection.cs" />
@@ -306,7 +179,6 @@
     <Compile Include="System\Data\OleDb\OleDbMetaDataCollectionNames.cs" />
     <Compile Include="System\Data\OleDb\OleDbParameter.cs" />
     <Compile Include="System\Data\OleDb\OleDbParameterCollection.cs" />
-    <Compile Include="System\Data\OleDb\OleDbParameterConverter.cs" />
     <Compile Include="System\Data\OleDb\OleDbPermission.cs" />
     <Compile Include="System\Data\OleDb\OleDbPermissionAttribute.cs" />
     <Compile Include="System\Data\OleDb\OleDbRowUpdatedEventArgs.cs" />
@@ -320,23 +192,14 @@
     <Compile Include="System\Data\ParameterDirection.cs" />
     <Compile Include="System\Data\PropertyAttributes.cs" />
     <Compile Include="System\Data\PropertyCollection.cs" />
-    <Compile Include="System\Data\QueryType.cs" />
     <Compile Include="System\Data\ReadOnlyException.cs" />
-    <Compile Include="System\Data\RelatedDataView.cs" />
-    <Compile Include="System\Data\RelationshipConverter.cs" />
-    <Compile Include="System\Data\RelationStructure.cs" />
-    <Compile Include="System\Data\RelationStructureCollection.cs" />
-    <Compile Include="System\Data\ResDescriptionAttribute.cs" />
     <Compile Include="System\Data\RowNotInTableException.cs" />
     <Compile Include="System\Data\Rule.cs" />
     <Compile Include="System\Data\SchemaSerializationMode.cs" />
     <Compile Include="System\Data\SchemaType.cs" />
     <Compile Include="System\Data\SerializationFormat.cs" />
-    <Compile Include="System\Data\SqlClient\NetworkLibraryConverter.cs" />
     <Compile Include="System\Data\SqlClient\OnChangeEventHandler.cs" />
     <Compile Include="System\Data\SqlClient\SortOrder.cs" />
-    <Compile Include="System\Data\SqlClient\SqlAsyncResult.cs" />
-    <Compile Include="System\Data\SqlClient\SqlAsyncState.cs" />
     <Compile Include="System\Data\SqlClient\SqlBulkCopy.cs" />
     <Compile Include="System\Data\SqlClient\SqlBulkCopyColumnMapping.cs" />
     <Compile Include="System\Data\SqlClient\SqlBulkCopyColumnMappingCollection.cs" />
@@ -349,9 +212,9 @@
     <Compile Include="System\Data\SqlClient\SqlCommandBuilder.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnection.cs" />
     <Compile Include="System\Data\SqlClient\SqlConnectionStringBuilder.cs" />
+    <Compile Include="System\Data\SqlClient\SqlCredential.cs" />
     <Compile Include="System\Data\SqlClient\SqlDataAdapter.cs" />
     <Compile Include="System\Data\SqlClient\SqlDataReader.cs" />
-    <Compile Include="System\Data\SqlClient\SqlDataSourceConverter.cs" />
     <Compile Include="System\Data\SqlClient\SQLDebugging.cs" />
     <Compile Include="System\Data\SqlClient\SqlDependency.cs" />
     <Compile Include="System\Data\SqlClient\SqlError.cs" />
@@ -359,14 +222,12 @@
     <Compile Include="System\Data\SqlClient\SqlException.cs" />
     <Compile Include="System\Data\SqlClient\SqlInfoMessageEventArgs.cs" />
     <Compile Include="System\Data\SqlClient\SqlInfoMessageEventHandler.cs" />
-    <Compile Include="System\Data\SqlClient\SqlInitialCatalogConverter.cs" />
     <Compile Include="System\Data\SqlClient\SqlNotificationEventArgs.cs" />
     <Compile Include="System\Data\SqlClient\SqlNotificationInfo.cs" />
     <Compile Include="System\Data\SqlClient\SqlNotificationSource.cs" />
     <Compile Include="System\Data\SqlClient\SqlNotificationType.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameter.cs" />
     <Compile Include="System\Data\SqlClient\SqlParameterCollection.cs" />
-    <Compile Include="System\Data\SqlClient\SqlParameterConverter.cs" />
     <Compile Include="System\Data\SqlClient\SqlRowsCopiedEventArgs.cs" />
     <Compile Include="System\Data\SqlClient\SqlRowsCopiedEventHandler.cs" />
     <Compile Include="System\Data\SqlClient\SqlRowUpdatedEventArgs.cs" />
@@ -374,7 +235,6 @@
     <Compile Include="System\Data\SqlClient\SqlRowUpdatingEventArgs.cs" />
     <Compile Include="System\Data\SqlClient\SqlRowUpdatingEventHandler.cs" />
     <Compile Include="System\Data\SqlClient\SqlTransaction.cs" />
-    <Compile Include="System\Data\SqlClient\SqlXmlTextReader.cs" />
     <Compile Include="System\Data\SqlDbType.cs" />
     <Compile Include="System\Data\SqlTypes\INullable.cs" />
     <Compile Include="System\Data\SqlTypes\SqlAlreadyFilledException.cs" />
@@ -409,25 +269,13 @@
     <Compile Include="System\Data\StatementType.cs" />
     <Compile Include="System\Data\StrongTypingException.cs" />
     <Compile Include="System\Data\SyntaxErrorException.cs" />
-    <Compile Include="System\Data\TableAdapterSchemaInfo.cs" />
-    <Compile Include="System\Data\TableMapping.cs" />
-    <Compile Include="System\Data\TableMappingCollection.cs" />
-    <Compile Include="System\Data\TableStructure.cs" />
-    <Compile Include="System\Data\TableStructureCollection.cs" />
     <Compile Include="System\Data\TypedDataSetGenerator.cs" />
     <Compile Include="System\Data\TypedDataSetGeneratorException.cs" />
     <Compile Include="System\Data\UniqueConstraint.cs" />
     <Compile Include="System\Data\UpdateRowSource.cs" />
     <Compile Include="System\Data\UpdateStatus.cs" />
     <Compile Include="System\Data\VersionNotFoundException.cs" />
-    <Compile Include="System\Data\XmlConstants.cs" />
-    <Compile Include="System\Data\XmlDataInferenceLoader.cs" />
-    <Compile Include="System\Data\XmlDataLoader.cs" />
-    <Compile Include="System\Data\XmlDataReader.cs" />
-    <Compile Include="System\Data\XmlDiffLoader.cs" />
     <Compile Include="System\Data\XmlReadMode.cs" />
-    <Compile Include="System\Data\XmlSchemaDataImporter.cs" />
-    <Compile Include="System\Data\XmlSchemaWriter.cs" />
     <Compile Include="System\Data\XmlWriteMode.cs" />
     <Compile Include="System\MonoDocumentationNoteAttribute.cs" />
     <Compile Include="System\MonoExtensionAttribute.cs" />
@@ -436,38 +284,10 @@
     <Compile Include="System\MonoNotSupportedAttribute.cs" />
     <Compile Include="System\MonoTODOAttribute.cs" />
     <Compile Include="System\Xml\XmlDataDocument.cs" />
-    <Compile Include="XmlHelper.cs" />
-    <Compile Include="XmlTableWriter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mono.Data.Tds\Mono.Data.Tds.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F0}</Project>
-      <Name>Mono.Data.Tds</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F3}</Project>
-      <Name>mscorlib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F7}</Project>
-      <Name>System.Configuration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.EnterpriseServices\System.EnterpriseServices.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78FC}</Project>
-      <Name>System.EnterpriseServices</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Transactions\System.Transactions.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78FF}</Project>
-      <Name>System.Transactions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C7900}</Project>
-      <Name>System.Xml</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System\System.csproj">
-      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78FA}</Project>
-      <Name>System</Name>
-    </ProjectReference>
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-  <ItemGroup />
 </Project>

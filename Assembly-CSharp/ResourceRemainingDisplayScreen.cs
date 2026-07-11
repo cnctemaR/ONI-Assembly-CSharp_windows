@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class ResourceRemainingDisplayScreen : KScreen
 {
+	public static void DestroyInstance()
+	{
+		ResourceRemainingDisplayScreen.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

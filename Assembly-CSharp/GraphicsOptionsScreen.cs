@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
@@ -154,15 +155,31 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void OnApply()
 	{
-		GraphicsOptionsScreen.Settings new_settings = default(GraphicsOptionsScreen.Settings);
-		new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
-		new_settings.fullscreen = this.fullscreenToggle.isOn;
-		this.ApplyConfirmSettings(new_settings, delegate
+		try
 		{
-			this.applyButton.isInteractable = false;
-			this.revertButton.isInteractable = true;
-			this.SaveResolutionToPrefs(new_settings);
-		});
+			GraphicsOptionsScreen.Settings new_settings = default(GraphicsOptionsScreen.Settings);
+			new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
+			new_settings.fullscreen = this.fullscreenToggle.isOn;
+			this.ApplyConfirmSettings(new_settings, delegate
+			{
+				this.applyButton.isInteractable = false;
+				this.revertButton.isInteractable = true;
+				this.SaveResolutionToPrefs(new_settings);
+			});
+		}
+		catch (Exception ex)
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append("Failed to apply graphics options!\nResolutions:");
+			foreach (Resolution resolution in this.resolutions)
+			{
+				stringBuilder.Append("\t" + resolution.ToString() + "\n");
+			}
+			stringBuilder.Append("Selected Resolution Idx: " + this.resolutionDropdown.value.ToString());
+			stringBuilder.Append("FullScreen: " + this.fullscreenToggle.isOn.ToString());
+			Output.LogError(new object[] { stringBuilder.ToString() });
+			throw ex;
+		}
 	}
 
 	private void OnRevert()

@@ -13,7 +13,7 @@ public class EntityPreview : KMonoBehaviour
 		{
 			this.objectPartitionerEntry = GameScenePartitioner.Instance.Add("EntityPreview", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.objectLayers[(int)this.objectLayer], new Action<object>(this.OnAreaChanged));
 		}
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "EntityPreview.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "EntityPreview.OnSpawn");
 		this.OnAreaChanged(null);
 	}
 
@@ -29,7 +29,7 @@ public class EntityPreview : KMonoBehaviour
 			this.objectPartitionerEntry.Release();
 			this.objectPartitionerEntry = null;
 		}
-		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		base.OnCleanUp();
 	}
 

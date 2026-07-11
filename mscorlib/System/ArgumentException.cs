@@ -1,79 +1,85 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class ArgumentException : SystemException
+	public class ArgumentException : SystemException, ISerializable
 	{
 		public ArgumentException()
-			: base(Locale.GetText("Value does not fall within the expected range."))
+			: base(Environment.GetResourceString("Value does not fall within the expected range."))
 		{
-			base.HResult = -2147024809;
+			base.SetErrorCode(-2147024809);
 		}
 
 		public ArgumentException(string message)
 			: base(message)
 		{
-			base.HResult = -2147024809;
+			base.SetErrorCode(-2147024809);
 		}
 
 		public ArgumentException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.HResult = -2147024809;
-		}
-
-		public ArgumentException(string message, string paramName)
-			: base(message)
-		{
-			this.param_name = paramName;
-			base.HResult = -2147024809;
+			base.SetErrorCode(-2147024809);
 		}
 
 		public ArgumentException(string message, string paramName, Exception innerException)
 			: base(message, innerException)
 		{
-			this.param_name = paramName;
-			base.HResult = -2147024809;
+			this.m_paramName = paramName;
+			base.SetErrorCode(-2147024809);
+		}
+
+		public ArgumentException(string message, string paramName)
+			: base(message)
+		{
+			this.m_paramName = paramName;
+			base.SetErrorCode(-2147024809);
 		}
 
 		protected ArgumentException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this.param_name = info.GetString("ParamName");
-		}
-
-		public virtual string ParamName
-		{
-			get
-			{
-				return this.param_name;
-			}
+			this.m_paramName = info.GetString("ParamName");
 		}
 
 		public override string Message
 		{
 			get
 			{
-				if (this.ParamName != null && this.ParamName.Length != 0)
+				string message = base.Message;
+				if (!string.IsNullOrEmpty(this.m_paramName))
 				{
-					return base.Message + Environment.NewLine + Locale.GetText("Parameter name: ") + this.ParamName;
+					string resourceString = Environment.GetResourceString("Parameter name: {0}", new object[] { this.m_paramName });
+					return message + Environment.NewLine + resourceString;
 				}
-				return base.Message;
+				return message;
 			}
 		}
 
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		public virtual string ParamName
 		{
-			base.GetObjectData(info, context);
-			info.AddValue("ParamName", this.ParamName);
+			get
+			{
+				return this.m_paramName;
+			}
 		}
 
-		private const int Result = -2147024809;
+		[SecurityCritical]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			base.GetObjectData(info, context);
+			info.AddValue("ParamName", this.m_paramName, typeof(string));
+		}
 
-		private string param_name;
+		private string m_paramName;
 	}
 }

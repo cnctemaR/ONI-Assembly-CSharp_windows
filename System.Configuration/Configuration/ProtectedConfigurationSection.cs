@@ -43,19 +43,17 @@ namespace System.Configuration
 
 		internal string EncryptSection(string clearXml, ProtectedConfigurationProvider protectionProvider)
 		{
-			XmlDocument xmlDocument = new XmlDocument();
+			XmlDocument xmlDocument = new ConfigurationXmlDocument();
 			xmlDocument.LoadXml(clearXml);
-			XmlNode xmlNode = protectionProvider.Encrypt(xmlDocument.DocumentElement);
-			return xmlNode.OuterXml;
+			return protectionProvider.Encrypt(xmlDocument.DocumentElement).OuterXml;
 		}
 
 		internal string DecryptSection(string encryptedXml, ProtectedConfigurationProvider protectionProvider)
 		{
-			XmlNode xmlNode = protectionProvider.Decrypt(new XmlDocument
+			return protectionProvider.Decrypt(new ConfigurationXmlDocument
 			{
 				InnerXml = encryptedXml
-			}.DocumentElement);
-			return xmlNode.OuterXml;
+			}.DocumentElement).OuterXml;
 		}
 
 		internal ProtectedConfigurationProviderCollection GetAllProviders()
@@ -74,8 +72,7 @@ namespace System.Configuration
 
 		private ProtectedConfigurationProvider InstantiateProvider(ProviderSettings ps)
 		{
-			Type type = Type.GetType(ps.Type, true);
-			ProtectedConfigurationProvider protectedConfigurationProvider = Activator.CreateInstance(type) as ProtectedConfigurationProvider;
+			ProtectedConfigurationProvider protectedConfigurationProvider = Activator.CreateInstance(Type.GetType(ps.Type, true)) as ProtectedConfigurationProvider;
 			if (protectedConfigurationProvider == null)
 			{
 				throw new Exception("The type specified does not extend ProtectedConfigurationProvider class.");

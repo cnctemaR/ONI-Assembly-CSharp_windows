@@ -40,7 +40,7 @@ namespace System.Diagnostics
 			}
 			set
 			{
-				global::System.Security.Permissions.ResourcePermissionBase.ValidateMachineName(value);
+				ResourcePermissionBase.ValidateMachineName(value);
 				this.machineName = value;
 			}
 		}

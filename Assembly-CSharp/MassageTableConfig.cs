@@ -31,17 +31,17 @@ public class MassageTableConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.RecBuilding);
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.MassageTable);
 		MassageTable massageTable = go.AddOrGet<MassageTable>();
 		massageTable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_masseur_kanim") };
 		massageTable.stressModificationValue = -30f;
-		massageTable.roomBonusValue = -30f;
+		massageTable.roomStressModificationValue = -60f;
 		massageTable.workLayer = Grid.SceneLayer.BuildingFront;
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.MassageTable.Id;
 		ownable.canBePublic = true;
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
-		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;
+		roomTracker.requiredRoomType = Db.Get().RoomTypes.MassageClinic.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Recommended;
 	}
 

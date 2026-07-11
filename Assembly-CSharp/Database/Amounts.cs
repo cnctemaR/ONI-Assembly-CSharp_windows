@@ -23,15 +23,13 @@ namespace Database
 			this.Toxicity.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerCycle, null));
 			this.Bladder = this.CreateAmount("Bladder", 0f, 100f, false, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS.STATS");
 			this.Bladder.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerCycle, null));
-			this.Decor = this.CreateAmount("Decor", -1000f, 1000f, false, Units.Flat, 0.1f, true, "STRINGS.DUPLICANTS.STATS");
-			this.Decor.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerSecond, null));
+			this.Decor = this.CreateAmount("Decor", -1000f, 1000f, false, Units.Flat, 0.016666668f, true, "STRINGS.DUPLICANTS.STATS");
+			this.Decor.SetDisplayer(new DecorDisplayer());
 			this.Maturity = this.CreateAmount("Maturity", 0f, 0f, true, Units.Flat, 0.0009166667f, true, "STRINGS.CREATURES.STATS");
 			this.Maturity.SetDisplayer(new MaturityDisplayer());
 			this.OldAge = this.CreateAmount("OldAge", 0f, 2400f, false, Units.Flat, 0f, false, "STRINGS.CREATURES.STATS");
 			this.Fertilization = this.CreateAmount("Fertilization", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Fertilization.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
-			this.Happiness = this.CreateAmount("Happiness", -1000f, 1000f, false, Units.Flat, 0.1f, true, "STRINGS.CREATURES.STATS");
-			this.Happiness.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None, null));
 			this.Fertility = this.CreateAmount("Fertility", 0f, 100f, true, Units.Flat, 0.008375f, true, "STRINGS.CREATURES.STATS");
 			this.Fertility.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Wildness = this.CreateAmount("Wildness", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
@@ -112,8 +110,6 @@ namespace Database
 		public Amount Irrigation;
 
 		public Amount CreatureCalories;
-
-		public Amount Happiness;
 
 		public Amount Fertility;
 

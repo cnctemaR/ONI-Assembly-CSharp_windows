@@ -85,7 +85,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 		SimUtil.DiseaseInfo diseaseInfo;
 		float num;
 		this.storage.ConsumeAndGetDisease(this.inputMaterial, this.massPerTinker, out diseaseInfo, out num);
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition(), Grid.SceneLayer.Ore, Folder.Ore, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0);
 		gameObject.SetActive(true);
 		this.chore = null;
 	}
@@ -101,7 +101,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 		{
 			if (this.chore == null)
 			{
-				this.chore = new WorkChore<TinkerStation>(Db.Get().ChoreTypes.GetByHash(this.choreType), this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+				this.chore = new WorkChore<TinkerStation>(Db.Get().ChoreTypes.GetByHash(this.choreType), this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 				this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, this.requiredRolePerk);
 				base.SetWorkTime(this.workTime);
 			}

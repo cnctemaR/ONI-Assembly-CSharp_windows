@@ -41,7 +41,7 @@ public class JobManager
 
 	public void Run(IWorkItemCollection work_items)
 	{
-		if (JobManager.runSingleThreaded)
+		if (JobManager.runSingleThreaded || this.threads.Count == 0)
 		{
 			for (int i = 0; i < work_items.Count; i++)
 			{

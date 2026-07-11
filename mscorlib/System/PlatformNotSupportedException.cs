@@ -9,28 +9,26 @@ namespace System
 	public class PlatformNotSupportedException : NotSupportedException
 	{
 		public PlatformNotSupportedException()
-			: base(Locale.GetText("This platform is not supported."))
+			: base(Environment.GetResourceString("Operation is not supported on this platform."))
 		{
-			base.HResult = -2146233031;
+			base.SetErrorCode(-2146233031);
 		}
 
 		public PlatformNotSupportedException(string message)
 			: base(message)
 		{
-			base.HResult = -2146233031;
+			base.SetErrorCode(-2146233031);
+		}
+
+		public PlatformNotSupportedException(string message, Exception inner)
+			: base(message, inner)
+		{
+			base.SetErrorCode(-2146233031);
 		}
 
 		protected PlatformNotSupportedException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		public PlatformNotSupportedException(string message, Exception inner)
-			: base(message, inner)
-		{
-			base.HResult = -2146233031;
-		}
-
-		private const int Result = -2146233031;
 	}
 }

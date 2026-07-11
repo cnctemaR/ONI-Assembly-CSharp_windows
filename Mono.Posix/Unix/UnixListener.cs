@@ -7,24 +7,6 @@ namespace Mono.Unix
 {
 	public class UnixListener : MarshalByRefObject, IDisposable
 	{
-		public UnixListener(string path)
-		{
-			if (!Directory.Exists(Path.GetDirectoryName(path)))
-			{
-				Directory.CreateDirectory(Path.GetDirectoryName(path));
-			}
-			this.Init(new UnixEndPoint(path));
-		}
-
-		public UnixListener(UnixEndPoint localEndPoint)
-		{
-			if (localEndPoint == null)
-			{
-				throw new ArgumentNullException("localendPoint");
-			}
-			this.Init(localEndPoint);
-		}
-
 		private void Init(UnixEndPoint ep)
 		{
 			this.listening = false;
@@ -46,6 +28,24 @@ namespace Mono.Unix
 			this.server = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
 			this.server.Bind(ep);
 			this.savedEP = this.server.LocalEndPoint;
+		}
+
+		public UnixListener(string path)
+		{
+			if (!Directory.Exists(Path.GetDirectoryName(path)))
+			{
+				Directory.CreateDirectory(Path.GetDirectoryName(path));
+			}
+			this.Init(new UnixEndPoint(path));
+		}
+
+		public UnixListener(UnixEndPoint localEndPoint)
+		{
+			if (localEndPoint == null)
+			{
+				throw new ArgumentNullException("localendPoint");
+			}
+			this.Init(localEndPoint);
 		}
 
 		public EndPoint LocalEndpoint
@@ -135,6 +135,13 @@ namespace Mono.Unix
 			}
 			if (disposing)
 			{
+				try
+				{
+					File.Delete(((UnixEndPoint)this.savedEP).Filename);
+				}
+				catch
+				{
+				}
 				if (this.server != null)
 				{
 					this.server.Close();

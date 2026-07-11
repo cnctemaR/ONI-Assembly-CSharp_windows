@@ -31,6 +31,8 @@ public class RefinerySideScreen : SideScreenContent
 			return;
 		}
 		this.queue.SetFabricator(component);
+		this.queue.AddAvailableMaterialStorage(component.inStorage);
+		this.queue.AddAvailableMaterialStorage(component.buildStorage);
 		this.Initialize(component);
 	}
 
@@ -84,8 +86,8 @@ public class RefinerySideScreen : SideScreenContent
 			if (flag)
 			{
 				num++;
-				Tuple<Sprite, Color> uisprite = Def.GetUISprite(complexRecipe.ingredients[0].material, "ui");
-				Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(complexRecipe.results[0].material, "ui");
+				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(complexRecipe.ingredients[0].material, "ui", false);
+				global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(complexRecipe.results[0].material, "ui", false);
 				KToggle newToggle;
 				if (target.sideScreenStyle == RefinerySideScreen.StyleSetting.GridInputOutput || target.sideScreenStyle == RefinerySideScreen.StyleSetting.ListInputOutput || target.sideScreenStyle == RefinerySideScreen.StyleSetting.ListInputOutput)
 				{
@@ -94,15 +96,15 @@ public class RefinerySideScreen : SideScreenContent
 					foreach (ComplexRecipe.RecipeElement recipeElement2 in complexRecipe.ingredients)
 					{
 						GameObject gameObject = global::Util.KInstantiateUI(component2.GetReference("FromIconPrefab").gameObject, component2.GetReference("FromIcons").gameObject, true);
-						gameObject.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement2.material, "ui").first;
-						gameObject.GetComponent<Image>().color = Def.GetUISprite(recipeElement2.material, "ui").second;
+						gameObject.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement2.material, "ui", false).first;
+						gameObject.GetComponent<Image>().color = Def.GetUISprite(recipeElement2.material, "ui", false).second;
 						gameObject.gameObject.name = recipeElement2.material.Name;
 					}
 					foreach (ComplexRecipe.RecipeElement recipeElement3 in complexRecipe.results)
 					{
 						GameObject gameObject2 = global::Util.KInstantiateUI(component2.GetReference("ToIconPrefab").gameObject, component2.GetReference("ToIcons").gameObject, true);
-						gameObject2.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement3.material, "ui").first;
-						gameObject2.GetComponent<Image>().color = Def.GetUISprite(recipeElement3.material, "ui").second;
+						gameObject2.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement3.material, "ui", false).first;
+						gameObject2.GetComponent<Image>().color = Def.GetUISprite(recipeElement3.material, "ui", false).second;
 						gameObject2.gameObject.name = recipeElement3.material.Name;
 					}
 				}

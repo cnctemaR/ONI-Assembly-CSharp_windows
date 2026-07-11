@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace System.IO.Compression
+{
+	public enum CompressionLevel
+	{
+		Optimal,
+		Fastest,
+		NoCompression
+	}
+}

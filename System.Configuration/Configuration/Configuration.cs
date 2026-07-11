@@ -8,6 +8,10 @@ namespace System.Configuration
 {
 	public sealed class Configuration
 	{
+		internal static event ConfigurationSaveEventHandler SaveStart;
+
+		internal static event ConfigurationSaveEventHandler SaveEnd;
+
 		internal Configuration(Configuration parent, string locationSubPath)
 		{
 			this.parent = parent;
@@ -34,10 +38,6 @@ namespace System.Configuration
 			this.Init(system, this.configPath, configuration);
 		}
 
-		internal static event ConfigurationSaveEventHandler SaveStart;
-
-		internal static event ConfigurationSaveEventHandler SaveEnd;
-
 		internal Configuration FindLocationConfiguration(string relativePath, Configuration defaultConfiguration)
 		{
 			Configuration configuration = defaultConfiguration;
@@ -55,7 +55,7 @@ namespace System.Configuration
 			{
 				relativePath = relativePath.Substring(text.Length);
 			}
-			ConfigurationLocation configurationLocation = this.Locations.Find(relativePath);
+			ConfigurationLocation configurationLocation = this.Locations.FindBest(relativePath);
 			if (configurationLocation == null)
 			{
 				return configuration;
@@ -79,9 +79,16 @@ namespace System.Configuration
 				this.rootGroup = new SectionGroupInfo();
 				this.rootGroup.StreamName = this.streamName;
 			}
-			if (this.streamName != null)
+			try
 			{
-				this.Load();
+				if (this.streamName != null)
+				{
+					this.Load();
+				}
+			}
+			catch (XmlException ex)
+			{
+				throw new ConfigurationErrorsException(ex.Message, ex, this.streamName, 0);
 			}
 		}
 
@@ -224,7 +231,7 @@ namespace System.Configuration
 			}
 			set
 			{
-				this.rootNamespace = ((!value) ? null : "http://schemas.microsoft.com/.NetConfiguration/v2.0");
+				this.rootNamespace = (value ? "http://schemas.microsoft.com/.NetConfiguration/v2.0" : null);
 			}
 		}
 
@@ -257,9 +264,9 @@ namespace System.Configuration
 			}
 		}
 
-		public ConfigurationSection GetSection(string path)
+		public ConfigurationSection GetSection(string sectionName)
 		{
-			string[] array = path.Split(new char[] { '/' });
+			string[] array = sectionName.Split(new char[] { '/' });
 			if (array.Length == 1)
 			{
 				return this.Sections[array[0]];
@@ -278,9 +285,9 @@ namespace System.Configuration
 			return null;
 		}
 
-		public ConfigurationSectionGroup GetSectionGroup(string path)
+		public ConfigurationSectionGroup GetSectionGroup(string sectionGroupName)
 		{
-			string[] array = path.Split(new char[] { '/' });
+			string[] array = sectionGroupName.Split(new char[] { '/' });
 			ConfigurationSectionGroup configurationSectionGroup = this.SectionGroups[array[0]];
 			int num = 1;
 			while (configurationSectionGroup != null && num < array.Length)
@@ -320,7 +327,7 @@ namespace System.Configuration
 			string text = obj as string;
 			configurationSection.RawXml = text;
 			configurationSection.Reset(configurationSection2);
-			if (text != null && text == obj)
+			if (text != null)
 			{
 				XmlTextReader xmlTextReader = new ConfigXmlTextReader(new StringReader(text), this.FilePath);
 				configurationSection.DeserializeSection(xmlTextReader);
@@ -363,7 +370,7 @@ namespace System.Configuration
 		{
 			if (group.HasChild(name))
 			{
-				throw new ConfigurationException("Cannot add a ConfigurationSection. A section or section group already exists with the name '" + name + "'");
+				throw new ConfigurationErrorsException("Cannot add a ConfigurationSection. A section or section group already exists with the name '" + name + "'");
 			}
 			if (!this.HasFile && !sec.SectionInformation.AllowLocation)
 			{
@@ -371,7 +378,7 @@ namespace System.Configuration
 			}
 			if (!this.system.Host.IsDefinitionAllowed(this.configPath, sec.SectionInformation.AllowDefinition, sec.SectionInformation.AllowExeDefinition))
 			{
-				object obj = ((sec.SectionInformation.AllowExeDefinition == ConfigurationAllowExeDefinition.MachineToApplication) ? sec.SectionInformation.AllowDefinition : sec.SectionInformation.AllowExeDefinition);
+				object obj = ((sec.SectionInformation.AllowExeDefinition != ConfigurationAllowExeDefinition.MachineToApplication) ? sec.SectionInformation.AllowExeDefinition : sec.SectionInformation.AllowDefinition);
 				throw new ConfigurationErrorsException(string.Concat(new object[] { "The section <", name, "> can't be defined in this configuration file (the allowed definition context is '", obj, "')." }));
 			}
 			if (sec.SectionInformation.Type == null)
@@ -383,13 +390,14 @@ namespace System.Configuration
 			sectionInfo.ConfigHost = this.system.Host;
 			group.AddChild(sectionInfo);
 			this.elementData[sectionInfo] = sec;
+			sec.Configuration = this;
 		}
 
 		internal void CreateSectionGroup(SectionGroupInfo parentGroup, string name, ConfigurationSectionGroup sec)
 		{
 			if (parentGroup.HasChild(name))
 			{
-				throw new ConfigurationException("Cannot add a ConfigurationSectionGroup. A section or section group already exists with the name '" + name + "'");
+				throw new ConfigurationErrorsException("Cannot add a ConfigurationSectionGroup. A section or section group already exists with the name '" + name + "'");
 			}
 			if (sec.Type == null)
 			{
@@ -414,13 +422,18 @@ namespace System.Configuration
 			this.Save(ConfigurationSaveMode.Modified, false);
 		}
 
-		public void Save(ConfigurationSaveMode mode)
+		public void Save(ConfigurationSaveMode saveMode)
 		{
-			this.Save(mode, false);
+			this.Save(saveMode, false);
 		}
 
-		public void Save(ConfigurationSaveMode mode, bool forceUpdateAll)
+		public void Save(ConfigurationSaveMode saveMode, bool forceSaveAll)
 		{
+			if (!forceSaveAll && saveMode != ConfigurationSaveMode.Full && !this.HasValues(saveMode))
+			{
+				this.ResetModified();
+				return;
+			}
 			ConfigurationSaveEventHandler saveStart = Configuration.SaveStart;
 			ConfigurationSaveEventHandler saveEnd = Configuration.SaveEnd;
 			object obj = null;
@@ -432,12 +445,11 @@ namespace System.Configuration
 				{
 					saveStart(this, new ConfigurationSaveEventArgs(this.streamName, true, null, obj));
 				}
-				this.Save(stream, mode, forceUpdateAll);
+				this.Save(stream, saveMode, forceSaveAll);
 				this.system.Host.WriteCompleted(this.streamName, true, obj);
 			}
-			catch (Exception ex2)
+			catch (Exception ex)
 			{
-				ex = ex2;
 				this.system.Host.WriteCompleted(this.streamName, false, obj);
 				throw;
 			}
@@ -456,20 +468,25 @@ namespace System.Configuration
 			this.SaveAs(filename, ConfigurationSaveMode.Modified, false);
 		}
 
-		public void SaveAs(string filename, ConfigurationSaveMode mode)
+		public void SaveAs(string filename, ConfigurationSaveMode saveMode)
 		{
-			this.SaveAs(filename, mode, false);
+			this.SaveAs(filename, saveMode, false);
 		}
 
 		[MonoInternalNote("Detect if file has changed")]
-		public void SaveAs(string filename, ConfigurationSaveMode mode, bool forceUpdateAll)
+		public void SaveAs(string filename, ConfigurationSaveMode saveMode, bool forceSaveAll)
 		{
+			if (!forceSaveAll && saveMode != ConfigurationSaveMode.Full && !this.HasValues(saveMode))
+			{
+				this.ResetModified();
+				return;
+			}
 			string directoryName = Path.GetDirectoryName(Path.GetFullPath(filename));
 			if (!Directory.Exists(directoryName))
 			{
 				Directory.CreateDirectory(directoryName);
 			}
-			this.Save(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write), mode, forceUpdateAll);
+			this.Save(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write), saveMode, forceSaveAll);
 		}
 
 		private void Save(Stream stream, ConfigurationSaveMode mode, bool forceUpdateAll)
@@ -513,6 +530,7 @@ namespace System.Configuration
 				}
 				this.SaveData(xmlTextWriter, mode, forceUpdateAll);
 				xmlTextWriter.WriteEndElement();
+				this.ResetModified();
 			}
 			finally
 			{
@@ -526,6 +544,32 @@ namespace System.Configuration
 			this.rootGroup.WriteRootData(tw, this, mode);
 		}
 
+		private bool HasValues(ConfigurationSaveMode mode)
+		{
+			foreach (object obj in this.Locations)
+			{
+				ConfigurationLocation configurationLocation = (ConfigurationLocation)obj;
+				if (configurationLocation.OpenedConfiguration != null && configurationLocation.OpenedConfiguration.HasValues(mode))
+				{
+					return true;
+				}
+			}
+			return this.rootGroup.HasValues(this, mode);
+		}
+
+		private void ResetModified()
+		{
+			foreach (object obj in this.Locations)
+			{
+				ConfigurationLocation configurationLocation = (ConfigurationLocation)obj;
+				if (configurationLocation.OpenedConfiguration != null)
+				{
+					configurationLocation.OpenedConfiguration.ResetModified();
+				}
+			}
+			this.rootGroup.ResetModified(this);
+		}
+
 		private bool Load()
 		{
 			if (string.IsNullOrEmpty(this.streamName))
@@ -535,7 +579,11 @@ namespace System.Configuration
 			Stream stream = null;
 			try
 			{
-				stream = (stream = this.system.Host.OpenStreamForRead(this.streamName));
+				stream = this.system.Host.OpenStreamForRead(this.streamName);
+				if (stream == null)
+				{
+					return false;
+				}
 			}
 			catch
 			{
@@ -545,6 +593,7 @@ namespace System.Configuration
 			{
 				this.ReadConfigFile(xmlTextReader, this.streamName);
 			}
+			this.ResetModified();
 			return true;
 		}
 
@@ -596,7 +645,7 @@ namespace System.Configuration
 		private void ThrowException(string text, XmlReader reader)
 		{
 			IXmlLineInfo xmlLineInfo = reader as IXmlLineInfo;
-			throw new ConfigurationException(text, this.streamName, (xmlLineInfo == null) ? 0 : xmlLineInfo.LineNumber);
+			throw new ConfigurationErrorsException(text, this.streamName, (xmlLineInfo != null) ? xmlLineInfo.LineNumber : 0);
 		}
 
 		private Configuration parent;

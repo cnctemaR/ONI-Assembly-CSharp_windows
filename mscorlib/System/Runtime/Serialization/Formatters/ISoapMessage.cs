@@ -7,16 +7,16 @@ namespace System.Runtime.Serialization.Formatters
 	[ComVisible(true)]
 	public interface ISoapMessage
 	{
-		Header[] Headers { get; set; }
-
-		string MethodName { get; set; }
-
 		string[] ParamNames { get; set; }
-
-		Type[] ParamTypes { get; set; }
 
 		object[] ParamValues { get; set; }
 
+		Type[] ParamTypes { get; set; }
+
+		string MethodName { get; set; }
+
 		string XmlNameSpace { get; set; }
+
+		Header[] Headers { get; set; }
 	}
 }

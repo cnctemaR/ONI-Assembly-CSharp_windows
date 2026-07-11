@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using KSerialization;
 using UnityEngine;
 
 public static class GarbageProfiler
@@ -74,7 +78,7 @@ public static class GarbageProfiler
 						",",
 						typeData.numArrayEntries,
 						",\"",
-						typeData.type.FullName,
+						typeData.type.ToString(),
 						"\""
 					}));
 				}
@@ -82,9 +86,9 @@ public static class GarbageProfiler
 		}
 		using (StreamWriter streamWriter2 = new StreamWriter(GarbageProfiler.GetFileName("memory_hierarchies")))
 		{
+			streamWriter2.WriteLine("Delta,Count,Type Hierarchy");
 			foreach (MemorySnapshot.TypeData typeData3 in array)
 			{
-				streamWriter2.WriteLine("Delta,Count,Type Hierarchy");
 				if (typeData3.instanceCount != 0)
 				{
 					foreach (KeyValuePair<MemorySnapshot.HierarchyNode, int> keyValuePair in typeData3.hierarchies)
@@ -105,7 +109,7 @@ public static class GarbageProfiler
 							",",
 							keyValuePair.Value,
 							", \"",
-							typeData3.type.FullName,
+							typeData3.type.ToString(),
 							": ",
 							keyValuePair.Key.ToString(),
 							"\""
@@ -144,7 +148,7 @@ public static class GarbageProfiler
 						", ",
 						typeData.instanceCount,
 						", \"",
-						typeData.type.FullName,
+						typeData.type.ToString(),
 						"\""
 					}));
 				}
@@ -169,7 +173,7 @@ public static class GarbageProfiler
 						", ",
 						typeData3.refCount,
 						", \"",
-						typeData3.type.FullName,
+						typeData3.type.ToString(),
 						"\""
 					}));
 				}
@@ -202,11 +206,135 @@ public static class GarbageProfiler
 		global::Debug.Log("Done writing reference stats!", null);
 	}
 
+	public static void DebugDumpRootItems()
+	{
+		global::Debug.Log("Writing root items...", null);
+		Type[] array = new Type[]
+		{
+			typeof(string),
+			typeof(HashedString),
+			typeof(KAnimHashedString),
+			typeof(Tag),
+			typeof(bool),
+			typeof(CellOffset),
+			typeof(Color),
+			typeof(Color32),
+			typeof(Vector2),
+			typeof(Vector3),
+			typeof(Vector2I)
+		};
+		Type[] array2 = new Type[]
+		{
+			typeof(List<>),
+			typeof(HashSet<>),
+			typeof(Dictionary<, >)
+		};
+		string fileName = GarbageProfiler.GetFileName("statics");
+		GarbageProfiler.ClearFileName();
+		using (StreamWriter streamWriter = new StreamWriter(fileName))
+		{
+			streamWriter.WriteLine("FieldName,Type,ListLength");
+			Assembly[] array3 = new Assembly[]
+			{
+				Assembly.GetAssembly(typeof(Game)),
+				Assembly.GetAssembly(typeof(App))
+			};
+			foreach (Assembly assembly in array3)
+			{
+				foreach (Type type in assembly.GetTypes())
+				{
+					if (type == GarbageProfiler.DEBUG_STATIC_TYPE)
+					{
+						Debugger.Break();
+					}
+					if (!type.IsAbstract && !type.IsGenericType)
+					{
+						string text = type.ToString();
+						if (!text.StartsWith("STRINGS."))
+						{
+							foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+							{
+								if (fieldInfo.IsStatic && !fieldInfo.IsInitOnly && !fieldInfo.IsLiteral)
+								{
+									if (!fieldInfo.Name.Contains("$cache"))
+									{
+										Type fieldType = fieldInfo.FieldType;
+										if (!fieldType.IsPointer && !Helper.IsPOD(fieldType) && Array.IndexOf<Type>(array, fieldType) < 0)
+										{
+											if (typeof(Array).IsAssignableFrom(fieldType))
+											{
+												Type elementType = fieldType.GetElementType();
+												if (elementType.IsPointer || Helper.IsPOD(elementType) || Array.IndexOf<Type>(array, elementType) >= 0)
+												{
+													goto IL_03C8;
+												}
+											}
+											if (fieldType.IsGenericType)
+											{
+												Type genericTypeDefinition = fieldType.GetGenericTypeDefinition();
+												Type[] genericArguments = fieldType.GetGenericArguments();
+												bool flag = false;
+												foreach (Type type2 in array2)
+												{
+													if (genericTypeDefinition == type2)
+													{
+														bool flag2 = true;
+														foreach (Type type3 in genericArguments)
+														{
+															if (!Helper.IsPOD(type3) && Array.IndexOf<Type>(array, type3) < 0)
+															{
+																flag2 = false;
+																break;
+															}
+														}
+														if (flag2)
+														{
+															flag = true;
+															break;
+														}
+													}
+												}
+												if (flag)
+												{
+													goto IL_03C8;
+												}
+											}
+											object value = fieldInfo.GetValue(null);
+											if (value != null)
+											{
+												string text2;
+												if (typeof(ICollection).IsAssignableFrom(fieldType))
+												{
+													ICollection collection = value as ICollection;
+													int count = collection.Count;
+													text2 = string.Format("\"{0}.{1}\",\"{2}\",{3}", new object[] { type, fieldInfo.Name, fieldType, count });
+												}
+												else
+												{
+													text2 = string.Format("\"{0}.{1}\",\"{2}\"", type, fieldInfo.Name, fieldType);
+												}
+												streamWriter.WriteLine(text2);
+											}
+										}
+									}
+								}
+								IL_03C8:;
+							}
+						}
+					}
+				}
+			}
+		}
+		global::Debug.Log("Done writing reference stats!", null);
+	}
+
 	private static MemorySnapshot previousSnapshot;
 
 	private static string ROOT_MEMORY_DUMP_PATH = "./memory/";
 
 	private static string filename_suffix;
+
+	private static Type DEBUG_STATIC_TYPE;
 
 	private class InstanceCountComparer : IComparer<MemorySnapshot.TypeData>
 	{

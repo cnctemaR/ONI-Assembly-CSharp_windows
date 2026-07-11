@@ -14,7 +14,6 @@ namespace Database
 			this.EmoteHighPriority = base.Add(new Urge("EmoteHighPriority"));
 			this.RecoverBreath = base.Add(new Urge("RecoverBreath"));
 			this.Aggression = base.Add(new Urge("Aggression"));
-			this.Relax = base.Add(new Urge("Relax"));
 			this.MoveToQuarantine = base.Add(new Urge("MoveToQuarantine"));
 			this.WashHands = base.Add(new Urge("WashHands"));
 			this.Shower = base.Add(new Urge("Shower"));
@@ -32,6 +31,7 @@ namespace Database
 			this.WarmUp = base.Add(new Urge("WarmUp"));
 			this.CoolDown = base.Add(new Urge("CoolDown"));
 			this.SwitchRole = base.Add(new Urge("SwitchRole"));
+			this.EmoteIdle = base.Add(new Urge("EmoteIdle"));
 		}
 
 		public Urge BeIncapacitated;
@@ -78,8 +78,6 @@ namespace Database
 
 		public Urge Aggression;
 
-		public Urge Relax;
-
 		public Urge MoveToSafety;
 
 		public Urge WarmUp;
@@ -87,5 +85,7 @@ namespace Database
 		public Urge CoolDown;
 
 		public Urge SwitchRole;
+
+		public Urge EmoteIdle;
 	}
 }

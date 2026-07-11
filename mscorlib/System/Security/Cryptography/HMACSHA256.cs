@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -8,15 +7,17 @@ namespace System.Security.Cryptography
 	public class HMACSHA256 : HMAC
 	{
 		public HMACSHA256()
-			: this(KeyBuilder.Key(8))
+			: this(Utils.GenerateRandom(64))
 		{
 		}
 
 		public HMACSHA256(byte[] key)
 		{
-			base.HashName = "SHA256";
+			this.m_hashName = "SHA256";
+			this.m_hash1 = HMAC.GetHashAlgorithmWithFipsFallback(() => new SHA256Managed(), () => HashAlgorithm.Create("System.Security.Cryptography.SHA256CryptoServiceProvider"));
+			this.m_hash2 = HMAC.GetHashAlgorithmWithFipsFallback(() => new SHA256Managed(), () => HashAlgorithm.Create("System.Security.Cryptography.SHA256CryptoServiceProvider"));
 			this.HashSizeValue = 256;
-			this.Key = key;
+			base.InitializeKey(key);
 		}
 	}
 }

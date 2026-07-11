@@ -312,10 +312,10 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		{
 			if (this.urgentChore == null)
 			{
-				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, null, true, null, null, null, true, null, false, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
+				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
 				this.urgentChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingUrgent, null);
 				this.urgentChore.AddPrecondition(this.HasSuitMarker, base.GetComponent<SuitLocker>());
-				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, null, true, null, null, null, true, null, false, null, false, true, false, PriorityScreen.PriorityClass.basic, -1, false);
+				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.basic, -1, false);
 				this.idleChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingIdle, null);
 				this.idleChore.AddPrecondition(this.HasSuitMarker, base.GetComponent<SuitLocker>());
 			}
@@ -376,7 +376,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			};
 		}
 
-		public static Chore.Precondition DoesSuitNeedRechargingUrgent = new Chore.Precondition
+		public static readonly Chore.Precondition DoesSuitNeedRechargingUrgent = new Chore.Precondition
 		{
 			id = "DoesSuitNeedRechargingUrgent",
 			description = DUPLICANTS.CHORES.PRECONDITIONS.DOES_SUIT_NEED_RECHARGING_URGENT,
@@ -393,7 +393,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			}
 		};
 
-		public static Chore.Precondition DoesSuitNeedRechargingIdle = new Chore.Precondition
+		public static readonly Chore.Precondition DoesSuitNeedRechargingIdle = new Chore.Precondition
 		{
 			id = "DoesSuitNeedRechargingIdle",
 			description = DUPLICANTS.CHORES.PRECONDITIONS.DOES_SUIT_NEED_RECHARGING_IDLE,

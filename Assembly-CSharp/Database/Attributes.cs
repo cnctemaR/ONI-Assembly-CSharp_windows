@@ -51,8 +51,8 @@ namespace Database
 			this.MachinerySpeed.SetFormatter(new PercentAttributeFormatter());
 			this.DecorExpectation = base.Add(new Klei.AI.Attribute("DecorExpectation", false, Klei.AI.Attribute.Display.Expectation, false, 0f));
 			this.FoodExpectation = base.Add(new Klei.AI.Attribute("FoodExpectation", false, Klei.AI.Attribute.Display.Expectation, false, 0f));
-			this.FoodExpectation.SetFormatter(new FoodQualityAttributeFormatter());
 			this.RoomTemperaturePreference = base.Add(new Klei.AI.Attribute("RoomTemperaturePreference", false, Klei.AI.Attribute.Display.Normal, false, 0f));
+			this.QualityOfLifeExpectation = base.Add(new Klei.AI.Attribute("QualityOfLifeExpectation", false, Klei.AI.Attribute.Display.Normal, false, 0f));
 			this.AirConsumptionRate = base.Add(new Klei.AI.Attribute("AirConsumptionRate", false, Klei.AI.Attribute.Display.Normal, false, 0f));
 			this.AirConsumptionRate.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond));
 			this.MaxUnderwaterTravelCost = base.Add(new Klei.AI.Attribute("MaxUnderwaterTravelCost", false, Klei.AI.Attribute.Display.Normal, false, 0f));
@@ -65,6 +65,8 @@ namespace Database
 			this.DoctoredLevel = base.Add(new Klei.AI.Attribute("DoctoredLevel", false, Klei.AI.Attribute.Display.Never, false, 0f));
 			this.CarryAmount = base.Add(new Klei.AI.Attribute("CarryAmount", false, Klei.AI.Attribute.Display.Details, false, 0f));
 			this.CarryAmount.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.None));
+			this.QualityOfLife = base.Add(new Klei.AI.Attribute("QualityOfLife", false, Klei.AI.Attribute.Display.Details, false, 0f));
+			this.QualityOfLife.SetFormatter(new QualityOfLifeAttributeFormatter());
 			this.LifeSupport = base.Add(new Klei.AI.Attribute("LifeSupport", true, Klei.AI.Attribute.Display.Never, false, 0f));
 			this.LifeSupport.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.Toggle = base.Add(new Klei.AI.Attribute("Toggle", true, Klei.AI.Attribute.Display.Never, false, 0f));
@@ -123,6 +125,8 @@ namespace Database
 
 		public Klei.AI.Attribute RoomTemperaturePreference;
 
+		public Klei.AI.Attribute QualityOfLifeExpectation;
+
 		public Klei.AI.Attribute AirConsumptionRate;
 
 		public Klei.AI.Attribute MaxUnderwaterTravelCost;
@@ -136,5 +140,7 @@ namespace Database
 		public Klei.AI.Attribute DoctoredLevel;
 
 		public Klei.AI.Attribute CarryAmount;
+
+		public Klei.AI.Attribute QualityOfLife;
 	}
 }

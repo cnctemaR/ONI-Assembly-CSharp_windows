@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeDelegateCreateExpression : CodeExpression
 	{
@@ -14,64 +11,44 @@ namespace System.CodeDom
 
 		public CodeDelegateCreateExpression(CodeTypeReference delegateType, CodeExpression targetObject, string methodName)
 		{
-			this.delegateType = delegateType;
-			this.targetObject = targetObject;
-			this.methodName = methodName;
+			this._delegateType = delegateType;
+			this.TargetObject = targetObject;
+			this._methodName = methodName;
 		}
 
 		public CodeTypeReference DelegateType
 		{
 			get
 			{
-				if (this.delegateType == null)
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._delegateType) == null)
 				{
-					this.delegateType = new CodeTypeReference(string.Empty);
+					codeTypeReference = (this._delegateType = new CodeTypeReference(""));
 				}
-				return this.delegateType;
+				return codeTypeReference;
 			}
 			set
 			{
-				this.delegateType = value;
+				this._delegateType = value;
 			}
 		}
+
+		public CodeExpression TargetObject { get; set; }
 
 		public string MethodName
 		{
 			get
 			{
-				if (this.methodName == null)
-				{
-					return string.Empty;
-				}
-				return this.methodName;
+				return this._methodName ?? string.Empty;
 			}
 			set
 			{
-				this.methodName = value;
+				this._methodName = value;
 			}
 		}
 
-		public CodeExpression TargetObject
-		{
-			get
-			{
-				return this.targetObject;
-			}
-			set
-			{
-				this.targetObject = value;
-			}
-		}
+		private CodeTypeReference _delegateType;
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private CodeTypeReference delegateType;
-
-		private string methodName;
-
-		private CodeExpression targetObject;
+		private string _methodName;
 	}
 }

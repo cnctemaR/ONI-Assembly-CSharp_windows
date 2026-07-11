@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class CopySettingsTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		CopySettingsTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -42,9 +47,9 @@ public class CopySettingsTool : DragTool
 		this.sourceGameObject = null;
 	}
 
-	public GameObject Placer;
-
 	public static CopySettingsTool Instance;
+
+	public GameObject Placer;
 
 	private GameObject sourceGameObject;
 }

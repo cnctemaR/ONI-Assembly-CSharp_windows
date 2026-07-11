@@ -84,7 +84,7 @@ public class WattsonMessage : KScreen
 				minionIdentity.gameObject.transform.SetPosition(new Vector3(telepad.transform.GetPosition().x + (float)idx - 1.5f, telepad.transform.GetPosition().y, minionIdentity.gameObject.transform.GetPosition().z));
 				GameObject gameObject = minionIdentity.gameObject;
 				ChoreProvider chore_provider = gameObject.GetComponent<ChoreProvider>();
-				EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop);
+				EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop, false);
 				UIScheduler.Instance.Schedule("DupeBirth", (float)idx * 0.5f, delegate(object data)
 				{
 					chorePre.Cancel("Done looping");

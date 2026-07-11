@@ -20,8 +20,7 @@ public class ConsumablesTableScreen : TableScreen
 		{
 			base.GetWidgetRow(widget_go).SelectAndFocusMinion();
 		}, new Comparison<MinionIdentity>(base.compare_rows_alphabetical), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_name), new Action<MinionIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically), false);
-		base.AddLabelColumn("Expectations", new Action<MinionIdentity, GameObject>(this.on_load_expectations), new Func<MinionIdentity, GameObject, string>(this.get_value_expectations_label), new Comparison<MinionIdentity>(this.compare_rows_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_expectations), 128, true);
-		base.AddLabelColumn("Stress", new Action<MinionIdentity, GameObject>(this.on_load_stress), new Func<MinionIdentity, GameObject, string>(this.get_value_stress_label), new Comparison<MinionIdentity>(this.compare_rows_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_stress), 64, true);
+		base.AddLabelColumn("QOLExpectations", new Action<MinionIdentity, GameObject>(this.on_load_qualityoflife_expectations), new Func<MinionIdentity, GameObject, string>(this.get_value_qualityoflife_expectations_label), new Comparison<MinionIdentity>(this.compare_rows_qualityoflife_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_qualityoflife_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_qualityoflife_expectations), 96, true);
 		List<IConsumableUIItem> list = new List<IConsumableUIItem>();
 		for (int i = 0; i < FOOD.FOOD_TYPES_LIST.Count; i++)
 		{
@@ -110,7 +109,7 @@ public class ConsumablesTableScreen : TableScreen
 		}
 	}
 
-	private void on_load_stress(MinionIdentity minion, GameObject widget_go)
+	private void on_load_qualityoflife_expectations(MinionIdentity minion, GameObject widget_go)
 	{
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		LocText componentInChildren = widget_go.GetComponentInChildren<LocText>(true);
@@ -118,108 +117,26 @@ public class ConsumablesTableScreen : TableScreen
 		{
 			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
 		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
 		else
 		{
-			componentInChildren.text = UI.CONSUMABLESSCREEN.STRESS;
+			componentInChildren.text = ((!widgetRow.isDefault) ? UI.VITALSSCREEN.QUALITYOFLIFE_EXPECTATIONS.ToString() : string.Empty);
 		}
 	}
 
-	private string get_value_stress_label(MinionIdentity minion, GameObject widget_go)
+	private string get_value_qualityoflife_expectations_label(MinionIdentity minion, GameObject widget_go)
 	{
-		return Db.Get().Amounts.Stress.Lookup(minion).GetValueString();
+		string text = "{0} / {1}";
+		return string.Format(text, Db.Get().Attributes.QualityOfLife.Lookup(minion).GetFormattedValue(), Db.Get().Attributes.QualityOfLifeExpectation.Lookup(minion).GetFormattedValue());
 	}
 
-	private int compare_rows_stress(MinionIdentity a, MinionIdentity b)
+	private int compare_rows_qualityoflife_expectations(MinionIdentity a, MinionIdentity b)
 	{
-		float value = Db.Get().Amounts.Stress.Lookup(a).value;
-		float value2 = Db.Get().Amounts.Stress.Lookup(b).value;
-		if (value > value2)
-		{
-			return -1;
-		}
-		if (value < value2)
-		{
-			return 1;
-		}
-		return 0;
-	}
-
-	protected void on_tooltip_stress(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
-	{
-		tooltip.ClearMultiStringTooltip();
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Default)
-		{
-			if (rowType != TableRow.RowType.Header)
-			{
-				if (rowType == TableRow.RowType.Minion)
-				{
-					if (minion != null)
-					{
-						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-						tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.STRESS_TOOLTIP, Db.Get().Amounts.Stress.Lookup(minion).GetValueString()), null);
-					}
-				}
-			}
-		}
-	}
-
-	protected void on_tooltip_sort_stress(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
-	{
-		tooltip.ClearMultiStringTooltip();
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		TableRow.RowType rowType = widgetRow.rowType;
-		if (rowType != TableRow.RowType.Default)
-		{
-			if (rowType != TableRow.RowType.Header)
-			{
-				if (rowType != TableRow.RowType.Minion)
-				{
-				}
-			}
-			else
-			{
-				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_STRESS, null);
-			}
-		}
-	}
-
-	private void on_load_expectations(MinionIdentity minion, GameObject widget_go)
-	{
-		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		LocText componentInChildren = widget_go.GetComponentInChildren<LocText>(true);
-		if (minion != null)
-		{
-			componentInChildren.text = (base.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
-		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = string.Empty;
-		}
-		else
-		{
-			componentInChildren.text = UI.CONSUMABLESSCREEN.FOOD_EXPECTATIONS;
-		}
-	}
-
-	private string get_value_expectations_label(MinionIdentity minion, GameObject widget_go)
-	{
-		return Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue();
-	}
-
-	private int compare_rows_expectations(MinionIdentity a, MinionIdentity b)
-	{
-		float totalValue = Db.Get().Attributes.FoodExpectation.Lookup(a).GetTotalValue();
-		float totalValue2 = Db.Get().Attributes.FoodExpectation.Lookup(b).GetTotalValue();
+		float totalValue = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(a).GetTotalValue();
+		float totalValue2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(b).GetTotalValue();
 		return totalValue.CompareTo(totalValue2);
 	}
 
-	protected void on_tooltip_expectations(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
+	protected void on_tooltip_qualityoflife_expectations(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
@@ -233,14 +150,16 @@ public class ConsumablesTableScreen : TableScreen
 					if (minion != null)
 					{
 						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-						tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_EXPECTATIONS_TOOLTIP, Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue()), null);
+						tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.QUALITYOFLIFE_EXPECTATIONS_TOOLTIP, Db.Get().Attributes.QualityOfLifeExpectation.Lookup(minion).GetFormattedValue()), null);
+						tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
+						tooltip.AddMultiStringTooltip(Db.Get().Attributes.QualityOfLife.Lookup(minion).GetAttributeValueTooltip(), null);
 					}
 				}
 			}
 		}
 	}
 
-	protected void on_tooltip_sort_expectations(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
+	protected void on_tooltip_sort_qualityoflife_expectations(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
@@ -469,26 +388,12 @@ public class ConsumablesTableScreen : TableScreen
 						}
 						if (foodInfo != null)
 						{
-							if (minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue() > (float)foodInfo.Quality)
-							{
-								tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
-								{
-									UI.CONSUMABLESSCREEN.EXPECTATIONS_BELOW,
-									minion.GetProperName(),
-									foodInfo.Quality,
-									minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
-								}), null);
-							}
-							else
-							{
-								tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
-								{
-									UI.CONSUMABLESSCREEN.EXPECTATIONS_ABOVE,
-									minion.GetProperName(),
-									foodInfo.Quality,
-									minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
-								}), null);
-							}
+							AttributeInstance attributeInstance = minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation);
+							tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, foodInfo.Quality, minion.GetProperName(), attributeInstance.GetTotalValue()), null);
+							int num = foodInfo.Quality + Mathf.RoundToInt(attributeInstance.GetTotalValue());
+							string effectForFoodQuality = Edible.GetEffectForFoodQuality(num);
+							Effect effect = Db.Get().effects.Get(effectForFoodQuality);
+							tooltip.AddMultiStringTooltip(Effect.CreateTooltip(effect, false), null);
 						}
 					}
 				}
@@ -633,7 +538,7 @@ public class ConsumablesTableScreen : TableScreen
 			Image image2 = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
 			if (component2.AnimFiles.Length > 0)
 			{
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui");
+				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui", false);
 				image2.sprite = uispriteFromMultiObjectAnim;
 			}
 			image2.color = Color.white;

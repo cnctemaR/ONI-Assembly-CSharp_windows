@@ -6,20 +6,20 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 	public EmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString[] emote_anims, Func<StatusItem> get_status_item = null)
 		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
-		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, null, emote_anims, KAnim.PlayMode.Once);
+		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, null, emote_anims, KAnim.PlayMode.Once, false);
 		this.getStatusItem = get_status_item;
 	}
 
-	public EmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode)
+	public EmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, bool flip_x = false)
 		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
-		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, play_mode);
+		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, play_mode, flip_x);
 	}
 
 	public EmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString emote_kanim, HashedString[] emote_anims, Func<StatusItem> get_status_item)
 		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
-		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, KAnim.PlayMode.Once);
+		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, KAnim.PlayMode.Once, false);
 		this.getStatusItem = get_status_item;
 	}
 
@@ -37,11 +37,29 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 		return "EmoteChore<" + this.smi.emoteAnims[0] + ">";
 	}
 
+	public void PairReactable(SelfEmoteReactable reactable)
+	{
+		this.reactable = reactable;
+	}
+
+	protected new virtual void End(string reason)
+	{
+		if (this.reactable != null)
+		{
+			this.reactable.PairEmote(null);
+			this.reactable.Cleanup();
+			this.reactable = null;
+		}
+		base.End(reason);
+	}
+
 	private Func<StatusItem> getStatusItem;
+
+	private SelfEmoteReactable reactable;
 
 	public class StatesInstance : GameStateMachine<EmoteChore.States, EmoteChore.StatesInstance, EmoteChore, object>.GameInstance
 	{
-		public StatesInstance(EmoteChore master, GameObject emoter, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode mode)
+		public StatesInstance(EmoteChore master, GameObject emoter, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode mode, bool flip_x)
 			: base(master)
 		{
 			this.emoteKAnim = emote_kanim;

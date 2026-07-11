@@ -55,14 +55,16 @@ public class Game : KMonoBehaviour
 			"Level Loaded....",
 			SceneManager.GetActiveScene().name
 		});
+		Singleton<KBatchedAnimUpdater>.CreateInstance();
+		Singleton<CellChangeMonitor>.CreateInstance();
 		this.userMenu = new UserMenu();
 		SimTemperatureTransfer.ClearInstanceMap();
 		StructureTemperatureComponents.ClearInstanceMap();
+		ElementConsumer.ClearInstanceMap();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.StopBE));
 		Game.Instance = this;
 		this.statusItemRenderer = new StatusItemRenderer();
 		this.prioritizableRenderer = new PrioritizableRenderer();
-		CellChangeMonitor.Destroy();
 		this.LoadEventHashes();
 		this.gasFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasConduits) - 0.4f);
 		this.liquidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.LiquidConduits) - 0.4f);
@@ -71,15 +73,11 @@ public class Game : KMonoBehaviour
 		Db.Get();
 		Game.quitting = false;
 		Game.PickupableLayer = LayerMask.NameToLayer("Pickupable");
-		Game.PickupableLayerMask = LayerMask.GetMask(new string[] { "Pickupable" });
-		this.ColliderRoot = global::Util.NewGameObject(base.gameObject, "Colliders");
-		Game.BlockSelectionLayer = LayerMask.NameToLayer("BlockSelection");
 		Game.BlockSelectionLayerMask = LayerMask.GetMask(new string[] { "BlockSelection" });
 		this.world = World.Instance;
 		KPrefabID.NextUniqueID = KPlayerPrefs.GetInt(Game.NextUniqueIDKey, 0);
 		this.circuitManager = new CircuitManager();
 		this.emergySim = new EnergySim();
-		this.elementInteractions = new ElementInteractions(this.elementInteractionsData);
 		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 13);
 		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 17);
 		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 25);
@@ -109,8 +107,7 @@ public class Game : KMonoBehaviour
 		this.screenMgr = global::Util.KInstantiate(this.screenManagerPrefab, null, null).GetComponent<GameScreenManager>();
 		this.roleManager = new RoleManager();
 		this.roomProber = new RoomProber();
-		this.roomProber.Init();
-		CellChangeMonitor.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
+		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 	}
 
@@ -166,6 +163,7 @@ public class Game : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
+		global::Debug.Log("-- GAME --", null);
 		this.LocalPlayer = this.SpawnPlayer();
 		WaterCubes.Instance.Init();
 		SpeedControlScreen.Instance.Pause(false);
@@ -210,12 +208,20 @@ public class Game : KMonoBehaviour
 			SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("SandboxMode");
 			SaveGame.Instance.sandboxEnabled = !settingConfig.IsDefaultLevel(currentQualitySetting.id);
 		}
+		this.mingleCellTracker = base.gameObject.AddComponent<MingleCellTracker>();
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
 		SimAndRenderScheduler.instance.Remove(KComponentSpawn.instance);
+		this.DestroyInstances();
+	}
+
+	private new void OnDestroy()
+	{
+		base.OnDestroy();
+		this.DestroyInstances();
 	}
 
 	private void UnsafeOnSpawn()
@@ -243,7 +249,7 @@ public class Game : KMonoBehaviour
 		component.ScreenManager.StartScreen(ScreenPrefabs.Instance.HudScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 		component.ScreenManager.StartScreen(ScreenPrefabs.Instance.HoverTextScreen.gameObject, null, GameScreenManager.UIRenderTarget.HoverTextScreen);
 		component.ScreenManager.StartScreen(ScreenPrefabs.Instance.ToolTipScreen.gameObject, null, GameScreenManager.UIRenderTarget.HoverTextScreen);
-		this.cameraController = global::Util.KInstantiate(this.cameraControllerPrefab, SceneOrganizer.Instance.GetFolder(Folder.Cameras), null).GetComponent<CameraController>();
+		this.cameraController = global::Util.KInstantiate(this.cameraControllerPrefab, null, null).GetComponent<CameraController>();
 		component.CameraController = this.cameraController;
 		KInputHandler.Add(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController, 1);
 		this.playerController = component.GetComponent<PlayerController>();
@@ -403,14 +409,17 @@ public class Game : KMonoBehaviour
 				{
 					Sim.MassEmittedCallback massEmittedCallback = ptr2->massEmittedCallbacks[num6];
 					handle3.index = massEmittedCallback.callbackIdx;
-					Game.ComplexCallbackInfo item = this.complexCallbackManager.GetItem(handle3);
-					if (item.cb != null)
+					if (this.complexCallbackManager.IsVersionValid(handle3))
 					{
-						if (massEmittedCallback.GetType() != typeof(Sim.MassEmittedCallback))
+						Game.ComplexCallbackInfo item = this.complexCallbackManager.GetItem(handle3);
+						if (item.cb != null)
 						{
-							Output.LogError(new object[] { "Somehow a callback from", item.debugInfo, "got into the MassEmittedCallbacks list" });
+							if (massEmittedCallback.GetType() != typeof(Sim.MassEmittedCallback))
+							{
+								Output.LogError(new object[] { "Somehow a callback from", item.debugInfo, "got into the MassEmittedCallbacks list" });
+							}
+							item.cb(massEmittedCallback);
 						}
-						item.cb(massEmittedCallback);
 					}
 				}
 				int numDiseaseConsumptionCallbacks = ptr2->numDiseaseConsumptionCallbacks;
@@ -419,10 +428,13 @@ public class Game : KMonoBehaviour
 				{
 					Sim.DiseaseConsumptionCallback diseaseConsumptionCallback = ptr2->diseaseConsumptionCallbacks[num7];
 					handle4.index = diseaseConsumptionCallback.callbackIdx;
-					Game.ComplexCallbackInfo item2 = this.complexCallbackManager.GetItem(handle4);
-					if (item2.cb != null)
+					if (this.complexCallbackManager.IsVersionValid(handle4))
 					{
-						item2.cb(diseaseConsumptionCallback);
+						Game.ComplexCallbackInfo item2 = this.complexCallbackManager.GetItem(handle4);
+						if (item2.cb != null)
+						{
+							item2.cb(diseaseConsumptionCallback);
+						}
 					}
 				}
 				int numComponentStateChangedMessages = ptr2->numComponentStateChangedMessages;
@@ -431,10 +443,13 @@ public class Game : KMonoBehaviour
 				{
 					Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr2->componentStateChangedMessages[num8];
 					handle5.index = componentStateChangedMessage.callbackIdx;
-					Game.ComplexCallbackInfo complexCallbackInfo2 = this.complexCallbackManager.Release(handle5, "component state changed cb");
-					if (complexCallbackInfo2.cb != null)
+					if (this.complexCallbackManager.IsVersionValid(handle5))
 					{
-						complexCallbackInfo2.cb(componentStateChangedMessage.simHandle);
+						Game.ComplexCallbackInfo complexCallbackInfo2 = this.complexCallbackManager.Release(handle5, "component state changed cb");
+						if (complexCallbackInfo2.cb != null)
+						{
+							complexCallbackInfo2.cb(componentStateChangedMessage.simHandle);
+						}
 					}
 				}
 				int numElementChunkMeltedInfos = ptr2->numElementChunkMeltedInfos;
@@ -478,7 +493,6 @@ public class Game : KMonoBehaviour
 				debugProperties.biomeTemperatureLerpRate = 0.001f;
 				debugProperties.isDebugEditing = ((!(DebugPaintElementScreen.Instance != null) || !DebugPaintElementScreen.Instance.gameObject.activeSelf) ? 0 : 1);
 				debugProperties.pad0 = (debugProperties.pad1 = (debugProperties.pad2 = 0));
-				SimMessages.NewGameFrame(dt, this.simActiveRegionMin, this.simActiveRegionMax);
 				SimMessages.SetDebugProperties(debugProperties);
 				if (dt > 0f)
 				{
@@ -587,7 +601,7 @@ public class Game : KMonoBehaviour
 		this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
 		LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
 		Pathfinding.Instance.RenderEveryTick();
-		CellChangeMonitor.Instance.RenderEveryTick();
+		Singleton<CellChangeMonitor>.Instance.RenderEveryTick();
 		this.SimEveryTick(deltaTime);
 	}
 
@@ -608,7 +622,7 @@ public class Game : KMonoBehaviour
 				}
 				if (this.hasFirstSimTickRun)
 				{
-					StateMachineUpdater.instance.AdvanceOneSimSubTick();
+					Singleton<StateMachineUpdater>.Instance.AdvanceOneSimSubTick();
 				}
 				this.simDt -= 0.016666668f;
 			}
@@ -621,6 +635,7 @@ public class Game : KMonoBehaviour
 
 	private unsafe void UnsafeSim200ms(float dt)
 	{
+		SimMessages.NewGameFrame(dt, this.simActiveRegionMin, this.simActiveRegionMax);
 		Sim.GameDataUpdate* ptr = this.StepTheSim(dt);
 		if (ptr == null)
 		{
@@ -631,8 +646,6 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		this.callbackManager.NextFrame();
-		this.complexCallbackManager.NextFrame();
 		this.gameSolidInfo.AddRange(this.solidInfo);
 		this.world.UpdateCellInfo(this.gameSolidInfo, this.callbackInfo, ptr->numSolidSubstanceChangeInfo, ptr->solidSubstanceChangeInfo, ptr->numLiquidChangeInfo, ptr->liquidChangeInfo);
 		this.gameSolidInfo.Clear();
@@ -672,12 +685,12 @@ public class Game : KMonoBehaviour
 		}
 		if (Input.GetMouseButton(0))
 		{
-			Game.VisualTunerElement = null;
+			this.VisualTunerElement = null;
 			int mouseCell = DebugHandler.GetMouseCell();
 			if (Grid.IsValidCell(mouseCell))
 			{
 				Element element = Grid.Element[mouseCell];
-				Game.VisualTunerElement = element;
+				this.VisualTunerElement = element;
 			}
 		}
 		this.gasConduitSystem.Update();
@@ -687,11 +700,11 @@ public class Game : KMonoBehaviour
 		if (mode != this.previousOverlayMode)
 		{
 			this.previousOverlayMode = mode;
-			if (mode != SimViewMode.LiquidVentMap)
+			if (mode != SimViewMode.GasVentMap)
 			{
-				if (mode != SimViewMode.GasVentMap)
+				if (mode != SimViewMode.SolidConveyorMap)
 				{
-					if (mode != SimViewMode.SolidConveyorMap)
+					if (mode != SimViewMode.LiquidVentMap)
 					{
 						this.liquidFlowVisualizer.ColourizePipeContents(false, false);
 						this.gasFlowVisualizer.ColourizePipeContents(false, false);
@@ -699,22 +712,22 @@ public class Game : KMonoBehaviour
 					}
 					else
 					{
-						this.liquidFlowVisualizer.ColourizePipeContents(false, true);
+						this.liquidFlowVisualizer.ColourizePipeContents(true, true);
 						this.gasFlowVisualizer.ColourizePipeContents(false, true);
-						this.solidFlowVisualizer.ColourizePipeContents(true, true);
+						this.solidFlowVisualizer.ColourizePipeContents(false, true);
 					}
 				}
 				else
 				{
 					this.liquidFlowVisualizer.ColourizePipeContents(false, true);
-					this.gasFlowVisualizer.ColourizePipeContents(true, true);
-					this.solidFlowVisualizer.ColourizePipeContents(false, true);
+					this.gasFlowVisualizer.ColourizePipeContents(false, true);
+					this.solidFlowVisualizer.ColourizePipeContents(true, true);
 				}
 			}
 			else
 			{
-				this.liquidFlowVisualizer.ColourizePipeContents(true, true);
-				this.gasFlowVisualizer.ColourizePipeContents(false, true);
+				this.liquidFlowVisualizer.ColourizePipeContents(false, true);
+				this.gasFlowVisualizer.ColourizePipeContents(true, true);
 				this.solidFlowVisualizer.ColourizePipeContents(false, true);
 			}
 		}
@@ -733,8 +746,8 @@ public class Game : KMonoBehaviour
 			this.prioritizableRenderer.RenderEveryTick();
 		}
 		this.LateUpdateComponents();
-		StateMachineUpdater.instance.Render(Time.unscaledDeltaTime);
-		StateMachineUpdater.instance.RenderEveryTick(Time.unscaledDeltaTime);
+		Singleton<StateMachineUpdater>.Instance.Render(Time.unscaledDeltaTime);
+		Singleton<StateMachineUpdater>.Instance.RenderEveryTick(Time.unscaledDeltaTime);
 		if (SelectTool.Instance != null && SelectTool.Instance.selected != null)
 		{
 			Navigator component = SelectTool.Instance.selected.GetComponent<Navigator>();
@@ -766,7 +779,6 @@ public class Game : KMonoBehaviour
 	private void OnApplicationQuit()
 	{
 		Game.quitting = true;
-		KAnimBatchManager.Destroy();
 		Sim.Shutdown();
 		AudioMixer.Destroy();
 		if (this.screenMgr != null && this.screenMgr.gameObject != null)
@@ -797,7 +809,7 @@ public class Game : KMonoBehaviour
 			};
 			Func<GameObject> func = delegate
 			{
-				GameObject gameObject = GameUtil.KInstantiate(this.fxSpawnData[fx_idx].fxPrefab, Grid.SceneLayer.Front, Folder.FX, null, 0);
+				GameObject gameObject = GameUtil.KInstantiate(this.fxSpawnData[fx_idx].fxPrefab, Grid.SceneLayer.Front, null, 0);
 				KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 				component.enabled = false;
 				gameObject.SetActive(true);
@@ -1138,13 +1150,14 @@ public class Game : KMonoBehaviour
 		}
 		base.GetComponent<EntombedItemVisualizer>().Clear();
 		global::UnityEngine.Object.Destroy(WorldGenSpawner.Instance);
-		KBatchedAnimUpdater.Destroy();
+		SimTemperatureTransfer.ClearInstanceMap();
+		StructureTemperatureComponents.ClearInstanceMap();
+		ElementConsumer.ClearInstanceMap();
 		KComponentSpawn.instance.comps.Clear();
 		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController);
 		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.playerController);
 		Sim.Shutdown();
 		SimAndRenderScheduler.instance.Reset();
-		StateMachineUpdater.instance.Reset();
 		Resources.UnloadUnusedAssets();
 	}
 
@@ -1187,6 +1200,145 @@ public class Game : KMonoBehaviour
 		global::Debug.Log("This is a debug log test", null);
 	}
 
+	private void DestroyInstances()
+	{
+		KMonoBehaviour.lastGameObject = null;
+		KMonoBehaviour.lastObj = null;
+		GridSettings.ClearGrid();
+		StateMachineManager.ResetParameters();
+		ChoreTable.Instance.ResetParameters();
+		BubbleManager.DestroyInstance();
+		AmbientSoundManager.Destroy();
+		AutoDisinfectableManager.DestroyInstance();
+		BuildMenu.DestroyInstance();
+		CancelTool.DestroyInstance();
+		ClearTool.DestroyInstance();
+		ChoreGroupManager.DestroyInstance();
+		CO2Manager.DestroyInstance();
+		ConsumerManager.DestroyInstance();
+		CopySettingsTool.DestroyInstance();
+		global::DateTime.DestroyInstance();
+		DebugBaseTemplateButton.DestroyInstance();
+		DebugPaintElementScreen.DestroyInstance();
+		DetailsScreen.DestroyInstance();
+		DietManager.DestroyInstance();
+		DebugText.DestroyInstance();
+		EdiblesManager.DestroyInstance();
+		FabricationNeeds.DestroyInstance();
+		FactionManager.DestroyInstance();
+		EmptyPipeTool.DestroyInstance();
+		FetchListStatusItemUpdater.DestroyInstance();
+		FishOvercrowingManager.DestroyInstance();
+		FallingWater.DestroyInstance();
+		GridCompositor.DestroyInstance();
+		Infrared.DestroyInstance();
+		KPrefabIDTracker.DestroyInstance();
+		ManagementMenu.DestroyInstance();
+		MaterialNeeds.DestroyInstance();
+		Messenger.DestroyInstance();
+		LoopingSoundManager.DestroyInstance();
+		MeterScreen.DestroyInstance();
+		MinionGroupProber.DestroyInstance();
+		NavPathDrawer.DestroyInstance();
+		MinionIdentity.DestroyStatics();
+		PathFinder.PathGrid = null;
+		Pathfinding.DestroyInstance();
+		PrebuildTool.DestroyInstance();
+		PrioritizeTool.DestroyInstance();
+		SelectTool.DestroyInstance();
+		PopFXManager.DestroyInstance();
+		ProgressBarsConfig.DestroyInstance();
+		PropertyTextures.DestroyInstance();
+		RationTracker.DestroyInstance();
+		ReportManager.DestroyInstance();
+		RedAlertManager.Instance.DestroyInstance();
+		Research.DestroyInstance();
+		RootMenu.DestroyInstance();
+		SaveLoader.DestroyInstance();
+		Scenario.DestroyInstance();
+		SimDebugView.DestroyInstance();
+		SpriteSheetAnimManager.DestroyInstance();
+		ScheduleManager.DestroyInstance();
+		Sounds.DestroyInstance();
+		ToolMenu.DestroyInstance();
+		WorldDamage.DestroyInstance();
+		WaterCubes.DestroyInstance();
+		WireBuildTool.DestroyInstance();
+		VisibilityTester.DestroyInstance();
+		Traces.DestroyInstance();
+		TopLeftControlScreen.DestroyInstance();
+		UtilityBuildTool.DestroyInstance();
+		ReportScreen.DestroyInstance();
+		ChorePreconditions.DestroyInstance();
+		SandboxBrushTool.DestroyInstance();
+		SandboxHeatTool.DestroyInstance();
+		SandboxClearFloorTool.DestroyInstance();
+		GameScreenManager.DestroyInstance();
+		GameScheduler.DestroyInstance();
+		NavigationReservations.DestroyInstance();
+		Tutorial.DestroyInstance();
+		CameraController.DestroyInstance();
+		CellEventLogger.DestroyInstance();
+		GameFlowManager.DestroyInstance();
+		Immigration.DestroyInstance();
+		BuildTool.DestroyInstance();
+		DebugTool.DestroyInstance();
+		DeconstructTool.DestroyInstance();
+		DigTool.DestroyInstance();
+		DisinfectTool.DestroyInstance();
+		HarvestTool.DestroyInstance();
+		MopTool.DestroyInstance();
+		MoveToLocationTool.DestroyInstance();
+		PlaceTool.DestroyInstance();
+		SandboxDestroyerTool.DestroyInstance();
+		SandboxFOWTool.DestroyInstance();
+		SandboxFloodTool.DestroyInstance();
+		SandboxSprinkleTool.DestroyInstance();
+		StampTool.DestroyInstance();
+		OnDemandUpdater.DestroyInstance();
+		HoverTextScreen.DestroyInstance();
+		ImmigrantScreen.DestroyInstance();
+		OverlayMenu.DestroyInstance();
+		NameDisplayScreen.DestroyInstance();
+		PlanScreen.DestroyInstance();
+		ResourceCategoryScreen.DestroyInstance();
+		ResourceRemainingDisplayScreen.DestroyInstance();
+		SandboxToolParameterMenu.DestroyInstance();
+		SpeedControlScreen.DestroyInstance();
+		Vignette.DestroyInstance();
+		PlayerController.DestroyInstance();
+		NotificationScreen.DestroyInstance();
+		BuildingCellVisualizerResources.DestroyInstance();
+		PauseScreen.DestroyInstance();
+		SaveLoadRoot.DestroyStatics();
+		KTime.DestroyInstance();
+		DemoTimer.DestroyInstance();
+		UIScheduler.DestroyInstance();
+		SaveGame.DestroyInstance();
+		GameClock.DestroyInstance();
+		TimeOfDay.DestroyInstance();
+		DeserializeWarnings.DestroyInstance();
+		UISounds.DestroyInstance();
+		RenderTextureDestroyer.DestroyInstance();
+		WorldInspector.DestroyStatics();
+		LoadScreen.DestroyInstance();
+		LoadingOverlay.DestroyInstance();
+		SimAndRenderScheduler.DestroyInstance();
+		Singleton<CellChangeMonitor>.DestroyInstance();
+		Singleton<StateMachineManager>.Instance.Clear();
+		Singleton<StateMachineUpdater>.Instance.Clear();
+		UpdateObjectCountParameter.Clear();
+		MaterialSelectionPanel.ClearStatics();
+		Game.Instance = null;
+		Grid.OnReveal = null;
+		this.VisualTunerElement = null;
+		Assets.ClearOnAddPrefab();
+		KMonoBehaviour.lastGameObject = null;
+		KMonoBehaviour.lastObj = null;
+		GameComps gameComps = KComponentSpawn.instance.comps as GameComps;
+		gameComps.Clear();
+	}
+
 	private static readonly string NextUniqueIDKey = "NextUniqueID";
 
 	private PlayerController playerController;
@@ -1220,15 +1372,11 @@ public class Game : KMonoBehaviour
 
 	public GameObject tempIntroScreenPrefab;
 
-	public static int BlockSelectionLayer;
-
 	public static int BlockSelectionLayerMask;
 
 	public static int PickupableLayer;
 
-	public static int PickupableLayerMask;
-
-	public static Element VisualTunerElement;
+	public Element VisualTunerElement;
 
 	public float currentSunlightIntensity;
 
@@ -1244,32 +1392,18 @@ public class Game : KMonoBehaviour
 
 	private bool sandboxModeActive;
 
-	public FrameDelayedHandleVector<Game.CallbackInfo> callbackManager = new FrameDelayedHandleVector<Game.CallbackInfo>(256);
+	public HandleVector<Game.CallbackInfo> callbackManager = new HandleVector<Game.CallbackInfo>(256);
 
 	public Game.ComplexCallbackHandleVector complexCallbackManager = new Game.ComplexCallbackHandleVector(256);
 
 	[NonSerialized]
 	public Player LocalPlayer;
 
-	[NonSerialized]
-	public GameObject ColliderRoot;
-
-	[NonSerialized]
-	public GameObject Collider3DRoot;
-
-	public ElementInteractions elementInteractions;
-
-	[SerializeField]
-	private TextAsset elementInteractionsData;
-
 	[SerializeField]
 	public TextAsset maleNamesFile;
 
 	[SerializeField]
 	public TextAsset femaleNamesFile;
-
-	[SerializeField]
-	private TextAsset buildingUpgrades;
 
 	[NonSerialized]
 	public World world;
@@ -1321,6 +1455,8 @@ public class Game : KMonoBehaviour
 
 	public ConduitDiseaseManager conduitDiseaseManager;
 
+	public MingleCellTracker mingleCellTracker;
+
 	private int simSubTick;
 
 	private bool hasFirstSimTickRun;
@@ -1360,8 +1496,6 @@ public class Game : KMonoBehaviour
 	private List<SolidInfo> gameSolidInfo = new List<SolidInfo>();
 
 	private bool IsPaused;
-
-	private EventInstance music;
 
 	private HashSet<int> solidChangedFilter = new HashSet<int>();
 
@@ -1455,7 +1589,7 @@ public class Game : KMonoBehaviour
 	{
 		public ComplexCallbackHandleVector(int initial_size)
 		{
-			this.baseMgr = new FrameDelayedHandleVector<Game.ComplexCallbackInfo>(initial_size);
+			this.baseMgr = new HandleVector<Game.ComplexCallbackInfo>(initial_size);
 		}
 
 		public HandleVector<Game.ComplexCallbackInfo>.Handle Add(Game.ComplexCallbackInfo item)
@@ -1519,17 +1653,17 @@ public class Game : KMonoBehaviour
 			return complexCallbackInfo;
 		}
 
-		public void NextFrame()
-		{
-			this.baseMgr.NextFrame();
-		}
-
 		public void Clear()
 		{
 			this.baseMgr.Clear();
 		}
 
-		private FrameDelayedHandleVector<Game.ComplexCallbackInfo> baseMgr;
+		public bool IsVersionValid(HandleVector<Game.ComplexCallbackInfo>.Handle handle)
+		{
+			return this.baseMgr.IsVersionValid(handle);
+		}
+
+		private HandleVector<Game.ComplexCallbackInfo> baseMgr;
 
 		private Dictionary<int, string> releaseInfo = new Dictionary<int, string>();
 	}

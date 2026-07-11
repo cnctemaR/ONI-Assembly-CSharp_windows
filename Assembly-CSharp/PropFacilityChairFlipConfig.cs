@@ -7,9 +7,9 @@ public class PropFacilityChairFlipConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityChairFlip", SETITEMS.CHAIR.NAME, SETITEMS.CHAIR.DESC, 50f, Assets.GetAnim("gravitas_chairFlip_kanim"), "off", Grid.SceneLayer.Building, 2, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityChairFlip", global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYCHAIR.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYCHAIR.DESC, 50f, Assets.GetAnim("gravitas_chairFlip_kanim"), "off", Grid.SceneLayer.Building, 2, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Granite);
 		component.Temperature = 294.15f;
 		return gameObject;
 	}

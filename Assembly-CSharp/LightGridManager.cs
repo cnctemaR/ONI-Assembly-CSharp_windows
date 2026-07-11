@@ -26,7 +26,7 @@ public static class LightGridManager
 
 	public static void DestroyPreview()
 	{
-		foreach (Tuple<int, int> tuple in LightGridManager.previewLightCells)
+		foreach (global::Tuple<int, int> tuple in LightGridManager.previewLightCells)
 		{
 			LightGridManager.previewLux[tuple.first] = 0;
 		}
@@ -44,14 +44,14 @@ public static class LightGridManager
 			if (Grid.IsValidCell(num))
 			{
 				int num2 = lux / LightGridManager.CalculateFalloff(0.5f, num, origin_cell);
-				LightGridManager.previewLightCells.Add(new Tuple<int, int>(num, num2));
+				LightGridManager.previewLightCells.Add(new global::Tuple<int, int>(num, num2));
 				LightGridManager.previewLux[num] = num2;
 			}
 		}
 		pooledList.Recycle();
 	}
 
-	public static List<Tuple<int, int>> previewLightCells = new List<Tuple<int, int>>();
+	public static List<global::Tuple<int, int>> previewLightCells = new List<global::Tuple<int, int>>();
 
 	public static int[] previewLux;
 

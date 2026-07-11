@@ -98,6 +98,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	{
 		base.SetWorkTime(this.GetFeedingTime(worker));
 		worker.GetAttributes().Add(this.caloriesModifier);
+		KPrefabID component = worker.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.AlwaysConverse);
 		this.StartConsuming();
 	}
 
@@ -108,6 +110,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	protected override void OnStopWork(Worker worker)
 	{
 		worker.GetAttributes().Remove(this.caloriesModifier);
+		KPrefabID component = worker.GetComponent<KPrefabID>();
+		component.RemoveTag(GameTags.AlwaysConverse);
 		this.StopConsuming(worker);
 	}
 
@@ -119,6 +123,11 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private void StopConsuming(Worker worker)
 	{
+		PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
+		if (component != null && component.DiseaseCount > 0)
+		{
+			new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_contaminated_food_kanim", new HashedString[] { "react" }, null);
+		}
 		float num = Time.time - this.consumptionStartTime;
 		float num2 = Mathf.Clamp01(num / this.GetFeedingTime(worker));
 		this.unitsConsumed = this.Units * num2;
@@ -129,6 +138,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);
 		}
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.EATEN, "{0}", this.GetProperName()), worker.GetProperName());
+		this.AddQualityEffects(worker);
 		worker.Trigger(1121894420, this);
 		base.Trigger(-10536414, worker.gameObject);
 		this.unitsConsumed = float.NaN;
@@ -138,6 +148,26 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		{
 			base.gameObject.DeleteObject();
 		}
+	}
+
+	public static string GetEffectForFoodQuality(int qualityLevel)
+	{
+		qualityLevel = Mathf.Clamp(qualityLevel, -1, 5);
+		return Edible.qualityEffects[qualityLevel];
+	}
+
+	private void AddQualityEffects(Worker worker)
+	{
+		Attributes attributes = base.gameObject.GetAttributes();
+		AttributeInstance attributeInstance = attributes.Add(Db.Get().Attributes.FoodExpectation);
+		int num = Mathf.RoundToInt(attributeInstance.GetTotalValue());
+		int num2 = this.FoodInfo.Quality + num;
+		Effects component = worker.GetComponent<Effects>();
+		foreach (KeyValuePair<int, string> keyValuePair in Edible.qualityEffects)
+		{
+			component.Remove(keyValuePair.Value);
+		}
+		component.Add(Edible.GetEffectForFoodQuality(num2), true);
 	}
 
 	protected override void OnCleanUp()
@@ -175,16 +205,16 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, false, true);
 
-	public enum Quality
+	private static Dictionary<int, string> qualityEffects = new Dictionary<int, string>
 	{
-		Awful = -3,
-		Terrible,
-		Poor,
-		Average,
-		Good,
-		Great,
-		Amazing
-	}
+		{ -1, "EdibleMinus3" },
+		{ 0, "EdibleMinus2" },
+		{ 1, "EdibleMinus1" },
+		{ 2, "Edible0" },
+		{ 3, "Edible1" },
+		{ 4, "Edible2" },
+		{ 5, "Edible3" }
+	};
 
 	public class EdibleStartWorkInfo : Worker.StartWorkInfo
 	{

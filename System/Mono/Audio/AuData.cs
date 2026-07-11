@@ -46,29 +46,37 @@ namespace Mono.Audio
 					this.stream.ReadByte();
 				}
 			}
-			int num5 = num3;
-			if (num5 != 1)
+			if (num3 == 1)
 			{
-				throw new Exception("incorrect format encoding" + num3);
+				this.frame_divider = 1;
+				this.format = AudioFormat.MU_LAW;
+				if (this.data_len == -1)
+				{
+					this.data_len = (int)this.stream.Length - num2;
+				}
+				return;
 			}
-			this.frame_divider = 1;
-			this.format = AudioFormat.MU_LAW;
-			if (this.data_len == -1)
-			{
-				this.data_len = (int)this.stream.Length - num2;
-			}
+			throw new Exception("incorrect format encoding" + num3);
 		}
 
 		public override void Play(AudioDevice dev)
 		{
-			int num = this.data_len;
-			byte[] array = new byte[4096];
+			int num = 0;
+			int chunkSize = (int)dev.ChunkSize;
+			int num2 = this.data_len;
+			byte[] array = new byte[this.data_len];
+			byte[] array2 = new byte[chunkSize];
 			this.stream.Position = 0L;
-			int num2;
-			while (!this.IsStopped && num >= 0 && (num2 = this.stream.Read(array, 0, Math.Min(array.Length, num))) > 0)
+			this.stream.Read(array, 0, this.data_len);
+			while (!this.IsStopped && num2 >= 0)
 			{
-				dev.PlaySample(array, num2 / (int)this.frame_divider);
-				num -= num2;
+				Buffer.BlockCopy(array, num, array2, 0, chunkSize);
+				int num3 = dev.PlaySample(array2, chunkSize / (int)(this.frame_divider * (ushort)this.channels));
+				if (num3 > 0)
+				{
+					num += num3 * (int)this.frame_divider * (int)this.channels;
+					num2 -= num3 * (int)this.frame_divider * (int)this.channels;
+				}
 			}
 		}
 

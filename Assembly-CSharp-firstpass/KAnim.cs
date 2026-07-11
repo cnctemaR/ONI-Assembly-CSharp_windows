@@ -71,13 +71,30 @@ public class KAnim
 
 		private static KBatchGroupData GetAnimBatchGroupData(KAnimFileData animFile)
 		{
+			if (!animFile.batchTag.IsValid)
+			{
+				global::Debug.LogErrorFormat("Invalid batchTag for anim [{0}]", new object[] { animFile.name });
+			}
 			KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(animFile.batchTag);
+			if (group == null)
+			{
+				global::Debug.LogErrorFormat("Null group for tag [{0}]", new object[] { animFile.batchTag });
+			}
 			HashedString hashedString = animFile.batchTag;
 			if (group.renderType == KAnimBatchGroup.RendererType.DontRender || group.renderType == KAnimBatchGroup.RendererType.AnimOnly)
 			{
+				if (!group.swapTarget.IsValid)
+				{
+					global::Debug.LogErrorFormat("Invalid swap target for group [{0}]", new object[] { group.id });
+				}
 				hashedString = group.swapTarget;
 			}
-			return KAnimBatchManager.Instance().GetBatchGroupData(hashedString);
+			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(hashedString);
+			if (batchGroupData == null)
+			{
+				global::Debug.LogErrorFormat("Null batch group for tag [{0}]", new object[] { hashedString });
+			}
+			return batchGroupData;
 		}
 
 		public KAnim.Anim.Frame GetFrame(KAnimFileData animFile, KAnim.PlayMode mode, float t)
@@ -175,7 +192,7 @@ public class KAnim
 
 			public int numElements;
 
-			public static KAnim.Anim.Frame InvalidFrame = new KAnim.Anim.Frame
+			public static readonly KAnim.Anim.Frame InvalidFrame = new KAnim.Anim.Frame
 			{
 				idx = -1
 			};
@@ -184,14 +201,11 @@ public class KAnim
 		[Serializable]
 		public struct FrameElement
 		{
-			public bool HasFlag(KAnim.LayerFlags flag)
-			{
-				return (this.flags & (int)flag) != 0;
-			}
-
 			public KAnimHashedString fileHash;
 
 			public KAnimHashedString symbol;
+
+			public int symbolIdx;
 
 			public KAnimHashedString folder;
 
@@ -325,6 +339,16 @@ public class KAnim
 		{
 			public int GetFrameIdx(int frame)
 			{
+				if (this.frameLookup == null)
+				{
+					global::Debug.LogErrorFormat("Cant get frame [{2}] because Symbol [{0}] for build [{1}] batch [{3}] has no frameLookup", new object[]
+					{
+						this.hash.ToString(),
+						this.build.name,
+						frame,
+						this.build.batchTag.ToString()
+					});
+				}
 				if (this.frameLookup.Length == 0 || frame >= this.frameLookup.Length)
 				{
 					return -1;

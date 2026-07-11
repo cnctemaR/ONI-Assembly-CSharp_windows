@@ -6,9 +6,9 @@ namespace System.Reflection
 	[ComVisible(true)]
 	public interface ICustomAttributeProvider
 	{
-		object[] GetCustomAttributes(bool inherit);
-
 		object[] GetCustomAttributes(Type attributeType, bool inherit);
+
+		object[] GetCustomAttributes(bool inherit);
 
 		bool IsDefined(Type attributeType, bool inherit);
 	}

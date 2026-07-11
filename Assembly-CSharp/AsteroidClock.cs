@@ -9,6 +9,10 @@ public class AsteroidClock : MonoBehaviour
 		this.UpdateOverlay();
 	}
 
+	private void Start()
+	{
+	}
+
 	private void Update()
 	{
 		if (GameClock.Instance != null)
@@ -19,7 +23,8 @@ public class AsteroidClock : MonoBehaviour
 
 	private void UpdateOverlay()
 	{
-		this.NightOverlay.fillAmount = 0.125f;
+		float num = 0.125f;
+		this.NightOverlay.fillAmount = num;
 	}
 
 	public Transform rotationTransform;

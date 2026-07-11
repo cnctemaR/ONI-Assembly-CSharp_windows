@@ -89,7 +89,7 @@ public class InterfaceTool : KMonoBehaviour
 		}
 		int num = Grid.PosToCell(cursor_pos);
 		cursor_pos = Grid.CellToPosCBC(num, this.visualizerLayer);
-		cursor_pos.z += InterfaceTool.DepthBias;
+		cursor_pos.z += -0.15f;
 		this.visualizer.transform.SetLocalPosition(cursor_pos);
 	}
 
@@ -137,6 +137,7 @@ public class InterfaceTool : KMonoBehaviour
 	{
 		if (new_cursor != InterfaceTool.activeCursor)
 		{
+			InterfaceTool.activeCursor = new_cursor;
 			Cursor.SetCursor(new_cursor, offset, mode);
 		}
 	}
@@ -161,7 +162,7 @@ public class InterfaceTool : KMonoBehaviour
 
 	public const float MaxClickDistance = 0.02f;
 
-	public static float DepthBias = -0.15f;
+	public const float DepthBias = -0.15f;
 
 	public GameObject visualizer;
 

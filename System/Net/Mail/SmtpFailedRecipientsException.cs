@@ -36,11 +36,6 @@ namespace System.Net.Mail
 			this.innerExceptions = (SmtpFailedRecipientException[])info.GetValue("innerExceptions", typeof(SmtpFailedRecipientException[]));
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			this.GetObjectData(info, context);
-		}
-
 		public SmtpFailedRecipientException[] InnerExceptions
 		{
 			get
@@ -49,14 +44,19 @@ namespace System.Net.Mail
 			}
 		}
 
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
-			if (info == null)
+			if (serializationInfo == null)
 			{
-				throw new ArgumentNullException("info");
+				throw new ArgumentNullException("serializationInfo");
 			}
-			base.GetObjectData(info, context);
-			info.AddValue("innerExceptions", this.innerExceptions);
+			base.GetObjectData(serializationInfo, streamingContext);
+			serializationInfo.AddValue("innerExceptions", this.innerExceptions);
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			this.GetObjectData(info, context);
 		}
 
 		private SmtpFailedRecipientException[] innerExceptions;

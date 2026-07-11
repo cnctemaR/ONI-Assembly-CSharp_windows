@@ -31,5 +31,5 @@ public class SuitExpert : RoleConfig
 
 	public const string ID = "SuitExpert";
 
-	public static AttributeModifier AthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), DUPLICANTS.ROLES.SUIT_EXPERT.NAME, false, false, true);
+	public static readonly AttributeModifier AthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), DUPLICANTS.ROLES.SUIT_EXPERT.NAME, false, false, true);
 }

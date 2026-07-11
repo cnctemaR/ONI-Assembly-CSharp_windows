@@ -3,7 +3,7 @@
 namespace System.Runtime.InteropServices.ComTypes
 {
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("00000010-0000-0000-c000-000000000046")]
+	[Guid("00000010-0000-0000-C000-000000000046")]
 	[ComImport]
 	public interface IRunningObjectTable
 	{

@@ -24,7 +24,6 @@ public class GeneratorConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 8f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
 		return buildingDef;

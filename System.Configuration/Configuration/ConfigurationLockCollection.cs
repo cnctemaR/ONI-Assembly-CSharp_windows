@@ -12,11 +12,6 @@ namespace System.Configuration
 			this.lockType = lockType;
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this.names.CopyTo(array, index);
-		}
-
 		private void CheckName(string name)
 		{
 			bool flag = (this.lockType & ConfigurationLockType.Attribute) == ConfigurationLockType.Attribute;
@@ -48,8 +43,8 @@ namespace System.Configuration
 				{
 					name,
 					this.valid_names,
-					(!flag) ? "element" : "attribute",
-					(!flag) ? "elements" : "attributes"
+					flag ? "attribute" : "element",
+					flag ? "attributes" : "elements"
 				}));
 			}
 		}
@@ -108,11 +103,15 @@ namespace System.Configuration
 		{
 			this.Clear();
 			char[] array = new char[] { ',' };
-			string[] array2 = attributeList.Split(array);
-			foreach (string text in array2)
+			foreach (string text in attributeList.Split(array))
 			{
 				this.Add(text.Trim());
 			}
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this.names.CopyTo(array, index);
 		}
 
 		public string AttributeList

@@ -4,29 +4,32 @@ namespace System.Collections.Specialized
 {
 	public class StringEnumerator
 	{
-		internal StringEnumerator(StringCollection coll)
+		internal StringEnumerator(StringCollection mappings)
 		{
-			this.enumerable = ((IEnumerable)coll).GetEnumerator();
+			this.temp = mappings;
+			this.baseEnumerator = this.temp.GetEnumerator();
 		}
 
 		public string Current
 		{
 			get
 			{
-				return (string)this.enumerable.Current;
+				return (string)this.baseEnumerator.Current;
 			}
 		}
 
 		public bool MoveNext()
 		{
-			return this.enumerable.MoveNext();
+			return this.baseEnumerator.MoveNext();
 		}
 
 		public void Reset()
 		{
-			this.enumerable.Reset();
+			this.baseEnumerator.Reset();
 		}
 
-		private IEnumerator enumerable;
+		private IEnumerator baseEnumerator;
+
+		private IEnumerable temp;
 	}
 }

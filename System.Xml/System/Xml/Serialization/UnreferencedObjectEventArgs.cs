@@ -6,28 +6,28 @@ namespace System.Xml.Serialization
 	{
 		public UnreferencedObjectEventArgs(object o, string id)
 		{
-			this.unreferencedObject = o;
-			this.unreferencedId = id;
-		}
-
-		public string UnreferencedId
-		{
-			get
-			{
-				return this.unreferencedId;
-			}
+			this.o = o;
+			this.id = id;
 		}
 
 		public object UnreferencedObject
 		{
 			get
 			{
-				return this.unreferencedObject;
+				return this.o;
 			}
 		}
 
-		private object unreferencedObject;
+		public string UnreferencedId
+		{
+			get
+			{
+				return this.id;
+			}
+		}
 
-		private string unreferencedId;
+		private object o;
+
+		private string id;
 	}
 }

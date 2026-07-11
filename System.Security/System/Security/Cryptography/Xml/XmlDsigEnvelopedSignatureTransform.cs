@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.Xml;
 
@@ -7,29 +6,30 @@ namespace System.Security.Cryptography.Xml
 {
 	public class XmlDsigEnvelopedSignatureTransform : Transform
 	{
-		public XmlDsigEnvelopedSignatureTransform()
-			: this(false)
+		internal int SignaturePosition
 		{
+			set
+			{
+				this._signaturePosition = value;
+			}
+		}
+
+		public XmlDsigEnvelopedSignatureTransform()
+		{
+			base.Algorithm = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
 		}
 
 		public XmlDsigEnvelopedSignatureTransform(bool includeComments)
 		{
+			this._includeComments = includeComments;
 			base.Algorithm = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
-			this.comments = includeComments;
 		}
 
 		public override Type[] InputTypes
 		{
 			get
 			{
-				if (this.input == null)
-				{
-					this.input = new Type[3];
-					this.input[0] = typeof(Stream);
-					this.input[1] = typeof(XmlDocument);
-					this.input[2] = typeof(XmlNodeList);
-				}
-				return this.input;
+				return this._inputTypes;
 			}
 		}
 
@@ -37,14 +37,12 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				if (this.output == null)
-				{
-					this.output = new Type[2];
-					this.output[0] = typeof(XmlDocument);
-					this.output[1] = typeof(XmlNodeList);
-				}
-				return this.output;
+				return this._outputTypes;
 			}
+		}
+
+		public override void LoadInnerXml(XmlNodeList nodeList)
+		{
 		}
 
 		protected override XmlNodeList GetInnerXml()
@@ -52,109 +50,181 @@ namespace System.Security.Cryptography.Xml
 			return null;
 		}
 
+		public override void LoadInput(object obj)
+		{
+			if (obj is Stream)
+			{
+				this.LoadStreamInput((Stream)obj);
+				return;
+			}
+			if (obj is XmlNodeList)
+			{
+				this.LoadXmlNodeListInput((XmlNodeList)obj);
+				return;
+			}
+			if (obj is XmlDocument)
+			{
+				this.LoadXmlDocumentInput((XmlDocument)obj);
+				return;
+			}
+		}
+
+		private void LoadStreamInput(Stream stream)
+		{
+			XmlDocument xmlDocument = new XmlDocument();
+			xmlDocument.PreserveWhitespace = true;
+			XmlResolver xmlResolver = (base.ResolverSet ? this._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), base.BaseURI));
+			XmlReader xmlReader = Utils.PreProcessStreamInput(stream, xmlResolver, base.BaseURI);
+			xmlDocument.Load(xmlReader);
+			this._containingDocument = xmlDocument;
+			if (this._containingDocument == null)
+			{
+				throw new CryptographicException("An XmlDocument context is required for enveloped transforms.");
+			}
+			this._nsm = new XmlNamespaceManager(this._containingDocument.NameTable);
+			this._nsm.AddNamespace("dsig", "http://www.w3.org/2000/09/xmldsig#");
+		}
+
+		private void LoadXmlNodeListInput(XmlNodeList nodeList)
+		{
+			if (nodeList == null)
+			{
+				throw new ArgumentNullException("nodeList");
+			}
+			this._containingDocument = Utils.GetOwnerDocument(nodeList);
+			if (this._containingDocument == null)
+			{
+				throw new CryptographicException("An XmlDocument context is required for enveloped transforms.");
+			}
+			this._nsm = new XmlNamespaceManager(this._containingDocument.NameTable);
+			this._nsm.AddNamespace("dsig", "http://www.w3.org/2000/09/xmldsig#");
+			this._inputNodeList = nodeList;
+		}
+
+		private void LoadXmlDocumentInput(XmlDocument doc)
+		{
+			if (doc == null)
+			{
+				throw new ArgumentNullException("doc");
+			}
+			this._containingDocument = doc;
+			this._nsm = new XmlNamespaceManager(this._containingDocument.NameTable);
+			this._nsm.AddNamespace("dsig", "http://www.w3.org/2000/09/xmldsig#");
+		}
+
 		public override object GetOutput()
 		{
-			if (this.inputObj is Stream)
+			if (this._containingDocument == null)
 			{
-				XmlDocument xmlDocument = new XmlDocument();
-				xmlDocument.PreserveWhitespace = true;
-				xmlDocument.XmlResolver = base.GetResolver();
-				xmlDocument.Load(new XmlSignatureStreamReader(new StreamReader(this.inputObj as Stream)));
-				return this.GetOutputFromNode(xmlDocument, this.GetNamespaceManager(xmlDocument), true);
+				throw new CryptographicException("An XmlDocument context is required for enveloped transforms.");
 			}
-			if (this.inputObj is XmlDocument)
+			if (this._inputNodeList != null)
 			{
-				XmlDocument xmlDocument = this.inputObj as XmlDocument;
-				return this.GetOutputFromNode(xmlDocument, this.GetNamespaceManager(xmlDocument), true);
-			}
-			if (this.inputObj is XmlNodeList)
-			{
-				ArrayList arrayList = new ArrayList();
-				XmlNodeList xmlNodeList = (XmlNodeList)this.inputObj;
-				if (xmlNodeList.Count > 0)
+				if (this._signaturePosition == 0)
 				{
-					XmlNamespaceManager namespaceManager = this.GetNamespaceManager(xmlNodeList.Item(0));
-					ArrayList arrayList2 = new ArrayList();
-					foreach (object obj in xmlNodeList)
+					return this._inputNodeList;
+				}
+				XmlNodeList xmlNodeList = this._containingDocument.SelectNodes("//dsig:Signature", this._nsm);
+				if (xmlNodeList == null)
+				{
+					return this._inputNodeList;
+				}
+				CanonicalXmlNodeList canonicalXmlNodeList = new CanonicalXmlNodeList();
+				foreach (object obj in this._inputNodeList)
+				{
+					XmlNode xmlNode = (XmlNode)obj;
+					if (xmlNode != null)
 					{
-						XmlNode xmlNode = (XmlNode)obj;
-						arrayList2.Add(xmlNode);
-					}
-					foreach (object obj2 in arrayList2)
-					{
-						XmlNode xmlNode2 = (XmlNode)obj2;
-						if (xmlNode2.SelectNodes("ancestor-or-self::dsig:Signature", namespaceManager).Count == 0)
+						if (Utils.IsXmlNamespaceNode(xmlNode) || Utils.IsNamespaceNode(xmlNode))
 						{
-							arrayList.Add(this.GetOutputFromNode(xmlNode2, namespaceManager, false));
+							canonicalXmlNodeList.Add(xmlNode);
+						}
+						else
+						{
+							try
+							{
+								XmlNode xmlNode2 = xmlNode.SelectSingleNode("ancestor-or-self::dsig:Signature[1]", this._nsm);
+								int num = 0;
+								foreach (object obj2 in xmlNodeList)
+								{
+									XmlNode xmlNode3 = (XmlNode)obj2;
+									num++;
+									if (xmlNode3 == xmlNode2)
+									{
+										break;
+									}
+								}
+								if (xmlNode2 == null || (xmlNode2 != null && num != this._signaturePosition))
+								{
+									canonicalXmlNodeList.Add(xmlNode);
+								}
+							}
+							catch
+							{
+							}
 						}
 					}
 				}
-				return new XmlDsigNodeList(arrayList);
+				return canonicalXmlNodeList;
 			}
-			if (this.inputObj is XmlElement)
+			else
 			{
-				XmlElement xmlElement = this.inputObj as XmlElement;
-				XmlNamespaceManager namespaceManager2 = this.GetNamespaceManager(xmlElement);
-				if (xmlElement.SelectNodes("ancestor-or-self::dsig:Signature", namespaceManager2).Count == 0)
+				XmlNodeList xmlNodeList2 = this._containingDocument.SelectNodes("//dsig:Signature", this._nsm);
+				if (xmlNodeList2 == null)
 				{
-					return this.GetOutputFromNode(xmlElement, namespaceManager2, true);
+					return this._containingDocument;
 				}
+				if (xmlNodeList2.Count < this._signaturePosition || this._signaturePosition <= 0)
+				{
+					return this._containingDocument;
+				}
+				xmlNodeList2[this._signaturePosition - 1].ParentNode.RemoveChild(xmlNodeList2[this._signaturePosition - 1]);
+				return this._containingDocument;
 			}
-			throw new NullReferenceException();
-		}
-
-		private XmlNamespaceManager GetNamespaceManager(XmlNode n)
-		{
-			XmlDocument xmlDocument = ((!(n is XmlDocument)) ? n.OwnerDocument : (n as XmlDocument));
-			XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(xmlDocument.NameTable);
-			xmlNamespaceManager.AddNamespace("dsig", "http://www.w3.org/2000/09/xmldsig#");
-			return xmlNamespaceManager;
-		}
-
-		private XmlNode GetOutputFromNode(XmlNode input, XmlNamespaceManager nsmgr, bool remove)
-		{
-			if (remove)
-			{
-				XmlNodeList xmlNodeList = input.SelectNodes("descendant-or-self::dsig:Signature", nsmgr);
-				ArrayList arrayList = new ArrayList();
-				foreach (object obj in xmlNodeList)
-				{
-					XmlNode xmlNode = (XmlNode)obj;
-					arrayList.Add(xmlNode);
-				}
-				foreach (object obj2 in arrayList)
-				{
-					XmlNode xmlNode2 = (XmlNode)obj2;
-					xmlNode2.ParentNode.RemoveChild(xmlNode2);
-				}
-			}
-			return input;
 		}
 
 		public override object GetOutput(Type type)
 		{
-			if (type == typeof(Stream))
+			if (type == typeof(XmlNodeList) || type.IsSubclassOf(typeof(XmlNodeList)))
 			{
-				return this.GetOutput();
+				if (this._inputNodeList == null)
+				{
+					this._inputNodeList = Utils.AllDescendantNodes(this._containingDocument, true);
+				}
+				return (XmlNodeList)this.GetOutput();
 			}
-			throw new ArgumentException("type");
+			if (!(type == typeof(XmlDocument)) && !type.IsSubclassOf(typeof(XmlDocument)))
+			{
+				throw new ArgumentException("The input type was invalid for this transform.", "type");
+			}
+			if (this._inputNodeList != null)
+			{
+				throw new ArgumentException("The input type was invalid for this transform.", "type");
+			}
+			return (XmlDocument)this.GetOutput();
 		}
 
-		public override void LoadInnerXml(XmlNodeList nodeList)
+		private Type[] _inputTypes = new Type[]
 		{
-		}
+			typeof(Stream),
+			typeof(XmlNodeList),
+			typeof(XmlDocument)
+		};
 
-		public override void LoadInput(object obj)
+		private Type[] _outputTypes = new Type[]
 		{
-			this.inputObj = obj;
-		}
+			typeof(XmlNodeList),
+			typeof(XmlDocument)
+		};
 
-		private Type[] input;
+		private XmlNodeList _inputNodeList;
 
-		private Type[] output;
+		private bool _includeComments;
 
-		private bool comments;
+		private XmlNamespaceManager _nsm;
 
-		private object inputObj;
+		private XmlDocument _containingDocument;
+
+		private int _signaturePosition;
 	}
 }

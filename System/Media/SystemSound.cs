@@ -12,8 +12,7 @@ namespace System.Media
 
 		public void Play()
 		{
-			SoundPlayer soundPlayer = new SoundPlayer(this.resource);
-			soundPlayer.Play();
+			new SoundPlayer(this.resource).Play();
 		}
 
 		private Stream resource;

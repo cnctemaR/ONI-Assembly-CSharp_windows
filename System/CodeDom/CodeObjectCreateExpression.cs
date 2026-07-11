@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeObjectCreateExpression : CodeExpression
 	{
@@ -14,19 +11,19 @@ namespace System.CodeDom
 
 		public CodeObjectCreateExpression(CodeTypeReference createType, params CodeExpression[] parameters)
 		{
-			this.createType = createType;
+			this.CreateType = createType;
 			this.Parameters.AddRange(parameters);
 		}
 
 		public CodeObjectCreateExpression(string createType, params CodeExpression[] parameters)
 		{
-			this.createType = new CodeTypeReference(createType);
+			this.CreateType = new CodeTypeReference(createType);
 			this.Parameters.AddRange(parameters);
 		}
 
 		public CodeObjectCreateExpression(Type createType, params CodeExpression[] parameters)
 		{
-			this.createType = new CodeTypeReference(createType);
+			this.CreateType = new CodeTypeReference(createType);
 			this.Parameters.AddRange(parameters);
 		}
 
@@ -34,37 +31,21 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.createType == null)
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._createType) == null)
 				{
-					this.createType = new CodeTypeReference(string.Empty);
+					codeTypeReference = (this._createType = new CodeTypeReference(""));
 				}
-				return this.createType;
+				return codeTypeReference;
 			}
 			set
 			{
-				this.createType = value;
+				this._createType = value;
 			}
 		}
 
-		public CodeExpressionCollection Parameters
-		{
-			get
-			{
-				if (this.parameters == null)
-				{
-					this.parameters = new CodeExpressionCollection();
-				}
-				return this.parameters;
-			}
-		}
+		public CodeExpressionCollection Parameters { get; } = new CodeExpressionCollection();
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private CodeTypeReference createType;
-
-		private CodeExpressionCollection parameters;
+		private CodeTypeReference _createType;
 	}
 }

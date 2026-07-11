@@ -5,9 +5,9 @@ using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-	[ListBindable(false)]
 	[Editor("Microsoft.VSDesigner.Data.Design.DBParametersEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-	public sealed class OleDbParameterCollection : DbParameterCollection, IList, IDataParameterCollection, IEnumerable, ICollection
+	[ListBindable(false)]
+	public sealed class OleDbParameterCollection : DbParameterCollection, ICollection, IEnumerable, IList, IDataParameterCollection
 	{
 		internal OleDbParameterCollection()
 		{
@@ -17,7 +17,31 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				return this.list.Count;
+				throw null;
+			}
+		}
+
+		public override bool IsFixedSize
+		{
+			get
+			{
+				throw null;
+			}
+		}
+
+		public override bool IsReadOnly
+		{
+			get
+			{
+				throw null;
+			}
+		}
+
+		public override bool IsSynchronized
+		{
+			get
+			{
+				throw null;
 			}
 		}
 
@@ -27,11 +51,10 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				return (OleDbParameter)this.list[index];
+				throw null;
 			}
 			set
 			{
-				this.list[index] = value;
 			}
 		}
 
@@ -41,47 +64,10 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				foreach (object obj in this.list)
-				{
-					OleDbParameter oleDbParameter = (OleDbParameter)obj;
-					if (oleDbParameter.ParameterName.Equals(parameterName))
-					{
-						return oleDbParameter;
-					}
-				}
-				throw new IndexOutOfRangeException("The specified name does not exist: " + parameterName);
+				throw null;
 			}
 			set
 			{
-				if (!this.Contains(parameterName))
-				{
-					throw new IndexOutOfRangeException("The specified name does not exist: " + parameterName);
-				}
-				this[this.IndexOf(parameterName)] = value;
-			}
-		}
-
-		public override bool IsFixedSize
-		{
-			get
-			{
-				return this.list.IsFixedSize;
-			}
-		}
-
-		public override bool IsReadOnly
-		{
-			get
-			{
-				return this.list.IsReadOnly;
-			}
-		}
-
-		public override bool IsSynchronized
-		{
-			get
-			{
-				return this.list.IsSynchronized;
 			}
 		}
 
@@ -89,226 +75,147 @@ namespace System.Data.OleDb
 		{
 			get
 			{
-				return this.list.SyncRoot;
+				throw null;
 			}
 		}
 
-		internal IntPtr GdaParameterList
+		public OleDbParameter Add(OleDbParameter value)
 		{
-			[MonoTODO]
-			get
-			{
-				return libgda.gda_parameter_list_new();
-			}
+			throw null;
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public override int Add(object value)
 		{
-			if (!(value is OleDbParameter))
-			{
-				throw new InvalidCastException("The parameter was not an OleDbParameter.");
-			}
-			this.Add((OleDbParameter)value);
-			return this.IndexOf(value);
-		}
-
-		public OleDbParameter Add(OleDbParameter value)
-		{
-			if (value.Container != null)
-			{
-				throw new ArgumentException("The OleDbParameter specified in the value parameter is already added to this or another OleDbParameterCollection.");
-			}
-			value.Container = this;
-			this.list.Add(value);
-			return value;
-		}
-
-		[Obsolete("OleDbParameterCollection.Add(string, value) is now obsolete. Use OleDbParameterCollection.AddWithValue(string, object) instead.")]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public OleDbParameter Add(string parameterName, object value)
-		{
-			return this.Add(new OleDbParameter(parameterName, value));
-		}
-
-		public OleDbParameter AddWithValue(string parameterName, object value)
-		{
-			return this.Add(new OleDbParameter(parameterName, value));
+			throw null;
 		}
 
 		public OleDbParameter Add(string parameterName, OleDbType oleDbType)
 		{
-			return this.Add(new OleDbParameter(parameterName, oleDbType));
+			throw null;
 		}
 
 		public OleDbParameter Add(string parameterName, OleDbType oleDbType, int size)
 		{
-			return this.Add(new OleDbParameter(parameterName, oleDbType, size));
+			throw null;
 		}
 
 		public OleDbParameter Add(string parameterName, OleDbType oleDbType, int size, string sourceColumn)
 		{
-			return this.Add(new OleDbParameter(parameterName, oleDbType, size, sourceColumn));
+			throw null;
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("OleDbParameterCollection.Add(string, value) is now obsolete. Use OleDbParameterCollection.AddWithValue(string, object) instead.")]
+		public OleDbParameter Add(string parameterName, object value)
+		{
+			throw null;
 		}
 
 		public override void AddRange(Array values)
 		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			foreach (object obj in values)
-			{
-				this.Add(obj);
-			}
 		}
 
 		public void AddRange(OleDbParameter[] values)
 		{
-			if (values == null)
-			{
-				throw new ArgumentNullException("values");
-			}
-			foreach (OleDbParameter oleDbParameter in values)
-			{
-				this.Add(oleDbParameter);
-			}
+		}
+
+		public OleDbParameter AddWithValue(string parameterName, object value)
+		{
+			throw null;
 		}
 
 		public override void Clear()
 		{
-			foreach (object obj in this.list)
-			{
-				OleDbParameter oleDbParameter = (OleDbParameter)obj;
-				oleDbParameter.Container = null;
-			}
-			this.list.Clear();
-		}
-
-		public override bool Contains(object value)
-		{
-			if (!(value is OleDbParameter))
-			{
-				throw new InvalidCastException("The parameter was not an OleDbParameter.");
-			}
-			return this.Contains(((OleDbParameter)value).ParameterName);
-		}
-
-		public override bool Contains(string value)
-		{
-			foreach (object obj in this.list)
-			{
-				OleDbParameter oleDbParameter = (OleDbParameter)obj;
-				if (oleDbParameter.ParameterName.Equals(value))
-				{
-					return true;
-				}
-			}
-			return false;
 		}
 
 		public bool Contains(OleDbParameter value)
 		{
-			return this.IndexOf(value) != -1;
+			throw null;
+		}
+
+		public override bool Contains(object value)
+		{
+			throw null;
+		}
+
+		public override bool Contains(string value)
+		{
+			throw null;
 		}
 
 		public override void CopyTo(Array array, int index)
 		{
-			this.list.CopyTo(array, index);
 		}
 
 		public void CopyTo(OleDbParameter[] array, int index)
 		{
-			this.CopyTo(array, index);
 		}
 
 		public override IEnumerator GetEnumerator()
 		{
-			return this.list.GetEnumerator();
+			throw null;
 		}
 
 		[MonoTODO]
 		protected override DbParameter GetParameter(int index)
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		[MonoTODO]
 		protected override DbParameter GetParameter(string parameterName)
 		{
-			throw new NotImplementedException();
-		}
-
-		public override int IndexOf(object value)
-		{
-			if (!(value is OleDbParameter))
-			{
-				throw new InvalidCastException("The parameter was not an OleDbParameter.");
-			}
-			return this.IndexOf(((OleDbParameter)value).ParameterName);
+			throw null;
 		}
 
 		public int IndexOf(OleDbParameter value)
 		{
-			return this.IndexOf(value);
+			throw null;
+		}
+
+		public override int IndexOf(object value)
+		{
+			throw null;
 		}
 
 		public override int IndexOf(string parameterName)
 		{
-			for (int i = 0; i < this.Count; i++)
-			{
-				if (this[i].ParameterName.Equals(parameterName))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		public override void Insert(int index, object value)
-		{
-			this.list.Insert(index, value);
+			throw null;
 		}
 
 		public void Insert(int index, OleDbParameter value)
 		{
-			this.Insert(index, value);
 		}
 
-		public override void Remove(object value)
+		public override void Insert(int index, object value)
 		{
-			((OleDbParameter)value).Container = null;
-			this.list.Remove(value);
 		}
 
 		public void Remove(OleDbParameter value)
 		{
-			this.Remove(value);
+		}
+
+		public override void Remove(object value)
+		{
 		}
 
 		public override void RemoveAt(int index)
 		{
-			this[index].Container = null;
-			this.list.RemoveAt(index);
 		}
 
 		public override void RemoveAt(string parameterName)
 		{
-			this.RemoveAt(this.IndexOf(parameterName));
 		}
 
 		[MonoTODO]
 		protected override void SetParameter(int index, DbParameter value)
 		{
-			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
 		protected override void SetParameter(string parameterName, DbParameter value)
 		{
-			throw new NotImplementedException();
 		}
-
-		private ArrayList list = new ArrayList();
 	}
 }

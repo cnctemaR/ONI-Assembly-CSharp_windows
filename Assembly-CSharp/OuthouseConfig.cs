@@ -21,7 +21,6 @@ public class OuthouseConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.DiseaseCellVisName = "FoodPoisoning";
-		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
 		SoundEventVolumeCache.instance.AddVolume("outhouse_kanim", "Latrine_door_open", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("outhouse_kanim", "Latrine_door_close", NOISE_POLLUTION.NOISY.TIER1);

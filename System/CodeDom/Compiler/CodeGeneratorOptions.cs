@@ -1,55 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.CodeDom.Compiler
 {
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public class CodeGeneratorOptions
 	{
-		public CodeGeneratorOptions()
-		{
-			this.properties = new global::System.Collections.Specialized.ListDictionary();
-		}
-
-		public bool BlankLinesBetweenMembers
+		public object this[string index]
 		{
 			get
 			{
-				object obj = this.properties["BlankLinesBetweenMembers"];
-				return obj == null || (bool)obj;
+				return this._options[index];
 			}
 			set
 			{
-				this.properties["BlankLinesBetweenMembers"] = value;
-			}
-		}
-
-		public string BracingStyle
-		{
-			get
-			{
-				object obj = this.properties["BracingStyle"];
-				return (obj != null) ? ((string)obj) : "Block";
-			}
-			set
-			{
-				this.properties["BracingStyle"] = value;
-			}
-		}
-
-		public bool ElseOnClosing
-		{
-			get
-			{
-				object obj = this.properties["ElseOnClosing"];
-				return obj != null && (bool)obj;
-			}
-			set
-			{
-				this.properties["ElseOnClosing"] = value;
+				this._options[index] = value;
 			}
 		}
 
@@ -57,41 +22,75 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				object obj = this.properties["IndentString"];
-				return (obj != null) ? ((string)obj) : "    ";
+				object obj = this._options["IndentString"];
+				if (obj == null)
+				{
+					return "    ";
+				}
+				return (string)obj;
 			}
 			set
 			{
-				this.properties["IndentString"] = value;
+				this._options["IndentString"] = value;
 			}
 		}
 
-		public object this[string index]
+		public string BracingStyle
 		{
 			get
 			{
-				return this.properties[index];
+				object obj = this._options["BracingStyle"];
+				if (obj == null)
+				{
+					return "Block";
+				}
+				return (string)obj;
 			}
 			set
 			{
-				this.properties[index] = value;
+				this._options["BracingStyle"] = value;
 			}
 		}
 
-		[ComVisible(false)]
-		public bool VerbatimOrder
+		public bool ElseOnClosing
 		{
 			get
 			{
-				object obj = this.properties["VerbatimOrder"];
+				object obj = this._options["ElseOnClosing"];
 				return obj != null && (bool)obj;
 			}
 			set
 			{
-				this.properties["VerbatimOrder"] = value;
+				this._options["ElseOnClosing"] = value;
 			}
 		}
 
-		private IDictionary properties;
+		public bool BlankLinesBetweenMembers
+		{
+			get
+			{
+				object obj = this._options["BlankLinesBetweenMembers"];
+				return obj == null || (bool)obj;
+			}
+			set
+			{
+				this._options["BlankLinesBetweenMembers"] = value;
+			}
+		}
+
+		public bool VerbatimOrder
+		{
+			get
+			{
+				object obj = this._options["VerbatimOrder"];
+				return obj != null && (bool)obj;
+			}
+			set
+			{
+				this._options["VerbatimOrder"] = value;
+			}
+		}
+
+		private readonly IDictionary _options = new ListDictionary();
 	}
 }

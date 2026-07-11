@@ -65,23 +65,32 @@ namespace System.Net
 				this.disposed = true;
 				MemoryStream headers = this.GetHeaders(true);
 				bool sendChunked = this.response.SendChunked;
-				if (headers != null)
+				if (this.stream.CanWrite)
 				{
-					long position = headers.Position;
-					if (sendChunked && !this.trailer_sent)
+					try
 					{
-						byte[] array = ResponseStream.GetChunkSizeBytes(0, true);
-						headers.Position = headers.Length;
-						headers.Write(array, 0, array.Length);
+						if (headers != null)
+						{
+							long position = headers.Position;
+							if (sendChunked && !this.trailer_sent)
+							{
+								byte[] array = ResponseStream.GetChunkSizeBytes(0, true);
+								headers.Position = headers.Length;
+								headers.Write(array, 0, array.Length);
+							}
+							this.InternalWrite(headers.GetBuffer(), (int)position, (int)(headers.Length - position));
+							this.trailer_sent = true;
+						}
+						else if (sendChunked && !this.trailer_sent)
+						{
+							byte[] array = ResponseStream.GetChunkSizeBytes(0, true);
+							this.InternalWrite(array, 0, array.Length);
+							this.trailer_sent = true;
+						}
 					}
-					this.InternalWrite(headers.GetBuffer(), (int)position, (int)(headers.Length - position));
-					this.trailer_sent = true;
-				}
-				else if (sendChunked && !this.trailer_sent)
-				{
-					byte[] array = ResponseStream.GetChunkSizeBytes(0, true);
-					this.InternalWrite(array, 0, array.Length);
-					this.trailer_sent = true;
+					catch (IOException)
+					{
+					}
 				}
 				this.response.Close();
 			}
@@ -89,12 +98,21 @@ namespace System.Net
 
 		private MemoryStream GetHeaders(bool closing)
 		{
-			if (this.response.HeadersSent)
+			object headers_lock = this.response.headers_lock;
+			MemoryStream memoryStream;
+			lock (headers_lock)
 			{
-				return null;
+				if (this.response.HeadersSent)
+				{
+					memoryStream = null;
+				}
+				else
+				{
+					MemoryStream memoryStream2 = new MemoryStream();
+					this.response.SendHeaders(closing, memoryStream2);
+					memoryStream = memoryStream2;
+				}
 			}
-			MemoryStream memoryStream = new MemoryStream();
-			this.response.SendHeaders(closing, memoryStream);
 			return memoryStream;
 		}
 
@@ -104,7 +122,7 @@ namespace System.Net
 
 		private static byte[] GetChunkSizeBytes(int size, bool final)
 		{
-			string text = string.Format("{0:x}\r\n{1}", size, (!final) ? string.Empty : "\r\n");
+			string text = string.Format("{0:x}\r\n{1}", size, final ? "\r\n" : "");
 			return Encoding.ASCII.GetBytes(text);
 		}
 
@@ -115,15 +133,14 @@ namespace System.Net
 				try
 				{
 					this.stream.Write(buffer, offset, count);
+					return;
 				}
 				catch
 				{
+					return;
 				}
 			}
-			else
-			{
-				this.stream.Write(buffer, offset, count);
-			}
+			this.stream.Write(buffer, offset, count);
 		}
 
 		public override void Write(byte[] buffer, int offset, int count)
@@ -131,6 +148,10 @@ namespace System.Net
 			if (this.disposed)
 			{
 				throw new ObjectDisposedException(base.GetType().ToString());
+			}
+			if (count == 0)
+			{
+				return;
 			}
 			MemoryStream headers = this.GetHeaders(false);
 			bool sendChunked = this.response.SendChunked;
@@ -211,18 +232,17 @@ namespace System.Net
 					{
 						this.stream.Write(ResponseStream.crlf, 0, 2);
 					}
+					return;
 				}
 				catch
 				{
+					return;
 				}
 			}
-			else
+			this.stream.EndWrite(ares);
+			if (this.response.SendChunked)
 			{
-				this.stream.EndWrite(ares);
-				if (this.response.SendChunked)
-				{
-					this.stream.Write(ResponseStream.crlf, 0, 2);
-				}
+				this.stream.Write(ResponseStream.crlf, 0, 2);
 			}
 		}
 

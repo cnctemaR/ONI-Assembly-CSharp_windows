@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	public interface IMethodCallMessage : IMessage, IMethodMessage
+	public interface IMethodCallMessage : IMethodMessage, IMessage
 	{
 		int InArgCount { get; }
 

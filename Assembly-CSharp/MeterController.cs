@@ -43,12 +43,13 @@ public class MeterController
 	private void Initialize(KAnimControllerBase building_controller, string meter_target, string meter_animation, Meter.Offset front_back, Vector3 tracker_offset, params string[] symbols_to_hide)
 	{
 		string text = building_controller.name + "." + meter_animation;
-		GameObject gameObject = new GameObject(text);
+		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(Assets.GetPrefab(MeterConfig.ID));
+		gameObject.name = text;
 		gameObject.SetActive(false);
 		gameObject.transform.parent = building_controller.transform;
 		this.gameObject = gameObject;
-		KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
-		kprefabID.PrefabTag = new Tag(text);
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		component.PrefabTag = new Tag(text);
 		Vector3 position = building_controller.transform.GetPosition();
 		if (front_back == Meter.Offset.Behind)
 		{
@@ -59,18 +60,18 @@ public class MeterController
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
 		}
 		gameObject.transform.SetPosition(position);
-		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
-		kbatchedAnimController.AnimFiles = new KAnimFile[] { building_controller.AnimFiles[0] };
-		kbatchedAnimController.initialAnim = meter_animation;
-		kbatchedAnimController.fgLayer = Grid.SceneLayer.NoLayer;
-		kbatchedAnimController.initialMode = KAnim.PlayMode.Paused;
-		kbatchedAnimController.isMovable = true;
-		kbatchedAnimController.FlipX = building_controller.FlipX;
-		kbatchedAnimController.FlipY = building_controller.FlipY;
-		this.meterController = kbatchedAnimController;
-		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
-		kbatchedAnimTracker.offset = tracker_offset;
-		kbatchedAnimTracker.symbol = new HashedString(meter_target);
+		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+		component2.AnimFiles = new KAnimFile[] { building_controller.AnimFiles[0] };
+		component2.initialAnim = meter_animation;
+		component2.fgLayer = Grid.SceneLayer.NoLayer;
+		component2.initialMode = KAnim.PlayMode.Paused;
+		component2.isMovable = true;
+		component2.FlipX = building_controller.FlipX;
+		component2.FlipY = building_controller.FlipY;
+		this.meterController = component2;
+		KBatchedAnimTracker component3 = gameObject.GetComponent<KBatchedAnimTracker>();
+		component3.offset = tracker_offset;
+		component3.symbol = new HashedString(meter_target);
 		gameObject.SetActive(true);
 		building_controller.SetSymbolVisiblity(meter_target, false);
 		if (symbols_to_hide != null)
@@ -80,7 +81,7 @@ public class MeterController
 				building_controller.SetSymbolVisiblity(symbols_to_hide[i], false);
 			}
 		}
-		this.link = new KAnimLink(building_controller, kbatchedAnimController);
+		this.link = new KAnimLink(building_controller, component2);
 	}
 
 	public void SetPositionPercent(float percent_full)

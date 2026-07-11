@@ -15,7 +15,6 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 		buildingDef.IsFoundation = true;
 		buildingDef.ViewMode = SimViewMode.None;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
@@ -47,7 +46,7 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = false;
-		go.GetComponent<Deconstructable>().allowDeconstruction = false;
+		go.GetComponent<Deconstructable>().allowDeconstruction = true;
 		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
 		component2.initialAnim = "closed";
 	}

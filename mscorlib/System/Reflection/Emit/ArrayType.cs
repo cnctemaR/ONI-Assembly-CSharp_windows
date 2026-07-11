@@ -1,14 +1,41 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Reflection.Emit
 {
-	internal class ArrayType : DerivedType
+	[StructLayout(LayoutKind.Sequential)]
+	internal class ArrayType : SymbolType
 	{
 		internal ArrayType(Type elementType, int rank)
 			: base(elementType)
 		{
 			this.rank = rank;
+		}
+
+		internal int GetEffectiveRank()
+		{
+			return this.rank;
+		}
+
+		internal override Type InternalResolve()
+		{
+			Type type = this.m_baseType.InternalResolve();
+			if (this.rank == 0)
+			{
+				return type.MakeArrayType();
+			}
+			return type.MakeArrayType(this.rank);
+		}
+
+		internal override Type RuntimeResolve()
+		{
+			Type type = this.m_baseType.RuntimeResolve();
+			if (this.rank == 0)
+			{
+				return type.MakeArrayType();
+			}
+			return type.MakeArrayType(this.rank);
 		}
 
 		protected override bool IsArrayImpl()
@@ -18,24 +45,11 @@ namespace System.Reflection.Emit
 
 		public override int GetArrayRank()
 		{
-			return (this.rank != 0) ? this.rank : 1;
-		}
-
-		public override Type BaseType
-		{
-			get
+			if (this.rank != 0)
 			{
-				return typeof(Array);
+				return this.rank;
 			}
-		}
-
-		protected override TypeAttributes GetAttributeFlagsImpl()
-		{
-			if (((ModuleBuilder)this.elementType.Module).assemblyb.IsCompilerContext)
-			{
-				return (this.elementType.Attributes & TypeAttributes.VisibilityMask) | TypeAttributes.Sealed | TypeAttributes.Serializable;
-			}
-			return this.elementType.Attributes;
+			return 1;
 		}
 
 		internal override string FormatName(string elementName)

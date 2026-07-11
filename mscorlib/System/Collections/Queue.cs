@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
+using System.Threading;
 
 namespace System.Collections
 {
-	[DebuggerDisplay("Count={Count}")]
+	[DebuggerTypeProxy(typeof(Queue.QueueDebugView))]
+	[DebuggerDisplay("Count = {Count}")]
 	[ComVisible(true)]
-	[DebuggerTypeProxy(typeof(CollectionDebuggerView))]
 	[Serializable]
-	public class Queue : IEnumerable, ICloneable, ICollection
+	public class Queue : ICollection, IEnumerable, ICloneable
 	{
 		public Queue()
 			: this(32, 2f)
@@ -20,8 +22,25 @@ namespace System.Collections
 		{
 		}
 
+		public Queue(int capacity, float growFactor)
+		{
+			if (capacity < 0)
+			{
+				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("Non-negative number required."));
+			}
+			if ((double)growFactor < 1.0 || (double)growFactor > 10.0)
+			{
+				throw new ArgumentOutOfRangeException("growFactor", Environment.GetResourceString("Queue grow factor must be between {0} and {1}.", new object[] { 1, 10 }));
+			}
+			this._array = new object[capacity];
+			this._head = 0;
+			this._tail = 0;
+			this._size = 0;
+			this._growFactor = (int)(growFactor * 100f);
+		}
+
 		public Queue(ICollection col)
-			: this((col != null) ? col.Count : 32)
+			: this((col == null) ? 32 : col.Count)
 		{
 			if (col == null)
 			{
@@ -33,26 +52,28 @@ namespace System.Collections
 			}
 		}
 
-		public Queue(int capacity, float growFactor)
-		{
-			if (capacity < 0)
-			{
-				throw new ArgumentOutOfRangeException("capacity", "Needs a non-negative number");
-			}
-			if (growFactor < 1f || growFactor > 10f)
-			{
-				throw new ArgumentOutOfRangeException("growFactor", "Queue growth factor must be between 1.0 and 10.0, inclusive");
-			}
-			this._array = new object[capacity];
-			this._growFactor = (int)(growFactor * 100f);
-		}
-
 		public virtual int Count
 		{
 			get
 			{
 				return this._size;
 			}
+		}
+
+		public virtual object Clone()
+		{
+			Queue queue = new Queue(this._size);
+			queue._size = this._size;
+			int num = this._size;
+			int num2 = ((this._array.Length - this._head < num) ? (this._array.Length - this._head) : num);
+			Array.Copy(this._array, this._head, queue._array, 0, num2);
+			num -= num2;
+			if (num > 0)
+			{
+				Array.Copy(this._array, 0, queue._array, this._array.Length - this._head, num);
+			}
+			queue._version = this._version;
+			return queue;
 		}
 
 		public virtual bool IsSynchronized
@@ -67,8 +88,29 @@ namespace System.Collections
 		{
 			get
 			{
-				return this;
+				if (this._syncRoot == null)
+				{
+					Interlocked.CompareExchange(ref this._syncRoot, new object(), null);
+				}
+				return this._syncRoot;
 			}
+		}
+
+		public virtual void Clear()
+		{
+			if (this._head < this._tail)
+			{
+				Array.Clear(this._array, this._head, this._size);
+			}
+			else
+			{
+				Array.Clear(this._array, this._head, this._array.Length - this._head);
+				Array.Clear(this._array, 0, this._tail);
+			}
+			this._head = 0;
+			this._tail = 0;
+			this._size = 0;
+			this._version++;
 		}
 
 		public virtual void CopyTo(Array array, int index)
@@ -77,21 +119,47 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("array");
 			}
+			if (array.Rank != 1)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
+			}
 			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException("index");
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
 			}
-			if (array.Rank > 1 || (index != 0 && index >= array.Length) || this._size > array.Length - index)
+			if (array.Length - index < this._size)
 			{
-				throw new ArgumentException();
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			int num = this._array.Length;
-			int num2 = num - this._head;
-			Array.Copy(this._array, this._head, array, index, Math.Min(this._size, num2));
-			if (this._size > num2)
+			int num = this._size;
+			if (num == 0)
 			{
-				Array.Copy(this._array, 0, array, index + num2, this._size - num2);
+				return;
 			}
+			int num2 = ((this._array.Length - this._head < num) ? (this._array.Length - this._head) : num);
+			Array.Copy(this._array, this._head, array, index, num2);
+			num -= num2;
+			if (num > 0)
+			{
+				Array.Copy(this._array, 0, array, index + this._array.Length - this._head, num);
+			}
+		}
+
+		public virtual void Enqueue(object obj)
+		{
+			if (this._size == this._array.Length)
+			{
+				int num = (int)((long)this._array.Length * (long)this._growFactor / 100L);
+				if (num < this._array.Length + 4)
+				{
+					num = this._array.Length + 4;
+				}
+				this.SetCapacity(num);
+			}
+			this._array[this._tail] = obj;
+			this._tail = (this._tail + 1) % this._array.Length;
+			this._size++;
+			this._version++;
 		}
 
 		public virtual IEnumerator GetEnumerator()
@@ -99,161 +167,137 @@ namespace System.Collections
 			return new Queue.QueueEnumerator(this);
 		}
 
-		public virtual object Clone()
-		{
-			Queue queue = new Queue(this._array.Length);
-			queue._growFactor = this._growFactor;
-			Array.Copy(this._array, 0, queue._array, 0, this._array.Length);
-			queue._head = this._head;
-			queue._size = this._size;
-			queue._tail = this._tail;
-			return queue;
-		}
-
-		public virtual void Clear()
-		{
-			this._version++;
-			this._head = 0;
-			this._size = 0;
-			this._tail = 0;
-			for (int i = this._array.Length - 1; i >= 0; i--)
-			{
-				this._array[i] = null;
-			}
-		}
-
-		public virtual bool Contains(object obj)
-		{
-			int num = this._head + this._size;
-			if (obj == null)
-			{
-				for (int i = this._head; i < num; i++)
-				{
-					if (this._array[i % this._array.Length] == null)
-					{
-						return true;
-					}
-				}
-			}
-			else
-			{
-				for (int j = this._head; j < num; j++)
-				{
-					if (obj.Equals(this._array[j % this._array.Length]))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
 		public virtual object Dequeue()
 		{
-			this._version++;
-			if (this._size < 1)
+			if (this.Count == 0)
 			{
-				throw new InvalidOperationException();
+				throw new InvalidOperationException(Environment.GetResourceString("Queue empty."));
 			}
 			object obj = this._array[this._head];
 			this._array[this._head] = null;
 			this._head = (this._head + 1) % this._array.Length;
 			this._size--;
-			return obj;
-		}
-
-		public virtual void Enqueue(object obj)
-		{
 			this._version++;
-			if (this._size == this._array.Length)
-			{
-				this.grow();
-			}
-			this._array[this._tail] = obj;
-			this._tail = (this._tail + 1) % this._array.Length;
-			this._size++;
+			return obj;
 		}
 
 		public virtual object Peek()
 		{
-			if (this._size < 1)
+			if (this.Count == 0)
 			{
-				throw new InvalidOperationException();
+				throw new InvalidOperationException(Environment.GetResourceString("Queue empty."));
 			}
 			return this._array[this._head];
 		}
 
+		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 		public static Queue Synchronized(Queue queue)
 		{
 			if (queue == null)
 			{
 				throw new ArgumentNullException("queue");
 			}
-			return new Queue.SyncQueue(queue);
+			return new Queue.SynchronizedQueue(queue);
+		}
+
+		public virtual bool Contains(object obj)
+		{
+			int num = this._head;
+			int size = this._size;
+			while (size-- > 0)
+			{
+				if (obj == null)
+				{
+					if (this._array[num] == null)
+					{
+						return true;
+					}
+				}
+				else if (this._array[num] != null && this._array[num].Equals(obj))
+				{
+					return true;
+				}
+				num = (num + 1) % this._array.Length;
+			}
+			return false;
+		}
+
+		internal object GetElement(int i)
+		{
+			return this._array[(this._head + i) % this._array.Length];
 		}
 
 		public virtual object[] ToArray()
 		{
 			object[] array = new object[this._size];
-			this.CopyTo(array, 0);
+			if (this._size == 0)
+			{
+				return array;
+			}
+			if (this._head < this._tail)
+			{
+				Array.Copy(this._array, this._head, array, 0, this._size);
+			}
+			else
+			{
+				Array.Copy(this._array, this._head, array, 0, this._array.Length - this._head);
+				Array.Copy(this._array, 0, array, this._array.Length - this._head, this._tail);
+			}
 			return array;
+		}
+
+		private void SetCapacity(int capacity)
+		{
+			object[] array = new object[capacity];
+			if (this._size > 0)
+			{
+				if (this._head < this._tail)
+				{
+					Array.Copy(this._array, this._head, array, 0, this._size);
+				}
+				else
+				{
+					Array.Copy(this._array, this._head, array, 0, this._array.Length - this._head);
+					Array.Copy(this._array, 0, array, this._array.Length - this._head, this._tail);
+				}
+			}
+			this._array = array;
+			this._head = 0;
+			this._tail = ((this._size == capacity) ? 0 : this._size);
+			this._version++;
 		}
 
 		public virtual void TrimToSize()
 		{
-			this._version++;
-			object[] array = new object[this._size];
-			this.CopyTo(array, 0);
-			this._array = array;
-			this._head = 0;
-			this._tail = 0;
-		}
-
-		private void grow()
-		{
-			int num = this._array.Length * this._growFactor / 100;
-			if (num < this._array.Length + 1)
-			{
-				num = this._array.Length + 1;
-			}
-			object[] array = new object[num];
-			this.CopyTo(array, 0);
-			this._array = array;
-			this._head = 0;
-			this._tail = this._head + this._size;
+			this.SetCapacity(this._size);
 		}
 
 		private object[] _array;
 
 		private int _head;
 
-		private int _size;
-
 		private int _tail;
+
+		private int _size;
 
 		private int _growFactor;
 
 		private int _version;
 
-		private class SyncQueue : Queue
-		{
-			internal SyncQueue(Queue queue)
-			{
-				this.queue = queue;
-			}
+		[NonSerialized]
+		private object _syncRoot;
 
-			public override int Count
+		private const int _MinimumGrow = 4;
+
+		private const int _ShrinkThreshold = 32;
+
+		[Serializable]
+		private class SynchronizedQueue : Queue
+		{
+			internal SynchronizedQueue(Queue q)
 			{
-				get
-				{
-					Queue queue = this.queue;
-					int count;
-					lock (queue)
-					{
-						count = this.queue.Count;
-					}
-					return count;
-				}
+				this._q = q;
+				this.root = this._q.SyncRoot;
 			}
 
 			public override bool IsSynchronized
@@ -268,113 +312,129 @@ namespace System.Collections
 			{
 				get
 				{
-					return this.queue.SyncRoot;
+					return this.root;
 				}
 			}
 
-			public override void CopyTo(Array array, int index)
+			public override int Count
 			{
-				Queue queue = this.queue;
-				lock (queue)
+				get
 				{
-					this.queue.CopyTo(array, index);
+					object obj = this.root;
+					int count;
+					lock (obj)
+					{
+						count = this._q.Count;
+					}
+					return count;
 				}
-			}
-
-			public override IEnumerator GetEnumerator()
-			{
-				Queue queue = this.queue;
-				IEnumerator enumerator;
-				lock (queue)
-				{
-					enumerator = this.queue.GetEnumerator();
-				}
-				return enumerator;
-			}
-
-			public override object Clone()
-			{
-				Queue queue = this.queue;
-				object obj;
-				lock (queue)
-				{
-					obj = new Queue.SyncQueue((Queue)this.queue.Clone());
-				}
-				return obj;
 			}
 
 			public override void Clear()
 			{
-				Queue queue = this.queue;
-				lock (queue)
+				object obj = this.root;
+				lock (obj)
 				{
-					this.queue.Clear();
+					this._q.Clear();
 				}
 			}
 
-			public override void TrimToSize()
+			public override object Clone()
 			{
-				Queue queue = this.queue;
-				lock (queue)
+				object obj = this.root;
+				object obj2;
+				lock (obj)
 				{
-					this.queue.TrimToSize();
+					obj2 = new Queue.SynchronizedQueue((Queue)this._q.Clone());
 				}
+				return obj2;
 			}
 
 			public override bool Contains(object obj)
 			{
-				Queue queue = this.queue;
-				bool flag;
-				lock (queue)
+				object obj2 = this.root;
+				bool flag2;
+				lock (obj2)
 				{
-					flag = this.queue.Contains(obj);
+					flag2 = this._q.Contains(obj);
 				}
-				return flag;
+				return flag2;
+			}
+
+			public override void CopyTo(Array array, int arrayIndex)
+			{
+				object obj = this.root;
+				lock (obj)
+				{
+					this._q.CopyTo(array, arrayIndex);
+				}
+			}
+
+			public override void Enqueue(object value)
+			{
+				object obj = this.root;
+				lock (obj)
+				{
+					this._q.Enqueue(value);
+				}
 			}
 
 			public override object Dequeue()
 			{
-				Queue queue = this.queue;
-				object obj;
-				lock (queue)
+				object obj = this.root;
+				object obj2;
+				lock (obj)
 				{
-					obj = this.queue.Dequeue();
+					obj2 = this._q.Dequeue();
 				}
-				return obj;
+				return obj2;
 			}
 
-			public override void Enqueue(object obj)
+			public override IEnumerator GetEnumerator()
 			{
-				Queue queue = this.queue;
-				lock (queue)
+				object obj = this.root;
+				IEnumerator enumerator;
+				lock (obj)
 				{
-					this.queue.Enqueue(obj);
+					enumerator = this._q.GetEnumerator();
 				}
+				return enumerator;
 			}
 
 			public override object Peek()
 			{
-				Queue queue = this.queue;
-				object obj;
-				lock (queue)
+				object obj = this.root;
+				object obj2;
+				lock (obj)
 				{
-					obj = this.queue.Peek();
+					obj2 = this._q.Peek();
 				}
-				return obj;
+				return obj2;
 			}
 
 			public override object[] ToArray()
 			{
-				Queue queue = this.queue;
+				object obj = this.root;
 				object[] array;
-				lock (queue)
+				lock (obj)
 				{
-					array = this.queue.ToArray();
+					array = this._q.ToArray();
 				}
 				return array;
 			}
 
-			private Queue queue;
+			public override void TrimToSize()
+			{
+				object obj = this.root;
+				lock (obj)
+				{
+					this._q.TrimToSize();
+				}
+			}
+
+			private Queue _q;
+
+			private object root;
 		}
 
 		[Serializable]
@@ -382,61 +442,104 @@ namespace System.Collections
 		{
 			internal QueueEnumerator(Queue q)
 			{
-				this.queue = q;
-				this._version = q._version;
-				this.current = -1;
+				this._q = q;
+				this._version = this._q._version;
+				this._index = 0;
+				this.currentElement = this._q._array;
+				if (this._q._size == 0)
+				{
+					this._index = -1;
+				}
 			}
 
 			public object Clone()
 			{
-				return new Queue.QueueEnumerator(this.queue)
+				return base.MemberwiseClone();
+			}
+
+			public virtual bool MoveNext()
+			{
+				if (this._version != this._q._version)
 				{
-					_version = this._version,
-					current = this.current
-				};
+					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+				}
+				if (this._index < 0)
+				{
+					this.currentElement = this._q._array;
+					return false;
+				}
+				this.currentElement = this._q.GetElement(this._index);
+				this._index++;
+				if (this._index == this._q._size)
+				{
+					this._index = -1;
+				}
+				return true;
 			}
 
 			public virtual object Current
 			{
 				get
 				{
-					if (this._version != this.queue._version || this.current < 0 || this.current >= this.queue._size)
+					if (this.currentElement != this._q._array)
 					{
-						throw new InvalidOperationException();
+						return this.currentElement;
 					}
-					return this.queue._array[(this.queue._head + this.current) % this.queue._array.Length];
+					if (this._index == 0)
+					{
+						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+					}
+					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
 				}
-			}
-
-			public virtual bool MoveNext()
-			{
-				if (this._version != this.queue._version)
-				{
-					throw new InvalidOperationException();
-				}
-				if (this.current >= this.queue._size - 1)
-				{
-					this.current = int.MaxValue;
-					return false;
-				}
-				this.current++;
-				return true;
 			}
 
 			public virtual void Reset()
 			{
-				if (this._version != this.queue._version)
+				if (this._version != this._q._version)
 				{
-					throw new InvalidOperationException();
+					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
 				}
-				this.current = -1;
+				if (this._q._size == 0)
+				{
+					this._index = -1;
+				}
+				else
+				{
+					this._index = 0;
+				}
+				this.currentElement = this._q._array;
 			}
 
-			private Queue queue;
+			private Queue _q;
+
+			private int _index;
 
 			private int _version;
 
-			private int current;
+			private object currentElement;
+		}
+
+		internal class QueueDebugView
+		{
+			public QueueDebugView(Queue queue)
+			{
+				if (queue == null)
+				{
+					throw new ArgumentNullException("queue");
+				}
+				this.queue = queue;
+			}
+
+			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+			public object[] Items
+			{
+				get
+				{
+					return this.queue.ToArray();
+				}
+			}
+
+			private Queue queue;
 		}
 	}
 }

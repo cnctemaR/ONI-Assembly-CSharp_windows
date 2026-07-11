@@ -27,7 +27,6 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.gasConduitsLayer = this.partitioner.CreateMask("GasConduit");
 		this.liquidConduitsLayer = this.partitioner.CreateMask("LiquidConduit");
 		this.solidConduitsLayer = this.partitioner.CreateMask("SolidConduit");
-		this.wiresLayer = this.partitioner.CreateMask("Wire");
 		this.noisePolluterLayer = this.partitioner.CreateMask("NoisePolluters");
 		this.validNavCellChangedLayer = this.partitioner.CreateMask("validNavCellChangedLayer");
 		this.dirtyNavCellUpdateLayer = this.partitioner.CreateMask("dirtyNavCellUpdateLayer");
@@ -63,7 +62,6 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.gasConduitsLayer = null;
 		this.liquidConduitsLayer = null;
 		this.solidConduitsLayer = null;
-		this.wiresLayer = null;
 		this.noisePolluterLayer = null;
 		this.validNavCellChangedLayer = null;
 		this.dirtyNavCellUpdateLayer = null;

@@ -25,7 +25,7 @@ public class LightBugPurpleConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = LightBugPurpleConfig.CreateLightBug("LightBugPurple", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.DESC, "lightbug_kanim", false);
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "LightBugPurpleEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.DESC, "egg_lightbug_kanim", LightBugTuning.EGG_MASS, "LightBugPurpleBaby", 15.000001f, 5f, LightBugTuning.EGG_CHANCES_PURPLE, LightBugPurpleConfig.EGG_SORT_ORDER, true, false, true);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "LightBugPurpleEgg", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.VARIANT_PURPLE.DESC, "egg_lightbug_kanim", LightBugTuning.EGG_MASS, "LightBugPurpleBaby", 15.000001f, 5f, LightBugTuning.EGG_CHANCES_PURPLE, LightBugPurpleConfig.EGG_SORT_ORDER, true, false, true, 1f);
 		return gameObject;
 	}
 

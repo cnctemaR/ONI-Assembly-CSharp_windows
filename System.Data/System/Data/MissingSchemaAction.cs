@@ -5,8 +5,8 @@ namespace System.Data
 	public enum MissingSchemaAction
 	{
 		Add = 1,
-		Ignore,
-		Error,
-		AddWithKey
+		AddWithKey = 4,
+		Error = 3,
+		Ignore = 2
 	}
 }

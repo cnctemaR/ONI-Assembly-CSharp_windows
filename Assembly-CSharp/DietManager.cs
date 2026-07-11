@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class DietManager : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		DietManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

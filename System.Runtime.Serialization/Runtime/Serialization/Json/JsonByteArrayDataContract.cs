@@ -1,0 +1,25 @@
+﻿using System;
+
+namespace System.Runtime.Serialization.Json
+{
+	internal class JsonByteArrayDataContract : JsonDataContract
+	{
+		public JsonByteArrayDataContract(ByteArrayDataContract traditionalByteArrayDataContract)
+			: base(traditionalByteArrayDataContract)
+		{
+		}
+
+		public override object ReadJsonValueCore(XmlReaderDelegator jsonReader, XmlObjectSerializerReadContextComplexJson context)
+		{
+			if (context != null)
+			{
+				return JsonDataContract.HandleReadValue(jsonReader.ReadElementContentAsBase64(), context);
+			}
+			if (!JsonDataContract.TryReadNullAtTopLevel(jsonReader))
+			{
+				return jsonReader.ReadElementContentAsBase64();
+			}
+			return null;
+		}
+	}
+}

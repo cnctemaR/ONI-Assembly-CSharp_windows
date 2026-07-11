@@ -4866,845 +4866,797 @@ namespace TMPro
 								case 444:
 									goto IL_108A;
 								default:
-									if (nameHashCode != 50348802)
+									if (nameHashCode != -1885698441)
 									{
-										if (nameHashCode != 340349191)
+										if (nameHashCode != -1883544150)
 										{
-											if (nameHashCode != 343615334)
+											if (nameHashCode != -1847322671)
 											{
-												if (nameHashCode == 371094791)
+												if (nameHashCode != -1831660941)
 												{
-													goto IL_27F1;
-												}
-												if (nameHashCode != 374360934)
-												{
-													if (nameHashCode != 457225591)
+													float num11;
+													if (nameHashCode != -1690034531)
 													{
-														if (nameHashCode != 514803617)
+														if (nameHashCode == -1668324918)
 														{
-															if (nameHashCode != 551025096)
+															goto IL_308B;
+														}
+														if (nameHashCode == -1632103439)
+														{
+															goto IL_310E;
+														}
+														if (nameHashCode == -1616441709)
+														{
+															goto IL_30CC;
+														}
+														if (nameHashCode != -884817987)
+														{
+															if (nameHashCode != -855002522)
 															{
-																if (nameHashCode != 566686826)
+																if (nameHashCode != -842693512)
 																{
-																	if (nameHashCode == 730022849)
+																	if (nameHashCode != -842656867)
 																	{
-																		goto IL_306E;
-																	}
-																	if (nameHashCode == 766244328)
-																	{
-																		goto IL_30EF;
-																	}
-																	if (nameHashCode != 781906058)
-																	{
-																		float num11;
-																		if (nameHashCode != 1100728678)
+																		if (nameHashCode != -445573839)
 																		{
-																			if (nameHashCode != 1109349752)
+																			if (nameHashCode != -445537194)
 																			{
-																				if (nameHashCode != 1109386397)
+																				if (nameHashCode != -330774850)
 																				{
-																					if (nameHashCode != 1897350193)
+																					if (nameHashCode != 66)
 																					{
-																						if (nameHashCode != 1897386838)
+																						if (nameHashCode != 73)
 																						{
-																							if (nameHashCode != 2012149182)
+																							if (nameHashCode == 98)
 																							{
-																								if (nameHashCode != -1885698441)
+																								goto IL_0F27;
+																							}
+																							if (nameHashCode != 105)
+																							{
+																								if (nameHashCode == 395)
 																								{
-																									if (nameHashCode != -1883544150)
+																									break;
+																								}
+																								if (nameHashCode != 402 && nameHashCode != 434)
+																								{
+																									if (nameHashCode != 656)
 																									{
-																										if (nameHashCode != -1847322671)
+																										if (nameHashCode != 660)
 																										{
-																											if (nameHashCode != -1831660941)
+																											if (nameHashCode != 670)
 																											{
-																												if (nameHashCode != -1690034531)
+																												if (nameHashCode == 912)
 																												{
-																													if (nameHashCode == -1668324918)
+																													goto IL_37C8;
+																												}
+																												if (nameHashCode == 916)
+																												{
+																													return true;
+																												}
+																												if (nameHashCode != 926)
+																												{
+																													if (nameHashCode != 2959)
 																													{
-																														goto IL_308B;
-																													}
-																													if (nameHashCode == -1632103439)
-																													{
-																														goto IL_310E;
-																													}
-																													if (nameHashCode == -1616441709)
-																													{
-																														goto IL_30CC;
-																													}
-																													if (nameHashCode != -884817987)
-																													{
-																														if (nameHashCode == -855002522)
+																														if (nameHashCode != 2963)
 																														{
-																															goto IL_3256;
-																														}
-																														if (nameHashCode == -842693512)
-																														{
-																															goto IL_3458;
-																														}
-																														if (nameHashCode == -842656867)
-																														{
-																															goto IL_2ABC;
-																														}
-																														if (nameHashCode == -445573839)
-																														{
-																															goto IL_3522;
-																														}
-																														if (nameHashCode == -445537194)
-																														{
-																															goto IL_2B8D;
-																														}
-																														if (nameHashCode != -330774850)
-																														{
-																															if (nameHashCode != 66)
+																															if (nameHashCode != 2973)
 																															{
-																																if (nameHashCode != 73)
+																																if (nameHashCode == 3215)
 																																{
-																																	if (nameHashCode == 98)
+																																	return true;
+																																}
+																																if (nameHashCode == 3219)
+																																{
+																																	return true;
+																																}
+																																if (nameHashCode != 3229)
+																																{
+																																	if (nameHashCode != 4556)
 																																	{
-																																		goto IL_0F27;
-																																	}
-																																	if (nameHashCode != 105)
-																																	{
-																																		if (nameHashCode == 395)
+																																		if (nameHashCode != 4728)
 																																		{
-																																			break;
-																																		}
-																																		if (nameHashCode != 402 && nameHashCode != 434)
-																																		{
-																																			if (nameHashCode != 656)
+																																			if (nameHashCode != 4742)
 																																			{
-																																				if (nameHashCode != 660)
+																																				if (nameHashCode == 6380)
 																																				{
-																																					if (nameHashCode != 670)
+																																					goto IL_1697;
+																																				}
+																																				if (nameHashCode == 6552)
+																																				{
+																																					goto IL_1261;
+																																				}
+																																				if (nameHashCode != 6566)
+																																				{
+																																					if (nameHashCode != 20677)
 																																					{
-																																						if (nameHashCode == 912)
+																																						if (nameHashCode != 20849)
 																																						{
-																																							goto IL_37C8;
-																																						}
-																																						if (nameHashCode == 916)
-																																						{
-																																							return true;
-																																						}
-																																						if (nameHashCode != 926)
-																																						{
-																																							if (nameHashCode != 2959)
+																																							if (nameHashCode != 20863)
 																																							{
-																																								if (nameHashCode != 2963)
+																																								if (nameHashCode == 22501)
 																																								{
-																																									if (nameHashCode != 2973)
+																																									goto IL_1740;
+																																								}
+																																								if (nameHashCode == 22673)
+																																								{
+																																									goto IL_1303;
+																																								}
+																																								if (nameHashCode != 22687)
+																																								{
+																																									int num10;
+																																									if (nameHashCode != 28511)
 																																									{
-																																										if (nameHashCode == 3215)
+																																										if (nameHashCode != 30245)
 																																										{
-																																											return true;
-																																										}
-																																										if (nameHashCode == 3219)
-																																										{
-																																											return true;
-																																										}
-																																										if (nameHashCode != 3229)
-																																										{
-																																											if (nameHashCode != 4556)
+																																											if (nameHashCode != 30266)
 																																											{
-																																												if (nameHashCode != 4728)
+																																												if (nameHashCode != 31169)
 																																												{
-																																													if (nameHashCode != 4742)
+																																													if (nameHashCode != 31191)
 																																													{
-																																														if (nameHashCode == 6380)
+																																														if (nameHashCode != 32745)
 																																														{
-																																															goto IL_1697;
-																																														}
-																																														if (nameHashCode == 6552)
-																																														{
-																																															goto IL_1261;
-																																														}
-																																														if (nameHashCode != 6566)
-																																														{
-																																															if (nameHashCode != 20677)
+																																															if (nameHashCode == 41311)
 																																															{
-																																																if (nameHashCode != 20849)
+																																																goto IL_1B19;
+																																															}
+																																															if (nameHashCode == 43045)
+																																															{
+																																																goto IL_11A7;
+																																															}
+																																															if (nameHashCode == 43066)
+																																															{
+																																																goto IL_2137;
+																																															}
+																																															if (nameHashCode == 43969)
+																																															{
+																																																goto IL_181E;
+																																															}
+																																															if (nameHashCode == 43991)
+																																															{
+																																																goto IL_17DD;
+																																															}
+																																															if (nameHashCode != 45545)
+																																															{
+																																																if (nameHashCode != 141358)
 																																																{
-																																																	if (nameHashCode != 20863)
+																																																	if (nameHashCode != 143092)
 																																																	{
-																																																		if (nameHashCode == 22501)
+																																																		if (nameHashCode != 143113)
 																																																		{
-																																																			goto IL_1740;
-																																																		}
-																																																		if (nameHashCode == 22673)
-																																																		{
-																																																			goto IL_1303;
-																																																		}
-																																																		if (nameHashCode != 22687)
-																																																		{
-																																																			int num10;
-																																																			if (nameHashCode != 28511)
+																																																			if (nameHashCode != 144016)
 																																																			{
-																																																				if (nameHashCode != 30245)
+																																																				if (nameHashCode != 145592)
 																																																				{
-																																																					if (nameHashCode != 30266)
+																																																					if (nameHashCode == 154158)
 																																																					{
-																																																						if (nameHashCode != 31169)
+																																																						goto IL_1E38;
+																																																					}
+																																																					if (nameHashCode == 155892)
+																																																					{
+																																																						goto IL_1211;
+																																																					}
+																																																					if (nameHashCode == 155913)
+																																																					{
+																																																						goto IL_2274;
+																																																					}
+																																																					if (nameHashCode == 156816)
+																																																					{
+																																																						goto IL_1827;
+																																																					}
+																																																					if (nameHashCode != 158392)
+																																																					{
+																																																						if (nameHashCode != 186285)
 																																																						{
-																																																							if (nameHashCode != 31191)
+																																																							if (nameHashCode != 186622)
 																																																							{
-																																																								if (nameHashCode != 32745)
+																																																								if (nameHashCode != 192323)
 																																																								{
-																																																									if (nameHashCode == 41311)
+																																																									if (nameHashCode != 226050)
 																																																									{
-																																																										goto IL_1B19;
-																																																									}
-																																																									if (nameHashCode == 43045)
-																																																									{
-																																																										goto IL_11A7;
-																																																									}
-																																																									if (nameHashCode == 43066)
-																																																									{
-																																																										goto IL_2137;
-																																																									}
-																																																									if (nameHashCode == 43969)
-																																																									{
-																																																										goto IL_181E;
-																																																									}
-																																																									if (nameHashCode == 43991)
-																																																									{
-																																																										goto IL_17DD;
-																																																									}
-																																																									if (nameHashCode != 45545)
-																																																									{
-																																																										if (nameHashCode != 141358)
+																																																										if (nameHashCode != 227814)
 																																																										{
-																																																											if (nameHashCode != 143092)
+																																																											if (nameHashCode != 230446)
 																																																											{
-																																																												if (nameHashCode != 143113)
+																																																												if (nameHashCode != 237918)
 																																																												{
-																																																													if (nameHashCode != 144016)
+																																																													if (nameHashCode == 275917)
 																																																													{
-																																																														if (nameHashCode != 145592)
+																																																														goto IL_231A;
+																																																													}
+																																																													if (nameHashCode == 276254)
+																																																													{
+																																																														goto IL_20EC;
+																																																													}
+																																																													if (nameHashCode == 280416)
+																																																													{
+																																																														return false;
+																																																													}
+																																																													if (nameHashCode == 281955)
+																																																													{
+																																																														goto IL_24A8;
+																																																													}
+																																																													if (nameHashCode == 315682)
+																																																													{
+																																																														goto IL_35FB;
+																																																													}
+																																																													if (nameHashCode == 317446)
+																																																													{
+																																																														goto IL_36E7;
+																																																													}
+																																																													if (nameHashCode == 320078)
+																																																													{
+																																																														goto IL_204A;
+																																																													}
+																																																													if (nameHashCode != 327550)
+																																																													{
+																																																														if (nameHashCode != 976214)
 																																																														{
-																																																															if (nameHashCode == 154158)
+																																																															if (nameHashCode != 982252)
 																																																															{
-																																																																goto IL_1E38;
-																																																															}
-																																																															if (nameHashCode == 155892)
-																																																															{
-																																																																goto IL_1211;
-																																																															}
-																																																															if (nameHashCode == 155913)
-																																																															{
-																																																																goto IL_2274;
-																																																															}
-																																																															if (nameHashCode == 156816)
-																																																															{
-																																																																goto IL_1827;
-																																																															}
-																																																															if (nameHashCode != 158392)
-																																																															{
-																																																																if (nameHashCode != 186285)
+																																																																if (nameHashCode != 1015979)
 																																																																{
-																																																																	if (nameHashCode != 186622)
+																																																																	if (nameHashCode != 1017743)
 																																																																	{
-																																																																		if (nameHashCode != 192323)
+																																																																		if (nameHashCode != 1027847)
 																																																																		{
-																																																																			if (nameHashCode != 226050)
+																																																																			if (nameHashCode == 1065846)
 																																																																			{
-																																																																				if (nameHashCode != 227814)
+																																																																				goto IL_2406;
+																																																																			}
+																																																																			if (nameHashCode == 1071884)
+																																																																			{
+																																																																				goto IL_29BB;
+																																																																			}
+																																																																			if (nameHashCode == 1105611)
+																																																																			{
+																																																																				goto IL_3668;
+																																																																			}
+																																																																			if (nameHashCode == 1107375)
+																																																																			{
+																																																																				return true;
+																																																																			}
+																																																																			if (nameHashCode != 1117479)
+																																																																			{
+																																																																				if (nameHashCode != 1286342)
 																																																																				{
-																																																																					if (nameHashCode != 230446)
+																																																																					if (nameHashCode != 1356515)
 																																																																					{
-																																																																						if (nameHashCode != 237918)
+																																																																						if (nameHashCode != 1441524)
 																																																																						{
-																																																																							if (nameHashCode == 275917)
+																																																																							if (nameHashCode != 1482398)
 																																																																							{
-																																																																								goto IL_231A;
-																																																																							}
-																																																																							if (nameHashCode == 276254)
-																																																																							{
-																																																																								goto IL_20EC;
-																																																																							}
-																																																																							if (nameHashCode == 280416)
-																																																																							{
-																																																																								return false;
-																																																																							}
-																																																																							if (nameHashCode == 281955)
-																																																																							{
-																																																																								goto IL_24A8;
-																																																																							}
-																																																																							if (nameHashCode == 315682)
-																																																																							{
-																																																																								goto IL_35FB;
-																																																																							}
-																																																																							if (nameHashCode == 317446)
-																																																																							{
-																																																																								goto IL_36E7;
-																																																																							}
-																																																																							if (nameHashCode == 320078)
-																																																																							{
-																																																																								goto IL_204A;
-																																																																							}
-																																																																							if (nameHashCode != 327550)
-																																																																							{
-																																																																								if (nameHashCode != 976214)
+																																																																								if (nameHashCode != 1524585)
 																																																																								{
-																																																																									if (nameHashCode != 982252)
+																																																																									if (nameHashCode != 1600507)
 																																																																									{
-																																																																										if (nameHashCode != 1015979)
+																																																																										if (nameHashCode != 1619421)
 																																																																										{
-																																																																											if (nameHashCode != 1017743)
+																																																																											if (nameHashCode == 1750458)
 																																																																											{
-																																																																												if (nameHashCode != 1027847)
+																																																																												return false;
+																																																																											}
+																																																																											if (nameHashCode == 1913798)
+																																																																											{
+																																																																												goto IL_3538;
+																																																																											}
+																																																																											if (nameHashCode == 1983971)
+																																																																											{
+																																																																												goto IL_2804;
+																																																																											}
+																																																																											if (nameHashCode == 2068980)
+																																																																											{
+																																																																												goto IL_29CE;
+																																																																											}
+																																																																											if (nameHashCode == 2109854)
+																																																																											{
+																																																																												goto IL_3131;
+																																																																											}
+																																																																											if (nameHashCode == 2152041)
+																																																																											{
+																																																																												goto IL_2906;
+																																																																											}
+																																																																											if (nameHashCode == 2227963)
+																																																																											{
+																																																																												goto IL_3671;
+																																																																											}
+																																																																											if (nameHashCode != 2246877)
+																																																																											{
+																																																																												if (nameHashCode != 6815845)
 																																																																												{
-																																																																													if (nameHashCode == 1065846)
+																																																																													if (nameHashCode != 6886018)
 																																																																													{
-																																																																														goto IL_2406;
-																																																																													}
-																																																																													if (nameHashCode == 1071884)
-																																																																													{
-																																																																														goto IL_29BB;
-																																																																													}
-																																																																													if (nameHashCode == 1105611)
-																																																																													{
-																																																																														goto IL_3668;
-																																																																													}
-																																																																													if (nameHashCode == 1107375)
-																																																																													{
-																																																																														return true;
-																																																																													}
-																																																																													if (nameHashCode != 1117479)
-																																																																													{
-																																																																														if (nameHashCode != 1286342)
+																																																																														if (nameHashCode != 6971027)
 																																																																														{
-																																																																															if (nameHashCode != 1356515)
+																																																																															if (nameHashCode != 7011901)
 																																																																															{
-																																																																																if (nameHashCode != 1441524)
+																																																																																if (nameHashCode != 7054088)
 																																																																																{
-																																																																																	if (nameHashCode != 1482398)
+																																																																																	if (nameHashCode != 7130010)
 																																																																																	{
-																																																																																		if (nameHashCode != 1524585)
+																																																																																		if (nameHashCode == 7443301)
 																																																																																		{
-																																																																																			if (nameHashCode != 1600507)
+																																																																																			goto IL_359E;
+																																																																																		}
+																																																																																		if (nameHashCode == 7513474)
+																																																																																		{
+																																																																																			goto IL_28AA;
+																																																																																		}
+																																																																																		if (nameHashCode == 7598483)
+																																																																																		{
+																																																																																			goto IL_2AA9;
+																																																																																		}
+																																																																																		if (nameHashCode == 7639357)
+																																																																																		{
+																																																																																			goto IL_323E;
+																																																																																		}
+																																																																																		if (nameHashCode == 7681544)
+																																																																																		{
+																																																																																			goto IL_29AC;
+																																																																																		}
+																																																																																		if (nameHashCode != 7757466)
+																																																																																		{
+																																																																																			if (nameHashCode != 9133802)
 																																																																																			{
-																																																																																				if (nameHashCode != 1619421)
+																																																																																				if (nameHashCode != 10723418)
 																																																																																				{
-																																																																																					if (nameHashCode == 1750458)
+																																																																																					if (nameHashCode != 11642281)
 																																																																																					{
-																																																																																						return false;
-																																																																																					}
-																																																																																					if (nameHashCode == 1913798)
-																																																																																					{
-																																																																																						goto IL_3538;
-																																																																																					}
-																																																																																					if (nameHashCode == 1983971)
-																																																																																					{
-																																																																																						goto IL_2804;
-																																																																																					}
-																																																																																					if (nameHashCode == 2068980)
-																																																																																					{
-																																																																																						goto IL_29CE;
-																																																																																					}
-																																																																																					if (nameHashCode == 2109854)
-																																																																																					{
-																																																																																						goto IL_3131;
-																																																																																					}
-																																																																																					if (nameHashCode == 2152041)
-																																																																																					{
-																																																																																						goto IL_2906;
-																																																																																					}
-																																																																																					if (nameHashCode == 2227963)
-																																																																																					{
-																																																																																						goto IL_3671;
-																																																																																					}
-																																																																																					if (nameHashCode != 2246877)
-																																																																																					{
-																																																																																						if (nameHashCode != 6815845)
+																																																																																						if (nameHashCode == 13526026)
 																																																																																						{
-																																																																																							if (nameHashCode != 6886018)
+																																																																																							goto IL_30AD;
+																																																																																						}
+																																																																																						if (nameHashCode == 15115642)
+																																																																																						{
+																																																																																							goto IL_352F;
+																																																																																						}
+																																																																																						if (nameHashCode != 16034505)
+																																																																																						{
+																																																																																							if (nameHashCode != 47840323)
 																																																																																							{
-																																																																																								if (nameHashCode != 6971027)
+																																																																																								if (nameHashCode != 50348802)
 																																																																																								{
-																																																																																									if (nameHashCode != 7011901)
+																																																																																									if (nameHashCode == 52232547)
 																																																																																									{
-																																																																																										if (nameHashCode != 7054088)
+																																																																																										goto IL_30CC;
+																																																																																									}
+																																																																																									if (nameHashCode != 54741026)
+																																																																																									{
+																																																																																										if (nameHashCode != 69403544)
 																																																																																										{
-																																																																																											if (nameHashCode != 7130010)
+																																																																																											if (nameHashCode != 72669687)
 																																																																																											{
-																																																																																												if (nameHashCode == 7443301)
+																																																																																												if (nameHashCode == 100149144)
 																																																																																												{
-																																																																																													goto IL_359E;
+																																																																																													goto IL_2745;
 																																																																																												}
-																																																																																												if (nameHashCode == 7513474)
+																																																																																												if (nameHashCode != 103415287)
 																																																																																												{
-																																																																																													goto IL_28AA;
-																																																																																												}
-																																																																																												if (nameHashCode == 7598483)
-																																																																																												{
-																																																																																													goto IL_2AA9;
-																																																																																												}
-																																																																																												if (nameHashCode == 7639357)
-																																																																																												{
-																																																																																													goto IL_323E;
-																																																																																												}
-																																																																																												if (nameHashCode == 7681544)
-																																																																																												{
-																																																																																													goto IL_29AC;
-																																																																																												}
-																																																																																												if (nameHashCode != 7757466)
-																																																																																												{
-																																																																																													if (nameHashCode != 9133802)
+																																																																																													if (nameHashCode != 340349191)
 																																																																																													{
-																																																																																														if (nameHashCode != 10723418)
+																																																																																														if (nameHashCode != 343615334)
 																																																																																														{
-																																																																																															if (nameHashCode != 11642281)
+																																																																																															if (nameHashCode == 371094791)
 																																																																																															{
-																																																																																																if (nameHashCode == 13526026)
+																																																																																																goto IL_27F1;
+																																																																																															}
+																																																																																															if (nameHashCode != 374360934)
+																																																																																															{
+																																																																																																if (nameHashCode != 457225591)
 																																																																																																{
-																																																																																																	goto IL_30AD;
-																																																																																																}
-																																																																																																if (nameHashCode == 15115642)
-																																																																																																{
-																																																																																																	goto IL_352F;
-																																																																																																}
-																																																																																																if (nameHashCode != 16034505)
-																																																																																																{
-																																																																																																	if (nameHashCode == 47840323 || nameHashCode == 52232547)
+																																																																																																	if (nameHashCode != 514803617)
 																																																																																																	{
-																																																																																																		goto IL_30CC;
-																																																																																																	}
-																																																																																																	if (nameHashCode != 54741026)
-																																																																																																	{
-																																																																																																		if (nameHashCode != 69403544)
+																																																																																																		if (nameHashCode != 551025096)
 																																																																																																		{
-																																																																																																			if (nameHashCode != 72669687)
+																																																																																																			if (nameHashCode == 566686826)
 																																																																																																			{
-																																																																																																				if (nameHashCode == 100149144)
+																																																																																																				goto IL_30AD;
+																																																																																																			}
+																																																																																																			if (nameHashCode == 730022849)
+																																																																																																			{
+																																																																																																				goto IL_306E;
+																																																																																																			}
+																																																																																																			if (nameHashCode != 766244328)
+																																																																																																			{
+																																																																																																				if (nameHashCode == 781906058)
 																																																																																																				{
-																																																																																																					goto IL_2745;
+																																																																																																					goto IL_30AD;
 																																																																																																				}
-																																																																																																				if (nameHashCode != 103415287)
+																																																																																																				if (nameHashCode == 1100728678)
+																																																																																																				{
+																																																																																																					goto IL_3256;
+																																																																																																				}
+																																																																																																				if (nameHashCode == 1109349752)
+																																																																																																				{
+																																																																																																					goto IL_3458;
+																																																																																																				}
+																																																																																																				if (nameHashCode == 1109386397)
+																																																																																																				{
+																																																																																																					goto IL_2ABC;
+																																																																																																				}
+																																																																																																				if (nameHashCode == 1897350193)
+																																																																																																				{
+																																																																																																					goto IL_3522;
+																																																																																																				}
+																																																																																																				if (nameHashCode == 1897386838)
+																																																																																																				{
+																																																																																																					goto IL_2B8D;
+																																																																																																				}
+																																																																																																				if (nameHashCode != 2012149182)
 																																																																																																				{
 																																																																																																					return false;
 																																																																																																				}
+																																																																																																				goto IL_14E7;
 																																																																																																			}
-																																																																																																			num10 = this.m_xmlAttribute[0].valueHashCode;
-																																																																																																			if (num10 == 764638571 || num10 == 523367755)
-																																																																																																			{
-																																																																																																				this.m_currentMaterial = this.m_materialReferences[0].material;
-																																																																																																				this.m_currentMaterialIndex = 0;
-																																																																																																				this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
-																																																																																																				return true;
-																																																																																																			}
-																																																																																																			Material material;
-																																																																																																			if (MaterialReferenceManager.TryGetMaterial(num10, out material))
-																																																																																																			{
-																																																																																																				this.m_currentMaterial = material;
-																																																																																																				this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																																																																				this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																																																																																			}
-																																																																																																			else
-																																																																																																			{
-																																																																																																				material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																																																																																				if (material == null)
-																																																																																																				{
-																																																																																																					return false;
-																																																																																																				}
-																																																																																																				MaterialReferenceManager.AddFontMaterial(num10, material);
-																																																																																																				this.m_currentMaterial = material;
-																																																																																																				this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																																																																				this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																																																																																			}
-																																																																																																			return true;
 																																																																																																		}
-																																																																																																		IL_2745:
-																																																																																																		int valueHashCode = this.m_xmlAttribute[0].valueHashCode;
-																																																																																																		TMP_ColorGradient tmp_ColorGradient;
-																																																																																																		if (MaterialReferenceManager.TryGetColorGradientPreset(valueHashCode, out tmp_ColorGradient))
-																																																																																																		{
-																																																																																																			this.m_colorGradientPreset = tmp_ColorGradient;
-																																																																																																		}
-																																																																																																		else
-																																																																																																		{
-																																																																																																			if (tmp_ColorGradient == null)
-																																																																																																			{
-																																																																																																				tmp_ColorGradient = Resources.Load<TMP_ColorGradient>(TMP_Settings.defaultColorGradientPresetsPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																																																																																			}
-																																																																																																			if (tmp_ColorGradient == null)
-																																																																																																			{
-																																																																																																				return false;
-																																																																																																			}
-																																																																																																			MaterialReferenceManager.AddColorGradientPreset(valueHashCode, tmp_ColorGradient);
-																																																																																																			this.m_colorGradientPreset = tmp_ColorGradient;
-																																																																																																		}
-																																																																																																		this.m_colorGradientStack.Add(this.m_colorGradientPreset);
+																																																																																																		this.m_style |= FontStyles.SmallCaps;
+																																																																																																		this.m_fontStyleStack.Add(FontStyles.SmallCaps);
 																																																																																																		return true;
 																																																																																																	}
-																																																																																																	goto IL_17D0;
+																																																																																																	IL_306E:
+																																																																																																	this.m_style |= FontStyles.LowerCase;
+																																																																																																	this.m_fontStyleStack.Add(FontStyles.LowerCase);
+																																																																																																	return true;
 																																																																																																}
+																																																																																																goto IL_1665;
 																																																																																															}
-																																																																																															num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																																															if (num11 == -9999f)
-																																																																																															{
-																																																																																																return false;
-																																																																																															}
-																																																																																															if (tagUnits == TagUnits.Pixels)
-																																																																																															{
-																																																																																																this.m_baselineOffset = num11;
-																																																																																																return true;
-																																																																																															}
-																																																																																															if (tagUnits != TagUnits.FontUnits)
-																																																																																															{
-																																																																																																return tagUnits != TagUnits.Percentage && false;
-																																																																																															}
-																																																																																															this.m_baselineOffset = num11 * this.m_fontScale * this.m_fontAsset.fontInfo.Ascender;
-																																																																																															return true;
 																																																																																														}
-																																																																																														IL_352F:
-																																																																																														this.tag_NoParsing = true;
+																																																																																														MaterialReference materialReference = this.m_materialReferenceStack.Remove();
+																																																																																														this.m_currentMaterial = materialReference.material;
+																																																																																														this.m_currentMaterialIndex = materialReference.index;
 																																																																																														return true;
 																																																																																													}
-																																																																																													goto IL_30AD;
+																																																																																													IL_27F1:
+																																																																																													this.m_colorGradientPreset = this.m_colorGradientStack.Remove();
+																																																																																													return true;
 																																																																																												}
 																																																																																											}
-																																																																																											this.m_isFXMatrixSet = false;
+																																																																																											num10 = this.m_xmlAttribute[0].valueHashCode;
+																																																																																											if (num10 == 764638571 || num10 == 523367755)
+																																																																																											{
+																																																																																												this.m_currentMaterial = this.m_materialReferences[0].material;
+																																																																																												this.m_currentMaterialIndex = 0;
+																																																																																												this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
+																																																																																												return true;
+																																																																																											}
+																																																																																											Material material;
+																																																																																											if (MaterialReferenceManager.TryGetMaterial(num10, out material))
+																																																																																											{
+																																																																																												this.m_currentMaterial = material;
+																																																																																												this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+																																																																																												this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+																																																																																											}
+																																																																																											else
+																																																																																											{
+																																																																																												material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+																																																																																												if (material == null)
+																																																																																												{
+																																																																																													return false;
+																																																																																												}
+																																																																																												MaterialReferenceManager.AddFontMaterial(num10, material);
+																																																																																												this.m_currentMaterial = material;
+																																																																																												this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, this.m_currentFontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+																																																																																												this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+																																																																																											}
 																																																																																											return true;
 																																																																																										}
-																																																																																										IL_29AC:
-																																																																																										this.m_monoSpacing = 0f;
-																																																																																										return true;
-																																																																																									}
-																																																																																									IL_323E:
-																																																																																									this.m_marginLeft = 0f;
-																																																																																									this.m_marginRight = 0f;
-																																																																																									return true;
-																																																																																								}
-																																																																																								IL_2AA9:
-																																																																																								this.tag_Indent = this.m_indentStack.Remove();
-																																																																																								return true;
-																																																																																							}
-																																																																																							IL_28AA:
-																																																																																							if (!this.m_isParsingText)
-																																																																																							{
-																																																																																								return true;
-																																																																																							}
-																																																																																							if (this.m_characterCount > 0)
-																																																																																							{
-																																																																																								this.m_xAdvance -= this.m_cSpacing;
-																																																																																								this.m_textInfo.characterInfo[this.m_characterCount - 1].xAdvance = this.m_xAdvance;
-																																																																																							}
-																																																																																							this.m_cSpacing = 0f;
-																																																																																							return true;
-																																																																																						}
-																																																																																						IL_359E:
-																																																																																						if (this.m_isParsingText)
-																																																																																						{
-																																																																																							global::Debug.Log(string.Concat(new object[]
-																																																																																							{
-																																																																																								"Action ID: [",
-																																																																																								this.m_actionStack.CurrentItem(),
-																																																																																								"] Last character index: ",
-																																																																																								this.m_characterCount - 1
-																																																																																							}), null);
-																																																																																						}
-																																																																																						this.m_actionStack.Remove();
-																																																																																						return true;
-																																																																																					}
-																																																																																				}
-																																																																																				int valueHashCode2 = this.m_xmlAttribute[0].valueHashCode;
-																																																																																				this.m_spriteIndex = -1;
-																																																																																				TMP_SpriteAsset tmp_SpriteAsset;
-																																																																																				if (this.m_xmlAttribute[0].valueType == TagType.None || this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
-																																																																																				{
-																																																																																					if (this.m_spriteAsset != null)
-																																																																																					{
-																																																																																						this.m_currentSpriteAsset = this.m_spriteAsset;
-																																																																																					}
-																																																																																					else if (this.m_defaultSpriteAsset != null)
-																																																																																					{
-																																																																																						this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
-																																																																																					}
-																																																																																					else if (this.m_defaultSpriteAsset == null)
-																																																																																					{
-																																																																																						if (TMP_Settings.defaultSpriteAsset != null)
-																																																																																						{
-																																																																																							this.m_defaultSpriteAsset = TMP_Settings.defaultSpriteAsset;
-																																																																																						}
-																																																																																						else
-																																																																																						{
-																																																																																							this.m_defaultSpriteAsset = Resources.Load<TMP_SpriteAsset>("Sprite Assets/Default Sprite Asset");
-																																																																																						}
-																																																																																						this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
-																																																																																					}
-																																																																																					if (this.m_currentSpriteAsset == null)
-																																																																																					{
-																																																																																						return false;
-																																																																																					}
-																																																																																				}
-																																																																																				else if (MaterialReferenceManager.TryGetSpriteAsset(valueHashCode2, out tmp_SpriteAsset))
-																																																																																				{
-																																																																																					this.m_currentSpriteAsset = tmp_SpriteAsset;
-																																																																																				}
-																																																																																				else
-																																																																																				{
-																																																																																					if (tmp_SpriteAsset == null)
-																																																																																					{
-																																																																																						tmp_SpriteAsset = Resources.Load<TMP_SpriteAsset>(TMP_Settings.defaultSpriteAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																																																																					}
-																																																																																					if (tmp_SpriteAsset == null)
-																																																																																					{
-																																																																																						return false;
-																																																																																					}
-																																																																																					MaterialReferenceManager.AddSpriteAsset(valueHashCode2, tmp_SpriteAsset);
-																																																																																					this.m_currentSpriteAsset = tmp_SpriteAsset;
-																																																																																				}
-																																																																																				if (this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
-																																																																																				{
-																																																																																					int num12 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																																					if (num12 == -9999)
-																																																																																					{
-																																																																																						return false;
-																																																																																					}
-																																																																																					if (num12 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
-																																																																																					{
-																																																																																						return false;
-																																																																																					}
-																																																																																					this.m_spriteIndex = num12;
-																																																																																				}
-																																																																																				this.m_spriteColor = TMP_Text.s_colorWhite;
-																																																																																				this.m_tintSprite = false;
-																																																																																				int num13 = 0;
-																																																																																				while (num13 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num13].nameHashCode != 0)
-																																																																																				{
-																																																																																					int nameHashCode2 = this.m_xmlAttribute[num13].nameHashCode;
-																																																																																					if (nameHashCode2 == 26705)
-																																																																																					{
-																																																																																						goto IL_2F54;
-																																																																																					}
-																																																																																					int num14;
-																																																																																					if (nameHashCode2 != 30547)
-																																																																																					{
-																																																																																						if (nameHashCode2 != 33019)
-																																																																																						{
-																																																																																							if (nameHashCode2 == 39505)
-																																																																																							{
-																																																																																								goto IL_2F54;
-																																																																																							}
-																																																																																							if (nameHashCode2 == 43347)
-																																																																																							{
-																																																																																								goto IL_2E37;
-																																																																																							}
-																																																																																							if (nameHashCode2 != 45819)
-																																																																																							{
-																																																																																								if (nameHashCode2 != 192323)
-																																																																																								{
-																																																																																									if (nameHashCode2 != 205930)
-																																																																																									{
-																																																																																										if (nameHashCode2 == 281955)
+																																																																																										IL_2745:
+																																																																																										int valueHashCode = this.m_xmlAttribute[0].valueHashCode;
+																																																																																										TMP_ColorGradient tmp_ColorGradient;
+																																																																																										if (MaterialReferenceManager.TryGetColorGradientPreset(valueHashCode, out tmp_ColorGradient))
 																																																																																										{
-																																																																																											goto IL_2F19;
+																																																																																											this.m_colorGradientPreset = tmp_ColorGradient;
 																																																																																										}
-																																																																																										if (nameHashCode2 != 295562)
+																																																																																										else
 																																																																																										{
-																																																																																											if (nameHashCode2 != 2246877 && nameHashCode2 != 1619421)
+																																																																																											if (tmp_ColorGradient == null)
+																																																																																											{
+																																																																																												tmp_ColorGradient = Resources.Load<TMP_ColorGradient>(TMP_Settings.defaultColorGradientPresetsPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+																																																																																											}
+																																																																																											if (tmp_ColorGradient == null)
 																																																																																											{
 																																																																																												return false;
 																																																																																											}
-																																																																																											goto IL_3003;
+																																																																																											MaterialReferenceManager.AddColorGradientPreset(valueHashCode, tmp_ColorGradient);
+																																																																																											this.m_colorGradientPreset = tmp_ColorGradient;
 																																																																																										}
+																																																																																										this.m_colorGradientStack.Add(this.m_colorGradientPreset);
+																																																																																										return true;
 																																																																																									}
-																																																																																									num14 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
-																																																																																									if (num14 == -9999)
-																																																																																									{
-																																																																																										return false;
-																																																																																									}
-																																																																																									if (num14 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
-																																																																																									{
-																																																																																										return false;
-																																																																																									}
-																																																																																									this.m_spriteIndex = num14;
-																																																																																									goto IL_3003;
 																																																																																								}
-																																																																																								IL_2F19:
-																																																																																								this.m_spriteColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength);
-																																																																																								goto IL_3003;
+																																																																																								this.m_baselineOffset = 0f;
+																																																																																								return true;
 																																																																																							}
+																																																																																							goto IL_30CC;
 																																																																																						}
-																																																																																						this.m_tintSprite = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength) != 0f;
-																																																																																						goto IL_3003;
 																																																																																					}
-																																																																																					IL_2E37:
-																																																																																					num14 = this.m_currentSpriteAsset.GetSpriteIndexFromHashcode(this.m_xmlAttribute[num13].valueHashCode);
-																																																																																					if (num14 == -1)
+																																																																																					num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																																																					if (num11 == -9999f)
 																																																																																					{
 																																																																																						return false;
 																																																																																					}
-																																																																																					this.m_spriteIndex = num14;
-																																																																																					IL_3003:
-																																																																																					num13++;
-																																																																																					continue;
-																																																																																					IL_2F54:
-																																																																																					int attributeParameters = this.GetAttributeParameters(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength, ref this.m_attributeParameterValues);
-																																																																																					if (attributeParameters != 3)
+																																																																																					if (tagUnits == TagUnits.Pixels)
 																																																																																					{
-																																																																																						return false;
+																																																																																						this.m_baselineOffset = num11;
+																																																																																						return true;
 																																																																																					}
-																																																																																					this.m_spriteIndex = (int)this.m_attributeParameterValues[0];
-																																																																																					if (this.m_isParsingText)
+																																																																																					if (tagUnits != TagUnits.FontUnits)
 																																																																																					{
-																																																																																						this.spriteAnimator.DoSpriteAnimation(this.m_characterCount, this.m_currentSpriteAsset, this.m_spriteIndex, (int)this.m_attributeParameterValues[1], (int)this.m_attributeParameterValues[2]);
+																																																																																						return tagUnits != TagUnits.Percentage && false;
 																																																																																					}
-																																																																																					goto IL_3003;
+																																																																																					this.m_baselineOffset = num11 * this.m_fontScale * this.m_fontAsset.fontInfo.Ascender;
+																																																																																					return true;
 																																																																																				}
-																																																																																				if (this.m_spriteIndex == -1)
-																																																																																				{
-																																																																																					return false;
-																																																																																				}
-																																																																																				this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentSpriteAsset.material, this.m_currentSpriteAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																																																				this.m_textElementType = TMP_TextElementType.Sprite;
+																																																																																				IL_352F:
+																																																																																				this.tag_NoParsing = true;
 																																																																																				return true;
 																																																																																			}
-																																																																																			IL_3671:
-																																																																																			num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																																			if (num11 == -9999f)
-																																																																																			{
-																																																																																				return false;
-																																																																																			}
-																																																																																			this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 0f, num11), Vector3.one);
-																																																																																			this.m_isFXMatrixSet = true;
+																																																																																			IL_30AD:
+																																																																																			this.m_style |= FontStyles.UpperCase;
+																																																																																			this.m_fontStyleStack.Add(FontStyles.UpperCase);
 																																																																																			return true;
 																																																																																		}
-																																																																																		IL_2906:
-																																																																																		num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																																		if (num11 == -9999f)
-																																																																																		{
-																																																																																			return false;
-																																																																																		}
-																																																																																		if (tagUnits != TagUnits.Pixels)
-																																																																																		{
-																																																																																			if (tagUnits != TagUnits.FontUnits)
-																																																																																			{
-																																																																																				if (tagUnits == TagUnits.Percentage)
-																																																																																				{
-																																																																																					return false;
-																																																																																				}
-																																																																																			}
-																																																																																			else
-																																																																																			{
-																																																																																				this.m_monoSpacing = num11;
-																																																																																				this.m_monoSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																																			}
-																																																																																		}
-																																																																																		else
-																																																																																		{
-																																																																																			this.m_monoSpacing = num11;
-																																																																																		}
-																																																																																		return true;
 																																																																																	}
-																																																																																	IL_3131:
-																																																																																	num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																																	if (num11 == -9999f)
+																																																																																	this.m_isFXMatrixSet = false;
+																																																																																	return true;
+																																																																																}
+																																																																																IL_29AC:
+																																																																																this.m_monoSpacing = 0f;
+																																																																																return true;
+																																																																															}
+																																																																															IL_323E:
+																																																																															this.m_marginLeft = 0f;
+																																																																															this.m_marginRight = 0f;
+																																																																															return true;
+																																																																														}
+																																																																														IL_2AA9:
+																																																																														this.tag_Indent = this.m_indentStack.Remove();
+																																																																														return true;
+																																																																													}
+																																																																													IL_28AA:
+																																																																													if (!this.m_isParsingText)
+																																																																													{
+																																																																														return true;
+																																																																													}
+																																																																													if (this.m_characterCount > 0)
+																																																																													{
+																																																																														this.m_xAdvance -= this.m_cSpacing;
+																																																																														this.m_textInfo.characterInfo[this.m_characterCount - 1].xAdvance = this.m_xAdvance;
+																																																																													}
+																																																																													this.m_cSpacing = 0f;
+																																																																													return true;
+																																																																												}
+																																																																												IL_359E:
+																																																																												if (this.m_isParsingText)
+																																																																												{
+																																																																													global::Debug.Log(string.Concat(new object[]
+																																																																													{
+																																																																														"Action ID: [",
+																																																																														this.m_actionStack.CurrentItem(),
+																																																																														"] Last character index: ",
+																																																																														this.m_characterCount - 1
+																																																																													}), null);
+																																																																												}
+																																																																												this.m_actionStack.Remove();
+																																																																												return true;
+																																																																											}
+																																																																										}
+																																																																										int valueHashCode2 = this.m_xmlAttribute[0].valueHashCode;
+																																																																										this.m_spriteIndex = -1;
+																																																																										TMP_SpriteAsset tmp_SpriteAsset;
+																																																																										if (this.m_xmlAttribute[0].valueType == TagType.None || this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
+																																																																										{
+																																																																											if (this.m_spriteAsset != null)
+																																																																											{
+																																																																												this.m_currentSpriteAsset = this.m_spriteAsset;
+																																																																											}
+																																																																											else if (this.m_defaultSpriteAsset != null)
+																																																																											{
+																																																																												this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
+																																																																											}
+																																																																											else if (this.m_defaultSpriteAsset == null)
+																																																																											{
+																																																																												if (TMP_Settings.defaultSpriteAsset != null)
+																																																																												{
+																																																																													this.m_defaultSpriteAsset = TMP_Settings.defaultSpriteAsset;
+																																																																												}
+																																																																												else
+																																																																												{
+																																																																													this.m_defaultSpriteAsset = Resources.Load<TMP_SpriteAsset>("Sprite Assets/Default Sprite Asset");
+																																																																												}
+																																																																												this.m_currentSpriteAsset = this.m_defaultSpriteAsset;
+																																																																											}
+																																																																											if (this.m_currentSpriteAsset == null)
+																																																																											{
+																																																																												return false;
+																																																																											}
+																																																																										}
+																																																																										else if (MaterialReferenceManager.TryGetSpriteAsset(valueHashCode2, out tmp_SpriteAsset))
+																																																																										{
+																																																																											this.m_currentSpriteAsset = tmp_SpriteAsset;
+																																																																										}
+																																																																										else
+																																																																										{
+																																																																											if (tmp_SpriteAsset == null)
+																																																																											{
+																																																																												tmp_SpriteAsset = Resources.Load<TMP_SpriteAsset>(TMP_Settings.defaultSpriteAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+																																																																											}
+																																																																											if (tmp_SpriteAsset == null)
+																																																																											{
+																																																																												return false;
+																																																																											}
+																																																																											MaterialReferenceManager.AddSpriteAsset(valueHashCode2, tmp_SpriteAsset);
+																																																																											this.m_currentSpriteAsset = tmp_SpriteAsset;
+																																																																										}
+																																																																										if (this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
+																																																																										{
+																																																																											int num12 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																																											if (num12 == -9999)
+																																																																											{
+																																																																												return false;
+																																																																											}
+																																																																											if (num12 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
+																																																																											{
+																																																																												return false;
+																																																																											}
+																																																																											this.m_spriteIndex = num12;
+																																																																										}
+																																																																										this.m_spriteColor = TMP_Text.s_colorWhite;
+																																																																										this.m_tintSprite = false;
+																																																																										int num13 = 0;
+																																																																										while (num13 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num13].nameHashCode != 0)
+																																																																										{
+																																																																											int nameHashCode2 = this.m_xmlAttribute[num13].nameHashCode;
+																																																																											if (nameHashCode2 == 26705)
+																																																																											{
+																																																																												goto IL_2F54;
+																																																																											}
+																																																																											int num14;
+																																																																											if (nameHashCode2 != 30547)
+																																																																											{
+																																																																												if (nameHashCode2 != 33019)
+																																																																												{
+																																																																													if (nameHashCode2 == 39505)
+																																																																													{
+																																																																														goto IL_2F54;
+																																																																													}
+																																																																													if (nameHashCode2 == 43347)
+																																																																													{
+																																																																														goto IL_2E37;
+																																																																													}
+																																																																													if (nameHashCode2 != 45819)
+																																																																													{
+																																																																														if (nameHashCode2 != 192323)
+																																																																														{
+																																																																															if (nameHashCode2 != 205930)
+																																																																															{
+																																																																																if (nameHashCode2 == 281955)
+																																																																																{
+																																																																																	goto IL_2F19;
+																																																																																}
+																																																																																if (nameHashCode2 != 295562)
+																																																																																{
+																																																																																	if (nameHashCode2 != 2246877 && nameHashCode2 != 1619421)
 																																																																																	{
 																																																																																		return false;
 																																																																																	}
-																																																																																	this.m_marginLeft = num11;
-																																																																																	if (tagUnits != TagUnits.Pixels)
-																																																																																	{
-																																																																																		if (tagUnits != TagUnits.FontUnits)
-																																																																																		{
-																																																																																			if (tagUnits == TagUnits.Percentage)
-																																																																																			{
-																																																																																				this.m_marginLeft = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginLeft / 100f;
-																																																																																			}
-																																																																																		}
-																																																																																		else
-																																																																																		{
-																																																																																			this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																																		}
-																																																																																	}
-																																																																																	this.m_marginLeft = ((this.m_marginLeft < 0f) ? 0f : this.m_marginLeft);
-																																																																																	this.m_marginRight = this.m_marginLeft;
-																																																																																	return true;
+																																																																																	goto IL_3003;
 																																																																																}
-																																																																																IL_29CE:
-																																																																																num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																																if (num11 == -9999f)
-																																																																																{
-																																																																																	return false;
-																																																																																}
-																																																																																if (tagUnits != TagUnits.Pixels)
-																																																																																{
-																																																																																	if (tagUnits != TagUnits.FontUnits)
-																																																																																	{
-																																																																																		if (tagUnits == TagUnits.Percentage)
-																																																																																		{
-																																																																																			this.tag_Indent = this.m_marginWidth * num11 / 100f;
-																																																																																		}
-																																																																																	}
-																																																																																	else
-																																																																																	{
-																																																																																		this.tag_Indent = num11;
-																																																																																		this.tag_Indent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																																	}
-																																																																																}
-																																																																																else
-																																																																																{
-																																																																																	this.tag_Indent = num11;
-																																																																																}
-																																																																																this.m_indentStack.Add(this.tag_Indent);
-																																																																																this.m_xAdvance = this.tag_Indent;
-																																																																																return true;
 																																																																															}
-																																																																															IL_2804:
-																																																																															num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																															if (num11 == -9999f)
+																																																																															num14 = (int)this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
+																																																																															if (num14 == -9999)
 																																																																															{
 																																																																																return false;
 																																																																															}
-																																																																															if (tagUnits != TagUnits.Pixels)
+																																																																															if (num14 > this.m_currentSpriteAsset.spriteInfoList.Count - 1)
 																																																																															{
-																																																																																if (tagUnits != TagUnits.FontUnits)
-																																																																																{
-																																																																																	if (tagUnits == TagUnits.Percentage)
-																																																																																	{
-																																																																																		return false;
-																																																																																	}
-																																																																																}
-																																																																																else
-																																																																																{
-																																																																																	this.m_cSpacing = num11;
-																																																																																	this.m_cSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																																}
+																																																																																return false;
 																																																																															}
-																																																																															else
-																																																																															{
-																																																																																this.m_cSpacing = num11;
-																																																																															}
-																																																																															return true;
+																																																																															this.m_spriteIndex = num14;
+																																																																															goto IL_3003;
 																																																																														}
-																																																																														IL_3538:
-																																																																														int valueHashCode3 = this.m_xmlAttribute[0].valueHashCode;
-																																																																														if (this.m_isParsingText)
-																																																																														{
-																																																																															this.m_actionStack.Add(valueHashCode3);
-																																																																															global::Debug.Log(string.Concat(new object[] { "Action ID: [", valueHashCode3, "] First character index: ", this.m_characterCount }), null);
-																																																																														}
-																																																																														return true;
+																																																																														IL_2F19:
+																																																																														this.m_spriteColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength);
+																																																																														goto IL_3003;
 																																																																													}
 																																																																												}
-																																																																												this.m_width = -1f;
-																																																																												return true;
+																																																																												this.m_tintSprite = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength) != 0f;
+																																																																												goto IL_3003;
 																																																																											}
-																																																																											return true;
+																																																																											IL_2E37:
+																																																																											num14 = this.m_currentSpriteAsset.GetSpriteIndexFromHashcode(this.m_xmlAttribute[num13].valueHashCode);
+																																																																											if (num14 == -1)
+																																																																											{
+																																																																												return false;
+																																																																											}
+																																																																											this.m_spriteIndex = num14;
+																																																																											IL_3003:
+																																																																											num13++;
+																																																																											continue;
+																																																																											IL_2F54:
+																																																																											int attributeParameters = this.GetAttributeParameters(this.m_htmlTag, this.m_xmlAttribute[num13].valueStartIndex, this.m_xmlAttribute[num13].valueLength, ref this.m_attributeParameterValues);
+																																																																											if (attributeParameters != 3)
+																																																																											{
+																																																																												return false;
+																																																																											}
+																																																																											this.m_spriteIndex = (int)this.m_attributeParameterValues[0];
+																																																																											if (this.m_isParsingText)
+																																																																											{
+																																																																												this.spriteAnimator.DoSpriteAnimation(this.m_characterCount, this.m_currentSpriteAsset, this.m_spriteIndex, (int)this.m_attributeParameterValues[1], (int)this.m_attributeParameterValues[2]);
+																																																																											}
+																																																																											goto IL_3003;
 																																																																										}
-																																																																										IL_3668:
-																																																																										this.m_isFXMatrixSet = false;
+																																																																										if (this.m_spriteIndex == -1)
+																																																																										{
+																																																																											return false;
+																																																																										}
+																																																																										this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentSpriteAsset.material, this.m_currentSpriteAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+																																																																										this.m_textElementType = TMP_TextElementType.Sprite;
 																																																																										return true;
 																																																																									}
-																																																																									IL_29BB:
-																																																																									this.m_htmlColor = this.m_colorStack.Remove();
+																																																																									IL_3671:
+																																																																									num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																																									if (num11 == -9999f)
+																																																																									{
+																																																																										return false;
+																																																																									}
+																																																																									this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 0f, num11), Vector3.one);
+																																																																									this.m_isFXMatrixSet = true;
 																																																																									return true;
 																																																																								}
-																																																																								IL_2406:
-																																																																								this.m_lineJustification = this.m_lineJustificationStack.Remove();
+																																																																								IL_2906:
+																																																																								num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																																								if (num11 == -9999f)
+																																																																								{
+																																																																									return false;
+																																																																								}
+																																																																								if (tagUnits != TagUnits.Pixels)
+																																																																								{
+																																																																									if (tagUnits != TagUnits.FontUnits)
+																																																																									{
+																																																																										if (tagUnits == TagUnits.Percentage)
+																																																																										{
+																																																																											return false;
+																																																																										}
+																																																																									}
+																																																																									else
+																																																																									{
+																																																																										this.m_monoSpacing = num11;
+																																																																										this.m_monoSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+																																																																									}
+																																																																								}
+																																																																								else
+																																																																								{
+																																																																									this.m_monoSpacing = num11;
+																																																																								}
 																																																																								return true;
 																																																																							}
+																																																																							IL_3131:
+																																																																							num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																																							if (num11 == -9999f)
+																																																																							{
+																																																																								return false;
+																																																																							}
+																																																																							this.m_marginLeft = num11;
+																																																																							if (tagUnits != TagUnits.Pixels)
+																																																																							{
+																																																																								if (tagUnits != TagUnits.FontUnits)
+																																																																								{
+																																																																									if (tagUnits == TagUnits.Percentage)
+																																																																									{
+																																																																										this.m_marginLeft = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginLeft / 100f;
+																																																																									}
+																																																																								}
+																																																																								else
+																																																																								{
+																																																																									this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+																																																																								}
+																																																																							}
+																																																																							this.m_marginLeft = ((this.m_marginLeft < 0f) ? 0f : this.m_marginLeft);
+																																																																							this.m_marginRight = this.m_marginLeft;
+																																																																							return true;
 																																																																						}
+																																																																						IL_29CE:
 																																																																						num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
 																																																																						if (num11 == -9999f)
 																																																																						{
@@ -5712,795 +5664,844 @@ namespace TMPro
 																																																																						}
 																																																																						if (tagUnits != TagUnits.Pixels)
 																																																																						{
-																																																																							if (tagUnits == TagUnits.FontUnits)
+																																																																							if (tagUnits != TagUnits.FontUnits)
 																																																																							{
-																																																																								return false;
+																																																																								if (tagUnits == TagUnits.Percentage)
+																																																																								{
+																																																																									this.tag_Indent = this.m_marginWidth * num11 / 100f;
+																																																																								}
 																																																																							}
-																																																																							if (tagUnits == TagUnits.Percentage)
+																																																																							else
 																																																																							{
-																																																																								this.m_width = this.m_marginWidth * num11 / 100f;
+																																																																								this.tag_Indent = num11;
+																																																																								this.tag_Indent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
 																																																																							}
 																																																																						}
 																																																																						else
 																																																																						{
-																																																																							this.m_width = num11;
+																																																																							this.tag_Indent = num11;
 																																																																						}
+																																																																						this.m_indentStack.Add(this.tag_Indent);
+																																																																						this.m_xAdvance = this.tag_Indent;
 																																																																						return true;
 																																																																					}
-																																																																					IL_204A:
+																																																																					IL_2804:
 																																																																					num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
 																																																																					if (num11 == -9999f)
 																																																																					{
 																																																																						return false;
 																																																																					}
-																																																																					if (tagUnits == TagUnits.Pixels)
-																																																																					{
-																																																																						this.m_xAdvance += num11;
-																																																																						return true;
-																																																																					}
-																																																																					if (tagUnits != TagUnits.FontUnits)
-																																																																					{
-																																																																						return tagUnits != TagUnits.Percentage && false;
-																																																																					}
-																																																																					this.m_xAdvance += num11 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																																																					return true;
-																																																																				}
-																																																																				IL_36E7:
-																																																																				int nameHashCode3 = this.m_xmlAttribute[1].nameHashCode;
-																																																																				if (nameHashCode3 == 327550)
-																																																																				{
-																																																																					float num15 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
 																																																																					if (tagUnits != TagUnits.Pixels)
 																																																																					{
 																																																																						if (tagUnits != TagUnits.FontUnits)
 																																																																						{
 																																																																							if (tagUnits == TagUnits.Percentage)
 																																																																							{
-																																																																								global::Debug.Log("Table width = " + num15 + "%.", null);
+																																																																								return false;
 																																																																							}
 																																																																						}
 																																																																						else
 																																																																						{
-																																																																							global::Debug.Log("Table width = " + num15 + "em.", null);
+																																																																							this.m_cSpacing = num11;
+																																																																							this.m_cSpacing *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
 																																																																						}
 																																																																					}
 																																																																					else
 																																																																					{
-																																																																						global::Debug.Log("Table width = " + num15 + "px.", null);
+																																																																						this.m_cSpacing = num11;
 																																																																					}
+																																																																					return true;
+																																																																				}
+																																																																				IL_3538:
+																																																																				int valueHashCode3 = this.m_xmlAttribute[0].valueHashCode;
+																																																																				if (this.m_isParsingText)
+																																																																				{
+																																																																					this.m_actionStack.Add(valueHashCode3);
+																																																																					global::Debug.Log(string.Concat(new object[] { "Action ID: [", valueHashCode3, "] First character index: ", this.m_characterCount }), null);
 																																																																				}
 																																																																				return true;
 																																																																			}
-																																																																			IL_35FB:
-																																																																			num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																																			if (num11 == -9999f)
-																																																																			{
-																																																																				return false;
-																																																																			}
-																																																																			this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(num11, 1f, 1f));
-																																																																			this.m_isFXMatrixSet = true;
-																																																																			return true;
 																																																																		}
-																																																																		IL_24A8:
-																																																																		if (this.m_htmlTag[6] == '#' && num == 10)
-																																																																		{
-																																																																			this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (this.m_htmlTag[6] == '#' && num == 11)
-																																																																		{
-																																																																			this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (this.m_htmlTag[6] == '#' && num == 13)
-																																																																		{
-																																																																			this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (this.m_htmlTag[6] == '#' && num == 15)
-																																																																		{
-																																																																			this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		int valueHashCode4 = this.m_xmlAttribute[0].valueHashCode;
-																																																																		if (valueHashCode4 == -36881330)
-																																																																		{
-																																																																			this.m_htmlColor = new Color32(160, 32, 240, byte.MaxValue);
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (valueHashCode4 == 125395)
-																																																																		{
-																																																																			this.m_htmlColor = Color.red;
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (valueHashCode4 == 3573310)
-																																																																		{
-																																																																			this.m_htmlColor = Color.blue;
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (valueHashCode4 == 26556144)
-																																																																		{
-																																																																			this.m_htmlColor = new Color32(byte.MaxValue, 128, 0, byte.MaxValue);
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (valueHashCode4 == 117905991)
-																																																																		{
-																																																																			this.m_htmlColor = Color.black;
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (valueHashCode4 == 121463835)
-																																																																		{
-																																																																			this.m_htmlColor = Color.green;
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (valueHashCode4 == 140357351)
-																																																																		{
-																																																																			this.m_htmlColor = Color.white;
-																																																																			this.m_colorStack.Add(this.m_htmlColor);
-																																																																			return true;
-																																																																		}
-																																																																		if (valueHashCode4 != 554054276)
-																																																																		{
-																																																																			return false;
-																																																																		}
-																																																																		this.m_htmlColor = Color.yellow;
-																																																																		this.m_colorStack.Add(this.m_htmlColor);
+																																																																		this.m_width = -1f;
 																																																																		return true;
 																																																																	}
-																																																																	IL_20EC:
-																																																																	if (this.m_xmlAttribute[0].valueLength != 3)
-																																																																	{
-																																																																		return false;
-																																																																	}
-																																																																	this.m_htmlColor.a = (byte)(this.HexToInt(this.m_htmlTag[7]) * 16 + this.HexToInt(this.m_htmlTag[8]));
 																																																																	return true;
 																																																																}
-																																																																IL_231A:
-																																																																int valueHashCode5 = this.m_xmlAttribute[0].valueHashCode;
-																																																																if (valueHashCode5 == -523808257)
-																																																																{
-																																																																	this.m_lineJustification = TextAlignmentOptions.Justified;
-																																																																	this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																																	return true;
-																																																																}
-																																																																if (valueHashCode5 == -458210101)
-																																																																{
-																																																																	this.m_lineJustification = TextAlignmentOptions.Center;
-																																																																	this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																																	return true;
-																																																																}
-																																																																if (valueHashCode5 == 3774683)
-																																																																{
-																																																																	this.m_lineJustification = TextAlignmentOptions.Left;
-																																																																	this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																																	return true;
-																																																																}
-																																																																if (valueHashCode5 == 122383428)
-																																																																{
-																																																																	this.m_lineJustification = TextAlignmentOptions.Flush;
-																																																																	this.m_lineJustificationStack.Add(this.m_lineJustification);
-																																																																	return true;
-																																																																}
-																																																																if (valueHashCode5 != 136703040)
-																																																																{
-																																																																	return false;
-																																																																}
-																																																																this.m_lineJustification = TextAlignmentOptions.Right;
-																																																																this.m_lineJustificationStack.Add(this.m_lineJustification);
+																																																																IL_3668:
+																																																																this.m_isFXMatrixSet = false;
 																																																																return true;
 																																																															}
+																																																															IL_29BB:
+																																																															this.m_htmlColor = this.m_colorStack.Remove();
+																																																															return true;
 																																																														}
-																																																														this.m_currentFontSize = this.m_sizeStack.Remove();
-																																																														this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																														IL_2406:
+																																																														this.m_lineJustification = this.m_lineJustificationStack.Remove();
 																																																														return true;
 																																																													}
-																																																													IL_1827:
-																																																													this.m_isNonBreakingSpace = false;
-																																																													return true;
 																																																												}
-																																																												IL_2274:
-																																																												if (this.m_isParsingText && !this.m_isCalculatingPreferredValues)
+																																																												num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																												if (num11 == -9999f)
 																																																												{
-																																																													try
+																																																													return false;
+																																																												}
+																																																												if (tagUnits != TagUnits.Pixels)
+																																																												{
+																																																													if (tagUnits == TagUnits.FontUnits)
 																																																													{
-																																																														this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextLength = this.m_characterCount - this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextfirstCharacterIndex;
-																																																														this.m_textInfo.linkCount++;
-																																																													}
-																																																													catch
-																																																													{
-																																																														if (!TMP_Text.linkWarning)
-																																																														{
-																																																															global::Debug.LogWarning("Possible Link within link error: " + this.text, null);
-																																																															TMP_Text.linkWarning = true;
-																																																														}
 																																																														return false;
 																																																													}
-																																																													return true;
+																																																													if (tagUnits == TagUnits.Percentage)
+																																																													{
+																																																														this.m_width = this.m_marginWidth * num11 / 100f;
+																																																													}
+																																																												}
+																																																												else
+																																																												{
+																																																													this.m_width = num11;
 																																																												}
 																																																												return true;
 																																																											}
-																																																											IL_1211:
-																																																											if ((this.m_fontStyle & FontStyles.Highlight) != FontStyles.Highlight)
+																																																											IL_204A:
+																																																											num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																											if (num11 == -9999f)
 																																																											{
-																																																												this.m_highlightColor = this.m_highlightColorStack.Remove();
-																																																												if (this.m_fontStyleStack.Remove(FontStyles.Highlight) == 0)
-																																																												{
-																																																													this.m_style &= (FontStyles)(-513);
-																																																												}
+																																																												return false;
 																																																											}
+																																																											if (tagUnits == TagUnits.Pixels)
+																																																											{
+																																																												this.m_xAdvance += num11;
+																																																												return true;
+																																																											}
+																																																											if (tagUnits != TagUnits.FontUnits)
+																																																											{
+																																																												return tagUnits != TagUnits.Percentage && false;
+																																																											}
+																																																											this.m_xAdvance += num11 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
 																																																											return true;
 																																																										}
-																																																										IL_1E38:
-																																																										MaterialReference materialReference = this.m_materialReferenceStack.Remove();
-																																																										this.m_currentFontAsset = materialReference.fontAsset;
-																																																										this.m_currentMaterial = materialReference.material;
-																																																										this.m_currentMaterialIndex = materialReference.index;
-																																																										this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																										IL_36E7:
+																																																										int nameHashCode3 = this.m_xmlAttribute[1].nameHashCode;
+																																																										if (nameHashCode3 == 327550)
+																																																										{
+																																																											float num15 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
+																																																											if (tagUnits != TagUnits.Pixels)
+																																																											{
+																																																												if (tagUnits != TagUnits.FontUnits)
+																																																												{
+																																																													if (tagUnits == TagUnits.Percentage)
+																																																													{
+																																																														global::Debug.Log("Table width = " + num15 + "%.", null);
+																																																													}
+																																																												}
+																																																												else
+																																																												{
+																																																													global::Debug.Log("Table width = " + num15 + "em.", null);
+																																																												}
+																																																											}
+																																																											else
+																																																											{
+																																																												global::Debug.Log("Table width = " + num15 + "px.", null);
+																																																											}
+																																																										}
 																																																										return true;
 																																																									}
-																																																								}
-																																																								num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																								if (num11 == -9999f)
-																																																								{
-																																																									return false;
-																																																								}
-																																																								if (tagUnits != TagUnits.Pixels)
-																																																								{
-																																																									if (tagUnits == TagUnits.FontUnits)
-																																																									{
-																																																										this.m_currentFontSize = this.m_fontSize * num11;
-																																																										this.m_sizeStack.Add(this.m_currentFontSize);
-																																																										this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																										return true;
-																																																									}
-																																																									if (tagUnits != TagUnits.Percentage)
+																																																									IL_35FB:
+																																																									num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																																									if (num11 == -9999f)
 																																																									{
 																																																										return false;
 																																																									}
-																																																									this.m_currentFontSize = this.m_fontSize * num11 / 100f;
-																																																									this.m_sizeStack.Add(this.m_currentFontSize);
-																																																									this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																									this.m_FXMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(num11, 1f, 1f));
+																																																									this.m_isFXMatrixSet = true;
 																																																									return true;
 																																																								}
-																																																								else
+																																																								IL_24A8:
+																																																								if (this.m_htmlTag[6] == '#' && num == 10)
 																																																								{
-																																																									if (this.m_htmlTag[5] == '+')
-																																																									{
-																																																										this.m_currentFontSize = this.m_fontSize + num11;
-																																																										this.m_sizeStack.Add(this.m_currentFontSize);
-																																																										this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																										return true;
-																																																									}
-																																																									if (this.m_htmlTag[5] == '-')
-																																																									{
-																																																										this.m_currentFontSize = this.m_fontSize + num11;
-																																																										this.m_sizeStack.Add(this.m_currentFontSize);
-																																																										this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																										return true;
-																																																									}
-																																																									this.m_currentFontSize = num11;
-																																																									this.m_sizeStack.Add(this.m_currentFontSize);
-																																																									this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+																																																									this.m_colorStack.Add(this.m_htmlColor);
 																																																									return true;
 																																																								}
+																																																								if (this.m_htmlTag[6] == '#' && num == 11)
+																																																								{
+																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (this.m_htmlTag[6] == '#' && num == 13)
+																																																								{
+																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (this.m_htmlTag[6] == '#' && num == 15)
+																																																								{
+																																																									this.m_htmlColor = this.HexCharsToColor(this.m_htmlTag, num);
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								int valueHashCode4 = this.m_xmlAttribute[0].valueHashCode;
+																																																								if (valueHashCode4 == -36881330)
+																																																								{
+																																																									this.m_htmlColor = new Color32(160, 32, 240, byte.MaxValue);
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (valueHashCode4 == 125395)
+																																																								{
+																																																									this.m_htmlColor = Color.red;
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (valueHashCode4 == 3573310)
+																																																								{
+																																																									this.m_htmlColor = Color.blue;
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (valueHashCode4 == 26556144)
+																																																								{
+																																																									this.m_htmlColor = new Color32(byte.MaxValue, 128, 0, byte.MaxValue);
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (valueHashCode4 == 117905991)
+																																																								{
+																																																									this.m_htmlColor = Color.black;
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (valueHashCode4 == 121463835)
+																																																								{
+																																																									this.m_htmlColor = Color.green;
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (valueHashCode4 == 140357351)
+																																																								{
+																																																									this.m_htmlColor = Color.white;
+																																																									this.m_colorStack.Add(this.m_htmlColor);
+																																																									return true;
+																																																								}
+																																																								if (valueHashCode4 != 554054276)
+																																																								{
+																																																									return false;
+																																																								}
+																																																								this.m_htmlColor = Color.yellow;
+																																																								this.m_colorStack.Add(this.m_htmlColor);
+																																																								return true;
 																																																							}
-																																																							IL_17DD:
-																																																							if (this.m_overflowMode == TextOverflowModes.Page)
+																																																							IL_20EC:
+																																																							if (this.m_xmlAttribute[0].valueLength != 3)
 																																																							{
-																																																								this.m_xAdvance = this.tag_LineIndent + this.tag_Indent;
-																																																								this.m_lineOffset = 0f;
-																																																								this.m_pageNumber++;
-																																																								this.m_isNewPage = true;
+																																																								return false;
 																																																							}
+																																																							this.m_htmlColor.a = (byte)(this.HexToInt(this.m_htmlTag[7]) * 16 + this.HexToInt(this.m_htmlTag[8]));
 																																																							return true;
 																																																						}
-																																																						IL_181E:
-																																																						this.m_isNonBreakingSpace = true;
+																																																						IL_231A:
+																																																						int valueHashCode5 = this.m_xmlAttribute[0].valueHashCode;
+																																																						if (valueHashCode5 == -523808257)
+																																																						{
+																																																							this.m_lineJustification = TextAlignmentOptions.Justified;
+																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
+																																																							return true;
+																																																						}
+																																																						if (valueHashCode5 == -458210101)
+																																																						{
+																																																							this.m_lineJustification = TextAlignmentOptions.Center;
+																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
+																																																							return true;
+																																																						}
+																																																						if (valueHashCode5 == 3774683)
+																																																						{
+																																																							this.m_lineJustification = TextAlignmentOptions.Left;
+																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
+																																																							return true;
+																																																						}
+																																																						if (valueHashCode5 == 122383428)
+																																																						{
+																																																							this.m_lineJustification = TextAlignmentOptions.Flush;
+																																																							this.m_lineJustificationStack.Add(this.m_lineJustification);
+																																																							return true;
+																																																						}
+																																																						if (valueHashCode5 != 136703040)
+																																																						{
+																																																							return false;
+																																																						}
+																																																						this.m_lineJustification = TextAlignmentOptions.Right;
+																																																						this.m_lineJustificationStack.Add(this.m_lineJustification);
 																																																						return true;
 																																																					}
-																																																					IL_2137:
-																																																					if (this.m_isParsingText && !this.m_isCalculatingPreferredValues)
-																																																					{
-																																																						int linkCount = this.m_textInfo.linkCount;
-																																																						if (linkCount + 1 > this.m_textInfo.linkInfo.Length)
-																																																						{
-																																																							TMP_TextInfo.Resize<TMP_LinkInfo>(ref this.m_textInfo.linkInfo, linkCount + 1);
-																																																						}
-																																																						this.m_textInfo.linkInfo[linkCount].textComponent = this;
-																																																						this.m_textInfo.linkInfo[linkCount].hashCode = this.m_xmlAttribute[0].valueHashCode;
-																																																						this.m_textInfo.linkInfo[linkCount].linkTextfirstCharacterIndex = this.m_characterCount;
-																																																						this.m_textInfo.linkInfo[linkCount].linkIdFirstCharacterIndex = startIndex + this.m_xmlAttribute[0].valueStartIndex;
-																																																						this.m_textInfo.linkInfo[linkCount].linkIdLength = this.m_xmlAttribute[0].valueLength;
-																																																						this.m_textInfo.linkInfo[linkCount].SetLinkID(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																					}
-																																																					return true;
 																																																				}
-																																																				IL_11A7:
-																																																				this.m_style |= FontStyles.Highlight;
-																																																				this.m_fontStyleStack.Add(FontStyles.Highlight);
-																																																				this.m_highlightColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																																				this.m_highlightColorStack.Add(this.m_highlightColor);
-																																																				return true;
-																																																			}
-																																																			IL_1B19:
-																																																			int valueHashCode6 = this.m_xmlAttribute[0].valueHashCode;
-																																																			int nameHashCode4 = this.m_xmlAttribute[1].nameHashCode;
-																																																			num10 = this.m_xmlAttribute[1].valueHashCode;
-																																																			if (valueHashCode6 == 764638571 || valueHashCode6 == 523367755)
-																																																			{
-																																																				this.m_currentFontAsset = this.m_materialReferences[0].fontAsset;
-																																																				this.m_currentMaterial = this.m_materialReferences[0].material;
-																																																				this.m_currentMaterialIndex = 0;
+																																																				this.m_currentFontSize = this.m_sizeStack.Remove();
 																																																				this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
-																																																				this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
 																																																				return true;
 																																																			}
-																																																			TMP_FontAsset tmp_FontAsset;
-																																																			if (!MaterialReferenceManager.TryGetFontAsset(valueHashCode6, out tmp_FontAsset))
-																																																			{
-																																																				tmp_FontAsset = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
-																																																				if (tmp_FontAsset == null)
-																																																				{
-																																																					return false;
-																																																				}
-																																																				MaterialReferenceManager.AddFontAsset(tmp_FontAsset);
-																																																			}
-																																																			if (nameHashCode4 == 0 && num10 == 0)
-																																																			{
-																																																				this.m_currentMaterial = tmp_FontAsset.material;
-																																																				this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																				this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																																			}
-																																																			else
-																																																			{
-																																																				if (nameHashCode4 != 103415287 && nameHashCode4 != 72669687)
-																																																				{
-																																																					return false;
-																																																				}
-																																																				Material material;
-																																																				if (MaterialReferenceManager.TryGetMaterial(num10, out material))
-																																																				{
-																																																					this.m_currentMaterial = material;
-																																																					this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																					this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																																				}
-																																																				else
-																																																				{
-																																																					material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength));
-																																																					if (material == null)
-																																																					{
-																																																						return false;
-																																																					}
-																																																					MaterialReferenceManager.AddFontMaterial(num10, material);
-																																																					this.m_currentMaterial = material;
-																																																					this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
-																																																					this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
-																																																				}
-																																																			}
-																																																			this.m_currentFontAsset = tmp_FontAsset;
-																																																			this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																			IL_1827:
+																																																			this.m_isNonBreakingSpace = false;
 																																																			return true;
 																																																		}
-																																																	}
-																																																	if ((this.m_style & FontStyles.Superscript) == FontStyles.Superscript)
-																																																	{
-																																																		if (this.m_fontScaleMultiplier < 1f)
+																																																		IL_2274:
+																																																		if (this.m_isParsingText && !this.m_isCalculatingPreferredValues)
 																																																		{
-																																																			this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
-																																																			this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
+																																																			try
+																																																			{
+																																																				this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextLength = this.m_characterCount - this.m_textInfo.linkInfo[this.m_textInfo.linkCount].linkTextfirstCharacterIndex;
+																																																				this.m_textInfo.linkCount++;
+																																																			}
+																																																			catch
+																																																			{
+																																																				if (!TMP_Text.linkWarning)
+																																																				{
+																																																					global::Debug.LogWarning("Possible Link within link error: " + this.text, null);
+																																																					TMP_Text.linkWarning = true;
+																																																				}
+																																																				return false;
+																																																			}
+																																																			return true;
 																																																		}
-																																																		if (this.m_fontStyleStack.Remove(FontStyles.Superscript) == 0)
+																																																		return true;
+																																																	}
+																																																	IL_1211:
+																																																	if ((this.m_fontStyle & FontStyles.Highlight) != FontStyles.Highlight)
+																																																	{
+																																																		this.m_highlightColor = this.m_highlightColorStack.Remove();
+																																																		if (this.m_fontStyleStack.Remove(FontStyles.Highlight) == 0)
 																																																		{
-																																																			this.m_style &= (FontStyles)(-129);
+																																																			this.m_style &= (FontStyles)(-513);
 																																																		}
 																																																	}
 																																																	return true;
 																																																}
-																																																IL_1303:
-																																																if ((this.m_style & FontStyles.Subscript) == FontStyles.Subscript)
-																																																{
-																																																	if (this.m_fontScaleMultiplier < 1f)
-																																																	{
-																																																		this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
-																																																		this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
-																																																	}
-																																																	if (this.m_fontStyleStack.Remove(FontStyles.Subscript) == 0)
-																																																	{
-																																																		this.m_style &= (FontStyles)(-257);
-																																																	}
-																																																}
+																																																IL_1E38:
+																																																MaterialReference materialReference2 = this.m_materialReferenceStack.Remove();
+																																																this.m_currentFontAsset = materialReference2.fontAsset;
+																																																this.m_currentMaterial = materialReference2.material;
+																																																this.m_currentMaterialIndex = materialReference2.index;
+																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
 																																																return true;
 																																															}
-																																															IL_1740:
-																																															this.m_isIgnoringAlignment = false;
+																																														}
+																																														num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																														if (num11 == -9999f)
+																																														{
+																																															return false;
+																																														}
+																																														if (tagUnits != TagUnits.Pixels)
+																																														{
+																																															if (tagUnits == TagUnits.FontUnits)
+																																															{
+																																																this.m_currentFontSize = this.m_fontSize * num11;
+																																																this.m_sizeStack.Add(this.m_currentFontSize);
+																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																return true;
+																																															}
+																																															if (tagUnits != TagUnits.Percentage)
+																																															{
+																																																return false;
+																																															}
+																																															this.m_currentFontSize = this.m_fontSize * num11 / 100f;
+																																															this.m_sizeStack.Add(this.m_currentFontSize);
+																																															this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																															return true;
+																																														}
+																																														else
+																																														{
+																																															if (this.m_htmlTag[5] == '+')
+																																															{
+																																																this.m_currentFontSize = this.m_fontSize + num11;
+																																																this.m_sizeStack.Add(this.m_currentFontSize);
+																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																return true;
+																																															}
+																																															if (this.m_htmlTag[5] == '-')
+																																															{
+																																																this.m_currentFontSize = this.m_fontSize + num11;
+																																																this.m_sizeStack.Add(this.m_currentFontSize);
+																																																this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																																return true;
+																																															}
+																																															this.m_currentFontSize = num11;
+																																															this.m_sizeStack.Add(this.m_currentFontSize);
+																																															this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
 																																															return true;
 																																														}
 																																													}
-																																													this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
-																																													this.m_baselineOffsetStack.Push(this.m_baselineOffset);
-																																													this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SuperscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
-																																													this.m_fontStyleStack.Add(FontStyles.Superscript);
-																																													this.m_style |= FontStyles.Superscript;
+																																													IL_17DD:
+																																													if (this.m_overflowMode == TextOverflowModes.Page)
+																																													{
+																																														this.m_xAdvance = this.tag_LineIndent + this.tag_Indent;
+																																														this.m_lineOffset = 0f;
+																																														this.m_pageNumber++;
+																																														this.m_isNewPage = true;
+																																													}
 																																													return true;
 																																												}
-																																												IL_1261:
-																																												this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
-																																												this.m_baselineOffsetStack.Push(this.m_baselineOffset);
-																																												this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SubscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
-																																												this.m_fontStyleStack.Add(FontStyles.Subscript);
-																																												this.m_style |= FontStyles.Subscript;
+																																												IL_181E:
+																																												this.m_isNonBreakingSpace = true;
 																																												return true;
 																																											}
-																																											IL_1697:
-																																											num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																																											if (num11 == -9999f)
+																																											IL_2137:
+																																											if (this.m_isParsingText && !this.m_isCalculatingPreferredValues)
 																																											{
-																																												return false;
+																																												int linkCount = this.m_textInfo.linkCount;
+																																												if (linkCount + 1 > this.m_textInfo.linkInfo.Length)
+																																												{
+																																													TMP_TextInfo.Resize<TMP_LinkInfo>(ref this.m_textInfo.linkInfo, linkCount + 1);
+																																												}
+																																												this.m_textInfo.linkInfo[linkCount].textComponent = this;
+																																												this.m_textInfo.linkInfo[linkCount].hashCode = this.m_xmlAttribute[0].valueHashCode;
+																																												this.m_textInfo.linkInfo[linkCount].linkTextfirstCharacterIndex = this.m_characterCount;
+																																												this.m_textInfo.linkInfo[linkCount].linkIdFirstCharacterIndex = startIndex + this.m_xmlAttribute[0].valueStartIndex;
+																																												this.m_textInfo.linkInfo[linkCount].linkIdLength = this.m_xmlAttribute[0].valueLength;
+																																												this.m_textInfo.linkInfo[linkCount].SetLinkID(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
 																																											}
-																																											if (tagUnits == TagUnits.Pixels)
-																																											{
-																																												this.m_xAdvance = num11;
-																																												return true;
-																																											}
-																																											if (tagUnits == TagUnits.FontUnits)
-																																											{
-																																												this.m_xAdvance = num11 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																																												return true;
-																																											}
-																																											if (tagUnits != TagUnits.Percentage)
-																																											{
-																																												return false;
-																																											}
-																																											this.m_xAdvance = this.m_marginWidth * num11 / 100f;
 																																											return true;
 																																										}
+																																										IL_11A7:
+																																										this.m_style |= FontStyles.Highlight;
+																																										this.m_fontStyleStack.Add(FontStyles.Highlight);
+																																										this.m_highlightColor = this.HexCharsToColor(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																										this.m_highlightColorStack.Add(this.m_highlightColor);
+																																										return true;
 																																									}
+																																									IL_1B19:
+																																									int valueHashCode6 = this.m_xmlAttribute[0].valueHashCode;
+																																									int nameHashCode4 = this.m_xmlAttribute[1].nameHashCode;
+																																									num10 = this.m_xmlAttribute[1].valueHashCode;
+																																									if (valueHashCode6 == 764638571 || valueHashCode6 == 523367755)
+																																									{
+																																										this.m_currentFontAsset = this.m_materialReferences[0].fontAsset;
+																																										this.m_currentMaterial = this.m_materialReferences[0].material;
+																																										this.m_currentMaterialIndex = 0;
+																																										this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
+																																										this.m_materialReferenceStack.Add(this.m_materialReferences[0]);
+																																										return true;
+																																									}
+																																									TMP_FontAsset tmp_FontAsset;
+																																									if (!MaterialReferenceManager.TryGetFontAsset(valueHashCode6, out tmp_FontAsset))
+																																									{
+																																										tmp_FontAsset = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
+																																										if (tmp_FontAsset == null)
+																																										{
+																																											return false;
+																																										}
+																																										MaterialReferenceManager.AddFontAsset(tmp_FontAsset);
+																																									}
+																																									if (nameHashCode4 == 0 && num10 == 0)
+																																									{
+																																										this.m_currentMaterial = tmp_FontAsset.material;
+																																										this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+																																										this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+																																									}
+																																									else
+																																									{
+																																										if (nameHashCode4 != 103415287 && nameHashCode4 != 72669687)
+																																										{
+																																											return false;
+																																										}
+																																										Material material;
+																																										if (MaterialReferenceManager.TryGetMaterial(num10, out material))
+																																										{
+																																											this.m_currentMaterial = material;
+																																											this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+																																											this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+																																										}
+																																										else
+																																										{
+																																											material = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength));
+																																											if (material == null)
+																																											{
+																																												return false;
+																																											}
+																																											MaterialReferenceManager.AddFontMaterial(num10, material);
+																																											this.m_currentMaterial = material;
+																																											this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
+																																											this.m_materialReferenceStack.Add(this.m_materialReferences[this.m_currentMaterialIndex]);
+																																										}
+																																									}
+																																									this.m_currentFontAsset = tmp_FontAsset;
+																																									this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
 																																									return true;
 																																								}
-																																								return true;
+																																							}
+																																							if ((this.m_style & FontStyles.Superscript) == FontStyles.Superscript)
+																																							{
+																																								if (this.m_fontScaleMultiplier < 1f)
+																																								{
+																																									this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
+																																									this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
+																																								}
+																																								if (this.m_fontStyleStack.Remove(FontStyles.Superscript) == 0)
+																																								{
+																																									this.m_style &= (FontStyles)(-129);
+																																								}
 																																							}
 																																							return true;
 																																						}
+																																						IL_1303:
+																																						if ((this.m_style & FontStyles.Subscript) == FontStyles.Subscript)
+																																						{
+																																							if (this.m_fontScaleMultiplier < 1f)
+																																							{
+																																								this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
+																																								this.m_fontScaleMultiplier /= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
+																																							}
+																																							if (this.m_fontStyleStack.Remove(FontStyles.Subscript) == 0)
+																																							{
+																																								this.m_style &= (FontStyles)(-257);
+																																							}
+																																						}
+																																						return true;
 																																					}
+																																					IL_1740:
+																																					this.m_isIgnoringAlignment = false;
 																																					return true;
 																																				}
-																																				return true;
 																																			}
-																																			IL_37C8:
-																																			int num16 = 1;
-																																			while (num16 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num16].nameHashCode != 0)
-																																			{
-																																				int nameHashCode5 = this.m_xmlAttribute[num16].nameHashCode;
-																																				if (nameHashCode5 != 327550)
-																																				{
-																																					if (nameHashCode5 == 275917)
-																																					{
-																																						int valueHashCode7 = this.m_xmlAttribute[num16].valueHashCode;
-																																						if (valueHashCode7 != -523808257)
-																																						{
-																																							if (valueHashCode7 != -458210101)
-																																							{
-																																								if (valueHashCode7 != 3774683)
-																																								{
-																																									if (valueHashCode7 == 136703040)
-																																									{
-																																										global::Debug.Log("TD align=\"right\".", null);
-																																									}
-																																								}
-																																								else
-																																								{
-																																									global::Debug.Log("TD align=\"left\".", null);
-																																								}
-																																							}
-																																							else
-																																							{
-																																								global::Debug.Log("TD align=\"center\".", null);
-																																							}
-																																						}
-																																						else
-																																						{
-																																							global::Debug.Log("TD align=\"justified\".", null);
-																																						}
-																																					}
-																																				}
-																																				else
-																																				{
-																																					float num17 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num16].valueStartIndex, this.m_xmlAttribute[num16].valueLength);
-																																					if (tagUnits != TagUnits.Pixels)
-																																					{
-																																						if (tagUnits != TagUnits.FontUnits)
-																																						{
-																																							if (tagUnits == TagUnits.Percentage)
-																																							{
-																																								global::Debug.Log("Table width = " + num17 + "%.", null);
-																																							}
-																																						}
-																																						else
-																																						{
-																																							global::Debug.Log("Table width = " + num17 + "em.", null);
-																																						}
-																																					}
-																																					else
-																																					{
-																																						global::Debug.Log("Table width = " + num17 + "px.", null);
-																																					}
-																																				}
-																																				num16++;
-																																			}
+																																			this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
+																																			this.m_baselineOffsetStack.Push(this.m_baselineOffset);
+																																			this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SuperscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
+																																			this.m_fontStyleStack.Add(FontStyles.Superscript);
+																																			this.m_style |= FontStyles.Superscript;
 																																			return true;
 																																		}
-																																		if (this.m_fontStyleStack.Remove(FontStyles.Italic) == 0)
-																																		{
-																																			this.m_style &= (FontStyles)(-3);
-																																		}
+																																		IL_1261:
+																																		this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.fontInfo.SubSize <= 0f) ? 1f : this.m_currentFontAsset.fontInfo.SubSize);
+																																		this.m_baselineOffsetStack.Push(this.m_baselineOffset);
+																																		this.m_baselineOffset += this.m_currentFontAsset.fontInfo.SubscriptOffset * this.m_fontScale * this.m_fontScaleMultiplier;
+																																		this.m_fontStyleStack.Add(FontStyles.Subscript);
+																																		this.m_style |= FontStyles.Subscript;
 																																		return true;
 																																	}
+																																	IL_1697:
+																																	num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																																	if (num11 == -9999f)
+																																	{
+																																		return false;
+																																	}
+																																	if (tagUnits == TagUnits.Pixels)
+																																	{
+																																		this.m_xAdvance = num11;
+																																		return true;
+																																	}
+																																	if (tagUnits == TagUnits.FontUnits)
+																																	{
+																																		this.m_xAdvance = num11 * this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+																																		return true;
+																																	}
+																																	if (tagUnits != TagUnits.Percentage)
+																																	{
+																																		return false;
+																																	}
+																																	this.m_xAdvance = this.m_marginWidth * num11 / 100f;
+																																	return true;
 																																}
-																																this.m_style |= FontStyles.Italic;
-																																this.m_fontStyleStack.Add(FontStyles.Italic);
-																																return true;
 																															}
-																															IL_0F27:
-																															this.m_style |= FontStyles.Bold;
-																															this.m_fontStyleStack.Add(FontStyles.Bold);
-																															this.m_fontWeightInternal = 700;
-																															this.m_fontWeightStack.Add(700);
 																															return true;
 																														}
-																														goto IL_14E7;
+																														return true;
 																													}
+																													return true;
 																												}
-																												num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																												if (num11 == -9999f)
-																												{
-																													return false;
-																												}
-																												this.m_marginRight = num11;
-																												if (tagUnits != TagUnits.Pixels)
-																												{
-																													if (tagUnits != TagUnits.FontUnits)
-																													{
-																														if (tagUnits == TagUnits.Percentage)
-																														{
-																															this.m_marginRight = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginRight / 100f;
-																														}
-																													}
-																													else
-																													{
-																														this.m_marginRight *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																													}
-																												}
-																												this.m_marginRight = ((this.m_marginRight < 0f) ? 0f : this.m_marginRight);
-																												return true;
-																											}
-																											IL_30CC:
-																											if (this.m_fontStyleStack.Remove(FontStyles.UpperCase) == 0)
-																											{
-																												this.m_style &= (FontStyles)(-17);
 																											}
 																											return true;
 																										}
-																										IL_310E:
-																										if (this.m_fontStyleStack.Remove(FontStyles.SmallCaps) == 0)
-																										{
-																											this.m_style &= (FontStyles)(-33);
-																										}
 																										return true;
 																									}
-																									IL_308B:
-																									if (this.m_fontStyleStack.Remove(FontStyles.LowerCase) == 0)
+																									IL_37C8:
+																									int num16 = 1;
+																									while (num16 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num16].nameHashCode != 0)
 																									{
-																										this.m_style &= (FontStyles)(-9);
-																									}
-																									return true;
-																								}
-																								goto IL_1665;
-																							}
-																							IL_14E7:
-																							num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																							if (num11 == -9999f)
-																							{
-																								return false;
-																							}
-																							if ((this.m_fontStyle & FontStyles.Bold) == FontStyles.Bold)
-																							{
-																								return true;
-																							}
-																							this.m_style &= (FontStyles)(-2);
-																							int num18 = (int)num11;
-																							if (num18 != 100)
-																							{
-																								if (num18 != 200)
-																								{
-																									if (num18 != 300)
-																									{
-																										if (num18 != 400)
+																										int nameHashCode5 = this.m_xmlAttribute[num16].nameHashCode;
+																										if (nameHashCode5 != 327550)
 																										{
-																											if (num18 != 500)
+																											if (nameHashCode5 == 275917)
 																											{
-																												if (num18 != 600)
+																												int valueHashCode7 = this.m_xmlAttribute[num16].valueHashCode;
+																												if (valueHashCode7 != -523808257)
 																												{
-																													if (num18 != 700)
+																													if (valueHashCode7 != -458210101)
 																													{
-																														if (num18 != 800)
+																														if (valueHashCode7 != 3774683)
 																														{
-																															if (num18 == 900)
+																															if (valueHashCode7 == 136703040)
 																															{
-																																this.m_fontWeightInternal = 900;
+																																global::Debug.Log("TD align=\"right\".", null);
 																															}
 																														}
 																														else
 																														{
-																															this.m_fontWeightInternal = 800;
+																															global::Debug.Log("TD align=\"left\".", null);
 																														}
 																													}
 																													else
 																													{
-																														this.m_fontWeightInternal = 700;
-																														this.m_style |= FontStyles.Bold;
+																														global::Debug.Log("TD align=\"center\".", null);
 																													}
 																												}
 																												else
 																												{
-																													this.m_fontWeightInternal = 600;
+																													global::Debug.Log("TD align=\"justified\".", null);
 																												}
-																											}
-																											else
-																											{
-																												this.m_fontWeightInternal = 500;
 																											}
 																										}
 																										else
 																										{
-																											this.m_fontWeightInternal = 400;
+																											float num17 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num16].valueStartIndex, this.m_xmlAttribute[num16].valueLength);
+																											if (tagUnits != TagUnits.Pixels)
+																											{
+																												if (tagUnits != TagUnits.FontUnits)
+																												{
+																													if (tagUnits == TagUnits.Percentage)
+																													{
+																														global::Debug.Log("Table width = " + num17 + "%.", null);
+																													}
+																												}
+																												else
+																												{
+																													global::Debug.Log("Table width = " + num17 + "em.", null);
+																												}
+																											}
+																											else
+																											{
+																												global::Debug.Log("Table width = " + num17 + "px.", null);
+																											}
 																										}
+																										num16++;
 																									}
-																									else
-																									{
-																										this.m_fontWeightInternal = 300;
-																									}
+																									return true;
 																								}
-																								else
+																								if (this.m_fontStyleStack.Remove(FontStyles.Italic) == 0)
 																								{
-																									this.m_fontWeightInternal = 200;
+																									this.m_style &= (FontStyles)(-3);
 																								}
+																								return true;
 																							}
-																							else
-																							{
-																								this.m_fontWeightInternal = 100;
-																							}
-																							this.m_fontWeightStack.Add(this.m_fontWeightInternal);
-																							return true;
 																						}
-																						IL_2B8D:
-																						this.tag_LineIndent = 0f;
+																						this.m_style |= FontStyles.Italic;
+																						this.m_fontStyleStack.Add(FontStyles.Italic);
 																						return true;
 																					}
-																					IL_3522:
-																					this.m_lineHeight = -32767f;
+																					IL_0F27:
+																					this.m_style |= FontStyles.Bold;
+																					this.m_fontStyleStack.Add(FontStyles.Bold);
+																					this.m_fontWeightInternal = 700;
+																					this.m_fontWeightStack.Add(700);
 																					return true;
 																				}
-																				IL_2ABC:
+																				IL_14E7:
 																				num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
 																				if (num11 == -9999f)
 																				{
 																					return false;
 																				}
-																				if (tagUnits != TagUnits.Pixels)
+																				if ((this.m_fontStyle & FontStyles.Bold) == FontStyles.Bold)
 																				{
-																					if (tagUnits != TagUnits.FontUnits)
+																					return true;
+																				}
+																				this.m_style &= (FontStyles)(-2);
+																				int num18 = (int)num11;
+																				if (num18 != 100)
+																				{
+																					if (num18 != 200)
 																					{
-																						if (tagUnits == TagUnits.Percentage)
+																						if (num18 != 300)
 																						{
-																							this.tag_LineIndent = this.m_marginWidth * num11 / 100f;
+																							if (num18 != 400)
+																							{
+																								if (num18 != 500)
+																								{
+																									if (num18 != 600)
+																									{
+																										if (num18 != 700)
+																										{
+																											if (num18 != 800)
+																											{
+																												if (num18 == 900)
+																												{
+																													this.m_fontWeightInternal = 900;
+																												}
+																											}
+																											else
+																											{
+																												this.m_fontWeightInternal = 800;
+																											}
+																										}
+																										else
+																										{
+																											this.m_fontWeightInternal = 700;
+																											this.m_style |= FontStyles.Bold;
+																										}
+																									}
+																									else
+																									{
+																										this.m_fontWeightInternal = 600;
+																									}
+																								}
+																								else
+																								{
+																									this.m_fontWeightInternal = 500;
+																								}
+																							}
+																							else
+																							{
+																								this.m_fontWeightInternal = 400;
+																							}
+																						}
+																						else
+																						{
+																							this.m_fontWeightInternal = 300;
 																						}
 																					}
 																					else
 																					{
-																						this.tag_LineIndent = num11;
-																						this.tag_LineIndent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+																						this.m_fontWeightInternal = 200;
 																					}
 																				}
 																				else
 																				{
-																					this.tag_LineIndent = num11;
+																					this.m_fontWeightInternal = 100;
 																				}
-																				this.m_xAdvance += this.tag_LineIndent;
+																				this.m_fontWeightStack.Add(this.m_fontWeightInternal);
 																				return true;
 																			}
-																			IL_3458:
-																			num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																			if (num11 == -9999f || num11 == 0f)
-																			{
-																				return false;
-																			}
-																			this.m_lineHeight = num11;
-																			if (tagUnits != TagUnits.Pixels)
-																			{
-																				if (tagUnits != TagUnits.FontUnits)
-																				{
-																					if (tagUnits == TagUnits.Percentage)
-																					{
-																						this.m_lineHeight = this.m_fontAsset.fontInfo.LineHeight * this.m_lineHeight / 100f * this.m_fontScale;
-																					}
-																				}
-																				else
-																				{
-																					this.m_lineHeight *= this.m_fontAsset.fontInfo.LineHeight * this.m_fontScale;
-																				}
-																			}
+																			IL_2B8D:
+																			this.tag_LineIndent = 0f;
 																			return true;
 																		}
-																		IL_3256:
-																		num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
-																		if (num11 == -9999f)
-																		{
-																			return false;
-																		}
-																		this.m_marginLeft = num11;
-																		if (tagUnits != TagUnits.Pixels)
-																		{
-																			if (tagUnits != TagUnits.FontUnits)
-																			{
-																				if (tagUnits == TagUnits.Percentage)
-																				{
-																					this.m_marginLeft = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginLeft / 100f;
-																				}
-																			}
-																			else
-																			{
-																				this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
-																			}
-																		}
-																		this.m_marginLeft = ((this.m_marginLeft < 0f) ? 0f : this.m_marginLeft);
+																		IL_3522:
+																		this.m_lineHeight = -32767f;
 																		return true;
 																	}
+																	IL_2ABC:
+																	num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																	if (num11 == -9999f)
+																	{
+																		return false;
+																	}
+																	if (tagUnits != TagUnits.Pixels)
+																	{
+																		if (tagUnits != TagUnits.FontUnits)
+																		{
+																			if (tagUnits == TagUnits.Percentage)
+																			{
+																				this.tag_LineIndent = this.m_marginWidth * num11 / 100f;
+																			}
+																		}
+																		else
+																		{
+																			this.tag_LineIndent = num11;
+																			this.tag_LineIndent *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+																		}
+																	}
+																	else
+																	{
+																		this.tag_LineIndent = num11;
+																	}
+																	this.m_xAdvance += this.tag_LineIndent;
+																	return true;
 																}
-																IL_30AD:
-																this.m_style |= FontStyles.UpperCase;
-																this.m_fontStyleStack.Add(FontStyles.UpperCase);
+																IL_3458:
+																num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+																if (num11 == -9999f || num11 == 0f)
+																{
+																	return false;
+																}
+																this.m_lineHeight = num11;
+																if (tagUnits != TagUnits.Pixels)
+																{
+																	if (tagUnits != TagUnits.FontUnits)
+																	{
+																		if (tagUnits == TagUnits.Percentage)
+																		{
+																			this.m_lineHeight = this.m_fontAsset.fontInfo.LineHeight * this.m_lineHeight / 100f * this.m_fontScale;
+																		}
+																	}
+																	else
+																	{
+																		this.m_lineHeight *= this.m_fontAsset.fontInfo.LineHeight * this.m_fontScale;
+																	}
+																}
 																return true;
 															}
-															IL_30EF:
-															this.m_style |= FontStyles.SmallCaps;
-															this.m_fontStyleStack.Add(FontStyles.SmallCaps);
+															IL_3256:
+															num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+															if (num11 == -9999f)
+															{
+																return false;
+															}
+															this.m_marginLeft = num11;
+															if (tagUnits != TagUnits.Pixels)
+															{
+																if (tagUnits != TagUnits.FontUnits)
+																{
+																	if (tagUnits == TagUnits.Percentage)
+																	{
+																		this.m_marginLeft = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginLeft / 100f;
+																	}
+																}
+																else
+																{
+																	this.m_marginLeft *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+																}
+															}
+															this.m_marginLeft = ((this.m_marginLeft < 0f) ? 0f : this.m_marginLeft);
 															return true;
 														}
-														IL_306E:
-														this.m_style |= FontStyles.LowerCase;
-														this.m_fontStyleStack.Add(FontStyles.LowerCase);
-														return true;
 													}
-													IL_1665:
-													this.m_fontWeightInternal = this.m_fontWeightStack.Remove();
-													if (this.m_fontWeightInternal == 400)
+													num11 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
+													if (num11 == -9999f)
 													{
-														this.m_style &= (FontStyles)(-2);
+														return false;
 													}
+													this.m_marginRight = num11;
+													if (tagUnits != TagUnits.Pixels)
+													{
+														if (tagUnits != TagUnits.FontUnits)
+														{
+															if (tagUnits == TagUnits.Percentage)
+															{
+																this.m_marginRight = (this.m_marginWidth - ((this.m_width == -1f) ? 0f : this.m_width)) * this.m_marginRight / 100f;
+															}
+														}
+														else
+														{
+															this.m_marginRight *= this.m_fontScale * this.m_fontAsset.fontInfo.TabWidth / (float)this.m_fontAsset.tabSize;
+														}
+													}
+													this.m_marginRight = ((this.m_marginRight < 0f) ? 0f : this.m_marginRight);
 													return true;
 												}
+												IL_30CC:
+												if (this.m_fontStyleStack.Remove(FontStyles.UpperCase) == 0)
+												{
+													this.m_style &= (FontStyles)(-17);
+												}
+												return true;
 											}
-											MaterialReference materialReference2 = this.m_materialReferenceStack.Remove();
-											this.m_currentMaterial = materialReference2.material;
-											this.m_currentMaterialIndex = materialReference2.index;
+											IL_310E:
+											if (this.m_fontStyleStack.Remove(FontStyles.SmallCaps) == 0)
+											{
+												this.m_style &= (FontStyles)(-33);
+											}
 											return true;
 										}
-										IL_27F1:
-										this.m_colorGradientPreset = this.m_colorGradientStack.Remove();
+										IL_308B:
+										if (this.m_fontStyleStack.Remove(FontStyles.LowerCase) == 0)
+										{
+											this.m_style &= (FontStyles)(-9);
+										}
 										return true;
 									}
-									IL_17D0:
-									this.m_baselineOffset = 0f;
+									IL_1665:
+									this.m_fontWeightInternal = this.m_fontWeightStack.Remove();
+									if (this.m_fontWeightInternal == 400)
+									{
+										this.m_style &= (FontStyles)(-2);
+									}
 									return true;
 								case 446:
 									goto IL_1166;

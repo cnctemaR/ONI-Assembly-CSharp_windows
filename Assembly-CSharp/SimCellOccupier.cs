@@ -29,7 +29,7 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 			if (this.doReplaceElement)
 			{
 				SimMessages.ReplaceAndDisplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount, callbackHandle.index);
-				callbackHandle.index = -1;
+				callbackHandle = HandleVector<Game.CallbackInfo>.InvalidHandle;
 				SimMessages.SetStrength(offset_cell, 0, this.strengthMultiplier);
 				Game.Instance.RemoveSolidChangedFilter(offset_cell);
 			}

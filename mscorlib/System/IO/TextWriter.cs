@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
@@ -8,54 +13,44 @@ namespace System.IO
 	[Serializable]
 	public abstract class TextWriter : MarshalByRefObject, IDisposable
 	{
+		private static string InitialNewLine
+		{
+			get
+			{
+				return Environment.NewLine;
+			}
+		}
+
 		protected TextWriter()
 		{
-			this.CoreNewLine = Environment.NewLine.ToCharArray();
+			this.InternalFormatProvider = null;
 		}
 
 		protected TextWriter(IFormatProvider formatProvider)
 		{
-			this.CoreNewLine = Environment.NewLine.ToCharArray();
-			this.internalFormatProvider = formatProvider;
+			this.InternalFormatProvider = formatProvider;
 		}
-
-		public abstract Encoding Encoding { get; }
 
 		public virtual IFormatProvider FormatProvider
 		{
 			get
 			{
-				return this.internalFormatProvider;
-			}
-		}
-
-		public virtual string NewLine
-		{
-			get
-			{
-				return new string(this.CoreNewLine);
-			}
-			set
-			{
-				if (value == null)
+				if (this.InternalFormatProvider == null)
 				{
-					value = Environment.NewLine;
+					return Thread.CurrentThread.CurrentCulture;
 				}
-				this.CoreNewLine = value.ToCharArray();
+				return this.InternalFormatProvider;
 			}
 		}
 
 		public virtual void Close()
 		{
 			this.Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (disposing)
-			{
-				GC.SuppressFinalize(this);
-			}
 		}
 
 		public void Dispose()
@@ -68,27 +63,36 @@ namespace System.IO
 		{
 		}
 
-		public static TextWriter Synchronized(TextWriter writer)
+		public abstract Encoding Encoding { get; }
+
+		public virtual string NewLine
 		{
-			return TextWriter.Synchronized(writer, false);
+			get
+			{
+				return new string(this.CoreNewLine);
+			}
+			set
+			{
+				if (value == null)
+				{
+					value = TextWriter.InitialNewLine;
+				}
+				this.CoreNewLine = value.ToCharArray();
+			}
 		}
 
-		internal static TextWriter Synchronized(TextWriter writer, bool neverClose)
+		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
+		public static TextWriter Synchronized(TextWriter writer)
 		{
 			if (writer == null)
 			{
-				throw new ArgumentNullException("writer is null");
+				throw new ArgumentNullException("writer");
 			}
-			if (writer is SynchronizedWriter)
+			if (writer is TextWriter.SyncTextWriter)
 			{
 				return writer;
 			}
-			return new SynchronizedWriter(writer, neverClose);
-		}
-
-		public virtual void Write(bool value)
-		{
-			this.Write(value.ToString());
+			return new TextWriter.SyncTextWriter(writer);
 		}
 
 		public virtual void Write(char value)
@@ -97,44 +101,76 @@ namespace System.IO
 
 		public virtual void Write(char[] buffer)
 		{
+			if (buffer != null)
+			{
+				this.Write(buffer, 0, buffer.Length);
+			}
+		}
+
+		public virtual void Write(char[] buffer, int index, int count)
+		{
 			if (buffer == null)
 			{
-				return;
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
 			}
-			this.Write(buffer, 0, buffer.Length);
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			for (int i = 0; i < count; i++)
+			{
+				this.Write(buffer[index + i]);
+			}
 		}
 
-		public virtual void Write(decimal value)
+		public virtual void Write(bool value)
 		{
-			this.Write(value.ToString(this.internalFormatProvider));
-		}
-
-		public virtual void Write(double value)
-		{
-			this.Write(value.ToString(this.internalFormatProvider));
+			this.Write(value ? "True" : "False");
 		}
 
 		public virtual void Write(int value)
 		{
-			this.Write(value.ToString(this.internalFormatProvider));
+			this.Write(value.ToString(this.FormatProvider));
+		}
+
+		[CLSCompliant(false)]
+		public virtual void Write(uint value)
+		{
+			this.Write(value.ToString(this.FormatProvider));
 		}
 
 		public virtual void Write(long value)
 		{
-			this.Write(value.ToString(this.internalFormatProvider));
+			this.Write(value.ToString(this.FormatProvider));
 		}
 
-		public virtual void Write(object value)
+		[CLSCompliant(false)]
+		public virtual void Write(ulong value)
 		{
-			if (value != null)
-			{
-				this.Write(value.ToString());
-			}
+			this.Write(value.ToString(this.FormatProvider));
 		}
 
 		public virtual void Write(float value)
 		{
-			this.Write(value.ToString(this.internalFormatProvider));
+			this.Write(value.ToString(this.FormatProvider));
+		}
+
+		public virtual void Write(double value)
+		{
+			this.Write(value.ToString(this.FormatProvider));
+		}
+
+		public virtual void Write(decimal value)
+		{
+			this.Write(value.ToString(this.FormatProvider));
 		}
 
 		public virtual void Write(string value)
@@ -145,69 +181,43 @@ namespace System.IO
 			}
 		}
 
-		[CLSCompliant(false)]
-		public virtual void Write(uint value)
+		public virtual void Write(object value)
 		{
-			this.Write(value.ToString(this.internalFormatProvider));
-		}
-
-		[CLSCompliant(false)]
-		public virtual void Write(ulong value)
-		{
-			this.Write(value.ToString(this.internalFormatProvider));
+			if (value != null)
+			{
+				IFormattable formattable = value as IFormattable;
+				if (formattable != null)
+				{
+					this.Write(formattable.ToString(null, this.FormatProvider));
+					return;
+				}
+				this.Write(value.ToString());
+			}
 		}
 
 		public virtual void Write(string format, object arg0)
 		{
-			this.Write(string.Format(format, arg0));
-		}
-
-		public virtual void Write(string format, params object[] arg)
-		{
-			this.Write(string.Format(format, arg));
-		}
-
-		public virtual void Write(char[] buffer, int index, int count)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			if (index < 0 || index > buffer.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			if (count < 0 || index > buffer.Length - count)
-			{
-				throw new ArgumentOutOfRangeException("count");
-			}
-			while (count > 0)
-			{
-				this.Write(buffer[index]);
-				count--;
-				index++;
-			}
+			this.Write(string.Format(this.FormatProvider, format, arg0));
 		}
 
 		public virtual void Write(string format, object arg0, object arg1)
 		{
-			this.Write(string.Format(format, arg0, arg1));
+			this.Write(string.Format(this.FormatProvider, format, arg0, arg1));
 		}
 
 		public virtual void Write(string format, object arg0, object arg1, object arg2)
 		{
-			this.Write(string.Format(format, arg0, arg1, arg2));
+			this.Write(string.Format(this.FormatProvider, format, arg0, arg1, arg2));
+		}
+
+		public virtual void Write(string format, params object[] arg)
+		{
+			this.Write(string.Format(this.FormatProvider, format, arg));
 		}
 
 		public virtual void WriteLine()
 		{
 			this.Write(this.CoreNewLine);
-		}
-
-		public virtual void WriteLine(bool value)
-		{
-			this.Write(value);
-			this.WriteLine();
 		}
 
 		public virtual void WriteLine(char value)
@@ -222,43 +232,19 @@ namespace System.IO
 			this.WriteLine();
 		}
 
-		public virtual void WriteLine(decimal value)
+		public virtual void WriteLine(char[] buffer, int index, int count)
 		{
-			this.Write(value);
+			this.Write(buffer, index, count);
 			this.WriteLine();
 		}
 
-		public virtual void WriteLine(double value)
+		public virtual void WriteLine(bool value)
 		{
 			this.Write(value);
 			this.WriteLine();
 		}
 
 		public virtual void WriteLine(int value)
-		{
-			this.Write(value);
-			this.WriteLine();
-		}
-
-		public virtual void WriteLine(long value)
-		{
-			this.Write(value);
-			this.WriteLine();
-		}
-
-		public virtual void WriteLine(object value)
-		{
-			this.Write(value);
-			this.WriteLine();
-		}
-
-		public virtual void WriteLine(float value)
-		{
-			this.Write(value);
-			this.WriteLine();
-		}
-
-		public virtual void WriteLine(string value)
 		{
 			this.Write(value);
 			this.WriteLine();
@@ -271,6 +257,12 @@ namespace System.IO
 			this.WriteLine();
 		}
 
+		public virtual void WriteLine(long value)
+		{
+			this.Write(value);
+			this.WriteLine();
+		}
+
 		[CLSCompliant(false)]
 		public virtual void WriteLine(ulong value)
 		{
@@ -278,44 +270,233 @@ namespace System.IO
 			this.WriteLine();
 		}
 
+		public virtual void WriteLine(float value)
+		{
+			this.Write(value);
+			this.WriteLine();
+		}
+
+		public virtual void WriteLine(double value)
+		{
+			this.Write(value);
+			this.WriteLine();
+		}
+
+		public virtual void WriteLine(decimal value)
+		{
+			this.Write(value);
+			this.WriteLine();
+		}
+
+		public virtual void WriteLine(string value)
+		{
+			if (value == null)
+			{
+				this.WriteLine();
+				return;
+			}
+			int length = value.Length;
+			int num = this.CoreNewLine.Length;
+			char[] array = new char[length + num];
+			value.CopyTo(0, array, 0, length);
+			if (num == 2)
+			{
+				array[length] = this.CoreNewLine[0];
+				array[length + 1] = this.CoreNewLine[1];
+			}
+			else if (num == 1)
+			{
+				array[length] = this.CoreNewLine[0];
+			}
+			else
+			{
+				Buffer.InternalBlockCopy(this.CoreNewLine, 0, array, length * 2, num * 2);
+			}
+			this.Write(array, 0, length + num);
+		}
+
+		public virtual void WriteLine(object value)
+		{
+			if (value == null)
+			{
+				this.WriteLine();
+				return;
+			}
+			IFormattable formattable = value as IFormattable;
+			if (formattable != null)
+			{
+				this.WriteLine(formattable.ToString(null, this.FormatProvider));
+				return;
+			}
+			this.WriteLine(value.ToString());
+		}
+
 		public virtual void WriteLine(string format, object arg0)
 		{
-			this.Write(format, arg0);
-			this.WriteLine();
-		}
-
-		public virtual void WriteLine(string format, params object[] arg)
-		{
-			this.Write(format, arg);
-			this.WriteLine();
-		}
-
-		public virtual void WriteLine(char[] buffer, int index, int count)
-		{
-			this.Write(buffer, index, count);
-			this.WriteLine();
+			this.WriteLine(string.Format(this.FormatProvider, format, arg0));
 		}
 
 		public virtual void WriteLine(string format, object arg0, object arg1)
 		{
-			this.Write(format, arg0, arg1);
-			this.WriteLine();
+			this.WriteLine(string.Format(this.FormatProvider, format, arg0, arg1));
 		}
 
 		public virtual void WriteLine(string format, object arg0, object arg1, object arg2)
 		{
-			this.Write(format, arg0, arg1, arg2);
-			this.WriteLine();
+			this.WriteLine(string.Format(this.FormatProvider, format, arg0, arg1, arg2));
 		}
 
-		protected char[] CoreNewLine;
+		public virtual void WriteLine(string format, params object[] arg)
+		{
+			this.WriteLine(string.Format(this.FormatProvider, format, arg));
+		}
 
-		internal IFormatProvider internalFormatProvider;
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteAsync(char value)
+		{
+			Tuple<TextWriter, char> tuple = new Tuple<TextWriter, char>(this, value);
+			return Task.Factory.StartNew(TextWriter._WriteCharDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteAsync(string value)
+		{
+			Tuple<TextWriter, string> tuple = new Tuple<TextWriter, string>(this, value);
+			return Task.Factory.StartNew(TextWriter._WriteStringDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public Task WriteAsync(char[] buffer)
+		{
+			if (buffer == null)
+			{
+				return Task.CompletedTask;
+			}
+			return this.WriteAsync(buffer, 0, buffer.Length);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteAsync(char[] buffer, int index, int count)
+		{
+			Tuple<TextWriter, char[], int, int> tuple = new Tuple<TextWriter, char[], int, int>(this, buffer, index, count);
+			return Task.Factory.StartNew(TextWriter._WriteCharArrayRangeDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteLineAsync(char value)
+		{
+			Tuple<TextWriter, char> tuple = new Tuple<TextWriter, char>(this, value);
+			return Task.Factory.StartNew(TextWriter._WriteLineCharDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteLineAsync(string value)
+		{
+			Tuple<TextWriter, string> tuple = new Tuple<TextWriter, string>(this, value);
+			return Task.Factory.StartNew(TextWriter._WriteLineStringDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public Task WriteLineAsync(char[] buffer)
+		{
+			if (buffer == null)
+			{
+				return Task.CompletedTask;
+			}
+			return this.WriteLineAsync(buffer, 0, buffer.Length);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteLineAsync(char[] buffer, int index, int count)
+		{
+			Tuple<TextWriter, char[], int, int> tuple = new Tuple<TextWriter, char[], int, int>(this, buffer, index, count);
+			return Task.Factory.StartNew(TextWriter._WriteLineCharArrayRangeDelegate, tuple, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task WriteLineAsync()
+		{
+			return this.WriteAsync(this.CoreNewLine);
+		}
+
+		[ComVisible(false)]
+		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		public virtual Task FlushAsync()
+		{
+			return Task.Factory.StartNew(TextWriter._FlushDelegate, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+		}
 
 		public static readonly TextWriter Null = new TextWriter.NullTextWriter();
 
+		[NonSerialized]
+		private static Action<object> _WriteCharDelegate = delegate(object state)
+		{
+			Tuple<TextWriter, char> tuple = (Tuple<TextWriter, char>)state;
+			tuple.Item1.Write(tuple.Item2);
+		};
+
+		[NonSerialized]
+		private static Action<object> _WriteStringDelegate = delegate(object state)
+		{
+			Tuple<TextWriter, string> tuple2 = (Tuple<TextWriter, string>)state;
+			tuple2.Item1.Write(tuple2.Item2);
+		};
+
+		[NonSerialized]
+		private static Action<object> _WriteCharArrayRangeDelegate = delegate(object state)
+		{
+			Tuple<TextWriter, char[], int, int> tuple3 = (Tuple<TextWriter, char[], int, int>)state;
+			tuple3.Item1.Write(tuple3.Item2, tuple3.Item3, tuple3.Item4);
+		};
+
+		[NonSerialized]
+		private static Action<object> _WriteLineCharDelegate = delegate(object state)
+		{
+			Tuple<TextWriter, char> tuple4 = (Tuple<TextWriter, char>)state;
+			tuple4.Item1.WriteLine(tuple4.Item2);
+		};
+
+		[NonSerialized]
+		private static Action<object> _WriteLineStringDelegate = delegate(object state)
+		{
+			Tuple<TextWriter, string> tuple5 = (Tuple<TextWriter, string>)state;
+			tuple5.Item1.WriteLine(tuple5.Item2);
+		};
+
+		[NonSerialized]
+		private static Action<object> _WriteLineCharArrayRangeDelegate = delegate(object state)
+		{
+			Tuple<TextWriter, char[], int, int> tuple6 = (Tuple<TextWriter, char[], int, int>)state;
+			tuple6.Item1.WriteLine(tuple6.Item2, tuple6.Item3, tuple6.Item4);
+		};
+
+		[NonSerialized]
+		private static Action<object> _FlushDelegate = delegate(object state)
+		{
+			((TextWriter)state).Flush();
+		};
+
+		protected char[] CoreNewLine = TextWriter.InitialNewLine.ToCharArray();
+
+		private IFormatProvider InternalFormatProvider;
+
+		[Serializable]
 		private sealed class NullTextWriter : TextWriter
 		{
+			internal NullTextWriter()
+				: base(CultureInfo.InvariantCulture)
+			{
+			}
+
 			public override Encoding Encoding
 			{
 				get
@@ -324,17 +505,354 @@ namespace System.IO
 				}
 			}
 
-			public override void Write(string s)
+			public override void Write(char[] buffer, int index, int count)
 			{
 			}
 
+			public override void Write(string value)
+			{
+			}
+
+			public override void WriteLine()
+			{
+			}
+
+			public override void WriteLine(string value)
+			{
+			}
+
+			public override void WriteLine(object value)
+			{
+			}
+		}
+
+		[Serializable]
+		internal sealed class SyncTextWriter : TextWriter, IDisposable
+		{
+			internal SyncTextWriter(TextWriter t)
+				: base(t.FormatProvider)
+			{
+				this._out = t;
+			}
+
+			public override Encoding Encoding
+			{
+				get
+				{
+					return this._out.Encoding;
+				}
+			}
+
+			public override IFormatProvider FormatProvider
+			{
+				get
+				{
+					return this._out.FormatProvider;
+				}
+			}
+
+			public override string NewLine
+			{
+				[MethodImpl(MethodImplOptions.Synchronized)]
+				get
+				{
+					return this._out.NewLine;
+				}
+				[MethodImpl(MethodImplOptions.Synchronized)]
+				set
+				{
+					this._out.NewLine = value;
+				}
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Close()
+			{
+				this._out.Close();
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			protected override void Dispose(bool disposing)
+			{
+				if (disposing)
+				{
+					((IDisposable)this._out).Dispose();
+				}
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Flush()
+			{
+				this._out.Flush();
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
 			public override void Write(char value)
 			{
+				this._out.Write(value);
 			}
 
-			public override void Write(char[] value, int index, int count)
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(char[] buffer)
 			{
+				this._out.Write(buffer);
 			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(char[] buffer, int index, int count)
+			{
+				this._out.Write(buffer, index, count);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(bool value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(int value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(uint value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(long value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(ulong value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(float value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(double value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(decimal value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(string value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(object value)
+			{
+				this._out.Write(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(string format, object arg0)
+			{
+				this._out.Write(format, arg0);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(string format, object arg0, object arg1)
+			{
+				this._out.Write(format, arg0, arg1);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(string format, object arg0, object arg1, object arg2)
+			{
+				this._out.Write(format, arg0, arg1, arg2);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void Write(string format, params object[] arg)
+			{
+				this._out.Write(format, arg);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine()
+			{
+				this._out.WriteLine();
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(char value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(decimal value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(char[] buffer)
+			{
+				this._out.WriteLine(buffer);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(char[] buffer, int index, int count)
+			{
+				this._out.WriteLine(buffer, index, count);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(bool value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(int value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(uint value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(long value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(ulong value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(float value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(double value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(string value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(object value)
+			{
+				this._out.WriteLine(value);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(string format, object arg0)
+			{
+				this._out.WriteLine(format, arg0);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(string format, object arg0, object arg1)
+			{
+				this._out.WriteLine(format, arg0, arg1);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(string format, object arg0, object arg1, object arg2)
+			{
+				this._out.WriteLine(format, arg0, arg1, arg2);
+			}
+
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override void WriteLine(string format, params object[] arg)
+			{
+				this._out.WriteLine(format, arg);
+			}
+
+			[ComVisible(false)]
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override Task WriteAsync(char value)
+			{
+				this.Write(value);
+				return Task.CompletedTask;
+			}
+
+			[ComVisible(false)]
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override Task WriteAsync(string value)
+			{
+				this.Write(value);
+				return Task.CompletedTask;
+			}
+
+			[ComVisible(false)]
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override Task WriteAsync(char[] buffer, int index, int count)
+			{
+				this.Write(buffer, index, count);
+				return Task.CompletedTask;
+			}
+
+			[ComVisible(false)]
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override Task WriteLineAsync(char value)
+			{
+				this.WriteLine(value);
+				return Task.CompletedTask;
+			}
+
+			[ComVisible(false)]
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override Task WriteLineAsync(string value)
+			{
+				this.WriteLine(value);
+				return Task.CompletedTask;
+			}
+
+			[ComVisible(false)]
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override Task WriteLineAsync(char[] buffer, int index, int count)
+			{
+				this.WriteLine(buffer, index, count);
+				return Task.CompletedTask;
+			}
+
+			[ComVisible(false)]
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			public override Task FlushAsync()
+			{
+				this.Flush();
+				return Task.CompletedTask;
+			}
+
+			private TextWriter _out;
 		}
 	}
 }

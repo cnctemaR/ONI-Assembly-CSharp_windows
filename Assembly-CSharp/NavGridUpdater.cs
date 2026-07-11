@@ -48,7 +48,7 @@ public class NavGridUpdater
 		{
 			workItemCollection.Add(new NavGridUpdater.CreateLinkWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, gridBitFields, max_links_per_cell, links, link_offsets));
 		}
-		App.instance.jobManager.Run(workItemCollection);
+		GlobalJobManager.Run(workItemCollection);
 	}
 
 	private static void CreateLinks(int cell, NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[] transitions)
@@ -80,7 +80,7 @@ public class NavGridUpdater
 		{
 			workItemCollection.Add(new NavGridUpdater.MarkValidCellWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, bounding_offsets, validators));
 		}
-		App.instance.jobManager.Run(workItemCollection);
+		GlobalJobManager.Run(workItemCollection);
 	}
 
 	public static void DebugDrawPath(int start_cell, int end_cell)

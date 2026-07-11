@@ -65,6 +65,12 @@ public class RefineryWorkable : Workable
 		resume.AddExperienceIfRole("MechatronicEngineer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
+	public override string GetConversationTopic()
+	{
+		string conversationTopic = this.refinery.GetConversationTopic();
+		return (conversationTopic == null) ? base.GetConversationTopic() : conversationTopic;
+	}
+
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
@@ -108,7 +114,7 @@ public class RefineryWorkable : Workable
 
 	public void CreateOrder(Refinery.MachineOrder buildable_order, ChoreType choreType, Tag[] choreTags)
 	{
-		buildable_order.chore = new WorkChore<RefineryWorkable>(choreType, this, null, choreTags, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		buildable_order.chore = new WorkChore<RefineryWorkable>(choreType, this, null, choreTags, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		if (this.workTimeRemaining <= 0f)
 		{
 			this.workTimeRemaining = this.GetWorkTime();

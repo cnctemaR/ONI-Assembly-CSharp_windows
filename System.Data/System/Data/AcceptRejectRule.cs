@@ -4,7 +4,7 @@ namespace System.Data
 {
 	public enum AcceptRejectRule
 	{
-		None,
-		Cascade
+		Cascade = 1,
+		None = 0
 	}
 }

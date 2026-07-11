@@ -7,14 +7,14 @@ namespace System.Runtime.CompilerServices
 	{
 		public InternalsVisibleToAttribute(string assemblyName)
 		{
-			this.assemblyName = assemblyName;
+			this._assemblyName = assemblyName;
 		}
 
 		public string AssemblyName
 		{
 			get
 			{
-				return this.assemblyName;
+				return this._assemblyName;
 			}
 		}
 
@@ -22,16 +22,16 @@ namespace System.Runtime.CompilerServices
 		{
 			get
 			{
-				return this.all_visible;
+				return this._allInternalsVisible;
 			}
 			set
 			{
-				this.all_visible = value;
+				this._allInternalsVisible = value;
 			}
 		}
 
-		private string assemblyName;
+		private string _assemblyName;
 
-		private bool all_visible = true;
+		private bool _allInternalsVisible = true;
 	}
 }

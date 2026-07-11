@@ -119,12 +119,16 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		[Tooltip("The maximum range that objects will be visible at.")]
 		public int visRange = 10;
 
+		[Tooltip("How often (in seconds) that this object should update the set of players that can see it.")]
 		public float visUpdateInterval = 1f;
 
+		[Tooltip("Which method to use for checking proximity of players.\n\nPhysics3D uses 3D physics to determine proximity.\n\nPhysics2D uses 2D physics to determine proximity.")]
 		public NetworkProximityChecker.CheckMethod checkMethod = NetworkProximityChecker.CheckMethod.Physics3D;
 
+		[Tooltip("Enable to force this object to be hidden from players.")]
 		public bool forceHidden = false;
 
 		private float m_VisUpdateTime;

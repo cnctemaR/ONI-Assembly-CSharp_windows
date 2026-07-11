@@ -71,13 +71,16 @@ public class DropDown : KMonoBehaviour
 			Util.KDestroyGameObject(this.contentContainer.GetChild(i));
 		}
 		this.rowLookup.Clear();
-		this.emptyRow = Util.KInstantiateUI(this.rowEntryPrefab, this.contentContainer.gameObject, true);
-		this.emptyRow.GetComponent<KButton>().onClick += delegate
+		if (this.addEmptyRow)
 		{
-			this.onEntrySelectedAction(null, this.targetData);
-			this.Close();
-		};
-		this.emptyRow.GetComponent<DropDownEntry>().label.text = UI.DROPDOWN.NONE;
+			this.emptyRow = Util.KInstantiateUI(this.rowEntryPrefab, this.contentContainer.gameObject, true);
+			this.emptyRow.GetComponent<KButton>().onClick += delegate
+			{
+				this.onEntrySelectedAction(null, this.targetData);
+				this.Close();
+			};
+			this.emptyRow.GetComponent<DropDownEntry>().label.text = UI.DROPDOWN.NONE;
+		}
 		for (int j = 0; j < contentKeys.Count; j++)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.rowEntryPrefab, this.contentContainer.gameObject, true);
@@ -106,7 +109,10 @@ public class DropDown : KMonoBehaviour
 		{
 			DropDownEntry component = keyValuePair.Value.GetComponent<DropDownEntry>();
 			component.label.text = keyValuePair.Key.GetProperName();
-			component.portrait.SetIdentityObject(keyValuePair.Key as IAssignableIdentity, true);
+			if (component.portrait != null && keyValuePair.Key is IAssignableIdentity)
+			{
+				component.portrait.SetIdentityObject(keyValuePair.Key as IAssignableIdentity, true);
+			}
 		}
 		if (this.sortFunction != null)
 		{
@@ -115,14 +121,20 @@ public class DropDown : KMonoBehaviour
 			{
 				this.rowLookup[this.entries[i]].transform.SetAsFirstSibling();
 			}
-			this.emptyRow.transform.SetAsFirstSibling();
+			if (this.emptyRow != null)
+			{
+				this.emptyRow.transform.SetAsFirstSibling();
+			}
 		}
 		foreach (KeyValuePair<IListableOption, GameObject> keyValuePair2 in this.rowLookup)
 		{
 			DropDownEntry component2 = keyValuePair2.Value.GetComponent<DropDownEntry>();
 			this.rowRefreshAction(component2, this.targetData);
 		}
-		this.rowRefreshAction(this.emptyRow.GetComponent<DropDownEntry>(), this.targetData);
+		if (this.emptyRow != null)
+		{
+			this.rowRefreshAction(this.emptyRow.GetComponent<DropDownEntry>(), this.targetData);
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -178,6 +190,8 @@ public class DropDown : KMonoBehaviour
 	public GameObject scrollRect;
 
 	public GameObject rowEntryPrefab;
+
+	public bool addEmptyRow = true;
 
 	public object targetData;
 

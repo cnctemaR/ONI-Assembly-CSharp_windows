@@ -19,16 +19,14 @@ public class TableScreen : KScreen
 		};
 		this.incubating = true;
 		base.transform.rectTransform().localScale = Vector3.zero;
-		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(delegate(MinionIdentity param)
+		Components.LiveMinionIdentities.OnAdd += delegate(MinionIdentity param)
 		{
 			this.MarkRowsDirty();
-		}));
-		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
-		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(delegate(MinionIdentity param)
+		};
+		Components.LiveMinionIdentities.OnRemove += delegate(MinionIdentity param)
 		{
 			this.MarkRowsDirty();
-		}));
+		};
 	}
 
 	protected override void OnShow(bool show)

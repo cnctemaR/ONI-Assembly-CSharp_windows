@@ -10,7 +10,7 @@ namespace System.Net.Mail
 		{
 			foreach (string text in addresses.Split(new char[] { ',' }))
 			{
-				this.Add(new MailAddress(text));
+				base.Add(new MailAddress(text));
 			}
 		}
 
@@ -35,13 +35,13 @@ namespace System.Net.Mail
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < this.Count; i++)
+			for (int i = 0; i < base.Count; i++)
 			{
 				if (i > 0)
 				{
 					stringBuilder.Append(", ");
 				}
-				stringBuilder.Append(this[i].ToString());
+				stringBuilder.Append(base[i].ToString());
 			}
 			return stringBuilder.ToString();
 		}

@@ -5,292 +5,20 @@ namespace System.Globalization
 	[Serializable]
 	public class PersianCalendar : Calendar
 	{
-		public PersianCalendar()
-		{
-			this.M_AbbrEraNames = new string[] { "A.P." };
-			this.M_EraNames = new string[] { "Anno Persico" };
-			if (this.twoDigitYearMax == 99)
-			{
-				this.twoDigitYearMax = 1410;
-			}
-		}
-
-		public override int[] Eras
+		public override DateTime MinSupportedDateTime
 		{
 			get
 			{
-				return new int[] { PersianCalendar.PersianEra };
+				return PersianCalendar.minDate;
 			}
 		}
 
-		public override int TwoDigitYearMax
+		public override DateTime MaxSupportedDateTime
 		{
 			get
 			{
-				return this.twoDigitYearMax;
+				return PersianCalendar.maxDate;
 			}
-			set
-			{
-				base.CheckReadOnly();
-				base.M_ArgumentInRange("value", value, 100, this.M_MaxYear);
-				this.twoDigitYearMax = value;
-			}
-		}
-
-		internal void M_CheckDateTime(DateTime time)
-		{
-			if (time.Ticks < 196036416000000000L)
-			{
-				throw new ArgumentOutOfRangeException("time", "Only positive Persian years are supported.");
-			}
-		}
-
-		internal void M_CheckEra(ref int era)
-		{
-			if (era == 0)
-			{
-				era = PersianCalendar.PersianEra;
-			}
-			if (era != PersianCalendar.PersianEra)
-			{
-				throw new ArgumentException("Era value was not valid.");
-			}
-		}
-
-		internal override void M_CheckYE(int year, ref int era)
-		{
-			this.M_CheckEra(ref era);
-			if (year < 1 || year > this.M_MaxYear)
-			{
-				throw new ArgumentOutOfRangeException("year", "Only Persian years between 1 and 9378, inclusive, are supported.");
-			}
-		}
-
-		internal void M_CheckYME(int year, int month, ref int era)
-		{
-			this.M_CheckYE(year, ref era);
-			if (month < 1 || month > 12)
-			{
-				throw new ArgumentOutOfRangeException("month", "Month must be between one and twelve.");
-			}
-			if (year == this.M_MaxYear && month > 10)
-			{
-				throw new ArgumentOutOfRangeException("month", "Months in year 9378 must be between one and ten.");
-			}
-		}
-
-		internal void M_CheckYMDE(int year, int month, int day, ref int era)
-		{
-			this.M_CheckYME(year, month, ref era);
-			base.M_ArgumentInRange("day", day, 1, this.GetDaysInMonth(year, month, era));
-			if (year == this.M_MaxYear && month == 10 && day > 10)
-			{
-				throw new ArgumentOutOfRangeException("day", "Days in month 10 of year 9378 must be between one and ten.");
-			}
-		}
-
-		internal int fixed_from_dmy(int day, int month, int year)
-		{
-			int num = 226894;
-			num += 365 * (year - 1);
-			num += (8 * year + 21) / 33;
-			if (month <= 7)
-			{
-				num += 31 * (month - 1);
-			}
-			else
-			{
-				num += 30 * (month - 1) + 6;
-			}
-			return num + day;
-		}
-
-		internal int year_from_fixed(int date)
-		{
-			return (33 * (date - 226895) + 3) / 12053 + 1;
-		}
-
-		internal void my_from_fixed(out int month, out int year, int date)
-		{
-			year = this.year_from_fixed(date);
-			int num = date - this.fixed_from_dmy(1, 1, year);
-			if (num < 216)
-			{
-				month = num / 31 + 1;
-			}
-			else
-			{
-				month = (num - 6) / 30 + 1;
-			}
-		}
-
-		internal void dmy_from_fixed(out int day, out int month, out int year, int date)
-		{
-			year = this.year_from_fixed(date);
-			day = date - this.fixed_from_dmy(1, 1, year);
-			if (day < 216)
-			{
-				month = day / 31 + 1;
-				day = day % 31 + 1;
-			}
-			else
-			{
-				month = (day - 6) / 30 + 1;
-				day = (day - 6) % 30 + 1;
-			}
-		}
-
-		internal bool is_leap_year(int year)
-		{
-			return (25 * year + 11) % 33 < 8;
-		}
-
-		public override DateTime AddMonths(DateTime time, int months)
-		{
-			int num = CCFixed.FromDateTime(time);
-			int num2;
-			int num3;
-			int num4;
-			this.dmy_from_fixed(out num2, out num3, out num4, num);
-			num3 += months;
-			num4 += CCMath.div_mod(out num3, num3, 12);
-			num = this.fixed_from_dmy(num2, num3, num4);
-			DateTime dateTime = CCFixed.ToDateTime(num).Add(time.TimeOfDay);
-			this.M_CheckDateTime(dateTime);
-			return dateTime;
-		}
-
-		public override DateTime AddYears(DateTime time, int years)
-		{
-			int num = CCFixed.FromDateTime(time);
-			int num2;
-			int num3;
-			int num4;
-			this.dmy_from_fixed(out num2, out num3, out num4, num);
-			num4 += years;
-			num = this.fixed_from_dmy(num2, num3, num4);
-			DateTime dateTime = CCFixed.ToDateTime(num).Add(time.TimeOfDay);
-			this.M_CheckDateTime(dateTime);
-			return dateTime;
-		}
-
-		public override int GetDayOfMonth(DateTime time)
-		{
-			this.M_CheckDateTime(time);
-			int num = CCFixed.FromDateTime(time);
-			int num2;
-			int num3;
-			int num4;
-			this.dmy_from_fixed(out num2, out num3, out num4, num);
-			return num2;
-		}
-
-		public override DayOfWeek GetDayOfWeek(DateTime time)
-		{
-			this.M_CheckDateTime(time);
-			int num = CCFixed.FromDateTime(time);
-			return CCFixed.day_of_week(num);
-		}
-
-		public override int GetDayOfYear(DateTime time)
-		{
-			this.M_CheckDateTime(time);
-			int num = CCFixed.FromDateTime(time);
-			int num2 = this.year_from_fixed(num);
-			int num3 = this.fixed_from_dmy(1, 1, num2);
-			return num - num3 + 1;
-		}
-
-		public override int GetDaysInMonth(int year, int month, int era)
-		{
-			this.M_CheckYME(year, month, ref era);
-			if (month <= 6)
-			{
-				return 31;
-			}
-			if (month == 12 && !this.is_leap_year(year))
-			{
-				return 29;
-			}
-			return 30;
-		}
-
-		public override int GetDaysInYear(int year, int era)
-		{
-			this.M_CheckYE(year, ref era);
-			return (!this.is_leap_year(year)) ? 365 : 366;
-		}
-
-		public override int GetEra(DateTime time)
-		{
-			this.M_CheckDateTime(time);
-			return PersianCalendar.PersianEra;
-		}
-
-		public override int GetLeapMonth(int year, int era)
-		{
-			return 0;
-		}
-
-		public override int GetMonth(DateTime time)
-		{
-			this.M_CheckDateTime(time);
-			int num = CCFixed.FromDateTime(time);
-			int num2;
-			int num3;
-			this.my_from_fixed(out num2, out num3, num);
-			return num2;
-		}
-
-		public override int GetMonthsInYear(int year, int era)
-		{
-			this.M_CheckYE(year, ref era);
-			return 12;
-		}
-
-		public override int GetYear(DateTime time)
-		{
-			this.M_CheckDateTime(time);
-			int num = CCFixed.FromDateTime(time);
-			return this.year_from_fixed(num);
-		}
-
-		public override bool IsLeapDay(int year, int month, int day, int era)
-		{
-			this.M_CheckYMDE(year, month, day, ref era);
-			return this.is_leap_year(year) && month == 12 && day == 30;
-		}
-
-		public override bool IsLeapMonth(int year, int month, int era)
-		{
-			this.M_CheckYME(year, month, ref era);
-			return false;
-		}
-
-		public override bool IsLeapYear(int year, int era)
-		{
-			this.M_CheckYE(year, ref era);
-			return this.is_leap_year(year);
-		}
-
-		public override DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era)
-		{
-			this.M_CheckYMDE(year, month, day, ref era);
-			base.M_CheckHMSM(hour, minute, second, millisecond);
-			int num = this.fixed_from_dmy(day, month, year);
-			return CCFixed.ToDateTime(num, hour, minute, second, (double)millisecond);
-		}
-
-		public override int ToFourDigitYear(int year)
-		{
-			base.M_ArgumentInRange("year", year, 0, 99);
-			int num = this.twoDigitYearMax % 100;
-			int num2 = this.twoDigitYearMax - num;
-			if (year <= num)
-			{
-				return num2 + year;
-			}
-			return num2 + year - 100;
 		}
 
 		public override CalendarAlgorithmType AlgorithmType
@@ -301,32 +29,340 @@ namespace System.Globalization
 			}
 		}
 
-		public override DateTime MinSupportedDateTime
+		internal override int BaseCalendarID
 		{
 			get
 			{
-				return PersianCalendar.PersianMin;
+				return 1;
 			}
 		}
 
-		public override DateTime MaxSupportedDateTime
+		internal override int ID
 		{
 			get
 			{
-				return PersianCalendar.PersianMax;
+				return 22;
 			}
 		}
 
-		internal const long M_MinTicks = 196036416000000000L;
+		private long GetAbsoluteDatePersian(int year, int month, int day)
+		{
+			if (year >= 1 && year <= 9378 && month >= 1 && month <= 12)
+			{
+				int num = PersianCalendar.DaysInPreviousMonths(month) + day - 1;
+				int num2 = (int)(365.242189 * (double)(year - 1));
+				return CalendricalCalculationsHelper.PersianNewYearOnOrBefore(PersianCalendar.PersianEpoch + (long)num2 + 180L) + (long)num;
+			}
+			throw new ArgumentOutOfRangeException(null, Environment.GetResourceString("Year, Month, and Day parameters describe an un-representable DateTime."));
+		}
 
-		internal const int M_MinYear = 1;
+		internal static void CheckTicksRange(long ticks)
+		{
+			if (ticks < PersianCalendar.minDate.Ticks || ticks > PersianCalendar.maxDate.Ticks)
+			{
+				throw new ArgumentOutOfRangeException("time", string.Format(CultureInfo.InvariantCulture, Environment.GetResourceString("Specified time is not supported in this calendar. It should be between {0} (Gregorian date) and {1} (Gregorian date), inclusive."), PersianCalendar.minDate, PersianCalendar.maxDate));
+			}
+		}
 
-		internal const int epoch = 226895;
+		internal static void CheckEraRange(int era)
+		{
+			if (era != 0 && era != PersianCalendar.PersianEra)
+			{
+				throw new ArgumentOutOfRangeException("era", Environment.GetResourceString("Era value was not valid."));
+			}
+		}
+
+		internal static void CheckYearRange(int year, int era)
+		{
+			PersianCalendar.CheckEraRange(era);
+			if (year < 1 || year > 9378)
+			{
+				throw new ArgumentOutOfRangeException("year", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 1, 9378));
+			}
+		}
+
+		internal static void CheckYearMonthRange(int year, int month, int era)
+		{
+			PersianCalendar.CheckYearRange(year, era);
+			if (year == 9378 && month > 10)
+			{
+				throw new ArgumentOutOfRangeException("month", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 1, 10));
+			}
+			if (month < 1 || month > 12)
+			{
+				throw new ArgumentOutOfRangeException("month", Environment.GetResourceString("Month must be between one and twelve."));
+			}
+		}
+
+		private static int MonthFromOrdinalDay(int ordinalDay)
+		{
+			int num = 0;
+			while (ordinalDay > PersianCalendar.DaysToMonth[num])
+			{
+				num++;
+			}
+			return num;
+		}
+
+		private static int DaysInPreviousMonths(int month)
+		{
+			month--;
+			return PersianCalendar.DaysToMonth[month];
+		}
+
+		internal int GetDatePart(long ticks, int part)
+		{
+			PersianCalendar.CheckTicksRange(ticks);
+			long num = ticks / 864000000000L + 1L;
+			int num2 = (int)Math.Floor((double)(CalendricalCalculationsHelper.PersianNewYearOnOrBefore(num) - PersianCalendar.PersianEpoch) / 365.242189 + 0.5) + 1;
+			if (part == 0)
+			{
+				return num2;
+			}
+			int num3 = (int)(num - CalendricalCalculationsHelper.GetNumberOfDays(this.ToDateTime(num2, 1, 1, 0, 0, 0, 0, 1)));
+			if (part == 1)
+			{
+				return num3;
+			}
+			int num4 = PersianCalendar.MonthFromOrdinalDay(num3);
+			if (part == 2)
+			{
+				return num4;
+			}
+			int num5 = num3 - PersianCalendar.DaysInPreviousMonths(num4);
+			if (part == 3)
+			{
+				return num5;
+			}
+			throw new InvalidOperationException(Environment.GetResourceString("Internal Error in DateTime and Calendar operations."));
+		}
+
+		public override DateTime AddMonths(DateTime time, int months)
+		{
+			if (months < -120000 || months > 120000)
+			{
+				throw new ArgumentOutOfRangeException("months", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), -120000, 120000));
+			}
+			int num = this.GetDatePart(time.Ticks, 0);
+			int num2 = this.GetDatePart(time.Ticks, 2);
+			int num3 = this.GetDatePart(time.Ticks, 3);
+			int num4 = num2 - 1 + months;
+			if (num4 >= 0)
+			{
+				num2 = num4 % 12 + 1;
+				num += num4 / 12;
+			}
+			else
+			{
+				num2 = 12 + (num4 + 1) % 12;
+				num += (num4 - 11) / 12;
+			}
+			int daysInMonth = this.GetDaysInMonth(num, num2);
+			if (num3 > daysInMonth)
+			{
+				num3 = daysInMonth;
+			}
+			long num5 = this.GetAbsoluteDatePersian(num, num2, num3) * 864000000000L + time.Ticks % 864000000000L;
+			Calendar.CheckAddResult(num5, this.MinSupportedDateTime, this.MaxSupportedDateTime);
+			return new DateTime(num5);
+		}
+
+		public override DateTime AddYears(DateTime time, int years)
+		{
+			return this.AddMonths(time, years * 12);
+		}
+
+		public override int GetDayOfMonth(DateTime time)
+		{
+			return this.GetDatePart(time.Ticks, 3);
+		}
+
+		public override DayOfWeek GetDayOfWeek(DateTime time)
+		{
+			return (DayOfWeek)(time.Ticks / 864000000000L + 1L) % (DayOfWeek)7;
+		}
+
+		public override int GetDayOfYear(DateTime time)
+		{
+			return this.GetDatePart(time.Ticks, 1);
+		}
+
+		public override int GetDaysInMonth(int year, int month, int era)
+		{
+			PersianCalendar.CheckYearMonthRange(year, month, era);
+			if (month == 10 && year == 9378)
+			{
+				return 13;
+			}
+			int num = PersianCalendar.DaysToMonth[month] - PersianCalendar.DaysToMonth[month - 1];
+			if (month == 12 && !this.IsLeapYear(year))
+			{
+				num--;
+			}
+			return num;
+		}
+
+		public override int GetDaysInYear(int year, int era)
+		{
+			PersianCalendar.CheckYearRange(year, era);
+			if (year == 9378)
+			{
+				return PersianCalendar.DaysToMonth[9] + 13;
+			}
+			if (!this.IsLeapYear(year, 0))
+			{
+				return 365;
+			}
+			return 366;
+		}
+
+		public override int GetEra(DateTime time)
+		{
+			PersianCalendar.CheckTicksRange(time.Ticks);
+			return PersianCalendar.PersianEra;
+		}
+
+		public override int[] Eras
+		{
+			get
+			{
+				return new int[] { PersianCalendar.PersianEra };
+			}
+		}
+
+		public override int GetMonth(DateTime time)
+		{
+			return this.GetDatePart(time.Ticks, 2);
+		}
+
+		public override int GetMonthsInYear(int year, int era)
+		{
+			PersianCalendar.CheckYearRange(year, era);
+			if (year == 9378)
+			{
+				return 10;
+			}
+			return 12;
+		}
+
+		public override int GetYear(DateTime time)
+		{
+			return this.GetDatePart(time.Ticks, 0);
+		}
+
+		public override bool IsLeapDay(int year, int month, int day, int era)
+		{
+			int daysInMonth = this.GetDaysInMonth(year, month, era);
+			if (day < 1 || day > daysInMonth)
+			{
+				throw new ArgumentOutOfRangeException("day", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Day must be between 1 and {0} for month {1}."), daysInMonth, month));
+			}
+			return this.IsLeapYear(year, era) && month == 12 && day == 30;
+		}
+
+		public override int GetLeapMonth(int year, int era)
+		{
+			PersianCalendar.CheckYearRange(year, era);
+			return 0;
+		}
+
+		public override bool IsLeapMonth(int year, int month, int era)
+		{
+			PersianCalendar.CheckYearMonthRange(year, month, era);
+			return false;
+		}
+
+		public override bool IsLeapYear(int year, int era)
+		{
+			PersianCalendar.CheckYearRange(year, era);
+			return year != 9378 && this.GetAbsoluteDatePersian(year + 1, 1, 1) - this.GetAbsoluteDatePersian(year, 1, 1) == 366L;
+		}
+
+		public override DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era)
+		{
+			int daysInMonth = this.GetDaysInMonth(year, month, era);
+			if (day < 1 || day > daysInMonth)
+			{
+				throw new ArgumentOutOfRangeException("day", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Day must be between 1 and {0} for month {1}."), daysInMonth, month));
+			}
+			long absoluteDatePersian = this.GetAbsoluteDatePersian(year, month, day);
+			if (absoluteDatePersian >= 0L)
+			{
+				return new DateTime(absoluteDatePersian * 864000000000L + Calendar.TimeToTicks(hour, minute, second, millisecond));
+			}
+			throw new ArgumentOutOfRangeException(null, Environment.GetResourceString("Year, Month, and Day parameters describe an un-representable DateTime."));
+		}
+
+		public override int TwoDigitYearMax
+		{
+			get
+			{
+				if (this.twoDigitYearMax == -1)
+				{
+					this.twoDigitYearMax = Calendar.GetSystemTwoDigitYearSetting(this.ID, 1410);
+				}
+				return this.twoDigitYearMax;
+			}
+			set
+			{
+				base.VerifyWritable();
+				if (value < 99 || value > 9378)
+				{
+					throw new ArgumentOutOfRangeException("value", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 99, 9378));
+				}
+				this.twoDigitYearMax = value;
+			}
+		}
+
+		public override int ToFourDigitYear(int year)
+		{
+			if (year < 0)
+			{
+				throw new ArgumentOutOfRangeException("year", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (year < 100)
+			{
+				return base.ToFourDigitYear(year);
+			}
+			if (year > 9378)
+			{
+				throw new ArgumentOutOfRangeException("year", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 1, 9378));
+			}
+			return year;
+		}
 
 		public static readonly int PersianEra = 1;
 
-		private static DateTime PersianMin = new DateTime(622, 3, 21, 0, 0, 0);
+		internal static long PersianEpoch = new DateTime(622, 3, 22).Ticks / 864000000000L;
 
-		private static DateTime PersianMax = new DateTime(9999, 12, 31, 11, 59, 59);
+		private const int ApproximateHalfYear = 180;
+
+		internal const int DatePartYear = 0;
+
+		internal const int DatePartDayOfYear = 1;
+
+		internal const int DatePartMonth = 2;
+
+		internal const int DatePartDay = 3;
+
+		internal const int MonthsPerYear = 12;
+
+		internal static int[] DaysToMonth = new int[]
+		{
+			0, 31, 62, 93, 124, 155, 186, 216, 246, 276,
+			306, 336, 366
+		};
+
+		internal const int MaxCalendarYear = 9378;
+
+		internal const int MaxCalendarMonth = 10;
+
+		internal const int MaxCalendarDay = 13;
+
+		internal static DateTime minDate = new DateTime(622, 3, 22);
+
+		internal static DateTime maxDate = DateTime.MaxValue;
+
+		private const int DEFAULT_TWO_DIGIT_YEAR_MAX = 1410;
 	}
 }

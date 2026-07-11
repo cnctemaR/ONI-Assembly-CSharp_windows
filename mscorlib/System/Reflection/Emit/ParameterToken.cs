@@ -28,6 +28,16 @@ namespace System.Reflection.Emit
 			return this.tokValue == obj.tokValue;
 		}
 
+		public static bool operator ==(ParameterToken a, ParameterToken b)
+		{
+			return object.Equals(a, b);
+		}
+
+		public static bool operator !=(ParameterToken a, ParameterToken b)
+		{
+			return !object.Equals(a, b);
+		}
+
 		public override int GetHashCode()
 		{
 			return this.tokValue;
@@ -41,18 +51,8 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		public static bool operator ==(ParameterToken a, ParameterToken b)
-		{
-			return object.Equals(a, b);
-		}
-
-		public static bool operator !=(ParameterToken a, ParameterToken b)
-		{
-			return !object.Equals(a, b);
-		}
-
 		internal int tokValue;
 
-		public static readonly ParameterToken Empty = default(ParameterToken);
+		public static readonly ParameterToken Empty;
 	}
 }

@@ -8,6 +8,16 @@ namespace System
 	[Serializable]
 	public class WeakReference : ISerializable
 	{
+		private void AllocateHandle(object target)
+		{
+			if (this.isLongReference)
+			{
+				this.gcHandle = GCHandle.Alloc(target, GCHandleType.WeakTrackResurrection);
+				return;
+			}
+			this.gcHandle = GCHandle.Alloc(target, GCHandleType.Weak);
+		}
+
 		public WeakReference(object target)
 			: this(target, false)
 		{
@@ -30,18 +40,6 @@ namespace System
 			this.AllocateHandle(value);
 		}
 
-		private void AllocateHandle(object target)
-		{
-			if (this.isLongReference)
-			{
-				this.gcHandle = GCHandle.Alloc(target, GCHandleType.WeakTrackResurrection);
-			}
-			else
-			{
-				this.gcHandle = GCHandle.Alloc(target, GCHandleType.Weak);
-			}
-		}
-
 		public virtual bool IsAlive
 		{
 			get
@@ -54,6 +52,10 @@ namespace System
 		{
 			get
 			{
+				if (!this.gcHandle.IsAllocated)
+				{
+					return null;
+				}
 				return this.gcHandle.Target;
 			}
 			set

@@ -63,12 +63,12 @@ namespace UnityEngine.UI
 
 		private void UpdateCull(bool cull)
 		{
-			bool flag = base.canvasRenderer.cull != cull;
-			base.canvasRenderer.cull = cull;
-			if (flag)
+			if (base.canvasRenderer.cull != cull)
 			{
+				base.canvasRenderer.cull = cull;
+				UISystemProfilerApi.AddMarker("MaskableGraphic.cullingChanged", this);
 				this.m_OnCullStateChanged.Invoke(cull);
-				this.SetVerticesDirty();
+				this.OnCullingChanged();
 			}
 		}
 
@@ -144,10 +144,10 @@ namespace UnityEngine.UI
 				base.rectTransform.GetWorldCorners(this.m_Corners);
 				if (base.canvas)
 				{
-					Canvas rootCanvas = base.canvas.rootCanvas;
+					Matrix4x4 worldToLocalMatrix = base.canvas.rootCanvas.transform.worldToLocalMatrix;
 					for (int i = 0; i < 4; i++)
 					{
-						this.m_Corners[i] = rootCanvas.transform.InverseTransformPoint(this.m_Corners[i]);
+						this.m_Corners[i] = worldToLocalMatrix.MultiplyPoint(this.m_Corners[i]);
 					}
 				}
 				return new Rect(this.m_Corners[0].x, this.m_Corners[0].y, this.m_Corners[2].x - this.m_Corners[0].x, this.m_Corners[2].y - this.m_Corners[0].y);

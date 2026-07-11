@@ -7,7 +7,6 @@ public class HappinessMonitor : GameStateMachine<HappinessMonitor, HappinessMoni
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.root.Update(new Action<HappinessMonitor.Instance, float>(HappinessMonitor.UpdateHappinessAmount), UpdateRate.SIM_1000ms, false);
 		this.satisfied.Transition(this.happy, new StateMachine<HappinessMonitor, HappinessMonitor.Instance, IStateMachineTarget, HappinessMonitor.Def>.Transition.ConditionCallback(HappinessMonitor.IsHappy), UpdateRate.SIM_1000ms).Transition(this.unhappy, GameStateMachine<HappinessMonitor, HappinessMonitor.Instance, IStateMachineTarget, HappinessMonitor.Def>.Not(new StateMachine<HappinessMonitor, HappinessMonitor.Instance, IStateMachineTarget, HappinessMonitor.Def>.Transition.ConditionCallback(HappinessMonitor.IsHappy)), UpdateRate.SIM_1000ms);
 		this.happy.DefaultState(this.happy.wild).Transition(this.satisfied, GameStateMachine<HappinessMonitor, HappinessMonitor.Instance, IStateMachineTarget, HappinessMonitor.Def>.Not(new StateMachine<HappinessMonitor, HappinessMonitor.Instance, IStateMachineTarget, HappinessMonitor.Def>.Transition.ConditionCallback(HappinessMonitor.IsHappy)), UpdateRate.SIM_1000ms);
 		this.happy.wild.ToggleEffect((HappinessMonitor.Instance smi) => this.happyWildEffect).TagTransition(GameTags.Creatures.Wild, this.happy.tame, true);
@@ -15,18 +14,13 @@ public class HappinessMonitor : GameStateMachine<HappinessMonitor, HappinessMoni
 		this.unhappy.DefaultState(this.unhappy.wild).Transition(this.satisfied, new StateMachine<HappinessMonitor, HappinessMonitor.Instance, IStateMachineTarget, HappinessMonitor.Def>.Transition.ConditionCallback(HappinessMonitor.IsHappy), UpdateRate.SIM_1000ms);
 		this.unhappy.wild.ToggleEffect((HappinessMonitor.Instance smi) => this.unhappyWildEffect).TagTransition(GameTags.Creatures.Wild, this.unhappy.tame, true);
 		this.unhappy.tame.ToggleEffect((HappinessMonitor.Instance smi) => this.unhappyTameEffect).TagTransition(GameTags.Creatures.Wild, this.unhappy.wild, false);
-		this.happyWildEffect = new Effect("Happy", CREATURES.MODIFIERS.HAPPY.NAME, CREATURES.MODIFIERS.HAPPY.TOOLTIP, 0f, true, false, false);
-		this.happyTameEffect = new Effect("Happy", CREATURES.MODIFIERS.HAPPY.NAME, CREATURES.MODIFIERS.HAPPY.TOOLTIP, 0f, true, false, false);
+		this.happyWildEffect = new Effect("Happy", CREATURES.MODIFIERS.HAPPY.NAME, CREATURES.MODIFIERS.HAPPY.TOOLTIP, 0f, true, false, false, null, 0f);
+		this.happyTameEffect = new Effect("Happy", CREATURES.MODIFIERS.HAPPY.NAME, CREATURES.MODIFIERS.HAPPY.TOOLTIP, 0f, true, false, false, null, 0f);
 		this.happyTameEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, 9f, CREATURES.MODIFIERS.HAPPY.NAME, true, false, true));
-		this.unhappyWildEffect = new Effect("Unhappy", CREATURES.MODIFIERS.UNHAPPY.NAME, CREATURES.MODIFIERS.UNHAPPY.TOOLTIP, 0f, true, false, true);
+		this.unhappyWildEffect = new Effect("Unhappy", CREATURES.MODIFIERS.UNHAPPY.NAME, CREATURES.MODIFIERS.UNHAPPY.TOOLTIP, 0f, true, false, true, null, 0f);
 		this.unhappyWildEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -15f, CREATURES.MODIFIERS.UNHAPPY.NAME, false, false, true));
-		this.unhappyTameEffect = new Effect("Unhappy", CREATURES.MODIFIERS.UNHAPPY.NAME, CREATURES.MODIFIERS.UNHAPPY.TOOLTIP, 0f, true, false, true);
+		this.unhappyTameEffect = new Effect("Unhappy", CREATURES.MODIFIERS.UNHAPPY.NAME, CREATURES.MODIFIERS.UNHAPPY.TOOLTIP, 0f, true, false, true, null, 0f);
 		this.unhappyTameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -80f, CREATURES.MODIFIERS.UNHAPPY.NAME, false, false, true));
-	}
-
-	private static void UpdateHappinessAmount(HappinessMonitor.Instance smi, float dt)
-	{
-		smi.happinessAmount.value = smi.happiness.GetTotalValue();
 	}
 
 	private static bool IsHappy(HappinessMonitor.Instance smi)
@@ -73,11 +67,8 @@ public class HappinessMonitor : GameStateMachine<HappinessMonitor, HappinessMoni
 			: base(master, def)
 		{
 			this.happiness = base.gameObject.GetAttributes().Add(Db.Get().CritterAttributes.Happiness);
-			this.happinessAmount = base.gameObject.GetAmounts().Add(new AmountInstance(Db.Get().Amounts.Happiness, base.gameObject));
 		}
 
 		public AttributeInstance happiness;
-
-		public AmountInstance happinessAmount;
 	}
 }

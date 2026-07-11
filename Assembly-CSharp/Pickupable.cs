@@ -208,14 +208,6 @@ public class Pickupable : Workable
 		int num = Grid.PosToCell(this);
 		if (!Grid.IsValidCell(num))
 		{
-			global::Debug.LogWarning(string.Concat(new object[]
-			{
-				"Destroying GO [",
-				base.name,
-				"] because it is in an invalid position [",
-				base.transform.GetPosition(),
-				"]"
-			}), null);
 			base.gameObject.DeleteObject();
 			return;
 		}
@@ -239,6 +231,7 @@ public class Pickupable : Workable
 			component2.overrideName = UI.OVERLAYS.DECOR.CLUTTER;
 		}
 		this.rottable = this.GetSMI<Rottable.Instance>();
+		this.edible = base.GetComponent<Edible>();
 		this.UpdateEntombedVisualizer();
 		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 	}
@@ -257,7 +250,7 @@ public class Pickupable : Workable
 		this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
 		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.RegisterListeners");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.RegisterListeners");
 	}
 
 	public void UnregisterListeners()
@@ -277,7 +270,7 @@ public class Pickupable : Workable
 			this.partitionerEntry.Release();
 			this.partitionerEntry = null;
 		}
-		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
 	private void OnSolidChanged(object data)
@@ -433,9 +426,9 @@ public class Pickupable : Workable
 				this.Absorb(other);
 				if (!hide_effects && EffectPrefabs.Instance != null)
 				{
-					Vector3 position = other.transform.GetPosition();
+					Vector3 position = base.transform.GetPosition();
 					position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
-					GameObject gameObject = global::Util.KInstantiate(EffectPrefabs.Instance.OreAbsorb, position, Quaternion.identity, SceneOrganizer.Instance.GetFolder(Folder.FX), null, true, 0);
+					GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position, Quaternion.identity, null, null, true, 0);
 					gameObject.SetActive(true);
 				}
 				return true;
@@ -541,6 +534,7 @@ public class Pickupable : Workable
 	{
 		this.storage = data as Storage;
 		bool flag = data is Storage || (data != null && (bool)data);
+		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		if (this.carryAnimOverride != null && this.lastCarrier != null)
 		{
 			this.lastCarrier.RemoveAnimOverrides(this.carryAnimOverride);
@@ -563,9 +557,17 @@ public class Pickupable : Workable
 				this.cachedCell = Grid.PosToCell(this.storage);
 			}
 			this.NotifyChanged(cachedCell);
+			if (component != null)
+			{
+				component.SetRegistered(false);
+			}
 		}
 		else
 		{
+			if (component != null)
+			{
+				component.SetRegistered(true);
+			}
 			this.RemovedFromStorage();
 		}
 	}
@@ -587,7 +589,7 @@ public class Pickupable : Workable
 		if (this.useGunforPickup && worker.usesMultiTool)
 		{
 			Workable.AnimInfo anim = base.GetAnim(worker);
-			anim.smi = new MultitoolController.Instance(this, worker, "pickup", EffectPrefabs.Instance.PickupEffect);
+			anim.smi = new MultitoolController.Instance(this, worker, "pickup", Assets.GetPrefab(EffectConfigs.OreAbsorbId));
 			return anim;
 		}
 		return base.GetAnim(worker);
@@ -833,6 +835,8 @@ public class Pickupable : Workable
 	};
 
 	public Rottable.Instance rottable;
+
+	public Edible edible;
 
 	private bool isReachable;
 

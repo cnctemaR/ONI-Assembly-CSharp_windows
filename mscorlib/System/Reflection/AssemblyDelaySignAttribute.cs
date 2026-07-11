@@ -3,23 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class AssemblyDelaySignAttribute : Attribute
 	{
 		public AssemblyDelaySignAttribute(bool delaySign)
 		{
-			this.delay = delaySign;
+			this.m_delaySign = delaySign;
 		}
 
 		public bool DelaySign
 		{
 			get
 			{
-				return this.delay;
+				return this.m_delaySign;
 			}
 		}
 
-		private bool delay;
+		private bool m_delaySign;
 	}
 }

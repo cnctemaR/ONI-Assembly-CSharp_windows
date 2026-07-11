@@ -39,7 +39,7 @@ public class HelmetController : KMonoBehaviour
 		}
 		KAnimFile anim = Assets.GetAnim("helm_oxygen_kanim");
 		KAnimHashedString kanimHashedString = new KAnimHashedString("snapTo_neck");
-		assigneeController.GetComponent<SymbolOverrideController>().AddSymbolOverride(kanimHashedString, anim.GetData().build.GetSymbol(kanimHashedString), 5);
+		assigneeController.GetComponent<SymbolOverrideController>().AddSymbolOverride(kanimHashedString, anim.GetData().build.GetSymbol(kanimHashedString), 6);
 		assigneeController.SetSymbolVisiblity(kanimHashedString, true);
 	}
 
@@ -56,7 +56,7 @@ public class HelmetController : KMonoBehaviour
 		{
 			return;
 		}
-		component.RemoveSymbolOverride(kanimHashedString, 5);
+		component.RemoveSymbolOverride(kanimHashedString, 6);
 		assigneeController.SetSymbolVisiblity(kanimHashedString, false);
 	}
 

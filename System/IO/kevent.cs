@@ -13,15 +13,15 @@ namespace System.IO
 			}
 		}
 
-		public int ident;
+		public UIntPtr ident;
 
-		public short filter;
+		public EventFilter filter;
 
-		public ushort flags;
+		public EventFlags flags;
 
-		public uint fflags;
+		public FilterFlags fflags;
 
-		public int data;
+		public IntPtr data;
 
 		public IntPtr udata;
 	}

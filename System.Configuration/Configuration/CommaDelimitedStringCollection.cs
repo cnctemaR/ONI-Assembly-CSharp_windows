@@ -9,7 +9,12 @@ namespace System.Configuration
 		{
 			get
 			{
-				return this.modified;
+				if (this.modified)
+				{
+					return true;
+				}
+				string text = this.ToString();
+				return text != null && text.GetHashCode() != this.originalStringHash;
 			}
 		}
 
@@ -71,9 +76,10 @@ namespace System.Configuration
 		public CommaDelimitedStringCollection Clone()
 		{
 			CommaDelimitedStringCollection commaDelimitedStringCollection = new CommaDelimitedStringCollection();
-			string[] array = new string[this.Count];
+			string[] array = new string[base.Count];
 			base.CopyTo(array, 0);
 			commaDelimitedStringCollection.AddRange(array);
+			commaDelimitedStringCollection.originalStringHash = this.originalStringHash;
 			return commaDelimitedStringCollection;
 		}
 
@@ -104,17 +110,30 @@ namespace System.Configuration
 
 		public override string ToString()
 		{
-			if (this.Count == 0)
+			if (base.Count == 0)
 			{
 				return null;
 			}
-			string[] array = new string[this.Count];
+			string[] array = new string[base.Count];
 			base.CopyTo(array, 0);
 			return string.Join(",", array);
+		}
+
+		internal void UpdateStringHash()
+		{
+			string text = this.ToString();
+			if (text == null)
+			{
+				this.originalStringHash = 0;
+				return;
+			}
+			this.originalStringHash = text.GetHashCode();
 		}
 
 		private bool modified;
 
 		private bool readOnly;
+
+		private int originalStringHash;
 	}
 }

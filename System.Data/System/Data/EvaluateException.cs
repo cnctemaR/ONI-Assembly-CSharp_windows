@@ -7,22 +7,18 @@ namespace System.Data
 	public class EvaluateException : InvalidExpressionException
 	{
 		public EvaluateException()
-			: base(Locale.GetText("This expression cannot be evaluated"))
-		{
-		}
-
-		public EvaluateException(string s)
-			: base(s)
-		{
-		}
-
-		public EvaluateException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		protected EvaluateException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		{
+		}
+
+		public EvaluateException(string s)
+		{
+		}
+
+		public EvaluateException(string message, Exception innerException)
 		{
 		}
 	}

@@ -13,15 +13,6 @@ namespace System
 			this._appid = identity;
 		}
 
-		[MonoTODO("Missing serialization support")]
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-		}
-
 		~ActivationContext()
 		{
 			this.Dispose(false);
@@ -77,16 +68,22 @@ namespace System
 		{
 			if (this._disposed)
 			{
-				if (disposing)
-				{
-				}
 				this._disposed = true;
 			}
 		}
 
-		private ActivationContext.ContextForm _form;
+		[MonoTODO("Missing serialization support")]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+		}
 
 		private ApplicationIdentity _appid;
+
+		private ActivationContext.ContextForm _form;
 
 		private bool _disposed;
 

@@ -103,10 +103,6 @@ namespace Klei.AI
 						}
 					}
 					base.Trigger(-1901442097, effect);
-					if (effect.triggerFloatingText && PopFXManager.Instance != null)
-					{
-						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, effect.Name, base.transform, 1.5f, false);
-					}
 				}
 				effectInstance.timeRemaining = effect.duration;
 				return effectInstance;
@@ -137,15 +133,12 @@ namespace Klei.AI
 			{
 				Attributes attributes = this.GetAttributes();
 				EffectInstance effectInstance = this.effects[num];
+				effectInstance.OnCleanUp();
 				Effect effect = effectInstance.effect;
 				effect.RemoveFrom(attributes);
 				int num3 = this.effects.Count - 1;
 				this.effects[num] = this.effects[num3];
 				this.effects.RemoveAt(num3);
-				if (effectInstance.statusItem != null)
-				{
-					effectInstance.gameObject.GetComponent<KSelectable>().RemoveStatusItem(effectInstance.statusItem, false);
-				}
 				base.Trigger(-1157678353, effect);
 			}
 		}

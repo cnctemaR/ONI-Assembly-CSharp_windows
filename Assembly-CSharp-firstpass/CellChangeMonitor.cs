@@ -2,21 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CellChangeMonitor
+public class CellChangeMonitor : Singleton<CellChangeMonitor>
 {
-	public static CellChangeMonitor Instance
-	{
-		get
-		{
-			return Singleton<CellChangeMonitor>.Instance;
-		}
-	}
-
-	public static void Destroy()
-	{
-		Singleton<CellChangeMonitor>.Destroy();
-	}
-
 	public void MarkDirty(Transform transform)
 	{
 		if (this.gridWidth == 0)

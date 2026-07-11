@@ -4,21 +4,52 @@ using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[Designer("System.Windows.Forms.Design.ComponentDocumentDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(global::System.ComponentModel.Design.IRootDesigner))]
+	[ComVisible(true)]
+	[Designer("System.Windows.Forms.Design.ComponentDocumentDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(IRootDesigner))]
 	[DesignerCategory("Component")]
 	[TypeConverter(typeof(ComponentConverter))]
-	[ComVisible(true)]
-	public class MarshalByValueComponent : IDisposable, IServiceProvider, IComponent
+	public class MarshalByValueComponent : IComponent, IDisposable, IServiceProvider
 	{
+		~MarshalByValueComponent()
+		{
+			this.Dispose(false);
+		}
+
 		public event EventHandler Disposed
 		{
 			add
 			{
-				this.Events.AddHandler(this.disposedEvent, value);
+				this.Events.AddHandler(MarshalByValueComponent.EventDisposed, value);
 			}
 			remove
 			{
-				this.Events.RemoveHandler(this.disposedEvent, value);
+				this.Events.RemoveHandler(MarshalByValueComponent.EventDisposed, value);
+			}
+		}
+
+		protected EventHandlerList Events
+		{
+			get
+			{
+				if (this.events == null)
+				{
+					this.events = new EventHandlerList();
+				}
+				return this.events;
+			}
+		}
+
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public virtual ISite Site
+		{
+			get
+			{
+				return this.site;
+			}
+			set
+			{
+				this.site = value;
 			}
 		}
 
@@ -28,26 +59,26 @@ namespace System.ComponentModel
 			GC.SuppressFinalize(this);
 		}
 
-		[global::System.MonoTODO]
 		protected virtual void Dispose(bool disposing)
 		{
 			if (disposing)
 			{
+				lock (this)
+				{
+					if (this.site != null && this.site.Container != null)
+					{
+						this.site.Container.Remove(this);
+					}
+					if (this.events != null)
+					{
+						EventHandler eventHandler = (EventHandler)this.events[MarshalByValueComponent.EventDisposed];
+						if (eventHandler != null)
+						{
+							eventHandler(this, EventArgs.Empty);
+						}
+					}
+				}
 			}
-		}
-
-		~MarshalByValueComponent()
-		{
-			this.Dispose(false);
-		}
-
-		public virtual object GetService(Type service)
-		{
-			if (this.mySite != null)
-			{
-				return this.mySite.GetService(service);
-			}
-			return null;
 		}
 
 		[Browsable(false)]
@@ -56,63 +87,49 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.mySite == null)
+				ISite site = this.site;
+				if (site != null)
 				{
-					return null;
+					return site.Container;
 				}
-				return this.mySite.Container;
+				return null;
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		public virtual object GetService(Type service)
+		{
+			if (this.site != null)
+			{
+				return this.site.GetService(service);
+			}
+			return null;
+		}
+
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public virtual bool DesignMode
 		{
 			get
 			{
-				return this.mySite != null && this.mySite.DesignMode;
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
-		public virtual ISite Site
-		{
-			get
-			{
-				return this.mySite;
-			}
-			set
-			{
-				this.mySite = value;
+				ISite site = this.site;
+				return site != null && site.DesignMode;
 			}
 		}
 
 		public override string ToString()
 		{
-			if (this.mySite == null)
+			ISite site = this.site;
+			if (site != null)
 			{
-				return base.GetType().ToString();
+				return site.Name + " [" + base.GetType().FullName + "]";
 			}
-			return string.Format("{0} [{1}]", this.mySite.Name, base.GetType().ToString());
+			return base.GetType().FullName;
 		}
 
-		protected EventHandlerList Events
-		{
-			get
-			{
-				if (this.eventList == null)
-				{
-					this.eventList = new EventHandlerList();
-				}
-				return this.eventList;
-			}
-		}
+		private static readonly object EventDisposed = new object();
 
-		private EventHandlerList eventList;
+		private ISite site;
 
-		private ISite mySite;
-
-		private object disposedEvent = new object();
+		private EventHandlerList events;
 	}
 }

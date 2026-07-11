@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class ProgressBarsConfig : ScriptableObject
 {
+	public static void DestroyInstance()
+	{
+		ProgressBarsConfig.instance = null;
+	}
+
 	public static ProgressBarsConfig Instance
 	{
 		get

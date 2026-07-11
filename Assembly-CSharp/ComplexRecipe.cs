@@ -30,7 +30,7 @@ public class ComplexRecipe
 		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
-			sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui");
+			sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false);
 		}
 		return sprite;
 	}

@@ -126,10 +126,10 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 			}
 			if (!flag)
 			{
-				TemplateSelectionInfoPanel.mass_per_element.Add(new Tuple<Element, float>(Grid.Element[num], Grid.Mass[num]));
+				TemplateSelectionInfoPanel.mass_per_element.Add(new global::Tuple<Element, float>(Grid.Element[num], Grid.Mass[num]));
 			}
 		}
-		TemplateSelectionInfoPanel.mass_per_element.Sort(delegate(Tuple<Element, float> a, Tuple<Element, float> b)
+		TemplateSelectionInfoPanel.mass_per_element.Sort(delegate(global::Tuple<Element, float> a, global::Tuple<Element, float> b)
 		{
 			if (a.second > b.second)
 			{
@@ -142,7 +142,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 			return 0;
 		});
 		string text = string.Empty;
-		foreach (Tuple<Element, float> tuple in TemplateSelectionInfoPanel.mass_per_element)
+		foreach (global::Tuple<Element, float> tuple in TemplateSelectionInfoPanel.mass_per_element)
 		{
 			string text2 = text;
 			text = string.Concat(new string[]
@@ -171,5 +171,5 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 
 	private Func<List<int>, string>[] details;
 
-	private static List<Tuple<Element, float>> mass_per_element = new List<Tuple<Element, float>>();
+	private static List<global::Tuple<Element, float>> mass_per_element = new List<global::Tuple<Element, float>>();
 }

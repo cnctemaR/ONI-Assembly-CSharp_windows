@@ -8,19 +8,10 @@ namespace System.Data.Common
 	{
 		public DataColumnMapping()
 		{
-			this.sourceColumn = string.Empty;
-			this.dataSetColumn = string.Empty;
 		}
 
 		public DataColumnMapping(string sourceColumn, string dataSetColumn)
 		{
-			this.sourceColumn = sourceColumn;
-			this.dataSetColumn = dataSetColumn;
-		}
-
-		object ICloneable.Clone()
-		{
-			return new DataColumnMapping(this.SourceColumn, this.DataSetColumn);
 		}
 
 		[DefaultValue("")]
@@ -28,11 +19,10 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.dataSetColumn;
+				throw null;
 			}
 			set
 			{
-				this.dataSetColumn = value;
 			}
 		}
 
@@ -41,57 +31,33 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.sourceColumn;
+				throw null;
 			}
 			set
 			{
-				this.sourceColumn = value;
 			}
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		public DataColumn GetDataColumnBySchemaAction(DataTable dataTable, Type dataType, MissingSchemaAction schemaAction)
 		{
-			if (dataTable.Columns.Contains(this.dataSetColumn))
-			{
-				return dataTable.Columns[this.dataSetColumn];
-			}
-			if (schemaAction == MissingSchemaAction.Ignore)
-			{
-				return null;
-			}
-			if (schemaAction == MissingSchemaAction.Error)
-			{
-				throw new InvalidOperationException(string.Format("Missing the DataColumn '{0}' in the DataTable '{1}' for the SourceColumn '{2}'", this.DataSetColumn, dataTable.TableName, this.SourceColumn));
-			}
-			return new DataColumn(this.dataSetColumn, dataType);
+			throw null;
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		public static DataColumn GetDataColumnBySchemaAction(string sourceColumn, string dataSetColumn, DataTable dataTable, Type dataType, MissingSchemaAction schemaAction)
 		{
-			if (dataTable.Columns.Contains(dataSetColumn))
-			{
-				return dataTable.Columns[dataSetColumn];
-			}
-			if (schemaAction == MissingSchemaAction.Ignore)
-			{
-				return null;
-			}
-			if (schemaAction == MissingSchemaAction.Error)
-			{
-				throw new InvalidOperationException(string.Format("Missing the DataColumn '{0}' in the DataTable '{1}' for the SourceColumn '{2}'", dataSetColumn, dataTable.TableName, sourceColumn));
-			}
-			return new DataColumn(dataSetColumn, dataType);
+			throw null;
+		}
+
+		object ICloneable.Clone()
+		{
+			throw null;
 		}
 
 		public override string ToString()
 		{
-			return this.SourceColumn;
+			throw null;
 		}
-
-		private string sourceColumn;
-
-		private string dataSetColumn;
 	}
 }

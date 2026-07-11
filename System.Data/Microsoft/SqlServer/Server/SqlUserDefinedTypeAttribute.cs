@@ -5,19 +5,15 @@ namespace Microsoft.SqlServer.Server
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
 	public sealed class SqlUserDefinedTypeAttribute : Attribute
 	{
-		public SqlUserDefinedTypeAttribute(Format f)
+		public SqlUserDefinedTypeAttribute(Format format)
 		{
-			this.format = f;
-			this.IsByteOrdered = false;
-			this.IsFixedLength = false;
-			this.MaxByteSize = 8000;
 		}
 
 		public Format Format
 		{
 			get
 			{
-				return this.format;
+				throw null;
 			}
 		}
 
@@ -25,11 +21,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isByteOrdered;
+				throw null;
 			}
 			set
 			{
-				this.isByteOrdered = value;
 			}
 		}
 
@@ -37,11 +32,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isFixedLength;
+				throw null;
 			}
 			set
 			{
-				this.isFixedLength = value;
 			}
 		}
 
@@ -49,22 +43,11 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.maxByteSize;
+				throw null;
 			}
 			set
 			{
-				this.maxByteSize = value;
 			}
 		}
-
-		private const int MaxByteSizeValue = 8000;
-
-		private Format format;
-
-		private bool isByteOrdered;
-
-		private bool isFixedLength;
-
-		private int maxByteSize;
 	}
 }

@@ -17,11 +17,6 @@ namespace System.Security.Permissions
 			this.Site = site;
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 11;
-		}
-
 		public string Site
 		{
 			get
@@ -70,8 +65,7 @@ namespace System.Security.Permissions
 			}
 			if (this.Match(siteIdentityPermission._site))
 			{
-				string text = ((this._site.Length <= siteIdentityPermission._site.Length) ? siteIdentityPermission._site : this._site);
-				return new SiteIdentityPermission(text);
+				return new SiteIdentityPermission((this._site.Length > siteIdentityPermission._site.Length) ? this._site : siteIdentityPermission._site);
 			}
 			return null;
 		}
@@ -122,10 +116,14 @@ namespace System.Security.Permissions
 			}
 			if (this.Match(siteIdentityPermission._site))
 			{
-				string text = ((this._site.Length >= siteIdentityPermission._site.Length) ? siteIdentityPermission._site : this._site);
-				return new SiteIdentityPermission(text);
+				return new SiteIdentityPermission((this._site.Length < siteIdentityPermission._site.Length) ? this._site : siteIdentityPermission._site);
 			}
 			throw new ArgumentException(Locale.GetText("Cannot union two different sites."), "target");
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 11;
 		}
 
 		private bool IsEmpty()

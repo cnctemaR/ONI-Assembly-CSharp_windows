@@ -12,11 +12,9 @@ namespace Mono.Audio
 			{
 				this._buffer = new byte[s.Length];
 				s.Read(this._buffer, 0, this._buffer.Length);
+				return;
 			}
-			else
-			{
-				this._buffer = new byte[0];
-			}
+			this._buffer = new byte[0];
 		}
 
 		[DllImport("winmm.dll", SetLastError = true)]
@@ -31,11 +29,9 @@ namespace Mono.Audio
 				{
 					this._buffer = new byte[value.Length];
 					value.Read(this._buffer, 0, this._buffer.Length);
+					return;
 				}
-				else
-				{
-					this._buffer = new byte[0];
-				}
+				this._buffer = new byte[0];
 			}
 		}
 

@@ -5,24 +5,14 @@ namespace Microsoft.SqlServer.Server
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false, Inherited = false)]
 	public class SqlFacetAttribute : Attribute
 	{
-		public SqlFacetAttribute()
-		{
-			this.isFixedLength = false;
-			this.isNullable = false;
-			this.maxSize = 0;
-			this.precision = 0;
-			this.scale = 0;
-		}
-
 		public bool IsFixedLength
 		{
 			get
 			{
-				return this.isFixedLength;
+				throw null;
 			}
 			set
 			{
-				this.isFixedLength = value;
 			}
 		}
 
@@ -30,11 +20,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isNullable;
+				throw null;
 			}
 			set
 			{
-				this.isNullable = value;
 			}
 		}
 
@@ -42,11 +31,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.maxSize;
+				throw null;
 			}
 			set
 			{
-				this.maxSize = value;
 			}
 		}
 
@@ -54,11 +42,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.precision;
+				throw null;
 			}
 			set
 			{
-				this.precision = value;
 			}
 		}
 
@@ -66,22 +53,11 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.scale;
+				throw null;
 			}
 			set
 			{
-				this.scale = value;
 			}
 		}
-
-		private bool isFixedLength;
-
-		private bool isNullable;
-
-		private int maxSize;
-
-		private int precision;
-
-		private int scale;
 	}
 }

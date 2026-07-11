@@ -8,22 +8,22 @@ namespace System.Runtime.InteropServices
 	{
 		public InterfaceTypeAttribute(ComInterfaceType interfaceType)
 		{
-			this.intType = interfaceType;
+			this._val = interfaceType;
 		}
 
 		public InterfaceTypeAttribute(short interfaceType)
 		{
-			this.intType = (ComInterfaceType)interfaceType;
+			this._val = (ComInterfaceType)interfaceType;
 		}
 
 		public ComInterfaceType Value
 		{
 			get
 			{
-				return this.intType;
+				return this._val;
 			}
 		}
 
-		private ComInterfaceType intType;
+		internal ComInterfaceType _val;
 	}
 }

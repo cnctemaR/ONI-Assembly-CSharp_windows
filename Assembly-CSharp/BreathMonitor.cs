@@ -12,6 +12,7 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		this.lowbreath.DefaultState(this.lowbreath.nowheretorecover).Transition(this.satisfied, new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(BreathMonitor.IsFullBreath), UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.RecoverBreath, new Func<BreathMonitor.Instance, bool>(BreathMonitor.IsNotInBreathableArea))
 			.ToggleUrge(Db.Get().Urges.RecoverBreath)
 			.ToggleThought(Db.Get().Thoughts.Suffocating, null)
+			.ToggleTag(GameTags.HoldingBreath)
 			.Enter(new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State.Callback(BreathMonitor.ShowBreathBar))
 			.Enter(new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State.Callback(BreathMonitor.UpdateRecoverBreathCell))
 			.Update(new Action<BreathMonitor.Instance, float>(BreathMonitor.UpdateRecoverBreathCell), UpdateRate.SIM_200ms, false);

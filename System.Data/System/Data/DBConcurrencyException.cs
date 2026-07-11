@@ -7,28 +7,18 @@ namespace System.Data
 	public sealed class DBConcurrencyException : SystemException
 	{
 		public DBConcurrencyException()
-			: base("Concurrency violation.")
 		{
 		}
 
 		public DBConcurrencyException(string message)
-			: base(message)
 		{
 		}
 
 		public DBConcurrencyException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		public DBConcurrencyException(string message, Exception inner, DataRow[] dataRows)
-			: base(message, inner)
-		{
-			this.rows = dataRows;
-		}
-
-		private DBConcurrencyException(SerializationInfo si, StreamingContext sc)
-			: base(si, sc)
 		{
 		}
 
@@ -36,15 +26,10 @@ namespace System.Data
 		{
 			get
 			{
-				if (this.rows != null)
-				{
-					return this.rows[0];
-				}
-				return null;
+				throw null;
 			}
 			set
 			{
-				this.rows = new DataRow[] { value };
 			}
 		}
 
@@ -52,35 +37,22 @@ namespace System.Data
 		{
 			get
 			{
-				if (this.rows != null)
-				{
-					return this.rows.Length;
-				}
-				return 0;
+				throw null;
 			}
 		}
 
 		[MonoTODO]
 		public void CopyToRows(DataRow[] array)
 		{
-			throw new NotImplementedException();
 		}
 
 		[MonoTODO]
-		public void CopyToRows(DataRow[] array, int ArrayIndex)
+		public void CopyToRows(DataRow[] array, int arrayIndex)
 		{
-			throw new NotImplementedException();
 		}
 
 		public override void GetObjectData(SerializationInfo si, StreamingContext context)
 		{
-			if (si == null)
-			{
-				throw new ArgumentNullException("si");
-			}
-			base.GetObjectData(si, context);
 		}
-
-		private DataRow[] rows;
 	}
 }

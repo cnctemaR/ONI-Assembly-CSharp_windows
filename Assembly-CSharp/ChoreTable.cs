@@ -108,7 +108,7 @@ public class ChoreTable
 	{
 		public Entry(StateMachine.BaseDef state_machine_def, int priority, int interrupt_priority)
 		{
-			StateMachine stateMachine = StateMachineManager.Instance.CreateStateMachine(state_machine_def.GetStateMachineType());
+			StateMachine stateMachine = Singleton<StateMachineManager>.Instance.CreateStateMachine(state_machine_def.GetStateMachineType());
 			Type stateMachineInstanceType = stateMachine.GetStateMachineInstanceType();
 			Type[] array = new Type[]
 			{
@@ -139,6 +139,14 @@ public class ChoreTable
 			}
 		}
 
+		public static void ResetParameters()
+		{
+			for (int i = 0; i < ChoreTable.Instance.parameters.Length; i++)
+			{
+				ChoreTable.Instance.parameters[i] = null;
+			}
+		}
+
 		public void OnCleanUp(KPrefabID prefab_id)
 		{
 			for (int i = 0; i < this.entries.Count; i++)
@@ -149,16 +157,18 @@ public class ChoreTable
 			this.entries = null;
 		}
 
+		private static object[] parameters = new object[3];
+
 		private ListPool<ChoreTable.Instance.Entry, ChoreTable.Instance>.PooledList entries;
 
 		private struct Entry
 		{
 			public Entry(ChoreTable.Entry chore_table_entry, KPrefabID prefab_id)
 			{
-				ChoreTable.Instance.Entry.parameters[0] = chore_table_entry.stateMachineDef;
-				ChoreTable.Instance.Entry.parameters[1] = chore_table_entry.choreType;
-				ChoreTable.Instance.Entry.parameters[2] = prefab_id;
-				this.chore = (Chore)Activator.CreateInstance(chore_table_entry.choreClassType, ChoreTable.Instance.Entry.parameters);
+				ChoreTable.Instance.parameters[0] = chore_table_entry.stateMachineDef;
+				ChoreTable.Instance.parameters[1] = chore_table_entry.choreType;
+				ChoreTable.Instance.parameters[2] = prefab_id;
+				this.chore = (Chore)Activator.CreateInstance(chore_table_entry.choreClassType, ChoreTable.Instance.parameters);
 			}
 
 			public void OnCleanUp(KPrefabID prefab_id)
@@ -169,8 +179,6 @@ public class ChoreTable
 					this.chore = null;
 				}
 			}
-
-			private static object[] parameters = new object[3];
 
 			public Chore chore;
 		}

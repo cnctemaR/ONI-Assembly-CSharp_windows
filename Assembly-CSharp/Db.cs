@@ -25,7 +25,7 @@ public class Db : EntityModifierSet
 		this.Urges = new Urges();
 		this.AssignableSlots = new AssignableSlots();
 		this.StateMachineCategories = new StateMachineCategories();
-		this.Personalities = new Personalities(this.personalitiesFile);
+		this.Personalities = new Personalities();
 		this.Faces = new Faces();
 		this.Shirts = new Shirts();
 		this.Expressions = new Expressions(this.Root);
@@ -38,14 +38,14 @@ public class Db : EntityModifierSet
 		this.Accessories = new Accessories(this.Root);
 		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
 		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
-		this.Roles = new Roles(this.Root);
+		this.ScheduleGroups = new ScheduleGroups(this.Root);
 		this.RoomTypeCategories = new RoomTypeCategories(this.Root);
 		this.RoomTypes = new RoomTypes(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
 		this.ChoreTypes = new ChoreTypes(this.Root);
-		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false);
+		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, 0f);
 		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
 		this.effects.Add(effect);
 		this.CollectResources(this.Root, this.ResourceTable);
@@ -94,8 +94,6 @@ public class Db : EntityModifierSet
 
 	private static Db _Instance;
 
-	public TextAsset personalitiesFile;
-
 	public TextAsset researchTreeFile;
 
 	public global::Database.Diseases Diseases;
@@ -138,7 +136,7 @@ public class Db : EntityModifierSet
 
 	public ScheduleBlockTypes ScheduleBlockTypes;
 
-	public Roles Roles;
+	public ScheduleGroups ScheduleGroups;
 
 	public RoomTypeCategories RoomTypeCategories;
 

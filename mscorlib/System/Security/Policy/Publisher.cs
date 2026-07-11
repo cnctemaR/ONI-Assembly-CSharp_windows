@@ -7,7 +7,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class Publisher : IBuiltInEvidence, IIdentityPermissionFactory
+	public sealed class Publisher : EvidenceBase, IIdentityPermissionFactory, IBuiltInEvidence
 	{
 		public Publisher(X509Certificate cert)
 		{
@@ -20,23 +20,6 @@ namespace System.Security.Policy
 				throw new ArgumentException("cert");
 			}
 			this.m_cert = cert;
-		}
-
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return ((!verbose) ? 1 : 3) + this.m_cert.GetRawCertData().Length;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return 0;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			return 0;
 		}
 
 		public X509Certificate Certificate
@@ -88,6 +71,23 @@ namespace System.Security.Policy
 			}
 			securityElement.AddChild(securityElement2);
 			return securityElement.ToString();
+		}
+
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			return (verbose ? 3 : 1) + this.m_cert.GetRawCertData().Length;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return 0;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			return 0;
 		}
 
 		private X509Certificate m_cert;

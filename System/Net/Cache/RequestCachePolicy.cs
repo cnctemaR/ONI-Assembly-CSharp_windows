@@ -5,28 +5,32 @@ namespace System.Net.Cache
 	public class RequestCachePolicy
 	{
 		public RequestCachePolicy()
+			: this(RequestCacheLevel.Default)
 		{
 		}
 
 		public RequestCachePolicy(RequestCacheLevel level)
 		{
-			this.level = level;
+			if (level < RequestCacheLevel.Default || level > RequestCacheLevel.NoCacheNoStore)
+			{
+				throw new ArgumentOutOfRangeException("level");
+			}
+			this.m_Level = level;
 		}
 
 		public RequestCacheLevel Level
 		{
 			get
 			{
-				return this.level;
+				return this.m_Level;
 			}
 		}
 
-		[global::System.MonoTODO]
 		public override string ToString()
 		{
-			throw new NotImplementedException();
+			return "Level:" + this.m_Level.ToString();
 		}
 
-		private RequestCacheLevel level;
+		private RequestCacheLevel m_Level;
 	}
 }

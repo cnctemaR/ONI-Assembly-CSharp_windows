@@ -98,7 +98,7 @@ public class Filterable : KMonoBehaviour
 	[Serialize]
 	private Tag selectedTag;
 
-	private static Operational.Flag filterSelected = new Operational.Flag("filterSelected", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag filterSelected = new Operational.Flag("filterSelected", Operational.Flag.Type.Requirement);
 
 	public enum ElementState
 	{

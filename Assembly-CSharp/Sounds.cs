@@ -5,6 +5,11 @@ public class Sounds : KMonoBehaviour
 {
 	public static Sounds Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		Sounds.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		Sounds.Instance = this;

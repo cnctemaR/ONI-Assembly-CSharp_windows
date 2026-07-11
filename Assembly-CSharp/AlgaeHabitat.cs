@@ -5,8 +5,6 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.randomiseLoopedOffset = true;
 		base.OnPrefabInit();
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
@@ -100,7 +98,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 				this.emptyChore.Cancel("dupe");
 			}
 			AlgaeHabitatEmpty component = base.master.GetComponent<AlgaeHabitatEmpty>();
-			this.emptyChore = new WorkChore<AlgaeHabitatEmpty>(Db.Get().ChoreTypes.EmptyStorage, component, null, null, true, new Action<Chore>(this.OnEmptyComplete), null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
+			this.emptyChore = new WorkChore<AlgaeHabitatEmpty>(Db.Get().ChoreTypes.EmptyStorage, component, null, null, true, new Action<Chore>(this.OnEmptyComplete), null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, true);
 		}
 
 		public void CancelEmptyChore()

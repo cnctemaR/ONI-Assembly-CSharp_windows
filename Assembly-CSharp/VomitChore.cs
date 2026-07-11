@@ -38,7 +38,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		{
 			if (dt > 0f)
 			{
-				float totalTime = this.animController.CurrentAnim.totalTime;
+				float totalTime = base.GetComponent<KBatchedAnimController>().CurrentAnim.totalTime;
 				float num = dt / totalTime;
 				Diseases diseases = base.master.GetComponent<MinionModifiers>().diseases;
 				SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
@@ -92,6 +92,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		{
 			default_state = this.moveto;
 			base.Target(this.vomiter);
+			this.root.ToggleAnims("anim_emotes_default_kanim", 0f);
 			this.moveto.TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk).ToggleAnims("anim_loco_vomiter_kanim", 0f)
 				.MoveTo((VomitChore.StatesInstance smi) => smi.GetVomitCell(), this.vomit, this.vomit, false);
 			this.vomit.DefaultState(this.vomit.buildup).ToggleAnims("anim_vomit_kanim", 0f).ToggleStatusItem((VomitChore.StatesInstance smi) => smi.statusItem, null)

@@ -5,8 +5,8 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	[MonoTODO("Anonymous pipes are not working even on win32, due to some access authorization issue")]
-	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
+	[global::System.MonoTODO("Anonymous pipes are not working even on win32, due to some access authorization issue")]
+	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
 	public sealed class AnonymousPipeServerStream : PipeStream
 	{
 		public AnonymousPipeServerStream()
@@ -32,17 +32,13 @@ namespace System.IO.Pipes
 		public AnonymousPipeServerStream(PipeDirection direction, HandleInheritability inheritability, int bufferSize, PipeSecurity pipeSecurity)
 			: base(direction, bufferSize)
 		{
-			if (pipeSecurity != null)
-			{
-				throw base.ThrowACLException();
-			}
 			if (direction == PipeDirection.InOut)
 			{
 				throw new NotSupportedException("Anonymous pipe direction can only be either in or out.");
 			}
 			if (PipeStream.IsWindows)
 			{
-				this.impl = new Win32AnonymousPipeServer(this, direction, inheritability, bufferSize);
+				this.impl = new Win32AnonymousPipeServer(this, direction, inheritability, bufferSize, pipeSecurity);
 			}
 			else
 			{
@@ -52,7 +48,7 @@ namespace System.IO.Pipes
 			base.IsConnected = true;
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public AnonymousPipeServerStream(PipeDirection direction, SafePipeHandle serverSafePipeHandle, SafePipeHandle clientSafePipeHandle)
 			: base(direction, 1024)
 		{
@@ -81,7 +77,11 @@ namespace System.IO.Pipes
 			this.ClientSafePipeHandle = clientSafePipeHandle;
 		}
 
-		[MonoTODO]
+		~AnonymousPipeServerStream()
+		{
+		}
+
+		[global::System.MonoTODO]
 		public SafePipeHandle ClientSafePipeHandle { get; private set; }
 
 		public override PipeTransmissionMode ReadMode
@@ -103,7 +103,7 @@ namespace System.IO.Pipes
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public void DisposeLocalCopyOfClientHandle()
 		{
 			this.impl.DisposeLocalCopyOfClientHandle();

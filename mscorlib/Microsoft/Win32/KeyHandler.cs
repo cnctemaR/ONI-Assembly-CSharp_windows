@@ -1,28 +1,57 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Security;
+using System.Text;
 using System.Threading;
 
 namespace Microsoft.Win32
 {
 	internal class KeyHandler
 	{
-		private KeyHandler(RegistryKey rkey, string basedir)
+		static KeyHandler()
 		{
-			if (!Directory.Exists(basedir))
+			KeyHandler.CleanVolatileKeys();
+		}
+
+		private KeyHandler(RegistryKey rkey, string basedir)
+			: this(rkey, basedir, false)
+		{
+		}
+
+		private KeyHandler(RegistryKey rkey, string basedir, bool is_volatile)
+		{
+			string volatileDir = KeyHandler.GetVolatileDir(basedir);
+			string text = basedir;
+			if (Directory.Exists(basedir))
+			{
+				is_volatile = false;
+			}
+			else if (Directory.Exists(volatileDir))
+			{
+				text = volatileDir;
+				is_volatile = true;
+			}
+			else if (is_volatile)
+			{
+				text = volatileDir;
+			}
+			if (!Directory.Exists(text))
 			{
 				try
 				{
-					Directory.CreateDirectory(basedir);
+					Directory.CreateDirectory(text);
 				}
-				catch (UnauthorizedAccessException)
+				catch (UnauthorizedAccessException ex)
 				{
-					throw new SecurityException("No access to the given key");
+					throw new SecurityException("No access to the given key", ex);
 				}
 			}
 			this.Dir = basedir;
-			this.file = Path.Combine(this.Dir, "values.xml");
+			this.ActualDir = text;
+			this.IsVolatile = is_volatile;
+			this.file = Path.Combine(this.ActualDir, "values.xml");
 			this.Load();
 		}
 
@@ -37,8 +66,7 @@ namespace Microsoft.Win32
 			{
 				using (FileStream fileStream = File.OpenRead(this.file))
 				{
-					StreamReader streamReader = new StreamReader(fileStream);
-					string text = streamReader.ReadToEnd();
+					string text = new StreamReader(fileStream).ReadToEnd();
 					if (text.Length != 0)
 					{
 						SecurityElement securityElement = SecurityElement.FromString(text);
@@ -79,38 +107,53 @@ namespace Microsoft.Win32
 					string text2 = (string)attributes["type"];
 					if (text2 != null)
 					{
-						string text3 = text2;
-						switch (text3)
+						if (!(text2 == "int"))
 						{
-						case "int":
-							this.values[text] = int.Parse(se.Text);
-							break;
-						case "bytearray":
-							this.values[text] = Convert.FromBase64String(se.Text);
-							break;
-						case "string":
-							this.values[text] = se.Text;
-							break;
-						case "expand":
-							this.values[text] = new ExpandString(se.Text);
-							break;
-						case "qword":
-							this.values[text] = long.Parse(se.Text);
-							break;
-						case "string-array":
-						{
-							ArrayList arrayList = new ArrayList();
-							if (se.Children != null)
+							if (!(text2 == "bytearray"))
 							{
-								foreach (object obj in se.Children)
+								if (!(text2 == "string"))
 								{
-									SecurityElement securityElement = (SecurityElement)obj;
-									arrayList.Add(securityElement.Text);
+									if (!(text2 == "expand"))
+									{
+										if (!(text2 == "qword"))
+										{
+											if (text2 == "string-array")
+											{
+												List<string> list = new List<string>();
+												if (se.Children != null)
+												{
+													foreach (object obj in se.Children)
+													{
+														SecurityElement securityElement = (SecurityElement)obj;
+														list.Add(securityElement.Text);
+													}
+												}
+												this.values[text] = list.ToArray();
+											}
+										}
+										else
+										{
+											this.values[text] = long.Parse(se.Text);
+										}
+									}
+									else
+									{
+										this.values[text] = new ExpandString(se.Text);
+									}
+								}
+								else
+								{
+									this.values[text] = ((se.Text == null) ? string.Empty : se.Text);
 								}
 							}
-							this.values[text] = arrayList.ToArray(typeof(string));
-							break;
+							else
+							{
+								this.values[text] = Convert.FromBase64String(se.Text);
+							}
 						}
+						else
+						{
+							this.values[text] = int.Parse(se.Text);
 						}
 					}
 				}
@@ -122,6 +165,11 @@ namespace Microsoft.Win32
 
 		public RegistryKey Ensure(RegistryKey rkey, string extra, bool writable)
 		{
+			return this.Ensure(rkey, extra, writable, false);
+		}
+
+		public RegistryKey Ensure(RegistryKey rkey, string extra, bool writable, bool is_volatile)
+		{
 			Type typeFromHandle = typeof(KeyHandler);
 			RegistryKey registryKey2;
 			lock (typeFromHandle)
@@ -130,7 +178,7 @@ namespace Microsoft.Win32
 				KeyHandler keyHandler = (KeyHandler)KeyHandler.dir_to_handler[text];
 				if (keyHandler == null)
 				{
-					keyHandler = new KeyHandler(rkey, text);
+					keyHandler = new KeyHandler(rkey, text, is_volatile);
 				}
 				RegistryKey registryKey = new RegistryKey(keyHandler, KeyHandler.CombineName(rkey, extra), writable);
 				KeyHandler.key_to_handler[registryKey] = keyHandler;
@@ -154,7 +202,7 @@ namespace Microsoft.Win32
 					registryKey = new RegistryKey(keyHandler, KeyHandler.CombineName(rkey, extra), writable);
 					KeyHandler.key_to_handler[registryKey] = keyHandler;
 				}
-				else if (Directory.Exists(text))
+				else if (Directory.Exists(text) || KeyHandler.VolatileKeyExists(text))
 				{
 					keyHandler = new KeyHandler(rkey, text);
 					registryKey = new RegistryKey(keyHandler, KeyHandler.CombineName(rkey, extra), writable);
@@ -175,6 +223,135 @@ namespace Microsoft.Win32
 			return rkey.Name + "\\" + extra;
 		}
 
+		private static long GetSystemBootTime()
+		{
+			if (!File.Exists("/proc/stat"))
+			{
+				return -1L;
+			}
+			string text = null;
+			try
+			{
+				using (StreamReader streamReader = new StreamReader("/proc/stat", Encoding.ASCII))
+				{
+					string text2;
+					while ((text2 = streamReader.ReadLine()) != null)
+					{
+						if (text2.StartsWith("btime"))
+						{
+							text = text2;
+							break;
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.Error.WriteLine("While reading system info {0}", ex);
+			}
+			if (text == null)
+			{
+				return -1L;
+			}
+			int num = text.IndexOf(' ');
+			long num2;
+			if (!long.TryParse(text.Substring(num, text.Length - num), out num2))
+			{
+				return -1L;
+			}
+			return num2;
+		}
+
+		private static long GetRegisteredBootTime(string path)
+		{
+			if (!File.Exists(path))
+			{
+				return -1L;
+			}
+			string text = null;
+			try
+			{
+				using (StreamReader streamReader = new StreamReader(path, Encoding.ASCII))
+				{
+					text = streamReader.ReadLine();
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.Error.WriteLine("While reading registry data at {0}: {1}", path, ex);
+			}
+			if (text == null)
+			{
+				return -1L;
+			}
+			long num;
+			if (!long.TryParse(text, out num))
+			{
+				return -1L;
+			}
+			return num;
+		}
+
+		private static void SaveRegisteredBootTime(string path, long btime)
+		{
+			try
+			{
+				using (StreamWriter streamWriter = new StreamWriter(path, false, Encoding.ASCII))
+				{
+					streamWriter.WriteLine(btime.ToString());
+				}
+			}
+			catch (Exception)
+			{
+			}
+		}
+
+		private static void CleanVolatileKeys()
+		{
+			long systemBootTime = KeyHandler.GetSystemBootTime();
+			foreach (string text in new string[]
+			{
+				KeyHandler.UserStore,
+				KeyHandler.MachineStore
+			})
+			{
+				if (Directory.Exists(text))
+				{
+					string text2 = Path.Combine(text, "last-btime");
+					string text3 = Path.Combine(text, "volatile-keys");
+					if (Directory.Exists(text3))
+					{
+						long registeredBootTime = KeyHandler.GetRegisteredBootTime(text2);
+						if (systemBootTime < 0L || registeredBootTime < 0L || registeredBootTime != systemBootTime)
+						{
+							Directory.Delete(text3, true);
+						}
+					}
+					KeyHandler.SaveRegisteredBootTime(text2, systemBootTime);
+				}
+			}
+		}
+
+		public static bool VolatileKeyExists(string dir)
+		{
+			Type typeFromHandle = typeof(KeyHandler);
+			lock (typeFromHandle)
+			{
+				KeyHandler keyHandler = (KeyHandler)KeyHandler.dir_to_handler[dir];
+				if (keyHandler != null)
+				{
+					return keyHandler.IsVolatile;
+				}
+			}
+			return !Directory.Exists(dir) && Directory.Exists(KeyHandler.GetVolatileDir(dir));
+		}
+
+		public static string GetVolatileDir(string dir)
+		{
+			string rootFromDir = KeyHandler.GetRootFromDir(dir);
+			return dir.Replace(rootFromDir, Path.Combine(rootFromDir, "volatile-keys"));
+		}
+
 		public static KeyHandler Lookup(RegistryKey rkey, bool createNonExisting)
 		{
 			Type typeFromHandle = typeof(KeyHandler);
@@ -193,22 +370,21 @@ namespace Microsoft.Win32
 				else
 				{
 					RegistryHive hive = rkey.Hive;
-					RegistryHive registryHive = hive;
-					switch (registryHive + -2147483648)
+					switch (hive)
 					{
-					case (RegistryHive)0:
-					case (RegistryHive)2:
-					case (RegistryHive)3:
-					case (RegistryHive)4:
-					case (RegistryHive)5:
-					case (RegistryHive)6:
+					case RegistryHive.ClassesRoot:
+					case RegistryHive.LocalMachine:
+					case RegistryHive.Users:
+					case RegistryHive.PerformanceData:
+					case RegistryHive.CurrentConfig:
+					case RegistryHive.DynData:
 					{
 						string text = Path.Combine(KeyHandler.MachineStore, hive.ToString());
 						keyHandler = new KeyHandler(rkey, text);
 						KeyHandler.dir_to_handler[text] = keyHandler;
 						break;
 					}
-					case (RegistryHive)1:
+					case RegistryHive.CurrentUser:
 					{
 						string text2 = Path.Combine(KeyHandler.UserStore, hive.ToString());
 						keyHandler = new KeyHandler(rkey, text2);
@@ -223,6 +399,19 @@ namespace Microsoft.Win32
 				}
 			}
 			return keyHandler2;
+		}
+
+		private static string GetRootFromDir(string dir)
+		{
+			if (dir.IndexOf(KeyHandler.UserStore) > -1)
+			{
+				return KeyHandler.UserStore;
+			}
+			if (dir.IndexOf(KeyHandler.MachineStore) > -1)
+			{
+				return KeyHandler.MachineStore;
+			}
+			throw new Exception("Could not get root for dir " + dir);
 		}
 
 		public static void Drop(RegistryKey rkey)
@@ -276,6 +465,65 @@ namespace Microsoft.Win32
 			}
 		}
 
+		public static bool Delete(string dir)
+		{
+			if (!Directory.Exists(dir))
+			{
+				string volatileDir = KeyHandler.GetVolatileDir(dir);
+				if (!Directory.Exists(volatileDir))
+				{
+					return false;
+				}
+				dir = volatileDir;
+			}
+			Directory.Delete(dir, true);
+			KeyHandler.Drop(dir);
+			return true;
+		}
+
+		public RegistryValueKind GetValueKind(string name)
+		{
+			if (name == null)
+			{
+				return RegistryValueKind.Unknown;
+			}
+			Hashtable hashtable = this.values;
+			object obj;
+			lock (hashtable)
+			{
+				obj = this.values[name];
+			}
+			if (obj == null)
+			{
+				return RegistryValueKind.Unknown;
+			}
+			if (obj is int)
+			{
+				return RegistryValueKind.DWord;
+			}
+			if (obj is string[])
+			{
+				return RegistryValueKind.MultiString;
+			}
+			if (obj is long)
+			{
+				return RegistryValueKind.QWord;
+			}
+			if (obj is byte[])
+			{
+				return RegistryValueKind.Binary;
+			}
+			if (obj is string)
+			{
+				return RegistryValueKind.String;
+			}
+			if (obj is ExpandString)
+			{
+				return RegistryValueKind.ExpandString;
+			}
+			return RegistryValueKind.Unknown;
+		}
+
 		public object GetValue(string name, RegistryValueOptions options)
 		{
 			if (this.IsMarkedForDeletion)
@@ -286,7 +534,12 @@ namespace Microsoft.Win32
 			{
 				name = string.Empty;
 			}
-			object obj = this.values[name];
+			Hashtable hashtable = this.values;
+			object obj;
+			lock (hashtable)
+			{
+				obj = this.values[name];
+			}
 			ExpandString expandString = obj as ExpandString;
 			if (expandString == null)
 			{
@@ -306,13 +559,17 @@ namespace Microsoft.Win32
 			{
 				name = string.Empty;
 			}
-			if (value is int || value is string || value is byte[] || value is string[])
+			Hashtable hashtable = this.values;
+			lock (hashtable)
 			{
-				this.values[name] = value;
-			}
-			else
-			{
-				this.values[name] = value.ToString();
+				if (value is int || value is string || value is byte[] || value is string[])
+				{
+					this.values[name] = value;
+				}
+				else
+				{
+					this.values[name] = value.ToString();
+				}
 			}
 			this.SetDirty();
 		}
@@ -320,9 +577,53 @@ namespace Microsoft.Win32
 		public string[] GetValueNames()
 		{
 			this.AssertNotMarkedForDeletion();
-			ICollection keys = this.values.Keys;
-			string[] array = new string[keys.Count];
-			keys.CopyTo(array, 0);
+			Hashtable hashtable = this.values;
+			string[] array2;
+			lock (hashtable)
+			{
+				ICollection keys = this.values.Keys;
+				string[] array = new string[keys.Count];
+				keys.CopyTo(array, 0);
+				array2 = array;
+			}
+			return array2;
+		}
+
+		public int GetSubKeyCount()
+		{
+			return this.GetSubKeyNames().Length;
+		}
+
+		public string[] GetSubKeyNames()
+		{
+			DirectoryInfo[] directories = new DirectoryInfo(this.ActualDir).GetDirectories();
+			string[] array;
+			if (this.IsVolatile || !Directory.Exists(KeyHandler.GetVolatileDir(this.Dir)))
+			{
+				array = new string[directories.Length];
+				for (int i = 0; i < directories.Length; i++)
+				{
+					DirectoryInfo directoryInfo = directories[i];
+					array[i] = directoryInfo.Name;
+				}
+				return array;
+			}
+			DirectoryInfo[] directories2 = new DirectoryInfo(KeyHandler.GetVolatileDir(this.Dir)).GetDirectories();
+			Dictionary<string, string> dictionary = new Dictionary<string, string>();
+			foreach (DirectoryInfo directoryInfo2 in directories)
+			{
+				dictionary[directoryInfo2.Name] = directoryInfo2.Name;
+			}
+			foreach (DirectoryInfo directoryInfo3 in directories2)
+			{
+				dictionary[directoryInfo3.Name] = directoryInfo3.Name;
+			}
+			array = new string[dictionary.Count];
+			int num = 0;
+			foreach (KeyValuePair<string, string> keyValuePair in dictionary)
+			{
+				array[num++] = keyValuePair.Value;
+			}
 			return array;
 		}
 
@@ -333,63 +634,76 @@ namespace Microsoft.Win32
 			{
 				name = string.Empty;
 			}
-			switch (valueKind)
+			Hashtable hashtable = this.values;
+			lock (hashtable)
 			{
-			case RegistryValueKind.String:
-				if (value is string)
+				switch (valueKind)
 				{
-					this.values[name] = value;
-					return;
+				case RegistryValueKind.String:
+					if (value is string)
+					{
+						this.values[name] = value;
+						return;
+					}
+					goto IL_0116;
+				case RegistryValueKind.ExpandString:
+					if (value is string)
+					{
+						this.values[name] = new ExpandString((string)value);
+						return;
+					}
+					goto IL_0116;
+				case RegistryValueKind.Binary:
+					if (value is byte[])
+					{
+						this.values[name] = value;
+						return;
+					}
+					goto IL_0116;
+				case RegistryValueKind.DWord:
+					try
+					{
+						this.values[name] = Convert.ToInt32(value);
+						return;
+					}
+					catch (OverflowException)
+					{
+						goto IL_0122;
+					}
+					break;
+				case (RegistryValueKind)5:
+				case (RegistryValueKind)6:
+				case (RegistryValueKind)8:
+				case (RegistryValueKind)9:
+				case (RegistryValueKind)10:
+					goto IL_0106;
+				case RegistryValueKind.MultiString:
+					break;
+				case RegistryValueKind.QWord:
+					try
+					{
+						this.values[name] = Convert.ToInt64(value);
+						return;
+					}
+					catch (OverflowException)
+					{
+						goto IL_0122;
+					}
+					goto IL_0106;
+				default:
+					goto IL_0106;
 				}
-				goto IL_0186;
-			case RegistryValueKind.ExpandString:
-				if (value is string)
-				{
-					this.values[name] = new ExpandString((string)value);
-					return;
-				}
-				goto IL_0186;
-			case RegistryValueKind.Binary:
-				if (value is byte[])
-				{
-					this.values[name] = value;
-					return;
-				}
-				goto IL_0186;
-			case RegistryValueKind.DWord:
-				if (value is long && (long)value < 2147483647L && (long)value > -2147483648L)
-				{
-					this.values[name] = (int)((long)value);
-					return;
-				}
-				if (value is int)
-				{
-					this.values[name] = value;
-					return;
-				}
-				goto IL_0186;
-			case RegistryValueKind.MultiString:
 				if (value is string[])
 				{
 					this.values[name] = value;
 					return;
 				}
-				goto IL_0186;
-			case RegistryValueKind.QWord:
-				if (value is int)
-				{
-					this.values[name] = (long)((int)value);
-					return;
-				}
-				if (value is long)
-				{
-					this.values[name] = value;
-					return;
-				}
-				goto IL_0186;
+				goto IL_0116;
+				IL_0106:
+				throw new ArgumentException("unknown value", "valueKind");
+				IL_0116:;
 			}
-			throw new ArgumentException("unknown value", "valueKind");
-			IL_0186:
+			IL_0122:
 			throw new ArgumentException("Value could not be converted to specified type", "valueKind");
 		}
 
@@ -430,14 +744,26 @@ namespace Microsoft.Win32
 			{
 				name = string.Empty;
 			}
-			return this.values.Contains(name);
+			Hashtable hashtable = this.values;
+			bool flag2;
+			lock (hashtable)
+			{
+				flag2 = this.values.Contains(name);
+			}
+			return flag2;
 		}
 
 		public int ValueCount
 		{
 			get
 			{
-				return this.values.Keys.Count;
+				Hashtable hashtable = this.values;
+				int count;
+				lock (hashtable)
+				{
+					count = this.values.Keys.Count;
+				}
+				return count;
 			}
 		}
 
@@ -452,7 +778,11 @@ namespace Microsoft.Win32
 		public void RemoveValue(string name)
 		{
 			this.AssertNotMarkedForDeletion();
-			this.values.Remove(name);
+			Hashtable hashtable = this.values;
+			lock (hashtable)
+			{
+				this.values.Remove(name);
+			}
 			this.SetDirty();
 		}
 
@@ -467,54 +797,58 @@ namespace Microsoft.Win32
 			{
 				return;
 			}
-			if (!File.Exists(this.file) && this.values.Count == 0)
-			{
-				return;
-			}
 			SecurityElement securityElement = new SecurityElement("values");
-			foreach (object obj in this.values)
+			Hashtable hashtable = this.values;
+			lock (hashtable)
 			{
-				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-				object value = dictionaryEntry.Value;
-				SecurityElement securityElement2 = new SecurityElement("value");
-				securityElement2.AddAttribute("name", SecurityElement.Escape((string)dictionaryEntry.Key));
-				if (value is string)
+				if (!File.Exists(this.file) && this.values.Count == 0)
 				{
-					securityElement2.AddAttribute("type", "string");
-					securityElement2.Text = SecurityElement.Escape((string)value);
+					return;
 				}
-				else if (value is int)
+				foreach (object obj in this.values)
 				{
-					securityElement2.AddAttribute("type", "int");
-					securityElement2.Text = value.ToString();
-				}
-				else if (value is long)
-				{
-					securityElement2.AddAttribute("type", "qword");
-					securityElement2.Text = value.ToString();
-				}
-				else if (value is byte[])
-				{
-					securityElement2.AddAttribute("type", "bytearray");
-					securityElement2.Text = Convert.ToBase64String((byte[])value);
-				}
-				else if (value is ExpandString)
-				{
-					securityElement2.AddAttribute("type", "expand");
-					securityElement2.Text = SecurityElement.Escape(value.ToString());
-				}
-				else if (value is string[])
-				{
-					securityElement2.AddAttribute("type", "string-array");
-					foreach (string text in (string[])value)
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+					object value = dictionaryEntry.Value;
+					SecurityElement securityElement2 = new SecurityElement("value");
+					securityElement2.AddAttribute("name", SecurityElement.Escape((string)dictionaryEntry.Key));
+					if (value is string)
 					{
-						securityElement2.AddChild(new SecurityElement("string")
-						{
-							Text = SecurityElement.Escape(text)
-						});
+						securityElement2.AddAttribute("type", "string");
+						securityElement2.Text = SecurityElement.Escape((string)value);
 					}
+					else if (value is int)
+					{
+						securityElement2.AddAttribute("type", "int");
+						securityElement2.Text = value.ToString();
+					}
+					else if (value is long)
+					{
+						securityElement2.AddAttribute("type", "qword");
+						securityElement2.Text = value.ToString();
+					}
+					else if (value is byte[])
+					{
+						securityElement2.AddAttribute("type", "bytearray");
+						securityElement2.Text = Convert.ToBase64String((byte[])value);
+					}
+					else if (value is ExpandString)
+					{
+						securityElement2.AddAttribute("type", "expand");
+						securityElement2.Text = SecurityElement.Escape(value.ToString());
+					}
+					else if (value is string[])
+					{
+						securityElement2.AddAttribute("type", "string-array");
+						foreach (string text in (string[])value)
+						{
+							securityElement2.AddChild(new SecurityElement("string")
+							{
+								Text = SecurityElement.Escape(text)
+							});
+						}
+					}
+					securityElement.AddChild(securityElement2);
 				}
-				securityElement.AddChild(securityElement2);
 			}
 			using (FileStream fileStream = File.Create(this.file))
 			{
@@ -536,7 +870,11 @@ namespace Microsoft.Win32
 		{
 			get
 			{
-				return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ".mono/registry");
+				if (KeyHandler.user_store == null)
+				{
+					KeyHandler.user_store = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ".mono/registry");
+				}
+				return KeyHandler.user_store;
 			}
 		}
 
@@ -544,27 +882,40 @@ namespace Microsoft.Win32
 		{
 			get
 			{
-				string text = Environment.GetEnvironmentVariable("MONO_REGISTRY_PATH");
-				if (text != null)
+				if (KeyHandler.machine_store == null)
 				{
-					return text;
+					KeyHandler.machine_store = Environment.GetEnvironmentVariable("MONO_REGISTRY_PATH");
+					if (KeyHandler.machine_store == null)
+					{
+						string machineConfigPath = Environment.GetMachineConfigPath();
+						int num = machineConfigPath.IndexOf("machine.config");
+						KeyHandler.machine_store = Path.Combine(Path.Combine(machineConfigPath.Substring(0, num - 1), ".."), "registry");
+					}
 				}
-				text = Environment.GetMachineConfigPath();
-				int num = text.IndexOf("machine.config");
-				return Path.Combine(Path.Combine(text.Substring(0, num - 1), ".."), "registry");
+				return KeyHandler.machine_store;
 			}
 		}
 
-		private static Hashtable key_to_handler = new Hashtable();
+		private static Hashtable key_to_handler = new Hashtable(new RegistryKeyComparer());
 
 		private static Hashtable dir_to_handler = new Hashtable(new CaseInsensitiveHashCodeProvider(), new CaseInsensitiveComparer());
 
+		private const string VolatileDirectoryName = "volatile-keys";
+
 		public string Dir;
+
+		private string ActualDir;
+
+		public bool IsVolatile;
 
 		private Hashtable values;
 
 		private string file;
 
 		private bool dirty;
+
+		private static string user_store;
+
+		private static string machine_store;
 	}
 }

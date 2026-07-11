@@ -90,8 +90,7 @@ namespace System
 		{
 			get
 			{
-				short keyState = WindowsConsoleDriver.GetKeyState(20);
-				return (keyState & 1) == 1;
+				return (WindowsConsoleDriver.GetKeyState(20) & 1) == 1;
 			}
 		}
 
@@ -200,7 +199,7 @@ namespace System
 					{
 						return false;
 					}
-					if (inputRecord.EventType == 1 && inputRecord.KeyDown)
+					if (inputRecord.EventType == 1 && inputRecord.KeyDown && !WindowsConsoleDriver.IsModifierKey(inputRecord.VirtualKeyCode))
 					{
 						return true;
 					}
@@ -251,8 +250,7 @@ namespace System
 		{
 			get
 			{
-				short keyState = WindowsConsoleDriver.GetKeyState(144);
-				return (keyState & 1) == 1;
+				return (WindowsConsoleDriver.GetKeyState(144) & 1) == 1;
 			}
 		}
 
@@ -289,7 +287,7 @@ namespace System
 			get
 			{
 				int num;
-				if (!WindowsConsoleDriver.GetConsoleMode(this.outputHandle, out num))
+				if (!WindowsConsoleDriver.GetConsoleMode(this.inputHandle, out num))
 				{
 					throw new Exception("Failed in GetConsoleMode: " + Marshal.GetLastWin32Error());
 				}
@@ -298,12 +296,11 @@ namespace System
 			set
 			{
 				int num;
-				if (!WindowsConsoleDriver.GetConsoleMode(this.outputHandle, out num))
+				if (!WindowsConsoleDriver.GetConsoleMode(this.inputHandle, out num))
 				{
 					throw new Exception("Failed in GetConsoleMode: " + Marshal.GetLastWin32Error());
 				}
-				bool flag = (num & 1) == 0;
-				if (flag == value)
+				if ((num & 1) == 0 == value)
 				{
 					return;
 				}
@@ -313,9 +310,9 @@ namespace System
 				}
 				else
 				{
-					num++;
+					num |= 1;
 				}
-				if (!WindowsConsoleDriver.SetConsoleMode(this.outputHandle, num))
+				if (!WindowsConsoleDriver.SetConsoleMode(this.inputHandle, num))
 				{
 					throw new Exception("Failed in SetConsoleMode: " + Marshal.GetLastWin32Error());
 				}
@@ -416,9 +413,10 @@ namespace System
 			Coord coord = new Coord(sourceWidth, sourceHeight);
 			Coord coord2 = new Coord(0, 0);
 			SmallRect smallRect = new SmallRect(sourceLeft, sourceTop, sourceLeft + sourceWidth - 1, sourceTop + sourceHeight - 1);
-			fixed (void* ptr = (void*)(&array[0]))
+			fixed (CharInfo* ptr = &array[0])
 			{
-				if (!WindowsConsoleDriver.ReadConsoleOutput(this.outputHandle, ptr, coord, coord2, ref smallRect))
+				void* ptr2 = (void*)ptr;
+				if (!WindowsConsoleDriver.ReadConsoleOutput(this.outputHandle, ptr2, coord, coord2, ref smallRect))
 				{
 					throw new ArgumentException(string.Empty, "Cannot read from the specified coordinates.");
 				}
@@ -454,8 +452,7 @@ namespace System
 			do
 			{
 				ConsoleKeyInfo consoleKeyInfo = this.ReadKey(false);
-				char keyChar = consoleKeyInfo.KeyChar;
-				flag = keyChar == '\n';
+				flag = consoleKeyInfo.KeyChar == '\n';
 				if (!flag)
 				{
 					stringBuilder.Append(consoleKeyInfo.KeyChar);
@@ -471,7 +468,7 @@ namespace System
 			int num;
 			while (WindowsConsoleDriver.ReadConsoleInput(this.inputHandle, out inputRecord, 1, out num))
 			{
-				if (inputRecord.EventType == 1 || inputRecord.KeyDown)
+				if (inputRecord.KeyDown && inputRecord.EventType == 1 && !WindowsConsoleDriver.IsModifierKey(inputRecord.VirtualKeyCode))
 				{
 					bool flag = (inputRecord.ControlKeyState & 3) != 0;
 					bool flag2 = (inputRecord.ControlKeyState & 12) != 0;
@@ -536,6 +533,11 @@ namespace System
 			{
 				throw new ArgumentOutOfRangeException("left/top", "Windows error " + Marshal.GetLastWin32Error());
 			}
+		}
+
+		private static bool IsModifierKey(short virtualKeyCode)
+		{
+			return virtualKeyCode - 16 <= 2 || virtualKeyCode == 20 || virtualKeyCode - 144 <= 1;
 		}
 
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]

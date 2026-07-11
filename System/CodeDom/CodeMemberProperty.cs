@@ -1,22 +1,39 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeMemberProperty : CodeTypeMember
 	{
-		public CodeStatementCollection GetStatements
+		public CodeTypeReference PrivateImplementationType { get; set; }
+
+		public CodeTypeReferenceCollection ImplementationTypes
 		{
 			get
 			{
-				if (this.getStatements == null)
+				CodeTypeReferenceCollection codeTypeReferenceCollection;
+				if ((codeTypeReferenceCollection = this._implementationTypes) == null)
 				{
-					this.getStatements = new CodeStatementCollection();
+					codeTypeReferenceCollection = (this._implementationTypes = new CodeTypeReferenceCollection());
 				}
-				return this.getStatements;
+				return codeTypeReferenceCollection;
+			}
+		}
+
+		public CodeTypeReference Type
+		{
+			get
+			{
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._type) == null)
+				{
+					codeTypeReference = (this._type = new CodeTypeReference(""));
+				}
+				return codeTypeReference;
+			}
+			set
+			{
+				this._type = value;
 			}
 		}
 
@@ -24,14 +41,14 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return this.hasGet || (this.getStatements != null && this.getStatements.Count > 0);
+				return this._hasGet || this.GetStatements.Count > 0;
 			}
 			set
 			{
-				this.hasGet = value;
-				if (!this.hasGet && this.getStatements != null)
+				this._hasGet = value;
+				if (!value)
 				{
-					this.getStatements.Clear();
+					this.GetStatements.Clear();
 				}
 			}
 		}
@@ -40,101 +57,30 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return this.hasSet || (this.setStatements != null && this.setStatements.Count > 0);
+				return this._hasSet || this.SetStatements.Count > 0;
 			}
 			set
 			{
-				this.hasSet = value;
-				if (!this.hasSet && this.setStatements != null)
+				this._hasSet = value;
+				if (!value)
 				{
-					this.setStatements.Clear();
+					this.SetStatements.Clear();
 				}
 			}
 		}
 
-		public CodeTypeReferenceCollection ImplementationTypes
-		{
-			get
-			{
-				if (this.implementationTypes == null)
-				{
-					this.implementationTypes = new CodeTypeReferenceCollection();
-				}
-				return this.implementationTypes;
-			}
-		}
+		public CodeStatementCollection GetStatements { get; } = new CodeStatementCollection();
 
-		public CodeParameterDeclarationExpressionCollection Parameters
-		{
-			get
-			{
-				if (this.parameters == null)
-				{
-					this.parameters = new CodeParameterDeclarationExpressionCollection();
-				}
-				return this.parameters;
-			}
-		}
+		public CodeStatementCollection SetStatements { get; } = new CodeStatementCollection();
 
-		public CodeTypeReference PrivateImplementationType
-		{
-			get
-			{
-				return this.privateImplementationType;
-			}
-			set
-			{
-				this.privateImplementationType = value;
-			}
-		}
+		public CodeParameterDeclarationExpressionCollection Parameters { get; } = new CodeParameterDeclarationExpressionCollection();
 
-		public CodeStatementCollection SetStatements
-		{
-			get
-			{
-				if (this.setStatements == null)
-				{
-					this.setStatements = new CodeStatementCollection();
-				}
-				return this.setStatements;
-			}
-		}
+		private CodeTypeReference _type;
 
-		public CodeTypeReference Type
-		{
-			get
-			{
-				if (this.type == null)
-				{
-					this.type = new CodeTypeReference(string.Empty);
-				}
-				return this.type;
-			}
-			set
-			{
-				this.type = value;
-			}
-		}
+		private bool _hasGet;
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
+		private bool _hasSet;
 
-		private CodeStatementCollection getStatements;
-
-		private bool hasGet;
-
-		private bool hasSet;
-
-		private CodeTypeReferenceCollection implementationTypes;
-
-		private CodeParameterDeclarationExpressionCollection parameters;
-
-		private CodeTypeReference privateImplementationType;
-
-		private CodeStatementCollection setStatements;
-
-		private CodeTypeReference type;
+		private CodeTypeReferenceCollection _implementationTypes;
 	}
 }

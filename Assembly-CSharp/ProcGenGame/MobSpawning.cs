@@ -12,6 +12,7 @@ namespace ProcGenGame
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
 			Node node = tc.node;
+			HashSet<int> alreadyOccupiedCells = new HashSet<int>();
 			List<Tag> list = new List<Tag>();
 			bool flag = false;
 			int num = 0;
@@ -66,7 +67,7 @@ namespace ProcGenGame
 					else
 					{
 						Mob mob = WorldGen.Settings.mobs.MobLookupTable[list[j].Name];
-						List<int> list2 = availableSpawnCells.FindAll((int cell) => MobSpawning.isSuitableMobSpawnPoint(cell, mob, cells, bgTemp, dc));
+						List<int> list2 = availableSpawnCells.FindAll((int cell) => MobSpawning.isSuitableMobSpawnPoint(cell, mob, cells, bgTemp, dc, ref alreadyOccupiedCells));
 						if (list2.Count == 0)
 						{
 							if (WorldGen.isRunningDebugGen)
@@ -107,8 +108,22 @@ namespace ProcGenGame
 							while (num6 < num5 && list2.Count != 0)
 							{
 								int num7 = list2[0];
-								list2.Remove(num7);
-								availableSpawnCells.Remove(num7);
+								for (int k = 0; k < mob.width; k++)
+								{
+									for (int l = 0; l < mob.height; l++)
+									{
+										int num8 = MobSpawning.MobWidthOffset(num7, k);
+										alreadyOccupiedCells.Add(num8);
+										if (list2.Contains(num8))
+										{
+											list2.Remove(num8);
+										}
+										if (availableSpawnCells.Contains(num8))
+										{
+											availableSpawnCells.Remove(num8);
+										}
+									}
+								}
 								tc.AddMob(new KeyValuePair<int, Tag>(num7, tag2));
 								dictionary.Add(num7, tag2.Name);
 								num6++;
@@ -121,11 +136,27 @@ namespace ProcGenGame
 			return dictionary;
 		}
 
-		private static bool isSuitableMobSpawnPoint(int cell, Mob mob, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc)
+		public static int MobWidthOffset(int occupiedCell, int widthIterator)
 		{
-			if (!Grid.IsValidCell(cell) || !Grid.IsValidCell(Grid.CellAbove(cell)) || !Grid.IsValidCell(Grid.CellBelow(cell)))
+			return Grid.OffsetCell(occupiedCell, (widthIterator % 2 != 0) ? (widthIterator / 2 + widthIterator % 2) : (-(widthIterator / 2)), 0);
+		}
+
+		private static bool isSuitableMobSpawnPoint(int cell, Mob mob, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, ref HashSet<int> alreadyOccupiedCells)
+		{
+			for (int i = 0; i < mob.width; i++)
 			{
-				return false;
+				for (int j = 0; j < mob.height; j++)
+				{
+					int num = MobSpawning.MobWidthOffset(cell, i);
+					if (!Grid.IsValidCell(num) || !Grid.IsValidCell(Grid.CellAbove(num)) || !Grid.IsValidCell(Grid.CellBelow(num)))
+					{
+						return false;
+					}
+					if (alreadyOccupiedCells.Contains(num))
+					{
+						return false;
+					}
+				}
 			}
 			switch (mob.location)
 			{
@@ -139,6 +170,17 @@ namespace ProcGenGame
 				return !MobSpawning.isNaturalCavity(cell) && Grid.Solid[cell];
 			case Mob.Location.Water:
 				return (Grid.Element[cell].id == SimHashes.Water || Grid.Element[cell].id == SimHashes.DirtyWater) && (Grid.Element[Grid.CellAbove(cell)].id == SimHashes.Water || Grid.Element[Grid.CellAbove(cell)].id == SimHashes.DirtyWater);
+			case Mob.Location.Surface:
+			{
+				bool flag = true;
+				for (int k = 0; k < mob.width; k++)
+				{
+					int num2 = MobSpawning.MobWidthOffset(cell, k);
+					flag = flag && Grid.Element[num2].id == SimHashes.Vacuum;
+					flag = flag && Grid.Solid[Grid.CellBelow(num2)];
+				}
+				return flag;
+			}
 			}
 			return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell];
 		}

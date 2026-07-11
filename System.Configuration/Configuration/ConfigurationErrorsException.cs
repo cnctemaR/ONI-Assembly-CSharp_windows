@@ -128,7 +128,11 @@ namespace System.Configuration
 			{
 				return ((IConfigErrorInfo)reader).Filename;
 			}
-			return (reader == null) ? null : reader.BaseURI;
+			if (reader == null)
+			{
+				return null;
+			}
+			return reader.BaseURI;
 		}
 
 		public static int GetLineNumber(XmlReader reader)
@@ -138,7 +142,11 @@ namespace System.Configuration
 				return ((IConfigErrorInfo)reader).LineNumber;
 			}
 			IXmlLineInfo xmlLineInfo = reader as IXmlLineInfo;
-			return (xmlLineInfo == null) ? 0 : xmlLineInfo.LineNumber;
+			if (xmlLineInfo == null)
+			{
+				return 0;
+			}
+			return xmlLineInfo.LineNumber;
 		}
 
 		public static string GetFilename(XmlNode node)

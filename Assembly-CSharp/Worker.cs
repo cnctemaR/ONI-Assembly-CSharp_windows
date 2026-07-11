@@ -43,6 +43,14 @@ public class Worker : KMonoBehaviour
 		}
 		if (this.workable != null)
 		{
+			if (this.workable.triggerWorkReactions && this.workable.GetWorkTime() > 30f)
+			{
+				string conversationTopic = this.workable.GetConversationTopic();
+				if (!string.IsNullOrWhiteSpace(conversationTopic))
+				{
+					this.CreateCompletionReactable(conversationTopic);
+				}
+			}
 			this.DetachAnimOverrides();
 			this.workable.CompleteWork(this);
 		}
@@ -55,19 +63,19 @@ public class Worker : KMonoBehaviour
 		{
 			return base.GetComponent<KAnimControllerBase>().IsStopped() || Time.time - this.workCompleteTime > 2f;
 		}
-		if (this.facing)
-		{
-			if (this.workable.ShouldFaceTargetWhenWorking())
-			{
-				this.facing.Face(this.workable.transform.GetPosition());
-			}
-			else
-			{
-				this.facing.Face(this.facing.transform.GetPosition() + Vector3.right);
-			}
-		}
 		if (this.workable != null)
 		{
+			if (this.facing)
+			{
+				if (this.workable.ShouldFaceTargetWhenWorking())
+				{
+					this.facing.Face(this.workable.GetFacingTarget());
+				}
+				else
+				{
+					this.facing.Face(this.facing.transform.GetPosition() + Vector3.right);
+				}
+			}
 			Klei.AI.Attribute workAttribute = this.workable.GetWorkAttribute();
 			if (workAttribute != null && workAttribute.IsTrainable)
 			{
@@ -113,6 +121,7 @@ public class Worker : KMonoBehaviour
 		this.workAnimOffset = Vector3.zero;
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.PreventChoreInterruption);
 		this.DetachAnimOverrides();
+		this.ClearPasserbyReactable();
 		AnimEventHandler component2 = base.GetComponent<AnimEventHandler>();
 		if (component2)
 		{
@@ -204,6 +213,7 @@ public class Worker : KMonoBehaviour
 					this.AttachOverrideAnims(component);
 				}
 				HashedString[] workAnims = this.workable.GetWorkAnims(this);
+				KAnim.PlayMode workAnimPlayMode = this.workable.GetWorkAnimPlayMode();
 				Vector3 workOffset = this.workable.GetWorkOffset();
 				this.workAnimOffset = workOffset;
 				component.Offset += workOffset;
@@ -221,7 +231,7 @@ public class Worker : KMonoBehaviour
 							}
 						}
 					}
-					component.Play(workAnims, KAnim.PlayMode.Loop);
+					component.Play(workAnims, workAnimPlayMode);
 				}
 			}
 			this.workable.StartWork(this);
@@ -232,6 +242,10 @@ public class Worker : KMonoBehaviour
 			else
 			{
 				this.onWorkChoreDisabledHandle = this.workable.Subscribe(2108245096, new Action<object>(this.OnWorkChoreDisabled));
+				if (this.workable.triggerWorkReactions && this.workable.WorkTimeRemaining > 10f)
+				{
+					this.CreatePasserbyReactable();
+				}
 				KSelectable component3 = base.GetComponent<KSelectable>();
 				this.previousStatusItem = component3.GetStatusItem(Db.Get().StatusItemCategories.Main);
 				component3.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
@@ -274,6 +288,78 @@ public class Worker : KMonoBehaviour
 		}
 	}
 
+	private void CreateCompletionReactable(string topic)
+	{
+		if (GameClock.Instance.GetTime() / 600f < 1f)
+		{
+			return;
+		}
+		EmoteReactable emoteReactable = OneshotReactableLocator.CreateOneshotReactable(base.gameObject, 3f, "WorkCompleteAcknowledgement", Db.Get().ChoreTypes.Emote, "anim_clapcheer_kanim", 9, 5);
+		emoteReactable.AddStep(new EmoteReactable.EmoteStep
+		{
+			anim = "clapcheer_pre",
+			startcb = new Action<GameObject>(this.GetReactionEffect)
+		}).AddStep(new EmoteReactable.EmoteStep
+		{
+			anim = "clapcheer_loop"
+		}).AddStep(new EmoteReactable.EmoteStep
+		{
+			anim = "clapcheer_pst"
+		})
+			.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
+		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
+		if (uisprite != null)
+		{
+			Thought thought = new Thought("Completion_" + topic, null, uisprite.first, "mode_satisfaction", "conversation_short", "bubble_conversation", SpeechMonitor.PREFIX_HAPPY, string.Empty, true, 4f);
+			emoteReactable.AddThought(thought);
+		}
+	}
+
+	private void CreatePasserbyReactable()
+	{
+		if (GameClock.Instance.GetTime() / 600f < 1f)
+		{
+			return;
+		}
+		if (this.passerbyReactable == null)
+		{
+			this.passerbyReactable = new EmoteReactable(base.gameObject, "WorkPasserbyAcknowledgement", Db.Get().ChoreTypes.Emote, "anim_react_thumbsup_kanim", 5, 5, 30f, 720f * TuningData<DupeGreetingManager.Tuning>.Get().greetingDelayMultiplier, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+			{
+				anim = "react",
+				startcb = new Action<GameObject>(this.GetReactionEffect)
+			}).AddThought(Db.Get().Thoughts.Encourage).AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor))
+				.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsFacingMe));
+		}
+	}
+
+	private void GetReactionEffect(GameObject reactor)
+	{
+		Effects component = base.GetComponent<Effects>();
+		component.Add("WorkEncouraged", true);
+	}
+
+	private bool ReactorIsOnFloor(GameObject reactor, Navigator.ActiveTransition transition)
+	{
+		return transition.end == NavType.Floor;
+	}
+
+	private bool ReactorIsFacingMe(GameObject reactor, Navigator.ActiveTransition transition)
+	{
+		Facing component = reactor.GetComponent<Facing>();
+		return base.transform.GetPosition().x < reactor.transform.GetPosition().x == component.GetFacing();
+	}
+
+	private void ClearPasserbyReactable()
+	{
+		if (this.passerbyReactable != null)
+		{
+			this.passerbyReactable.Cleanup();
+			this.passerbyReactable = null;
+		}
+	}
+
+	private const float EARLIEST_REACT_TIME = 1f;
+
 	[MyCmpGet]
 	private Facing facing;
 
@@ -297,6 +383,8 @@ public class Worker : KMonoBehaviour
 	private Vector3 workAnimOffset = Vector3.zero;
 
 	public bool usesMultiTool = true;
+
+	private Reactable passerbyReactable;
 
 	public enum State
 	{

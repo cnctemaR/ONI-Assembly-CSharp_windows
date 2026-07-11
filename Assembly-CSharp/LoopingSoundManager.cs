@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
@@ -8,6 +7,11 @@ using UnityEngine;
 
 public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 {
+	public static void DestroyInstance()
+	{
+		LoopingSoundManager.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		LoopingSoundManager.instance = this;
@@ -24,27 +28,26 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 
 	private void CollectParameterUpdaters()
 	{
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		foreach (Type type in App.GetCurrentDomainTypes())
 		{
-			foreach (Type type in assembly.GetTypes())
+			if (!type.IsAbstract)
 			{
-				if (!type.IsAbstract)
+				bool flag = false;
+				Type type2 = type.BaseType;
+				while (type2 != null)
 				{
-					bool flag = false;
-					for (Type type2 = type.BaseType; type2 != null; type2 = type2.BaseType)
+					if (type2 == typeof(LoopingSoundParameterUpdater))
 					{
-						if (type2 == typeof(LoopingSoundParameterUpdater))
-						{
-							flag = true;
-							break;
-						}
+						flag = true;
+						break;
 					}
-					if (flag)
-					{
-						LoopingSoundParameterUpdater loopingSoundParameterUpdater = (LoopingSoundParameterUpdater)Activator.CreateInstance(type);
-						DebugUtil.Assert(!this.parameterUpdaters.ContainsKey(loopingSoundParameterUpdater.parameter), "Assert!");
-						this.parameterUpdaters[loopingSoundParameterUpdater.parameter] = loopingSoundParameterUpdater;
-					}
+					type2 = type2.BaseType;
+				}
+				if (flag)
+				{
+					LoopingSoundParameterUpdater loopingSoundParameterUpdater = (LoopingSoundParameterUpdater)Activator.CreateInstance(type);
+					DebugUtil.Assert(!this.parameterUpdaters.ContainsKey(loopingSoundParameterUpdater.parameter), "Assert!");
+					this.parameterUpdaters[loopingSoundParameterUpdater.parameter] = loopingSoundParameterUpdater;
 				}
 			}
 		}
@@ -245,6 +248,10 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 
 	public static void StopSound(HandleVector<int>.Handle handle)
 	{
+		if (LoopingSoundManager.Get() == null)
+		{
+			return;
+		}
 		LoopingSoundManager.Sound data = LoopingSoundManager.Get().sounds.GetData(handle);
 		if (data.IsPlaying)
 		{

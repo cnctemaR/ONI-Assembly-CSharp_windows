@@ -4,15 +4,15 @@ namespace System.Net
 {
 	public class IPHostEntry
 	{
-		public IPAddress[] AddressList
+		public string HostName
 		{
 			get
 			{
-				return this.addressList;
+				return this.hostName;
 			}
 			set
 			{
-				this.addressList = value;
+				this.hostName = value;
 			}
 		}
 
@@ -28,22 +28,24 @@ namespace System.Net
 			}
 		}
 
-		public string HostName
+		public IPAddress[] AddressList
 		{
 			get
 			{
-				return this.hostName;
+				return this.addressList;
 			}
 			set
 			{
-				this.hostName = value;
+				this.addressList = value;
 			}
 		}
 
-		private IPAddress[] addressList;
+		private string hostName;
 
 		private string[] aliases;
 
-		private string hostName;
+		private IPAddress[] addressList;
+
+		internal bool isTrustedHost = true;
 	}
 }

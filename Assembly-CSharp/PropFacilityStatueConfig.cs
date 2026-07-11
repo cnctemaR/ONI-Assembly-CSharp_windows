@@ -7,9 +7,9 @@ public class PropFacilityStatueConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityStatue", SETITEMS.FACILITY_CENTERPEICE.NAME, SETITEMS.FACILITY_CENTERPEICE.DESC, 50f, Assets.GetAnim("gravitas_statue_kanim"), "off", Grid.SceneLayer.Building, 5, 9, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityStatue", global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYSTATUE.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYSTATUE.DESC, 50f, Assets.GetAnim("gravitas_statue_kanim"), "off", Grid.SceneLayer.Building, 5, 9, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Granite);
 		component.Temperature = 294.15f;
 		return gameObject;
 	}

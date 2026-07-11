@@ -21,7 +21,6 @@ public class SwitchConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		SoundEventVolumeCache.instance.AddVolume("switchpower_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);

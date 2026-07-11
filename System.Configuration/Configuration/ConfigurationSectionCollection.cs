@@ -48,7 +48,11 @@ namespace System.Configuration
 					{
 						return null;
 					}
-					base.BaseSet(name, configurationSection);
+					object obj = ConfigurationSectionCollection.lockObject;
+					lock (obj)
+					{
+						base.BaseSet(name, configurationSection);
+					}
 				}
 				return configurationSection;
 			}
@@ -101,9 +105,11 @@ namespace System.Configuration
 		{
 			foreach (object obj in this.group.Sections.AllKeys)
 			{
-				string key = (string)obj;
-				yield return this[key];
+				string text = (string)obj;
+				yield return this[text];
 			}
+			IEnumerator enumerator = null;
+			yield break;
 			yield break;
 		}
 
@@ -136,5 +142,7 @@ namespace System.Configuration
 		private SectionGroupInfo group;
 
 		private Configuration config;
+
+		private static readonly object lockObject = new object();
 	}
 }

@@ -3,35 +3,24 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class AssemblyFlagsAttribute : Attribute
 	{
-		[Obsolete("")]
+		[Obsolete("This constructor has been deprecated. Please use AssemblyFlagsAttribute(AssemblyNameFlags) instead. http://go.microsoft.com/fwlink/?linkid=14202")]
 		[CLSCompliant(false)]
 		public AssemblyFlagsAttribute(uint flags)
 		{
-			this.flags = flags;
+			this.m_flags = (AssemblyNameFlags)flags;
 		}
 
-		[Obsolete("")]
-		public AssemblyFlagsAttribute(int assemblyFlags)
-		{
-			this.flags = (uint)assemblyFlags;
-		}
-
-		public AssemblyFlagsAttribute(AssemblyNameFlags assemblyFlags)
-		{
-			this.flags = (uint)assemblyFlags;
-		}
-
+		[Obsolete("This property has been deprecated. Please use AssemblyFlags instead. http://go.microsoft.com/fwlink/?linkid=14202")]
 		[CLSCompliant(false)]
-		[Obsolete("")]
 		public uint Flags
 		{
 			get
 			{
-				return this.flags;
+				return (uint)this.m_flags;
 			}
 		}
 
@@ -39,10 +28,21 @@ namespace System.Reflection
 		{
 			get
 			{
-				return (int)this.flags;
+				return (int)this.m_flags;
 			}
 		}
 
-		private uint flags;
+		[Obsolete("This constructor has been deprecated. Please use AssemblyFlagsAttribute(AssemblyNameFlags) instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+		public AssemblyFlagsAttribute(int assemblyFlags)
+		{
+			this.m_flags = (AssemblyNameFlags)assemblyFlags;
+		}
+
+		public AssemblyFlagsAttribute(AssemblyNameFlags assemblyFlags)
+		{
+			this.m_flags = assemblyFlags;
+		}
+
+		private AssemblyNameFlags m_flags;
 	}
 }

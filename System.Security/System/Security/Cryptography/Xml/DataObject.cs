@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -8,7 +7,8 @@ namespace System.Security.Cryptography.Xml
 	{
 		public DataObject()
 		{
-			this.Build(null, null, null, null);
+			this._cachedXml = null;
+			this._elData = new CanonicalXmlNodeList();
 		}
 
 		public DataObject(string id, string mimeType, string encoding, XmlElement data)
@@ -17,82 +17,24 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("data");
 			}
-			this.Build(id, mimeType, encoding, data);
-		}
-
-		private void Build(string id, string mimeType, string encoding, XmlElement data)
-		{
-			XmlDocument xmlDocument = new XmlDocument();
-			XmlElement xmlElement = xmlDocument.CreateElement("Object", "http://www.w3.org/2000/09/xmldsig#");
-			if (id != null)
-			{
-				xmlElement.SetAttribute("Id", id);
-			}
-			if (mimeType != null)
-			{
-				xmlElement.SetAttribute("MimeType", mimeType);
-			}
-			if (encoding != null)
-			{
-				xmlElement.SetAttribute("Encoding", encoding);
-			}
-			if (data != null)
-			{
-				XmlNode xmlNode = xmlDocument.ImportNode(data, true);
-				xmlElement.AppendChild(xmlNode);
-			}
-			this.element = xmlElement;
-		}
-
-		public XmlNodeList Data
-		{
-			get
-			{
-				return this.element.ChildNodes;
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				XmlDocument xmlDocument = new XmlDocument();
-				XmlElement xmlElement = (XmlElement)xmlDocument.ImportNode(this.element, true);
-				while (xmlElement.LastChild != null)
-				{
-					xmlElement.RemoveChild(xmlElement.LastChild);
-				}
-				foreach (object obj in value)
-				{
-					XmlNode xmlNode = (XmlNode)obj;
-					xmlElement.AppendChild(xmlDocument.ImportNode(xmlNode, true));
-				}
-				this.element = xmlElement;
-				this.propertyModified = true;
-			}
-		}
-
-		public string Encoding
-		{
-			get
-			{
-				return this.GetField("Encoding");
-			}
-			set
-			{
-				this.SetField("Encoding", value);
-			}
+			this._id = id;
+			this._mimeType = mimeType;
+			this._encoding = encoding;
+			this._elData = new CanonicalXmlNodeList();
+			this._elData.Add(data);
+			this._cachedXml = null;
 		}
 
 		public string Id
 		{
 			get
 			{
-				return this.GetField("Id");
+				return this._id;
 			}
 			set
 			{
-				this.SetField("Id", value);
+				this._id = value;
+				this._cachedXml = null;
 			}
 		}
 
@@ -100,79 +42,94 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this.GetField("MimeType");
+				return this._mimeType;
 			}
 			set
 			{
-				this.SetField("MimeType", value);
+				this._mimeType = value;
+				this._cachedXml = null;
 			}
 		}
 
-		private string GetField(string attribute)
+		public string Encoding
 		{
-			XmlNode xmlNode = this.element.Attributes[attribute];
-			return (xmlNode == null) ? null : xmlNode.Value;
+			get
+			{
+				return this._encoding;
+			}
+			set
+			{
+				this._encoding = value;
+				this._cachedXml = null;
+			}
 		}
 
-		private void SetField(string attribute, string value)
+		public XmlNodeList Data
 		{
-			if (value == null)
+			get
 			{
-				return;
+				return this._elData;
 			}
-			if (this.propertyModified)
+			set
 			{
-				this.element.SetAttribute(attribute, value);
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				this._elData = new CanonicalXmlNodeList();
+				foreach (object obj in value)
+				{
+					XmlNode xmlNode = (XmlNode)obj;
+					this._elData.Add(xmlNode);
+				}
+				this._cachedXml = null;
 			}
-			else
+		}
+
+		private bool CacheValid
+		{
+			get
 			{
-				XmlDocument xmlDocument = new XmlDocument();
-				XmlElement xmlElement = xmlDocument.ImportNode(this.element, true) as XmlElement;
-				xmlElement.SetAttribute(attribute, value);
-				this.element = xmlElement;
-				this.propertyModified = true;
+				return this._cachedXml != null;
 			}
 		}
 
 		public XmlElement GetXml()
 		{
-			if (this.propertyModified)
+			if (this.CacheValid)
 			{
-				XmlElement xmlElement = this.element;
-				XmlDocument xmlDocument = new XmlDocument();
-				this.element = xmlDocument.CreateElement("Object", "http://www.w3.org/2000/09/xmldsig#");
-				foreach (object obj in xmlElement.Attributes)
+				return this._cachedXml;
+			}
+			return this.GetXml(new XmlDocument
+			{
+				PreserveWhitespace = true
+			});
+		}
+
+		internal XmlElement GetXml(XmlDocument document)
+		{
+			XmlElement xmlElement = document.CreateElement("Object", "http://www.w3.org/2000/09/xmldsig#");
+			if (!string.IsNullOrEmpty(this._id))
+			{
+				xmlElement.SetAttribute("Id", this._id);
+			}
+			if (!string.IsNullOrEmpty(this._mimeType))
+			{
+				xmlElement.SetAttribute("MimeType", this._mimeType);
+			}
+			if (!string.IsNullOrEmpty(this._encoding))
+			{
+				xmlElement.SetAttribute("Encoding", this._encoding);
+			}
+			if (this._elData != null)
+			{
+				foreach (object obj in this._elData)
 				{
-					XmlAttribute xmlAttribute = (XmlAttribute)obj;
-					string name = xmlAttribute.Name;
-					if (name != null)
-					{
-						if (DataObject.<>f__switch$map4 == null)
-						{
-							DataObject.<>f__switch$map4 = new Dictionary<string, int>(3)
-							{
-								{ "Id", 0 },
-								{ "Encoding", 0 },
-								{ "MimeType", 0 }
-							};
-						}
-						int num;
-						if (DataObject.<>f__switch$map4.TryGetValue(name, out num))
-						{
-							if (num == 0)
-							{
-								this.element.SetAttribute(xmlAttribute.Name, xmlAttribute.Value);
-							}
-						}
-					}
-				}
-				foreach (object obj2 in xmlElement.ChildNodes)
-				{
-					XmlNode xmlNode = (XmlNode)obj2;
-					this.element.AppendChild(xmlDocument.ImportNode(xmlNode, true));
+					XmlNode xmlNode = (XmlNode)obj;
+					xmlElement.AppendChild(document.ImportNode(xmlNode, true));
 				}
 			}
-			return this.element;
+			return xmlElement;
 		}
 
 		public void LoadXml(XmlElement value)
@@ -181,12 +138,25 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("value");
 			}
-			this.element = value;
-			this.propertyModified = false;
+			this._id = Utils.GetAttribute(value, "Id", "http://www.w3.org/2000/09/xmldsig#");
+			this._mimeType = Utils.GetAttribute(value, "MimeType", "http://www.w3.org/2000/09/xmldsig#");
+			this._encoding = Utils.GetAttribute(value, "Encoding", "http://www.w3.org/2000/09/xmldsig#");
+			foreach (object obj in value.ChildNodes)
+			{
+				XmlNode xmlNode = (XmlNode)obj;
+				this._elData.Add(xmlNode);
+			}
+			this._cachedXml = value;
 		}
 
-		private XmlElement element;
+		private string _id;
 
-		private bool propertyModified;
+		private string _mimeType;
+
+		private string _encoding;
+
+		private CanonicalXmlNodeList _elData;
+
+		private XmlElement _cachedXml;
 	}
 }

@@ -38,6 +38,11 @@ public class ReportManager : KMonoBehaviour
 		}
 	}
 
+	public static void DestroyInstance()
+	{
+		ReportManager.Instance = null;
+	}
+
 	public static ReportManager Instance { get; private set; }
 
 	public ReportManager.DailyReport TodaysReport
@@ -556,7 +561,7 @@ public class ReportManager : KMonoBehaviour
 			private List<ReportManager.NoteStorage.NoteEntries.NoteStorageBlock> storageBlocks = new List<ReportManager.NoteStorage.NoteEntries.NoteStorageBlock>();
 
 			[StructLayout(LayoutKind.Explicit)]
-			private struct NoteEntry
+			public struct NoteEntry
 			{
 				public NoteEntry(int report_entry_id, int note_hash, float value)
 				{
@@ -580,11 +585,51 @@ public class ReportManager : KMonoBehaviour
 				public float value;
 			}
 
+			[StructLayout(LayoutKind.Explicit)]
+			public struct NoteEntryArray
+			{
+				public NoteEntryArray(int size_in_structs)
+				{
+					int num = size_in_structs * Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry));
+					this.structs = null;
+					this.bytes = new byte[num];
+				}
+
+				public int SizeInStructs
+				{
+					get
+					{
+						return this.bytes.Length / Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry));
+					}
+				}
+
+				public int StructSizeInBytes
+				{
+					get
+					{
+						return Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry));
+					}
+				}
+
+				public void Resize(int size_in_structs)
+				{
+					byte[] array = this.bytes;
+					this.bytes = new byte[size_in_structs * Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry))];
+					Buffer.BlockCopy(array, 0, this.bytes, 0, array.Length);
+				}
+
+				[FieldOffset(0)]
+				public byte[] bytes;
+
+				[FieldOffset(0)]
+				public ReportManager.NoteStorage.NoteEntries.NoteEntry[] structs;
+			}
+
 			private struct NoteStorageBlock
 			{
 				public NoteStorageBlock(int capacity)
 				{
-					this.entries = new StructByteArray<ReportManager.NoteStorage.NoteEntries.NoteEntry>(capacity);
+					this.entries = new ReportManager.NoteStorage.NoteEntries.NoteEntryArray(capacity);
 					this.entryCount = 0;
 				}
 
@@ -640,7 +685,7 @@ public class ReportManager : KMonoBehaviour
 
 				private int entryCount;
 
-				private StructByteArray<ReportManager.NoteStorage.NoteEntries.NoteEntry> entries;
+				private ReportManager.NoteStorage.NoteEntries.NoteEntryArray entries;
 			}
 		}
 	}

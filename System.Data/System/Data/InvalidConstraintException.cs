@@ -7,22 +7,18 @@ namespace System.Data
 	public class InvalidConstraintException : DataException
 	{
 		public InvalidConstraintException()
-			: base(Locale.GetText("Cannot access or create this relation"))
-		{
-		}
-
-		public InvalidConstraintException(string s)
-			: base(s)
-		{
-		}
-
-		public InvalidConstraintException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		protected InvalidConstraintException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		{
+		}
+
+		public InvalidConstraintException(string s)
+		{
+		}
+
+		public InvalidConstraintException(string message, Exception innerException)
 		{
 		}
 	}

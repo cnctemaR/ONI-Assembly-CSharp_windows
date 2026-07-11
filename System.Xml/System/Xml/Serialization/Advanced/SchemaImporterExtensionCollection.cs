@@ -1,122 +1,60 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace System.Xml.Serialization.Advanced
 {
 	public class SchemaImporterExtensionCollection : CollectionBase
 	{
+		internal Hashtable Names
+		{
+			get
+			{
+				if (this.exNames == null)
+				{
+					this.exNames = new Hashtable();
+				}
+				return this.exNames;
+			}
+		}
+
 		public int Add(SchemaImporterExtension extension)
 		{
-			if (extension == null)
-			{
-				throw new ArgumentNullException("extension");
-			}
-			return base.List.Add(extension);
+			return this.Add(extension.GetType().FullName, extension);
 		}
 
-		public int Add(string key, Type type)
+		public int Add(string name, Type type)
 		{
-			if (key == null)
+			if (type.IsSubclassOf(typeof(SchemaImporterExtension)))
 			{
-				throw new ArgumentNullException("key");
+				return this.Add(name, (SchemaImporterExtension)Activator.CreateInstance(type));
 			}
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			if (!type.IsSubclassOf(typeof(SchemaImporterExtension)))
-			{
-				throw new ArgumentException("The type argument must be subclass of SchemaImporterExtension.");
-			}
-			SchemaImporterExtension schemaImporterExtension = (SchemaImporterExtension)Activator.CreateInstance(type);
-			if (this.named_items.ContainsKey(key))
-			{
-				throw new InvalidOperationException(string.Format("A SchemaImporterExtension keyed by '{0}' already exists.", key));
-			}
-			int num = this.Add(schemaImporterExtension);
-			this.named_items.Add(key, schemaImporterExtension);
-			return num;
-		}
-
-		public new void Clear()
-		{
-			this.named_items.Clear();
-			base.List.Clear();
-		}
-
-		public bool Contains(SchemaImporterExtension extension)
-		{
-			if (extension == null)
-			{
-				throw new ArgumentNullException("extension");
-			}
-			foreach (object obj in base.List)
-			{
-				SchemaImporterExtension schemaImporterExtension = (SchemaImporterExtension)obj;
-				if (extension.Equals(schemaImporterExtension))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public void CopyTo(SchemaImporterExtension[] array, int index)
-		{
-			base.List.CopyTo(array, index);
-		}
-
-		public int IndexOf(SchemaImporterExtension extension)
-		{
-			if (extension == null)
-			{
-				throw new ArgumentNullException("extension");
-			}
-			int num = 0;
-			foreach (object obj in base.List)
-			{
-				SchemaImporterExtension schemaImporterExtension = (SchemaImporterExtension)obj;
-				if (extension.Equals(schemaImporterExtension))
-				{
-					return num;
-				}
-				num++;
-			}
-			return -1;
-		}
-
-		public void Insert(int index, SchemaImporterExtension extension)
-		{
-			if (extension == null)
-			{
-				throw new ArgumentNullException("extension");
-			}
-			base.List.Insert(index, extension);
-		}
-
-		public void Remove(SchemaImporterExtension extension)
-		{
-			int num = this.IndexOf(extension);
-			if (num >= 0)
-			{
-				base.List.RemoveAt(num);
-			}
+			throw new ArgumentException(Res.GetString("'{0}' is not a valid SchemaExtensionType.", new object[] { type }));
 		}
 
 		public void Remove(string name)
 		{
-			if (name == null)
+			if (this.Names[name] != null)
 			{
-				throw new ArgumentNullException("name");
+				base.List.Remove(this.Names[name]);
+				this.Names[name] = null;
 			}
-			if (!this.named_items.ContainsKey(name))
+		}
+
+		public new void Clear()
+		{
+			this.Names.Clear();
+			base.List.Clear();
+		}
+
+		internal SchemaImporterExtensionCollection Clone()
+		{
+			SchemaImporterExtensionCollection schemaImporterExtensionCollection = new SchemaImporterExtensionCollection();
+			schemaImporterExtensionCollection.exNames = (Hashtable)this.Names.Clone();
+			foreach (object obj in base.List)
 			{
-				return;
+				schemaImporterExtensionCollection.List.Add(obj);
 			}
-			SchemaImporterExtension schemaImporterExtension = this.named_items[name];
-			this.Remove(schemaImporterExtension);
-			this.named_items.Remove(name);
+			return schemaImporterExtensionCollection;
 		}
 
 		public SchemaImporterExtension this[int index]
@@ -131,6 +69,45 @@ namespace System.Xml.Serialization.Advanced
 			}
 		}
 
-		private Dictionary<string, SchemaImporterExtension> named_items = new Dictionary<string, SchemaImporterExtension>();
+		internal int Add(string name, SchemaImporterExtension extension)
+		{
+			if (this.Names[name] == null)
+			{
+				this.Names[name] = extension;
+				return base.List.Add(extension);
+			}
+			if (this.Names[name].GetType() != extension.GetType())
+			{
+				throw new InvalidOperationException(Res.GetString("Duplicate extension name.  schemaImporterExtension with name '{0}' already been added.", new object[] { name }));
+			}
+			return -1;
+		}
+
+		public void Insert(int index, SchemaImporterExtension extension)
+		{
+			base.List.Insert(index, extension);
+		}
+
+		public int IndexOf(SchemaImporterExtension extension)
+		{
+			return base.List.IndexOf(extension);
+		}
+
+		public bool Contains(SchemaImporterExtension extension)
+		{
+			return base.List.Contains(extension);
+		}
+
+		public void Remove(SchemaImporterExtension extension)
+		{
+			base.List.Remove(extension);
+		}
+
+		public void CopyTo(SchemaImporterExtension[] array, int index)
+		{
+			base.List.CopyTo(array, index);
+		}
+
+		private Hashtable exNames;
 	}
 }

@@ -9,7 +9,7 @@ namespace OverlayModes
 {
 	public class Power : Mode
 	{
-		public Power(Canvas powerLabelParent, LocText powerLabelPrefab, BatteryUI batteryUIPrefab, Vector3 powerLabelOffset, Vector3 batteryUIOffset, Vector3 batteryUITransformerOffset, Color consumerColour, Color generatorColour, Color buildingDisabledColour, Color32 circuitUnpoweredColour, Color32 circuitSafeColour, Color32 circuitStrainingColour)
+		public Power(Canvas powerLabelParent, LocText powerLabelPrefab, BatteryUI batteryUIPrefab, Vector3 powerLabelOffset, Vector3 batteryUIOffset, Vector3 batteryUITransformerOffset, Vector3 batteryUISmallTransformerOffset, Color consumerColour, Color generatorColour, Color buildingDisabledColour, Color32 circuitUnpoweredColour, Color32 circuitSafeColour, Color32 circuitStrainingColour)
 		{
 			this.powerLabelParent = powerLabelParent;
 			this.powerLabelPrefab = powerLabelPrefab;
@@ -17,6 +17,7 @@ namespace OverlayModes
 			this.powerLabelOffset = powerLabelOffset;
 			this.batteryUIOffset = batteryUIOffset;
 			this.batteryUITransformerOffset = batteryUITransformerOffset;
+			this.batteryUISmallTransformerOffset = batteryUISmallTransformerOffset;
 			this.consumerColour = consumerColour;
 			this.generatorColour = generatorColour;
 			this.buildingDisabledColour = buildingDisabledColour;
@@ -366,7 +367,12 @@ namespace OverlayModes
 			{
 				num = -1f;
 			}
-			Vector3 vector2 = ((!flag) ? this.batteryUIOffset : this.batteryUITransformerOffset);
+			Vector3 vector2 = this.batteryUIOffset;
+			if (flag)
+			{
+				int widthInCells = bat.GetComponent<Building>().Def.WidthInCells;
+				vector2 = ((widthInCells != 2) ? this.batteryUITransformerOffset : this.batteryUISmallTransformerOffset);
+			}
 			vector2.x *= num;
 			freeBatteryUI.GetComponent<RectTransform>().SetPosition(Vector3.up + vector + vector2);
 			this.updateBatteryInfo.Add(new Power.UpdateBatteryInfo(bat, freeBatteryUI));
@@ -461,6 +467,8 @@ namespace OverlayModes
 		private Vector3 batteryUIOffset;
 
 		private Vector3 batteryUITransformerOffset;
+
+		private Vector3 batteryUISmallTransformerOffset;
 
 		private Color32 consumerColour;
 

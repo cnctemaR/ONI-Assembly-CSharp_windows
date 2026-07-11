@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 using System.Security.Permissions;
-using System.Text;
 
 namespace System
 {
@@ -12,53 +12,56 @@ namespace System
 	public class BadImageFormatException : SystemException
 	{
 		public BadImageFormatException()
-			: base(Locale.GetText("Format of the executable (.exe) or library (.dll) is invalid."))
+			: base(Environment.GetResourceString("Format of the executable (.exe) or library (.dll) is invalid."))
 		{
-			base.HResult = -2147024885;
+			base.SetErrorCode(-2147024885);
 		}
 
 		public BadImageFormatException(string message)
 			: base(message)
 		{
-			base.HResult = -2147024885;
-		}
-
-		protected BadImageFormatException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			this.fileName = info.GetString("BadImageFormat_FileName");
-			this.fusionLog = info.GetString("BadImageFormat_FusionLog");
+			base.SetErrorCode(-2147024885);
 		}
 
 		public BadImageFormatException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.HResult = -2147024885;
+			base.SetErrorCode(-2147024885);
 		}
 
 		public BadImageFormatException(string message, string fileName)
 			: base(message)
 		{
-			this.fileName = fileName;
-			base.HResult = -2147024885;
+			base.SetErrorCode(-2147024885);
+			this._fileName = fileName;
 		}
 
 		public BadImageFormatException(string message, string fileName, Exception inner)
 			: base(message, inner)
 		{
-			this.fileName = fileName;
-			base.HResult = -2147024885;
+			base.SetErrorCode(-2147024885);
+			this._fileName = fileName;
 		}
 
 		public override string Message
 		{
 			get
 			{
-				if (this.message == null)
+				this.SetMessageField();
+				return this._message;
+			}
+		}
+
+		private void SetMessageField()
+		{
+			if (this._message == null)
+			{
+				if (this._fileName == null && base.HResult == -2146233088)
 				{
-					return string.Format(CultureInfo.CurrentCulture, "Could not load file or assembly '{0}' or one of its dependencies. An attempt was made to load a program with an incorrect format.", new object[] { this.fileName });
+					this._message = Environment.GetResourceString("Format of the executable (.exe) or library (.dll) is invalid.");
+					return;
 				}
-				return base.Message;
+				this._message = FileLoadException.FormatFileLoadExceptionMessage(this._fileName, base.HResult);
 			}
 		}
 
@@ -66,52 +69,93 @@ namespace System
 		{
 			get
 			{
-				return this.fileName;
+				return this._fileName;
 			}
-		}
-
-		[MonoTODO("Probably not entirely correct. fusionLog needs to be set somehow (we are probably missing internal constuctor)")]
-		public string FusionLog
-		{
-			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
-			get
-			{
-				return this.fusionLog;
-			}
-		}
-
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("BadImageFormat_FileName", this.fileName);
-			info.AddValue("BadImageFormat_FusionLog", this.fusionLog);
 		}
 
 		public override string ToString()
 		{
-			StringBuilder stringBuilder = new StringBuilder(this.GetType().FullName);
-			stringBuilder.AppendFormat(": {0}", this.Message);
-			if (this.fileName != null && this.fileName.Length > 0)
+			string text = base.GetType().FullName + ": " + this.Message;
+			if (this._fileName != null && this._fileName.Length != 0)
 			{
-				stringBuilder.Append(Environment.NewLine);
-				stringBuilder.AppendFormat("File name: '{0}'", this.fileName);
+				text = text + Environment.NewLine + Environment.GetResourceString("File name: '{0}'", new object[] { this._fileName });
 			}
-			if (this.InnerException != null)
+			if (base.InnerException != null)
 			{
-				stringBuilder.AppendFormat(" ---> {0}", this.InnerException);
+				text = text + " ---> " + base.InnerException.ToString();
 			}
 			if (this.StackTrace != null)
 			{
-				stringBuilder.Append(Environment.NewLine);
-				stringBuilder.Append(this.StackTrace);
+				text = text + Environment.NewLine + this.StackTrace;
 			}
-			return stringBuilder.ToString();
+			try
+			{
+				if (this.FusionLog != null)
+				{
+					if (text == null)
+					{
+						text = " ";
+					}
+					text += Environment.NewLine;
+					text += Environment.NewLine;
+					text += this.FusionLog;
+				}
+			}
+			catch (SecurityException)
+			{
+			}
+			return text;
 		}
 
-		private const int Result = -2147024885;
+		protected BadImageFormatException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+			this._fileName = info.GetString("BadImageFormat_FileName");
+			try
+			{
+				this._fusionLog = info.GetString("BadImageFormat_FusionLog");
+			}
+			catch
+			{
+				this._fusionLog = null;
+			}
+		}
 
-		private string fileName;
+		private BadImageFormatException(string fileName, string fusionLog, int hResult)
+			: base(null)
+		{
+			base.SetErrorCode(hResult);
+			this._fileName = fileName;
+			this._fusionLog = fusionLog;
+			this.SetMessageField();
+		}
 
-		private string fusionLog;
+		public string FusionLog
+		{
+			[SecuritySafeCritical]
+			[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlEvidence | SecurityPermissionFlag.ControlPolicy)]
+			get
+			{
+				return this._fusionLog;
+			}
+		}
+
+		[SecurityCritical]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			base.GetObjectData(info, context);
+			info.AddValue("BadImageFormat_FileName", this._fileName, typeof(string));
+			try
+			{
+				info.AddValue("BadImageFormat_FusionLog", this.FusionLog, typeof(string));
+			}
+			catch (SecurityException)
+			{
+			}
+		}
+
+		private string _fileName;
+
+		private string _fusionLog;
 	}
 }

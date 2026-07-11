@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using Delaunay.Geo;
 using Klei;
@@ -23,7 +22,7 @@ namespace ProcGenGame
 		{
 			get
 			{
-				return WorldGen.settings.defaults.baseData.left;
+				return WorldGen.settings.GetBaseLocation().left;
 			}
 		}
 
@@ -31,7 +30,7 @@ namespace ProcGenGame
 		{
 			get
 			{
-				return WorldGen.settings.defaults.baseData.right;
+				return WorldGen.settings.GetBaseLocation().right;
 			}
 		}
 
@@ -39,7 +38,7 @@ namespace ProcGenGame
 		{
 			get
 			{
-				return WorldGen.settings.defaults.baseData.top;
+				return WorldGen.settings.GetBaseLocation().top;
 			}
 		}
 
@@ -47,7 +46,7 @@ namespace ProcGenGame
 		{
 			get
 			{
-				return WorldGen.settings.defaults.baseData.bottom;
+				return WorldGen.settings.GetBaseLocation().bottom;
 			}
 		}
 
@@ -231,8 +230,8 @@ namespace ProcGenGame
 				return;
 			}
 			WorldGen.data = new Data();
-			WorldGen.data.chunkEdgeSize = WorldGen.settings.GetDefaultInt("ChunkEdgeSize");
-			WorldGen.data.subWorldSize = new Vector2I(WorldGen.settings.GetDefaultInt("SubWorldWidth"), WorldGen.settings.GetDefaultInt("SubWorldHeight"));
+			WorldGen.data.chunkEdgeSize = WorldGen.settings.GetIntSetting("ChunkEdgeSize");
+			WorldGen.data.subWorldSize = new Vector2I(WorldGen.settings.GetIntSetting("SubWorldWidth"), WorldGen.settings.GetIntSetting("SubWorldHeight"));
 			TemplateCache.Init();
 			WorldGen.stats = new Dictionary<string, object>();
 		}
@@ -497,7 +496,6 @@ namespace ProcGenGame
 											terrainCell2.node.tags.Add(WorldGenTags.POI);
 											break;
 										}
-										global::Debug.Log("Cell is too short for POI container" + templateContainer.name, null);
 										float num2 = templateContainer.info.size.Y - (terrainCell2.poly.MaxY - terrainCell2.poly.MinY);
 										float num3 = templateContainer.info.size.X - (terrainCell2.poly.MaxX - terrainCell2.poly.MinX);
 										if (terrainCell2.poly.MaxY + num2 < (float)Grid.HeightInCells && terrainCell2.poly.MinY - num2 > 0f && terrainCell2.poly.MaxX + num3 < (float)Grid.WidthInCells && terrainCell2.poly.MinX - num3 > 0f)
@@ -514,7 +512,6 @@ namespace ProcGenGame
 					}
 				}
 			}
-			global::Debug.Log("Finished POI assignment", null);
 			List<TemplateContainer> list3 = TemplateCache.CollectBaseTemplateAssets("features/");
 			foreach (SubWorld subWorld2 in WorldGen.Settings.GetSubWorldList())
 			{
@@ -556,7 +553,6 @@ namespace ProcGenGame
 			{
 				array[num4].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
 			}
-			global::Debug.Log("Pre settle", null);
 			if (doSettle)
 			{
 				WorldGen.running = WorldGenSimUtil.DoSettleSim(array, array2, dc, WorldGen.successCallbackFn, WorldGen.data, list, this.errorCallback, delegate(Sim.Cell[] updatedCells, float[] updatedBGTemp, Sim.DiseaseCell[] updatedDisease)
@@ -564,12 +560,10 @@ namespace ProcGenGame
 					this.SpawnMobsAndTemplates(updatedCells, updatedBGTemp, updatedDisease, borderCells);
 				});
 			}
-			global::Debug.Log("post settle", null);
 			foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair3 in list)
 			{
 				this.PlaceTemplateSpawners(keyValuePair3.Key, keyValuePair3.Value);
 			}
-			global::Debug.Log("Mid", null);
 			for (int l = WorldGen.data.gameSpawnData.buildings.Count - 1; l >= 0; l--)
 			{
 				int num5 = Grid.XYToCell(WorldGen.data.gameSpawnData.buildings[l].location_x, WorldGen.data.gameSpawnData.buildings[l].location_y);
@@ -602,7 +596,6 @@ namespace ProcGenGame
 					WorldGen.data.gameSpawnData.pickupables.RemoveAt(num8);
 				}
 			}
-			global::Debug.Log("Before save", null);
 			WorldGen.SaveWorldGen();
 			WorldGen.successCallbackFn(UI.WORLDGEN.COMPLETE.key, 101f, WorldGenProgressStages.Stages.Complete);
 			WorldGen.running = false;
@@ -890,7 +883,7 @@ namespace ProcGenGame
 				WorldGen.running = updateProgressFn(new StringKey("Exception in ProcessByTerrainCell"), -1f, WorldGenProgressStages.Stages.Failure);
 				return false;
 			}
-			if (bool.Parse(WorldGen.settings.defaults.data["DrawWorldBorder"] as string))
+			if (WorldGen.settings.GetBoolSetting("DrawWorldBorder"))
 			{
 				SeededRandom seededRandom = new SeededRandom(0);
 				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 0f, WorldGenProgressStages.Stages.DrawWorldBorder);
@@ -1247,7 +1240,7 @@ namespace ProcGenGame
 							{
 								border.element = list;
 							}
-							border.width = (float)seededRandom.RandomRange(2, 3);
+							border.width = seededRandom.RandomRange(1f, 2.5f);
 							list4.Add(border);
 						}
 					}
@@ -1371,60 +1364,60 @@ namespace ProcGenGame
 
 		private static void DrawWorldBorder(Sim.Cell[] cells, Chunk world, SeededRandom rnd, HashSet<int> borderCells)
 		{
-			bool flag = bool.Parse(WorldGen.settings.defaults.data["DrawWorldBorderTop"] as string);
-			int num = int.Parse(WorldGen.settings.defaults.data["WorldBorderThickness"] as string);
-			int num2 = int.Parse(WorldGen.settings.defaults.data["WorldBorderRange"] as string);
+			bool boolSetting = WorldGen.settings.GetBoolSetting("DrawWorldBorderTop");
+			int intSetting = WorldGen.settings.GetIntSetting("WorldBorderThickness");
+			int intSetting2 = WorldGen.settings.GetIntSetting("WorldBorderRange");
 			byte b = (byte)ElementLoader.elements.IndexOf(WorldGen.unobtaniumElement);
 			float temperature = WorldGen.unobtaniumElement.defaultValues.temperature;
 			float mass = WorldGen.unobtaniumElement.defaultValues.mass;
-			int num3 = 0;
-			int num4 = 0;
-			int num5 = world.size.y - 32;
-			if (!flag)
+			int num = 0;
+			int num2 = 0;
+			int num3 = world.size.y - 32;
+			if (!boolSetting)
 			{
-				num5 = Math.Max(0, num5 - num - 2 * num2);
-				num3 = -num2;
-				num4 = -num2;
+				num3 = Math.Max(0, num3 - intSetting - 2 * intSetting2);
+				num = -intSetting2;
+				num2 = -intSetting2;
 			}
-			for (int i = num5; i >= 0; i--)
+			for (int i = num3; i >= 0; i--)
 			{
-				num3 = Mathf.Max(-num2, Mathf.Min(num3 + rnd.RandomRange(-2, 2), num2));
-				for (int j = 0; j < num + num3; j++)
+				num = Mathf.Max(-intSetting2, Mathf.Min(num + rnd.RandomRange(-2, 2), intSetting2));
+				for (int j = 0; j < intSetting + num; j++)
 				{
-					int num6 = Grid.XYToCell(j, i);
-					borderCells.Add(num6);
-					cells[num6].SetValues(b, temperature, mass);
+					int num4 = Grid.XYToCell(j, i);
+					borderCells.Add(num4);
+					cells[num4].SetValues(b, temperature, mass);
 				}
-				num4 = Mathf.Max(-num2, Mathf.Min(num4 + rnd.RandomRange(-2, 2), num2));
-				for (int k = 0; k < num + num4; k++)
+				num2 = Mathf.Max(-intSetting2, Mathf.Min(num2 + rnd.RandomRange(-2, 2), intSetting2));
+				for (int k = 0; k < intSetting + num2; k++)
 				{
-					int num7 = Grid.XYToCell(world.size.x - 1 - k, i);
+					int num5 = Grid.XYToCell(world.size.x - 1 - k, i);
+					borderCells.Add(num5);
+					cells[num5].SetValues(b, temperature, mass);
+				}
+			}
+			int num6 = 0;
+			for (int l = 0; l < world.size.x; l++)
+			{
+				num6 = Mathf.Max(-intSetting2, Mathf.Min(num6 + rnd.RandomRange(-2, 2), intSetting2));
+				for (int m = 0; m < intSetting + num6; m++)
+				{
+					int num7 = Grid.XYToCell(l, m);
 					borderCells.Add(num7);
 					cells[num7].SetValues(b, temperature, mass);
 				}
 			}
-			int num8 = 0;
-			for (int l = 0; l < world.size.x; l++)
+			if (boolSetting)
 			{
-				num8 = Mathf.Max(-num2, Mathf.Min(num8 + rnd.RandomRange(-2, 2), num2));
-				for (int m = 0; m < num + num8; m++)
-				{
-					int num9 = Grid.XYToCell(l, m);
-					borderCells.Add(num9);
-					cells[num9].SetValues(b, temperature, mass);
-				}
-			}
-			if (flag)
-			{
-				int num10 = 0;
+				int num8 = 0;
 				for (int n = 0; n < world.size.x; n++)
 				{
-					num10 = Mathf.Max(-num2, Mathf.Min(num10 + rnd.RandomRange(-2, 2), num2));
-					for (int num11 = 0; num11 < num + num10; num11++)
+					num8 = Mathf.Max(-intSetting2, Mathf.Min(num8 + rnd.RandomRange(-2, 2), intSetting2));
+					for (int num9 = 0; num9 < intSetting + num8; num9++)
 					{
-						int num12 = Grid.XYToCell(n, world.size.y - 1 - num11);
-						borderCells.Add(num12);
-						cells[num12].SetValues(b, temperature, mass);
+						int num10 = Grid.XYToCell(n, world.size.y - 1 - num9);
+						borderCells.Add(num10);
+						cells[num10].SetValues(b, temperature, mass);
 					}
 				}
 			}
@@ -1759,12 +1752,6 @@ namespace ProcGenGame
 		{
 			try
 			{
-				Manager.assemblies = new Assembly[]
-				{
-					typeof(WorldGen).Assembly,
-					typeof(Polygon).Assembly,
-					typeof(Vector2).Assembly
-				};
 				WorldGenSave worldGenSave = new WorldGenSave();
 				FastReader fastReader = new FastReader(File.ReadAllBytes(WorldGen.WORLDGEN_SAVE_FILENAME));
 				Manager.DeserializeDirectory(fastReader);
@@ -1806,12 +1793,6 @@ namespace ProcGenGame
 			SimSaveFileStructure simSaveFileStructure = new SimSaveFileStructure();
 			try
 			{
-				Manager.assemblies = new Assembly[]
-				{
-					typeof(WorldGen).Assembly,
-					typeof(Polygon).Assembly,
-					typeof(Vector2).Assembly
-				};
 				FastReader fastReader = new FastReader(File.ReadAllBytes(WorldGen.SIM_SAVE_FILENAME));
 				Manager.DeserializeDirectory(fastReader);
 				Deserializer.Deserialize(simSaveFileStructure, fastReader);

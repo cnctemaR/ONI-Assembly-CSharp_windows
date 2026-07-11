@@ -9,18 +9,21 @@ namespace System
 	public sealed class IndexOutOfRangeException : SystemException
 	{
 		public IndexOutOfRangeException()
-			: base(Locale.GetText("Array index is out of range."))
+			: base(Environment.GetResourceString("Index was outside the bounds of the array."))
 		{
+			base.SetErrorCode(-2146233080);
 		}
 
 		public IndexOutOfRangeException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2146233080);
 		}
 
 		public IndexOutOfRangeException(string message, Exception innerException)
 			: base(message, innerException)
 		{
+			base.SetErrorCode(-2146233080);
 		}
 
 		internal IndexOutOfRangeException(SerializationInfo info, StreamingContext context)

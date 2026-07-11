@@ -3,23 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class AssemblyCopyrightAttribute : Attribute
 	{
 		public AssemblyCopyrightAttribute(string copyright)
 		{
-			this.name = copyright;
+			this.m_copyright = copyright;
 		}
 
 		public string Copyright
 		{
 			get
 			{
-				return this.name;
+				return this.m_copyright;
 			}
 		}
 
-		private string name;
+		private string m_copyright;
 	}
 }

@@ -10,7 +10,7 @@ public class MinionStartingStats
 	{
 		if (is_starter_minion)
 		{
-			int num = global::UnityEngine.Random.Range(0, 32);
+			int num = global::UnityEngine.Random.Range(0, 31);
 			this.personality = Db.Get().Personalities[num];
 		}
 		else

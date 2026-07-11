@@ -151,6 +151,9 @@ namespace KSerialization
 			case SerializationTypeInfo.HashSet:
 				type = typeof(HashSet<>);
 				break;
+			case SerializationTypeInfo.Queue:
+				type = typeof(Queue<>);
+				break;
 			default:
 			{
 				if (serializationTypeInfo != SerializationTypeInfo.UserDefined)

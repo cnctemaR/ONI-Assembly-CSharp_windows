@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeStatement : CodeObject
 	{
-		public CodeLinePragma LinePragma
+		public CodeLinePragma LinePragma { get; set; }
+
+		public CodeDirectiveCollection StartDirectives
 		{
 			get
 			{
-				return this.linePragma;
-			}
-			set
-			{
-				this.linePragma = value;
+				CodeDirectiveCollection codeDirectiveCollection;
+				if ((codeDirectiveCollection = this._startDirectives) == null)
+				{
+					codeDirectiveCollection = (this._startDirectives = new CodeDirectiveCollection());
+				}
+				return codeDirectiveCollection;
 			}
 		}
 
@@ -24,30 +24,17 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.endDirectives == null)
+				CodeDirectiveCollection codeDirectiveCollection;
+				if ((codeDirectiveCollection = this._endDirectives) == null)
 				{
-					this.endDirectives = new CodeDirectiveCollection();
+					codeDirectiveCollection = (this._endDirectives = new CodeDirectiveCollection());
 				}
-				return this.endDirectives;
+				return codeDirectiveCollection;
 			}
 		}
 
-		public CodeDirectiveCollection StartDirectives
-		{
-			get
-			{
-				if (this.startDirectives == null)
-				{
-					this.startDirectives = new CodeDirectiveCollection();
-				}
-				return this.startDirectives;
-			}
-		}
+		private CodeDirectiveCollection _startDirectives;
 
-		private CodeLinePragma linePragma;
-
-		private CodeDirectiveCollection endDirectives;
-
-		private CodeDirectiveCollection startDirectives;
+		private CodeDirectiveCollection _endDirectives;
 	}
 }

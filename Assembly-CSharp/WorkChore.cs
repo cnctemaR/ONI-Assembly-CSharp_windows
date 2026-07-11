@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInstance> where WorkableType : Workable
 {
-	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, Tag[] chore_tags = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 0, bool ignore_building_assignment = false)
+	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, Tag[] chore_tags = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool ignore_schedule_block = false, bool only_when_operational = true, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 0, bool ignore_building_assignment = false)
 		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, priority_class, priority_class_value, is_preemptable, allow_in_context_menu, 0, chore_tags)
 	{
 		this.smi = new WorkChore<WorkableType>.StatesInstance(this, target.gameObject, override_anims);
@@ -20,6 +20,10 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		if (schedule_block != null)
 		{
 			base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, schedule_block);
+		}
+		else if (!ignore_schedule_block)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		}
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, this.smi.sm.workable.Get<WorkableType>(this.smi));
 		Operational component = target.GetComponent<Operational>();

@@ -61,7 +61,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 				Vector4 column = symbolTransform.GetColumn(3);
 				Vector3 vector = column;
 				vector.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront);
-				this.snoreEffect = FXHelpers.CreateEffect("snore_fx_kanim", vector, SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.Front, false);
+				this.snoreEffect = FXHelpers.CreateEffect("snore_fx_kanim", vector, null, false, Grid.SceneLayer.Front, false);
 				this.snoreEffect.destroyOnAnimComplete = true;
 				this.snoreEffect.Play("snore", KAnim.PlayMode.Loop, 1f, 0f);
 			}

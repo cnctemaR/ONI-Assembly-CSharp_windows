@@ -18,12 +18,13 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<StateMachineController>();
 		this.baseTemplate.AddComponent<Deconstructable>();
 		this.baseTemplate.AddComponent<SaveLoadRoot>();
-		this.baseTemplate.AddComponent<SavedObject>();
 		this.baseTemplate.AddComponent<OccupyArea>();
 		this.baseTemplate.AddComponent<DecorProvider>();
 		this.baseTemplate.AddComponent<Operational>();
 		this.baseTemplate.AddComponent<BuildingEnabledButton>();
 		this.baseTemplate.AddComponent<Prioritizable>();
+		this.baseTemplate.AddComponent<BuildingHP>();
+		this.baseTemplate.AddComponent<LoopingSounds>();
 		this.defaultBuildingCompleteKComponents.Add(typeof(RequiresFoundation));
 	}
 
@@ -37,8 +38,8 @@ public class BuildingConfigManager : KMonoBehaviour
 		BuildingDef buildingDef = config.CreateBuildingDef();
 		this.configTable[config] = buildingDef;
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.baseTemplate);
+		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		gameObject.name = buildingDef.PrefabID + "Template";
-		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 		gameObject.GetComponent<Building>().Def = buildingDef;
 		gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets = buildingDef.PlacementOffsets;
 		if (buildingDef.Deprecated)
@@ -59,11 +60,8 @@ public class BuildingConfigManager : KMonoBehaviour
 		}
 		if (flag)
 		{
-			buildingDef.BuildingUnderConstruction = BuildingLoader.Instance.CreateBuildingUnderConstruction(buildingDef, false);
+			buildingDef.BuildingUnderConstruction = BuildingLoader.Instance.CreateBuildingUnderConstruction(buildingDef);
 			buildingDef.BuildingUnderConstruction.name = BuildingConfigManager.GetUnderConstructionName(buildingDef.BuildingUnderConstruction.name);
-			buildingDef.BuildingUnderRelocation = BuildingLoader.Instance.CreateBuildingUnderConstruction(buildingDef, true);
-			GameObject buildingUnderRelocation = buildingDef.BuildingUnderRelocation;
-			buildingUnderRelocation.name += "UnderRelocation";
 			buildingDef.BuildingPreview = BuildingLoader.Instance.CreateBuildingPreview(buildingDef);
 			GameObject buildingPreview = buildingDef.BuildingPreview;
 			buildingPreview.name += "Preview";

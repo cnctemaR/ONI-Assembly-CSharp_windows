@@ -71,8 +71,7 @@ namespace Mono.Security.Authenticode
 			int num = this.ProcessFirstBlock();
 			if (num != 0)
 			{
-				string text = Locale.GetText("Cannot sign non PE files, e.g. .CAB or .MSI files (error {0}).", new object[] { num });
-				throw new NotSupportedException(text);
+				throw new NotSupportedException(Locale.GetText("Cannot sign non PE files, e.g. .CAB or .MSI files (error {0}).", new object[] { num }));
 			}
 		}
 
@@ -96,8 +95,7 @@ namespace Mono.Security.Authenticode
 			this.peOffset = BitConverterLE.ToInt32(this.fileblock, 60);
 			if (this.peOffset > this.fileblock.Length)
 			{
-				string text = string.Format(Locale.GetText("Header size too big (> {0} bytes)."), this.fileblock.Length);
-				throw new NotSupportedException(text);
+				throw new NotSupportedException(string.Format(Locale.GetText("Header size too big (> {0} bytes)."), this.fileblock.Length));
 			}
 			if ((long)this.peOffset > this.fs.Length)
 			{

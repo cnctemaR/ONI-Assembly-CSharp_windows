@@ -1,101 +1,20 @@
 ﻿using System;
-using System.Collections;
-using System.Globalization;
+using System.Collections.Generic;
 
 namespace Mono.Security.Protocol.Tls
 {
-	internal sealed class CipherSuiteCollection : IEnumerable, ICollection, IList
+	internal sealed class CipherSuiteCollection : List<CipherSuite>
 	{
-		public CipherSuiteCollection(SecurityProtocolType protocol)
-		{
-			this.protocol = protocol;
-			this.cipherSuites = new ArrayList();
-		}
-
-		object IList.this[int index]
-		{
-			get
-			{
-				return this[index];
-			}
-			set
-			{
-				this[index] = (CipherSuite)value;
-			}
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return this.cipherSuites.IsSynchronized;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this.cipherSuites.SyncRoot;
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.cipherSuites.GetEnumerator();
-		}
-
-		bool IList.Contains(object value)
-		{
-			return this.cipherSuites.Contains(value as CipherSuite);
-		}
-
-		int IList.IndexOf(object value)
-		{
-			return this.cipherSuites.IndexOf(value as CipherSuite);
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			this.cipherSuites.Insert(index, value as CipherSuite);
-		}
-
-		void IList.Remove(object value)
-		{
-			this.cipherSuites.Remove(value as CipherSuite);
-		}
-
-		void IList.RemoveAt(int index)
-		{
-			this.cipherSuites.RemoveAt(index);
-		}
-
-		int IList.Add(object value)
-		{
-			return this.cipherSuites.Add(value as CipherSuite);
-		}
-
 		public CipherSuite this[string name]
 		{
 			get
 			{
-				return (CipherSuite)this.cipherSuites[this.IndexOf(name)];
-			}
-			set
-			{
-				this.cipherSuites[this.IndexOf(name)] = value;
-			}
-		}
-
-		public CipherSuite this[int index]
-		{
-			get
-			{
-				return (CipherSuite)this.cipherSuites[index];
-			}
-			set
-			{
-				this.cipherSuites[index] = value;
+				int num = this.IndexOf(name);
+				if (num != -1)
+				{
+					return base[num];
+				}
+				return null;
 			}
 		}
 
@@ -103,55 +22,44 @@ namespace Mono.Security.Protocol.Tls
 		{
 			get
 			{
-				return (CipherSuite)this.cipherSuites[this.IndexOf(code)];
+				int num = this.IndexOf(code);
+				if (num != -1)
+				{
+					return base[num];
+				}
+				return null;
 			}
-			set
+		}
+
+		public CipherSuiteCollection(SecurityProtocolType protocol)
+		{
+			if (protocol <= SecurityProtocolType.Ssl2)
 			{
-				this.cipherSuites[this.IndexOf(code)] = value;
+				if (protocol != SecurityProtocolType.Default)
+				{
+					if (protocol != SecurityProtocolType.Ssl2)
+					{
+						goto IL_002F;
+					}
+					goto IL_002F;
+				}
 			}
-		}
-
-		public int Count
-		{
-			get
+			else if (protocol != SecurityProtocolType.Ssl3 && protocol != SecurityProtocolType.Tls)
 			{
-				return this.cipherSuites.Count;
+				goto IL_002F;
 			}
-		}
-
-		public bool IsFixedSize
-		{
-			get
-			{
-				return this.cipherSuites.IsFixedSize;
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				return this.cipherSuites.IsReadOnly;
-			}
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			this.cipherSuites.CopyTo(array, index);
-		}
-
-		public void Clear()
-		{
-			this.cipherSuites.Clear();
+			this.protocol = protocol;
+			return;
+			IL_002F:
+			throw new NotSupportedException("Unsupported security protocol type.");
 		}
 
 		public int IndexOf(string name)
 		{
 			int num = 0;
-			foreach (object obj in this.cipherSuites)
+			foreach (CipherSuite cipherSuite in this)
 			{
-				CipherSuite cipherSuite = (CipherSuite)obj;
-				if (this.cultureAwareCompare(cipherSuite.Name, name))
+				if (string.CompareOrdinal(name, cipherSuite.Name) == 0)
 				{
 					return num;
 				}
@@ -163,58 +71,51 @@ namespace Mono.Security.Protocol.Tls
 		public int IndexOf(short code)
 		{
 			int num = 0;
-			foreach (object obj in this.cipherSuites)
+			using (List<CipherSuite>.Enumerator enumerator = base.GetEnumerator())
 			{
-				CipherSuite cipherSuite = (CipherSuite)obj;
-				if (cipherSuite.Code == code)
+				while (enumerator.MoveNext())
 				{
-					return num;
+					if (enumerator.Current.Code == code)
+					{
+						return num;
+					}
+					num++;
 				}
-				num++;
 			}
 			return -1;
 		}
 
-		public CipherSuite Add(short code, string name, CipherAlgorithmType cipherType, HashAlgorithmType hashType, ExchangeAlgorithmType exchangeType, bool exportable, bool blockMode, byte keyMaterialSize, byte expandedKeyMaterialSize, short effectiveKeyBytes, byte ivSize, byte blockSize)
+		public void Add(short code, string name, CipherAlgorithmType cipherType, HashAlgorithmType hashType, ExchangeAlgorithmType exchangeType, bool exportable, bool blockMode, byte keyMaterialSize, byte expandedKeyMaterialSize, short effectiveKeyBytes, byte ivSize, byte blockSize)
 		{
 			SecurityProtocolType securityProtocolType = this.protocol;
 			if (securityProtocolType != SecurityProtocolType.Default)
 			{
-				if (securityProtocolType != SecurityProtocolType.Ssl2)
+				if (securityProtocolType != SecurityProtocolType.Ssl3)
 				{
-					if (securityProtocolType == SecurityProtocolType.Ssl3)
-					{
-						return this.add(new SslCipherSuite(code, name, cipherType, hashType, exchangeType, exportable, blockMode, keyMaterialSize, expandedKeyMaterialSize, effectiveKeyBytes, ivSize, blockSize));
-					}
 					if (securityProtocolType == SecurityProtocolType.Tls)
 					{
-						goto IL_0032;
+						goto IL_001C;
 					}
 				}
-				throw new NotSupportedException("Unsupported security protocol type.");
+				else
+				{
+					base.Add(new SslCipherSuite(code, name, cipherType, hashType, exchangeType, exportable, blockMode, keyMaterialSize, expandedKeyMaterialSize, effectiveKeyBytes, ivSize, blockSize));
+				}
+				return;
 			}
-			IL_0032:
-			return this.add(new TlsCipherSuite(code, name, cipherType, hashType, exchangeType, exportable, blockMode, keyMaterialSize, expandedKeyMaterialSize, effectiveKeyBytes, ivSize, blockSize));
+			IL_001C:
+			base.Add(new TlsCipherSuite(code, name, cipherType, hashType, exchangeType, exportable, blockMode, keyMaterialSize, expandedKeyMaterialSize, effectiveKeyBytes, ivSize, blockSize));
 		}
 
-		private TlsCipherSuite add(TlsCipherSuite cipherSuite)
+		public IList<string> GetNames()
 		{
-			this.cipherSuites.Add(cipherSuite);
-			return cipherSuite;
+			List<string> list = new List<string>(base.Count);
+			foreach (CipherSuite cipherSuite in this)
+			{
+				list.Add(cipherSuite.Name);
+			}
+			return list;
 		}
-
-		private SslCipherSuite add(SslCipherSuite cipherSuite)
-		{
-			this.cipherSuites.Add(cipherSuite);
-			return cipherSuite;
-		}
-
-		private bool cultureAwareCompare(string strA, string strB)
-		{
-			return CultureInfo.CurrentCulture.CompareInfo.Compare(strA, strB, CompareOptions.IgnoreCase | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth) == 0;
-		}
-
-		private ArrayList cipherSuites;
 
 		private SecurityProtocolType protocol;
 	}

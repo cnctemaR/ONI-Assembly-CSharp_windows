@@ -43,6 +43,20 @@ namespace TUNING
 
 		public static List<EdiblesManager.FoodInfo> FOOD_TYPES_LIST = new List<EdiblesManager.FoodInfo>();
 
+		public const int FOOD_QUALITY_AWFUL = -1;
+
+		public const int FOOD_QUALITY_TERRIBLE = 0;
+
+		public const int FOOD_QUALITY_POO = 1;
+
+		public const int FOOD_QUALITY_GOOD = 2;
+
+		public const int FOOD_QUALITY_GREAT = 3;
+
+		public const int FOOD_QUALITY_AMAZING = 4;
+
+		public const int FOOD_QUALITY_WONDERFUL = 5;
+
 		public class SPOIL_TIME
 		{
 			public const float DEFAULT = 2400f;
@@ -56,47 +70,47 @@ namespace TUNING
 
 		public class FOOD_TYPES
 		{
-			public static EdiblesManager.FoodInfo FIELDRATION = new EdiblesManager.FoodInfo("FieldRation", 800000f, -1, 255.15f, 277.15f, 9600f, false);
+			public static readonly EdiblesManager.FoodInfo FIELDRATION = new EdiblesManager.FoodInfo("FieldRation", 800000f, -1, 255.15f, 277.15f, 9600f, false);
 
-			public static EdiblesManager.FoodInfo MUSHBAR = new EdiblesManager.FoodInfo("MushBar", 800000f, -1, 255.15f, 277.15f, 2400f, true).AddEffects(new List<string> { "Diarrhea" });
+			public static readonly EdiblesManager.FoodInfo MUSHBAR = new EdiblesManager.FoodInfo("MushBar", 800000f, -1, 255.15f, 277.15f, 2400f, true).AddEffects(new List<string> { "Diarrhea" });
 
-			public static EdiblesManager.FoodInfo BASICPLANTFOOD = new EdiblesManager.FoodInfo("BasicPlantFood", 600000f, -1, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo BASICPLANTFOOD = new EdiblesManager.FoodInfo("BasicPlantFood", 600000f, -1, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo BASICFORAGEPLANT = new EdiblesManager.FoodInfo("BasicForagePlant", 800000f, -1, 255.15f, 277.15f, 2400f, false);
+			public static readonly EdiblesManager.FoodInfo BASICFORAGEPLANT = new EdiblesManager.FoodInfo("BasicForagePlant", 800000f, -1, 255.15f, 277.15f, 2400f, false);
 
-			public static EdiblesManager.FoodInfo MUSHROOM = new EdiblesManager.FoodInfo(MushroomConfig.ID, 2400000f, 0, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo MUSHROOM = new EdiblesManager.FoodInfo(MushroomConfig.ID, 2400000f, 0, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo MEAT = new EdiblesManager.FoodInfo("Meat", 1600000f, -1, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo MEAT = new EdiblesManager.FoodInfo("Meat", 1600000f, -1, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo PRICKLEFRUIT = new EdiblesManager.FoodInfo(PrickleFruitConfig.ID, 1600000f, 0, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo PRICKLEFRUIT = new EdiblesManager.FoodInfo(PrickleFruitConfig.ID, 1600000f, 0, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo PICKLEDMEAL = new EdiblesManager.FoodInfo("PickledMeal", 1800000f, -1, 255.15f, 277.15f, 9600f, true);
+			public static readonly EdiblesManager.FoodInfo PICKLEDMEAL = new EdiblesManager.FoodInfo("PickledMeal", 1800000f, -1, 255.15f, 277.15f, 9600f, true);
 
-			public static EdiblesManager.FoodInfo BASICPLANTBAR = new EdiblesManager.FoodInfo("BasicPlantBar", 1700000f, 0, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo BASICPLANTBAR = new EdiblesManager.FoodInfo("BasicPlantBar", 1700000f, 0, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo FRIEDMUSHBAR = new EdiblesManager.FoodInfo("FriedMushBar", 1050000f, 0, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo FRIEDMUSHBAR = new EdiblesManager.FoodInfo("FriedMushBar", 1050000f, 0, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo GRILLED_PRICKLEFRUIT = new EdiblesManager.FoodInfo("GrilledPrickleFruit", 2000000f, 1, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo GRILLED_PRICKLEFRUIT = new EdiblesManager.FoodInfo("GrilledPrickleFruit", 2000000f, 1, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo FRIED_MUSHROOM = new EdiblesManager.FoodInfo("FriedMushroom", 2800000f, 1, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo FRIED_MUSHROOM = new EdiblesManager.FoodInfo("FriedMushroom", 2800000f, 1, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo COLD_WHEAT_BREAD = new EdiblesManager.FoodInfo("ColdWheatBread", 1200000f, 2, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo COLD_WHEAT_BREAD = new EdiblesManager.FoodInfo("ColdWheatBread", 1200000f, 2, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo COOKED_EGG = new EdiblesManager.FoodInfo("CookedEgg", 2800000f, 2, 255.15f, 277.15f, 1200f, true);
+			public static readonly EdiblesManager.FoodInfo COOKED_EGG = new EdiblesManager.FoodInfo("CookedEgg", 2800000f, 2, 255.15f, 277.15f, 1200f, true);
 
-			public static EdiblesManager.FoodInfo FRUITCAKE = new EdiblesManager.FoodInfo("FruitCake", 4000000f, 3, 255.15f, 277.15f, 9600f, false);
+			public static readonly EdiblesManager.FoodInfo FRUITCAKE = new EdiblesManager.FoodInfo("FruitCake", 4000000f, 3, 255.15f, 277.15f, 9600f, false);
 
-			public static EdiblesManager.FoodInfo SALSA = new EdiblesManager.FoodInfo("Salsa", 4000000f, 4, 255.15f, 277.15f, 1200f, true);
+			public static readonly EdiblesManager.FoodInfo SALSA = new EdiblesManager.FoodInfo("Salsa", 4000000f, 4, 255.15f, 277.15f, 1200f, true);
 
-			public static EdiblesManager.FoodInfo SPICEBREAD = new EdiblesManager.FoodInfo("SpiceBread", 4000000f, 5, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo SPICEBREAD = new EdiblesManager.FoodInfo("SpiceBread", 4000000f, 5, 255.15f, 277.15f, 2400f, true);
 
-			public static EdiblesManager.FoodInfo COOKEDMEAT = new EdiblesManager.FoodInfo("CookedMeat", 4000000f, 5, 255.15f, 277.15f, 1200f, true).AddEffects(new List<string> { "GoodEats" });
+			public static readonly EdiblesManager.FoodInfo COOKEDMEAT = new EdiblesManager.FoodInfo("CookedMeat", 4000000f, 5, 255.15f, 277.15f, 1200f, true).AddEffects(new List<string> { "GoodEats" });
 
-			public static EdiblesManager.FoodInfo SPICENUT = new EdiblesManager.FoodInfo(SpiceNutConfig.ID, 0f, 0, 255.15f, 277.15f, 1200f, true);
+			public static readonly EdiblesManager.FoodInfo SPICENUT = new EdiblesManager.FoodInfo(SpiceNutConfig.ID, 0f, 0, 255.15f, 277.15f, 1200f, true);
 
-			public static EdiblesManager.FoodInfo COLD_WHEAT_SEED = new EdiblesManager.FoodInfo("ColdWheatSeed", 0f, 0, 283.15f, 308.15f, 4800f, true);
+			public static readonly EdiblesManager.FoodInfo COLD_WHEAT_SEED = new EdiblesManager.FoodInfo("ColdWheatSeed", 0f, 0, 283.15f, 308.15f, 4800f, true);
 
-			public static EdiblesManager.FoodInfo RAWEGG = new EdiblesManager.FoodInfo("RawEgg", 0f, -1, 255.15f, 277.15f, 2400f, true);
+			public static readonly EdiblesManager.FoodInfo RAWEGG = new EdiblesManager.FoodInfo("RawEgg", 0f, -1, 255.15f, 277.15f, 2400f, true);
 		}
 
 		public class RECIPES

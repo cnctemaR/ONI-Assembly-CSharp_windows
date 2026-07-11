@@ -45,9 +45,9 @@ namespace System.CodeDom.Compiler
 			}
 		}
 
-		private static ConfigurationProperty nameProp = new ConfigurationProperty("name", typeof(string), string.Empty, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey);
+		private static ConfigurationProperty nameProp = new ConfigurationProperty("name", typeof(string), "", ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey);
 
-		private static ConfigurationProperty valueProp = new ConfigurationProperty("value", typeof(string), string.Empty, ConfigurationPropertyOptions.IsRequired);
+		private static ConfigurationProperty valueProp = new ConfigurationProperty("value", typeof(string), "", ConfigurationPropertyOptions.IsRequired);
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 	}

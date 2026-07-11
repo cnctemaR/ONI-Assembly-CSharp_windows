@@ -7,60 +7,75 @@ namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class CharEnumerator : IEnumerator, IDisposable, ICloneable, IEnumerator<char>
+	public sealed class CharEnumerator : IEnumerator, ICloneable, IEnumerator<char>, IDisposable
 	{
-		internal CharEnumerator(string s)
+		internal CharEnumerator(string str)
 		{
-			this.str = s;
+			this.str = str;
 			this.index = -1;
-			this.length = s.Length;
+		}
+
+		public object Clone()
+		{
+			return base.MemberwiseClone();
+		}
+
+		public bool MoveNext()
+		{
+			if (this.index < this.str.Length - 1)
+			{
+				this.index++;
+				this.currentElement = this.str[this.index];
+				return true;
+			}
+			this.index = this.str.Length;
+			return false;
+		}
+
+		public void Dispose()
+		{
+			if (this.str != null)
+			{
+				this.index = this.str.Length;
+			}
+			this.str = null;
 		}
 
 		object IEnumerator.Current
 		{
 			get
 			{
-				return this.Current;
+				if (this.index == -1)
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+				}
+				if (this.index >= this.str.Length)
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+				}
+				return this.currentElement;
 			}
-		}
-
-		void IDisposable.Dispose()
-		{
 		}
 
 		public char Current
 		{
 			get
 			{
-				if (this.index == -1 || this.index >= this.length)
+				if (this.index == -1)
 				{
-					throw new InvalidOperationException(Locale.GetText("The position is not valid."));
+					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
 				}
-				return this.str[this.index];
+				if (this.index >= this.str.Length)
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+				}
+				return this.currentElement;
 			}
-		}
-
-		public object Clone()
-		{
-			return new CharEnumerator(this.str)
-			{
-				index = this.index
-			};
-		}
-
-		public bool MoveNext()
-		{
-			this.index++;
-			if (this.index >= this.length)
-			{
-				this.index = this.length;
-				return false;
-			}
-			return true;
 		}
 
 		public void Reset()
 		{
+			this.currentElement = '\0';
 			this.index = -1;
 		}
 
@@ -68,6 +83,6 @@ namespace System
 
 		private int index;
 
-		private int length;
+		private char currentElement;
 	}
 }

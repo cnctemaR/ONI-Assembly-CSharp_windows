@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 {
+	public static void DestroyInstance()
+	{
+		BubbleManager.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		BubbleManager.instance = this;

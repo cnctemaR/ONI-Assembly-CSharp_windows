@@ -7,7 +7,7 @@ public class PropSkeletonConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropSkeleton", SETITEMS.SKELETON.NAME, SETITEMS.SKELETON.DESC, 50f, Assets.GetAnim("skeleton_poi_kanim"), "off", Grid.SceneLayer.Building, 1, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER5, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropSkeleton", global::STRINGS.BUILDINGS.PREFABS.PROPSKELETON.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPSKELETON.DESC, 50f, Assets.GetAnim("skeleton_poi_kanim"), "off", Grid.SceneLayer.Building, 1, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER5, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Creature);
 		component.Temperature = 294.15f;

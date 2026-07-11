@@ -30,8 +30,6 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 
 	public Dictionary<string, List<string>> DefaultBuilds { get; private set; }
 
-	public bool LookupSymbolUnderGroupName { get; private set; }
-
 	public int MaxGroupSize { get; private set; }
 
 	public bool IsSwap(KAnimFile file)

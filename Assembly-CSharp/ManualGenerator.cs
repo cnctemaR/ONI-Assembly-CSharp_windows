@@ -153,7 +153,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 				{
 					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
 					{
-						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 					}
 				}
 				else if (this.chore != null)
@@ -170,6 +170,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	{
 		base.OnStartWork(worker);
 		this.operational.SetActive(true, false);
+		worker.GetComponent<KPrefabID>().AddTag(GameTags.AllowSpeech);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -193,6 +194,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
+		worker.GetComponent<KPrefabID>().RemoveTag(GameTags.AllowSpeech);
 		this.operational.SetActive(false, false);
 		if (this.chore != null && this.generator.PercentFull >= this.batteryRefillPercent)
 		{

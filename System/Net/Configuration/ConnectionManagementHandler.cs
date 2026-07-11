@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace System.Net.Configuration
 {
-	internal class ConnectionManagementHandler : global::System.Configuration.IConfigurationSectionHandler
+	internal class ConnectionManagementHandler : IConfigurationSectionHandler
 	{
 		public virtual object Create(object parent, object configContext, XmlNode section)
 		{
@@ -13,8 +13,7 @@ namespace System.Net.Configuration
 			{
 				HandlersUtil.ThrowException("Unrecognized attribute", section);
 			}
-			XmlNodeList childNodes = section.ChildNodes;
-			foreach (object obj in childNodes)
+			foreach (object obj in section.ChildNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
 				XmlNodeType nodeType = xmlNode.NodeType;

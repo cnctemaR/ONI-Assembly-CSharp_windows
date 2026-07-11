@@ -20,10 +20,10 @@ namespace TUNING
 
 		public static float ACTIVE_EXPERIENCE_VERY_QUICK = 0.2f;
 
-		public static int ATTRIBUTE_BONUS_SMALL = 2;
+		public static int ATTRIBUTE_BONUS_FIRST = 2;
 
-		public static int ATTRIBUTE_BONUS_MEDIUM = 2;
+		public static int ATTRIBUTE_BONUS_SECOND = 2;
 
-		public static int ATTRIBUTE_BONUS_LARGE = 2;
+		public static int ATTRIBUTE_BONUS_THIRD = 2;
 	}
 }

@@ -14,18 +14,16 @@ namespace System.Configuration
 		{
 			get
 			{
-				return (this.flags & ConfigurationPropertyOptions.IsKey) != ConfigurationPropertyOptions.None;
+				return (this.flags & ConfigurationPropertyOptions.IsKey) > ConfigurationPropertyOptions.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this.flags |= ConfigurationPropertyOptions.IsKey;
+					return;
 				}
-				else
-				{
-					this.flags &= ~ConfigurationPropertyOptions.IsKey;
-				}
+				this.flags &= ~ConfigurationPropertyOptions.IsKey;
 			}
 		}
 
@@ -33,18 +31,16 @@ namespace System.Configuration
 		{
 			get
 			{
-				return (this.flags & ConfigurationPropertyOptions.IsDefaultCollection) != ConfigurationPropertyOptions.None;
+				return (this.flags & ConfigurationPropertyOptions.IsDefaultCollection) > ConfigurationPropertyOptions.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this.flags |= ConfigurationPropertyOptions.IsDefaultCollection;
+					return;
 				}
-				else
-				{
-					this.flags &= ~ConfigurationPropertyOptions.IsDefaultCollection;
-				}
+				this.flags &= ~ConfigurationPropertyOptions.IsDefaultCollection;
 			}
 		}
 
@@ -84,18 +80,16 @@ namespace System.Configuration
 		{
 			get
 			{
-				return (this.flags & ConfigurationPropertyOptions.IsRequired) != ConfigurationPropertyOptions.None;
+				return (this.flags & ConfigurationPropertyOptions.IsRequired) > ConfigurationPropertyOptions.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this.flags |= ConfigurationPropertyOptions.IsRequired;
+					return;
 				}
-				else
-				{
-					this.flags &= ~ConfigurationPropertyOptions.IsRequired;
-				}
+				this.flags &= ~ConfigurationPropertyOptions.IsRequired;
 			}
 		}
 

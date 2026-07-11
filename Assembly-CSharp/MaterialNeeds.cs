@@ -5,6 +5,11 @@ public class MaterialNeeds : KMonoBehaviour
 {
 	public static MaterialNeeds Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		MaterialNeeds.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		MaterialNeeds.Instance = this;

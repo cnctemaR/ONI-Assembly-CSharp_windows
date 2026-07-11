@@ -23,7 +23,7 @@ public class OilFloaterDecorConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = OilFloaterDecorConfig.CreateOilFloater("OilfloaterDecor", global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC, "oilfloater_kanim", false);
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "OilfloaterDecorEgg", global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.EGG_NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC, "egg_oilfloater_kanim", OilFloaterTuning.EGG_MASS, "OilfloaterDecorBaby", 90f, 30f, OilFloaterTuning.EGG_CHANCES_DECOR, OilFloaterDecorConfig.EGG_SORT_ORDER, true, false, true);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "OilfloaterDecorEgg", global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.EGG_NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.VARIANT_DECOR.DESC, "egg_oilfloater_kanim", OilFloaterTuning.EGG_MASS, "OilfloaterDecorBaby", 90f, 30f, OilFloaterTuning.EGG_CHANCES_DECOR, OilFloaterDecorConfig.EGG_SORT_ORDER, true, false, true, 1f);
 		return gameObject;
 	}
 

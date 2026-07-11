@@ -10,21 +10,9 @@ public class EffectPrefabs : MonoBehaviour
 		EffectPrefabs.Instance = this;
 	}
 
-	public GameObject Explosion;
-
-	public GameObject AttackEffect;
-
-	public GameObject OreAbsorb;
-
-	public GameObject Fx;
-
 	public GameObject ThoughtBubble;
 
-	public GameObject PlantDeath;
-
-	public GameObject PickupEffect;
+	public GameObject ThoughtBubbleConvo;
 
 	public GameObject MeteorBackground;
-
-	public GameObject MeteorImpact;
 }

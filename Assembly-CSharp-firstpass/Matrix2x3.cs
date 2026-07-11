@@ -152,5 +152,5 @@ public struct Matrix2x3
 
 	public float m12;
 
-	public static Matrix2x3 identity = new Matrix2x3(1f, 0f, 0f, 0f, 1f, 0f);
+	public static readonly Matrix2x3 identity = new Matrix2x3(1f, 0f, 0f, 0f, 1f, 0f);
 }

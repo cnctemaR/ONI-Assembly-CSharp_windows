@@ -4,14 +4,14 @@ namespace System.EnterpriseServices.CompensatingResourceManager
 {
 	public sealed class ClerkInfo
 	{
-		internal ClerkInfo()
-		{
-		}
-
 		[MonoTODO]
 		~ClerkInfo()
 		{
 			throw new NotImplementedException();
+		}
+
+		internal ClerkInfo()
+		{
 		}
 
 		[MonoTODO]

@@ -7,41 +7,93 @@ namespace System.Runtime.Serialization
 {
 	public static class XmlSerializableServices
 	{
-		[MonoTODO]
-		public static void AddDefaultSchema(XmlSchemaSet schemas, XmlQualifiedName typeQName)
-		{
-			throw new NotImplementedException();
-		}
-
 		public static XmlNode[] ReadNodes(XmlReader xmlReader)
 		{
-			if (xmlReader.NodeType != XmlNodeType.Element || xmlReader.IsEmptyElement)
+			if (xmlReader == null)
 			{
-				return new XmlNode[0];
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("xmlReader");
 			}
-			int depth = xmlReader.Depth;
-			xmlReader.Read();
-			if (xmlReader.NodeType == XmlNodeType.EndElement)
-			{
-				return new XmlNode[0];
-			}
-			List<XmlNode> list = new List<XmlNode>();
 			XmlDocument xmlDocument = new XmlDocument();
-			while ((xmlReader.Depth > depth) & !xmlReader.EOF)
+			List<XmlNode> list = new List<XmlNode>();
+			if (xmlReader.MoveToFirstAttribute())
 			{
-				list.Add(xmlDocument.ReadNode(xmlReader));
+				for (;;)
+				{
+					if (XmlSerializableServices.IsValidAttribute(xmlReader))
+					{
+						XmlNode xmlNode = xmlDocument.ReadNode(xmlReader);
+						if (xmlNode == null)
+						{
+							break;
+						}
+						list.Add(xmlNode);
+					}
+					if (!xmlReader.MoveToNextAttribute())
+					{
+						goto IL_0059;
+					}
+				}
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(global::System.Runtime.Serialization.SR.GetString("Unexpected end of file.")));
+			}
+			IL_0059:
+			xmlReader.MoveToElement();
+			if (!xmlReader.IsEmptyElement)
+			{
+				int depth = xmlReader.Depth;
+				xmlReader.Read();
+				while (xmlReader.Depth > depth && xmlReader.NodeType != XmlNodeType.EndElement)
+				{
+					XmlNode xmlNode2 = xmlDocument.ReadNode(xmlReader);
+					if (xmlNode2 == null)
+					{
+						throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(global::System.Runtime.Serialization.SR.GetString("Unexpected end of file.")));
+					}
+					list.Add(xmlNode2);
+				}
 			}
 			return list.ToArray();
 		}
 
+		private static bool IsValidAttribute(XmlReader xmlReader)
+		{
+			return xmlReader.NamespaceURI != "http://schemas.microsoft.com/2003/10/Serialization/" && xmlReader.NamespaceURI != "http://www.w3.org/2001/XMLSchema-instance" && xmlReader.Prefix != "xmlns" && xmlReader.LocalName != "xmlns";
+		}
+
 		public static void WriteNodes(XmlWriter xmlWriter, XmlNode[] nodes)
 		{
-			foreach (XmlNode xmlNode in nodes)
+			if (xmlWriter == null)
 			{
-				xmlNode.WriteTo(xmlWriter);
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("xmlWriter");
+			}
+			if (nodes != null)
+			{
+				for (int i = 0; i < nodes.Length; i++)
+				{
+					if (nodes[i] != null)
+					{
+						nodes[i].WriteTo(xmlWriter);
+					}
+				}
 			}
 		}
 
-		private static Dictionary<XmlQualifiedName, XmlSchemaSet> defaultSchemas = new Dictionary<XmlQualifiedName, XmlSchemaSet>();
+		public static void AddDefaultSchema(XmlSchemaSet schemas, XmlQualifiedName typeQName)
+		{
+			if (schemas == null)
+			{
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("schemas");
+			}
+			if (typeQName == null)
+			{
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("typeQName");
+			}
+			SchemaExporter.AddDefaultXmlType(schemas, typeQName.Name, typeQName.Namespace);
+		}
+
+		internal static readonly string ReadNodesMethodName = "ReadNodes";
+
+		internal static string WriteNodesMethodName = "WriteNodes";
+
+		internal static string AddDefaultSchemaMethodName = "AddDefaultSchema";
 	}
 }

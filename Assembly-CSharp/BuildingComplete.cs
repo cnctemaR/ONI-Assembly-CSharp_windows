@@ -88,11 +88,6 @@ public class BuildingComplete : Building
 				TileVisualizer.RefreshCell(c, this.Def.TileLayer);
 			});
 		}
-		SaveLoadRoot component5 = base.GetComponent<SaveLoadRoot>();
-		if (component5 != null)
-		{
-			component5.folder = Folder.Entities;
-		}
 		base.RegisterBlockTileRenderer();
 		if (this.Def.PreventIdlingInFrontOfBuilding)
 		{
@@ -101,10 +96,10 @@ public class BuildingComplete : Building
 				Grid.PreventIdlingOnCell[base.PlacementCells[j]] = true;
 			}
 		}
-		KSelectable component6 = base.GetComponent<KSelectable>();
-		if (component6 != null)
+		KSelectable component5 = base.GetComponent<KSelectable>();
+		if (component5 != null)
 		{
-			component6.SetStatusIndicatorOffset(this.Def.placementPivot);
+			component5.SetStatusIndicatorOffset(this.Def.placementPivot);
 		}
 		Components.BuildingCompletes.Add(this);
 		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);

@@ -87,7 +87,7 @@ public class GroupSelectorWidget : MonoBehaviour
 			HierarchyReferences component2 = component.GetComponent<HierarchyReferences>();
 			if (component2 != null)
 			{
-				MonoBehaviour reference = component2.GetReference("CancelImg");
+				Component reference = component2.GetReference("CancelImg");
 				if (reference != null)
 				{
 					reference.gameObject.SetActive(true);

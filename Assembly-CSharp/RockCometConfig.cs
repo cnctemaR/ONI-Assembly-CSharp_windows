@@ -5,14 +5,14 @@ public class RockCometConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(RockCometConfig.ID, RockCometConfig.ID);
+		GameObject gameObject = EntityTemplates.CreateEntity(RockCometConfig.ID, RockCometConfig.ID, true);
 		gameObject.AddOrGet<SaveLoadRoot>();
-		gameObject.AddOrGet<SavedObject>();
+		gameObject.AddOrGet<LoopingSounds>();
 		Comet comet = gameObject.AddOrGet<Comet>();
-		float mass = ElementLoader.FindElementByHash(RockCometConfig.element).defaultValues.mass;
-		comet.massRange = new Vector2(mass * 0.8f * (float)RockCometConfig.ADDED_CELLS, mass * 1.2f * (float)RockCometConfig.ADDED_CELLS);
+		float mass = ElementLoader.FindElementByHash(SimHashes.Regolith).defaultValues.mass;
+		comet.massRange = new Vector2(mass * 0.8f * 6f, mass * 1.2f * 6f);
 		comet.temperatureRange = new Vector2(323.15f, 423.15f);
-		comet.addTiles = RockCometConfig.ADDED_CELLS;
+		comet.addTiles = 6;
 		comet.dissimilarElementAddTiles = 2;
 		comet.entityDamage = 20;
 		comet.totalTileDamage = 0.2f;
@@ -21,7 +21,7 @@ public class RockCometConfig : IEntityConfig
 		comet.flyingSoundID = 2;
 		comet.explosionEffectHash = SpawnFXHashes.MeteorImpactDirt;
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
-		primaryElement.SetElement(RockCometConfig.element);
+		primaryElement.SetElement(SimHashes.Regolith);
 		primaryElement.Temperature = (comet.temperatureRange.x + comet.temperatureRange.y) / 2f;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("meteor_rock_kanim") };
@@ -44,9 +44,9 @@ public class RockCometConfig : IEntityConfig
 	{
 	}
 
-	public static string ID = "RockComet";
+	public static readonly string ID = "RockComet";
 
-	private static SimHashes element = SimHashes.Regolith;
+	private const SimHashes element = SimHashes.Regolith;
 
-	private static int ADDED_CELLS = 6;
+	private const int ADDED_CELLS = 6;
 }

@@ -8,20 +8,20 @@ namespace System.ComponentModel.Design
 	public enum SelectionTypes
 	{
 		Auto = 1,
-		[Obsolete("This value has been deprecated. Use SelectionTypes.Auto instead.")]
+		[Obsolete("This value has been deprecated. Use SelectionTypes.Auto instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
 		Normal = 1,
 		Replace = 2,
-		[Obsolete("This value has been deprecated. It is no longer supported.")]
+		[Obsolete("This value has been deprecated.  It is no longer supported. http://go.microsoft.com/fwlink/?linkid=14202")]
 		MouseDown = 4,
-		[Obsolete("This value has been deprecated. It is no longer supported.")]
+		[Obsolete("This value has been deprecated.  It is no longer supported. http://go.microsoft.com/fwlink/?linkid=14202")]
 		MouseUp = 8,
-		[Obsolete("This value has been deprecated. Use SelectionTypes.Primary instead.")]
+		[Obsolete("This value has been deprecated. Use SelectionTypes.Primary instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
 		Click = 16,
 		Primary = 16,
-		[Obsolete("This value has been deprecated. It is no longer supported.")]
-		Valid = 31,
 		Toggle = 32,
 		Add = 64,
-		Remove = 128
+		Remove = 128,
+		[Obsolete("This value has been deprecated. Use Enum class methods to determine valid values, or use a type converter. http://go.microsoft.com/fwlink/?linkid=14202")]
+		Valid = 31
 	}
 }

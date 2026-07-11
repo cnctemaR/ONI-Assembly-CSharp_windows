@@ -36,10 +36,8 @@ public class RolesScreen : KModalScreen
 		this.ConsumeMouseScroll = true;
 		base.OnActivate();
 		this.RefreshAll(null);
-		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(this.MarkDirty));
-		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
-		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(this.MarkDirty));
+		Components.LiveMinionIdentities.OnAdd += new Action<MinionIdentity>(this.MarkDirty);
+		Components.LiveMinionIdentities.OnRemove += new Action<MinionIdentity>(this.MarkDirty);
 		this.CloseButton.onClick += delegate
 		{
 			ManagementMenu.Instance.CloseAll();
@@ -367,7 +365,7 @@ public class RolesScreen : KModalScreen
 
 	public Sprite[] TierIcons;
 
-	public static string[] tierNames = new string[]
+	public static readonly string[] tierNames = new string[]
 	{
 		UI.ROLES_SCREEN.TIER_NAMES.ZERO,
 		UI.ROLES_SCREEN.TIER_NAMES.ONE,

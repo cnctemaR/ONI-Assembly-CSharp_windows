@@ -44,13 +44,51 @@ public class FaceGraph : KMonoBehaviour
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		Accessorizer component2 = base.GetComponent<Accessorizer>();
 		KAnimFile anim = Assets.GetAnim("head_master_swap_kanim");
-		this.ApplyShape(component2.GetAccessory(Db.Get().AccessorySlots.Eyes).symbol, component, anim, "snapto_eyes");
-		this.ApplyShape(component2.GetAccessory(Db.Get().AccessorySlots.Mouth).symbol, component, anim, "snapto_mouth");
+		bool flag = this.ShouldUseSidewaysSymbol(component);
+		BlinkMonitor.Instance smi = component2.GetSMI<BlinkMonitor.Instance>();
+		if (smi.IsNullOrStopped() || !smi.IsBlinking())
+		{
+			this.ApplyShape(component2.GetAccessory(Db.Get().AccessorySlots.Eyes).symbol, component, anim, "snapto_eyes", flag);
+		}
+		SpeechMonitor.Instance smi2 = component2.GetSMI<SpeechMonitor.Instance>();
+		if (smi2.IsNullOrStopped() || !smi2.IsPlayingSpeech())
+		{
+			this.ApplyShape(component2.GetAccessory(Db.Get().AccessorySlots.Mouth).symbol, component, anim, "snapto_mouth", flag);
+		}
+		else
+		{
+			smi2.DrawMouth();
+		}
 	}
 
-	private void ApplyShape(KAnim.Build.Symbol variation_symbol, KBatchedAnimController controller, KAnimFile shapes_file, HashedString symbol_name_in_shape_file)
+	private bool ShouldUseSidewaysSymbol(KBatchedAnimController controller)
 	{
-		HashedString hashedString = "neutral";
+		KAnim.Anim currentAnim = controller.GetCurrentAnim();
+		if (currentAnim == null)
+		{
+			return false;
+		}
+		int currentFrameIndex = controller.GetCurrentFrameIndex();
+		if (currentFrameIndex <= 0)
+		{
+			return false;
+		}
+		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(currentAnim.animFile.animBatchTag);
+		KAnim.Anim.Frame frame = batchGroupData.GetFrame(currentFrameIndex);
+		for (int i = 0; i < frame.numElements; i++)
+		{
+			KAnim.Anim.FrameElement frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + i);
+			if (frameElement.symbol == FaceGraph.HASH_SNAPTO_EYES && frameElement.frame >= FaceGraph.FIRST_SIDEWAYS_FRAME)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void ApplyShape(KAnim.Build.Symbol variation_symbol, KBatchedAnimController controller, KAnimFile shapes_file, HashedString symbol_name_in_shape_file, bool should_use_sideways_symbol)
+	{
+		HashedString hashedString = FaceGraph.HASH_NEUTRAL;
 		if (this.currentExpression != null)
 		{
 			hashedString = this.currentExpression.face.hash;
@@ -58,6 +96,7 @@ public class FaceGraph : KMonoBehaviour
 		KAnim.Anim anim = null;
 		KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
 		bool flag = false;
+		bool flag2 = false;
 		int num = 0;
 		while (num < shapes_file.GetData().animCount && !flag)
 		{
@@ -72,7 +111,11 @@ public class FaceGraph : KMonoBehaviour
 					frameElement = batchGroupData.GetFrameElement(frame.firstElementIdx + i);
 					if (!(frameElement.symbol != symbol_name_in_shape_file))
 					{
-						flag = true;
+						if (flag2 || !should_use_sideways_symbol)
+						{
+							flag = true;
+						}
+						flag2 = true;
 						break;
 					}
 				}
@@ -83,7 +126,7 @@ public class FaceGraph : KMonoBehaviour
 		{
 			DebugUtil.Assert(false, "Could not find shape for expression: " + HashCache.Get().Get(hashedString));
 		}
-		if (!flag)
+		if (!flag2)
 		{
 			DebugUtil.Assert(false, "Could not find shape element for shape:" + HashCache.Get().Get(variation_symbol.hash));
 		}
@@ -119,4 +162,10 @@ public class FaceGraph : KMonoBehaviour
 	}
 
 	private List<Expression> expressions = new List<Expression>();
+
+	private static KAnimHashedString HASH_SNAPTO_EYES = "snapto_eyes";
+
+	private static KAnimHashedString HASH_NEUTRAL = "neutral";
+
+	private static int FIRST_SIDEWAYS_FRAME = 29;
 }

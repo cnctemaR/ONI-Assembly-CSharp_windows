@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
 	[ComVisible(true)]
 	public sealed class BufferedStream : Stream
 	{
+		private BufferedStream()
+		{
+		}
+
 		public BufferedStream(Stream stream)
 			: this(stream, 4096)
 		{
@@ -19,21 +26,98 @@ namespace System.IO
 			}
 			if (bufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("bufferSize", "<= 0");
+				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("'{0}' must be greater than zero.", new object[] { "bufferSize" }));
 			}
-			if (!stream.CanRead && !stream.CanWrite)
+			this._stream = stream;
+			this._bufferSize = bufferSize;
+			if (!this._stream.CanRead && !this._stream.CanWrite)
 			{
-				throw new ObjectDisposedException(Locale.GetText("Cannot access a closed Stream."));
+				__Error.StreamIsClosed();
 			}
-			this.m_stream = stream;
-			this.m_buffer = new byte[bufferSize];
+		}
+
+		private void EnsureNotClosed()
+		{
+			if (this._stream == null)
+			{
+				__Error.StreamIsClosed();
+			}
+		}
+
+		private void EnsureCanSeek()
+		{
+			if (!this._stream.CanSeek)
+			{
+				__Error.SeekNotSupported();
+			}
+		}
+
+		private void EnsureCanRead()
+		{
+			if (!this._stream.CanRead)
+			{
+				__Error.ReadNotSupported();
+			}
+		}
+
+		private void EnsureCanWrite()
+		{
+			if (!this._stream.CanWrite)
+			{
+				__Error.WriteNotSupported();
+			}
+		}
+
+		private void EnsureBeginEndAwaitableAllocated()
+		{
+			if (this._beginEndAwaitable == null)
+			{
+				this._beginEndAwaitable = new BeginEndAwaitableAdapter();
+			}
+		}
+
+		private void EnsureShadowBufferAllocated()
+		{
+			if (this._buffer.Length != this._bufferSize || this._bufferSize >= 81920)
+			{
+				return;
+			}
+			byte[] array = new byte[Math.Min(this._bufferSize + this._bufferSize, 81920)];
+			Buffer.InternalBlockCopy(this._buffer, 0, array, 0, this._writePos);
+			this._buffer = array;
+		}
+
+		private void EnsureBufferAllocated()
+		{
+			if (this._buffer == null)
+			{
+				this._buffer = new byte[this._bufferSize];
+			}
+		}
+
+		internal Stream UnderlyingStream
+		{
+			[FriendAccessAllowed]
+			get
+			{
+				return this._stream;
+			}
+		}
+
+		internal int BufferSize
+		{
+			[FriendAccessAllowed]
+			get
+			{
+				return this._bufferSize;
+			}
 		}
 
 		public override bool CanRead
 		{
 			get
 			{
-				return this.m_stream.CanRead;
+				return this._stream != null && this._stream.CanRead;
 			}
 		}
 
@@ -41,7 +125,7 @@ namespace System.IO
 		{
 			get
 			{
-				return this.m_stream.CanWrite;
+				return this._stream != null && this._stream.CanWrite;
 			}
 		}
 
@@ -49,7 +133,7 @@ namespace System.IO
 		{
 			get
 			{
-				return this.m_stream.CanSeek;
+				return this._stream != null && this._stream.CanSeek;
 			}
 		}
 
@@ -57,8 +141,12 @@ namespace System.IO
 		{
 			get
 			{
-				this.Flush();
-				return this.m_stream.Length;
+				this.EnsureNotClosed();
+				if (this._writePos > 0)
+				{
+					this.FlushWrite();
+				}
+				return this._stream.Length;
 			}
 		}
 
@@ -66,236 +154,843 @@ namespace System.IO
 		{
 			get
 			{
-				this.CheckObjectDisposedException();
-				return this.m_stream.Position - (long)this.m_buffer_read_ahead + (long)this.m_buffer_pos;
+				this.EnsureNotClosed();
+				this.EnsureCanSeek();
+				return this._stream.Position + (long)(this._readPos - this._readLen + this._writePos);
 			}
 			set
 			{
-				if (value < this.Position && this.Position - value <= (long)this.m_buffer_pos && this.m_buffer_reading)
+				if (value < 0L)
 				{
-					this.m_buffer_pos -= (int)(this.Position - value);
+					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Non-negative number required."));
 				}
-				else if (value > this.Position && value - this.Position < (long)(this.m_buffer_read_ahead - this.m_buffer_pos) && this.m_buffer_reading)
+				this.EnsureNotClosed();
+				this.EnsureCanSeek();
+				if (this._writePos > 0)
 				{
-					this.m_buffer_pos += (int)(value - this.Position);
+					this.FlushWrite();
 				}
-				else
-				{
-					this.Flush();
-					this.m_stream.Position = value;
-				}
+				this._readPos = 0;
+				this._readLen = 0;
+				this._stream.Seek(value, SeekOrigin.Begin);
 			}
 		}
 
 		protected override void Dispose(bool disposing)
 		{
-			if (this.disposed)
+			try
 			{
-				return;
+				if (disposing && this._stream != null)
+				{
+					try
+					{
+						this.Flush();
+					}
+					finally
+					{
+						this._stream.Close();
+					}
+				}
 			}
-			if (this.m_buffer != null)
+			finally
 			{
-				this.Flush();
+				this._stream = null;
+				this._buffer = null;
+				this._lastSyncCompletedReadTask = null;
+				base.Dispose(disposing);
 			}
-			this.m_stream.Close();
-			this.m_buffer = null;
-			this.disposed = true;
 		}
 
 		public override void Flush()
 		{
-			this.CheckObjectDisposedException();
-			if (this.m_buffer_reading)
+			this.EnsureNotClosed();
+			if (this._writePos > 0)
 			{
-				if (this.CanSeek)
+				this.FlushWrite();
+				return;
+			}
+			if (this._readPos >= this._readLen)
+			{
+				if (this._stream.CanWrite || this._stream is BufferedStream)
 				{
-					this.m_stream.Position = this.Position;
+					this._stream.Flush();
+				}
+				this._writePos = (this._readPos = (this._readLen = 0));
+				return;
+			}
+			if (!this._stream.CanSeek)
+			{
+				return;
+			}
+			this.FlushRead();
+			if (this._stream.CanWrite || this._stream is BufferedStream)
+			{
+				this._stream.Flush();
+			}
+		}
+
+		public override Task FlushAsync(CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCancellation<int>(cancellationToken);
+			}
+			this.EnsureNotClosed();
+			return BufferedStream.FlushAsyncInternal(cancellationToken, this, this._stream, this._writePos, this._readPos, this._readLen);
+		}
+
+		private static async Task FlushAsyncInternal(CancellationToken cancellationToken, BufferedStream _this, Stream stream, int writePos, int readPos, int readLen)
+		{
+			SemaphoreSlim sem = _this.EnsureAsyncActiveSemaphoreInitialized();
+			await sem.WaitAsync().ConfigureAwait(false);
+			try
+			{
+				if (writePos > 0)
+				{
+					await _this.FlushWriteAsync(cancellationToken).ConfigureAwait(false);
+				}
+				else if (readPos < readLen)
+				{
+					if (stream.CanSeek)
+					{
+						_this.FlushRead();
+						if (stream.CanRead || stream is BufferedStream)
+						{
+							await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+						}
+					}
+				}
+				else if (stream.CanWrite || stream is BufferedStream)
+				{
+					await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
 				}
 			}
-			else if (this.m_buffer_pos > 0)
+			finally
 			{
-				this.m_stream.Write(this.m_buffer, 0, this.m_buffer_pos);
-			}
-			this.m_buffer_read_ahead = 0;
-			this.m_buffer_pos = 0;
-		}
-
-		public override long Seek(long offset, SeekOrigin origin)
-		{
-			this.CheckObjectDisposedException();
-			if (!this.CanSeek)
-			{
-				throw new NotSupportedException(Locale.GetText("Non seekable stream."));
-			}
-			this.Flush();
-			return this.m_stream.Seek(offset, origin);
-		}
-
-		public override void SetLength(long value)
-		{
-			this.CheckObjectDisposedException();
-			if (value < 0L)
-			{
-				throw new ArgumentOutOfRangeException("value must be positive");
-			}
-			if (!this.m_stream.CanWrite && !this.m_stream.CanSeek)
-			{
-				throw new NotSupportedException("the stream cannot seek nor write.");
-			}
-			if (this.m_stream == null || (!this.m_stream.CanRead && !this.m_stream.CanWrite))
-			{
-				throw new IOException("the stream is not open");
-			}
-			this.m_stream.SetLength(value);
-			if (this.Position > value)
-			{
-				this.Position = value;
+				sem.Release();
 			}
 		}
 
-		public override int ReadByte()
+		private void FlushRead()
 		{
-			this.CheckObjectDisposedException();
-			byte[] array = new byte[1];
-			if (this.Read(array, 0, 1) == 1)
+			if (this._readPos - this._readLen != 0)
 			{
-				return (int)array[0];
+				this._stream.Seek((long)(this._readPos - this._readLen), SeekOrigin.Current);
 			}
-			return -1;
+			this._readPos = 0;
+			this._readLen = 0;
 		}
 
-		public override void WriteByte(byte value)
+		private void ClearReadBufferBeforeWrite()
 		{
-			this.CheckObjectDisposedException();
-			this.Write(new byte[] { value }, 0, 1);
+			if (this._readPos == this._readLen)
+			{
+				this._readPos = (this._readLen = 0);
+				return;
+			}
+			if (!this._stream.CanSeek)
+			{
+				throw new NotSupportedException(Environment.GetResourceString("Cannot write to a BufferedStream while the read buffer is not empty if the underlying stream is not seekable. Ensure that the stream underlying this BufferedStream can seek or avoid interleaving read and write operations on this BufferedStream."));
+			}
+			this.FlushRead();
+		}
+
+		private void FlushWrite()
+		{
+			this._stream.Write(this._buffer, 0, this._writePos);
+			this._writePos = 0;
+			this._stream.Flush();
+		}
+
+		private async Task FlushWriteAsync(CancellationToken cancellationToken)
+		{
+			await this._stream.WriteAsync(this._buffer, 0, this._writePos, cancellationToken).ConfigureAwait(false);
+			this._writePos = 0;
+			await this._stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+		}
+
+		private int ReadFromBuffer(byte[] array, int offset, int count)
+		{
+			int num = this._readLen - this._readPos;
+			if (num == 0)
+			{
+				return 0;
+			}
+			if (num > count)
+			{
+				num = count;
+			}
+			Buffer.InternalBlockCopy(this._buffer, this._readPos, array, offset, num);
+			this._readPos += num;
+			return num;
+		}
+
+		private int ReadFromBuffer(byte[] array, int offset, int count, out Exception error)
+		{
+			int num;
+			try
+			{
+				error = null;
+				num = this.ReadFromBuffer(array, offset, count);
+			}
+			catch (Exception ex)
+			{
+				error = ex;
+				num = 0;
+			}
+			return num;
 		}
 
 		public override int Read([In] [Out] byte[] array, int offset, int count)
 		{
 			if (array == null)
 			{
-				throw new ArgumentNullException("array");
-			}
-			this.CheckObjectDisposedException();
-			if (!this.m_stream.CanRead)
-			{
-				throw new NotSupportedException(Locale.GetText("Cannot read from stream"));
+				throw new ArgumentNullException("array", Environment.GetResourceString("Buffer cannot be null."));
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", "< 0");
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", "< 0");
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
 			}
 			if (array.Length - offset < count)
 			{
-				throw new ArgumentException("array.Length - offset < count");
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			if (!this.m_buffer_reading)
+			this.EnsureNotClosed();
+			this.EnsureCanRead();
+			int num = this.ReadFromBuffer(array, offset, count);
+			if (num == count)
 			{
-				this.Flush();
-				this.m_buffer_reading = true;
+				return num;
 			}
-			if (count <= this.m_buffer_read_ahead - this.m_buffer_pos)
+			int num2 = num;
+			if (num > 0)
 			{
-				Buffer.BlockCopyInternal(this.m_buffer, this.m_buffer_pos, array, offset, count);
-				this.m_buffer_pos += count;
-				if (this.m_buffer_pos == this.m_buffer_read_ahead)
+				count -= num;
+				offset += num;
+			}
+			this._readPos = (this._readLen = 0);
+			if (this._writePos > 0)
+			{
+				this.FlushWrite();
+			}
+			if (count >= this._bufferSize)
+			{
+				return this._stream.Read(array, offset, count) + num2;
+			}
+			this.EnsureBufferAllocated();
+			this._readLen = this._stream.Read(this._buffer, 0, this._bufferSize);
+			num = this.ReadFromBuffer(array, offset, count);
+			return num + num2;
+		}
+
+		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - offset < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (this._stream == null)
+			{
+				__Error.ReadNotSupported();
+			}
+			this.EnsureCanRead();
+			int num = 0;
+			SemaphoreSlim semaphoreSlim = base.EnsureAsyncActiveSemaphoreInitialized();
+			Task task = semaphoreSlim.WaitAsync();
+			if (task.Status == TaskStatus.RanToCompletion)
+			{
+				bool flag = true;
+				try
 				{
-					this.m_buffer_pos = 0;
-					this.m_buffer_read_ahead = 0;
+					Exception ex;
+					num = this.ReadFromBuffer(buffer, offset, count, out ex);
+					flag = num == count || ex != null;
+					if (flag)
+					{
+						Stream.SynchronousAsyncResult synchronousAsyncResult = ((ex == null) ? new Stream.SynchronousAsyncResult(num, state) : new Stream.SynchronousAsyncResult(ex, state, false));
+						if (callback != null)
+						{
+							callback(synchronousAsyncResult);
+						}
+						return synchronousAsyncResult;
+					}
 				}
-				return count;
-			}
-			int num = this.m_buffer_read_ahead - this.m_buffer_pos;
-			Buffer.BlockCopyInternal(this.m_buffer, this.m_buffer_pos, array, offset, num);
-			this.m_buffer_pos = 0;
-			this.m_buffer_read_ahead = 0;
-			offset += num;
-			count -= num;
-			if (count >= this.m_buffer.Length)
-			{
-				num += this.m_stream.Read(array, offset, count);
-			}
-			else
-			{
-				this.m_buffer_read_ahead = this.m_stream.Read(this.m_buffer, 0, this.m_buffer.Length);
-				if (count < this.m_buffer_read_ahead)
+				finally
 				{
-					Buffer.BlockCopyInternal(this.m_buffer, 0, array, offset, count);
-					this.m_buffer_pos = count;
-					num += count;
+					if (flag)
+					{
+						semaphoreSlim.Release();
+					}
+				}
+			}
+			return this.BeginReadFromUnderlyingStream(buffer, offset + num, count - num, callback, state, num, task);
+		}
+
+		private IAsyncResult BeginReadFromUnderlyingStream(byte[] buffer, int offset, int count, AsyncCallback callback, object state, int bytesAlreadySatisfied, Task semaphoreLockTask)
+		{
+			return TaskToApm.Begin(this.ReadFromUnderlyingStreamAsync(buffer, offset, count, CancellationToken.None, bytesAlreadySatisfied, semaphoreLockTask, true), callback, state);
+		}
+
+		public override int EndRead(IAsyncResult asyncResult)
+		{
+			if (asyncResult == null)
+			{
+				throw new ArgumentNullException("asyncResult");
+			}
+			if (asyncResult is Stream.SynchronousAsyncResult)
+			{
+				return Stream.SynchronousAsyncResult.EndRead(asyncResult);
+			}
+			return TaskToApm.End<int>(asyncResult);
+		}
+
+		private Task<int> LastSyncCompletedReadTask(int val)
+		{
+			Task<int> task = this._lastSyncCompletedReadTask;
+			if (task != null && task.Result == val)
+			{
+				return task;
+			}
+			task = Task.FromResult<int>(val);
+			this._lastSyncCompletedReadTask = task;
+			return task;
+		}
+
+		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - offset < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCancellation<int>(cancellationToken);
+			}
+			this.EnsureNotClosed();
+			this.EnsureCanRead();
+			int num = 0;
+			SemaphoreSlim semaphoreSlim = base.EnsureAsyncActiveSemaphoreInitialized();
+			Task task = semaphoreSlim.WaitAsync();
+			if (task.Status == TaskStatus.RanToCompletion)
+			{
+				bool flag = true;
+				try
+				{
+					Exception ex;
+					num = this.ReadFromBuffer(buffer, offset, count, out ex);
+					flag = num == count || ex != null;
+					if (flag)
+					{
+						return (ex == null) ? this.LastSyncCompletedReadTask(num) : Task.FromException<int>(ex);
+					}
+				}
+				finally
+				{
+					if (flag)
+					{
+						semaphoreSlim.Release();
+					}
+				}
+			}
+			return this.ReadFromUnderlyingStreamAsync(buffer, offset + num, count - num, cancellationToken, num, task, false);
+		}
+
+		private async Task<int> ReadFromUnderlyingStreamAsync(byte[] array, int offset, int count, CancellationToken cancellationToken, int bytesAlreadySatisfied, Task semaphoreLockTask, bool useApmPattern)
+		{
+			await semaphoreLockTask.ConfigureAwait(false);
+			int num2;
+			try
+			{
+				int num = this.ReadFromBuffer(array, offset, count);
+				if (num == count)
+				{
+					num2 = bytesAlreadySatisfied + num;
 				}
 				else
 				{
-					Buffer.BlockCopyInternal(this.m_buffer, 0, array, offset, this.m_buffer_read_ahead);
-					num += this.m_buffer_read_ahead;
-					this.m_buffer_read_ahead = 0;
+					if (num > 0)
+					{
+						count -= num;
+						offset += num;
+						bytesAlreadySatisfied += num;
+					}
+					int num3 = 0;
+					this._readLen = num3;
+					this._readPos = num3;
+					if (this._writePos > 0)
+					{
+						await this.FlushWriteAsync(cancellationToken).ConfigureAwait(false);
+					}
+					if (count >= this._bufferSize)
+					{
+						if (useApmPattern)
+						{
+							this.EnsureBeginEndAwaitableAllocated();
+							this._stream.BeginRead(array, offset, count, BeginEndAwaitableAdapter.Callback, this._beginEndAwaitable);
+							int num4 = bytesAlreadySatisfied;
+							Stream stream = this._stream;
+							num2 = num4 + stream.EndRead(await this._beginEndAwaitable);
+						}
+						else
+						{
+							int num4 = bytesAlreadySatisfied;
+							num2 = num4 + await this._stream.ReadAsync(array, offset, count, cancellationToken).ConfigureAwait(false);
+						}
+					}
+					else
+					{
+						this.EnsureBufferAllocated();
+						if (useApmPattern)
+						{
+							this.EnsureBeginEndAwaitableAllocated();
+							this._stream.BeginRead(this._buffer, 0, this._bufferSize, BeginEndAwaitableAdapter.Callback, this._beginEndAwaitable);
+							Stream stream = this._stream;
+							this._readLen = stream.EndRead(await this._beginEndAwaitable);
+							stream = null;
+						}
+						else
+						{
+							this._readLen = await this._stream.ReadAsync(this._buffer, 0, this._bufferSize, cancellationToken).ConfigureAwait(false);
+						}
+						num2 = bytesAlreadySatisfied + this.ReadFromBuffer(array, offset, count);
+					}
 				}
 			}
-			return num;
+			finally
+			{
+				base.EnsureAsyncActiveSemaphoreInitialized().Release();
+			}
+			return num2;
+		}
+
+		public override int ReadByte()
+		{
+			this.EnsureNotClosed();
+			this.EnsureCanRead();
+			if (this._readPos == this._readLen)
+			{
+				if (this._writePos > 0)
+				{
+					this.FlushWrite();
+				}
+				this.EnsureBufferAllocated();
+				this._readLen = this._stream.Read(this._buffer, 0, this._bufferSize);
+				this._readPos = 0;
+			}
+			if (this._readPos == this._readLen)
+			{
+				return -1;
+			}
+			byte[] buffer = this._buffer;
+			int readPos = this._readPos;
+			this._readPos = readPos + 1;
+			return buffer[readPos];
+		}
+
+		private void WriteToBuffer(byte[] array, ref int offset, ref int count)
+		{
+			int num = Math.Min(this._bufferSize - this._writePos, count);
+			if (num <= 0)
+			{
+				return;
+			}
+			this.EnsureBufferAllocated();
+			Buffer.InternalBlockCopy(array, offset, this._buffer, this._writePos, num);
+			this._writePos += num;
+			count -= num;
+			offset += num;
+		}
+
+		private void WriteToBuffer(byte[] array, ref int offset, ref int count, out Exception error)
+		{
+			try
+			{
+				error = null;
+				this.WriteToBuffer(array, ref offset, ref count);
+			}
+			catch (Exception ex)
+			{
+				error = ex;
+			}
 		}
 
 		public override void Write(byte[] array, int offset, int count)
 		{
 			if (array == null)
 			{
-				throw new ArgumentNullException("array");
-			}
-			this.CheckObjectDisposedException();
-			if (!this.m_stream.CanWrite)
-			{
-				throw new NotSupportedException(Locale.GetText("Cannot write to stream"));
+				throw new ArgumentNullException("array", Environment.GetResourceString("Buffer cannot be null."));
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", "< 0");
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", "< 0");
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
 			}
 			if (array.Length - offset < count)
 			{
-				throw new ArgumentException("array.Length - offset < count");
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			if (this.m_buffer_reading)
+			this.EnsureNotClosed();
+			this.EnsureCanWrite();
+			if (this._writePos == 0)
 			{
-				this.Flush();
-				this.m_buffer_reading = false;
+				this.ClearReadBufferBeforeWrite();
 			}
-			if (this.m_buffer_pos >= this.m_buffer.Length - count)
+			int num = checked(this._writePos + count);
+			if (checked(num + count >= this._bufferSize + this._bufferSize))
 			{
-				this.Flush();
-				this.m_stream.Write(array, offset, count);
+				if (this._writePos > 0)
+				{
+					if (num <= this._bufferSize + this._bufferSize && num <= 81920)
+					{
+						this.EnsureShadowBufferAllocated();
+						Buffer.InternalBlockCopy(array, offset, this._buffer, this._writePos, count);
+						this._stream.Write(this._buffer, 0, num);
+						this._writePos = 0;
+						return;
+					}
+					this._stream.Write(this._buffer, 0, this._writePos);
+					this._writePos = 0;
+				}
+				this._stream.Write(array, offset, count);
+				return;
+			}
+			this.WriteToBuffer(array, ref offset, ref count);
+			if (this._writePos < this._bufferSize)
+			{
+				return;
+			}
+			this._stream.Write(this._buffer, 0, this._writePos);
+			this._writePos = 0;
+			this.WriteToBuffer(array, ref offset, ref count);
+		}
+
+		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - offset < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (this._stream == null)
+			{
+				__Error.ReadNotSupported();
+			}
+			this.EnsureCanWrite();
+			SemaphoreSlim semaphoreSlim = base.EnsureAsyncActiveSemaphoreInitialized();
+			Task task = semaphoreSlim.WaitAsync();
+			if (task.Status == TaskStatus.RanToCompletion)
+			{
+				bool flag = true;
+				try
+				{
+					if (this._writePos == 0)
+					{
+						this.ClearReadBufferBeforeWrite();
+					}
+					flag = count < this._bufferSize - this._writePos;
+					if (flag)
+					{
+						Exception ex;
+						this.WriteToBuffer(buffer, ref offset, ref count, out ex);
+						Stream.SynchronousAsyncResult synchronousAsyncResult = ((ex == null) ? new Stream.SynchronousAsyncResult(state) : new Stream.SynchronousAsyncResult(ex, state, true));
+						if (callback != null)
+						{
+							callback(synchronousAsyncResult);
+						}
+						return synchronousAsyncResult;
+					}
+				}
+				finally
+				{
+					if (flag)
+					{
+						semaphoreSlim.Release();
+					}
+				}
+			}
+			return this.BeginWriteToUnderlyingStream(buffer, offset, count, callback, state, task);
+		}
+
+		private IAsyncResult BeginWriteToUnderlyingStream(byte[] buffer, int offset, int count, AsyncCallback callback, object state, Task semaphoreLockTask)
+		{
+			return TaskToApm.Begin(this.WriteToUnderlyingStreamAsync(buffer, offset, count, CancellationToken.None, semaphoreLockTask, true), callback, state);
+		}
+
+		public override void EndWrite(IAsyncResult asyncResult)
+		{
+			if (asyncResult == null)
+			{
+				throw new ArgumentNullException("asyncResult");
+			}
+			if (asyncResult is Stream.SynchronousAsyncResult)
+			{
+				Stream.SynchronousAsyncResult.EndWrite(asyncResult);
+				return;
+			}
+			TaskToApm.End(asyncResult);
+		}
+
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - offset < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCancellation<int>(cancellationToken);
+			}
+			this.EnsureNotClosed();
+			this.EnsureCanWrite();
+			SemaphoreSlim semaphoreSlim = base.EnsureAsyncActiveSemaphoreInitialized();
+			Task task = semaphoreSlim.WaitAsync();
+			if (task.Status == TaskStatus.RanToCompletion)
+			{
+				bool flag = true;
+				try
+				{
+					if (this._writePos == 0)
+					{
+						this.ClearReadBufferBeforeWrite();
+					}
+					flag = count < this._bufferSize - this._writePos;
+					if (flag)
+					{
+						Exception ex;
+						this.WriteToBuffer(buffer, ref offset, ref count, out ex);
+						return (ex == null) ? Task.CompletedTask : Task.FromException(ex);
+					}
+				}
+				finally
+				{
+					if (flag)
+					{
+						semaphoreSlim.Release();
+					}
+				}
+			}
+			return this.WriteToUnderlyingStreamAsync(buffer, offset, count, cancellationToken, task, false);
+		}
+
+		private async Task WriteToUnderlyingStreamAsync(byte[] array, int offset, int count, CancellationToken cancellationToken, Task semaphoreLockTask, bool useApmPattern)
+		{
+			await semaphoreLockTask.ConfigureAwait(false);
+			try
+			{
+				if (this._writePos == 0)
+				{
+					this.ClearReadBufferBeforeWrite();
+				}
+				int totalUserBytes = checked(this._writePos + count);
+				if (checked(totalUserBytes + count < this._bufferSize + this._bufferSize))
+				{
+					this.WriteToBuffer(array, ref offset, ref count);
+					if (this._writePos >= this._bufferSize)
+					{
+						if (useApmPattern)
+						{
+							this.EnsureBeginEndAwaitableAllocated();
+							this._stream.BeginWrite(this._buffer, 0, this._writePos, BeginEndAwaitableAdapter.Callback, this._beginEndAwaitable);
+							Stream stream = this._stream;
+							stream.EndWrite(await this._beginEndAwaitable);
+							stream = null;
+						}
+						else
+						{
+							await this._stream.WriteAsync(this._buffer, 0, this._writePos, cancellationToken).ConfigureAwait(false);
+						}
+						this._writePos = 0;
+						this.WriteToBuffer(array, ref offset, ref count);
+					}
+				}
+				else
+				{
+					if (this._writePos > 0)
+					{
+						if (totalUserBytes <= this._bufferSize + this._bufferSize && totalUserBytes <= 81920)
+						{
+							this.EnsureShadowBufferAllocated();
+							Buffer.InternalBlockCopy(array, offset, this._buffer, this._writePos, count);
+							if (useApmPattern)
+							{
+								this.EnsureBeginEndAwaitableAllocated();
+								this._stream.BeginWrite(this._buffer, 0, totalUserBytes, BeginEndAwaitableAdapter.Callback, this._beginEndAwaitable);
+								Stream stream = this._stream;
+								stream.EndWrite(await this._beginEndAwaitable);
+								stream = null;
+							}
+							else
+							{
+								await this._stream.WriteAsync(this._buffer, 0, totalUserBytes, cancellationToken).ConfigureAwait(false);
+							}
+							this._writePos = 0;
+							return;
+						}
+						if (useApmPattern)
+						{
+							this.EnsureBeginEndAwaitableAllocated();
+							this._stream.BeginWrite(this._buffer, 0, this._writePos, BeginEndAwaitableAdapter.Callback, this._beginEndAwaitable);
+							Stream stream = this._stream;
+							stream.EndWrite(await this._beginEndAwaitable);
+							stream = null;
+						}
+						else
+						{
+							await this._stream.WriteAsync(this._buffer, 0, this._writePos, cancellationToken).ConfigureAwait(false);
+						}
+						this._writePos = 0;
+					}
+					if (useApmPattern)
+					{
+						this.EnsureBeginEndAwaitableAllocated();
+						this._stream.BeginWrite(array, offset, count, BeginEndAwaitableAdapter.Callback, this._beginEndAwaitable);
+						Stream stream = this._stream;
+						stream.EndWrite(await this._beginEndAwaitable);
+						stream = null;
+					}
+					else
+					{
+						await this._stream.WriteAsync(array, offset, count, cancellationToken).ConfigureAwait(false);
+					}
+				}
+			}
+			finally
+			{
+				base.EnsureAsyncActiveSemaphoreInitialized().Release();
+			}
+		}
+
+		public override void WriteByte(byte value)
+		{
+			this.EnsureNotClosed();
+			if (this._writePos == 0)
+			{
+				this.EnsureCanWrite();
+				this.ClearReadBufferBeforeWrite();
+				this.EnsureBufferAllocated();
+			}
+			if (this._writePos >= this._bufferSize - 1)
+			{
+				this.FlushWrite();
+			}
+			byte[] buffer = this._buffer;
+			int writePos = this._writePos;
+			this._writePos = writePos + 1;
+			buffer[writePos] = value;
+		}
+
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			this.EnsureNotClosed();
+			this.EnsureCanSeek();
+			if (this._writePos > 0)
+			{
+				this.FlushWrite();
+				return this._stream.Seek(offset, origin);
+			}
+			if (this._readLen - this._readPos > 0 && origin == SeekOrigin.Current)
+			{
+				offset -= (long)(this._readLen - this._readPos);
+			}
+			long position = this.Position;
+			long num = this._stream.Seek(offset, origin);
+			this._readPos = (int)(num - (position - (long)this._readPos));
+			if (0 <= this._readPos && this._readPos < this._readLen)
+			{
+				this._stream.Seek((long)(this._readLen - this._readPos), SeekOrigin.Current);
 			}
 			else
 			{
-				Buffer.BlockCopyInternal(array, offset, this.m_buffer, this.m_buffer_pos, count);
-				this.m_buffer_pos += count;
+				this._readPos = (this._readLen = 0);
 			}
+			return num;
 		}
 
-		private void CheckObjectDisposedException()
+		public override void SetLength(long value)
 		{
-			if (this.disposed)
+			if (value < 0L)
 			{
-				throw new ObjectDisposedException("BufferedStream", Locale.GetText("Stream is closed"));
+				throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Length must be non-negative."));
 			}
+			this.EnsureNotClosed();
+			this.EnsureCanSeek();
+			this.EnsureCanWrite();
+			this.Flush();
+			this._stream.SetLength(value);
 		}
 
-		private Stream m_stream;
+		private const int _DefaultBufferSize = 4096;
 
-		private byte[] m_buffer;
+		private Stream _stream;
 
-		private int m_buffer_pos;
+		private byte[] _buffer;
 
-		private int m_buffer_read_ahead;
+		private readonly int _bufferSize;
 
-		private bool m_buffer_reading;
+		private int _readPos;
 
-		private bool disposed;
+		private int _readLen;
+
+		private int _writePos;
+
+		private BeginEndAwaitableAdapter _beginEndAwaitable;
+
+		private Task<int> _lastSyncCompletedReadTask;
+
+		private const int MaxShadowBufferSize = 81920;
 	}
 }

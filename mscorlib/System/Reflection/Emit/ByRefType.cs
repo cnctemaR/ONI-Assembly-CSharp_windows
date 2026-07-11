@@ -1,25 +1,24 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
-	internal class ByRefType : DerivedType
+	[StructLayout(LayoutKind.Sequential)]
+	internal class ByRefType : SymbolType
 	{
 		internal ByRefType(Type elementType)
 			: base(elementType)
 		{
 		}
 
+		internal override Type InternalResolve()
+		{
+			return this.m_baseType.InternalResolve().MakeByRefType();
+		}
+
 		protected override bool IsByRefImpl()
 		{
 			return true;
-		}
-
-		public override Type BaseType
-		{
-			get
-			{
-				return typeof(Array);
-			}
 		}
 
 		internal override string FormatName(string elementName)

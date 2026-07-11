@@ -15,7 +15,7 @@ public class PacuCleanerConfig : IEntityConfig
 			storage.capacityKg = 10f;
 			ElementConsumer elementConsumer = gameObject.AddOrGet<PassiveElementConsumer>();
 			elementConsumer.elementToConsume = SimHashes.DirtyWater;
-			elementConsumer.consumptionRate = PacuCleanerConfig.POLLUTED_WATER_CONVERTED_PER_CYCLE / 600f;
+			elementConsumer.consumptionRate = 0.2f;
 			elementConsumer.capacityKG = 10f;
 			elementConsumer.consumptionRadius = 3;
 			elementConsumer.showInStatusPanel = true;
@@ -25,18 +25,18 @@ public class PacuCleanerConfig : IEntityConfig
 			elementConsumer.showDescriptor = false;
 			gameObject.AddOrGet<UpdateElementConsumerPosition>();
 			BubbleSpawner bubbleSpawner = gameObject.AddComponent<BubbleSpawner>();
-			bubbleSpawner.element = PacuCleanerConfig.OUTPUT_ELEMENT;
+			bubbleSpawner.element = SimHashes.Water;
 			bubbleSpawner.emitMass = 2f;
 			bubbleSpawner.emitVariance = 0.5f;
 			bubbleSpawner.initialVelocity = new Vector2f(0, 1);
 			ElementConverter elementConverter = gameObject.AddOrGet<ElementConverter>();
 			elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 			{
-				new ElementConverter.ConsumedElement(PacuCleanerConfig.INPUT_ELEMENT.CreateTag(), PacuCleanerConfig.POLLUTED_WATER_CONVERTED_PER_CYCLE / 600f)
+				new ElementConverter.ConsumedElement(SimHashes.DirtyWater.CreateTag(), 0.2f)
 			};
 			elementConverter.outputElements = new ElementConverter.OutputElement[]
 			{
-				new ElementConverter.OutputElement(PacuCleanerConfig.POLLUTED_WATER_CONVERTED_PER_CYCLE / 600f, SimHashes.Water, 0f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
+				new ElementConverter.OutputElement(0.2f, SimHashes.Water, 0f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 			};
 		}
 		return gameObject;
@@ -46,7 +46,7 @@ public class PacuCleanerConfig : IEntityConfig
 	{
 		GameObject gameObject = PacuCleanerConfig.CreatePacu("PacuCleaner", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.DESC, "pacu_kanim", false);
 		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, 25f);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuCleanerEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuCleanerBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_CLEANER, PacuCleanerConfig.EGG_SORT_ORDER, false, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuCleanerEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuCleanerBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_CLEANER, 501, false, true, false, 0.75f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -68,13 +68,13 @@ public class PacuCleanerConfig : IEntityConfig
 
 	public const string EGG_ID = "PacuCleanerEgg";
 
-	public static float POLLUTED_WATER_CONVERTED_PER_CYCLE = 120f;
+	public const float POLLUTED_WATER_CONVERTED_PER_CYCLE = 120f;
 
-	public static SimHashes INPUT_ELEMENT = SimHashes.DirtyWater;
+	public const SimHashes INPUT_ELEMENT = SimHashes.DirtyWater;
 
-	public static SimHashes OUTPUT_ELEMENT = SimHashes.Water;
+	public const SimHashes OUTPUT_ELEMENT = SimHashes.Water;
 
-	public static EffectorValues DECOR = global::TUNING.BUILDINGS.DECOR.BONUS.TIER4;
+	public static readonly EffectorValues DECOR = global::TUNING.BUILDINGS.DECOR.BONUS.TIER4;
 
-	public static int EGG_SORT_ORDER = PacuConfig.EGG_SORT_ORDER + 1;
+	public const int EGG_SORT_ORDER = 501;
 }

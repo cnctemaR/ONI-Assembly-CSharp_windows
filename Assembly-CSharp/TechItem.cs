@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class TechItem : Resource
 {
-	public TechItem(string id, ResourceSet parent, string name, string description, Func<string, Sprite> getUISprite, Tech parentTech)
+	public TechItem(string id, ResourceSet parent, string name, string description, Func<string, bool, Sprite> getUISprite, Tech parentTech)
 		: base(id, parent, name)
 	{
 		this.description = description;
@@ -13,7 +13,7 @@ public class TechItem : Resource
 
 	public Sprite UISprite()
 	{
-		return this.getUISprite("ui");
+		return this.getUISprite("ui", false);
 	}
 
 	public bool IsComplete()
@@ -23,7 +23,7 @@ public class TechItem : Resource
 
 	public string description;
 
-	public Func<string, Sprite> getUISprite;
+	public Func<string, bool, Sprite> getUISprite;
 
 	public Tech parentTech;
 }

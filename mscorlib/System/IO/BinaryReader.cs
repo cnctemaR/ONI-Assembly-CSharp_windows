@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using Mono.Security;
 
@@ -9,29 +10,41 @@ namespace System.IO
 	public class BinaryReader : IDisposable
 	{
 		public BinaryReader(Stream input)
-			: this(input, Encoding.UTF8UnmarkedUnsafe)
+			: this(input, new UTF8Encoding(), false)
 		{
 		}
 
 		public BinaryReader(Stream input, Encoding encoding)
+			: this(input, encoding, false)
 		{
-			if (input == null || encoding == null)
+		}
+
+		public BinaryReader(Stream input, Encoding encoding, bool leaveOpen)
+		{
+			if (input == null)
 			{
-				throw new ArgumentNullException(Locale.GetText("Input or Encoding is a null reference."));
+				throw new ArgumentNullException("input");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
 			}
 			if (!input.CanRead)
 			{
-				throw new ArgumentException(Locale.GetText("The stream doesn't support reading."));
+				throw new ArgumentException(Environment.GetResourceString("Stream was not readable."));
 			}
 			this.m_stream = input;
-			this.m_encoding = encoding;
-			this.decoder = encoding.GetDecoder();
-			this.m_buffer = new byte[32];
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
+			this.m_decoder = encoding.GetDecoder();
+			this.m_maxCharsSize = encoding.GetMaxCharCount(128);
+			int num = encoding.GetMaxByteCount(1);
+			if (num < 16)
+			{
+				num = 16;
+			}
+			this.m_buffer = new byte[num];
+			this.m_2BytesPerChar = encoding is UnicodeEncoding;
+			this.m_isMemoryStream = this.m_stream.GetType() == typeof(MemoryStream);
+			this.m_leaveOpen = leaveOpen;
 		}
 
 		public virtual Stream BaseStream
@@ -45,259 +58,82 @@ namespace System.IO
 		public virtual void Close()
 		{
 			this.Dispose(true);
-			this.m_disposed = true;
 		}
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (disposing && this.m_stream != null)
+			if (disposing)
 			{
-				this.m_stream.Close();
-			}
-			this.m_disposed = true;
-			this.m_buffer = null;
-			this.m_encoding = null;
-			this.m_stream = null;
-			this.charBuffer = null;
-		}
-
-		protected virtual void FillBuffer(int numBytes)
-		{
-			if (this.m_disposed)
-			{
-				throw new ObjectDisposedException("BinaryReader", "Cannot read from a closed BinaryReader.");
-			}
-			if (this.m_stream == null)
-			{
-				throw new IOException("Stream is invalid");
-			}
-			this.CheckBuffer(numBytes);
-			int num;
-			for (int i = 0; i < numBytes; i += num)
-			{
-				num = this.m_stream.Read(this.m_buffer, i, numBytes - i);
-				if (num == 0)
+				Stream stream = this.m_stream;
+				this.m_stream = null;
+				if (stream != null && !this.m_leaveOpen)
 				{
-					throw new EndOfStreamException();
+					stream.Close();
 				}
 			}
+			this.m_stream = null;
+			this.m_buffer = null;
+			this.m_decoder = null;
+			this.m_charBytes = null;
+			this.m_singleChar = null;
+			this.m_charBuffer = null;
+		}
+
+		public void Dispose()
+		{
+			this.Dispose(true);
 		}
 
 		public virtual int PeekChar()
 		{
 			if (this.m_stream == null)
 			{
-				if (this.m_disposed)
-				{
-					throw new ObjectDisposedException("BinaryReader", "Cannot read from a closed BinaryReader.");
-				}
-				throw new IOException("Stream is invalid");
+				__Error.FileNotOpen();
 			}
-			else
+			if (!this.m_stream.CanSeek)
 			{
-				if (!this.m_stream.CanSeek)
-				{
-					return -1;
-				}
-				char[] array = new char[1];
-				int num2;
-				int num = this.ReadCharBytes(array, 0, 1, out num2);
-				this.m_stream.Position -= (long)num2;
-				if (num == 0)
-				{
-					return -1;
-				}
-				return (int)array[0];
+				return -1;
 			}
+			long position = this.m_stream.Position;
+			int num = this.Read();
+			this.m_stream.Position = position;
+			return num;
 		}
 
 		public virtual int Read()
 		{
-			if (this.charBuffer == null)
-			{
-				this.charBuffer = new char[128];
-			}
-			if (this.Read(this.charBuffer, 0, 1) == 0)
-			{
-				return -1;
-			}
-			return (int)this.charBuffer[0];
-		}
-
-		public virtual int Read(byte[] buffer, int index, int count)
-		{
 			if (this.m_stream == null)
 			{
-				if (this.m_disposed)
-				{
-					throw new ObjectDisposedException("BinaryReader", "Cannot read from a closed BinaryReader.");
-				}
-				throw new IOException("Stream is invalid");
+				__Error.FileNotOpen();
 			}
-			else
-			{
-				if (buffer == null)
-				{
-					throw new ArgumentNullException("buffer is null");
-				}
-				if (index < 0)
-				{
-					throw new ArgumentOutOfRangeException("index is less than 0");
-				}
-				if (count < 0)
-				{
-					throw new ArgumentOutOfRangeException("count is less than 0");
-				}
-				if (buffer.Length - index < count)
-				{
-					throw new ArgumentException("buffer is too small");
-				}
-				return this.m_stream.Read(buffer, index, count);
-			}
-		}
-
-		public virtual int Read(char[] buffer, int index, int count)
-		{
-			if (this.m_stream == null)
-			{
-				if (this.m_disposed)
-				{
-					throw new ObjectDisposedException("BinaryReader", "Cannot read from a closed BinaryReader.");
-				}
-				throw new IOException("Stream is invalid");
-			}
-			else
-			{
-				if (buffer == null)
-				{
-					throw new ArgumentNullException("buffer is null");
-				}
-				if (index < 0)
-				{
-					throw new ArgumentOutOfRangeException("index is less than 0");
-				}
-				if (count < 0)
-				{
-					throw new ArgumentOutOfRangeException("count is less than 0");
-				}
-				if (buffer.Length - index < count)
-				{
-					throw new ArgumentException("buffer is too small");
-				}
-				int num;
-				return this.ReadCharBytes(buffer, index, count, out num);
-			}
-		}
-
-		private int ReadCharBytes(char[] buffer, int index, int count, out int bytes_read)
-		{
-			int i = 0;
-			bytes_read = 0;
-			while (i < count)
-			{
-				int num = 0;
-				int chars;
-				do
-				{
-					this.CheckBuffer(num + 1);
-					int num2 = this.m_stream.ReadByte();
-					if (num2 == -1)
-					{
-						return i;
-					}
-					this.m_buffer[num++] = (byte)num2;
-					bytes_read++;
-					chars = this.m_encoding.GetChars(this.m_buffer, 0, num, buffer, index + i);
-				}
-				while (chars <= 0);
-				i++;
-			}
-			return i;
-		}
-
-		protected int Read7BitEncodedInt()
-		{
-			int num = 0;
-			int num2 = 0;
-			int i;
-			for (i = 0; i < 5; i++)
-			{
-				byte b = this.ReadByte();
-				num |= (int)(b & 127) << num2;
-				num2 += 7;
-				if ((b & 128) == 0)
-				{
-					break;
-				}
-			}
-			if (i < 5)
-			{
-				return num;
-			}
-			throw new FormatException("Too many bytes in what should have been a 7 bit encoded Int32.");
+			return this.InternalReadOneChar();
 		}
 
 		public virtual bool ReadBoolean()
 		{
-			return this.ReadByte() != 0;
+			this.FillBuffer(1);
+			return this.m_buffer[0] > 0;
 		}
 
 		public virtual byte ReadByte()
 		{
 			if (this.m_stream == null)
 			{
-				if (this.m_disposed)
-				{
-					throw new ObjectDisposedException("BinaryReader", "Cannot read from a closed BinaryReader.");
-				}
-				throw new IOException("Stream is invalid");
+				__Error.FileNotOpen();
 			}
-			else
+			int num = this.m_stream.ReadByte();
+			if (num == -1)
 			{
-				int num = this.m_stream.ReadByte();
-				if (num != -1)
-				{
-					return (byte)num;
-				}
-				throw new EndOfStreamException();
+				__Error.EndOfFile();
 			}
+			return (byte)num;
 		}
 
-		public virtual byte[] ReadBytes(int count)
+		[CLSCompliant(false)]
+		public virtual sbyte ReadSByte()
 		{
-			if (this.m_stream == null)
-			{
-				if (this.m_disposed)
-				{
-					throw new ObjectDisposedException("BinaryReader", "Cannot read from a closed BinaryReader.");
-				}
-				throw new IOException("Stream is invalid");
-			}
-			else
-			{
-				if (count < 0)
-				{
-					throw new ArgumentOutOfRangeException("count is less than 0");
-				}
-				byte[] array = new byte[count];
-				int i;
-				int num;
-				for (i = 0; i < count; i += num)
-				{
-					num = this.m_stream.Read(array, i, count - i);
-					if (num == 0)
-					{
-						break;
-					}
-				}
-				if (i != count)
-				{
-					byte[] array2 = new byte[i];
-					Buffer.BlockCopyInternal(array, 0, array2, 0, i);
-					return array2;
-				}
-				return array;
-			}
+			this.FillBuffer(1);
+			return (sbyte)this.m_buffer[0];
 		}
 
 		public virtual char ReadChar()
@@ -305,165 +141,15 @@ namespace System.IO
 			int num = this.Read();
 			if (num == -1)
 			{
-				throw new EndOfStreamException();
+				__Error.EndOfFile();
 			}
 			return (char)num;
-		}
-
-		public virtual char[] ReadChars(int count)
-		{
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count is less than 0");
-			}
-			if (count == 0)
-			{
-				return new char[0];
-			}
-			char[] array = new char[count];
-			int num = this.Read(array, 0, count);
-			if (num == 0)
-			{
-				throw new EndOfStreamException();
-			}
-			if (num != array.Length)
-			{
-				char[] array2 = new char[num];
-				Array.Copy(array, 0, array2, 0, num);
-				return array2;
-			}
-			return array;
-		}
-
-		public unsafe virtual decimal ReadDecimal()
-		{
-			this.FillBuffer(16);
-			decimal num;
-			if (BitConverter.IsLittleEndian)
-			{
-				for (int i = 0; i < 16; i++)
-				{
-					if (i < 4)
-					{
-						*((ref num) + (i + 8)) = this.m_buffer[i];
-					}
-					else if (i < 8)
-					{
-						*((ref num) + (i + 8)) = this.m_buffer[i];
-					}
-					else if (i < 12)
-					{
-						*((ref num) + (i - 4)) = this.m_buffer[i];
-					}
-					else if (i < 16)
-					{
-						*((ref num) + (i - 12)) = this.m_buffer[i];
-					}
-				}
-			}
-			else
-			{
-				for (int j = 0; j < 16; j++)
-				{
-					if (j < 4)
-					{
-						*((ref num) + (11 - j)) = this.m_buffer[j];
-					}
-					else if (j < 8)
-					{
-						*((ref num) + (19 - j)) = this.m_buffer[j];
-					}
-					else if (j < 12)
-					{
-						*((ref num) + (15 - j)) = this.m_buffer[j];
-					}
-					else if (j < 16)
-					{
-						*((ref num) + (15 - j)) = this.m_buffer[j];
-					}
-				}
-			}
-			return num;
-		}
-
-		public virtual double ReadDouble()
-		{
-			this.FillBuffer(8);
-			return BitConverterLE.ToDouble(this.m_buffer, 0);
 		}
 
 		public virtual short ReadInt16()
 		{
 			this.FillBuffer(2);
 			return (short)((int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8));
-		}
-
-		public virtual int ReadInt32()
-		{
-			this.FillBuffer(4);
-			return (int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8) | ((int)this.m_buffer[2] << 16) | ((int)this.m_buffer[3] << 24);
-		}
-
-		public virtual long ReadInt64()
-		{
-			this.FillBuffer(8);
-			uint num = (uint)((int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8) | ((int)this.m_buffer[2] << 16) | ((int)this.m_buffer[3] << 24));
-			uint num2 = (uint)((int)this.m_buffer[4] | ((int)this.m_buffer[5] << 8) | ((int)this.m_buffer[6] << 16) | ((int)this.m_buffer[7] << 24));
-			return (long)(((ulong)num2 << 32) | (ulong)num);
-		}
-
-		[CLSCompliant(false)]
-		public virtual sbyte ReadSByte()
-		{
-			return (sbyte)this.ReadByte();
-		}
-
-		public virtual string ReadString()
-		{
-			int num = this.Read7BitEncodedInt();
-			if (num < 0)
-			{
-				throw new IOException("Invalid binary file (string len < 0)");
-			}
-			if (num == 0)
-			{
-				return string.Empty;
-			}
-			if (this.charBuffer == null)
-			{
-				this.charBuffer = new char[128];
-			}
-			StringBuilder stringBuilder = null;
-			int chars;
-			for (;;)
-			{
-				int num2 = ((num <= 128) ? num : 128);
-				this.FillBuffer(num2);
-				chars = this.decoder.GetChars(this.m_buffer, 0, num2, this.charBuffer, 0);
-				if (stringBuilder == null && num2 == num)
-				{
-					break;
-				}
-				if (stringBuilder == null)
-				{
-					stringBuilder = new StringBuilder(num);
-				}
-				stringBuilder.Append(this.charBuffer, 0, chars);
-				num -= num2;
-				if (num <= 0)
-				{
-					goto Block_8;
-				}
-			}
-			return new string(this.charBuffer, 0, chars);
-			Block_8:
-			return stringBuilder.ToString();
-		}
-
-		public virtual float ReadSingle()
-		{
-			this.FillBuffer(4);
-			return BitConverterLE.ToSingle(this.m_buffer, 0);
 		}
 
 		[CLSCompliant(false)]
@@ -473,6 +159,20 @@ namespace System.IO
 			return (ushort)((int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8));
 		}
 
+		public virtual int ReadInt32()
+		{
+			if (this.m_isMemoryStream)
+			{
+				if (this.m_stream == null)
+				{
+					__Error.FileNotOpen();
+				}
+				return (this.m_stream as MemoryStream).InternalReadInt32();
+			}
+			this.FillBuffer(4);
+			return (int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8) | ((int)this.m_buffer[2] << 16) | ((int)this.m_buffer[3] << 24);
+		}
+
 		[CLSCompliant(false)]
 		public virtual uint ReadUInt32()
 		{
@@ -480,37 +180,430 @@ namespace System.IO
 			return (uint)((int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8) | ((int)this.m_buffer[2] << 16) | ((int)this.m_buffer[3] << 24));
 		}
 
+		public virtual long ReadInt64()
+		{
+			this.FillBuffer(8);
+			uint num = (uint)((int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8) | ((int)this.m_buffer[2] << 16) | ((int)this.m_buffer[3] << 24));
+			return (long)(((ulong)((int)this.m_buffer[4] | ((int)this.m_buffer[5] << 8) | ((int)this.m_buffer[6] << 16) | ((int)this.m_buffer[7] << 24)) << 32) | (ulong)num);
+		}
+
 		[CLSCompliant(false)]
 		public virtual ulong ReadUInt64()
 		{
 			this.FillBuffer(8);
 			uint num = (uint)((int)this.m_buffer[0] | ((int)this.m_buffer[1] << 8) | ((int)this.m_buffer[2] << 16) | ((int)this.m_buffer[3] << 24));
-			uint num2 = (uint)((int)this.m_buffer[4] | ((int)this.m_buffer[5] << 8) | ((int)this.m_buffer[6] << 16) | ((int)this.m_buffer[7] << 24));
-			return ((ulong)num2 << 32) | (ulong)num;
+			return ((ulong)((int)this.m_buffer[4] | ((int)this.m_buffer[5] << 8) | ((int)this.m_buffer[6] << 16) | ((int)this.m_buffer[7] << 24)) << 32) | (ulong)num;
 		}
 
-		private void CheckBuffer(int length)
+		[SecuritySafeCritical]
+		public virtual float ReadSingle()
 		{
-			if (this.m_buffer.Length <= length)
-			{
-				byte[] array = new byte[length];
-				Buffer.BlockCopyInternal(this.m_buffer, 0, array, 0, this.m_buffer.Length);
-				this.m_buffer = array;
-			}
+			this.FillBuffer(4);
+			return BitConverterLE.ToSingle(this.m_buffer, 0);
 		}
 
-		private const int MaxBufferSize = 128;
+		[SecuritySafeCritical]
+		public virtual double ReadDouble()
+		{
+			this.FillBuffer(8);
+			return BitConverterLE.ToDouble(this.m_buffer, 0);
+		}
+
+		public virtual decimal ReadDecimal()
+		{
+			this.FillBuffer(16);
+			decimal num;
+			try
+			{
+				num = decimal.ToDecimal(this.m_buffer);
+			}
+			catch (ArgumentException ex)
+			{
+				throw new IOException(Environment.GetResourceString("Decimal byte array constructor requires an array of length four containing valid decimal bytes."), ex);
+			}
+			return num;
+		}
+
+		public virtual string ReadString()
+		{
+			if (this.m_stream == null)
+			{
+				__Error.FileNotOpen();
+			}
+			int num = 0;
+			int num2 = this.Read7BitEncodedInt();
+			if (num2 < 0)
+			{
+				throw new IOException(Environment.GetResourceString("BinaryReader encountered an invalid string length of {0} characters.", new object[] { num2 }));
+			}
+			if (num2 == 0)
+			{
+				return string.Empty;
+			}
+			if (this.m_charBytes == null)
+			{
+				this.m_charBytes = new byte[128];
+			}
+			if (this.m_charBuffer == null)
+			{
+				this.m_charBuffer = new char[this.m_maxCharsSize];
+			}
+			StringBuilder stringBuilder = null;
+			int chars;
+			for (;;)
+			{
+				int num3 = ((num2 - num > 128) ? 128 : (num2 - num));
+				int num4 = this.m_stream.Read(this.m_charBytes, 0, num3);
+				if (num4 == 0)
+				{
+					__Error.EndOfFile();
+				}
+				chars = this.m_decoder.GetChars(this.m_charBytes, 0, num4, this.m_charBuffer, 0);
+				if (num == 0 && num4 == num2)
+				{
+					break;
+				}
+				if (stringBuilder == null)
+				{
+					stringBuilder = StringBuilderCache.Acquire(num2);
+				}
+				stringBuilder.Append(this.m_charBuffer, 0, chars);
+				num += num4;
+				if (num >= num2)
+				{
+					goto Block_11;
+				}
+			}
+			return new string(this.m_charBuffer, 0, chars);
+			Block_11:
+			return StringBuilderCache.GetStringAndRelease(stringBuilder);
+		}
+
+		[SecuritySafeCritical]
+		public virtual int Read(char[] buffer, int index, int count)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (this.m_stream == null)
+			{
+				__Error.FileNotOpen();
+			}
+			return this.InternalReadChars(buffer, index, count);
+		}
+
+		[SecurityCritical]
+		private unsafe int InternalReadChars(char[] buffer, int index, int count)
+		{
+			int i = count;
+			if (this.m_charBytes == null)
+			{
+				this.m_charBytes = new byte[128];
+			}
+			while (i > 0)
+			{
+				int num = i;
+				DecoderNLS decoderNLS = this.m_decoder as DecoderNLS;
+				if (decoderNLS != null && decoderNLS.HasState && num > 1)
+				{
+					num--;
+				}
+				if (this.m_2BytesPerChar)
+				{
+					num <<= 1;
+				}
+				if (num > 128)
+				{
+					num = 128;
+				}
+				int num2 = 0;
+				byte[] array;
+				if (this.m_isMemoryStream)
+				{
+					MemoryStream memoryStream = this.m_stream as MemoryStream;
+					num2 = memoryStream.InternalGetPosition();
+					num = memoryStream.InternalEmulateRead(num);
+					array = memoryStream.InternalGetBuffer();
+				}
+				else
+				{
+					num = this.m_stream.Read(this.m_charBytes, 0, num);
+					array = this.m_charBytes;
+				}
+				if (num == 0)
+				{
+					return count - i;
+				}
+				int chars;
+				checked
+				{
+					if (num2 < 0 || num < 0 || num2 + num > array.Length)
+					{
+						throw new ArgumentOutOfRangeException("byteCount");
+					}
+					if (index < 0 || i < 0 || index + i > buffer.Length)
+					{
+						throw new ArgumentOutOfRangeException("charsRemaining");
+					}
+					byte[] array2;
+					byte* ptr;
+					if ((array2 = array) == null || array2.Length == 0)
+					{
+						ptr = null;
+					}
+					else
+					{
+						ptr = &array2[0];
+					}
+					fixed (char[] array3 = buffer)
+					{
+						char* ptr2;
+						if (buffer == null || array3.Length == 0)
+						{
+							ptr2 = null;
+						}
+						else
+						{
+							ptr2 = &array3[0];
+						}
+						chars = this.m_decoder.GetChars(ptr + num2, num, ptr2 + index, i, false);
+					}
+					array2 = null;
+				}
+				i -= chars;
+				index += chars;
+			}
+			return count - i;
+		}
+
+		private int InternalReadOneChar()
+		{
+			int num = 0;
+			long num2 = 0L;
+			if (this.m_stream.CanSeek)
+			{
+				num2 = this.m_stream.Position;
+			}
+			if (this.m_charBytes == null)
+			{
+				this.m_charBytes = new byte[128];
+			}
+			if (this.m_singleChar == null)
+			{
+				this.m_singleChar = new char[1];
+			}
+			while (num == 0)
+			{
+				int num3 = (this.m_2BytesPerChar ? 2 : 1);
+				int num4 = this.m_stream.ReadByte();
+				this.m_charBytes[0] = (byte)num4;
+				if (num4 == -1)
+				{
+					num3 = 0;
+				}
+				if (num3 == 2)
+				{
+					num4 = this.m_stream.ReadByte();
+					this.m_charBytes[1] = (byte)num4;
+					if (num4 == -1)
+					{
+						num3 = 1;
+					}
+				}
+				if (num3 == 0)
+				{
+					return -1;
+				}
+				try
+				{
+					num = this.m_decoder.GetChars(this.m_charBytes, 0, num3, this.m_singleChar, 0);
+				}
+				catch
+				{
+					if (this.m_stream.CanSeek)
+					{
+						this.m_stream.Seek(num2 - this.m_stream.Position, SeekOrigin.Current);
+					}
+					throw;
+				}
+			}
+			if (num == 0)
+			{
+				return -1;
+			}
+			return (int)this.m_singleChar[0];
+		}
+
+		[SecuritySafeCritical]
+		public virtual char[] ReadChars(int count)
+		{
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (this.m_stream == null)
+			{
+				__Error.FileNotOpen();
+			}
+			if (count == 0)
+			{
+				return EmptyArray<char>.Value;
+			}
+			char[] array = new char[count];
+			int num = this.InternalReadChars(array, 0, count);
+			if (num != count)
+			{
+				char[] array2 = new char[num];
+				Buffer.InternalBlockCopy(array, 0, array2, 0, 2 * num);
+				array = array2;
+			}
+			return array;
+		}
+
+		public virtual int Read(byte[] buffer, int index, int count)
+		{
+			if (buffer == null)
+			{
+				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - index < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (this.m_stream == null)
+			{
+				__Error.FileNotOpen();
+			}
+			return this.m_stream.Read(buffer, index, count);
+		}
+
+		public virtual byte[] ReadBytes(int count)
+		{
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (this.m_stream == null)
+			{
+				__Error.FileNotOpen();
+			}
+			if (count == 0)
+			{
+				return EmptyArray<byte>.Value;
+			}
+			byte[] array = new byte[count];
+			int num = 0;
+			do
+			{
+				int num2 = this.m_stream.Read(array, num, count);
+				if (num2 == 0)
+				{
+					break;
+				}
+				num += num2;
+				count -= num2;
+			}
+			while (count > 0);
+			if (num != array.Length)
+			{
+				byte[] array2 = new byte[num];
+				Buffer.InternalBlockCopy(array, 0, array2, 0, num);
+				array = array2;
+			}
+			return array;
+		}
+
+		protected virtual void FillBuffer(int numBytes)
+		{
+			if (this.m_buffer != null && (numBytes < 0 || numBytes > this.m_buffer.Length))
+			{
+				throw new ArgumentOutOfRangeException("numBytes", Environment.GetResourceString("The number of bytes requested does not fit into BinaryReader's internal buffer."));
+			}
+			int num = 0;
+			if (this.m_stream == null)
+			{
+				__Error.FileNotOpen();
+			}
+			if (numBytes == 1)
+			{
+				int num2 = this.m_stream.ReadByte();
+				if (num2 == -1)
+				{
+					__Error.EndOfFile();
+				}
+				this.m_buffer[0] = (byte)num2;
+				return;
+			}
+			do
+			{
+				int num2 = this.m_stream.Read(this.m_buffer, num, numBytes - num);
+				if (num2 == 0)
+				{
+					__Error.EndOfFile();
+				}
+				num += num2;
+			}
+			while (num < numBytes);
+		}
+
+		protected internal int Read7BitEncodedInt()
+		{
+			int num = 0;
+			int num2 = 0;
+			while (num2 != 35)
+			{
+				byte b = this.ReadByte();
+				num |= (int)(b & 127) << num2;
+				num2 += 7;
+				if ((b & 128) == 0)
+				{
+					return num;
+				}
+			}
+			throw new FormatException(Environment.GetResourceString("Too many bytes in what should have been a 7 bit encoded Int32."));
+		}
+
+		private const int MaxCharBytesSize = 128;
 
 		private Stream m_stream;
 
-		private Encoding m_encoding;
-
 		private byte[] m_buffer;
 
-		private Decoder decoder;
+		private Decoder m_decoder;
 
-		private char[] charBuffer;
+		private byte[] m_charBytes;
 
-		private bool m_disposed;
+		private char[] m_singleChar;
+
+		private char[] m_charBuffer;
+
+		private int m_maxCharsSize;
+
+		private bool m_2BytesPerChar;
+
+		private bool m_isMemoryStream;
+
+		private bool m_leaveOpen;
 	}
 }

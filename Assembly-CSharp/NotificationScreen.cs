@@ -8,6 +8,11 @@ public class NotificationScreen : KScreen
 {
 	public static NotificationScreen Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		NotificationScreen.Instance = null;
+	}
+
 	private void OnAddNotifier(Notifier notifier)
 	{
 		notifier.OnAdd = (Action<Notification>)Delegate.Combine(notifier.OnAdd, new Action<Notification>(this.OnAddNotification));
@@ -49,10 +54,8 @@ public class NotificationScreen : KScreen
 	{
 		base.OnPrefabInit();
 		NotificationScreen.Instance = this;
-		Components.Cmps<Notifier> notifiers = Components.Notifiers;
-		notifiers.OnAdd = (Action<Notifier>)Delegate.Combine(notifiers.OnAdd, new Action<Notifier>(this.OnAddNotifier));
-		Components.Cmps<Notifier> notifiers2 = Components.Notifiers;
-		notifiers2.OnRemove = (Action<Notifier>)Delegate.Combine(notifiers2.OnRemove, new Action<Notifier>(this.OnRemoveNotifier));
+		Components.Notifiers.OnAdd += this.OnAddNotifier;
+		Components.Notifiers.OnRemove += this.OnRemoveNotifier;
 		foreach (Notifier notifier in Components.Notifiers.Items)
 		{
 			this.OnAddNotifier(notifier);
@@ -102,10 +105,8 @@ public class NotificationScreen : KScreen
 
 	protected override void OnCleanUp()
 	{
-		Components.Cmps<Notifier> notifiers = Components.Notifiers;
-		notifiers.OnAdd = (Action<Notifier>)Delegate.Remove(notifiers.OnAdd, new Action<Notifier>(this.OnAddNotifier));
-		Components.Cmps<Notifier> notifiers2 = Components.Notifiers;
-		notifiers2.OnRemove = (Action<Notifier>)Delegate.Remove(notifiers2.OnRemove, new Action<Notifier>(this.OnRemoveNotifier));
+		Components.Notifiers.OnAdd -= this.OnAddNotifier;
+		Components.Notifiers.OnRemove -= this.OnRemoveNotifier;
 	}
 
 	protected override void OnSpawn()

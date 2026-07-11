@@ -424,7 +424,7 @@ public class ScenePartitioner : ISim1000ms
 
 	private int queryId;
 
-	private static Predicate<ScenePartitionerEntry> removeCallback = (ScenePartitionerEntry entry) => entry == null || entry.obj == null;
+	private static readonly Predicate<ScenePartitionerEntry> removeCallback = (ScenePartitionerEntry entry) => entry == null || entry.obj == null;
 
 	private struct ScenePartitionerNode
 	{

@@ -125,6 +125,10 @@ namespace KSerialization
 				{
 					serializationTypeInfo |= SerializationTypeInfo.Pair;
 				}
+				else if (genericTypeDefinition == typeof(Queue<>))
+				{
+					serializationTypeInfo |= SerializationTypeInfo.Queue;
+				}
 				else
 				{
 					serializationTypeInfo |= SerializationTypeInfo.UserDefined;
@@ -482,6 +486,72 @@ namespace KSerialization
 				}
 				break;
 			case 22:
+				if (value != null)
+				{
+					TypeInfo typeInfo8 = type_info.subTypes[0];
+					ICollection collection2 = value as ICollection;
+					long position19 = writer.BaseStream.Position;
+					writer.Write(0);
+					writer.Write(collection2.Count);
+					long position20 = writer.BaseStream.Position;
+					if (Helper.IsPOD(typeInfo8.info))
+					{
+						Helper.WriteListPOD(writer, typeInfo8, collection2);
+					}
+					else if (Helper.IsValueType(typeInfo8.info))
+					{
+						SerializationTemplate serializationTemplate5 = Manager.GetSerializationTemplate(typeInfo8.type);
+						IEnumerator enumerator7 = collection2.GetEnumerator();
+						try
+						{
+							while (enumerator7.MoveNext())
+							{
+								object obj7 = enumerator7.Current;
+								serializationTemplate5.SerializeData(obj7, writer);
+							}
+						}
+						finally
+						{
+							IDisposable disposable7;
+							if ((disposable7 = enumerator7 as IDisposable) != null)
+							{
+								disposable7.Dispose();
+							}
+						}
+					}
+					else
+					{
+						IEnumerator enumerator8 = collection2.GetEnumerator();
+						try
+						{
+							while (enumerator8.MoveNext())
+							{
+								object obj8 = enumerator8.Current;
+								writer.WriteValue(typeInfo8, obj8);
+							}
+						}
+						finally
+						{
+							IDisposable disposable8;
+							if ((disposable8 = enumerator8 as IDisposable) != null)
+							{
+								disposable8.Dispose();
+							}
+						}
+					}
+					long position21 = writer.BaseStream.Position;
+					long num8 = position21 - position20;
+					writer.BaseStream.Position = position19;
+					writer.Write((int)num8);
+					writer.BaseStream.Position = position21;
+				}
+				else
+				{
+					writer.Write(4);
+					writer.Write(-1);
+				}
+				break;
+			case 23:
 			{
 				Color color = (Color)value;
 				writer.Write((byte)(color.r * 255f));

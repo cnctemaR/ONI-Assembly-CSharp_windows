@@ -18,6 +18,10 @@ namespace ProcGen
 
 		public string prefabName { get; private set; }
 
+		public int width { get; private set; }
+
+		public int height { get; private set; }
+
 		[StringEnumConverter]
 		public Mob.Location location { get; private set; }
 
@@ -31,7 +35,8 @@ namespace ProcGen
 			NearLiquid,
 			Solid,
 			Water,
-			ShallowLiquid
+			ShallowLiquid,
+			Surface
 		}
 	}
 }

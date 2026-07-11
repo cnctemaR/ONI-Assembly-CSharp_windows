@@ -88,6 +88,7 @@ public enum GameHashes
 	LevelUp = -110704193,
 	NewDay = 631075836,
 	ScheduleChanged = 467134493,
+	ScheduleBlocksChanged = -894023145,
 	Craft = 748399584,
 	Harvest = 1272413801,
 	Absorb = -2064133523,
@@ -286,5 +287,11 @@ public enum GameHashes
 	AteFromStorage = -1452790913,
 	SpawnedFrom = -2027483228,
 	UserSettingsChanged = -543130682,
-	StructureTemperatureRegistered = -1555603773
+	StructureTemperatureRegistered = -1555603773,
+	TopicDiscovered = 937885943,
+	TopicDiscussed = 1102989392,
+	StartedTalking = -594200555,
+	StoppedTalking = 25860745,
+	MetaUnlockUnlocked = 1594320620,
+	UnstableGroundImpact = -975551167
 }

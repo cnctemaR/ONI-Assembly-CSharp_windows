@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using STRINGS;
 
@@ -7,34 +8,34 @@ namespace Klei.AI
 	[DebuggerDisplay("{Id}")]
 	public class Effect : Modifier
 	{
-		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad)
+		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emote_anim = null, float emote_cooldown = 0f)
 			: base(id, name, description)
 		{
 			this.duration = duration;
 			this.showInUI = show_in_ui;
 			this.triggerFloatingText = trigger_floating_text;
 			this.isBad = is_bad;
+			this.emoteAnim = emote_anim;
+			this.emoteCooldown = emote_cooldown;
 		}
-
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public event Action<Effects, Effect, bool> OnAddRemove;
 
 		public override void AddTo(Attributes attributes)
 		{
 			base.AddTo(attributes);
-			if (this.OnAddRemove != null)
-			{
-				this.OnAddRemove(attributes.gameObject.GetComponent<Effects>(), this, true);
-			}
 		}
 
 		public override void RemoveFrom(Attributes attributes)
 		{
 			base.RemoveFrom(attributes);
-			if (this.OnAddRemove != null)
+		}
+
+		public void AddEmotePrecondition(Reactable.ReactablePrecondition precon)
+		{
+			if (this.emotePreconditions == null)
 			{
-				this.OnAddRemove(attributes.gameObject.GetComponent<Effects>(), this, false);
+				this.emotePreconditions = new List<Reactable.ReactablePrecondition>();
 			}
+			this.emotePreconditions.Add(precon);
 		}
 
 		public static string CreateTooltip(Effect effect, bool showDuration)
@@ -71,5 +72,11 @@ namespace Klei.AI
 		public bool triggerFloatingText;
 
 		public bool isBad;
+
+		public string emoteAnim;
+
+		public float emoteCooldown;
+
+		public List<Reactable.ReactablePrecondition> emotePreconditions;
 	}
 }

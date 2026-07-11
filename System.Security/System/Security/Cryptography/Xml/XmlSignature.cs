@@ -22,7 +22,11 @@ namespace System.Security.Cryptography.Xml
 		public static string GetAttributeFromElement(XmlElement xel, string attribute, string element)
 		{
 			XmlElement childElement = XmlSignature.GetChildElement(xel, element, "http://www.w3.org/2000/09/xmldsig#");
-			return (childElement == null) ? null : childElement.GetAttribute(attribute);
+			if (childElement == null)
+			{
+				return null;
+			}
+			return childElement.GetAttribute(attribute);
 		}
 
 		public static XmlElement[] GetChildElements(XmlElement xel, string element)
@@ -115,29 +119,6 @@ namespace System.Security.Cryptography.Xml
 			public const string Type = "Type";
 
 			public const string URI = "URI";
-		}
-
-		public class AlgorithmNamespaces
-		{
-			public const string XmlDsigBase64Transform = "http://www.w3.org/2000/09/xmldsig#base64";
-
-			public const string XmlDsigC14NTransform = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
-
-			public const string XmlDsigC14NWithCommentsTransform = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments";
-
-			public const string XmlDsigEnvelopedSignatureTransform = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
-
-			public const string XmlDsigXPathTransform = "http://www.w3.org/TR/1999/REC-xpath-19991116";
-
-			public const string XmlDsigXsltTransform = "http://www.w3.org/TR/1999/REC-xslt-19991116";
-
-			public const string XmlDsigExcC14NTransform = "http://www.w3.org/2001/10/xml-exc-c14n#";
-
-			public const string XmlDsigExcC14NWithCommentsTransform = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
-
-			public const string XmlDecryptionTransform = "http://www.w3.org/2002/07/decrypt#XML";
-
-			public const string XmlLicenseTransform = "urn:mpeg:mpeg21:2003:01-REL-R-NS:licenseTransform";
 		}
 
 		public class Uri

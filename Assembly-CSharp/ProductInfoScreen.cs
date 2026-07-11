@@ -83,11 +83,13 @@ public class ProductInfoScreen : KScreen
 
 	public void ConfigureScreen(BuildingDef def)
 	{
+		this.configuring = true;
 		this.currentDef = def;
 		this.SetTitle(def);
 		this.SetDescription(def);
 		this.SetEffects(def);
 		this.SetMaterials(def);
+		this.configuring = false;
 	}
 
 	private void ExpandInfo(PointerEventData data)
@@ -271,7 +273,7 @@ public class ProductInfoScreen : KScreen
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.RefreshScreen));
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.onMenuMaterialChanged));
 		this.materialSelectionPanel.AutoSelectAvailableMaterial();
-		this.ActivateAppropriateTool();
+		this.ActivateAppropriateTool(def);
 	}
 
 	private bool BuildRequirementsMet(BuildingDef def)
@@ -290,13 +292,13 @@ public class ProductInfoScreen : KScreen
 		{
 			return;
 		}
-		this.ActivateAppropriateTool();
+		this.ActivateAppropriateTool(this.currentDef);
 		this.SetDescription(this.currentDef);
 	}
 
-	private void ActivateAppropriateTool()
+	private void ActivateAppropriateTool(BuildingDef def)
 	{
-		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(this.currentDef))
+		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(def))
 		{
 			this.onElementsFullySelected.Signal();
 		}
@@ -341,6 +343,10 @@ public class ProductInfoScreen : KScreen
 
 	public void Close()
 	{
+		if (this.configuring)
+		{
+			return;
+		}
 		this.ClearProduct(true);
 		base.Show(false);
 	}
@@ -376,4 +382,6 @@ public class ProductInfoScreen : KScreen
 	public global::System.Action onElementsFullySelected;
 
 	private bool expandedInfo = true;
+
+	private bool configuring;
 }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Security.Permissions;
 using System.Security.Principal;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	[MonoTODO("working only on win32 right now")]
-	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
+	[global::System.MonoTODO("working only on win32 right now")]
+	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
 	public sealed class NamedPipeClientStream : PipeStream
 	{
 		public NamedPipeClientStream(string pipeName)
@@ -64,11 +66,14 @@ namespace System.IO.Pipes
 			if (PipeStream.IsWindows)
 			{
 				this.impl = new Win32NamedPipeClient(this, serverName, pipeName, desiredAccessRights, options, inheritability);
+				return;
 			}
-			else
-			{
-				this.impl = new UnixNamedPipeClient(this, serverName, pipeName, desiredAccessRights, options, inheritability);
-			}
+			this.impl = new UnixNamedPipeClient(this, serverName, pipeName, desiredAccessRights, options, inheritability);
+		}
+
+		~NamedPipeClientStream()
+		{
+			this.Dispose(false);
 		}
 
 		public void Connect()
@@ -83,6 +88,31 @@ namespace System.IO.Pipes
 			this.impl.Connect(timeout);
 			base.InitializeHandle(this.impl.Handle, false, this.impl.IsAsync);
 			base.IsConnected = true;
+		}
+
+		public Task ConnectAsync()
+		{
+			return this.ConnectAsync(-1, CancellationToken.None);
+		}
+
+		public Task ConnectAsync(int timeout)
+		{
+			return this.ConnectAsync(timeout, CancellationToken.None);
+		}
+
+		public Task ConnectAsync(CancellationToken cancellationToken)
+		{
+			return this.ConnectAsync(-1, cancellationToken);
+		}
+
+		public Task ConnectAsync(int timeout, CancellationToken cancellationToken)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected internal override void CheckPipePropertyOperations()
+		{
+			base.CheckPipePropertyOperations();
 		}
 
 		public int NumberOfServerInstances

@@ -26,7 +26,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		if (seedId != null && units > 0)
 		{
 			Vector3 vector = base.gameObject.transform.GetPosition() + new Vector3(0f, 0.5f, 0f);
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag(seedId)), vector, Grid.SceneLayer.Ore, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
+			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag(seedId)), vector, Grid.SceneLayer.Ore, null, 0);
 			PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
 			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 			component2.Temperature = component.Temperature;

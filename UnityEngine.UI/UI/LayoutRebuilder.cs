@@ -133,18 +133,27 @@ namespace UnityEngine.UI
 
 		public static void MarkLayoutForRebuild(RectTransform rect)
 		{
-			if (!(rect == null))
+			if (!(rect == null) && !(rect.gameObject == null))
 			{
 				List<Component> list = ListPool<Component>.Get();
+				bool flag = true;
 				RectTransform rectTransform = rect;
-				for (;;)
+				RectTransform rectTransform2 = rectTransform.parent as RectTransform;
+				while (flag && !(rectTransform2 == null) && !(rectTransform2.gameObject == null))
 				{
-					RectTransform rectTransform2 = rectTransform.parent as RectTransform;
-					if (!LayoutRebuilder.ValidLayoutGroup(rectTransform2, list))
+					flag = false;
+					rectTransform2.GetComponents(typeof(ILayoutGroup), list);
+					for (int i = 0; i < list.Count; i++)
 					{
-						break;
+						Component component = list[i];
+						if (component != null && component is Behaviour && ((Behaviour)component).isActiveAndEnabled)
+						{
+							flag = true;
+							rectTransform = rectTransform2;
+							break;
+						}
 					}
-					rectTransform = rectTransform2;
+					rectTransform2 = rectTransform2.parent as RectTransform;
 				}
 				if (rectTransform == rect && !LayoutRebuilder.ValidController(rectTransform, list))
 				{
@@ -158,36 +167,25 @@ namespace UnityEngine.UI
 			}
 		}
 
-		private static bool ValidLayoutGroup(RectTransform parent, List<Component> comps)
-		{
-			bool flag;
-			if (parent == null)
-			{
-				flag = false;
-			}
-			else
-			{
-				parent.GetComponents(typeof(ILayoutGroup), comps);
-				LayoutRebuilder.StripDisabledBehavioursFromList(comps);
-				bool flag2 = comps.Count > 0;
-				flag = flag2;
-			}
-			return flag;
-		}
-
 		private static bool ValidController(RectTransform layoutRoot, List<Component> comps)
 		{
 			bool flag;
-			if (layoutRoot == null)
+			if (layoutRoot == null || layoutRoot.gameObject == null)
 			{
 				flag = false;
 			}
 			else
 			{
 				layoutRoot.GetComponents(typeof(ILayoutController), comps);
-				LayoutRebuilder.StripDisabledBehavioursFromList(comps);
-				bool flag2 = comps.Count > 0;
-				flag = flag2;
+				for (int i = 0; i < comps.Count; i++)
+				{
+					Component component = comps[i];
+					if (component != null && component is Behaviour && ((Behaviour)component).isActiveAndEnabled)
+					{
+						return true;
+					}
+				}
+				flag = false;
 			}
 			return flag;
 		}

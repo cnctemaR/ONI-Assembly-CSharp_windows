@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 public class Vignette : MonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		Vignette.Instance = null;
+	}
+
 	private void Awake()
 	{
 		Vignette.Instance = this;

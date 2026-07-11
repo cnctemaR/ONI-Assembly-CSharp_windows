@@ -4,6 +4,11 @@ public class FabricationNeeds : KMonoBehaviour
 {
 	public static FabricationNeeds Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		FabricationNeeds.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		FabricationNeeds.Instance = this;

@@ -13,7 +13,7 @@ namespace System.Data.OleDb
 			[MonoTODO]
 			get
 			{
-				throw new NotImplementedException();
+				throw null;
 			}
 		}
 
@@ -22,7 +22,7 @@ namespace System.Data.OleDb
 			[MonoTODO]
 			get
 			{
-				throw new NotImplementedException();
+				throw null;
 			}
 		}
 
@@ -31,7 +31,7 @@ namespace System.Data.OleDb
 			[MonoTODO]
 			get
 			{
-				throw new NotImplementedException();
+				throw null;
 			}
 		}
 
@@ -40,14 +40,14 @@ namespace System.Data.OleDb
 			[MonoTODO]
 			get
 			{
-				throw new NotImplementedException();
+				throw null;
 			}
 		}
 
 		[MonoTODO]
 		public override string ToString()
 		{
-			throw new NotImplementedException();
+			throw null;
 		}
 	}
 }

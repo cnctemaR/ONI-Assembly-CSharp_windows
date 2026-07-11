@@ -116,9 +116,34 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		private bool ShouldIgnoreEventsOnNoFocus()
+		{
+			bool flag;
+			switch (SystemInfo.operatingSystemFamily)
+			{
+			case OperatingSystemFamily.MacOSX:
+			case OperatingSystemFamily.Windows:
+			case OperatingSystemFamily.Linux:
+				flag = true;
+				break;
+			default:
+				flag = false;
+				break;
+			}
+			return flag;
+		}
+
 		public override void UpdateModule()
 		{
-			if (!base.eventSystem.isFocused || (SystemInfo.operatingSystemFamily != OperatingSystemFamily.Windows && SystemInfo.operatingSystemFamily != OperatingSystemFamily.Linux && SystemInfo.operatingSystemFamily != OperatingSystemFamily.MacOSX))
+			if (!base.eventSystem.isFocused && this.ShouldIgnoreEventsOnNoFocus())
+			{
+				if (this.m_InputPointerEvent != null && this.m_InputPointerEvent.pointerDrag != null && this.m_InputPointerEvent.dragging)
+				{
+					ExecuteEvents.Execute<IEndDragHandler>(this.m_InputPointerEvent.pointerDrag, this.m_InputPointerEvent, ExecuteEvents.endDragHandler);
+				}
+				this.m_InputPointerEvent = null;
+			}
+			else
 			{
 				this.m_LastMousePosition = this.m_MousePosition;
 				this.m_MousePosition = base.input.mousePosition;
@@ -157,7 +182,7 @@ namespace UnityEngine.EventSystems
 
 		public override void ActivateModule()
 		{
-			if (!base.eventSystem.isFocused || (SystemInfo.operatingSystemFamily != OperatingSystemFamily.Windows && SystemInfo.operatingSystemFamily != OperatingSystemFamily.Linux && SystemInfo.operatingSystemFamily != OperatingSystemFamily.MacOSX))
+			if (base.eventSystem.isFocused || !this.ShouldIgnoreEventsOnNoFocus())
 			{
 				base.ActivateModule();
 				this.m_MousePosition = base.input.mousePosition;
@@ -179,7 +204,7 @@ namespace UnityEngine.EventSystems
 
 		public override void Process()
 		{
-			if (!base.eventSystem.isFocused || (SystemInfo.operatingSystemFamily != OperatingSystemFamily.Windows && SystemInfo.operatingSystemFamily != OperatingSystemFamily.Linux && SystemInfo.operatingSystemFamily != OperatingSystemFamily.MacOSX))
+			if (base.eventSystem.isFocused || !this.ShouldIgnoreEventsOnNoFocus())
 			{
 				bool flag = this.SendUpdateEventToSelectedObject();
 				if (base.eventSystem.sendNavigationEvents)
@@ -273,6 +298,7 @@ namespace UnityEngine.EventSystems
 				{
 					ExecuteEvents.Execute<IInitializePotentialDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
 				}
+				this.m_InputPointerEvent = pointerEvent;
 			}
 			if (released)
 			{
@@ -295,13 +321,9 @@ namespace UnityEngine.EventSystems
 				}
 				pointerEvent.dragging = false;
 				pointerEvent.pointerDrag = null;
-				if (pointerEvent.pointerDrag != null)
-				{
-					ExecuteEvents.Execute<IEndDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
-				}
-				pointerEvent.pointerDrag = null;
 				ExecuteEvents.ExecuteHierarchy<IPointerExitHandler>(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
 				pointerEvent.pointerEnter = null;
+				this.m_InputPointerEvent = pointerEvent;
 			}
 		}
 
@@ -501,6 +523,7 @@ namespace UnityEngine.EventSystems
 				{
 					ExecuteEvents.Execute<IInitializePotentialDragHandler>(buttonData.pointerDrag, buttonData, ExecuteEvents.initializePotentialDrag);
 				}
+				this.m_InputPointerEvent = buttonData;
 			}
 			if (data.ReleasedThisFrame())
 			{
@@ -528,6 +551,7 @@ namespace UnityEngine.EventSystems
 					base.HandlePointerExitAndEnter(buttonData, null);
 					base.HandlePointerExitAndEnter(buttonData, gameObject);
 				}
+				this.m_InputPointerEvent = buttonData;
 			}
 		}
 
@@ -547,6 +571,8 @@ namespace UnityEngine.EventSystems
 		private Vector2 m_MousePosition;
 
 		private GameObject m_CurrentFocusedGameObject;
+
+		private PointerEventData m_InputPointerEvent;
 
 		[SerializeField]
 		private string m_HorizontalAxis = "Horizontal";

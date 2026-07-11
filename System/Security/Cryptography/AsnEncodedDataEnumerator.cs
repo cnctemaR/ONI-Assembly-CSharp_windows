@@ -11,7 +11,7 @@ namespace System.Security.Cryptography
 			this._position = -1;
 		}
 
-		object IEnumerator.Current
+		public AsnEncodedData Current
 		{
 			get
 			{
@@ -23,7 +23,7 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		public AsnEncodedData Current
+		object IEnumerator.Current
 		{
 			get
 			{
@@ -37,7 +37,9 @@ namespace System.Security.Cryptography
 
 		public bool MoveNext()
 		{
-			if (++this._position < this._collection.Count)
+			int num = this._position + 1;
+			this._position = num;
+			if (num < this._collection.Count)
 			{
 				return true;
 			}

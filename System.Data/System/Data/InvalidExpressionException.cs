@@ -7,22 +7,18 @@ namespace System.Data
 	public class InvalidExpressionException : DataException
 	{
 		public InvalidExpressionException()
-			: base(Locale.GetText("This Expression is invalid"))
-		{
-		}
-
-		public InvalidExpressionException(string s)
-			: base(s)
-		{
-		}
-
-		public InvalidExpressionException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		protected InvalidExpressionException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		{
+		}
+
+		public InvalidExpressionException(string s)
+		{
+		}
+
+		public InvalidExpressionException(string message, Exception innerException)
 		{
 		}
 	}

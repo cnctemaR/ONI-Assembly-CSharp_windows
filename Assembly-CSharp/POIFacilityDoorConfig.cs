@@ -11,11 +11,9 @@ public class POIFacilityDoorConfig : IBuildingConfig
 		buildingDef.Repairable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Invincible = true;
-		buildingDef.Entombable = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.ViewMode = SimViewMode.None;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
@@ -41,7 +39,7 @@ public class POIFacilityDoorConfig : IBuildingConfig
 		KBatchedAnimController kbatchedAnimController = go.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
 		PrimaryElement component = go.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Steel);
 		component.Temperature = 273f;
 	}
 
@@ -50,7 +48,7 @@ public class POIFacilityDoorConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = false;
-		go.GetComponent<Deconstructable>().allowDeconstruction = false;
+		go.GetComponent<Deconstructable>().allowDeconstruction = true;
 		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
 		component2.initialAnim = "closed";
 	}

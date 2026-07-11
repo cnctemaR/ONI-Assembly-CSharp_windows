@@ -68,6 +68,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return this.workAnims;
 	}
 
+	public virtual KAnim.PlayMode GetWorkAnimPlayMode()
+	{
+		return this.workAnimPlayMode;
+	}
+
 	public virtual HashedString GetWorkPstAnim(Worker worker)
 	{
 		return this.workPstAnim;
@@ -160,6 +165,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			this.ShowProgressBar(true);
 		}
 		this.OnStartWork(this.worker);
+		string conversationTopic = this.GetConversationTopic();
+		if (conversationTopic != null)
+		{
+			this.worker.Trigger(937885943, conversationTopic);
+		}
 		if (this.OnWorkableEventCB != null)
 		{
 			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStarted);
@@ -195,6 +205,12 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			return this.attributeConverter.attribute;
 		}
 		return null;
+	}
+
+	public virtual string GetConversationTopic()
+	{
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		return (!component.HasTag(GameTags.NotAPrefab)) ? component.PrefabTag.Name : null;
 	}
 
 	public virtual void AwardExperience(float work_dt, MinionResume resume)
@@ -320,11 +336,17 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return this.faceTargetWhenWorking;
 	}
 
+	public virtual Vector3 GetFacingTarget()
+	{
+		return base.transform.GetPosition();
+	}
+
 	public void ShowProgressBar(bool show)
 	{
 		if (show)
 		{
 			this.progressBar = ProgressBar.CreateProgressBar(this, new Func<float>(this.GetPercentComplete));
+			this.progressBar.gameObject.SetActive(true);
 		}
 		else if (this.progressBar != null)
 		{
@@ -467,6 +489,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected float attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 
+	public bool triggerWorkReactions = true;
+
 	[SerializeField]
 	[Tooltip("What layer does the dupe switch to when interacting with the building")]
 	public Grid.SceneLayer workLayer = Grid.SceneLayer.Move;
@@ -509,6 +533,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	public HashedString[] workAnims = new HashedString[] { "working_pre", "working_loop" };
 
 	public HashedString workPstAnim = "working_pst";
+
+	public KAnim.PlayMode workAnimPlayMode;
 
 	protected bool faceTargetWhenWorking;
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class Components
 {
@@ -20,6 +22,8 @@ public class Components
 	public static Components.Cmps<Notifier> Notifiers = new Components.Cmps<Notifier>();
 
 	public static Components.Cmps<Fabricator> Fabricators = new Components.Cmps<Fabricator>();
+
+	public static Components.Cmps<Refinery> Refineries = new Components.Cmps<Refinery>();
 
 	public static Components.Cmps<PlantablePlot> PlantablePlots = new Components.Cmps<PlantablePlot>();
 
@@ -77,7 +81,9 @@ public class Components
 
 	public static Components.Cmps<DetectorNetwork.Instance> DetectorNetworks = new Components.Cmps<DetectorNetwork.Instance>();
 
-	public class Cmps<T>
+	public static Components.Cmps<Grave> Graves = new Components.Cmps<Grave>();
+
+	public class Cmps<T> : ICollection, IEnumerable
 	{
 		public Cmps()
 		{
@@ -144,8 +150,8 @@ public class Components
 
 		public void Register(Action<T> on_add, Action<T> on_remove)
 		{
-			this.OnAdd = (Action<T>)Delegate.Combine(this.OnAdd, on_add);
-			this.OnRemove = (Action<T>)Delegate.Combine(this.OnRemove, on_remove);
+			this.OnAdd += on_add;
+			this.OnRemove += on_remove;
 			foreach (T t in this.Items)
 			{
 				this.OnAdd(t);
@@ -154,16 +160,44 @@ public class Components
 
 		public void Unregister(Action<T> on_add, Action<T> on_remove)
 		{
-			this.OnAdd = (Action<T>)Delegate.Remove(this.OnAdd, on_add);
-			this.OnRemove = (Action<T>)Delegate.Remove(this.OnRemove, on_remove);
+			this.OnAdd -= on_add;
+			this.OnRemove -= on_remove;
+		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public event Action<T> OnAdd;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public event Action<T> OnRemove;
+
+		public bool IsSynchronized
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public object SyncRoot
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			return this.items.GetEnumerator();
 		}
 
 		private Dictionary<T, HandleVector<int>.Handle> table;
 
 		private KCompactedVector<T> items;
-
-		public Action<T> OnAdd;
-
-		public Action<T> OnRemove;
 	}
 }

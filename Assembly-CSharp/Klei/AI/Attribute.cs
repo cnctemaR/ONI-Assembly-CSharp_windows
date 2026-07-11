@@ -53,6 +53,16 @@ namespace Klei.AI
 			return null;
 		}
 
+		public string GetDescription(AttributeInstance instance)
+		{
+			return instance.GetDescription();
+		}
+
+		public string GetTooltip(AttributeInstance instance)
+		{
+			return instance.GetAttributeValueTooltip();
+		}
+
 		public string Description;
 
 		public float BaseValue;

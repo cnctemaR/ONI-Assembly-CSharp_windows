@@ -7,22 +7,18 @@ namespace System.Data
 	public class InRowChangingEventException : DataException
 	{
 		public InRowChangingEventException()
-			: base(Locale.GetText("Cannot EndEdit within a RowChanging event"))
-		{
-		}
-
-		public InRowChangingEventException(string s)
-			: base(s)
-		{
-		}
-
-		public InRowChangingEventException(string message, Exception inner)
-			: base(message, inner)
 		{
 		}
 
 		protected InRowChangingEventException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		{
+		}
+
+		public InRowChangingEventException(string s)
+		{
+		}
+
+		public InRowChangingEventException(string message, Exception innerException)
 		{
 		}
 	}

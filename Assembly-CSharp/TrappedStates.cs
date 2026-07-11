@@ -28,7 +28,7 @@ internal class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Ins
 			chore.AddPrecondition(TrappedStates.Instance.IsTrapped, null);
 		}
 
-		public static Chore.Precondition IsTrapped = new Chore.Precondition
+		public static readonly Chore.Precondition IsTrapped = new Chore.Precondition
 		{
 			id = "IsTrapped",
 			fn = delegate(ref Chore.Precondition.Context context, object data)

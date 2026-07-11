@@ -26,7 +26,6 @@ public class WaterPurifierConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.PowerInputOffset = new CellOffset(2, 0);
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 2);

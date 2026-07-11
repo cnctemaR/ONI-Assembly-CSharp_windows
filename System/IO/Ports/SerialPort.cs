@@ -7,15 +7,15 @@ using Microsoft.Win32;
 
 namespace System.IO.Ports
 {
-	[global::System.Diagnostics.MonitoringDescription("")]
-	public class SerialPort : global::System.ComponentModel.Component
+	[MonitoringDescription("")]
+	public class SerialPort : Component
 	{
 		public SerialPort()
 			: this(SerialPort.GetDefaultPortName(), 9600, Parity.None, 8, StopBits.One)
 		{
 		}
 
-		public SerialPort(global::System.ComponentModel.IContainer container)
+		public SerialPort(IContainer container)
 			: this()
 		{
 		}
@@ -49,49 +49,10 @@ namespace System.IO.Ports
 			this.parity = parity;
 		}
 
-		[global::System.Diagnostics.MonitoringDescription("")]
-		public event SerialErrorReceivedEventHandler ErrorReceived
-		{
-			add
-			{
-				base.Events.AddHandler(this.error_received, value);
-			}
-			remove
-			{
-				base.Events.RemoveHandler(this.error_received, value);
-			}
-		}
-
-		[global::System.Diagnostics.MonitoringDescription("")]
-		public event SerialPinChangedEventHandler PinChanged
-		{
-			add
-			{
-				base.Events.AddHandler(this.pin_changed, value);
-			}
-			remove
-			{
-				base.Events.RemoveHandler(this.pin_changed, value);
-			}
-		}
-
-		[global::System.Diagnostics.MonitoringDescription("")]
-		public event SerialDataReceivedEventHandler DataReceived
-		{
-			add
-			{
-				base.Events.AddHandler(this.data_received, value);
-			}
-			remove
-			{
-				base.Events.RemoveHandler(this.data_received, value);
-			}
-		}
-
 		private static string GetDefaultPortName()
 		{
 			string[] portNames = SerialPort.GetPortNames();
-			if (portNames.Length > 0)
+			if (portNames.Length != 0)
 			{
 				return portNames[0];
 			}
@@ -103,8 +64,8 @@ namespace System.IO.Ports
 			return "COM1";
 		}
 
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-		[global::System.ComponentModel.Browsable(false)]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public Stream BaseStream
 		{
 			get
@@ -114,9 +75,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.DefaultValue(9600)]
+		[DefaultValue(9600)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int BaudRate
 		{
 			get
@@ -137,8 +98,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-		[global::System.ComponentModel.Browsable(false)]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool BreakState
 		{
 			get
@@ -157,8 +118,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int BytesToRead
 		{
 			get
@@ -168,8 +129,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int BytesToWrite
 		{
 			get
@@ -179,31 +140,31 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-		[global::System.ComponentModel.Browsable(false)]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool CDHolding
 		{
 			get
 			{
 				this.CheckOpen();
-				return (this.stream.GetSignals() & SerialSignal.Cd) != SerialSignal.None;
+				return (this.stream.GetSignals() & SerialSignal.Cd) > SerialSignal.None;
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool CtsHolding
 		{
 			get
 			{
 				this.CheckOpen();
-				return (this.stream.GetSignals() & SerialSignal.Cts) != SerialSignal.None;
+				return (this.stream.GetSignals() & SerialSignal.Cts) > SerialSignal.None;
 			}
 		}
 
-		[global::System.ComponentModel.DefaultValue(8)]
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.Browsable(true)]
+		[DefaultValue(8)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int DataBits
 		{
 			get
@@ -224,38 +185,36 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.MonoTODO("Not implemented")]
-		[global::System.ComponentModel.DefaultValue(false)]
+		[MonoTODO("Not implemented")]
+		[Browsable(true)]
+		[MonitoringDescription("")]
+		[DefaultValue(false)]
 		public bool DiscardNull
 		{
 			get
 			{
-				this.CheckOpen();
 				throw new NotImplementedException();
 			}
 			set
 			{
-				this.CheckOpen();
 				throw new NotImplementedException();
 			}
 		}
 
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-		[global::System.ComponentModel.Browsable(false)]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool DsrHolding
 		{
 			get
 			{
 				this.CheckOpen();
-				return (this.stream.GetSignals() & SerialSignal.Dsr) != SerialSignal.None;
+				return (this.stream.GetSignals() & SerialSignal.Dsr) > SerialSignal.None;
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.ComponentModel.DefaultValue(false)]
-		[global::System.Diagnostics.MonitoringDescription("")]
+		[DefaultValue(false)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public bool DtrEnable
 		{
 			get
@@ -276,9 +235,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.Diagnostics.MonitoringDescription("")]
+		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("")]
 		public Encoding Encoding
 		{
 			get
@@ -295,9 +254,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DefaultValue(Handshake.None)]
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.Browsable(true)]
+		[DefaultValue(Handshake.None)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public Handshake Handshake
 		{
 			get
@@ -318,7 +277,7 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(false)]
+		[Browsable(false)]
 		public bool IsOpen
 		{
 			get
@@ -327,9 +286,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.Browsable(false)]
-		[global::System.ComponentModel.DefaultValue("\n")]
+		[DefaultValue("\n")]
+		[Browsable(false)]
+		[MonitoringDescription("")]
 		public string NewLine
 		{
 			get
@@ -350,9 +309,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DefaultValue(Parity.None)]
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.Browsable(true)]
+		[DefaultValue(Parity.None)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public Parity Parity
 		{
 			get
@@ -373,10 +332,10 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.MonoTODO("Not implemented")]
-		[global::System.ComponentModel.DefaultValue(63)]
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.Browsable(true)]
+		[MonoTODO("Not implemented")]
+		[Browsable(true)]
+		[MonitoringDescription("")]
+		[DefaultValue(63)]
 		public byte ParityReplace
 		{
 			get
@@ -389,9 +348,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DefaultValue("COM1")]
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.Diagnostics.MonitoringDescription("")]
+		[Browsable(true)]
+		[MonitoringDescription("")]
+		[DefaultValue("COM1")]
 		public string PortName
 		{
 			get
@@ -416,9 +375,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.DefaultValue(4096)]
-		[global::System.ComponentModel.Browsable(true)]
+		[DefaultValue(4096)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int ReadBufferSize
 		{
 			get
@@ -443,9 +402,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.ComponentModel.DefaultValue(-1)]
-		[global::System.Diagnostics.MonitoringDescription("")]
+		[DefaultValue(-1)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int ReadTimeout
 		{
 			get
@@ -454,7 +413,7 @@ namespace System.IO.Ports
 			}
 			set
 			{
-				if (value <= 0 && value != -1)
+				if (value < 0 && value != -1)
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
@@ -466,10 +425,10 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.MonoTODO("Not implemented")]
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.DefaultValue(1)]
-		[global::System.ComponentModel.Browsable(true)]
+		[MonoTODO("Not implemented")]
+		[DefaultValue(1)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int ReceivedBytesThreshold
 		{
 			get
@@ -486,9 +445,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.ComponentModel.DefaultValue(false)]
-		[global::System.Diagnostics.MonitoringDescription("")]
+		[DefaultValue(false)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public bool RtsEnable
 		{
 			get
@@ -509,9 +468,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DefaultValue(StopBits.One)]
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.Diagnostics.MonitoringDescription("")]
+		[DefaultValue(StopBits.One)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public StopBits StopBits
 		{
 			get
@@ -532,9 +491,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.DefaultValue(2048)]
-		[global::System.ComponentModel.Browsable(true)]
+		[DefaultValue(2048)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int WriteBufferSize
 		{
 			get
@@ -559,9 +518,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(true)]
-		[global::System.ComponentModel.DefaultValue(-1)]
-		[global::System.Diagnostics.MonitoringDescription("")]
+		[DefaultValue(-1)]
+		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int WriteTimeout
 		{
 			get
@@ -570,7 +529,7 @@ namespace System.IO.Ports
 			}
 			set
 			{
-				if (value <= 0 && value != -1)
+				if (value < 0 && value != -1)
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
@@ -620,11 +579,27 @@ namespace System.IO.Ports
 			if (platform == 4 || platform == 128 || platform == 6)
 			{
 				string[] files = Directory.GetFiles("/dev/", "tty*");
+				bool flag = false;
 				foreach (string text in files)
 				{
-					if (text.StartsWith("/dev/ttyS") || text.StartsWith("/dev/ttyUSB"))
+					if (text.StartsWith("/dev/ttyS") || text.StartsWith("/dev/ttyUSB") || text.StartsWith("/dev/ttyACM"))
 					{
-						list.Add(text);
+						flag = true;
+						break;
+					}
+				}
+				foreach (string text2 in files)
+				{
+					if (flag)
+					{
+						if (text2.StartsWith("/dev/ttyS") || text2.StartsWith("/dev/ttyUSB") || text2.StartsWith("/dev/ttyACM"))
+						{
+							list.Add(text2);
+						}
+					}
+					else if (text2 != "/dev/tty" && text2.StartsWith("/dev/tty") && !text2.StartsWith("/dev/ttyC"))
+					{
+						list.Add(text2);
 					}
 				}
 			}
@@ -634,13 +609,12 @@ namespace System.IO.Ports
 				{
 					if (registryKey != null)
 					{
-						string[] valueNames = registryKey.GetValueNames();
-						foreach (string text2 in valueNames)
+						foreach (string text3 in registryKey.GetValueNames())
 						{
-							string text3 = registryKey.GetValue(text2, string.Empty).ToString();
-							if (text3 != string.Empty)
+							string text4 = registryKey.GetValue(text3, "").ToString();
+							if (text4 != "")
 							{
-								list.Add(text3);
+								list.Add(text4);
 							}
 						}
 					}
@@ -693,7 +667,6 @@ namespace System.IO.Ports
 			return this.stream.Read(buffer, offset, count);
 		}
 
-		[global::System.MonoTODO("Read of char buffers is currently broken")]
 		public int Read(char[] buffer, int offset, int count)
 		{
 			this.CheckOpen();
@@ -709,8 +682,14 @@ namespace System.IO.Ports
 			{
 				throw new ArgumentException("offset+count", "The size of the buffer is less than offset + count.");
 			}
-			byte[] bytes = this.encoding.GetBytes(buffer, offset, count);
-			return this.stream.Read(bytes, 0, bytes.Length);
+			int num = 0;
+			int num2;
+			while (num < count && (num2 = this.ReadChar()) != -1)
+			{
+				buffer[offset + num] = (char)num2;
+				num++;
+			}
+			return num;
 		}
 
 		internal int read_byte()
@@ -744,7 +723,7 @@ namespace System.IO.Ports
 				}
 				array[num++] = (byte)num2;
 				chars = this.encoding.GetChars(array, 0, 1);
-				if (chars.Length > 0)
+				if (chars.Length != 0)
 				{
 					goto Block_2;
 				}
@@ -791,7 +770,7 @@ namespace System.IO.Ports
 				int num2 = this.read_byte();
 				if (num2 == -1)
 				{
-					break;
+					goto IL_0089;
 				}
 				list.Add((byte)num2);
 				if (num2 == (int)bytes[num])
@@ -799,27 +778,27 @@ namespace System.IO.Ports
 					num++;
 					if (num == bytes.Length)
 					{
-						goto Block_5;
+						break;
 					}
 				}
 				else
 				{
-					num = (((int)bytes[0] != num2) ? 0 : 1);
+					num = (((int)bytes[0] == num2) ? 1 : 0);
 				}
 			}
-			return this.encoding.GetString(list.ToArray());
-			Block_5:
 			return this.encoding.GetString(list.ToArray(), 0, list.Count - bytes.Length);
+			IL_0089:
+			return this.encoding.GetString(list.ToArray());
 		}
 
-		public void Write(string str)
+		public void Write(string text)
 		{
 			this.CheckOpen();
-			if (str == null)
+			if (text == null)
 			{
-				throw new ArgumentNullException("str");
+				throw new ArgumentNullException("text");
 			}
-			byte[] bytes = this.encoding.GetBytes(str);
+			byte[] bytes = this.encoding.GetBytes(text);
 			this.Write(bytes, 0, bytes.Length);
 		}
 
@@ -860,9 +839,9 @@ namespace System.IO.Ports
 			this.stream.Write(bytes, 0, bytes.Length);
 		}
 
-		public void WriteLine(string str)
+		public void WriteLine(string text)
 		{
-			this.Write(str + this.new_line);
+			this.Write(text + this.new_line);
 		}
 
 		private void CheckOpen()
@@ -897,6 +876,45 @@ namespace System.IO.Ports
 			if (serialPinChangedEventHandler != null)
 			{
 				serialPinChangedEventHandler(this, args);
+			}
+		}
+
+		[MonitoringDescription("")]
+		public event SerialErrorReceivedEventHandler ErrorReceived
+		{
+			add
+			{
+				base.Events.AddHandler(this.error_received, value);
+			}
+			remove
+			{
+				base.Events.RemoveHandler(this.error_received, value);
+			}
+		}
+
+		[MonitoringDescription("")]
+		public event SerialPinChangedEventHandler PinChanged
+		{
+			add
+			{
+				base.Events.AddHandler(this.pin_changed, value);
+			}
+			remove
+			{
+				base.Events.RemoveHandler(this.pin_changed, value);
+			}
+		}
+
+		[MonitoringDescription("")]
+		public event SerialDataReceivedEventHandler DataReceived
+		{
+			add
+			{
+				base.Events.AddHandler(this.data_received, value);
+			}
+			remove
+			{
+				base.Events.RemoveHandler(this.data_received, value);
 			}
 		}
 

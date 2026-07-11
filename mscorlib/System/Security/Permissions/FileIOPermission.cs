@@ -41,6 +41,14 @@ namespace System.Security.Permissions
 			this.AddPathList(access, pathList);
 		}
 
+		internal void CreateLists()
+		{
+			this.readList = new ArrayList();
+			this.writeList = new ArrayList();
+			this.appendList = new ArrayList();
+			this.pathList = new ArrayList();
+		}
+
 		[MonoTODO("(2.0) Access Control isn't implemented")]
 		public FileIOPermission(FileIOPermissionAccess access, AccessControlActions control, string path)
 		{
@@ -53,17 +61,8 @@ namespace System.Security.Permissions
 			throw new NotImplementedException();
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
+		internal FileIOPermission(FileIOPermissionAccess access, string[] pathList, bool checkForDuplicates, bool needFullPath)
 		{
-			return 2;
-		}
-
-		internal void CreateLists()
-		{
-			this.readList = new ArrayList();
-			this.writeList = new ArrayList();
-			this.appendList = new ArrayList();
-			this.pathList = new ArrayList();
 		}
 
 		public FileIOPermissionAccess AllFiles
@@ -163,34 +162,32 @@ namespace System.Security.Permissions
 			if (CodeAccessPermission.IsUnrestricted(esd))
 			{
 				this.m_Unrestricted = true;
+				return;
 			}
-			else
+			this.m_Unrestricted = false;
+			string text = esd.Attribute("Read");
+			if (text != null)
 			{
-				this.m_Unrestricted = false;
-				string text = esd.Attribute("Read");
-				if (text != null)
-				{
-					string[] array = text.Split(new char[] { ';' });
-					this.AddPathList(FileIOPermissionAccess.Read, array);
-				}
-				text = esd.Attribute("Write");
-				if (text != null)
-				{
-					string[] array = text.Split(new char[] { ';' });
-					this.AddPathList(FileIOPermissionAccess.Write, array);
-				}
-				text = esd.Attribute("Append");
-				if (text != null)
-				{
-					string[] array = text.Split(new char[] { ';' });
-					this.AddPathList(FileIOPermissionAccess.Append, array);
-				}
-				text = esd.Attribute("PathDiscovery");
-				if (text != null)
-				{
-					string[] array = text.Split(new char[] { ';' });
-					this.AddPathList(FileIOPermissionAccess.PathDiscovery, array);
-				}
+				string[] array = text.Split(new char[] { ';' });
+				this.AddPathList(FileIOPermissionAccess.Read, array);
+			}
+			text = esd.Attribute("Write");
+			if (text != null)
+			{
+				string[] array = text.Split(new char[] { ';' });
+				this.AddPathList(FileIOPermissionAccess.Write, array);
+			}
+			text = esd.Attribute("Append");
+			if (text != null)
+			{
+				string[] array = text.Split(new char[] { ';' });
+				this.AddPathList(FileIOPermissionAccess.Append, array);
+			}
+			text = esd.Attribute("PathDiscovery");
+			if (text != null)
+			{
+				string[] array = text.Split(new char[] { ';' });
+				this.AddPathList(FileIOPermissionAccess.PathDiscovery, array);
 			}
 		}
 
@@ -204,23 +201,27 @@ namespace System.Security.Permissions
 			switch (access)
 			{
 			case FileIOPermissionAccess.NoAccess:
-				goto IL_009D;
+				goto IL_007F;
 			case FileIOPermissionAccess.Read:
 				arrayList.AddRange(this.readList);
-				goto IL_009D;
+				goto IL_007F;
 			case FileIOPermissionAccess.Write:
 				arrayList.AddRange(this.writeList);
-				goto IL_009D;
+				goto IL_007F;
 			case FileIOPermissionAccess.Append:
 				arrayList.AddRange(this.appendList);
-				goto IL_009D;
+				goto IL_007F;
 			case FileIOPermissionAccess.PathDiscovery:
 				arrayList.AddRange(this.pathList);
-				goto IL_009D;
+				goto IL_007F;
 			}
 			FileIOPermission.ThrowInvalidFlag(access, false);
-			IL_009D:
-			return (arrayList.Count <= 0) ? null : ((string[])arrayList.ToArray(typeof(string)));
+			IL_007F:
+			if (arrayList.Count <= 0)
+			{
+				return null;
+			}
+			return (string[])arrayList.ToArray(typeof(string));
 		}
 
 		public override IPermission Intersect(IPermission target)
@@ -245,7 +246,11 @@ namespace System.Security.Permissions
 			FileIOPermission.IntersectKeys(this.writeList, fileIOPermission.writeList, fileIOPermission2.writeList);
 			FileIOPermission.IntersectKeys(this.appendList, fileIOPermission.appendList, fileIOPermission2.appendList);
 			FileIOPermission.IntersectKeys(this.pathList, fileIOPermission.pathList, fileIOPermission2.pathList);
-			return (!fileIOPermission2.IsEmpty()) ? fileIOPermission2 : null;
+			if (!fileIOPermission2.IsEmpty())
+			{
+				return fileIOPermission2;
+			}
+			return null;
 		}
 
 		public override bool IsSubsetOf(IPermission target)
@@ -306,22 +311,22 @@ namespace System.Security.Permissions
 			else
 			{
 				string[] array = this.GetPathList(FileIOPermissionAccess.Append);
-				if (array != null && array.Length > 0)
+				if (array != null && array.Length != 0)
 				{
 					securityElement.AddAttribute("Append", string.Join(";", array));
 				}
 				array = this.GetPathList(FileIOPermissionAccess.Read);
-				if (array != null && array.Length > 0)
+				if (array != null && array.Length != 0)
 				{
 					securityElement.AddAttribute("Read", string.Join(";", array));
 				}
 				array = this.GetPathList(FileIOPermissionAccess.Write);
-				if (array != null && array.Length > 0)
+				if (array != null && array.Length != 0)
 				{
 					securityElement.AddAttribute("Write", string.Join(";", array));
 				}
 				array = this.GetPathList(FileIOPermissionAccess.PathDiscovery);
-				if (array != null && array.Length > 0)
+				if (array != null && array.Length != 0)
 				{
 					securityElement.AddAttribute("PathDiscovery", string.Join(";", array));
 				}
@@ -384,6 +389,11 @@ namespace System.Security.Permissions
 			return base.GetHashCode();
 		}
 
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 2;
+		}
+
 		private bool IsEmpty()
 		{
 			return !this.m_Unrestricted && this.appendList.Count == 0 && this.readList.Count == 0 && this.writeList.Count == 0 && this.pathList.Count == 0;
@@ -422,27 +432,24 @@ namespace System.Security.Permissions
 			string directoryName = Path.GetDirectoryName(path);
 			if (directoryName != null && directoryName.LastIndexOfAny(FileIOPermission.BadPathNameCharacters) >= 0)
 			{
-				string text = string.Format(Locale.GetText("Invalid path characters in path: '{0}'"), path);
-				throw new ArgumentException(text, "path");
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid path characters in path: '{0}'"), path), "path");
 			}
 			string fileName = Path.GetFileName(path);
 			if (fileName != null && fileName.LastIndexOfAny(FileIOPermission.BadFileNameCharacters) >= 0)
 			{
-				string text2 = string.Format(Locale.GetText("Invalid filename characters in path: '{0}'"), path);
-				throw new ArgumentException(text2, "path");
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid filename characters in path: '{0}'"), path), "path");
 			}
 			if (!Path.IsPathRooted(path))
 			{
-				string text3 = Locale.GetText("Absolute path information is required.");
-				throw new ArgumentException(text3, "path");
+				throw new ArgumentException(Locale.GetText("Absolute path information is required."), "path");
 			}
 		}
 
 		internal static void ThrowIfInvalidPath(string[] paths)
 		{
-			foreach (string text in paths)
+			for (int i = 0; i < paths.Length; i++)
 			{
-				FileIOPermission.ThrowIfInvalidPath(text);
+				FileIOPermission.ThrowIfInvalidPath(paths[i]);
 			}
 		}
 
@@ -472,13 +479,15 @@ namespace System.Security.Permissions
 			foreach (object obj in local)
 			{
 				string text = (string)obj;
-				foreach (object obj2 in target)
+				using (IEnumerator enumerator2 = target.GetEnumerator())
 				{
-					string text2 = (string)obj2;
-					if (Path.IsPathSubsetOf(text2, text))
+					while (enumerator2.MoveNext())
 					{
-						flag = true;
-						break;
+						if (Path.IsPathSubsetOf((string)enumerator2.Current, text))
+						{
+							flag = true;
+							break;
+						}
 					}
 				}
 				if (!flag)

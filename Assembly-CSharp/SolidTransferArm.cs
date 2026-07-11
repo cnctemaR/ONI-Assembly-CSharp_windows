@@ -137,7 +137,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			for (int j = num - this.pickupRange; j < num + this.pickupRange + 1; j++)
 			{
 				int num3 = Grid.XYToCell(j, i);
-				if (Grid.IsValidCell(num3) && Grid.VisibilityTest(num, num2, j, i, true, true))
+				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, j, i, true, true))
 				{
 					this.reachableCells.Add(num3);
 				}

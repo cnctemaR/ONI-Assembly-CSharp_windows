@@ -232,6 +232,11 @@ public class WorldInspector : MonoBehaviour
 		return Mathf.Clamp(num3 + num6 * num5 / num2, num3, num4);
 	}
 
+	public static void DestroyStatics()
+	{
+		WorldInspector.cachedElement = null;
+	}
+
 	public static string[] MassStringsReadOnly(int cell)
 	{
 		if (!Grid.IsValidCell(cell))
@@ -322,9 +327,9 @@ public class WorldInspector : MonoBehaviour
 
 	private float temperaturePositionWidgetX_Max = 172f;
 
-	private static string[] massStrings = new string[4];
+	private static readonly string[] massStrings = new string[4];
 
-	private static string[] invalidCellMassStrings = new string[]
+	private static readonly string[] invalidCellMassStrings = new string[]
 	{
 		string.Empty,
 		string.Empty,

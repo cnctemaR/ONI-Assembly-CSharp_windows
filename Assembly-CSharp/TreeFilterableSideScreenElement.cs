@@ -63,7 +63,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 			if (component != null)
 			{
-				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui");
+				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false);
 			}
 		}
 		return sprite;
@@ -72,7 +72,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 	public void SetSprite(Tag t)
 	{
 		Element element = ElementLoader.GetElement(t);
-		Sprite sprite = ((element == null) ? this.GetStorageObjectSprite(t) : Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui"));
+		Sprite sprite = ((element == null) ? this.GetStorageObjectSprite(t) : Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false));
 		this.elementImg.sprite = sprite;
 		this.elementImg.enabled = sprite != null;
 	}

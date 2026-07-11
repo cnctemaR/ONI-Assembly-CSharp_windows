@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Collections;
 
 namespace System.Xml.Serialization
 {
@@ -7,50 +7,104 @@ namespace System.Xml.Serialization
 	{
 		public XmlSerializerNamespaces()
 		{
-			this.namespaces = new ListDictionary();
-		}
-
-		public XmlSerializerNamespaces(XmlQualifiedName[] namespaces)
-			: this()
-		{
-			foreach (XmlQualifiedName xmlQualifiedName in namespaces)
-			{
-				this.namespaces[xmlQualifiedName.Name] = xmlQualifiedName;
-			}
 		}
 
 		public XmlSerializerNamespaces(XmlSerializerNamespaces namespaces)
-			: this(namespaces.ToArray())
 		{
+			this.namespaces = (Hashtable)namespaces.Namespaces.Clone();
+		}
+
+		public XmlSerializerNamespaces(XmlQualifiedName[] namespaces)
+		{
+			foreach (XmlQualifiedName xmlQualifiedName in namespaces)
+			{
+				this.Add(xmlQualifiedName.Name, xmlQualifiedName.Namespace);
+			}
 		}
 
 		public void Add(string prefix, string ns)
 		{
-			XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(prefix, ns);
-			this.namespaces[xmlQualifiedName.Name] = xmlQualifiedName;
+			if (prefix != null && prefix.Length > 0)
+			{
+				XmlConvert.VerifyNCName(prefix);
+			}
+			if (ns != null && ns.Length > 0)
+			{
+				XmlConvert.ToUri(ns);
+			}
+			this.AddInternal(prefix, ns);
+		}
+
+		internal void AddInternal(string prefix, string ns)
+		{
+			this.Namespaces[prefix] = ns;
 		}
 
 		public XmlQualifiedName[] ToArray()
 		{
-			XmlQualifiedName[] array = new XmlQualifiedName[this.namespaces.Count];
-			this.namespaces.Values.CopyTo(array, 0);
-			return array;
+			if (this.NamespaceList == null)
+			{
+				return new XmlQualifiedName[0];
+			}
+			return (XmlQualifiedName[])this.NamespaceList.ToArray(typeof(XmlQualifiedName));
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.namespaces.Count;
+				return this.Namespaces.Count;
 			}
 		}
 
-		internal string GetPrefix(string Ns)
+		internal ArrayList NamespaceList
 		{
+			get
+			{
+				if (this.namespaces == null || this.namespaces.Count == 0)
+				{
+					return null;
+				}
+				ArrayList arrayList = new ArrayList();
+				foreach (object obj in this.Namespaces.Keys)
+				{
+					string text = (string)obj;
+					arrayList.Add(new XmlQualifiedName(text, (string)this.Namespaces[text]));
+				}
+				return arrayList;
+			}
+		}
+
+		internal Hashtable Namespaces
+		{
+			get
+			{
+				if (this.namespaces == null)
+				{
+					this.namespaces = new Hashtable();
+				}
+				return this.namespaces;
+			}
+			set
+			{
+				this.namespaces = value;
+			}
+		}
+
+		internal string LookupPrefix(string ns)
+		{
+			if (string.IsNullOrEmpty(ns))
+			{
+				return null;
+			}
+			if (this.namespaces == null || this.namespaces.Count == 0)
+			{
+				return null;
+			}
 			foreach (object obj in this.namespaces.Keys)
 			{
 				string text = (string)obj;
-				if (Ns == ((XmlQualifiedName)this.namespaces[text]).Namespace)
+				if (!string.IsNullOrEmpty(text) && (string)this.namespaces[text] == ns)
 				{
 					return text;
 				}
@@ -58,14 +112,6 @@ namespace System.Xml.Serialization
 			return null;
 		}
 
-		internal ListDictionary Namespaces
-		{
-			get
-			{
-				return this.namespaces;
-			}
-		}
-
-		private ListDictionary namespaces;
+		private Hashtable namespaces;
 	}
 }

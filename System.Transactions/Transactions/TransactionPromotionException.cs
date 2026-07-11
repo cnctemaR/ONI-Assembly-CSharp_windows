@@ -6,7 +6,7 @@ namespace System.Transactions
 	[Serializable]
 	public class TransactionPromotionException : TransactionException
 	{
-		protected TransactionPromotionException()
+		public TransactionPromotionException()
 		{
 		}
 

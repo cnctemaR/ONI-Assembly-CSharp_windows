@@ -7,14 +7,14 @@ namespace System.Xml.Serialization
 	{
 		public XmlSchemaProviderAttribute(string methodName)
 		{
-			this._methodName = methodName;
+			this.methodName = methodName;
 		}
 
 		public string MethodName
 		{
 			get
 			{
-				return this._methodName;
+				return this.methodName;
 			}
 		}
 
@@ -22,16 +22,16 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this._isAny;
+				return this.any;
 			}
 			set
 			{
-				this._isAny = value;
+				this.any = value;
 			}
 		}
 
-		private string _methodName;
+		private string methodName;
 
-		private bool _isAny;
+		private bool any;
 	}
 }

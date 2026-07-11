@@ -5,7 +5,7 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class UIPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
+	public sealed class UIPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
 	{
 		public UIPermission(PermissionState state)
 		{
@@ -32,11 +32,6 @@ namespace System.Security.Permissions
 			this.Window = windowFlag;
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 7;
-		}
-
 		public UIPermissionClipboard Clipboard
 		{
 			get
@@ -47,8 +42,7 @@ namespace System.Security.Permissions
 			{
 				if (!Enum.IsDefined(typeof(UIPermissionClipboard), value))
 				{
-					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
-					throw new ArgumentException(text, "UIPermissionClipboard");
+					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "UIPermissionClipboard");
 				}
 				this._clipboard = value;
 			}
@@ -64,8 +58,7 @@ namespace System.Security.Permissions
 			{
 				if (!Enum.IsDefined(typeof(UIPermissionWindow), value))
 				{
-					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
-					throw new ArgumentException(text, "UIPermissionWindow");
+					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "UIPermissionWindow");
 				}
 				this._window = value;
 			}
@@ -83,28 +76,24 @@ namespace System.Security.Permissions
 			{
 				this._window = UIPermissionWindow.AllWindows;
 				this._clipboard = UIPermissionClipboard.AllClipboard;
+				return;
+			}
+			string text = esd.Attribute("Window");
+			if (text == null)
+			{
+				this._window = UIPermissionWindow.NoWindows;
 			}
 			else
 			{
-				string text = esd.Attribute("Window");
-				if (text == null)
-				{
-					this._window = UIPermissionWindow.NoWindows;
-				}
-				else
-				{
-					this._window = (UIPermissionWindow)((int)Enum.Parse(typeof(UIPermissionWindow), text));
-				}
-				string text2 = esd.Attribute("Clipboard");
-				if (text2 == null)
-				{
-					this._clipboard = UIPermissionClipboard.NoClipboard;
-				}
-				else
-				{
-					this._clipboard = (UIPermissionClipboard)((int)Enum.Parse(typeof(UIPermissionClipboard), text2));
-				}
+				this._window = (UIPermissionWindow)Enum.Parse(typeof(UIPermissionWindow), text);
 			}
+			string text2 = esd.Attribute("Clipboard");
+			if (text2 == null)
+			{
+				this._clipboard = UIPermissionClipboard.NoClipboard;
+				return;
+			}
+			this._clipboard = (UIPermissionClipboard)Enum.Parse(typeof(UIPermissionClipboard), text2);
 		}
 
 		public override IPermission Intersect(IPermission target)
@@ -114,8 +103,8 @@ namespace System.Security.Permissions
 			{
 				return null;
 			}
-			UIPermissionWindow uipermissionWindow = ((this._window >= uipermission._window) ? uipermission._window : this._window);
-			UIPermissionClipboard uipermissionClipboard = ((this._clipboard >= uipermission._clipboard) ? uipermission._clipboard : this._clipboard);
+			UIPermissionWindow uipermissionWindow = ((this._window < uipermission._window) ? this._window : uipermission._window);
+			UIPermissionClipboard uipermissionClipboard = ((this._clipboard < uipermission._clipboard) ? this._clipboard : uipermission._clipboard);
 			if (this.IsEmpty(uipermissionWindow, uipermissionClipboard))
 			{
 				return null;
@@ -166,13 +155,18 @@ namespace System.Security.Permissions
 			{
 				return this.Copy();
 			}
-			UIPermissionWindow uipermissionWindow = ((this._window <= uipermission._window) ? uipermission._window : this._window);
-			UIPermissionClipboard uipermissionClipboard = ((this._clipboard <= uipermission._clipboard) ? uipermission._clipboard : this._clipboard);
+			UIPermissionWindow uipermissionWindow = ((this._window > uipermission._window) ? this._window : uipermission._window);
+			UIPermissionClipboard uipermissionClipboard = ((this._clipboard > uipermission._clipboard) ? this._clipboard : uipermission._clipboard);
 			if (this.IsEmpty(uipermissionWindow, uipermissionClipboard))
 			{
 				return null;
 			}
 			return new UIPermission(uipermissionWindow, uipermissionClipboard);
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 7;
 		}
 
 		private bool IsEmpty(UIPermissionWindow w, UIPermissionClipboard c)
@@ -194,10 +188,10 @@ namespace System.Security.Permissions
 			return uipermission;
 		}
 
-		private const int version = 1;
-
 		private UIPermissionWindow _window;
 
 		private UIPermissionClipboard _clipboard;
+
+		private const int version = 1;
 	}
 }

@@ -25,7 +25,6 @@ public class FlushToiletConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.DiseaseCellVisName = "FoodPoisoning";
-		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
@@ -39,6 +38,7 @@ public class FlushToiletConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Toilet);
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.FlushToilet);
 		FlushToilet flushToilet = go.AddOrGet<FlushToilet>();
 		flushToilet.massConsumedPerUse = 5f;
 		flushToilet.massEmittedPerUse = 11.7f;

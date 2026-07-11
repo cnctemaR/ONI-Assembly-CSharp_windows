@@ -124,7 +124,7 @@ namespace NodeEditorFramework
 
 		public void DisplayLayout(GUIContent content, GUIStyle style)
 		{
-			GUILayout.Label(content, style, new GUILayoutOption[0]);
+			GUILayout.Label(content, style, Array.Empty<GUILayoutOption>());
 			if (Event.current.type == EventType.Repaint)
 			{
 				this.SetPosition();

@@ -31,7 +31,7 @@ namespace ProcGen
 
 		public NoiseTreeFiles noise { get; private set; }
 
-		public DefaultSettings defaults { get; private set; }
+		private DefaultSettings defaults { get; set; }
 
 		public MobSettings mobs { get; private set; }
 
@@ -74,28 +74,107 @@ namespace ProcGen
 			return array;
 		}
 
-		public float GetDefaultFloat(string target)
+		public BaseLocation GetBaseLocation()
 		{
-			object obj = this.defaults.data[target];
-			if (obj.GetType() == typeof(float))
+			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.baseData != null)
 			{
-				return (float)obj;
+				Output.Log(new object[] { string.Format("World '{0}' is overriding baseData", this.world.name) });
+				return this.world.defaultsOverrides.baseData;
 			}
-			float num = float.Parse(obj as string);
-			this.defaults.data[target] = num;
-			return num;
+			return this.defaults.baseData;
 		}
 
-		public int GetDefaultInt(string target)
+		public List<string> GetOverworldAddTags()
 		{
-			object obj = this.defaults.data[target];
-			if (obj.GetType() == typeof(int))
+			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.overworldAddTags != null)
 			{
-				return (int)obj;
+				Output.Log(new object[] { string.Format("World '{0}' is overriding overworldAddTags", this.world.name) });
+				return this.world.defaultsOverrides.overworldAddTags;
 			}
-			int num = int.Parse(obj as string);
-			this.defaults.data[target] = num;
-			return num;
+			return this.defaults.overworldAddTags;
+		}
+
+		public List<string> GetDefaultMoveTags()
+		{
+			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.defaultMoveTags != null)
+			{
+				Output.Log(new object[] { string.Format("World '{0}' is overriding defaultMoveTags", this.world.name) });
+				return this.world.defaultsOverrides.defaultMoveTags;
+			}
+			return this.defaults.defaultMoveTags;
+		}
+
+		private bool GetSetting<T>(DefaultSettings set, string target, WorldGenSettings.ParserFn<T> parser, out T res)
+		{
+			if (set == null || set.data == null || !set.data.ContainsKey(target))
+			{
+				res = default(T);
+				return false;
+			}
+			object obj = set.data[target];
+			if (obj.GetType() == typeof(T))
+			{
+				res = (T)((object)obj);
+				return true;
+			}
+			bool flag = parser(obj as string, out res);
+			if (flag)
+			{
+				set.data[target] = res;
+			}
+			return flag;
+		}
+
+		private T GetSetting<T>(string target, WorldGenSettings.ParserFn<T> parser)
+		{
+			T t;
+			if (this.world != null)
+			{
+				if (!this.GetSetting<T>(this.world.defaultsOverrides, target, parser, out t))
+				{
+					this.GetSetting<T>(this.defaults, target, parser, out t);
+				}
+				else
+				{
+					Output.Log(new object[] { string.Format("World '{0}' is overriding setting '{1}'", this.world.name, target) });
+				}
+			}
+			else if (!this.GetSetting<T>(this.defaults, target, parser, out t))
+			{
+				Output.LogWarning(new object[] { string.Format("Couldn't find setting '{0}' in default settings!", target) });
+			}
+			return t;
+		}
+
+		public bool GetBoolSetting(string target)
+		{
+			return this.GetSetting<bool>(target, new WorldGenSettings.ParserFn<bool>(bool.TryParse));
+		}
+
+		private bool TryParseString(string input, out string res)
+		{
+			res = input;
+			return true;
+		}
+
+		public string GetStringSetting(string target)
+		{
+			return this.GetSetting<string>(target, new WorldGenSettings.ParserFn<string>(this.TryParseString));
+		}
+
+		public float GetFloatSetting(string target)
+		{
+			return this.GetSetting<float>(target, new WorldGenSettings.ParserFn<float>(float.TryParse));
+		}
+
+		public int GetIntSetting(string target)
+		{
+			return this.GetSetting<int>(target, new WorldGenSettings.ParserFn<int>(int.TryParse));
+		}
+
+		public E GetEnumSetting<E>(string target) where E : struct
+		{
+			return this.GetSetting<E>(target, new WorldGenSettings.ParserFn<E>(Enum.TryParse<E>));
 		}
 
 		public List<SubWorld> GetSubWorldList()
@@ -309,5 +388,7 @@ namespace ProcGen
 		private static string DEFAULTS_FILE = "defaults";
 
 		private static string MOBS_FILE = "mobs";
+
+		private delegate bool ParserFn<T>(string input, out T res);
 	}
 }

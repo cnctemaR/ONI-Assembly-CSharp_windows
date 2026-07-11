@@ -10,40 +10,16 @@ namespace System.Data.Sql
 
 		public SqlNotificationRequest(string userData, string options, int timeout)
 		{
-			this.UserData = userData;
-			this.Options = options;
-			this.Timeout = timeout;
-		}
-
-		public string UserData
-		{
-			get
-			{
-				return this.userData;
-			}
-			set
-			{
-				if (value != null && value.Length > 65535)
-				{
-					throw new ArgumentOutOfRangeException("UserData");
-				}
-				this.userData = value;
-			}
 		}
 
 		public string Options
 		{
 			get
 			{
-				return this.options;
+				throw null;
 			}
 			set
 			{
-				if (value != null && value.Length > 65535)
-				{
-					throw new ArgumentOutOfRangeException("Service");
-				}
-				this.options = value;
 			}
 		}
 
@@ -51,22 +27,22 @@ namespace System.Data.Sql
 		{
 			get
 			{
-				return this.timeout;
+				throw null;
 			}
 			set
 			{
-				if (value < 0)
-				{
-					throw new ArgumentOutOfRangeException("Timeout");
-				}
-				this.timeout = value;
 			}
 		}
 
-		private string userData;
-
-		private string options;
-
-		private int timeout;
+		public string UserData
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
 	}
 }

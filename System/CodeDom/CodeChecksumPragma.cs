@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeChecksumPragma : CodeDirective
 	{
@@ -14,55 +11,27 @@ namespace System.CodeDom
 
 		public CodeChecksumPragma(string fileName, Guid checksumAlgorithmId, byte[] checksumData)
 		{
-			this.fileName = fileName;
-			this.checksumAlgorithmId = checksumAlgorithmId;
-			this.checksumData = checksumData;
-		}
-
-		public Guid ChecksumAlgorithmId
-		{
-			get
-			{
-				return this.checksumAlgorithmId;
-			}
-			set
-			{
-				this.checksumAlgorithmId = value;
-			}
-		}
-
-		public byte[] ChecksumData
-		{
-			get
-			{
-				return this.checksumData;
-			}
-			set
-			{
-				this.checksumData = value;
-			}
+			this._fileName = fileName;
+			this.ChecksumAlgorithmId = checksumAlgorithmId;
+			this.ChecksumData = checksumData;
 		}
 
 		public string FileName
 		{
 			get
 			{
-				if (this.fileName == null)
-				{
-					return string.Empty;
-				}
-				return this.fileName;
+				return this._fileName ?? string.Empty;
 			}
 			set
 			{
-				this.fileName = value;
+				this._fileName = value;
 			}
 		}
 
-		private string fileName;
+		public Guid ChecksumAlgorithmId { get; set; }
 
-		private Guid checksumAlgorithmId;
+		public byte[] ChecksumData { get; set; }
 
-		private byte[] checksumData;
+		private string _fileName;
 	}
 }

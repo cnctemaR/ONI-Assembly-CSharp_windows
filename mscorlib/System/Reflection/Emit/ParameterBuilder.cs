@@ -3,9 +3,10 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
+	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_ParameterBuilder))]
 	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
+	[StructLayout(LayoutKind.Sequential)]
 	public class ParameterBuilder : _ParameterBuilder
 	{
 		internal ParameterBuilder(MethodBase mb, int pos, ParameterAttributes attributes, string strParamName)
@@ -17,31 +18,9 @@ namespace System.Reflection.Emit
 			if (mb is DynamicMethod)
 			{
 				this.table_idx = 0;
+				return;
 			}
-			else
-			{
-				this.table_idx = mb.get_next_table_index(this, 8, true);
-			}
-		}
-
-		void _ParameterBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ParameterBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
+			this.table_idx = mb.get_next_table_index(this, 8, true);
 		}
 
 		public virtual int Attributes
@@ -56,7 +35,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return (this.attrs & ParameterAttributes.In) != ParameterAttributes.None;
+				return (this.attrs & ParameterAttributes.In) > ParameterAttributes.None;
 			}
 		}
 
@@ -64,7 +43,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return (this.attrs & ParameterAttributes.Out) != ParameterAttributes.None;
+				return (this.attrs & ParameterAttributes.Out) > ParameterAttributes.None;
 			}
 		}
 
@@ -72,7 +51,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return (this.attrs & ParameterAttributes.Optional) != ParameterAttributes.None;
+				return (this.attrs & ParameterAttributes.Optional) > ParameterAttributes.None;
 			}
 		}
 
@@ -99,6 +78,18 @@ namespace System.Reflection.Emit
 
 		public virtual void SetConstant(object defaultValue)
 		{
+			if (this.position > 0)
+			{
+				Type parameterType = this.methodb.GetParameterType(this.position - 1);
+				if (defaultValue != null && parameterType != defaultValue.GetType() && (!parameterType.IsEnum || parameterType.UnderlyingSystemType != defaultValue.GetType()))
+				{
+					throw new ArgumentException("Constant does not match the defined type.");
+				}
+				if (parameterType.IsValueType && !parameterType.IsPrimitive && !parameterType.IsEnum && parameterType != typeof(DateTime))
+				{
+					throw new ArgumentException(parameterType + " is not a supported constant type.");
+				}
+			}
 			this.def_value = defaultValue;
 			this.attrs |= ParameterAttributes.HasDefault;
 		}
@@ -129,7 +120,8 @@ namespace System.Reflection.Emit
 			}
 			if (fullName == "System.Runtime.InteropServices.DefaultParameterValueAttribute")
 			{
-				this.SetConstant(CustomAttributeBuilder.decode_cattr(customBuilder).ctorArgs[0]);
+				CustomAttributeBuilder.CustomAttributeInfo customAttributeInfo = CustomAttributeBuilder.decode_cattr(customBuilder);
+				this.SetConstant(customAttributeInfo.ctorArgs[0]);
 				return;
 			}
 			if (this.cattrs != null)
@@ -138,12 +130,10 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
+				return;
 			}
-			else
-			{
-				this.cattrs = new CustomAttributeBuilder[1];
-				this.cattrs[0] = customBuilder;
-			}
+			this.cattrs = new CustomAttributeBuilder[1];
+			this.cattrs[0] = customBuilder;
 		}
 
 		[ComVisible(true)]
@@ -157,6 +147,26 @@ namespace System.Reflection.Emit
 		{
 			this.marshal_info = unmanagedMarshal;
 			this.attrs |= ParameterAttributes.HasFieldMarshal;
+		}
+
+		void _ParameterBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ParameterBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ParameterBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ParameterBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
 		}
 
 		private MethodBase methodb;

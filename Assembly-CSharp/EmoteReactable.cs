@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class EmoteReactable : Reactable
 {
-	public EmoteReactable(GameObject gameObject, ChoreType chore_type, HashedString animset, int range_width = 15, int range_height = 8)
-		: base(gameObject, chore_type, range_width, range_height, true)
+	public EmoteReactable(GameObject gameObject, HashedString id, ChoreType chore_type, HashedString animset, int range_width = 15, int range_height = 8, float min_reactable_time = 0f, float min_reactor_time = 0f, float max_trigger_time = float.PositiveInfinity)
+		: base(gameObject, id, chore_type, range_width, range_height, true, min_reactable_time, min_reactor_time, max_trigger_time)
 	{
-		this.reactionSource = gameObject;
 		this.animset = Assets.GetAnim(animset);
 	}
 
@@ -17,18 +16,42 @@ public class EmoteReactable : Reactable
 		return this;
 	}
 
+	public EmoteReactable AddExpression(Expression expression)
+	{
+		this.expression = expression;
+		return this;
+	}
+
+	public EmoteReactable AddThought(Thought thought)
+	{
+		this.thought = thought;
+		return this;
+	}
+
 	public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 	{
+		if (this.reactor != null)
+		{
+			return false;
+		}
 		if (new_reactor == null)
 		{
 			return false;
 		}
 		Navigator component = new_reactor.GetComponent<Navigator>();
-		return !(component == null) && component.IsMoving() && this.reactionSource != new_reactor;
+		return !(component == null) && component.IsMoving() && component.CurrentNavType != NavType.Tube && component.CurrentNavType != NavType.Ladder && component.CurrentNavType != NavType.Pole && this.gameObject != new_reactor;
 	}
 
 	public override void Update(float dt)
 	{
+		if (this.gameObject != null && this.reactor != null)
+		{
+			Facing component = this.reactor.GetComponent<Facing>();
+			if (component != null)
+			{
+				component.Face(this.gameObject.transform.GetPosition());
+			}
+		}
 		if (this.currentStep >= 0 && this.emoteSteps[this.currentStep].timeout > 0f && this.emoteSteps[this.currentStep].timeout < this.elapsed)
 		{
 			this.NextStep(null);
@@ -43,17 +66,39 @@ public class EmoteReactable : Reactable
 	{
 		this.kbac = this.reactor.GetComponent<KBatchedAnimController>();
 		this.kbac.AddAnimOverrides(this.animset, 0f);
+		if (this.expression != null)
+		{
+			this.reactor.GetComponent<FaceGraph>().AddExpression(this.expression);
+		}
+		if (this.thought != null)
+		{
+			this.reactor.GetSMI<ThoughtGraph.Instance>().AddThought(this.thought);
+		}
 		this.NextStep(null);
 	}
 
 	protected override void InternalEnd()
 	{
-		if (this.currentStep >= 0 && this.currentStep < this.emoteSteps.Count && this.emoteSteps[this.currentStep].timeout <= 0f)
+		if (this.kbac != null)
 		{
-			this.kbac.onAnimComplete -= this.NextStep;
+			if (this.currentStep >= 0 && this.currentStep < this.emoteSteps.Count && this.emoteSteps[this.currentStep].timeout <= 0f)
+			{
+				this.kbac.onAnimComplete -= this.NextStep;
+			}
+			this.kbac.RemoveAnimOverrides(this.animset);
+			this.kbac = null;
 		}
-		this.kbac.RemoveAnimOverrides(this.animset);
-		this.kbac = null;
+		if (this.reactor != null)
+		{
+			if (this.expression != null)
+			{
+				this.reactor.GetComponent<FaceGraph>().RemoveExpression(this.expression);
+			}
+			if (this.thought != null)
+			{
+				this.reactor.GetSMI<ThoughtGraph.Instance>().RemoveThought(this.thought);
+			}
+		}
 		this.currentStep = -1;
 	}
 
@@ -97,13 +142,11 @@ public class EmoteReactable : Reactable
 		}
 	}
 
-	protected GameObject reactionSource;
-
 	private KBatchedAnimController kbac;
 
-	public Expression expression = Db.Get().Expressions.Uncomfortable;
+	public Expression expression;
 
-	public Thought thought = Db.Get().Thoughts.Unhappy;
+	public Thought thought;
 
 	private KAnimFile animset;
 

@@ -2,17 +2,14 @@
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class DecimalConverter : BaseNumberConverter
 	{
-		public DecimalConverter()
-		{
-			this.InnerType = typeof(decimal);
-		}
-
-		internal override bool SupportHex
+		internal override bool AllowHex
 		{
 			get
 			{
@@ -20,30 +17,56 @@ namespace System.ComponentModel
 			}
 		}
 
+		internal override Type TargetType
+		{
+			get
+			{
+				return typeof(decimal);
+			}
+		}
+
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor) || base.CanConvertTo(context, destinationType);
+			return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
 		}
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor) && value is decimal)
+			if (destinationType == null)
 			{
-				decimal num = (decimal)value;
-				ConstructorInfo constructor = typeof(decimal).GetConstructor(new Type[] { typeof(int[]) });
-				return new global::System.ComponentModel.Design.Serialization.InstanceDescriptor(constructor, new object[] { decimal.GetBits(num) });
+				throw new ArgumentNullException("destinationType");
 			}
-			return base.ConvertTo(context, culture, value, destinationType);
+			if (!(destinationType == typeof(InstanceDescriptor)) || !(value is decimal))
+			{
+				return base.ConvertTo(context, culture, value, destinationType);
+			}
+			object[] array = new object[] { decimal.GetBits((decimal)value) };
+			MemberInfo constructor = typeof(decimal).GetConstructor(new Type[] { typeof(int[]) });
+			if (constructor != null)
+			{
+				return new InstanceDescriptor(constructor, array);
+			}
+			return null;
 		}
 
-		internal override string ConvertToString(object value, NumberFormatInfo format)
+		internal override object FromString(string value, int radix)
 		{
-			return ((decimal)value).ToString("G", format);
+			return Convert.ToDecimal(value, CultureInfo.CurrentCulture);
 		}
 
-		internal override object ConvertFromString(string value, NumberFormatInfo format)
+		internal override object FromString(string value, NumberFormatInfo formatInfo)
 		{
-			return decimal.Parse(value, NumberStyles.Float, format);
+			return decimal.Parse(value, NumberStyles.Float, formatInfo);
+		}
+
+		internal override object FromString(string value, CultureInfo culture)
+		{
+			return decimal.Parse(value, culture);
+		}
+
+		internal override string ToString(object value, NumberFormatInfo formatInfo)
+		{
+			return ((decimal)value).ToString("G", formatInfo);
 		}
 	}
 }

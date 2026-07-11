@@ -14,14 +14,12 @@ namespace System.Web
 
 		public AspNetHostingPermission(PermissionState state)
 		{
-			if (global::System.Security.Permissions.PermissionHelper.CheckPermissionState(state, true) == PermissionState.Unrestricted)
+			if (PermissionHelper.CheckPermissionState(state, true) == PermissionState.Unrestricted)
 			{
 				this._level = AspNetHostingPermissionLevel.Unrestricted;
+				return;
 			}
-			else
-			{
-				this._level = AspNetHostingPermissionLevel.None;
-			}
+			this._level = AspNetHostingPermissionLevel.None;
 		}
 
 		public AspNetHostingPermissionLevel Level
@@ -34,8 +32,7 @@ namespace System.Web
 			{
 				if (value < AspNetHostingPermissionLevel.None || value > AspNetHostingPermissionLevel.Unrestricted)
 				{
-					string text = global::Locale.GetText("Invalid enum {0}.");
-					throw new ArgumentException(string.Format(text, value), "Level");
+					throw new ArgumentException(string.Format(global::Locale.GetText("Invalid enum {0}."), value), "Level");
 				}
 				this._level = value;
 			}
@@ -53,38 +50,32 @@ namespace System.Web
 
 		public override void FromXml(SecurityElement securityElement)
 		{
-			global::System.Security.Permissions.PermissionHelper.CheckSecurityElement(securityElement, "securityElement", 1, 1);
+			PermissionHelper.CheckSecurityElement(securityElement, "securityElement", 1, 1);
 			if (securityElement.Tag != "IPermission")
 			{
-				string text = global::Locale.GetText("Invalid tag '{0}' for permission.");
-				throw new ArgumentException(string.Format(text, securityElement.Tag), "securityElement");
+				throw new ArgumentException(string.Format(global::Locale.GetText("Invalid tag '{0}' for permission."), securityElement.Tag), "securityElement");
 			}
 			if (securityElement.Attribute("version") == null)
 			{
-				string text2 = global::Locale.GetText("Missing version attribute.");
-				throw new ArgumentException(text2, "securityElement");
+				throw new ArgumentException(global::Locale.GetText("Missing version attribute."), "securityElement");
 			}
-			if (global::System.Security.Permissions.PermissionHelper.IsUnrestricted(securityElement))
+			if (PermissionHelper.IsUnrestricted(securityElement))
 			{
 				this._level = AspNetHostingPermissionLevel.Unrestricted;
+				return;
 			}
-			else
+			string text = securityElement.Attribute("Level");
+			if (text != null)
 			{
-				string text3 = securityElement.Attribute("Level");
-				if (text3 != null)
-				{
-					this._level = (AspNetHostingPermissionLevel)((int)Enum.Parse(typeof(AspNetHostingPermissionLevel), text3));
-				}
-				else
-				{
-					this._level = AspNetHostingPermissionLevel.None;
-				}
+				this._level = (AspNetHostingPermissionLevel)Enum.Parse(typeof(AspNetHostingPermissionLevel), text);
+				return;
 			}
+			this._level = AspNetHostingPermissionLevel.None;
 		}
 
 		public override SecurityElement ToXml()
 		{
-			SecurityElement securityElement = global::System.Security.Permissions.PermissionHelper.Element(typeof(AspNetHostingPermission), 1);
+			SecurityElement securityElement = PermissionHelper.Element(typeof(AspNetHostingPermission), 1);
 			if (this.IsUnrestricted())
 			{
 				securityElement.AddAttribute("Unrestricted", "true");
@@ -100,7 +91,7 @@ namespace System.Web
 			{
 				return null;
 			}
-			return new AspNetHostingPermission((this._level > aspNetHostingPermission.Level) ? aspNetHostingPermission.Level : this._level);
+			return new AspNetHostingPermission((this._level <= aspNetHostingPermission.Level) ? this._level : aspNetHostingPermission.Level);
 		}
 
 		public override bool IsSubsetOf(IPermission target)
@@ -120,7 +111,7 @@ namespace System.Web
 			{
 				return this.Copy();
 			}
-			return new AspNetHostingPermission((this._level <= aspNetHostingPermission.Level) ? aspNetHostingPermission.Level : this._level);
+			return new AspNetHostingPermission((this._level > aspNetHostingPermission.Level) ? this._level : aspNetHostingPermission.Level);
 		}
 
 		private bool IsEmpty()
@@ -137,7 +128,7 @@ namespace System.Web
 			AspNetHostingPermission aspNetHostingPermission = target as AspNetHostingPermission;
 			if (aspNetHostingPermission == null)
 			{
-				global::System.Security.Permissions.PermissionHelper.ThrowInvalidPermission(target, typeof(AspNetHostingPermission));
+				PermissionHelper.ThrowInvalidPermission(target, typeof(AspNetHostingPermission));
 			}
 			return aspNetHostingPermission;
 		}

@@ -7,7 +7,7 @@ public class GeneShufflerConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("GeneShuffler", SETITEMS.GENESHUFFLER.NAME, SETITEMS.GENESHUFFLER.DESC, 2000f, Assets.GetAnim("geneshuffler_kanim"), "on", Grid.SceneLayer.Building, 4, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("GeneShuffler", global::STRINGS.BUILDINGS.PREFABS.GENESHUFFLER.NAME, global::STRINGS.BUILDINGS.PREFABS.GENESHUFFLER.DESC, 2000f, Assets.GetAnim("geneshuffler_kanim"), "on", Grid.SceneLayer.Building, 4, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
@@ -31,6 +31,7 @@ public class GeneShufflerConfig : IEntityConfig
 		component2.slotID = Db.Get().AssignableSlots.GeneShuffler.Id;
 		OccupyArea component3 = inst.GetComponent<OccupyArea>();
 		component3.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		inst.GetComponent<Deconstructable>();
 	}
 
 	public void OnSpawn(GameObject inst)

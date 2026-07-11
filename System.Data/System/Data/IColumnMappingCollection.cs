@@ -3,8 +3,10 @@ using System.Collections;
 
 namespace System.Data
 {
-	public interface IColumnMappingCollection : IList, IEnumerable, ICollection
+	public interface IColumnMappingCollection : ICollection, IEnumerable, IList
 	{
+		object this[string index] { get; set; }
+
 		IColumnMapping Add(string sourceColumnName, string dataSetColumnName);
 
 		bool Contains(string sourceColumnName);
@@ -14,7 +16,5 @@ namespace System.Data
 		int IndexOf(string sourceColumnName);
 
 		void RemoveAt(string sourceColumnName);
-
-		object this[string index] { get; set; }
 	}
 }

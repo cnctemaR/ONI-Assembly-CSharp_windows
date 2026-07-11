@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class SpriteSheetAnimManager : KMonoBehaviour, IRenderEveryTick
 {
+	public static void DestroyInstance()
+	{
+		SpriteSheetAnimManager.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		SpriteSheetAnimManager.instance = this;

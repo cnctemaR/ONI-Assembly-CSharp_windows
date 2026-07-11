@@ -48,8 +48,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		if (component4 != null)
 		{
 			component4.AddProvider(GlobalChoreProvider.Instance);
-			base.gameObject.AddComponent<DecorNeed>();
-			base.gameObject.AddComponent<FoodQualityNeed>();
+			base.gameObject.AddComponent<QualityOfLifeNeed>();
 		}
 	}
 

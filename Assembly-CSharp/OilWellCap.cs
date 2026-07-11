@@ -136,7 +136,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 
 	private WorkChore<OilWellCap> CreateWorkChore()
 	{
-		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		workChore.AddPrecondition(OilWellCap.AllowedToDepressurize, this);
 		return workChore;
 	}
@@ -182,7 +182,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 
 	private MeterController pressureMeter;
 
-	private static Chore.Precondition AllowedToDepressurize = new Chore.Precondition
+	private static readonly Chore.Precondition AllowedToDepressurize = new Chore.Precondition
 	{
 		id = "AllowedToDepressurize",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.ALLOWED_TO_DEPRESSURIZE,

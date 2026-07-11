@@ -23,7 +23,6 @@ public class ApothecaryConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
 		return buildingDef;

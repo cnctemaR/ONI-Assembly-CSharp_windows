@@ -4,8 +4,14 @@ using System.Threading;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public static class AsyncOperationManager
 	{
+		public static AsyncOperation CreateOperation(object userSuppliedState)
+		{
+			return AsyncOperation.CreateOperation(userSuppliedState, AsyncOperationManager.SynchronizationContext);
+		}
+
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		public static SynchronizationContext SynchronizationContext
 		{
@@ -17,16 +23,11 @@ namespace System.ComponentModel
 				}
 				return SynchronizationContext.Current;
 			}
-			[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"NoFlags\"/>\n</PermissionSet>\n")]
+			[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 			set
 			{
 				SynchronizationContext.SetSynchronizationContext(value);
 			}
-		}
-
-		public static AsyncOperation CreateOperation(object userSuppliedState)
-		{
-			return new AsyncOperation(AsyncOperationManager.SynchronizationContext, userSuppliedState);
 		}
 	}
 }

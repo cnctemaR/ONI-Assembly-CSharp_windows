@@ -1,0 +1,74 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC2AF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine</RootNamespace>
+    <AssemblyName>UnityEngine.XRModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Experimental\Internal_SubsystemDescriptors.cs" />
+    <Compile Include="Experimental\Internal_SubsystemInstances.cs" />
+    <Compile Include="Experimental\ISubsystemDescriptor.cs" />
+    <Compile Include="Experimental\ISubsystemDescriptorImpl.cs" />
+    <Compile Include="Experimental\Subsystem.2.cs" />
+    <Compile Include="Experimental\Subsystem.cs" />
+    <Compile Include="Experimental\SubsystemDescriptor.cs" />
+    <Compile Include="Experimental\SubsystemDescriptorBase.cs" />
+    <Compile Include="Experimental\SubsystemManager.cs" />
+    <Compile Include="Experimental\XR\BoundedPlane.cs" />
+    <Compile Include="Experimental\XR\DotNetHelper.cs" />
+    <Compile Include="Experimental\XR\FrameReceivedEventArgs.cs" />
+    <Compile Include="Experimental\XR\PlaneAddedEventArgs.cs" />
+    <Compile Include="Experimental\XR\PlaneAlignment.cs" />
+    <Compile Include="Experimental\XR\PlaneRemovedEventArgs.cs" />
+    <Compile Include="Experimental\XR\PlaneUpdatedEventArgs.cs" />
+    <Compile Include="Experimental\XR\PointCloudUpdatedEventArgs.cs" />
+    <Compile Include="Experimental\XR\ReferencePoint.cs" />
+    <Compile Include="Experimental\XR\ReferencePointUpdatedEventArgs.cs" />
+    <Compile Include="Experimental\XR\SessionTrackingStateChangedEventArgs.cs" />
+    <Compile Include="Experimental\XR\TrackableId.cs" />
+    <Compile Include="Experimental\XR\TrackableType.cs" />
+    <Compile Include="Experimental\XR\TrackingState.cs" />
+    <Compile Include="Experimental\XR\XRCameraSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRCameraSubsystemDescriptor.cs" />
+    <Compile Include="Experimental\XR\XRDepthSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRDepthSubsystemDescriptor.cs" />
+    <Compile Include="Experimental\XR\XRExampleSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRExampleSubsystemDescriptor.cs" />
+    <Compile Include="Experimental\XR\XRInputSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRInputSubsystemDescriptor.cs" />
+    <Compile Include="Experimental\XR\XRPlaneSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRPlaneSubsystemDescriptor.cs" />
+    <Compile Include="Experimental\XR\XRRaycastHit.cs" />
+    <Compile Include="Experimental\XR\XRRaycastSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRRaycastSubsystemDescriptor.cs" />
+    <Compile Include="Experimental\XR\XRReferencePointSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRReferencePointSubsystemDescriptor.cs" />
+    <Compile Include="Experimental\XR\XRSessionSubsystem.cs" />
+    <Compile Include="Experimental\XR\XRSessionSubsystemDescriptor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XR\AvailableTrackingData.cs" />
+    <Compile Include="XR\InputTracking.cs" />
+    <Compile Include="XR\XRNode.cs" />
+    <Compile Include="XR\XRNodeState.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC27B}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC291}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

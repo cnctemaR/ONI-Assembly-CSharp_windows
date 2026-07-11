@@ -135,6 +135,53 @@ namespace STRINGS
 			public static LocString MANAGECODEX = "ManageCodex";
 
 			public static LocString MANAGEROLES = "ManageRoles";
+
+			public static LocString MANAGESCHEDULE = "ManageSchedule";
+		}
+
+		public class NAVIGATION
+		{
+			public static LocString NAME = "Navigation";
+
+			public static LocString SETUSERNAV1 = "SetUserNav1";
+
+			public static LocString SETUSERNAV2 = "SetUserNav2";
+
+			public static LocString SETUSERNAV3 = "SetUserNav3";
+
+			public static LocString SETUSERNAV4 = "SetUserNav4";
+
+			public static LocString SETUSERNAV5 = "SetUserNav5";
+
+			public static LocString SETUSERNAV6 = "SetUserNav6";
+
+			public static LocString SETUSERNAV7 = "SetUserNav7";
+
+			public static LocString SETUSERNAV8 = "SetUserNav8";
+
+			public static LocString SETUSERNAV9 = "SetUserNav9";
+
+			public static LocString SETUSERNAV10 = "SetUserNav10";
+
+			public static LocString GOTOUSERNAV1 = "GotoUserNav1";
+
+			public static LocString GOTOUSERNAV2 = "GotoUserNav2";
+
+			public static LocString GOTOUSERNAV3 = "GotoUserNav3";
+
+			public static LocString GOTOUSERNAV4 = "GotoUserNav4";
+
+			public static LocString GOTOUSERNAV5 = "GotoUserNav5";
+
+			public static LocString GOTOUSERNAV6 = "GotoUserNav6";
+
+			public static LocString GOTOUSERNAV7 = "GotoUserNav7";
+
+			public static LocString GOTOUSERNAV8 = "GotoUserNav8";
+
+			public static LocString GOTOUSERNAV9 = "GotoUserNav9";
+
+			public static LocString GOTOUSERNAV10 = "GotoUserNav10";
 		}
 
 		public class BUILDING
@@ -272,6 +319,94 @@ namespace STRINGS
 			public static LocString TOGGLESANDBOXTOOLS = "ToggleSandboxTools";
 
 			public static LocString SANDBOXREVEAL = "SandboxReveal";
+		}
+
+		public class BASEMENU
+		{
+			public static LocString NAME = "BaseMenu";
+
+			public static LocString BUILDCATEGORYTILES = "BuildCategoryTiles";
+
+			public static LocString BUILDCATEGORYLADDERS = "BuildCategoryLadders";
+
+			public static LocString BUILDCATEGORYDOORS = "BuildCategoryDoors";
+
+			public static LocString BUILDCATEGORYSTORAGE = "BuildCategoryStorage";
+
+			public static LocString BUILDCATEGORYRESEARCH = "BuildCategoryResearch";
+		}
+
+		public class FOODANDAGRICULTUREMENU
+		{
+			public static LocString NAME = "FoodAndAgricultureMenu";
+
+			public static LocString BUILDCATEGORYFARMING = "BuildCategoryFarming";
+
+			public static LocString BUILDCATEGORYCOOKING = "BuildCategoryCooking";
+
+			public static LocString BUILDCATEGORYRANCHING = "BuildCategoryRanching";
+		}
+
+		public class HEALTHANDHAPPINESSMENU
+		{
+			public static LocString NAME = "HealthAndHappinessMenu";
+
+			public static LocString BUILDCATEGORYMEDICAL = "BuildCategoryMedical";
+
+			public static LocString BUILDCATEGORYHYGIENE = "BuildCategoryHygiene";
+
+			public static LocString BUILDCATEGORYFURNITURE = "BuildCategoryFurniture";
+
+			public static LocString BUILDCATEGORYDECOR = "BuildCategoryDecor";
+
+			public static LocString BUILDCATEGORYRECREATION = "BuildCategoryRecreation";
+		}
+
+		public class INFRASTRUCTUREMENU
+		{
+			public static LocString NAME = "InfrastructureMenu";
+
+			public static LocString BUILDCATEGORYWIRES = "BuildCategoryWires";
+
+			public static LocString BUILDCATEGORYGENERATORS = "BuildCategoryGenerators";
+
+			public static LocString BUILDCATEGORYPOWERCONTROL = "BuildCategoryPowerControl";
+
+			public static LocString BUILDCATEGORYPIPES = "BuildCategoryPipes";
+
+			public static LocString BUILDCATEGORYPLUMBINGSTRUCTURES = "BuildCategoryPlumbingStructures";
+
+			public static LocString BUILDCATEGORYVENTILATIONSTRUCTURES = "BuildCategoryVentilationStructures";
+		}
+
+		public class INDUSTRIALMENU
+		{
+			public static LocString NAME = "IndustrialMenu";
+
+			public static LocString BUILDCATEGORYOXYGEN = "BuildCategoryOxygen";
+
+			public static LocString BUILDCATEGORYUTILITIES = "BuildCategoryUtilities";
+
+			public static LocString BUILDCATEGORYREFINING = "BuildCategoryRefining";
+
+			public static LocString BUILDCATEGORYEQUIPMENT = "BuildCategoryEquipment";
+		}
+
+		public class LOGISTICSMENU
+		{
+			public static LocString NAME = "LogisticsMenu";
+
+			public static LocString BUILDCATEGORYTRAVELTUBES = "BuildCategoryTravelTubes";
+
+			public static LocString BUILDCATEGORYCONVEYANCE = "BuildCategoryConveyance";
+
+			public static LocString BUILDCATEGORYLOGICWIRING = "BuildCategoryLogicWiring";
+
+			public static LocString BUILDCATEGORYLOGICGATES = "BuildCategoryLogicGates";
+
+			public static LocString BUILDCATEGORYLOGICSWITCHES = "BuildCategoryLogicSwitches";
+
+			public static LocString BUILDCATEGORYLOGICCONDUITS = "BuildCategoryLogicConduits";
 		}
 	}
 }

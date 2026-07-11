@@ -6,21 +6,18 @@ namespace System.Data
 	[TypeConverter(typeof(ExpandableObjectConverter))]
 	public class DataViewSetting
 	{
-		internal DataViewSetting(DataViewManager manager, DataTable table)
+		internal DataViewSetting()
 		{
-			this.dataViewManager = manager;
-			this.dataTable = table;
 		}
 
 		public bool ApplyDefaultSort
 		{
 			get
 			{
-				return this.applyDefaultSort;
+				throw null;
 			}
 			set
 			{
-				this.applyDefaultSort = value;
 			}
 		}
 
@@ -29,7 +26,7 @@ namespace System.Data
 		{
 			get
 			{
-				return this.dataViewManager;
+				throw null;
 			}
 		}
 
@@ -37,11 +34,10 @@ namespace System.Data
 		{
 			get
 			{
-				return this.rowFilter;
+				throw null;
 			}
 			set
 			{
-				this.rowFilter = value;
 			}
 		}
 
@@ -49,11 +45,10 @@ namespace System.Data
 		{
 			get
 			{
-				return this.rowStateFilter;
+				throw null;
 			}
 			set
 			{
-				this.rowStateFilter = value;
 			}
 		}
 
@@ -61,11 +56,10 @@ namespace System.Data
 		{
 			get
 			{
-				return this.sort;
+				throw null;
 			}
 			set
 			{
-				this.sort = value;
 			}
 		}
 
@@ -74,20 +68,8 @@ namespace System.Data
 		{
 			get
 			{
-				return this.dataTable;
+				throw null;
 			}
 		}
-
-		private bool applyDefaultSort;
-
-		private DataViewManager dataViewManager;
-
-		private string rowFilter = string.Empty;
-
-		private DataViewRowState rowStateFilter = DataViewRowState.CurrentRows;
-
-		private string sort = string.Empty;
-
-		private DataTable dataTable;
 	}
 }

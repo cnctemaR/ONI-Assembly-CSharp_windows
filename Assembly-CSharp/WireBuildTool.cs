@@ -2,6 +2,11 @@
 
 public class WireBuildTool : BaseUtilityBuildTool
 {
+	public static void DestroyInstance()
+	{
+		WireBuildTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		WireBuildTool.Instance = this;

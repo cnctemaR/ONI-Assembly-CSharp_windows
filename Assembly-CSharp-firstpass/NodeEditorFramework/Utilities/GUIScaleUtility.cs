@@ -43,7 +43,7 @@ namespace NodeEditorFramework.Utilities
 			if (type == null || property == null || method == null || method2 == null)
 			{
 				global::Debug.LogWarning("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!", null);
-				global::Debug.LogWarning(((type != null) ? string.Empty : "GUIClipType is Null, ") + ((property != null) ? string.Empty : "topmostRect is Null, ") + ((method != null) ? string.Empty : "GetTopRect is Null, ") + ((method2 != null) ? string.Empty : "ClipRect is Null, "), null);
+				global::Debug.LogWarning(((!(type == null)) ? string.Empty : "GUIClipType is Null, ") + ((!(property == null)) ? string.Empty : "topmostRect is Null, ") + ((!(method == null)) ? string.Empty : "GetTopRect is Null, ") + ((!(method2 == null)) ? string.Empty : "ClipRect is Null, "), null);
 				GUIScaleUtility.compabilityMode = true;
 				GUIScaleUtility.initiated = true;
 				return;
@@ -53,7 +53,7 @@ namespace NodeEditorFramework.Utilities
 			if (GUIScaleUtility.GetTopRectDelegate == null || GUIScaleUtility.topmostRectDelegate == null)
 			{
 				global::Debug.LogWarning("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!", null);
-				global::Debug.LogWarning(((type != null) ? string.Empty : "GUIClipType is Null, ") + ((property != null) ? string.Empty : "topmostRect is Null, ") + ((method != null) ? string.Empty : "GetTopRect is Null, ") + ((method2 != null) ? string.Empty : "ClipRect is Null, "), null);
+				global::Debug.LogWarning(((!(type == null)) ? string.Empty : "GUIClipType is Null, ") + ((!(property == null)) ? string.Empty : "topmostRect is Null, ") + ((!(method == null)) ? string.Empty : "GetTopRect is Null, ") + ((!(method2 == null)) ? string.Empty : "ClipRect is Null, "), null);
 				GUIScaleUtility.compabilityMode = true;
 				GUIScaleUtility.initiated = true;
 				return;
@@ -93,9 +93,9 @@ namespace NodeEditorFramework.Utilities
 			GUIScaleUtility.adjustedGUILayout.Add(adjustGUILayout);
 			if (adjustGUILayout)
 			{
-				GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
 				GUILayout.Space(rect.center.x - rect2.size.x + zoomPivot.x);
-				GUILayout.BeginVertical(new GUILayoutOption[0]);
+				GUILayout.BeginVertical(Array.Empty<GUILayoutOption>());
 				GUILayout.Space(rect.center.y - rect2.size.y + zoomPivot.y);
 			}
 			GUIScaleUtility.GUIMatrices.Add(GUI.matrix);

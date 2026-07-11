@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data.Common;
-using System.Data.Sql;
 using System.Security;
 using System.Security.Permissions;
 
@@ -8,7 +7,7 @@ namespace System.Data.SqlClient
 {
 	public sealed class SqlClientFactory : DbProviderFactory
 	{
-		private SqlClientFactory()
+		internal SqlClientFactory()
 		{
 		}
 
@@ -16,50 +15,50 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return true;
+				throw null;
 			}
 		}
 
 		public override DbCommand CreateCommand()
 		{
-			return new SqlCommand();
+			throw null;
 		}
 
 		public override DbCommandBuilder CreateCommandBuilder()
 		{
-			return new SqlCommandBuilder();
+			throw null;
 		}
 
 		public override DbConnection CreateConnection()
 		{
-			return new SqlConnection();
+			throw null;
 		}
 
 		public override DbConnectionStringBuilder CreateConnectionStringBuilder()
 		{
-			return new SqlConnectionStringBuilder();
+			throw null;
 		}
 
 		public override DbDataAdapter CreateDataAdapter()
 		{
-			return new SqlDataAdapter();
+			throw null;
 		}
 
 		public override DbDataSourceEnumerator CreateDataSourceEnumerator()
 		{
-			return SqlDataSourceEnumerator.Instance;
+			throw null;
 		}
 
 		public override DbParameter CreateParameter()
 		{
-			return new SqlParameter();
+			throw null;
 		}
 
 		public override CodeAccessPermission CreatePermission(PermissionState state)
 		{
-			return new SqlClientPermission(state);
+			throw null;
 		}
 
-		public static readonly SqlClientFactory Instance = new SqlClientFactory();
+		public static readonly SqlClientFactory Instance;
 	}
 }

@@ -149,7 +149,6 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 		KScreenManager.Instance.PopScreen(this);
 		if (this != null && base.gameObject != null)
 		{
-			base.gameObject.SetActive(false);
 			global::UnityEngine.Object.Destroy(base.gameObject);
 		}
 	}

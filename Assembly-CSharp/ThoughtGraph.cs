@@ -9,36 +9,64 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		default_state = this.initialdelay;
 		this.initialdelay.ScheduleGoTo(1f, this.nothoughts);
 		this.nothoughts.OnSignal(this.thoughtsChanged, this.displayingthought, (ThoughtGraph.Instance smi) => smi.HasThoughts()).OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (ThoughtGraph.Instance smi) => smi.HasThoughts());
-		this.displayingthought.Enter("CreateBubble", delegate(ThoughtGraph.Instance smi)
+		this.displayingthought.DefaultState(this.displayingthought.pre).Enter("CreateBubble", delegate(ThoughtGraph.Instance smi)
 		{
 			smi.CreateBubble();
 		}).Exit("DestroyBubble", delegate(ThoughtGraph.Instance smi)
 		{
 			smi.DestroyBubble();
-		}).ScheduleGoTo(4f, this.cooldown);
+		})
+			.ScheduleGoTo((ThoughtGraph.Instance smi) => this.thoughtDisplayTime.Get(smi), this.cooldown);
+		this.displayingthought.pre.ScheduleGoTo((ThoughtGraph.Instance smi) => TuningData<ThoughtGraph.Tuning>.Get().preLengthInSeconds, this.displayingthought.talking);
+		this.displayingthought.talking.Enter(new StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State.Callback(ThoughtGraph.BeginTalking));
 		this.cooldown.OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (ThoughtGraph.Instance smi) => smi.HasImmediateThought()).ScheduleGoTo(20f, this.nothoughts);
+	}
+
+	private static void BeginTalking(ThoughtGraph.Instance smi)
+	{
+		if (smi.currentThought == null)
+		{
+			return;
+		}
+		smi.GetSMI<SpeechMonitor.Instance>().PlaySpeech(smi.currentThought.speechPrefix, smi.currentThought.sound);
 	}
 
 	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.Signal thoughtsChanged;
 
 	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.Signal thoughtsChangedImmediate;
 
+	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.FloatParameter thoughtDisplayTime;
+
 	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State initialdelay;
 
 	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State nothoughts;
 
-	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State displayingthought;
+	public ThoughtGraph.DisplayingThoughtState displayingthought;
 
 	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State cooldown;
+
+	public class Tuning : TuningData<ThoughtGraph.Tuning>
+	{
+		public float preLengthInSeconds;
+	}
+
+	public class DisplayingThoughtState : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State
+	{
+		public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State pre;
+
+		public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State talking;
+	}
 
 	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.GameInstance, IRenderEveryTick
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
+			this.animController = base.GetComponent<KBatchedAnimController>();
 			this.bubble = Util.KInstantiate(EffectPrefabs.Instance.ThoughtBubble, base.gameObject, null);
-			this.spriteRenderer = this.bubble.transform.GetChild(1).GetComponent<SpriteRenderer>();
+			this.bubbleConvo = Util.KInstantiate(EffectPrefabs.Instance.ThoughtBubbleConvo, base.gameObject, null);
 			this.bubble.SetActive(false);
+			this.bubbleConvo.SetActive(false);
 		}
 
 		public bool HasThoughts()
@@ -95,48 +123,71 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			}
 			this.thoughts.Sort((Thought a, Thought b) => b.priority.CompareTo(a.priority));
 			Thought thought = this.thoughts[0];
-			this.bubble.SetActive(true);
-			this.spriteRenderer.sprite = thought.sprite;
-			this.bubble.GetComponent<KSelectable>().entityName = thought.hoverText;
-			VoiceSoundEvent voiceSoundEvent = new VoiceSoundEvent("ThoughtGraph", thought.sprite.name, 0, false);
-			AnimEventManager.EventPlayerData eventPlayerData = default(AnimEventManager.EventPlayerData);
-			eventPlayerData.controller = base.transform.GetComponent<KBatchedAnimController>();
-			this.controller = eventPlayerData.controller;
-			voiceSoundEvent.Play(eventPlayerData);
+			GameObject gameObject = this.bubble;
+			if (thought.modeSprite != null)
+			{
+				gameObject = this.bubbleConvo;
+			}
+			this.ApplySprite(gameObject, thought.sprite, "icon_sprite");
+			this.ApplySprite(gameObject, thought.bubbleSprite, "bubble_sprite");
+			if (thought.modeSprite != null)
+			{
+				this.ApplySprite(gameObject, thought.modeSprite, "icon_sprite_mode");
+			}
+			gameObject.SetActive(true);
+			base.sm.thoughtDisplayTime.Set(thought.showTime, this);
+			gameObject.GetComponent<KSelectable>().entityName = thought.hoverText;
+			KCollider2D component = gameObject.GetComponent<KCollider2D>();
+			if (component != null)
+			{
+				component.MarkDirty(false);
+			}
 			SimAndRenderScheduler.instance.Add(this, false);
+			this.currentThought = thought;
 			if (thought.showImmediately)
 			{
 				this.thoughts.RemoveAt(0);
 			}
 		}
 
+		private void ApplySprite(GameObject active_bubble, Sprite sprite, string target)
+		{
+			HierarchyReferences component = active_bubble.GetComponent<HierarchyReferences>();
+			SpriteRenderer reference = component.GetReference<SpriteRenderer>(target);
+			reference.sprite = sprite;
+		}
+
 		public void RenderEveryTick(float dt)
 		{
-			if (this.controller == null)
+			if (this.animController == null)
 			{
 				return;
 			}
 			bool flag;
-			Matrix2x3 symbolLocalTransform = this.controller.GetSymbolLocalTransform(this.symbol, out flag);
-			Matrix4x4 matrix4x = this.controller.GetTransformMatrix() * symbolLocalTransform;
+			Matrix2x3 symbolLocalTransform = this.animController.GetSymbolLocalTransform(ThoughtGraph.Instance.symbol, out flag);
+			Matrix4x4 matrix4x = this.animController.GetTransformMatrix() * symbolLocalTransform;
 			Vector3 vector = new Vector3(matrix4x.m03, matrix4x.m13, 0f);
 			this.bubble.transform.SetPosition(vector + EffectPrefabs.Instance.ThoughtBubble.transform.GetLocalPosition());
+			this.bubbleConvo.transform.SetPosition(vector + EffectPrefabs.Instance.ThoughtBubble.transform.GetLocalPosition());
 		}
 
 		public void DestroyBubble()
 		{
 			SimAndRenderScheduler.instance.Remove(this);
 			this.bubble.SetActive(false);
+			this.bubbleConvo.SetActive(false);
 		}
 
 		private List<Thought> thoughts = new List<Thought>();
 
 		private GameObject bubble;
 
-		private new KBatchedAnimController controller;
+		private GameObject bubbleConvo;
 
-		private SpriteRenderer spriteRenderer;
+		private KBatchedAnimController animController;
 
-		public HashedString symbol = new HashedString("snapTo_pivot");
+		public Thought currentThought;
+
+		public static HashedString symbol = new HashedString("snapTo_pivot");
 	}
 }

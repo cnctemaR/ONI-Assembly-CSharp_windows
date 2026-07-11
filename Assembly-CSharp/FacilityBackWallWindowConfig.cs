@@ -36,7 +36,7 @@ public class FacilityBackWallWindowConfig : IBuildingConfig
 		ZoneTile zoneTile = go.AddComponent<ZoneTile>();
 		zoneTile.width = 1;
 		zoneTile.height = 6;
-		go.GetComponent<PrimaryElement>().SetElement(SimHashes.Unobtanium);
+		go.GetComponent<PrimaryElement>().SetElement(SimHashes.Steel);
 		go.GetComponent<PrimaryElement>().Temperature = 273f;
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 	}

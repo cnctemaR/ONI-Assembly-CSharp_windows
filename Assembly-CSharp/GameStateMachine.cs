@@ -48,42 +48,24 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			: base(master)
 		{
 			base.def = def;
-			this.animController = master.GetComponent<KAnimControllerBase>();
 		}
 
 		public GameInstance(MasterType master)
 			: base(master)
 		{
-			this.animController = master.GetComponent<KAnimControllerBase>();
 		}
 
 		public void Queue(string anim, KAnim.PlayMode mode = KAnim.PlayMode.Once)
 		{
-			if (this.animController != null)
-			{
-				this.animController.Queue(anim, mode, 1f, 0f);
-			}
-			else
-			{
-				MasterType master = base.master;
-				global::Debug.LogWarning(master.name + " is missing a anim controller", null);
-			}
+			StateMachineInstanceType smi = base.smi;
+			smi.GetComponent<KBatchedAnimController>().Queue(anim, mode, 1f, 0f);
 		}
 
 		public void Play(string anim, KAnim.PlayMode mode = KAnim.PlayMode.Once)
 		{
-			if (this.animController != null)
-			{
-				this.animController.Play(anim, mode, 1f, 0f);
-			}
-			else
-			{
-				MasterType master = base.master;
-				global::Debug.LogWarning(master.name + " is missing a anim controller", null);
-			}
+			StateMachineInstanceType smi = base.smi;
+			smi.GetComponent<KBatchedAnimController>().Play(anim, mode, 1f, 0f);
 		}
-
-		public KAnimControllerBase animController;
 	}
 
 	public class TagTransitionData : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition
@@ -318,27 +300,22 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		private static StateMachine.Action[] AddAction(string name, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback, StateMachine.Action[] actions, bool add_to_end)
+		private static List<StateMachine.Action> AddAction(string name, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback, List<StateMachine.Action> actions, bool add_to_end)
 		{
-			List<StateMachine.Action> list;
-			if (actions != null)
+			if (actions == null)
 			{
-				list = new List<StateMachine.Action>(actions);
-			}
-			else
-			{
-				list = new List<StateMachine.Action>();
+				actions = new List<StateMachine.Action>();
 			}
 			StateMachine.Action action = new StateMachine.Action(name, callback);
 			if (add_to_end)
 			{
-				list.Add(action);
+				actions.Add(action);
 			}
 			else
 			{
-				list.Insert(0, action);
+				actions.Insert(0, action);
 			}
-			return list.ToArray();
+			return actions;
 		}
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State master
@@ -374,14 +351,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		private GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InternalUpdate(string name, UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater bucket_updater, UpdateRate update_rate, bool load_balance)
 		{
 			int num = this.CreateUpdateTableEntry();
-			List<StateMachine.UpdateAction> list;
-			if (this.updateActions != null)
+			if (this.updateActions == null)
 			{
-				list = new List<StateMachine.UpdateAction>(this.updateActions);
-			}
-			else
-			{
-				list = new List<StateMachine.UpdateAction>();
+				this.updateActions = new List<StateMachine.UpdateAction>();
 			}
 			StateMachine.UpdateAction updateAction = default(StateMachine.UpdateAction);
 			updateAction.updateTableIdx = num;
@@ -390,17 +362,16 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			int num2 = 1;
 			if (load_balance)
 			{
-				num2 = StateMachineUpdater.instance.GetFrameCount(update_rate);
+				num2 = Singleton<StateMachineUpdater>.Instance.GetFrameCount(update_rate);
 			}
 			updateAction.buckets = new StateMachineUpdater.BaseUpdateBucket[num2];
 			for (int i = 0; i < num2; i++)
 			{
 				UpdateBucketWithUpdater<StateMachineInstanceType> updateBucketWithUpdater = new UpdateBucketWithUpdater<StateMachineInstanceType>(name);
-				StateMachineUpdater.instance.AddBucket(update_rate, updateBucketWithUpdater);
+				Singleton<StateMachineUpdater>.Instance.AddBucket(update_rate, updateBucketWithUpdater);
 				updateAction.buckets[i] = updateBucketWithUpdater;
 			}
-			list.Add(updateAction);
-			this.updateActions = list.ToArray();
+			this.updateActions.Add(updateAction);
 			return this;
 		}
 
@@ -431,7 +402,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			int data_idx = this.CreateDataTableEntry();
 			this.Enter("ToggleEnter(" + name + ")", delegate(StateMachineInstanceType smi)
 			{
-				smi.dataTable[data_idx] = GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.HasToggleEnteredFlag;
+				smi.dataTable[data_idx] = GameStateMachineHelper.HasToggleEnteredFlag;
 				enter_callback(smi);
 			});
 			this.Exit("ToggleExit(" + name + ")", delegate(StateMachineInstanceType smi)
@@ -1683,19 +1654,13 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State EventHandler(GameHashes evt, Func<StateMachineInstanceType, KMonoBehaviour> global_event_system_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GameEvent.Callback callback)
 		{
-			List<StateEvent> list;
-			if (this.events != null)
+			if (this.events == null)
 			{
-				list = new List<StateEvent>(this.events);
-			}
-			else
-			{
-				list = new List<StateEvent>();
+				this.events = new List<StateEvent>();
 			}
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter targetParameter = this.GetStateTarget();
 			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GameEvent gameEvent = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GameEvent(evt, callback, targetParameter, global_event_system_callback);
-			list.Add(gameEvent);
-			this.events = list.ToArray();
+			this.events.Add(gameEvent);
 			return this;
 		}
 
@@ -1715,18 +1680,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ParamTransition<ParameterType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType> parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Callback callback)
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition[] array;
 			if (this.parameterTransitions == null)
 			{
-				array = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition[1];
+				this.parameterTransitions = new List<StateMachine.ParameterTransition>();
 			}
-			else
-			{
-				array = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition[this.parameterTransitions.Length + 1];
-				Array.Copy(this.parameterTransitions, array, this.parameterTransitions.Length);
-			}
-			array[array.Length - 1] = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Transition(parameter, state, callback);
-			this.parameterTransitions = array;
+			this.parameterTransitions.Add(new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Transition(parameter, state, callback));
 			return this;
 		}
 
@@ -1890,20 +1848,27 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Face(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter face_target, float x_offset = 0f)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("Face", delegate(StateMachineInstanceType smi)
+			{
+				Facing facing = state_target.Get<Facing>(smi);
+				IApproachable approachable = face_target.Get<IApproachable>(smi);
+				float num = approachable.transform.GetPosition().x + x_offset;
+				facing.Face(num);
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State TagTransition(Tag[] tags, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, bool on_remove = false)
 		{
-			List<StateMachine.BaseTransition> list;
-			if (this.transitions != null)
+			if (this.transitions == null)
 			{
-				list = new List<StateMachine.BaseTransition>(this.transitions);
+				this.transitions = new List<StateMachine.BaseTransition>();
 			}
-			else
-			{
-				list = new List<StateMachine.BaseTransition>();
-			}
-			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData tagTransitionData = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData(this, state, list.Count, tags, on_remove, this.GetStateTarget());
-			list.Add(tagTransitionData);
-			this.transitions = list.ToArray();
+			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData tagTransitionData = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData(this, state, this.transitions.Count, tags, on_remove, this.GetStateTarget());
+			this.transitions.Add(tagTransitionData);
 			return this;
 		}
 
@@ -1914,19 +1879,13 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State EventTransition(GameHashes evt, Func<StateMachineInstanceType, KMonoBehaviour> global_event_system_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback condition = null)
 		{
-			List<StateMachine.BaseTransition> list;
-			if (this.transitions != null)
+			if (this.transitions == null)
 			{
-				list = new List<StateMachine.BaseTransition>(this.transitions);
-			}
-			else
-			{
-				list = new List<StateMachine.BaseTransition>();
+				this.transitions = new List<StateMachine.BaseTransition>();
 			}
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter targetParameter = this.GetStateTarget();
-			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.EventTransitionData eventTransitionData = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.EventTransitionData(this, state, list.Count, evt, global_event_system_callback, condition, targetParameter);
-			list.Add(eventTransitionData);
-			this.transitions = list.ToArray();
+			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.EventTransitionData eventTransitionData = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.EventTransitionData(this, state, this.transitions.Count, evt, global_event_system_callback, condition, targetParameter);
+			this.transitions.Add(eventTransitionData);
 			return this;
 		}
 
@@ -2120,8 +2079,6 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		[StateMachine.DoNotAutoCreate]
 		private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter stateTarget;
-
-		private static object HasToggleEnteredFlag = new object();
 
 		private class TransitionUpdater : UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater
 		{

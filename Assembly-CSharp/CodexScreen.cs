@@ -59,7 +59,14 @@ public class CodexScreen : KScreen
 		this.PopulatePools();
 		this.CategorizeEntries();
 		this.FilterSearch(string.Empty);
-		this.prefabTextWidget.transform.parent.gameObject.SetActive(false);
+		Game.Instance.Subscribe(1594320620, delegate(object val)
+		{
+			this.FilterSearch(this.searchInputField.text);
+			if (!string.IsNullOrEmpty(this.activeEntryID))
+			{
+				this.ChangeArticle(this.activeEntryID, false);
+			}
+		});
 	}
 
 	private void SetupPrefabs()
@@ -127,11 +134,23 @@ public class CodexScreen : KScreen
 		return this.searchResults;
 	}
 
+	private bool HasUnlockedCategoryEntries(string entryID)
+	{
+		foreach (ContentContainer contentContainer in CodexCache.entries[entryID].contentContainers)
+		{
+			if (string.IsNullOrEmpty(contentContainer.lockID) || !Game.Instance.unlocks.IsLocked(contentContainer.lockID))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void FilterEntries(bool allowOpenCategories = true)
 	{
 		foreach (KeyValuePair<CodexEntry, GameObject> keyValuePair in this.entryButtons)
 		{
-			keyValuePair.Value.SetActive(this.searchResults.Contains(keyValuePair.Key));
+			keyValuePair.Value.SetActive(this.searchResults.Contains(keyValuePair.Key) && this.HasUnlockedCategoryEntries(keyValuePair.Key.id));
 		}
 		foreach (GameObject gameObject in this.categoryHeaders)
 		{
@@ -184,18 +203,19 @@ public class CodexScreen : KScreen
 		GameObject categoryHeader = Util.KInstantiateUI(this.prefabCategoryHeader, this.navigatorContent.gameObject, true);
 		GameObject categoryContent = categoryHeader.GetComponent<HierarchyReferences>().GetReference("Content").gameObject;
 		categories.Add(entryKVP.Value.category, categoryContent);
+		LocText reference = categoryHeader.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
 		if (CodexCache.entries.ContainsKey(entryKVP.Value.category))
 		{
-			categoryHeader.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").text = CodexCache.entries[entryKVP.Value.category].name;
+			reference.text = CodexCache.entries[entryKVP.Value.category].name;
 		}
 		else
 		{
-			categoryHeader.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").text = Strings.Get("STRINGS.UI.CODEX.CATEGORYNAMES." + entryKVP.Value.category.ToUpper());
+			reference.text = Strings.Get("STRINGS.UI.CODEX.CATEGORYNAMES." + entryKVP.Value.category.ToUpper());
 		}
 		this.categoryHeaders.Add(categoryHeader);
 		categoryContent.SetActive(false);
-		MultiToggle reference = categoryHeader.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("ExpandToggle");
-		reference.onClick = delegate
+		MultiToggle reference2 = categoryHeader.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("ExpandToggle");
+		reference2.onClick = delegate
 		{
 			this.ToggleCategoryOpen(categoryHeader, !categoryContent.activeSelf);
 		};
@@ -248,6 +268,10 @@ public class CodexScreen : KScreen
 		{
 			list[i].Value.transform.parent.SetSiblingIndex(i);
 		}
+		dictionary["NOTICES"].transform.parent.SetAsFirstSibling();
+		dictionary["RESEARCHNOTES"].transform.parent.SetAsFirstSibling();
+		dictionary["JOURNALS"].transform.parent.SetAsFirstSibling();
+		dictionary["EMAILS"].transform.parent.SetAsFirstSibling();
 		dictionary["Root"].transform.parent.SetAsFirstSibling();
 	}
 
@@ -289,16 +313,22 @@ public class CodexScreen : KScreen
 			id = "PAGENOTFOUND";
 		}
 		int num = 0;
+		string text = string.Empty;
 		while (this.contentContainers.transform.childCount > 0)
 		{
+			while (!string.IsNullOrEmpty(text) && CodexCache.entries[this.activeEntryID].contentContainers[num].lockID == text)
+			{
+				num++;
+			}
 			GameObject gameObject = this.contentContainers.transform.GetChild(0).gameObject;
 			int num2 = 0;
 			while (gameObject.transform.childCount > 0)
 			{
 				GameObject gameObject2 = gameObject.transform.GetChild(0).gameObject;
 				CodexWidget.ContentType contentType;
-				if (CodexCache.entries[this.activeEntryID].contentContainers[num].lockID != null && Game.Instance.unlocks.IsLocked(CodexCache.entries[this.activeEntryID].contentContainers[num].lockID))
+				if (gameObject2.name == "PrefabContentLocked")
 				{
+					text = CodexCache.entries[this.activeEntryID].contentContainers[num].lockID;
 					contentType = CodexWidget.ContentType.ContentLockedIndicator;
 				}
 				else
@@ -318,16 +348,17 @@ public class CodexScreen : KScreen
 			CodexCache.entries[id].contentContainers = new List<ContentContainer>();
 		}
 		bool flag2 = false;
-		string text = string.Empty;
-		foreach (ContentContainer contentContainer2 in CodexCache.entries[id].contentContainers)
+		string text2 = string.Empty;
+		for (int i = 0; i < CodexCache.entries[id].contentContainers.Count; i++)
 		{
+			ContentContainer contentContainer2 = CodexCache.entries[id].contentContainers[i];
 			if (!string.IsNullOrEmpty(contentContainer2.lockID) && Game.Instance.unlocks.IsLocked(contentContainer2.lockID))
 			{
-				if (text != contentContainer2.lockID)
+				if (text2 != contentContainer2.lockID)
 				{
 					GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
 					this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
-					text = contentContainer2.lockID;
+					text2 = contentContainer2.lockID;
 					GameObject gameObject4 = this.ContentUIPools[CodexWidget.ContentType.ContentLockedIndicator].GetFreeElement(gameObject3, true).gameObject;
 				}
 			}
@@ -350,31 +381,31 @@ public class CodexScreen : KScreen
 				}
 			}
 		}
-		string text2 = string.Empty;
-		string text3 = id;
+		string text3 = string.Empty;
+		string text4 = id;
 		int num3 = 0;
-		while (text3 != CodexCache.FormatLinkID("HOME") && num3 < 10)
+		while (text4 != CodexCache.FormatLinkID("HOME") && num3 < 10)
 		{
 			num3++;
-			if (text3 != null)
+			if (text4 != null)
 			{
-				if (text3 != id)
+				if (text4 != id)
 				{
-					text2 = text2.Insert(0, CodexCache.entries[text3].name + " > ");
+					text3 = text3.Insert(0, CodexCache.entries[text4].name + " > ");
 				}
 				else
 				{
-					text2 = text2.Insert(0, CodexCache.entries[text3].name);
+					text3 = text3.Insert(0, CodexCache.entries[text4].name);
 				}
-				text3 = CodexCache.entries[text3].parentId;
+				text4 = CodexCache.entries[text4].parentId;
 			}
 			else
 			{
-				text3 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
-				text2 = text2.Insert(0, CodexCache.entries[text3].name + " > ");
+				text4 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
+				text3 = text3.Insert(0, CodexCache.entries[text4].name + " > ");
 			}
 		}
-		this.currentLocationText.text = ((!(text2 == string.Empty)) ? text2 : CodexCache.entries["HOME"].name);
+		this.currentLocationText.text = ((!(text3 == string.Empty)) ? text3 : CodexCache.entries["HOME"].name);
 		if (this.history.Count == 0)
 		{
 			this.history.Add(this.activeEntryID);
@@ -426,37 +457,49 @@ public class CodexScreen : KScreen
 		{
 			global::UnityEngine.Object.DestroyImmediate(layoutGroup);
 		}
-		ContentContainer.ContentLayout contentLayout = container.contentLayout;
-		if (contentLayout != ContentContainer.ContentLayout.Horizontal)
+		if (!Game.Instance.unlocks.IsLocked(container.lockID))
 		{
-			if (contentLayout != ContentContainer.ContentLayout.Vertical)
+			ContentContainer.ContentLayout contentLayout = container.contentLayout;
+			if (contentLayout != ContentContainer.ContentLayout.Horizontal)
 			{
-				if (contentLayout == ContentContainer.ContentLayout.Grid)
+				if (contentLayout != ContentContainer.ContentLayout.Vertical)
 				{
-					layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
-					(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-					(layoutGroup as GridLayoutGroup).constraintCount = 3;
-					(layoutGroup as GridLayoutGroup).cellSize = new Vector2(170f, 32f);
+					if (contentLayout == ContentContainer.ContentLayout.Grid)
+					{
+						layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+						(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+						(layoutGroup as GridLayoutGroup).constraintCount = 3;
+						(layoutGroup as GridLayoutGroup).cellSize = new Vector2(170f, 32f);
+					}
+				}
+				else
+				{
+					layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
+					HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = layoutGroup as HorizontalOrVerticalLayoutGroup;
+					bool flag = false;
+					(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
+					horizontalOrVerticalLayoutGroup.childForceExpandHeight = flag;
+					(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
 				}
 			}
 			else
 			{
-				layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
-				HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup = layoutGroup as HorizontalOrVerticalLayoutGroup;
+				layoutGroup = containerGameObject.AddComponent<HorizontalLayoutGroup>();
+				layoutGroup.childAlignment = TextAnchor.MiddleLeft;
+				HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup2 = layoutGroup as HorizontalOrVerticalLayoutGroup;
 				bool flag = false;
 				(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
-				horizontalOrVerticalLayoutGroup.childForceExpandHeight = flag;
+				horizontalOrVerticalLayoutGroup2.childForceExpandHeight = flag;
 				(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
 			}
 		}
 		else
 		{
-			layoutGroup = containerGameObject.AddComponent<HorizontalLayoutGroup>();
-			layoutGroup.childAlignment = TextAnchor.MiddleLeft;
-			HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup2 = layoutGroup as HorizontalOrVerticalLayoutGroup;
+			layoutGroup = containerGameObject.AddComponent<VerticalLayoutGroup>();
+			HorizontalOrVerticalLayoutGroup horizontalOrVerticalLayoutGroup3 = layoutGroup as HorizontalOrVerticalLayoutGroup;
 			bool flag = false;
 			(layoutGroup as HorizontalOrVerticalLayoutGroup).childForceExpandWidth = flag;
-			horizontalOrVerticalLayoutGroup2.childForceExpandHeight = flag;
+			horizontalOrVerticalLayoutGroup3.childForceExpandHeight = flag;
 			(layoutGroup as HorizontalOrVerticalLayoutGroup).spacing = 8f;
 		}
 	}
@@ -468,6 +511,7 @@ public class CodexScreen : KScreen
 		case CodexWidget.ContentType.Text:
 		{
 			LocText component = contentGameObject.GetComponent<LocText>();
+			component.gameObject.SetActive(true);
 			string text;
 			content.properties.TryGetValue("style", out text);
 			if (text == "title")
@@ -511,12 +555,12 @@ public class CodexScreen : KScreen
 			else if (content.properties.ContainsKey("batchedAnimPrefabSourceID"))
 			{
 				Image component3 = contentGameObject.GetComponent<Image>();
-				component3.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui");
+				component3.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false);
 				component3.color = Color.white;
 			}
 			else if (content.objectProperties.ContainsKey("coloredSprite"))
 			{
-				Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
+				global::Tuple<Sprite, Color> tuple = (global::Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
 				Image component4 = contentGameObject.GetComponent<Image>();
 				if (tuple != null)
 				{
@@ -577,12 +621,12 @@ public class CodexScreen : KScreen
 		else if (content.properties.ContainsKey("batchedAnimPrefabSourceID"))
 		{
 			Image componentInChildren2 = contentGameObject.GetComponentInChildren<Image>();
-			componentInChildren2.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui");
+			componentInChildren2.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false);
 			componentInChildren2.color = Color.white;
 		}
 		else if (content.objectProperties.ContainsKey("coloredSprite"))
 		{
-			Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
+			global::Tuple<Sprite, Color> tuple = (global::Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
 			Image componentInChildren3 = contentGameObject.GetComponentInChildren<Image>();
 			if (tuple != null)
 			{
@@ -722,14 +766,17 @@ public class CodexScreen : KScreen
 	public enum PlanCategory
 	{
 		Home,
+		Emails,
+		Journals,
+		ResearchNotes,
 		Tech,
 		Creatures,
 		Plants,
 		Food,
 		Diseases,
 		Roles,
+		Systems,
 		Buildings,
-		Elements,
-		Systems
+		Elements
 	}
 }

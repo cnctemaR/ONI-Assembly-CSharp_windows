@@ -5,10 +5,13 @@ namespace System.Globalization
 	[Flags]
 	internal enum DateTimeFormatFlags
 	{
-		Unused = 0,
-		But = 1,
-		Serialized = 2,
-		By = 3,
-		Microsoft = 4
+		None = 0,
+		UseGenitiveMonth = 1,
+		UseLeapYearMonth = 2,
+		UseSpacesInMonthNames = 4,
+		UseHebrewRule = 8,
+		UseSpacesInDayNames = 16,
+		UseDigitPrefixInTokens = 32,
+		NotInitialized = -1
 	}
 }

@@ -6,7 +6,7 @@ namespace STRINGS
 	{
 		public class BUILDINGS
 		{
-			public class SetLocker
+			public class PropLocker
 			{
 				public static LocString HEADER = "Casual Friday!";
 
@@ -32,20 +32,6 @@ namespace STRINGS
 				public static LocString HEADER = "Preliminary Calculations";
 
 				public static LocString ENTRY = "TO: JSTERN@GRAVITASFACILITY.NOVA\nFROM: EJONES @GRAVITASFACILITY.NOVA\nSUBJECT: Preliminary Calculations\n\nDirector,\n\nEven with dramatic optimization we can't make the sheer volume of resources required to sustain a colony seed fit for even a small interplanetary travel duration. We'll need to consider serious changes if this is going to work.\n\nE Jones\nInformation and Statistics Department\nThe Gravitas Facility";
-			}
-
-			public class SET_DESK2
-			{
-				public static LocString HEADER = string.Empty;
-
-				public static LocString ENTRY = string.Empty;
-			}
-
-			public class SET_DESK3
-			{
-				public static LocString HEADER = string.Empty;
-
-				public static LocString ENTRY = string.Empty;
 			}
 
 			public class SET_OBJECT

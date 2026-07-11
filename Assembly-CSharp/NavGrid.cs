@@ -250,6 +250,8 @@ public class NavGrid
 
 	public string id;
 
+	public bool updateEveryFrame;
+
 	public Action<HashSet<int>> OnNavGridUpdateComplete;
 
 	public NavType[] ValidNavTypes;
@@ -262,11 +264,37 @@ public class NavGrid
 	{
 		public Link(int link, NavType start_nav_type, NavType end_nav_type, int transition_id, int cost)
 		{
+			this._transitionId = 0;
+			this._cost = 0;
 			this.link = link;
 			this.startNavType = start_nav_type;
 			this.endNavType = end_nav_type;
 			this.transitionId = transition_id;
 			this.cost = cost;
+		}
+
+		public int transitionId
+		{
+			get
+			{
+				return (int)this._transitionId;
+			}
+			set
+			{
+				this._transitionId = (byte)value;
+			}
+		}
+
+		public int cost
+		{
+			get
+			{
+				return (int)this._cost;
+			}
+			set
+			{
+				this._cost = (byte)value;
+			}
 		}
 
 		public int link;
@@ -275,9 +303,9 @@ public class NavGrid
 
 		public NavType endNavType;
 
-		public int transitionId;
+		private byte _transitionId;
 
-		public int cost;
+		private byte _cost;
 	}
 
 	public struct NavTypeData

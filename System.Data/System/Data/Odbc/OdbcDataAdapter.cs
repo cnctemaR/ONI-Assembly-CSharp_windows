@@ -10,38 +10,68 @@ namespace System.Data.Odbc
 	public sealed class OdbcDataAdapter : DbDataAdapter, IDataAdapter, IDbDataAdapter, ICloneable
 	{
 		public OdbcDataAdapter()
-			: this(null)
 		{
 		}
 
 		public OdbcDataAdapter(OdbcCommand selectCommand)
 		{
-			this.SelectCommand = selectCommand;
 		}
 
 		public OdbcDataAdapter(string selectCommandText, OdbcConnection selectConnection)
-			: this(new OdbcCommand(selectCommandText, selectConnection))
 		{
 		}
 
 		public OdbcDataAdapter(string selectCommandText, string selectConnectionString)
-			: this(selectCommandText, new OdbcConnection(selectConnectionString))
 		{
 		}
 
-		public event OdbcRowUpdatedEventHandler RowUpdated;
+		[DefaultValue(null)]
+		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		public new OdbcCommand DeleteCommand
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
 
-		public event OdbcRowUpdatingEventHandler RowUpdating;
+		[DefaultValue(null)]
+		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		public new OdbcCommand InsertCommand
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
+
+		[DefaultValue(null)]
+		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		public new OdbcCommand SelectCommand
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
 
 		IDbCommand IDbDataAdapter.DeleteCommand
 		{
 			get
 			{
-				return this.DeleteCommand;
+				throw null;
 			}
 			set
 			{
-				this.DeleteCommand = (OdbcCommand)value;
 			}
 		}
 
@@ -49,11 +79,10 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return this.InsertCommand;
+				throw null;
 			}
 			set
 			{
-				this.InsertCommand = (OdbcCommand)value;
 			}
 		}
 
@@ -61,11 +90,10 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return this.SelectCommand;
+				throw null;
 			}
 			set
 			{
-				this.SelectCommand = (OdbcCommand)value;
 			}
 		}
 
@@ -73,116 +101,68 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return this.UpdateCommand;
+				throw null;
 			}
 			set
 			{
-				this.UpdateCommand = (OdbcCommand)value;
 			}
 		}
 
-		[MonoTODO]
-		object ICloneable.Clone()
-		{
-			throw new NotImplementedException();
-		}
-
-		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[OdbcDescription("Used during Update for deleted rows in DataSet.")]
-		[OdbcCategory("Update")]
 		[DefaultValue(null)]
-		public new OdbcCommand DeleteCommand
-		{
-			get
-			{
-				return this.deleteCommand;
-			}
-			set
-			{
-				this.deleteCommand = value;
-			}
-		}
-
 		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[OdbcDescription("Used during Update for new rows in DataSet.")]
-		[OdbcCategory("Update")]
-		[DefaultValue(null)]
-		public new OdbcCommand InsertCommand
-		{
-			get
-			{
-				return this.insertCommand;
-			}
-			set
-			{
-				this.insertCommand = value;
-			}
-		}
-
-		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[OdbcCategory("Fill")]
-		[OdbcDescription("Used during Fill/FillSchema.")]
-		[DefaultValue(null)]
-		public new OdbcCommand SelectCommand
-		{
-			get
-			{
-				return this.selectCommand;
-			}
-			set
-			{
-				this.selectCommand = value;
-			}
-		}
-
-		[Editor("Microsoft.VSDesigner.Data.Design.DBCommandEditor, Microsoft.VSDesigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[OdbcCategory("Update")]
-		[OdbcDescription("Used during Update for modified rows in DataSet.")]
-		[DefaultValue(null)]
 		public new OdbcCommand UpdateCommand
 		{
 			get
 			{
-				return this.updateCommand;
+				throw null;
 			}
 			set
 			{
-				this.updateCommand = value;
+			}
+		}
+
+		public event OdbcRowUpdatedEventHandler RowUpdated
+		{
+			add
+			{
+			}
+			remove
+			{
+			}
+		}
+
+		public event OdbcRowUpdatingEventHandler RowUpdating
+		{
+			add
+			{
+			}
+			remove
+			{
 			}
 		}
 
 		protected override RowUpdatedEventArgs CreateRowUpdatedEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
 		{
-			return new OdbcRowUpdatedEventArgs(dataRow, command, statementType, tableMapping);
+			throw null;
 		}
 
 		protected override RowUpdatingEventArgs CreateRowUpdatingEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
 		{
-			return new OdbcRowUpdatingEventArgs(dataRow, command, statementType, tableMapping);
+			throw null;
 		}
 
 		protected override void OnRowUpdated(RowUpdatedEventArgs value)
 		{
-			if (this.RowUpdated != null)
-			{
-				this.RowUpdated(this, (OdbcRowUpdatedEventArgs)value);
-			}
 		}
 
 		protected override void OnRowUpdating(RowUpdatingEventArgs value)
 		{
-			if (this.RowUpdating != null)
-			{
-				this.RowUpdating(this, (OdbcRowUpdatingEventArgs)value);
-			}
 		}
 
-		private OdbcCommand deleteCommand;
-
-		private OdbcCommand insertCommand;
-
-		private OdbcCommand selectCommand;
-
-		private OdbcCommand updateCommand;
+		[MonoTODO]
+		object ICloneable.Clone()
+		{
+			throw null;
+		}
 	}
 }

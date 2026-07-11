@@ -284,6 +284,14 @@ namespace VoronoiTree
 			for (int j = 0; j < sites.Count; j++)
 			{
 				sites[j].poly = list[j].poly;
+				if (sites[j].poly == null)
+				{
+					global::Debug.LogErrorFormat("Site [{0}] at index [{1}]: Poly shouldnt be null here ever", new object[]
+					{
+						sites[j].id,
+						j
+					});
+				}
 				HashSet<uint> hashSet = new HashSet<uint>();
 				for (int k = 0; k < list[j].neighbours.Count; k++)
 				{

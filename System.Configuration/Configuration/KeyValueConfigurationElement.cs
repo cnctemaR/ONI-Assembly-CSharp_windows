@@ -4,6 +4,12 @@ namespace System.Configuration
 {
 	public class KeyValueConfigurationElement : ConfigurationElement
 	{
+		static KeyValueConfigurationElement()
+		{
+			KeyValueConfigurationElement.properties.Add(KeyValueConfigurationElement.keyProp);
+			KeyValueConfigurationElement.properties.Add(KeyValueConfigurationElement.valueProp);
+		}
+
 		internal KeyValueConfigurationElement()
 		{
 		}
@@ -12,12 +18,6 @@ namespace System.Configuration
 		{
 			base[KeyValueConfigurationElement.keyProp] = key;
 			base[KeyValueConfigurationElement.valueProp] = value;
-		}
-
-		static KeyValueConfigurationElement()
-		{
-			KeyValueConfigurationElement.properties.Add(KeyValueConfigurationElement.keyProp);
-			KeyValueConfigurationElement.properties.Add(KeyValueConfigurationElement.valueProp);
 		}
 
 		[ConfigurationProperty("key", DefaultValue = "", Options = ConfigurationPropertyOptions.IsKey)]
@@ -55,9 +55,9 @@ namespace System.Configuration
 			}
 		}
 
-		private static ConfigurationProperty keyProp = new ConfigurationProperty("key", typeof(string), string.Empty, ConfigurationPropertyOptions.IsKey);
+		private static ConfigurationProperty keyProp = new ConfigurationProperty("key", typeof(string), "", ConfigurationPropertyOptions.IsKey);
 
-		private static ConfigurationProperty valueProp = new ConfigurationProperty("value", typeof(string), string.Empty);
+		private static ConfigurationProperty valueProp = new ConfigurationProperty("value", typeof(string), "");
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 	}

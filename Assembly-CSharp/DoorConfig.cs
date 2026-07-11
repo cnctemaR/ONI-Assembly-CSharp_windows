@@ -19,13 +19,10 @@ public class DoorConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, none, 1f);
-		buildingDef.Entombable = false;
-		buildingDef.IsFoundation = true;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
+		buildingDef.Entombable = true;
+		buildingDef.IsFoundation = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
-		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
-		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		SoundEventVolumeCache.instance.AddVolume("door_internal_kanim", "Open_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_internal_kanim", "Close_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		return buildingDef;

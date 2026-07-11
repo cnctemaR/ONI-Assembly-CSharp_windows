@@ -94,6 +94,10 @@ public class KAnimBatch
 	public void Init()
 	{
 		this.dataTex = this.group.CreateTexture();
+		if (this.dataTex == null)
+		{
+			global::Debug.LogErrorFormat("Got null data texture from AnimBatchGroup [{0}]", new object[] { this.batchGroup });
+		}
 		int bestTextureSize = KAnimBatchGroup.GetBestTextureSize((float)(this.group.data.maxSymbolsPerBuild * this.group.maxGroupSize * 8));
 		this.symbolInstanceTex = this.group.CreateTexture("SymbolInstanceTex", bestTextureSize, KAnimBatch.ShaderProperty_symbolInstanceTex, KAnimBatch.ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE);
 		int width = this.dataTex.width;
@@ -366,6 +370,8 @@ public class KAnimBatch
 	private static int ShaderProperty_symbolOverrideInfoTex = Shader.PropertyToID("symbolOverrideInfoTex");
 
 	public static int ShaderProperty_SUPPORTS_SYMBOL_OVERRIDING = Shader.PropertyToID("SUPPORTS_SYMBOL_OVERRIDING");
+
+	public static int ShaderProperty_ANIM_TEXTURE_START_OFFSET = Shader.PropertyToID("ANIM_TEXTURE_START_OFFSET");
 
 	private KAnimBatch.SymbolInstanceSlot[] symbolInstanceSlots;
 

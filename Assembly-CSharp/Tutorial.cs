@@ -69,6 +69,11 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	public static Tutorial Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		Tutorial.Instance = null;
+	}
+
 	private void UpdateNotifierPosition()
 	{
 		if (this.notifierPosition == Vector3.zero)

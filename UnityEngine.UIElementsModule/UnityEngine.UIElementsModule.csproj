@@ -1,0 +1,281 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC2A0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine</RootNamespace>
+    <AssemblyName>UnityEngine.UIElementsModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Experimental\UIElements\AttachToPanelEvent.cs" />
+    <Compile Include="Experimental\UIElements\BaseControl.cs" />
+    <Compile Include="Experimental\UIElements\BaseTextControl.cs" />
+    <Compile Include="Experimental\UIElements\BaseTextElement.cs" />
+    <Compile Include="Experimental\UIElements\BaseVisualElementPanel.cs" />
+    <Compile Include="Experimental\UIElements\BlurEvent.cs" />
+    <Compile Include="Experimental\UIElements\Box.cs" />
+    <Compile Include="Experimental\UIElements\Button.cs" />
+    <Compile Include="Experimental\UIElements\CallbackEventHandler.cs" />
+    <Compile Include="Experimental\UIElements\CallbackPhase.cs" />
+    <Compile Include="Experimental\UIElements\Capture.cs" />
+    <Compile Include="Experimental\UIElements\ChangeEvent.cs" />
+    <Compile Include="Experimental\UIElements\ChangeType.cs" />
+    <Compile Include="Experimental\UIElements\ClampedDragger.cs" />
+    <Compile Include="Experimental\UIElements\Clickable.cs" />
+    <Compile Include="Experimental\UIElements\CommandEventBase.cs" />
+    <Compile Include="Experimental\UIElements\ContextClickEvent.cs" />
+    <Compile Include="Experimental\UIElements\ContextType.cs" />
+    <Compile Include="Experimental\UIElements\ContextualMenu.cs" />
+    <Compile Include="Experimental\UIElements\ContextualMenuManager.cs" />
+    <Compile Include="Experimental\UIElements\ContextualMenuManipulator.cs" />
+    <Compile Include="Experimental\UIElements\ContextualMenuPopulateEvent.cs" />
+    <Compile Include="Experimental\UIElements\CreationContext.cs" />
+    <Compile Include="Experimental\UIElements\CursorManager.cs" />
+    <Compile Include="Experimental\UIElements\CursorStyle.cs" />
+    <Compile Include="Experimental\UIElements\DetachFromPanelEvent.cs" />
+    <Compile Include="Experimental\UIElements\DragAndDropEventBase.cs" />
+    <Compile Include="Experimental\UIElements\DragEnterEvent.cs" />
+    <Compile Include="Experimental\UIElements\DragExitedEvent.cs" />
+    <Compile Include="Experimental\UIElements\DragLeaveEvent.cs" />
+    <Compile Include="Experimental\UIElements\DragPerformEvent.cs" />
+    <Compile Include="Experimental\UIElements\DragUpdatedEvent.cs" />
+    <Compile Include="Experimental\UIElements\EventBase.2.cs" />
+    <Compile Include="Experimental\UIElements\EventBase.cs" />
+    <Compile Include="Experimental\UIElements\EventCallback.2.cs" />
+    <Compile Include="Experimental\UIElements\EventCallback.cs" />
+    <Compile Include="Experimental\UIElements\EventCallbackFunctor.2.cs" />
+    <Compile Include="Experimental\UIElements\EventCallbackFunctor.cs" />
+    <Compile Include="Experimental\UIElements\EventCallbackFunctorBase.cs" />
+    <Compile Include="Experimental\UIElements\EventCallbackList.cs" />
+    <Compile Include="Experimental\UIElements\EventCallbackListPool.cs" />
+    <Compile Include="Experimental\UIElements\EventCallbackRegistry.cs" />
+    <Compile Include="Experimental\UIElements\EventDispatcher.cs" />
+    <Compile Include="Experimental\UIElements\EventPool.cs" />
+    <Compile Include="Experimental\UIElements\EventPropagation.cs" />
+    <Compile Include="Experimental\UIElements\ExecuteCommandEvent.cs" />
+    <Compile Include="Experimental\UIElements\Focusable.cs" />
+    <Compile Include="Experimental\UIElements\FocusChangeDirection.cs" />
+    <Compile Include="Experimental\UIElements\FocusController.cs" />
+    <Compile Include="Experimental\UIElements\FocusEvent.cs" />
+    <Compile Include="Experimental\UIElements\FocusEventBase.cs" />
+    <Compile Include="Experimental\UIElements\FocusInEvent.cs" />
+    <Compile Include="Experimental\UIElements\FocusOutEvent.cs" />
+    <Compile Include="Experimental\UIElements\GeometryChangedEvent.cs" />
+    <Compile Include="Experimental\UIElements\GetViewDataDictionary.cs" />
+    <Compile Include="Experimental\UIElements\IChangeEvent.cs" />
+    <Compile Include="Experimental\UIElements\ICommandEvent.cs" />
+    <Compile Include="Experimental\UIElements\ICursorManager.cs" />
+    <Compile Include="Experimental\UIElements\IDataWatchHandle.cs" />
+    <Compile Include="Experimental\UIElements\IDataWatchService.cs" />
+    <Compile Include="Experimental\UIElements\IDragAndDropEvent.cs" />
+    <Compile Include="Experimental\UIElements\IEventDispatcher.cs" />
+    <Compile Include="Experimental\UIElements\IEventHandler.cs" />
+    <Compile Include="Experimental\UIElements\IFocusEvent.cs" />
+    <Compile Include="Experimental\UIElements\IFocusRing.cs" />
+    <Compile Include="Experimental\UIElements\IKeyboardEvent.cs" />
+    <Compile Include="Experimental\UIElements\Image.cs" />
+    <Compile Include="Experimental\UIElements\IManipulator.cs" />
+    <Compile Include="Experimental\UIElements\IMGUIContainer.cs" />
+    <Compile Include="Experimental\UIElements\IMGUIEvent.cs" />
+    <Compile Include="Experimental\UIElements\IMouseCaptureEvent.cs" />
+    <Compile Include="Experimental\UIElements\IMouseEvent.cs" />
+    <Compile Include="Experimental\UIElements\IMouseEventInternal.cs" />
+    <Compile Include="Experimental\UIElements\INotifyValueChanged.cs" />
+    <Compile Include="Experimental\UIElements\InputEvent.cs" />
+    <Compile Include="Experimental\UIElements\IPanel.cs" />
+    <Compile Include="Experimental\UIElements\IPropagatableEvent.cs" />
+    <Compile Include="Experimental\UIElements\IScheduledItem.cs" />
+    <Compile Include="Experimental\UIElements\IScheduler.cs" />
+    <Compile Include="Experimental\UIElements\ISerializableJsonDictionary.cs" />
+    <Compile Include="Experimental\UIElements\IStyle.cs" />
+    <Compile Include="Experimental\UIElements\ITextInputField.cs" />
+    <Compile Include="Experimental\UIElements\ITransform.cs" />
+    <Compile Include="Experimental\UIElements\IUIElementDataWatch.cs" />
+    <Compile Include="Experimental\UIElements\IUIElementDataWatchRequest.cs" />
+    <Compile Include="Experimental\UIElements\IUxmlAttributes.cs" />
+    <Compile Include="Experimental\UIElements\IUxmlFactory.cs" />
+    <Compile Include="Experimental\UIElements\IVisualElementPanelActivatable.cs" />
+    <Compile Include="Experimental\UIElements\IVisualElementScheduledItem.cs" />
+    <Compile Include="Experimental\UIElements\IVisualElementScheduler.cs" />
+    <Compile Include="Experimental\UIElements\KeyboardEventArgs.cs" />
+    <Compile Include="Experimental\UIElements\KeyboardEventBase.cs" />
+    <Compile Include="Experimental\UIElements\KeyboardTextEditorEventHandler.cs" />
+    <Compile Include="Experimental\UIElements\KeyDownEvent.cs" />
+    <Compile Include="Experimental\UIElements\KeyUpEvent.cs" />
+    <Compile Include="Experimental\UIElements\Label.cs" />
+    <Compile Include="Experimental\UIElements\ListView.cs" />
+    <Compile Include="Experimental\UIElements\LoadResourceFunction.cs" />
+    <Compile Include="Experimental\UIElements\Manipulator.cs" />
+    <Compile Include="Experimental\UIElements\ManipulatorActivationFilter.cs" />
+    <Compile Include="Experimental\UIElements\MouseButton.cs" />
+    <Compile Include="Experimental\UIElements\MouseCaptureController.cs" />
+    <Compile Include="Experimental\UIElements\MouseCaptureEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseCaptureEventBase.cs" />
+    <Compile Include="Experimental\UIElements\MouseCaptureOutEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseDownEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseEnterEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseEnterWindowEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseEventArgs.cs" />
+    <Compile Include="Experimental\UIElements\MouseEventBase.cs" />
+    <Compile Include="Experimental\UIElements\MouseLeaveEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseLeaveWindowEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseManipulator.cs" />
+    <Compile Include="Experimental\UIElements\MouseMoveEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseOutEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseOverEvent.cs" />
+    <Compile Include="Experimental\UIElements\MouseUpEvent.cs" />
+    <Compile Include="Experimental\UIElements\ObjectPool.cs" />
+    <Compile Include="Experimental\UIElements\OnStylesResolved.cs" />
+    <Compile Include="Experimental\UIElements\Panel.cs" />
+    <Compile Include="Experimental\UIElements\PickingMode.cs" />
+    <Compile Include="Experimental\UIElements\PopupWindow.cs" />
+    <Compile Include="Experimental\UIElements\PropagationPhase.cs" />
+    <Compile Include="Experimental\UIElements\PseudoStates.cs" />
+    <Compile Include="Experimental\UIElements\RenderData.cs" />
+    <Compile Include="Experimental\UIElements\RepeatButton.cs" />
+    <Compile Include="Experimental\UIElements\SavePersistentViewData.cs" />
+    <Compile Include="Experimental\UIElements\ScheduledItem.cs" />
+    <Compile Include="Experimental\UIElements\Scroller.cs" />
+    <Compile Include="Experimental\UIElements\ScrollerButton.cs" />
+    <Compile Include="Experimental\UIElements\ScrollView.cs" />
+    <Compile Include="Experimental\UIElements\SelectionType.cs" />
+    <Compile Include="Experimental\UIElements\Slider.cs" />
+    <Compile Include="Experimental\UIElements\Spacing.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\Align.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\FlexDirection.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\ImageScaleMode.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\Justify.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\Overflow.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\PositionType.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\Visibility.cs" />
+    <Compile Include="Experimental\UIElements\StyleEnums\Wrap.cs" />
+    <Compile Include="Experimental\UIElements\StylePainterExtensionMethods.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\CustomProperty.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\HandlesApplicatorFunction.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\HierarchyTraversal.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\ICustomStyle.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\IHierarchyTraversal.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\RuleMatcher.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\ShorthandApplicatorFunction.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StyleComplexSelectorExtensions.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StyleContext.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StylePropertyApplyMode.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StylePropertyID.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StyleSheetApplicator.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StyleSheetCache.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StyleSheetExtensions.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StyleValue.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\StyleValueUtils.cs" />
+    <Compile Include="Experimental\UIElements\StyleSheets\VisualElementStylesData.cs" />
+    <Compile Include="Experimental\UIElements\TemplateAsset.cs" />
+    <Compile Include="Experimental\UIElements\TemplateContainer.cs" />
+    <Compile Include="Experimental\UIElements\TextEditorEngine.cs" />
+    <Compile Include="Experimental\UIElements\TextEditorEventHandler.cs" />
+    <Compile Include="Experimental\UIElements\TextField.cs" />
+    <Compile Include="Experimental\UIElements\TextInputFieldBase.cs" />
+    <Compile Include="Experimental\UIElements\TimeMsFunction.cs" />
+    <Compile Include="Experimental\UIElements\TimerEventScheduler.cs" />
+    <Compile Include="Experimental\UIElements\TimerState.cs" />
+    <Compile Include="Experimental\UIElements\Toggle.cs" />
+    <Compile Include="Experimental\UIElements\TouchScreenTextEditorEventHandler.cs" />
+    <Compile Include="Experimental\UIElements\UIElementsUtility.cs" />
+    <Compile Include="Experimental\UIElements\UQuery.cs" />
+    <Compile Include="Experimental\UIElements\UQueryExtensions.cs" />
+    <Compile Include="Experimental\UIElements\UxmlAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlBoolAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlChildElementDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlColorAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlDoubleAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlEnumAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlEnumeration.cs" />
+    <Compile Include="Experimental\UIElements\UxmlFactory.2.cs" />
+    <Compile Include="Experimental\UIElements\UxmlFactory.cs" />
+    <Compile Include="Experimental\UIElements\UxmlFloatAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlIntAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlLongAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlRootElementFactory.cs" />
+    <Compile Include="Experimental\UIElements\UxmlRootElementTraits.cs" />
+    <Compile Include="Experimental\UIElements\UxmlStringAttributeDescription.cs" />
+    <Compile Include="Experimental\UIElements\UxmlTraits.cs" />
+    <Compile Include="Experimental\UIElements\UxmlTypeRestriction.cs" />
+    <Compile Include="Experimental\UIElements\UxmlValueBounds.cs" />
+    <Compile Include="Experimental\UIElements\UxmlValueMatches.cs" />
+    <Compile Include="Experimental\UIElements\ValidateCommandEvent.cs" />
+    <Compile Include="Experimental\UIElements\VisualContainer.cs" />
+    <Compile Include="Experimental\UIElements\VisualElement.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementAsset.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementExtensions.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementFactoryRegistry.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementFocusChangeDirection.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementFocusRing.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementListPool.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementPanelActivator.cs" />
+    <Compile Include="Experimental\UIElements\VisualElementUtils.cs" />
+    <Compile Include="Experimental\UIElements\VisualTreeAsset.cs" />
+    <Compile Include="Experimental\UIElements\WheelEvent.cs" />
+    <Compile Include="Internal\Experimental\UIElements\PanelWrapper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Yoga\BaselineFunction.cs" />
+    <Compile Include="Yoga\Logger.cs" />
+    <Compile Include="Yoga\MeasureFunction.cs" />
+    <Compile Include="Yoga\MeasureOutput.cs" />
+    <Compile Include="Yoga\Native.cs" />
+    <Compile Include="Yoga\YogaAlign.cs" />
+    <Compile Include="Yoga\YogaBaselineFunc.cs" />
+    <Compile Include="Yoga\YogaConfig.cs" />
+    <Compile Include="Yoga\YogaConstants.cs" />
+    <Compile Include="Yoga\YogaDimension.cs" />
+    <Compile Include="Yoga\YogaDirection.cs" />
+    <Compile Include="Yoga\YogaDisplay.cs" />
+    <Compile Include="Yoga\YogaEdge.cs" />
+    <Compile Include="Yoga\YogaExperimentalFeature.cs" />
+    <Compile Include="Yoga\YogaFlexDirection.cs" />
+    <Compile Include="Yoga\YogaJustify.cs" />
+    <Compile Include="Yoga\YogaLogger.cs" />
+    <Compile Include="Yoga\YogaLogLevel.cs" />
+    <Compile Include="Yoga\YogaMeasureFunc.cs" />
+    <Compile Include="Yoga\YogaMeasureMode.cs" />
+    <Compile Include="Yoga\YogaNode.cs" />
+    <Compile Include="Yoga\YogaNodeType.cs" />
+    <Compile Include="Yoga\YogaOverflow.cs" />
+    <Compile Include="Yoga\YogaPositionType.cs" />
+    <Compile Include="Yoga\YogaPrintOptions.cs" />
+    <Compile Include="Yoga\YogaSize.cs" />
+    <Compile Include="Yoga\YogaUnit.cs" />
+    <Compile Include="Yoga\YogaValue.cs" />
+    <Compile Include="Yoga\YogaValueExtensions.cs" />
+    <Compile Include="Yoga\YogaWrap.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC27B}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC285}</Project>
+      <Name>UnityEngine.IMGUIModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC291}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.StyleSheetsModule\UnityEngine.StyleSheetsModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC296}</Project>
+      <Name>UnityEngine.StyleSheetsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC29A}</Project>
+      <Name>UnityEngine.TextRenderingModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Core" />
+  </ItemGroup>
+</Project>

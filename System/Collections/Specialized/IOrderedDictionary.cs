@@ -4,12 +4,12 @@ namespace System.Collections.Specialized
 {
 	public interface IOrderedDictionary : IDictionary, ICollection, IEnumerable
 	{
+		object this[int index] { get; set; }
+
 		IDictionaryEnumerator GetEnumerator();
 
-		void Insert(int idx, object key, object value);
+		void Insert(int index, object key, object value);
 
-		void RemoveAt(int idx);
-
-		object this[int idx] { get; set; }
+		void RemoveAt(int index);
 	}
 }

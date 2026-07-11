@@ -4,20 +4,15 @@ namespace System.Data.Odbc
 {
 	public sealed class OdbcInfoMessageEventArgs : EventArgs
 	{
-		internal OdbcInfoMessageEventArgs(OdbcErrorCollection errors)
+		internal OdbcInfoMessageEventArgs()
 		{
-			foreach (object obj in errors)
-			{
-				OdbcError odbcError = (OdbcError)obj;
-				this.errors.Add(odbcError);
-			}
 		}
 
 		public OdbcErrorCollection Errors
 		{
 			get
 			{
-				return this.errors;
+				throw null;
 			}
 		}
 
@@ -25,15 +20,13 @@ namespace System.Data.Odbc
 		{
 			get
 			{
-				return this.errors[0].Message;
+				throw null;
 			}
 		}
 
 		public override string ToString()
 		{
-			return this.Message;
+			throw null;
 		}
-
-		private OdbcErrorCollection errors = new OdbcErrorCollection();
 	}
 }

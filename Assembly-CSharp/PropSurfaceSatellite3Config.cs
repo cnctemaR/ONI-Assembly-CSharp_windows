@@ -7,7 +7,7 @@ public class PropSurfaceSatellite3Config : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropSurfaceSatellite3", SETITEMS.SATELLITE.NAME, SETITEMS.SATELLITE.DESC, 50f, Assets.GetAnim("satellite3_kanim"), "off", Grid.SceneLayer.Building, 4, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropSurfaceSatellite3", global::STRINGS.BUILDINGS.PREFABS.PROPSURFACESATELLITE3.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPSURFACESATELLITE3.DESC, 50f, Assets.GetAnim("satellite3_kanim"), "off", Grid.SceneLayer.Building, 6, 6, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;

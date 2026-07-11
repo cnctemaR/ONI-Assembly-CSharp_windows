@@ -8,7 +8,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 	{
 		default_state = this.pre;
 		base.Target(this.worker);
-		this.root.ToggleSnapOn("dig");
+		this.root.ToggleSnapOn("dig").ToggleTag(GameTags.AllowSpeech);
 		this.pre.Enter(delegate(MultitoolController.Instance smi)
 		{
 			smi.PlayPre();
@@ -88,7 +88,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter workable;
 
-	private static string[][][] ANIM_BASE = new string[][][]
+	private static readonly string[][][] ANIM_BASE = new string[][][]
 	{
 		new string[][]
 		{
@@ -192,7 +192,8 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
 			Vector3 targetPoint = workable.GetTargetPoint();
 			component.SetTargetPos(targetPoint);
-			this.hitEffect = GameUtil.KInstantiate(this.hitEffectPrefab, targetPoint, Grid.SceneLayer.FXFront2, Folder.FX, null, 0);
+			this.hitEffect = GameUtil.KInstantiate(this.hitEffectPrefab, targetPoint, Grid.SceneLayer.FXFront2, null, 0);
+			this.hitEffect.SetActive(true);
 			component.UpdateWorkTarget(workable.GetTargetPoint());
 		}
 

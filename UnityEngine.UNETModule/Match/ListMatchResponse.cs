@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace UnityEngine.Networking.Match
+{
+	[Serializable]
+	internal class ListMatchResponse : BasicResponse
+	{
+		public ListMatchResponse()
+		{
+			this.matches = new List<MatchDesc>();
+		}
+
+		public ListMatchResponse(List<MatchDesc> otherMatches)
+		{
+			this.matches = otherMatches;
+		}
+
+		public override string ToString()
+		{
+			return UnityString.Format("[{0}]-matches.Count:{1}", new object[]
+			{
+				base.ToString(),
+				(this.matches != null) ? this.matches.Count : 0
+			});
+		}
+
+		public List<MatchDesc> matches;
+	}
+}

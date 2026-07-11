@@ -21,7 +21,6 @@ public class ResearchCenterConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.AudioCategory = "Metal";
@@ -45,7 +44,7 @@ public class ResearchCenterConfig : IBuildingConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
 		ResearchCenter researchCenter = go.AddOrGet<ResearchCenter>();
 		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research_center_kanim") };
-		researchCenter.research_point_type_id = ResearchTypes.ID.ALPHA;
+		researchCenter.research_point_type_id = "alpha";
 		researchCenter.inputMaterial = ResearchCenterConfig.INPUT_MATERIAL;
 		researchCenter.mass_per_point = 50f;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();

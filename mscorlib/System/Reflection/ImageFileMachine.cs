@@ -9,6 +9,7 @@ namespace System.Reflection
 	{
 		I386 = 332,
 		IA64 = 512,
-		AMD64 = 34404
+		AMD64 = 34404,
+		ARM = 452
 	}
 }

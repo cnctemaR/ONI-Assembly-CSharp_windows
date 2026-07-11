@@ -2,6 +2,11 @@
 
 public class UtilityBuildTool : BaseUtilityBuildTool
 {
+	public static void DestroyInstance()
+	{
+		UtilityBuildTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		UtilityBuildTool.Instance = this;

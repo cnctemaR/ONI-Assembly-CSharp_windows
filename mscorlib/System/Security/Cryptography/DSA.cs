@@ -1,7 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Util;
 using System.Text;
-using Mono.Security;
 
 namespace System.Security.Cryptography
 {
@@ -20,14 +21,114 @@ namespace System.Security.Cryptography
 
 		public abstract byte[] CreateSignature(byte[] rgbHash);
 
-		public abstract DSAParameters ExportParameters(bool includePrivateParameters);
+		public abstract bool VerifySignature(byte[] rgbHash, byte[] rgbSignature);
 
-		internal void ZeroizePrivateKey(DSAParameters parameters)
+		protected virtual byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
 		{
-			if (parameters.X != null)
+			throw DSA.DerivedClassMustOverride();
+		}
+
+		protected virtual byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
+		{
+			throw DSA.DerivedClassMustOverride();
+		}
+
+		public byte[] SignData(byte[] data, HashAlgorithmName hashAlgorithm)
+		{
+			if (data == null)
 			{
-				Array.Clear(parameters.X, 0, parameters.X.Length);
+				throw new ArgumentNullException("data");
 			}
+			return this.SignData(data, 0, data.Length, hashAlgorithm);
+		}
+
+		public virtual byte[] SignData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			if (offset < 0 || offset > data.Length)
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+			if (count < 0 || count > data.Length - offset)
+			{
+				throw new ArgumentOutOfRangeException("count");
+			}
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw DSA.HashAlgorithmNameNullOrEmpty();
+			}
+			byte[] array = this.HashData(data, offset, count, hashAlgorithm);
+			return this.CreateSignature(array);
+		}
+
+		public virtual byte[] SignData(Stream data, HashAlgorithmName hashAlgorithm)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw DSA.HashAlgorithmNameNullOrEmpty();
+			}
+			byte[] array = this.HashData(data, hashAlgorithm);
+			return this.CreateSignature(array);
+		}
+
+		public bool VerifyData(byte[] data, byte[] signature, HashAlgorithmName hashAlgorithm)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			return this.VerifyData(data, 0, data.Length, signature, hashAlgorithm);
+		}
+
+		public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, HashAlgorithmName hashAlgorithm)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			if (offset < 0 || offset > data.Length)
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+			if (count < 0 || count > data.Length - offset)
+			{
+				throw new ArgumentOutOfRangeException("count");
+			}
+			if (signature == null)
+			{
+				throw new ArgumentNullException("signature");
+			}
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw DSA.HashAlgorithmNameNullOrEmpty();
+			}
+			byte[] array = this.HashData(data, offset, count, hashAlgorithm);
+			return this.VerifySignature(array, signature);
+		}
+
+		public virtual bool VerifyData(Stream data, byte[] signature, HashAlgorithmName hashAlgorithm)
+		{
+			if (data == null)
+			{
+				throw new ArgumentNullException("data");
+			}
+			if (signature == null)
+			{
+				throw new ArgumentNullException("signature");
+			}
+			if (string.IsNullOrEmpty(hashAlgorithm.Name))
+			{
+				throw DSA.HashAlgorithmNameNullOrEmpty();
+			}
+			byte[] array = this.HashData(data, hashAlgorithm);
+			return this.VerifySignature(array, signature);
 		}
 
 		public override void FromXmlString(string xmlString)
@@ -37,104 +138,97 @@ namespace System.Security.Cryptography
 				throw new ArgumentNullException("xmlString");
 			}
 			DSAParameters dsaparameters = default(DSAParameters);
-			try
+			SecurityElement topElement = new Parser(xmlString).GetTopElement();
+			string text = topElement.SearchForTextOfLocalName("P");
+			if (text == null)
 			{
-				dsaparameters.P = AsymmetricAlgorithm.GetNamedParam(xmlString, "P");
-				dsaparameters.Q = AsymmetricAlgorithm.GetNamedParam(xmlString, "Q");
-				dsaparameters.G = AsymmetricAlgorithm.GetNamedParam(xmlString, "G");
-				dsaparameters.J = AsymmetricAlgorithm.GetNamedParam(xmlString, "J");
-				dsaparameters.Y = AsymmetricAlgorithm.GetNamedParam(xmlString, "Y");
-				dsaparameters.X = AsymmetricAlgorithm.GetNamedParam(xmlString, "X");
-				dsaparameters.Seed = AsymmetricAlgorithm.GetNamedParam(xmlString, "Seed");
-				byte[] namedParam = AsymmetricAlgorithm.GetNamedParam(xmlString, "PgenCounter");
-				if (namedParam != null)
+				throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "DSA", "P" }));
+			}
+			dsaparameters.P = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text));
+			string text2 = topElement.SearchForTextOfLocalName("Q");
+			if (text2 == null)
+			{
+				throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "DSA", "Q" }));
+			}
+			dsaparameters.Q = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text2));
+			string text3 = topElement.SearchForTextOfLocalName("G");
+			if (text3 == null)
+			{
+				throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "DSA", "G" }));
+			}
+			dsaparameters.G = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text3));
+			string text4 = topElement.SearchForTextOfLocalName("Y");
+			if (text4 == null)
+			{
+				throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "DSA", "Y" }));
+			}
+			dsaparameters.Y = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text4));
+			string text5 = topElement.SearchForTextOfLocalName("J");
+			if (text5 != null)
+			{
+				dsaparameters.J = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text5));
+			}
+			string text6 = topElement.SearchForTextOfLocalName("X");
+			if (text6 != null)
+			{
+				dsaparameters.X = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text6));
+			}
+			string text7 = topElement.SearchForTextOfLocalName("Seed");
+			string text8 = topElement.SearchForTextOfLocalName("PgenCounter");
+			if (text7 != null && text8 != null)
+			{
+				dsaparameters.Seed = Convert.FromBase64String(Utils.DiscardWhiteSpaces(text7));
+				dsaparameters.Counter = Utils.ConvertByteArrayToInt(Convert.FromBase64String(Utils.DiscardWhiteSpaces(text8)));
+			}
+			else if (text7 != null || text8 != null)
+			{
+				if (text7 == null)
 				{
-					byte[] array = new byte[4];
-					Buffer.BlockCopy(namedParam, 0, array, 0, namedParam.Length);
-					dsaparameters.Counter = BitConverterLE.ToInt32(array, 0);
+					throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "DSA", "Seed" }));
 				}
-				this.ImportParameters(dsaparameters);
+				throw new CryptographicException(Environment.GetResourceString("Input string does not contain a valid encoding of the '{0}' '{1}' parameter.", new object[] { "DSA", "PgenCounter" }));
 			}
-			catch
-			{
-				this.ZeroizePrivateKey(dsaparameters);
-				throw;
-			}
-			finally
-			{
-				this.ZeroizePrivateKey(dsaparameters);
-			}
+			this.ImportParameters(dsaparameters);
 		}
-
-		public abstract void ImportParameters(DSAParameters parameters);
 
 		public override string ToXmlString(bool includePrivateParameters)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
 			DSAParameters dsaparameters = this.ExportParameters(includePrivateParameters);
-			try
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append("<DSAKeyValue>");
+			stringBuilder.Append("<P>" + Convert.ToBase64String(dsaparameters.P) + "</P>");
+			stringBuilder.Append("<Q>" + Convert.ToBase64String(dsaparameters.Q) + "</Q>");
+			stringBuilder.Append("<G>" + Convert.ToBase64String(dsaparameters.G) + "</G>");
+			stringBuilder.Append("<Y>" + Convert.ToBase64String(dsaparameters.Y) + "</Y>");
+			if (dsaparameters.J != null)
 			{
-				stringBuilder.Append("<DSAKeyValue>");
-				stringBuilder.Append("<P>");
-				stringBuilder.Append(Convert.ToBase64String(dsaparameters.P));
-				stringBuilder.Append("</P>");
-				stringBuilder.Append("<Q>");
-				stringBuilder.Append(Convert.ToBase64String(dsaparameters.Q));
-				stringBuilder.Append("</Q>");
-				stringBuilder.Append("<G>");
-				stringBuilder.Append(Convert.ToBase64String(dsaparameters.G));
-				stringBuilder.Append("</G>");
-				stringBuilder.Append("<Y>");
-				stringBuilder.Append(Convert.ToBase64String(dsaparameters.Y));
-				stringBuilder.Append("</Y>");
-				if (dsaparameters.J != null)
-				{
-					stringBuilder.Append("<J>");
-					stringBuilder.Append(Convert.ToBase64String(dsaparameters.J));
-					stringBuilder.Append("</J>");
-				}
-				if (dsaparameters.Seed != null)
-				{
-					stringBuilder.Append("<Seed>");
-					stringBuilder.Append(Convert.ToBase64String(dsaparameters.Seed));
-					stringBuilder.Append("</Seed>");
-					stringBuilder.Append("<PgenCounter>");
-					if (dsaparameters.Counter != 0)
-					{
-						byte[] bytes = BitConverterLE.GetBytes(dsaparameters.Counter);
-						int num = bytes.Length;
-						while (bytes[num - 1] == 0)
-						{
-							num--;
-						}
-						stringBuilder.Append(Convert.ToBase64String(bytes, 0, num));
-					}
-					else
-					{
-						stringBuilder.Append("AA==");
-					}
-					stringBuilder.Append("</PgenCounter>");
-				}
-				if (dsaparameters.X != null)
-				{
-					stringBuilder.Append("<X>");
-					stringBuilder.Append(Convert.ToBase64String(dsaparameters.X));
-					stringBuilder.Append("</X>");
-				}
-				else if (includePrivateParameters)
-				{
-					throw new ArgumentNullException("X");
-				}
-				stringBuilder.Append("</DSAKeyValue>");
+				stringBuilder.Append("<J>" + Convert.ToBase64String(dsaparameters.J) + "</J>");
 			}
-			catch
+			if (dsaparameters.Seed != null)
 			{
-				this.ZeroizePrivateKey(dsaparameters);
-				throw;
+				stringBuilder.Append("<Seed>" + Convert.ToBase64String(dsaparameters.Seed) + "</Seed>");
+				stringBuilder.Append("<PgenCounter>" + Convert.ToBase64String(Utils.ConvertIntToByteArray(dsaparameters.Counter)) + "</PgenCounter>");
 			}
+			if (includePrivateParameters)
+			{
+				stringBuilder.Append("<X>" + Convert.ToBase64String(dsaparameters.X) + "</X>");
+			}
+			stringBuilder.Append("</DSAKeyValue>");
 			return stringBuilder.ToString();
 		}
 
-		public abstract bool VerifySignature(byte[] rgbHash, byte[] rgbSignature);
+		public abstract DSAParameters ExportParameters(bool includePrivateParameters);
+
+		public abstract void ImportParameters(DSAParameters parameters);
+
+		private static Exception DerivedClassMustOverride()
+		{
+			return new NotImplementedException(Environment.GetResourceString("Derived classes must provide an implementation."));
+		}
+
+		internal static Exception HashAlgorithmNameNullOrEmpty()
+		{
+			return new ArgumentException(Environment.GetResourceString("The hash algorithm name cannot be null or empty."), "hashAlgorithm");
+		}
 	}
 }

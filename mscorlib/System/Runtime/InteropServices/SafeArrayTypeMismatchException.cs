@@ -8,28 +8,26 @@ namespace System.Runtime.InteropServices
 	public class SafeArrayTypeMismatchException : SystemException
 	{
 		public SafeArrayTypeMismatchException()
-			: base(Locale.GetText("The incoming SAVEARRAY does not match the expected managed signature"))
+			: base(Environment.GetResourceString("Specified array was not of the expected type."))
 		{
-			base.HResult = -2146233037;
+			base.SetErrorCode(-2146233037);
 		}
 
 		public SafeArrayTypeMismatchException(string message)
 			: base(message)
 		{
-			base.HResult = -2146233037;
+			base.SetErrorCode(-2146233037);
 		}
 
 		public SafeArrayTypeMismatchException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.HResult = -2146233037;
+			base.SetErrorCode(-2146233037);
 		}
 
 		protected SafeArrayTypeMismatchException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		private const int ErrorCode = -2146233037;
 	}
 }

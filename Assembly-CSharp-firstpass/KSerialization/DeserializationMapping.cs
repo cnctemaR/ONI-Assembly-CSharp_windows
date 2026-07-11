@@ -102,7 +102,7 @@ namespace KSerialization
 					}
 					else
 					{
-						if (deserializationInfo.property == null)
+						if (!(deserializationInfo.property != null))
 						{
 							throw new Exception("????");
 						}
@@ -136,6 +136,7 @@ namespace KSerialization
 					case SerializationTypeInfo.Dictionary:
 					case SerializationTypeInfo.List:
 					case SerializationTypeInfo.HashSet:
+					case SerializationTypeInfo.Queue:
 					{
 						int num = reader.ReadInt32();
 						reader.ReadInt32();
@@ -392,6 +393,40 @@ namespace KSerialization
 						}
 					}
 					obj = Activator.CreateInstance(type_info.genericInstantiationType, new object[] { array5 });
+				}
+				break;
+			}
+			case SerializationTypeInfo.Queue:
+			{
+				reader.ReadInt32();
+				int num11 = reader.ReadInt32();
+				if (num11 >= 0)
+				{
+					TypeInfo typeInfo8 = type_info.subTypes[0];
+					Array array6 = Array.CreateInstance(typeInfo8.type, num11);
+					if (Helper.IsPOD(typeInfo8.info))
+					{
+						this.ReadArrayFast(array6, typeInfo8, reader);
+					}
+					else if (Helper.IsValueType(typeInfo8.info))
+					{
+						DeserializationMapping deserializationMapping5 = Manager.GetDeserializationMapping(typeInfo8.type);
+						object obj12 = Activator.CreateInstance(typeInfo8.type);
+						for (int num12 = 0; num12 < num11; num12++)
+						{
+							deserializationMapping5.Deserialize(obj12, reader);
+							array6.SetValue(obj12, num12);
+						}
+					}
+					else
+					{
+						for (int num13 = 0; num13 < num11; num13++)
+						{
+							object obj13 = this.ReadValue(typeInfo8, reader, null);
+							array6.SetValue(obj13, num13);
+						}
+					}
+					obj = Activator.CreateInstance(type_info.genericInstantiationType, new object[] { array6 });
 				}
 				break;
 			}

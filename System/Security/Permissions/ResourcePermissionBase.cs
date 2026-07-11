@@ -63,8 +63,7 @@ namespace System.Security.Permissions
 			this.CheckEntry(entry);
 			if (this.Exists(entry))
 			{
-				string text = global::Locale.GetText("Entry already exists.");
-				throw new InvalidOperationException(text);
+				throw new InvalidOperationException(global::Locale.GetText("Entry already exists."));
 			}
 			this._list.Add(entry);
 		}
@@ -86,14 +85,14 @@ namespace System.Security.Permissions
 			return resourcePermissionBase;
 		}
 
-		[global::System.MonoTODO("incomplete - need more test")]
+		[MonoTODO("incomplete - need more test")]
 		public override void FromXml(SecurityElement securityElement)
 		{
 			if (securityElement == null)
 			{
 				throw new ArgumentNullException("securityElement");
 			}
-			this.CheckSecurityElement(securityElement, "securityElement", 1, 1);
+			CodeAccessPermission.CheckSecurityElement(securityElement, "securityElement", 1, 1);
 			this._list.Clear();
 			this._unrestricted = PermissionHelper.IsUnrestricted(securityElement);
 			if (securityElement.Children == null || securityElement.Children.Count < 1)
@@ -105,8 +104,7 @@ namespace System.Security.Permissions
 			{
 				SecurityElement securityElement2 = (SecurityElement)obj;
 				array[0] = securityElement2.Attribute("name");
-				int num = (int)Enum.Parse(this.PermissionAccessType, securityElement2.Attribute("access"));
-				ResourcePermissionBaseEntry resourcePermissionBaseEntry = new ResourcePermissionBaseEntry(num, array);
+				ResourcePermissionBaseEntry resourcePermissionBaseEntry = new ResourcePermissionBaseEntry((int)Enum.Parse(this.PermissionAccessType, securityElement2.Attribute("access")), array);
 				this.AddPermissionAccess(resourcePermissionBaseEntry);
 			}
 		}
@@ -202,8 +200,7 @@ namespace System.Security.Permissions
 					return;
 				}
 			}
-			string text = global::Locale.GetText("Entry doesn't exists.");
-			throw new InvalidOperationException(text);
+			throw new InvalidOperationException(global::Locale.GetText("Entry doesn't exists."));
 		}
 
 		public override SecurityElement ToXml()
@@ -306,8 +303,7 @@ namespace System.Security.Permissions
 			}
 			if (entry.PermissionAccessPath == null || entry.PermissionAccessPath.Length != this._tags.Length)
 			{
-				string text = global::Locale.GetText("Entry doesn't match TagNames");
-				throw new InvalidOperationException(text);
+				throw new InvalidOperationException(global::Locale.GetText("Entry doesn't match TagNames"));
 			}
 		}
 
@@ -348,41 +344,6 @@ namespace System.Security.Permissions
 			return false;
 		}
 
-		internal int CheckSecurityElement(SecurityElement se, string parameterName, int minimumVersion, int maximumVersion)
-		{
-			if (se == null)
-			{
-				throw new ArgumentNullException(parameterName);
-			}
-			if (se.Tag != "IPermission")
-			{
-				string text = string.Format(global::Locale.GetText("Invalid tag {0}"), se.Tag);
-				throw new ArgumentException(text, parameterName);
-			}
-			int num = minimumVersion;
-			string text2 = se.Attribute("version");
-			if (text2 != null)
-			{
-				try
-				{
-					num = int.Parse(text2);
-				}
-				catch (Exception ex)
-				{
-					string text3 = global::Locale.GetText("Couldn't parse version from '{0}'.");
-					text3 = string.Format(text3, text2);
-					throw new ArgumentException(text3, parameterName, ex);
-				}
-			}
-			if (num < minimumVersion || num > maximumVersion)
-			{
-				string text4 = global::Locale.GetText("Unknown version '{0}', expected versions between ['{1}','{2}'].");
-				text4 = string.Format(text4, num, minimumVersion, maximumVersion);
-				throw new ArgumentException(text4, parameterName);
-			}
-			return num;
-		}
-
 		internal static void ValidateMachineName(string name)
 		{
 			if (name == null || name.Length == 0 || name.IndexOfAny(ResourcePermissionBase.invalidChars) != -1)
@@ -392,21 +353,16 @@ namespace System.Security.Permissions
 				{
 					name = "(null)";
 				}
-				text = string.Format(text, name);
-				throw new ArgumentException(text, "MachineName");
+				throw new ArgumentException(string.Format(text, name), "MachineName");
 			}
 		}
 
 		internal static ResourcePermissionBase CreateFromType(Type type, bool unrestricted)
 		{
-			return (ResourcePermissionBase)Activator.CreateInstance(type, new object[] { (!unrestricted) ? PermissionState.None : PermissionState.Unrestricted });
+			return (ResourcePermissionBase)Activator.CreateInstance(type, new object[] { unrestricted ? PermissionState.Unrestricted : PermissionState.None });
 		}
 
 		private const int version = 1;
-
-		public const string Any = "*";
-
-		public const string Local = ".";
 
 		private ArrayList _list;
 
@@ -415,6 +371,10 @@ namespace System.Security.Permissions
 		private Type _type;
 
 		private string[] _tags;
+
+		public const string Any = "*";
+
+		public const string Local = ".";
 
 		private static char[] invalidChars = new char[] { '\t', '\n', '\v', '\f', '\r', ' ', '\\', 'Š' };
 	}

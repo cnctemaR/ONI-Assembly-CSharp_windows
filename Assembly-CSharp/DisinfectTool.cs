@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class DisinfectTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		DisinfectTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

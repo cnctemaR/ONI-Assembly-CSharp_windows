@@ -1,61 +1,70 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class Group : Capture
 	{
-		internal Group(string text, int index, int length, int n_caps)
-			: base(text, index, length)
+		internal Group(string text, int[] caps, int capcount, string name)
+			: base(text, (capcount == 0) ? 0 : caps[(capcount - 1) * 2], (capcount == 0) ? 0 : caps[capcount * 2 - 1])
 		{
-			this.success = true;
-			this.captures = new CaptureCollection(n_caps);
-			this.captures.SetValue(this, n_caps - 1);
-		}
-
-		internal Group(string text, int index, int length)
-			: base(text, index, length)
-		{
-			this.success = true;
-		}
-
-		internal Group()
-			: base(string.Empty)
-		{
-			this.success = false;
-			this.captures = new CaptureCollection(0);
-		}
-
-		[global::System.MonoTODO("not thread-safe")]
-		public static Group Synchronized(Group inner)
-		{
-			if (inner == null)
-			{
-				throw new ArgumentNullException("inner");
-			}
-			return inner;
-		}
-
-		public CaptureCollection Captures
-		{
-			get
-			{
-				return this.captures;
-			}
+			this._caps = caps;
+			this._capcount = capcount;
+			this._name = name;
 		}
 
 		public bool Success
 		{
 			get
 			{
-				return this.success;
+				return this._capcount != 0;
 			}
 		}
 
-		internal static Group Fail = new Group();
+		public string Name
+		{
+			get
+			{
+				return this._name;
+			}
+		}
 
-		private bool success;
+		public CaptureCollection Captures
+		{
+			get
+			{
+				if (this._capcoll == null)
+				{
+					this._capcoll = new CaptureCollection(this);
+				}
+				return this._capcoll;
+			}
+		}
 
-		private CaptureCollection captures;
+		public static Group Synchronized(Group inner)
+		{
+			if (inner == null)
+			{
+				throw new ArgumentNullException("inner");
+			}
+			CaptureCollection captures = inner.Captures;
+			if (inner._capcount > 0)
+			{
+				Capture capture = captures[0];
+			}
+			return inner;
+		}
+
+		internal static Group _emptygroup = new Group(string.Empty, new int[0], 0, string.Empty);
+
+		internal int[] _caps;
+
+		internal int _capcount;
+
+		internal CaptureCollection _capcoll;
+
+		[OptionalField]
+		internal string _name;
 	}
 }

@@ -4,9 +4,18 @@ namespace System.Net.Sockets
 {
 	public class MulticastOption
 	{
-		public MulticastOption(IPAddress group)
-			: this(group, IPAddress.Any)
+		public MulticastOption(IPAddress group, IPAddress mcint)
 		{
+			if (group == null)
+			{
+				throw new ArgumentNullException("group");
+			}
+			if (mcint == null)
+			{
+				throw new ArgumentNullException("mcint");
+			}
+			this.Group = group;
+			this.LocalAddress = mcint;
 		}
 
 		public MulticastOption(IPAddress group, int interfaceIndex)
@@ -19,22 +28,18 @@ namespace System.Net.Sockets
 			{
 				throw new ArgumentOutOfRangeException("interfaceIndex");
 			}
-			this.group = group;
-			this.iface_index = interfaceIndex;
+			this.Group = group;
+			this.ifIndex = interfaceIndex;
 		}
 
-		public MulticastOption(IPAddress group, IPAddress mcint)
+		public MulticastOption(IPAddress group)
 		{
 			if (group == null)
 			{
 				throw new ArgumentNullException("group");
 			}
-			if (mcint == null)
-			{
-				throw new ArgumentNullException("mcint");
-			}
-			this.group = group;
-			this.local = mcint;
+			this.Group = group;
+			this.LocalAddress = IPAddress.Any;
 		}
 
 		public IPAddress Group
@@ -53,12 +58,12 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.local;
+				return this.localAddress;
 			}
 			set
 			{
-				this.local = value;
-				this.iface_index = 0;
+				this.ifIndex = 0;
+				this.localAddress = value;
 			}
 		}
 
@@ -66,7 +71,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.iface_index;
+				return this.ifIndex;
 			}
 			set
 			{
@@ -74,15 +79,15 @@ namespace System.Net.Sockets
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
-				this.iface_index = value;
-				this.local = null;
+				this.localAddress = null;
+				this.ifIndex = value;
 			}
 		}
 
 		private IPAddress group;
 
-		private IPAddress local;
+		private IPAddress localAddress;
 
-		private int iface_index;
+		private int ifIndex;
 	}
 }

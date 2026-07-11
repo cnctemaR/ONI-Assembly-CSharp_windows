@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 using Klei;
 using Klei.AI;
@@ -149,7 +148,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		if (this.Mass > 100000f)
 		{
-			KCrashReporter.Assert(false, base.gameObject.name + " is attempting to serialize a very large mass. Resetting to default.");
+			KCrashReporter.Assert(false, base.gameObject.name + string.Format(" is attempting to serialize a mass of {0}. Resetting to default.", this.Mass));
 			this.Mass = this.Element.defaultValues.mass;
 		}
 	}
@@ -181,9 +180,9 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		{
 			throw new ArgumentException("Invalid mass");
 		}
-		if (this.Units > 100000f)
+		if (this.Units > 100000f && this.ElementID != SimHashes.Regolith)
 		{
-			Output.LogWarningWithObj(base.gameObject, new object[] { "unexpectedly large mass" });
+			KCrashReporter.Assert(false, base.gameObject.name + string.Format(" is getting an abnormal mass set: {0}.", this.Units));
 		}
 	}
 
@@ -196,8 +195,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		if (temperature <= 0f)
 		{
-			StackTrace stackTrace = new StackTrace(0, true);
-			KCrashReporter.Assert(false, "Tried to set PrimaryElement.Temperature to a value <= 0\n\n" + stackTrace.ToString());
+			KCrashReporter.Assert(false, "Tried to set PrimaryElement.Temperature to a value <= 0");
 		}
 		this.setTemperatureCallback(this, temperature);
 	}

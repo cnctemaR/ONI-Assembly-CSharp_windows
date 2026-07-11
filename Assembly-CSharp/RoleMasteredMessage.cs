@@ -10,7 +10,7 @@ public class RoleMasteredMessage : Message
 
 	public RoleMasteredMessage(MinionResume resume)
 	{
-		this.description = new Tuple<string, string>(resume.GetProperName(), resume.CurrentRole);
+		this.description = new global::Tuple<string, string>(resume.GetProperName(), resume.CurrentRole);
 	}
 
 	public override string GetSound()
@@ -40,5 +40,5 @@ public class RoleMasteredMessage : Message
 	}
 
 	[Serialize]
-	private Tuple<string, string> description;
+	private global::Tuple<string, string> description;
 }

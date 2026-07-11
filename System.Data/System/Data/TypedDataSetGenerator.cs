@@ -9,12 +9,11 @@ namespace System.Data
 	{
 		public static void Generate(DataSet dataSet, CodeNamespace codeNamespace, ICodeGenerator codeGen)
 		{
-			CustomDataClassGenerator.CreateDataSetClasses(dataSet, codeNamespace, codeGen, null);
 		}
 
 		public static string GenerateIdName(string name, ICodeGenerator codeGen)
 		{
-			return CustomDataClassGenerator.MakeSafeName(name, codeGen);
+			throw null;
 		}
 	}
 }

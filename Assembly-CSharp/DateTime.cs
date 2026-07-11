@@ -4,9 +4,14 @@ using UnityEngine;
 
 public class DateTime : KScreen
 {
-	protected override void OnActivate()
+	public static void DestroyInstance()
 	{
-		base.OnActivate();
+		global::DateTime.Instance = null;
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
 		global::DateTime.Instance = this;
 	}
 
@@ -58,4 +63,7 @@ public class DateTime : KScreen
 
 	[SerializeField]
 	private TextStyleSetting tooltipstyle_Playtime;
+
+	[SerializeField]
+	public KToggle scheduleToggle;
 }

@@ -5,18 +5,15 @@ namespace Microsoft.SqlServer.Server
 {
 	public sealed class SqlTriggerContext
 	{
-		internal SqlTriggerContext(TriggerAction triggerAction, bool[] columnsUpdated, SqlXml eventData)
+		internal SqlTriggerContext()
 		{
-			this.triggerAction = triggerAction;
-			this.columnsUpdated = columnsUpdated;
-			this.eventData = eventData;
 		}
 
 		public int ColumnCount
 		{
 			get
 			{
-				return (this.columnsUpdated != null) ? this.columnsUpdated.Length : 0;
+				throw null;
 			}
 		}
 
@@ -24,7 +21,7 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.eventData;
+				throw null;
 			}
 		}
 
@@ -32,23 +29,13 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.triggerAction;
+				throw null;
 			}
 		}
 
 		public bool IsUpdatedColumn(int columnOrdinal)
 		{
-			if (this.columnsUpdated == null)
-			{
-				throw new IndexOutOfRangeException("The index specified does not exist");
-			}
-			return this.columnsUpdated[columnOrdinal];
+			throw null;
 		}
-
-		private TriggerAction triggerAction;
-
-		private bool[] columnsUpdated;
-
-		private SqlXml eventData;
 	}
 }

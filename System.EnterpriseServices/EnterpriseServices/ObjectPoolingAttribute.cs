@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices
 {
-	[ComVisible(false)]
 	[AttributeUsage(AttributeTargets.Class)]
+	[ComVisible(false)]
 	public sealed class ObjectPoolingAttribute : Attribute, IConfigurationAttribute
 	{
 		public ObjectPoolingAttribute()

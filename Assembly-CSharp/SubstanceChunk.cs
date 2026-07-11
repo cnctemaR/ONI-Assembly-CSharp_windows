@@ -37,5 +37,5 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 		base.gameObject.DeleteObject();
 	}
 
-	private static KAnimHashedString symbolToTint = new KAnimHashedString("substance_tinter");
+	private static readonly KAnimHashedString symbolToTint = new KAnimHashedString("substance_tinter");
 }

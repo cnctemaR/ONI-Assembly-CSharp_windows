@@ -4,16 +4,15 @@ namespace System.Data
 {
 	public sealed class DataTableClearEventArgs : EventArgs
 	{
-		public DataTableClearEventArgs(DataTable table)
+		public DataTableClearEventArgs(DataTable dataTable)
 		{
-			this._table = table;
 		}
 
 		public DataTable Table
 		{
 			get
 			{
-				return this._table;
+				throw null;
 			}
 		}
 
@@ -21,7 +20,7 @@ namespace System.Data
 		{
 			get
 			{
-				return this._table.TableName;
+				throw null;
 			}
 		}
 
@@ -29,10 +28,8 @@ namespace System.Data
 		{
 			get
 			{
-				return this._table.Namespace;
+				throw null;
 			}
 		}
-
-		private readonly DataTable _table;
 	}
 }

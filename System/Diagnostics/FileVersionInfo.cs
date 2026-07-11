@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Security;
 using System.Security.Permissions;
 using System.Text;
 
 namespace System.Diagnostics
 {
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
 	public sealed class FileVersionInfo
 	{
 		private FileVersionInfo()
@@ -93,10 +92,6 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				if (SecurityManager.SecurityEnabled)
-				{
-					new FileIOPermission(FileIOPermissionAccess.PathDiscovery, this.filename).Demand();
-				}
 				return this.filename;
 			}
 		}
@@ -266,12 +261,7 @@ namespace System.Diagnostics
 
 		public static FileVersionInfo GetVersionInfo(string fileName)
 		{
-			if (SecurityManager.SecurityEnabled)
-			{
-				new FileIOPermission(FileIOPermissionAccess.Read, fileName).Demand();
-			}
-			string fullPath = Path.GetFullPath(fileName);
-			if (!File.Exists(fullPath))
+			if (!File.Exists(Path.GetFullPath(fileName)))
 			{
 				throw new FileNotFoundException(fileName);
 			}

@@ -1,28 +1,23 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine;
 
 public static class DrawUtil
 {
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void MultiColourGnomon(Vector2 pos, float size, float time = 0f)
 	{
 		size *= 0.5f;
 	}
 
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Gnomon(Vector3 pos, float size)
 	{
 		size *= 0.5f;
 	}
 
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Gnomon(Vector3 pos, float size, Color color, float time = 0f)
 	{
 		size *= 0.5f;
 	}
 
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Arrow(Vector3 start, Vector3 end, float size, Color color, float time = 0f)
 	{
 		Vector3 vector = end - start;
@@ -33,13 +28,11 @@ public static class DrawUtil
 		Quaternion quaternion = Quaternion.LookRotation(vector, Vector3.up);
 	}
 
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Circle(Vector3 pos, float radius)
 	{
 		DrawUtil.Circle(pos, radius, Color.white, null, 0f);
 	}
 
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Circle(Vector3 pos, float radius, Color color, Vector3? normal = null, float time = 0f)
 	{
 		Vector3 vector = ((normal == null) ? Vector3.up : normal.Value);
@@ -59,13 +52,11 @@ public static class DrawUtil
 		}
 	}
 
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Sphere(Vector3 pos, float radius)
 	{
 		DrawUtil.Sphere(pos, radius, Color.white, 0f);
 	}
 
-	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Sphere(Vector3 pos, float radius, Color color, float time = 0f)
 	{
 	}

@@ -44,21 +44,18 @@ public class TuningSystem
 	private static void InitializeTuning()
 	{
 		TuningSystem._TuningValues = new Dictionary<Type, object>();
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		foreach (Type type in App.GetCurrentDomainTypes())
 		{
-			foreach (Type type in assembly.GetTypes())
+			Type baseType = type.BaseType;
+			if (!(baseType == null) && baseType.IsGenericType)
 			{
-				Type baseType = type.BaseType;
-				if (baseType != null && baseType.IsGenericType)
+				if (baseType.GetGenericTypeDefinition() == typeof(TuningData<>))
 				{
-					if (baseType.GetGenericTypeDefinition() == typeof(TuningData<>))
-					{
-						Type type2 = baseType.GetGenericArguments()[0];
-						object obj = Activator.CreateInstance(type2);
-						TuningSystem._TuningValues[obj.GetType()] = obj;
-						FieldInfo field = baseType.GetField("_TuningData", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-						field.SetValue(null, obj);
-					}
+					Type type2 = baseType.GetGenericArguments()[0];
+					object obj = Activator.CreateInstance(type2);
+					TuningSystem._TuningValues[obj.GetType()] = obj;
+					FieldInfo field = baseType.GetField("_TuningData", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+					field.SetValue(null, obj);
 				}
 			}
 		}

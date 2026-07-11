@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class PrebuildTool : InterfaceTool
 {
+	public static void DestroyInstance()
+	{
+		PrebuildTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		PrebuildTool.Instance = this;

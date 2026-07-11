@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class DigTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		DigTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -29,7 +34,7 @@ public class DigTool : DragTool
 		}
 		if (DebugHandler.InstantBuildMode)
 		{
-			if (Grid.IsValidCell(cell))
+			if (Grid.IsValidCell(cell) && Grid.Solid[cell] && !Grid.Foundation[cell])
 			{
 				WorldDamage.Instance.DestroyCell(cell, -1);
 			}
@@ -59,12 +64,12 @@ public class DigTool : DragTool
 					return null;
 				}
 			}
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(new Tag("DigPlacer")), null, null);
 			gameObject.SetActive(true);
 			Grid.Objects[cell, 7] = gameObject;
 			Vector3 vector = Grid.CellToPosCBC(cell, DigTool.Instance.visualizerLayer);
-			float depthBias = InterfaceTool.DepthBias;
-			vector.z += depthBias;
+			float num = -0.15f;
+			vector.z += num;
 			gameObject.transform.SetPosition(vector);
 			gameObject.GetComponentInChildren<EasingAnimations>().PlayAnimation("ScaleUp", Mathf.Max(0f, (float)animationDelay * 0.02f));
 			return gameObject;

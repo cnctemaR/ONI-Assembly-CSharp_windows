@@ -2,10 +2,19 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-public class StateMachineUpdater
+public class StateMachineUpdater : Singleton<StateMachineUpdater>
 {
 	public StateMachineUpdater()
 	{
+		this.Initialize();
+	}
+
+	private void Initialize()
+	{
+		this.bucketGroups = new List<StateMachineUpdater.BucketGroup>();
+		this.simBucketGroups = new List<StateMachineUpdater.BucketGroup>();
+		this.renderBucketGroups = new List<StateMachineUpdater.BucketGroup>();
+		this.renderEveryTickBucketGroups = new List<StateMachineUpdater.BucketGroup>();
 		this.CreateBucketGroup(1, 0.016666668f, UpdateRate.RENDER_EVERY_TICK, this.renderEveryTickBucketGroups);
 		this.CreateBucketGroup(12, 0.016666668f, UpdateRate.RENDER_200ms, this.renderBucketGroups);
 		this.CreateBucketGroup(60, 0.016666668f, UpdateRate.RENDER_1000ms, this.renderBucketGroups);
@@ -13,18 +22,6 @@ public class StateMachineUpdater
 		this.CreateBucketGroup(12, 0.016666668f, UpdateRate.SIM_200ms, this.simBucketGroups);
 		this.CreateBucketGroup(60, 0.016666668f, UpdateRate.SIM_1000ms, this.simBucketGroups);
 		this.CreateBucketGroup(240, 0.016666668f, UpdateRate.SIM_4000ms, this.simBucketGroups);
-	}
-
-	public static StateMachineUpdater instance
-	{
-		get
-		{
-			if (StateMachineUpdater._instance == null)
-			{
-				StateMachineUpdater._instance = new StateMachineUpdater();
-			}
-			return StateMachineUpdater._instance;
-		}
 	}
 
 	private void CreateBucketGroup(int sub_tick_count, float seconds_per_sub_tick, UpdateRate update_rate, List<StateMachineUpdater.BucketGroup> sub_group)
@@ -79,9 +76,9 @@ public class StateMachineUpdater
 		return this.bucketGroups[(int)update_rate].GetFrameTime(frame);
 	}
 
-	public void Reset()
+	public void Clear()
 	{
-		StateMachineUpdater._instance = null;
+		this.Initialize();
 	}
 
 	private List<StateMachineUpdater.BucketGroup> bucketGroups = new List<StateMachineUpdater.BucketGroup>();
@@ -91,8 +88,6 @@ public class StateMachineUpdater
 	private List<StateMachineUpdater.BucketGroup> renderBucketGroups = new List<StateMachineUpdater.BucketGroup>();
 
 	private List<StateMachineUpdater.BucketGroup> renderEveryTickBucketGroups = new List<StateMachineUpdater.BucketGroup>();
-
-	private static StateMachineUpdater _instance;
 
 	public class BucketGroup
 	{

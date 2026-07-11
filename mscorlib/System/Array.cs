@@ -4,104 +4,61 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
-	[Serializable]
-	public abstract class Array : IEnumerable, ICloneable, ICollection, IList
+	public abstract class Array : ICollection, IEnumerable, IList, IStructuralComparable, IStructuralEquatable, ICloneable
 	{
-		private Array()
+		public static Array CreateInstance(Type elementType, params long[] lengths)
 		{
-		}
-
-		object IList.this[int index]
-		{
-			get
+			if (lengths == null)
 			{
-				if (index >= this.Length)
-				{
-					throw new IndexOutOfRangeException("index");
-				}
-				if (this.Rank > 1)
-				{
-					throw new ArgumentException(Locale.GetText("Only single dimension arrays are supported."));
-				}
-				return this.GetValueImpl(index);
+				throw new ArgumentNullException("lengths");
 			}
-			set
+			if (lengths.Length == 0)
 			{
-				if (index >= this.Length)
-				{
-					throw new IndexOutOfRangeException("index");
-				}
-				if (this.Rank > 1)
-				{
-					throw new ArgumentException(Locale.GetText("Only single dimension arrays are supported."));
-				}
-				this.SetValueImpl(value, index);
+				throw new ArgumentException("Must provide at least one rank.");
 			}
-		}
-
-		int IList.Add(object value)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList.Clear()
-		{
-			Array.Clear(this, this.GetLowerBound(0), this.Length);
-		}
-
-		bool IList.Contains(object value)
-		{
-			if (this.Rank > 1)
+			int[] array = new int[lengths.Length];
+			for (int i = 0; i < lengths.Length; i++)
 			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			int length = this.Length;
-			for (int i = 0; i < length; i++)
-			{
-				if (object.Equals(this.GetValueImpl(i), value))
+				long num = lengths[i];
+				if (num > 2147483647L || num < -2147483648L)
 				{
-					return true;
+					throw new ArgumentOutOfRangeException("len", "Arrays larger than 2GB are not supported.");
 				}
+				array[i] = (int)num;
 			}
-			return false;
+			return Array.CreateInstance(elementType, array);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		int IList.IndexOf(object value)
+		public static ReadOnlyCollection<T> AsReadOnly<T>(T[] array)
 		{
-			if (this.Rank > 1)
+			if (array == null)
 			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
+				throw new ArgumentNullException("array");
 			}
-			int length = this.Length;
-			for (int i = 0; i < length; i++)
+			return new ReadOnlyCollection<T>(array);
+		}
+
+		public static void Resize<T>(ref T[] array, int newSize)
+		{
+			if (newSize < 0)
 			{
-				if (object.Equals(this.GetValueImpl(i), value))
-				{
-					return i + this.GetLowerBound(0);
-				}
+				throw new ArgumentOutOfRangeException("newSize", "Non-negative number required.");
 			}
-			return this.GetLowerBound(0) - 1;
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList.Remove(object value)
-		{
-			throw new NotSupportedException();
-		}
-
-		void IList.RemoveAt(int index)
-		{
-			throw new NotSupportedException();
+			T[] array2 = array;
+			if (array2 == null)
+			{
+				array = new T[newSize];
+				return;
+			}
+			if (array2.Length != newSize)
+			{
+				T[] array3 = new T[newSize];
+				Array.Copy(array2, 0, array3, 0, (array2.Length > newSize) ? newSize : array2.Length);
+				array = array3;
+			}
 		}
 
 		int ICollection.Count
@@ -110,6 +67,1309 @@ namespace System
 			{
 				return this.Length;
 			}
+		}
+
+		bool IList.IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		object IList.this[int index]
+		{
+			get
+			{
+				return this.GetValue(index);
+			}
+			set
+			{
+				this.SetValue(value, index);
+			}
+		}
+
+		int IList.Add(object value)
+		{
+			throw new NotSupportedException("Collection was of a fixed size.");
+		}
+
+		bool IList.Contains(object value)
+		{
+			return Array.IndexOf(this, value) >= 0;
+		}
+
+		void IList.Clear()
+		{
+			Array.Clear(this, this.GetLowerBound(0), this.Length);
+		}
+
+		int IList.IndexOf(object value)
+		{
+			return Array.IndexOf(this, value);
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			throw new NotSupportedException("Collection was of a fixed size.");
+		}
+
+		void IList.Remove(object value)
+		{
+			throw new NotSupportedException("Collection was of a fixed size.");
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			throw new NotSupportedException("Collection was of a fixed size.");
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			if (array != null && array.Rank != 1)
+			{
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
+			}
+			Array.Copy(this, this.GetLowerBound(0), array, index, this.Length);
+		}
+
+		public object Clone()
+		{
+			return base.MemberwiseClone();
+		}
+
+		int IStructuralComparable.CompareTo(object other, IComparer comparer)
+		{
+			if (other == null)
+			{
+				return 1;
+			}
+			Array array = other as Array;
+			if (array == null || this.Length != array.Length)
+			{
+				throw new ArgumentException("Object is not a array with the same number of elements as the array to compare it to.", "other");
+			}
+			int num = 0;
+			int num2 = 0;
+			while (num < array.Length && num2 == 0)
+			{
+				object value = this.GetValue(num);
+				object value2 = array.GetValue(num);
+				num2 = comparer.Compare(value, value2);
+				num++;
+			}
+			return num2;
+		}
+
+		bool IStructuralEquatable.Equals(object other, IEqualityComparer comparer)
+		{
+			if (other == null)
+			{
+				return false;
+			}
+			if (this == other)
+			{
+				return true;
+			}
+			Array array = other as Array;
+			if (array == null || array.Length != this.Length)
+			{
+				return false;
+			}
+			for (int i = 0; i < array.Length; i++)
+			{
+				object value = this.GetValue(i);
+				object value2 = array.GetValue(i);
+				if (!comparer.Equals(value, value2))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		internal static int CombineHashCodes(int h1, int h2)
+		{
+			return ((h1 << 5) + h1) ^ h2;
+		}
+
+		int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
+		{
+			if (comparer == null)
+			{
+				throw new ArgumentNullException("comparer");
+			}
+			int num = 0;
+			for (int i = ((this.Length >= 8) ? (this.Length - 8) : 0); i < this.Length; i++)
+			{
+				num = Array.CombineHashCodes(num, comparer.GetHashCode(this.GetValue(i)));
+			}
+			return num;
+		}
+
+		public static int BinarySearch(Array array, object value)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.BinarySearch(array, array.GetLowerBound(0), array.Length, value, null);
+		}
+
+		public static TOutput[] ConvertAll<TInput, TOutput>(TInput[] array, Converter<TInput, TOutput> converter)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (converter == null)
+			{
+				throw new ArgumentNullException("converter");
+			}
+			TOutput[] array2 = new TOutput[array.Length];
+			for (int i = 0; i < array.Length; i++)
+			{
+				array2[i] = converter(array[i]);
+			}
+			return array2;
+		}
+
+		public static void Copy(Array sourceArray, Array destinationArray, long length)
+		{
+			if (length > 2147483647L || length < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("length", "Arrays larger than 2GB are not supported.");
+			}
+			Array.Copy(sourceArray, destinationArray, (int)length);
+		}
+
+		public static void Copy(Array sourceArray, long sourceIndex, Array destinationArray, long destinationIndex, long length)
+		{
+			if (sourceIndex > 2147483647L || sourceIndex < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("sourceIndex", "Arrays larger than 2GB are not supported.");
+			}
+			if (destinationIndex > 2147483647L || destinationIndex < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("destinationIndex", "Arrays larger than 2GB are not supported.");
+			}
+			if (length > 2147483647L || length < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("length", "Arrays larger than 2GB are not supported.");
+			}
+			Array.Copy(sourceArray, (int)sourceIndex, destinationArray, (int)destinationIndex, (int)length);
+		}
+
+		public void CopyTo(Array array, long index)
+		{
+			if (index > 2147483647L || index < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index", "Arrays larger than 2GB are not supported.");
+			}
+			this.CopyTo(array, (int)index);
+		}
+
+		public static void ForEach<T>(T[] array, Action<T> action)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (action == null)
+			{
+				throw new ArgumentNullException("action");
+			}
+			for (int i = 0; i < array.Length; i++)
+			{
+				action(array[i]);
+			}
+		}
+
+		public long LongLength
+		{
+			get
+			{
+				long num = (long)this.GetLength(0);
+				for (int i = 1; i < this.Rank; i++)
+				{
+					num *= (long)this.GetLength(i);
+				}
+				return num;
+			}
+		}
+
+		public long GetLongLength(int dimension)
+		{
+			return (long)this.GetLength(dimension);
+		}
+
+		public object GetValue(long index)
+		{
+			if (index > 2147483647L || index < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index", "Arrays larger than 2GB are not supported.");
+			}
+			return this.GetValue((int)index);
+		}
+
+		public object GetValue(long index1, long index2)
+		{
+			if (index1 > 2147483647L || index1 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index1", "Arrays larger than 2GB are not supported.");
+			}
+			if (index2 > 2147483647L || index2 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index2", "Arrays larger than 2GB are not supported.");
+			}
+			return this.GetValue((int)index1, (int)index2);
+		}
+
+		public object GetValue(long index1, long index2, long index3)
+		{
+			if (index1 > 2147483647L || index1 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index1", "Arrays larger than 2GB are not supported.");
+			}
+			if (index2 > 2147483647L || index2 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index2", "Arrays larger than 2GB are not supported.");
+			}
+			if (index3 > 2147483647L || index3 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index3", "Arrays larger than 2GB are not supported.");
+			}
+			return this.GetValue((int)index1, (int)index2, (int)index3);
+		}
+
+		public object GetValue(params long[] indices)
+		{
+			if (indices == null)
+			{
+				throw new ArgumentNullException("indices");
+			}
+			if (this.Rank != indices.Length)
+			{
+				throw new ArgumentException("Indices length does not match the array rank.");
+			}
+			int[] array = new int[indices.Length];
+			for (int i = 0; i < indices.Length; i++)
+			{
+				long num = indices[i];
+				if (num > 2147483647L || num < -2147483648L)
+				{
+					throw new ArgumentOutOfRangeException("index", "Arrays larger than 2GB are not supported.");
+				}
+				array[i] = (int)num;
+			}
+			return this.GetValue(array);
+		}
+
+		public bool IsFixedSize
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public bool IsSynchronized
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public object SyncRoot
+		{
+			get
+			{
+				return this;
+			}
+		}
+
+		public static int BinarySearch(Array array, int index, int length, object value)
+		{
+			return Array.BinarySearch(array, index, length, value, null);
+		}
+
+		public static int BinarySearch(Array array, object value, IComparer comparer)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.BinarySearch(array, array.GetLowerBound(0), array.Length, value, comparer);
+		}
+
+		public static int BinarySearch(Array array, int index, int length, object value, IComparer comparer)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0 || length < 0)
+			{
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "length", "Non-negative number required.");
+			}
+			if (array.Length - index < length)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			if (array.Rank != 1)
+			{
+				throw new RankException("Only single dimension arrays are supported here.");
+			}
+			if (comparer == null)
+			{
+				comparer = LowLevelComparer.Default;
+			}
+			int i = index;
+			int num = index + length - 1;
+			object[] array2 = array as object[];
+			if (array2 != null)
+			{
+				while (i <= num)
+				{
+					int median = Array.GetMedian(i, num);
+					int num2;
+					try
+					{
+						num2 = comparer.Compare(array2[median], value);
+					}
+					catch (Exception ex)
+					{
+						throw new InvalidOperationException("Failed to compare two elements in the array.", ex);
+					}
+					if (num2 == 0)
+					{
+						return median;
+					}
+					if (num2 < 0)
+					{
+						i = median + 1;
+					}
+					else
+					{
+						num = median - 1;
+					}
+				}
+			}
+			else
+			{
+				while (i <= num)
+				{
+					int median2 = Array.GetMedian(i, num);
+					int num3;
+					try
+					{
+						num3 = comparer.Compare(array.GetValue(median2), value);
+					}
+					catch (Exception ex2)
+					{
+						throw new InvalidOperationException("Failed to compare two elements in the array.", ex2);
+					}
+					if (num3 == 0)
+					{
+						return median2;
+					}
+					if (num3 < 0)
+					{
+						i = median2 + 1;
+					}
+					else
+					{
+						num = median2 - 1;
+					}
+				}
+			}
+			return ~i;
+		}
+
+		private static int GetMedian(int low, int hi)
+		{
+			return low + (hi - low >> 1);
+		}
+
+		public static int BinarySearch<T>(T[] array, T value)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.BinarySearch<T>(array, 0, array.Length, value, null);
+		}
+
+		public static int BinarySearch<T>(T[] array, T value, IComparer<T> comparer)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.BinarySearch<T>(array, 0, array.Length, value, comparer);
+		}
+
+		public static int BinarySearch<T>(T[] array, int index, int length, T value)
+		{
+			return Array.BinarySearch<T>(array, index, length, value, null);
+		}
+
+		public static int BinarySearch<T>(T[] array, int index, int length, T value, IComparer<T> comparer)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0 || length < 0)
+			{
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "length", "Non-negative number required.");
+			}
+			if (array.Length - index < length)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			return ArraySortHelper<T>.BinarySearch(array, index, length, value, comparer);
+		}
+
+		public static int IndexOf(Array array, object value)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.IndexOf(array, value, array.GetLowerBound(0), array.Length);
+		}
+
+		public static int IndexOf(Array array, object value, int startIndex)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			int lowerBound = array.GetLowerBound(0);
+			return Array.IndexOf(array, value, startIndex, array.Length - startIndex + lowerBound);
+		}
+
+		public static int IndexOf(Array array, object value, int startIndex, int count)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (array.Rank != 1)
+			{
+				throw new RankException("Only single dimension arrays are supported here.");
+			}
+			int lowerBound = array.GetLowerBound(0);
+			if (startIndex < lowerBound || startIndex > array.Length + lowerBound)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || count > array.Length - startIndex + lowerBound)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			object[] array2 = array as object[];
+			int num = startIndex + count;
+			if (array2 != null)
+			{
+				if (value == null)
+				{
+					for (int i = startIndex; i < num; i++)
+					{
+						if (array2[i] == null)
+						{
+							return i;
+						}
+					}
+				}
+				else
+				{
+					for (int j = startIndex; j < num; j++)
+					{
+						object obj = array2[j];
+						if (obj != null && obj.Equals(value))
+						{
+							return j;
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int k = startIndex; k < num; k++)
+				{
+					object value2 = array.GetValue(k);
+					if (value2 == null)
+					{
+						if (value == null)
+						{
+							return k;
+						}
+					}
+					else if (value2.Equals(value))
+					{
+						return k;
+					}
+				}
+			}
+			return lowerBound - 1;
+		}
+
+		public static int IndexOf<T>(T[] array, T value)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.IndexOfImpl<T>(array, value, 0, array.Length);
+		}
+
+		public static int IndexOf<T>(T[] array, T value, int startIndex)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.IndexOf<T>(array, value, startIndex, array.Length - startIndex);
+		}
+
+		public static int IndexOf<T>(T[] array, T value, int startIndex, int count)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (startIndex < 0 || startIndex > array.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || count > array.Length - startIndex)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			return Array.IndexOfImpl<T>(array, value, startIndex, count);
+		}
+
+		public static int LastIndexOf(Array array, object value)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.LastIndexOf(array, value, array.Length - 1, array.Length);
+		}
+
+		public static int LastIndexOf(Array array, object value, int startIndex)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.LastIndexOf(array, value, startIndex, startIndex + 1);
+		}
+
+		public static int LastIndexOf(Array array, object value, int startIndex, int count)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (array.Length == 0)
+			{
+				return -1;
+			}
+			if (startIndex < 0 || startIndex >= array.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			if (count > startIndex + 1)
+			{
+				throw new ArgumentOutOfRangeException("endIndex", "endIndex cannot be greater than startIndex.");
+			}
+			if (array.Rank != 1)
+			{
+				throw new RankException("Only single dimension arrays are supported here.");
+			}
+			object[] array2 = array as object[];
+			int num = startIndex - count + 1;
+			if (array2 != null)
+			{
+				if (value == null)
+				{
+					for (int i = startIndex; i >= num; i--)
+					{
+						if (array2[i] == null)
+						{
+							return i;
+						}
+					}
+				}
+				else
+				{
+					for (int j = startIndex; j >= num; j--)
+					{
+						object obj = array2[j];
+						if (obj != null && obj.Equals(value))
+						{
+							return j;
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int k = startIndex; k >= num; k--)
+				{
+					object value2 = array.GetValue(k);
+					if (value2 == null)
+					{
+						if (value == null)
+						{
+							return k;
+						}
+					}
+					else if (value2.Equals(value))
+					{
+						return k;
+					}
+				}
+			}
+			return -1;
+		}
+
+		public static int LastIndexOf<T>(T[] array, T value)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.LastIndexOf<T>(array, value, array.Length - 1, array.Length);
+		}
+
+		public static int LastIndexOf<T>(T[] array, T value, int startIndex)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.LastIndexOf<T>(array, value, startIndex, (array.Length == 0) ? 0 : (startIndex + 1));
+		}
+
+		public static int LastIndexOf<T>(T[] array, T value, int startIndex, int count)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (array.Length == 0)
+			{
+				if (startIndex != -1 && startIndex != 0)
+				{
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+				if (count != 0)
+				{
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+				}
+				return -1;
+			}
+			else
+			{
+				if (startIndex < 0 || startIndex >= array.Length)
+				{
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+				if (count < 0 || startIndex - count + 1 < 0)
+				{
+					throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+				}
+				return Array.LastIndexOfImpl<T>(array, value, startIndex, count);
+			}
+		}
+
+		public static void Reverse(Array array)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			Array.Reverse(array, array.GetLowerBound(0), array.Length);
+		}
+
+		public static void Reverse(Array array, int index, int length)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			int lowerBound = array.GetLowerBound(0);
+			if (index < lowerBound || length < 0)
+			{
+				throw new ArgumentOutOfRangeException((index < lowerBound) ? "index" : "length", "Non-negative number required.");
+			}
+			if (array.Length - (index - lowerBound) < length)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			if (array.Rank != 1)
+			{
+				throw new RankException("Only single dimension arrays are supported here.");
+			}
+			int i = index;
+			int num = index + length - 1;
+			object[] array2 = array as object[];
+			if (array2 != null)
+			{
+				while (i < num)
+				{
+					object obj = array2[i];
+					array2[i] = array2[num];
+					array2[num] = obj;
+					i++;
+					num--;
+				}
+				return;
+			}
+			while (i < num)
+			{
+				object value = array.GetValue(i);
+				array.SetValue(array.GetValue(num), i);
+				array.SetValue(value, num);
+				i++;
+				num--;
+			}
+		}
+
+		public static void Reverse<T>(T[] array)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			Array.Reverse<T>(array, 0, array.Length);
+		}
+
+		public static void Reverse<T>(T[] array, int index, int length)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0 || length < 0)
+			{
+				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "length", "Non-negative number required.");
+			}
+			if (array.Length - index < length)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			int i = index;
+			int num = index + length - 1;
+			while (i < num)
+			{
+				T t = array[i];
+				array[i] = array[num];
+				array[num] = t;
+				i++;
+				num--;
+			}
+		}
+
+		public void SetValue(object value, long index)
+		{
+			if (index > 2147483647L || index < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index", "Arrays larger than 2GB are not supported.");
+			}
+			this.SetValue(value, (int)index);
+		}
+
+		public void SetValue(object value, long index1, long index2)
+		{
+			if (index1 > 2147483647L || index1 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index1", "Arrays larger than 2GB are not supported.");
+			}
+			if (index2 > 2147483647L || index2 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index2", "Arrays larger than 2GB are not supported.");
+			}
+			this.SetValue(value, (int)index1, (int)index2);
+		}
+
+		public void SetValue(object value, long index1, long index2, long index3)
+		{
+			if (index1 > 2147483647L || index1 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index1", "Arrays larger than 2GB are not supported.");
+			}
+			if (index2 > 2147483647L || index2 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index2", "Arrays larger than 2GB are not supported.");
+			}
+			if (index3 > 2147483647L || index3 < -2147483648L)
+			{
+				throw new ArgumentOutOfRangeException("index3", "Arrays larger than 2GB are not supported.");
+			}
+			this.SetValue(value, (int)index1, (int)index2, (int)index3);
+		}
+
+		public void SetValue(object value, params long[] indices)
+		{
+			if (indices == null)
+			{
+				throw new ArgumentNullException("indices");
+			}
+			if (this.Rank != indices.Length)
+			{
+				throw new ArgumentException("Indices length does not match the array rank.");
+			}
+			int[] array = new int[indices.Length];
+			for (int i = 0; i < indices.Length; i++)
+			{
+				long num = indices[i];
+				if (num > 2147483647L || num < -2147483648L)
+				{
+					throw new ArgumentOutOfRangeException("index", "Arrays larger than 2GB are not supported.");
+				}
+				array[i] = (int)num;
+			}
+			this.SetValue(value, array);
+		}
+
+		public static void Sort(Array array)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			Array.Sort(array, null, array.GetLowerBound(0), array.Length, null);
+		}
+
+		public static void Sort(Array array, int index, int length)
+		{
+			Array.Sort(array, null, index, length, null);
+		}
+
+		public static void Sort(Array array, IComparer comparer)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			Array.Sort(array, null, array.GetLowerBound(0), array.Length, comparer);
+		}
+
+		public static void Sort(Array array, int index, int length, IComparer comparer)
+		{
+			Array.Sort(array, null, index, length, comparer);
+		}
+
+		public static void Sort(Array keys, Array items)
+		{
+			if (keys == null)
+			{
+				throw new ArgumentNullException("keys");
+			}
+			Array.Sort(keys, items, keys.GetLowerBound(0), keys.Length, null);
+		}
+
+		public static void Sort(Array keys, Array items, IComparer comparer)
+		{
+			if (keys == null)
+			{
+				throw new ArgumentNullException("keys");
+			}
+			Array.Sort(keys, items, keys.GetLowerBound(0), keys.Length, comparer);
+		}
+
+		public static void Sort(Array keys, Array items, int index, int length)
+		{
+			Array.Sort(keys, items, index, length, null);
+		}
+
+		public static void Sort(Array keys, Array items, int index, int length, IComparer comparer)
+		{
+			if (keys == null)
+			{
+				throw new ArgumentNullException("keys");
+			}
+			if (keys.Rank != 1 || (items != null && items.Rank != 1))
+			{
+				throw new RankException("Only single dimension arrays are supported here.");
+			}
+			int lowerBound = keys.GetLowerBound(0);
+			if (items != null && lowerBound != items.GetLowerBound(0))
+			{
+				throw new ArgumentException("The arrays' lower bounds must be identical.");
+			}
+			if (index < lowerBound || length < 0)
+			{
+				throw new ArgumentOutOfRangeException((length < 0) ? "length" : "index", "Non-negative number required.");
+			}
+			if (keys.Length - (index - lowerBound) < length || (items != null && index - lowerBound > items.Length - length))
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			if (length > 1)
+			{
+				Array.SortImpl(keys, items, index, length, comparer);
+			}
+		}
+
+		public static void Sort<T>(T[] array)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			Array.Sort<T>(array, 0, array.Length, null);
+		}
+
+		public static void Sort<T>(T[] array, int index, int length)
+		{
+			Array.Sort<T>(array, index, length, null);
+		}
+
+		public static void Sort<T>(T[] array, IComparer<T> comparer)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			Array.Sort<T>(array, 0, array.Length, comparer);
+		}
+
+		public static void Sort<T>(T[] array, int index, int length, IComparer<T> comparer)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0 || length < 0)
+			{
+				throw new ArgumentOutOfRangeException((length < 0) ? "length" : "index", "Non-negative number required.");
+			}
+			if (array.Length - index < length)
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			if (length > 1)
+			{
+				ArraySortHelper<T>.Sort(array, index, length, comparer);
+			}
+		}
+
+		public static void Sort<T>(T[] array, Comparison<T> comparison)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (comparison == null)
+			{
+				throw new ArgumentNullException("comparison");
+			}
+			ArraySortHelper<T>.Sort(array, 0, array.Length, comparison);
+		}
+
+		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items)
+		{
+			if (keys == null)
+			{
+				throw new ArgumentNullException("keys");
+			}
+			Array.Sort<TKey, TValue>(keys, items, 0, keys.Length, null);
+		}
+
+		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items, int index, int length)
+		{
+			Array.Sort<TKey, TValue>(keys, items, index, length, null);
+		}
+
+		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items, IComparer<TKey> comparer)
+		{
+			if (keys == null)
+			{
+				throw new ArgumentNullException("keys");
+			}
+			Array.Sort<TKey, TValue>(keys, items, 0, keys.Length, comparer);
+		}
+
+		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items, int index, int length, IComparer<TKey> comparer)
+		{
+			if (keys == null)
+			{
+				throw new ArgumentNullException("keys");
+			}
+			if (index < 0 || length < 0)
+			{
+				throw new ArgumentOutOfRangeException((length < 0) ? "length" : "index", "Non-negative number required.");
+			}
+			if (keys.Length - index < length || (items != null && index > items.Length - length))
+			{
+				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+			}
+			if (length > 1)
+			{
+				if (items == null)
+				{
+					Array.Sort<TKey>(keys, index, length, comparer);
+					return;
+				}
+				ArraySortHelper<TKey, TValue>.Default.Sort(keys, items, index, length, comparer);
+			}
+		}
+
+		public static bool Exists<T>(T[] array, Predicate<T> match)
+		{
+			return Array.FindIndex<T>(array, match) != -1;
+		}
+
+		public static void Fill<T>(T[] array, T value)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i] = value;
+			}
+		}
+
+		public static void Fill<T>(T[] array, T value, int startIndex, int count)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (startIndex < 0 || startIndex > array.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || startIndex > array.Length - count)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			for (int i = startIndex; i < startIndex + count; i++)
+			{
+				array[i] = value;
+			}
+		}
+
+		public static T Find<T>(T[] array, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (match == null)
+			{
+				throw new ArgumentNullException("match");
+			}
+			for (int i = 0; i < array.Length; i++)
+			{
+				if (match(array[i]))
+				{
+					return array[i];
+				}
+			}
+			return default(T);
+		}
+
+		public static T[] FindAll<T>(T[] array, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (match == null)
+			{
+				throw new ArgumentNullException("match");
+			}
+			int num = 0;
+			T[] array2 = Array.Empty<T>();
+			for (int i = 0; i < array.Length; i++)
+			{
+				if (match(array[i]))
+				{
+					if (num == array2.Length)
+					{
+						Array.Resize<T>(ref array2, Math.Min((num == 0) ? 4 : (num * 2), array.Length));
+					}
+					array2[num++] = array[i];
+				}
+			}
+			if (num != array2.Length)
+			{
+				Array.Resize<T>(ref array2, num);
+			}
+			return array2;
+		}
+
+		public static int FindIndex<T>(T[] array, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.FindIndex<T>(array, 0, array.Length, match);
+		}
+
+		public static int FindIndex<T>(T[] array, int startIndex, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.FindIndex<T>(array, startIndex, array.Length - startIndex, match);
+		}
+
+		public static int FindIndex<T>(T[] array, int startIndex, int count, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (startIndex < 0 || startIndex > array.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || startIndex > array.Length - count)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			if (match == null)
+			{
+				throw new ArgumentNullException("match");
+			}
+			int num = startIndex + count;
+			for (int i = startIndex; i < num; i++)
+			{
+				if (match(array[i]))
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		public static T FindLast<T>(T[] array, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (match == null)
+			{
+				throw new ArgumentNullException("match");
+			}
+			for (int i = array.Length - 1; i >= 0; i--)
+			{
+				if (match(array[i]))
+				{
+					return array[i];
+				}
+			}
+			return default(T);
+		}
+
+		public static int FindLastIndex<T>(T[] array, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.FindLastIndex<T>(array, array.Length - 1, array.Length, match);
+		}
+
+		public static int FindLastIndex<T>(T[] array, int startIndex, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			return Array.FindLastIndex<T>(array, startIndex, startIndex + 1, match);
+		}
+
+		public static int FindLastIndex<T>(T[] array, int startIndex, int count, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (match == null)
+			{
+				throw new ArgumentNullException("match");
+			}
+			if (array.Length == 0)
+			{
+				if (startIndex != -1)
+				{
+					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				}
+			}
+			else if (startIndex < 0 || startIndex >= array.Length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count < 0 || startIndex - count + 1 < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count must be positive and count must refer to a location within the string/array/collection.");
+			}
+			int num = startIndex - count;
+			for (int i = startIndex; i > num; i--)
+			{
+				if (match(array[i]))
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		public static bool TrueForAll<T>(T[] array, Predicate<T> match)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (match == null)
+			{
+				throw new ArgumentNullException("match");
+			}
+			for (int i = 0; i < array.Length; i++)
+			{
+				if (!match(array[i]))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			return new Array.ArrayEnumerator(this);
+		}
+
+		private Array()
+		{
 		}
 
 		internal int InternalArray__ICollection_get_Count()
@@ -124,6 +1384,10 @@ namespace System
 
 		internal IEnumerator<T> InternalArray__IEnumerable_GetEnumerator<T>()
 		{
+			if (this.Length == 0)
+			{
+				return Array.EmptyInternalEnumerator<T>.Value;
+			}
 			return new Array.InternalEnumerator<T>(this);
 		}
 
@@ -134,12 +1398,12 @@ namespace System
 
 		internal void InternalArray__ICollection_Add<T>(T item)
 		{
-			throw new NotSupportedException("Collection is read-only");
+			throw new NotSupportedException("Collection is of a fixed size");
 		}
 
 		internal bool InternalArray__ICollection_Remove<T>(T item)
 		{
-			throw new NotSupportedException("Collection is read-only");
+			throw new NotSupportedException("Collection is of a fixed size");
 		}
 
 		internal bool InternalArray__ICollection_Contains<T>(T item)
@@ -155,9 +1419,12 @@ namespace System
 				this.GetGenericValueImpl<T>(i, out t);
 				if (item == null)
 				{
-					return t == null;
+					if (t == null)
+					{
+						return true;
+					}
 				}
-				if (item.Equals(t))
+				else if (item.Equals(t))
 				{
 					return true;
 				}
@@ -165,39 +1432,35 @@ namespace System
 			return false;
 		}
 
-		internal void InternalArray__ICollection_CopyTo<T>(T[] array, int index)
+		internal void InternalArray__ICollection_CopyTo<T>(T[] array, int arrayIndex)
 		{
-			if (array == null)
+			Array.Copy(this, this.GetLowerBound(0), array, arrayIndex, this.Length);
+		}
+
+		internal T InternalArray__IReadOnlyList_get_Item<T>(int index)
+		{
+			if (index >= this.Length)
 			{
-				throw new ArgumentNullException("array");
+				throw new ArgumentOutOfRangeException("index");
 			}
-			if (this.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (index + this.GetLength(0) > array.GetLowerBound(0) + array.GetLength(0))
-			{
-				throw new ArgumentException("Destination array was not long enough. Check destIndex and length, and the array's lower bounds.");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("Value has to be >= 0."));
-			}
-			Array.Copy(this, this.GetLowerBound(0), array, index, this.GetLength(0));
+			T t;
+			this.GetGenericValueImpl<T>(index, out t);
+			return t;
+		}
+
+		internal int InternalArray__IReadOnlyCollection_get_Count()
+		{
+			return this.Length;
 		}
 
 		internal void InternalArray__Insert<T>(int index, T item)
 		{
-			throw new NotSupportedException("Collection is read-only");
+			throw new NotSupportedException("Collection is of a fixed size");
 		}
 
 		internal void InternalArray__RemoveAt(int index)
 		{
-			throw new NotSupportedException("Collection is read-only");
+			throw new NotSupportedException("Collection is of a fixed size");
 		}
 
 		internal int InternalArray__IndexOf<T>(T item)
@@ -207,8 +1470,7 @@ namespace System
 				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
 			}
 			int length = this.Length;
-			int i = 0;
-			while (i < length)
+			for (int i = 0; i < length; i++)
 			{
 				T t;
 				this.GetGenericValueImpl<T>(i, out t);
@@ -218,15 +1480,10 @@ namespace System
 					{
 						return i + this.GetLowerBound(0);
 					}
-					return this.GetLowerBound(0) - 1;
 				}
-				else
+				else if (t.Equals(item))
 				{
-					if (t.Equals(item))
-					{
-						return i + this.GetLowerBound(0);
-					}
-					i++;
+					return i + this.GetLowerBound(0);
 				}
 			}
 			return this.GetLowerBound(0) - 1;
@@ -278,16 +1535,6 @@ namespace System
 			}
 		}
 
-		[ComVisible(false)]
-		public long LongLength
-		{
-			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-			get
-			{
-				return (long)this.Length;
-			}
-		}
-
 		public int Rank
 		{
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -302,12 +1549,6 @@ namespace System
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetLength(int dimension);
-
-		[ComVisible(false)]
-		public long GetLongLength(int dimension)
-		{
-			return (long)this.GetLength(dimension);
-		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -331,43 +1572,6 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Array CreateInstanceImpl(Type elementType, int[] lengths, int[] bounds);
 
-		public bool IsSynchronized
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public object SyncRoot
-		{
-			get
-			{
-				return this;
-			}
-		}
-
-		public bool IsFixedSize
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return new Array.SimpleEnumerator(this);
-		}
-
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public int GetUpperBound(int dimension)
 		{
@@ -378,13 +1582,18 @@ namespace System
 		{
 			if (this.Rank != 1)
 			{
-				throw new ArgumentException(Locale.GetText("Array was not a one-dimensional array."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 			}
-			if (index < this.GetLowerBound(0) || index > this.GetUpperBound(0))
+			int lowerBound = this.GetLowerBound(0);
+			if (index < lowerBound || index > this.GetUpperBound(0))
 			{
 				throw new IndexOutOfRangeException(Locale.GetText("Index has to be between upper and lower bound of the array."));
 			}
-			return this.GetValueImpl(index - this.GetLowerBound(0));
+			if (base.GetType().GetElementType().IsPointer)
+			{
+				throw new NotSupportedException("Type is not supported.");
+			}
+			return this.GetValueImpl(index - lowerBound);
 		}
 
 		public object GetValue(int index1, int index2)
@@ -399,112 +1608,22 @@ namespace System
 			return this.GetValue(array);
 		}
 
-		[ComVisible(false)]
-		public object GetValue(long index)
-		{
-			if (index < 0L || index > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			return this.GetValue((int)index);
-		}
-
-		[ComVisible(false)]
-		public object GetValue(long index1, long index2)
-		{
-			if (index1 < 0L || index1 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index1", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			if (index2 < 0L || index2 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index2", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			return this.GetValue((int)index1, (int)index2);
-		}
-
-		[ComVisible(false)]
-		public object GetValue(long index1, long index2, long index3)
-		{
-			if (index1 < 0L || index1 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index1", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			if (index2 < 0L || index2 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index2", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			if (index3 < 0L || index3 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index3", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			return this.GetValue((int)index1, (int)index2, (int)index3);
-		}
-
-		[ComVisible(false)]
-		public void SetValue(object value, long index)
-		{
-			if (index < 0L || index > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			this.SetValue(value, (int)index);
-		}
-
-		[ComVisible(false)]
-		public void SetValue(object value, long index1, long index2)
-		{
-			if (index1 < 0L || index1 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index1", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			if (index2 < 0L || index2 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index2", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			int[] array = new int[]
-			{
-				(int)index1,
-				(int)index2
-			};
-			this.SetValue(value, array);
-		}
-
-		[ComVisible(false)]
-		public void SetValue(object value, long index1, long index2, long index3)
-		{
-			if (index1 < 0L || index1 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index1", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			if (index2 < 0L || index2 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index2", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			if (index3 < 0L || index3 > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index3", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			int[] array = new int[]
-			{
-				(int)index1,
-				(int)index2,
-				(int)index3
-			};
-			this.SetValue(value, array);
-		}
-
 		public void SetValue(object value, int index)
 		{
 			if (this.Rank != 1)
 			{
-				throw new ArgumentException(Locale.GetText("Array was not a one-dimensional array."));
+				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 			}
-			if (index < this.GetLowerBound(0) || index > this.GetUpperBound(0))
+			int lowerBound = this.GetLowerBound(0);
+			if (index < lowerBound || index > this.GetUpperBound(0))
 			{
 				throw new IndexOutOfRangeException(Locale.GetText("Index has to be >= lower bound and <= upper bound of the array."));
 			}
-			this.SetValueImpl(value, index - this.GetLowerBound(0));
+			if (base.GetType().GetElementType().IsPointer)
+			{
+				throw new NotSupportedException("Type is not supported.");
+			}
+			this.SetValueImpl(value, index - lowerBound);
 		}
 
 		public void SetValue(object value, int index1, int index2)
@@ -517,6 +1636,21 @@ namespace System
 		{
 			int[] array = new int[] { index1, index2, index3 };
 			this.SetValue(value, array);
+		}
+
+		internal static Array UnsafeCreateInstance(Type elementType, int[] lengths, int[] lowerBounds)
+		{
+			return Array.CreateInstance(elementType, lengths, lowerBounds);
+		}
+
+		internal static Array UnsafeCreateInstance(Type elementType, int length1, int length2)
+		{
+			return Array.CreateInstance(elementType, length1, length2);
+		}
+
+		internal static Array UnsafeCreateInstance(Type elementType, params int[] lengths)
+		{
+			return Array.CreateInstance(elementType, lengths);
 		}
 
 		public static Array CreateInstance(Type elementType, int length)
@@ -552,8 +1686,8 @@ namespace System
 				throw new TypeLoadException();
 			}
 			int[] array = null;
-			elementType = elementType.UnderlyingSystemType;
-			if (!elementType.IsSystemType)
+			elementType = elementType.UnderlyingSystemType as RuntimeType;
+			if (elementType == null)
 			{
 				throw new ArgumentException("Type must be a type provided by the runtime.", "elementType");
 			}
@@ -582,8 +1716,8 @@ namespace System
 			{
 				throw new ArgumentNullException("lowerBounds");
 			}
-			elementType = elementType.UnderlyingSystemType;
-			if (!elementType.IsSystemType)
+			elementType = elementType.UnderlyingSystemType as RuntimeType;
+			if (elementType == null)
 			{
 				throw new ArgumentException("Type must be a type provided by the runtime.", "elementType");
 			}
@@ -621,203 +1755,6 @@ namespace System
 			return Array.CreateInstanceImpl(elementType, lengths, lowerBounds);
 		}
 
-		private static int[] GetIntArray(long[] values)
-		{
-			int num = values.Length;
-			int[] array = new int[num];
-			for (int i = 0; i < num; i++)
-			{
-				long num2 = values[i];
-				if (num2 < 0L || num2 > 2147483647L)
-				{
-					throw new ArgumentOutOfRangeException("values", Locale.GetText("Each value has to be >= 0 and <= Int32.MaxValue."));
-				}
-				array[i] = (int)num2;
-			}
-			return array;
-		}
-
-		public static Array CreateInstance(Type elementType, params long[] lengths)
-		{
-			if (lengths == null)
-			{
-				throw new ArgumentNullException("lengths");
-			}
-			return Array.CreateInstance(elementType, Array.GetIntArray(lengths));
-		}
-
-		[ComVisible(false)]
-		public object GetValue(params long[] indices)
-		{
-			if (indices == null)
-			{
-				throw new ArgumentNullException("indices");
-			}
-			return this.GetValue(Array.GetIntArray(indices));
-		}
-
-		[ComVisible(false)]
-		public void SetValue(object value, params long[] indices)
-		{
-			if (indices == null)
-			{
-				throw new ArgumentNullException("indices");
-			}
-			this.SetValue(value, Array.GetIntArray(indices));
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch(Array array, object value)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (value == null)
-			{
-				return -1;
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (array.Length == 0)
-			{
-				return -1;
-			}
-			if (!(value is IComparable))
-			{
-				throw new ArgumentException(Locale.GetText("value does not support IComparable."));
-			}
-			return Array.DoBinarySearch(array, array.GetLowerBound(0), array.GetLength(0), value, null);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch(Array array, object value, IComparer comparer)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (array.Length == 0)
-			{
-				return -1;
-			}
-			if (comparer == null && value != null && !(value is IComparable))
-			{
-				throw new ArgumentException(Locale.GetText("comparer is null and value does not support IComparable."));
-			}
-			return Array.DoBinarySearch(array, array.GetLowerBound(0), array.GetLength(0), value, comparer);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch(Array array, int index, int length, object value)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (index < array.GetLowerBound(0))
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("index is less than the lower bound of array."));
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value has to be >= 0."));
-			}
-			if (index > array.GetLowerBound(0) + array.GetLength(0) - length)
-			{
-				throw new ArgumentException(Locale.GetText("index and length do not specify a valid range in array."));
-			}
-			if (array.Length == 0)
-			{
-				return -1;
-			}
-			if (value != null && !(value is IComparable))
-			{
-				throw new ArgumentException(Locale.GetText("value does not support IComparable"));
-			}
-			return Array.DoBinarySearch(array, index, length, value, null);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch(Array array, int index, int length, object value, IComparer comparer)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (index < array.GetLowerBound(0))
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("index is less than the lower bound of array."));
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value has to be >= 0."));
-			}
-			if (index > array.GetLowerBound(0) + array.GetLength(0) - length)
-			{
-				throw new ArgumentException(Locale.GetText("index and length do not specify a valid range in array."));
-			}
-			if (array.Length == 0)
-			{
-				return -1;
-			}
-			if (comparer == null && value != null && !(value is IComparable))
-			{
-				throw new ArgumentException(Locale.GetText("comparer is null and value does not support IComparable."));
-			}
-			return Array.DoBinarySearch(array, index, length, value, comparer);
-		}
-
-		private static int DoBinarySearch(Array array, int index, int length, object value, IComparer comparer)
-		{
-			if (comparer == null)
-			{
-				comparer = Comparer.Default;
-			}
-			int i = index;
-			int num = index + length - 1;
-			try
-			{
-				while (i <= num)
-				{
-					int num2 = i + (num - i) / 2;
-					object valueImpl = array.GetValueImpl(num2);
-					int num3 = comparer.Compare(valueImpl, value);
-					if (num3 == 0)
-					{
-						return num2;
-					}
-					if (num3 > 0)
-					{
-						num = num2 - 1;
-					}
-					else
-					{
-						i = num2 + 1;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				throw new InvalidOperationException(Locale.GetText("Comparer threw an exception."), ex);
-			}
-			return ~i;
-		}
-
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public static void Clear(Array array, int index, int length)
 		{
@@ -844,9 +1781,6 @@ namespace System
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ClearInternal(Array a, int index, int count);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern object Clone();
 
 		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
 		public static void Copy(Array sourceArray, Array destinationArray, int length)
@@ -877,6 +1811,10 @@ namespace System
 			{
 				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value has to be >= 0."));
 			}
+			if (sourceArray.Rank != destinationArray.Rank)
+			{
+				throw new RankException("Only single dimension arrays are supported here.");
+			}
 			if (sourceIndex < 0)
 			{
 				throw new ArgumentOutOfRangeException("sourceIndex", Locale.GetText("Value has to be >= 0."));
@@ -891,22 +1829,21 @@ namespace System
 			}
 			int num = sourceIndex - sourceArray.GetLowerBound(0);
 			int num2 = destinationIndex - destinationArray.GetLowerBound(0);
+			if (num2 < 0)
+			{
+				throw new ArgumentOutOfRangeException("destinationIndex", "Index was less than the array's lower bound in the first dimension.");
+			}
 			if (num > sourceArray.Length - length)
 			{
 				throw new ArgumentException("length");
 			}
 			if (num2 > destinationArray.Length - length)
 			{
-				string text = "Destination array was not long enough. Check destIndex and length, and the array's lower bounds";
-				throw new ArgumentException(text, string.Empty);
-			}
-			if (sourceArray.Rank != destinationArray.Rank)
-			{
-				throw new RankException(Locale.GetText("Arrays must be of same size."));
+				throw new ArgumentException("Destination array was not long enough. Check destIndex and length, and the array's lower bounds", string.Empty);
 			}
 			Type elementType = sourceArray.GetType().GetElementType();
 			Type elementType2 = destinationArray.GetType().GetElementType();
-			if (!object.ReferenceEquals(sourceArray, destinationArray) || num > num2)
+			if (sourceArray != destinationArray || num > num2)
 			{
 				for (int i = 0; i < length; i++)
 				{
@@ -915,1339 +1852,63 @@ namespace System
 					{
 						destinationArray.SetValueImpl(valueImpl, num2 + i);
 					}
-					catch
+					catch (ArgumentException)
 					{
-						if (elementType.Equals(typeof(object)))
-						{
-							throw new InvalidCastException();
-						}
-						throw new ArrayTypeMismatchException(string.Format(Locale.GetText("(Types: source={0};  target={1})"), elementType.FullName, elementType2.FullName));
-					}
-				}
-			}
-			else
-			{
-				for (int j = length - 1; j >= 0; j--)
-				{
-					object valueImpl2 = sourceArray.GetValueImpl(num + j);
-					try
-					{
-						destinationArray.SetValueImpl(valueImpl2, num2 + j);
+						throw Array.CreateArrayTypeMismatchException();
 					}
 					catch
 					{
-						if (elementType.Equals(typeof(object)))
+						if (Array.CanAssignArrayElement(elementType, elementType2))
 						{
-							throw new InvalidCastException();
+							throw;
 						}
-						throw new ArrayTypeMismatchException(string.Format(Locale.GetText("(Types: source={0};  target={1})"), elementType.FullName, elementType2.FullName));
+						throw Array.CreateArrayTypeMismatchException();
 					}
 				}
-			}
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Copy(Array sourceArray, long sourceIndex, Array destinationArray, long destinationIndex, long length)
-		{
-			if (sourceArray == null)
-			{
-				throw new ArgumentNullException("sourceArray");
-			}
-			if (destinationArray == null)
-			{
-				throw new ArgumentNullException("destinationArray");
-			}
-			if (sourceIndex < -2147483648L || sourceIndex > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("sourceIndex", Locale.GetText("Must be in the Int32 range."));
-			}
-			if (destinationIndex < -2147483648L || destinationIndex > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("destinationIndex", Locale.GetText("Must be in the Int32 range."));
-			}
-			if (length < 0L || length > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			Array.Copy(sourceArray, (int)sourceIndex, destinationArray, (int)destinationIndex, (int)length);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Copy(Array sourceArray, Array destinationArray, long length)
-		{
-			if (length < 0L || length > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			Array.Copy(sourceArray, destinationArray, (int)length);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int IndexOf(Array array, object value)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.IndexOf(array, value, 0, array.Length);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int IndexOf(Array array, object value, int startIndex)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.IndexOf(array, value, startIndex, array.Length - startIndex);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int IndexOf(Array array, object value, int startIndex, int count)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (count < 0 || startIndex < array.GetLowerBound(0) || startIndex - 1 > array.GetUpperBound(0) - count)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			int num = startIndex + count;
-			for (int i = startIndex; i < num; i++)
-			{
-				if (object.Equals(array.GetValueImpl(i), value))
-				{
-					return i;
-				}
-			}
-			return array.GetLowerBound(0) - 1;
-		}
-
-		public void Initialize()
-		{
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int LastIndexOf(Array array, object value)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Length == 0)
-			{
-				return array.GetLowerBound(0) - 1;
-			}
-			return Array.LastIndexOf(array, value, array.Length - 1);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int LastIndexOf(Array array, object value, int startIndex)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.LastIndexOf(array, value, startIndex, startIndex - array.GetLowerBound(0) + 1);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int LastIndexOf(Array array, object value, int startIndex, int count)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			int lowerBound = array.GetLowerBound(0);
-			if (array.Length == 0)
-			{
-				return lowerBound - 1;
-			}
-			if (count < 0 || startIndex < lowerBound || startIndex > array.GetUpperBound(0) || startIndex - count + 1 < lowerBound)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			for (int i = startIndex; i >= startIndex - count + 1; i--)
-			{
-				if (object.Equals(array.GetValueImpl(i), value))
-				{
-					return i;
-				}
-			}
-			return lowerBound - 1;
-		}
-
-		private static Array.Swapper get_swapper(Array array)
-		{
-			if (array is int[])
-			{
-				return new Array.Swapper(array.int_swapper);
-			}
-			if (array is double[])
-			{
-				return new Array.Swapper(array.double_swapper);
-			}
-			if (array is object[])
-			{
-				return new Array.Swapper(array.obj_swapper);
-			}
-			return new Array.Swapper(array.slow_swapper);
-		}
-
-		private static Array.Swapper get_swapper<T>(T[] array)
-		{
-			if (array is int[])
-			{
-				return new Array.Swapper(array.int_swapper);
-			}
-			if (array is double[])
-			{
-				return new Array.Swapper(array.double_swapper);
-			}
-			return new Array.Swapper(array.slow_swapper);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Reverse(Array array)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Reverse(array, array.GetLowerBound(0), array.GetLength(0));
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Reverse(Array array, int index, int length)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (index < array.GetLowerBound(0) || length < 0)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			if (index > array.GetUpperBound(0) + 1 - length)
-			{
-				throw new ArgumentException();
-			}
-			int num = index + length - 1;
-			object[] array2 = array as object[];
-			if (array2 != null)
-			{
-				while (index < num)
-				{
-					object obj = array2[index];
-					array2[index] = array2[num];
-					array2[num] = obj;
-					index++;
-					num--;
-				}
 				return;
 			}
-			int[] array3 = array as int[];
-			if (array3 != null)
+			for (int j = length - 1; j >= 0; j--)
 			{
-				while (index < num)
+				object valueImpl2 = sourceArray.GetValueImpl(num + j);
+				try
 				{
-					int num2 = array3[index];
-					array3[index] = array3[num];
-					array3[num] = num2;
-					index++;
-					num--;
+					destinationArray.SetValueImpl(valueImpl2, num2 + j);
 				}
-				return;
-			}
-			double[] array4 = array as double[];
-			if (array4 != null)
-			{
-				while (index < num)
+				catch (ArgumentException)
 				{
-					double num3 = array4[index];
-					array4[index] = array4[num];
-					array4[num] = num3;
-					index++;
-					num--;
+					throw Array.CreateArrayTypeMismatchException();
 				}
-				return;
-			}
-			Array.Swapper swapper = Array.get_swapper(array);
-			while (index < num)
-			{
-				swapper(index, num);
-				index++;
-				num--;
-			}
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array array)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Sort(array, null, array.GetLowerBound(0), array.GetLength(0), null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array keys, Array items)
-		{
-			if (keys == null)
-			{
-				throw new ArgumentNullException("keys");
-			}
-			Array.Sort(keys, items, keys.GetLowerBound(0), keys.GetLength(0), null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array array, IComparer comparer)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Sort(array, null, array.GetLowerBound(0), array.GetLength(0), comparer);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array array, int index, int length)
-		{
-			Array.Sort(array, null, index, length, null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array keys, Array items, IComparer comparer)
-		{
-			if (keys == null)
-			{
-				throw new ArgumentNullException("keys");
-			}
-			Array.Sort(keys, items, keys.GetLowerBound(0), keys.GetLength(0), comparer);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array keys, Array items, int index, int length)
-		{
-			Array.Sort(keys, items, index, length, null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array array, int index, int length, IComparer comparer)
-		{
-			Array.Sort(array, null, index, length, comparer);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort(Array keys, Array items, int index, int length, IComparer comparer)
-		{
-			if (keys == null)
-			{
-				throw new ArgumentNullException("keys");
-			}
-			if (keys.Rank > 1 || (items != null && items.Rank > 1))
-			{
-				throw new RankException();
-			}
-			if (items != null && keys.GetLowerBound(0) != items.GetLowerBound(0))
-			{
-				throw new ArgumentException();
-			}
-			if (index < keys.GetLowerBound(0))
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value has to be >= 0."));
-			}
-			if (keys.Length - (index + keys.GetLowerBound(0)) < length || (items != null && index > items.Length - length))
-			{
-				throw new ArgumentException();
-			}
-			if (length <= 1)
-			{
-				return;
-			}
-			if (comparer == null)
-			{
-				Array.Swapper swapper;
-				if (items == null)
+				catch
 				{
-					swapper = null;
-				}
-				else
-				{
-					swapper = Array.get_swapper(items);
-				}
-				if (keys is double[])
-				{
-					Array.combsort(keys as double[], index, length, swapper);
-					return;
-				}
-				if (!(keys is uint[]) && keys is int[])
-				{
-					Array.combsort(keys as int[], index, length, swapper);
-					return;
-				}
-				if (keys is char[])
-				{
-					Array.combsort(keys as char[], index, length, swapper);
-					return;
-				}
-			}
-			try
-			{
-				int num = index + length - 1;
-				Array.qsort(keys, items, index, num, comparer);
-			}
-			catch (Exception ex)
-			{
-				throw new InvalidOperationException(Locale.GetText("The comparer threw an exception."), ex);
-			}
-		}
-
-		private void int_swapper(int i, int j)
-		{
-			int[] array = this as int[];
-			int num = array[i];
-			array[i] = array[j];
-			array[j] = num;
-		}
-
-		private void obj_swapper(int i, int j)
-		{
-			object[] array = this as object[];
-			object obj = array[i];
-			array[i] = array[j];
-			array[j] = obj;
-		}
-
-		private void slow_swapper(int i, int j)
-		{
-			object valueImpl = this.GetValueImpl(i);
-			this.SetValueImpl(this.GetValue(j), i);
-			this.SetValueImpl(valueImpl, j);
-		}
-
-		private void double_swapper(int i, int j)
-		{
-			double[] array = this as double[];
-			double num = array[i];
-			array[i] = array[j];
-			array[j] = num;
-		}
-
-		private static int new_gap(int gap)
-		{
-			gap = gap * 10 / 13;
-			if (gap == 9 || gap == 10)
-			{
-				return 11;
-			}
-			if (gap < 1)
-			{
-				return 1;
-			}
-			return gap;
-		}
-
-		private static void combsort(double[] array, int start, int size, Array.Swapper swap_items)
-		{
-			int num = size;
-			bool flag;
-			do
-			{
-				num = Array.new_gap(num);
-				flag = false;
-				int num2 = start + size - num;
-				for (int i = start; i < num2; i++)
-				{
-					int num3 = i + num;
-					if (array[i] > array[num3])
+					if (Array.CanAssignArrayElement(elementType, elementType2))
 					{
-						double num4 = array[i];
-						array[i] = array[num3];
-						array[num3] = num4;
-						flag = true;
-						if (swap_items != null)
-						{
-							swap_items(i, num3);
-						}
+						throw;
 					}
+					throw Array.CreateArrayTypeMismatchException();
 				}
 			}
-			while (num != 1 || flag);
 		}
 
-		private static void combsort(int[] array, int start, int size, Array.Swapper swap_items)
+		private static Exception CreateArrayTypeMismatchException()
 		{
-			int num = size;
-			bool flag;
-			do
-			{
-				num = Array.new_gap(num);
-				flag = false;
-				int num2 = start + size - num;
-				for (int i = start; i < num2; i++)
-				{
-					int num3 = i + num;
-					if (array[i] > array[num3])
-					{
-						int num4 = array[i];
-						array[i] = array[num3];
-						array[num3] = num4;
-						flag = true;
-						if (swap_items != null)
-						{
-							swap_items(i, num3);
-						}
-					}
-				}
-			}
-			while (num != 1 || flag);
+			return new ArrayTypeMismatchException();
 		}
 
-		private static void combsort(char[] array, int start, int size, Array.Swapper swap_items)
+		private static bool CanAssignArrayElement(Type source, Type target)
 		{
-			int num = size;
-			bool flag;
-			do
+			if (source.IsValueType)
 			{
-				num = Array.new_gap(num);
-				flag = false;
-				int num2 = start + size - num;
-				for (int i = start; i < num2; i++)
-				{
-					int num3 = i + num;
-					if (array[i] > array[num3])
-					{
-						char c = array[i];
-						array[i] = array[num3];
-						array[num3] = c;
-						flag = true;
-						if (swap_items != null)
-						{
-							swap_items(i, num3);
-						}
-					}
-				}
+				return source.IsAssignableFrom(target);
 			}
-			while (num != 1 || flag);
-		}
-
-		private static void qsort(Array keys, Array items, int low0, int high0, IComparer comparer)
-		{
-			if (low0 >= high0)
+			if (source.IsInterface)
 			{
-				return;
+				return !target.IsValueType;
 			}
-			int num = low0;
-			int num2 = high0;
-			int num3 = num + (num2 - num) / 2;
-			object valueImpl = keys.GetValueImpl(num3);
-			for (;;)
+			if (target.IsInterface)
 			{
-				while (num < high0 && Array.compare(keys.GetValueImpl(num), valueImpl, comparer) < 0)
-				{
-					num++;
-				}
-				while (num2 > low0 && Array.compare(valueImpl, keys.GetValueImpl(num2), comparer) < 0)
-				{
-					num2--;
-				}
-				if (num > num2)
-				{
-					break;
-				}
-				Array.swap(keys, items, num, num2);
-				num++;
-				num2--;
+				return !source.IsValueType;
 			}
-			if (low0 < num2)
-			{
-				Array.qsort(keys, items, low0, num2, comparer);
-			}
-			if (num < high0)
-			{
-				Array.qsort(keys, items, num, high0, comparer);
-			}
-		}
-
-		private static void swap(Array keys, Array items, int i, int j)
-		{
-			object obj = keys.GetValueImpl(i);
-			keys.SetValueImpl(keys.GetValue(j), i);
-			keys.SetValueImpl(obj, j);
-			if (items != null)
-			{
-				obj = items.GetValueImpl(i);
-				items.SetValueImpl(items.GetValueImpl(j), i);
-				items.SetValueImpl(obj, j);
-			}
-		}
-
-		private static int compare(object value1, object value2, IComparer comparer)
-		{
-			if (value1 == null)
-			{
-				return (value2 != null) ? (-1) : 0;
-			}
-			if (value2 == null)
-			{
-				return 1;
-			}
-			if (comparer == null)
-			{
-				return ((IComparable)value1).CompareTo(value2);
-			}
-			return comparer.Compare(value1, value2);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<T>(T[] array)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Sort<T, T>(array, null, 0, array.Length, null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items)
-		{
-			if (keys == null)
-			{
-				throw new ArgumentNullException("keys");
-			}
-			Array.Sort<TKey, TValue>(keys, items, 0, keys.Length, null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<T>(T[] array, IComparer<T> comparer)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Sort<T, T>(array, null, 0, array.Length, comparer);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items, IComparer<TKey> comparer)
-		{
-			if (keys == null)
-			{
-				throw new ArgumentNullException("keys");
-			}
-			Array.Sort<TKey, TValue>(keys, items, 0, keys.Length, comparer);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<T>(T[] array, int index, int length)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Sort<T, T>(array, null, index, length, null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items, int index, int length)
-		{
-			Array.Sort<TKey, TValue>(keys, items, index, length, null);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<T>(T[] array, int index, int length, IComparer<T> comparer)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Sort<T, T>(array, null, index, length, comparer);
-		}
-
-		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
-		public static void Sort<TKey, TValue>(TKey[] keys, TValue[] items, int index, int length, IComparer<TKey> comparer)
-		{
-			if (keys == null)
-			{
-				throw new ArgumentNullException("keys");
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length");
-			}
-			if (keys.Length - index < length || (items != null && index > items.Length - length))
-			{
-				throw new ArgumentException();
-			}
-			if (length <= 1)
-			{
-				return;
-			}
-			if (comparer == null)
-			{
-				Array.Swapper swapper;
-				if (items == null)
-				{
-					swapper = null;
-				}
-				else
-				{
-					swapper = Array.get_swapper<TValue>(items);
-				}
-				if (keys is double[])
-				{
-					Array.combsort(keys as double[], index, length, swapper);
-					return;
-				}
-				if (!(keys is uint[]) && keys is int[])
-				{
-					Array.combsort(keys as int[], index, length, swapper);
-					return;
-				}
-				if (keys is char[])
-				{
-					Array.combsort(keys as char[], index, length, swapper);
-					return;
-				}
-			}
-			try
-			{
-				int num = index + length - 1;
-				Array.qsort<TKey, TValue>(keys, items, index, num, comparer);
-			}
-			catch (Exception ex)
-			{
-				throw new InvalidOperationException(Locale.GetText("The comparer threw an exception."), ex);
-			}
-		}
-
-		public static void Sort<T>(T[] array, Comparison<T> comparison)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			Array.Sort<T>(array, array.Length, comparison);
-		}
-
-		internal static void Sort<T>(T[] array, int length, Comparison<T> comparison)
-		{
-			if (comparison == null)
-			{
-				throw new ArgumentNullException("comparison");
-			}
-			if (length <= 1 || array.Length <= 1)
-			{
-				return;
-			}
-			try
-			{
-				int num = 0;
-				int num2 = length - 1;
-				Array.qsort<T>(array, num, num2, comparison);
-			}
-			catch (Exception ex)
-			{
-				throw new InvalidOperationException(Locale.GetText("Comparison threw an exception."), ex);
-			}
-		}
-
-		private static void qsort<K, V>(K[] keys, V[] items, int low0, int high0, IComparer<K> comparer)
-		{
-			if (low0 >= high0)
-			{
-				return;
-			}
-			int num = low0;
-			int num2 = high0;
-			int num3 = num + (num2 - num) / 2;
-			K k = keys[num3];
-			for (;;)
-			{
-				while (num < high0 && Array.compare<K>(keys[num], k, comparer) < 0)
-				{
-					num++;
-				}
-				while (num2 > low0 && Array.compare<K>(k, keys[num2], comparer) < 0)
-				{
-					num2--;
-				}
-				if (num > num2)
-				{
-					break;
-				}
-				Array.swap<K, V>(keys, items, num, num2);
-				num++;
-				num2--;
-			}
-			if (low0 < num2)
-			{
-				Array.qsort<K, V>(keys, items, low0, num2, comparer);
-			}
-			if (num < high0)
-			{
-				Array.qsort<K, V>(keys, items, num, high0, comparer);
-			}
-		}
-
-		private static int compare<T>(T value1, T value2, IComparer<T> comparer)
-		{
-			if (comparer != null)
-			{
-				return comparer.Compare(value1, value2);
-			}
-			if (value1 == null)
-			{
-				return (value2 != null) ? (-1) : 0;
-			}
-			if (value2 == null)
-			{
-				return 1;
-			}
-			if (value1 is IComparable<T>)
-			{
-				return ((IComparable<T>)((object)value1)).CompareTo(value2);
-			}
-			if (value1 is IComparable)
-			{
-				return ((IComparable)((object)value1)).CompareTo(value2);
-			}
-			string text = Locale.GetText("No IComparable or IComparable<{0}> interface found.");
-			throw new InvalidOperationException(string.Format(text, typeof(T)));
-		}
-
-		private static void qsort<T>(T[] array, int low0, int high0, Comparison<T> comparison)
-		{
-			if (low0 >= high0)
-			{
-				return;
-			}
-			int num = low0;
-			int num2 = high0;
-			int num3 = num + (num2 - num) / 2;
-			T t = array[num3];
-			for (;;)
-			{
-				while (num < high0 && comparison(array[num], t) < 0)
-				{
-					num++;
-				}
-				while (num2 > low0 && comparison(t, array[num2]) < 0)
-				{
-					num2--;
-				}
-				if (num > num2)
-				{
-					break;
-				}
-				Array.swap<T>(array, num, num2);
-				num++;
-				num2--;
-			}
-			if (low0 < num2)
-			{
-				Array.qsort<T>(array, low0, num2, comparison);
-			}
-			if (num < high0)
-			{
-				Array.qsort<T>(array, num, high0, comparison);
-			}
-		}
-
-		private static void swap<K, V>(K[] keys, V[] items, int i, int j)
-		{
-			K k = keys[i];
-			keys[i] = keys[j];
-			keys[j] = k;
-			if (items != null)
-			{
-				V v = items[i];
-				items[i] = items[j];
-				items[j] = v;
-			}
-		}
-
-		private static void swap<T>(T[] array, int i, int j)
-		{
-			T t = array[i];
-			array[i] = array[j];
-			array[j] = t;
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (this.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (index + this.GetLength(0) > array.GetLowerBound(0) + array.GetLength(0))
-			{
-				throw new ArgumentException("Destination array was not long enough. Check destIndex and length, and the array's lower bounds.");
-			}
-			if (array.Rank > 1)
-			{
-				throw new RankException(Locale.GetText("Only single dimension arrays are supported."));
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("Value has to be >= 0."));
-			}
-			Array.Copy(this, this.GetLowerBound(0), array, index, this.GetLength(0));
-		}
-
-		[ComVisible(false)]
-		public void CopyTo(Array array, long index)
-		{
-			if (index < 0L || index > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("Value must be >= 0 and <= Int32.MaxValue."));
-			}
-			this.CopyTo(array, (int)index);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static void Resize<T>(ref T[] array, int newSize)
-		{
-			Array.Resize<T>(ref array, (array != null) ? array.Length : 0, newSize);
-		}
-
-		internal static void Resize<T>(ref T[] array, int length, int newSize)
-		{
-			if (newSize < 0)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			if (array == null)
-			{
-				array = new T[newSize];
-				return;
-			}
-			if (array.Length == newSize)
-			{
-				return;
-			}
-			T[] array2 = new T[newSize];
-			Array.Copy(array, array2, Math.Min(newSize, length));
-			array = array2;
-		}
-
-		public static bool TrueForAll<T>(T[] array, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			foreach (T t in array)
-			{
-				if (!match(t))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		public static void ForEach<T>(T[] array, Action<T> action)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (action == null)
-			{
-				throw new ArgumentNullException("action");
-			}
-			foreach (T t in array)
-			{
-				action(t);
-			}
-		}
-
-		public static TOutput[] ConvertAll<TInput, TOutput>(TInput[] array, Converter<TInput, TOutput> converter)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (converter == null)
-			{
-				throw new ArgumentNullException("converter");
-			}
-			TOutput[] array2 = new TOutput[array.Length];
-			for (int i = 0; i < array.Length; i++)
-			{
-				array2[i] = converter(array[i]);
-			}
-			return array2;
-		}
-
-		public static int FindLastIndex<T>(T[] array, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.FindLastIndex<T>(array, 0, array.Length, match);
-		}
-
-		public static int FindLastIndex<T>(T[] array, int startIndex, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException();
-			}
-			return Array.FindLastIndex<T>(array, startIndex, array.Length - startIndex, match);
-		}
-
-		public static int FindLastIndex<T>(T[] array, int startIndex, int count, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			if (startIndex > array.Length || startIndex + count > array.Length)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			for (int i = startIndex + count - 1; i >= startIndex; i--)
-			{
-				if (match(array[i]))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		public static int FindIndex<T>(T[] array, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.FindIndex<T>(array, 0, array.Length, match);
-		}
-
-		public static int FindIndex<T>(T[] array, int startIndex, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.FindIndex<T>(array, startIndex, array.Length - startIndex, match);
-		}
-
-		public static int FindIndex<T>(T[] array, int startIndex, int count, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			if (startIndex > array.Length || startIndex + count > array.Length)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			for (int i = startIndex; i < startIndex + count; i++)
-			{
-				if (match(array[i]))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch<T>(T[] array, T value)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.BinarySearch<T>(array, 0, array.Length, value, null);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch<T>(T[] array, T value, IComparer<T> comparer)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.BinarySearch<T>(array, 0, array.Length, value, comparer);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch<T>(T[] array, int index, int length, T value)
-		{
-			return Array.BinarySearch<T>(array, index, length, value, null);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int BinarySearch<T>(T[] array, int index, int length, T value, IComparer<T> comparer)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Locale.GetText("index is less than the lower bound of array."));
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", Locale.GetText("Value has to be >= 0."));
-			}
-			if (index > array.Length - length)
-			{
-				throw new ArgumentException(Locale.GetText("index and length do not specify a valid range in array."));
-			}
-			if (comparer == null)
-			{
-				comparer = Comparer<T>.Default;
-			}
-			int i = index;
-			int num = index + length - 1;
-			try
-			{
-				while (i <= num)
-				{
-					int num2 = i + (num - i) / 2;
-					int num3 = comparer.Compare(value, array[num2]);
-					if (num3 == 0)
-					{
-						return num2;
-					}
-					if (num3 < 0)
-					{
-						num = num2 - 1;
-					}
-					else
-					{
-						i = num2 + 1;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				throw new InvalidOperationException(Locale.GetText("Comparer threw an exception."), ex);
-			}
-			return ~i;
-		}
-
-		public static int IndexOf<T>(T[] array, T value)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.IndexOf<T>(array, value, 0, array.Length);
-		}
-
-		public static int IndexOf<T>(T[] array, T value, int startIndex)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.IndexOf<T>(array, value, startIndex, array.Length - startIndex);
-		}
-
-		public static int IndexOf<T>(T[] array, T value, int startIndex, int count)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (count < 0 || startIndex < array.GetLowerBound(0) || startIndex - 1 > array.GetUpperBound(0) - count)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			int num = startIndex + count;
-			EqualityComparer<T> @default = EqualityComparer<T>.Default;
-			for (int i = startIndex; i < num; i++)
-			{
-				if (@default.Equals(array[i], value))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		public static int LastIndexOf<T>(T[] array, T value)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Length == 0)
-			{
-				return -1;
-			}
-			return Array.LastIndexOf<T>(array, value, array.Length - 1);
-		}
-
-		public static int LastIndexOf<T>(T[] array, T value, int startIndex)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return Array.LastIndexOf<T>(array, value, startIndex, startIndex + 1);
-		}
-
-		public static int LastIndexOf<T>(T[] array, T value, int startIndex, int count)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (count < 0 || startIndex < array.GetLowerBound(0) || startIndex > array.GetUpperBound(0) || startIndex - count + 1 < array.GetLowerBound(0))
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			EqualityComparer<T> @default = EqualityComparer<T>.Default;
-			for (int i = startIndex; i >= startIndex - count + 1; i--)
-			{
-				if (@default.Equals(array[i], value))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		public static T[] FindAll<T>(T[] array, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			int num = 0;
-			T[] array2 = new T[array.Length];
-			foreach (T t in array)
-			{
-				if (match(t))
-				{
-					array2[num++] = t;
-				}
-			}
-			Array.Resize<T>(ref array2, num);
-			return array2;
-		}
-
-		public static bool Exists<T>(T[] array, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			foreach (T t in array)
-			{
-				if (match(t))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public static ReadOnlyCollection<T> AsReadOnly<T>(T[] array)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			return new ReadOnlyCollection<T>(new Array.ArrayReadOnlyList<T>(array));
-		}
-
-		public static T Find<T>(T[] array, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			foreach (T t in array)
-			{
-				if (match(t))
-				{
-					return t;
-				}
-			}
-			return default(T);
-		}
-
-		public static T FindLast<T>(T[] array, Predicate<T> match)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			for (int i = array.Length - 1; i >= 0; i--)
-			{
-				if (match(array[i]))
-				{
-					return array[i];
-				}
-			}
-			return default(T);
+			return source.IsAssignableFrom(target) || target.IsAssignableFrom(source);
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -2256,7 +1917,115 @@ namespace System
 			Array.Copy(sourceArray, sourceIndex, destinationArray, destinationIndex, length);
 		}
 
-		internal struct InternalEnumerator<T> : IEnumerator, IDisposable, IEnumerator<T>
+		public static T[] Empty<T>()
+		{
+			return EmptyArray<T>.Value;
+		}
+
+		public void Initialize()
+		{
+		}
+
+		private static int IndexOfImpl<T>(T[] array, T value, int startIndex, int count)
+		{
+			return EqualityComparer<T>.Default.IndexOf(array, value, startIndex, count);
+		}
+
+		private static int LastIndexOfImpl<T>(T[] array, T value, int startIndex, int count)
+		{
+			return EqualityComparer<T>.Default.LastIndexOf(array, value, startIndex, count);
+		}
+
+		private static void SortImpl(Array keys, Array items, int index, int length, IComparer comparer)
+		{
+			object[] array = keys as object[];
+			object[] array2 = null;
+			if (array != null)
+			{
+				array2 = items as object[];
+			}
+			if (array != null && (items == null || array2 != null))
+			{
+				Array.SorterObjectArray sorterObjectArray = new Array.SorterObjectArray(array, array2, comparer);
+				sorterObjectArray.Sort(index, length);
+				return;
+			}
+			Array.SorterGenericArray sorterGenericArray = new Array.SorterGenericArray(keys, items, comparer);
+			sorterGenericArray.Sort(index, length);
+		}
+
+		internal static T UnsafeLoad<T>(T[] array, int index)
+		{
+			return array[index];
+		}
+
+		internal static void UnsafeStore<T>(T[] array, int index, T value)
+		{
+			array[index] = value;
+		}
+
+		internal static R UnsafeMov<S, R>(S instance)
+		{
+			return (R)((object)instance);
+		}
+
+		private sealed class ArrayEnumerator : IEnumerator, ICloneable
+		{
+			internal ArrayEnumerator(Array array)
+			{
+				this._array = array;
+				this._index = -1;
+				this._endIndex = array.Length;
+			}
+
+			public bool MoveNext()
+			{
+				if (this._index < this._endIndex)
+				{
+					this._index++;
+					return this._index < this._endIndex;
+				}
+				return false;
+			}
+
+			public void Reset()
+			{
+				this._index = -1;
+			}
+
+			public object Clone()
+			{
+				return base.MemberwiseClone();
+			}
+
+			public object Current
+			{
+				get
+				{
+					if (this._index < 0)
+					{
+						throw new InvalidOperationException("Enumeration has not started. Call MoveNext.");
+					}
+					if (this._index >= this._endIndex)
+					{
+						throw new InvalidOperationException("Enumeration already finished.");
+					}
+					if (this._index == 0 && this._array.GetType().GetElementType().IsPointer)
+					{
+						throw new NotSupportedException("Type is not supported.");
+					}
+					return this._array.GetValueImpl(this._index);
+				}
+			}
+
+			private Array _array;
+
+			private int _index;
+
+			private int _endIndex;
+		}
+
+		internal struct InternalEnumerator<T> : IEnumerator<T>, IDisposable, IEnumerator
 		{
 			internal InternalEnumerator(Array array)
 			{
@@ -2264,22 +2033,8 @@ namespace System
 				this.idx = -2;
 			}
 
-			void IEnumerator.Reset()
-			{
-				this.idx = -2;
-			}
-
-			object IEnumerator.Current
-			{
-				get
-				{
-					return this.Current;
-				}
-			}
-
 			public void Dispose()
 			{
-				this.idx = -2;
 			}
 
 			public bool MoveNext()
@@ -2288,7 +2043,13 @@ namespace System
 				{
 					this.idx = this.array.Length;
 				}
-				return this.idx != -1 && --this.idx != -1;
+				if (this.idx != -1)
+				{
+					int num = this.idx - 1;
+					this.idx = num;
+					return num != -1;
+				}
+				return false;
 			}
 
 			public T Current
@@ -2307,167 +2068,495 @@ namespace System
 				}
 			}
 
+			void IEnumerator.Reset()
+			{
+				this.idx = -2;
+			}
+
+			object IEnumerator.Current
+			{
+				get
+				{
+					return this.Current;
+				}
+			}
+
 			private const int NOT_STARTED = -2;
 
 			private const int FINISHED = -1;
 
-			private Array array;
+			private readonly Array array;
 
 			private int idx;
 		}
 
-		internal class SimpleEnumerator : IEnumerator, ICloneable
+		internal class EmptyInternalEnumerator<T> : IEnumerator<T>, IDisposable, IEnumerator
 		{
-			public SimpleEnumerator(Array arrayToEnumerate)
+			public void Dispose()
 			{
-				this.enumeratee = arrayToEnumerate;
-				this.currentpos = -1;
-				this.length = arrayToEnumerate.Length;
-			}
-
-			public object Current
-			{
-				get
-				{
-					if (this.currentpos < 0)
-					{
-						throw new InvalidOperationException(Locale.GetText("Enumeration has not started."));
-					}
-					if (this.currentpos >= this.length)
-					{
-						throw new InvalidOperationException(Locale.GetText("Enumeration has already ended"));
-					}
-					return this.enumeratee.GetValueImpl(this.currentpos);
-				}
 			}
 
 			public bool MoveNext()
 			{
-				if (this.currentpos < this.length)
+				return false;
+			}
+
+			public T Current
+			{
+				get
 				{
-					this.currentpos++;
+					throw new InvalidOperationException("Enumeration has not started. Call MoveNext");
 				}
-				return this.currentpos < this.length;
 			}
 
-			public void Reset()
+			object IEnumerator.Current
 			{
-				this.currentpos = -1;
+				get
+				{
+					return this.Current;
+				}
 			}
 
-			public object Clone()
+			void IEnumerator.Reset()
 			{
-				return base.MemberwiseClone();
 			}
 
-			private Array enumeratee;
-
-			private int currentpos;
-
-			private int length;
+			public static readonly Array.EmptyInternalEnumerator<T> Value = new Array.EmptyInternalEnumerator<T>();
 		}
 
-		private class ArrayReadOnlyList<T> : IEnumerable, IList<T>, ICollection<T>, IEnumerable<T>
+		internal sealed class FunctorComparer<T> : IComparer<T>
 		{
-			public ArrayReadOnlyList(T[] array)
+			public FunctorComparer(Comparison<T> comparison)
 			{
-				this.array = array;
+				this.comparison = comparison;
 			}
 
-			IEnumerator IEnumerable.GetEnumerator()
+			public int Compare(T x, T y)
 			{
-				return this.GetEnumerator();
+				return this.comparison(x, y);
 			}
 
-			public T this[int index]
-			{
-				get
-				{
-					if (index >= this.array.Length)
-					{
-						throw new ArgumentOutOfRangeException("index");
-					}
-					return this.array[index];
-				}
-				set
-				{
-					throw Array.ArrayReadOnlyList<T>.ReadOnlyError();
-				}
-			}
-
-			public int Count
-			{
-				get
-				{
-					return this.array.Length;
-				}
-			}
-
-			public bool IsReadOnly
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public void Add(T item)
-			{
-				throw Array.ArrayReadOnlyList<T>.ReadOnlyError();
-			}
-
-			public void Clear()
-			{
-				throw Array.ArrayReadOnlyList<T>.ReadOnlyError();
-			}
-
-			public bool Contains(T item)
-			{
-				return Array.IndexOf<T>(this.array, item) >= 0;
-			}
-
-			public void CopyTo(T[] array, int index)
-			{
-				this.array.CopyTo(array, index);
-			}
-
-			public IEnumerator<T> GetEnumerator()
-			{
-				for (int i = 0; i < this.array.Length; i++)
-				{
-					yield return this.array[i];
-				}
-				yield break;
-			}
-
-			public int IndexOf(T item)
-			{
-				return Array.IndexOf<T>(this.array, item);
-			}
-
-			public void Insert(int index, T item)
-			{
-				throw Array.ArrayReadOnlyList<T>.ReadOnlyError();
-			}
-
-			public bool Remove(T item)
-			{
-				throw Array.ArrayReadOnlyList<T>.ReadOnlyError();
-			}
-
-			public void RemoveAt(int index)
-			{
-				throw Array.ArrayReadOnlyList<T>.ReadOnlyError();
-			}
-
-			private static Exception ReadOnlyError()
-			{
-				return new NotSupportedException("This collection is read-only.");
-			}
-
-			private T[] array;
+			private Comparison<T> comparison;
 		}
 
-		private delegate void Swapper(int i, int j);
+		private struct SorterObjectArray
+		{
+			internal SorterObjectArray(object[] keys, object[] items, IComparer comparer)
+			{
+				if (comparer == null)
+				{
+					comparer = Comparer.Default;
+				}
+				this.keys = keys;
+				this.items = items;
+				this.comparer = comparer;
+			}
+
+			internal void SwapIfGreaterWithItems(int a, int b)
+			{
+				if (a != b && this.comparer.Compare(this.keys[a], this.keys[b]) > 0)
+				{
+					object obj = this.keys[a];
+					this.keys[a] = this.keys[b];
+					this.keys[b] = obj;
+					if (this.items != null)
+					{
+						object obj2 = this.items[a];
+						this.items[a] = this.items[b];
+						this.items[b] = obj2;
+					}
+				}
+			}
+
+			private void Swap(int i, int j)
+			{
+				object obj = this.keys[i];
+				this.keys[i] = this.keys[j];
+				this.keys[j] = obj;
+				if (this.items != null)
+				{
+					object obj2 = this.items[i];
+					this.items[i] = this.items[j];
+					this.items[j] = obj2;
+				}
+			}
+
+			internal void Sort(int left, int length)
+			{
+				this.IntrospectiveSort(left, length);
+			}
+
+			private void IntrospectiveSort(int left, int length)
+			{
+				if (length < 2)
+				{
+					return;
+				}
+				try
+				{
+					this.IntroSort(left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2(this.keys.Length));
+				}
+				catch (IndexOutOfRangeException)
+				{
+					IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(this.comparer);
+				}
+				catch (Exception ex)
+				{
+					throw new InvalidOperationException("Failed to compare two elements in the array.", ex);
+				}
+			}
+
+			private void IntroSort(int lo, int hi, int depthLimit)
+			{
+				while (hi > lo)
+				{
+					int num = hi - lo + 1;
+					if (num <= 16)
+					{
+						if (num == 1)
+						{
+							return;
+						}
+						if (num == 2)
+						{
+							this.SwapIfGreaterWithItems(lo, hi);
+							return;
+						}
+						if (num == 3)
+						{
+							this.SwapIfGreaterWithItems(lo, hi - 1);
+							this.SwapIfGreaterWithItems(lo, hi);
+							this.SwapIfGreaterWithItems(hi - 1, hi);
+							return;
+						}
+						this.InsertionSort(lo, hi);
+						return;
+					}
+					else
+					{
+						if (depthLimit == 0)
+						{
+							this.Heapsort(lo, hi);
+							return;
+						}
+						depthLimit--;
+						int num2 = this.PickPivotAndPartition(lo, hi);
+						this.IntroSort(num2 + 1, hi, depthLimit);
+						hi = num2 - 1;
+					}
+				}
+			}
+
+			private int PickPivotAndPartition(int lo, int hi)
+			{
+				int num = lo + (hi - lo) / 2;
+				this.SwapIfGreaterWithItems(lo, num);
+				this.SwapIfGreaterWithItems(lo, hi);
+				this.SwapIfGreaterWithItems(num, hi);
+				object obj = this.keys[num];
+				this.Swap(num, hi - 1);
+				int i = lo;
+				int num2 = hi - 1;
+				while (i < num2)
+				{
+					while (this.comparer.Compare(this.keys[++i], obj) < 0)
+					{
+					}
+					while (this.comparer.Compare(obj, this.keys[--num2]) < 0)
+					{
+					}
+					if (i >= num2)
+					{
+						break;
+					}
+					this.Swap(i, num2);
+				}
+				this.Swap(i, hi - 1);
+				return i;
+			}
+
+			private void Heapsort(int lo, int hi)
+			{
+				int num = hi - lo + 1;
+				for (int i = num / 2; i >= 1; i--)
+				{
+					this.DownHeap(i, num, lo);
+				}
+				for (int j = num; j > 1; j--)
+				{
+					this.Swap(lo, lo + j - 1);
+					this.DownHeap(1, j - 1, lo);
+				}
+			}
+
+			private void DownHeap(int i, int n, int lo)
+			{
+				object obj = this.keys[lo + i - 1];
+				object obj2 = ((this.items != null) ? this.items[lo + i - 1] : null);
+				while (i <= n / 2)
+				{
+					int num = 2 * i;
+					if (num < n && this.comparer.Compare(this.keys[lo + num - 1], this.keys[lo + num]) < 0)
+					{
+						num++;
+					}
+					if (this.comparer.Compare(obj, this.keys[lo + num - 1]) >= 0)
+					{
+						break;
+					}
+					this.keys[lo + i - 1] = this.keys[lo + num - 1];
+					if (this.items != null)
+					{
+						this.items[lo + i - 1] = this.items[lo + num - 1];
+					}
+					i = num;
+				}
+				this.keys[lo + i - 1] = obj;
+				if (this.items != null)
+				{
+					this.items[lo + i - 1] = obj2;
+				}
+			}
+
+			private void InsertionSort(int lo, int hi)
+			{
+				for (int i = lo; i < hi; i++)
+				{
+					int num = i;
+					object obj = this.keys[i + 1];
+					object obj2 = ((this.items != null) ? this.items[i + 1] : null);
+					while (num >= lo && this.comparer.Compare(obj, this.keys[num]) < 0)
+					{
+						this.keys[num + 1] = this.keys[num];
+						if (this.items != null)
+						{
+							this.items[num + 1] = this.items[num];
+						}
+						num--;
+					}
+					this.keys[num + 1] = obj;
+					if (this.items != null)
+					{
+						this.items[num + 1] = obj2;
+					}
+				}
+			}
+
+			private object[] keys;
+
+			private object[] items;
+
+			private IComparer comparer;
+		}
+
+		private struct SorterGenericArray
+		{
+			internal SorterGenericArray(Array keys, Array items, IComparer comparer)
+			{
+				if (comparer == null)
+				{
+					comparer = Comparer.Default;
+				}
+				this.keys = keys;
+				this.items = items;
+				this.comparer = comparer;
+			}
+
+			internal void SwapIfGreaterWithItems(int a, int b)
+			{
+				if (a != b && this.comparer.Compare(this.keys.GetValue(a), this.keys.GetValue(b)) > 0)
+				{
+					object value = this.keys.GetValue(a);
+					this.keys.SetValue(this.keys.GetValue(b), a);
+					this.keys.SetValue(value, b);
+					if (this.items != null)
+					{
+						object value2 = this.items.GetValue(a);
+						this.items.SetValue(this.items.GetValue(b), a);
+						this.items.SetValue(value2, b);
+					}
+				}
+			}
+
+			private void Swap(int i, int j)
+			{
+				object value = this.keys.GetValue(i);
+				this.keys.SetValue(this.keys.GetValue(j), i);
+				this.keys.SetValue(value, j);
+				if (this.items != null)
+				{
+					object value2 = this.items.GetValue(i);
+					this.items.SetValue(this.items.GetValue(j), i);
+					this.items.SetValue(value2, j);
+				}
+			}
+
+			internal void Sort(int left, int length)
+			{
+				this.IntrospectiveSort(left, length);
+			}
+
+			private void IntrospectiveSort(int left, int length)
+			{
+				if (length < 2)
+				{
+					return;
+				}
+				try
+				{
+					this.IntroSort(left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2(this.keys.Length));
+				}
+				catch (IndexOutOfRangeException)
+				{
+					IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(this.comparer);
+				}
+				catch (Exception ex)
+				{
+					throw new InvalidOperationException("Failed to compare two elements in the array.", ex);
+				}
+			}
+
+			private void IntroSort(int lo, int hi, int depthLimit)
+			{
+				while (hi > lo)
+				{
+					int num = hi - lo + 1;
+					if (num <= 16)
+					{
+						if (num == 1)
+						{
+							return;
+						}
+						if (num == 2)
+						{
+							this.SwapIfGreaterWithItems(lo, hi);
+							return;
+						}
+						if (num == 3)
+						{
+							this.SwapIfGreaterWithItems(lo, hi - 1);
+							this.SwapIfGreaterWithItems(lo, hi);
+							this.SwapIfGreaterWithItems(hi - 1, hi);
+							return;
+						}
+						this.InsertionSort(lo, hi);
+						return;
+					}
+					else
+					{
+						if (depthLimit == 0)
+						{
+							this.Heapsort(lo, hi);
+							return;
+						}
+						depthLimit--;
+						int num2 = this.PickPivotAndPartition(lo, hi);
+						this.IntroSort(num2 + 1, hi, depthLimit);
+						hi = num2 - 1;
+					}
+				}
+			}
+
+			private int PickPivotAndPartition(int lo, int hi)
+			{
+				int num = lo + (hi - lo) / 2;
+				this.SwapIfGreaterWithItems(lo, num);
+				this.SwapIfGreaterWithItems(lo, hi);
+				this.SwapIfGreaterWithItems(num, hi);
+				object value = this.keys.GetValue(num);
+				this.Swap(num, hi - 1);
+				int i = lo;
+				int num2 = hi - 1;
+				while (i < num2)
+				{
+					while (this.comparer.Compare(this.keys.GetValue(++i), value) < 0)
+					{
+					}
+					while (this.comparer.Compare(value, this.keys.GetValue(--num2)) < 0)
+					{
+					}
+					if (i >= num2)
+					{
+						break;
+					}
+					this.Swap(i, num2);
+				}
+				this.Swap(i, hi - 1);
+				return i;
+			}
+
+			private void Heapsort(int lo, int hi)
+			{
+				int num = hi - lo + 1;
+				for (int i = num / 2; i >= 1; i--)
+				{
+					this.DownHeap(i, num, lo);
+				}
+				for (int j = num; j > 1; j--)
+				{
+					this.Swap(lo, lo + j - 1);
+					this.DownHeap(1, j - 1, lo);
+				}
+			}
+
+			private void DownHeap(int i, int n, int lo)
+			{
+				object value = this.keys.GetValue(lo + i - 1);
+				object obj = ((this.items != null) ? this.items.GetValue(lo + i - 1) : null);
+				while (i <= n / 2)
+				{
+					int num = 2 * i;
+					if (num < n && this.comparer.Compare(this.keys.GetValue(lo + num - 1), this.keys.GetValue(lo + num)) < 0)
+					{
+						num++;
+					}
+					if (this.comparer.Compare(value, this.keys.GetValue(lo + num - 1)) >= 0)
+					{
+						break;
+					}
+					this.keys.SetValue(this.keys.GetValue(lo + num - 1), lo + i - 1);
+					if (this.items != null)
+					{
+						this.items.SetValue(this.items.GetValue(lo + num - 1), lo + i - 1);
+					}
+					i = num;
+				}
+				this.keys.SetValue(value, lo + i - 1);
+				if (this.items != null)
+				{
+					this.items.SetValue(obj, lo + i - 1);
+				}
+			}
+
+			private void InsertionSort(int lo, int hi)
+			{
+				for (int i = lo; i < hi; i++)
+				{
+					int num = i;
+					object value = this.keys.GetValue(i + 1);
+					object obj = ((this.items != null) ? this.items.GetValue(i + 1) : null);
+					while (num >= lo && this.comparer.Compare(value, this.keys.GetValue(num)) < 0)
+					{
+						this.keys.SetValue(this.keys.GetValue(num), num + 1);
+						if (this.items != null)
+						{
+							this.items.SetValue(this.items.GetValue(num), num + 1);
+						}
+						num--;
+					}
+					this.keys.SetValue(value, num + 1);
+					if (this.items != null)
+					{
+						this.items.SetValue(obj, num + 1);
+					}
+				}
+			}
+
+			private Array keys;
+
+			private Array items;
+
+			private IComparer comparer;
+		}
 	}
 }

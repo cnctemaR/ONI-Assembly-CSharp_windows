@@ -48,7 +48,7 @@ public class NumericDropDownTableColumn : TableColumn
 		<GetHeaderWidget>c__AnonStorey.$this = this;
 		<GetHeaderWidget>c__AnonStorey.widget_go = Util.KInstantiateUI(Assets.UIPrefabs.TableScreenWidgets.DropDownHeader, parent, true);
 		HierarchyReferences component = <GetHeaderWidget>c__AnonStorey.widget_go.GetComponent<HierarchyReferences>();
-		MonoBehaviour reference = component.GetReference("Label");
+		Component reference = component.GetReference("Label");
 		MultiToggle componentInChildren = reference.GetComponentInChildren<MultiToggle>(true);
 		this.column_sort_toggle = componentInChildren;
 		MultiToggle multiToggle = componentInChildren;
@@ -70,7 +70,7 @@ public class NumericDropDownTableColumn : TableColumn
 			<GetHeaderWidget>c__AnonStorey.$this.callbacks.headerSortTooltip(null, <GetHeaderWidget>c__AnonStorey.widget_go, tt3);
 			return string.Empty;
 		};
-		MonoBehaviour reference2 = component.GetReference("DropDown");
+		Component reference2 = component.GetReference("DropDown");
 		TMP_Dropdown componentInChildren2 = reference2.GetComponentInChildren<TMP_Dropdown>();
 		componentInChildren2.options = this.options;
 		componentInChildren2.onValueChanged.AddListener(delegate(int new_value)

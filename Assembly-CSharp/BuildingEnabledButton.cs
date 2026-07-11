@@ -112,5 +112,5 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 	[Serialize]
 	private bool buildingEnabled = true;
 
-	public static Operational.Flag EnabledFlag = new Operational.Flag("building_enabled", Operational.Flag.Type.Functional);
+	public static readonly Operational.Flag EnabledFlag = new Operational.Flag("building_enabled", Operational.Flag.Type.Functional);
 }

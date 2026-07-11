@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Security;
 
 namespace System.Runtime.Serialization
 {
@@ -7,39 +8,41 @@ namespace System.Runtime.Serialization
 	{
 		public SerializationObjectManager(StreamingContext context)
 		{
-			this.context = context;
+			this.m_context = context;
+			this.m_objectSeenTable = new Hashtable();
 		}
 
-		private event SerializationCallbacks.CallbackHandler callbacks;
-
+		[SecurityCritical]
 		public void RegisterObject(object obj)
 		{
-			if (this.seen.Contains(obj))
+			SerializationEvents serializationEventsForType = SerializationEventsCache.GetSerializationEventsForType(obj.GetType());
+			if (serializationEventsForType.HasOnSerializingEvents && this.m_objectSeenTable[obj] == null)
 			{
-				return;
-			}
-			SerializationCallbacks sc = SerializationCallbacks.GetSerializationCallbacks(obj.GetType());
-			this.seen[obj] = 1;
-			sc.RaiseOnSerializing(obj, this.context);
-			if (sc.HasSerializedCallbacks)
-			{
-				this.callbacks = (SerializationCallbacks.CallbackHandler)Delegate.Combine(this.callbacks, new SerializationCallbacks.CallbackHandler(delegate(StreamingContext ctx)
-				{
-					sc.RaiseOnSerialized(obj, ctx);
-				}));
+				this.m_objectSeenTable[obj] = true;
+				serializationEventsForType.InvokeOnSerializing(obj, this.m_context);
+				this.AddOnSerialized(obj);
 			}
 		}
 
 		public void RaiseOnSerializedEvent()
 		{
-			if (this.callbacks != null)
+			if (this.m_onSerializedHandler != null)
 			{
-				this.callbacks(this.context);
+				this.m_onSerializedHandler(this.m_context);
 			}
 		}
 
-		private readonly StreamingContext context;
+		[SecuritySafeCritical]
+		private void AddOnSerialized(object obj)
+		{
+			SerializationEvents serializationEventsForType = SerializationEventsCache.GetSerializationEventsForType(obj.GetType());
+			this.m_onSerializedHandler = serializationEventsForType.AddOnSerialized(obj, this.m_onSerializedHandler);
+		}
 
-		private readonly Hashtable seen = new Hashtable();
+		private Hashtable m_objectSeenTable = new Hashtable();
+
+		private SerializationEventHandler m_onSerializedHandler;
+
+		private StreamingContext m_context;
 	}
 }

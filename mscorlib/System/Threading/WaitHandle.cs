@@ -2,340 +2,130 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting;
 using System.Runtime.Remoting.Contexts;
+using System.Security;
 using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Threading
 {
 	[ComVisible(true)]
+	[StructLayout(LayoutKind.Sequential)]
 	public abstract class WaitHandle : MarshalByRefObject, IDisposable
 	{
-		void IDisposable.Dispose()
+		protected WaitHandle()
 		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
+			this.Init();
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool WaitAll_internal(WaitHandle[] handles, int ms, bool exitContext);
-
-		private static void CheckArray(WaitHandle[] handles, bool waitAll)
+		[SecuritySafeCritical]
+		private void Init()
 		{
-			if (handles == null)
-			{
-				throw new ArgumentNullException("waitHandles");
-			}
-			int num = handles.Length;
-			if (num > 64)
-			{
-				throw new NotSupportedException("Too many handles");
-			}
-			foreach (WaitHandle waitHandle in handles)
-			{
-				if (waitHandle == null)
-				{
-					throw new ArgumentNullException("waitHandles", "null handle");
-				}
-				if (waitHandle.safe_wait_handle == null)
-				{
-					throw new ArgumentException("null element found", "waitHandle");
-				}
-			}
+			this.safeWaitHandle = null;
+			this.waitHandle = WaitHandle.InvalidHandle;
+			this.hasThreadAffinity = false;
 		}
 
-		public static bool WaitAll(WaitHandle[] waitHandles)
-		{
-			WaitHandle.CheckArray(waitHandles, true);
-			return WaitHandle.WaitAll_internal(waitHandles, -1, false);
-		}
-
-		public static bool WaitAll(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext)
-		{
-			WaitHandle.CheckArray(waitHandles, true);
-			if (millisecondsTimeout < -1)
-			{
-				throw new ArgumentOutOfRangeException("millisecondsTimeout");
-			}
-			bool flag;
-			try
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.ExitContext();
-				}
-				flag = WaitHandle.WaitAll_internal(waitHandles, millisecondsTimeout, false);
-			}
-			finally
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.EnterContext();
-				}
-			}
-			return flag;
-		}
-
-		public static bool WaitAll(WaitHandle[] waitHandles, TimeSpan timeout, bool exitContext)
-		{
-			WaitHandle.CheckArray(waitHandles, true);
-			long num = (long)timeout.TotalMilliseconds;
-			if (num < -1L || num > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("timeout");
-			}
-			bool flag;
-			try
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.ExitContext();
-				}
-				flag = WaitHandle.WaitAll_internal(waitHandles, (int)num, exitContext);
-			}
-			finally
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.EnterContext();
-				}
-			}
-			return flag;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int WaitAny_internal(WaitHandle[] handles, int ms, bool exitContext);
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int WaitAny(WaitHandle[] waitHandles)
-		{
-			WaitHandle.CheckArray(waitHandles, false);
-			return WaitHandle.WaitAny_internal(waitHandles, -1, false);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int WaitAny(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext)
-		{
-			WaitHandle.CheckArray(waitHandles, false);
-			if (millisecondsTimeout < -1)
-			{
-				throw new ArgumentOutOfRangeException("millisecondsTimeout");
-			}
-			int num;
-			try
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.ExitContext();
-				}
-				num = WaitHandle.WaitAny_internal(waitHandles, millisecondsTimeout, exitContext);
-			}
-			finally
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.EnterContext();
-				}
-			}
-			return num;
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int WaitAny(WaitHandle[] waitHandles, TimeSpan timeout)
-		{
-			return WaitHandle.WaitAny(waitHandles, timeout, false);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int WaitAny(WaitHandle[] waitHandles, int millisecondsTimeout)
-		{
-			return WaitHandle.WaitAny(waitHandles, millisecondsTimeout, false);
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public static int WaitAny(WaitHandle[] waitHandles, TimeSpan timeout, bool exitContext)
-		{
-			WaitHandle.CheckArray(waitHandles, false);
-			long num = (long)timeout.TotalMilliseconds;
-			if (num < -1L || num > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("timeout");
-			}
-			int num2;
-			try
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.ExitContext();
-				}
-				num2 = WaitHandle.WaitAny_internal(waitHandles, (int)num, exitContext);
-			}
-			finally
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.EnterContext();
-				}
-			}
-			return num2;
-		}
-
-		public virtual void Close()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		[Obsolete("In the profiles > 2.x, use SafeHandle instead of Handle")]
+		[Obsolete("Use the SafeWaitHandle property instead.")]
 		public virtual IntPtr Handle
 		{
+			[SecuritySafeCritical]
 			get
 			{
-				return this.safe_wait_handle.DangerousGetHandle();
+				if (this.safeWaitHandle != null)
+				{
+					return this.safeWaitHandle.DangerousGetHandle();
+				}
+				return WaitHandle.InvalidHandle;
 			}
-			[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
-			[PermissionSet(SecurityAction.InheritanceDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
+			[SecurityCritical]
+			[SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
 				if (value == WaitHandle.InvalidHandle)
 				{
-					this.safe_wait_handle = new SafeWaitHandle(WaitHandle.InvalidHandle, false);
+					if (this.safeWaitHandle != null)
+					{
+						this.safeWaitHandle.SetHandleAsInvalid();
+						this.safeWaitHandle = null;
+					}
 				}
 				else
 				{
-					this.safe_wait_handle = new SafeWaitHandle(value, true);
+					this.safeWaitHandle = new SafeWaitHandle(value, true);
 				}
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool WaitOne_internal(IntPtr handle, int ms, bool exitContext);
-
-		protected virtual void Dispose(bool explicitDisposing)
-		{
-			if (!this.disposed)
-			{
-				this.disposed = true;
-				if (this.safe_wait_handle == null)
-				{
-					return;
-				}
-				lock (this)
-				{
-					if (this.safe_wait_handle != null)
-					{
-						this.safe_wait_handle.Dispose();
-					}
-				}
+				this.waitHandle = value;
 			}
 		}
 
 		public SafeWaitHandle SafeWaitHandle
 		{
+			[SecurityCritical]
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+			[SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			get
 			{
-				return this.safe_wait_handle;
+				if (this.safeWaitHandle == null)
+				{
+					this.safeWaitHandle = new SafeWaitHandle(WaitHandle.InvalidHandle, false);
+				}
+				return this.safeWaitHandle;
 			}
+			[SecurityCritical]
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+			[SecurityPermission(SecurityAction.InheritanceDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
-				if (value == null)
+				RuntimeHelpers.PrepareConstrainedRegions();
+				try
 				{
-					this.safe_wait_handle = new SafeWaitHandle(WaitHandle.InvalidHandle, false);
 				}
-				else
+				finally
 				{
-					this.safe_wait_handle = value;
-				}
-			}
-		}
-
-		public static bool SignalAndWait(WaitHandle toSignal, WaitHandle toWaitOn)
-		{
-			return WaitHandle.SignalAndWait(toSignal, toWaitOn, -1, false);
-		}
-
-		public static bool SignalAndWait(WaitHandle toSignal, WaitHandle toWaitOn, int millisecondsTimeout, bool exitContext)
-		{
-			if (toSignal == null)
-			{
-				throw new ArgumentNullException("toSignal");
-			}
-			if (toWaitOn == null)
-			{
-				throw new ArgumentNullException("toWaitOn");
-			}
-			if (millisecondsTimeout < -1)
-			{
-				throw new ArgumentOutOfRangeException("millisecondsTimeout");
-			}
-			return WaitHandle.SignalAndWait_Internal(toSignal.Handle, toWaitOn.Handle, millisecondsTimeout, exitContext);
-		}
-
-		public static bool SignalAndWait(WaitHandle toSignal, WaitHandle toWaitOn, TimeSpan timeout, bool exitContext)
-		{
-			double totalMilliseconds = timeout.TotalMilliseconds;
-			if (totalMilliseconds > 2147483647.0)
-			{
-				throw new ArgumentOutOfRangeException("timeout");
-			}
-			return WaitHandle.SignalAndWait(toSignal, toWaitOn, Convert.ToInt32(totalMilliseconds), false);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SignalAndWait_Internal(IntPtr toSignal, IntPtr toWaitOn, int ms, bool exitContext);
-
-		public virtual bool WaitOne()
-		{
-			this.CheckDisposed();
-			bool flag = false;
-			bool flag2;
-			try
-			{
-				this.safe_wait_handle.DangerousAddRef(ref flag);
-				flag2 = this.WaitOne_internal(this.safe_wait_handle.DangerousGetHandle(), -1, false);
-			}
-			finally
-			{
-				if (flag)
-				{
-					this.safe_wait_handle.DangerousRelease();
+					if (value == null)
+					{
+						this.safeWaitHandle = null;
+						this.waitHandle = WaitHandle.InvalidHandle;
+					}
+					else
+					{
+						this.safeWaitHandle = value;
+						this.waitHandle = this.safeWaitHandle.DangerousGetHandle();
+					}
 				}
 			}
-			return flag2;
+		}
+
+		[SecurityCritical]
+		internal void SetHandleInternal(SafeWaitHandle handle)
+		{
+			this.safeWaitHandle = handle;
+			this.waitHandle = handle.DangerousGetHandle();
 		}
 
 		public virtual bool WaitOne(int millisecondsTimeout, bool exitContext)
 		{
-			this.CheckDisposed();
 			if (millisecondsTimeout < -1)
 			{
-				throw new ArgumentOutOfRangeException("millisecondsTimeout");
+				throw new ArgumentOutOfRangeException("millisecondsTimeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
 			}
-			bool flag = false;
-			bool flag2;
-			try
+			return this.WaitOne((long)millisecondsTimeout, exitContext);
+		}
+
+		public virtual bool WaitOne(TimeSpan timeout, bool exitContext)
+		{
+			long num = (long)timeout.TotalMilliseconds;
+			if (-1L > num || 2147483647L < num)
 			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.ExitContext();
-				}
-				this.safe_wait_handle.DangerousAddRef(ref flag);
-				flag2 = this.WaitOne_internal(this.safe_wait_handle.DangerousGetHandle(), millisecondsTimeout, exitContext);
+				throw new ArgumentOutOfRangeException("timeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
 			}
-			finally
-			{
-				if (exitContext)
-				{
-					SynchronizationAttribute.EnterContext();
-				}
-				if (flag)
-				{
-					this.safe_wait_handle.DangerousRelease();
-				}
-			}
-			return flag2;
+			return this.WaitOne(num, exitContext);
+		}
+
+		public virtual bool WaitOne()
+		{
+			return this.WaitOne(-1, false);
 		}
 
 		public virtual bool WaitOne(int millisecondsTimeout)
@@ -348,68 +138,407 @@ namespace System.Threading
 			return this.WaitOne(timeout, false);
 		}
 
-		public virtual bool WaitOne(TimeSpan timeout, bool exitContext)
+		[SecuritySafeCritical]
+		private bool WaitOne(long timeout, bool exitContext)
 		{
-			this.CheckDisposed();
-			long num = (long)timeout.TotalMilliseconds;
-			if (num < -1L || num > 2147483647L)
+			return WaitHandle.InternalWaitOne(this.safeWaitHandle, timeout, this.hasThreadAffinity, exitContext);
+		}
+
+		[SecurityCritical]
+		internal static bool InternalWaitOne(SafeHandle waitableSafeHandle, long millisecondsTimeout, bool hasThreadAffinity, bool exitContext)
+		{
+			if (waitableSafeHandle == null)
 			{
-				throw new ArgumentOutOfRangeException("timeout");
+				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a disposed object."));
 			}
-			bool flag = false;
-			bool flag2;
+			int num = WaitHandle.WaitOneNative(waitableSafeHandle, (uint)millisecondsTimeout, hasThreadAffinity, exitContext);
+			if (num == 128)
+			{
+				WaitHandle.ThrowAbandonedMutexException();
+			}
+			return num != 258 && num != int.MaxValue;
+		}
+
+		[SecurityCritical]
+		internal bool WaitOneWithoutFAS()
+		{
+			if (this.safeWaitHandle == null)
+			{
+				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a disposed object."));
+			}
+			long num = -1L;
+			int num2 = WaitHandle.WaitOneNative(this.safeWaitHandle, (uint)num, this.hasThreadAffinity, false);
+			if (num2 == 128)
+			{
+				WaitHandle.ThrowAbandonedMutexException();
+			}
+			return num2 != 258 && num2 != int.MaxValue;
+		}
+
+		[SecuritySafeCritical]
+		public static bool WaitAll(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext)
+		{
+			if (waitHandles == null)
+			{
+				throw new ArgumentNullException(Environment.GetResourceString("The waitHandles parameter cannot be null."));
+			}
+			if (waitHandles.Length == 0)
+			{
+				throw new ArgumentNullException(Environment.GetResourceString("Waithandle array may not be empty."));
+			}
+			if (waitHandles.Length > 64)
+			{
+				throw new NotSupportedException(Environment.GetResourceString("The number of WaitHandles must be less than or equal to 64."));
+			}
+			if (-1 > millisecondsTimeout)
+			{
+				throw new ArgumentOutOfRangeException("millisecondsTimeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
+			}
+			WaitHandle[] array = new WaitHandle[waitHandles.Length];
+			for (int i = 0; i < waitHandles.Length; i++)
+			{
+				WaitHandle waitHandle = waitHandles[i];
+				if (waitHandle == null)
+				{
+					throw new ArgumentNullException(Environment.GetResourceString("At least one element in the specified array was null."));
+				}
+				if (RemotingServices.IsTransparentProxy(waitHandle))
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Cannot wait on a transparent proxy."));
+				}
+				array[i] = waitHandle;
+			}
+			int num = WaitHandle.WaitMultiple(array, millisecondsTimeout, exitContext, true);
+			if (128 <= num && 128 + array.Length > num)
+			{
+				WaitHandle.ThrowAbandonedMutexException();
+			}
+			GC.KeepAlive(array);
+			return num != 258 && num != int.MaxValue;
+		}
+
+		public static bool WaitAll(WaitHandle[] waitHandles, TimeSpan timeout, bool exitContext)
+		{
+			long num = (long)timeout.TotalMilliseconds;
+			if (-1L > num || 2147483647L < num)
+			{
+				throw new ArgumentOutOfRangeException("timeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
+			}
+			return WaitHandle.WaitAll(waitHandles, (int)num, exitContext);
+		}
+
+		public static bool WaitAll(WaitHandle[] waitHandles)
+		{
+			return WaitHandle.WaitAll(waitHandles, -1, true);
+		}
+
+		public static bool WaitAll(WaitHandle[] waitHandles, int millisecondsTimeout)
+		{
+			return WaitHandle.WaitAll(waitHandles, millisecondsTimeout, true);
+		}
+
+		public static bool WaitAll(WaitHandle[] waitHandles, TimeSpan timeout)
+		{
+			return WaitHandle.WaitAll(waitHandles, timeout, true);
+		}
+
+		[SecuritySafeCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		public static int WaitAny(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext)
+		{
+			if (waitHandles == null)
+			{
+				throw new ArgumentNullException(Environment.GetResourceString("The waitHandles parameter cannot be null."));
+			}
+			if (waitHandles.Length == 0)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Waithandle array may not be empty."));
+			}
+			if (64 < waitHandles.Length)
+			{
+				throw new NotSupportedException(Environment.GetResourceString("The number of WaitHandles must be less than or equal to 64."));
+			}
+			if (-1 > millisecondsTimeout)
+			{
+				throw new ArgumentOutOfRangeException("millisecondsTimeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
+			}
+			WaitHandle[] array = new WaitHandle[waitHandles.Length];
+			for (int i = 0; i < waitHandles.Length; i++)
+			{
+				WaitHandle waitHandle = waitHandles[i];
+				if (waitHandle == null)
+				{
+					throw new ArgumentNullException(Environment.GetResourceString("At least one element in the specified array was null."));
+				}
+				if (RemotingServices.IsTransparentProxy(waitHandle))
+				{
+					throw new InvalidOperationException(Environment.GetResourceString("Cannot wait on a transparent proxy."));
+				}
+				array[i] = waitHandle;
+			}
+			int num = WaitHandle.WaitMultiple(array, millisecondsTimeout, exitContext, false);
+			if (128 <= num && 128 + array.Length > num)
+			{
+				int num2 = num - 128;
+				if (0 <= num2 && num2 < array.Length)
+				{
+					WaitHandle.ThrowAbandonedMutexException(num2, array[num2]);
+				}
+				else
+				{
+					WaitHandle.ThrowAbandonedMutexException();
+				}
+			}
+			GC.KeepAlive(array);
+			return num;
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		public static int WaitAny(WaitHandle[] waitHandles, TimeSpan timeout, bool exitContext)
+		{
+			long num = (long)timeout.TotalMilliseconds;
+			if (-1L > num || 2147483647L < num)
+			{
+				throw new ArgumentOutOfRangeException("timeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
+			}
+			return WaitHandle.WaitAny(waitHandles, (int)num, exitContext);
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		public static int WaitAny(WaitHandle[] waitHandles, TimeSpan timeout)
+		{
+			return WaitHandle.WaitAny(waitHandles, timeout, true);
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		public static int WaitAny(WaitHandle[] waitHandles)
+		{
+			return WaitHandle.WaitAny(waitHandles, -1, true);
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		public static int WaitAny(WaitHandle[] waitHandles, int millisecondsTimeout)
+		{
+			return WaitHandle.WaitAny(waitHandles, millisecondsTimeout, true);
+		}
+
+		public static bool SignalAndWait(WaitHandle toSignal, WaitHandle toWaitOn)
+		{
+			return WaitHandle.SignalAndWait(toSignal, toWaitOn, -1, false);
+		}
+
+		public static bool SignalAndWait(WaitHandle toSignal, WaitHandle toWaitOn, TimeSpan timeout, bool exitContext)
+		{
+			long num = (long)timeout.TotalMilliseconds;
+			if (-1L > num || 2147483647L < num)
+			{
+				throw new ArgumentOutOfRangeException("timeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
+			}
+			return WaitHandle.SignalAndWait(toSignal, toWaitOn, (int)num, exitContext);
+		}
+
+		[SecuritySafeCritical]
+		public static bool SignalAndWait(WaitHandle toSignal, WaitHandle toWaitOn, int millisecondsTimeout, bool exitContext)
+		{
+			if (toSignal == null)
+			{
+				throw new ArgumentNullException("toSignal");
+			}
+			if (toWaitOn == null)
+			{
+				throw new ArgumentNullException("toWaitOn");
+			}
+			if (-1 > millisecondsTimeout)
+			{
+				throw new ArgumentOutOfRangeException("millisecondsTimeout", Environment.GetResourceString("Number must be either non-negative and less than or equal to Int32.MaxValue or -1."));
+			}
+			int num = WaitHandle.SignalAndWaitOne(toSignal.safeWaitHandle, toWaitOn.safeWaitHandle, millisecondsTimeout, toWaitOn.hasThreadAffinity, exitContext);
+			if (2147483647 != num && toSignal.hasThreadAffinity)
+			{
+				Thread.EndCriticalRegion();
+				Thread.EndThreadAffinity();
+			}
+			if (128 == num)
+			{
+				WaitHandle.ThrowAbandonedMutexException();
+			}
+			if (298 == num)
+			{
+				throw new InvalidOperationException(Environment.GetResourceString("The WaitHandle cannot be signaled because it would exceed its maximum count."));
+			}
+			return num == 0;
+		}
+
+		private static void ThrowAbandonedMutexException()
+		{
+			throw new AbandonedMutexException();
+		}
+
+		private static void ThrowAbandonedMutexException(int location, WaitHandle handle)
+		{
+			throw new AbandonedMutexException(location, handle);
+		}
+
+		public virtual void Close()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		[SecuritySafeCritical]
+		protected virtual void Dispose(bool explicitDisposing)
+		{
+			if (this.safeWaitHandle != null)
+			{
+				this.safeWaitHandle.Close();
+			}
+		}
+
+		public void Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		private unsafe static int WaitMultiple(WaitHandle[] waitHandles, int millisecondsTimeout, bool exitContext, bool WaitAll)
+		{
+			if (waitHandles.Length > 64)
+			{
+				return int.MaxValue;
+			}
+			int num = -1;
+			int num2;
 			try
 			{
 				if (exitContext)
 				{
 					SynchronizationAttribute.ExitContext();
 				}
-				this.safe_wait_handle.DangerousAddRef(ref flag);
-				flag2 = this.WaitOne_internal(this.safe_wait_handle.DangerousGetHandle(), (int)num, exitContext);
+				for (int i = 0; i < waitHandles.Length; i++)
+				{
+					try
+					{
+					}
+					finally
+					{
+						bool flag = false;
+						waitHandles[i].SafeWaitHandle.DangerousAddRef(ref flag);
+						num = i;
+					}
+				}
+				IntPtr* ptr;
+				checked
+				{
+					ptr = stackalloc IntPtr[unchecked((UIntPtr)waitHandles.Length) * (UIntPtr)sizeof(IntPtr)];
+				}
+				for (int j = 0; j < waitHandles.Length; j++)
+				{
+					ptr[j] = waitHandles[j].SafeWaitHandle.DangerousGetHandle();
+				}
+				num2 = WaitHandle.Wait_internal(ptr, waitHandles.Length, WaitAll, millisecondsTimeout);
 			}
 			finally
 			{
+				for (int k = num; k >= 0; k--)
+				{
+					waitHandles[k].SafeWaitHandle.DangerousRelease();
+				}
 				if (exitContext)
 				{
 					SynchronizationAttribute.EnterContext();
 				}
+			}
+			return num2;
+		}
+
+		private unsafe static int WaitOneNative(SafeHandle waitableSafeHandle, uint millisecondsTimeout, bool hasThreadAffinity, bool exitContext)
+		{
+			bool flag = false;
+			int num;
+			try
+			{
+				if (exitContext)
+				{
+					SynchronizationAttribute.ExitContext();
+				}
+				waitableSafeHandle.DangerousAddRef(ref flag);
+				IntPtr intPtr = waitableSafeHandle.DangerousGetHandle();
+				num = WaitHandle.Wait_internal(&intPtr, 1, false, (int)millisecondsTimeout);
+			}
+			finally
+			{
 				if (flag)
 				{
-					this.safe_wait_handle.DangerousRelease();
+					waitableSafeHandle.DangerousRelease();
+				}
+				if (exitContext)
+				{
+					SynchronizationAttribute.EnterContext();
 				}
 			}
-			return flag2;
+			return num;
 		}
 
-		internal void CheckDisposed()
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern int Wait_internal(IntPtr* handles, int numHandles, bool waitAll, int ms);
+
+		private static int SignalAndWaitOne(SafeWaitHandle waitHandleToSignal, SafeWaitHandle waitHandleToWaitOn, int millisecondsTimeout, bool hasThreadAffinity, bool exitContext)
 		{
-			if (this.disposed || this.safe_wait_handle == null)
+			bool flag = false;
+			bool flag2 = false;
+			int num;
+			try
 			{
-				throw new ObjectDisposedException(base.GetType().FullName);
+				waitHandleToSignal.DangerousAddRef(ref flag);
+				waitHandleToWaitOn.DangerousAddRef(ref flag2);
+				num = WaitHandle.SignalAndWait_Internal(waitHandleToSignal.DangerousGetHandle(), waitHandleToWaitOn.DangerousGetHandle(), millisecondsTimeout);
 			}
+			finally
+			{
+				if (flag)
+				{
+					waitHandleToSignal.DangerousRelease();
+				}
+				if (flag2)
+				{
+					waitHandleToWaitOn.DangerousRelease();
+				}
+			}
+			return num;
 		}
 
-		public static bool WaitAll(WaitHandle[] waitHandles, int millisecondsTimeout)
-		{
-			return WaitHandle.WaitAll(waitHandles, millisecondsTimeout, false);
-		}
-
-		public static bool WaitAll(WaitHandle[] waitHandles, TimeSpan timeout)
-		{
-			return WaitHandle.WaitAll(waitHandles, timeout, false);
-		}
-
-		~WaitHandle()
-		{
-			this.Dispose(false);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int SignalAndWait_Internal(IntPtr toSignal, IntPtr toWaitOn, int ms);
 
 		public const int WaitTimeout = 258;
 
-		private SafeWaitHandle safe_wait_handle;
+		private const int MAX_WAITHANDLES = 64;
+
+		private IntPtr waitHandle;
+
+		[SecurityCritical]
+		internal volatile SafeWaitHandle safeWaitHandle;
+
+		internal bool hasThreadAffinity;
+
+		private const int WAIT_OBJECT_0 = 0;
+
+		private const int WAIT_ABANDONED = 128;
+
+		private const int WAIT_FAILED = 2147483647;
+
+		private const int ERROR_TOO_MANY_POSTS = 298;
 
 		protected static readonly IntPtr InvalidHandle = (IntPtr)(-1);
 
-		private bool disposed;
+		internal const int MaxWaitHandles = 64;
+
+		internal enum OpenExistingResult
+		{
+			Success,
+			NameNotFound,
+			PathNotFound,
+			NameInvalid
+		}
 	}
 }

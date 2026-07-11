@@ -10,19 +10,23 @@ namespace System.Security.AccessControl
 			this.owner = owner;
 		}
 
+		public GenericAce Current
+		{
+			get
+			{
+				if (this.current >= 0)
+				{
+					return this.owner[this.current];
+				}
+				return null;
+			}
+		}
+
 		object IEnumerator.Current
 		{
 			get
 			{
 				return this.Current;
-			}
-		}
-
-		public GenericAce Current
-		{
-			get
-			{
-				return (this.current >= 0) ? this.owner[this.current] : null;
 			}
 		}
 

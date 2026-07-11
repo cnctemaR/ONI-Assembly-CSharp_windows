@@ -9,8 +9,8 @@ namespace System.Xml
 
 		void StartFragment(Stream stream, bool generateSelfContainedTextFragment);
 
-		void WriteFragment(byte[] buffer, int offset, int count);
-
 		void EndFragment();
+
+		void WriteFragment(byte[] buffer, int offset, int count);
 	}
 }

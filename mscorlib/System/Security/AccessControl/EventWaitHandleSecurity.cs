@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 namespace System.Security.AccessControl
@@ -6,8 +7,13 @@ namespace System.Security.AccessControl
 	public sealed class EventWaitHandleSecurity : NativeObjectSecurity
 	{
 		public EventWaitHandleSecurity()
+			: base(false, ResourceType.KernelObject)
 		{
-			throw new NotImplementedException();
+		}
+
+		internal EventWaitHandleSecurity(SafeHandle handle, AccessControlSections includeSections)
+			: base(false, ResourceType.KernelObject, handle, includeSections)
+		{
 		}
 
 		public override Type AccessRightType
@@ -39,40 +45,34 @@ namespace System.Security.AccessControl
 			return new EventWaitHandleAccessRule(identityReference, (EventWaitHandleRights)accessMask, type);
 		}
 
-		[MonoTODO]
 		public void AddAccessRule(EventWaitHandleAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.AddAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public bool RemoveAccessRule(EventWaitHandleAccessRule rule)
 		{
-			throw new NotImplementedException();
+			return base.RemoveAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAccessRuleAll(EventWaitHandleAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleAll(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAccessRuleSpecific(EventWaitHandleAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAccessRuleSpecific(rule);
 		}
 
-		[MonoTODO]
 		public void ResetAccessRule(EventWaitHandleAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.ResetAccessRule(rule);
 		}
 
-		[MonoTODO]
 		public void SetAccessRule(EventWaitHandleAccessRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAccessRule(rule);
 		}
 
 		public override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
@@ -80,34 +80,34 @@ namespace System.Security.AccessControl
 			return new EventWaitHandleAuditRule(identityReference, (EventWaitHandleRights)accessMask, flags);
 		}
 
-		[MonoTODO]
 		public void AddAuditRule(EventWaitHandleAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.AddAuditRule(rule);
 		}
 
-		[MonoTODO]
 		public bool RemoveAuditRule(EventWaitHandleAuditRule rule)
 		{
-			throw new NotImplementedException();
+			return base.RemoveAuditRule(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAuditRuleAll(EventWaitHandleAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAuditRuleAll(rule);
 		}
 
-		[MonoTODO]
 		public void RemoveAuditRuleSpecific(EventWaitHandleAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.RemoveAuditRuleSpecific(rule);
 		}
 
-		[MonoTODO]
 		public void SetAuditRule(EventWaitHandleAuditRule rule)
 		{
-			throw new NotImplementedException();
+			base.SetAuditRule(rule);
+		}
+
+		internal void Persist(SafeHandle handle)
+		{
+			base.PersistModifications(handle);
 		}
 	}
 }

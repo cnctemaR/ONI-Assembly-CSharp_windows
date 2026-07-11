@@ -16,11 +16,6 @@ namespace System.Security.Permissions
 			CodeAccessPermission.CheckPermissionState(state, false);
 		}
 
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 15;
-		}
-
 		public override IPermission Copy()
 		{
 			return new GacIdentityPermission();
@@ -37,8 +32,7 @@ namespace System.Security.Permissions
 
 		public override bool IsSubsetOf(IPermission target)
 		{
-			GacIdentityPermission gacIdentityPermission = this.Cast(target);
-			return gacIdentityPermission != null;
+			return this.Cast(target) != null;
 		}
 
 		public override IPermission Union(IPermission target)
@@ -55,6 +49,11 @@ namespace System.Security.Permissions
 		public override SecurityElement ToXml()
 		{
 			return base.Element(1);
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 15;
 		}
 
 		private GacIdentityPermission Cast(IPermission target)

@@ -58,7 +58,7 @@ namespace UnityEngine.UI
 		protected override void OnEnable()
 		{
 			base.OnEnable();
-			this.SetDirty();
+			this.m_DelayedSetDirty = true;
 		}
 
 		protected override void OnDisable()
@@ -66,6 +66,15 @@ namespace UnityEngine.UI
 			this.m_Tracker.Clear();
 			LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
 			base.OnDisable();
+		}
+
+		protected virtual void Update()
+		{
+			if (this.m_DelayedSetDirty)
+			{
+				this.m_DelayedSetDirty = false;
+				this.SetDirty();
+			}
 		}
 
 		protected override void OnRectTransformDimensionsChange()
@@ -153,6 +162,8 @@ namespace UnityEngine.UI
 
 		[NonSerialized]
 		private RectTransform m_Rect;
+
+		private bool m_DelayedSetDirty = false;
 
 		private DrivenRectTransformTracker m_Tracker;
 

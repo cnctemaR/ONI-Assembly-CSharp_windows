@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
@@ -9,9 +9,10 @@ using System.Text;
 
 namespace System.Reflection.Emit
 {
-	[ComDefaultInterface(typeof(_MethodBuilder))]
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_MethodBuilder))]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class MethodBuilder : MethodInfo, _MethodBuilder
 	{
 		internal MethodBuilder(TypeBuilder tb, string name, MethodAttributes attributes, CallingConventions callingConvention, Type returnType, Type[] returnModReq, Type[] returnModOpt, Type[] parameterTypes, Type[][] paramModReq, Type[][] paramModOpt)
@@ -54,26 +55,6 @@ namespace System.Reflection.Emit
 			this.charset = nativeCharset;
 		}
 
-		void _MethodBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _MethodBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _MethodBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _MethodBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
 		public override bool ContainsGenericParameters
 		{
 			get
@@ -107,6 +88,14 @@ namespace System.Reflection.Emit
 			get
 			{
 				throw this.NotSupported();
+			}
+		}
+
+		internal RuntimeMethodHandle MethodHandleInternal
+		{
+			get
+			{
+				return this.mhandle;
 			}
 		}
 
@@ -179,7 +168,7 @@ namespace System.Reflection.Emit
 		{
 			set
 			{
-				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709551567UL) | ((!value) ? 32UL : 16UL));
+				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709551567UL) | (value ? 16UL : 32UL));
 			}
 		}
 
@@ -187,7 +176,7 @@ namespace System.Reflection.Emit
 		{
 			set
 			{
-				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709539327UL) | ((!value) ? 8192UL : 4096UL));
+				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709539327UL) | (value ? 4096UL : 8192UL));
 			}
 		}
 
@@ -195,7 +184,7 @@ namespace System.Reflection.Emit
 		{
 			set
 			{
-				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709551614UL) | ((!value) ? 0UL : 1UL));
+				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709551614UL) | (value ? 1UL : 0UL));
 			}
 		}
 
@@ -203,7 +192,7 @@ namespace System.Reflection.Emit
 		{
 			set
 			{
-				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709551551UL) | ((!value) ? 0UL : 64UL));
+				this.extra_flags = (uint)(((ulong)this.extra_flags & 18446744073709551551UL) | (value ? 64UL : 0UL));
 			}
 		}
 
@@ -228,6 +217,11 @@ namespace System.Reflection.Emit
 			{
 				throw this.NotSupported();
 			}
+			return this.GetParametersInternal();
+		}
+
+		internal override ParameterInfo[] GetParametersInternal()
+		{
 			if (this.parameters == null)
 			{
 				return null;
@@ -235,18 +229,28 @@ namespace System.Reflection.Emit
 			ParameterInfo[] array = new ParameterInfo[this.parameters.Length];
 			for (int i = 0; i < this.parameters.Length; i++)
 			{
-				array[i] = new ParameterInfo((this.pinfo != null) ? this.pinfo[i + 1] : null, this.parameters[i], this, i + 1);
+				array[i] = ParameterInfo.New((this.pinfo == null) ? null : this.pinfo[i + 1], this.parameters[i], this, i + 1);
 			}
 			return array;
 		}
 
-		internal override int GetParameterCount()
+		internal override int GetParametersCount()
 		{
 			if (this.parameters == null)
 			{
 				return 0;
 			}
 			return this.parameters.Length;
+		}
+
+		internal override Type GetParameterType(int pos)
+		{
+			return this.parameters[pos];
+		}
+
+		internal MethodBase RuntimeResolve()
+		{
+			return this.type.RuntimeResolve().GetMethod(this);
 		}
 
 		public Module GetModule()
@@ -267,12 +271,15 @@ namespace System.Reflection.Emit
 			if (il == null)
 			{
 				this.code = null;
+				return;
 			}
-			else
-			{
-				this.code = new byte[count];
-				Array.Copy(il, this.code, count);
-			}
+			this.code = new byte[count];
+			Array.Copy(il, this.code, count);
+		}
+
+		public void SetMethodBody(byte[] il, int maxStack, byte[] localSignature, IEnumerable<ExceptionHandler> exceptionHandlers, IEnumerable<int> tokenFixups)
+		{
+			this.GetILGenerator().Init(il, maxStack, localSignature, exceptionHandlers, tokenFixups);
 		}
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
@@ -325,7 +332,7 @@ namespace System.Reflection.Emit
 		public ParameterBuilder DefineParameter(int position, ParameterAttributes attributes, string strParamName)
 		{
 			this.RejectIfCreated();
-			if (position < 0 || position > this.parameters.Length)
+			if (position < 0 || this.parameters == null || position > this.parameters.Length)
 			{
 				throw new ArgumentOutOfRangeException("position");
 			}
@@ -340,21 +347,59 @@ namespace System.Reflection.Emit
 
 		internal void check_override()
 		{
-			if (this.override_method != null && this.override_method.IsVirtual && !this.IsVirtual)
+			if (this.override_methods != null)
 			{
-				throw new TypeLoadException(string.Format("Method '{0}' override '{1}' but it is not virtual", this.name, this.override_method));
+				foreach (MethodInfo methodInfo in this.override_methods)
+				{
+					if (methodInfo.IsVirtual && !base.IsVirtual)
+					{
+						throw new TypeLoadException(string.Format("Method '{0}' override '{1}' but it is not virtual", this.name, methodInfo));
+					}
+				}
 			}
 		}
 
 		internal void fixup()
 		{
-			if ((this.attrs & (MethodAttributes.Abstract | MethodAttributes.PinvokeImpl)) == MethodAttributes.PrivateScope && (this.iattrs & (MethodImplAttributes)4099) == MethodImplAttributes.IL && (this.ilgen == null || ILGenerator.Mono_GetCurrentOffset(this.ilgen) == 0) && (this.code == null || this.code.Length == 0))
+			if ((this.attrs & (MethodAttributes.Abstract | MethodAttributes.PinvokeImpl)) == MethodAttributes.PrivateScope && (this.iattrs & (MethodImplAttributes)4099) == MethodImplAttributes.IL && (this.ilgen == null || this.ilgen.ILOffset == 0) && (this.code == null || this.code.Length == 0))
 			{
 				throw new InvalidOperationException(string.Format("Method '{0}.{1}' does not have a method body.", this.DeclaringType.FullName, this.Name));
 			}
 			if (this.ilgen != null)
 			{
-				this.ilgen.label_fixup();
+				this.ilgen.label_fixup(this);
+			}
+		}
+
+		internal void ResolveUserTypes()
+		{
+			this.rtype = TypeBuilder.ResolveUserType(this.rtype);
+			TypeBuilder.ResolveUserTypes(this.parameters);
+			TypeBuilder.ResolveUserTypes(this.returnModReq);
+			TypeBuilder.ResolveUserTypes(this.returnModOpt);
+			if (this.paramModReq != null)
+			{
+				Type[][] array = this.paramModReq;
+				for (int i = 0; i < array.Length; i++)
+				{
+					TypeBuilder.ResolveUserTypes(array[i]);
+				}
+			}
+			if (this.paramModOpt != null)
+			{
+				Type[][] array = this.paramModOpt;
+				for (int i = 0; i < array.Length; i++)
+				{
+					TypeBuilder.ResolveUserTypes(array[i]);
+				}
+			}
+		}
+
+		internal void FixupTokens(Dictionary<int, int> token_map, Dictionary<int, MemberInfo> member_map)
+		{
+			if (this.ilgen != null)
+			{
+				this.ilgen.FixupTokens(token_map, member_map);
 			}
 		}
 
@@ -377,17 +422,43 @@ namespace System.Reflection.Emit
 				throw new ArgumentNullException("customBuilder");
 			}
 			string fullName = customBuilder.Ctor.ReflectedType.FullName;
-			switch (fullName)
-			{
-			case "System.Runtime.CompilerServices.MethodImplAttribute":
+			if (fullName == "System.Runtime.CompilerServices.MethodImplAttribute")
 			{
 				byte[] data = customBuilder.Data;
-				int num2 = (int)data[2];
-				num2 |= (int)data[3] << 8;
-				this.iattrs |= (MethodImplAttributes)num2;
+				int num = (int)data[2];
+				num |= (int)data[3] << 8;
+				this.iattrs |= (MethodImplAttributes)num;
 				return;
 			}
-			case "System.Runtime.InteropServices.DllImportAttribute":
+			if (!(fullName == "System.Runtime.InteropServices.DllImportAttribute"))
+			{
+				if (fullName == "System.Runtime.InteropServices.PreserveSigAttribute")
+				{
+					this.iattrs |= MethodImplAttributes.PreserveSig;
+					return;
+				}
+				if (fullName == "System.Runtime.CompilerServices.SpecialNameAttribute")
+				{
+					this.attrs |= MethodAttributes.SpecialName;
+					return;
+				}
+				if (fullName == "System.Security.SuppressUnmanagedCodeSecurityAttribute")
+				{
+					this.attrs |= MethodAttributes.HasSecurity;
+				}
+				if (this.cattrs != null)
+				{
+					CustomAttributeBuilder[] array = new CustomAttributeBuilder[this.cattrs.Length + 1];
+					this.cattrs.CopyTo(array, 0);
+					array[this.cattrs.Length] = customBuilder;
+					this.cattrs = array;
+					return;
+				}
+				this.cattrs = new CustomAttributeBuilder[1];
+				this.cattrs[0] = customBuilder;
+				return;
+			}
+			else
 			{
 				CustomAttributeBuilder.CustomAttributeInfo customAttributeInfo = CustomAttributeBuilder.decode_cattr(customBuilder);
 				bool flag = true;
@@ -403,11 +474,11 @@ namespace System.Reflection.Emit
 					object obj = customAttributeInfo.namedParamValues[i];
 					if (text == "CallingConvention")
 					{
-						this.native_cc = (CallingConvention)((int)obj);
+						this.native_cc = (CallingConvention)obj;
 					}
 					else if (text == "CharSet")
 					{
-						this.charset = (CharSet)((int)obj);
+						this.charset = (CharSet)obj;
 					}
 					else if (text == "EntryPoint")
 					{
@@ -440,28 +511,6 @@ namespace System.Reflection.Emit
 					this.iattrs |= MethodImplAttributes.PreserveSig;
 				}
 				return;
-			}
-			case "System.Runtime.InteropServices.PreserveSigAttribute":
-				this.iattrs |= MethodImplAttributes.PreserveSig;
-				return;
-			case "System.Runtime.CompilerServices.SpecialNameAttribute":
-				this.attrs |= MethodAttributes.SpecialName;
-				return;
-			case "System.Security.SuppressUnmanagedCodeSecurityAttribute":
-				this.attrs |= MethodAttributes.HasSecurity;
-				break;
-			}
-			if (this.cattrs != null)
-			{
-				CustomAttributeBuilder[] array = new CustomAttributeBuilder[this.cattrs.Length + 1];
-				this.cattrs.CopyTo(array, 0);
-				array[this.cattrs.Length] = customBuilder;
-				this.cattrs = array;
-			}
-			else
-			{
-				this.cattrs = new CustomAttributeBuilder[1];
-				this.cattrs[0] = customBuilder;
 			}
 		}
 
@@ -498,9 +547,10 @@ namespace System.Reflection.Emit
 			this.RejectIfCreated();
 			if (this.permissions != null)
 			{
-				foreach (RefEmitPermissionSet refEmitPermissionSet in this.permissions)
+				RefEmitPermissionSet[] array = this.permissions;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (refEmitPermissionSet.action == action)
+					if (array[i].action == action)
 					{
 						throw new InvalidOperationException("Multiple permission sets specified with the same SecurityAction.");
 					}
@@ -559,9 +609,24 @@ namespace System.Reflection.Emit
 			return this.type.get_next_table_index(obj, table, inc);
 		}
 
+		private void ExtendArray<T>(ref T[] array, T elem)
+		{
+			if (array == null)
+			{
+				array = new T[1];
+			}
+			else
+			{
+				T[] array2 = new T[array.Length + 1];
+				Array.Copy(array, array2, array.Length);
+				array = array2;
+			}
+			array[array.Length - 1] = elem;
+		}
+
 		internal void set_override(MethodInfo mdecl)
 		{
-			this.override_method = mdecl;
+			this.ExtendArray<MethodInfo>(ref this.override_methods, mdecl);
 		}
 
 		private void RejectIfCreated()
@@ -577,8 +642,29 @@ namespace System.Reflection.Emit
 			return new NotSupportedException("The invoked member is not supported in a dynamic module.");
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public override extern MethodInfo MakeGenericMethod(params Type[] typeArguments);
+		public override MethodInfo MakeGenericMethod(params Type[] typeArguments)
+		{
+			if (!this.IsGenericMethodDefinition)
+			{
+				throw new InvalidOperationException("Method is not a generic method definition");
+			}
+			if (typeArguments == null)
+			{
+				throw new ArgumentNullException("typeArguments");
+			}
+			if (this.generic_params.Length != typeArguments.Length)
+			{
+				throw new ArgumentException("Incorrect length", "typeArguments");
+			}
+			for (int i = 0; i < typeArguments.Length; i++)
+			{
+				if (typeArguments[i] == null)
+				{
+					throw new ArgumentNullException("typeArguments");
+				}
+			}
+			return new MethodOnTypeBuilderInst(this, typeArguments);
+		}
 
 		public override bool IsGenericMethodDefinition
 		{
@@ -609,7 +695,7 @@ namespace System.Reflection.Emit
 		{
 			if (this.generic_params == null)
 			{
-				return Type.EmptyTypes;
+				return null;
 			}
 			Type[] array = new Type[this.generic_params.Length];
 			for (int i = 0; i < this.generic_params.Length; i++)
@@ -677,7 +763,35 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return base.Module;
+				return this.GetModule();
+			}
+		}
+
+		void _MethodBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _MethodBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override ParameterInfo ReturnParameter
+		{
+			get
+			{
+				return base.ReturnParameter;
 			}
 		}
 
@@ -705,7 +819,7 @@ namespace System.Reflection.Emit
 
 		private CustomAttributeBuilder[] cattrs;
 
-		private MethodInfo override_method;
+		private MethodInfo[] override_methods;
 
 		private string pi_dll;
 

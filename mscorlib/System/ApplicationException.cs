@@ -9,28 +9,26 @@ namespace System
 	public class ApplicationException : Exception
 	{
 		public ApplicationException()
-			: base(Locale.GetText("An application exception has occurred."))
+			: base(Environment.GetResourceString("Error in the application."))
 		{
-			base.HResult = -2146232832;
+			base.SetErrorCode(-2146232832);
 		}
 
 		public ApplicationException(string message)
 			: base(message)
 		{
-			base.HResult = -2146232832;
+			base.SetErrorCode(-2146232832);
 		}
 
 		public ApplicationException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.HResult = -2146232832;
+			base.SetErrorCode(-2146232832);
 		}
 
 		protected ApplicationException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
-
-		private const int Result = -2146232832;
 	}
 }

@@ -27,6 +27,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		{
 			this.requiredTagBits.SetTag(GameTags.Garbage);
 		}
+		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
 		base.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
 		Deconstructable component = base.target.GetComponent<Deconstructable>();
@@ -133,7 +134,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			this.fetchTarget = pickupable;
 			base.driver = driver;
 			this.fetcher = driver.gameObject;
-			this.Succeed("FetchAreaEnd");
+			base.Succeed("FetchAreaEnd");
 		}
 		else
 		{
@@ -245,7 +246,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	private GameScenePartitionerEntry partitionerEntry;
 
-	public static Chore.Precondition IsFetchTargetAvailable = new Chore.Precondition
+	public static readonly Chore.Precondition IsFetchTargetAvailable = new Chore.Precondition
 	{
 		id = "IsFetchTargetAvailable",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_FETCH_TARGET_AVAILABLE,

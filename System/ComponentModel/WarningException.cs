@@ -4,18 +4,28 @@ using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[Serializable]
 	public class WarningException : SystemException
 	{
+		public WarningException()
+			: this(null, null, null)
+		{
+		}
+
 		public WarningException(string message)
-			: base(message)
+			: this(message, null, null)
 		{
 		}
 
 		public WarningException(string message, string helpUrl)
-			: base(message)
+			: this(message, helpUrl, null)
 		{
-			this.helpUrl = helpUrl;
+		}
+
+		public WarningException(string message, Exception innerException)
+			: base(message, innerException)
+		{
 		}
 
 		public WarningException(string message, string helpUrl, string helpTopic)
@@ -25,49 +35,11 @@ namespace System.ComponentModel
 			this.helpTopic = helpTopic;
 		}
 
-		public WarningException()
-			: base(global::Locale.GetText("Warning"))
-		{
-		}
-
-		public WarningException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-		}
-
 		protected WarningException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			try
-			{
-				this.helpTopic = info.GetString("helpTopic");
-				this.helpUrl = info.GetString("helpUrl");
-			}
-			catch (SerializationException)
-			{
-				this.helpTopic = info.GetString("HelpTopic");
-				this.helpUrl = info.GetString("HelpUrl");
-			}
-		}
-
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			base.GetObjectData(info, context);
-			info.AddValue("helpTopic", this.helpTopic);
-			info.AddValue("helpUrl", this.helpUrl);
-		}
-
-		public string HelpTopic
-		{
-			get
-			{
-				return this.helpTopic;
-			}
+			this.helpUrl = (string)info.GetValue("helpUrl", typeof(string));
+			this.helpTopic = (string)info.GetValue("helpTopic", typeof(string));
 		}
 
 		public string HelpUrl
@@ -78,8 +50,28 @@ namespace System.ComponentModel
 			}
 		}
 
-		private string helpUrl;
+		public string HelpTopic
+		{
+			get
+			{
+				return this.helpTopic;
+			}
+		}
 
-		private string helpTopic;
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			info.AddValue("helpUrl", this.helpUrl);
+			info.AddValue("helpTopic", this.helpTopic);
+			base.GetObjectData(info, context);
+		}
+
+		private readonly string helpUrl;
+
+		private readonly string helpTopic;
 	}
 }

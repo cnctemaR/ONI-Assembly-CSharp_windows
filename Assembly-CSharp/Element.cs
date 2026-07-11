@@ -233,6 +233,8 @@ public class Element : IComparable<Element>
 
 	public SpawnFXHashes sublimateFX;
 
+	public float lightAbsorptionFactor;
+
 	public Sim.PhysicsData defaultValues;
 
 	public float toxicity;

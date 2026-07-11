@@ -11,11 +11,6 @@ namespace System.Configuration.Provider
 			this.values = new ArrayList();
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this.values.CopyTo(array, index);
-		}
-
 		public virtual void Add(ProviderBase provider)
 		{
 			if (this.readOnly)
@@ -49,6 +44,11 @@ namespace System.Configuration.Provider
 		}
 
 		public void CopyTo(ProviderBase[] array, int index)
+		{
+			this.values.CopyTo(array, index);
+		}
+
+		void ICollection.CopyTo(Array array, int index)
 		{
 			this.values.CopyTo(array, index);
 		}

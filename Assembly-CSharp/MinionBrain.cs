@@ -19,6 +19,7 @@ public class MinionBrain : Brain
 		this.Navigator.AddMask(new NavigationFeatureMask(base.gameObject));
 		this.Navigator.AddMask(new TravelTubeNavMask(base.gameObject));
 		base.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
+		base.Subscribe(-975551167, new Action<object>(this.OnUnstableGroundImpact));
 	}
 
 	protected override void OnSpawn()
@@ -29,6 +30,7 @@ public class MinionBrain : Brain
 		{
 			this.AddAnimTracker(gameObject);
 		}
+		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
 	}
 
 	private void AnimTrackStoredItem(object data)
@@ -64,7 +66,7 @@ public class MinionBrain : Brain
 		KBatchedAnimTracker component = go.GetComponent<KBatchedAnimTracker>();
 		if (component != null)
 		{
-			global::UnityEngine.Object.DestroyObject(component);
+			global::UnityEngine.Object.Destroy(component);
 		}
 	}
 
@@ -87,6 +89,42 @@ public class MinionBrain : Brain
 				Messenger.Instance.QueueMessage(discoveredSpaceMessage);
 			}
 		}
+	}
+
+	private void RegisterReactEmotePair(string kanim_file_name, float max_trigger_time)
+	{
+		if (base.gameObject == null)
+		{
+			return;
+		}
+		ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
+		if (smi != null)
+		{
+			EmoteChore emoteChore = new EmoteChore(base.gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteIdle, kanim_file_name, new HashedString[] { "react" }, null);
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.gameObject, "GolfClap_React", Db.Get().ChoreTypes.Cough, kanim_file_name, max_trigger_time, 0f, float.PositiveInfinity);
+			emoteChore.PairReactable(selfEmoteReactable);
+			selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
+			{
+				anim = "react"
+			});
+			selfEmoteReactable.PairEmote(emoteChore);
+			smi.AddOneshotReactable(selfEmoteReactable);
+		}
+	}
+
+	private void OnResearchComplete(object data)
+	{
+		this.RegisterReactEmotePair("anim_react_research_complete_kanim", 3f);
+	}
+
+	private void OnUnstableGroundImpact(object data)
+	{
+		this.RegisterReactEmotePair("anim_react_shock_kanim", 1f);
+	}
+
+	protected override void OnCleanUp()
+	{
+		Game.Instance.Unsubscribe(-107300940, new Action<object>(this.OnResearchComplete));
 	}
 
 	[MyCmpReq]

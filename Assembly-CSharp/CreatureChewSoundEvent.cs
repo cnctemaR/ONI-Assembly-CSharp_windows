@@ -12,7 +12,7 @@ public class CreatureChewSoundEvent : SoundEvent
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
 		string sound = GlobalAssets.GetSound(StringFormatter.Combine(base.name, "_", CreatureChewSoundEvent.GetChewSound(behaviour)), false);
-		if (SoundEvent.ShouldPlaySound(behaviour, sound, base.looping, this.isDynamic))
+		if (SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic))
 		{
 			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);

@@ -7,9 +7,9 @@ public class PropLightConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropLight", SETITEMS.LIGHT.NAME, SETITEMS.LIGHT.DESC, 50f, Assets.GetAnim("setpiece_light_kanim"), "off", Grid.SceneLayer.Building, 1, 1, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropLight", global::STRINGS.BUILDINGS.PREFABS.PROPLIGHT.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPLIGHT.DESC, 50f, Assets.GetAnim("setpiece_light_kanim"), "off", Grid.SceneLayer.Building, 1, 1, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Steel);
 		component.Temperature = 294.15f;
 		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
 		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };

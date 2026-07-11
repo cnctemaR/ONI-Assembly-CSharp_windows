@@ -9,6 +9,11 @@ public class WorldDamage : KMonoBehaviour
 {
 	public static WorldDamage Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		WorldDamage.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		WorldDamage.Instance = this;
@@ -101,7 +106,7 @@ public class WorldDamage : KMonoBehaviour
 		float random_delay = global::UnityEngine.Random.value * 0.25f;
 		yield return new WaitForSeconds(random_delay);
 		Vector3 p = Grid.CellToPosCCC(dest_cell, Grid.SceneLayer.Front);
-		GameObject fx = GameUtil.KInstantiate(this.leakEffect.gameObject, p, Grid.SceneLayer.Front, Folder.FX, null, 0);
+		GameObject fx = GameUtil.KInstantiate(this.leakEffect.gameObject, p, Grid.SceneLayer.Front, null, 0);
 		KBatchedAnimController kanim = fx.GetComponent<KBatchedAnimController>();
 		kanim.TintColour = elem.substance.colour;
 		kanim.onDestroySelf = new Action<GameObject>(this.ReleaseGO);

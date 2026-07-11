@@ -62,18 +62,19 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 				{
 					smi.GoTo(this.idle.move);
-				});
+				})
+				.ToggleTag(GameTags.AllowSpeech);
 			this.idle.onladder.PlayAnim("ladder_idle", KAnim.PlayMode.Loop).ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 			{
 				smi.GoTo(this.idle.move);
-			});
+			}).ToggleTag(GameTags.AllowSpeech);
 			this.idle.ontube.PlayAnim("tube_idle_loop", KAnim.PlayMode.Loop).Update("IdleMove", delegate(IdleChore.StatesInstance smi, float dt)
 			{
 				if (smi.HasIdleCell())
 				{
 					smi.GoTo(this.idle.move);
 				}
-			}, UpdateRate.SIM_1000ms, false);
+			}, UpdateRate.SIM_1000ms, false).ToggleTag(GameTags.AllowSpeech);
 			this.idle.move.Transition(this.idle, (IdleChore.StatesInstance smi) => !smi.HasIdleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk)
 				.ToggleAnims("anim_loco_walk_kanim", 0f)
 				.MoveTo((IdleChore.StatesInstance smi) => smi.GetIdleCell(), this.idle, this.idle, false)

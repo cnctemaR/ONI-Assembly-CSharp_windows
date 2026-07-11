@@ -9,6 +9,11 @@ public class Scenario : KMonoBehaviour
 {
 	public bool[] ReplaceElementMask { get; set; }
 
+	public static void DestroyInstance()
+	{
+		Scenario.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		Scenario.Instance = this;
@@ -321,7 +326,7 @@ public class Scenario : KMonoBehaviour
 	public void SetupClimbTest(int left, int bot)
 	{
 		this.DigHole(left, bot, 13, 5);
-		this.SpawnPrefab(left + 1, bot + 1, "Minion", Grid.SceneLayer.Ore, Folder.Entities);
+		this.SpawnPrefab(left + 1, bot + 1, "Minion", Grid.SceneLayer.Ore);
 		int num = left + 2;
 		this.Clear(num++, bot - 1);
 		num++;
@@ -476,7 +481,7 @@ public class Scenario : KMonoBehaviour
 
 	private GameObject SpawnMinion(int x, int y)
 	{
-		return this.SpawnPrefab(x, y, "Minion", Grid.SceneLayer.Move, Folder.Minions);
+		return this.SpawnPrefab(x, y, "Minion", Grid.SceneLayer.Move);
 	}
 
 	private void SetupLadderTest(int left, int bot)
@@ -552,7 +557,7 @@ public class Scenario : KMonoBehaviour
 		{
 			ElementLoader.FindElementByHash(element),
 			ElementLoader.FindElementByHash(SimHashes.SedimentaryRock)
-		}, 293.15f, false, false);
+		}, 293.15f, false);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.InternalTemperature = 300f;
 		component.Temperature = 300f;
@@ -570,20 +575,20 @@ public class Scenario : KMonoBehaviour
 		});
 	}
 
-	public GameObject SpawnPrefab(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore, Folder folder = Folder.Entities)
+	public GameObject SpawnPrefab(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore)
 	{
-		return Scenario.SpawnPrefab(this.RootCell, x, y, name, scene_layer, folder);
+		return Scenario.SpawnPrefab(this.RootCell, x, y, name, scene_layer);
 	}
 
-	public void SpawnPrefabLate(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore, Folder folder = Folder.Entities)
+	public void SpawnPrefabLate(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore)
 	{
 		this.RunAfterNextUpdate(delegate
 		{
-			Scenario.SpawnPrefab(this.RootCell, x, y, name, scene_layer, folder);
+			Scenario.SpawnPrefab(this.RootCell, x, y, name, scene_layer);
 		});
 	}
 
-	public static GameObject SpawnPrefab(int RootCell, int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore, Folder folder = Folder.Entities)
+	public static GameObject SpawnPrefab(int RootCell, int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore)
 	{
 		int num = Grid.OffsetCell(RootCell, x, y);
 		Tag tag = TagManager.Create(name);
@@ -592,7 +597,7 @@ public class Scenario : KMonoBehaviour
 		{
 			return null;
 		}
-		return GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
+		return GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, null, 0);
 	}
 
 	public void SetupElementTest()
@@ -891,7 +896,7 @@ public class Scenario : KMonoBehaviour
 				{
 					element,
 					ElementLoader.FindElementByHash(SimHashes.SedimentaryRock)
-				}, 0, false);
+				}, 0);
 			});
 		}
 
@@ -930,7 +935,7 @@ public class Scenario : KMonoBehaviour
 
 		private GameObject Hexaped()
 		{
-			return this.Scenario.SpawnPrefab(this.Left, this.Bot, "Hexaped", Grid.SceneLayer.Front, Folder.Creatures);
+			return this.Scenario.SpawnPrefab(this.Left, this.Bot, "Hexaped", Grid.SceneLayer.Front);
 		}
 
 		public void OreOffsets(int count, SimHashes element, params int[] offsets)
@@ -973,7 +978,7 @@ public class Scenario : KMonoBehaviour
 			int bot = this.Bot;
 			this.Scenario.RunAfterNextUpdate(delegate
 			{
-				GameObject gameObject = this.Scenario.SpawnPrefab(left, bot, prefab_id, Grid.SceneLayer.Ore, Folder.Entities);
+				GameObject gameObject = this.Scenario.SpawnPrefab(left, bot, prefab_id, Grid.SceneLayer.Ore);
 				if (on_spawn != null)
 				{
 					on_spawn(gameObject);

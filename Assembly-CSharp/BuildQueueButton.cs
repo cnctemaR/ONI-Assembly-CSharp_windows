@@ -26,20 +26,7 @@ public class BuildQueueButton : KMonoBehaviour
 		kbutton2.onPointerExit = (global::System.Action)Delegate.Combine(kbutton2.onPointerExit, new global::System.Action(this.PointerLeft));
 	}
 
-	private void Update()
-	{
-		if (this.order != null)
-		{
-			string empty = string.Empty;
-			bool flag = this.CheckMaterialAvailability(this.order, out empty);
-			if (this.materialsAvailable != flag)
-			{
-				this.SetAvailability(this.order.Result.ProperName(), flag, empty);
-			}
-		}
-	}
-
-	private void SetAvailability(string recipeName, bool currentAvailability, string str)
+	public void SetAvailability(string recipeName, bool currentAvailability, string str)
 	{
 		if (string.IsNullOrEmpty(str))
 		{
@@ -150,8 +137,6 @@ public class BuildQueueButton : KMonoBehaviour
 				this.order = order;
 				this.infiniteImg.SetActive(order.Infinite);
 				string empty = string.Empty;
-				bool flag = this.CheckMaterialAvailability(order, out empty);
-				this.SetAvailability(order.Result.ProperName(), flag, empty);
 			}
 			else
 			{

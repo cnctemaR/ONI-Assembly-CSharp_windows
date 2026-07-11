@@ -25,20 +25,20 @@ namespace System.Configuration
 			return ((ProviderSettings)element).Name;
 		}
 
-		public void Remove(string key)
+		public void Remove(string name)
 		{
-			base.BaseRemove(key);
+			base.BaseRemove(name);
 		}
 
-		public ProviderSettings this[int n]
+		public ProviderSettings this[int index]
 		{
 			get
 			{
-				return (ProviderSettings)base.BaseGet(n);
+				return (ProviderSettings)base.BaseGet(index);
 			}
 			set
 			{
-				this.BaseAdd(n, value);
+				this.BaseAdd(index, value);
 			}
 		}
 

@@ -5,6 +5,11 @@ using UnityEngine.EventSystems;
 
 public class RootMenu : KScreen
 {
+	public static void DestroyInstance()
+	{
+		RootMenu.Instance = null;
+	}
+
 	public static RootMenu Instance { get; private set; }
 
 	public override float GetSortKey()
@@ -86,7 +91,7 @@ public class RootMenu : KScreen
 		{
 			this.selectedGO = gameObject;
 			this.CloseSubMenus();
-			if (this.selectedGO != null)
+			if (this.selectedGO != null && this.selectedGO.GetComponent<KPrefabID>() != null)
 			{
 				this.AddSubMenu(this.detailsScreen);
 				this.detailsScreen.Refresh(this.selectedGO);
@@ -152,10 +157,20 @@ public class RootMenu : KScreen
 	public override void OnKeyUp(KButtonEvent e)
 	{
 		base.OnKeyUp(e);
-		if (!e.Consumed && e.TryConsume(global::Action.AlternateView) && this.tileScreenInst != null)
+		if (!e.Consumed)
 		{
-			this.tileScreenInst.Deactivate();
-			this.tileScreenInst = null;
+			if (e.TryConsume(global::Action.AlternateView))
+			{
+				if (this.tileScreenInst != null)
+				{
+					this.tileScreenInst.Deactivate();
+					this.tileScreenInst = null;
+				}
+			}
+			else if (SaveGame.Instance != null)
+			{
+				SaveGame.Instance.GetComponent<UserNavigation>().Handle(e);
+			}
 		}
 	}
 

@@ -76,7 +76,7 @@ public class InputBindingsScreen : KModalScreen
 				{
 					this.activeScreen = this.screens.Count;
 				}
-				if (!bindingEntry.mIgnoreRootConflics)
+				if (BuildMenu.UseHotkeyBuildMenu() || !bindingEntry.mIgnoreRootConflics)
 				{
 					this.screens.Add(bindingEntry.mGroup);
 				}
@@ -269,7 +269,7 @@ public class InputBindingsScreen : KModalScreen
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
 			if (bindingEntry.mKeyCode == KKeyCode.None)
 			{
-				if (!bindingEntry.mIgnoreRootConflics)
+				if (BuildMenu.UseHotkeyBuildMenu() || !bindingEntry.mIgnoreRootConflics)
 				{
 					num++;
 				}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Net.Sockets;
 
 namespace System.Net
@@ -6,39 +7,47 @@ namespace System.Net
 	[Serializable]
 	public class IPEndPoint : EndPoint
 	{
+		public override AddressFamily AddressFamily
+		{
+			get
+			{
+				return this.m_Address.AddressFamily;
+			}
+		}
+
+		public IPEndPoint(long address, int port)
+		{
+			if (!ValidationHelper.ValidateTcpPort(port))
+			{
+				throw new ArgumentOutOfRangeException("port");
+			}
+			this.m_Port = port;
+			this.m_Address = new IPAddress(address);
+		}
+
 		public IPEndPoint(IPAddress address, int port)
 		{
 			if (address == null)
 			{
 				throw new ArgumentNullException("address");
 			}
-			this.Address = address;
-			this.Port = port;
-		}
-
-		public IPEndPoint(long iaddr, int port)
-		{
-			this.Address = new IPAddress(iaddr);
-			this.Port = port;
+			if (!ValidationHelper.ValidateTcpPort(port))
+			{
+				throw new ArgumentOutOfRangeException("port");
+			}
+			this.m_Port = port;
+			this.m_Address = address;
 		}
 
 		public IPAddress Address
 		{
 			get
 			{
-				return this.address;
+				return this.m_Address;
 			}
 			set
 			{
-				this.address = value;
-			}
-		}
-
-		public override global::System.Net.Sockets.AddressFamily AddressFamily
-		{
-			get
-			{
-				return this.address.AddressFamily;
+				this.m_Address = value;
 			}
 		}
 
@@ -46,122 +55,86 @@ namespace System.Net
 		{
 			get
 			{
-				return this.port;
+				return this.m_Port;
 			}
 			set
 			{
-				if (value < 0 || value > 65535)
+				if (!ValidationHelper.ValidateTcpPort(value))
 				{
-					throw new ArgumentOutOfRangeException("Invalid port");
+					throw new ArgumentOutOfRangeException("value");
 				}
-				this.port = value;
+				this.m_Port = value;
 			}
-		}
-
-		public override EndPoint Create(SocketAddress socketAddress)
-		{
-			if (socketAddress == null)
-			{
-				throw new ArgumentNullException("socketAddress");
-			}
-			if (socketAddress.Family != this.AddressFamily)
-			{
-				throw new ArgumentException(string.Concat(new object[] { "The IPEndPoint was created using ", this.AddressFamily, " AddressFamily but SocketAddress contains ", socketAddress.Family, " instead, please use the same type." }));
-			}
-			int size = socketAddress.Size;
-			global::System.Net.Sockets.AddressFamily family = socketAddress.Family;
-			global::System.Net.Sockets.AddressFamily addressFamily = family;
-			IPEndPoint ipendPoint;
-			if (addressFamily != global::System.Net.Sockets.AddressFamily.InterNetwork)
-			{
-				if (addressFamily != global::System.Net.Sockets.AddressFamily.InterNetworkV6)
-				{
-					return null;
-				}
-				if (size < 28)
-				{
-					return null;
-				}
-				int num = ((int)socketAddress[2] << 8) + (int)socketAddress[3];
-				int num2 = (int)socketAddress[24] + ((int)socketAddress[25] << 8) + ((int)socketAddress[26] << 16) + ((int)socketAddress[27] << 24);
-				ushort[] array = new ushort[8];
-				for (int i = 0; i < 8; i++)
-				{
-					array[i] = (ushort)(((int)socketAddress[8 + i * 2] << 8) + (int)socketAddress[8 + i * 2 + 1]);
-				}
-				ipendPoint = new IPEndPoint(new IPAddress(array, (long)num2), num);
-			}
-			else
-			{
-				if (size < 8)
-				{
-					return null;
-				}
-				int num = ((int)socketAddress[2] << 8) + (int)socketAddress[3];
-				long num3 = ((long)socketAddress[7] << 24) + ((long)socketAddress[6] << 16) + ((long)socketAddress[5] << 8) + (long)socketAddress[4];
-				ipendPoint = new IPEndPoint(num3, num);
-			}
-			return ipendPoint;
-		}
-
-		public override SocketAddress Serialize()
-		{
-			SocketAddress socketAddress = null;
-			global::System.Net.Sockets.AddressFamily addressFamily = this.address.AddressFamily;
-			if (addressFamily != global::System.Net.Sockets.AddressFamily.InterNetwork)
-			{
-				if (addressFamily == global::System.Net.Sockets.AddressFamily.InterNetworkV6)
-				{
-					socketAddress = new SocketAddress(global::System.Net.Sockets.AddressFamily.InterNetworkV6, 28);
-					socketAddress[2] = (byte)((this.port >> 8) & 255);
-					socketAddress[3] = (byte)(this.port & 255);
-					byte[] addressBytes = this.address.GetAddressBytes();
-					for (int i = 0; i < 16; i++)
-					{
-						socketAddress[8 + i] = addressBytes[i];
-					}
-					socketAddress[24] = (byte)(this.address.ScopeId & 255L);
-					socketAddress[25] = (byte)((this.address.ScopeId >> 8) & 255L);
-					socketAddress[26] = (byte)((this.address.ScopeId >> 16) & 255L);
-					socketAddress[27] = (byte)((this.address.ScopeId >> 24) & 255L);
-				}
-			}
-			else
-			{
-				socketAddress = new SocketAddress(global::System.Net.Sockets.AddressFamily.InterNetwork, 16);
-				socketAddress[2] = (byte)((this.port >> 8) & 255);
-				socketAddress[3] = (byte)(this.port & 255);
-				long internalIPv4Address = this.address.InternalIPv4Address;
-				socketAddress[4] = (byte)(internalIPv4Address & 255L);
-				socketAddress[5] = (byte)((internalIPv4Address >> 8) & 255L);
-				socketAddress[6] = (byte)((internalIPv4Address >> 16) & 255L);
-				socketAddress[7] = (byte)((internalIPv4Address >> 24) & 255L);
-			}
-			return socketAddress;
 		}
 
 		public override string ToString()
 		{
-			return this.address.ToString() + ":" + this.port;
+			string text;
+			if (this.m_Address.AddressFamily == AddressFamily.InterNetworkV6)
+			{
+				text = "[{0}]:{1}";
+			}
+			else
+			{
+				text = "{0}:{1}";
+			}
+			return string.Format(text, this.m_Address.ToString(), this.Port.ToString(NumberFormatInfo.InvariantInfo));
 		}
 
-		public override bool Equals(object obj)
+		public override SocketAddress Serialize()
 		{
-			IPEndPoint ipendPoint = obj as IPEndPoint;
-			return ipendPoint != null && ipendPoint.port == this.port && ipendPoint.address.Equals(this.address);
+			return new SocketAddress(this.Address, this.Port);
+		}
+
+		public override EndPoint Create(SocketAddress socketAddress)
+		{
+			if (socketAddress.Family != this.AddressFamily)
+			{
+				throw new ArgumentException(global::SR.GetString("The AddressFamily {0} is not valid for the {1} end point, use {2} instead.", new object[]
+				{
+					socketAddress.Family.ToString(),
+					base.GetType().FullName,
+					this.AddressFamily.ToString()
+				}), "socketAddress");
+			}
+			if (socketAddress.Size < 8)
+			{
+				throw new ArgumentException(global::SR.GetString("The supplied {0} is an invalid size for the {1} end point.", new object[]
+				{
+					socketAddress.GetType().FullName,
+					base.GetType().FullName
+				}), "socketAddress");
+			}
+			return socketAddress.GetIPEndPoint();
+		}
+
+		public override bool Equals(object comparand)
+		{
+			return comparand is IPEndPoint && ((IPEndPoint)comparand).m_Address.Equals(this.m_Address) && ((IPEndPoint)comparand).m_Port == this.m_Port;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.address.GetHashCode() + this.port;
+			return this.m_Address.GetHashCode() ^ this.m_Port;
 		}
 
-		public const int MaxPort = 65535;
+		internal IPEndPoint Snapshot()
+		{
+			return new IPEndPoint(this.Address.Snapshot(), this.Port);
+		}
 
 		public const int MinPort = 0;
 
-		private IPAddress address;
+		public const int MaxPort = 65535;
 
-		private int port;
+		private IPAddress m_Address;
+
+		private int m_Port;
+
+		internal const int AnyPort = 0;
+
+		internal static IPEndPoint Any = new IPEndPoint(IPAddress.Any, 0);
+
+		internal static IPEndPoint IPv6Any = new IPEndPoint(IPAddress.IPv6Any, 0);
 	}
 }

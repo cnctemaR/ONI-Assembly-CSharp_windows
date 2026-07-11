@@ -3,25 +3,40 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
+	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
 	[ComVisible(true)]
-	[AttributeUsage(AttributeTargets.Class)]
 	[Serializable]
 	public sealed class AttributeUsageAttribute : Attribute
 	{
 		public AttributeUsageAttribute(AttributeTargets validOn)
 		{
-			this.valid_on = validOn;
+			this.m_attributeTarget = validOn;
+		}
+
+		internal AttributeUsageAttribute(AttributeTargets validOn, bool allowMultiple, bool inherited)
+		{
+			this.m_attributeTarget = validOn;
+			this.m_allowMultiple = allowMultiple;
+			this.m_inherited = inherited;
+		}
+
+		public AttributeTargets ValidOn
+		{
+			get
+			{
+				return this.m_attributeTarget;
+			}
 		}
 
 		public bool AllowMultiple
 		{
 			get
 			{
-				return this.allow_multiple;
+				return this.m_allowMultiple;
 			}
 			set
 			{
-				this.allow_multiple = value;
+				this.m_allowMultiple = value;
 			}
 		}
 
@@ -29,26 +44,20 @@ namespace System
 		{
 			get
 			{
-				return this.inherited;
+				return this.m_inherited;
 			}
 			set
 			{
-				this.inherited = value;
+				this.m_inherited = value;
 			}
 		}
 
-		public AttributeTargets ValidOn
-		{
-			get
-			{
-				return this.valid_on;
-			}
-		}
+		internal AttributeTargets m_attributeTarget = AttributeTargets.All;
 
-		private AttributeTargets valid_on;
+		internal bool m_allowMultiple;
 
-		private bool allow_multiple;
+		internal bool m_inherited = true;
 
-		private bool inherited = true;
+		internal static AttributeUsageAttribute Default = new AttributeUsageAttribute(AttributeTargets.All);
 	}
 }

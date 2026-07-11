@@ -5,7 +5,7 @@ public class GridVisibility : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "GridVisibility.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "GridVisibility.OnSpawn");
 		this.OnCellChange();
 	}
 
@@ -58,7 +58,7 @@ public class GridVisibility : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 	}
 
 	public float radius = 18f;

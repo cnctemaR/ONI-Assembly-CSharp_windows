@@ -43,14 +43,7 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 			int i = num;
 			while (i < value.Length)
 			{
-				if (value[i] == 'T')
-				{
-					flag2 = true;
-					num2 = 4;
-					i++;
-					num = i;
-				}
-				else
+				if (value[i] != 'T')
 				{
 					bool flag4 = true;
 					int num7 = 0;
@@ -83,68 +76,14 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 						num9 = double.Parse(value.Substring(num, i - num), CultureInfo.InvariantCulture);
 					}
 					char c = value[i];
-					if (c != 'D')
+					if (c <= 'H')
 					{
-						if (c != 'H')
+						if (c != 'D')
 						{
-							if (c != 'M')
+							if (c != 'H')
 							{
-								if (c != 'S')
-								{
-									if (c != 'Y')
-									{
-										flag3 = true;
-									}
-									else
-									{
-										num3 += num8 * 365;
-										if (num2 > 0 || !flag4)
-										{
-											flag3 = true;
-										}
-										else
-										{
-											num2 = 1;
-										}
-									}
-								}
-								else
-								{
-									if (flag4)
-									{
-										num6 = (double)num8;
-									}
-									else
-									{
-										num6 = num9;
-									}
-									if (!flag2 || num2 > 6)
-									{
-										flag3 = true;
-									}
-									else
-									{
-										num2 = 7;
-									}
-								}
+								goto IL_01F7;
 							}
-							else if (num2 < 2 && flag4)
-							{
-								num3 += 365 * (num8 / 12) + 30 * (num8 % 12);
-								num2 = 2;
-							}
-							else if (flag2 && num2 < 6 && flag4)
-							{
-								num5 = num8;
-								num2 = 6;
-							}
-							else
-							{
-								flag3 = true;
-							}
-						}
-						else
-						{
 							num4 = num8;
 							if (!flag2 || num2 > 4 || !flag4)
 							{
@@ -155,33 +94,98 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 								num2 = 5;
 							}
 						}
-					}
-					else
-					{
-						num3 += num8;
-						if (num2 > 2 || !flag4)
+						else
 						{
-							flag3 = true;
+							num3 += num8;
+							if (num2 > 2 || !flag4)
+							{
+								flag3 = true;
+							}
+							else
+							{
+								num2 = 3;
+							}
+						}
+					}
+					else if (c != 'M')
+					{
+						if (c != 'S')
+						{
+							if (c != 'Y')
+							{
+								goto IL_01F7;
+							}
+							num3 += num8 * 365;
+							if (num2 > 0 || !flag4)
+							{
+								flag3 = true;
+							}
+							else
+							{
+								num2 = 1;
+							}
 						}
 						else
 						{
-							num2 = 3;
+							if (flag4)
+							{
+								num6 = (double)num8;
+							}
+							else
+							{
+								num6 = num9;
+							}
+							if (!flag2 || num2 > 6)
+							{
+								flag3 = true;
+							}
+							else
+							{
+								num2 = 7;
+							}
 						}
 					}
-					if (flag3)
+					else if (num2 < 2 && flag4)
 					{
-						break;
+						num3 += 365 * (num8 / 12) + 30 * (num8 % 12);
+						num2 = 2;
 					}
-					i++;
-					num = i;
+					else if (flag2 && num2 < 6 && flag4)
+					{
+						num5 = num8;
+						num2 = 6;
+					}
+					else
+					{
+						flag3 = true;
+					}
+					IL_01FA:
+					if (!flag3)
+					{
+						i++;
+						num = i;
+						continue;
+					}
+					break;
+					IL_01F7:
+					flag3 = true;
+					goto IL_01FA;
 				}
+				flag2 = true;
+				num2 = 4;
+				i++;
+				num = i;
 			}
 			if (flag3)
 			{
 				throw new ArgumentException("Invalid format string for duration schema datatype.");
 			}
 			TimeSpan timeSpan = new TimeSpan(num3, num4, num5, 0) + TimeSpan.FromSeconds(num6);
-			return (!flag) ? timeSpan : (-timeSpan);
+			if (!flag)
+			{
+				return timeSpan;
+			}
+			return -timeSpan;
 		}
 
 		public static string ToString(TimeSpan timeSpan)
@@ -215,7 +219,7 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 					{
 						num += (double)timeSpan.Milliseconds / 1000.0;
 					}
-					stringBuilder.Append(string.Format(CultureInfo.InvariantCulture, "{0:0.0000000}", new object[] { num }));
+					stringBuilder.Append(string.Format(CultureInfo.InvariantCulture, "{0:0.0000000}", num));
 					stringBuilder.Append('S');
 				}
 			}

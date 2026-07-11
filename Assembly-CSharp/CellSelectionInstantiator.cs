@@ -5,8 +5,8 @@ public class CellSelectionInstantiator : MonoBehaviour
 {
 	private void Awake()
 	{
-		GameObject gameObject = Util.KInstantiate(this.CellSelectionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Misc), "WorldSelectionCollider");
-		GameObject gameObject2 = Util.KInstantiate(this.CellSelectionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Misc), "WorldSelectionCollider");
+		GameObject gameObject = Util.KInstantiate(this.CellSelectionPrefab, null, "WorldSelectionCollider");
+		GameObject gameObject2 = Util.KInstantiate(this.CellSelectionPrefab, null, "WorldSelectionCollider");
 		CellSelectionObject component = gameObject.GetComponent<CellSelectionObject>();
 		CellSelectionObject component2 = gameObject2.GetComponent<CellSelectionObject>();
 		component.alternateSelectionObject = component2;

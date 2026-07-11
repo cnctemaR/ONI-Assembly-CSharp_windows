@@ -64,6 +64,17 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 		this.savedOrders = new List<Fabricator.OrderSaveData>();
 	}
 
+	public override string GetConversationTopic()
+	{
+		if (this.machineOrders.Count > 0)
+		{
+			Fabricator.UserOrder parentOrder = this.machineOrders[0].parentOrder;
+			Recipe recipe = parentOrder.recipe;
+			return recipe.Result.Name;
+		}
+		return base.GetConversationTopic();
+	}
+
 	public Recipe[] GetRecipes()
 	{
 		string name = base.GetComponent<KPrefabID>().PrefabID().Name;
@@ -311,7 +322,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 				}
 				if (flag)
 				{
-					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 					if (this.workTimeRemaining <= 0f)
 					{
 						this.workTimeRemaining = this.GetWorkTime();
@@ -669,11 +680,23 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 			return dictionary;
 		}
 
+		public Dictionary<Tag, float> GetMaterialRequirements()
+		{
+			this.materialRequirements.Clear();
+			foreach (Recipe.Ingredient ingredient in this.recipe.Ingredients)
+			{
+				this.materialRequirements.Add(ingredient.tag, ingredient.amount);
+			}
+			return this.materialRequirements;
+		}
+
 		public Recipe recipe;
 
 		public List<Tag> orderTags;
 
 		public bool infinite;
+
+		private Dictionary<Tag, float> materialRequirements = new Dictionary<Tag, float>();
 	}
 
 	public class MachineOrder

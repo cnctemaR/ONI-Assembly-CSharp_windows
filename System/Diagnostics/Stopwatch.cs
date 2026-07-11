@@ -43,7 +43,11 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return (!this.is_running) ? this.elapsed : (Stopwatch.GetTimestamp() - this.started + this.elapsed);
+				if (!this.is_running)
+				{
+					return this.elapsed;
+				}
+				return Stopwatch.GetTimestamp() - this.started + this.elapsed;
 			}
 		}
 
@@ -78,7 +82,18 @@ namespace System.Diagnostics
 				return;
 			}
 			this.elapsed += Stopwatch.GetTimestamp() - this.started;
+			if (this.elapsed < 0L)
+			{
+				this.elapsed = 0L;
+			}
 			this.is_running = false;
+		}
+
+		public void Restart()
+		{
+			this.started = Stopwatch.GetTimestamp();
+			this.elapsed = 0L;
+			this.is_running = true;
 		}
 
 		public static readonly long Frequency = 10000000L;

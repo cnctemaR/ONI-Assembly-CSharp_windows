@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 public class SafetyChecker
 {
@@ -27,7 +26,6 @@ public class SafetyChecker
 		return num;
 	}
 
-	[StructLayout(LayoutKind.Sequential, Size = 1)]
 	public struct Condition
 	{
 		public Condition(string id, int condition_mask, SafetyChecker.Condition.Callback condition_callback)

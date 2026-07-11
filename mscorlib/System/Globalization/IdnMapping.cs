@@ -37,7 +37,7 @@ namespace System.Globalization
 
 		public override int GetHashCode()
 		{
-			return ((!this.allow_unassigned) ? 0 : 2) + ((!this.use_std3) ? 0 : 1);
+			return (this.allow_unassigned ? 2 : 0) + (this.use_std3 ? 1 : 0);
 		}
 
 		public string GetAscii(string unicode)
@@ -185,40 +185,52 @@ namespace System.Globalization
 				case UnicodeCategory.SpaceSeparator:
 					if (s[i] >= '\u0080')
 					{
-						goto IL_0164;
+						goto IL_0111;
 					}
 					break;
 				case UnicodeCategory.LineSeparator:
 				case UnicodeCategory.ParagraphSeparator:
 				case UnicodeCategory.Format:
-					goto IL_0080;
+					goto IL_006E;
 				case UnicodeCategory.Control:
 					if (s[i] == '\0' || s[i] >= '\u0080')
 					{
-						goto IL_0164;
+						goto IL_0111;
 					}
 					break;
 				case UnicodeCategory.Surrogate:
 				case UnicodeCategory.PrivateUse:
-					goto IL_0164;
+					goto IL_0111;
 				default:
-					goto IL_0080;
+					goto IL_006E;
 				}
-				IL_017C:
+				IL_0129:
 				i++;
 				continue;
-				IL_0080:
-				char c = s[i];
-				if (('\ufddf' > c || c > '\ufdef') && ((c & '\uffff') != '\ufffe' && ('\ufff9' > c || c > '\ufffd')) && ('⿰' > c || c > '⿻') && ('\u202a' > c || c > '\u202e') && ('\u206a' > c || c > '\u206f'))
-				{
-					char c2 = c;
-					if (c2 != '\u0340' && c2 != '\u0341' && c2 != '\u200e' && c2 != '\u200f' && c2 != '\u2028' && c2 != '\u2029')
-					{
-						goto IL_017C;
-					}
-				}
-				IL_0164:
+				IL_0111:
 				throw new ArgumentException(string.Format("Not allowed character was in the input string, at {0}", offset + i));
+				IL_006E:
+				char c = s[i];
+				if (('\ufddf' <= c && c <= '\ufdef') || (c & '\uffff') == '\ufffe' || ('\ufff9' <= c && c <= '\ufffd') || ('⿰' <= c && c <= '⿻') || ('\u202a' <= c && c <= '\u202e') || ('\u206a' <= c && c <= '\u206f'))
+				{
+					goto IL_0111;
+				}
+				if (c <= '\u200e')
+				{
+					if (c != '\u0340' && c != '\u0341' && c != '\u200e')
+					{
+						goto IL_0129;
+					}
+					goto IL_0111;
+				}
+				else
+				{
+					if (c == '\u200f' || c == '\u2028' || c == '\u2029')
+					{
+						goto IL_0111;
+					}
+					goto IL_0129;
+				}
 			}
 		}
 
@@ -235,12 +247,9 @@ namespace System.Globalization
 			for (int i = 0; i < s.Length; i++)
 			{
 				char c = s[i];
-				if (c != '-')
+				if (c != '-' && (c <= '/' || (':' <= c && c <= '@') || ('[' <= c && c <= '`') || ('{' <= c && c <= '\u007f')))
 				{
-					if (c <= '/' || (':' <= c && c <= '@') || ('[' <= c && c <= '`') || ('{' <= c && c <= '\u007f'))
-					{
-						throw new ArgumentException(string.Format("Not allowed character in STD3 mode, found at {0}", offset + i));
-					}
+					throw new ArgumentException(string.Format("Not allowed character in STD3 mode, found at {0}", offset + i));
 				}
 			}
 		}

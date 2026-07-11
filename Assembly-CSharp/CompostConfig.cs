@@ -21,7 +21,6 @@ public class CompostConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.Overheatable = false;
-		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);

@@ -160,7 +160,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		}
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component2 != null && component2.isMovable;
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "NoisePolluter.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "NoisePolluter.OnSpawn");
 		AttributeInstance attributeInstance = this.dB;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.dBRadius;
@@ -205,7 +205,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 			}
 			if (this.isMovable)
 			{
-				CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+				Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 			}
 		}
 		if (this.splat != null)

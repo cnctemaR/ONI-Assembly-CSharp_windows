@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeDefaultValueExpression : CodeExpression
 	{
@@ -14,30 +11,26 @@ namespace System.CodeDom
 
 		public CodeDefaultValueExpression(CodeTypeReference type)
 		{
-			this.type = type;
+			this._type = type;
 		}
 
 		public CodeTypeReference Type
 		{
 			get
 			{
-				if (this.type == null)
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._type) == null)
 				{
-					this.type = new CodeTypeReference(string.Empty);
+					codeTypeReference = (this._type = new CodeTypeReference(""));
 				}
-				return this.type;
+				return codeTypeReference;
 			}
 			set
 			{
-				this.type = value;
+				this._type = value;
 			}
 		}
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
-
-		private CodeTypeReference type;
+		private CodeTypeReference _type;
 	}
 }

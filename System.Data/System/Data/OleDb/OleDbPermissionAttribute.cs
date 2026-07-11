@@ -11,34 +11,27 @@ namespace System.Data.OleDb
 	public sealed class OleDbPermissionAttribute : DBDataPermissionAttribute
 	{
 		public OleDbPermissionAttribute(SecurityAction action)
-			: base(action)
+			: base((SecurityAction)0)
 		{
 		}
 
-		[Obsolete]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete]
 		public string Provider
 		{
 			get
 			{
-				if (this._provider == null)
-				{
-					return string.Empty;
-				}
-				return this._provider;
+				throw null;
 			}
 			set
 			{
-				this._provider = value;
 			}
 		}
 
 		public override IPermission CreatePermission()
 		{
-			return new OleDbPermission(this);
+			throw null;
 		}
-
-		private string _provider;
 	}
 }

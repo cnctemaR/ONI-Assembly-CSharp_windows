@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 {
+	public static void DestroyInstance()
+	{
+		FishOvercrowingManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		FishOvercrowingManager.Instance = this;
@@ -76,7 +81,6 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 							pooledList2.Add(Grid.CellAbove(num6));
 							pooledList2.Add(Grid.CellBelow(num6));
 							this.cells[num6] = cell;
-							i++;
 						}
 					}
 				}

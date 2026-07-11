@@ -4,6 +4,11 @@ using System.Diagnostics;
 
 public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 {
+	public static void DestroyInstance()
+	{
+		CellEventLogger.Instance = null;
+	}
+
 	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void LogCallbackSend(int cell, int callback_id)
 	{

@@ -21,7 +21,6 @@ public class WashSinkConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
-		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
@@ -31,6 +30,7 @@ public class WashSinkConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.WashStation);
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.AdvancedWashStation);
 		HandSanitizer handSanitizer = go.AddOrGet<HandSanitizer>();
 		handSanitizer.massConsumedPerUse = 5f;
 		handSanitizer.consumedElement = SimHashes.Water;

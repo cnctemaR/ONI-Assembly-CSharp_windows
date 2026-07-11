@@ -44,7 +44,7 @@ public class AdvancedResearchCenterConfig : IBuildingConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
 		ResearchCenter researchCenter = go.AddOrGet<ResearchCenter>();
 		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research2_kanim") };
-		researchCenter.research_point_type_id = ResearchTypes.ID.BETA;
+		researchCenter.research_point_type_id = "beta";
 		researchCenter.inputMaterial = AdvancedResearchCenterConfig.INPUT_MATERIAL;
 		researchCenter.mass_per_point = 50f;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();

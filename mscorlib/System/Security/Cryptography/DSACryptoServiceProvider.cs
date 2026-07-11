@@ -10,7 +10,7 @@ namespace System.Security.Cryptography
 	public sealed class DSACryptoServiceProvider : DSA, ICspAsymmetricAlgorithm
 	{
 		public DSACryptoServiceProvider()
-			: this(1024, null)
+			: this(1024)
 		{
 		}
 
@@ -20,37 +20,54 @@ namespace System.Security.Cryptography
 		}
 
 		public DSACryptoServiceProvider(int dwKeySize)
-			: this(dwKeySize, null)
 		{
+			this.privateKeyExportable = true;
+			base..ctor();
+			this.Common(dwKeySize, false);
 		}
 
 		public DSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
+		{
+			this.privateKeyExportable = true;
+			base..ctor();
+			bool flag = parameters != null;
+			this.Common(dwKeySize, flag);
+			if (flag)
+			{
+				this.Common(parameters);
+			}
+		}
+
+		private void Common(int dwKeySize, bool parameters)
 		{
 			this.LegalKeySizesValue = new KeySizes[1];
 			this.LegalKeySizesValue[0] = new KeySizes(512, 1024, 64);
 			this.KeySize = dwKeySize;
 			this.dsa = new DSAManaged(dwKeySize);
 			this.dsa.KeyGenerated += this.OnKeyGenerated;
-			this.persistKey = parameters != null;
-			if (parameters == null)
+			this.persistKey = parameters;
+			if (parameters)
 			{
-				parameters = new CspParameters(13);
-				if (DSACryptoServiceProvider.useMachineKeyStore)
-				{
-					parameters.Flags |= CspProviderFlags.UseMachineKeyStore;
-				}
-				this.store = new KeyPairPersistence(parameters);
+				return;
 			}
-			else
+			CspParameters cspParameters = new CspParameters(13);
+			if (DSACryptoServiceProvider.useMachineKeyStore)
 			{
-				this.store = new KeyPairPersistence(parameters);
-				this.store.Load();
-				if (this.store.KeyValue != null)
-				{
-					this.persisted = true;
-					this.FromXmlString(this.store.KeyValue);
-				}
+				cspParameters.Flags |= CspProviderFlags.UseMachineKeyStore;
 			}
+			this.store = new KeyPairPersistence(cspParameters);
+		}
+
+		private void Common(CspParameters parameters)
+		{
+			this.store = new KeyPairPersistence(parameters);
+			this.store.Load();
+			if (this.store.KeyValue != null)
+			{
+				this.persisted = true;
+				this.FromXmlString(this.store.KeyValue);
+			}
+			this.privateKeyExportable = (parameters.Flags & CspProviderFlags.UseNonExportableKey) == CspProviderFlags.NoFlags;
 		}
 
 		~DSACryptoServiceProvider()
@@ -136,22 +153,19 @@ namespace System.Security.Cryptography
 
 		public byte[] SignData(byte[] buffer)
 		{
-			HashAlgorithm hashAlgorithm = SHA1.Create();
-			byte[] array = hashAlgorithm.ComputeHash(buffer);
+			byte[] array = SHA1.Create().ComputeHash(buffer);
 			return this.dsa.CreateSignature(array);
 		}
 
 		public byte[] SignData(byte[] buffer, int offset, int count)
 		{
-			HashAlgorithm hashAlgorithm = SHA1.Create();
-			byte[] array = hashAlgorithm.ComputeHash(buffer, offset, count);
+			byte[] array = SHA1.Create().ComputeHash(buffer, offset, count);
 			return this.dsa.CreateSignature(array);
 		}
 
 		public byte[] SignData(Stream inputStream)
 		{
-			HashAlgorithm hashAlgorithm = SHA1.Create();
-			byte[] array = hashAlgorithm.ComputeHash(inputStream);
+			byte[] array = SHA1.Create().ComputeHash(inputStream);
 			return this.dsa.CreateSignature(array);
 		}
 
@@ -166,8 +180,7 @@ namespace System.Security.Cryptography
 
 		public bool VerifyData(byte[] rgbData, byte[] rgbSignature)
 		{
-			HashAlgorithm hashAlgorithm = SHA1.Create();
-			byte[] array = hashAlgorithm.ComputeHash(rgbData);
+			byte[] array = SHA1.Create().ComputeHash(rgbData);
 			return this.dsa.VerifySignature(array, rgbSignature);
 		}
 
@@ -187,6 +200,24 @@ namespace System.Security.Cryptography
 		public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature)
 		{
 			return this.dsa.VerifySignature(rgbHash, rgbSignature);
+		}
+
+		protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
+		{
+			if (hashAlgorithm != HashAlgorithmName.SHA1)
+			{
+				throw new CryptographicException(Environment.GetResourceString("'{0}' is not a known hash algorithm.", new object[] { hashAlgorithm.Name }));
+			}
+			return HashAlgorithm.Create(hashAlgorithm.Name).ComputeHash(data, offset, count);
+		}
+
+		protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
+		{
+			if (hashAlgorithm != HashAlgorithmName.SHA1)
+			{
+				throw new CryptographicException(Environment.GetResourceString("'{0}' is not a known hash algorithm.", new object[] { hashAlgorithm.Name }));
+			}
+			return HashAlgorithm.Create(hashAlgorithm.Name).ComputeHash(data);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -215,8 +246,8 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		[MonoTODO("call into KeyPairPersistence to get details")]
 		[ComVisible(false)]
+		[MonoTODO("call into KeyPairPersistence to get details")]
 		public CspKeyContainerInfo CspKeyContainerInfo
 		{
 			get
@@ -252,19 +283,17 @@ namespace System.Security.Cryptography
 			{
 				DSAParameters dsaparameters = dsa.ExportParameters(!(dsa as DSACryptoServiceProvider).PublicOnly);
 				this.ImportParameters(dsaparameters);
+				return;
 			}
-			else
+			try
 			{
-				try
-				{
-					DSAParameters dsaparameters2 = dsa.ExportParameters(true);
-					this.ImportParameters(dsaparameters2);
-				}
-				catch
-				{
-					DSAParameters dsaparameters3 = dsa.ExportParameters(false);
-					this.ImportParameters(dsaparameters3);
-				}
+				DSAParameters dsaparameters2 = dsa.ExportParameters(true);
+				this.ImportParameters(dsaparameters2);
+			}
+			catch
+			{
+				DSAParameters dsaparameters3 = dsa.ExportParameters(false);
+				this.ImportParameters(dsaparameters3);
 			}
 		}
 
@@ -276,7 +305,7 @@ namespace System.Security.Cryptography
 
 		private bool persisted;
 
-		private bool privateKeyExportable = true;
+		private bool privateKeyExportable;
 
 		private bool m_disposed;
 

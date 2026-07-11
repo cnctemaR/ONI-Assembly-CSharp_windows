@@ -40,12 +40,6 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		}
 	}
 
-	protected override void OnStartWork(Worker worker)
-	{
-		base.OnStartWork(worker);
-		worker.GetComponent<Effects>().Add("Sleep", false);
-	}
-
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
@@ -88,7 +82,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	protected override WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.high, 0, false);
+		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.StressHeal, this, null, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.high, 0, false);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
 		workChore.isPreferredChoreRegardlessOfTags = true;
 		return workChore;
@@ -171,7 +165,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	private static readonly string[] EffectsRemoved = new string[] { "SoreBack" };
 
-	private static Chore.Precondition IsStressAboveActivationRange = new Chore.Precondition
+	private static readonly Chore.Precondition IsStressAboveActivationRange = new Chore.Precondition
 	{
 		id = "IsStressAboveActivationRange",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_STRESS_ABOVE_ACTIVATION_RANGE,

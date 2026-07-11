@@ -38,52 +38,96 @@ namespace Mono.Security.Protocol.Tls
 
 		private HandshakeMessage createClientHandshakeMessage(HandshakeType type, byte[] buffer)
 		{
-			switch (type)
+			HandshakeType lastHandshakeMsg = this.context.LastHandshakeMsg;
+			if (type <= HandshakeType.Certificate)
 			{
-			case HandshakeType.CertificateVerify:
-				return new TlsClientCertificateVerify(this.context, buffer);
-			case HandshakeType.ClientKeyExchange:
-				return new TlsClientKeyExchange(this.context, buffer);
-			default:
 				if (type == HandshakeType.ClientHello)
 				{
 					return new TlsClientHello(this.context, buffer);
 				}
-				if (type != HandshakeType.Certificate)
+				if (type == HandshakeType.Certificate)
 				{
-					throw new TlsException(AlertDescription.UnexpectedMessage, string.Format(CultureInfo.CurrentUICulture, "Unknown server handshake message received ({0})", new object[] { type.ToString() }));
+					if (lastHandshakeMsg == HandshakeType.ClientHello)
+					{
+						this.cert = new TlsClientCertificate(this.context, buffer);
+						return this.cert;
+					}
+					goto IL_0106;
 				}
-				return new TlsClientCertificate(this.context, buffer);
-			case HandshakeType.Finished:
-				return new TlsClientFinished(this.context, buffer);
 			}
+			else if (type != HandshakeType.CertificateVerify)
+			{
+				if (type != HandshakeType.ClientKeyExchange)
+				{
+					if (type == HandshakeType.Finished)
+					{
+						if (((this.cert != null && this.cert.HasCertificate) ? (lastHandshakeMsg == HandshakeType.CertificateVerify) : (lastHandshakeMsg == HandshakeType.ClientKeyExchange)) && this.context.ChangeCipherSpecDone)
+						{
+							this.context.ChangeCipherSpecDone = false;
+							return new TlsClientFinished(this.context, buffer);
+						}
+						goto IL_0106;
+					}
+				}
+				else
+				{
+					if (lastHandshakeMsg == HandshakeType.ClientHello || lastHandshakeMsg == HandshakeType.Certificate)
+					{
+						return new TlsClientKeyExchange(this.context, buffer);
+					}
+					goto IL_0106;
+				}
+			}
+			else
+			{
+				if (lastHandshakeMsg == HandshakeType.ClientKeyExchange && this.cert != null)
+				{
+					return new TlsClientCertificateVerify(this.context, buffer);
+				}
+				goto IL_0106;
+			}
+			throw new TlsException(AlertDescription.UnexpectedMessage, string.Format(CultureInfo.CurrentUICulture, "Unknown server handshake message received ({0})", type.ToString()));
+			IL_0106:
+			throw new TlsException(AlertDescription.HandshakeFailiure, string.Format("Protocol error, unexpected protocol transition from {0} to {1}", lastHandshakeMsg, type));
 		}
 
 		private HandshakeMessage createServerHandshakeMessage(HandshakeType type)
 		{
-			switch (type)
+			if (type <= HandshakeType.ServerHello)
 			{
-			case HandshakeType.Certificate:
-				return new TlsServerCertificate(this.context);
-			case HandshakeType.ServerKeyExchange:
-				return new TlsServerKeyExchange(this.context);
-			case HandshakeType.CertificateRequest:
-				return new TlsServerCertificateRequest(this.context);
-			case HandshakeType.ServerHelloDone:
-				return new TlsServerHelloDone(this.context);
-			default:
-				switch (type)
+				if (type == HandshakeType.HelloRequest)
 				{
-				case HandshakeType.HelloRequest:
 					this.SendRecord(HandshakeType.ClientHello);
 					return null;
-				case HandshakeType.ServerHello:
+				}
+				if (type == HandshakeType.ServerHello)
+				{
 					return new TlsServerHello(this.context);
 				}
-				throw new InvalidOperationException("Unknown server handshake message type: " + type.ToString());
-			case HandshakeType.Finished:
-				return new TlsServerFinished(this.context);
 			}
+			else
+			{
+				switch (type)
+				{
+				case HandshakeType.Certificate:
+					return new TlsServerCertificate(this.context);
+				case HandshakeType.ServerKeyExchange:
+					return new TlsServerKeyExchange(this.context);
+				case HandshakeType.CertificateRequest:
+					return new TlsServerCertificateRequest(this.context);
+				case HandshakeType.ServerHelloDone:
+					return new TlsServerHelloDone(this.context);
+				default:
+					if (type == HandshakeType.Finished)
+					{
+						return new TlsServerFinished(this.context);
+					}
+					break;
+				}
+			}
+			throw new InvalidOperationException("Unknown server handshake message type: " + type.ToString());
 		}
+
+		private TlsClientCertificate cert;
 	}
 }

@@ -31,7 +31,7 @@ public class EntombedChore : Chore<EntombedChore.StatesInstance>
 		{
 			default_state = this.entombedbody;
 			base.Target(this.entombable);
-			this.root.Update("IsFaceEntombed", delegate(EntombedChore.StatesInstance smi, float dt)
+			this.root.ToggleAnims("anim_emotes_default_kanim", 0f).Update("IsFaceEntombed", delegate(EntombedChore.StatesInstance smi, float dt)
 			{
 				smi.UpdateFaceEntombed();
 			}, UpdateRate.SIM_200ms, false).ToggleStatusItem(Db.Get().DuplicantStatusItems.EntombedChore, null);

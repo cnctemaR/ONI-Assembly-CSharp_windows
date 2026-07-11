@@ -4,13 +4,13 @@ namespace TUNING
 {
 	public class NOISE_POLLUTION
 	{
-		public static EffectorValues NONE = new EffectorValues
+		public static readonly EffectorValues NONE = new EffectorValues
 		{
 			amount = 0,
 			radius = 0
 		};
 
-		public static EffectorValues CONE_OF_SILENCE = new EffectorValues
+		public static readonly EffectorValues CONE_OF_SILENCE = new EffectorValues
 		{
 			amount = -120,
 			radius = 5
@@ -33,43 +33,43 @@ namespace TUNING
 
 		public class NOISY
 		{
-			public static EffectorValues TIER0 = new EffectorValues
+			public static readonly EffectorValues TIER0 = new EffectorValues
 			{
 				amount = 45,
 				radius = 10
 			};
 
-			public static EffectorValues TIER1 = new EffectorValues
+			public static readonly EffectorValues TIER1 = new EffectorValues
 			{
 				amount = 55,
 				radius = 10
 			};
 
-			public static EffectorValues TIER2 = new EffectorValues
+			public static readonly EffectorValues TIER2 = new EffectorValues
 			{
 				amount = 65,
 				radius = 10
 			};
 
-			public static EffectorValues TIER3 = new EffectorValues
+			public static readonly EffectorValues TIER3 = new EffectorValues
 			{
 				amount = 75,
 				radius = 15
 			};
 
-			public static EffectorValues TIER4 = new EffectorValues
+			public static readonly EffectorValues TIER4 = new EffectorValues
 			{
 				amount = 90,
 				radius = 15
 			};
 
-			public static EffectorValues TIER5 = new EffectorValues
+			public static readonly EffectorValues TIER5 = new EffectorValues
 			{
 				amount = 105,
 				radius = 20
 			};
 
-			public static EffectorValues TIER6 = new EffectorValues
+			public static readonly EffectorValues TIER6 = new EffectorValues
 			{
 				amount = 125,
 				radius = 20
@@ -78,49 +78,49 @@ namespace TUNING
 
 		public class CREATURES
 		{
-			public static EffectorValues TIER0 = new EffectorValues
+			public static readonly EffectorValues TIER0 = new EffectorValues
 			{
 				amount = 30,
 				radius = 5
 			};
 
-			public static EffectorValues TIER1 = new EffectorValues
+			public static readonly EffectorValues TIER1 = new EffectorValues
 			{
 				amount = 35,
 				radius = 5
 			};
 
-			public static EffectorValues TIER2 = new EffectorValues
+			public static readonly EffectorValues TIER2 = new EffectorValues
 			{
 				amount = 45,
 				radius = 5
 			};
 
-			public static EffectorValues TIER3 = new EffectorValues
+			public static readonly EffectorValues TIER3 = new EffectorValues
 			{
 				amount = 55,
 				radius = 5
 			};
 
-			public static EffectorValues TIER4 = new EffectorValues
+			public static readonly EffectorValues TIER4 = new EffectorValues
 			{
 				amount = 65,
 				radius = 5
 			};
 
-			public static EffectorValues TIER5 = new EffectorValues
+			public static readonly EffectorValues TIER5 = new EffectorValues
 			{
 				amount = 75,
 				radius = 5
 			};
 
-			public static EffectorValues TIER6 = new EffectorValues
+			public static readonly EffectorValues TIER6 = new EffectorValues
 			{
 				amount = 90,
 				radius = 10
 			};
 
-			public static EffectorValues TIER7 = new EffectorValues
+			public static readonly EffectorValues TIER7 = new EffectorValues
 			{
 				amount = 105,
 				radius = 10
@@ -129,37 +129,37 @@ namespace TUNING
 
 		public class DAMPEN
 		{
-			public static EffectorValues TIER0 = new EffectorValues
+			public static readonly EffectorValues TIER0 = new EffectorValues
 			{
 				amount = -5,
 				radius = 1
 			};
 
-			public static EffectorValues TIER1 = new EffectorValues
+			public static readonly EffectorValues TIER1 = new EffectorValues
 			{
 				amount = -10,
 				radius = 2
 			};
 
-			public static EffectorValues TIER2 = new EffectorValues
+			public static readonly EffectorValues TIER2 = new EffectorValues
 			{
 				amount = -15,
 				radius = 3
 			};
 
-			public static EffectorValues TIER3 = new EffectorValues
+			public static readonly EffectorValues TIER3 = new EffectorValues
 			{
 				amount = -20,
 				radius = 4
 			};
 
-			public static EffectorValues TIER4 = new EffectorValues
+			public static readonly EffectorValues TIER4 = new EffectorValues
 			{
 				amount = -20,
 				radius = 5
 			};
 
-			public static EffectorValues TIER5 = new EffectorValues
+			public static readonly EffectorValues TIER5 = new EffectorValues
 			{
 				amount = -25,
 				radius = 6

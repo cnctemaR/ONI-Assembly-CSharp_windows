@@ -269,7 +269,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	{
 		GameObject prefab = Assets.GetPrefab(prefabTag);
 		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
-		return Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui");
+		return Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false);
 	}
 
 	public override bool IsValidForTarget(GameObject target)

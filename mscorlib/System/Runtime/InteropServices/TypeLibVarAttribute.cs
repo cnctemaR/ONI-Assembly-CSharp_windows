@@ -6,24 +6,24 @@ namespace System.Runtime.InteropServices
 	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
 	public sealed class TypeLibVarAttribute : Attribute
 	{
-		public TypeLibVarAttribute(short flags)
-		{
-			this.flags = (TypeLibVarFlags)flags;
-		}
-
 		public TypeLibVarAttribute(TypeLibVarFlags flags)
 		{
-			this.flags = flags;
+			this._val = flags;
+		}
+
+		public TypeLibVarAttribute(short flags)
+		{
+			this._val = (TypeLibVarFlags)flags;
 		}
 
 		public TypeLibVarFlags Value
 		{
 			get
 			{
-				return this.flags;
+				return this._val;
 			}
 		}
 
-		private TypeLibVarFlags flags;
+		internal TypeLibVarFlags _val;
 	}
 }

@@ -6,6 +6,10 @@ public class AccessorySlot : Resource
 	public AccessorySlot(string id, ResourceSet parent, KAnimFile swap_build, string build_symbol_override = null)
 		: base(id, parent, null)
 	{
+		if (swap_build == null)
+		{
+			Debug.LogErrorFormat("AccessorySlot {0} missing swap_build", new object[] { id });
+		}
 		this.targetSymbolId = new KAnimHashedString("snapTo_" + id.ToLower());
 		this.accessories = new List<Accessory>();
 		this.file = swap_build;

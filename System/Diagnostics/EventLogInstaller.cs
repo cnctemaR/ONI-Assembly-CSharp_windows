@@ -2,7 +2,7 @@
 
 namespace System.Diagnostics
 {
-	[global::System.MonoTODO]
+	[MonoTODO]
 	internal class EventLogInstaller
 	{
 	}

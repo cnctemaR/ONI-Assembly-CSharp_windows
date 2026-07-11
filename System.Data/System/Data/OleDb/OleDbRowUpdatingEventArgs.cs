@@ -6,31 +6,29 @@ namespace System.Data.OleDb
 	public sealed class OleDbRowUpdatingEventArgs : RowUpdatingEventArgs
 	{
 		public OleDbRowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-			: base(dataRow, command, statementType, tableMapping)
+			: base(null, null, StatementType.Select, null)
 		{
-		}
-
-		public new OleDbCommand Command
-		{
-			get
-			{
-				return (OleDbCommand)base.Command;
-			}
-			set
-			{
-				base.Command = value;
-			}
 		}
 
 		protected override IDbCommand BaseCommand
 		{
 			get
 			{
-				return base.BaseCommand;
+				throw null;
 			}
 			set
 			{
-				base.BaseCommand = value;
+			}
+		}
+
+		public new OleDbCommand Command
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
 			}
 		}
 	}

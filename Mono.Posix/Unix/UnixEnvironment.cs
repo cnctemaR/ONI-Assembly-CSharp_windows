@@ -36,8 +36,7 @@ namespace Mono.Unix
 			}
 			set
 			{
-				int num = Syscall.sethostname(value);
-				UnixMarshal.ThrowExceptionForLastErrorIf(num);
+				UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.sethostname(value));
 			}
 		}
 
@@ -158,7 +157,7 @@ namespace Mono.Unix
 			}
 			if (num == 0UL)
 			{
-				return string.Empty;
+				return "";
 			}
 			StringBuilder stringBuilder = new StringBuilder((int)num + 1);
 			num = Syscall.confstr(name, stringBuilder, num);
@@ -171,8 +170,7 @@ namespace Mono.Unix
 
 		public static void SetNiceValue(int inc)
 		{
-			int num = Syscall.nice(inc);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.nice(inc));
 		}
 
 		public static int CreateSession()
@@ -184,8 +182,7 @@ namespace Mono.Unix
 
 		public static void SetProcessGroup()
 		{
-			int num = Syscall.setpgrp();
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.setpgrp());
 		}
 
 		public static int GetProcessGroup()
@@ -212,8 +209,7 @@ namespace Mono.Unix
 				UnixMarshal.ThrowExceptionForLastError();
 			}
 			uint[] array = new uint[num];
-			int num2 = Syscall.getgroups(array);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num2);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.getgroups(array));
 			return array;
 		}
 
@@ -224,8 +220,7 @@ namespace Mono.Unix
 			{
 				array[i] = Convert.ToUInt32(groups[i].GroupId);
 			}
-			int num = Syscall.setgroups(array);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.setgroups(array));
 		}
 
 		public static long[] GetSupplementaryGroupIds()
@@ -246,8 +241,7 @@ namespace Mono.Unix
 			{
 				array[i] = Convert.ToUInt32(list[i]);
 			}
-			int num = Syscall.setgroups(array);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.setgroups(array));
 		}
 
 		public static int GetParentProcessId()

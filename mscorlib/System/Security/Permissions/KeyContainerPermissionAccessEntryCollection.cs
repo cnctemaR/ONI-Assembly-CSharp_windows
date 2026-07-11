@@ -6,7 +6,7 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class KeyContainerPermissionAccessEntryCollection : IEnumerable, ICollection
+	public sealed class KeyContainerPermissionAccessEntryCollection : ICollection, IEnumerable
 	{
 		internal KeyContainerPermissionAccessEntryCollection()
 		{
@@ -22,16 +22,6 @@ namespace System.Security.Permissions
 					this.Add(keyContainerPermissionAccessEntry);
 				}
 			}
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this._list.CopyTo(array, index);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new KeyContainerPermissionAccessEntryEnumerator(this._list);
 		}
 
 		public int Count
@@ -81,7 +71,17 @@ namespace System.Security.Permissions
 			this._list.CopyTo(array, index);
 		}
 
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this._list.CopyTo(array, index);
+		}
+
 		public KeyContainerPermissionAccessEntryEnumerator GetEnumerator()
+		{
+			return new KeyContainerPermissionAccessEntryEnumerator(this._list);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new KeyContainerPermissionAccessEntryEnumerator(this._list);
 		}

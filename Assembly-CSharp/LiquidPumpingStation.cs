@@ -308,13 +308,13 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		}
 	}
 
-	private static CellOffset[] floorOffsets = new CellOffset[]
+	private static readonly CellOffset[] floorOffsets = new CellOffset[]
 	{
 		new CellOffset(0, 0),
 		new CellOffset(1, 0)
 	};
 
-	private static CellOffset[] liquidOffsets = new CellOffset[]
+	private static readonly CellOffset[] liquidOffsets = new CellOffset[]
 	{
 		new CellOffset(0, 0),
 		new CellOffset(1, 0),

@@ -9,7 +9,7 @@ namespace System.IO
 			return string.Format("[Descriptor: {0} Mask: {1} Name: {2}]", this.WatchDescriptor, this.Mask, this.Name);
 		}
 
-		public static readonly InotifyEvent Default = default(InotifyEvent);
+		public static readonly InotifyEvent Default;
 
 		public int WatchDescriptor;
 

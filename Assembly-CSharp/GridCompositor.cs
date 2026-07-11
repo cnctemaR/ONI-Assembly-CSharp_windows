@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class GridCompositor : MonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		GridCompositor.Instance = null;
+	}
+
 	private void Awake()
 	{
 		GridCompositor.Instance = this;

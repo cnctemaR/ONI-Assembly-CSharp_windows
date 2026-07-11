@@ -10,6 +10,11 @@ public class DebugPaintElementScreen : KScreen
 {
 	public static DebugPaintElementScreen Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		DebugPaintElementScreen.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

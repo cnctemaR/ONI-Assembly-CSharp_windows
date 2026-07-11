@@ -819,10 +819,10 @@ namespace UnityEngine.Networking
 						this.m_StatResetTime = (int)Time.time;
 					}
 				}
+				int num = 0;
 				byte b;
 				for (;;)
 				{
-					int num = 0;
 					int num2;
 					int num3;
 					int num4;
@@ -888,7 +888,7 @@ namespace UnityEngine.Networking
 						}
 						break;
 					}
-					if (num + 1 >= 500)
+					if (++num >= 500)
 					{
 						goto Block_17;
 					}
@@ -898,7 +898,7 @@ namespace UnityEngine.Networking
 					}
 					if (networkEventType == NetworkEventType.Nothing)
 					{
-						goto IL_02C8;
+						goto IL_02C6;
 					}
 				}
 				Block_10:
@@ -913,7 +913,7 @@ namespace UnityEngine.Networking
 					Debug.Log("MaxEventsPerFrame hit (" + 500 + ")");
 				}
 				Block_19:
-				IL_02C8:
+				IL_02C6:
 				if (this.m_Connection != null && this.m_AsyncConnect == NetworkClient.ConnectState.Connected)
 				{
 					this.m_Connection.FlushChannels();

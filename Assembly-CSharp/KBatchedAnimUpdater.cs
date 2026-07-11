@@ -2,27 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class KBatchedAnimUpdater
+public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 {
-	public static KBatchedAnimUpdater instance
-	{
-		get
-		{
-			return Singleton<KBatchedAnimUpdater>.Instance;
-		}
-	}
-
-	public static void Destroy()
-	{
-		KBatchedAnimUpdater.instance.Clear();
-		Singleton<KBatchedAnimUpdater>.Destroy();
-	}
-
-	public static void CreateInstance()
-	{
-		Singleton<KBatchedAnimUpdater>.CreateInstance();
-	}
-
 	public void InitializeGrid()
 	{
 		this.Clear();
@@ -320,14 +301,14 @@ public class KBatchedAnimUpdater
 						chunkXY = KBatchedAnimUpdater.PosToChunkXY(info.controller.transform.GetPosition())
 					};
 					this.controllerChunkInfos[instanceID] = controllerChunkInfo;
-					CellChangeMonitor.Instance.RegisterMovementStateChanged(info.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
+					Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(info.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
 					List<KBatchedAnimController> controllerList = this.GetControllerList(controllerChunkInfo.chunkXY);
 					if (controllerList != null)
 					{
 						DebugUtil.Assert(!controllerList.Contains(info.controller), "Assert!");
 						controllerList.Add(info.controller);
 					}
-					bool flag = CellChangeMonitor.Instance.IsMoving(info.controller.transform);
+					bool flag = Singleton<CellChangeMonitor>.Instance.IsMoving(info.controller.transform);
 					if (flag)
 					{
 						this.movingControllerInfos.Add(new KBatchedAnimUpdater.MovingControllerInfo
@@ -358,7 +339,7 @@ public class KBatchedAnimUpdater
 						}
 					}
 					this.movingControllerInfos.RemoveAll((KBatchedAnimUpdater.MovingControllerInfo x) => x.controllerInstanceId == info.controllerInstanceId);
-					CellChangeMonitor.Instance.UnregisterMovementStateChanged(info.transformId, new Action<Transform, bool>(this.OnMovementStateChanged));
+					Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(info.transformId, new Action<Transform, bool>(this.OnMovementStateChanged));
 					this.controllerChunkInfos.Remove(info.controllerInstanceId);
 					pooledList.Remove(info.controller);
 				}
@@ -441,7 +422,7 @@ public class KBatchedAnimUpdater
 
 	private const int VISIBLE_BORDER = 4;
 
-	public static Vector2I INVALID_CHUNK_ID = Vector2I.minusone;
+	public static readonly Vector2I INVALID_CHUNK_ID = Vector2I.minusone;
 
 	private List<KBatchedAnimController>[,] controllerGrid;
 
@@ -471,7 +452,7 @@ public class KBatchedAnimUpdater
 
 	private int cleanUpChunkIndex;
 
-	private static Vector2 VISIBLE_RANGE_SCALE = new Vector2(1f, 1.5f);
+	private static readonly Vector2 VISIBLE_RANGE_SCALE = new Vector2(1f, 1.5f);
 
 	public enum RegistrationState
 	{

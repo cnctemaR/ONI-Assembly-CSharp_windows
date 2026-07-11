@@ -143,10 +143,10 @@ public class WorldGenSpawner : KMonoBehaviour
 			Grid.Revealed[i] = false;
 			Grid.Spawnable[i] = 0;
 		}
-		float num = float.Parse(WorldGen.Settings.defaults.data["NewBaseVisibiltyInnerRadius"] as string);
-		float num2 = float.Parse(WorldGen.Settings.defaults.data["NewBaseVisibiltyRadius"] as string);
+		float floatSetting = WorldGen.Settings.GetFloatSetting("NewBaseVisibiltyInnerRadius");
+		float floatSetting2 = WorldGen.Settings.GetFloatSetting("NewBaseVisibiltyRadius");
 		Vector2I baseStartPos = WorldGen.SpawnData.baseStartPos;
-		GridVisibility.Reveal(baseStartPos.x, baseStartPos.y, num2, num);
+		GridVisibility.Reveal(baseStartPos.x, baseStartPos.y, floatSetting2, floatSetting);
 	}
 
 	private static WorldGenSpawner instance;

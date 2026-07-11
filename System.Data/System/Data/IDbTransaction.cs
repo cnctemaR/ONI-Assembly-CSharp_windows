@@ -4,12 +4,12 @@ namespace System.Data
 {
 	public interface IDbTransaction : IDisposable
 	{
-		void Commit();
-
-		void Rollback();
-
 		IDbConnection Connection { get; }
 
 		IsolationLevel IsolationLevel { get; }
+
+		void Commit();
+
+		void Rollback();
 	}
 }

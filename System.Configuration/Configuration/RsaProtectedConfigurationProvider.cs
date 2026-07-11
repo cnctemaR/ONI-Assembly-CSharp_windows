@@ -26,25 +26,24 @@ namespace System.Configuration
 		}
 
 		[MonoTODO]
-		public override XmlNode Decrypt(XmlNode encrypted_node)
+		public override XmlNode Decrypt(XmlNode encryptedNode)
 		{
-			XmlDocument xmlDocument = new XmlDocument();
-			xmlDocument.Load(new StringReader(encrypted_node.OuterXml));
-			EncryptedXml encryptedXml = new EncryptedXml(xmlDocument);
+			ConfigurationXmlDocument configurationXmlDocument = new ConfigurationXmlDocument();
+			configurationXmlDocument.Load(new StringReader(encryptedNode.OuterXml));
+			EncryptedXml encryptedXml = new EncryptedXml(configurationXmlDocument);
 			encryptedXml.AddKeyNameMapping("Rsa Key", this.GetProvider());
 			encryptedXml.DecryptDocument();
-			return xmlDocument.DocumentElement;
+			return configurationXmlDocument.DocumentElement;
 		}
 
 		[MonoTODO]
 		public override XmlNode Encrypt(XmlNode node)
 		{
-			XmlDocument xmlDocument = new XmlDocument();
+			XmlDocument xmlDocument = new ConfigurationXmlDocument();
 			xmlDocument.Load(new StringReader(node.OuterXml));
 			EncryptedXml encryptedXml = new EncryptedXml(xmlDocument);
 			encryptedXml.AddKeyNameMapping("Rsa Key", this.GetProvider());
-			EncryptedData encryptedData = encryptedXml.Encrypt(xmlDocument.DocumentElement, "Rsa Key");
-			return encryptedData.GetXml();
+			return encryptedXml.Encrypt(xmlDocument.DocumentElement, "Rsa Key").GetXml();
 		}
 
 		[MonoTODO]
@@ -80,10 +79,8 @@ namespace System.Configuration
 		[MonoTODO]
 		public void ExportKey(string xmlFileName, bool includePrivateParameters)
 		{
-			RSACryptoServiceProvider provider = this.GetProvider();
-			string text = provider.ToXmlString(includePrivateParameters);
-			FileStream fileStream = new FileStream(xmlFileName, FileMode.OpenOrCreate, FileAccess.Write);
-			StreamWriter streamWriter = new StreamWriter(fileStream);
+			string text = this.GetProvider().ToXmlString(includePrivateParameters);
+			StreamWriter streamWriter = new StreamWriter(new FileStream(xmlFileName, FileMode.OpenOrCreate, FileAccess.Write));
 			streamWriter.Write(text);
 			streamWriter.Close();
 		}
@@ -114,8 +111,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				RSACryptoServiceProvider provider = this.GetProvider();
-				return provider.ExportParameters(false);
+				return this.GetProvider().ExportParameters(false);
 			}
 		}
 

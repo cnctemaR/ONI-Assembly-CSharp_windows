@@ -2,10 +2,16 @@
 using Klei;
 using Klei.AI;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 public class SimDebugView : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		SimDebugView.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		SimDebugView.Instance = this;
@@ -42,7 +48,7 @@ public class SimDebugView : KMonoBehaviour
 	public static Texture2D CreateTexture(out byte[] textureBytes, int width, int height)
 	{
 		textureBytes = new byte[width * height * 4];
-		return new Texture2D(width, height, TextureFormat.RGBA32, false)
+		return new Texture2D(width, height, TextureUtil.TextureFormatToGraphicsFormat(TextureFormat.RGBA32), TextureCreationFlags.None)
 		{
 			name = "SimDebugView",
 			wrapMode = TextureWrapMode.Clamp,
@@ -156,7 +162,7 @@ public class SimDebugView : KMonoBehaviour
 		}
 		this.currentFrame = Time.frameCount;
 		this.selectedCell = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
-		App.instance.jobManager.Run(this.updateSimViewWorkItems);
+		GlobalJobManager.Run(this.updateSimViewWorkItems);
 		texture.LoadRawTextureData(textureBytes);
 		texture.Apply();
 	}
@@ -247,122 +253,179 @@ public class SimDebugView : KMonoBehaviour
 	{
 		Color color = Color.black;
 		bool flag = (byte)(Grid.Element[cell].state & Element.State.TemperatureInsulated) != 0;
-		if (viewMode != SimViewMode.GameGrid)
+		if (viewMode != SimViewMode.PressureMap)
 		{
-			if (viewMode != SimViewMode.Decor)
+			if (viewMode != SimViewMode.Rooms)
 			{
-				if (viewMode != SimViewMode.Joules)
+				if (viewMode != SimViewMode.MinionOccupied)
 				{
-					if (viewMode != SimViewMode.OxygenMap)
+					if (viewMode != SimViewMode.HeatFlow)
 					{
-						if (viewMode != SimViewMode.MinionGroupProber)
+						if (viewMode != SimViewMode.SuitRequiredMap)
 						{
-							if (viewMode != SimViewMode.ConduitUpdates)
+							if (viewMode != SimViewMode.Forcefield)
 							{
-								if (viewMode != SimViewMode.SimCheckErrorMap)
+								if (viewMode != SimViewMode.Reachability)
 								{
-									if (viewMode != SimViewMode.TileType)
+									if (viewMode != SimViewMode.Flow)
 									{
-										if (viewMode != SimViewMode.ScenePartitioner)
+										if (viewMode != SimViewMode.PathProber)
 										{
-											if (viewMode != SimViewMode.Crop)
+											if (viewMode != SimViewMode.ThermalConductivity)
 											{
-												if (viewMode == SimViewMode.MassMap)
+												if (viewMode != SimViewMode.TemperatureMap)
 												{
-													if (!flag)
+													if (viewMode != SimViewMode.AllowPathfinding)
 													{
-														float num = Grid.Mass[cell];
-														if (num > 0f)
+														if (viewMode != SimViewMode.Disease)
 														{
-															float num2 = (num - SimDebugView.Instance.minMassExpected) / (SimDebugView.Instance.maxMassExpected - SimDebugView.Instance.minMassExpected);
-															color = Color.HSVToRGB(1f - num2, 1f, 1f);
-														}
-													}
-													return color;
-												}
-												if (viewMode != SimViewMode.HarvestWhenReady)
-												{
-													if (viewMode == SimViewMode.Priorities)
-													{
-														return Color.black;
-													}
-													if (viewMode == SimViewMode.TemperatureMapOld)
-													{
-														if (!flag)
-														{
-															color = SimDebugView.TemperatureToColor(Grid.Temperature[cell], this.minTempExpected, this.maxTempExpected);
-														}
-														return color;
-													}
-													if (viewMode == SimViewMode.NoisePollution)
-													{
-														return this.GetNoisePollutionColour(cell);
-													}
-													if (viewMode == SimViewMode.PressureMap)
-													{
-														return this.GetPressureMapColour(cell);
-													}
-													if (viewMode == SimViewMode.Rooms)
-													{
-														CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(cell);
-														if (cavityForCell != null && cavityForCell.room != null)
-														{
-															Room room = cavityForCell.room;
-															color = Db.Get().RoomTypes.GetRoomType(room).category.color;
-															color.a = 0.45f;
-															if (Grid.IsValidCell(this.selectedCell))
+															if (viewMode != SimViewMode.Reserved)
 															{
-																CavityInfo cavityForCell2 = Game.Instance.roomProber.GetCavityForCell(this.selectedCell);
-																if (cavityForCell2 == cavityForCell)
+																if (viewMode != SimViewMode.StateChange)
 																{
-																	color.a += 0.3f;
+																	if (viewMode != SimViewMode.SolidLiquidMap)
+																	{
+																		if (viewMode != SimViewMode.DangerMap)
+																		{
+																			if (viewMode != SimViewMode.Light)
+																			{
+																				if (viewMode != SimViewMode.GameGrid)
+																				{
+																					if (viewMode != SimViewMode.StateMap)
+																					{
+																						if (viewMode != SimViewMode.Decor)
+																						{
+																							if (viewMode != SimViewMode.Joules)
+																							{
+																								if (viewMode != SimViewMode.OxygenMap)
+																								{
+																									if (viewMode != SimViewMode.MinionGroupProber)
+																									{
+																										if (viewMode != SimViewMode.ConduitUpdates)
+																										{
+																											if (viewMode != SimViewMode.SimCheckErrorMap)
+																											{
+																												if (viewMode != SimViewMode.TileType)
+																												{
+																													if (viewMode != SimViewMode.ScenePartitioner)
+																													{
+																														if (viewMode != SimViewMode.Crop)
+																														{
+																															if (viewMode == SimViewMode.MassMap)
+																															{
+																																if (!flag)
+																																{
+																																	float num = Grid.Mass[cell];
+																																	if (num > 0f)
+																																	{
+																																		float num2 = (num - SimDebugView.Instance.minMassExpected) / (SimDebugView.Instance.maxMassExpected - SimDebugView.Instance.minMassExpected);
+																																		color = Color.HSVToRGB(1f - num2, 1f, 1f);
+																																	}
+																																}
+																																return color;
+																															}
+																															if (viewMode != SimViewMode.HarvestWhenReady)
+																															{
+																																if (viewMode == SimViewMode.Priorities)
+																																{
+																																	return Color.black;
+																																}
+																																if (viewMode == SimViewMode.TemperatureMapOld)
+																																{
+																																	if (!flag)
+																																	{
+																																		color = SimDebugView.TemperatureToColor(Grid.Temperature[cell], this.minTempExpected, this.maxTempExpected);
+																																	}
+																																	return color;
+																																}
+																																if (viewMode != SimViewMode.NoisePollution)
+																																{
+																																	return color;
+																																}
+																																return this.GetNoisePollutionColour(cell);
+																															}
+																														}
+																														color = Color.black;
+																													}
+																												}
+																												else
+																												{
+																													color = this.GetTileTypeColour(cell);
+																												}
+																											}
+																											else
+																											{
+																												color = this.GetSimCheckErrorMapColour(cell);
+																											}
+																										}
+																									}
+																									else
+																									{
+																										bool flag2 = MinionGroupProber.Get().IsReachable(cell, this.currentFrame);
+																										if (flag2)
+																										{
+																											color = Color.white;
+																										}
+																										else
+																										{
+																											color = Color.black;
+																										}
+																									}
+																								}
+																								else
+																								{
+																									color = this.GetOxygenMapColour(cell);
+																								}
+																							}
+																							else
+																							{
+																								float num3 = Grid.Element[cell].specificHeatCapacity * Grid.Temperature[cell] * (Grid.Mass[cell] * 1000f);
+																								float num4 = 0.5f * num3 / (ElementLoader.FindElementByHash(SimHashes.SandStone).specificHeatCapacity * 294f * 1000000f);
+																								color = Color.Lerp(Color.black, Color.red, num4);
+																							}
+																						}
+																						else
+																						{
+																							color = this.GetDecorColour(cell);
+																						}
+																					}
+																					else
+																					{
+																						color = this.GetStateMapColour(cell);
+																					}
+																				}
+																				else
+																				{
+																					color = this.GetGameGridColour(cell, ggMode);
+																				}
+																			}
+																			else
+																			{
+																				color = new Color(0.8f, 0.7f, 0.3f, Mathf.Clamp(Mathf.Sqrt((float)(Grid.LightIntensity[cell] + LightGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f));
+																				if (Grid.LightIntensity[cell] > 71999)
+																				{
+																					float num5 = ((float)Grid.LightIntensity[cell] + (float)LightGridManager.previewLux[cell] - 71999f) / 8001f;
+																					num5 /= 10f;
+																					color.r += Mathf.Min(0.1f, PerlinSimplexNoise.noise(Grid.CellToPos2D(cell).x / 8f, Grid.CellToPos2D(cell).y / 8f + (float)this.currentFrame / 32f) * num5);
+																				}
+																			}
+																		}
+																		else
+																		{
+																			color = this.GetDangerMap(cell);
+																		}
+																	}
+																	else
+																	{
+																		color = this.GetSolidLiquidMapColour(cell);
+																	}
+																}
+																else
+																{
+																	color = this.GetStateChangeColour(cell);
 																}
 															}
-														}
-														else
-														{
-															color = Color.black;
-														}
-														return color;
-													}
-													if (viewMode == SimViewMode.MinionOccupied)
-													{
-														if (Grid.Objects[cell, 0] != null)
-														{
-															color = Color.white;
-														}
-														return color;
-													}
-													if (viewMode == SimViewMode.HeatFlow)
-													{
-														return this.NormalizedHeatFlow(cell);
-													}
-													if (viewMode == SimViewMode.SuitRequiredMap)
-													{
-														return Color.black;
-													}
-													if (viewMode == SimViewMode.Forcefield)
-													{
-														if (Grid.ForceField[cell])
-														{
-															color = Color.white;
-														}
-														return color;
-													}
-													if (viewMode == SimViewMode.Reachability)
-													{
-														return Color.black;
-													}
-													if (viewMode == SimViewMode.Flow)
-													{
-														return color;
-													}
-													if (viewMode == SimViewMode.PathProber)
-													{
-														if (path_prober != null && path_prober != null)
-														{
-															int cost = path_prober.GetCost(cell);
-															if (cost != PathProber.InvalidCost)
+															else if (Grid.Reserved[cell])
 															{
 																color = Color.white;
 															}
@@ -371,31 +434,7 @@ public class SimDebugView : KMonoBehaviour
 																color = Color.black;
 															}
 														}
-														return color;
-													}
-													if (viewMode == SimViewMode.ThermalConductivity)
-													{
-														return this.GetThermalConductivityColour(flag, cell);
-													}
-													if (viewMode == SimViewMode.TemperatureMap)
-													{
-														return this.NormalizedTemperature(Grid.Temperature[cell]);
-													}
-													if (viewMode == SimViewMode.AllowPathfinding)
-													{
-														if (Grid.AllowPathfinding[cell])
-														{
-															color = Color.white;
-														}
-														else
-														{
-															color = Color.black;
-														}
-														return color;
-													}
-													if (viewMode == SimViewMode.Disease)
-													{
-														if (Grid.DiseaseIdx[cell] != 255)
+														else if (Grid.DiseaseIdx[cell] != 255)
 														{
 															Disease disease = Db.Get().Diseases[(int)Grid.DiseaseIdx[cell]];
 															color = disease.overlayColour;
@@ -405,97 +444,91 @@ public class SimDebugView : KMonoBehaviour
 														{
 															color.a = 0f;
 														}
-														return color;
 													}
-													if (viewMode == SimViewMode.Reserved)
+													else if (Grid.AllowPathfinding[cell])
 													{
-														if (Grid.Reserved[cell])
-														{
-															color = Color.white;
-														}
-														else
-														{
-															color = Color.black;
-														}
-														return color;
+														color = Color.white;
 													}
-													if (viewMode == SimViewMode.StateChange)
+													else
 													{
-														return this.GetStateChangeColour(cell);
+														color = Color.black;
 													}
-													if (viewMode == SimViewMode.SolidLiquidMap)
-													{
-														return this.GetSolidLiquidMapColour(cell);
-													}
-													if (viewMode == SimViewMode.DangerMap)
-													{
-														return this.GetDangerMap(cell);
-													}
-													if (viewMode == SimViewMode.Light)
-													{
-														color = new Color(0.8f, 0.7f, 0.3f, Mathf.Clamp(Mathf.Sqrt((float)(Grid.LightIntensity[cell] + LightGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f));
-														if (Grid.LightIntensity[cell] > 71999)
-														{
-															float num3 = ((float)Grid.LightIntensity[cell] + (float)LightGridManager.previewLux[cell] - 71999f) / 8001f;
-															num3 /= 10f;
-															color.r += Mathf.Min(0.1f, PerlinSimplexNoise.noise(Grid.CellToPos2D(cell).x / 8f, Grid.CellToPos2D(cell).y / 8f + (float)this.currentFrame / 32f) * num3);
-														}
-														return color;
-													}
-													if (viewMode != SimViewMode.StateMap)
-													{
-														return color;
-													}
-													return this.GetStateMapColour(cell);
+												}
+												else
+												{
+													color = this.NormalizedTemperature(Grid.Temperature[cell]);
 												}
 											}
-											color = Color.black;
+											else
+											{
+												color = this.GetThermalConductivityColour(flag, cell);
+											}
 										}
-									}
-									else
-									{
-										color = this.GetTileTypeColour(cell);
+										else if (path_prober != null && path_prober != null)
+										{
+											int cost = path_prober.GetCost(cell);
+											if (cost != PathProber.InvalidCost)
+											{
+												color = Color.white;
+											}
+											else
+											{
+												color = Color.black;
+											}
+										}
 									}
 								}
 								else
 								{
-									color = this.GetSimCheckErrorMapColour(cell);
+									color = Color.black;
 								}
+							}
+							else if (Grid.ForceField[cell])
+							{
+								color = Color.white;
 							}
 						}
 						else
 						{
-							bool flag2 = MinionGroupProber.Get().IsReachable(cell, this.currentFrame);
-							if (flag2)
-							{
-								color = Color.white;
-							}
-							else
-							{
-								color = Color.black;
-							}
+							color = Color.black;
 						}
 					}
 					else
 					{
-						color = this.GetOxygenMapColour(cell);
+						color = this.NormalizedHeatFlow(cell);
 					}
 				}
-				else
+				else if (Grid.Objects[cell, 0] != null)
 				{
-					float num4 = Grid.Element[cell].specificHeatCapacity * Grid.Temperature[cell] * (Grid.Mass[cell] * 1000f);
-					float num5 = 0.5f * num4 / (ElementLoader.FindElementByHash(SimHashes.SandStone).specificHeatCapacity * 294f * 1000000f);
-					color = Color.Lerp(Color.black, Color.red, num5);
+					color = Color.white;
 				}
 			}
 			else
 			{
-				color = this.GetDecorColour(cell);
+				CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(cell);
+				if (cavityForCell != null && cavityForCell.room != null)
+				{
+					Room room = cavityForCell.room;
+					color = room.roomType.category.color;
+					color.a = 0.45f;
+					if (Grid.IsValidCell(this.selectedCell))
+					{
+						CavityInfo cavityForCell2 = Game.Instance.roomProber.GetCavityForCell(this.selectedCell);
+						if (cavityForCell2 == cavityForCell)
+						{
+							color.a += 0.3f;
+						}
+					}
+				}
+				else
+				{
+					color = Color.black;
+				}
 			}
 		}
 		else
 		{
-			color = this.GetGameGridColour(cell, ggMode);
+			color = this.GetPressureMapColour(cell);
 		}
 		return color;
 	}

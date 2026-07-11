@@ -5,19 +5,35 @@ using UnityEngine;
 
 public class SleepChore : Chore<SleepChore.StatesInstance>
 {
-	public SleepChore(IStateMachineTarget target, GameObject bed)
-		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+	public SleepChore(ChoreType choreType, IStateMachineTarget target, GameObject bed, bool bedIsLocator, bool isInterruptable)
+		: base(choreType, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
 	{
-		this.smi = new SleepChore.StatesInstance(this, target.gameObject, bed);
-		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
-		base.AddPrecondition(SleepChore.IsOkayTimeToSleep, null);
-		if (bed != null)
+		this.smi = new SleepChore.StatesInstance(this, target.gameObject, bed, bedIsLocator, isInterruptable);
+		if (isInterruptable)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsOperational, bed.GetComponent<Operational>());
+			base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
+		}
+		base.AddPrecondition(SleepChore.IsOkayTimeToSleep, null);
+		Operational component = bed.GetComponent<Operational>();
+		if (component != null)
+		{
+			base.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
 		}
 	}
 
-	public static Chore.Precondition IsOkayTimeToSleep = new Chore.Precondition
+	public static Sleepable GetSafeFloorLocator(GameObject sleeper)
+	{
+		int num = sleeper.GetComponent<Sensors>().GetSensor<SafeCellSensor>().GetCell();
+		if (num == Grid.InvalidCell)
+		{
+			num = Grid.PosToCell(sleeper.transform.GetPosition());
+		}
+		Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
+		GameObject gameObject = ChoreHelpers.CreateSleepLocator(vector);
+		return gameObject.GetComponent<Sleepable>();
+	}
+
+	public static readonly Chore.Precondition IsOkayTimeToSleep = new Chore.Precondition
 	{
 		id = "IsOkayTimeToSleep",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_OKAY_TIME_TO_SLEEP,
@@ -34,33 +50,29 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 	public class StatesInstance : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.GameInstance
 	{
-		public StatesInstance(SleepChore master, GameObject sleeper, GameObject bed)
+		public StatesInstance(SleepChore master, GameObject sleeper, GameObject bed, bool bedIsLocator, bool isInterruptable)
 			: base(master)
 		{
 			base.sm.sleeper.Set(sleeper, base.smi);
-			base.sm.bed.Set(bed, base.smi);
+			base.sm.isInterruptable.Set(isInterruptable, base.smi);
+			if (bedIsLocator)
+			{
+				this.AddLocator(bed);
+			}
+			else
+			{
+				base.sm.bed.Set(bed, base.smi);
+			}
 		}
 
 		public void EvaluateSleepQuality()
 		{
-			if (base.sm.sleepingOnFloor.Get(base.smi))
-			{
-				base.sm.sleeper.Get<Effects>(base.smi).Add(Db.Get().effects.Get("SoreBack"), true);
-			}
 		}
 
-		public void CreateLocator()
+		public void AddLocator(GameObject sleepable)
 		{
-			int num = base.sm.sleeper.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>().GetCell();
-			if (num == Grid.InvalidCell)
-			{
-				num = Grid.PosToCell(base.sm.sleeper.Get<Transform>(base.smi).GetPosition());
-			}
-			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
-			Grid.Reserved[num] = true;
-			this.locator = ChoreHelpers.CreateLocator("SleepLocator", vector);
-			this.locatorCell = num;
-			this.locator.AddComponent<Sleepable>();
+			this.locator = sleepable;
+			Grid.Reserved[Grid.PosToCell(this.locator)] = true;
 			base.sm.bed.Set(this.locator, this);
 		}
 
@@ -68,7 +80,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		{
 			if (this.locator != null)
 			{
-				Grid.Reserved[this.locatorCell] = false;
+				Grid.Reserved[Grid.PosToCell(this.locator)] = false;
 				ChoreHelpers.DestroyLocator(this.locator);
 				base.sm.bed.Set(null, this);
 				this.locator = null;
@@ -115,8 +127,6 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 		public string stateChangeNoiseSource;
 
-		private int locatorCell;
-
 		private GameObject locator;
 	}
 
@@ -124,34 +134,26 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.check_for_bed;
+			default_state = this.approach;
 			base.Target(this.sleeper);
 			this.root.Exit("DestroyLocator", delegate(SleepChore.StatesInstance smi)
 			{
 				smi.DestroyLocator();
 			});
-			this.check_for_bed.Enter("Check For Bed", delegate(SleepChore.StatesInstance smi)
-			{
-				this.sleepingOnFloor.Set(false, smi);
-				if (this.bed.Get(smi) == null)
-				{
-					smi.CreateLocator();
-					this.sleepingOnFloor.Set(true, smi);
-				}
-				smi.GoTo(this.approach);
-			});
 			this.approach.InitializeStates(this.sleeper, this.bed, this.sleep, null, null, null);
 			this.sleep.Enter("SetAnims", delegate(SleepChore.StatesInstance smi)
 			{
 				smi.SetAnim();
-			}).DefaultState(this.sleep.normal).ToggleEffect("Sleep")
+			}).DefaultState(this.sleep.normal).ToggleTag(GameTags.Asleep)
 				.DoSleep(this.sleeper, this.bed, this.success, null);
-			this.sleep.normal.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null).EventTransition(GameHashes.SleepFail, this.sleep.interrupt, null);
+			this.sleep.uninterruptable.DoNothing();
+			this.sleep.normal.ParamTransition<bool>(this.isInterruptable, this.sleep.uninterruptable, (SleepChore.StatesInstance smi, bool p) => !p).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null)
+				.EventTransition(GameHashes.SleepDisturbed, this.sleep.interrupt, null);
 			this.sleep.interrupt.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterrupted, null).QueueAnim("interrupt", false, null).OnAnimQueueComplete(this.sleep.interrupt_transition);
 			this.sleep.interrupt_transition.Enter(delegate(SleepChore.StatesInstance smi)
 			{
 				smi.master.GetComponent<Effects>().Add(Db.Get().effects.Get("TerribleSleep"), true);
-				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state = ((!GameClock.Instance.IsNighttime()) ? this.success : this.sleep.normal);
+				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state = ((!smi.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Sleep)) ? this.success : this.sleep.normal);
 				smi.GoTo(state);
 			});
 			this.success.Enter(delegate(SleepChore.StatesInstance smi)
@@ -164,9 +166,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.TargetParameter bed;
 
-		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.BoolParameter sleepingOnFloor;
-
-		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State check_for_bed;
+		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.BoolParameter isInterruptable;
 
 		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.ApproachSubState<IApproachable> approach;
 
@@ -179,6 +179,8 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State condition_transition;
 
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State condition_transition_pre;
+
+			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State uninterruptable;
 
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State normal;
 

@@ -27,7 +27,6 @@ public static class CSVUtil
 						string text2 = grid[i, row];
 						if (text2 != null)
 						{
-							text2 = text2.Replace("\n\n", "\n");
 							CSVUtil.ParseValue(field, text2, def, grid[0, row]);
 						}
 					}
@@ -197,18 +196,18 @@ public static class CSVUtil
 				case TypeCode.Byte:
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
-					goto IL_0160;
+					goto IL_0166;
 				default:
-					goto IL_0160;
+					goto IL_0166;
 				}
-				IL_0173:
+				IL_0179:
 				num |= num2;
-				goto IL_017A;
-				IL_0160:
+				goto IL_0180;
+				IL_0166:
 				num2 = Convert.ToUInt64(obj, CultureInfo.InvariantCulture);
-				goto IL_0173;
+				goto IL_0179;
 			}
-			IL_017A:;
+			IL_0180:;
 		}
 		value = Enum.ToObject(type, num);
 		return true;

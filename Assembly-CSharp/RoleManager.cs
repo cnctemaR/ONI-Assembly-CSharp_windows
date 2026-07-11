@@ -11,36 +11,36 @@ public class RoleManager
 	public RoleManager()
 	{
 		List<RoleSlotUnlock> list = new List<RoleSlotUnlock>();
-		list.Add(new RoleSlotUnlock("Default", "Default", "Default", new List<Tuple<string, int>>
+		list.Add(new RoleSlotUnlock("Default", "Default", "Default", new List<global::Tuple<string, int>>
 		{
-			new Tuple<string, int>("NoRole", 128),
-			new Tuple<string, int>(JuniorMiner.ID, 128),
-			new Tuple<string, int>(Miner.ID, 128),
-			new Tuple<string, int>(SeniorMiner.ID, 128),
-			new Tuple<string, int>("JuniorFarmer", 128),
-			new Tuple<string, int>("Farmer", 128),
-			new Tuple<string, int>("SeniorFarmer", 128),
-			new Tuple<string, int>("Rancher", 128),
-			new Tuple<string, int>("SeniorRancher", 128),
-			new Tuple<string, int>(JuniorResearcher.ID, 128),
-			new Tuple<string, int>(Researcher.ID, 128),
-			new Tuple<string, int>(SeniorResearcher.ID, 128),
-			new Tuple<string, int>("Hauler", 128),
-			new Tuple<string, int>(JuniorBuilder.ID, 128),
-			new Tuple<string, int>(Builder.ID, 128),
-			new Tuple<string, int>(SeniorBuilder.ID, 128),
-			new Tuple<string, int>(JuniorCook.ID, 128),
-			new Tuple<string, int>(Cook.ID, 128),
-			new Tuple<string, int>(MachineTechnician.ID, 128),
-			new Tuple<string, int>(JuniorArtist.ID, 128),
-			new Tuple<string, int>(Artist.ID, 128),
-			new Tuple<string, int>(Handyman.ID, 128),
-			new Tuple<string, int>("SuitExpert", 128),
-			new Tuple<string, int>("OilTechnician", 128),
-			new Tuple<string, int>("PowerTechnician", 128),
-			new Tuple<string, int>(MaterialsManager.ID, 128),
-			new Tuple<string, int>("MechatronicEngineer", 128),
-			new Tuple<string, int>(Plumber.ID, 128)
+			new global::Tuple<string, int>("NoRole", 128),
+			new global::Tuple<string, int>(JuniorMiner.ID, 128),
+			new global::Tuple<string, int>(Miner.ID, 128),
+			new global::Tuple<string, int>(SeniorMiner.ID, 128),
+			new global::Tuple<string, int>("JuniorFarmer", 128),
+			new global::Tuple<string, int>("Farmer", 128),
+			new global::Tuple<string, int>("SeniorFarmer", 128),
+			new global::Tuple<string, int>("Rancher", 128),
+			new global::Tuple<string, int>("SeniorRancher", 128),
+			new global::Tuple<string, int>(JuniorResearcher.ID, 128),
+			new global::Tuple<string, int>(Researcher.ID, 128),
+			new global::Tuple<string, int>(SeniorResearcher.ID, 128),
+			new global::Tuple<string, int>("Hauler", 128),
+			new global::Tuple<string, int>(JuniorBuilder.ID, 128),
+			new global::Tuple<string, int>(Builder.ID, 128),
+			new global::Tuple<string, int>(SeniorBuilder.ID, 128),
+			new global::Tuple<string, int>(JuniorCook.ID, 128),
+			new global::Tuple<string, int>(Cook.ID, 128),
+			new global::Tuple<string, int>(MachineTechnician.ID, 128),
+			new global::Tuple<string, int>(JuniorArtist.ID, 128),
+			new global::Tuple<string, int>(Artist.ID, 128),
+			new global::Tuple<string, int>(Handyman.ID, 128),
+			new global::Tuple<string, int>("SuitExpert", 128),
+			new global::Tuple<string, int>("OilTechnician", 128),
+			new global::Tuple<string, int>("PowerTechnician", 128),
+			new global::Tuple<string, int>(MaterialsManager.ID, 128),
+			new global::Tuple<string, int>("MechatronicEngineer", 128),
+			new global::Tuple<string, int>(Plumber.ID, 128)
 		}, () => true));
 		this.SlotUnlocks = list;
 		base..ctor();
@@ -56,10 +56,8 @@ public class RoleManager
 				this.minionResumes.Add(component);
 			}
 		}
-		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(this.OnIDsChanged));
-		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
-		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(this.OnIDsChanged));
+		Components.LiveMinionIdentities.OnAdd += this.OnIDsChanged;
+		Components.LiveMinionIdentities.OnRemove += this.OnIDsChanged;
 		foreach (KeyValuePair<string, int> keyValuePair in this.roleRowIndex)
 		{
 			if (keyValuePair.Value > this.NumberOfRows)
@@ -129,7 +127,7 @@ public class RoleManager
 		int num = 0;
 		foreach (string text in this.achievedSlotUnlocks)
 		{
-			foreach (Tuple<string, int> tuple in this.GetSlotUnlock(text).slots)
+			foreach (global::Tuple<string, int> tuple in this.GetSlotUnlock(text).slots)
 			{
 				if (tuple.first == role_id)
 				{
@@ -290,7 +288,7 @@ public class RoleManager
 
 	public void UnlockSlots(RoleSlotUnlock roleSlotUnlock)
 	{
-		foreach (Tuple<string, int> tuple in roleSlotUnlock.slots)
+		foreach (global::Tuple<string, int> tuple in roleSlotUnlock.slots)
 		{
 			if (this.SlotsByRoleID.ContainsKey(tuple.first))
 			{
@@ -538,7 +536,7 @@ public class RoleManager
 		}
 		else
 		{
-			controller.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride(hat.targetSymbolId, 3);
+			controller.GetComponent<SymbolOverrideController>().TryRemoveSymbolOverride(hat.targetSymbolId, 4);
 		}
 		controller.SetSymbolVisiblity(hat.targetSymbolId, false);
 		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, false);
@@ -562,8 +560,8 @@ public class RoleManager
 		else
 		{
 			SymbolOverrideController component2 = controller.GetComponent<SymbolOverrideController>();
-			component2.TryRemoveSymbolOverride(hat.targetSymbolId, 3);
-			component2.AddSymbolOverride(hat.targetSymbolId, accessory.symbol, 3);
+			component2.TryRemoveSymbolOverride(hat.targetSymbolId, 4);
+			component2.AddSymbolOverride(hat.targetSymbolId, accessory.symbol, 4);
 		}
 		controller.SetSymbolVisiblity(hat.targetSymbolId, true);
 		controller.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, true);

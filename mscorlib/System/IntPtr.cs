@@ -21,8 +21,8 @@ namespace System
 			this.m_value = value;
 		}
 
-		[CLSCompliant(false)]
 		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
+		[CLSCompliant(false)]
 		public unsafe IntPtr(void* value)
 		{
 			this.m_value = value;
@@ -34,15 +34,6 @@ namespace System
 			this.m_value = @int;
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			info.AddValue("value", this.ToInt64());
-		}
-
 		public unsafe static int Size
 		{
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -50,6 +41,15 @@ namespace System
 			{
 				return sizeof(void*);
 			}
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			info.AddValue("value", this.ToInt64());
 		}
 
 		public override bool Equals(object obj)
@@ -78,8 +78,8 @@ namespace System
 			return this.m_value;
 		}
 
-		[CLSCompliant(false)]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[CLSCompliant(false)]
 		public unsafe void* ToPointer()
 		{
 			return this.m_value;
@@ -94,9 +94,9 @@ namespace System
 		{
 			if (IntPtr.Size == 4)
 			{
-				return this.m_value.ToString(format);
+				return this.m_value.ToString(format, null);
 			}
-			return this.m_value.ToString(format);
+			return this.m_value.ToString(format, null);
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -144,6 +144,36 @@ namespace System
 		public unsafe static explicit operator void*(IntPtr value)
 		{
 			return value.m_value;
+		}
+
+		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
+		public unsafe static IntPtr Add(IntPtr pointer, int offset)
+		{
+			return (IntPtr)((void*)((byte*)(void*)pointer + offset));
+		}
+
+		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
+		public unsafe static IntPtr Subtract(IntPtr pointer, int offset)
+		{
+			return (IntPtr)((void*)((byte*)(void*)pointer - offset));
+		}
+
+		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
+		public unsafe static IntPtr operator +(IntPtr pointer, int offset)
+		{
+			return (IntPtr)((void*)((byte*)(void*)pointer + offset));
+		}
+
+		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
+		public unsafe static IntPtr operator -(IntPtr pointer, int offset)
+		{
+			return (IntPtr)((void*)((byte*)(void*)pointer - offset));
+		}
+
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		internal bool IsNull()
+		{
+			return this.m_value == null;
 		}
 
 		private unsafe void* m_value;

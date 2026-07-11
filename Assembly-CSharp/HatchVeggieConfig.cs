@@ -17,15 +17,15 @@ public class HatchVeggieConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -HatchTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
-		List<Diet.Info> list = BaseHatchConfig.VeggieDiet(HatchVeggieConfig.EMIT_ELEMENT.CreateTag(), HatchVeggieConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_3, null, 0f);
-		list.AddRange(BaseHatchConfig.FoodDiet(HatchVeggieConfig.EMIT_ELEMENT.CreateTag(), HatchVeggieConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_3, null, 0f));
+		List<Diet.Info> list = BaseHatchConfig.VeggieDiet(SimHashes.Carbon.CreateTag(), HatchVeggieConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_3, null, 0f);
+		list.AddRange(BaseHatchConfig.FoodDiet(SimHashes.Carbon.CreateTag(), HatchVeggieConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_3, null, 0f));
 		return BaseHatchConfig.SetupDiet(gameObject, list, HatchVeggieConfig.CALORIES_PER_KG_OF_ORE, HatchVeggieConfig.MIN_POOP_SIZE_IN_KG);
 	}
 
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = HatchVeggieConfig.CreateHatch("HatchVeggie", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.DESC, "hatch_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchVeggieEgg", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchVeggieBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_VEGGIE, HatchVeggieConfig.EGG_SORT_ORDER, true, false, true);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchVeggieEgg", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_VEGGIE.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchVeggieBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_VEGGIE, HatchVeggieConfig.EGG_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -42,7 +42,7 @@ public class HatchVeggieConfig : IEntityConfig
 
 	public const string EGG_ID = "HatchVeggieEgg";
 
-	private static SimHashes EMIT_ELEMENT = SimHashes.Carbon;
+	private const SimHashes EMIT_ELEMENT = SimHashes.Carbon;
 
 	private static float KG_ORE_EATEN_PER_CYCLE = 140f;
 

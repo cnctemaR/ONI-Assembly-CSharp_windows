@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class ClearTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		ClearTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

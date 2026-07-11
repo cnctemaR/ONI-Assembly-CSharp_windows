@@ -37,8 +37,8 @@ public class UIDupeRandomizer : MonoBehaviour
 		UIDupeRandomizer.AddAccessory(dupe, this.slots.Arm.Lookup(bodyData.arms));
 		if (global::UnityEngine.Random.value < 0.15f)
 		{
-			component.AddBuildOverride(Assets.GetAnim("body_oxygen_kanim").GetData(), 5);
-			component.AddBuildOverride(Assets.GetAnim("helm_oxygen_kanim").GetData(), 5);
+			component.AddBuildOverride(Assets.GetAnim("body_oxygen_kanim").GetData(), 6);
+			component.AddBuildOverride(Assets.GetAnim("helm_oxygen_kanim").GetData(), 6);
 			dupe.SetSymbolVisiblity("snapto_neck", true);
 		}
 		else

@@ -6,5 +6,5 @@ public struct ElementReference
 {
 	public string Name;
 
-	public MonoBehaviour behaviour;
+	public Component behaviour;
 }

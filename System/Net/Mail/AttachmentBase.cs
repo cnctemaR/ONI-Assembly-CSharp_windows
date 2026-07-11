@@ -18,7 +18,7 @@ namespace System.Net.Mail
 			this.contentType.CharSet = null;
 		}
 
-		protected AttachmentBase(Stream contentStream, global::System.Net.Mime.ContentType contentType)
+		protected AttachmentBase(Stream contentStream, ContentType contentType)
 		{
 			if (contentStream == null || contentType == null)
 			{
@@ -45,10 +45,10 @@ namespace System.Net.Mail
 				throw new ArgumentNullException();
 			}
 			this.contentStream = File.OpenRead(fileName);
-			this.contentType = new global::System.Net.Mime.ContentType(AttachmentBase.MimeTypes.GetMimeType(fileName));
+			this.contentType = new ContentType(AttachmentBase.MimeTypes.GetMimeType(fileName));
 		}
 
-		protected AttachmentBase(string fileName, global::System.Net.Mime.ContentType contentType)
+		protected AttachmentBase(string fileName, ContentType contentType)
 		{
 			if (fileName == null)
 			{
@@ -92,7 +92,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public global::System.Net.Mime.ContentType ContentType
+		public ContentType ContentType
 		{
 			get
 			{
@@ -104,7 +104,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public global::System.Net.Mime.TransferEncoding TransferEncoding
+		public TransferEncoding TransferEncoding
 		{
 			get
 			{
@@ -131,11 +131,11 @@ namespace System.Net.Mail
 
 		private string id;
 
-		private global::System.Net.Mime.ContentType contentType = new global::System.Net.Mime.ContentType();
+		private ContentType contentType = new ContentType();
 
 		private Stream contentStream;
 
-		private global::System.Net.Mime.TransferEncoding transferEncoding = global::System.Net.Mime.TransferEncoding.Base64;
+		private TransferEncoding transferEncoding = TransferEncoding.Base64;
 
 		private class MimeTypes
 		{

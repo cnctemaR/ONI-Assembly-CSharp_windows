@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum MethodAttributes
 	{
@@ -20,8 +20,8 @@ namespace System.Reflection
 		Final = 32,
 		Virtual = 64,
 		HideBySig = 128,
-		VtableLayoutMask = 256,
 		CheckAccessOnOverride = 512,
+		VtableLayoutMask = 256,
 		ReuseSlot = 0,
 		NewSlot = 256,
 		Abstract = 1024,

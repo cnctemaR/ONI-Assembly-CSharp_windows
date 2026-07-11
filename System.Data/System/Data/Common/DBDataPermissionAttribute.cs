@@ -9,7 +9,7 @@ namespace System.Data.Common
 	public abstract class DBDataPermissionAttribute : CodeAccessSecurityAttribute
 	{
 		protected DBDataPermissionAttribute(SecurityAction action)
-			: base(action)
+			: base((SecurityAction)0)
 		{
 		}
 
@@ -17,27 +17,10 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.allowBlankPassword;
+				throw null;
 			}
 			set
 			{
-				this.allowBlankPassword = value;
-			}
-		}
-
-		public string KeyRestrictions
-		{
-			get
-			{
-				if (this.keyRestrictions == null)
-				{
-					return string.Empty;
-				}
-				return this.keyRestrictions;
-			}
-			set
-			{
-				this.keyRestrictions = value;
 			}
 		}
 
@@ -45,15 +28,10 @@ namespace System.Data.Common
 		{
 			get
 			{
-				if (this.connectionString == null)
-				{
-					return string.Empty;
-				}
-				return this.connectionString;
+				throw null;
 			}
 			set
 			{
-				this.connectionString = value;
 			}
 		}
 
@@ -61,33 +39,34 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.keyRestrictionBehavior;
+				throw null;
 			}
 			set
 			{
-				ExceptionHelper.CheckEnumValue(typeof(KeyRestrictionBehavior), value);
-				this.keyRestrictionBehavior = value;
+			}
+		}
+
+		public string KeyRestrictions
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
 			}
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool ShouldSerializeConnectionString()
 		{
-			return false;
+			throw null;
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool ShouldSerializeKeyRestrictions()
 		{
-			return false;
+			throw null;
 		}
-
-		private bool allowBlankPassword;
-
-		private string keyRestrictions;
-
-		private KeyRestrictionBehavior keyRestrictionBehavior;
-
-		private string connectionString;
 	}
 }

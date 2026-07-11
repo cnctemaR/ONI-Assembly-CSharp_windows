@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DynamicMethod : MethodInfo
 	{
 		public DynamicMethod(string name, Type returnType, Type[] parameterTypes, Module m)
@@ -77,9 +78,13 @@ namespace System.Reflection.Emit
 					}
 				}
 			}
+			if (owner != null && (owner.IsArray || owner.IsInterface))
+			{
+				throw new ArgumentException("Owner can't be an array or an interface.");
+			}
 			if (m == null)
 			{
-				m = DynamicMethod.AnonHostModuleHolder.anon_host_module;
+				m = DynamicMethod.AnonHostModuleHolder.AnonHostModule;
 			}
 			this.name = name;
 			this.attributes = attributes | MethodAttributes.Static;
@@ -92,20 +97,17 @@ namespace System.Reflection.Emit
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void create_dynamic_method(DynamicMethod m);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void destroy_dynamic_method(DynamicMethod m);
+		private static extern void create_dynamic_method(DynamicMethod m);
 
 		private void CreateDynMethod()
 		{
 			if (this.mhandle.Value == IntPtr.Zero)
 			{
-				if (this.ilgen == null || ILGenerator.Mono_GetCurrentOffset(this.ilgen) == 0)
+				if (this.ilgen == null || this.ilgen.ILOffset == 0)
 				{
 					throw new InvalidOperationException("Method '" + this.name + "' does not have a method body.");
 				}
-				this.ilgen.label_fixup();
+				this.ilgen.label_fixup(this);
 				try
 				{
 					this.creating = true;
@@ -128,17 +130,12 @@ namespace System.Reflection.Emit
 				{
 					this.creating = false;
 				}
-				this.create_dynamic_method(this);
+				DynamicMethod.create_dynamic_method(this);
 			}
 		}
 
-		~DynamicMethod()
-		{
-			this.destroy_dynamic_method(this);
-		}
-
 		[ComVisible(true)]
-		public Delegate CreateDelegate(Type delegateType)
+		public sealed override Delegate CreateDelegate(Type delegateType)
 		{
 			if (delegateType == null)
 			{
@@ -154,7 +151,7 @@ namespace System.Reflection.Emit
 		}
 
 		[ComVisible(true)]
-		public Delegate CreateDelegate(Type delegateType, object target)
+		public sealed override Delegate CreateDelegate(Type delegateType, object target)
 		{
 			if (delegateType == null)
 			{
@@ -185,22 +182,37 @@ namespace System.Reflection.Emit
 			return this;
 		}
 
-		[MonoTODO("Not implemented")]
 		public override object[] GetCustomAttributes(bool inherit)
 		{
-			throw new NotImplementedException();
+			return new object[]
+			{
+				new MethodImplAttribute(this.GetMethodImplementationFlags())
+			};
 		}
 
-		[MonoTODO("Not implemented")]
 		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			throw new NotImplementedException();
+			if (attributeType == null)
+			{
+				throw new ArgumentNullException("attributeType");
+			}
+			if (attributeType.IsAssignableFrom(typeof(MethodImplAttribute)))
+			{
+				return new object[]
+				{
+					new MethodImplAttribute(this.GetMethodImplementationFlags())
+				};
+			}
+			return EmptyArray<object>.Value;
 		}
 
-		[MonoTODO("Not implemented")]
 		public DynamicILInfo GetDynamicILInfo()
 		{
-			throw new NotImplementedException();
+			if (this.il_info == null)
+			{
+				this.il_info = new DynamicILInfo(this);
+			}
+			return this.il_info;
 		}
 
 		public ILGenerator GetILGenerator()
@@ -224,21 +236,40 @@ namespace System.Reflection.Emit
 
 		public override MethodImplAttributes GetMethodImplementationFlags()
 		{
-			return MethodImplAttributes.IL;
+			return MethodImplAttributes.NoInlining;
 		}
 
 		public override ParameterInfo[] GetParameters()
 		{
+			return this.GetParametersInternal();
+		}
+
+		internal override ParameterInfo[] GetParametersInternal()
+		{
 			if (this.parameters == null)
 			{
-				return new ParameterInfo[0];
+				return EmptyArray<ParameterInfo>.Value;
 			}
 			ParameterInfo[] array = new ParameterInfo[this.parameters.Length];
 			for (int i = 0; i < this.parameters.Length; i++)
 			{
-				array[i] = new ParameterInfo((this.pinfo != null) ? this.pinfo[i + 1] : null, this.parameters[i], this, i + 1);
+				array[i] = ParameterInfo.New((this.pinfo == null) ? null : this.pinfo[i + 1], this.parameters[i], this, i + 1);
 			}
 			return array;
+		}
+
+		internal override int GetParametersCount()
+		{
+			if (this.parameters != null)
+			{
+				return this.parameters.Length;
+			}
+			return 0;
+		}
+
+		internal override Type GetParameterType(int pos)
+		{
+			return this.parameters[pos];
 		}
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
@@ -260,23 +291,26 @@ namespace System.Reflection.Emit
 			return obj2;
 		}
 
-		[MonoTODO("Not implemented")]
 		public override bool IsDefined(Type attributeType, bool inherit)
 		{
-			throw new NotImplementedException();
+			if (attributeType == null)
+			{
+				throw new ArgumentNullException("attributeType");
+			}
+			return attributeType.IsAssignableFrom(typeof(MethodImplAttribute));
 		}
 
 		public override string ToString()
 		{
 			string text = string.Empty;
-			ParameterInfo[] array = this.GetParameters();
-			for (int i = 0; i < array.Length; i++)
+			ParameterInfo[] parametersInternal = this.GetParametersInternal();
+			for (int i = 0; i < parametersInternal.Length; i++)
 			{
 				if (i > 0)
 				{
 					text += ", ";
 				}
-				text += array[i].ParameterType.Name;
+				text += parametersInternal[i].ParameterType.Name;
 			}
 			return string.Concat(new string[]
 			{
@@ -445,14 +479,23 @@ namespace System.Reflection.Emit
 
 		internal bool creating;
 
+		private DynamicILInfo il_info;
+
 		private class AnonHostModuleHolder
 		{
 			static AnonHostModuleHolder()
 			{
 				AssemblyName assemblyName = new AssemblyName();
 				assemblyName.Name = "Anonymously Hosted DynamicMethods Assembly";
-				AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-				DynamicMethod.AnonHostModuleHolder.anon_host_module = assemblyBuilder.GetManifestModule();
+				DynamicMethod.AnonHostModuleHolder.anon_host_module = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run).GetManifestModule();
+			}
+
+			public static Module AnonHostModule
+			{
+				get
+				{
+					return DynamicMethod.AnonHostModuleHolder.anon_host_module;
+				}
 			}
 
 			public static Module anon_host_module;

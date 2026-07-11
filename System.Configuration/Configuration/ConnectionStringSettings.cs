@@ -5,12 +5,19 @@ namespace System.Configuration
 {
 	public sealed class ConnectionStringSettings : ConfigurationElement
 	{
+		static ConnectionStringSettings()
+		{
+			ConnectionStringSettings._properties.Add(ConnectionStringSettings._propName);
+			ConnectionStringSettings._properties.Add(ConnectionStringSettings._propProviderName);
+			ConnectionStringSettings._properties.Add(ConnectionStringSettings._propConnectionString);
+		}
+
 		public ConnectionStringSettings()
 		{
 		}
 
 		public ConnectionStringSettings(string name, string connectionString)
-			: this(name, connectionString, string.Empty)
+			: this(name, connectionString, "")
 		{
 		}
 
@@ -19,13 +26,6 @@ namespace System.Configuration
 			this.Name = name;
 			this.ConnectionString = connectionString;
 			this.ProviderName = providerName;
-		}
-
-		static ConnectionStringSettings()
-		{
-			ConnectionStringSettings._properties.Add(ConnectionStringSettings._propName);
-			ConnectionStringSettings._properties.Add(ConnectionStringSettings._propProviderName);
-			ConnectionStringSettings._properties.Add(ConnectionStringSettings._propConnectionString);
 		}
 
 		protected internal override ConfigurationPropertyCollection Properties
@@ -82,10 +82,10 @@ namespace System.Configuration
 
 		private static ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection();
 
-		private static readonly ConfigurationProperty _propConnectionString = new ConfigurationProperty("connectionString", typeof(string), string.Empty, ConfigurationPropertyOptions.IsRequired);
+		private static readonly ConfigurationProperty _propConnectionString = new ConfigurationProperty("connectionString", typeof(string), "", ConfigurationPropertyOptions.IsRequired);
 
 		private static readonly ConfigurationProperty _propName = new ConfigurationProperty("name", typeof(string), null, TypeDescriptor.GetConverter(typeof(string)), null, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey);
 
-		private static readonly ConfigurationProperty _propProviderName = new ConfigurationProperty("providerName", typeof(string), string.Empty, ConfigurationPropertyOptions.None);
+		private static readonly ConfigurationProperty _propProviderName = new ConfigurationProperty("providerName", typeof(string), "", ConfigurationPropertyOptions.None);
 	}
 }

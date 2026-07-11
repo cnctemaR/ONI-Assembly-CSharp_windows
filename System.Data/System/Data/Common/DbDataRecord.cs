@@ -3,93 +3,13 @@ using System.ComponentModel;
 
 namespace System.Data.Common
 {
-	public abstract class DbDataRecord : IDataRecord, ICustomTypeDescriptor
+	public abstract class DbDataRecord : ICustomTypeDescriptor, IDataRecord
 	{
-		[MonoTODO]
-		AttributeCollection ICustomTypeDescriptor.GetAttributes()
-		{
-			return new AttributeCollection(null);
-		}
-
-		[MonoTODO]
-		string ICustomTypeDescriptor.GetClassName()
-		{
-			return string.Empty;
-		}
-
-		[MonoTODO]
-		string ICustomTypeDescriptor.GetComponentName()
-		{
-			return null;
-		}
-
-		[MonoTODO]
-		TypeConverter ICustomTypeDescriptor.GetConverter()
-		{
-			return null;
-		}
-
-		[MonoTODO]
-		EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
-		{
-			return null;
-		}
-
-		[MonoTODO]
-		PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
-		{
-			return null;
-		}
-
-		[MonoTODO]
-		object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
-		{
-			return null;
-		}
-
-		[MonoTODO]
-		EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
-		{
-			return new EventDescriptorCollection(null);
-		}
-
-		[MonoTODO]
-		EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
-		{
-			return new EventDescriptorCollection(null);
-		}
-
-		[MonoTODO]
-		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
-		{
-			DataColumnPropertyDescriptor[] array = new DataColumnPropertyDescriptor[this.FieldCount];
-			for (int i = 0; i < this.FieldCount; i++)
-			{
-				DataColumnPropertyDescriptor dataColumnPropertyDescriptor = new DataColumnPropertyDescriptor(this.GetName(i), i, null);
-				dataColumnPropertyDescriptor.SetComponentType(typeof(DbDataRecord));
-				dataColumnPropertyDescriptor.SetPropertyType(this.GetFieldType(i));
-				array[i] = dataColumnPropertyDescriptor;
-			}
-			return new PropertyDescriptorCollection(array);
-		}
-
-		[MonoTODO]
-		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
-		{
-			return ((ICustomTypeDescriptor)this).GetProperties();
-		}
-
-		[MonoTODO]
-		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
-		{
-			return this;
-		}
-
 		public abstract int FieldCount { get; }
 
-		public abstract object this[string name] { get; }
-
 		public abstract object this[int i] { get; }
+
+		public abstract object this[string name] { get; }
 
 		public abstract bool GetBoolean(int i);
 
@@ -101,11 +21,19 @@ namespace System.Data.Common
 
 		public abstract long GetChars(int i, long dataIndex, char[] buffer, int bufferIndex, int length);
 
+		public IDataReader GetData(int i)
+		{
+			throw null;
+		}
+
 		public abstract string GetDataTypeName(int i);
 
-		protected abstract DbDataReader GetDbDataReader(int i);
-
 		public abstract DateTime GetDateTime(int i);
+
+		protected virtual DbDataReader GetDbDataReader(int i)
+		{
+			throw null;
+		}
 
 		public abstract decimal GetDecimal(int i);
 
@@ -135,9 +63,76 @@ namespace System.Data.Common
 
 		public abstract bool IsDBNull(int i);
 
-		public IDataReader GetData(int i)
+		[MonoTODO]
+		AttributeCollection ICustomTypeDescriptor.GetAttributes()
 		{
-			return (IDataReader)this.GetValue(i);
+			throw null;
+		}
+
+		[MonoTODO]
+		string ICustomTypeDescriptor.GetClassName()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		string ICustomTypeDescriptor.GetComponentName()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		TypeConverter ICustomTypeDescriptor.GetConverter()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
+		{
+			throw null;
 		}
 	}
 }

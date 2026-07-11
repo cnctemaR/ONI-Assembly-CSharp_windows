@@ -23,7 +23,6 @@ public class ShowerConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
-		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
@@ -34,6 +33,7 @@ public class ShowerConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.WashStation);
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.AdvancedWashStation);
 		Shower shower = go.AddOrGet<Shower>();
 		shower.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_shower_kanim") };
 		shower.workTime = 30f;

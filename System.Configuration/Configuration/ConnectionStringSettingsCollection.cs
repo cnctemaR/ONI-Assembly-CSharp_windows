@@ -6,19 +6,16 @@ namespace System.Configuration
 	[ConfigurationCollection(typeof(ConnectionStringSettings), CollectionType = ConfigurationElementCollectionType.AddRemoveClearMap)]
 	public sealed class ConnectionStringSettingsCollection : ConfigurationElementCollection
 	{
-		public ConnectionStringSettings this[string Name]
+		public ConnectionStringSettings this[string name]
 		{
 			get
 			{
 				foreach (object obj in this)
 				{
 					ConfigurationElement configurationElement = (ConfigurationElement)obj;
-					if (configurationElement is ConnectionStringSettings)
+					if (configurationElement is ConnectionStringSettings && string.Compare(((ConnectionStringSettings)configurationElement).Name, name, true, CultureInfo.InvariantCulture) == 0)
 					{
-						if (string.Compare(((ConnectionStringSettings)configurationElement).Name, Name, true, CultureInfo.InvariantCulture) == 0)
-						{
-							return configurationElement as ConnectionStringSettings;
-						}
+						return configurationElement as ConnectionStringSettings;
 					}
 				}
 				return null;
@@ -98,7 +95,7 @@ namespace System.Configuration
 			}
 			if (this.IndexOf((ConnectionStringSettings)element) >= 0)
 			{
-				throw new ConfigurationException(string.Format("The element {0} already exist!", ((ConnectionStringSettings)element).Name));
+				throw new ConfigurationErrorsException(string.Format("The element {0} already exist!", ((ConnectionStringSettings)element).Name));
 			}
 			this[index] = (ConnectionStringSettings)element;
 		}

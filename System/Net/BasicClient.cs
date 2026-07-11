@@ -10,8 +10,7 @@ namespace System.Net
 			{
 				return null;
 			}
-			string text = challenge.Trim();
-			if (text.ToLower().IndexOf("basic") == -1)
+			if (challenge.Trim().ToLower().IndexOf("basic", StringComparison.Ordinal) == -1)
 			{
 				return null;
 			}
@@ -42,14 +41,14 @@ namespace System.Net
 				return null;
 			}
 			string userName = credential.UserName;
-			if (userName == null || userName == string.Empty)
+			if (userName == null || userName == "")
 			{
 				return null;
 			}
 			string password = credential.Password;
 			string domain = credential.Domain;
 			byte[] array;
-			if (domain == null || domain == string.Empty || domain.Trim() == string.Empty)
+			if (domain == null || domain == "" || domain.Trim() == "")
 			{
 				array = BasicClient.GetBytes(userName + ":" + password);
 			}
@@ -57,8 +56,7 @@ namespace System.Net
 			{
 				array = BasicClient.GetBytes(string.Concat(new string[] { domain, "\\", userName, ":", password }));
 			}
-			string text = "Basic " + Convert.ToBase64String(array);
-			return new Authorization(text);
+			return new Authorization("Basic " + Convert.ToBase64String(array));
 		}
 
 		public Authorization PreAuthenticate(WebRequest webRequest, ICredentials credentials)

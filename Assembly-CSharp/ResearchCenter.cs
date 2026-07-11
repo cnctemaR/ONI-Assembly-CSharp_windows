@@ -14,7 +14,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE;
 		ElementConverter elementConverter = this.elementConverter;
 		elementConverter.onConvertMass = (Action<float>)Delegate.Combine(elementConverter.onConvertMass, new Action<float>(this.ConvertMassToResearchPoints));
-		if (this.research_point_type_id != ResearchTypes.ID.ALPHA)
+		if (this.research_point_type_id != "alpha")
 		{
 			this.requiredRolePerk = RoleManager.rolePerks.AllowAdvancedResearch.id;
 		}
@@ -63,7 +63,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		{
 			ChoreType research = Db.Get().ChoreTypes.Research;
 			Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-			this.chore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			this.chore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			base.SetWorkTime(float.PositiveInfinity);
 		}
 	}
@@ -321,5 +321,5 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	[SerializeField]
 	private float remainder_mass_points;
 
-	public static Operational.Flag ResearchSelectedFlag = new Operational.Flag("researchSelected", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag ResearchSelectedFlag = new Operational.Flag("researchSelected", Operational.Flag.Type.Requirement);
 }

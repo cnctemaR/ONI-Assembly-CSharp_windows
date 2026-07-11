@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Activation;
 
 namespace System.Runtime.Remoting.Contexts
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class)]
+	[ComVisible(true)]
 	[Serializable]
 	public class ContextAttribute : Attribute, IContextAttribute, IContextProperty
 	{
@@ -25,16 +24,7 @@ namespace System.Runtime.Remoting.Contexts
 
 		public override bool Equals(object o)
 		{
-			if (o == null)
-			{
-				return false;
-			}
-			if (!(o is ContextAttribute))
-			{
-				return false;
-			}
-			ContextAttribute contextAttribute = (ContextAttribute)o;
-			return !(contextAttribute.AttributeName != this.AttributeName);
+			return o != null && o is ContextAttribute && !(((ContextAttribute)o).AttributeName != this.AttributeName);
 		}
 
 		public virtual void Freeze(Context newContext)
@@ -56,8 +46,7 @@ namespace System.Runtime.Remoting.Contexts
 			{
 				throw new ArgumentNullException("ctorMsg");
 			}
-			IList contextProperties = ctorMsg.ContextProperties;
-			contextProperties.Add(this);
+			ctorMsg.ContextProperties.Add(this);
 		}
 
 		public virtual bool IsContextOK(Context ctx, IConstructionCallMessage ctorMsg)

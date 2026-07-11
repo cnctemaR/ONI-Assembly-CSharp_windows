@@ -14,11 +14,6 @@ public static class Util
 		b = t;
 	}
 
-	public static Vector3 Position(GameObject o)
-	{
-		return o.transform.GetPosition();
-	}
-
 	public static void InitializeComponent(Component cmp)
 	{
 		if (cmp != null)
@@ -129,20 +124,6 @@ public static class Util
 		return component;
 	}
 
-	public static T GetFirstChildComponent<T>(this Component c) where T : Component
-	{
-		for (int i = 0; i < c.transform.childCount; i++)
-		{
-			GameObject gameObject = c.transform.GetChild(i).gameObject;
-			T component = gameObject.GetComponent<T>();
-			if (component != null)
-			{
-				return component;
-			}
-		}
-		return (T)((object)null);
-	}
-
 	public static void SetLayerRecursively(this GameObject go, int layer)
 	{
 		Util.SetLayer(go.transform, layer);
@@ -167,20 +148,21 @@ public static class Util
 		original.DeleteObject();
 	}
 
-	public static T FindOrAddComponent<T>(this Component cmp) where T : KMonoBehaviour
+	public static T FindOrAddComponent<T>(this Component cmp) where T : Component
 	{
 		return cmp.gameObject.FindOrAddComponent<T>();
 	}
 
-	public static T FindOrAddComponent<T>(this GameObject go) where T : KMonoBehaviour
+	public static T FindOrAddComponent<T>(this GameObject go) where T : Component
 	{
 		T t = go.GetComponent<T>();
 		if (t == null)
 		{
 			t = go.AddComponent<T>();
-			if (!KMonoBehaviour.isPoolPreInit && !t.IsInitialized())
+			KMonoBehaviour kmonoBehaviour = t as KMonoBehaviour;
+			if (kmonoBehaviour != null && !KMonoBehaviour.isPoolPreInit && !kmonoBehaviour.IsInitialized())
 			{
-				DebugUtil.Assert(t.IsInitialized(), "Could not find component " + typeof(T).ToString() + " on object " + go.ToString());
+				global::Debug.LogErrorFormat("Could not find component " + typeof(T).ToString() + " on object " + go.ToString(), Array.Empty<object>());
 			}
 		}
 		else
@@ -200,39 +182,9 @@ public static class Util
 		KMonoBehaviour.isPoolPreInit = false;
 	}
 
-	public static void SetActive(GameObject go, bool active)
+	public static GameObject KInstantiate(GameObject original, Vector3 position)
 	{
-		if (go.activeSelf != active)
-		{
-			go.SetActive(active);
-		}
-	}
-
-	public static GameObject KInstantiateClearTransform(GameObject original, GameObject parent = null, string name = null)
-	{
-		GameObject gameObject = Util.KInstantiate(original, parent, name);
-		Util.Reset(gameObject.transform);
-		return gameObject;
-	}
-
-	public static GameObject KInstantiate(GameObject original, Folder folder, Vector3 position)
-	{
-		return Util.KInstantiate(original, position, Quaternion.identity, SceneOrganizer.Instance.GetFolder(folder), null, true, 0);
-	}
-
-	public static T KInstantiate<T>(GameObject original, Folder folder, Vector3 position)
-	{
-		return Util.KInstantiate(original, folder, position).GetComponent<T>();
-	}
-
-	public static T KInstantiate<T>(Component original, GameObject parent)
-	{
-		return Util.KInstantiate(original.gameObject, parent, null).GetComponent<T>();
-	}
-
-	public static T KInstantiate<T>(GameObject original, GameObject parent)
-	{
-		return Util.KInstantiate(original, parent, null).GetComponent<T>();
+		return Util.KInstantiate(original, position, Quaternion.identity, null, null, true, 0);
 	}
 
 	public static GameObject KInstantiate(Component original, GameObject parent = null, string name = null)
@@ -243,16 +195,6 @@ public static class Util
 	public static GameObject KInstantiate(GameObject original, GameObject parent = null, string name = null)
 	{
 		return Util.KInstantiate(original, Vector3.zero, Quaternion.identity, parent, name, true, 0);
-	}
-
-	public static GameObject KInstantiate(Component original, Vector3 position, Quaternion rotation, GameObject parent = null, string name = null)
-	{
-		return Util.KInstantiate(original.gameObject, position, rotation, parent, name, true, 0);
-	}
-
-	public static GameObject KInstantiate(GameObject go, Vector3 position, Quaternion rotation, Folder folder)
-	{
-		return Util.KInstantiate(go, position, rotation, SceneOrganizer.Instance.GetFolder(folder), null, true, 0);
 	}
 
 	public static GameObject KInstantiate(GameObject original, Vector3 position, Quaternion rotation, GameObject parent = null, string name = null, bool initialize_id = true, int gameLayer = 0)
@@ -268,21 +210,23 @@ public static class Util
 		}
 		if (gameObject == null)
 		{
-			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original, position, rotation);
+			if (original.GetComponent<RectTransform>() != null && parent != null)
+			{
+				gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original, position, rotation);
+				gameObject.transform.SetParent(parent.transform, true);
+			}
+			else
+			{
+				Transform transform = null;
+				if (parent != null)
+				{
+					transform = parent.transform;
+				}
+				gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original, position, rotation, transform);
+			}
 			if (gameLayer != 0)
 			{
 				gameObject.SetLayerRecursively(gameLayer);
-			}
-			if (parent != null)
-			{
-				if (gameObject.GetComponent<RectTransform>() != null)
-				{
-					gameObject.transform.SetParent(parent.transform, true);
-				}
-				else
-				{
-					gameObject.transform.parent = parent.transform;
-				}
 			}
 		}
 		if (name != null)
@@ -403,29 +347,6 @@ public static class Util
 	public static string StripTextFormatting(string original)
 	{
 		return Regex.Replace(original, "<[^>]*>([^<]*)<[^>]*>", "$1");
-	}
-
-	public static GameObject FindChildGameObject(this Transform root, string name)
-	{
-		if (root == null)
-		{
-			return null;
-		}
-		if (root.name == name)
-		{
-			return root.gameObject;
-		}
-		GameObject gameObject = null;
-		for (int i = 0; i < root.childCount; i++)
-		{
-			Transform child = root.GetChild(i);
-			gameObject = child.FindChildGameObject(name);
-			if (gameObject != null)
-			{
-				break;
-			}
-		}
-		return gameObject;
 	}
 
 	public static void Reset(Transform transform)
@@ -610,25 +531,6 @@ public static class Util
 		return Util.GetKleiRootPath();
 	}
 
-	public static T GetComponentInChildren<T>(this GameObject go, bool include_inactive) where T : Component
-	{
-		if (!include_inactive)
-		{
-			return go.GetComponentInChildren<T>();
-		}
-		T[] componentsInChildren = go.GetComponentsInChildren<T>(true);
-		if (componentsInChildren != null && componentsInChildren.Length > 0)
-		{
-			return componentsInChildren[0];
-		}
-		return (T)((object)null);
-	}
-
-	public static T GetComponentInChildren<T>(this Component cmp, bool include_inactive) where T : Component
-	{
-		return cmp.gameObject.GetComponentInChildren<T>(include_inactive);
-	}
-
 	public static Transform FindTransformRecursive(Transform node, string name)
 	{
 		if (node.name == name)
@@ -681,8 +583,6 @@ public static class Util
 	{
 		return center + global::UnityEngine.Random.Range(-plusminus, plusminus);
 	}
-
-	public const float OneOverRoot2 = 0.70710677f;
 
 	private static HashSet<char> defaultInvalidUserInputChars = new HashSet<char>(Path.GetInvalidPathChars());
 

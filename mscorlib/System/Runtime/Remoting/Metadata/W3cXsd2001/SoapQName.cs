@@ -96,7 +96,7 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 
 		public override string ToString()
 		{
-			if (this._key == null || this._key == string.Empty)
+			if (this._key == null || this._key == "")
 			{
 				return this._name;
 			}

@@ -3,12 +3,17 @@ using UnityEngine;
 
 public class PrioritizeTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		PrioritizeTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.interceptNumberKeysForPriority = true;
 		PrioritizeTool.Instance = this;
-		this.visualizer = Util.KInstantiate(this.visualizer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+		this.visualizer = Util.KInstantiate(this.visualizer, null, null);
 		this.viewMode = SimViewMode.Priorities;
 	}
 

@@ -302,7 +302,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 	private class SuitMarkerReactable : Reactable
 	{
 		public SuitMarkerReactable(SuitMarker suit_marker)
-			: base(suit_marker.gameObject, Db.Get().ChoreTypes.SuitMarker, 1, 1, false)
+			: base(suit_marker.gameObject, "SuitMarkerReactable", Db.Get().ChoreTypes.SuitMarker, 1, 1, false, 0f, 0f, float.PositiveInfinity)
 		{
 			this.suitMarker = suit_marker;
 		}

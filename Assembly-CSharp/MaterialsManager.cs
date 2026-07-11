@@ -14,7 +14,7 @@ public class MaterialsManager : RoleConfig
 		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };
 		base.perks = new RolePerk[]
 		{
-			RoleManager.rolePerks.IncreaseStrengthMedium,
+			RoleManager.rolePerks.IncreaseStrengthCourier,
 			RoleManager.rolePerks.IncreaseCarryAmountMedium
 		};
 	}

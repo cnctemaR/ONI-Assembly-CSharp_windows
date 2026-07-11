@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[Flags]
 	[ComVisible(false)]
+	[Flags]
 	public enum StringSplitOptions
 	{
 		None = 0,

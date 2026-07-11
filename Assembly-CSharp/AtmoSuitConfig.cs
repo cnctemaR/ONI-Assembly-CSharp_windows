@@ -29,7 +29,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		string text2 = "suit_oxygen_kanim";
 		string empty = string.Empty;
 		string text3 = "body_oxygen_kanim";
-		int num3 = 5;
+		int num3 = 6;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, empty, text3, num3, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
@@ -67,6 +67,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		suitTank.element = "Oxygen";
 		suitTank.capacity = 75f;
 		go.AddComponent<HelmetController>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Clothes);
 		go.AddComponent<SuitDiseaseHandler>();
 	}
 

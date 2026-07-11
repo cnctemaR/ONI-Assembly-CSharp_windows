@@ -8,9 +8,25 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class FallingWater : KMonoBehaviour, ISim200ms
 {
+	public static FallingWater instance
+	{
+		get
+		{
+			return FallingWater._instance;
+		}
+		private set
+		{
+		}
+	}
+
+	public static void DestroyInstance()
+	{
+		FallingWater._instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
-		FallingWater.instance = this;
+		FallingWater._instance = this;
 		base.OnPrefabInit();
 		this.mistEffect.SetActive(false);
 		this.mistPool = new ObjectPool(new Func<GameObject>(this.InstantiateMist), 16);
@@ -502,16 +518,16 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 
 	private KBatchedAnimController SpawnMist()
 	{
-		GameObject gameObject = this.mistPool.GetInstance();
-		gameObject.SetActive(true);
-		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+		GameObject instance = this.mistPool.GetInstance();
+		instance.SetActive(true);
+		KBatchedAnimController component = instance.GetComponent<KBatchedAnimController>();
 		component.Play("loop", KAnim.PlayMode.Loop, 1f, 0f);
 		return component;
 	}
 
 	private GameObject InstantiateMist()
 	{
-		GameObject gameObject = GameUtil.KInstantiate(this.mistEffect, Grid.SceneLayer.BuildingBack, Folder.FX, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(this.mistEffect, Grid.SceneLayer.BuildingBack, null, 0);
 		gameObject.SetActive(false);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.onDestroySelf = new Action<GameObject>(this.ReleaseMist);
@@ -632,7 +648,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 
 	private MaterialPropertyBlock propertyBlock;
 
-	public static FallingWater instance;
+	private static FallingWater _instance;
 
 	private List<int> clearList = new List<int>();
 

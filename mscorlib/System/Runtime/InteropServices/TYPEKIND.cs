@@ -2,7 +2,7 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete]
+	[Obsolete("Use System.Runtime.InteropServices.ComTypes.TYPEKIND instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
 	[Serializable]
 	public enum TYPEKIND
 	{

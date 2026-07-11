@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class AutoDisinfectableManager : KMonoBehaviour, ISim1000ms
 {
+	public static void DestroyInstance()
+	{
+		AutoDisinfectableManager.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

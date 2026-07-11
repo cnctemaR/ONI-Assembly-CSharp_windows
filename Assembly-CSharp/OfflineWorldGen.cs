@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using ProcGen;
@@ -129,7 +128,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			int i = 0;
 			while (i < this.startNodes.Count)
 			{
-				global::VoronoiTree.Tree tree = this.startNodes[i] as global::VoronoiTree.Tree;
+				Tree tree = this.startNodes[i] as Tree;
 				if (tree != null)
 				{
 					goto IL_00B8;
@@ -155,7 +154,7 @@ public class OfflineWorldGen : KMonoBehaviour
 				component.localScale = Vector3.one;
 				Text componentInChildren = gameObject.GetComponentInChildren<Text>();
 				SubWorld subWorld = null;
-				global::VoronoiTree.Tree tree2 = this.startNodes[i].parent;
+				Tree tree2 = this.startNodes[i].parent;
 				while (subWorld == null && tree2 != null)
 				{
 					subWorld = WorldGen.GetSubWorldForNode(tree2);
@@ -345,8 +344,6 @@ public class OfflineWorldGen : KMonoBehaviour
 	private void DoWorldGen(int selectedDimension)
 	{
 		this.RemoveButtons();
-		Hashtable hashtable = new Hashtable();
-		ElementLoader.Load(ref hashtable, this.simElementsSolidsFile.text, this.simElementsLiquidsFile.text, this.simElementsGasesFile.text, null);
 		this.DoWordGenInitialise();
 	}
 
@@ -411,12 +408,6 @@ public class OfflineWorldGen : KMonoBehaviour
 		this.errorMutex.ReleaseMutex();
 	}
 
-	public TextAsset simElementsSolidsFile;
-
-	public TextAsset simElementsLiquidsFile;
-
-	public TextAsset simElementsGasesFile;
-
 	[SerializeField]
 	private RectTransform buttonRoot;
 
@@ -474,7 +465,7 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private StringKey currentStringKeyRoot;
 
-	private static LocString[] convertableLocs = new LocString[]
+	private List<LocString> convertList = new List<LocString>
 	{
 		UI.WORLDGEN.SETTLESIM,
 		UI.WORLDGEN.BORDERS,
@@ -485,8 +476,6 @@ public class OfflineWorldGen : KMonoBehaviour
 		UI.WORLDGEN.BUILDNOISESOURCE,
 		UI.WORLDGEN.GENERATESOLARSYSTEM
 	};
-
-	private List<LocString> convertList = new List<LocString>(OfflineWorldGen.convertableLocs);
 
 	private WorldGenProgressStages.Stages currentStage;
 

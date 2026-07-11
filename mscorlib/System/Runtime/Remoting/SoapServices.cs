@@ -104,15 +104,13 @@ namespace System.Runtime.Remoting
 		public static void GetInteropFieldTypeAndNameFromXmlAttribute(Type containingType, string xmlAttribute, string xmlNamespace, out Type type, out string name)
 		{
 			SoapServices.TypeInfo typeInfo = (SoapServices.TypeInfo)SoapServices._typeInfos[containingType];
-			Hashtable hashtable = ((typeInfo == null) ? null : typeInfo.Attributes);
-			SoapServices.GetInteropFieldInfo(hashtable, xmlAttribute, xmlNamespace, out type, out name);
+			SoapServices.GetInteropFieldInfo((typeInfo != null) ? typeInfo.Attributes : null, xmlAttribute, xmlNamespace, out type, out name);
 		}
 
 		public static void GetInteropFieldTypeAndNameFromXmlElement(Type containingType, string xmlElement, string xmlNamespace, out Type type, out string name)
 		{
 			SoapServices.TypeInfo typeInfo = (SoapServices.TypeInfo)SoapServices._typeInfos[containingType];
-			Hashtable hashtable = ((typeInfo == null) ? null : typeInfo.Elements);
-			SoapServices.GetInteropFieldInfo(hashtable, xmlElement, xmlNamespace, out type, out name);
+			SoapServices.GetInteropFieldInfo((typeInfo != null) ? typeInfo.Elements : null, xmlElement, xmlNamespace, out type, out name);
 		}
 
 		private static void GetInteropFieldInfo(Hashtable fields, string xmlName, string xmlNamespace, out Type type, out string name)
@@ -272,9 +270,10 @@ namespace System.Runtime.Remoting
 
 		public static void PreLoad(Assembly assembly)
 		{
-			foreach (Type type in assembly.GetTypes())
+			Type[] types = assembly.GetTypes();
+			for (int i = 0; i < types.Length; i++)
 			{
-				SoapServices.PreLoad(type);
+				SoapServices.PreLoad(types[i]);
 			}
 		}
 
@@ -299,8 +298,7 @@ namespace System.Runtime.Remoting
 			lock (syncRoot)
 			{
 				typeInfo = new SoapServices.TypeInfo();
-				FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-				foreach (FieldInfo fieldInfo in fields)
+				foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
 				{
 					SoapFieldAttribute soapFieldAttribute = (SoapFieldAttribute)InternalRemotingServices.GetCachedSoapAttribute(fieldInfo);
 					if (soapFieldAttribute.IsInteropXmlElement())
@@ -360,8 +358,7 @@ namespace System.Runtime.Remoting
 				string text = (string)SoapServices._soapActions[mb];
 				if (text == null)
 				{
-					SoapMethodAttribute soapMethodAttribute = (SoapMethodAttribute)InternalRemotingServices.GetCachedSoapAttribute(mb);
-					text = soapMethodAttribute.SoapAction;
+					text = ((SoapMethodAttribute)InternalRemotingServices.GetCachedSoapAttribute(mb)).SoapAction;
 					SoapServices._soapActions[mb] = text;
 					SoapServices._soapActionsMethods[text] = mb;
 				}

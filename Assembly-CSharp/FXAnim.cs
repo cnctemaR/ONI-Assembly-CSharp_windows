@@ -56,5 +56,7 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 		private string anim;
 
 		private KAnim.PlayMode mode;
+
+		private KBatchedAnimController animController;
 	}
 }

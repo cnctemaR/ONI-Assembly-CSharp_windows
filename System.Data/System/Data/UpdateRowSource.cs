@@ -4,9 +4,9 @@ namespace System.Data
 {
 	public enum UpdateRowSource
 	{
-		None,
-		OutputParameters,
-		FirstReturnedRecord,
-		Both
+		Both = 3,
+		FirstReturnedRecord = 2,
+		None = 0,
+		OutputParameters
 	}
 }

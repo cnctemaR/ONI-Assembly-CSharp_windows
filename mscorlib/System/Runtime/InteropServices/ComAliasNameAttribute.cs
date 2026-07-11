@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class ComAliasNameAttribute : Attribute
 	{
 		public ComAliasNameAttribute(string alias)
 		{
-			this.val = alias;
+			this._val = alias;
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this.val;
+				return this._val;
 			}
 		}
 
-		private string val;
+		internal string _val;
 	}
 }

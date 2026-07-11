@@ -10,11 +10,7 @@ namespace System.Collections
 	{
 		public CaseInsensitiveComparer()
 		{
-			this.culture = CultureInfo.CurrentCulture;
-		}
-
-		private CaseInsensitiveComparer(bool invariant)
-		{
+			this.m_compareInfo = CultureInfo.CurrentCulture.CompareInfo;
 		}
 
 		public CaseInsensitiveComparer(CultureInfo culture)
@@ -23,17 +19,14 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("culture");
 			}
-			if (culture.LCID != CultureInfo.InvariantCulture.LCID)
-			{
-				this.culture = culture;
-			}
+			this.m_compareInfo = culture.CompareInfo;
 		}
 
 		public static CaseInsensitiveComparer Default
 		{
 			get
 			{
-				return CaseInsensitiveComparer.defaultComparer;
+				return new CaseInsensitiveComparer(CultureInfo.CurrentCulture);
 			}
 		}
 
@@ -41,7 +34,11 @@ namespace System.Collections
 		{
 			get
 			{
-				return CaseInsensitiveComparer.defaultInvariantComparer;
+				if (CaseInsensitiveComparer.m_InvariantCaseInsensitiveComparer == null)
+				{
+					CaseInsensitiveComparer.m_InvariantCaseInsensitiveComparer = new CaseInsensitiveComparer(CultureInfo.InvariantCulture);
+				}
+				return CaseInsensitiveComparer.m_InvariantCaseInsensitiveComparer;
 			}
 		}
 
@@ -49,21 +46,15 @@ namespace System.Collections
 		{
 			string text = a as string;
 			string text2 = b as string;
-			if (text == null || text2 == null)
+			if (text != null && text2 != null)
 			{
-				return Comparer.Default.Compare(a, b);
+				return this.m_compareInfo.Compare(text, text2, CompareOptions.IgnoreCase);
 			}
-			if (this.culture != null)
-			{
-				return this.culture.CompareInfo.Compare(text, text2, CompareOptions.IgnoreCase);
-			}
-			return CultureInfo.InvariantCulture.CompareInfo.Compare(text, text2, CompareOptions.IgnoreCase);
+			return Comparer.Default.Compare(a, b);
 		}
 
-		private static CaseInsensitiveComparer defaultComparer = new CaseInsensitiveComparer();
+		private CompareInfo m_compareInfo;
 
-		private static CaseInsensitiveComparer defaultInvariantComparer = new CaseInsensitiveComparer(true);
-
-		private CultureInfo culture;
+		private static volatile CaseInsensitiveComparer m_InvariantCaseInsensitiveComparer;
 	}
 }

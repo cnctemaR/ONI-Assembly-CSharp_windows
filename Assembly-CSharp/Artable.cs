@@ -48,7 +48,7 @@ public class Artable : Workable
 			Prioritizable.AddRef(base.gameObject);
 			ChoreType art = Db.Get().ChoreTypes.Art;
 			Tag[] artChores = GameTags.ChoreTypes.ArtChores;
-			this.chore = new WorkChore<Artable>(art, this, null, artChores, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			this.chore = new WorkChore<Artable>(art, this, null, artChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanArt.id);
 		}
 		base.OnSpawn();

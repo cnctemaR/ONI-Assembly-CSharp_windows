@@ -30,7 +30,6 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;

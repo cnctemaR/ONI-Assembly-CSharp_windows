@@ -2,8 +2,8 @@
 
 namespace Mono.Unix.Native
 {
-	[Map]
 	[Flags]
+	[Map]
 	[CLSCompliant(false)]
 	public enum AccessModes
 	{

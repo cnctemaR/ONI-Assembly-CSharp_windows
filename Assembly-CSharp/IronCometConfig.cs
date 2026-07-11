@@ -5,12 +5,13 @@ public class IronCometConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(IronCometConfig.ID, IronCometConfig.ID);
+		GameObject gameObject = EntityTemplates.CreateEntity(IronCometConfig.ID, IronCometConfig.ID, true);
 		gameObject.AddOrGet<SaveLoadRoot>();
-		gameObject.AddOrGet<SavedObject>();
+		gameObject.AddOrGet<LoopingSounds>();
 		Comet comet = gameObject.AddOrGet<Comet>();
 		comet.massRange = new Vector2(3f, 20f);
 		comet.temperatureRange = new Vector2(323.15f, 423.15f);
+		comet.explosionOreCount = new Vector2I(2, 4);
 		comet.entityDamage = 15;
 		comet.totalTileDamage = 1f;
 		comet.splashRadius = 1;

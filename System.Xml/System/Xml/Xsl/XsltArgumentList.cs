@@ -1,152 +1,83 @@
 ﻿using System;
 using System.Collections;
-using System.Security.Permissions;
-using System.Xml.XPath;
 
 namespace System.Xml.Xsl
 {
 	public class XsltArgumentList
 	{
-		public XsltArgumentList()
+		public object GetParam(string name, string namespaceUri)
 		{
-			this.extensionObjects = new Hashtable();
-			this.parameters = new Hashtable();
-		}
-
-		public event XsltMessageEncounteredEventHandler XsltMessageEncountered;
-
-		[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
-		public void AddExtensionObject(string namespaceUri, object extension)
-		{
-			if (namespaceUri == null)
-			{
-				throw new ArgumentException("The namespaceUri is a null reference.");
-			}
-			if (namespaceUri == "http://www.w3.org/1999/XSL/Transform")
-			{
-				throw new ArgumentException("The namespaceUri is http://www.w3.org/1999/XSL/Transform.");
-			}
-			if (this.extensionObjects.Contains(namespaceUri))
-			{
-				throw new ArgumentException("The namespaceUri already has an extension object associated with it.");
-			}
-			this.extensionObjects[namespaceUri] = extension;
-		}
-
-		public void AddParam(string name, string namespaceUri, object parameter)
-		{
-			if (namespaceUri == null)
-			{
-				throw new ArgumentException("The namespaceUri is a null reference.");
-			}
-			if (namespaceUri == "http://www.w3.org/1999/XSL/Transform")
-			{
-				throw new ArgumentException("The namespaceUri is http://www.w3.org/1999/XSL/Transform.");
-			}
-			if (name == null)
-			{
-				throw new ArgumentException("The parameter name is a null reference.");
-			}
-			XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(name, namespaceUri);
-			if (this.parameters.Contains(xmlQualifiedName))
-			{
-				throw new ArgumentException("The namespaceUri already has a parameter associated with it.");
-			}
-			parameter = this.ValidateParam(parameter);
-			this.parameters[xmlQualifiedName] = parameter;
-		}
-
-		public void Clear()
-		{
-			this.extensionObjects.Clear();
-			this.parameters.Clear();
+			return this.parameters[new XmlQualifiedName(name, namespaceUri)];
 		}
 
 		public object GetExtensionObject(string namespaceUri)
 		{
-			return this.extensionObjects[namespaceUri];
+			return this.extensions[namespaceUri];
 		}
 
-		public object GetParam(string name, string namespaceUri)
+		public void AddParam(string name, string namespaceUri, object parameter)
 		{
-			if (name == null)
-			{
-				throw new ArgumentException("The parameter name is a null reference.");
-			}
+			XsltArgumentList.CheckArgumentNull(name, "name");
+			XsltArgumentList.CheckArgumentNull(namespaceUri, "namespaceUri");
+			XsltArgumentList.CheckArgumentNull(parameter, "parameter");
 			XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(name, namespaceUri);
-			return this.parameters[xmlQualifiedName];
+			xmlQualifiedName.Verify();
+			this.parameters.Add(xmlQualifiedName, parameter);
 		}
 
-		public object RemoveExtensionObject(string namespaceUri)
+		public void AddExtensionObject(string namespaceUri, object extension)
 		{
-			object extensionObject = this.GetExtensionObject(namespaceUri);
-			this.extensionObjects.Remove(namespaceUri);
-			return extensionObject;
+			XsltArgumentList.CheckArgumentNull(namespaceUri, "namespaceUri");
+			XsltArgumentList.CheckArgumentNull(extension, "extension");
+			this.extensions.Add(namespaceUri, extension);
 		}
 
 		public object RemoveParam(string name, string namespaceUri)
 		{
 			XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(name, namespaceUri);
-			object param = this.GetParam(name, namespaceUri);
+			object obj = this.parameters[xmlQualifiedName];
 			this.parameters.Remove(xmlQualifiedName);
-			return param;
+			return obj;
 		}
 
-		private object ValidateParam(object parameter)
+		public object RemoveExtensionObject(string namespaceUri)
 		{
-			if (parameter is string)
-			{
-				return parameter;
-			}
-			if (parameter is bool)
-			{
-				return parameter;
-			}
-			if (parameter is double)
-			{
-				return parameter;
-			}
-			if (parameter is XPathNavigator)
-			{
-				return parameter;
-			}
-			if (parameter is XPathNodeIterator)
-			{
-				return parameter;
-			}
-			if (parameter is short)
-			{
-				return (double)((short)parameter);
-			}
-			if (parameter is ushort)
-			{
-				return (double)((ushort)parameter);
-			}
-			if (parameter is int)
-			{
-				return (double)((int)parameter);
-			}
-			if (parameter is long)
-			{
-				return (double)((long)parameter);
-			}
-			if (parameter is ulong)
-			{
-				return (ulong)parameter;
-			}
-			if (parameter is float)
-			{
-				return (double)((float)parameter);
-			}
-			if (parameter is decimal)
-			{
-				return (double)((decimal)parameter);
-			}
-			return parameter.ToString();
+			object obj = this.extensions[namespaceUri];
+			this.extensions.Remove(namespaceUri);
+			return obj;
 		}
 
-		internal Hashtable extensionObjects;
+		public event XsltMessageEncounteredEventHandler XsltMessageEncountered
+		{
+			add
+			{
+				this.xsltMessageEncountered = (XsltMessageEncounteredEventHandler)Delegate.Combine(this.xsltMessageEncountered, value);
+			}
+			remove
+			{
+				this.xsltMessageEncountered = (XsltMessageEncounteredEventHandler)Delegate.Remove(this.xsltMessageEncountered, value);
+			}
+		}
 
-		internal Hashtable parameters;
+		public void Clear()
+		{
+			this.parameters.Clear();
+			this.extensions.Clear();
+			this.xsltMessageEncountered = null;
+		}
+
+		private static void CheckArgumentNull(object param, string paramName)
+		{
+			if (param == null)
+			{
+				throw new ArgumentNullException(paramName);
+			}
+		}
+
+		private Hashtable parameters = new Hashtable();
+
+		private Hashtable extensions = new Hashtable();
+
+		internal XsltMessageEncounteredEventHandler xsltMessageEncountered;
 	}
 }

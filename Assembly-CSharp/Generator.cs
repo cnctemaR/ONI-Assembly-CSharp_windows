@@ -206,6 +206,11 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		}
 	}
 
+	public void ConsumeEnergy(float joules)
+	{
+		this.joulesAvailable = Mathf.Max(0f, this.JoulesAvailable - joules);
+	}
+
 	protected const int SimUpdateSortKey = 1001;
 
 	[MyCmpReq]
@@ -225,7 +230,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	public static readonly Operational.Flag generatorConnectedFlag = new Operational.Flag("GeneratorConnected", Operational.Flag.Type.Requirement);
 
-	protected static Operational.Flag wireConnectedFlag = new Operational.Flag("generatorWireConnected", Operational.Flag.Type.Requirement);
+	protected static readonly Operational.Flag wireConnectedFlag = new Operational.Flag("generatorWireConnected", Operational.Flag.Type.Requirement);
 
 	private float capacity;
 

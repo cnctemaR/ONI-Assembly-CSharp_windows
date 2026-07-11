@@ -7,55 +7,33 @@ namespace System.Data.SqlTypes
 {
 	[XmlSchemaProvider("GetXsdType")]
 	[Serializable]
-	public struct SqlGuid : IXmlSerializable, IComparable, INullable
+	public struct SqlGuid : INullable, IComparable, IXmlSerializable
 	{
 		public SqlGuid(byte[] value)
 		{
-			this.value = new Guid(value);
-			this.notNull = true;
+			throw null;
 		}
 
 		public SqlGuid(Guid g)
 		{
-			this.value = g;
-			this.notNull = true;
-		}
-
-		public SqlGuid(string s)
-		{
-			this.value = new Guid(s);
-			this.notNull = true;
+			throw null;
 		}
 
 		public SqlGuid(int a, short b, short c, byte d, byte e, byte f, byte g, byte h, byte i, byte j, byte k)
 		{
-			this.value = new Guid(a, b, c, d, e, f, g, h, i, j, k);
-			this.notNull = true;
+			throw null;
 		}
 
-		[MonoTODO]
-		XmlSchema IXmlSerializable.GetSchema()
+		public SqlGuid(string s)
 		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		void IXmlSerializable.ReadXml(XmlReader reader)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		void IXmlSerializable.WriteXml(XmlWriter writer)
-		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		public bool IsNull
 		{
 			get
 			{
-				return !this.notNull;
+				throw null;
 			}
 		}
 
@@ -63,217 +41,155 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				if (this.IsNull)
-				{
-					throw new SqlNullValueException("The property contains Null.");
-				}
-				return this.value;
+				throw null;
 			}
-		}
-
-		public int CompareTo(object value)
-		{
-			if (value == null)
-			{
-				return 1;
-			}
-			if (!(value is SqlGuid))
-			{
-				throw new ArgumentException(Locale.GetText("Value is not a System.Data.SqlTypes.SqlGuid"));
-			}
-			return this.CompareTo((SqlGuid)value);
 		}
 
 		public int CompareTo(SqlGuid value)
 		{
-			if (value.IsNull)
-			{
-				return 1;
-			}
-			return this.value.CompareTo(value.Value);
+			throw null;
 		}
 
-		public override bool Equals(object value)
+		public int CompareTo(object value)
 		{
-			if (!(value is SqlGuid))
-			{
-				return false;
-			}
-			if (this.IsNull)
-			{
-				return ((SqlGuid)value).IsNull;
-			}
-			return !((SqlGuid)value).IsNull && (bool)(this == (SqlGuid)value);
+			throw null;
 		}
 
 		public static SqlBoolean Equals(SqlGuid x, SqlGuid y)
 		{
-			return x == y;
+			throw null;
+		}
+
+		public override bool Equals(object value)
+		{
+			throw null;
 		}
 
 		public override int GetHashCode()
 		{
-			byte[] array = this.ToByteArray();
-			int num = 10;
-			foreach (byte b in array)
-			{
-				num = 91 * num + b.GetHashCode();
-			}
-			return num;
-		}
-
-		public static SqlBoolean GreaterThan(SqlGuid x, SqlGuid y)
-		{
-			return x > y;
-		}
-
-		public static SqlBoolean GreaterThanOrEqual(SqlGuid x, SqlGuid y)
-		{
-			return x >= y;
-		}
-
-		public static SqlBoolean LessThan(SqlGuid x, SqlGuid y)
-		{
-			return x < y;
-		}
-
-		public static SqlBoolean LessThanOrEqual(SqlGuid x, SqlGuid y)
-		{
-			return x <= y;
-		}
-
-		public static SqlBoolean NotEquals(SqlGuid x, SqlGuid y)
-		{
-			return x != y;
-		}
-
-		public static SqlGuid Parse(string s)
-		{
-			return new SqlGuid(s);
-		}
-
-		public byte[] ToByteArray()
-		{
-			return this.value.ToByteArray();
-		}
-
-		public SqlBinary ToSqlBinary()
-		{
-			return (SqlBinary)this;
-		}
-
-		public SqlString ToSqlString()
-		{
-			return (SqlString)this;
-		}
-
-		public override string ToString()
-		{
-			if (!this.notNull)
-			{
-				return "Null";
-			}
-			return this.value.ToString();
+			throw null;
 		}
 
 		public static XmlQualifiedName GetXsdType(XmlSchemaSet schemaSet)
 		{
-			return new XmlQualifiedName("string", "http://www.w3.org/2001/XMLSchema");
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThan(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThanOrEqual(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThan(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThanOrEqual(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean NotEquals(SqlGuid x, SqlGuid y)
+		{
+			throw null;
 		}
 
 		public static SqlBoolean operator ==(SqlGuid x, SqlGuid y)
 		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value == y.Value);
-		}
-
-		public static SqlBoolean operator >(SqlGuid x, SqlGuid y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			if (x.Value.CompareTo(y.Value) > 0)
-			{
-				return new SqlBoolean(true);
-			}
-			return new SqlBoolean(false);
-		}
-
-		public static SqlBoolean operator >=(SqlGuid x, SqlGuid y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			if (x.Value.CompareTo(y.Value) >= 0)
-			{
-				return new SqlBoolean(true);
-			}
-			return new SqlBoolean(false);
-		}
-
-		public static SqlBoolean operator !=(SqlGuid x, SqlGuid y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(!(x.Value == y.Value));
-		}
-
-		public static SqlBoolean operator <(SqlGuid x, SqlGuid y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			if (x.Value.CompareTo(y.Value) < 0)
-			{
-				return new SqlBoolean(true);
-			}
-			return new SqlBoolean(false);
-		}
-
-		public static SqlBoolean operator <=(SqlGuid x, SqlGuid y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			if (x.Value.CompareTo(y.Value) <= 0)
-			{
-				return new SqlBoolean(true);
-			}
-			return new SqlBoolean(false);
+			throw null;
 		}
 
 		public static explicit operator SqlGuid(SqlBinary x)
 		{
-			return new SqlGuid(x.Value);
+			throw null;
 		}
 
 		public static explicit operator Guid(SqlGuid x)
 		{
-			return x.Value;
+			throw null;
 		}
 
 		public static explicit operator SqlGuid(SqlString x)
 		{
-			return new SqlGuid(x.Value);
+			throw null;
+		}
+
+		public static SqlBoolean operator >(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean operator >=(SqlGuid x, SqlGuid y)
+		{
+			throw null;
 		}
 
 		public static implicit operator SqlGuid(Guid x)
 		{
-			return new SqlGuid(x);
+			throw null;
 		}
 
-		private Guid value;
+		public static SqlBoolean operator !=(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
 
-		private bool notNull;
+		public static SqlBoolean operator <(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean operator <=(SqlGuid x, SqlGuid y)
+		{
+			throw null;
+		}
+
+		public static SqlGuid Parse(string s)
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		XmlSchema IXmlSerializable.GetSchema()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		void IXmlSerializable.ReadXml(XmlReader reader)
+		{
+		}
+
+		[MonoTODO]
+		void IXmlSerializable.WriteXml(XmlWriter writer)
+		{
+		}
+
+		public byte[] ToByteArray()
+		{
+			throw null;
+		}
+
+		public SqlBinary ToSqlBinary()
+		{
+			throw null;
+		}
+
+		public SqlString ToSqlString()
+		{
+			throw null;
+		}
+
+		public override string ToString()
+		{
+			throw null;
+		}
 
 		public static readonly SqlGuid Null;
 	}

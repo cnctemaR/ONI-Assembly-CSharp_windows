@@ -18,8 +18,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.growing.enabled = false;
-		base.smi.animController.randomiseLoopedOffset = true;
+		base.smi.Get<KBatchedAnimController>().randomiseLoopedOffset = true;
 		base.smi.StartSM();
 	}
 
@@ -109,7 +108,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 					Notification notification = smi.master.CreateDeathNotification();
 					notifier.Add(notification, string.Empty);
 				}
-				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
+				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
 				smi.master.Trigger(1623392196, null);
 				smi.master.GetComponent<KBatchedAnimController>().StopAndClear();
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());

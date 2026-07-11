@@ -29,7 +29,6 @@ public class WireBridgeConfig : IBuildingConfig
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.ObjectLayer = ObjectLayer.WireConnectors;
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;

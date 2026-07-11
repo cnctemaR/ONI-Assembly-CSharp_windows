@@ -2,8 +2,8 @@
 
 namespace Mono.Unix.Native
 {
-	[Flags]
 	[Map]
+	[Flags]
 	public enum PollEvents : short
 	{
 		POLLIN = 1,

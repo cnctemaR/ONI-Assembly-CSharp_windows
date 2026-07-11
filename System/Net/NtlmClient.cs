@@ -7,7 +7,7 @@ namespace System.Net
 	{
 		public NtlmClient()
 		{
-			this.authObject = new Mono.Http.NtlmClient();
+			this.authObject = new NtlmClient();
 		}
 
 		public Authorization Authenticate(string challenge, WebRequest webRequest, ICredentials credentials)

@@ -38,7 +38,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		{
 			return;
 		}
-		if (Application.isPlaying && KMonoBehaviour.lastGameObject != base.gameObject)
+		if (!KMonoBehaviour.isPoolPreInit && Application.isPlaying && KMonoBehaviour.lastGameObject != base.gameObject)
 		{
 			KMonoBehaviour.lastGameObject = base.gameObject;
 			KMonoBehaviour.lastObj = KObjectManager.Instance.GetOrCreateObject(base.gameObject);
@@ -125,10 +125,9 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		{
 			return;
 		}
-		string name = base.GetType().Name;
 		if (!this.isInitialized)
 		{
-			global::Debug.LogError(base.name + "." + name + " is not initialized.", null);
+			global::Debug.LogError(base.name + "." + base.GetType().Name + " is not initialized.", null);
 			return;
 		}
 		this.isSpawned = true;
@@ -148,7 +147,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 				"Error in: ",
 				base.name,
 				".",
-				name,
+				base.GetType().Name,
 				".OnSpawn\n",
 				ex.ToString()
 			}) });

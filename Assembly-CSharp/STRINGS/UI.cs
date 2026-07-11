@@ -32,7 +32,7 @@ namespace STRINGS
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no closing link tag: {0}", new object[0]);
+						Debug.LogWarningFormat("String has no closing link tag: {0}", Array.Empty<object>());
 					}
 					int num2 = text2.IndexOf("<link=");
 					if (num2 != -1)
@@ -41,7 +41,7 @@ namespace STRINGS
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no open link tag: {0}", new object[0]);
+						Debug.LogWarningFormat("String has no open link tag: {0}", Array.Empty<object>());
 					}
 					int num3 = text2.IndexOf("\">");
 					if (num3 != -1)
@@ -50,7 +50,7 @@ namespace STRINGS
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no open link tag: {0}", new object[0]);
+						Debug.LogWarningFormat("String has no open link tag: {0}", Array.Empty<object>());
 					}
 				}
 			}
@@ -629,11 +629,11 @@ namespace STRINGS
 
 			public class PATCHNOTESSCREEN
 			{
-				public static LocString TITLE = "COSMIC UPGRADE";
+				public static LocString TITLE = "EXPRESSIVE UPGRADE";
 
-				public static LocString BODY = "<b>Welcome to the Cosmic Upgrade!!</b>\n\n{0}";
+				public static LocString BODY = "<b>Welcome to the Expressive Upgrade!!</b>\n\n{0}";
 
-				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• The Surface biome has been added to the top of the asteroid\n• Solar power and metallic meteors can be harnessed\n• New glass and steel resources allow constructing advanced buildings\n• Further fixes and polish to Critter Ranching and eggs\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• New Duplicant interactions and reactions\n• Colony Schedule management\n• Downtime and new leisure buildings\n• New lore, animations, and sounds\n\nPlease view the full patch notes for further details!";
 
 				public static LocString OK_BUTTON = "OK";
 			}
@@ -929,6 +929,8 @@ namespace STRINGS
 			public class SUPPORTWARNINGS
 			{
 				public static LocString AUDIO_DRIVERS = "A problem occurred initializing your audio device.\nSorry about that!\n\nThis is usually caused by outdated audio drivers.\n\nPlease visit your audio device manufacturer's website to download the latest drivers.";
+
+				public static LocString AUDIO_DRIVERS_MORE_INFO = "More Info";
 
 				public static LocString DUPLICATE_KEY_BINDINGS = "<b>Duplicate key bindings were detected.\nThis may be because your custom key bindings conflicted with a new feature's default key.\nPlease visit the controls screen to ensure your key bindings are set how you like them.</b>\n{0}";
 
@@ -1379,6 +1381,72 @@ namespace STRINGS
 						public static LocString DESCRIPTION = "Duplicants employed in this Tier desire unrealistically luxurious improvements to decor";
 					}
 				}
+
+				public class QUALITYOFLIFE
+				{
+					public class TIER0
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 0";
+					}
+
+					public class TIER1
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 1";
+					}
+
+					public class TIER2
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 2";
+					}
+
+					public class TIER3
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 3";
+					}
+
+					public class TIER4
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 4";
+					}
+
+					public class TIER5
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 5";
+					}
+
+					public class TIER6
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 6";
+					}
+
+					public class TIER7
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 7";
+					}
+
+					public class TIER8
+					{
+						public static LocString NAME = "Morale expectation";
+
+						public static LocString DESCRIPTION = "Tier 8";
+					}
+				}
 			}
 		}
 
@@ -1665,13 +1733,13 @@ namespace STRINGS
 
 			public static LocString MANAGEMENTMENU_DAILYREPORT = "View daily Colony Reports";
 
-			public static LocString MANAGEMENTMENU_SCHEDULE = "Adjust colony timetable";
-
 			public static LocString MANAGEMENTMENU_REQUIRES_RESEARCH = "Build a Research Station to unlock" + UI.HORIZONTAL_BR_RULE + "Research buildings can be found in the Stations Tab <color=#F44A47>[0]</color> of the Build Menu";
 
 			public static LocString MANAGEMENTMENU_REQUIRES_ROLES_STATION = "Build a Jobs Board to unlock" + UI.HORIZONTAL_BR_RULE + "The Jobs Board can be found in the Stations Tab <color=#F44A47>[0]</color> of the Build Menu";
 
 			public static LocString MANAGEMENTMENU_CODEX = "Browse database entries";
+
+			public static LocString MANAGEMENTMENU_SCHEDULE = "Adjust colony scheduling";
 
 			public static LocString OPEN_CODEX_ENTRY = "View full entry in database";
 
@@ -1942,6 +2010,10 @@ namespace STRINGS
 				public static LocString EMAILS = UI.FormatAsLink("E-mail", "EMAILS");
 
 				public static LocString JOURNALS = UI.FormatAsLink("Journals", "JOURNALS");
+
+				public static LocString RESEARCHNOTES = UI.FormatAsLink("Research Notes", "RESEARCHNOTES");
+
+				public static LocString NOTICES = UI.FormatAsLink("Notices", "NOTICES");
 
 				public static LocString FOOD = UI.FormatAsLink("Food", "FOOD");
 
@@ -2741,19 +2813,7 @@ namespace STRINGS
 
 			public static LocString FOOD_QUALITY = "Quality: {0}";
 
-			public static LocString FOOD_QUALITY_VS_EXPECTATION = UI.HORIZONTAL_RULE + "\nThis food type {0} {1}'s quality expectations\n[{2} Quality / {3} Expectation]";
-
-			public static LocString EXPECTATIONS_ABOVE = "<b><color=#B87194FF>fulfills</color></b>";
-
-			public static LocString EXPECTATIONS_BELOW = "is <b><color=#B87194FF>below</color></b>";
-
-			public static LocString FOOD_EXPECTATIONS = "Expectations";
-
-			public static LocString FOOD_EXPECTATIONS_TOOLTIP = "Expectations" + UI.HORIZONTAL_BR_RULE + "Desires food that is {0} quality or better";
-
-			public static LocString STRESS = "Stress";
-
-			public static LocString STRESS_TOOLTIP = "Stress" + UI.HORIZONTAL_BR_RULE + "{0} of a possible 100%";
+			public static LocString FOOD_QUALITY_VS_EXPECTATION = UI.HORIZONTAL_RULE + "\nThis food has a quality of {0}\nIt will give these bonuses if {1} eats it:";
 		}
 
 		public class JOBSSCREEN
@@ -2796,13 +2856,13 @@ namespace STRINGS
 
 			public static LocString OPTIONS = "Options";
 
-			public static LocString TOGGLE_ADVANCED_MODE = "Advanced";
+			public static LocString TOGGLE_ADVANCED_MODE = "Enable Proximity";
 
-			public static LocString TOGGLE_ADVANCED_MODE_TOOLTIP = "<b>Advanced Priority Settings</b>" + UI.HORIZONTAL_BR_RULE + "This option disables a hidden priority hierarchy used to choose errands in the event of a priority tie.\n\nWhen disabled, Duplicants will still choose errands based on their Priorities first and their Sub-Priorities second, but ties will be settled by simply choosing the nearest high priority errand. This helps them to stay near the same area of the colony so long as all the nearby work is their highest priority.\n\nThis mode is ideal for large bases and experienced players with heavily customized priority settings.";
+			public static LocString TOGGLE_ADVANCED_MODE_TOOLTIP = "<b>Proximity Errand Settings</b>" + UI.HORIZONTAL_BR_RULE + "Enabling Proximity settings tells my Duplicants to always choose the closest high priority errand to perform.\n\nWhen disabled, Duplicants will choose between two high priority errands based on a hidden priority hierarchy instead.\n\nEnabling Proximity helps cut down on travel time in areas with lots of high-priority errands, and is useful for large colonies.";
 
 			public static LocString RESET_SETTINGS = "Reset Priorities";
 
-			public static LocString RESET_SETTINGS_TOOLTIP = "Resets all priorities to the default values for this mode.\n\nDefault: All priorities will be reset to neutral.\n\nAdvanced: Priorities will be adjusted high-to-low for normal base operation.";
+			public static LocString RESET_SETTINGS_TOOLTIP = "<b>Reset Priorities</b>" + UI.HORIZONTAL_BR_RULE + "Returns all priorities to their default values.\n\nProximity Enabled: Priorities will be adjusted high-to-low.\n\nProximity Disabled: All priorities will be reset to neutral.";
 
 			public class PRIORITY
 			{
@@ -2854,6 +2914,10 @@ namespace STRINGS
 
 			public static LocString DECOR_EXPECTATIONS_TOOLTIP = "This Duplicant desires decor that is {0} or higher";
 
+			public static LocString QUALITYOFLIFE_EXPECTATIONS = "Morale";
+
+			public static LocString QUALITYOFLIFE_EXPECTATIONS_TOOLTIP = "This Duplicant needs a Morale rating of {0}.\n\nCurrent Morale:";
+
 			public class CONDITIONS_GROWING
 			{
 				public class WILD
@@ -2881,23 +2945,17 @@ namespace STRINGS
 
 		public class SCHEDULESCREEN
 		{
-			public static LocString SCHEDULE = "SCHEDULE:";
+			public static LocString SCHEDULE_NAME_DEFAULT = "Default Schedule";
 
-			public static LocString BLOCKS = "BLOCKS:";
+			public static LocString SCHEDULE_NAME_FORMAT = "Schedule {0}";
 
-			public static LocString SELECTBLOCKTYPETOOLTIP = "Select a block type to adjust the colony's schedule";
+			public static LocString RENAME_BUTTON_TOOLTIP = "Rename Schedule";
 
-			public static LocString CLICKTOSELECT = "Click to select.";
+			public static LocString ALARM_BUTTON_ON_TOOLTIP = "Toggle Sounds and Notifications\n\nEnabled. Sounds and notifications will play when schedule blocks change for this schedule.\n\nClick to disable.";
 
-			public static LocString CLICKTOCHANGE = "Click to change block type.";
+			public static LocString ALARM_BUTTON_OFF_TOOLTIP = "Toggle Sounds and Notifications\n\nDisabled. No sounds or notifications will play for this schedule.\n\nClick to enable.";
 
-			public static LocString TIMESLOT = "Time Slot";
-
-			public static LocString SELECTHELP = "Select an option and then click or drag on the timetable to adjust the Duplicant's schedule.";
-
-			public static LocString ALLOWED = "Allowed";
-
-			public static LocString DENIED = "Denied";
+			public static LocString DELETE_BUTTON_TOOLTIP = "Delete Schedule";
 		}
 
 		public class COLONYLOSTSCREEN
@@ -3627,11 +3685,11 @@ namespace STRINGS
 
 				public static LocString STUDIED_BUTTON = "ANALYSIS COMPLETE";
 
-				public static LocString SEND_STATUS = "Send a researcher to study this formation. A full analysis will take time, but should yield useful results.";
+				public static LocString SEND_STATUS = "Send a researcher to gather data here.\n\nAnalyzing a natural feature takes time, but yields useful results.";
 
 				public static LocString SEND_BUTTON = "ANALYZE";
 
-				public static LocString PENDING_STATUS = "A researcher is in the process of studying this formation.";
+				public static LocString PENDING_STATUS = "A researcher is in the process of studying this feature.";
 
 				public static LocString PENDING_BUTTON = "CANCEL ANALYSIS";
 			}
@@ -3851,6 +3909,77 @@ namespace STRINGS
 				public static LocString NAME = "Inspect";
 
 				public static LocString TOOLTIP = "Recover files from this structure";
+
+				public static LocString SEARCH_DISPLAY = "The display is still functional. I copy its message into my database.\n\nNew Codex Entry discovered.";
+
+				public static LocString SEARCH_POD = "I search my incoming message history and find a single entry. I move the odd message into my database.\n\nNew Codex Entry discovered.";
+
+				public static LocString ALREADY_SEARCHED = "I already took everything of interest from this. I can check the Codex to re-read what I found.";
+
+				public class SEARCH_COMPUTER_SUCCESS
+				{
+					public static LocString SEARCH1 = "After searching through the computer's database, I managed to piece together some files that piqued my interest.\n\nNew Codex Entry unlocked.";
+
+					public static LocString SEARCH2 = "Searching through the computer, I find some recoverable files that are still readable.\n\nNew Codex Entry unlocked.";
+
+					public static LocString SEARCH3 = "The computer looks pristine on the outside, but is corrupted internally. Still, I managed to find one uncorrupted file, and have added it to my database.\n\nNew Codex Entry unlocked.";
+
+					public static LocString SEARCH4 = "The computer was wiped almost completely clean, except for one file hidden in the recycle bin.\n\nNew Codex Entry unlocked.";
+
+					public static LocString SEARCH5 = "I search the computer, storing what useful data I can find in my own memory.\n\nNew Codex Entry unlocked.";
+
+					public static LocString SEARCH6 = "This computer is broken and requires some finessing to get working. Still, I recover a handful of interesting files.\n\nNew Codex Entry unlocked.";
+				}
+
+				public class SEARCH_COMPUTER_FAIL
+				{
+					public static LocString SEARCH1 = "Unfortunately, the computer's hard drive is irreparably corrupted.";
+
+					public static LocString SEARCH2 = "The computer was wiped clean before I got here. There is nothing to recover.";
+
+					public static LocString SEARCH3 = "Some intact files are available on the computer, but nothing I haven't already discovered elsewhere. I find nothing else.";
+
+					public static LocString SEARCH4 = "The computer has nothing of import.";
+
+					public static LocString SEARCH5 = "Someone's left a solitaire game up. There's nothing else of interest on the computer.\n\nAlso, it looks as though they were about to lose.";
+
+					public static LocString SEARCH6 = "The background on this computer depicts two kittens hugging in a field of daisies. There is nothing else of import to be found.";
+
+					public static LocString SEARCH7 = "The user alphabetized the shortcuts on their desktop. There is nothing else of import to be found.";
+
+					public static LocString SEARCH8 = "The background is a picture of a golden retriever in a science lab. It looks very confused. There is nothing else of import to be found.";
+
+					public static LocString SEARCH9 = "This user never changed their default background. There is nothing else of import to be found. How dull.";
+				}
+
+				public class SEARCH_TECHNOLOGY_SUCCESS
+				{
+					public static LocString SEARCH1 = "I scour the internal systems and find something of interest.\n\nNew Codex Entry discovered.";
+
+					public static LocString SEARCH2 = "I see if I can salvage anything from the electronics. I add what I find to the codex.\n\nNew Codex Entry discovered.";
+
+					public static LocString SEARCH3 = "I look for anything of interest within the abandoned machinery and add what I find to my database.\n\nNew Codex Entry discovered.";
+				}
+
+				public class SEARCH_OBJECT_SUCCESS
+				{
+					public static LocString SEARCH1 = "I look around and recover an old file.\n\nNew Codex Entry discovered.";
+
+					public static LocString SEARCH2 = "There's a three-ringed binder inside. I scan the surviving documents.\n\nNew Codex Entry discovered.";
+
+					public static LocString SEARCH3 = "A discarded journal inside remains mostly intact. I scan the pages of use.\n\nNew Codex Entry discovered.";
+
+					public static LocString SEARCH4 = "A single page of a long printout remains legible. I scan it and add it to my database.\n\nNew Codex Entry discovered.";
+
+					public static LocString SEARCH5 = "A few loose papers can be found inside. I scan the ones that look interesting.\n\nNew Codex Entry discovered.";
+
+					public static LocString SEARCH6 = "I find a memory stick inside and copy its data into my database.\n\nNew Codex Entry discovered.";
+				}
+
+				public class SEARCH_OBJECT_FAIL
+				{
+					public static LocString SEARCH1 = "I look around but find nothing of interest.";
+				}
 			}
 
 			public class OPENPOI
@@ -4103,6 +4232,312 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Automation", "BUILDCATEGORYAUTOMATION");
 
 				public static LocString TOOLTIP = "Automate my base with logic circuits and sensors.";
+			}
+		}
+
+		public class NEWBUILDCATEGORIES
+		{
+			public static class BASE
+			{
+				public static LocString NAME = UI.FormatAsLink("Base", "BUILD_CATEGORY_BASE");
+
+				public static LocString TOOLTIP = "Maintain your colony's infrastructure with these homebase basics.";
+			}
+
+			public static class INFRASTRUCTURE
+			{
+				public static LocString NAME = UI.FormatAsLink("Utilities", "BUILD_CATEGORY_INFRASTRUCTURE");
+
+				public static LocString TOOLTIP = "Power, plumbing, and ventilation can all be found here.";
+			}
+
+			public static class FOODANDAGRICULTURE
+			{
+				public static LocString NAME = UI.FormatAsLink("Food", "BUILD_CATEGORY_FOODANDAGRICULTURE");
+
+				public static LocString TOOLTIP = "Keep your Duplicants' spirits high and their bellies full.";
+			}
+
+			public static class LOGISTICS
+			{
+				public static LocString NAME = UI.FormatAsLink("Logistics", "BUILD_CATEGORY_LOGISTICS");
+
+				public static LocString TOOLTIP = "Devices for base automation and material transport.";
+			}
+
+			public static class HEALTHANDHAPPINESS
+			{
+				public static LocString NAME = UI.FormatAsLink("Accommodation", "BUILD_CATEGORY_HEALTHANDHAPPINESS");
+
+				public static LocString TOOLTIP = "Everything a Duplicant needs to stay happy, healthy, and fulfilled.";
+			}
+
+			public static class INDUSTRIAL
+			{
+				public static LocString NAME = UI.FormatAsLink("Industrials", "BUILD_CATEGORY_INDUSTRIAL");
+
+				public static LocString TOOLTIP = "Machinery for oxygen production, heat management, and material refinement.";
+			}
+
+			public static class LADDERS
+			{
+				public static LocString NAME = "Ladders";
+
+				public static LocString BUILDMENUTITLE = "Ladders";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class TILES
+			{
+				public static LocString NAME = "Tiles";
+
+				public static LocString BUILDMENUTITLE = "Tiles";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class DOORS
+			{
+				public static LocString NAME = "Doors";
+
+				public static LocString BUILDMENUTITLE = "Doors";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class TRAVELTUBES
+			{
+				public static LocString NAME = "Transit\nTubes";
+
+				public static LocString BUILDMENUTITLE = "Transit Tubes";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class STORAGE
+			{
+				public static LocString NAME = "Storage";
+
+				public static LocString BUILDMENUTITLE = "Storage";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class RESEARCH
+			{
+				public static LocString NAME = "Research";
+
+				public static LocString BUILDMENUTITLE = "Research";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class GENERATORS
+			{
+				public static LocString NAME = "Generators";
+
+				public static LocString BUILDMENUTITLE = "Generators";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class WIRES
+			{
+				public static LocString NAME = "Wires";
+
+				public static LocString BUILDMENUTITLE = "Wires";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class POWERCONTROL
+			{
+				public static LocString NAME = "Power\nRegulation";
+
+				public static LocString BUILDMENUTITLE = "Power Regulation";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class PLUMBINGSTRUCTURES
+			{
+				public static LocString NAME = "Plumbing";
+
+				public static LocString BUILDMENUTITLE = "Plumbing";
+
+				public static LocString TOOLTIP = "Get your water running and the sewage flowing.";
+			}
+
+			public static class PIPES
+			{
+				public static LocString NAME = "Pipes";
+
+				public static LocString BUILDMENUTITLE = "Pipes";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class VENTILATIONSTRUCTURES
+			{
+				public static LocString NAME = "Ventilation";
+
+				public static LocString BUILDMENUTITLE = "Ventilation";
+
+				public static LocString TOOLTIP = "Control the flow of gas in your base.";
+			}
+
+			public static class CONVEYANCE
+			{
+				public static LocString NAME = "Ore\nTransport";
+
+				public static LocString BUILDMENUTITLE = "Ore Transport";
+
+				public static LocString TOOLTIP = "Move solids objects around.";
+			}
+
+			public static class LOGICWIRING
+			{
+				public static LocString NAME = "Logic\nWiring";
+
+				public static LocString BUILDMENUTITLE = "Logic Wiring";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class LOGICGATES
+			{
+				public static LocString NAME = "Logic\nGates";
+
+				public static LocString BUILDMENUTITLE = "Logic Gates";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class LOGICSWITCHES
+			{
+				public static LocString NAME = "Logic\nSwitches";
+
+				public static LocString BUILDMENUTITLE = "Logic Switches";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class COOKING
+			{
+				public static LocString NAME = "Cooking";
+
+				public static LocString BUILDMENUTITLE = "Cooking";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class FARMING
+			{
+				public static LocString NAME = "Farming";
+
+				public static LocString BUILDMENUTITLE = "Farming";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class RANCHING
+			{
+				public static LocString NAME = "Ranching";
+
+				public static LocString BUILDMENUTITLE = "Ranching";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class HYGIENE
+			{
+				public static LocString NAME = "Hygiene";
+
+				public static LocString BUILDMENUTITLE = "Hygiene";
+
+				public static LocString TOOLTIP = "Keep your Duplicants clean.";
+			}
+
+			public static class MEDICAL
+			{
+				public static LocString NAME = "Medical";
+
+				public static LocString BUILDMENUTITLE = "Medical";
+
+				public static LocString TOOLTIP = "A cure for everything but the common cold.";
+			}
+
+			public static class RECREATION
+			{
+				public static LocString NAME = "Recreation";
+
+				public static LocString BUILDMENUTITLE = "Recreation";
+
+				public static LocString TOOLTIP = "Everything needed to reduce stress and increase fun.";
+			}
+
+			public static class FURNITURE
+			{
+				public static LocString NAME = "Furniture";
+
+				public static LocString BUILDMENUTITLE = "Furniture";
+
+				public static LocString TOOLTIP = "Amenities to keep your Duplicants happy, comfy and efficient.";
+			}
+
+			public static class DECOR
+			{
+				public static LocString NAME = "Decor";
+
+				public static LocString BUILDMENUTITLE = "Decor";
+
+				public static LocString TOOLTIP = "Spruce up your colony with some lovely interior decorating.";
+			}
+
+			public static class OXYGEN
+			{
+				public static LocString NAME = "Oxygen";
+
+				public static LocString BUILDMENUTITLE = "Oxygen";
+
+				public static LocString TOOLTIP = "Everything you need to keep your colony breathing.";
+			}
+
+			public static class UTILITIES
+			{
+				public static LocString NAME = "Temperature\nControl";
+
+				public static LocString BUILDMENUTITLE = "Temperature Control";
+
+				public static LocString TOOLTIP = string.Empty;
+			}
+
+			public static class REFINING
+			{
+				public static LocString NAME = "Refinement";
+
+				public static LocString BUILDMENUTITLE = "Refinement";
+
+				public static LocString TOOLTIP = "Use the resources you want, filter the ones you don't.";
+			}
+
+			public static class EQUIPMENT
+			{
+				public static LocString NAME = "Stations";
+
+				public static LocString BUILDMENUTITLE = "Stations";
+
+				public static LocString TOOLTIP = "Unlock new technologies through the power of science!";
+			}
+
+			public static class CONDUITSENSORS
+			{
+				public static LocString NAME = "Pipe Sensors";
+
+				public static LocString BUILDMENUTITLE = "Pipe Sensors";
+
+				public static LocString TOOLTIP = string.Empty;
 			}
 		}
 
@@ -5280,6 +5715,8 @@ namespace STRINGS
 			public static LocString CYCLES_OLD = "This Colony is {0} Cycle(s) Old";
 
 			public static LocString TIME_PLAYED = "Time Played: {0} hours";
+
+			public static LocString SCHEDULE_BUTTON_TOOLTIP = "Manage Schedule\n\nNOT IMPLEMENTED";
 		}
 
 		public class ENDOFDAYREPORT
@@ -5494,6 +5931,37 @@ namespace STRINGS
 				public static LocString NAME = "Hygiene";
 
 				public static LocString DESCRIPTION = "HYGIENE:\nDuring " + UI.FormatAsLink("Hygiene", "HYGIENE") + " hours Duplicants will head to their assigned washrooms to get cleaned up.";
+			}
+		}
+
+		public static class SCHEDULEGROUPS
+		{
+			public static class HYGENE
+			{
+				public static LocString NAME = "Bathtime";
+
+				public static LocString DESCRIPTION = "During bathtime blocks my Duplicants will take care of their hygienic needs, such as going to the bathroom, using the shower or washing their hands.";
+			}
+
+			public static class WORKTIME
+			{
+				public static LocString NAME = "Work";
+
+				public static LocString DESCRIPTION = "During Work shifts my Duplicants must perform the work tasks I have placed for them throughout the colony.\n\nIt's important when scheduling to maintain a good work-life balance for my Duplicants to maintain their health and prevent Morale loss.";
+			}
+
+			public static class RECREATION
+			{
+				public static LocString NAME = "Downtime";
+
+				public static LocString DESCRIPTION = "During downtime my Duplicants they may do as they please.\n\nThis may include personal matters like bathroom visits or snacking, or they may choose to engage in leisure activities like socializing with friends.\n\nDowntime increases Duplicant Morale.";
+			}
+
+			public static class SLEEP
+			{
+				public static LocString NAME = "Bedtime";
+
+				public static LocString DESCRIPTION = "My Duplicants use bedtime blocks to rest up after a hard day's work.\n\nScheduling too few bedtime blocks may prevent my Duplicants from regaining enough Stamina to make it through the following day.";
 			}
 		}
 

@@ -57,7 +57,7 @@ namespace TUNING
 
 		public const int REPAIR_EFFECTIVENESS_BASE = 10;
 
-		public static PlanScreen.PlanInfo[] PLANORDER = new PlanScreen.PlanInfo[]
+		public static readonly PlanScreen.PlanInfo[] PLANORDER = new PlanScreen.PlanInfo[]
 		{
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new string[]
 			{
@@ -85,6 +85,7 @@ namespace TUNING
 				"Battery",
 				"BatteryMedium",
 				"BatterySmart",
+				"PowerTransformerSmall",
 				"PowerTransformer",
 				SwitchConfig.ID,
 				LogicPowerRelayConfig.ID,
@@ -140,13 +141,16 @@ namespace TUNING
 				GasConduitTemperatureSensorConfig.ID
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[] { "Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "Grave" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "MassageTable", "Grave" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new string[]
 			{
 				BedConfig.ID,
 				LuxuryBedConfig.ID,
-				"MassageTable",
 				"DiningTable",
+				"WaterCooler",
+				"Phonobox",
+				"ArcadeMachine",
+				"EspressoMachine",
 				"FlowerVase",
 				"Canvas",
 				"Sculpture",
@@ -339,23 +343,23 @@ namespace TUNING
 
 		public class CONSTRUCTION_MASS_KG
 		{
-			public static float[] TIER_TINY = new float[] { 5f };
+			public static readonly float[] TIER_TINY = new float[] { 5f };
 
-			public static float[] TIER0 = new float[] { 25f };
+			public static readonly float[] TIER0 = new float[] { 25f };
 
-			public static float[] TIER1 = new float[] { 50f };
+			public static readonly float[] TIER1 = new float[] { 50f };
 
-			public static float[] TIER2 = new float[] { 100f };
+			public static readonly float[] TIER2 = new float[] { 100f };
 
-			public static float[] TIER3 = new float[] { 200f };
+			public static readonly float[] TIER3 = new float[] { 200f };
 
-			public static float[] TIER4 = new float[] { 400f };
+			public static readonly float[] TIER4 = new float[] { 400f };
 
-			public static float[] TIER5 = new float[] { 800f };
+			public static readonly float[] TIER5 = new float[] { 800f };
 
-			public static float[] TIER6 = new float[] { 1200f };
+			public static readonly float[] TIER6 = new float[] { 1200f };
 
-			public static float[] TIER7 = new float[] { 2000f };
+			public static readonly float[] TIER7 = new float[] { 2000f };
 		}
 
 		public class ENERGY_CONSUMPTION_WHEN_ACTIVE
@@ -508,7 +512,7 @@ namespace TUNING
 
 		public class DECOR
 		{
-			public static EffectorValues NONE = new EffectorValues
+			public static readonly EffectorValues NONE = new EffectorValues
 			{
 				amount = 0,
 				radius = 1
@@ -516,37 +520,37 @@ namespace TUNING
 
 			public class BONUS
 			{
-				public static EffectorValues TIER0 = new EffectorValues
+				public static readonly EffectorValues TIER0 = new EffectorValues
 				{
 					amount = 5,
 					radius = 1
 				};
 
-				public static EffectorValues TIER1 = new EffectorValues
+				public static readonly EffectorValues TIER1 = new EffectorValues
 				{
 					amount = 10,
 					radius = 2
 				};
 
-				public static EffectorValues TIER2 = new EffectorValues
+				public static readonly EffectorValues TIER2 = new EffectorValues
 				{
 					amount = 15,
 					radius = 3
 				};
 
-				public static EffectorValues TIER3 = new EffectorValues
+				public static readonly EffectorValues TIER3 = new EffectorValues
 				{
 					amount = 20,
 					radius = 4
 				};
 
-				public static EffectorValues TIER4 = new EffectorValues
+				public static readonly EffectorValues TIER4 = new EffectorValues
 				{
 					amount = 25,
 					radius = 5
 				};
 
-				public static EffectorValues TIER5 = new EffectorValues
+				public static readonly EffectorValues TIER5 = new EffectorValues
 				{
 					amount = 30,
 					radius = 6
@@ -555,37 +559,37 @@ namespace TUNING
 
 			public class PENALTY
 			{
-				public static EffectorValues TIER0 = new EffectorValues
+				public static readonly EffectorValues TIER0 = new EffectorValues
 				{
 					amount = -5,
 					radius = 1
 				};
 
-				public static EffectorValues TIER1 = new EffectorValues
+				public static readonly EffectorValues TIER1 = new EffectorValues
 				{
 					amount = -10,
 					radius = 2
 				};
 
-				public static EffectorValues TIER2 = new EffectorValues
+				public static readonly EffectorValues TIER2 = new EffectorValues
 				{
 					amount = -15,
 					radius = 3
 				};
 
-				public static EffectorValues TIER3 = new EffectorValues
+				public static readonly EffectorValues TIER3 = new EffectorValues
 				{
 					amount = -20,
 					radius = 4
 				};
 
-				public static EffectorValues TIER4 = new EffectorValues
+				public static readonly EffectorValues TIER4 = new EffectorValues
 				{
 					amount = -20,
 					radius = 5
 				};
 
-				public static EffectorValues TIER5 = new EffectorValues
+				public static readonly EffectorValues TIER5 = new EffectorValues
 				{
 					amount = -25,
 					radius = 6

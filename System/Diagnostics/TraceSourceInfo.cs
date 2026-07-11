@@ -15,8 +15,11 @@ namespace System.Diagnostics
 		{
 			this.name = name;
 			this.levels = levels;
-			this.listeners = new TraceListenerCollection(false);
-			this.listeners.Add(new DefaultTraceListener(), settings);
+			this.listeners = new TraceListenerCollection();
+			this.listeners.Add(new DefaultTraceListener
+			{
+				IndentSize = settings.IndentSize
+			});
 		}
 
 		public string Name

@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
-public class KCompactedVector<T>
+public class KCompactedVector<T> : ICollection, IEnumerable
 {
 	public KCompactedVector(int initial_count = 0)
 	{
@@ -90,6 +91,32 @@ public class KCompactedVector<T>
 	public List<T> GetDataList()
 	{
 		return this.data;
+	}
+
+	public bool IsSynchronized
+	{
+		get
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public object SyncRoot
+	{
+		get
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public void CopyTo(Array array, int index)
+	{
+		throw new NotImplementedException();
+	}
+
+	public IEnumerator GetEnumerator()
+	{
+		return this.data.GetEnumerator();
 	}
 
 	protected List<T> data;

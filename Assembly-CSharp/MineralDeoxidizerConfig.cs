@@ -24,7 +24,6 @@ public class MineralDeoxidizerConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.Breakable = true;
 		return buildingDef;

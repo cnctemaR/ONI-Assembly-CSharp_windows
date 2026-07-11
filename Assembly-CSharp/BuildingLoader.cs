@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class BuildingLoader : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		BuildingLoader.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		BuildingLoader.Instance = this;
@@ -39,6 +44,8 @@ public class BuildingLoader : KMonoBehaviour
 		storage.doDiseaseTransfer = false;
 		gameObject.AddOrGet<Cancellable>();
 		gameObject.AddOrGet<Prioritizable>();
+		gameObject.AddOrGet<Notifier>();
+		gameObject.AddOrGet<SaveLoadRoot>();
 		return gameObject;
 	}
 
@@ -136,17 +143,17 @@ public class BuildingLoader : KMonoBehaviour
 		return kprefabID;
 	}
 
-	public GameObject CreateBuildingUnderConstruction(BuildingDef def, bool isRelocating)
+	public GameObject CreateBuildingUnderConstruction(BuildingDef def)
 	{
-		GameObject gameObject = this.CreateBuilding(def, this.constructionTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
+		GameObject gameObject = this.CreateBuilding(def, this.constructionTemplate, null);
+		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		KSelectable component = gameObject.GetComponent<KSelectable>();
 		component.SetName(def.Name);
 		gameObject.GetComponent<PrimaryElement>().MassPerUnit = def.Mass[0];
-		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + ((!isRelocating) ? "UnderConstruction" : "UnderRelocation"));
+		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "UnderConstruction");
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 		Constructable component2 = gameObject.GetComponent<Constructable>();
-		component2.isRelocating = isRelocating;
-		component2.SetWorkTime((!isRelocating) ? def.ConstructionTime : 4f);
+		component2.SetWorkTime(def.ConstructionTime);
 		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
@@ -174,14 +181,14 @@ public class BuildingLoader : KMonoBehaviour
 		if (gameObject != null)
 		{
 			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(gameObject);
+			global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 			gameObject.name = def.PrefabID + "Complete";
-			gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 			gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
 			KSelectable component = gameObject.GetComponent<KSelectable>();
 			component.SetName(def.Name);
 			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 			component2.MassPerUnit = def.Mass[0];
-			BuildingHP buildingHP = BuildingLoader.UpdateComponentRequirement<BuildingHP>(gameObject, true);
+			BuildingHP buildingHP = gameObject.AddOrGet<BuildingHP>();
 			if (def.Invincible)
 			{
 				buildingHP.invincible = true;
@@ -251,11 +258,6 @@ public class BuildingLoader : KMonoBehaviour
 				gameObject.AddOrGet<LogicOperationalController>();
 			}
 			BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
-			LoopingSounds component4 = gameObject.GetComponent<LoopingSounds>();
-			if (component4 == null)
-			{
-				gameObject.AddComponent<LoopingSounds>();
-			}
 			if (def.BaseDecor != 0f)
 			{
 				DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
@@ -277,7 +279,8 @@ public class BuildingLoader : KMonoBehaviour
 
 	public GameObject CreateBuildingPreview(BuildingDef def)
 	{
-		GameObject gameObject = this.CreateBuilding(def, this.previewTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
+		GameObject gameObject = this.CreateBuilding(def, this.previewTemplate, null);
+		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		int num = LayerMask.NameToLayer("Place");
 		gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
 		BuildingLoader.Add2DComponents(def, gameObject, "place", true, num);

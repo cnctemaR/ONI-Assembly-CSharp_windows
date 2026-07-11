@@ -4,19 +4,19 @@ namespace System.Net.NetworkInformation
 {
 	public class NetworkAvailabilityEventArgs : EventArgs
 	{
-		internal NetworkAvailabilityEventArgs(bool available)
+		internal NetworkAvailabilityEventArgs(bool isAvailable)
 		{
-			this.available = available;
+			this.isAvailable = isAvailable;
 		}
 
 		public bool IsAvailable
 		{
 			get
 			{
-				return this.available;
+				return this.isAvailable;
 			}
 		}
 
-		private bool available;
+		private bool isAvailable;
 	}
 }

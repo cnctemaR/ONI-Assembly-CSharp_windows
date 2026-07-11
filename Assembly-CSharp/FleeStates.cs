@@ -34,19 +34,19 @@ internal class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, IS
 		this.cower.Enter(delegate(FleeStates.Instance smi)
 		{
 			string text3 = "DEFAULT COWER ANIMATION";
-			if (smi.animController.HasAnimation("cower"))
+			if (smi.Get<KBatchedAnimController>().HasAnimation("cower"))
 			{
 				text3 = "cower";
 			}
-			else if (smi.animController.HasAnimation("idle"))
+			else if (smi.Get<KBatchedAnimController>().HasAnimation("idle"))
 			{
 				text3 = "idle";
 			}
-			else if (smi.animController.HasAnimation("idle_loop"))
+			else if (smi.Get<KBatchedAnimController>().HasAnimation("idle_loop"))
 			{
 				text3 = "idle_loop";
 			}
-			smi.animController.Play(text3, KAnim.PlayMode.Loop, 1f, 0f);
+			smi.Get<KBatchedAnimController>().Play(text3, KAnim.PlayMode.Loop, 1f, 0f);
 		}).ScheduleGoTo(2f, this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Flee, false);
 	}

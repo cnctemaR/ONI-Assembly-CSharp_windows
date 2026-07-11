@@ -3,8 +3,17 @@
 namespace System.Collections.Generic
 {
 	[Serializable]
-	internal sealed class GenericEqualityComparer<T> : EqualityComparer<T> where T : IEquatable<T>
+	internal class GenericEqualityComparer<T> : EqualityComparer<T> where T : IEquatable<T>
 	{
+		public override bool Equals(T x, T y)
+		{
+			if (x != null)
+			{
+				return y != null && x.Equals(y);
+			}
+			return y == null;
+		}
+
 		public override int GetHashCode(T obj)
 		{
 			if (obj == null)
@@ -14,13 +23,66 @@ namespace System.Collections.Generic
 			return obj.GetHashCode();
 		}
 
-		public override bool Equals(T x, T y)
+		internal override int IndexOf(T[] array, T value, int startIndex, int count)
 		{
-			if (x == null)
+			int num = startIndex + count;
+			if (value == null)
 			{
-				return y == null;
+				for (int i = startIndex; i < num; i++)
+				{
+					if (array[i] == null)
+					{
+						return i;
+					}
+				}
 			}
-			return x.Equals(y);
+			else
+			{
+				for (int j = startIndex; j < num; j++)
+				{
+					if (array[j] != null && array[j].Equals(value))
+					{
+						return j;
+					}
+				}
+			}
+			return -1;
+		}
+
+		internal override int LastIndexOf(T[] array, T value, int startIndex, int count)
+		{
+			int num = startIndex - count + 1;
+			if (value == null)
+			{
+				for (int i = startIndex; i >= num; i--)
+				{
+					if (array[i] == null)
+					{
+						return i;
+					}
+				}
+			}
+			else
+			{
+				for (int j = startIndex; j >= num; j--)
+				{
+					if (array[j] != null && array[j].Equals(value))
+					{
+						return j;
+					}
+				}
+			}
+			return -1;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is GenericEqualityComparer<T>;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetType().Name.GetHashCode();
 		}
 	}
 }

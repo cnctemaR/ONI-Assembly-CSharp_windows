@@ -19,13 +19,13 @@ namespace System.Net.Mail
 			this.InitName(fileName);
 		}
 
-		public Attachment(string fileName, global::System.Net.Mime.ContentType contentType)
+		public Attachment(string fileName, ContentType contentType)
 			: base(fileName, contentType)
 		{
 			this.InitName(fileName);
 		}
 
-		public Attachment(Stream contentStream, global::System.Net.Mime.ContentType contentType)
+		public Attachment(Stream contentStream, ContentType contentType)
 			: base(contentStream, contentType)
 		{
 		}
@@ -42,7 +42,7 @@ namespace System.Net.Mail
 			this.Name = name;
 		}
 
-		public global::System.Net.Mime.ContentDisposition ContentDisposition
+		public ContentDisposition ContentDisposition
 		{
 			get
 			{
@@ -74,7 +74,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public static Attachment CreateAttachmentFromString(string content, global::System.Net.Mime.ContentType contentType)
+		public static Attachment CreateAttachmentFromString(string content, ContentType contentType)
 		{
 			if (content == null)
 			{
@@ -87,7 +87,7 @@ namespace System.Net.Mail
 			memoryStream.Position = 0L;
 			return new Attachment(memoryStream, contentType)
 			{
-				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable
+				TransferEncoding = TransferEncoding.QuotedPrintable
 			};
 		}
 
@@ -102,9 +102,9 @@ namespace System.Net.Mail
 			streamWriter.Write(content);
 			streamWriter.Flush();
 			memoryStream.Position = 0L;
-			return new Attachment(memoryStream, new global::System.Net.Mime.ContentType("text/plain"))
+			return new Attachment(memoryStream, new ContentType("text/plain"))
 			{
-				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable,
+				TransferEncoding = TransferEncoding.QuotedPrintable,
 				Name = name
 			};
 		}
@@ -122,7 +122,7 @@ namespace System.Net.Mail
 			memoryStream.Position = 0L;
 			return new Attachment(memoryStream, name, mediaType)
 			{
-				TransferEncoding = global::System.Net.Mime.ContentType.GuessTransferEncoding(contentEncoding),
+				TransferEncoding = MailMessage.GuessTransferEncoding(contentEncoding),
 				ContentType = 
 				{
 					CharSet = streamWriter.Encoding.BodyName
@@ -139,7 +139,7 @@ namespace System.Net.Mail
 			this.Name = Path.GetFileName(fileName);
 		}
 
-		private global::System.Net.Mime.ContentDisposition contentDisposition = new global::System.Net.Mime.ContentDisposition();
+		private ContentDisposition contentDisposition = new ContentDisposition();
 
 		private Encoding nameEncoding;
 	}

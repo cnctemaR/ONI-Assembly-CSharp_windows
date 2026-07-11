@@ -5,7 +5,7 @@ public class FishFeederBotConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity("FishFeederBot", "FishFeederBot");
+		GameObject gameObject = EntityTemplates.CreateEntity("FishFeederBot", "FishFeederBot", true);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("fishfeeder_kanim") };
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;

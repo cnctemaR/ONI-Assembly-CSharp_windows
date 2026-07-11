@@ -21,7 +21,7 @@ public class PuftBleachstoneConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = PuftBleachstoneConfig.CreatePuftBleachstone("PuftBleachstone", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.DESC, "puft_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftBleachstoneEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftBleachstoneBaby", 45f, 15f, PuftTuning.EGG_CHANCES_BLEACHSTONE, PuftBleachstoneConfig.EGG_SORT_ORDER, true, false, true);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftBleachstoneEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_BLEACHSTONE.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftBleachstoneBaby", 45f, 15f, PuftTuning.EGG_CHANCES_BLEACHSTONE, PuftBleachstoneConfig.EGG_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject inst)

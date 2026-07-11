@@ -28,7 +28,11 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		{
 			smi.Recover();
 		}).EventTransition(GameHashes.DestinationReached, this.standing, null)
-			.EventTransition(GameHashes.NavigationFailed, this.standing, null);
+			.EventTransition(GameHashes.NavigationFailed, this.standing, null)
+			.Exit(delegate(FallMonitor.Instance smi)
+			{
+				smi.RecoverEmote();
+			});
 		this.landfloor.Enter("Land", delegate(FallMonitor.Instance smi)
 		{
 			smi.LandFloor();
@@ -105,11 +109,23 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable, Grid.BitFields, false);
 						if (Grid.InvalidCell != num2)
 						{
+							Vector2I vector2I = Grid.CellToXY(num);
+							this.flipRecoverEmote = Grid.CellToXY(num2).x < vector2I.x;
 							this.navigator.BeginTransition(transition);
 							break;
 						}
 					}
 				}
+			}
+		}
+
+		public void RecoverEmote()
+		{
+			int num = global::UnityEngine.Random.Range(0, 9);
+			if (num == 8)
+			{
+				ChoreProvider component = base.master.GetComponent<ChoreProvider>();
+				new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_floor_missing_kanim", new HashedString[] { "react" }, KAnim.PlayMode.Once, this.flipRecoverEmote);
 			}
 		}
 
@@ -257,5 +273,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		};
 
 		private Navigator navigator;
+
+		private bool flipRecoverEmote;
 	}
 }

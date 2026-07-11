@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -8,30 +8,56 @@ using System.Threading;
 
 namespace System.Diagnostics
 {
-	[MonoTODO("Serialized objects are not compatible with .NET")]
 	[ComVisible(true)]
+	[MonoTODO("Serialized objects are not compatible with .NET")]
 	[Serializable]
 	public class StackTrace
 	{
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public StackTrace()
 		{
 			this.init_frames(0, false);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public StackTrace(bool fNeedFileInfo)
 		{
 			this.init_frames(0, fNeedFileInfo);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public StackTrace(int skipFrames)
 		{
 			this.init_frames(skipFrames, false);
 		}
 
+		[MethodImpl(MethodImplOptions.NoInlining)]
 		public StackTrace(int skipFrames, bool fNeedFileInfo)
 		{
 			this.init_frames(skipFrames, fNeedFileInfo);
 		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private void init_frames(int skipFrames, bool fNeedFileInfo)
+		{
+			if (skipFrames < 0)
+			{
+				throw new ArgumentOutOfRangeException("< 0", "skipFrames");
+			}
+			List<StackFrame> list = new List<StackFrame>();
+			skipFrames += 2;
+			StackFrame stackFrame;
+			while ((stackFrame = new StackFrame(skipFrames, fNeedFileInfo)) != null && stackFrame.GetMethod() != null)
+			{
+				list.Add(stackFrame);
+				skipFrames++;
+			}
+			this.debug_info = fNeedFileInfo;
+			this.frames = list.ToArray();
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern StackFrame[] get_trace(Exception e, int skipFrames, bool fNeedFileInfo);
 
 		public StackTrace(Exception e)
 			: this(e, 0, false)
@@ -49,11 +75,6 @@ namespace System.Diagnostics
 		}
 
 		public StackTrace(Exception e, int skipFrames, bool fNeedFileInfo)
-			: this(e, skipFrames, fNeedFileInfo, false)
-		{
-		}
-
-		internal StackTrace(Exception e, int skipFrames, bool fNeedFileInfo, bool returnNativeFrames)
 		{
 			if (e == null)
 			{
@@ -64,29 +85,7 @@ namespace System.Diagnostics
 				throw new ArgumentOutOfRangeException("< 0", "skipFrames");
 			}
 			this.frames = StackTrace.get_trace(e, skipFrames, fNeedFileInfo);
-			if (!returnNativeFrames)
-			{
-				bool flag = false;
-				for (int i = 0; i < this.frames.Length; i++)
-				{
-					if (this.frames[i].GetMethod() == null)
-					{
-						flag = true;
-					}
-				}
-				if (flag)
-				{
-					ArrayList arrayList = new ArrayList();
-					for (int j = 0; j < this.frames.Length; j++)
-					{
-						if (this.frames[j].GetMethod() != null)
-						{
-							arrayList.Add(this.frames[j]);
-						}
-					}
-					this.frames = (StackFrame[])arrayList.ToArray(typeof(StackFrame));
-				}
-			}
+			this.captured_traces = e.captured_traces;
 		}
 
 		public StackTrace(StackFrame frame)
@@ -95,38 +94,32 @@ namespace System.Diagnostics
 			this.frames[0] = frame;
 		}
 
-		[MonoTODO("Not possible to create StackTraces from other threads")]
+		[Obsolete]
+		[MonoLimitation("Not possible to create StackTraces from other threads")]
 		public StackTrace(Thread targetThread, bool needFileInfo)
 		{
+			if (targetThread == Thread.CurrentThread)
+			{
+				this.init_frames(0, needFileInfo);
+				return;
+			}
 			throw new NotImplementedException();
 		}
 
-		private void init_frames(int skipFrames, bool fNeedFileInfo)
+		internal StackTrace(StackFrame[] frames)
 		{
-			if (skipFrames < 0)
-			{
-				throw new ArgumentOutOfRangeException("< 0", "skipFrames");
-			}
-			ArrayList arrayList = new ArrayList();
-			skipFrames += 2;
-			StackFrame stackFrame;
-			while ((stackFrame = new StackFrame(skipFrames, fNeedFileInfo)) != null && stackFrame.GetMethod() != null)
-			{
-				arrayList.Add(stackFrame);
-				skipFrames++;
-			}
-			this.debug_info = fNeedFileInfo;
-			this.frames = (StackFrame[])arrayList.ToArray(typeof(StackFrame));
+			this.frames = frames;
 		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern StackFrame[] get_trace(Exception e, int skipFrames, bool fNeedFileInfo);
 
 		public virtual int FrameCount
 		{
 			get
 			{
-				return (this.frames != null) ? this.frames.Length : 0;
+				if (this.frames != null)
+				{
+					return this.frames.Length;
+				}
+				return 0;
 			}
 		}
 
@@ -145,75 +138,182 @@ namespace System.Diagnostics
 			return this.frames;
 		}
 
-		public override string ToString()
+		private static string GetAotId()
 		{
-			string text = string.Format("{0}   {1} ", Environment.NewLine, Locale.GetText("at"));
-			string text2 = Locale.GetText("<unknown method>");
-			string text3 = Locale.GetText(" in {0}:line {1}");
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < this.FrameCount; i++)
+			if (!StackTrace.isAotidSet)
+			{
+				StackTrace.aotid = Assembly.GetAotId();
+				if (StackTrace.aotid != null)
+				{
+					StackTrace.aotid = new Guid(StackTrace.aotid).ToString("N");
+				}
+				StackTrace.isAotidSet = true;
+			}
+			return StackTrace.aotid;
+		}
+
+		private bool AddFrames(StringBuilder sb)
+		{
+			string text = Locale.GetText("<unknown method>");
+			string text2 = "  ";
+			string text3 = Locale.GetText(" in {0}:{1} ");
+			string text4 = string.Format("{0}{1}{2} ", Environment.NewLine, text2, Locale.GetText("at"));
+			int i;
+			for (i = 0; i < this.FrameCount; i++)
 			{
 				StackFrame frame = this.GetFrame(i);
-				if (i > 0)
+				if (i == 0)
 				{
-					stringBuilder.Append(text);
+					sb.AppendFormat("{0}{1} ", text2, Locale.GetText("at"));
 				}
 				else
 				{
-					stringBuilder.AppendFormat("   {0} ", Locale.GetText("at"));
+					sb.Append(text4);
 				}
-				MethodBase method = frame.GetMethod();
-				if (method != null)
+				if (frame.GetMethod() == null)
 				{
-					stringBuilder.AppendFormat("{0}.{1}", method.DeclaringType.FullName, method.Name);
-					stringBuilder.Append("(");
-					ParameterInfo[] parameters = method.GetParameters();
-					for (int j = 0; j < parameters.Length; j++)
+					string internalMethodName = frame.GetInternalMethodName();
+					if (internalMethodName != null)
 					{
-						if (j > 0)
-						{
-							stringBuilder.Append(", ");
-						}
-						Type type = parameters[j].ParameterType;
-						bool isByRef = type.IsByRef;
-						if (isByRef)
-						{
-							type = type.GetElementType();
-						}
-						if (type.IsClass && type.Namespace != string.Empty)
-						{
-							stringBuilder.Append(type.Namespace);
-							stringBuilder.Append(".");
-						}
-						stringBuilder.Append(type.Name);
-						if (isByRef)
-						{
-							stringBuilder.Append(" ByRef");
-						}
-						stringBuilder.AppendFormat(" {0}", parameters[j].Name);
+						sb.Append(internalMethodName);
 					}
-					stringBuilder.Append(")");
+					else
+					{
+						sb.AppendFormat("<0x{0:x5} + 0x{1:x5}> {2}", frame.GetMethodAddress(), frame.GetNativeOffset(), text);
+					}
 				}
 				else
 				{
-					stringBuilder.Append(text2);
-				}
-				if (this.debug_info)
-				{
-					string secureFileName = frame.GetSecureFileName();
-					if (secureFileName != "<filename unknown>")
+					this.GetFullNameForStackTrace(sb, frame.GetMethod());
+					if (frame.GetILOffset() == -1)
 					{
-						stringBuilder.AppendFormat(text3, secureFileName, frame.GetFileLineNumber());
+						sb.AppendFormat(" <0x{0:x5} + 0x{1:x5}>", frame.GetMethodAddress(), frame.GetNativeOffset());
+						if (frame.GetMethodIndex() != 16777215U)
+						{
+							sb.AppendFormat(" {0}", frame.GetMethodIndex());
+						}
+					}
+					else
+					{
+						sb.AppendFormat(" [0x{0:x5}]", frame.GetILOffset());
+					}
+					string text5 = frame.GetSecureFileName();
+					if (text5[0] == '<')
+					{
+						string text6 = frame.GetMethod().Module.ModuleVersionId.ToString("N");
+						string aotId = StackTrace.GetAotId();
+						if (frame.GetILOffset() != -1 || aotId == null)
+						{
+							text5 = string.Format("<{0}>", text6);
+						}
+						else
+						{
+							text5 = string.Format("<{0}#{1}>", text6, aotId);
+						}
+					}
+					sb.AppendFormat(text3, text5, frame.GetFileLineNumber());
+				}
+			}
+			return i != 0;
+		}
+
+		internal void GetFullNameForStackTrace(StringBuilder sb, MethodBase mi)
+		{
+			Type type = mi.DeclaringType;
+			if (type.IsGenericType && !type.IsGenericTypeDefinition)
+			{
+				type = type.GetGenericTypeDefinition();
+			}
+			foreach (MethodInfo methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+			{
+				if (methodInfo.MetadataToken == mi.MetadataToken)
+				{
+					mi = methodInfo;
+					break;
+				}
+			}
+			sb.Append(type.ToString());
+			sb.Append(".");
+			sb.Append(mi.Name);
+			if (mi.IsGenericMethod)
+			{
+				Type[] genericArguments = mi.GetGenericArguments();
+				sb.Append("[");
+				for (int j = 0; j < genericArguments.Length; j++)
+				{
+					if (j > 0)
+					{
+						sb.Append(",");
+					}
+					sb.Append(genericArguments[j].Name);
+				}
+				sb.Append("]");
+			}
+			ParameterInfo[] parameters = mi.GetParameters();
+			sb.Append(" (");
+			for (int k = 0; k < parameters.Length; k++)
+			{
+				if (k > 0)
+				{
+					sb.Append(", ");
+				}
+				Type type2 = parameters[k].ParameterType;
+				if (type2.IsGenericType && !type2.IsGenericTypeDefinition)
+				{
+					type2 = type2.GetGenericTypeDefinition();
+				}
+				sb.Append(type2.ToString());
+				if (parameters[k].Name != null)
+				{
+					sb.Append(" ");
+					sb.Append(parameters[k].Name);
+				}
+			}
+			sb.Append(")");
+		}
+
+		public override string ToString()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			if (this.captured_traces != null)
+			{
+				StackTrace[] array = this.captured_traces;
+				for (int i = 0; i < array.Length; i++)
+				{
+					if (array[i].AddFrames(stringBuilder))
+					{
+						stringBuilder.Append(Environment.NewLine);
+						stringBuilder.Append("--- End of stack trace from previous location where exception was thrown ---");
+						stringBuilder.Append(Environment.NewLine);
 					}
 				}
 			}
+			this.AddFrames(stringBuilder);
 			return stringBuilder.ToString();
+		}
+
+		internal string ToString(StackTrace.TraceFormat traceFormat)
+		{
+			return this.ToString();
 		}
 
 		public const int METHODS_TO_SKIP = 0;
 
 		private StackFrame[] frames;
 
+		private readonly StackTrace[] captured_traces;
+
 		private bool debug_info;
+
+		private static bool isAotidSet;
+
+		private static string aotid;
+
+		internal enum TraceFormat
+		{
+			Normal,
+			TrailingNewLine,
+			NoResourceLookup
+		}
 	}
 }

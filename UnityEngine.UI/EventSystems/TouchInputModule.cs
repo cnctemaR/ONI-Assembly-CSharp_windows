@@ -40,6 +40,14 @@ namespace UnityEngine.EventSystems
 
 		public override void UpdateModule()
 		{
+			if (!base.eventSystem.isFocused)
+			{
+				if (this.m_InputPointerEvent != null && this.m_InputPointerEvent.pointerDrag != null && this.m_InputPointerEvent.dragging)
+				{
+					ExecuteEvents.Execute<IEndDragHandler>(this.m_InputPointerEvent.pointerDrag, this.m_InputPointerEvent, ExecuteEvents.endDragHandler);
+				}
+				this.m_InputPointerEvent = null;
+			}
 			this.m_LastMousePosition = this.m_MousePosition;
 			this.m_MousePosition = base.input.mousePosition;
 		}
@@ -178,6 +186,7 @@ namespace UnityEngine.EventSystems
 				{
 					ExecuteEvents.Execute<IInitializePotentialDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
 				}
+				this.m_InputPointerEvent = pointerEvent;
 			}
 			if (released)
 			{
@@ -207,6 +216,7 @@ namespace UnityEngine.EventSystems
 				pointerEvent.pointerDrag = null;
 				ExecuteEvents.ExecuteHierarchy<IPointerExitHandler>(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
 				pointerEvent.pointerEnter = null;
+				this.m_InputPointerEvent = pointerEvent;
 			}
 		}
 
@@ -241,6 +251,8 @@ namespace UnityEngine.EventSystems
 		private Vector2 m_LastMousePosition;
 
 		private Vector2 m_MousePosition;
+
+		private PointerEventData m_InputPointerEvent;
 
 		[SerializeField]
 		[FormerlySerializedAs("m_AllowActivationOnStandalone")]

@@ -1,25 +1,63 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Threading
 {
-	internal sealed class NativeEventCalls
+	internal static class NativeEventCalls
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr CreateEvent_internal(bool manual, bool initial, string name, out bool created);
+		public static extern IntPtr CreateEvent_internal(bool manual, bool initial, string name, out int errorCode);
+
+		public static bool SetEvent(SafeWaitHandle handle)
+		{
+			bool flag = false;
+			bool flag2;
+			try
+			{
+				handle.DangerousAddRef(ref flag);
+				flag2 = NativeEventCalls.SetEvent_internal(handle.DangerousGetHandle());
+			}
+			finally
+			{
+				if (flag)
+				{
+					handle.DangerousRelease();
+				}
+			}
+			return flag2;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool SetEvent_internal(IntPtr handle);
+		private static extern bool SetEvent_internal(IntPtr handle);
+
+		public static bool ResetEvent(SafeWaitHandle handle)
+		{
+			bool flag = false;
+			bool flag2;
+			try
+			{
+				handle.DangerousAddRef(ref flag);
+				flag2 = NativeEventCalls.ResetEvent_internal(handle.DangerousGetHandle());
+			}
+			finally
+			{
+				if (flag)
+				{
+					handle.DangerousRelease();
+				}
+			}
+			return flag2;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool ResetEvent_internal(IntPtr handle);
+		private static extern bool ResetEvent_internal(IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CloseEvent_internal(IntPtr handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr OpenEvent_internal(string name, EventWaitHandleRights rights, out MonoIOError error);
+		public static extern IntPtr OpenEvent_internal(string name, EventWaitHandleRights rights, out int errorCode);
 	}
 }

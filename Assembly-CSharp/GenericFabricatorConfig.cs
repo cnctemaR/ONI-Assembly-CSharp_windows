@@ -23,7 +23,6 @@ public class GenericFabricatorConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 2f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
 		buildingDef.Deprecated = true;

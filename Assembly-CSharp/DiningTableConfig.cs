@@ -20,7 +20,6 @@ public class DiningTableConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.WorkTime = 20f;
 		buildingDef.Overheatable = false;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
 	}

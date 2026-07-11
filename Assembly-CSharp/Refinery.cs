@@ -89,6 +89,17 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		this.savedOrders = new List<Refinery.OrderSaveData>();
 	}
 
+	public string GetConversationTopic()
+	{
+		if (this.machineOrders.Count > 0)
+		{
+			Refinery.UserOrder parentOrder = this.machineOrders[0].parentOrder;
+			ComplexRecipe recipe = parentOrder.recipe;
+			return recipe.results[0].material.Name;
+		}
+		return null;
+	}
+
 	public ComplexRecipe[] GetRecipes()
 	{
 		Tag tag = base.GetComponent<KPrefabID>().PrefabID();
@@ -118,10 +129,15 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		bool flag = true;
 		foreach (Refinery.OrderSaveData orderSaveData in this.savedOrders)
 		{
-			ComplexRecipe recipe = ComplexRecipeManager.Get().GetRecipe(orderSaveData.id);
-			if (recipe != null)
+			ComplexRecipeManager complexRecipeManager = ComplexRecipeManager.Get();
+			ComplexRecipe complexRecipe = complexRecipeManager.GetRecipe(orderSaveData.id);
+			if (complexRecipe == null)
 			{
-				Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, orderSaveData.infinite);
+				complexRecipe = complexRecipeManager.GetObsoleteRecipe(orderSaveData.id);
+			}
+			if (complexRecipe != null)
+			{
+				Refinery.UserOrder userOrder = new Refinery.UserOrder(complexRecipe, orderSaveData.infinite, this);
 				if (this.OnCreateOrder != null)
 				{
 					this.OnCreateOrder(userOrder);
@@ -129,7 +145,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 				this.userOrders.Add(userOrder);
 				if (flag && this.duplicantOperated)
 				{
-					this.workable.SetWorkTime(recipe.time);
+					this.workable.SetWorkTime(complexRecipe.time);
 					flag = false;
 				}
 			}
@@ -150,6 +166,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 			this.GetWorkable.AttributeConvertor = Db.Get().AttributeConverters.MachinerySpeed;
 			this.GetWorkable.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		}
+		Components.Refineries.Add(this);
 	}
 
 	protected override void OnSpawn()
@@ -175,7 +192,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 			{
 				machineOrder.Cancel();
 				this.machineOrders.RemoveAt(i);
-				if (machineOrder.chore != null)
+				if (machineOrder.chore != null || machineOrder.underway)
 				{
 					this.buildStorage.Transfer(this.inStorage, true, true);
 				}
@@ -194,6 +211,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		{
 			this.Cancel(userOrder);
 		}
+		Components.Refineries.Remove(this);
 		base.OnCleanUp();
 	}
 
@@ -251,7 +269,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 			else
 			{
 				GameObject prefab = Assets.GetPrefab(recipeElement.material);
-				GameObject gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, Folder.Ore, null, 0);
+				GameObject gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, null, 0);
 				int num6 = Grid.PosToCell(this);
 				gameObject2.transform.SetPosition(Grid.CellToPosCCC(num6, Grid.SceneLayer.Ore) + this.outputOffset);
 				PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
@@ -291,7 +309,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 	{
 		if (DebugHandler.InstantBuildMode)
 		{
-			Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, false);
+			Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, false, this);
 			if (this.OnCreateOrder != null)
 			{
 				this.OnCreateOrder(userOrder);
@@ -301,7 +319,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		else if (this.userOrders.Count < 6)
 		{
 			KFMOD.PlayOneShot(soundPath);
-			Refinery.UserOrder userOrder2 = new Refinery.UserOrder(recipe, isInfinite);
+			Refinery.UserOrder userOrder2 = new Refinery.UserOrder(recipe, isInfinite, this);
 			if (this.OnCreateOrder != null)
 			{
 				this.OnCreateOrder(userOrder2);
@@ -352,6 +370,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 				}
 				if (flag)
 				{
+					machineOrder2.underway = true;
 					foreach (ComplexRecipe.RecipeElement recipeElement2 in recipe.ingredients)
 					{
 						this.inStorage.Transfer(this.buildStorage, recipeElement2.material, recipeElement2.amount, false, true);
@@ -568,7 +587,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		this.machineOrders.RemoveAt(0);
 		this.operational.SetActive(false, false);
 		this.CompleteOrder(machineOrder.parentOrder);
-		this.buildStorage.Transfer(this.outStorage, true, true);
+		this.buildStorage.Transfer(this.inStorage, false, false);
 		this.UpdateOrderQueue(false);
 		this.ShowProgressBar(false);
 	}
@@ -629,15 +648,17 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		{
 			return;
 		}
-		if (this.machineOrders.Count > 0 && (this.machineOrders[0].fetchList == null || this.machineOrders[0].fetchList.IsComplete))
+		if (this.machineOrders.Count > 0 && (this.machineOrders[0].fetchList == null || this.machineOrders[0].fetchList.IsComplete || this.machineOrders[0].underway))
 		{
 			if (!this.operational.IsActive)
 			{
+				this.machineOrders[0].underway = true;
 				this.StartWork();
 			}
 			this.orderProgress += dt / this.machineOrders[0].parentOrder.recipe.time;
 			if (this.orderProgress >= 1f)
 			{
+				this.machineOrders[0].underway = false;
 				if (this.machineOrders.Count == 1)
 				{
 					this.StopWork();
@@ -645,6 +666,14 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 				this.OnCompleteWork();
 				this.orderProgress = 0f;
 			}
+		}
+		else if (!this.operational.IsActive && this.machineOrders.Count > 0)
+		{
+			if (this.buildStorage.MassStored() > 0f)
+			{
+				this.buildStorage.Transfer(this.inStorage, false, false);
+			}
+			this.UpdateOrderQueue(true);
 		}
 	}
 
@@ -713,10 +742,11 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 	[Serializable]
 	public class UserOrder : IBuildQueueOrder
 	{
-		public UserOrder(ComplexRecipe recipe, bool infinite = false)
+		public UserOrder(ComplexRecipe recipe, bool infinite = false, Refinery refinery = null)
 		{
 			this.recipe = recipe;
 			this.infinite = infinite;
+			this.refinery = refinery;
 		}
 
 		public Tag Result
@@ -762,9 +792,23 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 			return dictionary;
 		}
 
+		public Dictionary<Tag, float> GetMaterialRequirements()
+		{
+			this.materialRequirements.Clear();
+			foreach (ComplexRecipe.RecipeElement recipeElement in this.recipe.ingredients)
+			{
+				this.materialRequirements.Add(recipeElement.material, recipeElement.amount);
+			}
+			return this.materialRequirements;
+		}
+
 		public ComplexRecipe recipe;
 
 		public bool infinite;
+
+		private Refinery refinery;
+
+		private Dictionary<Tag, float> materialRequirements = new Dictionary<Tag, float>();
 	}
 
 	public class MachineOrder
@@ -792,6 +836,8 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		public FetchList2 fetchList;
 
 		public Chore chore;
+
+		public bool underway;
 	}
 
 	[Serializable]

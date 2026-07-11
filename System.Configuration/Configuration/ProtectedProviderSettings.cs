@@ -26,7 +26,7 @@ namespace System.Configuration
 			}
 		}
 
-		private static ConfigurationProperty providersProp = new ConfigurationProperty(string.Empty, typeof(ProviderSettingsCollection), null, null, null, ConfigurationPropertyOptions.IsDefaultCollection);
+		private static ConfigurationProperty providersProp = new ConfigurationProperty("", typeof(ProviderSettingsCollection), null, null, null, ConfigurationPropertyOptions.IsDefaultCollection);
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 	}

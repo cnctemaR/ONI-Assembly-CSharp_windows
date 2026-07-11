@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-public struct BindingEntry
+public struct BindingEntry : IEquatable<BindingEntry>
 {
 	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true, bool ignore_root_conflicts = false)
 	{
@@ -31,6 +31,11 @@ public struct BindingEntry
 			DebugUtil.Assert(false, "Assert!");
 			return KKeyCode.None;
 		}
+	}
+
+	public bool Equals(BindingEntry other)
+	{
+		return this == other;
 	}
 
 	public static bool operator ==(BindingEntry a, BindingEntry b)

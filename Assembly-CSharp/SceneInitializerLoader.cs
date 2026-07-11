@@ -10,7 +10,7 @@ public class SceneInitializerLoader : MonoBehaviour
 			camera.enabled = false;
 		}
 		KMonoBehaviour.isLoadingScene = false;
-		StateMachineManager.Destroy();
+		Singleton<StateMachineManager>.Instance.Clear();
 		Util.KInstantiate(this.sceneInitializer, null, null);
 	}
 

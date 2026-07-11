@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FDE398CE-B454-4AC6-BC9B-0C832F3FC297}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine</RootNamespace>
+    <AssemblyName>UnityEngine.SubstanceModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="ProceduralCacheSize.cs" />
+    <Compile Include="ProceduralLoadingBehavior.cs" />
+    <Compile Include="ProceduralMaterial.cs" />
+    <Compile Include="ProceduralOutputType.cs" />
+    <Compile Include="ProceduralProcessorUsage.cs" />
+    <Compile Include="ProceduralPropertyDescription.cs" />
+    <Compile Include="ProceduralPropertyType.cs" />
+    <Compile Include="ProceduralTexture.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC27B}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{FDE398CE-B454-4AC6-BC9B-0C832F3FC291}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

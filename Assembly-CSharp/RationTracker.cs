@@ -5,6 +5,11 @@ using KSerialization;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class RationTracker : KMonoBehaviour, ISaveLoadable
 {
+	public static void DestroyInstance()
+	{
+		RationTracker.instance = null;
+	}
+
 	public static RationTracker Get()
 	{
 		return RationTracker.instance;

@@ -37,7 +37,7 @@ public class Placeable : KMonoBehaviour
 		Vector3 vector = Grid.CellToPosCBC(this.targetCell, Grid.SceneLayer.Front);
 		if (this.preview == null)
 		{
-			this.preview = GameUtil.KInstantiate(Assets.GetPrefab(this.previewTag), vector, Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
+			this.preview = GameUtil.KInstantiate(Assets.GetPrefab(this.previewTag), vector, Grid.SceneLayer.Front, null, 0);
 			this.preview.SetActive(true);
 		}
 		else
@@ -62,7 +62,7 @@ public class Placeable : KMonoBehaviour
 	public void Place(int target)
 	{
 		Vector3 vector = Grid.CellToPosCBC(target, Grid.SceneLayer.Front);
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.spawnOnPlaceTag), vector, Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.spawnOnPlaceTag), vector, Grid.SceneLayer.Front, null, 0);
 		gameObject.SetActive(true);
 		this.DeleteObject();
 	}

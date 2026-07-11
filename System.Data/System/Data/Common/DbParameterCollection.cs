@@ -4,32 +4,8 @@ using System.ComponentModel;
 
 namespace System.Data.Common
 {
-	public abstract class DbParameterCollection : MarshalByRefObject, IList, IDataParameterCollection, IEnumerable, ICollection
+	public abstract class DbParameterCollection : MarshalByRefObject, ICollection, IEnumerable, IList, IDataParameterCollection
 	{
-		object IDataParameterCollection.this[string parameterName]
-		{
-			get
-			{
-				return this[parameterName];
-			}
-			set
-			{
-				this[parameterName] = (DbParameter)value;
-			}
-		}
-
-		object IList.this[int index]
-		{
-			get
-			{
-				return this[index];
-			}
-			set
-			{
-				this[index] = (DbParameter)value;
-			}
-		}
-
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public abstract int Count { get; }
@@ -39,54 +15,68 @@ namespace System.Data.Common
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public abstract bool IsFixedSize { get; }
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public abstract bool IsReadOnly { get; }
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public abstract bool IsSynchronized { get; }
-
-		public DbParameter this[string parameterName]
-		{
-			get
-			{
-				int num = this.IndexOf(parameterName);
-				return this[num];
-			}
-			set
-			{
-				int num = this.IndexOf(parameterName);
-				this[num] = value;
-			}
-		}
 
 		public DbParameter this[int index]
 		{
 			get
 			{
-				return this.GetParameter(index);
+				throw null;
 			}
 			set
 			{
-				this.SetParameter(index, value);
 			}
 		}
 
+		public DbParameter this[string parameterName]
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
+
+		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Browsable(false)]
 		public abstract object SyncRoot { get; }
+
+		object IList.this[int index]
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
+
+		object IDataParameterCollection.this[string parameterName]
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
 
 		public abstract int Add(object value);
 
 		public abstract void AddRange(Array values);
-
-		protected abstract DbParameter GetParameter(string parameterName);
-
-		protected abstract void SetParameter(string parameterName, DbParameter value);
 
 		public abstract void Clear();
 
@@ -101,6 +91,8 @@ namespace System.Data.Common
 
 		protected abstract DbParameter GetParameter(int index);
 
+		protected abstract DbParameter GetParameter(string parameterName);
+
 		public abstract int IndexOf(object value);
 
 		public abstract int IndexOf(string parameterName);
@@ -114,5 +106,7 @@ namespace System.Data.Common
 		public abstract void RemoveAt(string parameterName);
 
 		protected abstract void SetParameter(int index, DbParameter value);
+
+		protected abstract void SetParameter(string parameterName, DbParameter value);
 	}
 }

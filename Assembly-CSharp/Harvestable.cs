@@ -229,7 +229,7 @@ public class Harvestable : Workable
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			component.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
 		}
 		this.isMarkedForHarvest = true;

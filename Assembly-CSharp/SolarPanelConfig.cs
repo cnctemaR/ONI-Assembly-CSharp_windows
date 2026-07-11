@@ -25,7 +25,6 @@ public class SolarPanelConfig : IBuildingConfig
 		buildingDef.BuildLocationRule = BuildLocationRule.Anywhere;
 		buildingDef.HitPoints = 10;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
-		buildingDef.MaterialCategory = MATERIALS.GLASSES;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
 		return buildingDef;

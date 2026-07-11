@@ -8,6 +8,11 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class SaveLoadRoot : KMonoBehaviour
 {
+	public static void DestroyStatics()
+	{
+		SaveLoadRoot.serializableComponentManagers = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		if (SaveLoadRoot.serializableComponentManagers == null)
@@ -21,6 +26,35 @@ public class SaveLoadRoot : KMonoBehaviour
 				{
 					Type type = componentManager.GetType();
 					SaveLoadRoot.serializableComponentManagers[type.ToString()] = (ISerializableComponentManager)componentManager;
+				}
+			}
+		}
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (this.registered)
+		{
+			SaveLoader.Instance.saveManager.Register(this);
+		}
+		this.hasOnSpawnRun = true;
+	}
+
+	public void SetRegistered(bool registered)
+	{
+		if (this.registered != registered)
+		{
+			this.registered = registered;
+			if (this.hasOnSpawnRun)
+			{
+				if (registered)
+				{
+					SaveLoader.Instance.saveManager.Register(this);
+				}
+				else
+				{
+					SaveLoader.Instance.saveManager.Unregister(this);
 				}
 			}
 		}
@@ -44,7 +78,8 @@ public class SaveLoadRoot : KMonoBehaviour
 		writer.Write(transform.GetPosition());
 		writer.Write(transform.rotation);
 		writer.Write(transform.localScale);
-		writer.Write((byte)this.folder);
+		byte b = 0;
+		writer.Write(b);
 		KMonoBehaviour[] components = base.GetComponents<KMonoBehaviour>();
 		if (components == null)
 		{
@@ -110,9 +145,9 @@ public class SaveLoadRoot : KMonoBehaviour
 		}
 	}
 
-	public static SaveLoadRoot Load(Tag tag, IReader reader, bool get_disabled_visualizer)
+	public static SaveLoadRoot Load(Tag tag, IReader reader)
 	{
-		GameObject prefab = SaveLoader.Instance.saveManager.GetPrefab(tag, get_disabled_visualizer);
+		GameObject prefab = SaveLoader.Instance.saveManager.GetPrefab(tag);
 		return SaveLoadRoot.Load(prefab, reader);
 	}
 
@@ -121,34 +156,28 @@ public class SaveLoadRoot : KMonoBehaviour
 		Vector3 vector = reader.ReadVector3();
 		Quaternion quaternion = reader.ReadQuaternion();
 		Vector3 vector2 = reader.ReadVector3();
-		Folder folder = (Folder)reader.ReadByte();
+		reader.ReadByte();
 		SaveLoadRoot saveLoadRoot = null;
-		GameObject gameObject = SceneOrganizer.Instance.GetFolder(folder);
 		if (prefab != null)
 		{
-			GameObject gameObject2 = Util.KInstantiate(prefab, vector, quaternion, gameObject, null, true, 0);
-			gameObject2.transform.localScale = vector2;
-			gameObject2.SetActive(true);
-			saveLoadRoot = gameObject2.GetComponent<SaveLoadRoot>();
+			GameObject gameObject = Util.KInstantiate(prefab, vector, quaternion, null, null, true, 0);
+			gameObject.transform.localScale = vector2;
+			gameObject.SetActive(true);
+			saveLoadRoot = gameObject.GetComponent<SaveLoadRoot>();
 			if (saveLoadRoot != null)
 			{
-				if (gameObject2.GetComponent<SavedObject>() == null)
-				{
-					gameObject2.AddComponent<SavedObject>();
-				}
-				saveLoadRoot.folder = folder;
 				try
 				{
-					SaveLoadRoot.LoadInternal(gameObject2, reader);
+					SaveLoadRoot.LoadInternal(gameObject, reader);
 				}
 				catch (ArgumentException ex)
 				{
-					Output.LogErrorWithObj(gameObject2, new object[] { "Failed to load SaveLoadRoot ", ex.Message, "\n", ex.StackTrace });
+					Output.LogErrorWithObj(gameObject, new object[] { "Failed to load SaveLoadRoot ", ex.Message, "\n", ex.StackTrace });
 				}
 			}
 			else
 			{
-				Output.LogWithObj(gameObject2, new object[] { "missing SaveLoadRoot" });
+				Output.LogWithObj(gameObject, new object[] { "missing SaveLoadRoot" });
 			}
 		}
 		else
@@ -233,7 +262,9 @@ public class SaveLoadRoot : KMonoBehaviour
 		}
 	}
 
-	public Folder folder = Folder.Misc;
+	private bool hasOnSpawnRun;
+
+	private bool registered = true;
 
 	private static Dictionary<string, ISerializableComponentManager> serializableComponentManagers;
 }

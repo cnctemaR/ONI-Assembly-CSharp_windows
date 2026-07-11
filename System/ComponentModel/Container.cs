@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	public class Container : IDisposable, IContainer
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
+	public class Container : IContainer, IDisposable
 	{
-		public virtual ComponentCollection Components
+		~Container()
 		{
-			get
-			{
-				IComponent[] array = this.c.ToArray();
-				return new ComponentCollection(array);
-			}
+			this.Dispose(false);
 		}
 
 		public virtual void Add(IComponent component)
@@ -21,35 +18,39 @@ namespace System.ComponentModel
 
 		public virtual void Add(IComponent component, string name)
 		{
-			if (component != null && (component.Site == null || component.Site.Container != this))
+			object obj = this.syncObj;
+			lock (obj)
 			{
-				this.ValidateName(component, name);
-				if (component.Site != null)
+				if (component != null)
 				{
-					component.Site.Container.Remove(component);
-				}
-				component.Site = this.CreateSite(component, name);
-				this.c.Add(component);
-			}
-		}
-
-		protected virtual void ValidateName(IComponent component, string name)
-		{
-			if (component == null)
-			{
-				throw new ArgumentNullException("component");
-			}
-			if (name == null)
-			{
-				return;
-			}
-			foreach (IComponent component2 in this.c)
-			{
-				if (!object.ReferenceEquals(component, component2))
-				{
-					if (component2.Site != null && string.Compare(component2.Site.Name, name, true) == 0)
+					ISite site = component.Site;
+					if (site == null || site.Container != this)
 					{
-						throw new ArgumentException(string.Format("There already is a named component '{0}' in this container", name));
+						if (this.sites == null)
+						{
+							this.sites = new ISite[4];
+						}
+						else
+						{
+							this.ValidateName(component, name);
+							if (this.sites.Length == this.siteCount)
+							{
+								ISite[] array = new ISite[this.siteCount * 2];
+								Array.Copy(this.sites, 0, array, 0, this.siteCount);
+								this.sites = array;
+							}
+						}
+						if (site != null)
+						{
+							site.Container.Remove(component);
+						}
+						ISite site2 = this.CreateSite(component, name);
+						ISite[] array2 = this.sites;
+						int num = this.siteCount;
+						this.siteCount = num + 1;
+						array2[num] = site2;
+						component.Site = site2;
+						this.components = null;
 					}
 				}
 			}
@@ -57,7 +58,7 @@ namespace System.ComponentModel
 
 		protected virtual ISite CreateSite(IComponent component, string name)
 		{
-			return new Container.DefaultSite(name, component, this);
+			return new Container.Site(component, this, name);
 		}
 
 		public void Dispose()
@@ -70,57 +71,147 @@ namespace System.ComponentModel
 		{
 			if (disposing)
 			{
-				while (this.c.Count > 0)
+				object obj = this.syncObj;
+				lock (obj)
 				{
-					int num = this.c.Count - 1;
-					IComponent component = this.c[num];
-					this.Remove(component);
-					component.Dispose();
+					while (this.siteCount > 0)
+					{
+						ISite[] array = this.sites;
+						int num = this.siteCount - 1;
+						this.siteCount = num;
+						object obj2 = array[num];
+						((ISite)obj2).Component.Site = null;
+						((ISite)obj2).Component.Dispose();
+					}
+					this.sites = null;
+					this.components = null;
 				}
 			}
 		}
 
-		~Container()
-		{
-			this.Dispose(false);
-		}
-
 		protected virtual object GetService(Type service)
 		{
-			if (typeof(IContainer) != service)
+			if (!(service == typeof(IContainer)))
 			{
 				return null;
 			}
 			return this;
 		}
 
-		public virtual void Remove(IComponent component)
+		public virtual ComponentCollection Components
 		{
-			this.Remove(component, true);
+			get
+			{
+				object obj = this.syncObj;
+				ComponentCollection componentCollection2;
+				lock (obj)
+				{
+					if (this.components == null)
+					{
+						IComponent[] array = new IComponent[this.siteCount];
+						for (int i = 0; i < this.siteCount; i++)
+						{
+							array[i] = this.sites[i].Component;
+						}
+						this.components = new ComponentCollection(array);
+						if (this.filter == null && this.checkedFilter)
+						{
+							this.checkedFilter = false;
+						}
+					}
+					if (!this.checkedFilter)
+					{
+						this.filter = this.GetService(typeof(ContainerFilterService)) as ContainerFilterService;
+						this.checkedFilter = true;
+					}
+					if (this.filter != null)
+					{
+						ComponentCollection componentCollection = this.filter.FilterComponents(this.components);
+						if (componentCollection != null)
+						{
+							this.components = componentCollection;
+						}
+					}
+					componentCollection2 = this.components;
+				}
+				return componentCollection2;
+			}
 		}
 
-		private void Remove(IComponent component, bool unsite)
+		public virtual void Remove(IComponent component)
 		{
-			if (component != null && component.Site != null && component.Site.Container == this)
+			this.Remove(component, false);
+		}
+
+		private void Remove(IComponent component, bool preserveSite)
+		{
+			object obj = this.syncObj;
+			lock (obj)
 			{
-				if (unsite)
+				if (component != null)
 				{
-					component.Site = null;
+					ISite site = component.Site;
+					if (site != null && site.Container == this)
+					{
+						if (!preserveSite)
+						{
+							component.Site = null;
+						}
+						for (int i = 0; i < this.siteCount; i++)
+						{
+							if (this.sites[i] == site)
+							{
+								this.siteCount--;
+								Array.Copy(this.sites, i + 1, this.sites, i, this.siteCount - i);
+								this.sites[this.siteCount] = null;
+								this.components = null;
+								break;
+							}
+						}
+					}
 				}
-				this.c.Remove(component);
 			}
 		}
 
 		protected void RemoveWithoutUnsiting(IComponent component)
 		{
-			this.Remove(component, false);
+			this.Remove(component, true);
 		}
 
-		private List<IComponent> c = new List<IComponent>();
-
-		private class DefaultSite : IServiceProvider, ISite
+		protected virtual void ValidateName(IComponent component, string name)
 		{
-			public DefaultSite(string name, IComponent component, Container container)
+			if (component == null)
+			{
+				throw new ArgumentNullException("component");
+			}
+			if (name != null)
+			{
+				for (int i = 0; i < Math.Min(this.siteCount, this.sites.Length); i++)
+				{
+					ISite site = this.sites[i];
+					if (site != null && site.Name != null && string.Equals(site.Name, name, StringComparison.OrdinalIgnoreCase) && site.Component != component && ((InheritanceAttribute)TypeDescriptor.GetAttributes(site.Component)[typeof(InheritanceAttribute)]).InheritanceLevel != InheritanceLevel.InheritedReadOnly)
+					{
+						throw new ArgumentException(global::SR.GetString("Duplicate component name '{0}'.  Component names must be unique and case-insensitive.", new object[] { name }));
+					}
+				}
+			}
+		}
+
+		private ISite[] sites;
+
+		private int siteCount;
+
+		private ComponentCollection components;
+
+		private ContainerFilterService filter;
+
+		private bool checkedFilter;
+
+		private object syncObj = new object();
+
+		private class Site : ISite, IServiceProvider
+		{
+			internal Site(IComponent component, Container container, string name)
 			{
 				this.component = component;
 				this.container = container;
@@ -143,6 +234,15 @@ namespace System.ComponentModel
 				}
 			}
 
+			public object GetService(Type service)
+			{
+				if (!(service == typeof(ISite)))
+				{
+					return this.container.GetService(service);
+				}
+				return this;
+			}
+
 			public bool DesignMode
 			{
 				get
@@ -159,22 +259,17 @@ namespace System.ComponentModel
 				}
 				set
 				{
-					this.name = value;
+					if (value == null || this.name == null || !value.Equals(this.name))
+					{
+						this.container.ValidateName(this.component, value);
+						this.name = value;
+					}
 				}
 			}
 
-			public virtual object GetService(Type t)
-			{
-				if (typeof(ISite) == t)
-				{
-					return this;
-				}
-				return this.container.GetService(t);
-			}
+			private IComponent component;
 
-			private readonly IComponent component;
-
-			private readonly Container container;
+			private Container container;
 
 			private string name;
 		}

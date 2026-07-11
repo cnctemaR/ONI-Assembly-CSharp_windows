@@ -12,7 +12,7 @@ public class StandardAttributeFormatter : IAttributeFormatter
 
 	public GameUtil.TimeSlice DeltaTimeSlice { get; set; }
 
-	public string GetFormattedAttribute(AttributeInstance instance)
+	public virtual string GetFormattedAttribute(AttributeInstance instance)
 	{
 		return this.GetFormattedValue(instance.GetTotalDisplayValue(), GameUtil.TimeSlice.None, null);
 	}

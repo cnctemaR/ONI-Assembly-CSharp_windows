@@ -1,39 +1,49 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Dynamic.Utils;
 using System.Reflection;
 
 namespace System.Linq.Expressions
 {
-	public sealed class MethodCallExpression : Expression
+	[DebuggerTypeProxy(typeof(Expression.MethodCallExpressionProxy))]
+	public class MethodCallExpression : Expression, IArgumentProvider
 	{
-		internal MethodCallExpression(MethodInfo method, ReadOnlyCollection<Expression> arguments)
-			: base(ExpressionType.Call, method.ReturnType)
+		internal MethodCallExpression(MethodInfo method)
 		{
-			this.method = method;
-			this.arguments = arguments;
+			this.Method = method;
 		}
 
-		internal MethodCallExpression(Expression obj, MethodInfo method, ReadOnlyCollection<Expression> arguments)
-			: base(ExpressionType.Call, method.ReturnType)
+		internal virtual Expression GetInstance()
 		{
-			this.obj = obj;
-			this.method = method;
-			this.arguments = arguments;
+			return null;
 		}
+
+		public sealed override ExpressionType NodeType
+		{
+			get
+			{
+				return ExpressionType.Call;
+			}
+		}
+
+		public sealed override Type Type
+		{
+			get
+			{
+				return this.Method.ReturnType;
+			}
+		}
+
+		public MethodInfo Method { get; }
 
 		public Expression Object
 		{
 			get
 			{
-				return this.obj;
-			}
-		}
-
-		public MethodInfo Method
-		{
-			get
-			{
-				return this.method;
+				return this.GetInstance();
 			}
 		}
 
@@ -41,19 +51,71 @@ namespace System.Linq.Expressions
 		{
 			get
 			{
-				return this.arguments;
+				return this.GetOrMakeArguments();
 			}
 		}
 
-		internal override void Emit(EmitContext ec)
+		public MethodCallExpression Update(Expression @object, IEnumerable<Expression> arguments)
 		{
-			ec.EmitCall(this.obj, this.arguments, this.method);
+			if (@object == this.Object)
+			{
+				ICollection<Expression> collection;
+				if (arguments == null)
+				{
+					collection = null;
+				}
+				else
+				{
+					collection = arguments as ICollection<Expression>;
+					if (collection == null)
+					{
+						collection = (arguments = arguments.ToReadOnly<Expression>());
+					}
+				}
+				if (this.SameArguments(collection))
+				{
+					return this;
+				}
+			}
+			return Expression.Call(@object, this.Method, arguments);
 		}
 
-		private Expression obj;
+		[ExcludeFromCodeCoverage]
+		internal virtual bool SameArguments(ICollection<Expression> arguments)
+		{
+			throw ContractUtils.Unreachable;
+		}
 
-		private MethodInfo method;
+		[ExcludeFromCodeCoverage]
+		internal virtual ReadOnlyCollection<Expression> GetOrMakeArguments()
+		{
+			throw ContractUtils.Unreachable;
+		}
 
-		private ReadOnlyCollection<Expression> arguments;
+		protected internal override Expression Accept(ExpressionVisitor visitor)
+		{
+			return visitor.VisitMethodCall(this);
+		}
+
+		[ExcludeFromCodeCoverage]
+		internal virtual MethodCallExpression Rewrite(Expression instance, IReadOnlyList<Expression> args)
+		{
+			throw ContractUtils.Unreachable;
+		}
+
+		[ExcludeFromCodeCoverage]
+		public virtual Expression GetArgument(int index)
+		{
+			throw ContractUtils.Unreachable;
+		}
+
+		[ExcludeFromCodeCoverage]
+		public virtual int ArgumentCount
+		{
+			get
+			{
+				throw ContractUtils.Unreachable;
+			}
+		}
 	}
 }

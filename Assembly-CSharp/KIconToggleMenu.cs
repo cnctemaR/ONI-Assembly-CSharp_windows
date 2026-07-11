@@ -26,10 +26,18 @@ public class KIconToggleMenu : KScreen
 		{
 			if (ktoggle != null)
 			{
-				global::UnityEngine.Object.Destroy(ktoggle.gameObject);
+				if (!this.dontDestroyToggles.Contains(ktoggle))
+				{
+					global::UnityEngine.Object.Destroy(ktoggle.gameObject);
+				}
+				else
+				{
+					ktoggle.ClearOnClick();
+				}
 			}
 		}
 		this.toggles.Clear();
+		this.dontDestroyToggles.Clear();
 		if (this.toggleInfo == null)
 		{
 			return;
@@ -39,10 +47,22 @@ public class KIconToggleMenu : KScreen
 		{
 			int idx = i;
 			KIconToggleMenu.ToggleInfo toggleInfo = this.toggleInfo[i];
-			KToggle ktoggle2 = global::UnityEngine.Object.Instantiate<KToggle>((!(toggleInfo.prefabOverride != null)) ? this.prefab : toggleInfo.prefabOverride, Vector3.zero, Quaternion.identity);
+			KToggle ktoggle2;
+			if (toggleInfo.instanceOverride != null)
+			{
+				ktoggle2 = toggleInfo.instanceOverride;
+				this.dontDestroyToggles.Add(ktoggle2);
+			}
+			else if (toggleInfo.prefabOverride)
+			{
+				ktoggle2 = Util.KInstantiateUI<KToggle>(toggleInfo.prefabOverride.gameObject, transform.gameObject, true);
+			}
+			else
+			{
+				ktoggle2 = Util.KInstantiateUI<KToggle>(this.prefab.gameObject, transform.gameObject, true);
+			}
 			ktoggle2.Deselect();
 			ktoggle2.gameObject.name = "Toggle:" + toggleInfo.text;
-			ktoggle2.transform.SetParent(transform, false);
 			ktoggle2.group = this.group;
 			ktoggle2.onClick += delegate
 			{
@@ -89,50 +109,6 @@ public class KIconToggleMenu : KScreen
 			}
 			toggleInfo.toggle = ktoggle2;
 			this.toggles.Add(ktoggle2);
-		}
-	}
-
-	protected void SelectToggle(KToggle newlySelectedToggle)
-	{
-		if (this.currentlySelectedToggle == newlySelectedToggle)
-		{
-			this.currentlySelectedToggle = null;
-			this.selected = -1;
-		}
-		else
-		{
-			this.currentlySelectedToggle = newlySelectedToggle;
-		}
-		foreach (KToggle ktoggle in this.toggles)
-		{
-			if (ktoggle != null)
-			{
-				ImageToggleState component = ktoggle.GetComponent<ImageToggleState>();
-				if (ktoggle == this.currentlySelectedToggle)
-				{
-					ktoggle.Select();
-					ktoggle.isOn = true;
-					ktoggle.ActivateFlourish(true);
-					if (component && component.GetIsActive())
-					{
-						component.SetInactive();
-					}
-					else if (component && !component.GetIsActive())
-					{
-						component.SetActive();
-					}
-				}
-				else
-				{
-					ktoggle.Deselect();
-					ktoggle.isOn = false;
-					ktoggle.ActivateFlourish(false);
-					if (component && component.GetIsActive())
-					{
-						component.SetInactive();
-					}
-				}
-			}
 		}
 	}
 
@@ -248,6 +224,8 @@ public class KIconToggleMenu : KScreen
 
 	protected List<KToggle> toggles = new List<KToggle>();
 
+	private List<KToggle> dontDestroyToggles = new List<KToggle>();
+
 	protected int selected = -1;
 
 	public delegate void OnSelect(KIconToggleMenu.ToggleInfo toggleInfo);
@@ -289,5 +267,7 @@ public class KIconToggleMenu : KScreen
 		public Func<Sprite> getSpriteCB;
 
 		public KToggle prefabOverride;
+
+		public KToggle instanceOverride;
 	}
 }

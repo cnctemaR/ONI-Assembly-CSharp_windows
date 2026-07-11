@@ -24,7 +24,6 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
-		buildingDef.MaterialCategory = MATERIALS.PLASTICS;
 		buildingDef.AudioCategory = "Plastic";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;

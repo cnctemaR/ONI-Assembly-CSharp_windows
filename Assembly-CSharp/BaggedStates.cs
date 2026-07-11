@@ -73,7 +73,7 @@ internal class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instan
 		[Serialize]
 		public float baggedTime;
 
-		public static Chore.Precondition IsBagged = new Chore.Precondition
+		public static readonly Chore.Precondition IsBagged = new Chore.Precondition
 		{
 			id = "IsBagged",
 			fn = delegate(ref Chore.Precondition.Context context, object data)

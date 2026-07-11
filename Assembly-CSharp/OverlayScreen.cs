@@ -48,7 +48,7 @@ public class OverlayScreen : KMonoBehaviour
 		None none = new None();
 		this.RegisterMode(none);
 		this.RegisterMode(new Oxygen());
-		this.RegisterMode(new Power(this.powerLabelParent, this.powerLabelPrefab, this.batUIPrefab, this.powerLabelOffset, this.batteryUIOffset, this.batteryUITransformerOffset, this.consumerColour, this.generatorColour, this.buildingDisabledColour, this.circuitUnpoweredColour, this.circuitSafeColour, this.circuitStrainingColour));
+		this.RegisterMode(new Power(this.powerLabelParent, this.powerLabelPrefab, this.batUIPrefab, this.powerLabelOffset, this.batteryUIOffset, this.batteryUITransformerOffset, this.batteryUISmallTransformerOffset, this.consumerColour, this.generatorColour, this.buildingDisabledColour, this.circuitUnpoweredColour, this.circuitSafeColour, this.circuitStrainingColour));
 		this.RegisterMode(new Temperature());
 		this.RegisterMode(new ThermalConductivity());
 		this.RegisterMode(new global::OverlayModes.Light());
@@ -210,6 +210,9 @@ public class OverlayScreen : KMonoBehaviour
 
 	[SerializeField]
 	private Vector3 batteryUITransformerOffset;
+
+	[SerializeField]
+	private Vector3 batteryUISmallTransformerOffset;
 
 	[SerializeField]
 	private Color consumerColour;

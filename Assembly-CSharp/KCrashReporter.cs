@@ -233,7 +233,7 @@ public class KCrashReporter : MonoBehaviour
 		}
 		else if (Application.platform == RuntimePlatform.WindowsPlayer)
 		{
-			text = Path.Combine(KCrashReporter.dataRoot, "output_log.txt");
+			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "../LocalLow/Klei/Oxygen Not Included/output_log.txt");
 		}
 		else if (Application.platform == RuntimePlatform.OSXEditor)
 		{
@@ -268,11 +268,6 @@ public class KCrashReporter : MonoBehaviour
 	{
 		if (KCrashReporter.ignoreAll)
 		{
-			return;
-		}
-		if (KCrashReporter.debugWasUsed)
-		{
-			global::Debug.Log("Ignoring crash because debug was used.", null);
 			return;
 		}
 		global::Debug.Log("Reporting error.\n", null);
@@ -341,10 +336,14 @@ public class KCrashReporter : MonoBehaviour
 			{
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
+			if (KCrashReporter.debugWasUsed)
+			{
+				msg = "Debug tools were used in this game.\n\n" + msg;
+			}
 			error.fullstack = msg;
-			error.build = 275206;
+			error.build = 279457;
 			error.log = KCrashReporter.GetLogContents();
-			error.summaryline = text3;
+			error.summaryline = msg;
 			error.user_message = userMessage;
 			if (!string.IsNullOrEmpty(save_file_hash))
 			{

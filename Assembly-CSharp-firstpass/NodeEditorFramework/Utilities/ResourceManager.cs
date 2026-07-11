@@ -49,7 +49,7 @@ namespace NodeEditorFramework.Utilities
 				ResourceManager.loadedTextures.RemoveAt(num);
 			}
 			Texture2D texture2D = ResourceManager.LoadResource<Texture2D>(texPath);
-			ResourceManager.AddTextureToMemory(texPath, texture2D, new string[0]);
+			ResourceManager.AddTextureToMemory(texPath, texture2D, Array.Empty<string>());
 			return texture2D;
 		}
 
@@ -60,7 +60,7 @@ namespace NodeEditorFramework.Utilities
 			if (texture2D == null)
 			{
 				texture2D = ResourceManager.LoadTexture(texPath);
-				ResourceManager.AddTextureToMemory(texPath, texture2D, new string[0]);
+				ResourceManager.AddTextureToMemory(texPath, texture2D, Array.Empty<string>());
 				texture2D = RTEditorGUI.Tint(texture2D, col);
 				ResourceManager.AddTextureToMemory(texPath, texture2D, new string[] { text });
 			}

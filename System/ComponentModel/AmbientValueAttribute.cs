@@ -5,86 +5,98 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.All)]
 	public sealed class AmbientValueAttribute : Attribute
 	{
-		public AmbientValueAttribute(bool value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(byte value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(char value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(double value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(short value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(int value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(long value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(object value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(float value)
-		{
-			this.AmbientValue = value;
-		}
-
-		public AmbientValueAttribute(string value)
-		{
-			this.AmbientValue = value;
-		}
-
 		public AmbientValueAttribute(Type type, string value)
 		{
 			try
 			{
-				this.AmbientValue = Convert.ChangeType(value, type);
+				this.value = TypeDescriptor.GetConverter(type).ConvertFromInvariantString(value);
 			}
 			catch
 			{
-				this.AmbientValue = null;
 			}
+		}
+
+		public AmbientValueAttribute(char value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(byte value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(short value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(int value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(long value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(float value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(double value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(bool value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(string value)
+		{
+			this.value = value;
+		}
+
+		public AmbientValueAttribute(object value)
+		{
+			this.value = value;
 		}
 
 		public object Value
 		{
 			get
 			{
-				return this.AmbientValue;
+				return this.value;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is AmbientValueAttribute && (obj == this || ((AmbientValueAttribute)obj).Value == this.AmbientValue);
+			if (obj == this)
+			{
+				return true;
+			}
+			AmbientValueAttribute ambientValueAttribute = obj as AmbientValueAttribute;
+			if (ambientValueAttribute == null)
+			{
+				return false;
+			}
+			if (this.value != null)
+			{
+				return this.value.Equals(ambientValueAttribute.Value);
+			}
+			return ambientValueAttribute.Value == null;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.AmbientValue.GetHashCode();
+			return base.GetHashCode();
 		}
 
-		private object AmbientValue;
+		private readonly object value;
 	}
 }

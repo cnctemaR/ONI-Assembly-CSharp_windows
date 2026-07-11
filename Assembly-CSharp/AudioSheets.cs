@@ -4,11 +4,10 @@ using UnityEngine;
 
 public abstract class AudioSheets : ScriptableObject
 {
-	protected virtual void Initialize()
+	public virtual void Initialize()
 	{
 		foreach (AudioSheet audioSheet in this.sheets)
 		{
-			audioSheet.Load();
 			foreach (AudioSheet.SoundInfo soundInfo in audioSheet.soundInfos)
 			{
 				string text = soundInfo.Type;
@@ -34,11 +33,11 @@ public abstract class AudioSheets : ScriptableObject
 
 	private void CreateSound(string file_name, string anim_name, string type, float min_interval, string sound_name, int frame)
 	{
-		string text = file_name + "." + anim_name;
-		if (sound_name == null || sound_name == string.Empty)
+		if (string.IsNullOrEmpty(sound_name))
 		{
 			return;
 		}
+		HashedString hashedString = file_name + "." + anim_name;
 		AnimEvent animEvent = this.CreateSoundOfType(type, file_name, sound_name, frame, min_interval);
 		if (animEvent == null)
 		{
@@ -47,10 +46,10 @@ public abstract class AudioSheets : ScriptableObject
 		else
 		{
 			List<AnimEvent> list = null;
-			if (!this.events.TryGetValue(text, out list))
+			if (!this.events.TryGetValue(hashedString, out list))
 			{
 				list = new List<AnimEvent>();
-				this.events[text] = list;
+				this.events[hashedString] = list;
 			}
 			list.Add(animEvent);
 		}

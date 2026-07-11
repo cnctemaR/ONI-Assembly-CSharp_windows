@@ -54,7 +54,7 @@ public class PrioritizationGroupTableColumn : TableColumn
 		float num = 63f;
 		component2.minWidth = num;
 		layoutElement.preferredWidth = num;
-		MonoBehaviour reference = component.GetReference("Label");
+		Component reference = component.GetReference("Label");
 		LocText component3 = reference.GetComponent<LocText>();
 		component3.raycastTarget = true;
 		ToolTip component4 = reference.GetComponent<ToolTip>();

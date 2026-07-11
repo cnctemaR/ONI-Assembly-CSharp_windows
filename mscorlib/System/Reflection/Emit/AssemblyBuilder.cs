@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Resources;
@@ -11,18 +12,27 @@ using Mono.Security;
 
 namespace System.Reflection.Emit
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_AssemblyBuilder))]
+	[ComVisible(true)]
+	[StructLayout(LayoutKind.Sequential)]
 	public sealed class AssemblyBuilder : Assembly, _AssemblyBuilder
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void basic_init(AssemblyBuilder ab);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UpdateNativeCustomAttributes(AssemblyBuilder ab);
+
 		internal AssemblyBuilder(AssemblyName n, string directory, AssemblyBuilderAccess access, bool corlib_internal)
 		{
-			this.is_compiler_context = (access & (AssemblyBuilderAccess)2048) != (AssemblyBuilderAccess)0;
-			access &= (AssemblyBuilderAccess)(-2049);
+			if ((access & (AssemblyBuilderAccess)2048) != (AssemblyBuilderAccess)0)
+			{
+				throw new NotImplementedException("COMPILER_ACCESS is no longer supperted, use a newer mcs.");
+			}
 			if (!Enum.IsDefined(typeof(AssemblyBuilderAccess), access))
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Argument value {0} is not valid.", new object[] { (int)access }), "access");
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Argument value {0} is not valid.", (int)access), "access");
 			}
 			this.name = n.Name;
 			this.access = (uint)access;
@@ -52,7 +62,7 @@ namespace System.Reflection.Emit
 			else
 			{
 				byte[] publicKey = n.GetPublicKey();
-				if (publicKey != null && publicKey.Length > 0)
+				if (publicKey != null && publicKey.Length != 0)
 				{
 					this.sn = new StrongName(publicKey);
 				}
@@ -75,29 +85,6 @@ namespace System.Reflection.Emit
 			}
 			AssemblyBuilder.basic_init(this);
 		}
-
-		void _AssemblyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AssemblyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AssemblyBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _AssemblyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void basic_init(AssemblyBuilder ab);
 
 		public override string CodeBase
 		{
@@ -204,7 +191,7 @@ namespace System.Reflection.Emit
 			this.EmbedResourceFile(name, fileName, ResourceAttributes.Public);
 		}
 
-		internal void EmbedResourceFile(string name, string fileName, ResourceAttributes attribute)
+		private void EmbedResourceFile(string name, string fileName, ResourceAttributes attribute)
 		{
 			if (this.resources != null)
 			{
@@ -232,41 +219,23 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal void EmbedResource(string name, byte[] blob, ResourceAttributes attribute)
+		public static AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access)
 		{
-			if (this.resources != null)
+			if (name == null)
 			{
-				MonoResource[] array = new MonoResource[this.resources.Length + 1];
-				Array.Copy(this.resources, array, this.resources.Length);
-				this.resources = array;
+				throw new ArgumentNullException("name");
 			}
-			else
-			{
-				this.resources = new MonoResource[1];
-			}
-			int num = this.resources.Length - 1;
-			this.resources[num].name = name;
-			this.resources[num].attrs = attribute;
-			this.resources[num].data = blob;
+			return new AssemblyBuilder(name, null, access, false);
 		}
 
-		internal void AddTypeForwarder(Type t)
+		public static AssemblyBuilder DefineDynamicAssembly(AssemblyName name, AssemblyBuilderAccess access, IEnumerable<CustomAttributeBuilder> assemblyAttributes)
 		{
-			if (t == null)
+			AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(name, access);
+			foreach (CustomAttributeBuilder customAttributeBuilder in assemblyAttributes)
 			{
-				throw new ArgumentNullException("t");
+				assemblyBuilder.SetCustomAttribute(customAttributeBuilder);
 			}
-			if (this.type_forwarders == null)
-			{
-				this.type_forwarders = new Type[] { t };
-			}
-			else
-			{
-				Type[] array = new Type[this.type_forwarders.Length + 1];
-				Array.Copy(this.type_forwarders, array, this.type_forwarders.Length);
-				array[this.type_forwarders.Length] = t;
-				this.type_forwarders = array;
-			}
+			return assemblyBuilder;
 		}
 
 		public ModuleBuilder DefineDynamicModule(string name)
@@ -324,30 +293,6 @@ namespace System.Reflection.Emit
 			}
 			this.modules[this.modules.Length - 1] = moduleBuilder;
 			return moduleBuilder;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Module InternalAddModule(string fileName);
-
-		internal Module AddModule(string fileName)
-		{
-			if (fileName == null)
-			{
-				throw new ArgumentNullException(fileName);
-			}
-			Module module = this.InternalAddModule(fileName);
-			if (this.loaded_modules != null)
-			{
-				Module[] array = new Module[this.loaded_modules.Length + 1];
-				Array.Copy(this.loaded_modules, array, this.loaded_modules.Length);
-				this.loaded_modules = array;
-			}
-			else
-			{
-				this.loaded_modules = new Module[1];
-			}
-			this.loaded_modules[this.loaded_modules.Length - 1] = module;
-			return module;
 		}
 
 		public IResourceWriter DefineResource(string name, string description, string fileName)
@@ -411,7 +356,7 @@ namespace System.Reflection.Emit
 			}
 			if (!File.Exists(resourceFileName) || Directory.Exists(resourceFileName))
 			{
-				throw new FileNotFoundException("File '" + resourceFileName + "' does not exists or is a directory.");
+				throw new FileNotFoundException("File '" + resourceFileName + "' does not exist or is a directory.");
 			}
 			if (this.native_resource != NativeResourceType.None)
 			{
@@ -420,8 +365,7 @@ namespace System.Reflection.Emit
 			this.native_resource = NativeResourceType.Unmanaged;
 			using (FileStream fileStream = new FileStream(resourceFileName, FileMode.Open, FileAccess.Read))
 			{
-				Win32ResFileReader win32ResFileReader = new Win32ResFileReader(fileStream);
-				foreach (object obj in win32ResFileReader.ReadResources())
+				foreach (object obj in new Win32ResFileReader(fileStream).ReadResources())
 				{
 					Win32EncodedResource win32EncodedResource = (Win32EncodedResource)obj;
 					if (win32EncodedResource.Name.IsName || win32EncodedResource.Type.IsName)
@@ -440,7 +384,7 @@ namespace System.Reflection.Emit
 				throw new ArgumentException("Native resource has already been defined.");
 			}
 			this.native_resource = NativeResourceType.Assembly;
-			this.version_res = new Win32VersionResource(1, 0, this.IsCompilerContext);
+			this.version_res = new Win32VersionResource(1, 0, false);
 		}
 
 		public void DefineVersionInfoResource(string product, string productVersion, string company, string copyright, string trademark)
@@ -451,40 +395,11 @@ namespace System.Reflection.Emit
 			}
 			this.native_resource = NativeResourceType.Explicit;
 			this.version_res = new Win32VersionResource(1, 0, false);
-			this.version_res.ProductName = ((product == null) ? " " : product);
-			this.version_res.ProductVersion = ((productVersion == null) ? " " : productVersion);
-			this.version_res.CompanyName = ((company == null) ? " " : company);
-			this.version_res.LegalCopyright = ((copyright == null) ? " " : copyright);
-			this.version_res.LegalTrademarks = ((trademark == null) ? " " : trademark);
-		}
-
-		internal void DefineIconResource(string iconFileName)
-		{
-			if (iconFileName == null)
-			{
-				throw new ArgumentNullException("iconFileName");
-			}
-			if (iconFileName.Length == 0)
-			{
-				throw new ArgumentException("iconFileName");
-			}
-			if (!File.Exists(iconFileName) || Directory.Exists(iconFileName))
-			{
-				throw new FileNotFoundException("File '" + iconFileName + "' does not exists or is a directory.");
-			}
-			using (FileStream fileStream = new FileStream(iconFileName, FileMode.Open, FileAccess.Read))
-			{
-				Win32IconFileReader win32IconFileReader = new Win32IconFileReader(fileStream);
-				ICONDIRENTRY[] array = win32IconFileReader.ReadIcons();
-				Win32IconResource[] array2 = new Win32IconResource[array.Length];
-				for (int i = 0; i < array.Length; i++)
-				{
-					array2[i] = new Win32IconResource(i + 1, 0, array[i]);
-					this.AddUnmanagedResource(array2[i]);
-				}
-				Win32GroupIconResource win32GroupIconResource = new Win32GroupIconResource(1, 0, array2);
-				this.AddUnmanagedResource(win32GroupIconResource);
-			}
+			this.version_res.ProductName = ((product != null) ? product : " ");
+			this.version_res.ProductVersion = ((productVersion != null) ? productVersion : " ");
+			this.version_res.CompanyName = ((company != null) ? company : " ");
+			this.version_res.LegalCopyright = ((copyright != null) ? copyright : " ");
+			this.version_res.LegalTrademarks = ((trademark != null) ? trademark : " ");
 		}
 
 		private void DefineVersionInfoResourceImpl(string fileName)
@@ -493,7 +408,7 @@ namespace System.Reflection.Emit
 			{
 				this.version_res.FileLanguage = new CultureInfo(this.versioninfo_culture).LCID;
 			}
-			this.version_res.Version = ((this.version != null) ? this.version : "0.0.0.0");
+			this.version_res.Version = ((this.version == null) ? "0.0.0.0" : this.version);
 			if (this.cattrs != null)
 			{
 				NativeResourceType nativeResourceType = this.native_resource;
@@ -506,10 +421,7 @@ namespace System.Reflection.Emit
 							string fullName = customAttributeBuilder.Ctor.ReflectedType.FullName;
 							if (fullName == "System.Reflection.AssemblyCultureAttribute")
 							{
-								if (!this.IsCompilerContext)
-								{
-									this.version_res.FileLanguage = new CultureInfo(customAttributeBuilder.string_arg()).LCID;
-								}
+								this.version_res.FileLanguage = new CultureInfo(customAttributeBuilder.string_arg()).LCID;
 							}
 							else if (fullName == "System.Reflection.AssemblyDescriptionAttribute")
 							{
@@ -541,18 +453,11 @@ namespace System.Reflection.Emit
 						}
 						else if (fullName2 == "System.Reflection.AssemblyCultureAttribute")
 						{
-							if (!this.IsCompilerContext)
-							{
-								this.version_res.FileLanguage = new CultureInfo(customAttributeBuilder2.string_arg()).LCID;
-							}
+							this.version_res.FileLanguage = new CultureInfo(customAttributeBuilder2.string_arg()).LCID;
 						}
 						else if (fullName2 == "System.Reflection.AssemblyFileVersionAttribute")
 						{
-							string text = customAttributeBuilder2.string_arg();
-							if (!this.IsCompilerContext || (text != null && text.Length != 0))
-							{
-								this.version_res.FileVersion = text;
-							}
+							this.version_res.FileVersion = customAttributeBuilder2.string_arg();
 						}
 						else if (fullName2 == "System.Reflection.AssemblyInformationalVersionAttribute")
 						{
@@ -570,18 +475,7 @@ namespace System.Reflection.Emit
 				}
 			}
 			this.version_res.OriginalFilename = fileName;
-			if (this.IsCompilerContext)
-			{
-				this.version_res.InternalName = fileName;
-				if (this.version_res.ProductVersion.Trim().Length == 0)
-				{
-					this.version_res.ProductVersion = this.version_res.FileVersion;
-				}
-			}
-			else
-			{
-				this.version_res.InternalName = Path.GetFileNameWithoutExtension(fileName);
-			}
+			this.version_res.InternalName = Path.GetFileNameWithoutExtension(fileName);
 			this.AddUnmanagedResource(this.version_res);
 		}
 
@@ -669,7 +563,30 @@ namespace System.Reflection.Emit
 					}
 				}
 			}
-			return (array != null) ? array : Type.EmptyTypes;
+			if (array != null)
+			{
+				List<Exception> list = null;
+				foreach (Type type in array)
+				{
+					if (type is TypeBuilder)
+					{
+						if (list == null)
+						{
+							list = new List<Exception>();
+						}
+						list.Add(new TypeLoadException(string.Format("Type '{0}' is not finished", type.FullName)));
+					}
+				}
+				if (list != null)
+				{
+					throw new ReflectionTypeLoadException(new Type[list.Count], list.ToArray());
+				}
+			}
+			if (array != null)
+			{
+				return array;
+			}
+			return Type.EmptyTypes;
 		}
 
 		public override ManifestResourceInfo GetManifestResourceInfo(string resourceName)
@@ -692,14 +609,6 @@ namespace System.Reflection.Emit
 			throw this.not_supported();
 		}
 
-		internal bool IsCompilerContext
-		{
-			get
-			{
-				return this.is_compiler_context;
-			}
-		}
-
 		internal bool IsSave
 		{
 			get
@@ -712,7 +621,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.access == 1U || this.access == 3U;
+				return this.access == 1U || this.access == 3U || this.access == 9U;
 			}
 		}
 
@@ -789,7 +698,7 @@ namespace System.Reflection.Emit
 			if (this.entry_point != null && this.entry_point.DeclaringType.Module != moduleBuilder)
 			{
 				Type[] array2;
-				if (this.entry_point.GetParameters().Length == 1)
+				if (this.entry_point.GetParametersCount() == 1)
 				{
 					array2 = new Type[] { typeof(string) };
 				}
@@ -861,52 +770,21 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentNullException("customBuilder");
 			}
-			if (this.IsCompilerContext)
-			{
-				string fullName = customBuilder.Ctor.ReflectedType.FullName;
-				if (fullName == "System.Reflection.AssemblyVersionAttribute")
-				{
-					this.version = this.create_assembly_version(customBuilder.string_arg());
-					return;
-				}
-				if (fullName == "System.Reflection.AssemblyCultureAttribute")
-				{
-					this.culture = this.GetCultureString(customBuilder.string_arg());
-				}
-				else if (fullName == "System.Reflection.AssemblyAlgorithmIdAttribute")
-				{
-					byte[] array = customBuilder.Data;
-					int num = 2;
-					this.algid = (uint)array[num];
-					this.algid |= (uint)((uint)array[num + 1] << 8);
-					this.algid |= (uint)((uint)array[num + 2] << 16);
-					this.algid |= (uint)((uint)array[num + 3] << 24);
-				}
-				else if (fullName == "System.Reflection.AssemblyFlagsAttribute")
-				{
-					byte[] array = customBuilder.Data;
-					int num = 2;
-					this.flags |= (uint)array[num];
-					this.flags |= (uint)((uint)array[num + 1] << 8);
-					this.flags |= (uint)((uint)array[num + 2] << 16);
-					this.flags |= (uint)((uint)array[num + 3] << 24);
-					if (this.sn == null)
-					{
-						this.flags &= 4294967294U;
-					}
-				}
-			}
 			if (this.cattrs != null)
 			{
-				CustomAttributeBuilder[] array2 = new CustomAttributeBuilder[this.cattrs.Length + 1];
-				this.cattrs.CopyTo(array2, 0);
-				array2[this.cattrs.Length] = customBuilder;
-				this.cattrs = array2;
+				CustomAttributeBuilder[] array = new CustomAttributeBuilder[this.cattrs.Length + 1];
+				this.cattrs.CopyTo(array, 0);
+				array[this.cattrs.Length] = customBuilder;
+				this.cattrs = array;
 			}
 			else
 			{
 				this.cattrs = new CustomAttributeBuilder[1];
 				this.cattrs[0] = customBuilder;
+			}
+			if (customBuilder.Ctor != null && customBuilder.Ctor.DeclaringType == typeof(RuntimeCompatibilityAttribute))
+			{
+				AssemblyBuilder.UpdateNativeCustomAttributes(this);
 			}
 		}
 
@@ -922,19 +800,6 @@ namespace System.Reflection.Emit
 				throw new ArgumentNullException("binaryAttribute");
 			}
 			this.SetCustomAttribute(new CustomAttributeBuilder(con, binaryAttribute));
-		}
-
-		internal void SetCorlibTypeBuilders(Type corlib_object_type, Type corlib_value_type, Type corlib_enum_type)
-		{
-			this.corlib_object_type = corlib_object_type;
-			this.corlib_value_type = corlib_value_type;
-			this.corlib_enum_type = corlib_enum_type;
-		}
-
-		internal void SetCorlibTypeBuilders(Type corlib_object_type, Type corlib_value_type, Type corlib_enum_type, Type corlib_void_type)
-		{
-			this.SetCorlibTypeBuilders(corlib_object_type, corlib_value_type, corlib_enum_type);
-			this.corlib_void_type = corlib_void_type;
 		}
 
 		private Exception not_supported()
@@ -1059,12 +924,105 @@ namespace System.Reflection.Emit
 
 		private string GetCultureString(string str)
 		{
-			return (!(str == "neutral")) ? str : string.Empty;
+			if (!(str == "neutral"))
+			{
+				return str;
+			}
+			return string.Empty;
 		}
 
-		internal override AssemblyName UnprotectedGetName()
+		internal Type MakeGenericType(Type gtd, Type[] typeArguments)
 		{
-			AssemblyName assemblyName = base.UnprotectedGetName();
+			return new TypeBuilderInstantiation(gtd, typeArguments);
+		}
+
+		void _AssemblyBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AssemblyBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AssemblyBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _AssemblyBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override Type GetType(string name, bool throwOnError, bool ignoreCase)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException(name);
+			}
+			if (name.Length == 0)
+			{
+				throw new ArgumentException("name", "Name cannot be empty");
+			}
+			Type type = base.InternalGetType(null, name, throwOnError, ignoreCase);
+			if (!(type is TypeBuilder))
+			{
+				return type;
+			}
+			if (throwOnError)
+			{
+				throw new TypeLoadException(string.Format("Could not load type '{0}' from assembly '{1}'", name, this.name));
+			}
+			return null;
+		}
+
+		public override Module GetModule(string name)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (name.Length == 0)
+			{
+				throw new ArgumentException("Name can't be empty");
+			}
+			if (this.modules == null)
+			{
+				return null;
+			}
+			foreach (ModuleBuilder module in this.modules)
+			{
+				if (module.ScopeName == name)
+				{
+					return module;
+				}
+			}
+			return null;
+		}
+
+		public override Module[] GetModules(bool getResourceModules)
+		{
+			Module[] modulesInternal = this.GetModulesInternal();
+			if (!getResourceModules)
+			{
+				List<Module> list = new List<Module>(modulesInternal.Length);
+				foreach (Module module in modulesInternal)
+				{
+					if (!module.IsResource())
+					{
+						list.Add(module);
+					}
+				}
+				return list.ToArray();
+			}
+			return modulesInternal;
+		}
+
+		public override AssemblyName GetName(bool copiedName)
+		{
+			AssemblyName assemblyName = AssemblyName.Create(this, false);
 			if (this.sn != null)
 			{
 				assemblyName.SetPublicKey(this.sn.PublicKey);
@@ -1073,7 +1031,83 @@ namespace System.Reflection.Emit
 			return assemblyName;
 		}
 
-		private const AssemblyBuilderAccess COMPILER_ACCESS = (AssemblyBuilderAccess)2048;
+		[MonoTODO("This always returns an empty array")]
+		public override AssemblyName[] GetReferencedAssemblies()
+		{
+			return Assembly.GetReferencedAssemblies(this);
+		}
+
+		public override Module[] GetLoadedModules(bool getResourceModules)
+		{
+			return this.GetModules(getResourceModules);
+		}
+
+		public override Assembly GetSatelliteAssembly(CultureInfo culture)
+		{
+			return base.GetSatelliteAssembly(culture, null, true);
+		}
+
+		public override Assembly GetSatelliteAssembly(CultureInfo culture, Version version)
+		{
+			return base.GetSatelliteAssembly(culture, version, true);
+		}
+
+		public override Module ManifestModule
+		{
+			get
+			{
+				return this.GetManifestModule();
+			}
+		}
+
+		public override bool GlobalAssemblyCache
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public override bool IsDynamic
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public override bool IsDefined(Type attributeType, bool inherit)
+		{
+			return base.IsDefined(attributeType, inherit);
+		}
+
+		public override object[] GetCustomAttributes(bool inherit)
+		{
+			return base.GetCustomAttributes(inherit);
+		}
+
+		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
+		{
+			return base.GetCustomAttributes(attributeType, inherit);
+		}
+
+		public override string FullName
+		{
+			get
+			{
+				return base.FullName;
+			}
+		}
 
 		private UIntPtr dynamic_assembly;
 
@@ -1145,9 +1179,9 @@ namespace System.Reflection.Emit
 
 		private NativeResourceType native_resource;
 
-		private readonly bool is_compiler_context;
-
 		private string versioninfo_culture;
+
+		private const AssemblyBuilderAccess COMPILER_ACCESS = (AssemblyBuilderAccess)2048;
 
 		private ModuleBuilder manifest_module;
 	}

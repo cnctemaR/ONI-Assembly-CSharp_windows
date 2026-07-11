@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Cryptography;
 using System.Security.Permissions;
 using System.Text;
@@ -25,33 +24,43 @@ namespace System.IO
 			int num = Path.findExtension(path);
 			if (extension == null)
 			{
-				return (num >= 0) ? path.Substring(0, num) : path;
-			}
-			if (extension.Length == 0)
-			{
-				return (num >= 0) ? path.Substring(0, num + 1) : (path + '.');
-			}
-			if (path.Length != 0)
-			{
-				if (extension.Length > 0 && extension[0] != '.')
+				if (num >= 0)
 				{
-					extension = "." + extension;
+					return path.Substring(0, num);
 				}
+				return path;
+			}
+			else if (extension.Length == 0)
+			{
+				if (num >= 0)
+				{
+					return path.Substring(0, num + 1);
+				}
+				return path + ".";
 			}
 			else
 			{
-				extension = string.Empty;
+				if (path.Length != 0)
+				{
+					if (extension.Length > 0 && extension[0] != '.')
+					{
+						extension = "." + extension;
+					}
+				}
+				else
+				{
+					extension = string.Empty;
+				}
+				if (num < 0)
+				{
+					return path + extension;
+				}
+				if (num > 0)
+				{
+					return path.Substring(0, num) + extension;
+				}
+				return extension;
 			}
-			if (num < 0)
-			{
-				return path + extension;
-			}
-			if (num > 0)
-			{
-				string text = path.Substring(0, num);
-				return text + extension;
-			}
-			return extension;
 		}
 
 		public static string Combine(string path1, string path2)
@@ -97,20 +106,25 @@ namespace System.IO
 			int length = s.Length;
 			int num = 0;
 			int num2 = 0;
+			int num3 = 0;
 			char c = s[0];
 			if (length > 2 && c == '\\' && s[1] == '\\')
 			{
-				num2 = 2;
+				num3 = 2;
 			}
 			if (length == 1 && (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar))
 			{
 				return s;
 			}
-			for (int i = num2; i < length; i++)
+			for (int i = num3; i < length; i++)
 			{
 				char c2 = s[i];
 				if (c2 == Path.DirectorySeparatorChar || c2 == Path.AltDirectorySeparatorChar)
 				{
+					if (Path.DirectorySeparatorChar != Path.AltDirectorySeparatorChar && c2 == Path.AltDirectorySeparatorChar)
+					{
+						num2++;
+					}
 					if (i + 1 == length)
 					{
 						num++;
@@ -125,28 +139,28 @@ namespace System.IO
 					}
 				}
 			}
-			if (num == 0)
+			if (num == 0 && num2 == 0)
 			{
 				return s;
 			}
 			char[] array = new char[length - num];
-			if (num2 != 0)
+			if (num3 != 0)
 			{
 				array[0] = '\\';
 				array[1] = '\\';
 			}
-			int j = num2;
-			int num3 = num2;
-			while (j < length && num3 < array.Length)
+			int j = num3;
+			int num4 = num3;
+			while (j < length && num4 < array.Length)
 			{
 				char c3 = s[j];
 				if (c3 != Path.DirectorySeparatorChar && c3 != Path.AltDirectorySeparatorChar)
 				{
-					array[num3++] = c3;
+					array[num4++] = c3;
 				}
-				else if (num3 + 1 != array.Length)
+				else if (num4 + 1 != array.Length)
 				{
-					array[num3++] = Path.DirectorySeparatorChar;
+					array[num4++] = Path.DirectorySeparatorChar;
 					while (j < length - 1)
 					{
 						c3 = s[j + 1];
@@ -193,7 +207,11 @@ namespace System.IO
 			int length = text.Length;
 			if (length >= 2 && Path.DirectorySeparatorChar == '\\' && text[length - 1] == Path.VolumeSeparatorChar)
 			{
-				return text + Path.DirectorySeparatorChar;
+				return text + Path.DirectorySeparatorChar.ToString();
+			}
+			if (length == 1 && Path.DirectorySeparatorChar == '\\' && path.Length >= 2 && path[num] == Path.VolumeSeparatorChar)
+			{
+				return text + Path.VolumeSeparatorChar.ToString();
 			}
 			return Path.CleanPath(text);
 		}
@@ -241,48 +259,76 @@ namespace System.IO
 
 		public static string GetFullPath(string path)
 		{
-			string text = Path.InsecureGetFullPath(path);
-			if (SecurityManager.SecurityEnabled)
+			return Path.InsecureGetFullPath(path);
+		}
+
+		internal static string GetFullPathInternal(string path)
+		{
+			return Path.InsecureGetFullPath(path);
+		}
+
+		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		private static extern int GetFullPathName(string path, int numBufferChars, StringBuilder buffer, ref IntPtr lpFilePartOrNull);
+
+		internal static string GetFullPathName(string path)
+		{
+			StringBuilder stringBuilder = new StringBuilder(260);
+			IntPtr zero = IntPtr.Zero;
+			int fullPathName = Path.GetFullPathName(path, 260, stringBuilder, ref zero);
+			if (fullPathName == 0)
 			{
-				new FileIOPermission(FileIOPermissionAccess.PathDiscovery, text).Demand();
+				int lastWin32Error = Marshal.GetLastWin32Error();
+				throw new IOException("Windows API call to GetFullPathName failed, Windows error code: " + lastWin32Error);
 			}
-			return text;
+			if (fullPathName > 260)
+			{
+				stringBuilder = new StringBuilder(fullPathName);
+				Path.GetFullPathName(path, fullPathName, stringBuilder, ref zero);
+			}
+			return stringBuilder.ToString();
 		}
 
 		internal static string WindowsDriveAdjustment(string path)
 		{
 			if (path.Length < 2)
 			{
+				if (path.Length == 1 && (path[0] == '\\' || path[0] == '/'))
+				{
+					return Path.GetPathRoot(Directory.GetCurrentDirectory());
+				}
 				return path;
 			}
-			if (path[1] != ':' || !char.IsLetter(path[0]))
+			else
 			{
+				if (path[1] != ':' || !char.IsLetter(path[0]))
+				{
+					return path;
+				}
+				string text = Directory.InsecureGetCurrentDirectory();
+				if (path.Length == 2)
+				{
+					if (text[0] == path[0])
+					{
+						path = text;
+					}
+					else
+					{
+						path = Path.GetFullPathName(path);
+					}
+				}
+				else if (path[2] != Path.DirectorySeparatorChar && path[2] != Path.AltDirectorySeparatorChar)
+				{
+					if (text[0] == path[0])
+					{
+						path = Path.Combine(text, path.Substring(2, path.Length - 2));
+					}
+					else
+					{
+						path = Path.GetFullPathName(path);
+					}
+				}
 				return path;
 			}
-			string currentDirectory = Directory.GetCurrentDirectory();
-			if (path.Length == 2)
-			{
-				if (currentDirectory[0] == path[0])
-				{
-					path = currentDirectory;
-				}
-				else
-				{
-					path += '\\';
-				}
-			}
-			else if (path[2] != Path.DirectorySeparatorChar && path[2] != Path.AltDirectorySeparatorChar)
-			{
-				if (currentDirectory[0] == path[0])
-				{
-					path = Path.Combine(currentDirectory, path.Substring(2, path.Length - 2));
-				}
-				else
-				{
-					path = path.Substring(0, 2) + Path.DirectorySeparatorStr + path.Substring(2, path.Length - 2);
-				}
-			}
-			return path;
 		}
 
 		internal static string InsecureGetFullPath(string path)
@@ -293,15 +339,15 @@ namespace System.IO
 			}
 			if (path.Trim().Length == 0)
 			{
-				string text = Locale.GetText("The specified path is not of a legal form (empty).");
-				throw new ArgumentException(text);
+				throw new ArgumentException(Locale.GetText("The specified path is not of a legal form (empty)."));
 			}
 			if (Environment.IsRunningOnWindows)
 			{
 				path = Path.WindowsDriveAdjustment(path);
 			}
 			char c = path[path.Length - 1];
-			if (path.Length >= 2 && Path.IsDsc(path[0]) && Path.IsDsc(path[1]))
+			bool flag = true;
+			if (path.Length >= 2 && Path.IsDirectorySeparator(path[0]) && Path.IsDirectorySeparator(path[1]))
 			{
 				if (path.Length == 2 || path.IndexOf(path[0], 2) < 0)
 				{
@@ -311,36 +357,56 @@ namespace System.IO
 				{
 					path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 				}
+			}
+			else if (!Path.IsPathRooted(path))
+			{
+				if (!Environment.IsRunningOnWindows)
+				{
+					int num = 0;
+					while ((num = path.IndexOf('.', num)) != -1 && ++num != path.Length && path[num] != Path.DirectorySeparatorChar && path[num] != Path.AltDirectorySeparatorChar)
+					{
+					}
+					flag = num > 0;
+				}
+				string text = Directory.InsecureGetCurrentDirectory();
+				if (text[text.Length - 1] == Path.DirectorySeparatorChar)
+				{
+					path = text + path;
+				}
+				else
+				{
+					path = text + Path.DirectorySeparatorChar.ToString() + path;
+				}
+			}
+			else if (Path.DirectorySeparatorChar == '\\' && path.Length >= 2 && Path.IsDirectorySeparator(path[0]) && !Path.IsDirectorySeparator(path[1]))
+			{
+				string text2 = Directory.InsecureGetCurrentDirectory();
+				if (text2[1] == Path.VolumeSeparatorChar)
+				{
+					path = text2.Substring(0, 2) + path;
+				}
+				else
+				{
+					path = text2.Substring(0, text2.IndexOf('\\', text2.IndexOfUnchecked("\\\\", 0, text2.Length) + 1));
+				}
+			}
+			if (flag)
+			{
 				path = Path.CanonicalizePath(path);
 			}
-			else
+			if (Path.IsDirectorySeparator(c) && path[path.Length - 1] != Path.DirectorySeparatorChar)
 			{
-				if (!Path.IsPathRooted(path))
-				{
-					path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorStr + path;
-				}
-				else if (Path.DirectorySeparatorChar == '\\' && path.Length >= 2 && Path.IsDsc(path[0]) && !Path.IsDsc(path[1]))
-				{
-					string currentDirectory = Directory.GetCurrentDirectory();
-					if (currentDirectory[1] == Path.VolumeSeparatorChar)
-					{
-						path = currentDirectory.Substring(0, 2) + path;
-					}
-					else
-					{
-						path = currentDirectory.Substring(0, currentDirectory.IndexOf('\\', currentDirectory.IndexOf("\\\\") + 1));
-					}
-				}
-				path = Path.CanonicalizePath(path);
+				path += Path.DirectorySeparatorChar.ToString();
 			}
-			if (Path.IsDsc(c) && path[path.Length - 1] != Path.DirectorySeparatorChar)
+			string text3;
+			if (MonoIO.RemapPath(path, out text3))
 			{
-				path += Path.DirectorySeparatorChar;
+				path = text3;
 			}
 			return path;
 		}
 
-		private static bool IsDsc(char c)
+		internal static bool IsDirectorySeparator(char c)
 		{
 			return c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
 		}
@@ -361,77 +427,84 @@ namespace System.IO
 			}
 			if (Path.DirectorySeparatorChar == '/')
 			{
-				return (!Path.IsDsc(path[0])) ? string.Empty : Path.DirectorySeparatorStr;
-			}
-			int num = 2;
-			if (path.Length == 1 && Path.IsDsc(path[0]))
-			{
+				if (!Path.IsDirectorySeparator(path[0]))
+				{
+					return string.Empty;
+				}
 				return Path.DirectorySeparatorStr;
 			}
-			if (path.Length < 2)
+			else
 			{
-				return string.Empty;
-			}
-			if (Path.IsDsc(path[0]) && Path.IsDsc(path[1]))
-			{
-				while (num < path.Length && !Path.IsDsc(path[num]))
+				int num = 2;
+				if (path.Length == 1 && Path.IsDirectorySeparator(path[0]))
 				{
-					num++;
+					return Path.DirectorySeparatorStr;
 				}
-				if (num < path.Length)
+				if (path.Length < 2)
 				{
-					num++;
-					while (num < path.Length && !Path.IsDsc(path[num]))
+					return string.Empty;
+				}
+				if (Path.IsDirectorySeparator(path[0]) && Path.IsDirectorySeparator(path[1]))
+				{
+					while (num < path.Length && !Path.IsDirectorySeparator(path[num]))
 					{
 						num++;
 					}
+					if (num < path.Length)
+					{
+						num++;
+						while (num < path.Length && !Path.IsDirectorySeparator(path[num]))
+						{
+							num++;
+						}
+					}
+					return Path.DirectorySeparatorStr + Path.DirectorySeparatorStr + path.Substring(2, num - 2).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 				}
-				return Path.DirectorySeparatorStr + Path.DirectorySeparatorStr + path.Substring(2, num - 2).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-			}
-			if (Path.IsDsc(path[0]))
-			{
-				return Path.DirectorySeparatorStr;
-			}
-			if (path[1] == Path.VolumeSeparatorChar)
-			{
-				if (path.Length >= 3 && Path.IsDsc(path[2]))
+				if (Path.IsDirectorySeparator(path[0]))
 				{
-					num++;
+					return Path.DirectorySeparatorStr;
 				}
-				return path.Substring(0, num);
+				if (path[1] == Path.VolumeSeparatorChar)
+				{
+					if (path.Length >= 3 && Path.IsDirectorySeparator(path[2]))
+					{
+						num++;
+					}
+					return path.Substring(0, num);
+				}
+				return Directory.GetCurrentDirectory().Substring(0, 2);
 			}
-			return Directory.GetCurrentDirectory().Substring(0, 2);
 		}
 
-		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Unrestricted=\"true\"/>\n</PermissionSet>\n")]
+		[FileIOPermission(SecurityAction.Assert, Unrestricted = true)]
 		public static string GetTempFileName()
 		{
 			FileStream fileStream = null;
+			int num = 0;
 			Random random = new Random();
+			string tempPath = Path.GetTempPath();
 			string text;
 			do
 			{
-				int num = random.Next();
-				num++;
-				text = Path.Combine(Path.GetTempPath(), "tmp" + num.ToString("x") + ".tmp");
+				int num2 = random.Next();
+				text = Path.Combine(tempPath, "tmp" + (num2 + 1).ToString("x", CultureInfo.InvariantCulture) + ".tmp");
 				try
 				{
 					fileStream = new FileStream(text, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read, 8192, false, (FileOptions)1);
 				}
-				catch (SecurityException)
+				catch (IOException ex)
 				{
-					throw;
+					if (ex._HResult != -2147024816 || num++ > 65536)
+					{
+						throw;
+					}
 				}
-				catch (UnauthorizedAccessException)
+				catch (UnauthorizedAccessException ex2)
 				{
-					throw;
-				}
-				catch (DirectoryNotFoundException)
-				{
-					throw;
-				}
-				catch
-				{
+					if (num++ > 65536)
+					{
+						throw new IOException(ex2.Message, ex2);
+					}
 				}
 			}
 			while (fileStream == null);
@@ -439,13 +512,13 @@ namespace System.IO
 			return text;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Unrestricted=\"true\"/>\n</PermissionSet>\n")]
+		[EnvironmentPermission(SecurityAction.Demand, Unrestricted = true)]
 		public static string GetTempPath()
 		{
 			string temp_path = Path.get_temp_path();
 			if (temp_path.Length > 0 && temp_path[temp_path.Length - 1] != Path.DirectorySeparatorChar)
 			{
-				return temp_path + Path.DirectorySeparatorChar;
+				return temp_path + Path.DirectorySeparatorChar.ToString();
 			}
 			return temp_path;
 		}
@@ -525,7 +598,7 @@ namespace System.IO
 					stringBuilder.Append('.');
 				}
 				int num = (int)(array[i] % 36);
-				char c = (char)((num >= 26) ? (num - 26 + 48) : (num + 97));
+				char c = (char)((num < 26) ? (num + 97) : (num - 26 + 48));
 				stringBuilder.Append(c);
 			}
 			return stringBuilder.ToString();
@@ -548,14 +621,14 @@ namespace System.IO
 		private static string GetServerAndShare(string path)
 		{
 			int num = 2;
-			while (num < path.Length && !Path.IsDsc(path[num]))
+			while (num < path.Length && !Path.IsDirectorySeparator(path[num]))
 			{
 				num++;
 			}
 			if (num < path.Length)
 			{
 				num++;
-				while (num < path.Length && !Path.IsDsc(path[num]))
+				while (num < path.Length && !Path.IsDirectorySeparator(path[num]))
 				{
 					num++;
 				}
@@ -569,11 +642,11 @@ namespace System.IO
 			{
 				return false;
 			}
-			if (!Path.IsDsc(root[0]) || !Path.IsDsc(root[1]))
+			if (!Path.IsDirectorySeparator(root[0]) || !Path.IsDirectorySeparator(root[1]))
 			{
-				return root[0].Equals(path[0]) && path[1] == Path.VolumeSeparatorChar && (root.Length <= 2 || path.Length <= 2 || (Path.IsDsc(root[2]) && Path.IsDsc(path[2])));
+				return root[0].Equals(path[0]) && path[1] == Path.VolumeSeparatorChar && (root.Length <= 2 || path.Length <= 2 || (Path.IsDirectorySeparator(root[2]) && Path.IsDirectorySeparator(path[2])));
 			}
-			if (!Path.IsDsc(path[0]) || !Path.IsDsc(path[1]))
+			if (!Path.IsDirectorySeparator(path[0]) || !Path.IsDirectorySeparator(path[1]))
 			{
 				return false;
 			}
@@ -603,13 +676,13 @@ namespace System.IO
 				Path.AltDirectorySeparatorChar
 			});
 			int num = 0;
-			bool flag = Environment.IsRunningOnWindows && pathRoot.Length > 2 && Path.IsDsc(pathRoot[0]) && Path.IsDsc(pathRoot[1]);
-			int num2 = ((!flag) ? 0 : 3);
+			bool flag = Environment.IsRunningOnWindows && pathRoot.Length > 2 && Path.IsDirectorySeparator(pathRoot[0]) && Path.IsDirectorySeparator(pathRoot[1]);
+			int num2 = (flag ? 3 : 0);
 			for (int i = 0; i < array.Length; i++)
 			{
 				if (Environment.IsRunningOnWindows)
 				{
-					array[i] = array[i].TrimEnd(new char[0]);
+					array[i] = array[i].TrimEnd(Array.Empty<char>());
 				}
 				if (!(array[i] == ".") && (i == 0 || array[i].Length != 0))
 				{
@@ -626,13 +699,17 @@ namespace System.IO
 					}
 				}
 			}
-			if (num == 0 || (num == 1 && array[0] == string.Empty))
+			if (num == 0 || (num == 1 && array[0] == ""))
 			{
 				return pathRoot;
 			}
 			string text = string.Join(Path.DirectorySeparatorStr, array, 0, num);
 			if (!Environment.IsRunningOnWindows)
 			{
+				if (pathRoot != "" && text.Length > 0 && text[0] != '/')
+				{
+					text = pathRoot + text;
+				}
 				return text;
 			}
 			if (flag)
@@ -647,24 +724,24 @@ namespace System.IO
 			{
 				return text;
 			}
-			if (!Path.IsDsc(path[0]) && Path.SameRoot(pathRoot, path))
+			if (!Path.IsDirectorySeparator(path[0]) && Path.SameRoot(pathRoot, path))
 			{
 				if (text.Length <= 2 && !text.EndsWith(Path.DirectorySeparatorStr))
 				{
-					text += Path.DirectorySeparatorChar;
+					text += Path.DirectorySeparatorChar.ToString();
 				}
 				return text;
 			}
 			string currentDirectory = Directory.GetCurrentDirectory();
 			if (currentDirectory.Length > 1 && currentDirectory[1] == Path.VolumeSeparatorChar)
 			{
-				if (text.Length == 0 || Path.IsDsc(text[0]))
+				if (text.Length == 0 || Path.IsDirectorySeparator(text[0]))
 				{
-					text += '\\';
+					text += "\\";
 				}
 				return currentDirectory.Substring(0, 2) + text;
 			}
-			if (Path.IsDsc(currentDirectory[currentDirectory.Length - 1]) && Path.IsDsc(text[0]))
+			if (Path.IsDirectorySeparator(currentDirectory[currentDirectory.Length - 1]) && Path.IsDirectorySeparator(text[0]))
 			{
 				return currentDirectory + text.Substring(1);
 			}
@@ -691,6 +768,197 @@ namespace System.IO
 			return subset.Length == path.Length && string.Compare(subset, num, path, num, subset.Length - num) == 0;
 		}
 
+		public static string Combine(params string[] paths)
+		{
+			if (paths == null)
+			{
+				throw new ArgumentNullException("paths");
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			int num = paths.Length;
+			bool flag = false;
+			foreach (string text in paths)
+			{
+				if (text == null)
+				{
+					throw new ArgumentNullException("One of the paths contains a null value", "paths");
+				}
+				if (text.Length != 0)
+				{
+					if (text.IndexOfAny(Path.InvalidPathChars) != -1)
+					{
+						throw new ArgumentException("Illegal characters in path.");
+					}
+					if (flag)
+					{
+						flag = false;
+						stringBuilder.Append(Path.DirectorySeparatorStr);
+					}
+					num--;
+					if (Path.IsPathRooted(text))
+					{
+						stringBuilder.Length = 0;
+					}
+					stringBuilder.Append(text);
+					int length = text.Length;
+					if (length > 0 && num > 0)
+					{
+						char c = text[length - 1];
+						if (c != Path.DirectorySeparatorChar && c != Path.AltDirectorySeparatorChar && c != Path.VolumeSeparatorChar)
+						{
+							flag = true;
+						}
+					}
+				}
+			}
+			return stringBuilder.ToString();
+		}
+
+		public static string Combine(string path1, string path2, string path3)
+		{
+			if (path1 == null)
+			{
+				throw new ArgumentNullException("path1");
+			}
+			if (path2 == null)
+			{
+				throw new ArgumentNullException("path2");
+			}
+			if (path3 == null)
+			{
+				throw new ArgumentNullException("path3");
+			}
+			return Path.Combine(new string[] { path1, path2, path3 });
+		}
+
+		public static string Combine(string path1, string path2, string path3, string path4)
+		{
+			if (path1 == null)
+			{
+				throw new ArgumentNullException("path1");
+			}
+			if (path2 == null)
+			{
+				throw new ArgumentNullException("path2");
+			}
+			if (path3 == null)
+			{
+				throw new ArgumentNullException("path3");
+			}
+			if (path4 == null)
+			{
+				throw new ArgumentNullException("path4");
+			}
+			return Path.Combine(new string[] { path1, path2, path3, path4 });
+		}
+
+		internal static void Validate(string path)
+		{
+			Path.Validate(path, "path");
+		}
+
+		internal static void Validate(string path, string parameterName)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException(parameterName);
+			}
+			if (string.IsNullOrWhiteSpace(path))
+			{
+				throw new ArgumentException(Locale.GetText("Path is empty"));
+			}
+			if (path.IndexOfAny(Path.InvalidPathChars) != -1)
+			{
+				throw new ArgumentException(Locale.GetText("Path contains invalid chars"));
+			}
+			if (Environment.IsRunningOnWindows)
+			{
+				int num = path.IndexOf(':');
+				if (num >= 0 && num != 1)
+				{
+					throw new ArgumentException(parameterName);
+				}
+			}
+		}
+
+		internal static string DirectorySeparatorCharAsString
+		{
+			get
+			{
+				return Path.DirectorySeparatorStr;
+			}
+		}
+
+		internal static char[] TrimEndChars
+		{
+			get
+			{
+				if (!Environment.IsRunningOnWindows)
+				{
+					return Path.trimEndCharsUnix;
+				}
+				return Path.trimEndCharsWindows;
+			}
+		}
+
+		internal static void CheckSearchPattern(string searchPattern)
+		{
+			int num;
+			while ((num = searchPattern.IndexOf("..", StringComparison.Ordinal)) != -1)
+			{
+				if (num + 2 == searchPattern.Length)
+				{
+					throw new ArgumentException(Environment.GetResourceString("Search pattern cannot contain \"..\" to move up directories and can be contained only internally in file/directory names, as in \"a..b\"."));
+				}
+				if (searchPattern[num + 2] == Path.DirectorySeparatorChar || searchPattern[num + 2] == Path.AltDirectorySeparatorChar)
+				{
+					throw new ArgumentException(Environment.GetResourceString("Search pattern cannot contain \"..\" to move up directories and can be contained only internally in file/directory names, as in \"a..b\"."));
+				}
+				searchPattern = searchPattern.Substring(num + 2);
+			}
+		}
+
+		internal static void CheckInvalidPathChars(string path, bool checkAdditional = false)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (PathInternal.HasIllegalCharacters(path, checkAdditional))
+			{
+				throw new ArgumentException(Environment.GetResourceString("Illegal characters in path."));
+			}
+		}
+
+		internal static string InternalCombine(string path1, string path2)
+		{
+			if (path1 == null || path2 == null)
+			{
+				throw new ArgumentNullException((path1 == null) ? "path1" : "path2");
+			}
+			Path.CheckInvalidPathChars(path1, false);
+			Path.CheckInvalidPathChars(path2, false);
+			if (path2.Length == 0)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Path cannot be the empty string or all whitespace."), "path2");
+			}
+			if (Path.IsPathRooted(path2))
+			{
+				throw new ArgumentException(Environment.GetResourceString("Second path fragment must not be a drive or UNC name."), "path2");
+			}
+			int length = path1.Length;
+			if (length == 0)
+			{
+				return path2;
+			}
+			char c = path1[length - 1];
+			if (c != Path.DirectorySeparatorChar && c != Path.AltDirectorySeparatorChar && c != Path.VolumeSeparatorChar)
+			{
+				return path1 + Path.DirectorySeparatorCharAsString + path2;
+			}
+			return path1 + path2;
+		}
+
 		[Obsolete("see GetInvalidPathChars and GetInvalidFileNameChars methods.")]
 		public static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
 
@@ -712,5 +980,11 @@ namespace System.IO
 		};
 
 		private static readonly bool dirEqualsVolume = Path.DirectorySeparatorChar == Path.VolumeSeparatorChar;
+
+		internal const int MAX_PATH = 260;
+
+		internal static readonly char[] trimEndCharsWindows = new char[] { '\t', '\n', '\v', '\f', '\r', ' ', '\u0085', '\u00a0' };
+
+		internal static readonly char[] trimEndCharsUnix = new char[0];
 	}
 }

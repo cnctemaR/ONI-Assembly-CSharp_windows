@@ -85,7 +85,13 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 		{
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Shower.ShowerSM.Instance smi) => smi.IsOperational).PlayAnim("off");
-			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, null, true, null, null, null, false, null, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false), this.unoperational);
+			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore(delegate(Shower.ShowerSM.Instance smi)
+			{
+				ChoreType shower = Db.Get().ChoreTypes.Shower;
+				Shower master = smi.master;
+				ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
+				return new WorkChore<Shower>(shower, master, null, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
+			}, this.unoperational);
 			this.operational.idle.WorkableStartTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.showering);
 			this.operational.showering.WorkableStopTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.exiting).Enter(delegate(Shower.ShowerSM.Instance smi)
 			{

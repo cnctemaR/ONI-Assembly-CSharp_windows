@@ -7,6 +7,20 @@ namespace KSerialization
 {
 	public class Manager
 	{
+		public static void Initialize(IList<Type> root_types)
+		{
+			List<Assembly> list = new List<Assembly>();
+			foreach (Type type in root_types)
+			{
+				Assembly assembly = type.Assembly;
+				if (!list.Contains(assembly))
+				{
+					list.Add(assembly);
+				}
+			}
+			Manager.assemblies = list.ToArray();
+		}
+
 		public static Type GetType(string type_name)
 		{
 			Type type = Type.GetType(type_name);
@@ -238,6 +252,6 @@ namespace KSerialization
 
 		private static Dictionary<Type, TypeInfo> typeInfoMap = new Dictionary<Type, TypeInfo>();
 
-		public static Assembly[] assemblies = null;
+		private static Assembly[] assemblies = null;
 	}
 }

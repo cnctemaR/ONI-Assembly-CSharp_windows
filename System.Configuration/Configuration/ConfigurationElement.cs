@@ -67,7 +67,6 @@ namespace System.Configuration
 			}
 		}
 
-		[MonoTODO]
 		protected ContextInformation EvaluationContext
 		{
 			get
@@ -76,7 +75,7 @@ namespace System.Configuration
 				{
 					return this.Configuration.EvaluationContext;
 				}
-				throw new NotImplementedException();
+				throw new ConfigurationErrorsException("This element is not currently associated with any context.");
 			}
 		}
 
@@ -141,7 +140,7 @@ namespace System.Configuration
 		}
 
 		[MonoTODO]
-		protected virtual void ListErrors(IList list)
+		protected virtual void ListErrors(IList errorList)
 		{
 			throw new NotImplementedException();
 		}
@@ -151,11 +150,14 @@ namespace System.Configuration
 		{
 			try
 			{
-				prop.Validate(value);
+				if (value != null)
+				{
+					prop.Validate(value);
+				}
 			}
 			catch (Exception ex)
 			{
-				throw new ConfigurationErrorsException(string.Format("The value for the property '{0}' is not valid. The error is: {1}", prop.Name, ex.Message), ex);
+				throw new ConfigurationErrorsException(string.Format("The value for the property '{0}' on type {1} is not valid.", prop.Name, this.ElementInformation.Type), ex);
 			}
 		}
 
@@ -200,35 +202,35 @@ namespace System.Configuration
 			return this.defaultCollection;
 		}
 
-		protected internal object this[ConfigurationProperty property]
+		protected internal object this[ConfigurationProperty prop]
 		{
 			get
 			{
-				return this[property.Name];
+				return this[prop.Name];
 			}
 			set
 			{
-				this[property.Name] = value;
+				this[prop.Name] = value;
 			}
 		}
 
-		protected internal object this[string property_name]
+		protected internal object this[string propertyName]
 		{
 			get
 			{
-				PropertyInformation propertyInformation = this.ElementInformation.Properties[property_name];
+				PropertyInformation propertyInformation = this.ElementInformation.Properties[propertyName];
 				if (propertyInformation == null)
 				{
-					throw new InvalidOperationException("Property '" + property_name + "' not found in configuration element");
+					throw new InvalidOperationException("Property '" + propertyName + "' not found in configuration element");
 				}
 				return propertyInformation.Value;
 			}
 			set
 			{
-				PropertyInformation propertyInformation = this.ElementInformation.Properties[property_name];
+				PropertyInformation propertyInformation = this.ElementInformation.Properties[propertyName];
 				if (propertyInformation == null)
 				{
-					throw new InvalidOperationException("Property '" + property_name + "' not found in configuration element");
+					throw new InvalidOperationException("Property '" + propertyName + "' not found in configuration element");
 				}
 				this.SetPropertyValue(propertyInformation.Property, value, false);
 				propertyInformation.Value = value;
@@ -285,19 +287,6 @@ namespace System.Configuration
 			return num;
 		}
 
-		internal virtual bool HasValues()
-		{
-			foreach (object obj in this.ElementInformation.Properties)
-			{
-				PropertyInformation propertyInformation = (PropertyInformation)obj;
-				if (propertyInformation.ValueOrigin != PropertyValueOrigin.Default)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
 		internal virtual bool HasLocalModifications()
 		{
 			foreach (object obj in this.ElementInformation.Properties)
@@ -315,6 +304,7 @@ namespace System.Configuration
 		{
 			Hashtable hashtable = new Hashtable();
 			reader.MoveToContent();
+			this.elementPresent = true;
 			while (reader.MoveToNextAttribute())
 			{
 				PropertyInformation propertyInformation = this.ElementInformation.Properties[reader.LocalName];
@@ -340,15 +330,9 @@ namespace System.Configuration
 					{
 						this.LockItem = reader.Value.ToLowerInvariant() == "true";
 					}
-					else if (!(reader.LocalName == "xmlns"))
+					else if (!(reader.LocalName == "xmlns") && (!(this is ConfigurationSection) || !(reader.LocalName == "configSource")) && !this.OnDeserializeUnrecognizedAttribute(reader.LocalName, reader.Value))
 					{
-						if (!(this is ConfigurationSection) || !(reader.LocalName == "configSource"))
-						{
-							if (!this.OnDeserializeUnrecognizedAttribute(reader.LocalName, reader.Value))
-							{
-								throw new ConfigurationErrorsException("Unrecognized attribute '" + reader.LocalName + "'.", reader);
-							}
-						}
+						throw new ConfigurationErrorsException("Unrecognized attribute '" + reader.LocalName + "'.", reader);
 					}
 				}
 				else
@@ -373,10 +357,15 @@ namespace System.Configuration
 					}
 					catch (Exception ex)
 					{
-						string text = string.Format("The value for the property '{0}' is not valid. The error is: {1}", propertyInformation.Name, ex.Message);
-						throw new ConfigurationErrorsException(text, reader);
+						throw new ConfigurationErrorsException(string.Format("The value for the property '{0}' is not valid. The error is: {1}", propertyInformation.Name, ex.Message), reader);
 					}
 					hashtable[propertyInformation] = propertyInformation.Name;
+					ConfigXmlTextReader configXmlTextReader = reader as ConfigXmlTextReader;
+					if (configXmlTextReader != null)
+					{
+						propertyInformation.Source = configXmlTextReader.Filename;
+						propertyInformation.LineNumber = configXmlTextReader.LineNumber;
+					}
 				}
 			}
 			reader.MoveToElement();
@@ -414,14 +403,13 @@ namespace System.Configuration
 						{
 							if (!propertyInformation2.IsElement)
 							{
-								goto Block_23;
+								goto Block_22;
 							}
 							if (hashtable.Contains(propertyInformation2))
 							{
-								goto Block_24;
+								goto Block_23;
 							}
-							ConfigurationElement configurationElement = (ConfigurationElement)propertyInformation2.Value;
-							configurationElement.DeserializeElement(reader, serializeCollectionKey);
+							((ConfigurationElement)propertyInformation2.Value).DeserializeElement(reader, serializeCollectionKey);
 							hashtable[propertyInformation2] = propertyInformation2.Name;
 							if (depth == reader.Depth)
 							{
@@ -431,17 +419,17 @@ namespace System.Configuration
 					}
 					if (depth >= reader.Depth)
 					{
-						goto IL_03A5;
+						goto IL_0367;
 					}
 				}
 				throw new ConfigurationErrorsException("Unrecognized element '" + reader.LocalName + "'.", reader);
+				Block_22:
+				throw new ConfigurationErrorsException("Property '" + propertyInformation2.Name + "' is not a ConfigurationElement.");
 				Block_23:
-				throw new ConfigurationException("Property '" + propertyInformation2.Name + "' is not a ConfigurationElement.");
-				Block_24:
 				throw new ConfigurationErrorsException("The element <" + propertyInformation2.Name + "> may only appear once in this section.", reader);
 			}
 			reader.Skip();
-			IL_03A5:
+			IL_0367:
 			this.modified = false;
 			foreach (object obj in this.ElementInformation.Properties)
 			{
@@ -464,7 +452,7 @@ namespace System.Configuration
 			return false;
 		}
 
-		protected virtual bool OnDeserializeUnrecognizedElement(string element, XmlReader reader)
+		protected virtual bool OnDeserializeUnrecognizedElement(string elementName, XmlReader reader)
 		{
 			return false;
 		}
@@ -488,6 +476,23 @@ namespace System.Configuration
 
 		protected internal virtual bool IsModified()
 		{
+			if (this.modified)
+			{
+				return true;
+			}
+			foreach (object obj in this.ElementInformation.Properties)
+			{
+				PropertyInformation propertyInformation = (PropertyInformation)obj;
+				if (propertyInformation.IsElement)
+				{
+					ConfigurationElement configurationElement = propertyInformation.Value as ConfigurationElement;
+					if (configurationElement != null && configurationElement.IsModified())
+					{
+						this.modified = true;
+						break;
+					}
+				}
+			}
 			return this.modified;
 		}
 
@@ -503,14 +508,13 @@ namespace System.Configuration
 
 		protected internal virtual void Reset(ConfigurationElement parentElement)
 		{
+			this.elementPresent = false;
 			if (parentElement != null)
 			{
 				this.ElementInformation.Reset(parentElement.ElementInformation);
+				return;
 			}
-			else
-			{
-				this.InitializeDefault();
-			}
+			this.InitializeDefault();
 		}
 
 		protected internal virtual void ResetModified()
@@ -520,6 +524,11 @@ namespace System.Configuration
 			{
 				PropertyInformation propertyInformation = (PropertyInformation)obj;
 				propertyInformation.IsModified = false;
+				ConfigurationElement configurationElement = propertyInformation.Value as ConfigurationElement;
+				if (configurationElement != null)
+				{
+					configurationElement.ResetModified();
+				}
 			}
 		}
 
@@ -540,9 +549,13 @@ namespace System.Configuration
 			foreach (object obj2 in this.ElementInformation.Properties)
 			{
 				PropertyInformation propertyInformation = (PropertyInformation)obj2;
-				if (!propertyInformation.IsElement && propertyInformation.ValueOrigin != PropertyValueOrigin.Default)
+				if (!propertyInformation.IsElement)
 				{
-					if (!object.Equals(propertyInformation.Value, propertyInformation.DefaultValue))
+					if (this.saveContext == null)
+					{
+						throw new InvalidOperationException();
+					}
+					if (this.saveContext.HasValue(propertyInformation))
 					{
 						writer.WriteAttributeString(propertyInformation.Name, propertyInformation.GetStringValue());
 						flag = true;
@@ -566,57 +579,69 @@ namespace System.Configuration
 
 		protected internal virtual bool SerializeToXmlElement(XmlWriter writer, string elementName)
 		{
-			if (!this.HasValues())
+			if (this.saveContext == null)
+			{
+				throw new InvalidOperationException();
+			}
+			if (!this.saveContext.HasValues())
 			{
 				return false;
 			}
-			if (elementName != null && elementName != string.Empty)
+			if (elementName != null && elementName != "")
 			{
 				writer.WriteStartElement(elementName);
 			}
 			bool flag = this.SerializeElement(writer, false);
-			if (elementName != null && elementName != string.Empty)
+			if (elementName != null && elementName != "")
 			{
 				writer.WriteEndElement();
 			}
 			return flag;
 		}
 
-		protected internal virtual void Unmerge(ConfigurationElement source, ConfigurationElement parent, ConfigurationSaveMode updateMode)
+		protected internal virtual void Unmerge(ConfigurationElement sourceElement, ConfigurationElement parentElement, ConfigurationSaveMode saveMode)
 		{
-			if (parent != null && source.GetType() != parent.GetType())
+			if (parentElement != null && sourceElement.GetType() != parentElement.GetType())
 			{
-				throw new ConfigurationException("Can't unmerge two elements of different type");
+				throw new ConfigurationErrorsException("Can't unmerge two elements of different type");
 			}
-			foreach (object obj in source.ElementInformation.Properties)
+			bool flag = saveMode == ConfigurationSaveMode.Minimal || saveMode == ConfigurationSaveMode.Modified;
+			foreach (object obj in sourceElement.ElementInformation.Properties)
 			{
 				PropertyInformation propertyInformation = (PropertyInformation)obj;
 				if (propertyInformation.ValueOrigin != PropertyValueOrigin.Default)
 				{
 					PropertyInformation propertyInformation2 = this.ElementInformation.Properties[propertyInformation.Name];
 					object value = propertyInformation.Value;
-					if (parent == null || !parent.HasValue(propertyInformation.Name))
+					if (parentElement == null || !parentElement.HasValue(propertyInformation.Name))
 					{
 						propertyInformation2.Value = value;
 					}
 					else if (value != null)
 					{
-						object obj2 = parent[propertyInformation.Name];
-						if (propertyInformation.IsElement)
+						object obj2 = parentElement[propertyInformation.Name];
+						if (!propertyInformation.IsElement)
 						{
-							if (obj2 != null)
-							{
-								ConfigurationElement configurationElement = (ConfigurationElement)propertyInformation2.Value;
-								configurationElement.Unmerge((ConfigurationElement)value, (ConfigurationElement)obj2, updateMode);
-							}
-							else
+							if (!object.Equals(value, obj2) || saveMode == ConfigurationSaveMode.Full || (saveMode == ConfigurationSaveMode.Modified && propertyInformation.ValueOrigin == PropertyValueOrigin.SetHere))
 							{
 								propertyInformation2.Value = value;
 							}
 						}
-						else if (!object.Equals(value, obj2) || updateMode == ConfigurationSaveMode.Full || (updateMode == ConfigurationSaveMode.Modified && propertyInformation.ValueOrigin == PropertyValueOrigin.SetHere))
+						else
 						{
-							propertyInformation2.Value = value;
+							ConfigurationElement configurationElement = (ConfigurationElement)value;
+							if (!flag || configurationElement.IsModified())
+							{
+								if (obj2 == null)
+								{
+									propertyInformation2.Value = value;
+								}
+								else
+								{
+									ConfigurationElement configurationElement2 = (ConfigurationElement)obj2;
+									((ConfigurationElement)propertyInformation2.Value).Unmerge(configurationElement, configurationElement2, saveMode);
+								}
+							}
 						}
 					}
 				}
@@ -626,13 +651,21 @@ namespace System.Configuration
 		internal bool HasValue(string propName)
 		{
 			PropertyInformation propertyInformation = this.ElementInformation.Properties[propName];
-			return propertyInformation != null && propertyInformation.ValueOrigin != PropertyValueOrigin.Default;
+			return propertyInformation != null && propertyInformation.ValueOrigin > PropertyValueOrigin.Default;
 		}
 
 		internal bool IsReadFromConfig(string propName)
 		{
 			PropertyInformation propertyInformation = this.ElementInformation.Properties[propName];
 			return propertyInformation != null && propertyInformation.ValueOrigin == PropertyValueOrigin.SetHere;
+		}
+
+		internal bool IsElementPresent
+		{
+			get
+			{
+				return this.elementPresent;
+			}
 		}
 
 		private void ValidateValue(ConfigurationProperty p, string value)
@@ -644,9 +677,72 @@ namespace System.Configuration
 			}
 			if (!validator.CanValidate(p.Type))
 			{
-				throw new ConfigurationException(string.Format("Validator does not support type {0}", p.Type));
+				throw new ConfigurationErrorsException(string.Format("Validator does not support type {0}", p.Type));
 			}
 			validator.Validate(p.ConvertFromString(value));
+		}
+
+		internal bool HasValue(ConfigurationElement parent, PropertyInformation prop, ConfigurationSaveMode mode)
+		{
+			if (prop.ValueOrigin == PropertyValueOrigin.Default)
+			{
+				return false;
+			}
+			if (mode == ConfigurationSaveMode.Modified && prop.ValueOrigin == PropertyValueOrigin.SetHere && prop.IsModified)
+			{
+				return true;
+			}
+			object obj = ((parent != null && parent.HasValue(prop.Name)) ? parent[prop.Name] : prop.DefaultValue);
+			if (!prop.IsElement)
+			{
+				return !object.Equals(prop.Value, obj);
+			}
+			ConfigurationElement configurationElement = (ConfigurationElement)prop.Value;
+			ConfigurationElement configurationElement2 = (ConfigurationElement)obj;
+			return configurationElement.HasValues(configurationElement2, mode);
+		}
+
+		internal virtual bool HasValues(ConfigurationElement parent, ConfigurationSaveMode mode)
+		{
+			if (mode == ConfigurationSaveMode.Full)
+			{
+				return true;
+			}
+			if (this.modified && mode == ConfigurationSaveMode.Modified)
+			{
+				return true;
+			}
+			foreach (object obj in this.ElementInformation.Properties)
+			{
+				PropertyInformation propertyInformation = (PropertyInformation)obj;
+				if (this.HasValue(parent, propertyInformation, mode))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		internal virtual void PrepareSave(ConfigurationElement parent, ConfigurationSaveMode mode)
+		{
+			this.saveContext = new ConfigurationElement.SaveContext(this, parent, mode);
+			foreach (object obj in this.ElementInformation.Properties)
+			{
+				PropertyInformation propertyInformation = (PropertyInformation)obj;
+				if (propertyInformation.IsElement)
+				{
+					ConfigurationElement configurationElement = (ConfigurationElement)propertyInformation.Value;
+					if (parent == null || !parent.HasValue(propertyInformation.Name))
+					{
+						configurationElement.PrepareSave(null, mode);
+					}
+					else
+					{
+						ConfigurationElement configurationElement2 = (ConfigurationElement)parent[propertyInformation.Name];
+						configurationElement.PrepareSave(configurationElement2, mode);
+					}
+				}
+			}
 		}
 
 		private string rawXml;
@@ -667,6 +763,8 @@ namespace System.Configuration
 
 		private Configuration _configuration;
 
+		private bool elementPresent;
+
 		private ConfigurationLockCollection lockAllAttributesExcept;
 
 		private ConfigurationLockCollection lockAllElementsExcept;
@@ -676,5 +774,33 @@ namespace System.Configuration
 		private ConfigurationLockCollection lockElements;
 
 		private bool lockItem;
+
+		private ConfigurationElement.SaveContext saveContext;
+
+		private class SaveContext
+		{
+			public SaveContext(ConfigurationElement element, ConfigurationElement parent, ConfigurationSaveMode mode)
+			{
+				this.Element = element;
+				this.Parent = parent;
+				this.Mode = mode;
+			}
+
+			public bool HasValues()
+			{
+				return this.Mode == ConfigurationSaveMode.Full || this.Element.HasValues(this.Parent, this.Mode);
+			}
+
+			public bool HasValue(PropertyInformation prop)
+			{
+				return this.Mode == ConfigurationSaveMode.Full || this.Element.HasValue(this.Parent, prop, this.Mode);
+			}
+
+			public readonly ConfigurationElement Element;
+
+			public readonly ConfigurationElement Parent;
+
+			public readonly ConfigurationSaveMode Mode;
+		}
 	}
 }

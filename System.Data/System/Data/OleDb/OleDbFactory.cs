@@ -7,45 +7,45 @@ namespace System.Data.OleDb
 {
 	public sealed class OleDbFactory : DbProviderFactory
 	{
-		private OleDbFactory()
+		internal OleDbFactory()
 		{
 		}
 
 		public override DbCommand CreateCommand()
 		{
-			return new OleDbCommand();
+			throw null;
 		}
 
 		public override DbCommandBuilder CreateCommandBuilder()
 		{
-			return new OleDbCommandBuilder();
+			throw null;
 		}
 
 		public override DbConnection CreateConnection()
 		{
-			return new OleDbConnection();
+			throw null;
 		}
 
 		public override DbConnectionStringBuilder CreateConnectionStringBuilder()
 		{
-			return null;
+			throw null;
 		}
 
 		public override DbDataAdapter CreateDataAdapter()
 		{
-			return new OleDbDataAdapter();
+			throw null;
 		}
 
 		public override DbParameter CreateParameter()
 		{
-			return new OleDbParameter();
+			throw null;
 		}
 
 		public override CodeAccessPermission CreatePermission(PermissionState state)
 		{
-			return new OleDbPermission(state);
+			throw null;
 		}
 
-		public static readonly OleDbFactory Instance = new OleDbFactory();
+		public static readonly OleDbFactory Instance;
 	}
 }

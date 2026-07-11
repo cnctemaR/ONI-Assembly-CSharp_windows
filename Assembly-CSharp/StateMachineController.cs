@@ -109,7 +109,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		}
 		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
 		{
-			StateMachine.Instance smi = this.GetSMI(StateMachineManager.Instance.CreateStateMachine(baseDef.GetStateMachineType()).GetStateMachineInstanceType());
+			StateMachine.Instance smi = this.GetSMI(Singleton<StateMachineManager>.Instance.CreateStateMachine(baseDef.GetStateMachineType()).GetStateMachineInstanceType());
 			if (smi != null && !smi.IsRunning())
 			{
 				smi.StartSM();

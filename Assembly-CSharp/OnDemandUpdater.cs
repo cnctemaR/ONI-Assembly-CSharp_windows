@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class OnDemandUpdater : MonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		OnDemandUpdater.Instance = null;
+	}
+
 	private void Awake()
 	{
 		OnDemandUpdater.Instance = this;

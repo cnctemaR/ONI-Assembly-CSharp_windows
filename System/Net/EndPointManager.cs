@@ -28,8 +28,7 @@ namespace System.Net
 			{
 				foreach (object obj in arrayList)
 				{
-					string text2 = (string)obj;
-					EndPointManager.RemovePrefix(text2, listener);
+					EndPointManager.RemovePrefix((string)obj, listener);
 				}
 				throw;
 			}
@@ -51,25 +50,48 @@ namespace System.Net
 			{
 				throw new HttpListenerException(400, "Invalid path.");
 			}
-			if (listenerPrefix.Path.IndexOf("//") != -1)
+			if (listenerPrefix.Path.IndexOf("//", StringComparison.Ordinal) != -1)
 			{
 				throw new HttpListenerException(400, "Invalid path.");
 			}
-			EndPointListener eplistener = EndPointManager.GetEPListener(IPAddress.Any, listenerPrefix.Port, listener, listenerPrefix.Secure);
-			eplistener.AddPrefix(listenerPrefix, listener);
+			EndPointManager.GetEPListener(listenerPrefix.Host, listenerPrefix.Port, listener, listenerPrefix.Secure).AddPrefix(listenerPrefix, listener);
 		}
 
-		private static EndPointListener GetEPListener(IPAddress addr, int port, HttpListener listener, bool secure)
+		private static EndPointListener GetEPListener(string host, int port, HttpListener listener, bool secure)
 		{
-			Hashtable hashtable;
-			if (EndPointManager.ip_to_endpoints.ContainsKey(addr))
+			IPAddress ipaddress;
+			if (host == "*")
 			{
-				hashtable = (Hashtable)EndPointManager.ip_to_endpoints[addr];
+				ipaddress = IPAddress.Any;
+			}
+			else if (!IPAddress.TryParse(host, out ipaddress))
+			{
+				try
+				{
+					IPHostEntry hostByName = Dns.GetHostByName(host);
+					if (hostByName != null)
+					{
+						ipaddress = hostByName.AddressList[0];
+					}
+					else
+					{
+						ipaddress = IPAddress.Any;
+					}
+				}
+				catch
+				{
+					ipaddress = IPAddress.Any;
+				}
+			}
+			Hashtable hashtable;
+			if (EndPointManager.ip_to_endpoints.ContainsKey(ipaddress))
+			{
+				hashtable = (Hashtable)EndPointManager.ip_to_endpoints[ipaddress];
 			}
 			else
 			{
 				hashtable = new Hashtable();
-				EndPointManager.ip_to_endpoints[addr] = hashtable;
+				EndPointManager.ip_to_endpoints[ipaddress] = hashtable;
 			}
 			EndPointListener endPointListener;
 			if (hashtable.ContainsKey(port))
@@ -78,7 +100,7 @@ namespace System.Net
 			}
 			else
 			{
-				endPointListener = new EndPointListener(addr, port, secure);
+				endPointListener = new EndPointListener(listener, ipaddress, port, secure);
 				hashtable[port] = endPointListener;
 			}
 			return endPointListener;
@@ -127,12 +149,11 @@ namespace System.Net
 			{
 				return;
 			}
-			if (listenerPrefix.Path.IndexOf("//") != -1)
+			if (listenerPrefix.Path.IndexOf("//", StringComparison.Ordinal) != -1)
 			{
 				return;
 			}
-			EndPointListener eplistener = EndPointManager.GetEPListener(IPAddress.Any, listenerPrefix.Port, listener, listenerPrefix.Secure);
-			eplistener.RemovePrefix(listenerPrefix, listener);
+			EndPointManager.GetEPListener(listenerPrefix.Host, listenerPrefix.Port, listener, listenerPrefix.Secure).RemovePrefix(listenerPrefix, listener);
 		}
 
 		private static Hashtable ip_to_endpoints = new Hashtable();

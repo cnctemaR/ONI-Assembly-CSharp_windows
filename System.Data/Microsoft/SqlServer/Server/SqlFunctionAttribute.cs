@@ -6,23 +6,14 @@ namespace Microsoft.SqlServer.Server
 	[Serializable]
 	public class SqlFunctionAttribute : Attribute
 	{
-		public SqlFunctionAttribute()
-		{
-			this.dataAccess = DataAccessKind.None;
-			this.isDeterministic = false;
-			this.isPrecise = false;
-			this.systemDataAccess = SystemDataAccessKind.None;
-		}
-
 		public DataAccessKind DataAccess
 		{
 			get
 			{
-				return this.dataAccess;
+				throw null;
 			}
 			set
 			{
-				this.dataAccess = value;
 			}
 		}
 
@@ -30,11 +21,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isDeterministic;
+				throw null;
 			}
 			set
 			{
-				this.isDeterministic = value;
 			}
 		}
 
@@ -42,11 +32,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isPrecise;
+				throw null;
 			}
 			set
 			{
-				this.isPrecise = value;
 			}
 		}
 
@@ -54,20 +43,11 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.systemDataAccess;
+				throw null;
 			}
 			set
 			{
-				this.systemDataAccess = value;
 			}
 		}
-
-		private DataAccessKind dataAccess;
-
-		private bool isDeterministic;
-
-		private bool isPrecise;
-
-		private SystemDataAccessKind systemDataAccess;
 	}
 }

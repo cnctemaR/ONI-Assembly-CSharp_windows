@@ -5,23 +5,15 @@ namespace System.Data.SqlClient
 	[Serializable]
 	public sealed class SqlError
 	{
-		internal SqlError(byte errorClass, int lineNumber, string message, int number, string procedure, string server, string source, byte state)
+		internal SqlError()
 		{
-			this.errorClass = errorClass;
-			this.lineNumber = lineNumber;
-			this.message = message;
-			this.number = number;
-			this.procedure = procedure;
-			this.server = server;
-			this.source = source;
-			this.state = state;
 		}
 
 		public byte Class
 		{
 			get
 			{
-				return this.errorClass;
+				throw null;
 			}
 		}
 
@@ -29,7 +21,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return this.lineNumber;
+				throw null;
 			}
 		}
 
@@ -37,7 +29,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return this.message;
+				throw null;
 			}
 		}
 
@@ -45,7 +37,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return this.number;
+				throw null;
 			}
 		}
 
@@ -53,7 +45,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return this.procedure;
+				throw null;
 			}
 		}
 
@@ -61,7 +53,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return this.server;
+				throw null;
 			}
 		}
 
@@ -69,7 +61,7 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return this.source;
+				throw null;
 			}
 		}
 
@@ -77,30 +69,13 @@ namespace System.Data.SqlClient
 		{
 			get
 			{
-				return this.state;
+				throw null;
 			}
 		}
 
 		public override string ToString()
 		{
-			return this.Message;
+			throw null;
 		}
-
-		private byte errorClass;
-
-		private int lineNumber;
-
-		private string message = string.Empty;
-
-		private int number;
-
-		private string procedure = string.Empty;
-
-		private string source = string.Empty;
-
-		private byte state;
-
-		[NonSerialized]
-		private string server = string.Empty;
 	}
 }

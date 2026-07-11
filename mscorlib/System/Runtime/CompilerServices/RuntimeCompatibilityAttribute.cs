@@ -10,14 +10,14 @@ namespace System.Runtime.CompilerServices
 		{
 			get
 			{
-				return this.wrap_non_exception_throws;
+				return this.m_wrapNonExceptionThrows;
 			}
 			set
 			{
-				this.wrap_non_exception_throws = value;
+				this.m_wrapNonExceptionThrows = value;
 			}
 		}
 
-		private bool wrap_non_exception_throws;
+		private bool m_wrapNonExceptionThrows;
 	}
 }

@@ -49,11 +49,11 @@ public class FogOfWarMask : KMonoBehaviour
 	{
 		if (Grid.PreventFogOfWarReveal[cell])
 		{
-			GameUtil.FloodCollectCells(cell, FogOfWarMask.revealFogOfWarMask, 300, null, true);
+			GameUtil.FloodCollectCells(cell, new Func<int, bool>(FogOfWarMask.RevealFogOfWarMask), 300, null, true);
 		}
 	}
 
-	public static Func<int, bool> revealFogOfWarMask = delegate(int cell)
+	public static bool RevealFogOfWarMask(int cell)
 	{
 		bool flag = Grid.PreventFogOfWarReveal[cell];
 		if (flag)
@@ -62,5 +62,5 @@ public class FogOfWarMask : KMonoBehaviour
 			Grid.Reveal(cell, byte.MaxValue);
 		}
 		return flag;
-	};
+	}
 }

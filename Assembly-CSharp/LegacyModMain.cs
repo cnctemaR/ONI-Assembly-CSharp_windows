@@ -9,11 +9,14 @@ public class LegacyModMain
 {
 	public static void Load()
 	{
+		EntityTemplates.CreateTemplates();
+		EntityTemplates.CreateBaseOreTemplates();
 		LegacyModMain.LoadOre();
 		LegacyModMain.LoadBuildings();
 		LegacyModMain.ConfigElements();
 		LegacyModMain.LoadEntities();
 		LegacyModMain.LoadEquipment();
+		EntityTemplates.DestroyBaseOreTemplates();
 	}
 
 	private static void Test()
@@ -64,22 +67,21 @@ public class LegacyModMain
 			{
 				if (!(component == null))
 				{
-					for (Type type = component.GetType(); type != typeof(Component); type = type.BaseType)
+					Type type = component.GetType();
+					while (type != typeof(Component))
 					{
 						hashSet.Add(type);
+						type = type.BaseType;
 					}
 				}
 			}
 		}
 		HashSet<Type> hashSet2 = new HashSet<Type>();
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		foreach (Type type2 in App.GetCurrentDomainTypes())
 		{
-			foreach (Type type2 in assembly.GetTypes())
+			if (typeof(MonoBehaviour).IsAssignableFrom(type2) && !hashSet.Contains(type2))
 			{
-				if (typeof(MonoBehaviour).IsAssignableFrom(type2) && !hashSet.Contains(type2))
-				{
-					hashSet2.Add(type2);
-				}
+				hashSet2.Add(type2);
 			}
 		}
 		List<Type> list = new List<Type>(hashSet2);

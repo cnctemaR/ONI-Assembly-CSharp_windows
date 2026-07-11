@@ -6,7 +6,7 @@ namespace System.Data
 	{
 		Continue,
 		ErrorsOccurred,
-		SkipCurrentRow,
-		SkipAllRemainingRows
+		SkipAllRemainingRows = 3,
+		SkipCurrentRow = 2
 	}
 }

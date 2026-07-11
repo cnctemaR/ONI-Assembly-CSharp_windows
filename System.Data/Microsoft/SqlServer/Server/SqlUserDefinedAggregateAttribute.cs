@@ -5,21 +5,15 @@ namespace Microsoft.SqlServer.Server
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 	public sealed class SqlUserDefinedAggregateAttribute : Attribute
 	{
-		public SqlUserDefinedAggregateAttribute(Format f)
+		public SqlUserDefinedAggregateAttribute(Format format)
 		{
-			this.format = f;
-			this.IsInvariantToDuplicates = false;
-			this.IsInvariantToNulls = false;
-			this.IsInvariantToOrder = false;
-			this.IsNullIfEmpty = false;
-			this.MaxByteSize = 8000;
 		}
 
 		public Format Format
 		{
 			get
 			{
-				return this.format;
+				throw null;
 			}
 		}
 
@@ -27,11 +21,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isInvariantToDuplicates;
+				throw null;
 			}
 			set
 			{
-				this.isInvariantToDuplicates = value;
 			}
 		}
 
@@ -39,11 +32,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isInvariantToNulls;
+				throw null;
 			}
 			set
 			{
-				this.isInvariantToNulls = value;
 			}
 		}
 
@@ -51,11 +43,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isInvariantToOrder;
+				throw null;
 			}
 			set
 			{
-				this.isInvariantToOrder = value;
 			}
 		}
 
@@ -63,11 +54,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.isNullIfEmpty;
+				throw null;
 			}
 			set
 			{
-				this.isNullIfEmpty = value;
 			}
 		}
 
@@ -75,26 +65,13 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.maxByteSize;
+				throw null;
 			}
 			set
 			{
-				this.maxByteSize = value;
 			}
 		}
 
 		public const int MaxByteSizeValue = 8000;
-
-		private Format format;
-
-		private bool isInvariantToDuplicates;
-
-		private bool isInvariantToNulls;
-
-		private bool isInvariantToOrder;
-
-		private bool isNullIfEmpty;
-
-		private int maxByteSize;
 	}
 }

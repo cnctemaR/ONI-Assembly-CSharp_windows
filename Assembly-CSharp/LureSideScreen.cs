@@ -27,7 +27,7 @@ public class LureSideScreen : SideScreenContent
 					GameObject gameObject = Util.KInstantiateUI(this.prefab_toggle, this.toggle_container, true);
 					Image reference = gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("FGImage");
 					gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").text = ElementLoader.GetElement(bait).name;
-					reference.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(bait).substance.anim, "ui");
+					reference.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(bait).substance.anim, "ui", false);
 					MultiToggle component = gameObject.GetComponent<MultiToggle>();
 					this.toggles_by_tag.Add(bait3, component);
 				}

@@ -6,7 +6,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class ApplicationDirectory : IBuiltInEvidence
+	public sealed class ApplicationDirectory : EvidenceBase, IBuiltInEvidence
 	{
 		public ApplicationDirectory(string name)
 		{
@@ -19,23 +19,6 @@ namespace System.Security.Policy
 				throw new FormatException(Locale.GetText("Empty"));
 			}
 			this.directory = name;
-		}
-
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return ((!verbose) ? 1 : 3) + this.directory.Length;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return 0;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			return 0;
 		}
 
 		public string Directory
@@ -76,12 +59,28 @@ namespace System.Security.Policy
 			return securityElement.ToString();
 		}
 
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			return (verbose ? 3 : 1) + this.directory.Length;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return 0;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			return 0;
+		}
+
 		private void ThrowOnInvalid(string appdir)
 		{
 			if (appdir.IndexOfAny(Path.InvalidPathChars) != -1)
 			{
-				string text = Locale.GetText("Invalid character(s) in directory {0}");
-				throw new ArgumentException(string.Format(text, appdir), "other");
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid character(s) in directory {0}"), appdir), "other");
 			}
 		}
 

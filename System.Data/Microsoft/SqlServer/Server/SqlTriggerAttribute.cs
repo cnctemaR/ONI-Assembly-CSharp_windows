@@ -6,22 +6,14 @@ namespace Microsoft.SqlServer.Server
 	[Serializable]
 	public sealed class SqlTriggerAttribute : Attribute
 	{
-		public SqlTriggerAttribute()
-		{
-			this.triggerEvent = null;
-			this.name = null;
-			this.target = null;
-		}
-
 		public string Event
 		{
 			get
 			{
-				return this.triggerEvent;
+				throw null;
 			}
 			set
 			{
-				this.triggerEvent = value;
 			}
 		}
 
@@ -29,11 +21,10 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.name;
+				throw null;
 			}
 			set
 			{
-				this.name = value;
 			}
 		}
 
@@ -41,18 +32,11 @@ namespace Microsoft.SqlServer.Server
 		{
 			get
 			{
-				return this.target;
+				throw null;
 			}
 			set
 			{
-				this.target = value;
 			}
 		}
-
-		private string triggerEvent;
-
-		private string name;
-
-		private string target;
 	}
 }

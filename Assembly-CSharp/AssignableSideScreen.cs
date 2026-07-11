@@ -85,19 +85,15 @@ public class AssignableSideScreen : SideScreenContent
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(this.OnMinionIdentitiesChanged));
-		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
-		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(this.OnMinionIdentitiesChanged));
+		Components.LiveMinionIdentities.OnAdd += this.OnMinionIdentitiesChanged;
+		Components.LiveMinionIdentities.OnRemove += this.OnMinionIdentitiesChanged;
 	}
 
 	protected override void OnDeactivate()
 	{
 		base.OnDeactivate();
-		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Remove(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(this.OnMinionIdentitiesChanged));
-		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
-		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Remove(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(this.OnMinionIdentitiesChanged));
+		Components.LiveMinionIdentities.OnAdd -= this.OnMinionIdentitiesChanged;
+		Components.LiveMinionIdentities.OnRemove -= this.OnMinionIdentitiesChanged;
 	}
 
 	private void OnMinionIdentitiesChanged(MinionIdentity change)
@@ -116,19 +112,19 @@ public class AssignableSideScreen : SideScreenContent
 	private void Refresh(List<MinionIdentity> identities)
 	{
 		this.ClearContent();
-		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
+		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, Array.Empty<object>());
 		if (this.targetAssignable != null && this.targetAssignable.GetComponent<Equippable>() == null)
 		{
-			Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(this.targetAssignable.gameObject);
-			if (roomOfBuilding != null)
+			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(this.targetAssignable.gameObject);
+			if (roomOfGameObject != null)
 			{
-				RoomType roomType = Db.Get().RoomTypes.GetRoomType(roomOfBuilding);
+				RoomType roomType = roomOfGameObject.roomType;
 				if (roomType.primary_constraint != null && !roomType.primary_constraint.building_criteria(this.targetAssignable.GetComponent<KPrefabID>()))
 				{
 					AssignableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
 					freeElement.sideScreen = this;
-					this.identityRowMap.Add(roomOfBuilding, freeElement);
-					freeElement.SetContent(roomOfBuilding, new Action<IAssignableIdentity>(this.OnRowClicked), this);
+					this.identityRowMap.Add(roomOfGameObject, freeElement);
+					freeElement.SetContent(roomOfGameObject, new Action<IAssignableIdentity>(this.OnRowClicked), this);
 					return;
 				}
 			}

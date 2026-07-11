@@ -99,7 +99,7 @@ public class LiquidCooledRefinery : Refinery
 	[MyCmpReq]
 	private ConduitConsumer conduitConsumer;
 
-	public static Operational.Flag enoughCoolant = new Operational.Flag("enoughCoolant", Operational.Flag.Type.Functional);
+	public static readonly Operational.Flag enoughCoolant = new Operational.Flag("enoughCoolant", Operational.Flag.Type.Functional);
 
 	public Tag coolantTag;
 

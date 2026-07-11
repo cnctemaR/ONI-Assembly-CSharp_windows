@@ -1,22 +1,32 @@
 ﻿using System;
+using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
-	public sealed class Debug
+	public static class Debug
 	{
-		private Debug()
+		public static TraceListenerCollection Listeners
 		{
+			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+			[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
+			get
+			{
+				return TraceInternal.Listeners;
+			}
 		}
 
 		public static bool AutoFlush
 		{
+			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			get
 			{
-				return TraceImpl.AutoFlush;
+				return TraceInternal.AutoFlush;
 			}
+			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
-				TraceImpl.AutoFlush = value;
+				TraceInternal.AutoFlush = value;
 			}
 		}
 
@@ -24,11 +34,11 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return TraceImpl.IndentLevel;
+				return TraceInternal.IndentLevel;
 			}
 			set
 			{
-				TraceImpl.IndentLevel = value;
+				TraceInternal.IndentLevel = value;
 			}
 		}
 
@@ -36,182 +46,187 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return TraceImpl.IndentSize;
+				return TraceInternal.IndentSize;
 			}
 			set
 			{
-				TraceImpl.IndentSize = value;
+				TraceInternal.IndentSize = value;
 			}
-		}
-
-		public static TraceListenerCollection Listeners
-		{
-			get
-			{
-				return TraceImpl.Listeners;
-			}
-		}
-
-		[Conditional("DEBUG")]
-		public static void Assert(bool condition)
-		{
-			TraceImpl.Assert(condition);
-		}
-
-		[Conditional("DEBUG")]
-		public static void Assert(bool condition, string message)
-		{
-			TraceImpl.Assert(condition, message);
-		}
-
-		[Conditional("DEBUG")]
-		public static void Assert(bool condition, string message, string detailMessage)
-		{
-			TraceImpl.Assert(condition, message, detailMessage);
-		}
-
-		[Conditional("DEBUG")]
-		public static void Close()
-		{
-			TraceImpl.Close();
-		}
-
-		[Conditional("DEBUG")]
-		public static void Fail(string message)
-		{
-			TraceImpl.Fail(message);
-		}
-
-		[Conditional("DEBUG")]
-		public static void Fail(string message, string detailMessage)
-		{
-			TraceImpl.Fail(message, detailMessage);
 		}
 
 		[Conditional("DEBUG")]
 		public static void Flush()
 		{
-			TraceImpl.Flush();
+			TraceInternal.Flush();
 		}
 
 		[Conditional("DEBUG")]
-		public static void Indent()
+		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+		public static void Close()
 		{
-			TraceImpl.Indent();
+			TraceInternal.Close();
 		}
 
 		[Conditional("DEBUG")]
-		public static void Unindent()
+		public static void Assert(bool condition)
 		{
-			TraceImpl.Unindent();
+			TraceInternal.Assert(condition);
 		}
 
 		[Conditional("DEBUG")]
-		public static void Write(object value)
+		public static void Assert(bool condition, string message)
 		{
-			TraceImpl.Write(value);
+			TraceInternal.Assert(condition, message);
 		}
 
 		[Conditional("DEBUG")]
-		public static void Write(string message)
+		public static void Assert(bool condition, string message, string detailMessage)
 		{
-			TraceImpl.Write(message);
+			TraceInternal.Assert(condition, message, detailMessage);
 		}
 
 		[Conditional("DEBUG")]
-		public static void Write(object value, string category)
+		public static void Assert(bool condition, string message, string detailMessageFormat, params object[] args)
 		{
-			TraceImpl.Write(value, category);
+			TraceInternal.Assert(condition, message, string.Format(CultureInfo.InvariantCulture, detailMessageFormat, args));
 		}
 
 		[Conditional("DEBUG")]
-		public static void Write(string message, string category)
+		public static void Fail(string message)
 		{
-			TraceImpl.Write(message, category);
+			TraceInternal.Fail(message);
 		}
 
 		[Conditional("DEBUG")]
-		public static void WriteIf(bool condition, object value)
+		public static void Fail(string message, string detailMessage)
 		{
-			TraceImpl.WriteIf(condition, value);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteIf(bool condition, string message)
-		{
-			TraceImpl.WriteIf(condition, message);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteIf(bool condition, object value, string category)
-		{
-			TraceImpl.WriteIf(condition, value, category);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteIf(bool condition, string message, string category)
-		{
-			TraceImpl.WriteIf(condition, message, category);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLine(object value)
-		{
-			TraceImpl.WriteLine(value);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLine(string message)
-		{
-			TraceImpl.WriteLine(message);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLine(object value, string category)
-		{
-			TraceImpl.WriteLine(value, category);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLine(string message, string category)
-		{
-			TraceImpl.WriteLine(message, category);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLineIf(bool condition, object value)
-		{
-			TraceImpl.WriteLineIf(condition, value);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLineIf(bool condition, string message)
-		{
-			TraceImpl.WriteLineIf(condition, message);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLineIf(bool condition, object value, string category)
-		{
-			TraceImpl.WriteLineIf(condition, value, category);
-		}
-
-		[Conditional("DEBUG")]
-		public static void WriteLineIf(bool condition, string message, string category)
-		{
-			TraceImpl.WriteLineIf(condition, message, category);
+			TraceInternal.Fail(message, detailMessage);
 		}
 
 		[Conditional("DEBUG")]
 		public static void Print(string message)
 		{
-			TraceImpl.WriteLine(message);
+			TraceInternal.WriteLine(message);
 		}
 
 		[Conditional("DEBUG")]
 		public static void Print(string format, params object[] args)
 		{
-			TraceImpl.WriteLine(string.Format(format, args));
+			TraceInternal.WriteLine(string.Format(CultureInfo.InvariantCulture, format, args));
+		}
+
+		[Conditional("DEBUG")]
+		public static void Write(string message)
+		{
+			TraceInternal.Write(message);
+		}
+
+		[Conditional("DEBUG")]
+		public static void Write(object value)
+		{
+			TraceInternal.Write(value);
+		}
+
+		[Conditional("DEBUG")]
+		public static void Write(string message, string category)
+		{
+			TraceInternal.Write(message, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void Write(object value, string category)
+		{
+			TraceInternal.Write(value, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLine(string message)
+		{
+			TraceInternal.WriteLine(message);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLine(object value)
+		{
+			TraceInternal.WriteLine(value);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLine(string message, string category)
+		{
+			TraceInternal.WriteLine(message, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLine(object value, string category)
+		{
+			TraceInternal.WriteLine(value, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLine(string format, params object[] args)
+		{
+			TraceInternal.WriteLine(string.Format(CultureInfo.InvariantCulture, format, args));
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteIf(bool condition, string message)
+		{
+			TraceInternal.WriteIf(condition, message);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteIf(bool condition, object value)
+		{
+			TraceInternal.WriteIf(condition, value);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteIf(bool condition, string message, string category)
+		{
+			TraceInternal.WriteIf(condition, message, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteIf(bool condition, object value, string category)
+		{
+			TraceInternal.WriteIf(condition, value, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLineIf(bool condition, string message)
+		{
+			TraceInternal.WriteLineIf(condition, message);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLineIf(bool condition, object value)
+		{
+			TraceInternal.WriteLineIf(condition, value);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLineIf(bool condition, string message, string category)
+		{
+			TraceInternal.WriteLineIf(condition, message, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void WriteLineIf(bool condition, object value, string category)
+		{
+			TraceInternal.WriteLineIf(condition, value, category);
+		}
+
+		[Conditional("DEBUG")]
+		public static void Indent()
+		{
+			TraceInternal.Indent();
+		}
+
+		[Conditional("DEBUG")]
+		public static void Unindent()
+		{
+			TraceInternal.Unindent();
 		}
 	}
 }

@@ -4,11 +4,12 @@ using Klei.AI;
 
 public class Personality : Resource
 {
-	public Personality(string name_string_key, string name, string Gender, string StressTrait, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description)
+	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description)
 		: base(name, name)
 	{
 		this.nameStringKey = name_string_key;
 		this.genderStringKey = Gender;
+		this.personalityType = PersonalityType;
 		this.stresstrait = StressTrait;
 		this.congenitaltrait = CongenitalTrait;
 		this.unformattedDescription = description;
@@ -64,6 +65,8 @@ public class Personality : Resource
 	public string nameStringKey;
 
 	public string genderStringKey;
+
+	public string personalityType;
 
 	public string stresstrait;
 

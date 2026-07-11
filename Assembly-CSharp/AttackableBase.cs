@@ -21,11 +21,6 @@ public class AttackableBase : Workable, IApproachable
 		base.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
 		base.Subscribe(-1256572400, new Action<object>(this.SetupScenePartitioner));
 		base.Subscribe(1623392196, new Action<object>(this.OnDefeated));
-		Prioritizable component = base.GetComponent<Prioritizable>();
-		if (component != null)
-		{
-			component.showIcon = false;
-		}
 	}
 
 	public float GetDamageMultiplier()

@@ -14,32 +14,15 @@ using Mono.Security.Cryptography;
 namespace System.IO.IsolatedStorage
 {
 	[ComVisible(true)]
-	[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Unrestricted=\"true\"/>\n</PermissionSet>\n")]
+	[FileIOPermission(SecurityAction.Assert, Unrestricted = true)]
 	public sealed class IsolatedStorageFile : IsolatedStorage, IDisposable
 	{
-		private IsolatedStorageFile(IsolatedStorageScope scope)
-		{
-			this.storage_scope = scope;
-		}
-
-		internal IsolatedStorageFile(IsolatedStorageScope scope, string location)
-		{
-			this.storage_scope = scope;
-			this.directory = new DirectoryInfo(location);
-			if (!this.directory.Exists)
-			{
-				string text = Locale.GetText("Invalid storage.");
-				throw new IsolatedStorageException(text);
-			}
-		}
-
 		public static IEnumerator GetEnumerator(IsolatedStorageScope scope)
 		{
 			IsolatedStorageFile.Demand(scope);
 			if (scope != IsolatedStorageScope.User && scope != (IsolatedStorageScope.User | IsolatedStorageScope.Roaming) && scope != IsolatedStorageScope.Machine)
 			{
-				string text = Locale.GetText("Invalid scope, only User, User|Roaming and Machine are valid");
-				throw new ArgumentException(text);
+				throw new ArgumentException(Locale.GetText("Invalid scope, only User, User|Roaming and Machine are valid"));
 			}
 			return new IsolatedStorageFileEnumerator(scope, IsolatedStorageFile.GetIsolatedStorageRoot(scope));
 		}
@@ -47,12 +30,12 @@ namespace System.IO.IsolatedStorage
 		public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, Evidence domainEvidence, Type domainEvidenceType, Evidence assemblyEvidence, Type assemblyEvidenceType)
 		{
 			IsolatedStorageFile.Demand(scope);
-			bool flag = (scope & IsolatedStorageScope.Domain) != IsolatedStorageScope.None;
+			bool flag = (scope & IsolatedStorageScope.Domain) > IsolatedStorageScope.None;
 			if (flag && domainEvidence == null)
 			{
 				throw new ArgumentNullException("domainEvidence");
 			}
-			bool flag2 = (scope & IsolatedStorageScope.Assembly) != IsolatedStorageScope.None;
+			bool flag2 = (scope & IsolatedStorageScope.Assembly) > IsolatedStorageScope.None;
 			if (flag2 && assemblyEvidence == null)
 			{
 				throw new ArgumentNullException("assemblyEvidence");
@@ -99,7 +82,7 @@ namespace System.IO.IsolatedStorage
 			{
 				throw new ArgumentNullException("domainIdentity");
 			}
-			bool flag = (scope & IsolatedStorageScope.Assembly) != IsolatedStorageScope.None;
+			bool flag = (scope & IsolatedStorageScope.Assembly) > IsolatedStorageScope.None;
 			if (flag && assemblyIdentity == null)
 			{
 				throw new ArgumentNullException("assemblyIdentity");
@@ -172,7 +155,7 @@ namespace System.IO.IsolatedStorage
 			return isolatedStorageFile;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Allowed=\"ApplicationIsolationByMachine\"/>\n</PermissionSet>\n")]
+		[IsolatedStorageFilePermission(SecurityAction.Demand, UsageAllowed = IsolatedStorageContainment.ApplicationIsolationByMachine)]
 		public static IsolatedStorageFile GetMachineStoreForApplication()
 		{
 			IsolatedStorageScope isolatedStorageScope = IsolatedStorageScope.Machine | IsolatedStorageScope.Application;
@@ -183,11 +166,10 @@ namespace System.IO.IsolatedStorage
 			return isolatedStorageFile;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Allowed=\"AssemblyIsolationByMachine\"/>\n</PermissionSet>\n")]
+		[IsolatedStorageFilePermission(SecurityAction.Demand, UsageAllowed = IsolatedStorageContainment.AssemblyIsolationByMachine)]
 		public static IsolatedStorageFile GetMachineStoreForAssembly()
 		{
-			IsolatedStorageScope isolatedStorageScope = IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine;
-			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(isolatedStorageScope);
+			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine);
 			Evidence evidence = Assembly.GetCallingAssembly().UnprotectedGetEvidence();
 			isolatedStorageFile._fullEvidences = evidence;
 			isolatedStorageFile._assemblyIdentity = IsolatedStorageFile.GetAssemblyIdentityFromEvidence(evidence);
@@ -195,11 +177,10 @@ namespace System.IO.IsolatedStorage
 			return isolatedStorageFile;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Allowed=\"DomainIsolationByMachine\"/>\n</PermissionSet>\n")]
+		[IsolatedStorageFilePermission(SecurityAction.Demand, UsageAllowed = IsolatedStorageContainment.DomainIsolationByMachine)]
 		public static IsolatedStorageFile GetMachineStoreForDomain()
 		{
-			IsolatedStorageScope isolatedStorageScope = IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine;
-			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(isolatedStorageScope);
+			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine);
 			isolatedStorageFile._domainIdentity = IsolatedStorageFile.GetDomainIdentityFromEvidence(AppDomain.CurrentDomain.Evidence);
 			Evidence evidence = Assembly.GetCallingAssembly().UnprotectedGetEvidence();
 			isolatedStorageFile._fullEvidences = evidence;
@@ -208,7 +189,7 @@ namespace System.IO.IsolatedStorage
 			return isolatedStorageFile;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Allowed=\"ApplicationIsolationByUser\"/>\n</PermissionSet>\n")]
+		[IsolatedStorageFilePermission(SecurityAction.Demand, UsageAllowed = IsolatedStorageContainment.ApplicationIsolationByUser)]
 		public static IsolatedStorageFile GetUserStoreForApplication()
 		{
 			IsolatedStorageScope isolatedStorageScope = IsolatedStorageScope.User | IsolatedStorageScope.Application;
@@ -219,11 +200,10 @@ namespace System.IO.IsolatedStorage
 			return isolatedStorageFile;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Allowed=\"AssemblyIsolationByUser\"/>\n</PermissionSet>\n")]
+		[IsolatedStorageFilePermission(SecurityAction.Demand, UsageAllowed = IsolatedStorageContainment.AssemblyIsolationByUser)]
 		public static IsolatedStorageFile GetUserStoreForAssembly()
 		{
-			IsolatedStorageScope isolatedStorageScope = IsolatedStorageScope.User | IsolatedStorageScope.Assembly;
-			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(isolatedStorageScope);
+			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(IsolatedStorageScope.User | IsolatedStorageScope.Assembly);
 			Evidence evidence = Assembly.GetCallingAssembly().UnprotectedGetEvidence();
 			isolatedStorageFile._fullEvidences = evidence;
 			isolatedStorageFile._assemblyIdentity = IsolatedStorageFile.GetAssemblyIdentityFromEvidence(evidence);
@@ -231,11 +211,10 @@ namespace System.IO.IsolatedStorage
 			return isolatedStorageFile;
 		}
 
-		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Allowed=\"DomainIsolationByUser\"/>\n</PermissionSet>\n")]
+		[IsolatedStorageFilePermission(SecurityAction.Demand, UsageAllowed = IsolatedStorageContainment.DomainIsolationByUser)]
 		public static IsolatedStorageFile GetUserStoreForDomain()
 		{
-			IsolatedStorageScope isolatedStorageScope = IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly;
-			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(isolatedStorageScope);
+			IsolatedStorageFile isolatedStorageFile = new IsolatedStorageFile(IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly);
 			isolatedStorageFile._domainIdentity = IsolatedStorageFile.GetDomainIdentityFromEvidence(AppDomain.CurrentDomain.Evidence);
 			Evidence evidence = Assembly.GetCallingAssembly().UnprotectedGetEvidence();
 			isolatedStorageFile._fullEvidences = evidence;
@@ -244,10 +223,27 @@ namespace System.IO.IsolatedStorage
 			return isolatedStorageFile;
 		}
 
+		[ComVisible(false)]
+		public static IsolatedStorageFile GetUserStoreForSite()
+		{
+			throw new NotSupportedException();
+		}
+
 		public static void Remove(IsolatedStorageScope scope)
 		{
 			string isolatedStorageRoot = IsolatedStorageFile.GetIsolatedStorageRoot(scope);
-			Directory.Delete(isolatedStorageRoot, true);
+			if (!Directory.Exists(isolatedStorageRoot))
+			{
+				return;
+			}
+			try
+			{
+				Directory.Delete(isolatedStorageRoot, true);
+			}
+			catch (IOException)
+			{
+				throw new IsolatedStorageException("Could not remove storage.");
+			}
 		}
 
 		internal static string GetIsolatedStorageRoot(IsolatedStorageScope scope)
@@ -257,21 +253,20 @@ namespace System.IO.IsolatedStorage
 			{
 				if ((scope & IsolatedStorageScope.Roaming) != IsolatedStorageScope.None)
 				{
-					text = Environment.InternalGetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+					text = Environment.UnixGetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
 				}
 				else
 				{
-					text = Environment.InternalGetFolderPath(Environment.SpecialFolder.ApplicationData);
+					text = Environment.UnixGetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
 				}
 			}
 			else if ((scope & IsolatedStorageScope.Machine) != IsolatedStorageScope.None)
 			{
-				text = Environment.InternalGetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+				text = Environment.UnixGetFolderPath(Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.Create);
 			}
 			if (text == null)
 			{
-				string text2 = Locale.GetText("Couldn't access storage location for '{0}'.");
-				throw new IsolatedStorageException(string.Format(text2, scope));
+				throw new IsolatedStorageException(string.Format(Locale.GetText("Couldn't access storage location for '{0}'."), scope));
 			}
 			return Path.Combine(text, ".isolated-storage");
 		}
@@ -289,45 +284,58 @@ namespace System.IO.IsolatedStorage
 
 		private static IsolatedStorageContainment ScopeToContainment(IsolatedStorageScope scope)
 		{
-			switch (scope)
+			if (scope <= (IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Roaming))
 			{
-			case IsolatedStorageScope.User | IsolatedStorageScope.Assembly:
-				return IsolatedStorageContainment.AssemblyIsolationByUser;
-			default:
-				switch (scope)
+				if (scope <= (IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly))
 				{
-				case IsolatedStorageScope.User | IsolatedStorageScope.Assembly | IsolatedStorageScope.Roaming:
-					return IsolatedStorageContainment.AssemblyIsolationByRoamingUser;
-				default:
-					switch (scope)
+					if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Assembly))
 					{
-					case IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine:
-						return IsolatedStorageContainment.AssemblyIsolationByMachine;
-					default:
-						if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Application))
-						{
-							return IsolatedStorageContainment.ApplicationIsolationByUser;
-						}
-						if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Roaming | IsolatedStorageScope.Application))
-						{
-							return IsolatedStorageContainment.ApplicationIsolationByRoamingUser;
-						}
-						if (scope != (IsolatedStorageScope.Machine | IsolatedStorageScope.Application))
-						{
-							return IsolatedStorageContainment.UnrestrictedIsolatedStorage;
-						}
-						return IsolatedStorageContainment.ApplicationIsolationByMachine;
-					case IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine:
-						return IsolatedStorageContainment.DomainIsolationByMachine;
+						return IsolatedStorageContainment.AssemblyIsolationByUser;
 					}
-					break;
-				case IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Roaming:
-					return IsolatedStorageContainment.DomainIsolationByRoamingUser;
+					if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly))
+					{
+						return IsolatedStorageContainment.DomainIsolationByUser;
+					}
 				}
-				break;
-			case IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly:
-				return IsolatedStorageContainment.DomainIsolationByUser;
+				else
+				{
+					if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Assembly | IsolatedStorageScope.Roaming))
+					{
+						return IsolatedStorageContainment.AssemblyIsolationByRoamingUser;
+					}
+					if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Roaming))
+					{
+						return IsolatedStorageContainment.DomainIsolationByRoamingUser;
+					}
+				}
 			}
+			else if (scope <= (IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine))
+			{
+				if (scope == (IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine))
+				{
+					return IsolatedStorageContainment.AssemblyIsolationByMachine;
+				}
+				if (scope == (IsolatedStorageScope.Domain | IsolatedStorageScope.Assembly | IsolatedStorageScope.Machine))
+				{
+					return IsolatedStorageContainment.DomainIsolationByMachine;
+				}
+			}
+			else
+			{
+				if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Application))
+				{
+					return IsolatedStorageContainment.ApplicationIsolationByUser;
+				}
+				if (scope == (IsolatedStorageScope.User | IsolatedStorageScope.Roaming | IsolatedStorageScope.Application))
+				{
+					return IsolatedStorageContainment.ApplicationIsolationByRoamingUser;
+				}
+				if (scope == (IsolatedStorageScope.Machine | IsolatedStorageScope.Application))
+				{
+					return IsolatedStorageContainment.ApplicationIsolationByMachine;
+				}
+			}
+			return IsolatedStorageContainment.UnrestrictedIsolatedStorage;
 		}
 
 		internal static ulong GetDirectorySize(DirectoryInfo di)
@@ -342,6 +350,21 @@ namespace System.IO.IsolatedStorage
 				num += IsolatedStorageFile.GetDirectorySize(directoryInfo);
 			}
 			return num;
+		}
+
+		private IsolatedStorageFile(IsolatedStorageScope scope)
+		{
+			this.storage_scope = scope;
+		}
+
+		internal IsolatedStorageFile(IsolatedStorageScope scope, string location)
+		{
+			this.storage_scope = scope;
+			this.directory = new DirectoryInfo(location);
+			if (!this.directory.Exists)
+			{
+				throw new IsolatedStorageException(Locale.GetText("Invalid storage."));
+			}
 		}
 
 		~IsolatedStorageFile()
@@ -384,6 +407,7 @@ namespace System.IO.IsolatedStorage
 		}
 
 		[CLSCompliant(false)]
+		[Obsolete]
 		public override ulong CurrentSize
 		{
 			get
@@ -393,6 +417,7 @@ namespace System.IO.IsolatedStorage
 		}
 
 		[CLSCompliant(false)]
+		[Obsolete]
 		public override ulong MaximumSize
 		{
 			get
@@ -450,8 +475,64 @@ namespace System.IO.IsolatedStorage
 			}
 		}
 
+		[ComVisible(false)]
+		public override long AvailableFreeSpace
+		{
+			get
+			{
+				this.CheckOpen();
+				return long.MaxValue;
+			}
+		}
+
+		[ComVisible(false)]
+		public override long Quota
+		{
+			get
+			{
+				this.CheckOpen();
+				return (long)this.MaximumSize;
+			}
+		}
+
+		[ComVisible(false)]
+		public override long UsedSize
+		{
+			get
+			{
+				this.CheckOpen();
+				return (long)IsolatedStorageFile.GetDirectorySize(this.directory);
+			}
+		}
+
+		[ComVisible(false)]
+		public static bool IsEnabled
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		internal bool IsClosed
+		{
+			get
+			{
+				return this.closed;
+			}
+		}
+
+		internal bool IsDisposed
+		{
+			get
+			{
+				return this.disposed;
+			}
+		}
+
 		public void Close()
 		{
+			this.closed = true;
 		}
 
 		public void CreateDirectory(string dir)
@@ -460,35 +541,96 @@ namespace System.IO.IsolatedStorage
 			{
 				throw new ArgumentNullException("dir");
 			}
-			if (dir.IndexOfAny(Path.PathSeparatorChars) < 0)
+			if (dir.IndexOfAny(Path.PathSeparatorChars) >= 0)
 			{
-				if (this.directory.GetFiles(dir).Length > 0)
-				{
-					throw new IOException(Locale.GetText("Directory name already exists as a file."));
-				}
-				this.directory.CreateSubdirectory(dir);
-			}
-			else
-			{
-				string[] array = dir.Split(Path.PathSeparatorChars);
+				string[] array = dir.Split(Path.PathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
 				DirectoryInfo directoryInfo = this.directory;
 				for (int i = 0; i < array.Length; i++)
 				{
-					if (directoryInfo.GetFiles(array[i]).Length > 0)
+					if (directoryInfo.GetFiles(array[i]).Length != 0)
 					{
-						throw new IOException(Locale.GetText("Part of the directory name already exists as a file."));
+						throw new IsolatedStorageException("Unable to create directory.");
 					}
 					directoryInfo = directoryInfo.CreateSubdirectory(array[i]);
 				}
+				return;
 			}
+			if (this.directory.GetFiles(dir).Length != 0)
+			{
+				throw new IsolatedStorageException("Unable to create directory.");
+			}
+			this.directory.CreateSubdirectory(dir);
+		}
+
+		[ComVisible(false)]
+		public void CopyFile(string sourceFileName, string destinationFileName)
+		{
+			this.CopyFile(sourceFileName, destinationFileName, false);
+		}
+
+		[ComVisible(false)]
+		public void CopyFile(string sourceFileName, string destinationFileName, bool overwrite)
+		{
+			if (sourceFileName == null)
+			{
+				throw new ArgumentNullException("sourceFileName");
+			}
+			if (destinationFileName == null)
+			{
+				throw new ArgumentNullException("destinationFileName");
+			}
+			if (sourceFileName.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty file name is not valid.", "sourceFileName");
+			}
+			if (destinationFileName.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty file name is not valid.", "destinationFileName");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, sourceFileName);
+			string text2 = Path.Combine(this.directory.FullName, destinationFileName);
+			if (!this.IsPathInStorage(text) || !this.IsPathInStorage(text2))
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+			if (!Directory.Exists(Path.GetDirectoryName(text)))
+			{
+				throw new DirectoryNotFoundException("Could not find a part of path '" + sourceFileName + "'.");
+			}
+			if (!File.Exists(text))
+			{
+				throw new FileNotFoundException("Could not find a part of path '" + sourceFileName + "'.");
+			}
+			if (File.Exists(text2) && !overwrite)
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+			try
+			{
+				File.Copy(text, text2, overwrite);
+			}
+			catch (IOException)
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+		}
+
+		[ComVisible(false)]
+		public IsolatedStorageFileStream CreateFile(string path)
+		{
+			return new IsolatedStorageFileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, this);
 		}
 
 		public void DeleteDirectory(string dir)
 		{
 			try
 			{
-				DirectoryInfo directoryInfo = this.directory.CreateSubdirectory(dir);
-				directoryInfo.Delete();
+				if (Path.IsPathRooted(dir))
+				{
+					dir = dir.Substring(1);
+				}
+				this.directory.CreateSubdirectory(dir).Delete();
 			}
 			catch
 			{
@@ -498,12 +640,112 @@ namespace System.IO.IsolatedStorage
 
 		public void DeleteFile(string file)
 		{
-			File.Delete(Path.Combine(this.directory.FullName, file));
+			if (file == null)
+			{
+				throw new ArgumentNullException("file");
+			}
+			if (!File.Exists(Path.Combine(this.directory.FullName, file)))
+			{
+				throw new IsolatedStorageException(Locale.GetText("Could not delete file '{0}'", new object[] { file }));
+			}
+			try
+			{
+				File.Delete(Path.Combine(this.directory.FullName, file));
+			}
+			catch
+			{
+				throw new IsolatedStorageException(Locale.GetText("Could not delete file '{0}'", new object[] { file }));
+			}
 		}
 
 		public void Dispose()
 		{
+			this.disposed = true;
 			GC.SuppressFinalize(this);
+		}
+
+		[ComVisible(false)]
+		public bool DirectoryExists(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, path);
+			return this.IsPathInStorage(text) && Directory.Exists(text);
+		}
+
+		[ComVisible(false)]
+		public bool FileExists(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, path);
+			return this.IsPathInStorage(text) && File.Exists(text);
+		}
+
+		[ComVisible(false)]
+		public DateTimeOffset GetCreationTime(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty path is not valid.");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, path);
+			if (File.Exists(text))
+			{
+				return File.GetCreationTime(text);
+			}
+			return Directory.GetCreationTime(text);
+		}
+
+		[ComVisible(false)]
+		public DateTimeOffset GetLastAccessTime(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty path is not valid.");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, path);
+			if (File.Exists(text))
+			{
+				return File.GetLastAccessTime(text);
+			}
+			return Directory.GetLastAccessTime(text);
+		}
+
+		[ComVisible(false)]
+		public DateTimeOffset GetLastWriteTime(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path");
+			}
+			if (path.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty path is not valid.");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, path);
+			if (File.Exists(text))
+			{
+				return File.GetLastWriteTime(text);
+			}
+			return Directory.GetLastWriteTime(text);
 		}
 
 		public string[] GetDirectoryNames(string searchPattern)
@@ -512,23 +754,46 @@ namespace System.IO.IsolatedStorage
 			{
 				throw new ArgumentNullException("searchPattern");
 			}
+			if (searchPattern.Contains(".."))
+			{
+				throw new ArgumentException("Search pattern cannot contain '..' to move up directories.", "searchPattern");
+			}
 			string directoryName = Path.GetDirectoryName(searchPattern);
 			string fileName = Path.GetFileName(searchPattern);
-			DirectoryInfo[] array;
+			DirectoryInfo[] array = null;
 			if (directoryName == null || directoryName.Length == 0)
 			{
 				array = this.directory.GetDirectories(searchPattern);
 			}
 			else
 			{
-				DirectoryInfo[] directories = this.directory.GetDirectories(directoryName);
-				if (directories.Length != 1 || !(directories[0].Name == directoryName) || directories[0].FullName.IndexOf(this.directory.FullName) < 0)
+				DirectoryInfo directoryInfo = this.directory.GetDirectories(directoryName)[0];
+				if (directoryInfo.FullName.IndexOf(this.directory.FullName) >= 0)
 				{
-					throw new SecurityException();
+					array = directoryInfo.GetDirectories(fileName);
+					string[] array2 = directoryName.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+					for (int i = array2.Length - 1; i >= 0; i--)
+					{
+						if (directoryInfo.Name != array2[i])
+						{
+							array = null;
+							break;
+						}
+						directoryInfo = directoryInfo.Parent;
+					}
 				}
-				array = directories[0].GetDirectories(fileName);
+			}
+			if (array == null)
+			{
+				throw new SecurityException();
 			}
 			return this.GetNames(array);
+		}
+
+		[ComVisible(false)]
+		public string[] GetDirectoryNames()
+		{
+			return this.GetDirectoryNames("*");
 		}
 
 		private string[] GetNames(FileSystemInfo[] afsi)
@@ -546,6 +811,10 @@ namespace System.IO.IsolatedStorage
 			if (searchPattern == null)
 			{
 				throw new ArgumentNullException("searchPattern");
+			}
+			if (searchPattern.Contains(".."))
+			{
+				throw new ArgumentException("Search pattern cannot contain '..' to move up directories.", "searchPattern");
 			}
 			string directoryName = Path.GetDirectoryName(searchPattern);
 			string fileName = Path.GetFileName(searchPattern);
@@ -566,9 +835,141 @@ namespace System.IO.IsolatedStorage
 			return this.GetNames(array);
 		}
 
+		[ComVisible(false)]
+		public string[] GetFileNames()
+		{
+			return this.GetFileNames("*");
+		}
+
+		[ComVisible(false)]
+		public override bool IncreaseQuotaTo(long newQuotaSize)
+		{
+			if (newQuotaSize < this.Quota)
+			{
+				throw new ArgumentException();
+			}
+			this.CheckOpen();
+			return false;
+		}
+
+		[ComVisible(false)]
+		public void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
+		{
+			if (sourceDirectoryName == null)
+			{
+				throw new ArgumentNullException("sourceDirectoryName");
+			}
+			if (destinationDirectoryName == null)
+			{
+				throw new ArgumentNullException("sourceDirectoryName");
+			}
+			if (sourceDirectoryName.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty directory name is not valid.", "sourceDirectoryName");
+			}
+			if (destinationDirectoryName.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty directory name is not valid.", "destinationDirectoryName");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, sourceDirectoryName);
+			string text2 = Path.Combine(this.directory.FullName, destinationDirectoryName);
+			if (!this.IsPathInStorage(text) || !this.IsPathInStorage(text2))
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+			if (!Directory.Exists(text))
+			{
+				throw new DirectoryNotFoundException("Could not find a part of path '" + sourceDirectoryName + "'.");
+			}
+			if (!Directory.Exists(Path.GetDirectoryName(text2)))
+			{
+				throw new DirectoryNotFoundException("Could not find a part of path '" + destinationDirectoryName + "'.");
+			}
+			try
+			{
+				Directory.Move(text, text2);
+			}
+			catch (IOException)
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+		}
+
+		[ComVisible(false)]
+		public void MoveFile(string sourceFileName, string destinationFileName)
+		{
+			if (sourceFileName == null)
+			{
+				throw new ArgumentNullException("sourceFileName");
+			}
+			if (destinationFileName == null)
+			{
+				throw new ArgumentNullException("sourceFileName");
+			}
+			if (sourceFileName.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty file name is not valid.", "sourceFileName");
+			}
+			if (destinationFileName.Trim().Length == 0)
+			{
+				throw new ArgumentException("An empty file name is not valid.", "destinationFileName");
+			}
+			this.CheckOpen();
+			string text = Path.Combine(this.directory.FullName, sourceFileName);
+			string text2 = Path.Combine(this.directory.FullName, destinationFileName);
+			if (!this.IsPathInStorage(text) || !this.IsPathInStorage(text2))
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+			if (!File.Exists(text))
+			{
+				throw new FileNotFoundException("Could not find a part of path '" + sourceFileName + "'.");
+			}
+			if (!Directory.Exists(Path.GetDirectoryName(text2)))
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+			try
+			{
+				File.Move(text, text2);
+			}
+			catch (IOException)
+			{
+				throw new IsolatedStorageException("Operation not allowed.");
+			}
+		}
+
+		[ComVisible(false)]
+		public IsolatedStorageFileStream OpenFile(string path, FileMode mode)
+		{
+			return new IsolatedStorageFileStream(path, mode, this);
+		}
+
+		[ComVisible(false)]
+		public IsolatedStorageFileStream OpenFile(string path, FileMode mode, FileAccess access)
+		{
+			return new IsolatedStorageFileStream(path, mode, access, this);
+		}
+
+		[ComVisible(false)]
+		public IsolatedStorageFileStream OpenFile(string path, FileMode mode, FileAccess access, FileShare share)
+		{
+			return new IsolatedStorageFileStream(path, mode, access, share, this);
+		}
+
 		public override void Remove()
 		{
-			this.directory.Delete(true);
+			this.CheckOpen(false);
+			try
+			{
+				this.directory.Delete(true);
+			}
+			catch
+			{
+				throw new IsolatedStorageException("Could not remove storage.");
+			}
+			this.Close();
 		}
 
 		protected override IsolatedStoragePermission GetPermission(PermissionSet ps)
@@ -580,11 +981,36 @@ namespace System.IO.IsolatedStorage
 			return (IsolatedStoragePermission)ps.GetPermission(typeof(IsolatedStorageFilePermission));
 		}
 
+		private void CheckOpen()
+		{
+			this.CheckOpen(true);
+		}
+
+		private void CheckOpen(bool checkDirExists)
+		{
+			if (this.disposed)
+			{
+				throw new ObjectDisposedException("IsolatedStorageFile");
+			}
+			if (this.closed)
+			{
+				throw new InvalidOperationException("Storage needs to be open for this operation.");
+			}
+			if (checkDirExists && !Directory.Exists(this.directory.FullName))
+			{
+				throw new IsolatedStorageException("Isolated storage has been removed or disabled.");
+			}
+		}
+
+		private bool IsPathInStorage(string path)
+		{
+			return Path.GetFullPath(path).StartsWith(this.directory.FullName);
+		}
+
 		private string GetNameFromIdentity(object identity)
 		{
 			byte[] bytes = Encoding.UTF8.GetBytes(identity.ToString());
-			SHA1 sha = SHA1.Create();
-			byte[] array = sha.ComputeHash(bytes, 0, bytes.Length);
+			Array array = SHA1.Create().ComputeHash(bytes, 0, bytes.Length);
 			byte[] array2 = new byte[10];
 			Buffer.BlockCopy(array, 0, array2, 0, array2.Length);
 			return CryptoConvert.ToHex(array2);
@@ -627,7 +1053,7 @@ namespace System.IO.IsolatedStorage
 			return IsolatedStorageFile.GetTypeFromEvidence(e, typeof(Url));
 		}
 
-		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		[SecurityPermission(SecurityAction.Assert, SerializationFormatter = true)]
 		private void SaveIdentities(string root)
 		{
 			IsolatedStorageFile.Identities identities = new IsolatedStorageFile.Identities(this._applicationIdentity, this._assemblyIdentity, this._domainIdentity);
@@ -652,7 +1078,11 @@ namespace System.IO.IsolatedStorage
 
 		private Evidence _fullEvidences;
 
-		private static Mutex mutex = new Mutex();
+		private static readonly Mutex mutex = new Mutex();
+
+		private bool closed;
+
+		private bool disposed;
 
 		private DirectoryInfo directory;
 

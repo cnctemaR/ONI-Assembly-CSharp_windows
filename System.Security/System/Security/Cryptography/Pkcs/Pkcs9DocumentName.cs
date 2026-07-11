@@ -8,7 +8,7 @@ namespace System.Security.Cryptography.Pkcs
 	{
 		public Pkcs9DocumentName()
 		{
-			this.Oid = new Oid("1.3.6.1.4.1.311.88.2.1", null);
+			base.Oid = new Oid("1.3.6.1.4.1.311.88.2.1", null);
 		}
 
 		public Pkcs9DocumentName(string documentName)
@@ -17,7 +17,7 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				throw new ArgumentNullException("documentName");
 			}
-			this.Oid = new Oid("1.3.6.1.4.1.311.88.2.1", null);
+			base.Oid = new Oid("1.3.6.1.4.1.311.88.2.1", null);
 			this._name = documentName;
 			base.RawData = this.Encode();
 		}
@@ -28,7 +28,7 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				throw new ArgumentNullException("encodedDocumentName");
 			}
-			this.Oid = new Oid("1.3.6.1.4.1.311.88.2.1", null);
+			base.Oid = new Oid("1.3.6.1.4.1.311.88.2.1", null);
 			base.RawData = encodedDocumentName;
 			this.Decode(encodedDocumentName);
 		}
@@ -53,8 +53,7 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				return;
 			}
-			ASN1 asn = new ASN1(attribute);
-			byte[] value = asn.Value;
+			byte[] value = new ASN1(attribute).Value;
 			int num = value.Length;
 			if (value[num - 2] == 0)
 			{
@@ -65,8 +64,7 @@ namespace System.Security.Cryptography.Pkcs
 
 		internal byte[] Encode()
 		{
-			ASN1 asn = new ASN1(4, Encoding.Unicode.GetBytes(this._name + '\0'));
-			return asn.GetBytes();
+			return new ASN1(4, Encoding.Unicode.GetBytes(this._name + "\0")).GetBytes();
 		}
 
 		internal const string oid = "1.3.6.1.4.1.311.88.2.1";

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.IO
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum FileShare
 	{

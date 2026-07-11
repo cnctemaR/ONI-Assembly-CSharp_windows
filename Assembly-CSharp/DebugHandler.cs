@@ -43,7 +43,7 @@ public class DebugHandler : IInputHandler
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.DEBUG_TOOLS.INVALID_LOCATION, null, DebugHandler.GetMousePos(), 1.5f, false, true);
 			return;
 		}
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), SceneOrganizer.Instance.GetFolder(Folder.Entities), null);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
 		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPosCBC(DebugHandler.GetMouseCell(), Grid.SceneLayer.Move);
@@ -168,22 +168,22 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.SreenShot1x))
 		{
 			string text = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-			Application.CaptureScreenshot(text, 1);
+			ScreenCapture.CaptureScreenshot(text, 1);
 		}
 		else if (e.TryConsume(global::Action.SreenShot2x))
 		{
 			string text2 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-			Application.CaptureScreenshot(text2, 2);
+			ScreenCapture.CaptureScreenshot(text2, 2);
 		}
 		else if (e.TryConsume(global::Action.SreenShot8x))
 		{
 			string text3 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-			Application.CaptureScreenshot(text3, 8);
+			ScreenCapture.CaptureScreenshot(text3, 8);
 		}
 		else if (e.TryConsume(global::Action.SreenShot32x))
 		{
 			string text4 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
-			Application.CaptureScreenshot(text4, 32);
+			ScreenCapture.CaptureScreenshot(text4, 32);
 		}
 		else if (e.TryConsume(global::Action.DebugCellInfo))
 		{
@@ -383,10 +383,7 @@ public class DebugHandler : IInputHandler
 					}
 					else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
 					{
-						if (GenericGameSettings.instance.developerDebugEnable)
-						{
-							GarbageProfiler.DebugDumpGarbageStats();
-						}
+						GarbageProfiler.DebugDumpRootItems();
 					}
 					else if (e.TryConsume(global::Action.DebugDumpEventData))
 					{
@@ -399,6 +396,13 @@ public class DebugHandler : IInputHandler
 					{
 						if (GenericGameSettings.instance.developerDebugEnable)
 						{
+						}
+					}
+					else if (e.TryConsume(global::Action.DebugCrashSim))
+					{
+						if (GenericGameSettings.instance.developerDebugEnable)
+						{
+							GarbageProfiler.DebugDumpGarbageStats();
 						}
 					}
 					else if (e.TryConsume(global::Action.DebugNextCall))

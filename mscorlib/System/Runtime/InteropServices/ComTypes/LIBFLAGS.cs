@@ -4,7 +4,7 @@ namespace System.Runtime.InteropServices.ComTypes
 {
 	[Flags]
 	[Serializable]
-	public enum LIBFLAGS
+	public enum LIBFLAGS : short
 	{
 		LIBFLAG_FRESTRICTED = 1,
 		LIBFLAG_FCONTROL = 2,

@@ -40,7 +40,7 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 	{
 		bool flag = WildnessMonitor.IsWild(smi);
 		smi.wildness.hide = !flag;
-		Db.Get().Amounts.Happiness.Lookup(smi.gameObject).hide = flag;
+		Db.Get().CritterAttributes.Happiness.Lookup(smi.gameObject).hide = flag;
 		Db.Get().Amounts.Calories.Lookup(smi.gameObject).hide = flag;
 		Db.Get().Amounts.Temperature.Lookup(smi.gameObject).hide = flag;
 		AmountInstance amountInstance = Db.Get().Amounts.Fertility.Lookup(smi.gameObject);
@@ -54,7 +54,7 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 
 	public GameStateMachine<WildnessMonitor, WildnessMonitor.Instance, IStateMachineTarget, WildnessMonitor.Def>.State tame;
 
-	private static KAnimHashedString[] DOMESTICATION_SYMBOLS = new KAnimHashedString[] { "tag", "snapto_tag" };
+	private static readonly KAnimHashedString[] DOMESTICATION_SYMBOLS = new KAnimHashedString[] { "tag", "snapto_tag" };
 
 	public class Def : StateMachine.BaseDef
 	{

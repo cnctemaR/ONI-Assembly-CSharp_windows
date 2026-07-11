@@ -9,18 +9,21 @@ namespace System.Reflection
 	public sealed class AmbiguousMatchException : SystemException
 	{
 		public AmbiguousMatchException()
-			: base("Ambiguous matching in method resolution")
+			: base(Environment.GetResourceString("Ambiguous match found."))
 		{
+			base.SetErrorCode(-2147475171);
 		}
 
 		public AmbiguousMatchException(string message)
 			: base(message)
 		{
+			base.SetErrorCode(-2147475171);
 		}
 
 		public AmbiguousMatchException(string message, Exception inner)
 			: base(message, inner)
 		{
+			base.SetErrorCode(-2147475171);
 		}
 
 		internal AmbiguousMatchException(SerializationInfo info, StreamingContext context)

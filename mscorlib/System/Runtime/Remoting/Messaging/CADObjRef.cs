@@ -7,6 +7,7 @@ namespace System.Runtime.Remoting.Messaging
 		public CADObjRef(ObjRef o, int sourceDomain)
 		{
 			this.objref = o;
+			this.TypeInfo = o.SerializeType();
 			this.SourceDomain = sourceDomain;
 		}
 
@@ -26,8 +27,10 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
-		private ObjRef objref;
+		internal ObjRef objref;
 
-		public int SourceDomain;
+		internal int SourceDomain;
+
+		internal byte[] TypeInfo;
 	}
 }

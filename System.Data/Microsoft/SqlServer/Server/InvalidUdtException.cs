@@ -6,23 +6,7 @@ namespace Microsoft.SqlServer.Server
 	[Serializable]
 	public sealed class InvalidUdtException : SystemException
 	{
-		[MonoTODO]
 		internal InvalidUdtException()
-		{
-		}
-
-		[MonoTODO]
-		internal InvalidUdtException(string message)
-		{
-		}
-
-		[MonoTODO]
-		internal InvalidUdtException(string message, Exception innerException)
-		{
-		}
-
-		[MonoTODO]
-		internal InvalidUdtException(Type t, string reason)
 		{
 		}
 

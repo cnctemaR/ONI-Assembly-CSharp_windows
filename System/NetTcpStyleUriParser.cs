@@ -2,8 +2,11 @@
 
 namespace System
 {
-	[global::System.MonoTODO]
-	public class NetTcpStyleUriParser : global::System.UriParser
+	public class NetTcpStyleUriParser : UriParser
 	{
+		public NetTcpStyleUriParser()
+			: base(UriParser.NetTcpUri.Flags)
+		{
+		}
 	}
 }

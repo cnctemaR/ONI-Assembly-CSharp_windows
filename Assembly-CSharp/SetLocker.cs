@@ -20,7 +20,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 
 	public void DropContents()
 	{
-		Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents, Grid.SceneLayer.Front, Folder.Entities).SetActive(true);
+		Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents, Grid.SceneLayer.Front).SetActive(true);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab(this.contents.ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
 	}
 
@@ -70,7 +70,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.basic, 10, false);
+		}, null, null, true, null, false, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.basic, 10, false);
 		this.OnRefreshUserMenu(null);
 	}
 

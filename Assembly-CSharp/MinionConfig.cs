@@ -9,7 +9,7 @@ public class MinionConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		string text = DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME;
-		GameObject gameObject = EntityTemplates.CreateEntity(MinionConfig.ID, text);
+		GameObject gameObject = EntityTemplates.CreateEntity(MinionConfig.ID, text, true);
 		gameObject.AddOrGet<StateMachineController>();
 		MinionModifiers minionModifiers = gameObject.AddOrGet<MinionModifiers>();
 		MinionConfig.AddMinionAmounts(minionModifiers);
@@ -22,11 +22,12 @@ public class MinionConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, 0.16666667f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 100f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.MaxUnderwaterTravelCost.Id, 8f, text, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -35f, text, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, -1f, text, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, 0f, text, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, 0f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.ToiletEfficiency.Id, 1f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.RoomTemperaturePreference.Id, 0f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.CarryAmount.Id, 200f, text, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.QualityOfLife.Id, 1f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.Sneezyness.Id, 0f, text, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.025f, text, false, false, true));
 		gameObject.AddOrGet<MinionBrain>();
@@ -63,8 +64,7 @@ public class MinionConfig : IEntityConfig
 		gridVisibility.radius = 30f;
 		gridVisibility.innerRadius = 20f;
 		gameObject.AddOrGet<MinionSounds>();
-		SaveLoadRoot saveLoadRoot = gameObject.AddOrGet<SaveLoadRoot>();
-		saveLoadRoot.folder = Folder.Minions;
+		gameObject.AddOrGet<SaveLoadRoot>();
 		gameObject.AddOrGet<AntiCluster>();
 		Navigator navigator = gameObject.AddOrGet<Navigator>();
 		navigator.NavGridName = "MinionNavGrid";
@@ -76,7 +76,6 @@ public class MinionConfig : IEntityConfig
 		{
 			Assets.GetAnim("body_comp_default_kanim"),
 			Assets.GetAnim("anim_construction_default_kanim"),
-			Assets.GetAnim("anim_emotes_default_kanim"),
 			Assets.GetAnim("anim_idles_default_kanim"),
 			Assets.GetAnim("anim_loco_firepole_kanim"),
 			Assets.GetAnim("anim_loco_new_kanim"),
@@ -238,6 +237,9 @@ public class MinionConfig : IEntityConfig
 		primaryElement.ElementID = SimHashes.Creature;
 		gameObject.AddOrGet<ChoreProvider>();
 		gameObject.AddOrGetDef<DebugGoToMonitor.Def>();
+		gameObject.AddOrGetDef<SpeechMonitor.Def>();
+		gameObject.AddOrGetDef<BlinkMonitor.Def>();
+		gameObject.AddOrGetDef<ConversationMonitor.Def>();
 		gameObject.AddOrGet<Sensors>();
 		gameObject.AddOrGet<Chattable>();
 		gameObject.AddOrGet<FaceGraph>();
@@ -259,7 +261,6 @@ public class MinionConfig : IEntityConfig
 			new CellOffset(0, 0),
 			new CellOffset(0, 1)
 		};
-		gameObject.AddOrGet<SavedObject>();
 		gameObject.AddOrGet<Pickupable>();
 		CreatureSimTemperatureTransfer creatureSimTemperatureTransfer = gameObject.AddOrGet<CreatureSimTemperatureTransfer>();
 		creatureSimTemperatureTransfer.SurfaceArea = 10f;
@@ -274,7 +275,8 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<MinionResume>();
 		DuplicantNoiseLevels.SetupNoiseLevels();
 		this.SetupLaserEffects(gameObject);
-		SymbolOverrideControllerUtil.AddToPrefab(gameObject);
+		SymbolOverrideController symbolOverrideController = SymbolOverrideControllerUtil.AddToPrefab(gameObject);
+		symbolOverrideController.applySymbolOverridesEveryFrame = true;
 		MinionConfig.ConfigureSymbols(gameObject);
 		return gameObject;
 	}
@@ -436,7 +438,7 @@ public class MinionConfig : IEntityConfig
 		AmountInstance amountInstance6 = Db.Get().Amounts.Breath.Lookup(go);
 		amountInstance6.value = amountInstance6.GetMax();
 		AmountInstance amountInstance7 = Db.Get().Amounts.Calories.Lookup(go);
-		amountInstance7.value = 0.75f * amountInstance7.GetMax();
+		amountInstance7.value = 0.8875f * amountInstance7.GetMax();
 	}
 
 	public void OnSpawn(GameObject go)
@@ -450,6 +452,7 @@ public class MinionConfig : IEntityConfig
 		component.Add(new BreathableAreaSensor(component));
 		component.Add(new AssignableReachabilitySensor(component));
 		component.Add(new ToiletSensor(component));
+		component.Add(new MingleCellSensor(component));
 		StateMachineController component2 = go.GetComponent<StateMachineController>();
 		RationalAi.Instance instance = new RationalAi.Instance(component2);
 		instance.StartSM();
@@ -508,11 +511,13 @@ public class MinionConfig : IEntityConfig
 
 	public const int MINION_EXPRESSION_SYMBOL_LAYER = 2;
 
-	public const int MINION_CLOTHING_SYMBOL_LAYER = 3;
+	public const int MINION_MOUTH_FLAP_LAYER = 3;
 
-	public const int MINION_PICKUP_SYMBOL_LAYER = 4;
+	public const int MINION_CLOTHING_SYMBOL_LAYER = 4;
 
-	public const int MINION_SUIT_SYMBOL_LAYER = 5;
+	public const int MINION_PICKUP_SYMBOL_LAYER = 5;
+
+	public const int MINION_SUIT_SYMBOL_LAYER = 6;
 
 	public struct LaserEffect
 	{

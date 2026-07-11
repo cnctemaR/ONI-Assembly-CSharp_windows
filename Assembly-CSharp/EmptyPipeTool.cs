@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class EmptyPipeTool : FilteredDragTool
 {
+	public static void DestroyInstance()
+	{
+		EmptyPipeTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

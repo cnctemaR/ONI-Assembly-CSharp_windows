@@ -13,7 +13,6 @@ public class HealthBar : ProgressBar
 	public void OnChange()
 	{
 		base.enabled = true;
-		base.gameObject.SetActive(true);
 		this.showTimer = this.maxShowTime;
 	}
 

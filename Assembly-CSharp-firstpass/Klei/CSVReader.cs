@@ -82,10 +82,23 @@ namespace Klei
 
 		public static string[] SplitCsvLine(string line)
 		{
+			line = line.Replace("\n\n", "\n");
 			return (from Match m in CSVReader.regex.Matches(line)
 				select m.Groups[1].Value).ToArray<string>();
 		}
 
 		private static Regex regex = new Regex("(((?<x>(?=[,\\r\\n]+))|\"(?<x>([^\"]|\"\")+)\"|(?<x>[^,\\r\\n]+)),?)", RegexOptions.ExplicitCapture);
+
+		private struct ParseWorkItem : IWorkItem<object>
+		{
+			public void Run(object shared_data)
+			{
+				this.row = CSVReader.SplitCsvLine(this.line);
+			}
+
+			public string line;
+
+			public string[] row;
+		}
 	}
 }

@@ -73,7 +73,7 @@ public class AssignmentManager : KMonoBehaviour
 						{
 							if (ownables.gameObject == owner.gameObject)
 							{
-								if (assignable.assignee is Room && Db.Get().RoomTypes.GetRoomType(assignable.assignee as Room).priority_building_use)
+								if (assignable.assignee is Room && (assignable.assignee as Room).roomType.priority_building_use)
 								{
 									this.PreferredAssignableResults.Clear();
 									this.PreferredAssignableResults.Add(assignable);

@@ -1,0 +1,90 @@
+﻿using System;
+using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
+using UnityEngine.Rendering;
+
+namespace UnityEngine
+{
+	/// <summary>
+	///   <para>Color or depth buffer part of a RenderTexture.</para>
+	/// </summary>
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	public struct RenderBuffer
+	{
+		[FreeFunction(Name = "RenderBufferScripting::SetLoadAction", HasExplicitThis = true)]
+		internal void SetLoadAction(RenderBufferLoadAction action)
+		{
+			RenderBuffer.SetLoadAction_Injected(ref this, action);
+		}
+
+		[FreeFunction(Name = "RenderBufferScripting::SetStoreAction", HasExplicitThis = true)]
+		internal void SetStoreAction(RenderBufferStoreAction action)
+		{
+			RenderBuffer.SetStoreAction_Injected(ref this, action);
+		}
+
+		[FreeFunction(Name = "RenderBufferScripting::GetLoadAction", HasExplicitThis = true)]
+		internal RenderBufferLoadAction GetLoadAction()
+		{
+			return RenderBuffer.GetLoadAction_Injected(ref this);
+		}
+
+		[FreeFunction(Name = "RenderBufferScripting::GetStoreAction", HasExplicitThis = true)]
+		internal RenderBufferStoreAction GetStoreAction()
+		{
+			return RenderBuffer.GetStoreAction_Injected(ref this);
+		}
+
+		/// <summary>
+		///   <para>Returns native RenderBuffer. Be warned this is not native Texture, but rather pointer to unity struct that can be used with native unity API. Currently such API exists only on iOS.</para>
+		/// </summary>
+		[FreeFunction(Name = "RenderBufferScripting::GetNativeRenderBufferPtr", HasExplicitThis = true)]
+		public IntPtr GetNativeRenderBufferPtr()
+		{
+			return RenderBuffer.GetNativeRenderBufferPtr_Injected(ref this);
+		}
+
+		internal RenderBufferLoadAction loadAction
+		{
+			get
+			{
+				return this.GetLoadAction();
+			}
+			set
+			{
+				this.SetLoadAction(value);
+			}
+		}
+
+		internal RenderBufferStoreAction storeAction
+		{
+			get
+			{
+				return this.GetStoreAction();
+			}
+			set
+			{
+				this.SetStoreAction(value);
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLoadAction_Injected(ref RenderBuffer _unity_self, RenderBufferLoadAction action);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStoreAction_Injected(ref RenderBuffer _unity_self, RenderBufferStoreAction action);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RenderBufferLoadAction GetLoadAction_Injected(ref RenderBuffer _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RenderBufferStoreAction GetStoreAction_Injected(ref RenderBuffer _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetNativeRenderBufferPtr_Injected(ref RenderBuffer _unity_self);
+
+		internal int m_RenderTextureInstanceID;
+
+		internal IntPtr m_BufferPtr;
+	}
+}

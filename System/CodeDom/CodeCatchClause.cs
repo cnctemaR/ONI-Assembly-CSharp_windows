@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
-	[ComVisible(true)]
 	[Serializable]
 	public class CodeCatchClause
 	{
@@ -14,51 +11,48 @@ namespace System.CodeDom
 
 		public CodeCatchClause(string localName)
 		{
-			this.localName = localName;
+			this._localName = localName;
 		}
 
 		public CodeCatchClause(string localName, CodeTypeReference catchExceptionType)
 		{
-			this.localName = localName;
-			this.catchExceptionType = catchExceptionType;
+			this._localName = localName;
+			this._catchExceptionType = catchExceptionType;
 		}
 
 		public CodeCatchClause(string localName, CodeTypeReference catchExceptionType, params CodeStatement[] statements)
 		{
-			this.localName = localName;
-			this.catchExceptionType = catchExceptionType;
+			this._localName = localName;
+			this._catchExceptionType = catchExceptionType;
 			this.Statements.AddRange(statements);
-		}
-
-		public CodeTypeReference CatchExceptionType
-		{
-			get
-			{
-				if (this.catchExceptionType == null)
-				{
-					this.catchExceptionType = new CodeTypeReference(typeof(Exception));
-				}
-				return this.catchExceptionType;
-			}
-			set
-			{
-				this.catchExceptionType = value;
-			}
 		}
 
 		public string LocalName
 		{
 			get
 			{
-				if (this.localName == null)
-				{
-					return string.Empty;
-				}
-				return this.localName;
+				return this._localName ?? string.Empty;
 			}
 			set
 			{
-				this.localName = value;
+				this._localName = value;
+			}
+		}
+
+		public CodeTypeReference CatchExceptionType
+		{
+			get
+			{
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._catchExceptionType) == null)
+				{
+					codeTypeReference = (this._catchExceptionType = new CodeTypeReference(typeof(Exception)));
+				}
+				return codeTypeReference;
+			}
+			set
+			{
+				this._catchExceptionType = value;
 			}
 		}
 
@@ -66,18 +60,19 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.statements == null)
+				CodeStatementCollection codeStatementCollection;
+				if ((codeStatementCollection = this._statements) == null)
 				{
-					this.statements = new CodeStatementCollection();
+					codeStatementCollection = (this._statements = new CodeStatementCollection());
 				}
-				return this.statements;
+				return codeStatementCollection;
 			}
 		}
 
-		private CodeTypeReference catchExceptionType;
+		private CodeStatementCollection _statements;
 
-		private string localName;
+		private CodeTypeReference _catchExceptionType;
 
-		private CodeStatementCollection statements;
+		private string _localName;
 	}
 }

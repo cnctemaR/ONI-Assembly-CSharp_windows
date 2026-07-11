@@ -159,9 +159,6 @@ public class CharacterContainer : KScreen
 		this.stats.ApplyRace(this.animController.gameObject);
 		this.stats.ApplyAccessories(this.animController.gameObject);
 		this.stats.ApplyExperience(this.animController.gameObject);
-		DecorNeed decorNeed = this.animController.gameObject.AddComponent<DecorNeed>();
-		decorNeed.skipUpdate = true;
-		this.animController.gameObject.AddComponent<FoodQualityNeed>();
 		HashedString hashedString = CharacterContainer.idleAnims[global::UnityEngine.Random.Range(0, CharacterContainer.idleAnims.Length)];
 		this.idle_anim = Assets.GetAnim(hashedString);
 		if (this.idle_anim != null)
@@ -204,17 +201,20 @@ public class CharacterContainer : KScreen
 			global::UnityEngine.Object.Destroy(el.gameObject);
 		});
 		this.expectationLabels.Clear();
-		foreach (Need need in this.animController.gameObject.GetComponents<Need>())
+		foreach (Klei.AI.Attribute attribute in Db.Get().Attributes.resources)
 		{
-			LocText locText3 = Util.KInstantiateUI<LocText>(this.expectation.gameObject, this.expectation.transform.parent.gameObject, false);
-			locText3.gameObject.SetActive(true);
-			AttributeInstance attributeInstance = need.GetExpectationAttribute().Lookup(this.animController);
-			locText3.text = string.Format(UI.CHARACTERCONTAINER_NEED, need.Name, attributeInstance.GetFormattedValue());
-			this.expectationLabels.Add(locText3);
-			string text = need.ExpectationTooltip;
-			text += UI.HORIZONTAL_BR_RULE;
-			text += attributeInstance.GetAttributeValueTooltip();
-			locText3.GetComponent<ToolTip>().SetSimpleTooltip(text);
+			if (attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation)
+			{
+				LocText locText3 = Util.KInstantiateUI<LocText>(this.expectation.gameObject, this.expectation.transform.parent.gameObject, false);
+				locText3.gameObject.SetActive(true);
+				AttributeInstance attributeInstance = attribute.Lookup(this.animController);
+				locText3.text = string.Format(UI.CHARACTERCONTAINER_NEED, attribute.Name, attributeInstance.GetFormattedValue());
+				this.expectationLabels.Add(locText3);
+				string text = attributeInstance.Description;
+				text += UI.HORIZONTAL_BR_RULE;
+				text += attribute.GetTooltip(attributeInstance);
+				locText3.GetComponent<ToolTip>().SetSimpleTooltip(text);
+			}
 		}
 		foreach (KeyValuePair<HashedString, float> keyValuePair in this.stats.roleAptitudes)
 		{
@@ -565,7 +565,7 @@ public class CharacterContainer : KScreen
 
 	private Dictionary<string, Sprite> professionIconMap;
 
-	private static HashedString[] idleAnims = new HashedString[] { "anim_idle_healthy_kanim", "anim_idle_susceptible_kanim", "anim_idle_keener_kanim", "anim_idle_coaster_kanim", "anim_idle_fastfeet_kanim", "anim_idle_breatherdeep_kanim", "anim_idle_breathershallow_kanim" };
+	private static readonly HashedString[] idleAnims = new HashedString[] { "anim_idle_healthy_kanim", "anim_idle_susceptible_kanim", "anim_idle_keener_kanim", "anim_idle_coaster_kanim", "anim_idle_fastfeet_kanim", "anim_idle_breatherdeep_kanim", "anim_idle_breathershallow_kanim" };
 
 	public float baseCharacterScale = 0.38f;
 

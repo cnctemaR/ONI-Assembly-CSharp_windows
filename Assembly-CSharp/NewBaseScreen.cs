@@ -128,7 +128,7 @@ public class NewBaseScreen : KScreen
 			int num3 = num + i % (baseRight - baseLeft) + 1;
 			int num4 = num2;
 			int num5 = Grid.XYToCell(num3, num4);
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
+			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
 			Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num5, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);

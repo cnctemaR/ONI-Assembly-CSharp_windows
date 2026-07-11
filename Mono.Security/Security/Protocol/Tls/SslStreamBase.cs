@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Mono.Security.Interface;
 using Mono.Security.X509;
 
 namespace Mono.Security.Protocol.Tls
@@ -35,17 +36,12 @@ namespace Mono.Security.Protocol.Tls
 			{
 				try
 				{
-					this.OnNegotiateHandshakeCallback(asyncResult);
+					this.EndNegotiateHandshake(asyncResult);
 				}
-				catch (TlsException ex)
+				catch (Exception ex)
 				{
-					this.protocol.SendAlert(ex.Alert);
+					this.protocol.SendAlert(ref ex);
 					throw new IOException("The authentication or decryption has failed.", ex);
-				}
-				catch (Exception ex2)
-				{
-					this.protocol.SendAlert(AlertDescription.InternalError);
-					throw new IOException("The authentication or decryption has failed.", ex2);
 				}
 				if (internalAsyncResult.ProceedAfterHandshake)
 				{
@@ -65,10 +61,10 @@ namespace Mono.Security.Protocol.Tls
 					internalAsyncResult.SetComplete();
 				}
 			}
-			catch (Exception ex3)
+			catch (Exception ex2)
 			{
 				this.negotiationComplete.Set();
-				internalAsyncResult.SetComplete(ex3);
+				internalAsyncResult.SetComplete(ex2);
 			}
 		}
 
@@ -81,12 +77,12 @@ namespace Mono.Security.Protocol.Tls
 					return false;
 				}
 				object obj = this.negotiate;
-				bool flag;
+				bool flag2;
 				lock (obj)
 				{
-					flag = this.context.HandshakeState != HandshakeState.Finished;
+					flag2 = this.context.HandshakeState != HandshakeState.Finished;
 				}
-				return flag;
+				return flag2;
 			}
 		}
 
@@ -98,17 +94,15 @@ namespace Mono.Security.Protocol.Tls
 				if (!this.BeginNegotiateHandshake(internalAsyncResult))
 				{
 					this.negotiationComplete.WaitOne();
+					return;
 				}
-				else
-				{
-					this.EndNegotiateHandshake(internalAsyncResult);
-				}
+				this.EndNegotiateHandshake(internalAsyncResult);
 			}
 		}
 
-		internal abstract IAsyncResult OnBeginNegotiateHandshake(AsyncCallback callback, object state);
+		internal abstract IAsyncResult BeginNegotiateHandshake(AsyncCallback callback, object state);
 
-		internal abstract void OnNegotiateHandshakeCallback(IAsyncResult asyncResult);
+		internal abstract void EndNegotiateHandshake(IAsyncResult result);
 
 		internal abstract global::System.Security.Cryptography.X509Certificates.X509Certificate OnLocalCertificateSelection(global::System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates, global::System.Security.Cryptography.X509Certificates.X509Certificate serverCertificate, string targetHost, global::System.Security.Cryptography.X509Certificates.X509CertificateCollection serverRequestedCertificates);
 
@@ -258,7 +252,7 @@ namespace Mono.Security.Protocol.Tls
 
 		private bool BeginNegotiateHandshake(SslStreamBase.InternalAsyncResult asyncResult)
 		{
-			bool flag;
+			bool flag2;
 			try
 			{
 				object obj = this.negotiate;
@@ -266,28 +260,22 @@ namespace Mono.Security.Protocol.Tls
 				{
 					if (this.context.HandshakeState == HandshakeState.None)
 					{
-						this.OnBeginNegotiateHandshake(new AsyncCallback(this.AsyncHandshakeCallback), asyncResult);
-						flag = true;
+						this.BeginNegotiateHandshake(new AsyncCallback(this.AsyncHandshakeCallback), asyncResult);
+						flag2 = true;
 					}
 					else
 					{
-						flag = false;
+						flag2 = false;
 					}
 				}
 			}
-			catch (TlsException ex)
+			catch (Exception ex)
 			{
 				this.negotiationComplete.Set();
-				this.protocol.SendAlert(ex.Alert);
+				this.protocol.SendAlert(ref ex);
 				throw new IOException("The authentication or decryption has failed.", ex);
 			}
-			catch (Exception ex2)
-			{
-				this.negotiationComplete.Set();
-				this.protocol.SendAlert(AlertDescription.InternalError);
-				throw new IOException("The authentication or decryption has failed.", ex2);
-			}
-			return flag;
+			return flag2;
 		}
 
 		private void EndNegotiateHandshake(SslStreamBase.InternalAsyncResult asyncResult)
@@ -349,13 +337,13 @@ namespace Mono.Security.Protocol.Tls
 				object obj = this.read;
 				lock (obj)
 				{
-					bool flag = this.inputBuffer.Position == this.inputBuffer.Length && this.inputBuffer.Length > 0L;
-					bool flag2 = this.inputBuffer.Length > 0L && asyncResult.Count > 0;
-					if (flag)
+					bool flag2 = this.inputBuffer.Position == this.inputBuffer.Length && this.inputBuffer.Length > 0L;
+					bool flag3 = this.inputBuffer.Length > 0L && asyncResult.Count > 0;
+					if (flag2)
 					{
 						this.resetBuffer();
 					}
-					else if (flag2)
+					else if (flag3)
 					{
 						num = this.inputBuffer.Read(asyncResult.Buffer, asyncResult.Offset, asyncResult.Count);
 					}
@@ -363,6 +351,10 @@ namespace Mono.Security.Protocol.Tls
 				if (0 < num)
 				{
 					asyncResult.SetComplete(num);
+				}
+				else if (this.recordStream.Position < this.recordStream.Length)
+				{
+					this.InternalReadCallback_inner(asyncResult, this.recbuf, new object[] { this.recbuf, asyncResult }, false, 0);
 				}
 				else if (!this.context.ReceivedConnectionEnd)
 				{
@@ -373,108 +365,26 @@ namespace Mono.Security.Protocol.Tls
 					asyncResult.SetComplete(0);
 				}
 			}
-			catch (TlsException ex)
+			catch (Exception ex)
 			{
-				this.protocol.SendAlert(ex.Alert);
+				this.protocol.SendAlert(ref ex);
 				throw new IOException("The authentication or decryption has failed.", ex);
-			}
-			catch (Exception ex2)
-			{
-				throw new IOException("IO exception during read.", ex2);
 			}
 		}
 
 		private void InternalReadCallback(IAsyncResult result)
 		{
-			if (this.disposed)
-			{
-				return;
-			}
 			object[] array = (object[])result.AsyncState;
 			byte[] array2 = (byte[])array[0];
 			SslStreamBase.InternalAsyncResult internalAsyncResult = (SslStreamBase.InternalAsyncResult)array[1];
 			try
 			{
+				this.checkDisposed();
 				int num = this.innerStream.EndRead(result);
 				if (num > 0)
 				{
 					this.recordStream.Write(array2, 0, num);
-					bool flag = false;
-					long num2 = this.recordStream.Position;
-					this.recordStream.Position = 0L;
-					byte[] array3 = null;
-					if (this.recordStream.Length >= 5L)
-					{
-						array3 = this.protocol.ReceiveRecord(this.recordStream);
-					}
-					while (array3 != null)
-					{
-						long num3 = this.recordStream.Length - this.recordStream.Position;
-						byte[] array4 = null;
-						if (num3 > 0L)
-						{
-							array4 = new byte[num3];
-							this.recordStream.Read(array4, 0, array4.Length);
-						}
-						object obj = this.read;
-						lock (obj)
-						{
-							long position = this.inputBuffer.Position;
-							if (array3.Length > 0)
-							{
-								this.inputBuffer.Seek(0L, SeekOrigin.End);
-								this.inputBuffer.Write(array3, 0, array3.Length);
-								this.inputBuffer.Seek(position, SeekOrigin.Begin);
-								flag = true;
-							}
-						}
-						this.recordStream.SetLength(0L);
-						array3 = null;
-						if (num3 > 0L)
-						{
-							this.recordStream.Write(array4, 0, array4.Length);
-							if (this.recordStream.Length >= 5L)
-							{
-								this.recordStream.Position = 0L;
-								array3 = this.protocol.ReceiveRecord(this.recordStream);
-								if (array3 == null)
-								{
-									num2 = this.recordStream.Length;
-								}
-							}
-							else
-							{
-								num2 = num3;
-							}
-						}
-						else
-						{
-							num2 = 0L;
-						}
-					}
-					if (!flag && num > 0)
-					{
-						if (this.context.ReceivedConnectionEnd)
-						{
-							internalAsyncResult.SetComplete(0);
-						}
-						else
-						{
-							this.recordStream.Position = this.recordStream.Length;
-							this.innerStream.BeginRead(array2, 0, array2.Length, new AsyncCallback(this.InternalReadCallback), array);
-						}
-					}
-					else
-					{
-						this.recordStream.Position = num2;
-						int num4 = 0;
-						object obj2 = this.read;
-						lock (obj2)
-						{
-							num4 = this.inputBuffer.Read(internalAsyncResult.Buffer, internalAsyncResult.Offset, internalAsyncResult.Count);
-						}
-						internalAsyncResult.SetComplete(num4);
-					}
+					this.InternalReadCallback_inner(internalAsyncResult, array2, array, true, num);
 				}
 				else
 				{
@@ -484,6 +394,97 @@ namespace Mono.Security.Protocol.Tls
 			catch (Exception ex)
 			{
 				internalAsyncResult.SetComplete(ex);
+			}
+		}
+
+		private void InternalReadCallback_inner(SslStreamBase.InternalAsyncResult internalResult, byte[] recbuf, object[] state, bool didRead, int n)
+		{
+			if (this.disposed)
+			{
+				return;
+			}
+			try
+			{
+				bool flag = false;
+				long num = this.recordStream.Position;
+				this.recordStream.Position = 0L;
+				byte[] array = null;
+				if (this.recordStream.Length >= 5L)
+				{
+					array = this.protocol.ReceiveRecord(this.recordStream);
+				}
+				while (array != null)
+				{
+					long num2 = this.recordStream.Length - this.recordStream.Position;
+					byte[] array2 = null;
+					if (num2 > 0L)
+					{
+						array2 = new byte[num2];
+						this.recordStream.Read(array2, 0, array2.Length);
+					}
+					object obj = this.read;
+					lock (obj)
+					{
+						long position = this.inputBuffer.Position;
+						if (array.Length != 0)
+						{
+							this.inputBuffer.Seek(0L, SeekOrigin.End);
+							this.inputBuffer.Write(array, 0, array.Length);
+							this.inputBuffer.Seek(position, SeekOrigin.Begin);
+							flag = true;
+						}
+					}
+					this.recordStream.SetLength(0L);
+					array = null;
+					if (num2 > 0L)
+					{
+						this.recordStream.Write(array2, 0, array2.Length);
+						if (this.recordStream.Length >= 5L)
+						{
+							this.recordStream.Position = 0L;
+							array = this.protocol.ReceiveRecord(this.recordStream);
+							if (array == null)
+							{
+								num = this.recordStream.Length;
+							}
+						}
+						else
+						{
+							num = num2;
+						}
+					}
+					else
+					{
+						num = 0L;
+					}
+				}
+				if (!flag && (!didRead || n > 0))
+				{
+					if (this.context.ReceivedConnectionEnd)
+					{
+						internalResult.SetComplete(0);
+					}
+					else
+					{
+						this.recordStream.Position = this.recordStream.Length;
+						this.innerStream.BeginRead(recbuf, 0, recbuf.Length, new AsyncCallback(this.InternalReadCallback), state);
+					}
+				}
+				else
+				{
+					this.recordStream.Position = num;
+					int num3 = 0;
+					object obj = this.read;
+					lock (obj)
+					{
+						num3 = this.inputBuffer.Read(internalResult.Buffer, internalResult.Offset, internalResult.Count);
+					}
+					internalResult.SetComplete(num3);
+				}
+			}
+			catch (Exception ex)
+			{
+				internalResult.SetComplete(ex);
 			}
 		}
 
@@ -498,27 +499,20 @@ namespace Mono.Security.Protocol.Tls
 					this.innerStream.BeginWrite(array, 0, array.Length, new AsyncCallback(this.InternalWriteCallback), asyncResult);
 				}
 			}
-			catch (TlsException ex)
+			catch (Exception ex)
 			{
-				this.protocol.SendAlert(ex.Alert);
+				this.protocol.SendAlert(ref ex);
 				this.Close();
 				throw new IOException("The authentication or decryption has failed.", ex);
-			}
-			catch (Exception ex2)
-			{
-				throw new IOException("IO exception during Write.", ex2);
 			}
 		}
 
 		private void InternalWriteCallback(IAsyncResult ar)
 		{
-			if (this.disposed)
-			{
-				return;
-			}
 			SslStreamBase.InternalAsyncResult internalAsyncResult = (SslStreamBase.InternalAsyncResult)ar.AsyncState;
 			try
 			{
+				this.checkDisposed();
 				this.innerStream.EndWrite(ar);
 				internalAsyncResult.SetComplete();
 			}
@@ -575,7 +569,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				throw new ArgumentNullException("asyncResult is null or was not obtained by calling BeginRead.");
 			}
-			if (!asyncResult.IsCompleted && !asyncResult.AsyncWaitHandle.WaitOne(300000, false))
+			if (!asyncResult.IsCompleted && !asyncResult.AsyncWaitHandle.WaitOne())
 			{
 				throw new TlsException(AlertDescription.InternalError, "Couldn't complete EndRead");
 			}
@@ -594,7 +588,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				throw new ArgumentNullException("asyncResult is null or was not obtained by calling BeginWrite.");
 			}
-			if (!asyncResult.IsCompleted && !internalAsyncResult.AsyncWaitHandle.WaitOne(300000, false))
+			if (!asyncResult.IsCompleted && !internalAsyncResult.AsyncWaitHandle.WaitOne())
 			{
 				throw new TlsException(AlertDescription.InternalError, "Couldn't complete EndWrite");
 			}
@@ -670,12 +664,12 @@ namespace Mono.Security.Protocol.Tls
 							}
 						}
 					}
-					bool flag = false;
+					bool flag2 = false;
 					for (;;)
 					{
-						if (this.recordStream.Position == 0L || flag)
+						if (this.recordStream.Position == 0L || flag2)
 						{
-							flag = false;
+							flag2 = false;
 							byte[] array = new byte[16384];
 							int num2 = 0;
 							if (count == 1)
@@ -701,13 +695,13 @@ namespace Mono.Security.Protocol.Tls
 							}
 							this.recordStream.Write(array, 0, num2);
 						}
-						bool flag2 = false;
+						bool flag3 = false;
 						this.recordStream.Position = 0L;
 						byte[] array2 = null;
 						if (this.recordStream.Length >= 5L)
 						{
 							array2 = this.protocol.ReceiveRecord(this.recordStream);
-							flag = array2 == null;
+							flag2 = array2 == null;
 						}
 						while (array2 != null)
 						{
@@ -719,28 +713,29 @@ namespace Mono.Security.Protocol.Tls
 								this.recordStream.Read(array3, 0, array3.Length);
 							}
 							long position = this.inputBuffer.Position;
-							if (array2.Length > 0)
+							if (array2.Length != 0)
 							{
 								this.inputBuffer.Seek(0L, SeekOrigin.End);
 								this.inputBuffer.Write(array2, 0, array2.Length);
 								this.inputBuffer.Seek(position, SeekOrigin.Begin);
-								flag2 = true;
+								flag3 = true;
 							}
 							this.recordStream.SetLength(0L);
 							array2 = null;
 							if (num4 > 0L)
 							{
 								this.recordStream.Write(array3, 0, array3.Length);
+								this.recordStream.Position = 0L;
 							}
-							if (flag2)
+							if (flag3)
 							{
-								goto Block_23;
+								goto Block_24;
 							}
 						}
 					}
 					SslStreamBase.record_processing.Set();
 					return 0;
-					Block_23:
+					Block_24:
 					int num5 = this.inputBuffer.Read(buffer, offset, count);
 					SslStreamBase.record_processing.Set();
 					num6 = num5;
@@ -807,15 +802,11 @@ namespace Mono.Security.Protocol.Tls
 					byte[] array = this.protocol.EncodeRecord(ContentType.ApplicationData, buffer, offset, count);
 					this.innerStream.Write(array, 0, array.Length);
 				}
-				catch (TlsException ex)
+				catch (Exception ex)
 				{
-					this.protocol.SendAlert(ex.Alert);
+					this.protocol.SendAlert(ref ex);
 					this.Close();
 					throw new IOException("The authentication or decryption has failed.", ex);
-				}
-				catch (Exception ex2)
-				{
-					throw new IOException("IO exception during Write.", ex2);
 				}
 			}
 		}
@@ -914,8 +905,6 @@ namespace Mono.Security.Protocol.Tls
 			}
 		}
 
-		private const int WaitTimeOut = 300000;
-
 		private static ManualResetEvent record_processing = new ManualResetEvent(true);
 
 		internal Stream innerStream;
@@ -943,6 +932,8 @@ namespace Mono.Security.Protocol.Tls
 		private byte[] recbuf = new byte[16384];
 
 		private MemoryStream recordStream = new MemoryStream();
+
+		private delegate void AsyncHandshakeDelegate(SslStreamBase.InternalAsyncResult asyncResult, bool fromWrite);
 
 		private class InternalAsyncResult : IAsyncResult
 		{
@@ -1025,7 +1016,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				get
 				{
-					return this.IsCompleted && null != this._asyncException;
+					return this.IsCompleted && this._asyncException != null;
 				}
 			}
 
@@ -1058,12 +1049,12 @@ namespace Mono.Security.Protocol.Tls
 				get
 				{
 					object obj = this.locker;
-					bool flag;
+					bool flag2;
 					lock (obj)
 					{
-						flag = this.completed;
+						flag2 = this.completed;
 					}
-					return flag;
+					return flag2;
 				}
 			}
 
@@ -1129,7 +1120,5 @@ namespace Mono.Security.Protocol.Tls
 
 			private int _count;
 		}
-
-		private delegate void AsyncHandshakeDelegate(SslStreamBase.InternalAsyncResult asyncResult, bool fromWrite);
 	}
 }

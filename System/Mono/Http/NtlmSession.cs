@@ -6,33 +6,46 @@ namespace Mono.Http
 {
 	internal class NtlmSession
 	{
-		public global::System.Net.Authorization Authenticate(string challenge, global::System.Net.WebRequest webRequest, global::System.Net.ICredentials credentials)
+		public Authorization Authenticate(string challenge, WebRequest webRequest, ICredentials credentials)
 		{
-			global::System.Net.HttpWebRequest httpWebRequest = webRequest as global::System.Net.HttpWebRequest;
+			HttpWebRequest httpWebRequest = webRequest as HttpWebRequest;
 			if (httpWebRequest == null)
 			{
 				return null;
 			}
-			global::System.Net.NetworkCredential credential = credentials.GetCredential(httpWebRequest.RequestUri, "NTLM");
+			NetworkCredential credential = credentials.GetCredential(httpWebRequest.RequestUri, "NTLM");
 			if (credential == null)
 			{
 				return null;
 			}
-			string userName = credential.UserName;
-			string text = credential.Domain;
-			string text2 = credential.Password;
-			if (userName == null || userName == string.Empty)
+			string text = credential.UserName;
+			string text2 = credential.Domain;
+			string text3 = credential.Password;
+			if (text == null || text == "")
 			{
 				return null;
 			}
-			text = ((text == null || text.Length <= 0) ? httpWebRequest.Headers["Host"] : text);
+			if (string.IsNullOrEmpty(text2))
+			{
+				int num = text.IndexOf('\\');
+				if (num == -1)
+				{
+					num = text.IndexOf('/');
+				}
+				if (num >= 0)
+				{
+					text2 = text.Substring(0, num);
+					text = text.Substring(num + 1);
+				}
+			}
 			bool flag = false;
 			if (this.message == null)
 			{
-				this.message = new Type1Message
-				{
-					Domain = text
-				};
+				Type1Message type1Message = new Type1Message();
+				type1Message.Domain = text2;
+				type1Message.Host = "";
+				type1Message.Flags |= NtlmFlags.NegotiateNtlm2Key;
+				this.message = type1Message;
 			}
 			else if (this.message.Type == 1)
 			{
@@ -42,16 +55,15 @@ namespace Mono.Http
 					return null;
 				}
 				Type2Message type2Message = new Type2Message(Convert.FromBase64String(challenge));
-				if (text2 == null)
+				if (text3 == null)
 				{
-					text2 = string.Empty;
+					text3 = "";
 				}
-				this.message = new Type3Message
+				this.message = new Type3Message(type2Message)
 				{
-					Domain = text,
-					Username = userName,
-					Challenge = type2Message.Nonce,
-					Password = text2
+					Username = text,
+					Password = text3,
+					Domain = text2
 				};
 				flag = true;
 			}
@@ -59,15 +71,15 @@ namespace Mono.Http
 			{
 				this.message = new Type1Message
 				{
-					Domain = text
+					Domain = text2,
+					Host = ""
 				};
 			}
 			else
 			{
 				flag = true;
 			}
-			string text3 = "NTLM " + Convert.ToBase64String(this.message.GetBytes());
-			return new global::System.Net.Authorization(text3, flag);
+			return new Authorization("NTLM " + Convert.ToBase64String(this.message.GetBytes()), flag);
 		}
 
 		private MessageBase message;

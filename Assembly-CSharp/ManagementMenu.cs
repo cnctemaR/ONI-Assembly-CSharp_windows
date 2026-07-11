@@ -6,22 +6,23 @@ using UnityEngine;
 
 public class ManagementMenu : KIconToggleMenu
 {
+	public static void DestroyInstance()
+	{
+		ManagementMenu.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		ManagementMenu.Instance = this;
 		CodexCache.Init();
 		this.instantiator.Instantiate();
-		this.jobsScreen = this.instantiator.GetComponentInChildren<JobsTableScreen>();
-		this.jobsScreen.gameObject.SetActive(false);
-		this.consumablesScreen = this.instantiator.GetComponentInChildren<ConsumablesTableScreen>();
-		this.consumablesScreen.gameObject.SetActive(false);
-		this.vitalsScreen = this.instantiator.GetComponentInChildren<VitalsTableScreen>();
-		this.vitalsScreen.gameObject.SetActive(false);
+		this.jobsScreen = this.instantiator.GetComponentInChildren<JobsTableScreen>(true);
+		this.consumablesScreen = this.instantiator.GetComponentInChildren<ConsumablesTableScreen>(true);
+		this.vitalsScreen = this.instantiator.GetComponentInChildren<VitalsTableScreen>(true);
 		this.codexScreen = this.instantiator.GetComponentInChildren<CodexScreen>(true);
-		this.codexScreen.gameObject.SetActive(false);
+		this.scheduleScreen = this.instantiator.GetComponentInChildren<ScheduleScreen>(true);
 		this.rolesScreen = Resources.FindObjectsOfTypeAll(typeof(RolesScreen))[0] as KScreen;
-		this.rolesScreen.gameObject.SetActive(false);
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
 		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, string.Empty);
 		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, string.Empty);
@@ -31,6 +32,8 @@ public class ManagementMenu : KIconToggleMenu
 		this.rolesInfo = new KIconToggleMenu.ToggleInfo(UI.ROLES_SCREEN.MANAGEMENT_BUTTON, "OverviewUI_jobs_icon", null, global::Action.ManageRoles, UI.TOOLTIPS.MANAGEMENTMENU_ROLES, string.Empty);
 		this.codexInfo = new KIconToggleMenu.ToggleInfo(UI.CODEX.MANAGEMENT_BUTTON, "OverviewUI_database_icon", null, global::Action.ManageCodex, UI.TOOLTIPS.MANAGEMENTMENU_CODEX, string.Empty);
 		this.codexInfo.prefabOverride = this.smallPrefab;
+		this.scheduleInfo = new KIconToggleMenu.ToggleInfo(UI.SCHEDULE, null, null, global::Action.ManageSchedule, UI.TOOLTIPS.MANAGEMENTMENU_SCHEDULE, string.Empty);
+		this.scheduleInfo.instanceOverride = global::DateTime.Instance.scheduleToggle;
 		this.ScreenInfoMatch.Add(this.consumablesInfo, new ManagementMenu.ScreenData
 		{
 			screen = this.consumablesScreen,
@@ -67,20 +70,18 @@ public class ManagementMenu : KIconToggleMenu
 			tabIdx = 6,
 			toggleInfo = this.codexInfo
 		});
-		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.researchInfo, this.jobsInfo, this.rolesInfo, this.codexInfo });
-		base.onSelect += this.OnButtonClick;
-		foreach (KeyValuePair<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData> keyValuePair in this.ScreenInfoMatch)
+		this.ScreenInfoMatch.Add(this.scheduleInfo, new ManagementMenu.ScreenData
 		{
-			keyValuePair.Value.screen.Show(false);
-		}
-		Components.Cmps<ResearchCenter> researchCenters = Components.ResearchCenters;
-		researchCenters.OnAdd = (Action<ResearchCenter>)Delegate.Combine(researchCenters.OnAdd, new Action<ResearchCenter>(this.CheckResearch));
-		Components.Cmps<ResearchCenter> researchCenters2 = Components.ResearchCenters;
-		researchCenters2.OnRemove = (Action<ResearchCenter>)Delegate.Combine(researchCenters2.OnRemove, new Action<ResearchCenter>(this.CheckResearch));
-		Components.Cmps<RoleStation> roleStations = Components.RoleStations;
-		roleStations.OnAdd = (Action<RoleStation>)Delegate.Combine(roleStations.OnAdd, new Action<RoleStation>(this.CheckRoles));
-		Components.Cmps<RoleStation> roleStations2 = Components.RoleStations;
-		roleStations2.OnRemove = (Action<RoleStation>)Delegate.Combine(roleStations2.OnRemove, new Action<RoleStation>(this.CheckRoles));
+			screen = this.scheduleScreen,
+			tabIdx = 7,
+			toggleInfo = this.scheduleInfo
+		});
+		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.researchInfo, this.jobsInfo, this.rolesInfo, this.codexInfo, this.scheduleInfo });
+		base.onSelect += this.OnButtonClick;
+		Components.ResearchCenters.OnAdd += new Action<ResearchCenter>(this.CheckResearch);
+		Components.ResearchCenters.OnRemove += new Action<ResearchCenter>(this.CheckResearch);
+		Components.RoleStations.OnAdd += new Action<RoleStation>(this.CheckRoles);
+		Components.RoleStations.OnRemove += new Action<RoleStation>(this.CheckRoles);
 		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckResearch));
 		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckRoles));
 		this.CheckResearch(null);

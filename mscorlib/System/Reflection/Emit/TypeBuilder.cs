@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -9,26 +10,32 @@ using System.Security.Permissions;
 
 namespace System.Reflection.Emit
 {
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_TypeBuilder))]
+	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
-	public sealed class TypeBuilder : Type, _TypeBuilder
+	[StructLayout(LayoutKind.Sequential)]
+	public sealed class TypeBuilder : TypeInfo, _TypeBuilder
 	{
+		protected override TypeAttributes GetAttributeFlagsImpl()
+		{
+			return this.attrs;
+		}
+
 		internal TypeBuilder(ModuleBuilder mb, TypeAttributes attr, int table_idx)
 		{
 			this.parent = null;
 			this.attrs = attr;
 			this.class_size = 0;
 			this.table_idx = table_idx;
-			this.fullname = (this.tname = ((table_idx != 1) ? ("type_" + table_idx) : "<Module>"));
+			this.tname = ((table_idx == 1) ? "<Module>" : ("type_" + table_idx.ToString()));
 			this.nspace = string.Empty;
+			this.fullname = TypeIdentifiers.WithoutEscape(this.tname);
 			this.pmodule = mb;
-			this.setup_internal_class(this);
 		}
 
 		internal TypeBuilder(ModuleBuilder mb, string name, TypeAttributes attr, Type parent, Type[] interfaces, PackingSize packing_size, int type_size, Type nesting_type)
 		{
-			this.parent = parent;
+			this.parent = TypeBuilder.ResolveUserType(parent);
 			this.attrs = attr;
 			this.class_size = type_size;
 			this.packing_size = packing_size;
@@ -55,54 +62,13 @@ namespace System.Reflection.Emit
 				Array.Copy(interfaces, this.interfaces, interfaces.Length);
 			}
 			this.pmodule = mb;
-			if ((attr & TypeAttributes.ClassSemanticsMask) == TypeAttributes.NotPublic && parent == null && !this.IsCompilerContext)
+			if ((attr & TypeAttributes.ClassSemanticsMask) == TypeAttributes.NotPublic && parent == null)
 			{
 				this.parent = typeof(object);
 			}
 			this.table_idx = mb.get_next_table_index(this, 2, true);
-			this.setup_internal_class(this);
 			this.fullname = this.GetFullName();
 		}
-
-		void _TypeBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _TypeBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _TypeBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _TypeBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
-
-		protected override TypeAttributes GetAttributeFlagsImpl()
-		{
-			return this.attrs;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void setup_internal_class(TypeBuilder tb);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void create_internal_class(TypeBuilder tb);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void setup_generic_class();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void create_generic_class();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern EventInfo get_event_info(EventBuilder eb);
 
 		public override Assembly Assembly
 		{
@@ -116,7 +82,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				return this.fullname + ", " + this.Assembly.FullName;
+				return this.fullname.DisplayName + ", " + this.Assembly.FullName;
 			}
 		}
 
@@ -136,6 +102,29 @@ namespace System.Reflection.Emit
 			}
 		}
 
+		[ComVisible(true)]
+		public override bool IsSubclassOf(Type c)
+		{
+			if (c == null)
+			{
+				return false;
+			}
+			if (c == this)
+			{
+				return false;
+			}
+			Type baseType = this.parent;
+			while (baseType != null)
+			{
+				if (c == baseType)
+				{
+					return true;
+				}
+				baseType = baseType.BaseType;
+			}
+			return false;
+		}
+
 		public override Type UnderlyingSystemType
 		{
 			get
@@ -144,7 +133,7 @@ namespace System.Reflection.Emit
 				{
 					return this.created.UnderlyingSystemType;
 				}
-				if (!this.IsEnum || this.IsCompilerContext)
+				if (!this.IsEnum)
 				{
 					return this;
 				}
@@ -156,24 +145,25 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		private string GetFullName()
+		private TypeName GetFullName()
 		{
+			TypeIdentifier typeIdentifier = TypeIdentifiers.FromInternal(this.tname);
 			if (this.nesting_type != null)
 			{
-				return this.nesting_type.FullName + "+" + this.tname;
+				return TypeNames.FromDisplay(this.nesting_type.FullName).NestedName(typeIdentifier);
 			}
 			if (this.nspace != null && this.nspace.Length > 0)
 			{
-				return this.nspace + "." + this.tname;
+				return TypeIdentifiers.FromInternal(this.nspace, typeIdentifier);
 			}
-			return this.tname;
+			return typeIdentifier;
 		}
 
 		public override string FullName
 		{
 			get
 			{
-				return this.fullname;
+				return this.fullname.DisplayName;
 			}
 		}
 
@@ -247,9 +237,10 @@ namespace System.Reflection.Emit
 			this.check_not_created();
 			if (this.permissions != null)
 			{
-				foreach (RefEmitPermissionSet refEmitPermissionSet in this.permissions)
+				RefEmitPermissionSet[] array = this.permissions;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (refEmitPermissionSet.action == action)
+					if (array[i].action == action)
 					{
 						throw new InvalidOperationException("Multiple permission sets specified with the same SecurityAction.");
 					}
@@ -276,9 +267,10 @@ namespace System.Reflection.Emit
 			this.check_not_created();
 			if (this.interfaces != null)
 			{
-				foreach (Type type in this.interfaces)
+				Type[] array = this.interfaces;
+				for (int i = 0; i < array.Length; i++)
 				{
-					if (type == interfaceType)
+					if (array[i] == interfaceType)
 					{
 						return;
 					}
@@ -287,18 +279,16 @@ namespace System.Reflection.Emit
 				this.interfaces.CopyTo(array2, 0);
 				array2[this.interfaces.Length] = interfaceType;
 				this.interfaces = array2;
+				return;
 			}
-			else
-			{
-				this.interfaces = new Type[1];
-				this.interfaces[0] = interfaceType;
-			}
+			this.interfaces = new Type[1];
+			this.interfaces[0] = interfaceType;
 		}
 
 		protected override ConstructorInfo GetConstructorImpl(BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
 		{
 			this.check_created();
-			if (this.created != typeof(object))
+			if (!(this.created == typeof(object)))
 			{
 				return this.created.GetConstructor(bindingAttr, binder, callConvention, types, modifiers);
 			}
@@ -340,7 +330,7 @@ namespace System.Reflection.Emit
 				}
 				if (binder == null)
 				{
-					binder = Binder.DefaultBinder;
+					binder = Type.DefaultBinder;
 				}
 				return (ConstructorInfo)binder.SelectMethod(bindingAttr, array2, types, modifiers);
 			}
@@ -353,7 +343,7 @@ namespace System.Reflection.Emit
 
 		public override bool IsDefined(Type attributeType, bool inherit)
 		{
-			if (!this.is_created && !this.IsCompilerContext)
+			if (!this.is_created)
 			{
 				throw new NotSupportedException();
 			}
@@ -433,6 +423,11 @@ namespace System.Reflection.Emit
 			return this.DefineNestedType(name, attr, parent, null, packSize, 0);
 		}
 
+		public TypeBuilder DefineNestedType(string name, TypeAttributes attr, Type parent, PackingSize packSize, int typeSize)
+		{
+			return this.DefineNestedType(name, attr, parent, null, packSize, typeSize);
+		}
+
 		[ComVisible(true)]
 		public ConstructorBuilder DefineConstructor(MethodAttributes attributes, CallingConventions callingConvention, Type[] parameterTypes)
 		{
@@ -462,16 +457,22 @@ namespace System.Reflection.Emit
 		[ComVisible(true)]
 		public ConstructorBuilder DefineDefaultConstructor(MethodAttributes attributes)
 		{
-			Type corlib_object_type;
+			Type type;
 			if (this.parent != null)
 			{
-				corlib_object_type = this.parent;
+				type = this.parent;
 			}
 			else
 			{
-				corlib_object_type = this.pmodule.assemblyb.corlib_object_type;
+				type = this.pmodule.assemblyb.corlib_object_type;
 			}
-			ConstructorInfo constructor = corlib_object_type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+			Type type2 = type;
+			type = type.InternalResolve();
+			if (type == typeof(object) || type == typeof(ValueType))
+			{
+				type = type2;
+			}
+			ConstructorInfo constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
 			if (constructor == null)
 			{
 				throw new NotSupportedException("Parent does not have a default constructor. The default constructor must be explicitly defined.");
@@ -517,7 +518,7 @@ namespace System.Reflection.Emit
 		{
 			this.check_name("name", name);
 			this.check_not_created();
-			if (this.IsInterface && ((attributes & MethodAttributes.Abstract) == MethodAttributes.PrivateScope || (attributes & MethodAttributes.Virtual) == MethodAttributes.PrivateScope) && (attributes & MethodAttributes.Static) == MethodAttributes.PrivateScope)
+			if (base.IsInterface && ((attributes & MethodAttributes.Abstract) == MethodAttributes.PrivateScope || (attributes & MethodAttributes.Virtual) == MethodAttributes.PrivateScope) && (attributes & MethodAttributes.Static) == MethodAttributes.PrivateScope)
 			{
 				throw new ArgumentException("Interface method must be abstract and virtual.");
 			}
@@ -544,7 +545,7 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentException("PInvoke methods must be static and native and cannot be abstract.");
 			}
-			if (this.IsInterface)
+			if (base.IsInterface)
 			{
 				throw new ArgumentException("PInvoke methods cannot exist on interfaces.");
 			}
@@ -586,8 +587,7 @@ namespace System.Reflection.Emit
 			}
 			if (methodInfoBody is MethodBuilder)
 			{
-				MethodBuilder methodBuilder = (MethodBuilder)methodInfoBody;
-				methodBuilder.set_override(methodInfoDeclaration);
+				((MethodBuilder)methodInfoBody).set_override(methodInfoDeclaration);
 			}
 		}
 
@@ -621,9 +621,8 @@ namespace System.Reflection.Emit
 				this.fields = new FieldBuilder[1];
 				this.fields[0] = fieldBuilder;
 				this.num_fields++;
-				this.create_internal_class(this);
 			}
-			if (this.IsEnum && !this.IsCompilerContext && this.underlying_type == null && (attributes & FieldAttributes.Static) == FieldAttributes.PrivateScope)
+			if (this.IsEnum && this.underlying_type == null && (attributes & FieldAttributes.Static) == FieldAttributes.PrivateScope)
 			{
 				this.underlying_type = type;
 			}
@@ -632,10 +631,20 @@ namespace System.Reflection.Emit
 
 		public PropertyBuilder DefineProperty(string name, PropertyAttributes attributes, Type returnType, Type[] parameterTypes)
 		{
-			return this.DefineProperty(name, attributes, returnType, null, null, parameterTypes, null, null);
+			return this.DefineProperty(name, attributes, (CallingConventions)0, returnType, null, null, parameterTypes, null, null);
+		}
+
+		public PropertyBuilder DefineProperty(string name, PropertyAttributes attributes, CallingConventions callingConvention, Type returnType, Type[] parameterTypes)
+		{
+			return this.DefineProperty(name, attributes, callingConvention, returnType, null, null, parameterTypes, null, null);
 		}
 
 		public PropertyBuilder DefineProperty(string name, PropertyAttributes attributes, Type returnType, Type[] returnTypeRequiredCustomModifiers, Type[] returnTypeOptionalCustomModifiers, Type[] parameterTypes, Type[][] parameterTypeRequiredCustomModifiers, Type[][] parameterTypeOptionalCustomModifiers)
+		{
+			return this.DefineProperty(name, attributes, (CallingConventions)0, returnType, returnTypeRequiredCustomModifiers, returnTypeOptionalCustomModifiers, parameterTypes, parameterTypeRequiredCustomModifiers, parameterTypeOptionalCustomModifiers);
+		}
+
+		public PropertyBuilder DefineProperty(string name, PropertyAttributes attributes, CallingConventions callingConvention, Type returnType, Type[] returnTypeRequiredCustomModifiers, Type[] returnTypeOptionalCustomModifiers, Type[] parameterTypes, Type[][] parameterTypeRequiredCustomModifiers, Type[][] parameterTypeOptionalCustomModifiers)
 		{
 			this.check_name("name", name);
 			if (parameterTypes != null)
@@ -649,18 +658,15 @@ namespace System.Reflection.Emit
 				}
 			}
 			this.check_not_created();
-			PropertyBuilder propertyBuilder = new PropertyBuilder(this, name, attributes, returnType, returnTypeRequiredCustomModifiers, returnTypeOptionalCustomModifiers, parameterTypes, parameterTypeRequiredCustomModifiers, parameterTypeOptionalCustomModifiers);
+			PropertyBuilder propertyBuilder = new PropertyBuilder(this, name, attributes, callingConvention, returnType, returnTypeRequiredCustomModifiers, returnTypeOptionalCustomModifiers, parameterTypes, parameterTypeRequiredCustomModifiers, parameterTypeOptionalCustomModifiers);
 			if (this.properties != null)
 			{
-				PropertyBuilder[] array = new PropertyBuilder[this.properties.Length + 1];
-				Array.Copy(this.properties, array, this.properties.Length);
-				array[this.properties.Length] = propertyBuilder;
-				this.properties = array;
+				Array.Resize<PropertyBuilder>(ref this.properties, this.properties.Length + 1);
+				this.properties[this.properties.Length - 1] = propertyBuilder;
 			}
 			else
 			{
-				this.properties = new PropertyBuilder[1];
-				this.properties[0] = propertyBuilder;
+				this.properties = new PropertyBuilder[] { propertyBuilder };
 			}
 			return propertyBuilder;
 		}
@@ -672,7 +678,7 @@ namespace System.Reflection.Emit
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Type create_runtime_class(TypeBuilder tb);
+		private extern TypeInfo create_runtime_class();
 
 		private bool is_nested_in(Type t)
 		{
@@ -703,20 +709,24 @@ namespace System.Reflection.Emit
 
 		public Type CreateType()
 		{
+			return this.CreateTypeInfo();
+		}
+
+		public TypeInfo CreateTypeInfo()
+		{
 			if (this.createTypeCalled)
 			{
 				return this.created;
 			}
-			if (!this.IsInterface && this.parent == null && this != this.pmodule.assemblyb.corlib_object_type && this.FullName != "<Module>")
+			if (!base.IsInterface && this.parent == null && this != this.pmodule.assemblyb.corlib_object_type && this.FullName != "<Module>")
 			{
 				this.SetParent(this.pmodule.assemblyb.corlib_object_type);
 			}
-			this.create_generic_class();
 			if (this.fields != null)
 			{
 				foreach (FieldBuilder fieldBuilder in this.fields)
 				{
-					if (fieldBuilder != null)
+					if (!(fieldBuilder == null))
 					{
 						Type fieldType = fieldBuilder.FieldType;
 						if (!fieldBuilder.IsStatic && fieldType is TypeBuilder && fieldType.IsValueType && fieldType != this && this.is_nested_in(fieldType))
@@ -725,14 +735,17 @@ namespace System.Reflection.Emit
 							if (!typeBuilder.is_created)
 							{
 								AppDomain.CurrentDomain.DoTypeResolve(typeBuilder);
-								if (!typeBuilder.is_created)
-								{
-								}
+								bool is_created = typeBuilder.is_created;
 							}
 						}
 					}
 				}
 			}
+			if (!base.IsInterface && !base.IsValueType && this.ctors == null && this.tname != "<Module>" && ((this.GetAttributeFlagsImpl() & TypeAttributes.Abstract) | TypeAttributes.Sealed) != (TypeAttributes.Abstract | TypeAttributes.Sealed) && !this.has_ctor_method())
+			{
+				this.DefineDefaultConstructor(MethodAttributes.Public);
+			}
+			this.createTypeCalled = true;
 			if (this.parent != null && this.parent.IsSealed)
 			{
 				throw new TypeLoadException(string.Concat(new object[] { "Could not load type '", this.FullName, "' from assembly '", this.Assembly, "' because the parent type is sealed." }));
@@ -741,9 +754,19 @@ namespace System.Reflection.Emit
 			{
 				throw new TypeLoadException(string.Concat(new object[] { "Could not load type '", this.FullName, "' from assembly '", this.Assembly, "' because it is an enum with methods." }));
 			}
+			if (this.interfaces != null)
+			{
+				foreach (Type type in this.interfaces)
+				{
+					if (type.IsNestedPrivate && type.Assembly != this.Assembly)
+					{
+						throw new TypeLoadException(string.Concat(new object[] { "Could not load type '", this.FullName, "' from assembly '", this.Assembly, "' because it is implements the inaccessible interface '", type.FullName, "'." }));
+					}
+				}
+			}
 			if (this.methods != null)
 			{
-				bool flag = !this.IsAbstract;
+				bool flag = !base.IsAbstract;
 				for (int j = 0; j < this.num_methods; j++)
 				{
 					MethodBuilder methodBuilder = this.methods[j];
@@ -755,24 +778,109 @@ namespace System.Reflection.Emit
 					methodBuilder.fixup();
 				}
 			}
-			if (!this.IsInterface && !this.IsValueType && this.ctors == null && this.tname != "<Module>" && ((this.GetAttributeFlagsImpl() & TypeAttributes.Abstract) | TypeAttributes.Sealed) != (TypeAttributes.Abstract | TypeAttributes.Sealed) && !this.has_ctor_method())
-			{
-				this.DefineDefaultConstructor(MethodAttributes.Public);
-			}
 			if (this.ctors != null)
 			{
-				foreach (ConstructorBuilder constructorBuilder in this.ctors)
+				ConstructorBuilder[] array3 = this.ctors;
+				for (int i = 0; i < array3.Length; i++)
 				{
-					constructorBuilder.fixup();
+					array3[i].fixup();
 				}
 			}
-			this.createTypeCalled = true;
-			this.created = this.create_runtime_class(this);
+			this.ResolveUserTypes();
+			this.created = this.create_runtime_class();
 			if (this.created != null)
 			{
 				return this.created;
 			}
 			return this;
+		}
+
+		private void ResolveUserTypes()
+		{
+			this.parent = TypeBuilder.ResolveUserType(this.parent);
+			TypeBuilder.ResolveUserTypes(this.interfaces);
+			if (this.fields != null)
+			{
+				foreach (FieldBuilder fieldBuilder in this.fields)
+				{
+					if (fieldBuilder != null)
+					{
+						fieldBuilder.ResolveUserTypes();
+					}
+				}
+			}
+			if (this.methods != null)
+			{
+				foreach (MethodBuilder methodBuilder in this.methods)
+				{
+					if (methodBuilder != null)
+					{
+						methodBuilder.ResolveUserTypes();
+					}
+				}
+			}
+			if (this.ctors != null)
+			{
+				foreach (ConstructorBuilder constructorBuilder in this.ctors)
+				{
+					if (constructorBuilder != null)
+					{
+						constructorBuilder.ResolveUserTypes();
+					}
+				}
+			}
+		}
+
+		internal static void ResolveUserTypes(Type[] types)
+		{
+			if (types != null)
+			{
+				for (int i = 0; i < types.Length; i++)
+				{
+					types[i] = TypeBuilder.ResolveUserType(types[i]);
+				}
+			}
+		}
+
+		internal static Type ResolveUserType(Type t)
+		{
+			if (!(t != null) || (!(t.GetType().Assembly != typeof(int).Assembly) && !(t is TypeDelegator)))
+			{
+				return t;
+			}
+			t = t.UnderlyingSystemType;
+			if (t != null && (t.GetType().Assembly != typeof(int).Assembly || t is TypeDelegator))
+			{
+				throw new NotSupportedException("User defined subclasses of System.Type are not yet supported.");
+			}
+			return t;
+		}
+
+		internal void FixupTokens(Dictionary<int, int> token_map, Dictionary<int, MemberInfo> member_map)
+		{
+			if (this.methods != null)
+			{
+				for (int i = 0; i < this.num_methods; i++)
+				{
+					this.methods[i].FixupTokens(token_map, member_map);
+				}
+			}
+			if (this.ctors != null)
+			{
+				ConstructorBuilder[] array = this.ctors;
+				for (int j = 0; j < array.Length; j++)
+				{
+					array[j].FixupTokens(token_map, member_map);
+				}
+			}
+			if (this.subtypes != null)
+			{
+				TypeBuilder[] array2 = this.subtypes;
+				for (int j = 0; j < array2.Length; j++)
+				{
+					array2[j].FixupTokens(token_map, member_map);
+				}
+			}
 		}
 
 		internal void GenerateDebugInfo(ISymbolWriter symbolWriter)
@@ -782,15 +890,15 @@ namespace System.Reflection.Emit
 			{
 				for (int i = 0; i < this.num_methods; i++)
 				{
-					MethodBuilder methodBuilder = this.methods[i];
-					methodBuilder.GenerateDebugInfo(symbolWriter);
+					this.methods[i].GenerateDebugInfo(symbolWriter);
 				}
 			}
 			if (this.ctors != null)
 			{
-				foreach (ConstructorBuilder constructorBuilder in this.ctors)
+				ConstructorBuilder[] array = this.ctors;
+				for (int j = 0; j < array.Length; j++)
 				{
-					constructorBuilder.GenerateDebugInfo(symbolWriter);
+					array[j].GenerateDebugInfo(symbolWriter);
 				}
 			}
 			symbolWriter.CloseNamespace();
@@ -810,11 +918,7 @@ namespace System.Reflection.Emit
 			{
 				return this.created.GetConstructors(bindingAttr);
 			}
-			if (!this.IsCompilerContext)
-			{
-				throw new NotSupportedException();
-			}
-			return this.GetConstructorsInternal(bindingAttr);
+			throw new NotSupportedException();
 		}
 
 		internal ConstructorInfo[] GetConstructorsInternal(BindingFlags bindingAttr)
@@ -886,70 +990,7 @@ namespace System.Reflection.Emit
 			{
 				return this.created.GetEvents(bindingAttr);
 			}
-			if (!this.IsCompilerContext)
-			{
-				throw new NotSupportedException();
-			}
-			return new EventInfo[0];
-		}
-
-		internal EventInfo[] GetEvents_internal(BindingFlags bindingAttr)
-		{
-			if (this.events == null)
-			{
-				return new EventInfo[0];
-			}
-			ArrayList arrayList = new ArrayList();
-			foreach (EventBuilder eventBuilder in this.events)
-			{
-				if (eventBuilder != null)
-				{
-					EventInfo eventInfo = this.get_event_info(eventBuilder);
-					bool flag = false;
-					MethodInfo methodInfo = eventInfo.GetAddMethod(true);
-					if (methodInfo == null)
-					{
-						methodInfo = eventInfo.GetRemoveMethod(true);
-					}
-					if (methodInfo != null)
-					{
-						MethodAttributes attributes = methodInfo.Attributes;
-						if ((attributes & MethodAttributes.MemberAccessMask) == MethodAttributes.Public)
-						{
-							if ((bindingAttr & BindingFlags.Public) != BindingFlags.Default)
-							{
-								flag = true;
-							}
-						}
-						else if ((bindingAttr & BindingFlags.NonPublic) != BindingFlags.Default)
-						{
-							flag = true;
-						}
-						if (flag)
-						{
-							flag = false;
-							if ((attributes & MethodAttributes.Static) != MethodAttributes.PrivateScope)
-							{
-								if ((bindingAttr & BindingFlags.Static) != BindingFlags.Default)
-								{
-									flag = true;
-								}
-							}
-							else if ((bindingAttr & BindingFlags.Instance) != BindingFlags.Default)
-							{
-								flag = true;
-							}
-							if (flag)
-							{
-								arrayList.Add(eventInfo);
-							}
-						}
-					}
-				}
-			}
-			EventInfo[] array2 = new EventInfo[arrayList.Count];
-			arrayList.CopyTo(array2);
-			return array2;
+			throw new NotSupportedException();
 		}
 
 		public override FieldInfo GetField(string name, BindingFlags bindingAttr)
@@ -964,41 +1005,38 @@ namespace System.Reflection.Emit
 			}
 			foreach (FieldBuilder fieldInfo in this.fields)
 			{
-				if (fieldInfo != null)
+				if (!(fieldInfo == null) && !(fieldInfo.Name != name))
 				{
-					if (!(fieldInfo.Name != name))
+					bool flag = false;
+					FieldAttributes attributes = fieldInfo.Attributes;
+					if ((attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Public)
 					{
-						bool flag = false;
-						FieldAttributes attributes = fieldInfo.Attributes;
-						if ((attributes & FieldAttributes.FieldAccessMask) == FieldAttributes.Public)
+						if ((bindingAttr & BindingFlags.Public) != BindingFlags.Default)
 						{
-							if ((bindingAttr & BindingFlags.Public) != BindingFlags.Default)
+							flag = true;
+						}
+					}
+					else if ((bindingAttr & BindingFlags.NonPublic) != BindingFlags.Default)
+					{
+						flag = true;
+					}
+					if (flag)
+					{
+						flag = false;
+						if ((attributes & FieldAttributes.Static) != FieldAttributes.PrivateScope)
+						{
+							if ((bindingAttr & BindingFlags.Static) != BindingFlags.Default)
 							{
 								flag = true;
 							}
 						}
-						else if ((bindingAttr & BindingFlags.NonPublic) != BindingFlags.Default)
+						else if ((bindingAttr & BindingFlags.Instance) != BindingFlags.Default)
 						{
 							flag = true;
 						}
 						if (flag)
 						{
-							flag = false;
-							if ((attributes & FieldAttributes.Static) != FieldAttributes.PrivateScope)
-							{
-								if ((bindingAttr & BindingFlags.Static) != BindingFlags.Default)
-								{
-									flag = true;
-								}
-							}
-							else if ((bindingAttr & BindingFlags.Instance) != BindingFlags.Default)
-							{
-								flag = true;
-							}
-							if (flag)
-							{
-								return fieldInfo;
-							}
+							return fieldInfo;
 						}
 					}
 				}
@@ -1019,7 +1057,7 @@ namespace System.Reflection.Emit
 			ArrayList arrayList = new ArrayList();
 			foreach (FieldBuilder fieldInfo in this.fields)
 			{
-				if (fieldInfo != null)
+				if (!(fieldInfo == null))
 				{
 					bool flag = false;
 					FieldAttributes attributes = fieldInfo.Attributes;
@@ -1100,43 +1138,41 @@ namespace System.Reflection.Emit
 			{
 				MethodInfo[] array = this.parent.GetMethods(bindingAttr);
 				ArrayList arrayList = new ArrayList(array.Length);
-				bool flag = (bindingAttr & BindingFlags.FlattenHierarchy) != BindingFlags.Default;
+				bool flag = (bindingAttr & BindingFlags.FlattenHierarchy) > BindingFlags.Default;
 				foreach (MethodInfo methodInfo in array)
 				{
 					MethodAttributes methodAttributes = methodInfo.Attributes;
 					if (!methodInfo.IsStatic || flag)
 					{
+						MethodAttributes methodAttributes2 = methodAttributes & MethodAttributes.MemberAccessMask;
 						bool flag2;
-						switch (methodAttributes & MethodAttributes.MemberAccessMask)
+						if (methodAttributes2 != MethodAttributes.Private)
 						{
-						case MethodAttributes.Private:
-							flag2 = false;
-							break;
-						case MethodAttributes.FamANDAssem:
-						case MethodAttributes.Family:
-						case MethodAttributes.FamORAssem:
-							goto IL_00B6;
-						case MethodAttributes.Assembly:
-							flag2 = (bindingAttr & BindingFlags.NonPublic) != BindingFlags.Default;
-							break;
-						case MethodAttributes.Public:
-							flag2 = (bindingAttr & BindingFlags.Public) != BindingFlags.Default;
-							break;
-						default:
-							goto IL_00B6;
+							if (methodAttributes2 != MethodAttributes.Assembly)
+							{
+								if (methodAttributes2 == MethodAttributes.Public)
+								{
+									flag2 = (bindingAttr & BindingFlags.Public) > BindingFlags.Default;
+								}
+								else
+								{
+									flag2 = (bindingAttr & BindingFlags.NonPublic) > BindingFlags.Default;
+								}
+							}
+							else
+							{
+								flag2 = (bindingAttr & BindingFlags.NonPublic) > BindingFlags.Default;
+							}
 						}
-						IL_00C6:
+						else
+						{
+							flag2 = false;
+						}
 						if (flag2)
 						{
 							arrayList.Add(methodInfo);
-							goto IL_00D6;
 						}
-						goto IL_00D6;
-						IL_00B6:
-						flag2 = (bindingAttr & BindingFlags.NonPublic) != BindingFlags.Default;
-						goto IL_00C6;
 					}
-					IL_00D6:;
 				}
 				if (this.methods == null)
 				{
@@ -1161,41 +1197,38 @@ namespace System.Reflection.Emit
 			ArrayList arrayList2 = new ArrayList();
 			foreach (MethodInfo methodInfo2 in array2)
 			{
-				if (methodInfo2 != null)
+				if (!(methodInfo2 == null) && (name == null || string.Compare(methodInfo2.Name, name, ignoreCase) == 0))
 				{
-					if (name == null || string.Compare(methodInfo2.Name, name, ignoreCase) == 0)
+					bool flag2 = false;
+					MethodAttributes methodAttributes = methodInfo2.Attributes;
+					if ((methodAttributes & MethodAttributes.MemberAccessMask) == MethodAttributes.Public)
 					{
-						bool flag2 = false;
-						MethodAttributes methodAttributes = methodInfo2.Attributes;
-						if ((methodAttributes & MethodAttributes.MemberAccessMask) == MethodAttributes.Public)
+						if ((bindingAttr & BindingFlags.Public) != BindingFlags.Default)
 						{
-							if ((bindingAttr & BindingFlags.Public) != BindingFlags.Default)
+							flag2 = true;
+						}
+					}
+					else if ((bindingAttr & BindingFlags.NonPublic) != BindingFlags.Default)
+					{
+						flag2 = true;
+					}
+					if (flag2)
+					{
+						flag2 = false;
+						if ((methodAttributes & MethodAttributes.Static) != MethodAttributes.PrivateScope)
+						{
+							if ((bindingAttr & BindingFlags.Static) != BindingFlags.Default)
 							{
 								flag2 = true;
 							}
 						}
-						else if ((bindingAttr & BindingFlags.NonPublic) != BindingFlags.Default)
+						else if ((bindingAttr & BindingFlags.Instance) != BindingFlags.Default)
 						{
 							flag2 = true;
 						}
 						if (flag2)
 						{
-							flag2 = false;
-							if ((methodAttributes & MethodAttributes.Static) != MethodAttributes.PrivateScope)
-							{
-								if ((bindingAttr & BindingFlags.Static) != BindingFlags.Default)
-								{
-									flag2 = true;
-								}
-							}
-							else if ((bindingAttr & BindingFlags.Instance) != BindingFlags.Default)
-							{
-								flag2 = true;
-							}
-							if (flag2)
-							{
-								arrayList2.Add(methodInfo2);
-							}
+							arrayList2.Add(methodInfo2);
 						}
 					}
 				}
@@ -1213,52 +1246,11 @@ namespace System.Reflection.Emit
 		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
 		{
 			this.check_created();
-			bool flag = (bindingAttr & BindingFlags.IgnoreCase) != BindingFlags.Default;
-			MethodInfo[] methodsByName = this.GetMethodsByName(name, bindingAttr, flag, this);
-			MethodInfo methodInfo = null;
-			int num = ((types == null) ? 0 : types.Length);
-			int num2 = 0;
-			foreach (MethodInfo methodInfo2 in methodsByName)
-			{
-				if (callConvention == CallingConventions.Any || (methodInfo2.CallingConvention & callConvention) == callConvention)
-				{
-					methodInfo = methodInfo2;
-					num2++;
-				}
-			}
-			if (num2 == 0)
-			{
-				return null;
-			}
-			if (num2 == 1 && num == 0)
-			{
-				return methodInfo;
-			}
-			MethodBase[] array2 = new MethodBase[num2];
-			if (num2 == 1)
-			{
-				array2[0] = methodInfo;
-			}
-			else
-			{
-				num2 = 0;
-				foreach (MethodInfo methodInfo3 in methodsByName)
-				{
-					if (callConvention == CallingConventions.Any || (methodInfo3.CallingConvention & callConvention) == callConvention)
-					{
-						array2[num2++] = methodInfo3;
-					}
-				}
-			}
 			if (types == null)
 			{
-				return (MethodInfo)Binder.FindMostDerivedMatch(array2);
+				return this.created.GetMethod(name, bindingAttr);
 			}
-			if (binder == null)
-			{
-				binder = Binder.DefaultBinder;
-			}
-			return (MethodInfo)binder.SelectMethod(bindingAttr, array2, types, modifiers);
+			return this.created.GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
 		}
 
 		public override Type GetNestedType(string name, BindingFlags bindingAttr)
@@ -1276,26 +1268,26 @@ namespace System.Reflection.Emit
 					{
 						if ((bindingAttr & BindingFlags.Public) == BindingFlags.Default)
 						{
-							goto IL_007C;
+							goto IL_0055;
 						}
 					}
 					else if ((bindingAttr & BindingFlags.NonPublic) == BindingFlags.Default)
 					{
-						goto IL_007C;
+						goto IL_0055;
 					}
 					if (typeBuilder.Name == name)
 					{
 						return typeBuilder.created;
 					}
 				}
-				IL_007C:;
+				IL_0055:;
 			}
 			return null;
 		}
 
 		public override Type[] GetNestedTypes(BindingFlags bindingAttr)
 		{
-			if (!this.is_created && !this.IsCompilerContext)
+			if (!this.is_created)
 			{
 				throw new NotSupportedException();
 			}
@@ -1347,7 +1339,7 @@ namespace System.Reflection.Emit
 				{
 					methodInfo = propertyInfo.GetSetMethod(true);
 				}
-				if (methodInfo != null)
+				if (!(methodInfo == null))
 				{
 					MethodAttributes attributes = methodInfo.Attributes;
 					if ((attributes & MethodAttributes.MemberAccessMask) == MethodAttributes.Public)
@@ -1415,7 +1407,7 @@ namespace System.Reflection.Emit
 
 		protected override bool IsCOMObjectImpl()
 		{
-			return (this.GetAttributeFlagsImpl() & TypeAttributes.Import) != TypeAttributes.NotPublic;
+			return (this.GetAttributeFlagsImpl() & TypeAttributes.Import) > TypeAttributes.NotPublic;
 		}
 
 		protected override bool IsPointerImpl()
@@ -1430,7 +1422,20 @@ namespace System.Reflection.Emit
 
 		protected override bool IsValueTypeImpl()
 		{
-			return (Type.type_is_subtype_of(this, this.pmodule.assemblyb.corlib_value_type, false) || Type.type_is_subtype_of(this, typeof(ValueType), false)) && this != this.pmodule.assemblyb.corlib_value_type && this != this.pmodule.assemblyb.corlib_enum_type;
+			if (this == this.pmodule.assemblyb.corlib_value_type || this == this.pmodule.assemblyb.corlib_enum_type)
+			{
+				return false;
+			}
+			Type baseType = this.parent;
+			while (baseType != null)
+			{
+				if (baseType == this.pmodule.assemblyb.corlib_value_type)
+				{
+					return true;
+				}
+				baseType = baseType.BaseType;
+			}
+			return false;
 		}
 
 		public override Type MakeArrayType()
@@ -1452,10 +1457,30 @@ namespace System.Reflection.Emit
 			return new ByRefType(this);
 		}
 
-		[MonoTODO]
 		public override Type MakeGenericType(params Type[] typeArguments)
 		{
-			return base.MakeGenericType(typeArguments);
+			if (!this.IsGenericTypeDefinition)
+			{
+				throw new InvalidOperationException("not a generic type definition");
+			}
+			if (typeArguments == null)
+			{
+				throw new ArgumentNullException("typeArguments");
+			}
+			if (this.generic_params.Length != typeArguments.Length)
+			{
+				throw new ArgumentException(string.Format("The type or method has {0} generic parameter(s) but {1} generic argument(s) where provided. A generic argument must be provided for each generic parameter.", this.generic_params.Length, typeArguments.Length), "typeArguments");
+			}
+			for (int i = 0; i < typeArguments.Length; i++)
+			{
+				if (typeArguments[i] == null)
+				{
+					throw new ArgumentNullException("typeArguments");
+				}
+			}
+			Type[] array = new Type[typeArguments.Length];
+			typeArguments.CopyTo(array, 0);
+			return this.pmodule.assemblyb.MakeGenericType(this, array);
 		}
 
 		public override Type MakePointerType()
@@ -1472,11 +1497,6 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal void SetCharSet(TypeAttributes ta)
-		{
-			this.attrs = ta;
-		}
-
 		public void SetCustomAttribute(CustomAttributeBuilder customBuilder)
 		{
 			if (customBuilder == null)
@@ -1487,38 +1507,35 @@ namespace System.Reflection.Emit
 			if (fullName == "System.Runtime.InteropServices.StructLayoutAttribute")
 			{
 				byte[] data = customBuilder.Data;
-				int num = (int)data[2];
-				num |= (int)data[3] << 8;
+				int num = (int)data[2] | ((int)data[3] << 8);
 				this.attrs &= ~TypeAttributes.LayoutMask;
 				switch (num)
 				{
 				case 0:
 					this.attrs |= TypeAttributes.SequentialLayout;
-					goto IL_00B8;
+					goto IL_00A5;
 				case 2:
 					this.attrs |= TypeAttributes.ExplicitLayout;
-					goto IL_00B8;
+					goto IL_00A5;
 				case 3:
 					this.attrs |= TypeAttributes.NotPublic;
-					goto IL_00B8;
+					goto IL_00A5;
 				}
 				throw new Exception("Error in customattr");
-				IL_00B8:
-				string fullName2 = customBuilder.Ctor.GetParameters()[0].ParameterType.FullName;
+				IL_00A5:
+				Type type = ((customBuilder.Ctor is ConstructorBuilder) ? ((ConstructorBuilder)customBuilder.Ctor).parameters[0] : customBuilder.Ctor.GetParametersInternal()[0].ParameterType);
 				int num2 = 6;
-				if (fullName2 == "System.Int16")
+				if (type.FullName == "System.Int16")
 				{
 					num2 = 4;
 				}
 				int num3 = (int)data[num2++];
 				num3 |= (int)data[num2++] << 8;
-				int i = 0;
-				while (i < num3)
+				for (int i = 0; i < num3; i++)
 				{
 					num2++;
-					byte b = data[num2++];
 					int num4;
-					if (b == 85)
+					if (data[num2++] == 85)
 					{
 						num4 = CustomAttributeBuilder.decode_len(data, num2, out num2);
 						CustomAttributeBuilder.string_from_bytes(data, num2, num4);
@@ -1531,10 +1548,22 @@ namespace System.Reflection.Emit
 					num5 |= (int)data[num2++] << 8;
 					num5 |= (int)data[num2++] << 16;
 					num5 |= (int)data[num2++] << 24;
-					string text2 = text;
-					switch (text2)
+					if (!(text == "CharSet"))
 					{
-					case "CharSet":
+						if (!(text == "Pack"))
+						{
+							if (text == "Size")
+							{
+								this.class_size = num5;
+							}
+						}
+						else
+						{
+							this.packing_size = (PackingSize)num5;
+						}
+					}
+					else
+					{
 						switch (num5)
 						{
 						case 1:
@@ -1550,18 +1579,7 @@ namespace System.Reflection.Emit
 							this.attrs |= TypeAttributes.AutoClass;
 							break;
 						}
-						break;
-					case "Pack":
-						this.packing_size = (PackingSize)num5;
-						break;
-					case "Size":
-						this.class_size = num5;
-						break;
 					}
-					IL_02C7:
-					i++;
-					continue;
-					goto IL_02C7;
 				}
 				return;
 			}
@@ -1590,12 +1608,10 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
+				return;
 			}
-			else
-			{
-				this.cattrs = new CustomAttributeBuilder[1];
-				this.cattrs[0] = customBuilder;
-			}
+			this.cattrs = new CustomAttributeBuilder[1];
+			this.cattrs[0] = customBuilder;
 		}
 
 		[ComVisible(true)]
@@ -1655,7 +1671,8 @@ namespace System.Reflection.Emit
 			}
 			this.check_not_created();
 			string text = "$ArrayType$" + size;
-			Type type = this.pmodule.GetRegisteredType(this.fullname + "+" + text);
+			TypeIdentifier typeIdentifier = TypeIdentifiers.WithoutEscape(text);
+			Type type = this.pmodule.GetRegisteredType(this.fullname.NestedName(typeIdentifier));
 			if (type == null)
 			{
 				TypeBuilder typeBuilder = this.DefineNestedType(text, TypeAttributes.Public | TypeAttributes.NestedPublic | TypeAttributes.ExplicitLayout | TypeAttributes.Sealed, this.pmodule.assemblyb.corlib_value_type, null, PackingSize.Size1, size);
@@ -1695,7 +1712,7 @@ namespace System.Reflection.Emit
 			{
 				this.parent = parent;
 			}
-			this.setup_internal_class(this);
+			this.parent = TypeBuilder.ResolveUserType(this.parent);
 		}
 
 		internal int get_next_table_index(object obj, int table, bool inc)
@@ -1713,19 +1730,23 @@ namespace System.Reflection.Emit
 			return this.created.GetInterfaceMap(interfaceType);
 		}
 
-		internal bool IsCompilerContext
+		internal override Type InternalResolve()
 		{
-			get
-			{
-				return this.pmodule.assemblyb.IsCompilerContext;
-			}
+			this.check_created();
+			return this.created;
+		}
+
+		internal override Type RuntimeResolve()
+		{
+			this.check_created();
+			return this.created;
 		}
 
 		internal bool is_created
 		{
 			get
 			{
-				return this.created != null;
+				return this.createTypeCalled;
 			}
 		}
 
@@ -1775,13 +1796,6 @@ namespace System.Reflection.Emit
 		public override bool IsAssignableFrom(Type c)
 		{
 			return base.IsAssignableFrom(c);
-		}
-
-		[ComVisible(true)]
-		[MonoTODO]
-		public override bool IsSubclassOf(Type c)
-		{
-			return base.IsSubclassOf(c);
 		}
 
 		[MonoTODO("arrays")]
@@ -1853,10 +1867,12 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		public override extern bool IsGenericParameter
+		public override bool IsGenericParameter
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return false;
+			}
 		}
 
 		public override GenericParameterAttributes GenericParameterAttributes
@@ -1910,7 +1926,6 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentException("names");
 			}
-			this.setup_generic_class();
 			this.generic_params = new GenericTypeParameterBuilder[names.Length];
 			for (int i = 0; i < names.Length; i++)
 			{
@@ -1930,6 +1945,26 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentException("Type is not generic", "type");
 			}
+			if (!type.IsGenericType)
+			{
+				throw new ArgumentException("Type is not a generic type", "type");
+			}
+			if (type.IsGenericTypeDefinition)
+			{
+				throw new ArgumentException("Type cannot be a generic type definition", "type");
+			}
+			if (constructor == null)
+			{
+				throw new NullReferenceException();
+			}
+			if (!constructor.DeclaringType.IsGenericTypeDefinition)
+			{
+				throw new ArgumentException("constructor declaring type is not a generic type definition", "constructor");
+			}
+			if (constructor.DeclaringType != type.GetGenericTypeDefinition())
+			{
+				throw new ArgumentException("constructor declaring type is not the generic type definition of type", "constructor");
+			}
 			ConstructorInfo constructor2 = type.GetConstructor(constructor);
 			if (constructor2 == null)
 			{
@@ -1940,7 +1975,7 @@ namespace System.Reflection.Emit
 
 		private static bool IsValidGetMethodType(Type type)
 		{
-			if (type is TypeBuilder || type is MonoGenericClass)
+			if (type is TypeBuilder || type is TypeBuilderInstantiation)
 			{
 				return true;
 			}
@@ -1973,6 +2008,10 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentException("type is not TypeBuilder but " + type.GetType(), "type");
 			}
+			if (type is TypeBuilder && type.ContainsGenericParameters)
+			{
+				type = type.MakeGenericType(type.GetGenericArguments());
+			}
 			if (!type.IsGenericType)
 			{
 				throw new ArgumentException("type is not a generic type", "type");
@@ -1985,6 +2024,10 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentException("method declaring type is not the generic type definition of type", "method");
 			}
+			if (method == null)
+			{
+				throw new NullReferenceException();
+			}
 			MethodInfo method2 = type.GetMethod(method);
 			if (method2 == null)
 			{
@@ -1995,6 +2038,22 @@ namespace System.Reflection.Emit
 
 		public static FieldInfo GetField(Type type, FieldInfo field)
 		{
+			if (!type.IsGenericType)
+			{
+				throw new ArgumentException("Type is not a generic type", "type");
+			}
+			if (type.IsGenericTypeDefinition)
+			{
+				throw new ArgumentException("Type cannot be a generic type definition", "type");
+			}
+			if (field is FieldOnTypeBuilderInst)
+			{
+				throw new ArgumentException("The specified field must be declared on a generic type definition.", "field");
+			}
+			if (field.DeclaringType != type.GetGenericTypeDefinition())
+			{
+				throw new ArgumentException("field declaring type is not the generic type definition of type", "method");
+			}
 			FieldInfo field2 = type.GetField(field);
 			if (field2 == null)
 			{
@@ -2003,7 +2062,46 @@ namespace System.Reflection.Emit
 			return field2;
 		}
 
-		public const int UnspecifiedTypeSize = 0;
+		void _TypeBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _TypeBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _TypeBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _TypeBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
+		internal override bool IsUserType
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public override bool IsConstructedGenericType
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public override bool IsAssignableFrom(TypeInfo typeInfo)
+		{
+			return base.IsAssignableFrom(typeInfo);
+		}
 
 		private string tname;
 
@@ -2049,12 +2147,16 @@ namespace System.Reflection.Emit
 
 		private RefEmitPermissionSet[] permissions;
 
-		private Type created;
+		private TypeInfo created;
 
-		private string fullname;
+		private int state;
+
+		private TypeName fullname;
 
 		private bool createTypeCalled;
 
 		private Type underlying_type;
+
+		public const int UnspecifiedTypeSize = 0;
 	}
 }

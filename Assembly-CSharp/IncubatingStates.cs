@@ -51,7 +51,7 @@ internal class IncubatingStates : GameStateMachine<IncubatingStates, IncubatingS
 
 		public int variant_time = 3;
 
-		public static Chore.Precondition IsInIncubator = new Chore.Precondition
+		public static readonly Chore.Precondition IsInIncubator = new Chore.Precondition
 		{
 			id = "IsInIncubator",
 			fn = delegate(ref Chore.Precondition.Context context, object data)

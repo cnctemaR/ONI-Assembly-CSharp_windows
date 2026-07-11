@@ -149,7 +149,7 @@ public class Recipe : IHasSortOrder
 		GameObject gameObject2 = null;
 		if (prefab != null)
 		{
-			gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, Folder.Loot, null, 0);
+			gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, null, 0);
 			PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 			gameObject2.GetComponent<KSelectable>().entityName = this.Name;
 			if (component2 != null)
@@ -237,7 +237,7 @@ public class Recipe : IHasSortOrder
 			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 			if (component != null)
 			{
-				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui");
+				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false);
 			}
 		}
 		return sprite;

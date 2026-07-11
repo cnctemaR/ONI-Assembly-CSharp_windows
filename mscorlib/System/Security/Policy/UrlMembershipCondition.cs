@@ -8,7 +8,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class UrlMembershipCondition : ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition, IMembershipCondition
+	public sealed class UrlMembershipCondition : IMembershipCondition, ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition
 	{
 		public UrlMembershipCondition(string url)
 		{
@@ -136,13 +136,9 @@ namespace System.Security.Policy
 
 		internal void CheckUrl(string url)
 		{
-			int num = url.IndexOf(Uri.SchemeDelimiter);
-			string text = ((num >= 0) ? url : ("file://" + url));
-			Uri uri = new Uri(text, false, false);
-			if (uri.Host.IndexOf('*') >= 1)
+			if (new Uri((url.IndexOf(Uri.SchemeDelimiter) < 0) ? ("file://" + url) : url, false, false).Host.IndexOf('*') >= 1)
 			{
-				string text2 = Locale.GetText("Invalid * character in url");
-				throw new ArgumentException(text2, "name");
+				throw new ArgumentException(Locale.GetText("Invalid * character in url"), "name");
 			}
 		}
 

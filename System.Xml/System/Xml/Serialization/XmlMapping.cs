@@ -1,26 +1,35 @@
 ﻿using System;
-using System.Collections;
 
 namespace System.Xml.Serialization
 {
 	public abstract class XmlMapping
 	{
-		internal XmlMapping()
+		internal XmlMapping(TypeScope scope, ElementAccessor accessor)
+			: this(scope, accessor, XmlMappingAccess.Read | XmlMappingAccess.Write)
 		{
 		}
 
-		internal XmlMapping(string elementName, string ns)
+		internal XmlMapping(TypeScope scope, ElementAccessor accessor, XmlMappingAccess access)
 		{
-			this._elementName = elementName;
-			this._namespace = ns;
+			this.scope = scope;
+			this.accessor = accessor;
+			this.access = access;
+			this.shallow = scope == null;
 		}
 
-		[MonoTODO]
-		public string XsdElementName
+		internal ElementAccessor Accessor
 		{
 			get
 			{
-				return this._elementName;
+				return this.accessor;
+			}
+		}
+
+		internal TypeScope Scope
+		{
+			get
+			{
+				return this.scope;
 			}
 		}
 
@@ -28,7 +37,15 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this._elementName;
+				return global::System.Xml.Serialization.Accessor.UnescapeName(this.Accessor.Name);
+			}
+		}
+
+		public string XsdElementName
+		{
+			get
+			{
+				return this.Accessor.Name;
 			}
 		}
 
@@ -36,80 +53,116 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this._namespace;
+				return this.accessor.Namespace;
+			}
+		}
+
+		internal bool GenerateSerializer
+		{
+			get
+			{
+				return this.generateSerializer;
+			}
+			set
+			{
+				this.generateSerializer = value;
+			}
+		}
+
+		internal bool IsReadable
+		{
+			get
+			{
+				return (this.access & XmlMappingAccess.Read) > XmlMappingAccess.None;
+			}
+		}
+
+		internal bool IsWriteable
+		{
+			get
+			{
+				return (this.access & XmlMappingAccess.Write) > XmlMappingAccess.None;
+			}
+		}
+
+		internal bool IsSoap
+		{
+			get
+			{
+				return this.isSoap;
+			}
+			set
+			{
+				this.isSoap = value;
 			}
 		}
 
 		public void SetKey(string key)
 		{
+			this.SetKeyInternal(key);
+		}
+
+		internal void SetKeyInternal(string key)
+		{
 			this.key = key;
 		}
 
-		internal string GetKey()
+		internal static string GenerateKey(Type type, XmlRootAttribute root, string ns)
 		{
-			return this.key;
+			if (root == null)
+			{
+				root = (XmlRootAttribute)XmlAttributes.GetAttr(type, typeof(XmlRootAttribute));
+			}
+			return string.Concat(new string[]
+			{
+				type.FullName,
+				":",
+				(root == null) ? string.Empty : root.Key,
+				":",
+				(ns == null) ? string.Empty : ns
+			});
 		}
 
-		internal ObjectMap ObjectMap
-		{
-			get
-			{
-				return this.map;
-			}
-			set
-			{
-				this.map = value;
-			}
-		}
-
-		internal ArrayList RelatedMaps
-		{
-			get
-			{
-				return this.relatedMaps;
-			}
-			set
-			{
-				this.relatedMaps = value;
-			}
-		}
-
-		internal SerializationFormat Format
+		internal string Key
 		{
 			get
 			{
-				return this.format;
-			}
-			set
-			{
-				this.format = value;
+				return this.key;
 			}
 		}
 
-		internal SerializationSource Source
+		internal void CheckShallow()
 		{
-			get
+			if (this.shallow)
 			{
-				return this.source;
-			}
-			set
-			{
-				this.source = value;
+				throw new InvalidOperationException(Res.GetString("This mapping was not crated by reflection importer and cannot be used in this context."));
 			}
 		}
 
-		private ObjectMap map;
+		internal static bool IsShallow(XmlMapping[] mappings)
+		{
+			for (int i = 0; i < mappings.Length; i++)
+			{
+				if (mappings[i] == null || mappings[i].shallow)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 
-		private ArrayList relatedMaps;
+		private TypeScope scope;
 
-		private SerializationFormat format;
+		private bool generateSerializer;
 
-		private SerializationSource source;
+		private bool isSoap;
 
-		internal string _elementName;
-
-		internal string _namespace;
+		private ElementAccessor accessor;
 
 		private string key;
+
+		private bool shallow;
+
+		private XmlMappingAccess access;
 	}
 }

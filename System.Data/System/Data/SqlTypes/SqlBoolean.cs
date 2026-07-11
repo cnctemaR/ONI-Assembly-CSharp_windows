@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -8,47 +7,23 @@ namespace System.Data.SqlTypes
 {
 	[XmlSchemaProvider("GetXsdType")]
 	[Serializable]
-	public struct SqlBoolean : IXmlSerializable, IComparable, INullable
+	public struct SqlBoolean : INullable, IComparable, IXmlSerializable
 	{
 		public SqlBoolean(bool value)
 		{
-			this.value = ((!value) ? 0 : 1);
-			this.notNull = true;
+			throw null;
 		}
 
 		public SqlBoolean(int value)
 		{
-			this.value = ((value == 0) ? 0 : 1);
-			this.notNull = true;
-		}
-
-		[MonoTODO]
-		XmlSchema IXmlSerializable.GetSchema()
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		void IXmlSerializable.ReadXml(XmlReader reader)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		void IXmlSerializable.WriteXml(XmlWriter writer)
-		{
-			throw new NotImplementedException();
+			throw null;
 		}
 
 		public byte ByteValue
 		{
 			get
 			{
-				if (this.IsNull)
-				{
-					throw new SqlNullValueException(Locale.GetText("The property is set to null."));
-				}
-				return this.value;
+				throw null;
 			}
 		}
 
@@ -56,7 +31,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				return !this.IsNull && this.value == 0;
+				throw null;
 			}
 		}
 
@@ -64,7 +39,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				return !this.notNull;
+				throw null;
 			}
 		}
 
@@ -72,7 +47,7 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				return !this.IsNull && this.value != 0;
+				throw null;
 			}
 		}
 
@@ -80,434 +55,284 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				if (this.IsNull)
-				{
-					throw new SqlNullValueException(Locale.GetText("The property is set to null."));
-				}
-				return this.IsTrue;
+				throw null;
 			}
 		}
 
 		public static SqlBoolean And(SqlBoolean x, SqlBoolean y)
 		{
-			return x & y;
-		}
-
-		public int CompareTo(object value)
-		{
-			if (value == null)
-			{
-				return 1;
-			}
-			if (!(value is SqlBoolean))
-			{
-				throw new ArgumentException(Locale.GetText("Value is not a System.Data.SqlTypes.SqlBoolean"));
-			}
-			return this.CompareTo((SqlBoolean)value);
+			throw null;
 		}
 
 		public int CompareTo(SqlBoolean value)
 		{
-			if (value.IsNull)
-			{
-				return 1;
-			}
-			return this.value.CompareTo(value.ByteValue);
+			throw null;
 		}
 
-		public override bool Equals(object value)
+		public int CompareTo(object value)
 		{
-			if (!(value is SqlBoolean))
-			{
-				return false;
-			}
-			if (this.IsNull)
-			{
-				return ((SqlBoolean)value).IsNull;
-			}
-			return !((SqlBoolean)value).IsNull && (bool)(this == (SqlBoolean)value);
+			throw null;
 		}
 
 		public static SqlBoolean Equals(SqlBoolean x, SqlBoolean y)
 		{
-			return x == y;
+			throw null;
 		}
 
-		public static SqlBoolean GreaterThan(SqlBoolean x, SqlBoolean y)
+		public override bool Equals(object value)
 		{
-			return x > y;
-		}
-
-		public static SqlBoolean GreaterThanOrEquals(SqlBoolean x, SqlBoolean y)
-		{
-			return x >= y;
-		}
-
-		public static SqlBoolean LessThan(SqlBoolean x, SqlBoolean y)
-		{
-			return x < y;
-		}
-
-		public static SqlBoolean LessThanOrEquals(SqlBoolean x, SqlBoolean y)
-		{
-			return x <= y;
+			throw null;
 		}
 
 		public override int GetHashCode()
 		{
-			int num;
-			if (this.IsTrue)
-			{
-				num = 1;
-			}
-			else
-			{
-				num = 0;
-			}
-			return num;
-		}
-
-		public static SqlBoolean NotEquals(SqlBoolean x, SqlBoolean y)
-		{
-			return x != y;
-		}
-
-		public static SqlBoolean OnesComplement(SqlBoolean x)
-		{
-			return ~x;
-		}
-
-		public static SqlBoolean Or(SqlBoolean x, SqlBoolean y)
-		{
-			return x | y;
-		}
-
-		public static SqlBoolean Parse(string s)
-		{
-			if (s != null)
-			{
-				if (SqlBoolean.<>f__switch$map3 == null)
-				{
-					SqlBoolean.<>f__switch$map3 = new Dictionary<string, int>(2)
-					{
-						{ "0", 0 },
-						{ "1", 1 }
-					};
-				}
-				int num;
-				if (SqlBoolean.<>f__switch$map3.TryGetValue(s, out num))
-				{
-					if (num == 0)
-					{
-						return new SqlBoolean(false);
-					}
-					if (num == 1)
-					{
-						return new SqlBoolean(true);
-					}
-				}
-			}
-			return new SqlBoolean(bool.Parse(s));
-		}
-
-		public SqlByte ToSqlByte()
-		{
-			return new SqlByte(this.value);
-		}
-
-		public SqlDecimal ToSqlDecimal()
-		{
-			return (SqlDecimal)this;
-		}
-
-		public SqlDouble ToSqlDouble()
-		{
-			return (SqlDouble)this;
-		}
-
-		public SqlInt16 ToSqlInt16()
-		{
-			return (SqlInt16)this;
-		}
-
-		public SqlInt32 ToSqlInt32()
-		{
-			return (SqlInt32)this;
-		}
-
-		public SqlInt64 ToSqlInt64()
-		{
-			return (SqlInt64)this;
-		}
-
-		public SqlMoney ToSqlMoney()
-		{
-			return (SqlMoney)this;
-		}
-
-		public SqlSingle ToSqlSingle()
-		{
-			return (SqlSingle)this;
-		}
-
-		public SqlString ToSqlString()
-		{
-			if (this.IsNull)
-			{
-				return new SqlString("Null");
-			}
-			if (this.IsTrue)
-			{
-				return new SqlString("True");
-			}
-			return new SqlString("False");
-		}
-
-		public override string ToString()
-		{
-			if (this.IsNull)
-			{
-				return "Null";
-			}
-			if (this.IsTrue)
-			{
-				return "True";
-			}
-			return "False";
-		}
-
-		public static SqlBoolean Xor(SqlBoolean x, SqlBoolean y)
-		{
-			return x ^ y;
-		}
-
-		private static int Compare(SqlBoolean x, SqlBoolean y)
-		{
-			if (x == y)
-			{
-				return 0;
-			}
-			if (x.IsTrue && y.IsFalse)
-			{
-				return 1;
-			}
-			if (x.IsFalse && y.IsTrue)
-			{
-				return -1;
-			}
-			return 0;
+			throw null;
 		}
 
 		public static XmlQualifiedName GetXsdType(XmlSchemaSet schemaSet)
 		{
-			return new XmlQualifiedName("boolean", "http://www.w3.org/2001/XMLSchema");
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThan(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThanOrEquals(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThan(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThanOrEquals(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean NotEquals(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean OnesComplement(SqlBoolean x)
+		{
+			throw null;
 		}
 
 		public static SqlBoolean operator &(SqlBoolean x, SqlBoolean y)
 		{
-			return new SqlBoolean(x.Value & y.Value);
+			throw null;
 		}
 
 		public static SqlBoolean operator |(SqlBoolean x, SqlBoolean y)
 		{
-			return new SqlBoolean(x.Value | y.Value);
+			throw null;
 		}
 
 		public static SqlBoolean operator ==(SqlBoolean x, SqlBoolean y)
 		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value == y.Value);
+			throw null;
 		}
 
 		public static SqlBoolean operator ^(SqlBoolean x, SqlBoolean y)
 		{
-			return new SqlBoolean(x.Value ^ y.Value);
-		}
-
-		public static bool operator false(SqlBoolean x)
-		{
-			return x.IsFalse;
-		}
-
-		public static SqlBoolean operator !=(SqlBoolean x, SqlBoolean y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value != y.Value);
-		}
-
-		public static SqlBoolean operator !(SqlBoolean x)
-		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(!x.Value);
-		}
-
-		public static SqlBoolean operator ~(SqlBoolean x)
-		{
-			SqlBoolean sqlBoolean;
-			if (x.IsTrue)
-			{
-				sqlBoolean = new SqlBoolean(false);
-			}
-			else
-			{
-				sqlBoolean = new SqlBoolean(true);
-			}
-			return sqlBoolean;
-		}
-
-		public static SqlBoolean operator >(SqlBoolean x, SqlBoolean y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(SqlBoolean.Compare(x, y) > 0);
-		}
-
-		public static SqlBoolean operator >=(SqlBoolean x, SqlBoolean y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(SqlBoolean.Compare(x, y) >= 0);
-		}
-
-		public static SqlBoolean operator <(SqlBoolean x, SqlBoolean y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(SqlBoolean.Compare(x, y) < 0);
-		}
-
-		public static SqlBoolean operator <=(SqlBoolean x, SqlBoolean y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(SqlBoolean.Compare(x, y) <= 0);
-		}
-
-		public static bool operator true(SqlBoolean x)
-		{
-			return x.IsTrue;
+			throw null;
 		}
 
 		public static explicit operator bool(SqlBoolean x)
 		{
-			return x.Value;
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlByte x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean((int)x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlDecimal x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean((int)x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlDouble x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean((int)x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlInt16 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean((int)x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlInt32 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlInt64 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(checked((int)x.Value));
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlMoney x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean((int)x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlSingle x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean((int)x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlBoolean(SqlString x)
 		{
-			if (x.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return SqlBoolean.Parse(x.Value);
+			throw null;
+		}
+
+		public static bool operator false(SqlBoolean x)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean operator >(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean operator >=(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
 		}
 
 		public static implicit operator SqlBoolean(bool x)
 		{
-			return new SqlBoolean(x);
+			throw null;
 		}
 
-		private byte value;
+		public static SqlBoolean operator !=(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
 
-		private bool notNull;
+		public static SqlBoolean operator <(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
 
-		public static readonly SqlBoolean False = new SqlBoolean(false);
+		public static SqlBoolean operator <=(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean operator !(SqlBoolean x)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean operator ~(SqlBoolean x)
+		{
+			throw null;
+		}
+
+		public static bool operator true(SqlBoolean x)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean Or(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean Parse(string s)
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		XmlSchema IXmlSerializable.GetSchema()
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		void IXmlSerializable.ReadXml(XmlReader reader)
+		{
+		}
+
+		[MonoTODO]
+		void IXmlSerializable.WriteXml(XmlWriter writer)
+		{
+		}
+
+		public SqlByte ToSqlByte()
+		{
+			throw null;
+		}
+
+		public SqlDecimal ToSqlDecimal()
+		{
+			throw null;
+		}
+
+		public SqlDouble ToSqlDouble()
+		{
+			throw null;
+		}
+
+		public SqlInt16 ToSqlInt16()
+		{
+			throw null;
+		}
+
+		public SqlInt32 ToSqlInt32()
+		{
+			throw null;
+		}
+
+		public SqlInt64 ToSqlInt64()
+		{
+			throw null;
+		}
+
+		public SqlMoney ToSqlMoney()
+		{
+			throw null;
+		}
+
+		public SqlSingle ToSqlSingle()
+		{
+			throw null;
+		}
+
+		public SqlString ToSqlString()
+		{
+			throw null;
+		}
+
+		public override string ToString()
+		{
+			throw null;
+		}
+
+		public static SqlBoolean Xor(SqlBoolean x, SqlBoolean y)
+		{
+			throw null;
+		}
+
+		public static readonly SqlBoolean False;
 
 		public static readonly SqlBoolean Null;
 
-		public static readonly SqlBoolean One = new SqlBoolean(1);
+		public static readonly SqlBoolean One;
 
-		public static readonly SqlBoolean True = new SqlBoolean(true);
+		public static readonly SqlBoolean True;
 
-		public static readonly SqlBoolean Zero = new SqlBoolean(0);
+		public static readonly SqlBoolean Zero;
 	}
 }

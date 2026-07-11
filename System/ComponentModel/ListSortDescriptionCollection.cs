@@ -1,21 +1,52 @@
 ﻿using System;
 using System.Collections;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ListSortDescriptionCollection : IList, ICollection, IEnumerable
 	{
 		public ListSortDescriptionCollection()
 		{
-			this.list = new ArrayList();
 		}
 
 		public ListSortDescriptionCollection(ListSortDescription[] sorts)
 		{
-			this.list = new ArrayList();
-			foreach (ListSortDescription listSortDescription in sorts)
+			if (sorts != null)
 			{
-				this.list.Add(listSortDescription);
+				for (int i = 0; i < sorts.Length; i++)
+				{
+					this.sorts.Add(sorts[i]);
+				}
+			}
+		}
+
+		public ListSortDescription this[int index]
+		{
+			get
+			{
+				return (ListSortDescription)this.sorts[index];
+			}
+			set
+			{
+				throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+			}
+		}
+
+		bool IList.IsFixedSize
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		bool IList.IsReadOnly
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -27,15 +58,50 @@ namespace System.ComponentModel
 			}
 			set
 			{
-				throw new InvalidOperationException("ListSortDescriptorCollection is read only.");
+				throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
 			}
 		}
 
-		bool IList.IsFixedSize
+		int IList.Add(object value)
+		{
+			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+		}
+
+		void IList.Clear()
+		{
+			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+		}
+
+		public bool Contains(object value)
+		{
+			return ((IList)this.sorts).Contains(value);
+		}
+
+		public int IndexOf(object value)
+		{
+			return ((IList)this.sorts).IndexOf(value);
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+		}
+
+		void IList.Remove(object value)
+		{
+			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+		}
+
+		void IList.RemoveAt(int index)
+		{
+			throw new InvalidOperationException(global::SR.GetString("Once a ListSortDescriptionCollection has been created it can't be modified."));
+		}
+
+		public int Count
 		{
 			get
 			{
-				return this.list.IsFixedSize;
+				return this.sorts.Count;
 			}
 		}
 
@@ -43,7 +109,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.list.IsSynchronized;
+				return true;
 			}
 		}
 
@@ -51,83 +117,20 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.list.SyncRoot;
+				return this;
 			}
-		}
-
-		bool IList.IsReadOnly
-		{
-			get
-			{
-				return this.list.IsReadOnly;
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.list.GetEnumerator();
-		}
-
-		int IList.Add(object value)
-		{
-			return this.list.Add(value);
-		}
-
-		void IList.Clear()
-		{
-			this.list.Clear();
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			this.list.Insert(index, value);
-		}
-
-		void IList.Remove(object value)
-		{
-			this.list.Remove(value);
-		}
-
-		void IList.RemoveAt(int index)
-		{
-			this.list.RemoveAt(index);
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.list.Count;
-			}
-		}
-
-		public ListSortDescription this[int index]
-		{
-			get
-			{
-				return this.list[index] as ListSortDescription;
-			}
-			set
-			{
-				throw new InvalidOperationException("ListSortDescriptorCollection is read only.");
-			}
-		}
-
-		public bool Contains(object value)
-		{
-			return this.list.Contains(value);
 		}
 
 		public void CopyTo(Array array, int index)
 		{
-			this.list.CopyTo(array, index);
+			this.sorts.CopyTo(array, index);
 		}
 
-		public int IndexOf(object value)
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.list.IndexOf(value);
+			return this.sorts.GetEnumerator();
 		}
 
-		private ArrayList list;
+		private ArrayList sorts = new ArrayList();
 	}
 }

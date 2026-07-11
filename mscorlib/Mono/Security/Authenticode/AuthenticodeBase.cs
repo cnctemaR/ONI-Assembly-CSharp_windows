@@ -54,6 +54,7 @@ namespace Mono.Security.Authenticode
 				this.Close();
 			}
 			this.fs = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+			this.blockNo = 0;
 		}
 
 		internal void Close()
@@ -62,45 +63,52 @@ namespace Mono.Security.Authenticode
 			{
 				this.fs.Close();
 				this.fs = null;
-				this.blockNo = 0;
 			}
 		}
 
-		internal bool ReadFirstBlock()
+		internal void ReadFirstBlock()
+		{
+			int num = this.ProcessFirstBlock();
+			if (num != 0)
+			{
+				throw new NotSupportedException(Locale.GetText("Cannot sign non PE files, e.g. .CAB or .MSI files (error {0}).", new object[] { num }));
+			}
+		}
+
+		internal int ProcessFirstBlock()
 		{
 			if (this.fs == null)
 			{
-				return false;
+				return 1;
 			}
 			this.fs.Position = 0L;
 			this.blockLength = this.fs.Read(this.fileblock, 0, this.fileblock.Length);
 			this.blockNo = 1;
 			if (this.blockLength < 64)
 			{
-				return false;
+				return 2;
 			}
 			if (BitConverterLE.ToUInt16(this.fileblock, 0) != 23117)
 			{
-				return false;
+				return 3;
 			}
 			this.peOffset = BitConverterLE.ToInt32(this.fileblock, 60);
 			if (this.peOffset > this.fileblock.Length)
 			{
-				string text = string.Format(Locale.GetText("Header size too big (> {0} bytes)."), this.fileblock.Length);
-				throw new NotSupportedException(text);
+				throw new NotSupportedException(string.Format(Locale.GetText("Header size too big (> {0} bytes)."), this.fileblock.Length));
 			}
 			if ((long)this.peOffset > this.fs.Length)
 			{
-				return false;
+				return 4;
 			}
 			if (BitConverterLE.ToUInt32(this.fileblock, this.peOffset) != 17744U)
 			{
-				return false;
+				return 5;
 			}
 			this.dirSecurityOffset = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 152);
 			this.dirSecuritySize = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 156);
 			this.coffSymbolTableOffset = BitConverterLE.ToInt32(this.fileblock, this.peOffset + 12);
-			return true;
+			return 0;
 		}
 
 		internal byte[] GetSecurityEntry()

@@ -70,6 +70,32 @@ namespace System.Net.Configuration
 			}
 		}
 
+		[ConfigurationProperty("targetName", DefaultValue = null)]
+		public string TargetName
+		{
+			get
+			{
+				return (string)base["targetName"];
+			}
+			set
+			{
+				base["targetName"] = value;
+			}
+		}
+
+		[ConfigurationProperty("enableSsl", DefaultValue = false)]
+		public bool EnableSsl
+		{
+			get
+			{
+				return (bool)base["enableSsl"];
+			}
+			set
+			{
+				base["enableSsl"] = value;
+			}
+		}
+
 		protected override ConfigurationPropertyCollection Properties
 		{
 			get

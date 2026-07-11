@@ -5,10 +5,6 @@ namespace System.Configuration
 {
 	internal class InternalConfigurationRoot : IInternalConfigRoot
 	{
-		public event InternalConfigEventHandler ConfigChanged;
-
-		public event InternalConfigEventHandler ConfigRemoved;
-
 		[MonoTODO]
 		public IInternalConfigRecord GetConfigRecord(string configPath)
 		{
@@ -17,8 +13,7 @@ namespace System.Configuration
 
 		public object GetSection(string section, string configPath)
 		{
-			IInternalConfigRecord configRecord = this.GetConfigRecord(configPath);
-			return configRecord.GetSection(section);
+			return this.GetConfigRecord(configPath).GetSection(section);
 		}
 
 		[MonoTODO]
@@ -56,6 +51,10 @@ namespace System.Configuration
 				return this.isDesignTime;
 			}
 		}
+
+		public event InternalConfigEventHandler ConfigChanged;
+
+		public event InternalConfigEventHandler ConfigRemoved;
 
 		private IInternalConfigHost host;
 

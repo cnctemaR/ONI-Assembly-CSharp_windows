@@ -13,8 +13,38 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 	protected override void OnSpawn()
 	{
+		base.GetComponent<Storage>().SetOffsets(Grave.DELIVERY_OFFSETS);
+		Storage component = base.GetComponent<Storage>();
+		Storage storage = component;
+		storage.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(storage.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkEvent));
+		KAnimFile anim = Assets.GetAnim("anim_bury_dupe_kanim");
+		int num = 0;
+		KAnim.Anim anim2;
+		for (;;)
+		{
+			anim2 = anim.GetData().GetAnim(num);
+			if (anim2 == null)
+			{
+				goto IL_009C;
+			}
+			if (anim2.name == "working_pre")
+			{
+				break;
+			}
+			num++;
+		}
+		float num2 = (float)(anim2.numFrames - 3) / anim2.frameRate;
+		component.SetWorkTime(num2);
+		IL_009C:
 		base.OnSpawn();
 		base.smi.StartSM();
+		Components.Graves.Add(this);
+	}
+
+	protected override void OnCleanUp()
+	{
+		Components.Graves.Remove(this);
+		base.OnCleanUp();
 	}
 
 	private void OnStorageChanged(object data)
@@ -27,11 +57,32 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		}
 	}
 
+	private void OnWorkEvent(Workable.WorkableEvent evt)
+	{
+		if (evt == Workable.WorkableEvent.WorkStarted)
+		{
+			Storage component = base.GetComponent<Storage>();
+			if (component.worker != null)
+			{
+				Storage component2 = component.worker.GetComponent<Storage>();
+				GameObject gameObject = component2.items[0];
+				KBatchedAnimController component3 = gameObject.GetComponent<KBatchedAnimController>();
+				component3.AddAnimOverrides(Assets.GetAnim("anim_dead_dupe_kanim"), 0f);
+				component3.Play(new HashedString[] { "react_pre", "react_pst" }, KAnim.PlayMode.Once);
+			}
+		}
+	}
+
 	[Serialize]
 	public string graveName;
 
 	[Serialize]
 	public int epitaphIdx;
+
+	[Serialize]
+	public float burialTime = -1f;
+
+	private static readonly CellOffset[] DELIVERY_OFFSETS = new CellOffset[] { default(CellOffset) };
 
 	public class StatesInstance : GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.GameInstance
 	{
@@ -70,7 +121,13 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 			})
 				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.GraveEmpty)
 				.EventTransition(GameHashes.OnStorageChange, this.full, null);
-			this.full.PlayAnim("closed").ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave);
+			this.full.PlayAnim("closed").ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave).Enter(delegate(Grave.StatesInstance smi)
+			{
+				if (smi.master.burialTime < 0f)
+				{
+					smi.master.burialTime = GameClock.Instance.GetTime();
+				}
+			});
 		}
 
 		public GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.State empty;

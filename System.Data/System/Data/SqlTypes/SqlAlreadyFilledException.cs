@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace System.Data.SqlTypes
 {
@@ -7,23 +6,15 @@ namespace System.Data.SqlTypes
 	public sealed class SqlAlreadyFilledException : SqlTypeException
 	{
 		public SqlAlreadyFilledException()
-			: base(Locale.GetText("A SqlAlreadyFilled exception has occured."))
 		{
 		}
 
 		public SqlAlreadyFilledException(string message)
-			: base(message)
 		{
 		}
 
-		public SqlAlreadyFilledException(string message, Exception inner)
-			: base(message, inner)
+		public SqlAlreadyFilledException(string message, Exception e)
 		{
-		}
-
-		private new void GetObjectData(SerializationInfo si, StreamingContext context)
-		{
-			si.AddValue("SqlAlreadyFilledExceptionMessage", this.Message, typeof(string));
 		}
 	}
 }

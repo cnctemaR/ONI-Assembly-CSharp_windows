@@ -9,27 +9,30 @@ namespace System.Security.Cryptography
 	{
 		public PKCS1MaskGenerationMethod()
 		{
-			this.hashName = "SHA1";
+			this.HashNameValue = "SHA1";
 		}
 
 		public string HashName
 		{
 			get
 			{
-				return this.hashName;
+				return this.HashNameValue;
 			}
 			set
 			{
-				this.hashName = ((value != null) ? value : "SHA1");
+				this.HashNameValue = value;
+				if (this.HashNameValue == null)
+				{
+					this.HashNameValue = "SHA1";
+				}
 			}
 		}
 
 		public override byte[] GenerateMask(byte[] rgbSeed, int cbReturn)
 		{
-			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.hashName);
-			return PKCS1.MGF1(hashAlgorithm, rgbSeed, cbReturn);
+			return PKCS1.MGF1(HashAlgorithm.Create(this.HashNameValue), rgbSeed, cbReturn);
 		}
 
-		private string hashName;
+		private string HashNameValue;
 	}
 }

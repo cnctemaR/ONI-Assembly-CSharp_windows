@@ -28,7 +28,7 @@ internal class StunnedStates : GameStateMachine<StunnedStates, StunnedStates.Ins
 			chore.AddPrecondition(StunnedStates.Instance.IsStunned, null);
 		}
 
-		public static Chore.Precondition IsStunned = new Chore.Precondition
+		public static readonly Chore.Precondition IsStunned = new Chore.Precondition
 		{
 			id = "IsStunned",
 			fn = delegate(ref Chore.Precondition.Context context, object data)

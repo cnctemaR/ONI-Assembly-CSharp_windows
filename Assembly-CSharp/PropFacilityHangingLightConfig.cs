@@ -7,9 +7,9 @@ public class PropFacilityHangingLightConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityHangingLight", SETITEMS.FACILITY_LAMP.NAME, SETITEMS.FACILITY_LAMP.DESC, 50f, Assets.GetAnim("gravitas_light_kanim"), "off", Grid.SceneLayer.Building, 1, 4, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PropFacilityHangingLight", global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYLAMP.NAME, global::STRINGS.BUILDINGS.PREFABS.PROPFACILITYLAMP.DESC, 50f, Assets.GetAnim("gravitas_light_kanim"), "off", Grid.SceneLayer.Building, 1, 4, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Steel);
 		component.Temperature = 294.15f;
 		return gameObject;
 	}

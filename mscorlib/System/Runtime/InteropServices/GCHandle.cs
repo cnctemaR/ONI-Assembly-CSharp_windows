@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
@@ -17,7 +18,7 @@ namespace System.Runtime.InteropServices
 			this = new GCHandle(obj, GCHandleType.Normal);
 		}
 
-		private GCHandle(object value, GCHandleType type)
+		internal GCHandle(object value, GCHandleType type)
 		{
 			if (type < GCHandleType.Weak || type > GCHandleType.Pinned)
 			{
@@ -76,8 +77,31 @@ namespace System.Runtime.InteropServices
 
 		public void Free()
 		{
-			GCHandle.FreeHandle(this.handle);
-			this.handle = 0;
+			int num = this.handle;
+			if (num != 0 && Interlocked.CompareExchange(ref this.handle, 0, num) == num)
+			{
+				GCHandle.FreeHandle(num);
+				return;
+			}
+			throw new InvalidOperationException("Handle is not initialized.");
+		}
+
+		public static explicit operator IntPtr(GCHandle value)
+		{
+			return (IntPtr)value.handle;
+		}
+
+		public static explicit operator GCHandle(IntPtr value)
+		{
+			if (value == IntPtr.Zero)
+			{
+				throw new InvalidOperationException("GCHandle value cannot be zero");
+			}
+			if (!GCHandle.CheckCurrentDomain((int)value))
+			{
+				throw new ArgumentException("GCHandle value belongs to a different domain");
+			}
+			return new GCHandle(value);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -95,9 +119,19 @@ namespace System.Runtime.InteropServices
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr GetAddrOfPinnedObject(int handle);
 
+		public static bool operator ==(GCHandle a, GCHandle b)
+		{
+			return a.handle == b.handle;
+		}
+
+		public static bool operator !=(GCHandle a, GCHandle b)
+		{
+			return !(a == b);
+		}
+
 		public override bool Equals(object o)
 		{
-			return o != null && o is GCHandle && this.handle == ((GCHandle)o).handle;
+			return o is GCHandle && this == (GCHandle)o;
 		}
 
 		public override int GetHashCode()
@@ -113,34 +147,6 @@ namespace System.Runtime.InteropServices
 		public static IntPtr ToIntPtr(GCHandle value)
 		{
 			return (IntPtr)value;
-		}
-
-		public static explicit operator IntPtr(GCHandle value)
-		{
-			return (IntPtr)value.handle;
-		}
-
-		public static explicit operator GCHandle(IntPtr value)
-		{
-			if (value == IntPtr.Zero)
-			{
-				throw new ArgumentException("GCHandle value cannot be zero");
-			}
-			if (!GCHandle.CheckCurrentDomain((int)value))
-			{
-				throw new ArgumentException("GCHandle value belongs to a different domain");
-			}
-			return new GCHandle(value);
-		}
-
-		public static bool operator ==(GCHandle a, GCHandle b)
-		{
-			return a.Equals(b);
-		}
-
-		public static bool operator !=(GCHandle a, GCHandle b)
-		{
-			return !a.Equals(b);
 		}
 
 		private int handle;

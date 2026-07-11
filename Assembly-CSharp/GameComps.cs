@@ -20,15 +20,17 @@ public class GameComps : KComponents
 		}
 	}
 
-	public override void Shutdown()
+	public new void Clear()
 	{
-		base.Shutdown();
 		FieldInfo[] fields = typeof(GameComps).GetFields();
 		foreach (FieldInfo fieldInfo in fields)
 		{
-			fieldInfo.SetValue(null, null);
+			IComponentManager componentManager = fieldInfo.GetValue(null) as IComponentManager;
+			if (componentManager != null)
+			{
+				componentManager.Clear();
+			}
 		}
-		GameComps.kcomponentManagers.Clear();
 	}
 
 	public static void AddKComponentManager(Type kcomponent, IKComponentManager inst)

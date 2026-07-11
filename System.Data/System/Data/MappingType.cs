@@ -5,9 +5,9 @@ namespace System.Data
 	[Serializable]
 	public enum MappingType
 	{
+		Attribute = 2,
 		Element = 1,
-		Attribute,
-		SimpleContent,
-		Hidden
+		Hidden = 4,
+		SimpleContent = 3
 	}
 }

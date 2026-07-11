@@ -59,11 +59,11 @@ namespace STRINGS
 
 		public class STATS
 		{
-			public class MORALE
+			public class QUALITYOFLIFE
 			{
 				public static LocString NAME = "<DO NOT TRANSLATE>";
 
-				public static LocString TOOLTIP = string.Empty;
+				public static LocString TOOLTIP = "Morale" + UI.HORIZONTAL_BR_RULE + "Duplicants' effectiveness improves in higher Morale ratings and decreases in low ratings";
 			}
 
 			public class BREATH
@@ -106,6 +106,12 @@ namespace STRINGS
 				public static LocString NAME = "Decor";
 
 				public static LocString TOOLTIP = "Decor" + UI.HORIZONTAL_BR_RULE + "Duplicants become stressed in areas with decor lower than their expectations\nOpen the Decor Overlay <color=#F44A47>[F8]</color> to view current decor values";
+
+				public static LocString TOOLTIP_CURRENT = "\n\nCurrent Environmental Decor: {0}";
+
+				public static LocString TOOLTIP_AVERAGE_TODAY = "\nAverage Decor This Cycle: {0}";
+
+				public static LocString TOOLTIP_AVERAGE_YESTERDAY = "\nAverage Decor Last Cycle: {0}";
 			}
 
 			public class STRESS
@@ -324,6 +330,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant didn't find a toilet in time. Oops";
 			}
 
+			public class BREAK_PEE
+			{
+				public static LocString NAME = "Downtime: Use Toilet";
+
+				public static LocString STATUS = "Downtime: Going to use toilet";
+
+				public static LocString TOOLTIP = "This Duplicant has scheduled Downtime and is using their break to go to the toilet\n\nDuplicants have to use the toilet at least once per day";
+			}
+
 			public class STRESSVOMIT
 			{
 				public static LocString NAME = "Stress Vomit";
@@ -420,7 +435,7 @@ namespace STRINGS
 
 				public static LocString STATUS = "Singing To Egg";
 
-				public static LocString TOOLTIP = "Singing to critter eggs improves their incubation rate, and really who doesn't love singing?";
+				public static LocString TOOLTIP = "A gentle lullaby from a supportive Rancher encourages developing eggs\n\nIncreases Incubation Rate";
 			}
 
 			public class USETOILET
@@ -513,6 +528,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Zzzzzz...";
 			}
 
+			public class FLOORSLEEP
+			{
+				public static LocString NAME = "Sleep on Floor";
+
+				public static LocString STATUS = "Sleeping on Floor";
+
+				public static LocString TOOLTIP = "Zzzzzz...\n\nSleeping on the floor will give Duplicants a Sore Back";
+			}
+
 			public class TAKEMEDICINE
 			{
 				public static LocString NAME = "Take Medicine";
@@ -594,6 +618,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is taking it easy";
 			}
 
+			public class STRESSHEAL
+			{
+				public static LocString NAME = "De-Stress";
+
+				public static LocString STATUS = "De-Stressing";
+
+				public static LocString TOOLTIP = "This Duplicant really needs to unwind";
+			}
+
 			public class EQUIP
 			{
 				public static LocString NAME = "Equip";
@@ -628,6 +661,15 @@ namespace STRINGS
 				public static LocString STATUS = "Moving to unequip";
 
 				public static LocString TOOLTIP = "This Duplicant is removing a piece of their equipment";
+			}
+
+			public class MOURN
+			{
+				public static LocString NAME = "Mourn";
+
+				public static LocString STATUS = "Mourning";
+
+				public static LocString TOOLTIP = "Mourning the loss of a friend";
 			}
 
 			public class WARMUP
@@ -970,6 +1012,12 @@ namespace STRINGS
 
 				public static LocString IS_NOT_RED_ALERT = "Unavailable in Red Alert";
 
+				public static LocString NO_DEAD_BODIES = "Unburied Duplicant";
+
+				public static LocString VALID_MOURNING_SITE = "Nowhere to mourn";
+
+				public static LocString HAS_PLACE_TO_STAND = "Nowhere to stand";
+
 				public static LocString IS_SCHEDULED_TIME = "Not allowed by schedule";
 
 				public static LocString CAN_MOVE_TO = "Unreachable";
@@ -1010,6 +1058,8 @@ namespace STRINGS
 
 				public static LocString IS_ALLOWED_BY_AUTOMATION = "Automated";
 
+				public static LocString CAN_DO_RECREATION = "Not Interested";
+
 				public static LocString DOES_SUIT_NEED_RECHARGING_IDLE = "Suit is currently charged";
 
 				public static LocString DOES_SUIT_NEED_RECHARGING_URGENT = "Suit is currently charged";
@@ -1034,7 +1084,15 @@ namespace STRINGS
 
 				public static LocString IS_FETCH_TARGET_AVAILABLE = "No pending deliveries";
 
-				public static LocString EDIBLE_IS_NOT_NULL = "EdibleIsNotNull";
+				public static LocString EDIBLE_IS_NOT_NULL = "Consumable Permission not allowed";
+
+				public static LocString HAS_MINGLE_CELL = "Nowhere to Mingle";
+
+				public static LocString EXCLUSIVELY_AVAILABLE = "Building Already Busy";
+
+				public static LocString BLADDER_FULL = "Bladder isn't full";
+
+				public static LocString BLADDER_NOT_FULL = "Bladder too full";
 			}
 		}
 
@@ -1335,18 +1393,25 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is depressed by the lack of decor in this area";
 			}
 
+			public class POORQUALITYOFLIFE
+			{
+				public static LocString NAME = "Low Morale";
+
+				public static LocString TOOLTIP = "This Duplicant is getting stressed by their responsibilities, but improved amenities would cheer them up";
+			}
+
 			public class POOR_FOOD_QUALITY
 			{
 				public static LocString NAME = "Lousy Meal";
 
-				public static LocString TOOLTIP = "This Duplicant's last meal didn't meet their expectations";
+				public static LocString TOOLTIP = "The last meal this Duplicant ate didn't quite meet their expectations";
 			}
 
 			public class GOOD_FOOD_QUALITY
 			{
 				public static LocString NAME = "Decadent Meal";
 
-				public static LocString TOOLTIP = "This Duplicant's last meal exceeded their expectations";
+				public static LocString TOOLTIP = "The last meal this Duplicant ate exceeded their expectations!";
 			}
 
 			public class NERVOUSBREAKDOWN
@@ -1413,13 +1478,13 @@ namespace STRINGS
 
 			public class RATIONSNOTPERMITTED
 			{
-				public static LocString NAME = "Food Not Permitted";
+				public static LocString NAME = "Food Type Not Permitted";
 
-				public static LocString TOOLTIP = "This Duplicant is not allowed to eat any of the food they can reach.";
+				public static LocString TOOLTIP = "This Duplicant is not allowed to eat any of the food in their reach";
 
 				public static LocString NOTIFICATION_NAME = "Unpermitted food";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are not allowed to eat any of the " + UI.FormatAsLink("Food", "FOOD") + " within their reach:";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants' Consumable permissions prevent them from eating any of the " + UI.FormatAsLink("Food", "FOOD") + " within their reach:";
 			}
 
 			public class ROTTEN
@@ -2441,23 +2506,44 @@ namespace STRINGS
 				public static LocString NAME = "Skill Level";
 			}
 
-			public class PROPERBATHROOM
+			public class ROOMLATRINE
 			{
 				public static LocString NAME = "Nice Bathroom";
 
 				public static LocString TOOLTIP = "This Duplicant used a toilet in a nice bathroom";
 			}
 
+			public class ROOMBATHROOM
+			{
+				public static LocString NAME = "Plumbed Bathroom";
+
+				public static LocString TOOLTIP = "This Duplicant used a toilet in a well plumbed bathroom";
+			}
+
+			public class ROOMBARRACKS
+			{
+				public static LocString NAME = "Comfortable Barracks";
+
+				public static LocString TOOLTIP = "This Duplicant slept in proper barracks last night and feels refreshed";
+			}
+
+			public class ROOMBEDROOM
+			{
+				public static LocString NAME = "Comfortable Bedroom";
+
+				public static LocString TOOLTIP = "This Duplicant slept in a real bedroom last night and feels extra refreshed";
+			}
+
 			public class BEDSTAMINA
 			{
-				public static LocString NAME = "Slept in a cot";
+				public static LocString NAME = "Sleeping in a cot";
 
 				public static LocString TOOLTIP = "This Duplicant's sleeping arrangements are adequate";
 			}
 
 			public class LUXURYBEDSTAMINA
 			{
-				public static LocString NAME = "Slept in a comfy bed";
+				public static LocString NAME = "Sleeping in a comfy bed";
 
 				public static LocString TOOLTIP = "This Duplicant loves their snuggly bed";
 			}
@@ -2476,11 +2562,18 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This lucky Duplicant has their own private bedroom";
 			}
 
-			public class EATINMESSHALL
+			public class ROOMMESSHALL
 			{
 				public static LocString NAME = "Mess Hall";
 
-				public static LocString TOOLTIP = "This Duplicant ate their last meal in a nice mess hall";
+				public static LocString TOOLTIP = "This Duplicant's most recent meal was eaten in a suitable mess hall";
+			}
+
+			public class ROOMGREATHALL
+			{
+				public static LocString NAME = "Great Hall";
+
+				public static LocString TOOLTIP = "This Duplicant's most recent meal was eaten in a fancy great hall";
 			}
 
 			public class ENTITLEMENT
@@ -2663,11 +2756,11 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant's stress is just melting away";
 			}
 
-			public class ROOM_RELAXATION_EFFECT
+			public class STRESSREDUCTION_CLINIC
 			{
-				public static LocString NAME = "Unwinding";
+				public static LocString NAME = "Recieving Clinic Massage";
 
-				public static LocString TOOLTIP = "This Duplicant is taking some relaxing leisure time in the Rec Room";
+				public static LocString TOOLTIP = "Proper facilities futher improve this massage's effectiveness";
 			}
 
 			public class UGLY_CRYING
@@ -2695,6 +2788,8 @@ namespace STRINGS
 			public class METABOLISM_CALORIE_MODIFIER
 			{
 				public static LocString NAME = "Metabolism";
+
+				public static LocString TOOLTIP = "Metabolism determines how quickly a critter burns calories";
 			}
 
 			public class WORKING
@@ -2723,6 +2818,20 @@ namespace STRINGS
 				public static LocString NAME = "Managed Colony";
 
 				public static LocString TOOLTIP = "A Duplicant is in the colony manager job";
+			}
+
+			public class FLOORSLEEP
+			{
+				public static LocString NAME = "Sleeping On Floor";
+
+				public static LocString TOOLTIP = "This Duplicant is uncomfortably recovering stamina";
+			}
+
+			public class PASSEDOUTSLEEP
+			{
+				public static LocString NAME = "Exhausted";
+
+				public static LocString TOOLTIP = "Lack of rest depleted this Duplicant's stamina\n\nThey passed out from the fatigue";
 			}
 
 			public class SLEEP
@@ -3182,6 +3291,167 @@ namespace STRINGS
 				public static LocString TOOLTIP = "The extremely bright light here is making this Duplicant happy, but prolonged exposure will result in burning.";
 			}
 
+			public class TOOKABREAK
+			{
+				public static LocString NAME = "Downtime";
+
+				public static LocString TOOLTIP = "This Duplicant has a bit of time off from work to attend to personal matters";
+			}
+
+			public class SOCIALIZED
+			{
+				public static LocString NAME = "Socialized";
+
+				public static LocString TOOLTIP = "This Duplicant had some free time to hang out with buddies";
+			}
+
+			public class GOODCONVERSATION
+			{
+				public static LocString NAME = "Pleasant Chitchat";
+
+				public static LocString TOOLTIP = "This Duplicant recently had a chance to chat with a friend";
+			}
+
+			public class WORKENCOURAGED
+			{
+				public static LocString NAME = "Appreciated";
+
+				public static LocString TOOLTIP = "Someone saw how hard this Duplicant was working and gave them a compliment\n\nThis Duplicant feels great about themselves now!";
+			}
+
+			public class GREETING
+			{
+				public static LocString NAME = "Saw a Friend";
+
+				public static LocString TOOLTIP = "This Duplicant recently saw a friend in the halls and got to say \"hi\"\n\nIt wasn't even awkward!";
+			}
+
+			public class PLAYEDARCADE
+			{
+				public static LocString NAME = "Played Video Games";
+
+				public static LocString TOOLTIP = "This Duplicant recently got to play some fun video games!";
+			}
+
+			public class DANCED
+			{
+				public static LocString NAME = "Recently Danced";
+
+				public static LocString TOOLTIP = "This Duplicant had a chance to cut loose!\n\nLeisure activities increase Duplicants' Morale";
+			}
+
+			public class ESPRESSO
+			{
+				public static LocString NAME = "Had An Espresso";
+
+				public static LocString TOOLTIP = "This Duplicant had delicious drink!\n\nLeisure activities increase Duplicants' Morale";
+			}
+
+			public class EDIBLEMINUS3
+			{
+				public static LocString NAME = "Grisly Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Grisly\n\nThey hope their next meal will be better";
+			}
+
+			public class EDIBLEMINUS2
+			{
+				public static LocString NAME = "Terrible Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Terrible\n\nThey hope their next meal will be better";
+			}
+
+			public class EDIBLEMINUS1
+			{
+				public static LocString NAME = "Poor Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Poor\n\nThey hope their next meal will be a little better";
+			}
+
+			public class EDIBLE0
+			{
+				public static LocString NAME = "Standard Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Average\n\nThey thought it was sort of okay";
+			}
+
+			public class EDIBLE1
+			{
+				public static LocString NAME = "Good Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Good\n\nThey thought it was pretty good!";
+			}
+
+			public class EDIBLE2
+			{
+				public static LocString NAME = "Great Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Great\n\nThey thought it was pretty good!";
+			}
+
+			public class EDIBLE3
+			{
+				public static LocString NAME = "Superb Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Superb\n\nThey thought it was really good!";
+			}
+
+			public class EDIBLE4
+			{
+				public static LocString NAME = "Ambrosial Meal";
+
+				public static LocString TOOLTIP = "The food this Duplicant last ate was Ambrosial\n\nThey thought it was super tasty!";
+			}
+
+			public class DECORMINUS1
+			{
+				public static LocString NAME = "Ugly Decor";
+
+				public static LocString TOOLTIP = "This Duplicant finds the lack of decor in here downright depressing";
+			}
+
+			public class DECOR0
+			{
+				public static LocString NAME = "Poor Decor";
+
+				public static LocString TOOLTIP = "This Duplicant thinks the colony is decorated in poor taste";
+			}
+
+			public class DECOR1
+			{
+				public static LocString NAME = "Mediocre Decor";
+
+				public static LocString TOOLTIP = "This Duplicant has no strong opinions about the look of the colony";
+			}
+
+			public class DECOR2
+			{
+				public static LocString NAME = "Above Average Decor";
+
+				public static LocString TOOLTIP = "This Duplicant appreciates that the colony's been spruced up";
+			}
+
+			public class DECOR3
+			{
+				public static LocString NAME = "Nice Decor";
+
+				public static LocString TOOLTIP = "This Duplicant thinks it looks pretty good in here!";
+			}
+
+			public class DECOR4
+			{
+				public static LocString NAME = "Charming Decor";
+
+				public static LocString TOOLTIP = "This Duplicant thinks the colony's decor is downright charming!";
+			}
+
+			public class DECOR5
+			{
+				public static LocString NAME = "Gorgeous Decor";
+
+				public static LocString TOOLTIP = "This Duplicant loves what I've done with the place!";
+			}
+
 			public class POWERTINKER
 			{
 				public static LocString NAME = "Engie's Tune-Up";
@@ -3601,6 +3871,20 @@ namespace STRINGS
 
 				public static LocString DESC = "This Duplicant is incredibly strong.";
 			}
+
+			public class SIMPLETASTES
+			{
+				public static LocString NAME = "Simple Tastes";
+
+				public static LocString DESC = "This Duplicant is satisfied by even the blandest food.";
+			}
+
+			public class FOODIE
+			{
+				public static LocString NAME = "Foodie";
+
+				public static LocString DESC = "This Duplicant has a highly refined palate.";
+			}
 		}
 
 		public class PERSONALITIES
@@ -3926,6 +4210,19 @@ namespace STRINGS
 				}
 			}
 
+			public class QUALITYOFLIFE
+			{
+				public static LocString NAME = "Morale Expectation";
+
+				public static LocString EXPECTATION_TOOLTIP = "Duplicants love digging in the dirt as much as anyone, but sometimes they need a little more in their lives to inspire them to greater things. Failing to keep a Duplicant's Morale up will cause " + UI.FormatAsLink("Stressed", "STRESS") + ".";
+
+				public static LocString EXPECTATION_MOD_NAME = "Job Tier Request";
+
+				public static LocString GOOD_MODIFIER = "High Morale";
+
+				public static LocString BAD_MODIFIER = "Low Morale";
+			}
+
 			public class NOISE
 			{
 				public static LocString NAME = "Noise Expectation";
@@ -4161,30 +4458,37 @@ namespace STRINGS
 
 			public class DECOREXPECTATION
 			{
-				public static LocString NAME = "Decor Expectation";
+				public static LocString NAME = "Decor Perception";
 
 				public static LocString DESC = string.Concat(new string[]
 				{
-					"Not meeting a Duplicant's ",
+					"Duplicants with a high Decor Perception don't require as much ",
 					UI.FormatAsLink("Decor", "DECOR"),
-					" expectations will increase their ",
-					UI.FormatAsLink("Stress", "STRESS"),
+					" to keep up their ",
+					UI.FormatAsLink("Morale", "QUALITYOFLIFE"),
 					"."
 				});
 			}
 
 			public class FOODEXPECTATION
 			{
-				public static LocString NAME = "Food Quality Expectation";
+				public static LocString NAME = "Food Quality Perception";
 
 				public static LocString DESC = string.Concat(new string[]
 				{
-					"Not meeting a Duplicant's ",
+					"Duplicants with a high Food Perception are satisfied with lower quaity ",
 					UI.FormatAsLink("Food", "FOOD"),
-					" expectations will increase their ",
-					UI.FormatAsLink("Stress", "STRESS"),
+					" to keep up their ",
+					UI.FormatAsLink("Morale", "QUALITYOFLIFE"),
 					"."
 				});
+			}
+
+			public class QUALITYOFLIFEEXPECTATION
+			{
+				public static LocString NAME = "Morale Expectation";
+
+				public static LocString DESC = "Morale Expectation";
 			}
 
 			public class HYGIENE
@@ -4199,6 +4503,15 @@ namespace STRINGS
 				public static LocString NAME = "Carrying Capacity";
 
 				public static LocString DESC = "Determines the maximum weight that a Duplicant can carry.";
+			}
+
+			public class QUALITYOFLIFE
+			{
+				public static LocString NAME = "Morale";
+
+				public static LocString DESC = "How well this Duplicant's expectations and aspirations are being met.";
+
+				public static LocString DESC_FORMAT = "{0} / {1}";
 			}
 
 			public class AIRCONSUMPTIONRATE
@@ -4621,6 +4934,11 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Cold";
 			}
 
+			public class BREAKBLADDER
+			{
+				public static LocString TOOLTIP = "Bio Break";
+			}
+
 			public class FULLBLADDER
 			{
 				public static LocString TOOLTIP = "Full Bladder";
@@ -4689,6 +5007,21 @@ namespace STRINGS
 			public class NEWROLE
 			{
 				public static LocString TOOLTIP = "New Job";
+			}
+
+			public class CHATTY
+			{
+				public static LocString TOOLTIP = "Greeting";
+			}
+
+			public class ENCOURAGE
+			{
+				public static LocString TOOLTIP = "Encouraging";
+			}
+
+			public class CONVERSATION
+			{
+				public static LocString TOOLTIP = "Chatting";
 			}
 		}
 	}

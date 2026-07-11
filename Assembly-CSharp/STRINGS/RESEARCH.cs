@@ -208,6 +208,20 @@ namespace STRINGS
 				public static LocString DESC = UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " infrastructure capable of withstanding more intense conditions, such as " + UI.FormatAsLink("Heat", "Heat") + " and pressure.";
 			}
 
+			public class PRECISIONPLUMBING
+			{
+				public static LocString NAME = UI.FormatAsLink("Precision Plumbing", "PRECISIONPLUMBING");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Precise control of the flow and temperature of ",
+					UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID"),
+					" allows the creation of ",
+					UI.FormatAsLink("Morale", "QUALITYOFLIFE"),
+					"-enhancing devices."
+				});
+			}
+
 			public class SANITATIONSCIENCES
 			{
 				public static LocString NAME = UI.FormatAsLink("Sanitation", "SANITATIONSCIENCES");
@@ -385,9 +399,9 @@ namespace STRINGS
 
 			public class DUPETRAFFICCONTROL
 			{
-				public static LocString NAME = UI.FormatAsLink("Duplicant Traffic Control", "DUPETRAFFICCONTROL");
+				public static LocString NAME = UI.FormatAsLink("Computing", "DUPETRAFFICCONTROL");
 
-				public static LocString DESC = "Prevent my Duplicants from getting into dangerous situations.";
+				public static LocString DESC = "More advanced components allow more advanced Duplicant-machine interactions";
 			}
 
 			public class SMELTING

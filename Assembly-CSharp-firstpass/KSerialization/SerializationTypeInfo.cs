@@ -26,6 +26,7 @@ namespace KSerialization
 		Dictionary,
 		List,
 		HashSet,
+		Queue,
 		Colour,
 		IS_GENERIC_TYPE = 128,
 		IS_VALUE_TYPE = 64,

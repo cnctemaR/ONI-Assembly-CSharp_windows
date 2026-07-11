@@ -5,9 +5,11 @@ public class NativeAnimBatchLoader : MonoBehaviour
 {
 	private void Awake()
 	{
-		KAnimBatchManager.Destroy();
-		KAnimGroupFile.Destroy();
-		KGlobalAnimParser.Destroy();
+		KAnimBatchManager.DestroyInstance();
+		KAnimGroupFile.DestroyInstance();
+		KGlobalAnimParser.DestroyInstance();
+		KAnimBatchManager.CreateInstance();
+		KGlobalAnimParser.CreateInstance();
 		KAnimGroupFile.GetGroupFile().LoadAll();
 		KAnimBatchManager.Instance().CompleteInit();
 	}

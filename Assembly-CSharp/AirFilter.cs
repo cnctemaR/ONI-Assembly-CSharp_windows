@@ -15,13 +15,6 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffec
 		return this.elementConverter.HasEnoughMassToStartConverting();
 	}
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.randomiseLoopedOffset = true;
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

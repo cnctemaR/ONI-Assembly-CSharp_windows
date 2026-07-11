@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class KPrefabIDTracker
 {
+	public static void DestroyInstance()
+	{
+		KPrefabIDTracker.Instance = null;
+	}
+
 	public static KPrefabIDTracker Get()
 	{
 		if (KPrefabIDTracker.Instance == null)

@@ -1,0 +1,80 @@
+﻿using System;
+using System.Runtime.InteropServices;
+using UnityEngine.Bindings;
+using UnityEngine.Scripting;
+
+namespace UnityEngine
+{
+	/// <summary>
+	///   <para>Data of a lightmap.</para>
+	/// </summary>
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/LightmapData.h")]
+	[StructLayout(LayoutKind.Sequential)]
+	public sealed class LightmapData
+	{
+		[Obsolete("Use lightmapColor property (UnityUpgradable) -> lightmapColor", false)]
+		public Texture2D lightmapLight
+		{
+			get
+			{
+				return this.m_Light;
+			}
+			set
+			{
+				this.m_Light = value;
+			}
+		}
+
+		/// <summary>
+		///   <para>Lightmap storing color of incoming light.</para>
+		/// </summary>
+		public Texture2D lightmapColor
+		{
+			get
+			{
+				return this.m_Light;
+			}
+			set
+			{
+				this.m_Light = value;
+			}
+		}
+
+		/// <summary>
+		///   <para>Lightmap storing dominant direction of incoming light.</para>
+		/// </summary>
+		public Texture2D lightmapDir
+		{
+			get
+			{
+				return this.m_Dir;
+			}
+			set
+			{
+				this.m_Dir = value;
+			}
+		}
+
+		/// <summary>
+		///   <para>Texture storing occlusion mask per light (ShadowMask, up to four lights).</para>
+		/// </summary>
+		public Texture2D shadowMask
+		{
+			get
+			{
+				return this.m_ShadowMask;
+			}
+			set
+			{
+				this.m_ShadowMask = value;
+			}
+		}
+
+		internal Texture2D m_Light;
+
+		internal Texture2D m_Dir;
+
+		internal Texture2D m_ShadowMask;
+	}
+}

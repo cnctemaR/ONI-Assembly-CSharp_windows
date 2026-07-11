@@ -8,17 +8,17 @@ namespace System.Runtime.CompilerServices
 	{
 		public DefaultDependencyAttribute(LoadHint loadHintArgument)
 		{
-			this.hint = loadHintArgument;
+			this.loadHint = loadHintArgument;
 		}
 
 		public LoadHint LoadHint
 		{
 			get
 			{
-				return this.hint;
+				return this.loadHint;
 			}
 		}
 
-		private LoadHint hint;
+		private LoadHint loadHint;
 	}
 }

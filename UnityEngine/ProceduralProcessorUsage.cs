@@ -2,11 +2,8 @@
 
 namespace UnityEngine
 {
-	public enum ProceduralProcessorUsage
+	internal enum ProceduralProcessorUsage
 	{
-		Unsupported,
-		One,
-		Half,
-		All
+
 	}
 }

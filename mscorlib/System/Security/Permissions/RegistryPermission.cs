@@ -8,7 +8,7 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class RegistryPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
+	public sealed class RegistryPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
 	{
 		public RegistryPermission(PermissionState state)
 		{
@@ -31,16 +31,10 @@ namespace System.Security.Permissions
 		{
 			if (!Enum.IsDefined(typeof(AccessControlActions), control))
 			{
-				string text = string.Format(Locale.GetText("Invalid enum {0}"), control);
-				throw new ArgumentException(text, "AccessControlActions");
+				throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), control), "AccessControlActions");
 			}
 			this._state = PermissionState.None;
 			this.AddPathList(access, control, pathList);
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 5;
 		}
 
 		public void AddPathList(RegistryPermissionAccess access, string pathList)
@@ -84,7 +78,7 @@ namespace System.Security.Permissions
 			case RegistryPermissionAccess.NoAccess:
 			case RegistryPermissionAccess.AllAccess:
 				this.ThrowInvalidFlag(access, true);
-				goto IL_006E;
+				goto IL_0061;
 			case RegistryPermissionAccess.Read:
 				return this.GetPathList(this.readList);
 			case RegistryPermissionAccess.Write:
@@ -93,7 +87,7 @@ namespace System.Security.Permissions
 				return this.GetPathList(this.createList);
 			}
 			this.ThrowInvalidFlag(access, false);
-			IL_006E:
+			IL_0061:
 			return null;
 		}
 
@@ -108,49 +102,37 @@ namespace System.Security.Permissions
 			case RegistryPermissionAccess.NoAccess:
 				return;
 			case RegistryPermissionAccess.Read:
-			{
 				this.readList.Clear();
-				string[] array = pathList.Split(new char[] { ';' });
-				foreach (string text in array)
+				foreach (string text in pathList.Split(new char[] { ';' }))
 				{
 					this.readList.Add(text);
 				}
 				return;
-			}
 			case RegistryPermissionAccess.Write:
-			{
 				this.writeList.Clear();
-				string[] array = pathList.Split(new char[] { ';' });
-				foreach (string text2 in array)
+				foreach (string text2 in pathList.Split(new char[] { ';' }))
 				{
 					this.writeList.Add(text2);
 				}
 				return;
-			}
 			case RegistryPermissionAccess.Create:
-			{
 				this.createList.Clear();
-				string[] array = pathList.Split(new char[] { ';' });
-				foreach (string text3 in array)
+				foreach (string text3 in pathList.Split(new char[] { ';' }))
 				{
 					this.createList.Add(text3);
 				}
 				return;
-			}
 			case RegistryPermissionAccess.AllAccess:
-			{
 				this.createList.Clear();
 				this.readList.Clear();
 				this.writeList.Clear();
-				string[] array = pathList.Split(new char[] { ';' });
-				foreach (string text4 in array)
+				foreach (string text4 in pathList.Split(new char[] { ';' }))
 				{
 					this.createList.Add(text4);
 					this.readList.Add(text4);
 					this.writeList.Add(text4);
 				}
 				return;
-			}
 			}
 			this.ThrowInvalidFlag(access, false);
 		}
@@ -220,7 +202,11 @@ namespace System.Security.Permissions
 			this.IntersectKeys(this.createList, registryPermission.createList, registryPermission2.createList);
 			this.IntersectKeys(this.readList, registryPermission.readList, registryPermission2.readList);
 			this.IntersectKeys(this.writeList, registryPermission.writeList, registryPermission2.writeList);
-			return (!registryPermission2.IsEmpty()) ? registryPermission2 : null;
+			if (!registryPermission2.IsEmpty())
+			{
+				return registryPermission2;
+			}
+			return null;
 		}
 
 		public override bool IsSubsetOf(IPermission target)
@@ -308,6 +294,11 @@ namespace System.Security.Permissions
 			return registryPermission2;
 		}
 
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 5;
+		}
+
 		private bool IsEmpty()
 		{
 			return this._state == PermissionState.None && this.createList.Count == 0 && this.readList.Count == 0 && this.writeList.Count == 0;
@@ -392,8 +383,7 @@ namespace System.Security.Permissions
 
 		internal void AddWithUnionKey(IList list, string pathList)
 		{
-			string[] array = pathList.Split(new char[] { ';' });
-			foreach (string text in array)
+			foreach (string text in pathList.Split(new char[] { ';' }))
 			{
 				int count = list.Count;
 				if (count == 0)

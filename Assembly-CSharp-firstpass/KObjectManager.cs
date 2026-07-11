@@ -6,6 +6,11 @@ public class KObjectManager : MonoBehaviour
 {
 	public static KObjectManager Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		KObjectManager.Instance = null;
+	}
+
 	private void Awake()
 	{
 		KObjectManager.Instance = this;

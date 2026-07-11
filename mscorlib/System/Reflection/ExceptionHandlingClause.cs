@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
 	[ComVisible(true)]
-	public sealed class ExceptionHandlingClause
+	[StructLayout(LayoutKind.Sequential)]
+	public class ExceptionHandlingClause
 	{
-		internal ExceptionHandlingClause()
+		protected ExceptionHandlingClause()
 		{
 		}
 
-		public Type CatchType
+		public virtual Type CatchType
 		{
 			get
 			{
@@ -19,7 +19,7 @@ namespace System.Reflection
 			}
 		}
 
-		public int FilterOffset
+		public virtual int FilterOffset
 		{
 			get
 			{
@@ -27,7 +27,7 @@ namespace System.Reflection
 			}
 		}
 
-		public ExceptionHandlingClauseOptions Flags
+		public virtual ExceptionHandlingClauseOptions Flags
 		{
 			get
 			{
@@ -35,7 +35,7 @@ namespace System.Reflection
 			}
 		}
 
-		public int HandlerLength
+		public virtual int HandlerLength
 		{
 			get
 			{
@@ -43,7 +43,7 @@ namespace System.Reflection
 			}
 		}
 
-		public int HandlerOffset
+		public virtual int HandlerOffset
 		{
 			get
 			{
@@ -51,7 +51,7 @@ namespace System.Reflection
 			}
 		}
 
-		public int TryLength
+		public virtual int TryLength
 		{
 			get
 			{
@@ -59,7 +59,7 @@ namespace System.Reflection
 			}
 		}
 
-		public int TryOffset
+		public virtual int TryOffset
 		{
 			get
 			{
@@ -76,7 +76,7 @@ namespace System.Reflection
 			}
 			if (this.flags == ExceptionHandlingClauseOptions.Filter)
 			{
-				text = string.Format(CultureInfo.InvariantCulture, "{0}, FilterOffset={1}", new object[] { text, this.filter_offset });
+				text = string.Format("{0}, FilterOffset={1}", text, this.filter_offset);
 			}
 			return text;
 		}

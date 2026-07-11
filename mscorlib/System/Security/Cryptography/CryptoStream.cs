@@ -1,51 +1,49 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Security.Cryptography
 {
 	[ComVisible(true)]
-	public class CryptoStream : Stream
+	public class CryptoStream : Stream, IDisposable
 	{
 		public CryptoStream(Stream stream, ICryptoTransform transform, CryptoStreamMode mode)
 		{
-			if (mode == CryptoStreamMode.Read && !stream.CanRead)
-			{
-				throw new ArgumentException(Locale.GetText("Can't read on stream"));
-			}
-			if (mode == CryptoStreamMode.Write && !stream.CanWrite)
-			{
-				throw new ArgumentException(Locale.GetText("Can't write on stream"));
-			}
 			this._stream = stream;
-			this._transform = transform;
-			this._mode = mode;
-			this._disposed = false;
-			if (transform != null)
+			this._transformMode = mode;
+			this._Transform = transform;
+			CryptoStreamMode transformMode = this._transformMode;
+			if (transformMode != CryptoStreamMode.Read)
 			{
-				if (mode == CryptoStreamMode.Read)
+				if (transformMode != CryptoStreamMode.Write)
 				{
-					this._currentBlock = new byte[transform.InputBlockSize];
-					this._workingBlock = new byte[transform.InputBlockSize];
+					throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
 				}
-				else if (mode == CryptoStreamMode.Write)
+				if (!this._stream.CanWrite)
 				{
-					this._currentBlock = new byte[transform.OutputBlockSize];
-					this._workingBlock = new byte[transform.OutputBlockSize];
+					throw new ArgumentException(Environment.GetResourceString("Stream was not writable."), "stream");
 				}
+				this._canWrite = true;
 			}
-		}
-
-		~CryptoStream()
-		{
-			this.Dispose(false);
+			else
+			{
+				if (!this._stream.CanRead)
+				{
+					throw new ArgumentException(Environment.GetResourceString("Stream was not readable."), "stream");
+				}
+				this._canRead = true;
+			}
+			this.InitializeBuffer();
 		}
 
 		public override bool CanRead
 		{
 			get
 			{
-				return this._mode == CryptoStreamMode.Read;
+				return this._canRead;
 			}
 		}
 
@@ -61,7 +59,7 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this._mode == CryptoStreamMode.Write;
+				return this._canWrite;
 			}
 		}
 
@@ -69,7 +67,7 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				throw new NotSupportedException("Length");
+				throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
 			}
 		}
 
@@ -77,296 +75,611 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				throw new NotSupportedException("Position");
+				throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
 			}
 			set
 			{
-				throw new NotSupportedException("Position");
+				throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
 			}
 		}
 
-		public void Clear()
+		public bool HasFlushedFinalBlock
 		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
+			get
+			{
+				return this._finalBlockTransformed;
+			}
 		}
 
-		public override void Close()
+		public void FlushFinalBlock()
 		{
-			if (!this._flushedFinalBlock && this._mode == CryptoStreamMode.Write)
+			if (this._finalBlockTransformed)
 			{
-				this.FlushFinalBlock();
+				throw new NotSupportedException(Environment.GetResourceString("FlushFinalBlock() method was called twice on a CryptoStream. It can only be called once."));
 			}
-			if (this._stream != null)
+			byte[] array = this._Transform.TransformFinalBlock(this._InputBuffer, 0, this._InputBufferIndex);
+			this._finalBlockTransformed = true;
+			if (this._canWrite && this._OutputBufferIndex > 0)
 			{
-				this._stream.Close();
+				this._stream.Write(this._OutputBuffer, 0, this._OutputBufferIndex);
+				this._OutputBufferIndex = 0;
 			}
+			if (this._canWrite)
+			{
+				this._stream.Write(array, 0, array.Length);
+			}
+			CryptoStream cryptoStream = this._stream as CryptoStream;
+			if (cryptoStream != null)
+			{
+				if (!cryptoStream.HasFlushedFinalBlock)
+				{
+					cryptoStream.FlushFinalBlock();
+				}
+			}
+			else
+			{
+				this._stream.Flush();
+			}
+			if (this._InputBuffer != null)
+			{
+				Array.Clear(this._InputBuffer, 0, this._InputBuffer.Length);
+			}
+			if (this._OutputBuffer != null)
+			{
+				Array.Clear(this._OutputBuffer, 0, this._OutputBuffer.Length);
+			}
+		}
+
+		public override void Flush()
+		{
+		}
+
+		public override Task FlushAsync(CancellationToken cancellationToken)
+		{
+			if (base.GetType() != typeof(CryptoStream))
+			{
+				return base.FlushAsync(cancellationToken);
+			}
+			if (!cancellationToken.IsCancellationRequested)
+			{
+				return Task.CompletedTask;
+			}
+			return Task.FromCancellation(cancellationToken);
+		}
+
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
+		}
+
+		public override void SetLength(long value)
+		{
+			throw new NotSupportedException(Environment.GetResourceString("Stream does not support seeking."));
 		}
 
 		public override int Read([In] [Out] byte[] buffer, int offset, int count)
 		{
-			if (this._mode != CryptoStreamMode.Read)
+			if (!this.CanRead)
 			{
-				throw new NotSupportedException(Locale.GetText("not in Read mode"));
+				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Locale.GetText("negative"));
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Locale.GetText("negative"));
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
 			}
-			if (offset > buffer.Length - count)
+			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException("(offset+count)", Locale.GetText("buffer overflow"));
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			if (this._workingBlock == null)
+			int i = count;
+			int num = offset;
+			if (this._OutputBufferIndex != 0)
 			{
-				return 0;
-			}
-			int num = 0;
-			if (count == 0 || (this._transformedPos == this._transformedCount && this._endOfStream))
-			{
-				return num;
-			}
-			if (this._waitingBlock == null)
-			{
-				this._transformedBlock = new byte[this._transform.OutputBlockSize << 2];
-				this._transformedPos = 0;
-				this._transformedCount = 0;
-				this._waitingBlock = new byte[this._transform.InputBlockSize];
-				this._waitingCount = this._stream.Read(this._waitingBlock, 0, this._waitingBlock.Length);
-			}
-			while (count > 0)
-			{
-				int num2 = this._transformedCount - this._transformedPos;
-				if (num2 < this._transform.InputBlockSize)
+				if (this._OutputBufferIndex > count)
 				{
-					int num3 = 0;
-					this._workingCount = this._stream.Read(this._workingBlock, 0, this._transform.InputBlockSize);
-					this._endOfStream = this._workingCount < this._transform.InputBlockSize;
-					if (!this._endOfStream)
+					Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, count);
+					Buffer.InternalBlockCopy(this._OutputBuffer, count, this._OutputBuffer, 0, this._OutputBufferIndex - count);
+					this._OutputBufferIndex -= count;
+					return count;
+				}
+				Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, this._OutputBufferIndex);
+				i -= this._OutputBufferIndex;
+				num += this._OutputBufferIndex;
+				this._OutputBufferIndex = 0;
+			}
+			if (this._finalBlockTransformed)
+			{
+				return count - i;
+			}
+			if (i > this._OutputBlockSize && this._Transform.CanTransformMultipleBlocks)
+			{
+				int num2 = i / this._OutputBlockSize * this._InputBlockSize;
+				byte[] array = new byte[num2];
+				Buffer.InternalBlockCopy(this._InputBuffer, 0, array, 0, this._InputBufferIndex);
+				int num3 = this._InputBufferIndex;
+				num3 += this._stream.Read(array, this._InputBufferIndex, num2 - this._InputBufferIndex);
+				this._InputBufferIndex = 0;
+				if (num3 <= this._InputBlockSize)
+				{
+					this._InputBuffer = array;
+					this._InputBufferIndex = num3;
+				}
+				else
+				{
+					int num4 = num3 / this._InputBlockSize * this._InputBlockSize;
+					int num5 = num3 - num4;
+					if (num5 != 0)
 					{
-						num3 = this._transform.TransformBlock(this._waitingBlock, 0, this._waitingBlock.Length, this._transformedBlock, this._transformedCount);
-						Buffer.BlockCopy(this._workingBlock, 0, this._waitingBlock, 0, this._workingCount);
-						this._waitingCount = this._workingCount;
+						this._InputBufferIndex = num5;
+						Buffer.InternalBlockCopy(array, num4, this._InputBuffer, 0, num5);
+					}
+					byte[] array2 = new byte[num4 / this._InputBlockSize * this._OutputBlockSize];
+					int num6 = this._Transform.TransformBlock(array, 0, num4, array2, 0);
+					Buffer.InternalBlockCopy(array2, 0, buffer, num, num6);
+					Array.Clear(array, 0, array.Length);
+					Array.Clear(array2, 0, array2.Length);
+					i -= num6;
+					num += num6;
+				}
+			}
+			while (i > 0)
+			{
+				while (this._InputBufferIndex < this._InputBlockSize)
+				{
+					int num3 = this._stream.Read(this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex);
+					if (num3 != 0)
+					{
+						this._InputBufferIndex += num3;
 					}
 					else
 					{
-						if (this._workingCount > 0)
+						byte[] array3 = this._Transform.TransformFinalBlock(this._InputBuffer, 0, this._InputBufferIndex);
+						this._OutputBuffer = array3;
+						this._OutputBufferIndex = array3.Length;
+						this._finalBlockTransformed = true;
+						if (i < this._OutputBufferIndex)
 						{
-							num3 = this._transform.TransformBlock(this._waitingBlock, 0, this._waitingBlock.Length, this._transformedBlock, this._transformedCount);
-							Buffer.BlockCopy(this._workingBlock, 0, this._waitingBlock, 0, this._workingCount);
-							this._waitingCount = this._workingCount;
-							num2 += num3;
-							this._transformedCount += num3;
+							Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, i);
+							this._OutputBufferIndex -= i;
+							Buffer.InternalBlockCopy(this._OutputBuffer, i, this._OutputBuffer, 0, this._OutputBufferIndex);
+							return count;
 						}
-						if (!this._flushedFinalBlock)
+						Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, this._OutputBufferIndex);
+						i -= this._OutputBufferIndex;
+						this._OutputBufferIndex = 0;
+						return count - i;
+					}
+				}
+				int num6 = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
+				this._InputBufferIndex = 0;
+				if (i < num6)
+				{
+					Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, i);
+					this._OutputBufferIndex = num6 - i;
+					Buffer.InternalBlockCopy(this._OutputBuffer, i, this._OutputBuffer, 0, this._OutputBufferIndex);
+					return count;
+				}
+				Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, num, num6);
+				num += num6;
+				i -= num6;
+			}
+			return count;
+		}
+
+		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			if (!this.CanRead)
+			{
+				throw new NotSupportedException(Environment.GetResourceString("Stream does not support reading."));
+			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - offset < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (base.GetType() != typeof(CryptoStream))
+			{
+				return base.ReadAsync(buffer, offset, count, cancellationToken);
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCancellation<int>(cancellationToken);
+			}
+			return this.ReadAsyncInternal(buffer, offset, count, cancellationToken);
+		}
+
+		private async Task<int> ReadAsyncInternal(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		{
+			await default(CryptoStream.HopToThreadPoolAwaitable);
+			SemaphoreSlim sem = base.EnsureAsyncActiveSemaphoreInitialized();
+			await sem.WaitAsync().ConfigureAwait(false);
+			int num;
+			try
+			{
+				int bytesToDeliver = count;
+				int currentOutputIndex = offset;
+				if (this._OutputBufferIndex != 0)
+				{
+					if (this._OutputBufferIndex > count)
+					{
+						Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, count);
+						Buffer.InternalBlockCopy(this._OutputBuffer, count, this._OutputBuffer, 0, this._OutputBufferIndex - count);
+						this._OutputBufferIndex -= count;
+						return count;
+					}
+					Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, offset, this._OutputBufferIndex);
+					bytesToDeliver -= this._OutputBufferIndex;
+					currentOutputIndex += this._OutputBufferIndex;
+					this._OutputBufferIndex = 0;
+				}
+				if (this._finalBlockTransformed)
+				{
+					num = count - bytesToDeliver;
+				}
+				else
+				{
+					if (bytesToDeliver > this._OutputBlockSize && this._Transform.CanTransformMultipleBlocks)
+					{
+						int num2 = bytesToDeliver / this._OutputBlockSize * this._InputBlockSize;
+						byte[] tempInputBuffer = new byte[num2];
+						Buffer.InternalBlockCopy(this._InputBuffer, 0, tempInputBuffer, 0, this._InputBufferIndex);
+						int inputBufferIndex = this._InputBufferIndex;
+						int num3 = inputBufferIndex + await this._stream.ReadAsync(tempInputBuffer, this._InputBufferIndex, num2 - this._InputBufferIndex, cancellationToken).ConfigureAwait(false);
+						this._InputBufferIndex = 0;
+						if (num3 <= this._InputBlockSize)
 						{
-							byte[] array = this._transform.TransformFinalBlock(this._waitingBlock, 0, this._waitingCount);
-							num3 = array.Length;
-							Buffer.BlockCopy(array, 0, this._transformedBlock, this._transformedCount, array.Length);
+							this._InputBuffer = tempInputBuffer;
+							this._InputBufferIndex = num3;
+						}
+						else
+						{
+							int num4 = num3 / this._InputBlockSize * this._InputBlockSize;
+							int num5 = num3 - num4;
+							if (num5 != 0)
+							{
+								this._InputBufferIndex = num5;
+								Buffer.InternalBlockCopy(tempInputBuffer, num4, this._InputBuffer, 0, num5);
+							}
+							byte[] array = new byte[num4 / this._InputBlockSize * this._OutputBlockSize];
+							int num6 = this._Transform.TransformBlock(tempInputBuffer, 0, num4, array, 0);
+							Buffer.InternalBlockCopy(array, 0, buffer, currentOutputIndex, num6);
+							Array.Clear(tempInputBuffer, 0, tempInputBuffer.Length);
 							Array.Clear(array, 0, array.Length);
-							this._flushedFinalBlock = true;
+							bytesToDeliver -= num6;
+							currentOutputIndex += num6;
+							tempInputBuffer = null;
 						}
 					}
-					num2 += num3;
-					this._transformedCount += num3;
+					while (bytesToDeliver > 0)
+					{
+						while (this._InputBufferIndex < this._InputBlockSize)
+						{
+							int num3 = await this._stream.ReadAsync(this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex, cancellationToken).ConfigureAwait(false);
+							if (num3 != 0)
+							{
+								this._InputBufferIndex += num3;
+							}
+							else
+							{
+								byte[] array2 = this._Transform.TransformFinalBlock(this._InputBuffer, 0, this._InputBufferIndex);
+								this._OutputBuffer = array2;
+								this._OutputBufferIndex = array2.Length;
+								this._finalBlockTransformed = true;
+								if (bytesToDeliver < this._OutputBufferIndex)
+								{
+									Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
+									this._OutputBufferIndex -= bytesToDeliver;
+									Buffer.InternalBlockCopy(this._OutputBuffer, bytesToDeliver, this._OutputBuffer, 0, this._OutputBufferIndex);
+									return count;
+								}
+								Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, this._OutputBufferIndex);
+								bytesToDeliver -= this._OutputBufferIndex;
+								this._OutputBufferIndex = 0;
+								return count - bytesToDeliver;
+							}
+						}
+						int num6 = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
+						this._InputBufferIndex = 0;
+						if (bytesToDeliver < num6)
+						{
+							Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, bytesToDeliver);
+							this._OutputBufferIndex = num6 - bytesToDeliver;
+							Buffer.InternalBlockCopy(this._OutputBuffer, bytesToDeliver, this._OutputBuffer, 0, this._OutputBufferIndex);
+							return count;
+						}
+						Buffer.InternalBlockCopy(this._OutputBuffer, 0, buffer, currentOutputIndex, num6);
+						currentOutputIndex += num6;
+						bytesToDeliver -= num6;
+					}
+					num = count;
 				}
-				if (this._transformedPos > this._transform.OutputBlockSize)
-				{
-					Buffer.BlockCopy(this._transformedBlock, this._transformedPos, this._transformedBlock, 0, num2);
-					this._transformedCount -= this._transformedPos;
-					this._transformedPos = 0;
-				}
-				num2 = ((count >= num2) ? num2 : count);
-				if (num2 > 0)
-				{
-					Buffer.BlockCopy(this._transformedBlock, this._transformedPos, buffer, offset, num2);
-					this._transformedPos += num2;
-					num += num2;
-					offset += num2;
-					count -= num2;
-				}
-				if ((num2 != this._transform.InputBlockSize && this._waitingCount != this._transform.InputBlockSize) || this._endOfStream)
-				{
-					count = 0;
-				}
+			}
+			finally
+			{
+				sem.Release();
 			}
 			return num;
 		}
 
 		public override void Write(byte[] buffer, int offset, int count)
 		{
-			if (this._mode != CryptoStreamMode.Write)
+			if (!this.CanWrite)
 			{
-				throw new NotSupportedException(Locale.GetText("not in Write mode"));
+				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Locale.GetText("negative"));
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Locale.GetText("negative"));
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
 			}
-			if (offset > buffer.Length - count)
+			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException("(offset+count)", Locale.GetText("buffer overflow"));
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
 			}
-			if (this._stream == null)
+			int i = count;
+			int num = offset;
+			if (this._InputBufferIndex > 0)
 			{
-				throw new ArgumentNullException("inner stream was diposed");
-			}
-			int num = count;
-			if (this._partialCount > 0 && this._partialCount != this._transform.InputBlockSize)
-			{
-				int num2 = this._transform.InputBlockSize - this._partialCount;
-				num2 = ((count >= num2) ? num2 : count);
-				Buffer.BlockCopy(buffer, offset, this._workingBlock, this._partialCount, num2);
-				this._partialCount += num2;
-				offset += num2;
-				count -= num2;
-			}
-			int num3 = offset;
-			while (count > 0)
-			{
-				if (this._partialCount == this._transform.InputBlockSize)
+				if (count < this._InputBlockSize - this._InputBufferIndex)
 				{
-					int num4 = this._transform.TransformBlock(this._workingBlock, 0, this._partialCount, this._currentBlock, 0);
-					this._stream.Write(this._currentBlock, 0, num4);
-					this._partialCount = 0;
+					Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, count);
+					this._InputBufferIndex += count;
+					return;
 				}
-				if (this._transform.CanTransformMultipleBlocks)
+				Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex);
+				num += this._InputBlockSize - this._InputBufferIndex;
+				i -= this._InputBlockSize - this._InputBufferIndex;
+				this._InputBufferIndex = this._InputBlockSize;
+			}
+			if (this._OutputBufferIndex > 0)
+			{
+				this._stream.Write(this._OutputBuffer, 0, this._OutputBufferIndex);
+				this._OutputBufferIndex = 0;
+			}
+			if (this._InputBufferIndex == this._InputBlockSize)
+			{
+				int num2 = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
+				this._stream.Write(this._OutputBuffer, 0, num2);
+				this._InputBufferIndex = 0;
+			}
+			while (i > 0)
+			{
+				if (i < this._InputBlockSize)
 				{
-					int num5 = count & ~(this._transform.InputBlockSize - 1);
-					int num6 = count & (this._transform.InputBlockSize - 1);
-					int num7 = (1 + num5 / this._transform.InputBlockSize) * this._transform.OutputBlockSize;
-					if (this._workingBlock.Length < num7)
-					{
-						Array.Clear(this._workingBlock, 0, this._workingBlock.Length);
-						this._workingBlock = new byte[num7];
-					}
-					if (num5 > 0)
-					{
-						int num8 = this._transform.TransformBlock(buffer, offset, num5, this._workingBlock, 0);
-						this._stream.Write(this._workingBlock, 0, num8);
-					}
-					if (num6 > 0)
-					{
-						Buffer.BlockCopy(buffer, num - num6, this._workingBlock, 0, num6);
-					}
-					this._partialCount = num6;
-					count = 0;
+					Buffer.InternalBlockCopy(buffer, num, this._InputBuffer, 0, i);
+					this._InputBufferIndex += i;
+					return;
+				}
+				if (this._Transform.CanTransformMultipleBlocks)
+				{
+					int num3 = i / this._InputBlockSize;
+					int num4 = num3 * this._InputBlockSize;
+					byte[] array = new byte[num3 * this._OutputBlockSize];
+					int num2 = this._Transform.TransformBlock(buffer, num, num4, array, 0);
+					this._stream.Write(array, 0, num2);
+					num += num4;
+					i -= num4;
 				}
 				else
 				{
-					int num9 = Math.Min(this._transform.InputBlockSize - this._partialCount, count);
-					Buffer.BlockCopy(buffer, num3, this._workingBlock, this._partialCount, num9);
-					num3 += num9;
-					this._partialCount += num9;
-					count -= num9;
+					int num2 = this._Transform.TransformBlock(buffer, num, this._InputBlockSize, this._OutputBuffer, 0);
+					this._stream.Write(this._OutputBuffer, 0, num2);
+					num += this._InputBlockSize;
+					i -= this._InputBlockSize;
 				}
 			}
 		}
 
-		public override void Flush()
+		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			if (this._stream != null)
+			if (!this.CanWrite)
 			{
-				this._stream.Flush();
+				throw new NotSupportedException(Environment.GetResourceString("Stream does not support writing."));
 			}
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+			}
+			if (buffer.Length - offset < count)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+			}
+			if (base.GetType() != typeof(CryptoStream))
+			{
+				return base.WriteAsync(buffer, offset, count, cancellationToken);
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCancellation(cancellationToken);
+			}
+			return this.WriteAsyncInternal(buffer, offset, count, cancellationToken);
 		}
 
-		public void FlushFinalBlock()
+		private async Task WriteAsyncInternal(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 		{
-			if (this._flushedFinalBlock)
+			await default(CryptoStream.HopToThreadPoolAwaitable);
+			SemaphoreSlim sem = base.EnsureAsyncActiveSemaphoreInitialized();
+			await sem.WaitAsync().ConfigureAwait(false);
+			try
 			{
-				throw new NotSupportedException(Locale.GetText("This method cannot be called twice."));
-			}
-			if (this._disposed)
-			{
-				throw new NotSupportedException(Locale.GetText("CryptoStream was disposed."));
-			}
-			if (this._mode != CryptoStreamMode.Write)
-			{
-				return;
-			}
-			this._flushedFinalBlock = true;
-			byte[] array = this._transform.TransformFinalBlock(this._workingBlock, 0, this._partialCount);
-			if (this._stream != null)
-			{
-				this._stream.Write(array, 0, array.Length);
-				if (this._stream is CryptoStream)
+				int bytesToWrite = count;
+				int currentInputIndex = offset;
+				if (this._InputBufferIndex > 0)
 				{
-					(this._stream as CryptoStream).FlushFinalBlock();
+					if (count < this._InputBlockSize - this._InputBufferIndex)
+					{
+						Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, count);
+						this._InputBufferIndex += count;
+						return;
+					}
+					Buffer.InternalBlockCopy(buffer, offset, this._InputBuffer, this._InputBufferIndex, this._InputBlockSize - this._InputBufferIndex);
+					currentInputIndex += this._InputBlockSize - this._InputBufferIndex;
+					bytesToWrite -= this._InputBlockSize - this._InputBufferIndex;
+					this._InputBufferIndex = this._InputBlockSize;
 				}
-				this._stream.Flush();
+				if (this._OutputBufferIndex > 0)
+				{
+					await this._stream.WriteAsync(this._OutputBuffer, 0, this._OutputBufferIndex, cancellationToken).ConfigureAwait(false);
+					this._OutputBufferIndex = 0;
+				}
+				if (this._InputBufferIndex == this._InputBlockSize)
+				{
+					int num = this._Transform.TransformBlock(this._InputBuffer, 0, this._InputBlockSize, this._OutputBuffer, 0);
+					await this._stream.WriteAsync(this._OutputBuffer, 0, num, cancellationToken).ConfigureAwait(false);
+					this._InputBufferIndex = 0;
+				}
+				while (bytesToWrite > 0)
+				{
+					if (bytesToWrite < this._InputBlockSize)
+					{
+						Buffer.InternalBlockCopy(buffer, currentInputIndex, this._InputBuffer, 0, bytesToWrite);
+						this._InputBufferIndex += bytesToWrite;
+						break;
+					}
+					if (this._Transform.CanTransformMultipleBlocks)
+					{
+						int num2 = bytesToWrite / this._InputBlockSize;
+						int numWholeBlocksInBytes = num2 * this._InputBlockSize;
+						byte[] array = new byte[num2 * this._OutputBlockSize];
+						int num = this._Transform.TransformBlock(buffer, currentInputIndex, numWholeBlocksInBytes, array, 0);
+						await this._stream.WriteAsync(array, 0, num, cancellationToken).ConfigureAwait(false);
+						currentInputIndex += numWholeBlocksInBytes;
+						bytesToWrite -= numWholeBlocksInBytes;
+					}
+					else
+					{
+						int num = this._Transform.TransformBlock(buffer, currentInputIndex, this._InputBlockSize, this._OutputBuffer, 0);
+						await this._stream.WriteAsync(this._OutputBuffer, 0, num, cancellationToken).ConfigureAwait(false);
+						currentInputIndex += this._InputBlockSize;
+						bytesToWrite -= this._InputBlockSize;
+					}
+				}
 			}
-			Array.Clear(array, 0, array.Length);
+			finally
+			{
+				sem.Release();
+			}
 		}
 
-		public override long Seek(long offset, SeekOrigin origin)
+		public void Clear()
 		{
-			throw new NotSupportedException("Seek");
-		}
-
-		public override void SetLength(long value)
-		{
-			throw new NotSupportedException("SetLength");
+			this.Close();
 		}
 
 		protected override void Dispose(bool disposing)
 		{
-			if (!this._disposed)
+			try
 			{
-				this._disposed = true;
-				if (this._workingBlock != null)
-				{
-					Array.Clear(this._workingBlock, 0, this._workingBlock.Length);
-				}
-				if (this._currentBlock != null)
-				{
-					Array.Clear(this._currentBlock, 0, this._currentBlock.Length);
-				}
 				if (disposing)
 				{
-					this._stream = null;
-					this._workingBlock = null;
-					this._currentBlock = null;
+					if (!this._finalBlockTransformed)
+					{
+						this.FlushFinalBlock();
+					}
+					this._stream.Close();
 				}
+			}
+			finally
+			{
+				try
+				{
+					this._finalBlockTransformed = true;
+					if (this._InputBuffer != null)
+					{
+						Array.Clear(this._InputBuffer, 0, this._InputBuffer.Length);
+					}
+					if (this._OutputBuffer != null)
+					{
+						Array.Clear(this._OutputBuffer, 0, this._OutputBuffer.Length);
+					}
+					this._InputBuffer = null;
+					this._OutputBuffer = null;
+					this._canRead = false;
+					this._canWrite = false;
+				}
+				finally
+				{
+					base.Dispose(disposing);
+				}
+			}
+		}
+
+		private void InitializeBuffer()
+		{
+			if (this._Transform != null)
+			{
+				this._InputBlockSize = this._Transform.InputBlockSize;
+				this._InputBuffer = new byte[this._InputBlockSize];
+				this._OutputBlockSize = this._Transform.OutputBlockSize;
+				this._OutputBuffer = new byte[this._OutputBlockSize];
 			}
 		}
 
 		private Stream _stream;
 
-		private ICryptoTransform _transform;
+		private ICryptoTransform _Transform;
 
-		private CryptoStreamMode _mode;
+		private byte[] _InputBuffer;
 
-		private byte[] _currentBlock;
+		private int _InputBufferIndex;
 
-		private bool _disposed;
+		private int _InputBlockSize;
 
-		private bool _flushedFinalBlock;
+		private byte[] _OutputBuffer;
 
-		private int _partialCount;
+		private int _OutputBufferIndex;
 
-		private bool _endOfStream;
+		private int _OutputBlockSize;
 
-		private byte[] _waitingBlock;
+		private CryptoStreamMode _transformMode;
 
-		private int _waitingCount;
+		private bool _canRead;
 
-		private byte[] _transformedBlock;
+		private bool _canWrite;
 
-		private int _transformedPos;
+		private bool _finalBlockTransformed;
 
-		private int _transformedCount;
+		private struct HopToThreadPoolAwaitable : INotifyCompletion
+		{
+			public CryptoStream.HopToThreadPoolAwaitable GetAwaiter()
+			{
+				return this;
+			}
 
-		private byte[] _workingBlock;
+			public bool IsCompleted
+			{
+				get
+				{
+					return false;
+				}
+			}
 
-		private int _workingCount;
+			public void OnCompleted(Action continuation)
+			{
+				Task.Run(continuation);
+			}
+
+			public void GetResult()
+			{
+			}
+		}
 	}
 }

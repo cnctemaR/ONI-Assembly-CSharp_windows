@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Globalization;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class SingleConverter : BaseNumberConverter
 	{
-		public SingleConverter()
-		{
-			this.InnerType = typeof(float);
-		}
-
-		internal override bool SupportHex
+		internal override bool AllowHex
 		{
 			get
 			{
@@ -18,14 +15,32 @@ namespace System.ComponentModel
 			}
 		}
 
-		internal override string ConvertToString(object value, NumberFormatInfo format)
+		internal override Type TargetType
 		{
-			return ((float)value).ToString("R", format);
+			get
+			{
+				return typeof(float);
+			}
 		}
 
-		internal override object ConvertFromString(string value, NumberFormatInfo format)
+		internal override object FromString(string value, int radix)
 		{
-			return float.Parse(value, NumberStyles.Float, format);
+			return Convert.ToSingle(value, CultureInfo.CurrentCulture);
+		}
+
+		internal override object FromString(string value, NumberFormatInfo formatInfo)
+		{
+			return float.Parse(value, NumberStyles.Float, formatInfo);
+		}
+
+		internal override object FromString(string value, CultureInfo culture)
+		{
+			return float.Parse(value, culture);
+		}
+
+		internal override string ToString(object value, NumberFormatInfo formatInfo)
+		{
+			return ((float)value).ToString("R", formatInfo);
 		}
 	}
 }

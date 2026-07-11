@@ -36,7 +36,6 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 			return;
 		}
 		this.visualizer = Util.KInstantiate(Assets.UIPrefabs.ResourceVisualizer, GameScreenManager.Instance.worldSpaceCanvas, null);
-		this.visualizer.SetActive(false);
 	}
 
 	public void UpdateVisibility()

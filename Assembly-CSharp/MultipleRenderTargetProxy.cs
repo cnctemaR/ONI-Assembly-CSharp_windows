@@ -5,7 +5,6 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 {
 	private void Start()
 	{
-		this.camera = base.GetComponent<Camera>();
 		ScreenResize instance = ScreenResize.Instance;
 		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
 		this.CreateRenderTarget();
@@ -36,7 +35,8 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 			this.Textures[2].name = "MRT2";
 			array[2] = this.Textures[2].colorBuffer;
 		}
-		this.camera.SetTargetBuffers(array, this.Textures[0].depthBuffer);
+		Camera component = base.GetComponent<Camera>();
+		component.SetTargetBuffers(array, this.Textures[0].depthBuffer);
 		this.OnShadersReloaded();
 	}
 
@@ -78,8 +78,6 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 	}
 
 	public RenderTexture[] Textures = new RenderTexture[3];
-
-	private Camera camera;
 
 	private bool colouredOverlayBufferEnabled;
 }

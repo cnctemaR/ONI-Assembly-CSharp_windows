@@ -1,76 +1,30 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
-	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeMemberMethod : CodeTypeMember
 	{
-		public event EventHandler PopulateImplementationTypes;
-
 		public event EventHandler PopulateParameters;
 
 		public event EventHandler PopulateStatements;
 
-		public CodeTypeReferenceCollection ImplementationTypes
-		{
-			get
-			{
-				if (this.implementationTypes == null)
-				{
-					this.implementationTypes = new CodeTypeReferenceCollection();
-					if (this.PopulateImplementationTypes != null)
-					{
-						this.PopulateImplementationTypes(this, EventArgs.Empty);
-					}
-				}
-				return this.implementationTypes;
-			}
-		}
-
-		public CodeParameterDeclarationExpressionCollection Parameters
-		{
-			get
-			{
-				if (this.parameters == null)
-				{
-					this.parameters = new CodeParameterDeclarationExpressionCollection();
-					if (this.PopulateParameters != null)
-					{
-						this.PopulateParameters(this, EventArgs.Empty);
-					}
-				}
-				return this.parameters;
-			}
-		}
-
-		public CodeTypeReference PrivateImplementationType
-		{
-			get
-			{
-				return this.privateImplements;
-			}
-			set
-			{
-				this.privateImplements = value;
-			}
-		}
+		public event EventHandler PopulateImplementationTypes;
 
 		public CodeTypeReference ReturnType
 		{
 			get
 			{
-				if (this.returnType == null)
+				CodeTypeReference codeTypeReference;
+				if ((codeTypeReference = this._returnType) == null)
 				{
-					return new CodeTypeReference(typeof(void));
+					codeTypeReference = (this._returnType = new CodeTypeReference(typeof(void).FullName));
 				}
-				return this.returnType;
+				return codeTypeReference;
 			}
 			set
 			{
-				this.returnType = value;
+				this._returnType = value;
 			}
 		}
 
@@ -78,15 +32,56 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.statements == null)
+				if ((this._populated & 2) == 0)
 				{
-					this.statements = new CodeStatementCollection();
-					if (this.PopulateStatements != null)
+					this._populated |= 2;
+					EventHandler populateStatements = this.PopulateStatements;
+					if (populateStatements != null)
 					{
-						this.PopulateStatements(this, EventArgs.Empty);
+						populateStatements(this, EventArgs.Empty);
 					}
 				}
-				return this.statements;
+				return this._statements;
+			}
+		}
+
+		public CodeParameterDeclarationExpressionCollection Parameters
+		{
+			get
+			{
+				if ((this._populated & 1) == 0)
+				{
+					this._populated |= 1;
+					EventHandler populateParameters = this.PopulateParameters;
+					if (populateParameters != null)
+					{
+						populateParameters(this, EventArgs.Empty);
+					}
+				}
+				return this._parameters;
+			}
+		}
+
+		public CodeTypeReference PrivateImplementationType { get; set; }
+
+		public CodeTypeReferenceCollection ImplementationTypes
+		{
+			get
+			{
+				if (this._implementationTypes == null)
+				{
+					this._implementationTypes = new CodeTypeReferenceCollection();
+				}
+				if ((this._populated & 4) == 0)
+				{
+					this._populated |= 4;
+					EventHandler populateImplementationTypes = this.PopulateImplementationTypes;
+					if (populateImplementationTypes != null)
+					{
+						populateImplementationTypes(this, EventArgs.Empty);
+					}
+				}
+				return this._implementationTypes;
 			}
 		}
 
@@ -94,46 +89,46 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if (this.returnAttributes == null)
+				CodeAttributeDeclarationCollection codeAttributeDeclarationCollection;
+				if ((codeAttributeDeclarationCollection = this._returnAttributes) == null)
 				{
-					this.returnAttributes = new CodeAttributeDeclarationCollection();
+					codeAttributeDeclarationCollection = (this._returnAttributes = new CodeAttributeDeclarationCollection());
 				}
-				return this.returnAttributes;
+				return codeAttributeDeclarationCollection;
 			}
 		}
 
-		[ComVisible(false)]
 		public CodeTypeParameterCollection TypeParameters
 		{
 			get
 			{
-				if (this.typeParameters == null)
+				CodeTypeParameterCollection codeTypeParameterCollection;
+				if ((codeTypeParameterCollection = this._typeParameters) == null)
 				{
-					this.typeParameters = new CodeTypeParameterCollection();
+					codeTypeParameterCollection = (this._typeParameters = new CodeTypeParameterCollection());
 				}
-				return this.typeParameters;
+				return codeTypeParameterCollection;
 			}
 		}
 
-		internal override void Accept(ICodeDomVisitor visitor)
-		{
-			visitor.Visit(this);
-		}
+		private readonly CodeParameterDeclarationExpressionCollection _parameters = new CodeParameterDeclarationExpressionCollection();
 
-		private CodeTypeReferenceCollection implementationTypes;
+		private readonly CodeStatementCollection _statements = new CodeStatementCollection();
 
-		private CodeParameterDeclarationExpressionCollection parameters;
+		private CodeTypeReference _returnType;
 
-		private CodeTypeReference privateImplements;
+		private CodeTypeReferenceCollection _implementationTypes;
 
-		private CodeTypeReference returnType;
+		private CodeAttributeDeclarationCollection _returnAttributes;
 
-		private CodeStatementCollection statements;
+		private CodeTypeParameterCollection _typeParameters;
 
-		private CodeAttributeDeclarationCollection returnAttributes;
+		private int _populated;
 
-		private int populated;
+		private const int ParametersCollection = 1;
 
-		private CodeTypeParameterCollection typeParameters;
+		private const int StatementsCollection = 2;
+
+		private const int ImplTypesCollection = 4;
 	}
 }

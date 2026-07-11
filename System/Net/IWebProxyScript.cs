@@ -6,7 +6,7 @@ namespace System.Net
 	{
 		void Close();
 
-		bool Load(global::System.Uri scriptLocation, string Script, Type helperType);
+		bool Load(Uri scriptLocation, string script, Type helperType);
 
 		string Run(string url, string host);
 	}

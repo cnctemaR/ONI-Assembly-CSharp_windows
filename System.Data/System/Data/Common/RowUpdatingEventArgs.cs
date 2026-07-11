@@ -6,23 +6,27 @@ namespace System.Data.Common
 	{
 		public RowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
 		{
-			this.dataRow = dataRow;
-			this.command = command;
-			this.statementType = statementType;
-			this.tableMapping = tableMapping;
-			this.status = UpdateStatus.Continue;
-			this.errors = null;
+		}
+
+		protected virtual IDbCommand BaseCommand
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
 		}
 
 		public IDbCommand Command
 		{
 			get
 			{
-				return this.command;
+				throw null;
 			}
 			set
 			{
-				this.command = value;
 			}
 		}
 
@@ -30,11 +34,10 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.errors;
+				throw null;
 			}
 			set
 			{
-				this.errors = value;
 			}
 		}
 
@@ -42,7 +45,7 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.dataRow;
+				throw null;
 			}
 		}
 
@@ -50,7 +53,7 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.statementType;
+				throw null;
 			}
 		}
 
@@ -58,11 +61,10 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.status;
+				throw null;
 			}
 			set
 			{
-				this.status = value;
 			}
 		}
 
@@ -70,32 +72,8 @@ namespace System.Data.Common
 		{
 			get
 			{
-				return this.tableMapping;
+				throw null;
 			}
 		}
-
-		protected virtual IDbCommand BaseCommand
-		{
-			get
-			{
-				return this.command;
-			}
-			set
-			{
-				this.command = value;
-			}
-		}
-
-		private DataRow dataRow;
-
-		private IDbCommand command;
-
-		private StatementType statementType;
-
-		private DataTableMapping tableMapping;
-
-		private UpdateStatus status;
-
-		private Exception errors;
 	}
 }

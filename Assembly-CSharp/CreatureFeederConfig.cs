@@ -36,6 +36,7 @@ public class CreatureFeederConfig : IBuildingConfig
 		storage.showInUI = true;
 		storage.showDescriptor = true;
 		storage.allowItemRemoval = false;
+		storage.allowSettingOnlyFetchMarkedItems = false;
 		go.AddOrGet<StorageLocker>();
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<CreatureFeeder>();

@@ -2,10 +2,10 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete]
+	[Obsolete("Use System.Runtime.InteropServices.ComTypes.TYPEFLAGS instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
 	[Flags]
 	[Serializable]
-	public enum TYPEFLAGS
+	public enum TYPEFLAGS : short
 	{
 		TYPEFLAG_FAPPOBJECT = 1,
 		TYPEFLAG_FCANCREATE = 2,

@@ -1,36 +1,93 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security;
 
 namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class TypeLoadException : SystemException
+	public class TypeLoadException : SystemException, ISerializable
 	{
 		public TypeLoadException()
-			: base(Locale.GetText("A type load exception has occurred."))
+			: base(Environment.GetResourceString("Failure has occurred while loading a type."))
 		{
-			base.HResult = -2146233054;
+			base.SetErrorCode(-2146233054);
 		}
 
 		public TypeLoadException(string message)
 			: base(message)
 		{
-			base.HResult = -2146233054;
+			base.SetErrorCode(-2146233054);
 		}
 
 		public TypeLoadException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.HResult = -2146233054;
+			base.SetErrorCode(-2146233054);
 		}
 
-		internal TypeLoadException(string className, string assemblyName)
-			: this()
+		public override string Message
 		{
-			this.className = className;
-			this.assemblyName = assemblyName;
+			[SecuritySafeCritical]
+			get
+			{
+				this.SetMessageField();
+				return this._message;
+			}
+		}
+
+		[SecurityCritical]
+		private void SetMessageField()
+		{
+			if (this._message == null)
+			{
+				if (this.ClassName == null && this.ResourceId == 0)
+				{
+					this._message = Environment.GetResourceString("Failure has occurred while loading a type.");
+					return;
+				}
+				if (this.AssemblyName == null)
+				{
+					this.AssemblyName = Environment.GetResourceString("[Unknown]");
+				}
+				if (this.ClassName == null)
+				{
+					this.ClassName = Environment.GetResourceString("[Unknown]");
+				}
+				string text = "Could not load type '{0}' from assembly '{1}'.";
+				this._message = string.Format(CultureInfo.CurrentCulture, text, this.ClassName, this.AssemblyName, this.MessageArg);
+			}
+		}
+
+		public string TypeName
+		{
+			get
+			{
+				if (this.ClassName == null)
+				{
+					return string.Empty;
+				}
+				return this.ClassName;
+			}
+		}
+
+		private TypeLoadException(string className, string assemblyName)
+			: this(className, assemblyName, null, 0)
+		{
+		}
+
+		[SecurityCritical]
+		private TypeLoadException(string className, string assemblyName, string messageArg, int resourceId)
+			: base(null)
+		{
+			base.SetErrorCode(-2146233054);
+			this.ClassName = className;
+			this.AssemblyName = assemblyName;
+			this.MessageArg = messageArg;
+			this.ResourceId = resourceId;
+			this.SetMessageField();
 		}
 
 		protected TypeLoadException(SerializationInfo info, StreamingContext context)
@@ -40,38 +97,13 @@ namespace System
 			{
 				throw new ArgumentNullException("info");
 			}
-			this.className = info.GetString("TypeLoadClassName");
-			this.assemblyName = info.GetString("TypeLoadAssemblyName");
+			this.ClassName = info.GetString("TypeLoadClassName");
+			this.AssemblyName = info.GetString("TypeLoadAssemblyName");
+			this.MessageArg = info.GetString("TypeLoadMessageArg");
+			this.ResourceId = info.GetInt32("TypeLoadResourceID");
 		}
 
-		public override string Message
-		{
-			get
-			{
-				if (this.className == null)
-				{
-					return base.Message;
-				}
-				if (this.assemblyName != null && this.assemblyName != string.Empty)
-				{
-					return string.Format("Could not load type '{0}' from assembly '{1}'.", this.className, this.assemblyName);
-				}
-				return string.Format("Could not load type '{0}'.", this.className);
-			}
-		}
-
-		public string TypeName
-		{
-			get
-			{
-				if (this.className == null)
-				{
-					return string.Empty;
-				}
-				return this.className;
-			}
-		}
-
+		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			if (info == null)
@@ -79,16 +111,18 @@ namespace System
 				throw new ArgumentNullException("info");
 			}
 			base.GetObjectData(info, context);
-			info.AddValue("TypeLoadClassName", this.className, typeof(string));
-			info.AddValue("TypeLoadAssemblyName", this.assemblyName, typeof(string));
-			info.AddValue("TypeLoadMessageArg", string.Empty, typeof(string));
-			info.AddValue("TypeLoadResourceID", 0, typeof(int));
+			info.AddValue("TypeLoadClassName", this.ClassName, typeof(string));
+			info.AddValue("TypeLoadAssemblyName", this.AssemblyName, typeof(string));
+			info.AddValue("TypeLoadMessageArg", this.MessageArg, typeof(string));
+			info.AddValue("TypeLoadResourceID", this.ResourceId);
 		}
 
-		private const int Result = -2146233054;
+		private string ClassName;
 
-		private string className;
+		private string AssemblyName;
 
-		private string assemblyName;
+		private string MessageArg;
+
+		internal int ResourceId;
 	}
 }

@@ -13,5 +13,5 @@ public class OutputPoint : KMonoBehaviour
 	[MyCmpGet]
 	private Operational operational;
 
-	public static Operational.Flag outputClearFlag = new Operational.Flag("output_clear", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag outputClearFlag = new Operational.Flag("output_clear", Operational.Flag.Type.Requirement);
 }

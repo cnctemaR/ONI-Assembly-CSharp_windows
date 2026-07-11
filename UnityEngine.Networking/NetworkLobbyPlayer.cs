@@ -227,6 +227,7 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		[Tooltip("Enable to show the default lobby GUI for this player.")]
 		[SerializeField]
 		public bool ShowLobbyGUI = true;
 

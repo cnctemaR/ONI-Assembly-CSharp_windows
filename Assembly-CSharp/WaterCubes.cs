@@ -6,6 +6,11 @@ public class WaterCubes : KMonoBehaviour
 {
 	public static WaterCubes Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		WaterCubes.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		WaterCubes.Instance = this;

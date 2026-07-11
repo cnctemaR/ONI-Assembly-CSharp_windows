@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[AttributeUsage(AttributeTargets.Struct, Inherited = true)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Struct, Inherited = true)]
 	[Serializable]
 	public sealed class NativeCppClassAttribute : Attribute
 	{

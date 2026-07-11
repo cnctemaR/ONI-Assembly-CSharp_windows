@@ -36,7 +36,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		base.OnSpawn();
 		this.OnMove();
 		this.CheckDrowning(null);
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "DrowningMonitor.OnSpawn");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "DrowningMonitor.OnSpawn");
 	}
 
 	private void OnMove()
@@ -55,7 +55,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 
 	protected override void OnCleanUp()
 	{
-		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
+		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();

@@ -33,7 +33,7 @@ public class SandboxSpawnerTool : InterfaceTool
 		}
 		else
 		{
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(SandboxToolParameterMenu.instance.settings.Entity.PrefabTag), Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, Folder.Entities, null, 0);
+			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(SandboxToolParameterMenu.instance.settings.Entity.PrefabTag), Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0);
 			gameObject.SetActive(true);
 		}
 		UISounds.PlaySound(UISounds.Sound.ClickObject);
@@ -55,7 +55,7 @@ public class SandboxSpawnerTool : InterfaceTool
 
 	private void SpawnMinion()
 	{
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), SceneOrganizer.Instance.GetFolder(Folder.Entities), null);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
 		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 		Vector3 vector = Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Move);

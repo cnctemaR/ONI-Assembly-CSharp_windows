@@ -4,23 +4,37 @@ namespace System.Xml
 {
 	public abstract class XmlLinkedNode : XmlNode
 	{
+		internal XmlLinkedNode()
+		{
+			this.next = null;
+		}
+
 		internal XmlLinkedNode(XmlDocument doc)
 			: base(doc)
 		{
+			this.next = null;
 		}
 
-		internal bool IsRooted
+		public override XmlNode PreviousSibling
 		{
 			get
 			{
-				for (XmlNode xmlNode = this.ParentNode; xmlNode != null; xmlNode = xmlNode.ParentNode)
+				XmlNode parentNode = this.ParentNode;
+				if (parentNode != null)
 				{
-					if (xmlNode.NodeType == XmlNodeType.Document)
+					XmlNode xmlNode;
+					XmlNode nextSibling;
+					for (xmlNode = parentNode.FirstChild; xmlNode != null; xmlNode = nextSibling)
 					{
-						return true;
+						nextSibling = xmlNode.NextSibling;
+						if (nextSibling == this)
+						{
+							break;
+						}
 					}
+					return xmlNode;
 				}
-				return false;
+				return null;
 			}
 		}
 
@@ -28,46 +42,15 @@ namespace System.Xml
 		{
 			get
 			{
-				return (this.ParentNode != null && this.ParentNode.LastChild != this) ? this.nextSibling : null;
-			}
-		}
-
-		internal XmlLinkedNode NextLinkedSibling
-		{
-			get
-			{
-				return this.nextSibling;
-			}
-			set
-			{
-				this.nextSibling = value;
-			}
-		}
-
-		public override XmlNode PreviousSibling
-		{
-			get
-			{
-				if (this.ParentNode != null)
+				XmlNode parentNode = this.ParentNode;
+				if (parentNode != null && this.next != parentNode.FirstChild)
 				{
-					XmlNode firstChild = this.ParentNode.FirstChild;
-					if (firstChild != this)
-					{
-						while (firstChild.NextSibling != this)
-						{
-							if ((firstChild = firstChild.NextSibling) == null)
-							{
-								goto IL_0039;
-							}
-						}
-						return firstChild;
-					}
+					return this.next;
 				}
-				IL_0039:
 				return null;
 			}
 		}
 
-		private XmlLinkedNode nextSibling;
+		internal XmlLinkedNode next;
 	}
 }

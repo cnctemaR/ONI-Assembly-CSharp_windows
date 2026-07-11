@@ -19,6 +19,11 @@ public class ReportScreenEntryRow : KMonoBehaviour
 		return notes;
 	}
 
+	public static void DestroyStatics()
+	{
+		ReportScreenEntryRow.notes = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

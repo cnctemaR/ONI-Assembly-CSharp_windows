@@ -9,7 +9,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.pcmreadcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.pcmreadcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<SOUND_PCMREADCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -17,7 +17,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.pcmsetposcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.pcmsetposcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<SOUND_PCMSETPOSCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -25,7 +25,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.nonblockcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.nonblockcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<SOUND_NONBLOCKCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -33,7 +33,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.fileuseropen_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.fileuseropen_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<FILE_OPENCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.fileuserclose_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.fileuserclose_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<FILE_CLOSECALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.fileuserread_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.fileuserread_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<FILE_READCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -57,7 +57,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.fileuserseek_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.fileuserseek_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<FILE_SEEKCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.fileuserasyncread_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.fileuserasyncread_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<FILE_ASYNCREADCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 
@@ -73,7 +73,7 @@ namespace FMOD
 		{
 			set
 			{
-				this.fileuserasynccancel_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+				this.fileuserasynccancel_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate<FILE_ASYNCCANCELCALLBACK>(value) : IntPtr.Zero);
 			}
 		}
 

@@ -10,11 +10,11 @@ namespace System.Configuration
 		public override object ConvertFrom(ITypeDescriptorContext ctx, CultureInfo ci, object data)
 		{
 			CommaDelimitedStringCollection commaDelimitedStringCollection = new CommaDelimitedStringCollection();
-			string[] array = ((string)data).Split(new char[] { ',' });
-			foreach (string text in array)
+			foreach (string text in ((string)data).Split(new char[] { ',' }))
 			{
 				commaDelimitedStringCollection.Add(text.Trim());
 			}
+			commaDelimitedStringCollection.UpdateStringHash();
 			return commaDelimitedStringCollection;
 		}
 

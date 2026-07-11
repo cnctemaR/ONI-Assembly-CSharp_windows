@@ -10,40 +10,28 @@ namespace System.Data.Odbc
 	{
 		[Obsolete("use OdbcPermission(PermissionState.None)", true)]
 		public OdbcPermission()
-			: base(PermissionState.None)
+			: base(null)
 		{
 		}
 
 		public OdbcPermission(PermissionState state)
-			: base(state)
+			: base(null)
 		{
 		}
 
 		[Obsolete("use OdbcPermission(PermissionState.None)", true)]
 		public OdbcPermission(PermissionState state, bool allowBlankPassword)
-			: base(state)
-		{
-			base.AllowBlankPassword = allowBlankPassword;
-		}
-
-		internal OdbcPermission(DBDataPermission permission)
-			: base(permission)
+			: base(null)
 		{
 		}
 
-		internal OdbcPermission(DBDataPermissionAttribute attribute)
-			: base(attribute)
+		public override void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior)
 		{
 		}
 
 		public override IPermission Copy()
 		{
-			return new OdbcPermission(this);
-		}
-
-		public override void Add(string connectionString, string restrictions, KeyRestrictionBehavior behavior)
-		{
-			base.Add(connectionString, restrictions, behavior);
+			throw null;
 		}
 	}
 }

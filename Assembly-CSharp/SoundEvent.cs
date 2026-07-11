@@ -39,7 +39,7 @@ public class SoundEvent : AnimEvent
 
 	public EffectorValues noiseValues { get; set; }
 
-	public static bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour, string sound, bool is_looping, bool is_dynamic)
+	public static bool ShouldPlaySound(KBatchedAnimController controller, string sound, bool is_looping, bool is_dynamic)
 	{
 		CameraController instance = CameraController.Instance;
 		if (instance == null)
@@ -49,13 +49,13 @@ public class SoundEvent : AnimEvent
 		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
 		if (is_dynamic)
 		{
-			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(behaviour.position);
+			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(controller.transform.GetPosition());
 		}
 		if (sound == null || SoundEvent.IsLowPrioritySound(sound))
 		{
 			return false;
 		}
-		if (!instance.IsAudibleSound(behaviour.position, sound))
+		if (!instance.IsAudibleSound(controller.transform.GetPosition(), sound))
 		{
 			if (!is_looping && !GlobalAssets.IsHighPriority(sound))
 			{
@@ -71,7 +71,7 @@ public class SoundEvent : AnimEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (SoundEvent.ShouldPlaySound(behaviour, this.sound, this.looping, this.isDynamic))
+		if (SoundEvent.ShouldPlaySound(behaviour.controller, this.sound, this.looping, this.isDynamic))
 		{
 			this.PlaySound(behaviour);
 		}

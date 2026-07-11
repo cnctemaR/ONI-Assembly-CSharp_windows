@@ -20,7 +20,7 @@ public class TitleBarPortrait : KMonoBehaviour
 		Building component2 = selectedTarget.GetComponent<Building>();
 		if (component2 != null)
 		{
-			this.SetPortrait(component2.Def.GetUISprite("ui"));
+			this.SetPortrait(component2.Def.GetUISprite("ui", false));
 			return;
 		}
 		MeshRenderer componentInChildren = selectedTarget.GetComponentInChildren<MeshRenderer>();

@@ -1,60 +1,71 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Permissions;
 
 namespace System.Security.Policy
 {
 	internal static class DefaultPolicies
 	{
-		// Note: this type is marked as 'beforefieldinit'.
-		static DefaultPolicies()
-		{
-			byte[] array = new byte[16];
-			array[8] = 4;
-			DefaultPolicies._ecmaKey = array;
-			DefaultPolicies._msFinalKey = new byte[]
-			{
-				0, 36, 0, 0, 4, 128, 0, 0, 148, 0,
-				0, 0, 6, 2, 0, 0, 0, 36, 0, 0,
-				82, 83, 65, 49, 0, 4, 0, 0, 1, 0,
-				1, 0, 7, 209, 250, 87, 196, 174, 217, 240,
-				163, 46, 132, 170, 15, 174, 253, 13, 233, 232,
-				253, 106, 236, 143, 135, 251, 3, 118, 108, 131,
-				76, 153, 146, 30, 178, 59, 231, 154, 217, 213,
-				220, 193, 221, 154, 210, 54, 19, 33, 2, 144,
-				11, 114, 60, 249, 128, 149, 127, 196, 225, 119,
-				16, 143, 198, 7, 119, 79, 41, 232, 50, 14,
-				146, 234, 5, 236, 228, 232, 33, 192, 165, 239,
-				232, 241, 100, 92, 76, 12, 147, 193, 171, 153,
-				40, 93, 98, 44, 170, 101, 44, 29, 250, 214,
-				61, 116, 93, 111, 45, 229, 241, 126, 94, 175,
-				15, 196, 150, 61, 38, 28, 138, 18, 67, 101,
-				24, 32, 109, 192, 147, 52, 77, 90, 210, 147
-			};
-		}
-
 		public static PermissionSet GetSpecialPermissionSet(string name)
 		{
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
 			}
-			switch (name)
+			uint num = <PrivateImplementationDetails>.ComputeStringHash(name);
+			if (num <= 2314740779U)
 			{
-			case "FullTrust":
-				return DefaultPolicies.FullTrust;
-			case "LocalIntranet":
-				return DefaultPolicies.LocalIntranet;
-			case "Internet":
-				return DefaultPolicies.Internet;
-			case "SkipVerification":
-				return DefaultPolicies.SkipVerification;
-			case "Execution":
+				if (num != 734303062U)
+				{
+					if (num != 753551658U)
+					{
+						if (num == 2314740779U)
+						{
+							if (name == "LocalIntranet")
+							{
+								return DefaultPolicies.LocalIntranet;
+							}
+						}
+					}
+					else if (name == "Nothing")
+					{
+						return DefaultPolicies.Nothing;
+					}
+				}
+				else if (name == "FullTrust")
+				{
+					return DefaultPolicies.FullTrust;
+				}
+			}
+			else if (num <= 3132872517U)
+			{
+				if (num != 2939433820U)
+				{
+					if (num == 3132872517U)
+					{
+						if (name == "SkipVerification")
+						{
+							return DefaultPolicies.SkipVerification;
+						}
+					}
+				}
+				else if (name == "Internet")
+				{
+					return DefaultPolicies.Internet;
+				}
+			}
+			else if (num != 3650199797U)
+			{
+				if (num == 4030759744U)
+				{
+					if (name == "Everything")
+					{
+						return DefaultPolicies.Everything;
+					}
+				}
+			}
+			else if (name == "Execution")
+			{
 				return DefaultPolicies.Execution;
-			case "Nothing":
-				return DefaultPolicies.Nothing;
-			case "Everything":
-				return DefaultPolicies.Everything;
 			}
 			return null;
 		}
@@ -167,7 +178,7 @@ namespace System.Security.Policy
 			}
 			if (DefaultPolicies._fxVersion == null)
 			{
-				DefaultPolicies._fxVersion = new Version("2.0.0.0");
+				DefaultPolicies._fxVersion = new Version("4.0.0.0");
 			}
 			return new StrongNameMembershipCondition(strongNamePublicKeyBlob, name, DefaultPolicies._fxVersion);
 		}
@@ -191,7 +202,7 @@ namespace System.Security.Policy
 			SecurityPermissionFlag securityPermissionFlag = SecurityPermissionFlag.Assertion | SecurityPermissionFlag.Execution;
 			namedPermissionSet.AddPermission(new SecurityPermission(securityPermissionFlag));
 			namedPermissionSet.AddPermission(new UIPermission(PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.DnsPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.DnsPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
 			namedPermissionSet.AddPermission(PermissionBuilder.Create(DefaultPolicies.PrintingPermission("SafePrinting")));
 			return namedPermissionSet;
 		}
@@ -244,54 +255,77 @@ namespace System.Security.Policy
 			securityPermissionFlag &= ~SecurityPermissionFlag.SkipVerification;
 			namedPermissionSet.AddPermission(new SecurityPermission(securityPermissionFlag));
 			namedPermissionSet.AddPermission(new UIPermission(PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.DnsPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Drawing.Printing.PrintingPermission, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Diagnostics.EventLogPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.SocketPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.WebPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Diagnostics.PerformanceCounterPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.DirectoryServices.DirectoryServicesPermission, System.DirectoryServices, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Messaging.MessageQueuePermission, System.Messaging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.ServiceProcess.ServiceControllerPermission, System.ServiceProcess, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Data.OleDb.OleDbPermission, System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
-			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Data.SqlClient.SqlClientPermission, System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.DnsPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Drawing.Printing.PrintingPermission, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Diagnostics.EventLogPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.SocketPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Net.WebPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Diagnostics.PerformanceCounterPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.DirectoryServices.DirectoryServicesPermission, System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Messaging.MessageQueuePermission, System.Messaging, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.ServiceProcess.ServiceControllerPermission, System.ServiceProcess, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Data.OleDb.OleDbPermission, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
+			namedPermissionSet.AddPermission(PermissionBuilder.Create("System.Data.SqlClient.SqlClientPermission, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", PermissionState.Unrestricted));
 			return namedPermissionSet;
 		}
 
 		private static SecurityElement PrintingPermission(string level)
 		{
 			SecurityElement securityElement = new SecurityElement("IPermission");
-			securityElement.AddAttribute("class", "System.Drawing.Printing.PrintingPermission, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+			securityElement.AddAttribute("class", "System.Drawing.Printing.PrintingPermission, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
 			securityElement.AddAttribute("version", "1");
 			securityElement.AddAttribute("Level", level);
 			return securityElement;
 		}
 
-		private const string DnsPermissionClass = "System.Net.DnsPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+		// Note: this type is marked as 'beforefieldinit'.
+		static DefaultPolicies()
+		{
+			byte[] array = new byte[16];
+			array[8] = 4;
+			DefaultPolicies._ecmaKey = array;
+			DefaultPolicies._msFinalKey = new byte[]
+			{
+				0, 36, 0, 0, 4, 128, 0, 0, 148, 0,
+				0, 0, 6, 2, 0, 0, 0, 36, 0, 0,
+				82, 83, 65, 49, 0, 4, 0, 0, 1, 0,
+				1, 0, 7, 209, 250, 87, 196, 174, 217, 240,
+				163, 46, 132, 170, 15, 174, 253, 13, 233, 232,
+				253, 106, 236, 143, 135, 251, 3, 118, 108, 131,
+				76, 153, 146, 30, 178, 59, 231, 154, 217, 213,
+				220, 193, 221, 154, 210, 54, 19, 33, 2, 144,
+				11, 114, 60, 249, 128, 149, 127, 196, 225, 119,
+				16, 143, 198, 7, 119, 79, 41, 232, 50, 14,
+				146, 234, 5, 236, 228, 232, 33, 192, 165, 239,
+				232, 241, 100, 92, 76, 12, 147, 193, 171, 153,
+				40, 93, 98, 44, 170, 101, 44, 29, 250, 214,
+				61, 116, 93, 111, 45, 229, 241, 126, 94, 175,
+				15, 196, 150, 61, 38, 28, 138, 18, 67, 101,
+				24, 32, 109, 192, 147, 52, 77, 90, 210, 147
+			};
+		}
 
-		private const string EventLogPermissionClass = "System.Diagnostics.EventLogPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+		private const string DnsPermissionClass = "System.Net.DnsPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
-		private const string PrintingPermissionClass = "System.Drawing.Printing.PrintingPermission, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+		private const string EventLogPermissionClass = "System.Diagnostics.EventLogPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
-		private const string SocketPermissionClass = "System.Net.SocketPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+		private const string PrintingPermissionClass = "System.Drawing.Printing.PrintingPermission, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 
-		private const string WebPermissionClass = "System.Net.WebPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+		private const string SocketPermissionClass = "System.Net.SocketPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
-		private const string PerformanceCounterPermissionClass = "System.Diagnostics.PerformanceCounterPermission, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+		private const string WebPermissionClass = "System.Net.WebPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
-		private const string DirectoryServicesPermissionClass = "System.DirectoryServices.DirectoryServicesPermission, System.DirectoryServices, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+		private const string PerformanceCounterPermissionClass = "System.Diagnostics.PerformanceCounterPermission, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
-		private const string MessageQueuePermissionClass = "System.Messaging.MessageQueuePermission, System.Messaging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+		private const string DirectoryServicesPermissionClass = "System.DirectoryServices.DirectoryServicesPermission, System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 
-		private const string ServiceControllerPermissionClass = "System.ServiceProcess.ServiceControllerPermission, System.ServiceProcess, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+		private const string MessageQueuePermissionClass = "System.Messaging.MessageQueuePermission, System.Messaging, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 
-		private const string OleDbPermissionClass = "System.Data.OleDb.OleDbPermission, System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+		private const string ServiceControllerPermissionClass = "System.ServiceProcess.ServiceControllerPermission, System.ServiceProcess, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
 
-		private const string SqlClientPermissionClass = "System.Data.SqlClient.SqlClientPermission, System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+		private const string OleDbPermissionClass = "System.Data.OleDb.OleDbPermission, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
-		private const string DataProtectionPermissionClass = "System.Security.Permissions.DataProtectionPermission, System.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
-
-		private const string StorePermissionClass = "System.Security.Permissions.StorePermission, System.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+		private const string SqlClientPermissionClass = "System.Data.SqlClient.SqlClientPermission, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
 
 		private static Version _fxVersion;
 
@@ -321,31 +355,66 @@ namespace System.Security.Policy
 		{
 			public static bool IsReserved(string name)
 			{
-				if (name != null)
+				uint num = <PrivateImplementationDetails>.ComputeStringHash(name);
+				if (num <= 2314740779U)
 				{
-					if (DefaultPolicies.ReservedNames.<>f__switch$map30 == null)
+					if (num != 734303062U)
 					{
-						DefaultPolicies.ReservedNames.<>f__switch$map30 = new Dictionary<string, int>(7)
+						if (num != 753551658U)
 						{
-							{ "FullTrust", 0 },
-							{ "LocalIntranet", 0 },
-							{ "Internet", 0 },
-							{ "SkipVerification", 0 },
-							{ "Execution", 0 },
-							{ "Nothing", 0 },
-							{ "Everything", 0 }
-						};
-					}
-					int num;
-					if (DefaultPolicies.ReservedNames.<>f__switch$map30.TryGetValue(name, out num))
-					{
-						if (num == 0)
+							if (num != 2314740779U)
+							{
+								return false;
+							}
+							if (!(name == "LocalIntranet"))
+							{
+								return false;
+							}
+						}
+						else if (!(name == "Nothing"))
 						{
-							return true;
+							return false;
 						}
 					}
+					else if (!(name == "FullTrust"))
+					{
+						return false;
+					}
 				}
-				return false;
+				else if (num <= 3132872517U)
+				{
+					if (num != 2939433820U)
+					{
+						if (num != 3132872517U)
+						{
+							return false;
+						}
+						if (!(name == "SkipVerification"))
+						{
+							return false;
+						}
+					}
+					else if (!(name == "Internet"))
+					{
+						return false;
+					}
+				}
+				else if (num != 3650199797U)
+				{
+					if (num != 4030759744U)
+					{
+						return false;
+					}
+					if (!(name == "Everything"))
+					{
+						return false;
+					}
+				}
+				else if (!(name == "Execution"))
+				{
+					return false;
+				}
+				return true;
 			}
 
 			public const string FullTrust = "FullTrust";

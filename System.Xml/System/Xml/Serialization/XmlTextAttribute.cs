@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -15,22 +14,6 @@ namespace System.Xml.Serialization
 			this.type = type;
 		}
 
-		public string DataType
-		{
-			get
-			{
-				if (this.dataType == null)
-				{
-					return string.Empty;
-				}
-				return this.dataType;
-			}
-			set
-			{
-				this.dataType = value;
-			}
-		}
-
 		public Type Type
 		{
 			get
@@ -43,16 +26,24 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		internal void AddKeyHash(StringBuilder sb)
+		public string DataType
 		{
-			sb.Append("XTXA ");
-			KeyHelper.AddField(sb, 1, this.type);
-			KeyHelper.AddField(sb, 2, this.dataType);
-			sb.Append('|');
+			get
+			{
+				if (this.dataType != null)
+				{
+					return this.dataType;
+				}
+				return string.Empty;
+			}
+			set
+			{
+				this.dataType = value;
+			}
 		}
 
-		private string dataType;
-
 		private Type type;
+
+		private string dataType;
 	}
 }

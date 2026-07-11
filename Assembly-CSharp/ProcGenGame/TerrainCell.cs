@@ -577,8 +577,8 @@ namespace ProcGenGame
 
 		private void ApplyBackground(Chunk world, TerrainCell.SetValuesFunction SetValues, float temperatureMin, float temperatureRange, SeededRandom rnd)
 		{
-			float defaultFloat = WorldGen.Settings.GetDefaultFloat("CaveOverrideMaxValue");
-			float defaultFloat2 = WorldGen.Settings.GetDefaultFloat("CaveOverrideSliverValue");
+			float floatSetting = WorldGen.Settings.GetFloatSetting("CaveOverrideMaxValue");
+			float floatSetting2 = WorldGen.Settings.GetFloatSetting("CaveOverrideSliverValue");
 			Leaf leafForTerrainCell = WorldGen.GetLeafForTerrainCell(this);
 			bool flag = leafForTerrainCell.tags.Contains(WorldGenTags.IgnoreCaveOverride);
 			bool flag2 = leafForTerrainCell.tags.Contains(WorldGenTags.CaveVoidSliver);
@@ -668,9 +668,9 @@ namespace ProcGenGame
 					if (element.IsSolid)
 					{
 						defaultValues.mass = this.GetDensityMassForCell(world, num, defaultValues.mass);
-						if (!flag && num2 > defaultFloat && num2 < 100f)
+						if (!flag && num2 > floatSetting && num2 < 100f)
 						{
-							if (flag2 && num2 > defaultFloat2)
+							if (flag2 && num2 > floatSetting2)
 							{
 								element = WorldGen.voidElement;
 							}

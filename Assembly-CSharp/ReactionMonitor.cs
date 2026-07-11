@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor.Instance>
 {
@@ -53,6 +54,8 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
+			this.lastReactTimes = new Dictionary<HashedString, float>();
+			this.oneshotReactables = new List<Reactable>();
 		}
 
 		public void PollForReactables(Navigator.ActiveTransition transition)
@@ -69,21 +72,33 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			{
 				this.lastReactable = null;
 			}
+			for (int i = this.oneshotReactables.Count - 1; i >= 0; i--)
+			{
+				Reactable reactable = this.oneshotReactables[i];
+				if (reactable.IsExpired())
+				{
+					reactable.Cleanup();
+				}
+			}
 			int num = Grid.PosToCell(base.smi.gameObject);
 			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, 1, 1, GameScenePartitioner.Instance.objectLayers[0], pooledList);
-			for (int i = 0; i < pooledList.Count; i++)
+			for (int j = 0; j < pooledList.Count; j++)
 			{
-				Reactable reactable = pooledList[i].obj as Reactable;
-				if (reactable != null && reactable != this.lastReactable)
+				Reactable reactable2 = pooledList[j].obj as Reactable;
+				if (reactable2 != null && reactable2 != this.lastReactable)
 				{
-					if (reactable.CanBegin(base.gameObject, transition))
+					if (!this.lastReactTimes.ContainsKey(reactable2.id) || GameClock.Instance.GetTime() - this.lastReactTimes[reactable2.id] >= reactable2.minReactorTime)
 					{
-						this.justReacted = true;
-						this.lastReactable = reactable;
-						base.sm.reactable.Set(reactable, base.smi);
-						base.smi.GoTo(base.sm.reacting);
-						break;
+						if (reactable2.CanBegin(base.gameObject, transition))
+						{
+							this.justReacted = true;
+							this.lastReactable = reactable2;
+							this.lastReactTimes[reactable2.id] = GameClock.Instance.GetTime();
+							base.sm.reactable.Set(reactable2, base.smi);
+							base.smi.GoTo(base.sm.reacting);
+							break;
+						}
 					}
 				}
 			}
@@ -92,6 +107,14 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 
 		public void StopReaction()
 		{
+			for (int i = this.oneshotReactables.Count - 1; i >= 0; i--)
+			{
+				if (base.sm.reactable.Get(base.smi) == this.oneshotReactables[0])
+				{
+					this.oneshotReactables[i].Cleanup();
+					this.oneshotReactables.RemoveAt(i);
+				}
+			}
 			base.smi.GoTo(base.sm.idle);
 		}
 
@@ -100,8 +123,30 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			return base.smi.IsInsideState(base.sm.reacting);
 		}
 
+		public void AddOneshotReactable(SelfEmoteReactable reactable)
+		{
+			this.oneshotReactables.Add(reactable);
+		}
+
+		public void CancelOneShotReactable(SelfEmoteReactable cancel_target)
+		{
+			for (int i = this.oneshotReactables.Count - 1; i >= 0; i--)
+			{
+				Reactable reactable = this.oneshotReactables[i];
+				if (cancel_target == reactable)
+				{
+					reactable.Cleanup();
+					break;
+				}
+			}
+		}
+
 		private bool justReacted;
 
 		private Reactable lastReactable;
+
+		private Dictionary<HashedString, float> lastReactTimes;
+
+		private List<Reactable> oneshotReactables;
 	}
 }

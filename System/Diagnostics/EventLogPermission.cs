@@ -4,7 +4,7 @@ using System.Security.Permissions;
 namespace System.Diagnostics
 {
 	[Serializable]
-	public sealed class EventLogPermission : global::System.Security.Permissions.ResourcePermissionBase
+	public sealed class EventLogPermission : ResourcePermissionBase
 	{
 		public EventLogPermission()
 		{
@@ -53,7 +53,7 @@ namespace System.Diagnostics
 			base.PermissionAccessType = typeof(EventLogPermissionAccess);
 		}
 
-		internal global::System.Security.Permissions.ResourcePermissionBaseEntry[] GetEntries()
+		internal ResourcePermissionBaseEntry[] GetEntries()
 		{
 			return base.GetPermissionEntries();
 		}

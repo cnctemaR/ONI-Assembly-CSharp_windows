@@ -3,90 +3,72 @@ using System.ComponentModel;
 
 namespace System.Data
 {
-	public class DataRowView : ICustomTypeDescriptor, IEditableObject, IDataErrorInfo, INotifyPropertyChanged
+	public class DataRowView : ICustomTypeDescriptor, IDataErrorInfo, IEditableObject, INotifyPropertyChanged
 	{
-		internal DataRowView(DataView dataView, DataRow row, int index)
+		internal DataRowView()
 		{
-			this._dataView = dataView;
-			this._dataRow = row;
-			this._index = index;
 		}
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		AttributeCollection ICustomTypeDescriptor.GetAttributes()
+		public DataView DataView
 		{
-			return AttributeCollection.Empty;
-		}
-
-		[MonoTODO("Not implemented.   Always returns String.Empty")]
-		string ICustomTypeDescriptor.GetClassName()
-		{
-			return string.Empty;
-		}
-
-		[MonoTODO("Not implemented.   Always returns null")]
-		string ICustomTypeDescriptor.GetComponentName()
-		{
-			return null;
-		}
-
-		[MonoTODO("Not implemented.   Always returns null")]
-		TypeConverter ICustomTypeDescriptor.GetConverter()
-		{
-			return null;
-		}
-
-		[MonoTODO("Not implemented.   Always returns null")]
-		EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
-		{
-			return null;
-		}
-
-		[MonoTODO("Not implemented.   Always returns null")]
-		PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
-		{
-			return null;
-		}
-
-		[MonoTODO("Not implemented.   Always returns null")]
-		object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
-		{
-			return null;
-		}
-
-		[MonoTODO("Not implemented.   Always returns an empty collection")]
-		EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
-		{
-			return new EventDescriptorCollection(null);
-		}
-
-		[MonoTODO("Not implemented.   Always returns an empty collection")]
-		EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
-		{
-			return new EventDescriptorCollection(null);
-		}
-
-		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
-		{
-			if (this.DataView == null)
+			get
 			{
-				ITypedList dataView = this._dataView;
-				return dataView.GetItemProperties(new PropertyDescriptor[0]);
+				throw null;
 			}
-			return this.DataView.Table.GetPropertyDescriptorCollection();
 		}
 
-		[MonoTODO("It currently reports more descriptors than necessary")]
-		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+		public bool IsEdit
 		{
-			return ((ICustomTypeDescriptor)this).GetProperties();
+			get
+			{
+				throw null;
+			}
 		}
 
-		[MonoTODO]
-		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
+		public bool IsNew
 		{
-			return this;
+			get
+			{
+				throw null;
+			}
+		}
+
+		public object this[int ndx]
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
+
+		public object this[string property]
+		{
+			get
+			{
+				throw null;
+			}
+			set
+			{
+			}
+		}
+
+		public DataRow Row
+		{
+			get
+			{
+				throw null;
+			}
+		}
+
+		public DataRowVersion RowVersion
+		{
+			get
+			{
+				throw null;
+			}
 		}
 
 		string IDataErrorInfo.Error
@@ -94,7 +76,7 @@ namespace System.Data
 			[MonoTODO("Not implemented, always returns String.Empty")]
 			get
 			{
-				return string.Empty;
+				throw null;
 			}
 		}
 
@@ -103,210 +85,124 @@ namespace System.Data
 			[MonoTODO("Not implemented, always returns String.Empty")]
 			get
 			{
-				return string.Empty;
+				throw null;
 			}
 		}
 
-		public override bool Equals(object other)
+		public event PropertyChangedEventHandler PropertyChanged
 		{
-			return other != null && other is DataRowView && ((DataRowView)other)._dataRow != null && ((DataRowView)other)._dataRow.Equals(this._dataRow);
+			add
+			{
+			}
+			remove
+			{
+			}
 		}
 
 		public void BeginEdit()
 		{
-			this._dataRow.BeginEdit();
 		}
 
 		public void CancelEdit()
 		{
-			if (this.Row == this.DataView._lastAdded)
-			{
-				this.DataView.CompleteLastAdded(false);
-			}
-			else
-			{
-				this._dataRow.CancelEdit();
-			}
 		}
 
 		public DataView CreateChildView(DataRelation relation)
 		{
-			return this.DataView.CreateChildView(relation, this._index);
+			throw null;
 		}
 
 		public DataView CreateChildView(string relationName)
 		{
-			return this.CreateChildView(this.Row.Table.ChildRelations[relationName]);
+			throw null;
 		}
 
 		public void Delete()
 		{
-			this.DataView.Delete(this._index);
 		}
 
 		public void EndEdit()
 		{
-			if (this.Row == this.DataView._lastAdded)
-			{
-				this.DataView.CompleteLastAdded(true);
-			}
-			else
-			{
-				this._dataRow.EndEdit();
-			}
 		}
 
-		private void CheckAllowEdit()
+		public override bool Equals(object other)
 		{
-			if (!this.DataView.AllowEdit && this.Row != this.DataView._lastAdded)
-			{
-				throw new DataException("Cannot edit on a DataSource where AllowEdit is false.");
-			}
-		}
-
-		public DataView DataView
-		{
-			get
-			{
-				return this._dataView;
-			}
-		}
-
-		public bool IsEdit
-		{
-			get
-			{
-				return this._dataRow.HasVersion(DataRowVersion.Proposed);
-			}
-		}
-
-		public bool IsNew
-		{
-			get
-			{
-				return this.Row == this.DataView._lastAdded;
-			}
-		}
-
-		public object this[string property]
-		{
-			get
-			{
-				DataColumn dataColumn = this._dataView.Table.Columns[property];
-				if (dataColumn == null)
-				{
-					throw new ArgumentException(property + " is neither a DataColumn nor a DataRelation for table " + this._dataView.Table.TableName);
-				}
-				return this._dataRow[dataColumn, this.GetActualRowVersion()];
-			}
-			set
-			{
-				this.CheckAllowEdit();
-				DataColumn dataColumn = this._dataView.Table.Columns[property];
-				if (dataColumn == null)
-				{
-					throw new ArgumentException(property + " is neither a DataColumn nor a DataRelation for table " + this._dataView.Table.TableName);
-				}
-				this._dataRow[dataColumn] = value;
-			}
-		}
-
-		public object this[int ndx]
-		{
-			get
-			{
-				DataColumn dataColumn = this._dataView.Table.Columns[ndx];
-				if (dataColumn == null)
-				{
-					throw new ArgumentException(ndx + " is neither a DataColumn nor a DataRelation for table " + this._dataView.Table.TableName);
-				}
-				return this._dataRow[dataColumn, this.GetActualRowVersion()];
-			}
-			set
-			{
-				this.CheckAllowEdit();
-				DataColumn dataColumn = this._dataView.Table.Columns[ndx];
-				if (dataColumn == null)
-				{
-					throw new ArgumentException(ndx + " is neither a DataColumn nor a DataRelation for table " + this._dataView.Table.TableName);
-				}
-				this._dataRow[dataColumn] = value;
-			}
-		}
-
-		private DataRowVersion GetActualRowVersion()
-		{
-			DataViewRowState rowStateFilter = this._dataView.RowStateFilter;
-			switch (rowStateFilter)
-			{
-			case DataViewRowState.Unchanged:
-				break;
-			default:
-				if (rowStateFilter != DataViewRowState.Deleted)
-				{
-					if (rowStateFilter == DataViewRowState.ModifiedCurrent)
-					{
-						return DataRowVersion.Current;
-					}
-					if (rowStateFilter != DataViewRowState.ModifiedOriginal && rowStateFilter != DataViewRowState.OriginalRows)
-					{
-						return DataRowVersion.Default;
-					}
-				}
-				break;
-			case DataViewRowState.Added:
-				return DataRowVersion.Proposed;
-			}
-			return DataRowVersion.Original;
-		}
-
-		public DataRow Row
-		{
-			get
-			{
-				return this._dataRow;
-			}
-		}
-
-		public DataRowVersion RowVersion
-		{
-			get
-			{
-				DataRowVersion dataRowVersion = this.DataView.GetRowVersion(this._index);
-				if (dataRowVersion != DataRowVersion.Original)
-				{
-					dataRowVersion = DataRowVersion.Current;
-				}
-				return dataRowVersion;
-			}
+			throw null;
 		}
 
 		public override int GetHashCode()
 		{
-			return this._dataRow.GetHashCode();
+			throw null;
 		}
 
-		internal int Index
+		AttributeCollection ICustomTypeDescriptor.GetAttributes()
 		{
-			get
-			{
-				return this._index;
-			}
+			throw null;
 		}
 
-		private void OnPropertyChanged(string propertyName)
+		[MonoTODO("Not implemented.   Always returns String.Empty")]
+		string ICustomTypeDescriptor.GetClassName()
 		{
-			if (this.PropertyChanged != null)
-			{
-				PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
-				this.PropertyChanged(this, e);
-			}
+			throw null;
 		}
 
-		private DataView _dataView;
+		[MonoTODO("Not implemented.   Always returns null")]
+		string ICustomTypeDescriptor.GetComponentName()
+		{
+			throw null;
+		}
 
-		private DataRow _dataRow;
+		[MonoTODO("Not implemented.   Always returns null")]
+		TypeConverter ICustomTypeDescriptor.GetConverter()
+		{
+			throw null;
+		}
 
-		private int _index = -1;
+		[MonoTODO("Not implemented.   Always returns null")]
+		EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
+		{
+			throw null;
+		}
+
+		[MonoTODO("Not implemented.   Always returns null")]
+		PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
+		{
+			throw null;
+		}
+
+		[MonoTODO("Not implemented.   Always returns null")]
+		object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
+		{
+			throw null;
+		}
+
+		[MonoTODO("Not implemented.   Always returns an empty collection")]
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
+		{
+			throw null;
+		}
+
+		[MonoTODO("Not implemented.   Always returns an empty collection")]
+		EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
+		{
+			throw null;
+		}
+
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
+		{
+			throw null;
+		}
+
+		[MonoTODO("It currently reports more descriptors than necessary")]
+		PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+		{
+			throw null;
+		}
+
+		[MonoTODO]
+		object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
+		{
+			throw null;
+		}
 	}
 }

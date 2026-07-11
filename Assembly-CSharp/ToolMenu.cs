@@ -3,11 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class ToolMenu : KScreen
 {
+	public static void DestroyInstance()
+	{
+		ToolMenu.Instance = null;
+	}
+
 	public PriorityScreen PriorityScreen
 	{
 		get
@@ -27,7 +33,6 @@ public class ToolMenu : KScreen
 		ToolMenu.Instance = this;
 		this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.Prefab_priorityScreen.gameObject, base.gameObject, false);
 		this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), false);
-		this.priorityScreen.gameObject.SetActive(false);
 	}
 
 	protected override void OnSpawn()
@@ -84,7 +89,7 @@ public class ToolMenu : KScreen
 	private Texture2D CreatePlaneTexture(out byte[] textureBytes, int width, int height)
 	{
 		textureBytes = new byte[width * height * 4];
-		return new Texture2D(width, height, TextureFormat.RGBA32, false)
+		return new Texture2D(width, height, TextureUtil.TextureFormatToGraphicsFormat(TextureFormat.RGBA32), TextureCreationFlags.None)
 		{
 			name = "toolEffectDisplayPlane",
 			wrapMode = TextureWrapMode.Clamp,

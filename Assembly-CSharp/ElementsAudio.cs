@@ -1,5 +1,4 @@
 ﻿using System;
-using FileHelpers;
 
 public class ElementsAudio
 {
@@ -15,10 +14,9 @@ public class ElementsAudio
 		}
 	}
 
-	public void LoadData(string csvData)
+	public void LoadData(ElementsAudio.ElementAudioConfig[] elements_audio_configs)
 	{
-		FileHelperEngine fileHelperEngine = new FileHelperEngine(typeof(ElementsAudio.ElementAudioConfig));
-		this.elementAudioConfigs = fileHelperEngine.ReadString(csvData) as ElementsAudio.ElementAudioConfig[];
+		this.elementAudioConfigs = elements_audio_configs;
 	}
 
 	public ElementsAudio.ElementAudioConfig GetConfigForElement(SimHashes id)
@@ -40,47 +38,22 @@ public class ElementsAudio
 
 	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs;
 
-	[DelimitedRecord(",")]
-	[IgnoreFirst(1)]
-	[IgnoreEmptyLines]
-	public class ElementAudioConfig
+	public class ElementAudioConfig : Resource
 	{
-		[FieldOrder(1)]
 		public SimHashes elementID;
 
-		[FieldOrder(2)]
-		[FieldOptional]
-		[FieldNullValue(AmbienceType.None)]
-		public AmbienceType ambienceType;
+		public AmbienceType ambienceType = AmbienceType.None;
 
-		[FieldOrder(3)]
-		[FieldOptional]
-		[FieldNullValue(SolidAmbienceType.None)]
-		public SolidAmbienceType solidAmbienceType;
+		public SolidAmbienceType solidAmbienceType = SolidAmbienceType.None;
 
-		[FieldOrder(4)]
-		[FieldOptional]
-		[FieldNullValue("")]
-		public string miningSound;
+		public string miningSound = string.Empty;
 
-		[FieldOrder(5)]
-		[FieldOptional]
-		[FieldNullValue("")]
-		public string miningBreakSound;
+		public string miningBreakSound = string.Empty;
 
-		[FieldOrder(6)]
-		[FieldOptional]
-		[FieldNullValue("")]
-		public string oreBumpSound;
+		public string oreBumpSound = string.Empty;
 
-		[FieldOrder(7)]
-		[FieldOptional]
-		[FieldNullValue("")]
-		public string floorEventAudioCategory;
+		public string floorEventAudioCategory = string.Empty;
 
-		[FieldOrder(8)]
-		[FieldOptional]
-		[FieldNullValue("")]
-		public string creatureChewSound;
+		public string creatureChewSound = string.Empty;
 	}
 }

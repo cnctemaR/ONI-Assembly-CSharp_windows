@@ -62,13 +62,14 @@ namespace Mono.Remoting.Channels.Unix
 			IMessage message;
 			ITransportHeaders transportHeaders2;
 			Stream stream3;
-			switch (this.next_sink.ProcessMessage(serverChannelSinkStack, null, transportHeaders, stream2, out message, out transportHeaders2, out stream3))
+			ServerProcessing serverProcessing = this.next_sink.ProcessMessage(serverChannelSinkStack, null, transportHeaders, stream2, out message, out transportHeaders2, out stream3);
+			if (serverProcessing != ServerProcessing.Complete)
 			{
-			case ServerProcessing.Complete:
-				UnixMessageIO.SendMessageStream(stream, stream3, transportHeaders2, connection.Buffer);
-				stream.Flush();
-				break;
+				int num = serverProcessing - ServerProcessing.OneWay;
+				return;
 			}
+			UnixMessageIO.SendMessageStream(stream, stream3, transportHeaders2, connection.Buffer);
+			stream.Flush();
 		}
 
 		private IServerChannelSink next_sink;

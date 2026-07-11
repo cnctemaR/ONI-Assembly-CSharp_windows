@@ -4,19 +4,16 @@ namespace System.Data
 {
 	public sealed class DataTableNewRowEventArgs : EventArgs
 	{
-		public DataTableNewRowEventArgs(DataRow row)
+		public DataTableNewRowEventArgs(DataRow dataRow)
 		{
-			this._row = row;
 		}
 
 		public DataRow Row
 		{
 			get
 			{
-				return this._row;
+				throw null;
 			}
 		}
-
-		private readonly DataRow _row;
 	}
 }

@@ -12,19 +12,10 @@ namespace System.Diagnostics
 			this.visualizerName = visualizerTypeName;
 		}
 
-		public DebuggerVisualizerAttribute(Type visualizer)
-		{
-			if (visualizer == null)
-			{
-				throw new ArgumentNullException("visualizer");
-			}
-			this.visualizerName = visualizer.AssemblyQualifiedName;
-		}
-
 		public DebuggerVisualizerAttribute(string visualizerTypeName, string visualizerObjectSourceTypeName)
 		{
 			this.visualizerName = visualizerTypeName;
-			this.visualizerSourceName = visualizerObjectSourceTypeName;
+			this.visualizerObjectSourceName = visualizerObjectSourceTypeName;
 		}
 
 		public DebuggerVisualizerAttribute(string visualizerTypeName, Type visualizerObjectSource)
@@ -34,17 +25,16 @@ namespace System.Diagnostics
 				throw new ArgumentNullException("visualizerObjectSource");
 			}
 			this.visualizerName = visualizerTypeName;
-			this.visualizerSourceName = visualizerObjectSource.AssemblyQualifiedName;
+			this.visualizerObjectSourceName = visualizerObjectSource.AssemblyQualifiedName;
 		}
 
-		public DebuggerVisualizerAttribute(Type visualizer, string visualizerObjectSourceTypeName)
+		public DebuggerVisualizerAttribute(Type visualizer)
 		{
 			if (visualizer == null)
 			{
 				throw new ArgumentNullException("visualizer");
 			}
 			this.visualizerName = visualizer.AssemblyQualifiedName;
-			this.visualizerSourceName = visualizerObjectSourceTypeName;
 		}
 
 		public DebuggerVisualizerAttribute(Type visualizer, Type visualizerObjectSource)
@@ -58,7 +48,33 @@ namespace System.Diagnostics
 				throw new ArgumentNullException("visualizerObjectSource");
 			}
 			this.visualizerName = visualizer.AssemblyQualifiedName;
-			this.visualizerSourceName = visualizerObjectSource.AssemblyQualifiedName;
+			this.visualizerObjectSourceName = visualizerObjectSource.AssemblyQualifiedName;
+		}
+
+		public DebuggerVisualizerAttribute(Type visualizer, string visualizerObjectSourceTypeName)
+		{
+			if (visualizer == null)
+			{
+				throw new ArgumentNullException("visualizer");
+			}
+			this.visualizerName = visualizer.AssemblyQualifiedName;
+			this.visualizerObjectSourceName = visualizerObjectSourceTypeName;
+		}
+
+		public string VisualizerObjectSourceTypeName
+		{
+			get
+			{
+				return this.visualizerObjectSourceName;
+			}
+		}
+
+		public string VisualizerTypeName
+		{
+			get
+			{
+				return this.visualizerName;
+			}
 		}
 
 		public string Description
@@ -81,8 +97,12 @@ namespace System.Diagnostics
 			}
 			set
 			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				this.targetName = value.AssemblyQualifiedName;
 				this.target = value;
-				this.targetTypeName = this.target.AssemblyQualifiedName;
 			}
 		}
 
@@ -90,37 +110,21 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.targetTypeName;
+				return this.targetName;
 			}
 			set
 			{
-				this.targetTypeName = value;
+				this.targetName = value;
 			}
 		}
 
-		public string VisualizerObjectSourceTypeName
-		{
-			get
-			{
-				return this.visualizerSourceName;
-			}
-		}
-
-		public string VisualizerTypeName
-		{
-			get
-			{
-				return this.visualizerName;
-			}
-		}
-
-		private string description;
-
-		private string visualizerSourceName;
+		private string visualizerObjectSourceName;
 
 		private string visualizerName;
 
-		private string targetTypeName;
+		private string description;
+
+		private string targetName;
 
 		private Type target;
 	}

@@ -7,7 +7,6 @@ public class EggIncubatorWorkable : Workable
 	{
 		base.OnPrefabInit();
 		this.synchronizeAnims = false;
-		this.faceTargetWhenWorking = true;
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_incubator_kanim") };
 		base.SetWorkTime(15f);
 		this.showProgressBar = true;

@@ -7,7 +7,7 @@ public class SetLockerConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("SetLocker", SETITEMS.LOCKER.NAME, SETITEMS.LOCKER.DESC, 100f, Assets.GetAnim("setpiece_locker_kanim"), "on", Grid.SceneLayer.Building, 1, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("SetLocker", global::STRINGS.BUILDINGS.PREFABS.SETLOCKER.NAME, global::STRINGS.BUILDINGS.PREFABS.SETLOCKER.DESC, 100f, Assets.GetAnim("setpiece_locker_kanim"), "on", Grid.SceneLayer.Building, 1, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;

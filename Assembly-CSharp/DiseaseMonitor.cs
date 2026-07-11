@@ -35,7 +35,7 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 				smi.GoTo(this.post);
 			}
 		});
-		this.post.ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, DiseaseMonitor.SickPostKAnim, DiseaseMonitor.SickPostAnims, KAnim.PlayMode.Once), this.healthy);
+		this.post.ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, DiseaseMonitor.SickPostKAnim, DiseaseMonitor.SickPostAnims, KAnim.PlayMode.Once, false), this.healthy);
 	}
 
 	public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State healthy;

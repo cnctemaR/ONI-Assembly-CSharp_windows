@@ -7,66 +7,18 @@ namespace System.Data.SqlTypes
 {
 	[XmlSchemaProvider("GetXsdType")]
 	[Serializable]
-	public struct SqlInt16 : IXmlSerializable, IComparable, INullable
+	public struct SqlInt16 : INullable, IComparable, IXmlSerializable
 	{
 		public SqlInt16(short value)
 		{
-			this.value = value;
-			this.notNull = true;
-		}
-
-		XmlSchema IXmlSerializable.GetSchema()
-		{
-			return null;
-		}
-
-		void IXmlSerializable.ReadXml(XmlReader reader)
-		{
-			if (reader == null)
-			{
-				return;
-			}
-			switch (reader.ReadState)
-			{
-			case ReadState.Error:
-			case ReadState.EndOfFile:
-			case ReadState.Closed:
-				return;
-			default:
-				reader.MoveToContent();
-				if (reader.EOF)
-				{
-					return;
-				}
-				reader.Read();
-				if (reader.NodeType == XmlNodeType.EndElement)
-				{
-					return;
-				}
-				if (reader.Value.Length > 0)
-				{
-					if (string.Compare("Null", reader.Value) == 0)
-					{
-						this.notNull = false;
-						return;
-					}
-					this.value = short.Parse(reader.Value);
-					this.notNull = true;
-				}
-				return;
-			}
-		}
-
-		void IXmlSerializable.WriteXml(XmlWriter writer)
-		{
-			writer.WriteString(this.ToString());
+			throw null;
 		}
 
 		public bool IsNull
 		{
 			get
 			{
-				return !this.notNull;
+				throw null;
 			}
 		}
 
@@ -74,420 +26,324 @@ namespace System.Data.SqlTypes
 		{
 			get
 			{
-				if (this.IsNull)
-				{
-					throw new SqlNullValueException();
-				}
-				return this.value;
+				throw null;
 			}
 		}
 
 		public static SqlInt16 Add(SqlInt16 x, SqlInt16 y)
 		{
-			return x + y;
+			throw null;
 		}
 
 		public static SqlInt16 BitwiseAnd(SqlInt16 x, SqlInt16 y)
 		{
-			return x & y;
+			throw null;
 		}
 
 		public static SqlInt16 BitwiseOr(SqlInt16 x, SqlInt16 y)
 		{
-			return x | y;
-		}
-
-		public int CompareTo(object value)
-		{
-			if (value == null)
-			{
-				return 1;
-			}
-			if (!(value is SqlInt16))
-			{
-				throw new ArgumentException(Locale.GetText("Value is not a System.Data.SqlTypes.SqlInt16"));
-			}
-			return this.CompareSqlInt16((SqlInt16)value);
+			throw null;
 		}
 
 		public int CompareTo(SqlInt16 value)
 		{
-			return this.CompareSqlInt16(value);
+			throw null;
 		}
 
-		private int CompareSqlInt16(SqlInt16 value)
+		public int CompareTo(object value)
 		{
-			if (value.IsNull)
-			{
-				return 1;
-			}
-			return this.value.CompareTo(value.Value);
+			throw null;
 		}
 
 		public static SqlInt16 Divide(SqlInt16 x, SqlInt16 y)
 		{
-			return x / y;
-		}
-
-		public override bool Equals(object value)
-		{
-			if (!(value is SqlInt16))
-			{
-				return false;
-			}
-			if (this.IsNull)
-			{
-				return ((SqlInt16)value).IsNull;
-			}
-			return !((SqlInt16)value).IsNull && (bool)(this == (SqlInt16)value);
+			throw null;
 		}
 
 		public static SqlBoolean Equals(SqlInt16 x, SqlInt16 y)
 		{
-			return x == y;
+			throw null;
+		}
+
+		public override bool Equals(object value)
+		{
+			throw null;
 		}
 
 		public override int GetHashCode()
 		{
-			return (int)this.value;
-		}
-
-		public static SqlBoolean GreaterThan(SqlInt16 x, SqlInt16 y)
-		{
-			return x > y;
-		}
-
-		public static SqlBoolean GreaterThanOrEqual(SqlInt16 x, SqlInt16 y)
-		{
-			return x >= y;
-		}
-
-		public static SqlBoolean LessThan(SqlInt16 x, SqlInt16 y)
-		{
-			return x < y;
-		}
-
-		public static SqlBoolean LessThanOrEqual(SqlInt16 x, SqlInt16 y)
-		{
-			return x <= y;
-		}
-
-		public static SqlInt16 Mod(SqlInt16 x, SqlInt16 y)
-		{
-			return x % y;
-		}
-
-		public static SqlInt16 Modulus(SqlInt16 x, SqlInt16 y)
-		{
-			return x % y;
-		}
-
-		public static SqlInt16 Multiply(SqlInt16 x, SqlInt16 y)
-		{
-			return x * y;
-		}
-
-		public static SqlBoolean NotEquals(SqlInt16 x, SqlInt16 y)
-		{
-			return x != y;
-		}
-
-		public static SqlInt16 OnesComplement(SqlInt16 x)
-		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return ~x;
-		}
-
-		public static SqlInt16 Parse(string s)
-		{
-			return new SqlInt16(short.Parse(s));
-		}
-
-		public static SqlInt16 Subtract(SqlInt16 x, SqlInt16 y)
-		{
-			return x - y;
-		}
-
-		public SqlBoolean ToSqlBoolean()
-		{
-			return (SqlBoolean)this;
-		}
-
-		public SqlByte ToSqlByte()
-		{
-			return (SqlByte)this;
-		}
-
-		public SqlDecimal ToSqlDecimal()
-		{
-			return this;
-		}
-
-		public SqlDouble ToSqlDouble()
-		{
-			return this;
-		}
-
-		public SqlInt32 ToSqlInt32()
-		{
-			return this;
-		}
-
-		public SqlInt64 ToSqlInt64()
-		{
-			return this;
-		}
-
-		public SqlMoney ToSqlMoney()
-		{
-			return this;
-		}
-
-		public SqlSingle ToSqlSingle()
-		{
-			return this;
-		}
-
-		public SqlString ToSqlString()
-		{
-			return (SqlString)this;
-		}
-
-		public override string ToString()
-		{
-			if (this.IsNull)
-			{
-				return "Null";
-			}
-			return this.value.ToString();
-		}
-
-		public static SqlInt16 Xor(SqlInt16 x, SqlInt16 y)
-		{
-			return x ^ y;
+			throw null;
 		}
 
 		public static XmlQualifiedName GetXsdType(XmlSchemaSet schemaSet)
 		{
-			if (schemaSet != null && schemaSet.Count == 0)
-			{
-				XmlSchema xmlSchema = new XmlSchema();
-				XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
-				xmlSchemaComplexType.Name = "short";
-				xmlSchema.Items.Add(xmlSchemaComplexType);
-				schemaSet.Add(xmlSchema);
-			}
-			return new XmlQualifiedName("short", "http://www.w3.org/2001/XMLSchema");
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThan(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean GreaterThanOrEqual(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThan(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean LessThanOrEqual(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 Mod(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 Modulus(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 Multiply(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlBoolean NotEquals(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 OnesComplement(SqlInt16 x)
+		{
+			throw null;
 		}
 
 		public static SqlInt16 operator +(SqlInt16 x, SqlInt16 y)
 		{
-			return new SqlInt16(checked(x.Value + y.Value));
+			throw null;
 		}
 
 		public static SqlInt16 operator &(SqlInt16 x, SqlInt16 y)
 		{
-			return new SqlInt16(x.value & y.Value);
+			throw null;
 		}
 
 		public static SqlInt16 operator |(SqlInt16 x, SqlInt16 y)
 		{
-			return new SqlInt16(x.Value | y.Value);
+			throw null;
 		}
 
 		public static SqlInt16 operator /(SqlInt16 x, SqlInt16 y)
 		{
-			return new SqlInt16(x.Value / y.Value);
+			throw null;
 		}
 
 		public static SqlBoolean operator ==(SqlInt16 x, SqlInt16 y)
 		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value == y.Value);
+			throw null;
 		}
 
 		public static SqlInt16 operator ^(SqlInt16 x, SqlInt16 y)
 		{
-			return new SqlInt16(x.Value ^ y.Value);
-		}
-
-		public static SqlBoolean operator >(SqlInt16 x, SqlInt16 y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value > y.Value);
-		}
-
-		public static SqlBoolean operator >=(SqlInt16 x, SqlInt16 y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value >= y.Value);
-		}
-
-		public static SqlBoolean operator !=(SqlInt16 x, SqlInt16 y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value != y.Value);
-		}
-
-		public static SqlBoolean operator <(SqlInt16 x, SqlInt16 y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value < y.Value);
-		}
-
-		public static SqlBoolean operator <=(SqlInt16 x, SqlInt16 y)
-		{
-			if (x.IsNull || y.IsNull)
-			{
-				return SqlBoolean.Null;
-			}
-			return new SqlBoolean(x.Value <= y.Value);
-		}
-
-		public static SqlInt16 operator %(SqlInt16 x, SqlInt16 y)
-		{
-			return new SqlInt16(x.Value % y.Value);
-		}
-
-		public static SqlInt16 operator *(SqlInt16 x, SqlInt16 y)
-		{
-			return new SqlInt16(checked(x.Value * y.Value));
-		}
-
-		public static SqlInt16 operator ~(SqlInt16 x)
-		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16(~x.Value);
-		}
-
-		public static SqlInt16 operator -(SqlInt16 x, SqlInt16 y)
-		{
-			return new SqlInt16(checked(x.Value - y.Value));
-		}
-
-		public static SqlInt16 operator -(SqlInt16 x)
-		{
-			return new SqlInt16(checked(0 - x.Value));
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlBoolean x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16((short)x.ByteValue);
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlDecimal x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16((short)x.Value);
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlDouble x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16(checked((short)x.Value));
+			throw null;
 		}
 
 		public static explicit operator short(SqlInt16 x)
 		{
-			return x.Value;
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlInt32 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16(checked((short)x.Value));
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlInt64 x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16(checked((short)x.Value));
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlMoney x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16((short)Math.Round(x.Value));
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlSingle x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return new SqlInt16(checked((short)x.Value));
+			throw null;
 		}
 
 		public static explicit operator SqlInt16(SqlString x)
 		{
-			if (x.IsNull)
-			{
-				return SqlInt16.Null;
-			}
-			return SqlInt16.Parse(x.Value);
+			throw null;
 		}
 
-		public static implicit operator SqlInt16(short x)
+		public static SqlBoolean operator >(SqlInt16 x, SqlInt16 y)
 		{
-			return new SqlInt16(x);
+			throw null;
+		}
+
+		public static SqlBoolean operator >=(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
 		}
 
 		public static implicit operator SqlInt16(SqlByte x)
 		{
-			return new SqlInt16((short)x.Value);
+			throw null;
 		}
 
-		private short value;
+		public static implicit operator SqlInt16(short x)
+		{
+			throw null;
+		}
 
-		private bool notNull;
+		public static SqlBoolean operator !=(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
 
-		public static readonly SqlInt16 MaxValue = new SqlInt16(short.MaxValue);
+		public static SqlBoolean operator <(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
 
-		public static readonly SqlInt16 MinValue = new SqlInt16(short.MinValue);
+		public static SqlBoolean operator <=(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 operator %(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 operator *(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 operator ~(SqlInt16 x)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 operator -(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 operator -(SqlInt16 x)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 Parse(string s)
+		{
+			throw null;
+		}
+
+		public static SqlInt16 Subtract(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		XmlSchema IXmlSerializable.GetSchema()
+		{
+			throw null;
+		}
+
+		void IXmlSerializable.ReadXml(XmlReader reader)
+		{
+		}
+
+		void IXmlSerializable.WriteXml(XmlWriter writer)
+		{
+		}
+
+		public SqlBoolean ToSqlBoolean()
+		{
+			throw null;
+		}
+
+		public SqlByte ToSqlByte()
+		{
+			throw null;
+		}
+
+		public SqlDecimal ToSqlDecimal()
+		{
+			throw null;
+		}
+
+		public SqlDouble ToSqlDouble()
+		{
+			throw null;
+		}
+
+		public SqlInt32 ToSqlInt32()
+		{
+			throw null;
+		}
+
+		public SqlInt64 ToSqlInt64()
+		{
+			throw null;
+		}
+
+		public SqlMoney ToSqlMoney()
+		{
+			throw null;
+		}
+
+		public SqlSingle ToSqlSingle()
+		{
+			throw null;
+		}
+
+		public SqlString ToSqlString()
+		{
+			throw null;
+		}
+
+		public override string ToString()
+		{
+			throw null;
+		}
+
+		public static SqlInt16 Xor(SqlInt16 x, SqlInt16 y)
+		{
+			throw null;
+		}
+
+		public static readonly SqlInt16 MaxValue;
+
+		public static readonly SqlInt16 MinValue;
 
 		public static readonly SqlInt16 Null;
 
-		public static readonly SqlInt16 Zero = new SqlInt16(0);
+		public static readonly SqlInt16 Zero;
 	}
 }

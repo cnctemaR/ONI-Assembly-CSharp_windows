@@ -17,15 +17,15 @@ public class HatchConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -HatchTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
-		List<Diet.Info> list = BaseHatchConfig.BasicRockDiet(HatchConfig.EMIT_ELEMENT.CreateTag(), HatchConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f);
-		list.AddRange(BaseHatchConfig.FoodDiet(HatchConfig.EMIT_ELEMENT.CreateTag(), HatchConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_1, null, 0f));
+		List<Diet.Info> list = BaseHatchConfig.BasicRockDiet(SimHashes.Carbon.CreateTag(), HatchConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f);
+		list.AddRange(BaseHatchConfig.FoodDiet(SimHashes.Carbon.CreateTag(), HatchConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_1, null, 0f));
 		return BaseHatchConfig.SetupDiet(gameObject, list, HatchConfig.CALORIES_PER_KG_OF_ORE, HatchConfig.MIN_POOP_SIZE_IN_KG);
 	}
 
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = HatchConfig.CreateHatch("Hatch", global::STRINGS.CREATURES.SPECIES.HATCH.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, "hatch_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchEgg", global::STRINGS.CREATURES.SPECIES.HATCH.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_BASE, HatchConfig.EGG_SORT_ORDER, true, false, true);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchEgg", global::STRINGS.CREATURES.SPECIES.HATCH.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_BASE, HatchConfig.EGG_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -42,7 +42,7 @@ public class HatchConfig : IEntityConfig
 
 	public const string EGG_ID = "HatchEgg";
 
-	private static SimHashes EMIT_ELEMENT = SimHashes.Carbon;
+	private const SimHashes EMIT_ELEMENT = SimHashes.Carbon;
 
 	private static float KG_ORE_EATEN_PER_CYCLE = 140f;
 

@@ -7,6 +7,11 @@ public class KTime : KMonoBehaviour
 
 	public static KTime Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		KTime.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		KTime.Instance = this;

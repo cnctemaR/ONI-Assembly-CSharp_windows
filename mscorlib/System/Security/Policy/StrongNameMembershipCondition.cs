@@ -8,7 +8,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class StrongNameMembershipCondition : ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition, IMembershipCondition
+	public sealed class StrongNameMembershipCondition : IMembershipCondition, ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition
 	{
 		public StrongNameMembershipCondition(StrongNamePublicKeyBlob blob, string name, Version version)
 		{
@@ -138,11 +138,9 @@ namespace System.Security.Policy
 			if (text == null)
 			{
 				this.assemblyVersion = null;
+				return;
 			}
-			else
-			{
-				this.assemblyVersion = new Version(text);
-			}
+			this.assemblyVersion = new Version(text);
 		}
 
 		public override string ToString()

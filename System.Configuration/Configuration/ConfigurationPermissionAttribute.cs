@@ -15,7 +15,7 @@ namespace System.Configuration
 
 		public override IPermission CreatePermission()
 		{
-			return new ConfigurationPermission((!base.Unrestricted) ? PermissionState.None : PermissionState.Unrestricted);
+			return new ConfigurationPermission(base.Unrestricted ? PermissionState.Unrestricted : PermissionState.None);
 		}
 	}
 }

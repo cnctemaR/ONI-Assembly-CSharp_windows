@@ -13,7 +13,6 @@ public class ManualPressureDoorConfig : IBuildingConfig
 		buildingDef.IsFoundation = true;
 		buildingDef.ViewMode = SimViewMode.None;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;

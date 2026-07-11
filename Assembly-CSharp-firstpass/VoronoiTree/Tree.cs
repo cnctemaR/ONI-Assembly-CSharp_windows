@@ -124,6 +124,14 @@ namespace VoronoiTree
 			{
 				for (int j = 0; j < list.Count; j++)
 				{
+					if (!this.site.poly.Contains(list[j].position))
+					{
+						global::Debug.LogErrorFormat("Cant feed points [{0}] to powerdiagram that are outside its area [{1}] ", new object[]
+						{
+							list[j].id,
+							list[j].position
+						});
+					}
 				}
 				if (base.ComputeNodePD(list, 500, 0.2f))
 				{
@@ -166,6 +174,14 @@ namespace VoronoiTree
 			List<Diagram.Site> list = new List<Diagram.Site>();
 			for (int i = 0; i < this.children.Count; i++)
 			{
+				if (place || !this.site.poly.Contains(this.children[i].site.position))
+				{
+					global::Debug.LogErrorFormat("Cant feed points [{0}] to powerdiagram that are outside its area [{1}] ", new object[]
+					{
+						this.children[i].site.id,
+						this.children[i].site.position
+					});
+				}
 				list.Add(this.children[i].site);
 			}
 			if (place)

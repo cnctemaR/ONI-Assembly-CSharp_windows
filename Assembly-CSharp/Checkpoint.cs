@@ -150,7 +150,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 	private class CheckpointReactable : Reactable
 	{
 		public CheckpointReactable(Checkpoint checkpoint)
-			: base(checkpoint.gameObject, Db.Get().ChoreTypes.Checkpoint, 1, 1, false)
+			: base(checkpoint.gameObject, "CheckpointReactable", Db.Get().ChoreTypes.Checkpoint, 1, 1, false, 0f, 0f, float.PositiveInfinity)
 		{
 			this.checkpoint = checkpoint;
 			this.rotated = this.gameObject.GetComponent<Rotatable>().IsRotated;
@@ -216,7 +216,10 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 
 		protected override void InternalEnd()
 		{
-			this.reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(Assets.GetAnim("anim_idle_distracted_kanim"));
+			if (this.reactor != null)
+			{
+				this.reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(Assets.GetAnim("anim_idle_distracted_kanim"));
+			}
 		}
 
 		protected override void InternalCleanup()

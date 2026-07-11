@@ -2,9 +2,8 @@
 
 namespace UnityEngine.VR
 {
-	public enum TrackingSpaceType
+	internal enum TrackingSpaceType
 	{
-		Stationary,
-		RoomScale
+
 	}
 }

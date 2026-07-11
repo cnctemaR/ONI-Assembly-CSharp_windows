@@ -167,7 +167,7 @@ namespace Klei.AI
 
 				public Reactable GetReactable()
 				{
-					return new SelfEmoteReactable(base.master.gameObject, Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim").AddStep(new EmoteReactable.EmoteStep
+					return new SelfEmoteReactable(base.master.gameObject, "SlimeLungCough", Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim", 0f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 					{
 						anim = "sneeze",
 						finishcb = new Action<GameObject>(this.ProduceSlime)

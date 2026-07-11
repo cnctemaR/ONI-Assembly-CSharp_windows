@@ -15,8 +15,8 @@ namespace System.Security.Cryptography.Xml
 			base.ReferenceType = "DataReference";
 		}
 
-		public DataReference(string uri, TransformChain tc)
-			: base(uri, tc)
+		public DataReference(string uri, TransformChain transformChain)
+			: base(uri, transformChain)
 		{
 			base.ReferenceType = "DataReference";
 		}

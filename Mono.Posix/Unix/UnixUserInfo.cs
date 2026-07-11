@@ -136,7 +136,7 @@ namespace Mono.Unix
 
 		public override bool Equals(object obj)
 		{
-			return obj != null && base.GetType() == obj.GetType() && this.passwd.Equals(((UnixUserInfo)obj).passwd);
+			return obj != null && !(base.GetType() != obj.GetType()) && this.passwd.Equals(((UnixUserInfo)obj).passwd);
 		}
 
 		public override string ToString()

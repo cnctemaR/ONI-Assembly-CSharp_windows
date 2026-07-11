@@ -9,22 +9,25 @@ namespace System.IO
 	public class PathTooLongException : IOException
 	{
 		public PathTooLongException()
-			: base(Locale.GetText("Pathname is longer than the maximum length"))
+			: base(Environment.GetResourceString("The specified path, file name, or both are too long. The fully qualified file name must be less than 260 characters, and the directory name must be less than 248 characters."))
 		{
+			base.SetErrorCode(-2147024690);
 		}
 
 		public PathTooLongException(string message)
 			: base(message)
 		{
-		}
-
-		protected PathTooLongException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
+			base.SetErrorCode(-2147024690);
 		}
 
 		public PathTooLongException(string message, Exception innerException)
 			: base(message, innerException)
+		{
+			base.SetErrorCode(-2147024690);
+		}
+
+		protected PathTooLongException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 	}

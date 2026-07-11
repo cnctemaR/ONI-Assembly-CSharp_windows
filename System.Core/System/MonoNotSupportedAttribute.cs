@@ -3,7 +3,7 @@
 namespace System
 {
 	[AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
-	internal class MonoNotSupportedAttribute : MonoTODOAttribute
+	internal class MonoNotSupportedAttribute : global::System.MonoTODOAttribute
 	{
 		public MonoNotSupportedAttribute(string comment)
 			: base(comment)

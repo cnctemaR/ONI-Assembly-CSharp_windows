@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Globalization
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum CultureTypes
 	{
@@ -14,7 +14,9 @@ namespace System.Globalization
 		AllCultures = 7,
 		UserCustomCulture = 8,
 		ReplacementCultures = 16,
+		[Obsolete("This value has been deprecated.  Please use other values in CultureTypes.")]
 		WindowsOnlyCultures = 32,
+		[Obsolete("This value has been deprecated.  Please use other values in CultureTypes.")]
 		FrameworkCultures = 64
 	}
 }

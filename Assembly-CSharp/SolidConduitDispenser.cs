@@ -118,7 +118,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 	[SerializeField]
 	public bool alwaysDispense;
 
-	private static Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
+	private static readonly Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 
 	[MyCmpReq]
 	private Operational operational;

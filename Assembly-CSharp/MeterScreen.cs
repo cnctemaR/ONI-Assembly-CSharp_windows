@@ -10,6 +10,11 @@ public class MeterScreen : KScreen, IRender1000ms
 {
 	public static MeterScreen Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		MeterScreen.Instance = null;
+	}
+
 	public bool StartValuesSet
 	{
 		get

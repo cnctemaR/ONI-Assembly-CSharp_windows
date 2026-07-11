@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[Serializable]
 	public abstract class Formatter : IFormatter
 	{
-		public abstract SerializationBinder Binder { get; set; }
-
-		public abstract StreamingContext Context { get; set; }
-
-		public abstract ISurrogateSelector SurrogateSelector { get; set; }
+		protected Formatter()
+		{
+			this.m_objectQueue = new Queue();
+			this.m_idGenerator = new ObjectIDGenerator();
+		}
 
 		public abstract object Deserialize(Stream serializationStream);
 
@@ -28,6 +29,10 @@ namespace System.Runtime.Serialization
 			object obj = this.m_objectQueue.Dequeue();
 			bool flag;
 			objID = this.m_idGenerator.HasId(obj, out flag);
+			if (flag)
+			{
+				throw new SerializationException(Environment.GetResourceString("Object has never been assigned an objectID."));
+			}
 			return obj;
 		}
 
@@ -68,85 +73,98 @@ namespace System.Runtime.Serialization
 
 		protected abstract void WriteInt64(long val, string name);
 
+		protected abstract void WriteObjectRef(object obj, string name, Type memberType);
+
 		protected virtual void WriteMember(string memberName, object data)
 		{
 			if (data == null)
 			{
 				this.WriteObjectRef(data, memberName, typeof(object));
+				return;
 			}
 			Type type = data.GetType();
+			if (type == typeof(bool))
+			{
+				this.WriteBoolean(Convert.ToBoolean(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(char))
+			{
+				this.WriteChar(Convert.ToChar(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(sbyte))
+			{
+				this.WriteSByte(Convert.ToSByte(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(byte))
+			{
+				this.WriteByte(Convert.ToByte(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(short))
+			{
+				this.WriteInt16(Convert.ToInt16(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(int))
+			{
+				this.WriteInt32(Convert.ToInt32(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(long))
+			{
+				this.WriteInt64(Convert.ToInt64(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(float))
+			{
+				this.WriteSingle(Convert.ToSingle(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(double))
+			{
+				this.WriteDouble(Convert.ToDouble(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(DateTime))
+			{
+				this.WriteDateTime(Convert.ToDateTime(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(decimal))
+			{
+				this.WriteDecimal(Convert.ToDecimal(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(ushort))
+			{
+				this.WriteUInt16(Convert.ToUInt16(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(uint))
+			{
+				this.WriteUInt32(Convert.ToUInt32(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
+			if (type == typeof(ulong))
+			{
+				this.WriteUInt64(Convert.ToUInt64(data, CultureInfo.InvariantCulture), memberName);
+				return;
+			}
 			if (type.IsArray)
 			{
 				this.WriteArray(data, memberName, type);
+				return;
 			}
-			else if (type == typeof(bool))
-			{
-				this.WriteBoolean((bool)data, memberName);
-			}
-			else if (type == typeof(byte))
-			{
-				this.WriteByte((byte)data, memberName);
-			}
-			else if (type == typeof(char))
-			{
-				this.WriteChar((char)data, memberName);
-			}
-			else if (type == typeof(DateTime))
-			{
-				this.WriteDateTime((DateTime)data, memberName);
-			}
-			else if (type == typeof(decimal))
-			{
-				this.WriteDecimal((decimal)data, memberName);
-			}
-			else if (type == typeof(double))
-			{
-				this.WriteDouble((double)data, memberName);
-			}
-			else if (type == typeof(short))
-			{
-				this.WriteInt16((short)data, memberName);
-			}
-			else if (type == typeof(int))
-			{
-				this.WriteInt32((int)data, memberName);
-			}
-			else if (type == typeof(long))
-			{
-				this.WriteInt64((long)data, memberName);
-			}
-			else if (type == typeof(sbyte))
-			{
-				this.WriteSByte((sbyte)data, memberName);
-			}
-			else if (type == typeof(float))
-			{
-				this.WriteSingle((float)data, memberName);
-			}
-			else if (type == typeof(TimeSpan))
-			{
-				this.WriteTimeSpan((TimeSpan)data, memberName);
-			}
-			else if (type == typeof(ushort))
-			{
-				this.WriteUInt16((ushort)data, memberName);
-			}
-			else if (type == typeof(uint))
-			{
-				this.WriteUInt32((uint)data, memberName);
-			}
-			else if (type == typeof(ulong))
-			{
-				this.WriteUInt64((ulong)data, memberName);
-			}
-			else if (type.IsValueType)
+			if (type.IsValueType)
 			{
 				this.WriteValueType(data, memberName, type);
+				return;
 			}
 			this.WriteObjectRef(data, memberName, type);
 		}
-
-		protected abstract void WriteObjectRef(object obj, string name, Type memberType);
 
 		[CLSCompliant(false)]
 		protected abstract void WriteSByte(sbyte val, string name);
@@ -166,8 +184,14 @@ namespace System.Runtime.Serialization
 
 		protected abstract void WriteValueType(object obj, string name, Type memberType);
 
-		protected ObjectIDGenerator m_idGenerator = new ObjectIDGenerator();
+		public abstract ISurrogateSelector SurrogateSelector { get; set; }
 
-		protected Queue m_objectQueue = new Queue();
+		public abstract SerializationBinder Binder { get; set; }
+
+		public abstract StreamingContext Context { get; set; }
+
+		protected ObjectIDGenerator m_idGenerator;
+
+		protected Queue m_objectQueue;
 	}
 }

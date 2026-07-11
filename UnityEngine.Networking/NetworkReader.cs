@@ -349,7 +349,7 @@ namespace UnityEngine.Networking
 			byte[] array;
 			if (num == 0)
 			{
-				array = null;
+				array = new byte[0];
 			}
 			else
 			{

@@ -8,163 +8,134 @@ namespace System.Runtime.Serialization
 	public sealed class DataContractSerializer : XmlObjectSerializer
 	{
 		public DataContractSerializer(Type type)
-			: this(type, Type.EmptyTypes)
+			: this(type, null)
 		{
 		}
 
 		public DataContractSerializer(Type type, IEnumerable<Type> knownTypes)
+			: this(type, knownTypes, int.MaxValue, false, false, null)
 		{
-			this.max_items = 65536;
-			base..ctor();
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			this.type = type;
-			this.known_types = new KnownTypeCollection();
-			this.PopulateTypes(knownTypes);
-			this.known_types.TryRegister(type);
-			XmlQualifiedName qname = this.known_types.GetQName(type);
-			this.FillDictionaryString(qname.Name, qname.Namespace);
+		}
+
+		public DataContractSerializer(Type type, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate)
+			: this(type, knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate, null)
+		{
+		}
+
+		public DataContractSerializer(Type type, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate, DataContractResolver dataContractResolver)
+		{
+			this.Initialize(type, knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate, dataContractResolver, false);
 		}
 
 		public DataContractSerializer(Type type, string rootName, string rootNamespace)
-			: this(type, rootName, rootNamespace, Type.EmptyTypes)
-		{
-		}
-
-		public DataContractSerializer(Type type, XmlDictionaryString rootName, XmlDictionaryString rootNamespace)
-			: this(type, rootName, rootNamespace, Type.EmptyTypes)
+			: this(type, rootName, rootNamespace, null)
 		{
 		}
 
 		public DataContractSerializer(Type type, string rootName, string rootNamespace, IEnumerable<Type> knownTypes)
+			: this(type, rootName, rootNamespace, knownTypes, int.MaxValue, false, false, null)
 		{
-			this.max_items = 65536;
-			base..ctor();
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			if (rootName == null)
-			{
-				throw new ArgumentNullException("rootName");
-			}
-			if (rootNamespace == null)
-			{
-				throw new ArgumentNullException("rootNamespace");
-			}
-			this.type = type;
-			this.PopulateTypes(knownTypes);
-			this.FillDictionaryString(rootName, rootNamespace);
+		}
+
+		public DataContractSerializer(Type type, string rootName, string rootNamespace, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate)
+			: this(type, rootName, rootNamespace, knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate, null)
+		{
+		}
+
+		public DataContractSerializer(Type type, string rootName, string rootNamespace, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate, DataContractResolver dataContractResolver)
+		{
+			XmlDictionary xmlDictionary = new XmlDictionary(2);
+			this.Initialize(type, xmlDictionary.Add(rootName), xmlDictionary.Add(DataContract.GetNamespace(rootNamespace)), knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate, dataContractResolver, false);
+		}
+
+		public DataContractSerializer(Type type, XmlDictionaryString rootName, XmlDictionaryString rootNamespace)
+			: this(type, rootName, rootNamespace, null)
+		{
 		}
 
 		public DataContractSerializer(Type type, XmlDictionaryString rootName, XmlDictionaryString rootNamespace, IEnumerable<Type> knownTypes)
+			: this(type, rootName, rootNamespace, knownTypes, int.MaxValue, false, false, null, null)
 		{
-			this.max_items = 65536;
-			base..ctor();
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			if (rootName == null)
-			{
-				throw new ArgumentNullException("rootName");
-			}
-			if (rootNamespace == null)
-			{
-				throw new ArgumentNullException("rootNamespace");
-			}
-			this.type = type;
-			this.PopulateTypes(knownTypes);
-			this.root_name = rootName;
-			this.root_ns = rootNamespace;
 		}
 
-		public DataContractSerializer(Type type, IEnumerable<Type> knownTypes, int maxObjectsInGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate)
-			: this(type, knownTypes)
+		public DataContractSerializer(Type type, XmlDictionaryString rootName, XmlDictionaryString rootNamespace, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate)
+			: this(type, rootName, rootNamespace, knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate, null)
 		{
-			this.Initialize(maxObjectsInGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate);
 		}
 
-		public DataContractSerializer(Type type, string rootName, string rootNamespace, IEnumerable<Type> knownTypes, int maxObjectsInGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate)
-			: this(type, rootName, rootNamespace, knownTypes)
+		public DataContractSerializer(Type type, XmlDictionaryString rootName, XmlDictionaryString rootNamespace, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate, DataContractResolver dataContractResolver)
 		{
-			this.Initialize(maxObjectsInGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate);
+			this.Initialize(type, rootName, rootNamespace, knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate, dataContractResolver, false);
 		}
 
-		public DataContractSerializer(Type type, XmlDictionaryString rootName, XmlDictionaryString rootNamespace, IEnumerable<Type> knownTypes, int maxObjectsInGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate)
-			: this(type, rootName, rootNamespace, knownTypes)
+		public DataContractSerializer(Type type, DataContractSerializerSettings settings)
 		{
-			this.Initialize(maxObjectsInGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate);
-		}
-
-		private void PopulateTypes(IEnumerable<Type> knownTypes)
-		{
-			if (this.known_types == null)
+			if (settings == null)
 			{
-				this.known_types = new KnownTypeCollection();
+				settings = new DataContractSerializerSettings();
 			}
+			this.Initialize(type, settings.RootName, settings.RootNamespace, settings.KnownTypes, settings.MaxItemsInObjectGraph, settings.IgnoreExtensionDataObject, settings.PreserveObjectReferences, settings.DataContractSurrogate, settings.DataContractResolver, settings.SerializeReadOnlyTypes);
+		}
+
+		private void Initialize(Type type, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate, DataContractResolver dataContractResolver, bool serializeReadOnlyTypes)
+		{
+			XmlObjectSerializer.CheckNull(type, "type");
+			this.rootType = type;
 			if (knownTypes != null)
 			{
-				foreach (Type type in knownTypes)
+				this.knownTypeList = new List<Type>();
+				foreach (Type type2 in knownTypes)
 				{
-					this.known_types.TryRegister(type);
+					this.knownTypeList.Add(type2);
 				}
 			}
-			Type elementType = this.type;
-			if (this.type.HasElementType)
+			if (maxItemsInObjectGraph < 0)
 			{
-				elementType = this.type.GetElementType();
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("maxItemsInObjectGraph", global::System.Runtime.Serialization.SR.GetString("The value of this argument must be non-negative.")));
 			}
-			foreach (KnownTypeAttribute knownTypeAttribute in elementType.GetCustomAttributes(typeof(KnownTypeAttribute), true))
-			{
-				this.known_types.TryRegister(knownTypeAttribute.Type);
-			}
+			this.maxItemsInObjectGraph = maxItemsInObjectGraph;
+			this.ignoreExtensionDataObject = ignoreExtensionDataObject;
+			this.preserveObjectReferences = preserveObjectReferences;
+			this.dataContractSurrogate = dataContractSurrogate;
+			this.dataContractResolver = dataContractResolver;
+			this.serializeReadOnlyTypes = serializeReadOnlyTypes;
 		}
 
-		private void FillDictionaryString(string name, string ns)
+		private void Initialize(Type type, XmlDictionaryString rootName, XmlDictionaryString rootNamespace, IEnumerable<Type> knownTypes, int maxItemsInObjectGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate, DataContractResolver dataContractResolver, bool serializeReadOnlyTypes)
 		{
-			XmlDictionary xmlDictionary = new XmlDictionary();
-			this.root_name = xmlDictionary.Add(name);
-			this.root_ns = xmlDictionary.Add(ns);
-			this.names_filled = true;
-		}
-
-		private void Initialize(int maxObjectsInGraph, bool ignoreExtensionDataObject, bool preserveObjectReferences, IDataContractSurrogate dataContractSurrogate)
-		{
-			if (maxObjectsInGraph < 0)
-			{
-				throw new ArgumentOutOfRangeException("maxObjectsInGraph must not be negative.");
-			}
-			this.max_items = maxObjectsInGraph;
-			this.ignore_ext = ignoreExtensionDataObject;
-			this.preserve_refs = preserveObjectReferences;
-			this.surrogate = dataContractSurrogate;
-			this.PopulateTypes(Type.EmptyTypes);
-		}
-
-		public bool IgnoreExtensionDataObject
-		{
-			get
-			{
-				return this.ignore_ext;
-			}
+			this.Initialize(type, knownTypes, maxItemsInObjectGraph, ignoreExtensionDataObject, preserveObjectReferences, dataContractSurrogate, dataContractResolver, serializeReadOnlyTypes);
+			this.rootName = rootName;
+			this.rootNamespace = rootNamespace;
 		}
 
 		public ReadOnlyCollection<Type> KnownTypes
 		{
 			get
 			{
-				return this.known_runtime_types;
+				if (this.knownTypeCollection == null)
+				{
+					if (this.knownTypeList != null)
+					{
+						this.knownTypeCollection = new ReadOnlyCollection<Type>(this.knownTypeList);
+					}
+					else
+					{
+						this.knownTypeCollection = new ReadOnlyCollection<Type>(Globals.EmptyTypeArray);
+					}
+				}
+				return this.knownTypeCollection;
 			}
 		}
 
-		public IDataContractSurrogate DataContractSurrogate
+		internal override Dictionary<XmlQualifiedName, DataContract> KnownDataContracts
 		{
 			get
 			{
-				return this.surrogate;
+				if (this.knownDataContracts == null && this.knownTypeList != null)
+				{
+					this.knownDataContracts = XmlObjectSerializerContext.GetDataContractsForKnownTypes(this.knownTypeList);
+				}
+				return this.knownDataContracts;
 			}
 		}
 
@@ -172,7 +143,15 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.max_items;
+				return this.maxItemsInObjectGraph;
+			}
+		}
+
+		public IDataContractSurrogate DataContractSurrogate
+		{
+			get
+			{
+				return this.dataContractSurrogate;
 			}
 		}
 
@@ -180,176 +159,338 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.preserve_refs;
+				return this.preserveObjectReferences;
 			}
 		}
 
-		[MonoTODO]
-		public override bool IsStartObject(XmlDictionaryReader reader)
+		public bool IgnoreExtensionDataObject
 		{
-			throw new NotImplementedException();
-		}
-
-		public override bool IsStartObject(XmlReader reader)
-		{
-			return this.IsStartObject(XmlDictionaryReader.CreateDictionaryReader(reader));
-		}
-
-		public override object ReadObject(XmlReader reader)
-		{
-			return this.ReadObject(XmlDictionaryReader.CreateDictionaryReader(reader));
-		}
-
-		public override object ReadObject(XmlReader reader, bool verifyObjectName)
-		{
-			return this.ReadObject(XmlDictionaryReader.CreateDictionaryReader(reader), verifyObjectName);
-		}
-
-		[MonoTODO]
-		public override object ReadObject(XmlDictionaryReader reader, bool verifyObjectName)
-		{
-			int count = this.known_types.Count;
-			this.known_types.Add(this.type);
-			bool isEmptyElement = reader.IsEmptyElement;
-			object obj = XmlFormatterDeserializer.Deserialize(reader, this.type, this.known_types, this.surrogate, this.root_name.Value, this.root_ns.Value, verifyObjectName);
-			while (this.known_types.Count > count)
+			get
 			{
-				this.known_types.RemoveAt(count);
+				return this.ignoreExtensionDataObject;
 			}
-			return obj;
 		}
 
-		private void ReadRootStartElement(XmlReader reader, Type type)
+		public DataContractResolver DataContractResolver
 		{
-			SerializationMap serializationMap = this.known_types.FindUserMap(type);
-			XmlQualifiedName xmlQualifiedName = ((serializationMap == null) ? KnownTypeCollection.GetPredefinedTypeName(type) : serializationMap.XmlName);
-			reader.MoveToContent();
-			reader.ReadStartElement(xmlQualifiedName.Name, xmlQualifiedName.Namespace);
-			reader.Read();
+			get
+			{
+				return this.dataContractResolver;
+			}
+		}
+
+		public bool SerializeReadOnlyTypes
+		{
+			get
+			{
+				return this.serializeReadOnlyTypes;
+			}
+		}
+
+		private DataContract RootContract
+		{
+			get
+			{
+				if (this.rootContract == null)
+				{
+					this.rootContract = DataContract.GetDataContract((this.dataContractSurrogate == null) ? this.rootType : DataContractSerializer.GetSurrogatedType(this.dataContractSurrogate, this.rootType));
+					this.needsContractNsAtRoot = base.CheckIfNeedsContractNsAtRoot(this.rootName, this.rootNamespace, this.rootContract);
+				}
+				return this.rootContract;
+			}
+		}
+
+		internal override void InternalWriteObject(XmlWriterDelegator writer, object graph)
+		{
+			this.InternalWriteObject(writer, graph, null);
+		}
+
+		internal override void InternalWriteObject(XmlWriterDelegator writer, object graph, DataContractResolver dataContractResolver)
+		{
+			this.InternalWriteStartObject(writer, graph);
+			this.InternalWriteObjectContent(writer, graph, dataContractResolver);
+			this.InternalWriteEndObject(writer);
 		}
 
 		public override void WriteObject(XmlWriter writer, object graph)
 		{
-			XmlDictionaryWriter xmlDictionaryWriter = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-			this.WriteObject(xmlDictionaryWriter, graph);
-		}
-
-		[MonoTODO("support arrays; support Serializable; support SharedType; use DataContractSurrogate")]
-		public override void WriteObjectContent(XmlDictionaryWriter writer, object graph)
-		{
-			if (graph == null)
-			{
-				return;
-			}
-			int count = this.known_types.Count;
-			XmlFormatterSerializer.Serialize(writer, graph, this.known_types, this.ignore_ext, this.max_items, this.root_ns.Value);
-			while (this.known_types.Count > count)
-			{
-				this.known_types.RemoveAt(count);
-			}
-		}
-
-		public override void WriteObjectContent(XmlWriter writer, object graph)
-		{
-			XmlDictionaryWriter xmlDictionaryWriter = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-			this.WriteObjectContent(xmlDictionaryWriter, graph);
+			base.WriteObjectHandleExceptions(new XmlWriterDelegator(writer), graph);
 		}
 
 		public override void WriteStartObject(XmlWriter writer, object graph)
 		{
-			this.WriteStartObject(XmlDictionaryWriter.CreateDictionaryWriter(writer), graph);
+			base.WriteStartObjectHandleExceptions(new XmlWriterDelegator(writer), graph);
 		}
 
-		public override void WriteStartObject(XmlDictionaryWriter writer, object graph)
+		public override void WriteObjectContent(XmlWriter writer, object graph)
 		{
-			Type type = this.type;
-			if (this.root_name.Value == string.Empty)
-			{
-				throw new InvalidDataContractException("Type '" + this.type.ToString() + "' cannot have a DataContract attribute Name set to null or empty string.");
-			}
-			if (graph == null)
-			{
-				if (this.names_filled)
-				{
-					writer.WriteStartElement(this.root_name.Value, this.root_ns.Value);
-				}
-				else
-				{
-					writer.WriteStartElement(this.root_name, this.root_ns);
-				}
-				writer.WriteAttributeString("i", "nil", "http://www.w3.org/2001/XMLSchema-instance", "true");
-				return;
-			}
-			XmlQualifiedName qname = this.known_types.GetQName(type);
-			XmlQualifiedName qname2 = this.known_types.GetQName(graph.GetType());
-			this.known_types.Add(graph.GetType());
-			if (this.names_filled)
-			{
-				writer.WriteStartElement(this.root_name.Value, this.root_ns.Value);
-			}
-			else
-			{
-				writer.WriteStartElement(this.root_name, this.root_ns);
-			}
-			if (this.root_ns.Value != qname.Namespace && qname.Namespace != "http://schemas.microsoft.com/2003/10/Serialization/")
-			{
-				writer.WriteXmlnsAttribute(null, qname.Namespace);
-			}
-			if (qname == qname2)
-			{
-				if (qname.Namespace != "http://schemas.microsoft.com/2003/10/Serialization/" && !type.IsEnum)
-				{
-					writer.WriteXmlnsAttribute("i", "http://www.w3.org/2001/XMLSchema-instance");
-				}
-				return;
-			}
-			this.known_types.Add(type);
-			XmlQualifiedName xmlQualifiedName = KnownTypeCollection.GetPredefinedTypeName(graph.GetType());
-			if (xmlQualifiedName == XmlQualifiedName.Empty)
-			{
-				xmlQualifiedName = qname2;
-			}
-			else
-			{
-				xmlQualifiedName = new XmlQualifiedName(xmlQualifiedName.Name, "http://www.w3.org/2001/XMLSchema");
-			}
-			writer.WriteStartAttribute("i", "type", "http://www.w3.org/2001/XMLSchema-instance");
-			writer.WriteQualifiedName(xmlQualifiedName.Name, xmlQualifiedName.Namespace);
-			writer.WriteEndAttribute();
-		}
-
-		public override void WriteEndObject(XmlDictionaryWriter writer)
-		{
-			writer.WriteEndElement();
+			base.WriteObjectContentHandleExceptions(new XmlWriterDelegator(writer), graph);
 		}
 
 		public override void WriteEndObject(XmlWriter writer)
 		{
-			this.WriteEndObject(XmlDictionaryWriter.CreateDictionaryWriter(writer));
+			base.WriteEndObjectHandleExceptions(new XmlWriterDelegator(writer));
 		}
 
-		private const string xmlns = "http://www.w3.org/2000/xmlns/";
+		public override void WriteStartObject(XmlDictionaryWriter writer, object graph)
+		{
+			base.WriteStartObjectHandleExceptions(new XmlWriterDelegator(writer), graph);
+		}
 
-		private Type type;
+		public override void WriteObjectContent(XmlDictionaryWriter writer, object graph)
+		{
+			base.WriteObjectContentHandleExceptions(new XmlWriterDelegator(writer), graph);
+		}
 
-		private bool ignore_ext;
+		public override void WriteEndObject(XmlDictionaryWriter writer)
+		{
+			base.WriteEndObjectHandleExceptions(new XmlWriterDelegator(writer));
+		}
 
-		private bool preserve_refs;
+		public void WriteObject(XmlDictionaryWriter writer, object graph, DataContractResolver dataContractResolver)
+		{
+			base.WriteObjectHandleExceptions(new XmlWriterDelegator(writer), graph, dataContractResolver);
+		}
 
-		private StreamingContext context;
+		public override object ReadObject(XmlReader reader)
+		{
+			return base.ReadObjectHandleExceptions(new XmlReaderDelegator(reader), true);
+		}
 
-		private ReadOnlyCollection<Type> known_runtime_types;
+		public override object ReadObject(XmlReader reader, bool verifyObjectName)
+		{
+			return base.ReadObjectHandleExceptions(new XmlReaderDelegator(reader), verifyObjectName);
+		}
 
-		private KnownTypeCollection known_types;
+		public override bool IsStartObject(XmlReader reader)
+		{
+			return base.IsStartObjectHandleExceptions(new XmlReaderDelegator(reader));
+		}
 
-		private IDataContractSurrogate surrogate;
+		public override object ReadObject(XmlDictionaryReader reader, bool verifyObjectName)
+		{
+			return base.ReadObjectHandleExceptions(new XmlReaderDelegator(reader), verifyObjectName);
+		}
 
-		private int max_items;
+		public override bool IsStartObject(XmlDictionaryReader reader)
+		{
+			return base.IsStartObjectHandleExceptions(new XmlReaderDelegator(reader));
+		}
 
-		private bool names_filled;
+		public object ReadObject(XmlDictionaryReader reader, bool verifyObjectName, DataContractResolver dataContractResolver)
+		{
+			return base.ReadObjectHandleExceptions(new XmlReaderDelegator(reader), verifyObjectName, dataContractResolver);
+		}
 
-		private XmlDictionaryString root_name;
+		internal override void InternalWriteStartObject(XmlWriterDelegator writer, object graph)
+		{
+			base.WriteRootElement(writer, this.RootContract, this.rootName, this.rootNamespace, this.needsContractNsAtRoot);
+		}
 
-		private XmlDictionaryString root_ns;
+		internal override void InternalWriteObjectContent(XmlWriterDelegator writer, object graph)
+		{
+			this.InternalWriteObjectContent(writer, graph, null);
+		}
+
+		internal void InternalWriteObjectContent(XmlWriterDelegator writer, object graph, DataContractResolver dataContractResolver)
+		{
+			if (this.MaxItemsInObjectGraph == 0)
+			{
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(global::System.Runtime.Serialization.SR.GetString("Maximum number of items that can be serialized or deserialized in an object graph is '{0}'.", new object[] { this.MaxItemsInObjectGraph })));
+			}
+			DataContract dataContract = this.RootContract;
+			Type underlyingType = dataContract.UnderlyingType;
+			Type type = ((graph == null) ? underlyingType : graph.GetType());
+			if (this.dataContractSurrogate != null)
+			{
+				graph = DataContractSerializer.SurrogateToDataContractType(this.dataContractSurrogate, graph, underlyingType, ref type);
+			}
+			if (dataContractResolver == null)
+			{
+				dataContractResolver = this.DataContractResolver;
+			}
+			if (graph == null)
+			{
+				if (base.IsRootXmlAny(this.rootName, dataContract))
+				{
+					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(global::System.Runtime.Serialization.SR.GetString("A null value cannot be serialized at the top level for IXmlSerializable root type '{0}' since its IsAny setting is 'true'. This type must write all its contents including the root element. Verify that the IXmlSerializable implementation is correct.", new object[] { underlyingType })));
+				}
+				XmlObjectSerializer.WriteNull(writer);
+				return;
+			}
+			else if (underlyingType == type)
+			{
+				if (dataContract.CanContainReferences)
+				{
+					XmlObjectSerializerWriteContext xmlObjectSerializerWriteContext = XmlObjectSerializerWriteContext.CreateContext(this, dataContract, dataContractResolver);
+					xmlObjectSerializerWriteContext.HandleGraphAtTopLevel(writer, graph, dataContract);
+					xmlObjectSerializerWriteContext.SerializeWithoutXsiType(dataContract, writer, graph, underlyingType.TypeHandle);
+					return;
+				}
+				dataContract.WriteXmlValue(writer, graph, null);
+				return;
+			}
+			else
+			{
+				if (base.IsRootXmlAny(this.rootName, dataContract))
+				{
+					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(global::System.Runtime.Serialization.SR.GetString("An object of type '{0}' cannot be serialized at the top level for IXmlSerializable root type '{1}' since its IsAny setting is 'true'. This type must write all its contents including the root element. Verify that the IXmlSerializable implementation is correct.", new object[] { type, dataContract.UnderlyingType })));
+				}
+				dataContract = DataContractSerializer.GetDataContract(dataContract, underlyingType, type);
+				XmlObjectSerializerWriteContext xmlObjectSerializerWriteContext2 = XmlObjectSerializerWriteContext.CreateContext(this, this.RootContract, dataContractResolver);
+				if (dataContract.CanContainReferences)
+				{
+					xmlObjectSerializerWriteContext2.HandleGraphAtTopLevel(writer, graph, dataContract);
+				}
+				xmlObjectSerializerWriteContext2.OnHandleIsReference(writer, dataContract, graph);
+				xmlObjectSerializerWriteContext2.SerializeWithXsiTypeAtTopLevel(dataContract, writer, graph, underlyingType.TypeHandle, type);
+				return;
+			}
+		}
+
+		internal static DataContract GetDataContract(DataContract declaredTypeContract, Type declaredType, Type objectType)
+		{
+			if (declaredType.IsInterface && CollectionDataContract.IsCollectionInterface(declaredType))
+			{
+				return declaredTypeContract;
+			}
+			if (declaredType.IsArray)
+			{
+				return declaredTypeContract;
+			}
+			return DataContract.GetDataContract(objectType.TypeHandle, objectType, SerializationMode.SharedContract);
+		}
+
+		internal void SetDataContractSurrogate(IDataContractSurrogate adapter)
+		{
+			this.dataContractSurrogate = adapter;
+		}
+
+		internal override void InternalWriteEndObject(XmlWriterDelegator writer)
+		{
+			if (!base.IsRootXmlAny(this.rootName, this.RootContract))
+			{
+				writer.WriteEndElement();
+			}
+		}
+
+		internal override object InternalReadObject(XmlReaderDelegator xmlReader, bool verifyObjectName)
+		{
+			return this.InternalReadObject(xmlReader, verifyObjectName, null);
+		}
+
+		internal override object InternalReadObject(XmlReaderDelegator xmlReader, bool verifyObjectName, DataContractResolver dataContractResolver)
+		{
+			if (this.MaxItemsInObjectGraph == 0)
+			{
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(global::System.Runtime.Serialization.SR.GetString("Maximum number of items that can be serialized or deserialized in an object graph is '{0}'.", new object[] { this.MaxItemsInObjectGraph })));
+			}
+			if (dataContractResolver == null)
+			{
+				dataContractResolver = this.DataContractResolver;
+			}
+			if (verifyObjectName)
+			{
+				if (!this.InternalIsStartObject(xmlReader))
+				{
+					XmlDictionaryString topLevelElementName;
+					XmlDictionaryString topLevelElementNamespace;
+					if (this.rootName == null)
+					{
+						topLevelElementName = this.RootContract.TopLevelElementName;
+						topLevelElementNamespace = this.RootContract.TopLevelElementNamespace;
+					}
+					else
+					{
+						topLevelElementName = this.rootName;
+						topLevelElementNamespace = this.rootNamespace;
+					}
+					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationExceptionWithReaderDetails(global::System.Runtime.Serialization.SR.GetString("Expecting element '{1}' from namespace '{0}'.", new object[] { topLevelElementNamespace, topLevelElementName }), xmlReader));
+				}
+			}
+			else if (!base.IsStartElement(xmlReader))
+			{
+				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationExceptionWithReaderDetails(global::System.Runtime.Serialization.SR.GetString("Expecting state '{0}' when ReadObject is called.", new object[] { XmlNodeType.Element }), xmlReader));
+			}
+			DataContract dataContract = this.RootContract;
+			if (dataContract.IsPrimitive && dataContract.UnderlyingType == this.rootType)
+			{
+				return dataContract.ReadXmlValue(xmlReader, null);
+			}
+			if (base.IsRootXmlAny(this.rootName, dataContract))
+			{
+				return XmlObjectSerializerReadContext.ReadRootIXmlSerializable(xmlReader, dataContract as XmlDataContract, false);
+			}
+			return XmlObjectSerializerReadContext.CreateContext(this, dataContract, dataContractResolver).InternalDeserialize(xmlReader, this.rootType, dataContract, null, null);
+		}
+
+		internal override bool InternalIsStartObject(XmlReaderDelegator reader)
+		{
+			return base.IsRootElement(reader, this.RootContract, this.rootName, this.rootNamespace);
+		}
+
+		internal override Type GetSerializeType(object graph)
+		{
+			if (graph != null)
+			{
+				return graph.GetType();
+			}
+			return this.rootType;
+		}
+
+		internal override Type GetDeserializeType()
+		{
+			return this.rootType;
+		}
+
+		internal static object SurrogateToDataContractType(IDataContractSurrogate dataContractSurrogate, object oldObj, Type surrogatedDeclaredType, ref Type objType)
+		{
+			object objectToSerialize = DataContractSurrogateCaller.GetObjectToSerialize(dataContractSurrogate, oldObj, objType, surrogatedDeclaredType);
+			if (objectToSerialize != oldObj)
+			{
+				if (objectToSerialize == null)
+				{
+					objType = Globals.TypeOfObject;
+				}
+				else
+				{
+					objType = objectToSerialize.GetType();
+				}
+			}
+			return objectToSerialize;
+		}
+
+		internal static Type GetSurrogatedType(IDataContractSurrogate dataContractSurrogate, Type type)
+		{
+			return DataContractSurrogateCaller.GetDataContractType(dataContractSurrogate, DataContract.UnwrapNullableType(type));
+		}
+
+		private Type rootType;
+
+		private DataContract rootContract;
+
+		private bool needsContractNsAtRoot;
+
+		private XmlDictionaryString rootName;
+
+		private XmlDictionaryString rootNamespace;
+
+		private int maxItemsInObjectGraph;
+
+		private bool ignoreExtensionDataObject;
+
+		private bool preserveObjectReferences;
+
+		private IDataContractSurrogate dataContractSurrogate;
+
+		private ReadOnlyCollection<Type> knownTypeCollection;
+
+		internal IList<Type> knownTypeList;
+
+		internal Dictionary<XmlQualifiedName, DataContract> knownDataContracts;
+
+		private DataContractResolver dataContractResolver;
+
+		private bool serializeReadOnlyTypes;
 	}
 }

@@ -14,8 +14,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public void Serialize(BinaryWriter writer)
 	{
-		byte b = (byte)this.CurrentNavType;
-		writer.Write(b);
+		byte currentNavType = (byte)this.CurrentNavType;
+		writer.Write(currentNavType);
 	}
 
 	public void Deserialize(IReader reader)
@@ -40,9 +40,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	protected override void OnPrefabInit()
 	{
 		this.transitionDriver = new TransitionDriver(this);
-		this.targetLocator = new GameObject("TargetLocator").AddComponent<KPrefabID>();
-		this.targetLocator.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
-		this.targetLocator.PrefabTag = new Tag("TargetLocator");
+		this.targetLocator = Util.KInstantiate(Assets.GetPrefab(TargetLocator.ID), null, null).GetComponent<KPrefabID>();
+		this.targetLocator.gameObject.SetActive(true);
 		this.log = new LoggerFS("Navigator", 35);
 		this.simRenderLoadBalance = true;
 		this.autoRegisterSimRender = false;
@@ -595,13 +594,14 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			this.moving.Enter(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
-			}).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
+			}).ToggleTag(GameTags.AllowSpeech).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
 			{
 				smi.master.Sim33ms(dt);
-			}, UpdateRate.SIM_33ms, true).Exit(delegate(Navigator.StatesInstance smi)
-			{
-				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
-			});
+			}, UpdateRate.SIM_33ms, true)
+				.Exit(delegate(Navigator.StatesInstance smi)
+				{
+					smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
+				});
 			this.arrived.TriggerOnEnter(GameHashes.DestinationReached, null).GoTo(this.stopped);
 			this.failed.TriggerOnEnter(GameHashes.NavigationFailed, null).GoTo(this.stopped);
 			this.stopped.DoNothing();

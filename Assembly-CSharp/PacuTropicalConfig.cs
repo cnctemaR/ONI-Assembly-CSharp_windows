@@ -18,7 +18,7 @@ public class PacuTropicalConfig : IEntityConfig
 	{
 		GameObject gameObject = PacuTropicalConfig.CreatePacu("PacuTropical", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.DESC, "pacu_kanim", false);
 		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, 25f);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuTropicalEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuTropicalBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_TROPICAL, PacuTropicalConfig.EGG_SORT_ORDER, false, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuTropicalEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuTropicalBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_TROPICAL, 502, false, true, false, 0.75f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -35,7 +35,7 @@ public class PacuTropicalConfig : IEntityConfig
 
 	public const string EGG_ID = "PacuTropicalEgg";
 
-	public static EffectorValues DECOR = global::TUNING.BUILDINGS.DECOR.BONUS.TIER4;
+	public static readonly EffectorValues DECOR = global::TUNING.BUILDINGS.DECOR.BONUS.TIER4;
 
-	public static int EGG_SORT_ORDER = PacuConfig.EGG_SORT_ORDER + 2;
+	public const int EGG_SORT_ORDER = 502;
 }

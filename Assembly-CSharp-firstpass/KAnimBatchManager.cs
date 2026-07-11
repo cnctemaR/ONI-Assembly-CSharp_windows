@@ -19,20 +19,21 @@ public class KAnimBatchManager
 		}
 	}
 
+	public static void CreateInstance()
+	{
+		Singleton<KAnimBatchManager>.CreateInstance();
+	}
+
 	public static KAnimBatchManager Instance()
 	{
-		if (!KAnimBatchManager.created)
+		if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
 		{
-			KAnimBatchManager.created = true;
-			if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
-			{
-				global::Debug.LogError("Machine does not support RGBAFloat32", null);
-			}
+			global::Debug.LogError("Machine does not support RGBAFloat32", null);
 		}
 		return KAnimBatchManager.instance;
 	}
 
-	public static void Destroy()
+	public static void DestroyInstance()
 	{
 		if (KAnimBatchManager.instance != null)
 		{
@@ -62,7 +63,7 @@ public class KAnimBatchManager
 			KAnimBatchManager.instance.dirtyBatchLastFrame = 0;
 			KAnimBatchGroup.FinalizeTextureCache();
 		}
-		Singleton<KAnimBatchManager>.Destroy();
+		Singleton<KAnimBatchManager>.DestroyInstance();
 	}
 
 	public bool isReady
@@ -79,11 +80,13 @@ public class KAnimBatchManager
 		{
 			return null;
 		}
-		if (!this.batchGroupData.ContainsKey(groupID))
+		KBatchGroupData kbatchGroupData = null;
+		if (!this.batchGroupData.TryGetValue(groupID, out kbatchGroupData))
 		{
-			this.batchGroupData[groupID] = new KBatchGroupData(groupID);
+			kbatchGroupData = new KBatchGroupData(groupID);
+			this.batchGroupData[groupID] = kbatchGroupData;
 		}
-		return this.batchGroupData[groupID];
+		return kbatchGroupData;
 	}
 
 	public KAnimBatchGroup GetBatchGroup(BatchGroupKey group_key)
@@ -181,7 +184,7 @@ public class KAnimBatchManager
 		{
 			DebugUtil.Assert(batchSet != null, "Assert!");
 			DebugUtil.Assert(batchSet.group != null, "Assert!");
-			if (batchSet.active && batchSet.group.dataType == KAnimBatchGroup.DataType.Default)
+			if (batchSet.active)
 			{
 				Mesh mesh = batchSet.group.mesh;
 				for (int i = 0; i < batchSet.batchCount; i++)
@@ -241,8 +244,7 @@ public class KAnimBatchManager
 		Shader.PropertyToID("atlas7"),
 		Shader.PropertyToID("atlas8"),
 		Shader.PropertyToID("atlas9"),
-		Shader.PropertyToID("atlas10")
+		Shader.PropertyToID("atlas10"),
+		Shader.PropertyToID("atlas11")
 	};
-
-	private static bool created = false;
 }

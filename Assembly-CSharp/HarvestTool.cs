@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class HarvestTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		HarvestTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

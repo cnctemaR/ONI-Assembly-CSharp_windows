@@ -4,9 +4,13 @@ using System.Runtime.CompilerServices;
 
 namespace System.Xml
 {
-	public abstract class XmlNodeList : IEnumerable
+	public abstract class XmlNodeList : IEnumerable, IDisposable
 	{
+		public abstract XmlNode Item(int index);
+
 		public abstract int Count { get; }
+
+		public abstract IEnumerator GetEnumerator();
 
 		[IndexerName("ItemOf")]
 		public virtual XmlNode this[int i]
@@ -17,8 +21,13 @@ namespace System.Xml
 			}
 		}
 
-		public abstract IEnumerator GetEnumerator();
+		void IDisposable.Dispose()
+		{
+			this.PrivateDisposeNodeList();
+		}
 
-		public abstract XmlNode Item(int index);
+		protected virtual void PrivateDisposeNodeList()
+		{
+		}
 	}
 }

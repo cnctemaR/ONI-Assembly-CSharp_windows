@@ -51,10 +51,17 @@ namespace UnityEngine.EventSystems
 			}
 			pointerEventData.position = input.position;
 			pointerEventData.button = PointerEventData.InputButton.Left;
-			base.eventSystem.RaycastAll(pointerEventData, this.m_RaycastResultCache);
-			RaycastResult raycastResult = BaseInputModule.FindFirstRaycast(this.m_RaycastResultCache);
-			pointerEventData.pointerCurrentRaycast = raycastResult;
-			this.m_RaycastResultCache.Clear();
+			if (input.phase == TouchPhase.Canceled)
+			{
+				pointerEventData.pointerCurrentRaycast = default(RaycastResult);
+			}
+			else
+			{
+				base.eventSystem.RaycastAll(pointerEventData, this.m_RaycastResultCache);
+				RaycastResult raycastResult = BaseInputModule.FindFirstRaycast(this.m_RaycastResultCache);
+				pointerEventData.pointerCurrentRaycast = raycastResult;
+				this.m_RaycastResultCache.Clear();
+			}
 			return pointerEventData;
 		}
 

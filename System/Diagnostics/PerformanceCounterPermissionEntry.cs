@@ -16,7 +16,7 @@ namespace System.Diagnostics
 			{
 				throw new ArgumentException("permissionAccess");
 			}
-			global::System.Security.Permissions.ResourcePermissionBase.ValidateMachineName(machineName);
+			ResourcePermissionBase.ValidateMachineName(machineName);
 			if (categoryName == null)
 			{
 				throw new ArgumentNullException("categoryName");
@@ -50,9 +50,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		internal global::System.Security.Permissions.ResourcePermissionBaseEntry CreateResourcePermissionBaseEntry()
+		internal ResourcePermissionBaseEntry CreateResourcePermissionBaseEntry()
 		{
-			return new global::System.Security.Permissions.ResourcePermissionBaseEntry((int)this.permissionAccess, new string[] { this.machineName, this.categoryName });
+			return new ResourcePermissionBaseEntry((int)this.permissionAccess, new string[] { this.machineName, this.categoryName });
 		}
 
 		private const PerformanceCounterPermissionAccess All = PerformanceCounterPermissionAccess.Administer;

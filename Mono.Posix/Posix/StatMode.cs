@@ -2,8 +2,8 @@
 
 namespace Mono.Posix
 {
-	[Obsolete("Use Mono.Unix.Native.FilePermissions")]
 	[Flags]
+	[Obsolete("Use Mono.Unix.Native.FilePermissions")]
 	public enum StatMode
 	{
 		[Obsolete("Use Mono.Unix.Native.FilePermissions.S_IFSOCK")]

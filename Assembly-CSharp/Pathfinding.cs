@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 public class Pathfinding : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		Pathfinding.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		Pathfinding.Instance = this;
@@ -46,15 +51,23 @@ public class Pathfinding : KMonoBehaviour
 
 	public void UpdateNavGrids(bool update_all = false)
 	{
+		update_all = true;
 		if (update_all)
 		{
-			for (int i = 0; i < this.NavGrids.Count; i++)
+			foreach (NavGrid navGrid in this.NavGrids)
 			{
-				this.NavGrids[i].UpdateGraph();
+				navGrid.UpdateGraph();
 			}
 		}
 		else
 		{
+			foreach (NavGrid navGrid2 in this.NavGrids)
+			{
+				if (navGrid2.updateEveryFrame)
+				{
+					navGrid2.UpdateGraph();
+				}
+			}
 			this.NavGrids[this.UpdateIdx].UpdateGraph();
 			this.UpdateIdx = (this.UpdateIdx + 1) % this.NavGrids.Count;
 		}

@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class BuildTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		BuildTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		BuildTool.Instance = this;
@@ -31,9 +36,8 @@ public class BuildTool : DragTool
 		GameObject buildingPreview = this.def.BuildingPreview;
 		Vector3 vector = cursorPos;
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
-		Folder folder = Folder.Placers;
 		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, folder, null, num);
+		this.visualizer = GameUtil.KInstantiate(buildingPreview, vector, sceneLayer, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -44,7 +48,6 @@ public class BuildTool : DragTool
 			component.name = component.GetComponent<KPrefabID>().GetDebugName() + "_visualizer";
 		}
 		this.visualizer.SetActive(true);
-		this.visualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Placers).transform;
 		this.UpdateVis(cursorPos);
 		BuildToolHoverTextCard component2 = base.GetComponent<BuildToolHoverTextCard>();
 		component2.currentDef = this.def;
@@ -74,7 +77,10 @@ public class BuildTool : DragTool
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 		this.ClearTilePreview();
 		global::UnityEngine.Object.Destroy(this.visualizer);
-		Game.Instance.Trigger(-1190690038, null);
+		if (new_tool == SelectTool.Instance)
+		{
+			Game.Instance.Trigger(-1190690038, null);
+		}
 		base.OnDeactivateTool(new_tool);
 	}
 
@@ -255,7 +261,7 @@ public class BuildTool : DragTool
 			string text;
 			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false, true);
+				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false);
 				if (this.source != null)
 				{
 					this.source.DeleteObject();
@@ -264,7 +270,7 @@ public class BuildTool : DragTool
 		}
 		else
 		{
-			gameObject = this.def.TryPlace(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0, false);
+			gameObject = this.def.TryPlace(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0);
 			if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
 			{
 				if (!Grid.ObjectLayers[(int)this.def.TileLayer].ContainsKey(cell))
@@ -279,7 +285,7 @@ public class BuildTool : DragTool
 					{
 						Constructable component2 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
 						component2.IsReplacementTile = true;
-						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
+						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0);
 						component2.IsReplacementTile = false;
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
 					}

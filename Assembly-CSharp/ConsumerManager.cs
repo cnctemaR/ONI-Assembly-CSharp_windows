@@ -7,6 +7,11 @@ using TUNING;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 {
+	public static void DestroyInstance()
+	{
+		ConsumerManager.instance = null;
+	}
+
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Tag> OnDiscover;
 

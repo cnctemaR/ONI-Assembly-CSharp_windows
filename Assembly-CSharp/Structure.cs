@@ -57,7 +57,7 @@ public class Structure : KMonoBehaviour
 	[MyCmpReq]
 	private Operational operational;
 
-	public static Operational.Flag notEntombedFlag = new Operational.Flag("not_entombed", Operational.Flag.Type.Functional);
+	public static readonly Operational.Flag notEntombedFlag = new Operational.Flag("not_entombed", Operational.Flag.Type.Functional);
 
 	private bool isEntombed;
 

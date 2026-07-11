@@ -5,15 +5,38 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
+	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_ConstructorInfo))]
 	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
 	[Serializable]
 	public abstract class ConstructorInfo : MethodBase, _ConstructorInfo
 	{
+		[ComVisible(true)]
+		public override MemberTypes MemberType
+		{
+			get
+			{
+				return MemberTypes.Constructor;
+			}
+		}
+
+		[DebuggerHidden]
+		[DebuggerStepThrough]
+		public object Invoke(object[] parameters)
+		{
+			return this.Invoke(BindingFlags.CreateInstance, null, parameters ?? EmptyArray<object>.Value, null);
+		}
+
+		public abstract object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture);
+
 		void _ConstructorInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
 		{
 			throw new NotImplementedException();
+		}
+
+		Type _ConstructorInfo.GetType()
+		{
+			return base.GetType();
 		}
 
 		void _ConstructorInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
@@ -51,31 +74,24 @@ namespace System.Reflection
 			return this.Invoke(parameters);
 		}
 
-		[ComVisible(true)]
-		public override MemberTypes MemberType
+		public override bool Equals(object obj)
 		{
-			get
-			{
-				return MemberTypes.Constructor;
-			}
+			return obj == this;
 		}
 
-		[DebuggerStepThrough]
-		[DebuggerHidden]
-		public object Invoke(object[] parameters)
+		public override int GetHashCode()
 		{
-			if (parameters == null)
-			{
-				parameters = new object[0];
-			}
-			return this.Invoke(BindingFlags.CreateInstance, null, parameters, null);
+			return base.GetHashCode();
 		}
 
-		public abstract object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture);
-
-		virtual Type System.Runtime.InteropServices._ConstructorInfo.GetType()
+		public static bool operator ==(ConstructorInfo left, ConstructorInfo right)
 		{
-			return base.GetType();
+			return left == right || (!((left == null) ^ (right == null)) && left.Equals(right));
+		}
+
+		public static bool operator !=(ConstructorInfo left, ConstructorInfo right)
+		{
+			return left != right && (((left == null) ^ (right == null)) || !left.Equals(right));
 		}
 
 		[ComVisible(true)]

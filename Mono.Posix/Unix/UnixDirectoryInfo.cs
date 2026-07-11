@@ -40,7 +40,7 @@ namespace Mono.Unix
 					return this;
 				}
 				string directoryName = UnixPath.GetDirectoryName(base.FullPath);
-				if (directoryName == string.Empty)
+				if (directoryName == "")
 				{
 					throw new InvalidOperationException("Do not know parent directory for path `" + base.FullPath + "'");
 				}
@@ -64,8 +64,7 @@ namespace Mono.Unix
 		[CLSCompliant(false)]
 		public void Create(FilePermissions mode)
 		{
-			int num = Syscall.mkdir(base.FullPath, mode);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.mkdir(base.FullPath, mode));
 			base.Refresh();
 		}
 
@@ -102,8 +101,7 @@ namespace Mono.Unix
 					}
 				}
 			}
-			int num = Syscall.rmdir(base.FullPath);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.rmdir(base.FullPath));
 			base.Refresh();
 		}
 
@@ -169,8 +167,7 @@ namespace Mono.Unix
 			}
 			finally
 			{
-				int num = Syscall.closedir(intPtr);
-				UnixMarshal.ThrowExceptionForLastErrorIf(num);
+				UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.closedir(intPtr));
 			}
 			return entries;
 		}
@@ -250,8 +247,7 @@ namespace Mono.Unix
 
 		public static void SetCurrentDirectory(string path)
 		{
-			int num = Syscall.chdir(path);
-			UnixMarshal.ThrowExceptionForLastErrorIf(num);
+			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.chdir(path));
 		}
 	}
 }

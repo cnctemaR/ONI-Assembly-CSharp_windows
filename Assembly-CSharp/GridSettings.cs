@@ -54,9 +54,42 @@ public class GridSettings : KMonoBehaviour
 		}
 		if (Application.isPlaying)
 		{
-			KBatchedAnimUpdater.instance.InitializeGrid();
+			Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
 		}
 		Grid.OnReveal = null;
+	}
+
+	public static void ClearGrid()
+	{
+		Grid.WidthInCells = 0;
+		Grid.HeightInCells = 0;
+		Grid.CellCount = 0;
+		Grid.WidthInMeters = 0f;
+		Grid.HeightInMeters = 0f;
+		Grid.CellSizeInMeters = 0f;
+		Grid.HalfCellSizeInMeters = 0f;
+		Grid.Element = null;
+		Grid.Revealed = null;
+		Grid.Reserved = null;
+		Grid.Visible = null;
+		Grid.Spawnable = null;
+		Grid.BitFields = null;
+		Grid.LightCount = null;
+		Grid.Damage = null;
+		Grid.HasDoor = null;
+		Grid.HasAccessDoor = null;
+		Grid.HasLadder = null;
+		Grid.HasPole = null;
+		Grid.HasTube = null;
+		Grid.HasTubeEntrance = null;
+		Grid.Decor = null;
+		Grid.Loudness = null;
+		Grid.PreventFogOfWarReveal = null;
+		Grid.IsTileUnderConstruction = null;
+		Grid.PreventIdlingOnCell = null;
+		Grid.AllowPathfinding = null;
+		Grid.GravitasFacility = null;
+		Grid.ObjectLayers = null;
 	}
 
 	public int GridWidthInCells;

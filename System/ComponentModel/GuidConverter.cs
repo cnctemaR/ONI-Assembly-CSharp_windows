@@ -2,9 +2,11 @@
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
+using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class GuidConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -14,39 +16,30 @@ namespace System.ComponentModel
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return destinationType == typeof(string) || destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor) || base.CanConvertTo(context, destinationType);
+			return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
 		}
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value.GetType() == typeof(string))
+			if (value is string)
 			{
-				string text = (string)value;
-				try
-				{
-					return new Guid(text);
-				}
-				catch
-				{
-					throw new FormatException(text + "is not a valid GUID.");
-				}
+				return new Guid(((string)value).Trim());
 			}
 			return base.ConvertFrom(context, culture, value);
 		}
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (value is Guid)
+			if (destinationType == null)
 			{
-				Guid guid = (Guid)value;
-				if (destinationType == typeof(string) && value != null)
+				throw new ArgumentNullException("destinationType");
+			}
+			if (destinationType == typeof(InstanceDescriptor) && value is Guid)
+			{
+				ConstructorInfo constructor = typeof(Guid).GetConstructor(new Type[] { typeof(string) });
+				if (constructor != null)
 				{
-					return guid.ToString("D");
-				}
-				if (destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor))
-				{
-					ConstructorInfo constructor = typeof(Guid).GetConstructor(new Type[] { typeof(string) });
-					return new global::System.ComponentModel.Design.Serialization.InstanceDescriptor(constructor, new object[] { guid.ToString("D") });
+					return new InstanceDescriptor(constructor, new object[] { value.ToString() });
 				}
 			}
 			return base.ConvertTo(context, culture, value, destinationType);

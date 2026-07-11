@@ -1,29 +1,25 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
+	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
+	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class DesignerTransactionCloseEventArgs : EventArgs
 	{
+		[Obsolete("This constructor is obsolete. Use DesignerTransactionCloseEventArgs(bool, bool) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+		public DesignerTransactionCloseEventArgs(bool commit)
+			: this(commit, true)
+		{
+		}
+
 		public DesignerTransactionCloseEventArgs(bool commit, bool lastTransaction)
 		{
 			this.commit = commit;
-			this.last_transaction = lastTransaction;
-		}
-
-		[Obsolete("Use another constructor that indicates lastTransaction")]
-		public DesignerTransactionCloseEventArgs(bool commit)
-		{
-			this.commit = commit;
-		}
-
-		public bool LastTransaction
-		{
-			get
-			{
-				return this.last_transaction;
-			}
+			this.lastTransaction = lastTransaction;
 		}
 
 		public bool TransactionCommitted
@@ -34,8 +30,16 @@ namespace System.ComponentModel.Design
 			}
 		}
 
+		public bool LastTransaction
+		{
+			get
+			{
+				return this.lastTransaction;
+			}
+		}
+
 		private bool commit;
 
-		private bool last_transaction;
+		private bool lastTransaction;
 	}
 }

@@ -2,13 +2,8 @@
 
 namespace UnityEngine.VR
 {
-	public enum VRNode
+	internal enum VRNode
 	{
-		LeftEye,
-		RightEye,
-		CenterEye,
-		Head,
-		LeftHand,
-		RightHand
+
 	}
 }

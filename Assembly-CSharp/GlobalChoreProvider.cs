@@ -86,7 +86,7 @@ public class GlobalChoreProvider : ChoreProvider
 
 	public List<FetchChore> fetchChores = new List<FetchChore>();
 
-	private static GlobalChoreProvider.FetchComparer Comparer = new GlobalChoreProvider.FetchComparer();
+	private static readonly GlobalChoreProvider.FetchComparer Comparer = new GlobalChoreProvider.FetchComparer();
 
 	public struct Fetch
 	{

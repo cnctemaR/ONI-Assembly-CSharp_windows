@@ -8,21 +8,48 @@ namespace System.Xml.Serialization
 	{
 		public ImportContext(CodeIdentifiers identifiers, bool shareTypes)
 		{
-			this._typeIdentifiers = identifiers;
-			this._shareTypes = shareTypes;
-			if (shareTypes)
-			{
-				this.MappedTypes = new Hashtable();
-				this.DataMappedTypes = new Hashtable();
-				this.SharedAnonymousTypes = new Hashtable();
-			}
+			this.typeIdentifiers = identifiers;
+			this.shareTypes = shareTypes;
 		}
 
-		public bool ShareTypes
+		internal ImportContext()
+			: this(null, false)
+		{
+		}
+
+		internal SchemaObjectCache Cache
 		{
 			get
 			{
-				return this._shareTypes;
+				if (this.cache == null)
+				{
+					this.cache = new SchemaObjectCache();
+				}
+				return this.cache;
+			}
+		}
+
+		internal Hashtable Elements
+		{
+			get
+			{
+				if (this.elements == null)
+				{
+					this.elements = new Hashtable();
+				}
+				return this.elements;
+			}
+		}
+
+		internal Hashtable Mappings
+		{
+			get
+			{
+				if (this.mappings == null)
+				{
+					this.mappings = new Hashtable();
+				}
+				return this.mappings;
 			}
 		}
 
@@ -30,7 +57,19 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this._typeIdentifiers;
+				if (this.typeIdentifiers == null)
+				{
+					this.typeIdentifiers = new CodeIdentifiers();
+				}
+				return this.typeIdentifiers;
+			}
+		}
+
+		public bool ShareTypes
+		{
+			get
+			{
+				return this.shareTypes;
 			}
 		}
 
@@ -38,20 +77,18 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this._warnings;
+				return this.Cache.Warnings;
 			}
 		}
 
-		private bool _shareTypes;
+		private bool shareTypes;
 
-		private CodeIdentifiers _typeIdentifiers;
+		private SchemaObjectCache cache;
 
-		private StringCollection _warnings = new StringCollection();
+		private Hashtable mappings;
 
-		internal Hashtable MappedTypes;
+		private Hashtable elements;
 
-		internal Hashtable DataMappedTypes;
-
-		internal Hashtable SharedAnonymousTypes;
+		private CodeIdentifiers typeIdentifiers;
 	}
 }

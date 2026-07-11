@@ -10,22 +10,23 @@ public class MinionVitalsPanel : KMonoBehaviour
 {
 	public void Init()
 	{
-		this.AddLine(Db.Get().Amounts.HitPoints, this.icon_hitpoints, null);
-		this.AddLine(Db.Get().Amounts.Happiness, this.icon_happiness, null);
-		this.AddLine(Db.Get().Amounts.Wildness, this.icon_wildness, null);
-		this.AddLine(Db.Get().Amounts.Incubation, this.icon_incubation, null);
-		this.AddLine(Db.Get().Amounts.Viability, this.icon_hitpoints, null);
-		this.AddLine(Db.Get().Amounts.Fertility, this.icon_reproduction, null);
-		this.AddLine(Db.Get().Amounts.Age, this.icon_age, null);
-		this.AddLine(Db.Get().Amounts.Stress, this.icon_stress, null);
-		this.AddLine(Db.Get().Amounts.Bladder, this.icon_bladder, null);
-		this.AddLine(Db.Get().Amounts.Breath, this.icon_breath, null);
-		this.AddLine(Db.Get().Amounts.Stamina, this.icon_stamina, null);
-		this.AddLine(Db.Get().Amounts.Calories, this.icon_calories, null);
-		this.AddLine(Db.Get().Amounts.ImmuneLevel, this.icon_disease, null);
-		this.AddLine(Db.Get().Amounts.ScaleGrowth, this.icon_scale_growth, null);
-		this.AddLine(Db.Get().Amounts.Temperature, this.icon_temperature, null);
-		this.AddLine(Db.Get().Amounts.Decor, this.icon_decor, (AmountInstance ainstance) => this.GetDecorTooltip(ainstance));
+		this.AddAmountLine(Db.Get().Amounts.HitPoints, this.icon_hitpoints, null);
+		this.AddAttributeLine(Db.Get().CritterAttributes.Happiness, this.icon_happiness, null);
+		this.AddAmountLine(Db.Get().Amounts.Wildness, this.icon_wildness, null);
+		this.AddAmountLine(Db.Get().Amounts.Incubation, this.icon_incubation, null);
+		this.AddAmountLine(Db.Get().Amounts.Viability, this.icon_hitpoints, null);
+		this.AddAmountLine(Db.Get().Amounts.Fertility, this.icon_reproduction, null);
+		this.AddAmountLine(Db.Get().Amounts.Age, this.icon_age, null);
+		this.AddAmountLine(Db.Get().Amounts.Stress, this.icon_stress, null);
+		this.AddAmountLine(Db.Get().Amounts.Bladder, this.icon_bladder, null);
+		this.AddAmountLine(Db.Get().Amounts.Breath, this.icon_breath, null);
+		this.AddAmountLine(Db.Get().Amounts.Stamina, this.icon_stamina, null);
+		this.AddAmountLine(Db.Get().Amounts.Calories, this.icon_calories, null);
+		this.AddAmountLine(Db.Get().Amounts.ImmuneLevel, this.icon_disease, null);
+		this.AddAttributeLine(Db.Get().Attributes.QualityOfLife, this.icon_qualityoflife, null);
+		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, this.icon_scale_growth, null);
+		this.AddAmountLine(Db.Get().Amounts.Temperature, this.icon_temperature, null);
+		this.AddAmountLine(Db.Get().Amounts.Decor, this.icon_decor, null);
 		this.AddCheckboxLine(Db.Get().Amounts.AirPressure, this.conditionsContainerNormal, (GameObject go) => this.GetAirPressureLabel(go), delegate(GameObject go)
 		{
 			if (go.GetComponent<PressureVulnerable>() != null && go.GetComponent<PressureVulnerable>().pressure_sensitive)
@@ -82,34 +83,36 @@ public class MinionVitalsPanel : KMonoBehaviour
 		SimAndRenderScheduler.instance.Remove(this);
 	}
 
-	private string GetDecorTooltip(AmountInstance amount_instance)
-	{
-		string tooltip = amount_instance.amount.GetTooltip(amount_instance);
-		AttributeInstance attributeInstance = Db.Get().Attributes.DecorExpectation.Lookup(amount_instance.gameObject);
-		string text = tooltip;
-		return string.Concat(new object[]
-		{
-			text,
-			"\n\n",
-			attributeInstance.Name,
-			": ",
-			attributeInstance.GetTotalValue()
-		});
-	}
-
-	private void AddLine(Amount amount, Sprite icon, Func<AmountInstance, string> tooltip_func = null)
+	private void AddAmountLine(Amount amount, Sprite icon, Func<AmountInstance, string> tooltip_func = null)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, base.gameObject, false);
 		gameObject.GetComponentInChildren<Image>().sprite = icon;
 		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
-		MinionVitalsPanel.VitalLine vitalLine = default(MinionVitalsPanel.VitalLine);
-		vitalLine.amount = amount;
-		vitalLine.go = gameObject;
-		vitalLine.locText = gameObject.GetComponentInChildren<LocText>();
-		vitalLine.imageToggle = gameObject.GetComponentInChildren<ValueTrendImageToggle>();
-		vitalLine.tooltip = ((tooltip_func == null) ? new Func<AmountInstance, string>(amount.GetTooltip) : tooltip_func);
-		this.vitalsLines.Add(vitalLine);
+		MinionVitalsPanel.AmountLine amountLine = default(MinionVitalsPanel.AmountLine);
+		amountLine.amount = amount;
+		amountLine.go = gameObject;
+		amountLine.locText = gameObject.GetComponentInChildren<LocText>();
+		amountLine.toolTip = gameObject.GetComponentInChildren<ToolTip>();
+		amountLine.imageToggle = gameObject.GetComponentInChildren<ValueTrendImageToggle>();
+		amountLine.toolTipFunc = ((tooltip_func == null) ? new Func<AmountInstance, string>(amount.GetTooltip) : tooltip_func);
+		this.amountsLines.Add(amountLine);
+	}
+
+	private void AddAttributeLine(Klei.AI.Attribute attribute, Sprite icon, Func<AttributeInstance, string> tooltip_func = null)
+	{
+		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, base.gameObject, false);
+		gameObject.GetComponentInChildren<Image>().sprite = icon;
+		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
+		gameObject.SetActive(true);
+		MinionVitalsPanel.AttributeLine attributeLine = default(MinionVitalsPanel.AttributeLine);
+		attributeLine.attribute = attribute;
+		attributeLine.go = gameObject;
+		attributeLine.locText = gameObject.GetComponentInChildren<LocText>();
+		attributeLine.toolTip = gameObject.GetComponentInChildren<ToolTip>();
+		gameObject.GetComponentInChildren<ValueTrendImageToggle>().gameObject.SetActive(false);
+		attributeLine.toolTipFunc = ((tooltip_func == null) ? new Func<AttributeInstance, string>(attribute.GetTooltip) : tooltip_func);
+		this.attributesLines.Add(attributeLine);
 	}
 
 	private void AddCheckboxLine(Amount amount, Transform parentContainer, Func<GameObject, string> label_text_func, Func<GameObject, MinionVitalsPanel.CheckboxLineDisplayType> display_condition, Func<GameObject, bool> checkbox_value_func, Func<GameObject, string> tooltip_func = null)
@@ -163,7 +166,8 @@ public class MinionVitalsPanel : KMonoBehaviour
 			return;
 		}
 		Amounts amounts = this.selectedEntity.GetAmounts();
-		if (amounts == null)
+		Attributes attributes = this.selectedEntity.GetAttributes();
+		if (amounts == null || attributes == null)
 		{
 			return;
 		}
@@ -172,42 +176,34 @@ public class MinionVitalsPanel : KMonoBehaviour
 		{
 			this.conditionsContainerNormal.gameObject.SetActive(false);
 			this.conditionsContainerAdditional.gameObject.SetActive(false);
-			for (int i = 0; i < this.vitalsLines.Count; i++)
+			foreach (MinionVitalsPanel.AmountLine amountLine in this.amountsLines)
 			{
-				MinionVitalsPanel.VitalLine vitalLine = this.vitalsLines[i];
-				bool flag = false;
-				for (int j = 0; j < amounts.Count; j++)
+				bool flag = amountLine.TryUpdate(amounts);
+				if (amountLine.go.activeSelf != flag)
 				{
-					AmountInstance amountInstance = amounts[j];
-					if (vitalLine.amount == amountInstance.amount && !amountInstance.hide)
-					{
-						vitalLine.locText.SetText(vitalLine.amount.GetDescription(amountInstance));
-						vitalLine.imageToggle.SetValue(amountInstance, vitalLine.tooltip);
-						flag = true;
-						if (!vitalLine.go.activeSelf)
-						{
-							vitalLine.go.SetActive(true);
-						}
-						break;
-					}
+					amountLine.go.SetActive(flag);
 				}
-				if (!flag && vitalLine.go.activeSelf)
+			}
+			foreach (MinionVitalsPanel.AttributeLine attributeLine in this.attributesLines)
+			{
+				bool flag2 = attributeLine.TryUpdate(attributes);
+				if (attributeLine.go.activeSelf != flag2)
 				{
-					vitalLine.go.SetActive(false);
+					attributeLine.go.SetActive(flag2);
 				}
 			}
 		}
-		bool flag2 = false;
-		for (int k = 0; k < this.checkboxLines.Count; k++)
+		bool flag3 = false;
+		for (int i = 0; i < this.checkboxLines.Count; i++)
 		{
-			MinionVitalsPanel.CheckboxLine checkboxLine = this.checkboxLines[k];
+			MinionVitalsPanel.CheckboxLine checkboxLine = this.checkboxLines[i];
 			MinionVitalsPanel.CheckboxLineDisplayType checkboxLineDisplayType = MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
-			if (this.checkboxLines[k].amount != null)
+			if (this.checkboxLines[i].amount != null)
 			{
-				for (int l = 0; l < amounts.Count; l++)
+				for (int j = 0; j < amounts.Count; j++)
 				{
-					AmountInstance amountInstance2 = amounts[l];
-					if (checkboxLine.amount == amountInstance2.amount)
+					AmountInstance amountInstance = amounts[j];
+					if (checkboxLine.amount == amountInstance.amount)
 					{
 						checkboxLineDisplayType = checkboxLine.display_condition(this.selectedEntity.gameObject);
 						break;
@@ -234,7 +230,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 				}
 				if (checkboxLine.parentContainer == this.conditionsContainerAdditional)
 				{
-					flag2 = true;
+					flag3 = true;
 				}
 				if (checkboxLineDisplayType == MinionVitalsPanel.CheckboxLineDisplayType.Normal)
 				{
@@ -280,12 +276,16 @@ public class MinionVitalsPanel : KMonoBehaviour
 				locText = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
 				locText.color = ((!this.selectedEntity.GetComponent<Growing>().Replanted) ? Color.grey : Color.black);
 				locText.text = string.Empty;
-				locText.text = ((!flag2) ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
+				locText.text = ((!flag3) ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.BASE, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
 				locText.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC.TOOLTIP, GameUtil.GetFormattedCycles(component.GetComponent<Growing>().DomesticGrowthTime(), "F1")));
 			}
-			foreach (MinionVitalsPanel.VitalLine vitalLine2 in this.vitalsLines)
+			foreach (MinionVitalsPanel.AmountLine amountLine2 in this.amountsLines)
 			{
-				vitalLine2.go.SetActive(false);
+				amountLine2.go.SetActive(false);
+			}
+			foreach (MinionVitalsPanel.AttributeLine attributeLine2 in this.attributesLines)
+			{
+				attributeLine2.go.SetActive(false);
 			}
 		}
 	}
@@ -505,6 +505,8 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	public Sprite icon_disease;
 
+	public Sprite icon_qualityoflife;
+
 	public Sprite icon_age;
 
 	public Sprite icon_happiness;
@@ -523,7 +525,9 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	public GameObject selectedEntity;
 
-	public List<MinionVitalsPanel.VitalLine> vitalsLines = new List<MinionVitalsPanel.VitalLine>();
+	public List<MinionVitalsPanel.AmountLine> amountsLines = new List<MinionVitalsPanel.AmountLine>();
+
+	public List<MinionVitalsPanel.AttributeLine> attributesLines = new List<MinionVitalsPanel.AttributeLine>();
 
 	public List<MinionVitalsPanel.CheckboxLine> checkboxLines = new List<MinionVitalsPanel.CheckboxLine>();
 
@@ -532,8 +536,23 @@ public class MinionVitalsPanel : KMonoBehaviour
 	public Transform conditionsContainerAdditional;
 
 	[DebuggerDisplay("{amount.Name}")]
-	public struct VitalLine
+	public struct AmountLine
 	{
+		public bool TryUpdate(Amounts amounts)
+		{
+			foreach (AmountInstance amountInstance in amounts)
+			{
+				if (this.amount == amountInstance.amount && !amountInstance.hide)
+				{
+					this.locText.SetText(this.amount.GetDescription(amountInstance));
+					this.toolTip.toolTip = this.toolTipFunc(amountInstance);
+					this.imageToggle.SetValue(amountInstance);
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public Amount amount;
 
 		public GameObject go;
@@ -542,7 +561,37 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 		public LocText locText;
 
-		public Func<AmountInstance, string> tooltip;
+		public ToolTip toolTip;
+
+		public Func<AmountInstance, string> toolTipFunc;
+	}
+
+	[DebuggerDisplay("{attribute.Name}")]
+	public struct AttributeLine
+	{
+		public bool TryUpdate(Attributes attributes)
+		{
+			foreach (AttributeInstance attributeInstance in attributes)
+			{
+				if (this.attribute == attributeInstance.modifier && !attributeInstance.hide)
+				{
+					this.locText.SetText(this.attribute.GetDescription(attributeInstance));
+					this.toolTip.toolTip = this.toolTipFunc(attributeInstance);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public Klei.AI.Attribute attribute;
+
+		public GameObject go;
+
+		public LocText locText;
+
+		public ToolTip toolTip;
+
+		public Func<AttributeInstance, string> toolTipFunc;
 	}
 
 	public struct CheckboxLine

@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class Infrared : MonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		Infrared.Instance = null;
+	}
+
 	private void Awake()
 	{
 		Infrared.temperatureParametersId = Shader.PropertyToID("_TemperatureParameters");

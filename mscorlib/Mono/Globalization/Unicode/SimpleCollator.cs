@@ -34,9 +34,9 @@ namespace Mono.Globalization.Unicode
 				{
 					foreach (char c in contraction.Source)
 					{
-						byte[] array2 = this.unsafeFlags;
+						byte[] array3 = this.unsafeFlags;
 						char c2 = c / '\b';
-						array2[(int)c2] = array2[(int)c2] | (byte)(1 << (int)(c & '\a'));
+						array3[(int)c2] = array3[(int)c2] | (byte)(1 << (int)(c & '\a'));
 					}
 				}
 			}
@@ -59,8 +59,7 @@ namespace Mono.Globalization.Unicode
 
 		private unsafe void SetCJKTable(CultureInfo culture, ref CodePointIndexer cjkIndexer, ref byte* catTable, ref byte* lv1Table, ref CodePointIndexer lv2Indexer, ref byte* lv2Table)
 		{
-			string name = SimpleCollator.GetNeutralCulture(culture).Name;
-			MSCompatUnicodeTable.FillCJK(name, ref cjkIndexer, ref catTable, ref lv1Table, ref lv2Indexer, ref lv2Table);
+			MSCompatUnicodeTable.FillCJK(SimpleCollator.GetNeutralCulture(culture).Name, ref cjkIndexer, ref catTable, ref lv1Table, ref lv2Indexer, ref lv2Table);
 		}
 
 		private static CultureInfo GetNeutralCulture(CultureInfo info)
@@ -80,7 +79,11 @@ namespace Mono.Globalization.Unicode
 				return MSCompatUnicodeTable.Category(cp);
 			}
 			int num = this.cjkIndexer.ToIndex(cp);
-			return (num >= 0) ? this.cjkCatTable[num] : MSCompatUnicodeTable.Category(cp);
+			if (num >= 0)
+			{
+				return this.cjkCatTable[num];
+			}
+			return MSCompatUnicodeTable.Category(cp);
 		}
 
 		private unsafe byte Level1(int cp)
@@ -90,7 +93,11 @@ namespace Mono.Globalization.Unicode
 				return MSCompatUnicodeTable.Level1(cp);
 			}
 			int num = this.cjkIndexer.ToIndex(cp);
-			return (num >= 0) ? this.cjkLv1Table[num] : MSCompatUnicodeTable.Level1(cp);
+			if (num >= 0)
+			{
+				return this.cjkLv1Table[num];
+			}
+			return MSCompatUnicodeTable.Level1(cp);
 		}
 
 		private unsafe byte Level2(int cp, SimpleCollator.ExtenderType ext)
@@ -108,7 +115,7 @@ namespace Mono.Globalization.Unicode
 				return MSCompatUnicodeTable.Level2(cp);
 			}
 			int num = this.cjkLv2Indexer.ToIndex(cp);
-			byte b = ((num >= 0) ? this.cjkLv2Table[num] : 0);
+			byte b = ((num < 0) ? 0 : this.cjkLv2Table[num]);
 			if (b != 0)
 			{
 				return b;
@@ -199,27 +206,24 @@ namespace Mono.Globalization.Unicode
 			foreach (Contraction contraction in clist)
 			{
 				char[] source = contraction.Source;
-				if (source.Length <= start - end)
+				if (source.Length <= start - end && source[source.Length - 1] == s[start])
 				{
-					if (source[source.Length - 1] == s[start])
+					bool flag = true;
+					int j = 0;
+					int num = start - source.Length + 1;
+					while (j < source.Length)
 					{
-						bool flag = true;
-						int j = 0;
-						int num = start - source.Length + 1;
-						while (j < source.Length)
+						if (s[num] != source[j])
 						{
-							if (s[num] != source[j])
-							{
-								flag = false;
-								break;
-							}
-							j++;
-							num++;
+							flag = false;
+							break;
 						}
-						if (flag)
-						{
-							return contraction;
-						}
+						j++;
+						num++;
+					}
+					if (flag)
+					{
+						return contraction;
 					}
 				}
 			}
@@ -281,55 +285,68 @@ namespace Mono.Globalization.Unicode
 		{
 			if (i == 8213)
 			{
-				return (this.lcid != 16) ? SimpleCollator.ExtenderType.None : SimpleCollator.ExtenderType.Conditional;
-			}
-			if (i < 12293 || i > 65392)
-			{
-				return SimpleCollator.ExtenderType.None;
-			}
-			if (i >= 65148)
-			{
-				if (i == 65148 || i == 65149)
+				if (this.lcid != 16)
 				{
-					return SimpleCollator.ExtenderType.Simple;
+					return SimpleCollator.ExtenderType.None;
 				}
-				if (i == 65438 || i == 65439)
-				{
-					return SimpleCollator.ExtenderType.Voiced;
-				}
-				if (i == 65392)
-				{
-					return SimpleCollator.ExtenderType.Conditional;
-				}
-			}
-			if (i > 12542)
-			{
-				return SimpleCollator.ExtenderType.None;
-			}
-			switch (i)
-			{
-			case 12540:
 				return SimpleCollator.ExtenderType.Conditional;
-			case 12541:
-				break;
-			case 12542:
-				return SimpleCollator.ExtenderType.Voiced;
-			default:
-				if (i != 12337 && i != 12338 && i != 12445)
+			}
+			else
+			{
+				if (i < 12293 || i > 65392)
 				{
-					if (i == 12446)
+					return SimpleCollator.ExtenderType.None;
+				}
+				if (i >= 65148)
+				{
+					if (i - 65148 <= 1)
+					{
+						return SimpleCollator.ExtenderType.Simple;
+					}
+					if (i == 65392)
+					{
+						return SimpleCollator.ExtenderType.Conditional;
+					}
+					if (i - 65438 <= 1)
 					{
 						return SimpleCollator.ExtenderType.Voiced;
 					}
-					if (i != 12293)
+				}
+				if (i > 12542)
+				{
+					return SimpleCollator.ExtenderType.None;
+				}
+				if (i <= 12338)
+				{
+					if (i == 12293)
+					{
+						return SimpleCollator.ExtenderType.Buggy;
+					}
+					if (i - 12337 > 1)
 					{
 						return SimpleCollator.ExtenderType.None;
 					}
-					return SimpleCollator.ExtenderType.Buggy;
 				}
-				break;
+				else if (i != 12445)
+				{
+					if (i != 12446)
+					{
+						switch (i)
+						{
+						case 12540:
+							return SimpleCollator.ExtenderType.Conditional;
+						case 12541:
+							return SimpleCollator.ExtenderType.Simple;
+						case 12542:
+							break;
+						default:
+							return SimpleCollator.ExtenderType.None;
+						}
+					}
+					return SimpleCollator.ExtenderType.Voiced;
+				}
+				return SimpleCollator.ExtenderType.Simple;
 			}
-			return SimpleCollator.ExtenderType.Simple;
 		}
 
 		private static byte ToDashTypeValue(SimpleCollator.ExtenderType ext, CompareOptions opt)
@@ -338,14 +355,15 @@ namespace Mono.Globalization.Unicode
 			{
 				return 3;
 			}
-			switch (ext)
+			if (ext == SimpleCollator.ExtenderType.None)
 			{
-			case SimpleCollator.ExtenderType.None:
 				return 3;
-			case SimpleCollator.ExtenderType.Conditional:
-				return 5;
 			}
-			return 4;
+			if (ext != SimpleCollator.ExtenderType.Conditional)
+			{
+				return 4;
+			}
+			return 5;
 		}
 
 		private int FilterExtender(int i, SimpleCollator.ExtenderType ext, CompareOptions opt)
@@ -357,15 +375,55 @@ namespace Mono.Globalization.Unicode
 				switch (this.Level1(i) & 7)
 				{
 				case 2:
-					return (!flag) ? ((!flag2) ? 12354 : 12450) : 65393;
+					if (flag)
+					{
+						return 65393;
+					}
+					if (!flag2)
+					{
+						return 12354;
+					}
+					return 12450;
 				case 3:
-					return (!flag) ? ((!flag2) ? 12356 : 12452) : 65394;
+					if (flag)
+					{
+						return 65394;
+					}
+					if (!flag2)
+					{
+						return 12356;
+					}
+					return 12452;
 				case 4:
-					return (!flag) ? ((!flag2) ? 12358 : 12454) : 65395;
+					if (flag)
+					{
+						return 65395;
+					}
+					if (!flag2)
+					{
+						return 12358;
+					}
+					return 12454;
 				case 5:
-					return (!flag) ? ((!flag2) ? 12360 : 12456) : 65396;
+					if (flag)
+					{
+						return 65396;
+					}
+					if (!flag2)
+					{
+						return 12360;
+					}
+					return 12456;
 				case 6:
-					return (!flag) ? ((!flag2) ? 12362 : 12458) : 65397;
+					if (flag)
+					{
+						return 65397;
+					}
+					if (!flag2)
+					{
+						return 12362;
+					}
+					return 12458;
 				}
 			}
 			return i;
@@ -373,7 +431,7 @@ namespace Mono.Globalization.Unicode
 
 		private static bool IsIgnorable(int i, CompareOptions opt)
 		{
-			return MSCompatUnicodeTable.IsIgnorable(i, (byte)(1 + (((opt & CompareOptions.IgnoreSymbols) == CompareOptions.None) ? 0 : 2) + (((opt & CompareOptions.IgnoreNonSpace) == CompareOptions.None) ? 0 : 4)));
+			return MSCompatUnicodeTable.IsIgnorable(i, (byte)((((opt & (CompareOptions.OrdinalIgnoreCase | CompareOptions.Ordinal)) == CompareOptions.None) ? 1 : 0) + (((opt & CompareOptions.IgnoreSymbols) != CompareOptions.None) ? 2 : 0) + (((opt & CompareOptions.IgnoreNonSpace) != CompareOptions.None) ? 4 : 0)));
 		}
 
 		private bool IsSafe(int i)
@@ -402,9 +460,9 @@ namespace Mono.Globalization.Unicode
 
 		private unsafe void GetSortKey(string s, int start, int end, SortKeyBuffer buf, CompareOptions opt)
 		{
-			byte* ptr = stackalloc byte[checked(4 * 1)];
+			byte* ptr = stackalloc byte[(UIntPtr)4];
 			this.ClearBuffer(ptr, 4);
-			SimpleCollator.Context context = new SimpleCollator.Context(opt, null, null, null, null, ptr, false);
+			SimpleCollator.Context context = new SimpleCollator.Context(opt, null, null, null, null, ptr);
 			for (int i = start; i < end; i++)
 			{
 				int num = (int)s[i];
@@ -419,7 +477,7 @@ namespace Mono.Globalization.Unicode
 					else if (context.PrevSortKey != null)
 					{
 						byte* prevSortKey = context.PrevSortKey;
-						buf.AppendNormal(*prevSortKey, prevSortKey[1], (prevSortKey[2] == 1) ? this.Level2(num, extenderType) : prevSortKey[2], (prevSortKey[3] == 1) ? MSCompatUnicodeTable.Level3(num) : prevSortKey[3]);
+						buf.AppendNormal(*prevSortKey, prevSortKey[1], (prevSortKey[2] != 1) ? prevSortKey[2] : this.Level2(num, extenderType), (prevSortKey[3] != 1) ? prevSortKey[3] : MSCompatUnicodeTable.Level3(num));
 					}
 				}
 				else if (!SimpleCollator.IsIgnorable(num, opt))
@@ -439,7 +497,7 @@ namespace Mono.Globalization.Unicode
 							{
 								prevSortKey2[j] = contraction.SortKey[j];
 							}
-							buf.AppendNormal(*prevSortKey2, prevSortKey2[1], (prevSortKey2[2] == 1) ? this.Level2(num, extenderType) : prevSortKey2[2], (prevSortKey2[3] == 1) ? MSCompatUnicodeTable.Level3(num) : prevSortKey2[3]);
+							buf.AppendNormal(*prevSortKey2, prevSortKey2[1], (prevSortKey2[2] != 1) ? prevSortKey2[2] : this.Level2(num, extenderType), (prevSortKey2[3] != 1) ? prevSortKey2[3] : MSCompatUnicodeTable.Level3(num));
 							context.PrevCode = -1;
 						}
 						i += contraction.Source.Length - 1;
@@ -465,32 +523,32 @@ namespace Mono.Globalization.Unicode
 				return;
 			}
 			UnicodeCategory unicodeCategory = char.GetUnicodeCategory((char)i);
-			UnicodeCategory unicodeCategory2 = unicodeCategory;
-			if (unicodeCategory2 == UnicodeCategory.Surrogate)
+			if (unicodeCategory == UnicodeCategory.Surrogate)
 			{
 				this.FillSurrogateSortKeyRaw(i, buf);
 				return;
 			}
-			if (unicodeCategory2 != UnicodeCategory.PrivateUse)
+			if (unicodeCategory == UnicodeCategory.PrivateUse)
 			{
-				byte b = this.Level2(i, ext);
-				if (MSCompatUnicodeTable.HasSpecialWeight((char)i))
-				{
-					byte b2 = this.Level1(i);
-					buf.AppendKana(this.Category(i), b2, b, MSCompatUnicodeTable.Level3(i), MSCompatUnicodeTable.IsJapaneseSmallLetter((char)i), SimpleCollator.ToDashTypeValue(ext, opt), !MSCompatUnicodeTable.IsHiragana((char)i), SimpleCollator.IsHalfKana((int)((ushort)i), opt));
-					if ((opt & CompareOptions.IgnoreNonSpace) == CompareOptions.None && ext == SimpleCollator.ExtenderType.Voiced)
-					{
-						buf.AppendNormal(1, 1, 1, 0);
-					}
-				}
-				else
-				{
-					buf.AppendNormal(this.Category(i), this.Level1(i), b, MSCompatUnicodeTable.Level3(i));
-				}
+				int num2 = i - 57344;
+				buf.AppendNormal((byte)(229 + num2 / 254), (byte)(num2 % 254 + 2), 0, 0);
 				return;
 			}
-			int num2 = i - 57344;
-			buf.AppendNormal((byte)(229 + num2 / 254), (byte)(num2 % 254 + 2), 0, 0);
+			byte b = this.Level2(i, ext);
+			if (MSCompatUnicodeTable.HasSpecialWeight((char)i))
+			{
+				byte b2 = this.Level1(i);
+				buf.AppendKana(this.Category(i), b2, b, MSCompatUnicodeTable.Level3(i), MSCompatUnicodeTable.IsJapaneseSmallLetter((char)i), SimpleCollator.ToDashTypeValue(ext, opt), !MSCompatUnicodeTable.IsHiragana((char)i), SimpleCollator.IsHalfKana((int)((ushort)i), opt));
+				if ((opt & CompareOptions.IgnoreNonSpace) == CompareOptions.None && ext == SimpleCollator.ExtenderType.Voiced)
+				{
+					buf.AppendNormal(1, 1, 1, 0);
+					return;
+				}
+			}
+			else
+			{
+				buf.AppendNormal(this.Category(i), this.Level1(i), b, MSCompatUnicodeTable.Level3(i));
+			}
 		}
 
 		private void FillSurrogateSortKeyRaw(int i, SortKeyBuffer buf)
@@ -502,7 +560,7 @@ namespace Mono.Globalization.Unicode
 			{
 				num = 55296;
 				num2 = 65;
-				b = ((i != 55296) ? 63 : 62);
+				b = ((i == 55296) ? 62 : 63);
 			}
 			else if (55360 <= i && i < 55424)
 			{
@@ -528,136 +586,28 @@ namespace Mono.Globalization.Unicode
 
 		public int Compare(string s1, string s2)
 		{
-			return this.Compare(s1, s2, CompareOptions.None);
+			return this.Compare(s1, 0, s1.Length, s2, 0, s2.Length, CompareOptions.None);
 		}
 
-		public int Compare(string s1, string s2, CompareOptions options)
+		internal unsafe int Compare(string s1, int idx1, int len1, string s2, int idx2, int len2, CompareOptions options)
 		{
-			return this.Compare(s1, 0, s1.Length, s2, 0, s2.Length, options);
-		}
-
-		private int CompareOrdinal(string s1, int idx1, int len1, string s2, int idx2, int len2)
-		{
-			int num = ((len1 >= len2) ? len2 : len1);
-			int num2 = idx1 + num;
-			int num3 = idx2 + num;
-			if (idx1 < 0 || idx2 < 0 || num2 > s1.Length || num3 > s2.Length)
-			{
-				throw new SystemException(string.Format("CompareInfo Internal Error: Should not happen. {0} {1} {2} {3} {4} {5}", new object[] { idx1, idx2, len1, len2, s1.Length, s2.Length }));
-			}
-			int num4 = idx1;
-			int num5 = idx2;
-			while (num4 < num2 && num5 < num3)
-			{
-				if (s1[num4] != s2[num5])
-				{
-					return (int)(s1[num4] - s2[num5]);
-				}
-				num4++;
-				num5++;
-			}
-			return (len1 != len2) ? ((len1 != num) ? 1 : (-1)) : 0;
-		}
-
-		private int CompareQuick(string s1, int idx1, int len1, string s2, int idx2, int len2, out bool sourceConsumed, out bool targetConsumed, bool immediateBreakup)
-		{
-			sourceConsumed = false;
-			targetConsumed = false;
-			int num = ((len1 >= len2) ? len2 : len1);
-			int num2 = idx1 + num;
-			int num3 = idx2 + num;
-			if (idx1 < 0 || idx2 < 0 || num2 > s1.Length || num3 > s2.Length)
-			{
-				throw new SystemException(string.Format("CompareInfo Internal Error: Should not happen. {0} {1} {2} {3} {4} {5}", new object[] { idx1, idx2, len1, len2, s1.Length, s2.Length }));
-			}
-			int num4 = idx1;
-			int num5 = idx2;
-			while (num4 < num2 && num5 < num3)
-			{
-				if (s1[num4] != s2[num5])
-				{
-					if (immediateBreakup)
-					{
-						return -1;
-					}
-					int num6 = (int)(this.Category((int)s1[num4]) - this.Category((int)s2[num5]));
-					if (num6 == 0)
-					{
-						num6 = (int)(this.Level1((int)s1[num4]) - this.Level1((int)s2[num5]));
-					}
-					if (num6 == 0)
-					{
-						num6 = (int)(MSCompatUnicodeTable.Level3((int)s1[num4]) - MSCompatUnicodeTable.Level3((int)s2[num5]));
-					}
-					if (num6 == 0)
-					{
-						throw new SystemException(string.Format("CompareInfo Internal Error: Should not happen. '{0}' {2} {3} '{1}' {4} {5}", new object[] { s1, s2, idx1, num2, idx2, num3 }));
-					}
-					return num6;
-				}
-				else
-				{
-					num4++;
-					num5++;
-				}
-			}
-			sourceConsumed = len1 <= len2;
-			targetConsumed = len1 >= len2;
-			return (len1 != len2) ? ((len1 != num) ? 1 : (-1)) : 0;
-		}
-
-		private int CompareOrdinalIgnoreCase(string s1, int idx1, int len1, string s2, int idx2, int len2)
-		{
-			int num = ((len1 >= len2) ? len2 : len1);
-			int num2 = idx1 + num;
-			int num3 = idx2 + num;
-			if (idx1 < 0 || idx2 < 0 || num2 > s1.Length || num3 > s2.Length)
-			{
-				throw new SystemException(string.Format("CompareInfo Internal Error: Should not happen. {0} {1} {2} {3} {4} {5}", new object[] { idx1, idx2, len1, len2, s1.Length, s2.Length }));
-			}
-			TextInfo textInfo = SimpleCollator.invariant.textInfo;
-			int num4 = idx1;
-			int num5 = idx2;
-			while (num4 < num2 && num5 < num3)
-			{
-				if (textInfo.ToLower(s1[num4]) != textInfo.ToLower(s2[num5]))
-				{
-					return (int)(textInfo.ToLower(s1[num4]) - textInfo.ToLower(s2[num5]));
-				}
-				num4++;
-				num5++;
-			}
-			return (len1 != len2) ? ((len1 != num) ? 1 : (-1)) : 0;
-		}
-
-		public unsafe int Compare(string s1, int idx1, int len1, string s2, int idx2, int len2, CompareOptions options)
-		{
-			if (idx1 == idx2 && len1 == len2 && object.ReferenceEquals(s1, s2))
-			{
-				return 0;
-			}
-			if (options == CompareOptions.Ordinal)
-			{
-				return this.CompareOrdinal(s1, idx1, len1, s2, idx2, len2);
-			}
-			if (options == CompareOptions.OrdinalIgnoreCase)
-			{
-				return this.CompareOrdinalIgnoreCase(s1, idx1, len1, s2, idx2, len2);
-			}
-			byte* ptr;
-			byte* ptr2;
-			checked
-			{
-				ptr = stackalloc byte[4 * 1];
-				ptr2 = stackalloc byte[4 * 1];
-				this.ClearBuffer(ptr, 4);
-				this.ClearBuffer(ptr2, 4);
-			}
-			SimpleCollator.Context context = new SimpleCollator.Context(options, null, null, ptr, ptr2, null, this.QuickCheckPossible(s1, idx1, idx1 + len1, s2, idx2, idx2 + len2));
+			byte* ptr = stackalloc byte[(UIntPtr)4];
+			byte* ptr2 = stackalloc byte[(UIntPtr)4];
+			this.ClearBuffer(ptr, 4);
+			this.ClearBuffer(ptr2, 4);
+			SimpleCollator.Context context = new SimpleCollator.Context(options, null, null, ptr, ptr2, null);
 			bool flag;
 			bool flag2;
 			int num = this.CompareInternal(s1, idx1, len1, s2, idx2, len2, out flag, out flag2, true, false, ref context);
-			return (num != 0) ? ((num >= 0) ? 1 : (-1)) : 0;
+			if (num == 0)
+			{
+				return 0;
+			}
+			if (num >= 0)
+			{
+				return 1;
+			}
+			return -1;
 		}
 
 		private unsafe void ClearBuffer(byte* buffer, int size)
@@ -666,11 +616,6 @@ namespace Mono.Globalization.Unicode
 			{
 				buffer[i] = 0;
 			}
-		}
-
-		private bool QuickCheckPossible(string s1, int idx1, int end1, string s2, int idx2, int end2)
-		{
-			return false;
 		}
 
 		private unsafe int CompareInternal(string s1, int idx1, int len1, string s2, int idx2, int len2, out bool targetConsumed, out bool sourceConsumed, bool skipHeadingExtenders, bool immediateBreakup, ref SimpleCollator.Context ctx)
@@ -683,10 +628,6 @@ namespace Mono.Globalization.Unicode
 			targetConsumed = false;
 			sourceConsumed = false;
 			SimpleCollator.PreviousInfo previousInfo = new SimpleCollator.PreviousInfo(false);
-			if (option == CompareOptions.None && ctx.QuickCheckPossible)
-			{
-				return this.CompareQuick(s1, idx1, len1, s2, idx2, len2, out sourceConsumed, out targetConsumed, immediateBreakup);
-			}
 			int num5 = 0;
 			int num6 = 5;
 			int num7 = -1;
@@ -699,50 +640,46 @@ namespace Mono.Globalization.Unicode
 				{
 					if (this.GetExtenderType((int)s1[idx1]) == SimpleCollator.ExtenderType.None)
 					{
-						break;
+						IL_0071:
+						while (idx2 < num4 && this.GetExtenderType((int)s2[idx2]) != SimpleCollator.ExtenderType.None)
+						{
+							idx2++;
+						}
+						goto IL_0077;
 					}
 					idx1++;
 				}
-				while (idx2 < num4)
-				{
-					if (this.GetExtenderType((int)s2[idx2]) == SimpleCollator.ExtenderType.None)
-					{
-						break;
-					}
-					idx2++;
-				}
+				goto IL_0071;
 			}
+			IL_0077:
 			SimpleCollator.ExtenderType extenderType = SimpleCollator.ExtenderType.None;
 			SimpleCollator.ExtenderType extenderType2 = SimpleCollator.ExtenderType.None;
 			int num11 = idx1;
 			int num12 = idx2;
-			bool flag = (option & CompareOptions.StringSort) != CompareOptions.None;
-			bool flag2 = (option & CompareOptions.IgnoreNonSpace) != CompareOptions.None;
+			bool flag = (option & CompareOptions.StringSort) > CompareOptions.None;
+			bool flag2 = (option & CompareOptions.IgnoreNonSpace) > CompareOptions.None;
 			SimpleCollator.Escape escape = default(SimpleCollator.Escape);
 			SimpleCollator.Escape escape2 = default(SimpleCollator.Escape);
+			int num20;
 			for (;;)
 			{
-				while (idx1 < num3)
+				if (idx1 < num3)
 				{
-					if (!SimpleCollator.IsIgnorable((int)s1[idx1], option))
+					if (SimpleCollator.IsIgnorable((int)s1[idx1], option))
 					{
-						break;
+						idx1++;
+						continue;
 					}
-					idx1++;
 				}
-				while (idx2 < num4)
+				while (idx2 < num4 && SimpleCollator.IsIgnorable((int)s2[idx2], option))
 				{
-					if (!SimpleCollator.IsIgnorable((int)s2[idx2], option))
-					{
-						break;
-					}
 					idx2++;
 				}
 				if (idx1 >= num3)
 				{
 					if (escape.Source == null)
 					{
-						break;
+						goto IL_0882;
 					}
 					s1 = escape.Source;
 					num = escape.Start;
@@ -755,7 +692,7 @@ namespace Mono.Globalization.Unicode
 				{
 					if (escape2.Source == null)
 					{
-						break;
+						goto IL_0882;
 					}
 					s2 = escape2.Source;
 					num2 = escape2.Start;
@@ -773,49 +710,50 @@ namespace Mono.Globalization.Unicode
 							idx1++;
 							idx2++;
 						}
-						if (idx1 == num3 || idx2 == num4)
+						if (idx1 != num3 && idx2 != num4)
 						{
-							continue;
-						}
-						int num13 = num11;
-						int num14 = num12;
-						num11 = idx1;
-						num12 = idx2;
-						idx1--;
-						idx2--;
-						while (idx1 > num13)
-						{
-							if (this.Category((int)s1[idx1]) != 1)
-							{
-								break;
-							}
+							int num13 = num11;
+							int num14 = num12;
+							num11 = idx1;
+							num12 = idx2;
 							idx1--;
-						}
-						while (idx2 > num14)
-						{
-							if (this.Category((int)s2[idx2]) != 1)
-							{
-								break;
-							}
 							idx2--;
-						}
-						while (idx1 > num13)
-						{
-							if (this.IsSafe((int)s1[idx1]))
+							while (idx1 > num13)
 							{
-								break;
+								if (this.Category((int)s1[idx1]) != 1)
+								{
+									IL_020B:
+									while (idx2 > num14)
+									{
+										if (this.Category((int)s2[idx2]) != 1)
+										{
+											IL_0227:
+											while (idx1 > num13)
+											{
+												if (this.IsSafe((int)s1[idx1]))
+												{
+													IL_0245:
+													while (idx2 > num14 && !this.IsSafe((int)s2[idx2]))
+													{
+														idx2--;
+													}
+													goto IL_024B;
+												}
+												idx1--;
+											}
+											goto IL_0245;
+										}
+										idx2--;
+									}
+									goto IL_0227;
+								}
+								idx1--;
 							}
-							idx1--;
+							goto IL_020B;
 						}
-						while (idx2 > num14)
-						{
-							if (this.IsSafe((int)s2[idx2]))
-							{
-								break;
-							}
-							idx2--;
-						}
+						continue;
 					}
+					IL_024B:
 					int num15 = idx1;
 					int num16 = idx2;
 					byte* ptr = null;
@@ -864,7 +802,7 @@ namespace Mono.Globalization.Unicode
 					{
 						if (!flag && num6 == 5)
 						{
-							num7 = ((escape.Source == null) ? (num15 - num) : (escape.Index - escape.Start));
+							num7 = ((escape.Source != null) ? (escape.Index - escape.Start) : (num15 - num));
 							num9 = (int)this.Level1(num17) << (int)(8 + MSCompatUnicodeTable.Level3(num17));
 						}
 						ctx.PrevCode = num17;
@@ -874,7 +812,7 @@ namespace Mono.Globalization.Unicode
 					{
 						if (!flag && num6 == 5)
 						{
-							num8 = ((escape2.Source == null) ? (num16 - num2) : (escape2.Index - escape2.Start));
+							num8 = ((escape2.Source != null) ? (escape2.Index - escape2.Start) : (num16 - num2));
 							num10 = (int)this.Level1(num18) << (int)(8 + MSCompatUnicodeTable.Level3(num18));
 						}
 						previousInfo.Code = num18;
@@ -1024,7 +962,17 @@ namespace Mono.Globalization.Unicode
 							{
 								if (this.Category((int)s1[idx1]) != 1)
 								{
-									break;
+									IL_072B:
+									while (idx2 < num4 && this.Category((int)s2[idx2]) == 1)
+									{
+										if (ptr2[2] == 0)
+										{
+											ptr2[2] = 2;
+										}
+										ptr2[2] = ptr2[2] + this.Level2((int)s2[idx2], SimpleCollator.ExtenderType.None);
+										idx2++;
+									}
+									goto IL_0731;
 								}
 								if (ptr[2] == 0)
 								{
@@ -1033,25 +981,14 @@ namespace Mono.Globalization.Unicode
 								ptr[2] = ptr[2] + this.Level2((int)s1[idx1], SimpleCollator.ExtenderType.None);
 								idx1++;
 							}
-							while (idx2 < num4)
-							{
-								if (this.Category((int)s2[idx2]) != 1)
-								{
-									break;
-								}
-								if (ptr2[2] == 0)
-								{
-									ptr2[2] = 2;
-								}
-								ptr2[2] = ptr2[2] + this.Level2((int)s2[idx2], SimpleCollator.ExtenderType.None);
-								idx2++;
-							}
+							goto IL_072B;
 						}
-						int num20 = (int)(*ptr - *ptr2);
-						num20 = ((num20 == 0) ? ((int)(ptr[1] - ptr2[1])) : num20);
+						IL_0731:
+						num20 = (int)(*ptr - *ptr2);
+						num20 = ((num20 != 0) ? num20 : ((int)(ptr[1] - ptr2[1])));
 						if (num20 != 0)
 						{
-							return num20;
+							break;
 						}
 						if (num6 != 1)
 						{
@@ -1065,7 +1002,7 @@ namespace Mono.Globalization.Unicode
 									{
 										return -1;
 									}
-									num6 = ((!this.frenchSort) ? 1 : 2);
+									num6 = (this.frenchSort ? 2 : 1);
 									continue;
 								}
 							}
@@ -1089,15 +1026,15 @@ namespace Mono.Globalization.Unicode
 										{
 											return -1;
 										}
-										num5 = ((!flag3) ? (-1) : 1);
+										num5 = (flag3 ? 1 : (-1));
 										num6 = 3;
 									}
 									else if (flag3)
 									{
 										num20 = this.CompareFlagPair(!MSCompatUnicodeTable.IsJapaneseSmallLetter((char)num17), !MSCompatUnicodeTable.IsJapaneseSmallLetter((char)num18));
-										num20 = ((num20 == 0) ? ((int)(SimpleCollator.ToDashTypeValue(extenderType, option) - SimpleCollator.ToDashTypeValue(extenderType2, option))) : num20);
-										num20 = ((num20 == 0) ? this.CompareFlagPair(MSCompatUnicodeTable.IsHiragana((char)num17), MSCompatUnicodeTable.IsHiragana((char)num18)) : num20);
-										num20 = ((num20 == 0) ? this.CompareFlagPair(!SimpleCollator.IsHalfKana((int)((ushort)num17), option), !SimpleCollator.IsHalfKana((int)((ushort)num18), option)) : num20);
+										num20 = ((num20 != 0) ? num20 : ((int)(SimpleCollator.ToDashTypeValue(extenderType, option) - SimpleCollator.ToDashTypeValue(extenderType2, option))));
+										num20 = ((num20 != 0) ? num20 : this.CompareFlagPair(MSCompatUnicodeTable.IsHiragana((char)num17), MSCompatUnicodeTable.IsHiragana((char)num18)));
+										num20 = ((num20 != 0) ? num20 : this.CompareFlagPair(!SimpleCollator.IsHalfKana((int)((ushort)num17), option), !SimpleCollator.IsHalfKana((int)((ushort)num18), option)));
 										if (num20 != 0)
 										{
 											if (immediateBreakup)
@@ -1114,18 +1051,12 @@ namespace Mono.Globalization.Unicode
 					}
 				}
 			}
+			return num20;
+			IL_0882:
 			if (!flag2 && num5 != 0 && num6 > 2)
 			{
-				while (idx1 < num3 && idx2 < num4)
+				while (idx1 < num3 && idx2 < num4 && MSCompatUnicodeTable.IsIgnorableNonSpacing((int)s1[idx1]) && MSCompatUnicodeTable.IsIgnorableNonSpacing((int)s2[idx2]))
 				{
-					if (!MSCompatUnicodeTable.IsIgnorableNonSpacing((int)s1[idx1]))
-					{
-						break;
-					}
-					if (!MSCompatUnicodeTable.IsIgnorableNonSpacing((int)s2[idx2]))
-					{
-						break;
-					}
 					num5 = (int)(this.Level2(this.FilterOptions((int)s1[idx1], option), extenderType) - this.Level2(this.FilterOptions((int)s2[idx2], option), extenderType2));
 					if (num5 != 0)
 					{
@@ -1143,19 +1074,18 @@ namespace Mono.Globalization.Unicode
 				{
 					if (!MSCompatUnicodeTable.IsIgnorableNonSpacing((int)s1[idx1]))
 					{
-						break;
+						IL_0939:
+						while (idx2 < num4 && MSCompatUnicodeTable.IsIgnorableNonSpacing((int)s2[idx2]))
+						{
+							idx2++;
+						}
+						goto IL_093F;
 					}
 					idx1++;
 				}
-				while (idx2 < num4)
-				{
-					if (!MSCompatUnicodeTable.IsIgnorableNonSpacing((int)s2[idx2]))
-					{
-						break;
-					}
-					idx2++;
-				}
+				goto IL_0939;
 			}
+			IL_093F:
 			if (num5 == 0)
 			{
 				if (num7 < 0 && num8 >= 0)
@@ -1186,12 +1116,28 @@ namespace Mono.Globalization.Unicode
 					sourceConsumed = true;
 				}
 			}
-			return (idx1 == num3) ? ((idx2 != num4) ? (-1) : num5) : 1;
+			if (idx1 != num3)
+			{
+				return 1;
+			}
+			if (idx2 != num4)
+			{
+				return -1;
+			}
+			return num5;
 		}
 
 		private int CompareFlagPair(bool b1, bool b2)
 		{
-			return (b1 != b2) ? ((!b1) ? (-1) : 1) : 0;
+			if (b1 == b2)
+			{
+				return 0;
+			}
+			if (!b1)
+			{
+				return -1;
+			}
+			return 1;
 		}
 
 		public bool IsPrefix(string src, string target, CompareOptions opt)
@@ -1205,16 +1151,11 @@ namespace Mono.Globalization.Unicode
 			{
 				return true;
 			}
-			byte* ptr;
-			byte* ptr2;
-			checked
-			{
-				ptr = stackalloc byte[4 * 1];
-				ptr2 = stackalloc byte[4 * 1];
-				this.ClearBuffer(ptr, 4);
-				this.ClearBuffer(ptr2, 4);
-			}
-			SimpleCollator.Context context = new SimpleCollator.Context(opt, null, null, ptr, ptr2, null, this.QuickCheckPossible(s, start, start + length, target, 0, target.Length));
+			byte* ptr = stackalloc byte[(UIntPtr)4];
+			byte* ptr2 = stackalloc byte[(UIntPtr)4];
+			this.ClearBuffer(ptr, 4);
+			this.ClearBuffer(ptr2, 4);
+			SimpleCollator.Context context = new SimpleCollator.Context(opt, null, null, ptr, ptr2, null);
 			return this.IsPrefix(s, target, start, length, true, ref context);
 		}
 
@@ -1268,7 +1209,8 @@ namespace Mono.Globalization.Unicode
 				{
 					if (num2 < j)
 					{
-						if (target[j] >= '\u0080')
+						char c = target[j];
+						if (c == '\0' || c >= '\u0080')
 						{
 							testWasUnable = true;
 							return -1;
@@ -1277,7 +1219,8 @@ namespace Mono.Globalization.Unicode
 					}
 					if (num < i + j)
 					{
-						if (s[i + j] >= '\u0080')
+						char c2 = s[i + j];
+						if (c2 == '\0' || c2 >= '\u0080')
 						{
 							testWasUnable = true;
 							return -1;
@@ -1302,11 +1245,11 @@ namespace Mono.Globalization.Unicode
 		{
 			if (opt == CompareOptions.Ordinal)
 			{
-				return this.IndexOfOrdinal(s, target, start, length);
+				throw new NotSupportedException("Should not be reached");
 			}
 			if (opt == CompareOptions.OrdinalIgnoreCase)
 			{
-				return this.IndexOfOrdinalIgnoreCase(s, target, start, length);
+				throw new NotSupportedException("Should not be reached");
 			}
 			if (opt == CompareOptions.None)
 			{
@@ -1317,21 +1260,18 @@ namespace Mono.Globalization.Unicode
 					return num;
 				}
 			}
-			checked
-			{
-				byte* ptr = stackalloc byte[16 * 1];
-				byte* ptr2 = stackalloc byte[16 * 1];
-				byte* ptr3 = stackalloc byte[4 * 1];
-				byte* ptr4 = stackalloc byte[4 * 1];
-				byte* ptr5 = stackalloc byte[4 * 1];
-				this.ClearBuffer(ptr, 16);
-				this.ClearBuffer(ptr2, 16);
-				this.ClearBuffer(ptr3, 4);
-				this.ClearBuffer(ptr4, 4);
-				this.ClearBuffer(ptr5, 4);
-				SimpleCollator.Context context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null, false);
-				return this.IndexOf(s, target, start, length, ptr3, ref context);
-			}
+			byte* ptr = stackalloc byte[(UIntPtr)16];
+			byte* ptr2 = stackalloc byte[(UIntPtr)16];
+			byte* ptr3 = stackalloc byte[(UIntPtr)4];
+			byte* ptr4 = stackalloc byte[(UIntPtr)4];
+			byte* ptr5 = stackalloc byte[(UIntPtr)4];
+			this.ClearBuffer(ptr, 16);
+			this.ClearBuffer(ptr2, 16);
+			this.ClearBuffer(ptr3, 4);
+			this.ClearBuffer(ptr4, 4);
+			this.ClearBuffer(ptr5, 4);
+			SimpleCollator.Context context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null);
+			return this.IndexOf(s, target, start, length, ptr3, ref context);
 		}
 
 		private int IndexOfOrdinal(string s, string target, int start, int length)
@@ -1364,36 +1304,6 @@ namespace Mono.Globalization.Unicode
 			return -1;
 		}
 
-		private int IndexOfOrdinalIgnoreCase(string s, string target, int start, int length)
-		{
-			if (target.Length == 0)
-			{
-				return 0;
-			}
-			if (target.Length > length)
-			{
-				return -1;
-			}
-			int num = start + length - target.Length + 1;
-			for (int i = start; i < num; i++)
-			{
-				bool flag = false;
-				for (int j = 0; j < target.Length; j++)
-				{
-					if (this.textInfo.ToLower(s[i + j]) != this.textInfo.ToLower(target[j]))
-					{
-						flag = true;
-						break;
-					}
-				}
-				if (!flag)
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
 		public int IndexOf(string s, char target, CompareOptions opt)
 		{
 			return this.IndexOf(s, target, 0, s.Length, opt);
@@ -1403,31 +1313,24 @@ namespace Mono.Globalization.Unicode
 		{
 			if (opt == CompareOptions.Ordinal)
 			{
-				return this.IndexOfOrdinal(s, target, start, length);
+				throw new NotSupportedException("Should not be reached");
 			}
 			if (opt == CompareOptions.OrdinalIgnoreCase)
 			{
-				return this.IndexOfOrdinalIgnoreCase(s, target, start, length);
+				throw new NotSupportedException("Should not be reached");
 			}
-			byte* ptr3;
-			byte* ptr5;
-			SimpleCollator.Context context;
-			Contraction contraction;
-			checked
-			{
-				byte* ptr = stackalloc byte[16 * 1];
-				byte* ptr2 = stackalloc byte[16 * 1];
-				ptr3 = stackalloc byte[4 * 1];
-				byte* ptr4 = stackalloc byte[4 * 1];
-				ptr5 = stackalloc byte[4 * 1];
-				this.ClearBuffer(ptr, 16);
-				this.ClearBuffer(ptr2, 16);
-				this.ClearBuffer(ptr3, 4);
-				this.ClearBuffer(ptr4, 4);
-				this.ClearBuffer(ptr5, 4);
-				context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null, false);
-				contraction = this.GetContraction(target);
-			}
+			byte* ptr = stackalloc byte[(UIntPtr)16];
+			byte* ptr2 = stackalloc byte[(UIntPtr)16];
+			byte* ptr3 = stackalloc byte[(UIntPtr)4];
+			byte* ptr4 = stackalloc byte[(UIntPtr)4];
+			byte* ptr5 = stackalloc byte[(UIntPtr)4];
+			this.ClearBuffer(ptr, 16);
+			this.ClearBuffer(ptr2, 16);
+			this.ClearBuffer(ptr3, 4);
+			this.ClearBuffer(ptr4, 4);
+			this.ClearBuffer(ptr5, 4);
+			SimpleCollator.Context context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null);
+			Contraction contraction = this.GetContraction(target);
 			if (contraction == null)
 			{
 				int num = this.FilterOptions((int)target, opt);
@@ -1464,20 +1367,6 @@ namespace Mono.Globalization.Unicode
 			return -1;
 		}
 
-		private int IndexOfOrdinalIgnoreCase(string s, char target, int start, int length)
-		{
-			int num = start + length;
-			target = this.textInfo.ToLower(target);
-			for (int i = start; i < num; i++)
-			{
-				if (this.textInfo.ToLower(s[i]) == target)
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
 		private unsafe int IndexOfSortKey(string s, int start, int length, byte* sortkey, char target, int ti, bool noLv4, ref SimpleCollator.Context ctx)
 		{
 			int num = start + length;
@@ -1496,97 +1385,96 @@ namespace Mono.Globalization.Unicode
 		private unsafe int IndexOf(string s, string target, int start, int length, byte* targetSortKey, ref SimpleCollator.Context ctx)
 		{
 			CompareOptions option = ctx.Option;
-			int i;
-			for (i = 0; i < target.Length; i++)
+			int num = 0;
+			while (num < target.Length && SimpleCollator.IsIgnorable((int)target[num], option))
 			{
-				if (!SimpleCollator.IsIgnorable((int)target[i], option))
+				num++;
+			}
+			if (num != target.Length)
+			{
+				Contraction contraction = this.GetContraction(target, num, target.Length - num);
+				string text = ((contraction != null) ? contraction.Replacement : null);
+				byte* ptr = ((text == null) ? targetSortKey : null);
+				bool flag = true;
+				char c = '\0';
+				int num2 = -1;
+				if (contraction != null && ptr != null)
 				{
-					break;
+					for (int i = 0; i < contraction.SortKey.Length; i++)
+					{
+						ptr[i] = contraction.SortKey[i];
+					}
 				}
-			}
-			if (i == target.Length)
-			{
-				return start;
-			}
-			Contraction contraction = this.GetContraction(target, i, target.Length - i);
-			string text = ((contraction == null) ? null : contraction.Replacement);
-			byte* ptr = ((text != null) ? null : targetSortKey);
-			bool flag = true;
-			char c = '\0';
-			int num = -1;
-			if (contraction != null && ptr != null)
-			{
-				for (int j = 0; j < contraction.SortKey.Length; j++)
+				else if (ptr != null)
 				{
-					ptr[j] = contraction.SortKey[j];
+					c = target[num];
+					num2 = this.FilterOptions((int)target[num], option);
+					*ptr = this.Category(num2);
+					ptr[1] = this.Level1(num2);
+					if ((option & CompareOptions.IgnoreNonSpace) == CompareOptions.None)
+					{
+						ptr[2] = this.Level2(num2, SimpleCollator.ExtenderType.None);
+					}
+					ptr[3] = MSCompatUnicodeTable.Level3(num2);
+					flag = !MSCompatUnicodeTable.HasSpecialWeight((char)num2);
 				}
-			}
-			else if (ptr != null)
-			{
-				c = target[i];
-				num = this.FilterOptions((int)target[i], option);
-				*ptr = this.Category(num);
-				ptr[1] = this.Level1(num);
-				if ((option & CompareOptions.IgnoreNonSpace) == CompareOptions.None)
+				if (ptr != null)
 				{
-					ptr[2] = this.Level2(num, SimpleCollator.ExtenderType.None);
+					num++;
+					while (num < target.Length && this.Category((int)target[num]) == 1)
+					{
+						if (ptr[2] == 0)
+						{
+							ptr[2] = 2;
+						}
+						ptr[2] = ptr[2] + this.Level2((int)target[num], SimpleCollator.ExtenderType.None);
+						num++;
+					}
 				}
-				ptr[3] = MSCompatUnicodeTable.Level3(num);
-				flag = !MSCompatUnicodeTable.HasSpecialWeight((char)num);
-			}
-			if (ptr != null)
-			{
-				for (i++; i < target.Length; i++)
+				for (;;)
 				{
-					if (this.Category((int)target[i]) != 1)
+					int num3;
+					if (text != null)
+					{
+						num3 = this.IndexOf(s, text, start, length, targetSortKey, ref ctx);
+					}
+					else
+					{
+						num3 = this.IndexOfSortKey(s, start, length, ptr, c, num2, flag, ref ctx);
+					}
+					if (num3 < 0)
 					{
 						break;
 					}
-					if (ptr[2] == 0)
+					length -= num3 - start;
+					start = num3;
+					if (this.IsPrefix(s, target, start, length, false, ref ctx))
 					{
-						ptr[2] = 2;
+						return num3;
 					}
-					ptr[2] = ptr[2] + this.Level2((int)target[i], SimpleCollator.ExtenderType.None);
+					Contraction contraction2 = this.GetContraction(s, start, length);
+					if (contraction2 != null)
+					{
+						start += contraction2.Source.Length;
+						length -= contraction2.Source.Length;
+					}
+					else
+					{
+						start++;
+						length--;
+					}
+					if (length <= 0)
+					{
+						return -1;
+					}
 				}
+				return -1;
 			}
-			for (;;)
+			if (this.IndexOfOrdinal(target, '\0', 0, target.Length) < 0)
 			{
-				int num2;
-				if (text != null)
-				{
-					num2 = this.IndexOf(s, text, start, length, targetSortKey, ref ctx);
-				}
-				else
-				{
-					num2 = this.IndexOfSortKey(s, start, length, ptr, c, num, flag, ref ctx);
-				}
-				if (num2 < 0)
-				{
-					break;
-				}
-				length -= num2 - start;
-				start = num2;
-				if (this.IsPrefix(s, target, start, length, false, ref ctx))
-				{
-					return num2;
-				}
-				Contraction contraction2 = this.GetContraction(s, start, length);
-				if (contraction2 != null)
-				{
-					start += contraction2.Source.Length;
-					length -= contraction2.Source.Length;
-				}
-				else
-				{
-					start++;
-					length--;
-				}
-				if (length <= 0)
-				{
-					return -1;
-				}
+				return start;
 			}
-			return -1;
+			return this.IndexOfOrdinal(s, target, start, length);
 		}
 
 		public int LastIndexOf(string s, string target, CompareOptions opt)
@@ -1602,30 +1490,27 @@ namespace Mono.Globalization.Unicode
 			}
 			if (opt == CompareOptions.OrdinalIgnoreCase)
 			{
-				return this.LastIndexOfOrdinalIgnoreCase(s, target, start, length);
+				throw new NotSupportedException("Should not be reached");
 			}
-			checked
-			{
-				byte* ptr = stackalloc byte[16 * 1];
-				byte* ptr2 = stackalloc byte[16 * 1];
-				byte* ptr3 = stackalloc byte[4 * 1];
-				byte* ptr4 = stackalloc byte[4 * 1];
-				byte* ptr5 = stackalloc byte[4 * 1];
-				this.ClearBuffer(ptr, 16);
-				this.ClearBuffer(ptr2, 16);
-				this.ClearBuffer(ptr3, 4);
-				this.ClearBuffer(ptr4, 4);
-				this.ClearBuffer(ptr5, 4);
-				SimpleCollator.Context context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null, false);
-				return this.LastIndexOf(s, target, start, length, ptr3, ref context);
-			}
+			byte* ptr = stackalloc byte[(UIntPtr)16];
+			byte* ptr2 = stackalloc byte[(UIntPtr)16];
+			byte* ptr3 = stackalloc byte[(UIntPtr)4];
+			byte* ptr4 = stackalloc byte[(UIntPtr)4];
+			byte* ptr5 = stackalloc byte[(UIntPtr)4];
+			this.ClearBuffer(ptr, 16);
+			this.ClearBuffer(ptr2, 16);
+			this.ClearBuffer(ptr3, 4);
+			this.ClearBuffer(ptr4, 4);
+			this.ClearBuffer(ptr5, 4);
+			SimpleCollator.Context context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null);
+			return this.LastIndexOf(s, target, start, length, ptr3, ref context);
 		}
 
 		private int LastIndexOfOrdinal(string s, string target, int start, int length)
 		{
 			if (target.Length == 0)
 			{
-				return 0;
+				return start;
 			}
 			if (s.Length < target.Length || target.Length > length)
 			{
@@ -1662,47 +1547,6 @@ namespace Mono.Globalization.Unicode
 			return -1;
 		}
 
-		private int LastIndexOfOrdinalIgnoreCase(string s, string target, int start, int length)
-		{
-			if (target.Length == 0)
-			{
-				return 0;
-			}
-			if (s.Length < length || target.Length > length)
-			{
-				return -1;
-			}
-			int num = start - length + target.Length - 1;
-			char c = this.textInfo.ToLower(target[target.Length - 1]);
-			int i = start;
-			while (i > num)
-			{
-				if (this.textInfo.ToLower(s[i]) != c)
-				{
-					i--;
-				}
-				else
-				{
-					int num2 = i - target.Length + 1;
-					i--;
-					bool flag = false;
-					for (int j = target.Length - 2; j >= 0; j--)
-					{
-						if (this.textInfo.ToLower(s[num2 + j]) != this.textInfo.ToLower(target[j]))
-						{
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						return num2;
-					}
-				}
-			}
-			return -1;
-		}
-
 		public int LastIndexOf(string s, char target, CompareOptions opt)
 		{
 			return this.LastIndexOf(s, target, s.Length - 1, s.Length, opt);
@@ -1712,31 +1556,24 @@ namespace Mono.Globalization.Unicode
 		{
 			if (opt == CompareOptions.Ordinal)
 			{
-				return this.LastIndexOfOrdinal(s, target, start, length);
+				throw new NotSupportedException();
 			}
 			if (opt == CompareOptions.OrdinalIgnoreCase)
 			{
-				return this.LastIndexOfOrdinalIgnoreCase(s, target, start, length);
+				throw new NotSupportedException();
 			}
-			byte* ptr3;
-			byte* ptr5;
-			SimpleCollator.Context context;
-			Contraction contraction;
-			checked
-			{
-				byte* ptr = stackalloc byte[16 * 1];
-				byte* ptr2 = stackalloc byte[16 * 1];
-				ptr3 = stackalloc byte[4 * 1];
-				byte* ptr4 = stackalloc byte[4 * 1];
-				ptr5 = stackalloc byte[4 * 1];
-				this.ClearBuffer(ptr, 16);
-				this.ClearBuffer(ptr2, 16);
-				this.ClearBuffer(ptr3, 4);
-				this.ClearBuffer(ptr4, 4);
-				this.ClearBuffer(ptr5, 4);
-				context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null, false);
-				contraction = this.GetContraction(target);
-			}
+			byte* ptr = stackalloc byte[(UIntPtr)16];
+			byte* ptr2 = stackalloc byte[(UIntPtr)16];
+			byte* ptr3 = stackalloc byte[(UIntPtr)4];
+			byte* ptr4 = stackalloc byte[(UIntPtr)4];
+			byte* ptr5 = stackalloc byte[(UIntPtr)4];
+			this.ClearBuffer(ptr, 16);
+			this.ClearBuffer(ptr2, 16);
+			this.ClearBuffer(ptr3, 4);
+			this.ClearBuffer(ptr4, 4);
+			this.ClearBuffer(ptr5, 4);
+			SimpleCollator.Context context = new SimpleCollator.Context(opt, ptr, ptr2, ptr4, ptr5, null);
+			Contraction contraction = this.GetContraction(target);
 			if (contraction == null)
 			{
 				int num = this.FilterOptions((int)target, opt);
@@ -1760,41 +1597,6 @@ namespace Mono.Globalization.Unicode
 			return this.LastIndexOfSortKey(s, start, start, length, ptr5, -1, true, ref context);
 		}
 
-		private int LastIndexOfOrdinal(string s, char target, int start, int length)
-		{
-			if (s.Length == 0)
-			{
-				return -1;
-			}
-			int num = start - length;
-			for (int i = start; i > num; i--)
-			{
-				if (s[i] == target)
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		private int LastIndexOfOrdinalIgnoreCase(string s, char target, int start, int length)
-		{
-			if (s.Length == 0)
-			{
-				return -1;
-			}
-			int num = start - length;
-			char c = this.textInfo.ToUpper(target);
-			for (int i = start; i > num; i--)
-			{
-				if (this.textInfo.ToUpper(s[i]) == c)
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
 		private unsafe int LastIndexOfSortKey(string s, int start, int orgStart, int length, byte* sortkey, int ti, bool noLv4, ref SimpleCollator.Context ctx)
 		{
 			int num = start - length;
@@ -1814,105 +1616,100 @@ namespace Mono.Globalization.Unicode
 		{
 			CompareOptions option = ctx.Option;
 			int num = start;
-			int i;
-			for (i = 0; i < target.Length; i++)
+			int num2 = 0;
+			while (num2 < target.Length && SimpleCollator.IsIgnorable((int)target[num2], option))
 			{
-				if (!SimpleCollator.IsIgnorable((int)target[i], option))
+				num2++;
+			}
+			if (num2 != target.Length)
+			{
+				Contraction contraction = this.GetContraction(target, num2, target.Length - num2);
+				string text = ((contraction != null) ? contraction.Replacement : null);
+				byte* ptr = ((text == null) ? targetSortKey : null);
+				bool flag = true;
+				int num3 = -1;
+				if (contraction != null && ptr != null)
 				{
-					break;
+					for (int i = 0; i < contraction.SortKey.Length; i++)
+					{
+						ptr[i] = contraction.SortKey[i];
+					}
 				}
-			}
-			if (i == target.Length)
-			{
-				return start;
-			}
-			Contraction contraction = this.GetContraction(target, i, target.Length - i);
-			string text = ((contraction == null) ? null : contraction.Replacement);
-			byte* ptr = ((text != null) ? null : targetSortKey);
-			bool flag = true;
-			int num2 = -1;
-			if (contraction != null && ptr != null)
-			{
-				for (int j = 0; j < contraction.SortKey.Length; j++)
+				else if (ptr != null)
 				{
-					ptr[j] = contraction.SortKey[j];
+					num3 = this.FilterOptions((int)target[num2], option);
+					*ptr = this.Category(num3);
+					ptr[1] = this.Level1(num3);
+					if ((option & CompareOptions.IgnoreNonSpace) == CompareOptions.None)
+					{
+						ptr[2] = this.Level2(num3, SimpleCollator.ExtenderType.None);
+					}
+					ptr[3] = MSCompatUnicodeTable.Level3(num3);
+					flag = !MSCompatUnicodeTable.HasSpecialWeight((char)num3);
 				}
-			}
-			else if (ptr != null)
-			{
-				num2 = this.FilterOptions((int)target[i], option);
-				*ptr = this.Category(num2);
-				ptr[1] = this.Level1(num2);
-				if ((option & CompareOptions.IgnoreNonSpace) == CompareOptions.None)
+				if (ptr != null)
 				{
-					ptr[2] = this.Level2(num2, SimpleCollator.ExtenderType.None);
+					num2++;
+					while (num2 < target.Length && this.Category((int)target[num2]) == 1)
+					{
+						if (ptr[2] == 0)
+						{
+							ptr[2] = 2;
+						}
+						ptr[2] = ptr[2] + this.Level2((int)target[num2], SimpleCollator.ExtenderType.None);
+						num2++;
+					}
 				}
-				ptr[3] = MSCompatUnicodeTable.Level3(num2);
-				flag = !MSCompatUnicodeTable.HasSpecialWeight((char)num2);
-			}
-			if (ptr != null)
-			{
-				for (i++; i < target.Length; i++)
+				int num4;
+				for (;;)
 				{
-					if (this.Category((int)target[i]) != 1)
+					if (text != null)
+					{
+						num4 = this.LastIndexOf(s, text, start, length, targetSortKey, ref ctx);
+					}
+					else
+					{
+						num4 = this.LastIndexOfSortKey(s, start, num, length, ptr, num3, flag, ref ctx);
+					}
+					if (num4 < 0)
 					{
 						break;
 					}
-					if (ptr[2] == 0)
+					length -= start - num4;
+					start = num4;
+					if (this.IsPrefix(s, target, num4, num - num4 + 1, false, ref ctx))
 					{
-						ptr[2] = 2;
+						goto Block_16;
 					}
-					ptr[2] = ptr[2] + this.Level2((int)target[i], SimpleCollator.ExtenderType.None);
+					Contraction contraction2 = this.GetContraction(s, num4, num - num4 + 1);
+					if (contraction2 != null)
+					{
+						start -= contraction2.Source.Length;
+						length -= contraction2.Source.Length;
+					}
+					else
+					{
+						start--;
+						length--;
+					}
+					if (length <= 0)
+					{
+						return -1;
+					}
 				}
+				return -1;
+				Block_16:
+				while (num4 < num && SimpleCollator.IsIgnorable((int)s[num4], option))
+				{
+					num4++;
+				}
+				return num4;
 			}
-			int k;
-			for (;;)
+			if (this.IndexOfOrdinal(target, '\0', 0, target.Length) < 0)
 			{
-				if (text != null)
-				{
-					k = this.LastIndexOf(s, text, start, length, targetSortKey, ref ctx);
-				}
-				else
-				{
-					k = this.LastIndexOfSortKey(s, start, num, length, ptr, num2, flag, ref ctx);
-				}
-				if (k < 0)
-				{
-					break;
-				}
-				length -= start - k;
-				start = k;
-				if (this.IsPrefix(s, target, k, num - k + 1, false, ref ctx))
-				{
-					goto Block_15;
-				}
-				Contraction contraction2 = this.GetContraction(s, k, num - k + 1);
-				if (contraction2 != null)
-				{
-					start -= contraction2.Source.Length;
-					length -= contraction2.Source.Length;
-				}
-				else
-				{
-					start--;
-					length--;
-				}
-				if (length <= 0)
-				{
-					return -1;
-				}
+				return start;
 			}
-			return -1;
-			Block_15:
-			while (k < num)
-			{
-				if (!SimpleCollator.IsIgnorable((int)s[k], option))
-				{
-					break;
-				}
-				k++;
-			}
-			return k;
+			return this.LastIndexOfOrdinal(s, target, start, length);
 		}
 
 		private unsafe bool MatchesForward(string s, ref int idx, int end, int ti, byte* sortkey, bool noLv4, ref SimpleCollator.Context ctx)
@@ -1950,7 +1747,7 @@ namespace Mono.Globalization.Unicode
 		{
 			CompareOptions option = ctx.Option;
 			byte* ptr = ctx.Buffer1;
-			bool flag = (option & CompareOptions.IgnoreNonSpace) != CompareOptions.None;
+			bool flag = (option & CompareOptions.IgnoreNonSpace) > CompareOptions.None;
 			int num = -1;
 			if (ext == SimpleCollator.ExtenderType.None)
 			{
@@ -2015,12 +1812,8 @@ namespace Mono.Globalization.Unicode
 				}
 				if (flag2)
 				{
-					while (idx < end)
+					while (idx < end && this.Category((int)s[idx]) == 1)
 					{
-						if (this.Category((int)s[idx]) != 1)
-						{
-							break;
-						}
 						idx++;
 					}
 					return false;
@@ -2031,12 +1824,8 @@ namespace Mono.Globalization.Unicode
 					ctx.PrevCode = num;
 				}
 			}
-			while (idx < end)
+			while (idx < end && this.Category((int)s[idx]) == 1)
 			{
-				if (this.Category((int)s[idx]) != 1)
-				{
-					break;
-				}
 				if (!flag)
 				{
 					if (ptr[2] == 0)
@@ -2052,7 +1841,7 @@ namespace Mono.Globalization.Unicode
 
 		private unsafe bool MatchesPrimitive(CompareOptions opt, byte* source, int si, SimpleCollator.ExtenderType ext, byte* target, int ti, bool noLv4)
 		{
-			bool flag = (opt & CompareOptions.IgnoreNonSpace) != CompareOptions.None;
+			bool flag = (opt & CompareOptions.IgnoreNonSpace) > CompareOptions.None;
 			return *source == *target && source[1] == target[1] && (flag || source[2] == target[2]) && source[3] == target[3] && ((noLv4 && (si < 0 || !MSCompatUnicodeTable.HasSpecialWeight((char)si))) || (!noLv4 && (flag || ext != SimpleCollator.ExtenderType.Conditional) && MSCompatUnicodeTable.IsJapaneseSmallLetter((char)si) == MSCompatUnicodeTable.IsJapaneseSmallLetter((char)ti) && SimpleCollator.ToDashTypeValue(ext, opt) == SimpleCollator.ToDashTypeValue(SimpleCollator.ExtenderType.None, opt) && !MSCompatUnicodeTable.IsHiragana((char)si) == !MSCompatUnicodeTable.IsHiragana((char)ti) && SimpleCollator.IsHalfKana((int)((ushort)si), opt) == SimpleCollator.IsHalfKana((int)((ushort)ti), opt)));
 		}
 
@@ -2091,13 +1880,13 @@ namespace Mono.Globalization.Unicode
 		{
 			CompareOptions option = ctx.Option;
 			byte* buffer = ctx.Buffer1;
-			bool flag = (option & CompareOptions.IgnoreNonSpace) != CompareOptions.None;
+			bool flag = (option & CompareOptions.IgnoreNonSpace) > CompareOptions.None;
 			int num = idx;
 			int num2 = -1;
 			if (ext != SimpleCollator.ExtenderType.None)
 			{
 				byte b = 0;
-				for (int i = 0; i >= 0; i--)
+				for (int i = idx; i >= 0; i--)
 				{
 					if (!SimpleCollator.IsIgnorable((int)s[i], option))
 					{
@@ -2115,17 +1904,17 @@ namespace Mono.Globalization.Unicode
 							buffer[3] = MSCompatUnicodeTable.Level3(num2);
 							if (ext != SimpleCollator.ExtenderType.Conditional && b != 0)
 							{
-								buffer[2] = ((buffer[2] != 0) ? b : (b + 2));
+								buffer[2] = ((buffer[2] == 0) ? (b + 2) : b);
 							}
 							idx--;
-							goto IL_0101;
+							goto IL_00DA;
 						}
 						b = this.Level2(num3, SimpleCollator.ExtenderType.None);
 					}
 				}
 				return false;
 			}
-			IL_0101:
+			IL_00DA:
 			if (ext == SimpleCollator.ExtenderType.None)
 			{
 				ct = this.GetTailContraction(s, idx, end);
@@ -2186,26 +1975,22 @@ namespace Mono.Globalization.Unicode
 			}
 			if (ext == SimpleCollator.ExtenderType.None)
 			{
-				for (int k = num + 1; k < orgStart; k++)
+				int num5 = num + 1;
+				while (num5 < orgStart && this.Category((int)s[num5]) == 1)
 				{
-					if (this.Category((int)s[k]) != 1)
-					{
-						break;
-					}
 					if (!flag)
 					{
 						if (buffer[2] == 0)
 						{
 							buffer[2] = 2;
 						}
-						buffer[2] = buffer[2] + this.Level2((int)s[k], SimpleCollator.ExtenderType.None);
+						buffer[2] = buffer[2] + this.Level2((int)s[num5], SimpleCollator.ExtenderType.None);
 					}
+					num5++;
 				}
 			}
 			return this.MatchesPrimitive(option, buffer, num2, ext, sortkey, ti, noLv4);
 		}
-
-		private const int UnsafeFlagLength = 96;
 
 		private static bool QuickCheckDisabled = Environment.internalGetEnvironmentVariable("MONO_COLLATION_QUICK_CHECK_DISABLED") == "yes";
 
@@ -2213,19 +1998,7 @@ namespace Mono.Globalization.Unicode
 
 		private readonly TextInfo textInfo;
 
-		private readonly bool frenchSort;
-
-		private unsafe readonly byte* cjkCatTable;
-
-		private unsafe readonly byte* cjkLv1Table;
-
 		private readonly CodePointIndexer cjkIndexer;
-
-		private unsafe readonly byte* cjkLv2Table;
-
-		private readonly CodePointIndexer cjkLv2Indexer;
-
-		private readonly int lcid;
 
 		private readonly Contraction[] contractions;
 
@@ -2233,9 +2006,23 @@ namespace Mono.Globalization.Unicode
 
 		private readonly byte[] unsafeFlags;
 
+		private unsafe readonly byte* cjkCatTable;
+
+		private unsafe readonly byte* cjkLv1Table;
+
+		private unsafe readonly byte* cjkLv2Table;
+
+		private readonly CodePointIndexer cjkLv2Indexer;
+
+		private readonly int lcid;
+
+		private readonly bool frenchSort;
+
+		private const int UnsafeFlagLength = 96;
+
 		internal struct Context
 		{
-			public unsafe Context(CompareOptions opt, byte* alwaysMatchFlags, byte* neverMatchFlags, byte* buffer1, byte* buffer2, byte* prev1, bool quickCheckPossible)
+			public unsafe Context(CompareOptions opt, byte* alwaysMatchFlags, byte* neverMatchFlags, byte* buffer1, byte* buffer2, byte* prev1)
 			{
 				this.Option = opt;
 				this.AlwaysMatchFlags = alwaysMatchFlags;
@@ -2244,7 +2031,6 @@ namespace Mono.Globalization.Unicode
 				this.Buffer2 = buffer2;
 				this.PrevSortKey = prev1;
 				this.PrevCode = -1;
-				this.QuickCheckPossible = quickCheckPossible;
 			}
 
 			public void ClearPrevInfo()
@@ -2266,8 +2052,6 @@ namespace Mono.Globalization.Unicode
 			public int PrevCode;
 
 			public unsafe byte* PrevSortKey;
-
-			public readonly bool QuickCheckPossible;
 		}
 
 		private struct PreviousInfo

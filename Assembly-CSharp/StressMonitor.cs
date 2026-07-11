@@ -8,12 +8,13 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 	{
 		base.serializable = true;
 		default_state = this.satisfied;
-		this.root.ToggleUrge(Db.Get().Urges.Relax).Update("StressMonitor", delegate(StressMonitor.Instance smi, float dt)
+		this.root.Update("StressMonitor", delegate(StressMonitor.Instance smi, float dt)
 		{
 			smi.ReportStress(dt);
 		}, UpdateRate.SIM_200ms, false);
 		this.satisfied.Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value >= 60f, UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Neutral, null);
-		this.stressed.ToggleStatusItem(Db.Get().DuplicantStatusItems.Stressed, null).Transition(this.satisfied, (StressMonitor.Instance smi) => smi.stress.value < 60f, UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.Stressed, null);
+		this.stressed.ToggleStatusItem(Db.Get().DuplicantStatusItems.Stressed, null).Transition(this.satisfied, (StressMonitor.Instance smi) => smi.stress.value < 60f, UpdateRate.SIM_200ms).ToggleReactable((StressMonitor.Instance smi) => smi.CreateConcernReactable())
+			.TriggerOnEnter(GameHashes.Stressed, null);
 		this.stressed.tier1.Transition(this.stressed.tier2, (StressMonitor.Instance smi) => smi.HasHadEnough(), UpdateRate.SIM_200ms);
 		this.stressed.tier2.TriggerOnEnter(GameHashes.StressedHadEnough, null).Transition(this.stressed.tier1, (StressMonitor.Instance smi) => !smi.HasHadEnough(), UpdateRate.SIM_200ms);
 	}
@@ -61,6 +62,14 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, "Reporting stress for multipliers not supported yet.");
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, attributeModifier.Value * dt, attributeModifier.GetDescription(), base.gameObject.GetProperName());
 			}
+		}
+
+		public Reactable CreateConcernReactable()
+		{
+			return new EmoteReactable(base.master.gameObject, "StressConcern", Db.Get().ChoreTypes.Emote, "anim_react_concern_kanim", 15, 8, 0f, 30f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+			{
+				anim = "react"
+			});
 		}
 
 		public AmountInstance stress;

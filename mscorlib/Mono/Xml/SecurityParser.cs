@@ -46,8 +46,7 @@ namespace Mono.Xml
 			}
 			else
 			{
-				SecurityElement securityElement2 = (SecurityElement)this.stack.Peek();
-				securityElement2.AddChild(securityElement);
+				((SecurityElement)this.stack.Peek()).AddChild(securityElement);
 			}
 			this.stack.Push(securityElement);
 			this.current = securityElement;

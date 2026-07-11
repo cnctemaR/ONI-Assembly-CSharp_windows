@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class MopTool : DragTool
 {
+	public static void DestroyInstance()
+	{
+		MopTool.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -37,11 +42,11 @@ public class MopTool : DragTool
 					bool flag2 = Grid.Mass[cell] <= MopTool.maxMopAmt;
 					if (flag && flag2)
 					{
-						gameObject = Util.KInstantiate(this.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+						gameObject = Util.KInstantiate(this.Placer, null, null);
 						Grid.Objects[cell, 8] = gameObject;
 						Vector3 vector = Grid.CellToPosCBC(cell, this.visualizerLayer);
-						float depthBias = InterfaceTool.DepthBias;
-						vector.z += depthBias;
+						float num = -0.15f;
+						vector.z += num;
 						gameObject.transform.SetPosition(vector);
 						gameObject.SetActive(true);
 					}

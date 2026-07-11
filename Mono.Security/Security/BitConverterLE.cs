@@ -77,7 +77,7 @@ namespace Mono.Security
 
 		internal static byte[] GetBytes(bool value)
 		{
-			return new byte[] { (!value) ? 0 : 1 };
+			return new byte[] { value ? 1 : 0 };
 		}
 
 		internal unsafe static byte[] GetBytes(char value)
@@ -131,12 +131,10 @@ namespace Mono.Security
 			{
 				*dst = src[startIndex];
 				dst[1] = src[startIndex + 1];
+				return;
 			}
-			else
-			{
-				*dst = src[startIndex + 1];
-				dst[1] = src[startIndex];
-			}
+			*dst = src[startIndex + 1];
+			dst[1] = src[startIndex];
 		}
 
 		private unsafe static void UIntFromBytes(byte* dst, byte[] src, int startIndex)
@@ -147,14 +145,12 @@ namespace Mono.Security
 				dst[1] = src[startIndex + 1];
 				dst[2] = src[startIndex + 2];
 				dst[3] = src[startIndex + 3];
+				return;
 			}
-			else
-			{
-				*dst = src[startIndex + 3];
-				dst[1] = src[startIndex + 2];
-				dst[2] = src[startIndex + 1];
-				dst[3] = src[startIndex];
-			}
+			*dst = src[startIndex + 3];
+			dst[1] = src[startIndex + 2];
+			dst[2] = src[startIndex + 1];
+			dst[3] = src[startIndex];
 		}
 
 		private unsafe static void ULongFromBytes(byte* dst, byte[] src, int startIndex)
@@ -165,19 +161,17 @@ namespace Mono.Security
 				{
 					dst[i] = src[startIndex + i];
 				}
+				return;
 			}
-			else
+			for (int j = 0; j < 8; j++)
 			{
-				for (int j = 0; j < 8; j++)
-				{
-					dst[j] = src[startIndex + (7 - j)];
-				}
+				dst[j] = src[startIndex + (7 - j)];
 			}
 		}
 
 		internal static bool ToBoolean(byte[] value, int startIndex)
 		{
-			return value[startIndex] != 0;
+			return value[startIndex] > 0;
 		}
 
 		internal unsafe static char ToChar(byte[] value, int startIndex)

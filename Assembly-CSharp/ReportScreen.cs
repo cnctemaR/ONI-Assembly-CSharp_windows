@@ -7,6 +7,11 @@ public class ReportScreen : KScreen
 {
 	public static ReportScreen Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		ReportScreen.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

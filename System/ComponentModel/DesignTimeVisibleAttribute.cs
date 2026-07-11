@@ -5,14 +5,13 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 	public sealed class DesignTimeVisibleAttribute : Attribute
 	{
-		public DesignTimeVisibleAttribute()
-			: this(true)
-		{
-		}
-
 		public DesignTimeVisibleAttribute(bool visible)
 		{
 			this.visible = visible;
+		}
+
+		public DesignTimeVisibleAttribute()
+		{
 		}
 
 		public bool Visible
@@ -25,25 +24,30 @@ namespace System.ComponentModel
 
 		public override bool Equals(object obj)
 		{
-			return obj is DesignTimeVisibleAttribute && (obj == this || ((DesignTimeVisibleAttribute)obj).Visible == this.visible);
+			if (obj == this)
+			{
+				return true;
+			}
+			DesignTimeVisibleAttribute designTimeVisibleAttribute = obj as DesignTimeVisibleAttribute;
+			return designTimeVisibleAttribute != null && designTimeVisibleAttribute.Visible == this.visible;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.visible.GetHashCode();
+			return typeof(DesignTimeVisibleAttribute).GetHashCode() ^ (this.visible ? (-1) : 0);
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.visible == DesignTimeVisibleAttribute.Default.Visible;
+			return this.Visible == DesignTimeVisibleAttribute.Default.Visible;
 		}
 
 		private bool visible;
 
-		public static readonly DesignTimeVisibleAttribute Default = new DesignTimeVisibleAttribute(true);
+		public static readonly DesignTimeVisibleAttribute Yes = new DesignTimeVisibleAttribute(true);
 
 		public static readonly DesignTimeVisibleAttribute No = new DesignTimeVisibleAttribute(false);
 
-		public static readonly DesignTimeVisibleAttribute Yes = new DesignTimeVisibleAttribute(true);
+		public static readonly DesignTimeVisibleAttribute Default = DesignTimeVisibleAttribute.Yes;
 	}
 }

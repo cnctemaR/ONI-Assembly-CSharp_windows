@@ -6,6 +6,11 @@ using UnityEngine.UI;
 
 public class DemoTimer : MonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		DemoTimer.Instance = null;
+	}
+
 	private void Start()
 	{
 		DemoTimer.Instance = this;

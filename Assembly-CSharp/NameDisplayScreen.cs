@@ -6,13 +6,18 @@ using UnityEngine.UI;
 
 public class NameDisplayScreen : KScreen
 {
+	public static void DestroyInstance()
+	{
+		NameDisplayScreen.Instance = null;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		UIRegistry.nameDisplayScreen = this;
 		foreach (Health health2 in Components.Health.Items)
 		{
-			this.RegisterComponent(health2.gameObject, health2);
+			this.RegisterComponent(health2.gameObject, health2, true);
 		}
 		Components.Health.Register(delegate(Health health)
 		{
@@ -20,7 +25,7 @@ public class NameDisplayScreen : KScreen
 		}, null);
 		foreach (Equipment equipment2 in Components.Equipment.Items)
 		{
-			this.RegisterComponent(equipment2.gameObject, equipment2);
+			this.RegisterComponent(equipment2.gameObject, equipment2, false);
 		}
 		Components.Equipment.Register(delegate(Equipment equipment)
 		{
@@ -32,20 +37,26 @@ public class NameDisplayScreen : KScreen
 	{
 		base.OnPrefabInit();
 		NameDisplayScreen.Instance = this;
-		this.dispayRootPrefab.SetActive(false);
+	}
+
+	private bool ShouldShowName(GameObject representedObject)
+	{
+		return representedObject.GetComponent<MinionBrain>() != null;
 	}
 
 	public void AddNewEntry(GameObject representedObject)
 	{
 		NameDisplayScreen.Entry entry = new NameDisplayScreen.Entry();
 		entry.world_go = representedObject;
-		GameObject gameObject = Util.KInstantiateUI(this.dispayRootPrefab, base.gameObject, true);
-		entry.display_go = gameObject;
+		bool flag = this.ShouldShowName(representedObject);
+		GameObject gameObject = ((!flag) ? this.barsPrefab : this.nameAndBarsPrefab);
+		GameObject gameObject2 = Util.KInstantiateUI(gameObject, base.gameObject, true);
+		entry.display_go = gameObject2;
 		if (this.worldSpace)
 		{
 			entry.display_go.transform.localScale = Vector3.one * 0.01f;
 		}
-		gameObject.name = representedObject.name + " character overlay";
+		gameObject2.name = representedObject.name + " character overlay";
 		KSelectable component = representedObject.GetComponent<KSelectable>();
 		FactionAlignment component2 = representedObject.GetComponent<FactionAlignment>();
 		if (component != null && component2 != null && (component2.Alignment == FactionManager.FactionID.Friendly || component2.Alignment == FactionManager.FactionID.Duplicant))
@@ -53,61 +64,56 @@ public class NameDisplayScreen : KScreen
 			this.UpdateName(representedObject);
 		}
 		entry.Name = representedObject.name;
+		entry.refs = gameObject2.GetComponent<HierarchyReferences>();
 		this.entries.Add(entry);
 	}
 
-	public void RegisterComponent(GameObject representedObject, object Component)
+	public void RegisterComponent(GameObject representedObject, object component)
 	{
-		NameDisplayScreen.Entry entry = this.GetEntry(representedObject);
+		this.RegisterComponent(representedObject, component, false);
+	}
+
+	public void RegisterComponent(GameObject representedObject, object component, bool force_new_entry)
+	{
+		NameDisplayScreen.Entry entry = ((!force_new_entry) ? this.GetEntry(representedObject) : null);
 		if (entry == null)
 		{
-			CharacterOverlay component = representedObject.GetComponent<CharacterOverlay>();
-			if (!(component != null))
+			CharacterOverlay component2 = representedObject.GetComponent<CharacterOverlay>();
+			if (component2 != null)
 			{
-				return;
+				component2.Register();
+				entry = this.GetEntry(representedObject);
 			}
-			component.Register();
-			entry = this.GetEntry(representedObject);
 		}
 		if (entry == null)
 		{
 			return;
 		}
-		Transform transform = entry.display_go.transform.Find("Bars");
-		entry.bars_go = transform.gameObject;
-		bool flag = representedObject.GetComponent<MinionBrain>() != null;
-		if (flag)
+		Transform reference = entry.refs.GetReference<Transform>("Bars");
+		entry.bars_go = reference.gameObject;
+		if (component is Health)
 		{
-			this.UpdateName(representedObject);
-		}
-		else
-		{
-			Transform transform2 = entry.display_go.transform.Find("Name");
-			transform2.gameObject.SetActive(false);
-		}
-		if (Component is Health)
-		{
-			Health health = (Health)Component;
-			GameObject gameObject = Util.KInstantiateUI(ProgressBarsConfig.Instance.healthBarPrefab, transform.gameObject, false);
+			Health health = (Health)component;
+			GameObject gameObject = Util.KInstantiateUI(ProgressBarsConfig.Instance.healthBarPrefab, reference.gameObject, false);
 			gameObject.name = "Health Bar";
 			health.healthBar = gameObject.GetComponent<HealthBar>();
 			health.healthBar.GetComponent<KSelectable>().entityName = UI.METERS.HEALTH.TOOLTIP;
-			health.healthBar.GetComponent<KSelectableHealthBar>().IsSelectable = flag;
+			health.healthBar.GetComponent<KSelectableHealthBar>().IsSelectable = representedObject.GetComponent<MinionBrain>() != null;
 			entry.healthBar = health.healthBar;
 			gameObject.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
 		}
-		else if (Component is OxygenBreather)
+		else if (component is OxygenBreather)
 		{
-			GameObject gameObject2 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, transform.gameObject, false);
+			GameObject gameObject2 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, reference.gameObject, false);
 			entry.breathBar = gameObject2.GetComponent<ProgressBar>();
 			gameObject2.gameObject.GetComponent<ToolTip>().AddMultiStringTooltip("Breath", this.ToolTipStyle_Property);
 			gameObject2.name = "Breath Bar";
 			gameObject2.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("BreathBar");
 			gameObject2.GetComponent<KSelectable>().entityName = UI.METERS.BREATH.TOOLTIP;
 		}
-		else if (Component is Equipment)
+		else if (component is Equipment)
 		{
-			GameObject gameObject3 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, transform.gameObject, false);
+			GameObject gameObject3 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, reference.gameObject, false);
 			entry.suitBar = gameObject3.GetComponent<ProgressBar>();
 			gameObject3.name = "Suit Tank Bar";
 			gameObject3.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("OxygenTankBar");
@@ -160,6 +166,15 @@ public class NameDisplayScreen : KScreen
 				{
 					this.entries[i].bars_go.SetActive(false);
 				}
+				if (this.entries[i].bars_go != null)
+				{
+					GameObject bars_go = this.entries[i].bars_go;
+					bars_go.GetComponentsInChildren<KCollider2D>(false, this.workingList);
+					foreach (KCollider2D kcollider2D in this.workingList)
+					{
+						kcollider2D.MarkDirty(false);
+					}
+				}
 				i++;
 			}
 			else
@@ -207,8 +222,11 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		entry.healthBar.OnChange();
-		entry.healthBar.gameObject.SetActive(bVisible);
 		entry.healthBar.SetUpdateFunc(updatePercentFull);
+		if (entry.healthBar.gameObject.activeSelf != bVisible)
+		{
+			entry.healthBar.gameObject.SetActive(bVisible);
+		}
 	}
 
 	public void SetSuitTankDisplay(GameObject minion_go, Func<float> updatePercentFull, bool bVisible)
@@ -232,7 +250,9 @@ public class NameDisplayScreen : KScreen
 
 	public static NameDisplayScreen Instance;
 
-	public GameObject dispayRootPrefab;
+	public GameObject nameAndBarsPrefab;
+
+	public GameObject barsPrefab;
 
 	public TextStyleSetting ToolTipStyle_Property;
 
@@ -254,6 +274,8 @@ public class NameDisplayScreen : KScreen
 
 	public bool worldSpace = true;
 
+	private List<KCollider2D> workingList = new List<KCollider2D>();
+
 	[Serializable]
 	public class Entry
 	{
@@ -270,5 +292,7 @@ public class NameDisplayScreen : KScreen
 		public ProgressBar breathBar;
 
 		public ProgressBar suitBar;
+
+		public HierarchyReferences refs;
 	}
 }

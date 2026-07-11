@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -36,6 +37,17 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 	{
 	}
 
+	public static readonly Chore.Precondition IsNarcolepsingPrecondition = new Chore.Precondition
+	{
+		id = "IsNarcolepsingPrecondition",
+		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NARCOLEPSING,
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			Narcolepsy component = context.consumerState.consumer.GetComponent<Narcolepsy>();
+			return component != null && component.IsNarcolepsing();
+		}
+	};
+
 	public class StatesInstance : GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.GameInstance
 	{
 		public StatesInstance(Narcolepsy master)
@@ -52,6 +64,14 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 		public bool IsNarcolepsing()
 		{
 			return this.GetCurrentState() == base.sm.sleepy;
+		}
+
+		public GameObject CreateFloorLocator()
+		{
+			Sleepable safeFloorLocator = SleepChore.GetSafeFloorLocator(base.master.gameObject);
+			safeFloorLocator.effectName = "NarcolepticSleep";
+			safeFloorLocator.stretchOnWake = false;
+			return safeFloorLocator.gameObject;
 		}
 	}
 
@@ -81,7 +101,10 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 
 		private Chore CreateNarcolepsyChore(Narcolepsy.StatesInstance smi)
 		{
-			return new NarcolepsyChore(smi.master);
+			GameObject gameObject = smi.CreateFloorLocator();
+			SleepChore sleepChore = new SleepChore(Db.Get().ChoreTypes.Narcolepsy, smi.master, gameObject, true, false);
+			sleepChore.AddPrecondition(Narcolepsy.IsNarcolepsingPrecondition, null);
+			return sleepChore;
 		}
 
 		private float GetNewInterval(float min, float max)

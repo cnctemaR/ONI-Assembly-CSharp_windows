@@ -48,11 +48,11 @@ public class GlobalAssets : MonoBehaviour
 							if (text2.Length > 0 && !GlobalAssets.SoundTable.ContainsKey(text2))
 							{
 								GlobalAssets.SoundTable[text2] = text;
-								if (text.ToLower().Contains("lowpriority") || text2.ToLower().Contains("lowpriority"))
+								if (text.ToLower().Contains("lowpriority") || text2.Contains("lowpriority"))
 								{
 									GlobalAssets.LowPrioritySounds.Add(text);
 								}
-								else if (text.ToLower().Contains("highpriority") || text2.ToLower().Contains("highpriority"))
+								else if (text.ToLower().Contains("highpriority") || text2.Contains("highpriority"))
 								{
 									GlobalAssets.HighPrioritySounds.Add(text);
 								}

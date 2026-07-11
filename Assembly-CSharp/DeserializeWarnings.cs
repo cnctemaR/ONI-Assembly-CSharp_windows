@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class DeserializeWarnings : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		DeserializeWarnings.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		DeserializeWarnings.Instance = this;

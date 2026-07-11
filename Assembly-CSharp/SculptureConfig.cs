@@ -25,7 +25,6 @@ public class SculptureConfig : IBuildingConfig
 		}, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
-		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.ViewMode = SimViewMode.Decor;

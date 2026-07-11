@@ -51,6 +51,8 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		}
 	}
 
+	public float ChargeCapacity { get; private set; }
+
 	public int PowerSortOrder
 	{
 		get
@@ -94,7 +96,8 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.PowerCell = component.GetPowerInputCell();
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.OnOperationalChanged(null);
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		bool flag = base.GetComponent<PowerTransformer>();
+		this.meter = ((!flag) ? new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" }) : null);
 		Game.Instance.circuitManager.Connect(this);
 		Game.Instance.emergySim.AddBattery(this);
 	}
@@ -126,8 +129,12 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.dt = dt;
 		this.joulesConsumed = 0f;
 		this.WattsUsed = 0f;
-		float percentFull = this.PercentFull;
-		this.meter.SetPositionPercent(percentFull);
+		this.ChargeCapacity = this.chargeWattage * dt;
+		if (this.meter != null)
+		{
+			float percentFull = this.PercentFull;
+			this.meter.SetPositionPercent(percentFull);
+		}
 		this.UpdateSounds();
 		this.PreviousJoulesAvailable = this.JoulesAvailable;
 		this.ConsumeEnergy(this.joulesLostPerSecond * dt, true);
@@ -168,6 +175,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 	{
 		this.joulesAvailable = Mathf.Min(this.capacity, this.JoulesAvailable + joules);
 		this.joulesConsumed += joules;
+		this.ChargeCapacity -= joules;
 		this.WattsUsed = this.joulesConsumed / this.dt;
 	}
 
@@ -179,6 +187,11 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -num, StringFormatter.Replace(BUILDINGS.PREFABS.BATTERY.CHARGE_LOSS, "{Battery}", this.GetProperName()), null);
 		}
 		this.joulesAvailable = Mathf.Max(0f, this.JoulesAvailable - joules);
+	}
+
+	public void ConsumeEnergy(float joules)
+	{
+		this.ConsumeEnergy(joules, false);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -193,6 +206,9 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 
 	[SerializeField]
 	public float capacity;
+
+	[SerializeField]
+	public float chargeWattage = float.PositiveInfinity;
 
 	[Serialize]
 	private float joulesAvailable;

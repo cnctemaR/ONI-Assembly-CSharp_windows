@@ -9,22 +9,22 @@ namespace System
 	{
 		public LoaderOptimizationAttribute(byte value)
 		{
-			this.lo = (LoaderOptimization)value;
+			this._val = value;
 		}
 
 		public LoaderOptimizationAttribute(LoaderOptimization value)
 		{
-			this.lo = value;
+			this._val = (byte)value;
 		}
 
 		public LoaderOptimization Value
 		{
 			get
 			{
-				return this.lo;
+				return (LoaderOptimization)this._val;
 			}
 		}
 
-		private LoaderOptimization lo;
+		internal byte _val;
 	}
 }

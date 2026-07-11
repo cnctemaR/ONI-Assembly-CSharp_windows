@@ -21,7 +21,6 @@ public class PlanterBoxConfig : IBuildingConfig
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
-		buildingDef.MaterialCategory = MATERIALS.FARMABLE;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
 		return buildingDef;

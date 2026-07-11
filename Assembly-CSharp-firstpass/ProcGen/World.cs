@@ -23,6 +23,8 @@ namespace ProcGen
 
 		public Vector2I worldsize { get; private set; }
 
+		public DefaultSettings defaultsOverrides { get; private set; }
+
 		public World.LayoutMethod layoutMethod { get; private set; }
 
 		public List<WeightedName> ZoneFiles { get; private set; }

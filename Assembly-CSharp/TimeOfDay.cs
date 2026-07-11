@@ -7,6 +7,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 {
+	public static void DestroyInstance()
+	{
+		TimeOfDay.Instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

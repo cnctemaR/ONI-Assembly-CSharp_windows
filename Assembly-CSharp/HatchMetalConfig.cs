@@ -24,7 +24,7 @@ public class HatchMetalConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = HatchMetalConfig.CreateHatch("HatchMetal", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.DESC, "hatch_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchMetalEgg", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchMetalBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_METAL, HatchMetalConfig.EGG_SORT_ORDER, true, false, true);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchMetalEgg", global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.VARIANT_METAL.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchMetalBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_METAL, HatchMetalConfig.EGG_SORT_ORDER, true, false, true, 1f);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -49,7 +49,7 @@ public class HatchMetalConfig : IEntityConfig
 
 	public static int EGG_SORT_ORDER = HatchConfig.EGG_SORT_ORDER + 3;
 
-	public static TagBits METAL_ORE_TAGS = new TagBits(new Tag[]
+	public static readonly TagBits METAL_ORE_TAGS = new TagBits(new Tag[]
 	{
 		SimHashes.Cuprite.CreateTag(),
 		SimHashes.GoldAmalgam.CreateTag(),

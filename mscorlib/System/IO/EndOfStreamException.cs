@@ -9,22 +9,25 @@ namespace System.IO
 	public class EndOfStreamException : IOException
 	{
 		public EndOfStreamException()
-			: base(Locale.GetText("Failed to read past end of stream."))
+			: base(Environment.GetResourceString("Attempted to read past the end of the stream."))
 		{
+			base.SetErrorCode(-2147024858);
 		}
 
 		public EndOfStreamException(string message)
 			: base(message)
 		{
-		}
-
-		protected EndOfStreamException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
+			base.SetErrorCode(-2147024858);
 		}
 
 		public EndOfStreamException(string message, Exception innerException)
 			: base(message, innerException)
+		{
+			base.SetErrorCode(-2147024858);
+		}
+
+		protected EndOfStreamException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 	}

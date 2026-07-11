@@ -20,19 +20,17 @@ namespace System
 			}
 			if (num == 1)
 			{
-				this._delegate = delegateEntry.DeserializeDelegate(info);
+				this._delegate = delegateEntry.DeserializeDelegate(info, 0);
+				return;
 			}
-			else
+			Delegate[] array = new Delegate[num];
+			delegateEntry2 = delegateEntry;
+			for (int i = 0; i < num; i++)
 			{
-				Delegate[] array = new Delegate[num];
-				delegateEntry2 = delegateEntry;
-				for (int i = 0; i < num; i++)
-				{
-					array[i] = delegateEntry2.DeserializeDelegate(info);
-					delegateEntry2 = delegateEntry2.delegateEntry;
-				}
-				this._delegate = Delegate.Combine(array);
+				array[i] = delegateEntry2.DeserializeDelegate(info, i);
+				delegateEntry2 = delegateEntry2.delegateEntry;
 			}
+			this._delegate = Delegate.Combine(array);
 		}
 
 		public static void GetDelegateData(Delegate instance, SerializationInfo info, StreamingContext ctx)
@@ -42,7 +40,7 @@ namespace System
 			for (int i = 0; i < invocationList.Length; i++)
 			{
 				Delegate @delegate = invocationList[i];
-				string text = ((@delegate.Target == null) ? null : ("target" + i));
+				string text = ((@delegate.Target != null) ? ("target" + i) : null);
 				DelegateSerializationHolder.DelegateEntry delegateEntry2 = new DelegateSerializationHolder.DelegateEntry(@delegate, text);
 				if (delegateEntry == null)
 				{
@@ -57,6 +55,7 @@ namespace System
 				{
 					info.AddValue(text, @delegate.Target);
 				}
+				info.AddValue("method" + i, @delegate.Method);
 			}
 			info.SetType(typeof(DelegateSerializationHolder));
 		}
@@ -86,43 +85,44 @@ namespace System
 				this.methodName = del.Method.Name;
 			}
 
-			public Delegate DeserializeDelegate(SerializationInfo info)
+			public Delegate DeserializeDelegate(SerializationInfo info, int index)
 			{
 				object obj = null;
 				if (this.target != null)
 				{
 					obj = info.GetValue(this.target.ToString(), typeof(object));
 				}
-				Assembly assembly = Assembly.Load(this.assembly);
-				Type type = assembly.GetType(this.type);
-				Delegate @delegate;
+				string text = "method" + index;
+				MethodInfo methodInfo = (MethodInfo)info.GetValueNoThrow(text, typeof(MethodInfo));
+				Type type = Assembly.Load(this.assembly).GetType(this.type);
 				if (obj != null)
 				{
-					if (RemotingServices.IsTransparentProxy(obj))
+					if (RemotingServices.IsTransparentProxy(obj) && !Assembly.Load(this.targetTypeAssembly).GetType(this.targetTypeName).IsInstanceOfType(obj))
 					{
-						Assembly assembly2 = Assembly.Load(this.targetTypeAssembly);
-						Type type2 = assembly2.GetType(this.targetTypeName);
-						if (!type2.IsInstanceOfType(obj))
-						{
-							throw new RemotingException("Unexpected proxy type.");
-						}
+						throw new RemotingException("Unexpected proxy type.");
 					}
-					@delegate = Delegate.CreateDelegate(type, obj, this.methodName);
+					if (!(methodInfo == null))
+					{
+						return Delegate.CreateDelegate(type, obj, methodInfo);
+					}
+					return Delegate.CreateDelegate(type, obj, this.methodName);
 				}
 				else
 				{
-					Assembly assembly3 = Assembly.Load(this.targetTypeAssembly);
-					Type type3 = assembly3.GetType(this.targetTypeName);
-					@delegate = Delegate.CreateDelegate(type, type3, this.methodName);
+					if (methodInfo != null)
+					{
+						return Delegate.CreateDelegate(type, obj, methodInfo);
+					}
+					Type type2 = Assembly.Load(this.targetTypeAssembly).GetType(this.targetTypeName);
+					return Delegate.CreateDelegate(type, type2, this.methodName);
 				}
-				return @delegate;
 			}
 
 			private string type;
 
 			private string assembly;
 
-			public object target;
+			private object target;
 
 			private string targetTypeAssembly;
 

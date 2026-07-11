@@ -27,8 +27,8 @@ namespace System.CodeDom.Compiler
 			}
 		}
 
-		private string tool;
+		private readonly string tool;
 
-		private string version;
+		private readonly string version;
 	}
 }

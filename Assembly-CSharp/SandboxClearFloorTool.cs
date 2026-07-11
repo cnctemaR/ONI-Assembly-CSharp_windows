@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class SandboxClearFloorTool : BrushTool
 {
+	public static void DestroyInstance()
+	{
+		SandboxClearFloorTool.instance = null;
+	}
+
 	private SandboxSettings settings
 	{
 		get

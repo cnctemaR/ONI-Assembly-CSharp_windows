@@ -20,6 +20,11 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public static CameraController Instance { get; private set; }
 
+	public static void DestroyInstance()
+	{
+		CameraController.Instance = null;
+	}
+
 	public void ToggleColouredOverlayView(bool enabled)
 	{
 		this.mrt.ToggleColouredOverlayView(enabled);
@@ -148,7 +153,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		else if (e.TryConsume(global::Action.ZoomOut))
 		{
 			float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
-			this.targetOrthographicSize = Mathf.Min(num2, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
+			this.targetOrthographicSize = Mathf.Min(num2, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug);
 			this.overrideZoomSpeed = 0f;
 		}
 		else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
@@ -246,7 +251,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void SetTargetPos(Vector3 pos, float orthographic_size, bool playSound)
 	{
 		this.ClearFollowTarget();
-		if (playSound && pos != this.targetPos)
+		if (playSound && !this.isTargetPosSet)
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Click_Notification", false));
 		}
@@ -446,7 +451,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			base.transform.SetPosition(CameraSaveData.position);
 			base.transform.localScale = CameraSaveData.localScale;
 			base.transform.rotation = CameraSaveData.rotation;
-			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
+			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug);
 			this.SnapTo(base.transform.GetPosition());
 		}
 	}
@@ -557,8 +562,6 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private float maxOrthographicSize = 20f;
 
-	private float maxOrthographicSizeDebug = 200f;
-
 	private float overrideZoomSpeed;
 
 	private bool panning;
@@ -603,4 +606,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	private MultipleRenderTarget mrt;
 
 	public SoundCuller soundCuller;
+
+	public class Tuning : TuningData<CameraController.Tuning>
+	{
+		public float maxOrthographicSizeDebug;
+	}
 }

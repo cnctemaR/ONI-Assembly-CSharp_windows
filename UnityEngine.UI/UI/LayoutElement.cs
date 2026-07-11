@@ -129,7 +129,14 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				return 1;
+				return this.m_LayoutPriority;
+			}
+			set
+			{
+				if (SetPropertyUtility.SetStruct<int>(ref this.m_LayoutPriority, value))
+				{
+					this.SetDirty();
+				}
 			}
 		}
 
@@ -188,5 +195,8 @@ namespace UnityEngine.UI
 
 		[SerializeField]
 		private float m_FlexibleHeight = -1f;
+
+		[SerializeField]
+		private int m_LayoutPriority = 1;
 	}
 }

@@ -748,7 +748,6 @@ namespace UnityEngine.Networking
 				this.m_LocalConnection.Dispose();
 				this.m_LocalConnection = null;
 			}
-			NetworkServer.s_Active = false;
 			this.m_LocalClientActive = false;
 		}
 
@@ -1927,50 +1926,50 @@ namespace UnityEngine.Networking
 			return flag;
 		}
 
+		private static bool ValidateSceneObject(NetworkIdentity netId)
+		{
+			return netId.gameObject.hideFlags != HideFlags.NotEditable && netId.gameObject.hideFlags != HideFlags.HideAndDontSave && !netId.sceneId.IsEmpty();
+		}
+
 		public static bool SpawnObjects()
 		{
-			if (NetworkServer.active)
+			bool flag;
+			if (!NetworkServer.active)
+			{
+				flag = true;
+			}
+			else
 			{
 				foreach (NetworkIdentity networkIdentity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
 				{
-					if (networkIdentity.gameObject.hideFlags != HideFlags.NotEditable && networkIdentity.gameObject.hideFlags != HideFlags.HideAndDontSave)
+					if (NetworkServer.ValidateSceneObject(networkIdentity))
 					{
-						if (!networkIdentity.sceneId.IsEmpty())
+						if (LogFilter.logDebug)
 						{
-							if (LogFilter.logDebug)
+							Debug.Log(string.Concat(new object[]
 							{
-								Debug.Log(string.Concat(new object[]
-								{
-									"SpawnObjects sceneId:",
-									networkIdentity.sceneId,
-									" name:",
-									networkIdentity.gameObject.name
-								}));
-							}
-							networkIdentity.gameObject.SetActive(true);
+								"SpawnObjects sceneId:",
+								networkIdentity.sceneId,
+								" name:",
+								networkIdentity.gameObject.name
+							}));
 						}
+						networkIdentity.Reset();
+						networkIdentity.gameObject.SetActive(true);
 					}
 				}
 				NetworkIdentity[] array;
 				foreach (NetworkIdentity networkIdentity2 in array)
 				{
-					if (networkIdentity2.gameObject.hideFlags != HideFlags.NotEditable && networkIdentity2.gameObject.hideFlags != HideFlags.HideAndDontSave)
+					if (NetworkServer.ValidateSceneObject(networkIdentity2))
 					{
-						if (!networkIdentity2.sceneId.IsEmpty())
-						{
-							if (!networkIdentity2.isServer)
-							{
-								if (!(networkIdentity2.gameObject == null))
-								{
-									NetworkServer.Spawn(networkIdentity2.gameObject);
-									networkIdentity2.ForceAuthority(true);
-								}
-							}
-						}
+						NetworkServer.Spawn(networkIdentity2.gameObject);
+						networkIdentity2.ForceAuthority(true);
 					}
 				}
+				flag = true;
 			}
-			return true;
+			return flag;
 		}
 
 		private static void SendCrc(NetworkConnection targetConnection)

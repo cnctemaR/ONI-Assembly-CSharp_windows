@@ -1,0 +1,106 @@
+﻿using System;
+using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
+
+namespace UnityEngine
+{
+	/// <summary>
+	///   <para>A force applied constantly.</para>
+	/// </summary>
+	[NativeHeader("Runtime/Dynamics/ConstantForce.h")]
+	[RequireComponent(typeof(Rigidbody))]
+	public class ConstantForce : Behaviour
+	{
+		/// <summary>
+		///   <para>The force applied to the rigidbody every frame.</para>
+		/// </summary>
+		public Vector3 force
+		{
+			get
+			{
+				Vector3 vector;
+				this.get_force_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_force_Injected(ref value);
+			}
+		}
+
+		/// <summary>
+		///   <para>The force - relative to the rigid bodies coordinate system - applied every frame.</para>
+		/// </summary>
+		public Vector3 relativeForce
+		{
+			get
+			{
+				Vector3 vector;
+				this.get_relativeForce_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_relativeForce_Injected(ref value);
+			}
+		}
+
+		/// <summary>
+		///   <para>The torque applied to the rigidbody every frame.</para>
+		/// </summary>
+		public Vector3 torque
+		{
+			get
+			{
+				Vector3 vector;
+				this.get_torque_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_torque_Injected(ref value);
+			}
+		}
+
+		/// <summary>
+		///   <para>The torque - relative to the rigid bodies coordinate system - applied every frame.</para>
+		/// </summary>
+		public Vector3 relativeTorque
+		{
+			get
+			{
+				Vector3 vector;
+				this.get_relativeTorque_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_relativeTorque_Injected(ref value);
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_force_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_force_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_relativeForce_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_relativeForce_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_torque_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_torque_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_relativeTorque_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_relativeTorque_Injected(ref Vector3 value);
+	}
+}

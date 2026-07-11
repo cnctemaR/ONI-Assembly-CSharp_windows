@@ -10,6 +10,8 @@ namespace Microsoft.Win32
 
 		public const int AccessDenied = 5;
 
+		public const int InvalidHandle = 6;
+
 		public const int InvalidParameter = 87;
 
 		public const int MoreData = 234;
@@ -19,5 +21,7 @@ namespace Microsoft.Win32
 		public const int NoMoreEntries = 259;
 
 		public const int MarkedForDeletion = 1018;
+
+		public const int ChildMustBeVolatile = 1021;
 	}
 }

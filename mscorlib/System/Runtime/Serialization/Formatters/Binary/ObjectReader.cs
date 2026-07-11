@@ -1,962 +1,1116 @@
 ﻿using System;
-using System.Collections;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
+using System.Security;
+using System.Text;
+using System.Threading;
 
 namespace System.Runtime.Serialization.Formatters.Binary
 {
-	internal class ObjectReader
+	internal sealed class ObjectReader
 	{
-		public ObjectReader(BinaryFormatter formatter)
-		{
-			this._surrogateSelector = formatter.SurrogateSelector;
-			this._context = formatter.Context;
-			this._binder = formatter.Binder;
-			this._manager = new ObjectManager(this._surrogateSelector, this._context);
-			this._filterLevel = formatter.FilterLevel;
-		}
-
-		public void ReadObjectGraph(BinaryReader reader, bool readHeaders, out object result, out Header[] headers)
-		{
-			BinaryElement binaryElement = (BinaryElement)reader.ReadByte();
-			this.ReadObjectGraph(binaryElement, reader, readHeaders, out result, out headers);
-		}
-
-		public void ReadObjectGraph(BinaryElement elem, BinaryReader reader, bool readHeaders, out object result, out Header[] headers)
-		{
-			headers = null;
-			bool flag = this.ReadNextObject(elem, reader);
-			if (flag)
-			{
-				do
-				{
-					if (readHeaders && headers == null)
-					{
-						headers = (Header[])this.CurrentObject;
-					}
-					else if (this._rootObjectID == 0L)
-					{
-						this._rootObjectID = this._lastObjectID;
-					}
-				}
-				while (this.ReadNextObject(reader));
-			}
-			result = this._manager.GetObject(this._rootObjectID);
-		}
-
-		private bool ReadNextObject(BinaryElement element, BinaryReader reader)
-		{
-			if (element == BinaryElement.End)
-			{
-				this._manager.DoFixups();
-				this._manager.RaiseDeserializationEvent();
-				return false;
-			}
-			long num;
-			SerializationInfo serializationInfo;
-			this.ReadObject(element, reader, out num, out this._lastObject, out serializationInfo);
-			if (num != 0L)
-			{
-				this.RegisterObject(num, this._lastObject, serializationInfo, 0L, null, null);
-				this._lastObjectID = num;
-			}
-			return true;
-		}
-
-		public bool ReadNextObject(BinaryReader reader)
-		{
-			BinaryElement binaryElement = (BinaryElement)reader.ReadByte();
-			if (binaryElement == BinaryElement.End)
-			{
-				this._manager.DoFixups();
-				this._manager.RaiseDeserializationEvent();
-				return false;
-			}
-			long num;
-			SerializationInfo serializationInfo;
-			this.ReadObject(binaryElement, reader, out num, out this._lastObject, out serializationInfo);
-			if (num != 0L)
-			{
-				this.RegisterObject(num, this._lastObject, serializationInfo, 0L, null, null);
-				this._lastObjectID = num;
-			}
-			return true;
-		}
-
-		public object CurrentObject
+		private SerStack ValueFixupStack
 		{
 			get
 			{
-				return this._lastObject;
+				if (this.valueFixupStack == null)
+				{
+					this.valueFixupStack = new SerStack("ValueType Fixup Stack");
+				}
+				return this.valueFixupStack;
 			}
 		}
 
-		private void ReadObject(BinaryElement element, BinaryReader reader, out long objectId, out object value, out SerializationInfo info)
+		internal object TopObject
 		{
-			switch (element)
+			get
 			{
-			case BinaryElement.RefTypeObject:
-				this.ReadRefTypeObjectInstance(reader, out objectId, out value, out info);
+				return this.m_topObject;
+			}
+			set
+			{
+				this.m_topObject = value;
+				if (this.m_objectManager != null)
+				{
+					this.m_objectManager.TopObject = value;
+				}
+			}
+		}
+
+		internal void SetMethodCall(BinaryMethodCall binaryMethodCall)
+		{
+			this.bMethodCall = true;
+			this.binaryMethodCall = binaryMethodCall;
+		}
+
+		internal void SetMethodReturn(BinaryMethodReturn binaryMethodReturn)
+		{
+			this.bMethodReturn = true;
+			this.binaryMethodReturn = binaryMethodReturn;
+		}
+
+		internal ObjectReader(Stream stream, ISurrogateSelector selector, StreamingContext context, InternalFE formatterEnums, SerializationBinder binder)
+		{
+			if (stream == null)
+			{
+				throw new ArgumentNullException("stream", Environment.GetResourceString("Stream cannot be null."));
+			}
+			this.m_stream = stream;
+			this.m_surrogates = selector;
+			this.m_context = context;
+			this.m_binder = binder;
+			this.formatterEnums = formatterEnums;
+		}
+
+		[SecurityCritical]
+		internal object Deserialize(HeaderHandler handler, __BinaryParser serParser, bool fCheck, bool isCrossAppDomain, IMethodCallMessage methodCallMessage)
+		{
+			if (serParser == null)
+			{
+				throw new ArgumentNullException("serParser", Environment.GetResourceString("Parameter '{0}' cannot be null.", new object[] { serParser }));
+			}
+			this.bFullDeserialization = false;
+			this.TopObject = null;
+			this.topId = 0L;
+			this.bMethodCall = false;
+			this.bMethodReturn = false;
+			this.bIsCrossAppDomain = isCrossAppDomain;
+			this.bSimpleAssembly = this.formatterEnums.FEassemblyFormat == FormatterAssemblyStyle.Simple;
+			this.handler = handler;
+			serParser.Run();
+			if (this.bFullDeserialization)
+			{
+				this.m_objectManager.DoFixups();
+			}
+			if (!this.bMethodCall && !this.bMethodReturn)
+			{
+				if (this.TopObject == null)
+				{
+					throw new SerializationException(Environment.GetResourceString("No top object."));
+				}
+				if (this.HasSurrogate(this.TopObject.GetType()) && this.topId != 0L)
+				{
+					this.TopObject = this.m_objectManager.GetObject(this.topId);
+				}
+				if (this.TopObject is IObjectReference)
+				{
+					this.TopObject = ((IObjectReference)this.TopObject).GetRealObject(this.m_context);
+				}
+			}
+			if (this.bFullDeserialization)
+			{
+				this.m_objectManager.RaiseDeserializationEvent();
+			}
+			if (handler != null)
+			{
+				this.handlerObject = handler(this.headers);
+			}
+			if (this.bMethodCall)
+			{
+				object[] array = this.TopObject as object[];
+				this.TopObject = this.binaryMethodCall.ReadArray(array, this.handlerObject);
+			}
+			else if (this.bMethodReturn)
+			{
+				object[] array2 = this.TopObject as object[];
+				this.TopObject = this.binaryMethodReturn.ReadArray(array2, methodCallMessage, this.handlerObject);
+			}
+			return this.TopObject;
+		}
+
+		[SecurityCritical]
+		private bool HasSurrogate(Type t)
+		{
+			ISurrogateSelector surrogateSelector;
+			return this.m_surrogates != null && this.m_surrogates.GetSurrogate(t, this.m_context, out surrogateSelector) != null;
+		}
+
+		[SecurityCritical]
+		private void CheckSerializable(Type t)
+		{
+			if (!t.IsSerializable && !this.HasSurrogate(t))
+			{
+				throw new SerializationException(string.Format(CultureInfo.InvariantCulture, Environment.GetResourceString("Type '{0}' in Assembly '{1}' is not marked as serializable."), t.FullName, t.Assembly.FullName));
+			}
+		}
+
+		[SecurityCritical]
+		private void InitFullDeserialization()
+		{
+			this.bFullDeserialization = true;
+			this.stack = new SerStack("ObjectReader Object Stack");
+			this.m_objectManager = new ObjectManager(this.m_surrogates, this.m_context, false, this.bIsCrossAppDomain);
+			if (this.m_formatterConverter == null)
+			{
+				this.m_formatterConverter = new FormatterConverter();
+			}
+		}
+
+		internal object CrossAppDomainArray(int index)
+		{
+			return this.crossAppDomainArray[index];
+		}
+
+		[SecurityCritical]
+		internal ReadObjectInfo CreateReadObjectInfo(Type objectType)
+		{
+			return ReadObjectInfo.Create(objectType, this.m_surrogates, this.m_context, this.m_objectManager, this.serObjectInfoInit, this.m_formatterConverter, this.bSimpleAssembly);
+		}
+
+		[SecurityCritical]
+		internal ReadObjectInfo CreateReadObjectInfo(Type objectType, string[] memberNames, Type[] memberTypes)
+		{
+			return ReadObjectInfo.Create(objectType, memberNames, memberTypes, this.m_surrogates, this.m_context, this.m_objectManager, this.serObjectInfoInit, this.m_formatterConverter, this.bSimpleAssembly);
+		}
+
+		[SecurityCritical]
+		internal void Parse(ParseRecord pr)
+		{
+			switch (pr.PRparseTypeEnum)
+			{
+			case InternalParseTypeE.SerializedStreamHeader:
+				this.ParseSerializedStreamHeader(pr);
 				return;
-			case BinaryElement.UntypedRuntimeObject:
-				this.ReadObjectInstance(reader, true, false, out objectId, out value, out info);
+			case InternalParseTypeE.Object:
+				this.ParseObject(pr);
 				return;
-			case BinaryElement.UntypedExternalObject:
-				this.ReadObjectInstance(reader, false, false, out objectId, out value, out info);
+			case InternalParseTypeE.Member:
+				this.ParseMember(pr);
 				return;
-			case BinaryElement.RuntimeObject:
-				this.ReadObjectInstance(reader, true, true, out objectId, out value, out info);
+			case InternalParseTypeE.ObjectEnd:
+				this.ParseObjectEnd(pr);
 				return;
-			case BinaryElement.ExternalObject:
-				this.ReadObjectInstance(reader, false, true, out objectId, out value, out info);
+			case InternalParseTypeE.MemberEnd:
+				this.ParseMemberEnd(pr);
 				return;
-			case BinaryElement.String:
-				info = null;
-				this.ReadStringIntance(reader, out objectId, out value);
+			case InternalParseTypeE.SerializedStreamHeaderEnd:
+				this.ParseSerializedStreamHeaderEnd(pr);
 				return;
-			case BinaryElement.GenericArray:
-				info = null;
-				this.ReadGenericArray(reader, out objectId, out value);
-				return;
-			case BinaryElement.BoxedPrimitiveTypeValue:
-				value = this.ReadBoxedPrimitiveTypeValue(reader);
-				objectId = 0L;
-				info = null;
-				return;
-			case BinaryElement.NullValue:
-				value = null;
-				objectId = 0L;
-				info = null;
-				return;
-			case BinaryElement.Assembly:
-				this.ReadAssembly(reader);
-				this.ReadObject((BinaryElement)reader.ReadByte(), reader, out objectId, out value, out info);
-				return;
-			case BinaryElement.ArrayFiller8b:
-				value = new ObjectReader.ArrayNullFiller((int)reader.ReadByte());
-				objectId = 0L;
-				info = null;
-				return;
-			case BinaryElement.ArrayFiller32b:
-				value = new ObjectReader.ArrayNullFiller(reader.ReadInt32());
-				objectId = 0L;
-				info = null;
-				return;
-			case BinaryElement.ArrayOfPrimitiveType:
-				this.ReadArrayOfPrimitiveType(reader, out objectId, out value);
-				info = null;
-				return;
-			case BinaryElement.ArrayOfObject:
-				this.ReadArrayOfObject(reader, out objectId, out value);
-				info = null;
-				return;
-			case BinaryElement.ArrayOfString:
-				this.ReadArrayOfString(reader, out objectId, out value);
-				info = null;
+			case InternalParseTypeE.Envelope:
+			case InternalParseTypeE.EnvelopeEnd:
+			case InternalParseTypeE.Body:
+			case InternalParseTypeE.BodyEnd:
 				return;
 			}
-			throw new SerializationException("Unexpected binary element: " + (int)element);
+			throw new SerializationException(Environment.GetResourceString("Invalid element '{0}'.", new object[] { pr.PRname }));
 		}
 
-		private void ReadAssembly(BinaryReader reader)
+		private void ParseError(ParseRecord processing, ParseRecord onStack)
 		{
-			long num = (long)((ulong)reader.ReadUInt32());
-			string text = reader.ReadString();
-			this._registeredAssemblies[num] = text;
+			throw new SerializationException(Environment.GetResourceString("Parse error. Current element is not compatible with the next element, {0}.", new object[] { string.Concat(new object[] { onStack.PRname, " ", onStack.PRparseTypeEnum, " ", processing.PRname, " ", processing.PRparseTypeEnum }) }));
 		}
 
-		private void ReadObjectInstance(BinaryReader reader, bool isRuntimeObject, bool hasTypeInfo, out long objectId, out object value, out SerializationInfo info)
+		private void ParseSerializedStreamHeader(ParseRecord pr)
 		{
-			objectId = (long)((ulong)reader.ReadUInt32());
-			ObjectReader.TypeMetadata typeMetadata = this.ReadTypeMetadata(reader, isRuntimeObject, hasTypeInfo);
-			this.ReadObjectContent(reader, typeMetadata, objectId, out value, out info);
+			this.stack.Push(pr);
 		}
 
-		private void ReadRefTypeObjectInstance(BinaryReader reader, out long objectId, out object value, out SerializationInfo info)
+		private void ParseSerializedStreamHeaderEnd(ParseRecord pr)
 		{
-			objectId = (long)((ulong)reader.ReadUInt32());
-			long num = (long)((ulong)reader.ReadUInt32());
-			object @object = this._manager.GetObject(num);
-			if (@object == null)
+			this.stack.Pop();
+		}
+
+		private bool IsRemoting
+		{
+			get
 			{
-				throw new SerializationException("Invalid binary format");
+				return this.bMethodCall || this.bMethodReturn;
 			}
-			ObjectReader.TypeMetadata typeMetadata = (ObjectReader.TypeMetadata)this._typeMetadataCache[@object.GetType()];
-			this.ReadObjectContent(reader, typeMetadata, objectId, out value, out info);
 		}
 
-		private void ReadObjectContent(BinaryReader reader, ObjectReader.TypeMetadata metadata, long objectId, out object objectInstance, out SerializationInfo info)
+		[SecurityCritical]
+		internal void CheckSecurity(ParseRecord pr)
 		{
-			if (this._filterLevel == TypeFilterLevel.Low)
+			Type prdtType = pr.PRdtType;
+			if (prdtType != null && this.IsRemoting)
 			{
-				objectInstance = FormatterServices.GetSafeUninitializedObject(metadata.Type);
+				if (typeof(MarshalByRefObject).IsAssignableFrom(prdtType))
+				{
+					throw new ArgumentException(Environment.GetResourceString("Type {0} must be marshaled by reference in this context.", new object[] { prdtType.FullName }));
+				}
+				FormatterServices.CheckTypeSecurity(prdtType, this.formatterEnums.FEsecurityLevel);
+			}
+		}
+
+		[SecurityCritical]
+		private void ParseObject(ParseRecord pr)
+		{
+			if (!this.bFullDeserialization)
+			{
+				this.InitFullDeserialization();
+			}
+			if (pr.PRobjectPositionEnum == InternalObjectPositionE.Top)
+			{
+				this.topId = pr.PRobjectId;
+			}
+			if (pr.PRparseTypeEnum == InternalParseTypeE.Object)
+			{
+				this.stack.Push(pr);
+			}
+			if (pr.PRobjectTypeEnum == InternalObjectTypeE.Array)
+			{
+				this.ParseArray(pr);
+				return;
+			}
+			if (pr.PRdtType == null)
+			{
+				pr.PRnewObj = new TypeLoadExceptionHolder(pr.PRkeyDt);
+				return;
+			}
+			if (pr.PRdtType == Converter.typeofString)
+			{
+				if (pr.PRvalue == null)
+				{
+					return;
+				}
+				pr.PRnewObj = pr.PRvalue;
+				if (pr.PRobjectPositionEnum == InternalObjectPositionE.Top)
+				{
+					this.TopObject = pr.PRnewObj;
+					return;
+				}
+				this.stack.Pop();
+				this.RegisterObject(pr.PRnewObj, pr, (ParseRecord)this.stack.Peek());
+				return;
 			}
 			else
 			{
-				objectInstance = FormatterServices.GetUninitializedObject(metadata.Type);
-			}
-			this._manager.RaiseOnDeserializingEvent(objectInstance);
-			info = ((!metadata.NeedsSerializationInfo) ? null : new SerializationInfo(metadata.Type, new FormatterConverter()));
-			if (metadata.MemberNames != null)
-			{
-				for (int i = 0; i < metadata.FieldCount; i++)
+				this.CheckSerializable(pr.PRdtType);
+				if (this.IsRemoting && this.formatterEnums.FEsecurityLevel != TypeFilterLevel.Full)
 				{
-					this.ReadValue(reader, objectInstance, objectId, info, metadata.MemberTypes[i], metadata.MemberNames[i], null, null);
+					pr.PRnewObj = FormatterServices.GetSafeUninitializedObject(pr.PRdtType);
 				}
-			}
-			else
-			{
-				for (int j = 0; j < metadata.FieldCount; j++)
+				else
 				{
-					this.ReadValue(reader, objectInstance, objectId, info, metadata.MemberTypes[j], metadata.MemberInfos[j].Name, metadata.MemberInfos[j], null);
+					pr.PRnewObj = FormatterServices.GetUninitializedObject(pr.PRdtType);
 				}
-			}
-		}
-
-		private void RegisterObject(long objectId, object objectInstance, SerializationInfo info, long parentObjectId, MemberInfo parentObjectMemeber, int[] indices)
-		{
-			if (parentObjectId == 0L)
-			{
-				indices = null;
-			}
-			if (!objectInstance.GetType().IsValueType || parentObjectId == 0L)
-			{
-				this._manager.RegisterObject(objectInstance, objectId, info, 0L, null, null);
-			}
-			else
-			{
-				if (indices != null)
+				this.m_objectManager.RaiseOnDeserializingEvent(pr.PRnewObj);
+				if (pr.PRnewObj == null)
 				{
-					indices = (int[])indices.Clone();
+					throw new SerializationException(Environment.GetResourceString("Top object cannot be instantiated for element '{0}'.", new object[] { pr.PRdtType }));
 				}
-				this._manager.RegisterObject(objectInstance, objectId, info, parentObjectId, parentObjectMemeber, indices);
-			}
-		}
-
-		private void ReadStringIntance(BinaryReader reader, out long objectId, out object value)
-		{
-			objectId = (long)((ulong)reader.ReadUInt32());
-			value = reader.ReadString();
-		}
-
-		private void ReadGenericArray(BinaryReader reader, out long objectId, out object val)
-		{
-			objectId = (long)((ulong)reader.ReadUInt32());
-			reader.ReadByte();
-			int num = reader.ReadInt32();
-			bool flag = false;
-			int[] array = new int[num];
-			for (int i = 0; i < num; i++)
-			{
-				array[i] = reader.ReadInt32();
-				if (array[i] == 0)
+				if (pr.PRobjectPositionEnum == InternalObjectPositionE.Top)
 				{
-					flag = true;
+					this.TopObject = pr.PRnewObj;
 				}
-			}
-			TypeTag typeTag = (TypeTag)reader.ReadByte();
-			Type type = this.ReadType(reader, typeTag);
-			Array array2 = Array.CreateInstance(type, array);
-			if (flag)
-			{
-				val = array2;
+				if (pr.PRobjectInfo == null)
+				{
+					pr.PRobjectInfo = ReadObjectInfo.Create(pr.PRdtType, this.m_surrogates, this.m_context, this.m_objectManager, this.serObjectInfoInit, this.m_formatterConverter, this.bSimpleAssembly);
+				}
+				this.CheckSecurity(pr);
 				return;
 			}
-			int[] array3 = new int[num];
-			for (int j = num - 1; j >= 0; j--)
+		}
+
+		[SecurityCritical]
+		private void ParseObjectEnd(ParseRecord pr)
+		{
+			ParseRecord parseRecord = (ParseRecord)this.stack.Peek();
+			if (parseRecord == null)
 			{
-				array3[j] = array2.GetLowerBound(j);
+				parseRecord = pr;
 			}
-			bool flag2 = false;
-			while (!flag2)
+			if (parseRecord.PRobjectPositionEnum == InternalObjectPositionE.Top && parseRecord.PRdtType == Converter.typeofString)
 			{
-				this.ReadValue(reader, array2, objectId, null, type, null, null, array3);
-				int k = array2.Rank - 1;
-				while (k >= 0)
+				parseRecord.PRnewObj = parseRecord.PRvalue;
+				this.TopObject = parseRecord.PRnewObj;
+				return;
+			}
+			this.stack.Pop();
+			ParseRecord parseRecord2 = (ParseRecord)this.stack.Peek();
+			if (parseRecord.PRnewObj == null)
+			{
+				return;
+			}
+			if (parseRecord.PRobjectTypeEnum == InternalObjectTypeE.Array)
+			{
+				if (parseRecord.PRobjectPositionEnum == InternalObjectPositionE.Top)
 				{
-					array3[k]++;
-					if (array3[k] > array2.GetUpperBound(k))
+					this.TopObject = parseRecord.PRnewObj;
+				}
+				this.RegisterObject(parseRecord.PRnewObj, parseRecord, parseRecord2);
+				return;
+			}
+			parseRecord.PRobjectInfo.PopulateObjectMembers(parseRecord.PRnewObj, parseRecord.PRmemberData);
+			if (!parseRecord.PRisRegistered && parseRecord.PRobjectId > 0L)
+			{
+				this.RegisterObject(parseRecord.PRnewObj, parseRecord, parseRecord2);
+			}
+			if (parseRecord.PRisValueTypeFixup)
+			{
+				((ValueFixup)this.ValueFixupStack.Pop()).Fixup(parseRecord, parseRecord2);
+			}
+			if (parseRecord.PRobjectPositionEnum == InternalObjectPositionE.Top)
+			{
+				this.TopObject = parseRecord.PRnewObj;
+			}
+			parseRecord.PRobjectInfo.ObjectEnd();
+		}
+
+		[SecurityCritical]
+		private void ParseArray(ParseRecord pr)
+		{
+			if (pr.PRarrayTypeEnum == InternalArrayTypeE.Base64)
+			{
+				if (pr.PRvalue.Length > 0)
+				{
+					pr.PRnewObj = Convert.FromBase64String(pr.PRvalue);
+				}
+				else
+				{
+					pr.PRnewObj = new byte[0];
+				}
+				if (this.stack.Peek() == pr)
+				{
+					this.stack.Pop();
+				}
+				if (pr.PRobjectPositionEnum == InternalObjectPositionE.Top)
+				{
+					this.TopObject = pr.PRnewObj;
+				}
+				ParseRecord parseRecord = (ParseRecord)this.stack.Peek();
+				this.RegisterObject(pr.PRnewObj, pr, parseRecord);
+			}
+			else if (pr.PRnewObj != null && Converter.IsWriteAsByteArray(pr.PRarrayElementTypeCode))
+			{
+				if (pr.PRobjectPositionEnum == InternalObjectPositionE.Top)
+				{
+					this.TopObject = pr.PRnewObj;
+				}
+				ParseRecord parseRecord2 = (ParseRecord)this.stack.Peek();
+				this.RegisterObject(pr.PRnewObj, pr, parseRecord2);
+			}
+			else if (pr.PRarrayTypeEnum == InternalArrayTypeE.Jagged || pr.PRarrayTypeEnum == InternalArrayTypeE.Single)
+			{
+				bool flag = true;
+				if (pr.PRlowerBoundA == null || pr.PRlowerBoundA[0] == 0)
+				{
+					if (pr.PRarrayElementType == Converter.typeofString)
 					{
-						if (k > 0)
+						pr.PRobjectA = new string[pr.PRlengthA[0]];
+						pr.PRnewObj = pr.PRobjectA;
+						flag = false;
+					}
+					else if (pr.PRarrayElementType == Converter.typeofObject)
+					{
+						pr.PRobjectA = new object[pr.PRlengthA[0]];
+						pr.PRnewObj = pr.PRobjectA;
+						flag = false;
+					}
+					else if (pr.PRarrayElementType != null)
+					{
+						pr.PRnewObj = Array.UnsafeCreateInstance(pr.PRarrayElementType, new int[] { pr.PRlengthA[0] });
+					}
+					pr.PRisLowerBound = false;
+				}
+				else
+				{
+					if (pr.PRarrayElementType != null)
+					{
+						pr.PRnewObj = Array.UnsafeCreateInstance(pr.PRarrayElementType, pr.PRlengthA, pr.PRlowerBoundA);
+					}
+					pr.PRisLowerBound = true;
+				}
+				if (pr.PRarrayTypeEnum == InternalArrayTypeE.Single)
+				{
+					if (!pr.PRisLowerBound && Converter.IsWriteAsByteArray(pr.PRarrayElementTypeCode))
+					{
+						pr.PRprimitiveArray = new PrimitiveArray(pr.PRarrayElementTypeCode, (Array)pr.PRnewObj);
+					}
+					else if (flag && pr.PRarrayElementType != null && !pr.PRarrayElementType.IsValueType && !pr.PRisLowerBound)
+					{
+						pr.PRobjectA = (object[])pr.PRnewObj;
+					}
+				}
+				if (pr.PRobjectPositionEnum == InternalObjectPositionE.Headers)
+				{
+					this.headers = (Header[])pr.PRnewObj;
+				}
+				pr.PRindexMap = new int[1];
+			}
+			else
+			{
+				if (pr.PRarrayTypeEnum != InternalArrayTypeE.Rectangular)
+				{
+					throw new SerializationException(Environment.GetResourceString("Invalid array type '{0}'.", new object[] { pr.PRarrayTypeEnum }));
+				}
+				pr.PRisLowerBound = false;
+				if (pr.PRlowerBoundA != null)
+				{
+					for (int i = 0; i < pr.PRrank; i++)
+					{
+						if (pr.PRlowerBoundA[i] != 0)
 						{
-							array3[k] = array2.GetLowerBound(k);
-							k--;
-							continue;
+							pr.PRisLowerBound = true;
 						}
-						flag2 = true;
 					}
-					break;
 				}
+				if (pr.PRarrayElementType != null)
+				{
+					if (!pr.PRisLowerBound)
+					{
+						pr.PRnewObj = Array.UnsafeCreateInstance(pr.PRarrayElementType, pr.PRlengthA);
+					}
+					else
+					{
+						pr.PRnewObj = Array.UnsafeCreateInstance(pr.PRarrayElementType, pr.PRlengthA, pr.PRlowerBoundA);
+					}
+				}
+				int num = 1;
+				for (int j = 0; j < pr.PRrank; j++)
+				{
+					num *= pr.PRlengthA[j];
+				}
+				pr.PRindexMap = new int[pr.PRrank];
+				pr.PRrectangularMap = new int[pr.PRrank];
+				pr.PRlinearlength = num;
 			}
-			val = array2;
+			this.CheckSecurity(pr);
 		}
 
-		private object ReadBoxedPrimitiveTypeValue(BinaryReader reader)
+		private void NextRectangleMap(ParseRecord pr)
 		{
-			Type type = this.ReadType(reader, TypeTag.PrimitiveType);
-			return ObjectReader.ReadPrimitiveTypeValue(reader, type);
-		}
-
-		private void ReadArrayOfPrimitiveType(BinaryReader reader, out long objectId, out object val)
-		{
-			objectId = (long)((ulong)reader.ReadUInt32());
-			int num = reader.ReadInt32();
-			Type type = this.ReadType(reader, TypeTag.PrimitiveType);
-			switch (Type.GetTypeCode(type))
+			for (int i = pr.PRrank - 1; i > -1; i--)
 			{
-			case TypeCode.Boolean:
-			{
-				bool[] array = new bool[num];
-				for (int i = 0; i < num; i++)
+				if (pr.PRrectangularMap[i] < pr.PRlengthA[i] - 1)
 				{
-					array[i] = reader.ReadBoolean();
-				}
-				val = array;
-				return;
-			}
-			case TypeCode.Char:
-			{
-				char[] array2 = new char[num];
-				int num2;
-				for (int j = 0; j < num; j += num2)
-				{
-					num2 = reader.Read(array2, j, num - j);
-					if (num2 == 0)
+					pr.PRrectangularMap[i]++;
+					if (i < pr.PRrank - 1)
 					{
-						break;
+						for (int j = i + 1; j < pr.PRrank; j++)
+						{
+							pr.PRrectangularMap[j] = 0;
+						}
 					}
+					Array.Copy(pr.PRrectangularMap, pr.PRindexMap, pr.PRrank);
+					return;
 				}
-				val = array2;
-				return;
-			}
-			case TypeCode.SByte:
-			{
-				sbyte[] array3 = new sbyte[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array3, 1);
-				}
-				else
-				{
-					for (int k = 0; k < num; k++)
-					{
-						array3[k] = reader.ReadSByte();
-					}
-				}
-				val = array3;
-				return;
-			}
-			case TypeCode.Byte:
-			{
-				byte[] array4 = new byte[num];
-				int num3;
-				for (int l = 0; l < num; l += num3)
-				{
-					num3 = reader.Read(array4, l, num - l);
-					if (num3 == 0)
-					{
-						break;
-					}
-				}
-				val = array4;
-				return;
-			}
-			case TypeCode.Int16:
-			{
-				short[] array5 = new short[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array5, 2);
-				}
-				else
-				{
-					for (int m = 0; m < num; m++)
-					{
-						array5[m] = reader.ReadInt16();
-					}
-				}
-				val = array5;
-				return;
-			}
-			case TypeCode.UInt16:
-			{
-				ushort[] array6 = new ushort[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array6, 2);
-				}
-				else
-				{
-					for (int n = 0; n < num; n++)
-					{
-						array6[n] = reader.ReadUInt16();
-					}
-				}
-				val = array6;
-				return;
-			}
-			case TypeCode.Int32:
-			{
-				int[] array7 = new int[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array7, 4);
-				}
-				else
-				{
-					for (int num4 = 0; num4 < num; num4++)
-					{
-						array7[num4] = reader.ReadInt32();
-					}
-				}
-				val = array7;
-				return;
-			}
-			case TypeCode.UInt32:
-			{
-				uint[] array8 = new uint[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array8, 4);
-				}
-				else
-				{
-					for (int num5 = 0; num5 < num; num5++)
-					{
-						array8[num5] = reader.ReadUInt32();
-					}
-				}
-				val = array8;
-				return;
-			}
-			case TypeCode.Int64:
-			{
-				long[] array9 = new long[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array9, 8);
-				}
-				else
-				{
-					for (int num6 = 0; num6 < num; num6++)
-					{
-						array9[num6] = reader.ReadInt64();
-					}
-				}
-				val = array9;
-				return;
-			}
-			case TypeCode.UInt64:
-			{
-				ulong[] array10 = new ulong[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array10, 8);
-				}
-				else
-				{
-					for (int num7 = 0; num7 < num; num7++)
-					{
-						array10[num7] = reader.ReadUInt64();
-					}
-				}
-				val = array10;
-				return;
-			}
-			case TypeCode.Single:
-			{
-				float[] array11 = new float[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array11, 4);
-				}
-				else
-				{
-					for (int num8 = 0; num8 < num; num8++)
-					{
-						array11[num8] = reader.ReadSingle();
-					}
-				}
-				val = array11;
-				return;
-			}
-			case TypeCode.Double:
-			{
-				double[] array12 = new double[num];
-				if (num > 2)
-				{
-					this.BlockRead(reader, array12, 8);
-				}
-				else
-				{
-					for (int num9 = 0; num9 < num; num9++)
-					{
-						array12[num9] = reader.ReadDouble();
-					}
-				}
-				val = array12;
-				return;
-			}
-			case TypeCode.Decimal:
-			{
-				decimal[] array13 = new decimal[num];
-				for (int num10 = 0; num10 < num; num10++)
-				{
-					array13[num10] = reader.ReadDecimal();
-				}
-				val = array13;
-				return;
-			}
-			case TypeCode.DateTime:
-			{
-				DateTime[] array14 = new DateTime[num];
-				for (int num11 = 0; num11 < num; num11++)
-				{
-					array14[num11] = DateTime.FromBinary(reader.ReadInt64());
-				}
-				val = array14;
-				return;
-			}
-			case TypeCode.String:
-			{
-				string[] array15 = new string[num];
-				for (int num12 = 0; num12 < num; num12++)
-				{
-					array15[num12] = reader.ReadString();
-				}
-				val = array15;
-				return;
-			}
-			}
-			if (type != typeof(TimeSpan))
-			{
-				throw new NotSupportedException("Unsupported primitive type: " + type.FullName);
-			}
-			TimeSpan[] array16 = new TimeSpan[num];
-			for (int num13 = 0; num13 < num; num13++)
-			{
-				array16[num13] = new TimeSpan(reader.ReadInt64());
-			}
-			val = array16;
-		}
-
-		private void BlockRead(BinaryReader reader, Array array, int dataSize)
-		{
-			int i = Buffer.ByteLength(array);
-			if (this.arrayBuffer == null || (i > this.arrayBuffer.Length && this.arrayBuffer.Length != this.ArrayBufferLength))
-			{
-				this.arrayBuffer = new byte[(i > this.ArrayBufferLength) ? this.ArrayBufferLength : i];
-			}
-			int num = 0;
-			while (i > 0)
-			{
-				int num2 = ((i >= this.arrayBuffer.Length) ? this.arrayBuffer.Length : i);
-				int num3 = 0;
-				do
-				{
-					int num4 = reader.Read(this.arrayBuffer, num3, num2 - num3);
-					if (num4 == 0)
-					{
-						break;
-					}
-					num3 += num4;
-				}
-				while (num3 < num2);
-				IL_00A6:
-				if (!BitConverter.IsLittleEndian && dataSize > 1)
-				{
-					BinaryCommon.SwapBytes(this.arrayBuffer, num2, dataSize);
-				}
-				Buffer.BlockCopy(this.arrayBuffer, 0, array, num, num2);
-				i -= num2;
-				num += num2;
-				continue;
-				goto IL_00A6;
 			}
 		}
 
-		private void ReadArrayOfObject(BinaryReader reader, out long objectId, out object array)
+		[SecurityCritical]
+		private void ParseArrayMember(ParseRecord pr)
 		{
-			this.ReadSimpleArray(reader, typeof(object), out objectId, out array);
-		}
-
-		private void ReadArrayOfString(BinaryReader reader, out long objectId, out object array)
-		{
-			this.ReadSimpleArray(reader, typeof(string), out objectId, out array);
-		}
-
-		private void ReadSimpleArray(BinaryReader reader, Type elementType, out long objectId, out object val)
-		{
-			objectId = (long)((ulong)reader.ReadUInt32());
-			int num = reader.ReadInt32();
-			int[] array = new int[1];
-			Array array2 = Array.CreateInstance(elementType, num);
-			for (int i = 0; i < num; i++)
+			ParseRecord parseRecord = (ParseRecord)this.stack.Peek();
+			if (parseRecord.PRarrayTypeEnum == InternalArrayTypeE.Rectangular)
 			{
-				array[0] = i;
-				this.ReadValue(reader, array2, objectId, null, elementType, null, null, array);
-				i = array[0];
-			}
-			val = array2;
-		}
-
-		private ObjectReader.TypeMetadata ReadTypeMetadata(BinaryReader reader, bool isRuntimeObject, bool hasTypeInfo)
-		{
-			ObjectReader.TypeMetadata typeMetadata = new ObjectReader.TypeMetadata();
-			string text = reader.ReadString();
-			int num = reader.ReadInt32();
-			Type[] array = new Type[num];
-			string[] array2 = new string[num];
-			for (int i = 0; i < num; i++)
-			{
-				array2[i] = reader.ReadString();
-			}
-			if (hasTypeInfo)
-			{
-				TypeTag[] array3 = new TypeTag[num];
-				for (int j = 0; j < num; j++)
+				if (parseRecord.PRmemberIndex > 0)
 				{
-					array3[j] = (TypeTag)reader.ReadByte();
+					this.NextRectangleMap(parseRecord);
 				}
-				for (int k = 0; k < num; k++)
+				if (parseRecord.PRisLowerBound)
 				{
-					array[k] = this.ReadType(reader, array3[k]);
+					for (int i = 0; i < parseRecord.PRrank; i++)
+					{
+						parseRecord.PRindexMap[i] = parseRecord.PRrectangularMap[i] + parseRecord.PRlowerBoundA[i];
+					}
 				}
 			}
-			if (!isRuntimeObject)
+			else if (!parseRecord.PRisLowerBound)
 			{
-				long num2 = (long)((ulong)reader.ReadUInt32());
-				typeMetadata.Type = this.GetDeserializationType(num2, text);
+				parseRecord.PRindexMap[0] = parseRecord.PRmemberIndex;
 			}
 			else
 			{
-				typeMetadata.Type = Type.GetType(text, true);
+				parseRecord.PRindexMap[0] = parseRecord.PRlowerBoundA[0] + parseRecord.PRmemberIndex;
 			}
-			typeMetadata.MemberTypes = array;
-			typeMetadata.MemberNames = array2;
-			typeMetadata.FieldCount = array2.Length;
-			if (this._surrogateSelector != null)
+			if (pr.PRmemberValueEnum == InternalMemberValueE.Reference)
 			{
-				ISurrogateSelector surrogateSelector;
-				ISerializationSurrogate surrogate = this._surrogateSelector.GetSurrogate(typeMetadata.Type, this._context, out surrogateSelector);
-				typeMetadata.NeedsSerializationInfo = surrogate != null;
-			}
-			if (!typeMetadata.NeedsSerializationInfo)
-			{
-				if (!typeMetadata.Type.IsSerializable)
+				object @object = this.m_objectManager.GetObject(pr.PRidRef);
+				if (@object == null)
 				{
-					throw new SerializationException("Serializable objects must be marked with the Serializable attribute");
+					int[] array = new int[parseRecord.PRrank];
+					Array.Copy(parseRecord.PRindexMap, 0, array, 0, parseRecord.PRrank);
+					this.m_objectManager.RecordArrayElementFixup(parseRecord.PRobjectId, array, pr.PRidRef);
 				}
-				typeMetadata.NeedsSerializationInfo = typeof(ISerializable).IsAssignableFrom(typeMetadata.Type);
-				if (!typeMetadata.NeedsSerializationInfo)
+				else if (parseRecord.PRobjectA != null)
 				{
-					typeMetadata.MemberInfos = new MemberInfo[num];
-					for (int l = 0; l < num; l++)
+					parseRecord.PRobjectA[parseRecord.PRindexMap[0]] = @object;
+				}
+				else
+				{
+					((Array)parseRecord.PRnewObj).SetValue(@object, parseRecord.PRindexMap);
+				}
+			}
+			else if (pr.PRmemberValueEnum == InternalMemberValueE.Nested)
+			{
+				if (pr.PRdtType == null)
+				{
+					pr.PRdtType = parseRecord.PRarrayElementType;
+				}
+				this.ParseObject(pr);
+				this.stack.Push(pr);
+				if (parseRecord.PRarrayElementType != null)
+				{
+					if (parseRecord.PRarrayElementType.IsValueType && pr.PRarrayElementTypeCode == InternalPrimitiveTypeE.Invalid)
 					{
-						FieldInfo fieldInfo = null;
-						string text2 = array2[l];
-						int num3 = text2.IndexOf('+');
-						if (num3 != -1)
+						pr.PRisValueTypeFixup = true;
+						this.ValueFixupStack.Push(new ValueFixup((Array)parseRecord.PRnewObj, parseRecord.PRindexMap));
+					}
+					else if (parseRecord.PRobjectA != null)
+					{
+						parseRecord.PRobjectA[parseRecord.PRindexMap[0]] = pr.PRnewObj;
+					}
+					else
+					{
+						((Array)parseRecord.PRnewObj).SetValue(pr.PRnewObj, parseRecord.PRindexMap);
+					}
+				}
+			}
+			else if (pr.PRmemberValueEnum == InternalMemberValueE.InlineValue)
+			{
+				if (parseRecord.PRarrayElementType == Converter.typeofString || pr.PRdtType == Converter.typeofString)
+				{
+					this.ParseString(pr, parseRecord);
+					if (parseRecord.PRobjectA != null)
+					{
+						parseRecord.PRobjectA[parseRecord.PRindexMap[0]] = pr.PRvalue;
+					}
+					else
+					{
+						((Array)parseRecord.PRnewObj).SetValue(pr.PRvalue, parseRecord.PRindexMap);
+					}
+				}
+				else if (parseRecord.PRisArrayVariant)
+				{
+					if (pr.PRkeyDt == null)
+					{
+						throw new SerializationException(Environment.GetResourceString("Array element type is Object, 'dt' attribute is null."));
+					}
+					object obj;
+					if (pr.PRdtType == Converter.typeofString)
+					{
+						this.ParseString(pr, parseRecord);
+						obj = pr.PRvalue;
+					}
+					else if (pr.PRdtTypeCode == InternalPrimitiveTypeE.Invalid)
+					{
+						this.CheckSerializable(pr.PRdtType);
+						if (this.IsRemoting && this.formatterEnums.FEsecurityLevel != TypeFilterLevel.Full)
 						{
-							string text3 = array2[l].Substring(0, num3);
-							text2 = array2[l].Substring(num3 + 1);
-							for (Type type = typeMetadata.Type.BaseType; type != null; type = type.BaseType)
-							{
-								if (type.Name == text3)
-								{
-									fieldInfo = type.GetField(text2, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-									break;
-								}
-							}
+							obj = FormatterServices.GetSafeUninitializedObject(pr.PRdtType);
 						}
 						else
 						{
-							fieldInfo = typeMetadata.Type.GetField(text2, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-						}
-						if (fieldInfo == null)
-						{
-							throw new SerializationException("Field \"" + array2[l] + "\" not found in class " + typeMetadata.Type.FullName);
-						}
-						typeMetadata.MemberInfos[l] = fieldInfo;
-						if (!hasTypeInfo)
-						{
-							array[l] = fieldInfo.FieldType;
+							obj = FormatterServices.GetUninitializedObject(pr.PRdtType);
 						}
 					}
-					typeMetadata.MemberNames = null;
+					else if (pr.PRvarValue != null)
+					{
+						obj = pr.PRvarValue;
+					}
+					else
+					{
+						obj = Converter.FromString(pr.PRvalue, pr.PRdtTypeCode);
+					}
+					if (parseRecord.PRobjectA != null)
+					{
+						parseRecord.PRobjectA[parseRecord.PRindexMap[0]] = obj;
+					}
+					else
+					{
+						((Array)parseRecord.PRnewObj).SetValue(obj, parseRecord.PRindexMap);
+					}
 				}
-			}
-			if (!this._typeMetadataCache.ContainsKey(typeMetadata.Type))
-			{
-				this._typeMetadataCache[typeMetadata.Type] = typeMetadata;
-			}
-			return typeMetadata;
-		}
-
-		private void ReadValue(BinaryReader reader, object parentObject, long parentObjectId, SerializationInfo info, Type valueType, string fieldName, MemberInfo memberInfo, int[] indices)
-		{
-			object obj;
-			if (BinaryCommon.IsPrimitive(valueType))
-			{
-				obj = ObjectReader.ReadPrimitiveTypeValue(reader, valueType);
-				this.SetObjectValue(parentObject, fieldName, memberInfo, info, obj, valueType, indices);
-				return;
-			}
-			BinaryElement binaryElement = (BinaryElement)reader.ReadByte();
-			if (binaryElement == BinaryElement.ObjectReference)
-			{
-				long num = (long)((ulong)reader.ReadUInt32());
-				this.RecordFixup(parentObjectId, num, parentObject, info, fieldName, memberInfo, indices);
-				return;
-			}
-			long num2;
-			SerializationInfo serializationInfo;
-			this.ReadObject(binaryElement, reader, out num2, out obj, out serializationInfo);
-			bool flag = false;
-			if (num2 != 0L)
-			{
-				if (obj.GetType().IsValueType)
+				else if (parseRecord.PRprimitiveArray != null)
 				{
-					this.RecordFixup(parentObjectId, num2, parentObject, info, fieldName, memberInfo, indices);
-					flag = true;
-				}
-				if (info == null && !(parentObject is Array))
-				{
-					this.RegisterObject(num2, obj, serializationInfo, parentObjectId, memberInfo, null);
+					parseRecord.PRprimitiveArray.SetValue(pr.PRvalue, parseRecord.PRindexMap[0]);
 				}
 				else
 				{
-					this.RegisterObject(num2, obj, serializationInfo, parentObjectId, null, indices);
+					object obj2;
+					if (pr.PRvarValue != null)
+					{
+						obj2 = pr.PRvarValue;
+					}
+					else
+					{
+						obj2 = Converter.FromString(pr.PRvalue, parseRecord.PRarrayElementTypeCode);
+					}
+					if (parseRecord.PRobjectA != null)
+					{
+						parseRecord.PRobjectA[parseRecord.PRindexMap[0]] = obj2;
+					}
+					else
+					{
+						((Array)parseRecord.PRnewObj).SetValue(obj2, parseRecord.PRindexMap);
+					}
 				}
 			}
-			if (!flag)
+			else if (pr.PRmemberValueEnum == InternalMemberValueE.Null)
 			{
-				this.SetObjectValue(parentObject, fieldName, memberInfo, info, obj, valueType, indices);
-			}
-		}
-
-		private void SetObjectValue(object parentObject, string fieldName, MemberInfo memberInfo, SerializationInfo info, object value, Type valueType, int[] indices)
-		{
-			if (value is IObjectReference)
-			{
-				value = ((IObjectReference)value).GetRealObject(this._context);
-			}
-			if (parentObject is Array)
-			{
-				if (value is ObjectReader.ArrayNullFiller)
-				{
-					int nullCount = ((ObjectReader.ArrayNullFiller)value).NullCount;
-					indices[0] += nullCount - 1;
-				}
-				else
-				{
-					((Array)parentObject).SetValue(value, indices);
-				}
-			}
-			else if (info != null)
-			{
-				info.AddValue(fieldName, value, valueType);
-			}
-			else if (memberInfo is FieldInfo)
-			{
-				((FieldInfo)memberInfo).SetValue(parentObject, value);
+				parseRecord.PRmemberIndex += pr.PRnullCount - 1;
 			}
 			else
 			{
-				((PropertyInfo)memberInfo).SetValue(parentObject, value, null);
+				this.ParseError(pr, parseRecord);
+			}
+			parseRecord.PRmemberIndex++;
+		}
+
+		[SecurityCritical]
+		private void ParseArrayMemberEnd(ParseRecord pr)
+		{
+			if (pr.PRmemberValueEnum == InternalMemberValueE.Nested)
+			{
+				this.ParseObjectEnd(pr);
 			}
 		}
 
-		private void RecordFixup(long parentObjectId, long childObjectId, object parentObject, SerializationInfo info, string fieldName, MemberInfo memberInfo, int[] indices)
+		[SecurityCritical]
+		private void ParseMember(ParseRecord pr)
 		{
-			if (info != null)
+			ParseRecord parseRecord = (ParseRecord)this.stack.Peek();
+			InternalMemberTypeE prmemberTypeEnum = pr.PRmemberTypeEnum;
+			if (prmemberTypeEnum != InternalMemberTypeE.Field && prmemberTypeEnum == InternalMemberTypeE.Item)
 			{
-				this._manager.RecordDelayedFixup(parentObjectId, fieldName, childObjectId);
+				this.ParseArrayMember(pr);
+				return;
 			}
-			else if (parentObject is Array)
+			if (pr.PRdtType == null && parseRecord.PRobjectInfo.isTyped)
 			{
-				if (indices.Length == 1)
+				pr.PRdtType = parseRecord.PRobjectInfo.GetType(pr.PRname);
+				if (pr.PRdtType != null)
 				{
-					this._manager.RecordArrayElementFixup(parentObjectId, indices[0], childObjectId);
+					pr.PRdtTypeCode = Converter.ToCode(pr.PRdtType);
 				}
-				else
+			}
+			if (pr.PRmemberValueEnum == InternalMemberValueE.Null)
+			{
+				parseRecord.PRobjectInfo.AddValue(pr.PRname, null, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+				return;
+			}
+			if (pr.PRmemberValueEnum == InternalMemberValueE.Nested)
+			{
+				this.ParseObject(pr);
+				this.stack.Push(pr);
+				if (pr.PRobjectInfo != null && pr.PRobjectInfo.objectType != null && pr.PRobjectInfo.objectType.IsValueType)
 				{
-					this._manager.RecordArrayElementFixup(parentObjectId, (int[])indices.Clone(), childObjectId);
+					pr.PRisValueTypeFixup = true;
+					this.ValueFixupStack.Push(new ValueFixup(parseRecord.PRnewObj, pr.PRname, parseRecord.PRobjectInfo));
+					return;
 				}
+				parseRecord.PRobjectInfo.AddValue(pr.PRname, pr.PRnewObj, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+				return;
 			}
 			else
 			{
-				this._manager.RecordFixup(parentObjectId, memberInfo, childObjectId);
-			}
-		}
-
-		private Type GetDeserializationType(long assemblyId, string className)
-		{
-			string text = (string)this._registeredAssemblies[assemblyId];
-			Type type;
-			if (this._binder != null)
-			{
-				type = this._binder.BindToType(text, className);
-				if (type != null)
+				if (pr.PRmemberValueEnum != InternalMemberValueE.Reference)
 				{
-					return type;
-				}
-			}
-			Assembly assembly = Assembly.Load(text);
-			type = assembly.GetType(className, true);
-			if (type != null)
-			{
-				return type;
-			}
-			throw new SerializationException("Couldn't find type '" + className + "'.");
-		}
-
-		public Type ReadType(BinaryReader reader, TypeTag code)
-		{
-			switch (code)
-			{
-			case TypeTag.PrimitiveType:
-				return BinaryCommon.GetTypeFromCode((int)reader.ReadByte());
-			case TypeTag.String:
-				return typeof(string);
-			case TypeTag.ObjectType:
-				return typeof(object);
-			case TypeTag.RuntimeType:
-			{
-				string text = reader.ReadString();
-				if (this._context.State == StreamingContextStates.Remoting)
-				{
-					if (text == "System.RuntimeType")
+					if (pr.PRmemberValueEnum == InternalMemberValueE.InlineValue)
 					{
-						return typeof(MonoType);
+						if (pr.PRdtType == Converter.typeofString)
+						{
+							this.ParseString(pr, parseRecord);
+							parseRecord.PRobjectInfo.AddValue(pr.PRname, pr.PRvalue, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+							return;
+						}
+						if (pr.PRdtTypeCode != InternalPrimitiveTypeE.Invalid)
+						{
+							object obj;
+							if (pr.PRvarValue != null)
+							{
+								obj = pr.PRvarValue;
+							}
+							else
+							{
+								obj = Converter.FromString(pr.PRvalue, pr.PRdtTypeCode);
+							}
+							parseRecord.PRobjectInfo.AddValue(pr.PRname, obj, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+							return;
+						}
+						if (pr.PRarrayTypeEnum == InternalArrayTypeE.Base64)
+						{
+							parseRecord.PRobjectInfo.AddValue(pr.PRname, Convert.FromBase64String(pr.PRvalue), ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+							return;
+						}
+						if (pr.PRdtType == Converter.typeofObject)
+						{
+							throw new SerializationException(Environment.GetResourceString("Type is missing for member of type Object '{0}'.", new object[] { pr.PRname }));
+						}
+						this.ParseString(pr, parseRecord);
+						if (pr.PRdtType == Converter.typeofSystemVoid)
+						{
+							parseRecord.PRobjectInfo.AddValue(pr.PRname, pr.PRdtType, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+							return;
+						}
+						if (parseRecord.PRobjectInfo.isSi)
+						{
+							parseRecord.PRobjectInfo.AddValue(pr.PRname, pr.PRvalue, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+							return;
+						}
 					}
-					if (text == "System.RuntimeType[]")
+					else
 					{
-						return typeof(MonoType[]);
+						this.ParseError(pr, parseRecord);
 					}
+					return;
 				}
-				Type type = Type.GetType(text);
-				if (type != null)
+				object @object = this.m_objectManager.GetObject(pr.PRidRef);
+				if (@object == null)
 				{
-					return type;
+					parseRecord.PRobjectInfo.AddValue(pr.PRname, null, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+					parseRecord.PRobjectInfo.RecordFixup(parseRecord.PRobjectId, pr.PRname, pr.PRidRef);
+					return;
 				}
-				throw new SerializationException(string.Format("Could not find type '{0}'.", text));
-			}
-			case TypeTag.GenericType:
-			{
-				string text2 = reader.ReadString();
-				long num = (long)((ulong)reader.ReadUInt32());
-				return this.GetDeserializationType(num, text2);
-			}
-			case TypeTag.ArrayOfObject:
-				return typeof(object[]);
-			case TypeTag.ArrayOfString:
-				return typeof(string[]);
-			case TypeTag.ArrayOfPrimitiveType:
-			{
-				Type typeFromCode = BinaryCommon.GetTypeFromCode((int)reader.ReadByte());
-				return Type.GetType(typeFromCode.FullName + "[]");
-			}
-			default:
-				throw new NotSupportedException("Unknow type tag");
+				parseRecord.PRobjectInfo.AddValue(pr.PRname, @object, ref parseRecord.PRsi, ref parseRecord.PRmemberData);
+				return;
 			}
 		}
 
-		public static object ReadPrimitiveTypeValue(BinaryReader reader, Type type)
+		[SecurityCritical]
+		private void ParseMemberEnd(ParseRecord pr)
 		{
+			InternalMemberTypeE prmemberTypeEnum = pr.PRmemberTypeEnum;
+			if (prmemberTypeEnum != InternalMemberTypeE.Field)
+			{
+				if (prmemberTypeEnum == InternalMemberTypeE.Item)
+				{
+					this.ParseArrayMemberEnd(pr);
+					return;
+				}
+				this.ParseError(pr, (ParseRecord)this.stack.Peek());
+			}
+			else if (pr.PRmemberValueEnum == InternalMemberValueE.Nested)
+			{
+				this.ParseObjectEnd(pr);
+				return;
+			}
+		}
+
+		[SecurityCritical]
+		private void ParseString(ParseRecord pr, ParseRecord parentPr)
+		{
+			if (!pr.PRisRegistered && pr.PRobjectId > 0L)
+			{
+				this.RegisterObject(pr.PRvalue, pr, parentPr, true);
+			}
+		}
+
+		[SecurityCritical]
+		private void RegisterObject(object obj, ParseRecord pr, ParseRecord objectPr)
+		{
+			this.RegisterObject(obj, pr, objectPr, false);
+		}
+
+		[SecurityCritical]
+		private void RegisterObject(object obj, ParseRecord pr, ParseRecord objectPr, bool bIsString)
+		{
+			if (!pr.PRisRegistered)
+			{
+				pr.PRisRegistered = true;
+				long num = 0L;
+				MemberInfo memberInfo = null;
+				int[] array = null;
+				if (objectPr != null)
+				{
+					array = objectPr.PRindexMap;
+					num = objectPr.PRobjectId;
+					if (objectPr.PRobjectInfo != null && !objectPr.PRobjectInfo.isSi)
+					{
+						memberInfo = objectPr.PRobjectInfo.GetMemberInfo(pr.PRname);
+					}
+				}
+				SerializationInfo prsi = pr.PRsi;
+				if (bIsString)
+				{
+					this.m_objectManager.RegisterString((string)obj, pr.PRobjectId, prsi, num, memberInfo);
+					return;
+				}
+				this.m_objectManager.RegisterObject(obj, pr.PRobjectId, prsi, num, memberInfo, array);
+			}
+		}
+
+		[SecurityCritical]
+		internal long GetId(long objectId)
+		{
+			if (!this.bFullDeserialization)
+			{
+				this.InitFullDeserialization();
+			}
+			if (objectId > 0L)
+			{
+				return objectId;
+			}
+			if (this.bOldFormatDetected || objectId == -1L)
+			{
+				this.bOldFormatDetected = true;
+				if (this.valTypeObjectIdTable == null)
+				{
+					this.valTypeObjectIdTable = new IntSizedArray();
+				}
+				long num;
+				if ((num = (long)this.valTypeObjectIdTable[(int)objectId]) == 0L)
+				{
+					num = 2147483647L + objectId;
+					this.valTypeObjectIdTable[(int)objectId] = (int)num;
+				}
+				return num;
+			}
+			return -1L * objectId;
+		}
+
+		[Conditional("SER_LOGGING")]
+		private void IndexTraceMessage(string message, int[] index)
+		{
+			StringBuilder stringBuilder = StringBuilderCache.Acquire(10);
+			stringBuilder.Append("[");
+			for (int i = 0; i < index.Length; i++)
+			{
+				stringBuilder.Append(index[i]);
+				if (i != index.Length - 1)
+				{
+					stringBuilder.Append(",");
+				}
+			}
+			stringBuilder.Append("]");
+		}
+
+		[SecurityCritical]
+		internal Type Bind(string assemblyString, string typeString)
+		{
+			Type type = null;
+			if (this.m_binder != null)
+			{
+				type = this.m_binder.BindToType(assemblyString, typeString);
+			}
 			if (type == null)
 			{
-				return null;
+				type = this.FastBindToType(assemblyString, typeString);
 			}
-			switch (Type.GetTypeCode(type))
-			{
-			case TypeCode.Boolean:
-				return reader.ReadBoolean();
-			case TypeCode.Char:
-				return reader.ReadChar();
-			case TypeCode.SByte:
-				return reader.ReadSByte();
-			case TypeCode.Byte:
-				return reader.ReadByte();
-			case TypeCode.Int16:
-				return reader.ReadInt16();
-			case TypeCode.UInt16:
-				return reader.ReadUInt16();
-			case TypeCode.Int32:
-				return reader.ReadInt32();
-			case TypeCode.UInt32:
-				return reader.ReadUInt32();
-			case TypeCode.Int64:
-				return reader.ReadInt64();
-			case TypeCode.UInt64:
-				return reader.ReadUInt64();
-			case TypeCode.Single:
-				return reader.ReadSingle();
-			case TypeCode.Double:
-				return reader.ReadDouble();
-			case TypeCode.Decimal:
-				return decimal.Parse(reader.ReadString(), CultureInfo.InvariantCulture);
-			case TypeCode.DateTime:
-				return DateTime.FromBinary(reader.ReadInt64());
-			case TypeCode.String:
-				return reader.ReadString();
-			}
-			if (type == typeof(TimeSpan))
-			{
-				return new TimeSpan(reader.ReadInt64());
-			}
-			throw new NotSupportedException("Unsupported primitive type: " + type.FullName);
+			return type;
 		}
 
-		private ISurrogateSelector _surrogateSelector;
-
-		private StreamingContext _context;
-
-		private SerializationBinder _binder;
-
-		private TypeFilterLevel _filterLevel;
-
-		private ObjectManager _manager;
-
-		private Hashtable _registeredAssemblies = new Hashtable();
-
-		private Hashtable _typeMetadataCache = new Hashtable();
-
-		private object _lastObject;
-
-		private long _lastObjectID;
-
-		private long _rootObjectID;
-
-		private byte[] arrayBuffer;
-
-		private int ArrayBufferLength = 4096;
-
-		private class TypeMetadata
+		[SecurityCritical]
+		internal Type FastBindToType(string assemblyName, string typeName)
 		{
-			public Type Type;
-
-			public Type[] MemberTypes;
-
-			public string[] MemberNames;
-
-			public MemberInfo[] MemberInfos;
-
-			public int FieldCount;
-
-			public bool NeedsSerializationInfo;
+			Type type = null;
+			ObjectReader.TypeNAssembly typeNAssembly = (ObjectReader.TypeNAssembly)this.typeCache.GetCachedValue(typeName);
+			if (typeNAssembly == null || typeNAssembly.assemblyName != assemblyName)
+			{
+				Assembly assembly = null;
+				if (this.bSimpleAssembly)
+				{
+					try
+					{
+						assembly = ObjectReader.ResolveSimpleAssemblyName(new AssemblyName(assemblyName));
+					}
+					catch (Exception)
+					{
+					}
+					if (assembly == null)
+					{
+						return null;
+					}
+					ObjectReader.GetSimplyNamedTypeFromAssembly(assembly, typeName, ref type);
+				}
+				else
+				{
+					try
+					{
+						assembly = Assembly.Load(assemblyName);
+					}
+					catch (Exception)
+					{
+					}
+					if (assembly == null)
+					{
+						return null;
+					}
+					type = FormatterServices.GetTypeFromAssembly(assembly, typeName);
+				}
+				if (type == null)
+				{
+					return null;
+				}
+				ObjectReader.CheckTypeForwardedTo(assembly, type.Assembly, type);
+				typeNAssembly = new ObjectReader.TypeNAssembly();
+				typeNAssembly.type = type;
+				typeNAssembly.assemblyName = assemblyName;
+				this.typeCache.SetCachedValue(typeNAssembly);
+			}
+			return typeNAssembly.type;
 		}
 
-		private class ArrayNullFiller
+		[SecurityCritical]
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static Assembly ResolveSimpleAssemblyName(AssemblyName assemblyName)
 		{
-			public ArrayNullFiller(int count)
+			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMe;
+			Assembly assembly = RuntimeAssembly.LoadWithPartialNameInternal(assemblyName, null, ref stackCrawlMark);
+			if (assembly == null && assemblyName != null)
 			{
-				this.NullCount = count;
+				assembly = RuntimeAssembly.LoadWithPartialNameInternal(assemblyName.Name, null, ref stackCrawlMark);
+			}
+			return assembly;
+		}
+
+		[SecurityCritical]
+		private static void GetSimplyNamedTypeFromAssembly(Assembly assm, string typeName, ref Type type)
+		{
+			try
+			{
+				type = FormatterServices.GetTypeFromAssembly(assm, typeName);
+			}
+			catch (TypeLoadException)
+			{
+			}
+			catch (FileNotFoundException)
+			{
+			}
+			catch (FileLoadException)
+			{
+			}
+			catch (BadImageFormatException)
+			{
+			}
+			if (type == null)
+			{
+				type = Type.GetType(typeName, new Func<AssemblyName, Assembly>(ObjectReader.ResolveSimpleAssemblyName), new Func<Assembly, string, bool, Type>(new ObjectReader.TopLevelAssemblyTypeResolver(assm).ResolveType), false);
+			}
+		}
+
+		[SecurityCritical]
+		internal Type GetType(BinaryAssemblyInfo assemblyInfo, string name)
+		{
+			Type type = null;
+			if (this.previousName != null && this.previousName.Length == name.Length && this.previousName.Equals(name) && this.previousAssemblyString != null && this.previousAssemblyString.Length == assemblyInfo.assemblyString.Length && this.previousAssemblyString.Equals(assemblyInfo.assemblyString))
+			{
+				type = this.previousType;
+			}
+			else
+			{
+				type = this.Bind(assemblyInfo.assemblyString, name);
+				if (type == null)
+				{
+					Assembly assembly = assemblyInfo.GetAssembly();
+					if (this.bSimpleAssembly)
+					{
+						ObjectReader.GetSimplyNamedTypeFromAssembly(assembly, name, ref type);
+					}
+					else
+					{
+						type = FormatterServices.GetTypeFromAssembly(assembly, name);
+					}
+					if (type != null)
+					{
+						ObjectReader.CheckTypeForwardedTo(assembly, type.Assembly, type);
+					}
+				}
+				this.previousAssemblyString = assemblyInfo.assemblyString;
+				this.previousName = name;
+				this.previousType = type;
+			}
+			return type;
+		}
+
+		[SecuritySafeCritical]
+		private static void CheckTypeForwardedTo(Assembly sourceAssembly, Assembly destAssembly, Type resolvedType)
+		{
+			if (!FormatterServices.UnsafeTypeForwardersIsEnabled() && sourceAssembly != destAssembly)
+			{
+				TypeInformation typeInformation = BinaryFormatter.GetTypeInformation(resolvedType);
+				if (typeInformation.HasTypeForwardedFrom)
+				{
+					try
+					{
+						Assembly.Load(typeInformation.AssemblyString);
+					}
+					catch
+					{
+					}
+				}
+			}
+		}
+
+		internal Stream m_stream;
+
+		internal ISurrogateSelector m_surrogates;
+
+		internal StreamingContext m_context;
+
+		internal ObjectManager m_objectManager;
+
+		internal InternalFE formatterEnums;
+
+		internal SerializationBinder m_binder;
+
+		internal long topId;
+
+		internal bool bSimpleAssembly;
+
+		internal object handlerObject;
+
+		internal object m_topObject;
+
+		internal Header[] headers;
+
+		internal HeaderHandler handler;
+
+		internal SerObjectInfoInit serObjectInfoInit;
+
+		internal IFormatterConverter m_formatterConverter;
+
+		internal SerStack stack;
+
+		private SerStack valueFixupStack;
+
+		internal object[] crossAppDomainArray;
+
+		private bool bFullDeserialization;
+
+		private bool bMethodCall;
+
+		private bool bMethodReturn;
+
+		private BinaryMethodCall binaryMethodCall;
+
+		private BinaryMethodReturn binaryMethodReturn;
+
+		private bool bIsCrossAppDomain;
+
+		private const int THRESHOLD_FOR_VALUETYPE_IDS = 2147483647;
+
+		private bool bOldFormatDetected;
+
+		private IntSizedArray valTypeObjectIdTable;
+
+		private NameCache typeCache = new NameCache();
+
+		private string previousAssemblyString;
+
+		private string previousName;
+
+		private Type previousType;
+
+		internal class TypeNAssembly
+		{
+			public Type type;
+
+			public string assemblyName;
+		}
+
+		internal sealed class TopLevelAssemblyTypeResolver
+		{
+			public TopLevelAssemblyTypeResolver(Assembly topLevelAssembly)
+			{
+				this.m_topLevelAssembly = topLevelAssembly;
 			}
 
-			public int NullCount;
+			public Type ResolveType(Assembly assembly, string simpleTypeName, bool ignoreCase)
+			{
+				if (assembly == null)
+				{
+					assembly = this.m_topLevelAssembly;
+				}
+				return assembly.GetType(simpleTypeName, false, ignoreCase);
+			}
+
+			private Assembly m_topLevelAssembly;
 		}
 	}
 }

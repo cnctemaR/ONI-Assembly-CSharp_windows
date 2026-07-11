@@ -1,293 +1,362 @@
 ﻿using System;
-using System.Text;
+using System.Security;
 
 namespace System
 {
 	public static class BitConverter
 	{
-		private static bool AmILittleEndian()
+		private unsafe static bool AmILittleEndian()
 		{
 			double num = 1.0;
-			return num == (double)0;
+			byte* ptr = (byte*)(&num);
+			return *ptr == 0;
 		}
 
-		private unsafe static bool DoubleWordsAreSwapped()
+		public static byte[] GetBytes(bool value)
 		{
-			double num = 1.0;
-			return *((ref num) + 2) == 240;
+			return new byte[] { value ? 1 : 0 };
 		}
 
-		public static long DoubleToInt64Bits(double value)
+		public static byte[] GetBytes(char value)
 		{
-			return BitConverter.ToInt64(BitConverter.GetBytes(value), 0);
+			return BitConverter.GetBytes((short)value);
 		}
 
-		public static double Int64BitsToDouble(long value)
-		{
-			return BitConverter.ToDouble(BitConverter.GetBytes(value), 0);
-		}
-
-		internal static double InternalInt64BitsToDouble(long value)
-		{
-			return BitConverter.SwappableToDouble(BitConverter.GetBytes(value), 0);
-		}
-
-		private unsafe static byte[] GetBytes(byte* ptr, int count)
-		{
-			byte[] array = new byte[count];
-			for (int i = 0; i < count; i++)
-			{
-				array[i] = ptr[i];
-			}
-			return array;
-		}
-
-		public unsafe static byte[] GetBytes(bool value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 1);
-		}
-
-		public unsafe static byte[] GetBytes(char value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 2);
-		}
-
+		[SecuritySafeCritical]
 		public unsafe static byte[] GetBytes(short value)
 		{
-			return BitConverter.GetBytes((byte*)(&value), 2);
-		}
-
-		public unsafe static byte[] GetBytes(int value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 4);
-		}
-
-		public unsafe static byte[] GetBytes(long value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 8);
-		}
-
-		[CLSCompliant(false)]
-		public unsafe static byte[] GetBytes(ushort value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 2);
-		}
-
-		[CLSCompliant(false)]
-		public unsafe static byte[] GetBytes(uint value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 4);
-		}
-
-		[CLSCompliant(false)]
-		public unsafe static byte[] GetBytes(ulong value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 8);
-		}
-
-		public unsafe static byte[] GetBytes(float value)
-		{
-			return BitConverter.GetBytes((byte*)(&value), 4);
-		}
-
-		public unsafe static byte[] GetBytes(double value)
-		{
-			if (BitConverter.SwappedWordsInDouble)
+			byte[] array2;
+			byte[] array = (array2 = new byte[2]);
+			byte* ptr;
+			if (array == null || array2.Length == 0)
 			{
-				return new byte[]
-				{
-					*((ref value) + 4),
-					*((ref value) + 5),
-					*((ref value) + 6),
-					*((ref value) + 7),
-					(byte)value,
-					*((ref value) + 1),
-					*((ref value) + 2),
-					*((ref value) + 3)
-				};
-			}
-			return BitConverter.GetBytes((byte*)(&value), 8);
-		}
-
-		private unsafe static void PutBytes(byte* dst, byte[] src, int start_index, int count)
-		{
-			if (src == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (start_index < 0 || start_index > src.Length - 1)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (src.Length - count < start_index)
-			{
-				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-			}
-			for (int i = 0; i < count; i++)
-			{
-				dst[i] = src[i + start_index];
-			}
-		}
-
-		public static bool ToBoolean(byte[] value, int startIndex)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (startIndex < 0 || startIndex > value.Length - 1)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			return value[startIndex] != 0;
-		}
-
-		public unsafe static char ToChar(byte[] value, int startIndex)
-		{
-			char c;
-			BitConverter.PutBytes((byte*)(&c), value, startIndex, 2);
-			return c;
-		}
-
-		public unsafe static short ToInt16(byte[] value, int startIndex)
-		{
-			short num;
-			BitConverter.PutBytes((byte*)(&num), value, startIndex, 2);
-			return num;
-		}
-
-		public unsafe static int ToInt32(byte[] value, int startIndex)
-		{
-			int num;
-			BitConverter.PutBytes((byte*)(&num), value, startIndex, 4);
-			return num;
-		}
-
-		public unsafe static long ToInt64(byte[] value, int startIndex)
-		{
-			long num;
-			BitConverter.PutBytes((byte*)(&num), value, startIndex, 8);
-			return num;
-		}
-
-		[CLSCompliant(false)]
-		public unsafe static ushort ToUInt16(byte[] value, int startIndex)
-		{
-			ushort num;
-			BitConverter.PutBytes((byte*)(&num), value, startIndex, 2);
-			return num;
-		}
-
-		[CLSCompliant(false)]
-		public unsafe static uint ToUInt32(byte[] value, int startIndex)
-		{
-			uint num;
-			BitConverter.PutBytes((byte*)(&num), value, startIndex, 4);
-			return num;
-		}
-
-		[CLSCompliant(false)]
-		public unsafe static ulong ToUInt64(byte[] value, int startIndex)
-		{
-			ulong num;
-			BitConverter.PutBytes((byte*)(&num), value, startIndex, 8);
-			return num;
-		}
-
-		public unsafe static float ToSingle(byte[] value, int startIndex)
-		{
-			float num;
-			BitConverter.PutBytes((byte*)(&num), value, startIndex, 4);
-			return num;
-		}
-
-		public unsafe static double ToDouble(byte[] value, int startIndex)
-		{
-			double num;
-			if (!BitConverter.SwappedWordsInDouble)
-			{
-				BitConverter.PutBytes((byte*)(&num), value, startIndex, 8);
-				return num;
-			}
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (startIndex < 0 || startIndex > value.Length - 1)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (value.Length - 8 < startIndex)
-			{
-				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-			}
-			num = (double)value[startIndex + 4];
-			*((ref num) + 1) = value[startIndex + 5];
-			*((ref num) + 2) = value[startIndex + 6];
-			*((ref num) + 3) = value[startIndex + 7];
-			*((ref num) + 4) = value[startIndex];
-			*((ref num) + 5) = value[startIndex + 1];
-			*((ref num) + 6) = value[startIndex + 2];
-			*((ref num) + 7) = value[startIndex + 3];
-			return num;
-		}
-
-		internal unsafe static double SwappableToDouble(byte[] value, int startIndex)
-		{
-			if (BitConverter.SwappedWordsInDouble)
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				if (startIndex < 0 || startIndex > value.Length - 1)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-				}
-				if (value.Length - 8 < startIndex)
-				{
-					throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-				}
-				double num = (double)value[startIndex + 4];
-				*((ref num) + 1) = value[startIndex + 5];
-				*((ref num) + 2) = value[startIndex + 6];
-				*((ref num) + 3) = value[startIndex + 7];
-				*((ref num) + 4) = value[startIndex];
-				*((ref num) + 5) = value[startIndex + 1];
-				*((ref num) + 6) = value[startIndex + 2];
-				*((ref num) + 7) = value[startIndex + 3];
-				return num;
+				ptr = null;
 			}
 			else
 			{
-				double num;
+				ptr = &array2[0];
+			}
+			*(short*)ptr = value;
+			array2 = null;
+			return array;
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static byte[] GetBytes(int value)
+		{
+			byte[] array2;
+			byte[] array = (array2 = new byte[4]);
+			byte* ptr;
+			if (array == null || array2.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array2[0];
+			}
+			*(int*)ptr = value;
+			array2 = null;
+			return array;
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static byte[] GetBytes(long value)
+		{
+			byte[] array2;
+			byte[] array = (array2 = new byte[8]);
+			byte* ptr;
+			if (array == null || array2.Length == 0)
+			{
+				ptr = null;
+			}
+			else
+			{
+				ptr = &array2[0];
+			}
+			*(long*)ptr = value;
+			array2 = null;
+			return array;
+		}
+
+		[CLSCompliant(false)]
+		public static byte[] GetBytes(ushort value)
+		{
+			return BitConverter.GetBytes((short)value);
+		}
+
+		[CLSCompliant(false)]
+		public static byte[] GetBytes(uint value)
+		{
+			return BitConverter.GetBytes((int)value);
+		}
+
+		[CLSCompliant(false)]
+		public static byte[] GetBytes(ulong value)
+		{
+			return BitConverter.GetBytes((long)value);
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static byte[] GetBytes(float value)
+		{
+			return BitConverter.GetBytes(*(int*)(&value));
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static byte[] GetBytes(double value)
+		{
+			return BitConverter.GetBytes(*(long*)(&value));
+		}
+
+		public static char ToChar(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 2)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			return (char)BitConverter.ToInt16(value, startIndex);
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static short ToInt16(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 2)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			fixed (byte* ptr = &value[startIndex])
+			{
+				byte* ptr2 = ptr;
+				if (startIndex % 2 == 0)
+				{
+					return *(short*)ptr2;
+				}
 				if (BitConverter.IsLittleEndian)
 				{
-					BitConverter.PutBytes((byte*)(&num), value, startIndex, 8);
-					return num;
+					return (short)((int)(*ptr2) | ((int)ptr2[1] << 8));
 				}
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				if (startIndex < 0 || startIndex > value.Length - 1)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-				}
-				if (value.Length - 8 < startIndex)
-				{
-					throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-				}
-				num = (double)value[startIndex + 7];
-				*((ref num) + 1) = value[startIndex + 6];
-				*((ref num) + 2) = value[startIndex + 5];
-				*((ref num) + 3) = value[startIndex + 4];
-				*((ref num) + 4) = value[startIndex + 3];
-				*((ref num) + 5) = value[startIndex + 2];
-				*((ref num) + 6) = value[startIndex + 1];
-				*((ref num) + 7) = value[startIndex];
-				return num;
+				return (short)(((int)(*ptr2) << 8) | (int)ptr2[1]);
 			}
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static int ToInt32(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 4)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			fixed (byte* ptr = &value[startIndex])
+			{
+				byte* ptr2 = ptr;
+				if (startIndex % 4 == 0)
+				{
+					return *(int*)ptr2;
+				}
+				if (BitConverter.IsLittleEndian)
+				{
+					return (int)(*ptr2) | ((int)ptr2[1] << 8) | ((int)ptr2[2] << 16) | ((int)ptr2[3] << 24);
+				}
+				return ((int)(*ptr2) << 24) | ((int)ptr2[1] << 16) | ((int)ptr2[2] << 8) | (int)ptr2[3];
+			}
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static long ToInt64(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 8)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			fixed (byte* ptr = &value[startIndex])
+			{
+				byte* ptr2 = ptr;
+				if (startIndex % 8 == 0)
+				{
+					return *(long*)ptr2;
+				}
+				if (BitConverter.IsLittleEndian)
+				{
+					ulong num = (ulong)((int)(*ptr2) | ((int)ptr2[1] << 8) | ((int)ptr2[2] << 16) | ((int)ptr2[3] << 24));
+					int num2 = (int)ptr2[4] | ((int)ptr2[5] << 8) | ((int)ptr2[6] << 16) | ((int)ptr2[7] << 24);
+					return (long)(num | (ulong)((ulong)((long)num2) << 32));
+				}
+				int num3 = ((int)(*ptr2) << 24) | ((int)ptr2[1] << 16) | ((int)ptr2[2] << 8) | (int)ptr2[3];
+				return (long)((ulong)(((int)ptr2[4] << 24) | ((int)ptr2[5] << 16) | ((int)ptr2[6] << 8) | (int)ptr2[7]) | (ulong)((ulong)((long)num3) << 32));
+			}
+		}
+
+		[CLSCompliant(false)]
+		public static ushort ToUInt16(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 2)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			return (ushort)BitConverter.ToInt16(value, startIndex);
+		}
+
+		[CLSCompliant(false)]
+		public static uint ToUInt32(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 4)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			return (uint)BitConverter.ToInt32(value, startIndex);
+		}
+
+		[CLSCompliant(false)]
+		public static ulong ToUInt64(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 8)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			return (ulong)BitConverter.ToInt64(value, startIndex);
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static float ToSingle(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 4)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			int num = BitConverter.ToInt32(value, startIndex);
+			return *(float*)(&num);
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static double ToDouble(byte[] value, int startIndex)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
+			}
+			if ((ulong)startIndex >= (ulong)((long)value.Length))
+			{
+				ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
+			}
+			if (startIndex > value.Length - 8)
+			{
+				ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
+			}
+			long num = BitConverter.ToInt64(value, startIndex);
+			return *(double*)(&num);
+		}
+
+		private static char GetHexValue(int i)
+		{
+			if (i < 10)
+			{
+				return (char)(i + 48);
+			}
+			return (char)(i - 10 + 65);
+		}
+
+		public static string ToString(byte[] value, int startIndex, int length)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (startIndex < 0 || (startIndex >= value.Length && startIndex > 0))
+			{
+				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("StartIndex cannot be less than zero."));
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Value must be positive."));
+			}
+			if (startIndex > value.Length - length)
+			{
+				throw new ArgumentException(Environment.GetResourceString("Destination array is not long enough to copy all the items in the collection. Check array index and length."));
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			if (length > 715827882)
+			{
+				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("The specified length exceeds the maximum value of {0}.", new object[] { 715827882 }));
+			}
+			int num = length * 3;
+			char[] array = new char[num];
+			int num2 = startIndex;
+			for (int i = 0; i < num; i += 3)
+			{
+				byte b = value[num2++];
+				array[i] = BitConverter.GetHexValue((int)(b / 16));
+				array[i + 1] = BitConverter.GetHexValue((int)(b % 16));
+				array[i + 2] = '-';
+			}
+			return new string(array, 0, array.Length - 1);
 		}
 
 		public static string ToString(byte[] value)
@@ -308,70 +377,34 @@ namespace System
 			return BitConverter.ToString(value, startIndex, value.Length - startIndex);
 		}
 
-		public static string ToString(byte[] value, int startIndex, int length)
+		public static bool ToBoolean(byte[] value, int startIndex)
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("byteArray");
+				throw new ArgumentNullException("value");
 			}
-			if (startIndex < 0 || startIndex >= value.Length)
+			if (startIndex < 0)
 			{
-				if (startIndex == 0 && value.Length == 0)
-				{
-					return string.Empty;
-				}
-				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Non-negative number required."));
 			}
-			else
+			if (startIndex > value.Length - 1)
 			{
-				if (length < 0)
-				{
-					throw new ArgumentOutOfRangeException("length", "Value must be positive.");
-				}
-				if (startIndex > value.Length - length)
-				{
-					throw new ArgumentException("startIndex + length > value.Length");
-				}
-				if (length == 0)
-				{
-					return string.Empty;
-				}
-				StringBuilder stringBuilder = new StringBuilder(length * 3 - 1);
-				int num = startIndex + length;
-				for (int i = startIndex; i < num; i++)
-				{
-					if (i > startIndex)
-					{
-						stringBuilder.Append('-');
-					}
-					char c = (char)((value[i] >> 4) & 15);
-					char c2 = (char)(value[i] & 15);
-					if (c < '\n')
-					{
-						c += '0';
-					}
-					else
-					{
-						c -= '\n';
-						c += 'A';
-					}
-					if (c2 < '\n')
-					{
-						c2 += '0';
-					}
-					else
-					{
-						c2 -= '\n';
-						c2 += 'A';
-					}
-					stringBuilder.Append(c);
-					stringBuilder.Append(c2);
-				}
-				return stringBuilder.ToString();
+				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
 			}
+			return value[startIndex] != 0;
 		}
 
-		private static readonly bool SwappedWordsInDouble = BitConverter.DoubleWordsAreSwapped();
+		[SecuritySafeCritical]
+		public unsafe static long DoubleToInt64Bits(double value)
+		{
+			return *(long*)(&value);
+		}
+
+		[SecuritySafeCritical]
+		public unsafe static double Int64BitsToDouble(long value)
+		{
+			return *(double*)(&value);
+		}
 
 		public static readonly bool IsLittleEndian = BitConverter.AmILittleEndian();
 	}

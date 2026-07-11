@@ -8,7 +8,6 @@ public class FabricatorSM : StateMachineComponent<FabricatorSM.StatesInstance>
 		base.smi.StartSM();
 	}
 
-	[MyCmpGet]
 	private IHasBuildQueue fabricator;
 
 	public class StatesInstance : GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM, object>.GameInstance
@@ -16,6 +15,7 @@ public class FabricatorSM : StateMachineComponent<FabricatorSM.StatesInstance>
 		public StatesInstance(FabricatorSM master)
 			: base(master)
 		{
+			master.fabricator = master.GetComponent<IHasBuildQueue>();
 		}
 	}
 

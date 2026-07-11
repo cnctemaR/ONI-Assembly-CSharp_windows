@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	public class MethodCallMessageWrapper : InternalMessageWrapper, IMessage, IMethodCallMessage, IMethodMessage
+	public class MethodCallMessageWrapper : InternalMessageWrapper, IMethodCallMessage, IMethodMessage, IMessage
 	{
 		public MethodCallMessageWrapper(IMethodCallMessage msg)
 			: base(msg)
@@ -123,11 +123,9 @@ namespace System.Runtime.Remoting.Messaging
 				if (internalMessage != null)
 				{
 					internalMessage.Uri = value;
+					return;
 				}
-				else
-				{
-					this.Properties["__Uri"] = value;
-				}
+				this.Properties["__Uri"] = value;
 			}
 		}
 
@@ -157,7 +155,7 @@ namespace System.Runtime.Remoting.Messaging
 
 		private MethodCallMessageWrapper.DictionaryWrapper _properties;
 
-		private class DictionaryWrapper : MethodCallDictionary
+		private class DictionaryWrapper : MCMDictionary
 		{
 			public DictionaryWrapper(IMethodMessage message, IDictionary wrappedDictionary)
 				: base(message)
@@ -176,11 +174,9 @@ namespace System.Runtime.Remoting.Messaging
 				if (key == "__Args")
 				{
 					((MethodCallMessageWrapper)this._message)._args = (object[])value;
+					return;
 				}
-				else
-				{
-					base.SetMethodProperty(key, value);
-				}
+				base.SetMethodProperty(key, value);
 			}
 
 			protected override object GetMethodProperty(string key)

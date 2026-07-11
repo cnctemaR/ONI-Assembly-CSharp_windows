@@ -663,14 +663,19 @@ public static class GameUtil
 		return hashSet;
 	}
 
-	public static HashSet<int> FloodCollectCells(HashSet<int> results, int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null)
+	public static HashSet<int> FloodCollectCells(HashSet<int> results, int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null, bool clearOversizedResults = true)
 	{
-		GameUtil.probeFromCell(start_cell, is_valid, results, AddInvalidCellsToSet, maxSize);
-		if (AddInvalidCellsToSet != null && results.Count > maxSize)
+		HashSet<int> hashSet = new HashSet<int>();
+		GameUtil.probeFromCell(start_cell, is_valid, results, hashSet, maxSize);
+		if (AddInvalidCellsToSet != null)
 		{
-			AddInvalidCellsToSet.UnionWith(results);
+			AddInvalidCellsToSet.UnionWith(hashSet);
+			if (results.Count > maxSize)
+			{
+				AddInvalidCellsToSet.UnionWith(results);
+			}
 		}
-		if (results.Count > maxSize)
+		if (results.Count > maxSize && clearOversizedResults)
 		{
 			results.Clear();
 		}
@@ -763,45 +768,48 @@ public static class GameUtil
 			cell = start_cell,
 			depth = 0
 		});
-		GameUtil.FloodFillConditional(GameUtil.FloodFillNext, condition, visited_cells, valid_cells);
+		GameUtil.FloodFillConditional(GameUtil.FloodFillNext, condition, visited_cells, valid_cells, 10000);
 	}
 
-	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null)
+	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, ICollection<int> visited_cells, ICollection<int> valid_cells = null, int max_depth = 10000)
 	{
 		while (queue.Count > 0)
 		{
 			GameUtil.FloodFillInfo floodFillInfo = queue.Dequeue();
-			if (Grid.IsValidCell(floodFillInfo.cell))
+			if (floodFillInfo.depth < max_depth)
 			{
-				if (!visited_cells.Contains(floodFillInfo.cell))
+				if (Grid.IsValidCell(floodFillInfo.cell))
 				{
-					visited_cells.Add(floodFillInfo.cell);
-					if (condition(floodFillInfo.cell))
+					if (!visited_cells.Contains(floodFillInfo.cell))
 					{
-						if (valid_cells != null)
+						visited_cells.Add(floodFillInfo.cell);
+						if (condition(floodFillInfo.cell))
 						{
-							valid_cells.Add(floodFillInfo.cell);
+							if (valid_cells != null)
+							{
+								valid_cells.Add(floodFillInfo.cell);
+							}
+							queue.Enqueue(new GameUtil.FloodFillInfo
+							{
+								cell = Grid.CellLeft(floodFillInfo.cell),
+								depth = floodFillInfo.depth + 1
+							});
+							queue.Enqueue(new GameUtil.FloodFillInfo
+							{
+								cell = Grid.CellRight(floodFillInfo.cell),
+								depth = floodFillInfo.depth + 1
+							});
+							queue.Enqueue(new GameUtil.FloodFillInfo
+							{
+								cell = Grid.CellAbove(floodFillInfo.cell),
+								depth = floodFillInfo.depth + 1
+							});
+							queue.Enqueue(new GameUtil.FloodFillInfo
+							{
+								cell = Grid.CellBelow(floodFillInfo.cell),
+								depth = floodFillInfo.depth + 1
+							});
 						}
-						queue.Enqueue(new GameUtil.FloodFillInfo
-						{
-							cell = Grid.CellLeft(floodFillInfo.cell),
-							depth = floodFillInfo.depth + 1
-						});
-						queue.Enqueue(new GameUtil.FloodFillInfo
-						{
-							cell = Grid.CellRight(floodFillInfo.cell),
-							depth = floodFillInfo.depth + 1
-						});
-						queue.Enqueue(new GameUtil.FloodFillInfo
-						{
-							cell = Grid.CellAbove(floodFillInfo.cell),
-							depth = floodFillInfo.depth + 1
-						});
-						queue.Enqueue(new GameUtil.FloodFillInfo
-						{
-							cell = Grid.CellBelow(floodFillInfo.cell),
-							depth = floodFillInfo.depth + 1
-						});
 					}
 				}
 			}
@@ -1700,15 +1708,9 @@ public static class GameUtil
 		return null;
 	}
 
-	public static GameObject KInstantiate(GameObject original, Vector3 position, Grid.SceneLayer sceneLayer, Folder folder, string name = null, int gameLayer = 0)
+	public static GameObject KInstantiate(GameObject original, Vector3 position, Grid.SceneLayer sceneLayer, string name = null, int gameLayer = 0)
 	{
-		GameObject gameObject = GameUtil.KInstantiate(original, position, sceneLayer, SceneOrganizer.Instance.GetFolder(folder), name, gameLayer);
-		SaveLoadRoot component = gameObject.GetComponent<SaveLoadRoot>();
-		if (component != null)
-		{
-			component.folder = folder;
-		}
-		return gameObject;
+		return GameUtil.KInstantiate(original, position, sceneLayer, null, name, gameLayer);
 	}
 
 	public static GameObject KInstantiate(GameObject original, Vector3 position, Grid.SceneLayer sceneLayer, GameObject parent, string name = null, int gameLayer = 0)
@@ -1716,23 +1718,17 @@ public static class GameUtil
 		position.z = Grid.GetLayerZ(sceneLayer);
 		Vector3 vector = position;
 		Quaternion identity = Quaternion.identity;
-		GameObject gameObject = Util.KInstantiate(original, vector, identity, parent, name, true, gameLayer);
-		SaveLoadRoot component = gameObject.GetComponent<SaveLoadRoot>();
-		if (component != null && gameObject.GetComponent<SavedObject>() == null)
-		{
-			gameObject.AddComponent<SavedObject>();
-		}
-		return gameObject;
+		return Util.KInstantiate(original, vector, identity, parent, name, true, gameLayer);
 	}
 
-	public static GameObject KInstantiate(GameObject original, Grid.SceneLayer sceneLayer, Folder folder, string name = null, int gameLayer = 0)
+	public static GameObject KInstantiate(GameObject original, Grid.SceneLayer sceneLayer, string name = null, int gameLayer = 0)
 	{
-		return GameUtil.KInstantiate(original, Vector3.zero, sceneLayer, folder, name, gameLayer);
+		return GameUtil.KInstantiate(original, Vector3.zero, sceneLayer, name, gameLayer);
 	}
 
-	public static GameObject KInstantiate(Component original, Grid.SceneLayer sceneLayer, Folder folder, string name = null, int gameLayer = 0)
+	public static GameObject KInstantiate(Component original, Grid.SceneLayer sceneLayer, string name = null, int gameLayer = 0)
 	{
-		return GameUtil.KInstantiate(original.gameObject, Vector3.zero, sceneLayer, folder, name, gameLayer);
+		return GameUtil.KInstantiate(original.gameObject, Vector3.zero, sceneLayer, name, gameLayer);
 	}
 
 	public unsafe static void IsEmissionBlocked(int cell, out bool all_not_gaseous, out bool all_over_pressure)

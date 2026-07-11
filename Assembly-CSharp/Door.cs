@@ -115,10 +115,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				list.Add(Grid.CellRight(num2));
 			}
 			SimMessages.SetCellProperties(num2, 8);
-			Grid.RenderedByWorld[num2] = false;
+			if (Door.DisplacesGas(this.doorType))
+			{
+				Grid.RenderedByWorld[num2] = false;
+			}
 		}
-		List<int> list2 = new List<int>(this.building.PlacementCells);
-		Game.Instance.roomProber.AddDoor(this, list2, list);
 	}
 
 	protected override void OnCleanUp()
@@ -154,7 +155,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			Grid.Impassable[num2] = false;
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
-		Game.Instance.roomProber.RemoveDoor(this);
 		base.OnCleanUp();
 	}
 
@@ -300,37 +300,31 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				World.Instance.groundRenderer.MarkDirty(num2);
 				if (is_door_open)
 				{
-					if (Grid.Element[num2].IsSolid)
+					SimMessages.Dig(num2, Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false)).index);
+					if (this.IsRotated)
 					{
-						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
-						int num3 = num2;
-						SimHashes simHashes = SimHashes.Vacuum;
-						CellElementEvent cellElementEvent = CellEventLogger.Instance.DoorOpen;
-						float num4 = 0f;
-						float num5 = -1f;
-						int num6 = handle.index;
-						SimMessages.ReplaceElement(num3, simHashes, cellElementEvent, num4, num5, byte.MaxValue, 0, num6);
 						SimMessages.ClearCellProperties(num2, 4);
 					}
 					else
 					{
-						this.OnSimDoorOpened();
+						SimMessages.SetCellProperties(num2, 4);
 					}
-				}
-				else if (Grid.Element[num2].IsSolid)
-				{
-					this.OnSimDoorClosed();
 				}
 				else
 				{
-					HandleVector<Game.CallbackInfo>.Handle handle2 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false));
-					int num6 = num2;
-					SimHashes simHashes = component.ElementID;
-					CellElementEvent cellElementEvent = CellEventLogger.Instance.DoorClose;
+					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false));
+					float num3 = component.Temperature;
+					if (num3 <= 0f)
+					{
+						num3 = component.Temperature;
+					}
+					int num4 = num2;
+					SimHashes elementID = component.ElementID;
+					CellElementEvent doorClose = CellEventLogger.Instance.DoorClose;
 					float num5 = num;
-					float num4 = component.Temperature;
-					int num3 = handle2.index;
-					SimMessages.ReplaceAndDisplaceElement(num6, simHashes, cellElementEvent, num5, num4, byte.MaxValue, 0, num3);
+					float num6 = num3;
+					int index = handle.index;
+					SimMessages.ReplaceAndDisplaceElement(num4, elementID, doorClose, num5, num6, byte.MaxValue, 0, index);
 					SimMessages.SetCellProperties(num2, 4);
 				}
 			}
@@ -384,7 +378,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				this.changeStateChore.Cancel("Change state");
 			}
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 	}
 
@@ -442,6 +436,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				{
 					num /= (float)placementCells.Length;
 					PrimaryElement component = base.GetComponent<PrimaryElement>();
+					KCrashReporter.Assert(num > 0f, "Door has calculated an invalid temperature");
 					component.Temperature = num;
 				}
 			}
@@ -683,7 +678,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				{
 					if (smi.master.doorClosingSound != null)
 					{
-						smi.master.loopingSounds.UpdateSecondParameter(smi.master.doorClosingSound, Door.SOUND_PROGRESS_PARAMETER, smi.animController.GetPositionPercent());
+						smi.master.loopingSounds.UpdateSecondParameter(smi.master.doorClosingSound, Door.SOUND_PROGRESS_PARAMETER, smi.Get<KBatchedAnimController>().GetPositionPercent());
 					}
 				}, UpdateRate.SIM_33ms, false)
 				.Enter("SetActive", delegate(Door.Controller.Instance smi)
@@ -719,7 +714,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				{
 					if (smi.master.doorOpeningSound != null)
 					{
-						smi.master.loopingSounds.UpdateSecondParameter(smi.master.doorOpeningSound, Door.SOUND_PROGRESS_PARAMETER, smi.animController.GetPositionPercent());
+						smi.master.loopingSounds.UpdateSecondParameter(smi.master.doorOpeningSound, Door.SOUND_PROGRESS_PARAMETER, smi.Get<KBatchedAnimController>().GetPositionPercent());
 					}
 				}, UpdateRate.SIM_33ms, false)
 				.Enter("SetActive", delegate(Door.Controller.Instance smi)
@@ -780,7 +775,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)
 		{
-			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		}
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State open;

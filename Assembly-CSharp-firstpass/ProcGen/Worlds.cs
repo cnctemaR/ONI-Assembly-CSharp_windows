@@ -31,24 +31,55 @@ namespace ProcGen
 			}
 			else
 			{
-				for (int i = 0; i < files.Length; i++)
+				WorkItemCollection<Worlds.LoadWorldfileWorkItem, object> workItemCollection = new WorkItemCollection<Worlds.LoadWorldfileWorkItem, object>();
+				workItemCollection.Reset(null);
+				foreach (string text in files)
 				{
-					int num = files[i].LastIndexOf("//");
-					string text = ((num != -1) ? files[i].Substring(num + 2, files[i].Length - 2 - num) : files[i]);
-					World world = YamlIO<World>.LoadFile(files[i]);
-					if (world != null)
+					workItemCollection.Add(new Worlds.LoadWorldfileWorkItem
 					{
-						text = text.Replace(".yaml", string.Empty);
-						this.worldCache[text] = world;
+						path = text
+					});
+				}
+				GlobalJobManager.Run(workItemCollection);
+				for (int j = 0; j < workItemCollection.Count; j++)
+				{
+					Worlds.LoadWorldfileWorkItem workItem = workItemCollection.GetWorkItem(j);
+					if (workItem.world != null)
+					{
+						this.worldCache[workItem.worldName] = workItem.world;
 					}
 					else
 					{
-						Debug.LogWarning("WorldGen: Attempting to load world: " + text + " failed", null);
+						Debug.LogWarning("WorldGen: Attempting to load world: " + workItem.worldName + " failed", null);
 					}
 				}
 			}
 		}
 
 		public Dictionary<string, World> worldCache = new Dictionary<string, World>();
+
+		private struct LoadWorldfileWorkItem : IWorkItem<object>
+		{
+			public void Run(object shared_data)
+			{
+				int num = this.path.LastIndexOf("//");
+				this.worldName = ((num != -1) ? this.path.Substring(num + 2, this.path.Length - 2 - num) : this.path);
+				this.world = YamlIO<World>.LoadFile(this.path);
+				if (this.world != null)
+				{
+					this.worldName = this.worldName.Replace(".yaml", string.Empty);
+				}
+				else
+				{
+					Debug.LogWarning("WorldGen: Attempting to load world: " + this.worldName + " failed", null);
+				}
+			}
+
+			public string path;
+
+			public string worldName;
+
+			public World world;
+		}
 	}
 }

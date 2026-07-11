@@ -37,6 +37,10 @@ public class LightBuffer : MonoBehaviour
 
 	private void LateUpdate()
 	{
+		if (PropertyTextures.instance == null)
+		{
+			return;
+		}
 		if (this.Texture.width != Screen.width || this.Texture.height != Screen.height)
 		{
 			this.Texture.DestroyRenderTexture();

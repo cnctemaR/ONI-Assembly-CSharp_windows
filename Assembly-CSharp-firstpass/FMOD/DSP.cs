@@ -117,7 +117,7 @@ namespace FMOD
 
 		public RESULT setParameterData(int index, byte[] data)
 		{
-			return DSP.FMOD5_DSP_SetParameterData(this.handle, index, Marshal.UnsafeAddrOfPinnedArrayElement(data, 0), (uint)data.Length);
+			return DSP.FMOD5_DSP_SetParameterData(this.handle, index, Marshal.UnsafeAddrOfPinnedArrayElement<byte>(data, 0), (uint)data.Length);
 		}
 
 		public RESULT getParameterFloat(int index, out float value)

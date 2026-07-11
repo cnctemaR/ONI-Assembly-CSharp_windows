@@ -14,13 +14,13 @@ namespace System.Runtime.Serialization
 		{
 		}
 
-		protected InvalidDataContractException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		public InvalidDataContractException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 
-		public InvalidDataContractException(string message, Exception innerException)
-			: base(message, innerException)
+		protected InvalidDataContractException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 	}

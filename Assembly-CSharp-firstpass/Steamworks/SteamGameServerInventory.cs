@@ -14,7 +14,7 @@ namespace Steamworks
 		public static bool GetResultItems(SteamInventoryResult_t resultHandle, SteamItemDetails_t[] pOutItemsArray, ref uint punOutItemsArraySize)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			if ((long)pOutItemsArray.Length != (long)((ulong)punOutItemsArraySize))
+			if (pOutItemsArray != null && (long)pOutItemsArray.Length != (long)((ulong)punOutItemsArraySize))
 			{
 				throw new ArgumentException("pOutItemsArray must be the same size as punOutItemsArraySize!");
 			}
@@ -147,7 +147,7 @@ namespace Steamworks
 		public static bool GetItemDefinitionIDs(SteamItemDef_t[] pItemDefIDs, ref uint punItemDefIDsArraySize)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			if ((long)pItemDefIDs.Length != (long)((ulong)punItemDefIDsArraySize))
+			if (pItemDefIDs != null && (long)pItemDefIDs.Length != (long)((ulong)punItemDefIDsArraySize))
 			{
 				throw new ArgumentException("pItemDefIDs must be the same size as punItemDefIDsArraySize!");
 			}
@@ -178,7 +178,7 @@ namespace Steamworks
 		public static bool GetEligiblePromoItemDefinitionIDs(CSteamID steamID, SteamItemDef_t[] pItemDefIDs, ref uint punItemDefIDsArraySize)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			if ((long)pItemDefIDs.Length != (long)((ulong)punItemDefIDsArraySize))
+			if (pItemDefIDs != null && (long)pItemDefIDs.Length != (long)((ulong)punItemDefIDsArraySize))
 			{
 				throw new ArgumentException("pItemDefIDs must be the same size as punItemDefIDsArraySize!");
 			}
@@ -206,15 +206,15 @@ namespace Steamworks
 		public static bool GetItemsWithPrices(SteamItemDef_t[] pArrayItemDefs, ulong[] pCurrentPrices, ulong[] pBasePrices, uint unArrayLength)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			if ((long)pArrayItemDefs.Length != (long)((ulong)unArrayLength))
+			if (pArrayItemDefs != null && (long)pArrayItemDefs.Length != (long)((ulong)unArrayLength))
 			{
 				throw new ArgumentException("pArrayItemDefs must be the same size as unArrayLength!");
 			}
-			if ((long)pCurrentPrices.Length != (long)((ulong)unArrayLength))
+			if (pCurrentPrices != null && (long)pCurrentPrices.Length != (long)((ulong)unArrayLength))
 			{
 				throw new ArgumentException("pCurrentPrices must be the same size as unArrayLength!");
 			}
-			if ((long)pBasePrices.Length != (long)((ulong)unArrayLength))
+			if (pBasePrices != null && (long)pBasePrices.Length != (long)((ulong)unArrayLength))
 			{
 				throw new ArgumentException("pBasePrices must be the same size as unArrayLength!");
 			}
@@ -252,7 +252,7 @@ namespace Steamworks
 			{
 				using (InteropHelp.UTF8StringHandle utf8StringHandle2 = new InteropHelp.UTF8StringHandle(pchPropertyValue))
 				{
-					flag = NativeMethods.ISteamInventory_SetProperty(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, utf8StringHandle2);
+					flag = NativeMethods.ISteamInventory_SetPropertyString(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, utf8StringHandle2);
 				}
 			}
 			return flag;
@@ -264,29 +264,29 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
 			{
-				flag = NativeMethods.ISteamInventory_SetProperty0(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, bValue);
+				flag = NativeMethods.ISteamInventory_SetPropertyBool(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, bValue);
 			}
 			return flag;
 		}
 
-		public static bool SetProperty1(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, long nValue)
+		public static bool SetProperty(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, long nValue)
 		{
 			InteropHelp.TestIfAvailableGameServer();
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
 			{
-				flag = NativeMethods.ISteamInventory_SetProperty1(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, nValue);
+				flag = NativeMethods.ISteamInventory_SetPropertyInt64(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, nValue);
 			}
 			return flag;
 		}
 
-		public static bool SetProperty2(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, float flValue)
+		public static bool SetProperty(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, float flValue)
 		{
 			InteropHelp.TestIfAvailableGameServer();
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
 			{
-				flag = NativeMethods.ISteamInventory_SetProperty2(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, flValue);
+				flag = NativeMethods.ISteamInventory_SetPropertyFloat(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, flValue);
 			}
 			return flag;
 		}
@@ -295,6 +295,17 @@ namespace Steamworks
 		{
 			InteropHelp.TestIfAvailableGameServer();
 			return NativeMethods.ISteamInventory_SubmitUpdateProperties(CSteamGameServerAPIContext.GetSteamInventory(), handle, out pResultHandle);
+		}
+
+		public static bool InspectItem(out SteamInventoryResult_t pResultHandle, string pchItemToken)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchItemToken))
+			{
+				flag = NativeMethods.ISteamInventory_InspectItem(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, utf8StringHandle);
+			}
+			return flag;
 		}
 	}
 }

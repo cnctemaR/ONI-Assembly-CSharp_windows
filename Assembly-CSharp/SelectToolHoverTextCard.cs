@@ -639,34 +639,38 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				hoverTextDrawer.DrawText(MISC.STATUSITEMS.BURIEDITEM.NAME, this.Styles_BodyText.Standard);
 			}
-			if (element.id == SimHashes.OxyRock)
+			int num9 = Grid.CellAbove(num);
+			bool flag13 = element.IsLiquid && Grid.IsValidCell(num9) && (Grid.Element[num9].IsGas || Grid.Element[num9].IsVacuum);
+			if (element.sublimateId != (SimHashes)0 && (element.IsSolid || flag13))
 			{
-				float num9 = Grid.AccumulatedFlow[num] / 3f;
-				string text14 = BUILDING.STATUSITEMS.EMITTINGOXYGENAVG.NAME;
-				text14 = text14.Replace("{FlowRate}", GameUtil.GetFormattedMass(num9, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				float num10 = Grid.AccumulatedFlow[num] / 3f;
+				string elementNameByElementHash = GameUtil.GetElementNameByElementHash(element.id);
+				string elementNameByElementHash2 = GameUtil.GetElementNameByElementHash(element.sublimateId);
+				string text14 = BUILDING.STATUSITEMS.EMITTINGGASAVG.NAME;
+				text14 = text14.Replace("{FlowRate}", GameUtil.GetFormattedMass(num10, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				text14 = text14.Replace("{Element}", elementNameByElementHash2);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				hoverTextDrawer.DrawText(text14, this.Styles_BodyText.Standard);
-				if (num9 <= 0f)
+				bool flag14;
+				bool flag15;
+				GameUtil.IsEmissionBlocked(num, out flag14, out flag15);
+				string text15 = null;
+				if (flag14)
 				{
-					bool flag13;
-					bool flag14;
-					GameUtil.IsEmissionBlocked(num, out flag13, out flag14);
-					string text15 = null;
-					if (flag13)
-					{
-						text15 = MISC.STATUSITEMS.OXYROCK.NEIGHBORSBLOCKED.NAME;
-					}
-					else if (flag14)
-					{
-						text15 = MISC.STATUSITEMS.OXYROCK.OVERPRESSURE.NAME;
-					}
-					if (text15 != null)
-					{
-						hoverTextDrawer.NewLine(26);
-						hoverTextDrawer.DrawIcon(this.iconDash, 18);
-						hoverTextDrawer.DrawText(text15, this.Styles_BodyText.Standard);
-					}
+					text15 = MISC.STATUSITEMS.SUBLIMATIONBLOCKED.NAME;
+				}
+				else if (flag15)
+				{
+					text15 = MISC.STATUSITEMS.SUBLIMATIONOVERPRESSURE.NAME;
+				}
+				if (text15 != null)
+				{
+					text15 = text15.Replace("{Element}", elementNameByElementHash);
+					text15 = text15.Replace("{SubElement}", elementNameByElementHash2);
+					hoverTextDrawer.NewLine(26);
+					hoverTextDrawer.DrawIcon(this.iconDash, 18);
+					hoverTextDrawer.DrawText(text15, this.Styles_BodyText.Standard);
 				}
 			}
 			hoverTextDrawer.EndShadowBar();

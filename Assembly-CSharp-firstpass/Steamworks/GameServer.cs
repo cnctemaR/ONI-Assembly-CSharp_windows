@@ -16,6 +16,10 @@ namespace Steamworks
 			{
 				flag = CSteamGameServerAPIContext.Init();
 			}
+			if (flag)
+			{
+				CallbackDispatcher.Initialize();
+			}
 			return flag;
 		}
 
@@ -24,12 +28,12 @@ namespace Steamworks
 			InteropHelp.TestIfPlatformSupported();
 			NativeMethods.SteamGameServer_Shutdown();
 			CSteamGameServerAPIContext.Clear();
+			CallbackDispatcher.Shutdown();
 		}
 
 		public static void RunCallbacks()
 		{
-			InteropHelp.TestIfPlatformSupported();
-			NativeMethods.SteamGameServer_RunCallbacks();
+			CallbackDispatcher.RunFrame(true);
 		}
 
 		public static void ReleaseCurrentThreadMemory()

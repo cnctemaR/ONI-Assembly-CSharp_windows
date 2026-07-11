@@ -30,28 +30,28 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		{
 			FallerComponents.OnSolidChanged(h);
 		};
-		float num2 = -GravityComponent.GetRadius(data.transform) - 0.07f;
-		int num3 = Grid.PosToCell(new Vector3(position.x, position.y + num2, position.z));
-		bool flag = Grid.IsValidCell(num3) && Grid.Solid[num3] && data.initialVelocity.sqrMagnitude == 0f;
+		float groundOffset = GravityComponent.GetGroundOffset(data.transform.GetComponent<KCollider2D>());
+		int num2 = Grid.PosToCell(new Vector3(position.x, position.y - groundOffset - 0.07f, position.z));
+		bool flag = Grid.IsValidCell(num2) && Grid.Solid[num2] && data.initialVelocity.sqrMagnitude == 0f;
 		if ((Grid.IsValidCell(num) && Grid.Solid[num]) || flag)
 		{
 			data.solidChangedCB = delegate(object ev_data)
 			{
 				FallerComponents.OnSolidChanged(h);
 			};
-			int num4 = 2;
+			int num3 = 2;
 			Vector2I vector2I = Grid.CellToXY(num);
 			vector2I.y--;
 			if (vector2I.y < 0)
 			{
 				vector2I.y = 0;
-				num4 = 1;
+				num3 = 1;
 			}
 			else if (vector2I.y == Grid.HeightInCells - 1)
 			{
-				num4 = 1;
+				num3 = 1;
 			}
-			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, vector2I.x, vector2I.y, 1, num4, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
+			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, vector2I.x, vector2I.y, 1, num3, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
 			GameComps.Fallers.SetData(h, data);
 			return;
 		}
@@ -152,4 +152,6 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			FallerComponents.RemoveGravity(data.transform);
 		}
 	}
+
+	private const float EPSILON = 0.07f;
 }

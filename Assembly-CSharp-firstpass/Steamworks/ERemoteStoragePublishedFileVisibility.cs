@@ -6,6 +6,7 @@ namespace Steamworks
 	{
 		k_ERemoteStoragePublishedFileVisibilityPublic,
 		k_ERemoteStoragePublishedFileVisibilityFriendsOnly,
-		k_ERemoteStoragePublishedFileVisibilityPrivate
+		k_ERemoteStoragePublishedFileVisibilityPrivate,
+		k_ERemoteStoragePublishedFileVisibilityUnlisted
 	}
 }

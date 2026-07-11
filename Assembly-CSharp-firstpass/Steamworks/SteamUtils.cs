@@ -202,25 +202,31 @@ namespace Steamworks
 			return NativeMethods.ISteamUtils_IsSteamChinaLauncher(CSteamAPIContext.GetSteamUtils());
 		}
 
-		public static bool InitFilterText()
+		public static bool InitFilterText(uint unFilterOptions = 0U)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamUtils_InitFilterText(CSteamAPIContext.GetSteamUtils());
+			return NativeMethods.ISteamUtils_InitFilterText(CSteamAPIContext.GetSteamUtils(), unFilterOptions);
 		}
 
-		public static int FilterText(out string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly)
+		public static int FilterText(ETextFilteringContext eContext, CSteamID sourceSteamID, string pchInputMessage, out string pchOutFilteredText, uint nByteSizeOutFilteredText)
 		{
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal((int)nByteSizeOutFilteredText);
 			int num2;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchInputMessage))
 			{
-				int num = NativeMethods.ISteamUtils_FilterText(CSteamAPIContext.GetSteamUtils(), intPtr, nByteSizeOutFilteredText, utf8StringHandle, bLegalOnly);
+				int num = NativeMethods.ISteamUtils_FilterText(CSteamAPIContext.GetSteamUtils(), eContext, sourceSteamID, utf8StringHandle, intPtr, nByteSizeOutFilteredText);
 				pchOutFilteredText = ((num != -1) ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 				Marshal.FreeHGlobal(intPtr);
 				num2 = num;
 			}
 			return num2;
+		}
+
+		public static ESteamIPv6ConnectivityState GetIPv6ConnectivityState(ESteamIPv6ConnectivityProtocol eProtocol)
+		{
+			InteropHelp.TestIfAvailableClient();
+			return NativeMethods.ISteamUtils_GetIPv6ConnectivityState(CSteamAPIContext.GetSteamUtils(), eProtocol);
 		}
 	}
 }

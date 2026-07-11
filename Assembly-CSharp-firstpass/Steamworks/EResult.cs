@@ -4,7 +4,8 @@ namespace Steamworks
 {
 	public enum EResult
 	{
-		k_EResultOK = 1,
+		k_EResultNone,
+		k_EResultOK,
 		k_EResultFail,
 		k_EResultNoConnection,
 		k_EResultInvalidPassword = 5,
@@ -115,6 +116,9 @@ namespace Steamworks
 		k_EResultWGNetworkSendExceeded,
 		k_EResultAccountNotFriends,
 		k_EResultLimitedUserAccount,
-		k_EResultCantRemoveItem
+		k_EResultCantRemoveItem,
+		k_EResultAccountDeleted,
+		k_EResultExistingUserCancelledLicense,
+		k_EResultCommunityCooldown
 	}
 }

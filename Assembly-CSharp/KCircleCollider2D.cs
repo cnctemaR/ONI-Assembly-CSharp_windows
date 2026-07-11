@@ -30,7 +30,7 @@ public class KCircleCollider2D : KCollider2D
 	{
 		get
 		{
-			return new Bounds(base.transform.GetPosition() + new Vector3(base.offset.x, base.offset.y, 0f), new Vector3(this._radius, this._radius, 0f));
+			return new Bounds(base.transform.GetPosition() + new Vector3(base.offset.x, base.offset.y, 0f), new Vector3(this._radius * 2f, this._radius * 2f, 0f));
 		}
 	}
 

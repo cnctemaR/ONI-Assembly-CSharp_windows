@@ -17,7 +17,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
 			{
-				flag = NativeMethods.ISteamUserStats_GetStat(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
+				flag = NativeMethods.ISteamUserStats_GetStatInt32(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
 			}
 			return flag;
 		}
@@ -28,7 +28,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
 			{
-				flag = NativeMethods.ISteamUserStats_GetStat0(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
+				flag = NativeMethods.ISteamUserStats_GetStatFloat(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
 			}
 			return flag;
 		}
@@ -39,7 +39,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
 			{
-				flag = NativeMethods.ISteamUserStats_SetStat(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, nData);
+				flag = NativeMethods.ISteamUserStats_SetStatInt32(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, nData);
 			}
 			return flag;
 		}
@@ -50,7 +50,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
 			{
-				flag = NativeMethods.ISteamUserStats_SetStat0(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, fData);
+				flag = NativeMethods.ISteamUserStats_SetStatFloat(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, fData);
 			}
 			return flag;
 		}
@@ -176,7 +176,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
 			{
-				flag = NativeMethods.ISteamUserStats_GetUserStat(CSteamAPIContext.GetSteamUserStats(), steamIDUser, utf8StringHandle, out pData);
+				flag = NativeMethods.ISteamUserStats_GetUserStatInt32(CSteamAPIContext.GetSteamUserStats(), steamIDUser, utf8StringHandle, out pData);
 			}
 			return flag;
 		}
@@ -187,7 +187,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
 			{
-				flag = NativeMethods.ISteamUserStats_GetUserStat0(CSteamAPIContext.GetSteamUserStats(), steamIDUser, utf8StringHandle, out pData);
+				flag = NativeMethods.ISteamUserStats_GetUserStatFloat(CSteamAPIContext.GetSteamUserStats(), steamIDUser, utf8StringHandle, out pData);
 			}
 			return flag;
 		}
@@ -351,7 +351,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchStatName))
 			{
-				flag = NativeMethods.ISteamUserStats_GetGlobalStat(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
+				flag = NativeMethods.ISteamUserStats_GetGlobalStatInt64(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
 			}
 			return flag;
 		}
@@ -362,7 +362,7 @@ namespace Steamworks
 			bool flag;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchStatName))
 			{
-				flag = NativeMethods.ISteamUserStats_GetGlobalStat0(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
+				flag = NativeMethods.ISteamUserStats_GetGlobalStatDouble(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pData);
 			}
 			return flag;
 		}
@@ -373,7 +373,7 @@ namespace Steamworks
 			int num;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchStatName))
 			{
-				num = NativeMethods.ISteamUserStats_GetGlobalStatHistory(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, pData, cubData);
+				num = NativeMethods.ISteamUserStats_GetGlobalStatHistoryInt64(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, pData, cubData);
 			}
 			return num;
 		}
@@ -384,9 +384,31 @@ namespace Steamworks
 			int num;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchStatName))
 			{
-				num = NativeMethods.ISteamUserStats_GetGlobalStatHistory0(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, pData, cubData);
+				num = NativeMethods.ISteamUserStats_GetGlobalStatHistoryDouble(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, pData, cubData);
 			}
 			return num;
+		}
+
+		public static bool GetAchievementProgressLimits(string pchName, out int pnMinProgress, out int pnMaxProgress)
+		{
+			InteropHelp.TestIfAvailableClient();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
+			{
+				flag = NativeMethods.ISteamUserStats_GetAchievementProgressLimitsInt32(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pnMinProgress, out pnMaxProgress);
+			}
+			return flag;
+		}
+
+		public static bool GetAchievementProgressLimits(string pchName, out float pfMinProgress, out float pfMaxProgress)
+		{
+			InteropHelp.TestIfAvailableClient();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchName))
+			{
+				flag = NativeMethods.ISteamUserStats_GetAchievementProgressLimitsFloat(CSteamAPIContext.GetSteamUserStats(), utf8StringHandle, out pfMinProgress, out pfMaxProgress);
+			}
+			return flag;
 		}
 	}
 }

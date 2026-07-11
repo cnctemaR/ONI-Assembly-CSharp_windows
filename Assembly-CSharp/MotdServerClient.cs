@@ -92,7 +92,8 @@ public class MotdServerClient
 				motdResponse.news_header_text = UI.FRONTEND.MOTD.NEWS_HEADER;
 				motdResponse.news_body_text = UI.FRONTEND.MOTD.NEWS_BODY;
 				motdResponse.patch_notes_summary = UI.FRONTEND.MOTD.PATCH_NOTES_SUMMARY;
-				motdResponse.update_text_override = UI.FRONTEND.MOTD.UPDATE_TEXT;
+				motdResponse.vanilla_update_data.update_text_override = UI.FRONTEND.MOTD.UPDATE_TEXT;
+				motdResponse.expansion1_update_data.update_text_override = UI.FRONTEND.MOTD.UPDATE_TEXT_EXPANSION1;
 			}
 			this.doCallback(motdResponse, null);
 		});
@@ -120,12 +121,12 @@ public class MotdServerClient
 
 	private void GetWebMotd(string url, MotdServerClient.MotdResponse localMotd, Action<MotdServerClient.MotdResponse, string> cb)
 	{
-		MotdServerClient.<>c__DisplayClass15_0 CS$<>8__locals1 = new MotdServerClient.<>c__DisplayClass15_0();
+		MotdServerClient.<>c__DisplayClass16_0 CS$<>8__locals1 = new MotdServerClient.<>c__DisplayClass16_0();
 		CS$<>8__locals1.localMotd = localMotd;
 		CS$<>8__locals1.cb = cb;
 		Action<string, string> action = delegate(string response, string err)
 		{
-			MotdServerClient.<>c__DisplayClass15_1 CS$<>8__locals2 = new MotdServerClient.<>c__DisplayClass15_1();
+			MotdServerClient.<>c__DisplayClass16_1 CS$<>8__locals2 = new MotdServerClient.<>c__DisplayClass16_1();
 			CS$<>8__locals2.CS$<>8__locals1 = CS$<>8__locals1;
 			DebugUtil.DevAssert(CS$<>8__locals1.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded");
 			if (CS$<>8__locals1.localMotd.image_texture == null)
@@ -138,7 +139,7 @@ public class MotdServerClient
 				CS$<>8__locals1.cb(null, err);
 				return;
 			}
-			MotdServerClient.<>c__DisplayClass15_1 CS$<>8__locals3 = CS$<>8__locals2;
+			MotdServerClient.<>c__DisplayClass16_1 CS$<>8__locals3 = CS$<>8__locals2;
 			JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings();
 			jsonSerializerSettings.Error = delegate(object sender, ErrorEventArgs args)
 			{
@@ -219,6 +220,15 @@ public class MotdServerClient
 
 	private MotdServerClient.MotdResponse m_localMotd;
 
+	public class MotdUpdateData
+	{
+		public string last_update_time { get; set; }
+
+		public string next_update_time { get; set; }
+
+		public string update_text_override { get; set; }
+	}
+
 	public class MotdResponse
 	{
 		public int version { get; set; }
@@ -239,11 +249,9 @@ public class MotdServerClient
 
 		public string patch_notes_link_url { get; set; }
 
-		public string last_update_time { get; set; }
+		public MotdServerClient.MotdUpdateData vanilla_update_data { get; set; }
 
-		public string next_update_time { get; set; }
-
-		public string update_text_override { get; set; }
+		public MotdServerClient.MotdUpdateData expansion1_update_data { get; set; }
 
 		[JsonIgnore]
 		public Texture2D image_texture { get; set; }

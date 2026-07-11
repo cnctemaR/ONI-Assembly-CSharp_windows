@@ -39,17 +39,38 @@ namespace Steamworks
 
 		private void InternalOnServerResponded(IntPtr thisptr, HServerListRequest hRequest, int iServer)
 		{
-			this.m_ServerResponded(hRequest, iServer);
+			try
+			{
+				this.m_ServerResponded(hRequest, iServer);
+			}
+			catch (Exception ex)
+			{
+				CallbackDispatcher.ExceptionHandler(ex);
+			}
 		}
 
 		private void InternalOnServerFailedToRespond(IntPtr thisptr, HServerListRequest hRequest, int iServer)
 		{
-			this.m_ServerFailedToRespond(hRequest, iServer);
+			try
+			{
+				this.m_ServerFailedToRespond(hRequest, iServer);
+			}
+			catch (Exception ex)
+			{
+				CallbackDispatcher.ExceptionHandler(ex);
+			}
 		}
 
 		private void InternalOnRefreshComplete(IntPtr thisptr, HServerListRequest hRequest, EMatchMakingServerResponse response)
 		{
-			this.m_RefreshComplete(hRequest, response);
+			try
+			{
+				this.m_RefreshComplete(hRequest, response);
+			}
+			catch (Exception ex)
+			{
+				CallbackDispatcher.ExceptionHandler(ex);
+			}
 		}
 
 		public static explicit operator IntPtr(ISteamMatchmakingServerListResponse that)

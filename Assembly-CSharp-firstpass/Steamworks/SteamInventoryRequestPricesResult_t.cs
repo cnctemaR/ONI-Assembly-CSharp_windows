@@ -7,11 +7,23 @@ namespace Steamworks
 	[StructLayout(LayoutKind.Sequential, Pack = 8)]
 	public struct SteamInventoryRequestPricesResult_t
 	{
+		public string m_rgchCurrency
+		{
+			get
+			{
+				return InteropHelp.ByteArrayToStringUTF8(this.m_rgchCurrency_);
+			}
+			set
+			{
+				InteropHelp.StringToByteArrayUTF8(value, this.m_rgchCurrency_, 4);
+			}
+		}
+
 		public const int k_iCallback = 4705;
 
 		public EResult m_result;
 
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 4)]
-		public string m_rgchCurrency;
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+		private byte[] m_rgchCurrency_;
 	}
 }

@@ -101,32 +101,44 @@ namespace Database
 				str = str.Replace("{Tags}", treeFilterable.GetTagsAsStatus(6));
 				return str;
 			};
-			this.OxyRockEmitting = this.CreateStatusItem("OxyRockEmitting", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
-			this.OxyRockEmitting.resolveStringCallback = delegate(string str, object data)
+			this.SublimationEmitting = this.CreateStatusItem("SublimationEmitting", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.SublimationEmitting.resolveStringCallback = delegate(string str, object data)
 			{
 				CellSelectionObject cellSelectionObject5 = (CellSelectionObject)data;
+				if (cellSelectionObject5.element.sublimateId == (SimHashes)0)
+				{
+					return str;
+				}
+				str = str.Replace("{Element}", GameUtil.GetElementNameByElementHash(cellSelectionObject5.element.sublimateId));
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(cellSelectionObject5.FlowRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
-			this.OxyRockBlocked = this.CreateStatusItem("OxyRockBlocked", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
-			this.OxyRockBlocked.resolveStringCallback = delegate(string str, object data)
+			this.SublimationEmitting.resolveTooltipCallback = this.SublimationEmitting.resolveStringCallback;
+			this.SublimationBlocked = this.CreateStatusItem("SublimationBlocked", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.SublimationBlocked.resolveStringCallback = delegate(string str, object data)
 			{
-				bool flag;
-				bool flag2;
-				GameUtil.IsEmissionBlocked(((CellSelectionObject)data).SelectedCell, out flag, out flag2);
-				string text = null;
-				if (flag)
+				CellSelectionObject cellSelectionObject6 = (CellSelectionObject)data;
+				if (cellSelectionObject6.element.sublimateId == (SimHashes)0)
 				{
-					text = MISC.STATUSITEMS.OXYROCK.NEIGHBORSBLOCKED.NAME;
+					return str;
 				}
-				else if (flag2)
-				{
-					text = MISC.STATUSITEMS.OXYROCK.OVERPRESSURE.NAME;
-				}
-				str = str.Replace("{BlockedString}", text);
+				str = str.Replace("{Element}", cellSelectionObject6.element.name);
+				str = str.Replace("{SubElement}", GameUtil.GetElementNameByElementHash(cellSelectionObject6.element.sublimateId));
 				return str;
 			};
-			this.OxyRockInactive = this.CreateStatusItem("OxyRockInactive", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.SublimationBlocked.resolveTooltipCallback = this.SublimationBlocked.resolveStringCallback;
+			this.SublimationOverpressure = this.CreateStatusItem("SublimationOverpressure", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.SublimationOverpressure.resolveTooltipCallback = delegate(string str, object data)
+			{
+				CellSelectionObject cellSelectionObject7 = (CellSelectionObject)data;
+				if (cellSelectionObject7.element.sublimateId == (SimHashes)0)
+				{
+					return str;
+				}
+				str = str.Replace("{Element}", cellSelectionObject7.element.name);
+				str = str.Replace("{SubElement}", GameUtil.GetElementNameByElementHash(cellSelectionObject7.element.sublimateId));
+				return str;
+			};
 			this.Space = this.CreateStatusItem("Space", "MISC", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022);
 			this.BuriedItem = this.CreateStatusItem("BuriedItem", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.SpoutOverPressure = this.CreateStatusItem("SpoutOverPressure", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -251,11 +263,11 @@ namespace Database
 
 		public StatusItem TreeFilterableTags;
 
-		public StatusItem OxyRockInactive;
+		public StatusItem SublimationOverpressure;
 
-		public StatusItem OxyRockEmitting;
+		public StatusItem SublimationEmitting;
 
-		public StatusItem OxyRockBlocked;
+		public StatusItem SublimationBlocked;
 
 		public StatusItem BuriedItem;
 

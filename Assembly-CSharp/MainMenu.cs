@@ -80,7 +80,14 @@ public class MainMenu : KScreen
 				this.motdNewsHeader.text = response.news_header_text;
 				this.motdNewsBody.text = response.news_body_text;
 				this.patchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
-				this.nextUpdateTimer.UpdateReleaseTimes(response.last_update_time, response.next_update_time, response.update_text_override);
+				if (DlcManager.IsExpansion1Active())
+				{
+					this.nextUpdateTimer.UpdateReleaseTimes(response.expansion1_update_data.last_update_time, response.expansion1_update_data.next_update_time, response.expansion1_update_data.update_text_override);
+				}
+				else
+				{
+					this.nextUpdateTimer.UpdateReleaseTimes(response.vanilla_update_data.last_update_time, response.vanilla_update_data.next_update_time, response.vanilla_update_data.update_text_override);
+				}
 				if (response.image_texture != null)
 				{
 					this.motdImage.sprite = Sprite.Create(response.image_texture, new Rect(0f, 0f, (float)response.image_texture.width, (float)response.image_texture.height), Vector2.zero);
@@ -384,7 +391,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 449460U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 17)
+				if (header.buildVersion > 455421U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 17)
 				{
 					flag = false;
 				}

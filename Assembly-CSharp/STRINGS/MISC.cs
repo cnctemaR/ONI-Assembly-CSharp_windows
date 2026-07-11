@@ -118,6 +118,8 @@ namespace STRINGS
 
 			public static LocString EDIBLE = "Edible";
 
+			public static LocString OXIDIZER = "Oxidizer";
+
 			public static LocString COOKINGINGREDIENT = "Cooking Ingredient";
 
 			public static LocString MEDICINE = "Medicine";
@@ -170,7 +172,13 @@ namespace STRINGS
 
 			public static LocString FARMINGMATERIAL = "Fertilizer";
 
+			public static LocString INSULATOR = "Insulator";
+
+			public static LocString RAILGUNPAYLOADEMPTYABLE = "Payload";
+
 			public static LocString COMMAND_MODULE = "Command Module";
+
+			public static LocString HABITAT_MODULE = "Habitat Module";
 
 			public static LocString COMBUSTIBLEGAS = "Combustible Gas";
 
@@ -178,7 +186,11 @@ namespace STRINGS
 
 			public static LocString COMBUSTIBLESOLID = "Combustible Solid";
 
+			public static LocString UNIDENTIFIEDSEED = "Strange Seed";
+
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
+
+			public static LocString WARP_PORTAL = "Teleportal";
 
 			public static LocString FARMING = "Farm Build-Delivery";
 
@@ -205,45 +217,32 @@ namespace STRINGS
 
 		public class STATUSITEMS
 		{
-			public class OXYROCK
+			public class SUBLIMATIONBLOCKED
 			{
-				public class NEIGHBORSBLOCKED
-				{
-					public static LocString NAME = "Oxylite blocked";
+				public static LocString NAME = "{SubElement} emission blocked";
 
-					public static LocString TOOLTIP = "This " + UI.FormatAsLink("Oxylite", "OXYROCK") + " deposit is not exposed to air and cannot emit " + UI.FormatAsLink("Oxygen", "OXYGEN");
-				}
-
-				public class OVERPRESSURE
-				{
-					public static LocString NAME = "Inert";
-
-					public static LocString TOOLTIP = string.Concat(new string[]
-					{
-						"Environmental ",
-						UI.PRE_KEYWORD,
-						"Gas Pressure",
-						UI.PST_KEYWORD,
-						" is too high for this ",
-						UI.FormatAsLink("Oxylite", "OXYROCK"),
-						" deposit to emit ",
-						UI.FormatAsLink("Oxygen", "OXYGEN")
-					});
-				}
+				public static LocString TOOLTIP = "This {Element} deposit is not exposed to air and cannot emit {SubElement}";
 			}
 
-			public class OXYROCKBLOCKED
+			public class SUBLIMATIONOVERPRESSURE
 			{
-				public static LocString NAME = "{BlockedString}";
+				public static LocString NAME = "Inert";
 
-				public static LocString TOOLTIP = "This " + UI.FormatAsLink("Oxylite", "OXYROCK") + " deposit has no room to emit " + UI.FormatAsLink("Oxygen", "OXYGEN");
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Environmental ",
+					UI.PRE_KEYWORD,
+					"Gas Pressure",
+					UI.PST_KEYWORD,
+					" is too high for this {Element} deposit to emit {SubElement}"
+				});
 			}
 
-			public class OXYROCKEMITTING
+			public class SUBLIMATIONEMITTING
 			{
-				public static LocString NAME = BUILDING.STATUSITEMS.EMITTINGOXYGENAVG.NAME;
+				public static LocString NAME = BUILDING.STATUSITEMS.EMITTINGGASAVG.NAME;
 
-				public static LocString TOOLTIP = BUILDING.STATUSITEMS.EMITTINGOXYGENAVG.TOOLTIP;
+				public static LocString TOOLTIP = BUILDING.STATUSITEMS.EMITTINGGASAVG.TOOLTIP;
 			}
 
 			public class SPACE
@@ -261,81 +260,6 @@ namespace STRINGS
 					"Liquid",
 					UI.PST_KEYWORD,
 					" resources"
-				});
-			}
-
-			public class OXYROCKINACTIVE
-			{
-				public static LocString NAME = "Inert";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"Environmental ",
-					UI.PRE_KEYWORD,
-					"Gas Pressure",
-					UI.PST_KEYWORD,
-					" is too high for this ",
-					UI.FormatAsLink("Oxylite", "OXYROCK"),
-					" deposit to emit ",
-					ELEMENTS.OXYGEN.NAME
-				});
-			}
-
-			public class BLEACHSTONE
-			{
-				public class NEIGHBORSBLOCKED
-				{
-					public static LocString NAME = "Bleachstone blocked";
-
-					public static LocString TOOLTIP = "This " + UI.FormatAsLink("Bleachstone", "BLEACHSTONE") + " deposit is not exposed to air and cannot emit " + UI.FormatAsLink("Chlorine", "CHLORINE");
-				}
-
-				public class OVERPRESSURE
-				{
-					public static LocString NAME = "Inert";
-
-					public static LocString TOOLTIP = string.Concat(new string[]
-					{
-						"Environmental ",
-						UI.PRE_KEYWORD,
-						"Gas Pressure",
-						UI.PST_KEYWORD,
-						" is too high for this ",
-						UI.FormatAsLink("Bleachstone", "BLEACHSTONE"),
-						" deposit to emit ",
-						UI.FormatAsLink("Chlorine", "CHLORINE")
-					});
-				}
-			}
-
-			public class BLEACHSTONEBLOCKED
-			{
-				public static LocString NAME = "{BlockedString}";
-
-				public static LocString TOOLTIP = "This " + UI.FormatAsLink("Bleachstone", "BLEACHSTONE") + " deposit has no room to emit " + UI.FormatAsLink("Chlorine", "CHLORINE");
-			}
-
-			public class BLEACHSTONEEMITTING
-			{
-				public static LocString NAME = BUILDING.STATUSITEMS.EMITTINGGASAVG.NAME;
-
-				public static LocString TOOLTIP = BUILDING.STATUSITEMS.EMITTINGGASAVG.TOOLTIP;
-			}
-
-			public class BLEACHSTONEINACTIVE
-			{
-				public static LocString NAME = "Inert";
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"Environmental ",
-					UI.PRE_KEYWORD,
-					"Gas Pressure",
-					UI.PST_KEYWORD,
-					" is too high for this ",
-					UI.FormatAsLink("Bleachstone", "BLEACHSTONE"),
-					" deposit to emit ",
-					UI.FormatAsLink("Chlorine", "CHLORINE")
 				});
 			}
 
@@ -467,6 +391,13 @@ namespace STRINGS
 				public static LocString NOTIFICATION = "Buried object discovered";
 
 				public static LocString NOTIFICATION_TOOLTIP = "My Duplicants have uncovered a {Uncoverable}!\n\nClick to jump to its location.";
+			}
+
+			public class GENETICANALYSISCOMPLETED
+			{
+				public static LocString NAME = "Genome Sequenced";
+
+				public static LocString TOOLTIP = "This Station has sequenced a new seed mutation";
 			}
 
 			public class HEALTHSTATUS
@@ -679,6 +610,20 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "New information on this Natural Feature will be compiled once the field study is complete";
 			}
+
+			public class DURABILITY
+			{
+				public static LocString NAME = "Durability: {durability}";
+
+				public static LocString TOOLTIP = "This item will stop functioning when it reaches 0% durability.";
+			}
+
+			public class STOREDITEMDURABILITY
+			{
+				public static LocString NAME = "Suit Durability: {durability}";
+
+				public static LocString TOOLTIP = "The suit will stop functioning when it reaches 0% durability.";
+			}
 		}
 
 		public class POPFX
@@ -795,7 +740,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Video: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "Duplicants have limited jumping and climbing abilities. They can only climb two tiles high and cannot fit into spaces shorter than two tiles or cross gaps wider than one tile. I should keep this in mind while placing errands.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <b>Show Navigation</b> to view all areas within their reach.";
+				public static LocString MESSAGEBODY = "Duplicants have limited jumping and climbing abilities. They can only climb two tiles high and cannot fit into spaces shorter than two tiles, or cross gaps wider than one tile. I should keep this in mind while placing errands.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <b>Show Navigation</b> to view all areas within their reach.";
 
 				public static LocString TOOLTIP = "Notes on my Duplicants' maneuverability";
 			}
@@ -960,6 +905,28 @@ namespace STRINGS
 				});
 			}
 
+			public class RADIATION
+			{
+				public static LocString NAME = "Tutorial: Radiation";
+
+				public static LocString TOOLTIP = "Notes on managing radiation";
+
+				public static LocString MESSAGEBODY = string.Concat(new string[]
+				{
+					"Objects such as ",
+					UI.FormatAsLink("Uranium Ore", "URANIUMORE"),
+					" and ",
+					UI.FormatAsLink("Beetafineries", "BEE"),
+					" emit a ",
+					UI.FormatAsLink("Radioactive", "RADIOACTIVE"),
+					" energy that can be toxic to my Duplicants.\n\nI can use the Radiation Overlay ",
+					UI.FormatAsHotkey("[L-SHIFT + F4]"),
+					" to check the scope of the Radiation field. Building thick walls around radiation emitters will dampen the field and protect my Duplicants from getting ",
+					UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
+					" ."
+				});
+			}
+
 			public class MORALE
 			{
 				public static LocString NAME = "Video: Duplicant Morale";
@@ -1046,29 +1013,38 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Research Complete";
 
-				public static LocString MESSAGEBODY = "Eureka! My Duplicants have discovered {0} Technology.\n\nNew buildings have become available:\n  • {1}";
+				public static LocString MESSAGEBODY = "Eureka! We've discovered {0} Technology.\n\nNew buildings have become available:\n  • {1}";
 
 				public static LocString TOOLTIP = "{0} research complete!";
 			}
 
+			public class WORLDDETECTED
+			{
+				public static LocString NAME = "New " + UI.CLUSTERMAP.PLANETOID + " detected";
+
+				public static LocString MESSAGEBODY = "The Duplicants' astrological efforts have uncovered new " + UI.CLUSTERMAP.PLANETOID + "s:\n{0}";
+
+				public static LocString TOOLTIP = "{0} discovered";
+			}
+
 			public class SKILL_POINT_EARNED
 			{
-				public static LocString NAME = "Skill point earned";
+				public static LocString NAME = "{Duplicant} earned a skill point!";
 
 				public static LocString MESSAGEBODY = "These Duplicants have Skill Points that can be spent on new abilities:\n{0}";
 
 				public static LocString LINE = "\n• <b>{0}</b>";
 
-				public static LocString TOOLTIP = "Duplicants can now learn new skills";
+				public static LocString TOOLTIP = "{Duplicant} has been working hard and is ready to learn a new skill";
 			}
 
 			public class DUPLICANTABSORBED
 			{
 				public static LocString NAME = "Printables have been reabsorbed";
 
-				public static LocString MESSAGEBODY = "The Printing Pod is no longer available for printing.\nCountdown to the next production was rebooted.";
+				public static LocString MESSAGEBODY = "The Printing Pod is no longer available for printing.\nCountdown to the next production has been rebooted.";
 
-				public static LocString TOOLTIP = "Printables have been reabsorbed";
+				public static LocString TOOLTIP = "Printing countdown rebooted";
 			}
 
 			public class DUPLICANTDIED
@@ -1082,7 +1058,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Food has decayed";
 
-				public static LocString TOOLTIP = "These " + UI.FormatAsLink("Food", "FOOD") + " items have rotted and are no longer edible:\n• {0}";
+				public static LocString TOOLTIP = "These " + UI.FormatAsLink("Food", "FOOD") + " items have rotted and are no longer edible:{0}";
 			}
 
 			public class FOODSTALE
@@ -1139,6 +1115,13 @@ namespace STRINGS
 				public static LocString NAME = "Damage: Overheated";
 
 				public static LocString TOOLTIP = "Extreme heat is damaging these buildings:";
+			}
+
+			public class TILECOLLAPSE
+			{
+				public static LocString NAME = "Ceiling Collapse!";
+
+				public static LocString TOOLTIP = "Falling material fell on these Duplicants and displaced them:";
 			}
 
 			public class NO_OXYGEN_GENERATOR
@@ -1455,15 +1438,15 @@ namespace STRINGS
 
 			public class RESETSKILL
 			{
-				public static LocString NAME = "Reset skills";
+				public static LocString NAME = "Skills reset";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"Duplicants ",
+					"These Duplicants have had their ",
 					UI.PRE_KEYWORD,
-					"Skills",
+					"Skill Points",
 					UI.PST_KEYWORD,
-					" have been reset to defaults."
+					" refunded:"
 				});
 			}
 
@@ -1611,7 +1594,7 @@ namespace STRINGS
 				{
 					"These Duplicants have asphyxiated in ",
 					UI.PRE_KEYWORD,
-					"Heat",
+					"Hot",
 					UI.PST_KEYWORD,
 					" air:"
 				});
@@ -1621,7 +1604,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Duplicants have suffocated";
 
-				public static LocString TOOLTIP = "These Duplicants have asphyxiated in " + UI.FormatAsLink("cold", "HEAT") + " air:";
+				public static LocString TOOLTIP = "These Duplicants have asphyxiated in " + UI.FormatAsLink("Cold", "HEAT") + " air:";
 			}
 
 			public class DEATH_DROWNED
@@ -1691,7 +1674,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony Achievement earned";
 
-				public static LocString TOOLTIP = "Colony has earned a new achievement.";
+				public static LocString TOOLTIP = "The colony has earned a new achievement.";
+			}
+
+			public class WARP_PORTAL_DUPE_READY
+			{
+				public static LocString NAME = "Duplicant warp ready";
+
+				public static LocString TOOLTIP = "{dupe} is ready to warp from the " + BUILDINGS.PREFABS.WARPPORTAL.NAME;
 			}
 		}
 

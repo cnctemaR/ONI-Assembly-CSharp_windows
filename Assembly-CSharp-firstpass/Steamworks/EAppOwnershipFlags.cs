@@ -24,6 +24,9 @@ namespace Steamworks
 		k_EAppOwnershipFlags_PendingGift = 32768,
 		k_EAppOwnershipFlags_RentalNotActivated = 65536,
 		k_EAppOwnershipFlags_Rental = 131072,
-		k_EAppOwnershipFlags_SiteLicense = 262144
+		k_EAppOwnershipFlags_SiteLicense = 262144,
+		k_EAppOwnershipFlags_LegacyFreeSub = 524288,
+		k_EAppOwnershipFlags_InvalidOSType = 1048576,
+		k_EAppOwnershipFlags_TimedTrial = 2097152
 	}
 }

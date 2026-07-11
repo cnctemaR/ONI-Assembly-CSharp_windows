@@ -50,6 +50,23 @@ namespace Steamworks
 			return Encoding.UTF8.GetString(array);
 		}
 
+		public static string ByteArrayToStringUTF8(byte[] buffer)
+		{
+			int num = 0;
+			while (num < buffer.Length && buffer[num] != 0)
+			{
+				num++;
+			}
+			return Encoding.UTF8.GetString(buffer, 0, num);
+		}
+
+		public static void StringToByteArrayUTF8(string str, byte[] outArrayBuffer, int outArrayBufferSize)
+		{
+			outArrayBuffer = new byte[outArrayBufferSize];
+			int bytes = Encoding.UTF8.GetBytes(str, 0, str.Length, outArrayBuffer, 0);
+			outArrayBuffer[bytes] = 0;
+		}
+
 		public class UTF8StringHandle : SafeHandleZeroOrMinusOneIsInvalid
 		{
 			public UTF8StringHandle(string str)

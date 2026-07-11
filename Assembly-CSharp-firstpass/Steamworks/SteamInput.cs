@@ -25,7 +25,7 @@ namespace Steamworks
 		public static int GetConnectedControllers(InputHandle_t[] handlesOut)
 		{
 			InteropHelp.TestIfAvailableClient();
-			if (handlesOut.Length != 16)
+			if (handlesOut != null && handlesOut.Length != 16)
 			{
 				throw new ArgumentException("handlesOut must be the same size as Constants.STEAM_INPUT_MAX_COUNT!");
 			}
@@ -76,7 +76,7 @@ namespace Steamworks
 		public static int GetActiveActionSetLayers(InputHandle_t inputHandle, InputActionSetHandle_t[] handlesOut)
 		{
 			InteropHelp.TestIfAvailableClient();
-			if (handlesOut.Length != 16)
+			if (handlesOut != null && handlesOut.Length != 16)
 			{
 				throw new ArgumentException("handlesOut must be the same size as Constants.STEAM_INPUT_MAX_ACTIVE_LAYERS!");
 			}
@@ -103,7 +103,7 @@ namespace Steamworks
 		public static int GetDigitalActionOrigins(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputDigitalActionHandle_t digitalActionHandle, EInputActionOrigin[] originsOut)
 		{
 			InteropHelp.TestIfAvailableClient();
-			if (originsOut.Length != 8)
+			if (originsOut != null && originsOut.Length != 8)
 			{
 				throw new ArgumentException("originsOut must be the same size as Constants.STEAM_INPUT_MAX_ORIGINS!");
 			}
@@ -130,7 +130,7 @@ namespace Steamworks
 		public static int GetAnalogActionOrigins(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, EInputActionOrigin[] originsOut)
 		{
 			InteropHelp.TestIfAvailableClient();
-			if (originsOut.Length != 8)
+			if (originsOut != null && originsOut.Length != 8)
 			{
 				throw new ArgumentException("originsOut must be the same size as Constants.STEAM_INPUT_MAX_ORIGINS!");
 			}

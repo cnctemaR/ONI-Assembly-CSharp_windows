@@ -15,7 +15,7 @@ namespace Steamworks
 		public static UGCQueryHandle_t CreateQueryAllUGCRequest(EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return (UGCQueryHandle_t)NativeMethods.ISteamUGC_CreateQueryAllUGCRequest(CSteamGameServerAPIContext.GetSteamUGC(), eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage);
+			return (UGCQueryHandle_t)NativeMethods.ISteamUGC_CreateQueryAllUGCRequestPage(CSteamGameServerAPIContext.GetSteamUGC(), eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage);
 		}
 
 		public static UGCQueryHandle_t CreateQueryAllUGCRequest(EUGCQuery eQueryType, EUGCMatchingUGCType eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, string pchCursor = null)
@@ -24,7 +24,7 @@ namespace Steamworks
 			UGCQueryHandle_t ugcqueryHandle_t;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchCursor))
 			{
-				ugcqueryHandle_t = (UGCQueryHandle_t)NativeMethods.ISteamUGC_CreateQueryAllUGCRequest0(CSteamGameServerAPIContext.GetSteamUGC(), eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, utf8StringHandle);
+				ugcqueryHandle_t = (UGCQueryHandle_t)NativeMethods.ISteamUGC_CreateQueryAllUGCRequestCursor(CSteamGameServerAPIContext.GetSteamUGC(), eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, utf8StringHandle);
 			}
 			return ugcqueryHandle_t;
 		}
@@ -124,7 +124,7 @@ namespace Steamworks
 			bool flag2;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchKey))
 			{
-				bool flag = NativeMethods.ISteamUGC_GetQueryUGCKeyValueTag0(CSteamGameServerAPIContext.GetSteamUGC(), handle, index, utf8StringHandle, intPtr, cchValueSize);
+				bool flag = NativeMethods.ISteamUGC_GetQueryFirstUGCKeyValueTag(CSteamGameServerAPIContext.GetSteamUGC(), handle, index, utf8StringHandle, intPtr, cchValueSize);
 				pchValue = (flag ? InteropHelp.PtrToStringUTF8(intPtr) : null);
 				Marshal.FreeHGlobal(intPtr);
 				flag2 = flag;
@@ -147,6 +147,12 @@ namespace Steamworks
 				flag = NativeMethods.ISteamUGC_AddRequiredTag(CSteamGameServerAPIContext.GetSteamUGC(), handle, utf8StringHandle);
 			}
 			return flag;
+		}
+
+		public static bool AddRequiredTagGroup(UGCQueryHandle_t handle, IList<string> pTagGroups)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return NativeMethods.ISteamUGC_AddRequiredTagGroup(CSteamGameServerAPIContext.GetSteamUGC(), handle, new InteropHelp.SteamParamStringArray(pTagGroups));
 		}
 
 		public static bool AddExcludedTag(UGCQueryHandle_t handle, string pTagName)

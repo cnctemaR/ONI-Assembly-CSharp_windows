@@ -12,6 +12,10 @@ namespace Steamworks
 			{
 				flag = CSteamAPIContext.Init();
 			}
+			if (flag)
+			{
+				CallbackDispatcher.Initialize();
+			}
 			return flag;
 		}
 
@@ -19,6 +23,8 @@ namespace Steamworks
 		{
 			InteropHelp.TestIfPlatformSupported();
 			NativeMethods.SteamAPI_Shutdown();
+			CSteamAPIContext.Clear();
+			CallbackDispatcher.Shutdown();
 		}
 
 		public static bool RestartAppIfNecessary(AppId_t unOwnAppID)
@@ -35,20 +41,13 @@ namespace Steamworks
 
 		public static void RunCallbacks()
 		{
-			InteropHelp.TestIfPlatformSupported();
-			NativeMethods.SteamAPI_RunCallbacks();
+			CallbackDispatcher.RunFrame(false);
 		}
 
 		public static bool IsSteamRunning()
 		{
 			InteropHelp.TestIfPlatformSupported();
 			return NativeMethods.SteamAPI_IsSteamRunning();
-		}
-
-		public static HSteamUser GetHSteamUserCurrent()
-		{
-			InteropHelp.TestIfPlatformSupported();
-			return (HSteamUser)NativeMethods.Steam_GetHSteamUserCurrent();
 		}
 
 		public static HSteamPipe GetHSteamPipe()

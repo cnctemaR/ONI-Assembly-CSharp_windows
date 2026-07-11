@@ -72,12 +72,12 @@ public class DetailsScreen : KTabMenu
 		if (component != null)
 		{
 			component.SetName(newName);
-			return;
 		}
-		if (component2 != null)
+		else if (component2 != null)
 		{
 			component2.SetName(newName);
 		}
+		this.TabTitle.UpdateRenameTooltip(this.target);
 	}
 
 	protected override void OnDeactivate()
@@ -479,16 +479,18 @@ public class DetailsScreen : KTabMenu
 			{
 				this.TabTitle.SetSubText(minionIdentity.GetComponent<MinionResume>().GetSkillsSubtitle(), "");
 				this.TabTitle.SetUserEditable(true);
-				return;
 			}
-			if (userNameable != null)
+			else if (userNameable != null)
 			{
 				this.TabTitle.SetSubText("", "");
 				this.TabTitle.SetUserEditable(true);
-				return;
 			}
-			this.TabTitle.SetSubText("", "");
-			this.TabTitle.SetUserEditable(false);
+			else
+			{
+				this.TabTitle.SetSubText("", "");
+				this.TabTitle.SetUserEditable(false);
+			}
+			this.TabTitle.UpdateRenameTooltip(this.target);
 		}
 	}
 

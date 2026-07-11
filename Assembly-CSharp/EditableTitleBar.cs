@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using STRINGS;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -24,6 +25,19 @@ public class EditableTitleBar : TitleBar
 		if (this.inputField != null)
 		{
 			this.inputField.onEndEdit.AddListener(new UnityAction<string>(this.OnEndEdit));
+		}
+	}
+
+	public void UpdateRenameTooltip(GameObject target)
+	{
+		if (this.editNameButton != null && target != null)
+		{
+			if (target.GetComponent<MinionBrain>() != null)
+			{
+				this.editNameButton.GetComponent<ToolTip>().toolTip = UI.TOOLTIPS.EDITNAME;
+				return;
+			}
+			this.editNameButton.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.EDITNAMEGENERIC, target.GetProperName());
 		}
 	}
 

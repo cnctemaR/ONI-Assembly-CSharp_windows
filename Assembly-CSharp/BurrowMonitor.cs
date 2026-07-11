@@ -9,21 +9,14 @@ public class BurrowMonitor : GameStateMachine<BurrowMonitor, BurrowMonitor.Insta
 		this.openair.ToggleBehaviour(GameTags.Creatures.WantsToEnterBurrow, (BurrowMonitor.Instance smi) => smi.ShouldBurrow() && smi.timeinstate > smi.def.minimumAwakeTime, delegate(BurrowMonitor.Instance smi)
 		{
 			smi.BurrowComplete();
-		}).Transition(this.entombed, (BurrowMonitor.Instance smi) => smi.IsEntombed(), UpdateRate.SIM_200ms).Enter("SetFallAnim", delegate(BurrowMonitor.Instance smi)
+		}).Transition(this.entombed, (BurrowMonitor.Instance smi) => smi.IsEntombed() && !smi.HasTag(GameTags.Creatures.Bagged), UpdateRate.SIM_200ms).Enter("SetCollider", delegate(BurrowMonitor.Instance smi)
 		{
-			smi.GetSMI<CreatureFallMonitor.Instance>().anim = "fall";
-		})
-			.Enter("SetCollider", delegate(BurrowMonitor.Instance smi)
-			{
-				smi.SetCollider(true);
-			});
-		this.entombed.Enter("SetFallAnim", delegate(BurrowMonitor.Instance smi)
-		{
-			smi.GetSMI<CreatureFallMonitor.Instance>().anim = "dormant_pre";
-		}).Enter("SetCollider", delegate(BurrowMonitor.Instance smi)
+			smi.SetCollider(true);
+		});
+		this.entombed.Enter("SetCollider", delegate(BurrowMonitor.Instance smi)
 		{
 			smi.SetCollider(false);
-		}).Transition(this.openair, (BurrowMonitor.Instance smi) => !smi.IsEntombed(), UpdateRate.SIM_200ms)
+		}).Transition(this.openair, (BurrowMonitor.Instance smi) => !smi.IsEntombed(), UpdateRate.SIM_200ms).TagTransition(GameTags.Creatures.Bagged, this.openair, false)
 			.ToggleBehaviour(GameTags.Creatures.Burrowed, (BurrowMonitor.Instance smi) => smi.IsEntombed(), delegate(BurrowMonitor.Instance smi)
 			{
 				smi.GoTo(this.openair);
@@ -38,10 +31,6 @@ public class BurrowMonitor : GameStateMachine<BurrowMonitor, BurrowMonitor.Insta
 
 	public GameStateMachine<BurrowMonitor, BurrowMonitor.Instance, IStateMachineTarget, BurrowMonitor.Def>.State entombed;
 
-	public GameStateMachine<BurrowMonitor, BurrowMonitor.Instance, IStateMachineTarget, BurrowMonitor.Def>.State burrowcomplete;
-
-	public GameStateMachine<BurrowMonitor, BurrowMonitor.Instance, IStateMachineTarget, BurrowMonitor.Def>.State exitburrowcomplete;
-
 	public class Def : StateMachine.BaseDef
 	{
 		public float burrowHardnessLimit = 20f;
@@ -50,7 +39,7 @@ public class BurrowMonitor : GameStateMachine<BurrowMonitor, BurrowMonitor.Insta
 
 		public Vector2 moundColliderSize = new Vector2f(1f, 1.5f);
 
-		public Vector2 moundColliderOffset = new Vector2(0f, 0.75f);
+		public Vector2 moundColliderOffset = new Vector2(0f, -0.25f);
 	}
 
 	public new class Instance : GameStateMachine<BurrowMonitor, BurrowMonitor.Instance, IStateMachineTarget, BurrowMonitor.Def>.GameInstance
@@ -76,7 +65,7 @@ public class BurrowMonitor : GameStateMachine<BurrowMonitor, BurrowMonitor.Insta
 
 		public bool ShouldBurrow()
 		{
-			return !GameClock.Instance.IsNighttime() && this.CanBurrowInto(Grid.CellBelow(Grid.PosToCell(base.gameObject)));
+			return !GameClock.Instance.IsNighttime() && this.CanBurrowInto(Grid.CellBelow(Grid.PosToCell(base.gameObject))) && !base.HasTag(GameTags.Creatures.Bagged);
 		}
 
 		public bool CanBurrowInto(int cell)
@@ -106,14 +95,17 @@ public class BurrowMonitor : GameStateMachine<BurrowMonitor, BurrowMonitor.Insta
 		public void SetCollider(bool original_size)
 		{
 			KBoxCollider2D component = base.master.GetComponent<KBoxCollider2D>();
+			AnimEventHandler component2 = base.master.GetComponent<AnimEventHandler>();
 			if (original_size)
 			{
 				component.size = this.originalColliderSize;
 				component.offset = this.originalColliderOffset;
+				component2.baseOffset = this.originalColliderOffset;
 				return;
 			}
 			component.size = base.def.moundColliderSize;
 			component.offset = base.def.moundColliderOffset;
+			component2.baseOffset = base.def.moundColliderOffset;
 		}
 
 		private Vector2 originalColliderSize;

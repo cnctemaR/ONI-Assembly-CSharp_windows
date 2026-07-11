@@ -130,22 +130,35 @@ public class CellSelectionObject : KMonoBehaviour
 		this.mSelectable.SetName(Grid.Element[this.selectedCell].name);
 		DetailsScreen.Instance.Trigger(-1514841199, null);
 		this.UpdateStatusItem();
-		if (this.element.id == SimHashes.OxyRock)
+		int num = Grid.CellAbove(this.selectedCell);
+		bool flag = this.element.IsLiquid && Grid.IsValidCell(num) && (Grid.Element[num].IsGas || Grid.Element[num].IsVacuum);
+		if (this.element.sublimateId != (SimHashes)0 && (this.element.IsSolid || flag))
 		{
-			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, this);
-			if (this.FlowRate <= 0f)
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.SublimationEmitting, this);
+			bool flag2;
+			bool flag3;
+			GameUtil.IsEmissionBlocked(this.selectedCell, out flag2, out flag3);
+			if (flag2)
 			{
-				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, this);
+				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.SublimationBlocked, this);
+				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.SublimationOverpressure, false);
+			}
+			else if (flag3)
+			{
+				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.SublimationOverpressure, this);
+				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.SublimationBlocked, false);
 			}
 			else
 			{
-				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, false);
+				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.SublimationOverpressure, false);
+				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.SublimationBlocked, false);
 			}
 		}
 		else
 		{
-			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, false);
-			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, false);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.SublimationEmitting, false);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.SublimationBlocked, false);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.SublimationOverpressure, false);
 		}
 		if (Game.Instance.GetComponent<EntombedItemVisualizer>().IsEntombedItem(this.selectedCell))
 		{
@@ -155,8 +168,8 @@ public class CellSelectionObject : KMonoBehaviour
 		{
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.BuriedItem, true);
 		}
-		bool flag = CellSelectionObject.IsExposedToSpace(this.selectedCell);
-		this.mSelectable.ToggleStatusItem(Db.Get().MiscStatusItems.Space, flag, null);
+		bool flag4 = CellSelectionObject.IsExposedToSpace(this.selectedCell);
+		this.mSelectable.ToggleStatusItem(Db.Get().MiscStatusItems.Space, flag4, null);
 	}
 
 	public static bool IsExposedToSpace(int cell)

@@ -9,6 +9,6 @@ namespace Steamworks
 	{
 		public const int k_iCallback = 5701;
 
-		public uint m_unSessionID;
+		public RemotePlaySessionID_t m_unSessionID;
 	}
 }

@@ -1,0 +1,18 @@
+﻿using System;
+
+namespace Steamworks
+{
+	public enum ESteamNetworkingSocketsDebugOutputType
+	{
+		k_ESteamNetworkingSocketsDebugOutputType_None,
+		k_ESteamNetworkingSocketsDebugOutputType_Bug,
+		k_ESteamNetworkingSocketsDebugOutputType_Error,
+		k_ESteamNetworkingSocketsDebugOutputType_Important,
+		k_ESteamNetworkingSocketsDebugOutputType_Warning,
+		k_ESteamNetworkingSocketsDebugOutputType_Msg,
+		k_ESteamNetworkingSocketsDebugOutputType_Verbose,
+		k_ESteamNetworkingSocketsDebugOutputType_Debug,
+		k_ESteamNetworkingSocketsDebugOutputType_Everything,
+		k_ESteamNetworkingSocketsDebugOutputType__Force32Bit = 2147483647
+	}
+}

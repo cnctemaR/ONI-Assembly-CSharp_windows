@@ -171,6 +171,8 @@ public class Element : IComparable<Element>
 		return this.id - other.id;
 	}
 
+	public const int INVALID_ID = 0;
+
 	public SimHashes id;
 
 	public Tag tag;

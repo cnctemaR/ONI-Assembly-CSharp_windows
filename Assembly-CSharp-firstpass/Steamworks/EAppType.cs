@@ -19,9 +19,9 @@ namespace Steamworks
 		k_EAppType_Franchise = 1024,
 		k_EAppType_Video = 2048,
 		k_EAppType_Plugin = 4096,
-		k_EAppType_Music = 8192,
+		k_EAppType_MusicAlbum = 8192,
 		k_EAppType_Series = 16384,
-		k_EAppType_Comic = 32768,
+		k_EAppType_Comic_UNUSED = 32768,
 		k_EAppType_Beta = 65536,
 		k_EAppType_Shortcut = 1073741824,
 		k_EAppType_DepotOnly = -2147483647

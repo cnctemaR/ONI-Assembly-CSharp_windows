@@ -90,6 +90,7 @@ public class Baggable : KMonoBehaviour
 			component.SetCurrentNavType(NavType.Floor);
 		}
 		base.gameObject.AddTag(GameTags.Creatures.Bagged);
+		base.GetComponent<KAnimControllerBase>().Play("trussed", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Free()

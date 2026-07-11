@@ -114,6 +114,10 @@ public class KModalScreen : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
+		if (e.Consumed)
+		{
+			return;
+		}
 		if (Game.Instance != null && (e.TryConsume(global::Action.TogglePause) || e.TryConsume(global::Action.CycleSpeed)))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));

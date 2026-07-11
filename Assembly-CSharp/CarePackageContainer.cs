@@ -48,8 +48,6 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		base.OnCmpDisable();
 		if (this.animController != null)
 		{
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
 			this.animController.gameObject.DeleteObject();
 			this.animController = null;
 		}
@@ -66,11 +64,6 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 			characterSelectionController2.OnLimitUnreachedEvent = (global::System.Action)Delegate.Remove(characterSelectionController2.OnLimitUnreachedEvent, new global::System.Action(this.OnCharacterSelectionLimitUnReached));
 			CharacterSelectionController characterSelectionController3 = this.controller;
 			characterSelectionController3.OnReshuffleEvent = (Action<bool>)Delegate.Remove(characterSelectionController3.OnReshuffleEvent, new Action<bool>(this.Reshuffle));
-		}
-		if (this.animController != null)
-		{
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
 		}
 	}
 
@@ -99,8 +92,6 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		while (this.IsCharacterRedundant() && num < 20);
 		if (this.animController != null)
 		{
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.OnResize));
 			global::UnityEngine.Object.Destroy(this.animController.gameObject);
 			this.animController = null;
 		}
@@ -114,12 +105,6 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 				this.SelectDeliverable();
 			};
 		}
-	}
-
-	private void OnResize()
-	{
-		KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
-		this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
 	}
 
 	private void SetAnimator()

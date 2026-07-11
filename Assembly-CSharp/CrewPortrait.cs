@@ -17,8 +17,6 @@ public class CrewPortrait : KMonoBehaviour
 			base.StartCoroutine(this.AlphaIn());
 		}
 		this.requiresRefresh = true;
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
 	}
 
 	private IEnumerator AlphaIn()
@@ -89,8 +87,6 @@ public class CrewPortrait : KMonoBehaviour
 	{
 		base.OnCleanUp();
 		this.UnregisterEvents();
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.RefreshScale));
 	}
 
 	public void SetIdentityObject(IAssignableIdentity identity, bool jobEnabled = true)
@@ -143,20 +139,6 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			this.requiresRefresh = false;
 			this.Rebuild();
-			this.RefreshScale();
-		}
-	}
-
-	private void RefreshScale()
-	{
-		float num = 1f;
-		if (GameScreenManager.Instance != null && GameScreenManager.Instance.ssOverlayCanvas != null)
-		{
-			num = GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetCanvasScale();
-		}
-		if (this.controller != null)
-		{
-			this.controller.animScale = this.animScaleBase * (1f / num);
 		}
 	}
 
@@ -265,11 +247,7 @@ public class CrewPortrait : KMonoBehaviour
 			component.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(storedMinionIdentity.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
 			CrewPortrait.RefreshHat(storedMinionIdentity, controller);
 		}
-		float num = 1f;
-		if (GameScreenManager.Instance != null && GameScreenManager.Instance.ssOverlayCanvas != null)
-		{
-			num = 0.2f * (1f / GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>().GetUserScale());
-		}
+		float num = 0.25f;
 		controller.animScale = num;
 		string text = "ui";
 		controller.Play(text, KAnim.PlayMode.Loop, 1f, 0f);

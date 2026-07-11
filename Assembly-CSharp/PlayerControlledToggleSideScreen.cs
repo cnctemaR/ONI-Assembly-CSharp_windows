@@ -3,20 +3,6 @@ using UnityEngine;
 
 public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryTick
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
-	}
-
-	protected override void OnCleanUp()
-	{
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.RefreshScale));
-		base.OnCleanUp();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -116,21 +102,6 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 			}
 		}
 		this.currentState = state;
-	}
-
-	private void RefreshScale()
-	{
-		float canvasScale = base.GetComponentInParent<KCanvasScaler>().GetCanvasScale();
-		if (this.kbac != null)
-		{
-			this.kbac.animScale = this.animScaleBase * (1f / canvasScale);
-		}
-	}
-
-	protected override void OnCmpEnable()
-	{
-		base.OnCmpEnable();
-		this.RefreshScale();
 	}
 
 	public IPlayerControlledToggle target;

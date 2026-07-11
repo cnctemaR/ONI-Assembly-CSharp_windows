@@ -581,6 +581,7 @@ public class LoadScreen : KModalScreen
 				moreInfoButton.gameObject.SetActive(true);
 			}
 			MainMenu.Instance.RefreshResumeButton();
+			this.RefreshColonyList();
 		};
 		continueButton.ClearOnClick();
 		continueButton.onClick += delegate
@@ -796,7 +797,7 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					442154U,
+					442712U,
 					17
 				});
 			}
@@ -1096,7 +1097,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 17) || header.buildVersion > 442154U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 17) || header.buildVersion > 442712U;
 	}
 
 	private void UpdateSelected(KButton button, string filename)
@@ -1140,10 +1141,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 442154U)
+		if (header.buildVersion > 442712U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 442154U.ToString();
+			text2 = 442712U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -1199,7 +1200,7 @@ public class LoadScreen : KModalScreen
 	private void ShowSimpleDialog(string title, string message)
 	{
 		global::Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.gameObject, false).SetHeader(title).AddPlainText(message)
-			.AddDefaultOK()
+			.AddDefaultOK(false)
 			.Activate();
 	}
 
@@ -1226,7 +1227,7 @@ public class LoadScreen : KModalScreen
 				{
 					Application.OpenURL("https://forums.kleientertainment.com/klei-bug-tracker/oni/");
 				}, false)
-				.AddDefaultOK();
+				.AddDefaultOK(false);
 			this.errorInfoScreen.Activate();
 		}
 	}

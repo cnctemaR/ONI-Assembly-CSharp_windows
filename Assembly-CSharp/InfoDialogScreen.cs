@@ -18,12 +18,17 @@ public class InfoDialogScreen : KModalScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (e.TryConsume(global::Action.Escape) && this.escapeCloses)
+		if (!this.escapeCloses)
+		{
+			e.TryConsume(global::Action.Escape);
+			return;
+		}
+		if (e.TryConsume(global::Action.Escape))
 		{
 			this.Deactivate();
 			return;
 		}
-		if (PlayerController.Instance != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight) && this.escapeCloses)
+		if (PlayerController.Instance != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
 			this.Deactivate();
 			return;
@@ -31,12 +36,13 @@ public class InfoDialogScreen : KModalScreen
 		base.OnKeyDown(e);
 	}
 
-	public InfoDialogScreen AddDefaultOK()
+	public InfoDialogScreen AddDefaultOK(bool escapeCloses = false)
 	{
 		this.AddOption(UI.CONFIRMDIALOG.OK, delegate(InfoDialogScreen d)
 		{
 			d.Deactivate();
 		}, true);
+		this.escapeCloses = escapeCloses;
 		return this;
 	}
 

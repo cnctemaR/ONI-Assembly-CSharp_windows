@@ -673,10 +673,7 @@ public class SkillsScreen : KModalScreen
 		{
 			this.animController = Util.KInstantiateUI(Assets.GetPrefab(new Tag("FullMinionUIPortrait")), this.duplicantAnimAnchor.gameObject, false).GetComponent<KBatchedAnimController>();
 			this.animController.gameObject.SetActive(true);
-			KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
-			this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
-			ScreenResize instance = ScreenResize.Instance;
-			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+			this.animController.animScale = this.baseCharacterScale;
 		}
 		string text = "";
 		Accessorizer component = this.animController.GetComponent<Accessorizer>();
@@ -729,12 +726,6 @@ public class SkillsScreen : KModalScreen
 		}
 		this.animController.GetComponent<SymbolOverrideController>().AddSymbolOverride(Db.Get().AccessorySlots.HairAlways.targetSymbolId, symbol, 1);
 		this.animController.GetComponent<SymbolOverrideController>().AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, symbol2, 1);
-	}
-
-	private void OnResize()
-	{
-		KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
-		this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
 	}
 
 	public new const float SCREEN_SORT_KEY = 101f;

@@ -374,28 +374,47 @@ public static class RetireColonyUtility
 
 	public static Sprite LoadRetiredColonyPreview(string colonyName)
 	{
-		string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
-		string text2 = Path.Combine(Path.Combine(Util.RootFolder(), Util.GetRetiredColoniesFolderName()), text);
-		List<string> list = new List<string>();
-		if (Directory.Exists(text2))
+		try
 		{
-			foreach (string text3 in Directory.GetFiles(text2))
+			string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
+			string text2 = Path.Combine(Path.Combine(Util.RootFolder(), Util.GetRetiredColoniesFolderName()), text);
+			List<string> list = new List<string>();
+			if (Directory.Exists(text2))
 			{
-				if (text3.EndsWith(".png"))
+				foreach (string text3 in Directory.GetFiles(text2))
 				{
-					list.Add(text3);
+					if (text3.EndsWith(".png"))
+					{
+						list.Add(text3);
+					}
 				}
 			}
+			else
+			{
+				global::Debug.LogWarningFormat("LoadColonyPreview path does not exist or is not directory [{0}]", new object[] { text2 });
+			}
+			if (list.Count > 0)
+			{
+				Texture2D texture2D = new Texture2D(512, 768);
+				string text4 = list[list.Count - 1];
+				if (!texture2D.LoadImage(File.ReadAllBytes(text4)))
+				{
+					return null;
+				}
+				if (texture2D.width > SystemInfo.maxTextureSize || texture2D.height > SystemInfo.maxTextureSize)
+				{
+					return null;
+				}
+				if (texture2D.width == 0 || texture2D.height == 0)
+				{
+					return null;
+				}
+				return Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f), 100f, 0U, SpriteMeshType.FullRect);
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			global::Debug.LogWarningFormat("LoadColonyPreview path does not exist or is not directory [{0}]", new object[] { text2 });
-		}
-		if (list.Count > 0)
-		{
-			Texture2D texture2D = new Texture2D(512, 768);
-			texture2D.LoadImage(File.ReadAllBytes(list[list.Count - 1]));
-			return Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f), 100f, 0U, SpriteMeshType.FullRect);
+			global::Debug.Log("Loading timelapse preview failed! reason: " + ex.Message);
 		}
 		return null;
 	}
@@ -408,7 +427,18 @@ public static class RetireColonyUtility
 			try
 			{
 				Texture2D texture2D = new Texture2D(512, 768);
-				texture2D.LoadImage(File.ReadAllBytes(text));
+				if (!texture2D.LoadImage(File.ReadAllBytes(text)))
+				{
+					return null;
+				}
+				if (texture2D.width > SystemInfo.maxTextureSize || texture2D.height > SystemInfo.maxTextureSize)
+				{
+					return null;
+				}
+				if (texture2D.width == 0 || texture2D.height == 0)
+				{
+					return null;
+				}
 				return Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), new Vector2(0.5f, 0.5f), 100f, 0U, SpriteMeshType.FullRect);
 			}
 			catch (Exception ex)
@@ -420,7 +450,15 @@ public static class RetireColonyUtility
 		{
 			return null;
 		}
-		return RetireColonyUtility.LoadRetiredColonyPreview(colonyName);
+		try
+		{
+			return RetireColonyUtility.LoadRetiredColonyPreview(colonyName);
+		}
+		catch (Exception ex2)
+		{
+			global::Debug.Log(string.Format("failed to load fallback timelapse image!? {0}", ex2));
+		}
+		return null;
 	}
 
 	public static string StripInvalidCharacters(string source)

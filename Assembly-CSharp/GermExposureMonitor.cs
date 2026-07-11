@@ -102,6 +102,13 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		public List<string> excluded_effects;
 	}
 
+	public class ExposureStatusData
+	{
+		public GermExposureMonitor.ExposureType exposure_type;
+
+		public GermExposureMonitor.Instance owner;
+	}
+
 	public new class Instance : GameStateMachine<GermExposureMonitor, GermExposureMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
@@ -189,7 +196,8 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 								else
 								{
 									this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Exposed);
-									GermExposureTracker.Instance.AddExposure(exposureType, num);
+									float num2 = Mathf.Clamp01(num);
+									GermExposureTracker.Instance.AddExposure(exposureType, num2);
 								}
 							}
 						}
@@ -289,7 +297,11 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				if (guid == Guid.Empty && (exposureState == GermExposureMonitor.ExposureState.Exposed || exposureState == GermExposureMonitor.ExposureState.Contracted))
 				{
 					KSelectable component = base.GetComponent<KSelectable>();
-					guid = component.AddStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, exposureType.sickness_id);
+					guid = component.AddStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, new GermExposureMonitor.ExposureStatusData
+					{
+						exposure_type = exposureType,
+						owner = this
+					});
 				}
 				else if (guid != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Exposed && exposureState != GermExposureMonitor.ExposureState.Contracted)
 				{
@@ -397,6 +409,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 
 		private Traits traits;
 
+		[Serialize]
 		private Dictionary<string, GermExposureMonitor.ExposureState> exposureStates = new Dictionary<string, GermExposureMonitor.ExposureState>();
 
 		private Dictionary<string, Guid> statusItemHandles = new Dictionary<string, Guid>();

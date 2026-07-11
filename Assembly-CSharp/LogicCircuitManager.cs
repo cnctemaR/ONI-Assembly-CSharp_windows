@@ -16,11 +16,6 @@ public class LogicCircuitManager
 		this.Refresh(dt);
 	}
 
-	public void RenderEveryTick(float dt)
-	{
-		this.Refresh(dt);
-	}
-
 	private void Refresh(float dt)
 	{
 		bool isDirty = this.conduitSystem.IsDirty;
@@ -32,7 +27,7 @@ public class LogicCircuitManager
 		}
 		else if (this.conduitSystem.GetNetworks().Count > 0 && SpeedControlScreen.Instance != null && !SpeedControlScreen.Instance.IsPaused)
 		{
-			this.elapsedTime += Time.deltaTime;
+			this.elapsedTime += dt;
 			while (this.elapsedTime > LogicCircuitManager.ClockTickInterval)
 			{
 				this.elapsedTime -= LogicCircuitManager.ClockTickInterval;

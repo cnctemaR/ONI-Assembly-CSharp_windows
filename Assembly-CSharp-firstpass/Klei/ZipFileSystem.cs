@@ -68,6 +68,15 @@ namespace Klei
 			}
 		}
 
+		public bool FileExists(string path)
+		{
+			if (this.mountPoint.Length > 0)
+			{
+				path = path.Substring(this.mountPoint.Length);
+			}
+			return this.zipfile.ContainsEntry(path);
+		}
+
 		private string id;
 
 		private string mountPoint;

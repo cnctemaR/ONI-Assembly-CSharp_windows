@@ -602,7 +602,6 @@ public class Game : KMonoBehaviour
 		this.liquidConduitSystem.Update();
 		this.solidConduitSystem.Update();
 		this.circuitManager.RenderEveryTick(deltaTime);
-		this.logicCircuitManager.RenderEveryTick(deltaTime);
 		this.solidConduitFlow.RenderEveryTick(deltaTime);
 		if (this.forceActiveArea)
 		{
@@ -779,7 +778,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 326399U;
+		uint num = 326830U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);

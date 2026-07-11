@@ -75,12 +75,20 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		int num = Grid.PosToCell(this);
 		Immigration.Instance.EndImmigration();
 		GameObject gameObject = delivery.Deliver(Grid.CellToPosCBC(num, Grid.SceneLayer.Move));
-		if (gameObject.GetComponent<MinionIdentity>() != null)
+		MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
+		if (component != null)
 		{
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.PersonalTime, GameClock.Instance.GetTimeSinceStartOfReport(), string.Format(UI.ENDOFDAYREPORT.NOTES.PERSONAL_TIME, DUPLICANTS.CHORES.NOT_EXISTING_TASK), gameObject.GetProperName());
 			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 			{
 				minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", true);
+			}
+			MinionResume component2 = component.GetComponent<MinionResume>();
+			int num2 = 0;
+			while ((float)num2 < this.startingSkillPoints)
+			{
+				component2.ForceAddSkillPoint();
+				num2++;
 			}
 		}
 		base.smi.sm.closePortal.Trigger(base.smi);
@@ -101,6 +109,8 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 	private const int NUM_METER_NOTCHES = 8;
 
 	private List<MinionStartingStats> minionStats;
+
+	public float startingSkillPoints;
 
 	public static readonly HashedString[] PortalBirthAnim = new HashedString[] { "portalbirth" };
 

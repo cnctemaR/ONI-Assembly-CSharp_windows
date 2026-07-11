@@ -292,9 +292,16 @@ namespace Database
 			this.ExposedToGerms = this.CreateStatusItem("ExposedToGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.ExposedToGerms.resolveStringCallback = delegate(string str, object data)
 			{
-				string text4 = (string)data;
-				string name = Db.Get().Sicknesses.Get(text4).Name;
+				GermExposureMonitor.ExposureStatusData exposureStatusData = (GermExposureMonitor.ExposureStatusData)data;
+				string name = Db.Get().Sicknesses.Get(exposureStatusData.exposure_type.sickness_id).Name;
+				AttributeInstance attributeInstance3 = Db.Get().Attributes.GermSusceptibility.Lookup(exposureStatusData.owner.gameObject);
+				float contraction_rate = exposureStatusData.exposure_type.contraction_rate;
+				float num5 = contraction_rate * attributeInstance3.GetTotalValue();
+				float num6 = num5 - contraction_rate;
 				str = str.Replace("{Sickness}", name);
+				str = str.Replace("{Base}", GameUtil.GetFormattedPercent(contraction_rate * 100f, GameUtil.TimeSlice.None));
+				str = str.Replace("{Modifiers}", GameUtil.GetFormattedPercent(num6 * 100f, GameUtil.TimeSlice.None));
+				str = str.Replace("{Total}", GameUtil.GetFormattedPercent(num5 * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 		}

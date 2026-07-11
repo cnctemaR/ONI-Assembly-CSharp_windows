@@ -96,7 +96,7 @@ public class TuningSystem
 		{
 			if (!string.IsNullOrEmpty(text))
 			{
-				bool flag = ((LayeredFileSystem.instance != null) ? LayeredFileSystem.instance.Exists(text) : File.Exists(text));
+				bool flag = ((LayeredFileSystem.instance != null) ? LayeredFileSystem.instance.FileExists(text) : File.Exists(text));
 				if (flag)
 				{
 					string text2 = ((LayeredFileSystem.instance != null) ? LayeredFileSystem.instance.ReadText(text) : File.ReadAllText(text));

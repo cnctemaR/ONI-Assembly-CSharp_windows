@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{60E7D178-8426-4935-B9FB-1FC0CDBB83D8}</ProjectGuid>
+    <ProjectGuid>{45B839AF-E936-46AE-92F6-B48FC7318A46}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Xml.Linq</AssemblyName>
@@ -54,15 +54,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{60E7D178-8426-4935-B9FB-1FC0CDBB83CD}</Project>
+      <Project>{45B839AF-E936-46AE-92F6-B48FC7318A3B}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{60E7D178-8426-4935-B9FB-1FC0CDBB83D0}</Project>
+      <Project>{45B839AF-E936-46AE-92F6-B48FC7318A3E}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{60E7D178-8426-4935-B9FB-1FC0CDBB83D7}</Project>
+      <Project>{45B839AF-E936-46AE-92F6-B48FC7318A45}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
   </ItemGroup>

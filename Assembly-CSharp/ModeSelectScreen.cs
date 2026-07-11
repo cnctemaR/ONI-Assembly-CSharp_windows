@@ -27,6 +27,7 @@ public class ModeSelectScreen : KScreen
 		MultiToggle multiToggle6 = this.nosweatButton;
 		multiToggle6.onClick = (global::System.Action)Delegate.Combine(multiToggle6.onClick, new global::System.Action(this.OnClickNosweat));
 		this.closeButton.onClick += this.Deactivate;
+		this.SetAnimScale();
 	}
 
 	private void OnHoverEnterSurvival()
@@ -77,6 +78,19 @@ public class ModeSelectScreen : KScreen
 		gameObject.GetComponent<KScreen>().Activate();
 	}
 
+	private void SetAnimScale()
+	{
+		float canvasScale = base.GetComponentInParent<KCanvasScaler>().GetCanvasScale();
+		if (this.nosweatAnim != null)
+		{
+			this.nosweatAnim.animScale = this.nosweatAnim.animScale * (1f / canvasScale);
+		}
+		if (this.survivalAnim != null)
+		{
+			this.survivalAnim.animScale = this.survivalAnim.animScale * (1f / canvasScale);
+		}
+	}
+
 	[SerializeField]
 	private MultiToggle nosweatButton;
 
@@ -96,4 +110,10 @@ public class ModeSelectScreen : KScreen
 
 	[SerializeField]
 	private KButton closeButton;
+
+	[SerializeField]
+	private KBatchedAnimController nosweatAnim;
+
+	[SerializeField]
+	private KBatchedAnimController survivalAnim;
 }

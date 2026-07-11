@@ -44,7 +44,7 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		{
 			return TreeFilterableSideScreenRow.State.Mixed;
 		}
-		return TreeFilterableSideScreenRow.State.On;
+		return (this.rowElements.Count <= 0) ? TreeFilterableSideScreenRow.State.Off : TreeFilterableSideScreenRow.State.On;
 	}
 
 	protected override void OnPrefabInit()

@@ -330,19 +330,19 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public void ForceAddSkillPoint()
 	{
-		this.AddExperience(this.CalculateNextExperienceBar() - this.totalExperienceGained);
+		this.AddExperience(MinionResume.CalculateNextExperienceBar(this.TotalSkillPointsGained) - this.totalExperienceGained);
 	}
 
-	public float CalculateNextExperienceBar()
+	public static float CalculateNextExperienceBar(int current_skill_points)
 	{
-		float num = (float)(this.TotalSkillPointsGained + 1) / (float)SKILLS.TARGET_SKILLS_EARNED;
+		float num = (float)(current_skill_points + 1) / (float)SKILLS.TARGET_SKILLS_EARNED;
 		float num2 = Mathf.Pow(num, SKILLS.EXPERIENCE_LEVEL_POWER);
 		return num2 * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
 	}
 
-	public float CalculatePreviousExperienceBar()
+	public static float CalculatePreviousExperienceBar(int current_skill_points)
 	{
-		float num = (float)this.TotalSkillPointsGained / (float)SKILLS.TARGET_SKILLS_EARNED;
+		float num = (float)current_skill_points / (float)SKILLS.TARGET_SKILLS_EARNED;
 		float num2 = Mathf.Pow(num, SKILLS.EXPERIENCE_LEVEL_POWER);
 		return num2 * (float)SKILLS.TARGET_SKILLS_CYCLE * 600f;
 	}
@@ -405,7 +405,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	public void AddExperience(float amount)
 	{
 		float num = this.totalExperienceGained;
-		float num2 = this.CalculateNextExperienceBar();
+		float num2 = MinionResume.CalculateNextExperienceBar(this.TotalSkillPointsGained);
 		this.totalExperienceGained += amount;
 		if (this.totalExperienceGained >= num2 && num < num2)
 		{

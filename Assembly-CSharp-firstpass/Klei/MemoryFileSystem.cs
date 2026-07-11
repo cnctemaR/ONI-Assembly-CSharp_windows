@@ -63,6 +63,11 @@ namespace Klei
 			}
 		}
 
+		public bool FileExists(string path)
+		{
+			return this.dataMap.ContainsKey(path);
+		}
+
 		private string id;
 
 		private string mountPoint;

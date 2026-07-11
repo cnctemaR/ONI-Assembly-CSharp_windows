@@ -817,6 +817,7 @@ namespace KMod
 			ThreadedHttps<KleiMetrics>.Instance.SendEvent(pooledDictionary);
 			pooledDictionary.Recycle();
 			pooledList.Recycle();
+			KCrashReporter.haveActiveMods = pooledList.Count > 0;
 		}
 
 		public const Content all_content = Content.LayerableFiles | Content.Strings | Content.DLL | Content.Translation;

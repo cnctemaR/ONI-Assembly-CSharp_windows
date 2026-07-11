@@ -140,7 +140,7 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 	{
 		ObjectDispenser.Instance instance = (ObjectDispenser.Instance)data;
 		string text = ((!instance.IsAutomated()) ? BUILDING.STATUSITEMS.OBJECTDISPENSER.MANUAL_CONTROL : BUILDING.STATUSITEMS.OBJECTDISPENSER.AUTOMATION_CONTROL);
-		string text2 = ((!instance.IsOpened()) ? BUILDING.STATUSITEMS.OBJECTDISPENSER.CLOSED : BUILDING.STATUSITEMS.OBJECTDISPENSER.OPENED);
+		string text2 = ((!instance.IsOpened) ? BUILDING.STATUSITEMS.OBJECTDISPENSER.CLOSED : BUILDING.STATUSITEMS.OBJECTDISPENSER.OPENED);
 		return string.Format(text, text2);
 	}
 
@@ -177,38 +177,27 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.opened;
+			default_state = this.idle;
 			base.serializable = true;
-			this.closed_pre.Enter(delegate(ObjectDispenser.Instance smi)
+			this.idle.PlayAnim("on").EventHandler(GameHashes.OnStorageChange, delegate(ObjectDispenser.Instance smi)
 			{
-				smi.SetActive(true);
-			}).Exit(delegate(ObjectDispenser.Instance smi)
-			{
-				smi.SetActive(false);
-			}).PlayAnim("off_pre")
-				.OnAnimQueueComplete(this.closed);
-			this.closed.PlayAnim("off").ParamTransition<bool>(this.should_open, this.opened_pre, GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.IsTrue);
-			this.opened_pre.Enter(delegate(ObjectDispenser.Instance smi)
-			{
-				smi.SetActive(true);
-			}).Exit(delegate(ObjectDispenser.Instance smi)
-			{
-				smi.SetActive(false);
-			}).PlayAnim("on_pre")
-				.OnAnimQueueComplete(this.opened);
-			this.opened.Update(delegate(ObjectDispenser.Instance smi, float dt)
+				smi.UpdateState();
+			}).ParamTransition<bool>(this.should_open, this.drop_item, (ObjectDispenser.Instance smi, bool p) => p && !smi.master.GetComponent<Storage>().IsEmpty());
+			this.load_item.PlayAnim("working_load").OnAnimQueueComplete(this.load_item_pst);
+			this.load_item_pst.ParamTransition<bool>(this.should_open, this.idle, (ObjectDispenser.Instance smi, bool p) => !p).ParamTransition<bool>(this.should_open, this.drop_item, (ObjectDispenser.Instance smi, bool p) => p);
+			this.drop_item.PlayAnim("working_dispense").OnAnimQueueComplete(this.idle).Exit(delegate(ObjectDispenser.Instance smi)
 			{
 				smi.master.DropHeldItems();
-			}, UpdateRate.SIM_200ms, false).PlayAnim("on").ParamTransition<bool>(this.should_open, this.closed_pre, GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.IsFalse);
+			});
 		}
 
-		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State closed_pre;
+		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State load_item;
 
-		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State closed;
+		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State load_item_pst;
 
-		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State opened_pre;
+		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State drop_item;
 
-		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State opened;
+		public GameStateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.State idle;
 
 		public StateMachine<ObjectDispenser.States, ObjectDispenser.Instance, ObjectDispenser, object>.BoolParameter should_open;
 	}
@@ -226,14 +215,22 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 			base.smi.sm.should_open.Set(true, base.smi);
 		}
 
+		public void UpdateState()
+		{
+			base.smi.GoTo(base.sm.load_item);
+		}
+
 		public bool IsAutomated()
 		{
 			return this.logic.IsPortConnected(ObjectDispenser.PORT_ID);
 		}
 
-		public bool IsOpened()
+		public bool IsOpened
 		{
-			return (!this.IsAutomated()) ? this.manual_on : this.logic_on;
+			get
+			{
+				return (!this.IsAutomated()) ? this.manual_on : this.logic_on;
+			}
 		}
 
 		public void SetSwitchState(bool on)

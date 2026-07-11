@@ -346,7 +346,11 @@ public class KCrashReporter : MonoBehaviour
 			List<string> list = new List<string>();
 			if (KCrashReporter.debugWasUsed)
 			{
-				msg = string.Format("(Debug Used)\n{0}", msg);
+				list.Add("(Debug Used)");
+			}
+			if (KCrashReporter.haveActiveMods)
+			{
+				list.Add("(Mods Active)");
 			}
 			list.Add(msg);
 			string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug", "Output:LogError", "DebugUtil:Assert", "System.Array", "System.Collections", "KCrashReporter.Assert", "No stack trace." };
@@ -385,7 +389,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 326399;
+			error.build = 326830;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -477,6 +481,8 @@ public class KCrashReporter : MonoBehaviour
 	public static bool ignoreAll = false;
 
 	public static bool debugWasUsed = false;
+
+	public static bool haveActiveMods = false;
 
 	public static string error_canvas_name = "ErrorCanvas";
 

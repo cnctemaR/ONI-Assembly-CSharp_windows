@@ -11,5 +11,7 @@ namespace Klei
 		void GetFiles(Regex re, string path, ICollection<string> result);
 
 		string GetID();
+
+		bool FileExists(string path);
 	}
 }

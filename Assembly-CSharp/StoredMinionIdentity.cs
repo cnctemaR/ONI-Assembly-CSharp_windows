@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Database;
 using Klei.AI;
 using KSerialization;
@@ -13,6 +14,27 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	[Serialize]
 	public string nameStringKey { get; set; }
+
+	[OnDeserialized]
+	private void OnDeserializedMethod()
+	{
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 7))
+		{
+			int num = 0;
+			foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryByRoleID)
+			{
+				if (keyValuePair.Value && keyValuePair.Key != "NoRole")
+				{
+					num++;
+				}
+			}
+			this.TotalExperienceGained = MinionResume.CalculatePreviousExperienceBar(num);
+			foreach (KeyValuePair<HashedString, float> keyValuePair2 in this.AptitudeByRoleGroup)
+			{
+				this.AptitudeBySkillGroup[keyValuePair2.Key] = keyValuePair2.Value;
+			}
+		}
+	}
 
 	public bool HasPerk(SkillPerk perk)
 	{
@@ -263,7 +285,13 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	public Ref<MinionAssignablesProxy> assignableProxy;
 
 	[Serialize]
+	public Dictionary<string, bool> MasteryByRoleID = new Dictionary<string, bool>();
+
+	[Serialize]
 	public Dictionary<string, bool> MasteryBySkillID = new Dictionary<string, bool>();
+
+	[Serialize]
+	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();
 
 	[Serialize]
 	public Dictionary<HashedString, float> AptitudeBySkillGroup = new Dictionary<HashedString, float>();

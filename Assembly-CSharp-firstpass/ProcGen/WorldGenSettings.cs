@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace ProcGen
 {
@@ -136,27 +135,6 @@ namespace ProcGen
 		public SubWorld GetSubWorld(string name)
 		{
 			return this.world.GetSubWorld(name);
-		}
-
-		private bool GetPathAndName(string srcPath, string srcName, out string name)
-		{
-			if (File.Exists(srcPath + srcName + ".yaml"))
-			{
-				name = srcName;
-				return true;
-			}
-			string[] array = srcName.Split(new char[] { '/' });
-			name = array[0];
-			for (int i = 1; i < array.Length - 1; i++)
-			{
-				name = name + "/" + array[i];
-			}
-			if (File.Exists(srcPath + name + ".yaml"))
-			{
-				return true;
-			}
-			name = srcName;
-			return false;
 		}
 
 		private static bool TryParseEnum<E>(string value, out E result) where E : struct

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -75,24 +74,16 @@ namespace Klei
 			}
 		}
 
-		public bool Exists(string fullpath)
+		public bool FileExists(string fullpath)
 		{
-			string fileName = Path.GetFileName(fullpath);
-			string directoryName = Path.GetDirectoryName(fullpath);
-			string text;
-			Regex regex;
-			FSUtil.GetFilesSearchParams(directoryName, fileName, out text, out regex);
-			List<string> list = new List<string>();
 			foreach (IFileSystem fileSystem in this.filesystems)
 			{
-				fileSystem.GetFiles(regex, text, list);
-				if (list.Count > 0)
+				if (fileSystem.FileExists(fullpath))
 				{
-					break;
+					return true;
 				}
 			}
-			this.GetFiles(directoryName, fileName, list);
-			return list.Count > 0;
+			return false;
 		}
 
 		private string id = "LayeredFS";

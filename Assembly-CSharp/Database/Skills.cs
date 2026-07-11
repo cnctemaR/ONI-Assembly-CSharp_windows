@@ -172,14 +172,14 @@ namespace Database
 				Db.Get().SkillPerks.CanCompound,
 				Db.Get().SkillPerks.IncreaseCaringSmall
 			};
-			this.Medicine2 = base.Add(new Skill("Medicine2", DUPLICANTS.ROLES.MEDIC.NAME, DUPLICANTS.ROLES.MEDIC.DESCRIPTION, 1, "hat_role_medicalaid1", Db.Get().SkillGroups.MedicalAid.Id));
+			this.Medicine2 = base.Add(new Skill("Medicine2", DUPLICANTS.ROLES.MEDIC.NAME, DUPLICANTS.ROLES.MEDIC.DESCRIPTION, 1, "hat_role_medicalaid2", Db.Get().SkillGroups.MedicalAid.Id));
 			this.Medicine2.priorSkills = new List<string> { this.Medicine1.Id };
 			this.Medicine2.perks = new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.CanDoctor,
 				Db.Get().SkillPerks.IncreaseCaringMedium
 			};
-			this.Medicine3 = base.Add(new Skill("Medicine3", DUPLICANTS.ROLES.SENIOR_MEDIC.NAME, DUPLICANTS.ROLES.SENIOR_MEDIC.DESCRIPTION, 2, "hat_role_medicalaid1", Db.Get().SkillGroups.MedicalAid.Id));
+			this.Medicine3 = base.Add(new Skill("Medicine3", DUPLICANTS.ROLES.SENIOR_MEDIC.NAME, DUPLICANTS.ROLES.SENIOR_MEDIC.DESCRIPTION, 2, "hat_role_medicalaid3", Db.Get().SkillGroups.MedicalAid.Id));
 			this.Medicine3.priorSkills = new List<string> { this.Medicine2.Id };
 			this.Medicine3.perks = new List<SkillPerk>
 			{

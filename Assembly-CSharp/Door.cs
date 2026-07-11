@@ -11,6 +11,16 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		Door component = gameObject.GetComponent<Door>();
+		if (component != null)
+		{
+			this.QueueStateChange(component.requestedState);
+		}
+	}
+
 	public Door.ControlState CurrentState
 	{
 		get
@@ -57,6 +67,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		{
 			this.doorOpeningSound = GlobalAssets.GetSound(this.doorOpeningSoundEventName, false);
 		}
+		base.Subscribe<Door>(-905833192, Door.OnCopySettingsDelegate);
 	}
 
 	private Door.ControlState GetNextState(Door.ControlState wantedState)
@@ -646,6 +657,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	private Door.Controller.Instance controller;
 
 	private LoggerFSS log;
+
+	private static readonly EventSystem.IntraObjectHandler<Door> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<Door>(delegate(Door component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	public static readonly HashedString OPEN_CLOSE_PORT_ID = new HashedString("DoorOpenClose");
 

@@ -117,7 +117,7 @@ public class EmoteReactable : Reactable
 			}
 		}
 		this.currentStep++;
-		if (this.currentStep >= this.emoteSteps.Count)
+		if (this.currentStep >= this.emoteSteps.Count || this.kbac == null)
 		{
 			base.End();
 		}

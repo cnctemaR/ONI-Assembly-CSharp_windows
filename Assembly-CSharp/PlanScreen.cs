@@ -100,7 +100,7 @@ public class PlanScreen : KIconToggleMenu
 			return;
 		}
 		Building component = SelectTool.Instance.selected.GetComponent<Building>();
-		if (component != null && component.Def.ShowInBuildMenu)
+		if (component != null && component.Def.ShowInBuildMenu && !component.Def.Deprecated)
 		{
 			PlanScreen.Instance.CopyBuildingOrder(component);
 			this.copyBuildingButton.SetActive(false);
@@ -119,7 +119,7 @@ public class PlanScreen : KIconToggleMenu
 			return;
 		}
 		Building component2 = SelectTool.Instance.selected.GetComponent<Building>();
-		if (component2 != null && component2.Def.ShowInBuildMenu)
+		if (component2 != null && component2.Def.ShowInBuildMenu && !component2.Def.Deprecated)
 		{
 			Tuple<Sprite, Color> uisprite = Def.GetUISprite(component2.gameObject, "ui", false);
 			component.gameObject.SetActive(true);

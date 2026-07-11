@@ -106,8 +106,8 @@ public class SkillsScreen : KModalScreen
 		else
 		{
 			MinionResume component2 = minionIdentity.GetComponent<MinionResume>();
-			float num = component2.CalculatePreviousExperienceBar();
-			float num2 = component2.CalculateNextExperienceBar();
+			float num = MinionResume.CalculatePreviousExperienceBar(component2.TotalSkillPointsGained);
+			float num2 = MinionResume.CalculateNextExperienceBar(component2.TotalSkillPointsGained);
 			float num3 = (component2.TotalExperienceGained - num) / (num2 - num);
 			this.EXPCount.text = Mathf.RoundToInt(component2.TotalExperienceGained - num) + " / " + Mathf.RoundToInt(num2 - num);
 			this.duplicantLevelIndicator.text = (component2.TotalSkillPointsGained - component2.SkillsMastered).ToString();
@@ -281,7 +281,7 @@ public class SkillsScreen : KModalScreen
 		if (minionIdentity != null)
 		{
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
-			text = component.CurrentHat;
+			text = ((!string.IsNullOrEmpty(component.TargetHat)) ? component.TargetHat : component.CurrentHat);
 			foreach (KeyValuePair<string, bool> keyValuePair in component.MasteryBySkillID)
 			{
 				if (keyValuePair.Value)
@@ -294,7 +294,7 @@ public class SkillsScreen : KModalScreen
 		else
 		{
 			StoredMinionIdentity storedMinionIdentity = this.currentlySelectedMinion as StoredMinionIdentity;
-			text = storedMinionIdentity.currentHat;
+			text = ((!string.IsNullOrEmpty(storedMinionIdentity.targetHat)) ? storedMinionIdentity.targetHat : storedMinionIdentity.currentHat);
 		}
 		this.hatDropDown.openButton.enabled = minionIdentity != null;
 		this.selectedHat.transform.Find("Arrow").gameObject.SetActive(minionIdentity != null);
@@ -308,11 +308,11 @@ public class SkillsScreen : KModalScreen
 		{
 			return;
 		}
+		MinionResume component = minionIdentity.GetComponent<MinionResume>();
 		string text = "hat_role_none";
 		if (skill != null)
 		{
 			this.selectedHat.sprite = Assets.GetSprite((skill as SkillListable).skillHat);
-			MinionResume component = minionIdentity.GetComponent<MinionResume>();
 			if (component != null)
 			{
 				text = (skill as SkillListable).skillHat;
@@ -326,19 +326,17 @@ public class SkillsScreen : KModalScreen
 		else
 		{
 			this.selectedHat.sprite = Assets.GetSprite(text);
-			MinionResume component2 = minionIdentity.GetComponent<MinionResume>();
-			if (component2 != null)
+			if (component != null)
 			{
-				component2.SetHats(component2.CurrentHat, null);
-				component2.ApplyTargetHat();
+				component.SetHats(component.CurrentHat, null);
+				component.ApplyTargetHat();
 			}
 		}
 		foreach (SkillMinionWidget skillMinionWidget in this.minionWidgets)
 		{
 			if (skillMinionWidget.minion == this.currentlySelectedMinion)
 			{
-				HierarchyReferences component3 = skillMinionWidget.GetComponent<HierarchyReferences>();
-				component3.GetReference("selectedHat").GetComponent<Image>().sprite = Assets.GetSprite(text);
+				skillMinionWidget.RefreshHat(component.TargetHat);
 			}
 		}
 	}

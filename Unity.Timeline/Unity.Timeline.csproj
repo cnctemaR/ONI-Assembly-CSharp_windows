@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{90802165-669C-4110-8755-E435EFD3F743}</ProjectGuid>
+    <ProjectGuid>{0BD928B4-D7B0-4FCF-ADB3-38CCB198006B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Timeline</RootNamespace>
     <AssemblyName>Unity.Timeline</AssemblyName>
@@ -97,39 +97,39 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F734}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB198005C}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F737}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB198005F}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F739}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB1980061}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F747}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB198006F}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F74A}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB1980072}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F74E}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB1980076}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.DirectorModule\UnityEngine.DirectorModule.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F750}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB1980078}</Project>
       <Name>UnityEngine.DirectorModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ParticleSystemModule\UnityEngine.ParticleSystemModule.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F75C}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB1980084}</Project>
       <Name>UnityEngine.ParticleSystemModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{90802165-669C-4110-8755-E435EFD3F762}</Project>
+      <Project>{0BD928B4-D7B0-4FCF-ADB3-38CCB198008A}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

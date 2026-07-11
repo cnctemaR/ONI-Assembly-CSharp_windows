@@ -559,7 +559,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 447596U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 449460U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -573,7 +573,7 @@ public class Global : MonoBehaviour
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageCodeKey, Localization.GetCurrentLanguageCode());
 		if (selectedLanguageType == 2)
 		{
-			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguagePackKey, LanguageOptionsScreen.GetSavedLanguageMod());
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageModKey, LanguageOptionsScreen.GetSavedLanguageMod());
 		}
 	}
 
@@ -654,7 +654,7 @@ public class Global : MonoBehaviour
 
 	private bool updated_with_initialized_distribution_platform;
 
-	public static readonly string LanguagePackKey = "LanguagePack";
+	public static readonly string LanguageModKey = "LanguageMod";
 
 	public static readonly string LanguageCodeKey = "LanguageCode";
 }

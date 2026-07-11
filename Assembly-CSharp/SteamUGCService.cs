@@ -87,7 +87,7 @@ public class SteamUGCService : MonoBehaviour
 
 	private Texture2D LoadPreviewImage(SteamUGCDetails_t details)
 	{
-		byte[] array;
+		byte[] array = null;
 		if (details.m_hPreviewFile != UGCHandle_t.Invalid)
 		{
 			SteamRemoteStorage.UGCDownload(details.m_hPreviewFile, 0U);
@@ -101,7 +101,7 @@ public class SteamUGCService : MonoBehaviour
 				array = null;
 			}
 		}
-		else
+		if (array == null)
 		{
 			global::System.DateTime dateTime;
 			array = SteamUGCService.GetBytesFromZip(details.m_nPublishedFileId, SteamUGCService.previewFileNames, out dateTime, false);
@@ -399,7 +399,7 @@ public class SteamUGCService : MonoBehaviour
 
 	private Dictionary<PublishedFileId_t, int> retry_counts = new Dictionary<PublishedFileId_t, int>();
 
-	private static readonly string[] previewFileNames = new string[] { "preview.png", "preview.png", ".png", ".jpg" };
+	private static readonly string[] previewFileNames = new string[] { "preview.png", "Preview.png", "PREVIEW.png", ".png", ".jpg" };
 
 	private List<SteamUGCService.IClient> clients = new List<SteamUGCService.IClient>();
 

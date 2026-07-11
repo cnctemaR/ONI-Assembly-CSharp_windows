@@ -200,15 +200,15 @@ namespace KMod
 					}
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion = (from v in list2
-						where (long)v.info.lastWorkingBuild >= 447596L
+						where (long)v.info.lastWorkingBuild >= 449460L
 						orderby v.info.lastWorkingBuild
 						select v).Concat<Mod.ArchivedVersion>(from v in list2
-						where (long)v.info.lastWorkingBuild < 447596L
+						where (long)v.info.lastWorkingBuild < 449460L
 						orderby v.info.lastWorkingBuild descending
-						select v).First<Mod.ArchivedVersion>();
+						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion == null)
 					{
-						return "";
+						return null;
 					}
 					return archivedVersion.relativePath;
 				}
@@ -229,28 +229,27 @@ namespace KMod
 				}
 			}
 			string text = (string.IsNullOrEmpty(relative_root) ? "root" : relative_root);
-			Mod.PackagedModInfo packagedModInfo = null;
 			if (!flag)
 			{
 				this.ModDevLog(string.Concat(new string[] { "\t", this.title, ": has no mod_info.yaml in folder '", text, "'" }));
-				return packagedModInfo;
+				return null;
 			}
 			string text2 = this.file_source.Read(Path.Combine(relative_root, "mod_info.yaml"));
 			if (string.IsNullOrEmpty(text2))
 			{
 				this.ModDevLog(string.Format("\t{0}: Failed to read {1} in folder '{2}', skipping", this.label, "mod_info.yaml", text));
-				return packagedModInfo;
+				return null;
 			}
-			packagedModInfo = YamlIO.Parse<Mod.PackagedModInfo>(text2, default(FileHandle), null, null);
+			Mod.PackagedModInfo packagedModInfo = YamlIO.Parse<Mod.PackagedModInfo>(text2, default(FileHandle), null, null);
 			if (packagedModInfo == null)
 			{
-				this.ModDevLog(string.Format("\t{0}: Failed to parse {1} in folder '{2}', text is {3}", new object[] { this.label, "mod_info.yaml", text, text2 }));
-				return packagedModInfo;
+				this.ModDevLogError(string.Format("\t{0}: Failed to parse {1} in folder '{2}', text is {3}", new object[] { this.label, "mod_info.yaml", text, text2 }));
+				return null;
 			}
 			if (packagedModInfo.supportedContent == null)
 			{
-				this.ModDevLog(string.Format("\t{0}: {1} in folder '{2}' does not specify supportedContent", this.label, "mod_info.yaml", text));
-				return packagedModInfo;
+				this.ModDevLogError(string.Format("\t{0}: {1} in folder '{2}' does not specify supportedContent. Make sure you spelled it correctly in your mod_info!", this.label, "mod_info.yaml", text));
+				return null;
 			}
 			this.ModDevLog(string.Format("\t{0}: Found valid mod_info.yaml in folder '{1}': {2} at {3}", new object[] { this.label, text, packagedModInfo.supportedContent, packagedModInfo.lastWorkingBuild }));
 			return packagedModInfo;

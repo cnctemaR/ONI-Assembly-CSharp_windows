@@ -13,10 +13,10 @@ public class VoiceSoundEvent : SoundEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		VoiceSoundEvent.PlayVoice(base.name, behaviour.controller, this.intervalBetweenSpeaking, base.looping);
+		VoiceSoundEvent.PlayVoice(base.name, behaviour.controller, this.intervalBetweenSpeaking, base.looping, false);
 	}
 
-	public static EventInstance PlayVoice(string name, KBatchedAnimController controller, float interval_between_speaking, bool looping)
+	public static EventInstance PlayVoice(string name, KBatchedAnimController controller, float interval_between_speaking, bool looping, bool objectIsSelectedAndVisible = false)
 	{
 		EventInstance eventInstance = default(EventInstance);
 		MinionIdentity component = controller.GetComponent<MinionIdentity>();
@@ -41,7 +41,13 @@ public class VoiceSoundEvent : SoundEvent
 		{
 			return eventInstance;
 		}
-		Vector3 position = component2.transform.GetPosition();
+		Vector3 vector = component2.transform.GetPosition();
+		vector.z = 0f;
+		GameObject gameObject = controller.gameObject;
+		if (SoundEvent.ObjectIsSelectedAndVisible(gameObject))
+		{
+			vector = SoundEvent.AudioHighlightListenerPosition(vector);
+		}
 		string sound = GlobalAssets.GetSound(assetName, true);
 		if (!SoundEvent.ShouldPlaySound(controller, sound, looping, false))
 		{
@@ -63,7 +69,7 @@ public class VoiceSoundEvent : SoundEvent
 			}
 			else
 			{
-				eventInstance = SoundEvent.BeginOneShot(sound, position, 1f);
+				eventInstance = SoundEvent.BeginOneShot(sound, vector, 1f, false);
 				if (sound.Contains("sleep_"))
 				{
 					Traits component4 = controller.GetComponent<Traits>();

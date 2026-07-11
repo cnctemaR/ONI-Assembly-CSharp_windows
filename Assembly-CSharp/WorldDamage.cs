@@ -239,7 +239,7 @@ public class WorldDamage : KMonoBehaviour
 		text = GlobalAssets.GetSound(text, false);
 		if (CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text))
 		{
-			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos), 1f);
+			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos, false), 1f);
 		}
 	}
 

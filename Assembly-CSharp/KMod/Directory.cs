@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Klei;
-using STRINGS;
 using UnityEngine;
 
 namespace KMod
@@ -52,15 +51,15 @@ namespace KMod
 			}
 			catch (UnauthorizedAccessException)
 			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, path));
+				FileUtil.ErrorDialog(FileUtil.ErrorType.UnauthorizedAccess, path, null, null);
 			}
 			catch (IOException)
 			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_SUFFICIENT_SPACE, path));
+				FileUtil.ErrorDialog(FileUtil.ErrorType.IOError, path, null, null);
 			}
-			catch (Exception ex)
+			catch
 			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, ex.Message));
+				throw;
 			}
 		}
 

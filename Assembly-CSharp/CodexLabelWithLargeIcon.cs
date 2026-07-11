@@ -36,7 +36,7 @@ public class CodexLabelWithLargeIcon : CodexLabelWithIcon
 		contentGameObject.GetComponent<KButton>().ClearOnClick();
 		contentGameObject.GetComponent<KButton>().onClick += delegate
 		{
-			ManagementMenu.Instance.codexScreen.ChangeArticle(this.linkID, false);
+			ManagementMenu.Instance.codexScreen.ChangeArticle(this.linkID, false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 		};
 	}
 }

@@ -66,61 +66,71 @@ public class SculptingSoundEvent : SoundEvent
 		{
 			return;
 		}
-		if (!SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
-		{
-			return;
-		}
-		int num = -1;
 		GameObject gameObject = behaviour.controller.gameObject;
-		if (this.counterModulus >= -1)
+		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
 		{
-			HandleVector<int>.Handle handle = GameComps.WhiteBoards.GetHandle(gameObject);
-			if (!handle.IsValid())
+			int num = -1;
+			if (this.counterModulus >= -1)
 			{
-				handle = GameComps.WhiteBoards.Add(gameObject);
-			}
-			num = ((!GameComps.WhiteBoards.HasValue(handle, base.soundHash)) ? 0 : ((int)GameComps.WhiteBoards.GetValue(handle, base.soundHash)));
-			int num2 = ((this.counterModulus != -1) ? ((num + 1) % this.counterModulus) : 0);
-			GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
-		}
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-		string text = GlobalAssets.GetSound("Hammer_sculpture", false);
-		Worker component = behaviour.GetComponent<Worker>();
-		if (component != null)
-		{
-			Workable workable = component.workable;
-			if (workable != null)
-			{
-				Building component2 = workable.GetComponent<Building>();
-				if (component2 != null)
+				HandleVector<int>.Handle handle = GameComps.WhiteBoards.GetHandle(gameObject);
+				if (!handle.IsValid())
 				{
-					BuildingDef def = component2.Def;
-					string name = def.name;
-					if (name != null)
+					handle = GameComps.WhiteBoards.Add(gameObject);
+				}
+				num = ((!GameComps.WhiteBoards.HasValue(handle, base.soundHash)) ? 0 : ((int)GameComps.WhiteBoards.GetValue(handle, base.soundHash)));
+				int num2 = ((this.counterModulus != -1) ? ((num + 1) % this.counterModulus) : 0);
+				GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
+			}
+			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			float num3 = 1f;
+			if (base.objectIsSelectedAndVisible)
+			{
+				vector = SoundEvent.AudioHighlightListenerPosition(vector);
+				num3 = SoundEvent.GetVolume(base.objectIsSelectedAndVisible);
+			}
+			else
+			{
+				vector.z = 0f;
+			}
+			string text = GlobalAssets.GetSound("Hammer_sculpture", false);
+			Worker component = behaviour.GetComponent<Worker>();
+			if (component != null)
+			{
+				Workable workable = component.workable;
+				if (workable != null)
+				{
+					Building component2 = workable.GetComponent<Building>();
+					if (component2 != null)
 					{
-						if (!(name == "MetalSculpture"))
+						BuildingDef def = component2.Def;
+						string name = def.name;
+						if (name != null)
 						{
-							if (name == "MarbleSculpture")
+							if (!(name == "MetalSculpture"))
 							{
-								text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
+								if (name == "MarbleSculpture")
+								{
+									text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
+								}
 							}
-						}
-						else
-						{
-							text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
+							else
+							{
+								text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
+							}
 						}
 					}
 				}
 			}
-		}
-		EventInstance eventInstance = SoundEvent.BeginOneShot(text, position, 1f);
-		if (eventInstance.isValid())
-		{
-			if (num >= 0)
+			EventInstance eventInstance = SoundEvent.BeginOneShot(text, vector, num3, false);
+			if (eventInstance.isValid())
 			{
-				eventInstance.setParameterValue("eventCount", (float)num);
+				if (num >= 0)
+				{
+					eventInstance.setParameterValue("eventCount", (float)num);
+				}
+				SoundEvent.EndOneShot(eventInstance);
 			}
-			SoundEvent.EndOneShot(eventInstance);
 		}
 	}
 

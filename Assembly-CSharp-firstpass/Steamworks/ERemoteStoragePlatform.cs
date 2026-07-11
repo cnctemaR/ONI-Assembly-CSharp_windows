@@ -11,6 +11,8 @@ namespace Steamworks
 		k_ERemoteStoragePlatformPS3 = 4,
 		k_ERemoteStoragePlatformLinux = 8,
 		k_ERemoteStoragePlatformReserved2 = 16,
+		k_ERemoteStoragePlatformAndroid = 32,
+		k_ERemoteStoragePlatformIOS = 64,
 		k_ERemoteStoragePlatformAll = -1
 	}
 }

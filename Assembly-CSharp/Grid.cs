@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ProcGen;
 using UnityEngine;
 
 public class Grid
@@ -520,6 +521,21 @@ public class Grid
 	public static bool IsValidCell(int cell)
 	{
 		return cell >= 0 && cell < Grid.CellCount;
+	}
+
+	public static bool IsCellOpenToSpace(int cell)
+	{
+		if (Grid.IsSolidCell(cell))
+		{
+			return false;
+		}
+		GameObject gameObject = Grid.Objects[cell, 2];
+		if (gameObject != null)
+		{
+			return false;
+		}
+		SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
+		return subWorldZoneType == SubWorld.ZoneType.Space;
 	}
 
 	public static int PosToCell(Vector2 pos)

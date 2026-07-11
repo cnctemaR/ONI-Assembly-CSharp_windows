@@ -75,6 +75,8 @@ public class GameTags
 
 	public static readonly Tag BuildingFiber = TagManager.Create("BuildingFiber");
 
+	public static readonly Tag BuildingWood = TagManager.Create("BuildingWood");
+
 	public static readonly Tag PreciousRock = TagManager.Create("PreciousRock");
 
 	public static readonly Tag Artifact = TagManager.Create("Artifact");
@@ -223,6 +225,8 @@ public class GameTags
 
 	public static readonly Tag FloorTiles = TagManager.Create("FloorTiles");
 
+	public static readonly Tag Carpeted = TagManager.Create("Carpeted");
+
 	public static readonly Tag FarmTiles = TagManager.Create("FarmTiles");
 
 	public static readonly Tag Ladders = TagManager.Create("Ladders");
@@ -276,6 +280,8 @@ public class GameTags
 		GameTags.AquaSuit,
 		GameTags.JetSuit
 	};
+
+	public static readonly Tag EquippableBalloon = TagManager.Create("EquippableBalloon");
 
 	public static readonly Tag Clothes = TagManager.Create("Clothes");
 
@@ -340,6 +346,8 @@ public class GameTags
 	public static readonly Tag Asleep = TagManager.Create("Asleep");
 
 	public static readonly Tag HoldingBreath = TagManager.Create("HoldingBreath");
+
+	public static readonly Tag Overjoyed = TagManager.Create("Overjoyed");
 
 	public static readonly Tag Operational = TagManager.Create("Operational");
 
@@ -432,7 +440,11 @@ public class GameTags
 		GameTags.RareMaterials
 	};
 
-	public static TagSet MaterialBuildingElements = new TagSet { GameTags.BuildingFiber };
+	public static TagSet MaterialBuildingElements = new TagSet
+	{
+		GameTags.BuildingFiber,
+		GameTags.BuildingWood
+	};
 
 	public static TagSet OtherEntityTags = new TagSet
 	{

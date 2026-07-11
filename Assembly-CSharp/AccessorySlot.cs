@@ -26,19 +26,15 @@ public class AccessorySlot : Resource
 		string text = this.Id.ToLower();
 		if (symbol != null)
 		{
-			string text2 = text + "_DEFAULT";
-			Accessory accessory = new Accessory(text2, parent, this, default_build.batchTag, symbol);
-			this.accessories.Add(accessory);
-			HashCache.Get().Add(accessory.IdHash.HashValue, accessory.Id);
 		}
 		for (int i = 0; i < build.symbols.Length; i++)
 		{
-			string text3 = HashCache.Get().Get(build.symbols[i].hash);
-			if (text3.StartsWith(text))
+			string text2 = HashCache.Get().Get(build.symbols[i].hash);
+			if (text2.StartsWith(text))
 			{
-				Accessory accessory2 = new Accessory(text3, parent, this, this.file.batchTag, build.symbols[i]);
-				this.accessories.Add(accessory2);
-				HashCache.Get().Add(accessory2.IdHash.HashValue, accessory2.Id);
+				Accessory accessory = new Accessory(text2, parent, this, this.file.batchTag, build.symbols[i]);
+				this.accessories.Add(accessory);
+				HashCache.Get().Add(accessory.IdHash.HashValue, accessory.Id);
 			}
 		}
 	}

@@ -22,6 +22,7 @@ public class LogicCircuitManager
 		if (isDirty)
 		{
 			this.conduitSystem.Update();
+			LogicCircuitNetwork.logicSoundRegister.Clear();
 			this.PropagateSignals(true);
 			this.elapsedTime = 0f;
 		}
@@ -47,7 +48,7 @@ public class LogicCircuitManager
 		foreach (UtilityNetwork utilityNetwork2 in networks)
 		{
 			LogicCircuitNetwork logicCircuitNetwork2 = (LogicCircuitNetwork)utilityNetwork2;
-			logicCircuitNetwork2.SendLogicEvents(force_send_events);
+			logicCircuitNetwork2.SendLogicEvents(force_send_events, logicCircuitNetwork2.id);
 		}
 	}
 

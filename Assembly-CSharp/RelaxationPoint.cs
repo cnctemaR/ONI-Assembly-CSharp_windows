@@ -86,6 +86,11 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 		base.OnCompleteWork(worker);
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
+	}
+
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
 		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);

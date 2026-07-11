@@ -23,7 +23,9 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("ArcadeMachineWorkable", vector);
 			ArcadeMachineWorkable arcadeMachineWorkable = gameObject.AddOrGet<ArcadeMachineWorkable>();
-			arcadeMachineWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Gaming);
+			KSelectable kselectable = gameObject.AddOrGet<KSelectable>();
+			kselectable.SetName(this.GetProperName());
+			kselectable.IsSelectable = false;
 			int player_index = i;
 			ArcadeMachineWorkable arcadeMachineWorkable2 = arcadeMachineWorkable;
 			arcadeMachineWorkable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(arcadeMachineWorkable2.OnWorkableEventCB, new Action<Workable.WorkableEvent>(delegate(Workable.WorkableEvent ev)

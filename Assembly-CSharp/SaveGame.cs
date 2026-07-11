@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using KSerialization;
@@ -84,24 +83,11 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 372041U;
+		header.buildVersion = 381414U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
 		return bytes;
-	}
-
-	public static SaveGame.Header GetHeader(BinaryReader br)
-	{
-		SaveGame.Header header = default(SaveGame.Header);
-		header.buildVersion = br.ReadUInt32();
-		header.headerSize = br.ReadInt32();
-		header.headerVersion = br.ReadUInt32();
-		if (1U <= header.headerVersion)
-		{
-			header.compression = br.ReadInt32();
-		}
-		return header;
 	}
 
 	public static SaveGame.GameInfo GetHeader(IReader br, out SaveGame.Header header)
@@ -115,7 +101,16 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			header.compression = br.ReadInt32();
 		}
 		byte[] array = br.ReadBytes(header.headerSize);
-		return SaveGame.GetGameInfo(array);
+		SaveGame.GameInfo gameInfo = SaveGame.GetGameInfo(array);
+		if (gameInfo.IsVersionOlderThan(7, 14) && gameInfo.worldTraits != null)
+		{
+			string[] worldTraits = gameInfo.worldTraits;
+			for (int i = 0; i < worldTraits.Length; i++)
+			{
+				worldTraits[i] = worldTraits[i].Replace('\\', '/');
+			}
+		}
+		return gameInfo;
 	}
 
 	public static SaveGame.GameInfo GetGameInfo(byte[] data)
@@ -229,7 +224,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.worldTraits = worldTraits;
 			this.sandboxEnabled = sandboxEnabled;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 12;
+			this.saveMinorVersion = 15;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)

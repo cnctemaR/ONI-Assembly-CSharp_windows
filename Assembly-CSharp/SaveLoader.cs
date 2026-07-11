@@ -25,8 +25,6 @@ public class SaveLoader : KMonoBehaviour
 
 	public global::System.Action OnWorldGenComplete { get; set; }
 
-	public SaveGame.Header LoadedHeader { get; private set; }
-
 	public SaveGame.GameInfo GameInfo { get; private set; }
 
 	protected override void OnPrefabInit()
@@ -264,7 +262,7 @@ public class SaveLoader : KMonoBehaviour
 		FastReader fastReader = new FastReader(array);
 		if (Sim.Load(fastReader) != 0)
 		{
-			DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
+			DebugUtil.LogWarningArgs(new object[] { "--- Error loading save ---\nSimDLL found bad data\n" });
 			Sim.Shutdown();
 			return false;
 		}
@@ -273,7 +271,7 @@ public class SaveLoader : KMonoBehaviour
 		if (!this.saveManager.Load(reader))
 		{
 			Sim.Shutdown();
-			DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\n" });
+			DebugUtil.LogWarningArgs(new object[] { "--- Error loading save ---\n" });
 			SaveLoader.SetActiveSaveFilePath(null);
 			return false;
 		}
@@ -525,14 +523,9 @@ public class SaveLoader : KMonoBehaviour
 
 	public static SaveGame.GameInfo LoadHeader(string filename, out SaveGame.Header header)
 	{
-		SaveGame.GameInfo gameInfo;
-		using (BinaryReader binaryReader = new BinaryReader(File.Open(filename, FileMode.Open)))
-		{
-			header = SaveGame.GetHeader(binaryReader);
-			byte[] array = binaryReader.ReadBytes(header.headerSize);
-			gameInfo = SaveGame.GetGameInfo(array);
-		}
-		return gameInfo;
+		byte[] array = File.ReadAllBytes(filename);
+		IReader reader = new FastReader(array);
+		return SaveGame.GetHeader(reader, out header);
 	}
 
 	public bool Load(string filename)
@@ -545,7 +538,6 @@ public class SaveLoader : KMonoBehaviour
 			IReader reader = new FastReader(array);
 			SaveGame.Header header;
 			this.GameInfo = SaveGame.GetHeader(reader, out header);
-			this.LoadedHeader = header;
 			DebugUtil.LogArgs(new object[] { string.Format("Loading save file: {4}\n headerVersion:{0}, buildVersion:{1}, headerSize:{2}, IsCompressed:{3}", new object[] { header.headerVersion, header.buildVersion, header.headerSize, header.IsCompressed, filename }) });
 			DebugUtil.LogArgs(new object[] { string.Format("GameInfo: numberOfCycles:{0}, numberOfDuplicants:{1}, baseName:{2}, isAutoSave:{3}, originalSaveName:{4}, saveVersion:{5}.{6}", new object[]
 			{
@@ -582,7 +574,7 @@ public class SaveLoader : KMonoBehaviour
 		}
 		catch (Exception ex)
 		{
-			DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\n" + ex.Message + "\n" + ex.StackTrace });
+			DebugUtil.LogWarningArgs(new object[] { "--- Error loading save ---\n" + ex.Message + "\n" + ex.StackTrace });
 			Sim.Shutdown();
 			SaveLoader.SetActiveSaveFilePath(null);
 			return false;
@@ -649,7 +641,7 @@ public class SaveLoader : KMonoBehaviour
 			FastReader fastReader = new FastReader(simSaveFileStructure.Sim);
 			if (Sim.Load(fastReader) != 0)
 			{
-				DebugUtil.LogWarningArgs(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
+				DebugUtil.LogWarningArgs(new object[] { "--- Error loading save ---\nSimDLL found bad data\n" });
 				Sim.Shutdown();
 				return false;
 			}

@@ -289,7 +289,7 @@ public static class GameUtil
 
 	public static string GetFormattedUnits(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displaySuffix = true)
 	{
-		string text = UI.UNITSUFFIXES.UNITS;
+		string text = ((units != 1f) ? UI.UNITSUFFIXES.UNITS : UI.UNITSUFFIXES.UNIT);
 		units = GameUtil.ApplyTimeSlice(units, timeSlice);
 		string text2 = string.Empty;
 		if (units == 0f)
@@ -1612,6 +1612,9 @@ public static class GameUtil
 				}
 				break;
 			}
+			break;
+		case KKeyCode.Insert:
+			text = INPUT.INSERT;
 			break;
 		}
 		return text;

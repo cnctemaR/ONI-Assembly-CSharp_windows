@@ -13,7 +13,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 		base.OnSpawn();
 		this.elapsedTime = 0f;
 		this.pumpable = this.UpdateOperational();
-		this.dispenser.GetConduitManager().AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.Last);
+		this.dispenser.GetConduitManager().AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.LastPostUpdate);
 	}
 
 	protected override void OnCleanUp()
@@ -82,8 +82,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 
 	private void OnConduitUpdate(float dt)
 	{
-		bool flag = this.dispenser.ConduitContents.mass > 0f;
-		this.conduitBlockedStatusGuid = this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.ConduitBlocked, this.conduitBlockedStatusGuid, flag, null);
+		this.conduitBlockedStatusGuid = this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.ConduitBlocked, this.conduitBlockedStatusGuid, this.dispenser.blocked, null);
 	}
 
 	public ConduitType conduitType

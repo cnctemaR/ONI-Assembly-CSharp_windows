@@ -16,7 +16,7 @@ public struct SoundCuller
 
 	public bool IsAudible(Vector2 pos, float falloff_distance_sq)
 	{
-		pos = this.GetVerticallyScaledPosition(pos);
+		pos = this.GetVerticallyScaledPosition(pos, false);
 		return this.IsAudibleNoCameraScaling(pos, falloff_distance_sq);
 	}
 
@@ -25,7 +25,7 @@ public struct SoundCuller
 		return !string.IsNullOrEmpty(sound_path) && this.IsAudible(pos, KFMOD.GetSoundEventDescription(sound_path).falloffDistanceSq);
 	}
 
-	public Vector3 GetVerticallyScaledPosition(Vector2 pos)
+	public Vector3 GetVerticallyScaledPosition(Vector3 pos, bool objectIsSelectedAndVisible = false)
 	{
 		float num = 1f;
 		float num2;
@@ -47,6 +47,10 @@ public struct SoundCuller
 		float num3 = num2 * num2 / (4f * this.zoomScaler);
 		num3 *= num;
 		Vector3 vector = new Vector3(pos.x, pos.y + num3, 0f);
+		if (objectIsSelectedAndVisible)
+		{
+			vector.z = pos.z;
+		}
 		return vector;
 	}
 

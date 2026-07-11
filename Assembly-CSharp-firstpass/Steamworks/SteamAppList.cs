@@ -8,20 +8,20 @@ namespace Steamworks
 		public static uint GetNumInstalledApps()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamAppList_GetNumInstalledApps();
+			return NativeMethods.ISteamAppList_GetNumInstalledApps(CSteamAPIContext.GetSteamAppList());
 		}
 
 		public static uint GetInstalledApps(AppId_t[] pvecAppID, uint unMaxAppIDs)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamAppList_GetInstalledApps(pvecAppID, unMaxAppIDs);
+			return NativeMethods.ISteamAppList_GetInstalledApps(CSteamAPIContext.GetSteamAppList(), pvecAppID, unMaxAppIDs);
 		}
 
 		public static int GetAppName(AppId_t nAppID, out string pchName, int cchNameMax)
 		{
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameMax);
-			int num = NativeMethods.ISteamAppList_GetAppName(nAppID, intPtr, cchNameMax);
+			int num = NativeMethods.ISteamAppList_GetAppName(CSteamAPIContext.GetSteamAppList(), nAppID, intPtr, cchNameMax);
 			pchName = ((num == -1) ? null : InteropHelp.PtrToStringUTF8(intPtr));
 			Marshal.FreeHGlobal(intPtr);
 			return num;
@@ -31,7 +31,7 @@ namespace Steamworks
 		{
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameMax);
-			int num = NativeMethods.ISteamAppList_GetAppInstallDir(nAppID, intPtr, cchNameMax);
+			int num = NativeMethods.ISteamAppList_GetAppInstallDir(CSteamAPIContext.GetSteamAppList(), nAppID, intPtr, cchNameMax);
 			pchDirectory = ((num == -1) ? null : InteropHelp.PtrToStringUTF8(intPtr));
 			Marshal.FreeHGlobal(intPtr);
 			return num;
@@ -40,7 +40,7 @@ namespace Steamworks
 		public static int GetAppBuildId(AppId_t nAppID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamAppList_GetAppBuildId(nAppID);
+			return NativeMethods.ISteamAppList_GetAppBuildId(CSteamAPIContext.GetSteamAppList(), nAppID);
 		}
 	}
 }

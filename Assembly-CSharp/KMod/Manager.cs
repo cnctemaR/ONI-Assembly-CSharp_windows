@@ -13,19 +13,15 @@ namespace KMod
 	{
 		public Manager()
 		{
-			Manager $this = this;
 			string filename = this.GetFilename();
 			try
 			{
-				FileUtil.DoIOAction(delegate
+				if (FileUtil.FileExists(filename, 0))
 				{
-					if (File.Exists(filename))
-					{
-						string text = File.ReadAllText(filename);
-						Manager.PersistentData persistentData = JsonConvert.DeserializeObject<Manager.PersistentData>(text);
-						$this.mods = persistentData.mods;
-					}
-				}, 5);
+					string text = File.ReadAllText(filename);
+					Manager.PersistentData persistentData = JsonConvert.DeserializeObject<Manager.PersistentData>(text);
+					this.mods = persistentData.mods;
+				}
 			}
 			catch (Exception)
 			{
@@ -566,11 +562,17 @@ namespace KMod
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine();
+			int num = 30;
 			foreach (Event @event in events)
 			{
 				if (@event.event_type == event_type)
 				{
 					stringBuilder.AppendLine(@event.mod.title);
+					if (--num <= 0)
+					{
+						stringBuilder.AppendLine(UI.FRONTEND.MOD_DIALOGS.ADDITIONAL_MOD_EVENTS);
+						break;
+					}
 				}
 			}
 			return stringBuilder.ToString();
@@ -582,6 +584,7 @@ namespace KMod
 			stringBuilder.AppendLine();
 			string text = null;
 			string text2 = null;
+			int num = 30;
 			foreach (Event @event in events)
 			{
 				Event.GetUIStrings(@event.event_type, out text, out text2);
@@ -591,6 +594,11 @@ namespace KMod
 					stringBuilder.AppendFormat(" ({0})", @event.details);
 				}
 				stringBuilder.Append("\n");
+				if (--num <= 0)
+				{
+					stringBuilder.AppendLine(UI.FRONTEND.MOD_DIALOGS.ADDITIONAL_MOD_EVENTS);
+					break;
+				}
 			}
 			return stringBuilder.ToString();
 		}
@@ -600,11 +608,17 @@ namespace KMod
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine();
 			HashSetPool<string, Manager>.PooledHashSet pooledHashSet = HashSetPool<string, Manager>.Allocate();
+			int num = 30;
 			foreach (Event @event in events)
 			{
 				if (pooledHashSet.Add(@event.mod.title))
 				{
 					stringBuilder.AppendLine(@event.mod.title);
+					if (--num <= 0)
+					{
+						stringBuilder.AppendLine(UI.FRONTEND.MOD_DIALOGS.ADDITIONAL_MOD_EVENTS);
+						break;
+					}
 				}
 			}
 			pooledHashSet.Recycle();
@@ -996,6 +1010,8 @@ namespace KMod
 		private const int IO_OP_RETRY_COUNT = 5;
 
 		private bool load_user_mod_loader_dll = true;
+
+		private const int MAX_DIALOG_ENTRIES = 30;
 
 		private int current_version = 1;
 

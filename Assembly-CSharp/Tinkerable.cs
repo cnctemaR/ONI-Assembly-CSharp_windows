@@ -107,8 +107,11 @@ public class Tinkerable : Workable
 	{
 		Operational component = base.GetComponent<Operational>();
 		bool flag = component == null || component.IsFunctional;
-		bool flag2 = !this.HasEffect() && this.RoomHasActiveTinkerstation() && flag;
-		if (this.chore == null && flag2)
+		bool flag2 = this.HasEffect();
+		bool flag3 = this.RoomHasActiveTinkerstation();
+		bool flag4 = !flag2 && flag3 && flag;
+		bool flag5 = flag2 || !flag3;
+		if (this.chore == null && flag4)
 		{
 			this.UpdateMaterialReservation(true);
 			base.SetWorkTime(this.workTime);
@@ -131,7 +134,7 @@ public class Tinkerable : Workable
 				this.chore.AddPrecondition(ChorePreconditions.instance.IsInMyRoom, Grid.PosToCell(base.transform.GetPosition()));
 			}
 		}
-		else if (this.chore != null && !flag2)
+		else if (this.chore != null && flag5)
 		{
 			this.UpdateMaterialReservation(false);
 			this.chore.Cancel("No longer needed");

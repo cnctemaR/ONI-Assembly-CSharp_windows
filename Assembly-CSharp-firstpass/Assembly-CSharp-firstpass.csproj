@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3BA6C270-DFBA-47E9-A32A-96B956ADD38F}</ProjectGuid>
+    <ProjectGuid>{AD3FBB54-0048-476E-A8A3-3303790EB75C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -411,6 +411,7 @@
     <Compile Include="ISim200ms.cs" />
     <Compile Include="ISim33ms.cs" />
     <Compile Include="ISim4000ms.cs" />
+    <Compile Include="ISimEveryTick.cs" />
     <Compile Include="IStateMachineControllerHack.cs" />
     <Compile Include="IStateMachineTarget.cs" />
     <Compile Include="IUniformGridObject.cs" />
@@ -465,9 +466,9 @@
     <Compile Include="Klei\CSVReader.cs" />
     <Compile Include="Klei\FileHandle.cs" />
     <Compile Include="Klei\FileSystem.cs" />
+    <Compile Include="Klei\FileUtil.cs" />
     <Compile Include="Klei\GenericGameSettings.cs" />
     <Compile Include="Klei\IFileDirectory.cs" />
-    <Compile Include="Klei\KProfilerPlugin.cs" />
     <Compile Include="Klei\MemoryFileDirectory.cs" />
     <Compile Include="Klei\MeshCreator.cs" />
     <Compile Include="Klei\RootDirectory.cs" />
@@ -878,14 +879,15 @@
     <Compile Include="SteamDistributionPlatform.cs" />
     <Compile Include="SteamManager.cs" />
     <Compile Include="Steamworks\AccountID_t.cs" />
+    <Compile Include="Steamworks\ActiveBeaconsUpdated_t.cs" />
+    <Compile Include="Steamworks\AddAppDependencyResult_t.cs" />
     <Compile Include="Steamworks\AddUGCDependencyResult_t.cs" />
     <Compile Include="Steamworks\AppId_t.cs" />
     <Compile Include="Steamworks\AppProofOfPurchaseKeyResponse_t.cs" />
     <Compile Include="Steamworks\AssociateWithClanResult_t.cs" />
     <Compile Include="Steamworks\AudioPlayback_Status.cs" />
+    <Compile Include="Steamworks\AvailableBeaconLocationsUpdated_t.cs" />
     <Compile Include="Steamworks\AvatarImageLoaded_t.cs" />
-    <Compile Include="Steamworks\BroadcastUploadStart_t.cs" />
-    <Compile Include="Steamworks\BroadcastUploadStop_t.cs" />
     <Compile Include="Steamworks\Callback.cs" />
     <Compile Include="Steamworks\CallbackDispatcher.cs" />
     <Compile Include="Steamworks\CallbackIdentities.cs" />
@@ -895,10 +897,10 @@
     <Compile Include="Steamworks\CCallbackBase.cs" />
     <Compile Include="Steamworks\CCallbackBaseVTable.cs" />
     <Compile Include="Steamworks\CGameID.cs" />
+    <Compile Include="Steamworks\ChangeNumOpenSlotsCallback_t.cs" />
     <Compile Include="Steamworks\CheckFileSignature_t.cs" />
     <Compile Include="Steamworks\ClanOfficerListResponse_t.cs" />
     <Compile Include="Steamworks\ClientGameServerDeny_t.cs" />
-    <Compile Include="Steamworks\ClientUnifiedMessageHandle.cs" />
     <Compile Include="Steamworks\ComputeNewPlayerCompatibilityResult_t.cs" />
     <Compile Include="Steamworks\Constants.cs" />
     <Compile Include="Steamworks\ControllerActionSetHandle_t.cs" />
@@ -908,14 +910,20 @@
     <Compile Include="Steamworks\ControllerDigitalActionHandle_t.cs" />
     <Compile Include="Steamworks\ControllerHandle_t.cs" />
     <Compile Include="Steamworks\ControllerMotionData_t.cs" />
+    <Compile Include="Steamworks\CreateBeaconCallback_t.cs" />
     <Compile Include="Steamworks\CreateItemResult_t.cs" />
+    <Compile Include="Steamworks\CSteamAPIContext.cs" />
+    <Compile Include="Steamworks\CSteamGameServerAPIContext.cs" />
     <Compile Include="Steamworks\CSteamID.cs" />
+    <Compile Include="Steamworks\DeleteItemResult_t.cs" />
     <Compile Include="Steamworks\DepotId_t.cs" />
     <Compile Include="Steamworks\DlcInstalled_t.cs" />
     <Compile Include="Steamworks\DllCheck.cs" />
     <Compile Include="Steamworks\DownloadClanActivityCountsResult_t.cs" />
     <Compile Include="Steamworks\DownloadItemResult_t.cs" />
+    <Compile Include="Steamworks\DurationControl_t.cs" />
     <Compile Include="Steamworks\EAccountType.cs" />
+    <Compile Include="Steamworks\EActivateGameOverlayToWebPageMode.cs" />
     <Compile Include="Steamworks\EAppOwnershipFlags.cs" />
     <Compile Include="Steamworks\EAppReleaseState.cs" />
     <Compile Include="Steamworks\EAppType.cs" />
@@ -931,16 +939,22 @@
     <Compile Include="Steamworks\EControllerSource.cs" />
     <Compile Include="Steamworks\EControllerSourceMode.cs" />
     <Compile Include="Steamworks\EDenyReason.cs" />
+    <Compile Include="Steamworks\EDurationControlNotification.cs" />
+    <Compile Include="Steamworks\EDurationControlProgress.cs" />
     <Compile Include="Steamworks\EFailureType.cs" />
     <Compile Include="Steamworks\EFriendFlags.cs" />
     <Compile Include="Steamworks\EFriendRelationship.cs" />
     <Compile Include="Steamworks\EGamepadTextInputLineMode.cs" />
     <Compile Include="Steamworks\EGamepadTextInputMode.cs" />
+    <Compile Include="Steamworks\EGameSearchErrorCode_t.cs" />
     <Compile Include="Steamworks\EGCResults.cs" />
     <Compile Include="Steamworks\EHTMLKeyModifiers.cs" />
     <Compile Include="Steamworks\EHTMLMouseButton.cs" />
     <Compile Include="Steamworks\EHTTPMethod.cs" />
     <Compile Include="Steamworks\EHTTPStatusCode.cs" />
+    <Compile Include="Steamworks\EInputActionOrigin.cs" />
+    <Compile Include="Steamworks\EInputSource.cs" />
+    <Compile Include="Steamworks\EInputSourceMode.cs" />
     <Compile Include="Steamworks\EItemPreviewType.cs" />
     <Compile Include="Steamworks\EItemState.cs" />
     <Compile Include="Steamworks\EItemStatistic.cs" />
@@ -954,15 +968,19 @@
     <Compile Include="Steamworks\ELobbyDistanceFilter.cs" />
     <Compile Include="Steamworks\ELobbyType.cs" />
     <Compile Include="Steamworks\EMarketingMessageFlags.cs" />
+    <Compile Include="Steamworks\EMarketNotAllowedReasonFlags.cs" />
     <Compile Include="Steamworks\EMatchMakingServerResponse.cs" />
     <Compile Include="Steamworks\EMouseCursor.cs" />
     <Compile Include="Steamworks\EncryptedAppTicketResponse_t.cs" />
+    <Compile Include="Steamworks\EndGameResultCallback_t.cs" />
     <Compile Include="Steamworks\ENotificationPosition.cs" />
     <Compile Include="Steamworks\EOverlayToStoreFlag.cs" />
     <Compile Include="Steamworks\EP2PSend.cs" />
     <Compile Include="Steamworks\EP2PSessionError.cs" />
+    <Compile Include="Steamworks\EParentalFeature.cs" />
     <Compile Include="Steamworks\EPersonaChange.cs" />
     <Compile Include="Steamworks\EPersonaState.cs" />
+    <Compile Include="Steamworks\EPlayerResult_t.cs" />
     <Compile Include="Steamworks\ERegisterActivationCodeResult.cs" />
     <Compile Include="Steamworks\ERemoteStoragePlatform.cs" />
     <Compile Include="Steamworks\ERemoteStoragePublishedFileVisibility.cs" />
@@ -973,7 +991,12 @@
     <Compile Include="Steamworks\ESteamAPICallFailure.cs" />
     <Compile Include="Steamworks\ESteamControllerLEDFlag.cs" />
     <Compile Include="Steamworks\ESteamControllerPad.cs" />
+    <Compile Include="Steamworks\ESteamDeviceFormFactor.cs" />
+    <Compile Include="Steamworks\ESteamInputLEDFlag.cs" />
+    <Compile Include="Steamworks\ESteamInputType.cs" />
     <Compile Include="Steamworks\ESteamItemFlags.cs" />
+    <Compile Include="Steamworks\ESteamPartyBeaconLocationData.cs" />
+    <Compile Include="Steamworks\ESteamPartyBeaconLocationType.cs" />
     <Compile Include="Steamworks\ESteamUserStatType.cs" />
     <Compile Include="Steamworks\EUGCMatchingUGCType.cs" />
     <Compile Include="Steamworks\EUGCQuery.cs" />
@@ -991,6 +1014,7 @@
     <Compile Include="Steamworks\EWorkshopFileType.cs" />
     <Compile Include="Steamworks\EWorkshopVideoProvider.cs" />
     <Compile Include="Steamworks\EWorkshopVote.cs" />
+    <Compile Include="Steamworks\EXboxOrigin.cs" />
     <Compile Include="Steamworks\FavoritesListAccountsUpdated_t.cs" />
     <Compile Include="Steamworks\FavoritesListChanged_t.cs" />
     <Compile Include="Steamworks\FileDetailsResult_t.cs" />
@@ -1015,6 +1039,7 @@
     <Compile Include="Steamworks\GameWebCallback_t.cs" />
     <Compile Include="Steamworks\GCMessageAvailable_t.cs" />
     <Compile Include="Steamworks\GCMessageFailed_t.cs" />
+    <Compile Include="Steamworks\GetAppDependenciesResult_t.cs" />
     <Compile Include="Steamworks\GetAuthSessionTicketResponse_t.cs" />
     <Compile Include="Steamworks\GetOPFSettingsResult_t.cs" />
     <Compile Include="Steamworks\GetUserItemVoteResult_t.cs" />
@@ -1039,6 +1064,7 @@
     <Compile Include="Steamworks\HSteamPipe.cs" />
     <Compile Include="Steamworks\HSteamUser.cs" />
     <Compile Include="Steamworks\HTML_BrowserReady_t.cs" />
+    <Compile Include="Steamworks\HTML_BrowserRestarted_t.cs" />
     <Compile Include="Steamworks\HTML_CanGoBackAndForward_t.cs" />
     <Compile Include="Steamworks\HTML_ChangedTitle_t.cs" />
     <Compile Include="Steamworks\HTML_CloseBrowser_t.cs" />
@@ -1065,6 +1091,13 @@
     <Compile Include="Steamworks\HTTPRequestDataReceived_t.cs" />
     <Compile Include="Steamworks\HTTPRequestHandle.cs" />
     <Compile Include="Steamworks\HTTPRequestHeadersReceived_t.cs" />
+    <Compile Include="Steamworks\InputActionSetHandle_t.cs" />
+    <Compile Include="Steamworks\InputAnalogActionData_t.cs" />
+    <Compile Include="Steamworks\InputAnalogActionHandle_t.cs" />
+    <Compile Include="Steamworks\InputDigitalActionData_t.cs" />
+    <Compile Include="Steamworks\InputDigitalActionHandle_t.cs" />
+    <Compile Include="Steamworks\InputHandle_t.cs" />
+    <Compile Include="Steamworks\InputMotionData_t.cs" />
     <Compile Include="Steamworks\InteropHelp.cs" />
     <Compile Include="Steamworks\IPCFailure_t.cs" />
     <Compile Include="Steamworks\IPCountry_t.cs" />
@@ -1074,6 +1107,7 @@
     <Compile Include="Steamworks\ISteamMatchmakingServerListResponse.cs" />
     <Compile Include="Steamworks\ItemInstalled_t.cs" />
     <Compile Include="Steamworks\JoinClanChatRoomCompletionResult_t.cs" />
+    <Compile Include="Steamworks\JoinPartyCallback_t.cs" />
     <Compile Include="Steamworks\LeaderboardEntry_t.cs" />
     <Compile Include="Steamworks\LeaderboardFindResult_t.cs" />
     <Compile Include="Steamworks\LeaderboardScoresDownloaded_t.cs" />
@@ -1091,6 +1125,7 @@
     <Compile Include="Steamworks\LobbyMatchList_t.cs" />
     <Compile Include="Steamworks\LowBatteryPower_t.cs" />
     <Compile Include="Steamworks\ManifestId_t.cs" />
+    <Compile Include="Steamworks\MarketEligibilityResponse_t.cs" />
     <Compile Include="Steamworks\MatchMakingKeyValuePair_t.cs" />
     <Compile Include="Steamworks\MicroTxnAuthorizationResponse_t.cs" />
     <Compile Include="Steamworks\MMKVPMarshaller.cs" />
@@ -1109,14 +1144,16 @@
     <Compile Include="Steamworks\MusicPlayerWantsVolume_t.cs" />
     <Compile Include="Steamworks\MusicPlayerWillQuit_t.cs" />
     <Compile Include="Steamworks\NativeMethods.cs" />
-    <Compile Include="Steamworks\NewLaunchQueryParameters_t.cs" />
+    <Compile Include="Steamworks\NewUrlLaunchParameters_t.cs" />
     <Compile Include="Steamworks\NumberOfCurrentPlayers_t.cs" />
     <Compile Include="Steamworks\P2PSessionConnectFail_t.cs" />
     <Compile Include="Steamworks\P2PSessionRequest_t.cs" />
     <Compile Include="Steamworks\P2PSessionState_t.cs" />
     <Compile Include="Steamworks\Packsize.cs" />
+    <Compile Include="Steamworks\PartyBeaconID_t.cs" />
     <Compile Include="Steamworks\PersonaStateChange_t.cs" />
     <Compile Include="Steamworks\PlaybackStatusHasChanged_t.cs" />
+    <Compile Include="Steamworks\PlayerAcceptState_t.cs" />
     <Compile Include="Steamworks\PublishedFileId_t.cs" />
     <Compile Include="Steamworks\PublishedFileUpdateHandle_t.cs" />
     <Compile Include="Steamworks\RegisterActivationCodeResponse_t.cs" />
@@ -1148,13 +1185,22 @@
     <Compile Include="Steamworks\RemoteStorageUpdatePublishedFileResult_t.cs" />
     <Compile Include="Steamworks\RemoteStorageUpdateUserPublishedItemVoteResult_t.cs" />
     <Compile Include="Steamworks\RemoteStorageUserVoteDetails_t.cs" />
+    <Compile Include="Steamworks\RemoveAppDependencyResult_t.cs" />
     <Compile Include="Steamworks\RemoveUGCDependencyResult_t.cs" />
+    <Compile Include="Steamworks\RequestPlayersForGameFinalResultCallback_t.cs" />
+    <Compile Include="Steamworks\RequestPlayersForGameProgressCallback_t.cs" />
+    <Compile Include="Steamworks\RequestPlayersForGameResultCallback_t.cs" />
+    <Compile Include="Steamworks\ReservationNotificationCallback_t.cs" />
+    <Compile Include="Steamworks\RTime32.cs" />
     <Compile Include="Steamworks\ScreenshotHandle.cs" />
     <Compile Include="Steamworks\ScreenshotReady_t.cs" />
     <Compile Include="Steamworks\ScreenshotRequested_t.cs" />
+    <Compile Include="Steamworks\SearchForGameProgressCallback_t.cs" />
+    <Compile Include="Steamworks\SearchForGameResultCallback_t.cs" />
     <Compile Include="Steamworks\servernetadr_t.cs" />
     <Compile Include="Steamworks\SetPersonaNameResponse_t.cs" />
     <Compile Include="Steamworks\SetUserItemVoteResult_t.cs" />
+    <Compile Include="Steamworks\SiteId_t.cs" />
     <Compile Include="Steamworks\SNetListenSocket_t.cs" />
     <Compile Include="Steamworks\SNetSocket_t.cs" />
     <Compile Include="Steamworks\SocketStatusCallback_t.cs" />
@@ -1164,7 +1210,6 @@
     <Compile Include="Steamworks\SteamAPICall_t.cs" />
     <Compile Include="Steamworks\SteamAPIWarningMessageHook_t.cs" />
     <Compile Include="Steamworks\SteamAPI_CheckCallbackRegistered_t.cs" />
-    <Compile Include="Steamworks\SteamAPI_PostAPIResultInProcess_t.cs" />
     <Compile Include="Steamworks\SteamAppInstalled_t.cs" />
     <Compile Include="Steamworks\SteamAppList.cs" />
     <Compile Include="Steamworks\SteamApps.cs" />
@@ -1173,7 +1218,10 @@
     <Compile Include="Steamworks\SteamController.cs" />
     <Compile Include="Steamworks\SteamEncryptedAppTicket.cs" />
     <Compile Include="Steamworks\SteamFriends.cs" />
+    <Compile Include="Steamworks\SteamGameSearch.cs" />
     <Compile Include="Steamworks\SteamGameServer.cs" />
+    <Compile Include="Steamworks\SteamGameServerApps.cs" />
+    <Compile Include="Steamworks\SteamGameServerClient.cs" />
     <Compile Include="Steamworks\SteamGameServerHTTP.cs" />
     <Compile Include="Steamworks\SteamGameServerInventory.cs" />
     <Compile Include="Steamworks\SteamGameServerNetworking.cs" />
@@ -1182,12 +1230,16 @@
     <Compile Include="Steamworks\SteamGameServerUtils.cs" />
     <Compile Include="Steamworks\SteamHTMLSurface.cs" />
     <Compile Include="Steamworks\SteamHTTP.cs" />
+    <Compile Include="Steamworks\SteamInput.cs" />
     <Compile Include="Steamworks\SteamInventory.cs" />
     <Compile Include="Steamworks\SteamInventoryDefinitionUpdate_t.cs" />
     <Compile Include="Steamworks\SteamInventoryEligiblePromoItemDefIDs_t.cs" />
     <Compile Include="Steamworks\SteamInventoryFullUpdate_t.cs" />
+    <Compile Include="Steamworks\SteamInventoryRequestPricesResult_t.cs" />
     <Compile Include="Steamworks\SteamInventoryResultReady_t.cs" />
     <Compile Include="Steamworks\SteamInventoryResult_t.cs" />
+    <Compile Include="Steamworks\SteamInventoryStartPurchaseResult_t.cs" />
+    <Compile Include="Steamworks\SteamInventoryUpdateHandle_t.cs" />
     <Compile Include="Steamworks\SteamItemDef_t.cs" />
     <Compile Include="Steamworks\SteamItemDetails_t.cs" />
     <Compile Include="Steamworks\SteamItemInstanceID_t.cs" />
@@ -1199,6 +1251,13 @@
     <Compile Include="Steamworks\SteamMusicRemote.cs" />
     <Compile Include="Steamworks\SteamNetworking.cs" />
     <Compile Include="Steamworks\SteamParamStringArray_t.cs" />
+    <Compile Include="Steamworks\SteamParentalSettings.cs" />
+    <Compile Include="Steamworks\SteamParentalSettingsChanged_t.cs" />
+    <Compile Include="Steamworks\SteamParties.cs" />
+    <Compile Include="Steamworks\SteamPartyBeaconLocation_t.cs" />
+    <Compile Include="Steamworks\SteamRemotePlay.cs" />
+    <Compile Include="Steamworks\SteamRemotePlaySessionConnected_t.cs" />
+    <Compile Include="Steamworks\SteamRemotePlaySessionDisconnected_t.cs" />
     <Compile Include="Steamworks\SteamRemoteStorage.cs" />
     <Compile Include="Steamworks\SteamScreenshots.cs" />
     <Compile Include="Steamworks\SteamServerConnectFailure_t.cs" />
@@ -1209,8 +1268,6 @@
     <Compile Include="Steamworks\SteamUGCDetails_t.cs" />
     <Compile Include="Steamworks\SteamUGCQueryCompleted_t.cs" />
     <Compile Include="Steamworks\SteamUGCRequestUGCDetailsResult_t.cs" />
-    <Compile Include="Steamworks\SteamUnifiedMessages.cs" />
-    <Compile Include="Steamworks\SteamUnifiedMessagesSendMethodResult_t.cs" />
     <Compile Include="Steamworks\SteamUser.cs" />
     <Compile Include="Steamworks\SteamUserStats.cs" />
     <Compile Include="Steamworks\SteamUtils.cs" />
@@ -1218,10 +1275,12 @@
     <Compile Include="Steamworks\StopPlaytimeTrackingResult_t.cs" />
     <Compile Include="Steamworks\StoreAuthURLResponse_t.cs" />
     <Compile Include="Steamworks\SubmitItemUpdateResult_t.cs" />
+    <Compile Include="Steamworks\SubmitPlayerResultResultCallback_t.cs" />
     <Compile Include="Steamworks\UGCFileWriteStreamHandle_t.cs" />
     <Compile Include="Steamworks\UGCHandle_t.cs" />
     <Compile Include="Steamworks\UGCQueryHandle_t.cs" />
     <Compile Include="Steamworks\UGCUpdateHandle_t.cs" />
+    <Compile Include="Steamworks\UnreadChatMessagesChanged_t.cs" />
     <Compile Include="Steamworks\UserAchievementIconFetched_t.cs" />
     <Compile Include="Steamworks\UserAchievementStored_t.cs" />
     <Compile Include="Steamworks\UserFavoriteItemsListChanged_t.cs" />
@@ -1501,67 +1560,67 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD393}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB760}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD396}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB763}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD397}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB764}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD399}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB766}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3A1}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB76E}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3A0}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB76D}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD39B}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB768}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3A2}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB76F}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3A5}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB772}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3AE}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB77B}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3B8}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB785}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3C0}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB78D}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3C1}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB78E}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3CD}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB79A}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3D4}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB7A1}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3D2}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB79F}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

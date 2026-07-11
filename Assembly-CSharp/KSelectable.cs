@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
@@ -117,6 +118,28 @@ public class KSelectable : KMonoBehaviour
 		this.ClearHighlight();
 		this.ApplyHighlight(0.2f);
 		base.Trigger(-1503271301, true);
+		if (base.GetComponent<LoopingSounds>() != null)
+		{
+			base.GetComponent<LoopingSounds>().UpdateObjectSelection(this.selected);
+		}
+		if (base.transform.GetComponentInParent<LoopingSounds>() != null)
+		{
+			base.transform.GetComponentInParent<LoopingSounds>().UpdateObjectSelection(this.selected);
+		}
+		int childCount = base.transform.childCount;
+		for (int i = 0; i < childCount; i++)
+		{
+			int childCount2 = base.transform.GetChild(i).childCount;
+			for (int j = 0; j < childCount2; j++)
+			{
+				if (base.transform.GetChild(i).transform.GetChild(j).GetComponent<LoopingSounds>() != null)
+				{
+					base.transform.GetChild(i).transform.GetChild(j).GetComponent<LoopingSounds>().UpdateObjectSelection(this.selected);
+				}
+			}
+		}
+		this.UpdateWorkerSelection(this.selected);
+		this.UpdateWorkableSelection(this.selected);
 	}
 
 	public void Unselect()
@@ -127,6 +150,37 @@ public class KSelectable : KMonoBehaviour
 			this.ClearHighlight();
 			base.Trigger(-1503271301, false);
 		}
+		if (base.GetComponent<LoopingSounds>() != null)
+		{
+			base.GetComponent<LoopingSounds>().UpdateObjectSelection(this.selected);
+		}
+		if (base.transform.GetComponentInParent<LoopingSounds>() != null)
+		{
+			base.transform.GetComponentInParent<LoopingSounds>().UpdateObjectSelection(this.selected);
+		}
+		IEnumerator enumerator = base.transform.GetEnumerator();
+		try
+		{
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				if (transform.GetComponent<LoopingSounds>() != null)
+				{
+					transform.GetComponent<LoopingSounds>().UpdateObjectSelection(this.selected);
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
+		}
+		this.UpdateWorkerSelection(this.selected);
+		this.UpdateWorkableSelection(this.selected);
 	}
 
 	public void Hover(bool playAudio)
@@ -252,6 +306,34 @@ public class KSelectable : KMonoBehaviour
 	public StatusItemGroup GetStatusItemGroup()
 	{
 		return this.statusItemGroup;
+	}
+
+	public void UpdateWorkerSelection(bool selected)
+	{
+		Workable[] components = base.GetComponents<Workable>();
+		if (components.Length > 0)
+		{
+			for (int i = 0; i < components.Length; i++)
+			{
+				if (components[i].worker != null && components[i].GetComponent<LoopingSounds>() != null)
+				{
+					components[i].GetComponent<LoopingSounds>().UpdateObjectSelection(selected);
+				}
+			}
+		}
+	}
+
+	public void UpdateWorkableSelection(bool selected)
+	{
+		Worker component = base.GetComponent<Worker>();
+		if (component != null && component.workable != null)
+		{
+			Workable workable = base.GetComponent<Worker>().workable;
+			if (workable.GetComponent<LoopingSounds>() != null)
+			{
+				workable.GetComponent<LoopingSounds>().UpdateObjectSelection(selected);
+			}
+		}
 	}
 
 	protected override void OnLoadLevel()

@@ -40,7 +40,20 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 		int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
 		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, true, -1);
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.GetPosition(), 1f);
+		GameObject gameObject2 = gameObject;
+		bool flag = SoundEvent.ObjectIsSelectedAndVisible(gameObject2);
+		Vector3 vector3 = gameObject2.GetComponent<Transform>().GetPosition();
+		float num3 = 1f;
+		if (flag)
+		{
+			vector3 = SoundEvent.AudioHighlightListenerPosition(vector3);
+			num3 = SoundEvent.GetVolume(flag);
+		}
+		else
+		{
+			vector3.z = 0f;
+		}
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), vector3, num3);
 	}
 
 	private void OnDeath(object data)

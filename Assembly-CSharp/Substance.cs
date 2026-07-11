@@ -26,11 +26,15 @@ public class Substance
 						KPrefabID component2 = objectLayerListItem.gameObject.GetComponent<KPrefabID>();
 						if (component2.PrefabTag == tag)
 						{
-							gameObject = component2.gameObject;
-							primaryElement = component2.GetComponent<PrimaryElement>();
-							temperature = SimUtil.CalculateFinalTemperature(primaryElement.Mass, primaryElement.Temperature, mass, temperature);
-							position = gameObject.transform.GetPosition();
-							break;
+							PrimaryElement component3 = component2.GetComponent<PrimaryElement>();
+							if (component3.Mass + mass <= PrimaryElement.MAX_MASS)
+							{
+								gameObject = component2.gameObject;
+								primaryElement = component3;
+								temperature = SimUtil.CalculateFinalTemperature(primaryElement.Mass, primaryElement.Temperature, mass, temperature);
+								position = gameObject.transform.GetPosition();
+								break;
+							}
 						}
 					}
 				}

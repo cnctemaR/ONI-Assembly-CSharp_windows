@@ -14,11 +14,13 @@ public static class ReachedDistantPlanetSequence
 	{
 		Vector3 cameraTagetMid = Vector3.zero;
 		Vector3 cameraTargetTop = Vector3.zero;
-		foreach (Spacecraft spacecraft in SpacecraftManager.instance.GetSpacecraft())
+		Spacecraft spacecraft = null;
+		foreach (Spacecraft spacecraft2 in SpacecraftManager.instance.GetSpacecraft())
 		{
-			if (spacecraft.state != Spacecraft.MissionState.Grounded && SpacecraftManager.instance.GetSpacecraftDestination(spacecraft.id).GetDestinationType().Id == Db.Get().SpaceDestinationTypes.Wormhole.Id)
+			if (spacecraft2.state != Spacecraft.MissionState.Grounded && SpacecraftManager.instance.GetSpacecraftDestination(spacecraft2.id).GetDestinationType().Id == Db.Get().SpaceDestinationTypes.Wormhole.Id)
 			{
-				foreach (RocketModule rocketModule in spacecraft.launchConditions.rocketModules)
+				spacecraft = spacecraft2;
+				foreach (RocketModule rocketModule in spacecraft2.launchConditions.rocketModules)
 				{
 					if (rocketModule.GetComponent<RocketEngine>() != null)
 					{
@@ -86,6 +88,7 @@ public static class ReachedDistantPlanetSequence
 		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot, STOP_MODE.ALLOWFADEOUT);
 		yield return new WaitForSecondsRealtime(2f);
+		spacecraft.TemporallyTear();
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
@@ -100,6 +103,7 @@ public static class ReachedDistantPlanetSequence
 			StoryMessageScreen.HideInterface(false);
 			CameraController.Instance.FadeIn(0f, 1f);
 			CameraController.Instance.SetWorldInteractive(true);
+			HoverTextScreen.Instance.Show(true);
 			CameraController.Instance.SetOverrideZoomSpeed(1f);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryCinematicSnapshot, STOP_MODE.ALLOWFADEOUT);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot, STOP_MODE.ALLOWFADEOUT);

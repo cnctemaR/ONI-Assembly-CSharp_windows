@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using Klei.CustomSettings;
 using STRINGS;
@@ -25,7 +26,8 @@ public class SaveUpgradeWarning : KMonoBehaviour
 	{
 		List<SaveUpgradeWarning.Upgrade> list = new List<SaveUpgradeWarning.Upgrade>
 		{
-			new SaveUpgradeWarning.Upgrade(7, 5, new global::System.Action(this.SuddenMoraleHelper))
+			new SaveUpgradeWarning.Upgrade(7, 5, new global::System.Action(this.SuddenMoraleHelper)),
+			new SaveUpgradeWarning.Upgrade(7, 13, new global::System.Action(this.BedAndBathHelper))
 		};
 		foreach (SaveUpgradeWarning.Upgrade upgrade in list)
 		{
@@ -57,6 +59,25 @@ public class SaveUpgradeWarning : KMonoBehaviour
 			screen.Deactivate();
 		});
 		screen.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVEUPGRADEWARNINGS.SUDDENMORALEHELPER, Mathf.RoundToInt(morale_effect.duration / 600f)), UI.FRONTEND.SAVEUPGRADEWARNINGS.SUDDENMORALEHELPER_TITLE, null);
+	}
+
+	private void BedAndBathHelper()
+	{
+		if (SaveGame.Instance == null)
+		{
+			return;
+		}
+		ColonyAchievementTracker component = SaveGame.Instance.GetComponent<ColonyAchievementTracker>();
+		if (component == null)
+		{
+			return;
+		}
+		ColonyAchievement basicComforts = Db.Get().ColonyAchievements.BasicComforts;
+		ColonyAchievementStatus colonyAchievementStatus = null;
+		if (component.achievements.TryGetValue(basicComforts.Id, out colonyAchievementStatus))
+		{
+			colonyAchievementStatus.failed = false;
+		}
 	}
 
 	[MyCmpReq]

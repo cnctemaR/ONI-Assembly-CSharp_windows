@@ -258,6 +258,8 @@ public static class RoomConstraints
 		return false;
 	}, 1, ROOMS.CRITERIA.LIGHT.NAME, ROOMS.CRITERIA.LIGHT.DESCRIPTION, null);
 
+	public static RoomConstraints.Constraint DESTRESSING_BUILDING = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.DeStressingBuilding), null, 1, ROOMS.CRITERIA.DESTRESSING_BUILDING.NAME, ROOMS.CRITERIA.DESTRESSING_BUILDING.DESCRIPTION, null);
+
 	public static RoomConstraints.Constraint MASSAGE_TABLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.MassageTable), null, 1, ROOMS.CRITERIA.MASSAGE_TABLE.NAME, ROOMS.CRITERIA.MASSAGE_TABLE.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint MESS_STATION_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.MessTable), null, 1, ROOMS.CRITERIA.MESS_STATION_SINGLE.NAME, ROOMS.CRITERIA.MESS_STATION_SINGLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.REC_BUILDING });
@@ -320,6 +322,8 @@ public static class RoomConstraints
 		public static Tag LightSource = "LightSource".ToTag();
 
 		public static Tag MassageTable = "MassageTable".ToTag();
+
+		public static Tag DeStressingBuilding = "DeStressingBuilding".ToTag();
 
 		public static Tag IndustrialMachinery = "IndustrialMachinery".ToTag();
 

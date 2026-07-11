@@ -80,6 +80,7 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		base.Subscribe<OxidizerTank>(-905833192, OxidizerTank.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -141,6 +142,16 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		this.storage.ConsumeAllIgnoringDisease();
 	}
 
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		OxidizerTank component = gameObject.GetComponent<OxidizerTank>();
+		if (component != null)
+		{
+			this.UserMaxCapacity = component.UserMaxCapacity;
+		}
+	}
+
 	public Storage storage;
 
 	private MeterController meter;
@@ -156,6 +167,11 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		SimHashes.OxyRock.CreateTag(),
 		SimHashes.LiquidOxygen.CreateTag()
 	};
+
+	private static readonly EventSystem.IntraObjectHandler<OxidizerTank> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<OxidizerTank>(delegate(OxidizerTank component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private static readonly EventSystem.IntraObjectHandler<OxidizerTank> OnReturnRocketDelegate = new EventSystem.IntraObjectHandler<OxidizerTank>(delegate(OxidizerTank component, object data)
 	{

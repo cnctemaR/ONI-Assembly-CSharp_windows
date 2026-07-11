@@ -66,20 +66,21 @@ public class MinionStartingStats : ITelepadDeliverable
 						this.personality.hair = 0;
 					}
 				}
-				else if (accessorySlot != Db.Get().AccessorySlots.HatHair)
+				else if (accessorySlot == Db.Get().AccessorySlots.HatHair || accessorySlot == Db.Get().AccessorySlots.HairAlways || accessorySlot == Db.Get().AccessorySlots.Hat)
 				{
-					if (accessorySlot == Db.Get().AccessorySlots.Body)
+					accessory = accessorySlot.accessories[0];
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Body)
+				{
+					accessory = accessorySlot.Lookup(bodyData.body);
+					if (accessory == null)
 					{
-						accessory = accessorySlot.Lookup(bodyData.body);
-						if (accessory == null)
-						{
-							this.personality.body = 0;
-						}
+						this.personality.body = 0;
 					}
-					else if (accessorySlot == Db.Get().AccessorySlots.Arm)
-					{
-						accessory = accessorySlot.Lookup(bodyData.arms);
-					}
+				}
+				else if (accessorySlot == Db.Get().AccessorySlots.Arm)
+				{
+					accessory = accessorySlot.Lookup(bodyData.arms);
 				}
 				if (accessory == null)
 				{
@@ -97,14 +98,17 @@ public class MinionStartingStats : ITelepadDeliverable
 		global::System.Random randSeed = new global::System.Random();
 		Trait trait = Db.Get().traits.Get(this.personality.stresstrait);
 		this.stressTrait = trait;
-		Trait trait2 = Db.Get().traits.Get(this.personality.congenitaltrait);
-		if (trait2.Name == "None")
+		Trait trait2 = Db.Get().traits.Get(this.personality.joyTrait);
+		this.joyTrait = trait2;
+		this.stickerType = this.personality.stickerType;
+		Trait trait3 = Db.Get().traits.Get(this.personality.congenitaltrait);
+		if (trait3.Name == "None")
 		{
 			this.congenitaltrait = null;
 		}
 		else
 		{
-			this.congenitaltrait = trait2;
+			this.congenitaltrait = trait3;
 		}
 		Func<List<DUPLICANTSTATS.TraitVal>, bool> func = delegate(List<DUPLICANTSTATS.TraitVal> traitPossibilities)
 		{
@@ -161,21 +165,21 @@ public class MinionStartingStats : ITelepadDeliverable
 					}
 					if (num2 > traitVal.probability)
 					{
-						Trait trait3 = Db.Get().traits.TryGet(traitVal.id);
-						if (trait3 == null)
+						Trait trait4 = Db.Get().traits.TryGet(traitVal.id);
+						if (trait4 == null)
 						{
 							global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id);
 						}
-						else if (!is_starter_minion || trait3.ValidStarterTrait)
+						else if (!is_starter_minion || trait4.ValidStarterTrait)
 						{
 							selectedTraits.Add(traitVal.id);
 							statDelta += traitVal.statBonus;
-							this.Traits.Add(trait3);
-							if (trait3.disabledChoreGroups != null)
+							this.Traits.Add(trait4);
+							if (trait4.disabledChoreGroups != null)
 							{
-								for (int k = 0; k < trait3.disabledChoreGroups.Length; k++)
+								for (int k = 0; k < trait4.disabledChoreGroups.Length; k++)
 								{
-									disabled_chore_groups.Add(trait3.disabledChoreGroups[k]);
+									disabled_chore_groups.Add(trait4.disabledChoreGroups[k]);
 								}
 							}
 							return true;
@@ -372,6 +376,8 @@ public class MinionStartingStats : ITelepadDeliverable
 		{
 			component.Add(this.congenitaltrait);
 		}
+		component.Add(this.joyTrait);
+		go.GetComponent<MinionIdentity>().SetStickerType(this.stickerType);
 		go.GetComponent<MinionIdentity>().SetName(this.Name);
 		go.GetComponent<MinionIdentity>().SetGender(this.GenderStringKey);
 	}
@@ -398,7 +404,11 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	public Trait stressTrait;
 
+	public Trait joyTrait;
+
 	public Trait congenitaltrait;
+
+	public string stickerType;
 
 	public int voiceIdx;
 

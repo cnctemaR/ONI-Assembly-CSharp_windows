@@ -55,7 +55,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 		smi.ev.clearHandle();
 		if (smi.voiceEvent != null)
 		{
-			smi.ev = VoiceSoundEvent.PlayVoice(smi.voiceEvent, smi.GetComponent<KBatchedAnimController>(), 0f, false);
+			smi.ev = VoiceSoundEvent.PlayVoice(smi.voiceEvent, smi.GetComponent<KBatchedAnimController>(), 0f, false, false);
 		}
 		if (smi.ev.isValid())
 		{

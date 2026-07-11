@@ -115,9 +115,9 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 			{
 				smi.CancelFetchTask();
 			})
-				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.GraveEmpty)
+				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.GraveEmpty, null)
 				.EventTransition(GameHashes.OnStorageChange, this.full, null);
-			this.full.PlayAnim("closed").ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave).Enter(delegate(Grave.StatesInstance smi)
+			this.full.PlayAnim("closed").ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave, null).Enter(delegate(Grave.StatesInstance smi)
 			{
 				if (smi.master.burialTime < 0f)
 				{

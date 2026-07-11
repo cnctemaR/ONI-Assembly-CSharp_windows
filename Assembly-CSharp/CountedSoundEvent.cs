@@ -66,32 +66,37 @@ public class CountedSoundEvent : SoundEvent
 		{
 			return;
 		}
-		if (!SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
-		{
-			return;
-		}
-		int num = -1;
 		GameObject gameObject = behaviour.controller.gameObject;
-		if (this.counterModulus >= -1)
+		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
 		{
-			HandleVector<int>.Handle handle = GameComps.WhiteBoards.GetHandle(gameObject);
-			if (!handle.IsValid())
+			int num = -1;
+			if (this.counterModulus >= -1)
 			{
-				handle = GameComps.WhiteBoards.Add(gameObject);
+				HandleVector<int>.Handle handle = GameComps.WhiteBoards.GetHandle(gameObject);
+				if (!handle.IsValid())
+				{
+					handle = GameComps.WhiteBoards.Add(gameObject);
+				}
+				num = ((!GameComps.WhiteBoards.HasValue(handle, base.soundHash)) ? 0 : ((int)GameComps.WhiteBoards.GetValue(handle, base.soundHash)));
+				int num2 = ((this.counterModulus != -1) ? ((num + 1) % this.counterModulus) : 0);
+				GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
 			}
-			num = ((!GameComps.WhiteBoards.HasValue(handle, base.soundHash)) ? 0 : ((int)GameComps.WhiteBoards.GetValue(handle, base.soundHash)));
-			int num2 = ((this.counterModulus != -1) ? ((num + 1) % this.counterModulus) : 0);
-			GameComps.WhiteBoards.SetValue(handle, base.soundHash, num2);
-		}
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position, 1f);
-		if (eventInstance.isValid())
-		{
-			if (num >= 0)
+			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			vector.z = 0f;
+			if (base.objectIsSelectedAndVisible)
 			{
-				eventInstance.setParameterValue("eventCount", (float)num);
+				vector = SoundEvent.AudioHighlightListenerPosition(vector);
 			}
-			SoundEvent.EndOneShot(eventInstance);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
+			if (eventInstance.isValid())
+			{
+				if (num >= 0)
+				{
+					eventInstance.setParameterValue("eventCount", (float)num);
+				}
+				SoundEvent.EndOneShot(eventInstance);
+			}
 		}
 	}
 

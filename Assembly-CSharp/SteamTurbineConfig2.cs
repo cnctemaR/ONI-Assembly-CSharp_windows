@@ -67,7 +67,6 @@ public class SteamTurbineConfig2 : IBuildingConfig
 		steamTurbine.destElem = SimHashes.Water;
 		steamTurbine.pumpKGRate = 2f;
 		steamTurbine.maxSelfHeat = 64f;
-		steamTurbine.maxWattage = SteamTurbineConfig2.MAX_WATTAGE;
 		steamTurbine.wasteHeatToTurbinePercent = 0.1f;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };

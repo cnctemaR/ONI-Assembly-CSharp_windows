@@ -15,6 +15,10 @@ namespace Database
 
 		public override bool Success()
 		{
+			if (Components.LiveMinionIdentities.Items.Count <= 0)
+			{
+				return false;
+			}
 			int num = 0;
 			foreach (IBasicBuilding basicBuilding in Components.BasicBuildings.Items)
 			{
@@ -29,12 +33,12 @@ namespace Database
 					}
 				}
 			}
-			return Components.LiveMinionIdentities.Items.Count > 0 && num >= Components.LiveMinionIdentities.Items.Count;
+			return num >= Components.LiveMinionIdentities.Items.Count;
 		}
 
 		public override bool Fail()
 		{
-			return Components.LiveMinionIdentities.Items.Count <= 0;
+			return false;
 		}
 
 		public override void Deserialize(IReader reader)

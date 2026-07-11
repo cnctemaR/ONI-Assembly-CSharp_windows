@@ -13,8 +13,8 @@ public class DesalinatorWorkableEmpty : Workable
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_desalinator_kanim") };
 		this.workAnims = DesalinatorWorkableEmpty.WORK_ANIMS;
-		this.workingPstComplete = DesalinatorWorkableEmpty.PST_ANIM;
-		this.workingPstFailed = DesalinatorWorkableEmpty.PST_ANIM;
+		this.workingPstComplete = new HashedString[] { DesalinatorWorkableEmpty.PST_ANIM };
+		this.workingPstFailed = new HashedString[] { DesalinatorWorkableEmpty.PST_ANIM };
 		this.synchronizeAnims = false;
 	}
 

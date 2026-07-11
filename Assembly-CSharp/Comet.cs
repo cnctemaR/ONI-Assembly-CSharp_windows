@@ -8,6 +8,16 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Comet : KMonoBehaviour, ISim33ms
 {
+	private float GetVolume(GameObject gameObject)
+	{
+		float num = 1f;
+		if (gameObject != null && gameObject.GetComponent<KSelectable>() != null && gameObject.GetComponent<KSelectable>().IsSelected)
+		{
+			num = 1f;
+		}
+		return num;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -219,7 +229,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			return 0f;
 		}
 		float num2 = input_damage * num / element.strength;
-		this.PlayTileDamageSound(element, Grid.CellToPos(cell));
+		this.PlayTileDamageSound(element, Grid.CellToPos(cell), gameObject);
 		if (num2 == 0f)
 		{
 			return 0f;
@@ -267,7 +277,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				float num = ((!component3.HasTag(GameTags.Bunker)) ? ((float)damage) : ((float)damage * this.bunkerDamageMultiplier));
 				if (component2 != null && component2.Def != null)
 				{
-					this.PlayBuildingDamageSound(component2.Def, Grid.CellToPos(cell));
+					this.PlayBuildingDamageSound(component2.Def, Grid.CellToPos(cell), gameObject);
 				}
 				component.gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 				{
@@ -321,7 +331,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		return this.GetDistanceFromImpact();
 	}
 
-	private void PlayTileDamageSound(Element element, Vector3 pos)
+	private void PlayTileDamageSound(Element element, Vector3 pos, GameObject tile_go)
 	{
 		string text = element.substance.GetMiningBreakSound();
 		if (text == null)
@@ -343,11 +353,12 @@ public class Comet : KMonoBehaviour, ISim33ms
 		text = GlobalAssets.GetSound(text, false);
 		if (CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text))
 		{
-			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos), 1f);
+			float volume = this.GetVolume(tile_go);
+			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos, false), volume);
 		}
 	}
 
-	private void PlayBuildingDamageSound(BuildingDef def, Vector3 pos)
+	private void PlayBuildingDamageSound(BuildingDef def, Vector3 pos, GameObject building_go)
 	{
 		if (def != null)
 		{
@@ -360,7 +371,8 @@ public class Comet : KMonoBehaviour, ISim33ms
 			}
 			if (text2 != null && CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text2))
 			{
-				KFMOD.PlayOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(pos), 1f);
+				float volume = this.GetVolume(building_go);
+				KFMOD.PlayOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(pos, false), volume);
 			}
 		}
 	}
@@ -421,7 +433,8 @@ public class Comet : KMonoBehaviour, ISim33ms
 		string sound = GlobalAssets.GetSound(this.impactSound, false);
 		if (CameraController.Instance.IsAudibleSound(pos, sound))
 		{
-			EventInstance eventInstance = KFMOD.BeginOneShot(sound, pos, 1f);
+			float volume = this.GetVolume(base.gameObject);
+			EventInstance eventInstance = KFMOD.BeginOneShot(sound, pos, volume);
 			eventInstance.setParameterValue("userVolume_SFX", KPlayerPrefs.GetFloat("Volume_SFX"));
 			KFMOD.EndOneShot(eventInstance);
 		}

@@ -18,6 +18,10 @@ namespace TUNING
 
 		public const string PRECIOUSROCK = "PreciousRock";
 
+		public const string WOOD = "BuildingWood";
+
+		public const string BUILDINGFIBER = "BuildingFiber";
+
 		public static readonly string[] ALL_METALS = new string[] { "Metal" };
 
 		public static readonly string[] RAW_METALS = new string[] { "Metal" };

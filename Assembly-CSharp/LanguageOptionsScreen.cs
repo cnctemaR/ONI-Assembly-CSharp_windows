@@ -518,7 +518,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 
 		public static void Set(PublishedFileId_t item, global::System.DateTime lastModified)
 		{
-			YamlIO.Save<LanguageOptionsScreen.InstalledLanguageData>(new LanguageOptionsScreen.InstalledLanguageData
+			YamlIO.SaveOrWarnUser<LanguageOptionsScreen.InstalledLanguageData>(new LanguageOptionsScreen.InstalledLanguageData
 			{
 				PublishedFileId = item.m_PublishedFileId,
 				LastModified = lastModified.ToFileTimeUtc()

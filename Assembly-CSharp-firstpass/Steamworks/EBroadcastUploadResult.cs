@@ -17,6 +17,16 @@ namespace Steamworks
 		k_EBroadcastUploadResultSettingsChanged,
 		k_EBroadcastUploadResultMissingAudio,
 		k_EBroadcastUploadResultTooFarBehind,
-		k_EBroadcastUploadResultTranscodeBehind
+		k_EBroadcastUploadResultTranscodeBehind,
+		k_EBroadcastUploadResultNotAllowedToPlay,
+		k_EBroadcastUploadResultBusy,
+		k_EBroadcastUploadResultBanned,
+		k_EBroadcastUploadResultAlreadyActive,
+		k_EBroadcastUploadResultForcedOff,
+		k_EBroadcastUploadResultAudioBehind,
+		k_EBroadcastUploadResultShutdown,
+		k_EBroadcastUploadResultDisconnect,
+		k_EBroadcastUploadResultVideoInitFailed,
+		k_EBroadcastUploadResultAudioInitFailed
 	}
 }

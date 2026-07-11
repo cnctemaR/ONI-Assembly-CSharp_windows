@@ -67,6 +67,7 @@ public class OxidizerTankLiquidConfig : IBuildingConfig
 		});
 		OxidizerTank oxidizerTank = go.AddOrGet<OxidizerTank>();
 		oxidizerTank.storage = storage;
+		go.AddOrGet<CopyBuildingSettings>();
 		go.AddOrGet<DropToUserCapacity>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;

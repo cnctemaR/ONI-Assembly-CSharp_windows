@@ -23,8 +23,10 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectD
 			int num = Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]);
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("PhonoboxWorkable", vector);
+			KSelectable kselectable = gameObject.AddOrGet<KSelectable>();
+			kselectable.SetName(this.GetProperName());
+			kselectable.IsSelectable = false;
 			PhonoboxWorkable phonoboxWorkable = gameObject.AddOrGet<PhonoboxWorkable>();
-			phonoboxWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Dancing);
 			phonoboxWorkable.owner = this;
 			this.workables[i] = phonoboxWorkable;
 		}

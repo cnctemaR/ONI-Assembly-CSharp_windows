@@ -1387,6 +1387,8 @@ public class BuildingDef : Def
 		return this.OutputConduitType == ConduitType.Solid;
 	}
 
+	public string DlcId;
+
 	public float EnergyConsumptionWhenActive;
 
 	public float GeneratorWattageRating;
@@ -1591,8 +1593,6 @@ public class BuildingDef : Def
 	public int BaseNoisePollution;
 
 	public int BaseNoisePollutionRadius;
-
-	public BuildingDef[] Enables;
 
 	private static Dictionary<CellOffset, CellOffset[]> placementOffsetsCache = new Dictionary<CellOffset, CellOffset[]>();
 }

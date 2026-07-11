@@ -94,8 +94,9 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		float num = 1f + Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
-		this.elementConverter.SetWorkSpeedMultiplier(num);
+		float num = ((!this.currentlyLit) ? 1f : (1f + DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS));
+		float num2 = 1f + Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate() + num;
+		this.elementConverter.SetWorkSpeedMultiplier(num2);
 		return base.OnWorkTick(worker, dt);
 	}
 

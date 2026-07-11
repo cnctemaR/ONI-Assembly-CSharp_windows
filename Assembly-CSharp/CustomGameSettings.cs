@@ -141,13 +141,13 @@ public class CustomGameSettings : KMonoBehaviour
 	public SettingLevel GetCurrentQualitySetting(string setting_id)
 	{
 		SettingConfig settingConfig = this.QualitySettings[setting_id];
-		if (this.customGameMode == CustomGameSettings.CustomGameMode.Survival)
+		if (this.customGameMode == CustomGameSettings.CustomGameMode.Survival && settingConfig.triggers_custom_game)
 		{
-			return (!settingConfig.triggers_custom_game) ? settingConfig.GetLevel(this.CurrentQualityLevelsBySetting[setting_id]) : settingConfig.GetLevel(settingConfig.default_level_id);
+			return settingConfig.GetLevel(settingConfig.default_level_id);
 		}
-		if (this.customGameMode == CustomGameSettings.CustomGameMode.Nosweat)
+		if (this.customGameMode == CustomGameSettings.CustomGameMode.Nosweat && settingConfig.triggers_custom_game)
 		{
-			return (!settingConfig.triggers_custom_game) ? settingConfig.GetLevel(this.CurrentQualityLevelsBySetting[setting_id]) : settingConfig.GetLevel(settingConfig.nosweat_default_level_id);
+			return settingConfig.GetLevel(settingConfig.nosweat_default_level_id);
 		}
 		if (!this.CurrentQualityLevelsBySetting.ContainsKey(setting_id))
 		{

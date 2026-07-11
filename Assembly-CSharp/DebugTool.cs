@@ -91,6 +91,9 @@ public class DebugTool : DragTool
 			case DebugTool.Type.Sample:
 				DebugPaintElementScreen.Instance.SampleCell(cell);
 				break;
+			case DebugTool.Type.StoreSubstance:
+				this.DoStoreSubstance(cell);
+				break;
 			}
 		}
 	}
@@ -217,6 +220,53 @@ public class DebugTool : DragTool
 		pooledList.Recycle();
 	}
 
+	public void DoStoreSubstance(int cell)
+	{
+		if (!Grid.IsValidBuildingCell(cell))
+		{
+			return;
+		}
+		GameObject gameObject = Grid.Objects[cell, 1];
+		if (gameObject == null)
+		{
+			return;
+		}
+		Storage component = gameObject.GetComponent<Storage>();
+		if (component == null)
+		{
+			return;
+		}
+		Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.ElementIdx[cell]] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
+		if (element == null)
+		{
+			element = ElementLoader.FindElementByHash(SimHashes.Vacuum);
+		}
+		byte b = ((!DebugPaintElementScreen.Instance.paintDisease.isOn) ? Grid.DiseaseIdx[cell] : DebugPaintElementScreen.Instance.diseaseIdx);
+		float num = ((!DebugPaintElementScreen.Instance.paintTemperature.isOn) ? element.defaultValues.temperature : DebugPaintElementScreen.Instance.temperature);
+		float num2 = ((!DebugPaintElementScreen.Instance.paintMass.isOn) ? element.defaultValues.mass : DebugPaintElementScreen.Instance.mass);
+		if (num == -1f)
+		{
+			num = element.defaultValues.temperature;
+		}
+		if (num2 == -1f)
+		{
+			num2 = element.defaultValues.mass;
+		}
+		int num3 = ((!DebugPaintElementScreen.Instance.paintDiseaseCount.isOn) ? 0 : DebugPaintElementScreen.Instance.diseaseCount);
+		if (element.IsGas)
+		{
+			component.AddGasChunk(element.id, num2, num, b, num3, false, true);
+		}
+		else if (element.IsLiquid)
+		{
+			component.AddLiquid(element.id, num2, num, b, num3, false, true);
+		}
+		else if (element.IsSolid)
+		{
+			component.AddOre(element.id, num2, num, b, num3, false, true);
+		}
+	}
+
 	public static DebugTool Instance;
 
 	public DebugTool.Type type;
@@ -236,6 +286,7 @@ public class DebugTool : DragTool
 		RemoveSelection,
 		Deconstruct,
 		Destroy,
-		Sample
+		Sample,
+		StoreSubstance
 	}
 }

@@ -36,6 +36,8 @@ public class MetricsOptionsScreen : KModalScreen
 	{
 		KPrivacyPrefs.instance.disableDataCollection = !KPrivacyPrefs.instance.disableDataCollection;
 		KPrivacyPrefs.Save();
+		KPlayerPrefs.SetString("DisableDataCollection", (!KPrivacyPrefs.instance.disableDataCollection) ? "no" : "yes");
+		KPlayerPrefs.Save();
 		ThreadedHttps<KleiMetrics>.Instance.SetEnabled(!KPrivacyPrefs.instance.disableDataCollection);
 		this.enableButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
 	}

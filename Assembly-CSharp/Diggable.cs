@@ -35,8 +35,8 @@ public class Diggable : Workable
 		this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		this.multitoolContext = "dig";
 		this.multitoolHitEffectTag = "fx_dig_splash";
-		this.workingPstComplete = HashedString.Invalid;
-		this.workingPstFailed = HashedString.Invalid;
+		this.workingPstComplete = null;
+		this.workingPstFailed = null;
 		Prioritizable.AddRef(base.gameObject);
 	}
 
@@ -236,20 +236,32 @@ public class Diggable : Workable
 		}
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		float approximateDigTime = Diggable.GetApproximateDigTime(Grid.PosToCell(this));
+		worker.Work(approximateDigTime);
+		return true;
+	}
+
 	public static void DoDigTick(int cell, float dt)
+	{
+		float approximateDigTime = Diggable.GetApproximateDigTime(cell);
+		float num = dt / approximateDigTime;
+		WorldDamage.Instance.ApplyDamage(cell, num, -1, -1, null, null);
+	}
+
+	public static float GetApproximateDigTime(int cell)
 	{
 		float num = (float)Grid.Element[cell].hardness;
 		if (num == 255f)
 		{
-			return;
+			return float.MaxValue;
 		}
 		Element element = ElementLoader.FindElementByHash(SimHashes.Ice);
 		float num2 = num / (float)element.hardness;
 		float num3 = Mathf.Min(Grid.Mass[cell], 400f) / 400f;
 		float num4 = 4f * num3;
-		float num5 = num4 + num2 * num4;
-		float num6 = dt / num5;
-		WorldDamage.Instance.ApplyDamage(cell, num6, -1, -1, null, null);
+		return num4 + num2 * num4;
 	}
 
 	public static Diggable GetDiggable(int cell)

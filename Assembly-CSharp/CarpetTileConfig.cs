@@ -17,11 +17,7 @@ public class CarpetTileConfig : IBuildingConfig
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, new EffectorValues
-		{
-			amount = 10,
-			radius = 1
-		}, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER3, none, 0.2f);
 		BuildingTemplates.CreateFoundationTileDef(buildingDef);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -47,6 +43,7 @@ public class CarpetTileConfig : IBuildingConfig
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
+		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.PENALTY_2;
 		go.AddOrGet<TileTemperature>();
 		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
 		kanimGridTileVisualizer.blockTileConnectorID = CarpetTileConfig.BlockTileConnectorID;
@@ -58,6 +55,7 @@ public class CarpetTileConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RemoveLoopingSounds(go);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.FloorTiles, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Carpeted, false);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

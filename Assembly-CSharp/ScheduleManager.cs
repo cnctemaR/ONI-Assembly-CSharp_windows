@@ -75,6 +75,14 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 		}
 	}
 
+	public void OnStoredDupeDestroyed(StoredMinionIdentity dupe)
+	{
+		foreach (Schedule schedule in this.schedules)
+		{
+			schedule.Unassign(dupe.gameObject.GetComponent<Schedulable>());
+		}
+	}
+
 	private void SetupDefaultSchedule()
 	{
 		this.AddSchedule(Db.Get().ScheduleGroups.allGroups, UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT, true);

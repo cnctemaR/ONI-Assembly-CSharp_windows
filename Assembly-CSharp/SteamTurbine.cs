@@ -137,8 +137,8 @@ public class SteamTurbine : Generator
 	private static string ResolveWattageStatus(string str, object data)
 	{
 		SteamTurbine steamTurbine = (SteamTurbine)data;
-		float num = Game.Instance.accumulators.GetAverageRate(steamTurbine.accumulator) / steamTurbine.maxWattage;
-		return str.Replace("{Wattage}", GameUtil.GetFormattedWattage(steamTurbine.CurrentWattage, GameUtil.WattageFormatterUnit.Automatic)).Replace("{Max_Wattage}", GameUtil.GetFormattedWattage(steamTurbine.maxWattage, GameUtil.WattageFormatterUnit.Automatic)).Replace("{Efficiency}", GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None))
+		float num = Game.Instance.accumulators.GetAverageRate(steamTurbine.accumulator) / steamTurbine.WattageRating;
+		return str.Replace("{Wattage}", GameUtil.GetFormattedWattage(steamTurbine.CurrentWattage, GameUtil.WattageFormatterUnit.Automatic)).Replace("{Max_Wattage}", GameUtil.GetFormattedWattage(steamTurbine.WattageRating, GameUtil.WattageFormatterUnit.Automatic)).Replace("{Efficiency}", GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None))
 			.Replace("{Src_Element}", ElementLoader.FindElementByHash(steamTurbine.srcElem).name);
 	}
 
@@ -186,7 +186,7 @@ public class SteamTurbine : Generator
 				{
 					num2 = Mathf.Min(component.Mass, this.pumpKGRate * dt);
 					float num3 = this.JoulesToGenerate(component);
-					num = Mathf.Min(num3 * (num2 / this.pumpKGRate), this.maxWattage * dt);
+					num = Mathf.Min(num3 * (num2 / this.pumpKGRate), base.WattageRating * dt);
 					float num4 = this.HeatFromCoolingSteam(component);
 					float num5 = num4 * (num2 / component.Mass);
 					float num6 = num2 / component.Mass;
@@ -200,14 +200,14 @@ public class SteamTurbine : Generator
 				}
 			}
 		}
-		num = Mathf.Clamp(num, 0f, this.maxWattage);
+		num = Mathf.Clamp(num, 0f, base.WattageRating);
 		Game.Instance.accumulators.Accumulate(this.accumulator, num);
 		if (num > 0f)
 		{
 			base.GenerateJoules(num, false);
 		}
-		this.meter.SetPositionPercent(Game.Instance.accumulators.GetAverageRate(this.accumulator) / this.maxWattage);
-		this.meter.SetSymbolTint(SteamTurbine.TINT_SYMBOL, Color.Lerp(Color.red, Color.green, Game.Instance.accumulators.GetAverageRate(this.accumulator) / this.maxWattage));
+		this.meter.SetPositionPercent(Game.Instance.accumulators.GetAverageRate(this.accumulator) / base.WattageRating);
+		this.meter.SetSymbolTint(SteamTurbine.TINT_SYMBOL, Color.Lerp(Color.red, Color.green, Game.Instance.accumulators.GetAverageRate(this.accumulator) / base.WattageRating));
 	}
 
 	public float HeatFromCoolingSteam(PrimaryElement steam)
@@ -220,7 +220,7 @@ public class SteamTurbine : Generator
 	{
 		float temperature = steam.Temperature;
 		float num = (temperature - this.outputElementTemperature) / (this.idealSourceElementTemperature - this.outputElementTemperature);
-		return this.maxWattage * (float)Math.Pow((double)num, 1.0);
+		return base.WattageRating * (float)Math.Pow((double)num, 1.0);
 	}
 
 	public float CurrentWattage
@@ -246,8 +246,6 @@ public class SteamTurbine : Generator
 	public float maxBuildingTemperature = 373.15f;
 
 	public float outputElementTemperature = 368.15f;
-
-	public float maxWattage = 850f;
 
 	public float minConvertMass;
 

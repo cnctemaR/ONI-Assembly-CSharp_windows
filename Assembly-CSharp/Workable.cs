@@ -65,7 +65,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return this.workAnimPlayMode;
 	}
 
-	public virtual HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
+	public virtual HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
 	{
 		if (successfully_completed)
 		{
@@ -169,6 +169,14 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStarted);
 		}
 		this.numberOfUses++;
+		if (base.gameObject.GetComponent<KSelectable>() != null && base.gameObject.GetComponent<KSelectable>().IsSelected && this.worker.gameObject.GetComponent<LoopingSounds>() != null)
+		{
+			this.worker.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
+		}
+		else if (this.worker.gameObject.GetComponent<KSelectable>() != null && this.worker.gameObject.GetComponent<KSelectable>().IsSelected && base.gameObject.GetComponent<LoopingSounds>() != null)
+		{
+			base.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
+		}
 	}
 
 	public bool WorkTick(Worker worker, float dt)
@@ -198,15 +206,20 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 				int num3 = Grid.LightIntensity[num2];
 				if (num3 > 0)
 				{
+					this.currentlyLit = true;
 					num += DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS;
 					if (this.lightEfficiencyBonusStatusItemHandle == Guid.Empty)
 					{
 						this.lightEfficiencyBonusStatusItemHandle = worker.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.LightWorkEfficiencyBonus, this);
 					}
 				}
-				else if (this.lightEfficiencyBonusStatusItemHandle != Guid.Empty)
+				else
 				{
-					worker.GetComponent<KSelectable>().RemoveStatusItem(this.lightEfficiencyBonusStatusItemHandle, false);
+					this.currentlyLit = false;
+					if (this.lightEfficiencyBonusStatusItemHandle != Guid.Empty)
+					{
+						worker.GetComponent<KSelectable>().RemoveStatusItem(this.lightEfficiencyBonusStatusItemHandle, false);
+					}
 				}
 			}
 		}
@@ -271,6 +284,14 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		if (this.lightEfficiencyBonusStatusItemHandle != Guid.Empty)
 		{
 			this.lightEfficiencyBonusStatusItemHandle = workerToStop.GetComponent<KSelectable>().RemoveStatusItem(this.lightEfficiencyBonusStatusItemHandle, false);
+		}
+		if (base.gameObject.GetComponent<KSelectable>() != null && !base.gameObject.GetComponent<KSelectable>().IsSelected && base.gameObject.GetComponent<LoopingSounds>() != null)
+		{
+			base.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(false);
+		}
+		else if (workerToStop.gameObject.GetComponent<KSelectable>() != null && !workerToStop.gameObject.GetComponent<KSelectable>().IsSelected && workerToStop.gameObject.GetComponent<LoopingSounds>() != null)
+		{
+			workerToStop.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(false);
 		}
 		this.worker = null;
 		this.UpdateStatusItem(null);
@@ -478,6 +499,18 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 	}
 
+	public virtual bool InstantlyFinish(Worker worker)
+	{
+		float num = worker.workable.WorkTimeRemaining;
+		if (!float.IsInfinity(num))
+		{
+			worker.Work(num);
+			return true;
+		}
+		DebugUtil.DevAssert(false, this.ToString() + " was asked to instantly finish but it has infinite work time! Override InstantlyFinish in your workable!");
+		return false;
+	}
+
 	public virtual List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -516,6 +549,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected StatusItem lightEfficiencyBonusStatusItem;
 
 	protected Guid lightEfficiencyBonusStatusItemHandle;
+
+	public bool currentlyLit;
 
 	protected StatusItem workerStatusItem;
 
@@ -590,9 +625,9 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public HashedString[] workAnims = new HashedString[] { "working_pre", "working_loop" };
 
-	public HashedString workingPstComplete = "working_pst";
+	public HashedString[] workingPstComplete = new HashedString[] { "working_pst" };
 
-	public HashedString workingPstFailed = "working_pst";
+	public HashedString[] workingPstFailed = new HashedString[] { "working_pst" };
 
 	public KAnim.PlayMode workAnimPlayMode;
 

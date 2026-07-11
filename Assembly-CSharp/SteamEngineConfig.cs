@@ -71,6 +71,7 @@ public class SteamEngineConfig : IBuildingConfig
 			Storage.StoredItemModifier.Seal,
 			Storage.StoredItemModifier.Insulate
 		});
+		go.AddOrGet<CopyBuildingSettings>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 10f;

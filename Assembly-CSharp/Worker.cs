@@ -60,7 +60,8 @@ public class Worker : KMonoBehaviour
 	{
 		if (this.state == Worker.State.PendingCompletion)
 		{
-			if (!base.GetComponent<KAnimControllerBase>().IsStopped() && Time.time - this.workPendingCompletionTime <= 4f / Mathf.Max(Time.timeScale, 1f))
+			bool flag = Time.time - this.workPendingCompletionTime > 10f;
+			if (!base.GetComponent<KAnimControllerBase>().IsStopped() && !flag)
 			{
 				return Worker.WorkResult.InProgress;
 			}
@@ -96,9 +97,9 @@ public class Worker : KMonoBehaviour
 						else
 						{
 							Rotatable component2 = this.workable.GetComponent<Rotatable>();
-							bool flag = component2 != null && component2.GetOrientation() == Orientation.FlipH;
+							bool flag2 = component2 != null && component2.GetOrientation() == Orientation.FlipH;
 							Vector3 vector = this.facing.transform.GetPosition();
-							vector += ((!flag) ? Vector3.right : Vector3.left);
+							vector += ((!flag2) ? Vector3.right : Vector3.left);
 							this.facing.Face(vector);
 						}
 					}
@@ -144,25 +145,28 @@ public class Worker : KMonoBehaviour
 		this.state = Worker.State.PendingCompletion;
 		this.workPendingCompletionTime = Time.time;
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		HashedString workPstAnim = this.workable.GetWorkPstAnim(this, this.successFullyCompleted);
-		if (workPstAnim.IsValid)
+		HashedString[] workPstAnims = this.workable.GetWorkPstAnims(this, this.successFullyCompleted);
+		if (this.smi == null)
 		{
-			if (this.workable != null && this.workable.synchronizeAnims)
+			if (workPstAnims != null && workPstAnims.Length > 0)
 			{
-				KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
-				if (component2 != null && component2.HasAnimation(workPstAnim))
+				if (this.workable != null && this.workable.synchronizeAnims)
 				{
-					component2.Play(workPstAnim, KAnim.PlayMode.Once, 1f, 0f);
+					KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
+					if (component2 != null)
+					{
+						component2.Play(workPstAnims, KAnim.PlayMode.Once);
+					}
+				}
+				else
+				{
+					component.Play(workPstAnims, KAnim.PlayMode.Once);
 				}
 			}
 			else
 			{
-				component.Play(workPstAnim, KAnim.PlayMode.Once, 1f, 0f);
+				this.state = Worker.State.Completing;
 			}
-		}
-		else
-		{
-			this.state = Worker.State.Completing;
 		}
 		base.Trigger(-1142962013, this);
 	}
@@ -243,10 +247,10 @@ public class Worker : KMonoBehaviour
 				KBatchedAnimController component = this.workable.GetComponent<KBatchedAnimController>();
 				if (component != null)
 				{
-					HashedString workPstAnim = this.workable.GetWorkPstAnim(this, false);
-					if (workPstAnim.IsValid)
+					HashedString[] workPstAnims = this.workable.GetWorkPstAnims(this, false);
+					if (workPstAnims != null)
 					{
-						component.Play(workPstAnim, KAnim.PlayMode.Once, 1f, 0f);
+						component.Play(workPstAnims, KAnim.PlayMode.Once);
 						component.SetPositionPercent(1f);
 					}
 				}
@@ -280,6 +284,7 @@ public class Worker : KMonoBehaviour
 		{
 			base.gameObject.AddTag(GameTags.PerformingWorkRequest);
 			this.state = Worker.State.Working;
+			base.gameObject.Trigger(1568504979, this);
 			if (this.workable != null)
 			{
 				this.animInfo = this.workable.GetAnim(this);
@@ -345,6 +350,11 @@ public class Worker : KMonoBehaviour
 			DebugUtil.LogErrorArgs(this, new object[] { text2 + "\n" + ex.ToString() });
 			throw;
 		}
+	}
+
+	public bool InstantlyFinish()
+	{
+		return this.workable != null && this.workable.InstantlyFinish(this);
 	}
 
 	private void AttachOverrideAnims(KAnimControllerBase worker_controller)

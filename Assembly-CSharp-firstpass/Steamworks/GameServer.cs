@@ -12,6 +12,10 @@ namespace Steamworks
 			{
 				flag = NativeMethods.SteamGameServer_Init(unIP, usSteamPort, usGamePort, usQueryPort, eServerMode, utf8StringHandle);
 			}
+			if (flag)
+			{
+				flag = CSteamGameServerAPIContext.Init();
+			}
 			return flag;
 		}
 
@@ -19,6 +23,7 @@ namespace Steamworks
 		{
 			InteropHelp.TestIfPlatformSupported();
 			NativeMethods.SteamGameServer_Shutdown();
+			CSteamGameServerAPIContext.Clear();
 		}
 
 		public static void RunCallbacks()

@@ -97,9 +97,9 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 		{
 			this.Activate();
 		}
-		if (this.ConsumeMouseScroll && !this.activateOnSpawn)
+		if (this.ConsumeMouseScroll && !this.IsActive())
 		{
-			global::Debug.LogWarning("ConsumeMouseScroll is true on" + base.gameObject.name + " , but activateOnSpawn is disabled. Mouse scrolling might not work properly on this screen.");
+			global::Debug.LogWarning("ConsumeMouseScroll is true on" + base.gameObject.name + " , but screen has not been activated. Mouse scrolling might not work properly on this screen.");
 		}
 	}
 

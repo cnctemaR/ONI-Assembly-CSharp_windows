@@ -17,7 +17,7 @@ public class SuitEquipper : KMonoBehaviour
 		{
 			EquipmentSlotInstance equipmentSlotInstance = (EquipmentSlotInstance)assignableSlotInstance;
 			Equippable equippable = equipmentSlotInstance.assignable as Equippable;
-			if (equippable)
+			if (equippable && equippable.unequippable)
 			{
 				string text = string.Format(UI.USERMENUACTIONS.UNEQUIP.NAME, equippable.def.GenericName);
 				Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("iconDown", text, delegate

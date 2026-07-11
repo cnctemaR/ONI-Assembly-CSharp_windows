@@ -1,0 +1,87 @@
+﻿using System;
+using Klei.AI;
+using TUNING;
+
+public class VerticalWindTunnelWorkable : Workable, IWorkerPrioritizable
+{
+	private VerticalWindTunnelWorkable()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+	}
+
+	public override HashedString[] GetWorkAnims(Worker worker)
+	{
+		Attributes attributes = worker.GetAttributes();
+		AttributeInstance attributeInstance = attributes.Get(Db.Get().Attributes.Athletics);
+		if (attributeInstance.GetTotalValue() <= 12f)
+		{
+			return this.windTunnel.workAnims[0];
+		}
+		if (attributeInstance.GetTotalValue() <= 20f)
+		{
+			return this.windTunnel.workAnims[1];
+		}
+		return this.windTunnel.workAnims[2];
+	}
+
+	public override HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
+	{
+		Attributes attributes = worker.GetAttributes();
+		AttributeInstance attributeInstance = attributes.Get(Db.Get().Attributes.Athletics);
+		if (attributeInstance.GetTotalValue() <= 12f)
+		{
+			return this.windTunnel.workPstAnims[0];
+		}
+		if (attributeInstance.GetTotalValue() <= 20f)
+		{
+			return this.windTunnel.workPstAnims[1];
+		}
+		return this.windTunnel.workPstAnims[2];
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.synchronizeAnims = false;
+		this.showProgressBar = true;
+		this.resetProgressOnStop = true;
+		base.SetWorkTime(90f);
+	}
+
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		worker.GetComponent<Effects>().Add("VerticalWindTunnelFlying", false);
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		worker.GetComponent<Effects>().Remove("VerticalWindTunnelFlying");
+	}
+
+	protected override void OnCompleteWork(Worker worker)
+	{
+		Effects component = worker.GetComponent<Effects>();
+		component.Add(this.windTunnel.trackingEffect, true);
+		component.Add(this.windTunnel.specificEffect, true);
+	}
+
+	public bool GetWorkerPriority(Worker worker, out int priority)
+	{
+		priority = this.windTunnel.basePriority;
+		Effects component = worker.GetComponent<Effects>();
+		if (component.HasEffect(this.windTunnel.trackingEffect))
+		{
+			priority = 0;
+			return false;
+		}
+		if (component.HasEffect(this.windTunnel.specificEffect))
+		{
+			priority = RELAXATION.PRIORITY.RECENTLY_USED;
+		}
+		return true;
+	}
+
+	public VerticalWindTunnel windTunnel;
+}

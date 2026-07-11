@@ -7,6 +7,7 @@ namespace Steamworks
 		k_ELobbyTypePrivate,
 		k_ELobbyTypeFriendsOnly,
 		k_ELobbyTypePublic,
-		k_ELobbyTypeInvisible
+		k_ELobbyTypeInvisible,
+		k_ELobbyTypePrivateUnique
 	}
 }

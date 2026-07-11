@@ -829,7 +829,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 372041U;
+		uint num = 381414U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1125,6 +1125,7 @@ public class Game : KMonoBehaviour
 		{
 			yield return null;
 		}
+		PlayerController.Instance.AllowDragging(false);
 		for (int i = 0; i < 1; i++)
 		{
 			yield return null;
@@ -1142,6 +1143,11 @@ public class Game : KMonoBehaviour
 		{
 			this.activatePostCB();
 		}
+		for (int k = 0; k < 5; k++)
+		{
+			yield return null;
+		}
+		PlayerController.Instance.AllowDragging(true);
 		yield break;
 	}
 

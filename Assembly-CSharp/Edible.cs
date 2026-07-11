@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class Edible : Workable, IGameObjectEffectDescriptor
@@ -90,7 +91,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		return (!flag) ? Edible.normalWorkAnims : Edible.saltWorkAnims;
 	}
 
-	public override HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
+	public override HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
 	{
 		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
 		bool flag = smi != null && smi.UseSalt();
@@ -123,32 +124,83 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	protected override void OnStartWork(Worker worker)
 	{
-		base.SetWorkTime(this.GetFeedingTime(worker));
-		worker.GetAttributes().Add(this.caloriesModifier);
+		this.totalFeedingTime = this.GetFeedingTime(worker);
+		base.SetWorkTime(this.totalFeedingTime);
+		this.caloriesConsumed = 0f;
+		this.unitsConsumed = 0f;
+		this.totalUnits = this.Units;
 		KPrefabID component = worker.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.AlwaysConverse, false);
+		this.totalConsumableCalories = this.Units * this.foodInfo.CaloriesPerUnit;
 		this.StartConsuming();
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		this.consumptionTime += dt;
-		return false;
+		if (this.currentlyLit)
+		{
+			if (this.currentModifier != this.caloriesLitSpaceModifier)
+			{
+				worker.GetAttributes().Remove(this.currentModifier);
+				worker.GetAttributes().Add(this.caloriesLitSpaceModifier);
+				this.currentModifier = this.caloriesLitSpaceModifier;
+			}
+		}
+		else if (this.currentModifier != this.caloriesModifier)
+		{
+			worker.GetAttributes().Remove(this.currentModifier);
+			worker.GetAttributes().Add(this.caloriesModifier);
+			this.currentModifier = this.caloriesModifier;
+		}
+		return this.OnTickConsume(worker, dt);
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
-		worker.GetAttributes().Remove(this.caloriesModifier);
+		if (this.currentModifier != null)
+		{
+			worker.GetAttributes().Remove(this.currentModifier);
+			this.currentModifier = null;
+		}
 		KPrefabID component = worker.GetComponent<KPrefabID>();
 		component.RemoveTag(GameTags.AlwaysConverse);
 		this.StopConsuming(worker);
+	}
+
+	private bool OnTickConsume(Worker worker, float dt)
+	{
+		bool flag = false;
+		float num = dt / this.totalFeedingTime;
+		float num2 = num * this.totalConsumableCalories;
+		if (this.caloriesConsumed + num2 > this.totalConsumableCalories)
+		{
+			num2 = this.totalConsumableCalories - this.caloriesConsumed;
+		}
+		this.caloriesConsumed += num2;
+		worker.GetAmounts().Get("Calories").value += num2;
+		float num3 = this.totalUnits * num;
+		if (this.Units - num3 < 0f)
+		{
+			num3 = this.Units;
+		}
+		this.Units -= num3;
+		this.unitsConsumed += num3;
+		if (float.IsNaN(this.unitsConsumed))
+		{
+			KCrashReporter.Assert(false, "Why is unitsConsumed NaN?");
+			this.unitsConsumed = this.Units;
+		}
+		if (this.Units <= 0f)
+		{
+			flag = true;
+		}
+		return flag;
 	}
 
 	private void StartConsuming()
 	{
 		DebugUtil.DevAssert(!this.isBeingConsumed, "Can't StartConsuming()...we've already started");
 		this.isBeingConsumed = true;
-		this.consumptionTime = 0f;
 		base.worker.Trigger(1406130139, this);
 	}
 
@@ -156,25 +208,11 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	{
 		DebugUtil.DevAssert(this.isBeingConsumed, "StopConsuming() called without StartConsuming()");
 		this.isBeingConsumed = false;
-		if (float.IsNaN(this.consumptionTime))
-		{
-			DebugUtil.DevAssert(false, "consumptionTime NaN in StopConsuming()");
-			return;
-		}
 		PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
 		if (component != null && component.DiseaseCount > 0)
 		{
 			new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_contaminated_food_kanim", new HashedString[] { "react" }, null);
 		}
-		float num = Mathf.Clamp01(this.consumptionTime / this.GetFeedingTime(worker));
-		this.unitsConsumed = this.Units * num;
-		if (float.IsNaN(this.unitsConsumed))
-		{
-			KCrashReporter.Assert(false, "Why is unitsConsumed NaN?");
-			this.unitsConsumed = this.Units;
-		}
-		this.caloriesConsumed = this.unitsConsumed * this.foodInfo.CaloriesPerUnit;
-		this.Units -= this.unitsConsumed;
 		for (int i = 0; i < this.foodInfo.Effects.Count; i++)
 		{
 			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);
@@ -185,7 +223,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		base.Trigger(-10536414, worker.gameObject);
 		this.unitsConsumed = float.NaN;
 		this.caloriesConsumed = float.NaN;
-		this.consumptionTime = float.NaN;
+		this.totalUnits = float.NaN;
 		if (this.Units <= 0f)
 		{
 			base.gameObject.DeleteObject();
@@ -236,13 +274,21 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private EdiblesManager.FoodInfo foodInfo;
 
-	private float consumptionTime = float.NaN;
-
 	public float unitsConsumed = float.NaN;
 
 	public float caloriesConsumed = float.NaN;
 
-	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, false, true);
+	private float totalFeedingTime = float.NaN;
+
+	private float totalUnits = float.NaN;
+
+	private float totalConsumableCalories = float.NaN;
+
+	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
+
+	private AttributeModifier caloriesLitSpaceModifier = new AttributeModifier("CaloriesDelta", (1f + DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS) / 2E-05f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
+
+	private AttributeModifier currentModifier;
 
 	private static readonly EventSystem.IntraObjectHandler<Edible> OnCraftDelegate = new EventSystem.IntraObjectHandler<Edible>(delegate(Edible component, object data)
 	{
@@ -257,13 +303,13 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private static readonly HashedString[] saltHatWorkAnims = new HashedString[] { "salt_hat_pre", "salt_hat_loop" };
 
-	private static readonly HashedString normalWorkPstAnim = "working_pst";
+	private static readonly HashedString[] normalWorkPstAnim = new HashedString[] { "working_pst" };
 
-	private static readonly HashedString hatWorkPstAnim = "hat_pst";
+	private static readonly HashedString[] hatWorkPstAnim = new HashedString[] { "hat_pst" };
 
-	private static readonly HashedString saltWorkPstAnim = "salt_pst";
+	private static readonly HashedString[] saltWorkPstAnim = new HashedString[] { "salt_pst" };
 
-	private static readonly HashedString saltHatWorkPstAnim = "salt_hat_pst";
+	private static readonly HashedString[] saltHatWorkPstAnim = new HashedString[] { "salt_hat_pst" };
 
 	private static Dictionary<int, string> qualityEffects = new Dictionary<int, string>
 	{

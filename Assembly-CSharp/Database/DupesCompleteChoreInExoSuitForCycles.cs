@@ -15,31 +15,29 @@ namespace Database
 		public override bool Success()
 		{
 			Dictionary<int, List<int>> dupesCompleteChoresInSuits = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().dupesCompleteChoresInSuits;
-			if (dupesCompleteChoresInSuits.Count <= this.numCycles)
-			{
-				return false;
-			}
 			Dictionary<int, float> dictionary = new Dictionary<int, float>();
 			foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
 			{
 				dictionary.Add(minionIdentity.GetComponent<KPrefabID>().InstanceID, minionIdentity.arrivalTime);
 			}
 			int num = 0;
-			for (int i = GameClock.Instance.GetCycle() - this.numCycles; i < GameClock.Instance.GetCycle(); i++)
+			int num2 = Math.Min(dupesCompleteChoresInSuits.Count, this.numCycles);
+			for (int i = GameClock.Instance.GetCycle() - num2; i <= GameClock.Instance.GetCycle(); i++)
 			{
 				if (dupesCompleteChoresInSuits.ContainsKey(i))
 				{
 					List<int> list = dictionary.Keys.Except<int>(dupesCompleteChoresInSuits[i]).ToList<int>();
 					bool flag = true;
-					foreach (int num2 in list)
+					foreach (int num3 in list)
 					{
-						if (dictionary[num2] < (float)i)
+						if (dictionary[num3] < (float)i)
 						{
 							flag = false;
 							break;
 						}
 					}
 					num = ((!flag) ? 0 : (num + 1));
+					this.currentCycleStreak = num;
 					if (num >= this.numCycles)
 					{
 						this.currentCycleStreak = this.numCycles;

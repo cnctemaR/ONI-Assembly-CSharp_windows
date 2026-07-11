@@ -81,5 +81,11 @@ public static class Constants
 
 	public const float SPACE_DISTANCE_TO_KILOMETERS = 10000f;
 
+	public const int LOGIC_SOUND_INTERVAL_COUNTER = 2;
+
+	public const float LOGIC_SOUND_VOLUME_COOLDOWN = 5f;
+
 	public const float DEFAULT_SOUND_EVENT_VOLUME = 1f;
+
+	public const float AUDIO_HIGHLIGHT_POSITION_INTENSITY = 0f;
 }

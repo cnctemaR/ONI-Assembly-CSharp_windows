@@ -9,6 +9,10 @@ public class KFMOD
 {
 	public static SoundDescription GetSoundEventDescription(HashedString path)
 	{
+		if (!KFMOD.soundDescriptions.ContainsKey(path))
+		{
+			return default(SoundDescription);
+		}
 		return KFMOD.soundDescriptions[path];
 	}
 
@@ -57,7 +61,7 @@ public class KFMOD
 			}
 			return eventInstance;
 		}
-		Vector3 vector = new Vector3(position.x, position.y, 0f);
+		Vector3 vector = new Vector3(position.x, position.y, position.z);
 		if (KFMODDebugger.instance != null)
 		{
 		}

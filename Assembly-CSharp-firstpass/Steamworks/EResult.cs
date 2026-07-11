@@ -110,6 +110,11 @@ namespace Steamworks
 		k_EResultIPBanned,
 		k_EResultGSLTExpired,
 		k_EResultInsufficientFunds,
-		k_EResultTooManyPending
+		k_EResultTooManyPending,
+		k_EResultNoSiteLicensesFound,
+		k_EResultWGNetworkSendExceeded,
+		k_EResultAccountNotFriends,
+		k_EResultLimitedUserAccount,
+		k_EResultCantRemoveItem
 	}
 }

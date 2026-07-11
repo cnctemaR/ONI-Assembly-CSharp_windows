@@ -36,6 +36,6 @@ public class AchievementEarnedMessage : Message
 	public override void OnClick()
 	{
 		RetireColonyUtility.SaveColonySummaryData();
-		MainMenu.ActivateRetiredColoniesScreen(PauseScreen.Instance.transform.parent.gameObject, SaveGame.Instance.BaseName, null);
+		MainMenu.ActivateRetiredColoniesScreenFromData(PauseScreen.Instance.transform.parent.gameObject, RetireColonyUtility.GetCurrentColonyRetiredColonyData());
 	}
 }

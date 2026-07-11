@@ -26,7 +26,7 @@ public class MainMenu : KScreen
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.RETIREDCOLONIES, delegate
 		{
-			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, string.Empty, null);
+			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, string.Empty);
 		}, 14));
 		if (DistributionPlatform.Initialized)
 		{
@@ -64,7 +64,11 @@ public class MainMenu : KScreen
 				{
 					this.motdImage.sprite = Sprite.Create(response.image_texture, new Rect(0f, 0f, (float)response.image_texture.width, (float)response.image_texture.height), Vector2.zero);
 				}
-				if (this.motdImage.sprite.rect.height != 0f)
+				else
+				{
+					global::Debug.LogWarning("GetMotd failed to return an image texture");
+				}
+				if (this.motdImage.sprite != null && this.motdImage.sprite.rect.height != 0f)
 				{
 					AspectRatioFitter component = this.motdImage.gameObject.GetComponent<AspectRatioFitter>();
 					if (component != null)
@@ -76,6 +80,10 @@ public class MainMenu : KScreen
 					{
 						global::Debug.LogWarning("Missing AspectRatioFitter on MainMenu motd image.");
 					}
+				}
+				else
+				{
+					global::Debug.LogWarning("Cannot resize motd image, missing sprite");
 				}
 				this.motdImageButton.onClick.AddListener(delegate
 				{
@@ -227,7 +235,7 @@ public class MainMenu : KScreen
 		LoadScreen.Instance.gameObject.SetActive(true);
 	}
 
-	public static void ActivateRetiredColoniesScreen(GameObject parent, string colonyID = "", string[] newlyAchieved = null)
+	public static void ActivateRetiredColoniesScreen(GameObject parent, string colonyID = "")
 	{
 		if (RetiredColonyInfoScreen.Instance == null)
 		{
@@ -301,7 +309,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 372041U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 381414U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

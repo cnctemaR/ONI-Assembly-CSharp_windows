@@ -129,6 +129,19 @@ namespace STRINGS
 
 				public static LocString RECIPE_DESC = "Allows Duplicants to breathe while submerged in <style=\"liquid\">Liquid</style>.\n\nDoes not work outside of liquid.";
 			}
+
+			public class EQUIPPABLEBALLOON
+			{
+				public static LocString NAME = UI.FormatAsLink("Balloon Friend", "EQUIPPABLEBALLOON");
+
+				public static LocString DESC = "A floating friend to reassure my Duplicants they are so very, very clever.";
+
+				public static LocString EFFECT = "Gives Duplicants a boost in brain function.\n\nSupplied by Duplicants with the Balloon Artist " + UI.FormatAsLink("Overjoyed", "MORALE") + " response.";
+
+				public static LocString RECIPE_DESC = "Gives Duplicants a boost in brain function.\n\nSupplied by Duplicants with the Balloon Artist " + UI.FormatAsLink("Overjoyed", "MORALE") + " response.";
+
+				public static LocString GENERICNAME = "Balloon Friend";
+			}
 		}
 	}
 }

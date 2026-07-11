@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -8,6 +9,9 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Sim.ConsumedMassInfo> OnElementConsumed;
+
 	public float AverageConsumeRate
 	{
 		get
@@ -127,6 +131,10 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 			{
 				this.consumedTemperature = GameUtil.GetFinalTemperature(consumed_info.temperature, consumed_info.mass, this.consumedTemperature, this.consumedMass);
 				this.consumedMass += consumed_info.mass;
+				if (this.OnElementConsumed != null)
+				{
+					this.OnElementConsumed(consumed_info);
+				}
 			}
 		}
 		Game.Instance.accumulators.Accumulate(this.accumulator, consumed_info.mass);

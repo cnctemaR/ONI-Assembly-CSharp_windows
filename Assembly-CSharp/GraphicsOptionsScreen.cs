@@ -20,13 +20,24 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.doneButton.onClick += this.OnDone;
 		this.closeButton.onClick += this.OnDone;
 		this.doneButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.DONE_BUTTON);
+		bool flag = QualitySettings.GetQualityLevel() == 1;
+		this.lowResToggle.ChangeState((!flag) ? 0 : 1);
+		MultiToggle multiToggle = this.lowResToggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnLowResToggle));
+		this.lowResToggle.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.LOWRES);
 		this.resolutionDropdown.ClearOptions();
 		this.BuildOptions();
+		ScreenResize instance = ScreenResize.Instance;
+		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(delegate
+		{
+			this.BuildOptions();
+			this.resolutionDropdown.options = this.options;
+		}));
 		this.resolutionDropdown.options = this.options;
 		this.resolutionDropdown.onValueChanged.AddListener(new UnityAction<int>(this.OnResolutionChanged));
 		this.fullscreenToggle.ChangeState((!Screen.fullScreen) ? 0 : 1);
-		MultiToggle multiToggle = this.fullscreenToggle;
-		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnFullscreenToggle));
+		MultiToggle multiToggle2 = this.fullscreenToggle;
+		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(this.OnFullscreenToggle));
 		this.fullscreenToggle.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.FULLSCREEN);
 		this.resolutionDropdown.transform.parent.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.RESOLUTION);
 		if (this.fullscreenToggle.CurrentState == 1)
@@ -49,20 +60,42 @@ internal class GraphicsOptionsScreen : KModalScreen
 		};
 	}
 
+	public static void SetSettingsFromPrefs()
+	{
+		GraphicsOptionsScreen.SetResolutionFromPrefs();
+		GraphicsOptionsScreen.SetLowResFromPrefs();
+	}
+
+	public static void SetLowResFromPrefs()
+	{
+		int num = 0;
+		if (KPlayerPrefs.HasKey(GraphicsOptionsScreen.LowResKey))
+		{
+			if (QualitySettings.GetQualityLevel() != num)
+			{
+				num = KPlayerPrefs.GetInt(GraphicsOptionsScreen.LowResKey);
+				QualitySettings.SetQualityLevel(num, true);
+			}
+		}
+		else
+		{
+			QualitySettings.SetQualityLevel(num, true);
+		}
+		DebugUtil.LogArgs(new object[] { string.Format("Low Res Textures? {0}", (num != 1) ? "No" : "Yes") });
+	}
+
 	public static void SetResolutionFromPrefs()
 	{
 		int num = Screen.currentResolution.width;
 		int num2 = Screen.currentResolution.height;
 		int num3 = Screen.currentResolution.refreshRate;
 		bool flag = Screen.fullScreen;
-		DebugUtil.LogArgs(new object[] { string.Format("Starting up with a resolution of {0}x{1} @{2}hz (fullscreen: {3})", new object[] { num, num2, num3, flag }) });
 		if (KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionWidthKey) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionHeightKey))
 		{
 			int @int = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionWidthKey);
 			int int2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
 			int int3 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKey, Screen.currentResolution.refreshRate);
 			bool flag2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, (!Screen.fullScreen) ? 0 : 1) == 1;
-			DebugUtil.LogArgs(new object[] { string.Format("Found player prefs resolution {0}x{1} @{2}hz (fullscreen: {3})", new object[] { @int, int2, int3, flag2 }) });
 			if (int2 <= 1 || @int <= 1)
 			{
 				DebugUtil.LogArgs(new object[] { "Saved resolution was invalid, ignoring..." });
@@ -136,11 +169,13 @@ internal class GraphicsOptionsScreen : KModalScreen
 		settings.resolution.width = Screen.width;
 		settings.resolution.height = Screen.height;
 		settings.fullscreen = Screen.fullScreen;
-		GraphicsOptionsScreen.SaveResolutionToPrefs(settings);
+		settings.lowRes = QualitySettings.GetQualityLevel();
+		GraphicsOptionsScreen.SaveSettingsToPrefs(settings);
 	}
 
-	private static void SaveResolutionToPrefs(GraphicsOptionsScreen.Settings settings)
+	private static void SaveSettingsToPrefs(GraphicsOptionsScreen.Settings settings)
 	{
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.LowResKey, settings.lowRes);
 		global::Debug.LogFormat("Screen resolution updated, saving values to prefs: {0}x{1} @ {2}, fullscreen: {3}", new object[]
 		{
 			settings.resolution.width,
@@ -191,12 +226,18 @@ internal class GraphicsOptionsScreen : KModalScreen
 	{
 		this.options.Clear();
 		this.resolutions.Clear();
-		foreach (Resolution resolution in Screen.resolutions)
+		Resolution resolution = default(Resolution);
+		resolution.width = Screen.width;
+		resolution.height = Screen.height;
+		resolution.refreshRate = Screen.currentResolution.refreshRate;
+		this.options.Add(new Dropdown.OptionData(resolution.ToString()));
+		this.resolutions.Add(resolution);
+		foreach (Resolution resolution2 in Screen.resolutions)
 		{
-			if (resolution.height >= 720)
+			if (resolution2.height >= 720)
 			{
-				this.options.Add(new Dropdown.OptionData(resolution.ToString()));
-				this.resolutions.Add(resolution);
+				this.options.Add(new Dropdown.OptionData(resolution2.ToString()));
+				this.resolutions.Add(resolution2);
 			}
 		}
 	}
@@ -231,7 +272,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 				width = Screen.width,
 				height = Screen.height,
 				refreshRate = Screen.currentResolution.refreshRate
-			}
+			},
+			lowRes = QualitySettings.GetQualityLevel()
 		};
 	}
 
@@ -242,10 +284,11 @@ internal class GraphicsOptionsScreen : KModalScreen
 			GraphicsOptionsScreen.Settings new_settings = default(GraphicsOptionsScreen.Settings);
 			new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
 			new_settings.fullscreen = this.fullscreenToggle.CurrentState != 0;
+			new_settings.lowRes = this.lowResToggle.CurrentState;
 			this.ApplyConfirmSettings(new_settings, delegate
 			{
 				this.applyButton.isInteractable = false;
-				GraphicsOptionsScreen.SaveResolutionToPrefs(new_settings);
+				GraphicsOptionsScreen.SaveSettingsToPrefs(new_settings);
 			});
 		}
 		catch (Exception ex)
@@ -279,6 +322,10 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.applyButton.isInteractable = true;
 		}
+		else if (settings.lowRes != this.lowResToggle.CurrentState)
+		{
+			this.applyButton.isInteractable = true;
+		}
 		else
 		{
 			int resolutionIndex = this.GetResolutionIndex(settings.resolution);
@@ -294,6 +341,12 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void OnResolutionChanged(int idx)
 	{
+		this.RefreshApplyButton();
+	}
+
+	private void OnLowResToggle()
+	{
+		this.lowResToggle.ChangeState((this.lowResToggle.CurrentState != 0) ? 0 : 1);
 		this.RefreshApplyButton();
 	}
 
@@ -325,6 +378,17 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.resolutionDropdown.value = resolutionIndex;
 		}
+		global::Debug.Log(string.Concat(new object[]
+		{
+			"Applying low res settings ",
+			new_settings.lowRes,
+			" / existing is ",
+			QualitySettings.GetQualityLevel()
+		}));
+		if (QualitySettings.GetQualityLevel() != new_settings.lowRes)
+		{
+			QualitySettings.SetQualityLevel(new_settings.lowRes, true);
+		}
 	}
 
 	private IEnumerator Timer(float time, global::System.Action revert)
@@ -345,6 +409,9 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	[SerializeField]
 	private Dropdown resolutionDropdown;
+
+	[SerializeField]
+	private MultiToggle lowResToggle;
 
 	[SerializeField]
 	private MultiToggle fullscreenToggle;
@@ -378,6 +445,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	public static readonly string FullScreenKey = "FullScreen";
 
+	public static readonly string LowResKey = "LowResTextures";
+
 	private KCanvasScaler[] CanvasScalers;
 
 	private ConfirmDialogScreen confirmDialog;
@@ -393,5 +462,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		public bool fullscreen;
 
 		public Resolution resolution;
+
+		public int lowRes;
 	}
 }

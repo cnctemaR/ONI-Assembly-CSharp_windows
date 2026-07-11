@@ -128,6 +128,38 @@ namespace TUNING
 			instance.StartSM();
 		}
 
+		private static void OnAddBalloonArtist(GameObject go)
+		{
+			BalloonArtist.Instance instance = new BalloonArtist.Instance(go.GetComponent<KMonoBehaviour>());
+			instance.StartSM();
+			JoyBehaviourMonitor.Instance instance2 = new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_happy_balloon_stickers_kanim", null, Db.Get().Expressions.Balloon);
+			instance2.StartSM();
+		}
+
+		private static void OnAddSparkleStreaker(GameObject go)
+		{
+			SparkleStreaker.Instance instance = new SparkleStreaker.Instance(go.GetComponent<KMonoBehaviour>());
+			instance.StartSM();
+			JoyBehaviourMonitor.Instance instance2 = new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_sparkle_kanim", null, Db.Get().Expressions.Sparkle);
+			instance2.StartSM();
+		}
+
+		private static void OnAddStickerBomber(GameObject go)
+		{
+			StickerBomber.Instance instance = new StickerBomber.Instance(go.GetComponent<KMonoBehaviour>());
+			instance.StartSM();
+			JoyBehaviourMonitor.Instance instance2 = new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_stickers", null, Db.Get().Expressions.Sticker);
+			instance2.StartSM();
+		}
+
+		private static void OnAddSuperProductive(GameObject go)
+		{
+			SuperProductive.Instance instance = new SuperProductive.Instance(go.GetComponent<KMonoBehaviour>());
+			instance.StartSM();
+			JoyBehaviourMonitor.Instance instance2 = new JoyBehaviourMonitor.Instance(go.GetComponent<KMonoBehaviour>(), "anim_loco_productive_kanim", "anim_loco_walk_productive_kanim", Db.Get().Expressions.Productive);
+			instance2.StartSM();
+		}
+
 		// Note: this type is marked as 'beforefieldinit'.
 		static TRAITS()
 		{
@@ -180,6 +212,10 @@ namespace TUNING
 			list.Add(TRAITS.CreateTrait("UglyCrier", DUPLICANTS.TRAITS.UGLYCRIER.NAME, DUPLICANTS.TRAITS.UGLYCRIER.DESC, new Action<GameObject>(TRAITS.OnAddUglyCrier), null, false, null));
 			list.Add(TRAITS.CreateTrait("BingeEater", DUPLICANTS.TRAITS.BINGEEATER.NAME, DUPLICANTS.TRAITS.BINGEEATER.DESC, new Action<GameObject>(TRAITS.OnAddBingeEater), null, false, null));
 			list.Add(TRAITS.CreateTrait("StressVomiter", DUPLICANTS.TRAITS.STRESSVOMITER.NAME, DUPLICANTS.TRAITS.STRESSVOMITER.DESC, new Action<GameObject>(TRAITS.OnAddStressVomiter), null, false, null));
+			list.Add(TRAITS.CreateTrait("BalloonArtist", DUPLICANTS.TRAITS.BALLOONARTIST.NAME, DUPLICANTS.TRAITS.BALLOONARTIST.DESC, new Action<GameObject>(TRAITS.OnAddBalloonArtist), null, false, null));
+			list.Add(TRAITS.CreateTrait("SparkleStreaker", DUPLICANTS.TRAITS.SPARKLESTREAKER.NAME, DUPLICANTS.TRAITS.SPARKLESTREAKER.DESC, new Action<GameObject>(TRAITS.OnAddSparkleStreaker), null, false, null));
+			list.Add(TRAITS.CreateTrait("StickerBomber", DUPLICANTS.TRAITS.STICKERBOMBER.NAME, DUPLICANTS.TRAITS.STICKERBOMBER.DESC, new Action<GameObject>(TRAITS.OnAddStickerBomber), null, false, null));
+			list.Add(TRAITS.CreateTrait("SuperProductive", DUPLICANTS.TRAITS.SUPERPRODUCTIVE.NAME, DUPLICANTS.TRAITS.SUPERPRODUCTIVE.DESC, new Action<GameObject>(TRAITS.OnAddSuperProductive), null, false, null));
 			list.Add(TRAITS.CreateComponentTrait<EarlyBird>("EarlyBird", DUPLICANTS.TRAITS.EARLYBIRD.NAME, DUPLICANTS.TRAITS.EARLYBIRD.DESC, true, () => string.Format(DUPLICANTS.TRAITS.EARLYBIRD.EXTENDED_DESC, GameUtil.AddPositiveSign(TRAITS.EARLYBIRD_MODIFIER.ToString(), true))));
 			list.Add(TRAITS.CreateComponentTrait<NightOwl>("NightOwl", DUPLICANTS.TRAITS.NIGHTOWL.NAME, DUPLICANTS.TRAITS.NIGHTOWL.DESC, true, () => string.Format(DUPLICANTS.TRAITS.NIGHTOWL.EXTENDED_DESC, GameUtil.AddPositiveSign(TRAITS.NIGHTOWL_MODIFIER.ToString(), true))));
 			list.Add(TRAITS.CreateComponentTrait<Claustrophobic>("Claustrophobic", DUPLICANTS.TRAITS.NEEDS.CLAUSTROPHOBIC.NAME, DUPLICANTS.TRAITS.NEEDS.CLAUSTROPHOBIC.DESC, false, null));
@@ -232,5 +268,39 @@ namespace TUNING
 		public static int HORRIBLE_ATTRIBUTE_PENALTY = -5;
 
 		public static readonly List<global::System.Action> TRAIT_CREATORS;
+
+		public class JOY_REACTIONS
+		{
+			public static float MIN_MORALE_EXCESS = 8f;
+
+			public static float MAX_MORALE_EXCESS = 20f;
+
+			public static float MIN_REACTION_CHANCE = 2f;
+
+			public static float MAX_REACTION_CHANCE = 5f;
+
+			public static float JOY_REACTION_DURATION = 570f;
+
+			public class SUPER_PRODUCTIVE
+			{
+				public static float INSTANT_SUCCESS_CHANCE = 10f;
+			}
+
+			public class BALLOON_ARTIST
+			{
+				public static float MINIMUM_BALLOON_MOVESPEED = 5f;
+
+				public static int NUM_BALLOONS_TO_GIVE = 4;
+			}
+
+			public class STICKER_BOMBER
+			{
+				public static float TIME_PER_STICKER_BOMB = 150f;
+
+				public static float STICKER_DURATION = 12000f;
+
+				public static List<string> STICKER_ANIMS = new List<string> { "a", "b", "c", "d", "e", "unicorn" };
+			}
+		}
 	}
 }

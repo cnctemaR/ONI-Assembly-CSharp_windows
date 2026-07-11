@@ -67,7 +67,7 @@ public static class BasePacuConfig
 		def5.lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))
 		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pacu_kanim"), symbol_prefix, null, 0);
+			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_prefix, null, 0);
 		}
 		return gameObject;
 	}

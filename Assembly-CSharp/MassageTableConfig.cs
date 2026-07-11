@@ -32,6 +32,7 @@ public class MassageTableConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.MassageTable, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.DeStressingBuilding, false);
 		MassageTable massageTable = go.AddOrGet<MassageTable>();
 		massageTable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_masseur_kanim") };
 		massageTable.stressModificationValue = -30f;

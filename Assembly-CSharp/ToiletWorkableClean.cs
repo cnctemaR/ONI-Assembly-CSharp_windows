@@ -14,8 +14,8 @@ public class ToiletWorkableClean : Workable
 		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Basekeeping.Id;
 		this.skillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 		this.workAnims = ToiletWorkableClean.CLEAN_ANIMS;
-		this.workingPstComplete = ToiletWorkableClean.PST_ANIM;
-		this.workingPstFailed = ToiletWorkableClean.PST_ANIM;
+		this.workingPstComplete = new HashedString[] { ToiletWorkableClean.PST_ANIM };
+		this.workingPstFailed = new HashedString[] { ToiletWorkableClean.PST_ANIM };
 	}
 
 	protected override void OnCompleteWork(Worker worker)

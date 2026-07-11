@@ -29,7 +29,7 @@ namespace Database
 			Func<string, object, string> func = delegate(string str, object data)
 			{
 				Workable workable = (Workable)data;
-				if (workable != null)
+				if (workable != null && workable.GetComponent<KSelectable>() != null)
 				{
 					str = str.Replace("{Target}", workable.GetComponent<KSelectable>().GetName());
 				}
@@ -314,8 +314,6 @@ namespace Database
 			this.LowImmunity.AddNotification(null, null, null, 0f);
 			this.Studying = this.CreateStatusItem("Studying", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Socializing = this.CreateStatusItem("Socializing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
-			this.Dancing = this.CreateStatusItem("Dancing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
-			this.Gaming = this.CreateStatusItem("Gaming", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Mingling = this.CreateStatusItem("Mingling", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.ContactWithGerms = this.CreateStatusItem("ContactWithGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.Disease.ID, true, 2);
 			this.ContactWithGerms.resolveStringCallback = delegate(string str, object data)
@@ -370,6 +368,12 @@ namespace Database
 				}
 			};
 			this.LightWorkEfficiencyBonus = this.CreateStatusItem("LightWorkEfficiencyBonus", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.LightWorkEfficiencyBonus.resolveStringCallback = delegate(string str, object data)
+			{
+				string text6 = string.Format(DUPLICANTS.STATUSITEMS.LIGHTWORKEFFICIENCYBONUS.NO_BUILDING_WORK_ATTRIBUTE, GameUtil.AddPositiveSign(GameUtil.GetFormattedPercent(DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS * 100f, GameUtil.TimeSlice.None), true));
+				return string.Format(str, text6);
+			};
+			this.BeingProductive = this.CreateStatusItem("BeingProductive", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 		}
 
 		public StatusItem Idle;
@@ -542,10 +546,6 @@ namespace Database
 
 		public StatusItem Socializing;
 
-		public StatusItem Dancing;
-
-		public StatusItem Gaming;
-
 		public StatusItem Mingling;
 
 		public StatusItem ContactWithGerms;
@@ -553,6 +553,8 @@ namespace Database
 		public StatusItem ExposedToGerms;
 
 		public StatusItem LightWorkEfficiencyBonus;
+
+		public StatusItem BeingProductive;
 
 		private const int NONE_OVERLAY = 0;
 	}

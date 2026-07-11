@@ -282,11 +282,11 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			this.ready.idle.Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.GetComponent<Operational>().SetActive(false, false);
-			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToilet).WorkableStartTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.inuse);
+			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToilet, null).WorkableStartTransition((FlushToilet.SMInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.inuse);
 			this.ready.inuse.Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.ShowContaminatedMeter();
-			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToiletInUse).Update(delegate(FlushToilet.SMInstance smi, float dt)
+			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.FlushToiletInUse, null).Update(delegate(FlushToilet.SMInstance smi, float dt)
 			{
 				smi.UpdateDirtyState();
 			}, UpdateRate.SIM_200ms, false)

@@ -55,5 +55,11 @@ namespace Steamworks
 			Marshal.Copy(intPtr, array, 0, (int)pcubUserData);
 			return array;
 		}
+
+		public static bool BIsTicketSigned(byte[] rgubTicketDecrypted, uint cubTicketDecrypted, byte[] pubRSAKey, uint cubRSAKey)
+		{
+			InteropHelp.TestIfPlatformSupported();
+			return NativeMethods.SteamEncryptedAppTicket_BIsTicketSigned(rgubTicketDecrypted, cubTicketDecrypted, pubRSAKey, cubRSAKey);
+		}
 	}
 }

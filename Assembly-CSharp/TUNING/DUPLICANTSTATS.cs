@@ -257,6 +257,26 @@ namespace TUNING
 			}
 		};
 
+		public static readonly List<DUPLICANTSTATS.TraitVal> JOYTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		{
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BalloonArtist"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "SparkleStreaker"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "StickerBomber"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "SuperProductive"
+			}
+		};
+
 		public static readonly List<DUPLICANTSTATS.TraitVal> GENESHUFFLERTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
@@ -447,6 +467,14 @@ namespace TUNING
 			public const float GUESSTIMATE_CALORIES_BURNED_PER_SECOND = -1666.6666f;
 
 			public const float OXYGEN_USED_PER_SECOND = 0.1f;
+
+			public const float OXYGEN_TO_CO2_CONVERSION = 0.02f;
+
+			public const float LOW_OXYGEN_THRESHOLD = 0.52f;
+
+			public const float NO_OXYGEN_THRESHOLD = 0.05f;
+
+			public const float MIN_CO2_TO_EMIT = 0.02f;
 
 			public const float BLADDER_INCREASE_PER_SECOND = 0.16666667f;
 

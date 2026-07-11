@@ -53,6 +53,7 @@ namespace Database
 			this.Shower = this.Add("Shower", new string[0], "Shower", new string[0], DUPLICANTS.CHORES.SHOWER.NAME, DUPLICANTS.CHORES.SHOWER.STATUS, DUPLICANTS.CHORES.SHOWER.TOOLTIP, false, -1, null);
 			this.LearnSkill = this.Add("LearnSkill", new string[0], "LearnSkill", new string[0], DUPLICANTS.CHORES.LEARNSKILL.NAME, DUPLICANTS.CHORES.LEARNSKILL.STATUS, DUPLICANTS.CHORES.LEARNSKILL.TOOLTIP, false, -1, null);
 			this.Equip = this.Add("Equip", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.EQUIP.NAME, DUPLICANTS.CHORES.EQUIP.STATUS, DUPLICANTS.CHORES.EQUIP.TOOLTIP, false, -1, null);
+			this.JoyReaction = this.Add("JoyReaction", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.JOYREACTION.NAME, DUPLICANTS.CHORES.JOYREACTION.STATUS, DUPLICANTS.CHORES.JOYREACTION.TOOLTIP, false, 5000, null);
 			this.StressHeal = this.Add("StressHeal", new string[0], string.Empty, new string[] { string.Empty }, DUPLICANTS.CHORES.STRESSHEAL.NAME, DUPLICANTS.CHORES.STRESSHEAL.STATUS, DUPLICANTS.CHORES.STRESSHEAL.TOOLTIP, false, -1, null);
 			this.Relax = this.Add("Relax", new string[0], string.Empty, new string[] { "Sleep" }, DUPLICANTS.CHORES.RELAX.NAME, DUPLICANTS.CHORES.RELAX.STATUS, DUPLICANTS.CHORES.RELAX.TOOLTIP, false, -1, null);
 			this.Recharge = this.Add("Recharge", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.RECHARGE.NAME, DUPLICANTS.CHORES.RECHARGE.STATUS, DUPLICANTS.CHORES.RECHARGE.TOOLTIP, false, -1, null);
@@ -129,6 +130,7 @@ namespace Database
 				new ChoreType[] { this.EmoteHighPriority, this.StressActingOut, this.Vomit, this.Cough, this.Pee, this.StressIdle, this.RescueIncapacitated, this.SwitchHat },
 				new ChoreType[] { this.MoveToQuarantine },
 				new ChoreType[] { this.TopPriority },
+				new ChoreType[] { this.JoyReaction },
 				new ChoreType[] { this.Attack },
 				new ChoreType[] { this.Flee },
 				new ChoreType[] { this.LearnSkill, this.Eat, this.BreakPee },
@@ -435,6 +437,8 @@ namespace Database
 		public ChoreType Astronaut;
 
 		public ChoreType TopPriority;
+
+		public ChoreType JoyReaction;
 
 		private int nextImplicitPriority = 10000;
 

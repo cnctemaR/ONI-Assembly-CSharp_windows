@@ -22,6 +22,14 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			this.reactable.Get(smi).End();
 		})
 			.EventTransition(GameHashes.NavigationFailed, this.idle, null)
+			.Enter(delegate(ReactionMonitor.Instance smi)
+			{
+				smi.master.Trigger(-909573545, null);
+			})
+			.Exit(delegate(ReactionMonitor.Instance smi)
+			{
+				smi.master.Trigger(824899998, null);
+			})
 			.Enter("Reactable.AddChorePreventionTag", delegate(ReactionMonitor.Instance smi)
 			{
 				if (this.reactable.Get(smi).preventChoreInterruption)

@@ -4,9 +4,9 @@ using TUNING;
 
 public class EdiblesManager : KMonoBehaviour
 {
-	public EdiblesManager.FoodInfo GetFoodInfo(string FoodID)
+	public EdiblesManager.FoodInfo GetFoodInfo(string foodID)
 	{
-		string text = FoodID.Replace("Compost", string.Empty);
+		string text = foodID.Replace("Compost", string.Empty);
 		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
 		{
 			if (foodInfo.Id == text)
@@ -14,7 +14,6 @@ public class EdiblesManager : KMonoBehaviour
 				return foodInfo;
 			}
 		}
-		Debug.LogWarning("No food with ID: " + FoodID);
 		return null;
 	}
 

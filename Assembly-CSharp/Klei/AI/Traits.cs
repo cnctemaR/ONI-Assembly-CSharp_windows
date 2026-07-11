@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using TUNING;
 
 namespace Klei.AI
 {
@@ -25,6 +26,28 @@ namespace Klei.AI
 				{
 					Trait trait = Db.Get().traits.Get(text);
 					this.AddInternal(trait);
+				}
+			}
+			if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 15))
+			{
+				List<DUPLICANTSTATS.TraitVal> joytraits = DUPLICANTSTATS.JOYTRAITS;
+				MinionIdentity component = base.GetComponent<MinionIdentity>();
+				if (component)
+				{
+					bool flag = true;
+					foreach (DUPLICANTSTATS.TraitVal traitVal in joytraits)
+					{
+						if (this.HasTrait(traitVal.id))
+						{
+							flag = false;
+						}
+					}
+					if (flag)
+					{
+						DUPLICANTSTATS.TraitVal random = joytraits.GetRandom<DUPLICANTSTATS.TraitVal>();
+						Trait trait2 = Db.Get().traits.Get(random.id);
+						this.Add(trait2);
+					}
 				}
 			}
 		}

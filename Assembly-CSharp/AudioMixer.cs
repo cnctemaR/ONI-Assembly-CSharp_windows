@@ -289,6 +289,8 @@ public class AudioMixer
 
 	private const string FACILITY_VISIBLE_ID = "facilityVisible";
 
+	private const string FOCUS_BUS_PATH = "bus:/SFX/Focus";
+
 	public Dictionary<HashedString, EventInstance> activeSnapshots = new Dictionary<HashedString, EventInstance>();
 
 	public List<HashedString> SnapshotDebugLog = new List<HashedString>();

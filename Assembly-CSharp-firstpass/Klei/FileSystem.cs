@@ -30,6 +30,19 @@ namespace Klei
 			return null;
 		}
 
+		public static FileHandle FindFileHandle(string filename)
+		{
+			FileSystem.Initialize();
+			foreach (IFileDirectory fileDirectory in FileSystem.file_sources)
+			{
+				if (fileDirectory.FileExists(filename))
+				{
+					return fileDirectory.FindFileHandle(filename);
+				}
+			}
+			return default(FileHandle);
+		}
+
 		public static void GetFiles(Regex re, string path, ICollection<FileHandle> result)
 		{
 			FileSystem.Initialize();

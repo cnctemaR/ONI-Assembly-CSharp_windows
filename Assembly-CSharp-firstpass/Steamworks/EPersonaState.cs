@@ -11,6 +11,7 @@ namespace Steamworks
 		k_EPersonaStateSnooze,
 		k_EPersonaStateLookingToTrade,
 		k_EPersonaStateLookingToPlay,
+		k_EPersonaStateInvisible,
 		k_EPersonaStateMax
 	}
 }

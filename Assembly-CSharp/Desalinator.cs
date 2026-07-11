@@ -216,7 +216,7 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 			}).Exit(delegate(Desalinator.StatesInstance smi)
 			{
 				smi.CancelEmptyChore();
-			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.DesalinatorNeedsEmptying)
+			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.DesalinatorNeedsEmptying, null)
 				.EventTransition(GameHashes.OnStorageChange, this.empty, (Desalinator.StatesInstance smi) => smi.IsSaltRemoved());
 			this.empty.PlayAnim("off").Enter("ResetStorage", delegate(Desalinator.StatesInstance smi)
 			{

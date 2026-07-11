@@ -13,5 +13,7 @@ namespace Steamworks
 
 		[MarshalAs(UnmanagedType.I1)]
 		public bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
+
+		public PublishedFileId_t m_nPublishedFileId;
 	}
 }

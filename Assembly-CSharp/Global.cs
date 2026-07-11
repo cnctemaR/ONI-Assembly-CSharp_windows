@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Threading;
 using Klei;
 using KMod;
@@ -14,7 +16,7 @@ public class Global : MonoBehaviour
 {
 	public static Global Instance { get; private set; }
 
-	public static BindingEntry[] GenerateDefaultBindings()
+	public static BindingEntry[] GenerateDefaultBindings(bool hotKeyBuildMenuPermitted = true)
 	{
 		List<BindingEntry> list = new List<BindingEntry>
 		{
@@ -63,6 +65,8 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Alpha0, Modifier.None, global::Action.Plan10, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Minus, Modifier.None, global::Action.Plan11, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Equals, Modifier.None, global::Action.Plan12, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Minus, Modifier.Shift, global::Action.Plan13, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Equals, Modifier.Shift, global::Action.Plan14, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.CopyBuilding, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.MouseScrollUp, Modifier.None, global::Action.ZoomIn, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.MouseScrollDown, Modifier.None, global::Action.ZoomOut, true, false),
@@ -131,7 +135,6 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F7, Modifier.Alt, global::Action.DebugInvincible, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F10, Modifier.Alt, global::Action.DebugForceLightEverywhere, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F10, Modifier.Shift, global::Action.DebugElementTest, true, false),
-			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F11, Modifier.Shift, global::Action.DebugRiverTest, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F12, Modifier.Shift, global::Action.DebugTileTest, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.N, Modifier.Alt, global::Action.DebugRefreshNavCell, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Q, Modifier.Ctrl, global::Action.DebugGotoTarget, true, false),
@@ -208,7 +211,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.R, Modifier.Shift, global::Action.SandboxReveal, true, false)
 		};
 		IList<BuildMenu.DisplayInfo> list2 = (IList<BuildMenu.DisplayInfo>)BuildMenu.OrderedBuildings.data;
-		if (BuildMenu.UseHotkeyBuildMenu())
+		if (BuildMenu.UseHotkeyBuildMenu() && hotKeyBuildMenuPermitted)
 		{
 			foreach (BuildMenu.DisplayInfo displayInfo in list2)
 			{
@@ -286,7 +289,7 @@ public class Global : MonoBehaviour
 		this.modManager.Load(Content.DLL);
 		this.modManager.Load(Content.Strings);
 		global::KSerialization.Manager.Initialize();
-		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings());
+		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings(true));
 		Audio.Get();
 		KAnimBatchManager.CreateInstance();
 		Singleton<SoundEventVolumeCache>.CreateInstance();
@@ -300,6 +303,7 @@ public class Global : MonoBehaviour
 		this.mainThread = Thread.CurrentThread;
 		KProfiler.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
+		this.TestDataLocations();
 		if (DistributionPlatform.Initialized)
 		{
 			if (!KPrivacyPrefs.instance.disableDataCollection)
@@ -333,6 +337,137 @@ public class Global : MonoBehaviour
 			KPlayerPrefs.Save();
 			KPrivacyPrefs.instance.disableDataCollection = true;
 			KPrivacyPrefs.Save();
+		}
+	}
+
+	private void TestDataLocations()
+	{
+		if (Application.platform != RuntimePlatform.WindowsPlayer)
+		{
+			if (Application.platform != RuntimePlatform.WindowsEditor)
+			{
+				return;
+			}
+		}
+		try
+		{
+			string text = Util.RootFolder();
+			string text2 = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+			text2 = Path.Combine(text2, "Klei");
+			text2 = Path.Combine(text2, Util.GetTitleFolderName());
+			global::Debug.Log("Test Data Location / docs / " + text);
+			global::Debug.Log("Test Data Location / local / " + text2);
+			if (!global::System.IO.Directory.Exists(text2))
+			{
+				global::System.IO.Directory.CreateDirectory(text2);
+			}
+			if (!global::System.IO.Directory.Exists(text))
+			{
+				global::System.IO.Directory.CreateDirectory(text);
+			}
+			string text3 = Path.Combine(text, "test");
+			string text4 = Path.Combine(text2, "test");
+			string[] array = new string[] { text3, text4 };
+			bool[] array2 = new bool[2];
+			bool[] array3 = new bool[2];
+			bool[] array4 = new bool[2];
+			for (int i = 0; i < array.Length; i++)
+			{
+				try
+				{
+					using (FileStream fileStream = File.Open(array[i], FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+					{
+						Encoding utf = Encoding.UTF8;
+						byte[] bytes = utf.GetBytes("test");
+						fileStream.Write(bytes, 0, bytes.Length);
+						array2[i] = true;
+					}
+				}
+				catch (Exception ex)
+				{
+					array2[i] = false;
+					KCrashReporter.Assert(false, "Test Data Locations / failed to write " + array[i] + ": " + ex.Message);
+				}
+				try
+				{
+					using (FileStream fileStream2 = File.Open(array[i], FileMode.Open, FileAccess.Read))
+					{
+						Encoding utf2 = Encoding.UTF8;
+						byte[] array5 = new byte[fileStream2.Length];
+						if ((long)fileStream2.Read(array5, 0, array5.Length) == fileStream2.Length)
+						{
+							string @string = utf2.GetString(array5);
+							if (@string == "test")
+							{
+								array3[i] = true;
+							}
+							else
+							{
+								array3[i] = false;
+								KCrashReporter.Assert(false, string.Concat(new string[]
+								{
+									"Test Data Locations / failed to validate contents ",
+									array[i],
+									", got: `",
+									@string,
+									"`"
+								}));
+							}
+						}
+					}
+				}
+				catch (Exception ex2)
+				{
+					array3[i] = false;
+					KCrashReporter.Assert(false, "Test Data Locations / failed to read " + array[i] + ": " + ex2.Message);
+				}
+				try
+				{
+					File.Delete(array[i]);
+					array4[i] = true;
+				}
+				catch (Exception ex3)
+				{
+					array4[i] = false;
+					KCrashReporter.Assert(false, "Test Data Locations / failed to remove " + array[i] + ": " + ex3.Message);
+				}
+			}
+			for (int j = 0; j < array.Length; j++)
+			{
+				global::Debug.Log(string.Concat(new object[]
+				{
+					"Test Data Locations / ",
+					array[j],
+					" / write ",
+					array2[j],
+					" / read ",
+					array3[j],
+					" / removed ",
+					array4[j]
+				}));
+			}
+			bool flag = array2[0] && array3[0];
+			bool flag2 = array2[1] && array3[1];
+			if (flag && flag2)
+			{
+				Global.saveFolderTestResult = "both";
+			}
+			else if (flag && !flag2)
+			{
+				Global.saveFolderTestResult = "docs_only";
+			}
+			else if (!flag && flag2)
+			{
+				Global.saveFolderTestResult = "local_only";
+			}
+			else
+			{
+				Global.saveFolderTestResult = "neither";
+			}
+		}
+		catch (Exception ex4)
+		{
+			KCrashReporter.Assert(false, "Test Data Locations / failed: " + ex4.Message);
 		}
 	}
 
@@ -392,7 +527,8 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 372041U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 381414U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -487,6 +623,8 @@ public class Global : MonoBehaviour
 	private bool gotKleiUserID;
 
 	public Thread mainThread;
+
+	private static string saveFolderTestResult = "unknown";
 
 	private bool updated_with_initialized_distribution_platform;
 

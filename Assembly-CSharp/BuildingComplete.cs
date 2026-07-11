@@ -82,6 +82,11 @@ public class BuildingComplete : Building
 			{
 				this.primaryElement.Mass = this.Def.Mass[0];
 			}
+			float temperature = this.primaryElement.Temperature;
+			if (temperature > 0f && !float.IsNaN(temperature) && !float.IsInfinity(temperature))
+			{
+				BuildingComplete.MinKelvinSeen = Mathf.Min(BuildingComplete.MinKelvinSeen, temperature);
+			}
 			PrimaryElement primaryElement = this.primaryElement;
 			primaryElement.setTemperatureCallback = (PrimaryElement.SetTemperatureCallback)Delegate.Combine(primaryElement.setTemperatureCallback, new PrimaryElement.SetTemperatureCallback(this.OnSetTemperature));
 		}

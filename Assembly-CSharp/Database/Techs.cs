@@ -101,6 +101,10 @@ namespace Database
 				new string[] { "DiningTable", "FarmTile", "CookingStation", "EggCracker" }
 			},
 			{
+				"FoodRepurposing",
+				new string[] { "Juicer" }
+			},
+			{
 				"FinerDining",
 				new string[] { "GourmetCookingStation" }
 			},
@@ -139,6 +143,7 @@ namespace Database
 					LogicPressureSensorGasConfig.ID,
 					"GasVentHighPressure",
 					"GasLogicValve",
+					"GasBottler",
 					"GasConduitPreferentialFlow",
 					"GasConduitOverflow"
 				}
@@ -174,7 +179,7 @@ namespace Database
 			},
 			{
 				"MedicineIV",
-				new string[] { "AdvancedDoctorStation" }
+				new string[] { "AdvancedDoctorStation", "HotTub" }
 			},
 			{
 				"LiquidPiping",
@@ -207,16 +212,20 @@ namespace Database
 				}
 			},
 			{
+				"FlowRedirection",
+				new string[] { "MechanicalSurfboard" }
+			},
+			{
 				"AdvancedFiltration",
 				new string[] { "GasFilter", "LiquidFilter" }
 			},
 			{
 				"Distillation",
-				new string[] { "WaterPurifier", "AlgaeDistillery", "EthanolDistillery", "GasBottler", "BottleEmptierGas" }
+				new string[] { "WaterPurifier", "AlgaeDistillery", "EthanolDistillery", "BottleEmptierGas" }
 			},
 			{
 				"Catalytics",
-				new string[] { "OxyliteRefinery", "SupermaterialRefinery" }
+				new string[] { "OxyliteRefinery", "SupermaterialRefinery", "SodaFountain" }
 			},
 			{
 				"PowerRegulation",
@@ -244,7 +253,7 @@ namespace Database
 			},
 			{
 				"RenewableEnergy",
-				new string[] { "SteamTurbine", "SteamTurbine2", "SolarPanel" }
+				new string[] { "SteamTurbine", "SteamTurbine2", "SolarPanel", "Sauna" }
 			},
 			{
 				"Combustion",
@@ -275,6 +284,10 @@ namespace Database
 				new string[] { "Canvas", "Sculpture" }
 			},
 			{
+				"EnvironmentalAppreciation",
+				new string[] { "BeachChair" }
+			},
+			{
 				"Luxury",
 				new string[]
 				{
@@ -289,7 +302,7 @@ namespace Database
 			},
 			{
 				"GlassFurnishings",
-				new string[] { "GlassTile", "FlowerVaseHangingFancy" }
+				new string[] { "GlassTile", "FlowerVaseHangingFancy", "SunLamp" }
 			},
 			{
 				"RenaissanceArt",
@@ -407,7 +420,7 @@ namespace Database
 			},
 			{
 				"TravelTubes",
-				new string[] { "TravelTubeEntrance", "TravelTube", "TravelTubeWallBridge" }
+				new string[] { "TravelTubeEntrance", "TravelTube", "TravelTubeWallBridge", "VerticalWindTunnel" }
 			},
 			{
 				"SmartStorage",

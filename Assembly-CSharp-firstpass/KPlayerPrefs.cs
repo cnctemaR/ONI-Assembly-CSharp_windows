@@ -76,7 +76,7 @@ public class KPlayerPrefs
 	{
 		try
 		{
-			YamlIO.Save<KPlayerPrefs>(KPlayerPrefs.instance, KPlayerPrefs.PATH, null);
+			YamlIO.SaveOrWarnUser<KPlayerPrefs>(KPlayerPrefs.instance, KPlayerPrefs.PATH, null);
 		}
 		catch (Exception ex)
 		{
@@ -193,6 +193,8 @@ public class KPlayerPrefs
 	private static KPlayerPrefs _instance;
 
 	private static bool _corruptedFlag;
+
+	public const string KPLAYER_PREFS_DATA_COLLECTION_KEY = "DisableDataCollection";
 
 	public static readonly string FILENAME = "kplayerprefs.yaml";
 

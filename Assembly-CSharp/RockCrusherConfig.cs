@@ -41,7 +41,7 @@ public class RockCrusherConfig : IBuildingConfig
 		ComplexFabricatorWorkable complexFabricatorWorkable = go.AddOrGet<ComplexFabricatorWorkable>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
 		complexFabricatorWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_rockrefinery_kanim") };
-		complexFabricatorWorkable.workingPstComplete = "working_pst_complete";
+		complexFabricatorWorkable.workingPstComplete = new HashedString[] { "working_pst_complete" };
 		Tag tag = SimHashes.Sand.CreateTag();
 		List<Element> list = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.Crushable));
 		ComplexRecipe complexRecipe;

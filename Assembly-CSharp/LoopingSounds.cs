@@ -30,8 +30,19 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				asset = asset
 			};
-			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, position, base.transform, !ignore_pause, true, enable_camera_scaled_position);
+			GameObject gameObject = base.gameObject;
+			this.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+			if (this.objectIsSelectedAndVisible)
+			{
+				this.sound_pos = SoundEvent.AudioHighlightListenerPosition(base.transform.GetPosition());
+				this.vol = SoundEvent.GetVolume(this.objectIsSelectedAndVisible);
+			}
+			else
+			{
+				this.sound_pos = behaviour.GetComponent<Transform>().GetPosition();
+				this.sound_pos.z = 0f;
+			}
+			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, this.sound_pos, base.transform, !ignore_pause, true, enable_camera_scaled_position, this.vol, this.objectIsSelectedAndVisible);
 			this.loopingSounds.Add(loopingSoundEvent);
 		}
 		return true;
@@ -50,7 +61,19 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				asset = asset
 			};
-			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, base.transform.GetPosition(), base.transform, true, true, true);
+			GameObject gameObject = base.gameObject;
+			this.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+			if (this.objectIsSelectedAndVisible)
+			{
+				this.sound_pos = SoundEvent.AudioHighlightListenerPosition(base.transform.GetPosition());
+				this.vol = SoundEvent.GetVolume(this.objectIsSelectedAndVisible);
+			}
+			else
+			{
+				this.sound_pos = base.transform.GetPosition();
+				this.sound_pos.z = 0f;
+			}
+			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, this.sound_pos, base.transform, true, true, true, this.vol, this.objectIsSelectedAndVisible);
 			this.loopingSounds.Add(loopingSoundEvent);
 		}
 		return true;
@@ -69,7 +92,19 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				asset = asset
 			};
-			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, base.transform.GetPosition(), base.transform, pause_on_game_pause, enable_culling, enable_camera_scaled_position);
+			GameObject gameObject = base.gameObject;
+			this.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+			if (this.objectIsSelectedAndVisible)
+			{
+				this.sound_pos = SoundEvent.AudioHighlightListenerPosition(base.transform.GetPosition());
+				this.vol = SoundEvent.GetVolume(this.objectIsSelectedAndVisible);
+			}
+			else
+			{
+				this.sound_pos = base.transform.GetPosition();
+				this.sound_pos.z = 0f;
+			}
+			loopingSoundEvent.handle = LoopingSoundManager.Get().Add(asset, this.sound_pos, base.transform, pause_on_game_pause, enable_culling, enable_camera_scaled_position, this.vol, this.objectIsSelectedAndVisible);
 			this.loopingSounds.Add(loopingSoundEvent);
 		}
 		return true;
@@ -199,12 +234,40 @@ public class LoopingSounds : KMonoBehaviour
 		}
 	}
 
+	public void UpdateObjectSelection(bool selected)
+	{
+		GameObject gameObject = base.gameObject;
+		if (selected && gameObject != null && CameraController.Instance.IsVisiblePos(gameObject.transform.position))
+		{
+			this.objectIsSelectedAndVisible = true;
+			this.sound_pos = SoundEvent.AudioHighlightListenerPosition(this.sound_pos);
+			this.vol = 1f;
+		}
+		else
+		{
+			this.objectIsSelectedAndVisible = false;
+			this.sound_pos = base.transform.GetPosition();
+			this.sound_pos.z = 0f;
+			this.vol = 1f;
+		}
+		for (int i = 0; i < this.loopingSounds.Count; i++)
+		{
+			LoopingSoundManager.Get().UpdateObjectSelection(this.loopingSounds[i].handle, this.sound_pos, this.vol, this.objectIsSelectedAndVisible);
+		}
+	}
+
 	private List<LoopingSounds.LoopingSoundEvent> loopingSounds = new List<LoopingSounds.LoopingSoundEvent>();
 
 	private Dictionary<HashedString, float> lastTimePlayed = new Dictionary<HashedString, float>();
 
 	[SerializeField]
 	public bool updatePosition;
+
+	public float vol = 1f;
+
+	public bool objectIsSelectedAndVisible;
+
+	public Vector3 sound_pos;
 
 	private struct LoopingSoundEvent
 	{

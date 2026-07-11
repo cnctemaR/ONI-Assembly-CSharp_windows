@@ -183,7 +183,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 			{
 				smi.master.Exhale();
 			}, UpdateRate.SIM_200ms, false);
-			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (ColdBreather.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemCooling)
+			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (ColdBreather.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemCooling, null)
 				.Enter(delegate(ColdBreather.StatesInstance smi)
 				{
 					smi.master.elementConsumer.EnableConsumption(true);

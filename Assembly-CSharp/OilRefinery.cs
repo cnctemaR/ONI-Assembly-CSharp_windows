@@ -178,6 +178,11 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 			this.operational.SetActive(false, false);
 		}
 
+		public override bool InstantlyFinish(Worker worker)
+		{
+			return false;
+		}
+
 		[MyCmpGet]
 		public Operational operational;
 	}

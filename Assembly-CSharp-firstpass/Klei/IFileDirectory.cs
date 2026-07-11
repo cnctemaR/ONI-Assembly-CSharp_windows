@@ -15,5 +15,7 @@ namespace Klei
 		string GetID();
 
 		bool FileExists(string path);
+
+		FileHandle FindFileHandle(string filename);
 	}
 }

@@ -261,7 +261,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		}
 	}
 
-	private void Sim33ms(float dt)
+	private void SimEveryTick(float dt)
 	{
 		if (this.IsMoving())
 		{
@@ -636,8 +636,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
 			}).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
 			{
-				smi.master.Sim33ms(dt);
-			}, UpdateRate.SIM_33ms, true).Exit(delegate(Navigator.StatesInstance smi)
+				smi.master.SimEveryTick(dt);
+			}, UpdateRate.SIM_EVERY_TICK, true).Exit(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
 			});

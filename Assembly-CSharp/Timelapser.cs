@@ -121,7 +121,7 @@ public class Timelapser : KMonoBehaviour
 					this.screenshotActive = true;
 					this.RefreshRenderTextureSize(null);
 					this.SetPostionAndOrtho();
-					DebugHandler.SetHideUI(true);
+					DebugHandler.SetTimelapseMode(true);
 					this.activeOverlay = OverlayScreen.Instance.mode;
 					OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID, false);
 				}
@@ -129,7 +129,7 @@ public class Timelapser : KMonoBehaviour
 				{
 					this.RenderAndPrint();
 					this.freezeCamera.enabled = false;
-					DebugHandler.SetHideUI(false);
+					DebugHandler.SetTimelapseMode(false);
 					this.screenshotPending = false;
 					this.previewScreenshot = false;
 					this.screenshotActive = false;

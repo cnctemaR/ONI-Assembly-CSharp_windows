@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3BA6C270-DFBA-47E9-A32A-96B956ADD3C5}</ProjectGuid>
+    <ProjectGuid>{AD3FBB54-0048-476E-A8A3-3303790EB792}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.SpatialTracking</AssemblyName>
@@ -23,11 +23,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD396}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB763}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3B1}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB77E}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

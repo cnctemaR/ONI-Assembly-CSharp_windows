@@ -34,6 +34,8 @@ namespace STRINGS
 
 			public static LocString BUILDINGFIBER = "Fiber";
 
+			public static LocString BUILDINGWOOD = "Wood";
+
 			public static LocString CRUSHABLE = "Crushable";
 
 			public static LocString BAGABLECREATURE = "Critter";
@@ -93,6 +95,8 @@ namespace STRINGS
 			public static LocString BED = "Bed";
 
 			public static LocString MESSSTATION = "Dining Table";
+
+			public static LocString TOY = "Toy";
 
 			public static LocString SUIT = "Suit";
 
@@ -791,7 +795,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Video: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "Duplicants can only climb two tiles high and cannot fit into spaces smaller than two tiles, which I should keep in mind while placing errands.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <b>Show Navigation</b> to view all areas within their reach.";
+				public static LocString MESSAGEBODY = "Duplicants have limited jumping and climbing abilities. They can only climb two tiles high and cannot fit into spaces shorter than two tiles or cross gaps wider than one tile. I should keep this in mind while placing errands.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <b>Show Navigation</b> to view all areas within their reach.";
 
 				public static LocString TOOLTIP = "Notes on my Duplicants' maneuverability";
 			}
@@ -962,7 +966,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on Duplicant expectations";
 
-				public static LocString MESSAGEBODY = "The Foods, Rooms, Decor, and Recreation a Duplicant experiences will have an effect on their Morale. Good experiences improve their Morale and poor experiences drop it. When Morale is below their Expectations, Duplicants will become Stressed.\n\nAs Duplicants are assigned to Jobs, they gain increased Expectations, and so the colony will have to be improved to keep up their Morale. An overview of Morale and Stress can be viewed on the Vitals screen.";
+				public static LocString MESSAGEBODY = "Food, Rooms, Decor, and Recreation all have have an effect on Duplicant Morale. Good experiences improve their Morale and poor experiences lower it. When Morale is below their Expectations, Duplicants will become Stressed.\n\nAs Duplicants are given new Skills they gain increased Expectations, and the colony will have to be improved to keep up their Morale. An overview of Morale and Stress can be viewed on the Vitals screen.";
 			}
 
 			public class POWER
@@ -971,7 +975,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on managing electricity";
 
-				public static LocString MESSAGEBODY = string.Empty;
+				public static LocString MESSAGEBODY = "Generators produce power and the various buildings and machines in the colony are the Consumers. Each Consumer will pull a certain wattage from the power circuit it is connected to.\n\nI can use the Power Overlay " + UI.FormatAsHotkey("[F2]") + " to check the status of my circuits. If the Consumers are consuming more wattage than the Generators are producing, the Batteries will drain and there will be brownouts. Additionally, if the Consumers are consuming more wattage than the Wires can handle, the Wires will overload and burn out. To correct both these situations, I will need to reorganize my Consumers onto separate circuits.";
 			}
 
 			public class DIGGING
@@ -980,7 +984,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on buried riches";
 
-				public static LocString MESSAGEBODY = string.Empty;
+				public static LocString MESSAGEBODY = "Everything a colony needs to get going is found in the ground. By instructing a Duplicant to dig in an area I can mine resources to build infrastructure, find food, and clear space for the colony to grow. I can access the Dig Tool " + UI.FormatAsHotkey("[G]") + " which allows me to select the area I want my Duplicants to dig.\n\nDuplicants will need to gain the Superhard Digging skill to mine Abyssalite and the Superduperhard Digging skill to mine Diamond and Obsidian.";
 			}
 
 			public class INSULATION
@@ -998,7 +1002,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on connecting buildings with pipes";
 
-				public static LocString MESSAGEBODY = string.Empty;
+				public static LocString MESSAGEBODY = "When connecting pipes it is useful to have the Plumbing Overlay " + UI.FormatAsHotkey("[F6]") + " selected. Each building which requires plumbing must have their Building Intake connected to the Output Pipe from a source such as a Liquid Pump. Liquid Pumps must be submerged in water and attached to a power source to function.\n\nBuildings often output contaminated water which must flow out of the building through piping from the Output Pipe. The water can then be expelled through Liquid Vent or filtered through a Liquid Filter and reused.";
 			}
 
 			public class DTU

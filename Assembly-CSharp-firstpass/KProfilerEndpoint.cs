@@ -19,6 +19,11 @@ public class KProfilerEndpoint
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
+	public virtual void Ping(string display, double value)
+	{
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
 	public virtual void EndFrame()
 	{
 	}

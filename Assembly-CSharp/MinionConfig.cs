@@ -423,6 +423,7 @@ public class MinionConfig : IEntityConfig
 		component.Add(new AssignableReachabilitySensor(component));
 		component.Add(new ToiletSensor(component));
 		component.Add(new MingleCellSensor(component));
+		component.Add(new BalloonStandCellSensor(component));
 		StateMachineController component2 = go.GetComponent<StateMachineController>();
 		RationalAi.Instance instance = new RationalAi.Instance(component2);
 		instance.StartSM();

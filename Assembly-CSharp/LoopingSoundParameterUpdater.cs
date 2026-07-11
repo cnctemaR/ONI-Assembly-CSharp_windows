@@ -26,5 +26,7 @@ public abstract class LoopingSoundParameterUpdater
 		public Transform transform;
 
 		public SoundDescription description;
+
+		public bool objectIsSelectedAndVisible;
 	}
 }

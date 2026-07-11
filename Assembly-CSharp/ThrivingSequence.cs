@@ -258,6 +258,7 @@ public static class ThrivingSequence
 			CameraController.Instance.FadeIn(0f, 1f);
 			CameraController.Instance.SetWorldInteractive(true);
 			CameraController.Instance.SetOverrideZoomSpeed(1f);
+			HoverTextScreen.Instance.Show(true);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryCinematicSnapshot, STOP_MODE.ALLOWFADEOUT);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot, STOP_MODE.ALLOWFADEOUT);
 			RootMenu.Instance.canTogglePauseScreen = true;

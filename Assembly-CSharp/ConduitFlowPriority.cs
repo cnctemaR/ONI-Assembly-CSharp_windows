@@ -4,5 +4,6 @@ public enum ConduitFlowPriority
 {
 	First = -100,
 	Default = 0,
-	Last = 100
+	Dispense = 50,
+	LastPostUpdate = 100
 }

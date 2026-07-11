@@ -89,7 +89,10 @@ public class PauseScreen : KModalButtonMenu
 			ToolTipScreen.Instance.ClearToolTip(this.closeButton.GetComponent<ToolTip>());
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
 			MusicManager.instance.OnEscapeMenu(false);
-			MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
+			if (MusicManager.instance.SongIsPlaying("Music_ESC_Menu"))
+			{
+				MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
+			}
 		}
 	}
 
@@ -212,9 +215,6 @@ public class PauseScreen : KModalButtonMenu
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			base.Show(false);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
-			MusicManager.instance.OnEscapeMenu(false);
-			MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
 		}
 		else
 		{

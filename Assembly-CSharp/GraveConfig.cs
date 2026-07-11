@@ -34,7 +34,7 @@ public class GraveConfig : IBuildingConfig
 		storage.SetDefaultStoredItemModifiers(GraveConfig.StorageModifiers);
 		storage.overrideAnims = GraveConfig.STORAGE_OVERRIDE_ANIM_FILES;
 		storage.workAnims = GraveConfig.STORAGE_WORK_ANIMS;
-		storage.workingPstComplete = GraveConfig.STORAGE_PST_ANIM;
+		storage.workingPstComplete = new HashedString[] { GraveConfig.STORAGE_PST_ANIM };
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
 		storage.workAnimPlayMode = KAnim.PlayMode.Once;

@@ -3,7 +3,7 @@ using Klei;
 using Klei.AI;
 using TUNING;
 
-public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IWorkerPrioritizable
+public class EspressoMachineWorkable : Workable, IWorkerPrioritizable
 {
 	private EspressoMachineWorkable()
 	{
@@ -78,5 +78,5 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 
 	private static string specificEffect = "Espresso";
 
-	private static string trackingEffect = "RecentlyEspresso";
+	private static string trackingEffect = "RecentlyRecDrink";
 }

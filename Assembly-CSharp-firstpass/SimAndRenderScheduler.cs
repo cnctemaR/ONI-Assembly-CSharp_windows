@@ -9,6 +9,7 @@ public class SimAndRenderScheduler
 		this.availableInterfaces[typeof(IRenderEveryTick)] = UpdateRate.RENDER_EVERY_TICK;
 		this.availableInterfaces[typeof(IRender200ms)] = UpdateRate.RENDER_200ms;
 		this.availableInterfaces[typeof(IRender1000ms)] = UpdateRate.RENDER_1000ms;
+		this.availableInterfaces[typeof(ISimEveryTick)] = UpdateRate.SIM_EVERY_TICK;
 		this.availableInterfaces[typeof(ISim33ms)] = UpdateRate.SIM_33ms;
 		this.availableInterfaces[typeof(ISim200ms)] = UpdateRate.SIM_200ms;
 		this.availableInterfaces[typeof(ISim1000ms)] = UpdateRate.SIM_1000ms;
@@ -67,6 +68,8 @@ public class SimAndRenderScheduler
 			return typeof(IRender200ms);
 		case UpdateRate.RENDER_1000ms:
 			return typeof(IRender1000ms);
+		case UpdateRate.SIM_EVERY_TICK:
+			return typeof(ISimEveryTick);
 		case UpdateRate.SIM_33ms:
 			return typeof(ISim33ms);
 		case UpdateRate.SIM_200ms:
@@ -112,6 +115,9 @@ public class SimAndRenderScheduler
 			case UpdateRate.RENDER_1000ms:
 				this.render1000ms.Add((IRender1000ms)obj, load_balance);
 				break;
+			case UpdateRate.SIM_EVERY_TICK:
+				this.simEveryTick.Add((ISimEveryTick)obj, load_balance);
+				break;
 			case UpdateRate.SIM_33ms:
 				this.sim33ms.Add((ISim33ms)obj, load_balance);
 				break;
@@ -144,6 +150,9 @@ public class SimAndRenderScheduler
 				break;
 			case UpdateRate.RENDER_1000ms:
 				this.render1000ms.Remove((IRender1000ms)obj);
+				break;
+			case UpdateRate.SIM_EVERY_TICK:
+				this.simEveryTick.Remove((ISimEveryTick)obj);
 				break;
 			case UpdateRate.SIM_33ms:
 				this.sim33ms.Remove((ISim33ms)obj);
@@ -217,6 +226,8 @@ public class SimAndRenderScheduler
 	public SimAndRenderScheduler.Render200ms render200ms = new SimAndRenderScheduler.Render200ms();
 
 	public SimAndRenderScheduler.Render1000msUpdater render1000ms = new SimAndRenderScheduler.Render1000msUpdater();
+
+	public SimAndRenderScheduler.SimEveryTickUpdater simEveryTick = new SimAndRenderScheduler.SimEveryTickUpdater();
 
 	public SimAndRenderScheduler.Sim33msUpdater sim33ms = new SimAndRenderScheduler.Sim33msUpdater();
 
@@ -347,6 +358,19 @@ public class SimAndRenderScheduler
 		public void Update(IRender1000ms updater, float dt)
 		{
 			updater.Render1000ms(dt);
+		}
+	}
+
+	public class SimEveryTickUpdater : SimAndRenderScheduler.UpdaterManager<ISimEveryTick>, UpdateBucketWithUpdater<ISimEveryTick>.IUpdater
+	{
+		public SimEveryTickUpdater()
+			: base(UpdateRate.SIM_EVERY_TICK)
+		{
+		}
+
+		public void Update(ISimEveryTick updater, float dt)
+		{
+			updater.SimEveryTick(dt);
 		}
 	}
 

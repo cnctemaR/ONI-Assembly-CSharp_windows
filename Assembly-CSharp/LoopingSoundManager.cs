@@ -75,6 +75,21 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		this.sounds.SetData(handle, data);
 	}
 
+	public void UpdateObjectSelection(HandleVector<int>.Handle handle, Vector3 sound_pos, float vol, bool objectIsSelectedAndVisible)
+	{
+		LoopingSoundManager.Sound data = this.sounds.GetData(handle);
+		data.pos = sound_pos;
+		data.vol = vol;
+		data.objectIsSelectedAndVisible = objectIsSelectedAndVisible;
+		ATTRIBUTES_3D attributes_3D = sound_pos.To3DAttributes();
+		if (data.IsPlaying)
+		{
+			data.ev.set3DAttributes(attributes_3D);
+			data.ev.setVolume(vol);
+		}
+		this.sounds.SetData(handle, data);
+	}
+
 	public void UpdateVelocity(HandleVector<int>.Handle handle, Vector2 velocity)
 	{
 		LoopingSoundManager.Sound data = this.sounds.GetData(handle);
@@ -93,15 +108,21 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		for (int i = 0; i < dataList.Count; i++)
 		{
 			LoopingSoundManager.Sound sound = dataList[i];
-			if (sound.transform != null)
+			if (sound.objectIsSelectedAndVisible)
+			{
+				sound.pos = SoundEvent.AudioHighlightListenerPosition(sound.transform.GetPosition());
+				sound.vol = 1f;
+			}
+			else if (sound.transform != null)
 			{
 				sound.pos = sound.transform.GetPosition();
-				if (sound.animController != null)
-				{
-					Vector3 offset = sound.animController.Offset;
-					sound.pos.x = sound.pos.x + offset.x;
-					sound.pos.y = sound.pos.y + offset.y;
-				}
+				sound.pos.z = 0f;
+			}
+			if (sound.animController != null)
+			{
+				Vector3 offset = sound.animController.Offset;
+				sound.pos.x = sound.pos.x + offset.x;
+				sound.pos.y = sound.pos.y + offset.y;
 			}
 			bool flag2 = !sound.IsCullingEnabled || (sound.ShouldCameraScalePosition && soundCuller.IsAudible(sound.pos, sound.falloffDistanceSq)) || soundCuller.IsAudibleNoCameraScaling(sound.pos, sound.falloffDistanceSq);
 			bool isPlaying = sound.IsPlaying;
@@ -125,12 +146,19 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			LoopingSoundManager.Sound sound2 = dataList[num];
 			SoundDescription soundDescription = this.GetSoundDescription(sound2.path);
 			sound2.ev.setPaused(flag && sound2.ShouldPauseOnGamePaused);
-			Vector2 vector = sound2.pos;
-			if (sound2.ShouldCameraScalePosition)
+			sound2.pos.z = 0f;
+			Vector3 pos = sound2.pos;
+			if (sound2.objectIsSelectedAndVisible)
 			{
-				vector = SoundEvent.GetCameraScaledPosition(vector);
+				sound2.pos = SoundEvent.AudioHighlightListenerPosition(sound2.transform.GetPosition());
+				sound2.vol = 1f;
 			}
-			sound2.ev.set3DAttributes(vector.To3DAttributes());
+			else if (sound2.transform != null)
+			{
+				sound2.pos = sound2.transform.GetPosition();
+			}
+			sound2.ev.set3DAttributes(pos.To3DAttributes());
+			sound2.ev.setVolume(sound2.vol);
 			sound2.ev.start();
 			sound2.flags |= LoopingSoundManager.Sound.Flags.PLAYING;
 			if (sound2.firstParameter != HashedString.Invalid)
@@ -146,7 +174,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 				ev = sound2.ev,
 				path = sound2.path,
 				description = soundDescription,
-				transform = sound2.transform
+				transform = sound2.transform,
+				objectIsSelectedAndVisible = false
 			};
 			foreach (SoundDescription.Parameter parameter in soundDescription.parameters)
 			{
@@ -168,7 +197,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 				ev = sound4.ev,
 				path = sound4.path,
 				description = soundDescription2,
-				transform = sound4.transform
+				transform = sound4.transform,
+				objectIsSelectedAndVisible = false
 			};
 			foreach (SoundDescription.Parameter parameter2 in soundDescription2.parameters)
 			{
@@ -194,7 +224,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		float velocityScale = TuningData<LoopingSoundManager.Tuning>.Get().velocityScale;
 		foreach (LoopingSoundManager.Sound sound6 in pooledList)
 		{
-			ATTRIBUTES_3D attributes_3D = SoundEvent.GetCameraScaledPosition(sound6.pos).To3DAttributes();
+			ATTRIBUTES_3D attributes_3D = SoundEvent.GetCameraScaledPosition(sound6.pos, sound6.objectIsSelectedAndVisible).To3DAttributes();
 			attributes_3D.velocity = (sound6.velocity * velocityScale).ToFMODVector();
 			sound6.ev.set3DAttributes(attributes_3D);
 		}
@@ -227,7 +257,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		return KFMOD.GetSoundEventDescription(path);
 	}
 
-	public HandleVector<int>.Handle Add(string path, Vector2 pos, Transform transform = null, bool pause_on_game_pause = true, bool enable_culling = true, bool enable_camera_scaled_position = true)
+	public HandleVector<int>.Handle Add(string path, Vector3 pos, Transform transform = null, bool pause_on_game_pause = true, bool enable_culling = true, bool enable_camera_scaled_position = true, float vol = 1f, bool objectIsSelectedAndVisible = false)
 	{
 		SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(path);
 		LoopingSoundManager.Sound.Flags flags = (LoopingSoundManager.Sound.Flags)0;
@@ -257,7 +287,9 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			pos = pos,
 			flags = flags,
 			firstParameter = HashedString.Invalid,
-			secondParameter = HashedString.Invalid
+			secondParameter = HashedString.Invalid,
+			vol = vol,
+			objectIsSelectedAndVisible = objectIsSelectedAndVisible
 		};
 		return this.sounds.Allocate(sound);
 	}
@@ -269,7 +301,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 			global::Debug.LogWarning("Missing sound");
 			return HandleVector<int>.InvalidHandle;
 		}
-		return LoopingSoundManager.Get().Add(path, pos, null, pause_on_game_pause, enable_culling, true);
+		return LoopingSoundManager.Get().Add(path, pos, null, pause_on_game_pause, enable_culling, true, 1f, false);
 	}
 
 	public static void StopSound(HandleVector<int>.Handle handle)
@@ -294,7 +326,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 						ev = data.ev,
 						path = data.path,
 						description = soundEventDescription,
-						transform = data.transform
+						transform = data.transform,
+						objectIsSelectedAndVisible = false
 					};
 					loopingSoundParameterUpdater.Remove(sound);
 				}
@@ -370,7 +403,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 
 		public HashedString path;
 
-		public Vector2 pos;
+		public Vector3 pos;
 
 		public Vector2 velocity;
 
@@ -381,6 +414,10 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		public float firstParameterValue;
 
 		public float secondParameterValue;
+
+		public float vol;
+
+		public bool objectIsSelectedAndVisible;
 
 		public LoopingSoundManager.Sound.Flags flags;
 

@@ -49,6 +49,22 @@ namespace TUNING
 
 		public const int CEILINGLIGHT_LUX = 1800;
 
+		public const int SUNLAMP_LUX = 40000;
+
+		public const float SUNLAMP_RANGE = 16f;
+
+		public const float SUNLAMP_ANGLE = 5.2f;
+
+		public const LightShape SUNLAMP_SHAPE = LightShape.Cone;
+
+		public static readonly Color SUNLAMP_COLOR = LIGHT2D.LIGHT_YELLOW;
+
+		public static readonly Color SUNLAMP_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
+
+		public static readonly Vector2 SUNLAMP_OFFSET = new Vector2(0f, 3.5f);
+
+		public static readonly Vector2 SUNLAMP_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
+
 		public static readonly Color LIGHT_PREVIEW_COLOR = LIGHT2D.LIGHT_YELLOW;
 
 		public const float HEADQUARTERS_RANGE = 5f;

@@ -327,5 +327,8 @@ public enum GameHashes
 	SkillPointAquired = 1505456302,
 	MedCotMinimumThresholdUpdated = 875045922,
 	GameOptionsUpdated = 75424175,
-	CheckColonyAchievements = 395452326
+	CheckColonyAchievements = 395452326,
+	StartWork = 1568504979,
+	StartReactable = -909573545,
+	EndReactable = 824899998
 }

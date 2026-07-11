@@ -80,6 +80,16 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		this.CleanupLimboMinions();
 	}
 
+	public void OnHardDelete()
+	{
+		if (this.assignableProxy.Get() != null)
+		{
+			Util.KDestroyGameObject(this.assignableProxy.Get().gameObject);
+		}
+		ScheduleManager.Instance.OnStoredDupeDestroyed(this);
+		Components.StoredMinionIdentities.Remove(this);
+	}
+
 	private void OnDeserializeModifiers()
 	{
 		foreach (KeyValuePair<string, float> keyValuePair in this.savedAttributeValues)

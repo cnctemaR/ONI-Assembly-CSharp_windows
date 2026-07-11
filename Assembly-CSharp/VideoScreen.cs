@@ -133,7 +133,7 @@ public class VideoScreen : KModalScreen
 		this.OnStop = (global::System.Action)Delegate.Combine(this.OnStop, new global::System.Action(delegate
 		{
 			RetireColonyUtility.SaveColonySummaryData();
-			MainMenu.ActivateRetiredColoniesScreen(base.transform.parent.gameObject, SaveGame.Instance.BaseName, SaveGame.Instance.GetComponent<ColonyAchievementTracker>().achievementsToDisplay.ToArray());
+			MainMenu.ActivateRetiredColoniesScreenFromData(base.transform.parent.gameObject, RetireColonyUtility.GetCurrentColonyRetiredColonyData());
 		}));
 	}
 
@@ -195,6 +195,25 @@ public class VideoScreen : KModalScreen
 			this.OnStop();
 		}
 		base.Show(false);
+	}
+
+	public override void ScreenUpdate(bool topLevel)
+	{
+		base.ScreenUpdate(topLevel);
+		if (this.audioHandle.isValid())
+		{
+			int num;
+			this.audioHandle.getTimelinePosition(out num);
+			double num2 = this.videoPlayer.time * 1000.0;
+			if ((double)num - num2 > 33.0)
+			{
+				this.videoPlayer.frame += 1L;
+			}
+			else if (num2 - (double)num > 33.0)
+			{
+				this.videoPlayer.frame -= 1L;
+			}
+		}
 	}
 
 	public static VideoScreen Instance;

@@ -1,20 +1,26 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using STRINGS;
-using UnityEngine;
 
 namespace Klei
 {
 	public static class FileUtil
 	{
-		public static void ErrorDialog(string msg)
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event global::System.Action onErrorMessage;
+
+		public static void ErrorDialog(FileUtil.ErrorType errorType, string errorSubject, string exceptionMessage, string exceptionStackTrace)
 		{
-			global::Debug.Log(msg);
-			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
-			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(msg, null, null, null, null, null, null, null, null, true);
-			global::UnityEngine.Object.DontDestroyOnLoad(component.gameObject);
+			global::Debug.Log(string.Format("Error encountered during file access: {0} error: {1}", errorType, errorSubject));
+			FileUtil.errorType = errorType;
+			FileUtil.errorSubject = errorSubject;
+			FileUtil.exceptionMessage = exceptionMessage;
+			FileUtil.exceptionStackTrace = exceptionStackTrace;
+			if (FileUtil.onErrorMessage != null)
+			{
+				FileUtil.onErrorMessage();
+			}
 		}
 
 		public static T DoIOFunc<T>(Func<T> io_op, int retry_count = 0)
@@ -98,19 +104,43 @@ namespace Klei
 			throw new Exception("Unreachable code path in FileUtil::DoIOAction()");
 		}
 
+		public static void DoIODialog(global::System.Action io_op, string io_subject, int retry_count = 0)
+		{
+			try
+			{
+				FileUtil.DoIOAction(io_op, retry_count);
+			}
+			catch (UnauthorizedAccessException ex)
+			{
+				DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException during IO on ", io_subject, ", squelching. Stack trace was:\n", ex.Message, "\n", ex.StackTrace });
+				FileUtil.ErrorDialog(FileUtil.ErrorType.UnauthorizedAccess, io_subject, ex.Message, ex.StackTrace);
+			}
+			catch (IOException ex2)
+			{
+				DebugUtil.LogArgs(new object[] { "IOException during IO on ", io_subject, ", squelching. Stack trace was:\n", ex2.Message, "\n", ex2.StackTrace });
+				FileUtil.ErrorDialog(FileUtil.ErrorType.IOError, io_subject, ex2.Message, ex2.StackTrace);
+			}
+			catch
+			{
+				throw;
+			}
+		}
+
 		public static T DoIODialog<T>(Func<T> io_op, string io_subject, T fail_result, int retry_count = 0)
 		{
 			try
 			{
 				return FileUtil.DoIOFunc<T>(io_op, retry_count);
 			}
-			catch (UnauthorizedAccessException)
+			catch (UnauthorizedAccessException ex)
 			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_UNAUTHORIZED, io_subject));
+				DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException during IO on ", io_subject, ", squelching. Stack trace was:\n", ex.Message, "\n", ex.StackTrace });
+				FileUtil.ErrorDialog(FileUtil.ErrorType.IOError, io_subject, ex.Message, ex.StackTrace);
 			}
-			catch (IOException)
+			catch (IOException ex2)
 			{
-				FileUtil.ErrorDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.IO_SUFFICIENT_SPACE, io_subject));
+				DebugUtil.LogArgs(new object[] { "IOException during IO on ", io_subject, ", squelching. Stack trace was:\n", ex2.Message, "\n", ex2.StackTrace });
+				FileUtil.ErrorDialog(FileUtil.ErrorType.IOError, io_subject, ex2.Message, ex2.StackTrace);
 			}
 			catch
 			{
@@ -160,10 +190,25 @@ namespace Klei
 
 		private const int RETRY_MILLISECONDS = 100;
 
+		public static FileUtil.ErrorType errorType;
+
+		public static string errorSubject;
+
+		public static string exceptionMessage;
+
+		public static string exceptionStackTrace;
+
 		private enum Test
 		{
 			NoTesting,
 			RetryOnce
+		}
+
+		public enum ErrorType
+		{
+			None,
+			UnauthorizedAccess,
+			IOError
 		}
 	}
 }

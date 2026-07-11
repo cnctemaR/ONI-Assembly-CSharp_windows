@@ -155,6 +155,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		NameDisplayScreen.Instance.UpdateName(base.gameObject);
 	}
 
+	public void SetStickerType(string stickerType)
+	{
+		this.stickerType = stickerType;
+	}
+
 	public bool IsNull()
 	{
 		return this == null;
@@ -325,6 +330,9 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	[Serialize]
 	public string gender;
+
+	[Serialize]
+	public string stickerType;
 
 	[Serialize]
 	[ReadOnly]

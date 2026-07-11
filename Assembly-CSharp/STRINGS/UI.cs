@@ -236,6 +236,8 @@ namespace STRINGS
 
 		public static LocString CHARACTERCONTAINER_STRESSTRAIT = "Stress Reaction: {0}";
 
+		public static LocString CHARACTERCONTAINER_JOYTRAIT = "Overjoyed Response: {0}";
+
 		public static LocString CHARACTERCONTAINER_CONGENITALTRAIT = "Genetic Trait: {0}";
 
 		public static LocString CHARACTERCONTAINER_NOARCHETYPESELECTED = "Random";
@@ -1475,13 +1477,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "LAUNCH TRAILER!";
+				public static LocString IMAGE_HEADER = "RECREATION PACK!";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "<b>Welcome to the Launch Upgrade! ONI Has Launched!</b>\n\n<b>Update Features:</b>\n\n• New asteroid selections with 3 new biomes to explore and exploit\n• Pips, Pokeshells, Dasha Saltvines, Waterweed, and Nosh Sprouts to tend and grow\n• New buildings to process new resources and improve your colony\n• Colony Initiatives and Imperatives keep track of your colony's progress\n• The squashing of many long-standing bugs and issues!\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCH_NOTES_SUMMARY = "<b>Welcome to Meep's Mandatory Recreation Pack!</b>\n\n<b>Update Features:</b>\n\n• New recreational buildings for Duplicants to relax in\n• New 'Overjoyed Reactions' may trigger when Duplicants have an excess of morale\n• Numerous bug fixes and improvements\n\nPlease view the full patch notes for further details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 			}
@@ -1643,6 +1645,8 @@ namespace STRINGS
 
 			public class MOD_DIALOGS
 			{
+				public static LocString ADDITIONAL_MOD_EVENTS = "(...additional entries omitted)";
+
 				public class INSTALL_INFO_INACCESSIBLE
 				{
 					public static LocString TITLE = "STEAM CONTENT ERROR";
@@ -2027,6 +2031,8 @@ namespace STRINGS
 
 				public static LocString RESOLUTION = "Resolution:";
 
+				public static LocString LOWRES = "Low Resolution Textures";
+
 				public static LocString APPLYBUTTON = "Apply";
 
 				public static LocString REVERTBUTTON = "Revert";
@@ -2095,9 +2101,13 @@ namespace STRINGS
 
 				public static LocString PLAYER_PREFS_CORRUPTED = "A problem occurred while loading your game options.\nThey have been reset to their default settings.\n\n";
 
-				public static LocString IO_UNAUTHORIZED = "An Unauthorized Access Error occurred when trying to write to disk.\nPlease check that you have permissions to write to:\n{0}";
+				public static LocString IO_UNAUTHORIZED = "An Unauthorized Access Error occurred when trying to write to disk.\nPlease check that you have permissions to write to:\n{0}\n\nThis may prevent the game from saving.";
 
 				public static LocString IO_SUFFICIENT_SPACE = "An Insufficient Space Error occurred when trying to write to disk. \n\nPlease free up some space.\n{0}";
+
+				public static LocString IO_UNKNOWN = "An unknown error occurred when trying to write or access a file.\n{0}";
+
+				public static LocString MORE_INFO_BUTTON = "More Info";
 			}
 
 			public class SAVEUPGRADEWARNINGS
@@ -2766,6 +2776,8 @@ namespace STRINGS
 				public static LocString PAINT = "Paint";
 
 				public static LocString SAMPLE = "Sample";
+
+				public static LocString STORE = "Store";
 
 				public static LocString FILL = "Fill";
 			}
@@ -3719,6 +3731,10 @@ namespace STRINGS
 
 			public static LocString BACK_BUTTON_NO_HISTORY_TOOLTIP = "Click to go back:\nN/A";
 
+			public static LocString FORWARD_BUTTON_TOOLTIP = "Click to go forward:\n{0}";
+
+			public static LocString FORWARD_BUTTON_NO_HISTORY_TOOLTIP = "Click to go forward:\nN/A";
+
 			public static LocString TITLE = "DATABASE";
 
 			public static LocString MANAGEMENT_BUTTON = "DATABASE";
@@ -3864,6 +3880,8 @@ namespace STRINGS
 			public static LocString PERSECOND = "/s";
 
 			public static LocString PERCYCLE = "/cycle";
+
+			public static LocString UNIT = " unit";
 
 			public static LocString UNITS = " units";
 
@@ -5834,9 +5852,9 @@ namespace STRINGS
 
 				public static LocString VICTORY_CONDITIONS = "Hardwired Imperatives";
 
-				public static LocString SUMMARY_TITLE = "COLONY SUMMARY";
+				public static LocString SUMMARY_TITLE = "Colony Summary";
 
-				public static LocString SKILLS_BUTTON = "DUPLICANT SKILLS";
+				public static LocString SKILLS_BUTTON = "Duplicant Skills";
 			}
 
 			public class VALVESIDESCREEN
@@ -8026,7 +8044,7 @@ namespace STRINGS
 
 			public static LocString KCAL_PER_CYCLE = UI.FormatAsLink("KCal", "FOOD") + " per cycle: {0}";
 
-			public static LocString REMOVES_DISEASE = "Removes disease";
+			public static LocString REMOVES_DISEASE = "Kills germs";
 
 			public static LocString DOCTORING = "Doctoring";
 
@@ -8521,7 +8539,11 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Temperature",
 					UI.PST_KEYWORD,
-					" of piped gases by <b>{0}</b>"
+					" of piped ",
+					UI.PRE_KEYWORD,
+					"Gases",
+					UI.PST_KEYWORD,
+					"by <b>{0}</b>"
 				});
 
 				public static LocString LIQUIDCOOLING = string.Concat(new string[]
@@ -8530,7 +8552,11 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Temperature",
 					UI.PST_KEYWORD,
-					" of piped liquids by <b>{0}</b>"
+					" of piped ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" by <b>{0}</b>"
 				});
 
 				public static LocString MAX_WATTAGE = string.Concat(new string[]
@@ -8568,11 +8594,15 @@ namespace STRINGS
 
 				public static LocString REMOVES_DISEASE = string.Concat(new string[]
 				{
-					"Cooking will pasteurize ingredients and remove their ",
+					"The cooking process kills all ",
+					UI.PRE_KEYWORD,
+					"Germs",
+					UI.PST_KEYWORD,
+					" present in the ingredients, removing the ",
 					UI.PRE_KEYWORD,
 					"Disease",
 					UI.PST_KEYWORD,
-					" risk"
+					" risk when eating the product"
 				});
 
 				public static LocString DOCTORING = "Doctoring increases existing health benefits and can allow the treatment of otherwise stubborn " + UI.PRE_KEYWORD + "Diseases" + UI.PST_KEYWORD;
@@ -8599,11 +8629,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Volume",
 					UI.PST_KEYWORD,
-					", ",
-					UI.PRE_KEYWORD,
-					"Temperature",
-					UI.PST_KEYWORD,
-					", and ",
+					" and ",
 					UI.PRE_KEYWORD,
 					"Specific Heat Capacity",
 					UI.PST_KEYWORD,
@@ -8611,12 +8637,9 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Gas",
 					UI.PST_KEYWORD,
-					UI.HORIZONTAL_BR_RULE,
-					"Cooling 1 Kg of room temperature ",
+					"\n\nCooling 1 Kg of ",
 					ELEMENTS.OXYGEN.NAME,
-					" will output ",
-					UI.FormatAsPositiveModifier("{0}"),
-					" per second"
+					" the entire <b>{1}</b> will output <b>{0}</b>"
 				});
 
 				public static LocString HEATGENERATED_LIQUIDCONDITIONER = string.Concat(new string[]
@@ -8629,11 +8652,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Volume",
 					UI.PST_KEYWORD,
-					", ",
-					UI.PRE_KEYWORD,
-					"Temperature",
-					UI.PST_KEYWORD,
-					", and ",
+					" and ",
 					UI.PRE_KEYWORD,
 					"Specific Heat Capacity",
 					UI.PST_KEYWORD,
@@ -8641,12 +8660,9 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Liquid",
 					UI.PST_KEYWORD,
-					UI.HORIZONTAL_BR_RULE,
-					"Cooling 1 Kg of room temperature ",
+					"\n\nCooling 10 Kg of ",
 					ELEMENTS.WATER.NAME,
-					" will output ",
-					UI.FormatAsNegativeRate("{0}"),
-					" per second"
+					" the entire <b>{1}</b> will output <b>{0}</b>"
 				});
 
 				public static LocString MOVEMENT_BONUS = "Increases the Runspeed of Duplicants";
@@ -8947,6 +8963,8 @@ namespace STRINGS
 
 			public static LocString EMITS_LIGHT = UI.FormatAsLink("Light Range", "LIGHT") + ": {0} tiles";
 
+			public static LocString EMITS_LIGHT_LUX = UI.FormatAsLink("Brightness", "LIGHT") + ": {0} Lux";
+
 			public static LocString DARKNESS = "Darkness";
 
 			public static LocString LIGHT = "Light";
@@ -9086,6 +9104,15 @@ namespace STRINGS
 				});
 
 				public static LocString EMITS_LIGHT = string.Concat(new string[]
+				{
+					"Emits ",
+					UI.PRE_KEYWORD,
+					"Light",
+					UI.PST_KEYWORD,
+					"\n\nDuplicants can operate buildings more quickly when they're well lit"
+				});
+
+				public static LocString EMITS_LIGHT_LUX = string.Concat(new string[]
 				{
 					"Emits ",
 					UI.PRE_KEYWORD,

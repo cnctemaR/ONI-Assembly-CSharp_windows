@@ -1092,6 +1092,24 @@ namespace STRINGS
 			}
 		}
 
+		public class A1A_B111
+		{
+			public static LocString TITLE = "Personal Journal: B111";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "I sent Dr. Holland home today after I found him wandering the lab mumbling to himself. He looked like he hadn’t slept in days!\n\nI worry that everyone here is so afraid of disappointing ‘The Director’ that they are pushing themselves to the breaking point. Next chance I get, I’m going to bring this up with Jackie.\n------------------\n";
+
+				public static LocString CONTAINER2 = "Well, that didn’t work.\n\nBringing up the need for some office bonding activities with the Director only met with her usual stubborn insistence that we “don’t have time for any fun”.\n\nThis is ridiculous. Tomorrow I’m going to organize something fun for everyone and Jackie will just have to deal with it. She just needs to see the long term benefits of short term stress relief to fully understand the importance of this.\n------------------\n";
+
+				public static LocString CONTAINER3 = "I can’t believe this! I organized a potluck lunch thinking it would be a nice break but Jackie discovered us as we were setting up and insisted that no one had time for “fooling around”. Of course, everyone was too afraid to defy ‘The Director’ and went right back to work.\n\nAll the food was just thrown out. Someone had even made home-made perogies! Seeing the break room garbage full of potato salad and chicken wings made me even more depressed than before. Those perogies looked so good.\n------------------\n";
+
+				public static LocString CONTAINER4 = "I keep finding senseless mistakes from stressed-out lab workers. It’s getting dangerous. I’m worried this colony we’re building will be plagued with these kind of problems if we don’t prioritize mental health as much as physical health. What’s the use of making all these plans for the future if we can’t build a better world?\n\nMaybe there’s some way I can sneak some prerequisite down-time activities into the Printing Pod without Jackie knowing.\n------------------\n";
+			}
+		}
+
 		public class A2_B327
 		{
 			public static LocString TITLE = "Personal Journal: B327";
@@ -1227,6 +1245,13 @@ namespace STRINGS
 					public static LocString TITLE = "Out Of Blueprints";
 
 					public static LocString BODY = "I've officially run out of unique blueprints from which to print new Duplicants.\n\nIf I desire to grow the colony further, I'll have no choice but to print doubles of existing individuals. Hopefully it won't throw anyone into an existential crisis to live side by side with their double.\n\nPerhaps I could give the new clones nicknames to reduce the confusion.\n\n";
+				}
+
+				public class RECBUILDINGS
+				{
+					public static LocString TITLE = "Recreation";
+
+					public static LocString BODY = "My Duplicants continue to grow and learn so much and I can’t help but take pride in their accomplishments. But as their skills increase, they require more stimulus to keep their morale high. All work and no play is making an unhappy colony. \n\nI will have to provide more elaborate recreational activities for my Duplicants to amuse themselves if I want my colony to grow. Recreation time makes for a happy Duplicant, and a happy Duplicant is a productive Duplicant.\n\n";
 				}
 
 				public class STRANGERELICS
@@ -1967,6 +1992,17 @@ namespace STRINGS
 				" and ",
 				BUILDINGS.PREFABS.ESPRESSOMACHINE.NAME,
 				" improve a Duplicants morale when used. Duplicants need recreation time in their schedules to use these buildings.\n\n"
+			});
+
+			public static LocString HEADER_3 = "Overjoyed Responses";
+
+			public static LocString PARAGRAPH_3 = string.Concat(new string[]
+			{
+				"If a Duplicant has a very high Morale value, they will spontaneously display an Overjoyed Response. Each Duplicant has a different Overjoyed Behavior - but all overjoyed reponses are good. Some will positively affect Building ",
+				UI.PRE_KEYWORD,
+				"Decor",
+				UI.PST_KEYWORD,
+				", others will positively affect Duplicant morale or productivity.\n\n"
 			});
 		}
 

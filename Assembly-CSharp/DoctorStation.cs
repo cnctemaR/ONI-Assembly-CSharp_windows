@@ -76,6 +76,11 @@ public class DoctorStation : Workable
 		this.smi.sm.hasPatient.Set(false, this.smi);
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
+	}
+
 	public void SetHasDoctor(bool has)
 	{
 		this.smi.sm.hasDoctor.Set(has, this.smi);

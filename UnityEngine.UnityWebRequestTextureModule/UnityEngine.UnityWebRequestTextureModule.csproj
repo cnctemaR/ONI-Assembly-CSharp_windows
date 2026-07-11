@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3BA6C270-DFBA-47E9-A32A-96B956ADD3DC}</ProjectGuid>
+    <ProjectGuid>{AD3FBB54-0048-476E-A8A3-3303790EB7A9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestTextureModule</AssemblyName>
@@ -20,27 +20,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD396}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB763}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD39B}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB768}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3AE}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB77B}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3B7}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB784}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3C4}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB791}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{3BA6C270-DFBA-47E9-A32A-96B956ADD3DB}</Project>
+      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB7A8}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

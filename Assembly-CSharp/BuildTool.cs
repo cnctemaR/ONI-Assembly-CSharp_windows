@@ -335,7 +335,7 @@ public class BuildTool : DragTool
 				if (this.placeSound != null)
 				{
 					this.buildingCount = this.buildingCount % 14 + 1;
-					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f);
+					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f, false);
 					if (this.def.AudioSize == "small")
 					{
 						eventInstance.setParameterValue("tileCount", (float)this.buildingCount);

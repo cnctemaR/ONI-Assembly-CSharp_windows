@@ -205,6 +205,20 @@ namespace STRINGS
 				public static LocString DESC = "Useful techniques to manage critter populations in the colony.";
 			}
 
+			public class FOODREPURPOSING
+			{
+				public static LocString NAME = UI.FormatAsLink("Food Repurposing", "FOODREPURPOSING");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Blend that leftover ",
+					UI.FormatAsLink("Food", "FOOD"),
+					" into a ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					" boosting slurry."
+				});
+			}
+
 			public class FINEDINING
 			{
 				public static LocString NAME = UI.FormatAsLink("Meal Preparation", "FINEDINING");
@@ -231,6 +245,13 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Improved Ventilation", "IMPROVEDGASPIPING");
 
 				public static LocString DESC = UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " infrastructure capable of withstanding more intense conditions, such as " + UI.FormatAsLink("Heat", "Heat") + " and pressure.";
+			}
+
+			public class FLOWREDIRECTION
+			{
+				public static LocString NAME = UI.FormatAsLink("Flow Redirection", "FLOWREDIRECTION");
+
+				public static LocString DESC = "Balance on irrigated concave platforms for a " + UI.FormatAsLink("Morale", "MORALE") + " boost.";
 			}
 
 			public class TEMPERATUREMODULATION
@@ -436,6 +457,20 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Home Luxuries", "LUXURY");
 
 				public static LocString DESC = "Luxury amenities for advanced " + UI.FormatAsLink("Stress", "STRESS") + " reduction.";
+			}
+
+			public class ENVIRONMENTALAPPRECIATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Environmental Appreciation", "ENVIRONMENTALAPPRECIATION");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Improve ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					" by lazing around in ",
+					UI.FormatAsLink("Light", "LIGHT"),
+					" with a high Lux value."
+				});
 			}
 
 			public class FINEART

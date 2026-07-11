@@ -12,10 +12,15 @@ namespace Steamworks
 		k_EControllerSource_Switch,
 		k_EControllerSource_LeftTrigger,
 		k_EControllerSource_RightTrigger,
+		k_EControllerSource_LeftBumper,
+		k_EControllerSource_RightBumper,
 		k_EControllerSource_Gyro,
 		k_EControllerSource_CenterTrackpad,
 		k_EControllerSource_RightJoystick,
 		k_EControllerSource_DPad,
+		k_EControllerSource_Key,
+		k_EControllerSource_Mouse,
+		k_EControllerSource_LeftGyro,
 		k_EControllerSource_Count
 	}
 }

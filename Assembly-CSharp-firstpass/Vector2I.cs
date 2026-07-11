@@ -133,8 +133,17 @@ public struct Vector2I : IComparable<Vector2I>, IEquatable<Vector2I>
 
 	public override bool Equals(object obj)
 	{
-		Vector2I vector2I = (Vector2I)obj;
-		return vector2I.x == this.x && vector2I.y == this.y;
+		bool flag;
+		try
+		{
+			Vector2I vector2I = (Vector2I)obj;
+			flag = vector2I.x == this.x && vector2I.y == this.y;
+		}
+		catch
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public bool Equals(Vector2I v)

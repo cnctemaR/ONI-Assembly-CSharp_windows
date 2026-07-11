@@ -18,6 +18,7 @@ public class ImmigrantScreen : CharacterSelectionController
 	protected override void OnSpawn()
 	{
 		this.activateOnSpawn = false;
+		this.ConsumeMouseScroll = false;
 		base.OnSpawn();
 		base.IsStarterMinion = false;
 		this.rejectButton.onClick += this.OnRejectAll;
@@ -105,7 +106,6 @@ public class ImmigrantScreen : CharacterSelectionController
 		this.containers.Clear();
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
-		MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
 		MusicManager.instance.PlaySong("Stinger_NewDuplicant", false);
 	}
 
@@ -132,7 +132,6 @@ public class ImmigrantScreen : CharacterSelectionController
 		base.Show(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
-		MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
 	}
 
 	[SerializeField]

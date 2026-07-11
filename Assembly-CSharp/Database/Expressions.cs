@@ -24,6 +24,12 @@ namespace Database
 			this.Tired = new Expression("Tired", this, faces.Tired);
 			this.Unhappy = new Expression("Unhappy", this, faces.Uncomfortable);
 			this.Uncomfortable = new Expression("Uncomfortable", this, faces.Uncomfortable);
+			this.Productive = new Expression("Productive", this, faces.Productive);
+			this.Determined = new Expression("Determined", this, faces.Determined);
+			this.Sticker = new Expression("Sticker", this, faces.Sticker);
+			this.Balloon = new Expression("Sticker", this, faces.Balloon);
+			this.Sparkle = new Expression("Sticker", this, faces.Sparkle);
+			this.Tickled = new Expression("Tickled", this, faces.Tickled);
 			this.Happy = new Expression("Happy", this, faces.Happy);
 			this.Relief = new Expression("Relief", this, faces.Happy);
 			this.Neutral = new Expression("Neutral", this, faces.Neutral);
@@ -70,5 +76,17 @@ namespace Database
 		public Expression SickCold;
 
 		public Expression Relief;
+
+		public Expression Productive;
+
+		public Expression Determined;
+
+		public Expression Sticker;
+
+		public Expression Balloon;
+
+		public Expression Sparkle;
+
+		public Expression Tickled;
 	}
 }

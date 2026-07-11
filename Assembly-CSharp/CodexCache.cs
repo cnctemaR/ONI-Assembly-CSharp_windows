@@ -14,7 +14,7 @@ public static class CodexCache
 		return linkID;
 	}
 
-	public static void Init()
+	public static void CodexCacheInit()
 	{
 		CodexCache.entries = new Dictionary<string, CodexEntry>();
 		CodexCache.subEntries = new Dictionary<string, SubEntry>();
@@ -110,7 +110,7 @@ public static class CodexCache
 			}
 			for (int i = 0; i < keyValuePair2.Value.subEntries.Count; i++)
 			{
-				keyValuePair2.Value.contentContainers.AddRange(keyValuePair2.Value.subEntries[i].contentContainers);
+				keyValuePair2.Value.AddContentContainerRange(keyValuePair2.Value.subEntries[i].contentContainers);
 			}
 		}
 		CodexEntryGenerator.PopulateCategoryEntries(list, delegate(CodexEntry a, CodexEntry b)
@@ -358,10 +358,13 @@ public static class CodexCache
 		id = CodexCache.FormatLinkID(entry.id);
 		entry.id = id;
 		CodexEntry codexEntry = CodexCache.entries[id];
-		codexEntry.customContentLength = entry.contentContainers.Count;
-		for (int i = entry.contentContainers.Count - 1; i >= 0; i--)
+		for (int i = 0; i < entry.log.modificationRecords.Count; i++)
 		{
-			codexEntry.contentContainers.Insert(0, entry.contentContainers[i]);
+		}
+		codexEntry.customContentLength = entry.contentContainers.Count;
+		for (int j = entry.contentContainers.Count - 1; j >= 0; j--)
+		{
+			codexEntry.InsertContentContainer(0, entry.contentContainers[j]);
 		}
 		if (entry.disabled)
 		{

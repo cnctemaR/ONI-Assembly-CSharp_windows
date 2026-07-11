@@ -237,6 +237,10 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 					{
 						base.transform.SetPosition(Grid.CellToPosCBC(num2, Grid.SceneLayer.Move));
 						base.transform.GetComponent<Navigator>().Stop(false);
+						if (base.gameObject.HasTag(GameTags.Incapacitated))
+						{
+							base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+						}
 						this.UpdateFalling();
 						this.GoTo(base.sm.standing);
 						return;

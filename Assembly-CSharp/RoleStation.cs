@@ -8,6 +8,7 @@ public class RoleStation : Workable, IEffectDescriptor
 	{
 		base.OnPrefabInit();
 		this.synchronizeAnims = true;
+		this.UpdateStatusItemDelegate = new Action<object>(this.UpdateSkillPointAvailableStatusItem);
 	}
 
 	protected override void OnSpawn()
@@ -18,8 +19,8 @@ public class RoleStation : Workable, IEffectDescriptor
 		this.smi.StartSM();
 		base.SetWorkTime(7.53f);
 		this.resetProgressOnStop = true;
-		this.subscriptions.Add(base.Subscribe<RoleStation>(-1523247426, RoleStation.OnUpdateDelegate));
-		this.subscriptions.Add(base.Subscribe<RoleStation>(1505456302, RoleStation.OnUpdateDelegate));
+		this.subscriptions.Add(Game.Instance.Subscribe(-1523247426, this.UpdateStatusItemDelegate));
+		this.subscriptions.Add(Game.Instance.Subscribe(1505456302, this.UpdateStatusItemDelegate));
 		this.UpdateSkillPointAvailableStatusItem(null);
 	}
 
@@ -38,13 +39,16 @@ public class RoleStation : Workable, IEffectDescriptor
 			{
 				object obj = enumerator.Current;
 				MinionResume minionResume = (MinionResume)obj;
-				if (minionResume.TotalSkillPointsGained - minionResume.SkillsMastered > 0)
+				if (!minionResume.HasTag(GameTags.Dead))
 				{
-					if (this.skillPointAvailableStatusItem == Guid.Empty)
+					if (minionResume.TotalSkillPointsGained - minionResume.SkillsMastered > 0)
 					{
-						this.skillPointAvailableStatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SkillPointsAvailable, null);
+						if (this.skillPointAvailableStatusItem == Guid.Empty)
+						{
+							this.skillPointAvailableStatusItem = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.SkillPointsAvailable, null);
+						}
+						return;
 					}
-					return;
 				}
 			}
 		}
@@ -106,12 +110,9 @@ public class RoleStation : Workable, IEffectDescriptor
 
 	private Guid skillPointAvailableStatusItem;
 
-	private List<int> subscriptions = new List<int>();
+	private Action<object> UpdateStatusItemDelegate;
 
-	private static readonly EventSystem.IntraObjectHandler<RoleStation> OnUpdateDelegate = new EventSystem.IntraObjectHandler<RoleStation>(delegate(RoleStation component, object data)
-	{
-		component.UpdateSkillPointAvailableStatusItem(data);
-	});
+	private List<int> subscriptions = new List<int>();
 
 	public class RoleStationSM : GameStateMachine<RoleStation.RoleStationSM, RoleStation.RoleStationSM.Instance, RoleStation>
 	{

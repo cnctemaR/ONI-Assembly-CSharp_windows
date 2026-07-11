@@ -157,19 +157,19 @@ public class PlanScreen : KIconToggleMenu
 			int num = 0;
 			this.tagCategoryMap = new Dictionary<Tag, HashedString>();
 			this.tagOrderMap = new Dictionary<Tag, int>();
-			if (global::TUNING.BUILDINGS.PLANORDER.Count > 12)
+			if (global::TUNING.BUILDINGS.PLANORDER.Count > 14)
 			{
 				DebugUtil.LogWarningArgs(new object[]
 				{
 					"Insufficient keys to cover root plan menu",
-					"Max of 12 keys supported but TUNING.BUILDINGS.PLANORDER has " + global::TUNING.BUILDINGS.PLANORDER.Count
+					"Max of 14 keys supported but TUNING.BUILDINGS.PLANORDER has " + global::TUNING.BUILDINGS.PLANORDER.Count
 				});
 			}
 			this.toggleEntries.Clear();
 			for (int i = 0; i < global::TUNING.BUILDINGS.PLANORDER.Count; i++)
 			{
 				PlanScreen.PlanInfo planInfo = global::TUNING.BUILDINGS.PLANORDER[i];
-				global::Action action = ((i >= 12) ? global::Action.NumActions : (global::Action.Plan1 + i));
+				global::Action action = ((i >= 14) ? global::Action.NumActions : (global::Action.Plan1 + i));
 				string text = PlanScreen.iconNameMap[planInfo.category];
 				string text2 = HashCache.Get().Get(planInfo.category).ToUpper();
 				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(UI.StripLinkFormatting(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".NAME")), text, planInfo.category, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".TOOLTIP"), string.Empty);
@@ -384,14 +384,14 @@ public class PlanScreen : KIconToggleMenu
 												string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
 												if (sound != null)
 												{
-													EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition(), 1f);
+													EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition(), 1f, false);
 													SoundEvent.EndOneShot(eventInstance);
 												}
 											}
 											string sound2 = GlobalAssets.GetSound("NewBuildable", false);
 											if (sound2 != null)
 											{
-												EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f);
+												EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f, false);
 												eventInstance2.setParameterValue("playCount", (float)this.notificationPingCount);
 												SoundEvent.EndOneShot(eventInstance2);
 											}
@@ -685,6 +685,7 @@ public class PlanScreen : KIconToggleMenu
 
 	private bool GetToggleEntryForCategory(HashedString category, out PlanScreen.ToggleEntry toggleEntry)
 	{
+		toggleEntry = null;
 		foreach (PlanScreen.ToggleEntry toggleEntry2 in this.toggleEntries)
 		{
 			if (toggleEntry2.planCategory == category)
@@ -693,7 +694,6 @@ public class PlanScreen : KIconToggleMenu
 				return true;
 			}
 		}
-		toggleEntry = default(PlanScreen.ToggleEntry);
 		return false;
 	}
 
@@ -1136,7 +1136,7 @@ public class PlanScreen : KIconToggleMenu
 		public TextStyleSetting InactiveDeselected;
 	}
 
-	private struct ToggleEntry
+	private class ToggleEntry
 	{
 		public ToggleEntry(KIconToggleMenu.ToggleInfo toggle_info, HashedString plan_category, List<BuildingDef> building_defs, bool hideIfNotResearched)
 		{

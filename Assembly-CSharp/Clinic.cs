@@ -88,6 +88,11 @@ public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISlider
 		}
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
+	}
+
 	private Chore CreateWorkChore(ChoreType chore_type, bool allow_prioritization, bool allow_in_red_alert, PriorityScreen.PriorityClass priority_class, bool ignore_schedule_block = false)
 	{
 		return new WorkChore<Clinic>(chore_type, this, null, true, null, null, null, allow_in_red_alert, null, ignore_schedule_block, true, null, false, true, allow_prioritization, priority_class, 5, false, false);

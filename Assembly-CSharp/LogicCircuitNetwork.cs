@@ -112,7 +112,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 		}
 	}
 
-	public void SendLogicEvents(bool force_send)
+	public void SendLogicEvents(bool force_send, int id)
 	{
 		if (this.resetting)
 		{
@@ -126,12 +126,12 @@ public class LogicCircuitNetwork : UtilityNetwork
 			}
 			if (!force_send)
 			{
-				this.TriggerAudio((this.previousValue < 0) ? 0 : this.previousValue);
+				this.TriggerAudio((this.previousValue < 0) ? 0 : this.previousValue, id);
 			}
 		}
 	}
 
-	private void TriggerAudio(int old_value)
+	private void TriggerAudio(int old_value, int id)
 	{
 		SpeedControlScreen instance = SpeedControlScreen.Instance;
 		if (old_value != this.outputValue && instance != null && !instance.IsPaused)
@@ -151,7 +151,29 @@ public class LogicCircuitNetwork : UtilityNetwork
 				if (list[num] != null)
 				{
 					Vector3 position = list[num].transform.GetPosition();
-					EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Logic_Circuit_Toggle", false), position, 1f);
+					string text = "Logic_Circuit_Toggle";
+					LogicCircuitNetwork.LogicSoundPair logicSoundPair = new LogicCircuitNetwork.LogicSoundPair();
+					if (!LogicCircuitNetwork.logicSoundRegister.ContainsKey(id))
+					{
+						LogicCircuitNetwork.logicSoundRegister.Add(id, logicSoundPair);
+					}
+					else
+					{
+						logicSoundPair.playedIndex = LogicCircuitNetwork.logicSoundRegister[id].playedIndex;
+						logicSoundPair.lastPlayed = LogicCircuitNetwork.logicSoundRegister[id].lastPlayed;
+					}
+					if (logicSoundPair.playedIndex < 2)
+					{
+						LogicCircuitNetwork.logicSoundRegister[id].playedIndex = logicSoundPair.playedIndex + 1;
+					}
+					else
+					{
+						LogicCircuitNetwork.logicSoundRegister[id].playedIndex = 0;
+						LogicCircuitNetwork.logicSoundRegister[id].lastPlayed = Time.time;
+					}
+					float num2 = (Time.time - logicSoundPair.lastPlayed) / 5f;
+					EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), position, 1f);
+					eventInstance.setParameterValue("logic_volumeModifer", num2);
 					eventInstance.setParameterValue("wireCount", (float)(this.wires.Count % 24));
 					eventInstance.setParameterValue("enabled", (float)this.outputValue);
 					KFMOD.EndOneShot(eventInstance);
@@ -203,4 +225,15 @@ public class LogicCircuitNetwork : UtilityNetwork
 	private int outputValue;
 
 	private bool resetting;
+
+	public static float logicSoundLastPlayedTime = 0f;
+
+	public static Dictionary<int, LogicCircuitNetwork.LogicSoundPair> logicSoundRegister = new Dictionary<int, LogicCircuitNetwork.LogicSoundPair>();
+
+	public class LogicSoundPair
+	{
+		public int playedIndex;
+
+		public float lastPlayed;
+	}
 }

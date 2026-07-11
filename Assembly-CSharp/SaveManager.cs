@@ -109,7 +109,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(12);
+		writer.Write(15);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -122,6 +122,7 @@ public class SaveManager : KMonoBehaviour
 		this.orderedKeys.Clear();
 		this.orderedKeys.AddRange(this.sceneObjects.Keys);
 		this.orderedKeys.Remove(SaveGame.Instance.PrefabID());
+		this.orderedKeys = this.orderedKeys.OrderBy<Tag, bool>((Tag a) => a.Name == "StickerBomb").ToList<Tag>();
 		this.orderedKeys = this.orderedKeys.OrderBy<Tag, bool>((Tag a) => a.Name.Contains("UnderConstruction")).ToList<Tag>();
 		this.Write(SaveGame.Instance.PrefabID(), new List<SaveLoadRoot>(new SaveLoadRoot[] { SaveGame.Instance.GetComponent<SaveLoadRoot>() }), writer);
 		foreach (Tag tag in this.orderedKeys)
@@ -208,9 +209,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 12)
+		if (num != 7 || num2 > 15)
 		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 12, num, num2 }) });
+			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 15, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -287,7 +288,13 @@ public class SaveManager : KMonoBehaviour
 
 	public const int SAVE_MINOR_VERSION_EXPANDED_WORLD_INFO = 12;
 
-	public const int SAVE_MINOR_VERSION = 12;
+	public const int SAVE_MINOR_VERSION_BASIC_COMFORTS_FIX = 13;
+
+	public const int SAVE_MINOR_VERSION_PLATFORM_TRAIT_NAMES = 14;
+
+	public const int SAVE_MINOR_VERSION_ADD_JOY_REACTIONS = 15;
+
+	public const int SAVE_MINOR_VERSION = 15;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 

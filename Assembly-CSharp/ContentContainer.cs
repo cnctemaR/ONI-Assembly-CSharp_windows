@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization.Converters;
+using UnityEngine;
 
 public class ContentContainer
 {
@@ -24,11 +25,14 @@ public class ContentContainer
 
 	public bool showBeforeGeneratedContent { get; set; }
 
+	public GameObject go;
+
 	public enum ContentLayout
 	{
 		Vertical,
 		Horizontal,
 		Grid,
-		GridTwoColumn
+		GridTwoColumn,
+		GridTwoColumnTall
 	}
 }

@@ -8,13 +8,17 @@ namespace Steamworks
 		public static EResult GetResultStatus(SteamInventoryResult_t resultHandle)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GetResultStatus(resultHandle);
+			return NativeMethods.ISteamInventory_GetResultStatus(CSteamGameServerAPIContext.GetSteamInventory(), resultHandle);
 		}
 
 		public static bool GetResultItems(SteamInventoryResult_t resultHandle, SteamItemDetails_t[] pOutItemsArray, ref uint punOutItemsArraySize)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GetResultItems(resultHandle, pOutItemsArray, ref punOutItemsArraySize);
+			if ((long)pOutItemsArray.Length != (long)((ulong)punOutItemsArraySize))
+			{
+				throw new ArgumentException("pOutItemsArray must be the same size as punOutItemsArraySize!");
+			}
+			return NativeMethods.ISteamInventory_GetResultItems(CSteamGameServerAPIContext.GetSteamInventory(), resultHandle, pOutItemsArray, ref punOutItemsArraySize);
 		}
 
 		public static bool GetResultItemProperty(SteamInventoryResult_t resultHandle, uint unItemIndex, string pchPropertyName, out string pchValueBuffer, ref uint punValueBufferSizeOut)
@@ -24,7 +28,7 @@ namespace Steamworks
 			bool flag2;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
 			{
-				bool flag = NativeMethods.ISteamGameServerInventory_GetResultItemProperty(resultHandle, unItemIndex, utf8StringHandle, intPtr, ref punValueBufferSizeOut);
+				bool flag = NativeMethods.ISteamInventory_GetResultItemProperty(CSteamGameServerAPIContext.GetSteamInventory(), resultHandle, unItemIndex, utf8StringHandle, intPtr, ref punValueBufferSizeOut);
 				pchValueBuffer = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
 				Marshal.FreeHGlobal(intPtr);
 				flag2 = flag;
@@ -35,115 +39,119 @@ namespace Steamworks
 		public static uint GetResultTimestamp(SteamInventoryResult_t resultHandle)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GetResultTimestamp(resultHandle);
+			return NativeMethods.ISteamInventory_GetResultTimestamp(CSteamGameServerAPIContext.GetSteamInventory(), resultHandle);
 		}
 
 		public static bool CheckResultSteamID(SteamInventoryResult_t resultHandle, CSteamID steamIDExpected)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_CheckResultSteamID(resultHandle, steamIDExpected);
+			return NativeMethods.ISteamInventory_CheckResultSteamID(CSteamGameServerAPIContext.GetSteamInventory(), resultHandle, steamIDExpected);
 		}
 
 		public static void DestroyResult(SteamInventoryResult_t resultHandle)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			NativeMethods.ISteamGameServerInventory_DestroyResult(resultHandle);
+			NativeMethods.ISteamInventory_DestroyResult(CSteamGameServerAPIContext.GetSteamInventory(), resultHandle);
 		}
 
 		public static bool GetAllItems(out SteamInventoryResult_t pResultHandle)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GetAllItems(out pResultHandle);
+			return NativeMethods.ISteamInventory_GetAllItems(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle);
 		}
 
 		public static bool GetItemsByID(out SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t[] pInstanceIDs, uint unCountInstanceIDs)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GetItemsByID(out pResultHandle, pInstanceIDs, unCountInstanceIDs);
+			return NativeMethods.ISteamInventory_GetItemsByID(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, pInstanceIDs, unCountInstanceIDs);
 		}
 
 		public static bool SerializeResult(SteamInventoryResult_t resultHandle, byte[] pOutBuffer, out uint punOutBufferSize)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_SerializeResult(resultHandle, pOutBuffer, out punOutBufferSize);
+			return NativeMethods.ISteamInventory_SerializeResult(CSteamGameServerAPIContext.GetSteamInventory(), resultHandle, pOutBuffer, out punOutBufferSize);
 		}
 
 		public static bool DeserializeResult(out SteamInventoryResult_t pOutResultHandle, byte[] pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE = false)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_DeserializeResult(out pOutResultHandle, pBuffer, unBufferSize, bRESERVED_MUST_BE_FALSE);
+			return NativeMethods.ISteamInventory_DeserializeResult(CSteamGameServerAPIContext.GetSteamInventory(), out pOutResultHandle, pBuffer, unBufferSize, bRESERVED_MUST_BE_FALSE);
 		}
 
 		public static bool GenerateItems(out SteamInventoryResult_t pResultHandle, SteamItemDef_t[] pArrayItemDefs, uint[] punArrayQuantity, uint unArrayLength)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GenerateItems(out pResultHandle, pArrayItemDefs, punArrayQuantity, unArrayLength);
+			return NativeMethods.ISteamInventory_GenerateItems(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, pArrayItemDefs, punArrayQuantity, unArrayLength);
 		}
 
 		public static bool GrantPromoItems(out SteamInventoryResult_t pResultHandle)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GrantPromoItems(out pResultHandle);
+			return NativeMethods.ISteamInventory_GrantPromoItems(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle);
 		}
 
 		public static bool AddPromoItem(out SteamInventoryResult_t pResultHandle, SteamItemDef_t itemDef)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_AddPromoItem(out pResultHandle, itemDef);
+			return NativeMethods.ISteamInventory_AddPromoItem(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, itemDef);
 		}
 
 		public static bool AddPromoItems(out SteamInventoryResult_t pResultHandle, SteamItemDef_t[] pArrayItemDefs, uint unArrayLength)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_AddPromoItems(out pResultHandle, pArrayItemDefs, unArrayLength);
+			return NativeMethods.ISteamInventory_AddPromoItems(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, pArrayItemDefs, unArrayLength);
 		}
 
 		public static bool ConsumeItem(out SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_ConsumeItem(out pResultHandle, itemConsume, unQuantity);
+			return NativeMethods.ISteamInventory_ConsumeItem(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, itemConsume, unQuantity);
 		}
 
 		public static bool ExchangeItems(out SteamInventoryResult_t pResultHandle, SteamItemDef_t[] pArrayGenerate, uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, SteamItemInstanceID_t[] pArrayDestroy, uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_ExchangeItems(out pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
+			return NativeMethods.ISteamInventory_ExchangeItems(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
 		}
 
 		public static bool TransferItemQuantity(out SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t itemIdSource, uint unQuantity, SteamItemInstanceID_t itemIdDest)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_TransferItemQuantity(out pResultHandle, itemIdSource, unQuantity, itemIdDest);
+			return NativeMethods.ISteamInventory_TransferItemQuantity(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, itemIdSource, unQuantity, itemIdDest);
 		}
 
 		public static void SendItemDropHeartbeat()
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			NativeMethods.ISteamGameServerInventory_SendItemDropHeartbeat();
+			NativeMethods.ISteamInventory_SendItemDropHeartbeat(CSteamGameServerAPIContext.GetSteamInventory());
 		}
 
 		public static bool TriggerItemDrop(out SteamInventoryResult_t pResultHandle, SteamItemDef_t dropListDefinition)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_TriggerItemDrop(out pResultHandle, dropListDefinition);
+			return NativeMethods.ISteamInventory_TriggerItemDrop(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, dropListDefinition);
 		}
 
 		public static bool TradeItems(out SteamInventoryResult_t pResultHandle, CSteamID steamIDTradePartner, SteamItemInstanceID_t[] pArrayGive, uint[] pArrayGiveQuantity, uint nArrayGiveLength, SteamItemInstanceID_t[] pArrayGet, uint[] pArrayGetQuantity, uint nArrayGetLength)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_TradeItems(out pResultHandle, steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
+			return NativeMethods.ISteamInventory_TradeItems(CSteamGameServerAPIContext.GetSteamInventory(), out pResultHandle, steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
 		}
 
 		public static bool LoadItemDefinitions()
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_LoadItemDefinitions();
+			return NativeMethods.ISteamInventory_LoadItemDefinitions(CSteamGameServerAPIContext.GetSteamInventory());
 		}
 
-		public static bool GetItemDefinitionIDs(SteamItemDef_t[] pItemDefIDs, out uint punItemDefIDsArraySize)
+		public static bool GetItemDefinitionIDs(SteamItemDef_t[] pItemDefIDs, ref uint punItemDefIDsArraySize)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GetItemDefinitionIDs(pItemDefIDs, out punItemDefIDsArraySize);
+			if ((long)pItemDefIDs.Length != (long)((ulong)punItemDefIDsArraySize))
+			{
+				throw new ArgumentException("pItemDefIDs must be the same size as punItemDefIDsArraySize!");
+			}
+			return NativeMethods.ISteamInventory_GetItemDefinitionIDs(CSteamGameServerAPIContext.GetSteamInventory(), pItemDefIDs, ref punItemDefIDsArraySize);
 		}
 
 		public static bool GetItemDefinitionProperty(SteamItemDef_t iDefinition, string pchPropertyName, out string pchValueBuffer, ref uint punValueBufferSizeOut)
@@ -153,7 +161,7 @@ namespace Steamworks
 			bool flag2;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
 			{
-				bool flag = NativeMethods.ISteamGameServerInventory_GetItemDefinitionProperty(iDefinition, utf8StringHandle, intPtr, ref punValueBufferSizeOut);
+				bool flag = NativeMethods.ISteamInventory_GetItemDefinitionProperty(CSteamGameServerAPIContext.GetSteamInventory(), iDefinition, utf8StringHandle, intPtr, ref punValueBufferSizeOut);
 				pchValueBuffer = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
 				Marshal.FreeHGlobal(intPtr);
 				flag2 = flag;
@@ -164,13 +172,129 @@ namespace Steamworks
 		public static SteamAPICall_t RequestEligiblePromoItemDefinitionsIDs(CSteamID steamID)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return (SteamAPICall_t)NativeMethods.ISteamGameServerInventory_RequestEligiblePromoItemDefinitionsIDs(steamID);
+			return (SteamAPICall_t)NativeMethods.ISteamInventory_RequestEligiblePromoItemDefinitionsIDs(CSteamGameServerAPIContext.GetSteamInventory(), steamID);
 		}
 
 		public static bool GetEligiblePromoItemDefinitionIDs(CSteamID steamID, SteamItemDef_t[] pItemDefIDs, ref uint punItemDefIDsArraySize)
 		{
 			InteropHelp.TestIfAvailableGameServer();
-			return NativeMethods.ISteamGameServerInventory_GetEligiblePromoItemDefinitionIDs(steamID, pItemDefIDs, ref punItemDefIDsArraySize);
+			if ((long)pItemDefIDs.Length != (long)((ulong)punItemDefIDsArraySize))
+			{
+				throw new ArgumentException("pItemDefIDs must be the same size as punItemDefIDsArraySize!");
+			}
+			return NativeMethods.ISteamInventory_GetEligiblePromoItemDefinitionIDs(CSteamGameServerAPIContext.GetSteamInventory(), steamID, pItemDefIDs, ref punItemDefIDsArraySize);
+		}
+
+		public static SteamAPICall_t StartPurchase(SteamItemDef_t[] pArrayItemDefs, uint[] punArrayQuantity, uint unArrayLength)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return (SteamAPICall_t)NativeMethods.ISteamInventory_StartPurchase(CSteamGameServerAPIContext.GetSteamInventory(), pArrayItemDefs, punArrayQuantity, unArrayLength);
+		}
+
+		public static SteamAPICall_t RequestPrices()
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return (SteamAPICall_t)NativeMethods.ISteamInventory_RequestPrices(CSteamGameServerAPIContext.GetSteamInventory());
+		}
+
+		public static uint GetNumItemsWithPrices()
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return NativeMethods.ISteamInventory_GetNumItemsWithPrices(CSteamGameServerAPIContext.GetSteamInventory());
+		}
+
+		public static bool GetItemsWithPrices(SteamItemDef_t[] pArrayItemDefs, ulong[] pCurrentPrices, ulong[] pBasePrices, uint unArrayLength)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			if ((long)pArrayItemDefs.Length != (long)((ulong)unArrayLength))
+			{
+				throw new ArgumentException("pArrayItemDefs must be the same size as unArrayLength!");
+			}
+			if ((long)pCurrentPrices.Length != (long)((ulong)unArrayLength))
+			{
+				throw new ArgumentException("pCurrentPrices must be the same size as unArrayLength!");
+			}
+			if ((long)pBasePrices.Length != (long)((ulong)unArrayLength))
+			{
+				throw new ArgumentException("pBasePrices must be the same size as unArrayLength!");
+			}
+			return NativeMethods.ISteamInventory_GetItemsWithPrices(CSteamGameServerAPIContext.GetSteamInventory(), pArrayItemDefs, pCurrentPrices, pBasePrices, unArrayLength);
+		}
+
+		public static bool GetItemPrice(SteamItemDef_t iDefinition, out ulong pCurrentPrice, out ulong pBasePrice)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return NativeMethods.ISteamInventory_GetItemPrice(CSteamGameServerAPIContext.GetSteamInventory(), iDefinition, out pCurrentPrice, out pBasePrice);
+		}
+
+		public static SteamInventoryUpdateHandle_t StartUpdateProperties()
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return (SteamInventoryUpdateHandle_t)NativeMethods.ISteamInventory_StartUpdateProperties(CSteamGameServerAPIContext.GetSteamInventory());
+		}
+
+		public static bool RemoveProperty(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
+			{
+				flag = NativeMethods.ISteamInventory_RemoveProperty(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle);
+			}
+			return flag;
+		}
+
+		public static bool SetProperty(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, string pchPropertyValue)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
+			{
+				using (InteropHelp.UTF8StringHandle utf8StringHandle2 = new InteropHelp.UTF8StringHandle(pchPropertyValue))
+				{
+					flag = NativeMethods.ISteamInventory_SetProperty(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, utf8StringHandle2);
+				}
+			}
+			return flag;
+		}
+
+		public static bool SetProperty(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, bool bValue)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
+			{
+				flag = NativeMethods.ISteamInventory_SetProperty0(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, bValue);
+			}
+			return flag;
+		}
+
+		public static bool SetProperty1(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, long nValue)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
+			{
+				flag = NativeMethods.ISteamInventory_SetProperty1(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, nValue);
+			}
+			return flag;
+		}
+
+		public static bool SetProperty2(SteamInventoryUpdateHandle_t handle, SteamItemInstanceID_t nItemID, string pchPropertyName, float flValue)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			bool flag;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
+			{
+				flag = NativeMethods.ISteamInventory_SetProperty2(CSteamGameServerAPIContext.GetSteamInventory(), handle, nItemID, utf8StringHandle, flValue);
+			}
+			return flag;
+		}
+
+		public static bool SubmitUpdateProperties(SteamInventoryUpdateHandle_t handle, out SteamInventoryResult_t pResultHandle)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return NativeMethods.ISteamInventory_SubmitUpdateProperties(CSteamGameServerAPIContext.GetSteamInventory(), handle, out pResultHandle);
 		}
 	}
 }

@@ -338,10 +338,6 @@ public class DebugHandler : IInputHandler
 				{
 					AudioDebug.Get().ToggleMusic();
 				}
-				else if (e.TryConsume(global::Action.DebugRiverTest))
-				{
-					Scenario.Instance.SetupRiverTest();
-				}
 				else if (e.TryConsume(global::Action.DebugTileTest))
 				{
 					Scenario.Instance.SetupTileTest();
@@ -453,20 +449,27 @@ public class DebugHandler : IInputHandler
 
 	public static void ToggleScreenshotMode()
 	{
-		DebugHandler.SetHideUI(!DebugHandler.HideUI);
+		DebugHandler.ScreenshotMode = !DebugHandler.ScreenshotMode;
+		DebugHandler.UpdateUI();
 		if (CameraController.Instance != null)
 		{
-			CameraController.Instance.EnableFreeCamera(DebugHandler.HideUI);
+			CameraController.Instance.EnableFreeCamera(DebugHandler.ScreenshotMode);
 		}
 		if (KScreenManager.Instance != null)
 		{
-			KScreenManager.Instance.DisableInput(DebugHandler.HideUI);
+			KScreenManager.Instance.DisableInput(DebugHandler.ScreenshotMode);
 		}
 	}
 
-	public static void SetHideUI(bool hide)
+	public static void SetTimelapseMode(bool enabled)
 	{
-		DebugHandler.HideUI = hide;
+		DebugHandler.TimelapseMode = enabled;
+		DebugHandler.UpdateUI();
+	}
+
+	private static void UpdateUI()
+	{
+		DebugHandler.HideUI = DebugHandler.TimelapseMode || DebugHandler.ScreenshotMode;
 		float num = ((!DebugHandler.HideUI) ? 1f : 0f);
 		GameScreenManager.Instance.ssHoverTextCanvas.GetComponent<CanvasGroup>().alpha = num;
 		GameScreenManager.Instance.ssCameraCanvas.GetComponent<CanvasGroup>().alpha = num;
@@ -482,6 +485,10 @@ public class DebugHandler : IInputHandler
 	public static bool SelectInEditor;
 
 	public static bool DebugPathFinding;
+
+	public static bool ScreenshotMode;
+
+	public static bool TimelapseMode;
 
 	public static bool HideUI;
 

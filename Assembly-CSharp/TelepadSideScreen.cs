@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Database;
 using STRINGS;
@@ -18,8 +19,7 @@ public class TelepadSideScreen : SideScreenContent
 		this.viewColonySummaryBtn.onClick += delegate
 		{
 			this.newAchievementsEarned.gameObject.SetActive(false);
-			RetireColonyUtility.SaveColonySummaryData();
-			MainMenu.ActivateRetiredColoniesScreen(PauseScreen.Instance.transform.parent.gameObject, SaveGame.Instance.BaseName, null);
+			MainMenu.ActivateRetiredColoniesScreenFromData(PauseScreen.Instance.transform.parent.gameObject, RetireColonyUtility.GetCurrentColonyRetiredColonyData());
 		};
 		this.openRolesScreenButton.onClick += delegate
 		{
@@ -76,6 +76,7 @@ public class TelepadSideScreen : SideScreenContent
 			}
 			this.UpdateVictoryConditions();
 			this.UpdateAchievementsUnlocked();
+			this.UpdateSkills();
 		}
 	}
 
@@ -142,6 +143,37 @@ public class TelepadSideScreen : SideScreenContent
 		}
 	}
 
+	private void UpdateSkills()
+	{
+		bool flag = false;
+		IEnumerator enumerator = Components.MinionResumes.GetEnumerator();
+		try
+		{
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				MinionResume minionResume = (MinionResume)obj;
+				if (!minionResume.HasTag(GameTags.Dead))
+				{
+					if (minionResume.TotalSkillPointsGained - minionResume.SkillsMastered > 0)
+					{
+						flag = true;
+						break;
+					}
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
+		}
+		this.skillPointsAvailable.gameObject.SetActive(flag);
+	}
+
 	[SerializeField]
 	private LocText timeLabel;
 
@@ -159,6 +191,9 @@ public class TelepadSideScreen : SideScreenContent
 
 	[SerializeField]
 	private KButton openRolesScreenButton;
+
+	[SerializeField]
+	private Image skillPointsAvailable;
 
 	[SerializeField]
 	private GameObject victoryConditionsContainer;

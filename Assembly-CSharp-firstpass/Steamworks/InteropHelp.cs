@@ -15,7 +15,7 @@ namespace Steamworks
 		public static void TestIfAvailableClient()
 		{
 			InteropHelp.TestIfPlatformSupported();
-			if (NativeMethods.SteamClient() == IntPtr.Zero)
+			if (CSteamAPIContext.GetSteamClient() == IntPtr.Zero && !CSteamAPIContext.Init())
 			{
 				throw new InvalidOperationException("Steamworks is not initialized.");
 			}
@@ -24,9 +24,9 @@ namespace Steamworks
 		public static void TestIfAvailableGameServer()
 		{
 			InteropHelp.TestIfPlatformSupported();
-			if (NativeMethods.SteamGameServerClient() == IntPtr.Zero)
+			if (CSteamGameServerAPIContext.GetSteamClient() == IntPtr.Zero && !CSteamGameServerAPIContext.Init())
 			{
-				throw new InvalidOperationException("Steamworks is not initialized.");
+				throw new InvalidOperationException("Steamworks GameServer is not initialized.");
 			}
 		}
 

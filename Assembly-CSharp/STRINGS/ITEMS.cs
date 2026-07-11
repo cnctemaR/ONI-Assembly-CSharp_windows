@@ -394,14 +394,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Omelette", "COOKEDEGG");
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"Fluffed and folded ",
-					UI.PRE_KEYWORD,
-					"Egg",
-					UI.PST_KEYWORD,
-					" innards.\n\nIt turns out you do, in fact, have to break a few eggs to make it."
-				});
+				public static LocString DESC = "Fluffed and folded Egg innards.\n\nIt turns out you do, in fact, have to break a few eggs to make it.";
 
 				public static LocString RECIPEDESC = "Fluffed and folded egg innards.";
 			}
@@ -533,16 +526,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Muckroot", "BASICFORAGEPLANT");
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"A seedless fruit with an upsettingly bland aftertaste.\n\nIt cannot be replanted.\n\nDigging up ",
-					UI.PRE_KEYWORD,
-					"Buried Objects",
-					UI.PST_KEYWORD,
-					" may uncover a ",
-					ITEMS.FOOD.BASICFORAGEPLANT.NAME,
-					"."
-				});
+				public static LocString DESC = "A seedless fruit with an upsettingly bland aftertaste.\n\nIt cannot be replanted.\n\nDigging up Buried Objects may uncover a " + ITEMS.FOOD.BASICFORAGEPLANT.NAME + ".";
 			}
 
 			public class FORESTFORAGEPLANT

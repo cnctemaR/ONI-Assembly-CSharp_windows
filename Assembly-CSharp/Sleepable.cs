@@ -36,7 +36,7 @@ public class Sleepable : Workable
 		return Sleepable.normalWorkAnims;
 	}
 
-	public override HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
+	public override HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (base.GetComponent<Building>() != null && component != null && component.CurrentHat != null)
@@ -104,6 +104,11 @@ public class Sleepable : Workable
 		}
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
@@ -129,7 +134,7 @@ public class Sleepable : Workable
 
 	private static readonly HashedString[] hatWorkAnims = new HashedString[] { "hat_pre", "working_loop" };
 
-	private static readonly HashedString normalWorkPstAnim = "working_pst";
+	private static readonly HashedString[] normalWorkPstAnim = new HashedString[] { "working_pst" };
 
-	private static readonly HashedString hatWorkPstAnim = "hat_pst";
+	private static readonly HashedString[] hatWorkPstAnim = new HashedString[] { "hat_pst" };
 }

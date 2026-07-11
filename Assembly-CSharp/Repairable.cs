@@ -24,8 +24,8 @@ public class Repairable : Workable
 		this.faceTargetWhenWorking = true;
 		this.multitoolContext = "build";
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
-		this.workingPstComplete = HashedString.Invalid;
-		this.workingPstFailed = HashedString.Invalid;
+		this.workingPstComplete = null;
+		this.workingPstFailed = null;
 	}
 
 	protected override void OnSpawn()

@@ -82,8 +82,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Storing;
 		this.resetProgressOnStop = true;
 		this.synchronizeAnims = false;
-		this.workingPstComplete = HashedString.Invalid;
-		this.workingPstFailed = HashedString.Invalid;
+		this.workingPstComplete = null;
+		this.workingPstFailed = null;
 	}
 
 	[OnDeserialized]

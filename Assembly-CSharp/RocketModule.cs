@@ -112,7 +112,7 @@ public class RocketModule : KMonoBehaviour
 		if (this.conditionManager != null && !App.IsExiting && !KMonoBehaviour.isLoadingScene)
 		{
 			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.conditionManager);
-			this.conditionManager.DEBUG_TraceModuleDestruction(base.name, spacecraftFromLaunchConditionManager.state.ToString(), new StackTrace(true).ToString());
+			this.conditionManager.DEBUG_TraceModuleDestruction(base.name, (spacecraftFromLaunchConditionManager != null) ? spacecraftFromLaunchConditionManager.state.ToString() : "null spacecraft", new StackTrace(true).ToString());
 		}
 	}
 
@@ -152,7 +152,11 @@ public class RocketModule : KMonoBehaviour
 		{
 			GameComps.StructureTemperatures.Disable(handle);
 		}
-		this.ToggleComponent(typeof(ManualDeliveryKG), false);
+		ManualDeliveryKG[] components = base.GetComponents<ManualDeliveryKG>();
+		foreach (ManualDeliveryKG manualDeliveryKG in components)
+		{
+			manualDeliveryKG.Pause(true, "Rocket in space");
+		}
 		this.ToggleComponent(typeof(ElementConsumer), false);
 		this.ToggleComponent(typeof(ElementConverter), false);
 		this.ToggleComponent(typeof(ConduitDispenser), false);
@@ -189,7 +193,11 @@ public class RocketModule : KMonoBehaviour
 		{
 			GameComps.StructureTemperatures.Enable(handle);
 		}
-		this.ToggleComponent(typeof(ManualDeliveryKG), true);
+		ManualDeliveryKG[] components = base.GetComponents<ManualDeliveryKG>();
+		foreach (ManualDeliveryKG manualDeliveryKG in components)
+		{
+			manualDeliveryKG.Pause(false, "landed");
+		}
 		this.ToggleComponent(typeof(ElementConsumer), true);
 		this.ToggleComponent(typeof(ElementConverter), true);
 		this.ToggleComponent(typeof(ConduitDispenser), true);

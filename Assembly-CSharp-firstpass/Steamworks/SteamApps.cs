@@ -8,74 +8,74 @@ namespace Steamworks
 		public static bool BIsSubscribed()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsSubscribed();
+			return NativeMethods.ISteamApps_BIsSubscribed(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static bool BIsLowViolence()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsLowViolence();
+			return NativeMethods.ISteamApps_BIsLowViolence(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static bool BIsCybercafe()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsCybercafe();
+			return NativeMethods.ISteamApps_BIsCybercafe(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static bool BIsVACBanned()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsVACBanned();
+			return NativeMethods.ISteamApps_BIsVACBanned(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static string GetCurrentGameLanguage()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return InteropHelp.PtrToStringUTF8(NativeMethods.ISteamApps_GetCurrentGameLanguage());
+			return InteropHelp.PtrToStringUTF8(NativeMethods.ISteamApps_GetCurrentGameLanguage(CSteamAPIContext.GetSteamApps()));
 		}
 
 		public static string GetAvailableGameLanguages()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return InteropHelp.PtrToStringUTF8(NativeMethods.ISteamApps_GetAvailableGameLanguages());
+			return InteropHelp.PtrToStringUTF8(NativeMethods.ISteamApps_GetAvailableGameLanguages(CSteamAPIContext.GetSteamApps()));
 		}
 
 		public static bool BIsSubscribedApp(AppId_t appID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsSubscribedApp(appID);
+			return NativeMethods.ISteamApps_BIsSubscribedApp(CSteamAPIContext.GetSteamApps(), appID);
 		}
 
 		public static bool BIsDlcInstalled(AppId_t appID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsDlcInstalled(appID);
+			return NativeMethods.ISteamApps_BIsDlcInstalled(CSteamAPIContext.GetSteamApps(), appID);
 		}
 
 		public static uint GetEarliestPurchaseUnixTime(AppId_t nAppID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_GetEarliestPurchaseUnixTime(nAppID);
+			return NativeMethods.ISteamApps_GetEarliestPurchaseUnixTime(CSteamAPIContext.GetSteamApps(), nAppID);
 		}
 
 		public static bool BIsSubscribedFromFreeWeekend()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsSubscribedFromFreeWeekend();
+			return NativeMethods.ISteamApps_BIsSubscribedFromFreeWeekend(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static int GetDLCCount()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_GetDLCCount();
+			return NativeMethods.ISteamApps_GetDLCCount(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static bool BGetDLCDataByIndex(int iDLC, out AppId_t pAppID, out bool pbAvailable, out string pchName, int cchNameBufferSize)
 		{
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameBufferSize);
-			bool flag = NativeMethods.ISteamApps_BGetDLCDataByIndex(iDLC, out pAppID, out pbAvailable, intPtr, cchNameBufferSize);
+			bool flag = NativeMethods.ISteamApps_BGetDLCDataByIndex(CSteamAPIContext.GetSteamApps(), iDLC, out pAppID, out pbAvailable, intPtr, cchNameBufferSize);
 			pchName = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
@@ -84,26 +84,26 @@ namespace Steamworks
 		public static void InstallDLC(AppId_t nAppID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			NativeMethods.ISteamApps_InstallDLC(nAppID);
+			NativeMethods.ISteamApps_InstallDLC(CSteamAPIContext.GetSteamApps(), nAppID);
 		}
 
 		public static void UninstallDLC(AppId_t nAppID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			NativeMethods.ISteamApps_UninstallDLC(nAppID);
+			NativeMethods.ISteamApps_UninstallDLC(CSteamAPIContext.GetSteamApps(), nAppID);
 		}
 
 		public static void RequestAppProofOfPurchaseKey(AppId_t nAppID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			NativeMethods.ISteamApps_RequestAppProofOfPurchaseKey(nAppID);
+			NativeMethods.ISteamApps_RequestAppProofOfPurchaseKey(CSteamAPIContext.GetSteamApps(), nAppID);
 		}
 
 		public static bool GetCurrentBetaName(out string pchName, int cchNameBufferSize)
 		{
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal(cchNameBufferSize);
-			bool flag = NativeMethods.ISteamApps_GetCurrentBetaName(intPtr, cchNameBufferSize);
+			bool flag = NativeMethods.ISteamApps_GetCurrentBetaName(CSteamAPIContext.GetSteamApps(), intPtr, cchNameBufferSize);
 			pchName = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
 			Marshal.FreeHGlobal(intPtr);
 			return flag;
@@ -112,20 +112,20 @@ namespace Steamworks
 		public static bool MarkContentCorrupt(bool bMissingFilesOnly)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_MarkContentCorrupt(bMissingFilesOnly);
+			return NativeMethods.ISteamApps_MarkContentCorrupt(CSteamAPIContext.GetSteamApps(), bMissingFilesOnly);
 		}
 
 		public static uint GetInstalledDepots(AppId_t appID, DepotId_t[] pvecDepots, uint cMaxDepots)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_GetInstalledDepots(appID, pvecDepots, cMaxDepots);
+			return NativeMethods.ISteamApps_GetInstalledDepots(CSteamAPIContext.GetSteamApps(), appID, pvecDepots, cMaxDepots);
 		}
 
 		public static uint GetAppInstallDir(AppId_t appID, out string pchFolder, uint cchFolderBufferSize)
 		{
 			InteropHelp.TestIfAvailableClient();
 			IntPtr intPtr = Marshal.AllocHGlobal((int)cchFolderBufferSize);
-			uint num = NativeMethods.ISteamApps_GetAppInstallDir(appID, intPtr, cchFolderBufferSize);
+			uint num = NativeMethods.ISteamApps_GetAppInstallDir(CSteamAPIContext.GetSteamApps(), appID, intPtr, cchFolderBufferSize);
 			pchFolder = ((num == 0U) ? null : InteropHelp.PtrToStringUTF8(intPtr));
 			Marshal.FreeHGlobal(intPtr);
 			return num;
@@ -134,13 +134,13 @@ namespace Steamworks
 		public static bool BIsAppInstalled(AppId_t appID)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_BIsAppInstalled(appID);
+			return NativeMethods.ISteamApps_BIsAppInstalled(CSteamAPIContext.GetSteamApps(), appID);
 		}
 
 		public static CSteamID GetAppOwner()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return (CSteamID)NativeMethods.ISteamApps_GetAppOwner();
+			return (CSteamID)NativeMethods.ISteamApps_GetAppOwner(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static string GetLaunchQueryParam(string pchKey)
@@ -149,7 +149,7 @@ namespace Steamworks
 			string text;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchKey))
 			{
-				text = InteropHelp.PtrToStringUTF8(NativeMethods.ISteamApps_GetLaunchQueryParam(utf8StringHandle));
+				text = InteropHelp.PtrToStringUTF8(NativeMethods.ISteamApps_GetLaunchQueryParam(CSteamAPIContext.GetSteamApps(), utf8StringHandle));
 			}
 			return text;
 		}
@@ -157,19 +157,19 @@ namespace Steamworks
 		public static bool GetDlcDownloadProgress(AppId_t nAppID, out ulong punBytesDownloaded, out ulong punBytesTotal)
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_GetDlcDownloadProgress(nAppID, out punBytesDownloaded, out punBytesTotal);
+			return NativeMethods.ISteamApps_GetDlcDownloadProgress(CSteamAPIContext.GetSteamApps(), nAppID, out punBytesDownloaded, out punBytesTotal);
 		}
 
 		public static int GetAppBuildId()
 		{
 			InteropHelp.TestIfAvailableClient();
-			return NativeMethods.ISteamApps_GetAppBuildId();
+			return NativeMethods.ISteamApps_GetAppBuildId(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static void RequestAllProofOfPurchaseKeys()
 		{
 			InteropHelp.TestIfAvailableClient();
-			NativeMethods.ISteamApps_RequestAllProofOfPurchaseKeys();
+			NativeMethods.ISteamApps_RequestAllProofOfPurchaseKeys(CSteamAPIContext.GetSteamApps());
 		}
 
 		public static SteamAPICall_t GetFileDetails(string pszFileName)
@@ -178,9 +178,25 @@ namespace Steamworks
 			SteamAPICall_t steamAPICall_t;
 			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pszFileName))
 			{
-				steamAPICall_t = (SteamAPICall_t)NativeMethods.ISteamApps_GetFileDetails(utf8StringHandle);
+				steamAPICall_t = (SteamAPICall_t)NativeMethods.ISteamApps_GetFileDetails(CSteamAPIContext.GetSteamApps(), utf8StringHandle);
 			}
 			return steamAPICall_t;
+		}
+
+		public static int GetLaunchCommandLine(out string pszCommandLine, int cubCommandLine)
+		{
+			InteropHelp.TestIfAvailableClient();
+			IntPtr intPtr = Marshal.AllocHGlobal(cubCommandLine);
+			int num = NativeMethods.ISteamApps_GetLaunchCommandLine(CSteamAPIContext.GetSteamApps(), intPtr, cubCommandLine);
+			pszCommandLine = ((num == -1) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+			Marshal.FreeHGlobal(intPtr);
+			return num;
+		}
+
+		public static bool BIsSubscribedFromFamilySharing()
+		{
+			InteropHelp.TestIfAvailableClient();
+			return NativeMethods.ISteamApps_BIsSubscribedFromFamilySharing(CSteamAPIContext.GetSteamApps());
 		}
 	}
 }

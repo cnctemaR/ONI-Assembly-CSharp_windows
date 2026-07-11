@@ -283,7 +283,7 @@ public static class CodexEntryGenerator
 						}
 					}
 				}
-				if (!flag)
+				if (!flag && !component.hideInCodex)
 				{
 					List<ContentContainer> list = new List<ContentContainer>();
 					CodexEntryGenerator.GenerateTitleContainers(gameObject.GetProperName(), list);
@@ -515,9 +515,8 @@ public static class CodexEntryGenerator
 				{
 					new CodexText(tutorialMessage.GetMessageBody(), CodexTextStyle.Body)
 				}, ContentContainer.ContentLayout.Vertical));
-				string text = codexVideo.name.Substring(codexVideo.name.LastIndexOf("\\") + 1);
 				CodexEntry codexEntry2 = new CodexEntry("Videos", list, UI.FormatAsLink(tutorialMessage.GetTitle(), "videos_" + i));
-				codexEntry2.icon = Assets.GetSprite("ui_videos_" + text);
+				codexEntry2.icon = Assets.GetSprite("codexVideo");
 				CodexCache.AddEntry("videos_" + i, codexEntry2, null);
 				dictionary.Add(codexEntry2.id, codexEntry2);
 			}
@@ -1146,10 +1145,9 @@ public static class CodexEntryGenerator
 		List<ICodexWidget> list = new List<ICodexWidget>();
 		foreach (ComplexRecipe complexRecipe in component.GetRecipes())
 		{
-			GameObject prefab = Assets.GetPrefab(complexRecipe.results[0].material);
-			list.Add(new CodexLabelWithIcon(complexRecipe.GetUIName(true), CodexTextStyle.Body, Def.GetUISprite(prefab, "ui", false)));
+			list.Add(new CodexRecipePanel(complexRecipe));
 		}
-		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.GridTwoColumn));
+		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.Vertical));
 	}
 
 	private static void GenerateReceptacleContainers(GameObject entity, List<ContentContainer> containers)

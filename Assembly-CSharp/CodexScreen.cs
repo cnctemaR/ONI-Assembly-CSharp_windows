@@ -8,13 +8,13 @@ using UnityEngine.UI;
 
 public class CodexScreen : KScreen
 {
-	private string activeEntryID
+	public string activeEntryID
 	{
 		get
 		{
 			return this._activeEntryID;
 		}
-		set
+		private set
 		{
 			this._activeEntryID = value;
 		}
@@ -34,7 +34,7 @@ public class CodexScreen : KScreen
 		};
 		if (string.IsNullOrEmpty(this.activeEntryID))
 		{
-			this.ChangeArticle("HOME", false);
+			this.ChangeArticle("HOME", false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 		}
 		this.searchInputField.onValueChanged.AddListener(delegate(string value)
 		{
@@ -65,7 +65,7 @@ public class CodexScreen : KScreen
 		return 10000f;
 	}
 
-	private void Init()
+	private void CodexScreenInit()
 	{
 		this.textStyles[CodexTextStyle.Title] = this.textStyleTitle;
 		this.textStyles[CodexTextStyle.Subtitle] = this.textStyleSubtitle;
@@ -75,6 +75,10 @@ public class CodexScreen : KScreen
 		this.PopulatePools();
 		this.CategorizeEntries();
 		this.FilterSearch(string.Empty);
+		this.backButtonButton.onClick += this.HistoryStepBack;
+		this.backButtonButton.soundPlayer.AcceptClickCondition = () => this.currentHistoryIdx > 0;
+		this.fwdButtonButton.onClick += this.HistoryStepForward;
+		this.fwdButtonButton.soundPlayer.AcceptClickCondition = () => this.currentHistoryIdx < this.history.Count - 1;
 		Game.Instance.Subscribe(1594320620, delegate(object val)
 		{
 			if (!base.gameObject.activeSelf)
@@ -84,7 +88,7 @@ public class CodexScreen : KScreen
 			this.FilterSearch(this.searchInputField.text);
 			if (!string.IsNullOrEmpty(this.activeEntryID))
 			{
-				this.ChangeArticle(this.activeEntryID, false);
+				this.ChangeArticle(this.activeEntryID, false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			}
 		});
 	}
@@ -104,6 +108,7 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexLargeSpacer)] = this.prefabLargeSpacer;
 		this.ContentPrefabs[typeof(CodexVideo)] = this.prefabVideoWidget;
 		this.ContentPrefabs[typeof(CodexIndentedLabelWithIcon)] = this.prefabIndentedLabelWithIcon;
+		this.ContentPrefabs[typeof(CodexRecipePanel)] = this.prefabRecipePanel;
 	}
 
 	private List<CodexEntry> FilterSearch(string input)
@@ -260,7 +265,7 @@ public class CodexScreen : KScreen
 			string id = tuple.second.id;
 			gameObject2.GetComponent<KButton>().onClick += delegate
 			{
-				this.ChangeArticle(id, false);
+				this.ChangeArticle(id, false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 			};
 			if (string.IsNullOrEmpty(tuple.second.name))
 			{
@@ -274,7 +279,7 @@ public class CodexScreen : KScreen
 				string subEntryId = subEntry.id;
 				gameObject3.GetComponent<KButton>().onClick += delegate
 				{
-					this.ChangeArticle(subEntryId, false);
+					this.ChangeArticle(subEntryId, false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 				};
 				if (string.IsNullOrEmpty(subEntry.name))
 				{
@@ -323,7 +328,7 @@ public class CodexScreen : KScreen
 		categories[category_name].transform.parent.SetAsFirstSibling();
 	}
 
-	public void ChangeArticle(string id, bool playClickSound = false)
+	public void ChangeArticle(string id, bool playClickSound = false, Vector3 targetPosition = default(Vector3), CodexScreen.HistoryDirection historyMovement = CodexScreen.HistoryDirection.NewArticle)
 	{
 		global::Debug.Assert(id != null);
 		if (playClickSound)
@@ -332,8 +337,9 @@ public class CodexScreen : KScreen
 		}
 		if (this.contentContainerPool == null)
 		{
-			this.Init();
+			this.CodexScreenInit();
 		}
+		string text = string.Empty;
 		SubEntry subEntry = null;
 		if (!CodexCache.entries.ContainsKey(id))
 		{
@@ -341,7 +347,20 @@ public class CodexScreen : KScreen
 			if (subEntry != null && !subEntry.disabled)
 			{
 				id = subEntry.parentEntryID.ToUpper();
+				text = UI.StripLinkFormatting(subEntry.name);
 			}
+			else
+			{
+				id = "PAGENOTFOUND";
+			}
+		}
+		if (CodexCache.entries[id].disabled)
+		{
+			id = "PAGENOTFOUND";
+		}
+		if (string.IsNullOrEmpty(text))
+		{
+			text = UI.StripLinkFormatting(CodexCache.entries[id].name);
 		}
 		ICodexWidget codexWidget = null;
 		CodexCache.entries[id].GetFirstWidget();
@@ -357,15 +376,11 @@ public class CodexScreen : KScreen
 				}
 			}
 		}
-		if (!CodexCache.entries.ContainsKey(id) || CodexCache.entries[id].disabled)
-		{
-			id = "PAGENOTFOUND";
-		}
 		int num = 0;
-		string text = string.Empty;
+		string text2 = string.Empty;
 		while (this.contentContainers.transform.childCount > 0)
 		{
-			while (!string.IsNullOrEmpty(text) && CodexCache.entries[this.activeEntryID].contentContainers[num].lockID == text)
+			while (!string.IsNullOrEmpty(text2) && CodexCache.entries[this.activeEntryID].contentContainers[num].lockID == text2)
 			{
 				num++;
 			}
@@ -377,7 +392,7 @@ public class CodexScreen : KScreen
 				Type type;
 				if (gameObject2.name == "PrefabContentLocked")
 				{
-					text = CodexCache.entries[this.activeEntryID].contentContainers[num].lockID;
+					text2 = CodexCache.entries[this.activeEntryID].contentContainers[num].lockID;
 					type = typeof(CodexContentLockedIndicator);
 				}
 				else
@@ -394,20 +409,20 @@ public class CodexScreen : KScreen
 		this.activeEntryID = id;
 		if (CodexCache.entries[id].contentContainers == null)
 		{
-			CodexCache.entries[id].contentContainers = new List<ContentContainer>();
+			CodexCache.entries[id].CreateContentContainerCollection();
 		}
 		bool flag2 = false;
-		string text2 = string.Empty;
+		string text3 = string.Empty;
 		for (int i = 0; i < CodexCache.entries[id].contentContainers.Count; i++)
 		{
 			ContentContainer contentContainer2 = CodexCache.entries[id].contentContainers[i];
 			if (!string.IsNullOrEmpty(contentContainer2.lockID) && !Game.Instance.unlocks.IsUnlocked(contentContainer2.lockID))
 			{
-				if (text2 != contentContainer2.lockID)
+				if (text3 != contentContainer2.lockID)
 				{
 					GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
 					this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
-					text2 = contentContainer2.lockID;
+					text3 = contentContainer2.lockID;
 					GameObject gameObject4 = this.ContentUIPools[typeof(CodexContentLockedIndicator)].GetFreeElement(gameObject3, true).gameObject;
 				}
 			}
@@ -430,55 +445,96 @@ public class CodexScreen : KScreen
 				}
 			}
 		}
-		string text3 = string.Empty;
-		string text4 = id;
+		string text4 = string.Empty;
+		string text5 = id;
 		int num3 = 0;
-		while (text4 != CodexCache.FormatLinkID("HOME") && num3 < 10)
+		while (text5 != CodexCache.FormatLinkID("HOME") && num3 < 10)
 		{
 			num3++;
-			if (text4 != null)
+			if (text5 != null)
 			{
-				if (text4 != id)
+				if (text5 != id)
 				{
-					text3 = text3.Insert(0, CodexCache.entries[text4].name + " > ");
+					text4 = text4.Insert(0, CodexCache.entries[text5].name + " > ");
 				}
 				else
 				{
-					text3 = text3.Insert(0, CodexCache.entries[text4].name);
+					text4 = text4.Insert(0, CodexCache.entries[text5].name);
 				}
-				text4 = CodexCache.entries[text4].parentId;
+				text5 = CodexCache.entries[text5].parentId;
 			}
 			else
 			{
-				text4 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
-				text3 = text3.Insert(0, CodexCache.entries[text4].name + " > ");
+				text5 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
+				text4 = text4.Insert(0, CodexCache.entries[text5].name + " > ");
 			}
 		}
-		this.currentLocationText.text = ((!(text3 == string.Empty)) ? text3 : CodexCache.entries["HOME"].name);
+		this.currentLocationText.text = ((!(text4 == string.Empty)) ? text4 : ("<b>" + UI.StripLinkFormatting(CodexCache.entries["HOME"].name) + "</b>"));
 		if (this.history.Count == 0)
 		{
-			this.history.Add(this.activeEntryID);
+			this.history.Add(new CodexScreen.HistoryEntry(id, Vector3.zero, text));
+			this.currentHistoryIdx = 0;
 		}
-		else if (this.history[this.history.Count - 1] != this.activeEntryID)
+		else if (historyMovement == CodexScreen.HistoryDirection.Back)
 		{
-			if (this.history.Count > 1 && this.history[this.history.Count - 2] == this.activeEntryID)
+			this.history[this.currentHistoryIdx].position = this.displayPane.transform.localPosition;
+			this.currentHistoryIdx--;
+		}
+		else if (historyMovement == CodexScreen.HistoryDirection.Forward)
+		{
+			this.history[this.currentHistoryIdx].position = this.displayPane.transform.localPosition;
+			this.currentHistoryIdx++;
+		}
+		else if (historyMovement == CodexScreen.HistoryDirection.NewArticle || historyMovement == CodexScreen.HistoryDirection.Up)
+		{
+			if (this.currentHistoryIdx == this.history.Count - 1)
 			{
-				this.history.RemoveAt(this.history.Count - 1);
+				this.history.Add(new CodexScreen.HistoryEntry(this.activeEntryID, Vector3.zero, text));
+				this.history[this.currentHistoryIdx].position = this.displayPane.transform.localPosition;
+				this.currentHistoryIdx++;
 			}
 			else
 			{
-				this.history.Add(this.activeEntryID);
+				for (int j = this.history.Count - 1; j > this.currentHistoryIdx; j--)
+				{
+					this.history.RemoveAt(j);
+				}
+				this.history.Add(new CodexScreen.HistoryEntry(this.activeEntryID, Vector3.zero, text));
+				this.history[this.history.Count - 2].position = this.displayPane.transform.localPosition;
+				this.currentHistoryIdx++;
 			}
 		}
-		if (this.history.Count > 1)
+		if (this.currentHistoryIdx > 0)
 		{
-			this.backButton.text = UI.FormatAsLink(string.Format(UI.CODEX.BACK_BUTTON, UI.StripLinkFormatting(CodexCache.entries[this.history[this.history.Count - 2]].name)), CodexCache.entries[this.history[this.history.Count - 2]].id);
+			this.backButtonButton.GetComponent<Image>().color = Color.black;
+			this.backButton.text = UI.FormatAsLink(string.Format(UI.CODEX.BACK_BUTTON, UI.StripLinkFormatting(CodexCache.entries[this.history[this.history.Count - 2].id].name)), CodexCache.entries[this.history[this.history.Count - 2].id].id);
+			this.backButtonButton.GetComponent<ToolTip>().toolTip = string.Format(UI.CODEX.BACK_BUTTON_TOOLTIP, this.history[this.currentHistoryIdx - 1].name);
 		}
 		else
 		{
+			this.backButtonButton.GetComponent<Image>().color = Color.grey;
 			this.backButton.text = UI.StripLinkFormatting(GameUtil.ColourizeString(Color.grey, string.Format(UI.CODEX.BACK_BUTTON, CodexCache.entries["HOME"].name)));
+			this.backButtonButton.GetComponent<ToolTip>().toolTip = UI.CODEX.BACK_BUTTON_NO_HISTORY_TOOLTIP;
 		}
-		if (rectTransform != null)
+		if (this.currentHistoryIdx < this.history.Count - 1)
+		{
+			this.fwdButtonButton.GetComponent<Image>().color = Color.black;
+			this.fwdButtonButton.GetComponent<ToolTip>().toolTip = string.Format(UI.CODEX.FORWARD_BUTTON_TOOLTIP, this.history[this.currentHistoryIdx + 1].name);
+		}
+		else
+		{
+			this.fwdButtonButton.GetComponent<Image>().color = Color.grey;
+			this.fwdButtonButton.GetComponent<ToolTip>().toolTip = UI.CODEX.FORWARD_BUTTON_NO_HISTORY_TOOLTIP;
+		}
+		if (targetPosition != Vector3.zero)
+		{
+			if (this.scrollToTargetRoutine != null)
+			{
+				base.StopCoroutine(this.scrollToTargetRoutine);
+			}
+			this.scrollToTargetRoutine = base.StartCoroutine(this.ScrollToTarget(targetPosition));
+		}
+		else if (rectTransform != null)
 		{
 			if (this.scrollToTargetRoutine != null)
 			{
@@ -492,6 +548,37 @@ public class CodexScreen : KScreen
 		}
 	}
 
+	private void HistoryStepBack()
+	{
+		if (this.currentHistoryIdx == 0)
+		{
+			return;
+		}
+		string id = this.history[this.currentHistoryIdx - 1].id;
+		Vector3 position = this.history[this.currentHistoryIdx - 1].position;
+		this.ChangeArticle(id, false, position, CodexScreen.HistoryDirection.Back);
+	}
+
+	private void HistoryStepForward()
+	{
+		if (this.currentHistoryIdx == this.history.Count - 1)
+		{
+			return;
+		}
+		string id = this.history[this.currentHistoryIdx + 1].id;
+		Vector3 position = this.history[this.currentHistoryIdx + 1].position;
+		this.ChangeArticle(id, false, position, CodexScreen.HistoryDirection.Forward);
+	}
+
+	private void HistoryStepUp()
+	{
+		if (string.IsNullOrEmpty(CodexCache.entries[this.activeEntryID].parentId))
+		{
+			return;
+		}
+		this.ChangeArticle(CodexCache.entries[this.activeEntryID].parentId, false, default(Vector3), CodexScreen.HistoryDirection.Up);
+	}
+
 	private IEnumerator ScrollToTarget(RectTransform targetWidgetTransform)
 	{
 		yield return 0;
@@ -499,8 +586,16 @@ public class CodexScreen : KScreen
 		yield break;
 	}
 
+	private IEnumerator ScrollToTarget(Vector3 position)
+	{
+		yield return 0;
+		this.displayScrollRect.content.SetLocalPosition(position);
+		yield break;
+	}
+
 	private void ConfigureContentContainer(ContentContainer container, GameObject containerGameObject, bool bgColor = false)
 	{
+		container.go = containerGameObject;
 		LayoutGroup layoutGroup = containerGameObject.GetComponent<LayoutGroup>();
 		if (layoutGroup != null)
 		{
@@ -542,7 +637,14 @@ public class CodexScreen : KScreen
 				layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
 				(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
 				(layoutGroup as GridLayoutGroup).constraintCount = 2;
-				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(256f, 32f);
+				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(264f, 32f);
+				(layoutGroup as GridLayoutGroup).spacing = new Vector2(0f, 12f);
+				break;
+			case ContentContainer.ContentLayout.GridTwoColumnTall:
+				layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
+				(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+				(layoutGroup as GridLayoutGroup).constraintCount = 2;
+				(layoutGroup as GridLayoutGroup).cellSize = new Vector2(264f, 64f);
 				(layoutGroup as GridLayoutGroup).spacing = new Vector2(0f, 12f);
 				break;
 			}
@@ -580,7 +682,9 @@ public class CodexScreen : KScreen
 
 	private bool editingSearch;
 
-	private List<string> history = new List<string>();
+	private List<CodexScreen.HistoryEntry> history = new List<CodexScreen.HistoryEntry>();
+
+	private int currentHistoryIdx;
 
 	[Header("Hierarchy")]
 	[SerializeField]
@@ -606,6 +710,12 @@ public class CodexScreen : KScreen
 
 	[SerializeField]
 	private LocText backButton;
+
+	[SerializeField]
+	private KButton backButtonButton;
+
+	[SerializeField]
+	private KButton fwdButtonButton;
 
 	[SerializeField]
 	private LocText currentLocationText;
@@ -653,6 +763,9 @@ public class CodexScreen : KScreen
 	[SerializeField]
 	private GameObject prefabIndentedLabelWithIcon;
 
+	[SerializeField]
+	private GameObject prefabRecipePanel;
+
 	[Header("Text Styles")]
 	[SerializeField]
 	private TextStyleSetting textStyleTitle;
@@ -691,5 +804,29 @@ public class CodexScreen : KScreen
 		Roles,
 		Buildings,
 		Elements
+	}
+
+	public enum HistoryDirection
+	{
+		Back,
+		Forward,
+		Up,
+		NewArticle
+	}
+
+	public class HistoryEntry
+	{
+		public HistoryEntry(string entry, Vector3 pos, string articleName)
+		{
+			this.id = entry;
+			this.position = pos;
+			this.name = articleName;
+		}
+
+		public string id;
+
+		public Vector3 position;
+
+		public string name;
 	}
 }

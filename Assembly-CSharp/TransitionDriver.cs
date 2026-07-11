@@ -9,6 +9,14 @@ public class TransitionDriver
 		this.log = new LoggerFS("TransitionDriver", 35);
 	}
 
+	public Navigator.ActiveTransition GetTransition
+	{
+		get
+		{
+			return this.transition;
+		}
+	}
+
 	public void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)

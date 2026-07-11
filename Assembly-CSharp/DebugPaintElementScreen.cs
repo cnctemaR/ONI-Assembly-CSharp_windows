@@ -46,6 +46,7 @@ public class DebugPaintElementScreen : KScreen
 		this.paintButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.PAINT;
 		this.fillButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.FILL;
 		this.sampleButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.SAMPLE;
+		this.storeButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.STORE;
 		this.affectBuildings.transform.parent.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.BUILDINGS;
 		this.affectCells.transform.parent.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.CELLS;
 	}
@@ -74,6 +75,7 @@ public class DebugPaintElementScreen : KScreen
 		this.paintButton.onClick += this.OnClickPaint;
 		this.fillButton.onClick += this.OnClickFill;
 		this.sampleButton.onClick += this.OnClickSample;
+		this.storeButton.onClick += this.OnClickStore;
 		this.spawnButton.enabled = false;
 		KPopupMenu kpopupMenu2 = this.elementPopup;
 		kpopupMenu2.OnSelect = (Action<string, int>)Delegate.Combine(kpopupMenu2.OnSelect, new Action<string, int>(this.OnSelectElement));
@@ -169,6 +171,15 @@ public class DebugPaintElementScreen : KScreen
 		this.OnDiseaseCountChange();
 		this.OnChangeFOWReveal();
 		DebugTool.Instance.Activate(DebugTool.Type.ReplaceSubstance);
+	}
+
+	private void OnClickStore()
+	{
+		this.OnChangeMassPressure();
+		this.OnChangeTemperature();
+		this.OnDiseaseCountChange();
+		this.OnChangeFOWReveal();
+		DebugTool.Instance.Activate(DebugTool.Type.StoreSubstance);
 	}
 
 	private void OnClickSample()
@@ -407,6 +418,9 @@ public class DebugPaintElementScreen : KScreen
 
 	[SerializeField]
 	private KButton spawnButton;
+
+	[SerializeField]
+	private KButton storeButton;
 
 	[Header("Parameter Toggles")]
 	public Toggle paintElement;

@@ -19,8 +19,8 @@ public class Deconstructable : Workable
 		this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		this.multitoolContext = "build";
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
-		this.workingPstComplete = HashedString.Invalid;
-		this.workingPstFailed = HashedString.Invalid;
+		this.workingPstComplete = null;
+		this.workingPstFailed = null;
 		Building component = base.GetComponent<Building>();
 		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
 		if (component.Def.IsTilePiece)

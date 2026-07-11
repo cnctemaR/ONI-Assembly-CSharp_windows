@@ -151,11 +151,19 @@ namespace TUNING
 				LuxuryBedConfig.ID,
 				"FloorLamp",
 				"CeilingLight",
+				"SunLamp",
 				"DiningTable",
 				"WaterCooler",
 				"Phonobox",
 				"ArcadeMachine",
 				"EspressoMachine",
+				"HotTub",
+				"MechanicalSurfboard",
+				"Sauna",
+				"Juicer",
+				"SodaFountain",
+				"BeachChair",
+				"VerticalWindTunnel",
 				"FlowerVase",
 				"FlowerVaseWall",
 				"FlowerVaseHanging",
@@ -275,10 +283,16 @@ namespace TUNING
 			typeof(ArcadeMachine),
 			typeof(Telescope),
 			typeof(EspressoMachine),
-			typeof(EspressoMachineWorkable),
 			typeof(JetSuitTank),
 			typeof(Phonobox),
 			typeof(ArcadeMachine),
+			typeof(BeachChair),
+			typeof(Sauna),
+			typeof(VerticalWindTunnel),
+			typeof(HotTub),
+			typeof(Juicer),
+			typeof(SodaFountain),
+			typeof(MechanicalSurfboard),
 			typeof(BottleEmptier),
 			typeof(AccessControl),
 			typeof(CommandModule),
@@ -575,6 +589,8 @@ namespace TUNING
 			public const float MEDIUM_WORK_TIME = 30f;
 
 			public const float LONG_WORK_TIME = 90f;
+
+			public const float VERY_LONG_WORK_TIME = 150f;
 
 			public const float EXTENSIVE_WORK_TIME = 180f;
 		}

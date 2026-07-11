@@ -18,9 +18,18 @@ public class WallDamageSoundEvent : SoundEvent
 			this.tile = smi.sm.wallCellToBreak;
 			int audioCategory = WallDamageSoundEvent.GetAudioCategory(this.tile);
 			vector = Grid.CellToPos(this.tile);
-			EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, 1f);
-			eventInstance.setParameterValue("material_ID", (float)audioCategory);
-			SoundEvent.EndOneShot(eventInstance);
+			vector.z = 0f;
+			GameObject gameObject = behaviour.controller.gameObject;
+			if (base.objectIsSelectedAndVisible)
+			{
+				vector = SoundEvent.AudioHighlightListenerPosition(vector);
+			}
+			if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
+			{
+				EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
+				eventInstance.setParameterValue("material_ID", (float)audioCategory);
+				SoundEvent.EndOneShot(eventInstance);
+			}
 		}
 	}
 

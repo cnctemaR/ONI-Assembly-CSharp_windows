@@ -73,6 +73,19 @@ namespace Klei
 			return this.dataMap.ContainsKey(path);
 		}
 
+		public FileHandle FindFileHandle(string path)
+		{
+			if (this.FileExists(path))
+			{
+				return new FileHandle
+				{
+					full_path = path,
+					source = this
+				};
+			}
+			return default(FileHandle);
+		}
+
 		private string id;
 
 		private string mountPoint;

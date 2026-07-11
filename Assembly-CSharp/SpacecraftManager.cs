@@ -427,6 +427,18 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		return SpacecraftManager.DestinationAnalysisState.Hidden;
 	}
 
+	public bool AreAllDestinationsAnalyzed()
+	{
+		foreach (SpaceDestination spaceDestination in this.destinations)
+		{
+			if (this.GetDestinationAnalysisState(spaceDestination) != SpacecraftManager.DestinationAnalysisState.Complete)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public void SetStarmapAnalysisDestinationID(int id)
 	{
 		this.analyzeDestinationID = id;

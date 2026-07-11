@@ -36,7 +36,10 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			smi.GoToProperHeathState();
 		});
 		this.wounded.medium.ToggleAnims("anim_loco_wounded_kanim", 1f);
-		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f);
+		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f).Update("LookForAvailableClinic", delegate(WoundMonitor.Instance smi, float dt)
+		{
+			smi.FindAvailableMedicalBed();
+		}, UpdateRate.SIM_1000ms, false);
 	}
 
 	public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget, object>.State healthy;
@@ -169,6 +172,17 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		public bool ShouldExitInfirmary()
 		{
 			return this.health.State == Health.HealthState.Perfect;
+		}
+
+		public void FindAvailableMedicalBed()
+		{
+			AssignableSlot clinic = Db.Get().AssignableSlots.Clinic;
+			Ownables soleOwner = base.gameObject.GetComponent<MinionIdentity>().GetSoleOwner();
+			AssignableSlotInstance slot = soleOwner.GetSlot(clinic);
+			if (slot.assignable == null)
+			{
+				soleOwner.AutoAssignSlot(clinic);
+			}
 		}
 
 		public Health health;

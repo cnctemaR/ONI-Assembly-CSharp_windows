@@ -176,6 +176,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
+		global::Debug.Log("Worker is " + base.worker);
 		this.operational.SetActive(true, false);
 	}
 
@@ -211,6 +212,11 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 			this.chore.Cancel("complete");
 			this.chore = null;
 		}
+	}
+
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
 	}
 
 	private void OnOperationalChanged(object data)

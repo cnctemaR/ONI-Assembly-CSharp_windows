@@ -196,8 +196,8 @@ public class Pickupable : Workable, IHasSortOrder
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.workingPstComplete = HashedString.Invalid;
-		this.workingPstFailed = HashedString.Invalid;
+		this.workingPstComplete = null;
+		this.workingPstFailed = null;
 		this.log = new LoggerFSSF("Pickupable");
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.PickingUp;
 		base.SetWorkTime(1.5f);
@@ -656,6 +656,11 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
+	}
+
 	public override Vector3 GetTargetPoint()
 	{
 		return base.transform.GetPosition();
@@ -776,7 +781,7 @@ public class Pickupable : Workable, IHasSortOrder
 				{
 					num2 = SoundUtil.GetLiquidDepth(num);
 				}
-				FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition()), 1f);
+				FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(base.transform.GetPosition(), false), 1f);
 				eventInstance.setParameterValue("velocity", vector.magnitude);
 				eventInstance.setParameterValue("liquidDepth", num2);
 				KFMOD.EndOneShot(eventInstance);

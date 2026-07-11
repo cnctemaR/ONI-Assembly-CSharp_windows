@@ -202,6 +202,12 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 
 	private bool destroyed;
 
+	[Serialize]
+	public bool unequippable = true;
+
+	[Serialize]
+	public bool hideInCodex;
+
 	private static readonly EventSystem.IntraObjectHandler<Equippable> SetDestroyedTrueDelegate = new EventSystem.IntraObjectHandler<Equippable>(delegate(Equippable component, object data)
 	{
 		component.destroyed = true;

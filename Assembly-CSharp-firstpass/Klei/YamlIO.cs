@@ -24,9 +24,23 @@ namespace Klei
 			}
 		}
 
+		public static void SaveOrWarnUser<T>(T some_object, string filename, List<Tuple<string, Type>> tagMappings = null)
+		{
+			FileUtil.DoIODialog(delegate
+			{
+				YamlIO.Save<T>(some_object, filename, tagMappings);
+			}, filename, 0);
+		}
+
+		public static T LoadFile<T>(FileHandle filehandle, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
+		{
+			return YamlIO.Parse<T>(FileSystem.ConvertToText(filehandle.source.ReadBytes(filehandle.full_path)), filehandle, handle_error, tagMappings);
+		}
+
 		public static T LoadFile<T>(string filename, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
 		{
-			return YamlIO.Parse<T>(FileSystem.ConvertToText(FileSystem.ReadBytes(filename)), filename, handle_error, tagMappings);
+			FileHandle fileHandle = FileSystem.FindFileHandle(filename);
+			return YamlIO.LoadFile<T>(fileHandle, handle_error, tagMappings);
 		}
 
 		public static void LogError(YamlIO.Error error, bool force_log_as_warning)
@@ -62,7 +76,7 @@ namespace Klei
 			}
 		}
 
-		public static T Parse<T>(string readText, string debugFilename, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
+		public static T Parse<T>(string readText, FileHandle debugFileHandle, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
 		{
 			try
 			{
@@ -75,10 +89,7 @@ namespace Klei
 				{
 					handle_error(new YamlIO.Error
 					{
-						file = new FileHandle
-						{
-							full_path = debugFilename
-						},
+						file = debugFileHandle,
 						text = readText,
 						message = error,
 						severity = YamlIO.Error.Severity.Recoverable
@@ -101,10 +112,7 @@ namespace Klei
 			{
 				handle_error(new YamlIO.Error
 				{
-					file = new FileHandle
-					{
-						full_path = debugFilename
-					},
+					file = debugFileHandle,
 					text = readText,
 					message = ex.Message,
 					inner_exception = ex.InnerException,

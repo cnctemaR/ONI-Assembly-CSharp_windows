@@ -28,8 +28,9 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 		{
 			global::World instance = global::World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
-			master.Subscribe(387220196, new Action<object>(this.OnDestinationReached));
-			master.Subscribe(-766531887, new Action<object>(this.OnDestinationReached));
+			this.OnDestinationReachedDelegate = new Action<object>(this.OnDestinationReached);
+			master.Subscribe(387220196, this.OnDestinationReachedDelegate);
+			master.Subscribe(-766531887, this.OnDestinationReachedDelegate);
 		}
 
 		protected override void OnCleanUp()
@@ -37,8 +38,8 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 			base.OnCleanUp();
 			global::World instance = global::World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Remove(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
-			base.master.Unsubscribe(387220196, new Action<object>(this.OnDestinationReached));
-			base.master.Unsubscribe(-766531887, new Action<object>(this.OnDestinationReached));
+			base.master.Unsubscribe(387220196, this.OnDestinationReachedDelegate);
+			base.master.Unsubscribe(-766531887, this.OnDestinationReachedDelegate);
 		}
 
 		private void OnDestinationReached(object data)
@@ -130,5 +131,7 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 
 		[Serialize]
 		public int lastDigCell = -1;
+
+		private Action<object> OnDestinationReachedDelegate;
 	}
 }

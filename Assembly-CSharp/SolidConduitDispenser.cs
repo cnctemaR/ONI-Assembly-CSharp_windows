@@ -33,7 +33,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[20];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("SolidConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
-		this.GetConduitFlow().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Last);
+		this.GetConduitFlow().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Dispense);
 		this.OnConduitConnectionChanged(null);
 	}
 

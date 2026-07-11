@@ -70,7 +70,6 @@ public class AchievementWidget : KMonoBehaviour
 		EventInstance achievementUnlockedSound = KFMOD.BeginOneShot(GlobalAssets.GetSound("AchievementUnlocked", false), Vector3.zero, 1f);
 		int pitchParamValue = Mathf.RoundToInt(MathUtil.Clamp(1f, 7f, startDelay - startDelay % 1f / 1f)) - 1;
 		achievementUnlockedSound.setParameterValue("num_achievements", (float)pitchParamValue);
-		global::Debug.Log("parameter: " + pitchParamValue);
 		KFMOD.EndOneShot(achievementUnlockedSound);
 		for (float i = 0f; i < 1.2f; i += Time.unscaledDeltaTime)
 		{

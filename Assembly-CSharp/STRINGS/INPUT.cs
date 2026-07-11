@@ -16,6 +16,8 @@ namespace STRINGS
 
 		public static LocString PERIOD = "Period Key";
 
+		public static LocString INSERT = "Insert";
+
 		public static LocString LEFT_SHIFT = "L-Shift";
 
 		public static LocString RIGHT_SHIFT = "R-Shift";

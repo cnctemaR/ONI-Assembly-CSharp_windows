@@ -4,6 +4,13 @@ namespace TUNING
 {
 	public class EQUIPMENT
 	{
+		public class TOYS
+		{
+			public static string SLOT = "Toy";
+
+			public static float BALLOON_MASS = 1f;
+		}
+
 		public class ATTRIBUTE_MOD_IDS
 		{
 			public static string DECOR = "Decor";

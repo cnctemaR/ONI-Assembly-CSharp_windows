@@ -83,7 +83,8 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		if (connectedReleaseSound != null)
 		{
 			Vector3 position = base.transform.GetPosition();
-			EventInstance eventInstance = SoundEvent.BeginOneShot(connectedReleaseSound, position, 1f);
+			position.z = SoundListenerController.Instance.transform.GetPosition().z;
+			EventInstance eventInstance = SoundEvent.BeginOneShot(connectedReleaseSound, position, 1f, false);
 			eventInstance.setParameterValue("connectedCount", (float)connectionCount);
 			SoundEvent.EndOneShot(eventInstance);
 		}
@@ -122,13 +123,6 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		{
 			global::UnityEngine.Object.Destroy(pulse);
 		}));
-	}
-
-	protected override void OnSpawn()
-	{
-		this.resources = BuildingCellVisualizerResources.Instance();
-		this.enableRaycast = this.building as BuildingComplete != null;
-		this.icons = new Dictionary<GameObject, Image>();
 	}
 
 	private void MapBuilding()
@@ -235,6 +229,15 @@ public class BuildingCellVisualizer : KMonoBehaviour
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
+		if (this.resources == null)
+		{
+			this.resources = BuildingCellVisualizerResources.Instance();
+		}
+		if (this.icons == null)
+		{
+			this.icons = new Dictionary<GameObject, Image>();
+		}
+		this.enableRaycast = this.building as BuildingComplete != null;
 		this.MapBuilding();
 		Components.BuildingCellVisualizers.Add(this);
 	}

@@ -27,6 +27,22 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		}
 	}
 
+	public Storage DebugStorage
+	{
+		get
+		{
+			return this.storage;
+		}
+	}
+
+	public FetchList2 DebugFetchList
+	{
+		get
+		{
+			return this.fetchList;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

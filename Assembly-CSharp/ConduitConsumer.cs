@@ -154,9 +154,14 @@ public class ConduitConsumer : KMonoBehaviour
 		base.Trigger(-2094018600, this.IsConnected);
 	}
 
+	public void SetOnState(bool onState)
+	{
+		this.isOn = onState;
+	}
+
 	private void ConduitUpdate(float dt)
 	{
-		if (this.isConsuming)
+		if (this.isConsuming && this.isOn)
 		{
 			ConduitFlow conduitManager = this.GetConduitManager();
 			this.Consume(dt, conduitManager);
@@ -267,6 +272,9 @@ public class ConduitConsumer : KMonoBehaviour
 	[SerializeField]
 	public bool useSecondaryInput;
 
+	[SerializeField]
+	public bool isOn = true;
+
 	[NonSerialized]
 	public bool isConsuming = true;
 
@@ -284,8 +292,6 @@ public class ConduitConsumer : KMonoBehaviour
 	public float consumptionRate = float.PositiveInfinity;
 
 	public SimHashes lastConsumedElement = SimHashes.Vacuum;
-
-	public static readonly Operational.Flag elementRequirementFlag = new Operational.Flag("elementRequired", Operational.Flag.Type.Requirement);
 
 	private HandleVector<int>.Handle partitionerEntry;
 

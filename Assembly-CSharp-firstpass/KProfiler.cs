@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 
@@ -43,6 +44,16 @@ public static class KProfiler
 	{
 		KProfiler.counter--;
 		return KProfiler.counter;
+	}
+
+	public static string SanitizeName(string name)
+	{
+		return KProfiler.re.Replace(name, "${1}");
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
+	public static void Ping(string display, double value)
+	{
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
@@ -128,6 +139,10 @@ public static class KProfiler
 	public static KProfilerEndpoint UnityEndpoint = new KProfilerEndpoint();
 
 	public static KProfilerEndpoint ChromeEndpoint = new KProfilerEndpoint();
+
+	private static string pattern = "<link=\"(.+)\">(.+)<\\/link>";
+
+	private static Regex re = new Regex(KProfiler.pattern);
 
 	public struct Region : IDisposable
 	{

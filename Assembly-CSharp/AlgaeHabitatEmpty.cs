@@ -11,8 +11,8 @@ public class AlgaeHabitatEmpty : Workable
 		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.workAnims = AlgaeHabitatEmpty.CLEAN_ANIMS;
-		this.workingPstComplete = AlgaeHabitatEmpty.PST_ANIM;
-		this.workingPstFailed = AlgaeHabitatEmpty.PST_ANIM;
+		this.workingPstComplete = new HashedString[] { AlgaeHabitatEmpty.PST_ANIM };
+		this.workingPstFailed = new HashedString[] { AlgaeHabitatEmpty.PST_ANIM };
 		this.synchronizeAnims = false;
 	}
 

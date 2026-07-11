@@ -15,7 +15,7 @@ public class ManagementMenu : KIconToggleMenu
 	{
 		base.OnPrefabInit();
 		ManagementMenu.Instance = this;
-		CodexCache.Init();
+		CodexCache.CodexCacheInit();
 		ScheduledUIInstantiation component = GameScreenManager.Instance.ssOverlayCanvas.GetComponent<ScheduledUIInstantiation>();
 		this.instantiator.Instantiate();
 		this.jobsScreen = this.instantiator.GetComponentInChildren<JobsTableScreen>(true);
@@ -351,7 +351,7 @@ public class ManagementMenu : KIconToggleMenu
 		{
 			this.ToggleCodex();
 		}
-		this.codexScreen.ChangeArticle(id, false);
+		this.codexScreen.ChangeArticle(id, false, default(Vector3), CodexScreen.HistoryDirection.NewArticle);
 	}
 
 	public void ToggleSkills()

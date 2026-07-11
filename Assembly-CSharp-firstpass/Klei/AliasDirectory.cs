@@ -80,6 +80,20 @@ namespace Klei
 			return File.Exists(this.GetActualPath(path));
 		}
 
+		public FileHandle FindFileHandle(string path)
+		{
+			if (this.FileExists(path))
+			{
+				path = this.GetVirtualPath(FileSystem.Normalize(path));
+				return new FileHandle
+				{
+					full_path = path,
+					source = this
+				};
+			}
+			return default(FileHandle);
+		}
+
 		private string id;
 
 		private string root;

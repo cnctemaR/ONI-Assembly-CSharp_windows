@@ -22,7 +22,8 @@ public class WoodLogConfig : IEntityConfig
 		List<Tag> list = new List<Tag>
 		{
 			GameTags.IndustrialIngredient,
-			GameTags.Organics
+			GameTags.Organics,
+			GameTags.BuildingWood
 		};
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(text, text2, text3, num, flag, anim, text4, sceneLayer, collisionShape, num2, num3, flag2, 0, SimHashes.Creature, list);
 		gameObject.AddOrGet<EntitySplitter>();

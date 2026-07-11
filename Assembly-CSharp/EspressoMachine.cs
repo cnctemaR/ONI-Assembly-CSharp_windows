@@ -42,7 +42,7 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 
 	public const string SPECIFIC_EFFECT = "Espresso";
 
-	public const string TRACKING_EFFECT = "RecentlyEspresso";
+	public const string TRACKING_EFFECT = "RecentlyRecDrink";
 
 	public static Tag INGREDIENT_TAG = new Tag("SpiceNut");
 

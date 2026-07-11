@@ -35,7 +35,7 @@ public class CreatureBait : StateMachineComponent<CreatureBait.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.idle.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Baited).Enter(delegate(CreatureBait.StatesInstance smi)
+			this.idle.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Baited, null).Enter(delegate(CreatureBait.StatesInstance smi)
 			{
 				Element element = ElementLoader.FindElementByName(smi.master.baitElement.ToString());
 				KAnim.Build build = element.substance.anim.GetData().build;

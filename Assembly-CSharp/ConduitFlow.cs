@@ -2164,7 +2164,7 @@ public class ConduitFlow : IConduitFlow
 						});
 						vertexIterator2.Next();
 					}
-					if (this.cycle_vertices.Count != 0)
+					if (this.cycle_vertices.Count > 1)
 					{
 						int i = 0;
 						int num = this.cycle_vertices.Count - 1;

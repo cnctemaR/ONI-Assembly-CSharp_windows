@@ -307,14 +307,14 @@ public class BuildMenu : KScreen
 				string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
 				if (sound != null)
 				{
-					EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition(), 1f);
+					EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.GetPosition(), 1f, false);
 					SoundEvent.EndOneShot(eventInstance);
 				}
 			}
 			string sound2 = GlobalAssets.GetSound("NewBuildable", false);
 			if (sound2 != null)
 			{
-				EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f);
+				EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.GetPosition(), 1f, false);
 				eventInstance2.setParameterValue("playCount", (float)BuildMenu.Instance.notificationPingCount);
 				SoundEvent.EndOneShot(eventInstance2);
 			}
@@ -695,7 +695,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo(LuxuryBedConfig.ID, global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("DiningTable", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("FloorLamp", global::Action.BuildMenuKeyF),
-				new BuildMenu.BuildingInfo("CeilingLight", global::Action.BuildMenuKeyT)
+				new BuildMenu.BuildingInfo("CeilingLight", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("SunLamp", global::Action.BuildMenuKeyS)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Decor"), "icon_category_furniture", global::Action.BuildCategoryDecor, KKeyCode.D, new List<BuildMenu.BuildingInfo>
 			{
@@ -715,6 +716,13 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("ArcadeMachine", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("Phonobox", global::Action.BuildMenuKeyP),
 				new BuildMenu.BuildingInfo("EspressoMachine", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("HotTub", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("MechanicalSurfboard", global::Action.BuildMenuKeyM),
+				new BuildMenu.BuildingInfo("Sauna", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("BeachChair", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("Juicer", global::Action.BuildMenuKeyJ),
+				new BuildMenu.BuildingInfo("SodaFountain", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("VerticalWindTunnel", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("ParkSign", global::Action.BuildMenuKeyR)
 			})
 		}),

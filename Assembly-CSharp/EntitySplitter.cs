@@ -132,7 +132,7 @@ public class EntitySplitter : KMonoBehaviour
 		}
 	}
 
-	public float maxStackSize = float.MaxValue;
+	public float maxStackSize = PrimaryElement.MAX_MASS;
 
 	private static readonly EventSystem.IntraObjectHandler<EntitySplitter> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<EntitySplitter>(delegate(EntitySplitter component, object data)
 	{

@@ -18,6 +18,18 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 		base.SetWorkTime(15f);
 	}
 
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		worker.GetComponent<Effects>().Add("ArcadePlaying", false);
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		worker.GetComponent<Effects>().Remove("ArcadePlaying");
+	}
+
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Effects component = worker.GetComponent<Effects>();
@@ -49,7 +61,7 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 
 	public ArcadeMachine owner;
 
-	public int basePriority = RELAXATION.PRIORITY.TIER4;
+	public int basePriority = RELAXATION.PRIORITY.TIER3;
 
 	private static string specificEffect = "PlayedArcade";
 

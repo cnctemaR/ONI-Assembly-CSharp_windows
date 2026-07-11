@@ -82,6 +82,23 @@ namespace Klei
 			return this.zipfile.ContainsEntry(path);
 		}
 
+		public FileHandle FindFileHandle(string path)
+		{
+			if (this.FileExists(path))
+			{
+				if (this.mountPoint.Length > 0)
+				{
+					path = path.Substring(this.mountPoint.Length);
+				}
+				return new FileHandle
+				{
+					full_path = FileSystem.Normalize(Path.Combine(this.mountPoint, path)),
+					source = this
+				};
+			}
+			return default(FileHandle);
+		}
+
 		private string id;
 
 		private string mountPoint;

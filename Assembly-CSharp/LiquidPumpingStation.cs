@@ -378,8 +378,9 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				float num = Mathf.Min(this.amountPerTick, this.amountToPickup - this.consumedAmount);
 				num = Mathf.Max(num, 1f);
 				HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(this.OnSimConsumeCallback), this, "LiquidPumpingStation");
-				int num2 = Grid.OffsetCell(this.cell, new CellOffset(0, -PumpingStationGuide.GetDepthAvailable(this.cell, this.pump)));
-				SimMessages.ConsumeMass(num2, this.element, num, 3, handle.index);
+				int depthAvailable = PumpingStationGuide.GetDepthAvailable(this.cell, this.pump);
+				int num2 = Grid.OffsetCell(this.cell, new CellOffset(0, -depthAvailable));
+				SimMessages.ConsumeMass(num2, this.element, num, (byte)(depthAvailable + 1), handle.index);
 			}
 		}
 

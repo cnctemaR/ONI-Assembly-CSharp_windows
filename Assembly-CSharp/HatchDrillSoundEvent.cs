@@ -11,11 +11,17 @@ public class HatchDrillSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-		int num = Grid.PosToCell(position);
+		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		vector.z = 0f;
+		GameObject gameObject = behaviour.controller.gameObject;
+		if (SoundEvent.ObjectIsSelectedAndVisible(gameObject))
+		{
+			vector = SoundEvent.AudioHighlightListenerPosition(vector);
+		}
+		int num = Grid.PosToCell(vector);
 		int num2 = Grid.CellBelow(num);
 		float num3 = (float)HatchDrillSoundEvent.GetAudioCategory(num2);
-		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position, 1f);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, 1f, false);
 		eventInstance.setParameterValue("material_ID", num3);
 		SoundEvent.EndOneShot(eventInstance);
 	}

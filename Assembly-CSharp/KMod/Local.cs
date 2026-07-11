@@ -35,8 +35,8 @@ namespace KMod
 
 		private void Subscribe(string id, long timestamp, IFileSource file_source)
 		{
-			string text = file_source.Read("mod.yaml");
-			Local.Header header = ((!string.IsNullOrEmpty(text)) ? YamlIO.Parse<Local.Header>(text, file_source.GetRoot() + "\\mod.yaml", null, null) : null);
+			FileHandle fileHandle = file_source.GetFileSystem().FindFileHandle(Path.Combine(file_source.GetRoot(), "mod.yaml"));
+			Local.Header header = ((fileHandle.full_path == null) ? null : YamlIO.LoadFile<Local.Header>(fileHandle, null, null));
 			if (header == null)
 			{
 				header = new Local.Header

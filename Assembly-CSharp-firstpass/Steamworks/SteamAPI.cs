@@ -4,15 +4,15 @@ namespace Steamworks
 {
 	public static class SteamAPI
 	{
-		public static bool InitSafe()
-		{
-			return SteamAPI.Init();
-		}
-
 		public static bool Init()
 		{
 			InteropHelp.TestIfPlatformSupported();
-			return NativeMethods.SteamAPI_Init();
+			bool flag = NativeMethods.SteamAPI_Init();
+			if (flag)
+			{
+				flag = CSteamAPIContext.Init();
+			}
+			return flag;
 		}
 
 		public static void Shutdown()

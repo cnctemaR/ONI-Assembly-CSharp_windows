@@ -15,4 +15,6 @@ public class EffectPrefabs : MonoBehaviour
 	public GameObject ThoughtBubbleConvo;
 
 	public GameObject MeteorBackground;
+
+	public GameObject SparkleStreakFX;
 }

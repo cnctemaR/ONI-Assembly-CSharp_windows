@@ -51,6 +51,19 @@ namespace Klei
 			return File.Exists(path);
 		}
 
+		public FileHandle FindFileHandle(string path)
+		{
+			if (this.FileExists(path))
+			{
+				return new FileHandle
+				{
+					full_path = FileSystem.Normalize(path),
+					source = this
+				};
+			}
+			return default(FileHandle);
+		}
+
 		private string id = "StandardFS";
 	}
 }

@@ -21,6 +21,8 @@ namespace Steamworks
 		k_EAppType_Plugin = 4096,
 		k_EAppType_Music = 8192,
 		k_EAppType_Series = 16384,
+		k_EAppType_Comic = 32768,
+		k_EAppType_Beta = 65536,
 		k_EAppType_Shortcut = 1073741824,
 		k_EAppType_DepotOnly = -2147483647
 	}

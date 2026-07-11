@@ -280,8 +280,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		{
 			default_state = this.needsdirt;
 			this.root.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => !smi.HasDirt()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
-			this.needsdirt.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => smi.HasDirt());
-			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet).ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
+			this.needsdirt.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => smi.HasDirt());
+			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet, null).ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
 				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateBreakUseChore), null)
 				.ToggleTag(GameTags.Usable)
 				.EventHandler(GameHashes.Flush, delegate(Toilet.StatesInstance smi, object data)
@@ -296,7 +296,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			{
 				smi.CancelCleanChore();
 			}).ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
-				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable)
+				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null)
 				.EventTransition(GameHashes.OnStorageChange, this.empty, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved());
 			this.full.PlayAnims((Toilet.StatesInstance smi) => Toilet.States.FULL_ANIMS, KAnim.PlayMode.Once).OnAnimQueueComplete(this.fullWaitingForClean);
 			this.fullWaitingForClean.Enter(delegate(Toilet.StatesInstance smi)
@@ -306,7 +306,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			{
 				smi.CancelCleanChore();
 			}).ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
-				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable)
+				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null)
 				.EventTransition(GameHashes.OnStorageChange, this.empty, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved())
 				.Enter(delegate(Toilet.StatesInstance smi)
 				{
@@ -323,7 +323,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 				smi.master.storage.ConsumeAllIgnoringDisease();
 			})
 				.GoTo(this.needsdirt);
-			this.notoperational.EventTransition(GameHashes.OperationalChanged, this.needsdirt, (Toilet.StatesInstance smi) => smi.Get<Operational>().IsOperational).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable);
+			this.notoperational.EventTransition(GameHashes.OperationalChanged, this.needsdirt, (Toilet.StatesInstance smi) => smi.Get<Operational>().IsOperational).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null);
 		}
 
 		private Chore CreateUrgentUseChore(Toilet.StatesInstance smi)

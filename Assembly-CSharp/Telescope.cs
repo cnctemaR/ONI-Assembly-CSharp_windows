@@ -6,6 +6,15 @@ using UnityEngine;
 
 public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescriptor, ISim200ms
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.attributeConverter = Db.Get().AttributeConverters.ResearchSpeed;
+		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE;
+		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Research.Id;
+		this.skillExperienceMultiplier = SKILLS.ALL_DAY_EXPERIENCE;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -21,6 +30,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 		this.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
 		this.operational = base.GetComponent<Operational>();
 		this.storage = base.GetComponent<Storage>();
+		this.UpdateWorkingState(null);
 	}
 
 	protected override void OnCleanUp()
@@ -118,16 +128,15 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 	{
 		if (SpacecraftManager.instance.HasAnalysisTarget())
 		{
-			float num = 1f + Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
 			int starmapAnalysisDestinationID = SpacecraftManager.instance.GetStarmapAnalysisDestinationID();
 			SpaceDestination destination = SpacecraftManager.instance.GetDestination(starmapAnalysisDestinationID);
-			float num2 = 1f / (float)destination.OneBasedDistance;
-			float num3 = (float)ROCKETRY.DESTINATION_ANALYSIS.DISCOVERED;
+			float num = 1f / (float)destination.OneBasedDistance;
+			float num2 = (float)ROCKETRY.DESTINATION_ANALYSIS.DISCOVERED;
 			float default_CYCLES_PER_DISCOVERY = ROCKETRY.DESTINATION_ANALYSIS.DEFAULT_CYCLES_PER_DISCOVERY;
-			float num4 = num3 / default_CYCLES_PER_DISCOVERY;
-			float num5 = num4 / 600f;
-			float num6 = dt * num * num2 * num5;
-			SpacecraftManager.instance.EarnDestinationAnalysisPoints(starmapAnalysisDestinationID, num6);
+			float num3 = num2 / default_CYCLES_PER_DISCOVERY;
+			float num4 = num3 / 600f;
+			float num5 = dt * num * num4;
+			SpacecraftManager.instance.EarnDestinationAnalysisPoints(starmapAnalysisDestinationID, num5);
 		}
 		return base.OnWorkTick(worker, dt);
 	}
@@ -157,7 +166,8 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 			flag = true;
 		}
 		KSelectable component = base.GetComponent<KSelectable>();
-		component.ToggleStatusItem(Db.Get().BuildingStatusItems.NoApplicableAnalysisSelected, !flag, null);
+		bool flag2 = !flag && !SpacecraftManager.instance.AreAllDestinationsAnalyzed();
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.NoApplicableAnalysisSelected, flag2, null);
 		this.operational.SetFlag(this.flag, flag);
 		if (!flag && base.worker)
 		{

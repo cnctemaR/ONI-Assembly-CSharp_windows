@@ -12,10 +12,17 @@ public class CreatureChewSoundEvent : SoundEvent
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
 		string sound = GlobalAssets.GetSound(StringFormatter.Combine(base.name, "_", CreatureChewSoundEvent.GetChewSound(behaviour)), false);
-		if (SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic))
+		GameObject gameObject = behaviour.controller.gameObject;
+		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic))
 		{
-			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position, 1f);
+			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			vector.z = 0f;
+			if (base.objectIsSelectedAndVisible)
+			{
+				vector = SoundEvent.AudioHighlightListenerPosition(vector);
+			}
+			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
 			if (behaviour.controller.gameObject.GetDef<BabyMonitor.Def>() != null)
 			{
 				eventInstance.setParameterValue("isBaby", 1f);

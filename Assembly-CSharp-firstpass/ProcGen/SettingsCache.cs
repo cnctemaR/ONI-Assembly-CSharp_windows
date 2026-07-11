@@ -213,6 +213,35 @@ namespace ProcGen
 			}
 		}
 
+		public static void LoadWorldTraits(List<YamlIO.Error> errors)
+		{
+			List<FileHandle> list = new List<FileHandle>();
+			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(SettingsCache.path, "traits")), "*.yaml", list);
+			foreach (FileHandle fileHandle in list)
+			{
+				SettingsCache.LoadWorldTrait(fileHandle, errors);
+			}
+		}
+
+		public static void LoadWorldTrait(FileHandle file, List<YamlIO.Error> errors)
+		{
+			WorldTrait worldTrait = YamlIO.LoadFile<WorldTrait>(file, delegate(YamlIO.Error error, bool force_log_as_warning)
+			{
+				errors.Add(error);
+			}, null);
+			int num = SettingsCache.FirstUncommonCharacter(SettingsCache.path, file.full_path);
+			string text = ((num <= -1) ? file.full_path : file.full_path.Substring(num));
+			text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
+			text = text.Replace('\\', '/');
+			if (worldTrait == null)
+			{
+				DebugUtil.LogWarningArgs(new object[] { "Failed to load trait: ", text });
+				return;
+			}
+			SettingsCache.traits[text] = worldTrait;
+			worldTrait.filePath = text;
+		}
+
 		public static List<string> GetWorldNames()
 		{
 			return SettingsCache.worlds.GetNames();
@@ -260,20 +289,15 @@ namespace ProcGen
 			pooledList.Reverse();
 			ListPool<T, WorldGenSettings>.PooledList pooledList2 = ListPool<T, WorldGenSettings>.Allocate();
 			pooledList2.Add(new T());
-			using (List<FileHandle>.Enumerator enumerator = pooledList.GetEnumerator())
+			foreach (FileHandle fileHandle in pooledList)
 			{
-				while (enumerator.MoveNext())
+				T t = YamlIO.LoadFile<T>(fileHandle, delegate(YamlIO.Error error, bool force_log_as_warning)
 				{
-					FileHandle file = enumerator.Current;
-					T t = YamlIO.Parse<T>(FileSystem.ConvertToText(file.source.ReadBytes(file.full_path)), file.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
-					{
-						error.file = file;
-						errors.Add(error);
-					}, null);
-					if (t != null)
-					{
-						pooledList2.Add(t);
-					}
+					errors.Add(error);
+				}, null);
+				if (t != null)
+				{
+					pooledList2.Add(t);
 				}
 			}
 			pooledList.Recycle();
@@ -307,32 +331,7 @@ namespace ProcGen
 				return false;
 			}
 			SettingsCache.worlds.LoadFiles(SettingsCache.GetPath(), errors);
-			List<FileHandle> list = new List<FileHandle>();
-			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(SettingsCache.path, "traits")), "*.yaml", list);
-			using (List<FileHandle>.Enumerator enumerator = list.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					FileHandle trait_file = enumerator.Current;
-					WorldTrait worldTrait = YamlIO.LoadFile<WorldTrait>(trait_file.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
-					{
-						error.file = trait_file;
-						errors.Add(error);
-					}, null);
-					int num = SettingsCache.FirstUncommonCharacter(SettingsCache.path, trait_file.full_path);
-					string text = ((num <= -1) ? trait_file.full_path : trait_file.full_path.Substring(num));
-					text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
-					if (worldTrait == null)
-					{
-						DebugUtil.LogWarningArgs(new object[] { "Failed to load trait: ", text });
-					}
-					else
-					{
-						SettingsCache.traits[text] = worldTrait;
-						worldTrait.filePath = text;
-					}
-				}
-			}
+			SettingsCache.LoadWorldTraits(errors);
 			foreach (KeyValuePair<string, World> keyValuePair in SettingsCache.worlds.worldCache)
 			{
 				SettingsCache.LoadFeatures(keyValuePair.Value.globalFeatures, errors);

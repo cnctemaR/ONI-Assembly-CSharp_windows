@@ -14,6 +14,7 @@ namespace Steamworks
 		k_EChatRoomEnterResponseClanDisabled,
 		k_EChatRoomEnterResponseCommunityBan,
 		k_EChatRoomEnterResponseMemberBlockedYou,
-		k_EChatRoomEnterResponseYouBlockedMember
+		k_EChatRoomEnterResponseYouBlockedMember,
+		k_EChatRoomEnterResponseRatelimitExceeded = 15
 	}
 }

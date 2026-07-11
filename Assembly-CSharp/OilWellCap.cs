@@ -181,6 +181,12 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 		return this.smi.GetPressurePercent() <= 0f;
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		this.ReleaseGasPressure(60f);
+		return true;
+	}
+
 	private OilWellCap.StatesInstance smi;
 
 	[MyCmpReq]

@@ -83,6 +83,11 @@ public class Breakable : Workable
 		}
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();

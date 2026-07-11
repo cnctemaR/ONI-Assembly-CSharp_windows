@@ -19,5 +19,8 @@ namespace Steamworks
 
 		[MarshalAs(UnmanagedType.I1)]
 		public bool m_bCachedData;
+
+		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+		public string m_rgchNextCursor;
 	}
 }

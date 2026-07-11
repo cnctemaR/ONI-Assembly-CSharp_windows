@@ -18,6 +18,7 @@ public class PhonoboxConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.Floodable = true;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Overheatable = true;

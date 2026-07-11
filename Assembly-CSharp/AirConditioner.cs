@@ -157,11 +157,19 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 		List<Descriptor> list = new List<Descriptor>();
 		string formattedTemperature = GameUtil.GetFormattedTemperature(this.temperatureDelta, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false);
 		Element element = ElementLoader.FindElementByName((!this.isLiquidConditioner) ? "Oxygen" : "Water");
-		float num = Mathf.Abs(this.temperatureDelta * element.specificHeatCapacity);
+		float num;
+		if (this.isLiquidConditioner)
+		{
+			num = Mathf.Abs(this.temperatureDelta * element.specificHeatCapacity * 10000f);
+		}
+		else
+		{
+			num = Mathf.Abs(this.temperatureDelta * element.specificHeatCapacity * 1000f);
+		}
 		float num2 = num * 1f;
 		Descriptor descriptor = default(Descriptor);
-		string text = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedHeatEnergyRate(num2, GameUtil.HeatEnergyFormatterUnit.Automatic));
-		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedHeatEnergy(num, GameUtil.HeatEnergyFormatterUnit.Automatic));
+		string text = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedHeatEnergy(num2, GameUtil.HeatEnergyFormatterUnit.Automatic), GameUtil.GetFormattedTemperature(Mathf.Abs(this.temperatureDelta), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false));
+		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedHeatEnergy(num2, GameUtil.HeatEnergyFormatterUnit.Automatic), GameUtil.GetFormattedTemperature(Mathf.Abs(this.temperatureDelta), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true, false));
 		descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		Descriptor descriptor2 = default(Descriptor);

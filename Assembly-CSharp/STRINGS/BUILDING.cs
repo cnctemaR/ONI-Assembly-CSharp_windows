@@ -1147,6 +1147,20 @@ namespace STRINGS
 				});
 			}
 
+			public class TANNINGLIGHTSUFFICIENT
+			{
+				public static LocString NAME = "Tanning Light available";
+
+				public static LocString TOOLTIP = "There is sufficient " + UI.FormatAsLink("Light", "LIGHT") + " here to create pleasing skin crisping";
+			}
+
+			public class TANNINGLIGHTINSUFFICIENT
+			{
+				public static LocString NAME = "Insufficient Tanning Light";
+
+				public static LocString TOOLTIP = "The " + UI.FormatAsLink("Light", "LIGHT") + " here is not bright enough for that Sunny Day feeling";
+			}
+
 			public class UNASSIGNED
 			{
 				public static LocString NAME = "Unassigned";
@@ -1806,6 +1820,20 @@ namespace STRINGS
 					UI.FormatAsHotkey("[ENTER]"),
 					" to resume use"
 				});
+			}
+
+			public class MISSINGREQUIREMENTS
+			{
+				public static LocString NAME = "Missing Requirements";
+
+				public static LocString TOOLTIP = "There are some problems that need to be fixed before this building is operational.";
+			}
+
+			public class GETTINGREADY
+			{
+				public static LocString NAME = "Getting Ready";
+
+				public static LocString TOOLTIP = "This building will soon be ready to use";
 			}
 
 			public class WORKING
@@ -2541,6 +2569,27 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					":"
 				});
+			}
+
+			public class HOTTUBWATERTOOCOLD
+			{
+				public static LocString NAME = "Water Too Cold";
+
+				public static LocString TOOLTIP = "This Hot Tub's water is below <b>{temperature}</b>.\n\nThe water is being drained so that it can be replaced with warmer water.";
+			}
+
+			public class HOTTUBTOOHOT
+			{
+				public static LocString NAME = "Building Too Hot";
+
+				public static LocString TOOLTIP = "This Hot Tub's temperature is above <b>{temperature}</b>.\n\nIt needs to cool down before it can be safely used.";
+			}
+
+			public class HOTTUBFILLING
+			{
+				public static LocString NAME = "Filling Up ({fullness})";
+
+				public static LocString TOOLTIP = "This Hot Tub is currently filling with water.\n\nIt will be available to use when water level reaches <b>100%</b>";
 			}
 		}
 

@@ -69,7 +69,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 	{
 		SimAndRenderScheduler.instance.Add(this, false);
 		this.Refresh();
-		this.MopTick();
+		this.MopTick(this.amountMoppedPerTick);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -80,6 +80,12 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 	protected override void OnCompleteWork(Worker worker)
 	{
 		SimAndRenderScheduler.instance.Remove(this);
+	}
+
+	public override bool InstantlyFinish(Worker worker)
+	{
+		this.MopTick(1000f);
+		return true;
 	}
 
 	public void Sim1000ms(float dt)
@@ -96,7 +102,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		if (base.worker != null)
 		{
 			this.Refresh();
-			this.MopTick();
+			this.MopTick(this.amountMoppedPerTick);
 		}
 	}
 
@@ -128,7 +134,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		}
 	}
 
-	private void MopTick()
+	private void MopTick(float mopAmount)
 	{
 		int num = Grid.PosToCell(this);
 		for (int i = 0; i < this.offsets.Length; i++)
@@ -136,7 +142,7 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 			int num2 = Grid.OffsetCell(num, this.offsets[i]);
 			if (Grid.Element[num2].IsLiquid)
 			{
-				Moppable.MopCell(num2, this.amountMoppedPerTick, new Action<Sim.MassConsumedCallback, object>(this.OnCellMopped));
+				Moppable.MopCell(num2, mopAmount, new Action<Sim.MassConsumedCallback, object>(this.OnCellMopped));
 			}
 		}
 	}

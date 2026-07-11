@@ -103,6 +103,7 @@ public class FuelTank : Storage, IUserControlledCapacity
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		base.Subscribe<FuelTank>(-905833192, FuelTank.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -148,6 +149,16 @@ public class FuelTank : Storage, IUserControlledCapacity
 		this.items.Clear();
 	}
 
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		FuelTank component = gameObject.GetComponent<FuelTank>();
+		if (component != null)
+		{
+			this.UserMaxCapacity = component.UserMaxCapacity;
+		}
+	}
+
 	private bool isSuspended;
 
 	private MeterController meter;
@@ -159,4 +170,9 @@ public class FuelTank : Storage, IUserControlledCapacity
 	private Tag fuelType;
 
 	public float minimumLaunchMass = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
+
+	private static readonly EventSystem.IntraObjectHandler<FuelTank> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<FuelTank>(delegate(FuelTank component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

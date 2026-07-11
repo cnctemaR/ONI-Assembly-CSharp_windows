@@ -164,6 +164,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private void StartDrag(global::Action action)
 	{
+		if (!this.draggingAllowed)
+		{
+			return;
+		}
 		if (this.dragAction == global::Action.Invalid)
 		{
 			this.dragAction = action;
@@ -174,6 +178,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private void UpdateDrag()
 	{
+		if (!this.draggingAllowed)
+		{
+			return;
+		}
 		this.dragDelta = Vector2.zero;
 		Vector3 mousePos = KInputManager.GetMousePos();
 		if (!this.dragging && this.dragAction != global::Action.Invalid && ((mousePos - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
@@ -290,6 +298,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		return this.dragAction != global::Action.Invalid;
 	}
 
+	public void AllowDragging(bool allow)
+	{
+		this.draggingAllowed = allow;
+	}
+
 	public Vector3 GetDragDelta()
 	{
 		return this.dragDelta;
@@ -313,6 +326,8 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	private const float MIN_DRAG_TIME = 0.3f;
 
 	private global::Action dragAction;
+
+	private bool draggingAllowed = true;
 
 	private bool dragging;
 

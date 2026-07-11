@@ -18,6 +18,7 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 		this.CreateBucketGroup(1, 0.016666668f, UpdateRate.RENDER_EVERY_TICK, this.renderEveryTickBucketGroups);
 		this.CreateBucketGroup(12, 0.016666668f, UpdateRate.RENDER_200ms, this.renderBucketGroups);
 		this.CreateBucketGroup(60, 0.016666668f, UpdateRate.RENDER_1000ms, this.renderBucketGroups);
+		this.CreateBucketGroup(1, 0.016666668f, UpdateRate.SIM_EVERY_TICK, this.simBucketGroups);
 		this.CreateBucketGroup(2, 0.016666668f, UpdateRate.SIM_33ms, this.simBucketGroups);
 		this.CreateBucketGroup(12, 0.016666668f, UpdateRate.SIM_200ms, this.simBucketGroups);
 		this.CreateBucketGroup(60, 0.016666668f, UpdateRate.SIM_1000ms, this.simBucketGroups);

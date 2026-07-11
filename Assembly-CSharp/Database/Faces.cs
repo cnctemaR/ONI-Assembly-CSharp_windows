@@ -22,6 +22,12 @@ namespace Database
 			this.SickFierySkin = base.Add(new Face("Fiery"));
 			this.SickCold = base.Add(new Face("Cold"));
 			this.Dead = base.Add(new Face("Death"));
+			this.Productive = base.Add(new Face("Productive"));
+			this.Determined = base.Add(new Face("Determined"));
+			this.Sticker = base.Add(new Face("Sticker"));
+			this.Sparkle = base.Add(new Face("Sparkle"));
+			this.Balloon = base.Add(new Face("Balloon"));
+			this.Tickled = base.Add(new Face("Tickled"));
 		}
 
 		public Face Neutral;
@@ -55,5 +61,17 @@ namespace Database
 		public Face SickFierySkin;
 
 		public Face SickCold;
+
+		public Face Productive;
+
+		public Face Determined;
+
+		public Face Sticker;
+
+		public Face Balloon;
+
+		public Face Sparkle;
+
+		public Face Tickled;
 	}
 }

@@ -22,12 +22,15 @@ public class MotdServerClient
 		}
 	}
 
-	private static string MotdLocalImagePath
+	private static string MotdLocalImagePath(int imageVersion)
 	{
-		get
+		return string.Concat(new object[]
 		{
-			return "motd_local/" + MotdServerClient.GetLocalePathModifier() + "image";
-		}
+			"motd_local/",
+			MotdServerClient.GetLocalePathModifier(),
+			"image_",
+			imageVersion
+		});
 	}
 
 	private static string GetLocalePathModifier()
@@ -58,6 +61,7 @@ public class MotdServerClient
 		{
 			if (err == null)
 			{
+				global::Debug.Assert(response.image_texture != null, "Attempting to return response with no image texture");
 				this.doCallback(response, err);
 			}
 			else
@@ -71,20 +75,23 @@ public class MotdServerClient
 	private MotdServerClient.MotdResponse GetLocalMotd(string filePath)
 	{
 		TextAsset textAsset = Resources.Load<TextAsset>(filePath.Replace(".json", string.Empty));
-		MotdServerClient.MotdResponse motdResponse = JsonConvert.DeserializeObject<MotdServerClient.MotdResponse>(textAsset.ToString());
-		motdResponse.image_texture = Resources.Load<Texture2D>(MotdServerClient.MotdLocalImagePath);
-		return motdResponse;
+		this.m_localMotd = JsonConvert.DeserializeObject<MotdServerClient.MotdResponse>(textAsset.ToString());
+		string text = MotdServerClient.MotdLocalImagePath(this.m_localMotd.image_version);
+		this.m_localMotd.image_texture = Resources.Load<Texture2D>(text);
+		global::Debug.Assert(this.m_localMotd.image_texture != null, "Failed to load " + text);
+		return this.m_localMotd;
 	}
 
 	private void GetWebMotd(string url, MotdServerClient.MotdResponse localMotd, Action<MotdServerClient.MotdResponse, string> cb)
 	{
 		MotdServerClient.<GetWebMotd>c__AnonStorey1 <GetWebMotd>c__AnonStorey = new MotdServerClient.<GetWebMotd>c__AnonStorey1();
-		<GetWebMotd>c__AnonStorey.cb = cb;
 		<GetWebMotd>c__AnonStorey.localMotd = localMotd;
+		<GetWebMotd>c__AnonStorey.cb = cb;
 		Action<string, string> action = delegate(string response, string err)
 		{
 			MotdServerClient.<GetWebMotd>c__AnonStorey1.<GetWebMotd>c__AnonStorey2 <GetWebMotd>c__AnonStorey2 = new MotdServerClient.<GetWebMotd>c__AnonStorey1.<GetWebMotd>c__AnonStorey2();
 			<GetWebMotd>c__AnonStorey2.<>f__ref$1 = <GetWebMotd>c__AnonStorey;
+			global::Debug.Assert(<GetWebMotd>c__AnonStorey.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded");
 			if (err != null)
 			{
 				<GetWebMotd>c__AnonStorey.cb(null, err);
@@ -172,6 +179,8 @@ public class MotdServerClient
 	}
 
 	private Action<MotdServerClient.MotdResponse, string> m_callback;
+
+	private MotdServerClient.MotdResponse m_localMotd;
 
 	public class MotdResponse
 	{

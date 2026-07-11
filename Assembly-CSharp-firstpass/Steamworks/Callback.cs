@@ -110,14 +110,14 @@ namespace Steamworks
 
 		private void BuildCCallbackBase()
 		{
-			this.VTable = new CCallbackBaseVTable
+			this.m_CallbackBaseVTable = new CCallbackBaseVTable
 			{
 				m_RunCallResult = new CCallbackBaseVTable.RunCRDel(this.OnRunCallResult),
 				m_RunCallback = new CCallbackBaseVTable.RunCBDel(this.OnRunCallback),
 				m_GetCallbackSizeBytes = new CCallbackBaseVTable.GetCallbackSizeBytesDel(this.OnGetCallbackSizeBytes)
 			};
 			this.m_pVTable = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CCallbackBaseVTable)));
-			Marshal.StructureToPtr(this.VTable, this.m_pVTable, false);
+			Marshal.StructureToPtr(this.m_CallbackBaseVTable, this.m_pVTable, false);
 			this.m_CCallbackBase = new CCallbackBase
 			{
 				m_vfptr = this.m_pVTable,
@@ -127,7 +127,7 @@ namespace Steamworks
 			this.m_pCCallbackBase = GCHandle.Alloc(this.m_CCallbackBase, GCHandleType.Pinned);
 		}
 
-		private CCallbackBaseVTable VTable;
+		private CCallbackBaseVTable m_CallbackBaseVTable;
 
 		private IntPtr m_pVTable = IntPtr.Zero;
 

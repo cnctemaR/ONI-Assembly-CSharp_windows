@@ -253,7 +253,7 @@ public class SpeedControlScreen : KScreen
 		string sound = GlobalAssets.GetSound("Speed_Change", false);
 		if (sound != null)
 		{
-			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, Vector3.zero, 1f);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, Vector3.zero, 1f, false);
 			eventInstance.setParameterValue("Speed", speed);
 			SoundEvent.EndOneShot(eventInstance);
 		}

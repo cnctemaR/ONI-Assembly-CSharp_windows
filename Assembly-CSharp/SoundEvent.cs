@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using FMOD.Studio;
 using UnityEngine;
@@ -40,7 +41,89 @@ public class SoundEvent : AnimEvent
 
 	public float minInterval { get; private set; }
 
+	public bool objectIsSelectedAndVisible { get; set; }
+
 	public EffectorValues noiseValues { get; set; }
+
+	public static bool ObjectIsSelectedAndVisible(GameObject go)
+	{
+		if (go != null && go.GetComponent<KSelectable>() != null && CameraController.Instance.IsVisiblePos(go.transform.position))
+		{
+			if (go.GetComponent<KSelectable>().IsSelected)
+			{
+				return true;
+			}
+			if (go.GetComponent<Worker>() != null && go.GetComponent<Worker>().workable != null)
+			{
+				Workable workable = go.GetComponent<Worker>().workable;
+				if (workable.GetComponent<KSelectable>() != null && workable.GetComponent<KSelectable>().IsSelected)
+				{
+					return true;
+				}
+			}
+			if (go.GetComponent<Workable>() != null)
+			{
+				Workable[] components = go.GetComponents<Workable>();
+				if (components.Length > 0)
+				{
+					for (int i = 0; i < components.Length; i++)
+					{
+						if (components[i].worker != null && components[i].GetComponent<KSelectable>().IsSelected)
+						{
+							return true;
+						}
+					}
+				}
+			}
+			if (go.transform.GetComponentInParent<KSelectable>() != null && go.transform.GetComponentInParent<KSelectable>().IsSelected)
+			{
+				return true;
+			}
+			IEnumerator enumerator = go.transform.GetEnumerator();
+			try
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					if (transform.GetComponent<KSelectable>() != null && transform.GetComponent<KSelectable>().IsSelected)
+					{
+						return true;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public static Vector3 AudioHighlightListenerPosition(Vector3 sound_pos)
+	{
+		Vector3 position = SoundListenerController.Instance.transform.position;
+		float num = 1f * sound_pos.x + 0f * position.x;
+		float num2 = 1f * sound_pos.y + 0f * position.y;
+		float num3 = 0f * position.z;
+		Vector3 vector = new Vector3(num, num2, num3);
+		return vector;
+	}
+
+	public static float GetVolume(bool objectIsSelectedAndVisible)
+	{
+		float num = 1f;
+		if (objectIsSelectedAndVisible)
+		{
+			num = 1f;
+		}
+		return num;
+	}
 
 	public static bool ShouldPlaySound(KBatchedAnimController controller, string sound, bool is_looping, bool is_dynamic)
 	{
@@ -78,7 +161,9 @@ public class SoundEvent : AnimEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (SoundEvent.ShouldPlaySound(behaviour.controller, this.sound, this.looping, this.isDynamic))
+		GameObject gameObject = behaviour.controller.gameObject;
+		this.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+		if (this.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, this.sound, this.looping, this.isDynamic))
 		{
 			this.PlaySound(behaviour);
 		}
@@ -86,18 +171,24 @@ public class SoundEvent : AnimEvent
 
 	protected void PlaySound(AnimEventManager.EventPlayerData behaviour, string sound)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		vector.z = 0f;
+		GameObject gameObject = behaviour.controller.gameObject;
+		if (SoundEvent.ObjectIsSelectedAndVisible(gameObject))
+		{
+			vector = SoundEvent.AudioHighlightListenerPosition(vector);
+		}
 		KBatchedAnimController component = behaviour.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
 			Vector3 offset = component.Offset;
-			position.x += offset.x;
-			position.y += offset.y;
+			vector.x += offset.x;
+			vector.y += offset.y;
 		}
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
-			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", position }));
+			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", vector }));
 		}
 		try
 		{
@@ -113,7 +204,7 @@ public class SoundEvent : AnimEvent
 					DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}
 			}
-			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.noiseValues, this.GetVolume(behaviour)))
+			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.noiseValues, SoundEvent.GetVolume(this.objectIsSelectedAndVisible), this.objectIsSelectedAndVisible))
 			{
 				DebugUtil.LogWarningArgs(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 			}
@@ -131,19 +222,19 @@ public class SoundEvent : AnimEvent
 		this.PlaySound(behaviour, this.sound);
 	}
 
-	public static Vector3 GetCameraScaledPosition(Vector3 pos)
+	public static Vector3 GetCameraScaledPosition(Vector3 pos, bool objectIsSelectedAndVisible = false)
 	{
 		Vector3 vector = Vector3.zero;
 		if (CameraController.Instance != null)
 		{
-			vector = CameraController.Instance.GetVerticallyScaledPosition(pos);
+			vector = CameraController.Instance.GetVerticallyScaledPosition(pos, objectIsSelectedAndVisible);
 		}
 		return vector;
 	}
 
-	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos, float volume = 1f)
+	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos, float volume = 1f, bool objectIsSelectedAndVisible = false)
 	{
-		return KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos), volume);
+		return KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos, objectIsSelectedAndVisible), volume);
 	}
 
 	public static bool EndOneShot(FMOD.Studio.EventInstance instance)
@@ -151,12 +242,12 @@ public class SoundEvent : AnimEvent
 		return KFMOD.EndOneShot(instance);
 	}
 
-	public static bool PlayOneShot(string sound, Vector3 pos, float volume = 1f)
+	public static bool PlayOneShot(string sound, Vector3 sound_pos, float volume = 1f)
 	{
 		bool flag = false;
 		if (!string.IsNullOrEmpty(sound))
 		{
-			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, pos, volume);
+			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, sound_pos, volume, false);
 			if (eventInstance.isValid())
 			{
 				flag = SoundEvent.EndOneShot(eventInstance);
@@ -165,13 +256,18 @@ public class SoundEvent : AnimEvent
 		return flag;
 	}
 
-	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues, float volume = 1f)
+	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues, float volume = 1f, bool objectIsSelectedAndVisible = false)
 	{
 		bool flag = false;
 		if (!string.IsNullOrEmpty(sound))
 		{
-			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position, volume);
+			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			vector.z = 0f;
+			if (objectIsSelectedAndVisible)
+			{
+				vector = SoundEvent.AudioHighlightListenerPosition(vector);
+			}
+			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, volume, false);
 			if (eventInstance.isValid())
 			{
 				flag = SoundEvent.EndOneShot(eventInstance);
@@ -207,11 +303,6 @@ public class SoundEvent : AnimEvent
 		{
 			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name);
 		}
-	}
-
-	protected float GetVolume(AnimEventManager.EventPlayerData behaviour)
-	{
-		return 1f;
 	}
 
 	public static int IGNORE_INTERVAL = -1;

@@ -335,6 +335,13 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires one or more light sources";
 			}
 
+			public class DESTRESSING_BUILDING
+			{
+				public static LocString NAME = "De-Stressing Building";
+
+				public static LocString DESCRIPTION = "Requires one or more De-Stressing Building";
+			}
+
 			public class MASSAGE_TABLE
 			{
 				public static LocString NAME = "Massage Table";

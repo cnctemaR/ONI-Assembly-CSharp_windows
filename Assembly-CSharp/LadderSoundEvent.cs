@@ -10,28 +10,40 @@ public class LadderSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-		int num = Grid.PosToCell(position);
-		BuildingDef buildingDef = null;
-		if (Grid.IsValidCell(num))
+		GameObject gameObject = behaviour.controller.gameObject;
+		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
 		{
-			GameObject gameObject = Grid.Objects[num, 1];
-			if (gameObject != null && gameObject.GetComponent<Ladder>() != null)
+			Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+			vector.z = 0f;
+			float num = 1f;
+			if (base.objectIsSelectedAndVisible)
 			{
-				Building component = gameObject.GetComponent<BuildingComplete>();
-				if (component != null)
+				vector = SoundEvent.AudioHighlightListenerPosition(vector);
+				num = SoundEvent.GetVolume(base.objectIsSelectedAndVisible);
+			}
+			int num2 = Grid.PosToCell(vector);
+			BuildingDef buildingDef = null;
+			if (Grid.IsValidCell(num2))
+			{
+				GameObject gameObject2 = Grid.Objects[num2, 1];
+				if (gameObject2 != null && gameObject2.GetComponent<Ladder>() != null)
 				{
-					buildingDef = component.Def;
+					Building component = gameObject2.GetComponent<BuildingComplete>();
+					if (component != null)
+					{
+						buildingDef = component.Def;
+					}
 				}
 			}
-		}
-		if (buildingDef != null)
-		{
-			string text = ((!(buildingDef.PrefabID == "LadderFast")) ? base.name : StringFormatter.Combine(base.name, "_Plastic"));
-			string sound = GlobalAssets.GetSound(text, false);
-			if (sound != null)
+			if (buildingDef != null)
 			{
-				SoundEvent.PlayOneShot(sound, position, 1f);
+				string text = ((!(buildingDef.PrefabID == "LadderFast")) ? base.name : StringFormatter.Combine(base.name, "_Plastic"));
+				string sound = GlobalAssets.GetSound(text, false);
+				if (sound != null)
+				{
+					SoundEvent.PlayOneShot(sound, vector, num);
+				}
 			}
 		}
 	}

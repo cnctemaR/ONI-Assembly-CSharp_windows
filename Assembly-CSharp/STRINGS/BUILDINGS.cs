@@ -352,6 +352,15 @@ namespace STRINGS
 				public static LocString EFFECT = "Plays music for Duplicants to dance to on their breaks.\n\nIncreases Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
 			}
 
+			public class JUICER
+			{
+				public static LocString NAME = UI.FormatAsLink("Juicer", "JUICER");
+
+				public static LocString DESC = "Fruity juice can really brighten a Duplicant's breaktime";
+
+				public static LocString EFFECT = "Provides refreshment for Duplicants on their breaks.\n\nDrinking juice increases Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
+			}
+
 			public class ESPRESSOMACHINE
 			{
 				public static LocString NAME = UI.FormatAsLink("Espresso Machine", "ESPRESSOMACHINE");
@@ -359,6 +368,96 @@ namespace STRINGS
 				public static LocString DESC = "A shot of espresso helps Duplicants relax after a long day.";
 
 				public static LocString EFFECT = "Provides refreshment for Duplicants on their breaks.\n\nIncreases Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
+			}
+
+			public class MECHANICALSURFBOARD
+			{
+				public static LocString NAME = UI.FormatAsLink("Mechanical Surfboard", "MECHANICALSURFBOARD");
+
+				public static LocString DESC = "Mechanical waves make for radical relaxation time.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Increases Duplicant ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					".\n\nSome ",
+					UI.FormatAsLink("Water", "WATER"),
+					" gets splashed on the floor during use."
+				});
+			}
+
+			public class SAUNA
+			{
+				public static LocString NAME = UI.FormatAsLink("Sauna", "SAUNA");
+
+				public static LocString DESC = "A steamy sauna soothes away all the aches and pains.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Uses ",
+					UI.FormatAsLink("Steam", "STEAM"),
+					" to create a relaxing atmosphere.\n\nIncreases Duplicant ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					"."
+				});
+			}
+
+			public class BEACHCHAIR
+			{
+				public static LocString NAME = UI.FormatAsLink("Beach Chair", "BEACHCHAIR");
+
+				public static LocString DESC = "Soak up some relaxing sun rays.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Duplicants can relax by lounging in ",
+					UI.FormatAsLink("Sunlight", "LIGHT"),
+					".\n\nIncreases Duplicants ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					"."
+				});
+
+				public static LocString LIGHTEFFECT_LOW = "{attrib}: {amount} (Low Lux)";
+
+				public static LocString LIGHTEFFECT_LOW_TOOLTIP = "Duplicants will gain {amount} {attrib} if this building is in dim light.";
+
+				public static LocString LIGHTEFFECT_HIGH = "{attrib}: {amount} (High Lux)";
+
+				public static LocString LIGHTEFFECT_HIGH_TOOLTIP = "Duplicants will gain {amount} {attrib} if this building is in bright light.";
+			}
+
+			public class SUNLAMP
+			{
+				public static LocString NAME = UI.FormatAsLink("Sun Lamp", "SUNLAMP");
+
+				public static LocString DESC = "An artificial ray of sunshine.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Gives off ",
+					UI.FormatAsLink("Sunlight", "LIGHT"),
+					" level Lux. \n\nCan be paired with ",
+					UI.FormatAsLink("Beach Chair", "BEACHCHAIR"),
+					"."
+				});
+			}
+
+			public class VERTICALWINDTUNNEL
+			{
+				public static LocString NAME = UI.FormatAsLink("Vertical Wind Tunnel", "VERTICALWINDTUNNEL");
+
+				public static LocString DESC = "Duplicants love the feeling of high-powered wind through their hair.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Must be connected to ",
+					UI.FormatAsLink("Gas Pipes", "GASPIPING"),
+					" and a ",
+					UI.FormatAsLink("Power Source", "POWER"),
+					".\n\nIncreases Duplicants ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					"."
+				});
 			}
 
 			public class CHECKPOINT
@@ -883,7 +982,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Wall Pot", "FLOWERVASEWALL");
 
-				public static LocString DESC = "Placing a plant in a wall pot can add a spot of decor to otherwise bare walls.";
+				public static LocString DESC = "Placing a plant in a wall pot can add a spot of Decor to otherwise bare walls.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -903,7 +1002,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Hanging Pot", "FLOWERVASEHANGING");
 
-				public static LocString DESC = "Hanging pots can add some decor to a room, without blocking buildings on the floor.";
+				public static LocString DESC = "Hanging pots can add some Decor to a room, without blocking buildings on the floor.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -923,7 +1022,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Aero Pot", "FLOWERVASEHANGINGFANCY");
 
-				public static LocString DESC = "Aero pots can be hung from the ceiling and have extremely high decor values.";
+				public static LocString DESC = "Aero pots can be hung from the ceiling and have extremely high Decor.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -1788,7 +1887,7 @@ namespace STRINGS
 					"Used to build the walls and floors of rooms.\n\nAllows ",
 					UI.FormatAsLink("Light", "LIGHT"),
 					" and ",
-					UI.FormatAsLink("Decor Values", "DECOR"),
+					UI.FormatAsLink("Decor", "DECOR"),
 					" to pass through."
 				});
 			}
@@ -1815,7 +1914,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Carpeted Tile", "CARPETTILE");
 
-				public static LocString DESC = "Carpeted tile remains decorative even when other tile is stacked atop it.";
+				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -2347,7 +2446,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Storage Bin", "STORAGELOCKER");
 
-				public static LocString DESC = "Resources left on the floor become \"debris\" and lower decor when not put away.";
+				public static LocString DESC = "Resources left on the floor become \"debris\" and lower Decor when not put away.";
 
 				public static LocString EFFECT = "Stores the Solid resources of your choosing.";
 			}
@@ -3836,7 +3935,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Perception can be drastically changed by a bit of thoughtful presentation.";
 
-				public static LocString EFFECT = "Displays a single object, doubling its " + UI.FormatAsLink("Decor", "DECOR") + " value.\n\nObjects with negative decor will gain some positive decor when displayed.";
+				public static LocString EFFECT = "Displays a single object, doubling its " + UI.FormatAsLink("Decor", "DECOR") + " value.\n\nObjects with negative Decor will gain some positive Decor when displayed.";
 
 				public static LocString DISPLAYED_ITEM_FMT = "Displayed {0}";
 			}
@@ -3934,6 +4033,53 @@ namespace STRINGS
 					UI.FormatAsLink("Astronaut-in-Training", "ASTRONAUTTRAINEE"),
 					" trait to receive training."
 				});
+			}
+
+			public class HOTTUB
+			{
+				public static LocString NAME = UI.FormatAsLink("Hot Tub", "HOTTUB");
+
+				public static LocString DESC = "Relaxes Duplicants with massaging jets of heated liquid.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Requires ",
+					UI.FormatAsLink("Pipes", "LIQUIDPIPING"),
+					" to and from tub and ",
+					UI.FormatAsLink("Power", "POWER"),
+					" to run the jets.\n\nWater must be a comfortable temperature and will cool rapidly.\n\nIncreases Duplicant ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					"."
+				});
+
+				public static LocString REQUIREMENT = "Minimum {element} Temperature: {temperature}";
+
+				public static LocString REQUIREMENT_TOOLTIP = "The Hot Tub will only be usable if supplied with {temperature} {element}. If the {element} gets too cold, the Hot Tub will drain and require refilling with {element}.";
+			}
+
+			public class SODAFOUNTAIN
+			{
+				public static LocString NAME = UI.FormatAsLink("Soda Fountain", "SODAFOUNTAIN");
+
+				public static LocString DESC = "Sparkling water puts a twinkle in a Duplicant's eye.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Creates soda from ",
+					UI.FormatAsLink("Water", "WATER"),
+					" and ",
+					UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
+					".\n\nConsuming soda water increases Duplicant ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					"."
+				});
+			}
+
+			public class STICKERBOMB
+			{
+				public static LocString NAME = "Sticker Bomb";
+
+				public static LocString DESC = "Surprise decor sneak attacks a Duplicant's gloomy day.";
 			}
 
 			public class MASSIVEHEATSINK

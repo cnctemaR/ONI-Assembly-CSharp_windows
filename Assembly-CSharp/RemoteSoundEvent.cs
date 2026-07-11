@@ -12,7 +12,13 @@ public class RemoteSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		vector.z = 0f;
+		GameObject gameObject = behaviour.controller.gameObject;
+		if (SoundEvent.ObjectIsSelectedAndVisible(gameObject))
+		{
+			vector = SoundEvent.AudioHighlightListenerPosition(vector);
+		}
 		Workable workable = behaviour.GetComponent<Worker>().workable;
 		if (workable != null)
 		{
@@ -25,9 +31,12 @@ public class RemoteSoundEvent : SoundEvent
 				{
 					num = 0f;
 				}
-				EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position, 1f);
-				eventInstance.setParameterValue("State", num);
-				SoundEvent.EndOneShot(eventInstance);
+				if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
+				{
+					EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
+					eventInstance.setParameterValue("State", num);
+					SoundEvent.EndOneShot(eventInstance);
+				}
 			}
 		}
 	}

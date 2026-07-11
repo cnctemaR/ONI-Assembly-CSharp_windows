@@ -123,7 +123,7 @@ public class Spacecraft
 		return this.missionDuration;
 	}
 
-	private void CompleteMission()
+	public void CompleteMission()
 	{
 		SpacecraftManager.instance.PushReadyToLandNotification(this);
 		this.SetState(Spacecraft.MissionState.WaitingToLand);
@@ -139,6 +139,29 @@ public class Spacecraft
 			{
 				gameObject.Trigger(1366341636, SpacecraftManager.instance.GetSpacecraftDestination(this.id));
 			}
+		}
+	}
+
+	public void TemporallyTear()
+	{
+		LaunchConditionManager launchConditions = this.launchConditions;
+		for (int i = launchConditions.rocketModules.Count - 1; i >= 0; i--)
+		{
+			Storage component = launchConditions.rocketModules[i].GetComponent<Storage>();
+			if (component != null)
+			{
+				component.ConsumeAllIgnoringDisease();
+			}
+			MinionStorage component2 = launchConditions.rocketModules[i].GetComponent<MinionStorage>();
+			if (component2 != null)
+			{
+				List<MinionStorage.Info> storedMinionInfo = component2.GetStoredMinionInfo();
+				for (int j = storedMinionInfo.Count - 1; j >= 0; j--)
+				{
+					component2.DeleteStoredMinion(storedMinionInfo[j].id);
+				}
+			}
+			Util.KDestroyGameObject(launchConditions.rocketModules[i].gameObject);
 		}
 	}
 

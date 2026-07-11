@@ -901,9 +901,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		return this.soundCuller.IsAudible(pos, sound_path);
 	}
 
-	public Vector3 GetVerticallyScaledPosition(Vector2 pos)
+	public Vector3 GetVerticallyScaledPosition(Vector3 pos, bool objectIsSelectedAndVisible = false)
 	{
-		return this.soundCuller.GetVerticallyScaledPosition(pos);
+		return this.soundCuller.GetVerticallyScaledPosition(pos, objectIsSelectedAndVisible);
 	}
 
 	public bool IsVisiblePos(Vector3 pos)

@@ -15,20 +15,15 @@ public class ElementLoader
 		ListPool<FileHandle, ElementLoader>.PooledList pooledList = ListPool<FileHandle, ElementLoader>.Allocate();
 		FileSystem.GetFiles(FileSystem.Normalize(ElementLoader.path), "*.yaml", pooledList);
 		ListPool<YamlIO.Error, ElementLoader>.PooledList errors = ListPool<YamlIO.Error, ElementLoader>.Allocate();
-		using (List<FileHandle>.Enumerator enumerator = pooledList.GetEnumerator())
+		foreach (FileHandle fileHandle in pooledList)
 		{
-			while (enumerator.MoveNext())
+			ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(fileHandle.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
 			{
-				FileHandle file = enumerator.Current;
-				ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(file.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
-				{
-					error.file = file;
-					errors.Add(error);
-				}, null);
-				if (elementEntryCollection != null)
-				{
-					list.AddRange(elementEntryCollection.elements);
-				}
+				errors.Add(error);
+			}, null);
+			if (elementEntryCollection != null)
+			{
+				list.AddRange(elementEntryCollection.elements);
 			}
 		}
 		pooledList.Recycle();

@@ -636,6 +636,8 @@ namespace Database
 			this.CoolingStalledHotEnv.resolveStringCallback = func3;
 			this.CoolingStalledHotLiquid = this.CreateStatusItem("CoolingStalledHotLiquid", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.CoolingStalledHotLiquid.resolveStringCallback = func3;
+			this.MissingRequirements = this.CreateStatusItem("MissingRequirements", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.GettingReady = this.CreateStatusItem("GettingReady", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.Working = this.CreateStatusItem("Working", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.NeedsValidRegion = this.CreateStatusItem("NeedsValidRegion", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.NeedSeed = this.CreateStatusItem("NeedSeed", "BUILDING", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
@@ -746,6 +748,29 @@ namespace Database
 				str = str.Replace("{0}", element4.name);
 				return str;
 			};
+			this.TanningLightSufficient = this.CreateStatusItem("TanningLightSufficient", BUILDING.STATUSITEMS.TANNINGLIGHTSUFFICIENT.NAME, BUILDING.STATUSITEMS.TANNINGLIGHTSUFFICIENT.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.TanningLightInsufficient = this.CreateStatusItem("TanningLightInsufficient", BUILDING.STATUSITEMS.TANNINGLIGHTINSUFFICIENT.NAME, BUILDING.STATUSITEMS.TANNINGLIGHTINSUFFICIENT.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.HotTubWaterTooCold = this.CreateStatusItem("HotTubWaterTooCold", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022);
+			this.HotTubWaterTooCold.resolveStringCallback = delegate(string str, object data)
+			{
+				HotTub hotTub = (HotTub)data;
+				str = str.Replace("{temperature}", GameUtil.GetFormattedTemperature(hotTub.minimumWaterTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				return str;
+			};
+			this.HotTubTooHot = this.CreateStatusItem("HotTubTooHot", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022);
+			this.HotTubTooHot.resolveStringCallback = delegate(string str, object data)
+			{
+				HotTub hotTub2 = (HotTub)data;
+				str = str.Replace("{temperature}", GameUtil.GetFormattedTemperature(hotTub2.maxOperatingTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				return str;
+			};
+			this.HotTubFilling = this.CreateStatusItem("HotTubFilling", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022);
+			this.HotTubFilling.resolveStringCallback = delegate(string str, object data)
+			{
+				HotTub hotTub3 = (HotTub)data;
+				str = str.Replace("{fullness}", GameUtil.GetFormattedPercent(hotTub3.PercentFull, GameUtil.TimeSlice.None));
+				return str;
+			};
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -779,6 +804,12 @@ namespace Database
 			}
 			return flag;
 		}
+
+		public StatusItem MissingRequirements;
+
+		public StatusItem GettingReady;
+
+		public StatusItem Working;
 
 		public MaterialsStatusItem MaterialsUnavailable;
 
@@ -1026,8 +1057,6 @@ namespace Database
 
 		public StatusItem CoolingStalledColdLiquid;
 
-		public StatusItem Working;
-
 		public StatusItem CannotCoolFurther;
 
 		public StatusItem NeedsValidRegion;
@@ -1117,5 +1146,15 @@ namespace Database
 		public StatusItem SkillPointsAvailable;
 
 		public StatusItem Baited;
+
+		public StatusItem TanningLightSufficient;
+
+		public StatusItem TanningLightInsufficient;
+
+		public StatusItem HotTubWaterTooCold;
+
+		public StatusItem HotTubTooHot;
+
+		public StatusItem HotTubFilling;
 	}
 }

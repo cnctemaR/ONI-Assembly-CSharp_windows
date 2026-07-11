@@ -16,8 +16,9 @@ namespace Steamworks
 		k_EPersonaChangeLeftSource = 256,
 		k_EPersonaChangeRelationshipChanged = 512,
 		k_EPersonaChangeNameFirstSet = 1024,
-		k_EPersonaChangeFacebookInfo = 2048,
+		k_EPersonaChangeBroadcast = 2048,
 		k_EPersonaChangeNickname = 4096,
-		k_EPersonaChangeSteamLevel = 8192
+		k_EPersonaChangeSteamLevel = 8192,
+		k_EPersonaChangeRichPresence = 16384
 	}
 }

@@ -24,7 +24,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		{
 			smi.DestroyHitEffect();
 		})
-			.EventTransition(GameHashes.WorkerPlayPostAnim, this.pst, null);
+			.EventTransition(GameHashes.WorkerPlayPostAnim, this.pst, (MultitoolController.Instance smi) => smi.GetComponent<Worker>().state == Worker.State.PendingCompletion);
 		this.pst.Enter("PlayPost", delegate(MultitoolController.Instance smi)
 		{
 			smi.PlayPost();

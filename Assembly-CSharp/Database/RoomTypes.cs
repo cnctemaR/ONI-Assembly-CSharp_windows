@@ -158,7 +158,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 7));
+			}, 2, null, true, true, null, 8));
 			this.Hospital = base.Add(new RoomType("Hospital", ROOMS.TYPES.HOSPITAL.NAME, ROOMS.TYPES.HOSPITAL.TOOLTIP, ROOMS.TYPES.HOSPITAL.EFFECT, Db.Get().RoomTypeCategories.Hospital, RoomConstraints.CLINIC, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.TOILET,
@@ -170,7 +170,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 8));
+			}, 2, null, true, true, null, 9));
 			this.PowerPlant = base.Add(new RoomType("PowerPlant", ROOMS.TYPES.POWER_PLANT.NAME, ROOMS.TYPES.POWER_PLANT.TOOLTIP, ROOMS.TYPES.POWER_PLANT.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.POWER_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -179,7 +179,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 9));
+			}, 2, null, true, true, null, 10));
 			this.Farm = base.Add(new RoomType("Farm", ROOMS.TYPES.FARM.NAME, ROOMS.TYPES.FARM.TOOLTIP, ROOMS.TYPES.FARM.EFFECT, Db.Get().RoomTypeCategories.Agricultural, RoomConstraints.FARM_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -188,7 +188,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 10));
+			}, 2, null, true, true, null, 11));
 			this.CreaturePen = base.Add(new RoomType("CreaturePen", ROOMS.TYPES.CREATUREPEN.NAME, ROOMS.TYPES.CREATUREPEN.TOOLTIP, ROOMS.TYPES.CREATUREPEN.EFFECT, Db.Get().RoomTypeCategories.Agricultural, RoomConstraints.RANCH_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -198,7 +198,7 @@ namespace Database
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT,
 				RoomDetails.CREATURE_COUNT
-			}, 2, null, true, true, null, 11));
+			}, 2, null, true, true, null, 12));
 			this.MachineShop = new RoomType("MachineShop", ROOMS.TYPES.MACHINE_SHOP.NAME, ROOMS.TYPES.MACHINE_SHOP.TOOLTIP, ROOMS.TYPES.MACHINE_SHOP.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.MACHINE_SHOP, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -207,18 +207,18 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true, null, 12);
+			}, 2, null, true, true, null, 13);
 			this.RecRoom = base.Add(new RoomType("RecRoom", ROOMS.TYPES.REC_ROOM.NAME, ROOMS.TYPES.REC_ROOM.TOOLTIP, ROOMS.TYPES.REC_ROOM.EFFECT, Db.Get().RoomTypeCategories.Recreation, RoomConstraints.REC_BUILDING, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.DECORATIVE_ITEM,
 				RoomConstraints.MINIMUM_SIZE_12,
-				RoomConstraints.MAXIMUM_SIZE_64
+				RoomConstraints.MAXIMUM_SIZE_96
 			}, new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 0, null, true, true, null, 13));
+			}, 0, null, true, true, null, 14));
 			text = "NatureReserve";
 			text2 = ROOMS.TYPES.NATURERESERVE.NAME;
 			text3 = ROOMS.TYPES.NATURERESERVE.TOOLTIP;
@@ -241,7 +241,7 @@ namespace Database
 			};
 			num = 1;
 			array3 = new string[] { "RoomNatureReserve" };
-			this.NatureReserve = base.Add(new RoomType(text, text2, text3, text4, roomTypeCategory, constraint, array, array2, num, null, false, false, array3, 15));
+			this.NatureReserve = base.Add(new RoomType(text, text2, text3, text4, roomTypeCategory, constraint, array, array2, num, null, false, false, array3, 16));
 			text4 = "Park";
 			text3 = ROOMS.TYPES.PARK.NAME;
 			text2 = ROOMS.TYPES.PARK.TOOLTIP;
@@ -265,7 +265,7 @@ namespace Database
 			num = 1;
 			array4 = new RoomType[] { this.NatureReserve };
 			array3 = new string[] { "RoomPark" };
-			this.Park = base.Add(new RoomType(text4, text3, text2, text, roomTypeCategory, constraint, array, array2, num, array4, false, false, array3, 14));
+			this.Park = base.Add(new RoomType(text4, text3, text2, text, roomTypeCategory, constraint, array, array2, num, array4, false, false, array3, 15));
 		}
 
 		public Assignables[] GetAssignees(Room room)

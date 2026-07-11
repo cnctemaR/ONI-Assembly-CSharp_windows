@@ -236,6 +236,7 @@ public class MinionStorage : KMonoBehaviour
 		}
 		if (this.serializedMinions[minionIndex].serializedMinion != null)
 		{
+			this.serializedMinions[minionIndex].serializedMinion.Get().GetComponent<StoredMinionIdentity>().OnHardDelete();
 			Util.KDestroyGameObject(this.serializedMinions[minionIndex].serializedMinion.Get().gameObject);
 		}
 		this.serializedMinions.RemoveAt(minionIndex);

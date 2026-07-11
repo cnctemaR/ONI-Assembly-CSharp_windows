@@ -153,6 +153,12 @@ public class EmptyConduitWorkable : Workable
 		return flag;
 	}
 
+	public override bool InstantlyFinish(Worker worker)
+	{
+		worker.Work(4f);
+		return true;
+	}
+
 	public void EmptyPipeContents()
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());

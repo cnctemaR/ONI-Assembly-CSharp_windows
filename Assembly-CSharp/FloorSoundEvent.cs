@@ -35,11 +35,18 @@ public class FloorSoundEvent : SoundEvent
 				text2 = GlobalAssets.GetSound(text, true);
 			}
 		}
-		if (SoundEvent.IsLowPrioritySound(text2))
+		GameObject gameObject = behaviour.controller.gameObject;
+		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+		if (SoundEvent.IsLowPrioritySound(text2) && !base.objectIsSelectedAndVisible)
 		{
 			return;
 		}
-		vector = SoundEvent.GetCameraScaledPosition(vector);
+		vector = SoundEvent.GetCameraScaledPosition(vector, false);
+		vector.z = 0f;
+		if (base.objectIsSelectedAndVisible)
+		{
+			vector = SoundEvent.AudioHighlightListenerPosition(vector);
+		}
 		if (Grid.Element == null)
 		{
 			return;
@@ -50,9 +57,9 @@ public class FloorSoundEvent : SoundEvent
 		{
 			num3 = SoundUtil.GetLiquidDepth(num);
 			string sound = GlobalAssets.GetSound("Liquid_footstep", true);
-			if (sound != null)
+			if (sound != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic)))
 			{
-				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, 1f);
+				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
 				if (num3 > 0f)
 				{
 					eventInstance.setParameterValue("liquidDepth", num3);
@@ -60,9 +67,9 @@ public class FloorSoundEvent : SoundEvent
 				SoundEvent.EndOneShot(eventInstance);
 			}
 		}
-		if (text2 != null)
+		if (text2 != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, text2, base.looping, this.isDynamic)))
 		{
-			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, vector, 1f);
+			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, vector, 1f, false);
 			if (eventInstance2.isValid())
 			{
 				if (num3 > 0f)

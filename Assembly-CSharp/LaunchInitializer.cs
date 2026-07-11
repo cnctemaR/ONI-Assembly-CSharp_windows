@@ -15,9 +15,9 @@ public class LaunchInitializer : MonoBehaviour
 		{
 			global::Debug.LogError("Machine does not support RGBAFloat32");
 		}
-		GraphicsOptionsScreen.SetResolutionFromPrefs();
+		GraphicsOptionsScreen.SetSettingsFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("release Build: LU-" + 372041U.ToString());
+		global::Debug.Log("release Build: RP-" + 381414U.ToString());
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();
@@ -54,7 +54,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "LU";
+	public const string BUILD_PREFIX = "RP";
 
 	public GameObject[] SpawnPrefabs;
 

@@ -21,6 +21,6 @@ namespace Steamworks
 
 		public uint unTall;
 
-		public HHTMLBrowser unNewWindow_BrowserHandle;
+		public HHTMLBrowser unNewWindow_BrowserHandle_IGNORE;
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using TUNING;
 
 namespace STRINGS
 {
@@ -1118,6 +1117,17 @@ namespace STRINGS
 				public static LocString REPORT_NAME = "Deliver to {0}";
 			}
 
+			public class JOYREACTION
+			{
+				public static LocString NAME = "Joy Reaction";
+
+				public static LocString STATUS = "Overjoyed";
+
+				public static LocString TOOLTIP = "This Duplicant is doing something because they are " + UI.PRE_KEYWORD + "Overjoyed" + UI.PST_KEYWORD;
+
+				public static LocString REPORT_NAME = "Overjoyed Reaction";
+			}
+
 			public class STORAGEFETCH
 			{
 				public static LocString NAME = "Store Materials";
@@ -1458,6 +1468,8 @@ namespace STRINGS
 				public static LocString BLADDER_NOT_FULL = "Bladder too full";
 
 				public static LocString CURRENTLY_PEEING = "Currently Peeing";
+
+				public static LocString HAS_BALLOON_STALL_CELL = "Has a location for a Balloon Stall";
 			}
 		}
 
@@ -2837,10 +2849,10 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Light",
 					UI.PST_KEYWORD,
-					" is allowing this Duplicant to work ",
-					GameUtil.GetFormattedPercent(DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS * 100f, GameUtil.TimeSlice.None),
-					" faster"
+					" is allowing this Duplicant to work faster:\n    {0}"
 				});
+
+				public static LocString NO_BUILDING_WORK_ATTRIBUTE = "{0} Speed";
 			}
 
 			public class PICKINGUP
@@ -3004,20 +3016,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is using their break to chat with friends";
 			}
 
-			public class DANCING
-			{
-				public static LocString NAME = "Dancing!";
-
-				public static LocString TOOLTIP = "This Duplicant is getting down with their bad self";
-			}
-
-			public class GAMING
-			{
-				public static LocString NAME = "Playing a Game";
-
-				public static LocString TOOLTIP = "This Duplicant is playing a video game\n\nIt looks like fun";
-			}
-
 			public class NOISEPEACEFUL
 			{
 				public static LocString NAME = "Peace and Quiet";
@@ -3082,6 +3080,13 @@ namespace STRINGS
 				public static LocString NAME = "{Severity} to {Sickness} Germs";
 
 				public static LocString TOOLTIP = "This Duplicant has been exposed to a concentration of {Sickness} Germs and is at risk of waking up sick on their next shift\n\nExposed {Source}\n\nRate of Contracting {Sickness}: {Chance}\n\nResistance Rating: {Total}\n    • Base {Sickness} Resistance: {Base}\n    • " + DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.NAME + ": {Dupe}\n    • {Severity} Exposure: {ExposureLevelBonus}\n\n<i>Click to jump to last exposure location</i>";
+			}
+
+			public class BEINGPRODUCTIVE
+			{
+				public static LocString NAME = "Super Focused";
+
+				public static LocString TOOLTIP = "This Duplicant is focused on being super productive right now";
 			}
 		}
 
@@ -4046,6 +4051,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is uncomfortably cold";
 			}
 
+			public class CARPETFEET
+			{
+				public static LocString NAME = "Tickled Tootsies";
+
+				public static LocString TOOLTIP = "Walking on carpet has made this Duplicant's day a little more luxurious";
+			}
+
 			public class WETFEET
 			{
 				public static LocString NAME = "Soggy Feet";
@@ -4082,7 +4094,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Ouch!";
 
-				public static LocString TOOLTIP = "This Duplicant ate a raw " + UI.FormatAsLink("Bristle Berry", "PRICKLEFRUIT") + " and it gave their mouth ouchies.";
+				public static LocString TOOLTIP = "This Duplicant ate a raw " + UI.FormatAsLink("Bristle Berry", "PRICKLEFRUIT") + " and it gave their mouth ouchies";
 			}
 
 			public class NOOXYGEN
@@ -4519,11 +4531,39 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Someone saw how hard this Duplicant was working and gave them a compliment\n\nThis Duplicant feels great about themselves now!";
 			}
 
+			public class ISSPARKLESTREAKER
+			{
+				public static LocString NAME = "Sparkle Streaking";
+
+				public static LocString TOOLTIP = "This Duplicant is currently Sparkle Streaking!\n\nBaa-ling!";
+			}
+
+			public class SAWSPARKLESTREAKER
+			{
+				public static LocString NAME = "Sparkle Flattered";
+
+				public static LocString TOOLTIP = "A Sparkle Streaker's sparkles dazzled this Duplicant\n\nThis Duplicant has a spring in their step now!";
+			}
+
+			public class HASBALLOON
+			{
+				public static LocString NAME = "Balloon Buddy";
+
+				public static LocString TOOLTIP = "A Balloon Artist gave this Duplicant a balloon!\n\nThis Duplicant feels super crafty now!";
+			}
+
 			public class GREETING
 			{
 				public static LocString NAME = "Saw Friend";
 
 				public static LocString TOOLTIP = "This Duplicant recently saw a friend in the halls and got to say \"hi\"\n\nIt wasn't even awkward!";
+			}
+
+			public class ARCADEPLAYING
+			{
+				public static LocString NAME = "Gaming";
+
+				public static LocString TOOLTIP = "This Duplicant is playing a video game\n\nIt looks like fun!";
 			}
 
 			public class PLAYEDARCADE
@@ -4540,11 +4580,102 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant had a chance to cut loose!\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
 			}
 
+			public class JUICER
+			{
+				public static LocString NAME = "Drank Juice";
+
+				public static LocString TOOLTIP = "This Duplicant had delicious fruity drink!\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
 			public class ESPRESSO
 			{
 				public static LocString NAME = "Drank Espresso";
 
 				public static LocString TOOLTIP = "This Duplicant had delicious drink!\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
+			public class MECHANICALSURFBOARD
+			{
+				public static LocString NAME = "Stoked";
+
+				public static LocString TOOLTIP = "This Duplicant had a rad experience on a surfboard.\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
+			public class MECHANICALSURFING
+			{
+				public static LocString NAME = "Surfin'";
+
+				public static LocString TOOLTIP = "This Duplicant is surfin' some artificial waves!";
+			}
+
+			public class SAUNA
+			{
+				public static LocString NAME = "Steam Powered";
+
+				public static LocString TOOLTIP = "This Duplicant just had a relaxing time in a sauna\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
+			public class SAUNARELAXING
+			{
+				public static LocString NAME = "Relaxing";
+
+				public static LocString TOOLTIP = "This Duplicant is relaxing in a sauna";
+			}
+
+			public class HOTTUB
+			{
+				public static LocString NAME = "Hot Tubbed";
+
+				public static LocString TOOLTIP = "This Duplicant recently unwound in a Hot Tub\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
+			public class HOTTUBRELAXING
+			{
+				public static LocString NAME = "Relaxing";
+
+				public static LocString TOOLTIP = "This Duplicant is unwinding in a hot tub\n\nThey sure look relaxed";
+			}
+
+			public class SODAFOUNTAIN
+			{
+				public static LocString NAME = "Soda Filled";
+
+				public static LocString TOOLTIP = "This Duplicant just enjoyed a bubbly beverage\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
+			public class VERTICALWINDTUNNELFLYING
+			{
+				public static LocString NAME = "Airborne";
+
+				public static LocString TOOLTIP = "This Duplicant is having an exhilarating time in the wind tunnel\n\nWhoosh!";
+			}
+
+			public class VERTICALWINDTUNNEL
+			{
+				public static LocString NAME = "Wind Swept";
+
+				public static LocString TOOLTIP = "This Duplicant recently had an exhilarating wind tunnel experience\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
+			public class BEACHCHAIRRELAXING
+			{
+				public static LocString NAME = "Totally Chill";
+
+				public static LocString TOOLTIP = "This Duplicant is totally chillin' in a beach chair";
+			}
+
+			public class BEACHCHAIRLIT
+			{
+				public static LocString NAME = "Sun Kissed";
+
+				public static LocString TOOLTIP = "This Duplicant had an amazing experience at the Beach\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
+			}
+
+			public class BEACHCHAIRUNLIT
+			{
+				public static LocString NAME = "Passably Relaxed";
+
+				public static LocString TOOLTIP = "This Duplicant just had a mediocre beach experience\n\nLeisure activities increase Duplicants' " + UI.PRE_KEYWORD + "Morale" + UI.PST_KEYWORD;
 			}
 
 			public class EDIBLEMINUS3
@@ -5333,6 +5464,34 @@ namespace STRINGS
 				public static LocString NAME = "Vomiter";
 
 				public static LocString DESC = "This Duplicant is liable to puke everywhere when " + UI.PRE_KEYWORD + "Stressed" + UI.PST_KEYWORD;
+			}
+
+			public class BALLOONARTIST
+			{
+				public static LocString NAME = "Balloon Artist";
+
+				public static LocString DESC = "This Duplicant hands out balloons when they are " + UI.PRE_KEYWORD + "Overjoyed" + UI.PST_KEYWORD;
+			}
+
+			public class SPARKLESTREAKER
+			{
+				public static LocString NAME = "Sparkle Streaker";
+
+				public static LocString DESC = "This Duplicant leaves a trail of happy sparkles when they are " + UI.PRE_KEYWORD + "Overjoyed" + UI.PST_KEYWORD;
+			}
+
+			public class STICKERBOMBER
+			{
+				public static LocString NAME = "Sticker Bomber";
+
+				public static LocString DESC = "This Duplicant will spontaneously redecorate a room when they are " + UI.PRE_KEYWORD + "Overjoyed" + UI.PST_KEYWORD;
+			}
+
+			public class SUPERPRODUCTIVE
+			{
+				public static LocString NAME = "Super Productive";
+
+				public static LocString DESC = "This Duplicant is super productive when they are " + UI.PRE_KEYWORD + "Overjoyed" + UI.PST_KEYWORD;
 			}
 
 			public class IRONGUT

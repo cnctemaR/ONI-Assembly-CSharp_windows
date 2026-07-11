@@ -72,7 +72,7 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		this.placeSound = GlobalAssets.GetSound("Place_building_" + this.def.AudioSize, false);
 		Vector3 vector = Grid.CellToPos(cell);
-		EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f, false);
 		if (this.path.Count > 1 && cell == this.path[this.path.Count - 2].cell)
 		{
 			if (this.previousCellConnection != null)
@@ -292,7 +292,7 @@ public class BaseUtilityBuildTool : DragTool
 		{
 			this.buildingCount = this.buildingCount % 14 + 1;
 			Vector3 vector = Grid.CellToPos(num);
-			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f);
+			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector, 1f, false);
 			if (this.def.AudioSize == "small")
 			{
 				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
@@ -391,6 +391,7 @@ public class BaseUtilityBuildTool : DragTool
 	{
 		this.ApplyPathToConduitSystem();
 		int num = 0;
+		bool flag = false;
 		for (int i = 0; i < this.path.Count; i++)
 		{
 			BaseUtilityBuildTool.PathNode pathNode = this.path[i];
@@ -426,32 +427,21 @@ public class BaseUtilityBuildTool : DragTool
 						{
 							num++;
 						}
-						Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
-						if (component2 != null)
-						{
-							if (BuildMenu.Instance != null)
-							{
-								component2.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
-							}
-							if (PlanScreen.Instance != null)
-							{
-								component2.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
-							}
-						}
+						flag = true;
 					}
 				}
 			}
 			else
 			{
-				IUtilityItem component3 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-				if (component3 != null)
+				IUtilityItem component2 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+				if (component2 != null)
 				{
-					utilityConnections = component3.Connections;
+					utilityConnections = component2.Connections;
 				}
 				utilityConnections |= this.conduitMgr.GetConnections(pathNode.cell, false);
 				if (gameObject.GetComponent<BuildingComplete>() != null)
 				{
-					component3.UpdateConnections(utilityConnections);
+					component2.UpdateConnections(utilityConnections);
 				}
 			}
 			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && (!Game.Instance.SandboxModeActive || !SandboxToolParameterMenu.instance.settings.InstantBuild) && this.def.IsValidBuildLocation(null, vector, Orientation.Neutral))
@@ -460,27 +450,28 @@ public class BaseUtilityBuildTool : DragTool
 				GameObject gameObject3 = Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer];
 				if (gameObject2 != null && gameObject3 == null)
 				{
-					BuildingComplete component4 = gameObject2.GetComponent<BuildingComplete>();
-					if (component4 != null && component4.Def != this.def)
+					BuildingComplete component3 = gameObject2.GetComponent<BuildingComplete>();
+					bool flag2 = gameObject2.GetComponent<PrimaryElement>().Element.tag != this.selectedElements[0];
+					if (component3 != null && (component3.Def != this.def || flag2))
 					{
-						Constructable component5 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
-						component5.IsReplacementTile = true;
+						Constructable component4 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
+						component4.IsReplacementTile = true;
 						gameObject = this.def.Instantiate(vector, Orientation.Neutral, this.selectedElements, 0);
-						component5.IsReplacementTile = false;
+						component4.IsReplacementTile = false;
 						if (!this.def.MaterialsAvailable(this.selectedElements) && !DebugHandler.InstantBuildMode)
 						{
 							PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, vector, 1.5f, false, false);
 						}
 						Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer] = gameObject;
-						IUtilityItem component6 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-						if (component6 != null)
+						IUtilityItem component5 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+						if (component5 != null)
 						{
-							utilityConnections = component6.Connections;
+							utilityConnections = component5.Connections;
 						}
 						utilityConnections |= this.conduitMgr.GetConnections(pathNode.cell, false);
 						if (gameObject.GetComponent<BuildingComplete>() != null)
 						{
-							component6.UpdateConnections(utilityConnections);
+							component5.UpdateConnections(utilityConnections);
 						}
 						string visualizerString = this.conduitMgr.GetVisualizerString(utilityConnections);
 						string text2 = visualizerString;
@@ -489,11 +480,27 @@ public class BaseUtilityBuildTool : DragTool
 							text2 += "_place";
 						}
 						this.Play(gameObject, text2);
+						flag = true;
 					}
 				}
 			}
 			if (gameObject != null)
 			{
+				if (flag)
+				{
+					Prioritizable component6 = gameObject.GetComponent<Prioritizable>();
+					if (component6 != null)
+					{
+						if (BuildMenu.Instance != null)
+						{
+							component6.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
+						}
+						if (PlanScreen.Instance != null)
+						{
+							component6.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
+						}
+					}
+				}
 				IUtilityItem component7 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
 				if (component7 != null)
 				{

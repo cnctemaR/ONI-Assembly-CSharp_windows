@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Klei.CustomSettings;
 using KMod;
 using ProcGen;
-using ProcGenGame;
 using UnityEngine;
 
 public class NewGameSettingsPanel : KMonoBehaviour
@@ -22,11 +21,6 @@ public class NewGameSettingsPanel : KMonoBehaviour
 
 	public void Init()
 	{
-		Global.Instance.modManager.Load(Content.LayerableFiles);
-		SettingsCache.Clear();
-		WorldGen.LoadSettings();
-		CustomGameSettings.Instance.LoadWorlds();
-		Global.Instance.modManager.Report(base.gameObject);
 		this.settings = CustomGameSettings.Instance;
 		this.widgets = new List<NewGameSettingWidget>();
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.settings.QualitySettings)

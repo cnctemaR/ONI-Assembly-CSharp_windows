@@ -167,7 +167,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static VideoClip GetVideo(string name)
 	{
-		string text = "video/" + name;
+		string text = "video_webm/" + name;
 		return Resources.Load<VideoClip>(text);
 	}
 
@@ -400,7 +400,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public List<string> videoClipNames;
 
-	private const string VIDEO_ASSET_PATH = "video";
+	private const string VIDEO_ASSET_PATH = "video_webm";
 
 	public List<TintedSprite> TintedSpriteAssets;
 

@@ -599,6 +599,8 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	private const string LastUserActionFieldName = "LastUA";
 
+	public const string SaveFolderWriteTest = "SaveFolderWriteTest";
+
 	private string PlatformUserIDFieldName;
 
 	private static int sessionID = -1;

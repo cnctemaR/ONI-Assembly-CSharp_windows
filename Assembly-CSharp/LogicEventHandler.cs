@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FMOD.Studio;
 using UnityEngine;
 
@@ -67,7 +68,30 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 			{
 				return;
 			}
+			LogicCircuitNetwork.LogicSoundPair logicSoundPair = new LogicCircuitNetwork.LogicSoundPair();
+			Dictionary<int, LogicCircuitNetwork.LogicSoundPair> logicSoundRegister = LogicCircuitNetwork.logicSoundRegister;
+			int id = networkForCell.id;
+			if (!logicSoundRegister.ContainsKey(id))
+			{
+				logicSoundRegister.Add(id, logicSoundPair);
+			}
+			else
+			{
+				logicSoundPair.playedIndex = logicSoundRegister[id].playedIndex;
+				logicSoundPair.lastPlayed = logicSoundRegister[id].lastPlayed;
+			}
+			if (logicSoundPair.playedIndex < 2)
+			{
+				logicSoundRegister[id].playedIndex = logicSoundPair.playedIndex + 1;
+			}
+			else
+			{
+				logicSoundRegister[id].playedIndex = 0;
+				logicSoundRegister[id].lastPlayed = Time.time;
+			}
+			float num = (Time.time - logicSoundPair.lastPlayed) / 5f;
 			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), Grid.CellToPos(this.cell), 1f);
+			eventInstance.setParameterValue("logic_volumeModifer", num);
 			eventInstance.setParameterValue("wireCount", (float)(networkForCell.Wires.Count % 24));
 			eventInstance.setParameterValue("enabled", (float)new_value);
 			KFMOD.EndOneShot(eventInstance);

@@ -59,8 +59,8 @@ public class HeadquartersConfig : IBuildingConfig
 		RoleStation roleStation = go.AddOrGet<RoleStation>();
 		roleStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_hqbase_skill_upgrade_kanim") };
 		roleStation.workAnims = new HashedString[] { "upgrade" };
-		roleStation.workingPstComplete = HashedString.Invalid;
-		roleStation.workingPstFailed = HashedString.Invalid;
+		roleStation.workingPstComplete = null;
+		roleStation.workingPstFailed = null;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

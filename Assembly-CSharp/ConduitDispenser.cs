@@ -56,7 +56,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 16 : 12];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
-		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Last);
+		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Dispense);
 		this.OnConduitConnectionChanged(null);
 	}
 
@@ -67,9 +67,23 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 		base.OnCleanUp();
 	}
 
+	public void SetOnState(bool onState)
+	{
+		this.isOn = onState;
+	}
+
 	private void ConduitUpdate(float dt)
 	{
 		this.operational.SetFlag(ConduitDispenser.outputConduitFlag, this.IsConnected);
+		this.blocked = false;
+		if (this.isOn)
+		{
+			this.Dispense(dt);
+		}
+	}
+
+	private void Dispense(float dt)
+	{
 		if (this.operational.IsOperational || this.alwaysDispense)
 		{
 			PrimaryElement primaryElement = this.FindSuitableElement();
@@ -85,6 +99,10 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 					primaryElement.ModifyDiseaseCount(-num3, "ConduitDispenser.ConduitUpdate");
 					primaryElement.Mass -= num;
 					base.Trigger(-1697596308, primaryElement.gameObject);
+				}
+				else
+				{
+					this.blocked = true;
 				}
 			}
 		}
@@ -139,6 +157,12 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 
 	[SerializeField]
 	public bool alwaysDispense;
+
+	[SerializeField]
+	public bool isOn = true;
+
+	[SerializeField]
+	public bool blocked;
 
 	private static readonly Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 

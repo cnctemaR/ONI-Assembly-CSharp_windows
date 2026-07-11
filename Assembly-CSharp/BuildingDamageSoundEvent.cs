@@ -11,12 +11,23 @@ public class BuildingDamageSoundEvent : SoundEvent
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
+		Vector3 vector = behaviour.GetComponent<Transform>().GetPosition();
+		vector.z = 0f;
+		GameObject gameObject = behaviour.controller.gameObject;
+		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
+		if (base.objectIsSelectedAndVisible)
+		{
+			vector = SoundEvent.AudioHighlightListenerPosition(vector);
+		}
 		Worker component = behaviour.GetComponent<Worker>();
 		if (component == null)
 		{
-			SoundEvent.PlayOneShot(GlobalAssets.GetSound("Building_Dmg_Metal", false), position, 1f);
-			return;
+			string sound = GlobalAssets.GetSound("Building_Dmg_Metal", false);
+			if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic))
+			{
+				SoundEvent.PlayOneShot(base.sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible));
+				return;
+			}
 		}
 		Workable workable = component.workable;
 		if (workable != null)
@@ -32,9 +43,9 @@ public class BuildingDamageSoundEvent : SoundEvent
 					text = "Building_Dmg_Metal";
 					text2 = GlobalAssets.GetSound(text, false);
 				}
-				if (text2 != null)
+				if (text2 != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, text2, base.looping, this.isDynamic)))
 				{
-					SoundEvent.PlayOneShot(text2, position, 1f);
+					SoundEvent.PlayOneShot(text2, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible));
 				}
 			}
 		}

@@ -44,7 +44,7 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected virtual void OnActivateTool()
 	{
-		if (OverlayScreen.Instance != null && this.viewMode != OverlayModes.None.ID)
+		if (OverlayScreen.Instance != null && this.viewMode != OverlayModes.None.ID && OverlayScreen.Instance.mode != this.viewMode)
 		{
 			OverlayScreen.Instance.ToggleOverlay(this.viewMode, true);
 			InterfaceTool.toolActivatedViewMode = this.viewMode;

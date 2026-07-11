@@ -16,7 +16,6 @@ public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 		this.synchronizeAnims = false;
 		this.showProgressBar = true;
 		this.resetProgressOnStop = true;
-		this.lightEfficiencyBonus = false;
 		base.SetWorkTime(15f);
 	}
 
@@ -52,11 +51,13 @@ public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 	protected override void OnStartWork(Worker worker)
 	{
 		this.owner.AddWorker(worker);
+		worker.GetComponent<Effects>().Add("Dancing", false);
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
 		this.owner.RemoveWorker(worker);
+		worker.GetComponent<Effects>().Remove("Dancing");
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)

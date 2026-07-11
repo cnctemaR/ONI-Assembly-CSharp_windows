@@ -53,7 +53,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 			{
 				ColonyAchievementTracker.UnlockPlatformAchievement(keyValuePair.Key);
 				this.completedAchievementsToDisplay.Add(keyValuePair.Key);
-				this.TriggerNewAchievementCompleted(null);
+				this.TriggerNewAchievementCompleted(keyValuePair.Key, null);
 				RetireColonyUtility.SaveColonySummaryData();
 			}
 		}
@@ -68,21 +68,13 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 				keyValuePair.Value.UpdateAchievement();
 				if (keyValuePair.Value.success && !keyValuePair.Value.failed)
 				{
-					this.newlyCompletedAchievements.Add(keyValuePair.Key);
+					ColonyAchievementTracker.UnlockPlatformAchievement(keyValuePair.Key);
+					this.completedAchievementsToDisplay.Add(keyValuePair.Key);
+					this.TriggerNewAchievementCompleted(keyValuePair.Key, null);
 				}
 			}
 		}
-		if (this.newlyCompletedAchievements.Count > 0)
-		{
-			foreach (string text in this.newlyCompletedAchievements)
-			{
-				ColonyAchievementTracker.UnlockPlatformAchievement(text);
-				this.completedAchievementsToDisplay.Add(text);
-			}
-			this.TriggerNewAchievementCompleted(null);
-			RetireColonyUtility.SaveColonySummaryData();
-		}
-		this.newlyCompletedAchievements.Clear();
+		RetireColonyUtility.SaveColonySummaryData();
 	}
 
 	private static void UnlockPlatformAchievement(string achievement_id)
@@ -118,7 +110,6 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 
 	public void DebugTriggerAchievement(string id)
 	{
-		this.newlyCompletedAchievements.Add(id);
 		this.achievements[id].failed = false;
 		this.achievements[id].success = true;
 	}
@@ -161,17 +152,13 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		base.OnCleanUp();
 	}
 
-	private void TriggerNewAchievementCompleted(GameObject cameraTarget = null)
+	private void TriggerNewAchievementCompleted(string achievement, GameObject cameraTarget = null)
 	{
 		bool flag = false;
-		for (int i = 0; i < this.newlyCompletedAchievements.Count; i++)
+		if (Db.Get().ColonyAchievements.Get(achievement).isVictoryCondition)
 		{
-			if (Db.Get().ColonyAchievements.Get(this.newlyCompletedAchievements[i]).isVictoryCondition)
-			{
-				flag = true;
-				this.BeginVictorySequence(this.newlyCompletedAchievements[i]);
-				break;
-			}
+			flag = true;
+			this.BeginVictorySequence(achievement);
 		}
 		if (!flag)
 		{
@@ -355,8 +342,6 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 
 	[Serialize]
 	private List<string> completedAchievementsToDisplay = new List<string>();
-
-	private List<string> newlyCompletedAchievements = new List<string>();
 
 	private SchedulerHandle victorySchedulerHandle;
 

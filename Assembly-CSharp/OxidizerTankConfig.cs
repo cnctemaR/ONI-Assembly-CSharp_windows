@@ -65,6 +65,7 @@ public class OxidizerTankConfig : IBuildingConfig
 		});
 		OxidizerTank oxidizerTank = go.AddOrGet<OxidizerTank>();
 		oxidizerTank.storage = storage;
+		go.AddOrGet<CopyBuildingSettings>();
 		go.AddOrGet<DropToUserCapacity>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);

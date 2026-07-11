@@ -9,7 +9,7 @@ public class EggCracker : KMonoBehaviour
 		base.OnSpawn();
 		this.refinery.choreType = Db.Get().ChoreTypes.Cook;
 		this.refinery.fetchChoreTypeIdHash = Db.Get().ChoreTypes.CookFetch.IdHash;
-		this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Mushing;
+		this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Processing;
 		this.workable.AttributeConverter = Db.Get().AttributeConverters.CookingSpeed;
 		this.workable.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		this.workable.SkillExperienceSkillGroup = Db.Get().SkillGroups.Cooking.Id;

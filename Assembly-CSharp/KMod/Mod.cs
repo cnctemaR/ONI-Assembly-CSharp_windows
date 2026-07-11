@@ -65,6 +65,7 @@ namespace KMod
 			other_mod.enabled = this.enabled;
 			other_mod.crash_count = this.crash_count;
 			other_mod.loaded_content = this.loaded_content;
+			other_mod.reinstall_path = this.reinstall_path;
 		}
 
 		public void ScanContent()
@@ -427,6 +428,9 @@ namespace KMod
 
 		[JsonProperty]
 		public int crash_count;
+
+		[JsonProperty]
+		public string reinstall_path;
 
 		public IFileSource file_source;
 

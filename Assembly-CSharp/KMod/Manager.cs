@@ -37,7 +37,35 @@ namespace KMod
 			bool flag = false;
 			foreach (Mod mod in this.mods)
 			{
-				if (mod.status == Mod.Status.UninstallPending)
+				Mod.Status status = mod.status;
+				if (status != Mod.Status.UninstallPending)
+				{
+					if (status == Mod.Status.ReinstallPending)
+					{
+						global::Debug.LogFormat("Latent reinstall of mod {0}", new object[] { mod.title });
+						if (!string.IsNullOrEmpty(mod.reinstall_path) && File.Exists(mod.reinstall_path))
+						{
+							bool enabled = mod.enabled;
+							mod.file_source = new ZipFile(mod.reinstall_path);
+							mod.enabled = false;
+							if (mod.Uninstall())
+							{
+								mod.Install();
+								if (mod.status == Mod.Status.Installed)
+								{
+									mod.enabled = enabled;
+								}
+							}
+							flag = true;
+						}
+						else if (mod.enabled)
+						{
+							mod.enabled = false;
+							flag = true;
+						}
+					}
+				}
+				else
 				{
 					global::Debug.LogFormat("Latent uninstall of mod {0} from {1}", new object[]
 					{
@@ -57,6 +85,11 @@ namespace KMod
 					{
 						flag = true;
 					}
+				}
+				if (!string.IsNullOrEmpty(mod.reinstall_path))
+				{
+					mod.reinstall_path = null;
+					flag = true;
 				}
 			}
 			foreach (Mod mod2 in list)
@@ -223,26 +256,30 @@ namespace KMod
 						mod = mod.label
 					});
 				}
+				string root = mod.file_source.GetRoot();
 				mod2.CopyPersistentDataTo(mod);
 				int num = this.mods.IndexOf(mod2);
 				this.mods.RemoveAt(num);
 				this.mods.Insert(num, mod);
 				if (flag3 || mod.status == Mod.Status.NotInstalled)
 				{
-					bool enabled = mod.enabled;
-					if (flag3)
+					if (mod.enabled)
 					{
-						this.Uninstall(mod);
-					}
-					this.Install(mod);
-					mod.enabled = enabled;
-					if (mod.enabled && (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != 0)
-					{
+						mod.reinstall_path = root;
+						mod.status = Mod.Status.ReinstallPending;
 						this.events.Add(new Event
 						{
 							event_type = EventType.RestartRequested,
 							mod = mod.label
 						});
+					}
+					else
+					{
+						if (flag3)
+						{
+							this.Uninstall(mod);
+						}
+						this.Install(mod);
 					}
 				}
 				else
@@ -258,7 +295,7 @@ namespace KMod
 		{
 			global::Debug.LogFormat("Update mod {0}", new object[] { mod.title });
 			Mod mod2 = this.mods.Find((Mod candidate) => mod.label.Match(candidate.label));
-			DebugUtil.DevAssert(string.IsNullOrEmpty(mod2.label.id), "Should be subscribed to a mod we are getting an Update notification for");
+			DebugUtil.DevAssert(!string.IsNullOrEmpty(mod2.label.id), "Should be subscribed to a mod we are getting an Update notification for");
 			if (mod2.status == Mod.Status.UninstallPending)
 			{
 				return;
@@ -268,21 +305,26 @@ namespace KMod
 				event_type = EventType.VersionUpdate,
 				mod = mod.label
 			});
+			string root = mod.file_source.GetRoot();
 			mod2.CopyPersistentDataTo(mod);
+			mod.is_subscribed = mod2.is_subscribed;
 			int num = this.mods.IndexOf(mod2);
 			this.mods.RemoveAt(num);
 			this.mods.Insert(num, mod);
-			bool enabled = mod.enabled;
-			this.Uninstall(mod);
-			this.Install(mod);
-			mod.enabled = enabled;
-			if (mod.enabled && (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != 0)
+			if (mod.enabled)
 			{
+				mod.reinstall_path = root;
+				mod.status = Mod.Status.ReinstallPending;
 				this.events.Add(new Event
 				{
 					event_type = EventType.RestartRequested,
 					mod = mod.label
 				});
+			}
+			else
+			{
+				this.Uninstall(mod);
+				this.Install(mod);
 			}
 			this.dirty = true;
 			this.Update(caller);
@@ -776,8 +818,6 @@ namespace KMod
 				EventType event_type = event2.event_type;
 				switch (event_type)
 				{
-				case EventType.VersionUpdate:
-				case EventType.AvailableContentChanged:
 				case EventType.RestartRequested:
 					flag3 = true;
 					break;

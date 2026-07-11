@@ -19,7 +19,6 @@ public class Timelapser : KMonoBehaviour
 	{
 		this.RefreshRenderTextureSize(null);
 		Game.Instance.Subscribe(75424175, new Action<object>(this.RefreshRenderTextureSize));
-		this.captureCamera = base.GetComponent<Camera>();
 		this.freezeCamera = CameraController.Instance.timelapseFreezeCamera;
 		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
 		this.OnResize();
@@ -61,6 +60,16 @@ public class Timelapser : KMonoBehaviour
 					this.screenshotToday = true;
 				}
 			}
+		}
+	}
+
+	private void Update()
+	{
+		if (this.screenshotToday && GameClock.Instance.GetTime() % 600f > 300f && !PlayerController.Instance.IsDragging())
+		{
+			CameraController.Instance.ForcePanningState(false);
+			this.screenshotToday = false;
+			this.SaveScreenshot();
 		}
 	}
 
@@ -121,11 +130,8 @@ public class Timelapser : KMonoBehaviour
 		this.camSize = overlayCamera.orthographicSize;
 		CameraController.Instance.SetOrthographicsSize((float)num);
 		this.camPosition = CameraController.Instance.transform.position;
-		CameraController.Instance.SetPosition(telepad.transform.position);
-		CameraController.Instance.SetTargetPos(telepad.transform.position, this.camSize, false);
-		this.captureCamera.aspect = 1.777f;
-		this.captureCamera.orthographicSize = (float)num;
-		this.captureCamera.transform.SetPosition(telepad.transform.position);
+		CameraController.Instance.SetPosition(new Vector3(telepad.transform.position.x, telepad.transform.position.y, CameraController.Instance.transform.position.z));
+		CameraController.Instance.SetTargetPos(new Vector3(telepad.transform.position.x, telepad.transform.position.y, CameraController.Instance.transform.position.z), this.camSize, false);
 	}
 
 	private void RenderAndPrint()
@@ -137,7 +143,7 @@ public class Timelapser : KMonoBehaviour
 		}
 		RenderTexture active = RenderTexture.active;
 		RenderTexture.active = this.bufferRenderTexture;
-		CameraController.Instance.SetPosition(telepad.transform.position);
+		CameraController.Instance.SetPosition(new Vector3(telepad.transform.position.x, telepad.transform.position.y, CameraController.Instance.transform.position.z));
 		CameraController.Instance.RenderForTimelapser(ref this.bufferRenderTexture);
 		this.WriteToPng(this.bufferRenderTexture);
 		CameraController.Instance.SetOrthographicsSize(this.camSize);
@@ -200,8 +206,6 @@ public class Timelapser : KMonoBehaviour
 	private bool screenshotPending;
 
 	private bool screenshotToday;
-
-	public Camera captureCamera;
 
 	private Camera freezeCamera;
 

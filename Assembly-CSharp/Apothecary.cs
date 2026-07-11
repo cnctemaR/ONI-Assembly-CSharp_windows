@@ -15,6 +15,7 @@ public class Apothecary : ComplexFabricator
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Fabricating;
 		this.workable.AttributeConverter = Db.Get().AttributeConverters.CompoundingSpeed;
 		this.workable.SkillExperienceSkillGroup = Db.Get().SkillGroups.MedicalAid.Id;
 		this.workable.SkillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;

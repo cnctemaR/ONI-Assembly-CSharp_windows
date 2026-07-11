@@ -768,18 +768,8 @@ public class Grid
 
 	public static void GetVisibleExtents(out int min_x, out int min_y, out int max_x, out int max_y)
 	{
-		Vector3 vector;
-		Vector3 vector2;
-		if (GameUtil.IsCapturingTimeLapse())
-		{
-			vector = Game.Instance.timelapser.captureCamera.ViewportToWorldPoint(new Vector3(1f, 1f, Game.Instance.timelapser.captureCamera.transform.GetPosition().z));
-			vector2 = Game.Instance.timelapser.captureCamera.ViewportToWorldPoint(new Vector3(0f, 0f, Game.Instance.timelapser.captureCamera.transform.GetPosition().z));
-		}
-		else
-		{
-			vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
-			vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
-		}
+		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
+		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
 		min_y = (int)vector2.y;
 		max_y = (int)(vector.y + 0.5f);
 		min_x = (int)vector2.x;

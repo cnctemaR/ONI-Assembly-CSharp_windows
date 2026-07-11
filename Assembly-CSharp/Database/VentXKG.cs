@@ -30,7 +30,7 @@ namespace Database
 					}
 				}
 			}
-			return num >= this.kilogramsToVent * 1000f;
+			return num >= this.kilogramsToVent;
 		}
 
 		public override void Serialize(BinaryWriter writer)

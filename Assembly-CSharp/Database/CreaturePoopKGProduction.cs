@@ -14,7 +14,7 @@ namespace Database
 
 		public override bool Success()
 		{
-			return Game.Instance.savedInfo.creaturePoopAmount.ContainsKey(this.poopElement) && Game.Instance.savedInfo.creaturePoopAmount[this.poopElement] >= this.amountToPoop * 1000f;
+			return Game.Instance.savedInfo.creaturePoopAmount.ContainsKey(this.poopElement) && Game.Instance.savedInfo.creaturePoopAmount[this.poopElement] >= this.amountToPoop;
 		}
 
 		public override void Serialize(BinaryWriter writer)

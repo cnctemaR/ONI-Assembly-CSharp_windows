@@ -41,6 +41,15 @@ namespace Database
 				if (workable2 != null)
 				{
 					str = str.Replace("{Target}", workable2.GetComponent<KSelectable>().GetName());
+					ComplexFabricatorWorkable complexFabricatorWorkable = workable2 as ComplexFabricatorWorkable;
+					if (complexFabricatorWorkable != null)
+					{
+						ComplexRecipe currentWorkingOrder = complexFabricatorWorkable.CurrentWorkingOrder;
+						if (currentWorkingOrder != null)
+						{
+							str = str.Replace("{Item}", currentWorkingOrder.FirstResult.ProperName());
+						}
+					}
 				}
 				return str;
 			};

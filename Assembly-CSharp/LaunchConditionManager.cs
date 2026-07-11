@@ -139,10 +139,6 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 			Spacecraft spacecraftFromLaunchConditionManager2 = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
 			spacecraftFromLaunchConditionManager2.BeginMission(destination);
 		}
-		GameScheduler.Instance.Schedule("VictoryConditionCheck", 0.1f, delegate(object data)
-		{
-			Game.Instance.Trigger(395452326, null);
-		}, null, null);
 	}
 
 	public bool CheckReadyToLaunch()

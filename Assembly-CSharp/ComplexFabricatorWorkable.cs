@@ -57,10 +57,18 @@ public class ComplexFabricatorWorkable : Workable
 		}
 	}
 
+	public ComplexRecipe CurrentWorkingOrder
+	{
+		get
+		{
+			return (!(this.fabricator != null)) ? null : this.fabricator.CurrentWorkingOrder;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.workerStatusItem = Db.Get().DuplicantStatusItems.Processing;
+		this.workerStatusItem = Db.Get().DuplicantStatusItems.Fabricating;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.skillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;

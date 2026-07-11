@@ -86,7 +86,16 @@ public class KFMOD
 		{
 			return default(EventInstance);
 		}
-		EventInstance eventInstance = RuntimeManager.CreateInstance(path);
+		EventInstance eventInstance;
+		try
+		{
+			eventInstance = RuntimeManager.CreateInstance(path);
+		}
+		catch (EventNotFoundException ex)
+		{
+			global::Debug.LogWarning(ex, null);
+			return default(EventInstance);
+		}
 		HashedString hashedString = path;
 		SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(hashedString);
 		OneShotSoundParameterUpdater.Sound sound = new OneShotSoundParameterUpdater.Sound

@@ -25,7 +25,7 @@ public class SandboxToolParameterMenu : KScreen
 			Tuple<Sprite, Color> uisprite = Def.GetUISprite(this.settings.Element, "ui");
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].sprite = uisprite.first;
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].color = uisprite.second;
-			this.temperatureSlider.SetRange(Mathf.Max(SandboxToolParameterMenu.instance.settings.Element.lowTemp - 10f, 1f), SandboxToolParameterMenu.instance.settings.Element.highTemp + 10f);
+			this.temperatureSlider.SetRange(Mathf.Max(SandboxToolParameterMenu.instance.settings.Element.lowTemp - 10f, 1f), Mathf.Min(9999f, SandboxToolParameterMenu.instance.settings.Element.highTemp + 10f));
 			this.temperatureSlider.SetValue(SandboxToolParameterMenu.instance.settings.Element.defaultValues.temperature);
 			this.massSlider.SetRange(0.1f, SandboxToolParameterMenu.instance.settings.Element.defaultValues.mass * 2f);
 		}));
@@ -601,7 +601,7 @@ public class SandboxToolParameterMenu : KScreen
 
 	public SandboxToolParameterMenu.SliderValue temperatureSlider = new SandboxToolParameterMenu.SliderValue(150f, 500f, "cold", "hot", UI.UNITSUFFIXES.TEMPERATURE.KELVIN, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE.TOOLTIP, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.temperature = (float)Mathf.RoundToInt(value * 100f) / 100f;
+		SandboxToolParameterMenu.instance.settings.temperature = Mathf.Clamp((float)Mathf.RoundToInt(value * 100f) / 100f, 1f, 9999f);
 	});
 
 	public SandboxToolParameterMenu.SliderValue temperatureAdditiveSlider = new SandboxToolParameterMenu.SliderValue(-15f, 15f, "cold", "hot", UI.UNITSUFFIXES.TEMPERATURE.KELVIN, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.TOOLTIP, delegate(float value)

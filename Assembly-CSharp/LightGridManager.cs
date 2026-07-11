@@ -36,15 +36,19 @@ public static class LightGridManager
 	public static void CreatePreview(int origin_cell, float radius, LightShape shape, int lux)
 	{
 		LightGridManager.previewLightCells.Clear();
-		List<int> list = new List<int>();
-		list.Add(origin_cell);
-		DiscreteShadowCaster.GetVisibleCells(origin_cell, list, (int)radius, shape);
-		foreach (int num in list)
+		ListPool<int, LightGridManager.LightGridEmitter>.PooledList pooledList = ListPool<int, LightGridManager.LightGridEmitter>.Allocate();
+		pooledList.Add(origin_cell);
+		DiscreteShadowCaster.GetVisibleCells(origin_cell, pooledList, (int)radius, shape);
+		foreach (int num in pooledList)
 		{
-			int num2 = lux / LightGridManager.CalculateFalloff(0.5f, num, origin_cell);
-			LightGridManager.previewLightCells.Add(new Tuple<int, int>(num, num2));
-			LightGridManager.previewLux[num] = num2;
+			if (Grid.IsValidCell(num))
+			{
+				int num2 = lux / LightGridManager.CalculateFalloff(0.5f, num, origin_cell);
+				LightGridManager.previewLightCells.Add(new Tuple<int, int>(num, num2));
+				LightGridManager.previewLux[num] = num2;
+			}
 		}
+		pooledList.Recycle();
 	}
 
 	public static List<Tuple<int, int>> previewLightCells = new List<Tuple<int, int>>();

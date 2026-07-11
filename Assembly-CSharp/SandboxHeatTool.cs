@@ -73,7 +73,7 @@ public class SandboxHeatTool : BrushTool
 		int index = Game.Instance.callbackManager.Add(callbackInfo).index;
 		float num = Grid.Temperature[cell];
 		num += SandboxToolParameterMenu.instance.settings.temperatureAdditive;
-		num = Mathf.Clamp(num, 1f, 4000f);
+		num = Mathf.Clamp(num, 1f, 9999f);
 		int cell2 = cell;
 		SimHashes id = Grid.Element[cell].id;
 		CellElementEvent sandBoxTool = CellEventLogger.Instance.SandBoxTool;

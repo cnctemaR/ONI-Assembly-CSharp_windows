@@ -2105,59 +2105,26 @@ namespace TMPro
 			{
 				if (this.stringPositionInternal > 0)
 				{
-					try
-					{
-						this.m_Text = this.text.Remove(this.stringPositionInternal - 1, 1);
-						int num = this.stringPositionInternal - 1;
-						this.stringPositionInternal = num;
-						this.stringSelectPositionInternal = num;
-						this.m_isLastKeyBackspace = true;
-						this.SendOnValueChangedAndUpdateLabel();
-					}
-					catch (Exception ex)
-					{
-						global::Debug.LogError(string.Concat(new object[]
-						{
-							this.text.Length,
-							" ",
-							this.stringPositionInternal,
-							" ",
-							this.text,
-							"\n",
-							ex.ToString()
-						}), null);
-					}
+					this.stringPositionInternal = Math.Min(this.stringPositionInternal, this.m_Text.Length);
+					this.m_Text = this.text.Remove(this.stringPositionInternal - 1, 1);
+					int num = this.stringPositionInternal - 1;
+					this.stringPositionInternal = num;
+					this.stringSelectPositionInternal = num;
+					this.m_isLastKeyBackspace = true;
+					this.SendOnValueChangedAndUpdateLabel();
 				}
 			}
 			else
 			{
 				if (this.caretPositionInternal > 0)
 				{
-					try
-					{
-						this.m_Text = this.text.Remove(this.GetStringIndexFromCaretPosition(this.caretPositionInternal - 1), 1);
-						int num = this.caretPositionInternal - 1;
-						this.caretPositionInternal = num;
-						this.caretSelectPositionInternal = num;
-						num = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
-						this.stringPositionInternal = num;
-						this.stringSelectPositionInternal = num;
-					}
-					catch (Exception ex2)
-					{
-						global::Debug.LogError(string.Concat(new object[]
-						{
-							this.text.Length,
-							" ",
-							this.caretPositionInternal,
-							" ",
-							this.stringSelectPositionInternal,
-							" ",
-							this.text,
-							"\n",
-							ex2.ToString()
-						}), null);
-					}
+					this.m_Text = this.text.Remove(this.GetStringIndexFromCaretPosition(this.caretPositionInternal - 1), 1);
+					int num = this.caretPositionInternal - 1;
+					this.caretPositionInternal = num;
+					this.caretSelectPositionInternal = num;
+					num = this.GetStringIndexFromCaretPosition(this.caretPositionInternal);
+					this.stringPositionInternal = num;
+					this.stringSelectPositionInternal = num;
 				}
 				this.m_isLastKeyBackspace = true;
 				this.SendOnValueChangedAndUpdateLabel();

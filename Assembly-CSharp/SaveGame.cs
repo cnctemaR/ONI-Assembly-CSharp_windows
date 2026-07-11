@@ -57,7 +57,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 274136U;
+		header.buildVersion = 274307U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);

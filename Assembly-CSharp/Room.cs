@@ -24,7 +24,7 @@ public class Room : IAssignableIdentity
 			if (kprefabID != null)
 			{
 				Ownable component = kprefabID.GetComponent<Ownable>();
-				if (component != null && component.assignee != null)
+				if (component != null && component.assignee != null && component.assignee != this)
 				{
 					foreach (Ownables ownables in component.assignee.GetOwners())
 					{

@@ -263,22 +263,28 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 			base.OnWorkTick(worker, dt);
 			HandSanitizer component = base.GetComponent<HandSanitizer>();
 			Storage component2 = base.GetComponent<Storage>();
+			float massAvailable = component2.GetMassAvailable(component.consumedElement);
+			if (massAvailable == 0f)
+			{
+				return true;
+			}
 			PrimaryElement component3 = worker.GetComponent<PrimaryElement>();
-			int num = Math.Min((int)(dt / this.workTime * (float)component.diseaseRemovalCount), component3.DiseaseCount);
-			this.diseaseRemoved += num;
+			float num = component.massConsumedPerUse * dt / this.workTime;
+			float num2 = Mathf.Min(num, massAvailable);
+			int num3 = Math.Min((int)(dt / this.workTime * (float)component.diseaseRemovalCount), component3.DiseaseCount);
+			this.diseaseRemoved += num3;
 			SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
 			invalid.idx = component3.DiseaseIdx;
-			invalid.count = num;
-			component3.ModifyDiseaseCount(-num, "HandSanitizer.OnWorkTick");
-			component.maxPossiblyRemoved += num;
-			float num2 = component.massConsumedPerUse * dt / this.workTime;
+			invalid.count = num3;
+			component3.ModifyDiseaseCount(-num3, "HandSanitizer.OnWorkTick");
+			component.maxPossiblyRemoved += num3;
 			SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
-			float num3;
-			component2.ConsumeAndGetDisease(ElementLoader.FindElementByHash(component.consumedElement).tag, num2, out diseaseInfo, out num3);
+			float num4;
+			component2.ConsumeAndGetDisease(ElementLoader.FindElementByHash(component.consumedElement).tag, num2, out diseaseInfo, out num4);
 			if (component.outputElement != SimHashes.Vacuum)
 			{
 				diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(invalid, diseaseInfo);
-				component2.AddLiquid(component.outputElement, num2, num3, diseaseInfo.idx, diseaseInfo.count, false, true);
+				component2.AddLiquid(component.outputElement, num2, num4, diseaseInfo.idx, diseaseInfo.count, false, true);
 			}
 			return this.diseaseRemoved > component.diseaseRemovalCount;
 		}

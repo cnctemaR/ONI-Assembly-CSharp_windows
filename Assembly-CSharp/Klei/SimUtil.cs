@@ -79,23 +79,28 @@ namespace Klei
 
 		public static float CalculateFinalTemperature(float mass1, float temp1, float mass2, float temp2)
 		{
-			float num = mass1 * temp1;
-			float num2 = mass2 * temp2;
-			float num3 = num + num2;
-			float num4 = num3 / (mass1 + mass2);
-			float num5;
+			float num = mass1 + mass2;
+			if (num == 0f)
+			{
+				return 0f;
+			}
+			float num2 = mass1 * temp1;
+			float num3 = mass2 * temp2;
+			float num4 = num2 + num3;
+			float num5 = num4 / num;
 			float num6;
+			float num7;
 			if (temp1 > temp2)
 			{
-				num5 = temp2;
-				num6 = temp1;
+				num6 = temp2;
+				num7 = temp1;
 			}
 			else
 			{
-				num5 = temp1;
-				num6 = temp2;
+				num6 = temp1;
+				num7 = temp2;
 			}
-			return Math.Max(num5, Math.Min(num6, num4));
+			return Math.Max(num6, Math.Min(num7, num5));
 		}
 
 		[Conditional("STRICT_CHECKING")]

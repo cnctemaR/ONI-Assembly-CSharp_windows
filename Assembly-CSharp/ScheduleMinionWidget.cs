@@ -29,15 +29,30 @@ public class ScheduleMinionWidget : KMonoBehaviour
 		IAssignableIdentity component = schedulable.GetComponent<IAssignableIdentity>();
 		this.portrait.SetIdentityObject(component, true);
 		this.label.text = component.GetProperName();
-		MinionIdentity minionIdentity = (MinionIdentity)component;
-		Traits component2 = minionIdentity.GetComponent<Traits>();
-		if (component2.HasTrait("NightOwl"))
+		MinionIdentity minionIdentity = component as MinionIdentity;
+		StoredMinionIdentity storedMinionIdentity = component as StoredMinionIdentity;
+		if (minionIdentity != null)
 		{
-			this.nightOwlIcon.SetActive(true);
+			Traits component2 = minionIdentity.GetComponent<Traits>();
+			if (component2.HasTrait("NightOwl"))
+			{
+				this.nightOwlIcon.SetActive(true);
+			}
+			else if (component2.HasTrait("EarlyBird"))
+			{
+				this.earlyBirdIcon.SetActive(true);
+			}
 		}
-		else if (component2.HasTrait("EarlyBird"))
+		else if (storedMinionIdentity != null)
 		{
-			this.earlyBirdIcon.SetActive(true);
+			if (storedMinionIdentity.traitIDs.Contains("NightOwl"))
+			{
+				this.nightOwlIcon.SetActive(true);
+			}
+			else if (storedMinionIdentity.traitIDs.Contains("EarlyBird"))
+			{
+				this.earlyBirdIcon.SetActive(true);
+			}
 		}
 		this.dropDown.Initialize(ScheduleManager.Instance.GetSchedules().Cast<IListableOption>(), new Action<IListableOption, object>(this.OnDropEntryClick), null, new Action<DropDownEntry, object>(this.DropEntryRefreshAction), false, schedulable);
 	}

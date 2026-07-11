@@ -158,7 +158,11 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 				if (this.endpoints.ContainsKey(cell))
 				{
 					DebugUtil.DevLogError(string.Format("Cell {0} already has a utility network endpoint assigned. Adding {1} will stomp previous endpoint, destroying the object that's already there.", cell, item.ToString()));
-					Util.KDestroyGameObject(((KMonoBehaviour)this.endpoints[cell]).gameObject);
+					KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)this.endpoints[cell];
+					if (kmonoBehaviour != null)
+					{
+						Util.KDestroyGameObject(kmonoBehaviour);
+					}
 				}
 				this.endpoints[cell] = item;
 			}
@@ -167,7 +171,11 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 				if (this.items.ContainsKey(cell))
 				{
 					DebugUtil.DevLogError(string.Format("Cell {0} already has a utility network connector assigned. Adding {1} will stomp previous item, destroying the object that's already there.", cell, item.ToString()));
-					Util.KDestroyGameObject(((KMonoBehaviour)this.items[cell]).gameObject);
+					KMonoBehaviour kmonoBehaviour2 = (KMonoBehaviour)this.items[cell];
+					if (kmonoBehaviour2 != null)
+					{
+						Util.KDestroyGameObject(kmonoBehaviour2);
+					}
 				}
 				this.items[cell] = item;
 			}

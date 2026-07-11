@@ -152,11 +152,13 @@ public static class Util
 
 	public static void KDestroyGameObject(Component original)
 	{
+		global::Debug.Assert(original != null, "Attempted to destroy a GameObject that is already destroyed.");
 		Util.KDestroyGameObject(original.gameObject);
 	}
 
 	public static void KDestroyGameObject(GameObject original)
 	{
+		global::Debug.Assert(original != null, "Attempted to destroy a GameObject that is already destroyed.");
 		original.DeleteObject();
 	}
 

@@ -17,19 +17,19 @@ public class Constructable : Workable, ISaveLoadable
 		}
 	}
 
-	public IList<Element> SelectedElements
+	public IList<Tag> SelectedElementsTags
 	{
 		get
 		{
-			return this.selectedElements;
+			return this.selectedElementsTags;
 		}
 		set
 		{
-			if (this.selectedElements == null || this.selectedElements.Length != value.Count)
+			if (this.selectedElementsTags == null || this.selectedElementsTags.Length != value.Count)
 			{
-				this.selectedElements = new Element[value.Count];
+				this.selectedElementsTags = new Tag[value.Count];
 			}
-			value.CopyTo(this.selectedElements, 0);
+			value.CopyTo(this.selectedElementsTags, 0);
 		}
 	}
 
@@ -123,10 +123,9 @@ public class Constructable : Workable, ISaveLoadable
 				PrimaryElement component7 = gameObject2.GetComponent<PrimaryElement>();
 				float mass = component7.Mass;
 				float temperature = component7.Temperature;
-				SimHashes elementID = component7.ElementID;
 				byte diseaseIdx = component7.DiseaseIdx;
 				int diseaseCount = component7.DiseaseCount;
-				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, elementID, mass, temperature, diseaseIdx, diseaseCount);
+				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, component7.Element.tag, mass, temperature, diseaseIdx, diseaseCount);
 				gameObject2.Trigger(1606648047, null);
 				gameObject2.DeleteObject();
 			}
@@ -150,7 +149,8 @@ public class Constructable : Workable, ISaveLoadable
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
 		int num = Grid.PosToCell(base.transform.GetLocalPosition());
-		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.initialTemperature, true);
+		this.UnmarkArea();
+		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, true);
 		gameObject.transform.rotation = base.transform.rotation;
 		Rotatable component2 = gameObject.GetComponent<Rotatable>();
 		if (component2 != null)
@@ -200,6 +200,7 @@ public class Constructable : Workable, ISaveLoadable
 		this.workingStatusItem = null;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
+		this.minimumAttributeMultiplier = 0.75f;
 		Prioritizable.AddRef(base.gameObject);
 		this.synchronizeAnims = false;
 		this.multitoolContext = "build";
@@ -227,12 +228,13 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		this.fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.BuildFetch, this.choreTags);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		component.ElementID = this.selectedElements[0].id;
+		Element element = ElementLoader.GetElement(this.SelectedElementsTags[0]);
+		component.ElementID = element.id;
 		PrimaryElement primaryElement = component;
 		float num = 293.15f;
 		component.Temperature = num;
 		primaryElement.Temperature = num;
-		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElements))
+		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElementsTags))
 		{
 			FetchList2 fetchList = this.fetchList;
 			Tag tag = ingredient.tag;
@@ -272,7 +274,7 @@ public class Constructable : Workable, ISaveLoadable
 			}
 			else
 			{
-				Output.LogError(new object[] { "multiple replacement tiles on the same cell!" });
+				Output.LogError("multiple replacement tiles on the same cell!");
 				Util.KDestroyGameObject(base.gameObject);
 			}
 		}
@@ -336,9 +338,14 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void UnmarkArea()
 	{
+		if (this.unmarked)
+		{
+			return;
+		}
+		this.unmarked = true;
 		int num = Grid.PosToCell(base.transform.GetPosition());
-		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? this.building.Def.ObjectLayer : this.building.Def.ReplacementLayer);
 		BuildingDef def = this.building.Def;
+		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? this.building.Def.ObjectLayer : this.building.Def.ReplacementLayer);
 		def.UnmarkArea(num, this.building.Orientation, objectLayer, base.gameObject);
 		if (def.IsTilePiece)
 		{
@@ -559,7 +566,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			ChoreType build = Db.Get().ChoreTypes.Build;
 			Tag[] array = this.choreTags;
-			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)
@@ -582,7 +589,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.SelectedElements))
+		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.SelectedElementsTags))
 		{
 			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, -ingredient.amount);
 		}
@@ -611,19 +618,6 @@ public class Constructable : Workable, ISaveLoadable
 		}
 	}
 
-	[OnSerializing]
-	internal void OnSerializing()
-	{
-		if (this.selectedElements != null)
-		{
-			this.ids = new int[this.selectedElements.Length];
-			for (int i = 0; i < this.selectedElements.Length; i++)
-			{
-				this.ids[i] = (int)this.selectedElements[i].id;
-			}
-		}
-	}
-
 	[OnDeserialized]
 	internal void OnDeserialized()
 	{
@@ -633,6 +627,17 @@ public class Constructable : Workable, ISaveLoadable
 			for (int i = 0; i < this.ids.Length; i++)
 			{
 				this.selectedElements[i] = ElementLoader.FindElementByHash((SimHashes)this.ids[i]);
+			}
+			if (this.selectedElementsTags == null)
+			{
+				this.selectedElementsTags = new Tag[this.ids.Length];
+				for (int j = 0; j < this.ids.Length; j++)
+				{
+					this.selectedElementsTags[j] = ElementLoader.FindElementByHash((SimHashes)this.ids[j]).tag;
+				}
+			}
+			for (int k = 0; k < this.selectedElements.Length; k++)
+			{
 			}
 		}
 	}
@@ -713,6 +718,8 @@ public class Constructable : Workable, ISaveLoadable
 
 	private bool finished;
 
+	private bool unmarked;
+
 	public bool isDiggingRequired = true;
 
 	private bool waitForFetchesBeforeDigging;
@@ -734,6 +741,9 @@ public class Constructable : Workable, ISaveLoadable
 	private HandleVector<int>.Handle ladderParititonerEntry;
 
 	private LoggerFSS log = new LoggerFSS("Constructable", 35);
+
+	[Serialize]
+	private Tag[] selectedElementsTags;
 
 	private Element[] selectedElements;
 

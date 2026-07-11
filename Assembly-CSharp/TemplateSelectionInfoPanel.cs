@@ -83,7 +83,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 			num += Grid.Temperature[num2];
 		}
 		num /= (float)cells.Count;
-		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.AVERAGE_TEMPERATURE, GameUtil.GetFormattedTemperature(num, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.AVERAGE_TEMPERATURE, GameUtil.GetFormattedTemperature(num, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 	}
 
 	private static string TotalJoules(List<int> cells)

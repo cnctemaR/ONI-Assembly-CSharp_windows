@@ -206,6 +206,17 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return tag;
 	}
 
+	public static Tag GetCategoryForEntity(KPrefabID entity)
+	{
+		ElementChunk component = entity.GetComponent<ElementChunk>();
+		if (component != null)
+		{
+			PrimaryElement component2 = component.GetComponent<PrimaryElement>();
+			return component2.Element.materialCategory;
+		}
+		return WorldInventory.GetCategoryForTags(entity.Tags);
+	}
+
 	private void OnAddedFetchable(object data)
 	{
 		GameObject gameObject = (GameObject)data;
@@ -218,12 +229,9 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		Tag tag = component2.PrefabID();
 		if (!this.Inventory.ContainsKey(tag))
 		{
-			Tag categoryForTags = WorldInventory.GetCategoryForTags(component2.Tags);
-			if (!categoryForTags.IsValid)
-			{
-				DebugUtil.SoftAssert(false, component.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
-			}
-			this.Discover(tag, categoryForTags);
+			Tag categoryForEntity = WorldInventory.GetCategoryForEntity(component2);
+			DebugUtil.SoftAssert(categoryForEntity.IsValid, new object[] { component.name, "was found by worldinventory but doesn't have a category! Add it to the element definition." });
+			this.Discover(tag, categoryForEntity);
 		}
 		foreach (Tag tag2 in component2.Tags)
 		{

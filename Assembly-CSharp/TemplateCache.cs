@@ -30,7 +30,7 @@ public static class TemplateCache
 			TemplateCache.Init();
 		}
 		string text = Path.Combine(TemplateCache.baseTemplatePath, "bases/startingBase.yaml");
-		return YamlIO<TemplateContainer>.LoadFile(text);
+		return YamlIO<TemplateContainer>.LoadFile(text, null);
 	}
 
 	public static TemplateContainer GetTemplate(string templatePath)
@@ -42,7 +42,7 @@ public static class TemplateCache
 		if (TemplateCache.templates[templatePath] == null)
 		{
 			string text = Path.Combine(TemplateCache.baseTemplatePath, templatePath);
-			TemplateContainer templateContainer = YamlIO<TemplateContainer>.LoadFile(text + ".yaml");
+			TemplateContainer templateContainer = YamlIO<TemplateContainer>.LoadFile(text + ".yaml", null);
 			if (templateContainer == null)
 			{
 				global::Debug.LogWarning("Missing template [" + text + ".yaml]", null);
@@ -111,7 +111,7 @@ public static class TemplateCache
 	{
 		public void Run(object shared_data)
 		{
-			this.template = YamlIO<TemplateContainer>.LoadFile(this.path);
+			this.template = YamlIO<TemplateContainer>.LoadFile(this.path, null);
 		}
 
 		public string path;

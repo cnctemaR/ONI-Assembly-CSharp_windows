@@ -18,7 +18,7 @@ public class NavGrid
 		this.maxLinksPerCell = max_links_per_cell + 1;
 		for (int i = 0; i < transitions.Length; i++)
 		{
-			DebugUtil.Assert(i >= 0 && i <= 255, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(i >= 0 && i <= 255);
 			transitions[i].id = (byte)i;
 			if (!list.Contains(transitions[i].start))
 			{
@@ -373,9 +373,9 @@ public class NavGrid
 	{
 		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool impassable_not_void = false)
 		{
-			DebugUtil.Assert(x <= 127 && x >= -128, "Assert!", string.Empty, string.Empty);
-			DebugUtil.Assert(y <= 127 && y >= -128, "Assert!", string.Empty, string.Empty);
-			DebugUtil.Assert(cost <= 255 && cost >= 0, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(x <= 127 && x >= -128);
+			DebugUtil.Assert(y <= 127 && y >= -128);
+			DebugUtil.Assert(cost <= 255 && cost >= 0);
 			this.id = byte.MaxValue;
 			this.start = start;
 			this.end = end;
@@ -421,11 +421,11 @@ public class NavGrid
 
 		public int IsValid(int cell, NavTable nav_table, ushort[] gridBitFields)
 		{
-			int num = Grid.OffsetCell(cell, (int)this.x, (int)this.y);
-			if (!Grid.IsValidCell(num))
+			if (!Grid.IsCellOffsetValid(cell, (int)this.x, (int)this.y))
 			{
 				return Grid.InvalidCell;
 			}
+			int num = Grid.OffsetCell(cell, (int)this.x, (int)this.y);
 			if (!nav_table.IsValid(num, this.end))
 			{
 				return Grid.InvalidCell;
@@ -606,12 +606,6 @@ public class NavGrid
 				{
 					return Grid.InvalidCell;
 				}
-			}
-			CellOffset offset = Grid.GetOffset(cell);
-			CellOffset offset2 = Grid.GetOffset(num);
-			if (Math.Abs(offset.x - offset2.x) >= Grid.WidthInCells - 1)
-			{
-				return Grid.InvalidCell;
 			}
 			return num;
 		}

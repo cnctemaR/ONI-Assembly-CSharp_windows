@@ -102,7 +102,7 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			this.targetImage.enabled = false;
 		}
-		if (this.useLabels && identity is MinionIdentity)
+		if ((this.useLabels && identity is MinionIdentity) || identity is MinionAssignablesProxy)
 		{
 			this.SetDuplicantJobTitleActive(jobEnabled);
 		}
@@ -217,6 +217,14 @@ public class CrewPortrait : KMonoBehaviour
 		MinionIdentity minionIdentity = identityObject as MinionIdentity;
 		if (minionIdentity == null)
 		{
+			MinionAssignablesProxy minionAssignablesProxy = identityObject as MinionAssignablesProxy;
+			if (minionAssignablesProxy != null && minionAssignablesProxy.target != null)
+			{
+				minionIdentity = minionAssignablesProxy.target as MinionIdentity;
+			}
+		}
+		if (minionIdentity == null)
+		{
 			return;
 		}
 		SymbolOverrideController component = controller.GetComponent<SymbolOverrideController>();
@@ -240,7 +248,7 @@ public class CrewPortrait : KMonoBehaviour
 		}
 		controller.animScale = num;
 		string text = "ui";
-		controller.Play(text, KAnim.PlayMode.Once, 1f, 0f);
+		controller.Play(text, KAnim.PlayMode.Loop, 1f, 0f);
 		controller.SetSymbolVisiblity(CrewPortrait.snapTo_neck, false);
 		controller.SetSymbolVisiblity(CrewPortrait.snapTo_pivot, false);
 		controller.SetSymbolVisiblity(CrewPortrait.snapTo_rgthand, false);

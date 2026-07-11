@@ -20,7 +20,7 @@ public class WashSinkConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, tier2, 0.2f);
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
-		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
+		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
@@ -36,7 +36,7 @@ public class WashSinkConfig : IBuildingConfig
 		handSanitizer.consumedElement = SimHashes.Water;
 		handSanitizer.outputElement = SimHashes.DirtyWater;
 		handSanitizer.diseaseRemovalCount = 120000;
-		handSanitizer.maxUses = 40;
+		handSanitizer.maxUses = 1;
 		handSanitizer.dirtyMeterOffset = Meter.Offset.Behind;
 		go.AddOrGet<DirectionControl>();
 		HandSanitizer.Work work = go.AddOrGet<HandSanitizer.Work>();
@@ -57,6 +57,8 @@ public class WashSinkConfig : IBuildingConfig
 		storage.doDiseaseTransfer = false;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<LoopingSounds>();
+		RequireOutputs requireOutputs = go.AddOrGet<RequireOutputs>();
+		requireOutputs.ignoreFullPipe = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -69,7 +71,7 @@ public class WashSinkConfig : IBuildingConfig
 
 	public const float WATER_PER_USE = 5f;
 
-	public const int USES_PER_FLUSH = 40;
+	public const int USES_PER_FLUSH = 1;
 
 	public const float WORK_TIME = 5f;
 }

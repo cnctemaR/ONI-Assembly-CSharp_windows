@@ -27,4 +27,33 @@ public static class KGameObjectComponentManagerUtil
 		Deserializer.Deserialize(typeof(DataType), reader, out obj);
 		mgr.SetData(handle, (DataType)((object)obj));
 	}
+
+	public static void Serialize<MgrType, Header, Payload>(MgrType mgr, GameObject go, BinaryWriter writer) where MgrType : KGameObjectSplitComponentManager<Header, Payload> where Header : new() where Payload : new()
+	{
+		long position = writer.BaseStream.Position;
+		writer.Write(0);
+		long position2 = writer.BaseStream.Position;
+		HandleVector<int>.Handle handle = mgr.GetHandle(go);
+		Header header;
+		Payload payload;
+		mgr.GetData(handle, out header, out payload);
+		Serializer.SerializeTypeless(header, writer);
+		Serializer.SerializeTypeless(payload, writer);
+		long position3 = writer.BaseStream.Position;
+		long num = position3 - position2;
+		writer.BaseStream.Position = position;
+		writer.Write((int)num);
+		writer.BaseStream.Position = position3;
+	}
+
+	public static void Deserialize<MgrType, Header, Payload>(MgrType mgr, GameObject go, IReader reader) where MgrType : KGameObjectSplitComponentManager<Header, Payload> where Header : new() where Payload : new()
+	{
+		HandleVector<int>.Handle handle = mgr.GetHandle(go);
+		object obj;
+		Deserializer.Deserialize(typeof(Header), reader, out obj);
+		object obj2;
+		Deserializer.Deserialize(typeof(Payload), reader, out obj2);
+		Payload payload = (Payload)((object)obj2);
+		mgr.SetData(handle, (Header)((object)obj), ref payload);
+	}
 }

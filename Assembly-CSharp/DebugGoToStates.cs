@@ -10,7 +10,7 @@ internal class DebugGoToStates : GameStateMachine<DebugGoToStates, DebugGoToStat
 		string text = CREATURES.STATUSITEMS.DEBUGGOTO.NAME;
 		string text2 = CREATURES.STATUSITEMS.DEBUGGOTO.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
 		this.behaviourcomplete.BehaviourComplete(GameTags.HasDebugDestination, false);
 	}
 

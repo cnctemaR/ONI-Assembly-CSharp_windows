@@ -96,7 +96,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 	{
 		if (resource == null)
 		{
-			Output.LogError(new object[] { "Tried to add a null to the resource set" });
+			Output.LogError("Tried to add a null to the resource set");
 			return (T)((object)null);
 		}
 		this.resources.Add(resource);

@@ -105,7 +105,10 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		List<Tutorial.Item> list = new List<Tutorial.Item>();
 		List<Tutorial.Item> list2 = list;
 		Tutorial.Item item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDTOILET.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 5f, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDTOILET.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 5f, delegate(object d)
+		{
+			PlanScreen.Instance.OpenCategoryByName("Plumbing");
+		}, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.ToiletExists);
 		list2.Add(item);
 		this.itemTree.Add(list);
@@ -123,41 +126,70 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		List<Tutorial.Item> list6 = new List<Tutorial.Item>();
 		List<Tutorial.Item> list7 = list6;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.HYGENE_NEEDED.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.HYGENE_NEEDED.TOOLTIP, null, true, 20f, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.HYGENE_NEEDED.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.HYGENE_NEEDED.TOOLTIP, null, true, 20f, delegate(object d)
+		{
+			PlanScreen.Instance.OpenCategoryByName("Medicine");
+		}, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.HygeneExists);
 		list7.Add(item);
 		this.itemTree.Add(list6);
 		List<Tutorial.Item> list8 = this.warningItems;
 		item = new Tutorial.Item();
 		Tutorial.Item item2 = item;
-		string text = MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.NAME;
-		HashedString invalid = HashedString.Invalid;
-		item2.notification = new Notification(text, NotificationType.Tutorial, invalid, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, null, null);
-		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.SufficientOxygen);
+		string text = MISC.NOTIFICATIONS.NO_OXYGEN_GENERATOR.NAME;
+		HashedString hashedString = HashedString.Invalid;
+		item2.notification = new Notification(text, NotificationType.Tutorial, hashedString, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NO_OXYGEN_GENERATOR.TOOLTIP, null, false, 0f, delegate(object d)
+		{
+			PlanScreen.Instance.OpenCategoryByName("Oxygen");
+		}, null);
+		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.OxygenGeneratorBuilt);
 		item.minTimeToNotify = 80f;
 		item.lastNotifyTime = 0f;
 		list8.Add(item);
-		this.warningItems.Add(new Tutorial.Item
-		{
-			notification = new Notification(MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, new Func<List<Notification>, object, string>(this.UnrefrigeratedFoodTooltip), null, false, 0f, null, null),
-			requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodIsRefrigerated),
-			minTimeToNotify = 6f,
-			lastNotifyTime = 0f
-		});
-		this.warningItems.Add(new Tutorial.Item
-		{
-			notification = new Notification(MISC.NOTIFICATIONS.FOODLOW.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(this.OnLowFoodTooltip), null, false, 0f, null, null),
-			requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughFood),
-			minTimeToNotify = 10f,
-			lastNotifyTime = 0f
-		});
 		List<Tutorial.Item> list9 = this.warningItems;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.NO_MEDICAL_COTS.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> n, object o) => MISC.NOTIFICATIONS.NO_MEDICAL_COTS.TOOLTIP, null, false, 0f, null, null);
+		Tutorial.Item item3 = item;
+		text = MISC.NOTIFICATIONS.INSUFFICIENTOXYGENLASTCYCLE.NAME;
+		hashedString = HashedString.Invalid;
+		item3.notification = new Notification(text, NotificationType.Tutorial, hashedString, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, delegate(object d)
+		{
+			this.ZoomToNextOxygenGenerator();
+		}, null);
+		item.hideCondition = new Tutorial.HideConditionDelegate(this.OxygenGeneratorNotBuilt);
+		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.SufficientOxygenLastCycleAndThisCycle);
+		item.minTimeToNotify = 80f;
+		item.lastNotifyTime = 0f;
+		list9.Add(item);
+		List<Tutorial.Item> list10 = this.warningItems;
+		item = new Tutorial.Item();
+		item.notification = new Notification(MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, new Func<List<Notification>, object, string>(this.UnrefrigeratedFoodTooltip), null, false, 0f, delegate(object d)
+		{
+			PlanScreen.Instance.OpenCategoryByName("Food");
+		}, null);
+		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodIsRefrigerated);
+		item.minTimeToNotify = 6f;
+		item.lastNotifyTime = 0f;
+		list10.Add(item);
+		List<Tutorial.Item> list11 = this.warningItems;
+		item = new Tutorial.Item();
+		item.notification = new Notification(MISC.NOTIFICATIONS.FOODLOW.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(this.OnLowFoodTooltip), null, false, 0f, delegate(object d)
+		{
+			PlanScreen.Instance.OpenCategoryByName("Food");
+		}, null);
+		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughFood);
+		item.minTimeToNotify = 10f;
+		item.lastNotifyTime = 0f;
+		list11.Add(item);
+		List<Tutorial.Item> list12 = this.warningItems;
+		item = new Tutorial.Item();
+		item.notification = new Notification(MISC.NOTIFICATIONS.NO_MEDICAL_COTS.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> n, object o) => MISC.NOTIFICATIONS.NO_MEDICAL_COTS.TOOLTIP, null, false, 0f, delegate(object d)
+		{
+			PlanScreen.Instance.OpenCategoryByName("Medicine");
+		}, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughMedicalCots);
 		item.minTimeToNotify = 10f;
 		item.lastNotifyTime = 0f;
-		list9.Add(item);
+		list12.Add(item);
 	}
 
 	public void TutorialMessage(Tutorial.TutorialMessages tm)
@@ -228,8 +260,8 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	private string OnOxygenTooltip(List<Notification> notifications, object data)
 	{
-		ReportManager.ReportEntry entry = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
-		string text = MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.TOOLTIP;
+		ReportManager.ReportEntry entry = ReportManager.Instance.YesterdaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
+		string text = MISC.NOTIFICATIONS.INSUFFICIENTOXYGENLASTCYCLE.TOOLTIP;
 		text = text.Replace("{EmittingRate}", GameUtil.GetFormattedMass(entry.Positive, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		return text.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(Mathf.Abs(entry.Negative), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
@@ -305,6 +337,11 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 						item.notification.Clear();
 						list.RemoveAt(i);
 					}
+					else if (item.hideCondition != null && item.hideCondition())
+					{
+						item.notification.Clear();
+						list.RemoveAt(i);
+					}
 					else
 					{
 						this.UpdateNotifierPosition();
@@ -320,6 +357,11 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		foreach (Tutorial.Item item2 in this.warningItems)
 		{
 			if (item2.requirementSatisfied())
+			{
+				item2.notification.Clear();
+				item2.lastNotifyTime = Time.time;
+			}
+			else if (item2.hideCondition != null && item2.hideCondition())
 			{
 				item2.notification.Clear();
 				item2.lastNotifyTime = Time.time;
@@ -340,10 +382,25 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		}
 	}
 
-	private bool SufficientOxygen()
+	private bool OxygenGeneratorBuilt()
 	{
-		ReportManager.ReportEntry entry = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
-		return entry.Net > 0.0001f || (GameClock.Instance.GetCycle() < 1 && !GameClock.Instance.IsNighttime());
+		return this.oxygenGenerators.Count > 0;
+	}
+
+	private bool OxygenGeneratorNotBuilt()
+	{
+		return this.oxygenGenerators.Count == 0;
+	}
+
+	private bool SufficientOxygenLastCycleAndThisCycle()
+	{
+		if (ReportManager.Instance.YesterdaysReport == null)
+		{
+			return true;
+		}
+		ReportManager.ReportEntry entry = ReportManager.Instance.YesterdaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
+		ReportManager.ReportEntry entry2 = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
+		return entry2.Net > 0.0001f || entry.Net > 0.0001f || (GameClock.Instance.GetCycle() < 1 && !GameClock.Instance.IsNighttime());
 	}
 
 	private bool FoodIsRefrigerated()
@@ -414,9 +471,9 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	private bool FoodSourceExists()
 	{
-		foreach (Fabricator fabricator in Components.Fabricators.Items)
+		foreach (ComplexFabricator complexFabricator in Components.ComplexFabricators.Items)
 		{
-			if (fabricator.GetType() == typeof(MicrobeMusher))
+			if (complexFabricator.GetType() == typeof(MicrobeMusher))
 			{
 				return true;
 			}
@@ -432,6 +489,14 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 	private bool ToiletExists()
 	{
 		return Components.Toilets.Count > 0;
+	}
+
+	private void ZoomToNextOxygenGenerator()
+	{
+		Vector3 position = this.oxygenGenerators[this.focusedOxygenGenerator].transform.position;
+		position.z = -40f;
+		CameraController.Instance.SetTargetPos(position, 8f, true);
+		this.focusedOxygenGenerator = (this.focusedOxygenGenerator + 1) % this.oxygenGenerators.Count;
 	}
 
 	[MyCmpAdd]
@@ -458,6 +523,10 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	private Vector3 notifierPosition;
 
+	public List<GameObject> oxygenGenerators = new List<GameObject>();
+
+	private int focusedOxygenGenerator;
+
 	public enum TutorialMessages
 	{
 		TM_Basics,
@@ -479,11 +548,15 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		TM_COUNT
 	}
 
+	private delegate bool HideConditionDelegate();
+
 	private delegate bool RequirementSatisfiedDelegate();
 
 	private class Item
 	{
 		public Notification notification;
+
+		public Tutorial.HideConditionDelegate hideCondition;
 
 		public Tutorial.RequirementSatisfiedDelegate requirementSatisfied;
 

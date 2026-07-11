@@ -11,7 +11,7 @@ internal class SubmergedStates : GameStateMachine<SubmergedStates, SubmergedStat
 		string text = CREATURES.STATUSITEMS.IDLE.NAME;
 		string text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
 		this.idle_pre.Enter("PlayIdleAnim", delegate(SubmergedStates.Instance smi)
 		{
 			smi.PlayIdleAnim(false);

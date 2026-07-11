@@ -31,7 +31,7 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 			}
 		});
 		this.passingout.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreatePassingOutChore), this.satisfied, this.satisfied);
-		this.sleeponfloor.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.satisfied, this.satisfied);
+		this.sleeponfloor.EventTransition(GameHashes.AssignablesChanged, this.checkforbed, null).EventTransition(GameHashes.AssignableReachabilityChanged, this.checkforbed, (SleepChoreMonitor.Instance smi) => smi.IsBedReachable()).ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.satisfied, this.satisfied);
 		this.bedassigned.ParamTransition<GameObject>(this.bed, this.checkforbed, (SleepChoreMonitor.Instance smi, GameObject p) => p == null).EventTransition(GameHashes.AssignablesChanged, this.checkforbed, null).EventTransition(GameHashes.AssignableReachabilityChanged, this.checkforbed, (SleepChoreMonitor.Instance smi) => !smi.IsBedReachable())
 			.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepChore), this.satisfied, this.satisfied);
 	}
@@ -74,19 +74,19 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 
 		public void UpdateBed()
 		{
-			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
-			Assignable assignable = component.GetAssignable(Db.Get().AssignableSlots.MedicalBed);
+			Ownables soleOwner = base.sm.masterTarget.Get(base.smi).GetComponent<MinionIdentity>().GetSoleOwner();
+			Assignable assignable = soleOwner.GetAssignable(Db.Get().AssignableSlots.MedicalBed);
 			Assignable assignable2;
-			if (assignable != null && assignable.CanAutoAssignTo(base.gameObject.GetComponent<MinionIdentity>()))
+			if (assignable != null && assignable.CanAutoAssignTo(base.sm.masterTarget.Get(base.smi).GetComponent<MinionIdentity>().assignableProxy.Get()))
 			{
 				assignable2 = assignable;
 			}
 			else
 			{
-				assignable2 = component.GetAssignable(Db.Get().AssignableSlots.Bed);
+				assignable2 = soleOwner.GetAssignable(Db.Get().AssignableSlots.Bed);
 				if (assignable2 == null)
 				{
-					assignable2 = component.AutoAssignSlot(Db.Get().AssignableSlots.Bed);
+					assignable2 = soleOwner.AutoAssignSlot(Db.Get().AssignableSlots.Bed);
 					if (assignable2 != null)
 					{
 						AssignableReachabilitySensor sensor = base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>();

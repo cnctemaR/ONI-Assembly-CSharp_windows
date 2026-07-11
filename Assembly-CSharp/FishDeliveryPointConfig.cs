@@ -11,7 +11,7 @@ public class FishDeliveryPointConfig : IBuildingConfig
 		buildingDef.Entombable = true;
 		buildingDef.Floodable = true;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
-		buildingDef.ViewMode = SimViewMode.Rooms;
+		buildingDef.ViewMode = OverlayModes.Rooms.ID;
 		return buildingDef;
 	}
 
@@ -24,14 +24,14 @@ public class FishDeliveryPointConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.SWIMMING_CREATURES;
 		storage.workAnims = new HashedString[]
 		{
-			new HashedString("place"),
-			new HashedString("release")
+			new HashedString("working_pre")
 		};
 		storage.workAnimPlayMode = KAnim.PlayMode.Once;
-		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
+		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_fishrelocator_kanim") };
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
 		storage.allowSettingOnlyFetchMarkedItems = false;
+		storage.faceTargetWhenWorking = false;
 		CreatureDeliveryPoint creatureDeliveryPoint = go.AddOrGet<CreatureDeliveryPoint>();
 		creatureDeliveryPoint.deliveryOffsets = new CellOffset[]
 		{

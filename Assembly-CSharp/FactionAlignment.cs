@@ -22,6 +22,7 @@ public class FactionAlignment : KMonoBehaviour
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
 		}
 		base.Subscribe<FactionAlignment>(1623392196, FactionAlignment.OnDeathDelegate);
+		this.UpdateStatusItem();
 	}
 
 	private void OnDeath(object data)
@@ -60,9 +61,14 @@ public class FactionAlignment : KMonoBehaviour
 	public void SetPlayerTargeted(bool state)
 	{
 		this.targeted = state && this.targetable;
+		this.UpdateStatusItem();
+	}
+
+	private void UpdateStatusItem()
+	{
 		if (this.targeted)
 		{
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OrderAttack, this);
+			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OrderAttack, null);
 		}
 		else
 		{

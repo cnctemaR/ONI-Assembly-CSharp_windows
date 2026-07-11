@@ -6,7 +6,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class Pickupable : Workable
+public class Pickupable : Workable, IHasSortOrder
 {
 	private Pickupable()
 	{
@@ -22,6 +22,8 @@ public class Pickupable : Workable
 			return this.primaryElement;
 		}
 	}
+
+	public int sortOrder { get; set; }
 
 	public Storage storage { get; set; }
 
@@ -112,7 +114,7 @@ public class Pickupable : Workable
 		}
 		set
 		{
-			DebugUtil.Assert(this.primaryElement != null, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(this.primaryElement != null);
 			this.primaryElement.Units = value;
 			if (value <= 0.001f)
 			{
@@ -355,14 +357,14 @@ public class Pickupable : Workable
 		}
 		else
 		{
-			bool flag = false;
 			this.ReleaseEntombedVisualizerAndAddFaller(true);
 			if (this.HandleSolidCell(num))
 			{
 				return;
 			}
 			this.objectLayerListItem.Update(num);
-			if (!this.KPrefabID.HasTag(GameTags.Stored))
+			bool flag = false;
+			if (this.absorbable && !this.KPrefabID.HasTag(GameTags.Stored))
 			{
 				int num2 = Grid.CellBelow(num);
 				if (Grid.IsValidCell(num2) && Grid.Solid[num2])
@@ -373,9 +375,13 @@ public class Pickupable : Workable
 						GameObject gameObject = objectLayerListItem.gameObject;
 						objectLayerListItem = objectLayerListItem.nextItem;
 						Pickupable component = gameObject.GetComponent<Pickupable>();
-						if (component != null && !flag)
+						if (component != null)
 						{
 							flag = component.TryAbsorb(this, false, false);
+							if (flag)
+							{
+								break;
+							}
 						}
 					}
 				}
@@ -544,6 +550,11 @@ public class Pickupable : Workable
 		{
 			this.lastCarrier.RemoveAnimOverrides(this.carryAnimOverride);
 			this.lastCarrier = null;
+		}
+		KSelectable component2 = base.GetComponent<KSelectable>();
+		if (component2)
+		{
+			component2.IsSelectable = !flag;
 		}
 		if (flag)
 		{
@@ -826,6 +837,8 @@ public class Pickupable : Workable
 	[MyCmpAdd]
 	[NonSerialized]
 	public Prioritizable prioritizable;
+
+	public bool absorbable;
 
 	public Func<Pickupable, bool> CanAbsorb = (Pickupable other) => false;
 

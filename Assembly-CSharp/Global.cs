@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading;
 using Klei;
 using KSerialization;
@@ -21,13 +22,13 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.PanLeft, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.D, Modifier.None, global::Action.PanRight, true, false),
 			new BindingEntry("Tool", GamepadButton.NumButtons, KKeyCode.O, Modifier.None, global::Action.RotateBuilding, true, false),
-			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.J, Modifier.None, global::Action.ManagePeople, true, false),
+			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.L, Modifier.None, global::Action.ManagePeople, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.F, Modifier.None, global::Action.ManageConsumables, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.V, Modifier.None, global::Action.ManageVitals, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.R, Modifier.None, global::Action.ManageResearch, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.E, Modifier.None, global::Action.ManageReport, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.U, Modifier.None, global::Action.ManageCodex, true, false),
-			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.L, Modifier.None, global::Action.ManageRoles, true, false),
+			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.J, Modifier.None, global::Action.ManageRoles, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.Period, Modifier.None, global::Action.ManageSchedule, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.Z, Modifier.None, global::Action.ManageStarmap, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.G, Modifier.None, global::Action.Dig, true, false),
@@ -37,7 +38,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.T, Modifier.None, global::Action.Attack, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.N, Modifier.None, global::Action.Capture, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Y, Modifier.None, global::Action.Harvest, true, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.EmptyPipe, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Insert, Modifier.None, global::Action.EmptyPipe, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.P, Modifier.None, global::Action.Prioritize, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.S, Modifier.Alt, global::Action.ToggleScreenshotMode, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.C, Modifier.None, global::Action.BuildingCancel, true, false),
@@ -60,6 +61,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Alpha0, Modifier.None, global::Action.Plan10, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Minus, Modifier.None, global::Action.Plan11, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Equals, Modifier.None, global::Action.Plan12, true, false),
+			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.CopyBuilding, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.MouseScrollUp, Modifier.None, global::Action.ZoomIn, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.MouseScrollDown, Modifier.None, global::Action.ZoomOut, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F1, Modifier.None, global::Action.Overlay1, true, false),
@@ -195,12 +197,12 @@ public class Global : MonoBehaviour
 		IList<BuildMenu.DisplayInfo> list2 = (IList<BuildMenu.DisplayInfo>)BuildMenu.OrderedBuildings.data;
 		foreach (BuildMenu.DisplayInfo displayInfo in list2)
 		{
-			Global.AddBindings(BuildMenu.Category.INVALID, displayInfo, list);
+			Global.AddBindings(HashedString.Invalid, displayInfo, list);
 		}
 		return list.ToArray();
 	}
 
-	private static void AddBindings(BuildMenu.Category parent_category, BuildMenu.DisplayInfo display_info, List<BindingEntry> bindings)
+	private static void AddBindings(HashedString parent_category, BuildMenu.DisplayInfo display_info, List<BindingEntry> bindings)
 	{
 		if (display_info.data != null)
 		{
@@ -215,8 +217,10 @@ public class Global : MonoBehaviour
 			}
 			else if (typeof(IList<BuildMenu.BuildingInfo>).IsAssignableFrom(type))
 			{
-				string text = parent_category.ToString() + "Menu";
-				BindingEntry bindingEntry = new BindingEntry(text, GamepadButton.NumButtons, display_info.keyCode, Modifier.None, display_info.hotkey, true, true);
+				string text = HashCache.Get().Get(parent_category);
+				TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+				string text2 = textInfo.ToTitleCase(text) + " Menu";
+				BindingEntry bindingEntry = new BindingEntry(text2, GamepadButton.NumButtons, display_info.keyCode, Modifier.None, display_info.hotkey, true, true);
 				bindings.Add(bindingEntry);
 			}
 		}
@@ -264,6 +268,7 @@ public class Global : MonoBehaviour
 		Singleton<KBatchedAnimUpdater>.CreateInstance();
 		DistributionPlatform.Initialize();
 		Localization.Initialize(false);
+		KProfiler.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
 		if (DistributionPlatform.Initialized)
 		{
@@ -351,7 +356,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 291640U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 299745U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());

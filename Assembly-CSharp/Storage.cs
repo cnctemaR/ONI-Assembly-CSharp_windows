@@ -16,6 +16,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		this.showProgressBar = false;
+		this.faceTargetWhenWorking = true;
 	}
 
 	public bool ShouldOnlyTransferFromLowerPriority
@@ -47,6 +48,14 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.defaultStoredItemModifers = modifiers;
 	}
 
+	public int masterPriority
+	{
+		get
+		{
+			return (!(this.prioritizable != null)) ? 10 : this.prioritizable.GetMasterPriority().priority_value;
+		}
+	}
+
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
 		if (this.useGunForDelivery && worker.usesMultiTool)
@@ -68,7 +77,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		base.Subscribe<Storage>(1502190696, Storage.OnQueueDestroyObjectDelegate);
 		base.Subscribe<Storage>(-905833192, Storage.OnCopySettingsDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Storing;
-		this.faceTargetWhenWorking = true;
 		this.resetProgressOnStop = true;
 		this.synchronizeAnims = false;
 		this.workingPstComplete = HashedString.Invalid;
@@ -82,6 +90,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		{
 			this.onlyFetchMarkedItems = false;
 		}
+		this.UpdateFetchCategory();
 	}
 
 	protected override void OnSpawn()
@@ -106,6 +115,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			Prioritizable prioritizable = component2;
 			prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
 		}
+		this.UpdateFetchCategory();
 	}
 
 	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false, bool do_disease_transfer = true, bool is_deserializing = false)
@@ -155,13 +165,16 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			{
 				if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups, true))
 				{
-					base.Trigger(-1697596308, go);
-					base.Trigger(-778359855, null);
-					this.ApplyStoredItemModifiers(go, true, false);
-					if (this.OnStorageIncreased != null)
+					if (!block_events)
 					{
-						this.OnStorageIncreased();
+						base.Trigger(-1697596308, go);
+						base.Trigger(-778359855, null);
+						if (this.OnStorageIncreased != null)
+						{
+							this.OnStorageIncreased();
+						}
 					}
+					this.ApplyStoredItemModifiers(go, true, false);
 					gameObject = gameObject2;
 					go = null;
 					break;
@@ -516,15 +529,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public void ConsumeAllIgnoringDisease()
 	{
-		while (this.items.Count > 0)
+		for (int i = this.items.Count - 1; i >= 0; i--)
 		{
-			this.ConsumeIgnoringDisease(this.items[0]);
+			this.ConsumeIgnoringDisease(this.items[i]);
 		}
 	}
 
 	public void ConsumeAndGetDisease(Tag tag, float amount, out SimUtil.DiseaseInfo disease_info, out float aggregate_temperature)
 	{
-		DebugUtil.Assert(tag.IsValid, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(tag.IsValid);
 		disease_info = SimUtil.DiseaseInfo.Invalid;
 		List<GameObject> list = null;
 		aggregate_temperature = 0f;
@@ -733,9 +746,19 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		if (is_set != this.onlyFetchMarkedItems)
 		{
 			this.onlyFetchMarkedItems = is_set;
+			this.UpdateFetchCategory();
 			base.Trigger(644822890, null);
 			base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("sweep", is_set);
 		}
+	}
+
+	private void UpdateFetchCategory()
+	{
+		if (this.fetchCategory == Storage.FetchCategory.Building)
+		{
+			return;
+		}
+		this.fetchCategory = ((!this.onlyFetchMarkedItems) ? Storage.FetchCategory.GeneralStorage : Storage.FetchCategory.StorageSweepOnly);
 	}
 
 	protected override void OnCleanUp()
@@ -1112,6 +1135,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public bool sendOnStoreOnSpawn;
 
+	public Storage.FetchCategory fetchCategory;
+
 	public int storageNetworkID = -1;
 
 	public float storageFullMargin;
@@ -1161,6 +1186,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		Hide,
 		Seal,
 		Preserve
+	}
+
+	public enum FetchCategory
+	{
+		Building,
+		GeneralStorage,
+		StorageSweepOnly
 	}
 
 	public enum FXPrefix

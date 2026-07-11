@@ -1,5 +1,6 @@
 ﻿using System;
 using FMOD.Studio;
+using STRINGS;
 using UnityEngine;
 
 public class DragTool : InterfaceTool
@@ -37,6 +38,11 @@ public class DragTool : InterfaceTool
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		KScreenManager.Instance.SetEventSystemEnabled(true);
+		if (this.areaVisualizerText != Guid.Empty)
+		{
+			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
+			this.areaVisualizerText = Guid.Empty;
+		}
 		base.OnDeactivateTool(new_tool);
 	}
 
@@ -85,6 +91,13 @@ public class DragTool : InterfaceTool
 		this.downPos = cursor_pos;
 		this.previousCursorPos = cursor_pos;
 		KScreenManager.Instance.SetEventSystemEnabled(false);
+		if (this.areaVisualizerTextPrefab != null)
+		{
+			this.areaVisualizerText = NameDisplayScreen.Instance.AddWorldText(string.Empty, this.areaVisualizerTextPrefab);
+			GameObject worldText = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText);
+			LocText component = worldText.GetComponent<LocText>();
+			component.color = this.areaColour;
+		}
 		DragTool.Mode mode = this.GetMode();
 		if (mode == DragTool.Mode.Brush)
 		{
@@ -119,6 +132,11 @@ public class DragTool : InterfaceTool
 		}
 		this.dragging = false;
 		DragTool.Mode mode = this.GetMode();
+		if (this.areaVisualizerText != Guid.Empty)
+		{
+			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
+			this.areaVisualizerText = Guid.Empty;
+		}
 		if (mode == DragTool.Mode.Box && this.areaVisualizer != null)
 		{
 			this.areaVisualizer.SetActive(false);
@@ -227,23 +245,42 @@ public class DragTool : InterfaceTool
 				Vector2 vector4 = vector2 - vector3;
 				Vector2 vector5 = (vector2 + vector3) * 0.5f;
 				this.areaVisualizer.transform.SetPosition(new Vector2(vector5.x, vector5.y));
+				int num = (int)(vector2.x - vector3.x + (vector2.y - vector3.y) - 1f);
 				if (this.areaVisualizerSpriteRenderer.size != vector4)
 				{
 					string sound = GlobalAssets.GetSound(this.GetDragSound(), false);
 					if (sound != null)
 					{
-						int num = (int)(vector2.x - vector3.x + (vector2.y - vector3.y) - 1f);
 						EventInstance eventInstance = SoundEvent.BeginOneShot(sound, this.areaVisualizer.transform.GetPosition());
 						eventInstance.setParameterValue("tileCount", (float)num);
 						SoundEvent.EndOneShot(eventInstance);
 					}
 				}
 				this.areaVisualizerSpriteRenderer.size = vector4;
+				if (this.areaVisualizerText != Guid.Empty)
+				{
+					Vector2I vector2I = new Vector2I(Mathf.RoundToInt(vector4.x), Mathf.RoundToInt(vector4.y));
+					GameObject worldText = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText);
+					LocText component = worldText.GetComponent<LocText>();
+					component.text = string.Format(UI.TOOLS.TOOL_AREA_FMT, vector2I.x, vector2I.y);
+					Vector2 vector6 = vector5;
+					component.transform.SetPosition(vector6);
+				}
 			}
 		}
 		else
 		{
 			this.AddDragPoints(cursorPos, this.previousCursorPos);
+			if (this.areaVisualizerText != Guid.Empty)
+			{
+				int dragLength = this.GetDragLength();
+				GameObject worldText2 = NameDisplayScreen.Instance.GetWorldText(this.areaVisualizerText);
+				LocText component2 = worldText2.GetComponent<LocText>();
+				component2.text = string.Format(UI.TOOLS.TOOL_LENGTH_FMT, dragLength);
+				Vector3 vector7 = Grid.CellToPos(Grid.PosToCell(cursorPos));
+				vector7 += new Vector3(0f, 1f, 0f);
+				component2.transform.SetPosition(vector7);
+			}
 		}
 		this.previousCursorPos = cursorPos;
 	}
@@ -254,6 +291,11 @@ public class DragTool : InterfaceTool
 
 	protected virtual void OnDragComplete(Vector3 cursorDown, Vector3 cursorUp)
 	{
+	}
+
+	protected virtual int GetDragLength()
+	{
+		return 0;
 	}
 
 	private void AddDragPoint(Vector3 cursorPos)
@@ -407,9 +449,14 @@ public class DragTool : InterfaceTool
 	private GameObject areaVisualizer;
 
 	[SerializeField]
+	private GameObject areaVisualizerTextPrefab;
+
+	[SerializeField]
 	private Color32 areaColour = new Color(1f, 1f, 1f, 0.5f);
 
 	protected SpriteRenderer areaVisualizerSpriteRenderer;
+
+	protected Guid areaVisualizerText;
 
 	protected Vector3 placementPivot;
 

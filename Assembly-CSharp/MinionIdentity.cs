@@ -24,7 +24,6 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	protected override void OnPrefabInit()
 	{
-		this.ownables = new List<Ownables> { base.GetComponent<Ownables>() };
 		if (this.name == null)
 		{
 			this.name = MinionIdentity.ChooseRandomName();
@@ -44,6 +43,8 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	protected override void OnSpawn()
 	{
+		this.ValidateProxy();
+		this.CleanupLimboMinions();
 		PathProber component = base.GetComponent<PathProber>();
 		if (component != null)
 		{
@@ -66,7 +67,6 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			{
 				Components.LiveMinionIdentities.Add(this);
 			}
-			Game.Instance.assignmentManager.AddToAssignmentGroup("public", this);
 		}
 		SymbolOverrideController component2 = base.GetComponent<SymbolOverrideController>();
 		if (component2 != null)
@@ -96,6 +96,39 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			component5.carryAnimOverride = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 		}
 		this.ApplyCustomGameSettings();
+	}
+
+	public void ValidateProxy()
+	{
+		this.assignableProxy = MinionAssignablesProxy.InitAssignableProxy(this.assignableProxy, this);
+	}
+
+	private void CleanupLimboMinions()
+	{
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		if (component.InstanceID == -1)
+		{
+			Output.LogWarning(new object[] { "Minion with an invalid kpid! Attempting to recover...", this.name });
+			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
+			{
+				KPrefabIDTracker.Get().Unregister(component);
+			}
+			component.InstanceID = KPrefabID.GetUniqueID();
+			KPrefabIDTracker.Get().Register(component);
+			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+		}
+		if (component.conflicted)
+		{
+			Output.LogWarning(new object[] { "Minion with a conflicted kpid! Attempting to recover... ", component.InstanceID, this.name });
+			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
+			{
+				KPrefabIDTracker.Get().Unregister(component);
+			}
+			component.InstanceID = KPrefabID.GetUniqueID();
+			KPrefabIDTracker.Get().Register(component);
+			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+		}
+		this.assignableProxy.Get().SetTarget(this, base.gameObject);
 	}
 
 	public string GetProperName()
@@ -146,7 +179,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.assignmentManager.RemoveFromAllGroups(this);
+		MinionAssignablesProxy minionAssignablesProxy = this.assignableProxy.Get();
+		if (minionAssignablesProxy && minionAssignablesProxy.target == this)
+		{
+			Util.KDestroyGameObject(minionAssignablesProxy.gameObject);
+		}
 		Components.MinionIdentities.Remove(this);
 		Components.LiveMinionIdentities.Remove(this);
 	}
@@ -160,21 +197,24 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	private void OnDied(object data)
 	{
-		Ownables component = base.GetComponent<Ownables>();
-		component.UnassignAll();
-		Equipment component2 = base.GetComponent<Equipment>();
-		component2.UnequipAll();
+		this.GetSoleOwner().UnassignAll();
+		this.GetEquipment().UnequipAll();
 		Components.LiveMinionIdentities.Remove(this);
 	}
 
 	public List<Ownables> GetOwners()
 	{
-		return this.ownables;
+		return this.assignableProxy.Get().ownables;
 	}
 
 	public Ownables GetSoleOwner()
 	{
-		return base.GetComponent<Ownables>();
+		return this.assignableProxy.Get().GetComponent<Ownables>();
+	}
+
+	public Equipment GetEquipment()
+	{
+		return this.assignableProxy.Get().GetComponent<Equipment>();
 	}
 
 	public void Sim1000ms(float dt)
@@ -285,7 +325,8 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	[Serialize]
 	public KCompBuilder.BodyData bodyData;
 
-	private List<Ownables> ownables;
+	[Serialize]
+	public Ref<MinionAssignablesProxy> assignableProxy;
 
 	public float timeLastSpoke;
 

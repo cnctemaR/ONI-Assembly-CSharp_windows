@@ -10,7 +10,7 @@ internal class GrowUpStates : GameStateMachine<GrowUpStates, GrowUpStates.Instan
 		string text = CREATURES.STATUSITEMS.GROWINGUP.NAME;
 		string text2 = CREATURES.STATUSITEMS.GROWINGUP.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
 		this.grow_up_pre.QueueAnim("growup_pre", false, null).OnAnimQueueComplete(this.spawn_adult);
 		this.spawn_adult.Enter(new StateMachine<GrowUpStates, GrowUpStates.Instance, IStateMachineTarget, GrowUpStates.Def>.State.Callback(GrowUpStates.SpawnAdult));
 	}

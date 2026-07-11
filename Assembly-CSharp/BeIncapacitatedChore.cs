@@ -4,7 +4,7 @@ using UnityEngine;
 public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 {
 	public BeIncapacitatedChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
 	{
 		this.smi = new BeIncapacitatedChore.StatesInstance(this);
 	}
@@ -13,11 +13,11 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 	{
 		Clinic clinic = null;
 		AssignableSlot clinic2 = Db.Get().AssignableSlots.Clinic;
-		Ownables component = this.gameObject.GetComponent<Ownables>();
-		AssignableSlotInstance slot = component.GetSlot(clinic2);
+		Ownables soleOwner = this.gameObject.GetComponent<MinionIdentity>().GetSoleOwner();
+		AssignableSlotInstance slot = soleOwner.GetSlot(clinic2);
 		if (slot.assignable == null)
 		{
-			Assignable assignable = component.AutoAssignSlot(clinic2);
+			Assignable assignable = soleOwner.AutoAssignSlot(clinic2);
 			if (assignable != null)
 			{
 				clinic = assignable.GetComponent<Clinic>();
@@ -93,11 +93,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				{
 					flag = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee == null)
-				{
-					flag = true;
-				}
-				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
+				else if (!this.clinic.Get(smi).GetComponent<Assignable>().IsAssignedTo(smi.master.GetComponent<IAssignableIdentity>()))
 				{
 					flag = true;
 				}
@@ -113,11 +109,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				{
 					flag2 = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee == null)
-				{
-					flag2 = true;
-				}
-				else if (this.clinic.Get(smi).GetComponent<Assignable>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
+				else if (!this.clinic.Get(smi).GetComponent<Assignable>().IsAssignedTo(smi.master.GetComponent<IAssignableIdentity>()))
 				{
 					flag2 = true;
 				}

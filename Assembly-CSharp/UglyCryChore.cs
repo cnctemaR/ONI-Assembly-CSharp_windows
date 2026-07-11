@@ -7,7 +7,7 @@ using UnityEngine;
 public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 {
 	public UglyCryChore(ChoreType chore_type, IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
 	{
 		this.smi = new UglyCryChore.StatesInstance(this, target.gameObject);
 	}

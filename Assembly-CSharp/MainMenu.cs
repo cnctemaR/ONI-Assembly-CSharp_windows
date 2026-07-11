@@ -98,8 +98,9 @@ public class MainMenu : KMonoBehaviour
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
 		}
-		if (GenericGameSettings.instance.autoResumeGame)
+		if (GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce)
 		{
+			MainMenu.HasAutoresumedOnce = true;
 			this.ResumeGame();
 		}
 	}
@@ -195,7 +196,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 291640U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 299745U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -359,6 +360,8 @@ public class MainMenu : KMonoBehaviour
 
 	[SerializeField]
 	private GameObject buttonParent;
+
+	private static bool HasAutoresumedOnce;
 
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 

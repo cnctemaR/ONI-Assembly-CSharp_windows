@@ -11,6 +11,18 @@ public class BatterySmart : Battery, IActivationRangeTarget
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		base.Subscribe<BatterySmart>(-905833192, BatterySmart.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		BatterySmart component = gameObject.GetComponent<BatterySmart>();
+		if (component != null)
+		{
+			this.ActivateValue = component.ActivateValue;
+			this.DeactivateValue = component.DeactivateValue;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -173,6 +185,14 @@ public class BatterySmart : Battery, IActivationRangeTarget
 	private LogicPorts logicPorts;
 
 	private MeterController logicMeter;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<BatterySmart> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<BatterySmart>(delegate(BatterySmart component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private static readonly EventSystem.IntraObjectHandler<BatterySmart> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<BatterySmart>(delegate(BatterySmart component, object data)
 	{

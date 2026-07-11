@@ -83,7 +83,8 @@ public class PathFinder
 		PathFinder.FindPaths(nav_grid, ref abilities, potential_path, PathFinder.PathGrid, query, ref PathFinder.QueryId, PathFinder.Temp.Potentials, ref invalidCell, ref navType);
 		if (invalidCell != PathFinder.InvalidCell)
 		{
-			PathFinder.Cell cell = PathFinder.PathGrid.GetCell(invalidCell, navType, PathFinder.QueryId);
+			bool flag = false;
+			PathFinder.Cell cell = PathFinder.PathGrid.GetCell(invalidCell, navType, PathFinder.QueryId, out flag);
 			query.SetResult(invalidCell, cell.cost, navType);
 		}
 	}
@@ -105,7 +106,8 @@ public class PathFinder
 	{
 		if (path_cell != PathFinder.InvalidCell)
 		{
-			PathFinder.Cell cell = path_grid.GetCell(path_cell, path_nav_type, query_id);
+			bool flag = false;
+			PathFinder.Cell cell = path_grid.GetCell(path_cell, path_nav_type, query_id, out flag);
 			path.Clear();
 			path.cost = cell.cost;
 			while (path_cell != PathFinder.InvalidCell)
@@ -119,7 +121,7 @@ public class PathFinder
 				path_cell = cell.parent;
 				if (path_cell != PathFinder.InvalidCell)
 				{
-					cell = path_grid.GetCell(path_cell, cell.parentNavType, query_id);
+					cell = path_grid.GetCell(path_cell, cell.parentNavType, query_id, out flag);
 				}
 			}
 			if (path.nodes != null)
@@ -138,7 +140,8 @@ public class PathFinder
 	{
 		potentials.Clear();
 		query_id++;
-		PathFinder.Cell cell = path_grid.GetCell(potential_path, query_id);
+		bool flag = false;
+		PathFinder.Cell cell = path_grid.GetCell(potential_path, query_id, out flag);
 		PathFinder.AddPotential(potential_path, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, potentials, query_id, path_grid, ref cell);
 		PathFinder.FindPaths(nav_grid, ref abilities, potentials, query_id, path_grid, query, ref result_cell, ref result_nav_type);
 	}
@@ -158,25 +161,26 @@ public class PathFinder
 
 	private static bool FindPaths(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialPath potential, int potential_cost, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, PathFinderQuery query, ref int result_cell, ref NavType result_nav_type, ref int result_cost)
 	{
-		PathFinder.Cell cell = path_grid.GetCell(potential, query_id);
+		bool flag = false;
+		PathFinder.Cell cell = path_grid.GetCell(potential, query_id, out flag);
 		if (cell.cost != potential_cost)
 		{
 			return false;
 		}
 		int cost = cell.cost;
 		NavType navType = cell.navType;
-		bool flag = navType != NavType.Tube && query.IsMatch(potential.cell, cell.parent, cost) && cost < result_cost;
-		if (flag)
+		bool flag2 = navType != NavType.Tube && query.IsMatch(potential.cell, cell.parent, cost) && cost < result_cost;
+		if (flag2)
 		{
 			result_cell = potential.cell;
 			result_cost = cost;
 			result_nav_type = navType;
 		}
-		if (!flag)
+		if (!flag2)
 		{
 			PathFinder.AddPotentials(nav_grid.potentialScratchPad, potential, cell.cost, (int)cell.underwaterCost, ref abilities, query, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, query_id, path_grid, cell.parent, cell.parentNavType);
 		}
-		return flag;
+		return flag2;
 	}
 
 	public static void AddPotential(PathFinder.PotentialPath potential_path, int parent_cell, NavType parent_nav_type, int cost, int underwater_cost, int transition_id, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, ref PathFinder.Cell cell_data)
@@ -223,13 +227,14 @@ public class PathFinder
 		{
 			NavGrid.Link link2 = linksWithCorrectNavType[i];
 			int link3 = link2.link;
-			if (path_grid.IsCellInRange(link3))
+			bool flag = false;
+			PathFinder.Cell cell = path_grid.GetCell(link3, link2.endNavType, query_id, out flag);
+			if (flag)
 			{
-				PathFinder.Cell cell = path_grid.GetCell(link3, link2.endNavType, query_id);
 				int num5 = cost + (int)link2.cost;
-				bool flag = query_id != cell.queryId;
-				bool flag2 = num5 < cell.cost;
-				if (flag || flag2)
+				bool flag2 = query_id != cell.queryId;
+				bool flag3 = num5 < cell.cost;
+				if (flag2 || flag3)
 				{
 					linksInCellRange[num4++] = new PathFinder.PotentialScratchPad.PathGridCellData
 					{

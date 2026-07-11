@@ -50,10 +50,11 @@ internal class ClearableManager
 			PrioritySetting masterPriority = sortedClearable.masterPriority;
 			Chore.Precondition.Context context = default(Chore.Precondition.Context);
 			context.personalPriority = personalPriority;
-			TagBits tagBits = pickupable.KPrefabID.GetTagBits();
+			KPrefabID kprefabID = pickupable.KPrefabID;
+			kprefabID.UpdateTagBits();
 			foreach (GlobalChoreProvider.Fetch fetch in GlobalChoreProvider.Instance.fetches)
 			{
-				bool flag2 = tagBits.HasAny(fetch.chore.tagBits);
+				bool flag2 = kprefabID.HasAnyTags_AssumeLaundered(ref fetch.chore.tagBits);
 				if (flag2)
 				{
 					context.Set(fetch.chore, consumer_state, false, pickupable);

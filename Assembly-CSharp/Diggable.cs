@@ -52,7 +52,7 @@ public class Diggable : Workable
 		{
 			choreType = Db.Get().ChoreTypes.GetByHash(this.choreTypeIdHash);
 		}
-		this.chore = new WorkChore<Diggable>(choreType, this, null, this.choreTags, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		this.chore = new WorkChore<Diggable>(choreType, this, null, this.choreTags, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);

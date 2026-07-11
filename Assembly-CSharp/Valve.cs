@@ -29,6 +29,16 @@ public class Valve : Workable, ISaveLoadable
 		}
 	}
 
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		Valve component = gameObject.GetComponent<Valve>();
+		if (component != null)
+		{
+			this.desiredFlow = component.desiredFlow;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -36,6 +46,7 @@ public class Valve : Workable, ISaveLoadable
 		this.synchronizeAnims = false;
 		this.valveBase.CurrentFlow = this.valveBase.MaxFlow;
 		this.desiredFlow = this.valveBase.MaxFlow;
+		base.Subscribe<Valve>(-905833192, Valve.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -77,7 +88,7 @@ public class Valve : Workable, ISaveLoadable
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
 				component.AddStatusItem(Db.Get().BuildingStatusItems.PendingWork, this);
-				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 			}
 		}
 	}
@@ -109,4 +120,12 @@ public class Valve : Workable, ISaveLoadable
 	private float desiredFlow = 0.5f;
 
 	private Chore chore;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<Valve> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<Valve>(delegate(Valve component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

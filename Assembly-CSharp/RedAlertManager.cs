@@ -9,7 +9,7 @@ public class RedAlertManager : GameStateMachine<RedAlertManager, RedAlertManager
 	{
 		default_state = this.off;
 		base.serializable = true;
-		this.off.ParamTransition<bool>(this.isOn, this.on, (RedAlertManager.Instance smi, bool p) => p);
+		this.off.ParamTransition<bool>(this.isOn, this.on, GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.IsTrue);
 		this.on.Enter("EnterEvent", delegate(RedAlertManager.Instance smi)
 		{
 			Game.Instance.Trigger(1585324898, null);
@@ -25,7 +25,7 @@ public class RedAlertManager : GameStateMachine<RedAlertManager, RedAlertManager
 				Vignette.Instance.Reset();
 			})
 			.ToggleNotification((RedAlertManager.Instance smi) => smi.notification)
-			.ParamTransition<bool>(this.isOn, this.off, (RedAlertManager.Instance smi, bool p) => !p);
+			.ParamTransition<bool>(this.isOn, this.off, GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.IsFalse);
 	}
 
 	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.State off;

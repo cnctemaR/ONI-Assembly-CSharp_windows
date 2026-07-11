@@ -119,6 +119,8 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 
 	private SimUtil.DiseaseInfo accumulatedDisease;
 
+	public const float WATER_PER_USE = 5f;
+
 	private static readonly string[] EffectsRemoved = new string[] { "SoakingWet", "WetFeet" };
 
 	public class ShowerSM : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower>
@@ -126,19 +128,43 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.unoperational;
+			this.root.Update(new Action<Shower.ShowerSM.Instance, float>(this.UpdateStatusItems), UpdateRate.SIM_200ms, false);
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Shower.ShowerSM.Instance smi) => smi.IsOperational).PlayAnim("off");
-			this.operational.EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleRecurringChore(delegate(Shower.ShowerSM.Instance smi)
+			this.operational.DefaultState(this.operational.not_ready).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational);
+			this.operational.not_ready.EventTransition(GameHashes.OnStorageChange, this.operational.ready, (Shower.ShowerSM.Instance smi) => smi.IsReady()).PlayAnim("off");
+			this.operational.ready.ToggleChore(new Func<Shower.ShowerSM.Instance, Chore>(this.CreateShowerChore), this.operational.not_ready);
+		}
+
+		private Chore CreateShowerChore(Shower.ShowerSM.Instance smi)
+		{
+			ChoreType shower = Db.Get().ChoreTypes.Shower;
+			Shower master = smi.master;
+			ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
+			return new WorkChore<Shower>(shower, master, null, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 5, false);
+		}
+
+		private void UpdateStatusItems(Shower.ShowerSM.Instance smi, float dt)
+		{
+			if (smi.OutputFull())
 			{
-				ChoreType shower = Db.Get().ChoreTypes.Shower;
-				Shower master = smi.master;
-				ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
-				return new WorkChore<Shower>(shower, master, null, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
-			}, null);
+				smi.master.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, this);
+			}
+			else
+			{
+				smi.master.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, false);
+			}
 		}
 
 		public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State unoperational;
 
-		public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State operational;
+		public Shower.ShowerSM.OperationalState operational;
+
+		public class OperationalState : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State
+		{
+			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State not_ready;
+
+			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State ready;
+		}
 
 		public new class Instance : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.GameInstance
 		{
@@ -161,6 +187,28 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			public void SetActive(bool active)
 			{
 				this.operational.SetActive(active, false);
+			}
+
+			private bool HasSufficientMass()
+			{
+				bool flag = false;
+				PrimaryElement primaryElement = base.GetComponent<Storage>().FindPrimaryElement(SimHashes.Water);
+				if (primaryElement != null)
+				{
+					flag = primaryElement.Mass >= 5f;
+				}
+				return flag;
+			}
+
+			public bool OutputFull()
+			{
+				PrimaryElement primaryElement = base.GetComponent<Storage>().FindPrimaryElement(SimHashes.DirtyWater);
+				return primaryElement != null && primaryElement.Mass >= 5f;
+			}
+
+			public bool IsReady()
+			{
+				return this.HasSufficientMass() && !this.OutputFull();
 			}
 
 			private Operational operational;

@@ -23,7 +23,7 @@ public class AstronautTrainingCenterConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.PowerInputOffset = new CellOffset(-2, 0);
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
 		return buildingDef;
@@ -43,7 +43,6 @@ public class AstronautTrainingCenterConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "AstronautTrainingCenter";

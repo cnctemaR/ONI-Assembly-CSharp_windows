@@ -31,21 +31,16 @@ public class PathGrid
 		this.groupProber = group_prober;
 	}
 
-	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path, int query_id)
+	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path, int query_id, out bool is_cell_in_range)
 	{
-		return this.GetCell(potential_path.cell, potential_path.navType, query_id);
+		return this.GetCell(potential_path.cell, potential_path.navType, query_id, out is_cell_in_range);
 	}
 
-	public bool IsCellInRange(int cell)
+	public PathFinder.Cell GetCell(int cell, NavType nav_type, int query_id, out bool is_cell_in_range)
 	{
 		int num = this.OffsetCell(cell);
-		return this.IsValidOffsetCell(num);
-	}
-
-	public PathFinder.Cell GetCell(int cell, NavType nav_type, int query_id)
-	{
-		int num = this.OffsetCell(cell);
-		if (!this.IsValidOffsetCell(num))
+		is_cell_in_range = this.IsValidOffsetCell(num);
+		if (!is_cell_in_range)
 		{
 			return new PathFinder.Cell
 			{

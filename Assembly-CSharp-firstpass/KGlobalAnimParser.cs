@@ -70,7 +70,7 @@ public class KGlobalAnimParser
 		string text = Path.Combine(fullName, KGlobalAnimParser.ANIM_COMMAND_FILE);
 		if (File.Exists(text))
 		{
-			AnimCommandFile animCommandFile = YamlIO<AnimCommandFile>.LoadFile(text);
+			AnimCommandFile animCommandFile = YamlIO<AnimCommandFile>.LoadFile(text, null);
 			animCommandFile.directory = "Assets/anim/" + Directory.GetParent(path).Name;
 			KGlobalAnimParser.instance.commandFiles[hashedString] = animCommandFile;
 			return animCommandFile;

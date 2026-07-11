@@ -11,7 +11,7 @@ internal class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance,
 		string text = CREATURES.STATUSITEMS.DEAD.NAME;
 		string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main).Enter("EnableGravity", delegate(DeathStates.Instance smi)
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).Enter("EnableGravity", delegate(DeathStates.Instance smi)
 		{
 			smi.EnableGravityIfNecessary();
 		}).PlayAnim("Death")

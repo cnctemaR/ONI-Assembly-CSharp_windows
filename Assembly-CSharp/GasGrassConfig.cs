@@ -38,7 +38,7 @@ public class GasGrassConfig : IEntityConfig
 		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.GASGRASS.DESC;
 		kanimFile = Assets.GetAnim("seed_gassygrass_kanim");
 		List<Tag> list = new List<Tag> { GameTags.CropSeed };
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, global::STRINGS.CREATURES.SPECIES.GASGRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, string.Empty);
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, global::STRINGS.CREATURES.SPECIES.GASGRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, string.Empty, false);
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "GasGrass_preview", Assets.GetAnim("gassygrass_kanim"), "place", 1, 1);
 		SoundEventVolumeCache.instance.AddVolume("gassygrass_kanim", "GasGrass_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("gassygrass_kanim", "GasGrass_harvest", NOISE_POLLUTION.CREATURES.TIER3);

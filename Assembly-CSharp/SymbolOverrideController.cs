@@ -9,8 +9,8 @@ public class SymbolOverrideController : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		this.animController = base.GetComponent<KBatchedAnimController>();
-		DebugUtil.Assert(base.GetComponent<KBatchedAnimController>() != null, "SymbolOverrideController requires KBatchedAnimController", string.Empty, string.Empty);
-		DebugUtil.Assert(base.GetComponent<KBatchedAnimController>().usingNewSymbolOverrideSystem, "SymbolOverrideController requires usingNewSymbolOverrideSystem to be set to true. Try adding the component by calling: SymbolOverrideControllerUtil.AddToPrefab", string.Empty, string.Empty);
+		DebugUtil.Assert(base.GetComponent<KBatchedAnimController>() != null, "SymbolOverrideController requires KBatchedAnimController");
+		DebugUtil.Assert(base.GetComponent<KBatchedAnimController>().usingNewSymbolOverrideSystem, "SymbolOverrideController requires usingNewSymbolOverrideSystem to be set to true. Try adding the component by calling: SymbolOverrideControllerUtil.AddToPrefab");
 		for (int i = 0; i < this.symbolOverrides.Count; i++)
 		{
 			SymbolOverrideController.SymbolEntry symbolEntry = this.symbolOverrides[i];
@@ -94,7 +94,7 @@ public class SymbolOverrideController : KMonoBehaviour
 		}
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		KAnimBatch batch = component.GetBatch();
-		DebugUtil.Assert(batch != null, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(batch != null);
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(component.batchGroupID);
 		int count = batch.atlases.Count;
 		this.atlases.Clear(count);

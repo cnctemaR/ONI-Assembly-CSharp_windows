@@ -3,7 +3,7 @@
 public class DeliverFoodChore : Chore<DeliverFoodChore.StatesInstance>
 {
 	public DeliverFoodChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.DeliverFood, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.DeliverFood, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null)
 	{
 		this.smi = new DeliverFoodChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.instance.IsChattable, target);

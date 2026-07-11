@@ -90,7 +90,7 @@ public class KButtonMenu : KScreen
 		this.Update();
 	}
 
-	private Button.ButtonClickedEvent SetupPopupMenu(KButtonMenu.ButtonInfo binfo, KButton button)
+	protected Button.ButtonClickedEvent SetupPopupMenu(KButtonMenu.ButtonInfo binfo, KButton button)
 	{
 		KButtonMenu.<SetupPopupMenu>c__AnonStorey2 <SetupPopupMenu>c__AnonStorey = new KButtonMenu.<SetupPopupMenu>c__AnonStorey2();
 		<SetupPopupMenu>c__AnonStorey.binfo = binfo;
@@ -194,7 +194,7 @@ public class KButtonMenu : KScreen
 	protected bool keepMenuOpen;
 
 	[SerializeField]
-	private Transform buttonParent;
+	protected Transform buttonParent;
 
 	public GameObject buttonPrefab;
 

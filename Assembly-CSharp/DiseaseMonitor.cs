@@ -10,23 +10,19 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 		base.serializable = true;
 		default_state = this.healthy;
 		this.healthy.EventTransition(GameHashes.DiseaseAdded, this.sick, (DiseaseMonitor.Instance smi) => smi.IsSick());
-		this.sick.DefaultState(this.sick.notify).EventTransition(GameHashes.DiseaseCured, this.post_nocheer, (DiseaseMonitor.Instance smi) => !smi.IsSick()).ToggleAnims("anim_idle_sick_kanim", 0f)
-			.ToggleExpression(Db.Get().Expressions.Sick, null)
-			.ToggleUrge(Db.Get().Urges.RestDueToDisease)
-			.Update("AutoAssignClinic", delegate(DiseaseMonitor.Instance smi, float dt)
-			{
-				smi.AutoAssignClinic();
-			}, UpdateRate.SIM_4000ms, false)
+		this.sick.DefaultState(this.sick.minor).EventTransition(GameHashes.DiseaseCured, this.post_nocheer, (DiseaseMonitor.Instance smi) => !smi.IsSick()).ToggleThought(Db.Get().Thoughts.GotInfected, null);
+		this.sick.minor.EventTransition(GameHashes.DiseaseAdded, this.sick.major, (DiseaseMonitor.Instance smi) => smi.HasMajorDisease());
+		this.sick.major.EventTransition(GameHashes.DiseaseCured, this.sick.minor, (DiseaseMonitor.Instance smi) => !smi.HasMajorDisease()).ToggleUrge(Db.Get().Urges.RestDueToDisease).Update("AutoAssignClinic", delegate(DiseaseMonitor.Instance smi, float dt)
+		{
+			smi.AutoAssignClinic();
+		}, UpdateRate.SIM_4000ms, false)
 			.Exit(delegate(DiseaseMonitor.Instance smi)
 			{
 				smi.UnassignClinic();
 			});
-		this.sick.notify.DefaultState(this.sick.notify.notify);
-		this.sick.notify.notify.ToggleThought(Db.Get().Thoughts.GotInfected, null).ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.Emote, DiseaseMonitor.SickAnims, null), this.sick.notify.cooldown);
-		this.sick.notify.cooldown.ScheduleGoTo(5f, this.sick.notify);
 		this.post_nocheer.Enter(delegate(DiseaseMonitor.Instance smi)
 		{
-			if (smi.IsNightTime())
+			if (smi.IsSleepingOrSleepSchedule())
 			{
 				smi.GoTo(this.healthy);
 			}
@@ -46,22 +42,15 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 
 	public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State post_nocheer;
 
-	private static readonly HashedString[] SickAnims = new HashedString[] { "idle_pre", "idle_default" };
-
 	private static readonly HashedString SickPostKAnim = "anim_cheer_kanim";
 
 	private static readonly HashedString[] SickPostAnims = new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" };
 
-	public class NotifyStates : GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State
-	{
-		public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State notify;
-
-		public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State cooldown;
-	}
-
 	public class SickStates : GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public DiseaseMonitor.NotifyStates notify;
+		public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State minor;
+
+		public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State major;
 	}
 
 	public new class Instance : GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.GameInstance
@@ -82,11 +71,23 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 			return this.activeDiseases.Count > 0;
 		}
 
+		public bool HasMajorDisease()
+		{
+			foreach (DiseaseInstance diseaseInstance in this.activeDiseases)
+			{
+				if (diseaseInstance.modifier.severity >= Disease.Severity.Major)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void AutoAssignClinic()
 		{
-			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
+			Ownables soleOwner = base.sm.masterTarget.Get(base.smi).GetComponent<MinionIdentity>().GetSoleOwner();
 			AssignableSlot clinic = Db.Get().AssignableSlots.Clinic;
-			AssignableSlotInstance slot = component.GetSlot(clinic);
+			AssignableSlotInstance slot = soleOwner.GetSlot(clinic);
 			if (slot == null)
 			{
 				return;
@@ -95,23 +96,29 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 			{
 				return;
 			}
-			component.AutoAssignSlot(clinic);
+			soleOwner.AutoAssignSlot(clinic);
 		}
 
 		public void UnassignClinic()
 		{
-			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
+			Ownables soleOwner = base.sm.masterTarget.Get(base.smi).GetComponent<MinionIdentity>().GetSoleOwner();
 			AssignableSlot clinic = Db.Get().AssignableSlots.Clinic;
-			AssignableSlotInstance slot = component.GetSlot(clinic);
+			AssignableSlotInstance slot = soleOwner.GetSlot(clinic);
 			if (slot != null)
 			{
 				slot.Unassign(true);
 			}
 		}
 
-		public bool IsNightTime()
+		public bool IsSleepingOrSleepSchedule()
 		{
-			return TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night;
+			Schedulable component = base.GetComponent<Schedulable>();
+			if (component != null && component.IsAllowed(Db.Get().ScheduleBlockTypes.Sleep))
+			{
+				return true;
+			}
+			KPrefabID component2 = base.GetComponent<KPrefabID>();
+			return component2 != null && component2.HasTag(GameTags.Asleep);
 		}
 
 		private Diseases activeDiseases;

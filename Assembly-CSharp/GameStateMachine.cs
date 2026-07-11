@@ -15,16 +15,6 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		return (StateMachineInstanceType smi) => !transition_cb(smi);
 	}
 
-	public static bool IsTrue(StateMachine.Instance smi, bool b)
-	{
-		return b;
-	}
-
-	public static bool IsFalse(StateMachine.Instance smi, bool b)
-	{
-		return !b;
-	}
-
 	public override void BindStates()
 	{
 		base.BindState(null, this.root, "root");
@@ -32,6 +22,30 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 	}
 
 	public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State root = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State();
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<bool>.Callback IsFalse = (StateMachineInstanceType smi, bool p) => !p;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<bool>.Callback IsTrue = (StateMachineInstanceType smi, bool p) => p;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsZero = (StateMachineInstanceType smi, float p) => p == 0f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsLTZero = (StateMachineInstanceType smi, float p) => p < 0f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsLTEZero = (StateMachineInstanceType smi, float p) => p <= 0f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsGTZero = (StateMachineInstanceType smi, float p) => p > 0f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsGTEZero = (StateMachineInstanceType smi, float p) => p >= 0f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsOne = (StateMachineInstanceType smi, float p) => p == 1f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsLTOne = (StateMachineInstanceType smi, float p) => p < 1f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsLTEOne = (StateMachineInstanceType smi, float p) => p <= 1f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsGTOne = (StateMachineInstanceType smi, float p) => p > 1f;
+
+	protected static StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<float>.Callback IsGTEOne = (StateMachineInstanceType smi, float p) => p >= 1f;
 
 	public class PreLoopPostState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
 	{
@@ -520,7 +534,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				if (condition == null || condition(smi))
 				{
 					AttributeModifier attributeModifier = callback(smi);
-					DebugUtil.Assert(smi.dataTable[data_idx] == null, "Assert!", string.Empty, string.Empty);
+					DebugUtil.Assert(smi.dataTable[data_idx] == null);
 					smi.dataTable[data_idx] = attributeModifier;
 					state_target.Get(smi).GetAttributes().Add(attributeModifier);
 				}
@@ -728,25 +742,6 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			}, delegate(StateMachineInstanceType smi)
 			{
 				GameComps.Gravities.Remove(state_target.Get(smi));
-			});
-			return this;
-		}
-
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleFaller()
-		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
-			int data_idx = this.CreateDataTableEntry();
-			this.Enter("AddComponent<Faller>()", delegate(StateMachineInstanceType smi)
-			{
-				GameObject gameObject = state_target.Get(smi);
-				smi.dataTable[data_idx] = gameObject;
-				GameComps.Fallers.Add(gameObject, Vector2.zero);
-			});
-			this.Exit("RemoveComponent<Faller>()", delegate(StateMachineInstanceType smi)
-			{
-				GameObject gameObject2 = (GameObject)smi.dataTable[data_idx];
-				smi.dataTable[data_idx] = null;
-				GameComps.Fallers.Remove(gameObject2);
 			});
 			return this;
 		}
@@ -1606,7 +1601,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				{
 					callback((StateMachineInstanceType)((object)smi_data));
 				}, smi, null);
-				DebugUtil.Assert(smi.dataTable[data_idx] == null, "Assert!", string.Empty, string.Empty);
+				DebugUtil.Assert(smi.dataTable[data_idx] == null);
 				smi.dataTable[data_idx] = schedulerHandle;
 			});
 			this.Exit("RemoveScheduledCallback(" + name + ")", delegate(StateMachineInstanceType smi)
@@ -1906,7 +1901,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleStatusItem(string name, string tooltip, string icon = "", StatusItem.IconType icon_type = StatusItem.IconType.Info, NotificationType notification_type = NotificationType.Neutral, bool allow_multiples = false, SimViewMode render_overlay = SimViewMode.None, int status_overlays = 63486, Func<string, StateMachineInstanceType, string> resolve_string_callback = null, Func<string, StateMachineInstanceType, string> resolve_tooltip_callback = null, StatusItemCategory category = null)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleStatusItem(string name, string tooltip, string icon = "", StatusItem.IconType icon_type = StatusItem.IconType.Info, NotificationType notification_type = NotificationType.Neutral, bool allow_multiples = false, HashedString render_overlay = default(HashedString), int status_overlays = 63486, Func<string, StateMachineInstanceType, string> resolve_string_callback = null, Func<string, StateMachineInstanceType, string> resolve_tooltip_callback = null, StatusItemCategory category = null)
 		{
 			StatusItem statusItem = new StatusItem(this.longName, name, tooltip, icon, icon_type, notification_type, allow_multiples, render_overlay, status_overlays);
 			if (resolve_string_callback != null)

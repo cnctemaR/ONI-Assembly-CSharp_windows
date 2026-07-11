@@ -15,6 +15,9 @@ public class KNumberInputField : KScreen
 	}
 
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event global::System.Action onStartEdit;
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onEndEdit;
 
 	protected override void OnSpawn()
@@ -31,7 +34,13 @@ public class KNumberInputField : KScreen
 	private void OnEditStart()
 	{
 		this.isEditing = true;
+		this.inputField.Select();
+		this.inputField.ActivateInputField();
 		KScreenManager.Instance.RefreshStack();
+		if (this.onStartEdit != null)
+		{
+			this.onStartEdit();
+		}
 	}
 
 	private void OnEditEnd(string input)
@@ -60,10 +69,23 @@ public class KNumberInputField : KScreen
 	private void StopEditing()
 	{
 		this.isEditing = false;
+		this.inputField.DeactivateInputField();
 		if (this.onEndEdit != null)
 		{
 			this.onEndEdit();
 		}
+	}
+
+	public void SetAmount(float newValue)
+	{
+		newValue = Mathf.Clamp(newValue, this.minValue, this.maxValue);
+		if (this.decimalPlaces != -1)
+		{
+			float num = Mathf.Pow(10f, (float)this.decimalPlaces);
+			newValue = Mathf.Round(newValue * num) / num;
+		}
+		this.currentValue = newValue;
+		this.SetDisplayValue(this.currentValue.ToString());
 	}
 
 	private void ProcessInput(string input)
@@ -73,17 +95,11 @@ public class KNumberInputField : KScreen
 		try
 		{
 			num = float.Parse(input);
+			this.SetAmount(num);
 		}
 		catch
 		{
 		}
-		num = Mathf.Clamp(num, this.minValue, this.maxValue);
-		if (this.decimalPlaces != -1)
-		{
-			float num2 = Mathf.Pow(10f, (float)this.decimalPlaces);
-			num = Mathf.Round(num * num2) / num2;
-		}
-		this.currentValue = num;
 	}
 
 	public void SetDisplayValue(string input)

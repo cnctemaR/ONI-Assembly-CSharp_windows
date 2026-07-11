@@ -269,12 +269,25 @@ public class SandboxToolParameterMenu : KScreen
 			return gameObject4 != null && gameObject4.GetComponent<PlantableSeed>() != null;
 		}, searchFilter7, Def.GetUISprite(Assets.GetPrefab("PrickleFlowerSeed"), "ui", false));
 		list.Add(searchFilter8);
+		text = UI.SANDBOXTOOLS.FILTERS.ENTITIES.INDUSTRIAL_PRODUCTS;
+		func = delegate(object entity)
+		{
+			if ((entity as KPrefabID).gameObject == null)
+			{
+				return false;
+			}
+			GameObject gameObject5 = (entity as KPrefabID).gameObject;
+			return gameObject5 != null && (gameObject5.HasTag(GameTags.IndustrialIngredient) || gameObject5.HasTag(GameTags.IndustrialProduct) || gameObject5.HasTag(GameTags.Medicine));
+		};
+		tuple = Def.GetUISprite(Assets.GetPrefab("GenericPill"), "ui", false);
+		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter9 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func, null, tuple);
+		list.Add(searchFilter9);
 		List<KPrefabID> list3 = new List<KPrefabID>();
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
-			foreach (SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter9 in list)
+			foreach (SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter10 in list)
 			{
-				if (searchFilter9.condition(kprefabID))
+				if (searchFilter10.condition(kprefabID))
 				{
 					list3.Add(kprefabID);
 					break;
@@ -343,14 +356,15 @@ public class SandboxToolParameterMenu : KScreen
 		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 		GameObject panel = component.GetReference("ScrollPanel").gameObject;
 		GameObject gameObject2 = component.GetReference("Content").gameObject;
-		InputField reference = component.GetReference<InputField>("Filter");
-		KButton reference2 = component.GetReference<KButton>("Button");
-		reference2.onClick += delegate
+		InputField filterInputField = component.GetReference<InputField>("Filter");
+		KButton reference = component.GetReference<KButton>("Button");
+		reference.onClick += delegate
 		{
 			panel.SetActive(!panel.activeSelf);
 			if (panel.activeSelf)
 			{
 				panel.GetComponent<KScrollRect>().verticalNormalizedPosition = 1f;
+				filterInputField.ActivateInputField();
 			}
 		};
 		GameObject gameObject3 = component.GetReference("optionPrefab").gameObject;
@@ -438,8 +452,8 @@ public class SandboxToolParameterMenu : KScreen
 				gameObject5.SetActive(false);
 			}
 		}
-		selector.button = reference2;
-		reference.onValueChanged.AddListener(delegate(string filterString)
+		selector.button = reference;
+		filterInputField.onValueChanged.AddListener(delegate(string filterString)
 		{
 			List<KeyValuePair<object, GameObject>> list = new List<KeyValuePair<object, GameObject>>();
 			selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
@@ -468,7 +482,7 @@ public class SandboxToolParameterMenu : KScreen
 			}
 			panel.GetComponent<KScrollRect>().verticalNormalizedPosition = 1f;
 		});
-		this.inputFields.Add(reference.gameObject);
+		this.inputFields.Add(filterInputField.gameObject);
 		panel.SetActive(false);
 		return gameObject;
 	}

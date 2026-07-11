@@ -28,12 +28,12 @@ public class ResourceRemainingDisplayScreen : KScreen
 		this.dispayPrefab.SetActive(false);
 	}
 
-	public void SetResources(IList<Element> _selected_elements, Recipe recipe)
+	public void SetResources(IList<Tag> _selected_elements, Recipe recipe)
 	{
 		this.selected_elements.Clear();
-		foreach (Element element in _selected_elements)
+		foreach (Tag tag in _selected_elements)
 		{
-			this.selected_elements.Add(element);
+			this.selected_elements.Add(tag);
 		}
 		this.currentRecipe = recipe;
 	}
@@ -74,8 +74,7 @@ public class ResourceRemainingDisplayScreen : KScreen
 		{
 			for (int i = 0; i < this.currentRecipe.Ingredients.Count; i++)
 			{
-				Element element = this.selected_elements[i];
-				Tag tag = GameTagExtensions.Create(element.id);
+				Tag tag = this.selected_elements[i];
 				float num = this.currentRecipe.Ingredients[i].amount * (float)this.numberOfPendingConstructions;
 				float num2 = WorldInventory.Instance.GetTotalAmount(tag) - WorldInventory.Instance.GetAmount(tag);
 				float num3 = WorldInventory.Instance.GetTotalAmount(tag) - (num2 + num);
@@ -110,7 +109,7 @@ public class ResourceRemainingDisplayScreen : KScreen
 
 	private Recipe currentRecipe;
 
-	private List<Element> selected_elements = new List<Element>();
+	private List<Tag> selected_elements = new List<Tag>();
 
 	private int numberOfPendingConstructions;
 

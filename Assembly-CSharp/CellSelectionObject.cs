@@ -30,9 +30,9 @@ public class CellSelectionObject : KMonoBehaviour
 		this.SelectedDisplaySprite.transform.localScale = Vector3.one * 0.390625f;
 		this.SelectedDisplaySprite.GetComponent<SpriteRenderer>().sprite = this.Sprite_Hover;
 		base.Subscribe(Game.Instance.gameObject, 493375141, new Action<object>(this.ForceRefreshUserMenu));
-		this.overlayFilterMap.Add(SimViewMode.OxygenMap, () => Grid.Element[this.mouseCell].IsGas);
-		this.overlayFilterMap.Add(SimViewMode.GasVentMap, () => Grid.Element[this.mouseCell].IsGas);
-		this.overlayFilterMap.Add(SimViewMode.LiquidVentMap, () => Grid.Element[this.mouseCell].IsLiquid);
+		this.overlayFilterMap.Add(OverlayModes.Oxygen.ID, () => Grid.Element[this.mouseCell].IsGas);
+		this.overlayFilterMap.Add(OverlayModes.GasConduits.ID, () => Grid.Element[this.mouseCell].IsGas);
+		this.overlayFilterMap.Add(OverlayModes.LiquidConduits.ID, () => Grid.Element[this.mouseCell].IsLiquid);
 	}
 
 	protected override void OnCleanUp()
@@ -62,7 +62,7 @@ public class CellSelectionObject : KMonoBehaviour
 			if (Grid.IsValidCell(this.mouseCell) && Grid.IsVisible(this.mouseCell))
 			{
 				bool flag = true;
-				foreach (KeyValuePair<SimViewMode, Func<bool>> keyValuePair in this.overlayFilterMap)
+				foreach (KeyValuePair<HashedString, Func<bool>> keyValuePair in this.overlayFilterMap)
 				{
 					if (keyValuePair.Value == null)
 					{
@@ -260,7 +260,7 @@ public class CellSelectionObject : KMonoBehaviour
 
 	private float updateTimer;
 
-	private Dictionary<SimViewMode, Func<bool>> overlayFilterMap = new Dictionary<SimViewMode, Func<bool>>();
+	private Dictionary<HashedString, Func<bool>> overlayFilterMap = new Dictionary<HashedString, Func<bool>>();
 
 	private bool isAppFocused = true;
 }

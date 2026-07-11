@@ -20,7 +20,7 @@ public class SwampLilyFlowerConfig : IEntityConfig
 		float num3 = 0.4f;
 		bool flag2 = true;
 		List<Tag> list = new List<Tag> { GameTags.IndustrialIngredient };
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, text, text2, num, flag, anim, text3, sceneLayer, collisionShape, num2, num3, flag2, SimHashes.Creature, list);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, text, text2, num, flag, anim, text3, sceneLayer, collisionShape, num2, num3, flag2, 0, SimHashes.Creature, list);
 		gameObject.AddOrGet<EntitySplitter>();
 		return gameObject;
 	}

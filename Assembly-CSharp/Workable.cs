@@ -182,7 +182,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		if (this.attributeConverter != null)
 		{
 			AttributeConverterInstance converter = worker.GetComponent<AttributeConverters>().GetConverter(this.attributeConverter.Id);
-			return Mathf.Max(1f + converter.Evaluate(), 0.1f);
+			return Mathf.Max(1f + converter.Evaluate(), this.minimumAttributeMultiplier);
 		}
 		return 1f;
 	}
@@ -342,7 +342,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	{
 		if (show)
 		{
-			this.progressBar = ProgressBar.CreateProgressBar(this, new Func<float>(this.GetPercentComplete));
+			if (this.progressBar == null)
+			{
+				this.progressBar = ProgressBar.CreateProgressBar(this, new Func<float>(this.GetPercentComplete));
+			}
 			this.progressBar.gameObject.SetActive(true);
 		}
 		else if (this.progressBar != null)
@@ -475,6 +478,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected AttributeConverter attributeConverter;
 
+	protected float minimumAttributeMultiplier = 0.5f;
+
 	public bool resetProgressOnStop;
 
 	protected bool shouldTransferDiseaseWithWorker = true;
@@ -530,7 +535,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public KAnim.PlayMode workAnimPlayMode;
 
-	protected bool faceTargetWhenWorking;
+	public bool faceTargetWhenWorking;
 
 	protected ProgressBar progressBar;
 

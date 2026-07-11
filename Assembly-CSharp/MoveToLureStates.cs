@@ -13,7 +13,7 @@ internal class MoveToLureStates : GameStateMachine<MoveToLureStates, MoveToLureS
 		string text = CREATURES.STATUSITEMS.CONSIDERINGLURE.NAME;
 		string text2 = CREATURES.STATUSITEMS.CONSIDERINGLURE.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
 		this.move.MoveTo(new Func<MoveToLureStates.Instance, int>(MoveToLureStates.GetLureCell), new Func<MoveToLureStates.Instance, CellOffset[]>(MoveToLureStates.GetLureOffsets), this.behaviourcomplete, null, false);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.MoveToLure, false);
 	}

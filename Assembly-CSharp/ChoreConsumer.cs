@@ -176,7 +176,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public void AddProvider(ChoreProvider provider)
 	{
-		DebugUtil.Assert(provider != null, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(provider != null);
 		this.providers.Add(provider);
 	}
 
@@ -187,7 +187,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public void AddUrge(Urge urge)
 	{
-		DebugUtil.Assert(urge != null, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(urge != null);
 		this.urges.Add(urge);
 		base.Trigger(-736698276, urge);
 	}
@@ -461,7 +461,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public void AddBehaviourPrecondition(Tag tag, Func<object, bool> precondition, object arg)
 	{
-		DebugUtil.Assert(!this.behaviourPreconditions.ContainsKey(tag), "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(!this.behaviourPreconditions.ContainsKey(tag));
 		this.behaviourPreconditions[tag] = new ChoreConsumer.BehaviourPrecondition
 		{
 			cb = precondition,

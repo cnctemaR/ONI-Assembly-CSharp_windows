@@ -6,7 +6,7 @@ using UnityEngine;
 public class SleepChore : Chore<SleepChore.StatesInstance>
 {
 	public SleepChore(ChoreType choreType, IStateMachineTarget target, GameObject bed, bool bedIsLocator, bool isInterruptable)
-		: base(choreType, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+		: base(choreType, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
 	{
 		this.smi = new SleepChore.StatesInstance(this, target.gameObject, bed, bedIsLocator, isInterruptable);
 		if (isInterruptable)
@@ -148,7 +148,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 				.DoSleep(this.sleeper, this.bed, this.success, null)
 				.TriggerOnExit(GameHashes.SleepFinished);
 			this.sleep.uninterruptable.DoNothing();
-			this.sleep.normal.ParamTransition<bool>(this.isInterruptable, this.sleep.uninterruptable, (SleepChore.StatesInstance smi, bool p) => !p).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null)
+			this.sleep.normal.ParamTransition<bool>(this.isInterruptable, this.sleep.uninterruptable, GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.IsFalse).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null)
 				.EventTransition(GameHashes.SleepDisturbed, this.sleep.interrupt, null);
 			this.sleep.interrupt.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterrupted, null).QueueAnim("interrupt", false, null).OnAnimQueueComplete(this.sleep.interrupt_transition);
 			this.sleep.interrupt_transition.Enter(delegate(SleepChore.StatesInstance smi)

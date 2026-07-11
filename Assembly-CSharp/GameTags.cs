@@ -67,6 +67,10 @@ public class GameTags
 
 	public static readonly Tag RareMaterials = TagManager.Create("RareMaterials");
 
+	public static readonly Tag BuildingFiber = TagManager.Create("BuildingFiber");
+
+	public static readonly Tag PreciousRock = TagManager.Create("PreciousRock");
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted");
@@ -82,6 +86,8 @@ public class GameTags
 	public static readonly Tag HeatBulb = TagManager.Create("HeatBulb");
 
 	public static readonly Tag Egg = TagManager.Create("Egg");
+
+	public static readonly Tag IncubatableEgg = TagManager.Create("IncubatableEgg");
 
 	public static readonly Tag Trapped = TagManager.Create("Trapped");
 
@@ -189,6 +195,12 @@ public class GameTags
 
 	public static readonly Tag Glass = TagManager.Create("Glass");
 
+	public static readonly Tag Door = TagManager.Create("Door");
+
+	public static readonly Tag Farm = TagManager.Create("Farm");
+
+	public static readonly Tag StorageLocker = TagManager.Create("StorageLocker");
+
 	public static readonly Tag MISSING_TAG = TagManager.Create("MISSING_TAG");
 
 	public static readonly Tag PlantRenderer = TagManager.Create("PlantRenderer");
@@ -277,6 +289,8 @@ public class GameTags
 
 	public static readonly Tag HasDebugDestination = TagManager.Create("HasDebugDestination");
 
+	public static readonly Tag Shaded = TagManager.Create("Shaded");
+
 	public static readonly Tag DupeBrain = TagManager.Create("DupeBrain");
 
 	public static readonly Tag CreatureBrain = TagManager.Create("CreatureBrain");
@@ -288,6 +302,8 @@ public class GameTags
 	public static readonly Tag Operational = TagManager.Create("Operational");
 
 	public static readonly Tag JetSuitBlocker = TagManager.Create("JetSuitBlocker");
+
+	public static readonly Tag HasInvalidPorts = TagManager.Create("HasInvalidPorts");
 
 	public static readonly Tag Rocket = TagManager.Create("Rocket");
 
@@ -339,12 +355,7 @@ public class GameTags
 		GameTags.MarkedForCompost
 	};
 
-	public static TagSet IgnoredMaterialCategories = new TagSet
-	{
-		GameTags.Special,
-		GameTags.Breathable,
-		GameTags.Unbreathable
-	};
+	public static TagSet IgnoredMaterialCategories = new TagSet { GameTags.Special };
 
 	public static TagSet MaterialCategories = new TagSet
 	{
@@ -356,7 +367,8 @@ public class GameTags
 		GameTags.Filter,
 		GameTags.Liquifiable,
 		GameTags.Liquid,
-		GameTags.Gas,
+		GameTags.Breathable,
+		GameTags.Unbreathable,
 		GameTags.ConsumableOre,
 		GameTags.Organics,
 		GameTags.Farmable,
@@ -366,6 +378,8 @@ public class GameTags
 		GameTags.CookingIngredient,
 		GameTags.RareMaterials
 	};
+
+	public static TagSet MaterialBuildingElements = new TagSet { GameTags.BuildingFiber };
 
 	public static TagSet OtherEntityTags = new TagSet
 	{

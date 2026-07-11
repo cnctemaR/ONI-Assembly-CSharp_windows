@@ -22,7 +22,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		if (flag)
 		{
 			OverlayScreen instance = OverlayScreen.Instance;
-			instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+			instance.OnOverlayChanged = (Action<HashedString>)Delegate.Combine(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 			this.OnOverlayChanged(OverlayScreen.Instance.mode);
 			this.CreateVisualizers();
 			SimAndRenderScheduler.instance.Add(this, false);
@@ -41,7 +41,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	protected override void OnCleanUp()
 	{
 		OverlayScreen instance = OverlayScreen.Instance;
-		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+		instance.OnOverlayChanged = (Action<HashedString>)Delegate.Remove(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 		this.DestroyVisualizers();
 		if (this.isPhysical)
 		{
@@ -51,6 +51,11 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	}
 
 	public void RenderEveryTick(float dt)
+	{
+		this.CreateVisualizers();
+	}
+
+	public void HackRefreshVisualizers()
 	{
 		this.CreateVisualizers();
 	}
@@ -332,9 +337,9 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		return networkForCell != null;
 	}
 
-	private void OnOverlayChanged(SimViewMode mode)
+	private void OnOverlayChanged(HashedString mode)
 	{
-		if (mode == SimViewMode.Logic)
+		if (mode == OverlayModes.Logic.ID)
 		{
 			base.enabled = true;
 			this.CreateVisualizers();

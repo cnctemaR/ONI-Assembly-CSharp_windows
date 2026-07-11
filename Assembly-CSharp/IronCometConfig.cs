@@ -1,11 +1,12 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class IronCometConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateEntity(IronCometConfig.ID, IronCometConfig.ID, true);
+		GameObject gameObject = EntityTemplates.CreateEntity(IronCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.IRONCOMET.NAME, true);
 		gameObject.AddOrGet<SaveLoadRoot>();
 		gameObject.AddOrGet<LoopingSounds>();
 		Comet comet = gameObject.AddOrGet<Comet>();

@@ -14,12 +14,12 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 		string text = CREATURES.STATUSITEMS.LOOKINGFORFOOD.NAME;
 		string text2 = CREATURES.STATUSITEMS.LOOKINGFORFOOD.TOOLTIP;
 		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State state2 = this.inhaling.DefaultState(this.inhaling.pre);
 		text2 = CREATURES.STATUSITEMS.INHALING.NAME;
 		text = CREATURES.STATUSITEMS.INHALING.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.inhaling.pre.PlayAnim("inhale_pre").QueueAnim("inhale_loop", true, null).Update("Consume", delegate(InhaleStates.Instance smi, float dt)
 		{
 			smi.GetSMI<GasAndLiquidConsumerMonitor.Instance>().Consume(dt);

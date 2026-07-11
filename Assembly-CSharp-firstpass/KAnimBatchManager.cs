@@ -197,8 +197,8 @@ public class KAnimBatchManager
 		}
 		foreach (BatchSet batchSet in this.activeBatchSets)
 		{
-			DebugUtil.Assert(batchSet != null, "Assert!", string.Empty, string.Empty);
-			DebugUtil.Assert(batchSet.group != null, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(batchSet != null);
+			DebugUtil.Assert(batchSet.group != null);
 			Mesh mesh = batchSet.group.mesh;
 			for (int i = 0; i < batchSet.batchCount; i++)
 			{

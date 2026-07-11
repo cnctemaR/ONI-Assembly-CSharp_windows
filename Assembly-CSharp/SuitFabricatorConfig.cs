@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,15 +14,15 @@ public class SuitFabricatorConfig : IBuildingConfig
 		string text2 = "suit_maker_kanim";
 		int num3 = 100;
 		float num4 = 240f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 480f;
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		return buildingDef;
@@ -31,15 +33,57 @@ public class SuitFabricatorConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<Prioritizable>();
-		Fabricator fabricator = go.AddOrGet<Fabricator>();
-		fabricator.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_suit_fabricator_kanim") };
+		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
+		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
+		go.AddOrGet<FabricatorIngredientStatusManager>();
+		go.AddOrGet<CopyBuildingSettings>();
+		go.AddOrGet<ComplexFabricatorWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_suit_fabricator_kanim") };
 		Prioritizable.AddRef(go);
-		BuildingTemplates.CreateFabricatorStorage(go, fabricator);
+		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
+		this.ConfigureRecipes();
+	}
+
+	private void ConfigureRecipes()
+	{
+		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), 2f),
+			new ComplexRecipe.RecipeElement(SimHashes.Cuprite.CreateTag(), 300f)
+		};
+		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("Atmo_Suit".ToTag(), 1f)
+		};
+		string text = ComplexRecipeManager.MakeRecipeID("SuitFabricator", array, array2);
+		AtmoSuitConfig.recipe = new ComplexRecipe(text, array, array2)
+		{
+			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
+			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC,
+			useResultAsDescription = true,
+			fabricators = new List<Tag> { "SuitFabricator" }
+		};
+		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(SimHashes.Steel.ToString(), 200f),
+			new ComplexRecipe.RecipeElement(SimHashes.Petroleum.ToString(), 25f)
+		};
+		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("Jet_Suit".ToTag(), 1f)
+		};
+		string text2 = ComplexRecipeManager.MakeRecipeID("SuitFabricator", array3, array4);
+		JetSuitConfig.recipe = new ComplexRecipe(text2, array3, array4)
+		{
+			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
+			description = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.RECIPE_DESC,
+			useResultAsDescription = true,
+			fabricators = new List<Tag> { "SuitFabricator" },
+			requiredTech = Db.Get().TechItems.jetSuit.parentTech.Id
+		};
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGetDef<PoweredActiveController.Def>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits);

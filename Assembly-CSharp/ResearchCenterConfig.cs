@@ -20,7 +20,7 @@ public class ResearchCenterConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 60f;
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.AudioCategory = "Metal";

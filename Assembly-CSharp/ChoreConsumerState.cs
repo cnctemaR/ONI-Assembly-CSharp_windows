@@ -11,7 +11,6 @@ public class ChoreConsumerState
 		this.prefabid = consumer.GetComponent<KPrefabID>();
 		this.ownable = consumer.GetComponent<Ownable>();
 		this.gameObject = consumer.gameObject;
-		this.assignables = consumer.GetComponent<Assignables>();
 		this.solidTransferArm = consumer.GetComponent<SolidTransferArm>();
 		this.hasSolidTransferArm = this.solidTransferArm != null;
 		this.resume = consumer.GetComponent<MinionResume>();
@@ -19,7 +18,21 @@ public class ChoreConsumerState
 		this.schedulable = consumer.GetComponent<Schedulable>();
 		this.traits = consumer.GetComponent<Traits>();
 		this.choreProvider = consumer.GetComponent<ChoreProvider>();
-		this.equipment = consumer.GetComponent<Equipment>();
+		MinionIdentity component = consumer.GetComponent<MinionIdentity>();
+		if (component != null)
+		{
+			if (component.assignableProxy == null)
+			{
+				component.assignableProxy = MinionAssignablesProxy.InitAssignableProxy(component.assignableProxy, component);
+			}
+			this.assignables = component.GetSoleOwner();
+			this.equipment = component.GetEquipment();
+		}
+		else
+		{
+			this.assignables = consumer.GetComponent<Assignables>();
+			this.equipment = consumer.GetComponent<Equipment>();
+		}
 		this.storage = consumer.GetComponent<Storage>();
 		this.consumableConsumer = consumer.GetComponent<ConsumableConsumer>();
 		this.worker = consumer.GetComponent<Worker>();

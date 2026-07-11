@@ -115,7 +115,6 @@ public class Worker : KMonoBehaviour
 			this.CompleteWork();
 			return Worker.WorkResult.Success;
 		}
-		this.state = Worker.State.Working;
 		this.StopWork();
 		return Worker.WorkResult.Failed;
 	}

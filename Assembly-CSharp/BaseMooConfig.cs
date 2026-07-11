@@ -24,7 +24,7 @@ public static class BaseMooConfig
 		def.lures = new Tag[] { GameTags.SlimeMold };
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
 		gameObject.AddOrGetDef<RanchableMonitor.Def>();
 		gameObject.AddOrGetDef<FixedCapturableMonitor.Def>();
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new BaggedStates.Def(), true)

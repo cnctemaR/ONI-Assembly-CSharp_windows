@@ -252,31 +252,31 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 			{
 				smi.master.pressureState = PressureVulnerable.PressureState.LethalLow;
 			}).TriggerOnEnter(GameHashes.LowPressureFatal, null).ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_Low)
-				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.IsFalse);
 			this.lethalHigh.Enter(delegate(PressureVulnerable.StatesInstance smi)
 			{
 				smi.master.pressureState = PressureVulnerable.PressureState.LethalHigh;
 			}).TriggerOnEnter(GameHashes.HighPressureFatal, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_High)
-				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.IsFalse);
 			this.warningLow.Enter(delegate(PressureVulnerable.StatesInstance smi)
 			{
 				smi.master.pressureState = PressureVulnerable.PressureState.WarningLow;
 			}).TriggerOnEnter(GameHashes.LowPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_Low)
 				.ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_Low)
-				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
-			this.unsafeElement.ParamTransition<bool>(this.safe_element, this.normal, (PressureVulnerable.StatesInstance smi, bool p) => p).TriggerOnExit(GameHashes.CorrectAtmosphere).TriggerOnEnter(GameHashes.WrongAtmosphere, null);
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.IsFalse);
+			this.unsafeElement.ParamTransition<bool>(this.safe_element, this.normal, GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.IsTrue).TriggerOnExit(GameHashes.CorrectAtmosphere).TriggerOnEnter(GameHashes.WrongAtmosphere, null);
 			this.warningHigh.Enter(delegate(PressureVulnerable.StatesInstance smi)
 			{
 				smi.master.pressureState = PressureVulnerable.PressureState.WarningHigh;
 			}).TriggerOnEnter(GameHashes.HighPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_High)
 				.ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_High)
-				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.IsFalse);
 			this.normal.Enter(delegate(PressureVulnerable.StatesInstance smi)
 			{
 				smi.master.pressureState = PressureVulnerable.PressureState.Normal;
 			}).TriggerOnEnter(GameHashes.OptimalPressureAchieved, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_High)
 				.ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_Low)
-				.ParamTransition<bool>(this.safe_element, this.unsafeElement, (PressureVulnerable.StatesInstance smi, bool p) => !p);
+				.ParamTransition<bool>(this.safe_element, this.unsafeElement, GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.IsFalse);
 		}
 
 		public StateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.FloatParameter pressure;

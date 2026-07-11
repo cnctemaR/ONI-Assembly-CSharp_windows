@@ -53,6 +53,18 @@ public class ReportManager : KMonoBehaviour
 		}
 	}
 
+	public ReportManager.DailyReport YesterdaysReport
+	{
+		get
+		{
+			if (this.dailyReports.Count <= 1)
+			{
+				return null;
+			}
+			return this.dailyReports[this.dailyReports.Count - 1];
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		ReportManager.Instance = this;

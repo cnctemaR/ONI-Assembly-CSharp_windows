@@ -81,7 +81,8 @@ public class MinionConfig : IEntityConfig
 			Assets.GetAnim("anim_loco_new_kanim"),
 			Assets.GetAnim("anim_loco_tube_kanim"),
 			Assets.GetAnim("anim_loco_hover_kanim"),
-			Assets.GetAnim("anim_construction_firepole_kanim")
+			Assets.GetAnim("anim_construction_firepole_kanim"),
+			Assets.GetAnim("anim_construction_jetsuit_kanim")
 		};
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
 		kboxCollider2D.offset = new Vector2(0f, 0.8f);
@@ -230,8 +231,6 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<Traits>();
 		gameObject.AddOrGet<AttributeLevels>();
 		gameObject.AddOrGet<AttributeConverters>();
-		gameObject.AddOrGet<Equipment>();
-		gameObject.AddOrGet<Ownables>();
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.InternalTemperature = 310.15f;
 		primaryElement.MassPerUnit = 30f;
@@ -268,6 +267,7 @@ public class MinionConfig : IEntityConfig
 		creatureSimTemperatureTransfer.Thickness = 0.01f;
 		gameObject.AddOrGet<DiseaseTrigger>();
 		gameObject.AddOrGet<ClothingWearer>();
+		gameObject.AddOrGet<SuitEquipper>();
 		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();
 		decorProvider.baseRadius = 3f;
 		decorProvider.isMovable = true;

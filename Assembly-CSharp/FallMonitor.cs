@@ -10,7 +10,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		{
 			smi.UpdateFalling();
 		}, UpdateRate.SIM_33ms, true);
-		this.standing.ParamTransition<bool>(this.isEntombed, this.entombed, (FallMonitor.Instance smi, bool p) => p).ParamTransition<bool>(this.isFalling, this.falling_pre, (FallMonitor.Instance smi, bool p) => p);
+		this.standing.ParamTransition<bool>(this.isEntombed, this.entombed, GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.IsTrue).ParamTransition<bool>(this.isFalling, this.falling_pre, GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.IsTrue);
 		this.falling_pre.Enter("StopNavigator", delegate(FallMonitor.Instance smi)
 		{
 			smi.GetComponent<Navigator>().Stop(false);
@@ -20,7 +20,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		}).GoTo(this.falling)
 			.ToggleBrain("falling_pre");
 		this.falling.ToggleBrain("falling").PlayAnim("fall_pre").QueueAnim("fall_loop", true, null)
-			.ParamTransition<bool>(this.isEntombed, this.entombed, (FallMonitor.Instance smi, bool p) => p)
+			.ParamTransition<bool>(this.isEntombed, this.entombed, GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.IsTrue)
 			.Transition(this.recoverladder, (FallMonitor.Instance smi) => smi.CanRecoverToLadder(), UpdateRate.SIM_33ms)
 			.Transition(this.recoverpole, (FallMonitor.Instance smi) => smi.CanRecoverToPole(), UpdateRate.SIM_33ms)
 			.ToggleGravity(this.landfloor);
@@ -56,7 +56,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		this.entombed.stuck.Enter("StopNavigator", delegate(FallMonitor.Instance smi)
 		{
 			smi.GetComponent<Navigator>().Stop(false);
-		}).ToggleChore((FallMonitor.Instance smi) => new EntombedChore(smi.master), this.standing).ParamTransition<bool>(this.isEntombed, this.standing, (FallMonitor.Instance smi, bool p) => !p);
+		}).ToggleChore((FallMonitor.Instance smi) => new EntombedChore(smi.master), this.standing).ParamTransition<bool>(this.isEntombed, this.standing, GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.IsFalse);
 	}
 
 	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State standing;

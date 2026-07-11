@@ -13,21 +13,22 @@ public class StorageLockerSmart : StorageLocker
 		this.ports = base.gameObject.GetComponent<LogicPorts>();
 		base.Subscribe<StorageLockerSmart>(-1697596308, StorageLockerSmart.UpdateLogicCircuitCBDelegate);
 		base.Subscribe<StorageLockerSmart>(-592767678, StorageLockerSmart.UpdateLogicCircuitCBDelegate);
-		this.UpdateLogicCircuit();
+		this.UpdateLogicAndActiveState();
 	}
 
 	private void UpdateLogicCircuitCB(object data)
 	{
-		this.UpdateLogicCircuit();
+		this.UpdateLogicAndActiveState();
 	}
 
-	private void UpdateLogicCircuit()
+	private void UpdateLogicAndActiveState()
 	{
 		bool flag = this.filteredStorage.IsFull();
 		bool isOperational = this.operational.IsOperational;
 		bool flag2 = flag && isOperational;
 		this.ports.SendSignal(FilteredStorage.FULL_PORT_ID, (!flag2) ? 0 : 1);
 		this.filteredStorage.SetLogicMeter(flag2);
+		this.operational.SetActive(isOperational, false);
 	}
 
 	public override float UserMaxCapacity
@@ -39,7 +40,7 @@ public class StorageLockerSmart : StorageLocker
 		set
 		{
 			base.UserMaxCapacity = value;
-			this.UpdateLogicCircuit();
+			this.UpdateLogicAndActiveState();
 		}
 	}
 

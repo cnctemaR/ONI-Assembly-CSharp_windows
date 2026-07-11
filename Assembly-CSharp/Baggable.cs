@@ -19,7 +19,7 @@ public class Baggable : KMonoBehaviour
 		pickupable.workingPstFailed = HashedString.Invalid;
 		pickupable.overrideAnims = new KAnimFile[] { this.minionAnimOverride };
 		pickupable.trackOnPickup = false;
-		pickupable.useGunforPickup = false;
+		pickupable.useGunforPickup = this.useGunForPickup;
 		pickupable.synchronizeAnims = false;
 		pickupable.SetWorkTime(3f);
 		if (this.mustStandOntopOfTrapForPickup)
@@ -105,6 +105,8 @@ public class Baggable : KMonoBehaviour
 
 	[Serialize]
 	public bool wrangled;
+
+	public bool useGunForPickup;
 
 	private static readonly EventSystem.IntraObjectHandler<Baggable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Baggable>(delegate(Baggable component, object data)
 	{

@@ -55,7 +55,7 @@ namespace KSerialization
 						if (serializationConfig.MemberSerialization != memberSerialization && memberSerialization != MemberSerialization.Invalid)
 						{
 							string text = "Found conflicting serialization configurations on type " + type2.ToString() + " and " + type.ToString();
-							Output.LogError(new object[] { text });
+							Output.LogError(text);
 							throw new ArgumentException(text);
 						}
 						memberSerialization = serializationConfig.MemberSerialization;
@@ -228,7 +228,7 @@ namespace KSerialization
 				catch (Exception ex)
 				{
 					string text = string.Format("Error occurred while serializing field {0} on template {1}", serializationField.field.Name, this.serializableType.Name);
-					Output.LogError(new object[] { text });
+					Output.LogError(text);
 					throw new ArgumentException(text, ex);
 				}
 			}
@@ -242,7 +242,7 @@ namespace KSerialization
 				catch (Exception ex2)
 				{
 					string text2 = string.Format("Error occurred while serializing property {0} on template {1}", serializationProperty.property.Name, this.serializableType.Name);
-					Output.LogError(new object[] { text2 });
+					Output.LogError(text2);
 					throw new ArgumentException(text2, ex2);
 				}
 			}

@@ -31,7 +31,7 @@ namespace ProcGen.Noise
 		{
 			for (int i = 0; i < this.tree_files.Count; i++)
 			{
-				Tree tree = YamlIO<Tree>.LoadFile(NoiseTreeFiles.GetTreeFilePath(this.tree_files[i]));
+				Tree tree = YamlIO<Tree>.LoadFile(NoiseTreeFiles.GetTreeFilePath(this.tree_files[i]), null);
 				if (tree != null)
 				{
 					this.trees.Add(this.tree_files[i], tree);
@@ -45,7 +45,7 @@ namespace ProcGen.Noise
 			{
 				if (!this.trees.ContainsKey(name))
 				{
-					Tree tree = YamlIO<Tree>.LoadFile(path + name + ".yaml");
+					Tree tree = YamlIO<Tree>.LoadFile(path + name + ".yaml", null);
 					if (tree != null)
 					{
 						this.trees.Add(name, tree);
@@ -85,7 +85,7 @@ namespace ProcGen.Noise
 		{
 			if (!this.trees.ContainsKey(name))
 			{
-				Tree tree = YamlIO<Tree>.LoadFile(path + "/" + name + ".yaml");
+				Tree tree = YamlIO<Tree>.LoadFile(path + "/" + name + ".yaml", null);
 				if (tree == null)
 				{
 					return null;

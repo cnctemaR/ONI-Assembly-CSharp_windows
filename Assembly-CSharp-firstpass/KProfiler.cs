@@ -1,9 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using UnityEngine;
 
 public static class KProfiler
 {
+	public static void BeginThreadProfiling(string threadGroupName, string threadName)
+	{
+	}
+
+	public static void EndThreadProfiling()
+	{
+	}
+
 	public static int BeginSampleI(string region_name)
 	{
 		int num = KProfiler.counter;
@@ -48,7 +57,17 @@ public static class KProfiler
 		return KProfiler.counter;
 	}
 
+	public static void AddEvent(string event_name)
+	{
+	}
+
+	public static void AddCounter(string event_name, int count)
+	{
+	}
+
 	public static int counter;
+
+	public static Thread main_thread;
 
 	public struct Region : IDisposable
 	{

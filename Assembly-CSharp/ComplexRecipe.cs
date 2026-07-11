@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class ComplexRecipe
@@ -22,6 +23,21 @@ public class ComplexRecipe
 		return num;
 	}
 
+	public bool RequiresTechUnlock()
+	{
+		return !string.IsNullOrEmpty(this.requiredTech);
+	}
+
+	public bool IsRequiredTechUnlocked()
+	{
+		if (string.IsNullOrEmpty(this.requiredTech))
+		{
+			return true;
+		}
+		Tech tech = Db.Get().Techs.Get(this.requiredTech);
+		return tech.IsComplete();
+	}
+
 	public Sprite GetUIIcon()
 	{
 		Sprite sprite = null;
@@ -42,7 +58,15 @@ public class ComplexRecipe
 
 	public string GetUIName()
 	{
-		return (!this.useResultAsDescription) ? this.ingredients[0].material.ProperName() : this.results[0].material.ProperName();
+		if (this.displayInputAndOutput)
+		{
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
+		}
+		if (this.useResultAsDescription)
+		{
+			return this.results[0].material.ProperName();
+		}
+		return this.ingredients[0].material.ProperName();
 	}
 
 	public string id;
@@ -57,11 +81,15 @@ public class ComplexRecipe
 
 	public bool useResultAsDescription;
 
+	public bool displayInputAndOutput;
+
 	public string description;
 
 	public List<Tag> fabricators;
 
 	public int sortOrder;
+
+	public string requiredTech;
 
 	public class RecipeElement
 	{
@@ -71,8 +99,8 @@ public class ComplexRecipe
 			this.amount = amount;
 		}
 
-		public Tag material;
+		public float amount { get; private set; }
 
-		public float amount;
+		public Tag material;
 	}
 }

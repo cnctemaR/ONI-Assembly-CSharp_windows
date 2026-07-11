@@ -33,20 +33,57 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 63486);
 		}
 		base.Subscribe<AccessControl>(279163026, AccessControl.OnControlStateChangedDelegate);
+		base.Subscribe<AccessControl>(-905833192, AccessControl.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		List<Tuple<MinionAssignablesProxy, AccessControl.Permission>> list = new List<Tuple<MinionAssignablesProxy, AccessControl.Permission>>();
+		for (int i = this.savedPermissions.Count - 1; i >= 0; i--)
+		{
+			KPrefabID kprefabID = this.savedPermissions[i].Key.Get();
+			if (kprefabID != null)
+			{
+				MinionIdentity component = kprefabID.GetComponent<MinionIdentity>();
+				if (component != null)
+				{
+					list.Add(new Tuple<MinionAssignablesProxy, AccessControl.Permission>(component.assignableProxy.Get(), this.savedPermissions[i].Value));
+					this.savedPermissions.RemoveAt(i);
+				}
+			}
+		}
+		foreach (Tuple<MinionAssignablesProxy, AccessControl.Permission> tuple in list)
+		{
+			this.SetPermission(tuple.first.gameObject, tuple.second);
+		}
 		this.SetStatusItem();
 	}
 
 	private void OnControlStateChanged(object data)
 	{
 		this.overrideAccess = (Door.ControlState)data;
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		AccessControl component = gameObject.GetComponent<AccessControl>();
+		if (component != null)
+		{
+			this.savedPermissions.Clear();
+			foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in component.savedPermissions)
+			{
+				if (keyValuePair.Key.Get() != null)
+				{
+					this.SetPermission(keyValuePair.Key.Get().gameObject, keyValuePair.Value);
+				}
+			}
+			this._defaultPermission = component._defaultPermission;
+		}
 	}
 
 	public void SetPermission(GameObject key, AccessControl.Permission permission)
@@ -160,6 +197,9 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	[MyCmpReq]
 	private KSelectable selectable;
 
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
 	[Serialize]
 	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();
 
@@ -176,6 +216,11 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	private static readonly EventSystem.IntraObjectHandler<AccessControl> OnControlStateChangedDelegate = new EventSystem.IntraObjectHandler<AccessControl>(delegate(AccessControl component, object data)
 	{
 		component.OnControlStateChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<AccessControl> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<AccessControl>(delegate(AccessControl component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 
 	public enum Permission

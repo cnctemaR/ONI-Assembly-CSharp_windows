@@ -64,6 +64,22 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 		return "STRINGS.UI.UISIDESCREENS.LOGIC_DELAY_SIDE_SCREEN.TOOLTIP";
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicGateFilter>(-905833192, LogicGateFilter.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		LogicGateFilter component = gameObject.GetComponent<LogicGateFilter>();
+		if (component != null)
+		{
+			this.DelayAmount = component.DelayAmount;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -132,4 +148,12 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 	private float delayAmount = 5f;
 
 	private MeterController meter;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicGateFilter> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicGateFilter>(delegate(LogicGateFilter component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

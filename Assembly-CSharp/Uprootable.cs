@@ -118,7 +118,7 @@ public class Uprootable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
 		}
 		this.isMarkedForUproot = true;

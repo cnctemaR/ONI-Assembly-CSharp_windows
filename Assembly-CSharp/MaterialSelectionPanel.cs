@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using STRINGS;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public class MaterialSelectionPanel : KScreen
 		MaterialSelectionPanel.elementsWithTag.Clear();
 	}
 
-	public Element CurrentSelectedElement
+	public Tag CurrentSelectedElement
 	{
 		get
 		{
@@ -18,7 +19,7 @@ public class MaterialSelectionPanel : KScreen
 		}
 	}
 
-	public IList<Element> GetSelectedElementAsList
+	public IList<Tag> GetSelectedElementAsList
 	{
 		get
 		{
@@ -50,6 +51,7 @@ public class MaterialSelectionPanel : KScreen
 		for (int i = 0; i < 3; i++)
 		{
 			MaterialSelector materialSelector = Util.KInstantiateUI<MaterialSelector>(this.MaterialSelectorTemplate, base.gameObject, false);
+			materialSelector.selectorIndex = i;
 			this.MaterialSelectors.Add(materialSelector);
 		}
 		this.MaterialSelectors[0].gameObject.SetActive(true);
@@ -170,6 +172,31 @@ public class MaterialSelectionPanel : KScreen
 		return flag;
 	}
 
+	public void SelectSourcesMaterials(Building building)
+	{
+		Tag[] array = null;
+		Deconstructable component = building.gameObject.GetComponent<Deconstructable>();
+		if (component != null)
+		{
+			array = component.constructionElements;
+		}
+		Constructable component2 = building.GetComponent<Constructable>();
+		if (component2 != null)
+		{
+			array = component2.SelectedElementsTags.ToArray<Tag>();
+		}
+		if (array != null)
+		{
+			for (int i = 0; i < Mathf.Min(array.Length, this.MaterialSelectors.Count); i++)
+			{
+				if (this.MaterialSelectors[i].ElementToggles.ContainsKey(array[i]))
+				{
+					this.MaterialSelectors[i].OnSelectMaterial(array[i], this.activeRecipe, false);
+				}
+			}
+		}
+	}
+
 	public bool CanBuild(Recipe recipe)
 	{
 		foreach (MaterialSelector materialSelector in this.MaterialSelectors)
@@ -191,26 +218,40 @@ public class MaterialSelectionPanel : KScreen
 		{
 			return selectedElemInfo;
 		}
-		List<Element> list = null;
+		List<Tag> list = null;
 		if (!MaterialSelectionPanel.elementsWithTag.TryGetValue(materialCategoryTag, out list))
 		{
-			list = new List<Element>();
+			list = new List<Tag>();
 			foreach (Element element in ElementLoader.elements)
 			{
 				if (element.tag == materialCategoryTag || element.HasTag(materialCategoryTag))
 				{
-					list.Add(element);
+					list.Add(element.tag);
+				}
+			}
+			foreach (Tag tag in GameTags.MaterialBuildingElements)
+			{
+				if (tag == materialCategoryTag)
+				{
+					foreach (GameObject gameObject in Assets.GetPrefabsWithTag(tag))
+					{
+						KPrefabID component = gameObject.GetComponent<KPrefabID>();
+						if (component != null && !list.Contains(component.PrefabTag))
+						{
+							list.Add(component.PrefabTag);
+						}
+					}
 				}
 			}
 			MaterialSelectionPanel.elementsWithTag[materialCategoryTag] = list;
 		}
-		foreach (Element element2 in list)
+		foreach (Tag tag2 in list)
 		{
-			float amount = WorldInventory.Instance.GetAmount(element2.tag);
+			float amount = WorldInventory.Instance.GetAmount(tag2);
 			if (amount > selectedElemInfo.kgAvailable)
 			{
 				selectedElemInfo.kgAvailable = amount;
-				selectedElemInfo.element = element2;
+				selectedElemInfo.element = tag2;
 			}
 		}
 		return selectedElemInfo;
@@ -232,11 +273,11 @@ public class MaterialSelectionPanel : KScreen
 		this.priorityScreen.SetScreenPriority(priority, false);
 	}
 
-	public Dictionary<KToggle, Element> ElementToggles = new Dictionary<KToggle, Element>();
+	public Dictionary<KToggle, Tag> ElementToggles = new Dictionary<KToggle, Tag>();
 
 	private List<MaterialSelector> MaterialSelectors = new List<MaterialSelector>();
 
-	private List<Element> currentSelectedElements = new List<Element>();
+	private List<Tag> currentSelectedElements = new List<Tag>();
 
 	[SerializeField]
 	protected PriorityScreen priorityScreenPrefab;
@@ -252,13 +293,13 @@ public class MaterialSelectionPanel : KScreen
 
 	private Recipe activeRecipe;
 
-	private static Dictionary<Tag, List<Element>> elementsWithTag = new Dictionary<Tag, List<Element>>();
+	private static Dictionary<Tag, List<Tag>> elementsWithTag = new Dictionary<Tag, List<Tag>>();
 
 	public delegate void SelectElement(Element element, float kgAvailable, float recipe_amount);
 
 	public struct SelectedElemInfo
 	{
-		public Element element;
+		public Tag element;
 
 		public float kgAvailable;
 	}

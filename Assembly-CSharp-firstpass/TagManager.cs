@@ -19,7 +19,7 @@ public class TagManager
 		Tag tag = TagManager.Create(tag_string);
 		if (string.IsNullOrEmpty(proper_name))
 		{
-			DebugUtil.Assert(false, "Attempting to set proper name for tag: " + tag_string + "to null or empty.", string.Empty, string.Empty);
+			DebugUtil.Assert(false, "Attempting to set proper name for tag: " + tag_string + "to null or empty.");
 		}
 		TagManager.ProperNames[tag] = proper_name;
 		return tag;

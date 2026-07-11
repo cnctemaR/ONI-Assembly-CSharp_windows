@@ -52,7 +52,7 @@ public class GeneratedOre
 				}
 				else
 				{
-					Output.LogError(new object[] { "Missing substance or anim for element [" + element.name + "]" });
+					Output.LogError("Missing substance or anim for element [" + element.name + "]");
 				}
 			}
 		}

@@ -12,11 +12,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 		base.serializable = true;
 		this.root.TagTransition(GameTags.Preserved, this.Preserved, false).TagTransition(GameTags.Entombed, this.Preserved, false);
 		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
-		this.Preserved.TagTransition(new Tag[]
-		{
-			GameTags.Preserved,
-			GameTags.Entombed
-		}, this.Fresh, true).Enter("RefreshModifiers", delegate(Rottable.Instance smi)
+		this.Preserved.TagTransition(Rottable.PRESERVED_TAGS, this.Fresh, true).Enter("RefreshModifiers", delegate(Rottable.Instance smi)
 		{
 			smi.RefreshModifiers(0f);
 		});
@@ -24,7 +20,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 		{
 			smi.GoTo(this.Stale);
 		});
-		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, (Rottable.Instance smi, float p) => p <= 0f)
+		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.IsLTEZero)
 			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, false);
 		this.Spoiled.Enter(delegate(Rottable.Instance smi)
 		{
@@ -157,6 +153,12 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Stale;
 
 	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.State Spoiled;
+
+	private static readonly Tag[] PRESERVED_TAGS = new Tag[]
+	{
+		GameTags.Preserved,
+		GameTags.Entombed
+	};
 
 	private static readonly Rottable.RotCB rotCB = new Rottable.RotCB();
 
@@ -321,7 +323,8 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 				return;
 			}
 			KSelectable component = base.GetComponent<KSelectable>();
-			if (Grid.Solid[num])
+			KPrefabID component2 = base.GetComponent<KPrefabID>();
+			if (component2.HasAnyTags(Rottable.PRESERVED_TAGS))
 			{
 				this.UnrefrigeratedModifier.SetValue(0f);
 				this.ContaminatedAtmosphere.SetValue(0f);
@@ -398,6 +401,12 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 					base.sm.rotParameter.Set(num3, base.smi);
 				}
 			}
+		}
+
+		public bool IsRotLevelStackable(Rottable.Instance other)
+		{
+			float num = Mathf.Abs(this.RotConstitutionPercentage - other.RotConstitutionPercentage);
+			return num < 0.1f;
 		}
 
 		public string GetToolTip()

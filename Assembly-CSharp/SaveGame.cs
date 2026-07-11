@@ -64,7 +64,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 291640U;
+		header.buildVersion = 299745U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -141,6 +141,9 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	public EntombedItemManager entombedItemManager;
 
 	public WorldGenSpawner worldGenSpawner;
+
+	[MyCmpReq]
+	public MaterialSelectorSerializer materialSelectorSerializer;
 
 	public struct Header
 	{

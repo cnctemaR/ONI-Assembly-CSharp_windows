@@ -90,11 +90,11 @@ public class OverlayLegend : KScreen
 
 	private void OnChamberChanged()
 	{
-		if (this.currentMode != SimViewMode.Rooms)
+		if (this.currentMode != OverlayModes.Rooms.ID)
 		{
 			return;
 		}
-		this.SetLegend(SimViewMode.Rooms, true);
+		this.SetLegend(OverlayModes.Rooms.ID, true);
 	}
 
 	private void SetLegend(OverlayLegend.OverlayInfo overlayInfo)
@@ -113,24 +113,13 @@ public class OverlayLegend : KScreen
 		this.title.text = overlayInfo.name;
 		if (overlayInfo.isProgrammaticallyPopulated)
 		{
-			SimViewMode mode = overlayInfo.mode;
-			if (mode != SimViewMode.Disease)
-			{
-				if (mode != SimViewMode.NoisePollution)
-				{
-					if (mode == SimViewMode.Rooms)
-					{
-						this.PopulateRoomsLegend(overlayInfo);
-					}
-				}
-				else
-				{
-					this.PopulateNoiseLegend(overlayInfo);
-				}
-			}
-			else
+			if (overlayInfo.mode == OverlayModes.Disease.ID)
 			{
 				this.PopulateDiseaseLegend(overlayInfo);
+			}
+			else if (overlayInfo.mode == OverlayModes.Rooms.ID)
+			{
+				this.PopulateRoomsLegend(overlayInfo);
 			}
 		}
 		else
@@ -139,7 +128,7 @@ public class OverlayLegend : KScreen
 		}
 	}
 
-	public void SetLegend(SimViewMode mode, bool refreshing = false)
+	public void SetLegend(HashedString mode, bool refreshing = false)
 	{
 		if (this.currentMode == mode && !refreshing)
 		{
@@ -147,17 +136,17 @@ public class OverlayLegend : KScreen
 		}
 		this.ClearLegend();
 		OverlayLegend.OverlayInfo overlayInfo = this.overlayInfoList.Find((OverlayLegend.OverlayInfo ol) => ol.mode == mode);
-		if (mode == SimViewMode.TemperatureMap)
+		if (mode == OverlayModes.Temperature.ID)
 		{
 			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
 			for (int i = 0; i < overlayInfo.infoUnits.Count; i++)
 			{
 				overlayInfo.infoUnits[i].color = SimDebugView.Instance.temperatureThresholds[num - i].color;
 				overlayInfo.infoUnits[i].tooltip = UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE;
-				overlayInfo.infoUnits[i].tooltipFormatData = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+				overlayInfo.infoUnits[i].tooltipFormatData = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 			}
 		}
-		else if (mode == SimViewMode.HeatFlow)
+		else if (mode == OverlayModes.HeatFlow.ID)
 		{
 			overlayInfo.infoUnits[0].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING;
 			overlayInfo.infoUnits[1].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL;
@@ -204,7 +193,7 @@ public class OverlayLegend : KScreen
 		base.Show(false);
 	}
 
-	public OverlayLegend.OverlayInfo GetOverlayInfo(SimViewMode mode)
+	public OverlayLegend.OverlayInfo GetOverlayInfo(HashedString mode)
 	{
 		for (int i = 0; i < this.overlayInfoList.Count; i++)
 		{
@@ -384,7 +373,7 @@ public class OverlayLegend : KScreen
 		}
 		string[] names = Enum.GetNames(typeof(AudioEventManager.NoiseEffect));
 		Array values = Enum.GetValues(typeof(AudioEventManager.NoiseEffect));
-		Color[] dbColours = SimDebugView.Instance.dbColours;
+		Color[] dbColours = SimDebugView.dbColours;
 		for (int i = 0; i < names.Length; i++)
 		{
 			GameObject freeUnitObject = this.GetFreeUnitObject();
@@ -465,7 +454,7 @@ public class OverlayLegend : KScreen
 
 	private ToolParameterMenu toolParameterMenu;
 
-	private SimViewMode currentMode;
+	private HashedString currentMode = OverlayModes.None.ID;
 
 	private List<GameObject> inactiveUnitObjs;
 
@@ -510,7 +499,7 @@ public class OverlayLegend : KScreen
 	{
 		public string name;
 
-		public SimViewMode mode;
+		public HashedString mode;
 
 		public List<OverlayLegend.OverlayInfoUnit> infoUnits;
 

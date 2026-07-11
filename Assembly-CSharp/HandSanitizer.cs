@@ -91,7 +91,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 
 	private void OnStorageChange(object data)
 	{
-		if (base.smi.OutputFull())
+		if (this.dumpWhenFull && base.smi.OutputFull())
 		{
 			base.smi.DumpOutput();
 		}
@@ -107,6 +107,8 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	public int maxUses = 10;
 
 	public SimHashes outputElement = SimHashes.Vacuum;
+
+	public bool dumpWhenFull;
 
 	private WorkableReactable reactable;
 
@@ -154,7 +156,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		{
 		}
 
-		public bool HasSufficientMass()
+		private bool HasSufficientMass()
 		{
 			bool flag = false;
 			PrimaryElement primaryElement = base.GetComponent<Storage>().FindPrimaryElement(base.master.consumedElement);
@@ -169,6 +171,11 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		{
 			PrimaryElement primaryElement = base.GetComponent<Storage>().FindPrimaryElement(base.master.outputElement);
 			return primaryElement != null && primaryElement.Mass >= (float)base.master.maxUses * base.master.massConsumedPerUse;
+		}
+
+		public bool IsReady()
+		{
+			return this.HasSufficientMass() && !this.OutputFull();
 		}
 
 		public void OnCompleteWork(Worker worker)
@@ -190,12 +197,24 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.notready;
+			this.root.Update(new Action<HandSanitizer.SMInstance, float>(this.UpdateStatusItems), UpdateRate.SIM_200ms, false);
 			this.notoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.notready, false);
-			this.notready.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.ready, (HandSanitizer.SMInstance smi) => smi.HasSufficientMass()).TagTransition(GameTags.Operational, this.notoperational, true);
-			this.ready.DefaultState(this.ready.free).ToggleReactable((HandSanitizer.SMInstance smi) => smi.master.reactable = new HandSanitizer.WashHandsReactable(smi.master.GetComponent<HandSanitizer.Work>(), Db.Get().ChoreTypes.WashHands, smi.master.GetComponent<DirectionControl>().allowedDirection)).EventTransition(GameHashes.OnStorageChange, this.notready, (HandSanitizer.SMInstance smi) => !smi.HasSufficientMass())
-				.TagTransition(GameTags.Operational, this.notoperational, true);
+			this.notready.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.ready, (HandSanitizer.SMInstance smi) => smi.IsReady()).TagTransition(GameTags.Operational, this.notoperational, true);
+			this.ready.DefaultState(this.ready.free).ToggleReactable((HandSanitizer.SMInstance smi) => smi.master.reactable = new HandSanitizer.WashHandsReactable(smi.master.GetComponent<HandSanitizer.Work>(), Db.Get().ChoreTypes.WashHands, smi.master.GetComponent<DirectionControl>().allowedDirection)).TagTransition(GameTags.Operational, this.notoperational, true);
 			this.ready.free.PlayAnim("on").WorkableStartTransition((HandSanitizer.SMInstance smi) => smi.GetComponent<HandSanitizer.Work>(), this.ready.occupied);
-			this.ready.occupied.PlayAnim("working_pre").QueueAnim("working_loop", true, null).WorkableStopTransition((HandSanitizer.SMInstance smi) => smi.GetComponent<HandSanitizer.Work>(), this.ready);
+			this.ready.occupied.PlayAnim("working_pre").QueueAnim("working_loop", true, null).WorkableStopTransition((HandSanitizer.SMInstance smi) => smi.GetComponent<HandSanitizer.Work>(), this.notready);
+		}
+
+		private void UpdateStatusItems(HandSanitizer.SMInstance smi, float dt)
+		{
+			if (smi.OutputFull())
+			{
+				smi.master.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, this);
+			}
+			else
+			{
+				smi.master.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, false);
+			}
 		}
 
 		public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer, object>.State notready;

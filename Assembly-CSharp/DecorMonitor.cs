@@ -19,6 +19,8 @@ public class DecorMonitor : GameStateMachine<DecorMonitor, DecorMonitor.Instance
 		});
 	}
 
+	public static float MAXIMUM_DECOR_VALUE = 120f;
+
 	public new class Instance : GameStateMachine<DecorMonitor, DecorMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
@@ -105,12 +107,12 @@ public class DecorMonitor : GameStateMachine<DecorMonitor, DecorMonitor.Instance
 
 		private List<KeyValuePair<float, string>> effectLookup = new List<KeyValuePair<float, string>>
 		{
-			new KeyValuePair<float, string>(-30f, "DecorMinus1"),
-			new KeyValuePair<float, string>(0f, "Decor0"),
-			new KeyValuePair<float, string>(30f, "Decor1"),
-			new KeyValuePair<float, string>(60f, "Decor2"),
-			new KeyValuePair<float, string>(90f, "Decor3"),
-			new KeyValuePair<float, string>(120f, "Decor4"),
+			new KeyValuePair<float, string>(DecorMonitor.MAXIMUM_DECOR_VALUE * -0.25f, "DecorMinus1"),
+			new KeyValuePair<float, string>(DecorMonitor.MAXIMUM_DECOR_VALUE * 0f, "Decor0"),
+			new KeyValuePair<float, string>(DecorMonitor.MAXIMUM_DECOR_VALUE * 0.25f, "Decor1"),
+			new KeyValuePair<float, string>(DecorMonitor.MAXIMUM_DECOR_VALUE * 0.5f, "Decor2"),
+			new KeyValuePair<float, string>(DecorMonitor.MAXIMUM_DECOR_VALUE * 0.75f, "Decor3"),
+			new KeyValuePair<float, string>(DecorMonitor.MAXIMUM_DECOR_VALUE, "Decor4"),
 			new KeyValuePair<float, string>(float.MaxValue, "Decor5")
 		};
 	}

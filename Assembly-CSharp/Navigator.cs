@@ -217,6 +217,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.path.Clear();
 		base.smi.sm.moveTarget.Set(null, base.smi);
 		this.transitionDriver.EndTransition();
+		HashedString idleAnim = this.NavGrid.GetIdleAnim(this.CurrentNavType);
+		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+		component.Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
 		if (arrived_at_destination)
 		{
 			base.smi.GoTo(base.smi.sm.arrived);

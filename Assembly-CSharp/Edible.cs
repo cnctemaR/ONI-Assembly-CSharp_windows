@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class Edible : Workable, IGameObjectEffectDescriptor, IHasSortOrder
+public class Edible : Workable, IGameObjectEffectDescriptor
 {
 	private Edible()
 	{
@@ -50,8 +50,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor, IHasSortOrder
 		}
 	}
 
-	public int sortOrder { get; set; }
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -59,7 +57,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, IHasSortOrder
 		{
 			if (this.FoodID == null)
 			{
-				Output.LogError(new object[] { "No food FoodID" });
+				Output.LogError("No food FoodID");
 			}
 			this.foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.FoodID);
 		}
@@ -85,6 +83,16 @@ public class Edible : Workable, IGameObjectEffectDescriptor, IHasSortOrder
 			return Edible.hatWorkAnims;
 		}
 		return Edible.normalWorkAnims;
+	}
+
+	public override HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
+	{
+		MinionResume component = worker.GetComponent<MinionResume>();
+		if (base.GetComponent<Building>() != null && component != null && component.CurrentRole != "NoRole")
+		{
+			return Edible.hatWorkPstAnim;
+		}
+		return Edible.normalWorkPstAnim;
 	}
 
 	private void OnCraft(object data)
@@ -129,15 +137,18 @@ public class Edible : Workable, IGameObjectEffectDescriptor, IHasSortOrder
 
 	private void StartConsuming()
 	{
+		this.started = true;
 		this.consumptionStartTime = Time.time;
 		base.worker.Trigger(1406130139, this);
 	}
 
 	private void StopConsuming(Worker worker)
 	{
+		DebugUtil.DevAssert(this.started, new object[] { "StopConsuming() called without StartConsuming()" });
+		this.started = false;
 		if (float.IsNaN(this.consumptionStartTime))
 		{
-			KCrashReporter.Assert(false, "How did stop consuming get called twice?");
+			DebugUtil.DevAssert(false, new object[] { "consumptionStartTime NaN in StopConsuming()" });
 			return;
 		}
 		PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
@@ -215,6 +226,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor, IHasSortOrder
 	public string FoodID;
 
 	private EdiblesManager.FoodInfo foodInfo;
+
+	private bool started;
 
 	private float consumptionStartTime = float.NaN;
 

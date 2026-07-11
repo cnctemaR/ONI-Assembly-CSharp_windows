@@ -77,7 +77,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	{
 		ChoreType research = Db.Get().ChoreTypes.Research;
 		Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-		return new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		return new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 	}
 
 	public override float GetPercentComplete()

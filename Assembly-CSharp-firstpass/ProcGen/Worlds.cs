@@ -39,7 +39,7 @@ namespace ProcGen
 			FSUtil.GetFiles(filesystem, Path.Combine(path, "worlds"), "*.yaml", list);
 			foreach (string text in list)
 			{
-				World world = YamlIO<World>.LoadFile(text);
+				World world = YamlIO<World>.LoadFile(text, null);
 				string worldName = Worlds.GetWorldName(text);
 				this.worldCache[worldName] = new Worlds.Data
 				{

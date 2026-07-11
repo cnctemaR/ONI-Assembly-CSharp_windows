@@ -23,7 +23,7 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 1600f;
 		buildingDef.SelfHeatKilowattsWhenActive = 16f;
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
 		return buildingDef;
@@ -33,12 +33,14 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 	{
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		Refinery refinery = go.AddOrGet<Refinery>();
-		refinery.sideScreenStyle = RefinerySideScreen.StyleSetting.ListInputOutput;
-		refinery.duplicantOperated = true;
-		RefineryWorkable refineryWorkable = go.AddOrGet<RefineryWorkable>();
-		BuildingTemplates.CreateRefineryStorage(go, refinery);
-		refineryWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_rockrefinery_kanim") };
+		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
+		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
+		complexFabricator.duplicantOperated = true;
+		go.AddOrGet<FabricatorIngredientStatusManager>();
+		go.AddOrGet<CopyBuildingSettings>();
+		ComplexFabricatorWorkable complexFabricatorWorkable = go.AddOrGet<ComplexFabricatorWorkable>();
+		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
+		complexFabricatorWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_rockrefinery_kanim") };
 		Prioritizable.AddRef(go);
 		float num = 0.01f;
 		float num2 = (1f - num) * 0.5f;

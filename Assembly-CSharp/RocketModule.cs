@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using STRINGS;
 using UnityEngine;
 
@@ -44,6 +45,16 @@ public class RocketModule : KMonoBehaviour
 		}
 		base.Subscribe<RocketModule>(-1056989049, RocketModule.OnLaunchDelegate);
 		base.Subscribe<RocketModule>(238242047, RocketModule.OnLandDelegate);
+		base.Subscribe<RocketModule>(1502190696, RocketModule.DEBUG_OnDestroyDelegate);
+	}
+
+	private void DEBUG_OnDestroy(object data)
+	{
+		if (this.conditionManager != null && !App.IsExiting && !KMonoBehaviour.isLoadingScene)
+		{
+			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.conditionManager);
+			this.conditionManager.DEBUG_TraceModuleDestruction(base.name, spacecraftFromLaunchConditionManager.state.ToString(), new StackTrace(true).ToString());
+		}
 	}
 
 	public void OnConditionManagerTagsChanged(object data)
@@ -77,6 +88,17 @@ public class RocketModule : KMonoBehaviour
 		{
 			component3.SetAllowDeconstruction(false);
 		}
+		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
+		if (handle.IsValid())
+		{
+			GameComps.StructureTemperatures.Disable(handle);
+		}
+		this.ToggleComponent(typeof(ManualDeliveryKG), false);
+		this.ToggleComponent(typeof(ElementConsumer), false);
+		this.ToggleComponent(typeof(ElementConverter), false);
+		this.ToggleComponent(typeof(ConduitDispenser), false);
+		this.ToggleComponent(typeof(SolidConduitDispenser), false);
+		this.ToggleComponent(typeof(EnergyConsumer), false);
 	}
 
 	private void OnLand(object data)
@@ -102,6 +124,26 @@ public class RocketModule : KMonoBehaviour
 		if (component2 != null)
 		{
 			component2.SetAllowDeconstruction(true);
+		}
+		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
+		if (handle.IsValid())
+		{
+			GameComps.StructureTemperatures.Enable(handle);
+		}
+		this.ToggleComponent(typeof(ManualDeliveryKG), true);
+		this.ToggleComponent(typeof(ElementConsumer), true);
+		this.ToggleComponent(typeof(ElementConverter), true);
+		this.ToggleComponent(typeof(ConduitDispenser), true);
+		this.ToggleComponent(typeof(SolidConduitDispenser), true);
+		this.ToggleComponent(typeof(EnergyConsumer), true);
+	}
+
+	private void ToggleComponent(Type cmpType, bool enabled)
+	{
+		MonoBehaviour monoBehaviour = (MonoBehaviour)base.GetComponent(cmpType);
+		if (monoBehaviour != null)
+		{
+			monoBehaviour.enabled = enabled;
 		}
 	}
 
@@ -179,5 +221,10 @@ public class RocketModule : KMonoBehaviour
 	private static readonly EventSystem.IntraObjectHandler<RocketModule> OnLandDelegate = new EventSystem.IntraObjectHandler<RocketModule>(delegate(RocketModule component, object data)
 	{
 		component.OnLand(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<RocketModule> DEBUG_OnDestroyDelegate = new EventSystem.IntraObjectHandler<RocketModule>(delegate(RocketModule component, object data)
+	{
+		component.DEBUG_OnDestroy(data);
 	});
 }

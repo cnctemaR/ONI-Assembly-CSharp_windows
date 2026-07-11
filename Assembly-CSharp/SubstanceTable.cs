@@ -46,4 +46,8 @@ public class SubstanceTable : ScriptableObject, ISerializationCallbackReceiver
 
 	[SerializeField]
 	private List<Substance> list;
+
+	public Material solidMaterial;
+
+	public Material liquidMaterial;
 }

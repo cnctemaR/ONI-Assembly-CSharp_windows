@@ -18,11 +18,23 @@ public class EquipmentConfigManager : KMonoBehaviour
 	public void RegisterEquipment(IEquipmentConfig config)
 	{
 		EquipmentDef equipmentDef = config.CreateEquipmentDef();
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(equipmentDef.Id, equipmentDef.Name, equipmentDef.RecipeDescription, equipmentDef.Mass, true, equipmentDef.Anim, "object", Grid.SceneLayer.Ore, equipmentDef.CollisionShape, equipmentDef.width, equipmentDef.height, true, equipmentDef.OutputElement, null);
+		string id = equipmentDef.Id;
+		string name = equipmentDef.Name;
+		string recipeDescription = equipmentDef.RecipeDescription;
+		float mass = equipmentDef.Mass;
+		bool flag = true;
+		KAnimFile anim = equipmentDef.Anim;
+		string text = "object";
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
+		EntityTemplates.CollisionShape collisionShape = equipmentDef.CollisionShape;
+		float width = equipmentDef.width;
+		float height = equipmentDef.height;
+		bool flag2 = true;
+		SimHashes outputElement = equipmentDef.OutputElement;
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, recipeDescription, mass, flag, anim, text, sceneLayer, collisionShape, width, height, flag2, 0, outputElement, null);
 		Equippable equippable = gameObject.AddComponent<Equippable>();
 		equippable.def = equipmentDef;
 		equippable.slotID = equipmentDef.Slot;
-		this.LoadRecipe(equipmentDef, equippable);
 		config.DoPostConfigure(gameObject);
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 	}

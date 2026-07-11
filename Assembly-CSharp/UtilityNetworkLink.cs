@@ -75,6 +75,13 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 		linked_cell2 = Grid.OffsetCell(cell, rotatedCellOffset2);
 	}
 
+	public bool AreCellsValid(int cell, Orientation orientation)
+	{
+		CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.link1, orientation);
+		CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(this.link2, orientation);
+		return Grid.IsCellOffsetValid(cell, rotatedCellOffset) && Grid.IsCellOffsetValid(cell, rotatedCellOffset2);
+	}
+
 	private void OnBuildingBroken(object data)
 	{
 		this.Disconnect();

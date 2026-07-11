@@ -297,7 +297,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		}
 		else
 		{
-			Output.LogError(new object[] { "If you're filtering, your storage filter should have the filters set on it" });
+			Output.LogError("If you're filtering, your storage filter should have the filters set on it");
 		}
 	}
 

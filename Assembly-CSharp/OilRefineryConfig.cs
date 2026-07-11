@@ -24,7 +24,7 @@ public class OilRefineryConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
 		buildingDef.SelfHeatKilowattsWhenActive = 8f;
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
-		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
+		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
@@ -67,7 +67,6 @@ public class OilRefineryConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "OilRefinery";

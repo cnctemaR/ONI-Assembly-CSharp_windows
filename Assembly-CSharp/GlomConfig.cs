@@ -47,7 +47,7 @@ public class GlomConfig : IEntityConfig
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_jump", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_land", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_expel", NOISE_POLLUTION.CREATURES.TIER4);
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new TrappedStates.Def(), true).Add(new BaggedStates.Def(), true)
 			.Add(new FallStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)

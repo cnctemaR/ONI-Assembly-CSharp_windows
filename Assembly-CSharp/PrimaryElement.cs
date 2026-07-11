@@ -69,11 +69,11 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		else if (this.diseaseHandle.IsValid())
 		{
-			DiseaseContainer data = GameComps.DiseaseContainers.GetData(this.diseaseHandle);
-			if (data.diseaseIdx != 255)
+			DiseaseHeader header = GameComps.DiseaseContainers.GetHeader(this.diseaseHandle);
+			if (header.diseaseIdx != 255)
 			{
-				this.diseaseID = Db.Get().Diseases[(int)data.diseaseIdx].id;
-				this.diseaseCount = data.diseaseCount;
+				this.diseaseID = Db.Get().Diseases[(int)header.diseaseIdx].id;
+				this.diseaseCount = header.diseaseCount;
 			}
 		}
 	}
@@ -123,10 +123,10 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 		else if (this.diseaseHandle.IsValid())
 		{
-			DiseaseContainer data = GameComps.DiseaseContainers.GetData(this.diseaseHandle);
-			data.diseaseIdx = index;
-			data.diseaseCount = this.diseaseCount;
-			GameComps.DiseaseContainers.SetData(this.diseaseHandle, data);
+			DiseaseHeader header = GameComps.DiseaseContainers.GetHeader(this.diseaseHandle);
+			header.diseaseIdx = index;
+			header.diseaseCount = this.diseaseCount;
+			GameComps.DiseaseContainers.SetHeader(this.diseaseHandle, header);
 		}
 		else
 		{
@@ -222,6 +222,10 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
+			if (this.diseaseRedirectTarget)
+			{
+				return this.diseaseRedirectTarget.DiseaseIdx;
+			}
 			byte b = byte.MaxValue;
 			if (this.useSimDiseaseInfo)
 			{
@@ -230,7 +234,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			}
 			else if (this.diseaseHandle.IsValid())
 			{
-				b = GameComps.DiseaseContainers.GetData(this.diseaseHandle).diseaseIdx;
+				b = GameComps.DiseaseContainers.GetHeader(this.diseaseHandle).diseaseIdx;
 			}
 			return b;
 		}
@@ -240,6 +244,10 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
+			if (this.diseaseRedirectTarget)
+			{
+				return this.diseaseRedirectTarget.DiseaseCount;
+			}
 			int num = 0;
 			if (this.useSimDiseaseInfo)
 			{
@@ -248,7 +256,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			}
 			else if (this.diseaseHandle.IsValid())
 			{
-				num = GameComps.DiseaseContainers.GetData(this.diseaseHandle).diseaseCount;
+				num = GameComps.DiseaseContainers.GetHeader(this.diseaseHandle).diseaseCount;
 			}
 			return num;
 		}
@@ -268,9 +276,16 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		if (attributes != null)
 		{
 			Element element = this.Element;
-			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+			try
 			{
-				attributes.Add(attributeModifier);
+				foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+				{
+					attributes.Add(attributeModifier);
+				}
+			}
+			catch
+			{
+				global::Debug.Log("!", null);
 			}
 		}
 	}
@@ -339,9 +354,9 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	public void ModifyDiseaseCount(int delta, string reason)
 	{
-		if (this.ModifyDiseaseCountHandler != null)
+		if (this.diseaseRedirectTarget)
 		{
-			this.ModifyDiseaseCountHandler(delta, reason);
+			this.diseaseRedirectTarget.ModifyDiseaseCount(delta, reason);
 			return;
 		}
 		if (this.useSimDiseaseInfo)
@@ -367,9 +382,9 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		{
 			return;
 		}
-		if (this.AddDiseaseHandler != null)
+		if (this.diseaseRedirectTarget)
 		{
-			this.AddDiseaseHandler(disease_idx, delta, reason);
+			this.diseaseRedirectTarget.AddDisease(disease_idx, delta, reason);
 			return;
 		}
 		if (this.useSimDiseaseInfo)
@@ -431,24 +446,28 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		this.AddDisease(pickupable.PrimaryElement.DiseaseIdx, pickupable.PrimaryElement.DiseaseCount, "PrimaryElement.OnAbsorb");
 	}
 
-	public void SetDiseaseVisualProvider(GameObject visualizer)
+	private void SetDiseaseVisualProvider(GameObject visualizer)
 	{
 		HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(base.gameObject);
 		if (handle != HandleVector<int>.InvalidHandle)
 		{
-			DiseaseContainer data = GameComps.DiseaseContainers.GetData(handle);
-			data.visualDiseaseProvider = visualizer;
-			GameComps.DiseaseContainers.SetData(handle, data);
+			DiseaseContainer payload = GameComps.DiseaseContainers.GetPayload(handle);
+			payload.visualDiseaseProvider = visualizer;
+			GameComps.DiseaseContainers.SetPayload(handle, ref payload);
 		}
+	}
+
+	public void RedirectDisease(GameObject target)
+	{
+		this.SetDiseaseVisualProvider(target);
+		this.diseaseRedirectTarget = ((!target) ? null : target.GetComponent<PrimaryElement>());
 	}
 
 	public PrimaryElement.GetTemperatureCallback getTemperatureCallback = new PrimaryElement.GetTemperatureCallback(PrimaryElement.OnGetTemperature);
 
 	public PrimaryElement.SetTemperatureCallback setTemperatureCallback = new PrimaryElement.SetTemperatureCallback(PrimaryElement.OnSetTemperature);
 
-	public Action<int, string> ModifyDiseaseCountHandler;
-
-	public Action<byte, int, string> AddDiseaseHandler;
+	private PrimaryElement diseaseRedirectTarget;
 
 	private bool useSimDiseaseInfo;
 

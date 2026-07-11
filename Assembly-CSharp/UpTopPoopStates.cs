@@ -15,7 +15,7 @@ internal class UpTopPoopStates : GameStateMachine<UpTopPoopStates, UpTopPoopStat
 		string text = CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Poop, false);
 	}
 
@@ -43,12 +43,22 @@ internal class UpTopPoopStates : GameStateMachine<UpTopPoopStates, UpTopPoopStat
 		{
 			int num = Grid.PosToCell(base.gameObject);
 			int num2 = Grid.OffsetCell(num, 0, 1);
-			while (Grid.IsValidCell(num2) && !Grid.Solid[num2])
+			while (Grid.IsValidCell(num2) && !Grid.Solid[num2] && !this.IsClosedDoor(num2))
 			{
 				num = num2;
 				num2 = Grid.OffsetCell(num, 0, 1);
 			}
 			return num;
+		}
+
+		public bool IsClosedDoor(int cellAbove)
+		{
+			if (Grid.HasDoor[cellAbove])
+			{
+				Door component = Grid.Objects[cellAbove, 1].GetComponent<Door>();
+				return component != null && component.CurrentState != Door.ControlState.Opened;
+			}
+			return false;
 		}
 	}
 }

@@ -9,7 +9,7 @@ public class TouristModuleConfig : IBuildingConfig
 		string text = "TouristModule";
 		int num = 5;
 		int num2 = 5;
-		string text2 = "rocket_storage_live_kanim";
+		string text2 = "rocket_tourist_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
 		float[] command_MODULE_MASS = BUILDINGS.ROCKETRY_MASS_KG.COMMAND_MODULE_MASS;
@@ -19,9 +19,7 @@ public class TouristModuleConfig : IBuildingConfig
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, command_MODULE_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.Deprecated = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
-		buildingDef.ViewMode = SimViewMode.None;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;

@@ -84,7 +84,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 							break;
 						}
 					}
-					return element.substance.debugColour;
+					return element.substance.uiColour;
 				};
 			}
 		}

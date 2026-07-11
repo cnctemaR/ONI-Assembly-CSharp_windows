@@ -34,12 +34,12 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 
 	public float GetRangeMinInputField()
 	{
-		return GameUtil.GetConvertedTemperature(this.RangeMin);
+		return GameUtil.GetConvertedTemperature(this.RangeMin, false);
 	}
 
 	public float GetRangeMaxInputField()
 	{
-		return GameUtil.GetConvertedTemperature(this.RangeMax);
+		return GameUtil.GetConvertedTemperature(this.RangeMax, false);
 	}
 
 	public LocString Title
@@ -76,7 +76,7 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 
 	public string Format(float value, bool units)
 	{
-		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, units);
+		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, units, false);
 	}
 
 	public float ProcessedSliderValue(float input)
@@ -112,6 +112,36 @@ public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 			locString = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
 		}
 		return locString;
+	}
+
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
+		{
+			return ThresholdScreenLayoutType.SliderBar;
+		}
+	}
+
+	public int IncrementScale
+	{
+		get
+		{
+			return 1;
+		}
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return new NonLinearSlider.Range[]
+			{
+				new NonLinearSlider.Range(25f, 260f),
+				new NonLinearSlider.Range(50f, 400f),
+				new NonLinearSlider.Range(12f, 1500f),
+				new NonLinearSlider.Range(13f, 10000f)
+			};
+		}
 	}
 
 	public float rangeMin;

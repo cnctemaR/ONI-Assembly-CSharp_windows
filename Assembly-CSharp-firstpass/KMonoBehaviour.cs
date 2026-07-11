@@ -54,7 +54,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			}
 			catch (Exception ex)
 			{
-				Output.LogError(new object[] { string.Concat(new string[]
+				Output.LogError(string.Concat(new string[]
 				{
 					"Error in: ",
 					base.name,
@@ -62,7 +62,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 					base.GetType().Name,
 					".OnPrefabInit\n",
 					ex.ToString()
-				}) });
+				}));
 			}
 		}
 	}
@@ -142,7 +142,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		}
 		catch (Exception ex)
 		{
-			Output.LogError(new object[] { string.Concat(new string[]
+			Output.LogError(string.Concat(new string[]
 			{
 				"Error in: ",
 				base.name,
@@ -150,7 +150,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 				base.GetType().Name,
 				".OnSpawn\n",
 				ex.ToString()
-			}) });
+			}));
 		}
 	}
 

@@ -19,6 +19,19 @@ public static class CodexCache
 		CodexCache.entries = new Dictionary<string, CodexEntry>();
 		CodexCache.unlockedEntryLookup = new Dictionary<string, List<string>>();
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
+		if (CodexCache.widgetTagMappings == null)
+		{
+			CodexCache.widgetTagMappings = new List<Tuple<string, Type>>
+			{
+				new Tuple<string, Type>("!CodexText", typeof(CodexText)),
+				new Tuple<string, Type>("!CodexImage", typeof(CodexImage)),
+				new Tuple<string, Type>("!CodexDividerLine", typeof(CodexDividerLine)),
+				new Tuple<string, Type>("!CodexSpacer", typeof(CodexSpacer)),
+				new Tuple<string, Type>("!CodexLabelWithIcon", typeof(CodexLabelWithIcon)),
+				new Tuple<string, Type>("!CodexContentLockedIndicator", typeof(CodexContentLockedIndicator)),
+				new Tuple<string, Type>("!CodexLargeSpacer", typeof(CodexLargeSpacer))
+			};
+		}
 		string text = CodexCache.FormatLinkID("creatures");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator.GenerateCreatureEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Hatch").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
 		text = CodexCache.FormatLinkID("plants");
@@ -37,6 +50,8 @@ public static class CodexCache
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ELEMENTS, CodexEntryGenerator.GenerateElementEntries(), null));
 		text = CodexCache.FormatLinkID("geysers");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.GEYSERS, CodexEntryGenerator.GenerateGeyserEntries(), null));
+		text = CodexCache.FormatLinkID("equipment");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.EQUIPMENT, CodexEntryGenerator.GenerateEquipmentEntries(), null));
 		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID("HOME"), UI.CODEX.CATEGORYNAMES.ROOT, dictionary, null);
 		CodexEntryGenerator.GeneratePageNotFound();
 		List<CategoryEntry> list = new List<CategoryEntry>();
@@ -61,45 +76,34 @@ public static class CodexCache
 				int num = 0;
 				foreach (SubEntry subEntry in keyValuePair2.Value.subEntries)
 				{
-					if (subEntry.lockID != null && Game.Instance.unlocks.IsLocked(subEntry.lockID))
+					if (subEntry.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry.lockID))
 					{
 						num++;
 					}
 				}
-				List<CodexWidget> list2 = new List<CodexWidget>();
-				list2.Add(new CodexWidget(CodexWidget.ContentType.Spacer));
-				list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
+				List<ICodexWidget> list2 = new List<ICodexWidget>();
+				list2.Add(new CodexSpacer());
+				list2.Add(new CodexText(string.Concat(new object[]
 				{
-					{
-						"string",
-						string.Concat(new object[]
-						{
-							CODEX.HEADERS.SUBENTRIES,
-							" (",
-							keyValuePair2.Value.subEntries.Count - num,
-							"/",
-							keyValuePair2.Value.subEntries.Count,
-							")"
-						})
-					},
-					{ "style", "subtitle" }
-				}));
+					CODEX.HEADERS.SUBENTRIES,
+					" (",
+					keyValuePair2.Value.subEntries.Count - num,
+					"/",
+					keyValuePair2.Value.subEntries.Count,
+					")"
+				}), CodexTextStyle.Subtitle));
 				foreach (SubEntry subEntry2 in keyValuePair2.Value.subEntries)
 				{
-					if (subEntry2.lockID != null && Game.Instance.unlocks.IsLocked(subEntry2.lockID))
+					if (subEntry2.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry2.lockID))
 					{
-						list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string> { 
-						{
-							"string",
-							UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name))
-						} }));
+						list2.Add(new CodexText(UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name)), CodexTextStyle.Body));
 					}
 					else
 					{
-						list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string> { { "string", subEntry2.name } }));
+						list2.Add(new CodexText(subEntry2.name, CodexTextStyle.Body));
 					}
 				}
-				list2.Add(new CodexWidget(CodexWidget.ContentType.Spacer));
+				list2.Add(new CodexSpacer());
 				keyValuePair2.Value.contentContainers.Insert(keyValuePair2.Value.customContentLength, new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
 			}
 			for (int i = 0; i < keyValuePair2.Value.subEntries.Count; i++)
@@ -225,9 +229,9 @@ public static class CodexCache
 									subEntry.contentContainers.Add(v.contentContainers[i]);
 								}
 							}
-							subEntry.contentContainers.Add(new ContentContainer(new List<CodexWidget>
+							subEntry.contentContainers.Add(new ContentContainer(new List<ICodexWidget>
 							{
-								new CodexWidget(CodexWidget.ContentType.LargeSpacer)
+								new CodexLargeSpacer()
 							}, ContentContainer.ContentLayout.Vertical));
 							subEntry.layoutPriority = v.layoutPriority;
 						}
@@ -266,6 +270,10 @@ public static class CodexCache
 	public static void AddEntry(string id, CodexEntry entry, List<CategoryEntry> categoryEntries = null)
 	{
 		id = CodexCache.FormatLinkID(id);
+		if (CodexCache.entries.ContainsKey(id))
+		{
+			global::Debug.LogError("Tried to add " + id + " to the Codex screen multiple times", null);
+		}
 		CodexCache.entries.Add(id, entry);
 		entry.id = id;
 		if (entry.name == null)
@@ -351,7 +359,7 @@ public static class CodexCache
 		if (CodexCache.entries[templatePath] == null)
 		{
 			string text = Path.Combine(CodexCache.baseEntryPath, templatePath);
-			CodexEntry codexEntry = YamlIO<CodexEntry>.LoadFile(text + ".yaml");
+			CodexEntry codexEntry = YamlIO<CodexEntry>.LoadFile(text + ".yaml", CodexCache.widgetTagMappings);
 			if (codexEntry == null)
 			{
 				global::Debug.LogWarning("Missing template [" + text + ".yaml]", null);
@@ -374,23 +382,14 @@ public static class CodexCache
 		{
 			global::Debug.LogWarning(ex, null);
 		}
-		WorkItemCollection<CodexCache.CollectEntryWorkItem, object> workItemCollection = new WorkItemCollection<CodexCache.CollectEntryWorkItem, object>();
-		foreach (string text2 in array)
+		string text2 = folder.ToUpper();
+		foreach (string text3 in array)
 		{
-			workItemCollection.Add(new CodexCache.CollectEntryWorkItem
+			CodexEntry codexEntry = YamlIO<CodexEntry>.LoadFile(text3, CodexCache.widgetTagMappings);
+			if (codexEntry != null)
 			{
-				path = text2
-			});
-		}
-		GlobalJobManager.Run(workItemCollection);
-		string text3 = folder.ToUpper();
-		for (int j = 0; j < workItemCollection.Count; j++)
-		{
-			CodexEntry asset = workItemCollection.GetWorkItem(j).asset;
-			if (asset != null)
-			{
-				asset.category = text3;
-				list.Add(asset);
+				codexEntry.category = text2;
+				list.Add(codexEntry);
 			}
 		}
 		list.Sort((CodexEntry x, CodexEntry y) => x.title.CompareTo(y.title));
@@ -410,21 +409,12 @@ public static class CodexCache
 		{
 			global::Debug.LogWarning(ex, null);
 		}
-		WorkItemCollection<CodexCache.CollectSubEntryWorkItem, object> workItemCollection = new WorkItemCollection<CodexCache.CollectSubEntryWorkItem, object>();
 		foreach (string text2 in array)
 		{
-			workItemCollection.Add(new CodexCache.CollectSubEntryWorkItem
+			SubEntry subEntry = YamlIO<SubEntry>.LoadFile(text2, CodexCache.widgetTagMappings);
+			if (subEntry != null)
 			{
-				path = text2
-			});
-		}
-		GlobalJobManager.Run(workItemCollection);
-		for (int j = 0; j < workItemCollection.Count; j++)
-		{
-			SubEntry asset = workItemCollection.GetWorkItem(j).asset;
-			if (asset != null)
-			{
-				list.Add(asset);
+				list.Add(subEntry);
 			}
 		}
 		list.Sort((SubEntry x, SubEntry y) => x.title.CompareTo(y.title));
@@ -437,27 +427,5 @@ public static class CodexCache
 
 	private static Dictionary<string, List<string>> unlockedEntryLookup;
 
-	private struct CollectEntryWorkItem : IWorkItem<object>
-	{
-		public void Run(object shared_data)
-		{
-			this.asset = YamlIO<CodexEntry>.LoadFile(this.path);
-		}
-
-		public string path;
-
-		public CodexEntry asset;
-	}
-
-	private struct CollectSubEntryWorkItem : IWorkItem<object>
-	{
-		public void Run(object shared_data)
-		{
-			this.asset = YamlIO<SubEntry>.LoadFile(this.path);
-		}
-
-		public string path;
-
-		public SubEntry asset;
-	}
+	private static List<Tuple<string, Type>> widgetTagMappings;
 }

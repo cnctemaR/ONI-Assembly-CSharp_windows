@@ -194,10 +194,6 @@ public class Game : KMonoBehaviour
 			base.Trigger(-1992507039, null);
 			base.Trigger(-838649377, null);
 		}
-		else
-		{
-			this.ResetTime();
-		}
 		KScreen kscreen = this.LocalPlayer.ScreenManager.StartScreen(ScreenPrefabs.Instance.ResourceCategoryScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 		kscreen.transform.SetSiblingIndex(1);
 		foreach (MeshRenderer meshRenderer in Resources.FindObjectsOfTypeAll(typeof(MeshRenderer)))
@@ -288,7 +284,7 @@ public class Game : KMonoBehaviour
 			{
 				if (Grid.Visible == null || Grid.Visible.Length == 0)
 				{
-					Output.LogError(new object[] { "Invalid Grid.Visible, what have you done?!" });
+					Output.LogError("Invalid Grid.Visible, what have you done?!");
 					return null;
 				}
 				intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, Grid.Visible.Length, Grid.Visible);
@@ -358,7 +354,7 @@ public class Game : KMonoBehaviour
 					Sim.SpawnOreInfo spawnOreInfo = ptr2->digInfo[m];
 					if (spawnOreInfo.temperature <= 0f && spawnOreInfo.mass > 0f)
 					{
-						Output.LogError(new object[] { "Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this...." });
+						Output.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
 					}
 					component.OnDigComplete(spawnOreInfo.cellIdx, spawnOreInfo.mass, spawnOreInfo.temperature, spawnOreInfo.elemIdx, spawnOreInfo.diseaseIdx, spawnOreInfo.diseaseCount);
 				}
@@ -370,7 +366,7 @@ public class Game : KMonoBehaviour
 					Element element2 = ElementLoader.elements[(int)spawnOreInfo2.elemIdx];
 					if (spawnOreInfo2.temperature <= 0f && spawnOreInfo2.mass > 0f)
 					{
-						Output.LogError(new object[] { "Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this...." });
+						Output.LogError("Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this....");
 					}
 					element2.substance.SpawnResource(vector, spawnOreInfo2.mass, spawnOreInfo2.temperature, spawnOreInfo2.diseaseIdx, spawnOreInfo2.diseaseCount, false, false);
 				}
@@ -675,7 +671,7 @@ public class Game : KMonoBehaviour
 	{
 		if (OverlayScreen.Instance != null)
 		{
-			SimViewMode mode = OverlayScreen.Instance.GetMode();
+			HashedString mode = OverlayScreen.Instance.GetMode();
 			foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers.Items)
 			{
 				buildingCellVisualizer.Tick(mode);
@@ -685,7 +681,7 @@ public class Game : KMonoBehaviour
 
 	public void ForceOverlayUpdate()
 	{
-		this.previousOverlayMode = SimViewMode.None;
+		this.previousOverlayMode = OverlayModes.None.ID;
 	}
 
 	private void LateUpdate()
@@ -713,47 +709,41 @@ public class Game : KMonoBehaviour
 		this.gasConduitSystem.Update();
 		this.liquidConduitSystem.Update();
 		this.solidConduitSystem.Update();
-		SimViewMode mode = SimDebugView.Instance.GetMode();
+		HashedString mode = SimDebugView.Instance.GetMode();
 		if (mode != this.previousOverlayMode)
 		{
 			this.previousOverlayMode = mode;
-			if (mode != SimViewMode.GasVentMap)
+			if (mode == OverlayModes.LiquidConduits.ID)
 			{
-				if (mode != SimViewMode.SolidConveyorMap)
-				{
-					if (mode != SimViewMode.LiquidVentMap)
-					{
-						this.liquidFlowVisualizer.ColourizePipeContents(false, false);
-						this.gasFlowVisualizer.ColourizePipeContents(false, false);
-						this.solidFlowVisualizer.ColourizePipeContents(false, false);
-					}
-					else
-					{
-						this.liquidFlowVisualizer.ColourizePipeContents(true, true);
-						this.gasFlowVisualizer.ColourizePipeContents(false, true);
-						this.solidFlowVisualizer.ColourizePipeContents(false, true);
-					}
-				}
-				else
-				{
-					this.liquidFlowVisualizer.ColourizePipeContents(false, true);
-					this.gasFlowVisualizer.ColourizePipeContents(false, true);
-					this.solidFlowVisualizer.ColourizePipeContents(true, true);
-				}
+				this.liquidFlowVisualizer.ColourizePipeContents(true, true);
+				this.gasFlowVisualizer.ColourizePipeContents(false, true);
+				this.solidFlowVisualizer.ColourizePipeContents(false, true);
 			}
-			else
+			else if (mode == OverlayModes.GasConduits.ID)
 			{
 				this.liquidFlowVisualizer.ColourizePipeContents(false, true);
 				this.gasFlowVisualizer.ColourizePipeContents(true, true);
 				this.solidFlowVisualizer.ColourizePipeContents(false, true);
 			}
+			else if (mode == OverlayModes.SolidConveyor.ID)
+			{
+				this.liquidFlowVisualizer.ColourizePipeContents(false, true);
+				this.gasFlowVisualizer.ColourizePipeContents(false, true);
+				this.solidFlowVisualizer.ColourizePipeContents(true, true);
+			}
+			else
+			{
+				this.liquidFlowVisualizer.ColourizePipeContents(false, false);
+				this.gasFlowVisualizer.ColourizePipeContents(false, false);
+				this.solidFlowVisualizer.ColourizePipeContents(false, false);
+			}
 		}
-		this.gasFlowVisualizer.Render(this.gasFlowPos.z, 0, this.gasConduitFlow.ContinuousLerpPercent, mode == SimViewMode.GasVentMap && this.gasConduitFlow.DiscreteLerpPercent != this.previousGasConduitFlowDiscreteLerpPercent);
-		this.liquidFlowVisualizer.Render(this.liquidFlowPos.z, 0, this.liquidConduitFlow.ContinuousLerpPercent, mode == SimViewMode.LiquidVentMap && this.liquidConduitFlow.DiscreteLerpPercent != this.previousLiquidConduitFlowDiscreteLerpPercent);
-		this.solidFlowVisualizer.Render(this.solidFlowPos.z, 0, this.solidConduitFlow.ContinuousLerpPercent, mode == SimViewMode.SolidConveyorMap && this.solidConduitFlow.DiscreteLerpPercent != this.previousSolidConduitFlowDiscreteLerpPercent);
-		this.previousGasConduitFlowDiscreteLerpPercent = ((mode != SimViewMode.GasVentMap) ? (-1f) : this.gasConduitFlow.DiscreteLerpPercent);
-		this.previousLiquidConduitFlowDiscreteLerpPercent = ((mode != SimViewMode.LiquidVentMap) ? (-1f) : this.liquidConduitFlow.DiscreteLerpPercent);
-		this.previousSolidConduitFlowDiscreteLerpPercent = ((mode != SimViewMode.SolidConveyorMap) ? (-1f) : this.solidConduitFlow.DiscreteLerpPercent);
+		this.gasFlowVisualizer.Render(this.gasFlowPos.z, 0, this.gasConduitFlow.ContinuousLerpPercent, mode == OverlayModes.GasConduits.ID && this.gasConduitFlow.DiscreteLerpPercent != this.previousGasConduitFlowDiscreteLerpPercent);
+		this.liquidFlowVisualizer.Render(this.liquidFlowPos.z, 0, this.liquidConduitFlow.ContinuousLerpPercent, mode == OverlayModes.LiquidConduits.ID && this.liquidConduitFlow.DiscreteLerpPercent != this.previousLiquidConduitFlowDiscreteLerpPercent);
+		this.solidFlowVisualizer.Render(this.solidFlowPos.z, 0, this.solidConduitFlow.ContinuousLerpPercent, mode == OverlayModes.SolidConveyor.ID && this.solidConduitFlow.DiscreteLerpPercent != this.previousSolidConduitFlowDiscreteLerpPercent);
+		this.previousGasConduitFlowDiscreteLerpPercent = ((!(mode == OverlayModes.GasConduits.ID)) ? (-1f) : this.gasConduitFlow.DiscreteLerpPercent);
+		this.previousLiquidConduitFlowDiscreteLerpPercent = ((!(mode == OverlayModes.LiquidConduits.ID)) ? (-1f) : this.liquidConduitFlow.DiscreteLerpPercent);
+		this.previousSolidConduitFlowDiscreteLerpPercent = ((!(mode == OverlayModes.SolidConveyor.ID)) ? (-1f) : this.solidConduitFlow.DiscreteLerpPercent);
 		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
 		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
 		Shader.SetGlobalVector("_WsToCs", new Vector4(vector.x / (float)Grid.WidthInCells, vector.y / (float)Grid.HeightInCells, (vector2.x - vector.x) / (float)Grid.WidthInCells, (vector2.y - vector.y) / (float)Grid.HeightInCells));
@@ -800,7 +790,7 @@ public class Game : KMonoBehaviour
 		GC.Collect();
 		float num = Time.realtimeSinceStartup - realtimeSinceStartup;
 		global::Debug.Log("\tGC.Collect() took " + num.ToString() + " seconds", null);
-		uint num2 = 291640U;
+		uint num2 = 299745U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(SaveLoader.GetLatestSaveFile());
@@ -1025,12 +1015,6 @@ public class Game : KMonoBehaviour
 		{
 			this.OnLoad(gameSaveData);
 		}
-	}
-
-	public void ResetTime()
-	{
-		KPlayerPrefs.DeleteKey(Game.NextUniqueIDKey);
-		KPrefabID.NextUniqueID = 0;
 	}
 
 	public void SetAutoSaveCallbacks(Game.SavingPreCB activatePreCB, Game.SavingActiveCB activateActiveCB, Game.SavingPostCB activatePostCB)
@@ -1296,8 +1280,6 @@ public class Game : KMonoBehaviour
 		DetailsScreen.DestroyInstance();
 		DietManager.DestroyInstance();
 		DebugText.DestroyInstance();
-		FabricationNeeds.DestroyInstance();
-		RefineryNeeds.DestroyInstance();
 		FactionManager.DestroyInstance();
 		EmptyPipeTool.DestroyInstance();
 		FetchListStatusItemUpdater.DestroyInstance();
@@ -1622,7 +1604,7 @@ public class Game : KMonoBehaviour
 
 	private bool isLoading;
 
-	private SimViewMode previousOverlayMode;
+	private HashedString previousOverlayMode = OverlayModes.None.ID;
 
 	private float previousGasConduitFlowDiscreteLerpPercent = -1f;
 

@@ -52,7 +52,7 @@ public class SpiceVineConfig : IEntityConfig
 		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.DESC;
 		kanimFile = Assets.GetAnim("seed_spicenut_kanim");
 		list = new List<Tag> { GameTags.CropSeed };
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty);
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty, false);
 		GameObject gameObject4 = EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3);
 		EntityTemplates.MakeHangingOffsets(gameObject4, 1, 3);
 		return gameObject;

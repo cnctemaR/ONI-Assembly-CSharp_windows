@@ -4,10 +4,8 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection, IGameObjectEffectDescriptor, ISim200ms
+public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEffectDescriptor, ISim200ms
 {
-	public int sortOrder { get; set; }
-
 	public SingleEntityReceptacle.ReceptacleDirection Direction
 	{
 		get

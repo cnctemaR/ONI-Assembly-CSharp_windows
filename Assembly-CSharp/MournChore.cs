@@ -7,28 +7,34 @@ using UnityEngine;
 public class MournChore : Chore<MournChore.StatesInstance>
 {
 	public MournChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, null)
 	{
 		this.smi = new MournChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		base.AddPrecondition(ChorePreconditions.instance.NoDeadBodies, null);
-		base.AddPrecondition(ChorePreconditions.instance.ValidMourningSite, null);
-		base.AddPrecondition(MournChore.HasPlaceToStand, null);
+		base.AddPrecondition(MournChore.HasValidMournLocation, master);
 	}
 
-	private static int GetStandableCell(int cell)
+	private static int GetStandableCell(int cell, Navigator navigator)
 	{
-		int num = -1;
 		foreach (CellOffset cellOffset in MournChore.ValidStandingOffsets)
 		{
-			int num2 = Grid.OffsetCell(cell, cellOffset);
-			if (!Grid.Reserved[num2])
+			if (Grid.IsCellOffsetValid(cell, cellOffset))
 			{
-				num = num2;
-				break;
+				int num = Grid.OffsetCell(cell, cellOffset);
+				if (!Grid.Reserved[num])
+				{
+					if (navigator.NavGrid.NavTable.IsValid(num, NavType.Floor))
+					{
+						if (navigator.GetNavigationCost(num) != -1)
+						{
+							return num;
+						}
+					}
+				}
 			}
 		}
-		return num;
+		return -1;
 	}
 
 	public static Grave FindGraveToMournAt()
@@ -94,19 +100,21 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		new CellOffset(1, 0)
 	};
 
-	private static readonly Chore.Precondition HasPlaceToStand = new Chore.Precondition
+	private static readonly Chore.Precondition HasValidMournLocation = new Chore.Precondition
 	{
 		id = "HasPlaceToStand",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.HAS_PLACE_TO_STAND,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
+			IStateMachineTarget stateMachineTarget = (IStateMachineTarget)data;
+			Navigator component = stateMachineTarget.GetComponent<Navigator>();
 			bool flag = false;
 			Grave grave = MournChore.FindGraveToMournAt();
 			if (grave != null)
 			{
 				int num = Grid.PosToCell(grave);
-				int standableCell = MournChore.GetStandableCell(num);
-				if (standableCell >= 0)
+				int standableCell = MournChore.GetStandableCell(num, component);
+				if (Grid.IsValidCell(standableCell))
 				{
 					flag = true;
 				}
@@ -126,7 +134,8 @@ public class MournChore : Chore<MournChore.StatesInstance>
 		{
 			Grave grave = MournChore.FindGraveToMournAt();
 			int num = Grid.PosToCell(grave.transform.GetPosition());
-			int standableCell = MournChore.GetStandableCell(num);
+			Navigator component = base.master.GetComponent<Navigator>();
+			int standableCell = MournChore.GetStandableCell(num, component);
 			if (standableCell < 0)
 			{
 				base.smi.GoTo(null);

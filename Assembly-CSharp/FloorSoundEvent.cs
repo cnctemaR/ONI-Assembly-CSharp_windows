@@ -117,6 +117,10 @@ public class FloorSoundEvent : SoundEvent
 				{
 					text = "TileMetal";
 				}
+				else if (prefabID == "CarpetTile")
+				{
+					text = "Carpet";
+				}
 				else
 				{
 					text = "Tile";

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D10}</ProjectGuid>
+    <ProjectGuid>{C0C0E3B2-E2DF-4C74-98E5-765DD19DF297}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.ImageConversionModule</AssemblyName>
@@ -19,19 +19,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8CF0}</Project>
+      <Project>{C0C0E3B2-E2DF-4C74-98E5-765DD19DF277}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8CF3}</Project>
+      <Project>{C0C0E3B2-E2DF-4C74-98E5-765DD19DF27A}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D07}</Project>
+      <Project>{C0C0E3B2-E2DF-4C74-98E5-765DD19DF28E}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{B2109074-A84E-4C99-A4F3-1D9ECD3C8D1D}</Project>
+      <Project>{C0C0E3B2-E2DF-4C74-98E5-765DD19DF2A4}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

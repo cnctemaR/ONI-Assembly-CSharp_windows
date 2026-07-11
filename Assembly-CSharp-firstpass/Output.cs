@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Output
 {
-	private static string BuildString(object[] objs)
+	public static string BuildString(object[] objs)
 	{
 		string text = string.Empty;
 		if (objs.Length > 0)
@@ -61,11 +61,12 @@ public class Output
 
 	public static void Print(string str)
 	{
+		Console.Out.WriteLine(str);
 	}
 
 	private static void PrintWithObj(global::UnityEngine.Object obj, string str)
 	{
-		Console.Out.WriteLine(str);
+		Console.Out.WriteLine(str + " : " + ((!(obj != null)) ? "<null>" : obj.name));
 	}
 
 	private static void Warn(string str)
@@ -75,10 +76,10 @@ public class Output
 
 	private static void LogWarningWithObj(global::UnityEngine.Object obj, string str)
 	{
-		Console.Out.WriteLine("WARNING: " + str);
+		Console.Out.WriteLine("WARNING: " + str + " : " + ((!(obj != null)) ? "<null>" : obj.name));
 	}
 
-	private static void LogError(string str)
+	public static void LogError(string str)
 	{
 		global::Debug.LogError(str, null);
 	}

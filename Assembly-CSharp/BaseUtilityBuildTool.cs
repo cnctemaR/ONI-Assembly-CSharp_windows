@@ -55,7 +55,7 @@ public class BaseUtilityBuildTool : DragTool
 		base.OnDeactivateTool(new_tool);
 	}
 
-	public void Activate(BuildingDef def, IList<Element> selected_elements)
+	public void Activate(BuildingDef def, IList<Tag> selected_elements)
 	{
 		this.selectedElements = selected_elements;
 		this.def = def;
@@ -82,10 +82,7 @@ public class BaseUtilityBuildTool : DragTool
 				this.previousCellConnection = null;
 			}
 			this.previousCell = cell;
-			if (!this.CheckForConnection(cell, "Wire", string.Empty, ref this.previousCellConnection, false))
-			{
-				this.CheckForConnection(cell, "Pipe", string.Empty, ref this.previousCellConnection, false);
-			}
+			this.CheckForConnection(cell, this.def.PrefabID, string.Empty, ref this.previousCellConnection, false);
 			global::UnityEngine.Object.Destroy(this.path[this.path.Count - 1].visualizer);
 			TileVisualizer.RefreshCell(this.path[this.path.Count - 1].cell, this.def.TileLayer, this.def.ReplacementLayer);
 			this.path.RemoveAt(this.path.Count - 1);
@@ -102,14 +99,7 @@ public class BaseUtilityBuildTool : DragTool
 				visualizer = null,
 				valid = flag
 			});
-			if (!this.CheckForConnection(cell, "Wire", "OutletConnected", ref this.previousCellConnection, true))
-			{
-				this.CheckForConnection(cell, "Pipe", "OutletConnected", ref this.previousCellConnection, true);
-			}
-			else
-			{
-				this.previousCell = cell;
-			}
+			this.CheckForConnection(cell, this.def.PrefabID, "OutletConnected", ref this.previousCellConnection, true);
 			this.buildingCount = this.buildingCount % 14 + 1;
 			eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
 			SoundEvent.EndOneShot(eventInstance);
@@ -118,11 +108,23 @@ public class BaseUtilityBuildTool : DragTool
 		ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(this.path.Count);
 	}
 
+	protected override int GetDragLength()
+	{
+		return this.path.Count;
+	}
+
 	private bool CheckValidPathPiece(int cell)
 	{
-		if (this.def.BuildLocationRule == BuildLocationRule.NotInTiles && Grid.Objects[cell, 9] != null)
+		if (this.def.BuildLocationRule == BuildLocationRule.NotInTiles)
 		{
-			return false;
+			if (Grid.Objects[cell, 9] != null)
+			{
+				return false;
+			}
+			if (Grid.HasDoor[cell])
+			{
+				return false;
+			}
 		}
 		GameObject gameObject = Grid.Objects[cell, (int)this.def.ObjectLayer];
 		if (gameObject != null && gameObject.GetComponent<KAnimGraphTileVisualizer>() == null)
@@ -135,38 +137,94 @@ public class BaseUtilityBuildTool : DragTool
 
 	private bool CheckForConnection(int cell, string defName, string soundName, ref BuildingCellVisualizer outBcv, bool fireEvents = true)
 	{
-		if (this.def.Name.Contains(defName))
+		Building building = this.GetBuilding(cell);
+		if (building != null)
 		{
-			Building building = this.GetBuilding(cell);
-			if (building != null)
+			int num = -1;
+			int num2 = -1;
+			int num3 = -1;
+			if (defName.Contains("LogicWire"))
 			{
-				bool flag = defName.Contains("Wire");
-				int num = ((!flag) ? building.GetUtilityInputCell() : building.GetPowerInputCell());
-				int num2 = ((!flag) ? building.GetUtilityOutputCell() : num);
-				if (cell == num || cell == num2)
+				LogicPorts component = building.gameObject.GetComponent<LogicPorts>();
+				if (component != null)
 				{
-					BuildingCellVisualizer component = building.gameObject.GetComponent<BuildingCellVisualizer>();
-					outBcv = component;
-					if (component != null)
+					foreach (ILogicUIElement logicUIElement in component.inputPorts)
 					{
-						bool flag2 = false;
-						if (flag && component.RequiresPower)
+						if (logicUIElement.GetLogicUICell() == cell)
 						{
-							flag2 = true;
+							num = logicUIElement.GetLogicUICell();
+							break;
 						}
-						if (flag2)
+					}
+					if (num == -1)
+					{
+						foreach (ILogicUIElement logicUIElement2 in component.outputPorts)
 						{
-							if (fireEvents)
+							if (logicUIElement2.GetLogicUICell() == cell)
 							{
-								component.ConnectedEvent(cell);
-								string sound = GlobalAssets.GetSound(soundName, false);
-								if (sound != null)
-								{
-									KMonoBehaviour.PlaySound(sound);
-								}
+								num2 = logicUIElement2.GetLogicUICell();
+								break;
 							}
-							return true;
 						}
+					}
+				}
+			}
+			else if (defName.Contains("Wire"))
+			{
+				num = building.GetPowerInputCell();
+				num2 = building.GetPowerOutputCell();
+			}
+			else if (defName.Contains("Liquid"))
+			{
+				if (building.Def.InputConduitType == ConduitType.Liquid)
+				{
+					num = building.GetUtilityInputCell();
+				}
+				if (building.Def.OutputConduitType == ConduitType.Liquid)
+				{
+					num2 = building.GetUtilityOutputCell();
+				}
+				ElementFilter component2 = building.GetComponent<ElementFilter>();
+				if (component2 != null && component2.portInfo.conduitType == ConduitType.Liquid)
+				{
+					num3 = component2.GetFilteredCell();
+				}
+			}
+			else if (defName.Contains("Gas"))
+			{
+				if (building.Def.InputConduitType == ConduitType.Gas)
+				{
+					num = building.GetUtilityInputCell();
+				}
+				if (building.Def.OutputConduitType == ConduitType.Gas)
+				{
+					num2 = building.GetUtilityOutputCell();
+				}
+				ElementFilter component3 = building.GetComponent<ElementFilter>();
+				if (component3 != null && component3.portInfo.conduitType == ConduitType.Gas)
+				{
+					num3 = component3.GetFilteredCell();
+				}
+			}
+			if (cell == num || cell == num2 || cell == num3)
+			{
+				BuildingCellVisualizer component4 = building.gameObject.GetComponent<BuildingCellVisualizer>();
+				outBcv = component4;
+				if (component4 != null)
+				{
+					bool flag = true;
+					if (flag)
+					{
+						if (fireEvents)
+						{
+							component4.ConnectedEvent(cell);
+							string sound = GlobalAssets.GetSound(soundName, false);
+							if (sound != null)
+							{
+								KMonoBehaviour.PlaySound(sound);
+							}
+						}
+						return true;
 					}
 				}
 			}
@@ -207,10 +265,7 @@ public class BaseUtilityBuildTool : DragTool
 				visualizer = null,
 				valid = flag
 			});
-			if (!this.CheckForConnection(num, "Wire", "OutletConnected", ref this.previousCellConnection, true))
-			{
-				this.CheckForConnection(num, "Pipe", "OutletConnected", ref this.previousCellConnection, true);
-			}
+			this.CheckForConnection(num, this.def.PrefabID, "OutletConnected", ref this.previousCellConnection, true);
 		}
 		this.visUpdater = base.StartCoroutine(this.VisUpdater());
 		this.visualizer.GetComponent<KBatchedAnimController>().StopAndClear();
@@ -451,7 +506,7 @@ public class BaseUtilityBuildTool : DragTool
 		}
 	}
 
-	private IList<Element> selectedElements;
+	private IList<Tag> selectedElements;
 
 	private BuildingDef def;
 

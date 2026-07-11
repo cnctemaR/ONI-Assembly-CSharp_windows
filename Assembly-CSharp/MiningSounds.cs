@@ -22,10 +22,10 @@ public class MiningSounds : KMonoBehaviour
 					return;
 				}
 				text = "Mine_" + text;
-				this.miningSoundMigrated = GlobalAssets.GetSound(text, false);
-				if (this.miningSoundMigrated != null)
+				this.miningSoundEvent = GlobalAssets.GetSound(text, false);
+				if (this.miningSoundEvent != null)
 				{
-					this.loopingSounds.StartSound(this.miningSoundMigrated);
+					this.loopingSounds.StartSound(this.miningSoundEvent);
 				}
 			}
 		}
@@ -33,12 +33,19 @@ public class MiningSounds : KMonoBehaviour
 
 	private void OnStopMiningSound(object data)
 	{
-		if (this.miningSoundMigrated != null)
+		if (this.miningSoundEvent != null)
 		{
-			this.loopingSounds.StopSound(this.miningSoundMigrated);
+			this.loopingSounds.StopSound(this.miningSoundEvent);
 			this.miningSound = null;
 		}
 	}
+
+	public void SetPercentComplete(float progress)
+	{
+		this.loopingSounds.SetParameter(this.miningSoundEvent, MiningSounds.HASH_PERCENTCOMPLETE, progress);
+	}
+
+	private static HashedString HASH_PERCENTCOMPLETE = "percentComplete";
 
 	[MyCmpGet]
 	private LoopingSounds loopingSounds;
@@ -46,7 +53,7 @@ public class MiningSounds : KMonoBehaviour
 	private FMODAsset miningSound;
 
 	[EventRef]
-	private string miningSoundMigrated;
+	private string miningSoundEvent;
 
 	private static readonly EventSystem.IntraObjectHandler<MiningSounds> OnStartMiningSoundDelegate = new EventSystem.IntraObjectHandler<MiningSounds>(delegate(MiningSounds component, object data)
 	{

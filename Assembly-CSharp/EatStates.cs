@@ -12,12 +12,12 @@ internal class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStat
 		string text = CREATURES.STATUSITEMS.LOOKINGFORFOOD.NAME;
 		string text2 = CREATURES.STATUSITEMS.LOOKINGFORFOOD.TOOLTIP;
 		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		GameStateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State state2 = this.eating.DefaultState(this.eating.pre);
 		text2 = CREATURES.STATUSITEMS.EATING.NAME;
 		text = CREATURES.STATUSITEMS.EATING.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.eating.pre.QueueAnim("eat_pre", false, null).OnAnimQueueComplete(this.eating.loop);
 		this.eating.loop.Enter(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.EatComplete)).QueueAnim("eat_loop", true, null).ScheduleGoTo(3f, this.eating.pst);
 		this.eating.pst.QueueAnim("eat_pst", false, null).OnAnimQueueComplete(this.behaviourcomplete);
@@ -34,7 +34,7 @@ internal class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStat
 		GameObject gameObject = smi.sm.target.Get(smi);
 		if (gameObject != null)
 		{
-			DebugUtil.Assert(!gameObject.HasTag(GameTags.Creatures.ReservedByCreature), "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(!gameObject.HasTag(GameTags.Creatures.ReservedByCreature));
 			gameObject.AddTag(GameTags.Creatures.ReservedByCreature);
 		}
 	}
@@ -44,7 +44,7 @@ internal class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStat
 		GameObject gameObject = smi.sm.target.Get(smi);
 		if (gameObject != null)
 		{
-			DebugUtil.Assert(gameObject.HasTag(GameTags.Creatures.ReservedByCreature), "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(gameObject.HasTag(GameTags.Creatures.ReservedByCreature));
 			gameObject.RemoveTag(GameTags.Creatures.ReservedByCreature);
 		}
 	}

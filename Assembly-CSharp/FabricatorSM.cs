@@ -8,14 +8,14 @@ public class FabricatorSM : StateMachineComponent<FabricatorSM.StatesInstance>
 		base.smi.StartSM();
 	}
 
-	private IHasBuildQueue fabricator;
+	private ComplexFabricator fabricator;
 
 	public class StatesInstance : GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM, object>.GameInstance
 	{
 		public StatesInstance(FabricatorSM master)
 			: base(master)
 		{
-			master.fabricator = master.GetComponent<IHasBuildQueue>();
+			master.fabricator = master.GetComponent<ComplexFabricator>();
 		}
 	}
 

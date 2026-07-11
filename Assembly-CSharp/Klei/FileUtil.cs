@@ -29,6 +29,7 @@ namespace Klei
 				{
 					throw ex;
 				}
+				global::Debug.Log(text, null);
 				GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
 				ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
 				component.PopupConfirmDialog(text, null, null, null, null, null, null, null, null);
@@ -63,6 +64,7 @@ namespace Klei
 				{
 					throw ex;
 				}
+				global::Debug.Log(text, null);
 				GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
 				ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
 				component.PopupConfirmDialog(text, null, null, null, null, null, null, null, null);
@@ -94,6 +96,7 @@ namespace Klei
 				{
 					throw ex;
 				}
+				global::Debug.Log(text, null);
 				GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
 				ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
 				component.PopupConfirmDialog(text, null, null, null, null, null, null, null, null);

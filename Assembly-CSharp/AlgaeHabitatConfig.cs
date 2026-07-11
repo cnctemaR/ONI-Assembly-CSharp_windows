@@ -20,7 +20,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.Floodable = false;
-		buildingDef.ViewMode = SimViewMode.OxygenMap;
+		buildingDef.ViewMode = OverlayModes.Oxygen.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
@@ -53,7 +53,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		manualDeliveryKG2.refillMass = 72f;
 		manualDeliveryKG2.allowPause = true;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
-		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_outhouse_kanim") };
+		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_algae_terarrium_kanim") };
 		AlgaeHabitatEmpty algaeHabitatEmpty = go.AddOrGet<AlgaeHabitatEmpty>();
 		algaeHabitatEmpty.workTime = 5f;
 		algaeHabitatEmpty.overrideAnims = array;

@@ -26,7 +26,7 @@ public class SingleButtonSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			Output.LogError(new object[] { "Invalid gameObject received" });
+			Output.LogError("Invalid gameObject received");
 			return;
 		}
 		this.target = new_target.GetComponent<ISidescreenButtonControl>();

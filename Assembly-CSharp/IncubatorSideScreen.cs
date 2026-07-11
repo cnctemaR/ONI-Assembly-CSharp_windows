@@ -22,22 +22,18 @@ public class IncubatorSideScreen : ReceptacleSideScreen
 	protected override Sprite GetEntityIcon(Tag prefabTag)
 	{
 		GameObject prefab = Assets.GetPrefab(prefabTag);
-		IncubationMonitor.Def def = prefab.GetDef<IncubationMonitor.Def>();
-		string text = "ui";
-		if (def != null)
+		return Def.GetUISprite(prefab, "ui", false).first;
+	}
+
+	public override void SetTarget(GameObject target)
+	{
+		base.SetTarget(target);
+		this.continuousToggle.ChangeState((!target.GetComponent<EggIncubator>().AutoReplaceEntity) ? 1 : 0);
+		this.continuousToggle.onClick = delegate
 		{
-			GameObject prefab2 = Assets.GetPrefab(def.spawnedCreature);
-			if (prefab2)
-			{
-				CreatureBrain component = prefab2.GetComponent<CreatureBrain>();
-				if (component && !string.IsNullOrEmpty(component.symbolPrefix))
-				{
-					text = component.symbolPrefix + text;
-				}
-			}
-		}
-		KBatchedAnimController component2 = prefab.GetComponent<KBatchedAnimController>();
-		return Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], text, false);
+			target.GetComponent<EggIncubator>().ToggleAutoReplace();
+			this.continuousToggle.ChangeState((!target.GetComponent<EggIncubator>().AutoReplaceEntity) ? 1 : 0);
+		};
 	}
 
 	public DescriptorPanel RequirementsDescriptorPanel;
@@ -45,4 +41,6 @@ public class IncubatorSideScreen : ReceptacleSideScreen
 	public DescriptorPanel HarvestDescriptorPanel;
 
 	public DescriptorPanel EffectsDescriptorPanel;
+
+	public MultiToggle continuousToggle;
 }

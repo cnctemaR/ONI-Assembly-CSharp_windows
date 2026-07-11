@@ -18,6 +18,8 @@ namespace Klei.AI
 				new AttributeModifier("ToiletEfficiency", -0.4f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false, true),
 				new AttributeModifier("StaminaDelta", -2.5f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false, true)
 			}));
+			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_sick_kanim" }, Db.Get().Expressions.Sick));
+			base.AddDiseaseComponent(new PeriodicEmoteDisease("anim_idle_sick_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 5f));
 			base.AddDiseaseComponent(new FoodPoisoning.FoodPoisoningComponent());
 		}
 

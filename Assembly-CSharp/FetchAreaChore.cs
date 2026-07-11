@@ -6,8 +6,14 @@ using UnityEngine;
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 {
 	public FetchAreaChore(Chore.Precondition.Context context)
-		: base(context.chore.choreType, context.consumerState.consumer, context.consumerState.choreProvider, false, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null)
 	{
+		ChoreType choreType = context.chore.choreType;
+		ChoreConsumer consumer = context.consumerState.consumer;
+		ChoreProvider choreProvider = context.consumerState.choreProvider;
+		bool flag = false;
+		PriorityScreen.PriorityClass priority_class = context.masterPriority.priority_class;
+		int priority_value = context.masterPriority.priority_value;
+		base..ctor(choreType, consumer, choreProvider, flag, null, null, null, priority_class, priority_value, false, true, 0, null);
 		this.showAvailabilityInHoverText = false;
 		this.smi = new FetchAreaChore.StatesInstance(this, context);
 	}
@@ -127,10 +133,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					if (pickupable2.UnreservedAmount > 0f)
 					{
-						TagBits tagBits = component.GetTagBits();
-						if (tagBits.HasAll(this.rootChore.requiredTagBits))
+						component.UpdateTagBits();
+						if (component.HasAllTags_AssumeLaundered(ref this.rootChore.requiredTagBits))
 						{
-							if (!tagBits.HasAny(this.rootChore.forbiddenTagBits))
+							if (!component.HasAnyTags_AssumeLaundered(ref this.rootChore.forbiddenTagBits))
 							{
 								if (!list.Contains(pickupable2))
 								{
@@ -172,7 +178,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 				Chore.Precondition.Context context2 = pooledList[j];
 				FetchChore fetchChore = context2.chore as FetchChore;
-				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tagBits.AreEqual(this.rootChore.tagBits))
+				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tagBits.AreEqual(ref this.rootChore.tagBits))
 				{
 					num8 = Mathf.Min(fetchChore.originalAmount, num4 - num9);
 					if (minTakeAmount > 0f)

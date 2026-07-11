@@ -25,7 +25,7 @@ public class WaterPurifierConfig : IBuildingConfig
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
-		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
+		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.PowerInputOffset = new CellOffset(2, 0);
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 2);

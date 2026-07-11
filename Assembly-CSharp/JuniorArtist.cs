@@ -15,6 +15,7 @@ public class JuniorArtist : RoleConfig
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.CanArt,
+			RoleManager.rolePerks.CanArtUgly,
 			RoleManager.rolePerks.IncreaseArtSmall
 		};
 	}

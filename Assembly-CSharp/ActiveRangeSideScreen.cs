@@ -8,36 +8,40 @@ public class ActiveRangeSideScreen : SideScreenContent
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.activateValueLabel.text = "100";
-		this.deactivateValueLabel.text = "100";
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.activateValueLabel.maxValue = this.target.MaxValue;
+		this.activateValueLabel.minValue = this.target.MinValue;
+		this.deactivateValueLabel.maxValue = this.target.MaxValue;
+		this.deactivateValueLabel.minValue = this.target.MinValue;
 		this.activateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnActivateValueChanged));
 		this.deactivateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnDeactivateValueChanged));
 	}
 
 	private void OnActivateValueChanged(float new_value)
 	{
-		this.activateValueLabel.text = new_value.ToString();
 		this.target.ActivateValue = new_value;
 		if (this.target.ActivateValue < this.target.DeactivateValue)
 		{
-			this.activateValueSlider.value = this.deactivateValueSlider.value;
+			this.target.ActivateValue = this.target.DeactivateValue;
+			this.activateValueSlider.value = this.target.ActivateValue;
 		}
+		this.activateValueLabel.SetDisplayValue(this.target.ActivateValue.ToString());
 		this.RefreshTooltips();
 	}
 
 	private void OnDeactivateValueChanged(float new_value)
 	{
-		this.deactivateValueLabel.text = new_value.ToString();
 		this.target.DeactivateValue = new_value;
 		if (this.target.DeactivateValue > this.target.ActivateValue)
 		{
-			this.deactivateValueSlider.value = this.activateValueSlider.value;
+			this.target.DeactivateValue = this.activateValueSlider.value;
+			this.deactivateValueSlider.value = this.target.DeactivateValue;
 		}
+		this.deactivateValueLabel.SetDisplayValue(this.target.DeactivateValue.ToString());
 		this.RefreshTooltips();
 	}
 
@@ -67,20 +71,36 @@ public class ActiveRangeSideScreen : SideScreenContent
 		}
 		this.activateLabel.text = this.target.ActivateSliderLabelText;
 		this.deactivateLabel.text = this.target.DeactivateSliderLabelText;
+		this.activateValueLabel.Activate();
+		this.deactivateValueLabel.Activate();
 		this.activateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnActivateValueChanged));
 		this.activateValueSlider.minValue = this.target.MinValue;
 		this.activateValueSlider.maxValue = this.target.MaxValue;
 		this.activateValueSlider.value = this.target.ActivateValue;
 		this.activateValueSlider.wholeNumbers = this.target.UseWholeNumbers;
-		this.activateValueLabel.text = this.target.ActivateValue.ToString();
 		this.activateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnActivateValueChanged));
+		this.activateValueLabel.SetDisplayValue(this.target.ActivateValue.ToString());
+		this.activateValueLabel.onEndEdit += delegate
+		{
+			float activateValue = this.target.ActivateValue;
+			float.TryParse(this.activateValueLabel.field.text, out activateValue);
+			this.OnActivateValueChanged(activateValue);
+			this.activateValueSlider.value = activateValue;
+		};
 		this.deactivateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnDeactivateValueChanged));
 		this.deactivateValueSlider.minValue = this.target.MinValue;
 		this.deactivateValueSlider.maxValue = this.target.MaxValue;
 		this.deactivateValueSlider.value = this.target.DeactivateValue;
 		this.deactivateValueSlider.wholeNumbers = this.target.UseWholeNumbers;
-		this.deactivateValueLabel.text = this.target.DeactivateValue.ToString();
 		this.deactivateValueSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnDeactivateValueChanged));
+		this.deactivateValueLabel.SetDisplayValue(this.target.DeactivateValue.ToString());
+		this.deactivateValueLabel.onEndEdit += delegate
+		{
+			float deactivateValue = this.target.DeactivateValue;
+			float.TryParse(this.deactivateValueLabel.field.text, out deactivateValue);
+			this.OnDeactivateValueChanged(deactivateValue);
+			this.deactivateValueSlider.value = deactivateValue;
+		};
 		this.RefreshTooltips();
 	}
 
@@ -107,9 +127,10 @@ public class ActiveRangeSideScreen : SideScreenContent
 	[SerializeField]
 	private LocText deactivateLabel;
 
+	[Header("Number Input")]
 	[SerializeField]
-	private LocText activateValueLabel;
+	private KNumberInputField activateValueLabel;
 
 	[SerializeField]
-	private LocText deactivateValueLabel;
+	private KNumberInputField deactivateValueLabel;
 }

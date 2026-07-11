@@ -18,6 +18,18 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		this.ChangeState((this.state + 1) % this.states.Length);
 	}
 
+	protected virtual void Update()
+	{
+		if (this.clickHeldDown)
+		{
+			this.totalHeldTime += Time.unscaledDeltaTime;
+			if (this.totalHeldTime > this.heldTimeThreshold && this.onHold != null)
+			{
+				this.onHold();
+			}
+		}
+	}
+
 	public void ChangeState(int new_state_index)
 	{
 		this.state = new_state_index;
@@ -52,22 +64,11 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		this.RefreshHoverColor();
 	}
 
-	public void OnPointerClick(PointerEventData eventData)
+	public virtual void OnPointerClick(PointerEventData eventData)
 	{
 		if (this.states.Length - 1 < this.state)
 		{
 			global::Debug.LogWarning("Multi toggle has too few / no states", null);
-		}
-		if (this.play_sound_on_click)
-		{
-			if (this.states[this.state].on_click_override_sound_path == string.Empty)
-			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
-			}
-			else
-			{
-				KFMOD.PlayOneShot(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
-			}
 		}
 		if (this.onClick != null)
 		{
@@ -112,7 +113,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		}
 	}
 
-	private void RefreshHoverColor()
+	protected void RefreshHoverColor()
 	{
 		if (this.pointerOver)
 		{
@@ -172,12 +173,33 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 		}
 	}
 
-	public void OnPointerDown(PointerEventData eventData)
+	public virtual void OnPointerDown(PointerEventData eventData)
 	{
+		this.clickHeldDown = true;
+		if (this.play_sound_on_click)
+		{
+			if (this.states[this.state].on_click_override_sound_path == string.Empty)
+			{
+				KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
+			}
+			else
+			{
+				KFMOD.PlayOneShot(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
+			}
+		}
 	}
 
-	public void OnPointerUp(PointerEventData eventData)
+	public virtual void OnPointerUp(PointerEventData eventData)
 	{
+		if (this.clickHeldDown)
+		{
+			this.clickHeldDown = false;
+			if (this.onStopHold != null)
+			{
+				this.onStopHold();
+			}
+		}
+		this.totalHeldTime = 0f;
 	}
 
 	[Header("Settings")]
@@ -195,6 +217,16 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHa
 	public global::System.Action onEnter;
 
 	public global::System.Action onExit;
+
+	public global::System.Action onHold;
+
+	public global::System.Action onStopHold;
+
+	protected bool clickHeldDown;
+
+	protected float totalHeldTime;
+
+	protected float heldTimeThreshold = 0.4f;
 
 	private bool pointerOver;
 }

@@ -31,7 +31,7 @@ public class SolidConduitFlowVisualizer
 	{
 		if (element != null)
 		{
-			Color color = element.substance.overlayColour;
+			Color color = element.substance.conduitColour;
 			color.a = 128f;
 			return color;
 		}

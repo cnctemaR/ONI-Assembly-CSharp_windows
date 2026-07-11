@@ -8,11 +8,11 @@ namespace STRINGS
 		{
 			public class ANGERDAMAGE
 			{
-				public static LocString NAME = "Damage: Tantrum";
+				public static LocString NAME = "Damage: Duplicant Tantrum";
 
 				public static LocString TOOLTIP = "A stressed Duplicant is damaging this building";
 
-				public static LocString NOTIFICATION = "Building Damage: Tantrum";
+				public static LocString NOTIFICATION = "Building Damage: Duplicant Tantrum";
 
 				public static LocString NOTIFICATION_TOOLTIP = "Stressed Duplicants are damaging these buildings:\n\n{0}";
 			}
@@ -131,56 +131,56 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Current Status: Needs Configuration";
 
-					public static LocString TOOLTIP = "Set this Dock to store an Exosuit or remain on Standby";
+					public static LocString TOOLTIP = "Set this dock to store a suit or remain on Standby";
 				}
 
 				public class READY
 				{
 					public static LocString NAME = "Current Status: On Standby";
 
-					public static LocString TOOLTIP = "This Dock is functional and ready to receive an Exosuit";
+					public static LocString TOOLTIP = "This dock is ready to receive a suit";
 				}
 
 				public class SUIT_REQUESTED
 				{
 					public static LocString NAME = "Current Status: Awaiting Delivery";
 
-					public static LocString TOOLTIP = "Waiting for a Duplicant to deliver an Exosuit";
+					public static LocString TOOLTIP = "Waiting for a Duplicant to deliver a suit";
 				}
 
 				public class CHARGING
 				{
 					public static LocString NAME = "Current Status: Charging Suit";
 
-					public static LocString TOOLTIP = "This Exosuit is docked and charging";
+					public static LocString TOOLTIP = "This suit is docked and refueling";
 				}
 
 				public class NO_OXYGEN
 				{
 					public static LocString NAME = "Current Status: No Oxygen";
 
-					public static LocString TOOLTIP = "This Dock does not contain enough oxygen to refill a suit";
+					public static LocString TOOLTIP = "This dock does not contain enough oxygen to refill a suit";
 				}
 
 				public class NO_FUEL
 				{
 					public static LocString NAME = "Current Status: No Fuel";
 
-					public static LocString TOOLTIP = "This Dock does not contain enough fuel to refill a suit";
+					public static LocString TOOLTIP = "This dock does not contain enough fuel to refill a suit";
 				}
 
 				public class NOT_OPERATIONAL
 				{
 					public static LocString NAME = "Current Status: Offline";
 
-					public static LocString TOOLTIP = "This Exosuit Dock requires power";
+					public static LocString TOOLTIP = "This dock requires power";
 				}
 
 				public class FULLY_CHARGED
 				{
-					public static LocString NAME = "Current Status: Full Charge";
+					public static LocString NAME = "Current Status: Full Fuelled";
 
-					public static LocString TOOLTIP = "This Exosuit is fully charged and ready for use";
+					public static LocString TOOLTIP = "This suit is fully refuelled and ready for use";
 				}
 			}
 
@@ -188,21 +188,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Clearance: Vacancy Only";
 
-				public static LocString TOOLTIP = "Suited Duplicants may pass only if there is room in an Exosuit Dock to store their suit";
+				public static LocString TOOLTIP = "Suited Duplicants may pass only if there is room in a dock to store their suit";
 			}
 
 			public class SUITMARKERTRAVERSALANYTIME
 			{
 				public static LocString NAME = "Clearance: Always Permitted";
 
-				public static LocString TOOLTIP = "Suited Duplicants may pass even if there is no room to store their suits" + UI.HORIZONTAL_BR_RULE + "When Exosuit Docks are all full, Duplicants will unequip their suits and drop them on the floor";
+				public static LocString TOOLTIP = "Suited Duplicants may pass even if there is no room to store their suits" + UI.HORIZONTAL_BR_RULE + "When all available docks are full, Duplicants will unequip their suits and drop them on the floor";
 			}
 
 			public class SUIT_LOCKER_NEEDS_CONFIGURATION
 			{
 				public static LocString NAME = "Not Configured";
 
-				public static LocString TOOLTIP = "Exosuit Dock settings not configured";
+				public static LocString TOOLTIP = "Dock settings not configured";
 			}
 
 			public class CURRENTDOORCONTROLSTATE
@@ -222,7 +222,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Pipe Blocked";
 
-				public static LocString TOOLTIP = "This pipe system is not serviceable";
+				public static LocString TOOLTIP = "Output pipe is blocked";
+			}
+
+			public class OUTPUTPIPEFULL
+			{
+				public static LocString NAME = "Output Pipe Full";
+
+				public static LocString TOOLTIP = "Unable to flush contents, output pipe is blocked";
 			}
 
 			public class CONSTRUCTIONUNREACHABLE
@@ -271,9 +278,20 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings are entombed and need to be dug out:";
 			}
 
+			public class INVALIDPORTOVERLAP
+			{
+				public static LocString NAME = "Invalid Port Overlap";
+
+				public static LocString TOOLTIP = "Ports on this building overlap those on another building. This building must be rebuilt in a valid location.";
+
+				public static LocString NOTIFICATION_NAME = "Building has overlapping ports";
+
+				public static LocString NOTIFICATION_TOOLTIP = "These buildings must be rebuilt with non-overlapping ports:";
+			}
+
 			public class GENESHUFFLECOMPLETED
 			{
-				public static LocString NAME = "Neural vacillation complete";
+				public static LocString NAME = "Vacillation Complete";
 
 				public static LocString TOOLTIP = "The Duplicant has completed the neural vacillation process and is ready to be released";
 			}
@@ -413,16 +431,16 @@ namespace STRINGS
 
 			public class MISSINGFOUNDATION
 			{
-				public static LocString NAME = "Missing Foundation";
+				public static LocString NAME = "Missing Tile";
 
-				public static LocString TOOLTIP = "Build Tiles beneath this building" + UI.HORIZONTAL_BR_RULE + "Tiles can be found in the <color=#833A5FFF>Base Tab</color> <color=#F44A47>[1]</color> of the Build Menu";
-			}
-
-			public class NEEDBORINGMACHINE
-			{
-				public static LocString NAME = "Multitool Required";
-
-				public static LocString TOOLTIP = "A multitool is required to mine this material" + UI.HORIZONTAL_BR_RULE + "Multitools can be made at Crafting Stations in the <color=#833A5FFF>Stations Tab</color> <color=#F44A47>[0]</color> of the Build Menu";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Build ",
+					UI.FormatAsLink("Tile", "TILE"),
+					" beneath this building",
+					UI.HORIZONTAL_BR_RULE,
+					"Tile can be found in the <color=#833A5FFF>Base Tab</color> <color=#F44A47><b>[1]</b></color> of the Build Menu"
+				});
 			}
 
 			public class NEUTRONIUMUNMINABLE
@@ -496,21 +514,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Conveyor Loader";
 
-				public static LocString TOOLTIP = "Material cannot be fed onto this Conveyor Rail system for transport" + UI.HORIZONTAL_BR_RULE + "Enter the Shipping Tab <color=#F44A47>[7]</color> of the Build Menu to build and connect a Conveyor Loader";
+				public static LocString TOOLTIP = "Material cannot be fed onto this Conveyor system for transport" + UI.HORIZONTAL_BR_RULE + "Enter the Shipping Tab <color=#F44A47><b>[7]</b></color> of the Build Menu to build and connect a Conveyor Loader";
 			}
 
 			public class NEEDSOLIDOUT
 			{
 				public static LocString NAME = "No Conveyor Receptacle";
 
-				public static LocString TOOLTIP = "Material cannot be offloaded from this Conveyor system and will backup the rails" + UI.HORIZONTAL_BR_RULE + "Enter the Shipping Tab <color=#F44A47>[7]</color> of the Build Menu to build and connect a Conveyor Receptacle";
+				public static LocString TOOLTIP = "Material cannot be offloaded from this Conveyor system and will backup the rails" + UI.HORIZONTAL_BR_RULE + "Enter the Shipping Tab <color=#F44A47><b>[7]</b></color> of the Build Menu to build and connect a " + UI.FormatAsLink("Conveyor Receptacle", "SOLIDCONDUITOUTBOX");
 			}
 
 			public class SOLIDPIPEOBSTRUCTED
 			{
 				public static LocString NAME = "Conveyor Rail Backup";
 
-				public static LocString TOOLTIP = "This Conveyor Rail cannot carry anymore material" + UI.HORIZONTAL_BR_RULE + "Remove material from the Conveyor Receptacle to free space for more objects";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Conveyor Rail cannot carry anymore material",
+					UI.HORIZONTAL_BR_RULE,
+					"Remove material from the ",
+					UI.FormatAsLink("Conveyor Receptacle", "SOLIDCONDUITOUTBOX"),
+					" to free space for more objects"
+				});
 			}
 
 			public class NEEDPLANT
@@ -556,7 +581,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "New Duplicants are available";
 
-				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod <color=#F44A47>[H]</color> is ready to print a new Duplicant.\nI'll need to select a DNA blueprint:";
+				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod <color=#F44A47><b>[H]</b></color> is ready to print a new Duplicant.\nI'll need to select a DNA blueprint:";
 			}
 
 			public class NOAPPLICABLERESEARCHSELECTED
@@ -565,7 +590,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This building cannot produce the correct research type for the current research focus";
 
-				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Research Center", UI.StripLinkFormatting(BUILDINGS.PREFABS.ADVANCEDRESEARCHCENTER.NAME)) + " idle";
+				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Research Center", "ADVANCEDRESEARCHCENTER") + " idle";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings cannot produce the correct <b>Research Type</b> for the selected " + UI.FormatAsLink("Research Focus", "TECH") + ":";
 			}
@@ -576,7 +601,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Select an unknown destination in the starmap to study";
 
-				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Telescope", UI.StripLinkFormatting(BUILDINGS.PREFABS.TELESCOPE.NAME)) + " idle";
+				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Telescope", "TELESCOPE") + " idle";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings need a space destination to study";
 			}
@@ -599,14 +624,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Checkpoint";
 
-				public static LocString TOOLTIP = "Docks must be placed beside an Exosuit Checkpoint, opposite the side its checkpoint faces";
+				public static LocString TOOLTIP = "Docks must be placed beside a checkpoint, opposite the side the checkpoint faces";
 			}
 
 			public class SUITMARKERWRONGSIDE
 			{
 				public static LocString NAME = "Invalid Checkpoint";
 
-				public static LocString TOOLTIP = "This building has been built on the wrong side of an Exosuit Checkpoint\n\nExosuit Docks must be placed beside a Checkpoint, opposite the side its checkpoint faces";
+				public static LocString TOOLTIP = "This building has been built on the wrong side of a checkpoint\n\nDocks must be placed beside a checkpoint, opposite the side the checkpoint faces";
 			}
 
 			public class NOFILTERELEMENTSELECTED
@@ -681,7 +706,7 @@ namespace STRINGS
 
 			public class PENDINGSWITCHTOGGLE
 			{
-				public static LocString NAME = "Setting Change Errand";
+				public static LocString NAME = "Settings Errand";
 
 				public static LocString TOOLTIP = "Settings will be changed once a Duplicant is available";
 			}
@@ -776,11 +801,20 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"A ",
-					BUILDINGS.PREFABS.GANTRY.NAME,
-					" must be built below a ",
-					BUILDINGS.PREFABS.COMMANDMODULE.NAME,
-					" for an astronaut to access it"
+					UI.FormatAsLink("Gantry", "GANTRY"),
+					" must be built below ",
+					UI.FormatAsLink("Command Capsules", "COMMANDMODULE"),
+					" and ",
+					UI.FormatAsLink("Sight-Seeing Modules", "TOURISTMODULE"),
+					" for Duplicants access"
 				});
+			}
+
+			public class DISEMBARKINGDUPLICANT
+			{
+				public static LocString NAME = "Waiting To Disembark";
+
+				public static LocString TOOLTIP = "The Duplicant inside this rocket can't come out until the " + UI.FormatAsLink("Gantry", "GANTRY") + " is extended";
 			}
 
 			public class ROCKETNAME
@@ -794,14 +828,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Has Gantry";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"A ",
-					BUILDINGS.PREFABS.GANTRY.NAME,
-					" must be built below a ",
-					BUILDINGS.PREFABS.COMMANDMODULE.NAME,
-					" for an astronaut to access it"
-				});
+				public static LocString TOOLTIP = "Duplicants may now enter this section of the rocket";
 			}
 
 			public class NORMAL
@@ -864,7 +891,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Requires Emptying";
 
-				public static LocString TOOLTIP = "This amenity cannot be used while full" + UI.HORIZONTAL_BR_RULE + "Emptying it will produce " + ELEMENTS.TOXICSAND.NAME;
+				public static LocString TOOLTIP = "This amenity cannot be used while full" + UI.HORIZONTAL_BR_RULE + "Emptying it will produce " + UI.FormatAsLink("Polluted Dirt", "TOXICSAND");
 			}
 
 			public class HABITATNEEDSEMPTYING
@@ -874,13 +901,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"This ",
-					BUILDINGS.PREFABS.ALGAEHABITAT.NAME,
+					UI.FormatAsLink("Algae Terrarium", "ALGAEHABITAT"),
 					" needs to be emptied of ",
-					ELEMENTS.DIRTYWATER.NAME,
+					UI.FormatAsLink("Contaminated Water", "DIRTYWATER"),
 					UI.HORIZONTAL_BR_RULE,
-					BUILDINGS.PREFABS.BOTTLEEMPTIER.NAME,
-					"s can be used to transport and dispose of ",
-					ELEMENTS.DIRTYWATER.NAME,
+					UI.FormatAsLink("Bottle Emptiers", "BOTTLEEMPTIER"),
+					" can be used to transport and dispose of ",
+					UI.FormatAsLink("Contaminated Water", "DIRTYWATER"),
 					" in designated areas"
 				});
 			}
@@ -972,7 +999,7 @@ namespace STRINGS
 
 			public class EMITTINGOXYGENAVG
 			{
-				public static LocString NAME = "Emitting " + ELEMENTS.OXYGEN.NAME + ": {FlowRate}";
+				public static LocString NAME = "Emitting " + UI.FormatAsLink("Oxygen", "OXYGEN") + ": {FlowRate}";
 
 				public static LocString TOOLTIP = "Producing oxygen at a rate of {FlowRate}";
 			}
@@ -1076,7 +1103,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Requires Flipping";
 
-				public static LocString TOOLTIP = "Compost must be flipped periodically to produce fertilizer";
+				public static LocString TOOLTIP = "Compost must be flipped periodically to produce " + UI.FormatAsLink("Dirt", "DIRT");
 			}
 
 			public class AWAITINGWASTE
@@ -1234,7 +1261,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Building Disabled";
 
-				public static LocString TOOLTIP = "Press <color=#F44A47>[ENTER]</color> to resume use";
+				public static LocString TOOLTIP = "Press <color=#F44A47><b>[ENTER]</b></color> to resume use";
 			}
 
 			public class WORKING
@@ -1407,7 +1434,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony Lacks {Roles}s";
 
-				public static LocString TOOLTIP = "Open the Jobs Panel <color=#F44A47><b>(L)</b></color> and assign a Duplicant to the {Roles} position to use this building";
+				public static LocString TOOLTIP = "Open the Jobs Panel <color=#F44A47><b>[L]</b></color> and assign a Duplicant to the {Roles} position to use this building";
 			}
 
 			public class SWITCHSTATUSACTIVE
@@ -1494,18 +1521,25 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This well can no longer function due to excessive backpressure";
 			}
 
+			public class NOTINANYROOM
+			{
+				public static LocString NAME = "Outside of room";
+
+				public static LocString TOOLTIP = "This building must be built inside a room for full functionality\n\nOpen the Room Overlay <color=#F44A47><b>[F11]</b></color> to view full room status";
+			}
+
 			public class NOTINREQUIREDROOM
 			{
 				public static LocString NAME = "Outside of {0}";
 
-				public static LocString TOOLTIP = "This building must be built inside a {0} for full functionality\n\nOpen the Room Overlay <color=#F44A47>[F11]</color> to view full room status";
+				public static LocString TOOLTIP = "This building must be built inside a {0} for full functionality\n\nOpen the Room Overlay <color=#F44A47><b>[F11]</b></color> to view full room status";
 			}
 
 			public class NOTINRECOMMENDEDROOM
 			{
 				public static LocString NAME = "Outside of {0}";
 
-				public static LocString TOOLTIP = "It is recommended to build this building inside a {0}\n\nOpen the Room Overlay <color=#F44A47>[F11]</color> to view full room status";
+				public static LocString TOOLTIP = "It is recommended to build this building inside a {0}\n\nOpen the Room Overlay <color=#F44A47><b>[F11]</b></color> to view full room status";
 			}
 
 			public class RELEASING_PRESSURE

@@ -59,15 +59,19 @@ public class SolidConduitConsumer : KMonoBehaviour
 			if (contents.pickupableHandle.IsValid() && (this.alwaysConsume || this.operational.IsOperational))
 			{
 				float num = ((!(this.capacityTag != GameTags.Any)) ? this.storage.MassStored() : this.storage.GetMassAvailable(this.capacityTag));
-				float num2 = Mathf.Min(this.storage.RemainingCapacity(), this.capacityKG - num);
-				Pickupable pickupable = conduitFlow.GetPickupable(contents.pickupableHandle);
-				if (pickupable.PrimaryElement.Mass <= num2)
+				float num2 = Mathf.Min(this.storage.capacityKg, this.capacityKG);
+				float num3 = Mathf.Max(0f, num2 - num);
+				if (num3 > 0f)
 				{
-					Pickupable pickupable2 = conduitFlow.RemovePickupable(this.utilityCell);
-					if (pickupable2)
+					Pickupable pickupable = conduitFlow.GetPickupable(contents.pickupableHandle);
+					if (pickupable.PrimaryElement.Mass <= num3 || pickupable.PrimaryElement.Mass > num2)
 					{
-						this.storage.Store(pickupable2.gameObject, true, false, true, false);
-						flag = true;
+						Pickupable pickupable2 = conduitFlow.RemovePickupable(this.utilityCell);
+						if (pickupable2)
+						{
+							this.storage.Store(pickupable2.gameObject, true, false, true, false);
+							flag = true;
+						}
 					}
 				}
 			}

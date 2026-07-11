@@ -136,7 +136,8 @@ public class SimpleInfoScreen : TargetScreen
 		{
 			color = this.statusItemTextColor_regular;
 		}
-		SimpleInfoScreen.StatusItemEntry statusItemEntry = new SimpleInfoScreen.StatusItemEntry(status_item, category, this.StatusItemPrefab, gameObject.transform, this.ToolTipStyle_Property, color, show_immediate, new Action<SimpleInfoScreen.StatusItemEntry>(this.OnStatusItemDestroy));
+		TextStyleSetting textStyleSetting = ((category != Db.Get().StatusItemCategories.Main) ? this.StatusItemStyle_Other : this.StatusItemStyle_Main);
+		SimpleInfoScreen.StatusItemEntry statusItemEntry = new SimpleInfoScreen.StatusItemEntry(status_item, category, this.StatusItemPrefab, gameObject.transform, this.ToolTipStyle_Property, color, textStyleSetting, show_immediate, new Action<SimpleInfoScreen.StatusItemEntry>(this.OnStatusItemDestroy));
 		statusItemEntry.SetSprite(status_item.item.sprite);
 		if (category != null)
 		{
@@ -147,6 +148,10 @@ public class SimpleInfoScreen : TargetScreen
 				num = statusItemEntry2.GetIndex();
 				statusItemEntry2.Destroy(true);
 				this.oldStatusItems.Remove(statusItemEntry2);
+			}
+			if (category == Db.Get().StatusItemCategories.Main)
+			{
+				num = 0;
 			}
 			if (num != -1)
 			{
@@ -388,10 +393,14 @@ public class SimpleInfoScreen : TargetScreen
 					gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
 					string text2 = GameUtil.GetUnitFormattedName(gameObject, false);
 					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component2.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 					if (smi != null)
 					{
-						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, smi.StateString());
+						string text3 = smi.StateString();
+						if (!string.IsNullOrEmpty(text3))
+						{
+							text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text3);
+						}
 						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting);
 					}
 					if (component2.DiseaseIdx != 255)
@@ -524,6 +533,10 @@ public class SimpleInfoScreen : TargetScreen
 
 	public TextStyleSetting ToolTipStyle_Property;
 
+	public TextStyleSetting StatusItemStyle_Main;
+
+	public TextStyleSetting StatusItemStyle_Other;
+
 	public Color statusItemTextColor_regular = Color.black;
 
 	public Color statusItemTextColor_bad = new Color(0.95686275f, 0.2901961f, 0.2784314f);
@@ -550,15 +563,17 @@ public class SimpleInfoScreen : TargetScreen
 	[DebuggerDisplay("{item.item.Name}")]
 	public class StatusItemEntry : IRenderEveryTick
 	{
-		public StatusItemEntry(StatusItemGroup.Entry item, StatusItemCategory category, GameObject status_item_prefab, Transform parent, TextStyleSetting tooltip_style, Color color, bool skip_fade, Action<SimpleInfoScreen.StatusItemEntry> onDestroy)
+		public StatusItemEntry(StatusItemGroup.Entry item, StatusItemCategory category, GameObject status_item_prefab, Transform parent, TextStyleSetting tooltip_style, Color color, TextStyleSetting style, bool skip_fade, Action<SimpleInfoScreen.StatusItemEntry> onDestroy)
 		{
 			this.item = item;
 			this.category = category;
 			this.tooltipStyle = tooltip_style;
 			this.onDestroy = onDestroy;
 			this.color = color;
+			this.style = style;
 			this.widget = Util.KInstantiateUI(status_item_prefab, parent.gameObject, false);
 			this.text = this.widget.GetComponentInChildren<LocText>(true);
+			SetTextStyleSetting.ApplyStyle(this.text, style);
 			this.toolTip = this.widget.GetComponentInChildren<ToolTip>(true);
 			this.image = this.widget.GetComponentInChildren<Image>(true);
 			item.SetIcon(this.image);
@@ -688,6 +703,8 @@ public class SimpleInfoScreen : TargetScreen
 		private LocText text;
 
 		public Color color;
+
+		public TextStyleSetting style;
 
 		private SimpleInfoScreen.StatusItemEntry.FadeStage fadeStage;
 

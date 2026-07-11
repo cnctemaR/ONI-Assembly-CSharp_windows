@@ -217,7 +217,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 					HandleVector<Game.ComplexCallbackInfo<int>>.Handle handle = Game.Instance.simComponentCallbackManager.Add(new Action<int, object>(SimTemperatureTransfer.OnSimRegisteredCallback), this, "SimTemperatureTransfer.SimRegister");
 					float num2 = component.InternalTemperature;
 					KCrashReporter.Assert(num2 > 0f, "Invalid temperature");
-					KCrashReporter.Assert(component.Mass > 0f);
+					KCrashReporter.Assert(component.Mass > 0f, "Invalid pe.Mass");
 					if (num2 <= 0f)
 					{
 						component.InternalTemperature = 293f;

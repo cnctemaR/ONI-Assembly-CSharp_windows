@@ -14,7 +14,7 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 			return instance.IsCreatureAvailableForFixedCapture();
 		};
 		this.IsCreatureAvailableForFixedCapture = precondition;
-		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null);
+		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null);
 		base.AddPrecondition(this.IsCreatureAvailableForFixedCapture, capture_point.GetSMI<FixedCapturePoint.Instance>());
 		base.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanWrangleCreatures.id);
 		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);

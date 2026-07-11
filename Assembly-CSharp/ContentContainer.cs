@@ -7,16 +7,16 @@ public class ContentContainer : YamlIO<ContentContainer>
 {
 	public ContentContainer()
 	{
-		this.content = new List<CodexWidget>();
+		this.content = new List<ICodexWidget>();
 	}
 
-	public ContentContainer(List<CodexWidget> content, ContentContainer.ContentLayout contentLayout)
+	public ContentContainer(List<ICodexWidget> content, ContentContainer.ContentLayout contentLayout)
 	{
 		this.content = content;
 		this.contentLayout = contentLayout;
 	}
 
-	public List<CodexWidget> content { get; set; }
+	public List<ICodexWidget> content { get; set; }
 
 	public string lockID { get; set; }
 

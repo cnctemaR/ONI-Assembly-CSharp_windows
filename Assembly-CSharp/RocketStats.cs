@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,6 +8,20 @@ public class RocketStats
 	public RocketStats(CommandModule commandModule)
 	{
 		this.commandModule = commandModule;
+		if (RocketStats.oxidizerEfficiencies == null)
+		{
+			RocketStats.oxidizerEfficiencies = new Dictionary<Tag, float>
+			{
+				{
+					SimHashes.OxyRock.CreateTag(),
+					ROCKETRY.OXIDIZER_EFFICIENCY.LOW
+				},
+				{
+					SimHashes.LiquidOxygen.CreateTag(),
+					ROCKETRY.OXIDIZER_EFFICIENCY.HIGH
+				}
+			};
+		}
 	}
 
 	public float GetRocketMaxDistance()
@@ -105,8 +120,7 @@ public class RocketStats
 			OxidizerTank component = gameObject.GetComponent<OxidizerTank>();
 			if (component != null)
 			{
-				num += component.GetAmountAvailable(ElementLoader.FindElementByHash(SimHashes.LiquidOxygen).tag);
-				num += component.GetAmountAvailable(GameTags.OxyRock);
+				num += component.GetTotalOxidizerAvailable();
 			}
 			if (includeBoosters)
 			{
@@ -122,22 +136,38 @@ public class RocketStats
 
 	public float GetAverageOxidizerEfficiency()
 	{
-		float num = 0f;
-		float num2 = 0f;
+		Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
+		dictionary[SimHashes.LiquidOxygen.CreateTag()] = 0f;
+		dictionary[SimHashes.OxyRock.CreateTag()] = 0f;
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.commandModule.GetComponent<AttachableBuilding>()))
 		{
 			OxidizerTank component = gameObject.GetComponent<OxidizerTank>();
 			if (component != null)
 			{
-				num += component.GetAmountAvailable(ElementLoader.FindElementByHash(SimHashes.LiquidOxygen).tag);
-				num2 += component.GetAmountAvailable(GameTags.OxyRock);
+				Dictionary<Tag, float> oxidizersAvailable = component.GetOxidizersAvailable();
+				foreach (KeyValuePair<Tag, float> keyValuePair in oxidizersAvailable)
+				{
+					if (dictionary.ContainsKey(keyValuePair.Key))
+					{
+						Dictionary<Tag, float> dictionary2;
+						Tag key;
+						(dictionary2 = dictionary)[key = keyValuePair.Key] = dictionary2[key] + keyValuePair.Value;
+					}
+				}
 			}
 		}
-		if (num + num2 == 0f)
+		float num = 0f;
+		float num2 = 0f;
+		foreach (KeyValuePair<Tag, float> keyValuePair2 in dictionary)
+		{
+			num += keyValuePair2.Value * RocketStats.oxidizerEfficiencies[keyValuePair2.Key];
+			num2 += keyValuePair2.Value;
+		}
+		if (num2 == 0f)
 		{
 			return 0f;
 		}
-		float num3 = (num2 * ROCKETRY.OXIDIZER_EFFICIENCY.LOW + num * ROCKETRY.OXIDIZER_EFFICIENCY.HIGH) / (num2 + num);
+		float num3 = num / num2;
 		return num3 * 100f;
 	}
 
@@ -203,4 +233,6 @@ public class RocketStats
 	}
 
 	private CommandModule commandModule;
+
+	private static Dictionary<Tag, float> oxidizerEfficiencies;
 }

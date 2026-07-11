@@ -22,6 +22,7 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		};
 		Pickupable pickupable2 = component;
 		pickupable2.CanAbsorb = (Func<Pickupable, bool>)Delegate.Combine(pickupable2.CanAbsorb, func2);
+		component.absorbable = true;
 		data.onTakeCB = func;
 		data.canAbsorbCB = func2;
 		base.SetData(handle, data);

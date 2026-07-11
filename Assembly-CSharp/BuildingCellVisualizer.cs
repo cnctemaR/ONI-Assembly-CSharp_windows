@@ -285,118 +285,46 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		Components.BuildingCellVisualizers.Remove(this);
 	}
 
-	public void Tick(SimViewMode mode)
+	public void Tick(HashedString mode)
 	{
 		if (mode != this.previousMode)
 		{
 			this.DisableIcons();
 		}
-		if (mode != SimViewMode.LiquidVentMap)
+		if (mode == OverlayModes.Power.ID)
 		{
-			if (mode != SimViewMode.PowerMap)
+			if (this.requiresPowerInput || this.requiresPowerOutput)
 			{
-				if (mode != SimViewMode.GasVentMap)
-				{
-					if (mode != SimViewMode.SolidConveyorMap)
-					{
-						if (mode != SimViewMode.Disease)
-						{
-							this.DisableIcons();
-						}
-						else if (this.diseaseSourceSprite != null)
-						{
-							int utilityOutputCell = this.building.GetUtilityOutputCell();
-							this.DrawUtilityIcon(utilityOutputCell, this.diseaseSourceSprite, ref this.inputVisualizer, this.diseaseSourceColour);
-						}
-					}
-					else if (this.requiresSolidInput || this.requiresSolidOutput)
-					{
-						if (this.requiresSolidInput)
-						{
-							bool flag = null != Grid.Objects[this.building.GetUtilityInputCell(), 20];
-							BuildingCellVisualizerResources.ConnectedDisconnectedColours input = this.resources.liquidIOColours.input;
-							Color color = ((!flag) ? input.disconnected : input.connected);
-							this.DrawUtilityIcon(this.building.GetUtilityInputCell(), this.resources.liquidInputIcon, ref this.inputVisualizer, color);
-						}
-						if (this.requiresSolidOutput)
-						{
-							bool flag2 = null != Grid.Objects[this.building.GetUtilityOutputCell(), 20];
-							BuildingCellVisualizerResources.ConnectedDisconnectedColours output = this.resources.liquidIOColours.output;
-							Color color2 = ((!flag2) ? output.disconnected : output.connected);
-							this.DrawUtilityIcon(this.building.GetUtilityOutputCell(), this.resources.liquidOutputIcon, ref this.outputVisualizer, color2);
-						}
-					}
-					else
-					{
-						this.DisableIcons();
-					}
-				}
-				else if (this.requiresGasInput || this.requiresGasOutput || this.requiresSecondGasOutput || this.requiresSecondGasInput)
-				{
-					if (this.requiresGasInput)
-					{
-						bool flag3 = null != Grid.Objects[this.building.GetUtilityInputCell(), 12];
-						BuildingCellVisualizerResources.ConnectedDisconnectedColours input2 = this.resources.gasIOColours.input;
-						Color color3 = ((!flag3) ? input2.disconnected : input2.connected);
-						this.DrawUtilityIcon(this.building.GetUtilityInputCell(), this.resources.gasInputIcon, ref this.inputVisualizer, color3);
-					}
-					if (this.requiresGasOutput)
-					{
-						bool flag4 = null != Grid.Objects[this.building.GetUtilityOutputCell(), 12];
-						BuildingCellVisualizerResources.ConnectedDisconnectedColours output2 = this.resources.gasIOColours.output;
-						Color color4 = ((!flag4) ? output2.disconnected : output2.connected);
-						this.DrawUtilityIcon(this.building.GetUtilityOutputCell(), this.resources.gasOutputIcon, ref this.outputVisualizer, color4);
-					}
-					if (this.requiresSecondGasInput)
-					{
-						CellOffset secondaryConduitOffset = this.building.GetComponent<ISecondaryInput>().GetSecondaryConduitOffset();
-						int visualizerCell = this.GetVisualizerCell(this.building, secondaryConduitOffset);
-						this.DrawUtilityIcon(visualizerCell, this.resources.gasInputIcon, ref this.secondaryInputVisualizer, BuildingCellVisualizer.secondInputColour, Color.white, 1.5f, false);
-					}
-					if (this.requiresSecondGasOutput)
-					{
-						CellOffset secondaryConduitOffset2 = this.building.GetComponent<ISecondaryOutput>().GetSecondaryConduitOffset();
-						int visualizerCell2 = this.GetVisualizerCell(this.building, secondaryConduitOffset2);
-						this.DrawUtilityIcon(visualizerCell2, this.resources.gasOutputIcon, ref this.secondaryOutputVisualizer, BuildingCellVisualizer.secondOutputColour, Color.white, 1.5f, false);
-					}
-				}
-				else
-				{
-					this.DisableIcons();
-				}
-			}
-			else if (this.requiresPowerInput || this.requiresPowerOutput)
-			{
-				bool flag5 = this.building as BuildingPreview != null;
+				bool flag = this.building as BuildingPreview != null;
 				BuildingEnabledButton component = this.building.GetComponent<BuildingEnabledButton>();
 				int powerInputCell = this.building.GetPowerInputCell();
 				if (this.requiresPowerInput)
 				{
 					int circuitID = (int)Game.Instance.circuitManager.GetCircuitID(powerInputCell);
-					Color color5 = ((!(component != null) || component.IsEnabled) ? Color.white : Color.gray);
-					Sprite sprite = ((flag5 || circuitID == 65535) ? this.resources.electricityInputIcon : this.resources.electricityConnectedIcon);
-					this.DrawUtilityIcon(powerInputCell, sprite, ref this.inputVisualizer, color5, this.GetWireColor(powerInputCell), 1f, false);
+					Color color = ((!(component != null) || component.IsEnabled) ? Color.white : Color.gray);
+					Sprite sprite = ((flag || circuitID == 65535) ? this.resources.electricityInputIcon : this.resources.electricityConnectedIcon);
+					this.DrawUtilityIcon(powerInputCell, sprite, ref this.inputVisualizer, color, this.GetWireColor(powerInputCell), 1f, false);
 				}
 				if (this.requiresPowerOutput)
 				{
 					int powerOutputCell = this.building.GetPowerOutputCell();
 					int circuitID2 = (int)Game.Instance.circuitManager.GetCircuitID(powerOutputCell);
-					Color color6 = ((!this.building.Def.UseWhitePowerOutputConnectorColour) ? this.resources.electricityOutputColor : Color.white);
-					Color32 color7 = ((!(component != null) || component.IsEnabled) ? color6 : Color.gray);
-					Sprite sprite2 = ((flag5 || circuitID2 == 65535) ? this.resources.electricityInputIcon : this.resources.electricityConnectedIcon);
-					this.DrawUtilityIcon(powerOutputCell, sprite2, ref this.outputVisualizer, color7, this.GetWireColor(powerOutputCell), 1f, false);
+					Color color2 = ((!this.building.Def.UseWhitePowerOutputConnectorColour) ? this.resources.electricityOutputColor : Color.white);
+					Color32 color3 = ((!(component != null) || component.IsEnabled) ? color2 : Color.gray);
+					Sprite sprite2 = ((flag || circuitID2 == 65535) ? this.resources.electricityInputIcon : this.resources.electricityConnectedIcon);
+					this.DrawUtilityIcon(powerOutputCell, sprite2, ref this.outputVisualizer, color3, this.GetWireColor(powerOutputCell), 1f, false);
 				}
 			}
 			else
 			{
-				bool flag6 = true;
+				bool flag2 = true;
 				Switch component2 = base.GetComponent<Switch>();
 				if (component2 != null)
 				{
 					int num = Grid.PosToCell(base.transform.GetPosition());
-					Color32 color8 = ((!component2.IsHandlerOn()) ? this.resources.switchOffColor : this.resources.switchColor);
-					this.DrawUtilityIcon(num, this.resources.switchIcon, ref this.outputVisualizer, color8, Color.white, 1f, false);
-					flag6 = false;
+					Color32 color4 = ((!component2.IsHandlerOn()) ? this.resources.switchOffColor : this.resources.switchColor);
+					this.DrawUtilityIcon(num, this.resources.switchIcon, ref this.outputVisualizer, color4, Color.white, 1f, false);
+					flag2 = false;
 				}
 				else
 				{
@@ -408,42 +336,117 @@ public class BuildingCellVisualizer : KMonoBehaviour
 						component3.GetCells(out num2, out num3);
 						this.DrawUtilityIcon(num2, (Game.Instance.circuitManager.GetCircuitID(num2) != ushort.MaxValue) ? this.resources.electricityConnectedIcon : this.resources.electricityBridgeIcon, ref this.inputVisualizer, this.resources.electricityInputColor, Color.white, 1f, false);
 						this.DrawUtilityIcon(num3, (Game.Instance.circuitManager.GetCircuitID(num3) != ushort.MaxValue) ? this.resources.electricityConnectedIcon : this.resources.electricityBridgeIcon, ref this.outputVisualizer, this.resources.electricityInputColor, Color.white, 1f, false);
-						flag6 = false;
+						flag2 = false;
 					}
 				}
-				if (flag6)
+				if (flag2)
 				{
 					this.DisableIcons();
 				}
 			}
 		}
-		else if (this.requiresLiquidInput || this.requiresLiquidOutput || this.requiresSecondLiquidOutput || this.requiresSecondLiquidInput)
+		else if (mode == OverlayModes.GasConduits.ID)
 		{
-			if (this.requiresLiquidInput)
+			if (this.requiresGasInput || this.requiresGasOutput || this.requiresSecondGasOutput || this.requiresSecondGasInput)
 			{
-				bool flag7 = null != Grid.Objects[this.building.GetUtilityInputCell(), 16];
-				BuildingCellVisualizerResources.ConnectedDisconnectedColours input3 = this.resources.liquidIOColours.input;
-				Color color9 = ((!flag7) ? input3.disconnected : input3.connected);
-				this.DrawUtilityIcon(this.building.GetUtilityInputCell(), this.resources.liquidInputIcon, ref this.inputVisualizer, color9);
+				if (this.requiresGasInput)
+				{
+					bool flag3 = null != Grid.Objects[this.building.GetUtilityInputCell(), 12];
+					BuildingCellVisualizerResources.ConnectedDisconnectedColours input = this.resources.gasIOColours.input;
+					Color color5 = ((!flag3) ? input.disconnected : input.connected);
+					this.DrawUtilityIcon(this.building.GetUtilityInputCell(), this.resources.gasInputIcon, ref this.inputVisualizer, color5);
+				}
+				if (this.requiresGasOutput)
+				{
+					bool flag4 = null != Grid.Objects[this.building.GetUtilityOutputCell(), 12];
+					BuildingCellVisualizerResources.ConnectedDisconnectedColours output = this.resources.gasIOColours.output;
+					Color color6 = ((!flag4) ? output.disconnected : output.connected);
+					this.DrawUtilityIcon(this.building.GetUtilityOutputCell(), this.resources.gasOutputIcon, ref this.outputVisualizer, color6);
+				}
+				if (this.requiresSecondGasInput)
+				{
+					CellOffset secondaryConduitOffset = this.building.GetComponent<ISecondaryInput>().GetSecondaryConduitOffset();
+					int visualizerCell = this.GetVisualizerCell(this.building, secondaryConduitOffset);
+					this.DrawUtilityIcon(visualizerCell, this.resources.gasInputIcon, ref this.secondaryInputVisualizer, BuildingCellVisualizer.secondInputColour, Color.white, 1.5f, false);
+				}
+				if (this.requiresSecondGasOutput)
+				{
+					CellOffset secondaryConduitOffset2 = this.building.GetComponent<ISecondaryOutput>().GetSecondaryConduitOffset();
+					int visualizerCell2 = this.GetVisualizerCell(this.building, secondaryConduitOffset2);
+					this.DrawUtilityIcon(visualizerCell2, this.resources.gasOutputIcon, ref this.secondaryOutputVisualizer, BuildingCellVisualizer.secondOutputColour, Color.white, 1.5f, false);
+				}
 			}
-			if (this.requiresLiquidOutput)
+			else
 			{
-				bool flag8 = null != Grid.Objects[this.building.GetUtilityOutputCell(), 16];
-				BuildingCellVisualizerResources.ConnectedDisconnectedColours output3 = this.resources.liquidIOColours.output;
-				Color color10 = ((!flag8) ? output3.disconnected : output3.connected);
-				this.DrawUtilityIcon(this.building.GetUtilityOutputCell(), this.resources.liquidOutputIcon, ref this.outputVisualizer, color10);
+				this.DisableIcons();
 			}
-			if (this.requiresSecondLiquidInput)
+		}
+		else if (mode == OverlayModes.LiquidConduits.ID)
+		{
+			if (this.requiresLiquidInput || this.requiresLiquidOutput || this.requiresSecondLiquidOutput || this.requiresSecondLiquidInput)
 			{
-				CellOffset secondaryConduitOffset3 = this.building.GetComponent<ISecondaryInput>().GetSecondaryConduitOffset();
-				int visualizerCell3 = this.GetVisualizerCell(this.building, secondaryConduitOffset3);
-				this.DrawUtilityIcon(visualizerCell3, this.resources.liquidInputIcon, ref this.secondaryInputVisualizer, BuildingCellVisualizer.secondInputColour, Color.white, 1.5f, false);
+				if (this.requiresLiquidInput)
+				{
+					bool flag5 = null != Grid.Objects[this.building.GetUtilityInputCell(), 16];
+					BuildingCellVisualizerResources.ConnectedDisconnectedColours input2 = this.resources.liquidIOColours.input;
+					Color color7 = ((!flag5) ? input2.disconnected : input2.connected);
+					this.DrawUtilityIcon(this.building.GetUtilityInputCell(), this.resources.liquidInputIcon, ref this.inputVisualizer, color7);
+				}
+				if (this.requiresLiquidOutput)
+				{
+					bool flag6 = null != Grid.Objects[this.building.GetUtilityOutputCell(), 16];
+					BuildingCellVisualizerResources.ConnectedDisconnectedColours output2 = this.resources.liquidIOColours.output;
+					Color color8 = ((!flag6) ? output2.disconnected : output2.connected);
+					this.DrawUtilityIcon(this.building.GetUtilityOutputCell(), this.resources.liquidOutputIcon, ref this.outputVisualizer, color8);
+				}
+				if (this.requiresSecondLiquidInput)
+				{
+					CellOffset secondaryConduitOffset3 = this.building.GetComponent<ISecondaryInput>().GetSecondaryConduitOffset();
+					int visualizerCell3 = this.GetVisualizerCell(this.building, secondaryConduitOffset3);
+					this.DrawUtilityIcon(visualizerCell3, this.resources.liquidInputIcon, ref this.secondaryInputVisualizer, BuildingCellVisualizer.secondInputColour, Color.white, 1.5f, false);
+				}
+				if (this.requiresSecondLiquidOutput)
+				{
+					CellOffset secondaryConduitOffset4 = this.building.GetComponent<ISecondaryOutput>().GetSecondaryConduitOffset();
+					int visualizerCell4 = this.GetVisualizerCell(this.building, secondaryConduitOffset4);
+					this.DrawUtilityIcon(visualizerCell4, this.resources.liquidOutputIcon, ref this.secondaryOutputVisualizer, BuildingCellVisualizer.secondOutputColour, Color.white, 1.5f, false);
+				}
 			}
-			if (this.requiresSecondLiquidOutput)
+			else
 			{
-				CellOffset secondaryConduitOffset4 = this.building.GetComponent<ISecondaryOutput>().GetSecondaryConduitOffset();
-				int visualizerCell4 = this.GetVisualizerCell(this.building, secondaryConduitOffset4);
-				this.DrawUtilityIcon(visualizerCell4, this.resources.liquidOutputIcon, ref this.secondaryOutputVisualizer, BuildingCellVisualizer.secondOutputColour, Color.white, 1.5f, false);
+				this.DisableIcons();
+			}
+		}
+		else if (mode == OverlayModes.SolidConveyor.ID)
+		{
+			if (this.requiresSolidInput || this.requiresSolidOutput)
+			{
+				if (this.requiresSolidInput)
+				{
+					bool flag7 = null != Grid.Objects[this.building.GetUtilityInputCell(), 20];
+					BuildingCellVisualizerResources.ConnectedDisconnectedColours input3 = this.resources.liquidIOColours.input;
+					Color color9 = ((!flag7) ? input3.disconnected : input3.connected);
+					this.DrawUtilityIcon(this.building.GetUtilityInputCell(), this.resources.liquidInputIcon, ref this.inputVisualizer, color9);
+				}
+				if (this.requiresSolidOutput)
+				{
+					bool flag8 = null != Grid.Objects[this.building.GetUtilityOutputCell(), 20];
+					BuildingCellVisualizerResources.ConnectedDisconnectedColours output3 = this.resources.liquidIOColours.output;
+					Color color10 = ((!flag8) ? output3.disconnected : output3.connected);
+					this.DrawUtilityIcon(this.building.GetUtilityOutputCell(), this.resources.liquidOutputIcon, ref this.outputVisualizer, color10);
+				}
+			}
+			else
+			{
+				this.DisableIcons();
+			}
+		}
+		else if (mode == OverlayModes.Disease.ID)
+		{
+			if (this.diseaseSourceSprite != null)
+			{
+				int utilityOutputCell = this.building.GetUtilityOutputCell();
+				this.DrawUtilityIcon(utilityOutputCell, this.diseaseSourceSprite, ref this.inputVisualizer, this.diseaseSourceColour);
 			}
 		}
 		else
@@ -578,7 +581,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 
 	private Dictionary<GameObject, Image> icons;
 
-	private SimViewMode previousMode;
+	private HashedString previousMode;
 
 	private static readonly EventSystem.IntraObjectHandler<BuildingCellVisualizer> OnBuildingUpgradedDelegate = new EventSystem.IntraObjectHandler<BuildingCellVisualizer>(delegate(BuildingCellVisualizer component, object data)
 	{

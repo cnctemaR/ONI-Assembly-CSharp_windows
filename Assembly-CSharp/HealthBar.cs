@@ -53,7 +53,7 @@ public class HealthBar : ProgressBar
 		{
 			return;
 		}
-		if ((SimViewMode)data == SimViewMode.None)
+		if ((HashedString)data == OverlayModes.None.ID)
 		{
 			if (!base.gameObject.activeSelf && this.ShouldShow)
 			{

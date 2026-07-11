@@ -1,5 +1,4 @@
 ﻿using System;
-using OverlayModes;
 using TUNING;
 using UnityEngine;
 
@@ -19,7 +18,7 @@ public class LogicWireConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier_TINY, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
-		buildingDef.ViewMode = SimViewMode.Logic;
+		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.ObjectLayer = ObjectLayer.LogicWires;
 		buildingDef.TileLayer = ObjectLayer.LogicWiresTiling;
 		buildingDef.SceneLayer = Grid.SceneLayer.LogicWires;
@@ -32,7 +31,7 @@ public class LogicWireConfig : IBuildingConfig
 		buildingDef.isKAnimTile = true;
 		buildingDef.isUtility = true;
 		buildingDef.DragBuild = true;
-		GeneratedBuildings.RegisterWithOverlay(Logic.HighlightItemIDs, "LogicWire");
+		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, "LogicWire");
 		return buildingDef;
 	}
 

@@ -8,7 +8,7 @@ public class Gantry : Switch
 		base.OnSpawn();
 		if (Gantry.infoStatusItem == null)
 		{
-			Gantry.infoStatusItem = new StatusItem("GantryAutomationInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			Gantry.infoStatusItem = new StatusItem("GantryAutomationInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			Gantry.infoStatusItem.resolveStringCallback = new Func<string, object, string>(Gantry.ResolveInfoStatusItemString);
 		}
 		base.GetComponent<KAnimControllerBase>().PlaySpeedMultiplier = 0.5f;
@@ -141,7 +141,7 @@ public class Gantry : Switch
 				smi.SetActive(false);
 			}).PlayAnim("off_pre")
 				.OnAnimQueueComplete(this.retracted);
-			this.retracted.PlayAnim("off").ParamTransition<bool>(this.should_extend, this.extended_pre, new StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.Parameter<bool>.Callback(GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsTrue));
+			this.retracted.PlayAnim("off").ParamTransition<bool>(this.should_extend, this.extended_pre, GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsTrue);
 			this.extended_pre.Enter(delegate(Gantry.Instance smi)
 			{
 				smi.SetActive(true);
@@ -157,7 +157,7 @@ public class Gantry : Switch
 			{
 				smi.master.SetForceField(false);
 			}).PlayAnim("on")
-				.ParamTransition<bool>(this.should_extend, this.retracted_pre, new StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.Parameter<bool>.Callback(GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsFalse));
+				.ParamTransition<bool>(this.should_extend, this.retracted_pre, GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsFalse);
 		}
 
 		public GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.State retracted_pre;

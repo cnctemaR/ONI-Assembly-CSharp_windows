@@ -13,7 +13,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		this.faceTargetWhenWorking = true;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Socializing;
 		this.synchronizeAnims = false;
-		this.showProgressBar = true;
+		this.showProgressBar = false;
 		this.resetProgressOnStop = true;
 	}
 

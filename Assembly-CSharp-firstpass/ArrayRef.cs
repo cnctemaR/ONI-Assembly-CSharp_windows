@@ -94,7 +94,7 @@ public struct ArrayRef<T>
 			this.elements[num] = this.elements[num + 1];
 		}
 		this.sizeImpl--;
-		DebugUtil.Assert(this.sizeImpl >= 0, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(this.sizeImpl >= 0);
 	}
 
 	public void RemoveAtSwap(int index)
@@ -102,7 +102,7 @@ public struct ArrayRef<T>
 		this.ValidateIndex(index);
 		this.elements[index] = this.elements[this.size - 1];
 		this.sizeImpl--;
-		DebugUtil.Assert(this.sizeImpl >= 0, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(this.sizeImpl >= 0);
 	}
 
 	public void RemoveAll(Predicate<T> match)
@@ -125,7 +125,7 @@ public struct ArrayRef<T>
 			{
 				this.elements[num] = this.elements[this.size - 1];
 				this.sizeImpl--;
-				DebugUtil.Assert(this.sizeImpl >= 0, "Assert!", string.Empty, string.Empty);
+				DebugUtil.Assert(this.sizeImpl >= 0);
 			}
 			else
 			{
@@ -166,14 +166,14 @@ public struct ArrayRef<T>
 
 	private void MaybeGrow(int index)
 	{
-		DebugUtil.Assert(this.capacity == 0 || this.capacity == this.elements.Length, "Assert!", string.Empty, string.Empty);
-		DebugUtil.Assert(index >= 0, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(this.capacity == 0 || this.capacity == this.elements.Length);
+		DebugUtil.Assert(index >= 0);
 		if (index < this.capacity)
 		{
 			return;
 		}
 		this.Reallocate((this.capacity != 0) ? (this.capacity * 2) : 1);
-		DebugUtil.Assert(this.capacity == 0 || this.capacity == this.elements.Length, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(this.capacity == 0 || this.capacity == this.elements.Length);
 	}
 
 	private void Reallocate(int newCapacity)

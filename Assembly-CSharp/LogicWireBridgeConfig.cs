@@ -1,5 +1,4 @@
 ﻿using System;
-using OverlayModes;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -20,7 +19,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.LogicBridge;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier_TINY, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
-		buildingDef.ViewMode = SimViewMode.Logic;
+		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
 		buildingDef.SceneLayer = Grid.SceneLayer.LogicWireBridges;
 		buildingDef.Overheatable = false;
@@ -32,7 +31,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
-		GeneratedBuildings.RegisterWithOverlay(Logic.HighlightItemIDs, "LogicWireBridge");
+		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, "LogicWireBridge");
 		return buildingDef;
 	}
 

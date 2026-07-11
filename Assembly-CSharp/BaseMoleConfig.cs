@@ -16,11 +16,12 @@ public static class BaseMoleConfig
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", 10, true, false, 123.149994f, 673.15f, 73.149994f, 773.15f);
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
-		gameObject.AddOrGetDef<DiggerMonitor.Def>();
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true);
+		DiggerMonitor.Def def = gameObject.AddOrGetDef<DiggerMonitor.Def>();
+		def.depthToDig = MoleTuning.DEPTH_TO_HIDE;
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new FallStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)
-			.Add(new DiggerStates.Def(MoleTuning.DEPTH_TO_HIDE), true)
+			.Add(new DiggerStates.Def(), true)
 			.Add(new GrowUpStates.Def(), true)
 			.Add(new TrappedStates.Def(), true)
 			.Add(new IncubatingStates.Def(), true)
@@ -37,9 +38,9 @@ public static class BaseMoleConfig
 			.Add(new NestingPoopState.Def((!is_baby) ? SimHashes.Regolith.CreateTag() : Tag.Invalid), true)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
 			.PopInterruptGroup();
-		IdleStates.Def def = new IdleStates.Def();
-		def.customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMoleConfig.CustomIdleAnim);
-		ChoreTable.Builder builder2 = builder.Add(def, true);
+		IdleStates.Def def2 = new IdleStates.Def();
+		def2.customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMoleConfig.CustomIdleAnim);
+		ChoreTable.Builder builder2 = builder.Add(def2, true);
 		EntityTemplates.AddCreatureBrain(gameObject, builder2, GameTags.Creatures.Species.MoleSpecies, null);
 		return gameObject;
 	}
@@ -56,11 +57,15 @@ public static class BaseMoleConfig
 
 	private static HashedString CustomIdleAnim(IdleStates.Instance smi, ref HashedString pre_anim)
 	{
-		int num = Grid.PosToCell(smi.master.gameObject);
-		if (Grid.IsSolidCell(num))
+		Navigator component = smi.gameObject.GetComponent<Navigator>();
+		if (component.CurrentNavType == NavType.Solid)
 		{
-			int num2 = global::UnityEngine.Random.Range(0, BaseMoleConfig.SolidIdleAnims.Length);
-			return BaseMoleConfig.SolidIdleAnims[num2];
+			int num = global::UnityEngine.Random.Range(0, BaseMoleConfig.SolidIdleAnims.Length);
+			return BaseMoleConfig.SolidIdleAnims[num];
+		}
+		if (smi.gameObject.GetDef<BabyMonitor.Def>() != null && global::UnityEngine.Random.Range(0, 100) >= 90)
+		{
+			return "drill_fail";
 		}
 		return "idle_loop";
 	}

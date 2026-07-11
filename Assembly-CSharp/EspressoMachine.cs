@@ -71,7 +71,7 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 			ChoreType relax = Db.Get().ChoreTypes.Relax;
 			Workable workable = component;
 			ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-			Chore chore = new WorkChore<EspressoMachineWorkable>(relax, workable, null, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 0, false);
+			Chore chore = new WorkChore<EspressoMachineWorkable>(relax, workable, null, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false);
 			chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
 			return chore;
 		}

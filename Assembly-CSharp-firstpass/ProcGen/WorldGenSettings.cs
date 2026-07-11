@@ -236,7 +236,7 @@ namespace ProcGen
 			}
 			if (!WorldGenSettings.biomeSettingsCache.ContainsKey(empty))
 			{
-				BiomeSettings biomeSettings = YamlIO<BiomeSettings>.LoadFile(this.base_path + empty + ".yaml");
+				BiomeSettings biomeSettings = YamlIO<BiomeSettings>.LoadFile(this.base_path + empty + ".yaml", null);
 				if (biomeSettings != null)
 				{
 					WorldGenSettings.biomeSettingsCache.Add(empty, biomeSettings);
@@ -272,7 +272,7 @@ namespace ProcGen
 			}
 			if (!this.featuresettings.ContainsKey(empty))
 			{
-				FeatureSettings featureSettings = YamlIO<FeatureSettings>.LoadFile(this.base_path + empty + ".yaml");
+				FeatureSettings featureSettings = YamlIO<FeatureSettings>.LoadFile(this.base_path + empty + ".yaml", null);
 				if (featureSettings != null)
 				{
 					this.featuresettings.Add(empty, featureSettings);
@@ -348,35 +348,35 @@ namespace ProcGen
 
 		public void Save(string path)
 		{
-			this.layers.Save(path + WorldGenSettings.LAYERS_FILE + ".yaml");
-			this.features.Save(path + WorldGenSettings.FEATURES_FILE + ".yaml");
-			this.rivers.Save(path + WorldGenSettings.RIVERS_FILE + ".yaml");
-			this.rooms.Save(path + WorldGenSettings.ROOMS_FILE + ".yaml");
-			this.temperatures.Save(path + WorldGenSettings.TEMPERATURES_FILE + ".yaml");
-			this.defaults.Save(path + WorldGenSettings.DEFAULTS_FILE + ".yaml");
-			this.mobs.Save(path + WorldGenSettings.MOBS_FILE + ".yaml");
+			this.layers.Save(path + WorldGenSettings.LAYERS_FILE + ".yaml", null);
+			this.features.Save(path + WorldGenSettings.FEATURES_FILE + ".yaml", null);
+			this.rivers.Save(path + WorldGenSettings.RIVERS_FILE + ".yaml", null);
+			this.rooms.Save(path + WorldGenSettings.ROOMS_FILE + ".yaml", null);
+			this.temperatures.Save(path + WorldGenSettings.TEMPERATURES_FILE + ".yaml", null);
+			this.defaults.Save(path + WorldGenSettings.DEFAULTS_FILE + ".yaml", null);
+			this.mobs.Save(path + WorldGenSettings.MOBS_FILE + ".yaml", null);
 		}
 
 		public static WorldGenSettings LoadFile(string path, IFileSystem filesystem)
 		{
 			WorldGenSettings worldGenSettings = new WorldGenSettings();
 			worldGenSettings.worlds.LoadFiles(path, filesystem);
-			worldGenSettings.layers = YamlIO<LevelLayerSettings>.LoadFile(path + WorldGenSettings.LAYERS_FILE + ".yaml");
+			worldGenSettings.layers = YamlIO<LevelLayerSettings>.LoadFile(path + WorldGenSettings.LAYERS_FILE + ".yaml", null);
 			worldGenSettings.layers.LevelLayers.ConvertBandSizeToMaxSize();
-			worldGenSettings.features = YamlIO<TerrainFeatureSettings>.LoadFile(path + WorldGenSettings.FEATURES_FILE + ".yaml");
+			worldGenSettings.features = YamlIO<TerrainFeatureSettings>.LoadFile(path + WorldGenSettings.FEATURES_FILE + ".yaml", null);
 			foreach (KeyValuePair<string, TerrainFeature> keyValuePair in worldGenSettings.features.TerrainFeatures)
 			{
 				keyValuePair.Value.name = keyValuePair.Key;
 			}
-			worldGenSettings.rivers = YamlIO<Rivers>.LoadFile(path + WorldGenSettings.RIVERS_FILE + ".yaml");
-			worldGenSettings.rooms = YamlIO<RoomDescriptions>.LoadFile(path + WorldGenSettings.ROOMS_FILE + ".yaml");
+			worldGenSettings.rivers = YamlIO<Rivers>.LoadFile(path + WorldGenSettings.RIVERS_FILE + ".yaml", null);
+			worldGenSettings.rooms = YamlIO<RoomDescriptions>.LoadFile(path + WorldGenSettings.ROOMS_FILE + ".yaml", null);
 			foreach (KeyValuePair<string, Room> keyValuePair2 in worldGenSettings.rooms.rooms)
 			{
 				keyValuePair2.Value.name = keyValuePair2.Key;
 			}
-			worldGenSettings.temperatures = YamlIO<Temperatures>.LoadFile(path + WorldGenSettings.TEMPERATURES_FILE + ".yaml");
-			worldGenSettings.defaults = YamlIO<DefaultSettings>.LoadFile(path + WorldGenSettings.DEFAULTS_FILE + ".yaml");
-			worldGenSettings.mobs = YamlIO<MobSettings>.LoadFile(path + WorldGenSettings.MOBS_FILE + ".yaml");
+			worldGenSettings.temperatures = YamlIO<Temperatures>.LoadFile(path + WorldGenSettings.TEMPERATURES_FILE + ".yaml", null);
+			worldGenSettings.defaults = YamlIO<DefaultSettings>.LoadFile(path + WorldGenSettings.DEFAULTS_FILE + ".yaml", null);
+			worldGenSettings.mobs = YamlIO<MobSettings>.LoadFile(path + WorldGenSettings.MOBS_FILE + ".yaml", null);
 			foreach (KeyValuePair<string, Mob> keyValuePair3 in worldGenSettings.mobs.MobLookupTable)
 			{
 				keyValuePair3.Value.name = keyValuePair3.Key;

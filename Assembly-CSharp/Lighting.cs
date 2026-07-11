@@ -50,7 +50,7 @@ public class Lighting : MonoBehaviour
 			Shader.SetGlobalVector("_SubstanceParameters", new Vector4(this.Settings.substanceEdgeParameters.intensity, this.Settings.substanceEdgeParameters.edgeIntensity, this.Settings.substanceEdgeParameters.directSunlightScale, this.Settings.substanceEdgeParameters.power));
 			Shader.SetGlobalVector("_TileEdgeParameters", new Vector4(this.Settings.tileEdgeParameters.intensity, this.Settings.tileEdgeParameters.edgeIntensity, this.Settings.tileEdgeParameters.directSunlightScale, this.Settings.tileEdgeParameters.power));
 		}
-		bool flag = SimDebugView.Instance != null && SimDebugView.Instance.GetMode() == SimViewMode.Disease;
+		bool flag = SimDebugView.Instance != null && SimDebugView.Instance.GetMode() == OverlayModes.Disease.ID;
 		float num = ((!flag) ? 0f : 1f);
 		if (this.disableLighting)
 		{

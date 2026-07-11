@@ -40,6 +40,7 @@ public class DetailsScreen : KTabMenu
 		this.CloseButton.onClick += this.DeselectAndClose;
 		this.TabTitle.OnNameChanged += this.OnNameChanged;
 		this.TabTitle.OnStartedEditing += this.OnStartedEditing;
+		this.sideScreen2.SetActive(false);
 		base.Subscribe<DetailsScreen>(-1514841199, DetailsScreen.OnRefreshDataDelegate);
 	}
 
@@ -216,7 +217,7 @@ public class DetailsScreen : KTabMenu
 				num2++;
 				if (num == -1)
 				{
-					if (SimDebugView.Instance.GetMode() != SimViewMode.None)
+					if (SimDebugView.Instance.GetMode() != OverlayModes.None.ID)
 					{
 						if (SimDebugView.Instance.GetMode() == this.screens[j].focusInViewMode)
 						{
@@ -283,6 +284,26 @@ public class DetailsScreen : KTabMenu
 		{
 			this.screens[newTab].screen.SetTarget(this.target);
 		}
+	}
+
+	public KScreen SetSecondarySideScreen(KScreen secondaryPrefab, string title)
+	{
+		this.ClearSecondarySideScreen();
+		this.activeSideScreen2 = KScreenManager.Instance.InstantiateScreen(secondaryPrefab.gameObject, this.sideScreen2ContentBody);
+		this.activeSideScreen2.Activate();
+		this.sideScreen2Title.text = title;
+		this.sideScreen2.SetActive(true);
+		return this.activeSideScreen2;
+	}
+
+	public void ClearSecondarySideScreen()
+	{
+		if (this.activeSideScreen2 != null)
+		{
+			this.activeSideScreen2.Deactivate();
+			this.activeSideScreen2 = null;
+		}
+		this.sideScreen2.SetActive(false);
 	}
 
 	public void DeactivateSideContent()
@@ -498,6 +519,18 @@ public class DetailsScreen : KTabMenu
 	[SerializeField]
 	private List<DetailsScreen.SideScreenRef> sideScreens;
 
+	[Header("Secondary Side Screens")]
+	[SerializeField]
+	private GameObject sideScreen2ContentBody;
+
+	[SerializeField]
+	private GameObject sideScreen2;
+
+	[SerializeField]
+	private LocText sideScreen2Title;
+
+	private KScreen activeSideScreen2;
+
 	private bool HasActivated;
 
 	private bool isEditing;
@@ -532,7 +565,7 @@ public class DetailsScreen : KTabMenu
 
 		public bool hideWhenDead;
 
-		public SimViewMode focusInViewMode;
+		public HashedString focusInViewMode;
 
 		[HideInInspector]
 		public int tabIdx;

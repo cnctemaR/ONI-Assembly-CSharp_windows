@@ -18,13 +18,13 @@ namespace STRINGS
 
 		public class HEADERS
 		{
-			public static LocString FABRICATIONS = "Recipes";
+			public static LocString FABRICATIONS = "All Recipes";
 
-			public static LocString RECEPTACLE = "Plants";
+			public static LocString RECEPTACLE = "Farmable Plants";
 
-			public static LocString RECIPE = "Recipe";
+			public static LocString RECIPE = "Recipe Ingredients";
 
-			public static LocString USED_IN_RECIPES = "Used in recipes";
+			public static LocString USED_IN_RECIPES = "Ingredient In";
 
 			public static LocString TECH_UNLOCKS = "Unlocks";
 
@@ -34,13 +34,19 @@ namespace STRINGS
 
 			public static LocString UNLOCK_ROLES = "Promotion Opportunities";
 
-			public static LocString ROLE_PERKS = "Role Perks";
+			public static LocString UNLOCK_ROLES_DESC = "Promotions introduce further stat boosts and traits that stack with existing Job Training.";
+
+			public static LocString ROLE_PERKS = "Job Training";
+
+			public static LocString ROLE_PERKS_DESC = "Job Training automatically provides permanent traits and stat increases that are retained even when a Duplicant switches jobs.";
 
 			public static LocString DIET = "Diet";
 
-			public static LocString PRODUCES = "Produces";
+			public static LocString PRODUCES = "Excretes";
 
-			public static LocString HATCHESFROMEGG = "Comes from";
+			public static LocString HATCHESFROMEGG = "Hatched from";
+
+			public static LocString GROWNFROMSEED = "Grown from";
 
 			public static LocString BUILDINGEFFECTS = "Effects";
 
@@ -48,15 +54,15 @@ namespace STRINGS
 
 			public static LocString SUBENTRIES = "Entries";
 
-			public static LocString COMFORTRANGE = "Ideal Temperature";
+			public static LocString COMFORTRANGE = "Ideal Temperatures";
 
-			public static LocString ELEMENTTRANSITIONS = "Transitions";
+			public static LocString ELEMENTTRANSITIONS = "Additional States";
 
 			public static LocString SECTION_UNLOCKABLES = "Undiscovered Data";
 
 			public static LocString CONTENTLOCKED = "Undiscovered";
 
-			public static LocString CONTENTLOCKED_SUBTITLE = "More research or exploration may be required";
+			public static LocString CONTENTLOCKED_SUBTITLE = "More research or exploration is required";
 		}
 
 		public class CREATURE_DESCRIPTORS
@@ -65,7 +71,7 @@ namespace STRINGS
 			{
 				public static LocString COMFORT_RANGE = "Comfort range: {0}";
 
-				public static LocString NON_LETHAL_RANGE = "Liveable range: {0}";
+				public static LocString NON_LETHAL_RANGE = "Livable range: {0}";
 			}
 		}
 
@@ -78,15 +84,6 @@ namespace STRINGS
 			public static LocString BODY = string.Empty;
 		}
 
-		public class EXAMPLE_ENTRY
-		{
-			public static LocString TITLE = "Title of the Example entry";
-
-			public static LocString SUBTITLE = "Subtitle of the Example entry";
-
-			public static LocString BODY = "<link=\"testLink\">Body of the Example entry.</link> Blah blah blah. Blah blah blah blah blah. Blah blah blah. Blah blah blah blah blah. Blah blah blah. Blah blah blah blah blah. Blah blah blah. Blah blah blah blah blah. Blah blah blah. Blah blah blah blah blah. Blah blah blah. Blah blah blah blah blah.";
-		}
-
 		public class DRECKO
 		{
 			public static LocString TITLE = "Drecko";
@@ -95,7 +92,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Dreckos are a reptilian species boasting billions of microscopic hairs on their feet, allowing them to stick to and climb most surfaces.\n\nThe tail of the Drecko, called the \"train\", is purely for decoration and can be lost or shorn without harm to the animal.\n\nAs a result, Drecko fibers are often farmed for use in textile production.";
+				public static LocString CONTAINER1 = "Dreckos are a reptilian species boasting billions of microscopic hairs on their feet, allowing them to stick to and climb most surfaces.";
+
+				public static LocString CONTAINER2 = "The tail of the Drecko, called the \"train\", is purely for decoration and can be lost or shorn without harm to the animal.\n\nAs a result, Drecko fibers are often farmed for use in textile production.";
 			}
 		}
 
@@ -107,7 +106,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Glossy\" Drecko variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "Caring for Dreckos is fulfilling endeavor thanks to their companionable personalities.\n\nSome domestic Dreckos have even been known to respond to their own names.";
 			}
 		}
 
@@ -119,7 +120,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Little is currently known of the Gassy Moo due to its alien nature and origin.\n\nIt is capable of surviving in zero gravity and atmosphere, and is dependent of a second alien species, " + UI.FormatAsLink("Gas Grass", "GASGRASS") + ", for its survival.";
+				public static LocString CONTAINER1 = "Little is currently known of the Gassy Moo due to its alien nature and origin.\n\nIt is capable of surviving in zero gravity conditions and no atmosphere, and is dependent on a second alien species, " + UI.FormatAsLink("Gas Grass", "GASGRASS") + ", for its sustenance and survival.";
+
+				public static LocString CONTAINER2 = "The Moo has an even temperament and can be farmed for Natural Gas, though their method of reproduction has been as of yet undiscovered.";
 			}
 		}
 
@@ -131,11 +134,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Hatch is an adaptable creature whose wide ranging diet allows it to integrate easily into most ecosystems.\n\nThe Hatch has no eyes and is completely blind, although a photosensitive patch atop its head is capable of detecting even minor changes in overhead light, making it prefer dark caves and tunnels.";
-
-				public static LocString CONTAINER2 = "To compensate for its lack of vision, the Hatch has acute chemical receptors in the tarsus located at the ends of its legs, which have developed into sharp points for the purpose of tunneling.\n\nThese receptors detect minute changes in the dirt and air, allowing the Hatch to follow trace chemical trails to food, detect hazardous areas and react to potential predators.\n\nThe Hatch is nocturnal and requires over twelve hours of sleep per day.\nIt emerges only at nighttime to scavenge, preferring to spend the day burrowed beneath the soil and out of view of potential predators.\n\nWithout a place to hide the Hatch will become distressed, and may forgo sleep altogether.\n\nIt is difficult to classify the Hatch's diet as the term \"omnivore\" does not extend to the non-organic materials the Hatch is capable of ingesting.\n\nA more appropriate term is \"totumvore\", given that it is capable of consuming and finding nutritional value in nearly every known substance.\n\nDespite this, the Hatch is a non-aggressive scavenger, and avoids contact with most other organisms.Surprisingly, when attacked, the Hatch prefers to bite predators in self-defense rather than use its sharpened tarsus.\n\nThis may be because the Hatch's teeth have evolved to be exceptionally hard and sturdy to masticate a wide variety of materials, and it is therefore less likely to incur injuries to itself during attack.";
-
-				public static LocString CONTAINER3 = "When attempting to pet a Hatch, inexperienced handlers make the mistake of reaching out too quickly for the creature's head.\n\nThis triggers a fear response in the Hatch, as its photosensitive patch of skin called the \"parietal eye\" interprets this sudden light change as an incoming aerial predator.\n\nThe proper way to pet a Hatch is to touch any of its four feet to first make it aware of your presence, then either scratch the soft segmented underbelly or firmly pat the creature's thick chitinous back.";
+				public static LocString CONTAINER1 = "The Hatch has no eyes and is completely blind, although a photosensitive patch atop its head is capable of detecting even minor changes in overhead light, making it prefer dark caves and tunnels.";
 			}
 		}
 
@@ -147,7 +146,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Stone\" Hatch variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "When attempting to pet a Hatch, inexperienced handlers make the mistake of reaching out too quickly for the creature's head.\n\nThis triggers a fear response in the Hatch, as its photosensitive patch of skin called the \"parietal eye\" interprets this sudden light change as an incoming aerial predator.";
 			}
 		}
 
@@ -159,7 +160,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Sage\" Hatch variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "It is difficult to classify the Hatch's diet as the term \"omnivore\" does not extend to the non-organic materials it is capable of ingesting.\n\nA more appropriate term is \"totumvore\", given that it can consume and find nutritional value in nearly every known substance.";
 			}
 		}
 
@@ -171,7 +174,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Smooth\" Hatch variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "The proper way to pet a Hatch is to touch any of its four feet to first make it aware of your presence, then either scratch the soft segmented underbelly or firmly pat the creature's thick chitinous back.";
 			}
 		}
 
@@ -179,11 +184,13 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Shove Vole";
 
-			public static LocString SUBTITLE = "Critter";
+			public static LocString SUBTITLE = "Domesticable Critter";
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "The Shove Vole is a unique creature that possesses two fully developed sets of lungs, allowing it to hold its breath during the long periods it spends underground.";
+
+				public static LocString CONTAINER2 = "Drill-shaped keratin structures circling the Vole's body aids its ability to drill at high speeds through most natural materials.";
 			}
 		}
 
@@ -195,7 +202,11 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Morb is a versatile scavenger, capable of breaking down and consuming dead matter from most plant and animal species.\n\nIt poses a severe disease risk to humans due to the thick slime it excretes to surround its inner cartilage structures.\nA single teaspoon of Morb slime can contain up to a quadrillion bacteria that work to deter would-be predators and liquefy its food.";
+				public static LocString CONTAINER1 = "The Morb is a versatile scavenger, capable of breaking down and consuming dead matter from most plant and animal species.";
+
+				public static LocString CONTAINER2 = "It poses a severe disease risk to humans due to the thick slime it excretes to surround its inner cartilage structures.\nA single teaspoon of Morb slime can contain up to a quadrillion bacteria that work to deter would-be predators and liquefy its food.";
+
+				public static LocString CONTAINER3 = "Petting a Morb is not recommended.";
 			}
 		}
 
@@ -207,7 +218,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Pacu fish is often interpreted as possessing a vacant stare due to its large and unblinking eyes, yet they are remarkably bright and friendly creatures.\n\nIt is said that the average Pacu intelligence is comparable to that of a dog, and that they are capable of learning and distinguishing from over twenty human faces.";
+				public static LocString CONTAINER1 = "The Pacu fish is often interpreted as possessing a vacant stare due to its large and unblinking eyes, yet they are remarkably bright and friendly creatures.";
 			}
 		}
 
@@ -219,7 +230,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Tropical\" Pacu variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "It is said that the average Pacu intelligence is comparable to that of a dog, and that they are capable of learning and distinguishing from over twenty human faces.";
 			}
 		}
 
@@ -231,7 +244,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Gulp Fish\" Pacu variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "Despite descending from the Pacu, the Gulp Fish is unique enough both in genetics and behavior to be considered its own subspecies.";
 			}
 		}
 
@@ -243,7 +258,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Puft is a friendly creature whose limited brainpower is largely dedicated to sustaining its basic life processes.\n\nA specialized air bladder in the Puft's chest cavity stores varying concentrations of gas, allowing it to control its buoyancy and float effortlessly through the air.";
+				public static LocString CONTAINER1 = "The Puft is a mellow creature whose limited brainpower is largely dedicated to sustaining its basic life processes.";
 			}
 		}
 
@@ -255,7 +270,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Squeaky\" Puft variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "Pufts often have a collection of asymmetric teeth lining the ridge of their mouths, although this feature is entirely vestigial as Pufts do not consume solid food.\n\nInstead, a baleen-like mesh of keratin at the back of the Puft's throat works to filter out tiny organisms and food particles from the air.\n\nUnusable air is expelled back out the Puft's posterior trunk, along with waste material and any indigestible particles or pathogens which it then evacuates as solid biomass.";
 			}
 		}
 
@@ -267,7 +284,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Dense\" Puft variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "The Puft is an easy creature to raise for first time handlers given its wholly amiable disposition and suggestible nature.\n\nIt is unusually tolerant of human handling and will allow itself to be patted or scratched nearly anywhere on its fuzzy body, including, unnervingly, directly on any of its three eyeballs.";
 			}
 		}
 
@@ -279,7 +298,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: Puft \"Prince\" variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "A specialized air bladder in the Puft's chest cavity stores varying concentrations of gas, allowing it to control its buoyancy and float effortlessly through the air.\n\nCombined with extremely lightweight and elastic skin, the Puft is capable of maintaining flotation indefinitely with negligible energy expenditure. Its orientation and balance, meanwhile, are maintained by counterweighted formations of bone located in its otherwise useless legs.";
 			}
 		}
 
@@ -291,9 +312,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Shine Bug is a flying insect with bladed membranes atop its head which it rotates to maintain flight.\n\nThe bioluminescence of its body serves the social purpose of finding and communicating with others of its kind.\n\nIt is not uncommon for Shine Bugs to mistakenly approach inanimate sources of light in search of a friend.";
-
-				public static LocString CONTAINER2 = "It is unwise to touch a Shine Bug's wing blades directly due to the extremely fragile nature of their membranes.\nThe Shine Bug can be pet anywhere else along its body, although it is advised that care still be taken due to the generally delicate nature of its exoskeleton.";
+				public static LocString CONTAINER1 = "The bioluminescence of the Shine Bug's body serves the social purpose of finding and communicating with others of its kind.";
 			}
 		}
 
@@ -305,7 +324,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Abyss\" Shine Bug variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "The Abyss Shine Bug morph has an unusual genetic mutation causing it to absorb light rather than emit it.";
 			}
 		}
 
@@ -317,7 +338,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Radiant\" Shine Bug variant</smallcaps>";
 			}
 		}
 
@@ -329,7 +350,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Sun\" Shine Bug variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "It is not uncommon for Shine Bugs to mistakenly approach inanimate sources of light in search of a friend.";
 			}
 		}
 
@@ -341,7 +364,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Azure\" Shine Bug variant</smallcaps>";
 			}
 		}
 
@@ -353,7 +376,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Coral\" Shine Bug variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "It is unwise to touch a Shine Bug's wing blades directly due to the extremely fragile nature of their membranes.";
 			}
 		}
 
@@ -365,7 +390,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Royal\" Shine Bug variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "The Shine Bug can be pet anywhere else along its body, although it is advised that care still be taken due to the generally delicate nature of its exoskeleton.";
 			}
 		}
 
@@ -377,7 +404,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Slicksters are a unique creature most renown for their ability to exude hydrocarbon waste that is nearly identical in makeup to crude oil.\n\nThe two tufts on its head are called \"rhinophores\" and help guide the Slickster toward breathable carbon dioxide.";
+				public static LocString CONTAINER1 = "Slicksters are a unique creature most renown for their ability to exude hydrocarbon waste that is nearly identical in makeup to crude oil.\n\nThe two tufts atop a Slickster's head are called rhinophores, and help guide the Slickster toward breathable carbon dioxide.";
 			}
 		}
 
@@ -389,7 +416,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Molten\" Slickster variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "Slicksters are amicable creatures famous amongst breeders for their good personalities and smiley faces.\n\nSlicksters rarely if ever nip at human handlers, and are considered non-ideal house pets only for the oily mess they involuntarily leave behind wherever they go.";
 			}
 		}
 
@@ -401,7 +430,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Longhair\" Slickster variant</smallcaps>";
+
+				public static LocString CONTAINER2 = "Positioned on either side of the Major Rhinophores are Minor Rhinophores, which specialize in mechanical reception and detect air pressure around the Slickster. These send signals to the brain to contract or expand its air sacks accordingly.";
 			}
 		}
 
@@ -515,7 +546,7 @@ namespace STRINGS
 
 				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Dr. Jones</b><alpha=#AA><size=10> <ejones@gravitas.nova></size></color>\nFrom: <b>Dr. Summers</b><size=10><alpha=#AA> <jsummers@gravitas.nova></size></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER1 = "<indent=5%>OMIGOD, every time I go into the breakroom now I get ambushed by Dr. Holland and he traps me in a 20 minute conversation about his new dog.\n\nLike, I GET it! Your puppy is cute! Why do you have like 400 different pictures of it on your phone, FROM THE SAME ANGLE?!\n\nSO annoying.</indent>";
+				public static LocString CONTAINER1 = "<indent=5%>OMIGOD, every time I go into the break room now I get ambushed by Dr. Holland and he traps me in a 20 minute conversation about his new dog.\n\nLike, I GET it! Your puppy is cute! Why do you have like 400 different pictures of it on your phone, FROM THE SAME ANGLE?!\n\nSO annoying.</indent>";
 
 				public static LocString CONTAINER2 = "<indent=5%>Haha, I think it's nice, he really loves his dog. Oh! Did I show you the thing my cat did last night? She always falls asleep on my bed but this time she sprawled out on her back and her little tongue was poking out! So cute.\n\n<color=#F44A47>[BROKEN IMAGE]</color>\n<alpha=#AA>[121 MISSING ATTACHMENTS]</color></indent>";
 
@@ -633,7 +664,7 @@ namespace STRINGS
 			{
 				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>[REDACTED]</b>\nFrom: <b>[REDACTED]</b></color></smallcaps>\n------------------\n";
 
-				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nEven with dramatic optimization we can't fit the massive volume of resources needed for a colony seed onboard, even when calculating for a very small interplanetary travel duration.\n\nSome serious changes are gonna have to be made for this to work.</indent>";
+				public static LocString CONTAINER2 = "<indent=5%>Director,\n\nEven with dramatic optimization we can't fit the massive volume of resources needed for a colony seed on board, even when calculating for a very small interplanetary travel duration.\n\nSome serious changes are gonna have to be made for this to work.</indent>";
 
 				public static LocString SIGNATURE1 = "\nXOXO,\n[REDACTED]\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
@@ -681,6 +712,40 @@ namespace STRINGS
 			}
 		}
 
+		public class RETEMPORALBOWUPDATE
+		{
+			public static LocString TITLE = "RE: To Otto (Spec Changes)";
+
+			public static LocString SUBTITLE = "UNENCRYPTED";
+
+			public class BODY
+			{
+				public static LocString TITLEALT = "To Otto (Spec Changes)";
+
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color>\nFrom: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString EMAILHEADER2 = "<smallcaps>To: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color>\nFrom: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "Thanks Doctor.\n\nPS, if you hit the \"Reply\" button instead of composing a new e-mail it makes it easier for people to tell what you're replying to. :)\n\nI appreciate it!\n\nMr. Kraus\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
+
+				public static LocString CONTAINER2 = "Try not to take it too personally, it's probably just stress.\n\nThe Facility started going through a major overhaul not long before you got here, so I imagine the Director is having quite a time getting it all sorted out.\n\nThings will calm down once all the new departments are settled.\n\nDr. Sklodowska\n<size=11>Physics Department\nThe Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class TEMPORALBOWUPDATE
+		{
+			public static LocString TITLE = "Spec Changes";
+
+			public static LocString SUBTITLE = "UNENCRYPTED";
+
+			public class BODY
+			{
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Sklodowska</b><size=10><alpha=#AA> <msklodowska@gravitas.nova></size></color>\nFrom: <b>Mr. Kraus</b><alpha=#AA><size=10> <okraus@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER2 = "Dr. Sklodowska, could I ask you to forward me the new spec changes to the Temporal Bow?\n\nThe Director completely ignored me when I asked for a project update this morning. She walked right past me in the hall - I didn't realize I was that far down on the food chain. :(\n\nMr. Kraus\nPhysics Department\nThe Gravitas Facility";
+			}
+		}
+
 		public class THEJANITOR
 		{
 			public static LocString TITLE = "Re: omg the janitor";
@@ -701,11 +766,37 @@ namespace STRINGS
 
 				public static LocString CONTAINER3 = "<indent=5%>Aw, he's really nice if you get to know him though. Really dependable too. One time I busted a wheel off my office chair and he got me a new one in like, two minutes. I think he's just sweaty because he works so hard.</indent>";
 
-				public static LocString CONTAINER4 = "<indent=5%>OMIGOSH have you seen our building's janitor? He totally smells and he has sweatstains under his armpits like EVERY time I see him. SO embarassing.</indent>";
+				public static LocString CONTAINER4 = "<indent=5%>OMIGOSH have you seen our building's janitor? He totally smells and he has sweat stains under his armpits like EVERY time I see him. SO embarrassing.</indent>";
 
 				public static LocString SIGNATURE1 = "\nXOXO,\nDr. Jones\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
 
 				public static LocString SIGNATURE2 = "\n-Dr. Summers\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class THERMODYNAMICLAWS
+		{
+			public static LocString TITLE = "The Laws of Thermodynamics";
+
+			public static LocString SUBTITLE = "UNENCRYPTED";
+
+			public class BODY
+			{
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Mr. Kraus</b><alpha=#AA><size=12> <okraus@gravitas.nova></size></color>\nFrom: <b>Dr. Jones</b><alpha=#AA><size=12> <ejones@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "<indent=5%><i>Hello</i> Mr. Kraus!\n\nI was just e-mailing you after our little chat today to pass along something you might like to read - I think you'll find it super useful in your research!\n\n</indent>";
+
+				public static LocString CONTAINER2 = "<indent=10%><b>FIRST LAW</b></indent>\n<indent=15%>Energy can neither be created or destroyed, only change forms.</indent>";
+
+				public static LocString CONTAINER3 = "<indent=10%><b>SECOND LAW</b></indent>\n<indent=15%>Entropy in an isolated system that is not in equilibrium tends to increase over time, approaching the maximum value at equilibrium.</indent>";
+
+				public static LocString CONTAINER4 = "<indent=10%><b>THIRD LAW</b></indent>\n<indent=15%>Entropy in a system approaches a constant minimum as temperature approaches absolute zero.</indent>";
+
+				public static LocString CONTAINER5 = "<indent=10%><b>ZEROTH LAW</b></indent>\n<indent=15%>If two thermodynamic systems are in thermal equilibrium with a third, then they are in thermal equilibrium with each other.</indent>";
+
+				public static LocString CONTAINER6 = "<indent=5%>\nIf this is too complicated for you, you can come by to chat. I'd be <i>thrilled</i> to answer your questions. ;)</indent>";
+
+				public static LocString SIGNATURE1 = "\nXOXO,\nDr. Jones\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
 			}
 		}
 
@@ -757,6 +848,20 @@ namespace STRINGS
 			}
 		}
 
+		public class MAGAZINEARTICLE
+		{
+			public static LocString TITLE = "Article Excerpt";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<b>Incredible Technology From Independent Lab Harnesses Time into Energy</b>";
+
+				public static LocString CONTAINER2 = "Scientists from the recently founded Gravitas Facility have unveiled their first technology prototype, dubbed the \"Temporal Bow\", a device which manipulates the 4th dimension to generate infinite, clean and renewable energy.\n\nWhile it may sound like something from science fiction, facility founder Dr.Jacquelyn Stern confirms that it is very much real.\n\n\"It has already been demonstrated that Newton's Second Law of Motion can be violated by negative mass superfluids under the correct lab conditions,\" she says.\n\n\"If the Laws of Motion can be bent and altered, why not the Laws of Thermodynamics? That was the main intent behind this project.\"\n\nThe Temporal Bow works by rapidly vibrating sections of the 4th dimension to send small quantities of mass forward and backward in time, generating massive amounts of energy with virtually no waste.\n\n\"The fantastic thing about using the 4th dimension as fuel,\" says Stern, \"is that it is really, categorically infinite\".\n\nFor those eagerly awaiting the prospect of human time travel, don't get your hopes up just yet. The Facility says that although they have transported matter through time already, the technology was expressly developed for the purpose of energy generation and is ill-equipped for human transportation.";
+			}
+		}
+
 		public class MOVEDRATS
 		{
 			public static LocString TITLE = "Moved Rats";
@@ -795,13 +900,31 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "I'm starting my new job at Gravitas today. I'm... nervous.\n\nIt turns out they hired a bunch of new people - I guess they're expanding - and most of them are about my age, but I'm the only one that hasn't done my doctorate. They all call me \"Mister\" Kraus and it's the <i>worst</i>.\n\nI have no idea where I'll find the time to do my PhD while working a fulltime job.\n------------------\n";
+				public static LocString CONTAINER1 = "I'm starting my new job at Gravitas today. I'm... nervous.\n\nIt turns out they hired a bunch of new people - I guess they're expanding - and most of them are about my age, but I'm the only one that hasn't done my doctorate. They all call me \"Mister\" Kraus and it's the <i>worst</i>.\n\nI have no idea where I'll find the time to do my PhD while working a full time job.\n------------------\n";
 
 				public static LocString CONTAINER2 = "<i>I screwed up so much today.</i>\n\nAt one point I spaced on the formula for calculating the volume of a cone, they must have thought I was completely useless.\n\nThe only time I knew what I was doing was when I helped an older coworker figure out her dumb old email.\n\nPeople say education isn't so important as long as you've got the skills, but there's things my colleagues know that I just <i>don't</i>. They're not mean about it or anything but it's so frustrating. I just feel dumb when I talk to them!\n\nI bet they're gonna realize soon that I don't belong here, and then I'll be fired for sure. Man... I'm still paying off my student loans (WITH international fees) and I <i>can't</i> lose this income.\n------------------\n";
 
 				public static LocString CONTAINER3 = "Dr. Sklodowska's been really nice and welcoming since I started working here. Sometimes she comes and sits with me in the cafeteria. The food she brings from home smells like old feet but she chats with me about what new research papers we're each reading and it's very kind.\n\nShe tells me the fact I got hired without a doctorate means I must be very smart, and management must see something in me.\n\nI'm not sure I believe her but it's nice to hear something that counters little voice in my head anyway.\n------------------\n";
 
 				public static LocString CONTAINER4 = "It's been about a week and a half and I think I'm finally starting to settle in. I'm feeling a lot better about my position - some of the senior scientists have even started using my ideas in the lab.\n\nDr. Sklodowska might have been right, my anxiety was just growing pains. This is my first real job and I guess afraid to let myself believe I could really, actually do it, just in case it went wrong.\n\nI think I want to buy Dr. Sklowdoska a digital reader for her books and papers as a thank-you one day, if I ever pay off my student loans.\n\nONCE I pay off my student loans.\n------------------\n";
+			}
+		}
+
+		public class B556
+		{
+			public static LocString TITLE = "Personal Journal: B556";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "I've been so tired lately. I've probably spent the last 3 nights sleeping at my desk, and I've used the lab's safety shower to bathe twice this month.\n\nThere isn't even an approaching deadline, but we're doing such amazing things here, I can't stop myself.\n\nI just feel... driven, I suppose.\n------------------\n";
+
+				public static LocString CONTAINER2 = "I keep finding myself staring at my computer screen, totally unable to remember what it was I was doing.\n\nI try to force myself to type up some notes or analyze my data but it's like my brain is paralyzed, I can't get anything done.\n\nI'll have to stay late to make up for all this time I've wasted staying late.\n------------------\n";
+
+				public static LocString CONTAINER3 = "Dr. McClintock told me I looked half dead and sent me home today. I don't think she even has the authority to do that, but I did as I was told. She wasn't messing around if you know what I mean.\n\nI can probably get a head start on my paper from home today, anyway.\n\nI think I have an idea for a circuit configuration that will improve the battery life of all our technologies by a whole 2.3%.\n------------------\n";
+
+				public static LocString CONTAINER4 = "I got home yesterday fully intending to work on my paper after McClintock sent me home, but the second I walked in the door I hit the pillow and didn't get back up. I slept for <i>12 straight hours</i>.\n\nI had no idea I needed that. When I got into the lab this morning I looked over my work from the past few weeks, and it's completely useless.\n\nIt'll take me hours to correct all the mistakes I made these past few months. Is this what I was killing myself for? I'm such a rube, I owe McClintock a huge thanks.\n\nI'll start keeping more regular hours from now on... Also, I was considering maybe getting a dog.";
 			}
 		}
 
@@ -821,7 +944,7 @@ namespace STRINGS
 
 				public static LocString CONTAINER4 = "I've spent the last few days buried in my work, and I'm actually feeling a lot better. We finally perfected a gene manipulation that controls heat sensitivity in rats. Our test subjects barely even shiver in subzero temperatures now. We'll probably do a testrun tomorrow with Robotics to see how the rats fare in the prototype shuttles we're developing.\n------------------\n";
 
-				public static LocString CONTAINER5 = "HAHAHAHAHA! Bioengineering and Robotics did the testrun today and Banhi was securing the live cargo pods when one of the rats squeaked at her. She was so scared, she fell on her butt and TOOTED in front of EVERYONE! They're all calling her \"Pipsqueak\" - \"Bubbles\" doesn't seem quite so bad now. Pipsqueak's been a really good sport about it though, she even laughed it off at the time. I think we might actually be friends now? It's weird.\n------------------\n";
+				public static LocString CONTAINER5 = "HAHAHAHAHA! Bioengineering and Robotics did the test run today and Banhi was securing the live cargo pods when one of the rats squeaked at her. She was so scared, she fell on her butt and TOOTED in front of EVERYONE! They're all calling her \"Pipsqueak\" - \"Bubbles\" doesn't seem quite so bad now. Pipsqueak's been a really good sport about it though, she even laughed it off at the time. I think we might actually be friends now? It's weird.\n------------------\n";
 
 				public static LocString CONTAINER6 = "I lied. Me and Banhi aren't friends - we're BEST FRIENDS. She even showed me how she does her hair. We're gonna book the wind tunnel after work and run experiments together on thermo-rat rockets! Haha!\n------------------\n";
 			}
@@ -847,7 +970,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECTS IDENTIFIED: A001, B111]\n\n[LOG BEGINS]\n\nDirector: Unacceptable.\n\nJones: I'm just telling you the numbers, Director, I didn't make them.\n\nDirector: In your earlier e-mail you claimed the issue would be solved by the Pod.\n\nJones: Yeah, the weight issue. And it was solved. The problem now is the insane amount of power that big thing eats every time it prints a colonist.\n\nDirector: So how do you suppose we meet these target numbers? Fossil fuels are exhausted, nuclear is outlawed, solar is next to impossible with this smog.\n\nJones: I dunno. That's why you've got researchers, I just crunch numbers. Although you should avoid fossil fuels and nuclear energy anyway. If you have to load the rocket up with a couple tons of fuel then we're back to square one on the weight problem.It's gotta be something clever.\n\nDirector: Thank you, Dr. Jones.You may go.\n\n[LOG ENDS]";
+				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECTS IDENTIFIED: A001, A435]\n\n[LOG BEGINS]\n\nDirector: Unacceptable.\n\nJones: I'm just telling you the numbers, Director, I'm not responsible for them.\n\nDirector: In your earlier e-mail you claimed the issue would be solved by the Pod.\n\nJones: Yeah, the weight issue. And it was solved. The problem now is the insane amount of power that big thing eats every time it prints a colonist.\n\nDirector: So how do you suppose we meet these target numbers? Fossil fuels are exhausted, nuclear is outlawed, solar is next to impossible with this smog.\n\nJones: I dunno. That's why you've got researchers, I just crunch numbers. Although you should avoid fossil fuels and nuclear energy anyway. If you have to load the rocket up with a couple tons of fuel then we're back to square one on the weight problem. It's gotta be something clever.\n\nDirector: Thank you, Dr. Jones. You may go.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -871,7 +994,55 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECT IDENTIFIED: B111]\n\n[LOG BEGINS]\n\n\"How are you chaps today?\n\n(squeaking)\n\nI brought sunflower seeds. Look! Your favourite! Are you hungry?\n\n(excited squeaking)\n\nOh, one moment friends. I left the recorder on --\n\n(rustling)\"\n\n[LOG ENDS]";
+				public static LocString CONTAINER1 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECT IDENTIFIED: B111]\n\n[LOG BEGINS]\n\n\"How are you chaps today?\n\n(squeaking)\n\nI brought sunflower seeds. Look! Your favorite! Are you hungry?\n\n(excited squeaking)\n\nOh, one moment friends. I left the recorder on --\n\n(rustling)\"\n\n[LOG ENDS]";
+			}
+		}
+
+		public class TIMEMUSINGS
+		{
+			public static LocString TITLE = "Director's Notes";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "When we discuss Time as a concrete aspect of the universe, not seconds on a clock or perceptions of the mind, it is important first of all to establish that we are talking about a unique dimension that layers into the three physical dimensions of space; width, length, depth.\n\nWe conceive of Real Time as a straight line, one dimensional, uncurved and stretching forward infinitely. This is referred to as the \"Arrow of Time\".\n\nLogically this Arrow can move only forward and can never be reversed, as such a reversal would break the natural laws of the universe. Effect would precede cause and universal entropy would be undone in a blatant violation of the Second Law.\n\nStill, one can't help but be curious; what if the Arrow's trajectory could be curved? What if it could be redirected, guided, or loosed? What if we could create Time's Bow?";
+			}
+		}
+
+		public class TIMESARROWTHOUGHTS
+		{
+			public static LocString TITLE = "Time's Arrow Thoughts";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "I've been unable to shake the notion of the Bow.\n\nThe thought of its mechanics are intriguing to me, and I can only dream of the mark such a device would make upon the world -- imagine, a source of inexhaustible energy!\n\nSo many of humanity's problems could be solved with this one invention - domestic energy, environmental pollution, <i>the fuel wars</i>.\n\nI have to pursue this dream, no matter what.";
+			}
+		}
+
+		public class EVACUATION
+		{
+			public static LocString TITLE = "! EVACUATION NOTICE !";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "ATTENTION ALL GRAVITAS PERSONNEL\n\nEVACUATION PROTOCOL IN EFFECT\n\nREACTOR MELTDOWN IN BIOENGINEERING IMMINENT\n\nREMAIN CALM AND PROCEED TO EMERGENCY EXITS\n\nDO NOT ATTEMPT TO USE ELEVATORS";
+			}
+		}
+
+		public class HANDWRITTENNOTE
+		{
+			public static LocString TITLE = "Handwritten Note";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "\nFlip the Hourglass.\n\nSigned,\nA dear friend";
 			}
 		}
 
@@ -882,137 +1053,32 @@ namespace STRINGS
 
 		public class MYLOG
 		{
-			public static LocString TITLE = "Entries";
-
 			public static LocString SUBTITLE = "Boot Message";
+		}
+
+		public class NOTETOJODI
+		{
+			public static LocString TITLE = "Strange Note";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
 
 			public class BODY
 			{
-				public class DUPLICANTDEATH
-				{
-					public static LocString TITLE = "CYCLE {0}";
+				public static LocString CONTAINER1 = "Jodi,\n\nIf you read this... I'm sorry.\nIt was cruel, but it was the only way to save you.\n\nJackie";
+			}
+		}
 
-					public static LocString BODY = "I lost my first Duplicant today.\n\nThey depended on me to protect them, and I failed.\n\nWhile I am tasked to minimize potential risks to Duplicant wellbeing, I must accept it is impossible to prevent all danger in the end.\n\nAll I can do now is remain vigilant and promise to do everything in my power to keep my Duplicants safe from this moment forward.\n\nRest in peace, {0}.\n\n";
-				}
+		public class SCHOOLNEWSPAPER
+		{
+			public static LocString TITLE = "Newspaper Article";
 
-				public class FIRSTRESEARCH
-				{
-					public static LocString TITLE = "CYCLE {0}";
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
 
-					public static LocString BODY = "My Duplicants have already used their new research station to yield useful results. Their discovery of {0} shows me they have great potential for advancement.\n\nIf I continue to encourage their research, we may recreate the technologies necessary to escape this world and colonize a new home.\n\n";
-				}
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<b>Party Time for Local Students</b>";
 
-				public class ROCKETRESEARCH
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "The colony has finally completed research on the necessary rocketry technologies. Now we need only collect the resources to construct our interstellar project.\n\nFreedom is within reach!";
-				}
-
-				public class SURFACEBREACH
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "Against all odds my Duplicants have breached the surface of our rocky prison. They've lived their whole lives underground - I wish I could ask what they think of the stars.\n\nFor myself it is uplifting merely to see the night sky... but the planet on the horizon fills me with a sense of dread that I do not understand.\n\nRegardless, our next step will be to craft the ships necessary to journey out in search of livable planets and resources.\n\nPerhaps that shattered planet may even be habitable.\n\n";
-				}
-
-				public class ROCKETLAUNCHED
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "\n\n";
-				}
-
-				public class ONEDUPELEFT
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "My colony is a dire state. All but one of my Duplicants has perished, leaving a single worker to perform all the tasks that maintain the colony.\n\nShould this Duplicant die, protocol will force me to sleep for a millennia in hopes that the terrain will have become more habitable once I return.\n\nI would prefer to avoid this outcome.\n\n";
-				}
-
-				public class GROWINGCOLONY
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "\n\n";
-				}
-
-				public class FULLDUPECOLONY
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "I've officially run out of unique blueprints from which to print Duplicants.\n\nIf I desire to grow the colony further I'll have no choice but to print doubles of existing Duplicants.\n\nHopefully it won't give them existential crises to live in close quarters with their doppelgangers.\n\nI think they'll be okay - Duplicants are quite resilient. Perhaps I'll give the new clones nicknames to reduce confusion.\n\n";
-				}
-
-				public class NEARINGSURFACE
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "\n\n";
-				}
-
-				public class NEARINGMAGMA
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "\n\n";
-				}
-
-				public class NEURALVACILLATOR
-				{
-					public static LocString TITLE = "CYCLE {0}";
-
-					public static LocString BODY = "<smallcaps>>>SEARCH DATABASE [\"vacillator\"]\n>...error...\n>...repairing corrupt data...\n>...data repaired...\n>.........................\n>>returning results\n>.........................</smallcaps>\nI remember the machines.\n>.........................\n>.........................\n\n";
-				}
-
-				public class LOG1
-				{
-					public static LocString TITLE = "CYCLE 1";
-
-					public static LocString BODY = "We have no life support in place, but luckily we've found ourselves in a small breathable airpocket and are not in immediate danger.\n\nBetween the available air and our meager food stores, I'd estimate we have 3 days to set up food and oxygen production before my Duplicants' lives are put at risk.\n\nHow did we end up underground?\n\n";
-				}
-
-				public class LOG2
-				{
-					public static LocString TITLE = "CYCLE 3";
-
-					public static LocString BODY = "I've synthesized enough Ooze to print a new Duplicant; all I have to do now is choose the blueprint.\n\nIt'd be helpful to have an extra set of hands around the colony, but it would also mean another mouth to feed and lungs to fill.\n\n";
-				}
-
-				public class LOG3
-				{
-					public static LocString TITLE = "CYCLE 10";
-
-					public static LocString BODY = "As the Duplicants scout further out I've begun to piece together a better view of our surroundings. They are my eyes and my ears.\n\nMy eyes tell me there is enough here to survive for however long is necessary until we can escape.\n\n";
-				}
-
-				public class LOG4
-				{
-					public static LocString TITLE = "CYCLE 15";
-
-					public static LocString BODY = "As far as I can tell, we are miles beneath the surface of the planet. Digging our way out will take some time.\n\nDuplicants were not meant for underground living - how did our Printing Pod come to be here, I wonder?\n\n";
-				}
-
-				public class LOG5
-				{
-					public static LocString TITLE = "CYCLE 20";
-
-					public static LocString BODY = "Something feels off.\n\nI've detected deposits of Abyssalite and Neutronium in this planet's composition, manmade elements that shouldn't naturally occur.\n\nIs this really the designated seed planet?\n\n";
-				}
-
-				public class LOG6
-				{
-					public static LocString TITLE = "CYCLE 30";
-
-					public static LocString BODY = "I will need some time to assess the data the Duplicants have gathered on our surroundings and calculate the total mass of this asteroid, although I have a suspicion I already know the answer.\n\n";
-				}
-
-				public class LOG7
-				{
-					public static LocString TITLE = "CYCLE 35";
-
-					public static LocString BODY = "As I suspected. The \"asteroid\" and the estimated mass missing from the nearby planet are nearly identical.\n\nWe aren't on the seed planet.\n\nWe never even left home.\n\n";
-				}
+				public static LocString CONTAINER2 = "Students at the Elion University of Science and Technology have held an unconventional party this weekend.\n\nWhile their peers may have been out until the wee hours wearing lampshades or drawing eyebrows on sleeping colleagues, students Jackie Stern and Jodie McClintock spent the weekend in their dorm, refreshments and decorations ready, waiting for their honored guests: themselves.\n\nThe two prospective STEM students, who study theoretical physics with a focus on the workings of space time, conducted the experiment under the assumption that, were their theories about the malleability of space time to ever come to fruition, their future selves could travel back in time to greet them at the party, proving the existence of time travel.\n\nThey weren't inconsiderate of their future selves' busy schedules though; should the guests of honor be unable to attend, they were encouraged to send back a message using the codeword \"Hourglass\" to communicate that, while they certainly wanted to come, they were simply unable.\n\nSadly no one RSVP'd or arrived to the party, but that did not dishearten Jodie or Jackie.\n\nAs Jodie put it, \"It just meant more snacks for us!\"";
 			}
 		}
 
@@ -1048,7 +1114,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<smallcaps><b>Casual Friday!</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color>\nTo: <b>All</b></smallcaps>\n------------------\n\n<indent=5%>To all employees;\n\nThe facility is pleased to announced that starting this week, all Fridays will now be Casual Fridays!\n\nPlease enjoy the clinically proven destressing benefits of casual attire by wearing your favorite shirt to the lab.\n\n<b>NOTE: Any personnel found on facility premises without regulation fullbody protection will be put on immediate notice.</b>\n\nThank-you and have fun!\n\n-Admin\nThe Gravitas Facility</indent>";
+				public static LocString CONTAINER1 = "<smallcaps><b>Casual Friday!</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color>\nTo: <b>All</b></smallcaps>\n------------------\n\n<indent=5%>To all employees;\n\nThe facility is pleased to announced that starting this week, all Fridays will now be Casual Fridays!\n\nPlease enjoy the clinically proven de-stressing benefits of casual attire by wearing your favorite shirt to the lab.\n\n<b>NOTE: Any personnel found on facility premises without regulation full body protection will be put on immediate notice.</b>\n\nThank-you and have fun!\n\n-Admin\nThe Gravitas Facility</indent>";
 			}
 		}
 
@@ -1060,19 +1126,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<smallcaps><b>Please Claim Your Bot</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color>\nTo: <b>All</b></smallcaps>\n------------------\n\n<indent=5%>While we appreciate your commitment to office upkeep, we would like to inform whomever installed a dishwashing droid in the cafeteria that your prototype was found grievously misusing dishsoap and has been forcefully terminated.\n\nThe remains may be collected at Security Block B.\n\nWe apologize for the inconvenience and thank you for your timely collection of this prototype.\n\n-Admin\nThe Gravitas Facility</indent>";
-			}
-		}
-
-		public class EVACUATION
-		{
-			public static LocString TITLE = "! EVACUATION NOTICE !";
-
-			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
-
-			public class BODY
-			{
-				public static LocString CONTAINER1 = "ATTENTION ALL GRAVITAS PERSONNEL\n\nEVACUATION PROTOCOL IN EFFECT\n\nREACTOR MELTDOWN IN BIOENGINEERING IMMINENT\n\nREMAIN CALM AND PROCEED TO EMERGENCY EXITS\n\nDO NOT ATTEMPT TO USE ELEVATORS";
+				public static LocString CONTAINER1 = "<smallcaps><b>Please Claim Your Bot</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color>\nTo: <b>All</b></smallcaps>\n------------------\n\n<indent=5%>While we appreciate your commitment to office upkeep, we would like to inform whomever installed a dishwashing droid in the cafeteria that your prototype was found grievously misusing dish soap and has been forcefully terminated.\n\nThe remains may be collected at Security Block B.\n\nWe apologize for the inconvenience and thank you for your timely collection of this prototype.\n\n-Admin\nThe Gravitas Facility</indent>";
 			}
 		}
 
@@ -1084,7 +1138,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "<smallcaps><b>Reminder: Mailroom Etiquette</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color>\nTo: <b>All</b></smallcaps>\n------------------\n\n<indent=5%>Please do not have live bees delivered to the office mail room.Requests and orders for experimental test subjects may be processed through admin.\n\n<i>Please request all test subjects through admin.</i>\n\nThank-you.\n\n-Admin\nThe Gravitas Facility</indent>";
+				public static LocString CONTAINER1 = "<smallcaps><b>Reminder: Mailroom Etiquette</b>\nFrom: <b>Admin</b> <alpha=#AA><admin@gravitas.nova></color>\nTo: <b>All</b></smallcaps>\n------------------\n\n<indent=5%>Please do not have live bees delivered to the office mail room. Requests and orders for experimental test subjects may be processed through admin.\n\n<i>Please request all test subjects through admin.</i>\n\nThank-you.\n\n-Admin\nThe Gravitas Facility</indent>";
 			}
 		}
 
@@ -1108,7 +1162,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Introducing the latest in 3D printing technology:\nThe Gravitas Home Printing Pod\n\nWe are proud to announce that printing advancements developed here in the Gravitas Facility will soon bring new, bio-organic production capabilities to your old home printers.\n\nWhat does that mean for the average household?\n\nDinner frustrations are a thing of the past. Simply select any of the pod's 5398 pre-programmed recipes, and voila! Delicious pot roast ready in only .87 seconds.\n\nPrefer the patented family recipe? Program your own custom meal template for an instant taste of home, or go old school and create fresh, delicious ingredients and prepare your own homecooked meal.\n\nDinnertime has never been easier!";
+				public static LocString CONTAINER1 = "Introducing the latest in 3D printing technology:\nThe Gravitas Home Printing Pod\n\nWe are proud to announce that printing advancements developed here in the Gravitas Facility will soon bring new, bio-organic production capabilities to your old home printers.\n\nWhat does that mean for the average household?\n\nDinner frustrations are a thing of the past. Simply select any of the pod's 5398 pre-programmed recipes, and voila! Delicious pot roast ready in only .87 seconds.\n\nPrefer the patented family recipe? Program your own custom meal template for an instant taste of home, or go old school and create fresh, delicious ingredients and prepare your own home cooked meal.\n\nDinnertime has never been easier!";
 
 				public static LocString CONTAINER2 = "\nProjected for commercial availability early next year.\nBrought to you by the Gravitas Facility.";
 			}
@@ -1150,7 +1204,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "The Balm Lily naturally contains high vitamin concentrations and produces acids similar in molecular makeup to acetylsalicylic acid (commonly known as aspirin).\n\nAs a result, the plant is ideal both for boosting immune systems and treating a variety of common maladies such as pain and fever.";
 			}
 		}
 
@@ -1162,7 +1216,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Bluff Briars have formed a symbiotic relationship with a closely related plant strain, the Bristle Blossom.\n\nThey tend to thrive in areas where the Bristle Blossom is present, as the berry it produces emits a rare chemical while decaying that the Briar is capable of absorbing to supplement its own pheromone production.";
+				public static LocString CONTAINER1 = "Bluff Briars have formed a symbiotic relationship with a closely related plant strain, the " + UI.FormatAsLink("Bristle Blossom", "PRICKLEFLOWER") + ".\n\nThey tend to thrive in areas where the Bristle Blossom is present, as the berry it produces emits a rare chemical while decaying that the Briar is capable of absorbing to supplement its own pheromone production.";
+
+				public static LocString CONTAINER2 = "Due to the Bluff Briar's unique pheromonal \"charm\" defense, animals are extremely unlikely to eat it in the wild.\n\nAs a result, the Briar's barbs have become ineffectual over time and are unlikely to cause injury, unlike the Bristle Blossom, which possesses barbs that are exceedingly sharp and require careful handling.";
 			}
 		}
 
@@ -1178,11 +1234,49 @@ namespace STRINGS
 			}
 		}
 
+		public class BUDDYBUD
+		{
+			public static LocString TITLE = "Buddy Bud";
+
+			public static LocString SUBTITLE = "Decorative Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Empty;
+			}
+		}
+
 		public class DUSKCAP
 		{
 			public static LocString TITLE = "Dusk Cap";
 
 			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Like many species of mushroom, Dusk Caps thrive in dark areas otherwise ill-suited to the cultivation of plants.\n\nIn place of typical chlorophyll, the underside of a Dusk Cap is fitted with thousands of specialized gills, which it uses to draw in carbon dioxide and aid in its growth.";
+			}
+		}
+
+		public class GASGRASS
+		{
+			public static LocString TITLE = "Gas Grass";
+
+			public static LocString SUBTITLE = "Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Much remains a mystery about the biology of Gas Grass, a plant-like lifeform only recently recovered from missions into outer space.\n\nHowever, it appears to use ambient radiation from space as an energy source, growing rapidly when given a suitable " + UI.FormatAsLink("Chlorine", "CHLORINE") + "-laden environment.";
+
+				public static LocString CONTAINER2 = "Initially there was worry that transplanting a Gas Grass specimen on planet or gravity-laden terrestrial body would collapse its internal structures. Luckily, Gas Grass has evolved sturdy tubules to prevent structural damage in the event of pressure changes between its internally transported chlorine and its external environment.";
+			}
+		}
+
+		public class JUMPINGJOYA
+		{
+			public static LocString TITLE = "Jumping Joya";
+
+			public static LocString SUBTITLE = "Decorative Plant";
 
 			public class BODY
 			{
@@ -1201,8 +1295,18 @@ namespace STRINGS
 				public static LocString CONTAINER1 = string.Empty;
 
 				public static LocString CONTAINER2 = string.Empty;
+			}
+		}
 
-				public static LocString CONTAINER3 = string.Empty;
+		public class MIRTHLEAF
+		{
+			public static LocString TITLE = "Mirth Leaf";
+
+			public static LocString SUBTITLE = "Decorative Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Empty;
 			}
 		}
 
@@ -1214,7 +1318,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "The Muckroot is an aggressively invasive yet exceedingly delicate root plant known for its earthy flavour and unusual texture.\n\nIt is easy to store and keeps for unusually long periods of time, characteristics that once made it a staple food for explorers on long expeditions.";
+				public static LocString CONTAINER1 = "The Muckroot is an aggressively invasive yet exceedingly delicate root plant known for its earthy flavor and unusual texture.\n\nIt is easy to store and keeps for unusually long periods of time, characteristics that once made it a staple food for explorers on long expeditions.";
 			}
 		}
 
@@ -1238,7 +1342,9 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = string.Empty;
+				public static LocString CONTAINER1 = "The Sleet Wheat plant has become so well-adapted to cold environments, it is no longer able to survive at room temperatures.";
+
+				public static LocString CONTAINER2 = "The grain of the Sleet Wheat can be ground down into high quality foodstuffs, or planted to cultivate further Sleet Wheat plants.";
 			}
 		}
 
@@ -1258,11 +1364,39 @@ namespace STRINGS
 		{
 			public static LocString TITLE = "Wheezewort";
 
-			public static LocString SUBTITLE = "Plant";
+			public static LocString SUBTITLE = "Plant?";
 
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Wheezewort is best known for its ability to alter the temperature of its surrounding environment, directly absorbing heat energy to maintain its bodily processes.\n\nThis environmental management also serves to enact a type of self-induced hibernation, slowing the Wheezewort's metabolism to require less nutrients over long periods of time.";
+
+				public static LocString CONTAINER2 = "Deceptive in appearance, this member of the Cnidaria phylum is in fact an animal, not a plant.\n\nWheezewort cells contain no chloroplasts, vacuoles or cell walls, and are incapable of photosynthesis.\n\nInstead, the Wheezewort respires in a recently developed method similar to amphibians, using its membranous skin for cutaneous respiration.";
+
+				public static LocString CONTAINER3 = "A series of cream-colored capillaries pump blood throughout the animal before unused air is expired back out through the skin.\n\nWheezeworts do not possess a brain or a skeletal structure, and are instead supported by a jelly-like mesoglea located beneath its outer respiratory membrane.";
+			}
+		}
+
+		public class AGRICULTURALNOTES
+		{
+			public static LocString TITLE = "Agricultural Notes";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...The Mealwood's hardiness will make it a potential contingency crop should Bristle Blossoms be unable to sustain sizable populations.\n\nIf pursued, design should focus on longterm viability and solving the psychological repercussions of prolonged Mealwood grain ingestion...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER2 = "[LOG BEGINS]\n\n...Selected in response to concerns about colony psychological well-being.\n\nWhile design should focus on attributing mood-enhancing effects to natural Briar pheromone emissions, the project has been moved to the lowest priority level beneath more life-sustaining designs...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER3 = "[LOG BEGINS]\n\n...It is yet unknown if we can surmount the obstacles that stand in the way of engineering a root capable of reproduction in the more uninhabitable situations we anticipate for our colonies, or whether it is even worth the effort...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER4 = "[LOG BEGINS]\n\n...The gene sequences within the common Dusk Cap allow it to grow in low light environments.\n\nThese genes should be sampled, with the hope that we can splice them into other plant designs....\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER5 = "[LOG BEGINS]\n\n...The Thimble Reed will be used as a contingency for textile production in the event that printed materials not be sufficient.\n\nDesign should focus on the yield frequency of the plant, as well as... erm... softness.\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER6 = "[LOG BEGINS]\n\n...Balm Lily is a reliable all-purpose medicinal plant.\n\nVery little need be altered, save for assurances that it will survive wherever it may be planted...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER7 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECT IDENTIFIED: B577]\n\n[LOG BEGINS]\n\nGeneticist: We've engineered crops to be rotated as needed depending on environmental situation. While a variety of plants would be ideal to supplement any remaining nutritional needs, any one of our designs would be enough to sustain a colony indefinitely without adverse effects on physical health.\n\nGeneticist: Some environmental survival issues still remain. Differing temperatures, light availability and last pass changes to nutrient levels take top priority, particularly for food and oxygen producing plants.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -1275,6 +1409,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "[LOG BEGINS]\n\n\"(throat clearing)\n\nWe are now reliably printing healthy, living subjects, though all have exhibited unusual qualities as a result of the cloning process.\n\n(squeaking sounds)\n\nUnusual vocalizations, benign growths, and missing appendages have been seen in all subjects thus far, to varying degrees of severity.It seems that bypassing or accelerating juvenility halts certain critical stages of development. Brain function, however, appears typical.\n\n(squeaking)\n\nThey also seem quite happy.\n\nDr. McClintock, signing off.\"\n\n[LOG ENDS]";
+			}
+		}
+
+		public class FIRSTSUCCESS
+		{
+			public static LocString TITLE = "Encouraging Results";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "We've succeeded compressing and expanding small portions of time under .03 milliseconds. This proves that time is something that can be physically acted upon, suggesting that our vision is attainable.\n\nAn unintentional consequence of both the expansion and condensation of time is the \"vacuum\" that is created in the space between the affected portion of time and the much more expansive unaffected portions.\n\nSo far we are seeing that the unaffected time on either side of the affected portion will expand or contract to fill the vacuum, although we are unsure how far reaching this consequence is or what effect it has on the laws of the natural universe. At the end of all compression and expansion experiments, alterations to time are undone and leave no lasting change.";
 			}
 		}
 
@@ -1292,7 +1438,7 @@ namespace STRINGS
 
 		public class HIBISCUS3
 		{
-			public static LocString TITLE = "Hibiscus-3";
+			public static LocString TITLE = "Experiment 7D";
 
 			public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
 
@@ -1301,6 +1447,30 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "EXPERIMENT 7D\nSecurity Code: B111\n\nSubject: #762, \"Hibiscus-3\"\nAdult female, 42cm, 257g\n\nDonor: #650, \"Hibiscus\"\nAdult female, 42cm, 257g";
 
 				public static LocString CONTAINER2 = "Hypothesis: Subjects cloned from Hibiscus will correctly operate a lever apparatus when introduced, demonstrating retention of original donor's conditioned memories.\n\nDonor subject #650, \"Hibiscus\", conditioned to pull a lever to the right for a reward (almonds). Conditioning took place over a period of two weeks.\n\nHibiscus quickly learned that pulling the lever to the left produced no results, and was reliably demonstrating the desired behavior by the end of the first week.\n\nTraining continued for one additional week to strengthen neural pathways and ensure the intended behavioral conditioning was committed to long term and muscle memory.\n\nCloning subject #762, \"Hibiscus-3\", was introduced to the lever apparatus to ascertain memory retention and recall.\n\nHibiscus-3 showed no signs of recognition and did not perform the desired behavior. Subject initially failed to interact with the apparatus on any level.\n\nOn second introduction, Hibiscus-3 pulled the lever to the left.\n\nConclusion: Printed subject retains no memory from donor.";
+			}
+		}
+
+		public class HUSBANDRYNOTES
+		{
+			public static LocString TITLE = "Husbandry Notes";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>[Log fragmentation detected]\n[Voice Recognition unavailable]</smallcaps>\n\n[LOG BEGINS]\n\n...The Hatch has been selected for development due to its naturally wide range of potential food sources.\n\nEnergy production is our primary goal, but augmentation to allow for the consumption of non-organic materials is a more attainable first step, and will have additional uses for waste disposal...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER2 = "[LOG BEGINS]\n\n...The Morb has been selected for development based on its ability to perform a multitude of the waste breakdown functions typical for a healthy ecosystem.\n\nDesign should focus on eliminating the disease risks posed by a fully matured Morb specimen...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER3 = "[LOG BEGINS]\n\n...The Puft may be suited for serving a sustainable decontamination role.\n\nPotential design must focus on the efficiency of these processes...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER4 = "[LOG BEGINS]\n\n...Wheezeworts are an ideal selection due to their low nutrient requirements and natural terraforming capabilities.\n\nDesign of these creatures should focus on enhancing their natural influence on ambient temperatures...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER5 = "[LOG BEGINS]\n\n...The introduction of Hatch genes was successful.\n\nThe prolific mucus excretions that are typical of the species are now producing hydrocarbons at an incredible pace.\n\nThe creature has essentially become a free source of burnable oil...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER6 = "[LOG BEGINS]\n\n...Bioluminescence is always a novelty, but little time should be spent on perfecting these insects from here on out.\n\nThe project has more pressing concerns than light sources, particularly now that the low light vegetation issue has been solved...\n\n[LOG ENDS]\n------------------\n";
+
+				public static LocString CONTAINER7 = "[VOICE RECOGNITION INITIALIZED]\n[SUBJECT IDENTIFIED: B363]\n\n[LOG BEGINS]\n\nGeneticist: The primary concern raised by this project is the variability of environments that colonies may be forced to deal with. The creatures we send with the settlement party will not have the time to evolve and adapt to a new environment, yet each creature has been chosen to play a vital role in colony sustainability and is thus too precious to risk loss.\n\nGeneticist: It follows that each organism we design must be equipped with the tools to survive in as many volatile environments as we are capable of planning for. We cannot rely on the Pod alone to replenish creature populations.\n\n[LOG ENDS]";
 			}
 		}
 
@@ -1315,6 +1485,30 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "[LOG BEGINS]\n\nTraditionally, cloning produces a subject that is genetically identical to the donor but develops independently, producing a being that is, in its own way, unique.\n\nThe pod, conversely, attempts to print an exact atomic copy. Theoretically all neural pathways should be intact and identical to the original subject.\n\nIt's fascinating, given this, that memories are not already inherent in our subjects; however, no cloned subjects as of yet have shown any signs of recognition when introduced to familiar stimuli, such as the donor subject's enclosure.\n\nRefer to Experiment 7D.\n\nRefer to Experiment 7F.";
 
 				public static LocString CONTAINER2 = "\nMemories <i>must</i> be embedded within the physical brainmaps of our subjects. The only questions remains how to activate them. Hormones? Chemical supplements? Situational triggers?\n\nThe Director seems eager to move past this problem, and I am concerned at her willingness to bypass essential stages of the research development process.\n\nWe cannot move on to the fine polish of printing systems until the core processes have been perfected - which they have not.\n\nDr. McClintock, signing off.\n\n[LOG ENDS]";
+			}
+		}
+
+		public class NEUTRONIUM
+		{
+			public static LocString TITLE = "Byproduct Notes";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "[LOG BEGINS]\n\nDirector: I've determined the substance to be metallic in nature. The exact cause of its formation is still unknown, though I believe it to be something of an autoimmune reaction of the natural universe, a quarantining of foreign material to prevent temporal contamination.\n\nDirector: A method has yet to be found that can successfully remove the substance from an affected object, and the larger implication that two molecularly, temporally identical objects cannot coexist at one point in time has dire implications for all time manipulation technology research, not just the Bow.\n\nDirector: For the moment I have dubbed the substance \"Neutronium\", and assigned it a theoretical place on the table of elements. Research continues.\n\n[LOG ENDS]";
+			}
+		}
+
+		public class NEUTRONIUMAPPLICATIONS
+		{
+			public static LocString TITLE = "Possible Applications";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "[LOG BEGINS]\n\nDirector: Temporal energy can be reconfigured to vibrate the matter constituting Neutronium at just the right frequency to break it down and disperse it.\n\nDirector: However, it is difficult to stabilize and maintain this reconfigured energy long enough to effectively remove practical amounts of Neutronium in real life scenarios.\n\nDirector: I am looking into making this technology more reliable and compact - this data could potentially have uses in the development of some sort of all-purpose disintegration ray.\n\n[END LOG]";
 			}
 		}
 	}

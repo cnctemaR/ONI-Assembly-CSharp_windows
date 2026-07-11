@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity, IListableOption
@@ -12,28 +13,105 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public string nameStringKey { get; set; }
 
-	protected override void OnPrefabInit()
+	public bool HasPerk(RolePerk perk)
 	{
-		Ownables component = base.GetComponent<Ownables>();
-		Equipment component2 = base.GetComponent<Equipment>();
-		foreach (AssignableSlot assignableSlot in Db.Get().AssignableSlots.resources)
+		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
 		{
-			if (assignableSlot is OwnableSlot)
+			if (roleConfig.HasPerk(perk) && this.MasteryByRoleID.ContainsKey(roleConfig.id) && this.MasteryByRoleID[roleConfig.id])
 			{
-				OwnableSlotInstance ownableSlotInstance = new OwnableSlotInstance(component, (OwnableSlot)assignableSlot);
-				component.Add(ownableSlotInstance);
-			}
-			else if (assignableSlot is EquipmentSlot)
-			{
-				EquipmentSlotInstance equipmentSlotInstance = new EquipmentSlotInstance(component2, (EquipmentSlot)assignableSlot);
-				component2.Add(equipmentSlotInstance);
+				return true;
 			}
 		}
-		this.ownablesList = new List<Ownables> { component };
+		return Game.Instance.roleManager.GetRole(this.currentRole) != null && Game.Instance.roleManager.GetRole(this.currentRole).HasPerk(perk);
+	}
+
+	protected override void OnPrefabInit()
+	{
+		this.assignableProxy = new Ref<MinionAssignablesProxy>();
 	}
 
 	protected override void OnSpawn()
 	{
+		this.ValidateProxy();
+		this.CleanupLimboMinions();
+	}
+
+	public void ValidateProxy()
+	{
+		this.assignableProxy = MinionAssignablesProxy.InitAssignableProxy(this.assignableProxy, this);
+	}
+
+	private void CleanupLimboMinions()
+	{
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		bool flag = false;
+		if (component.InstanceID == -1)
+		{
+			Output.LogWarning(new object[] { "Stored minion with an invalid kpid! Attempting to recover...", this.storedName });
+			flag = true;
+			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
+			{
+				KPrefabIDTracker.Get().Unregister(component);
+			}
+			component.InstanceID = KPrefabID.GetUniqueID();
+			KPrefabIDTracker.Get().Register(component);
+			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+		}
+		if (component.conflicted)
+		{
+			Output.LogWarning(new object[] { "Minion with a conflicted kpid! Attempting to recover... ", component.InstanceID, this.storedName });
+			if (KPrefabIDTracker.Get().GetInstance(component.InstanceID) != null)
+			{
+				KPrefabIDTracker.Get().Unregister(component);
+			}
+			component.InstanceID = KPrefabID.GetUniqueID();
+			KPrefabIDTracker.Get().Register(component);
+			Output.LogWarning(new object[] { "Restored as:", component.InstanceID });
+		}
+		this.assignableProxy.Get().SetTarget(this, base.gameObject);
+		bool flag2 = false;
+		foreach (MinionStorage minionStorage in Components.MinionStorages.Items)
+		{
+			List<MinionStorage.Info> storedMinionInfo = minionStorage.GetStoredMinionInfo();
+			for (int i = 0; i < storedMinionInfo.Count; i++)
+			{
+				MinionStorage.Info info = storedMinionInfo[i];
+				if (flag && info.serializedMinion != null && info.serializedMinion.GetId() == -1 && info.name == this.storedName)
+				{
+					Output.LogWarning(new object[]
+					{
+						"Found a minion storage with an invalid ref, rebinding.",
+						component.InstanceID,
+						this.storedName,
+						minionStorage.gameObject.name
+					});
+					info = new MinionStorage.Info(this.storedName, new Ref<KPrefabID>(component));
+					storedMinionInfo[i] = info;
+					Assignable component2 = minionStorage.GetComponent<Assignable>();
+					component2.Assign(this);
+					flag2 = true;
+					break;
+				}
+				if (info.serializedMinion != null && info.serializedMinion.Get() == component)
+				{
+					flag2 = true;
+					break;
+				}
+			}
+			if (flag2)
+			{
+				break;
+			}
+		}
+		if (!flag2)
+		{
+			Output.LogWarning(new object[] { "Found a stored minion that wasn't in any minion storage. Respawning them at the portal.", component.InstanceID, this.storedName });
+			GameObject telepad = GameUtil.GetTelepad();
+			if (telepad != null)
+			{
+				MinionStorage.DeserializeMinion(component.gameObject, telepad.transform.GetPosition());
+			}
+		}
 	}
 
 	public string GetProperName()
@@ -43,12 +121,12 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	public List<Ownables> GetOwners()
 	{
-		return this.ownablesList;
+		return this.assignableProxy.Get().ownables;
 	}
 
 	public Ownables GetSoleOwner()
 	{
-		return base.GetComponent<Ownables>();
+		return this.assignableProxy.Get().GetComponent<Ownables>();
 	}
 
 	public bool IsNull()
@@ -87,7 +165,8 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public List<Tag> forbiddenTags;
 
-	private List<Ownables> ownablesList;
+	[Serialize]
+	public Ref<MinionAssignablesProxy> assignableProxy;
 
 	[Serialize]
 	public Dictionary<string, float> ExperienceByRoleID = new Dictionary<string, float>();

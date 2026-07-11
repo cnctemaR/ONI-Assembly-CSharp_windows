@@ -34,7 +34,7 @@ public class PrioritizableRenderer
 		{
 			if (!(GameScreenManager.Instance == null))
 			{
-				if (!(SimDebugView.Instance == null) && SimDebugView.Instance.GetMode() == SimViewMode.Priorities)
+				if (!(SimDebugView.Instance == null) && !(SimDebugView.Instance.GetMode() != OverlayModes.Priorities.ID))
 				{
 					this.prioritizables.Clear();
 					for (int i = 0; i < Components.Prioritizables.Count; i++)

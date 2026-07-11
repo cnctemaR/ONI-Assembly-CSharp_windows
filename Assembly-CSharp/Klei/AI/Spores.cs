@@ -9,7 +9,7 @@ namespace Klei.AI
 		public Spores()
 			: base("Spores", Disease.DiseaseType.Ailment, Disease.Severity.Major, 0.005f, new List<Disease.InfectionVector> { Disease.InfectionVector.Contact }, 900f, 0, new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent(), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent())
 		{
-			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_spores_kanim" }, "SickSpores"));
+			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_spores_kanim" }, Db.Get().Expressions.SickSpores));
 			base.AddDiseaseComponent(new Spores.SporesComponent());
 		}
 

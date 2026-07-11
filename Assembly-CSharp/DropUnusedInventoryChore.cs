@@ -3,7 +3,7 @@
 public class DropUnusedInventoryChore : Chore<DropUnusedInventoryChore.StatesInstance>
 {
 	public DropUnusedInventoryChore(ChoreType chore_type, IStateMachineTarget target)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
 	{
 		this.smi = new DropUnusedInventoryChore.StatesInstance(this);
 	}

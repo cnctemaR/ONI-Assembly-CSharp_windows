@@ -232,22 +232,23 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				{
 					num14 = num2;
 				}
+				Element element = ElementLoader.FindElementByHash(outputElement.elementHash);
 				if (outputElement.storeOutput)
 				{
-					PrimaryElement primaryElement = this.storage.AddToPrimaryElement(outputElement.element.id, num13, num14);
+					PrimaryElement primaryElement = this.storage.AddToPrimaryElement(outputElement.elementHash, num13, num14);
 					if (primaryElement == null)
 					{
-						if (outputElement.element.IsGas)
+						if (element.IsGas)
 						{
 							this.storage.AddGasChunk(outputElement.elementHash, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, true);
 						}
-						else if (outputElement.element.IsLiquid)
+						else if (element.IsLiquid)
 						{
 							this.storage.AddLiquid(outputElement.elementHash, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, true);
 						}
 						else
 						{
-							GameObject gameObject3 = outputElement.element.substance.SpawnResource(base.transform.GetPosition(), num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false);
+							GameObject gameObject3 = element.substance.SpawnResource(base.transform.GetPosition(), num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false);
 							this.storage.Store(gameObject3, true, false, true, false);
 						}
 					}
@@ -260,14 +261,14 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				{
 					Vector3 vector = new Vector3(base.transform.GetPosition().x + outputElement.outputElementOffset.x, base.transform.GetPosition().y + outputElement.outputElementOffset.y, 0f);
 					int num15 = Grid.PosToCell(vector);
-					if (outputElement.element.IsLiquid)
+					if (element.IsLiquid)
 					{
-						int idx = (int)outputElement.element.idx;
+						int idx = (int)element.idx;
 						FallingWater.instance.AddParticle(num15, (byte)idx, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false, false, false);
 					}
-					else if (outputElement.element.IsSolid)
+					else if (element.IsSolid)
 					{
-						outputElement.element.substance.SpawnResource(vector, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, false, false);
+						element.substance.SpawnResource(vector, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, false, false);
 					}
 					else
 					{
@@ -290,7 +291,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		this.machinerySpeedAttribute = attributes.Add(Db.Get().Attributes.MachinerySpeed);
 		if (ElementConverter.ElementConverterInput == null)
 		{
-			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 63486).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 63486).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
 				str = str.Replace("{ElementTypes}", consumedElement.Name);
@@ -300,7 +301,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		}
 		if (ElementConverter.ElementConverterOutput == null)
 		{
-			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 63486).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 63486).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.OutputElement outputElement = (ElementConverter.OutputElement)data;
 				str = str.Replace("{ElementTypes}", outputElement.Name);
@@ -442,7 +443,6 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 			this.massGenerationRate = kgPerSecond;
 			this.outputElementOffset = new Vector2(outputElementOffsetx, outputElementOffsety);
 			this.accumulator = HandleVector<int>.InvalidHandle;
-			this.element = ElementLoader.FindElementByHash(element);
 			this.applyInputTemperature = apply_input_temperature;
 			this.diseaseWeight = diseaseWeight;
 			this.addedDiseaseIdx = addedDiseaseIdx;
@@ -466,8 +466,6 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		}
 
 		public SimHashes elementHash;
-
-		public Element element;
 
 		public float outputTemperature;
 

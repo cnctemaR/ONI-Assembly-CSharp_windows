@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 
 public class JobManager
 {
-	public JobManager()
+	public bool isShuttingDown { get; private set; }
+
+	private void Initialize()
 	{
 		int num = Math.Max(SystemInfo.processorCount, 1);
 		this.semaphore = new Semaphore(0, num);
 		for (int i = 0; i < num; i++)
 		{
-			this.threads.Add(new JobManager.WorkerThread(this.semaphore, this));
+			this.threads.Add(new JobManager.WorkerThread(this.semaphore, this, string.Format("KWorker{0}", i)));
 		}
 	}
-
-	public bool isShuttingDown { get; private set; }
 
 	public bool DoNextWorkItem()
 	{
@@ -41,6 +42,10 @@ public class JobManager
 
 	public void Run(IWorkItemCollection work_items)
 	{
+		if (this.semaphore == null)
+		{
+			this.Initialize();
+		}
 		if (JobManager.runSingleThreaded || this.threads.Count == 0)
 		{
 			for (int i = 0; i < work_items.Count; i++)
@@ -93,13 +98,13 @@ public class JobManager
 
 	private class WorkerThread
 	{
-		public WorkerThread(Semaphore semaphore, JobManager job_manager)
+		public WorkerThread(Semaphore semaphore, JobManager job_manager, string name)
 		{
 			this.semaphore = semaphore;
 			this.thread = new Thread(new ParameterizedThreadStart(JobManager.WorkerThread.ThreadMain), 131072);
 			Util.ApplyInvariantCultureToThread(this.thread);
 			this.thread.Priority = global::System.Threading.ThreadPriority.AboveNormal;
-			this.thread.Name = "JobManagerWorkerThread";
+			this.thread.Name = name;
 			this.jobManager = job_manager;
 			this.exceptions = new List<Exception>();
 			this.thread.Start(this);
@@ -107,6 +112,7 @@ public class JobManager
 
 		public void Run()
 		{
+			KProfiler.BeginThreadProfiling("KJobManager", this.thread.Name);
 			for (;;)
 			{
 				this.semaphore.WaitOne();
@@ -116,17 +122,21 @@ public class JobManager
 				}
 				try
 				{
-					while (this.jobManager.DoNextWorkItem())
+					bool flag = true;
+					while (flag)
 					{
+						flag = this.jobManager.DoNextWorkItem();
 					}
 				}
 				catch (Exception ex)
 				{
 					this.exceptions.Add(ex);
 					JobManager.errorOccured = true;
+					Debugger.Break();
 				}
 				this.jobManager.DecrementActiveWorkerThreadCount();
 			}
+			KProfiler.EndThreadProfiling();
 		}
 
 		public void PrintExceptions()

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using STRINGS;
 
-[DebuggerDisplay("{id}")]
+[DebuggerDisplay("{name}")]
 [Serializable]
 public class Element : IComparable<Element>
 {
@@ -108,17 +108,17 @@ public class Element : IComparable<Element>
 		if (this.IsSolid)
 		{
 			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCSOLID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetHardnessString(this, addHardnessColor));
+			text += string.Format(ELEMENTS.ELEMENTDESCSOLID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetHardnessString(this, addHardnessColor));
 		}
 		else if (this.IsLiquid)
 		{
 			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCLIQUID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+			text += string.Format(ELEMENTS.ELEMENTDESCLIQUID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 		}
 		else if (!this.IsVacuum)
 		{
 			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+			text += string.Format(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 		}
 		string text2 = ELEMENTS.THERMALPROPERTIES;
 		text2 = text2.Replace("{SPECIFIC_HEAT_CAPACITY}", GameUtil.GetFormattedSHC(this.specificHeatCapacity));
@@ -143,17 +143,9 @@ public class Element : IComparable<Element>
 		{
 			foreach (AttributeModifier attributeModifier in this.attributeModifiers)
 			{
-				Klei.AI.Attribute attribute = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId);
-				string text4 = text;
-				text = string.Concat(new object[]
-				{
-					text4,
-					"\n",
-					attribute.Name,
-					": +",
-					attributeModifier.Value * 100f,
-					"%"
-				});
+				string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
+				string formattedString = attributeModifier.GetFormattedString(null);
+				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, formattedString);
 			}
 		}
 		return text;

@@ -16,6 +16,8 @@ namespace TUNING
 
 		public const string BUILDABLERAW = "BuildableRaw";
 
+		public const string PRECIOUSROCK = "PreciousRock";
+
 		public static readonly string[] ALL_METALS = new string[] { "Metal" };
 
 		public static readonly string[] RAW_METALS = new string[] { "Metal" };
@@ -30,6 +32,8 @@ namespace TUNING
 
 		public static readonly string[] REFINED_MINERALS = new string[] { "BuildableProcessed" };
 
+		public static readonly string[] PRECIOUS_ROCKS = new string[] { "PreciousRock" };
+
 		public static readonly string[] FARMABLE = new string[] { "Farmable" };
 
 		public static readonly string[] EXTRUDABLE = new string[] { "Extrudable" };
@@ -41,6 +45,8 @@ namespace TUNING
 		public static readonly string[] GLASSES = new string[] { "Glass" };
 
 		public static readonly string[] TRANSPARENTS = new string[] { "Transparent" };
+
+		public static readonly string[] BUILDING_FIBER = new string[] { "BuildingFiber" };
 
 		public static readonly string[] ANY_BUILDABLE = new string[] { "BuildableAny" };
 	}

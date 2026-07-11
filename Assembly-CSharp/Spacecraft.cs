@@ -62,6 +62,13 @@ public class Spacecraft
 		this.state = state;
 	}
 
+	public void BeginMission(SpaceDestination destination)
+	{
+		this.missionElapsed = 0f;
+		this.missionDuration = (float)destination.OneBasedDistance * ROCKETRY.MISSION_DURATION_SCALE;
+		this.SetState(Spacecraft.MissionState.Launching);
+	}
+
 	public void ForceComplete()
 	{
 		this.missionElapsed = this.missionDuration;
@@ -89,44 +96,28 @@ public class Spacecraft
 		return this.missionDuration;
 	}
 
-	public void SetMission(SpaceDestination destination)
-	{
-		if (!SpacecraftManager.instance.savedSpacecraftDestinations.ContainsKey(this.id))
-		{
-			SpacecraftManager.instance.savedSpacecraftDestinations.Add(this.id, destination.id);
-		}
-		else
-		{
-			SpacecraftManager.instance.savedSpacecraftDestinations[this.id] = destination.id;
-		}
-		this.missionElapsed = 0f;
-		this.missionDuration = (float)destination.OneBasedDistance * ROCKETRY.MISSION_DURATION_SCALE;
-	}
-
 	private void CompleteMission()
 	{
 		SpacecraftManager.instance.PushReadyToLandNotification(this);
-		this.state = Spacecraft.MissionState.WaitingToLand;
+		this.SetState(Spacecraft.MissionState.WaitingToLand);
 		this.Land();
-	}
-
-	private void ClearMission()
-	{
-		SpacecraftManager.instance.savedSpacecraftDestinations[this.id] = -1;
-		this.missionElapsed = 0f;
-		this.missionDuration = 0f;
 	}
 
 	private void Land()
 	{
-		this.launchConditions.Trigger(1366341636, SpacecraftManager.instance.GetActiveMission(this.id));
+		this.launchConditions.Trigger(1366341636, SpacecraftManager.instance.GetSpacecraftDestination(this.id));
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.launchConditions.GetComponent<AttachableBuilding>()))
 		{
 			if (gameObject != this.launchConditions.gameObject)
 			{
-				gameObject.Trigger(1366341636, SpacecraftManager.instance.GetActiveMission(this.id));
+				gameObject.Trigger(1366341636, SpacecraftManager.instance.GetSpacecraftDestination(this.id));
 			}
 		}
+	}
+
+	public void GenerateName()
+	{
+		this.SetRocketName(GameUtil.GenerateRandomRocketName());
 	}
 
 	[Serialize]
@@ -156,6 +147,7 @@ public class Spacecraft
 		Launching,
 		Underway,
 		WaitingToLand,
+		Landing,
 		Destroyed
 	}
 }

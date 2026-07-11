@@ -54,7 +54,6 @@ namespace Klei
 
 		public void GetFiles(Regex re, string path, ICollection<string> result)
 		{
-			string[] files = Directory.GetFiles(path);
 			foreach (string text in this.dataMap.Keys)
 			{
 				if (re.IsMatch(text))

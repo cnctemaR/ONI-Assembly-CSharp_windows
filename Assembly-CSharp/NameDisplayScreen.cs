@@ -11,24 +11,37 @@ public class NameDisplayScreen : KScreen
 		NameDisplayScreen.Instance = null;
 	}
 
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		UIRegistry.nameDisplayScreen = this;
-		Components.Health.Register(delegate(Health health)
-		{
-			this.RegisterComponent(health.gameObject, health, false);
-		}, null);
-		Components.Equipment.Register(delegate(Equipment equipment)
-		{
-			this.RegisterComponent(equipment.gameObject, equipment, false);
-		}, null);
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		NameDisplayScreen.Instance = this;
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		UIRegistry.nameDisplayScreen = this;
+		Components.Health.Register(new Action<Health>(this.OnHealthAdded), null);
+		Components.Equipment.Register(new Action<Equipment>(this.OnEquipmentAdded), null);
+	}
+
+	private void OnHealthAdded(Health health)
+	{
+		this.RegisterComponent(health.gameObject, health, false);
+	}
+
+	private void OnEquipmentAdded(Equipment equipment)
+	{
+		MinionAssignablesProxy component = equipment.GetComponent<MinionAssignablesProxy>();
+		GameObject targetGameObject = component.GetTargetGameObject();
+		if (targetGameObject)
+		{
+			this.RegisterComponent(targetGameObject, equipment, false);
+		}
+		else
+		{
+			global::Debug.LogWarningFormat("OnEquipmentAdded proxy target {0} was null.", new object[] { component.TargetInstanceID });
+		}
 	}
 
 	private bool ShouldShowName(GameObject representedObject)
@@ -36,6 +49,48 @@ public class NameDisplayScreen : KScreen
 		bool flag = representedObject.GetComponent<MinionBrain>() != null;
 		bool flag2 = representedObject.GetComponent<CommandModule>() != null;
 		return flag || flag2;
+	}
+
+	public Guid AddWorldText(string initialText, GameObject prefab)
+	{
+		NameDisplayScreen.TextEntry textEntry = new NameDisplayScreen.TextEntry();
+		textEntry.guid = Guid.NewGuid();
+		textEntry.display_go = Util.KInstantiateUI(prefab, base.gameObject, true);
+		textEntry.display_go.GetComponentInChildren<LocText>().text = initialText;
+		this.textEntries.Add(textEntry);
+		return textEntry.guid;
+	}
+
+	public GameObject GetWorldText(Guid guid)
+	{
+		GameObject gameObject = null;
+		foreach (NameDisplayScreen.TextEntry textEntry in this.textEntries)
+		{
+			if (textEntry.guid == guid)
+			{
+				gameObject = textEntry.display_go;
+				break;
+			}
+		}
+		return gameObject;
+	}
+
+	public void RemoveWorldText(Guid guid)
+	{
+		int num = -1;
+		for (int i = 0; i < this.textEntries.Count; i++)
+		{
+			if (this.textEntries[i].guid == guid)
+			{
+				num = i;
+				break;
+			}
+		}
+		if (num >= 0)
+		{
+			global::UnityEngine.Object.Destroy(this.textEntries[num].display_go);
+			this.textEntries.RemoveAt(num);
+		}
 	}
 
 	public void AddNewEntry(GameObject representedObject)
@@ -179,12 +234,12 @@ public class NameDisplayScreen : KScreen
 		{
 			return;
 		}
-		SimViewMode simViewMode = SimViewMode.None;
+		HashedString hashedString = OverlayModes.None.ID;
 		if (OverlayScreen.Instance != null)
 		{
-			simViewMode = OverlayScreen.Instance.GetMode();
+			hashedString = OverlayScreen.Instance.GetMode();
 		}
-		bool flag = !(Camera.main == null) && Camera.main.orthographicSize < this.HideDistance && simViewMode == SimViewMode.None;
+		bool flag = !(Camera.main == null) && Camera.main.orthographicSize < this.HideDistance && hashedString == OverlayModes.None.ID;
 		int num = this.entries.Count;
 		int i = 0;
 		while (i < num)
@@ -372,6 +427,8 @@ public class NameDisplayScreen : KScreen
 
 	public List<NameDisplayScreen.Entry> entries = new List<NameDisplayScreen.Entry>();
 
+	public List<NameDisplayScreen.TextEntry> textEntries = new List<NameDisplayScreen.TextEntry>();
+
 	public bool worldSpace = true;
 
 	private List<KCollider2D> workingList = new List<KCollider2D>();
@@ -400,5 +457,12 @@ public class NameDisplayScreen : KScreen
 		public HierarchyReferences thoughtBubbleConvo;
 
 		public HierarchyReferences refs;
+	}
+
+	public class TextEntry
+	{
+		public Guid guid;
+
+		public GameObject display_go;
 	}
 }

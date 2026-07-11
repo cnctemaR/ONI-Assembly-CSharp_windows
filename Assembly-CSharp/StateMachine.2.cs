@@ -514,7 +514,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					{
 						text = text + "\n" + baseState.name;
 					}
-					Output.LogError(new object[] { text });
+					Output.LogError(text);
 					base.Error();
 				}
 				else

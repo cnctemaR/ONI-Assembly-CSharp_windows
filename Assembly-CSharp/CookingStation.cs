@@ -4,7 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class CookingStation : Fabricator, IEffectDescriptor
+public class CookingStation : ComplexFabricator, IEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -12,37 +12,34 @@ public class CookingStation : Fabricator, IEffectDescriptor
 		this.choreType = Db.Get().ChoreTypes.Cook;
 		this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.CookFetch.IdHash;
 		this.choreTags = GameTags.ChoreTypes.CookingChores;
-		this.requiredRolePerk = RoleManager.rolePerks.CanElectricGrill.id;
-		this.workerStatusItem = Db.Get().DuplicantStatusItems.Cooking;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_cookstation_kanim") };
-		this.attributeConverter = Db.Get().AttributeConverters.CookingSpeed;
-		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
-	}
-
-	protected override bool OnWorkTick(Worker worker, float dt)
-	{
-		if (this.diseaseCountKillRate > 0)
+		this.workable.requiredRolePerk = RoleManager.rolePerks.CanElectricGrill.id;
+		this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Cooking;
+		this.workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_cookstation_kanim") };
+		this.workable.AttributeConvertor = Db.Get().AttributeConverters.CookingSpeed;
+		this.workable.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
+		ComplexFabricatorWorkable workable = this.workable;
+		workable.OnWorkTickActions = (Action<Worker, float>)Delegate.Combine(workable.OnWorkTickActions, new Action<Worker, float>(delegate(Worker worker, float dt)
 		{
-			PrimaryElement component = base.GetComponent<PrimaryElement>();
-			int num = Math.Max(1, (int)((float)this.diseaseCountKillRate * dt));
-			component.ModifyDiseaseCount(-num, "CookingStation");
+			if (this.diseaseCountKillRate > 0)
+			{
+				PrimaryElement component = base.GetComponent<PrimaryElement>();
+				int num = Math.Max(1, (int)((float)this.diseaseCountKillRate * dt));
+				component.ModifyDiseaseCount(-num, "CookingStation");
+			}
+		}));
+	}
+
+	protected override List<GameObject> SpawnOrderProduct(ComplexFabricator.UserOrder completed_order)
+	{
+		List<GameObject> list = base.SpawnOrderProduct(completed_order);
+		foreach (GameObject gameObject in list)
+		{
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			component.ModifyDiseaseCount(-component.DiseaseCount, "CookingStation.CompleteOrder");
+			component.Temperature = 368.15f;
 		}
-		return false;
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(Cook.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-	}
-
-	protected override GameObject CompleteOrder(Fabricator.UserOrder completed_order)
-	{
-		GameObject gameObject = base.CompleteOrder(completed_order);
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.ModifyDiseaseCount(-component.DiseaseCount, "CookingStation.CompleteOrder");
-		component.Temperature = 368.15f;
 		base.GetComponent<Operational>().SetActive(false, false);
-		return gameObject;
+		return list;
 	}
 
 	public override List<Descriptor> GetDescriptors(BuildingDef def)

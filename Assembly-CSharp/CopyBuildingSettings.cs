@@ -30,32 +30,61 @@ public class CopyBuildingSettings : KMonoBehaviour
 
 	public static bool ApplyCopy(int targetCell, GameObject sourceGameObject)
 	{
-		GameObject gameObject = Grid.Objects[targetCell, 1];
+		ObjectLayer objectLayer = ObjectLayer.Building;
+		Building component = sourceGameObject.GetComponent<BuildingComplete>();
+		if (component != null)
+		{
+			objectLayer = component.Def.ObjectLayer;
+		}
+		GameObject gameObject = Grid.Objects[targetCell, (int)objectLayer];
 		if (gameObject == null)
 		{
 			return false;
 		}
-		KPrefabID component = sourceGameObject.GetComponent<KPrefabID>();
-		if (component == null)
+		if (gameObject == sourceGameObject)
 		{
 			return false;
 		}
-		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+		KPrefabID component2 = sourceGameObject.GetComponent<KPrefabID>();
 		if (component2 == null)
 		{
 			return false;
 		}
-		if (component2.PrefabID() != component.PrefabID())
+		KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
+		if (component3 == null)
 		{
 			return false;
 		}
-		component2.Trigger(-905833192, sourceGameObject);
+		CopyBuildingSettings component4 = sourceGameObject.GetComponent<CopyBuildingSettings>();
+		if (component4 == null)
+		{
+			return false;
+		}
+		CopyBuildingSettings component5 = gameObject.GetComponent<CopyBuildingSettings>();
+		if (component5 == null)
+		{
+			return false;
+		}
+		if (component4.copyGroupTag != Tag.Invalid)
+		{
+			if (component4.copyGroupTag != component5.copyGroupTag)
+			{
+				return false;
+			}
+		}
+		else if (component3.PrefabID() != component2.PrefabID())
+		{
+			return false;
+		}
+		component3.Trigger(-905833192, sourceGameObject);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 		return true;
 	}
 
 	[MyCmpReq]
 	private KPrefabID id;
+
+	public Tag copyGroupTag;
 
 	private static readonly EventSystem.IntraObjectHandler<CopyBuildingSettings> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<CopyBuildingSettings>(delegate(CopyBuildingSettings component, object data)
 	{

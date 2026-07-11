@@ -25,7 +25,7 @@ namespace Klei
 				{
 					try
 					{
-						YamlIO<GenericGameSettings>.LoadFile(GenericGameSettings.Path);
+						YamlIO<GenericGameSettings>.LoadFile(GenericGameSettings.Path, null);
 					}
 					catch
 					{
@@ -82,7 +82,7 @@ namespace Klei
 		{
 			try
 			{
-				base.Save(GenericGameSettings.Path);
+				base.Save(GenericGameSettings.Path, null);
 			}
 			catch (Exception ex)
 			{

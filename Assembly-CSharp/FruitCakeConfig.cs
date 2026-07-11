@@ -7,15 +7,9 @@ public class FruitCakeConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("FruitCake", ITEMS.FOOD.FRUITCAKE.NAME, ITEMS.FOOD.FRUITCAKE.DESC, 1f, false, Assets.GetAnim("fruitcake_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("FruitCake", ITEMS.FOOD.FRUITCAKE.NAME, ITEMS.FOOD.FRUITCAKE.DESC, 1f, false, Assets.GetAnim("fruitcake_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.FRUITCAKE);
-		string text = "FruitCake";
-		string text2 = ITEMS.FOOD.FRUITCAKE.RECIPEDESC;
-		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 3);
-		recipe.AddIngredient(new Recipe.Ingredient("ColdWheatSeed", 5f));
-		recipe.AddIngredient(new Recipe.Ingredient(PrickleFruitConfig.ID, 1f));
-		recipe.FabricationVisualizer = FruitCakeConfig.CreateFabricationVisualizer(gameObject);
-		recipe.SetFabricator("MicrobeMusher", FOOD.RECIPES.STANDARD_COOK_TIME);
+		ComplexRecipeManager.Get().GetRecipe(FruitCakeConfig.recipe.id).FabricationVisualizer = MushBarConfig.CreateFabricationVisualizer(gameObject);
 		return gameObject;
 	}
 
@@ -27,23 +21,7 @@ public class FruitCakeConfig : IEntityConfig
 	{
 	}
 
-	public static GameObject CreateFabricationVisualizer(GameObject result)
-	{
-		KBatchedAnimController component = result.GetComponent<KBatchedAnimController>();
-		GameObject gameObject = new GameObject();
-		gameObject.name = result.name + "Visualizer";
-		gameObject.SetActive(false);
-		gameObject.transform.SetLocalPosition(Vector3.zero);
-		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
-		kbatchedAnimController.AnimFiles = component.AnimFiles;
-		kbatchedAnimController.initialAnim = "fabricating";
-		kbatchedAnimController.isMovable = true;
-		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
-		kbatchedAnimTracker.symbol = new HashedString("meter_ration");
-		kbatchedAnimTracker.offset = Vector3.zero;
-		kbatchedAnimTracker.skipInitialDisable = true;
-		return gameObject;
-	}
-
 	public const string ID = "FruitCake";
+
+	public static ComplexRecipe recipe;
 }

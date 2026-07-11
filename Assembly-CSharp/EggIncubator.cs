@@ -9,6 +9,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.autoReplaceEntity = true;
 		this.statusItemNeed = Db.Get().BuildingStatusItems.NeedEgg;
 		this.statusItemNoneAvailable = Db.Get().BuildingStatusItems.NoAvailableEgg;
 		this.statusItemAwaitingDelivery = Db.Get().BuildingStatusItems.AwaitingEggDelivery;
@@ -86,8 +87,21 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		if (base.occupyingObject && !this.storage.items.Contains(base.occupyingObject))
 		{
 			this.UnsubscribeFromOccupant();
-			base.occupyingObject = null;
 			this.ClearOccupant();
+		}
+	}
+
+	protected override void ClearOccupant()
+	{
+		bool flag = false;
+		if (base.occupyingObject != null)
+		{
+			flag = !base.occupyingObject.HasTag(GameTags.Egg);
+		}
+		base.ClearOccupant();
+		if (this.autoReplaceEntity && flag && this.requestedEntityTag.IsValid)
+		{
+			this.CreateOrder(this.requestedEntityTag);
 		}
 	}
 
@@ -99,7 +113,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		KSelectable component2 = base.occupyingObject.GetComponent<KSelectable>();
 		if (component2 != null)
 		{
-			component2.enabled = true;
+			component2.IsSelectable = true;
 		}
 	}
 
@@ -159,7 +173,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		{
 			if (this.chore == null)
 			{
-				this.chore = new WorkChore<EggIncubatorWorkable>(Db.Get().ChoreTypes.EggSing, this.workable, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+				this.chore = new WorkChore<EggIncubatorWorkable>(Db.Get().ChoreTypes.EggSing, this.workable, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 			}
 		}
 		else if (this.chore != null)

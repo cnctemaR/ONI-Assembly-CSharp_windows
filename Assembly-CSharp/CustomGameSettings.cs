@@ -173,7 +173,7 @@ public class CustomGameSettings : KMonoBehaviour
 		FSUtil.GetFiles(fs, text, "*.yaml", list);
 		foreach (string text2 in list)
 		{
-			global::ProcGen.World world = YamlIO<global::ProcGen.World>.LoadFile(text2);
+			global::ProcGen.World world = YamlIO<global::ProcGen.World>.LoadFile(text2, null);
 			string worldName = Worlds.GetWorldName(text2);
 			levels.Add(new SettingLevel(worldName, world.name, world.description, user_data));
 		}

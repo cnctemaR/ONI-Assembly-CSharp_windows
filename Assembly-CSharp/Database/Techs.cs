@@ -106,7 +106,14 @@ namespace Database
 			},
 			{
 				"AnimalControl",
-				new string[] { "CreatureTrap", "FishTrap", "AirborneCreatureLure", "EggIncubator" }
+				new string[]
+				{
+					"CreatureTrap",
+					"FishTrap",
+					"AirborneCreatureLure",
+					"EggIncubator",
+					LogicCritterCountSensorConfig.ID
+				}
 			},
 			{
 				"ImprovedOxygen",
@@ -129,10 +136,6 @@ namespace Database
 				}
 			},
 			{
-				"Clothing",
-				new string[] { "ClothingFabricator", "Phonobox" }
-			},
-			{
 				"PressureManagement",
 				new string[] { "LiquidValve", "GasValve", "ManualPressureDoor", "GasPermeableMembrane" }
 			},
@@ -143,20 +146,6 @@ namespace Database
 			{
 				"LiquidPiping",
 				new string[] { "LiquidConduit", "LiquidPump", "LiquidVent", "LiquidConduitBridge" }
-			},
-			{
-				"Luxury",
-				new string[]
-				{
-					LuxuryBedConfig.ID,
-					"LadderFast",
-					"PlasticTile",
-					"ExteriorWall"
-				}
-			},
-			{
-				"RefractiveDecor",
-				new string[] { "GlassTile" }
 			},
 			{
 				"ImprovedLiquidPiping",
@@ -241,7 +230,33 @@ namespace Database
 			},
 			{
 				"Artistry",
-				new string[] { "Canvas", "Sculpture", "IceSculpture" }
+				new string[] { "CrownMoulding", "CornerMoulding", "SmallSculpture", "IceSculpture", "ItemPedestal", "FlowerVaseWall", "FlowerVaseHanging" }
+			},
+			{
+				"Clothing",
+				new string[] { "Canvas", "ClothingFabricator", "CarpetTile" }
+			},
+			{
+				"Acoustics",
+				new string[] { "Phonobox" }
+			},
+			{
+				"FineArt",
+				new string[] { "CanvasWide", "CanvasTall", "Sculpture" }
+			},
+			{
+				"Luxury",
+				new string[]
+				{
+					LuxuryBedConfig.ID,
+					"LadderFast",
+					"PlasticTile",
+					"ExteriorWall"
+				}
+			},
+			{
+				"RefractiveDecor",
+				new string[] { "GlassTile", "FlowerVaseHangingFancy", "MarbleSculpture", "MetalSculpture" }
 			},
 			{
 				"Plastics",
@@ -396,7 +411,7 @@ namespace Database
 			},
 			{
 				"EnginesIII",
-				new string[] { "HydrogenEngine" }
+				new string[] { "OxidizerTankLiquid", "HydrogenEngine" }
 			},
 			{
 				"Jetpacks",

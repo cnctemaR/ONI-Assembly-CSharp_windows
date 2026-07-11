@@ -52,7 +52,7 @@ namespace Klei.AI
 				}
 				if (attribute != null && attribute.ShowInUI != Attribute.Display.Never)
 				{
-					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString(null, false));
+					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString(null));
 				}
 			}
 			StringEntry stringEntry;
@@ -72,7 +72,7 @@ namespace Klei.AI
 			Effect effect = Db.Get().effects.Get(effect_id);
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 			{
-				Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(parent, false), string.Empty, Descriptor.DescriptorType.Effect, false);
+				Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(parent), string.Empty, Descriptor.DescriptorType.Effect, false);
 				if (increase_indent)
 				{
 					descriptor.IncreaseIndent();

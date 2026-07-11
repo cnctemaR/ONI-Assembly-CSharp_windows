@@ -30,7 +30,7 @@ public class StandardAttributeFormatter : IAttributeFormatter
 		case GameUtil.UnitClass.SimpleInteger:
 			return GameUtil.GetFormattedInt(value, timeSlice);
 		case GameUtil.UnitClass.Temperature:
-			return GameUtil.GetFormattedTemperature(value, timeSlice, (timeSlice != GameUtil.TimeSlice.None) ? GameUtil.TemperatureInterpretation.Relative : GameUtil.TemperatureInterpretation.Absolute, true);
+			return GameUtil.GetFormattedTemperature(value, timeSlice, (timeSlice != GameUtil.TimeSlice.None) ? GameUtil.TemperatureInterpretation.Relative : GameUtil.TemperatureInterpretation.Absolute, true, false);
 		case GameUtil.UnitClass.Mass:
 			return GameUtil.GetFormattedMass(value, timeSlice, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 		case GameUtil.UnitClass.Calories:
@@ -61,7 +61,7 @@ public class StandardAttributeFormatter : IAttributeFormatter
 		for (int num = 0; num != instance.Modifiers.Count; num++)
 		{
 			AttributeModifier attributeModifier = instance.Modifiers[num];
-			string formattedString = attributeModifier.GetFormattedString(instance.gameObject, false);
+			string formattedString = attributeModifier.GetFormattedString(instance.gameObject);
 			if (formattedString != null)
 			{
 				text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier.GetDescription(), formattedString);

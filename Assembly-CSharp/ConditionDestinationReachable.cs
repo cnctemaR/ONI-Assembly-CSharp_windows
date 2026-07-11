@@ -16,8 +16,8 @@ public class ConditionDestinationReachable : RocketLaunchCondition
 	public override bool EvaluateLaunchCondition()
 	{
 		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
-		SpaceDestination activeMission = SpacecraftManager.instance.GetActiveMission(id);
-		return activeMission != null && this.CanReachDestination(activeMission);
+		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
+		return spacecraftDestination != null && this.CanReachDestination(spacecraftDestination);
 	}
 
 	public bool CanReachDestination(SpaceDestination destination)
@@ -29,7 +29,7 @@ public class ConditionDestinationReachable : RocketLaunchCondition
 	public SpaceDestination GetDestination()
 	{
 		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
-		return SpacecraftManager.instance.GetActiveMission(id);
+		return SpacecraftManager.instance.GetSpacecraftDestination(id);
 	}
 
 	public override string GetLaunchStatusMessage(bool ready)

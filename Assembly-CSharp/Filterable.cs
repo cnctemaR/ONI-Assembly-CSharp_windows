@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using KSerialization;
+using UnityEngine;
 
 public class Filterable : KMonoBehaviour
 {
@@ -25,53 +25,54 @@ public class Filterable : KMonoBehaviour
 	public virtual IList<Tag> GetTagOptions()
 	{
 		List<Tag> list = new List<Tag>();
-		IEnumerator enumerator = Enum.GetValues(typeof(SimHashes)).GetEnumerator();
-		try
+		foreach (Element element in ElementLoader.elements)
 		{
-			while (enumerator.MoveNext())
+			bool flag = true;
+			if (this.filterElementState != Filterable.ElementState.None)
 			{
-				object obj = enumerator.Current;
-				SimHashes simHashes = (SimHashes)obj;
-				bool flag = true;
-				if (this.filterElementState != Filterable.ElementState.None)
+				Filterable.ElementState elementState = this.filterElementState;
+				if (elementState != Filterable.ElementState.Gas)
 				{
-					Element element = ElementLoader.FindElementByHash(simHashes);
-					Filterable.ElementState elementState = this.filterElementState;
-					if (elementState != Filterable.ElementState.Gas)
+					if (elementState != Filterable.ElementState.Liquid)
 					{
-						if (elementState != Filterable.ElementState.Liquid)
+						if (elementState == Filterable.ElementState.Solid)
 						{
-							if (elementState == Filterable.ElementState.Solid)
-							{
-								flag = element.IsSolid;
-							}
-						}
-						else
-						{
-							flag = element.IsLiquid;
+							flag = element.IsSolid;
 						}
 					}
 					else
 					{
-						flag = element.IsGas;
+						flag = element.IsLiquid;
 					}
 				}
-				if (flag)
+				else
 				{
-					Tag tag = GameTagExtensions.Create(simHashes);
-					list.Add(tag);
+					flag = element.IsGas;
 				}
 			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
+			if (flag)
 			{
-				disposable.Dispose();
+				Tag tag = GameTagExtensions.Create(element.id);
+				list.Add(tag);
 			}
 		}
 		return list;
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<Filterable>(-905833192, Filterable.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		Filterable component = gameObject.GetComponent<Filterable>();
+		if (component != null)
+		{
+			this.SelectedTag = component.SelectedTag;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -92,6 +93,9 @@ public class Filterable : KMonoBehaviour
 		}
 	}
 
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
 	[Serialize]
 	public Filterable.ElementState filterElementState;
 
@@ -99,6 +103,11 @@ public class Filterable : KMonoBehaviour
 	private Tag selectedTag;
 
 	private static readonly Operational.Flag filterSelected = new Operational.Flag("filterSelected", Operational.Flag.Type.Requirement);
+
+	private static readonly EventSystem.IntraObjectHandler<Filterable> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<Filterable>(delegate(Filterable component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	public enum ElementState
 	{

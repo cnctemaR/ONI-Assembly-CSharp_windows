@@ -66,18 +66,21 @@ public class Comet : KMonoBehaviour, ISim33ms
 			GameObject gameObject = (scenePartitionerEntry.obj as Pickupable).gameObject;
 			if (!(gameObject.GetComponent<MinionIdentity>() != null))
 			{
-				Vector2 vector4 = (gameObject.transform.GetPosition() - pos).normalized;
-				vector4 += new Vector2(0f, 0.55f);
-				vector4 *= 0.5f * global::UnityEngine.Random.Range(this.explosionSpeedRange.x, this.explosionSpeedRange.y);
-				if (GameComps.Fallers.Has(gameObject))
+				if (gameObject.GetDef<CreatureFallMonitor.Def>() == null)
 				{
-					GameComps.Fallers.Remove(gameObject);
+					Vector2 vector4 = (gameObject.transform.GetPosition() - pos).normalized;
+					vector4 += new Vector2(0f, 0.55f);
+					vector4 *= 0.5f * global::UnityEngine.Random.Range(this.explosionSpeedRange.x, this.explosionSpeedRange.y);
+					if (GameComps.Fallers.Has(gameObject))
+					{
+						GameComps.Fallers.Remove(gameObject);
+					}
+					if (GameComps.Gravities.Has(gameObject))
+					{
+						GameComps.Gravities.Remove(gameObject);
+					}
+					GameComps.Fallers.Add(gameObject, vector4);
 				}
-				if (GameComps.Gravities.Has(gameObject))
-				{
-					GameComps.Gravities.Remove(gameObject);
-				}
-				GameComps.Fallers.Add(gameObject, vector4);
 			}
 		}
 		pooledList.Recycle();
@@ -142,11 +145,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				depth = 0
 			});
 			GameUtil.FloodFillConditional(pooledQueue, new Func<int, bool>(this.SpawnTilesCellTest), pooledHashSet2, pooledHashSet, 10);
-			if (this.addTiles > 0)
-			{
-				Output.Log(new object[] { string.Format("Comet at height: addtiles {0}, height {1}, height ratio {2}, total added {3}", new object[] { this.addTiles, depthOfElement, num7, num8 }) });
-			}
-			float num9 = ((num8 <= 0) ? 1f : (this.addTileMass / (float)num8));
+			float num9 = ((num8 <= 0) ? 1f : (this.addTileMass / (float)this.addTiles));
 			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
 			foreach (int num10 in pooledHashSet)
 			{

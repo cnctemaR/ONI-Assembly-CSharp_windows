@@ -15,6 +15,7 @@ public class Artist : RoleConfig
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.CanArt,
+			RoleManager.rolePerks.CanArtOkay,
 			RoleManager.rolePerks.IncreaseArtMedium
 		};
 	}

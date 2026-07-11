@@ -89,7 +89,7 @@ public class TileScreen : KScreen
 				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element.lowTemp - 100f, 0f), 0f, element.lowTemp + 100f);
 			}
 			this.temperatureSlider.SetExtraValue(num3);
-			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)num3), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)num3), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 			Dictionary<int, float> info = FallingWater.instance.GetInfo(num);
 			if (info.Count > 0)
 			{
@@ -110,9 +110,9 @@ public class TileScreen : KScreen
 
 	private void DisplayConduitFlowInfo()
 	{
-		SimViewMode mode = OverlayScreen.Instance.GetMode();
-		UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
-		ConduitFlow conduitFlow = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow);
+		HashedString mode = OverlayScreen.Instance.GetMode();
+		UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((!(mode == OverlayModes.GasConduits.ID)) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
+		ConduitFlow conduitFlow = ((!(mode == OverlayModes.LiquidConduits.ID)) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow);
 		Vector3 mousePos = KInputManager.GetMousePos();
 		mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
 		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePos);
@@ -161,7 +161,7 @@ public class TileScreen : KScreen
 				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element2.lowTemp - 100f, 0f), 0f, element2.lowTemp + 100f);
 			}
 			this.temperatureSlider.SetExtraValue(temperature);
-			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 		}
 		else
 		{
@@ -175,14 +175,14 @@ public class TileScreen : KScreen
 	private void Update()
 	{
 		base.transform.SetPosition(KInputManager.GetMousePos());
-		SimViewMode mode = OverlayScreen.Instance.GetMode();
-		if (mode != SimViewMode.GasVentMap && mode != SimViewMode.LiquidVentMap)
+		HashedString mode = OverlayScreen.Instance.GetMode();
+		if (mode == OverlayModes.GasConduits.ID || mode == OverlayModes.LiquidConduits.ID)
 		{
-			this.DisplayTileInfo();
+			this.DisplayConduitFlowInfo();
 		}
 		else
 		{
-			this.DisplayConduitFlowInfo();
+			this.DisplayTileInfo();
 		}
 	}
 

@@ -4,7 +4,7 @@ using UnityEngine;
 public class IdleChore : Chore<IdleChore.StatesInstance>
 {
 	public IdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, null)
 	{
 		this.showAvailabilityInHoverText = false;
 		this.smi = new IdleChore.StatesInstance(this, target.gameObject);
@@ -58,7 +58,7 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 				}, UpdateRate.SIM_1000ms, false)
 				.ToggleStateMachine((IdleChore.StatesInstance smi) => new TaskAvailabilityMonitor.Instance(smi.master))
 				.ToggleTag(GameTags.Idle);
-			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, (IdleChore.StatesInstance smi, bool p) => p).ParamTransition<bool>(this.isOnTube, this.idle.ontube, (IdleChore.StatesInstance smi, bool p) => p)
+			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue).ParamTransition<bool>(this.isOnTube, this.idle.ontube, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
 				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 				{
 					smi.GoTo(this.idle.move);

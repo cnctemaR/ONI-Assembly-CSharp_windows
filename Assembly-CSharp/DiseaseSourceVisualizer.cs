@@ -15,7 +15,7 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		OverlayScreen instance = OverlayScreen.Instance;
-		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnViewModeChanged));
+		instance.OnOverlayChanged = (Action<HashedString>)Delegate.Remove(instance.OnOverlayChanged, new Action<HashedString>(this.OnViewModeChanged));
 		base.OnCleanUp();
 		Components.DiseaseSourceVisualizers.Remove(this);
 		if (this.visualizer != null)
@@ -87,14 +87,14 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 		this.visualizer.transform.SetPosition(base.transform.GetPosition() + this.offset);
 	}
 
-	private void OnViewModeChanged(SimViewMode mode)
+	private void OnViewModeChanged(HashedString mode)
 	{
 		this.Show(mode);
 	}
 
-	public void Show(SimViewMode mode)
+	public void Show(HashedString mode)
 	{
-		base.enabled = this.visible && mode == SimViewMode.Disease;
+		base.enabled = this.visible && mode == OverlayModes.Disease.ID;
 		if (this.visualizer != null)
 		{
 			this.visualizer.SetActive(base.enabled);

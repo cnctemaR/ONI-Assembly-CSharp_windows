@@ -15,17 +15,49 @@ public class EntitySplitter : KMonoBehaviour
 		}
 		Pickupable pickupable2 = pickupable;
 		pickupable2.OnTake = (Func<float, Pickupable>)Delegate.Combine(pickupable2.OnTake, new Func<float, Pickupable>((float amount) => EntitySplitter.Split(pickupable, amount, null)));
-		pickupable.CanAbsorb = delegate(Pickupable other)
+		Rottable.Instance rottable = base.gameObject.GetSMI<Rottable.Instance>();
+		pickupable.absorbable = true;
+		pickupable.CanAbsorb = (Pickupable other) => EntitySplitter.CanFirstAbsorbSecond(pickupable, rottable, other, this.maxStackSize);
+		base.Subscribe<EntitySplitter>(-2064133523, EntitySplitter.OnAbsorbDelegate);
+	}
+
+	private static bool CanFirstAbsorbSecond(Pickupable pickupable, Rottable.Instance rottable, Pickupable other, float maxStackSize)
+	{
+		if (other == null)
 		{
-			if (other == null)
+			return false;
+		}
+		KPrefabID component = pickupable.GetComponent<KPrefabID>();
+		KPrefabID component2 = other.GetComponent<KPrefabID>();
+		if (component == null)
+		{
+			return false;
+		}
+		if (component2 == null)
+		{
+			return false;
+		}
+		if (component.PrefabTag != component2.PrefabTag)
+		{
+			return false;
+		}
+		if (pickupable.TotalAmount + other.TotalAmount > maxStackSize)
+		{
+			return false;
+		}
+		if (rottable != null)
+		{
+			Rottable.Instance smi = other.GetSMI<Rottable.Instance>();
+			if (smi == null)
 			{
 				return false;
 			}
-			KPrefabID component = pickupable.GetComponent<KPrefabID>();
-			KPrefabID component2 = other.GetComponent<KPrefabID>();
-			return component != null && component2 != null && component.PrefabTag == component2.PrefabTag && pickupable.TotalAmount + other.TotalAmount <= this.maxStackSize;
-		};
-		base.Subscribe<EntitySplitter>(-2064133523, EntitySplitter.OnAbsorbDelegate);
+			if (!rottable.IsRotLevelStackable(smi))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static Pickupable Split(Pickupable pickupable, float amount, GameObject prefab = null)

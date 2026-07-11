@@ -157,7 +157,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 
 	private Thought GetThoughtForTopic(Conversation setup, Conversation.Topic topic)
 	{
-		DebugUtil.DevAssert(!string.IsNullOrEmpty(topic.topic), "Assert!", string.Empty, string.Empty);
+		DebugUtil.DevAssert(!string.IsNullOrEmpty(topic.topic), new object[0]);
 		if (string.IsNullOrEmpty(topic.topic))
 		{
 			return null;
@@ -168,7 +168,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 			Conversation.Mode mode = Conversation.Topic.Modes[(int)topic.mode];
 			return new Thought("Topic_" + topic.topic, null, sprite, mode.icon, mode.voice, "bubble_chatter", mode.mouth, DUPLICANTS.THOUGHTS.CONVERSATION.TOOLTIP, true, TuningData<ConversationManager.Tuning>.Get().speakTime);
 		}
-		DebugUtil.DevAssert(sprite != null, "Couldn't find a sprite for conversation topic:", topic.topic, string.Empty);
+		DebugUtil.DevAssert(sprite != null, new object[] { "Couldn't find a sprite for conversation topic:", topic.topic });
 		return null;
 	}
 

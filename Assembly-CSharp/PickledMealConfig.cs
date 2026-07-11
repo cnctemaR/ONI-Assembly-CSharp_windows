@@ -7,14 +7,10 @@ public class PickledMealConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("PickledMeal", ITEMS.FOOD.PICKLEDMEAL.NAME, ITEMS.FOOD.PICKLEDMEAL.DESC, 1f, false, Assets.GetAnim("pickledmeal_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("PickledMeal", ITEMS.FOOD.PICKLEDMEAL.NAME, ITEMS.FOOD.PICKLEDMEAL.DESC, 1f, false, Assets.GetAnim("pickledmeal_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.7f, true, 0, SimHashes.Creature, null);
 		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.PICKLEDMEAL);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Pickled);
-		string text = "PickledMeal";
-		string text2 = ITEMS.FOOD.PICKLEDMEAL.RECIPEDESC;
-		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 21).SetFabricator("CookingStation", FOOD.RECIPES.SMALL_COOK_TIME);
-		recipe.AddIngredient(new Recipe.Ingredient("BasicPlantFood", 3f));
 		return gameObject;
 	}
 
@@ -27,4 +23,6 @@ public class PickledMealConfig : IEntityConfig
 	}
 
 	public const string ID = "PickledMeal";
+
+	public static ComplexRecipe recipe;
 }

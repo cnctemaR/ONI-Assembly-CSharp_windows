@@ -44,7 +44,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 				if (flag)
 				{
 					LoopingSoundParameterUpdater loopingSoundParameterUpdater = (LoopingSoundParameterUpdater)Activator.CreateInstance(type);
-					DebugUtil.Assert(!this.parameterUpdaters.ContainsKey(loopingSoundParameterUpdater.parameter), "Assert!", string.Empty, string.Empty);
+					DebugUtil.Assert(!this.parameterUpdaters.ContainsKey(loopingSoundParameterUpdater.parameter));
 					this.parameterUpdaters[loopingSoundParameterUpdater.parameter] = loopingSoundParameterUpdater;
 				}
 			}

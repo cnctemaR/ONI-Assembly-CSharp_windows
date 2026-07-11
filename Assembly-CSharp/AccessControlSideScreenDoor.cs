@@ -57,7 +57,7 @@ public class AccessControlSideScreenDoor : KMonoBehaviour
 		this.isUpDown = rotated;
 	}
 
-	public void SetContent(AccessControl.Permission permission, Action<MinionIdentity, AccessControl.Permission> onPermissionChange)
+	public void SetContent(AccessControl.Permission permission, Action<MinionAssignablesProxy, AccessControl.Permission> onPermissionChange)
 	{
 		this.permissionChangedCallback = onPermissionChange;
 		this.leftButton.isOn = permission == AccessControl.Permission.Both || permission == AccessControl.Permission.GoLeft;
@@ -69,9 +69,9 @@ public class AccessControlSideScreenDoor : KMonoBehaviour
 
 	public KToggle rightButton;
 
-	private Action<MinionIdentity, AccessControl.Permission> permissionChangedCallback;
+	private Action<MinionAssignablesProxy, AccessControl.Permission> permissionChangedCallback;
 
 	private bool isUpDown;
 
-	protected MinionIdentity targetIdentity;
+	protected MinionAssignablesProxy targetIdentity;
 }

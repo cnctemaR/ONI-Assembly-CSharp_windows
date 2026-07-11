@@ -54,7 +54,7 @@ namespace ProcGen
 				}
 				if (!this.ZoneLookupTable.ContainsKey(text))
 				{
-					SubWorldFile subWorldFile = YamlIO<SubWorldFile>.LoadFile(path + weightedName.name + ".yaml");
+					SubWorldFile subWorldFile = YamlIO<SubWorldFile>.LoadFile(path + weightedName.name + ".yaml", null);
 					if (subWorldFile != null)
 					{
 						subWorld = subWorldFile.zone;

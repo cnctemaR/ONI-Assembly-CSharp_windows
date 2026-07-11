@@ -84,7 +84,7 @@ public class BuildTool : DragTool
 		base.OnDeactivateTool(new_tool);
 	}
 
-	public void Activate(BuildingDef def, IList<Element> selected_elements, GameObject source = null)
+	public void Activate(BuildingDef def, IList<Tag> selected_elements, GameObject source = null)
 	{
 		this.selectedElements = selected_elements;
 		this.def = def;
@@ -252,6 +252,11 @@ public class BuildTool : DragTool
 		{
 			return;
 		}
+		int num = Grid.PosToCell(this.visualizer);
+		if (num != cell)
+		{
+			return;
+		}
 		this.lastDragCell = cell;
 		this.ClearTilePreview();
 		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
@@ -281,30 +286,25 @@ public class BuildTool : DragTool
 				if (gameObject2 != null && Grid.Objects[cell, (int)this.def.ReplacementLayer] == null)
 				{
 					BuildingComplete component = gameObject2.GetComponent<BuildingComplete>();
-					if (component != null && component.Def.Replaceable && component.Def.IsFoundation && component.Def.isKAnimTile && (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
+					if (component != null && component.Def.Replaceable && component.Def.IsFoundation && component.Def.isKAnimTile && (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element.tag))
 					{
-						Constructable component2 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
-						component2.IsReplacementTile = true;
-						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0);
-						component2.IsReplacementTile = false;
+						gameObject = this.def.TryReplaceTile(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0);
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
 					}
 				}
 			}
 			if (gameObject != null)
 			{
-				ObjectLayer objectLayer = ((!gameObject.GetComponent<Constructable>().IsReplacementTile) ? this.def.ObjectLayer : this.def.ReplacementLayer);
-				this.def.MarkArea(cell, this.buildingOrientation, objectLayer, gameObject);
-				Prioritizable component3 = gameObject.GetComponent<Prioritizable>();
-				if (component3 != null)
+				Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
+				if (component2 != null)
 				{
 					if (BuildMenu.Instance != null)
 					{
-						component3.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
+						component2.SetMasterPriority(BuildMenu.Instance.GetBuildingPriority());
 					}
 					if (PlanScreen.Instance != null)
 					{
-						component3.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
+						component2.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
 					}
 				}
 				if (this.source != null)
@@ -333,10 +333,10 @@ public class BuildTool : DragTool
 			{
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, vector, 1.5f, false, false);
 			}
-			Rotatable component4 = gameObject.GetComponent<Rotatable>();
-			if (component4 != null)
+			Rotatable component3 = gameObject.GetComponent<Rotatable>();
+			if (component3 != null)
 			{
-				component4.SetOrientation(this.buildingOrientation);
+				component3.SetOrientation(this.buildingOrientation);
 			}
 		}
 	}
@@ -399,7 +399,7 @@ public class BuildTool : DragTool
 
 	private int lastDragCell = -1;
 
-	private IList<Element> selectedElements;
+	private IList<Tag> selectedElements;
 
 	private BuildingDef def;
 

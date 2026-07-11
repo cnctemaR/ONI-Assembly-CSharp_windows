@@ -21,7 +21,6 @@ public class Db : EntityModifierSet
 	public override void Initialize()
 	{
 		base.Initialize();
-		this.Diseases = new global::Database.Diseases(this.Root);
 		this.Urges = new Urges();
 		this.AssignableSlots = new AssignableSlots();
 		this.StateMachineCategories = new StateMachineCategories();
@@ -42,6 +41,7 @@ public class Db : EntityModifierSet
 		this.RoomTypeCategories = new RoomTypeCategories(this.Root);
 		this.RoomTypes = new RoomTypes(this.Root);
 		this.SpaceDestinationTypes = new SpaceDestinationTypes(this.Root);
+		this.Diseases = new global::Database.Diseases(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);

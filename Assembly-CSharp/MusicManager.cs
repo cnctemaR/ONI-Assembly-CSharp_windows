@@ -357,7 +357,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			{
 				this.SetDynamicMusicPaused();
 			}
-			if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode != SimViewMode.None)
+			if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode != OverlayModes.None.ID)
 			{
 				this.SetDynamicMusicOverlayActive();
 			}

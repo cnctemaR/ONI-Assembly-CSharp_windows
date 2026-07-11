@@ -1,71 +1,138 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using UnityEngine;
 
 public static class DebugUtil
 {
-	public static void Assert(bool test, string message = "Assert!", string message1 = "", string message2 = "")
+	private static void Break(string message)
+	{
+		global::Debug.LogError(message, null);
+		global::Debug.Break();
+		Debugger.Break();
+	}
+
+	public static void Assert(bool test)
 	{
 		if (!test)
 		{
-			global::Debug.LogError(string.Concat(new string[] { message, " ", message1, " ", message2 }), null);
-			global::Debug.Break();
+			DebugUtil.Break("Failed assertion");
 		}
 	}
 
-	public static void DevAssert(bool test, string message0 = "Assert!", string message1 = "", string message2 = "")
+	public static void Assert(bool test, string message)
+	{
+		if (!test)
+		{
+			DebugUtil.Break(message);
+		}
+	}
+
+	public static void Assert(bool test, string message0, string message1)
+	{
+		if (!test)
+		{
+			DebugUtil.errorMessageBuilder.Length = 0;
+			DebugUtil.Break(DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
+				.ToString());
+		}
+	}
+
+	public static void Assert(bool test, string message0, string message1, string message2)
+	{
+		if (!test)
+		{
+			DebugUtil.errorMessageBuilder.Length = 0;
+			DebugUtil.Break(DebugUtil.errorMessageBuilder.Append(message0).Append(" ").Append(message1)
+				.Append(" ")
+				.Append(message2)
+				.ToString());
+		}
+	}
+
+	public static void Assert(bool test, params object[] objs)
+	{
+		if (!test)
+		{
+			global::Debug.LogError(Output.BuildString(objs), null);
+			global::Debug.Break();
+			Debugger.Break();
+		}
+	}
+
+	public static void DevAssert(bool test, params object[] objs)
 	{
 		if (!test)
 		{
 			if (Application.isEditor)
 			{
-				global::Debug.LogError(message0 + message1 + message2, null);
+				global::Debug.LogError(Output.BuildString(objs), null);
 				global::Debug.Break();
+				Debugger.Break();
 			}
 			else
 			{
-				global::Debug.LogWarning(message0 + message1 + message2, null);
+				global::Debug.LogWarning(Output.BuildString(objs), null);
 			}
 		}
 	}
 
-	public static void SoftAssert(bool test, string message = "Assert!")
+	public static void DevAssertWithStack(bool test, params object[] objs)
 	{
 		if (!test)
 		{
-			global::Debug.LogWarning(message, null);
+			if (Application.isEditor)
+			{
+				global::Debug.LogError(Output.BuildString(objs), null);
+				global::Debug.Break();
+				Debugger.Break();
+			}
+			else
+			{
+				StackTrace stackTrace = new StackTrace(1, true);
+				string text = string.Format("{0}\n{1}", Output.BuildString(objs), stackTrace);
+				global::Debug.LogWarning(text, null);
+			}
 		}
 	}
 
-	public static string FullName(Component cmp)
+	public static void SoftAssert(bool test, params object[] objs)
 	{
-		return string.Concat(new object[]
+		if (!test)
 		{
-			DebugUtil.FullName(cmp.gameObject),
-			" (",
-			cmp.GetType().ToString(),
-			" ",
-			cmp.GetInstanceID(),
-			")"
-		});
+			global::Debug.LogWarning(Output.BuildString(objs), null);
+		}
+	}
+
+	private static void RecursiveBuildFullName(GameObject obj)
+	{
+		if (obj == null)
+		{
+			return;
+		}
+		DebugUtil.RecursiveBuildFullName(obj.transform.parent.gameObject);
+		DebugUtil.fullNameBuilder.Append("/").Append(obj.name);
+	}
+
+	private static StringBuilder BuildFullName(GameObject obj)
+	{
+		DebugUtil.fullNameBuilder.Length = 0;
+		DebugUtil.RecursiveBuildFullName(obj);
+		return DebugUtil.fullNameBuilder.Append(" (").Append(obj.GetInstanceID()).Append(")");
 	}
 
 	public static string FullName(GameObject obj)
 	{
-		GameObject gameObject = obj;
-		string text = "/" + obj.name;
-		while (obj.transform.parent != null)
-		{
-			obj = obj.transform.parent.gameObject;
-			text = "/" + obj.name + text;
-		}
-		return string.Concat(new object[]
-		{
-			text,
-			" (",
-			gameObject.GetInstanceID(),
-			")"
-		});
+		return DebugUtil.BuildFullName(obj).ToString();
+	}
+
+	public static string FullName(Component cmp)
+	{
+		return DebugUtil.BuildFullName(cmp.gameObject).Append(" (").Append(cmp.GetType())
+			.Append(" ")
+			.Append(cmp.GetInstanceID().ToString())
+			.Append(")")
+			.ToString();
 	}
 
 	public static void LogIfSelected(GameObject obj, params object[] objs)
@@ -86,4 +153,8 @@ public static class DebugUtil
 	public static void ProfileEnd()
 	{
 	}
+
+	private static StringBuilder errorMessageBuilder = new StringBuilder();
+
+	private static StringBuilder fullNameBuilder = new StringBuilder();
 }

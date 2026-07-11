@@ -36,11 +36,16 @@ namespace TUNING
 			GameTags.Clothes,
 			GameTags.ManufacturedMaterial,
 			GameTags.Egg,
+			GameTags.RareMaterials,
 			GameTags.Other
 		};
 
 		public static List<Tag> LIQUIDS = new List<Tag> { GameTags.Liquid };
 
-		public static List<Tag> GASES = new List<Tag> { GameTags.Gas };
+		public static List<Tag> GASES = new List<Tag>
+		{
+			GameTags.Breathable,
+			GameTags.Unbreathable
+		};
 	}
 }

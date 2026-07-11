@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		this.rocketStats = new RocketStats(this);
 	}
 
-	public void ReleaseAstronaut()
+	public void ReleaseAstronaut(bool fill_bladder)
 	{
 		if (this.releasingAstronaut)
 		{
@@ -26,9 +27,20 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		for (int i = storedMinionInfo.Count - 1; i >= 0; i--)
 		{
 			GameObject gameObject = component.DeserializeMinion(storedMinionInfo[i].id, Grid.CellToPos(Grid.PosToCell(base.smi.master.transform.GetPosition())));
-			if (Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(base.smi.master.gameObject), 0, -1)])
+			if (!(gameObject == null))
 			{
-				gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+				if (Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(base.smi.master.gameObject), 0, -1)])
+				{
+					gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+				}
+				if (fill_bladder)
+				{
+					AmountInstance amountInstance = Db.Get().Amounts.Bladder.Lookup(gameObject);
+					if (amountInstance != null)
+					{
+						amountInstance.value = amountInstance.GetMax();
+					}
+				}
 			}
 		}
 		this.releasingAstronaut = false;
@@ -39,7 +51,14 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		base.OnSpawn();
 		this.storage = base.GetComponent<Storage>();
 		this.assignable = base.GetComponent<Assignable>();
-		this.assignable.eligibleFilter = (MinionIdentity identity) => identity.GetComponent<MinionResume>().HasPerk(RoleManager.rolePerks.CanUseRockets);
+		this.assignable.eligibleFilter = delegate(MinionAssignablesProxy identity)
+		{
+			if (identity.target is MinionIdentity)
+			{
+				return (identity.target as KMonoBehaviour).GetComponent<MinionResume>().HasPerk(RoleManager.rolePerks.CanUseRockets);
+			}
+			return identity.target is StoredMinionIdentity && (identity.target as StoredMinionIdentity).HasPerk(RoleManager.rolePerks.CanUseRockets);
+		};
 		base.smi.StartSM();
 		int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), 0, -1);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("CommandModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGantryChanged));
@@ -52,6 +71,11 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		this.flightPathIsClear = (ConditionFlightPathIsClear)component.AddFlightCondition(new ConditionFlightPathIsClear(base.gameObject, 1));
 	}
 
+	private static bool HasValidGantry(GameObject go)
+	{
+		return Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(go), 0, -1)];
+	}
+
 	private void OnGantryChanged(object data)
 	{
 		if (base.gameObject != null)
@@ -59,7 +83,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 			KSelectable component = base.GetComponent<KSelectable>();
 			component.RemoveStatusItem(Db.Get().BuildingStatusItems.HasGantry, false);
 			component.RemoveStatusItem(Db.Get().BuildingStatusItems.MissingGantry, false);
-			if (Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(base.smi.master.gameObject), 0, -1)])
+			if (CommandModule.HasValidGantry(base.smi.master.gameObject))
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.HasGantry, null);
 			}
@@ -67,6 +91,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.MissingGantry, null);
 			}
+			base.smi.sm.gantryChanged.Trigger(base.smi);
 		}
 	}
 
@@ -74,7 +99,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	{
 		ChoreType astronaut = Db.Get().ChoreTypes.Astronaut;
 		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
-		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
+		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.emergency, 5, false);
 		workChore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanUseRockets);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
 		return workChore;
@@ -84,7 +109,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	{
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		this.partitionerEntry.Clear();
-		this.ReleaseAstronaut();
+		this.ReleaseAstronaut(false);
 		base.smi.StopSM("cleanup");
 	}
 
@@ -137,21 +162,68 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 				component2.Pause(suspended, "Rocket is suspended");
 			}
 		}
+
+		public bool CheckStoredMinionIsAssignee()
+		{
+			foreach (MinionStorage.Info info in base.GetComponent<MinionStorage>().GetStoredMinionInfo())
+			{
+				if (info.serializedMinion != null)
+				{
+					KPrefabID kprefabID = info.serializedMinion.Get();
+					if (!(kprefabID == null))
+					{
+						StoredMinionIdentity component = kprefabID.GetComponent<StoredMinionIdentity>();
+						Assignable component2 = base.GetComponent<Assignable>();
+						if (component2.assignee == component.assignableProxy.Get())
+						{
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
 	}
 
 	public class States : GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.grounded.idle;
-			this.grounded.DefaultState(this.grounded.idle).TagTransition(GameTags.RocketNotOnGround, this.spaceborne, false);
-			this.grounded.idle.PlayAnim("grounded", KAnim.PlayMode.Loop).GoTo(this.grounded.awaitingAstronaut);
-			this.grounded.awaitingAstronaut.PlayAnim("grounded", KAnim.PlayMode.Loop).EnterTransition(this.grounded.hasAstronaut, (CommandModule.StatesInstance smi) => smi.GetComponent<MinionStorage>().GetStoredMinionInfo().Count > 0).ToggleChore((CommandModule.StatesInstance smi) => smi.master.CreateWorkChore(), this.grounded.hasAstronaut);
-			this.grounded.hasAstronaut.PlayAnim("grounded", KAnim.PlayMode.Loop).EventHandler(GameHashes.AssigneeChanged, delegate(CommandModule.StatesInstance smi)
+			default_state = this.grounded;
+			this.grounded.PlayAnim("grounded", KAnim.PlayMode.Loop).DefaultState(this.grounded.awaitingAstronaut).TagTransition(GameTags.RocketNotOnGround, this.spaceborne, false);
+			this.grounded.awaitingAstronaut.Enter(delegate(CommandModule.StatesInstance smi)
 			{
-				smi.master.ReleaseAstronaut();
+				if (smi.CheckStoredMinionIsAssignee())
+				{
+					smi.GoTo(this.grounded.hasAstronaut);
+				}
 				Game.Instance.userMenu.Refresh(smi.gameObject);
-			}).EventTransition(GameHashes.AssigneeChanged, this.grounded.idle, null);
+			}).EventHandler(GameHashes.AssigneeChanged, delegate(CommandModule.StatesInstance smi)
+			{
+				if (smi.CheckStoredMinionIsAssignee())
+				{
+					smi.GoTo(this.grounded.hasAstronaut);
+				}
+				Game.Instance.userMenu.Refresh(smi.gameObject);
+			}).ToggleChore((CommandModule.StatesInstance smi) => smi.master.CreateWorkChore(), this.grounded.hasAstronaut);
+			this.grounded.hasAstronaut.EventHandler(GameHashes.AssigneeChanged, delegate(CommandModule.StatesInstance smi)
+			{
+				if (!smi.CheckStoredMinionIsAssignee())
+				{
+					smi.GoTo(this.grounded.waitingToRelease);
+				}
+			});
+			this.grounded.waitingToRelease.ToggleStatusItem(Db.Get().BuildingStatusItems.DisembarkingDuplicant, null).OnSignal(this.gantryChanged, this.grounded.awaitingAstronaut, delegate(CommandModule.StatesInstance smi)
+			{
+				if (CommandModule.HasValidGantry(smi.gameObject))
+				{
+					smi.master.ReleaseAstronaut(this.accumulatedPee.Get(smi));
+					this.accumulatedPee.Set(false, smi);
+					Game.Instance.userMenu.Refresh(smi.gameObject);
+					return true;
+				}
+				return false;
+			});
 			this.spaceborne.DefaultState(this.spaceborne.launch);
 			this.spaceborne.launch.Enter(delegate(CommandModule.StatesInstance smi)
 			{
@@ -161,10 +233,14 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 			this.spaceborne.land.Enter(delegate(CommandModule.StatesInstance smi)
 			{
 				smi.SetSuspended(false);
-				smi.master.ReleaseAstronaut();
 				Game.Instance.userMenu.Refresh(smi.gameObject);
-			}).GoTo(this.grounded);
+				this.accumulatedPee.Set(true, smi);
+			}).GoTo(this.grounded.waitingToRelease);
 		}
+
+		public StateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.Signal gantryChanged;
+
+		public StateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.BoolParameter accumulatedPee;
 
 		public CommandModule.States.GroundedStates grounded;
 
@@ -172,11 +248,11 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 		public class GroundedStates : GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State
 		{
-			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State idle;
-
 			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State awaitingAstronaut;
 
 			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State hasAstronaut;
+
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State waitingToRelease;
 		}
 
 		public class SpaceborneStates : GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State

@@ -39,16 +39,19 @@ public class ToolMenu : KScreen
 	{
 		this.activateOnSpawn = true;
 		base.OnSpawn();
-		this.SetData();
-		this.rows.ForEach(delegate(ToolMenu.ToolCollection[] row)
+		this.CreateSandBoxTools();
+		this.CreateBasicTools();
+		this.rows.Add(this.sandboxTools);
+		this.rows.Add(this.basicTools);
+		this.rows.ForEach(delegate(List<ToolMenu.ToolCollection> row)
 		{
 			this.InstantiateCollectionsUI(row);
 		});
-		this.rows.ForEach(delegate(ToolMenu.ToolCollection[] row)
+		this.rows.ForEach(delegate(List<ToolMenu.ToolCollection> row)
 		{
 			this.BuildRowToggles(row);
 		});
-		this.rows.ForEach(delegate(ToolMenu.ToolCollection[] row)
+		this.rows.ForEach(delegate(List<ToolMenu.ToolCollection> row)
 		{
 			this.BuildToolToggles(row);
 		});
@@ -142,68 +145,72 @@ public class ToolMenu : KScreen
 	{
 		this.ClearSelection();
 		PlayerController.Instance.ActivateTool(SelectTool.Instance);
-		this.rowSandboxTools[0].toggle.transform.parent.gameObject.SetActive(Game.Instance.SandboxModeActive);
+		this.sandboxTools[0].toggle.transform.parent.transform.parent.gameObject.SetActive(Game.Instance.SandboxModeActive);
 	}
 
-	private void SetData()
+	public static ToolMenu.ToolCollection CreateToolCollection(LocString collection_name, string icon_name, global::Action hotkey, string tool_name, LocString tooltip, bool largeIcon)
 	{
-		ToolMenu.ToolCollection toolCollection = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.BRUSH.NAME, "brush", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.BRUSH.NAME, "brush", global::Action.SandboxBrush, "SandboxBrushTool", toolCollection, UI.SANDBOXTOOLS.SETTINGS.BRUSH.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection2 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.SPRINKLE.NAME, "sprinkle", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.SPRINKLE.NAME, "sprinkle", global::Action.SandboxSprinkle, "SandboxSprinkleTool", toolCollection2, UI.SANDBOXTOOLS.SETTINGS.SPRINKLE.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection3 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.FLOOD.NAME, "flood", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.FLOOD.NAME, "flood", global::Action.SandboxFlood, "SandboxFloodTool", toolCollection3, UI.SANDBOXTOOLS.SETTINGS.FLOOD.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection4 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.SAMPLE.NAME, "sample", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.SAMPLE.NAME, "sample", global::Action.SandboxSample, "SandboxSampleTool", toolCollection4, UI.SANDBOXTOOLS.SETTINGS.SAMPLE.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection5 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.HEATGUN.NAME, "brush", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.HEATGUN.NAME, "brush", global::Action.SandboxHeatGun, "SandboxHeatTool", toolCollection5, UI.SANDBOXTOOLS.SETTINGS.HEATGUN.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection6 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.SPAWNER.NAME, "spawn", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.SPAWNER.NAME, "spawn", global::Action.SandboxSpawnEntity, "SandboxSpawnerTool", toolCollection6, UI.SANDBOXTOOLS.SETTINGS.SPAWNER.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection7 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.CLEAR_FLOOR.NAME, "clear_floor", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.CLEAR_FLOOR.NAME, "clear_floor", global::Action.SandboxClearFloor, "SandboxClearFloorTool", toolCollection7, UI.SANDBOXTOOLS.SETTINGS.CLEAR_FLOOR.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection8 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.DESTROY.NAME, "destroy", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.DESTROY.NAME, "destroy", global::Action.SandboxDestroy, "SandboxDestroyerTool", toolCollection8, UI.SANDBOXTOOLS.SETTINGS.DESTROY.TOOLTIP, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection9 = new ToolMenu.ToolCollection(UI.TOOLS.SANDBOX.FOW.NAME, "brush", string.Empty, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.SANDBOX.FOW.NAME, "brush", global::Action.SandboxReveal, "SandboxFOWTool", toolCollection9, UI.SANDBOXTOOLS.SETTINGS.FOW.TOOLTIP, SimViewMode.None, false, null, null);
-		this.rowSandboxTools = new ToolMenu.ToolCollection[] { toolCollection, toolCollection2, toolCollection3, toolCollection4, toolCollection5, toolCollection6, toolCollection7, toolCollection8, toolCollection9 };
-		ToolMenu.ToolCollection toolCollection10 = new ToolMenu.ToolCollection(UI.TOOLS.DECONSTRUCT.NAME, "icon_action_deconstruct", UI.TOOLTIPS.DECONSTRUCTBUTTON, false, global::Action.BuildingDeconstruct);
-		new ToolMenu.ToolInfo(UI.TOOLS.DECONSTRUCT.NAME, "icon_action_deconstruct", global::Action.BuildingDeconstruct, "DeconstructTool", toolCollection10, UI.TOOLTIPS.DECONSTRUCTBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection11 = new ToolMenu.ToolCollection(UI.TOOLS.CANCEL.NAME, "icon_action_cancel", UI.TOOLTIPS.CANCELBUTTON, false, global::Action.BuildingCancel);
-		new ToolMenu.ToolInfo(UI.TOOLS.CANCEL.NAME, "icon_action_cancel", global::Action.BuildingCancel, "CancelTool", toolCollection11, UI.TOOLTIPS.CANCELBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection12 = new ToolMenu.ToolCollection(UI.TOOLS.DIG.NAME, "icon_action_dig", string.Empty, false, global::Action.Dig);
-		new ToolMenu.ToolInfo(UI.TOOLS.DIG.NAME, "icon_action_dig", global::Action.Dig, "DigTool", toolCollection12, UI.TOOLTIPS.DIGBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection13 = new ToolMenu.ToolCollection(UI.TOOLS.PRIORITIESCATEGORY.NAME, "icon_action_prioritize", UI.TOOLTIPS.PRIORITIZEMAINBUTTON, false, global::Action.AccessPrioritizeCollection);
-		new ToolMenu.ToolInfo(UI.TOOLS.PRIORITIZE.NAME, "icon_action_prioritize", global::Action.Prioritize, "PrioritizeTool", toolCollection13, UI.TOOLTIPS.PRIORITIZEBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection14 = new ToolMenu.ToolCollection(UI.TOOLS.MARKFORSTORAGE.NAME, "icon_action_store", UI.TOOLTIPS.CLEARBUTTON, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.MARKFORSTORAGE.NAME, "icon_action_store", global::Action.Clear, "ClearTool", toolCollection14, UI.TOOLTIPS.CLEARBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection15 = new ToolMenu.ToolCollection(UI.TOOLS.MOP.NAME, "icon_action_mop", UI.TOOLTIPS.MOPBUTTON, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.MOP.NAME, "icon_action_mop", global::Action.Mop, "MopTool", toolCollection15, UI.TOOLTIPS.MOPBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection16 = new ToolMenu.ToolCollection(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", UI.TOOLTIPS.DISINFECTBUTTON, false, global::Action.NumActions);
-		new ToolMenu.ToolInfo(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", global::Action.Disinfect, "DisinfectTool", toolCollection16, UI.TOOLTIPS.DISINFECTBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection17 = new ToolMenu.ToolCollection(UI.TOOLS.ATTACK.NAME, "icon_action_attack", string.Empty, false, global::Action.Attack);
-		new ToolMenu.ToolInfo(UI.TOOLS.ATTACK.NAME, "icon_action_attack", global::Action.Attack, "AttackTool", toolCollection17, UI.TOOLTIPS.ATTACKBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection18 = new ToolMenu.ToolCollection(UI.TOOLS.CAPTURE.NAME, "icon_action_capture", string.Empty, false, global::Action.Capture);
-		new ToolMenu.ToolInfo(UI.TOOLS.CAPTURE.NAME, "icon_action_capture", global::Action.Capture, "CaptureTool", toolCollection18, UI.TOOLTIPS.CAPTUREBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection19 = new ToolMenu.ToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", string.Empty, false, global::Action.Harvest);
-		new ToolMenu.ToolInfo(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", toolCollection19, UI.TOOLTIPS.HARVESTBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection20 = new ToolMenu.ToolCollection(UI.TOOLS.EMPTY_PIPE.NAME, "icon_action_empty_pipes", string.Empty, false, global::Action.Harvest);
-		new ToolMenu.ToolInfo(UI.TOOLS.EMPTY_PIPE.NAME, "icon_action_empty_pipes", global::Action.EmptyPipe, "EmptyPipeTool", toolCollection20, UI.TOOLS.EMPTY_PIPE.TOOLTIP, SimViewMode.None, false, null, null);
-		this.rowBasicTools = new ToolMenu.ToolCollection[]
-		{
-			toolCollection12, toolCollection18, toolCollection19, toolCollection20, toolCollection13, toolCollection14, toolCollection15, toolCollection16, toolCollection10, toolCollection17,
-			toolCollection11
-		};
-		this.rows.Add(this.rowSandboxTools);
-		this.rows.Add(this.rowBasicTools);
+		string text = collection_name;
+		ToolMenu.ToolCollection toolCollection = new ToolMenu.ToolCollection(text, icon_name, string.Empty, false, global::Action.NumActions, largeIcon);
+		new ToolMenu.ToolInfo(collection_name, icon_name, hotkey, tool_name, toolCollection, tooltip, false, null, null);
+		return toolCollection;
 	}
 
-	private void InstantiateCollectionsUI(ToolMenu.ToolCollection[] collections)
+	private void CreateSandBoxTools()
+	{
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.BRUSH.NAME, "brush", global::Action.SandboxBrush, "SandboxBrushTool", UI.SANDBOXTOOLS.SETTINGS.BRUSH.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.SPRINKLE.NAME, "sprinkle", global::Action.SandboxSprinkle, "SandboxSprinkleTool", UI.SANDBOXTOOLS.SETTINGS.SPRINKLE.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.FLOOD.NAME, "flood", global::Action.SandboxFlood, "SandboxFloodTool", UI.SANDBOXTOOLS.SETTINGS.FLOOD.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.SAMPLE.NAME, "sample", global::Action.SandboxSample, "SandboxSampleTool", UI.SANDBOXTOOLS.SETTINGS.SAMPLE.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.HEATGUN.NAME, "brush", global::Action.SandboxHeatGun, "SandboxHeatTool", UI.SANDBOXTOOLS.SETTINGS.HEATGUN.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.SPAWNER.NAME, "spawn", global::Action.SandboxSpawnEntity, "SandboxSpawnerTool", UI.SANDBOXTOOLS.SETTINGS.SPAWNER.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.CLEAR_FLOOR.NAME, "clear_floor", global::Action.SandboxClearFloor, "SandboxClearFloorTool", UI.SANDBOXTOOLS.SETTINGS.CLEAR_FLOOR.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.DESTROY.NAME, "destroy", global::Action.SandboxDestroy, "SandboxDestroyerTool", UI.SANDBOXTOOLS.SETTINGS.DESTROY.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.FOW.NAME, "brush", global::Action.SandboxReveal, "SandboxFOWTool", UI.SANDBOXTOOLS.SETTINGS.FOW.TOOLTIP, false));
+	}
+
+	private void CreateBasicTools()
+	{
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.DIG.NAME, "icon_action_dig", global::Action.Dig, "DigTool", UI.TOOLTIPS.DIGBUTTON, true));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.CANCEL.NAME, "icon_action_cancel", global::Action.BuildingCancel, "CancelTool", UI.TOOLTIPS.CANCELBUTTON, true));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.DECONSTRUCT.NAME, "icon_action_deconstruct", global::Action.BuildingDeconstruct, "DeconstructTool", UI.TOOLTIPS.DECONSTRUCTBUTTON, true));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.PRIORITIZE.NAME, "icon_action_prioritize", global::Action.Prioritize, "PrioritizeTool", UI.TOOLTIPS.PRIORITIZEBUTTON, true));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", global::Action.Disinfect, "DisinfectTool", UI.TOOLTIPS.DISINFECTBUTTON, false));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.MARKFORSTORAGE.NAME, "icon_action_store", global::Action.Clear, "ClearTool", UI.TOOLTIPS.CLEARBUTTON, false));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.ATTACK.NAME, "icon_action_attack", global::Action.Attack, "AttackTool", UI.TOOLTIPS.ATTACKBUTTON, false));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.MOP.NAME, "icon_action_mop", global::Action.Mop, "MopTool", UI.TOOLTIPS.MOPBUTTON, false));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.CAPTURE.NAME, "icon_action_capture", global::Action.Capture, "CaptureTool", UI.TOOLTIPS.CAPTUREBUTTON, false));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", UI.TOOLTIPS.HARVESTBUTTON, false));
+		this.basicTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.EMPTY_PIPE.NAME, "icon_action_empty_pipes", global::Action.EmptyPipe, "EmptyPipeTool", UI.TOOLS.EMPTY_PIPE.TOOLTIP, false));
+	}
+
+	private void InstantiateCollectionsUI(IList<ToolMenu.ToolCollection> collections)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.prefabToolRow, base.gameObject, true);
-		for (int i = 0; i < collections.Length; i++)
+		GameObject gameObject2 = Util.KInstantiateUI(this.largeToolSet, gameObject, true);
+		GameObject gameObject3 = Util.KInstantiateUI(this.smallToolSet, gameObject, true);
+		GameObject gameObject4 = Util.KInstantiateUI(this.smallToolBottomRow, gameObject3, true);
+		GameObject gameObject5 = Util.KInstantiateUI(this.smallToolTopRow, gameObject3, true);
+		GameObject gameObject6 = Util.KInstantiateUI(this.sandboxToolSet, gameObject, true);
+		bool flag = true;
+		for (int i = 0; i < collections.Count; i++)
 		{
+			GameObject gameObject7;
+			if (collections == this.sandboxTools)
+			{
+				gameObject7 = gameObject6;
+			}
+			else if (collections[i].largeIcon)
+			{
+				gameObject7 = gameObject2;
+			}
+			else
+			{
+				gameObject7 = ((!flag) ? gameObject4 : gameObject5);
+				flag = !flag;
+			}
 			ToolMenu.ToolCollection tc = collections[i];
-			tc.toggle = Util.KInstantiateUI((collections[i].tools.Count <= 1) ? ((collections != this.rowSandboxTools) ? this.toolIconPrefab : this.sandboxToolIconPrefab) : this.collectionIconPrefab, gameObject, true);
+			tc.toggle = Util.KInstantiateUI((collections[i].tools.Count <= 1) ? ((collections != this.sandboxTools) ? ((!collections[i].largeIcon) ? this.toolIconPrefab : this.toolIconLargePrefab) : this.sandboxToolIconPrefab) : this.collectionIconPrefab, gameObject7, true);
 			KToggle component = tc.toggle.GetComponent<KToggle>();
 			component.soundPlayer.Enabled = false;
 			component.onClick += delegate
@@ -216,35 +223,35 @@ public class ToolMenu : KScreen
 			};
 			if (tc.tools != null)
 			{
-				GameObject gameObject2;
+				GameObject gameObject8;
 				if (tc.tools.Count < this.smallCollectionMax)
 				{
-					gameObject2 = Util.KInstantiateUI(this.Prefab_collectionContainer, gameObject, true);
-					gameObject2.transform.SetSiblingIndex(gameObject2.transform.GetSiblingIndex() - 1);
-					gameObject2.transform.localScale = Vector3.one;
-					gameObject2.rectTransform().sizeDelta = new Vector2((float)(tc.tools.Count * 75), 50f);
-					tc.MaskContainer = gameObject2.GetComponentInChildren<Mask>().gameObject;
-					gameObject2.SetActive(false);
+					gameObject8 = Util.KInstantiateUI(this.Prefab_collectionContainer, gameObject7, true);
+					gameObject8.transform.SetSiblingIndex(gameObject8.transform.GetSiblingIndex() - 1);
+					gameObject8.transform.localScale = Vector3.one;
+					gameObject8.rectTransform().sizeDelta = new Vector2((float)(tc.tools.Count * 75), 50f);
+					tc.MaskContainer = gameObject8.GetComponentInChildren<Mask>().gameObject;
+					gameObject8.SetActive(false);
 				}
 				else
 				{
-					gameObject2 = Util.KInstantiateUI(this.Prefab_collectionContainerWindow, gameObject, true);
-					gameObject2.transform.localScale = Vector3.one;
-					gameObject2.GetComponentInChildren<LocText>().SetText(tc.text.ToUpper());
-					tc.MaskContainer = gameObject2.GetComponentInChildren<GridLayoutGroup>().gameObject;
-					gameObject2.SetActive(false);
+					gameObject8 = Util.KInstantiateUI(this.Prefab_collectionContainerWindow, gameObject7, true);
+					gameObject8.transform.localScale = Vector3.one;
+					gameObject8.GetComponentInChildren<LocText>().SetText(tc.text.ToUpper());
+					tc.MaskContainer = gameObject8.GetComponentInChildren<GridLayoutGroup>().gameObject;
+					gameObject8.SetActive(false);
 				}
-				tc.UIMenuDisplay = gameObject2;
+				tc.UIMenuDisplay = gameObject8;
 				for (int j = 0; j < tc.tools.Count; j++)
 				{
 					ToolMenu.ToolInfo ti = tc.tools[j];
-					GameObject gameObject3 = Util.KInstantiateUI((collections != this.rowSandboxTools) ? this.toolIconPrefab : this.sandboxToolIconPrefab, tc.MaskContainer, true);
-					gameObject3.name = ti.text;
-					ti.toggle = gameObject3.GetComponent<KToggle>();
+					GameObject gameObject9 = Util.KInstantiateUI((collections != this.sandboxTools) ? ((!collections[i].largeIcon) ? this.toolIconPrefab : this.toolIconLargePrefab) : this.sandboxToolIconPrefab, tc.MaskContainer, true);
+					gameObject9.name = ti.text;
+					ti.toggle = gameObject9.GetComponent<KToggle>();
 					if (ti.collection.tools.Count > 1)
 					{
 						RectTransform rectTransform = ti.toggle.gameObject.GetComponentInChildren<SetTextStyleSetting>().rectTransform();
-						if (gameObject3.name.Length > 12)
+						if (gameObject9.name.Length > 12)
 						{
 							rectTransform.GetComponent<SetTextStyleSetting>().SetStyle(this.CategoryLabelTextStyle_LeftAlign);
 							rectTransform.anchoredPosition = new Vector2(16f, rectTransform.anchoredPosition.y);
@@ -261,6 +268,18 @@ public class ToolMenu : KScreen
 					});
 				}
 			}
+		}
+		if (gameObject2.transform.childCount == 0)
+		{
+			global::UnityEngine.Object.Destroy(gameObject2);
+		}
+		if (gameObject4.transform.childCount == 0 && gameObject5.transform.childCount == 0)
+		{
+			global::UnityEngine.Object.Destroy(gameObject3);
+		}
+		if (gameObject6.transform.childCount == 0)
+		{
+			global::UnityEngine.Object.Destroy(gameObject6);
 		}
 	}
 
@@ -299,15 +318,15 @@ public class ToolMenu : KScreen
 		{
 			PlayerController.Instance.ActivateTool(SelectTool.Instance);
 		}
-		this.rows.ForEach(delegate(ToolMenu.ToolCollection[] row)
+		this.rows.ForEach(delegate(List<ToolMenu.ToolCollection> row)
 		{
 			this.RefreshRowDisplay(row);
 		});
 	}
 
-	private void RefreshRowDisplay(ToolMenu.ToolCollection[] row)
+	private void RefreshRowDisplay(IList<ToolMenu.ToolCollection> row)
 	{
-		for (int i = 0; i < row.Length; i++)
+		for (int i = 0; i < row.Count; i++)
 		{
 			ToolMenu.ToolCollection tc = row[i];
 			if (this.currentlySelectedTool != null && this.currentlySelectedTool.collection == tc)
@@ -385,15 +404,15 @@ public class ToolMenu : KScreen
 		{
 			this.currentlySelectedCollection = collection;
 		}
-		this.rows.ForEach(delegate(ToolMenu.ToolCollection[] row)
+		this.rows.ForEach(delegate(List<ToolMenu.ToolCollection> row)
 		{
 			this.OpenOrCloseCollectionsInRow(row, true);
 		});
 	}
 
-	private void OpenOrCloseCollectionsInRow(ToolMenu.ToolCollection[] row, bool autoSelectTool = true)
+	private void OpenOrCloseCollectionsInRow(IList<ToolMenu.ToolCollection> row, bool autoSelectTool = true)
 	{
-		for (int i = 0; i < row.Length; i++)
+		for (int i = 0; i < row.Count; i++)
 		{
 			ToolMenu.ToolCollection tc = row[i];
 			if (this.currentlySelectedCollection == tc)
@@ -475,19 +494,19 @@ public class ToolMenu : KScreen
 					Game.Instance.SandboxModeActive = !Game.Instance.SandboxModeActive;
 				}
 			}
-			foreach (ToolMenu.ToolCollection[] array in this.rows)
+			foreach (List<ToolMenu.ToolCollection> list in this.rows)
 			{
-				if (array != this.rowSandboxTools || Game.Instance.SandboxModeActive)
+				if (list != this.sandboxTools || Game.Instance.SandboxModeActive)
 				{
-					for (int i = 0; i < array.Length; i++)
+					for (int i = 0; i < list.Count; i++)
 					{
-						global::Action toolHotkey = array[i].hotkey;
+						global::Action toolHotkey = list[i].hotkey;
 						if (toolHotkey != global::Action.NumActions && e.IsAction(toolHotkey) && (this.currentlySelectedCollection == null || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Find((ToolMenu.ToolInfo t) => GameInputMapping.CompareActionKeyCodes(t.hotkey, toolHotkey)) == null)))
 						{
-							if (this.currentlySelectedCollection != array[i])
+							if (this.currentlySelectedCollection != list[i])
 							{
-								this.ChooseCollection(array[i], false);
-								this.ChooseTool(array[i].tools[0]);
+								this.ChooseCollection(list[i], false);
+								this.ChooseTool(list[i].tools[0]);
 							}
 							else if (this.currentlySelectedCollection.tools.Count > 1)
 							{
@@ -502,20 +521,20 @@ public class ToolMenu : KScreen
 							}
 							break;
 						}
-						for (int j = 0; j < array[i].tools.Count; j++)
+						for (int j = 0; j < list[i].tools.Count; j++)
 						{
-							if ((this.currentlySelectedCollection == null && array[i].tools.Count == 1) || this.currentlySelectedCollection == array[i] || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Count == 1 && array[i].tools.Count == 1))
+							if ((this.currentlySelectedCollection == null && list[i].tools.Count == 1) || this.currentlySelectedCollection == list[i] || (this.currentlySelectedCollection != null && this.currentlySelectedCollection.tools.Count == 1 && list[i].tools.Count == 1))
 							{
-								global::Action hotkey = array[i].tools[j].hotkey;
+								global::Action hotkey = list[i].tools[j].hotkey;
 								if (e.IsAction(hotkey) && e.TryConsume(hotkey))
 								{
-									if (array[i].tools.Count == 1 && this.currentlySelectedCollection != array[i])
+									if (list[i].tools.Count == 1 && this.currentlySelectedCollection != list[i])
 									{
-										this.ChooseCollection(array[i], false);
+										this.ChooseCollection(list[i], false);
 									}
-									else if (this.currentlySelectedTool != array[i].tools[j])
+									else if (this.currentlySelectedTool != list[i].tools[j])
 									{
-										this.ChooseTool(array[i].tools[j]);
+										this.ChooseTool(list[i].tools[j]);
 									}
 								}
 								else if (GameInputMapping.CompareActionKeyCodes(e.GetAction(), hotkey))
@@ -592,9 +611,9 @@ public class ToolMenu : KScreen
 		base.OnKeyUp(e);
 	}
 
-	protected void BuildRowToggles(ToolMenu.ToolCollection[] row)
+	protected void BuildRowToggles(IList<ToolMenu.ToolCollection> row)
 	{
-		for (int i = 0; i < row.Length; i++)
+		for (int i = 0; i < row.Count; i++)
 		{
 			ToolMenu.ToolCollection toolCollection = row[i];
 			if (!(toolCollection.toggle == null))
@@ -640,10 +659,11 @@ public class ToolMenu : KScreen
 		}
 	}
 
-	protected void BuildToolToggles(ToolMenu.ToolCollection[] row)
+	protected void BuildToolToggles(IList<ToolMenu.ToolCollection> row)
 	{
-		foreach (ToolMenu.ToolCollection toolCollection in row)
+		for (int i = 0; i < row.Count; i++)
 		{
+			ToolMenu.ToolCollection toolCollection = row[i];
 			if (!(toolCollection.toggle == null))
 			{
 				for (int j = 0; j < toolCollection.tools.Count; j++)
@@ -682,9 +702,9 @@ public class ToolMenu : KScreen
 	{
 		bool flag = true;
 		this.boundRootActions.Clear();
-		foreach (ToolMenu.ToolCollection[] array in this.rows)
+		foreach (List<ToolMenu.ToolCollection> list in this.rows)
 		{
-			foreach (ToolMenu.ToolCollection toolCollection in array)
+			foreach (ToolMenu.ToolCollection toolCollection in list)
 			{
 				if (this.boundRootActions.Contains(toolCollection.hotkey))
 				{
@@ -722,14 +742,26 @@ public class ToolMenu : KScreen
 
 	public GameObject toolIconPrefab;
 
+	public GameObject toolIconLargePrefab;
+
 	public GameObject sandboxToolIconPrefab;
 
 	public GameObject collectionIconPrefab;
 
 	public GameObject prefabToolRow;
 
+	public GameObject largeToolSet;
+
+	public GameObject smallToolSet;
+
+	public GameObject smallToolBottomRow;
+
+	public GameObject smallToolTopRow;
+
+	public GameObject sandboxToolSet;
+
 	[SerializeField]
-	private Sprite[] icons;
+	private List<Sprite> icons = new List<Sprite>();
 
 	private PriorityScreen priorityScreen;
 
@@ -745,11 +777,11 @@ public class ToolMenu : KScreen
 
 	private byte[] toolEffectDisplayBytes;
 
-	private List<ToolMenu.ToolCollection[]> rows = new List<ToolMenu.ToolCollection[]>();
+	private List<List<ToolMenu.ToolCollection>> rows = new List<List<ToolMenu.ToolCollection>>();
 
-	public ToolMenu.ToolCollection[] rowBasicTools;
+	public List<ToolMenu.ToolCollection> basicTools = new List<ToolMenu.ToolCollection>();
 
-	public ToolMenu.ToolCollection[] rowSandboxTools;
+	public List<ToolMenu.ToolCollection> sandboxTools = new List<ToolMenu.ToolCollection>();
 
 	public ToolMenu.ToolCollection currentlySelectedCollection;
 
@@ -775,7 +807,7 @@ public class ToolMenu : KScreen
 
 	public class ToolInfo
 	{
-		public ToolInfo(string text, string icon_name, global::Action hotkey, string ToolName, ToolMenu.ToolCollection toolCollection, string tooltip = "", SimViewMode associatedViewMode = SimViewMode.None, bool forceViewMode = false, Action<object> onSelectCallback = null, object toolData = null)
+		public ToolInfo(string text, string icon_name, global::Action hotkey, string ToolName, ToolMenu.ToolCollection toolCollection, string tooltip = "", bool forceViewMode = false, Action<object> onSelectCallback = null, object toolData = null)
 		{
 			this.text = text;
 			this.icon = icon_name;
@@ -784,10 +816,10 @@ public class ToolMenu : KScreen
 			this.collection = toolCollection;
 			toolCollection.tools.Add(this);
 			this.tooltip = tooltip;
-			this.viewMode = associatedViewMode;
 			this.forceViewMode = forceViewMode;
 			this.onSelectCallback = onSelectCallback;
 			this.toolData = toolData;
+			this.viewMode = OverlayModes.None.ID;
 		}
 
 		public string text;
@@ -802,7 +834,7 @@ public class ToolMenu : KScreen
 
 		public string tooltip;
 
-		public SimViewMode viewMode;
+		public HashedString viewMode;
 
 		public bool forceViewMode;
 
@@ -815,13 +847,14 @@ public class ToolMenu : KScreen
 
 	public class ToolCollection
 	{
-		public ToolCollection(string text, string icon_name, string tooltip = "", bool useInfoMenu = false, global::Action hotkey = global::Action.NumActions)
+		public ToolCollection(string text, string icon_name, string tooltip = "", bool useInfoMenu = false, global::Action hotkey = global::Action.NumActions, bool largeIcon = false)
 		{
 			this.text = text;
 			this.icon = icon_name;
 			this.tooltip = tooltip;
 			this.useInfoMenu = useInfoMenu;
 			this.hotkey = hotkey;
+			this.largeIcon = largeIcon;
 		}
 
 		public string text;
@@ -831,6 +864,8 @@ public class ToolMenu : KScreen
 		public string tooltip;
 
 		public bool useInfoMenu;
+
+		public bool largeIcon;
 
 		public GameObject toggle;
 

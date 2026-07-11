@@ -31,7 +31,7 @@ public static class BaseLightBugConfig
 		def.lures = new Tag[] { GameTags.Phosphorite };
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
 		if (is_baby)
 		{
 			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();

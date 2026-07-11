@@ -46,7 +46,7 @@ public abstract class StateMachine
 		this.debugSettings = StateMachineDebuggerSettings.Get().CreateEntry(base.GetType());
 		StateMachine.BaseState baseState = null;
 		this.InitializeStates(out baseState);
-		DebugUtil.Assert(baseState != null, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(baseState != null);
 		this.defaultState = baseState;
 	}
 
@@ -286,7 +286,7 @@ public abstract class StateMachine
 			if (!this.IsRunning())
 			{
 				StateMachine.BaseState defaultState = this.stateMachine.GetDefaultState();
-				DebugUtil.Assert(defaultState != null, "Assert!", string.Empty, string.Empty);
+				DebugUtil.Assert(defaultState != null);
 				if (!this.GetComponent<StateMachineController>().Restore(this))
 				{
 					this.GoTo(defaultState);

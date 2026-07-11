@@ -6,6 +6,23 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim200ms
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicPressureSensor>(-905833192, LogicPressureSensor.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		LogicPressureSensor component = gameObject.GetComponent<LogicPressureSensor>();
+		if (component != null)
+		{
+			this.Threshold = component.Threshold;
+			this.ActivateAboveThreshold = component.ActivateAboveThreshold;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -171,24 +188,7 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 
 	public LocString ThresholdValueUnits()
 	{
-		LocString locString = null;
-		GameUtil.MassUnit massUnit = GameUtil.massUnit;
-		if (massUnit != GameUtil.MassUnit.Kilograms)
-		{
-			if (massUnit == GameUtil.MassUnit.Pounds)
-			{
-				locString = UI.UNITSUFFIXES.MASS.POUND;
-			}
-		}
-		else if (this.desiredState == Element.State.Gas)
-		{
-			locString = UI.UNITSUFFIXES.MASS.GRAM;
-		}
-		else
-		{
-			locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
-		}
-		return locString;
+		return GameUtil.GetCurrentMassUnit(this.desiredState == Element.State.Gas);
 	}
 
 	public LocString Title
@@ -196,6 +196,30 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 		get
 		{
 			return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TITLE;
+		}
+	}
+
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
+		{
+			return ThresholdScreenLayoutType.SliderBar;
+		}
+	}
+
+	public int IncrementScale
+	{
+		get
+		{
+			return 1;
+		}
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return NonLinearSlider.GetDefaultRange(this.RangeMax);
 		}
 	}
 
@@ -236,4 +260,12 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 	private float[] samples = new float[8];
 
 	private int sampleIdx;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicPressureSensor> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicPressureSensor>(delegate(LogicPressureSensor component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

@@ -5,14 +5,14 @@ namespace Klei.AI
 {
 	public class AnimatedDisease : Disease.DiseaseComponent
 	{
-		public AnimatedDisease(HashedString[] kanim_filenames, string expression_id)
+		public AnimatedDisease(HashedString[] kanim_filenames, Expression expression)
 		{
 			this.kanims = new KAnimFile[kanim_filenames.Length];
 			for (int i = 0; i < kanim_filenames.Length; i++)
 			{
 				this.kanims[i] = Assets.GetAnim(kanim_filenames[i]);
 			}
-			this.expressionID = expression_id;
+			this.expression = expression;
 		}
 
 		public override object OnInfect(GameObject go, DiseaseInstance diseaseInstance)
@@ -21,20 +21,18 @@ namespace Klei.AI
 			{
 				go.GetComponent<KAnimControllerBase>().AddAnimOverrides(this.kanims[i], 10f);
 			}
-			if (this.expressionID != null)
+			if (this.expression != null)
 			{
-				Expression expression = Db.Get().Expressions.TryGet(this.expressionID);
-				go.GetComponent<FaceGraph>().AddExpression(expression);
+				go.GetComponent<FaceGraph>().AddExpression(this.expression);
 			}
 			return null;
 		}
 
 		public override void OnCure(GameObject go, object instace_data)
 		{
-			if (this.expressionID != null)
+			if (this.expression != null)
 			{
-				Expression expression = Db.Get().Expressions.TryGet(this.expressionID);
-				go.GetComponent<FaceGraph>().RemoveExpression(expression);
+				go.GetComponent<FaceGraph>().RemoveExpression(this.expression);
 			}
 			for (int i = 0; i < this.kanims.Length; i++)
 			{
@@ -44,6 +42,6 @@ namespace Klei.AI
 
 		private KAnimFile[] kanims;
 
-		private string expressionID;
+		private Expression expression;
 	}
 }

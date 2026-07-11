@@ -75,14 +75,14 @@ public class MinionEquipmentPanel : KMonoBehaviour
 
 	private void Build()
 	{
-		this.ShowAssignables(this.SelectedMinion.GetComponent<Ownables>(), this.roomPanel);
-		this.ShowAssignables(this.SelectedMinion.GetComponent<Equipment>(), this.ownablePanel);
+		this.ShowAssignables(this.SelectedMinion.GetComponent<MinionIdentity>().GetSoleOwner(), this.roomPanel);
+		this.ShowAssignables(this.SelectedMinion.GetComponent<MinionIdentity>().GetEquipment(), this.ownablePanel);
 	}
 
 	private void ShowAssignables(Assignables assignables, GameObject panel)
 	{
 		bool flag = false;
-		foreach (AssignableSlotInstance assignableSlotInstance in assignables)
+		foreach (AssignableSlotInstance assignableSlotInstance in assignables.Slots)
 		{
 			if (assignableSlotInstance.slot.showInUI)
 			{

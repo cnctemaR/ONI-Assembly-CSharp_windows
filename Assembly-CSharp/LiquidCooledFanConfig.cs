@@ -21,7 +21,7 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.Overheatable = false;
-		buildingDef.ViewMode = SimViewMode.TemperatureMap;
+		buildingDef.ViewMode = OverlayModes.Temperature.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
@@ -67,7 +67,6 @@ public class LiquidCooledFanConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "LiquidCooledFan";

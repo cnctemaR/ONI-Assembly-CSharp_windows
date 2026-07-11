@@ -33,65 +33,40 @@ public class GeneShuffler : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.geneShufflerSMI = new GeneShuffler.GeneShufflerSM.Instance(this);
-		this.geneShufflerSMI.StartSM();
 		this.showProgressBar = false;
+		this.geneShufflerSMI = new GeneShuffler.GeneShufflerSM.Instance(this);
 		this.RefreshRechargeChore();
 		this.RefreshConsumedState();
 		base.Subscribe<GeneShuffler>(-1697596308, GeneShuffler.OnStorageChangeDelegate);
-	}
-
-	private void RefreshConsumedState()
-	{
-		this.assignable.SetCanBeAssigned(!this.IsConsumed);
-		if (!this.IsConsumed)
-		{
-			if (this.assignable.assignee != null)
-			{
-				if (!this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
-				{
-					this.ActivateChore(null);
-				}
-				else
-				{
-					this.geneShufflerSMI.GoTo(this.geneShufflerSMI.sm.idle);
-				}
-			}
-		}
-		else
-		{
-			this.geneShufflerSMI.GoTo(this.geneShufflerSMI.sm.consumed);
-		}
+		this.geneShufflerSMI.StartSM();
 	}
 
 	private void Assign(IAssignableIdentity new_assignee)
 	{
+		this.CancelChore();
 		if (new_assignee != null)
 		{
-			if (this.geneShufflerSMI != null && !this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
-			{
-				this.ActivateChore(null);
-			}
-		}
-		else if (this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.idle))
-		{
-			this.CancelChore(null);
+			this.ActivateChore();
 		}
 	}
 
 	private void Recharge()
 	{
-		this.IsConsumed = false;
-		this.RechargeRequested = false;
-		this.assignable.SetCanBeAssigned(true);
-		this.geneShufflerSMI.GoTo(this.geneShufflerSMI.sm.idle);
+		this.SetConsumed(false);
+		this.RequestRecharge(false);
 		this.RefreshRechargeChore();
+		this.RefreshSideScreen();
+	}
+
+	private void SetConsumed(bool consumed)
+	{
+		this.IsConsumed = consumed;
 		this.RefreshConsumedState();
-		KSelectable component = base.GetComponent<KSelectable>();
-		if (component.IsSelected)
-		{
-			DetailsScreen.Instance.Refresh(base.gameObject);
-		}
+	}
+
+	private void RefreshConsumedState()
+	{
+		this.geneShufflerSMI.sm.isCharged.Set(!this.IsConsumed, this.geneShufflerSMI);
 	}
 
 	private void OnStorageChange(object data)
@@ -125,11 +100,15 @@ public class GeneShuffler : Workable
 		base.OnStartWork(worker);
 		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null);
 		this.notifier.Add(this.notification, string.Empty);
+		this.DeSelectBuilding();
+	}
+
+	private void DeSelectBuilding()
+	{
 		if (base.GetComponent<KSelectable>().IsSelected)
 		{
 			SelectTool.Instance.Select(null, true);
 		}
-		this.assignable.SetCanBeAssigned(false);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -163,10 +142,7 @@ public class GeneShuffler : Workable
 		CameraController.Instance.CameraGoTo(base.transform.GetPosition(), 1f, false);
 		this.ApplyRandomTrait(worker);
 		this.assignable.Unassign();
-		if (base.GetComponent<KSelectable>().IsSelected)
-		{
-			SelectTool.Instance.Select(null, true);
-		}
+		this.DeSelectBuilding();
 		this.notifier.Remove(this.notification);
 	}
 
@@ -189,6 +165,7 @@ public class GeneShuffler : Workable
 			InfoDialogScreen infoDialogScreen = (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 			string text2 = string.Format(UI.GENESHUFFLERMESSAGE.BODY_SUCCESS, worker.GetProperName(), trait.Name, trait.GetTooltip());
 			infoDialogScreen.SetHeader(UI.GENESHUFFLERMESSAGE.HEADER).AddPlainText(text2);
+			this.SetConsumed(true);
 		}
 		else
 		{
@@ -198,24 +175,18 @@ public class GeneShuffler : Workable
 		}
 	}
 
-	public void ActivateChore(object param = null)
+	private void ActivateChore()
 	{
-		if (this.chore != null)
-		{
-			this.CancelChore(null);
-		}
 		base.GetComponent<Workable>().SetWorkTime(float.PositiveInfinity);
 		ChoreType geneShuffle = Db.Get().ChoreTypes.GeneShuffle;
 		KAnimFile anim = Assets.GetAnim("anim_interacts_neuralvacillator_kanim");
 		this.chore = new WorkChore<Workable>(geneShuffle, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, false, true, anim, false, true, true, PriorityScreen.PriorityClass.emergency, 0, false);
-		this.chore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
-		this.chore.AddPrecondition(ChorePreconditions.instance.IsOperational, this.assignable.gameObject.GetComponent<Operational>());
+		}, null, null, true, null, false, true, anim, false, true, true, PriorityScreen.PriorityClass.emergency, 5, false);
 	}
 
-	public void CancelChore(object param = null)
+	private void CancelChore()
 	{
 		if (this.chore == null)
 		{
@@ -240,6 +211,21 @@ public class GeneShuffler : Workable
 	private void RefreshRechargeChore()
 	{
 		this.delivery.Pause(!this.RechargeRequested, "No recharge requested");
+	}
+
+	public void RefreshSideScreen()
+	{
+		KSelectable component = base.GetComponent<KSelectable>();
+		if (component.IsSelected)
+		{
+			DetailsScreen.Instance.Refresh(base.gameObject);
+		}
+	}
+
+	public void SetAssignable(bool set_it)
+	{
+		this.assignable.SetCanBeAssigned(set_it);
+		this.RefreshSideScreen();
 	}
 
 	[MyCmpReq]
@@ -279,24 +265,25 @@ public class GeneShuffler : Workable
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			base.serializable = false;
 			default_state = this.idle;
-			this.idle.PlayAnim("idle").WorkableStartTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pre);
-			this.working.pre.PlayAnim("working_pre").EventTransition(GameHashes.AnimQueueComplete, this.working.loop, null);
+			this.idle.PlayAnim("on").Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
+			{
+				smi.master.SetAssignable(true);
+			}).Exit(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
+			{
+				smi.master.SetAssignable(false);
+			})
+				.WorkableStartTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pre)
+				.ParamTransition<bool>(this.isCharged, this.consumed, GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.IsFalse);
+			this.working.pre.PlayAnim("working_pre").OnAnimQueueComplete(this.working.loop);
 			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ScheduleGoTo(5f, this.working.complete);
 			this.working.complete.ToggleStatusItem(Db.Get().BuildingStatusItems.GeneShuffleCompleted, null).Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
 			{
-				KSelectable component = smi.master.GetComponent<KSelectable>();
-				if (component.IsSelected)
-				{
-					DetailsScreen.Instance.Refresh(smi.master.gameObject);
-				}
+				smi.master.RefreshSideScreen();
 			}).WorkableStopTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pst);
 			this.working.pst.EventTransition(GameHashes.AnimQueueComplete, this.consumed, null);
-			this.consumed.PlayAnim("off", KAnim.PlayMode.Once).Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
-			{
-				smi.master.IsConsumed = true;
-			});
+			this.consumed.PlayAnim("off", KAnim.PlayMode.Once).ParamTransition<bool>(this.isCharged, this.recharging, GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.IsTrue);
+			this.recharging.PlayAnim("recharging", KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
 		}
 
 		public GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.State idle;
@@ -304,6 +291,10 @@ public class GeneShuffler : Workable
 		public GeneShuffler.GeneShufflerSM.WorkingStates working;
 
 		public GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.State consumed;
+
+		public GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.State recharging;
+
+		public StateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.BoolParameter isCharged;
 
 		public class WorkingStates : GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.State
 		{

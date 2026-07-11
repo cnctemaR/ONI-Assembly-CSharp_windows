@@ -17,11 +17,11 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		{
 			smi.OnEatComplete(obj);
 		}).EventTransition(GameHashes.DiseaseAdded, this.infected, (ImmuneSystemMonitor.Instance smi) => smi.IsSick()).Transition(this.recovering, (ImmuneSystemMonitor.Instance smi) => smi.effects.HasEffect("PostDiseaseRecovery"), UpdateRate.SIM_200ms);
-		this.healthy.ParamTransition<bool>(this.isLosingImmunity, this.infecting, (ImmuneSystemMonitor.Instance smi, bool p) => p).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
+		this.healthy.ParamTransition<bool>(this.isLosingImmunity, this.infecting, GameStateMachine<ImmuneSystemMonitor, ImmuneSystemMonitor.Instance, IStateMachineTarget, object>.IsTrue).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.UpdateImmuneSystem();
 		}, UpdateRate.SIM_200ms, false);
-		this.infecting.DefaultState(this.infecting.high).ParamTransition<bool>(this.isLosingImmunity, this.healthy, (ImmuneSystemMonitor.Instance smi, bool p) => !p).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
+		this.infecting.DefaultState(this.infecting.high).ParamTransition<bool>(this.isLosingImmunity, this.healthy, GameStateMachine<ImmuneSystemMonitor, ImmuneSystemMonitor.Instance, IStateMachineTarget, object>.IsFalse).Update(delegate(ImmuneSystemMonitor.Instance smi, float dt)
 		{
 			smi.UpdateImmuneSystem();
 		}, UpdateRate.SIM_200ms, false);
@@ -95,6 +95,8 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		public override void StopSM(string reason)
 		{
 			GameClock.Instance.Unsubscribe(-722330267, new Action<object>(this.OnNightTime));
+			AmountInstance amountInstance = this.immuneLevel;
+			amountInstance.OnDelta = (Action<float>)Delegate.Remove(amountInstance.OnDelta, new Action<float>(this.OnImmuneDelta));
 			base.StopSM(reason);
 		}
 
@@ -104,14 +106,14 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(edible.gameObject);
 			if (handle != HandleVector<int>.InvalidHandle)
 			{
-				DiseaseContainer data = GameComps.DiseaseContainers.GetData(handle);
-				if (data.diseaseIdx != 255)
+				DiseaseHeader header = GameComps.DiseaseContainers.GetHeader(handle);
+				if (header.diseaseIdx != 255)
 				{
-					Disease disease = Db.Get().Diseases[(int)data.diseaseIdx];
+					Disease disease = Db.Get().Diseases[(int)header.diseaseIdx];
 					if (disease.infectionVectors.Contains(Disease.InfectionVector.Digestion))
 					{
 						float num = edible.unitsConsumed / (edible.unitsConsumed + edible.Units);
-						int num2 = Mathf.CeilToInt((float)data.diseaseCount * num);
+						int num2 = Mathf.CeilToInt((float)header.diseaseCount * num);
 						GameComps.DiseaseContainers.ModifyDiseaseCount(handle, -num2);
 						KPrefabID component = edible.GetComponent<KPrefabID>();
 						this.InjectDisease(disease, num2, component.PrefabID(), Disease.InfectionVector.Digestion);

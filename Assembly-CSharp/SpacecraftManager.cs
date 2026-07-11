@@ -4,10 +4,9 @@ using Database;
 using KSerialization;
 using STRINGS;
 using TUNING;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class SpacecraftManager : KMonoBehaviour
+public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 {
 	public static void DestroyInstance()
 	{
@@ -39,7 +38,7 @@ public class SpacecraftManager : KMonoBehaviour
 
 	private void GenerateRandomDestinations()
 	{
-		global::System.Random random = new global::System.Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed);
+		Random random = new Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed);
 		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
 		List<List<string>> list = new List<List<string>>
 		{
@@ -155,13 +154,74 @@ public class SpacecraftManager : KMonoBehaviour
 		}
 	}
 
-	public SpaceDestination GetActiveMission(int spacecraftID)
+	public SpaceDestination GetSpacecraftDestination(LaunchConditionManager lcm)
 	{
+		Spacecraft spacecraftFromLaunchConditionManager = this.GetSpacecraftFromLaunchConditionManager(lcm);
+		return this.GetSpacecraftDestination(spacecraftFromLaunchConditionManager.id);
+	}
+
+	public SpaceDestination GetSpacecraftDestination(int spacecraftID)
+	{
+		this.CleanSavedSpacecraftDestinations();
 		if (this.savedSpacecraftDestinations.ContainsKey(spacecraftID))
 		{
 			return this.GetDestination(this.savedSpacecraftDestinations[spacecraftID]);
 		}
 		return null;
+	}
+
+	public List<int> GetSpacecraftsForDestination(SpaceDestination destination)
+	{
+		this.CleanSavedSpacecraftDestinations();
+		List<int> list = new List<int>();
+		foreach (KeyValuePair<int, int> keyValuePair in this.savedSpacecraftDestinations)
+		{
+			if (keyValuePair.Value == destination.id)
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		return list;
+	}
+
+	private void CleanSavedSpacecraftDestinations()
+	{
+		List<int> list = new List<int>();
+		foreach (KeyValuePair<int, int> keyValuePair in this.savedSpacecraftDestinations)
+		{
+			bool flag = false;
+			foreach (Spacecraft spacecraft in this.spacecraft)
+			{
+				if (spacecraft.id == keyValuePair.Key)
+				{
+					flag = true;
+					break;
+				}
+			}
+			bool flag2 = false;
+			foreach (SpaceDestination spaceDestination in this.destinations)
+			{
+				if (spaceDestination.id == keyValuePair.Value)
+				{
+					flag2 = true;
+					break;
+				}
+			}
+			if (!flag || !flag2)
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		foreach (int num in list)
+		{
+			this.savedSpacecraftDestinations.Remove(num);
+		}
+	}
+
+	public void SetSpacecraftDestination(LaunchConditionManager lcm, SpaceDestination destination)
+	{
+		Spacecraft spacecraftFromLaunchConditionManager = this.GetSpacecraftFromLaunchConditionManager(lcm);
+		this.savedSpacecraftDestinations[spacecraftFromLaunchConditionManager.id] = destination.id;
 	}
 
 	public int GetSpacecraftID(LaunchableRocket rocket)
@@ -185,7 +245,7 @@ public class SpacecraftManager : KMonoBehaviour
 				return spaceDestination;
 			}
 		}
-		global::Debug.LogErrorFormat("No space destination with ID {0}", new object[] { destinationID });
+		Debug.LogErrorFormat("No space destination with ID {0}", new object[] { destinationID });
 		return null;
 	}
 
@@ -227,11 +287,11 @@ public class SpacecraftManager : KMonoBehaviour
 		return null;
 	}
 
-	public void Update()
+	public void Sim1000ms(float dt)
 	{
 		foreach (Spacecraft spacecraft in this.spacecraft)
 		{
-			spacecraft.ProgressMission(Time.deltaTime);
+			spacecraft.ProgressMission(dt);
 		}
 	}
 

@@ -49,7 +49,7 @@ public class ComplexRecipeManager
 		{
 			if (complexRecipe.id == recipe.id)
 			{
-				Output.LogError(new object[] { string.Format("DUPLICATE RECIPE ID! '{0}' is being added to the recipe manager multiple times. This will result in the failure to save/load certain queued recipes at fabricators.", recipe.id) });
+				Output.LogError(string.Format("DUPLICATE RECIPE ID! '{0}' is being added to the recipe manager multiple times. This will result in the failure to save/load certain queued recipes at fabricators.", recipe.id));
 			}
 		}
 		this.recipes.Add(recipe);

@@ -20,13 +20,13 @@ public class WireBridgeConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.WireBridge;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.ObjectLayer = ObjectLayer.WireConnectors;
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
 		buildingDef.AudioCategory = "Metal";

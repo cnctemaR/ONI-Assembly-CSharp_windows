@@ -447,13 +447,6 @@ public class GroundRenderer : KMonoBehaviour
 
 			public List<int> indices;
 		}
-
-		private class Tuning : TuningData<GroundRenderer.ElementChunk.Tuning>
-		{
-			public bool _DrawAlpha;
-
-			public bool _DrawOpaque;
-		}
 	}
 
 	private struct WorldChunk

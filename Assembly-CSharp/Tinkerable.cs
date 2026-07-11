@@ -116,7 +116,7 @@ public class Tinkerable : Workable
 			base.SetWorkTime(this.workTime);
 			if (this.HasMaterial())
 			{
-				this.chore = new WorkChore<Tinkerable>(Db.Get().ChoreTypes.GetByHash(this.choreTypeTinker), this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+				this.chore = new WorkChore<Tinkerable>(Db.Get().ChoreTypes.GetByHash(this.choreTypeTinker), this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 				if (component != null)
 				{
 					this.chore.AddPrecondition(ChorePreconditions.instance.IsFunctional, component);

@@ -21,15 +21,15 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 		component2.SetText(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.BELOW_BUTTON);
 		this.thresholdSlider.onDrag += delegate
 		{
-			this.ReceiveValueFromSlider(this.thresholdSlider.value);
+			this.ReceiveValueFromSlider(this.thresholdSlider.GetValueForPercentage(GameUtil.GetRoundedTemperatureInKelvin(this.thresholdSlider.value)));
 		};
 		this.thresholdSlider.onPointerDown += delegate
 		{
-			this.ReceiveValueFromSlider(this.thresholdSlider.value);
+			this.ReceiveValueFromSlider(this.thresholdSlider.GetValueForPercentage(GameUtil.GetRoundedTemperatureInKelvin(this.thresholdSlider.value)));
 		};
 		this.thresholdSlider.onMove += delegate
 		{
-			this.ReceiveValueFromSlider(this.thresholdSlider.value);
+			this.ReceiveValueFromSlider(this.thresholdSlider.GetValueForPercentage(GameUtil.GetRoundedTemperatureInKelvin(this.thresholdSlider.value)));
 		};
 		this.numberInput.onEndEdit += delegate
 		{
@@ -70,10 +70,59 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 			return;
 		}
 		this.UpdateLabels();
-		this.thresholdSlider.minValue = this.thresholdSwitch.RangeMin;
-		this.thresholdSlider.maxValue = this.thresholdSwitch.RangeMax;
-		this.thresholdSlider.value = this.thresholdSwitch.Threshold;
-		this.thresholdSlider.GetComponentInChildren<ToolTip>();
+		if (this.target.GetComponent<IThresholdSwitch>().LayoutType == ThresholdScreenLayoutType.SliderBar)
+		{
+			this.thresholdSlider.gameObject.SetActive(true);
+			this.thresholdSlider.minValue = 0f;
+			this.thresholdSlider.maxValue = 100f;
+			this.thresholdSlider.SetRanges(this.thresholdSwitch.GetRanges);
+			this.thresholdSlider.value = this.thresholdSlider.GetPercentageFromValue(this.thresholdSwitch.Threshold);
+			this.thresholdSlider.GetComponentInChildren<ToolTip>();
+		}
+		else
+		{
+			this.thresholdSlider.gameObject.SetActive(false);
+		}
+		MultiToggle incrementMinorToggle = this.incrementMinor.GetComponent<MultiToggle>();
+		incrementMinorToggle.onClick = delegate
+		{
+			this.UpdateThresholdValue(this.thresholdSwitch.Threshold + (float)this.thresholdSwitch.IncrementScale);
+			incrementMinorToggle.ChangeState(1);
+		};
+		incrementMinorToggle.onStopHold = delegate
+		{
+			incrementMinorToggle.ChangeState(0);
+		};
+		MultiToggle incrementMajorToggle = this.incrementMajor.GetComponent<MultiToggle>();
+		incrementMajorToggle.onClick = delegate
+		{
+			this.UpdateThresholdValue(this.thresholdSwitch.Threshold + 10f * (float)this.thresholdSwitch.IncrementScale);
+			incrementMajorToggle.ChangeState(1);
+		};
+		incrementMajorToggle.onStopHold = delegate
+		{
+			incrementMajorToggle.ChangeState(0);
+		};
+		MultiToggle decrementMinorToggle = this.decrementMinor.GetComponent<MultiToggle>();
+		decrementMinorToggle.onClick = delegate
+		{
+			this.UpdateThresholdValue(this.thresholdSwitch.Threshold - (float)this.thresholdSwitch.IncrementScale);
+			decrementMinorToggle.ChangeState(1);
+		};
+		decrementMinorToggle.onStopHold = delegate
+		{
+			decrementMinorToggle.ChangeState(0);
+		};
+		MultiToggle decrementMajorToggle = this.decrementMajor.GetComponent<MultiToggle>();
+		decrementMajorToggle.onClick = delegate
+		{
+			this.UpdateThresholdValue(this.thresholdSwitch.Threshold - 10f * (float)this.thresholdSwitch.IncrementScale);
+			decrementMajorToggle.ChangeState(1);
+		};
+		decrementMajorToggle.onStopHold = delegate
+		{
+			decrementMajorToggle.ChangeState(0);
+		};
 		this.unitsLabel.text = this.thresholdSwitch.ThresholdValueUnits();
 		this.numberInput.minValue = this.thresholdSwitch.GetRangeMinInputField();
 		this.numberInput.maxValue = this.thresholdSwitch.GetRangeMaxInputField();
@@ -135,8 +184,24 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 
 	private void UpdateThresholdValue(float newValue)
 	{
+		if (newValue < this.thresholdSwitch.RangeMin)
+		{
+			newValue = this.thresholdSwitch.RangeMin;
+		}
+		if (newValue > this.thresholdSwitch.RangeMax)
+		{
+			newValue = this.thresholdSwitch.RangeMax;
+		}
 		this.thresholdSwitch.Threshold = newValue;
-		this.thresholdSlider.value = newValue;
+		NonLinearSlider nonLinearSlider = this.thresholdSlider;
+		if (nonLinearSlider != null)
+		{
+			this.thresholdSlider.value = nonLinearSlider.GetPercentageFromValue(newValue);
+		}
+		else
+		{
+			this.thresholdSlider.value = newValue;
+		}
 		this.UpdateTargetThresholdLabel();
 	}
 
@@ -172,7 +237,7 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 
 	[Header("Slider")]
 	[SerializeField]
-	private KSlider thresholdSlider;
+	private NonLinearSlider thresholdSlider;
 
 	[Header("Number Input")]
 	[SerializeField]
@@ -180,4 +245,17 @@ public class ThresholdSwitchSideScreen : SideScreenContent, IRender200ms
 
 	[SerializeField]
 	private LocText unitsLabel;
+
+	[Header("Increment Buttons")]
+	[SerializeField]
+	private GameObject incrementMinor;
+
+	[SerializeField]
+	private GameObject incrementMajor;
+
+	[SerializeField]
+	private GameObject decrementMinor;
+
+	[SerializeField]
+	private GameObject decrementMajor;
 }

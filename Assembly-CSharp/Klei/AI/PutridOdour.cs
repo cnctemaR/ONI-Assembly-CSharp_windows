@@ -12,6 +12,8 @@ namespace Klei.AI
 		{
 			base.AddDiseaseComponent(new CommonSickEffectDisease());
 			base.AddDiseaseComponent(new PutridOdour.PutridOdourComponent());
+			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_sick_kanim" }, Db.Get().Expressions.Sick));
+			base.AddDiseaseComponent(new PeriodicEmoteDisease("anim_idle_sick_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 5f));
 		}
 
 		protected override void PopulateElemGrowthInfo()

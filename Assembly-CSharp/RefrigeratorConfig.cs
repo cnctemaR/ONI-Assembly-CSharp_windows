@@ -23,7 +23,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.Floodable = false;
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		SoundEventVolumeCache.instance.AddVolume("fridge_kanim", "Refrigerator_open", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("fridge_kanim", "Refrigerator_close", NOISE_POLLUTION.NOISY.TIER1);
@@ -50,6 +50,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		storage.allowItemRemoval = true;
 		storage.capacityKg = 100f;
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
+		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		Prioritizable.AddRef(go);
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<Refrigerator>();

@@ -14,7 +14,7 @@ internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IS
 		string text = CREATURES.STATUSITEMS.IDLE.NAME;
 		string text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main).ToggleTag(GameTags.Idle);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).ToggleTag(GameTags.Idle);
 		this.loop.Enter(new StateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State.Callback(this.PlayIdle)).ToggleScheduleCallback("IdleMove", (IdleStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(IdleStates.Instance smi)
 		{
 			smi.GoTo(this.move);

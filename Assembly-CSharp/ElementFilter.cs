@@ -178,7 +178,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	{
 		if (ElementFilter.filterStatusItem == null)
 		{
-			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, true, 63486);
+			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.LiquidConduits.ID, true, 63486);
 			ElementFilter.filterStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementFilter elementFilter = (ElementFilter)data;
@@ -193,11 +193,11 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 				}
 				return str;
 			};
-			ElementFilter.filterStatusItem.conditionalOverlayCallback = new Func<SimViewMode, object, bool>(this.ShowInUtilityOverlay);
+			ElementFilter.filterStatusItem.conditionalOverlayCallback = new Func<HashedString, object, bool>(this.ShowInUtilityOverlay);
 		}
 	}
 
-	private bool ShowInUtilityOverlay(SimViewMode mode, object data)
+	private bool ShowInUtilityOverlay(HashedString mode, object data)
 	{
 		bool flag = false;
 		ElementFilter elementFilter = (ElementFilter)data;
@@ -206,12 +206,12 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 		{
 			if (conduitType == ConduitType.Liquid)
 			{
-				flag = mode == SimViewMode.LiquidVentMap;
+				flag = mode == OverlayModes.LiquidConduits.ID;
 			}
 		}
 		else
 		{
-			flag = mode == SimViewMode.GasVentMap;
+			flag = mode == OverlayModes.GasConduits.ID;
 		}
 		return flag;
 	}
@@ -224,6 +224,11 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	public CellOffset GetSecondaryConduitOffset()
 	{
 		return this.portInfo.offset;
+	}
+
+	public int GetFilteredCell()
+	{
+		return this.filteredCell;
 	}
 
 	[SerializeField]

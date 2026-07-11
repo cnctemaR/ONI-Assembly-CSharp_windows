@@ -215,7 +215,7 @@ public class KAnimBatchGroup
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry CreateTexture(string name, int size_in_floats, int texture_property_id, int texture_size_property_id)
 	{
-		DebugUtil.Assert(size_in_floats > 0, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(size_in_floats > 0);
 		KAnimBatchGroup.KAnimBatchTextureCache.Entry entry = KAnimBatchGroup.cache.Get(size_in_floats, texture_property_id, texture_size_property_id);
 		entry.name = name;
 		return entry;

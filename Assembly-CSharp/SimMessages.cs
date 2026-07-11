@@ -644,7 +644,7 @@ public static class SimMessages
 		}
 		if (max_temperature <= 0f)
 		{
-			Output.LogError(new object[] { "invalid max temperature for cell energy modification" });
+			Output.LogError("invalid max temperature for cell energy modification");
 			return;
 		}
 		SimMessages.ModifyCellEnergyMessage* ptr = stackalloc SimMessages.ModifyCellEnergyMessage[checked(1 * sizeof(SimMessages.ModifyCellEnergyMessage))];

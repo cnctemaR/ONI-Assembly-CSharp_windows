@@ -21,12 +21,13 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		Game.Instance.Subscribe(-1190690038, new Action<object>(this.OnBuildToolDeactivated));
 	}
 
-	public void Configure(BuildMenu.Category category, IList<BuildMenu.BuildingInfo> building_infos)
+	public void Configure(HashedString category, IList<BuildMenu.BuildingInfo> building_infos)
 	{
 		this.ClearButtons();
 		this.SetHasFocus(true);
 		List<KIconToggleMenu.ToggleInfo> list = new List<KIconToggleMenu.ToggleInfo>();
-		string text = category.ToString().ToUpper();
+		string text = HashCache.Get().Get(category).ToUpper();
+		text = text.Replace(" ", string.Empty);
 		this.titleLabel.text = Strings.Get("STRINGS.UI.NEWBUILDCATEGORIES." + text + ".BUILDMENUTITLE");
 		foreach (BuildMenu.BuildingInfo buildingInfo in building_infos)
 		{

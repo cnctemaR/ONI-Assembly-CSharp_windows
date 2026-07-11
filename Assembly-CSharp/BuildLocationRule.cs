@@ -2,16 +2,19 @@
 
 public enum BuildLocationRule
 {
-	OnFloor,
 	Anywhere,
-	OnCeiling,
-	Tile,
-	Conduit,
-	NotInTiles,
-	BuildingAttachPoint,
-	LogicBridge,
+	OnFloor,
 	OnFloorOverSpace,
-	WireTile,
+	OnCeiling,
+	OnWall,
+	InCorner,
+	Tile,
+	NotInTiles,
+	Conduit,
+	LogicBridge,
+	WireBridge,
+	HighWattBridgeTile,
+	BuildingAttachPoint,
 	OnFloorOrBuildingAttachPoint,
 	OnFoundationRotatable
 }

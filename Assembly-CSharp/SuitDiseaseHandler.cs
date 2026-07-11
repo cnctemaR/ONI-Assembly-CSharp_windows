@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class SuitDiseaseHandler : KMonoBehaviour
 {
@@ -9,29 +10,31 @@ public class SuitDiseaseHandler : KMonoBehaviour
 		base.Subscribe<SuitDiseaseHandler>(-170173755, SuitDiseaseHandler.OnUnequippedDelegate);
 	}
 
-	private void OnEquipped(object data)
+	private PrimaryElement GetPrimaryElement(object data)
 	{
 		Equipment equipment = (Equipment)data;
-		PrimaryElement component = equipment.GetComponent<PrimaryElement>();
-		if (component != null)
+		MinionAssignablesProxy component = equipment.GetComponent<MinionAssignablesProxy>();
+		GameObject targetGameObject = component.GetTargetGameObject();
+		return targetGameObject.GetComponent<PrimaryElement>();
+	}
+
+	private void OnEquipped(object data)
+	{
+		PrimaryElement primaryElement = this.GetPrimaryElement(data);
+		if (primaryElement != null)
 		{
-			component.ModifyDiseaseCountHandler = new Action<int, string>(this.OnModifyDiseaseCount);
-			component.AddDiseaseHandler = new Action<byte, int, string>(this.OnAddDisease);
-			component.ForcePermanentDiseaseContainer(true);
-			component.SetDiseaseVisualProvider(base.gameObject);
+			primaryElement.ForcePermanentDiseaseContainer(true);
+			primaryElement.RedirectDisease(base.gameObject);
 		}
 	}
 
 	private void OnUnequipped(object data)
 	{
-		Equipment equipment = (Equipment)data;
-		PrimaryElement component = equipment.GetComponent<PrimaryElement>();
-		if (component != null)
+		PrimaryElement primaryElement = this.GetPrimaryElement(data);
+		if (primaryElement != null)
 		{
-			component.ModifyDiseaseCountHandler = null;
-			component.AddDiseaseHandler = null;
-			component.ForcePermanentDiseaseContainer(false);
-			component.SetDiseaseVisualProvider(null);
+			primaryElement.ForcePermanentDiseaseContainer(false);
+			primaryElement.RedirectDisease(null);
 		}
 	}
 

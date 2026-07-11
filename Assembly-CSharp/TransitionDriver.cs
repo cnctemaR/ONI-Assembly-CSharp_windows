@@ -40,18 +40,31 @@ public class TransitionDriver
 		if (transition.isLooping)
 		{
 			KAnimControllerBase component3 = navigator.GetComponent<KAnimControllerBase>();
-			if (component3.CurrentAnim == null || (component3.CurrentAnim.name != transition.anim && component3.CurrentAnim.name != transition.preAnim))
+			component3.PlaySpeedMultiplier = transition.animSpeed;
+			bool flag = transition.preAnim != string.Empty;
+			bool flag2 = component3.CurrentAnim != null && component3.CurrentAnim.name == transition.anim;
+			bool flag3 = flag && component3.CurrentAnim != null && component3.CurrentAnim.name == transition.preAnim;
+			if (flag3)
 			{
-				component3.PlaySpeedMultiplier = transition.animSpeed;
-				if (transition.preAnim != string.Empty)
+				component3.ClearQueue();
+				component3.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+			}
+			else if (flag2)
+			{
+				if (component3.PlayMode != KAnim.PlayMode.Loop)
 				{
-					component3.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
+					component3.ClearQueue();
 					component3.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 				}
-				else
-				{
-					component3.Play(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
-				}
+			}
+			else if (flag)
+			{
+				component3.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
+				component3.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
+			}
+			else
+			{
+				component3.Play(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 		}
 		else if (transition.anim != null)

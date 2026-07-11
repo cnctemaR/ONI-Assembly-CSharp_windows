@@ -380,7 +380,8 @@ public class EconomyDetails
 				{
 					foreach (ElementConverter.OutputElement outputElement in component.outputElements)
 					{
-						EconomyDetails.Resource resource2 = this.CreateResource(outputElement.element.tag, this.massResourceType);
+						Element element = ElementLoader.FindElementByHash(outputElement.elementHash);
+						EconomyDetails.Resource resource2 = this.CreateResource(element.tag, this.massResourceType);
 						transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource2, outputElement.massGenerationRate));
 					}
 				}

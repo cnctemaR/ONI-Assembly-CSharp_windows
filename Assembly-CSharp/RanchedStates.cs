@@ -15,7 +15,7 @@ internal class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Ins
 		string text = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP;
 		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.ranch.cheer.pre.ScheduleGoTo(0.9f, this.ranch.cheer.cheer);
 		this.ranch.cheer.cheer.Enter("FaceRancher", delegate(RanchedStates.Instance smi)
 		{
@@ -26,7 +26,7 @@ internal class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Ins
 		text2 = CREATURES.STATUSITEMS.GETTING_RANCHED.NAME;
 		text = CREATURES.STATUSITEMS.GETTING_RANCHED.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.ranch.move.movetoranch.Enter("Speedup", delegate(RanchedStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.originalSpeed * 1.25f;
@@ -43,17 +43,17 @@ internal class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Ins
 		text = CREATURES.STATUSITEMS.GETTING_RANCHED.NAME;
 		text2 = CREATURES.STATUSITEMS.GETTING_RANCHED.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state3.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state3.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State state4 = this.wavegoodbye.Enter(new StateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State.Callback(RanchedStates.PlayGroomingPstAnim)).OnAnimQueueComplete(this.runaway);
 		text2 = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME;
 		text = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state4.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state4.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>.State state5 = this.runaway.MoveTo(new Func<RanchedStates.Instance, int>(RanchedStates.GetRunawayCell), this.behaviourcomplete, this.behaviourcomplete, false);
 		text = CREATURES.STATUSITEMS.IDLE.NAME;
 		text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state5.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state5.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToGetRanched, false);
 	}
 

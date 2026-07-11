@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
-using STRINGS;
 using UnityEngine;
 
 public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDescriptor, IGameObjectEffectDescriptor
@@ -116,20 +115,7 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 	{
 		get
 		{
-			GameUtil.MassUnit massUnit = GameUtil.massUnit;
-			LocString locString;
-			if (massUnit != GameUtil.MassUnit.Pounds)
-			{
-				if (massUnit != GameUtil.MassUnit.Kilograms)
-				{
-				}
-				locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
-			}
-			else
-			{
-				locString = UI.UNITSUFFIXES.MASS.POUND;
-			}
-			return locString;
+			return GameUtil.GetCurrentMassUnit(false);
 		}
 	}
 

@@ -69,7 +69,7 @@ public class FetchList2 : IFetchList
 	{
 		if (amount <= 0f)
 		{
-			Output.LogError(new object[] { "Requesting an invalid FetchList2 amount" });
+			Output.LogError("Requesting an invalid FetchList2 amount");
 		}
 		foreach (Tag tag in tags)
 		{

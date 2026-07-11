@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 		this.isSuspended = state;
 	}
 
-	public void ReleaseAstronaut(object data)
+	public void ReleaseAstronaut(object data, bool applyBuff = false)
 	{
 		if (this.releasingAstronaut)
 		{
@@ -39,6 +40,10 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 			if (Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(base.smi.master.gameObject), 0, -1)])
 			{
 				gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+				if (applyBuff)
+				{
+					gameObject.GetComponent<Effects>().Add(Db.Get().effects.Get("SpaceTourist"), true);
+				}
 			}
 		}
 		this.releasingAstronaut = false;
@@ -64,7 +69,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 		base.OnSpawn();
 		this.storage = base.GetComponent<Storage>();
 		this.assignable = base.GetComponent<Assignable>();
-		this.assignable.eligibleFilter = (MinionIdentity identity) => true;
+		this.assignable.eligibleFilter = (MinionAssignablesProxy identity) => true;
 		base.smi.StartSM();
 		int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), 0, -1);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("TouristModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGantryChanged));
@@ -95,7 +100,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 	{
 		ChoreType astronaut = Db.Get().ChoreTypes.Astronaut;
 		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
-		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.emergency, 0, false);
+		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.emergency, 5, false);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
 		return workChore;
 	}
@@ -104,7 +109,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 	{
 		if (base.GetComponent<MinionStorage>().GetStoredMinionInfo().Count > 0)
 		{
-			this.ReleaseAstronaut(null);
+			this.ReleaseAstronaut(null, false);
 			Game.Instance.userMenu.Refresh(base.gameObject);
 		}
 	}
@@ -113,7 +118,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 	{
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		this.partitionerEntry.Clear();
-		this.ReleaseAstronaut(null);
+		this.ReleaseAstronaut(null, false);
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		base.smi.StopSM("cleanup");
 	}
@@ -154,7 +159,8 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 			smi.gameObject.Subscribe(238242047, delegate(object data)
 			{
 				smi.SetSuspended(false);
-				smi.ReleaseAstronaut(null);
+				smi.ReleaseAstronaut(null, true);
+				smi.assignable.Unassign();
 			});
 		}
 	}

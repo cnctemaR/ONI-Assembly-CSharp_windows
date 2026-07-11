@@ -16,7 +16,7 @@ public class AlgaeHabitatEmpty : Workable
 		this.synchronizeAnims = false;
 	}
 
-	private static readonly HashedString[] CLEAN_ANIMS = new HashedString[] { "unclog_pre", "unclog_loop" };
+	private static readonly HashedString[] CLEAN_ANIMS = new HashedString[] { "sponge_pre", "sponge_loop" };
 
-	private static readonly HashedString PST_ANIM = new HashedString("unclog_pst");
+	private static readonly HashedString PST_ANIM = new HashedString("sponge_pst");
 }

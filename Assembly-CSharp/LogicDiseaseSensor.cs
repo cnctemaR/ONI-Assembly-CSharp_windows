@@ -7,6 +7,23 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim200ms
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicDiseaseSensor>(-905833192, LogicDiseaseSensor.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		LogicDiseaseSensor component = gameObject.GetComponent<LogicDiseaseSensor>();
+		if (component != null)
+		{
+			this.Threshold = component.Threshold;
+			this.ActivateAboveThreshold = component.ActivateAboveThreshold;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -158,6 +175,30 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 		return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.DISEASE_UNITS;
 	}
 
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
+		{
+			return ThresholdScreenLayoutType.SliderBar;
+		}
+	}
+
+	public int IncrementScale
+	{
+		get
+		{
+			return 100;
+		}
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return NonLinearSlider.GetDefaultRange(this.RangeMax);
+		}
+	}
+
 	private void UpdateLogicCircuit()
 	{
 		base.GetComponent<LogicPorts>().SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
@@ -217,6 +258,14 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 	private int[] samples = new int[8];
 
 	private int sampleIdx;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicDiseaseSensor> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicDiseaseSensor>(delegate(LogicDiseaseSensor component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private static readonly HashedString[] ON_ANIMS = new HashedString[] { "on_pre", "on_loop" };
 

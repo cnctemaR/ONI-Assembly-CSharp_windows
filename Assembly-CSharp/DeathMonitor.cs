@@ -7,7 +7,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 		default_state = this.alive;
 		base.serializable = true;
 		this.alive.ParamTransition<Death>(this.death, this.dying_duplicant, (DeathMonitor.Instance smi, Death p) => p != null && smi.IsDuplicant).ParamTransition<Death>(this.death, this.dying_creature, (DeathMonitor.Instance smi, Death p) => p != null && !smi.IsDuplicant);
-		this.dying_duplicant.ToggleTag(GameTags.Dying).ToggleChore((DeathMonitor.Instance smi) => new DieChore(smi.master, this.death.Get(smi)), this.die);
+		this.dying_duplicant.ToggleAnims("anim_emotes_default_kanim", 0f).ToggleTag(GameTags.Dying).ToggleChore((DeathMonitor.Instance smi) => new DieChore(smi.master, this.death.Get(smi)), this.die);
 		this.dying_creature.ToggleBehaviour(GameTags.Creatures.Die, (DeathMonitor.Instance smi) => true, delegate(DeathMonitor.Instance smi)
 		{
 			smi.GoTo(this.dead);
@@ -23,12 +23,11 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 				Messenger.Instance.QueueMessage(deathMessage);
 			}
 		}).GoTo(this.dead);
-		this.dead.defaultState = this.dead.ground.TriggerOnEnter(GameHashes.Died, null).ToggleTag(GameTags.Dead).ToggleAnims("anim_emotes_default_kanim", 0f)
-			.Enter(delegate(DeathMonitor.Instance smi)
-			{
-				smi.ApplyDeath();
-				Game.Instance.Trigger(282337316, smi.gameObject);
-			});
+		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f).defaultState = this.dead.ground.TriggerOnEnter(GameHashes.Died, null).ToggleTag(GameTags.Dead).Enter(delegate(DeathMonitor.Instance smi)
+		{
+			smi.ApplyDeath();
+			Game.Instance.Trigger(282337316, smi.gameObject);
+		});
 		this.dead.ground.Enter(delegate(DeathMonitor.Instance smi)
 		{
 			Death death2 = this.death.Get(smi);
@@ -38,20 +37,10 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			}
 			if (smi.IsDuplicant)
 			{
-				smi.GetComponent<KAnimControllerBase>().Play(death2.loopAnim, KAnim.PlayMode.Once, 1f, 0f);
+				smi.GetComponent<KAnimControllerBase>().Play(death2.loopAnim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
-		}).Exit(delegate(DeathMonitor.Instance smi)
-		{
-			smi.Unsubscribe(856640610, new Action<object>(smi.PickedUp));
-		});
-		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f).Enter("ApplyDeath", delegate(DeathMonitor.Instance smi)
-		{
-			smi.Get<KBatchedAnimController>().Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
-		}).Exit(delegate(DeathMonitor.Instance smi)
-		{
-			smi.Get<KBatchedAnimController>().ClearQueue();
-		})
-			.EventTransition(GameHashes.OnUnstored, this.dead.ground, null);
+		}).EventTransition(GameHashes.OnStore, this.dead.carried, (DeathMonitor.Instance smi) => smi.IsDuplicant && smi.HasTag(GameTags.Stored));
+		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f).PlayAnim("idle_default", KAnim.PlayMode.Loop).EventTransition(GameHashes.OnStore, this.dead.ground, (DeathMonitor.Instance smi) => !smi.HasTag(GameTags.Stored));
 	}
 
 	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State alive;

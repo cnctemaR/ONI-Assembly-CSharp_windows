@@ -26,28 +26,10 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 			this.attributes.Add(disease.cureSpeedBase);
 			amountInstance.SetValue(0f);
 		}
-		Equipment component2 = base.GetComponent<Equipment>();
+		ChoreConsumer component2 = base.GetComponent<ChoreConsumer>();
 		if (component2 != null)
 		{
-			Ownables component3 = base.GetComponent<Ownables>();
-			foreach (AssignableSlot assignableSlot in Db.Get().AssignableSlots.resources)
-			{
-				if (assignableSlot is OwnableSlot)
-				{
-					OwnableSlotInstance ownableSlotInstance = new OwnableSlotInstance(component3, (OwnableSlot)assignableSlot);
-					component3.Add(ownableSlotInstance);
-				}
-				else if (assignableSlot is EquipmentSlot)
-				{
-					EquipmentSlotInstance equipmentSlotInstance = new EquipmentSlotInstance(component2, (EquipmentSlot)assignableSlot);
-					component2.Add(equipmentSlotInstance);
-				}
-			}
-		}
-		ChoreConsumer component4 = base.GetComponent<ChoreConsumer>();
-		if (component4 != null)
-		{
-			component4.AddProvider(GlobalChoreProvider.Instance);
+			component2.AddProvider(GlobalChoreProvider.Instance);
 			base.gameObject.AddComponent<QualityOfLifeNeed>();
 		}
 	}
@@ -93,6 +75,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 
 	private void OnDeath(object data)
 	{
+		global::Debug.LogFormat("OnDeath {0}", new object[] { data });
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			minionIdentity.GetComponent<Effects>().Add("Mourning", true);

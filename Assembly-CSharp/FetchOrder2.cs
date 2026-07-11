@@ -8,7 +8,7 @@ public class FetchOrder2
 	{
 		if (amount <= 0f)
 		{
-			Output.LogError(new object[] { "Requesting an invalid FetchOrder2 amount" });
+			Output.LogError("Requesting an invalid FetchOrder2 amount");
 		}
 		this.choreType = chore_type;
 		this.Tags = tags;

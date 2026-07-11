@@ -40,7 +40,12 @@ internal class ModDB
 		{
 			this.mods = new List<ModInfo>();
 			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, Global.Instance.globalCanvas);
-			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.MODS.DB_CORRUPT, moddb_filename), null, null, null, null, null, null, null, null);
+			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
+			string text2 = string.Format(UI.FRONTEND.MODS.DB_CORRUPT, moddb_filename);
+			global::System.Action action = null;
+			global::System.Action action2 = null;
+			string text3 = UI.FRONTEND.MOD_ERRORS.TITLE;
+			confirmDialogScreen2.PopupConfirmDialog(text2, action, action2, null, null, text3, null, null, null);
 			global::UnityEngine.Object.DontDestroyOnLoad(confirmDialogScreen.gameObject);
 		}
 	}
@@ -118,20 +123,39 @@ internal class ModDB
 				string modDir = this.GetModDir(mods_root, modInfo);
 				if (Directory.Exists(modDir))
 				{
-					string[] files = Directory.GetFiles(modDir, "*.dll");
-					string[] array = files;
-					int j = 0;
-					while (j < array.Length)
+					string text = Path.Combine(modDir, "elements.json");
+					if (File.Exists(text))
 					{
-						string text = array[j];
+						string fullPath = Path.GetFullPath(text);
+						ElementLoader.additionalJSONFiles.Add(fullPath);
+					}
+					string[] array = new string[] { "strings.pot", "strings.po" };
+					foreach (string text2 in array)
+					{
+						string text3 = Path.Combine(modDir, text2);
+						if (File.Exists(text3))
+						{
+							Dictionary<string, string> dictionary = Localization.LoadStringsFile(text3, Path.GetExtension(text3) == ".pot");
+							foreach (KeyValuePair<string, string> keyValuePair in dictionary)
+							{
+								Strings.Add(new string[] { keyValuePair.Key, keyValuePair.Value });
+							}
+						}
+					}
+					string[] files = Directory.GetFiles(modDir, "*.dll");
+					string[] array3 = files;
+					int k = 0;
+					while (k < array3.Length)
+					{
+						string text4 = array3[k];
 						try
 						{
-							string fullPath = Path.GetFullPath(text);
-							Output.Log(new object[] { string.Format("Loading MOD: {0}, {1}, {2}", modInfo.assetID, (modInfo.description != null) ? modInfo.description : "no desc", fullPath) });
-							Assembly assembly = Assembly.LoadFrom(fullPath);
+							string fullPath2 = Path.GetFullPath(text4);
+							global::Debug.Log(string.Format("Loading MOD: {0}, {1}, {2}", modInfo.assetID, (modInfo.description != null) ? modInfo.description : "no desc", fullPath2), null);
+							Assembly assembly = Assembly.LoadFrom(fullPath2);
 							if (assembly == null)
 							{
-								goto IL_01B7;
+								goto IL_02C5;
 							}
 							if (harmonyInstance != null)
 							{
@@ -148,13 +172,20 @@ internal class ModDB
 						{
 							modInfo.enabled = false;
 							this.mods[i] = modInfo;
+							string text5 = string.Format(UI.FRONTEND.MODS.FAILED_TO_LOAD, modInfo.assetID, modInfo.description, ex.ToString());
+							global::Debug.Log(text5, null);
 							ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, Global.Instance.globalCanvas);
-							confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.MODS.FAILED_TO_LOAD, modInfo.assetID, modInfo.description, ex.ToString()), null, null, null, null, null, null, null, null);
+							ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
+							string text6 = text5;
+							global::System.Action action = null;
+							global::System.Action action2 = null;
+							string text7 = UI.FRONTEND.MOD_ERRORS.TITLE;
+							confirmDialogScreen2.PopupConfirmDialog(text6, action, action2, null, null, text7, null, null, null);
 							global::UnityEngine.Object.DontDestroyOnLoad(confirmDialogScreen.gameObject);
 						}
 						break;
-						IL_01B7:
-						j++;
+						IL_02C5:
+						k++;
 						continue;
 						break;
 					}
@@ -167,7 +198,7 @@ internal class ModDB
 				}
 			}
 		}
-		ModDB.MethodInfoQueryData[] array2 = new ModDB.MethodInfoQueryData[]
+		ModDB.MethodInfoQueryData[] array4 = new ModDB.MethodInfoQueryData[]
 		{
 			new ModDB.MethodInfoQueryData("OnLoad", new Type[0]),
 			new ModDB.MethodInfoQueryData("OnLoad", new Type[] { typeof(string) })
@@ -180,7 +211,7 @@ internal class ModDB
 				{
 					try
 					{
-						foreach (ModDB.MethodInfoQueryData methodInfoQueryData in array2)
+						foreach (ModDB.MethodInfoQueryData methodInfoQueryData in array4)
 						{
 							MethodInfo method = type.GetMethod(methodInfoQueryData.methodName, methodInfoQueryData.parameterTypes);
 							if (method != null)
@@ -195,9 +226,16 @@ internal class ModDB
 						ModInfo modInfo2 = this.mods[modAssemblyInfo.infoIdx];
 						modInfo2.enabled = false;
 						this.mods[modAssemblyInfo.infoIdx] = modInfo2;
-						ConfirmDialogScreen confirmDialogScreen2 = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, Global.Instance.globalCanvas);
-						confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.FRONTEND.MODS.FAILED_TO_LOAD, modInfo2.assetID, modInfo2.description, ex2.ToString()), null, null, null, null, null, null, null, null);
-						global::UnityEngine.Object.DontDestroyOnLoad(confirmDialogScreen2.gameObject);
+						string text8 = string.Format(UI.FRONTEND.MODS.FAILED_TO_LOAD, modInfo2.assetID, modInfo2.description, ex2.ToString());
+						global::Debug.Log(text8, null);
+						ConfirmDialogScreen confirmDialogScreen3 = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, Global.Instance.globalCanvas);
+						ConfirmDialogScreen confirmDialogScreen4 = confirmDialogScreen3;
+						string text7 = text8;
+						global::System.Action action2 = null;
+						global::System.Action action = null;
+						string text6 = UI.FRONTEND.MOD_ERRORS.TITLE;
+						confirmDialogScreen4.PopupConfirmDialog(text7, action2, action, null, null, text6, null, null, null);
+						global::UnityEngine.Object.DontDestroyOnLoad(confirmDialogScreen3.gameObject);
 					}
 				}
 			}

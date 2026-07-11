@@ -34,6 +34,7 @@ public class RoleManager
 			new Tuple<string, int>(MachineTechnician.ID, 128),
 			new Tuple<string, int>(JuniorArtist.ID, 128),
 			new Tuple<string, int>(Artist.ID, 128),
+			new Tuple<string, int>(MasterArtist.ID, 128),
 			new Tuple<string, int>(Handyman.ID, 128),
 			new Tuple<string, int>("SuitExpert", 128),
 			new Tuple<string, int>("OilTechnician", 128),
@@ -197,7 +198,8 @@ public class RoleManager
 				new SeniorResearcher(),
 				new SeniorFarmer(),
 				new SeniorRancher(),
-				new SuitExpert()
+				new SuitExpert(),
+				new MasterArtist()
 			},
 			new List<RoleConfig>
 			{
@@ -852,6 +854,10 @@ public class RoleManager
 			Artist.ID,
 			"hat_role_art2"
 		},
+		{
+			MasterArtist.ID,
+			"hat_role_art3"
+		},
 		{ "Hauler", "hat_role_hauling1" },
 		{
 			MaterialsManager.ID,
@@ -947,7 +953,8 @@ public class RoleManager
 		new string[]
 		{
 			JuniorArtist.ID,
-			Artist.ID
+			Artist.ID,
+			MasterArtist.ID
 		}
 	};
 

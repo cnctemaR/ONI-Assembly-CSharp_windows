@@ -7,7 +7,7 @@ public static class SymbolOverrideControllerUtil
 	{
 		SymbolOverrideController symbolOverrideController = prefab.AddComponent<SymbolOverrideController>();
 		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
-		DebugUtil.Assert(symbolOverrideController != null, "SymbolOverrideController must be added after a KBatchedAnimController component.", string.Empty, string.Empty);
+		DebugUtil.Assert(symbolOverrideController != null, "SymbolOverrideController must be added after a KBatchedAnimController component.");
 		component.usingNewSymbolOverrideSystem = true;
 		return symbolOverrideController;
 	}

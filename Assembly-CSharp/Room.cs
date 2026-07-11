@@ -41,7 +41,8 @@ public class Room : IAssignableIdentity
 
 	public Ownables GetSoleOwner()
 	{
-		return this.GetOwners()[0];
+		List<Ownables> owners = this.GetOwners();
+		return (owners.Count <= 0) ? null : owners[0];
 	}
 
 	public List<KPrefabID> GetPrimaryEntities()
@@ -88,5 +89,5 @@ public class Room : IAssignableIdentity
 
 	private List<KPrefabID> primary_buildings = new List<KPrefabID>();
 
-	public List<Ownables> current_owners = new List<Ownables>();
+	private List<Ownables> current_owners = new List<Ownables>();
 }

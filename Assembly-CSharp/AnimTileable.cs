@@ -107,16 +107,9 @@ public class AnimTileable : KMonoBehaviour
 		if (gameObject != null)
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
-			if (component != null)
+			if (component != null && component.HasAnyTags(this.tags))
 			{
-				for (int i = 0; i < this.tags.Length; i++)
-				{
-					if (component.PrefabTag == this.tags[i])
-					{
-						flag = true;
-						break;
-					}
-				}
+				flag = true;
 			}
 		}
 		return flag;

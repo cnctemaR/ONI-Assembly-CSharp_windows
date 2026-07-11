@@ -35,18 +35,7 @@ public class BuildingComplete : Building
 		{
 			GameComps.StructureTemperatures.Add(base.gameObject);
 		}
-		base.Subscribe<BuildingComplete>(-1503271301, BuildingComplete.OnSelectObjectDelegate);
 		base.Subscribe<BuildingComplete>(1606648047, BuildingComplete.OnObjectReplacedDelegate);
-	}
-
-	private void OnSelectObject(object data)
-	{
-		if (this.Def.SelectMode != SimViewMode.None)
-		{
-			bool flag = (bool)data;
-			GameHashes gameHashes = ((!flag) ? GameHashes.DisableOverlay : GameHashes.EnableOverlay);
-			Game.Instance.gameObject.Trigger((int)gameHashes, this.Def.SelectMode);
-		}
 	}
 
 	private void OnObjectReplaced(object data)
@@ -110,6 +99,41 @@ public class BuildingComplete : Building
 		Components.BuildingCompletes.Add(this);
 		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
 		this.hasSpawnedKComponents = true;
+		Attributes attributes = this.GetAttributes();
+		if (attributes != null)
+		{
+			Deconstructable component6 = base.GetComponent<Deconstructable>();
+			if (component6 != null)
+			{
+				for (int k = 1; k < component6.constructionElements.Length; k++)
+				{
+					Tag tag = component6.constructionElements[k];
+					Element element = ElementLoader.GetElement(tag);
+					if (element != null)
+					{
+						foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+						{
+							attributes.Add(attributeModifier);
+						}
+					}
+					else
+					{
+						GameObject gameObject = Assets.TryGetPrefab(tag);
+						if (gameObject != null)
+						{
+							PrefabAttributeModifiers component7 = gameObject.GetComponent<PrefabAttributeModifiers>();
+							if (component7 != null)
+							{
+								foreach (AttributeModifier attributeModifier2 in component7.descriptors)
+								{
+									attributes.Add(attributeModifier2);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private string GetInspectSound()
@@ -184,11 +208,6 @@ public class BuildingComplete : Building
 	private bool wasReplaced;
 
 	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
-
-	private static readonly EventSystem.IntraObjectHandler<BuildingComplete> OnSelectObjectDelegate = new EventSystem.IntraObjectHandler<BuildingComplete>(delegate(BuildingComplete component, object data)
-	{
-		component.OnSelectObject(data);
-	});
 
 	private static readonly EventSystem.IntraObjectHandler<BuildingComplete> OnObjectReplacedDelegate = new EventSystem.IntraObjectHandler<BuildingComplete>(delegate(BuildingComplete component, object data)
 	{

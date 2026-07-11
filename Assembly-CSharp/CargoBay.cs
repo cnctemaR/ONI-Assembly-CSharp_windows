@@ -39,9 +39,9 @@ public class CargoBay : KMonoBehaviour
 
 	public void SpawnResources(object data)
 	{
-		SpaceDestination destination = SpacecraftManager.instance.GetDestination(SpacecraftManager.instance.savedSpacecraftDestinations[SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<LaunchableRocket>())]);
+		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<LaunchableRocket>()));
 		int num = Grid.PosToCell(base.gameObject);
-		foreach (KeyValuePair<SimHashes, float> keyValuePair in destination.GetMissionResourceResult(this.storage.RemainingCapacity(), this.storageType == CargoBay.CargoType.solids, this.storageType == CargoBay.CargoType.liquids, this.storageType == CargoBay.CargoType.gasses))
+		foreach (KeyValuePair<SimHashes, float> keyValuePair in spacecraftDestination.GetMissionResourceResult(this.storage.RemainingCapacity(), this.storageType == CargoBay.CargoType.solids, this.storageType == CargoBay.CargoType.liquids, this.storageType == CargoBay.CargoType.gasses))
 		{
 			Element element = ElementLoader.FindElementByHash(keyValuePair.Key);
 			if (this.storageType == CargoBay.CargoType.solids && element.IsSolid)
@@ -63,7 +63,7 @@ public class CargoBay : KMonoBehaviour
 		}
 		if (this.storageType == CargoBay.CargoType.entities)
 		{
-			foreach (KeyValuePair<Tag, int> keyValuePair2 in destination.GetMissionEntityResult())
+			foreach (KeyValuePair<Tag, int> keyValuePair2 in spacecraftDestination.GetMissionEntityResult())
 			{
 				GameObject prefab = Assets.GetPrefab(keyValuePair2.Key);
 				if (prefab == null)

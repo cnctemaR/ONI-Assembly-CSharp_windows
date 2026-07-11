@@ -11,12 +11,16 @@ internal class SameSpotPoopStates : GameStateMachine<SameSpotPoopStates, SameSpo
 		{
 			this.targetCell.Set(smi.GetSMI<GasAndLiquidConsumerMonitor.Instance>().targetCell, smi);
 		});
-		this.goingtopoop.MoveTo((SameSpotPoopStates.Instance smi) => smi.GetLastPoopCell(), this.pooping, this.pooping, false);
+		this.goingtopoop.MoveTo((SameSpotPoopStates.Instance smi) => smi.GetLastPoopCell(), this.pooping, this.updatepoopcell, false);
 		GameStateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>.State state = this.pooping.PlayAnim("poop");
 		string text = CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
+		this.updatepoopcell.Enter(delegate(SameSpotPoopStates.Instance smi)
+		{
+			smi.SetLastPoopCell();
+		}).GoTo(this.pooping);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Poop, false);
 	}
 
@@ -25,6 +29,8 @@ internal class SameSpotPoopStates : GameStateMachine<SameSpotPoopStates, SameSpo
 	public GameStateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>.State pooping;
 
 	public GameStateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>.State behaviourcomplete;
+
+	public GameStateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>.State updatepoopcell;
 
 	public StateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>.IntParameter targetCell;
 

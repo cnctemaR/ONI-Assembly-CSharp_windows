@@ -153,6 +153,19 @@ public class Grid
 		return cell + x + y * Grid.WidthInCells;
 	}
 
+	public static bool IsCellOffsetValid(int cell, int x, int y)
+	{
+		int num;
+		int num2;
+		Grid.CellToXY(cell, out num, out num2);
+		return num + x >= 0 && num + x < Grid.WidthInCells && num2 + y >= 0 && num2 + y < Grid.HeightInCells;
+	}
+
+	public static bool IsCellOffsetValid(int cell, CellOffset offset)
+	{
+		return Grid.IsCellOffsetValid(cell, offset.x, offset.y);
+	}
+
 	public static int PosToCell(StateMachine.Instance smi)
 	{
 		return Grid.PosToCell(smi.transform.GetPosition());
@@ -473,7 +486,7 @@ public class Grid
 
 	public static bool VisibleBlockingCB(int cell)
 	{
-		return !Grid.Transparent[cell] && Grid.Element[cell].IsSolid;
+		return !Grid.Transparent[cell] && Grid.IsSolidCell(cell);
 	}
 
 	public static bool VisibilityTest(int x, int y, int x2, int y2, bool blocking_tile_visible = false)

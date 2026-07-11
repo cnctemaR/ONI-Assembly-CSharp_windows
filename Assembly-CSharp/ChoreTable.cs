@@ -33,7 +33,7 @@ public class ChoreTable
 
 		public ChoreTable.Builder PopInterruptGroup()
 		{
-			DebugUtil.Assert(this.interruptGroupId > 0, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(this.interruptGroupId > 0);
 			this.interruptGroupId--;
 			return this;
 		}
@@ -54,7 +54,7 @@ public class ChoreTable
 
 		public ChoreTable CreateTable()
 		{
-			DebugUtil.Assert(this.interruptGroupId == 0, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(this.interruptGroupId == 0);
 			ChoreTable.Entry[] array = new ChoreTable.Entry[this.infos.Count];
 			Stack<int> stack = new Stack<int>();
 			for (int i = 0; i < this.infos.Count; i++)
@@ -97,7 +97,7 @@ public class ChoreTable
 	public class ChoreTableChore<StateMachineType, StateMachineInstanceType> : Chore<StateMachineInstanceType> where StateMachineInstanceType : StateMachine.Instance
 	{
 		public ChoreTableChore(StateMachine.BaseDef state_machine_def, ChoreType chore_type, KPrefabID prefab_id)
-			: base(chore_type, prefab_id, prefab_id.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null)
+			: base(chore_type, prefab_id, prefab_id.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null)
 		{
 			this.showAvailabilityInHoverText = false;
 			this.smi = state_machine_def.CreateSMI(this) as StateMachineInstanceType;

@@ -11,8 +11,8 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 		base.serializable = true;
 		this.unoperational.TagTransition(GameTags.Operational, this.operational, false);
 		this.operational.DefaultState(this.operational.manual).TagTransition(GameTags.Operational, this.unoperational, true);
-		this.operational.manual.ParamTransition<bool>(this.automated, this.operational.automated, (FixedCapturePoint.Instance smi, bool p) => p);
-		this.operational.automated.ParamTransition<bool>(this.automated, this.operational.manual, (FixedCapturePoint.Instance smi, bool p) => !p).ToggleChore((FixedCapturePoint.Instance smi) => smi.CreateChore(), this.unoperational, this.unoperational).Update("FindFixedCapturable", delegate(FixedCapturePoint.Instance smi, float dt)
+		this.operational.manual.ParamTransition<bool>(this.automated, this.operational.automated, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.IsTrue);
+		this.operational.automated.ParamTransition<bool>(this.automated, this.operational.manual, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.IsFalse).ToggleChore((FixedCapturePoint.Instance smi) => smi.CreateChore(), this.unoperational, this.unoperational).Update("FindFixedCapturable", delegate(FixedCapturePoint.Instance smi, float dt)
 		{
 			smi.FindFixedCapturable();
 		}, UpdateRate.SIM_1000ms, false);

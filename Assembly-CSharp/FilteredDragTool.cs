@@ -53,13 +53,13 @@ public class FilteredDragTool : DragTool
 	{
 		base.OnSpawn();
 		OverlayScreen instance = OverlayScreen.Instance;
-		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+		instance.OnOverlayChanged = (Action<HashedString>)Delegate.Combine(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 	}
 
 	protected override void OnCleanUp()
 	{
 		OverlayScreen instance = OverlayScreen.Instance;
-		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+		instance.OnOverlayChanged = (Action<HashedString>)Delegate.Remove(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 		base.OnCleanUp();
 	}
 
@@ -212,44 +212,32 @@ public class FilteredDragTool : DragTool
 		throw new ArgumentException("Invalid filter layer: " + filter_layer);
 	}
 
-	private void OnOverlayChanged(SimViewMode overlay)
+	private void OnOverlayChanged(HashedString overlay)
 	{
 		if (!this.active)
 		{
 			return;
 		}
 		string text = null;
-		if (overlay != SimViewMode.LiquidVentMap)
+		if (overlay == OverlayModes.Power.ID)
 		{
-			if (overlay != SimViewMode.PowerMap)
-			{
-				if (overlay != SimViewMode.GasVentMap)
-				{
-					if (overlay != SimViewMode.SolidConveyorMap)
-					{
-						if (overlay == SimViewMode.Logic)
-						{
-							text = ToolParameterMenu.FILTERLAYERS.LOGIC;
-						}
-					}
-					else
-					{
-						text = ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT;
-					}
-				}
-				else
-				{
-					text = ToolParameterMenu.FILTERLAYERS.GASCONDUIT;
-				}
-			}
-			else
-			{
-				text = ToolParameterMenu.FILTERLAYERS.WIRES;
-			}
+			text = ToolParameterMenu.FILTERLAYERS.WIRES;
 		}
-		else
+		else if (overlay == OverlayModes.LiquidConduits.ID)
 		{
 			text = ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT;
+		}
+		else if (overlay == OverlayModes.GasConduits.ID)
+		{
+			text = ToolParameterMenu.FILTERLAYERS.GASCONDUIT;
+		}
+		else if (overlay == OverlayModes.SolidConveyor.ID)
+		{
+			text = ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT;
+		}
+		else if (overlay == OverlayModes.Logic.ID)
+		{
+			text = ToolParameterMenu.FILTERLAYERS.LOGIC;
 		}
 		this.currentFilterTargets = this.filterTargets;
 		if (text != null)

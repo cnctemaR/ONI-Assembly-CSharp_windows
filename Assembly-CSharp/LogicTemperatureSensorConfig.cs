@@ -1,5 +1,4 @@
 ﻿using System;
-using OverlayModes;
 using TUNING;
 using UnityEngine;
 
@@ -22,12 +21,12 @@ public class LogicTemperatureSensorConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
-		buildingDef.ViewMode = SimViewMode.Logic;
+		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		SoundEventVolumeCache.instance.AddVolume("switchthermal_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("switchthermal_kanim", "PowerSwitch_off", NOISE_POLLUTION.NOISY.TIER3);
-		GeneratedBuildings.RegisterWithOverlay(Logic.HighlightItemIDs, LogicTemperatureSensorConfig.ID);
+		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, LogicTemperatureSensorConfig.ID);
 		return buildingDef;
 	}
 
@@ -48,7 +47,7 @@ public class LogicTemperatureSensorConfig : IBuildingConfig
 		LogicTemperatureSensor logicTemperatureSensor = go.AddOrGet<LogicTemperatureSensor>();
 		logicTemperatureSensor.manuallyControlled = false;
 		logicTemperatureSensor.minTemp = 0f;
-		logicTemperatureSensor.maxTemp = 573.15f;
+		logicTemperatureSensor.maxTemp = 9999f;
 	}
 
 	public static string ID = "LogicTemperatureSensor";

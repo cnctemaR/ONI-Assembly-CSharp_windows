@@ -139,7 +139,7 @@ namespace KSerialization
 				catch (Exception ex)
 				{
 					string text2 = string.Concat(new string[] { "Error deserializing template ", text, "\n", ex.Message, "\n", ex.StackTrace });
-					Output.LogError(new object[] { text2 });
+					Output.LogError(text2);
 					throw new Exception(text2, ex);
 				}
 			}

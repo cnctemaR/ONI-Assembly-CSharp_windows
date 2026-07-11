@@ -570,7 +570,7 @@ namespace ProcGen
 			{
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
-				Output.LogError(new object[] { "ex: " + message + " " + stackTrace });
+				Output.LogError("ex: " + message + " " + stackTrace);
 			}
 		}
 
@@ -662,7 +662,7 @@ namespace ProcGen
 			{
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
-				Output.LogError(new object[] { "ex: " + message + " " + stackTrace });
+				Output.LogError("ex: " + message + " " + stackTrace);
 			}
 			this.UpdateEdgesAroundStart();
 		}

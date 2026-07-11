@@ -732,15 +732,15 @@ public class SolidConduitFlow : IConduitFlow
 		if (OverlayScreen.Instance != null)
 		{
 			OverlayScreen instance = OverlayScreen.Instance;
-			instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+			instance.OnOverlayChanged = (Action<HashedString>)Delegate.Remove(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 			OverlayScreen instance2 = OverlayScreen.Instance;
-			instance2.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(instance2.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+			instance2.OnOverlayChanged = (Action<HashedString>)Delegate.Combine(instance2.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 		}
 	}
 
-	private void OnOverlayChanged(SimViewMode mode)
+	private void OnOverlayChanged(HashedString mode)
 	{
-		bool flag = mode == SimViewMode.SolidConveyorMap;
+		bool flag = mode == OverlayModes.SolidConveyor.ID;
 		if (flag == this.viewingConduits)
 		{
 			return;

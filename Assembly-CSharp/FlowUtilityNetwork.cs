@@ -55,16 +55,25 @@ public class FlowUtilityNetwork : UtilityNetwork
 		{
 			FlowUtilityNetwork.IItem item = this.sinks[i];
 			item.Network = null;
+			UtilityNetworkGridNode utilityNetworkGridNode = grid[item.Cell];
+			utilityNetworkGridNode.networkIdx = -1;
+			grid[item.Cell] = utilityNetworkGridNode;
 		}
 		for (int j = 0; j < this.sources.Count; j++)
 		{
 			FlowUtilityNetwork.IItem item2 = this.sources[j];
 			item2.Network = null;
+			UtilityNetworkGridNode utilityNetworkGridNode2 = grid[item2.Cell];
+			utilityNetworkGridNode2.networkIdx = -1;
+			grid[item2.Cell] = utilityNetworkGridNode2;
 		}
 		for (int k = 0; k < this.conduits.Count; k++)
 		{
 			FlowUtilityNetwork.IItem item3 = this.conduits[k];
 			item3.Network = null;
+			UtilityNetworkGridNode utilityNetworkGridNode3 = grid[item3.Cell];
+			utilityNetworkGridNode3.networkIdx = -1;
+			grid[item3.Cell] = utilityNetworkGridNode3;
 		}
 	}
 

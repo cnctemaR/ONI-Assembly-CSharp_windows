@@ -27,11 +27,18 @@ public class EmptyPipeTool : FilteredDragTool
 					EmptyConduitWorkable component = gameObject.GetComponent<EmptyConduitWorkable>();
 					if (!(component == null))
 					{
-						component.MarkForEmptying();
-						Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
-						if (component2 != null)
+						if (DebugHandler.InstantBuildMode)
 						{
-							component2.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+							component.EmptyPipeContents();
+						}
+						else
+						{
+							component.MarkForEmptying();
+							Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
+							if (component2 != null)
+							{
+								component2.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+							}
 						}
 					}
 				}

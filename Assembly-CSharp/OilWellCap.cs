@@ -65,6 +65,22 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 		return "STRINGS.UI.UISIDESCREENS.OIL_WELL_CAP_SIDE_SCREEN.TOOLTIP";
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<OilWellCap>(-905833192, OilWellCap.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		OilWellCap component = gameObject.GetComponent<OilWellCap>();
+		if (component != null)
+		{
+			this.depressurizePercent = component.depressurizePercent;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -136,7 +152,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 
 	private WorkChore<OilWellCap> CreateWorkChore()
 	{
-		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 		workChore.AddPrecondition(OilWellCap.AllowedToDepressurize, this);
 		return workChore;
 	}
@@ -176,11 +192,20 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 
 	public float releaseGasRate = 10f;
 
+	[Serialize]
 	private float depressurizePercent = 0.75f;
 
 	private HandleVector<int>.Handle accumulator = HandleVector<int>.InvalidHandle;
 
 	private MeterController pressureMeter;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<OilWellCap> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<OilWellCap>(delegate(OilWellCap component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private static readonly Chore.Precondition AllowedToDepressurize = new Chore.Precondition
 	{
@@ -212,8 +237,8 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 		{
 			default_state = this.idle;
 			this.root.ToggleRecurringChore((OilWellCap.StatesInstance smi) => smi.master.CreateWorkChore(), null);
-			this.idle.PlayAnim("off").ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f)
-				.ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p)
+			this.idle.PlayAnim("off").ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne)
+				.ParamTransition<bool>(this.working, this.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
 				.EventTransition(GameHashes.OperationalChanged, this.active, (OilWellCap.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.active.DefaultState(this.active.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).EventTransition(GameHashes.OperationalChanged, this.idle, (OilWellCap.StatesInstance smi) => !smi.master.operational.IsOperational)
 				.Enter(delegate(OilWellCap.StatesInstance smi)
@@ -228,15 +253,15 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 				{
 					smi.master.AddGasPressure(dt);
 				}, UpdateRate.SIM_200ms, false);
-			this.active.pre.PlayAnim("working_pre").ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p)
+			this.active.pre.PlayAnim("working_pre").ParamTransition<float>(this.pressurePercent, this.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne).ParamTransition<bool>(this.working, this.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
 				.OnAnimQueueComplete(this.active.loop);
-			this.active.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ParamTransition<float>(this.pressurePercent, this.active.pst, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.active.pst, (OilWellCap.StatesInstance smi, bool p) => p)
+			this.active.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ParamTransition<float>(this.pressurePercent, this.active.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne).ParamTransition<bool>(this.working, this.active.pst, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
 				.EventTransition(GameHashes.OperationalChanged, this.active.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
 			this.active.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.idle);
 			this.overpressure.PlayAnim("over_pressured_pre", KAnim.PlayMode.Once).QueueAnim("over_pressured_loop", true, null).ToggleStatusItem(Db.Get().BuildingStatusItems.WellOverpressure, null)
 				.ParamTransition<float>(this.pressurePercent, this.idle, (OilWellCap.StatesInstance smi, float p) => p <= 0f)
-				.ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p);
-			this.releasing_pressure.DefaultState(this.releasing_pressure.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.EmittingElement, (OilWellCap.StatesInstance smi) => smi.master).ParamTransition<bool>(this.working, this.idle, (OilWellCap.StatesInstance smi, bool p) => !p)
+				.ParamTransition<bool>(this.working, this.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue);
+			this.releasing_pressure.DefaultState(this.releasing_pressure.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.EmittingElement, (OilWellCap.StatesInstance smi) => smi.master).ParamTransition<bool>(this.working, this.idle, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsFalse)
 				.Update(delegate(OilWellCap.StatesInstance smi, float dt)
 				{
 					smi.master.ReleaseGasPressure(dt);

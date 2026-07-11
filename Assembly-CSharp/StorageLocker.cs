@@ -1,6 +1,5 @@
 ﻿using System;
 using KSerialization;
-using STRINGS;
 using UnityEngine;
 
 public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
@@ -20,21 +19,12 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 
 	protected override void OnSpawn()
 	{
-		base.Subscribe<StorageLocker>(1088293757, StorageLocker.OnToggleClosedDelegate);
 		this.filteredStorage.FilterChanged();
 	}
 
 	protected override void OnCleanUp()
 	{
 		this.filteredStorage.CleanUp();
-	}
-
-	private void OnToggleClosed(object data)
-	{
-		BuildingEnabledButton component = base.GetComponent<BuildingEnabledButton>();
-		bool flag = component != null && !component.IsEnabled;
-		this.filteredStorage.SetEnabled(!flag);
-		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	private void OnCopySettings(object data)
@@ -101,20 +91,7 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	{
 		get
 		{
-			GameUtil.MassUnit massUnit = GameUtil.massUnit;
-			LocString locString;
-			if (massUnit != GameUtil.MassUnit.Pounds)
-			{
-				if (massUnit != GameUtil.MassUnit.Kilograms)
-				{
-				}
-				locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
-			}
-			else
-			{
-				locString = UI.UNITSUFFIXES.MASS.POUND;
-			}
-			return locString;
+			return GameUtil.GetCurrentMassUnit(false);
 		}
 	}
 
@@ -128,10 +105,5 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	private static readonly EventSystem.IntraObjectHandler<StorageLocker> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<StorageLocker>(delegate(StorageLocker component, object data)
 	{
 		component.OnCopySettings(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<StorageLocker> OnToggleClosedDelegate = new EventSystem.IntraObjectHandler<StorageLocker>(delegate(StorageLocker component, object data)
-	{
-		component.OnToggleClosed(data);
 	});
 }

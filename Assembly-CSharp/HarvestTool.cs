@@ -15,7 +15,7 @@ public class HarvestTool : DragTool
 		HarvestTool.Instance = this;
 		this.options.Add("HARVEST_WHEN_READY", ToolParameterMenu.ToggleState.On);
 		this.options.Add("DO_NOT_HARVEST", ToolParameterMenu.ToggleState.Off);
-		this.viewMode = SimViewMode.HarvestWhenReady;
+		this.viewMode = OverlayModes.Harvest.ID;
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)

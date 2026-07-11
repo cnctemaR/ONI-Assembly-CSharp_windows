@@ -438,7 +438,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
 		{
-			if (roleConfig.HasPerk(perk) && this.MasteryByRoleID[roleConfig.id])
+			if (roleConfig.HasPerk(perk) && this.MasteryByRoleID.ContainsKey(roleConfig.id) && this.MasteryByRoleID[roleConfig.id])
 			{
 				return true;
 			}

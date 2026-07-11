@@ -21,32 +21,17 @@ public class KPrefabIDTracker
 	{
 		if (instance.InstanceID != -1)
 		{
-			KPrefabIDTracker.Entry entry = new KPrefabIDTracker.Entry
+			if (this.prefabIdMap.ContainsKey(instance.InstanceID))
 			{
-				id = instance.InstanceID,
-				instance = instance
-			};
-			this.entryMap[instance] = entry;
+				Output.LogWarningWithObj(instance.gameObject, new object[] { string.Format("KPID instance id {0} was previously used by {1} but we're trying to add it from {2}. Conflict!", instance.InstanceID, this.prefabIdMap[instance.InstanceID].gameObject, instance.name) });
+			}
 			this.prefabIdMap[instance.InstanceID] = instance;
 		}
 	}
 
 	public void Unregister(KPrefabID instance)
 	{
-		this.entryMap.Remove(instance);
 		this.prefabIdMap.Remove(instance.InstanceID);
-	}
-
-	public void Update(KPrefabID instance)
-	{
-		KPrefabIDTracker.Entry entry = default(KPrefabIDTracker.Entry);
-		if (this.entryMap.TryGetValue(instance, out entry))
-		{
-			entry.id = instance.InstanceID;
-			entry.instance = instance;
-			this.entryMap[instance] = entry;
-			this.prefabIdMap[entry.id] = instance;
-		}
 	}
 
 	public KPrefabID GetInstance(int instance_id)
@@ -58,14 +43,5 @@ public class KPrefabIDTracker
 
 	private static KPrefabIDTracker Instance;
 
-	private Dictionary<KPrefabID, KPrefabIDTracker.Entry> entryMap = new Dictionary<KPrefabID, KPrefabIDTracker.Entry>();
-
 	private Dictionary<int, KPrefabID> prefabIdMap = new Dictionary<int, KPrefabID>();
-
-	public struct Entry
-	{
-		public int id;
-
-		public KPrefabID instance;
-	}
 }

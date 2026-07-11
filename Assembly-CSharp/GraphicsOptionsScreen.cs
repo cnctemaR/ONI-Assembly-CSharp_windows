@@ -51,14 +51,67 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	public static void SetResolutionFromPrefs()
 	{
+		int num = Screen.currentResolution.width;
+		int num2 = Screen.currentResolution.height;
+		int num3 = Screen.currentResolution.refreshRate;
+		bool flag = Screen.fullScreen;
+		Output.Log(new object[] { string.Format("Starting up with a resolution of {0}x{1} @{2}hz (fullscreen: {3})", new object[] { num, num2, num3, flag }) });
 		if ((Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionWidthKey) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionHeightKey))
 		{
-			int @int = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionWidthKey);
-			int int2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
-			int int3 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKey, Screen.currentResolution.refreshRate);
-			bool flag = KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, (!Screen.fullScreen) ? 0 : 1) == 1;
-			Screen.SetResolution(@int, int2, flag, int3);
+			Output.Log(new object[] { "Found OSX player prefs resolution, overriding with that" });
+			num = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionWidthKey);
+			num2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
+			num3 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKey, Screen.currentResolution.refreshRate);
+			flag = KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, (!Screen.fullScreen) ? 0 : 1) == 1;
 		}
+		else if (num <= 1 || num2 <= 1)
+		{
+			Output.LogWarning(new object[] { "Detected a degenerate resolution, attempting to fix..." });
+			foreach (Resolution resolution in Screen.resolutions)
+			{
+				if (resolution.width == 1920)
+				{
+					num = resolution.width;
+					num2 = resolution.height;
+					num3 = 0;
+				}
+			}
+			if (num <= 1 || num2 <= 1)
+			{
+				foreach (Resolution resolution2 in Screen.resolutions)
+				{
+					if (resolution2.width == 1280)
+					{
+						num = resolution2.width;
+						num2 = resolution2.height;
+						num3 = 0;
+					}
+				}
+			}
+			if (num <= 1 || num2 <= 1)
+			{
+				foreach (Resolution resolution3 in Screen.resolutions)
+				{
+					if (resolution3.width > 1 && resolution3.height > 1 && resolution3.refreshRate > 0)
+					{
+						num = resolution3.width;
+						num2 = resolution3.height;
+						num3 = 0;
+					}
+				}
+			}
+			if (num <= 1 || num2 <= 1)
+			{
+				string text = "Could not find a suitable resolution for this screen! Reported available resolutions are:";
+				foreach (Resolution resolution4 in Screen.resolutions)
+				{
+					text += string.Format("\n{0}x{1} @ {2}", resolution4.width, resolution4.height, resolution4.refreshRate);
+				}
+				Output.LogError(text);
+			}
+		}
+		Output.Log(new object[] { string.Format("Reapplying a resolution of {0}x{1} @{2}hz (fullscreen: {3})", new object[] { num, num2, num3, flag }) });
+		Screen.SetResolution(num, num2, flag, num3);
 	}
 
 	private void SaveResolutionToPrefs(GraphicsOptionsScreen.Settings settings)
@@ -177,7 +230,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 			}
 			stringBuilder.Append("Selected Resolution Idx: " + this.resolutionDropdown.value.ToString());
 			stringBuilder.Append("FullScreen: " + this.fullscreenToggle.isOn.ToString());
-			Output.LogError(new object[] { stringBuilder.ToString() });
+			Output.LogError(stringBuilder.ToString());
 			throw ex;
 		}
 	}

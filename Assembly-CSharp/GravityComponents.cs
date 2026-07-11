@@ -67,7 +67,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 								}
 							}
 						}
-						if (Grid.Solid[num6])
+						if (Grid.Solid[num6] || (Grid.LiquidPumpFloor[num6] && gravityComponent.transform.GetComponent<MinionIdentity>() != null))
 						{
 							vector3.y = Grid.CellToPosCBC(Grid.CellAbove(num6), Grid.SceneLayer.Move).y + gravityComponent.radius;
 							gravityComponent.velocity.x = 0f;

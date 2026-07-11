@@ -60,7 +60,7 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 			for (int num = 0; num != this.stress.deltaAttribute.Modifiers.Count; num++)
 			{
 				AttributeModifier attributeModifier = this.stress.deltaAttribute.Modifiers[num];
-				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, "Reporting stress for multipliers not supported yet.", string.Empty, string.Empty);
+				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, new object[] { "Reporting stress for multipliers not supported yet." });
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, attributeModifier.Value * dt, attributeModifier.GetDescription(), base.gameObject.GetProperName());
 			}
 		}

@@ -279,7 +279,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		if (this.activeScreen != screenData)
 		{
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID);
 			if (this.activeScreen != null)
 			{
 				this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);

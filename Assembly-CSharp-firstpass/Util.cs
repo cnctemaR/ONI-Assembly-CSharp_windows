@@ -245,8 +245,8 @@ public static class Util
 			if (initialize_id)
 			{
 				component.InstanceID = KPrefabID.GetUniqueID();
+				KPrefabIDTracker.Get().Register(component);
 			}
-			KPrefabIDTracker.Get().Register(component);
 			KPrefabID component2 = original.GetComponent<KPrefabID>();
 			component.CopyTags(component2);
 			component.CopyInitFunctions(component2);

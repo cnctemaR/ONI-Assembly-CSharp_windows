@@ -54,7 +54,8 @@ public class GlobalChoreProvider : ChoreProvider
 						chore = fetchChore,
 						tagBitsHash = fetchChore.tagBitsHash,
 						cost = num,
-						priority = fetchChore.masterPriority
+						priority = fetchChore.masterPriority,
+						category = fetchChore.destination.fetchCategory
 					});
 				}
 			}
@@ -117,11 +118,15 @@ public class GlobalChoreProvider : ChoreProvider
 	{
 		public bool IsBetterThan(GlobalChoreProvider.Fetch fetch)
 		{
+			if (this.category != fetch.category)
+			{
+				return false;
+			}
 			if (this.tagBitsHash != fetch.tagBitsHash)
 			{
 				return false;
 			}
-			if (!this.chore.tagBits.AreEqual(fetch.chore.tagBits))
+			if (!this.chore.tagBits.AreEqual(ref fetch.chore.tagBits))
 			{
 				return false;
 			}
@@ -150,6 +155,8 @@ public class GlobalChoreProvider : ChoreProvider
 		public int cost;
 
 		public PrioritySetting priority;
+
+		public Storage.FetchCategory category;
 	}
 
 	private class FetchComparer : IComparer<GlobalChoreProvider.Fetch>

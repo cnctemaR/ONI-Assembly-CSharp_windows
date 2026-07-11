@@ -59,17 +59,8 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 	private void OnWorkEvent(Workable.WorkableEvent evt)
 	{
-		if (evt == Workable.WorkableEvent.WorkStarted)
+		if (evt != Workable.WorkableEvent.WorkStarted)
 		{
-			Storage component = base.GetComponent<Storage>();
-			if (component.worker != null)
-			{
-				Storage component2 = component.worker.GetComponent<Storage>();
-				GameObject gameObject = component2.items[0];
-				KBatchedAnimController component3 = gameObject.GetComponent<KBatchedAnimController>();
-				component3.AddAnimOverrides(Assets.GetAnim("anim_dead_dupe_kanim"), 0f);
-				component3.Play(new HashedString[] { "react_pre", "react_pst" }, KAnim.PlayMode.Once);
-			}
 		}
 	}
 

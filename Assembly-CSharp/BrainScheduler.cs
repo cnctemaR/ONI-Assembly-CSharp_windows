@@ -37,7 +37,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick
 				flag = true;
 			}
 		}
-		DebugUtil.Assert(flag, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(flag);
 	}
 
 	private void OnRemoveBrain(Brain brain)
@@ -51,7 +51,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick
 				brainGroup.RemoveBrain(brain);
 			}
 		}
-		DebugUtil.Assert(flag, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(flag);
 	}
 
 	public void RenderEveryTick(float dt)

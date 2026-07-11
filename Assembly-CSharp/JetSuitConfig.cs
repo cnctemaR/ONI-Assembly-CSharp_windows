@@ -21,14 +21,11 @@ public class JetSuitConfig : IEquipmentConfig
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		string text = "Jet_Suit";
 		string slot = global::TUNING.EQUIPMENT.SUITS.SLOT;
-		string fabricator = global::TUNING.EQUIPMENT.SUITS.FABRICATOR;
-		float num = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME;
 		SimHashes simHashes = SimHashes.Steel;
-		Dictionary<string, float> dictionary2 = dictionary;
-		float num2 = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS;
+		float num = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, "suit_jetpack_kanim", string.Empty, "body_jetpack_kanim", 6, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array, "JetSuit");
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, simHashes, num, "suit_jetpack_kanim", string.Empty, "body_jetpack_kanim", 6, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array, "JetSuit");
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
@@ -39,16 +36,16 @@ public class JetSuitConfig : IEquipmentConfig
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
 			if (soleOwner != null)
 			{
-				Navigator component = soleOwner.GetComponent<Navigator>();
+				GameObject targetGameObject = soleOwner.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
+				Navigator component = targetGameObject.GetComponent<Navigator>();
 				if (component != null)
 				{
 					component.SetFlags(PathFinder.PotentialPath.Flags.HasJetPack);
 				}
-				MinionResume component2 = soleOwner.GetComponent<MinionResume>();
+				MinionResume component2 = targetGameObject.GetComponent<MinionResume>();
 				if (component2 != null && component2.HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
 				{
-					eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
-						.Add(SuitExpert.AthleticsModifier);
+					targetGameObject.GetAttributes().Get(Db.Get().Attributes.Athletics).Add(SuitExpert.AthleticsModifier);
 				}
 			}
 		};
@@ -57,12 +54,13 @@ public class JetSuitConfig : IEquipmentConfig
 			if (eq.assignee != null)
 			{
 				Ownables soleOwner2 = eq.assignee.GetSoleOwner();
-				Attributes attributes = soleOwner2.GetAttributes();
+				GameObject targetGameObject2 = soleOwner2.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
+				Attributes attributes = targetGameObject2.GetAttributes();
 				if (attributes != null)
 				{
 					attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
 				}
-				Navigator component3 = soleOwner2.GetComponent<Navigator>();
+				Navigator component3 = targetGameObject2.GetComponent<Navigator>();
 				if (component3 != null)
 				{
 					component3.ClearFlags(PathFinder.PotentialPath.Flags.HasJetPack);
@@ -90,6 +88,8 @@ public class JetSuitConfig : IEquipmentConfig
 	}
 
 	public const string ID = "Jet_Suit";
+
+	public static ComplexRecipe recipe;
 
 	private const PathFinder.PotentialPath.Flags suit_flags = PathFinder.PotentialPath.Flags.HasJetPack;
 }

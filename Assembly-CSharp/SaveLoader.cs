@@ -511,6 +511,17 @@ public class SaveLoader : KMonoBehaviour
 			SaveGame.Header header;
 			this.GameInfo = SaveGame.GetHeader(reader, out header);
 			this.LoadedHeader = header;
+			Output.Log(new object[] { string.Format("Loading save file: {4}\n headerVersion:{0}, buildVersion:{1}, headerSize:{2}, IsCompressed:{3}", new object[] { header.headerVersion, header.buildVersion, header.headerSize, header.IsCompressed, filename }) });
+			Output.Log(new object[] { string.Format("GameInfo: numberOfCycles:{0}, numberOfDuplicants:{1}, baseName:{2}, isAutoSave:{3}, originalSaveName:{4}, saveVersion:{5}.{6}", new object[]
+			{
+				this.GameInfo.numberOfCycles,
+				this.GameInfo.numberOfDuplicants,
+				this.GameInfo.baseName,
+				this.GameInfo.isAutoSave,
+				this.GameInfo.originalSaveName,
+				this.GameInfo.saveMajorVersion,
+				this.GameInfo.saveMinorVersion
+			}) });
 			if (this.GameInfo.saveMajorVersion == 7 && this.GameInfo.saveMinorVersion < 4)
 			{
 				Helper.SetTypeInfoMask((SerializationTypeInfo)191);

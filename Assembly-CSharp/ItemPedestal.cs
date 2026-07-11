@@ -8,7 +8,15 @@ public class ItemPedestal : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-731304873, new Action<object>(this.OnOccupantChanged));
+		base.Subscribe<ItemPedestal>(-731304873, ItemPedestal.OnOccupantChangedDelegate);
+		if (this.receptacle.Occupant)
+		{
+			KBatchedAnimController component = this.receptacle.Occupant.GetComponent<KBatchedAnimController>();
+			if (component)
+			{
+				component.enabled = true;
+			}
+		}
 	}
 
 	private void OnOccupantChanged(object data)

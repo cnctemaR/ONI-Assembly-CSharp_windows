@@ -42,7 +42,7 @@ public class LoadProfiler : ProfilerBase
 		{
 			return;
 		}
-		LoadProfiler.Instance.WriteLine(event_name, "I", "},");
+		LoadProfiler.Instance.ManifestThreadInfo(null).WriteLine("GAME", event_name, LoadProfiler.Instance.sw, "I", "},");
 	}
 
 	[Conditional("ENABLE_LOAD_STATS")]

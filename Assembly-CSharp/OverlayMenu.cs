@@ -13,8 +13,8 @@ public class OverlayMenu : KIconToggleMenu
 	{
 		base.OnPrefabInit();
 		OverlayMenu.Instance = this;
-		this.overlay_toggle_infos = this.InitializeToggles();
-		base.Setup(this.overlay_toggle_infos);
+		this.InitializeToggles();
+		base.Setup(this.overlayToggleInfos);
 		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
 		base.onSelect += this.OnToggleSelect;
@@ -38,7 +38,7 @@ public class OverlayMenu : KIconToggleMenu
 		{
 			return;
 		}
-		foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.overlay_toggle_infos)
+		foreach (KIconToggleMenu.ToggleInfo toggleInfo in this.overlayToggleInfos)
 		{
 			OverlayMenu.OverlayToggleInfo overlayToggleInfo = (OverlayMenu.OverlayToggleInfo)toggleInfo;
 			toggleInfo.toggle.gameObject.SetActive(overlayToggleInfo.IsUnlocked());
@@ -56,24 +56,24 @@ public class OverlayMenu : KIconToggleMenu
 		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 	}
 
-	private List<KIconToggleMenu.ToggleInfo> InitializeToggles()
+	private void InitializeToggles()
 	{
-		return new List<KIconToggleMenu.ToggleInfo>
+		this.overlayToggleInfos = new List<KIconToggleMenu.ToggleInfo>
 		{
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.OXYGEN.BUTTON, "overlay_oxygen", SimViewMode.OxygenMap, string.Empty, global::Action.Overlay1, UI.TOOLTIPS.OXYGENOVERLAYSTRING, UI.OVERLAYS.OXYGEN.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ELECTRICAL.BUTTON, "overlay_power", SimViewMode.PowerMap, string.Empty, global::Action.Overlay2, UI.TOOLTIPS.POWEROVERLAYSTRING, UI.OVERLAYS.ELECTRICAL.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.TEMPERATURE.BUTTON, "overlay_temperature", SimViewMode.TemperatureMap, string.Empty, global::Action.Overlay3, UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING, UI.OVERLAYS.TEMPERATURE.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.HEATFLOW.BUTTON, "overlay_heatflow", SimViewMode.HeatFlow, string.Empty, global::Action.Overlay4, UI.TOOLTIPS.HEATFLOWOVERLAYSTRING, UI.OVERLAYS.HEATFLOW.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIGHTING.BUTTON, "overlay_lights", SimViewMode.Light, string.Empty, global::Action.Overlay5, UI.TOOLTIPS.LIGHTSOVERLAYSTRING, UI.OVERLAYS.LIGHTING.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, "overlay_liquidvent", SimViewMode.LiquidVentMap, string.Empty, global::Action.Overlay6, UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING, UI.OVERLAYS.LIQUIDPLUMBING.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.GASPLUMBING.BUTTON, "overlay_gasvent", SimViewMode.GasVentMap, string.Empty, global::Action.Overlay7, UI.TOOLTIPS.GASVENTOVERLAYSTRING, UI.OVERLAYS.GASPLUMBING.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DECOR.BUTTON, "overlay_decor", SimViewMode.Decor, string.Empty, global::Action.Overlay8, UI.TOOLTIPS.DECOROVERLAYSTRING, UI.OVERLAYS.DECOR.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DISEASE.BUTTON, "overlay_disease", SimViewMode.Disease, string.Empty, global::Action.Overlay9, UI.TOOLTIPS.DISEASEOVERLAYSTRING, UI.OVERLAYS.DISEASE.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.CROPS.BUTTON, "overlay_farming", SimViewMode.Crop, string.Empty, global::Action.Overlay10, UI.TOOLTIPS.CROPS_OVERLAY_STRING, UI.OVERLAYS.CROPS.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ROOMS.BUTTON, "overlay_rooms", SimViewMode.Rooms, string.Empty, global::Action.Overlay11, UI.TOOLTIPS.ROOMSOVERLAYSTRING, UI.OVERLAYS.ROOMS.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.SUIT.BUTTON, "overlay_suit", SimViewMode.SuitRequiredMap, "SuitsOverlay", global::Action.Overlay12, UI.TOOLTIPS.SUITOVERLAYSTRING, UI.OVERLAYS.SUIT.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LOGIC.BUTTON, "overlay_logic", SimViewMode.Logic, "AutomationOverlay", global::Action.Overlay13, UI.TOOLTIPS.LOGICOVERLAYSTRING, UI.OVERLAYS.LOGIC.BUTTON),
-			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.CONVEYOR.BUTTON, "overlay_conveyor", SimViewMode.SolidConveyorMap, "ConveyorOverlay", global::Action.Overlay14, UI.TOOLTIPS.CONVEYOR_OVERLAY_STRING, UI.OVERLAYS.CONVEYOR.BUTTON)
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.OXYGEN.BUTTON, "overlay_oxygen", OverlayModes.Oxygen.ID, string.Empty, global::Action.Overlay1, UI.TOOLTIPS.OXYGENOVERLAYSTRING, UI.OVERLAYS.OXYGEN.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ELECTRICAL.BUTTON, "overlay_power", OverlayModes.Power.ID, string.Empty, global::Action.Overlay2, UI.TOOLTIPS.POWEROVERLAYSTRING, UI.OVERLAYS.ELECTRICAL.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.TEMPERATURE.BUTTON, "overlay_temperature", OverlayModes.Temperature.ID, string.Empty, global::Action.Overlay3, UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING, UI.OVERLAYS.TEMPERATURE.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.HEATFLOW.BUTTON, "overlay_heatflow", OverlayModes.HeatFlow.ID, string.Empty, global::Action.Overlay4, UI.TOOLTIPS.HEATFLOWOVERLAYSTRING, UI.OVERLAYS.HEATFLOW.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIGHTING.BUTTON, "overlay_lights", OverlayModes.Light.ID, string.Empty, global::Action.Overlay5, UI.TOOLTIPS.LIGHTSOVERLAYSTRING, UI.OVERLAYS.LIGHTING.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, "overlay_liquidvent", OverlayModes.LiquidConduits.ID, string.Empty, global::Action.Overlay6, UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING, UI.OVERLAYS.LIQUIDPLUMBING.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.GASPLUMBING.BUTTON, "overlay_gasvent", OverlayModes.GasConduits.ID, string.Empty, global::Action.Overlay7, UI.TOOLTIPS.GASVENTOVERLAYSTRING, UI.OVERLAYS.GASPLUMBING.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DECOR.BUTTON, "overlay_decor", OverlayModes.Decor.ID, string.Empty, global::Action.Overlay8, UI.TOOLTIPS.DECOROVERLAYSTRING, UI.OVERLAYS.DECOR.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.DISEASE.BUTTON, "overlay_disease", OverlayModes.Disease.ID, string.Empty, global::Action.Overlay9, UI.TOOLTIPS.DISEASEOVERLAYSTRING, UI.OVERLAYS.DISEASE.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.CROPS.BUTTON, "overlay_farming", OverlayModes.Crop.ID, string.Empty, global::Action.Overlay10, UI.TOOLTIPS.CROPS_OVERLAY_STRING, UI.OVERLAYS.CROPS.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.ROOMS.BUTTON, "overlay_rooms", OverlayModes.Rooms.ID, string.Empty, global::Action.Overlay11, UI.TOOLTIPS.ROOMSOVERLAYSTRING, UI.OVERLAYS.ROOMS.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.SUIT.BUTTON, "overlay_suit", OverlayModes.Suit.ID, "SuitsOverlay", global::Action.Overlay12, UI.TOOLTIPS.SUITOVERLAYSTRING, UI.OVERLAYS.SUIT.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LOGIC.BUTTON, "overlay_logic", OverlayModes.Logic.ID, "AutomationOverlay", global::Action.Overlay13, UI.TOOLTIPS.LOGICOVERLAYSTRING, UI.OVERLAYS.LOGIC.BUTTON),
+			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.CONVEYOR.BUTTON, "overlay_conveyor", OverlayModes.SolidConveyor.ID, "ConveyorOverlay", global::Action.Overlay14, UI.TOOLTIPS.CONVEYOR_OVERLAY_STRING, UI.OVERLAYS.CONVEYOR.BUTTON)
 		};
 	}
 
@@ -81,7 +81,7 @@ public class OverlayMenu : KIconToggleMenu
 	{
 		if (SimDebugView.Instance.GetMode() == ((OverlayMenu.OverlayToggleInfo)toggle_info).simView)
 		{
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID);
 		}
 		else if (((OverlayMenu.OverlayToggleInfo)toggle_info).IsUnlocked())
 		{
@@ -91,10 +91,10 @@ public class OverlayMenu : KIconToggleMenu
 
 	private void OnOverlayChanged(object overlay_data)
 	{
-		SimViewMode simViewMode = (SimViewMode)overlay_data;
-		for (int i = 0; i < this.overlay_toggle_infos.Count; i++)
+		HashedString hashedString = (HashedString)overlay_data;
+		for (int i = 0; i < this.overlayToggleInfos.Count; i++)
 		{
-			this.overlay_toggle_infos[i].toggle.isOn = ((OverlayMenu.OverlayToggleInfo)this.overlay_toggle_infos[i]).simView == simViewMode;
+			this.overlayToggleInfos[i].toggle.isOn = ((OverlayMenu.OverlayToggleInfo)this.overlayToggleInfos[i]).simView == hashedString;
 		}
 	}
 
@@ -104,9 +104,9 @@ public class OverlayMenu : KIconToggleMenu
 		{
 			return;
 		}
-		if (OverlayScreen.Instance.GetMode() != SimViewMode.None && e.TryConsume(global::Action.Escape))
+		if (OverlayScreen.Instance.GetMode() != OverlayModes.None.ID && e.TryConsume(global::Action.Escape))
 		{
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID);
 		}
 		if (!e.Consumed)
 		{
@@ -120,9 +120,9 @@ public class OverlayMenu : KIconToggleMenu
 		{
 			return;
 		}
-		if (OverlayScreen.Instance.GetMode() != SimViewMode.None && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		if (OverlayScreen.Instance.GetMode() != OverlayModes.None.ID && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID);
 		}
 		if (!e.Consumed)
 		{
@@ -132,11 +132,11 @@ public class OverlayMenu : KIconToggleMenu
 
 	public static OverlayMenu Instance;
 
-	private List<KIconToggleMenu.ToggleInfo> overlay_toggle_infos;
+	private List<KIconToggleMenu.ToggleInfo> overlayToggleInfos;
 
 	private class OverlayToggleInfo : KIconToggleMenu.ToggleInfo
 	{
-		public OverlayToggleInfo(string text, string icon_name, SimViewMode sim_view, string required_tech_item = "", global::Action hotKey = global::Action.NumActions, string tooltip = "", string tooltip_header = "")
+		public OverlayToggleInfo(string text, string icon_name, HashedString sim_view, string required_tech_item = "", global::Action hotKey = global::Action.NumActions, string tooltip = "", string tooltip_header = "")
 			: base(text, icon_name, null, hotKey, tooltip, tooltip_header)
 		{
 			this.simView = sim_view;
@@ -148,7 +148,7 @@ public class OverlayMenu : KIconToggleMenu
 			return DebugHandler.InstantBuildMode || string.IsNullOrEmpty(this.requiredTechItem) || Db.Get().Techs.IsTechItemComplete(this.requiredTechItem);
 		}
 
-		public SimViewMode simView;
+		public HashedString simView;
 
 		public string requiredTechItem;
 	}

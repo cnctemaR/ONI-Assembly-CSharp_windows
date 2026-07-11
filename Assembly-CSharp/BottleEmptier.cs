@@ -208,7 +208,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.waitingfordelivery;
-			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
+			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 63486);
 			this.statusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				BottleEmptier bottleEmptier = (BottleEmptier)data;

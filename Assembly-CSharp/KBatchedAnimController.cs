@@ -125,8 +125,8 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void SetBatchGroup(KAnimFileData kafd)
 	{
-		DebugUtil.Assert(!this.batchGroupID.IsValid, "Should only be setting the batch group once.", string.Empty, string.Empty);
-		DebugUtil.Assert(kafd != null, "Null anim data!! For", base.name, string.Empty);
+		DebugUtil.Assert(!this.batchGroupID.IsValid, "Should only be setting the batch group once.");
+		DebugUtil.Assert(kafd != null, "Null anim data!! For", base.name);
 		base.curBuild = kafd.build;
 		DebugUtil.Assert(base.curBuild != null, "Null build for anim!! ", base.name, kafd.name);
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(base.curBuild.batchTag);
@@ -152,7 +152,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		if (this.animFiles.Length <= 0)
 		{
-			DebugUtil.Assert(false, "KBatchedAnimController has no anim files:" + base.name, string.Empty, string.Empty);
+			DebugUtil.Assert(false, "KBatchedAnimController has no anim files:" + base.name);
 		}
 		if (this.animFiles[0].buildFile == null)
 		{
@@ -172,7 +172,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		if (this.usingNewSymbolOverrideSystem)
 		{
-			DebugUtil.Assert(base.GetComponent<SymbolOverrideController>() != null, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(base.GetComponent<SymbolOverrideController>() != null);
 		}
 	}
 
@@ -619,7 +619,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public void SetSymbolOverride(int symbol_idx, KAnim.Build.SymbolFrameInstance symbol_frame_instance)
 	{
-		DebugUtil.Assert(this.usingNewSymbolOverrideSystem, "KBatchedAnimController requires usingNewSymbolOverrideSystem to bet to true to enable symbol overrides.", string.Empty, string.Empty);
+		DebugUtil.Assert(this.usingNewSymbolOverrideSystem, "KBatchedAnimController requires usingNewSymbolOverrideSystem to bet to true to enable symbol overrides.");
 		base.symbolOverrideInfoGpuData.SetSymbolOverrideInfo(symbol_idx, symbol_frame_instance);
 	}
 
@@ -716,14 +716,14 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void RegisterVisibilityListener()
 	{
-		DebugUtil.Assert(!this.visibilityListenerRegistered, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(!this.visibilityListenerRegistered);
 		Singleton<KBatchedAnimUpdater>.Instance.VisibilityRegister(this);
 		this.visibilityListenerRegistered = true;
 	}
 
 	private void UnregisterVisibilityListener()
 	{
-		DebugUtil.Assert(this.visibilityListenerRegistered, "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(this.visibilityListenerRegistered);
 		Singleton<KBatchedAnimUpdater>.Instance.VisibilityUnregister(this);
 		this.visibilityListenerRegistered = false;
 	}

@@ -186,6 +186,8 @@ public class KSlider : Slider
 		}
 	}
 
+	public AnimationCurve sliderWeightCurve;
+
 	public static string[] DefaultSounds = new string[5];
 
 	private string[] currentSounds;

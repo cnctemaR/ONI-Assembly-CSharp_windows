@@ -170,7 +170,7 @@ public class SaveLoadRoot : KMonoBehaviour
 		SaveLoadRoot saveLoadRoot = null;
 		if (prefab != null)
 		{
-			GameObject gameObject = Util.KInstantiate(prefab, position, rotation, null, null, true, 0);
+			GameObject gameObject = Util.KInstantiate(prefab, position, rotation, null, null, false, 0);
 			gameObject.transform.localScale = scale;
 			gameObject.SetActive(true);
 			saveLoadRoot = gameObject.GetComponent<SaveLoadRoot>();

@@ -31,29 +31,25 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 		})
 			.Target(this.masterTarget);
 		this.replanted.irrigated.DefaultState(this.replanted.irrigated.absorbing).TriggerOnEnter(this.ResourceRecievedEvent, null);
-		this.replanted.irrigated.absorbing.DefaultState(this.replanted.irrigated.absorbing.normal).ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.starved, (IrrigationMonitor.Instance smi, bool p) => !p).ToggleAttributeModifier("Absorbing", (IrrigationMonitor.Instance smi) => smi.absorptionRate, null)
+		this.replanted.irrigated.absorbing.DefaultState(this.replanted.irrigated.absorbing.normal).ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.starved, GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.IsFalse).ToggleAttributeModifier("Absorbing", (IrrigationMonitor.Instance smi) => smi.absorptionRate, null)
 			.Enter(delegate(IrrigationMonitor.Instance smi)
 			{
-				smi.StartAbsorbing();
+				smi.UpdateAbsorbing(true);
 			})
-			.EventHandler(GameHashes.Wilt, delegate(IrrigationMonitor.Instance smi)
+			.EventHandler(GameHashes.TagsChanged, delegate(IrrigationMonitor.Instance smi)
 			{
-				smi.StopAbsorbing();
-			})
-			.EventHandler(GameHashes.WiltRecover, delegate(IrrigationMonitor.Instance smi)
-			{
-				smi.StartAbsorbing();
+				smi.UpdateAbsorbing(true);
 			})
 			.Exit(delegate(IrrigationMonitor.Instance smi)
 			{
-				smi.StopAbsorbing();
+				smi.UpdateAbsorbing(false);
 			});
-		this.replanted.irrigated.absorbing.normal.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.absorbing.wrongLiquid, (IrrigationMonitor.Instance smi, bool p) => p);
-		this.replanted.irrigated.absorbing.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.absorbing.normal, (IrrigationMonitor.Instance smi, bool p) => !p);
+		this.replanted.irrigated.absorbing.normal.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.absorbing.wrongLiquid, GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.IsTrue);
+		this.replanted.irrigated.absorbing.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.irrigated.absorbing.normal, GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.IsFalse);
 		this.replanted.starved.DefaultState(this.replanted.starved.normal).TriggerOnEnter(this.ResourceDepletedEvent, null).ParamTransition<bool>(this.enoughCorrectLiquidToRecover, this.replanted.irrigated.absorbing, (IrrigationMonitor.Instance smi, bool p) => p && this.hasCorrectLiquid.Get(smi))
 			.ParamTransition<bool>(this.hasCorrectLiquid, this.replanted.irrigated.absorbing, (IrrigationMonitor.Instance smi, bool p) => p && this.enoughCorrectLiquidToRecover.Get(smi));
-		this.replanted.starved.normal.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.starved.wrongLiquid, (IrrigationMonitor.Instance smi, bool p) => p);
-		this.replanted.starved.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.starved.normal, (IrrigationMonitor.Instance smi, bool p) => !p);
+		this.replanted.starved.normal.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.starved.wrongLiquid, GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.IsTrue);
+		this.replanted.starved.wrongLiquid.ParamTransition<bool>(this.hasIncorrectLiquid, this.replanted.starved.normal, GameStateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.IsFalse);
 	}
 
 	public StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.TargetParameter resourceStorage;
@@ -353,27 +349,24 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 			base.sm.enoughCorrectLiquidToRecover.Set(flag3 && flag, base.smi);
 		}
 
-		public void StartAbsorbing()
+		public void UpdateAbsorbing(bool allow)
 		{
-			if (this.absorberHandle.IsValid())
+			bool flag = allow && !base.smi.gameObject.HasTag(GameTags.Wilting);
+			if (flag != this.absorberHandle.IsValid())
 			{
-				return;
+				if (flag)
+				{
+					if (base.def.consumedElements == null || base.def.consumedElements.Length == 0)
+					{
+						return;
+					}
+					this.absorberHandle = Game.Instance.plantElementAbsorbers.Add(this.storage, base.def.consumedElements);
+				}
+				else
+				{
+					this.absorberHandle = Game.Instance.plantElementAbsorbers.Remove(this.absorberHandle);
+				}
 			}
-			if (base.def.consumedElements == null || base.def.consumedElements.Length == 0)
-			{
-				return;
-			}
-			GameObject gameObject = base.smi.gameObject;
-			this.absorberHandle = Game.Instance.plantElementAbsorbers.Add(this.storage, base.def.consumedElements);
-		}
-
-		public void StopAbsorbing()
-		{
-			if (!this.absorberHandle.IsValid())
-			{
-				return;
-			}
-			this.absorberHandle = Game.Instance.plantElementAbsorbers.Remove(this.absorberHandle);
 		}
 
 		public AttributeModifier consumptionRate;

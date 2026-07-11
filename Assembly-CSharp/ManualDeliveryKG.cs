@@ -112,22 +112,30 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 	private void RequestDelivery()
 	{
 		float fetchAmount = this.GetFetchAmount();
-		if (fetchAmount > 0f && (this.fetchList == null || this.fetchList.IsComplete))
+		if (fetchAmount > 0f)
 		{
-			if (this.fetchList != null)
+			if (this.fetchList == null || this.fetchList.IsComplete)
 			{
-				this.fetchList.Cancel("Request Delivery");
+				if (this.fetchList != null)
+				{
+					this.fetchList.Cancel("Request Delivery");
+				}
+				ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
+				this.fetchList = new FetchList2(this.storage, byHash, this.choreTags);
+				this.fetchList.ShowStatusItem = this.ShowStatusItem;
+				this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
+				FetchList2 fetchList = this.fetchList;
+				Tag[] array = new Tag[] { this.requestedItemTag };
+				float num = fetchAmount;
+				FetchOrder2.OperationalRequirement operationalRequirement = this.operationalRequirement;
+				fetchList.Add(array, null, null, num, operationalRequirement);
+				this.fetchList.Submit(null, false);
 			}
-			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
-			this.fetchList = new FetchList2(this.storage, byHash, this.choreTags);
-			this.fetchList.ShowStatusItem = this.ShowStatusItem;
-			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
-			FetchList2 fetchList = this.fetchList;
-			Tag[] array = new Tag[] { this.requestedItemTag };
-			float num = fetchAmount;
-			FetchOrder2.OperationalRequirement operationalRequirement = this.operationalRequirement;
-			fetchList.Add(array, null, null, num, operationalRequirement);
-			this.fetchList.Submit(null, false);
+		}
+		else if (this.fetchList != null)
+		{
+			this.fetchList.Cancel("Storage is full");
+			this.fetchList = null;
 		}
 	}
 
@@ -161,6 +169,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		if (storage == this.storage)
 		{
 			this.UpdateFilteredItems();
+			this.UpdateDeliveryState();
 		}
 	}
 

@@ -1,10 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 using UnityEngine;
 
 public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 {
 	public List<RocketModule> rocketModules { get; private set; }
+
+	public void DEBUG_TraceModuleDestruction(string moduleName, string state, string stackTrace)
+	{
+		if (this.DEBUG_ModuleDestructions == null)
+		{
+			this.DEBUG_ModuleDestructions = new List<Tuple<string, string, string>>();
+		}
+		this.DEBUG_ModuleDestructions.Add(new Tuple<string, string, string>(moduleName, state, stackTrace));
+	}
+
+	[ContextMenu("Dump Module Destructions")]
+	private void DEBUG_DumpModuleDestructions()
+	{
+		if (this.DEBUG_ModuleDestructions == null || this.DEBUG_ModuleDestructions.Count == 0)
+		{
+			Output.Log(new object[] { "Sorry, no logged module destructions. :(" });
+			return;
+		}
+		foreach (Tuple<string, string, string> tuple in this.DEBUG_ModuleDestructions)
+		{
+			Output.Log(new object[] { "\n\nBEGIN MODULE DUMP\n", tuple.first, ">", tuple.second, "\n", tuple.third, "\nEND MODULE DUMP\n\n" });
+		}
+	}
 
 	protected override void OnPrefabInit()
 	{
@@ -44,11 +68,11 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		{
 			return;
 		}
-		SpaceDestination activeMission = SpacecraftManager.instance.GetActiveMission(spacecraftFromLaunchConditionManager.id);
+		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(spacecraftFromLaunchConditionManager.id);
 		LogicPorts component = base.gameObject.GetComponent<LogicPorts>();
-		if (component.GetInputValue(this.triggerPort) == 1 && activeMission != null && activeMission.id != -1)
+		if (component.GetInputValue(this.triggerPort) == 1 && spacecraftDestination != null && spacecraftDestination.id != -1)
 		{
-			this.Launch(activeMission);
+			this.Launch(spacecraftDestination);
 		}
 	}
 
@@ -103,12 +127,17 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		{
 			global::Debug.LogError("Null destination passed to launch", null);
 		}
+		Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
+		if (spacecraftFromLaunchConditionManager.state != Spacecraft.MissionState.Grounded)
+		{
+			return;
+		}
 		if (this.CheckReadyToLaunch() && this.CheckAbleToFly())
 		{
 			this.launchable.Trigger(-1056989049, null);
-			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
-			spacecraftFromLaunchConditionManager.SetState(Spacecraft.MissionState.Underway);
-			SpacecraftManager.instance.savedSpacecraftDestinations[spacecraftFromLaunchConditionManager.id] = destination.id;
+			SpacecraftManager.instance.SetSpacecraftDestination(this, destination);
+			Spacecraft spacecraftFromLaunchConditionManager2 = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
+			spacecraftFromLaunchConditionManager2.BeginMission(destination);
 		}
 	}
 
@@ -156,9 +185,17 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	{
 		bool flag = this.CheckReadyToLaunch();
 		LogicPorts component = base.gameObject.GetComponent<LogicPorts>();
-		component.SendSignal(this.statusPort, (!flag) ? 0 : 1);
 		if (flag)
 		{
+			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
+			if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Grounded || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Launching)
+			{
+				component.SendSignal(this.statusPort, 1);
+			}
+			else
+			{
+				component.SendSignal(this.statusPort, 0);
+			}
 			KSelectable component2 = base.GetComponent<KSelectable>();
 			foreach (RocketModule rocketModule in this.rocketModules)
 			{
@@ -183,6 +220,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		else
 		{
 			this.ClearFlightStatuses();
+			component.SendSignal(this.statusPort, 0);
 		}
 	}
 
@@ -191,6 +229,9 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	public HashedString statusPort;
 
 	private LaunchableRocket launchable;
+
+	[Serialize]
+	private List<Tuple<string, string, string>> DEBUG_ModuleDestructions;
 
 	private Dictionary<RocketFlightCondition, Guid> conditionStatuses = new Dictionary<RocketFlightCondition, Guid>();
 }

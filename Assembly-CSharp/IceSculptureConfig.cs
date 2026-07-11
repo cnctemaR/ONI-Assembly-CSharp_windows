@@ -20,15 +20,16 @@ public class IceSculptureConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, new EffectorValues
 		{
-			amount = 10,
-			radius = 10
+			amount = 20,
+			radius = 8
 		}, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.ViewMode = SimViewMode.Decor;
+		buildingDef.ViewMode = OverlayModes.Decor.ID;
 		buildingDef.DefaultAnimState = "slab";
+		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		return buildingDef;
 	}
 
@@ -41,10 +42,9 @@ public class IceSculptureConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		Artable artable = go.AddComponent<Sculpture>();
-		artable.requiredRolePerk = RoleManager.rolePerks.CanArt.id;
-		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.NAME, "slab", 0, 0, false, Artable.Status.Ready));
-		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.POORQUALITYNAME, "crap", 0, 5, false, Artable.Status.Ugly));
-		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.AVERAGEQUALITYNAME, "idle", 2, 15, true, Artable.Status.Okay));
+		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.NAME, "slab", 0, false, Artable.Status.Ready));
+		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.POORQUALITYNAME, "crap", 5, false, Artable.Status.Ugly));
+		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.AVERAGEQUALITYNAME, "idle", 10, true, Artable.Status.Okay));
 	}
 
 	public const string ID = "IceSculpture";

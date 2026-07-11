@@ -162,7 +162,7 @@ public class GroundMasks : ScriptableObject
 							uvdata2 = new GroundMasks.UVData(uvdata.br, uvdata.tr, uvdata.bl, uvdata.tl);
 							break;
 						default:
-							Output.LogError(new object[] { "Unhandled rotation case" });
+							Output.LogError("Unhandled rotation case");
 							break;
 						}
 						array[j] = uvdata2;

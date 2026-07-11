@@ -86,7 +86,7 @@ public class DiseaseInfoScreen : TargetScreen
 					AttributeModifier currentImmuneModifier = smi.GetCurrentImmuneModifier(disease);
 					if (currentImmuneModifier != null)
 					{
-						this.immuneSystemPanel.SetLabel("disease_rate2_" + disease.Id, string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2, currentImmuneModifier.GetFormattedString(this.selectedTarget, false), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2_TOOLTIP, currentImmuneModifier.GetFormattedString(this.selectedTarget, false), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))));
+						this.immuneSystemPanel.SetLabel("disease_rate2_" + disease.Id, string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2, currentImmuneModifier.GetFormattedString(this.selectedTarget), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2_TOOLTIP, currentImmuneModifier.GetFormattedString(this.selectedTarget), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))));
 					}
 				}
 			}
@@ -224,11 +224,11 @@ public class DiseaseInfoScreen : TargetScreen
 		{
 			if (num5 > 0f)
 			{
-				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.DIE_TOOLTIP);
+				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.DIE_TOOLTIP);
 			}
 			else
 			{
-				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP);
+				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP);
 			}
 		}
 	}

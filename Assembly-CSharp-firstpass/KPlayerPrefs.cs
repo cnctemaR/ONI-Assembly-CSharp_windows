@@ -23,7 +23,7 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 				KPlayerPrefs.PATH = KPlayerPrefs.GetPath();
 				try
 				{
-					YamlIO<KPlayerPrefs>.LoadFile(KPlayerPrefs.PATH);
+					YamlIO<KPlayerPrefs>.LoadFile(KPlayerPrefs.PATH, null);
 				}
 				catch
 				{
@@ -62,7 +62,7 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 	{
 		try
 		{
-			KPlayerPrefs.instance.Save(KPlayerPrefs.PATH);
+			KPlayerPrefs.instance.Save(KPlayerPrefs.PATH, null);
 		}
 		catch (Exception ex)
 		{

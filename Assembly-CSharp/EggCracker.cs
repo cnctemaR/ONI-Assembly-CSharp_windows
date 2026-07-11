@@ -11,8 +11,8 @@ public class EggCracker : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		RefineryWorkable refineryWorkable = this.workable;
-		refineryWorkable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(refineryWorkable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+		ComplexFabricatorWorkable complexFabricatorWorkable = this.workable;
+		complexFabricatorWorkable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(complexFabricatorWorkable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
 	}
 
 	protected override void OnCleanUp()
@@ -26,7 +26,7 @@ public class EggCracker : KMonoBehaviour
 	{
 		if (e == Workable.WorkableEvent.WorkStarted)
 		{
-			Refinery.MachineOrder currentMachineOrder = this.refinery.CurrentMachineOrder;
+			ComplexFabricator.MachineOrder currentMachineOrder = this.refinery.CurrentMachineOrder;
 			if (currentMachineOrder != null)
 			{
 				ComplexRecipe.RecipeElement[] ingredients = currentMachineOrder.parentOrder.recipe.ingredients;
@@ -73,10 +73,10 @@ public class EggCracker : KMonoBehaviour
 	}
 
 	[MyCmpReq]
-	private Refinery refinery;
+	private ComplexFabricator refinery;
 
 	[MyCmpReq]
-	private RefineryWorkable workable;
+	private ComplexFabricatorWorkable workable;
 
 	private KBatchedAnimTracker tracker;
 

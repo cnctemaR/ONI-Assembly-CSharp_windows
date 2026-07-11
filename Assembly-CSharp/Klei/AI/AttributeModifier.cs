@@ -40,7 +40,7 @@ namespace Klei.AI
 
 		public void SetValue(float value)
 		{
-			DebugUtil.DevAssert(!this.IsReadonly, "Assert!", string.Empty, string.Empty);
+			DebugUtil.DevAssert(!this.IsReadonly, new object[0]);
 			this.Value = value;
 		}
 
@@ -49,11 +49,11 @@ namespace Klei.AI
 			return (this.DescriptionCB == null) ? this.Description : this.DescriptionCB();
 		}
 
-		public string GetFormattedString(GameObject parent_instance, bool ignore_default_formatter = false)
+		public string GetFormattedString(GameObject parent_instance)
 		{
 			IAttributeFormatter attributeFormatter = null;
 			Attribute attribute = Db.Get().Attributes.TryGet(this.AttributeId);
-			if (!ignore_default_formatter)
+			if (!this.IsMultiplier)
 			{
 				if (attribute != null)
 				{

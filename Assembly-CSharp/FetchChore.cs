@@ -6,15 +6,15 @@ using UnityEngine;
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
 	public FetchChore(ChoreType choreType, Storage destination, float amount, Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0, Tag[] chore_tags = null)
-		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 0, false, true, priority_mod, chore_tags)
+		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 5, false, true, priority_mod, chore_tags)
 	{
 		if (choreType == null)
 		{
-			Output.LogError(new object[] { "You must specify a chore type for fetching!" });
+			Output.LogError("You must specify a chore type for fetching!");
 		}
 		if (amount <= 0f)
 		{
-			Output.LogError(new object[] { "Requesting an invalid FetchChore amount" });
+			Output.LogError("Requesting an invalid FetchChore amount");
 		}
 		base.SetPrioritizable((!(destination.prioritizable != null)) ? destination.GetComponent<Prioritizable>() : destination.prioritizable);
 		this.smi = new FetchChore.StatesInstance(this);
@@ -25,7 +25,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.requiredTagBits = new TagBits(required_tags);
 		this.forbiddenTagBits = new TagBits(forbidden_tags);
 		this.tagBitsHash = this.tagBits.GetHashCode();
-		DebugUtil.DevAssert(!this.tagBits.HasAny(~FetchManager.disallowedTagMask), "Fetch chore fetching invalid tags.", string.Empty, string.Empty);
+		DebugUtil.DevAssert(!this.tagBits.HasAny(ref FetchManager.disallowedTagBits), new object[] { "Fetch chore fetching invalid tags." });
 		if (destination.GetOnlyFetchMarkedItems())
 		{
 			this.requiredTagBits.SetTag(GameTags.Garbage);
@@ -158,7 +158,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				pickupable = Game.Instance.fetchManager.FindFetchTarget(consumer_state.worker, this.destination, this.tagBits, this.requiredTagBits, this.forbiddenTagBits, this.originalAmount);
+				pickupable = Game.Instance.fetchManager.FindFetchTarget(this.destination, ref this.tagBits, ref this.requiredTagBits, ref this.forbiddenTagBits, this.originalAmount);
 			}
 		}
 		return pickupable;
@@ -278,10 +278,15 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				flag = FetchManager.IsFetchablePickup(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, context.consumerState.storage);
+				flag = FetchManager.IsFetchablePickup(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, ref fetchChore.tagBits, ref fetchChore.requiredTagBits, ref fetchChore.forbiddenTagBits, context.consumerState.storage);
 			}
 			if (flag)
 			{
+				if (pickupable == null)
+				{
+					global::Debug.Log(string.Format("Failed to find fetch target for {0}", fetchChore.destination), null);
+					return false;
+				}
 				context.data = pickupable;
 				int num;
 				if (context.consumerState.consumer.GetNavigationCost(pickupable, out num))

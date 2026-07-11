@@ -1,5 +1,4 @@
 ﻿using System;
-using OverlayModes;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -25,13 +24,13 @@ public class LogicMemoryConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.PermittedRotations = PermittedRotations.R360;
-		buildingDef.ViewMode = SimViewMode.Logic;
+		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
 		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_on", NOISE_POLLUTION.NOISY.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("logic_memory_kanim", "PowerMemory_off", NOISE_POLLUTION.NOISY.TIER3);
-		GeneratedBuildings.RegisterWithOverlay(Logic.HighlightItemIDs, LogicMemoryConfig.ID);
+		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, LogicMemoryConfig.ID);
 		return buildingDef;
 	}
 

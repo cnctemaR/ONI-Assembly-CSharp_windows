@@ -9,7 +9,9 @@ public class Components
 
 	public static Components.Cmps<MinionIdentity> MinionIdentities = new Components.Cmps<MinionIdentity>();
 
-	public static Components.Cmps<MinionIdentity> StoredMinionIdentities = new Components.Cmps<MinionIdentity>();
+	public static Components.Cmps<StoredMinionIdentity> StoredMinionIdentities = new Components.Cmps<StoredMinionIdentity>();
+
+	public static Components.Cmps<MinionStorage> MinionStorages = new Components.Cmps<MinionStorage>();
 
 	public static Components.Cmps<Sleepable> Sleepables = new Components.Cmps<Sleepable>();
 
@@ -90,6 +92,10 @@ public class Components
 	public static Components.Cmps<AttachableBuilding> AttachableBuildings = new Components.Cmps<AttachableBuilding>();
 
 	public static Components.Cmps<BuildingAttachPoint> BuildingAttachPoints = new Components.Cmps<BuildingAttachPoint>();
+
+	public static Components.Cmps<MinionAssignablesProxy> MinionAssignablesProxy = new Components.Cmps<MinionAssignablesProxy>();
+
+	public static Components.Cmps<ComplexFabricator> ComplexFabricators = new Components.Cmps<ComplexFabricator>();
 
 	public class Cmps<T> : ICollection, IEnumerable
 	{

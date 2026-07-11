@@ -323,6 +323,8 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 
 	public PathFinder.PotentialPath.Flags PathFlag;
 
+	public KAnimFile interactAnim = Assets.GetAnim("anim_equip_clothing_kanim");
+
 	private static readonly EventSystem.IntraObjectHandler<SuitMarker> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<SuitMarker>(delegate(SuitMarker component, object data)
 	{
 		component.OnRefreshUserMenu(data);
@@ -363,7 +365,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			{
 				return false;
 			}
-			if (new_reactor.GetComponent<Equipment>().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
+			if (new_reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
 			{
 				return (num >= 0 || !component.IsRotated) && (num <= 0 || component.IsRotated);
 			}
@@ -374,7 +376,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 		{
 			this.startTime = Time.time;
 			KBatchedAnimController component = this.reactor.GetComponent<KBatchedAnimController>();
-			component.AddAnimOverrides(Assets.GetAnim("anim_equip_clothing_kanim"), 1f);
+			component.AddAnimOverrides(this.suitMarker.interactAnim, 1f);
 			component.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
 			component.Queue("working_loop", KAnim.PlayMode.Once, 1f, 0f);
 			component.Queue("working_pst", KAnim.PlayMode.Once, 1f, 0f);
@@ -390,6 +392,12 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 
 		public override void Update(float dt)
 		{
+			Rotatable component = this.suitMarker.GetComponent<Rotatable>();
+			Facing facing = ((!this.reactor) ? null : this.reactor.GetComponent<Facing>());
+			if (facing)
+			{
+				facing.SetFacing(component.GetOrientation() == Orientation.FlipH);
+			}
 			if (Time.time - this.startTime > 2.8f)
 			{
 				this.Run();
@@ -402,8 +410,8 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			if (this.reactor != null)
 			{
 				GameObject reactor = this.reactor;
-				bool flag = !reactor.GetComponent<Equipment>().IsSlotOccupied(Db.Get().AssignableSlots.Suit);
-				reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(Assets.GetAnim("anim_equip_clothing_kanim"));
+				bool flag = !reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit);
+				reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(this.suitMarker.interactAnim);
 				if (this.suitMarker != null)
 				{
 					bool flag2 = false;
@@ -418,13 +426,13 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 							KPrefabID fullyChargedOutfit = suitLocker.GetFullyChargedOutfit();
 							if (fullyChargedOutfit != null && flag)
 							{
-								suitLocker.EquipTo(reactor.GetComponent<Equipment>());
+								suitLocker.EquipTo(reactor.GetComponent<MinionIdentity>().GetEquipment());
 								flag2 = true;
 								break;
 							}
 							if (!flag && suitLocker.CanDropOffSuit())
 							{
-								suitLocker.UnequipFrom(reactor.GetComponent<Equipment>());
+								suitLocker.UnequipFrom(reactor.GetComponent<MinionIdentity>().GetEquipment());
 								flag2 = true;
 								break;
 							}
@@ -433,7 +441,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 					}
 					if (!flag2 && !flag)
 					{
-						Assignable assignable = reactor.GetComponent<Equipment>().GetAssignable(Db.Get().AssignableSlots.Suit);
+						Assignable assignable = reactor.GetComponent<MinionIdentity>().GetEquipment().GetAssignable(Db.Get().AssignableSlots.Suit);
 						assignable.Unassign();
 						Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null);
 						assignable.GetComponent<Notifier>().Add(notification, string.Empty);
@@ -446,7 +454,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 		{
 			if (this.reactor != null)
 			{
-				this.reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(Assets.GetAnim("anim_equip_clothing_kanim"));
+				this.reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(this.suitMarker.interactAnim);
 			}
 		}
 

@@ -10,7 +10,8 @@ public class ClosestEdibleSensor : Sensor
 
 	public override void Update()
 	{
-		Pickupable pickupable = Game.Instance.fetchManager.FindEdibleFetchTarget(this.worker, base.GetComponent<Storage>(), new TagBits(ClosestEdibleSensor.edibleTag), default(TagBits), new TagBits(base.GetComponent<ConsumableConsumer>().forbiddenTags), 0f);
+		TagBits tagBits = new TagBits(base.GetComponent<ConsumableConsumer>().forbiddenTags);
+		Pickupable pickupable = Game.Instance.fetchManager.FindEdibleFetchTarget(base.GetComponent<Storage>(), ref ClosestEdibleSensor.edibleTagBits, ref TagBits.None, ref tagBits, 0f);
 		bool flag = this.edibleInReachButNotPermitted;
 		Edible edible = null;
 		bool flag2 = false;
@@ -22,7 +23,7 @@ public class ClosestEdibleSensor : Sensor
 		}
 		else
 		{
-			Pickupable pickupable2 = Game.Instance.fetchManager.FindFetchTarget(this.worker, base.GetComponent<Storage>(), new TagBits(ClosestEdibleSensor.edibleTag), default(TagBits), default(TagBits), 0f);
+			Pickupable pickupable2 = Game.Instance.fetchManager.FindFetchTarget(base.GetComponent<Storage>(), ref ClosestEdibleSensor.edibleTagBits, ref TagBits.None, ref TagBits.None, 0f);
 			flag = pickupable2 != null;
 		}
 		if (edible != this.edible || this.hasEdible != flag2)
@@ -39,7 +40,7 @@ public class ClosestEdibleSensor : Sensor
 		return this.edible;
 	}
 
-	private static Tag[] edibleTag = new Tag[] { GameTags.Edible };
+	private static TagBits edibleTagBits = new TagBits(GameTags.Edible);
 
 	private Edible edible;
 

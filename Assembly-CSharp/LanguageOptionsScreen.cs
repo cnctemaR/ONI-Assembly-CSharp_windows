@@ -439,14 +439,14 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 			{
 				PublishedFileId = item.m_PublishedFileId,
 				LastModified = lastModified.ToFileTimeUtc()
-			}.Save(LanguageOptionsScreen.InstalledLanguageData.FilePath());
+			}.Save(LanguageOptionsScreen.InstalledLanguageData.FilePath(), null);
 		}
 
 		public static void Get(out PublishedFileId_t item, out global::System.DateTime lastModified)
 		{
 			if (LanguageOptionsScreen.InstalledLanguageData.Exists())
 			{
-				LanguageOptionsScreen.InstalledLanguageData installedLanguageData = YamlIO<LanguageOptionsScreen.InstalledLanguageData>.LoadFile(LanguageOptionsScreen.InstalledLanguageData.FilePath());
+				LanguageOptionsScreen.InstalledLanguageData installedLanguageData = YamlIO<LanguageOptionsScreen.InstalledLanguageData>.LoadFile(LanguageOptionsScreen.InstalledLanguageData.FilePath(), null);
 				if (installedLanguageData != null)
 				{
 					lastModified = global::System.DateTime.FromFileTimeUtc(installedLanguageData.LastModified);

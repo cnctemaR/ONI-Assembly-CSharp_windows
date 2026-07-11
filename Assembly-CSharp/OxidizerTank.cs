@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
-using STRINGS;
-using TUNING;
 using UnityEngine;
 
-public class OxidizerTank : Storage, ISingleSliderControl, ISliderControl
+public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 {
 	public bool IsSuspended
 	{
@@ -15,7 +13,7 @@ public class OxidizerTank : Storage, ISingleSliderControl, ISliderControl
 		}
 	}
 
-	public float TargetFillMass
+	public float UserMaxCapacity
 	{
 		get
 		{
@@ -24,73 +22,58 @@ public class OxidizerTank : Storage, ISingleSliderControl, ISliderControl
 		set
 		{
 			this.targetFillMass = value;
-			this.capacityKg = this.targetFillMass;
-			float num = base.MassStored();
-			if (this.capacityKg < num)
+			this.storage.capacityKg = this.targetFillMass;
+			ConduitConsumer component = base.GetComponent<ConduitConsumer>();
+			if (component != null)
 			{
-				base.DropAll(false);
+				component.capacityKG = this.targetFillMass;
 			}
+			ManualDeliveryKG component2 = base.GetComponent<ManualDeliveryKG>();
+			if (component2 != null)
+			{
+				component2.capacity = (component2.refillMass = this.targetFillMass);
+			}
+			base.Trigger(-945020481, this);
 		}
 	}
 
-	public float GetSliderMin(int index)
-	{
-		return 0f;
-	}
-
-	public float GetSliderMax(int index)
-	{
-		return 2700f;
-	}
-
-	public float GetSliderValue(int index)
-	{
-		return this.TargetFillMass;
-	}
-
-	public void SetSliderValue(float mass, int index)
-	{
-		this.TargetFillMass = mass;
-	}
-
-	public string SliderTitleKey
+	public float MinCapacity
 	{
 		get
 		{
-			return "STRINGS.BUILDINGS.PREFABS.OXIDIZERTANK.NAME";
+			return 0f;
 		}
 	}
 
-	public string GetSliderTooltipKey(int index)
-	{
-		return "STRINGS.UI.UISIDESCREENS.OXIDIZERTANK.FUELAMOUNT";
-	}
-
-	public string SliderUnits
+	public float MaxCapacity
 	{
 		get
 		{
-			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+			return 2700f;
 		}
 	}
 
-	public Tag[] OxidizerTypes
+	public float AmountStored
 	{
 		get
 		{
-			return this.oxidizerTypes;
+			return this.storage.MassStored();
 		}
-		set
+	}
+
+	public bool WholeValues
+	{
+		get
 		{
-			this.oxidizerTypes = value;
-			if (this.storageFilters == null)
-			{
-				this.storageFilters = new List<Tag>();
-			}
-			foreach (Tag tag in this.oxidizerTypes)
-			{
-				this.storageFilters.Add(tag);
-			}
+			return false;
+		}
+	}
+
+	public LocString CapacityUnits
+	{
+		get
+		{
+			return GameUtil.GetCurrentMassUnit(false);
 		}
 	}
 
@@ -102,36 +85,62 @@ public class OxidizerTank : Storage, ISingleSliderControl, ISliderControl
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.GetComponent<KBatchedAnimController>().Play("grounded", KAnim.PlayMode.Loop, 1f, 0f);
-		base.gameObject.Subscribe(1366341636, new Action<object>(this.OnReturn));
+		this.UserMaxCapacity = this.UserMaxCapacity;
+		base.Subscribe<OxidizerTank>(1366341636, OxidizerTank.OnReturnRocketDelegate);
+		base.Subscribe<OxidizerTank>(-1697596308, OxidizerTank.OnStorageChangeDelegate);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
-		base.Subscribe(-1697596308, delegate(object data)
-		{
-			this.meter.SetPositionPercent(base.MassStored() / this.capacityKg);
-		});
 	}
 
+	public float MassStored()
+	{
+		return this.storage.MassStored();
+	}
+
+	public float GetTotalOxidizerAvailable()
+	{
+		float num = 0f;
+		foreach (Tag tag in this.oxidizerTypes)
+		{
+			num += this.storage.GetAmountAvailable(tag);
+		}
+		return num;
+	}
+
+	public Dictionary<Tag, float> GetOxidizersAvailable()
+	{
+		Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
+		foreach (Tag tag in this.oxidizerTypes)
+		{
+			dictionary[tag] = this.storage.GetAmountAvailable(tag);
+		}
+		return dictionary;
+	}
+
+	[ContextMenu("Fill Tank")]
 	public void FillTank(SimHashes element)
 	{
 		if (ElementLoader.FindElementByHash(element).IsLiquid)
 		{
-			base.AddLiquid(element, this.targetFillMass, ElementLoader.FindElementByHash(element).defaultValues.temperature, 0, 0, false, true);
+			this.storage.AddLiquid(element, this.targetFillMass, ElementLoader.FindElementByHash(element).defaultValues.temperature, 0, 0, false, true);
 		}
 		else if (ElementLoader.FindElementByHash(element).IsSolid)
 		{
-			GameObject gameObject = ElementLoader.FindElementByHash(element).substance.SpawnResource(base.gameObject.transform.GetPosition(), this.TargetFillMass, 300f, byte.MaxValue, 0, false, false);
-			base.Store(gameObject, false, false, true, false);
+			GameObject gameObject = ElementLoader.FindElementByHash(element).substance.SpawnResource(base.gameObject.transform.GetPosition(), this.targetFillMass, 300f, byte.MaxValue, 0, false, false);
+			this.storage.Store(gameObject, false, false, true, false);
 		}
+	}
+
+	private void OnStorageChange(object data)
+	{
+		this.meter.SetPositionPercent(this.storage.MassStored() / this.storage.capacityKg);
 	}
 
 	private void OnReturn(object data)
 	{
-		for (int i = this.items.Count - 1; i >= 0; i--)
-		{
-			Util.KDestroyGameObject(this.items[i]);
-		}
-		this.items.Clear();
+		this.storage.ConsumeAllIgnoringDisease();
 	}
+
+	public Storage storage;
 
 	private MeterController meter;
 
@@ -143,9 +152,17 @@ public class OxidizerTank : Storage, ISingleSliderControl, ISliderControl
 	[SerializeField]
 	private Tag[] oxidizerTypes = new Tag[]
 	{
-		"Oxylite".ToTag(),
-		"LiquidOxygen".ToTag()
+		SimHashes.OxyRock.CreateTag(),
+		SimHashes.LiquidOxygen.CreateTag()
 	};
 
-	public float minimumLaunchMass = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.OXIDIZER_TANK_OXIDIZER_MASS[0];
+	private static readonly EventSystem.IntraObjectHandler<OxidizerTank> OnReturnRocketDelegate = new EventSystem.IntraObjectHandler<OxidizerTank>(delegate(OxidizerTank component, object data)
+	{
+		component.OnReturn(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<OxidizerTank> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<OxidizerTank>(delegate(OxidizerTank component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 }

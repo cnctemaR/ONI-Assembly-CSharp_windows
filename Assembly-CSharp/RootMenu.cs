@@ -91,7 +91,7 @@ public class RootMenu : KScreen
 		{
 			this.selectedGO = gameObject;
 			this.CloseSubMenus();
-			if (this.selectedGO != null && this.selectedGO.GetComponent<KPrefabID>() != null)
+			if (this.selectedGO != null && (this.selectedGO.GetComponent<KPrefabID>() != null || this.selectedGO.GetComponent<CellSelectionObject>()))
 			{
 				this.AddSubMenu(this.detailsScreen);
 				this.detailsScreen.Refresh(this.selectedGO);

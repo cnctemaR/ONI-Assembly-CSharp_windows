@@ -162,6 +162,7 @@ public class WiltCondition : KMonoBehaviour
 	{
 		this.wiltSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
+		component.GetComponent<KPrefabID>().AddTag(GameTags.Wilting);
 		if (!this.wilting)
 		{
 			this.wilting = true;
@@ -190,7 +191,6 @@ public class WiltCondition : KMonoBehaviour
 				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowing, this);
 			}
 		}
-		component.GetComponent<KPrefabID>().AddTag(GameTags.Wilting);
 	}
 
 	public string WiltCausesString()
@@ -226,12 +226,12 @@ public class WiltCondition : KMonoBehaviour
 		this.recoverSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
 		this.wilting = false;
-		base.Trigger(712767498, null);
 		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, false);
 		component.RemoveStatusItem(Db.Get().CreatureStatusItems.Wilting, false);
 		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowing, false);
 		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowingDomestic, false);
 		component.GetComponent<KPrefabID>().RemoveTag(GameTags.Wilting);
+		base.Trigger(712767498, null);
 	}
 
 	[MyCmpGet]

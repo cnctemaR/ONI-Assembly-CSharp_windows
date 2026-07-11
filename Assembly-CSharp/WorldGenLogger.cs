@@ -4,6 +4,6 @@ public static class WorldGenLogger
 {
 	public static void LogException(string message, string stack)
 	{
-		Output.LogError(new object[] { message + "\n" + stack });
+		Output.LogError(message + "\n" + stack);
 	}
 }

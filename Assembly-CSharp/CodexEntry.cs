@@ -25,7 +25,7 @@ public class CodexEntry : YamlIO<CodexEntry>
 
 	public List<ContentContainer> contentContainers { get; set; }
 
-	public CodexWidget GetFirstWidget()
+	public ICodexWidget GetFirstWidget()
 	{
 		for (int i = 0; i < this.contentContainers.Count; i++)
 		{

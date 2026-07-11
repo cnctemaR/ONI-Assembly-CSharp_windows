@@ -49,8 +49,8 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	private void OnEquipped(object data)
 	{
 		Equipment equipment = (Equipment)data;
-		NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.gameObject, new Func<float>(this.PercentFull), true);
-		OxygenBreather component = equipment.GetComponent<OxygenBreather>();
+		NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.GetComponent<MinionAssignablesProxy>().GetTargetGameObject(), new Func<float>(this.PercentFull), true);
+		OxygenBreather component = equipment.GetComponent<MinionAssignablesProxy>().GetTargetGameObject().GetComponent<OxygenBreather>();
 		if (component != null)
 		{
 			component.SetGasProvider(this);
@@ -62,8 +62,8 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		Equipment equipment = (Equipment)data;
 		if (!equipment.destroyed)
 		{
-			NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.gameObject, new Func<float>(this.PercentFull), false);
-			OxygenBreather component = equipment.GetComponent<OxygenBreather>();
+			NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.GetComponent<MinionAssignablesProxy>().GetTargetGameObject(), new Func<float>(this.PercentFull), false);
+			OxygenBreather component = equipment.GetComponent<MinionAssignablesProxy>().GetTargetGameObject().GetComponent<OxygenBreather>();
 			if (component != null)
 			{
 				component.SetGasProvider(new GasBreatherFromWorldProvider());

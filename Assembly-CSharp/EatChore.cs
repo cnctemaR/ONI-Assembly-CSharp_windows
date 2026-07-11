@@ -7,7 +7,7 @@ using UnityEngine;
 public class EatChore : Chore<EatChore.StatesInstance>
 {
 	public EatChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
 	{
 		this.smi = new EatChore.StatesInstance(this);
 		this.showAvailabilityInHoverText = false;
@@ -78,12 +78,12 @@ public class EatChore : Chore<EatChore.StatesInstance>
 
 		public void UpdateMessStation()
 		{
-			Ownables component = base.sm.eater.Get(base.smi).GetComponent<Ownables>();
-			List<Assignable> list = Game.Instance.assignmentManager.GetPreferredAssignables(component, Db.Get().AssignableSlots.MessStation);
+			Ownables soleOwner = base.sm.eater.Get(base.smi).GetComponent<MinionIdentity>().GetSoleOwner();
+			List<Assignable> list = Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, Db.Get().AssignableSlots.MessStation);
 			if (list.Count == 0)
 			{
-				component.AutoAssignSlot(Db.Get().AssignableSlots.MessStation);
-				list = Game.Instance.assignmentManager.GetPreferredAssignables(component, Db.Get().AssignableSlots.MessStation);
+				soleOwner.AutoAssignSlot(Db.Get().AssignableSlots.MessStation);
+				list = Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, Db.Get().AssignableSlots.MessStation);
 			}
 			Assignable assignable = ((list.Count <= 0) ? null : list[0]);
 			base.smi.sm.messstation.Set(assignable, base.smi);

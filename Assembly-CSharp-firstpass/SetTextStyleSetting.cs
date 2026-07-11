@@ -22,6 +22,7 @@ public class SetTextStyleSetting : KMonoBehaviour
 		sdfText.fontSize = (float)style.fontSize;
 		sdfText.color = style.textColor;
 		sdfText.font = style.sdfFont;
+		sdfText.fontStyle = style.style;
 	}
 
 	protected override void OnPrefabInit()

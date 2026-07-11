@@ -14,11 +14,11 @@ namespace STRINGS
 
 			public static LocString NO_RESEARCHER_ROLE = "No Researchers assigned";
 
-			public static LocString NO_RESEARCHER_ROLE_TOOLTIP = "The selected research focus requires an advanced type of research to complete\n\nAssign a Duplicant to the Research Assistant job using the Jobs Panel <color=#F44A47>[L]</color> to enable this errand";
+			public static LocString NO_RESEARCHER_ROLE_TOOLTIP = "The selected research focus requires an advanced type of research to complete\n\nAssign a Duplicant to the Research Assistant job using the Jobs Panel <color=#F44A47><b>[J]</b></color> to enable this errand";
 
 			public static LocString MISSING_RESEARCH_STATION = "Missing Research Station";
 
-			public static LocString MISSING_RESEARCH_STATION_TOOLTIP = "The selected research focus requires a {0} to perform\n\nOpen the Stations Tab <color=#F44A47>[=]</color> of the Build Menu to construct one";
+			public static LocString MISSING_RESEARCH_STATION_TOOLTIP = "The selected research focus requires a {0} to perform\n\nOpen the Stations Tab <color=#F44A47><b>[0]</b></color> of the Build Menu to construct one";
 		}
 
 		public class TYPES
@@ -78,14 +78,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Advanced Research Capability";
 
-				public static LocString DESC = "Allows Advanced Research Points to be acculumated, unlocking higher technology tiers.";
+				public static LocString DESC = "Allows Advanced Research Points to be accumulated, unlocking higher technology tiers.";
 			}
 
 			public class GAMMA_RESEARCH_POINT
 			{
 				public static LocString NAME = "Interstellar Research Capability";
 
-				public static LocString DESC = "Allows Interstellar Research Points to be acculumated, unlocking higher technology tiers.";
+				public static LocString DESC = "Allows Interstellar Research Points to be accumulated, unlocking higher technology tiers.";
 			}
 
 			public class CONVEYOR_OVERLAY
@@ -224,13 +224,6 @@ namespace STRINGS
 				public static LocString DESC = "Rudimentary technologies for installing " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " infrastructure.";
 			}
 
-			public class LUXURY
-			{
-				public static LocString NAME = UI.FormatAsLink("Home Luxuries", "LUXURY");
-
-				public static LocString DESC = "Luxury amenities for advanced " + UI.FormatAsLink("Stress", "STRESS") + " reduction.";
-			}
-
 			public class IMPROVEDLIQUIDPIPING
 			{
 				public static LocString NAME = UI.FormatAsLink("Improved Plumbing", "IMPROVEDLIQUIDPIPING");
@@ -291,7 +284,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Power Regulation", "POWERREGULATION");
 
-				public static LocString DESC = "Prevent wasted " + UI.FormatAsLink("Power", "POWER") + " with improved eletrical tools.";
+				public static LocString DESC = "Prevent wasted " + UI.FormatAsLink("Power", "POWER") + " with improved electrical tools.";
 			}
 
 			public class COMBUSTION
@@ -322,6 +315,41 @@ namespace STRINGS
 				public static LocString DESC = "Majorly improve " + UI.FormatAsLink("Decor", "DECOR") + " by allowing Duplicants artistic and emotional expression.";
 			}
 
+			public class CLOTHING
+			{
+				public static LocString NAME = UI.FormatAsLink("Textile Production", "CLOTHING");
+
+				public static LocString DESC = "Allow Duplicants to explore their softer side.";
+			}
+
+			public class ACOUSTICS
+			{
+				public static LocString NAME = UI.FormatAsLink("Acoustics", "ACOUSTICS");
+
+				public static LocString DESC = "Precise control of the audio spectrum allows Duplicants to get funky.";
+			}
+
+			public class LUXURY
+			{
+				public static LocString NAME = UI.FormatAsLink("Home Luxuries", "LUXURY");
+
+				public static LocString DESC = "Luxury amenities for advanced " + UI.FormatAsLink("Stress", "STRESS") + " reduction.";
+			}
+
+			public class FINEART
+			{
+				public static LocString NAME = UI.FormatAsLink("Fine Art", "FINEART");
+
+				public static LocString DESC = "Broader options for artistic " + UI.FormatAsLink("Decor", "DECOR") + " improvements.";
+			}
+
+			public class REFRACTIVEDECOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Advanced Chiselwork", "REFRACTIVEDECOR");
+
+				public static LocString DESC = "Methods for working with high quality art materials.";
+			}
+
 			public class ADVANCEDPOWERREGULATION
 			{
 				public static LocString NAME = UI.FormatAsLink("Advanced Power Regulation", "ADVANCEDPOWERREGULATION");
@@ -333,14 +361,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Plastic Manufacturing", "PLASTICS");
 
-				public static LocString DESC = "Stable, light weight, durable. Plastics are useful in a wide array of applications.";
-			}
-
-			public class CLOTHING
-			{
-				public static LocString NAME = UI.FormatAsLink("Self Expression", "CLOTHING");
-
-				public static LocString DESC = "Produce leisurely luxury items for Duplicants.";
+				public static LocString DESC = "Stable, lightweight, durable. Plastics are useful in a wide array of applications.";
 			}
 
 			public class SUITS
@@ -387,7 +408,7 @@ namespace STRINGS
 
 			public class VALVEMINIATURIZATION
 			{
-				public static LocString NAME = UI.FormatAsLink("Valve Minaturization", "VALVEMINIATURIZATION");
+				public static LocString NAME = UI.FormatAsLink("Valve Miniaturization", "VALVEMINIATURIZATION");
 
 				public static LocString DESC = "Smaller, more efficient pumps for those low-throughput situations.";
 			}
@@ -481,13 +502,6 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Celestial Detection", "SKYDETECTORS");
 
 				public static LocString DESC = "Space: It's not quite as empty as you might think.";
-			}
-
-			public class REFRACTIVEDECOR
-			{
-				public static LocString NAME = UI.FormatAsLink("Refractive Decor", "REFRACTIVEDECOR");
-
-				public static LocString DESC = "The ultimate solution to ugly things? Make them transparent.";
 			}
 
 			public class JETPACKS

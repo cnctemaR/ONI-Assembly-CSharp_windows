@@ -374,6 +374,10 @@ namespace TMPro
 			TMP_TextUtilities.ScreenPointToWorldPointInRectangle(transform, position, camera, out position);
 			for (int i = 0; i < text.textInfo.linkCount; i++)
 			{
+				if (text.textInfo.linkInfo.Length - 1 < i)
+				{
+					break;
+				}
 				TMP_LinkInfo tmp_LinkInfo = text.textInfo.linkInfo[i];
 				bool flag = false;
 				Vector3 vector = Vector3.zero;

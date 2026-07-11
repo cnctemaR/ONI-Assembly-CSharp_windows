@@ -13,9 +13,9 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 		Components.Telescopes.Add(this);
 		if (Telescope.reducedVisibilityStatusItem == null)
 		{
-			Telescope.reducedVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_REDUCED", "BUILDING", "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			Telescope.reducedVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_REDUCED", "BUILDING", "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
 			Telescope.reducedVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
-			Telescope.noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			Telescope.noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
 			Telescope.noVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
 		}
 		this.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
@@ -85,6 +85,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 			return;
 		}
 		OxygenBreather component = worker.GetComponent<OxygenBreather>();
+		KPrefabID component2 = worker.GetComponent<KPrefabID>();
 		if (ev != Workable.WorkableEvent.WorkStarted)
 		{
 			if (ev == Workable.WorkableEvent.WorkStopped)
@@ -92,6 +93,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 				component.SetGasProvider(this.workerGasProvider);
 				component.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
 				base.ShowProgressBar(false);
+				component2.RemoveTag(GameTags.Shaded);
 			}
 		}
 		else
@@ -108,6 +110,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 			this.workerGasProvider = component.GetGasProvider();
 			component.SetGasProvider(this);
 			component.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
+			component2.AddTag(GameTags.Shaded);
 		}
 	}
 
@@ -143,7 +146,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 	{
 		ChoreType research = Db.Get().ChoreTypes.Research;
 		Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-		WorkChore<Telescope> workChore = new WorkChore<Telescope>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		WorkChore<Telescope> workChore = new WorkChore<Telescope>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
 		workChore.AddPrecondition(Telescope.ContainsOxygen, null);
 		return workChore;
 	}

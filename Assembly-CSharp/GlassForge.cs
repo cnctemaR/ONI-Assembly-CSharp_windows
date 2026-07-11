@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class GlassForge : Refinery
+public class GlassForge : ComplexFabricator
 {
 	protected override void OnPrefabInit()
 	{

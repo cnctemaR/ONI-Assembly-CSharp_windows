@@ -16,7 +16,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		Prioritizable.AddRef(base.gameObject);
 		if (CreatureDeliveryPoint.capacityStatusItem == null)
 		{
-			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			CreatureDeliveryPoint.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				IUserControlledCapacity userControlledCapacity = (IUserControlledCapacity)data;
@@ -155,12 +155,6 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	private void OnFetchComplete(FetchOrder2 fetchOrder, Pickupable fetchedItem)
 	{
 		this.RebalanceFetches();
-		if (this.playAnimsOnFetch)
-		{
-			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
-			component.Queue("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-		}
 	}
 
 	private void OnFetchBegun(FetchOrder2 fetchOrder, Pickupable fetchedItem)
@@ -281,27 +275,38 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 			this.root.Update("RefreshCreatureCount", delegate(CreatureDeliveryPoint.SMInstance smi, float dt)
 			{
 				smi.master.RefreshCreatureCount(null);
-			}, UpdateRate.SIM_1000ms, false);
-			this.waiting.EventTransition(GameHashes.OnStorageChange, this.creatureDelivered, (CreatureDeliveryPoint.SMInstance smi) => !smi.GetComponent<Storage>().IsEmpty());
-			this.creatureDelivered.Enter(delegate(CreatureDeliveryPoint.SMInstance smi)
+			}, UpdateRate.SIM_1000ms, false).EventHandler(GameHashes.OnStorageChange, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State.Callback(CreatureDeliveryPoint.States.DropAllCreatures));
+			this.waiting.EnterTransition(this.interact_waiting, (CreatureDeliveryPoint.SMInstance smi) => smi.master.playAnimsOnFetch);
+			this.interact_waiting.WorkableStartTransition((CreatureDeliveryPoint.SMInstance smi) => smi.master.GetComponent<Storage>(), this.interact_delivery);
+			this.interact_delivery.PlayAnim("working_pre").QueueAnim("working_pst", false, null).OnAnimQueueComplete(this.interact_waiting);
+		}
+
+		public static void DropAllCreatures(CreatureDeliveryPoint.SMInstance smi)
+		{
+			Storage component = smi.master.GetComponent<Storage>();
+			if (component.IsEmpty())
 			{
-				Storage component = smi.master.GetComponent<Storage>();
-				List<GameObject> items = component.items;
-				int count = items.Count;
-				int num = Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.spawnOffset);
-				Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Creatures);
-				for (int i = count - 1; i >= 0; i--)
-				{
-					GameObject gameObject = items[i];
-					component.Drop(gameObject);
-					gameObject.transform.SetPosition(vector);
-				}
-				smi.master.RefreshCreatureCount(null);
-			}).GoTo(this.waiting);
+				return;
+			}
+			List<GameObject> items = component.items;
+			int count = items.Count;
+			int num = Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.spawnOffset);
+			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Creatures);
+			for (int i = count - 1; i >= 0; i--)
+			{
+				GameObject gameObject = items[i];
+				component.Drop(gameObject);
+				gameObject.transform.SetPosition(vector);
+				KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+				component2.SetSceneLayer(Grid.SceneLayer.Creatures);
+			}
+			smi.master.RefreshCreatureCount(null);
 		}
 
 		public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State waiting;
 
-		public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State creatureDelivered;
+		public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State interact_waiting;
+
+		public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State interact_delivery;
 	}
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using FMOD.Studio;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class SplashMessageScreen : KMonoBehaviour
 {
@@ -12,6 +14,40 @@ public class SplashMessageScreen : KMonoBehaviour
 			base.gameObject.SetActive(false);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWelcomeScreenSnapshot, STOP_MODE.ALLOWFADEOUT);
 		};
+	}
+
+	private void OnEnable()
+	{
+		LayoutElement component = this.confirmButton.GetComponent<LayoutElement>();
+		LocText componentInChildren = this.confirmButton.GetComponentInChildren<LocText>();
+		if (Screen.width > 2560)
+		{
+			component.minWidth = 720f;
+			component.minHeight = 128f;
+			this.bodyText.minWidth = 840f;
+			componentInChildren.fontSizeMax = 24f;
+		}
+		else if (Screen.width > 1920)
+		{
+			component.minWidth = 720f;
+			component.minHeight = 128f;
+			this.bodyText.minWidth = 700f;
+			componentInChildren.fontSizeMax = 24f;
+		}
+		else if (Screen.width > 1280)
+		{
+			component.minWidth = 440f;
+			component.minHeight = 64f;
+			this.bodyText.minWidth = 480f;
+			componentInChildren.fontSizeMax = 18f;
+		}
+		else
+		{
+			component.minWidth = 300f;
+			component.minHeight = 48f;
+			this.bodyText.minWidth = 300f;
+			componentInChildren.fontSizeMax = 16f;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -29,4 +65,6 @@ public class SplashMessageScreen : KMonoBehaviour
 	}
 
 	public KButton confirmButton;
+
+	public LayoutElement bodyText;
 }

@@ -4,7 +4,7 @@ using STRINGS;
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
 	public TakeMedicineChore(MedicinalPill master)
-		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
 	{
 		this.medicine = master;
 		this.pickupable = this.medicine.GetComponent<Pickupable>();

@@ -1767,7 +1767,7 @@ namespace ProcGenGame
 				WorldGen.data = worldGenSave.data;
 				if (worldGenSave.version.x != 1 || worldGenSave.version.y > 1)
 				{
-					Output.LogError(new object[] { string.Concat(new object[]
+					Output.LogError(string.Concat(new object[]
 					{
 						"LoadWorldGenSim Error! Wrong save version Current: [",
 						1,
@@ -1778,7 +1778,7 @@ namespace ProcGenGame
 						".",
 						worldGenSave.version.y,
 						"]"
-					}) });
+					}));
 					WorldGen.wasLoaded = false;
 				}
 				else

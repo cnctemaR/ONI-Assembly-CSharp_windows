@@ -33,11 +33,11 @@ public class Def : ScriptableObject
 			}
 			if ((item as Element).IsLiquid)
 			{
-				return new Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.debugColour);
+				return new Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.uiColour);
 			}
 			if ((item as Element).IsGas)
 			{
-				return new Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.debugColour);
+				return new Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.uiColour);
 			}
 			return new Tuple<Sprite, Color>(null, Color.clear);
 		}
@@ -48,15 +48,31 @@ public class Def : ScriptableObject
 			{
 				return Def.GetUISprite(ElementLoader.GetElement(gameObject.PrefabID()), animName, centered);
 			}
-			CreatureBrain component = gameObject.GetComponent<CreatureBrain>();
-			if (component != null)
+			CreatureBrain creatureBrain = gameObject.GetComponent<CreatureBrain>();
+			if (creatureBrain != null)
 			{
-				animName = component.symbolPrefix + "ui";
+				animName = creatureBrain.symbolPrefix + "ui";
 			}
-			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-			if (component2)
+			if (gameObject.HasTag(GameTags.Egg))
 			{
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered);
+				IncubationMonitor.Def def = gameObject.GetDef<IncubationMonitor.Def>();
+				if (def != null)
+				{
+					GameObject prefab = Assets.GetPrefab(def.spawnedCreature);
+					if (prefab)
+					{
+						creatureBrain = prefab.GetComponent<CreatureBrain>();
+						if (creatureBrain && !string.IsNullOrEmpty(creatureBrain.symbolPrefix))
+						{
+							animName = creatureBrain.symbolPrefix + animName;
+						}
+					}
+				}
+			}
+			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+			if (component)
+			{
+				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], animName, centered);
 				return new Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (!(uispriteFromMultiObjectAnim != null)) ? Color.clear : Color.white);
 			}
 			if (gameObject.GetComponent<Building>() != null)

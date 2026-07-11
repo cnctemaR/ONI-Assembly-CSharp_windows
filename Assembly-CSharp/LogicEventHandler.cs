@@ -58,7 +58,7 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 		SpeedControlScreen instance = SpeedControlScreen.Instance;
 		if (networkForCell != null && new_value != this.value && instance != null && !instance.IsPaused)
 		{
-			if (KPlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayAutomation) && KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) != 1 && OverlayScreen.Instance.GetMode() != SimViewMode.Logic)
+			if (KPlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayAutomation) && KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayAutomation) != 1 && OverlayScreen.Instance.GetMode() != OverlayModes.Logic.ID)
 			{
 				return;
 			}

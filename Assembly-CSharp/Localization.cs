@@ -131,6 +131,12 @@ public static class Localization
 		return flag;
 	}
 
+	public static Dictionary<string, string> LoadStringsFile(string path, bool isTemplate)
+	{
+		string[] array = File.ReadAllLines(path, Encoding.UTF8);
+		return Localization.ExtractTranslatedStrings(array, isTemplate);
+	}
+
 	private static Dictionary<string, string> ExtractTranslatedStrings(string[] lines, bool isTemplate = false)
 	{
 		Dictionary<string, string> dictionary = new Dictionary<string, string>();

@@ -25,6 +25,7 @@ public class RoleAssignmentRequirements
 		this.HasExperience_MachineTechnician = new PreviousRoleAssignmentRequirement(MachineTechnician.ID);
 		this.HasExperience_PowerTechnician = new PreviousRoleAssignmentRequirement("PowerTechnician");
 		this.HasExperience_JuniorArtist = new PreviousRoleAssignmentRequirement(JuniorArtist.ID);
+		this.HasExperience_Artist = new PreviousRoleAssignmentRequirement(Artist.ID);
 		this.HasExperience_Handyman = new PreviousRoleAssignmentRequirement(Handyman.ID);
 		this.HasExperience_MechatronicsEngineer = new PreviousRoleAssignmentRequirement("MechatronicEngineer");
 		this.HasColonyLeader = new RoleAssignmentRequirement("HasColonyLeader", UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.HAS_COLONY_LEADER.DESCRIPTION, (MinionResume resume) => true);
@@ -106,6 +107,8 @@ public class RoleAssignmentRequirements
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorCook;
 
 	public PreviousRoleAssignmentRequirement HasExperience_JuniorArtist;
+
+	public PreviousRoleAssignmentRequirement HasExperience_Artist;
 
 	public PreviousRoleAssignmentRequirement HasExperience_Handyman;
 

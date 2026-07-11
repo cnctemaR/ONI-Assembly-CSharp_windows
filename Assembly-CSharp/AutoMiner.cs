@@ -132,6 +132,8 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 			return;
 		}
 		Diggable.DoDigTick(this.dig_cell, dt);
+		float num = Grid.Damage[this.dig_cell];
+		this.mining_sounds.SetPercentComplete(num);
 		Vector3 vector = Grid.CellToPosCCC(this.dig_cell, Grid.SceneLayer.FXFront2);
 		vector.z = 0f;
 		Vector3 position = this.arm_go.transform.GetPosition();
@@ -297,6 +299,8 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		}
 	}
 
+	private static HashedString HASH_ROTATION = "rotation";
+
 	[MyCmpReq]
 	private Operational operational;
 
@@ -308,6 +312,9 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 
 	[MyCmpGet]
 	private Rotatable rotatable;
+
+	[MyCmpReq]
+	private MiningSounds mining_sounds;
 
 	public int x;
 
@@ -348,8 +355,6 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 	{
 		component.OnOperationalChanged(data);
 	});
-
-	private static HashedString HASH_ROTATION = "rotation";
 
 	public class Instance : GameStateMachine<AutoMiner.States, AutoMiner.Instance, AutoMiner, object>.GameInstance
 	{

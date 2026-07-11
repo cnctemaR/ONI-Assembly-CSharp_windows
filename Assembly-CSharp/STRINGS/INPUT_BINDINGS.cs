@@ -68,6 +68,8 @@ namespace STRINGS
 
 			public static LocString PLAN12 = "Plan12";
 
+			public static LocString COPYBUILDING = "CopyBuilding";
+
 			public static LocString ZOOMIN = "ZoomIn";
 
 			public static LocString ZOOMOUT = "ZoomOut";
@@ -327,7 +329,7 @@ namespace STRINGS
 
 		public class BASEMENU
 		{
-			public static LocString NAME = "BaseMenu";
+			public static LocString NAME = "Base Menu";
 
 			public static LocString BUILDCATEGORYTILES = "BuildCategoryTiles";
 
@@ -342,7 +344,7 @@ namespace STRINGS
 
 		public class FOODANDAGRICULTUREMENU
 		{
-			public static LocString NAME = "FoodAndAgricultureMenu";
+			public static LocString NAME = "Food And Agriculture Menu";
 
 			public static LocString BUILDCATEGORYFARMING = "BuildCategoryFarming";
 
@@ -353,7 +355,7 @@ namespace STRINGS
 
 		public class HEALTHANDHAPPINESSMENU
 		{
-			public static LocString NAME = "HealthAndHappinessMenu";
+			public static LocString NAME = "Health And Happiness Menu";
 
 			public static LocString BUILDCATEGORYMEDICAL = "BuildCategoryMedical";
 
@@ -368,7 +370,7 @@ namespace STRINGS
 
 		public class INFRASTRUCTUREMENU
 		{
-			public static LocString NAME = "InfrastructureMenu";
+			public static LocString NAME = "Infrastructure Menu";
 
 			public static LocString BUILDCATEGORYWIRES = "BuildCategoryWires";
 
@@ -385,7 +387,7 @@ namespace STRINGS
 
 		public class INDUSTRIALMENU
 		{
-			public static LocString NAME = "IndustrialMenu";
+			public static LocString NAME = "Industrial Menu";
 
 			public static LocString BUILDCATEGORYOXYGEN = "BuildCategoryOxygen";
 
@@ -400,7 +402,7 @@ namespace STRINGS
 
 		public class LOGISTICSMENU
 		{
-			public static LocString NAME = "LogisticsMenu";
+			public static LocString NAME = "Logistics Menu";
 
 			public static LocString BUILDCATEGORYTRAVELTUBES = "BuildCategoryTravelTubes";
 

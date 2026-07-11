@@ -75,7 +75,7 @@ public class UIDupeRandomizer : MonoBehaviour
 		if (accessory != null)
 		{
 			SymbolOverrideController component = minion.GetComponent<SymbolOverrideController>();
-			DebugUtil.Assert(component != null, minion.name + " is missing symbol override controller", string.Empty, string.Empty);
+			DebugUtil.Assert(component != null, minion.name + " is missing symbol override controller");
 			component.TryRemoveSymbolOverride(accessory.slot.targetSymbolId, 0);
 			component.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol, 0);
 			minion.SetSymbolVisiblity(accessory.slot.targetSymbolId, true);

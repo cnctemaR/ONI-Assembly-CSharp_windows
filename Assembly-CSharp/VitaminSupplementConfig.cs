@@ -7,14 +7,8 @@ public class VitaminSupplementConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("VitaminSupplement", ITEMS.PILLS.VITAMINSUPPLEMENT.NAME, ITEMS.PILLS.VITAMINSUPPLEMENT.DESC, 1f, true, Assets.GetAnim("pill_2_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("VitaminSupplement", ITEMS.PILLS.VITAMINSUPPLEMENT.NAME, ITEMS.PILLS.VITAMINSUPPLEMENT.DESC, 1f, true, Assets.GetAnim("pill_2_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, 0, SimHashes.Creature, null);
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.VITAMINSUPPLEMENT);
-		string text = "VitaminSupplement";
-		string text2 = ITEMS.PILLS.VITAMINSUPPLEMENT.NAME;
-		string text3 = ITEMS.PILLS.VITAMINSUPPLEMENT.RECIPEDESC;
-		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, text2, text3, 10).SetFabricator("Apothecary", 40f);
-		recipe.AddIngredient(new Recipe.Ingredient("Carbon", 100f));
-		recipe.AddIngredient(new Recipe.Ingredient(SwampLilyFlowerConfig.ID, 1f));
 		return gameObject;
 	}
 
@@ -27,4 +21,6 @@ public class VitaminSupplementConfig : IEntityConfig
 	}
 
 	public const string ID = "VitaminSupplement";
+
+	public static ComplexRecipe recipe;
 }

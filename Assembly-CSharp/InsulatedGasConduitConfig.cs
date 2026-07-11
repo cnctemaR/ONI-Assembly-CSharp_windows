@@ -22,7 +22,7 @@ public class InsulatedGasConduitConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
-		buildingDef.ViewMode = SimViewMode.GasVentMap;
+		buildingDef.ViewMode = OverlayModes.GasConduits.ID;
 		buildingDef.ObjectLayer = ObjectLayer.GasConduit;
 		buildingDef.TileLayer = ObjectLayer.GasConduitTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementGasConduit;

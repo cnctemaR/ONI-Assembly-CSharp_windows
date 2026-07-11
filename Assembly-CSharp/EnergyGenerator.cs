@@ -54,6 +54,21 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		base.OnPrefabInit();
 		EnergyGenerator.EnsureStatusItemAvailable();
 		base.Subscribe<EnergyGenerator>(824508782, EnergyGenerator.OnActiveChangedDelegate);
+		if (!this.ignoreBatteryRefillPercent)
+		{
+			base.gameObject.AddOrGet<CopyBuildingSettings>();
+			base.Subscribe<EnergyGenerator>(-905833192, EnergyGenerator.OnCopySettingsDelegate);
+		}
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		EnergyGenerator component = gameObject.GetComponent<EnergyGenerator>();
+		if (component != null)
+		{
+			this.batteryRefillPercent = component.batteryRefillPercent;
+		}
 	}
 
 	protected void OnActiveChanged(object data)
@@ -235,7 +250,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	{
 		if (EnergyGenerator.batteriesSufficientlyFull == null)
 		{
-			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 		}
 	}
 
@@ -327,6 +342,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	private static readonly EventSystem.IntraObjectHandler<EnergyGenerator> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<EnergyGenerator>(delegate(EnergyGenerator component, object data)
 	{
 		component.OnActiveChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<EnergyGenerator> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<EnergyGenerator>(delegate(EnergyGenerator component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 
 	[DebuggerDisplay("{tag} -{consumptionRate} kg/s")]

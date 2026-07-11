@@ -13,7 +13,7 @@ internal class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, IS
 		string text = CREATURES.STATUSITEMS.FLEEING.NAME;
 		string text2 = CREATURES.STATUSITEMS.FLEEING.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
 		this.plan.Enter(delegate(FleeStates.Instance smi)
 		{
 			ThreatMonitor.Instance smi2 = smi.master.gameObject.GetSMI<ThreatMonitor.Instance>();

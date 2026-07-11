@@ -20,7 +20,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		base.smi.StartSM();
 		if (Checkpoint.infoStatusItem_Logic == null)
 		{
-			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
 			Checkpoint.infoStatusItem_Logic.resolveStringCallback = new Func<string, object, string>(Checkpoint.ResolveInfoStatusItem_Logic);
 		}
 		this.Refresh(this.redLight);
@@ -260,8 +260,8 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 			{
 				smi.master.RefreshLight();
 			}, UpdateRate.SIM_200ms, false);
-			this.stop.ParamTransition<bool>(this.redLight, this.go, (Checkpoint.SMInstance smi, bool redLight) => !redLight).PlayAnim("red_light");
-			this.go.ParamTransition<bool>(this.redLight, this.stop, (Checkpoint.SMInstance smi, bool redLight) => redLight).PlayAnim("green_light");
+			this.stop.ParamTransition<bool>(this.redLight, this.go, GameStateMachine<Checkpoint.States, Checkpoint.SMInstance, Checkpoint, object>.IsFalse).PlayAnim("red_light");
+			this.go.ParamTransition<bool>(this.redLight, this.stop, GameStateMachine<Checkpoint.States, Checkpoint.SMInstance, Checkpoint, object>.IsTrue).PlayAnim("green_light");
 		}
 
 		public StateMachine<Checkpoint.States, Checkpoint.SMInstance, Checkpoint, object>.BoolParameter redLight;

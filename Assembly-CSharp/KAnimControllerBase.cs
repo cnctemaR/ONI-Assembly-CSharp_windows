@@ -633,7 +633,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
-			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.", string.Empty, string.Empty);
+			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
 			component.AddBuildOverride(kanim_file.GetData(), 0);
 		}
 		this.overrideAnimFiles.Add(new KAnimControllerBase.OverrideAnimFileData
@@ -650,7 +650,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
-			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.", string.Empty, string.Empty);
+			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
 			component.TryRemoveBuildOverride(kanim_file.GetData(), 0);
 		}
 		for (int i = 0; i < this.overrideAnimFiles.Count; i++)
@@ -744,11 +744,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		}
 		set
 		{
-			DebugUtil.Assert(value.Length > 0, "Controller has no anim files.", string.Empty, string.Empty);
-			DebugUtil.Assert(value[0].buildFile != null, "First anim file needs to be the build file.", string.Empty, string.Empty);
+			DebugUtil.Assert(value.Length > 0, "Controller has no anim files.");
+			DebugUtil.Assert(value[0].buildFile != null, "First anim file needs to be the build file.");
 			for (int i = 0; i < value.Length; i++)
 			{
-				DebugUtil.Assert(value[i] != null, "Anim file is null", string.Empty, string.Empty);
+				DebugUtil.Assert(value[i] != null, "Anim file is null");
 			}
 			this.animFiles = new KAnimFile[value.Length];
 			for (int j = 0; j < value.Length; j++)

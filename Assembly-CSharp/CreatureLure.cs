@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
@@ -9,6 +10,17 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 	{
 		base.OnPrefabInit();
 		this.operational = base.GetComponent<Operational>();
+		base.Subscribe<CreatureLure>(-905833192, CreatureLure.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		CreatureLure component = gameObject.GetComponent<CreatureLure>();
+		if (component != null)
+		{
+			this.ChangeBaitSetting(component.activeBaitSetting);
+		}
 	}
 
 	protected override void OnSpawn()
@@ -89,6 +101,14 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 	private Operational operational;
 
 	private Operational.Flag baited = new Operational.Flag("Baited", Operational.Flag.Type.Requirement);
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<CreatureLure> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<CreatureLure>(delegate(CreatureLure component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private static readonly EventSystem.IntraObjectHandler<CreatureLure> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<CreatureLure>(delegate(CreatureLure component, object data)
 	{

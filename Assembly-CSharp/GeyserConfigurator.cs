@@ -14,7 +14,7 @@ public class GeyserConfigurator : KMonoBehaviour
 		}
 		if (geyserType == null)
 		{
-			Output.LogError(new object[] { string.Format("Tried finding a geyser with id {0} but it doesn't exist!", typeId.ToString()) });
+			Output.LogError(string.Format("Tried finding a geyser with id {0} but it doesn't exist!", typeId.ToString()));
 		}
 		return geyserType;
 	}

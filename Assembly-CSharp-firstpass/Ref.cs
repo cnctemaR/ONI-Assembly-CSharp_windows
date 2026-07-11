@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
@@ -16,8 +17,28 @@ public class Ref<ReferenceType> : ISaveLoadable where ReferenceType : KMonoBehav
 	{
 	}
 
+	private void UpdateID()
+	{
+		ReferenceType referenceType = this.Get();
+		if (referenceType)
+		{
+			this.id = this.obj.GetComponent<KPrefabID>().InstanceID;
+		}
+		else
+		{
+			this.id = -1;
+		}
+	}
+
+	[OnSerializing]
+	public void OnSerializing()
+	{
+		this.UpdateID();
+	}
+
 	public int GetId()
 	{
+		this.UpdateID();
 		return this.id;
 	}
 

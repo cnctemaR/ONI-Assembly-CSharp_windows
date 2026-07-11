@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 public class InterfaceTool : KMonoBehaviour
 {
-	public SimViewMode ViewMode
+	public HashedString ViewMode
 	{
 		get
 		{
@@ -44,7 +44,7 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected virtual void OnActivateTool()
 	{
-		if (OverlayScreen.Instance != null && this.viewMode != SimViewMode.None && OverlayScreen.Instance.mode == SimViewMode.None)
+		if (OverlayScreen.Instance != null && this.viewMode != OverlayModes.None.ID && OverlayScreen.Instance.mode == OverlayModes.None.ID)
 		{
 			OverlayScreen.Instance.ToggleOverlay(this.viewMode);
 			InterfaceTool.toolActivatedViewMode = this.viewMode;
@@ -55,10 +55,10 @@ public class InterfaceTool : KMonoBehaviour
 	public void DeactivateTool(InterfaceTool new_tool = null)
 	{
 		this.OnDeactivateTool(new_tool);
-		if ((new_tool == null || new_tool == SelectTool.Instance) && InterfaceTool.toolActivatedViewMode != SimViewMode.None)
+		if ((new_tool == null || new_tool == SelectTool.Instance) && InterfaceTool.toolActivatedViewMode != OverlayModes.None.ID)
 		{
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
-			InterfaceTool.toolActivatedViewMode = SimViewMode.None;
+			OverlayScreen.Instance.ToggleOverlay(OverlayModes.None.ID);
+			InterfaceTool.toolActivatedViewMode = OverlayModes.None.ID;
 		}
 	}
 
@@ -180,11 +180,11 @@ public class InterfaceTool : KMonoBehaviour
 
 	public global::System.Action OnDeactivate;
 
-	private static Texture2D activeCursor;
+	private static Texture2D activeCursor = null;
 
-	private static SimViewMode toolActivatedViewMode;
+	private static HashedString toolActivatedViewMode = OverlayModes.None.ID;
 
-	protected SimViewMode viewMode;
+	protected HashedString viewMode = OverlayModes.None.ID;
 
 	private HoverTextConfiguration hoverTextConfiguration;
 

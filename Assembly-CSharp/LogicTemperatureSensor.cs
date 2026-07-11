@@ -10,7 +10,24 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 	{
 		get
 		{
-			return GameComps.StructureTemperatures.GetData(this.structureTemperature).Temperature;
+			return GameComps.StructureTemperatures.GetPayload(this.structureTemperature).Temperature;
+		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicTemperatureSensor>(-905833192, LogicTemperatureSensor.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		LogicTemperatureSensor component = gameObject.GetComponent<LogicTemperatureSensor>();
+		if (component != null)
+		{
+			this.Threshold = component.Threshold;
+			this.ActivateAboveThreshold = component.ActivateAboveThreshold;
 		}
 	}
 
@@ -127,12 +144,12 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 
 	public float GetRangeMinInputField()
 	{
-		return GameUtil.GetConvertedTemperature(this.RangeMin);
+		return GameUtil.GetConvertedTemperature(this.RangeMin, false);
 	}
 
 	public float GetRangeMaxInputField()
 	{
-		return GameUtil.GetConvertedTemperature(this.RangeMax);
+		return GameUtil.GetConvertedTemperature(this.RangeMax, false);
 	}
 
 	public LocString Title
@@ -169,7 +186,7 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 
 	public string Format(float value, bool units)
 	{
-		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, units);
+		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, units, true);
 	}
 
 	public float ProcessedSliderValue(float input)
@@ -207,6 +224,36 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 		return locString;
 	}
 
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
+		{
+			return ThresholdScreenLayoutType.SliderBar;
+		}
+	}
+
+	public int IncrementScale
+	{
+		get
+		{
+			return 1;
+		}
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return new NonLinearSlider.Range[]
+			{
+				new NonLinearSlider.Range(25f, 260f),
+				new NonLinearSlider.Range(50f, 400f),
+				new NonLinearSlider.Range(12f, 1500f),
+				new NonLinearSlider.Range(13f, 10000f)
+			};
+		}
+	}
+
 	private HandleVector<int>.Handle structureTemperature;
 
 	private int simUpdateCounter;
@@ -228,4 +275,12 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 	private float averageTemp;
 
 	private bool wasOn;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicTemperatureSensor> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicTemperatureSensor>(delegate(LogicTemperatureSensor component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

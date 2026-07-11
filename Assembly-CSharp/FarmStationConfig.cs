@@ -19,7 +19,7 @@ public class FarmStationConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
-		buildingDef.ViewMode = SimViewMode.Rooms;
+		buildingDef.ViewMode = OverlayModes.Rooms.ID;
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
@@ -66,7 +66,6 @@ public class FarmStationConfig : IBuildingConfig
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Farm.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
-		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "FarmStation";

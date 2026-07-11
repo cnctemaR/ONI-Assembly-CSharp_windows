@@ -9,7 +9,7 @@ internal class PlayAnimsStates : GameStateMachine<PlayAnimsStates, PlayAnimsStat
 		string text = "Unused";
 		string text2 = "Unused";
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemName, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemTooltip, main);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemName, (string str, PlayAnimsStates.Instance smi) => smi.def.statusItemTooltip, main);
 		this.animating.Enter("PlayAnims", delegate(PlayAnimsStates.Instance smi)
 		{
 			smi.PlayAnims();
@@ -78,7 +78,14 @@ internal class PlayAnimsStates : GameStateMachine<PlayAnimsStates, PlayAnimsStat
 				{
 					playMode = KAnim.PlayMode.Loop;
 				}
-				component.Queue(base.def.anims[i], playMode, 1f, 0f);
+				if (i == 0)
+				{
+					component.Play(base.def.anims[i], playMode, 1f, 0f);
+				}
+				else
+				{
+					component.Queue(base.def.anims[i], playMode, 1f, 0f);
+				}
 			}
 		}
 

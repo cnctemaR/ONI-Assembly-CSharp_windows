@@ -6,7 +6,7 @@ using UnityEngine;
 public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 {
 	public RecoverBreathChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 0, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
 	{
 		this.smi = new RecoverBreathChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);

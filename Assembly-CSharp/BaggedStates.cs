@@ -1,6 +1,7 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 internal class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>
 {
@@ -12,11 +13,11 @@ internal class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instan
 		string text = CREATURES.STATUSITEMS.BAGGED.NAME;
 		string text2 = CREATURES.STATUSITEMS.BAGGED.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
-		this.bagged.Enter(new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State.Callback(BaggedStates.BagStart)).ToggleTag(GameTags.Creatures.Deliverable).ToggleFaller()
-			.PlayAnim("trussed", KAnim.PlayMode.Loop)
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
+		this.bagged.Enter(new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State.Callback(BaggedStates.BagStart)).ToggleTag(GameTags.Creatures.Deliverable).PlayAnim("trussed", KAnim.PlayMode.Loop)
 			.TagTransition(GameTags.Creatures.Bagged, null, true)
 			.Transition(this.escape, new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.Transition.ConditionCallback(BaggedStates.ShouldEscape), UpdateRate.SIM_4000ms)
+			.EventHandler(GameHashes.OnStore, new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State.Callback(BaggedStates.OnStore))
 			.Exit(new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State.Callback(BaggedStates.BagEnd));
 		this.escape.Enter(new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State.Callback(BaggedStates.Unbag)).PlayAnim("escape").OnAnimQueueComplete(null);
 	}
@@ -27,11 +28,13 @@ internal class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instan
 		{
 			smi.baggedTime = GameClock.Instance.GetTime();
 		}
+		smi.UpdateFaller(true);
 	}
 
 	private static void BagEnd(BaggedStates.Instance smi)
 	{
 		smi.baggedTime = 0f;
+		smi.UpdateFaller(false);
 	}
 
 	private static void Unbag(BaggedStates.Instance smi)
@@ -41,6 +44,11 @@ internal class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instan
 		{
 			component.Free();
 		}
+	}
+
+	private static void OnStore(BaggedStates.Instance smi)
+	{
+		smi.UpdateFaller(true);
 	}
 
 	private static bool ShouldEscape(BaggedStates.Instance smi)
@@ -68,6 +76,23 @@ internal class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instan
 			: base(chore, def)
 		{
 			chore.AddPrecondition(BaggedStates.Instance.IsBagged, null);
+		}
+
+		public void UpdateFaller(bool bagged)
+		{
+			bool flag = bagged && !base.gameObject.HasTag(GameTags.Stored);
+			bool flag2 = GameComps.Fallers.Has(base.gameObject);
+			if (flag != flag2)
+			{
+				if (flag)
+				{
+					GameComps.Fallers.Add(base.gameObject, Vector2.zero);
+				}
+				else
+				{
+					GameComps.Fallers.Remove(base.gameObject);
+				}
+			}
 		}
 
 		[Serialize]

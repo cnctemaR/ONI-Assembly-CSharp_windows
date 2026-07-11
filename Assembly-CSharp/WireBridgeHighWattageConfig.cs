@@ -20,13 +20,13 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.WireTile;
+		BuildLocationRule buildLocationRule = BuildLocationRule.HighWattBridgeTile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER5, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
@@ -37,7 +37,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
-		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.SceneLayer = Grid.SceneLayer.WireBridgesFront;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireBridgeHighWattage");
 		return buildingDef;

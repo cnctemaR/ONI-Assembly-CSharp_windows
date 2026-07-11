@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,15 +14,15 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		string text2 = "clothingfactory_kanim";
 		int num3 = 100;
 		float num4 = 240f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
-		buildingDef.ViewMode = SimViewMode.PowerMap;
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PowerInputOffset = new CellOffset(2, 0);
 		return buildingDef;
@@ -32,15 +34,73 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);
-		Fabricator fabricator = go.AddOrGet<Fabricator>();
-		fabricator.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_clothingfactory_kanim") };
-		fabricator.AnimOffset = new Vector3(-1f, 0f, 0f);
-		BuildingTemplates.CreateFabricatorStorage(go, fabricator);
+		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
+		go.AddOrGet<ComplexFabricatorWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_clothingfactory_kanim") };
+		go.AddOrGet<ComplexFabricatorWorkable>().AnimOffset = new Vector3(-1f, 0f, 0f);
+		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
+		go.AddOrGet<FabricatorIngredientStatusManager>();
+		go.AddOrGet<CopyBuildingSettings>();
+		this.ConfigureRecipes();
+		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
+	}
+
+	private void ConfigureRecipes()
+	{
+		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), (float)global::TUNING.EQUIPMENT.VESTS.WARM_VEST_MASS)
+		};
+		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("Warm_Vest".ToTag(), 1f)
+		};
+		string text = ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array, array2);
+		WarmVestConfig.recipe = new ComplexRecipe(text, array, array2)
+		{
+			time = global::TUNING.EQUIPMENT.VESTS.WARM_VEST_FABTIME,
+			description = global::STRINGS.EQUIPMENT.PREFABS.WARM_VEST.RECIPE_DESC,
+			useResultAsDescription = true,
+			fabricators = new List<Tag> { "ClothingFabricator" },
+			sortOrder = 1
+		};
+		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS)
+		};
+		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("Cool_Vest".ToTag(), 1f)
+		};
+		string text2 = ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array3, array4);
+		CoolVestConfig.recipe = new ComplexRecipe(text2, array3, array4)
+		{
+			time = global::TUNING.EQUIPMENT.VESTS.COOL_VEST_FABTIME,
+			description = global::STRINGS.EQUIPMENT.PREFABS.COOL_VEST.RECIPE_DESC,
+			useResultAsDescription = true,
+			fabricators = new List<Tag> { "ClothingFabricator" },
+			sortOrder = 1
+		};
+		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), (float)global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_MASS)
+		};
+		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("Funky_Vest".ToTag(), 1f)
+		};
+		string text3 = ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array5, array6);
+		FunkyVestConfig.recipe = new ComplexRecipe(text3, array5, array6)
+		{
+			time = global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_FABTIME,
+			description = global::STRINGS.EQUIPMENT.PREFABS.FUNKY_VEST.RECIPE_DESC,
+			useResultAsDescription = true,
+			fabricators = new List<Tag> { "ClothingFabricator" },
+			sortOrder = 1
+		};
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "ClothingFabricator";

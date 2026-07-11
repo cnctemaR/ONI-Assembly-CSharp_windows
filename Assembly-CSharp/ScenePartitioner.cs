@@ -47,7 +47,7 @@ public class ScenePartitioner : ISim1000ms
 		}
 		ScenePartitionerLayer scenePartitionerLayer2 = new ScenePartitionerLayer(name, this.layers.Count);
 		this.layers.Add(scenePartitionerLayer2);
-		DebugUtil.Assert(this.layers.Count <= this.nodes.GetLength(0), "Assert!", string.Empty, string.Empty);
+		DebugUtil.Assert(this.layers.Count <= this.nodes.GetLength(0));
 		return scenePartitionerLayer2;
 	}
 

@@ -28,7 +28,7 @@ public class AccessControlSideScreenRow : AccessControlSideScreenDoor
 		this.customControls.SetActive(!isDefault);
 	}
 
-	public void SetMinionContent(MinionIdentity identity, AccessControl.Permission permission, bool isDefault, Action<MinionIdentity, AccessControl.Permission> onPermissionChange, Action<MinionIdentity, bool> onDefaultClick)
+	public void SetMinionContent(MinionAssignablesProxy identity, AccessControl.Permission permission, bool isDefault, Action<MinionAssignablesProxy, AccessControl.Permission> onPermissionChange, Action<MinionAssignablesProxy, bool> onDefaultClick)
 	{
 		base.SetContent(permission, onPermissionChange);
 		if (identity == null)
@@ -60,5 +60,5 @@ public class AccessControlSideScreenRow : AccessControlSideScreenDoor
 
 	public GameObject customControls;
 
-	private Action<MinionIdentity, bool> defaultClickedCallback;
+	private Action<MinionAssignablesProxy, bool> defaultClickedCallback;
 }

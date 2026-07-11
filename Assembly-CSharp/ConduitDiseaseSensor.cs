@@ -121,6 +121,30 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 		return UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.DISEASE_UNITS;
 	}
 
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
+		{
+			return ThresholdScreenLayoutType.SliderBar;
+		}
+	}
+
+	public int IncrementScale
+	{
+		get
+		{
+			return 1;
+		}
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return NonLinearSlider.GetDefaultRange(this.RangeMax);
+		}
+	}
+
 	private const float rangeMin = 0f;
 
 	private const float rangeMax = 100000f;

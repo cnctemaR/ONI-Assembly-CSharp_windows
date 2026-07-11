@@ -76,7 +76,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		}
 		if (temperature <= 0f || base_mass <= 0f)
 		{
-			Output.LogError(new object[] { string.Format("Unexpected water mass/temperature values added to the falling water manager T({0}) M({1})", temperature, base_mass) });
+			Output.LogError(string.Format("Unexpected water mass/temperature values added to the falling water manager T({0}) M({1})", temperature, base_mass));
 		}
 		float time = this.GetTime();
 		if (!skip_sound)

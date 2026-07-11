@@ -31,4 +31,10 @@ public interface IThresholdSwitch
 	float ProcessedSliderValue(float input);
 
 	float ProcessedInputValue(float input);
+
+	ThresholdScreenLayoutType LayoutType { get; }
+
+	int IncrementScale { get; }
+
+	NonLinearSlider.Range[] GetRanges { get; }
 }

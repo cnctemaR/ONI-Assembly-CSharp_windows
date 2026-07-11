@@ -55,6 +55,9 @@ public class CodexScreen : KScreen
 
 	private void Init()
 	{
+		this.textStyles[CodexTextStyle.Title] = this.textStyleTitle;
+		this.textStyles[CodexTextStyle.Subtitle] = this.textStyleSubtitle;
+		this.textStyles[CodexTextStyle.Body] = this.textStyleBody;
 		this.SetupPrefabs();
 		this.PopulatePools();
 		this.CategorizeEntries();
@@ -73,33 +76,13 @@ public class CodexScreen : KScreen
 	{
 		this.contentContainerPool = new UIGameObjectPool(this.prefabContentContainer);
 		this.contentContainerPool.disabledElementParent = this.widgetPool;
-		for (int i = 0; i < 7; i++)
-		{
-			switch (i)
-			{
-			case 0:
-				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabTextWidget;
-				break;
-			case 1:
-				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabImageWidget;
-				break;
-			case 2:
-				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabDividerLineWidget;
-				break;
-			case 3:
-				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabSpacer;
-				break;
-			case 4:
-				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabLabelWithIcon;
-				break;
-			case 5:
-				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabContentLocked;
-				break;
-			case 6:
-				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabLargeSpacer;
-				break;
-			}
-		}
+		this.ContentPrefabs[typeof(CodexText)] = this.prefabTextWidget;
+		this.ContentPrefabs[typeof(CodexImage)] = this.prefabImageWidget;
+		this.ContentPrefabs[typeof(CodexDividerLine)] = this.prefabDividerLineWidget;
+		this.ContentPrefabs[typeof(CodexSpacer)] = this.prefabSpacer;
+		this.ContentPrefabs[typeof(CodexLabelWithIcon)] = this.prefabLabelWithIcon;
+		this.ContentPrefabs[typeof(CodexContentLockedIndicator)] = this.prefabContentLocked;
+		this.ContentPrefabs[typeof(CodexLargeSpacer)] = this.prefabLargeSpacer;
 	}
 
 	private List<CodexEntry> FilterSearch(string input)
@@ -138,7 +121,7 @@ public class CodexScreen : KScreen
 	{
 		foreach (ContentContainer contentContainer in CodexCache.entries[entryID].contentContainers)
 		{
-			if (string.IsNullOrEmpty(contentContainer.lockID) || !Game.Instance.unlocks.IsLocked(contentContainer.lockID))
+			if (string.IsNullOrEmpty(contentContainer.lockID) || Game.Instance.unlocks.IsUnlocked(contentContainer.lockID))
 			{
 				return true;
 			}
@@ -187,10 +170,11 @@ public class CodexScreen : KScreen
 
 	private void PopulatePools()
 	{
-		for (int i = 0; i < 7; i++)
+		foreach (KeyValuePair<Type, GameObject> keyValuePair in this.ContentPrefabs)
 		{
-			this.ContentUIPools[(CodexWidget.ContentType)i] = new UIGameObjectPool(this.ContentPrefabs[(CodexWidget.ContentType)i]);
-			this.ContentUIPools[(CodexWidget.ContentType)i].disabledElementParent = this.widgetPool;
+			UIGameObjectPool uigameObjectPool = new UIGameObjectPool(keyValuePair.Value);
+			uigameObjectPool.disabledElementParent = this.widgetPool;
+			this.ContentUIPools[keyValuePair.Key] = uigameObjectPool;
 		}
 	}
 
@@ -307,7 +291,7 @@ public class CodexScreen : KScreen
 				id = subEntry.parentEntryID.ToUpper();
 			}
 		}
-		CodexWidget codexWidget = null;
+		ICodexWidget codexWidget = null;
 		CodexCache.entries[id].GetFirstWidget();
 		RectTransform rectTransform = null;
 		if (subEntry != null)
@@ -338,17 +322,17 @@ public class CodexScreen : KScreen
 			while (gameObject.transform.childCount > 0)
 			{
 				GameObject gameObject2 = gameObject.transform.GetChild(0).gameObject;
-				CodexWidget.ContentType contentType;
+				Type type;
 				if (gameObject2.name == "PrefabContentLocked")
 				{
 					text = CodexCache.entries[this.activeEntryID].contentContainers[num].lockID;
-					contentType = CodexWidget.ContentType.ContentLockedIndicator;
+					type = typeof(CodexContentLockedIndicator);
 				}
 				else
 				{
-					contentType = CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2].type;
+					type = CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2].GetType();
 				}
-				this.ContentUIPools[contentType].ClearElement(gameObject2);
+				this.ContentUIPools[type].ClearElement(gameObject2);
 				num2++;
 			}
 			this.contentContainerPool.ClearElement(this.contentContainers.transform.GetChild(0).gameObject);
@@ -365,14 +349,14 @@ public class CodexScreen : KScreen
 		for (int i = 0; i < CodexCache.entries[id].contentContainers.Count; i++)
 		{
 			ContentContainer contentContainer2 = CodexCache.entries[id].contentContainers[i];
-			if (!string.IsNullOrEmpty(contentContainer2.lockID) && Game.Instance.unlocks.IsLocked(contentContainer2.lockID))
+			if (!string.IsNullOrEmpty(contentContainer2.lockID) && !Game.Instance.unlocks.IsUnlocked(contentContainer2.lockID))
 			{
 				if (text2 != contentContainer2.lockID)
 				{
 					GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
 					this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
 					text2 = contentContainer2.lockID;
-					GameObject gameObject4 = this.ContentUIPools[CodexWidget.ContentType.ContentLockedIndicator].GetFreeElement(gameObject3, true).gameObject;
+					GameObject gameObject4 = this.ContentUIPools[typeof(CodexContentLockedIndicator)].GetFreeElement(gameObject3, true).gameObject;
 				}
 			}
 			else
@@ -382,10 +366,10 @@ public class CodexScreen : KScreen
 				flag2 = !flag2;
 				if (contentContainer2.content != null)
 				{
-					foreach (CodexWidget codexWidget2 in contentContainer2.content)
+					foreach (ICodexWidget codexWidget2 in contentContainer2.content)
 					{
-						GameObject gameObject5 = this.ContentUIPools[codexWidget2.type].GetFreeElement(gameObject3, true).gameObject;
-						this.ConfigureContentWidget(codexWidget2, gameObject5);
+						GameObject gameObject5 = this.ContentUIPools[codexWidget2.GetType()].GetFreeElement(gameObject3, true).gameObject;
+						codexWidget2.Configure(gameObject5, this.displayPane, this.textStyles);
 						if (codexWidget2 == codexWidget)
 						{
 							rectTransform = gameObject5.rectTransform();
@@ -470,7 +454,7 @@ public class CodexScreen : KScreen
 		{
 			global::UnityEngine.Object.DestroyImmediate(layoutGroup);
 		}
-		if (!Game.Instance.unlocks.IsLocked(container.lockID))
+		if (Game.Instance.unlocks.IsUnlocked(container.lockID))
 		{
 			ContentContainer.ContentLayout contentLayout = container.contentLayout;
 			if (contentLayout != ContentContainer.ContentLayout.Horizontal)
@@ -517,175 +501,11 @@ public class CodexScreen : KScreen
 		}
 	}
 
-	private void ConfigureContentWidget(CodexWidget content, GameObject contentGameObject)
-	{
-		switch (content.type)
-		{
-		case CodexWidget.ContentType.Text:
-		{
-			LocText component = contentGameObject.GetComponent<LocText>();
-			component.gameObject.SetActive(true);
-			string text;
-			content.properties.TryGetValue("style", out text);
-			if (text == "title")
-			{
-				component.textStyleSetting = this.textStyleTitle;
-				component.AllowLinks = false;
-			}
-			else if (text == "subtitle")
-			{
-				component.textStyleSetting = this.textStyleSubtitle;
-				component.AllowLinks = false;
-			}
-			else
-			{
-				component.textStyleSetting = this.textStyleBody;
-				component.AllowLinks = true;
-			}
-			if (content.properties.ContainsKey("stringKey"))
-			{
-				content.properties.TryGetValue("stringKey", out text);
-				component.text = Strings.Get(text);
-			}
-			else if (content.properties.ContainsKey("string"))
-			{
-				content.properties.TryGetValue("string", out text);
-				component.text = text;
-			}
-			component.ApplySettings();
-			this.ConfigurePreferredLayout(content, contentGameObject);
-			break;
-		}
-		case CodexWidget.ContentType.Image:
-			if (content.properties.ContainsKey("spriteName"))
-			{
-				string text;
-				content.properties.TryGetValue("spriteName", out text);
-				Image component2 = contentGameObject.GetComponent<Image>();
-				component2.sprite = Assets.GetSprite(text);
-				component2.color = Color.white;
-			}
-			else if (content.properties.ContainsKey("batchedAnimPrefabSourceID"))
-			{
-				Image component3 = contentGameObject.GetComponent<Image>();
-				component3.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false);
-				component3.color = Color.white;
-			}
-			else if (content.objectProperties.ContainsKey("coloredSprite"))
-			{
-				Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
-				Image component4 = contentGameObject.GetComponent<Image>();
-				if (tuple != null)
-				{
-					component4.sprite = tuple.first;
-					component4.color = tuple.second;
-				}
-				else
-				{
-					component4.sprite = null;
-					component4.color = Color.clear;
-				}
-			}
-			else
-			{
-				Image component5 = contentGameObject.GetComponent<Image>();
-				component5.sprite = (Sprite)content.objectProperties["sprite"];
-				component5.color = Color.white;
-			}
-			this.ConfigurePreferredLayout(content, contentGameObject);
-			break;
-		case CodexWidget.ContentType.DividerLine:
-			contentGameObject.GetComponent<LayoutElement>().minWidth = this.displayPane.rectTransform().sizeDelta.x - 64f;
-			break;
-		case CodexWidget.ContentType.Spacer:
-			this.ConfigurePreferredLayout(content, contentGameObject);
-			break;
-		case CodexWidget.ContentType.LabelWithIcon:
-			this.ConfigureLabelWithIcon(content, contentGameObject);
-			break;
-		}
-	}
-
-	private void ConfigureLabelWithIcon(CodexWidget content, GameObject contentGameObject)
-	{
-		LocText componentInChildren = contentGameObject.GetComponentInChildren<LocText>();
-		componentInChildren.textStyleSetting = this.textStyleBody;
-		componentInChildren.AllowLinks = true;
-		string empty = string.Empty;
-		if (content.properties.ContainsKey("stringKey"))
-		{
-			content.properties.TryGetValue("stringKey", out empty);
-			componentInChildren.text = Strings.Get(empty);
-		}
-		else if (content.properties.ContainsKey("string"))
-		{
-			content.properties.TryGetValue("string", out empty);
-			componentInChildren.text = empty;
-		}
-		componentInChildren.ApplySettings();
-		string empty2 = string.Empty;
-		if (content.properties.ContainsKey("spriteName"))
-		{
-			content.properties.TryGetValue("spriteName", out empty2);
-			Image component = contentGameObject.GetComponent<Image>();
-			component.sprite = Assets.GetSprite(empty2);
-			component.color = Color.white;
-		}
-		else if (content.properties.ContainsKey("batchedAnimPrefabSourceID"))
-		{
-			Image componentInChildren2 = contentGameObject.GetComponentInChildren<Image>();
-			componentInChildren2.sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(content.properties["batchedAnimPrefabSourceID"]).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false);
-			componentInChildren2.color = Color.white;
-		}
-		else if (content.objectProperties.ContainsKey("coloredSprite"))
-		{
-			Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
-			Image componentInChildren3 = contentGameObject.GetComponentInChildren<Image>();
-			if (tuple != null)
-			{
-				componentInChildren3.sprite = tuple.first;
-				componentInChildren3.color = tuple.second;
-			}
-			else
-			{
-				componentInChildren3.sprite = null;
-				componentInChildren3.color = Color.clear;
-			}
-		}
-		else
-		{
-			Image componentInChildren4 = contentGameObject.GetComponentInChildren<Image>();
-			componentInChildren4.sprite = (Sprite)content.objectProperties["sprite"];
-			componentInChildren4.color = Color.white;
-		}
-	}
-
-	private void ConfigurePreferredLayout(CodexWidget content, GameObject contentGameObject)
-	{
-		LayoutElement component = contentGameObject.GetComponent<LayoutElement>();
-		if (content.properties.ContainsKey("preferredHeight"))
-		{
-			component.preferredHeight = (float)Convert.ToInt32(content.properties["preferredHeight"]);
-		}
-		else
-		{
-			component.preferredHeight = -1f;
-		}
-		if (content.properties.ContainsKey("preferredWidth"))
-		{
-			component.preferredWidth = (float)Convert.ToInt32(content.properties["preferredWidth"]);
-		}
-		else
-		{
-			component.preferredWidth = -1f;
-		}
-	}
-
 	private string activeEntryID;
 
-	private Dictionary<CodexWidget.ContentType, UIGameObjectPool> ContentUIPools = new Dictionary<CodexWidget.ContentType, UIGameObjectPool>();
+	private Dictionary<Type, UIGameObjectPool> ContentUIPools = new Dictionary<Type, UIGameObjectPool>();
 
-	private Dictionary<CodexWidget.ContentType, GameObject> ContentPrefabs = new Dictionary<CodexWidget.ContentType, GameObject>();
+	private Dictionary<Type, GameObject> ContentPrefabs = new Dictionary<Type, GameObject>();
 
 	private List<GameObject> categoryHeaders = new List<GameObject>();
 
@@ -771,6 +591,8 @@ public class CodexScreen : KScreen
 
 	[SerializeField]
 	private TextStyleSetting textStyleBody;
+
+	private Dictionary<CodexTextStyle, TextStyleSetting> textStyles = new Dictionary<CodexTextStyle, TextStyleSetting>();
 
 	private List<CodexEntry> searchResults = new List<CodexEntry>();
 

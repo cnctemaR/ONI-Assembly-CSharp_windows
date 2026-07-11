@@ -7,14 +7,15 @@ namespace Klei.AI
 	public class Sunburn : Disease
 	{
 		public Sunburn()
-			: base("Sunburn", Disease.DiseaseType.Ailment, Disease.Severity.Major, 0.005f, new List<Disease.InfectionVector> { Disease.InfectionVector.Exposure }, 900f, 0, new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent(), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent())
+			: base("Sunburn", Disease.DiseaseType.Ailment, Disease.Severity.Minor, 0.005f, new List<Disease.InfectionVector> { Disease.InfectionVector.Exposure }, 540f, 0, new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent(), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent())
 		{
 			base.AddDiseaseComponent(new CommonSickEffectDisease());
 			base.AddDiseaseComponent(new AttributeModifierDisease(new AttributeModifier[]
 			{
 				new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.033333335f, DUPLICANTS.DISEASES.SUNBURN.NAME, false, false, true)
 			}));
-			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_hot_kanim" }, "Hot"));
+			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_hot_kanim", "anim_loco_run_hot_kanim", "anim_loco_walk_hot_kanim" }, Db.Get().Expressions.SickFierySkin));
+			base.AddDiseaseComponent(new PeriodicEmoteDisease("anim_idle_hot_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 5f));
 		}
 
 		public const string ID = "Sunburn";

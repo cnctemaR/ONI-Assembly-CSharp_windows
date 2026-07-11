@@ -3,7 +3,7 @@ using Klei;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class ElementChunk : KMonoBehaviour, IHasSortOrder
+public class ElementChunk : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
@@ -11,17 +11,6 @@ public class ElementChunk : KMonoBehaviour, IHasSortOrder
 		GameComps.OreSizeVisualizers.Add(base.gameObject);
 		GameComps.ElementSplitters.Add(base.gameObject);
 		base.Subscribe<ElementChunk>(-2064133523, ElementChunk.OnAbsorbDelegate);
-	}
-
-	public int sortOrder
-	{
-		get
-		{
-			return base.GetComponent<PrimaryElement>().Element.buildMenuSort;
-		}
-		set
-		{
-		}
 	}
 
 	protected override void OnSpawn()

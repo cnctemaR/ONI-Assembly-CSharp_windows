@@ -15,7 +15,7 @@ internal class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCa
 		string text = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXCITED_TO_BE_RANCHED.TOOLTIP;
 		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.capture.cheer.pre.ScheduleGoTo(0.9f, this.capture.cheer.cheer);
 		this.capture.cheer.cheer.Enter("FaceRancher", delegate(FixedCaptureStates.Instance smi)
 		{
@@ -26,7 +26,7 @@ internal class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCa
 		text2 = CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME;
 		text = CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.capture.move.movetoranch.Enter("Speedup", delegate(FixedCaptureStates.Instance smi)
 		{
 			smi.GetComponent<Navigator>().defaultSpeed = smi.originalSpeed * 1.25f;
@@ -42,7 +42,7 @@ internal class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCa
 		text = CREATURES.STATUSITEMS.GETTING_WRANGLED.NAME;
 		text2 = CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		ranching.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
+		ranching.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToGetCaptured, false);
 	}
 

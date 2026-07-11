@@ -10,7 +10,7 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 	{
 		get
 		{
-			return GameComps.StructureTemperatures.GetData(this.structureTemperature).Temperature;
+			return GameComps.StructureTemperatures.GetPayload(this.structureTemperature).Temperature;
 		}
 	}
 
@@ -103,12 +103,12 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 
 	public float GetRangeMinInputField()
 	{
-		return GameUtil.GetConvertedTemperature(this.RangeMin);
+		return GameUtil.GetConvertedTemperature(this.RangeMin, false);
 	}
 
 	public float GetRangeMaxInputField()
 	{
-		return GameUtil.GetConvertedTemperature(this.RangeMax);
+		return GameUtil.GetConvertedTemperature(this.RangeMax, false);
 	}
 
 	public LocString Title
@@ -145,7 +145,7 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 
 	public string Format(float value, bool units)
 	{
-		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, units);
+		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, units, false);
 	}
 
 	public float ProcessedSliderValue(float input)
@@ -181,6 +181,30 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 			locString = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
 		}
 		return locString;
+	}
+
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
+		{
+			return ThresholdScreenLayoutType.InputField;
+		}
+	}
+
+	public int IncrementScale
+	{
+		get
+		{
+			return 1;
+		}
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return NonLinearSlider.GetDefaultRange(this.RangeMax);
+		}
 	}
 
 	private HandleVector<int>.Handle structureTemperature;

@@ -162,8 +162,8 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 			global::Debug.LogError("Planted seed " + depositedEntity.gameObject.name + " is missing PlantableSeed component", null);
 			return null;
 		}
-		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(this), Grid.SceneLayer.BuildingBack);
-		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(component.PlantID), vector, Grid.SceneLayer.BuildingBack, null, 0);
+		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(this), this.plantLayer);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(component.PlantID), vector, this.plantLayer, null, 0);
 		gameObject.SetActive(true);
 		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
 		this.plantRef.Set(component2);
@@ -186,6 +186,14 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 			}
 		}
 		return gameObject;
+	}
+
+	protected override void PositionOccupyingObject()
+	{
+		base.PositionOccupyingObject();
+		KBatchedAnimController component = base.occupyingObject.GetComponent<KBatchedAnimController>();
+		component.SetSceneLayer(this.plantLayer);
+		this.OffsetAnim(component, this.occupyingObjectVisualOffset);
 	}
 
 	private void RegisterWithPlant(GameObject plant)
@@ -225,6 +233,10 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 
 	public override void OrderRemoveOccupant()
 	{
+		if (base.Occupant == null)
+		{
+			return;
+		}
 		Uprootable component = base.Occupant.GetComponent<Uprootable>();
 		if (component == null)
 		{
@@ -282,6 +294,8 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 			{
 				gameObject.transform.SetLocalPosition(this.occupyingObjectRelativePosition);
 			}
+			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+			this.OffsetAnim(component2, this.occupyingObjectVisualOffset);
 			gameObject.SetActive(true);
 			gameObject.Subscribe(-1820564715, new Action<object>(this.OnValidChanged));
 			if (solid)
@@ -290,6 +304,15 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 			}
 			this.plantPreview.UpdateValidity();
 		}
+	}
+
+	private void OffsetAnim(KBatchedAnimController kanim, Vector3 offset)
+	{
+		if (this.rotatable != null)
+		{
+			offset = this.rotatable.GetRotatedOffset(offset);
+		}
+		kanim.Offset = offset;
 	}
 
 	private void OnValidChanged(object obj)
@@ -320,6 +343,10 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 
 	[Serialize]
 	private Ref<KPrefabID> plantRef;
+
+	public Vector3 occupyingObjectVisualOffset = Vector3.zero;
+
+	public Grid.SceneLayer plantLayer = Grid.SceneLayer.BuildingBack;
 
 	private EntityPreview plantPreview;
 

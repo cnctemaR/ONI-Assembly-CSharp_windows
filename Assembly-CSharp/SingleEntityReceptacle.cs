@@ -13,6 +13,19 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		}
 	}
 
+	public bool AutoReplaceEntity
+	{
+		get
+		{
+			return this.autoReplaceEntity;
+		}
+	}
+
+	public void ToggleAutoReplace()
+	{
+		this.autoReplaceEntity = !this.autoReplaceEntity;
+	}
+
 	protected GameObject occupyingObject
 	{
 		get

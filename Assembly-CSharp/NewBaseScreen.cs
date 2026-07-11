@@ -48,7 +48,6 @@ public class NewBaseScreen : KScreen
 		{
 			SpeedControlScreen.Instance.Unpause(false);
 		}
-		Game.Instance.ResetTime();
 		this.Final();
 	}
 

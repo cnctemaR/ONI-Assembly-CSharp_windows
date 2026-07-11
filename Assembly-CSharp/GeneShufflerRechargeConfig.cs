@@ -20,7 +20,7 @@ public class GeneShufflerRechargeConfig : IEntityConfig
 		float num3 = 0.6f;
 		bool flag2 = true;
 		List<Tag> list = new List<Tag> { GameTags.IndustrialIngredient };
-		return EntityTemplates.CreateLooseEntity(text, text2, text3, num, flag, anim, text4, sceneLayer, collisionShape, num2, num3, flag2, SimHashes.Creature, list);
+		return EntityTemplates.CreateLooseEntity(text, text2, text3, num, flag, anim, text4, sceneLayer, collisionShape, num2, num3, flag2, 0, SimHashes.Creature, list);
 	}
 
 	public void OnPrefabInit(GameObject inst)

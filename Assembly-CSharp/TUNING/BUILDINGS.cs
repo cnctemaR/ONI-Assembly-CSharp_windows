@@ -59,14 +59,14 @@ namespace TUNING
 
 		public static List<PlanScreen.PlanInfo> PLANORDER = new List<PlanScreen.PlanInfo>
 		{
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Base"), false, new List<string>
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
-				"BunkerTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "TravelTube",
-				"TravelTubeEntrance", "TravelTubeWallBridge"
+				"BunkerTile", "CarpetTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir",
+				"TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
+			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
 			{
 				"ManualGenerator",
 				"Generator",
@@ -94,12 +94,12 @@ namespace TUNING
 				PressureSwitchLiquidConfig.ID,
 				PressureSwitchGasConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
 				"MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder",
 				"FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Plumbing, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
 				"Outhouse",
 				"FlushToilet",
@@ -122,7 +122,7 @@ namespace TUNING
 				LiquidConduitDiseaseSensorConfig.ID,
 				LiquidConduitTemperatureSensorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.HVAC, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("HVAC"), false, new List<string>
 			{
 				"GasConduit",
 				"InsulatedGasConduit",
@@ -143,36 +143,46 @@ namespace TUNING
 				GasConduitDiseaseSensorConfig.ID,
 				GasConduitTemperatureSensorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
 				"Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer",
 				"OxyliteRefinery", "SupermaterialRefinery"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "MassageTable", "Grave" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "MassageTable", "Grave" }),
+			new PlanScreen.PlanInfo(new HashedString("Furniture"), false, new List<string>
 			{
 				BedConfig.ID,
 				LuxuryBedConfig.ID,
+				"FloorLamp",
+				"CeilingLight",
 				"DiningTable",
 				"WaterCooler",
 				"Phonobox",
 				"ArcadeMachine",
 				"EspressoMachine",
 				"FlowerVase",
-				"Canvas",
+				"FlowerVaseWall",
+				"FlowerVaseHanging",
+				"FlowerVaseHangingFancy",
+				"SmallSculpture",
 				"Sculpture",
 				"IceSculpture",
-				"ItemPedestal",
-				"FloorLamp",
-				"CeilingLight"
+				"MarbleSculpture",
+				"MetalSculpture",
+				"CrownMoulding",
+				"CornerMoulding",
+				"Canvas",
+				"CanvasWide",
+				"CanvasTall",
+				"ItemPedestal"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
 				"ResearchCenter", "AdvancedResearchCenter", "CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator",
 				"SuitFabricator", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "AstronautTrainingCenter"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new List<string> { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "ExteriorWall" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string> { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "ExteriorWall" }),
+			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
 				"LogicWire",
 				"LogicWireBridge",
@@ -190,23 +200,22 @@ namespace TUNING
 				LogicTimeOfDaySensorConfig.ID,
 				LogicDiseaseSensorConfig.ID,
 				LogicElementSensorGasConfig.ID,
+				LogicCritterCountSensorConfig.ID,
 				"FloorSwitch",
 				"Checkpoint",
 				CometDetectorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Conveyance, new List<string> { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge", "AutoMiner" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Rocketry, new List<string>
+			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string> { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge", "AutoMiner" }),
+			new PlanScreen.PlanInfo(new HashedString("Rocketry"), true, new List<string>
 			{
-				"Gantry", "SteamEngine", "KeroseneEngine", "SolidBooster", "LiquidFuelTank", "OxidizerTank", "CargoBay", "GasCargoBay", "LiquidCargoBay", "CommandModule",
-				"TouristModule", "ResearchModule", "SpecialCargoBay", "HydrogenEngine"
+				"Gantry", "SteamEngine", "KeroseneEngine", "SolidBooster", "LiquidFuelTank", "OxidizerTank", "OxidizerTankLiquid", "CargoBay", "GasCargoBay", "LiquidCargoBay",
+				"CommandModule", "TouristModule", "ResearchModule", "SpecialCargoBay", "HydrogenEngine"
 			})
 		};
 
 		public static List<Type> COMPONENT_DESCRIPTION_ORDER = new List<Type>
 		{
 			typeof(BottleEmptier),
-			typeof(Fabricator),
-			typeof(MicrobeMusher),
 			typeof(CookingStation),
 			typeof(RoleStation),
 			typeof(ResearchCenter),
@@ -241,7 +250,6 @@ namespace TUNING
 			typeof(Growing),
 			typeof(Equippable),
 			typeof(ColdBreather),
-			typeof(SeedSplicer),
 			typeof(ResearchPointObject),
 			typeof(SuitTank),
 			typeof(IlluminationVulnerable),
@@ -254,13 +262,10 @@ namespace TUNING
 			typeof(Bed),
 			typeof(OreScrubber),
 			typeof(OreScrubber.Work),
-			typeof(Refinery),
-			typeof(LiquidCooledRefinery),
 			typeof(MinimumOperatingTemperature),
 			typeof(RoomTracker),
 			typeof(EnergyConsumerSelfSustaining),
 			typeof(ArcadeMachine),
-			typeof(GlassForge),
 			typeof(Telescope),
 			typeof(EspressoMachine),
 			typeof(EspressoMachineWorkable),
@@ -271,7 +276,6 @@ namespace TUNING
 			typeof(CommandModule),
 			typeof(FuelTank),
 			typeof(LaunchableRocket),
-			typeof(OxidizerTank),
 			typeof(RocketEngine),
 			typeof(SolidBooster),
 			typeof(TouristModule),

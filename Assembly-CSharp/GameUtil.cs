@@ -35,18 +35,47 @@ public static class GameUtil
 		return text + GameUtil.GetTemperatureUnitSuffix();
 	}
 
-	public static float GetConvertedTemperature(float temperature)
+	public static float GetTemperatureConvertedFromKelvin(float temperature, GameUtil.TemperatureUnit targetUnit)
 	{
-		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
-		if (temperatureUnit == GameUtil.TemperatureUnit.Celsius)
+		if (targetUnit == GameUtil.TemperatureUnit.Celsius)
 		{
 			return temperature - 273.15f;
 		}
-		if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
+		if (targetUnit != GameUtil.TemperatureUnit.Fahrenheit)
 		{
 			return temperature;
 		}
 		return temperature * 1.8f - 459.67f;
+	}
+
+	public static float GetConvertedTemperature(float temperature, bool roundOutput = false)
+	{
+		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
+		float num;
+		if (temperatureUnit == GameUtil.TemperatureUnit.Celsius)
+		{
+			num = temperature - 273.15f;
+			return (!roundOutput) ? num : Mathf.Round(num);
+		}
+		if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
+		{
+			return (!roundOutput) ? temperature : Mathf.Round(temperature);
+		}
+		num = temperature * 1.8f - 459.67f;
+		return (!roundOutput) ? num : Mathf.Round(num);
+	}
+
+	public static float GetTemperatureConvertedToKelvin(float temperature, GameUtil.TemperatureUnit fromUnit)
+	{
+		if (fromUnit == GameUtil.TemperatureUnit.Celsius)
+		{
+			return temperature + 273.15f;
+		}
+		if (fromUnit != GameUtil.TemperatureUnit.Fahrenheit)
+		{
+			return temperature;
+		}
+		return (temperature + 459.67f) * 5f / 9f;
 	}
 
 	public static float GetTemperatureConvertedToKelvin(float temperature)
@@ -264,7 +293,33 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(text2, timeSlice);
 	}
 
-	public static string GetFormattedTemperature(float temp, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation interpretation = GameUtil.TemperatureInterpretation.Absolute, bool displayUnits = true)
+	public static float GetRoundedTemperatureInKelvin(float kelvin)
+	{
+		float num = 0f;
+		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
+		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
+		{
+			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
+			{
+				if (temperatureUnit == GameUtil.TemperatureUnit.Kelvin)
+				{
+					num = (float)Mathf.RoundToInt(kelvin);
+				}
+			}
+			else
+			{
+				float num2 = (float)Mathf.RoundToInt(GameUtil.GetTemperatureConvertedFromKelvin(kelvin, GameUtil.TemperatureUnit.Fahrenheit));
+				num = GameUtil.GetTemperatureConvertedToKelvin(num2, GameUtil.TemperatureUnit.Fahrenheit);
+			}
+		}
+		else
+		{
+			num = GameUtil.GetTemperatureConvertedToKelvin(Mathf.Round(GameUtil.GetConvertedTemperature(Mathf.Round(kelvin), true)));
+		}
+		return num;
+	}
+
+	public static string GetFormattedTemperature(float temp, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation interpretation = GameUtil.TemperatureInterpretation.Absolute, bool displayUnits = true, bool roundInDestinationFormat = false)
 	{
 		if (interpretation != GameUtil.TemperatureInterpretation.Absolute)
 		{
@@ -275,7 +330,7 @@ public static class GameUtil
 		}
 		else
 		{
-			temp = GameUtil.GetConvertedTemperature(temp);
+			temp = GameUtil.GetConvertedTemperature(temp, roundInDestinationFormat);
 		}
 		temp = GameUtil.ApplyTimeSlice(temp, timeSlice);
 		string text = string.Empty;
@@ -578,6 +633,28 @@ public static class GameUtil
 			text = UI.UNITSUFFIXES.INFORMATION.GIGABYTE;
 		}
 		return GameUtil.AddTimeSliceText(amount + text, timeSlice);
+	}
+
+	public static LocString GetCurrentMassUnit(bool useSmallUnit = false)
+	{
+		LocString locString = null;
+		GameUtil.MassUnit massUnit = GameUtil.massUnit;
+		if (massUnit != GameUtil.MassUnit.Kilograms)
+		{
+			if (massUnit == GameUtil.MassUnit.Pounds)
+			{
+				locString = UI.UNITSUFFIXES.MASS.POUND;
+			}
+		}
+		else if (useSmallUnit)
+		{
+			locString = UI.UNITSUFFIXES.MASS.GRAM;
+		}
+		else
+		{
+			locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
+		}
+		return locString;
 	}
 
 	public static string GetFormattedMass(float mass, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.MetricMassFormat massFormat = GameUtil.MetricMassFormat.UseThreshold, bool includeSuffix = true, string floatFormat = "{0:0.#}")
@@ -1504,12 +1581,15 @@ public static class GameUtil
 		});
 	}
 
-	public static void IndentListOfDescriptors(List<Descriptor> list)
+	public static void IndentListOfDescriptors(List<Descriptor> list, int indentCount = 1)
 	{
 		for (int i = 0; i < list.Count; i++)
 		{
 			Descriptor descriptor = list[i];
-			descriptor.IncreaseIndent();
+			for (int j = 0; j < indentCount; j++)
+			{
+				descriptor.IncreaseIndent();
+			}
 			list[i] = descriptor;
 		}
 	}
@@ -1555,7 +1635,7 @@ public static class GameUtil
 			}
 		}
 		KPrefabID component2 = go.GetComponent<KPrefabID>();
-		if (component2.AdditionalRequirements != null)
+		if (component2 != null && component2.AdditionalRequirements != null)
 		{
 			foreach (Descriptor descriptor2 in component2.AdditionalRequirements)
 			{
@@ -1565,7 +1645,7 @@ public static class GameUtil
 				}
 			}
 		}
-		if (component2.AdditionalEffects != null)
+		if (component2 != null && component2.AdditionalEffects != null)
 		{
 			foreach (Descriptor descriptor3 in component2.AdditionalEffects)
 			{
@@ -1588,7 +1668,7 @@ public static class GameUtil
 				list.Add(descriptor);
 			}
 		}
-		GameUtil.IndentListOfDescriptors(list);
+		GameUtil.IndentListOfDescriptors(list, 1);
 		return list;
 	}
 
@@ -1602,7 +1682,7 @@ public static class GameUtil
 				list.Add(descriptor);
 			}
 		}
-		GameUtil.IndentListOfDescriptors(list);
+		GameUtil.IndentListOfDescriptors(list, 1);
 		return list;
 	}
 
@@ -1616,7 +1696,7 @@ public static class GameUtil
 				list.Add(descriptor);
 			}
 		}
-		GameUtil.IndentListOfDescriptors(list);
+		GameUtil.IndentListOfDescriptors(list, 1);
 		return list;
 	}
 
@@ -1630,7 +1710,7 @@ public static class GameUtil
 				list.Add(descriptor);
 			}
 		}
-		GameUtil.IndentListOfDescriptors(list);
+		GameUtil.IndentListOfDescriptors(list, 1);
 		return list;
 	}
 
@@ -1646,7 +1726,7 @@ public static class GameUtil
 				list.Add(descriptor2);
 			}
 		}
-		GameUtil.IndentListOfDescriptors(list);
+		GameUtil.IndentListOfDescriptors(list, 1);
 		return list;
 	}
 
@@ -1798,7 +1878,7 @@ public static class GameUtil
 			{
 				global::Klei.AI.Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
 				string name = attribute.Name;
-				string formattedString = attributeModifier.GetFormattedString(null, false);
+				string formattedString = attributeModifier.GetFormattedString(null);
 				string text = ((attributeModifier.Value < 0f) ? "consumed" : "produced");
 				string text2 = UI.GAMEOBJECTEFFECTS.EQUIPMENT_MODS.text.Replace("{Attribute}", name).Replace("{Style}", text).Replace("{Value}", formattedString);
 				list.Add(new Descriptor(text2, text2, Descriptor.DescriptorType.Effect, false));
@@ -2009,6 +2089,78 @@ public static class GameUtil
 		return text + text3 + text2;
 	}
 
+	public static string GenerateRandomRocketName()
+	{
+		string text = string.Empty;
+		string text2 = string.Empty;
+		string text3 = string.Empty;
+		string text4 = string.Empty;
+		int num = 1;
+		int num2 = 2;
+		int num3 = 4;
+		List<string> list = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.NOUN)));
+		text = list.GetRandom<string>();
+		int num4 = 0;
+		if (global::UnityEngine.Random.value > 0.7f)
+		{
+			List<string> list2 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.PREFIX)));
+			text2 = list2.GetRandom<string>();
+			num4 |= num;
+		}
+		if (global::UnityEngine.Random.value > 0.5f)
+		{
+			List<string> list3 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.ADJECTIVE)));
+			text3 = list3.GetRandom<string>();
+			num4 |= num2;
+		}
+		if (global::UnityEngine.Random.value > 0.1f)
+		{
+			List<string> list4 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.ROCKET.SUFFIX)));
+			text4 = list4.GetRandom<string>();
+			num4 |= num3;
+		}
+		string text5;
+		if (num4 == (num | num2 | num3))
+		{
+			text5 = NAMEGEN.ROCKET.FMT_PREFIX_ADJECTIVE_NOUN_SUFFIX;
+		}
+		else if (num4 == (num2 | num3))
+		{
+			text5 = NAMEGEN.ROCKET.FMT_ADJECTIVE_NOUN_SUFFIX;
+		}
+		else if (num4 == (num | num3))
+		{
+			text5 = NAMEGEN.ROCKET.FMT_PREFIX_NOUN_SUFFIX;
+		}
+		else if (num4 == num3)
+		{
+			text5 = NAMEGEN.ROCKET.FMT_NOUN_SUFFIX;
+		}
+		else if (num4 == (num | num2))
+		{
+			text5 = NAMEGEN.ROCKET.FMT_PREFIX_ADJECTIVE_NOUN;
+		}
+		else if (num4 == num)
+		{
+			text5 = NAMEGEN.ROCKET.FMT_PREFIX_NOUN;
+		}
+		else if (num4 == num2)
+		{
+			text5 = NAMEGEN.ROCKET.FMT_ADJECTIVE_NOUN;
+		}
+		else
+		{
+			text5 = NAMEGEN.ROCKET.FMT_NOUN;
+		}
+		Output.Log(new object[]
+		{
+			"Rocket name bits:",
+			Convert.ToString(num4, 2)
+		});
+		return text5.Replace("{Prefix}", text2).Replace("{Adjective}", text3).Replace("{Noun}", text)
+			.Replace("{Suffix}", text4);
+	}
+
 	public static float GetThermalComfort(int cell, float tolerance = -0.083680004f)
 	{
 		float num = 0f;
@@ -2061,10 +2213,14 @@ public static class GameUtil
 		return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", new object[] { colour.r, colour.g, colour.b, colour.a });
 	}
 
-	public static string GetFormattedDecor(float value)
+	public static string GetFormattedDecor(float value, bool enforce_max = false)
 	{
 		string text = string.Empty;
-		LocString locString = UI.OVERLAYS.DECOR.VALUE;
+		LocString locString = ((value <= DecorMonitor.MAXIMUM_DECOR_VALUE || !enforce_max) ? UI.OVERLAYS.DECOR.VALUE : UI.OVERLAYS.DECOR.MAXIMUM_DECOR);
+		if (enforce_max)
+		{
+			value = Math.Min(value, DecorMonitor.MAXIMUM_DECOR_VALUE);
+		}
 		if (value > 0f)
 		{
 			text = "+";
@@ -2098,8 +2254,8 @@ public static class GameUtil
 		{
 			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
 			{
-				string text = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null, false));
-				string text2 = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null, false));
+				string text = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null));
+				string text2 = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null));
 				Descriptor descriptor = default(Descriptor);
 				descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
 				descriptor.IncreaseIndent();
@@ -2116,7 +2272,7 @@ public static class GameUtil
 		foreach (AttributeModifier attributeModifier in element.attributeModifiers)
 		{
 			string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
-			string formattedString = attributeModifier.GetFormattedString(null, attributeModifier.IsMultiplier);
+			string formattedString = attributeModifier.GetFormattedString(null);
 			text = text + "\n    • " + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, formattedString);
 		}
 		text += GameUtil.GetSignificantMaterialPropertyTooltips(element);
@@ -2175,6 +2331,83 @@ public static class GameUtil
 	public static int NaturalBuildingCell(this KMonoBehaviour cmp)
 	{
 		return Grid.PosToCell(cmp.transform.GetPosition());
+	}
+
+	public static List<Descriptor> GetMaterialDescriptors(Tag tag)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Element element = ElementLoader.GetElement(tag);
+		if (element != null)
+		{
+			if (element.attributeModifiers.Count > 0)
+			{
+				foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+				{
+					string text = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null));
+					string text2 = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + attributeModifier.AttributeId.ToUpper())), attributeModifier.GetFormattedString(null));
+					Descriptor descriptor = default(Descriptor);
+					descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
+					descriptor.IncreaseIndent();
+					list.Add(descriptor);
+				}
+			}
+			list.AddRange(GameUtil.GetSignificantMaterialPropertyDescriptors(element));
+		}
+		else
+		{
+			GameObject gameObject = Assets.TryGetPrefab(tag);
+			if (gameObject != null)
+			{
+				PrefabAttributeModifiers component = gameObject.GetComponent<PrefabAttributeModifiers>();
+				if (component != null)
+				{
+					foreach (AttributeModifier attributeModifier2 in component.descriptors)
+					{
+						string text3 = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + attributeModifier2.AttributeId.ToUpper())), attributeModifier2.GetFormattedString(null));
+						string text4 = string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + attributeModifier2.AttributeId.ToUpper())), attributeModifier2.GetFormattedString(null));
+						Descriptor descriptor2 = default(Descriptor);
+						descriptor2.SetupDescriptor(text3, text4, Descriptor.DescriptorType.Effect);
+						descriptor2.IncreaseIndent();
+						list.Add(descriptor2);
+					}
+				}
+			}
+		}
+		return list;
+	}
+
+	public static string GetMaterialTooltips(Tag tag)
+	{
+		string text = tag.ProperName();
+		Element element = ElementLoader.GetElement(tag);
+		if (element != null)
+		{
+			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+			{
+				string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
+				string formattedString = attributeModifier.GetFormattedString(null);
+				text = text + "\n    • " + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, formattedString);
+			}
+			text += GameUtil.GetSignificantMaterialPropertyTooltips(element);
+		}
+		else
+		{
+			GameObject gameObject = Assets.TryGetPrefab(tag);
+			if (gameObject != null)
+			{
+				PrefabAttributeModifiers component = gameObject.GetComponent<PrefabAttributeModifiers>();
+				if (component != null)
+				{
+					foreach (AttributeModifier attributeModifier2 in component.descriptors)
+					{
+						string name2 = Db.Get().BuildingAttributes.Get(attributeModifier2.AttributeId).Name;
+						string formattedString2 = attributeModifier2.GetFormattedString(null);
+						text = text + "\n    • " + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name2, formattedString2);
+					}
+				}
+			}
+		}
+		return text;
 	}
 
 	public static GameUtil.TemperatureUnit temperatureUnit;

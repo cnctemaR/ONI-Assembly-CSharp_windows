@@ -1,69 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei;
-using KSerialization.Converters;
+using UnityEngine;
+using UnityEngine.UI;
 
-public class CodexWidget : YamlIO<CodexWidget>
+public abstract class CodexWidget<SubClass> : YamlIO<SubClass>, ICodexWidget
 {
-	public CodexWidget()
+	protected CodexWidget()
 	{
-		this.properties = new Dictionary<string, string>();
-		this.objectProperties = new Dictionary<string, object>();
-		this.properties["preferredWidth"] = "-1";
-		this.properties["preferredHeight"] = "-1";
+		this.preferredWidth = -1;
+		this.preferredHeight = -1;
 	}
 
-	public CodexWidget(CodexWidget.ContentType type)
-		: this(type, new Dictionary<string, string>())
+	protected CodexWidget(int preferredWidth, int preferredHeight)
 	{
+		this.preferredWidth = preferredWidth;
+		this.preferredHeight = preferredHeight;
 	}
 
-	public CodexWidget(CodexWidget.ContentType type, Dictionary<string, string> properties, Dictionary<string, object> objectProperties)
+	public int preferredWidth { get; set; }
+
+	public int preferredHeight { get; set; }
+
+	public abstract void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles);
+
+	protected void ConfigurePreferredLayout(GameObject contentGameObject)
 	{
-		this.type = type;
-		this.properties = properties;
-		this.objectProperties = objectProperties;
-		if (!properties.ContainsKey("preferredWidth"))
-		{
-			properties["preferredWidth"] = "-1";
-		}
-		if (!properties.ContainsKey("preferredHeight"))
-		{
-			properties["preferredHeight"] = "-1";
-		}
-	}
-
-	public CodexWidget(CodexWidget.ContentType type, Dictionary<string, string> properties)
-	{
-		this.type = type;
-		this.properties = properties;
-		this.objectProperties = new Dictionary<string, object>();
-		if (!properties.ContainsKey("preferredWidth"))
-		{
-			properties["preferredWidth"] = "-1";
-		}
-		if (!properties.ContainsKey("preferredHeight"))
-		{
-			properties["preferredHeight"] = "-1";
-		}
-	}
-
-	[StringEnumConverter]
-	public CodexWidget.ContentType type { get; set; }
-
-	public Dictionary<string, string> properties { get; set; }
-
-	public Dictionary<string, object> objectProperties { get; set; }
-
-	public enum ContentType
-	{
-		Text,
-		Image,
-		DividerLine,
-		Spacer,
-		LabelWithIcon,
-		ContentLockedIndicator,
-		LargeSpacer,
-		LENGTH
+		LayoutElement componentInChildren = contentGameObject.GetComponentInChildren<LayoutElement>();
+		componentInChildren.preferredHeight = (float)this.preferredHeight;
+		componentInChildren.preferredWidth = (float)this.preferredWidth;
 	}
 }

@@ -20,7 +20,7 @@ public class SolidConduitOutboxConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
-		buildingDef.ViewMode = SimViewMode.SolidConveyorMap;
+		buildingDef.ViewMode = OverlayModes.SolidConveyor.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.InputConduitType = ConduitType.Solid;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);

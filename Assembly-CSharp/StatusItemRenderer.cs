@@ -114,13 +114,13 @@ public class StatusItemRenderer
 		this.entryCount--;
 	}
 
-	private SimViewMode GetMode()
+	private HashedString GetMode()
 	{
 		if (OverlayScreen.Instance != null)
 		{
 			return OverlayScreen.Instance.mode;
 		}
-		return SimViewMode.None;
+		return OverlayModes.None.ID;
 	}
 
 	public void MarkAllDirty()
@@ -148,7 +148,7 @@ public class StatusItemRenderer
 	{
 		foreach (StatusItemRenderer.Entry entry in this.visibleEntries)
 		{
-			entry.GetIntersection(pos, intersections, this.scale, this.GetMode());
+			entry.GetIntersection(pos, intersections, this.scale);
 		}
 	}
 
@@ -156,7 +156,7 @@ public class StatusItemRenderer
 	{
 		foreach (StatusItemRenderer.Entry entry in this.visibleEntries)
 		{
-			entry.GetIntersection(pos, selectables, this.scale, this.GetMode());
+			entry.GetIntersection(pos, selectables, this.scale);
 		}
 	}
 
@@ -249,7 +249,7 @@ public class StatusItemRenderer
 			this.material = new Material(shader);
 		}
 
-		public void Render(StatusItemRenderer renderer, Vector3 camera_bl, Vector3 camera_tr, SimViewMode overlay)
+		public void Render(StatusItemRenderer renderer, Vector3 camera_bl, Vector3 camera_tr, HashedString overlay)
 		{
 			if (DebugHandler.HideUI)
 			{
@@ -295,7 +295,7 @@ public class StatusItemRenderer
 				int num2 = 0;
 				foreach (StatusItem statusItem2 in this.statusItems)
 				{
-					if (statusItem2.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem2.render_overlay == overlay)
+					if (statusItem2.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem2.render_overlay != overlay))
 					{
 						num2++;
 					}
@@ -321,7 +321,7 @@ public class StatusItemRenderer
 				for (int i = 0; i < this.statusItems.Count; i++)
 				{
 					StatusItem statusItem3 = this.statusItems[i];
-					if (statusItem3.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem3.render_overlay == overlay)
+					if (statusItem3.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem3.render_overlay != overlay))
 					{
 						float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
 						Sprite sprite = this.statusItems[i].sprite.sprite;
@@ -362,7 +362,7 @@ public class StatusItemRenderer
 			this.statusItems.AddRange(entry.statusItems);
 		}
 
-		private bool Intersects(Vector2 pos, float scale, SimViewMode overlay)
+		private bool Intersects(Vector2 pos, float scale)
 		{
 			if (this.transform == null)
 			{
@@ -378,9 +378,9 @@ public class StatusItemRenderer
 			return pos.x >= vector4.x && pos.x <= vector5.x && pos.y >= vector4.y && pos.y <= vector5.y;
 		}
 
-		public void GetIntersection(Vector2 pos, List<SelectTool.Intersection> intersections, float scale, SimViewMode overlay)
+		public void GetIntersection(Vector2 pos, List<SelectTool.Intersection> intersections, float scale)
 		{
-			if (this.Intersects(pos, scale, overlay))
+			if (this.Intersects(pos, scale))
 			{
 				KSelectable component = this.transform.GetComponent<KSelectable>();
 				if (component.IsSelectable)
@@ -394,9 +394,9 @@ public class StatusItemRenderer
 			}
 		}
 
-		public void GetIntersection(Vector2 pos, List<KSelectable> selectables, float scale, SimViewMode overlay)
+		public void GetIntersection(Vector2 pos, List<KSelectable> selectables, float scale)
 		{
-			if (this.Intersects(pos, scale, overlay))
+			if (this.Intersects(pos, scale))
 			{
 				KSelectable component = this.transform.GetComponent<KSelectable>();
 				if (component.IsSelectable && !selectables.Contains(component))

@@ -58,18 +58,8 @@ public class ChorePreconditions
 		precondition5.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Assignable assignable = (Assignable)data;
-			if (assignable.assignee != null)
-			{
-				foreach (Ownables ownables in assignable.assignee.GetOwners())
-				{
-					if (ownables.gameObject == context.consumerState.gameObject)
-					{
-						return true;
-					}
-				}
-				return false;
-			}
-			return false;
+			IAssignableIdentity component = context.consumerState.gameObject.GetComponent<IAssignableIdentity>();
+			return assignable.IsAssignedTo(component);
 		};
 		this.IsAssignedtoMe = precondition5;
 		Chore.Precondition precondition6 = default(Chore.Precondition);
@@ -82,9 +72,9 @@ public class ChorePreconditions
 			{
 				if (context.consumerState.ownable != null)
 				{
-					foreach (Ownables ownables2 in room.GetOwners())
+					foreach (Ownables ownables in room.GetOwners())
 					{
-						if (ownables2.gameObject == context.consumerState.gameObject)
+						if (ownables.gameObject == context.consumerState.gameObject)
 						{
 							return true;
 						}
@@ -506,17 +496,9 @@ public class ChorePreconditions
 		};
 		this.NoDeadBodies = precondition39;
 		Chore.Precondition precondition40 = default(Chore.Precondition);
-		precondition40.id = "ValidMourningSite";
-		precondition40.description = DUPLICANTS.CHORES.PRECONDITIONS.VALID_MOURNING_SITE;
+		precondition40.id = "NotCurrentlyPeeing";
+		precondition40.description = DUPLICANTS.CHORES.PRECONDITIONS.CURRENTLY_PEEING;
 		precondition40.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			return MournChore.FindGraveToMournAt() != null;
-		};
-		this.ValidMourningSite = precondition40;
-		Chore.Precondition precondition41 = default(Chore.Precondition);
-		precondition41.id = "NotCurrentlyPeeing";
-		precondition41.description = DUPLICANTS.CHORES.PRECONDITIONS.CURRENTLY_PEEING;
-		precondition41.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			bool flag = true;
 			Chore currentChore2 = context.consumerState.choreDriver.GetCurrentChore();
@@ -527,7 +509,7 @@ public class ChorePreconditions
 			}
 			return flag;
 		};
-		this.NotCurrentlyPeeing = precondition41;
+		this.NotCurrentlyPeeing = precondition40;
 		base..ctor();
 	}
 
@@ -627,8 +609,6 @@ public class ChorePreconditions
 	public Chore.Precondition IsBladderNotFull;
 
 	public Chore.Precondition NoDeadBodies;
-
-	public Chore.Precondition ValidMourningSite;
 
 	public Chore.Precondition NotCurrentlyPeeing;
 }

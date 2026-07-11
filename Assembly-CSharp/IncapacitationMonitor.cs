@@ -17,7 +17,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 			GameTags.HitPointsDepleted
 		}, this.healthy, true);
 		this.Incapacitated.EventTransition(GameHashes.IncapacitationRecovery, this.start_recovery, null).ToggleTag(GameTags.Incapacitated).ToggleRecurringChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), null)
-			.ParamTransition<float>(this.bleedOutStamina, this.die, (IncapacitationMonitor.Instance smi, float parameter) => parameter <= 0f)
+			.ParamTransition<float>(this.bleedOutStamina, this.die, GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.IsLTEZero)
 			.ToggleUrge(Db.Get().Urges.BeIncapacitated)
 			.Enter(delegate(IncapacitationMonitor.Instance smi)
 			{

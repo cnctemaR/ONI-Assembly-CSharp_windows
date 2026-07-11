@@ -50,7 +50,7 @@ public class GasBottler : Workable
 			default_state = this.empty;
 			this.empty.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.filling, (GasBottler.Controller.Instance smi) => smi.master.storage.IsFull());
 			this.filling.PlayAnim("working").OnAnimQueueComplete(this.ready);
-			this.ready.EventTransition(GameHashes.OnStorageChange, this.empty, (GasBottler.Controller.Instance smi) => !smi.master.storage.IsFull()).Enter(delegate(GasBottler.Controller.Instance smi)
+			this.ready.EventTransition(GameHashes.OnStorageChange, this.pickup, (GasBottler.Controller.Instance smi) => !smi.master.storage.IsFull()).Enter(delegate(GasBottler.Controller.Instance smi)
 			{
 				smi.master.storage.allowItemRemoval = true;
 				foreach (GameObject gameObject in smi.master.storage.items)
@@ -65,6 +65,7 @@ public class GasBottler : Workable
 					gameObject2.Trigger(-778359855, smi.master.storage);
 				}
 			});
+			this.pickup.PlayAnim("pick_up").OnAnimQueueComplete(this.empty);
 		}
 
 		public GameStateMachine<GasBottler.Controller, GasBottler.Controller.Instance, GasBottler, object>.State empty;
@@ -72,6 +73,8 @@ public class GasBottler : Workable
 		public GameStateMachine<GasBottler.Controller, GasBottler.Controller.Instance, GasBottler, object>.State filling;
 
 		public GameStateMachine<GasBottler.Controller, GasBottler.Controller.Instance, GasBottler, object>.State ready;
+
+		public GameStateMachine<GasBottler.Controller, GasBottler.Controller.Instance, GasBottler, object>.State pickup;
 
 		public new class Instance : GameStateMachine<GasBottler.Controller, GasBottler.Controller.Instance, GasBottler, object>.GameInstance
 		{

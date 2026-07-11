@@ -1,7 +1,6 @@
 ﻿using System;
 using Klei.AI;
 using KSerialization;
-using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Equipment : Assignables
@@ -17,7 +16,6 @@ public class Equipment : Assignables
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe<Equipment>(493375141, Equipment.OnRefreshUserMenuDelegate);
 		base.Subscribe<Equipment>(1502190696, Equipment.SetDestroyedTrueDelegate);
 		base.Subscribe<Equipment>(1969584890, Equipment.SetDestroyedTrueDelegate);
 	}
@@ -33,9 +31,9 @@ public class Equipment : Assignables
 	{
 		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
 		slot.Assign(equippable);
-		base.Trigger(-448952673, equippable.GetComponent<KPrefabID>());
+		base.GetTargetGameObject().Trigger(-448952673, equippable.GetComponent<KPrefabID>());
 		equippable.Trigger(-1617557748, this);
-		Attributes attributes = base.gameObject.GetAttributes();
+		Attributes attributes = base.GetTargetGameObject().GetAttributes();
 		if (attributes != null)
 		{
 			foreach (AttributeModifier attributeModifier in equippable.def.AttributeModifiers)
@@ -43,7 +41,7 @@ public class Equipment : Assignables
 				attributes.Add(attributeModifier);
 			}
 		}
-		SnapOn component = slot.gameObject.GetComponent<SnapOn>();
+		SnapOn component = base.GetTargetGameObject().GetComponent<SnapOn>();
 		if (component != null)
 		{
 			component.AttachSnapOnByName(equippable.def.SnapOn);
@@ -52,7 +50,7 @@ public class Equipment : Assignables
 				component.AttachSnapOnByName(equippable.def.SnapOn1);
 			}
 		}
-		KBatchedAnimController component2 = slot.gameObject.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController component2 = base.GetTargetGameObject().GetComponent<KBatchedAnimController>();
 		if (component2 != null && equippable.def.BuildOverride != null)
 		{
 			component2.GetComponent<SymbolOverrideController>().AddBuildOverride(equippable.def.BuildOverride.GetData(), equippable.def.BuildOverridePriority);
@@ -61,10 +59,10 @@ public class Equipment : Assignables
 		equippable.OnEquip(slot);
 		if (this.refreshHandle.TimeRemaining > 0f)
 		{
-			Debug.LogWarning(base.gameObject.GetProperName() + " is already in the process of changing equipment", null);
+			Debug.LogWarning(base.GetTargetGameObject().GetProperName() + " is already in the process of changing equipment", null);
 			this.refreshHandle.ClearScheduler();
 		}
-		CreatureSimTemperatureTransfer transferer = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+		CreatureSimTemperatureTransfer transferer = base.GetTargetGameObject().GetComponent<CreatureSimTemperatureTransfer>();
 		if (!(component2 == null))
 		{
 			this.refreshHandle = GameScheduler.Instance.Schedule("ChangeEquipment", 2f, delegate(object obj)
@@ -83,16 +81,16 @@ public class Equipment : Assignables
 		equippable.GetComponent<KBatchedAnimController>().enabled = true;
 		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
 		slot.Unassign(true);
-		base.Trigger(-1285462312, equippable.GetComponent<KPrefabID>());
+		base.GetTargetGameObject().Trigger(-1285462312, equippable.GetComponent<KPrefabID>());
 		equippable.Trigger(-170173755, this);
-		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController component = base.GetTargetGameObject().GetComponent<KBatchedAnimController>();
 		if (!this.destroyed)
 		{
 			if (equippable.def.BuildOverride != null && component != null)
 			{
 				component.GetComponent<SymbolOverrideController>().TryRemoveBuildOverride(equippable.def.BuildOverride.GetData(), equippable.def.BuildOverridePriority);
 			}
-			Attributes attributes = slot.gameObject.GetAttributes();
+			Attributes attributes = base.GetTargetGameObject().GetAttributes();
 			if (attributes != null)
 			{
 				foreach (AttributeModifier attributeModifier in equippable.def.AttributeModifiers)
@@ -102,7 +100,7 @@ public class Equipment : Assignables
 			}
 			if (!equippable.def.IsBody)
 			{
-				SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
+				SnapOn component2 = base.GetTargetGameObject().GetComponent<SnapOn>();
 				component2.DetachSnapOnByName(equippable.def.SnapOn);
 				if (equippable.def.SnapOn1 != null)
 				{
@@ -113,9 +111,9 @@ public class Equipment : Assignables
 			{
 				this.refreshHandle = GameScheduler.Instance.Schedule("ChangeEquipment", 1f, delegate(object obj)
 				{
-					if (this != null && this.gameObject != null)
+					if (this != null && this.GetTargetGameObject() != null)
 					{
-						CreatureSimTemperatureTransfer component3 = this.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+						CreatureSimTemperatureTransfer component3 = this.GetTargetGameObject().GetComponent<CreatureSimTemperatureTransfer>();
 						if (component3 != null)
 						{
 							component3.RefreshRegistration();
@@ -138,23 +136,6 @@ public class Equipment : Assignables
 		return equipmentSlotInstance.IsAssigned() && (equipmentSlotInstance.assignable as Equippable).isEquipped;
 	}
 
-	private void OnRefreshUserMenu(object data)
-	{
-		foreach (AssignableSlotInstance assignableSlotInstance in this)
-		{
-			EquipmentSlotInstance equipmentSlotInstance = (EquipmentSlotInstance)assignableSlotInstance;
-			if (equipmentSlotInstance.assignable != null)
-			{
-				EquipmentSlotInstance slot_iter = equipmentSlotInstance;
-				string text = string.Format(UI.USERMENUACTIONS.UNEQUIP.NAME, equipmentSlotInstance.assignable.GetComponent<Equippable>().def.GenericName);
-				Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
-				{
-					((Equippable)slot_iter.assignable).Unassign();
-				}, global::Action.NumActions, null, null, null, string.Empty, true), 2f);
-			}
-		}
-	}
-
 	public void UnequipAll()
 	{
 		foreach (AssignableSlotInstance assignableSlotInstance in this.slots)
@@ -167,11 +148,6 @@ public class Equipment : Assignables
 	}
 
 	private SchedulerHandle refreshHandle;
-
-	private static readonly EventSystem.IntraObjectHandler<Equipment> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Equipment>(delegate(Equipment component, object data)
-	{
-		component.OnRefreshUserMenu(data);
-	});
 
 	private static readonly EventSystem.IntraObjectHandler<Equipment> SetDestroyedTrueDelegate = new EventSystem.IntraObjectHandler<Equipment>(delegate(Equipment component, object data)
 	{

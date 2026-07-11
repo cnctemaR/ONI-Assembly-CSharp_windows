@@ -33,10 +33,18 @@ public class KilnConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = false;
-		Refinery refinery = go.AddOrGet<Refinery>();
-		refinery.duplicantOperated = false;
-		refinery.sideScreenStyle = RefinerySideScreen.StyleSetting.ListInputOutput;
-		BuildingTemplates.CreateRefineryStorage(go, refinery);
+		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
+		complexFabricator.duplicantOperated = false;
+		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
+		go.AddOrGet<FabricatorIngredientStatusManager>();
+		go.AddOrGet<CopyBuildingSettings>();
+		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
+		this.ConfgiureRecipes();
+		Prioritizable.AddRef(go);
+	}
+
+	private void ConfgiureRecipes()
+	{
 		Tag tag = SimHashes.Ceramic.CreateTag();
 		Tag tag2 = SimHashes.Clay.CreateTag();
 		Tag tag3 = SimHashes.Carbon.CreateTag();
@@ -57,6 +65,7 @@ public class KilnConfig : IBuildingConfig
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Clay).name, ElementLoader.FindElementByHash(SimHashes.Ceramic).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("Kiln") };
+		complexRecipe.useResultAsDescription = true;
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
 		Tag tag4 = SimHashes.RefinedCarbon.CreateTag();
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
@@ -73,8 +82,8 @@ public class KilnConfig : IBuildingConfig
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Carbon).name, ElementLoader.FindElementByHash(SimHashes.RefinedCarbon).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("Kiln") };
+		complexRecipe.useResultAsDescription = true;
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
-		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

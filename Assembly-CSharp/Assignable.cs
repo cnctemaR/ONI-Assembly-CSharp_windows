@@ -32,6 +32,10 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	[OnDeserialized]
 	internal void OnDeserialized()
 	{
+	}
+
+	private void RestoreAssignee()
+	{
 		IAssignableIdentity savedAssignee = this.GetSavedAssignee();
 		if (savedAssignee != null)
 		{
@@ -55,6 +59,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.RestoreAssignee();
 		Game.Instance.assignmentManager.Add(this);
 		if (this.assignee == null && this.canBePublic)
 		{
@@ -112,6 +117,23 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		return this.assignee != null;
 	}
 
+	public bool IsAssignedTo(IAssignableIdentity identity)
+	{
+		Ownables soleOwner = identity.GetSoleOwner();
+		if (this.assignee != null)
+		{
+			foreach (Ownables ownables in this.assignee.GetOwners())
+			{
+				if (ownables.gameObject == soleOwner.gameObject)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
 	public virtual void Assign(IAssignableIdentity new_assignee)
 	{
 		if (new_assignee == this.assignee)
@@ -120,25 +142,24 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		}
 		if (new_assignee is KMonoBehaviour)
 		{
-			KMonoBehaviour kmonoBehaviour = new_assignee as KMonoBehaviour;
 			if (!this.CanAssignTo(new_assignee))
 			{
 				return;
 			}
-			this.assignee_identityRef.Set(kmonoBehaviour);
+			this.assignee_identityRef.Set((KMonoBehaviour)new_assignee);
 			this.assignee_groupID = string.Empty;
 		}
 		else if (new_assignee is AssignmentGroup)
 		{
 			this.assignee_identityRef.Set(null);
-			this.assignee_groupID = (new_assignee as AssignmentGroup).id;
+			this.assignee_groupID = ((AssignmentGroup)new_assignee).id;
 		}
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Assigned);
 		this.assignee = new_assignee;
-		if (this.slot != null && (new_assignee is MinionIdentity || new_assignee is StoredMinionIdentity))
+		if (this.slot != null && (new_assignee is MinionIdentity || new_assignee is StoredMinionIdentity || new_assignee is MinionAssignablesProxy))
 		{
-			KMonoBehaviour kmonoBehaviour2 = new_assignee as KMonoBehaviour;
-			Ownables component = kmonoBehaviour2.GetComponent<Ownables>();
+			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)new_assignee;
+			Ownables component = kmonoBehaviour.GetComponent<Ownables>();
 			if (component != null)
 			{
 				AssignableSlotInstance slot = component.GetSlot(this.slot);
@@ -147,7 +168,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 					slot.Assign(this);
 				}
 			}
-			Equipment component2 = kmonoBehaviour2.GetComponent<Equipment>();
+			Equipment component2 = kmonoBehaviour.GetComponent<Equipment>();
 			if (component2 != null)
 			{
 				AssignableSlotInstance slot2 = component2.GetSlot(this.slot);
@@ -171,13 +192,16 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 			return;
 		}
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Assigned);
-		if (this.slot != null && (this.assignee is MinionIdentity || this.assignee is StoredMinionIdentity))
+		if (this.slot != null)
 		{
-			Assignables component = (this.assignee as KMonoBehaviour).GetComponent<Ownables>();
-			AssignableSlotInstance slot = component.GetSlot(this.slot);
-			if (slot != null)
+			Assignables soleOwner = this.assignee.GetSoleOwner();
+			if (soleOwner)
 			{
-				slot.Unassign(true);
+				AssignableSlotInstance slot = soleOwner.GetSlot(this.slot);
+				if (slot != null)
+				{
+					slot.Unassign(true);
+				}
 			}
 		}
 		this.assignee = null;
@@ -243,7 +267,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 	public IAssignableIdentity assignee;
 
 	[Serialize]
-	private Ref<KMonoBehaviour> assignee_identityRef = new Ref<KMonoBehaviour>();
+	protected Ref<KMonoBehaviour> assignee_identityRef = new Ref<KMonoBehaviour>();
 
 	[Serialize]
 	private string assignee_groupID = string.Empty;
@@ -259,5 +283,5 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 
 	private List<Func<MinionIdentity, bool>> assignmentPreconditions = new List<Func<MinionIdentity, bool>>();
 
-	public Func<MinionIdentity, bool> eligibleFilter;
+	public Func<MinionAssignablesProxy, bool> eligibleFilter;
 }

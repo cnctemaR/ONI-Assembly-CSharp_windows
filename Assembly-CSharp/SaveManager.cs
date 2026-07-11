@@ -238,7 +238,7 @@ public class SaveManager : KMonoBehaviour
 						SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(gameObject, reader);
 						if (saveLoadRoot == null)
 						{
-							Output.LogError(new object[] { "Error loading data [" + text + "]" });
+							Output.LogError("Error loading data [" + text + "]");
 							return false;
 						}
 					}

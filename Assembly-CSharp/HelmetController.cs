@@ -16,7 +16,7 @@ public class HelmetController : KMonoBehaviour
 		Equippable component = base.GetComponent<Equippable>();
 		if (component.assignee != null)
 		{
-			Transform transform = component.assignee.GetSoleOwner().transform;
+			Transform transform = ((!(component.assignee is MinionIdentity)) ? (component.assignee as MinionAssignablesProxy).GetTargetGameObject().transform : (component.assignee as MinionIdentity).transform);
 			kbatchedAnimController = transform.GetComponent<KBatchedAnimController>();
 		}
 		return kbatchedAnimController;
@@ -26,13 +26,13 @@ public class HelmetController : KMonoBehaviour
 	{
 		Equippable component = base.GetComponent<Equippable>();
 		this.ShowHelmet();
-		Ownables soleOwner = component.assignee.GetSoleOwner();
-		soleOwner.Subscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
-		soleOwner.Subscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
-		soleOwner.Subscribe(1347184327, new Action<object>(this.OnPathAdvanced));
+		GameObject gameObject = ((!(component.assignee is MinionIdentity)) ? (component.assignee as MinionAssignablesProxy).GetTargetGameObject() : (component.assignee as MinionIdentity).gameObject);
+		gameObject.Subscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
+		gameObject.Subscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
+		gameObject.Subscribe(1347184327, new Action<object>(this.OnPathAdvanced));
 		this.in_tube = false;
 		this.is_flying = false;
-		this.owner_navigator = soleOwner.GetComponent<Navigator>();
+		this.owner_navigator = gameObject.GetComponent<Navigator>();
 	}
 
 	private void OnUnequipped(object data)
@@ -45,10 +45,10 @@ public class HelmetController : KMonoBehaviour
 			IAssignableIdentity assignee = component.assignee;
 			if (assignee != null)
 			{
-				Ownables soleOwner = assignee.GetSoleOwner();
-				soleOwner.Unsubscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
-				soleOwner.Unsubscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
-				soleOwner.Unsubscribe(1347184327, new Action<object>(this.OnPathAdvanced));
+				GameObject gameObject = ((!(component.assignee is MinionIdentity)) ? (component.assignee as MinionAssignablesProxy).GetTargetGameObject() : (component.assignee as MinionIdentity).gameObject);
+				gameObject.Unsubscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
+				gameObject.Unsubscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
+				gameObject.Unsubscribe(1347184327, new Action<object>(this.OnPathAdvanced));
 			}
 		}
 	}

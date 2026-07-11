@@ -44,7 +44,8 @@ public class PathProber : KMonoBehaviour
 			this.QueryId++;
 		}
 		this.PathGrid.SetRootCell(cell);
-		PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type, this.QueryId);
+		bool flag = false;
+		PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type, this.QueryId, out flag);
 		PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(cell, nav_type, flags);
 		PathFinder.AddPotential(potentialPath, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, this.Potentials, this.QueryId, this.PathGrid, ref cell2);
 		this.UpdateProbe(nav_grid, ref abilities, this.Potentials, this.QueryId);
@@ -61,7 +62,8 @@ public class PathProber : KMonoBehaviour
 
 	private void UpdateProbe(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialPath potential, int potential_cost, PathFinder.PotentialList potentials, int query_id)
 	{
-		PathFinder.Cell cell = this.PathGrid.GetCell(potential, query_id);
+		bool flag;
+		PathFinder.Cell cell = this.PathGrid.GetCell(potential, query_id, out flag);
 		if (cell.cost == potential_cost)
 		{
 			PathFinder.AddPotentials(nav_grid.potentialScratchPad, potential, cell.cost, (int)cell.underwaterCost, ref abilities, null, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, query_id, this.PathGrid, cell.parent, cell.parentNavType);

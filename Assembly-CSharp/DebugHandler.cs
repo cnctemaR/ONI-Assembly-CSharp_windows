@@ -136,6 +136,7 @@ public class DebugHandler : IInputHandler
 				ManagementMenu.Instance.CheckRoles(null);
 				ManagementMenu.Instance.CheckStarmap(null);
 			}
+			Game.Instance.Trigger(1594320620, "all_the_things");
 		}
 		else if (e.TryConsume(global::Action.DebugExplosion))
 		{

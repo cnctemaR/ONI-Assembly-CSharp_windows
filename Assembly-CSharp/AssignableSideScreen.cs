@@ -68,7 +68,7 @@ public class AssignableSideScreen : SideScreenContent
 			this.rowPool = new UIPool<AssignableSideScreenRow>(this.rowPrefab);
 		}
 		base.gameObject.SetActive(true);
-		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
+		this.identityList = new List<MinionAssignablesProxy>(Components.MinionAssignablesProxy.Items);
 		this.dupeSortingToggle.ChangeState(0);
 		this.generalSortingToggle.ChangeState(0);
 		this.activeSortToggle = null;
@@ -88,7 +88,7 @@ public class AssignableSideScreen : SideScreenContent
 
 	private void OnMinionIdentitiesChanged(MinionIdentity change)
 	{
-		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
+		this.identityList = new List<MinionAssignablesProxy>(Components.MinionAssignablesProxy.Items);
 		this.Refresh(this.identityList);
 	}
 
@@ -100,7 +100,7 @@ public class AssignableSideScreen : SideScreenContent
 		}
 	}
 
-	private void Refresh(List<MinionIdentity> identities)
+	private void Refresh(List<MinionAssignablesProxy> identities)
 	{
 		this.ClearContent();
 		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
@@ -128,14 +128,14 @@ public class AssignableSideScreen : SideScreenContent
 			this.identityRowMap.Add(Game.Instance.assignmentManager.assignment_groups["public"], freeElement2);
 			freeElement2.SetContent(Game.Instance.assignmentManager.assignment_groups["public"], new Action<IAssignableIdentity>(this.OnRowClicked), this);
 		}
-		foreach (MinionIdentity minionIdentity in identities)
+		foreach (MinionAssignablesProxy minionAssignablesProxy in identities)
 		{
-			if (this.targetAssignable.eligibleFilter == null || this.targetAssignable.eligibleFilter(minionIdentity))
+			if (this.targetAssignable.eligibleFilter == null || this.targetAssignable.eligibleFilter(minionAssignablesProxy))
 			{
 				AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
 				freeElement3.sideScreen = this;
-				this.identityRowMap.Add(minionIdentity, freeElement3);
-				freeElement3.SetContent(minionIdentity, new Action<IAssignableIdentity>(this.OnRowClicked), this);
+				this.identityRowMap.Add(minionAssignablesProxy, freeElement3);
+				freeElement3.SetContent(minionAssignablesProxy, new Action<IAssignableIdentity>(this.OnRowClicked), this);
 			}
 		}
 		this.ExecuteSort(this.activeSortFunction);
@@ -235,7 +235,7 @@ public class AssignableSideScreen : SideScreenContent
 
 	private bool CanDeselect(IAssignableIdentity identity)
 	{
-		return identity is MinionIdentity;
+		return identity is MinionAssignablesProxy;
 	}
 
 	private void ChangeAssignment(IAssignableIdentity new_identity)
@@ -282,5 +282,5 @@ public class AssignableSideScreen : SideScreenContent
 
 	private Dictionary<IAssignableIdentity, AssignableSideScreenRow> identityRowMap = new Dictionary<IAssignableIdentity, AssignableSideScreenRow>();
 
-	private List<MinionIdentity> identityList = new List<MinionIdentity>();
+	private List<MinionAssignablesProxy> identityList = new List<MinionAssignablesProxy>();
 }

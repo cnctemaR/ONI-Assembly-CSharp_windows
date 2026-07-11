@@ -18,5 +18,7 @@ public class TextStyleSetting : ScriptableObject
 
 	public Color textColor;
 
+	public FontStyles style;
+
 	public bool enableWordWrapping = true;
 }

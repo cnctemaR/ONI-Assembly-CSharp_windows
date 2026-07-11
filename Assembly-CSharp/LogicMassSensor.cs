@@ -6,6 +6,23 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<LogicMassSensor>(-905833192, LogicMassSensor.OnCopySettingsDelegate);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		LogicMassSensor component = gameObject.GetComponent<LogicMassSensor>();
+		if (component != null)
+		{
+			this.Threshold = component.Threshold;
+			this.ActivateAboveThreshold = component.ActivateAboveThreshold;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -206,20 +223,31 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 
 	public LocString ThresholdValueUnits()
 	{
-		LocString locString = null;
-		GameUtil.MassUnit massUnit = GameUtil.massUnit;
-		if (massUnit != GameUtil.MassUnit.Kilograms)
+		return GameUtil.GetCurrentMassUnit(false);
+	}
+
+	public ThresholdScreenLayoutType LayoutType
+	{
+		get
 		{
-			if (massUnit == GameUtil.MassUnit.Pounds)
-			{
-				locString = UI.UNITSUFFIXES.MASS.POUND;
-			}
+			return ThresholdScreenLayoutType.SliderBar;
 		}
-		else
+	}
+
+	public int IncrementScale
+	{
+		get
 		{
-			locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
+			return 1;
 		}
-		return locString;
+	}
+
+	public NonLinearSlider.Range[] GetRanges
+	{
+		get
+		{
+			return NonLinearSlider.GetDefaultRange(this.RangeMax);
+		}
 	}
 
 	private void SwitchToggled(bool toggled_on)
@@ -296,4 +324,12 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 	private HandleVector<int>.Handle pickupablesChangedEntry;
 
 	private HandleVector<int>.Handle floorSwitchActivatorChangedEntry;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicMassSensor> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<LogicMassSensor>(delegate(LogicMassSensor component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

@@ -25,7 +25,7 @@ public class ResearchDatabankConfig : IEntityConfig
 			GameTags.IndustrialIngredient,
 			GameTags.Experimental
 		};
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(text, text2, text3, num, flag, anim, text4, sceneLayer, collisionShape, num2, num3, flag2, SimHashes.Creature, list);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(text, text2, text3, num, flag, anim, text4, sceneLayer, collisionShape, num2, num3, flag2, 0, SimHashes.Creature, list);
 		EntitySplitter entitySplitter = gameObject.AddOrGet<EntitySplitter>();
 		entitySplitter.maxStackSize = (float)ROCKETRY.DESTINATION_RESEARCH.BASIC;
 		return gameObject;

@@ -13,7 +13,7 @@ public class BuildWatermark : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		string text = "LU-" + ((!Application.isEditor) ? 364722U.ToString() : "<EDITOR>");
+		string text = "LU-" + ((!Application.isEditor) ? 365655U.ToString() : "<EDITOR>");
 		this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.WATERMARK, text));
 	}
 

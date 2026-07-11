@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{E5800F00-E7D6-4142-8D62-13F7334C7A54}</ProjectGuid>
+    <ProjectGuid>{8C28A596-4883-4194-B35A-26D8558C98AB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Playables</RootNamespace>
     <AssemblyName>UnityEngine.DirectorModule</AssemblyName>
@@ -20,15 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{E5800F00-E7D6-4142-8D62-13F7334C7A3A}</Project>
+      <Project>{8C28A596-4883-4194-B35A-26D8558C9891}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{E5800F00-E7D6-4142-8D62-13F7334C7A52}</Project>
+      <Project>{8C28A596-4883-4194-B35A-26D8558C98A9}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{E5800F00-E7D6-4142-8D62-13F7334C7A68}</Project>
+      <Project>{8C28A596-4883-4194-B35A-26D8558C98BF}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

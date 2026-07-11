@@ -30,6 +30,12 @@ public class ToiletWorkableClean : Workable
 		base.OnCompleteWork(worker);
 	}
 
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		base.GetComponent<KAnimControllerBase>().Play(ToiletWorkableClean.PST_ANIM, KAnim.PlayMode.Once, 1f, 0f);
+	}
+
 	public override HashedString[] GetWorkAnims(Worker worker)
 	{
 		return ToiletWorkableClean.CLEAN_ANIMS;

@@ -602,11 +602,14 @@ public class Pickupable : Workable
 		Storage component = worker.GetComponent<Storage>();
 		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
 		float amount = pickupableStartWorkInfo.amount;
-		Pickupable pickupable = this.Take(amount);
-		if (pickupable != null)
+		if (this != null)
 		{
-			component.Store(pickupable.gameObject, false, false, true, false);
-			worker.workCompleteData = pickupable;
+			Pickupable pickupable = this.Take(amount);
+			if (pickupable != null)
+			{
+				component.Store(pickupable.gameObject, false, false, true, false);
+				worker.workCompleteData = pickupable;
+			}
 		}
 	}
 

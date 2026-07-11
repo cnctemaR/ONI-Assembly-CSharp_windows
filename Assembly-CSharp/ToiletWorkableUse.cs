@@ -28,8 +28,10 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		}
 	}
 
-	public override void AwardExperience(float work_dt, MinionResume resume)
+	protected override void OnStopWork(Worker worker)
 	{
+		base.OnStopWork(worker);
+		base.GetComponent<KAnimControllerBase>().Play(Workable.DefaultPstWorkAnim, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

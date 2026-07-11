@@ -237,7 +237,7 @@ public class Recipe : IHasSortOrder
 			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 			if (component != null)
 			{
-				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], component.initialAnim);
+				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui");
 			}
 		}
 		return sprite;

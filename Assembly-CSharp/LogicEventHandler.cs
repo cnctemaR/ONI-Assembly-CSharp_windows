@@ -62,7 +62,12 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 			{
 				return;
 			}
-			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Logic_Building_Toggle", false), Grid.CellToPos(this.cell));
+			string text = "Logic_Building_Toggle";
+			if (!CameraController.Instance.IsAudibleSound(Grid.CellToPosCCC(this.cell, Grid.SceneLayer.BuildingFront), 0f))
+			{
+				return;
+			}
+			EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(text, false), Grid.CellToPos(this.cell));
 			eventInstance.setParameterValue("wireCount", (float)(networkForCell.Wires.Count % 24));
 			eventInstance.setParameterValue("enabled", (float)new_value);
 			KFMOD.EndOneShot(eventInstance);

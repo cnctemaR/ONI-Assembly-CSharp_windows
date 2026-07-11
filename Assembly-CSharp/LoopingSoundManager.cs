@@ -224,9 +224,21 @@ public class LoopingSoundManager : KMonoBehaviour
 			float num = 0f;
 			foreach (EventInstance eventInstance in this.events)
 			{
-				if (CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f))
+				bool flag = CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f);
+				PLAYBACK_STATE playback_STATE;
+				eventInstance.getPlaybackState(out playback_STATE);
+				bool flag2 = playback_STATE == PLAYBACK_STATE.STOPPED || playback_STATE == PLAYBACK_STATE.STOPPING;
+				if (flag)
 				{
 					num += 1f;
+				}
+				if (flag2 && flag)
+				{
+					eventInstance.start();
+				}
+				else if (!flag2 && !flag)
+				{
+					eventInstance.stop(STOP_MODE.IMMEDIATE);
 				}
 			}
 			if (this.events.Count > 0)

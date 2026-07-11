@@ -49,11 +49,16 @@ public class Clinic : Workable, IEffectDescriptor
 		return array;
 	}
 
+	public override Workable.AnimInfo GetAnim(Worker worker)
+	{
+		this.overrideAnims = this.GetAppropriateOverrideAnims(worker);
+		return base.GetAnim(worker);
+	}
+
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
 		worker.GetComponent<Effects>().Add("Sleep", false);
-		this.overrideAnims = this.GetAppropriateOverrideAnims(worker);
 		base.GetComponent<KAnimControllerBase>().Play(Clinic.SICK_ANIMS, KAnim.PlayMode.Loop);
 	}
 

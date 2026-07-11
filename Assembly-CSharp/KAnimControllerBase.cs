@@ -887,6 +887,8 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	[SerializeField]
 	protected bool flipY;
 
+	public string defaultAnim;
+
 	protected KAnim.Anim curAnim;
 
 	protected int curAnimFrameIdx = KAnim.Anim.Frame.InvalidFrame.idx;

@@ -20,6 +20,10 @@ public class IceCooledFanWorkable : Workable
 
 	protected override void OnSpawn()
 	{
+		GameScheduler.Instance.Schedule("InsulationTutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Insulation, true);
+		}, null, null);
 		base.OnSpawn();
 	}
 

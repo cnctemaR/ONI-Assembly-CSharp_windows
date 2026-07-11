@@ -251,7 +251,7 @@ public class SaveLoader : KMonoBehaviour
 			gameInfo2.worldTraits = new string[0];
 			this.GameInfo = gameInfo2;
 		}
-		this.worldGen = new WorldGen(this.GameInfo.worldID, new List<string>(this.GameInfo.worldTraits));
+		this.worldGen = new WorldGen(this.GameInfo.worldID, new List<string>(this.GameInfo.worldTraits), false);
 		Game.LoadSettings(deserializer);
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
 		Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
@@ -614,7 +614,7 @@ public class SaveLoader : KMonoBehaviour
 		Data data;
 		Dictionary<string, object> dictionary;
 		WorldGen.LoadWorldGen(out text, out list, out data, out dictionary);
-		this.worldGen = new WorldGen(text, list, data, dictionary);
+		this.worldGen = new WorldGen(text, list, data, dictionary, true);
 		SaveGame.GameInfo gameInfo = this.GameInfo;
 		gameInfo.worldID = text;
 		gameInfo.worldTraits = list.ToArray();

@@ -91,7 +91,12 @@ public class MotdServerClient
 		{
 			MotdServerClient.<GetWebMotd>c__AnonStorey1.<GetWebMotd>c__AnonStorey2 <GetWebMotd>c__AnonStorey2 = new MotdServerClient.<GetWebMotd>c__AnonStorey1.<GetWebMotd>c__AnonStorey2();
 			<GetWebMotd>c__AnonStorey2.<>f__ref$1 = <GetWebMotd>c__AnonStorey;
-			global::Debug.Assert(<GetWebMotd>c__AnonStorey.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded");
+			DebugUtil.DevAssert(<GetWebMotd>c__AnonStorey.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded");
+			if (<GetWebMotd>c__AnonStorey.localMotd.image_texture == null)
+			{
+				<GetWebMotd>c__AnonStorey.cb(null, "Local image_texture has been unloaded since we requested the MOTD");
+				return;
+			}
 			if (err != null)
 			{
 				<GetWebMotd>c__AnonStorey.cb(null, err);

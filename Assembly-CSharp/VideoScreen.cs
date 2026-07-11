@@ -189,7 +189,7 @@ public class VideoScreen : KModalScreen
 		this.screen.texture = null;
 		this.videoPlayer.targetTexture = null;
 		AudioMixer.instance.Stop(this.activeAudioSnapshot, STOP_MODE.ALLOWFADEOUT);
-		this.audioHandle.stop(STOP_MODE.IMMEDIATE);
+		this.audioHandle.stop(STOP_MODE.ALLOWFADEOUT);
 		if (this.OnStop != null)
 		{
 			this.OnStop();

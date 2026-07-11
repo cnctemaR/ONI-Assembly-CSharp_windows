@@ -44,6 +44,11 @@ public class KAnimSynchronizer
 			return;
 		}
 		KAnim.Anim currentAnim = this.masterController.GetCurrentAnim();
+		if (currentAnim != null && controller.defaultAnim != null && !controller.HasAnimation(currentAnim.name))
+		{
+			controller.Play(controller.defaultAnim, KAnim.PlayMode.Loop, 1f, 0f);
+			return;
+		}
 		if (currentAnim == null)
 		{
 			return;

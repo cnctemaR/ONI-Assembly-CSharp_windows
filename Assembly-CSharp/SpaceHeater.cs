@@ -18,6 +18,10 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IE
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		GameScheduler.Instance.Schedule("InsulationTutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Insulation, true);
+		}, null, null);
 		base.smi.StartSM();
 	}
 

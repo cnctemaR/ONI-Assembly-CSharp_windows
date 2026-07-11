@@ -18,20 +18,20 @@ namespace ProcGenGame
 	[Serializable]
 	public class WorldGen
 	{
-		public WorldGen(string worldName = "worlds/SandstoneDefault", List<string> chosenTraits = null)
+		public WorldGen(string worldName, List<string> chosenTraits, bool assertMissingTraits)
 		{
 			WorldGen.LoadSettings();
-			this.Settings = new WorldGenSettings(worldName, chosenTraits);
+			this.Settings = new WorldGenSettings(worldName, chosenTraits, assertMissingTraits);
 			this.data = new Data();
 			this.data.chunkEdgeSize = this.Settings.GetIntSetting("ChunkEdgeSize");
 			this.data.subWorldSize = new Vector2I(this.Settings.GetIntSetting("SubWorldWidth"), this.Settings.GetIntSetting("SubWorldHeight"));
 			this.stats = new Dictionary<string, object>();
 		}
 
-		public WorldGen(string worldName, List<string> chosenTraits, Data data, Dictionary<string, object> stats)
+		public WorldGen(string worldName, List<string> chosenTraits, Data data, Dictionary<string, object> stats, bool assertMissingTraits)
 		{
 			WorldGen.LoadSettings();
-			this.Settings = new WorldGenSettings(worldName, chosenTraits);
+			this.Settings = new WorldGenSettings(worldName, chosenTraits, assertMissingTraits);
 			this.data = data;
 			this.stats = stats;
 		}

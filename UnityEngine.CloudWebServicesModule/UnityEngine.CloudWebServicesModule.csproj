@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{AD3FBB54-0048-476E-A8A3-3303790EB778}</ProjectGuid>
+    <ProjectGuid>{2FBBD9FB-D968-48F1-AAC6-926989655229}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.CloudWebServicesModule</RootNamespace>
     <AssemblyName>UnityEngine.CloudWebServicesModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB763}</Project>
+      <Project>{2FBBD9FB-D968-48F1-AAC6-926989655214}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{AD3FBB54-0048-476E-A8A3-3303790EB791}</Project>
+      <Project>{2FBBD9FB-D968-48F1-AAC6-926989655242}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

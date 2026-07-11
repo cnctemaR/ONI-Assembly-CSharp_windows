@@ -50,7 +50,10 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 			{
 				this.OnWorkableEvent(player_index, ev);
 			}));
-			verticalWindTunnelWorkable.overrideAnims = this.overrideAnims[i];
+			verticalWindTunnelWorkable.overrideAnim = this.overrideAnims[i];
+			verticalWindTunnelWorkable.preAnims = this.workPreAnims[i];
+			verticalWindTunnelWorkable.loopAnim = this.workAnims[i];
+			verticalWindTunnelWorkable.pstAnims = this.workPstAnims[i];
 			this.workables[i] = verticalWindTunnelWorkable;
 			this.workables[i].windTunnel = this;
 		}
@@ -188,25 +191,22 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 
 	public HashSet<int> players = new HashSet<int>();
 
-	public KAnimFile[][] overrideAnims = new KAnimFile[][]
+	public HashedString[] overrideAnims = new HashedString[] { "anim_interacts_windtunnel_center_kanim", "anim_interacts_windtunnel_left_kanim", "anim_interacts_windtunnel_right_kanim" };
+
+	public string[][] workPreAnims = new string[][]
 	{
-		new KAnimFile[] { Assets.GetAnim("anim_interacts_windtunnel_center_kanim") },
-		new KAnimFile[] { Assets.GetAnim("anim_interacts_windtunnel_left_kanim") },
-		new KAnimFile[] { Assets.GetAnim("anim_interacts_windtunnel_right_kanim") }
+		new string[] { "weak_working_front_pre", "weak_working_back_pre" },
+		new string[] { "medium_working_front_pre", "medium_working_back_pre" },
+		new string[] { "strong_working_front_pre", "strong_working_back_pre" }
 	};
 
-	public HashedString[][] workAnims = new HashedString[][]
-	{
-		new HashedString[] { "weak_working_pre", "weak_working_loop" },
-		new HashedString[] { "medium_working_pre", "medium_working_loop" },
-		new HashedString[] { "strong_working_pre", "strong_working_loop" }
-	};
+	public string[] workAnims = new string[] { "weak_working_loop", "medium_working_loop", "strong_working_loop" };
 
-	public HashedString[][] workPstAnims = new HashedString[][]
+	public string[][] workPstAnims = new string[][]
 	{
-		new HashedString[] { "weak_working_pst" },
-		new HashedString[] { "medium_working_pst" },
-		new HashedString[] { "strong_working_pst" }
+		new string[] { "weak_working_back_pst", "weak_working_front_pst" },
+		new string[] { "medium_working_back_pst", "medium_working_front_pst" },
+		new string[] { "strong_working_back_pst", "strong_working_front_pst" }
 	};
 
 	public class States : GameStateMachine<VerticalWindTunnel.States, VerticalWindTunnel.StatesInstance, VerticalWindTunnel>

@@ -362,7 +362,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
 		this.seed = int.Parse(currentQualitySetting2.id);
 		List<string> randomTraits = SettingsCache.GetRandomTraits(this.seed);
-		this.worldGen = new WorldGen(currentQualitySetting.id, randomTraits);
+		this.worldGen = new WorldGen(currentQualitySetting.id, randomTraits, true);
 		Vector2I worldsize = this.worldGen.Settings.world.worldsize;
 		GridSettings.Reset(worldsize.x, worldsize.y);
 		this.worldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.seed, this.seed, this.seed, this.seed);

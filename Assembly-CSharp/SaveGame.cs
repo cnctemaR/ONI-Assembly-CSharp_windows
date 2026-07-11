@@ -83,7 +83,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 381414U;
+		header.buildVersion = 381818U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -151,8 +151,15 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		{
 			foreach (string text in SaveLoader.Instance.GameInfo.worldTraits)
 			{
-				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text);
-				list.Add(new Tuple<string, ScriptableObject>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, false);
+				if (cachedTrait != null)
+				{
+					list.Add(new Tuple<string, ScriptableObject>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+				}
+				else
+				{
+					list.Add(new Tuple<string, ScriptableObject>(WORLD_TRAITS.MISSING_TRAIT, ToolTipScreen.Instance.defaultTooltipBodyStyle));
+				}
 			}
 		}
 		return list;

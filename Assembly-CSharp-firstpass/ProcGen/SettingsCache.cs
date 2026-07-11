@@ -65,13 +65,18 @@ namespace ProcGen
 			return new List<string>(SettingsCache.traits.Keys);
 		}
 
-		public static WorldTrait GetCachedTrait(string name)
+		public static WorldTrait GetCachedTrait(string name, bool assertMissingTrait)
 		{
 			if (SettingsCache.traits.ContainsKey(name))
 			{
 				return SettingsCache.traits[name];
 			}
-			throw new Exception("Couldnt get trait [" + name + "]");
+			if (assertMissingTrait)
+			{
+				throw new Exception("Couldnt get trait [" + name + "]");
+			}
+			global::Debug.LogWarning("Couldnt get trait [" + name + "]");
+			return null;
 		}
 
 		public static SubWorld GetCachedSubWorld(string name)
@@ -374,7 +379,7 @@ namespace ProcGen
 				int num2 = random.Next(list.Count);
 				string text = list[num2];
 				bool flag = false;
-				foreach (string text2 in SettingsCache.GetCachedTrait(text).exclusiveWith)
+				foreach (string text2 in SettingsCache.GetCachedTrait(text, true).exclusiveWith)
 				{
 					if (list2.Contains(text2))
 					{

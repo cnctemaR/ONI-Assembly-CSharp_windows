@@ -90,7 +90,7 @@ public class ColonyDestinationAsteroidData
 			List<string> randomTraits = SettingsCache.GetRandomTraits(this.seed);
 			foreach (string text in randomTraits)
 			{
-				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text);
+				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
 				list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(cachedTrait.name), cachedTrait.colorHex), Strings.Get(cachedTrait.description), null));
 			}
 		}

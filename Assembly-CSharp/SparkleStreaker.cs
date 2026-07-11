@@ -13,14 +13,14 @@ public class SparkleStreaker : GameStateMachine<SparkleStreaker, SparkleStreaker
 			.ToggleLoopingSound(this.soundPath, null, true, true, true)
 			.Enter(delegate(SparkleStreaker.Instance smi)
 			{
-				this.sparkleStreakFX = Util.KInstantiate(EffectPrefabs.Instance.SparkleStreakFX, smi.master.transform.GetPosition() + this.offset);
-				this.sparkleStreakFX.transform.SetParent(smi.master.transform);
-				this.sparkleStreakFX.SetActive(true);
+				smi.sparkleStreakFX = Util.KInstantiate(EffectPrefabs.Instance.SparkleStreakFX, smi.master.transform.GetPosition() + this.offset);
+				smi.sparkleStreakFX.transform.SetParent(smi.master.transform);
+				smi.sparkleStreakFX.SetActive(true);
 				smi.CreatePasserbyReactable();
 			})
 			.Exit(delegate(SparkleStreaker.Instance smi)
 			{
-				Util.KDestroyGameObject(this.sparkleStreakFX);
+				Util.KDestroyGameObject(smi.sparkleStreakFX);
 				smi.ClearPasserbyReactable();
 			});
 		this.overjoyed.idle.Enter(delegate(SparkleStreaker.Instance smi)
@@ -38,10 +38,6 @@ public class SparkleStreaker : GameStateMachine<SparkleStreaker, SparkleStreaker
 	public GameStateMachine<SparkleStreaker, SparkleStreaker.Instance, IStateMachineTarget, object>.State neutral;
 
 	public SparkleStreaker.OverjoyedStates overjoyed;
-
-	public StateMachine.Instance fx_smi;
-
-	public GameObject sparkleStreakFX;
 
 	public string soundPath = GlobalAssets.GetSound("SparkleStreaker_lp", false);
 
@@ -112,5 +108,7 @@ public class SparkleStreaker : GameStateMachine<SparkleStreaker, SparkleStreaker
 		}
 
 		private Reactable passerbyReactable;
+
+		public GameObject sparkleStreakFX;
 	}
 }

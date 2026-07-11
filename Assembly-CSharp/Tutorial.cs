@@ -102,7 +102,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 	{
 		if (this.tutorialMessagesRemaining.Count == 0)
 		{
-			for (int i = 0; i <= 18; i++)
+			for (int i = 0; i <= 19; i++)
 			{
 				this.tutorialMessagesRemaining.Add((Tutorial.TutorialMessages)i);
 			}
@@ -265,6 +265,9 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			break;
 		case Tutorial.TutorialMessages.TM_Power:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Power, MISC.NOTIFICATIONS.POWER.NAME, MISC.NOTIFICATIONS.POWER.MESSAGEBODY, MISC.NOTIFICATIONS.POWER.TOOLTIP, "tutorials\\Power", "Tute_Power", VIDEOS.POWER, "overlay_power");
+			break;
+		case Tutorial.TutorialMessages.TM_Insulation:
+			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Insulation, MISC.NOTIFICATIONS.INSULATION.NAME, MISC.NOTIFICATIONS.INSULATION.MESSAGEBODY, MISC.NOTIFICATIONS.INSULATION.TOOLTIP, "tutorials\\Insulation", "Tute_Insulation", VIDEOS.INSULATION, "icon_thermal_conductivity");
 			break;
 		case Tutorial.TutorialMessages.TM_Plumbing:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, MISC.NOTIFICATIONS.PLUMBING.NAME, MISC.NOTIFICATIONS.PLUMBING.MESSAGEBODY, MISC.NOTIFICATIONS.PLUMBING.TOOLTIP, "tutorials\\Piping", "Tute_Plumbing", VIDEOS.PLUMBING, "icon_category_plumbing");
@@ -614,6 +617,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		TM_Schedule,
 		TM_Digging,
 		TM_Power,
+		TM_Insulation,
 		TM_Plumbing,
 		TM_COUNT
 	}

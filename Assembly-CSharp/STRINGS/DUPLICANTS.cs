@@ -6144,6 +6144,8 @@ namespace STRINGS
 
 				public static LocString APTITUDE_SKILLS_MOD_NAME = "Interested Skills Learned";
 
+				public static LocString TOTAL_SKILL_POINTS = "Total Skill Points: {0}";
+
 				public static LocString GOOD_MODIFIER = "High Morale";
 
 				public static LocString NEUTRAL_MODIFIER = "Sufficient Morale";

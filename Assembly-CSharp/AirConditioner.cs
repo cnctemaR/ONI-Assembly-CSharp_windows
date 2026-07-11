@@ -29,6 +29,10 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		GameScheduler.Instance.Schedule("InsulationTutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Insulation, true);
+		}, null, null);
 		this.structureTemperature = GameComps.StructureTemperatures.GetHandle(base.gameObject);
 		this.cooledAirOutputCell = this.building.GetUtilityOutputCell();
 	}

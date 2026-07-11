@@ -4,6 +4,8 @@ namespace STRINGS
 {
 	public static class WORLD_TRAITS
 	{
+		public static LocString MISSING_TRAIT = "<missing trait>";
+
 		public static class NO_TRAITS
 		{
 			public static LocString NAME = "<i>This world is stable and has no unusual features.</i>";

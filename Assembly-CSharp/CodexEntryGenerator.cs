@@ -495,7 +495,7 @@ public static class CodexEntryGenerator
 			}, ContentContainer.ContentLayout.Vertical)
 		}, Strings.Get("STRINGS.UI.CODEX.CATEGORYNAMES.MISCELLANEOUSTIPS"));
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
-		for (int i = 0; i < 18; i++)
+		for (int i = 0; i < 19; i++)
 		{
 			TutorialMessage tutorialMessage = (TutorialMessage)Tutorial.Instance.TutorialMessage((Tutorial.TutorialMessages)i, false);
 			if (!string.IsNullOrEmpty(tutorialMessage.videoClipId))

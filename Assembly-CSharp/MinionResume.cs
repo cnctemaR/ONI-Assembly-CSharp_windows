@@ -619,7 +619,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public string GetSkillsSubtitle()
 	{
-		return "Total Skill Points: " + this.TotalSkillPointsGained;
+		return string.Format(DUPLICANTS.NEEDS.QUALITYOFLIFE.TOTAL_SKILL_POINTS, this.TotalSkillPointsGained);
 	}
 
 	public static bool AnyMinionHasPerk(string perk)

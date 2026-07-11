@@ -9,34 +9,11 @@ public class VerticalWindTunnelWorkable : Workable, IWorkerPrioritizable
 		base.SetReportType(ReportManager.ReportType.PersonalTime);
 	}
 
-	public override HashedString[] GetWorkAnims(Worker worker)
+	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
-		Attributes attributes = worker.GetAttributes();
-		AttributeInstance attributeInstance = attributes.Get(Db.Get().Attributes.Athletics);
-		if (attributeInstance.GetTotalValue() <= 12f)
-		{
-			return this.windTunnel.workAnims[0];
-		}
-		if (attributeInstance.GetTotalValue() <= 20f)
-		{
-			return this.windTunnel.workAnims[1];
-		}
-		return this.windTunnel.workAnims[2];
-	}
-
-	public override HashedString[] GetWorkPstAnims(Worker worker, bool successfully_completed)
-	{
-		Attributes attributes = worker.GetAttributes();
-		AttributeInstance attributeInstance = attributes.Get(Db.Get().Attributes.Athletics);
-		if (attributeInstance.GetTotalValue() <= 12f)
-		{
-			return this.windTunnel.workPstAnims[0];
-		}
-		if (attributeInstance.GetTotalValue() <= 20f)
-		{
-			return this.windTunnel.workPstAnims[1];
-		}
-		return this.windTunnel.workPstAnims[2];
+		Workable.AnimInfo anim = base.GetAnim(worker);
+		anim.smi = new WindTunnelWorkerStateMachine.StatesInstance(worker, this);
+		return anim;
 	}
 
 	protected override void OnPrefabInit()
@@ -84,4 +61,12 @@ public class VerticalWindTunnelWorkable : Workable, IWorkerPrioritizable
 	}
 
 	public VerticalWindTunnel windTunnel;
+
+	public HashedString overrideAnim;
+
+	public string[] preAnims;
+
+	public string loopAnim;
+
+	public string[] pstAnims;
 }

@@ -5,7 +5,7 @@ namespace ProcGen
 {
 	public class WorldGenSettings
 	{
-		public WorldGenSettings(string worldName = "worlds/SandstoneDefault", List<string> traits = null)
+		public WorldGenSettings(string worldName, List<string> traits, bool assertMissingTraits)
 		{
 			if (!SettingsCache.worlds.HasWorld(worldName))
 			{
@@ -24,7 +24,11 @@ namespace ProcGen
 				});
 				foreach (string text in traits)
 				{
-					list.Add(SettingsCache.GetCachedTrait(text));
+					WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, assertMissingTraits);
+					if (cachedTrait != null)
+					{
+						list.Add(cachedTrait);
+					}
 				}
 			}
 			else

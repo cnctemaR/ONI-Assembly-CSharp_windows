@@ -27,7 +27,6 @@ namespace Klei.CustomSettings
 			{
 				if (this.levels[j].id == base.default_level_id)
 				{
-					global::Debug.LogWarning(string.Concat(new string[] { "Unable to find level for setting:", base.id, "(", level_id, ") Using default level." }), null);
 					return this.levels[j];
 				}
 			}

@@ -97,85 +97,42 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		};
 		this.state.OnSelectedOutfitOptChanged += delegate
 		{
-			Option<ClothingOutfitTarget> option2 = this.state.SelectedOutfitOpt;
-			if (option2.IsSome())
+			if (this.state.SelectedOutfitOpt.IsSome())
 			{
-				TMP_Text tmp_Text = this.selectionHeaderLabel;
-				option2 = this.state.SelectedOutfitOpt;
-				tmp_Text.text = option2.Unwrap().ReadName();
+				this.selectionHeaderLabel.text = this.state.SelectedOutfitOpt.Unwrap().ReadName();
 			}
 			else
 			{
 				this.selectionHeaderLabel.text = UI.OUTFIT_NAME.NONE;
 			}
-			option2 = this.state.SelectedOutfitOpt;
-			ClothingOutfitUtility.OutfitType outfitType = option2.AndThen<ClothingOutfitUtility.OutfitType>((ClothingOutfitTarget t) => t.OutfitType).UnwrapOr(ClothingOutfitUtility.OutfitType.Clothing, null);
-			this.dioramaMinionOrMannequin.current.SetOutfit(outfitType, this.state.SelectedOutfitOpt);
+			this.dioramaMinionOrMannequin.current.SetOutfit(this.state.CurrentOutfitType, this.state.SelectedOutfitOpt);
 			this.dioramaMinionOrMannequin.current.ReactToFullOutfitChange();
-			this.outfitDescriptionPanel.Refresh(this.state.SelectedOutfitOpt, outfitType);
+			this.outfitDescriptionPanel.Refresh(this.state.SelectedOutfitOpt, this.state.CurrentOutfitType);
 			this.dioramaBG.sprite = KleiPermitDioramaVis.GetDioramaBackground(this.state.CurrentOutfitType);
 			this.pickOutfitButton.gameObject.SetActive(this.Config.isPickingOutfitForDupe);
 			OutfitBrowserScreenConfig outfitBrowserScreenConfig2 = this.Config;
 			if (outfitBrowserScreenConfig2.minionPersonality.IsSome())
 			{
-				KButton kbutton = this.pickOutfitButton;
-				option2 = this.state.SelectedOutfitOpt;
-				bool flag;
-				if (option2.IsSome())
-				{
-					option2 = this.state.SelectedOutfitOpt;
-					flag = !option2.Unwrap().DoesContainNonOwnedItems();
-				}
-				else
-				{
-					flag = true;
-				}
-				kbutton.isInteractable = flag;
+				this.pickOutfitButton.isInteractable = !this.state.SelectedOutfitOpt.IsSome() || !this.state.SelectedOutfitOpt.Unwrap().DoesContainNonOwnedItems();
 				GameObject gameObject = this.pickOutfitButton.gameObject;
-				Option<string> option3;
+				Option<string> option2;
 				if (!this.pickOutfitButton.isInteractable)
 				{
 					LocString tooltip_PICK_OUTFIT_ERROR_LOCKED = UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_PICK_OUTFIT_ERROR_LOCKED;
 					string text = "{MinionName}";
 					outfitBrowserScreenConfig2 = this.Config;
-					option3 = Option.Some<string>(tooltip_PICK_OUTFIT_ERROR_LOCKED.Replace(text, outfitBrowserScreenConfig2.GetMinionName()));
+					option2 = Option.Some<string>(tooltip_PICK_OUTFIT_ERROR_LOCKED.Replace(text, outfitBrowserScreenConfig2.GetMinionName()));
 				}
 				else
 				{
-					option3 = Option.None;
+					option2 = Option.None;
 				}
-				KleiItemsUI.ConfigureTooltipOn(gameObject, option3);
+				KleiItemsUI.ConfigureTooltipOn(gameObject, option2);
 			}
-			KButton kbutton2 = this.editOutfitButton;
-			option2 = this.state.SelectedOutfitOpt;
-			kbutton2.isInteractable = option2.IsSome();
-			KButton kbutton3 = this.renameOutfitButton;
-			option2 = this.state.SelectedOutfitOpt;
-			bool flag2;
-			if (option2.IsSome())
-			{
-				option2 = this.state.SelectedOutfitOpt;
-				flag2 = option2.Unwrap().CanWriteName;
-			}
-			else
-			{
-				flag2 = false;
-			}
-			kbutton3.isInteractable = flag2;
+			this.editOutfitButton.isInteractable = this.state.SelectedOutfitOpt.IsSome();
+			this.renameOutfitButton.isInteractable = this.state.SelectedOutfitOpt.IsSome() && this.state.SelectedOutfitOpt.Unwrap().CanWriteName;
 			KleiItemsUI.ConfigureTooltipOn(this.renameOutfitButton.gameObject, this.renameOutfitButton.isInteractable ? UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_RENAME_OUTFIT : UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_RENAME_OUTFIT_ERROR_READONLY);
-			KButton kbutton4 = this.deleteOutfitButton;
-			option2 = this.state.SelectedOutfitOpt;
-			bool flag3;
-			if (option2.IsSome())
-			{
-				option2 = this.state.SelectedOutfitOpt;
-				flag3 = option2.Unwrap().CanDelete;
-			}
-			else
-			{
-				flag3 = false;
-			}
-			kbutton4.isInteractable = flag3;
+			this.deleteOutfitButton.isInteractable = this.state.SelectedOutfitOpt.IsSome() && this.state.SelectedOutfitOpt.Unwrap().CanDelete;
 			KleiItemsUI.ConfigureTooltipOn(this.deleteOutfitButton.gameObject, this.deleteOutfitButton.isInteractable ? UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_DELETE_OUTFIT : UI.OUTFIT_BROWSER_SCREEN.TOOLTIP_DELETE_OUTFIT_ERROR_READONLY);
 			this.state.OnSelectedOutfitOptChanged += this.RefreshGallery;
 			this.state.OnFilterChanged += this.RefreshGallery;
@@ -376,7 +333,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		GameObject isUnownedOverlayGO = spawn.transform.GetChild(3).gameObject;
 		gameObject.SetActive(true);
 		gameObject2.SetActive(false);
-		gameObject.GetComponentInChildren<UIMannequin>().SetOutfit(target.AndThen<ClothingOutfitUtility.OutfitType>((ClothingOutfitTarget t) => t.OutfitType).UnwrapOr(ClothingOutfitUtility.OutfitType.Clothing, null), target);
+		gameObject.GetComponentInChildren<UIMannequin>().SetOutfit(this.state.CurrentOutfitType, target);
 		if (!target.HasValue)
 		{
 			gameObject2.SetActive(true);

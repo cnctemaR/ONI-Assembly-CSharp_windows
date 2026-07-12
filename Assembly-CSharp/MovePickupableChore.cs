@@ -113,7 +113,10 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 				int num2 = Grid.PosToCell(this.deliverypoint.Get(smi));
 				if (this.pickupablesource.Get(smi) == null || Grid.PosToCell(gameObject2) == num2)
 				{
-					this.pickupablesource.Set(component3.GetNextTarget(), smi, false);
+					GameObject nextTarget = component3.GetNextTarget();
+					this.pickupablesource.Set(nextTarget, smi, false);
+					PrimaryElement component5 = nextTarget.GetComponent<PrimaryElement>();
+					smi.sm.requestedamount.Set(component5.Mass, smi, false);
 				}
 				smi.GoTo(this.fetch);
 			}).ReturnSuccess();

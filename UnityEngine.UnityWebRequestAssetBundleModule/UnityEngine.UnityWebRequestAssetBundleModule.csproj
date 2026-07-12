@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{E9D1473C-22BE-4158-93C3-50689245E2CE}</ProjectGuid>
+    <ProjectGuid>{35120664-086B-4D96-84E3-AF0585A54CAB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestAssetBundleModule</AssemblyName>
@@ -20,19 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{E9D1473C-22BE-4158-93C3-50689245E29D}</Project>
+      <Project>{35120664-086B-4D96-84E3-AF0585A54C7A}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{E9D1473C-22BE-4158-93C3-50689245E2A2}</Project>
+      <Project>{35120664-086B-4D96-84E3-AF0585A54C7F}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{E9D1473C-22BE-4158-93C3-50689245E2B8}</Project>
+      <Project>{35120664-086B-4D96-84E3-AF0585A54C95}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{E9D1473C-22BE-4158-93C3-50689245E2D0}</Project>
+      <Project>{35120664-086B-4D96-84E3-AF0585A54CAD}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

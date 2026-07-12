@@ -25,8 +25,7 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			base.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, this, false);
 			base.sm.isOnTube.Set(currentNavType == NavType.Tube, this, false);
 			int num = Grid.PosToCell(base.smi);
-			bool flag = base.sm.isOnSuitMarkerCell.Get(base.smi);
-			base.sm.isOnSuitMarkerCell.Set(Grid.IsValidCell(num) && Grid.HasSuitMarker[num] && !flag, this, false);
+			base.sm.isOnSuitMarkerCell.Set(Grid.IsValidCell(num) && Grid.HasSuitMarker[num], this, false);
 		}
 
 		public int GetIdleCell()
@@ -85,7 +84,10 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 				component.RunQuery(idleSuitMarkerCellQuery);
 				component.GoTo(idleSuitMarkerCellQuery.GetResultCell(), null);
 			}).EventTransition(GameHashes.DestinationReached, this.idle, null)
-				.EventTransition(GameHashes.NavigationFailed, this.idle, null);
+				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
+				{
+					smi.GoTo(this.idle.move);
+				});
 			this.idle.move.Transition(this.idle, (IdleChore.StatesInstance smi) => !smi.HasIdleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk, null)
 				.ToggleAnims("anim_loco_walk_kanim", 0f, "")
 				.MoveTo((IdleChore.StatesInstance smi) => smi.GetIdleCell(), this.idle, this.idle, false)

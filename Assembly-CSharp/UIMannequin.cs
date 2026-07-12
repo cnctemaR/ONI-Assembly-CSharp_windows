@@ -52,6 +52,7 @@ public class UIMannequin : KMonoBehaviour, UIMinionOrMannequin.ITarget
 		}
 		MinionConfig.ConfigureSymbols(this.SpawnedAvatar, false);
 		SymbolOverrideController component = this.SpawnedAvatar.GetComponent<SymbolOverrideController>();
+		component.RemoveAllSymbolOverrides(0);
 		foreach (ClothingItemResource clothingItemResource in outfit)
 		{
 			KAnim.Build build = clothingItemResource.AnimFile.GetData().build;

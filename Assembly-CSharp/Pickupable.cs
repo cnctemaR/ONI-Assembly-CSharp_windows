@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 using FMOD.Studio;
 using KSerialization;
 using STRINGS;
@@ -257,6 +258,16 @@ public class Pickupable : Workable, IHasSortOrder
 		this.UpdateEntombedVisualizer();
 		base.Subscribe<Pickupable>(-1582839653, Pickupable.OnTagsChangedDelegate);
 		this.NotifyChanged(num);
+	}
+
+	[OnDeserialized]
+	public void OnDeserialize()
+	{
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 28))
+		{
+			KBatchedAnimController component = base.transform.GetComponent<KBatchedAnimController>();
+			component.SetSceneLayer(component.sceneLayer);
+		}
 	}
 
 	public void RegisterListeners()

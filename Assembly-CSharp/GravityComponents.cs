@@ -23,7 +23,8 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 			GravityComponent gravityComponent = this.data[i];
 			if (gravityComponent.elapsedTime >= 0f && !(gravityComponent.transform == null) && !base.IsInCleanupList(gravityComponent.transform.gameObject))
 			{
-				Vector2 vector = gravityComponent.transform.GetPosition();
+				Vector3 position = gravityComponent.transform.GetPosition();
+				Vector2 vector = position;
 				Vector2 vector2 = new Vector2(gravityComponent.velocity.x, gravityComponent.velocity.y + -9.8f * dt);
 				float sqrMagnitude = vector2.sqrMagnitude;
 				if (sqrMagnitude > num)
@@ -119,7 +120,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 				int num10 = Grid.PosToCell(vector3);
 				if (!Grid.IsValidCell(num2) || Grid.WorldIdx[num2] == ClusterManager.INVALID_WORLD_IDX || Grid.IsValidCellInWorld(num10, (int)Grid.WorldIdx[num2]))
 				{
-					gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y));
+					gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
 					if (flag3)
 					{
 						gravityComponent.transform.gameObject.Trigger(1188683690, vector2);

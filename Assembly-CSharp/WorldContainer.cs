@@ -148,6 +148,11 @@ public class WorldContainer : KMonoBehaviour
 		this.RefreshHasTopPriorityChore();
 		this.UpgradeFixedTraits();
 		this.RefreshFixedTraits();
+		if (DlcManager.IsPureVanilla())
+		{
+			this.isStartWorld = true;
+			this.isDupeVisited = true;
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -557,6 +562,8 @@ public class WorldContainer : KMonoBehaviour
 		this.worldOffset = Vector2I.zero;
 		this.worldSize = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
 		this.isDiscovered = true;
+		this.isStartWorld = true;
+		this.isDupeVisited = true;
 		this.m_seasonIds = new List<string> { Db.Get().GameplaySeasons.MeteorShowers.Id };
 	}
 

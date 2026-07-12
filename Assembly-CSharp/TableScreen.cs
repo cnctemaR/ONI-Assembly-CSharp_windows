@@ -160,7 +160,10 @@ public class TableScreen : KScreen
 		}
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
-			this.AddRow(Components.LiveMinionIdentities[i]);
+			if (Components.LiveMinionIdentities[i] != null)
+			{
+				this.AddRow(Components.LiveMinionIdentities[i]);
+			}
 		}
 		foreach (MinionStorage minionStorage in Components.MinionStorages.Items)
 		{
@@ -181,16 +184,13 @@ public class TableScreen : KScreen
 		{
 			Component reference = keyValuePair.Value.GetComponent<HierarchyReferences>().GetReference("NobodyRow");
 			reference.gameObject.SetActive(true);
-			using (IEnumerator enumerator5 = Components.MinionAssignablesProxy.GetEnumerator())
+			foreach (object obj in Components.MinionAssignablesProxy)
 			{
-				while (enumerator5.MoveNext())
+				MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)obj;
+				if (minionAssignablesProxy != null && minionAssignablesProxy.GetTargetGameObject() != null && minionAssignablesProxy.GetTargetGameObject().GetMyWorld().id == keyValuePair.Key)
 				{
-					if (((MinionAssignablesProxy)enumerator5.Current).GetTargetGameObject().GetComponent<KMonoBehaviour>().GetMyWorld()
-						.id == keyValuePair.Key)
-					{
-						reference.gameObject.SetActive(false);
-						break;
-					}
+					reference.gameObject.SetActive(false);
+					break;
 				}
 			}
 			keyValuePair.Value.SetActive(ClusterManager.Instance.GetWorld(keyValuePair.Key).IsDiscovered && DlcManager.FeatureClusterSpaceEnabled());

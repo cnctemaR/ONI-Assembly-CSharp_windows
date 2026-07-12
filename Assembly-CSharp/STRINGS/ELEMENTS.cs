@@ -613,7 +613,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Nuclear Fallout", "FALLOUT");
 
-			public static LocString DESC = "TBD";
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Nuclear Fallout is a highly toxic gas full of ",
+				UI.FormatAsLink("Radioactive Contaminants", "RADIATION"),
+				". Formed in a ",
+				UI.FormatAsLink("Reactor meltdown", "NUCLEARREACTOR"),
+				"."
+			});
 		}
 
 		public class FOOLSGOLD
@@ -701,8 +708,8 @@ namespace STRINGS
 			{
 				"Highly toxic liquid full of ",
 				UI.FormatAsLink("Radioactive Contaminants", "RADIATION"),
-				". Formed in an ",
-				UI.FormatAsLink("Nuclear Meltdown", "MELTDOWN"),
+				". Formed in a ",
+				UI.FormatAsLink("Reactor meltdown", "NUCLEARREACTOR"),
 				"."
 			});
 		}
@@ -1221,8 +1228,8 @@ namespace STRINGS
 			{
 				"Highly toxic liquid full of ",
 				UI.FormatAsLink("Radioactive Contaminants", "RADIATION"),
-				". Formed in an ",
-				UI.FormatAsLink("Nuclear Meltdown", "MELTDOWN"),
+				". Formed in a ",
+				UI.FormatAsLink("Reactor meltdown", "NUCLEARREACTOR"),
 				"."
 			});
 		}

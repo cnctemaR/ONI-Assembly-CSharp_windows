@@ -94,23 +94,26 @@ public static class RetireColonyUtility
 
 	public static RetiredColonyData GetCurrentColonyRetiredColonyData()
 	{
-		MinionAssignablesProxy[] array = new MinionAssignablesProxy[Components.MinionAssignablesProxy.Count];
-		for (int i = 0; i < array.Length; i++)
+		List<MinionAssignablesProxy> list = new List<MinionAssignablesProxy>();
+		for (int i = 0; i < Components.MinionAssignablesProxy.Count; i++)
 		{
-			array[i] = Components.MinionAssignablesProxy[i];
+			if (Components.MinionAssignablesProxy[i] != null)
+			{
+				list.Add(Components.MinionAssignablesProxy[i]);
+			}
 		}
-		List<string> list = new List<string>();
+		List<string> list2 = new List<string>();
 		foreach (KeyValuePair<string, ColonyAchievementStatus> keyValuePair in SaveGame.Instance.GetComponent<ColonyAchievementTracker>().achievements)
 		{
 			if (keyValuePair.Value.success)
 			{
-				list.Add(keyValuePair.Key);
+				list2.Add(keyValuePair.Key);
 			}
 		}
-		BuildingComplete[] array2 = new BuildingComplete[Components.BuildingCompletes.Count];
-		for (int j = 0; j < array2.Length; j++)
+		BuildingComplete[] array = new BuildingComplete[Components.BuildingCompletes.Count];
+		for (int j = 0; j < array.Length; j++)
 		{
-			array2[j] = Components.BuildingCompletes[j];
+			array[j] = Components.BuildingCompletes[j];
 		}
 		string text = null;
 		Dictionary<string, string> dictionary = new Dictionary<string, string>();
@@ -125,7 +128,7 @@ public static class RetireColonyUtility
 				}
 			}
 		}
-		return new RetiredColonyData(SaveGame.Instance.BaseName, GameClock.Instance.GetCycle(), global::System.DateTime.Now.ToShortDateString(), list.ToArray(), array, array2, text, dictionary);
+		return new RetiredColonyData(SaveGame.Instance.BaseName, GameClock.Instance.GetCycle(), global::System.DateTime.Now.ToShortDateString(), list2.ToArray(), list.ToArray(), array, text, dictionary);
 	}
 
 	private static RetiredColonyData LoadRetiredColony(string file, bool skipStats, Encoding enc)

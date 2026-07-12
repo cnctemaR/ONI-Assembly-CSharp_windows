@@ -419,7 +419,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 493827U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
+				if (header.buildVersion > 494396U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
 				{
 					flag = false;
 				}

@@ -91,6 +91,7 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 		base.OnPrefabInit();
 		this.ownables = new List<Ownables> { base.gameObject.AddOrGet<Ownables>() };
 		Components.MinionAssignablesProxy.Add(this);
+		base.Subscribe<MinionAssignablesProxy>(1502190696, MinionAssignablesProxy.OnQueueDestroyObjectDelegate);
 		this.ConfigureAssignableSlots();
 	}
 
@@ -162,13 +163,17 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 		}
 	}
 
+	private void OnQueueDestroyObject(object data)
+	{
+		Components.MinionAssignablesProxy.Remove(this);
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
 		Game.Instance.assignmentManager.RemoveFromAllGroups(this);
 		base.GetComponent<Ownables>().UnassignAll();
 		base.GetComponent<Equipment>().UnequipAll();
-		Components.MinionAssignablesProxy.Remove(this);
 	}
 
 	private void OnAssignablesChanged(object data)
@@ -274,5 +279,10 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 	private static readonly EventSystem.IntraObjectHandler<MinionAssignablesProxy> OnAssignablesChangedDelegate = new EventSystem.IntraObjectHandler<MinionAssignablesProxy>(delegate(MinionAssignablesProxy component, object data)
 	{
 		component.OnAssignablesChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<MinionAssignablesProxy> OnQueueDestroyObjectDelegate = new EventSystem.IntraObjectHandler<MinionAssignablesProxy>(delegate(MinionAssignablesProxy component, object data)
+	{
+		component.OnQueueDestroyObject(data);
 	});
 }

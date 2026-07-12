@@ -160,7 +160,7 @@ public class CrewPortrait : KMonoBehaviour
 		CrewPortrait.SetPortraitData(this.identityObject, this.controller, this.useDefaultExpression);
 		if (this.useLabels && this.duplicantName != null)
 		{
-			this.duplicantName.SetText((this.identityObject != null) ? this.identityObject.GetProperName() : "");
+			this.duplicantName.SetText((!this.identityObject.IsNullOrDestroyed()) ? this.identityObject.GetProperName() : "");
 			if (this.identityObject is MinionIdentity && this.duplicantJob != null)
 			{
 				this.duplicantJob.SetText((this.identityObject != null) ? (this.identityObject as MinionIdentity).GetComponent<MinionResume>().GetSkillsSubtitle() : "");

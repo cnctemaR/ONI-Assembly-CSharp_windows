@@ -78,20 +78,22 @@ public class PlantBranch : GameStateMachine<PlantBranch, PlantBranch.Instance, I
 		private void SetOccupyGridSpace(bool active)
 		{
 			int num = Grid.PosToCell(base.gameObject);
-			if (active)
+			if (!active)
 			{
-				GameObject gameObject = Grid.Objects[num, 5];
-				if (gameObject != null && gameObject != base.gameObject)
+				if (Grid.Objects[num, 5] == base.gameObject)
 				{
-					global::Debug.LogWarningFormat(base.gameObject, "PlantBranch.SetOccupyGridSpace already occupied by {0}", new object[] { gameObject });
+					Grid.Objects[num, 5] = null;
 				}
-				Grid.Objects[num, 5] = base.gameObject;
 				return;
 			}
-			if (Grid.Objects[num, 5] == base.gameObject)
+			GameObject gameObject = Grid.Objects[num, 5];
+			if (gameObject != null && gameObject != base.gameObject)
 			{
-				Grid.Objects[num, 5] = null;
+				global::Debug.LogWarningFormat(base.gameObject, "PlantBranch.SetOccupyGridSpace already occupied by {0}", new object[] { gameObject });
+				Util.KDestroyGameObject(base.gameObject);
+				return;
 			}
+			Grid.Objects[num, 5] = base.gameObject;
 		}
 
 		public void SetTrunk(PlantBranchGrower.Instance trunk)

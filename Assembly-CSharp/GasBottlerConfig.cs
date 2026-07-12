@@ -24,6 +24,7 @@ public class GasBottlerConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.GASES;
 		storage.capacityKg = 25f;
 		storage.allowItemRemoval = false;
+		go.AddTag(GameTags.GasSource);
 		go.AddOrGet<DropAllWorkable>().removeTags = new List<Tag> { GameTags.GasSource };
 		GasBottler gasBottler = go.AddOrGet<GasBottler>();
 		gasBottler.storage = storage;

@@ -385,9 +385,9 @@ public class EntityTemplates
 		def.temperatureColdDeadly = lethalLowTemperature;
 		def.temperatureColdUncomfortable = warningLowTemperature;
 		template.GetComponent<PrimaryElement>().Temperature = def.GetIdealTemperature();
+		modifiers.initialAmounts.Add(Db.Get().Amounts.CritterTemperature.Id);
 		if (isWarmBlooded)
 		{
-			modifiers.initialAmounts.Add(Db.Get().Amounts.CritterTemperature.Id);
 			string properName = template.GetProperName();
 			template.UpdateComponentRequirement<SimTemperatureTransfer>(false);
 			CreatureSimTemperatureTransfer creatureSimTemperatureTransfer = template.AddOrGet<CreatureSimTemperatureTransfer>();

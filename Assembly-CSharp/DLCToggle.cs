@@ -7,10 +7,9 @@ public class DLCToggle : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		this.expansion1Active = DlcManager.IsExpansion1Active();
-		this.button.onClick += this.ToggleExpansion1Cicked;
 	}
 
-	private void ToggleExpansion1Cicked()
+	public void ToggleExpansion1Cicked()
 	{
 		Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, base.GetComponentInParent<Canvas>().gameObject, true).AddDefaultCancel().SetHeader(this.expansion1Active ? UI.FRONTEND.MAINMENU.DLC.DEACTIVATE_EXPANSION1 : UI.FRONTEND.MAINMENU.DLC.ACTIVATE_EXPANSION1)
 			.AddSprite(this.expansion1Active ? GlobalResources.Instance().baseGameLogoSmall : GlobalResources.Instance().expansion1LogoSmall)
@@ -20,9 +19,6 @@ public class DLCToggle : KMonoBehaviour
 				DlcManager.ToggleDLC("EXPANSION1_ID");
 			}, true);
 	}
-
-	[SerializeField]
-	private KButton button;
 
 	private bool expansion1Active;
 }

@@ -40,6 +40,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		storage.showDescriptor = true;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		go.AddTag(GameTags.CorrosionProof);
+		go.AddTag(GameTags.LiquidSource);
 	}
 
 	private static void AddGuide(GameObject go, bool occupy_tiles)

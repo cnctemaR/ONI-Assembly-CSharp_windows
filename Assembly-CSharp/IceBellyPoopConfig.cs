@@ -13,7 +13,7 @@ public class IceBellyPoopConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("IceBellyPoop", ITEMS.INDUSTRIAL_PRODUCTS.ICE_BELLY_POOP.NAME, ITEMS.INDUSTRIAL_PRODUCTS.ICE_BELLY_POOP.DESC, 100f, false, Assets.GetAnim("bammoth_poop_kanim"), "idle3", Grid.SceneLayer.BuildingBack, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, true, 0, SimHashes.Creature, new List<Tag>());
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("IceBellyPoop", ITEMS.INDUSTRIAL_PRODUCTS.ICE_BELLY_POOP.NAME, ITEMS.INDUSTRIAL_PRODUCTS.ICE_BELLY_POOP.DESC, 100f, false, Assets.GetAnim("bammoth_poop_kanim"), "idle3", Grid.SceneLayer.BuildingBack, EntityTemplates.CollisionShape.CIRCLE, 0.4f, 0.4f, true, 0, SimHashes.Creature, new List<Tag> { GameTags.PedestalDisplayable });
 		gameObject.GetComponent<KCollider2D>().offset = new Vector2(0f, 0.05f);
 		gameObject.AddTag(GameTags.IndustrialProduct);
 		gameObject.AddOrGet<OccupyArea>().SetCellOffsets(EntityTemplates.GenerateOffsets(1, 1));

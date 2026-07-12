@@ -153,16 +153,16 @@ namespace STRINGS
 
 		public static class CERES_BASE_CLUSTER
 		{
-			public static LocString NAME = "Ceres Cluster";
+			public static LocString NAME = "Ceres";
 
-			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
+			public static LocString DESCRIPTION = "A frosty location with sub-zero temperatures throughout.\n\n<smallcaps>Duplicants who work in Ceres's sub-zero temperatures will need to wear or build warming equipment. Abundant natural fuel sources could lead to a well-powered colony.</smallcaps>";
 		}
 
 		public static class CERES_BASE_SHATTERED_CLUSTER
 		{
-			public static LocString NAME = "Blasted Ceres Cluster";
+			public static LocString NAME = "Blasted Ceres";
 
-			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
+			public static LocString DESCRIPTION = "The heavily damaged remnants of a frosty location with sub-zero temperatures throughout.\n\n<smallcaps>Exploring the rubble of Blasted Ceres's sub-zero temperatures is particularly challenging, yet natural fuel sources provide a valuable payoff.</smallcaps>";
 		}
 
 		public static class CERES_CLASSIC_CLUSTER
@@ -176,7 +176,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Blasted Ceres Cluster";
 
-			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an Ice Cave starting world.";
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an icy, exploded starting world.";
 		}
 
 		public static class CERES_SPACEDOUT_CLUSTER

@@ -12,6 +12,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+		this.DefineManualPumpingAffectedBuildings();
 		base.Subscribe<BottleEmptier>(493375141, BottleEmptier.OnRefreshUserMenuDelegate);
 		base.Subscribe<BottleEmptier>(-905833192, BottleEmptier.OnCopySettingsDelegate);
 	}
@@ -19,6 +20,24 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return null;
+	}
+
+	private void DefineManualPumpingAffectedBuildings()
+	{
+		if (BottleEmptier.manualPumpingAffectedBuildings.ContainsKey(this.isGasEmptier))
+		{
+			return;
+		}
+		List<string> list = new List<string>();
+		Tag tag = (this.isGasEmptier ? GameTags.GasSource : GameTags.LiquidSource);
+		foreach (BuildingDef buildingDef in Assets.BuildingDefs)
+		{
+			if (buildingDef.BuildingComplete.HasTag(tag))
+			{
+				list.Add(buildingDef.Name);
+			}
+		}
+		BottleEmptier.manualPumpingAffectedBuildings.Add(this.isGasEmptier, list.ToArray());
 	}
 
 	private void OnChangeAllowManualPumpingStationFetching()
@@ -29,13 +48,24 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 	private void OnRefreshUserMenu(object data)
 	{
+		string text = (this.isGasEmptier ? UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED_GAS.TOOLTIP : UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.TOOLTIP);
+		string text2 = (this.isGasEmptier ? UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED_GAS.TOOLTIP : UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.TOOLTIP);
+		if (BottleEmptier.manualPumpingAffectedBuildings.ContainsKey(this.isGasEmptier))
+		{
+			foreach (string text3 in BottleEmptier.manualPumpingAffectedBuildings[this.isGasEmptier])
+			{
+				string text4 = string.Format(UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.ITEM, text3);
+				text += text4;
+				text2 += text4;
+			}
+		}
 		if (this.isGasEmptier)
 		{
-			KIconButtonMenu.ButtonInfo buttonInfo = (this.allowManualPumpingStationFetching ? new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED_GAS.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED_GAS.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED_GAS.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED_GAS.TOOLTIP, true));
+			KIconButtonMenu.ButtonInfo buttonInfo = (this.allowManualPumpingStationFetching ? new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED_GAS.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, text2, true) : new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED_GAS.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, text, true));
 			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 0.4f);
 			return;
 		}
-		KIconButtonMenu.ButtonInfo buttonInfo2 = (this.allowManualPumpingStationFetching ? new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.TOOLTIP, true));
+		KIconButtonMenu.ButtonInfo buttonInfo2 = (this.allowManualPumpingStationFetching ? new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, text2, true) : new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, text, true));
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 0.4f);
 	}
 
@@ -52,6 +82,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	public bool allowManualPumpingStationFetching;
 
 	public bool isGasEmptier;
+
+	private static Dictionary<bool, string[]> manualPumpingAffectedBuildings = new Dictionary<bool, string[]>();
 
 	private static readonly EventSystem.IntraObjectHandler<BottleEmptier> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<BottleEmptier>(delegate(BottleEmptier component, object data)
 	{
@@ -223,22 +255,27 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				{
 					return str;
 				}
+				string text;
 				if (bottleEmptier2.allowManualPumpingStationFetching)
 				{
 					if (bottleEmptier2.isGasEmptier)
 					{
-						return BUILDING.STATUSITEMS.CANISTER_EMPTIER.ALLOWED.TOOLTIP;
+						text = BUILDING.STATUSITEMS.CANISTER_EMPTIER.ALLOWED.TOOLTIP;
 					}
-					return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.TOOLTIP;
+					else
+					{
+						text = BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.TOOLTIP;
+					}
+				}
+				else if (bottleEmptier2.isGasEmptier)
+				{
+					text = BUILDING.STATUSITEMS.CANISTER_EMPTIER.DENIED.TOOLTIP;
 				}
 				else
 				{
-					if (bottleEmptier2.isGasEmptier)
-					{
-						return BUILDING.STATUSITEMS.CANISTER_EMPTIER.DENIED.TOOLTIP;
-					}
-					return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.TOOLTIP;
+					text = BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.TOOLTIP;
 				}
+				return text;
 			};
 			this.root.ToggleStatusItem(this.statusItem, (BottleEmptier.StatesInstance smi) => smi.master);
 			this.unoperational.TagTransition(GameTags.Operational, this.waitingfordelivery, false).PlayAnim("off");

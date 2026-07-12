@@ -413,7 +413,7 @@ public abstract class OverlayModes
 		{
 			GameObject freeCropUI = this.GetFreeCropUI();
 			OverlayModes.Crop.UpdateCropInfo updateCropInfo = new OverlayModes.Crop.UpdateCropInfo(harvestable, freeCropUI);
-			Vector3 vector = Grid.CellToPos(Grid.PosToCell(harvestable), 0.5f, -1.25f, 0f);
+			Vector3 vector = Grid.CellToPos(Grid.PosToCell(harvestable), 0.5f, -1.25f, 0f) + harvestable.iconOffset;
 			freeCropUI.GetComponent<RectTransform>().SetPosition(Vector3.up + vector);
 			this.updateCropInfo.Add(updateCropInfo);
 		}
@@ -3759,6 +3759,7 @@ public abstract class OverlayModes
 			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.CONSUMABLEORE, this.legendFilters))
 			{
 				Game.Instance.tileOverlayFilters.Add(GameTags.ConsumableOre);
+				Game.Instance.tileOverlayFilters.Add(GameTags.Sublimating);
 			}
 			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.ORGANICS, this.legendFilters))
 			{

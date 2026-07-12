@@ -30,6 +30,8 @@ public enum GameHashes
 	Died = 1623392196,
 	DeathAnimComplete = -66249442,
 	Revived = -1117766961,
+	OnEquip = -210173199,
+	OnUnequip = -1841406856,
 	Defrosted = -1804024542,
 	VisualizerChanged = -2100764682,
 	BuildingStateChanged = -809948329,

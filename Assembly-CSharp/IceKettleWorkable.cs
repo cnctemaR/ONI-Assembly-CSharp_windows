@@ -87,12 +87,14 @@ public class IceKettleWorkable : Workable
 
 	private void OverridePickupableInteractions(Pickupable pickupable)
 	{
+		pickupable.AddTag(GameTags.LiquidSource);
 		pickupable.targetWorkable = this;
 		pickupable.SetOffsets(new CellOffset[] { this.workCellOffset });
 	}
 
 	private void RestorePickupableInteractions(Pickupable pickupable)
 	{
+		pickupable.RemoveTag(GameTags.LiquidSource);
 		pickupable.targetWorkable = pickupable;
 		pickupable.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}

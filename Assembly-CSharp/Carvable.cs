@@ -76,6 +76,7 @@ public class Carvable : Workable, IDigActionEntity
 		}
 		if (this.chore == null)
 		{
+			this.isMarkedForCarve = true;
 			this.chore = new WorkChore<Carvable>(Db.Get().ChoreTypes.Dig, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			this.chore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, null);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);

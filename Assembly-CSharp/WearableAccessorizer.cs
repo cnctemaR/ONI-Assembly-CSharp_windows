@@ -65,7 +65,7 @@ public class WearableAccessorizer : KMonoBehaviour
 		foreach (KeyValuePair<WearableAccessorizer.WearableType, WearableAccessorizer.Wearable> keyValuePair in this.wearables)
 		{
 			keyValuePair.Value.Deserialize();
-			if (keyValuePair.Value.BuildAnims == null)
+			if (keyValuePair.Value.BuildAnims == null || keyValuePair.Value.BuildAnims.Count == 0)
 			{
 				list.Add(keyValuePair.Key);
 			}

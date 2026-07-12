@@ -113,13 +113,12 @@ public class MainMenu : KScreen
 
 	private void RefreshDLCLogos()
 	{
-		List<string> activeDLCIds = DlcManager.GetActiveDLCIds();
-		this.logoDLC1.material = (activeDLCIds.Contains("EXPANSION1_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
-		this.logoDLC2.material = (activeDLCIds.Contains("DLC2_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+		this.logoDLC1.GetReference<Image>("icon").material = (DlcManager.IsContentSubscribed("EXPANSION1_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+		this.logoDLC2.GetReference<Image>("icon").material = (DlcManager.IsContentSubscribed("DLC2_ID") ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
 		if (DistributionPlatform.Initialized)
 		{
-			string DLC1_URL = "";
-			string DLC2_URL = "";
+			string DLC1_STORE_URL = "";
+			string DLC2_STORE_URL = "";
 			string name = DistributionPlatform.Inst.Name;
 			if (name != null)
 			{
@@ -129,38 +128,67 @@ public class MainMenu : KScreen
 					{
 						if (name == "Rail")
 						{
-							DLC1_URL = "https://www.wegame.com.cn/store/2001539/";
-							DLC2_URL = "";
+							DLC1_STORE_URL = "https://www.wegame.com.cn/store/2001539/";
+							DLC2_STORE_URL = "https://www.wegame.com.cn/store/2002196/";
+							this.logoDLC1.GetReference<Image>("icon").sprite = Assets.GetSprite("dlc1_logo_crop_cn");
+							this.logoDLC2.GetReference<Image>("icon").sprite = Assets.GetSprite("dlc2_logo_crop_cn");
 						}
 					}
 					else
 					{
-						DLC1_URL = "https://store.epicgames.com/en-US/p/oxygen-not-included--spaced-out";
-						DLC2_URL = "";
+						DLC1_STORE_URL = "https://store.epicgames.com/en-US/p/oxygen-not-included--spaced-out";
+						DLC2_STORE_URL = "";
 					}
 				}
 				else
 				{
-					DLC1_URL = "https://store.steampowered.com/app/1452490/Oxygen_Not_Included__Spaced_Out/";
-					DLC2_URL = "https://store.steampowered.com/app/2952300/Oxygen_Not_Included_The_Frosty_Planet_Pack/";
+					DLC1_STORE_URL = "https://store.steampowered.com/app/1452490/Oxygen_Not_Included__Spaced_Out/";
+					DLC2_STORE_URL = "https://store.steampowered.com/app/2952300/Oxygen_Not_Included_The_Frosty_Planet_Pack/";
 				}
 			}
-			MultiToggle component = this.logoDLC1.GetComponent<MultiToggle>();
-			component.onClick = (global::System.Action)Delegate.Combine(component.onClick, new global::System.Action(delegate
+			MultiToggle reference = this.logoDLC1.GetReference<MultiToggle>("multitoggle");
+			reference.onClick = (global::System.Action)Delegate.Combine(reference.onClick, new global::System.Action(delegate
 			{
-				App.OpenWebURL(DLC1_URL);
+				if (DlcManager.IsContentOwned("EXPANSION1_ID"))
+				{
+					this.logoDLC1.GetReference<DLCToggle>("dlctoggle").ToggleExpansion1Cicked();
+					return;
+				}
+				App.OpenWebURL(DLC1_STORE_URL);
 			}));
-			MultiToggle component2 = this.logoDLC2.GetComponent<MultiToggle>();
-			component2.onClick = (global::System.Action)Delegate.Combine(component2.onClick, new global::System.Action(delegate
+			string text;
+			if (!DlcManager.IsContentOwned("EXPANSION1_ID"))
 			{
-				App.OpenWebURL(DLC2_URL);
+				text = UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP;
+			}
+			else
+			{
+				text = (DlcManager.IsContentSubscribed("EXPANSION1_ID") ? UI.FRONTEND.MAINMENU.DLC.DEACTIVATE_EXPANSION1_TOOLTIP : UI.FRONTEND.MAINMENU.DLC.ACTIVATE_EXPANSION1_TOOLTIP);
+			}
+			this.logoDLC1.GetReference<ToolTip>("tooltip").SetSimpleTooltip(text);
+			MultiToggle reference2 = this.logoDLC2.GetReference<MultiToggle>("multitoggle");
+			reference2.onClick = (global::System.Action)Delegate.Combine(reference2.onClick, new global::System.Action(delegate
+			{
+				App.OpenWebURL(DLC2_STORE_URL);
 			}));
-			bool flag = DlcManager.GetOwnedDLCIds().Contains("DLC2_ID");
-			this.DLC2WishlistAd.gameObject.SetActive(!flag);
-			bool flag2 = DlcManager.IsContentSubscribed("DLC2_ID");
-			this.DLC2OwnedCheckmark.gameObject.SetActive(flag2);
-			this.DLC2OwnedCheckmark.gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.MAINMENU.DLC.CONTENT_ACTIVE_TOOLTIP);
+			this.logoDLC2.GetReference<LocText>("statuslabel").SetText(this.GetDLCStatusString("DLC2_ID", false));
+			string text2 = this.GetDLCStatusString("DLC2_ID", true);
+			text2 = text2 + "\n\n" + UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP;
+			this.logoDLC2.GetReference<ToolTip>("tooltip").SetSimpleTooltip(text2);
 		}
+	}
+
+	public string GetDLCStatusString(string dlcID, bool tooltip = false)
+	{
+		if (!DlcManager.IsContentOwned(dlcID))
+		{
+			return tooltip ? UI.FRONTEND.MAINMENU.DLC.CONTENT_NOTOWNED_TOOLTIP : UI.FRONTEND.MAINMENU.WISHLIST_AD;
+		}
+		if (DlcManager.IsContentSubscribed(dlcID))
+		{
+			return tooltip ? UI.FRONTEND.MAINMENU.DLC.CONTENT_ACTIVE_TOOLTIP : UI.FRONTEND.MAINMENU.DLC.CONTENT_INSTALLED_LABEL;
+		}
+		return tooltip ? UI.FRONTEND.MAINMENU.DLC.CONTENT_OWNED_NOTINSTALLED_TOOLTIP : UI.FRONTEND.MAINMENU.DLC.CONTENT_OWNED_NOTINSTALLED_LABEL;
 	}
 
 	private void OnApplicationFocus(bool focus)
@@ -481,7 +509,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 622509U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 34)
+				if (header.buildVersion > 623230U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 34)
 				{
 					flag = false;
 				}
@@ -711,16 +739,10 @@ public class MainMenu : KScreen
 	public string IntroShortName;
 
 	[SerializeField]
-	private Image logoDLC1;
+	private HierarchyReferences logoDLC1;
 
 	[SerializeField]
-	private Image logoDLC2;
-
-	[SerializeField]
-	private GameObject DLC2WishlistAd;
-
-	[SerializeField]
-	private GameObject DLC2OwnedCheckmark;
+	private HierarchyReferences logoDLC2;
 
 	private KButton lockerButton;
 

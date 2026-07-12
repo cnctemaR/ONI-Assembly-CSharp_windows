@@ -15,9 +15,10 @@ public class PinkRockCarvedConfig : IEntityConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("PinkRockCarved", global::STRINGS.CREATURES.SPECIES.PINKROCKCARVED.NAME, global::STRINGS.CREATURES.SPECIES.PINKROCKCARVED.DESC, 1f, true, Assets.GetAnim("pinkrock_decor_kanim"), "idle", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.CIRCLE, 0.5f, 0.5f, true, 0, SimHashes.Creature, new List<Tag>
 		{
-			GameTags.Experimental,
+			GameTags.RareMaterials,
 			GameTags.MiscPickupable,
-			GameTags.PedestalDisplayable
+			GameTags.PedestalDisplayable,
+			GameTags.Experimental
 		});
 		gameObject.AddOrGet<OccupyArea>();
 		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();

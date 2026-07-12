@@ -220,7 +220,16 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 				int num5 = ((this.Width % 2 == 0) ? (this.Width / 2 - 1) : Mathf.FloorToInt((float)(this.Width - 1) * 0.5f));
 				Vector2I vector2I2 = vector2I - DiscreteShadowCaster.TravelDirectionToOrtogonalDiractionVector(this.LightDirection) * num5;
 				num = vector2I2.x;
-				num2 = vector2I2.y - num4;
+				switch (this.LightDirection)
+				{
+				case DiscreteShadowCaster.Direction.North:
+					num2 = vector2I2.y;
+					goto IL_0119;
+				case DiscreteShadowCaster.Direction.South:
+					num2 = vector2I2.y - num4;
+					goto IL_0119;
+				}
+				num2 = vector2I2.y - DiscreteShadowCaster.TravelDirectionToOrtogonalDiractionVector(this.LightDirection).y * num5;
 			}
 		}
 		else
@@ -232,6 +241,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 			num3 = num7;
 			num4 = ((this.shape == global::LightShape.Circle) ? num7 : num6);
 		}
+		IL_0119:
 		return new Extents(num, num2, num3, num4);
 	}
 

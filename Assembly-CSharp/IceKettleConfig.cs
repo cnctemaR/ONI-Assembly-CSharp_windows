@@ -42,6 +42,7 @@ public class IceKettleConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
+		go.AddTag(GameTags.LiquidSource);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = Mathf.Ceil(152.80188f);
 		storage.showInUI = true;

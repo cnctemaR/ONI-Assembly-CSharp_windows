@@ -85,6 +85,7 @@ public class Tinkerable : Workable
 	{
 		base.OnSpawn();
 		Prioritizable.AddRef(base.gameObject);
+		this.prioritizableAdded = true;
 	}
 
 	protected override void OnCleanUp()
@@ -94,7 +95,10 @@ public class Tinkerable : Workable
 		{
 			this.updateHandle.ClearScheduler();
 		}
-		Prioritizable.RemoveRef(base.gameObject);
+		if (this.prioritizableAdded)
+		{
+			Prioritizable.RemoveRef(base.gameObject);
+		}
 		base.OnCleanUp();
 	}
 
@@ -284,6 +288,8 @@ public class Tinkerable : Workable
 	{
 		component.OnOperationalChanged(data);
 	});
+
+	private bool prioritizableAdded;
 
 	private SchedulerHandle updateHandle;
 

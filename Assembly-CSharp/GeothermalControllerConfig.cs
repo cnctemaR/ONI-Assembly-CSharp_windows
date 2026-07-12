@@ -189,7 +189,8 @@ public class GeothermalControllerConfig : IEntityConfig
 		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
 		{
 			Storage.StoredItemModifier.Hide,
-			Storage.StoredItemModifier.Insulate
+			Storage.StoredItemModifier.Insulate,
+			Storage.StoredItemModifier.Seal
 		});
 		return gameObject;
 	}

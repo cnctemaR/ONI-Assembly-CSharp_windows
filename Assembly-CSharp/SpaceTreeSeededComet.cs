@@ -79,17 +79,30 @@ public class SpaceTreeSeededComet : Comet
 		int num2 = Grid.OffsetCell(cell, new CellOffset(0, tileMaxHeight));
 		int num3 = num2;
 		bool flag = false;
-		do
+		if (!Grid.IsValidCell(cell))
+		{
+			return;
+		}
+		for (;;)
 		{
 			num2 = num3;
 			num3 = Grid.OffsetCell(num2, 0, -1);
+			if (!Grid.IsValidCell(num3))
+			{
+				break;
+			}
 			if (Grid.Solid[num3] && SpaceTreeSeededComet.CanGrowOnCell(num2, b))
 			{
 				flag = true;
 			}
 			num--;
+			if (flag || num <= 0)
+			{
+				goto IL_005F;
+			}
 		}
-		while (!flag && num > 0);
+		return;
+		IL_005F:
 		if (flag)
 		{
 			GameObject prefab = Assets.GetPrefab("SpaceTree");

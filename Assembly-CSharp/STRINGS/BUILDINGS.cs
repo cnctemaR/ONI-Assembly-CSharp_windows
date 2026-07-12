@@ -4346,6 +4346,13 @@ namespace STRINGS
 					UI.FormatAsLink("Snow", "SNOW"),
 					"."
 				});
+
+				public class OPTION_TOOLTIPS
+				{
+					public static LocString ICE = "Convert " + UI.FormatAsLink("Water", "WATER") + " into " + UI.FormatAsLink("Ice", "ICE");
+
+					public static LocString SNOW = "Convert " + UI.FormatAsLink("Water", "WATER") + " into " + UI.FormatAsLink("Snow", "SNOW");
+				}
 			}
 
 			public class LIQUIDCOOLEDFAN
@@ -4838,7 +4845,7 @@ namespace STRINGS
 				{
 					"Used to build the walls and floors of rooms.\n\nProvides good insulation and boosts ",
 					UI.FormatAsLink("Decor", "DECOR"),
-					", contributing to  ",
+					", contributing to ",
 					UI.FormatAsLink("Morale", "MORALE"),
 					"."
 				});

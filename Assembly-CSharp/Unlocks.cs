@@ -474,7 +474,7 @@ public class Unlocks : KMonoBehaviour
 		},
 		{
 			"dlc2emails",
-			new string[] { "email_newbaby", "email_cerestourism1", "email_cerestourism2", "email_voicemail" }
+			new string[] { "email_newbaby", "email_cerestourism1", "email_cerestourism2", "email_voicemail", "email_expelled" }
 		},
 		{
 			"journals",

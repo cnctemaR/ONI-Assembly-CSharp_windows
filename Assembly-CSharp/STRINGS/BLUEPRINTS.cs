@@ -566,16 +566,16 @@ namespace STRINGS
 			public static LocString DESC = "Grants the wearer enthusiasm and beginner's luck.";
 		}
 
-		public class PERMIT_COOKSTATION_COTTAGE
+		public class PERMIT_COOKINGSTATION_COTTAGE
 		{
-			public static LocString NAME = UI.FormatAsLink("Backcountry Grill", "PERMIT_COOKSTATION_COTTAGE");
+			public static LocString NAME = UI.FormatAsLink("Backcountry Grill", "COOKINGSTATION");
 
 			public static LocString DESC = "The smoky flavor is intentional.";
 		}
 
-		public class PERMIT_COOKSTATION_GOURMET_COTTAGE
+		public class PERMIT_COOKINGSTATION_GOURMET_COTTAGE
 		{
-			public static LocString NAME = UI.FormatAsLink("Rustic Gas Range", "PERMIT_COOKSTATION_GOURMET_COTTAGE");
+			public static LocString NAME = UI.FormatAsLink("Rustic Gas Range", "GOURMETCOOKINGSTATION");
 
 			public static LocString DESC = "It makes quality meal recipes feel more...approachable.";
 		}

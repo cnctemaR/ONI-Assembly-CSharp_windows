@@ -60,7 +60,7 @@ public class GeothermalController : StateMachineComponent<GeothermalController.S
 
 	public bool IsFull()
 	{
-		return this.storage.MassStored() >= 12000f;
+		return this.storage.MassStored() > 11999.9f;
 	}
 
 	public float ComputeContentTemperature()
@@ -195,7 +195,7 @@ public class GeothermalController : StateMachineComponent<GeothermalController.S
 
 	public bool IsObstructed()
 	{
-		if (this.storage.MassStored() >= 12000f)
+		if (this.IsFull())
 		{
 			bool flag = false;
 			foreach (GeothermalVent geothermalVent in this.FindVents(false))

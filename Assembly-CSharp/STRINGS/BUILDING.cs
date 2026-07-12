@@ -64,7 +64,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Power",
 					UI.PST_KEYWORD,
-					" are met"
+					" requirements are met"
 				});
 			}
 
@@ -261,9 +261,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Liquid",
 						UI.PST_KEYWORD,
-						" from a ",
-						BUILDINGS.PREFABS.LIQUIDPUMPINGSTATION.NAME,
-						" to bring to this location"
+						" from a bottling station to bring to this location"
 					});
 				}
 
@@ -277,9 +275,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Liquid",
 						UI.PST_KEYWORD,
-						" from a ",
-						BUILDINGS.PREFABS.LIQUIDPUMPINGSTATION.NAME,
-						" to bring to this location"
+						" from a bottling station to bring to this location"
 					});
 				}
 			}
@@ -296,9 +292,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Gas",
 						UI.PST_KEYWORD,
-						" from a ",
-						BUILDINGS.PREFABS.GASBOTTLER.NAME,
-						" to bring to this location"
+						" from a canister filling station to bring to this location"
 					});
 				}
 
@@ -312,9 +306,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Gas",
 						UI.PST_KEYWORD,
-						" from a ",
-						BUILDINGS.PREFABS.GASBOTTLER.NAME,
-						" to bring to this location"
+						" from a canister filling station to bring to this location"
 					});
 				}
 			}

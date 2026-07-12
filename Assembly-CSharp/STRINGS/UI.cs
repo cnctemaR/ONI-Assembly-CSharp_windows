@@ -3545,29 +3545,39 @@ namespace STRINGS
 
 				public static LocString WISHLIST_AD = "Available now";
 
+				public static LocString WISHLIST_AD_TOOLTIP = "<color=#ffff00ff><b>Click to view it in the store</b></color>";
+
 				public class DLC
 				{
-					public static LocString ACTIVATE_EXPANSION1 = "ACTIVATE DLC";
+					public static LocString ACTIVATE_EXPANSION1 = "ENABLE DLC";
 
-					public static LocString ACTIVATE_EXPANSION1_TOOLTIP = "Click to activate the <i>Spaced Out!</i> DLC";
+					public static LocString ACTIVATE_EXPANSION1_TOOLTIP = "<b>This DLC is disabled</b>\n\n<color=#ffff00ff><b>Click to enable the <i>Spaced Out!</i> DLC</b></color>";
 
-					public static LocString ACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to activate <i>Spaced Out!</i>";
+					public static LocString ACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to enable <i>Spaced Out!</i>";
 
-					public static LocString ACTIVATE_EXPANSION1_RAIL_DESC = "<i>Spaced Out!</i> will be activated the next time you launch the game. The game will now close.";
+					public static LocString ACTIVATE_EXPANSION1_RAIL_DESC = "<i>Spaced Out!</i> will be enabled the next time you launch the game. The game will now close.";
 
-					public static LocString DEACTIVATE_EXPANSION1 = "DEACTIVATE DLC";
+					public static LocString DEACTIVATE_EXPANSION1 = "DISABLE DLC";
 
-					public static LocString DEACTIVATE_EXPANSION1_TOOLTIP = "This DLC is enabled\nClick to deactivate the <i>Spaced Out!</i> DLC";
+					public static LocString DEACTIVATE_EXPANSION1_TOOLTIP = "<b>This DLC is enabled</b>\n\n<color=#ffff00ff><b>Click to disable the <i>Spaced Out!</i> DLC</b></color>";
 
-					public static LocString DEACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to activate the <i>Oxygen Not Included</i> base game.";
+					public static LocString DEACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to enable the <i>Oxygen Not Included</i> base game.";
 
-					public static LocString DEACTIVATE_EXPANSION1_RAIL_DESC = "<i>Spaced Out!</i> will be deactivated the next time you launch the game. The game will now close.";
+					public static LocString DEACTIVATE_EXPANSION1_RAIL_DESC = "<i>Spaced Out!</i> will be disabled the next time you launch the game. The game will now close.";
 
 					public static LocString AD_DLC1 = "Spaced Out! DLC";
 
 					public static LocString CONTENT_INSTALLED_LABEL = "Installed";
 
-					public static LocString CONTENT_ACTIVE_TOOLTIP = "This DLC is enabled\nFind it in the destination selection screen when starting a new game, or in the Load Game screen for existing DLC-enabled saves";
+					public static LocString CONTENT_ACTIVE_TOOLTIP = "<b>This DLC is enabled</b>\n\nFind it in the destination selection screen when starting a new game, or in the Load Game screen for existing DLC-enabled saves";
+
+					public static LocString CONTENT_OWNED_NOTINSTALLED_LABEL = "";
+
+					public static LocString CONTENT_OWNED_NOTINSTALLED_TOOLTIP = "This DLC is owned but not currently installed";
+
+					public static LocString CONTENT_NOTOWNED_LABEL = "Available Now";
+
+					public static LocString CONTENT_NOTOWNED_TOOLTIP = "This DLC is available now!\n\n<color=#ffff00ff><b>Click to view store page</b></color>";
 				}
 			}
 
@@ -12632,7 +12642,9 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Enable Auto-Bottle";
 
-					public static LocString TOOLTIP = "If enabled, Duplicants will deliver bottled liquids to this building directly from Pitcher Pumps";
+					public static LocString TOOLTIP = "If enabled, Duplicants will deliver bottled liquids to this building directly from these sources:\n";
+
+					public static LocString ITEM = "\n{0}";
 				}
 
 				public static class DENIED
@@ -15499,7 +15511,7 @@ namespace STRINGS
 
 				public static LocString IMPROVED_BUILDINGS_ITEM = "{0}";
 
-				public static LocString IMPROVED_PLANTS = UI.PRE_KEYWORD + "Tune Ups" + UI.PST_KEYWORD + " will improve these plants:";
+				public static LocString IMPROVED_PLANTS = UI.PRE_KEYWORD + "Crop Tending" + UI.PST_KEYWORD + " will improve growth times for these plants:";
 
 				public static LocString IMPROVED_PLANTS_ITEM = "{0}";
 

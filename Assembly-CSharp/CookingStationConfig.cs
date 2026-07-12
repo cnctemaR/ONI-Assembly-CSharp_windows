@@ -275,7 +275,7 @@ public class CookingStationConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("CookedPikeapple", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
-		CookedPikeappleConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array27, array28), array27, array28)
+		CookedPikeappleConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CookingStation", array27, array28), array27, array28, DlcManager.AVAILABLE_DLC_2)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.COOKEDPIKEAPPLE.RECIPEDESC,

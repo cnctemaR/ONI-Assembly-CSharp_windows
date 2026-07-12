@@ -129,11 +129,15 @@ public class PlantBranchGrower : GameStateMachine<PlantBranchGrower, PlantBranch
 
 		public GameObject GetBranch(int idx)
 		{
-			if (this.branches == null || this.branches[idx] == null)
+			if (this.branches != null && this.branches[idx] != null)
 			{
-				return null;
+				KPrefabID kprefabID = this.branches[idx].Get();
+				if (kprefabID != null)
+				{
+					return kprefabID.gameObject;
+				}
 			}
-			return this.branches[idx].Get().gameObject;
+			return null;
 		}
 
 		protected override void OnCleanUp()

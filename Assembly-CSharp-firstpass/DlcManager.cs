@@ -352,7 +352,7 @@ public class DlcManager
 		return dlcId == null || dlcId == "" || (DlcManager.CheckPlatformSubscription(dlcId) && KPlayerPrefs.GetInt(dlcId + ".ENABLED", 1) == 1);
 	}
 
-	private static bool IsContentOwned(string dlcId)
+	public static bool IsContentOwned(string dlcId)
 	{
 		if (DlcManager.IsVanillaId(dlcId))
 		{

@@ -15,13 +15,14 @@ public class CritterTemperatureDeltaAsEnergyAmountDisplayer : StandardAmountDisp
 		PrimaryElement component = instance.gameObject.GetComponent<PrimaryElement>();
 		string text = string.Format(master.description, this.formatter.GetFormattedValue(def.temperatureColdUncomfortable, GameUtil.TimeSlice.None), this.formatter.GetFormattedValue(def.temperatureHotUncomfortable, GameUtil.TimeSlice.None));
 		float num = ElementLoader.FindElementByHash(SimHashes.Creature).specificHeatCapacity * component.Mass * 1000f;
-		text += "\n\n";
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
+			text += "\n\n";
 			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle));
 		}
-		else
+		else if (instance.deltaAttribute.Modifiers.Count > 0)
 		{
+			text += "\n\n";
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond));
 			text = text + "\n" + string.Format(UI.CHANGEPERSECOND, GameUtil.GetFormattedJoules(instance.deltaAttribute.GetTotalDisplayValue() * num, "F1", GameUtil.TimeSlice.None));
 		}

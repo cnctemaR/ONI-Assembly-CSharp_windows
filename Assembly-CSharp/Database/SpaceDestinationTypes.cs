@@ -350,7 +350,11 @@ namespace Database
 						SimHashes.Ice,
 						new MathUtil.MinMax(100f, 200f)
 					}
-				}, new Dictionary<string, int> { { "WoodDeer", 1 } }, Db.Get().ArtifactDropRates.Good, 384000000, 383980000, 60, true));
+				}, new Dictionary<string, int>
+				{
+					{ "WoodDeer", 3 },
+					{ "HardSkinBerryPlantSeed", 4 }
+				}, Db.Get().ArtifactDropRates.Good, 384000000, 383980000, 60, true));
 			}
 		}
 

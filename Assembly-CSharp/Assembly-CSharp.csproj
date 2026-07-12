@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DDE60CB8-03A9-4764-89B9-E9D583543D09}</ProjectGuid>
+    <ProjectGuid>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E1C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -3995,123 +3995,123 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\0Harmony\0Harmony.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D06}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E19}</Project>
       <Name>0Harmony</Name>
     </ProjectReference>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D07}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E1A}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Assembly-CSharp-firstpass\Assembly-CSharp-firstpass.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D08}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E1B}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
     <ProjectReference Include="..\com.rlabrecque.steamworks.net\com.rlabrecque.steamworks.net.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D0A}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E1D}</Project>
       <Name>com.rlabrecque.steamworks.net</Name>
     </ProjectReference>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D0B}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E1E}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D10}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E23}</Project>
       <Name>ImGui.NET</Name>
     </ProjectReference>
     <ProjectReference Include="..\ImGui\ImGui.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D0F}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E22}</Project>
       <Name>ImGui</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D11}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E24}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D12}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E25}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D14}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E27}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D16}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E29}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D19}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E2C}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Numerics\System.Numerics.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D22}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E35}</Project>
       <Name>System.Numerics</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D1C}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E2F}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D2B}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E3E}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D30}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E43}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D32}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E45}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D38}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E4B}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D41}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E54}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D42}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E55}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D43}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E56}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ParticleSystemModule\UnityEngine.ParticleSystemModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D48}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E5B}</Project>
       <Name>UnityEngine.ParticleSystemModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D4A}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E5D}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D4B}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E5E}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ScreenCaptureModule\UnityEngine.ScreenCaptureModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D4F}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E62}</Project>
       <Name>UnityEngine.ScreenCaptureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D5A}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E6D}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D5F}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E72}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D5D}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E70}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D68}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E7B}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VideoModule\UnityEngine.VideoModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D6D}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E80}</Project>
       <Name>UnityEngine.VideoModule</Name>
     </ProjectReference>
   </ItemGroup>

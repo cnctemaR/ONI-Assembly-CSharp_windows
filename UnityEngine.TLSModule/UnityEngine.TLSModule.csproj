@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DDE60CB8-03A9-4764-89B9-E9D583543D5C}</ProjectGuid>
+    <ProjectGuid>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E6F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.TLS</RootNamespace>
     <AssemblyName>UnityEngine.TLSModule</AssemblyName>
@@ -20,11 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D15}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E28}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{DDE60CB8-03A9-4764-89B9-E9D583543D50}</Project>
+      <Project>{ED2CA9EA-9E25-43F1-B6A8-783EBA766E63}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

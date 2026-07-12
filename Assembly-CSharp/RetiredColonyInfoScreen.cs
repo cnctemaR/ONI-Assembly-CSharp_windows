@@ -461,7 +461,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			{
 				keyValuePair.Value.SetActive(true);
 			}
-			if (colonyAchievement.IsValidForSave())
+			if (!(Game.Instance != null) || colonyAchievement.IsValidForSave())
 			{
 				if (!flag && data == null && this.retiredColonyData != null)
 				{

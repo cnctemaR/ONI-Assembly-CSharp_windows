@@ -21,6 +21,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_MINERALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
+		buildingDef.AddLogicPowerPort = false;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.125f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;

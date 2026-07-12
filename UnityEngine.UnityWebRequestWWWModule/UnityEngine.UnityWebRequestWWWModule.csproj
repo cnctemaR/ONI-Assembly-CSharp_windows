@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DABF94F6-8E15-4F56-8071-110A643F7B4E}</ProjectGuid>
+    <ProjectGuid>{94EC2357-A33E-4136-87AC-931A315E8A01}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestWWWModule</AssemblyName>
@@ -21,31 +21,31 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B19}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89CC}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B1A}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89CD}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B1E}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89D1}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B27}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89DA}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B34}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89E7}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestAssetBundleModule\UnityEngine.UnityWebRequestAssetBundleModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B4A}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89FD}</Project>
       <Name>UnityEngine.UnityWebRequestAssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B4C}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89FF}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

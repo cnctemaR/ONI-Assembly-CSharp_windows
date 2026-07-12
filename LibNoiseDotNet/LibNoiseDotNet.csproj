@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DABF94F6-8E15-4F56-8071-110A643F7B01}</ProjectGuid>
+    <ProjectGuid>{94EC2357-A33E-4136-87AC-931A315E89B4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>LibNoiseDotNet</RootNamespace>
     <AssemblyName>LibNoiseDotNet</AssemblyName>
@@ -110,7 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B04}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89B7}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
   </ItemGroup>

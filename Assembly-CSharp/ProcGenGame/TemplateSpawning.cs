@@ -15,7 +15,7 @@ namespace ProcGenGame
 			TemplateSpawning.m_poiPadding = settings.GetIntSetting("POIPadding");
 			TemplateSpawning.minProgressPercent = 0f;
 			TemplateSpawning.maxProgressPercent = 0.33f;
-			TemplateSpawning.SpawnStartingTemplate(settings, terrainCells, ref list, ref placedPOIBounds, successCallbackFn);
+			TemplateSpawning.SpawnStartingTemplate(settings, terrainCells, ref list, ref placedPOIBounds, isRunningDebugGen, successCallbackFn);
 			TemplateSpawning.minProgressPercent = TemplateSpawning.maxProgressPercent;
 			TemplateSpawning.maxProgressPercent = 0.66f;
 			TemplateSpawning.SpawnTemplatesFromTemplateRules(settings, terrainCells, myRandom, ref list, ref placedPOIBounds, isRunningDebugGen, successCallbackFn);
@@ -31,7 +31,7 @@ namespace ProcGenGame
 			return MathUtil.ReRange(stagePercent, 0f, 1f, TemplateSpawning.minProgressPercent, TemplateSpawning.maxProgressPercent);
 		}
 
-		private static void SpawnStartingTemplate(WorldGenSettings settings, List<TerrainCell> terrainCells, ref List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets, ref List<RectInt> placedPOIBounds, WorldGen.OfflineCallbackFunction successCallbackFn)
+		private static void SpawnStartingTemplate(WorldGenSettings settings, List<TerrainCell> terrainCells, ref List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets, ref List<RectInt> placedPOIBounds, bool isRunningDebugGen, WorldGen.OfflineCallbackFunction successCallbackFn)
 		{
 			TerrainCell terrainCell = terrainCells.Find((TerrainCell tc) => tc.node.tags.Contains(WorldGenTags.StartLocation));
 			if (settings.world.startingBaseTemplate.IsNullOrWhiteSpace())
@@ -43,7 +43,12 @@ namespace ProcGenGame
 			RectInt templateBounds = template.GetTemplateBounds(keyValuePair.Key, TemplateSpawning.m_poiPadding);
 			if (TemplateSpawning.IsPOIOverlappingBounds(placedPOIBounds, templateBounds))
 			{
-				DebugUtil.DevLogError("TemplateSpawning: Starting template overlaps world boundaries in world '" + settings.world.filePath + "'");
+				string text = "TemplateSpawning: Starting template overlaps world boundaries in world '" + settings.world.filePath + "'";
+				DebugUtil.DevLogError(text);
+				if (!isRunningDebugGen)
+				{
+					throw new Exception(text);
+				}
 			}
 			templateSpawnTargets.Add(keyValuePair);
 			placedPOIBounds.Add(templateBounds);

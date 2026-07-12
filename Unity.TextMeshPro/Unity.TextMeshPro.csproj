@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DABF94F6-8E15-4F56-8071-110A643F7B12}</ProjectGuid>
+    <ProjectGuid>{94EC2357-A33E-4136-87AC-931A315E89C5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>TMPro</RootNamespace>
     <AssemblyName>Unity.TextMeshPro</AssemblyName>
@@ -111,43 +111,43 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B04}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89B7}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B07}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89BA}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B09}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89BC}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B1E}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89D1}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B28}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89DB}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B29}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89DC}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B30}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89E3}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B3D}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89F0}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B43}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89F6}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{DABF94F6-8E15-4F56-8071-110A643F7B40}</Project>
+      <Project>{94EC2357-A33E-4136-87AC-931A315E89F3}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

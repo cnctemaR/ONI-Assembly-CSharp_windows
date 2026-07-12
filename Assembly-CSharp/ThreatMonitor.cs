@@ -235,10 +235,10 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 			if (factionAlignment.GetComponent<Bee>())
 			{
-				Chore currentChore = this.choreDriver.GetCurrentChore();
-				if (currentChore != null && currentChore.gameObject.GetComponent<HiveWorkableEmpty>() != null)
+				Chore chore = ((this.choreDriver != null) ? this.choreDriver.GetCurrentChore() : null);
+				if (chore != null && chore.gameObject.GetComponent<HiveWorkableEmpty>() != null)
 				{
-					currentChore.gameObject.GetComponent<HiveWorkableEmpty>().wasStung = true;
+					chore.gameObject.GetComponent<HiveWorkableEmpty>().wasStung = true;
 				}
 			}
 		}

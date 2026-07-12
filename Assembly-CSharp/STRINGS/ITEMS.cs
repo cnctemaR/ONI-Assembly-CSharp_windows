@@ -959,6 +959,13 @@ namespace STRINGS
 			});
 		}
 
+		public class DEBRISPAYLOAD
+		{
+			public static LocString NAME = "Rocket Debris";
+
+			public static LocString DESC = "Whatever is left over from a Rocket Self-Destruct can be recovered once it has crash-landed.";
+		}
+
 		public class RADIATION
 		{
 			public class HIGHENERGYPARITCLE

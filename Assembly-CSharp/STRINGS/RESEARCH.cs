@@ -436,9 +436,7 @@ namespace STRINGS
 					UI.FormatAsLink("Salt", "SALT"),
 					" from ",
 					UI.FormatAsLink("Brine", "BRINE"),
-					" or pull ",
-					UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
-					" from the air."
+					"."
 				});
 			}
 

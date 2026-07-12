@@ -125,6 +125,7 @@ public class GameplayEventInstance : ISaveLoadable
 	{
 		GameplayEventInfoScreen gameplayEventInfoScreen = (GameplayEventInfoScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.GameplayEventInfoScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject);
 		gameplayEventInfoScreen.SetEventData(eventPopupData);
+		AudioMixer.instance.Start(AudioMixerSnapshots.Get().EventPopupSnapshot);
 		if (eventPopupData.focus != null)
 		{
 			WorldContainer myWorld = eventPopupData.focus.gameObject.GetMyWorld();

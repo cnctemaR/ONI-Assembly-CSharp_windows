@@ -546,35 +546,41 @@ public class BuildingDef : Def
 				}
 			}
 		}
-		ISecondaryInput component2 = this.BuildingComplete.GetComponent<ISecondaryInput>();
-		if (component2 != null)
+		ISecondaryInput[] components = this.BuildingComplete.GetComponents<ISecondaryInput>();
+		if (components != null)
 		{
-			for (int k = 0; k < 4; k++)
+			foreach (ISecondaryInput secondaryInput in components)
 			{
-				ConduitType conduitType = (ConduitType)k;
-				if (conduitType != ConduitType.None && component2.HasSecondaryConduitType(conduitType))
+				for (int k = 0; k < 4; k++)
 				{
-					ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(conduitType);
-					CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(conduitType), orientation);
-					int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
-					this.MarkOverlappingPorts(Grid.Objects[num9, (int)objectLayerForConduitType3], go);
-					Grid.Objects[num9, (int)objectLayerForConduitType3] = go;
+					ConduitType conduitType = (ConduitType)k;
+					if (conduitType != ConduitType.None && secondaryInput.HasSecondaryConduitType(conduitType))
+					{
+						ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(conduitType);
+						CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(secondaryInput.GetSecondaryConduitOffset(conduitType), orientation);
+						int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
+						this.MarkOverlappingPorts(Grid.Objects[num9, (int)objectLayerForConduitType3], go);
+						Grid.Objects[num9, (int)objectLayerForConduitType3] = go;
+					}
 				}
 			}
 		}
-		ISecondaryOutput component3 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
-		if (component3 != null)
+		ISecondaryOutput[] components2 = this.BuildingComplete.GetComponents<ISecondaryOutput>();
+		if (components2 != null)
 		{
-			for (int l = 0; l < 4; l++)
+			foreach (ISecondaryOutput secondaryOutput in components2)
 			{
-				ConduitType conduitType2 = (ConduitType)l;
-				if (conduitType2 != ConduitType.None && component3.HasSecondaryConduitType(conduitType2))
+				for (int l = 0; l < 4; l++)
 				{
-					ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(conduitType2);
-					CellOffset rotatedCellOffset8 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(conduitType2), orientation);
-					int num10 = Grid.OffsetCell(cell, rotatedCellOffset8);
-					this.MarkOverlappingPorts(Grid.Objects[num10, (int)objectLayerForConduitType4], go);
-					Grid.Objects[num10, (int)objectLayerForConduitType4] = go;
+					ConduitType conduitType2 = (ConduitType)l;
+					if (conduitType2 != ConduitType.None && secondaryOutput.HasSecondaryConduitType(conduitType2))
+					{
+						ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(conduitType2);
+						CellOffset rotatedCellOffset8 = Rotatable.GetRotatedCellOffset(secondaryOutput.GetSecondaryConduitOffset(conduitType2), orientation);
+						int num10 = Grid.OffsetCell(cell, rotatedCellOffset8);
+						this.MarkOverlappingPorts(Grid.Objects[num10, (int)objectLayerForConduitType4], go);
+						Grid.Objects[num10, (int)objectLayerForConduitType4] = go;
+					}
 				}
 			}
 		}
@@ -663,38 +669,44 @@ public class BuildingDef : Def
 				Grid.Objects[num7, 29] = null;
 			}
 		}
-		ISecondaryInput component = this.BuildingComplete.GetComponent<ISecondaryInput>();
-		if (component != null)
+		ISecondaryInput[] components = this.BuildingComplete.GetComponents<ISecondaryInput>();
+		if (components != null)
 		{
-			for (int j = 0; j < 4; j++)
+			foreach (ISecondaryInput secondaryInput in components)
 			{
-				ConduitType conduitType = (ConduitType)j;
-				if (conduitType != ConduitType.None && component.HasSecondaryConduitType(conduitType))
+				for (int k = 0; k < 4; k++)
 				{
-					ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(conduitType);
-					CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(component.GetSecondaryConduitOffset(conduitType), orientation);
-					int num8 = Grid.OffsetCell(cell, rotatedCellOffset6);
-					if (Grid.Objects[num8, (int)objectLayerForConduitType3] == go)
+					ConduitType conduitType = (ConduitType)k;
+					if (conduitType != ConduitType.None && secondaryInput.HasSecondaryConduitType(conduitType))
 					{
-						Grid.Objects[num8, (int)objectLayerForConduitType3] = null;
+						ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(conduitType);
+						CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(secondaryInput.GetSecondaryConduitOffset(conduitType), orientation);
+						int num8 = Grid.OffsetCell(cell, rotatedCellOffset6);
+						if (Grid.Objects[num8, (int)objectLayerForConduitType3] == go)
+						{
+							Grid.Objects[num8, (int)objectLayerForConduitType3] = null;
+						}
 					}
 				}
 			}
 		}
-		ISecondaryOutput component2 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
-		if (component2 != null)
+		ISecondaryOutput[] components2 = this.BuildingComplete.GetComponents<ISecondaryOutput>();
+		if (components2 != null)
 		{
-			for (int k = 0; k < 4; k++)
+			foreach (ISecondaryOutput secondaryOutput in components2)
 			{
-				ConduitType conduitType2 = (ConduitType)k;
-				if (conduitType2 != ConduitType.None && component2.HasSecondaryConduitType(conduitType2))
+				for (int l = 0; l < 4; l++)
 				{
-					ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(conduitType2);
-					CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(conduitType2), orientation);
-					int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
-					if (Grid.Objects[num9, (int)objectLayerForConduitType4] == go)
+					ConduitType conduitType2 = (ConduitType)l;
+					if (conduitType2 != ConduitType.None && secondaryOutput.HasSecondaryConduitType(conduitType2))
 					{
-						Grid.Objects[num9, (int)objectLayerForConduitType4] = null;
+						ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(conduitType2);
+						CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(secondaryOutput.GetSecondaryConduitOffset(conduitType2), orientation);
+						int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
+						if (Grid.Objects[num9, (int)objectLayerForConduitType4] == go)
+						{
+							Grid.Objects[num9, (int)objectLayerForConduitType4] = null;
+						}
 					}
 				}
 			}
@@ -764,6 +776,14 @@ public class BuildingDef : Def
 				return false;
 			}
 		}
+		else if (this.BuildLocationRule == BuildLocationRule.InCornerFloor)
+		{
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
+			{
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_CORNER_FLOOR;
+				return false;
+			}
+		}
 		else if (this.BuildLocationRule == BuildLocationRule.BelowRocketCeiling)
 		{
 			WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[cell]);
@@ -830,6 +850,7 @@ public class BuildingDef : Def
 		{
 		case BuildLocationRule.Anywhere:
 		case BuildLocationRule.Conduit:
+		case BuildLocationRule.OnFloorOrBuildingAttachPoint:
 			flag = true;
 			break;
 		case BuildLocationRule.OnFloor:
@@ -933,39 +954,18 @@ public class BuildingDef : Def
 			fail_reason = string.Format(UI.TOOLTIPS.HELP_BUILDLOCATION_ATTACHPOINT, this.AttachmentSlotTag);
 			break;
 		}
-		case BuildLocationRule.OnFloorOrBuildingAttachPoint:
-			if (!BuildingDef.CheckFoundation(cell, orientation, BuildLocationRule.OnFloor, this.WidthInCells, this.HeightInCells, default(Tag)))
-			{
-				flag = false;
-				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_FLOOR_OR_ATTACHPOINT;
-				if (!flag)
-				{
-					int num2 = 0;
-					while (num2 < Components.BuildingAttachPoints.Count && !flag)
-					{
-						for (int j = 0; j < Components.BuildingAttachPoints[num2].points.Length; j++)
-						{
-							if (Components.BuildingAttachPoints[num2].AcceptsAttachment(this.AttachmentSlotTag, Grid.OffsetCell(cell, this.attachablePosition)))
-							{
-								flag = true;
-								break;
-							}
-						}
-						num2++;
-					}
-					fail_reason = string.Format(UI.TOOLTIPS.HELP_BUILDLOCATION_FLOOR_OR_ATTACHPOINT, this.AttachmentSlotTag);
-				}
-			}
-			else
-			{
-				flag = true;
-			}
-			break;
 		case BuildLocationRule.OnRocketEnvelope:
 			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, GameTags.RocketEnvelopeTile))
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_ONROCKETENVELOPE;
+			}
+			break;
+		case BuildLocationRule.InCornerFloor:
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
+			{
+				flag = false;
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_CORNER_FLOOR;
 			}
 			break;
 		}
@@ -1058,34 +1058,40 @@ public class BuildingDef : Def
 		Building component = source_go.GetComponent<Building>();
 		if (flag && component)
 		{
-			ISecondaryInput component2 = component.Def.BuildingComplete.GetComponent<ISecondaryInput>();
-			if (component2 != null)
+			ISecondaryInput[] components = component.Def.BuildingComplete.GetComponents<ISecondaryInput>();
+			if (components != null)
 			{
-				for (int i = 0; i < 4; i++)
+				foreach (ISecondaryInput secondaryInput in components)
 				{
-					ConduitType conduitType = (ConduitType)i;
-					if (conduitType != ConduitType.None && component2.HasSecondaryConduitType(conduitType))
+					for (int j = 0; j < 4; j++)
 					{
-						CellOffset rotatedCellOffset3 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(conduitType), orientation);
-						int num3 = Grid.OffsetCell(cell, rotatedCellOffset3);
-						flag = this.IsValidConduitConnection(source_go, conduitType, num3, ref fail_reason);
+						ConduitType conduitType = (ConduitType)j;
+						if (conduitType != ConduitType.None && secondaryInput.HasSecondaryConduitType(conduitType))
+						{
+							CellOffset rotatedCellOffset3 = Rotatable.GetRotatedCellOffset(secondaryInput.GetSecondaryConduitOffset(conduitType), orientation);
+							int num3 = Grid.OffsetCell(cell, rotatedCellOffset3);
+							flag = this.IsValidConduitConnection(source_go, conduitType, num3, ref fail_reason);
+						}
 					}
 				}
 			}
 		}
 		if (flag)
 		{
-			ISecondaryOutput component3 = component.Def.BuildingComplete.GetComponent<ISecondaryOutput>();
-			if (component3 != null)
+			ISecondaryOutput[] components2 = component.Def.BuildingComplete.GetComponents<ISecondaryOutput>();
+			if (components2 != null)
 			{
-				for (int j = 0; j < 4; j++)
+				foreach (ISecondaryOutput secondaryOutput in components2)
 				{
-					ConduitType conduitType2 = (ConduitType)j;
-					if (conduitType2 != ConduitType.None && component3.HasSecondaryConduitType(conduitType2))
+					for (int k = 0; k < 4; k++)
 					{
-						CellOffset rotatedCellOffset4 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(conduitType2), orientation);
-						int num4 = Grid.OffsetCell(cell, rotatedCellOffset4);
-						flag = this.IsValidConduitConnection(source_go, conduitType2, num4, ref fail_reason);
+						ConduitType conduitType2 = (ConduitType)k;
+						if (conduitType2 != ConduitType.None && secondaryOutput.HasSecondaryConduitType(conduitType2))
+						{
+							CellOffset rotatedCellOffset4 = Rotatable.GetRotatedCellOffset(secondaryOutput.GetSecondaryConduitOffset(conduitType2), orientation);
+							int num4 = Grid.OffsetCell(cell, rotatedCellOffset4);
+							flag = this.IsValidConduitConnection(source_go, conduitType2, num4, ref fail_reason);
+						}
 					}
 				}
 			}
@@ -1276,6 +1282,10 @@ public class BuildingDef : Def
 		{
 			return BuildingDef.CheckBaseFoundation(cell, orientation, BuildLocationRule.OnCeiling, width, height, optionalFoundationRequiredTag) && BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
 		}
+		if (location_rule == BuildLocationRule.InCornerFloor)
+		{
+			return BuildingDef.CheckBaseFoundation(cell, orientation, BuildLocationRule.OnFloor, width, height, optionalFoundationRequiredTag) && BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
+		}
 		return BuildingDef.CheckBaseFoundation(cell, orientation, location_rule, width, height, optionalFoundationRequiredTag);
 	}
 
@@ -1301,7 +1311,7 @@ public class BuildingDef : Def
 
 	public static bool CheckWallFoundation(int cell, int width, int height, bool leftWall)
 	{
-		for (int i = 0; i <= height; i++)
+		for (int i = 0; i < height; i++)
 		{
 			CellOffset cellOffset = new CellOffset(leftWall ? (-(width - 1) / 2 - 1) : (width / 2 + 1), i);
 			int num = Grid.OffsetCell(cell, cellOffset);

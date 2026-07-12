@@ -66,7 +66,7 @@ public class RadiationEmitter : SimComponent
 	{
 		Game.Instance.simComponentCallbackManager.GetItem(cb_handle);
 		int emissionCell = this.GetEmissionCell();
-		SimMessages.AddRadiationEmitter(cb_handle.index, emissionCell, this.emitRadiusX, this.emitRadiusY, this.emitRads, this.emitRate, this.emitSpeed, this.emitDirection, this.emitAngle, this.emitType);
+		SimMessages.AddRadiationEmitter(cb_handle.index, emissionCell, 0, 0, 0f, 0f, 0f, 0f, 0f, this.emitType);
 	}
 
 	protected override void OnSimUnregister()

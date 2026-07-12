@@ -70,7 +70,8 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, true);
 		}, null, null);
-		this.utilityCell = this.GetOutputCell();
+		ConduitFlow conduitManager = this.GetConduitManager();
+		this.utilityCell = this.GetOutputCell(conduitManager.conduitType);
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType == ConduitType.Gas) ? 12 : 16];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Dispense);
@@ -164,13 +165,20 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 		}
 	}
 
-	private int GetOutputCell()
+	private int GetOutputCell(ConduitType outputConduitType)
 	{
 		Building component = base.GetComponent<Building>();
 		if (this.useSecondaryOutput)
 		{
-			ISecondaryOutput component2 = base.GetComponent<ISecondaryOutput>();
-			return Grid.OffsetCell(component.NaturalBuildingCell(), component2.GetSecondaryConduitOffset(this.conduitType));
+			ISecondaryOutput[] components = base.GetComponents<ISecondaryOutput>();
+			foreach (ISecondaryOutput secondaryOutput in components)
+			{
+				if (secondaryOutput.HasSecondaryConduitType(outputConduitType))
+				{
+					return Grid.OffsetCell(component.NaturalBuildingCell(), secondaryOutput.GetSecondaryConduitOffset(outputConduitType));
+				}
+			}
+			return Grid.OffsetCell(component.NaturalBuildingCell(), components[0].GetSecondaryConduitOffset(outputConduitType));
 		}
 		return component.GetUtilityOutputCell();
 	}

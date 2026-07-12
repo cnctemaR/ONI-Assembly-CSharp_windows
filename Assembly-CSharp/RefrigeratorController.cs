@@ -42,7 +42,7 @@ public class RefrigeratorController : GameStateMachine<RefrigeratorController, R
 			if (!(gameObject == null))
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				if (!(component == null) && component.Temperature >= smi.def.simulatedInternalTemperature + smi.def.activeCoolingStopBuffer)
+				if (!(component == null) && component.Mass >= 0.01f && component.Temperature >= smi.def.simulatedInternalTemperature + smi.def.activeCoolingStopBuffer)
 				{
 					return false;
 				}
@@ -58,7 +58,7 @@ public class RefrigeratorController : GameStateMachine<RefrigeratorController, R
 			if (!(gameObject == null))
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				if (!(component == null) && component.Temperature >= smi.def.simulatedInternalTemperature + smi.def.activeCoolingStartBuffer)
+				if (!(component == null) && component.Mass >= 0.01f && component.Temperature >= smi.def.simulatedInternalTemperature + smi.def.activeCoolingStartBuffer)
 				{
 					return true;
 				}

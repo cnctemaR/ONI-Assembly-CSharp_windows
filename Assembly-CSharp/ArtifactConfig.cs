@@ -20,7 +20,7 @@ public class ArtifactConfig : IMultiEntityConfig
 		list.Add(ArtifactConfig.CreateArtifact("VHS", UI.SPACEARTIFACTS.VHS.NAME, UI.SPACEARTIFACTS.VHS.DESCRIPTION, "idle_vhs", "ui_vhs", DECOR.SPACEARTIFACT.TIER1, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("Saxophone", UI.SPACEARTIFACTS.SAXOPHONE.NAME, UI.SPACEARTIFACTS.SAXOPHONE.DESCRIPTION, "idle_saxophone", "ui_saxophone", DECOR.SPACEARTIFACT.TIER1, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("ModernArt", UI.SPACEARTIFACTS.MODERNART.NAME, UI.SPACEARTIFACTS.MODERNART.DESCRIPTION, "idle_abstract_blocks", "ui_abstract_blocks", DECOR.SPACEARTIFACT.TIER1, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
-		list.Add(ArtifactConfig.CreateArtifact("HoneyJar", UI.SPACEARTIFACTS.HONEY_JAR.NAME, UI.SPACEARTIFACTS.HONEY_JAR.DESCRIPTION, "idle_honey_jar", "ui_honey_jar", DECOR.SPACEARTIFACT.TIER1, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
+		list.Add(ArtifactConfig.CreateArtifact("HoneyJar", UI.SPACEARTIFACTS.HONEYJAR.NAME, UI.SPACEARTIFACTS.HONEYJAR.DESCRIPTION, "idle_honey_jar", "ui_honey_jar", DECOR.SPACEARTIFACT.TIER1, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("AmeliasWatch", UI.SPACEARTIFACTS.AMELIASWATCH.NAME, UI.SPACEARTIFACTS.AMELIASWATCH.DESCRIPTION, "idle_earnhart_watch", "ui_earnhart_watch", DECOR.SPACEARTIFACT.TIER2, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("TeaPot", UI.SPACEARTIFACTS.TEAPOT.NAME, UI.SPACEARTIFACTS.TEAPOT.DESCRIPTION, "idle_teapot", "ui_teapot", DECOR.SPACEARTIFACT.TIER2, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("BrickPhone", UI.SPACEARTIFACTS.BRICKPHONE.NAME, UI.SPACEARTIFACTS.BRICKPHONE.DESCRIPTION, "idle_brick_phone", "ui_brick_phone", DECOR.SPACEARTIFACT.TIER2, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
@@ -29,7 +29,7 @@ public class ArtifactConfig : IMultiEntityConfig
 		{
 			go.AddOrGet<LoopingSounds>();
 		}, SimHashes.Creature));
-		list.Add(ArtifactConfig.CreateArtifact("BioluminescentRock", UI.SPACEARTIFACTS.BIOLUMROCK.NAME, UI.SPACEARTIFACTS.BIOLUMROCK.DESCRIPTION, "idle_bioluminescent_rock", "ui_bioluminescent_rock", DECOR.SPACEARTIFACT.TIER2, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", delegate(GameObject go)
+		list.Add(ArtifactConfig.CreateArtifact("BioluminescentRock", UI.SPACEARTIFACTS.BIOLUMINESCENTROCK.NAME, UI.SPACEARTIFACTS.BIOLUMINESCENTROCK.DESCRIPTION, "idle_bioluminescent_rock", "ui_bioluminescent_rock", DECOR.SPACEARTIFACT.TIER2, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", delegate(GameObject go)
 		{
 			Light2D light2D = go.AddOrGet<Light2D>();
 			light2D.overlayColour = LIGHT2D.BIOLUMROCK_COLOR;
@@ -41,12 +41,12 @@ public class ArtifactConfig : IMultiEntityConfig
 			light2D.shape = global::LightShape.Cone;
 			light2D.drawOverlay = true;
 		}, SimHashes.Creature));
-		list.Add(ArtifactConfig.CreateArtifact("GrubStatue", UI.SPACEARTIFACTS.GRUB_STATUE.NAME, UI.SPACEARTIFACTS.GRUB_STATUE.DESCRIPTION, "idle_grub_statue", "ui_grub_statue", DECOR.SPACEARTIFACT.TIER2, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
+		list.Add(ArtifactConfig.CreateArtifact("GrubStatue", UI.SPACEARTIFACTS.GRUBSTATUE.NAME, UI.SPACEARTIFACTS.GRUBSTATUE.DESCRIPTION, "idle_grub_statue", "ui_grub_statue", DECOR.SPACEARTIFACT.TIER2, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("Stethoscope", UI.SPACEARTIFACTS.STETHOSCOPE.NAME, UI.SPACEARTIFACTS.STETHOSCOPE.DESCRIPTION, "idle_stethocope", "ui_stethoscope", DECOR.SPACEARTIFACT.TIER3, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("EggRock", UI.SPACEARTIFACTS.EGGROCK.NAME, UI.SPACEARTIFACTS.EGGROCK.DESCRIPTION, "idle_egg_rock_light", "ui_egg_rock_light", DECOR.SPACEARTIFACT.TIER3, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("HatchFossil", UI.SPACEARTIFACTS.HATCHFOSSIL.NAME, UI.SPACEARTIFACTS.HATCHFOSSIL.DESCRIPTION, "idle_fossil_hatch", "ui_fossil_hatch", DECOR.SPACEARTIFACT.TIER3, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("RockTornado", UI.SPACEARTIFACTS.ROCKTORNADO.NAME, UI.SPACEARTIFACTS.ROCKTORNADO.DESCRIPTION, "idle_whirlwind_rock", "ui_whirlwind_rock", DECOR.SPACEARTIFACT.TIER3, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
-		list.Add(ArtifactConfig.CreateArtifact("PacuPercolator", UI.SPACEARTIFACTS.PERCOLATOR.NAME, UI.SPACEARTIFACTS.PERCOLATOR.DESCRIPTION, "idle_percolator", "ui_percolator", DECOR.SPACEARTIFACT.TIER3, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
+		list.Add(ArtifactConfig.CreateArtifact("PacuPercolator", UI.SPACEARTIFACTS.PACUPERCOLATOR.NAME, UI.SPACEARTIFACTS.PACUPERCOLATOR.DESCRIPTION, "idle_percolator", "ui_percolator", DECOR.SPACEARTIFACT.TIER3, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("MagmaLamp", UI.SPACEARTIFACTS.MAGMALAMP.NAME, UI.SPACEARTIFACTS.MAGMALAMP.DESCRIPTION, "idle_lava_lamp", "ui_lava_lamp", DECOR.SPACEARTIFACT.TIER3, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", delegate(GameObject go)
 		{
 			Light2D light2D2 = go.AddOrGet<Light2D>();
@@ -75,13 +75,13 @@ public class ArtifactConfig : IMultiEntityConfig
 			light2D3.shape = global::LightShape.Circle;
 			light2D3.drawOverlay = true;
 		}, SimHashes.Creature));
-		list.Add(ArtifactConfig.CreateArtifact("MoodRing", UI.SPACEARTIFACTS.MOOD_RING.NAME, UI.SPACEARTIFACTS.MOOD_RING.DESCRIPTION, "idle_moodring", "ui_moodring", DECOR.SPACEARTIFACT.TIER4, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
+		list.Add(ArtifactConfig.CreateArtifact("MoodRing", UI.SPACEARTIFACTS.MOODRING.NAME, UI.SPACEARTIFACTS.MOODRING.DESCRIPTION, "idle_moodring", "ui_moodring", DECOR.SPACEARTIFACT.TIER4, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("SolarSystem", UI.SPACEARTIFACTS.SOLARSYSTEM.NAME, UI.SPACEARTIFACTS.SOLARSYSTEM.DESCRIPTION, "idle_solar_system_loop", "ui_solar_system", DECOR.SPACEARTIFACT.TIER5, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", delegate(GameObject go)
 		{
 			go.AddOrGet<LoopingSounds>();
 		}, SimHashes.Creature));
 		list.Add(ArtifactConfig.CreateArtifact("Moonmoonmoon", UI.SPACEARTIFACTS.MOONMOONMOON.NAME, UI.SPACEARTIFACTS.MOONMOONMOON.DESCRIPTION, "idle_moon", "ui_moon", DECOR.SPACEARTIFACT.TIER5, DlcManager.AVAILABLE_ALL_VERSIONS, "artifacts_kanim", null, SimHashes.Creature));
-		list.Add(ArtifactConfig.CreateArtifact("ReactorModel", UI.SPACEARTIFACTS.REACTOR_MODEL.NAME, UI.SPACEARTIFACTS.REACTOR_MODEL.DESCRIPTION, "idle_model", "ui_model", DECOR.SPACEARTIFACT.TIER5, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
+		list.Add(ArtifactConfig.CreateArtifact("ReactorModel", UI.SPACEARTIFACTS.REACTORMODEL.NAME, UI.SPACEARTIFACTS.REACTORMODEL.DESCRIPTION, "idle_model", "ui_model", DECOR.SPACEARTIFACT.TIER5, DlcManager.AVAILABLE_EXPANSION1_ONLY, "artifacts_2_kanim", null, SimHashes.Creature));
 		for (int i = list.Count - 1; i >= 0; i--)
 		{
 			if (list[i] == null)

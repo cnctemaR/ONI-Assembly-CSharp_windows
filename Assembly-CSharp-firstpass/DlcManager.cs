@@ -165,7 +165,7 @@ public class DlcManager
 		{
 			if (dlcId != null && dlcId.Length == 0)
 			{
-				return "B";
+				return "V";
 			}
 			if (dlcId == "EXPANSION1_ID")
 			{

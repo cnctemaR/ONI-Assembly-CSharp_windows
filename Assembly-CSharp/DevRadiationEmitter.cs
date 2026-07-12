@@ -3,6 +3,15 @@ using STRINGS;
 
 public class DevRadiationEmitter : KMonoBehaviour, ISingleSliderControl, ISliderControl
 {
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (this.radiationEmitter != null)
+		{
+			this.radiationEmitter.SetEmitting(true);
+		}
+	}
+
 	public string SliderTitleKey
 	{
 		get

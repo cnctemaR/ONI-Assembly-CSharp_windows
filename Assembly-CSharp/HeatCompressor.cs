@@ -54,7 +54,7 @@ public class HeatCompressor : StateMachineComponent<HeatCompressor.StatesInstanc
 
 	public void EjectHeatCube()
 	{
-		this.heatCubeStorage.DropAll(base.transform.GetPosition(), false, false, default(Vector3), true);
+		this.heatCubeStorage.DropAll(base.transform.GetPosition(), false, false, default(Vector3), true, null);
 	}
 
 	[MyCmpReq]

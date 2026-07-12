@@ -60,6 +60,11 @@ public class PropSurfaceSatellite1Config : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
+		RadiationEmitter component = inst.GetComponent<RadiationEmitter>();
+		if (component != null)
+		{
+			component.SetEmitting(true);
+		}
 	}
 
 	public const string ID = "PropSurfaceSatellite1";

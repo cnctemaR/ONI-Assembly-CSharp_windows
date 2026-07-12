@@ -165,6 +165,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		set
 		{
 			this.flipX = value;
+			if (this.layering != null)
+			{
+				this.layering.Dirty();
+			}
+			this.SetDirty();
 		}
 	}
 
@@ -177,6 +182,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		set
 		{
 			this.flipY = value;
+			if (this.layering != null)
+			{
+				this.layering.Dirty();
+			}
+			this.SetDirty();
 		}
 	}
 

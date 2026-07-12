@@ -91,6 +91,15 @@ public class ClusterGrid
 			select entity).ToList<ClusterGridEntity>();
 	}
 
+	public ClusterGridEntity GetAsteroidAtCell(AxialI cell)
+	{
+		if (!this.cellContents.ContainsKey(cell))
+		{
+			return null;
+		}
+		return this.cellContents[cell].Where<ClusterGridEntity>((ClusterGridEntity e) => e.Layer == EntityLayer.Asteroid).FirstOrDefault<ClusterGridEntity>();
+	}
+
 	public bool HasVisibleAsteroidAtCell(AxialI cell)
 	{
 		return this.GetVisibleEntityOfLayerAtCell(cell, EntityLayer.Asteroid) != null;
@@ -195,48 +204,45 @@ public class ClusterGrid
 		float num = (float)entity.Location.R;
 		float num2 = (float)entity.Location.Q;
 		List<ClusterGridEntity> list = this.cellContents[entity.Location];
-		if (list.Count > 1 && entity.SpaceOutInSameHex())
+		if (list.Count <= 1 || !entity.SpaceOutInSameHex())
 		{
-			int num3 = 0;
-			int num4 = 0;
-			foreach (ClusterGridEntity clusterGridEntity in list)
-			{
-				if (entity == clusterGridEntity)
-				{
-					num3 = num4;
-				}
-				if (clusterGridEntity.SpaceOutInSameHex())
-				{
-					num4++;
-				}
-			}
-			int num5;
-			if (num4 != 2)
-			{
-				if (num4 != 3)
-				{
-					num5 = 1;
-				}
-				else
-				{
-					num5 = 2;
-				}
-			}
-			else
-			{
-				num5 = 3;
-			}
-			AxialI axialI = AxialI.DIRECTIONS[num3 * num5 % AxialI.DIRECTIONS.Count];
-			float num6 = 0.1f;
-			if (num4 >= AxialI.DIRECTIONS.Count)
-			{
-				float num7 = 0.15f / (float)(num4 / AxialI.DIRECTIONS.Count);
-				num6 += num7 * (float)num3 / (float)AxialI.DIRECTIONS.Count;
-			}
-			num += (float)axialI.R * num6;
-			num2 += (float)axialI.Q * num6;
+			return AxialUtil.AxialToWorld(num, num2);
 		}
-		return AxialUtil.AxialToWorld(num, num2);
+		int num3 = 0;
+		int num4 = 0;
+		foreach (ClusterGridEntity clusterGridEntity in list)
+		{
+			if (entity == clusterGridEntity)
+			{
+				num3 = num4;
+			}
+			if (clusterGridEntity.SpaceOutInSameHex())
+			{
+				num4++;
+			}
+		}
+		if (list.Count > num4)
+		{
+			num4 += 5;
+			num3 += 5;
+		}
+		else if (num4 > 0)
+		{
+			num4++;
+			num3++;
+		}
+		if (num4 == 0 || num4 == 1)
+		{
+			return AxialUtil.AxialToWorld(num, num2);
+		}
+		float num5 = Mathf.Min(Mathf.Pow((float)num4, 0.5f), 1f) * 0.5f;
+		float num6 = Mathf.Pow((float)num3 / (float)num4, 0.5f);
+		float num7 = 0.81f;
+		float num8 = Mathf.Pow((float)num4, 0.5f) * num7;
+		float num9 = 6.2831855f * num8 * num6;
+		float num10 = Mathf.Cos(num9) * num5 * num6;
+		float num11 = Mathf.Sin(num9) * num5 * num6;
+		return AxialUtil.AxialToWorld(num, num2) + new Vector3(num10, num11, 0f);
 	}
 
 	public List<AxialI> GetPath(AxialI start, AxialI end, ClusterDestinationSelector destination_selector)
@@ -370,9 +376,7 @@ public class ClusterGrid
 
 	public const float NodeDistanceScale = 600f;
 
-	private const float MIN_OFFSET_WITHIN_HEX = 0.1f;
-
-	private const float MAX_OFFSET_WITHIN_HEX = 0.25f;
+	private const float MAX_OFFSET_RADIUS = 0.5f;
 
 	public int numRings;
 

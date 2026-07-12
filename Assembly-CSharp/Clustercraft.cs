@@ -17,6 +17,8 @@ public class Clustercraft : ClusterGridEntity
 		}
 	}
 
+	public bool Exploding { get; protected set; }
+
 	public override EntityLayer Layer
 	{
 		get
@@ -49,7 +51,7 @@ public class Clustercraft : ClusterGridEntity
 	{
 		get
 		{
-			return true;
+			return !this.Exploding;
 		}
 	}
 
@@ -155,6 +157,11 @@ public class Clustercraft : ClusterGridEntity
 	{
 		this.status = craft_status;
 		this.UpdateGroundTags();
+	}
+
+	public void SetExploding()
+	{
+		this.Exploding = true;
 	}
 
 	protected override void OnPrefabInit()
@@ -639,12 +646,14 @@ public class Clustercraft : ClusterGridEntity
 				}
 			}
 		}
+		bool flag2 = false;
 		if (visibleEntityOfLayerAtCell != null)
 		{
 			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.InFlight, this.m_clusterTraveler);
 		}
 		else if (!this.HasResourcesToMove(1, Clustercraft.CombustionResource.All) && !flag)
 		{
+			flag2 = true;
 			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.RocketStranded, orbitAsteroid);
 		}
 		else if (!this.m_moduleInterface.GetClusterDestinationSelector().IsAtDestination() && !this.CheckDesinationInRange())
@@ -663,6 +672,7 @@ public class Clustercraft : ClusterGridEntity
 		{
 			this.mainStatusHandle = component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
 		}
+		base.GetComponent<KPrefabID>().SetTag(GameTags.RocketStranded, flag2);
 		float num = 0f;
 		float num2 = 0f;
 		foreach (CargoBayCluster cargoBayCluster in this.GetAllCargoBays())
@@ -732,9 +742,14 @@ public class Clustercraft : ClusterGridEntity
 		return this.status > Clustercraft.CraftStatus.Grounded;
 	}
 
-	public override bool ShowProgressBar()
+	public bool IsTravellingAndFueled()
 	{
 		return this.HasResourcesToMove(1, Clustercraft.CombustionResource.All) && this.m_clusterTraveler.IsTraveling();
+	}
+
+	public override bool ShowProgressBar()
+	{
+		return this.IsTravellingAndFueled();
 	}
 
 	public override float GetProgress()

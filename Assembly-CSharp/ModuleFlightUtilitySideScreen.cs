@@ -52,9 +52,13 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
-		if (this.refreshHandle != -1 && target != null)
+		if (target != null)
 		{
-			target.Unsubscribe(this.refreshHandle);
+			foreach (int num in this.refreshHandle)
+			{
+				target.Unsubscribe(num);
+			}
+			this.refreshHandle.Clear();
 		}
 		base.SetTarget(target);
 		this.targetCraft = target.GetComponent<Clustercraft>();
@@ -62,7 +66,8 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 		{
 			this.targetCraft = target.GetMyWorld().GetComponent<Clustercraft>();
 		}
-		this.refreshHandle = this.targetCraft.gameObject.Subscribe(-1298331547, new Action<object>(this.RefreshAll));
+		this.refreshHandle.Add(this.targetCraft.gameObject.Subscribe(-1298331547, new Action<object>(this.RefreshAll)));
+		this.refreshHandle.Add(this.targetCraft.gameObject.Subscribe(1792516731, new Action<object>(this.RefreshAll)));
 		this.BuildModules();
 	}
 
@@ -127,7 +132,7 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 		{
 			int id = component.id;
 			reference3.gameObject.SetActive(true);
-			reference3.Initialize(Components.LiveMinionIdentities.GetWorldItems(id, false), new Action<IListableOption, object>(this.OnDuplicantEntryClick), null, new Action<DropDownEntry, object>(this.PadDropDownEntryRefreshAction), true, module);
+			reference3.Initialize(Components.LiveMinionIdentities.GetWorldItems(id, false), new Action<IListableOption, object>(this.OnDuplicantEntryClick), null, new Action<DropDownEntry, object>(this.DropDownEntryRefreshAction), true, module);
 			reference3.selectedLabel.text = ((module.ChosenDuplicant != null) ? this.GetDuplicantRowName(module.ChosenDuplicant) : UI.UISIDESCREENS.MODULEFLIGHTUTILITYSIDESCREEN.SELECT_DUPLICANT.ToString());
 			reference4.gameObject.SetActive(true);
 			reference4.SetIdentityObject(module.ChosenDuplicant, false);
@@ -167,11 +172,25 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 		this.RefreshAll(null);
 	}
 
-	private void PadDropDownEntryRefreshAction(DropDownEntry entry, object targetData)
+	private void DropDownEntryRefreshAction(DropDownEntry entry, object targetData)
 	{
 		MinionIdentity minionIdentity = (MinionIdentity)entry.entryData;
 		entry.label.text = this.GetDuplicantRowName(minionIdentity);
 		entry.portrait.SetIdentityObject(minionIdentity, false);
+		bool flag = false;
+		foreach (Ref<RocketModuleCluster> @ref in this.targetCraft.ModuleInterface.ClusterModules)
+		{
+			RocketModuleCluster rocketModuleCluster = @ref.Get();
+			if (!(rocketModuleCluster == null))
+			{
+				IEmptyableCargo smi = rocketModuleCluster.GetSMI<IEmptyableCargo>();
+				if (smi != null && !(((IEmptyableCargo)targetData).ChosenDuplicant == minionIdentity))
+				{
+					flag = flag || smi.ChosenDuplicant == minionIdentity;
+				}
+			}
+		}
+		entry.button.isInteractable = !flag;
 	}
 
 	private void StyleRepeatButton(IEmptyableCargo module)
@@ -193,5 +212,5 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 
 	private Dictionary<IEmptyableCargo, HierarchyReferences> modulePanels = new Dictionary<IEmptyableCargo, HierarchyReferences>();
 
-	private int refreshHandle = -1;
+	private List<int> refreshHandle = new List<int>();
 }

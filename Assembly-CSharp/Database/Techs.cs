@@ -206,7 +206,7 @@ namespace Database
 				"MeshTile"
 			}, this, null);
 			new Tech("FlowRedirection", new List<string> { "MechanicalSurfboard", "ModularLaunchpadPortLiquid", "ModularLaunchpadPortLiquidUnloader", "LiquidCargoBaySmall" }, this, null);
-			new Tech("LiquidDistribution", new List<string> { "RocketInteriorLiquidInput", "RocketInteriorLiquidOutput" }, this, null);
+			new Tech("LiquidDistribution", new List<string> { "RocketInteriorLiquidInput", "RocketInteriorLiquidOutput", "WallToilet" }, this, null);
 			new Tech("AdvancedSanitation", new List<string> { "DecontaminationShower" }, this, null);
 			new Tech("AdvancedFiltration", new List<string> { "GasFilter", "LiquidFilter", "SludgePress" }, this, null);
 			new Tech("Distillation", new List<string> { "AlgaeDistillery", "EthanolDistillery", "WaterPurifier" }, this, null);
@@ -275,9 +275,14 @@ namespace Database
 			}, this, null);
 			new Tech("ArtificialFriends", new List<string> { "SweepBotStation", "ScoutModule" }, this, null);
 			new Tech("BasicRefinement", new List<string> { "RockCrusher", "Kiln" }, this, null);
-			new Tech("RefinedObjects", new List<string> { "FirePole", "ThermalBlock" }, this, null);
+			new Tech("RefinedObjects", new List<string>
+			{
+				"FirePole",
+				"ThermalBlock",
+				LadderBedConfig.ID
+			}, this, null);
 			new Tech("Smelting", new List<string> { "MetalRefinery", "MetalTile" }, this, null);
-			new Tech("HighTempForging", new List<string> { "GlassForge", "BunkerTile", "BunkerDoor", "Gantry" }, this, null);
+			new Tech("HighTempForging", new List<string> { "GlassForge", "BunkerTile", "BunkerDoor" }, this, null);
 			new Tech("HighPressureForging", new List<string> { "DiamondPress" }, this, null);
 			new Tech("RadiationProtection", new List<string> { "LeadSuit", "LeadSuitMarker", "LeadSuitLocker" }, this, null);
 			new Tech("TemperatureModulation", new List<string> { "LiquidCooledFan", "IceCooledFan", "IceMachine", "InsulationTile", "SpaceHeater" }, this, null);
@@ -375,6 +380,7 @@ namespace Database
 			{
 				return;
 			}
+			base.Get("HighTempForging").AddUnlockedItemIDs(new string[] { "Gantry" });
 			new Tech("Bioengineering", new List<string> { "GeneticAnalysisStation" }, this, null);
 			new Tech("SpaceCombustion", new List<string> { "SugarEngine", "SmallOxidizerTank" }, this, null);
 			new Tech("HighVelocityDestruction", new List<string> { "NoseconeHarvest" }, this, null);

@@ -95,7 +95,7 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 		}
 		if (!this.liquidStorage.IsEmpty())
 		{
-			this.liquidStorage.DropAll(false, false, new Vector3(1f, 0f, 0f), true);
+			this.liquidStorage.DropAll(false, false, new Vector3(1f, 0f, 0f), true, null);
 		}
 		this.UpdateMeter();
 	}
@@ -225,7 +225,7 @@ public class IceCooledFan : StateMachineComponent<IceCooledFan.StatesInstance>
 					{
 						smi.master.gameObject.GetComponent<ManualDeliveryKG>().Pause(false, "Working");
 					}
-					smi.master.liquidStorage.DropAll(false, false, default(Vector3), true);
+					smi.master.liquidStorage.DropAll(false, false, default(Vector3), true, null);
 				});
 			this.work_pst.ScheduleGoTo(2f, this.unworkable);
 			this.unworkable.Update("IceFanUnworkableStatusItems", delegate(IceCooledFan.StatesInstance smi, float dt)

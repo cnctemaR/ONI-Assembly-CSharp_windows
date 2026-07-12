@@ -137,7 +137,7 @@ public class OrbitalDeployCargoModule : GameStateMachine<OrbitalDeployCargoModul
 						num += this.storage.Transfer(gameObject.GetComponent<Storage>(), GameTags.Stored, 200f - num, false, true);
 					}
 					gameObject.SetActive(true);
-					gameObject.GetSMI<RailGunPayload.StatesInstance>().Land(component.Location, component2.GetMyWorldLocation());
+					gameObject.GetSMI<RailGunPayload.StatesInstance>().Travel(component.Location, component2.GetMyWorldLocation());
 				}
 			}
 			this.CheckIfLoaded();

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE726}</ProjectGuid>
+    <ProjectGuid>{0797AF16-56CC-4308-9EA2-C95510C7658D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -174,6 +174,7 @@
     <Compile Include="BackgroundEarthConfig.cs" />
     <Compile Include="Baggable.cs" />
     <Compile Include="BaggedStates.cs" />
+    <Compile Include="BallisticClusterGridEntity.cs" />
     <Compile Include="BalloonArtist.cs" />
     <Compile Include="BalloonArtistChore.cs" />
     <Compile Include="BalloonFX.cs" />
@@ -344,6 +345,8 @@
     <Compile Include="CargoBayCluster.cs" />
     <Compile Include="CargoBayConduit.cs" />
     <Compile Include="CargoBayIsEmpty.cs" />
+    <Compile Include="CargoDropperMinion.cs" />
+    <Compile Include="CargoDropperStorage.cs" />
     <Compile Include="CargoLander.cs" />
     <Compile Include="CarpetTileConfig.cs" />
     <Compile Include="CategoryEntry.cs" />
@@ -414,12 +417,14 @@
     <Compile Include="ClusterDestinationSelector.cs" />
     <Compile Include="ClusterDestinationSideScreen.cs" />
     <Compile Include="ClusterFogOfWarManager.cs" />
+    <Compile Include="ClusterFXEntity.cs" />
     <Compile Include="ClusterGrid.cs" />
     <Compile Include="ClusterGridEntity.cs" />
     <Compile Include="ClusterGridWorldSideScreen.cs" />
     <Compile Include="ClusterLocationChangedEvent.cs" />
     <Compile Include="ClusterLocationFilterSideScreen.cs" />
     <Compile Include="ClusterManager.cs" />
+    <Compile Include="ClusterMapFXAnimator.cs" />
     <Compile Include="ClusterMapHex.cs" />
     <Compile Include="ClusterMapPath.cs" />
     <Compile Include="ClusterMapPathDrawer.cs" />
@@ -721,6 +726,7 @@
     <Compile Include="DeathMessage.cs" />
     <Compile Include="DeathMonitor.cs" />
     <Compile Include="DeathStates.cs" />
+    <Compile Include="DebrisPayloadConfig.cs" />
     <Compile Include="DebugBaseTemplateButton.cs" />
     <Compile Include="DebugCellDrawer.cs" />
     <Compile Include="DebugElementMenu.cs" />
@@ -749,6 +755,7 @@
     <Compile Include="Demolishable.cs" />
     <Compile Include="DemoOverScreen.cs" />
     <Compile Include="DemoTimer.cs" />
+    <Compile Include="DeployingPioneerLanderFXConfig.cs" />
     <Compile Include="Desalinator.cs" />
     <Compile Include="DesalinatorConfig.cs" />
     <Compile Include="DesalinatorWorkableEmpty.cs" />
@@ -928,6 +935,7 @@
     <Compile Include="EquippableBalloon.cs" />
     <Compile Include="EquippableBalloonConfig.cs" />
     <Compile Include="EquippableWorkable.cs" />
+    <Compile Include="EscapePodConfig.cs" />
     <Compile Include="EspressoMachine.cs" />
     <Compile Include="EspressoMachineConfig.cs" />
     <Compile Include="EspressoMachineWorkable.cs" />
@@ -948,6 +956,7 @@
     <Compile Include="ExpandRevealUIContent.cs" />
     <Compile Include="Expectation.cs" />
     <Compile Include="Expectations.cs" />
+    <Compile Include="ExplodingClusterShipConfig.cs" />
     <Compile Include="ExposureType.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Extents.cs" />
@@ -1565,6 +1574,8 @@
     <Compile Include="KUISelectable.cs" />
     <Compile Include="LabelTableColumn.cs" />
     <Compile Include="Ladder.cs" />
+    <Compile Include="LadderBed.cs" />
+    <Compile Include="LadderBedConfig.cs" />
     <Compile Include="LadderConfig.cs" />
     <Compile Include="LadderDiseaseTransitionLayer.cs" />
     <Compile Include="LadderFastConfig.cs" />
@@ -2253,7 +2264,6 @@
     <Compile Include="RailGun.cs" />
     <Compile Include="RailGunConfig.cs" />
     <Compile Include="RailGunPayload.cs" />
-    <Compile Include="RailgunPayloadClusterGridEntity.cs" />
     <Compile Include="RailGunPayloadConfig.cs" />
     <Compile Include="RailGunPayloadOpener.cs" />
     <Compile Include="RailGunPayloadOpenerConfig.cs" />
@@ -2370,6 +2380,9 @@
     <Compile Include="RockCrusherConfig.cs" />
     <Compile Include="RocketClusterDestinationSelector.cs" />
     <Compile Include="RocketCommandConditions.cs" />
+    <Compile Include="RocketConduitReceiver.cs" />
+    <Compile Include="RocketConduitSender.cs" />
+    <Compile Include="RocketConduitStatus.cs" />
     <Compile Include="RocketConduitStorageAccess.cs" />
     <Compile Include="RocketControlStation.cs" />
     <Compile Include="RocketControlStationConfig.cs" />
@@ -2382,9 +2395,13 @@
     <Compile Include="RocketFuelTracker.cs" />
     <Compile Include="RocketHeightLimit.cs" />
     <Compile Include="RocketInteriorGasInputConfig.cs" />
+    <Compile Include="RocketInteriorGasInputPortConfig.cs" />
     <Compile Include="RocketInteriorGasOutputConfig.cs" />
+    <Compile Include="RocketInteriorGasOutputPortConfig.cs" />
     <Compile Include="RocketInteriorLiquidInputConfig.cs" />
+    <Compile Include="RocketInteriorLiquidInputPortConfig.cs" />
     <Compile Include="RocketInteriorLiquidOutputConfig.cs" />
+    <Compile Include="RocketInteriorLiquidOutputPortConfig.cs" />
     <Compile Include="RocketInteriorPowerPlugConfig.cs" />
     <Compile Include="RocketInteriorSolidInputConfig.cs" />
     <Compile Include="RocketInteriorSolidOutputConfig.cs" />
@@ -2397,6 +2414,7 @@
     <Compile Include="RocketPassengerMonitor.cs" />
     <Compile Include="RocketProcessConditionDisplayTarget.cs" />
     <Compile Include="RocketRestrictionSideScreen.cs" />
+    <Compile Include="RocketSelfDestructMonitor.cs" />
     <Compile Include="RocketSimpleInfoPanel.cs" />
     <Compile Include="RocketStats.cs" />
     <Compile Include="RocketThrustWidget.cs" />
@@ -2517,6 +2535,7 @@
     <Compile Include="SelectModuleSideScreen.cs" />
     <Compile Include="SelectTool.cs" />
     <Compile Include="SelectToolHoverTextCard.cs" />
+    <Compile Include="SelfDestructButtonSideScreen.cs" />
     <Compile Include="SelfEmoteReactable.cs" />
     <Compile Include="SensitiveFeet.cs" />
     <Compile Include="Sensor.cs" />
@@ -2926,6 +2945,7 @@
     <Compile Include="TrappedStates.cs" />
     <Compile Include="TrappedType.cs" />
     <Compile Include="TrapTrigger.cs" />
+    <Compile Include="TravellingCargoLander.cs" />
     <Compile Include="TravelTube.cs" />
     <Compile Include="TravelTubeBridge.cs" />
     <Compile Include="TravelTubeConfig.cs" />
@@ -3063,6 +3083,7 @@
     <Compile Include="VomitChore.cs" />
     <Compile Include="WallDamageSoundEvent.cs" />
     <Compile Include="WallInfo.cs" />
+    <Compile Include="WallToiletConfig.cs" />
     <Compile Include="WarmBlooded.cs" />
     <Compile Include="WarmVestConfig.cs" />
     <Compile Include="WarpConduitReceiver.cs" />
@@ -3138,111 +3159,111 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\0Harmony\0Harmony.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE723}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C7658A}</Project>
       <Name>0Harmony</Name>
     </ProjectReference>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE724}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C7658B}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Assembly-CSharp-firstpass\Assembly-CSharp-firstpass.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE725}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C7658C}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE727}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C7658E}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE72B}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C76592}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE72C}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C76593}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE72F}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C76596}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE730}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C76597}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE732}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C76599}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE734}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C7659B}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE73D}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765A4}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE742}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765A9}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AssetBundleModule\UnityEngine.AssetBundleModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE744}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765AB}</Project>
       <Name>UnityEngine.AssetBundleModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE749}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765B0}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE752}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765B9}</Project>
       <Name>UnityEngine.ImageConversionModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE753}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765BA}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE754}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765BB}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ParticleSystemModule\UnityEngine.ParticleSystemModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE758}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765BF}</Project>
       <Name>UnityEngine.ParticleSystemModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE75A}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765C1}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE75B}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765C2}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.ScreenCaptureModule\UnityEngine.ScreenCaptureModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE75E}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765C5}</Project>
       <Name>UnityEngine.ScreenCaptureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE768}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765CF}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE76E}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765D5}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE76B}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765D2}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE777}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765DE}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestTextureModule\UnityEngine.UnityWebRequestTextureModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE778}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765DF}</Project>
       <Name>UnityEngine.UnityWebRequestTextureModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.VideoModule\UnityEngine.VideoModule.csproj">
-      <Project>{1C1F8E0F-B1FB-4EBD-A3F5-47765C3BE77C}</Project>
+      <Project>{0797AF16-56CC-4308-9EA2-C95510C765E3}</Project>
       <Name>UnityEngine.VideoModule</Name>
     </ProjectReference>
   </ItemGroup>

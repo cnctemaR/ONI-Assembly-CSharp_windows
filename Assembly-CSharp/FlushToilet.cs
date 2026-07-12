@@ -16,8 +16,8 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		liquidConduitFlow.onConduitsRebuilt += this.OnConduitsRebuilt;
 		liquidConduitFlow.AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlowPriority.Default);
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
-		this.fillMeter = new MeterController(component2, "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), Array.Empty<string>());
-		this.contaminationMeter = new MeterController(component2, "meter_target", "meter_dirty", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), Array.Empty<string>());
+		this.fillMeter = new MeterController(component2, "meter_target", "meter", this.meterOffset, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), Array.Empty<string>());
+		this.contaminationMeter = new MeterController(component2, "meter_target", "meter_dirty", this.meterOffset, Grid.SceneLayer.NoLayer, new Vector3(0.4f, 3.2f, 0.1f), Array.Empty<string>());
 		Components.Toilets.Add(this);
 		Components.BasicBuildings.Add(this);
 		base.smi.StartSM();
@@ -105,13 +105,16 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		{
 			return;
 		}
-		bool flag = Game.Instance.liquidConduitFlow.GetContents(this.outputCell).mass > 0f && base.smi.HasContaminatedMass();
+		ConduitFlow liquidConduitFlow = Game.Instance.liquidConduitFlow;
+		bool flag = base.smi.master.requireOutput && liquidConduitFlow.GetContents(this.outputCell).mass > 0f && base.smi.HasContaminatedMass();
 		base.smi.sm.outputBlocked.Set(flag, base.smi);
 	}
 
 	private MeterController fillMeter;
 
 	private MeterController contaminationMeter;
+
+	public Meter.Offset meterOffset = Meter.Offset.Behind;
 
 	[SerializeField]
 	public float massConsumedPerUse = 5f;
@@ -130,6 +133,9 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 	[SerializeField]
 	public int diseaseOnDupePerFlush;
+
+	[SerializeField]
+	public bool requireOutput = true;
 
 	[MyCmpGet]
 	private ConduitConsumer conduitConsumer;
@@ -155,7 +161,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 		public bool HasValidConnections()
 		{
-			return Game.Instance.liquidConduitFlow.HasConduit(base.master.inputCell) && Game.Instance.liquidConduitFlow.HasConduit(base.master.outputCell);
+			return Game.Instance.liquidConduitFlow.HasConduit(base.master.inputCell) && (!base.master.requireOutput || Game.Instance.liquidConduitFlow.HasConduit(base.master.outputCell));
 		}
 
 		public bool UpdateFullnessState()

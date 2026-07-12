@@ -24,6 +24,7 @@ public class ClustercraftConfig : IEntityConfig
 		gameObject.AddOrGet<ClusterTraveler>();
 		gameObject.AddOrGetDef<AlertStateManager.Def>();
 		gameObject.AddOrGet<Notifier>();
+		gameObject.AddOrGetDef<RocketSelfDestructMonitor.Def>();
 		return gameObject;
 	}
 

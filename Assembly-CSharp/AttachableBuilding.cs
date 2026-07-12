@@ -78,6 +78,23 @@ public class AttachableBuilding : KMonoBehaviour
 		}
 	}
 
+	public static int CountAttachedBelow(AttachableBuilding searchStart)
+	{
+		int num = 0;
+		AttachableBuilding attachableBuilding = searchStart;
+		while (attachableBuilding != null)
+		{
+			BuildingAttachPoint attachedTo = attachableBuilding.GetAttachedTo();
+			attachableBuilding = null;
+			if (attachedTo != null)
+			{
+				num++;
+				attachableBuilding = attachedTo.GetComponent<AttachableBuilding>();
+			}
+		}
+		return num;
+	}
+
 	public static void GetAttachedAbove(AttachableBuilding searchStart, ref List<GameObject> buildings)
 	{
 		BuildingAttachPoint buildingAttachPoint = searchStart.GetComponent<BuildingAttachPoint>();
@@ -111,6 +128,18 @@ public class AttachableBuilding : KMonoBehaviour
 		}
 	}
 
+	public static void NotifyBuildingsNetworkChanged(List<GameObject> buildings, AttachableBuilding attachable = null)
+	{
+		foreach (GameObject gameObject in buildings)
+		{
+			AttachableBuilding component = gameObject.GetComponent<AttachableBuilding>();
+			if (component != null && component.onAttachmentNetworkChanged != null)
+			{
+				component.onAttachmentNetworkChanged(attachable);
+			}
+		}
+	}
+
 	public static List<GameObject> GetAttachedNetwork(AttachableBuilding searchStart)
 	{
 		List<GameObject> list = new List<GameObject>();
@@ -138,19 +167,12 @@ public class AttachableBuilding : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this))
-		{
-			AttachableBuilding component = gameObject.GetComponent<AttachableBuilding>();
-			if (component != null && component.onAttachmentNetworkChanged != null)
-			{
-				component.onAttachmentNetworkChanged(this);
-			}
-		}
+		AttachableBuilding.NotifyBuildingsNetworkChanged(AttachableBuilding.GetAttachedNetwork(this), this);
 		this.RegisterWithAttachPoint(false);
 		Components.AttachableBuildings.Remove(this);
 	}
 
 	public Tag attachableToTag;
 
-	public Action<AttachableBuilding> onAttachmentNetworkChanged;
+	public Action<object> onAttachmentNetworkChanged;
 }

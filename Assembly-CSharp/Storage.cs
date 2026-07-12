@@ -515,7 +515,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return flag;
 	}
 
-	public void DropAll(Vector3 position, bool vent_gas = false, bool dump_liquid = false, Vector3 offset = default(Vector3), bool do_disease_transfer = true)
+	public void DropAll(Vector3 position, bool vent_gas = false, bool dump_liquid = false, Vector3 offset = default(Vector3), bool do_disease_transfer = true, List<GameObject> collect_dropped_items = null)
 	{
 		while (this.items.Count > 0)
 		{
@@ -554,54 +554,18 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 						component2.SetSceneLayer(Grid.SceneLayer.Ore);
 					}
 					this.MakeWorldActive(gameObject);
+					if (collect_dropped_items != null)
+					{
+						collect_dropped_items.Add(gameObject);
+					}
 				}
 			}
 		}
 	}
 
-	public void DropAll(bool vent_gas = false, bool dump_liquid = false, Vector3 offset = default(Vector3), bool do_disease_transfer = true)
+	public void DropAll(bool vent_gas = false, bool dump_liquid = false, Vector3 offset = default(Vector3), bool do_disease_transfer = true, List<GameObject> collect_dropped_items = null)
 	{
-		while (this.items.Count > 0)
-		{
-			GameObject gameObject = this.items[0];
-			if (do_disease_transfer)
-			{
-				this.TransferDiseaseWithObject(gameObject);
-			}
-			this.items.RemoveAt(0);
-			if (gameObject != null)
-			{
-				bool flag = false;
-				if (vent_gas || dump_liquid)
-				{
-					Dumpable component = gameObject.GetComponent<Dumpable>();
-					if (component != null)
-					{
-						if (vent_gas && gameObject.GetComponent<PrimaryElement>().Element.IsGas)
-						{
-							component.Dump();
-							flag = true;
-						}
-						if (dump_liquid && gameObject.GetComponent<PrimaryElement>().Element.IsLiquid)
-						{
-							component.Dump();
-							flag = true;
-						}
-					}
-				}
-				if (!flag)
-				{
-					Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Ore) + offset;
-					gameObject.transform.SetPosition(vector);
-					KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-					if (component2)
-					{
-						component2.SetSceneLayer(Grid.SceneLayer.Ore);
-					}
-					this.MakeWorldActive(gameObject);
-				}
-			}
-		}
+		this.DropAll(Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Ore), vent_gas, dump_liquid, offset, do_disease_transfer, collect_dropped_items);
 	}
 
 	public void Drop(Tag t, List<GameObject> obj_list)
@@ -910,7 +874,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	private void OnDeath(object data)
 	{
-		this.DropAll(true, true, default(Vector3), true);
+		this.DropAll(true, true, default(Vector3), true, null);
 	}
 
 	public bool IsFull()
@@ -1057,7 +1021,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	private void OnQueueDestroyObject(object data)
 	{
 		this.endOfLife = true;
-		this.DropAll(true, false, default(Vector3), true);
+		this.DropAll(true, false, default(Vector3), true, null);
 		this.OnCleanUp();
 	}
 

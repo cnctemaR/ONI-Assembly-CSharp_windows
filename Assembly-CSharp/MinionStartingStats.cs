@@ -254,18 +254,7 @@ public class MinionStartingStats : ITelepadDeliverable
 			}
 			num5--;
 		}
-		if (num5 <= 0)
-		{
-			this.IsValid = false;
-			string report = string.Format("Failed to generate minion positive={0}, negative={1}", num, num2);
-			this.Traits.ForEach(delegate(Trait x)
-			{
-				report = report + "\n" + x.Id;
-			});
-			DebugUtil.DevLogError("MinionStartingStats Failure" + report);
-			KCrashReporter.ReportErrorDevNotification("MinionStartingStats Failure", "", report);
-		}
-		else
+		if (num5 > 0)
 		{
 			this.IsValid = true;
 		}

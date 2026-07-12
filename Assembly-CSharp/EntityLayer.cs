@@ -6,5 +6,6 @@ public enum EntityLayer
 	Craft,
 	POI,
 	Telescope,
-	Payload
+	Payload,
+	FX
 }

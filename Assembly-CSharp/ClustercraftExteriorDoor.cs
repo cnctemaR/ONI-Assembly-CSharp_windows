@@ -58,6 +58,8 @@ public class ClustercraftExteriorDoor : KMonoBehaviour
 		{
 			RocketModuleSideScreen.instance.UpdateButtonStates();
 		}
+		base.Trigger(-1118736034, null);
+		targetWorld.gameObject.Trigger(-1118736034, null);
 	}
 
 	public void SetTarget(ClustercraftInteriorDoor target)

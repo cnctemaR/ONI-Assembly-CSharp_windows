@@ -370,6 +370,13 @@ namespace STRINGS
 				});
 			}
 
+			public class OUTPUTTILEBLOCKED
+			{
+				public static LocString NAME = "Output Blocked";
+
+				public static LocString TOOLTIP = "Output is blocked";
+			}
+
 			public class CONDUITBLOCKEDMULTIPLES
 			{
 				public static LocString NAME = "Pipe Blocked";
@@ -1901,14 +1908,14 @@ namespace STRINGS
 
 			public class FLUSHTOILET
 			{
-				public static LocString NAME = "Lavatory Ready";
+				public static LocString NAME = "{toilet} Ready";
 
 				public static LocString TOOLTIP = "This bathroom is ready to receive visitors";
 			}
 
 			public class FLUSHTOILETINUSE
 			{
-				public static LocString NAME = "Lavatory In Use";
+				public static LocString NAME = "{toilet} In Use";
 
 				public static LocString TOOLTIP = "This bathroom is occupied";
 			}

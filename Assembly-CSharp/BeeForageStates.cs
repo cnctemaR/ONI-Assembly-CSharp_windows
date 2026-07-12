@@ -140,7 +140,7 @@ public class BeeForageStates : GameStateMachine<BeeForageStates, BeeForageStates
 
 	private static void DropAll(BeeForageStates.Instance smi)
 	{
-		smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true);
+		smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);
 	}
 
 	private static bool FindMineableCell(BeeForageStates.Instance smi)

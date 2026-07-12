@@ -68,12 +68,12 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 		}
 	}
 
-	public bool HasSecondaryConduitType(ConduitType type)
+	bool ISecondaryOutput.HasSecondaryConduitType(ConduitType type)
 	{
 		return type == this.gasPortInfo.conduitType || type == this.liquidPortInfo.conduitType || type == this.solidPortInfo.conduitType;
 	}
 
-	public CellOffset GetSecondaryConduitOffset(ConduitType type)
+	CellOffset ISecondaryOutput.GetSecondaryConduitOffset(ConduitType type)
 	{
 		if (type == this.gasPortInfo.conduitType)
 		{
@@ -83,11 +83,11 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 		{
 			return this.liquidPortInfo.offset;
 		}
-		if (type == this.solidPortInfo.conduitType)
+		if (type != this.solidPortInfo.conduitType)
 		{
-			return this.solidPortInfo.offset;
+			return CellOffset.none;
 		}
-		return CellOffset.none;
+		return this.solidPortInfo.offset;
 	}
 
 	private static readonly CellOffset[] delivery_offset = new CellOffset[1];

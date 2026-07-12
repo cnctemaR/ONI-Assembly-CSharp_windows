@@ -359,7 +359,8 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 			{
 				smi.LaunchLoop(dt);
 			}, UpdateRate.SIM_EVERY_TICK, false)
-				.ParamTransition<float>(this.distanceAboveGround, this.not_grounded.space, (LaunchableRocketCluster.StatesInstance smi, float p) => p >= this.distanceToSpace.Get(smi));
+				.ParamTransition<float>(this.distanceAboveGround, this.not_grounded.space, (LaunchableRocketCluster.StatesInstance smi, float p) => p >= this.distanceToSpace.Get(smi))
+				.TriggerOnEnter(GameHashes.StartRocketLaunch, null);
 			this.not_grounded.space.EnterTransition(this.not_grounded.landing_setup, (LaunchableRocketCluster.StatesInstance smi) => smi.IsNotSpaceBound()).EventTransition(GameHashes.DoReturnRocket, this.not_grounded.landing_setup, null).Enter(delegate(LaunchableRocketCluster.StatesInstance smi)
 			{
 				smi.FinalizeLaunch();
@@ -377,7 +378,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 				smi.LandingLoop(dt);
 			}, UpdateRate.SIM_EVERY_TICK, false).ParamTransition<float>(this.distanceAboveGround, this.not_grounded.land, new StateMachine<LaunchableRocketCluster.States, LaunchableRocketCluster.StatesInstance, LaunchableRocketCluster, object>.Parameter<float>.Callback(this.IsFullyLanded<float>))
 				.ParamTransition<float>(this.warmupTimeRemaining, this.not_grounded.land, new StateMachine<LaunchableRocketCluster.States, LaunchableRocketCluster.StatesInstance, LaunchableRocketCluster, object>.Parameter<float>.Callback(this.IsFullyLanded<float>));
-			this.not_grounded.land.Enter(delegate(LaunchableRocketCluster.StatesInstance smi)
+			this.not_grounded.land.TriggerOnEnter(GameHashes.RocketTouchDown, null).Enter(delegate(LaunchableRocketCluster.StatesInstance smi)
 			{
 				foreach (Ref<RocketModuleCluster> @ref in smi.master.parts)
 				{
@@ -421,7 +422,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 					else if (Grid.FakeFloor[num])
 					{
 						GameObject gameObject = Grid.Objects[num, 39];
-						if (gameObject != null)
+						if (gameObject != null && gameObject.HasTag(GameTags.GantryExtended))
 						{
 							BuildingHP component2 = gameObject.GetComponent<BuildingHP>();
 							if (component2 != null)

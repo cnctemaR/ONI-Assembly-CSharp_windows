@@ -198,6 +198,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 				return false;
 			}
 			ClusterGridEntity poiatCurrentLocation = component.GetPOIAtCurrentLocation();
+			bool flag = false;
 			if (poiatCurrentLocation != null && poiatCurrentLocation.GetComponent<HarvestablePOIClusterGridEntity>())
 			{
 				HarvestablePOIStates.Instance smi = poiatCurrentLocation.GetSMI<HarvestablePOIStates.Instance>();
@@ -211,26 +212,27 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 					Element element = ElementLoader.FindElementByHash(keyValuePair.Key);
 					CargoBay.CargoType cargoType = CargoBay.ElementStateToCargoTypes[element.state & Element.State.Solid];
 					List<CargoBayCluster> cargoBaysOfType = component.GetCargoBaysOfType(cargoType);
-					if (cargoBaysOfType == null || cargoBaysOfType.Count <= 0)
+					if (cargoBaysOfType != null && cargoBaysOfType.Count > 0)
 					{
-						base.sm.canHarvest.Set(false, this);
-						return false;
-					}
-					using (List<CargoBayCluster>.Enumerator enumerator2 = cargoBaysOfType.GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
+						using (List<CargoBayCluster>.Enumerator enumerator2 = cargoBaysOfType.GetEnumerator())
 						{
-							if (enumerator2.Current.storage.RemainingCapacity() > 0f)
+							while (enumerator2.MoveNext())
 							{
-								base.sm.canHarvest.Set(true, this);
-								return true;
+								if (enumerator2.Current.storage.RemainingCapacity() > 0f)
+								{
+									flag = true;
+								}
 							}
+						}
+						if (flag)
+						{
+							break;
 						}
 					}
 				}
 			}
-			base.sm.canHarvest.Set(false, this);
-			return false;
+			base.sm.canHarvest.Set(flag, this);
+			return flag;
 		}
 
 		public static void AddHarvestStatusItems(GameObject statusTarget, float harvestRate)

@@ -69,7 +69,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	{
 		if (!base.occupyingObject)
 		{
-			this.storage.DropAll(false, false, default(Vector3), true);
+			this.storage.DropAll(false, false, default(Vector3), true, null);
 		}
 	}
 
@@ -119,7 +119,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	{
 		global::UnityEngine.Object.Destroy(this.tracker);
 		this.tracker = null;
-		this.storage.DropAll(false, false, default(Vector3), true);
+		this.storage.DropAll(false, false, default(Vector3), true, null);
 		base.occupyingObject = null;
 		this.ClearOccupant();
 	}
@@ -156,7 +156,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	public void StoreBaby(GameObject baby)
 	{
 		this.UnsubscribeFromOccupant();
-		this.storage.DropAll(false, false, default(Vector3), true);
+		this.storage.DropAll(false, false, default(Vector3), true, null);
 		this.storage.allowItemRemoval = true;
 		this.storage.Store(baby, false, false, true, false);
 		base.occupyingObject = baby;

@@ -219,6 +219,7 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 			this.ForceAttachmentNetwork();
 		}
 		this.SetBottomModule();
+		base.Subscribe(-1311384361, new Action<object>(this.CompleteSelfDestruct));
 	}
 
 	private void OnLoad(Game.GameSaveData data)
@@ -618,6 +619,70 @@ public class CraftModuleInterface : KMonoBehaviour, ISim4000ms
 			}
 			rocketModuleCluster = rocketModuleCluster2;
 		}
+	}
+
+	public static Storage SpawnRocketDebris(string nameSuffix, SimHashes element)
+	{
+		Vector3 vector = new Vector3(-1f, -1f, 0f);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("DebrisPayload"), vector);
+		gameObject.GetComponent<PrimaryElement>().SetElement(element, true);
+		gameObject.name += nameSuffix;
+		gameObject.SetActive(true);
+		return gameObject.GetComponent<Storage>();
+	}
+
+	public void CompleteSelfDestruct(object data = null)
+	{
+		global::Debug.Assert(this.HasTag(GameTags.RocketInSpace), "Self Destruct is only valid for in-space rockets!");
+		SimHashes elementID = this.GetPassengerModule().GetComponent<PrimaryElement>().ElementID;
+		List<RocketModule> list = new List<RocketModule>();
+		foreach (Ref<RocketModuleCluster> @ref in this.clusterModules)
+		{
+			list.Add(@ref.Get());
+		}
+		List<GameObject> list2 = new List<GameObject>();
+		foreach (RocketModule rocketModule in list)
+		{
+			Storage[] components = rocketModule.GetComponents<Storage>();
+			for (int i = 0; i < components.Length; i++)
+			{
+				components[i].DropAll(false, false, default(Vector3), true, list2);
+			}
+			Deconstructable component = rocketModule.GetComponent<Deconstructable>();
+			list2.AddRange(component.ForceDestroyAndGetMaterials());
+		}
+		List<Storage> list3 = new List<Storage>();
+		foreach (GameObject gameObject in list2)
+		{
+			Pickupable component2 = gameObject.GetComponent<Pickupable>();
+			if (component2 != null)
+			{
+				component2.PrimaryElement.Units = (float)Mathf.Max(1, Mathf.RoundToInt(component2.PrimaryElement.Units * 0.5f));
+				if ((list3.Count == 0 || list3[list3.Count - 1].RemainingCapacity() == 0f) && component2.PrimaryElement.Mass > 0f)
+				{
+					list3.Add(CraftModuleInterface.SpawnRocketDebris(" from CMI", elementID));
+				}
+				Storage storage = list3[list3.Count - 1];
+				while (component2.PrimaryElement.Mass > storage.RemainingCapacity())
+				{
+					Pickupable pickupable = component2.Take(storage.RemainingCapacity());
+					storage.Store(pickupable.gameObject, false, false, true, false);
+					storage = CraftModuleInterface.SpawnRocketDebris(" from CMI", elementID);
+					list3.Add(storage);
+				}
+				if (component2.PrimaryElement.Mass > 0f)
+				{
+					storage.Store(component2.gameObject, false, false, true, false);
+				}
+			}
+		}
+		foreach (Storage storage2 in list3)
+		{
+			RailGunPayload.StatesInstance smi = storage2.GetSMI<RailGunPayload.StatesInstance>();
+			smi.StartSM();
+			smi.Travel(this.m_clustercraft.Location, ClusterUtil.ClosestVisibleAsteroidToLocation(this.m_clustercraft.Location).Location);
+		}
+		this.m_clustercraft.SetExploding();
 	}
 
 	[Serialize]

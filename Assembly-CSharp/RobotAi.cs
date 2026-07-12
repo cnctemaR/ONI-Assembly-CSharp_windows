@@ -31,7 +31,7 @@ public class RobotAi : GameStateMachine<RobotAi, RobotAi.Instance>
 		})
 			.Enter("DropStorage", delegate(RobotAi.Instance smi)
 			{
-				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true);
+				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);
 			});
 	}
 

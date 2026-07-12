@@ -47,6 +47,7 @@ public class FlushToiletConfig : IBuildingConfig
 		flushToilet.diseaseId = "FoodPoisoning";
 		flushToilet.diseasePerFlush = 100000;
 		flushToilet.diseaseOnDupePerFlush = 5000;
+		flushToilet.requireOutput = true;
 		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_toiletflush_kanim") };
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
 		toiletWorkableUse.overrideAnims = array;

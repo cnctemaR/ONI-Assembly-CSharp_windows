@@ -46,7 +46,7 @@ public class KAnimLink
 
 	private void OnTintColourChanged(Color c)
 	{
-		if (this.slave != null)
+		if (this.syncTint && this.slave != null)
 		{
 			this.slave.TintColour = c;
 		}
@@ -59,6 +59,8 @@ public class KAnimLink
 			this.slave.HighlightColour = c;
 		}
 	}
+
+	public bool syncTint = true;
 
 	private KAnimControllerBase master;
 

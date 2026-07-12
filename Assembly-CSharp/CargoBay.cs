@@ -23,7 +23,7 @@ public class CargoBay : KMonoBehaviour
 	{
 		KIconButtonMenu.ButtonInfo buttonInfo = new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, delegate
 		{
-			this.storage.DropAll(false, false, default(Vector3), true);
+			this.storage.DropAll(false, false, default(Vector3), true, null);
 		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP, true);
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}

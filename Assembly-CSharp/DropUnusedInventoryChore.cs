@@ -24,7 +24,7 @@ public class DropUnusedInventoryChore : Chore<DropUnusedInventoryChore.StatesIns
 			default_state = this.dropping;
 			this.dropping.Enter(delegate(DropUnusedInventoryChore.StatesInstance smi)
 			{
-				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true);
+				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);
 			}).GoTo(this.success);
 			this.success.ReturnSuccess();
 		}

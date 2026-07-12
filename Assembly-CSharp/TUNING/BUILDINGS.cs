@@ -100,6 +100,7 @@ namespace TUNING
 			{
 				"Outhouse",
 				"FlushToilet",
+				"WallToilet",
 				ShowerConfig.ID,
 				"LiquidPumpingStation",
 				"BottleEmptier",
@@ -156,6 +157,7 @@ namespace TUNING
 			{
 				BedConfig.ID,
 				LuxuryBedConfig.ID,
+				LadderBedConfig.ID,
 				"FloorLamp",
 				"CeilingLight",
 				"SunLamp",

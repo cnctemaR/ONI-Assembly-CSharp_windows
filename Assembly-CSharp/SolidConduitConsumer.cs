@@ -116,8 +116,14 @@ public class SolidConduitConsumer : KMonoBehaviour, IConduitConsumer
 	{
 		if (this.useSecondaryInput)
 		{
-			ISecondaryInput component = base.GetComponent<ISecondaryInput>();
-			return Grid.OffsetCell(this.building.NaturalBuildingCell(), component.GetSecondaryConduitOffset(ConduitType.Solid));
+			foreach (ISecondaryInput secondaryInput in base.GetComponents<ISecondaryInput>())
+			{
+				if (secondaryInput.HasSecondaryConduitType(ConduitType.Solid))
+				{
+					return Grid.OffsetCell(this.building.NaturalBuildingCell(), secondaryInput.GetSecondaryConduitOffset(ConduitType.Solid));
+				}
+			}
+			return Grid.OffsetCell(this.building.NaturalBuildingCell(), CellOffset.none);
 		}
 		return this.building.GetUtilityInputCell();
 	}

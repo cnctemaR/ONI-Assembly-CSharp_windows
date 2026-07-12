@@ -10,7 +10,7 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 		{
 			flag = true;
 		}
-		if ((base.smi.master.senderLiquidStorage.MassStored() > 0f || base.smi.master.senderLiquidStorage.items.Count > 0) && base.smi.master.gasPort.dispenser.GetConduitManager().GetPermittedFlow(base.smi.master.liquidPort.outputCell) != ConduitFlow.FlowDirections.None)
+		if ((base.smi.master.senderLiquidStorage.MassStored() > 0f || base.smi.master.senderLiquidStorage.items.Count > 0) && base.smi.master.liquidPort.dispenser.GetConduitManager().GetPermittedFlow(base.smi.master.liquidPort.outputCell) != ConduitFlow.FlowDirections.None)
 		{
 			flag = true;
 		}

@@ -257,7 +257,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 			}
 			if (this.wasteStorage.MassStored() >= 100f)
 			{
-				this.wasteStorage.DropAll(true, true, default(Vector3), true);
+				this.wasteStorage.DropAll(true, true, default(Vector3), true, null);
 			}
 			if (this.spentFuel >= activeFuel.Mass)
 			{

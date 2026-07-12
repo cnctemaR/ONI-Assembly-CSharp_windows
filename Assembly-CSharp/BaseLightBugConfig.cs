@@ -45,6 +45,10 @@ public static class BaseLightBugConfig
 			radiationEmitter.emitRadiusY = radiationEmitter.emitRadiusX;
 			radiationEmitter.emitRads = 12f;
 			radiationEmitter.emissionOffset = new Vector3(0f, 0f, 0f);
+			component.prefabSpawnFn += delegate(GameObject inst)
+			{
+				inst.GetComponent<RadiationEmitter>().SetEmitting(true);
+			};
 		}
 		if (is_baby)
 		{

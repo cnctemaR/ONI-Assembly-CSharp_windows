@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
+using UnityEngine;
 
-public class RailgunPayloadClusterGridEntity : ClusterGridEntity
+public class BallisticClusterGridEntity : ClusterGridEntity
 {
 	public override string Name
 	{
 		get
 		{
-			return ITEMS.RAILGUNPAYLOAD.NAME;
+			return Strings.Get(this.nameKey);
 		}
 	}
 
@@ -28,8 +28,10 @@ public class RailgunPayloadClusterGridEntity : ClusterGridEntity
 			{
 				new ClusterGridEntity.AnimConfig
 				{
-					animFile = Assets.GetAnim("payload01_kanim"),
-					initialAnim = "idle_loop"
+					animFile = Assets.GetAnim(this.clusterAnimName),
+					initialAnim = "idle_loop",
+					symbolSwapTarget = this.clusterAnimSymbolSwapTarget,
+					symbolSwapSymbol = this.clusterAnimSymbolSwapSymbol
 				}
 			};
 		}
@@ -47,7 +49,7 @@ public class RailgunPayloadClusterGridEntity : ClusterGridEntity
 	{
 		get
 		{
-			return ClusterRevealLevel.Hidden;
+			return ClusterRevealLevel.Visible;
 		}
 	}
 
@@ -95,14 +97,27 @@ public class RailgunPayloadClusterGridEntity : ClusterGridEntity
 		return this.m_clusterTraveler.GetMoveProgress();
 	}
 
+	public void SwapSymbolFromSameAnim(string targetSymbolName, string swappedSymbolName)
+	{
+		this.clusterAnimSymbolSwapTarget = targetSymbolName;
+		this.clusterAnimSymbolSwapSymbol = swappedSymbolName;
+	}
+
 	[MyCmpReq]
 	private ClusterDestinationSelector m_destionationSelector;
 
 	[MyCmpReq]
-	private KSelectable m_selectable;
-
-	[MyCmpReq]
 	private ClusterTraveler m_clusterTraveler;
+
+	[SerializeField]
+	public string clusterAnimName;
+
+	[SerializeField]
+	public StringKey nameKey;
+
+	private string clusterAnimSymbolSwapTarget;
+
+	private string clusterAnimSymbolSwapSymbol;
 
 	public bool NoWaitInOrbit;
 }

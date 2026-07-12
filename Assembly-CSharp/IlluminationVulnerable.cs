@@ -145,7 +145,9 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 				if (Grid.IsValidCell(num))
 				{
 					smi.master.GetAmounts().Get(Db.Get().Amounts.Illumination).SetValue((float)Grid.LightCount[num]);
+					return;
 				}
+				smi.master.GetAmounts().Get(Db.Get().Amounts.Illumination).SetValue(0f);
 			}, UpdateRate.SIM_1000ms, false);
 			this.comfortable.Update("Illumination.Comfortable", delegate(IlluminationVulnerable.StatesInstance smi, float dt)
 			{

@@ -144,6 +144,10 @@ public class Components
 
 	public static Components.Cmps<ArtifactAnalysisStationWorkable> ArtifactAnalysisStations = new Components.Cmps<ArtifactAnalysisStationWorkable>();
 
+	public static Components.Cmps<RocketConduitReceiver> RocketConduitReceivers = new Components.Cmps<RocketConduitReceiver>();
+
+	public static Components.Cmps<RocketConduitSender> RocketConduitSenders = new Components.Cmps<RocketConduitSender>();
+
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 
 	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
@@ -237,9 +241,13 @@ public class Components
 			foreach (T t in this.Items)
 			{
 				bool flag = (t as KMonoBehaviour).GetMyWorldId() == worldId;
-				if (!flag && checkChildWorlds && (t as KMonoBehaviour).GetMyWorld().ParentWorldId == worldId)
+				if (!flag && checkChildWorlds)
 				{
-					flag = true;
+					WorldContainer myWorld = (t as KMonoBehaviour).GetMyWorld();
+					if (myWorld != null && myWorld.ParentWorldId == worldId)
+					{
+						flag = true;
+					}
 				}
 				if (flag)
 				{

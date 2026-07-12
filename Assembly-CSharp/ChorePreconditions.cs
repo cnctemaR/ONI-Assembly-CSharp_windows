@@ -619,6 +619,15 @@ public class ChorePreconditions
 			return flag;
 		};
 		this.NotCurrentlyPeeing = precondition;
+		precondition = default(Chore.Precondition);
+		precondition.id = "IsRocketTravelling";
+		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_ROCKET_TRAVELLING;
+		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			Clustercraft component2 = ClusterManager.Instance.GetWorld(context.chore.gameObject.GetMyWorldId()).GetComponent<Clustercraft>();
+			return !(component2 == null) && component2.IsTravellingAndFueled();
+		};
+		this.IsRocketTravelling = precondition;
 		base..ctor();
 	}
 
@@ -713,4 +722,6 @@ public class ChorePreconditions
 	public Chore.Precondition IsNotARobot;
 
 	public Chore.Precondition NotCurrentlyPeeing;
+
+	public Chore.Precondition IsRocketTravelling;
 }

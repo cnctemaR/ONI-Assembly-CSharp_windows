@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,18 +26,20 @@ public class ClusterMapHex : MultiToggle, ICanvasRaycastFilter
 
 	public void SetRevealed(ClusterRevealLevel level)
 	{
+		this._revealLevel = level;
 		switch (level)
 		{
 		case ClusterRevealLevel.Hidden:
-			this.fogOfWar.color = new Color(0f, 0f, 0f, 0.86f);
 			this.fogOfWar.gameObject.SetActive(true);
+			this.peekedTile.gameObject.SetActive(false);
 			return;
 		case ClusterRevealLevel.Peeked:
-			this.fogOfWar.color = new Color(0f, 0f, 0f, 0.56f);
-			this.fogOfWar.gameObject.SetActive(true);
+			this.fogOfWar.gameObject.SetActive(false);
+			this.peekedTile.gameObject.SetActive(true);
 			return;
 		case ClusterRevealLevel.Visible:
 			this.fogOfWar.gameObject.SetActive(false);
+			this.peekedTile.gameObject.SetActive(false);
 			return;
 		default:
 			return;
@@ -97,6 +100,26 @@ public class ClusterMapHex : MultiToggle, ICanvasRaycastFilter
 	private void OnHover()
 	{
 		this.m_tooltip.ClearMultiStringTooltip();
+		string text = "";
+		switch (this._revealLevel)
+		{
+		case ClusterRevealLevel.Hidden:
+			text = UI.CLUSTERMAP.TOOLTIP_HIDDEN_HEX;
+			break;
+		case ClusterRevealLevel.Peeked:
+			text = ((ClusterGrid.Instance.GetEntitiesOnCell(this.location).Count > 0) ? UI.CLUSTERMAP.TOOLTIP_PEEKED_HEX_WITH_OBJECT : UI.CLUSTERMAP.TOOLTIP_HIDDEN_HEX);
+			break;
+		case ClusterRevealLevel.Visible:
+			if (ClusterGrid.Instance.GetEntitiesOnCell(this.location).Count == 0)
+			{
+				text = UI.CLUSTERMAP.TOOLTIP_EMPTY_HEX;
+			}
+			break;
+		}
+		if (!text.IsNullOrWhiteSpace())
+		{
+			this.m_tooltip.AddMultiStringTooltip(text, this.informationTooltipStyle);
+		}
 		this.UpdateHoverColors(true);
 		ClusterMapScreen.Instance.OnHoverHex(this);
 	}
@@ -137,10 +160,16 @@ public class ClusterMapHex : MultiToggle, ICanvasRaycastFilter
 
 	public Image fogOfWar;
 
+	public Image peekedTile;
+
 	public TextStyleSetting invalidDestinationTooltipStyle;
+
+	public TextStyleSetting informationTooltipStyle;
 
 	[MyCmpGet]
 	private ToolTip m_tooltip;
+
+	private ClusterRevealLevel _revealLevel;
 
 	public enum ToggleState
 	{

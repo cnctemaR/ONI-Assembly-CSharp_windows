@@ -46,6 +46,12 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return 1f - this.workTimeRemaining / this.workTime;
 	}
 
+	public void ConfigureMultitoolContext(HashedString context, Tag hitEffectTag)
+	{
+		this.multitoolContext = context;
+		this.multitoolHitEffectTag = hitEffectTag;
+	}
+
 	public virtual Workable.AnimInfo GetAnim(Worker worker)
 	{
 		Workable.AnimInfo animInfo = default(Workable.AnimInfo);

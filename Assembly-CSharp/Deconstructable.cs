@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 using TUNING;
@@ -136,15 +137,25 @@ public class Deconstructable : Workable
 		}
 	}
 
-	private void TriggerDestroy(float temperature, byte disease_idx, int disease_count)
+	public List<GameObject> ForceDestroyAndGetMaterials()
+	{
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		float temperature = component.Temperature;
+		byte diseaseIdx = component.DiseaseIdx;
+		int diseaseCount = component.DiseaseCount;
+		return this.TriggerDestroy(temperature, diseaseIdx, diseaseCount);
+	}
+
+	private List<GameObject> TriggerDestroy(float temperature, byte disease_idx, int disease_count)
 	{
 		if (this == null || this.destroyed)
 		{
-			return;
+			return null;
 		}
-		this.SpawnItemsFromConstruction(temperature, disease_idx, disease_count);
+		List<GameObject> list = this.SpawnItemsFromConstruction(temperature, disease_idx, disease_count);
 		this.destroyed = true;
 		base.gameObject.DeleteObject();
+		return list;
 	}
 
 	private void QueueDeconstruction()
@@ -206,8 +217,9 @@ public class Deconstructable : Workable
 		this.SpawnItemsFromConstruction(temperature, diseaseIdx, diseaseCount);
 	}
 
-	private void SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count)
+	private List<GameObject> SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count)
 	{
+		List<GameObject> list = new List<GameObject>();
 		Building component = base.GetComponent<Building>();
 		float[] array;
 		if (component != null)
@@ -238,8 +250,10 @@ public class Deconstructable : Workable
 				GameComps.Fallers.Remove(gameObject);
 			}
 			GameComps.Fallers.Add(gameObject, zero);
+			list.Add(gameObject);
 			num++;
 		}
+		return list;
 	}
 
 	public GameObject SpawnItem(Vector3 position, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)

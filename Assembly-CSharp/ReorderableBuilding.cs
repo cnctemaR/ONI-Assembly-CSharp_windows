@@ -255,7 +255,7 @@ public class ReorderableBuilding : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (base.GetComponent<BuildingUnderConstruction>() == null)
+		if (base.GetComponent<BuildingUnderConstruction>() == null && !this.HasTag(GameTags.RocketInSpace))
 		{
 			this.RemoveModule();
 		}
@@ -486,6 +486,24 @@ public class ReorderableBuilding : KMonoBehaviour
 		{
 			component3.DeregisterComponents();
 		}
+		RocketConduitSender[] components = go.GetComponents<RocketConduitSender>();
+		if (components.Length != 0)
+		{
+			RocketConduitSender[] array = components;
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i].RemoveConduitPortFromNetwork();
+			}
+		}
+		RocketConduitReceiver[] components2 = go.GetComponents<RocketConduitReceiver>();
+		if (components2.Length != 0)
+		{
+			RocketConduitReceiver[] array2 = components2;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].RemoveConduitPortFromNetwork();
+			}
+		}
 	}
 
 	private static void MarkBuilding(GameObject go, AttachableBuilding aboveBuilding)
@@ -516,6 +534,24 @@ public class ReorderableBuilding : KMonoBehaviour
 		if (component4 != null)
 		{
 			component4.PostReorderMove();
+		}
+		RocketConduitSender[] components = go.GetComponents<RocketConduitSender>();
+		if (components.Length != 0)
+		{
+			RocketConduitSender[] array = components;
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i].AddConduitPortToNetwork();
+			}
+		}
+		RocketConduitReceiver[] components2 = go.GetComponents<RocketConduitReceiver>();
+		if (components2.Length != 0)
+		{
+			RocketConduitReceiver[] array2 = components2;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i].AddConduitPortToNetwork();
+			}
 		}
 	}
 

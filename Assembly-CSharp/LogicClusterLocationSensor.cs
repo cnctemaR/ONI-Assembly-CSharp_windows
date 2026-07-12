@@ -22,7 +22,16 @@ public class LogicClusterLocationSensor : Switch, ISaveLoadable, ISim200ms
 
 	private void OnCopySettings(object data)
 	{
-		((GameObject)data).GetComponent<LogicTimeOfDaySensor>() != null;
+		LogicClusterLocationSensor component = ((GameObject)data).GetComponent<LogicClusterLocationSensor>();
+		if (component != null)
+		{
+			this.activeLocations.Clear();
+			for (int i = 0; i < component.activeLocations.Count; i++)
+			{
+				this.SetLocationEnabled(component.activeLocations[i], true);
+			}
+			this.activeInSpace = component.activeInSpace;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -32,7 +41,6 @@ public class LogicClusterLocationSensor : Switch, ISaveLoadable, ISim200ms
 		this.UpdateLogicCircuit();
 		this.UpdateVisualState(true);
 		this.wasOn = this.switchedOn;
-		this.SetLocationEnabled(new AxialI(0, 0), true);
 	}
 
 	public void SetLocationEnabled(AxialI location, bool setting)

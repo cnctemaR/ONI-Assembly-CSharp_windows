@@ -61,7 +61,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 		})
 			.Enter("DropStorage", delegate(RationalAi.Instance smi)
 			{
-				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true);
+				smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);
 			});
 	}
 

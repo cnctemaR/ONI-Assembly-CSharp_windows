@@ -43,20 +43,23 @@ public class TemporalTearOpener : GameStateMachine<TemporalTearOpener, TemporalT
 				return;
 			}
 			smi.GoTo(this.check_requirements);
-		});
-		this.check_requirements.PlayAnim("off").DefaultState(this.check_requirements.has_target).Enter(delegate(TemporalTearOpener.Instance smi)
+		}).PlayAnim("off");
+		this.check_requirements.DefaultState(this.check_requirements.has_target).Enter(delegate(TemporalTearOpener.Instance smi)
 		{
 			smi.GetComponent<HighEnergyParticleStorage>().receiverOpen = false;
+			smi.GetComponent<KBatchedAnimController>().Play("port_close", KAnim.PlayMode.Once, 1f, 0f);
+			smi.GetComponent<KBatchedAnimController>().Queue("off", KAnim.PlayMode.Loop, 1f, 0f);
 		});
 		this.check_requirements.has_target.ToggleStatusItem(TemporalTearOpener.s_noTargetStatus, null).UpdateTransition(this.check_requirements.has_los, (TemporalTearOpener.Instance smi, float dt) => ClusterManager.Instance.GetClusterPOIManager().IsTemporalTearRevealed(), UpdateRate.SIM_200ms, false);
 		this.check_requirements.has_los.ToggleStatusItem(TemporalTearOpener.s_noLosStatus, null).UpdateTransition(this.check_requirements.enough_colonies, (TemporalTearOpener.Instance smi, float dt) => smi.HasLineOfSight(), UpdateRate.SIM_200ms, false);
 		this.check_requirements.enough_colonies.ToggleStatusItem(TemporalTearOpener.s_insufficient_colonies, null).UpdateTransition(this.charging, (TemporalTearOpener.Instance smi, float dt) => smi.HasSufficientColonies(), UpdateRate.SIM_200ms, false);
-		this.charging.DefaultState(this.charging.idle).PlayAnim("on").ToggleStatusItem(TemporalTearOpener.s_progressStatus, (TemporalTearOpener.Instance smi) => smi)
-			.UpdateTransition(this.check_requirements.has_los, (TemporalTearOpener.Instance smi, float dt) => !smi.HasLineOfSight(), UpdateRate.SIM_200ms, false)
+		this.charging.DefaultState(this.charging.idle).ToggleStatusItem(TemporalTearOpener.s_progressStatus, (TemporalTearOpener.Instance smi) => smi).UpdateTransition(this.check_requirements.has_los, (TemporalTearOpener.Instance smi, float dt) => !smi.HasLineOfSight(), UpdateRate.SIM_200ms, false)
 			.UpdateTransition(this.check_requirements.enough_colonies, (TemporalTearOpener.Instance smi, float dt) => !smi.HasSufficientColonies(), UpdateRate.SIM_200ms, false)
 			.Enter(delegate(TemporalTearOpener.Instance smi)
 			{
 				smi.GetComponent<HighEnergyParticleStorage>().receiverOpen = true;
+				smi.GetComponent<KBatchedAnimController>().Play("port_open", KAnim.PlayMode.Once, 1f, 0f);
+				smi.GetComponent<KBatchedAnimController>().Queue("on", KAnim.PlayMode.Loop, 1f, 0f);
 			});
 		this.charging.idle.EventTransition(GameHashes.OnParticleStorageChanged, this.charging.consuming, (TemporalTearOpener.Instance smi) => !smi.GetComponent<HighEnergyParticleStorage>().IsEmpty());
 		this.charging.consuming.EventTransition(GameHashes.OnParticleStorageChanged, this.charging.idle, (TemporalTearOpener.Instance smi) => smi.GetComponent<HighEnergyParticleStorage>().IsEmpty()).UpdateTransition(this.ready, (TemporalTearOpener.Instance smi, float dt) => smi.ConsumeParticlesAndCheckComplete(dt), UpdateRate.SIM_200ms, false);
@@ -123,6 +126,16 @@ public class TemporalTearOpener : GameStateMachine<TemporalTearOpener, TemporalT
 			: base(master, def)
 		{
 			this.m_meter = new MeterController(base.gameObject.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
+			EnterTemporalTearSequence.tearOpenerGameObject = base.gameObject;
+		}
+
+		protected override void OnCleanUp()
+		{
+			if (EnterTemporalTearSequence.tearOpenerGameObject == base.gameObject)
+			{
+				EnterTemporalTearSequence.tearOpenerGameObject = null;
+			}
+			base.OnCleanUp();
 		}
 
 		public bool HasLineOfSight()

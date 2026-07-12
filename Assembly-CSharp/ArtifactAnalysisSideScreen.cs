@@ -62,10 +62,21 @@ public class ArtifactAnalysisSideScreen : SideScreenContent
 	{
 		SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.ArtifactReveal, -1).smi as SimpleEvent.StatesInstance;
 		statesInstance.artifact = artifactPrefab;
-		InfoDescription component = artifactPrefab.GetComponent<InfoDescription>();
-		if (component != null)
+		artifactPrefab.GetComponent<KPrefabID>();
+		artifactPrefab.GetComponent<InfoDescription>();
+		string text = artifactPrefab.PrefabID().Name.ToUpper();
+		text = text.Replace("ARTIFACT_", "");
+		string text2 = "STRINGS.UI.SPACEARTIFACTS." + text + ".ARTIFACT";
+		string text3 = string.Format("<b>{0}</b>", artifactPrefab.GetProperName());
+		StringEntry stringEntry;
+		Strings.TryGet(text2, out stringEntry);
+		if (stringEntry != null && !stringEntry.String.IsNullOrWhiteSpace())
 		{
-			statesInstance.SetTextParameter("desc", component.description);
+			text3 = text3 + "\n\n" + stringEntry.String;
+		}
+		if (text3 != null && !text3.IsNullOrWhiteSpace())
+		{
+			statesInstance.SetTextParameter("desc", text3);
 		}
 		statesInstance.ShowEventPopup(null);
 	}

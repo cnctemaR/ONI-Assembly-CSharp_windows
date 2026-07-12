@@ -1,4 +1,5 @@
 ﻿using System;
+using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -143,16 +144,22 @@ public class RocketModuleSideScreen : SideScreenContent
 
 	private void ClickViewInterior()
 	{
-		if (ClusterManager.Instance.activeWorld == this.reorderable.GetComponent<ClustercraftExteriorDoor>().GetTargetWorld())
+		ClustercraftExteriorDoor component = this.reorderable.GetComponent<ClustercraftExteriorDoor>();
+		PassengerRocketModule component2 = this.reorderable.GetComponent<PassengerRocketModule>();
+		WorldContainer targetWorld = component.GetTargetWorld();
+		WorldContainer myWorld = component.GetMyWorld();
+		if (ClusterManager.Instance.activeWorld == targetWorld)
 		{
-			if (this.reorderable.GetComponent<ClustercraftExteriorDoor>().GetMyWorld().id != (int)ClusterManager.INVALID_WORLD_IDX)
+			if (myWorld.id != (int)ClusterManager.INVALID_WORLD_IDX)
 			{
-				ClusterManager.Instance.SetActiveWorld(this.reorderable.GetComponent<ClustercraftExteriorDoor>().GetMyWorld().id);
+				AudioMixer.instance.Stop(component2.interiorReverbSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+				ClusterManager.Instance.SetActiveWorld(myWorld.id);
 			}
 		}
 		else
 		{
-			ClusterManager.Instance.SetActiveWorld(this.reorderable.GetComponent<ClustercraftExteriorDoor>().GetTargetWorld().id);
+			AudioMixer.instance.Start(component2.interiorReverbSnapshot);
+			ClusterManager.Instance.SetActiveWorld(targetWorld.id);
 		}
 		this.UpdateButtonStates();
 	}

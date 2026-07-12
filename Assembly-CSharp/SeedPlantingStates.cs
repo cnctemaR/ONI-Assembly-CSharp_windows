@@ -139,7 +139,7 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 
 	private static void DropAll(SeedPlantingStates.Instance smi)
 	{
-		smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true);
+		smi.GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);
 	}
 
 	private static int GetPlantableCell(SeedPlantingStates.Instance smi)

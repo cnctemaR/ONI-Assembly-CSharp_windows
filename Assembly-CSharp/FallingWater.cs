@@ -137,7 +137,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			{
 				vector3.y = Mathf.Floor(vector3.y + 1f);
 			}
-			this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num7, elementIdx));
+			this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num7, elementIdx, (int)Grid.WorldIdx[num]));
 			this.particleProperties.Add(new FallingWater.ParticleProperties(elementIdx, num4, temperature, disease_idx, num6, debug_track));
 		}
 	}
@@ -214,6 +214,11 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			{
 				int num7 = j * Grid.WidthInCells + num;
 				int num8 = (j + 1) * Grid.WidthInCells + num;
+				if (Grid.IsValidCell(num7) && (int)Grid.WorldIdx[num7] != particlePhysics.worldIdx)
+				{
+					this.RemoveParticle(i, ref count);
+					break;
+				}
 				if (Grid.IsValidCell(num7))
 				{
 					Element element = Grid.Element[num7];
@@ -578,6 +583,19 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
+		if (!SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 26))
+		{
+			for (int i = 0; i < this.physics.Count; i++)
+			{
+				int num = Grid.PosToCell(this.physics[i].position);
+				if (Grid.IsValidCell(num))
+				{
+					FallingWater.ParticlePhysics particlePhysics = this.physics[i];
+					particlePhysics.worldIdx = (int)Grid.WorldIdx[num];
+					this.physics[i] = particlePhysics;
+				}
+			}
+		}
 		if (this.serializedParticleProperties != null)
 		{
 			Diseases diseases = Db.Get().Diseases;
@@ -595,11 +613,11 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 					particleProperties.diseaseCount = serializedParticleProperties.diseaseCount;
 					this.particleProperties.Add(particleProperties);
 				}
-				goto IL_00DC;
+				goto IL_015B;
 			}
 		}
 		this.particleProperties = this.properties;
-		IL_00DC:
+		IL_015B:
 		this.properties = null;
 	}
 
@@ -742,13 +760,14 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 
 	private struct ParticlePhysics
 	{
-		public ParticlePhysics(Vector2 position, Vector2 velocity, int frame, byte elementIdx)
+		public ParticlePhysics(Vector2 position, Vector2 velocity, int frame, byte elementIdx, int worldIdx)
 		{
 			this.position = position;
 			this.velocity = velocity;
 			this.frame = frame;
 			this.colour = ElementLoader.elements[(int)elementIdx].substance.colour;
 			this.colour.a = 191;
+			this.worldIdx = worldIdx;
 		}
 
 		public Vector2 position;
@@ -758,6 +777,8 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		public int frame;
 
 		public Color32 colour;
+
+		public int worldIdx;
 	}
 
 	private struct SerializedParticleProperties

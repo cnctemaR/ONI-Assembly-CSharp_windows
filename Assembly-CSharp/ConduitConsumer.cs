@@ -140,17 +140,26 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 	{
 		get
 		{
-			int inputCell = this.GetInputCell();
-			return this.GetConduitManager().GetContents(inputCell).mass;
+			ConduitFlow conduitManager = this.GetConduitManager();
+			int inputCell = this.GetInputCell(conduitManager.conduitType);
+			return conduitManager.GetContents(inputCell).mass;
 		}
 	}
 
-	private int GetInputCell()
+	private int GetInputCell(ConduitType inputConduitType)
 	{
 		if (this.useSecondaryInput)
 		{
-			ISecondaryInput component = base.GetComponent<ISecondaryInput>();
-			return Grid.OffsetCell(this.building.NaturalBuildingCell(), component.GetSecondaryConduitOffset(this.conduitType));
+			ISecondaryInput[] components = base.GetComponents<ISecondaryInput>();
+			foreach (ISecondaryInput secondaryInput in components)
+			{
+				if (secondaryInput.HasSecondaryConduitType(inputConduitType))
+				{
+					return Grid.OffsetCell(this.building.NaturalBuildingCell(), secondaryInput.GetSecondaryConduitOffset(inputConduitType));
+				}
+			}
+			global::Debug.LogWarning("No secondaryInput of type was found");
+			return Grid.OffsetCell(this.building.NaturalBuildingCell(), components[0].GetSecondaryConduitOffset(inputConduitType));
 		}
 		return this.building.GetUtilityInputCell();
 	}
@@ -162,7 +171,8 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, true);
 		}, null, null);
-		this.utilityCell = this.GetInputCell();
+		ConduitFlow conduitManager = this.GetConduitManager();
+		this.utilityCell = this.GetInputCell(conduitManager.conduitType);
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType == ConduitType.Gas) ? 12 : 16];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
@@ -201,7 +211,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 		this.consumedLastTick = true;
 		if (this.building.Def.CanMove)
 		{
-			this.utilityCell = this.GetInputCell();
+			this.utilityCell = this.GetInputCell(conduit_mgr.conduitType);
 		}
 		if (!this.IsConnected)
 		{

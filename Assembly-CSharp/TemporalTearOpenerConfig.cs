@@ -23,6 +23,7 @@ public class TemporalTearOpenerConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER6;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, tier2, 0.2f);
+		buildingDef.DefaultAnimState = "off";
 		buildingDef.Entombable = false;
 		buildingDef.Invincible = true;
 		buildingDef.UseHighEnergyParticleInputPort = true;

@@ -163,4 +163,20 @@ public static class ClusterUtil
 		}
 		return string.Format("InvalidWorld(pos={0})", gameObject.transform.GetPosition());
 	}
+
+	public static ClusterGridEntity ClosestVisibleAsteroidToLocation(AxialI location)
+	{
+		foreach (AxialI axialI in AxialUtil.SpiralOut(location, ClusterGrid.Instance.numRings))
+		{
+			if (ClusterGrid.Instance.IsValidCell(axialI) && ClusterGrid.Instance.IsCellVisible(axialI))
+			{
+				ClusterGridEntity asteroidAtCell = ClusterGrid.Instance.GetAsteroidAtCell(axialI);
+				if (asteroidAtCell != null)
+				{
+					return asteroidAtCell;
+				}
+			}
+		}
+		return null;
+	}
 }

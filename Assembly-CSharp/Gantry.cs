@@ -99,7 +99,8 @@ public class Gantry : Switch
 			{
 				smi.master.SetWalkable(false);
 			}).PlayAnim("on")
-				.ParamTransition<bool>(this.should_extend, this.retracted_pre, GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsFalse);
+				.ParamTransition<bool>(this.should_extend, this.retracted_pre, GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.IsFalse)
+				.ToggleTag(GameTags.GantryExtended);
 		}
 
 		public GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.State retracted_pre;

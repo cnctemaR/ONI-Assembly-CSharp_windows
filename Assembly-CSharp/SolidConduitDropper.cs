@@ -25,7 +25,7 @@ public class SolidConduitDropper : StateMachineComponent<SolidConduitDropper.SMI
 	{
 		base.smi.sm.consuming.Set(this.consumer.IsConsuming, base.smi);
 		base.smi.sm.isclosed.Set(!this.operational.IsOperational, base.smi);
-		this.storage.DropAll(false, false, default(Vector3), true);
+		this.storage.DropAll(false, false, default(Vector3), true, null);
 	}
 
 	[MyCmpReq]

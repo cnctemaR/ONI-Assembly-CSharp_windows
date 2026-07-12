@@ -75,7 +75,7 @@ public class RocketModule : KMonoBehaviour
 		base.Subscribe<RocketModule>(1502190696, RocketModule.DEBUG_OnDestroyDelegate);
 		this.FixSorting();
 		AttachableBuilding component2 = base.GetComponent<AttachableBuilding>();
-		component2.onAttachmentNetworkChanged = (Action<AttachableBuilding>)Delegate.Combine(component2.onAttachmentNetworkChanged, new Action<AttachableBuilding>(this.OnAttachmentNetworkChanged));
+		component2.onAttachmentNetworkChanged = (Action<object>)Delegate.Combine(component2.onAttachmentNetworkChanged, new Action<object>(this.OnAttachmentNetworkChanged));
 		if (this.bgAnimFile != null)
 		{
 			this.AddBGGantry();
@@ -107,7 +107,7 @@ public class RocketModule : KMonoBehaviour
 		}
 	}
 
-	private void OnAttachmentNetworkChanged(AttachableBuilding ab)
+	private void OnAttachmentNetworkChanged(object ab)
 	{
 		this.FixSorting();
 	}

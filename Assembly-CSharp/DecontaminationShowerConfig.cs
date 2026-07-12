@@ -61,7 +61,7 @@ public class DecontaminationShowerConfig : IBuildingConfig
 		conduitConsumer.capacityKG = 100f;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
 		AutoStorageDropper.Def def = go.AddOrGetDef<AutoStorageDropper.Def>();
-		def.dropTag = SimHashes.DirtyWater.CreateTag();
+		def.elementFilter = new SimHashes[] { SimHashes.DirtyWater };
 		def.dropOffset = new CellOffset(1, 0);
 		go.AddOrGet<Storage>().SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 	}

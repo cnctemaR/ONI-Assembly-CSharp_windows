@@ -44,6 +44,7 @@ public class ClusterMapScreen : KScreen
 		global::Debug.Assert(this.cellVisPrefab.rectTransform().sizeDelta == new Vector2(2f, 2f), "The radius of the cellVisPrefab hex must be 1");
 		global::Debug.Assert(this.terrainVisPrefab.rectTransform().sizeDelta == new Vector2(2f, 2f), "The radius of the terrainVisPrefab hex must be 1");
 		global::Debug.Assert(this.mobileVisPrefab.rectTransform().sizeDelta == new Vector2(2f, 2f), "The radius of the mobileVisPrefab hex must be 1");
+		global::Debug.Assert(this.staticVisPrefab.rectTransform().sizeDelta == new Vector2(2f, 2f), "The radius of the staticVisPrefab hex must be 1");
 		int num;
 		int num2;
 		int num3;
@@ -54,6 +55,7 @@ public class ClusterMapScreen : KScreen
 		this.mapScrollRect.content.localScale = new Vector3(this.m_currentZoomScale, this.m_currentZoomScale, 1f);
 		this.m_onDestinationChangedDelegate = new Action<object>(this.OnDestinationChanged);
 		this.m_onSelectObjectDelegate = new Action<object>(this.OnSelectObject);
+		base.Subscribe(1980521255, new Action<object>(this.UpdateVis));
 	}
 
 	protected void MoveToNISPosition()
@@ -150,7 +152,7 @@ public class ClusterMapScreen : KScreen
 		{
 			this.m_destinationSelector = null;
 		}
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	public ClusterMapScreen.Mode GetMode()
@@ -164,7 +166,7 @@ public class ClusterMapScreen : KScreen
 		if (show)
 		{
 			this.MoveToNISPosition();
-			this.UpdateVis();
+			this.UpdateVis(null);
 			if (this.m_mode == ClusterMapScreen.Mode.Default)
 			{
 				this.TrySelectDefault();
@@ -227,7 +229,7 @@ public class ClusterMapScreen : KScreen
 
 	private void OnDestinationChanged(object data)
 	{
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	private void OnSelectObject(object data)
@@ -253,24 +255,24 @@ public class ClusterMapScreen : KScreen
 				this.SetMode(ClusterMapScreen.Mode.Default);
 			}
 		}
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	private void OnFogOfWarRevealed(object data = null)
 	{
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	private void OnNewTelescopeTarget(object data = null)
 	{
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	private void TrySelectDefault()
 	{
 		if (this.m_selectedHex != null && this.m_selectedEntity != null)
 		{
-			this.UpdateVis();
+			this.UpdateVis(null);
 			return;
 		}
 		if (this.m_cellVisByLocation.Count > 0 && ClusterGrid.Instance.cellContents[AxialI.ZERO].Count > 0)
@@ -299,7 +301,7 @@ public class ClusterMapScreen : KScreen
 			maxQ = Mathf.Max(maxQ, component.location.Q);
 		}
 		this.SetupVisGameObjects();
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	public Transform GetGridEntityNameTarget(ClusterGridEntity entity)
@@ -349,7 +351,8 @@ public class ClusterMapScreen : KScreen
 			{
 				ClusterGrid.Instance.GetCellRevealLevel(keyValuePair.Key);
 				ClusterRevealLevel isVisibleInFOW = clusterGridEntity.IsVisibleInFOW;
-				if (ClusterMapScreen.GetRevealLevel(clusterGridEntity) != ClusterRevealLevel.Hidden && !this.m_gridEntityVis.ContainsKey(clusterGridEntity))
+				ClusterRevealLevel revealLevel = ClusterMapScreen.GetRevealLevel(clusterGridEntity);
+				if (clusterGridEntity.IsVisible && revealLevel != ClusterRevealLevel.Hidden && !this.m_gridEntityVis.ContainsKey(clusterGridEntity))
 				{
 					ClusterMapVisualizer clusterMapVisualizer = null;
 					GameObject gameObject = null;
@@ -364,16 +367,20 @@ public class ClusterMapScreen : KScreen
 						gameObject = this.mobileVisContainer;
 						break;
 					case EntityLayer.POI:
-						clusterMapVisualizer = this.POIVisPrefab;
+						clusterMapVisualizer = this.staticVisPrefab;
 						gameObject = this.POIVisContainer;
 						break;
 					case EntityLayer.Telescope:
-						clusterMapVisualizer = this.telescopeVisPrefab;
+						clusterMapVisualizer = this.staticVisPrefab;
 						gameObject = this.telescopeVisContainer;
 						break;
 					case EntityLayer.Payload:
 						clusterMapVisualizer = this.mobileVisPrefab;
 						gameObject = this.mobileVisContainer;
+						break;
+					case EntityLayer.FX:
+						clusterMapVisualizer = this.staticVisPrefab;
+						gameObject = this.FXVisContainer;
 						break;
 					}
 					ClusterNameDisplayScreen.Instance.AddNewEntry(clusterGridEntity);
@@ -409,7 +416,7 @@ public class ClusterMapScreen : KScreen
 
 	private void OnClusterLocationChanged(object data)
 	{
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	public static ClusterRevealLevel GetRevealLevel(ClusterGridEntity entity)
@@ -427,19 +434,18 @@ public class ClusterMapScreen : KScreen
 		return ClusterRevealLevel.Hidden;
 	}
 
-	private void UpdateVis()
+	private void UpdateVis(object data = null)
 	{
 		this.SetupVisGameObjects();
 		this.UpdatePaths();
 		foreach (KeyValuePair<ClusterGridEntity, ClusterMapVisualizer> keyValuePair in this.m_gridEntityAnims)
 		{
-			keyValuePair.Key.GetComponent<ClusterTraveler>();
 			ClusterRevealLevel revealLevel = ClusterMapScreen.GetRevealLevel(keyValuePair.Key);
 			keyValuePair.Value.Show(revealLevel);
 			bool flag = this.m_selectedEntity == keyValuePair.Key;
 			keyValuePair.Value.Select(flag);
 		}
-		if (this.m_selectedEntity != null)
+		if (this.m_selectedEntity != null && this.m_gridEntityVis.ContainsKey(this.m_selectedEntity))
 		{
 			ClusterMapVisualizer clusterMapVisualizer = this.m_gridEntityVis[this.m_selectedEntity];
 			this.m_selectMarker.SetTargetTransform(clusterMapVisualizer.transform);
@@ -497,7 +503,7 @@ public class ClusterMapScreen : KScreen
 			ClusterMapHex component = this.m_cellVisByLocation[entity.Location].GetComponent<ClusterMapHex>();
 			this.m_selectedHex = component;
 		}
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	public void SelectHex(ClusterMapHex newSelectionHex)
@@ -545,7 +551,7 @@ public class ClusterMapScreen : KScreen
 				}
 			}
 		}
-		this.UpdateVis();
+		this.UpdateVis(null);
 	}
 
 	public bool HasCurrentHover()
@@ -563,7 +569,7 @@ public class ClusterMapScreen : KScreen
 		this.m_hoveredHex = newHoverHex;
 		if (this.m_mode == ClusterMapScreen.Mode.SelectDestination)
 		{
-			this.UpdateVis();
+			this.UpdateVis(null);
 		}
 		this.UpdateHexToggleStates();
 	}
@@ -650,25 +656,25 @@ public class ClusterMapScreen : KScreen
 
 	public static ClusterMapScreen Instance;
 
-	public ClusterMapVisualizer cellVisPrefab;
-
 	public GameObject cellVisContainer;
-
-	public ClusterMapVisualizer terrainVisPrefab;
 
 	public GameObject terrainVisContainer;
 
-	public ClusterMapVisualizer mobileVisPrefab;
-
 	public GameObject mobileVisContainer;
-
-	public ClusterMapVisualizer telescopeVisPrefab;
 
 	public GameObject telescopeVisContainer;
 
-	public ClusterMapVisualizer POIVisPrefab;
-
 	public GameObject POIVisContainer;
+
+	public GameObject FXVisContainer;
+
+	public ClusterMapVisualizer cellVisPrefab;
+
+	public ClusterMapVisualizer terrainVisPrefab;
+
+	public ClusterMapVisualizer mobileVisPrefab;
+
+	public ClusterMapVisualizer staticVisPrefab;
 
 	public Color rocketPathColor;
 

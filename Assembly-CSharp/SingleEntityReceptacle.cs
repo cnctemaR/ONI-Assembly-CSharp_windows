@@ -203,7 +203,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		if (this.occupyingObject)
 		{
 			this.UnsubscribeFromOccupant();
-			this.storage.DropAll(false, false, default(Vector3), true);
+			this.storage.DropAll(false, false, default(Vector3), true, null);
 		}
 		this.occupyingObject = null;
 		this.UpdateActive();

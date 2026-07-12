@@ -24,7 +24,7 @@ public class Bee : KMonoBehaviour
 		Storage component2 = base.GetComponent<Storage>();
 		byte index = Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.id);
 		component2.AddOre(SimHashes.NuclearWaste, BeeTuning.WASTE_DROPPED_ON_DEATH, component.Temperature, index, BeeTuning.GERMS_DROPPED_ON_DEATH, false, true);
-		component2.DropAll(base.transform.position, true, true, default(Vector3), true);
+		component2.DropAll(base.transform.position, true, true, default(Vector3), true, null);
 	}
 
 	private void StartSleep()
@@ -59,6 +59,7 @@ public class Bee : KMonoBehaviour
 			num *= keyValuePair.Value;
 		}
 		RadiationEmitter component = base.GetComponent<RadiationEmitter>();
+		component.SetEmitting(true);
 		component.emitRads = num;
 		component.Refresh();
 	}

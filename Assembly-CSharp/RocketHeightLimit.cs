@@ -16,7 +16,29 @@ public class RocketHeightLimit : SelectModuleCondition
 			return true;
 		}
 		RocketModuleCluster component = existingModule.GetComponent<RocketModuleCluster>();
-		return component == null || component.CraftInterface.MaxHeight == -1 || component.CraftInterface.RocketHeight + num <= component.CraftInterface.MaxHeight;
+		if (component == null)
+		{
+			return true;
+		}
+		int num2 = component.CraftInterface.MaxHeight;
+		RocketEngineCluster component2 = existingModule.GetComponent<RocketEngineCluster>();
+		RocketEngineCluster component3 = selectedPart.BuildingComplete.GetComponent<RocketEngineCluster>();
+		if (selectionContext == SelectModuleCondition.SelectionContext.ReplaceModule && component2 != null)
+		{
+			if (component3 != null)
+			{
+				num2 = component3.maxHeight;
+			}
+			else
+			{
+				num2 = -1;
+			}
+		}
+		if (component3 != null && selectionContext == SelectModuleCondition.SelectionContext.AddModuleBelow)
+		{
+			num2 = component3.maxHeight;
+		}
+		return num2 == -1 || component.CraftInterface.RocketHeight + num <= num2;
 	}
 
 	public override string GetStatusTooltip(bool ready, BuildingDef selectedPart)

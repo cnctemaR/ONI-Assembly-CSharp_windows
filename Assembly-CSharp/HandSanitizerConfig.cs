@@ -7,7 +7,7 @@ public class HandSanitizerConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "HandSanitizer";
-		int num = 2;
+		int num = 1;
 		int num2 = 3;
 		string text2 = "handsanitizer_kanim";
 		int num3 = 30;

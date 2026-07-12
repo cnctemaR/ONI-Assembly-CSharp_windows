@@ -236,7 +236,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	{
 		if (!this.storage.IsEmpty() && !this.choreDriver.HasChore())
 		{
-			this.storage.DropAll(false, false, default(Vector3), true);
+			this.storage.DropAll(false, false, default(Vector3), true, null);
 		}
 	}
 

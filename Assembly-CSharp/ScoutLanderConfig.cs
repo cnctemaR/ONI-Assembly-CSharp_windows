@@ -21,6 +21,7 @@ public class ScoutLanderConfig : IEntityConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("rocket_scout_cargo_lander_kanim"), "grounded", Grid.SceneLayer.Building, 3, 3, tier, tier2, SimHashes.Creature, null, 293f);
 		gameObject.AddOrGetDef<CargoLander.Def>().previewTag = "ScoutLander_Preview".ToTag();
+		gameObject.AddOrGetDef<CargoDropperStorage.Def>();
 		gameObject.AddOrGet<Prioritizable>();
 		Prioritizable.AddRef(gameObject);
 		gameObject.AddOrGet<Operational>();

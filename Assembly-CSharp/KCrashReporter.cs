@@ -287,13 +287,14 @@ public class KCrashReporter : MonoBehaviour
 		return "";
 	}
 
-	public static void ReportErrorDevNotification(string notification_name, string stack_trace, string details)
+	public static void ReportErrorDevNotification(string notification_name, string stack_trace, string details = "")
 	{
 		if (KCrashReporter.previouslyReportedDevNotifications == null)
 		{
 			KCrashReporter.previouslyReportedDevNotifications = new HashSet<int>();
 		}
 		details = "DevNotification: " + notification_name + " - " + details;
+		global::Debug.Log(details);
 		int hashValue = new HashedString(notification_name).HashValue;
 		bool hasReportedError = KCrashReporter.hasReportedError;
 		if (!KCrashReporter.previouslyReportedDevNotifications.Contains(hashValue))
@@ -379,7 +380,7 @@ public class KCrashReporter : MonoBehaviour
 					}
 				}
 			}
-			if (userMessage == UI.CRASHSCREEN.BODY.text)
+			if (userMessage == UI.CRASHSCREEN.BODY.text || userMessage.IsNullOrWhiteSpace())
 			{
 				userMessage = "";
 			}
@@ -399,7 +400,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 474321;
+			error.build = 476059;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;

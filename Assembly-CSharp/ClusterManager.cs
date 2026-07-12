@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD.Studio;
 using KSerialization;
 using ProcGenGame;
 using TUNING;
@@ -125,6 +126,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		{
 			this.m_grid = new ClusterGrid(this.m_numRings);
 		}
+		this.UpdateWorldReverbSnapshot(this.activeWorldId);
 		base.OnSpawn();
 	}
 
@@ -191,7 +193,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	private WorldContainer CreateAsteroidWorldContainer(WorldGen world)
 	{
 		int nextWorldId = this.GetNextWorldId();
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("Asteroid"), null, null);
+		GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab("Asteroid"), null, null);
 		WorldContainer component = gameObject.GetComponent<WorldContainer>();
 		component.SetID(nextWorldId);
 		component.SetWorldDetails(world);
@@ -526,37 +528,74 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 			global::Debug.LogError(string.Format("Attempting to destroy world id {0}. The world is not a valid rocket interior", world_id));
 			return;
 		}
-		GameObject craft_go = door.GetComponent<RocketModuleCluster>().CraftInterface.gameObject;
+		GameObject gameObject = door.GetComponent<RocketModuleCluster>().CraftInterface.gameObject;
 		if (this.activeWorldId == world_id)
 		{
-			if (craft_go.GetComponent<WorldContainer>().ParentWorldId == world_id)
+			if (gameObject.GetComponent<WorldContainer>().ParentWorldId == world_id)
 			{
 				this.SetActiveWorld(ClusterManager.Instance.GetStartWorld().id);
 			}
 			else
 			{
-				this.SetActiveWorld(craft_go.GetComponent<WorldContainer>().ParentWorldId);
+				this.SetActiveWorld(gameObject.GetComponent<WorldContainer>().ParentWorldId);
 			}
 		}
-		OrbitalMechanics component = craft_go.GetComponent<OrbitalMechanics>();
+		OrbitalMechanics component = gameObject.GetComponent<OrbitalMechanics>();
 		if (!component.IsNullOrDestroyed())
 		{
 			global::UnityEngine.Object.Destroy(component);
 		}
-		Vector3 spawn_pos = door.transform.position;
-		world.EjectAllDupes(spawn_pos);
+		bool flag = gameObject.GetComponent<Clustercraft>().Status == Clustercraft.CraftStatus.InFlight;
+		PrimaryElement moduleElemet = door.GetComponent<PrimaryElement>();
+		AxialI clusterLocation = world.GetComponent<ClusterGridEntity>().Location;
+		Vector3 rocketModuleWorldPos = door.transform.position;
+		if (!flag)
+		{
+			world.EjectAllDupes(rocketModuleWorldPos);
+		}
+		else
+		{
+			world.SpacePodAllDupes(clusterLocation, moduleElemet.ElementID);
+		}
 		world.CancelChores();
 		HashSet<int> noRefundTiles;
-		world.DestroyWorldBuildings(spawn_pos, out noRefundTiles);
+		world.DestroyWorldBuildings(out noRefundTiles);
+		if (!flag)
+		{
+			GameScheduler.Instance.ScheduleNextFrame("ClusterManager.world.TransferResourcesToParentWorld", delegate(object obj)
+			{
+				world.TransferResourcesToParentWorld(rocketModuleWorldPos + new Vector3(0f, 0.5f, 0f), noRefundTiles);
+			}, null, null);
+			GameScheduler.Instance.ScheduleNextFrame("ClusterManager.DeleteWorldObjects", delegate(object obj)
+			{
+				this.DeleteWorldObjects(world);
+			}, null, null);
+			return;
+		}
+		GameScheduler.Instance.ScheduleNextFrame("ClusterManager.world.TransferResourcesToDebris", delegate(object obj)
+		{
+			world.TransferResourcesToDebris(clusterLocation, noRefundTiles, moduleElemet.ElementID);
+		}, null, null);
 		GameScheduler.Instance.ScheduleNextFrame("ClusterManager.DeleteWorldObjects", delegate(object obj)
 		{
-			this.DeleteWorldObjects(world, craft_go, spawn_pos, noRefundTiles);
+			this.DeleteWorldObjects(world);
 		}, null, null);
 	}
 
-	private void DeleteWorldObjects(WorldContainer world, GameObject craft_go, Vector3 spawn_pos, HashSet<int> noRefundTiles)
+	public void UpdateWorldReverbSnapshot(int worldId)
 	{
-		world.TransferResourcesToParentWorld(spawn_pos, noRefundTiles);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SmallRocketInteriorReverbSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MediumRocketInteriorReverbSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		WorldContainer world = this.GetWorld(worldId);
+		if (world.IsModuleInterior)
+		{
+			PassengerRocketModule passengerModule = world.GetComponent<Clustercraft>().ModuleInterface.GetPassengerModule();
+			AudioMixer.instance.Start(passengerModule.interiorReverbSnapshot);
+		}
+	}
+
+	private void DeleteWorldObjects(WorldContainer world)
+	{
 		Grid.FreeGridSpace(world.WorldSize, world.WorldOffset);
 		WorldInventory worldInventory = null;
 		if (world != null)

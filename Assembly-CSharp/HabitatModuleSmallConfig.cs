@@ -46,7 +46,7 @@ public class HabitatModuleSmallConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(GameTags.NoseRocketModule, false);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.LaunchButtonRocketModule, false);
 		go.AddOrGet<AssignmentGroupController>().generateGroupOnStart = true;
-		go.AddOrGet<PassengerRocketModule>();
+		go.AddOrGet<PassengerRocketModule>().interiorReverbSnapshot = AudioMixerSnapshots.Get().SmallRocketInteriorReverbSnapshot;
 		go.AddOrGet<ClustercraftExteriorDoor>().interiorTemplateName = "expansion1::interiors/habitat_small";
 		go.AddOrGetDef<SimpleDoorController.Def>();
 		go.AddOrGet<NavTeleporter>();
@@ -55,6 +55,28 @@ public class HabitatModuleSmallConfig : IBuildingConfig
 		go.AddOrGet<RocketCommandConditions>();
 		go.AddOrGet<RocketProcessConditionDisplayTarget>();
 		go.AddOrGet<CharacterOverlay>().shouldShowName = true;
+		Storage storage = go.AddComponent<Storage>();
+		storage.showInUI = false;
+		storage.capacityKg = 10f;
+		RocketConduitSender rocketConduitSender = go.AddComponent<RocketConduitSender>();
+		rocketConduitSender.conduitStorage = storage;
+		rocketConduitSender.conduitPortInfo = this.liquidInputPort;
+		go.AddComponent<RocketConduitReceiver>().conduitPortInfo = this.liquidOutputPort;
+		Storage storage2 = go.AddComponent<Storage>();
+		storage2.showInUI = false;
+		storage2.capacityKg = 1f;
+		RocketConduitSender rocketConduitSender2 = go.AddComponent<RocketConduitSender>();
+		rocketConduitSender2.conduitStorage = storage2;
+		rocketConduitSender2.conduitPortInfo = this.gasInputPort;
+		go.AddComponent<RocketConduitReceiver>().conduitPortInfo = this.gasOutputPort;
+	}
+
+	private void AttachPorts(GameObject go)
+	{
+		go.AddComponent<ConduitSecondaryInput>().portInfo = this.liquidInputPort;
+		go.AddComponent<ConduitSecondaryOutput>().portInfo = this.liquidOutputPort;
+		go.AddComponent<ConduitSecondaryInput>().portInfo = this.gasInputPort;
+		go.AddComponent<ConduitSecondaryOutput>().portInfo = this.gasOutputPort;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -71,9 +93,32 @@ public class HabitatModuleSmallConfig : IBuildingConfig
 			new CellOffset(1, -1)
 		};
 		fakeFloorAdder.initiallyActive = false;
+		go.AddOrGet<BuildingCellVisualizer>();
 		go.GetComponent<ReorderableBuilding>().buildConditions.Add(new LimitOneCommandModule());
 		go.GetComponent<ReorderableBuilding>().buildConditions.Add(new TopOnly());
 	}
 
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		base.DoPostConfigurePreview(def, go);
+		go.AddOrGet<BuildingCellVisualizer>();
+		this.AttachPorts(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		base.DoPostConfigureUnderConstruction(go);
+		go.AddOrGet<BuildingCellVisualizer>();
+		this.AttachPorts(go);
+	}
+
 	public const string ID = "HabitatModuleSmall";
+
+	private ConduitPortInfo gasInputPort = new ConduitPortInfo(ConduitType.Gas, new CellOffset(-1, 0));
+
+	private ConduitPortInfo gasOutputPort = new ConduitPortInfo(ConduitType.Gas, new CellOffset(1, 0));
+
+	private ConduitPortInfo liquidInputPort = new ConduitPortInfo(ConduitType.Liquid, new CellOffset(-1, 1));
+
+	private ConduitPortInfo liquidOutputPort = new ConduitPortInfo(ConduitType.Liquid, new CellOffset(1, 1));
 }

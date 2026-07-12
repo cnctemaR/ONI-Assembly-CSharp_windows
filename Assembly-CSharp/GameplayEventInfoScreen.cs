@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -38,7 +39,7 @@ public class GameplayEventInfoScreen : KModalScreen
 			while (enumerator.MoveNext())
 			{
 				GameplayEventPopupData.PopupOption option = enumerator.Current;
-				GameObject gameObject = Util.KInstantiateUI(this.optionPrefab, this.buttonsGroup, false);
+				GameObject gameObject = global::Util.KInstantiateUI(this.optionPrefab, this.buttonsGroup, false);
 				gameObject.name = "Option: " + option.mainText;
 				KButton component = gameObject.GetComponent<KButton>();
 				component.isInteractable = option.allowed;
@@ -62,7 +63,7 @@ public class GameplayEventInfoScreen : KModalScreen
 				{
 					this.CreateOptionIcon(gameObject, popupOptionIcon);
 				}
-				Util.KInstantiateUI(this.optionTextPrefab, gameObject, false).GetComponent<LocText>().text = ((option.description == null) ? ("<b>" + option.mainText + "</b>") : string.Concat(new string[] { "<b>", option.mainText, "</b>\n<i>(", option.description, ")</i>" }));
+				global::Util.KInstantiateUI(this.optionTextPrefab, gameObject, false).GetComponent<LocText>().text = ((option.description == null) ? ("<b>" + option.mainText + "</b>") : string.Concat(new string[] { "<b>", option.mainText, "</b>\n<i>(", option.description, ")</i>" }));
 				foreach (GameplayEventPopupData.PopupOptionIcon popupOptionIcon2 in option.consequenceIcons)
 				{
 					this.CreateOptionIcon(gameObject, popupOptionIcon2);
@@ -72,9 +73,15 @@ public class GameplayEventInfoScreen : KModalScreen
 		}
 	}
 
+	public override void Deactivate()
+	{
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().EventPopupSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		base.Deactivate();
+	}
+
 	private void CreateOptionIcon(GameObject option, GameplayEventPopupData.PopupOptionIcon optionIcon)
 	{
-		GameObject gameObject = Util.KInstantiateUI(this.optionIconPrefab, option, false);
+		GameObject gameObject = global::Util.KInstantiateUI(this.optionIconPrefab, option, false);
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(optionIcon.tooltip);
 		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 		Image reference = component.GetReference<Image>("Mask");

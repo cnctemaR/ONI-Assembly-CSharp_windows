@@ -42,7 +42,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		base.OnSpawn();
 		this.launchable = base.GetComponent<ILaunchableRocket>();
 		this.FindModules();
-		base.GetComponent<AttachableBuilding>().onAttachmentNetworkChanged = delegate(AttachableBuilding data)
+		base.GetComponent<AttachableBuilding>().onAttachmentNetworkChanged = delegate(object data)
 		{
 			this.FindModules();
 		};

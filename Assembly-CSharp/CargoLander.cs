@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
@@ -52,10 +51,7 @@ public class CargoLander : GameStateMachine<CargoLander, CargoLander.StatesInsta
 			{
 				smi.DoLand();
 			});
-		this.grounded.emptying.PlayAnim("deploying").Enter(delegate(CargoLander.StatesInstance smi)
-		{
-			smi.JettisonCargo();
-		}).OnAnimQueueComplete(this.grounded.empty);
+		this.grounded.emptying.PlayAnim("deploying").TriggerOnEnter(GameHashes.JettisonCargo, null).OnAnimQueueComplete(this.grounded.empty);
 		this.grounded.empty.PlayAnim("deployed").ParamTransition<bool>(this.hasCargo, this.grounded.loaded, GameStateMachine<CargoLander, CargoLander.StatesInstance, IStateMachineTarget, CargoLander.Def>.IsTrue);
 	}
 
@@ -77,8 +73,6 @@ public class CargoLander : GameStateMachine<CargoLander, CargoLander.StatesInsta
 
 	public class Def : StateMachine.BaseDef
 	{
-		public Vector3 cargoDropOffset;
-
 		public Tag previewTag;
 
 		public bool deployOnLanding = true;
@@ -145,52 +139,7 @@ public class CargoLander : GameStateMachine<CargoLander, CargoLander.StatesInsta
 			{
 				base.sm.emptyCargo.Trigger(this);
 			}
-		}
-
-		public void JettisonCargo()
-		{
-			Vector3 vector = base.master.transform.GetPosition() + base.def.cargoDropOffset;
-			MinionStorage component = base.GetComponent<MinionStorage>();
-			if (component != null)
-			{
-				List<MinionStorage.Info> storedMinionInfo = component.GetStoredMinionInfo();
-				for (int i = storedMinionInfo.Count - 1; i >= 0; i--)
-				{
-					MinionStorage.Info info = storedMinionInfo[i];
-					GameObject gameObject = component.DeserializeMinion(info.id, base.transform.GetPosition());
-					gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
-					ChoreProvider component2 = gameObject.GetComponent<ChoreProvider>();
-					if (component2 != null)
-					{
-						new EmoteChore(component2, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_pioneer_cargo_lander_kanim", new HashedString[] { "enter" }, KAnim.PlayMode.Once, false);
-					}
-				}
-			}
-			Storage component3 = base.GetComponent<Storage>();
-			if (component3 != null)
-			{
-				GameObject gameObject2 = component3.FindFirst("ScoutRover");
-				if (gameObject2 != null)
-				{
-					component3.Drop(gameObject2, true);
-					Vector3 position = base.master.transform.GetPosition();
-					position.z = Grid.GetLayerZ(Grid.SceneLayer.Creatures);
-					gameObject2.transform.SetPosition(position);
-					ChoreProvider component4 = gameObject2.GetComponent<ChoreProvider>();
-					if (component4 != null)
-					{
-						KBatchedAnimController component5 = gameObject2.GetComponent<KBatchedAnimController>();
-						if (component5 != null)
-						{
-							component5.Play("enter", KAnim.PlayMode.Once, 1f, 0f);
-						}
-						new EmoteChore(component4, Db.Get().ChoreTypes.EmoteHighPriority, null, new HashedString[] { "enter" }, KAnim.PlayMode.Once, false);
-					}
-				}
-				component3.DropAll(vector, false, false, default(Vector3), true);
-			}
-			base.Trigger(-602000519, base.gameObject);
-			this.CheckIfLoaded();
+			base.smi.master.gameObject.Trigger(1591811118, this);
 		}
 
 		public bool CheckIfLoaded()

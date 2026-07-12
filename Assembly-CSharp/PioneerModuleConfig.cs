@@ -56,6 +56,7 @@ public class PioneerModuleConfig : IBuildingConfig
 		JettisonableCargoModule.Def def2 = go.AddOrGetDef<JettisonableCargoModule.Def>();
 		def2.landerPrefabID = "PioneerLander".ToTag();
 		def2.landerContainer = storage;
+		def2.clusterMapFXPrefabID = "DeployingPioneerLanderFX";
 		go.AddOrGet<BuildingAttachPoint>().points = new BuildingAttachPoint.HardPoint[]
 		{
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 3), GameTags.Rocket, null)

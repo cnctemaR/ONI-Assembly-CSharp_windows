@@ -39,7 +39,7 @@ public class MainMenu : KScreen
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 22, this.normalButtonStyle));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.RETIREDCOLONIES, delegate
 		{
-			MainMenu.ActivateRetiredColoniesScreen(this.transform.gameObject, "");
+			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, "");
 		}, 14, this.normalButtonStyle));
 		if (DistributionPlatform.Initialized)
 		{
@@ -59,23 +59,16 @@ public class MainMenu : KScreen
 		}
 		this.CheckDoubleBoundKeys();
 		this.topLeftAlphaMessage.gameObject.SetActive(false);
-		this.nextUpdateTimer.gameObject.SetActive(false);
-		bool ownsExpansion1 = DistributionPlatform.Inst.IsDLCPurchased("EXPANSION1_ID");
-		this.expansion1Toggle.gameObject.SetActive(ownsExpansion1);
+		this.MOTDContainer.SetActive(false);
+		this.buttonContainer.SetActive(false);
+		bool flag = DistributionPlatform.Inst.IsDLCPurchased("EXPANSION1_ID");
+		this.nextUpdateTimer.gameObject.SetActive(flag);
+		this.expansion1Toggle.gameObject.SetActive(flag);
 		this.m_motdServerClient = new MotdServerClient();
 		this.m_motdServerClient.GetMotd(delegate(MotdServerClient.MotdResponse response, string error)
 		{
 			if (error == null)
 			{
-				this.topLeftAlphaMessage.gameObject.SetActive(true);
-				if (ownsExpansion1)
-				{
-					this.nextUpdateTimer.gameObject.SetActive(true);
-				}
-				this.motdImageHeader.text = response.image_header_text;
-				this.motdNewsHeader.text = response.news_header_text;
-				this.motdNewsBody.text = response.news_body_text;
-				PatchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
 				if (DlcManager.IsExpansion1Active())
 				{
 					this.nextUpdateTimer.UpdateReleaseTimes(response.expansion1_update_data.last_update_time, response.expansion1_update_data.next_update_time, response.expansion1_update_data.update_text_override);
@@ -84,6 +77,13 @@ public class MainMenu : KScreen
 				{
 					this.nextUpdateTimer.UpdateReleaseTimes(response.vanilla_update_data.last_update_time, response.vanilla_update_data.next_update_time, response.vanilla_update_data.update_text_override);
 				}
+				this.topLeftAlphaMessage.gameObject.SetActive(true);
+				this.MOTDContainer.SetActive(true);
+				this.buttonContainer.SetActive(true);
+				this.motdImageHeader.text = response.image_header_text;
+				this.motdNewsHeader.text = response.news_header_text;
+				this.motdNewsBody.text = response.news_body_text;
+				PatchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
 				if (response.image_texture != null)
 				{
 					this.motdImage.sprite = Sprite.Create(response.image_texture, new Rect(0f, 0f, (float)response.image_texture.width, (float)response.image_texture.height), Vector2.zero);
@@ -407,7 +407,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 474321U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 25)
+				if (header.buildVersion > 476059U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 26)
 				{
 					flag = false;
 				}
@@ -610,6 +610,12 @@ public class MainMenu : KScreen
 	private string ambientLoopEventName;
 
 	private EventInstance ambientLoop;
+
+	[SerializeField]
+	private GameObject MOTDContainer;
+
+	[SerializeField]
+	private GameObject buttonContainer;
 
 	[SerializeField]
 	private LocText motdImageHeader;

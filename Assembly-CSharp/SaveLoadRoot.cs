@@ -255,7 +255,7 @@ public class SaveLoadRoot : KMonoBehaviour
 					{
 						DebugUtil.DevAssert(num3 == 0 && num4 == 0, string.Format("Implementation does not support multiple components with optional components, type {0}, {1}, {2}. Using only the first one and skipping the rest.", text, num3, num4), null);
 						Type type2 = Type.GetType(component.m_optionalComponentTypeNames[num5]);
-						if (gameObject.GetComponent(type2) == null)
+						if (num4 == 0)
 						{
 							kmonoBehaviour = (KMonoBehaviour)gameObject.AddComponent(type2);
 						}

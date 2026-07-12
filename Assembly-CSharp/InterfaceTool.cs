@@ -157,7 +157,15 @@ public class InterfaceTool : KMonoBehaviour
 		if (new_cursor != InterfaceTool.activeCursor)
 		{
 			InterfaceTool.activeCursor = new_cursor;
-			Cursor.SetCursor(new_cursor, offset, mode);
+			try
+			{
+				Cursor.SetCursor(new_cursor, offset, mode);
+			}
+			catch (Exception ex)
+			{
+				string text = string.Format("SetCursor Failed new_cursor={0} offset={1} mode={2}", new_cursor, offset, mode);
+				KCrashReporter.ReportErrorDevNotification("SetCursor Failed", ex.StackTrace, text);
+			}
 		}
 	}
 

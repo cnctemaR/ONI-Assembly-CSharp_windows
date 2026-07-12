@@ -120,7 +120,7 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 				gameObject.transform.SetPosition(base.transform.GetPosition() + this.dropOffset.ToVector3());
 			}
 		}
-		this.smi.GetMaster().GetComponent<Storage>().DropAll(false, false, default(Vector3), true);
+		this.smi.GetMaster().GetComponent<Storage>().DropAll(false, false, default(Vector3), true, null);
 	}
 
 	protected override void Toggle()

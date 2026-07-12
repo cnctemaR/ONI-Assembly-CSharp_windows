@@ -86,7 +86,7 @@ public class Durability : KMonoBehaviour
 			{
 				component.AddLiquid(SimHashes.Petroleum, component2.amount, base.GetComponent<PrimaryElement>().Temperature, byte.MaxValue, 0, false, true);
 			}
-			component.DropAll(false, false, default(Vector3), true);
+			component.DropAll(false, false, default(Vector3), true, null);
 		}
 		Util.KDestroyGameObject(base.gameObject);
 	}

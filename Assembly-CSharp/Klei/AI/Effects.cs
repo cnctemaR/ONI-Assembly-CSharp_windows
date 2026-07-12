@@ -224,12 +224,29 @@ namespace Klei.AI
 					Effects.SaveLoadEffect saveLoadEffect = new Effects.SaveLoadEffect
 					{
 						id = effectInstance.effect.Id,
-						timeRemaining = effectInstance.timeRemaining
+						timeRemaining = effectInstance.timeRemaining,
+						saved = true
 					};
 					list.Add(saveLoadEffect);
 				}
 			}
 			this.saveLoadEffects = list.ToArray();
+		}
+
+		public List<Effects.SaveLoadEffect> GetAllEffectsForSerialization()
+		{
+			List<Effects.SaveLoadEffect> list = new List<Effects.SaveLoadEffect>();
+			foreach (EffectInstance effectInstance in this.effects)
+			{
+				Effects.SaveLoadEffect saveLoadEffect = new Effects.SaveLoadEffect
+				{
+					id = effectInstance.effect.Id,
+					timeRemaining = effectInstance.timeRemaining,
+					saved = effectInstance.shouldSave
+				};
+				list.Add(saveLoadEffect);
+			}
+			return list;
 		}
 
 		public List<EffectInstance> GetTimeLimitedEffects()
@@ -259,11 +276,13 @@ namespace Klei.AI
 		private List<Effect> effectImmunites = new List<Effect>();
 
 		[Serializable]
-		private struct SaveLoadEffect
+		public struct SaveLoadEffect
 		{
 			public string id;
 
 			public float timeRemaining;
+
+			public bool saved;
 		}
 	}
 }

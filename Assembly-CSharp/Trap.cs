@@ -40,7 +40,7 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 				base.smi.GoTo(base.smi.sm.occupied);
 				return;
 			}
-			component.DropAll(false, false, default(Vector3), true);
+			component.DropAll(false, false, default(Vector3), true, null);
 		}
 	}
 

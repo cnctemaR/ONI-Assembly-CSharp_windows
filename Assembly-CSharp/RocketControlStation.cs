@@ -232,6 +232,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			Workable component = smi.master.GetComponent<RocketControlStationIdleWorkable>();
 			WorkChore<RocketControlStationIdleWorkable> workChore = new WorkChore<RocketControlStationIdleWorkable>(Db.Get().ChoreTypes.RocketControl, component, null, true, null, null, null, false, Db.Get().ScheduleBlockTypes.Work, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 			workChore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanUseRocketControlStation);
+			workChore.AddPrecondition(ChorePreconditions.instance.IsRocketTravelling, null);
 			return workChore;
 		}
 

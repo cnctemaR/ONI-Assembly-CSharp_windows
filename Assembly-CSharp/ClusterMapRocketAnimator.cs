@@ -14,6 +14,7 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 			.EventTransition(GameHashes.ClusterDestinationChanged, this.moving.traveling, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsTraveling))
 			.EventTransition(GameHashes.StartMining, this.utility.mining, null)
 			.EventTransition(GameHashes.RocketLaunched, this.moving.takeoff, null)
+			.EventTransition(GameHashes.RocketSelfDestructRequested, this.exploding, null)
 			.Transition(this.moving.traveling, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsTraveling), UpdateRate.SIM_200ms)
 			.Transition(this.grounded, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsGrounded), UpdateRate.SIM_200ms)
 			.Transition(this.moving.landing, new StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.Transition.ConditionCallback(this.IsLanding), UpdateRate.SIM_200ms);
@@ -70,6 +71,20 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 				smi.GoTo(this.idle);
 			});
 		});
+		this.exploding.Enter(delegate(ClusterMapRocketAnimator.StatesInstance smi)
+		{
+			smi.GetComponent<ClusterMapVisualizer>().GetFirstAnimController().SwapAnims(new KAnimFile[] { Assets.GetAnim("rocket_self_destruct_kanim") });
+			smi.PlayVisAnim("explode", KAnim.PlayMode.Once);
+			smi.SubscribeOnVisAnimComplete(delegate(object data)
+			{
+				smi.GoTo(this.exploding_pst);
+			});
+		});
+		this.exploding_pst.Enter(delegate(ClusterMapRocketAnimator.StatesInstance smi)
+		{
+			smi.GetComponent<ClusterMapVisualizer>().GetFirstAnimController().Stop();
+			smi.entity.gameObject.Trigger(-1311384361, null);
+		});
 	}
 
 	private bool ClusterChangedAtMyLocation(ClusterMapRocketAnimator.StatesInstance smi, object data)
@@ -110,8 +125,6 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 		}
 	}
 
-	private KBatchedAnimController aninController;
-
 	public StateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.TargetParameter entityTarget;
 
 	public GameStateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.State idle;
@@ -121,6 +134,10 @@ public class ClusterMapRocketAnimator : GameStateMachine<ClusterMapRocketAnimato
 	public ClusterMapRocketAnimator.MovingStates moving;
 
 	public ClusterMapRocketAnimator.UtilityStates utility;
+
+	public GameStateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.State exploding;
+
+	public GameStateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.State exploding_pst;
 
 	public class MovingStates : GameStateMachine<ClusterMapRocketAnimator, ClusterMapRocketAnimator.StatesInstance, ClusterMapVisualizer, object>.State
 	{

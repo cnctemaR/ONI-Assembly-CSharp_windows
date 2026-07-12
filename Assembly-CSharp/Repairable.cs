@@ -247,7 +247,7 @@ public class Repairable : Workable
 			if (base.smi.master.storageProxy != null)
 			{
 				base.smi.master.transform.GetComponent<Prioritizable>().RemoveRef();
-				base.smi.master.storageProxy.DropAll(false, false, default(Vector3), true);
+				base.smi.master.storageProxy.DropAll(false, false, default(Vector3), true, null);
 				Util.KDestroyGameObject(base.smi.master.storageProxy.gameObject);
 			}
 		}

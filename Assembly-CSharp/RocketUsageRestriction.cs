@@ -50,7 +50,7 @@ public class RocketUsageRestriction : GameStateMachine<RocketUsageRestriction, R
 			return;
 		}
 		smi.isRestrictionApplied = restrict;
-		smi.operational.SetFlag(RocketUsageRestriction.rocketUsageAllowed, !restrict);
+		smi.operational.SetFlag(RocketUsageRestriction.rocketUsageAllowed, !smi.def.restrictOperational || !restrict);
 		smi.master.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.RocketRestrictionActive, restrict, null);
 		Storage[] components = smi.master.gameObject.GetComponents<Storage>();
 		if (components == null || components.Length == 0)
@@ -111,6 +111,8 @@ public class RocketUsageRestriction : GameStateMachine<RocketUsageRestriction, R
 		}
 
 		public bool initialControlledStateWhenBuilt = true;
+
+		public bool restrictOperational = true;
 	}
 
 	public class ControlledStates : GameStateMachine<RocketUsageRestriction, RocketUsageRestriction.StatesInstance, IStateMachineTarget, RocketUsageRestriction.Def>.State

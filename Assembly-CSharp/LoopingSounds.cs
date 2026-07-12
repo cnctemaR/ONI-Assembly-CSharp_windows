@@ -168,6 +168,18 @@ public class LoopingSounds : KMonoBehaviour
 		}
 	}
 
+	public void PauseSound(string asset, bool paused)
+	{
+		for (int i = 0; i < this.loopingSounds.Count; i++)
+		{
+			if (this.loopingSounds[i].asset == asset)
+			{
+				LoopingSoundManager.PauseSound(this.loopingSounds[i].handle, paused);
+				return;
+			}
+		}
+	}
+
 	public void StopAllSounds()
 	{
 		for (int i = 0; i < this.loopingSounds.Count; i++)
@@ -199,7 +211,9 @@ public class LoopingSounds : KMonoBehaviour
 	{
 		if (AudioDebug.Get().debugGameEventSounds)
 		{
-			global::Debug.Log("GameSoundEvent: " + ev.Name);
+			string text = "GameSoundEvent: ";
+			HashedString name = ev.Name;
+			global::Debug.Log(text + name.ToString());
 		}
 		List<AnimEvent> events = GameAudioSheets.Get().GetEvents(ev.Name);
 		if (events == null)

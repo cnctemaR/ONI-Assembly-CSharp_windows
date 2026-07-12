@@ -95,28 +95,28 @@ public class ScenePartitioner : ISim1000ms
 		Extents nodeExtents = this.GetNodeExtents(entry);
 		if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				entry.obj.ToString(),
 				" x/w ",
-				nodeExtents.x,
+				nodeExtents.x.ToString(),
 				"/",
-				nodeExtents.width,
+				nodeExtents.width.ToString(),
 				" < ",
-				this.nodes.GetLength(2)
+				this.nodes.GetLength(2).ToString()
 			}));
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				entry.obj.ToString(),
 				" y/h ",
-				nodeExtents.y,
+				nodeExtents.y.ToString(),
 				"/",
-				nodeExtents.height,
+				nodeExtents.height.ToString(),
 				" < ",
-				this.nodes.GetLength(1)
+				this.nodes.GetLength(1).ToString()
 			}));
 		}
 		int layer = entry.layer;
@@ -144,26 +144,26 @@ public class ScenePartitioner : ISim1000ms
 		Extents nodeExtents = this.GetNodeExtents(entry);
 		if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				" x/w ",
-				nodeExtents.x,
+				nodeExtents.x.ToString(),
 				"/",
-				nodeExtents.width,
+				nodeExtents.width.ToString(),
 				" < ",
-				this.nodes.GetLength(2)
+				this.nodes.GetLength(2).ToString()
 			}));
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				" y/h ",
-				nodeExtents.y,
+				nodeExtents.y.ToString(),
 				"/",
-				nodeExtents.height,
+				nodeExtents.height.ToString(),
 				" < ",
-				this.nodes.GetLength(1)
+				this.nodes.GetLength(1).ToString()
 			}));
 		}
 		int layer = entry.layer;
@@ -204,26 +204,26 @@ public class ScenePartitioner : ISim1000ms
 		Extents nodeExtents = this.GetNodeExtents(entry);
 		if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				" x/w ",
-				nodeExtents.x,
+				nodeExtents.x.ToString(),
 				"/",
-				nodeExtents.width,
+				nodeExtents.width.ToString(),
 				" < ",
-				this.nodes.GetLength(2)
+				this.nodes.GetLength(2).ToString()
 			}));
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				" y/h ",
-				nodeExtents.y,
+				nodeExtents.y.ToString(),
 				"/",
-				nodeExtents.height,
+				nodeExtents.height.ToString(),
 				" < ",
-				this.nodes.GetLength(1)
+				this.nodes.GetLength(1).ToString()
 			}));
 		}
 		int layer = entry.layer;

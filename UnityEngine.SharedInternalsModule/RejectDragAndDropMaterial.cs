@@ -3,8 +3,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Class)]
+	[VisibleToOtherModules]
 	internal class RejectDragAndDropMaterial : Attribute
 	{
 	}

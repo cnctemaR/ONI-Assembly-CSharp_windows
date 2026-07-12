@@ -20,6 +20,15 @@ public class KFMOD
 	{
 		try
 		{
+			Settings instance = Settings.Instance;
+			if (!DlcManager.IsExpansion1Active())
+			{
+				instance.Banks.RemoveAll((string b) => b.StartsWith("expansion1_"));
+			}
+			if (global::UnityEngine.Object.FindObjectsOfType<RuntimeManager>().Length != 0)
+			{
+				global::Debug.LogError("FMOD got initialized before we tried to initialize it! This will cause bad things to happen!");
+			}
 			global::FMOD.Studio.System studioSystem = RuntimeManager.StudioSystem;
 			KFMOD.didFmodInitializeSuccessfully = RuntimeManager.IsInitialized;
 		}

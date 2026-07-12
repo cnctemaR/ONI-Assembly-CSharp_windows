@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
@@ -6,13 +7,13 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Geometry/AABB.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Geometry/Intersection.h")]
+	[NativeClass("AABB")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeType(Header = "Runtime/Geometry/AABB.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[NativeClass("AABB")]
 	[NativeHeader("Runtime/Geometry/Ray.h")]
-	public struct Bounds : IEquatable<Bounds>
+	public struct Bounds : IEquatable<Bounds>, IFormattable
 	{
 		public Bounds(Vector3 center, Vector3 size)
 		{
@@ -152,15 +153,25 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("Center: {0}, Extents: {1}", new object[] { this.m_Center, this.m_Extents });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F1";
+			}
 			return UnityString.Format("Center: {0}, Extents: {1}", new object[]
 			{
-				this.m_Center.ToString(format),
-				this.m_Extents.ToString(format)
+				this.m_Center.ToString(format, formatProvider),
+				this.m_Extents.ToString(format, formatProvider)
 			});
 		}
 

@@ -3,34 +3,36 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
+public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISidescreenButtonControl
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.contents = this.possible_contents_ids[global::UnityEngine.Random.Range(0, this.possible_contents_ids.Length)];
+	}
+
+	public void ChooseContents()
+	{
+		this.contents = this.possible_contents_ids[global::UnityEngine.Random.Range(0, this.possible_contents_ids.GetLength(0))];
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		base.Subscribe<SetLocker>(493375141, SetLocker.OnRefreshUserMenuDelegate);
 	}
 
 	public void DropContents()
 	{
-		Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents, Grid.SceneLayer.Front).SetActive(true);
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab(this.contents.ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
-	}
-
-	private void OnRefreshUserMenu(object data)
-	{
-		if (base.smi.IsInsideState(base.smi.sm.closed) && !this.used)
+		if (this.contents == null)
 		{
-			KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore != null) ? new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.OPENPOI.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF, true) : new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.OPENPOI.NAME, new global::System.Action(this.OnClickOpen), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.OPENPOI.TOOLTIP, true));
-			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
+			return;
 		}
+		for (int i = 0; i < this.contents.Length; i++)
+		{
+			Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents[i], Grid.SceneLayer.Front).SetActive(true);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab(this.contents[i].ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
+		}
+		base.gameObject.Trigger(-372600542, this);
 	}
 
 	private void OnClickOpen()
@@ -54,7 +56,6 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		{
 			this.CompleteChore();
 		}, null, null, true, null, false, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
-		this.OnRefreshUserMenu(null);
 	}
 
 	public void CancelChore(object param = null)
@@ -75,7 +76,48 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
-	public string[] possible_contents_ids;
+	public string SidescreenButtonText
+	{
+		get
+		{
+			return (this.chore == null) ? UI.USERMENUACTIONS.OPENPOI.NAME : UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
+		}
+	}
+
+	public string SidescreenButtonTooltip
+	{
+		get
+		{
+			return (this.chore == null) ? UI.USERMENUACTIONS.OPENPOI.TOOLTIP : UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
+		}
+	}
+
+	public bool SidescreenEnabled()
+	{
+		return true;
+	}
+
+	public void OnSidescreenButtonPressed()
+	{
+		if (this.chore == null)
+		{
+			this.OnClickOpen();
+			return;
+		}
+		this.OnClickCancel();
+	}
+
+	public bool SidescreenButtonInteractable()
+	{
+		return !this.used;
+	}
+
+	public int ButtonSideScreenSortOrder()
+	{
+		return 20;
+	}
+
+	public string[][] possible_contents_ids;
 
 	public string machineSound;
 
@@ -84,12 +126,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	public Vector2I dropOffset = Vector2I.zero;
 
 	[Serialize]
-	private string contents = "";
-
-	private static readonly EventSystem.IntraObjectHandler<SetLocker> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<SetLocker>(delegate(SetLocker component, object data)
-	{
-		component.OnRefreshUserMenu(data);
-	});
+	private string[] contents;
 
 	[Serialize]
 	private bool used;
@@ -109,7 +146,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.closed;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.closed.PlayAnim("on").Enter(delegate(SetLocker.StatesInstance smi)
 			{
 				if (smi.master.machineSound != null)

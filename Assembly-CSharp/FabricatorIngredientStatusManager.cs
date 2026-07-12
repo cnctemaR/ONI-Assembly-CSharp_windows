@@ -57,7 +57,7 @@ public class FabricatorIngredientStatusManager : KMonoBehaviour, ISim1000ms
 				bool flag = false;
 				foreach (ComplexRecipe.RecipeElement recipeElement2 in complexRecipe2.ingredients)
 				{
-					float num = this.fabricator.inStorage.GetAmountAvailable(recipeElement2.material) + this.fabricator.buildStorage.GetAmountAvailable(recipeElement2.material) + WorldInventory.Instance.GetTotalAmount(recipeElement2.material) - recipeElement2.amount;
+					float num = this.fabricator.inStorage.GetAmountAvailable(recipeElement2.material) + this.fabricator.buildStorage.GetAmountAvailable(recipeElement2.material) + this.fabricator.GetMyWorld().worldInventory.GetTotalAmount(recipeElement2.material, true) - recipeElement2.amount;
 					flag = flag || this.ChangeRecipeRequiredResourceBalance(complexRecipe2, recipeElement2.material, num) || (this.statusItems.ContainsKey(complexRecipe2) && this.fabricator.GetRecipeQueueCount(complexRecipe2) == 0);
 				}
 				if (flag)

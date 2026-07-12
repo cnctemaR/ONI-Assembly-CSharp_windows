@@ -5,7 +5,6 @@ using System.Text;
 using KSerialization;
 using Newtonsoft.Json;
 using ProcGen;
-using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 
@@ -54,10 +53,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	{
 		SaveGame.Instance = this;
 		new ColonyRationMonitor.Instance(this).StartSM();
-		new VignetteManager.Instance(this).StartSM();
 		this.entombedItemManager = base.gameObject.AddComponent<EntombedItemManager>();
-		this.worldGen = SaveLoader.Instance.worldGen;
 		this.worldGenSpawner = base.gameObject.AddComponent<WorldGenSpawner>();
+		base.gameObject.AddOrGetDef<GameplaySeasonManager.Def>();
+		base.gameObject.AddOrGetDef<ClusterFogOfWarManager.Def>();
 	}
 
 	[OnSerializing]
@@ -80,10 +79,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	public byte[] GetSaveHeader(bool isAutoSave, bool isCompressed, out SaveGame.Header header)
 	{
 		string originalSaveFileName = SaveLoader.GetOriginalSaveFileName(SaveLoader.GetActiveSaveFilePath());
-		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, this.sandboxEnabled));
+		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.clusterId, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, DlcManager.GetHighestActiveDlcId(), this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 469300U;
+		header.buildVersion = 471531U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);
@@ -94,7 +93,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	{
 		if (!(info.colonyGuid != Guid.Empty))
 		{
-			return info.baseName + "/" + info.worldID;
+			return info.baseName + "/" + info.clusterId;
 		}
 		return info.colonyGuid.ToString();
 	}
@@ -112,12 +111,13 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		catch (Exception ex)
 		{
+			global::Debug.LogWarning("Exception while loading " + filename);
 			global::Debug.LogWarning(ex);
 		}
 		return null;
 	}
 
-	public static SaveGame.GameInfo GetHeader(IReader br, out SaveGame.Header header)
+	public static SaveGame.GameInfo GetHeader(IReader br, out SaveGame.Header header, string debugFileName)
 	{
 		header = default(SaveGame.Header);
 		header.buildVersion = br.ReadUInt32();
@@ -127,7 +127,14 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		{
 			header.compression = br.ReadInt32();
 		}
-		SaveGame.GameInfo gameInfo = SaveGame.GetGameInfo(br.ReadBytes(header.headerSize));
+		byte[] array = br.ReadBytes(header.headerSize);
+		if (header.headerSize == 0 && !SaveGame.debug_SaveFileHeaderBlank_sent)
+		{
+			SaveGame.debug_SaveFileHeaderBlank_sent = true;
+			global::Debug.LogWarning("SaveFileHeaderBlank - " + debugFileName);
+			KCrashReporter.ReportErrorDevNotification("SaveFileHeaderBlank", Environment.StackTrace, debugFileName);
+		}
+		SaveGame.GameInfo gameInfo = SaveGame.GetGameInfo(array);
 		if (gameInfo.IsVersionOlderThan(7, 14) && gameInfo.worldTraits != null)
 		{
 			string[] worldTraits = gameInfo.worldTraits;
@@ -135,6 +142,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			{
 				worldTraits[i] = worldTraits[i].Replace('\\', '/');
 			}
+		}
+		if (gameInfo.IsVersionOlderThan(7, 20))
+		{
+			gameInfo.dlcId = "";
 		}
 		return gameInfo;
 	}
@@ -160,19 +171,20 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		Game.Instance.Trigger(-1917495436, null);
 	}
 
-	public List<global::Tuple<string, ScriptableObject>> GetColonyToolTip()
+	public List<global::Tuple<string, TextStyleSetting>> GetColonyToolTip()
 	{
-		List<global::Tuple<string, ScriptableObject>> list = new List<global::Tuple<string, ScriptableObject>>();
-		list.Add(new global::Tuple<string, ScriptableObject>(this.baseName, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+		List<global::Tuple<string, TextStyleSetting>> list = new List<global::Tuple<string, TextStyleSetting>>();
+		list.Add(new global::Tuple<string, TextStyleSetting>(this.baseName, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
 		if (GameClock.Instance != null)
 		{
-			list.Add(new global::Tuple<string, ScriptableObject>(" ", null));
-			list.Add(new global::Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.CYCLES_OLD, GameUtil.GetCurrentCycle()), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
-			list.Add(new global::Tuple<string, ScriptableObject>(string.Format(UI.ASTEROIDCLOCK.TIME_PLAYED, (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00")), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+			list.Add(new global::Tuple<string, TextStyleSetting>(" ", null));
+			list.Add(new global::Tuple<string, TextStyleSetting>(string.Format(UI.ASTEROIDCLOCK.CYCLES_OLD, GameUtil.GetCurrentCycle()), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+			list.Add(new global::Tuple<string, TextStyleSetting>(string.Format(UI.ASTEROIDCLOCK.TIME_PLAYED, (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00")), ToolTipScreen.Instance.defaultTooltipBodyStyle));
 		}
-		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(SaveLoader.Instance.GameInfo.worldID);
-		list.Add(new global::Tuple<string, ScriptableObject>(" ", null));
-		list.Add(new global::Tuple<string, ScriptableObject>(Strings.Get(worldData.name), ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+		int cameraActiveCluster = CameraController.Instance.cameraActiveCluster;
+		WorldContainer world = ClusterManager.Instance.GetWorld(cameraActiveCluster);
+		list.Add(new global::Tuple<string, TextStyleSetting>(" ", null));
+		list.Add(new global::Tuple<string, TextStyleSetting>(world.GetComponent<ClusterGridEntity>().Name, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
 		if (SaveLoader.Instance.GameInfo.worldTraits != null)
 		{
 			string[] worldTraits = SaveLoader.Instance.GameInfo.worldTraits;
@@ -181,11 +193,11 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(worldTraits[i], false);
 				if (cachedTrait != null)
 				{
-					list.Add(new global::Tuple<string, ScriptableObject>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+					list.Add(new global::Tuple<string, TextStyleSetting>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
 				}
 				else
 				{
-					list.Add(new global::Tuple<string, ScriptableObject>(WORLD_TRAITS.MISSING_TRAIT, ToolTipScreen.Instance.defaultTooltipBodyStyle));
+					list.Add(new global::Tuple<string, TextStyleSetting>(WORLD_TRAITS.MISSING_TRAIT, ToolTipScreen.Instance.defaultTooltipBodyStyle));
 				}
 			}
 		}
@@ -224,7 +236,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	[MyCmpReq]
 	public MaterialSelectorSerializer materialSelectorSerializer;
 
-	public WorldGen worldGen;
+	private static bool debug_SaveFileHeaderBlank_sent;
 
 	public struct Header
 	{
@@ -247,19 +259,20 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	public struct GameInfo
 	{
-		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, string worldID, string[] worldTraits, Guid colonyGuid, bool sandboxEnabled = false)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName, string clusterId, string[] worldTraits, Guid colonyGuid, string dlcId, bool sandboxEnabled = false)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;
 			this.baseName = baseName;
 			this.isAutoSave = isAutoSave;
 			this.originalSaveName = originalSaveName;
-			this.worldID = worldID;
+			this.clusterId = clusterId;
 			this.worldTraits = worldTraits;
 			this.colonyGuid = colonyGuid;
 			this.sandboxEnabled = sandboxEnabled;
+			this.dlcId = dlcId;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 17;
+			this.saveMinorVersion = 25;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)
@@ -286,12 +299,14 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 		public int saveMinorVersion;
 
-		public string worldID;
+		public string clusterId;
 
 		public string[] worldTraits;
 
 		public bool sandboxEnabled;
 
 		public Guid colonyGuid;
+
+		public string dlcId;
 	}
 }

@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[Il2CppEagerStaticClassConstruction]
 	[UsedByNativeCode]
-	public struct Vector3Int : IEquatable<Vector3Int>
+	public struct Vector3Int : IEquatable<Vector3Int>, IFormattable
 	{
 		public int x
 		{
@@ -42,6 +46,7 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public Vector3Int(int x, int y, int z)
 		{
 			this.m_X = x;
@@ -49,6 +54,7 @@ namespace UnityEngine
 			this.m_Z = z;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void Set(int x, int y, int z)
 		{
 			this.m_X = x;
@@ -112,26 +118,31 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float Distance(Vector3Int a, Vector3Int b)
 		{
 			return (a - b).magnitude;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int Min(Vector3Int lhs, Vector3Int rhs)
 		{
 			return new Vector3Int(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y), Mathf.Min(lhs.z, rhs.z));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int Max(Vector3Int lhs, Vector3Int rhs)
 		{
 			return new Vector3Int(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y), Mathf.Max(lhs.z, rhs.z));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int Scale(Vector3Int a, Vector3Int b)
 		{
 			return new Vector3Int(a.x * b.x, a.y * b.y, a.z * b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void Scale(Vector3Int scale)
 		{
 			this.x *= scale.x;
@@ -139,6 +150,7 @@ namespace UnityEngine
 			this.z *= scale.z;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void Clamp(Vector3Int min, Vector3Int max)
 		{
 			this.x = Math.Max(min.x, this.x);
@@ -149,82 +161,98 @@ namespace UnityEngine
 			this.z = Math.Min(max.z, this.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static implicit operator Vector3(Vector3Int v)
 		{
 			return new Vector3((float)v.x, (float)v.y, (float)v.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static explicit operator Vector2Int(Vector3Int v)
 		{
 			return new Vector2Int(v.x, v.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int FloorToInt(Vector3 v)
 		{
 			return new Vector3Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y), Mathf.FloorToInt(v.z));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int CeilToInt(Vector3 v)
 		{
 			return new Vector3Int(Mathf.CeilToInt(v.x), Mathf.CeilToInt(v.y), Mathf.CeilToInt(v.z));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int RoundToInt(Vector3 v)
 		{
 			return new Vector3Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), Mathf.RoundToInt(v.z));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int operator +(Vector3Int a, Vector3Int b)
 		{
 			return new Vector3Int(a.x + b.x, a.y + b.y, a.z + b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int operator -(Vector3Int a, Vector3Int b)
 		{
 			return new Vector3Int(a.x - b.x, a.y - b.y, a.z - b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int operator *(Vector3Int a, Vector3Int b)
 		{
 			return new Vector3Int(a.x * b.x, a.y * b.y, a.z * b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int operator -(Vector3Int a)
 		{
 			return new Vector3Int(-a.x, -a.y, -a.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int operator *(Vector3Int a, int b)
 		{
 			return new Vector3Int(a.x * b, a.y * b, a.z * b);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int operator *(int a, Vector3Int b)
 		{
 			return new Vector3Int(a * b.x, a * b.y, a * b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3Int operator /(Vector3Int a, int b)
 		{
 			return new Vector3Int(a.x / b, a.y / b, a.z / b);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static bool operator ==(Vector3Int lhs, Vector3Int rhs)
 		{
 			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static bool operator !=(Vector3Int lhs, Vector3Int rhs)
 		{
 			return !(lhs == rhs);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public override bool Equals(object other)
 		{
 			bool flag = !(other is Vector3Int);
 			return !flag && this.Equals((Vector3Int)other);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public bool Equals(Vector3Int other)
 		{
 			return this == other;
@@ -239,16 +267,21 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("({0}, {1}, {2})", new object[] { this.x, this.y, this.z });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
 			return UnityString.Format("({0}, {1}, {2})", new object[]
 			{
-				this.x.ToString(format),
-				this.y.ToString(format),
-				this.z.ToString(format)
+				this.x.ToString(format, formatProvider),
+				this.y.ToString(format, formatProvider),
+				this.z.ToString(format, formatProvider)
 			});
 		}
 
@@ -300,6 +333,22 @@ namespace UnityEngine
 			}
 		}
 
+		public static Vector3Int forward
+		{
+			get
+			{
+				return Vector3Int.s_Forward;
+			}
+		}
+
+		public static Vector3Int back
+		{
+			get
+			{
+				return Vector3Int.s_Back;
+			}
+		}
+
 		private int m_X;
 
 		private int m_Y;
@@ -317,5 +366,9 @@ namespace UnityEngine
 		private static readonly Vector3Int s_Left = new Vector3Int(-1, 0, 0);
 
 		private static readonly Vector3Int s_Right = new Vector3Int(1, 0, 0);
+
+		private static readonly Vector3Int s_Forward = new Vector3Int(0, 0, 1);
+
+		private static readonly Vector3Int s_Back = new Vector3Int(0, 0, -1);
 	}
 }

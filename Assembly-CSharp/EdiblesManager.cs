@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using TUNING;
+using System.Linq;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/EdiblesManager")]
 public class EdiblesManager : KMonoBehaviour
 {
+	public static List<EdiblesManager.FoodInfo> GetAllFoodTypes()
+	{
+		return EdiblesManager.s_allFoodTypes.Where<EdiblesManager.FoodInfo>((EdiblesManager.FoodInfo x) => DlcManager.IsContentActive(x.DlcId)).ToList<EdiblesManager.FoodInfo>();
+	}
+
 	public static EdiblesManager.FoodInfo GetFoodInfo(string foodID)
 	{
 		string text = foodID.Replace("Compost", "");
-		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
+		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.s_allFoodTypes)
 		{
 			if (foodInfo.Id == text)
 			{
@@ -19,11 +24,14 @@ public class EdiblesManager : KMonoBehaviour
 		return null;
 	}
 
+	private static List<EdiblesManager.FoodInfo> s_allFoodTypes = new List<EdiblesManager.FoodInfo>();
+
 	public class FoodInfo : IConsumableUIItem
 	{
-		public FoodInfo(string id, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime, bool can_rot)
+		public FoodInfo(string id, string dlcId, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime, bool can_rot)
 		{
 			this.Id = id;
+			this.DlcId = dlcId;
 			this.CaloriesPerUnit = caloriesPerUnit;
 			this.Quality = quality;
 			this.PreserveTemperature = preserveTemperatue;
@@ -34,12 +42,15 @@ public class EdiblesManager : KMonoBehaviour
 			this.Name = Strings.Get("STRINGS.ITEMS.FOOD." + id.ToUpper() + ".NAME");
 			this.Description = Strings.Get("STRINGS.ITEMS.FOOD." + id.ToUpper() + ".DESC");
 			this.Effects = new List<string>();
-			FOOD.FOOD_TYPES_LIST.Add(this);
+			EdiblesManager.s_allFoodTypes.Add(this);
 		}
 
-		public EdiblesManager.FoodInfo AddEffects(List<string> effects)
+		public EdiblesManager.FoodInfo AddEffects(List<string> effects, string[] dlcIds)
 		{
-			this.Effects.AddRange(effects);
+			if (DlcManager.IsDlcListValidForCurrentContent(dlcIds))
+			{
+				this.Effects.AddRange(effects);
+			}
 			return this;
 		}
 
@@ -84,6 +95,8 @@ public class EdiblesManager : KMonoBehaviour
 		}
 
 		public string Id;
+
+		public string DlcId;
 
 		public string Name;
 

@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
 
 public class LadderPOIConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		int num = 1;
@@ -17,9 +23,9 @@ public class LadderPOIConfig : IEntityConfig
 		int num5 = num2;
 		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num3, Assets.GetAnim("ladder_poi_kanim"), "off", Grid.SceneLayer.Building, num4, num5, tier, tier2, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num3, Assets.GetAnim("ladder_poi_kanim"), "off", Grid.SceneLayer.Building, num4, num5, tier, tier2, SimHashes.Creature, new List<Tag> { GameTags.Gravitas }, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Polypropylene);
+		component.SetElement(SimHashes.Polypropylene, true);
 		component.Temperature = 294.15f;
 		Ladder ladder = gameObject.AddOrGet<Ladder>();
 		ladder.upwardsMovementSpeedMultiplier = 1.5f;
@@ -29,6 +35,7 @@ public class LadderPOIConfig : IEntityConfig
 		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
 		occupyArea.OccupiedCellsOffsets = EntityTemplates.GenerateOffsets(num, num2);
 		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}
 

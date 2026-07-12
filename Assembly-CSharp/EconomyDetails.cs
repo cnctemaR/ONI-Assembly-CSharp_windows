@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Klei.AI;
 using ProcGen;
-using TUNING;
 using UnityEngine;
 
 public class EconomyDetails
@@ -44,7 +43,7 @@ public class EconomyDetails
 		{
 			this.CreateResource(tag, this.massResourceType);
 		}
-		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
+		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.GetAllFoodTypes())
 		{
 			this.CreateResource(foodInfo.Id.ToTag(), this.amountResourceType);
 		}
@@ -54,7 +53,9 @@ public class EconomyDetails
 			this.CreateTransformation(kprefabID, kprefabID.PrefabTag);
 			if (kprefabID.GetComponent<GeyserConfigurator>() != null)
 			{
-				this.CreateTransformation(kprefabID, kprefabID.PrefabTag + "_ActiveOnly");
+				KPrefabID kprefabID2 = kprefabID;
+				Tag prefabTag = kprefabID.PrefabTag;
+				this.CreateTransformation(kprefabID2, prefabTag.ToString() + "_ActiveOnly");
 			}
 		}
 		foreach (Effect effect in Db.Get().effects.resources)
@@ -269,7 +270,7 @@ public class EconomyDetails
 		string text5 = "B" + (num2 + 5).ToString();
 		o.Write("\n");
 		o.Write("\nTiming:");
-		o.Write("\nTimeInSeconds:," + scenario.timeInSeconds);
+		o.Write("\nTimeInSeconds:," + scenario.timeInSeconds.ToString());
 		o.Write("\nSecondsPerCycle:," + 600f.ToString());
 		o.Write("\nCycles:,=" + text2 + "/" + text5);
 	}
@@ -805,7 +806,7 @@ public class EconomyDetails
 			}
 			list.Add(scenario20);
 		}
-		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
+		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.GetAllFoodTypes())
 		{
 			EconomyDetails.Scenario scenario21 = new EconomyDetails.Scenario("food/" + foodInfo.Id, 0f, null);
 			Tag tag2 = TagManager.Create(foodInfo.Id);
@@ -872,10 +873,10 @@ public class EconomyDetails
 			streamWriter2.Write("Resource,Amount");
 			foreach (EconomyDetails.BiomeTransformation biomeTransformation in list3)
 			{
-				streamWriter2.Write("," + biomeTransformation.tag);
+				streamWriter2.Write("," + biomeTransformation.tag.ToString());
 			}
 			streamWriter2.Write("\n");
-			streamWriter2.Write("Cells, " + details.startingBiomeCellCount + "\n");
+			streamWriter2.Write("Cells, " + details.startingBiomeCellCount.ToString() + "\n");
 			foreach (KeyValuePair<Element, float> keyValuePair in details.startingBiomeAmounts)
 			{
 				streamWriter2.Write(keyValuePair.Key.id.ToString() + ", " + keyValuePair.Value.ToString());
@@ -892,6 +893,45 @@ public class EconomyDetails
 			}
 		}
 		global::Debug.Log("Completed economy details dump!!");
+	}
+
+	private static void DumpNameMapping()
+	{
+		string text = "assets/Tuning/Economy/name_mapping.csv";
+		if (!Directory.Exists("assets/Tuning/Economy"))
+		{
+			Directory.CreateDirectory("assets/Tuning/Economy");
+		}
+		using (StreamWriter streamWriter = new StreamWriter(text))
+		{
+			streamWriter.Write("Game Name, Prefab Name, Anim Files\n");
+			foreach (KPrefabID kprefabID in Assets.Prefabs)
+			{
+				string text2 = TagManager.StripLinkFormatting(kprefabID.GetProperName());
+				Tag tag = kprefabID.PrefabID();
+				if (!text2.IsNullOrWhiteSpace() && !tag.Name.Contains("UnderConstruction") && !tag.Name.Contains("Preview"))
+				{
+					streamWriter.Write(text2);
+					TextWriter textWriter = streamWriter;
+					string text3 = ",";
+					Tag tag2 = tag;
+					textWriter.Write(text3 + tag2.ToString());
+					KAnimControllerBase component = kprefabID.GetComponent<KAnimControllerBase>();
+					if (component != null)
+					{
+						foreach (KAnimFile kanimFile in component.AnimFiles)
+						{
+							streamWriter.Write("," + kanimFile.name);
+						}
+					}
+					else
+					{
+						streamWriter.Write(",");
+					}
+					streamWriter.Write("\n");
+				}
+			}
+		}
 	}
 
 	private List<EconomyDetails.Transformation> transformations = new List<EconomyDetails.Transformation>();

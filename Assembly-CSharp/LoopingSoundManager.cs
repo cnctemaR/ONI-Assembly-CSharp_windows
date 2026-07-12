@@ -25,6 +25,15 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			Game.Instance.Subscribe(-1788536802, new Action<object>(LoopingSoundManager.instance.OnPauseChanged));
 		}
+		Game.Instance.Subscribe(1983128072, delegate(object worlds)
+		{
+			this.OnActiveWorldChanged();
+		});
+	}
+
+	private void OnActiveWorldChanged()
+	{
+		this.StopAllSounds();
 	}
 
 	private void CollectParameterUpdaters()
@@ -320,7 +329,7 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		LoopingSoundManager.Sound data = LoopingSoundManager.Get().sounds.GetData(handle);
 		if (data.IsPlaying)
 		{
-			data.ev.stop(global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			data.ev.stop(LoopingSoundManager.Get().GameIsPaused ? global::FMOD.Studio.STOP_MODE.IMMEDIATE : global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 			data.ev.release();
 			SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(data.path);
 			foreach (SoundDescription.Parameter parameter in soundEventDescription.parameters)
@@ -343,9 +352,19 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		LoopingSoundManager.Get().sounds.Free(handle);
 	}
 
+	public static void PauseSound(HandleVector<int>.Handle handle, bool paused)
+	{
+		LoopingSoundManager.Sound data = LoopingSoundManager.Get().sounds.GetData(handle);
+		if (data.IsPlaying)
+		{
+			data.ev.setPaused(paused);
+		}
+	}
+
 	private void OnPauseChanged(object data)
 	{
 		bool flag = (bool)data;
+		this.GameIsPaused = flag;
 		foreach (LoopingSoundManager.Sound sound in this.sounds.GetDataList())
 		{
 			if (sound.IsPlaying)
@@ -357,6 +376,8 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 	}
 
 	private static LoopingSoundManager instance;
+
+	private bool GameIsPaused;
 
 	private Dictionary<HashedString, LoopingSoundParameterUpdater> parameterUpdaters = new Dictionary<HashedString, LoopingSoundParameterUpdater>();
 

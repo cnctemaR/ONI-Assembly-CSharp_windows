@@ -37,10 +37,11 @@ namespace ProcGen
 			return this.mobkeys;
 		}
 
-		public void Merge(MobSettings other)
+		public MobSettings Merge(MobSettings other)
 		{
 			this.MobLookupTable.Merge(other.MobLookupTable);
 			this.mobkeys = null;
+			return this;
 		}
 
 		public static float AmbientMobDensity = 1f;

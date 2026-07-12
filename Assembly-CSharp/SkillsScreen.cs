@@ -10,6 +10,15 @@ using UnityEngine.UI;
 
 public class SkillsScreen : KModalScreen
 {
+	public override float GetSortKey()
+	{
+		if (base.isEditing)
+		{
+			return 50f;
+		}
+		return 20f;
+	}
+
 	public IAssignableIdentity CurrentlySelectedMinion
 	{
 		get
@@ -31,12 +40,18 @@ public class SkillsScreen : KModalScreen
 		}
 	}
 
+	protected override void OnSpawn()
+	{
+		ClusterManager.Instance.Subscribe(-1078710002, new Action<object>(this.WorldRemoved));
+	}
+
 	protected override void OnActivate()
 	{
 		base.ConsumeMouseScroll = true;
 		base.OnActivate();
 		this.BuildMinions();
 		this.RefreshAll();
+		this.SortRows((this.active_sort_method == null) ? this.compareByMinion : this.active_sort_method);
 		Components.LiveMinionIdentities.OnAdd += this.OnAddMinionIdentity;
 		Components.LiveMinionIdentities.OnRemove += this.OnRemoveMinionIdentity;
 		this.CloseButton.onClick += delegate
@@ -46,17 +61,17 @@ public class SkillsScreen : KModalScreen
 		MultiToggle multiToggle = this.dupeSortingToggle;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
-			this.SortByMinon();
+			this.SortRows(this.compareByMinion);
 		}));
 		MultiToggle multiToggle2 = this.moraleSortingToggle;
 		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(delegate
 		{
-			this.SortByMorale();
+			this.SortRows(this.compareByMorale);
 		}));
 		MultiToggle multiToggle3 = this.experienceSortingToggle;
 		multiToggle3.onClick = (global::System.Action)Delegate.Combine(multiToggle3.onClick, new global::System.Action(delegate
 		{
-			this.SortByExperience();
+			this.SortRows(this.compareByExperience);
 		}));
 	}
 
@@ -68,7 +83,9 @@ public class SkillsScreen : KModalScreen
 			{
 				this.CurrentlySelectedMinion = Components.LiveMinionIdentities.Items[0];
 			}
+			this.BuildMinions();
 			this.RefreshAll();
+			this.SortRows((this.active_sort_method == null) ? this.compareByMinion : this.active_sort_method);
 		}
 		base.OnShow(show);
 	}
@@ -88,13 +105,27 @@ public class SkillsScreen : KModalScreen
 		this.RefreshHat();
 	}
 
+	public void GetMinionIdentity(IAssignableIdentity assignableIdentity, out MinionIdentity minionIdentity, out StoredMinionIdentity storedMinionIdentity)
+	{
+		if (assignableIdentity is MinionAssignablesProxy)
+		{
+			minionIdentity = ((MinionAssignablesProxy)assignableIdentity).GetTargetGameObject().GetComponent<MinionIdentity>();
+			storedMinionIdentity = ((MinionAssignablesProxy)assignableIdentity).GetTargetGameObject().GetComponent<StoredMinionIdentity>();
+			return;
+		}
+		minionIdentity = assignableIdentity as MinionIdentity;
+		storedMinionIdentity = assignableIdentity as StoredMinionIdentity;
+	}
+
 	private void RefreshProgressBars()
 	{
 		if (this.currentlySelectedMinion == null || this.currentlySelectedMinion.IsNull())
 		{
 			return;
 		}
-		MinionIdentity minionIdentity = this.currentlySelectedMinion as MinionIdentity;
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.GetMinionIdentity(this.currentlySelectedMinion, out minionIdentity, out storedMinionIdentity);
 		HierarchyReferences component = this.expectationsTooltip.GetComponent<HierarchyReferences>();
 		component.GetReference("Labels").gameObject.SetActive(minionIdentity != null);
 		component.GetReference("MoraleBar").gameObject.SetActive(minionIdentity != null);
@@ -103,8 +134,8 @@ public class SkillsScreen : KModalScreen
 		this.experienceProgressFill.gameObject.SetActive(minionIdentity != null);
 		if (minionIdentity == null)
 		{
-			this.expectationsTooltip.SetSimpleTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, (this.currentlySelectedMinion as StoredMinionIdentity).GetStorageReason(), this.currentlySelectedMinion.GetProperName()));
-			this.experienceBarTooltip.SetSimpleTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, (this.currentlySelectedMinion as StoredMinionIdentity).GetStorageReason(), this.currentlySelectedMinion.GetProperName()));
+			this.expectationsTooltip.SetSimpleTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, storedMinionIdentity.GetStorageReason(), this.currentlySelectedMinion.GetProperName()));
+			this.experienceBarTooltip.SetSimpleTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, storedMinionIdentity.GetStorageReason(), this.currentlySelectedMinion.GetProperName()));
 			this.EXPCount.text = "";
 			this.duplicantLevelIndicator.text = UI.TABLESCREENS.NA;
 			return;
@@ -113,7 +144,7 @@ public class SkillsScreen : KModalScreen
 		float num = MinionResume.CalculatePreviousExperienceBar(component2.TotalSkillPointsGained);
 		float num2 = MinionResume.CalculateNextExperienceBar(component2.TotalSkillPointsGained);
 		float num3 = (component2.TotalExperienceGained - num) / (num2 - num);
-		this.EXPCount.text = Mathf.RoundToInt(component2.TotalExperienceGained - num) + " / " + Mathf.RoundToInt(num2 - num);
+		this.EXPCount.text = Mathf.RoundToInt(component2.TotalExperienceGained - num).ToString() + " / " + Mathf.RoundToInt(num2 - num).ToString();
 		this.duplicantLevelIndicator.text = component2.AvailableSkillpoints.ToString();
 		this.experienceProgressFill.fillAmount = num3;
 		this.experienceBarTooltip.SetSimpleTooltip(string.Format(UI.SKILLS_SCREEN.EXPERIENCE_TOOLTIP, Mathf.RoundToInt(num2 - num) - Mathf.RoundToInt(component2.TotalExperienceGained - num)));
@@ -227,12 +258,12 @@ public class SkillsScreen : KModalScreen
 		}
 		string text2 = "";
 		Dictionary<string, float> dictionary = new Dictionary<string, float>();
-		text2 = string.Concat(new object[]
+		text2 = string.Concat(new string[]
 		{
 			text2,
 			GameUtil.ApplyBoldString(UI.SKILLS_SCREEN.MORALE),
 			": ",
-			attributeInstance.GetTotalValue(),
+			attributeInstance.GetTotalValue().ToString(),
 			"\n"
 		});
 		for (int l = 0; l < attributeInstance.Modifiers.Count; l++)
@@ -256,12 +287,12 @@ public class SkillsScreen : KModalScreen
 			});
 		}
 		text2 += "\n";
-		text2 = string.Concat(new object[]
+		text2 = string.Concat(new string[]
 		{
 			text2,
 			GameUtil.ApplyBoldString(UI.SKILLS_SCREEN.MORALE_EXPECTATION),
 			": ",
-			attributeInstance2.GetTotalValue(),
+			attributeInstance2.GetTotalValue().ToString(),
 			"\n"
 		});
 		for (int m = 0; m < attributeInstance2.Modifiers.Count; m++)
@@ -273,7 +304,7 @@ public class SkillsScreen : KModalScreen
 				attributeInstance2.Modifiers[m].GetDescription(),
 				": ",
 				(attributeInstance2.Modifiers[m].Value > 0f) ? UIConstants.ColorPrefixRed : UIConstants.ColorPrefixGreen,
-				attributeInstance2.Modifiers[m].GetFormattedString(component2.gameObject),
+				attributeInstance2.Modifiers[m].GetFormattedString(),
 				UIConstants.ColorSuffix,
 				"\n"
 			});
@@ -289,7 +320,9 @@ public class SkillsScreen : KModalScreen
 		}
 		List<IListableOption> list = new List<IListableOption>();
 		string text = "";
-		MinionIdentity minionIdentity = this.currentlySelectedMinion as MinionIdentity;
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.GetMinionIdentity(this.currentlySelectedMinion, out minionIdentity, out storedMinionIdentity);
 		if (minionIdentity != null)
 		{
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
@@ -305,7 +338,6 @@ public class SkillsScreen : KModalScreen
 		}
 		else
 		{
-			StoredMinionIdentity storedMinionIdentity = this.currentlySelectedMinion as StoredMinionIdentity;
 			text = (string.IsNullOrEmpty(storedMinionIdentity.targetHat) ? storedMinionIdentity.currentHat : storedMinionIdentity.targetHat);
 		}
 		this.hatDropDown.openButton.enabled = minionIdentity != null;
@@ -315,7 +347,9 @@ public class SkillsScreen : KModalScreen
 
 	private void OnHatDropEntryClick(IListableOption skill, object data)
 	{
-		MinionIdentity minionIdentity = this.currentlySelectedMinion as MinionIdentity;
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.GetMinionIdentity(this.currentlySelectedMinion, out minionIdentity, out storedMinionIdentity);
 		if (minionIdentity == null)
 		{
 			return;
@@ -344,9 +378,10 @@ public class SkillsScreen : KModalScreen
 				component.ApplyTargetHat();
 			}
 		}
-		foreach (SkillMinionWidget skillMinionWidget in this.minionWidgets)
+		IAssignableIdentity assignableIdentity = minionIdentity.assignableProxy.Get();
+		foreach (SkillMinionWidget skillMinionWidget in this.sortableRows)
 		{
-			if (skillMinionWidget.minion == this.currentlySelectedMinion)
+			if (skillMinionWidget.assignableIdentity == assignableIdentity)
 			{
 				skillMinionWidget.RefreshHat(component.TargetHat);
 			}
@@ -383,26 +418,6 @@ public class SkillsScreen : KModalScreen
 		}
 	}
 
-	public override void OnKeyUp(KButtonEvent e)
-	{
-		if (!e.Consumed && !this.scrollRect.isDragging && e.TryConsume(global::Action.MouseRight))
-		{
-			ManagementMenu.Instance.CloseAll();
-			return;
-		}
-		base.OnKeyUp(e);
-	}
-
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		if (!e.Consumed && e.TryConsume(global::Action.Escape))
-		{
-			ManagementMenu.Instance.CloseAll();
-			return;
-		}
-		base.OnKeyDown(e);
-	}
-
 	private void RefreshSkillWidgets()
 	{
 		int num = 1;
@@ -411,33 +426,46 @@ public class SkillsScreen : KModalScreen
 			List<Skill> skillsBySkillGroup = this.GetSkillsBySkillGroup(skillGroup.Id);
 			if (skillsBySkillGroup.Count > 0)
 			{
-				if (!this.skillGroupRow.ContainsKey(skillGroup.Id))
-				{
-					this.skillGroupRow.Add(skillGroup.Id, num++);
-				}
+				Dictionary<int, int> dictionary = new Dictionary<int, int>();
 				for (int i = 0; i < skillsBySkillGroup.Count; i++)
 				{
 					Skill skill = skillsBySkillGroup[i];
-					if (!this.skillWidgets.ContainsKey(skill.Id))
+					if (!skill.deprecated)
 					{
-						while (skill.tier >= this.skillColumns.Count)
+						if (!this.skillWidgets.ContainsKey(skill.Id))
 						{
-							GameObject gameObject = Util.KInstantiateUI(this.Prefab_skillColumn, this.Prefab_tableLayout, true);
-							this.skillColumns.Add(gameObject);
-							HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-							if (this.skillColumns.Count % 2 == 0)
+							while (skill.tier >= this.skillColumns.Count)
 							{
-								component.GetReference("BG").gameObject.SetActive(false);
+								GameObject gameObject = Util.KInstantiateUI(this.Prefab_skillColumn, this.Prefab_tableLayout, true);
+								this.skillColumns.Add(gameObject);
+								HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+								if (this.skillColumns.Count % 2 == 0)
+								{
+									component.GetReference("BG").gameObject.SetActive(false);
+								}
 							}
+							int num2 = 0;
+							dictionary.TryGetValue(skill.tier, out num2);
+							dictionary[skill.tier] = num2 + 1;
+							GameObject gameObject2 = Util.KInstantiateUI(this.Prefab_skillWidget, this.skillColumns[skill.tier], true);
+							this.skillWidgets.Add(skill.Id, gameObject2);
 						}
-						GameObject gameObject2 = Util.KInstantiateUI(this.Prefab_skillWidget, this.skillColumns[skill.tier], true);
-						this.skillWidgets.Add(skill.Id, gameObject2);
+						this.skillWidgets[skill.Id].GetComponent<SkillWidget>().Refresh(skill.Id);
 					}
-					this.skillWidgets[skill.Id].GetComponent<SkillWidget>().Refresh(skill.Id);
+				}
+				if (!this.skillGroupRow.ContainsKey(skillGroup.Id))
+				{
+					int num3 = 1;
+					foreach (KeyValuePair<int, int> keyValuePair in dictionary)
+					{
+						num3 = Mathf.Max(num3, keyValuePair.Value);
+					}
+					this.skillGroupRow.Add(skillGroup.Id, num);
+					num += num3;
 				}
 			}
 		}
-		foreach (SkillMinionWidget skillMinionWidget in this.minionWidgets)
+		foreach (SkillMinionWidget skillMinionWidget in this.sortableRows)
 		{
 			skillMinionWidget.Refresh();
 		}
@@ -487,8 +515,22 @@ public class SkillsScreen : KModalScreen
 
 	public float GetRowPosition(string skillID)
 	{
-		int num = this.skillGroupRow[Db.Get().Skills.Get(skillID).skillGroup];
-		return (float)(this.layoutRowHeight * (num - 1));
+		Skill skill = Db.Get().Skills.Get(skillID);
+		int num = this.skillGroupRow[skill.skillGroup];
+		List<Skill> skillsBySkillGroup = this.GetSkillsBySkillGroup(skill.skillGroup);
+		int num2 = 0;
+		foreach (Skill skill2 in skillsBySkillGroup)
+		{
+			if (skill2 == skill)
+			{
+				break;
+			}
+			if (skill2.tier == skill.tier)
+			{
+				num2++;
+			}
+		}
+		return (float)(this.layoutRowHeight * (num2 + num - 1));
 	}
 
 	private void OnAddMinionIdentity(MinionIdentity add)
@@ -509,16 +551,16 @@ public class SkillsScreen : KModalScreen
 
 	private void BuildMinions()
 	{
-		for (int i = this.minionWidgets.Count - 1; i >= 0; i--)
+		for (int i = this.sortableRows.Count - 1; i >= 0; i--)
 		{
-			this.minionWidgets[i].DeleteObject();
+			this.sortableRows[i].DeleteObject();
 		}
-		this.minionWidgets.Clear();
+		this.sortableRows.Clear();
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.Prefab_minion, this.Prefab_minionLayout, true);
-			gameObject.GetComponent<SkillMinionWidget>().SetMinon(minionIdentity);
-			this.minionWidgets.Add(gameObject.GetComponent<SkillMinionWidget>());
+			gameObject.GetComponent<SkillMinionWidget>().SetMinon(minionIdentity.assignableProxy.Get());
+			this.sortableRows.Add(gameObject.GetComponent<SkillMinionWidget>());
 		}
 		foreach (MinionStorage minionStorage in Components.MinionStorages.Items)
 		{
@@ -528,14 +570,63 @@ public class SkillsScreen : KModalScreen
 				{
 					StoredMinionIdentity storedMinionIdentity = info.serializedMinion.Get<StoredMinionIdentity>();
 					GameObject gameObject2 = Util.KInstantiateUI(this.Prefab_minion, this.Prefab_minionLayout, true);
-					gameObject2.GetComponent<SkillMinionWidget>().SetMinon(storedMinionIdentity);
-					this.minionWidgets.Add(gameObject2.GetComponent<SkillMinionWidget>());
+					gameObject2.GetComponent<SkillMinionWidget>().SetMinon(storedMinionIdentity.assignableProxy.Get());
+					this.sortableRows.Add(gameObject2.GetComponent<SkillMinionWidget>());
+				}
+			}
+		}
+		foreach (int num in ClusterManager.Instance.GetWorldIDsSorted())
+		{
+			if (ClusterManager.Instance.GetWorld(num).IsDiscovered)
+			{
+				this.AddWorldDivider(num);
+			}
+		}
+		foreach (KeyValuePair<int, GameObject> keyValuePair in this.worldDividers)
+		{
+			keyValuePair.Value.SetActive(ClusterManager.Instance.GetWorld(keyValuePair.Key).IsDiscovered && DlcManager.FeatureClusterSpaceEnabled());
+			Component reference = keyValuePair.Value.GetComponent<HierarchyReferences>().GetReference("NobodyRow");
+			reference.gameObject.SetActive(true);
+			using (IEnumerator enumerator6 = Components.MinionAssignablesProxy.GetEnumerator())
+			{
+				while (enumerator6.MoveNext())
+				{
+					if (((MinionAssignablesProxy)enumerator6.Current).GetTargetGameObject().GetComponent<KMonoBehaviour>().GetMyWorld()
+						.id == keyValuePair.Key)
+					{
+						reference.gameObject.SetActive(false);
+						break;
+					}
 				}
 			}
 		}
 		if (this.CurrentlySelectedMinion == null && Components.LiveMinionIdentities.Count > 0)
 		{
 			this.CurrentlySelectedMinion = Components.LiveMinionIdentities.Items[0];
+		}
+	}
+
+	protected void AddWorldDivider(int worldId)
+	{
+		if (!this.worldDividers.ContainsKey(worldId))
+		{
+			GameObject gameObject = Util.KInstantiateUI(this.Prefab_worldDivider, this.Prefab_minionLayout, true);
+			gameObject.GetComponentInChildren<Image>().color = ClusterManager.worldColors[worldId % ClusterManager.worldColors.Length];
+			ClusterGridEntity component = ClusterManager.Instance.GetWorld(worldId).GetComponent<ClusterGridEntity>();
+			gameObject.GetComponentInChildren<LocText>().SetText(component.Name);
+			gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite = component.GetUISprite();
+			this.worldDividers.Add(worldId, gameObject);
+		}
+	}
+
+	private void WorldRemoved(object worldId)
+	{
+		int num = (int)worldId;
+		GameObject gameObject;
+		if (this.worldDividers.TryGetValue(num, out gameObject))
+		{
+			global::UnityEngine.Object.Destroy(gameObject);
+			this.worldDividers.Remove(num);
 		}
 	}
 
@@ -554,7 +645,7 @@ public class SkillsScreen : KModalScreen
 		List<Skill> list = new List<Skill>();
 		foreach (Skill skill in Db.Get().Skills.resources)
 		{
-			if (skill.skillGroup == skillGrp)
+			if (skill.skillGroup == skillGrp && !skill.deprecated)
 			{
 				list.Add(skill);
 			}
@@ -578,94 +669,65 @@ public class SkillsScreen : KModalScreen
 		this.activeSortToggle.ChangeState(this.sortReversed ? 2 : 1);
 	}
 
-	private void SortByMorale()
+	private void SortRows(Comparison<IAssignableIdentity> comparison)
 	{
-		this.SelectSortToggle(this.moraleSortingToggle);
-		List<SkillMinionWidget> list = this.minionWidgets;
-		list.Sort(delegate(SkillMinionWidget a, SkillMinionWidget b)
+		this.active_sort_method = comparison;
+		Dictionary<IAssignableIdentity, SkillMinionWidget> dictionary = new Dictionary<IAssignableIdentity, SkillMinionWidget>();
+		foreach (SkillMinionWidget skillMinionWidget in this.sortableRows)
 		{
-			MinionIdentity minionIdentity = a.minion as MinionIdentity;
-			MinionIdentity minionIdentity2 = b.minion as MinionIdentity;
-			if (minionIdentity == null && minionIdentity2 == null)
-			{
-				return 0;
-			}
-			if (minionIdentity == null)
-			{
-				return -1;
-			}
-			if (minionIdentity2 == null)
-			{
-				return 1;
-			}
-			MinionResume component = minionIdentity.GetComponent<MinionResume>();
-			MinionResume component2 = minionIdentity2.GetComponent<MinionResume>();
-			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component);
-			AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component);
-			AttributeInstance attributeInstance3 = Db.Get().Attributes.QualityOfLife.Lookup(component2);
-			AttributeInstance attributeInstance4 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component2);
-			float num = attributeInstance.GetTotalValue() / attributeInstance2.GetTotalValue();
-			float num2 = attributeInstance3.GetTotalValue() / attributeInstance4.GetTotalValue();
-			return num.CompareTo(num2);
-		});
-		this.ReorderEntries(list, this.sortReversed);
-	}
-
-	private void SortByMinon()
-	{
-		this.SelectSortToggle(this.dupeSortingToggle);
-		List<SkillMinionWidget> list = this.minionWidgets;
-		list.Sort((SkillMinionWidget a, SkillMinionWidget b) => a.minion.GetProperName().CompareTo(b.minion.GetProperName()));
-		this.ReorderEntries(list, this.sortReversed);
-	}
-
-	private void SortByExperience()
-	{
-		this.SelectSortToggle(this.experienceSortingToggle);
-		List<SkillMinionWidget> list = this.minionWidgets;
-		list.Sort(delegate(SkillMinionWidget a, SkillMinionWidget b)
+			dictionary.Add(skillMinionWidget.assignableIdentity, skillMinionWidget);
+		}
+		Dictionary<int, List<IAssignableIdentity>> minionsByWorld = ClusterManager.Instance.MinionsByWorld;
+		this.sortableRows.Clear();
+		Dictionary<int, int> dictionary2 = new Dictionary<int, int>();
+		int num = 0;
+		int num2 = 0;
+		foreach (KeyValuePair<int, List<IAssignableIdentity>> keyValuePair in minionsByWorld)
 		{
-			MinionIdentity minionIdentity = a.minion as MinionIdentity;
-			MinionIdentity minionIdentity2 = b.minion as MinionIdentity;
-			if (minionIdentity == null && minionIdentity2 == null)
+			dictionary2.Add(keyValuePair.Key, num);
+			num++;
+			List<IAssignableIdentity> list = new List<IAssignableIdentity>();
+			foreach (IAssignableIdentity assignableIdentity in keyValuePair.Value)
 			{
-				return 0;
+				list.Add(assignableIdentity);
 			}
-			if (minionIdentity == null)
+			if (comparison != null)
 			{
-				return -1;
+				list.Sort(comparison);
+				if (this.sortReversed)
+				{
+					list.Reverse();
+				}
 			}
-			if (minionIdentity2 == null)
+			num += list.Count;
+			num2 += list.Count;
+			for (int i = 0; i < list.Count; i++)
 			{
-				return 1;
+				try
+				{
+					IAssignableIdentity assignableIdentity2 = list[i];
+					SkillMinionWidget skillMinionWidget2 = dictionary[assignableIdentity2];
+					this.sortableRows.Add(skillMinionWidget2);
+				}
+				catch
+				{
+					global::Debug.Log("!");
+				}
 			}
-			MinionResume component = minionIdentity.GetComponent<MinionResume>();
-			MinionResume component2 = minionIdentity2.GetComponent<MinionResume>();
-			float num = (float)(component.AvailableSkillpoints / (component.TotalSkillPointsGained + 1));
-			float num2 = (float)(component2.AvailableSkillpoints / (component2.TotalSkillPointsGained + 1));
-			return num.CompareTo(num2);
-		});
-		this.ReorderEntries(list, this.sortReversed);
-	}
-
-	protected void ReorderEntries(List<SkillMinionWidget> sortedEntries, bool reverse)
-	{
-		for (int i = 0; i < sortedEntries.Count; i++)
+		}
+		for (int j = 0; j < this.sortableRows.Count; j++)
 		{
-			if (reverse)
-			{
-				sortedEntries[i].transform.SetSiblingIndex(sortedEntries.Count - 1 - i);
-			}
-			else
-			{
-				sortedEntries[i].transform.SetSiblingIndex(i);
-			}
+			this.sortableRows[j].gameObject.transform.SetSiblingIndex(j);
+		}
+		foreach (KeyValuePair<int, int> keyValuePair2 in dictionary2)
+		{
+			this.worldDividers[keyValuePair2.Key].transform.SetSiblingIndex(keyValuePair2.Value);
 		}
 	}
 
-	private void SetPortraitAnimator(IAssignableIdentity identity)
+	private void SetPortraitAnimator(IAssignableIdentity assignableIdentity)
 	{
-		if (identity == null || identity.IsNull())
+		if (assignableIdentity == null || assignableIdentity.IsNull())
 		{
 			return;
 		}
@@ -681,8 +743,9 @@ public class SkillsScreen : KModalScreen
 		{
 			component.RemoveAccessory(component.GetAccessories()[i].Get());
 		}
-		MinionIdentity minionIdentity = identity as MinionIdentity;
-		StoredMinionIdentity storedMinionIdentity = identity as StoredMinionIdentity;
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.GetMinionIdentity(assignableIdentity, out minionIdentity, out storedMinionIdentity);
 		Accessorizer accessorizer = null;
 		if (minionIdentity != null)
 		{
@@ -700,12 +763,6 @@ public class SkillsScreen : KModalScreen
 				component.AddAccessory(resourceRef2.Get());
 			}
 			text = storedMinionIdentity.currentHat;
-		}
-		HashedString hashedString = "anim_idle_healthy_kanim";
-		this.idle_anim = Assets.GetAnim(hashedString);
-		if (this.idle_anim != null)
-		{
-			this.animController.AddAnimOverrides(this.idle_anim, 0f);
 		}
 		this.animController.Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
 		AccessorySlot hat = Db.Get().AccessorySlots.Hat;
@@ -728,8 +785,6 @@ public class SkillsScreen : KModalScreen
 		this.animController.GetComponent<SymbolOverrideController>().AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, symbol2, 1);
 	}
 
-	public new const float SCREEN_SORT_KEY = 101f;
-
 	[SerializeField]
 	private KButton CloseButton;
 
@@ -749,6 +804,9 @@ public class SkillsScreen : KModalScreen
 	[SerializeField]
 	private GameObject Prefab_tableLayout;
 
+	[SerializeField]
+	private GameObject Prefab_worldDivider;
+
 	[Header("Sort Toggles")]
 	[SerializeField]
 	private MultiToggle dupeSortingToggle;
@@ -762,6 +820,8 @@ public class SkillsScreen : KModalScreen
 	private MultiToggle activeSortToggle;
 
 	private bool sortReversed;
+
+	private Comparison<IAssignableIdentity> active_sort_method;
 
 	[Header("Duplicant Animation")]
 	[SerializeField]
@@ -832,7 +892,11 @@ public class SkillsScreen : KModalScreen
 
 	private IAssignableIdentity currentlySelectedMinion;
 
-	private List<SkillMinionWidget> minionWidgets = new List<SkillMinionWidget>();
+	private List<GameObject> rows = new List<GameObject>();
+
+	private List<SkillMinionWidget> sortableRows = new List<SkillMinionWidget>();
+
+	private Dictionary<int, GameObject> worldDividers = new Dictionary<int, GameObject>();
 
 	private string hoveredSkillID = "";
 
@@ -849,4 +913,56 @@ public class SkillsScreen : KModalScreen
 	private int layoutRowHeight = 80;
 
 	private Coroutine delayRefreshRoutine;
+
+	protected Comparison<IAssignableIdentity> compareByExperience = delegate(IAssignableIdentity a, IAssignableIdentity b)
+	{
+		GameObject targetGameObject = ((MinionAssignablesProxy)a).GetTargetGameObject();
+		GameObject targetGameObject2 = ((MinionAssignablesProxy)b).GetTargetGameObject();
+		if (targetGameObject == null && targetGameObject2 == null)
+		{
+			return 0;
+		}
+		if (targetGameObject == null)
+		{
+			return -1;
+		}
+		if (targetGameObject2 == null)
+		{
+			return 1;
+		}
+		MinionResume component = targetGameObject.GetComponent<MinionResume>();
+		MinionResume component2 = targetGameObject2.GetComponent<MinionResume>();
+		float num = (float)component.AvailableSkillpoints;
+		float num2 = (float)component2.AvailableSkillpoints;
+		return num.CompareTo(num2);
+	};
+
+	protected Comparison<IAssignableIdentity> compareByMinion = (IAssignableIdentity a, IAssignableIdentity b) => a.GetProperName().CompareTo(b.GetProperName());
+
+	protected Comparison<IAssignableIdentity> compareByMorale = delegate(IAssignableIdentity a, IAssignableIdentity b)
+	{
+		GameObject targetGameObject3 = ((MinionAssignablesProxy)a).GetTargetGameObject();
+		GameObject targetGameObject4 = ((MinionAssignablesProxy)b).GetTargetGameObject();
+		if (targetGameObject3 == null && targetGameObject4 == null)
+		{
+			return 0;
+		}
+		if (targetGameObject3 == null)
+		{
+			return -1;
+		}
+		if (targetGameObject4 == null)
+		{
+			return 1;
+		}
+		MinionResume component3 = targetGameObject3.GetComponent<MinionResume>();
+		MinionResume component4 = targetGameObject4.GetComponent<MinionResume>();
+		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component3);
+		Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component3);
+		AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLife.Lookup(component4);
+		Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component4);
+		float totalValue = attributeInstance.GetTotalValue();
+		float totalValue2 = attributeInstance2.GetTotalValue();
+		return totalValue.CompareTo(totalValue2);
+	};
 }

@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Video
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Video/Public/Base/MediaComponent.h")]
+	[UsedByNativeCode]
 	internal class VideoPlayback
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -110,7 +110,7 @@ namespace UnityEngineInternal.Video
 			bool flag = trackIndex >= this.GetAudioTrackCount();
 			if (flag)
 			{
-				throw new ArgumentOutOfRangeException("trackIndex", trackIndex, "VideoPlayback has " + this.GetAudioTrackCount() + " tracks.");
+				throw new ArgumentOutOfRangeException("trackIndex", trackIndex, "VideoPlayback has " + this.GetAudioTrackCount().ToString() + " tracks.");
 			}
 			AudioSampleProvider audioSampleProvider = AudioSampleProvider.Lookup(this.GetAudioSampleProviderId(trackIndex), null, trackIndex);
 			bool flag2 = audioSampleProvider == null;
@@ -126,7 +126,7 @@ namespace UnityEngineInternal.Video
 			bool flag4 = audioSampleProvider.trackIndex != trackIndex;
 			if (flag4)
 			{
-				throw new InvalidOperationException(string.Concat(new object[] { "Internal error: VideoPlayback.GetAudioSampleProvider got provider for track ", audioSampleProvider.trackIndex, " instead of ", trackIndex }));
+				throw new InvalidOperationException("Internal error: VideoPlayback.GetAudioSampleProvider got provider for track " + audioSampleProvider.trackIndex.ToString() + " instead of " + trackIndex.ToString());
 			}
 			return audioSampleProvider;
 		}

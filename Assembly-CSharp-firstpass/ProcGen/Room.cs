@@ -88,7 +88,8 @@ namespace ProcGen
 			Weighted,
 			WeightedBucket,
 			WeightedResample,
-			PickOneWeighted
+			PickOneWeighted,
+			HorizontalSlice
 		}
 	}
 }

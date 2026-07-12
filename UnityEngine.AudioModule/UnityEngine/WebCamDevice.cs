@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -54,14 +55,19 @@ namespace UnityEngine
 			}
 		}
 
+		[NativeName("name")]
 		internal string m_Name;
 
+		[NativeName("depthCameraName")]
 		internal string m_DepthCameraName;
 
+		[NativeName("flags")]
 		internal int m_Flags;
 
+		[NativeName("kind")]
 		internal WebCamKind m_Kind;
 
+		[NativeName("resolutions")]
 		internal Resolution[] m_Resolutions;
 	}
 }

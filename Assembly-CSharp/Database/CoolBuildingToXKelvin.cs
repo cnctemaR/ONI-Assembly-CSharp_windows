@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class CoolBuildingToXKelvin : ColonyAchievementRequirement
+	public class CoolBuildingToXKelvin : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public CoolBuildingToXKelvin(int kelvinToCoolTo)
 		{
@@ -16,14 +15,9 @@ namespace Database
 			return BuildingComplete.MinKelvinSeen <= (float)this.kelvinToCoolTo;
 		}
 
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.kelvinToCoolTo = reader.ReadInt32();
-		}
-
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.kelvinToCoolTo);
 		}
 
 		public override string GetProgress(bool complete)

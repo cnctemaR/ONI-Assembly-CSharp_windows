@@ -6,8 +6,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeConditional("HOT_RELOAD_AVAILABLE")]
 	[NativeType(Header = "Runtime/Export/HotReload/HotReload.bindings.h")]
+	[NativeConditional("HOT_RELOAD_AVAILABLE")]
 	internal static class HotReloadDeserializer
 	{
 		[FreeFunction("HotReload::Prepare")]
@@ -28,8 +28,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void DeserializeAsset(Object asset, byte[] data);
 
-		[NativeThrows]
 		[FreeFunction("HotReload::RemapInstanceIds")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void RemapInstanceIds(Object editorAsset, int[] editorToPlayerInstanceIdMapKeys, int[] editorToPlayerInstanceIdMapValues);
 

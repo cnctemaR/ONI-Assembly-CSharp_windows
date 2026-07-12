@@ -13,6 +13,10 @@ namespace Klei
 
 		public int HeightInCells;
 
+		public int x;
+
+		public int y;
+
 		public byte[] Sim;
 
 		public WorldDetailSave worldDetail;

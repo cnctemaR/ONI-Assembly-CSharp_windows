@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
@@ -30,6 +31,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		base.OnPrefabInit();
 		Components.Crops.Add(this);
+		this.yield = this.GetAttributes().Add(Db.Get().PlantAttributes.YieldAmount);
 	}
 
 	protected override void OnSpawn()
@@ -49,7 +51,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		return this.cropVal.renewable;
 	}
 
-	public void SpawnFruit(object callbackParam)
+	public void SpawnConfiguredFruit(object callbackParam)
 	{
 		if (this == null)
 		{
@@ -58,26 +60,37 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		Crop.CropVal cropVal = this.cropVal;
 		if (!string.IsNullOrEmpty(cropVal.cropId))
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), 0, 0, cropVal.cropId, Grid.SceneLayer.Ore);
-			if (gameObject != null)
+			this.SpawnSomeFruit(cropVal.cropId, this.yield.GetTotalValue());
+			base.Trigger(-1072826864, this);
+		}
+	}
+
+	public void SpawnSomeFruit(Tag cropID, float amount)
+	{
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(cropID), base.transform.GetPosition() + new Vector3(0f, 0.75f, 0f), Grid.SceneLayer.Ore, null, 0);
+		if (gameObject != null)
+		{
+			MutantPlant component = base.GetComponent<MutantPlant>();
+			MutantPlant component2 = gameObject.GetComponent<MutantPlant>();
+			if (component != null && component.IsOriginal && component2 != null && base.GetComponent<SeedProducer>().RollForMutation())
 			{
-				float num = 0.75f;
-				gameObject.transform.SetPosition(gameObject.transform.GetPosition() + new Vector3(0f, num, 0f));
-				gameObject.SetActive(true);
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				component.Units = (float)cropVal.numProduced;
-				component.Temperature = base.gameObject.GetComponent<PrimaryElement>().Temperature;
-				Edible component2 = gameObject.GetComponent<Edible>();
-				if (component2)
-				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.HARVESTED, "{0}", component2.GetProperName()), UI.ENDOFDAYREPORT.NOTES.HARVESTED_CONTEXT);
-				}
+				component2.Mutate();
 			}
-			else
+			gameObject.SetActive(true);
+			PrimaryElement component3 = gameObject.GetComponent<PrimaryElement>();
+			component3.Units = amount;
+			component3.Temperature = base.gameObject.GetComponent<PrimaryElement>().Temperature;
+			base.Trigger(35625290, gameObject);
+			Edible component4 = gameObject.GetComponent<Edible>();
+			if (component4)
 			{
-				DebugUtil.LogErrorArgs(base.gameObject, new object[] { "tried to spawn an invalid crop prefab:", cropVal.cropId });
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component4.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.HARVESTED, "{0}", component4.GetProperName()), UI.ENDOFDAYREPORT.NOTES.HARVESTED_CONTEXT);
+				return;
 			}
-			base.Trigger(-1072826864, null);
+		}
+		else
+		{
+			DebugUtil.LogErrorArgs(base.gameObject, new object[] { "tried to spawn an invalid crop prefab:", cropID });
 		}
 	}
 
@@ -106,34 +119,31 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		Tag tag = new Tag(this.cropVal.cropId);
 		GameObject prefab = Assets.GetPrefab(tag);
 		Edible component = prefab.GetComponent<Edible>();
-		float num = 0f;
-		string text = "";
+		Klei.AI.Attribute yieldAmount = Db.Get().PlantAttributes.YieldAmount;
+		float preModifiedAttributeValue = go.GetComponent<Modifiers>().GetPreModifiedAttributeValue(yieldAmount);
 		if (component != null)
 		{
-			num = component.FoodInfo.CaloriesPerUnit;
-		}
-		float num2 = num * (float)this.cropVal.numProduced;
-		InfoDescription component2 = prefab.GetComponent<InfoDescription>();
-		if (component2)
-		{
-			text = component2.description;
-		}
-		string text2;
-		if (GameTags.DisplayAsCalories.Contains(tag))
-		{
-			text2 = GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true);
-		}
-		else if (GameTags.DisplayAsUnits.Contains(tag))
-		{
-			text2 = GameUtil.GetFormattedUnits((float)this.cropVal.numProduced, GameUtil.TimeSlice.None, false);
+			DebugUtil.Assert(GameTags.DisplayAsCalories.Contains(tag), "Trying to display crop info for an edible fruit which isn't displayed as calories!", tag.ToString());
+			float caloriesPerUnit = component.FoodInfo.CaloriesPerUnit;
+			float num = caloriesPerUnit * preModifiedAttributeValue;
+			string text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+			Descriptor descriptor = new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD, prefab.GetProperName(), text), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD, "", GameUtil.GetFormattedCalories(caloriesPerUnit, GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true)), Descriptor.DescriptorType.Effect, false);
+			list.Add(descriptor);
 		}
 		else
 		{
-			text2 = GameUtil.GetFormattedMass((float)this.cropVal.numProduced, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+			string text;
+			if (GameTags.DisplayAsUnits.Contains(tag))
+			{
+				text = GameUtil.GetFormattedUnits((float)this.cropVal.numProduced, GameUtil.TimeSlice.None, false, "");
+			}
+			else
+			{
+				text = GameUtil.GetFormattedMass((float)this.cropVal.numProduced, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+			}
+			Descriptor descriptor2 = new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_NONFOOD, prefab.GetProperName(), text), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD_NONFOOD, text), Descriptor.DescriptorType.Effect, false);
+			list.Add(descriptor2);
 		}
-		LocString yield = UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD;
-		Descriptor descriptor = new Descriptor(string.Format(yield, prefab.GetProperName(), text2), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD, text, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true)), Descriptor.DescriptorType.Effect, false);
-		list.Add(descriptor);
 		return list;
 	}
 
@@ -155,6 +165,8 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 	private KSelectable selectable;
 
 	public Crop.CropVal cropVal;
+
+	private AttributeInstance yield;
 
 	public string domesticatedDesc = "";
 

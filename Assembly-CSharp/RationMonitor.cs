@@ -5,7 +5,7 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.rationsavailable;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.EventHandler(GameHashes.EatCompleteEater, delegate(RationMonitor.Instance smi, object d)
 		{
 			smi.OnEatComplete(d);

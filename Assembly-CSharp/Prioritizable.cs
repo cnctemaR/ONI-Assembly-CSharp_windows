@@ -44,6 +44,7 @@ public class Prioritizable : KMonoBehaviour
 			this.onPriorityChanged(this.masterPrioritySetting);
 		}
 		this.RefreshHighPriorityNotification();
+		this.RefreshTopPriorityOnWorld();
 		Vector3 position = base.transform.GetPosition();
 		Extents extents = new Extents((int)position.x, (int)position.y, 1, 1);
 		this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.name, this, extents, GameScenePartitioner.Instance.prioritizableObjects, null);
@@ -64,19 +65,45 @@ public class Prioritizable : KMonoBehaviour
 			{
 				this.onPriorityChanged(this.masterPrioritySetting);
 			}
+			this.RefreshTopPriorityOnWorld();
 			this.RefreshHighPriorityNotification();
 		}
+	}
+
+	private void RefreshTopPriorityOnWorld()
+	{
+		this.SetTopPriorityOnWorld(this.IsTopPriority());
+	}
+
+	private void SetTopPriorityOnWorld(bool state)
+	{
+		WorldContainer myWorld = base.gameObject.GetMyWorld();
+		if (Game.Instance == null || myWorld == null)
+		{
+			return;
+		}
+		if (state)
+		{
+			myWorld.AddTopPriorityPrioritizable(this);
+			return;
+		}
+		myWorld.RemoveTopPriorityPrioritizable(this);
 	}
 
 	public void AddRef()
 	{
 		this.refCount++;
+		this.RefreshTopPriorityOnWorld();
 		this.RefreshHighPriorityNotification();
 	}
 
 	public void RemoveRef()
 	{
 		this.refCount--;
+		if (this.IsTopPriority() || this.refCount == 0)
+		{
+			this.SetTopPriorityOnWorld(false);
+		}
 		this.RefreshHighPriorityNotification();
 	}
 
@@ -92,6 +119,19 @@ public class Prioritizable : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
+		WorldContainer myWorld = base.gameObject.GetMyWorld();
+		if (myWorld != null)
+		{
+			myWorld.RemoveTopPriorityPrioritizable(this);
+		}
+		else
+		{
+			global::Debug.LogWarning("World has been destroyed before prioritizable " + base.name);
+			foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+			{
+				worldContainer.RemoveTopPriorityPrioritizable(this);
+			}
+		}
 		base.OnCleanUp();
 		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		Components.Prioritizables.Remove(this);

@@ -10,9 +10,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Export/Shaders/ComputeShader.bindings.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	public sealed class ComputeBuffer : IDisposable
 	{
 		~ComputeBuffer()
@@ -98,6 +98,12 @@ namespace UnityEngine
 		}
 
 		public extern int stride
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		private extern ComputeBufferMode usage
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -199,8 +205,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetNativeData(IntPtr data, int nativeBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
 
-		[SecurityCritical]
 		[FreeFunction(Name = "ComputeShader_Bindings::InternalSetData", HasExplicitThis = true, ThrowsException = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
 
@@ -241,10 +247,44 @@ namespace UnityEngine
 			this.InternalGetData(data, managedBufferStartIndex, computeBufferStartIndex, count, Marshal.SizeOf(data.GetType().GetElementType()));
 		}
 
-		[SecurityCritical]
 		[FreeFunction(Name = "ComputeShader_Bindings::InternalGetData", HasExplicitThis = true, ThrowsException = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalGetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe extern void* BeginBufferWrite(int offset = 0, int size = 0);
+
+		public unsafe NativeArray<T> BeginWrite<T>(int computeBufferStartIndex, int count) where T : struct
+		{
+			bool flag = this.usage != ComputeBufferMode.SubUpdates;
+			if (flag)
+			{
+				throw new ArgumentException("ComputeBuffer must be created with usage mode ComputeBufferMode.SubUpdates to be able to be mapped with BeginWrite");
+			}
+			int num = UnsafeUtility.SizeOf<T>();
+			bool flag2 = computeBufferStartIndex < 0 || count < 0 || (computeBufferStartIndex + count) * num > this.count * this.stride;
+			if (flag2)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (computeBufferStartIndex:{0} count:{1} elementSize:{2}, this.count:{3}, this.stride{4})", new object[] { computeBufferStartIndex, count, num, this.count, this.stride }));
+			}
+			void* ptr = this.BeginBufferWrite(computeBufferStartIndex * num, count * num);
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, count, Allocator.Invalid);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void EndBufferWrite(int bytesWritten = 0);
+
+		public void EndWrite<T>(int countWritten) where T : struct
+		{
+			bool flag = countWritten < 0;
+			if (flag)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (countWritten:{0})", countWritten));
+			}
+			int num = UnsafeUtility.SizeOf<T>();
+			this.EndBufferWrite(countWritten * num);
+		}
 
 		public string name
 		{

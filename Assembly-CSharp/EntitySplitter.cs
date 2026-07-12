@@ -58,6 +58,26 @@ public class EntitySplitter : KMonoBehaviour
 				return false;
 			}
 		}
+		if (pickupable.HasTag(GameTags.Seed) || pickupable.HasTag(GameTags.CropSeed))
+		{
+			MutantPlant component3 = pickupable.GetComponent<MutantPlant>();
+			MutantPlant component4 = other.GetComponent<MutantPlant>();
+			if (component3 != null || component4 != null)
+			{
+				if (component3 == null != (component4 == null))
+				{
+					return false;
+				}
+				if (component3.HasTag(GameTags.UnidentifiedSeed) != component4.HasTag(GameTags.UnidentifiedSeed))
+				{
+					return false;
+				}
+				if (component3.SubSpeciesID != component4.SubSpeciesID)
+				{
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
@@ -96,7 +116,7 @@ public class EntitySplitter : KMonoBehaviour
 		if (storage != null)
 		{
 			storage.Trigger(-1697596308, pickupable.gameObject);
-			storage.Trigger(-778359855, null);
+			storage.Trigger(-778359855, storage);
 		}
 		return component;
 	}

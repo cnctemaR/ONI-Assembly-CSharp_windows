@@ -2,6 +2,7 @@
 using System.IO;
 using FMOD.Studio;
 using Klei;
+using ProcGen;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
@@ -51,7 +52,7 @@ public class PauseScreen : KModalButtonMenu
 		}
 		this.closeButton.onClick += this.OnResume;
 		PauseScreen.instance = this;
-		base.Show(false);
+		this.Show(false);
 	}
 
 	protected override void OnSpawn()
@@ -59,20 +60,39 @@ public class PauseScreen : KModalButtonMenu
 		base.OnSpawn();
 		this.clipboard.GetText = new Func<string>(this.GetClipboardText);
 		this.title.SetText(UI.FRONTEND.PAUSE_SCREEN.TITLE);
-		string settingsCoordinate = CustomGameSettings.Instance.GetSettingsCoordinate();
-		string[] array = CustomGameSettings.Instance.ParseSettingCoordinate(settingsCoordinate);
-		this.worldSeed.SetText(string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED, settingsCoordinate));
-		this.worldSeed.GetComponent<ToolTip>().toolTip = string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED_TOOLTIP, array[1], array[2], array[3]);
+		try
+		{
+			string settingsCoordinate = CustomGameSettings.Instance.GetSettingsCoordinate();
+			string[] array = CustomGameSettings.ParseSettingCoordinate(settingsCoordinate);
+			this.worldSeed.SetText(string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED, settingsCoordinate));
+			this.worldSeed.GetComponent<ToolTip>().toolTip = string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED_TOOLTIP, array[1], array[2], array[3]);
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning(string.Format("Failed to load Coordinates on ClusterLayout {0}, please report this error on the forums", ex));
+			CustomGameSettings.Instance.Print();
+			global::Debug.Log("ClusterCache: " + string.Join(",", SettingsCache.clusterLayouts.clusterCache.Keys));
+			this.worldSeed.SetText(string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED, "0"));
+		}
 	}
 
 	private string GetClipboardText()
 	{
-		return CustomGameSettings.Instance.GetSettingsCoordinate();
+		string text;
+		try
+		{
+			text = CustomGameSettings.Instance.GetSettingsCoordinate();
+		}
+		catch
+		{
+			text = "";
+		}
+		return text;
 	}
 
 	private void OnResume()
 	{
-		base.Show(false);
+		this.Show(false);
 	}
 
 	protected override void OnShow(bool show)
@@ -110,7 +130,7 @@ public class PauseScreen : KModalButtonMenu
 		if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
 		{
 			base.gameObject.SetActive(false);
-			((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, Path.GetFileNameWithoutExtension(filename)), delegate
+			((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, global::System.IO.Path.GetFileNameWithoutExtension(filename)), delegate
 			{
 				this.DoSave(filename);
 				this.gameObject.SetActive(true);
@@ -125,7 +145,6 @@ public class PauseScreen : KModalButtonMenu
 		try
 		{
 			SaveLoader.Instance.Save(filename, false, true);
-			ReportErrorDialog.MOST_RECENT_SAVEFILE = filename;
 		}
 		catch (IOException ex)
 		{
@@ -206,7 +225,7 @@ public class PauseScreen : KModalButtonMenu
 	{
 		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
-			base.Show(false);
+			this.Show(false);
 			return;
 		}
 		base.OnKeyDown(e);
@@ -214,7 +233,6 @@ public class PauseScreen : KModalButtonMenu
 
 	public static void TriggerQuitGame()
 	{
-		SaveGame.Instance.worldGen.Reset();
 		ThreadedHttps<KleiMetrics>.Instance.EndGame();
 		LoadScreen.ForceStopGame();
 		App.LoadScene("frontend");

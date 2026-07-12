@@ -23,7 +23,8 @@ namespace UnityEngine.UI
 
 		public void Cull()
 		{
-			for (int i = 0; i < this.m_Clippers.Count; i++)
+			int count = this.m_Clippers.Count;
+			for (int i = 0; i < count; i++)
 			{
 				this.m_Clippers[i].PerformClipping();
 			}

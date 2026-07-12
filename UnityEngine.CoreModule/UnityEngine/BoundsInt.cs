@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[UsedByNativeCode]
-	public struct BoundsInt : IEquatable<BoundsInt>
+	public struct BoundsInt : IEquatable<BoundsInt>, IFormattable
 	{
 		public int x
 		{
@@ -213,7 +214,21 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("Position: {0}, Size: {1}", new object[] { this.m_Position, this.m_Size });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format)
+		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			return UnityString.Format("Position: {0}, Size: {1}", new object[]
+			{
+				this.m_Position.ToString(format, formatProvider),
+				this.m_Size.ToString(format, formatProvider)
+			});
 		}
 
 		public static bool operator ==(BoundsInt lhs, BoundsInt rhs)
@@ -271,7 +286,7 @@ namespace UnityEngine
 
 			public bool MoveNext()
 			{
-				bool flag = this._current.z >= this._max.z;
+				bool flag = this._current.z >= this._max.z || this._current.y >= this._max.y;
 				bool flag2;
 				if (flag)
 				{
@@ -285,16 +300,21 @@ namespace UnityEngine
 					if (flag3)
 					{
 						this._current.x = this._min.x;
+						bool flag4 = this._current.x >= this._max.x;
+						if (flag4)
+						{
+							return false;
+						}
 						num = this._current.y;
 						this._current.y = num + 1;
-						bool flag4 = this._current.y >= this._max.y;
-						if (flag4)
+						bool flag5 = this._current.y >= this._max.y;
+						if (flag5)
 						{
 							this._current.y = this._min.y;
 							num = this._current.z;
 							this._current.z = num + 1;
-							bool flag5 = this._current.z >= this._max.z;
-							if (flag5)
+							bool flag6 = this._current.z >= this._max.z;
+							if (flag6)
 							{
 								return false;
 							}

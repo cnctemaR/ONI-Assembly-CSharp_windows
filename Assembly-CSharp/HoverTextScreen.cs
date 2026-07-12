@@ -29,12 +29,6 @@ public class HoverTextScreen : KScreen
 
 	private void Update()
 	{
-		Vector3 vector = Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos());
-		if (OverlayScreen.Instance == null || vector.x < 0f || vector.x > Grid.WidthInMeters || vector.y < 0f || vector.y > Grid.HeightInMeters)
-		{
-			this.drawer.SetEnabled(false);
-			return;
-		}
 		bool flag = PlayerController.Instance.ActiveTool.ShowHoverUI();
 		this.drawer.SetEnabled(flag);
 	}

@@ -100,7 +100,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		base.ClearOccupant();
 		if (this.autoReplaceEntity && flag && this.requestedEntityTag.IsValid)
 		{
-			this.CreateOrder(this.requestedEntityTag);
+			this.CreateOrder(this.requestedEntityTag, Tag.Invalid);
 		}
 	}
 

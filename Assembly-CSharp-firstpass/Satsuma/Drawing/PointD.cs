@@ -5,9 +5,9 @@ namespace Satsuma.Drawing
 {
 	public struct PointD : IEquatable<PointD>
 	{
-		public double X { get; private set; }
+		public double X { readonly get; private set; }
 
-		public double Y { get; private set; }
+		public double Y { readonly get; private set; }
 
 		public PointD(double x, double y)
 		{

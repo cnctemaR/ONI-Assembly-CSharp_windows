@@ -29,9 +29,9 @@ public class ImmigrantScreen : CharacterSelectionController
 		this.proceedButton.GetComponentInChildren<LocText>().text = UI.IMMIGRANTSCREEN.PROCEEDBUTTON;
 		this.closeButton.onClick += delegate
 		{
-			base.Show(false);
+			this.Show(false);
 		};
-		base.Show(false);
+		this.Show(false);
 	}
 
 	protected override void OnShow(bool show)
@@ -70,7 +70,7 @@ public class ImmigrantScreen : CharacterSelectionController
 
 	public override void Deactivate()
 	{
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public static void InitializeImmigrantScreen(Telepad telepad)
@@ -96,7 +96,7 @@ public class ImmigrantScreen : CharacterSelectionController
 	protected override void OnProceed()
 	{
 		this.telepad.OnAcceptDelivery(this.selectedDeliverables[0]);
-		base.Show(false);
+		this.Show(false);
 		this.containers.ForEach(delegate(ITelepadDeliverableContainer cc)
 		{
 			global::UnityEngine.Object.Destroy(cc.GetGameObject());
@@ -127,7 +127,7 @@ public class ImmigrantScreen : CharacterSelectionController
 		});
 		this.containers.Clear();
 		this.rejectConfirmationScreen.SetActive(false);
-		base.Show(false);
+		this.Show(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 	}

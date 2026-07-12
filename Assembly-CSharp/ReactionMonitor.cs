@@ -6,7 +6,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.idle;
-		base.serializable = false;
+		base.serializable = StateMachine.SerializeType.Never;
 		this.idle.Enter("ClearReactable", delegate(ReactionMonitor.Instance smi)
 		{
 			this.reactable.Set(null, smi);

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Klei.AI;
+using ProcGenGame;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/Scenario")]
@@ -19,10 +20,10 @@ public class Scenario : KMonoBehaviour
 	{
 		Scenario.Instance = this;
 		SaveLoader instance = SaveLoader.Instance;
-		instance.OnWorldGenComplete = (global::System.Action)Delegate.Combine(instance.OnWorldGenComplete, new global::System.Action(this.OnWorldGenComplete));
+		instance.OnWorldGenComplete = (Action<Cluster>)Delegate.Combine(instance.OnWorldGenComplete, new Action<Cluster>(this.OnWorldGenComplete));
 	}
 
-	private void OnWorldGenComplete()
+	private void OnWorldGenComplete(Cluster clusterLayout)
 	{
 		this.Init();
 	}
@@ -565,7 +566,14 @@ public class Scenario : KMonoBehaviour
 			DebugUtil.LogErrorArgs(new object[] { "Missing def for", prefab_id });
 		}
 		Element element2 = ElementLoader.FindElementByHash(element);
-		global::Debug.Assert(element2 != null, "Missing primary element.");
+		global::Debug.Assert(element2 != null, string.Concat(new string[]
+		{
+			"Missing primary element '",
+			Enum.GetName(typeof(SimHashes), element),
+			"' in '",
+			prefab_id,
+			"'"
+		}));
 		GameObject gameObject = buildingDef.Build(buildingDef.GetBuildingCell(num), Orientation.Neutral, null, new Tag[]
 		{
 			element2.tag,

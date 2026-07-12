@@ -129,12 +129,12 @@ namespace UnityEngine.TextCore
 		[NativeName("metrics")]
 		private GlyphMetrics m_Metrics;
 
-		[SerializeField]
 		[NativeName("glyphRect")]
+		[SerializeField]
 		private GlyphRect m_GlyphRect;
 
-		[NativeName("scale")]
 		[SerializeField]
+		[NativeName("scale")]
 		private float m_Scale;
 
 		[SerializeField]

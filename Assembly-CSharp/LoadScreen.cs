@@ -92,7 +92,7 @@ public class LoadScreen : KModalScreen
 		}
 	}
 
-	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetColonies(List<string> files)
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetColoniesDetails(List<SaveLoader.SaveFileEntry> files)
 	{
 		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> dictionary = new Dictionary<string, List<LoadScreen.SaveGameFileDetails>>();
 		if (files.Count <= 0)
@@ -101,26 +101,26 @@ public class LoadScreen : KModalScreen
 		}
 		for (int i = 0; i < files.Count; i++)
 		{
-			if (this.IsFileValid(files[i]))
+			if (this.IsFileValid(files[i].path))
 			{
-				global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = SaveGame.GetFileInfo(files[i]);
+				global::Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = SaveGame.GetFileInfo(files[i].path);
 				SaveGame.Header first = fileInfo.first;
 				SaveGame.GameInfo second = fileInfo.second;
-				global::System.DateTime lastWriteTime = File.GetLastWriteTime(files[i]);
+				global::System.DateTime timeStamp = files[i].timeStamp;
 				long num = 0L;
 				try
 				{
-					num = new FileInfo(files[i]).Length;
+					num = new FileInfo(files[i].path).Length;
 				}
 				catch (Exception ex)
 				{
-					global::Debug.LogWarning("Failed to get size for file: " + files[i] + "\n" + ex.ToString());
+					global::Debug.LogWarning("Failed to get size for file: " + files[i].ToString() + "\n" + ex.ToString());
 				}
 				LoadScreen.SaveGameFileDetails saveGameFileDetails = new LoadScreen.SaveGameFileDetails
 				{
 					BaseName = second.baseName,
-					FileName = files[i],
-					FileDate = lastWriteTime,
+					FileName = files[i].path,
+					FileDate = timeStamp,
 					FileHeader = first,
 					FileInfo = second,
 					Size = num,
@@ -136,22 +136,22 @@ public class LoadScreen : KModalScreen
 		return dictionary;
 	}
 
-	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetColonies()
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetColonies(bool sort)
 	{
-		List<string> allFiles = SaveLoader.GetAllFiles(SaveLoader.SaveType.both);
-		return this.GetColonies(allFiles);
+		List<SaveLoader.SaveFileEntry> allFiles = SaveLoader.GetAllFiles(sort, SaveLoader.SaveType.both);
+		return this.GetColoniesDetails(allFiles);
 	}
 
-	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetLocalColonies()
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetLocalColonies(bool sort)
 	{
-		List<string> allFiles = SaveLoader.GetAllFiles(SaveLoader.SaveType.local);
-		return this.GetColonies(allFiles);
+		List<SaveLoader.SaveFileEntry> allFiles = SaveLoader.GetAllFiles(sort, SaveLoader.SaveType.local);
+		return this.GetColoniesDetails(allFiles);
 	}
 
-	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetCloudColonies()
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> GetCloudColonies(bool sort)
 	{
-		List<string> allFiles = SaveLoader.GetAllFiles(SaveLoader.SaveType.cloud);
-		return this.GetColonies(allFiles);
+		List<SaveLoader.SaveFileEntry> allFiles = SaveLoader.GetAllFiles(sort, SaveLoader.SaveType.cloud);
+		return this.GetColoniesDetails(allFiles);
 	}
 
 	private bool IsFileValid(string filename)
@@ -180,7 +180,7 @@ public class LoadScreen : KModalScreen
 		{
 			return;
 		}
-		foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in this.GetColonies())
+		foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in this.GetColonies(false))
 		{
 			bool flag = false;
 			List<LoadScreen.SaveGameFileDetails> list = new List<LoadScreen.SaveGameFileDetails>();
@@ -283,7 +283,7 @@ public class LoadScreen : KModalScreen
 			this.colonyListPool.ClearAll();
 		}
 		this.CheckCloudLocalOverlap();
-		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> colonies = this.GetColonies();
+		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> colonies = this.GetColonies(true);
 		if (colonies.Count > 0)
 		{
 			foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in colonies)
@@ -465,10 +465,10 @@ public class LoadScreen : KModalScreen
 	private int CountValidSaves(string path, SearchOption searchType = SearchOption.AllDirectories)
 	{
 		int num = 0;
-		List<string> saveFiles = SaveLoader.GetSaveFiles(path, searchType);
+		List<SaveLoader.SaveFileEntry> saveFiles = SaveLoader.GetSaveFiles(path, false, searchType);
 		for (int i = 0; i < saveFiles.Count; i++)
 		{
-			if (this.IsFileValid(saveFiles[i]))
+			if (this.IsFileValid(saveFiles[i].path))
 			{
 				num++;
 			}
@@ -489,40 +489,40 @@ public class LoadScreen : KModalScreen
 		errorMessage = null;
 		int num = 0;
 		string savePrefixAndCreateFolder = SaveLoader.GetSavePrefixAndCreateFolder();
-		List<string> saveFiles = SaveLoader.GetSaveFiles(savePrefixAndCreateFolder, SearchOption.TopDirectoryOnly);
+		List<SaveLoader.SaveFileEntry> saveFiles = SaveLoader.GetSaveFiles(savePrefixAndCreateFolder, false, SearchOption.TopDirectoryOnly);
 		for (int i = 0; i < saveFiles.Count; i++)
 		{
-			string text = saveFiles[i];
-			if (this.IsFileValid(text))
+			SaveLoader.SaveFileEntry saveFileEntry = saveFiles[i];
+			if (this.IsFileValid(saveFileEntry.path))
 			{
-				string text2;
-				if (this.MigrateSave(savePrefixAndCreateFolder, text, false, out text2))
+				string text;
+				if (this.MigrateSave(savePrefixAndCreateFolder, saveFileEntry.path, false, out text))
 				{
 					num++;
 				}
 				else if (errorColony == null)
 				{
-					errorColony = text;
-					errorMessage = text2;
+					errorColony = saveFileEntry.path;
+					errorMessage = text;
 				}
 			}
 		}
 		int num2 = 0;
-		List<string> saveFiles2 = SaveLoader.GetSaveFiles(SaveLoader.GetAutoSavePrefix(), SearchOption.AllDirectories);
+		List<SaveLoader.SaveFileEntry> saveFiles2 = SaveLoader.GetSaveFiles(SaveLoader.GetAutoSavePrefix(), false, SearchOption.AllDirectories);
 		for (int j = 0; j < saveFiles2.Count; j++)
 		{
-			string text3 = saveFiles2[j];
-			if (this.IsFileValid(text3))
+			SaveLoader.SaveFileEntry saveFileEntry2 = saveFiles2[j];
+			if (this.IsFileValid(saveFileEntry2.path))
 			{
-				string text4;
-				if (this.MigrateSave(savePrefixAndCreateFolder, text3, true, out text4))
+				string text2;
+				if (this.MigrateSave(savePrefixAndCreateFolder, saveFileEntry2.path, true, out text2))
 				{
 					num2++;
 				}
 				else if (errorColony == null)
 				{
-					errorColony = text3;
-					errorMessage = text4;
+					errorColony = saveFileEntry2.path;
+					errorMessage = text2;
 				}
 			}
 		}
@@ -580,7 +580,7 @@ public class LoadScreen : KModalScreen
 			{
 				moreInfoButton.gameObject.SetActive(true);
 			}
-			MainMenu.Instance.RefreshResumeButton();
+			MainMenu.Instance.RefreshResumeButton(false);
 			this.RefreshColonyList();
 		};
 		continueButton.ClearOnClick();
@@ -668,7 +668,7 @@ public class LoadScreen : KModalScreen
 
 	private void DoConvertAllToLocal()
 	{
-		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> cloudColonies = this.GetCloudColonies();
+		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> cloudColonies = this.GetCloudColonies(false);
 		if (cloudColonies.Count == 0)
 		{
 			return;
@@ -684,13 +684,13 @@ public class LoadScreen : KModalScreen
 			this.ShowSimpleDialog(UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_TO_LOCAL_SUCCESS.Replace("{Client}", text));
 		}
 		this.RefreshColonyList();
-		MainMenu.Instance.RefreshResumeButton();
+		MainMenu.Instance.RefreshResumeButton(false);
 		SaveLoader.SetCloudSavesDefault(false);
 	}
 
 	private void DoConvertAllToCloud()
 	{
-		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> localColonies = this.GetLocalColonies();
+		Dictionary<string, List<LoadScreen.SaveGameFileDetails>> localColonies = this.GetLocalColonies(false);
 		if (localColonies.Count == 0)
 		{
 			return;
@@ -715,7 +715,7 @@ public class LoadScreen : KModalScreen
 			this.ShowSimpleDialog(UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD, UI.FRONTEND.LOADSCREEN.CONVERT_ALL_TO_CLOUD_SUCCESS.Replace("{Client}", text2));
 		}
 		this.RefreshColonyList();
-		MainMenu.Instance.RefreshResumeButton();
+		MainMenu.Instance.RefreshResumeButton(false);
 		SaveLoader.SetCloudSavesDefault(true);
 	}
 
@@ -788,13 +788,9 @@ public class LoadScreen : KModalScreen
 
 	private bool CheckSave(LoadScreen.SaveGameFileDetails save, LocText display)
 	{
-		if (LoadScreen.IsSaveFileFromSpacedOut(save.FileHeader, save.FileInfo))
+		if (LoadScreen.IsSaveFileFromUninstalledDLC(save.FileInfo) && display != null)
 		{
-			if (display != null)
-			{
-				display.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_FROM_SPACED_OUT, save.FileInfo.saveMinorVersion, 17);
-			}
-			return false;
+			display.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_MISSING_CONTENT, save.FileName);
 		}
 		if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(save.FileHeader, save.FileInfo))
 		{
@@ -805,8 +801,8 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					469300U,
-					17
+					471531U,
+					25
 				});
 			}
 			return false;
@@ -821,7 +817,7 @@ public class LoadScreen : KModalScreen
 					save.FileInfo.saveMajorVersion,
 					save.FileInfo.saveMinorVersion,
 					7,
-					17
+					25
 				});
 			}
 			return false;
@@ -834,15 +830,24 @@ public class LoadScreen : KModalScreen
 		HierarchyReferences component = this.colonyViewRoot.GetComponent<HierarchyReferences>();
 		component.GetReference<RectTransform>("Title").GetComponent<LocText>().text = save.BaseName;
 		component.GetReference<RectTransform>("Date").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate);
-		TMP_Text reference = component.GetReference<LocText>("InfoWorld");
-		string text = save.FileInfo.worldID;
-		if (text == null)
+		string text = save.FileInfo.clusterId;
+		if (text != null && !SettingsCache.clusterLayouts.clusterCache.ContainsKey(text))
 		{
-			text = "worlds/SandstoneDefault";
+			string text2 = SettingsCache.GetScope("EXPANSION1_ID") + text;
+			if (SettingsCache.clusterLayouts.clusterCache.ContainsKey(text2))
+			{
+				text = text2;
+			}
+			else
+			{
+				DebugUtil.DevLogError("Failed to find cluster " + text + " including the scoped path, setting to default cluster name.");
+				global::Debug.Log("ClusterCache: " + string.Join(",", SettingsCache.clusterLayouts.clusterCache.Keys));
+				text = WorldGenSettings.ClusterDefaultName;
+			}
 		}
-		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(text);
-		string text2 = ((worldData != null) ? Strings.Get(worldData.name) : " - ");
-		reference.text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_INFO_FMT, UI.FRONTEND.LOADSCREEN.WORLD_NAME, text2);
+		global::ProcGen.World world = ((text != null) ? SettingsCache.clusterLayouts.GetWorldData(text, 0) : null);
+		string text3 = ((world != null) ? Strings.Get(world.name) : " - ");
+		component.GetReference<LocText>("InfoWorld").text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_INFO_FMT, UI.FRONTEND.LOADSCREEN.WORLD_NAME, text3);
 		component.GetReference<LocText>("InfoCycles").text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_INFO_FMT, UI.FRONTEND.LOADSCREEN.CYCLES_SURVIVED, save.FileInfo.numberOfCycles);
 		component.GetReference<LocText>("InfoDupes").text = string.Format(UI.FRONTEND.LOADSCREEN.COLONY_INFO_FMT, UI.FRONTEND.LOADSCREEN.DUPLICANTS_ALIVE, save.FileInfo.numberOfDuplicants);
 		TMP_Text component2 = component.GetReference<RectTransform>("FileSize").GetComponent<LocText>();
@@ -926,14 +931,14 @@ public class LoadScreen : KModalScreen
 			button.ClearOnClick();
 			button.onClick += delegate
 			{
-				this.UpdateSelected(button, save.FileName);
+				this.UpdateSelected(button, save.FileName, save.FileInfo.dlcId);
 				this.ShowColonySave(save);
 			};
 			if (flag)
 			{
 				button.onDoubleClick += delegate
 				{
-					this.UpdateSelected(button, save.FileName);
+					this.UpdateSelected(button, save.FileName, save.FileInfo.dlcId);
 					this.Load();
 				};
 			}
@@ -948,13 +953,13 @@ public class LoadScreen : KModalScreen
 			{
 				component4.onClick += delegate
 				{
-					this.UpdateSelected(button, save.FileName);
+					this.UpdateSelected(button, save.FileName, save.FileInfo.dlcId);
 					this.Load();
 				};
 			}
 			if (j == selectIndex)
 			{
-				this.UpdateSelected(button, save.FileName);
+				this.UpdateSelected(button, save.FileName, save.FileInfo.dlcId);
 				this.ShowColonySave(save);
 			}
 		}
@@ -969,7 +974,8 @@ public class LoadScreen : KModalScreen
 		HierarchyReferences freeElement = this.colonyListPool.GetFreeElement(this.saveButtonRoot, true);
 		saves.Sort((LoadScreen.SaveGameFileDetails x, LoadScreen.SaveGameFileDetails y) => y.FileDate.CompareTo(x.FileDate));
 		LoadScreen.SaveGameFileDetails firstSave = saves[0];
-		bool flag = LoadScreen.IsSaveFileFromSpacedOut(firstSave.FileHeader, firstSave.FileInfo);
+		string text;
+		bool flag = LoadScreen.IsSaveFromCurrentDLC(firstSave.FileInfo, out text);
 		string colonyName = firstSave.BaseName;
 		ValueTuple<int, int, ulong> savesSizeAndCounts = this.GetSavesSizeAndCounts(saves);
 		int item = savesSizeAndCounts.Item1;
@@ -997,12 +1003,12 @@ public class LoadScreen : KModalScreen
 			global::System.Action <>9__5;
 			cloudButton.onClick += delegate
 			{
-				string text = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL_DETAILS);
+				string text2 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL_DETAILS);
 				LoadScreen <>4__this = this;
-				string text2 = text;
-				string text3 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL;
-				string text4 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
-				string text5 = null;
+				string text3 = text2;
+				string text4 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_LOCAL;
+				string text5 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
+				string text6 = null;
 				global::System.Action action;
 				if ((action = <>9__5) == null)
 				{
@@ -1013,22 +1019,22 @@ public class LoadScreen : KModalScreen
 						locationText.text = (isLocal ? UI.FRONTEND.LOADSCREEN.LOCAL_SAVE : UI.FRONTEND.LOADSCREEN.CLOUD_SAVE);
 						this.ConvertColonyToLocal(colonyName);
 						this.RefreshColonyList();
-						MainMenu.Instance.RefreshResumeButton();
+						MainMenu.Instance.RefreshResumeButton(false);
 					});
 				}
-				<>4__this.ConfirmCloudSaveMigrations(text2, text3, text4, text5, action, null, this.cloudToLocalSprite);
+				<>4__this.ConfirmCloudSaveMigrations(text3, text4, text5, text6, action, null, this.cloudToLocalSprite);
 			};
 			localButton.gameObject.SetActive(isLocal);
 			localButton.ClearOnClick();
 			global::System.Action <>9__6;
 			localButton.onClick += delegate
 			{
-				string text6 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD_DETAILS);
+				string text7 = string.Format("{0}\n", UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD_DETAILS);
 				LoadScreen <>4__this2 = this;
-				string text7 = text6;
-				string text8 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD;
-				string text9 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
-				string text10 = null;
+				string text8 = text7;
+				string text9 = UI.FRONTEND.LOADSCREEN.CONVERT_TO_CLOUD;
+				string text10 = UI.FRONTEND.LOADSCREEN.CONVERT_COLONY;
+				string text11 = null;
 				global::System.Action action2;
 				if ((action2 = <>9__6) == null)
 				{
@@ -1039,16 +1045,16 @@ public class LoadScreen : KModalScreen
 						locationText.text = (isLocal ? UI.FRONTEND.LOADSCREEN.LOCAL_SAVE : UI.FRONTEND.LOADSCREEN.CLOUD_SAVE);
 						this.ConvertColonyToCloud(colonyName);
 						this.RefreshColonyList();
-						MainMenu.Instance.RefreshResumeButton();
+						MainMenu.Instance.RefreshResumeButton(false);
 					});
 				}
-				<>4__this2.ConfirmCloudSaveMigrations(text7, text8, text9, text10, action2, null, this.localToCloudSprite);
+				<>4__this2.ConfirmCloudSaveMigrations(text8, text9, text10, text11, action2, null, this.localToCloudSprite);
 			};
 		}
 		KButton component2 = freeElement.GetReference<RectTransform>("Button").GetComponent<KButton>();
 		component2.ClearOnClick();
-		component2.isInteractable = !flag;
-		reference.gameObject.SetActive(flag);
+		component2.isInteractable = flag;
+		reference.gameObject.SetActive(DlcManager.IsExpansion1Id(firstSave.FileInfo.dlcId));
 		component2.onClick += delegate
 		{
 			this.ShowColony(saves, -1);
@@ -1057,7 +1063,7 @@ public class LoadScreen : KModalScreen
 		{
 			component2.onDoubleClick += delegate
 			{
-				this.UpdateSelected(null, firstSave.FileName);
+				this.UpdateSelected(null, firstSave.FileName, firstSave.FileInfo.dlcId);
 				this.Load();
 			};
 		}
@@ -1104,15 +1110,34 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 17) || header.buildVersion > 469300U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 25) || header.buildVersion > 471531U;
 	}
 
-	private static bool IsSaveFileFromSpacedOut(SaveGame.Header header, SaveGame.GameInfo gameInfo)
+	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
 	{
-		return gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 17;
+		string dlcId = gameInfo.dlcId;
+		if (dlcId != null)
+		{
+			if (dlcId == "EXPANSION1_ID")
+			{
+				saveDlcName = UI.DLC1.NAME_ITAL;
+				goto IL_003E;
+			}
+			if (dlcId != null && dlcId.Length != 0)
+			{
+			}
+		}
+		saveDlcName = UI.VANILLA.NAME_ITAL;
+		IL_003E:
+		return gameInfo.dlcId == DlcManager.GetHighestActiveDlcId();
 	}
 
-	private void UpdateSelected(KButton button, string filename)
+	private static bool IsSaveFileFromUninstalledDLC(SaveGame.GameInfo gameInfo)
+	{
+		return DlcManager.IsContentActive(gameInfo.dlcId);
+	}
+
+	private void UpdateSelected(KButton button, string filename, string dlcId)
 	{
 		if (this.selectedSave != null && this.selectedSave.button != null)
 		{
@@ -1124,6 +1149,7 @@ public class LoadScreen : KModalScreen
 		}
 		this.selectedSave.button = button;
 		this.selectedSave.filename = filename;
+		this.selectedSave.dlcId = dlcId;
 		if (this.selectedSave.button != null)
 		{
 			this.selectedSave.button.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
@@ -1132,6 +1158,17 @@ public class LoadScreen : KModalScreen
 
 	private void Load()
 	{
+		if (this.selectedSave.dlcId != DlcManager.GetHighestActiveDlcId())
+		{
+			string text = (DlcManager.IsVanillaId(this.selectedSave.dlcId) ? UI.FRONTEND.LOADSCREEN.VANILLA_RESTART : UI.FRONTEND.LOADSCREEN.EXPANSION1_RESTART);
+			this.ConfirmDoAction(text, delegate
+			{
+				DlcManager.SetExpansion1Enabled(!DlcManager.IsExpansion1Active());
+				KPlayerPrefs.SetString("AutoResumeSaveFile", this.selectedSave.filename);
+				App.instance.Restart();
+			});
+			return;
+		}
 		LoadingOverlay.Load(new global::System.Action(this.DoLoad));
 	}
 
@@ -1147,21 +1184,21 @@ public class LoadScreen : KModalScreen
 
 	private static void DoLoad(string filename)
 	{
-		ReportErrorDialog.MOST_RECENT_SAVEFILE = filename;
+		KCrashReporter.MOST_RECENT_SAVEFILE = filename;
 		bool flag = true;
 		SaveGame.Header header;
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 469300U)
+		if (header.buildVersion > 471531U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 469300U.ToString();
+			text2 = 471531U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 17);
+			text2 = string.Format("v{0}.{1}", 7, 25);
 		}
 		if (!flag)
 		{
@@ -1201,6 +1238,7 @@ public class LoadScreen : KModalScreen
 				{
 					onDelete();
 				}
+				MainMenu.Instance.RefreshResumeButton(false);
 			}
 			catch (SystemException ex)
 			{
@@ -1350,6 +1388,8 @@ public class LoadScreen : KModalScreen
 	private class SelectedSave
 	{
 		public string filename;
+
+		public string dlcId;
 
 		public KButton button;
 	}

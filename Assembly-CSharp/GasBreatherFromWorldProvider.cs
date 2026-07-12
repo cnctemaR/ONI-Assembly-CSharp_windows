@@ -50,6 +50,10 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		{
 			return;
 		}
+		if (ElementLoader.elements[(int)mass_cb_info.elemIdx].id == SimHashes.ContaminatedOxygen)
+		{
+			this.oxygenBreather.Trigger(-935848905, mass_cb_info);
+		}
 		Game.Instance.accumulators.Accumulate(this.oxygenBreather.O2Accumulator, mass_cb_info.mass);
 		float num = -mass_cb_info.mass;
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, this.oxygenBreather.GetProperName(), null);

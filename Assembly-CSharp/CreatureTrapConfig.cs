@@ -19,13 +19,14 @@ public class CreatureTrapConfig : IBuildingConfig
 		storage.allowItemRemoval = true;
 		storage.SetDefaultStoredItemModifiers(CreatureTrapConfig.StoredItemModifiers);
 		storage.sendOnStoreOnSpawn = true;
-		Trap trap = go.AddOrGet<Trap>();
-		trap.trappableCreatures = new Tag[]
+		TrapTrigger trapTrigger = go.AddOrGet<TrapTrigger>();
+		trapTrigger.trappableCreatures = new Tag[]
 		{
 			GameTags.Creatures.Walker,
 			GameTags.Creatures.Hoverer
 		};
-		trap.trappedOffset = new Vector2(0.5f, 0f);
+		trapTrigger.trappedOffset = new Vector2(0.5f, 0f);
+		go.AddOrGet<Trap>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

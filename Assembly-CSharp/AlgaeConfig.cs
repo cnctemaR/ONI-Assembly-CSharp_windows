@@ -12,6 +12,11 @@ public class AlgaeConfig : IOreConfig
 		}
 	}
 
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		return EntityTemplates.CreateSolidOreEntity(this.ElementID, new List<Tag> { GameTags.Life });

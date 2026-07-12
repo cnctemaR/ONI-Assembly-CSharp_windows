@@ -71,9 +71,9 @@ namespace UnityEngine.Rendering
 
 		public ShaderKeyword[] GetShaderKeywords()
 		{
-			ShaderKeyword[] array = new ShaderKeyword[320];
+			ShaderKeyword[] array = new ShaderKeyword[448];
 			int num = 0;
-			for (int i = 0; i < 320; i++)
+			for (int i = 0; i < 448; i++)
 			{
 				ShaderKeyword shaderKeyword = new ShaderKeyword(i);
 				bool flag = this.IsEnabled(shaderKeyword);
@@ -89,12 +89,12 @@ namespace UnityEngine.Rendering
 
 		private const int k_SizeInBits = 32;
 
-		[FixedBuffer(typeof(uint), 10)]
+		[FixedBuffer(typeof(uint), 14)]
 		internal ShaderKeywordSet.<m_Bits>e__FixedBuffer m_Bits;
 
 		[CompilerGenerated]
 		[UnsafeValueType]
-		[StructLayout(LayoutKind.Sequential, Size = 40)]
+		[StructLayout(LayoutKind.Sequential, Size = 56)]
 		public struct <m_Bits>e__FixedBuffer
 		{
 			public uint FixedElementField;

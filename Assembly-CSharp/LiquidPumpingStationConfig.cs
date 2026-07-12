@@ -61,6 +61,11 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 	{
 		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingPreview, false);
 		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingUnderConstruction, true);
+		go.AddOrGet<FakeFloorAdder>().floorOffsets = new CellOffset[]
+		{
+			new CellOffset(0, 0),
+			new CellOffset(1, 0)
+		};
 	}
 
 	public const string ID = "LiquidPumpingStation";

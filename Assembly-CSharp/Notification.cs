@@ -41,10 +41,9 @@ public class Notification
 		}
 	}
 
-	public Notification(string title, NotificationType type, HashedString group, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, Transform click_focus = null, bool volume_attenuation = true)
+	public Notification(string title, NotificationType type, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, Transform click_focus = null, bool volume_attenuation = true)
 	{
 		this.titleText = title;
-		this.Group = group;
 		this.Type = type;
 		this.ToolTip = tooltip;
 		this.tooltipData = tooltip_data;
@@ -54,6 +53,9 @@ public class Notification
 		this.customClickData = custom_click_data;
 		this.clickFocus = click_focus;
 		this.volume_attenuation = volume_attenuation;
+		int num = this.notificationIncrement;
+		this.notificationIncrement = num + 1;
+		this.Idx = num;
 	}
 
 	public void Clear()
@@ -108,8 +110,6 @@ public class Notification
 		return text;
 	}
 
-	public HashedString Group;
-
 	public object tooltipData;
 
 	public bool expires = true;
@@ -121,6 +121,8 @@ public class Notification
 	public Notification.ClickCallback customClickCallback;
 
 	public object customClickData;
+
+	private int notificationIncrement;
 
 	private string notifierName;
 

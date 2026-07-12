@@ -5,16 +5,29 @@ public class ContainerPool<ContainerType, PoolIdentifier> : ContainerPool where 
 {
 	public ContainerType Allocate()
 	{
-		if (this.freeContainers.Count == 0)
+		Stack<ContainerType> stack = this.freeContainers;
+		ContainerType containerType;
+		lock (stack)
 		{
-			return new ContainerType();
+			if (this.freeContainers.Count == 0)
+			{
+				containerType = new ContainerType();
+			}
+			else
+			{
+				containerType = this.freeContainers.Pop();
+			}
 		}
-		return this.freeContainers.Pop();
+		return containerType;
 	}
 
 	public void Free(ContainerType container)
 	{
-		this.freeContainers.Push(container);
+		Stack<ContainerType> stack = this.freeContainers;
+		lock (stack)
+		{
+			this.freeContainers.Push(container);
+		}
 	}
 
 	public override string GetName()

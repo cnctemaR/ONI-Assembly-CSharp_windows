@@ -491,8 +491,8 @@ namespace System.Reflection
 			return assembly;
 		}
 
-		[MonoTODO("This overload is not currently implemented")]
 		[Obsolete]
+		[MonoTODO("This overload is not currently implemented")]
 		public static Assembly LoadFrom(string assemblyFile, Evidence securityEvidence, byte[] hashValue, AssemblyHashAlgorithm hashAlgorithm)
 		{
 			throw new NotImplementedException();

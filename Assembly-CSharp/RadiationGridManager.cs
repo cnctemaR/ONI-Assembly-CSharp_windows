@@ -11,41 +11,30 @@ public static class RadiationGridManager
 
 	public static void Initialise()
 	{
-		RadiationGridManager.previewLux = new int[Grid.CellCount];
+		RadiationGridManager.emitters = new List<RadiationGridEmitter>();
 	}
 
 	public static void Shutdown()
 	{
-		RadiationGridManager.previewLux = null;
-		RadiationGridManager.previewLightCells.Clear();
+		RadiationGridManager.emitters.Clear();
 	}
 
-	public static void DestroyPreview()
+	public static void Refresh()
 	{
-		foreach (global::Tuple<int, int> tuple in RadiationGridManager.previewLightCells)
+		for (int i = 0; i < RadiationGridManager.emitters.Count; i++)
 		{
-			RadiationGridManager.previewLux[tuple.first] = 0;
-		}
-		RadiationGridManager.previewLightCells.Clear();
-	}
-
-	public static void CreatePreview(int origin_cell, float radius, global::LightShape shape, int lux)
-	{
-		RadiationGridManager.previewLightCells.Clear();
-		ListPool<int, RadiationGridEmitter>.PooledList pooledList = ListPool<int, RadiationGridEmitter>.Allocate();
-		pooledList.Add(origin_cell);
-		DiscreteShadowCaster.GetVisibleCells(origin_cell, pooledList, (int)radius, shape);
-		foreach (int num in pooledList)
-		{
-			if (Grid.IsValidCell(num))
+			if (RadiationGridManager.emitters[i].enabled)
 			{
-				int num2 = lux / RadiationGridManager.CalculateFalloff(0.5f, num, origin_cell);
-				RadiationGridManager.previewLightCells.Add(new global::Tuple<int, int>(num, num2));
-				RadiationGridManager.previewLux[num] = num2;
+				RadiationGridManager.emitters[i].Emit();
 			}
 		}
-		pooledList.Recycle();
 	}
+
+	public const float STANDARD_MASS_FALLOFF = 1000000f;
+
+	public const int RADIATION_LINGER_RATE = 4;
+
+	public static List<RadiationGridEmitter> emitters = new List<RadiationGridEmitter>();
 
 	public static List<global::Tuple<int, int>> previewLightCells = new List<global::Tuple<int, int>>();
 

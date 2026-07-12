@@ -75,9 +75,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[MonitoringDescription("")]
 		[DefaultValue(9600)]
 		[Browsable(true)]
+		[MonitoringDescription("")]
 		public int BaudRate
 		{
 			get
@@ -98,8 +98,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public bool BreakState
 		{
 			get
@@ -118,8 +118,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int BytesToRead
 		{
 			get
@@ -129,8 +129,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public int BytesToWrite
 		{
 			get
@@ -151,8 +151,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public bool CtsHolding
 		{
 			get
@@ -186,8 +186,8 @@ namespace System.IO.Ports
 		}
 
 		[MonoTODO("Not implemented")]
-		[Browsable(true)]
 		[MonitoringDescription("")]
+		[Browsable(true)]
 		[DefaultValue(false)]
 		public bool DiscardNull
 		{
@@ -201,8 +201,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public bool DsrHolding
 		{
 			get
@@ -212,9 +212,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DefaultValue(false)]
-		[Browsable(true)]
 		[MonitoringDescription("")]
+		[Browsable(true)]
+		[DefaultValue(false)]
 		public bool DtrEnable
 		{
 			get
@@ -236,8 +236,8 @@ namespace System.IO.Ports
 		}
 
 		[MonitoringDescription("")]
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public Encoding Encoding
 		{
 			get
@@ -254,9 +254,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DefaultValue(Handshake.None)]
-		[Browsable(true)]
 		[MonitoringDescription("")]
+		[Browsable(true)]
+		[DefaultValue(Handshake.None)]
 		public Handshake Handshake
 		{
 			get
@@ -286,9 +286,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[MonitoringDescription("")]
 		[DefaultValue("\n")]
 		[Browsable(false)]
+		[MonitoringDescription("")]
 		public string NewLine
 		{
 			get
@@ -309,9 +309,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[MonitoringDescription("")]
 		[DefaultValue(Parity.None)]
 		[Browsable(true)]
+		[MonitoringDescription("")]
 		public Parity Parity
 		{
 			get
@@ -402,9 +402,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[Browsable(true)]
 		[DefaultValue(-1)]
 		[MonitoringDescription("")]
+		[Browsable(true)]
 		public int ReadTimeout
 		{
 			get
@@ -425,10 +425,10 @@ namespace System.IO.Ports
 			}
 		}
 
+		[MonoTODO("Not implemented")]
 		[DefaultValue(1)]
 		[Browsable(true)]
 		[MonitoringDescription("")]
-		[MonoTODO("Not implemented")]
 		public int ReceivedBytesThreshold
 		{
 			get
@@ -446,8 +446,8 @@ namespace System.IO.Ports
 		}
 
 		[DefaultValue(false)]
-		[Browsable(true)]
 		[MonitoringDescription("")]
+		[Browsable(true)]
 		public bool RtsEnable
 		{
 			get
@@ -468,9 +468,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[DefaultValue(StopBits.One)]
-		[Browsable(true)]
 		[MonitoringDescription("")]
+		[Browsable(true)]
+		[DefaultValue(StopBits.One)]
 		public StopBits StopBits
 		{
 			get
@@ -491,9 +491,9 @@ namespace System.IO.Ports
 			}
 		}
 
+		[DefaultValue(2048)]
 		[MonitoringDescription("")]
 		[Browsable(true)]
-		[DefaultValue(2048)]
 		public int WriteBufferSize
 		{
 			get

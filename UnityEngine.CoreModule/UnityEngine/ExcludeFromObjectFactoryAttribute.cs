@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Class)]
 	[UsedByNativeCode]
+	[AttributeUsage(AttributeTargets.Class)]
 	public class ExcludeFromObjectFactoryAttribute : Attribute
 	{
 	}

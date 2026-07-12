@@ -3,9 +3,9 @@ using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class StandardCommands
 	{
 		private static readonly Guid standardCommandSet = StandardCommands.ShellGuids.VSStandardCommandSet97;

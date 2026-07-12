@@ -8,7 +8,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (TSubsystemDescriptor)((object)this.m_subsystemDescriptor);
+				return (TSubsystemDescriptor)((object)this.m_SubsystemDescriptor);
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using FMOD.Studio;
 using Klei;
 using Steamworks;
 using STRINGS;
@@ -19,7 +20,7 @@ public class MainMenu : KScreen
 
 	private KButton MakeButton(MainMenu.ButtonInfo info)
 	{
-		KButton kbutton = Util.KInstantiateUI<KButton>(this.buttonPrefab.gameObject, this.buttonParent, true);
+		KButton kbutton = global::Util.KInstantiateUI<KButton>(this.buttonPrefab.gameObject, this.buttonParent, true);
 		kbutton.onClick += info.action;
 		KImage component = kbutton.GetComponent<KImage>();
 		component.colorStyleSetting = info.style;
@@ -47,21 +48,20 @@ public class MainMenu : KScreen
 		}
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14, this.normalButtonStyle));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14, this.normalButtonStyle));
-		KCrashReporter.MOST_RECENT_SAVEFILE = null;
-		this.RefreshResumeButton();
+		this.RefreshResumeButton(false);
 		this.Button_ResumeGame.onClick += this.ResumeGame;
 		this.StartFEAudio();
 		this.SpawnVideoScreen();
 		this.CheckPlayerPrefsCorruption();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
-			this.patchNotesScreen.gameObject.SetActive(true);
+			global::Util.KInstantiateUI(this.patchNotesScreenPrefab.gameObject, FrontEndManager.Instance.gameObject, true);
 		}
 		this.CheckDoubleBoundKeys();
 		this.topLeftAlphaMessage.gameObject.SetActive(false);
 		this.nextUpdateTimer.gameObject.SetActive(false);
-		this.expansion1Toggle.gameObject.SetActive(false);
-		bool ownsExpansion1 = DistributionPlatform.Inst.PurchasedDLC;
+		bool ownsExpansion1 = DistributionPlatform.Inst.IsDLCPurchased("EXPANSION1_ID");
+		this.expansion1Toggle.gameObject.SetActive(ownsExpansion1);
 		this.m_motdServerClient = new MotdServerClient();
 		this.m_motdServerClient.GetMotd(delegate(MotdServerClient.MotdResponse response, string error)
 		{
@@ -70,16 +70,12 @@ public class MainMenu : KScreen
 				this.topLeftAlphaMessage.gameObject.SetActive(true);
 				if (ownsExpansion1)
 				{
-					this.expansion1Toggle.gameObject.SetActive(true);
-				}
-				else
-				{
 					this.nextUpdateTimer.gameObject.SetActive(true);
 				}
 				this.motdImageHeader.text = response.image_header_text;
 				this.motdNewsHeader.text = response.news_header_text;
 				this.motdNewsBody.text = response.news_body_text;
-				this.patchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
+				PatchNotesScreen.UpdatePatchNotes(response.patch_notes_summary, response.patch_notes_link_url);
 				if (DlcManager.IsExpansion1Active())
 				{
 					this.nextUpdateTimer.UpdateReleaseTimes(response.expansion1_update_data.last_update_time, response.expansion1_update_data.next_update_time, response.expansion1_update_data.update_text_override);
@@ -121,15 +117,14 @@ public class MainMenu : KScreen
 			}
 			global::Debug.LogWarning("Motd Request error: " + error);
 		});
-		this.lastUpdateTime = Time.unscaledTime;
 		this.activateOnSpawn = true;
 	}
 
-	public void RefreshMainMenu()
+	private void OnApplicationFocus(bool focus)
 	{
-		if (this.refreshResumeButton)
+		if (focus)
 		{
-			this.RefreshResumeButton();
+			this.RefreshResumeButton(false);
 		}
 	}
 
@@ -232,10 +227,10 @@ public class MainMenu : KScreen
 				text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, savePrefix);
 			}
 			string text3 = string.Format(text2, savePrefix);
-			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
+			global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
 		}
 		Global.Instance.modManager.Report(base.gameObject);
-		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce) || !string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame))
+		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce && !KCrashReporter.hasCrash) || !string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame) || KPlayerPrefs.HasKey("AutoResumeSaveFile"))
 		{
 			MainMenu.HasAutoresumedOnce = true;
 			this.ResumeGame();
@@ -248,6 +243,18 @@ public class MainMenu : KScreen
 		{
 			this.m_motdServerClient.UnregisterCallback();
 			this.m_motdServerClient = null;
+		}
+	}
+
+	protected override void OnActivate()
+	{
+		if (!this.ambientLoopEventName.IsNullOrWhiteSpace())
+		{
+			this.ambientLoop = KFMOD.CreateInstance(GlobalAssets.GetSound(this.ambientLoopEventName, false));
+			if (this.ambientLoop.isValid())
+			{
+				this.ambientLoop.start();
+			}
 		}
 	}
 
@@ -265,6 +272,7 @@ public class MainMenu : KScreen
 	protected override void OnLoadLevel()
 	{
 		base.OnLoadLevel();
+		this.StopAmbience();
 		this.UnregisterMotdRequest();
 	}
 
@@ -287,7 +295,20 @@ public class MainMenu : KScreen
 
 	private void ResumeGame()
 	{
-		string text = (string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame) ? SaveLoader.GetLatestSaveFile() : GenericGameSettings.instance.performanceCapture.saveGame);
+		string text;
+		if (KPlayerPrefs.HasKey("AutoResumeSaveFile"))
+		{
+			text = KPlayerPrefs.GetString("AutoResumeSaveFile");
+			KPlayerPrefs.DeleteKey("AutoResumeSaveFile");
+		}
+		else if (!string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame))
+		{
+			text = GenericGameSettings.instance.performanceCapture.saveGame;
+		}
+		else
+		{
+			text = SaveLoader.GetLatestSaveForCurrentDLC();
+		}
 		if (!string.IsNullOrEmpty(text))
 		{
 			KCrashReporter.MOST_RECENT_SAVEFILE = text;
@@ -308,7 +329,7 @@ public class MainMenu : KScreen
 	{
 		if (LoadScreen.Instance == null)
 		{
-			Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true).GetComponent<LoadScreen>().requireConfirmation = false;
+			global::Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true).GetComponent<LoadScreen>();
 		}
 	}
 
@@ -322,7 +343,7 @@ public class MainMenu : KScreen
 	{
 		if (RetiredColonyInfoScreen.Instance == null)
 		{
-			Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
+			global::Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
 		}
 		RetiredColonyInfoScreen.Instance.Show(true);
 		if (!string.IsNullOrEmpty(colonyID))
@@ -339,7 +360,7 @@ public class MainMenu : KScreen
 	{
 		if (RetiredColonyInfoScreen.Instance == null)
 		{
-			Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
+			global::Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
 		}
 		RetiredColonyInfoScreen.Instance.Show(true);
 		RetiredColonyInfoScreen.Instance.LoadColony(data);
@@ -347,22 +368,17 @@ public class MainMenu : KScreen
 
 	private void SpawnVideoScreen()
 	{
-		VideoScreen.Instance = Util.KInstantiateUI(ScreenPrefabs.Instance.VideoScreen.gameObject, base.gameObject, false).GetComponent<VideoScreen>();
+		VideoScreen.Instance = global::Util.KInstantiateUI(ScreenPrefabs.Instance.VideoScreen.gameObject, base.gameObject, false).GetComponent<VideoScreen>();
 	}
 
 	private void Update()
 	{
-		if (Time.unscaledTime - this.lastUpdateTime > 1f)
-		{
-			this.RefreshMainMenu();
-			this.lastUpdateTime = Time.unscaledTime;
-		}
 	}
 
-	public void RefreshResumeButton()
+	public void RefreshResumeButton(bool simpleCheck = false)
 	{
-		string latestSaveFile = SaveLoader.GetLatestSaveFile();
-		bool flag = !string.IsNullOrEmpty(latestSaveFile) && File.Exists(latestSaveFile);
+		string latestSaveForCurrentDLC = SaveLoader.GetLatestSaveForCurrentDLC();
+		bool flag = !string.IsNullOrEmpty(latestSaveForCurrentDLC) && File.Exists(latestSaveForCurrentDLC);
 		if (flag)
 		{
 			try
@@ -371,31 +387,35 @@ public class MainMenu : KScreen
 				{
 					flag = false;
 				}
-				global::System.DateTime lastWriteTime = File.GetLastWriteTime(latestSaveFile);
+				global::System.DateTime lastWriteTime = File.GetLastWriteTime(latestSaveForCurrentDLC);
 				MainMenu.SaveFileEntry saveFileEntry = default(MainMenu.SaveFileEntry);
 				SaveGame.Header header = default(SaveGame.Header);
 				SaveGame.GameInfo gameInfo = default(SaveGame.GameInfo);
-				if (!this.saveFileEntries.TryGetValue(latestSaveFile, out saveFileEntry) || saveFileEntry.timeStamp != lastWriteTime)
+				if (!this.saveFileEntries.TryGetValue(latestSaveForCurrentDLC, out saveFileEntry) || saveFileEntry.timeStamp != lastWriteTime)
 				{
-					gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
+					gameInfo = SaveLoader.LoadHeader(latestSaveForCurrentDLC, out header);
 					saveFileEntry = new MainMenu.SaveFileEntry
 					{
 						timeStamp = lastWriteTime,
 						header = header,
 						headerData = gameInfo
 					};
-					this.saveFileEntries[latestSaveFile] = saveFileEntry;
+					this.saveFileEntries[latestSaveForCurrentDLC] = saveFileEntry;
 				}
 				else
 				{
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 469300U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 17)
+				if (header.buildVersion > 471531U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 25)
 				{
 					flag = false;
 				}
-				string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(latestSaveFile);
+				if (!DlcManager.IsContentActive(gameInfo.dlcId))
+				{
+					flag = false;
+				}
+				string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(latestSaveForCurrentDLC);
 				if (!string.IsNullOrEmpty(gameInfo.baseName))
 				{
 					this.Button_ResumeGame.GetComponentsInChildren<LocText>()[1].text = string.Format(UI.FRONTEND.MAINMENU.RESUMEBUTTON_BASENAME, gameInfo.baseName, gameInfo.numberOfCycles + 1);
@@ -424,17 +444,17 @@ public class MainMenu : KScreen
 
 	private void Translations()
 	{
-		Util.KInstantiateUI<LanguageOptionsScreen>(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, base.transform.parent.gameObject, false);
+		global::Util.KInstantiateUI<LanguageOptionsScreen>(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, base.transform.parent.gameObject, false);
 	}
 
 	private void Mods()
 	{
-		Util.KInstantiateUI<ModsScreen>(ScreenPrefabs.Instance.modsMenu.gameObject, base.transform.parent.gameObject, false);
+		global::Util.KInstantiateUI<ModsScreen>(ScreenPrefabs.Instance.modsMenu.gameObject, base.transform.parent.gameObject, false);
 	}
 
 	private void Options()
 	{
-		Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
+		global::Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
 	}
 
 	private void QuitGame()
@@ -450,18 +470,37 @@ public class MainMenu : KScreen
 		{
 			AudioMixer.instance.StartUserVolumesSnapshot();
 		}
-		if (AudioDebug.Get().musicEnabled && !MusicManager.instance.SongIsPlaying("Music_TitleTheme"))
+		if (AudioDebug.Get().musicEnabled && !MusicManager.instance.SongIsPlaying(this.menuMusicEventName))
 		{
-			MusicManager.instance.PlaySong("Music_TitleTheme", false);
+			MusicManager.instance.PlaySong(this.menuMusicEventName, false);
 		}
 		this.CheckForAudioDriverIssue();
+	}
+
+	public void StopAmbience()
+	{
+		if (this.ambientLoop.isValid())
+		{
+			this.ambientLoop.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			this.ambientLoop.release();
+			this.ambientLoop.clearHandle();
+		}
+	}
+
+	public void StopMainMenuMusic()
+	{
+		if (MusicManager.instance.SongIsPlaying(this.menuMusicEventName))
+		{
+			MusicManager.instance.StopSong(this.menuMusicEventName, true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		}
 	}
 
 	private void CheckForAudioDriverIssue()
 	{
 		if (!KFMOD.didFmodInitializeSuccessfully)
 		{
-			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO, delegate
+			global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO, delegate
 			{
 				Application.OpenURL("http://support.kleientertainment.com/customer/en/portal/articles/2947881-no-audio-when-playing-oxygen-not-included");
 			}, null, null, null, GlobalResources.Instance().sadDupeAudio);
@@ -473,7 +512,7 @@ public class MainMenu : KScreen
 		if (KPlayerPrefs.HasCorruptedFlag())
 		{
 			KPlayerPrefs.ResetCorruptedFlag();
-			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.PLAYER_PREFS_CORRUPTED, null, null, null, null, null, null, null, GlobalResources.Instance().sadDupe);
+			global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.PLAYER_PREFS_CORRUPTED, null, null, null, null, null, null, null, GlobalResources.Instance().sadDupe);
 		}
 	}
 
@@ -499,7 +538,19 @@ public class MainMenu : KScreen
 								string mGroup2 = GameInputMapping.KeyBindings[j].mGroup;
 								if ((mGroup == "Root" || mGroup2 == "Root" || mGroup == mGroup2) && (!(mGroup == "Root") || !bindingEntry.mIgnoreRootConflics) && (!(mGroup2 == "Root") || !bindingEntry2.mIgnoreRootConflics))
 								{
-									text = string.Concat(new object[] { text, "\n\n", bindingEntry2.mAction, ": <b>", bindingEntry2.mKeyCode, "</b>\n", bindingEntry.mAction, ": <b>", bindingEntry.mKeyCode, "</b>" });
+									text = string.Concat(new string[]
+									{
+										text,
+										"\n\n",
+										bindingEntry2.mAction.ToString(),
+										": <b>",
+										bindingEntry2.mKeyCode.ToString(),
+										"</b>\n",
+										bindingEntry.mAction.ToString(),
+										": <b>",
+										bindingEntry.mKeyCode.ToString(),
+										"</b>"
+									});
 									BindingEntry bindingEntry3 = bindingEntry2;
 									bindingEntry3.mKeyCode = KKeyCode.None;
 									bindingEntry3.mModifier = Modifier.None;
@@ -518,7 +569,7 @@ public class MainMenu : KScreen
 		}
 		if (text != "")
 		{
-			Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.DUPLICATE_KEY_BINDINGS, text), null, null, null, null, null, null, null, GlobalResources.Instance().sadDupe);
+			global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.DUPLICATE_KEY_BINDINGS, text), null, null, null, null, null, null, null, GlobalResources.Instance().sadDupe);
 		}
 	}
 
@@ -529,15 +580,11 @@ public class MainMenu : KScreen
 
 	private static MainMenu _instance;
 
-	public RectTransform LogoAndMenu;
-
 	public KButton Button_ResumeGame;
 
 	private KButton Button_NewGame;
 
 	public GameObject topLeftAlphaMessage;
-
-	private float lastUpdateTime;
 
 	private MotdServerClient m_motdServerClient;
 
@@ -556,6 +603,14 @@ public class MainMenu : KScreen
 	private ColorStyleSetting normalButtonStyle;
 
 	[SerializeField]
+	private string menuMusicEventName;
+
+	[SerializeField]
+	private string ambientLoopEventName;
+
+	private EventInstance ambientLoop;
+
+	[SerializeField]
 	private LocText motdImageHeader;
 
 	[SerializeField]
@@ -571,7 +626,7 @@ public class MainMenu : KScreen
 	private LocText motdNewsBody;
 
 	[SerializeField]
-	private PatchNotesScreen patchNotesScreen;
+	private PatchNotesScreen patchNotesScreenPrefab;
 
 	[SerializeField]
 	private NextUpdateTimer nextUpdateTimer;
@@ -587,6 +642,8 @@ public class MainMenu : KScreen
 	private bool refreshResumeButton = true;
 
 	private int m_cheatInputCounter;
+
+	public const string AutoResumeSaveFileKey = "AutoResumeSaveFile";
 
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 

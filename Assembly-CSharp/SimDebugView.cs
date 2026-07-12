@@ -47,6 +47,16 @@ public class SimDebugView : KMonoBehaviour
 		this.SetMode(global::OverlayModes.None.ID);
 	}
 
+	public static Texture2D CreateTexture(int width, int height)
+	{
+		return new Texture2D(width, height)
+		{
+			name = "SimDebugView",
+			wrapMode = TextureWrapMode.Clamp,
+			filterMode = FilterMode.Point
+		};
+	}
+
 	public static Texture2D CreateTexture(out byte[] textureBytes, int width, int height)
 	{
 		textureBytes = new byte[width * height * 4];
@@ -326,14 +336,8 @@ public class SimDebugView : KMonoBehaviour
 
 	public static Color GetRadiationColour(SimDebugView instance, int cell)
 	{
-		Color color = new Color(0.2f, 0.9f, 0.3f, Mathf.Clamp(Mathf.Sqrt((float)(Grid.RadiationCount[cell] + RadiationGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f));
-		if (Grid.RadiationCount[cell] > 72000)
-		{
-			float num = ((float)Grid.RadiationCount[cell] + (float)LightGridManager.previewLux[cell] - 72000f) / 8000f;
-			num /= 10f;
-			color.r += Mathf.Min(0.1f, PerlinSimplexNoise.noise(Grid.CellToPos2D(cell).x / 8f, Grid.CellToPos2D(cell).y / 8f + (float)instance.currentFrame / 32f) * num);
-		}
-		return color;
+		float num = Mathf.Clamp(Mathf.Sqrt(Grid.Radiation[cell]) / 30f, 0f, 1f);
+		return new Color(0.2f, 0.9f, 0.3f, num);
 	}
 
 	public static Color GetRoomsColour(SimDebugView instance, int cell)
@@ -1140,12 +1144,22 @@ public class SimDebugView : KMonoBehaviour
 				int num2 = Grid.XYToCell(this.x1, i);
 				for (int j = num; j <= num2; j++)
 				{
-					Color color = func(shared_data.instance, j);
 					int num3 = j * 4;
-					shared_data.textureBytes[num3] = (byte)(Mathf.Min(color.r, 1f) * 255f);
-					shared_data.textureBytes[num3 + 1] = (byte)(Mathf.Min(color.g, 1f) * 255f);
-					shared_data.textureBytes[num3 + 2] = (byte)(Mathf.Min(color.b, 1f) * 255f);
-					shared_data.textureBytes[num3 + 3] = (byte)(Mathf.Min(color.a, 1f) * 255f);
+					if (Grid.IsActiveWorld(j))
+					{
+						Color color = func(shared_data.instance, j);
+						shared_data.textureBytes[num3] = (byte)(Mathf.Min(color.r, 1f) * 255f);
+						shared_data.textureBytes[num3 + 1] = (byte)(Mathf.Min(color.g, 1f) * 255f);
+						shared_data.textureBytes[num3 + 2] = (byte)(Mathf.Min(color.b, 1f) * 255f);
+						shared_data.textureBytes[num3 + 3] = (byte)(Mathf.Min(color.a, 1f) * 255f);
+					}
+					else
+					{
+						shared_data.textureBytes[num3] = 0;
+						shared_data.textureBytes[num3 + 1] = 0;
+						shared_data.textureBytes[num3 + 2] = 0;
+						shared_data.textureBytes[num3 + 3] = 0;
+					}
 				}
 			}
 		}

@@ -97,15 +97,15 @@ namespace UnityEngine.U2D
 
 		[NativeName("HasChannel")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool HasVertexAttribute([NotNull] this Sprite sprite, VertexAttribute channel);
+		public static extern bool HasVertexAttribute([NotNull("ArgumentNullException")] this Sprite sprite, VertexAttribute channel);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetVertexCount([NotNull] this Sprite sprite, int count);
+		public static extern void SetVertexCount([NotNull("ArgumentNullException")] this Sprite sprite, int count);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetVertexCount([NotNull] this Sprite sprite);
+		public static extern int GetVertexCount([NotNull("ArgumentNullException")] this Sprite sprite);
 
-		private static SpriteChannelInfo GetBindPoseInfo([NotNull] Sprite sprite)
+		private static SpriteChannelInfo GetBindPoseInfo([NotNull("ArgumentNullException")] Sprite sprite)
 		{
 			SpriteChannelInfo spriteChannelInfo;
 			SpriteDataAccessExtensions.GetBindPoseInfo_Injected(sprite, out spriteChannelInfo);
@@ -113,9 +113,9 @@ namespace UnityEngine.U2D
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetBindPoseData([NotNull] Sprite sprite, void* src, int count);
+		private unsafe static extern void SetBindPoseData([NotNull("ArgumentNullException")] Sprite sprite, void* src, int count);
 
-		private static SpriteChannelInfo GetIndicesInfo([NotNull] Sprite sprite)
+		private static SpriteChannelInfo GetIndicesInfo([NotNull("ArgumentNullException")] Sprite sprite)
 		{
 			SpriteChannelInfo spriteChannelInfo;
 			SpriteDataAccessExtensions.GetIndicesInfo_Injected(sprite, out spriteChannelInfo);
@@ -123,9 +123,9 @@ namespace UnityEngine.U2D
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetIndicesData([NotNull] Sprite sprite, void* src, int count);
+		private unsafe static extern void SetIndicesData([NotNull("ArgumentNullException")] Sprite sprite, void* src, int count);
 
-		private static SpriteChannelInfo GetChannelInfo([NotNull] Sprite sprite, VertexAttribute channel)
+		private static SpriteChannelInfo GetChannelInfo([NotNull("ArgumentNullException")] Sprite sprite, VertexAttribute channel)
 		{
 			SpriteChannelInfo spriteChannelInfo;
 			SpriteDataAccessExtensions.GetChannelInfo_Injected(sprite, channel, out spriteChannelInfo);
@@ -133,13 +133,13 @@ namespace UnityEngine.U2D
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetChannelData([NotNull] Sprite sprite, VertexAttribute channel, void* src);
+		private unsafe static extern void SetChannelData([NotNull("ArgumentNullException")] Sprite sprite, VertexAttribute channel, void* src);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern SpriteBone[] GetBoneInfo([NotNull] Sprite sprite);
+		private static extern SpriteBone[] GetBoneInfo([NotNull("ArgumentNullException")] Sprite sprite);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetBoneData([NotNull] Sprite sprite, SpriteBone[] src);
+		private static extern void SetBoneData([NotNull("ArgumentNullException")] Sprite sprite, SpriteBone[] src);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int GetPrimaryVertexStreamSize(Sprite sprite);

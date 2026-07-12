@@ -1,32 +1,21 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
-	[NativeHeader("Runtime/Video/MovieTexture.h")]
-	[NativeHeader("Modules/UnityWebRequestAudio/Public/DownloadHandlerMovieTexture.h")]
-	[Obsolete("MovieTexture is deprecated. Use VideoPlayer instead.", false)]
+	[Obsolete("MovieTexture is deprecated. Use VideoPlayer instead.", true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerMovieTexture : DownloadHandler
 	{
 		public DownloadHandlerMovieTexture()
 		{
-			this.InternalCreateDHMovieTexture();
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerMovieTexture obj);
-
-		private void InternalCreateDHMovieTexture()
-		{
-			this.m_Ptr = DownloadHandlerMovieTexture.Create(this);
+			DownloadHandlerMovieTexture.FeatureRemoved();
 		}
 
 		protected override byte[] GetData()
 		{
-			return DownloadHandler.InternalGetByteArray(this);
+			DownloadHandlerMovieTexture.FeatureRemoved();
+			return null;
 		}
 
 		protected override string GetText()
@@ -34,15 +23,24 @@ namespace UnityEngine.Networking
 			throw new NotSupportedException("String access is not supported for movies");
 		}
 
-		public extern MovieTexture movieTexture
+		public MovieTexture movieTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				DownloadHandlerMovieTexture.FeatureRemoved();
+				return null;
+			}
 		}
 
 		public static MovieTexture GetContent(UnityWebRequest uwr)
 		{
-			return DownloadHandler.GetCheckedDownloader<DownloadHandlerMovieTexture>(uwr).movieTexture;
+			DownloadHandlerMovieTexture.FeatureRemoved();
+			return null;
+		}
+
+		private static void FeatureRemoved()
+		{
+			throw new Exception("Movie texture has been removed, use VideoPlayer instead");
 		}
 	}
 }

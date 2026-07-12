@@ -8,6 +8,7 @@ public class GridVisibility : KMonoBehaviour
 	{
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "GridVisibility.OnSpawn");
 		this.OnCellChange();
+		base.gameObject.GetMyWorld().SetDiscovered(false);
 	}
 
 	private void OnCellChange()
@@ -34,26 +35,25 @@ public class GridVisibility : KMonoBehaviour
 
 	public static void Reveal(int baseX, int baseY, int radius, float innerRadius)
 	{
+		int num = (int)Grid.WorldIdx[baseY * Grid.WidthInCells + baseX];
 		for (int i = -radius; i <= radius; i++)
 		{
 			for (int j = -radius; j <= radius; j++)
 			{
-				int num = baseY + i;
-				int num2 = baseX + j;
-				if (num >= 0 && Grid.HeightInCells - 1 >= num && num2 >= 0 && Grid.WidthInCells - 1 >= num2)
+				int num2 = baseY + i;
+				int num3 = baseX + j;
+				if (num2 >= 0 && Grid.HeightInCells - 1 >= num2 && num3 >= 0 && Grid.WidthInCells - 1 >= num3)
 				{
-					int num3 = num * Grid.WidthInCells + num2;
-					if (Grid.Visible[num3] < 255)
+					int num4 = num2 * Grid.WidthInCells + num3;
+					if (Grid.Visible[num4] < 255 && num == (int)Grid.WorldIdx[num4])
 					{
 						Vector2 vector = new Vector2((float)j, (float)i);
-						float num4 = Mathf.Lerp(1f, 0f, (vector.magnitude - innerRadius) / ((float)radius - innerRadius));
-						Grid.Reveal(num3, (byte)(255f * num4));
+						float num5 = Mathf.Lerp(1f, 0f, (vector.magnitude - innerRadius) / ((float)radius - innerRadius));
+						Grid.Reveal(num4, (byte)(255f * num5));
 					}
 				}
 			}
 		}
-		int num5 = Mathf.CeilToInt((float)radius);
-		Game.Instance.UpdateGameActiveRegion(baseX - num5, baseY - num5, baseX + num5, baseY + num5);
 	}
 
 	protected override void OnCleanUp()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using FMOD.Studio;
 using UnityEngine;
 
@@ -59,7 +58,13 @@ public class SelectTool : InterfaceTool
 		}
 		pos.z = -40f;
 		pos += offset;
-		CameraController.Instance.SetTargetPos(pos, 8f, true);
+		WorldContainer worldFromPosition = ClusterManager.Instance.GetWorldFromPosition(pos);
+		if (worldFromPosition != null)
+		{
+			CameraController.Instance.ActiveWorldStarWipe(worldFromPosition.id, pos, 10f, null);
+			return;
+		}
+		DebugUtil.DevLogError("DevError: specified camera focus position has null world - possible out of bounds location");
 	}
 
 	public void SelectAndFocus(Vector3 pos, KSelectable selectable, Vector3 offset)
@@ -77,15 +82,13 @@ public class SelectTool : InterfaceTool
 	{
 		this.delayedNextSelection = new_selected;
 		this.delayedSkipSound = skipSound;
-		base.StartCoroutine(this.DoSelectNextFrame());
+		UIScheduler.Instance.ScheduleNextFrame("DelayedSelect", new Action<object>(this.DoSelectNextFrame), null, null);
 	}
 
-	private IEnumerator DoSelectNextFrame()
+	private void DoSelectNextFrame(object data)
 	{
-		yield return null;
 		this.Select(this.delayedNextSelection, this.delayedSkipSound);
 		this.delayedNextSelection = null;
-		yield break;
 	}
 
 	public void Select(KSelectable new_selected, bool skipSound = false)
@@ -100,7 +103,7 @@ public class SelectTool : InterfaceTool
 			this.selected.Unselect();
 		}
 		GameObject gameObject = null;
-		if (new_selected != null)
+		if (new_selected != null && new_selected.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 		{
 			SelectToolHoverTextCard component = base.GetComponent<SelectToolHoverTextCard>();
 			if (component != null)
@@ -139,7 +142,7 @@ public class SelectTool : InterfaceTool
 		{
 			this.selectMarker.gameObject.SetActive(false);
 		}
-		this.selected = new_selected;
+		this.selected = ((gameObject == null) ? null : new_selected);
 		Game.Instance.Trigger(-1503271301, gameObject);
 	}
 

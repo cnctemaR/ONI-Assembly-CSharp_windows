@@ -40,6 +40,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			SpotLight spotLight = default(SpotLight);
 			RectangleLight rectangleLight = default(RectangleLight);
 			DiscLight discLight = default(DiscLight);
+			Cookie cookie = default(Cookie);
 			LightDataGI lightDataGI = default(LightDataGI);
 			for (int i = 0; i < requests.Length; i++)
 			{
@@ -48,23 +49,28 @@ namespace UnityEngine.Experimental.GlobalIllumination
 				{
 				case LightType.Spot:
 					LightmapperUtils.Extract(light, ref spotLight);
-					lightDataGI.Init(ref spotLight);
+					LightmapperUtils.Extract(light, out cookie);
+					lightDataGI.Init(ref spotLight, ref cookie);
 					break;
 				case LightType.Directional:
 					LightmapperUtils.Extract(light, ref directionalLight);
-					lightDataGI.Init(ref directionalLight);
+					LightmapperUtils.Extract(light, out cookie);
+					lightDataGI.Init(ref directionalLight, ref cookie);
 					break;
 				case LightType.Point:
 					LightmapperUtils.Extract(light, ref pointLight);
-					lightDataGI.Init(ref pointLight);
+					LightmapperUtils.Extract(light, out cookie);
+					lightDataGI.Init(ref pointLight, ref cookie);
 					break;
 				case LightType.Area:
 					LightmapperUtils.Extract(light, ref rectangleLight);
-					lightDataGI.Init(ref rectangleLight);
+					LightmapperUtils.Extract(light, out cookie);
+					lightDataGI.Init(ref rectangleLight, ref cookie);
 					break;
 				case LightType.Disc:
 					LightmapperUtils.Extract(light, ref discLight);
-					lightDataGI.Init(ref discLight);
+					LightmapperUtils.Extract(light, out cookie);
+					lightDataGI.Init(ref discLight, ref cookie);
 					break;
 				default:
 					lightDataGI.InitNoBake(light.GetInstanceID());

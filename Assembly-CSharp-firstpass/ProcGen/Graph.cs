@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Delaunay.Geo;
 using KSerialization;
 using Satsuma;
@@ -10,9 +9,9 @@ using UnityEngine;
 namespace ProcGen
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class Graph
+	public class Graph<N, A> where N : Node, new() where A : Arc, new()
 	{
-		public List<Node> nodes
+		public List<N> nodes
 		{
 			get
 			{
@@ -20,7 +19,7 @@ namespace ProcGen
 			}
 		}
 
-		public List<Arc> arcs
+		public List<A> arcs
 		{
 			get
 			{
@@ -38,54 +37,96 @@ namespace ProcGen
 		public Graph(int seed)
 		{
 			this.SetSeed(seed);
-			this.nodeList = new List<Node>();
-			this.arcList = new List<Arc>();
+			this.nodeList = new List<N>();
+			this.arcList = new List<A>();
 			this.baseGraph = new CustomGraph();
 		}
 
-		public Node AddNode(string type)
+		public N AddNode(string type, Vector2 position = default(Vector2))
 		{
-			Node node = new Node(this.baseGraph.AddNode(), type);
-			this.nodeList.Add(node);
-			return node;
+			N n = new N();
+			n.SetNode(this.baseGraph.AddNode());
+			n.SetType(type);
+			n.SetPosition(position);
+			this.nodeList.Add(n);
+			return n;
 		}
 
-		public void Remove(Node n)
+		public void Remove(N n)
 		{
 			this.baseGraph.DeleteNode(n.node);
 			this.nodes.Remove(n);
 		}
 
-		public Arc AddArc(Node nodeA, Node nodeB, string type)
+		public A AddArc(N nodeA, N nodeB, string type)
 		{
-			Arc arc = new Arc(this.baseGraph.AddArc(nodeA.node, nodeB.node, Directedness.Undirected), type);
-			this.arcList.Add(arc);
-			return arc;
+			Arc arc = this.baseGraph.AddArc(nodeA.node, nodeB.node, Directedness.Undirected);
+			A a = new A();
+			a.SetArc(arc);
+			a.SetType(type);
+			this.arcList.Add(a);
+			return a;
 		}
 
-		public Node FindNodeByID(uint id)
+		public N FindNodeByID(uint id)
 		{
-			return this.nodeList.Find((Node node) => node.node.Id == (long)((ulong)id));
+			return this.nodeList.Find((N node) => node.node.Id == (long)((ulong)id));
 		}
 
-		public Arc FindArcByID(uint id)
+		public A FindArcByID(uint id)
 		{
-			return this.arcList.Find((Arc arc) => arc.arc.Id == (long)((ulong)id));
+			return this.arcList.Find((A arc) => arc.arc.Id == (long)((ulong)id));
 		}
 
-		public Node FindNode(Predicate<Node> pred)
+		public N FindNode(Predicate<N> pred)
 		{
 			return this.nodeList.Find(pred);
 		}
 
-		public Arc FindArc(Predicate<Arc> pred)
+		public A FindArc(Predicate<A> pred)
 		{
 			return this.arcList.Find(pred);
 		}
 
-		public int GetDistanceToTagSetFromNode(Node node, TagSet tagset)
+		public List<A> GetArcs(N node0)
 		{
-			List<Node> nodesWithAtLeastOneTag = this.GetNodesWithAtLeastOneTag(tagset);
+			List<A> list = new List<A>();
+			using (IEnumerator<Arc> enumerator = this.baseGraph.Arcs(node0.node, ArcFilter.All).GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					Arc sarc = enumerator.Current;
+					list.Add(this.arcList.Find((A a) => a.arc == sarc));
+				}
+			}
+			return list;
+		}
+
+		public A GetArc(N node0, N node1)
+		{
+			IEnumerator<Arc> enumerator = this.baseGraph.Arcs(node0.node, node1.node, ArcFilter.All).GetEnumerator();
+			if (enumerator.MoveNext())
+			{
+				Arc sarc = enumerator.Current;
+				return this.arcList.Find((A a) => a.arc == sarc);
+			}
+			return default(A);
+		}
+
+		public List<N> GetNodes(A arc)
+		{
+			Node u = this.baseGraph.U(arc.arc);
+			Node v = this.baseGraph.V(arc.arc);
+			return new List<N>
+			{
+				this.nodeList.Find((N n) => n.node == u),
+				this.nodeList.Find((N n) => n.node == v)
+			};
+		}
+
+		public int GetDistanceToTagSetFromNode(N node, TagSet tagset)
+		{
+			List<N> nodesWithAtLeastOneTag = this.GetNodesWithAtLeastOneTag(tagset);
 			if (nodesWithAtLeastOneTag.Count > 0)
 			{
 				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
@@ -99,9 +140,9 @@ namespace ProcGen
 			return -1;
 		}
 
-		public int GetDistanceToTagFromNode(Node node, Tag tag)
+		public int GetDistanceToTagFromNode(N node, Tag tag)
 		{
-			List<Node> nodesWithTag = this.GetNodesWithTag(tag);
+			List<N> nodesWithTag = this.GetNodesWithTag(tag);
 			if (nodesWithTag.Count > 0)
 			{
 				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
@@ -117,7 +158,7 @@ namespace ProcGen
 
 		public Dictionary<uint, int> GetDistanceToTag(Tag tag)
 		{
-			List<Node> nodesWithTag = this.GetNodesWithTag(tag);
+			List<N> nodesWithTag = this.GetNodesWithTag(tag);
 			if (nodesWithTag.Count > 0)
 			{
 				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
@@ -136,39 +177,19 @@ namespace ProcGen
 			return null;
 		}
 
-		public List<Node> GetNodesWithAtLeastOneTag(TagSet tagset)
+		public List<N> GetNodesWithAtLeastOneTag(TagSet tagset)
 		{
-			return this.nodeList.FindAll((Node node) => node.tags.ContainsOne(tagset));
+			return this.nodeList.FindAll((N node) => node.tags.ContainsOne(tagset));
 		}
 
-		public List<Node> GetNodesWithTag(Tag tag)
+		public List<N> GetNodesWithTag(Tag tag)
 		{
-			return this.nodeList.FindAll((Node node) => node.tags.Contains(tag));
+			return this.nodeList.FindAll((N node) => node.tags.Contains(tag));
 		}
 
-		public List<Arc> GetArcsWithTag(Tag tag)
+		public List<A> GetArcsWithTag(Tag tag)
 		{
-			return this.arcList.FindAll((Arc arc) => arc.tags.Contains(tag));
-		}
-
-		[OnDeserialized]
-		internal void OnDeserializedMethod()
-		{
-			try
-			{
-				for (int i = 0; i < this.nodeList.Count; i++)
-				{
-					Node node = new Node(this.baseGraph.AddNode(), this.nodeList[i].type);
-					node.SetPosition(this.nodeList[i].position);
-					this.nodeList[i] = node;
-				}
-			}
-			catch (Exception ex)
-			{
-				string message = ex.Message;
-				string stackTrace = ex.StackTrace;
-				global::Debug.Log("Error deserialising " + message + "\n" + stackTrace);
-			}
+			return this.arcList.FindAll((A arc) => arc.tags.Contains(tag));
 		}
 
 		public static PointD GetForceForBoundry(PointD particle, Polygon bounds)
@@ -198,7 +219,7 @@ namespace ProcGen
 
 		public PointD GetPositionForNode(Node node)
 		{
-			Node node2 = this.nodeList.Find((Node n) => n.node == node);
+			Node node2 = this.nodeList.Find((N n) => n.node == node);
 			return new PointD((double)node2.position.x, (double)node2.position.y);
 		}
 
@@ -240,7 +261,7 @@ namespace ProcGen
 				Func<PointD, PointD> func3;
 				if ((func3 = <>9__1) == null)
 				{
-					func3 = (<>9__1 = (PointD point) => Graph.GetForceForBoundry(point, bounds));
+					func3 = (<>9__1 = (PointD point) => Graph<N, A>.GetForceForBoundry(point, bounds));
 				}
 				forceDirectedLayout2.ExternalForce = func3;
 				forceDirectedLayout.Run(0.01);
@@ -249,7 +270,7 @@ namespace ProcGen
 				while (enumerator.MoveNext())
 				{
 					Node node = enumerator.Current;
-					Node node2 = this.nodeList.Find((Node n) => n.node == node);
+					Node node2 = this.nodeList.Find((N n) => n.node == node);
 					if (node2 != null)
 					{
 						vector.x = (float)forceDirectedLayout.NodePositions[node].X;
@@ -272,16 +293,16 @@ namespace ProcGen
 			}
 			if (num >= 10)
 			{
-				global::Debug.LogWarning("Re-ran layout " + num + " times");
+				global::Debug.LogWarning("Re-ran layout " + num.ToString() + " times");
 			}
 			return flag;
 		}
 
 		[Serialize]
-		public List<Node> nodeList;
+		public List<N> nodeList;
 
 		[Serialize]
-		public List<Arc> arcList;
+		public List<A> arcList;
 
 		private SeededRandom myRandom;
 	}

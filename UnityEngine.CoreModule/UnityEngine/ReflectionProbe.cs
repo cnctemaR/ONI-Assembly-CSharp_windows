@@ -13,8 +13,8 @@ namespace UnityEngine
 	public sealed class ReflectionProbe : Behaviour
 	{
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[NativeName("ProbeType")]
 		[Obsolete("type property has been deprecated. Starting with Unity 5.4, the only supported reflection probe type is Cube.", true)]
+		[NativeName("ProbeType")]
 		public extern ReflectionProbeType type
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -93,6 +93,15 @@ namespace UnityEngine
 
 		[NativeName("HDR")]
 		public extern bool hdr
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[NativeName("RenderDynamicObjects")]
+		public extern bool renderDynamicObjects
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;

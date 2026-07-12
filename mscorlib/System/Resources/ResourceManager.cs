@@ -139,8 +139,8 @@ namespace System.Resources
 			this._lastUsedResourceCache = null;
 		}
 
-		[SecuritySafeCritical]
 		[OnDeserialized]
+		[SecuritySafeCritical]
 		private void OnDeserialized(StreamingContext ctx)
 		{
 			this._resourceSets = new Dictionary<string, ResourceSet>();

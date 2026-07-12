@@ -963,14 +963,14 @@ namespace STRINGS
 		{
 			public class HIGHENERGYPARITCLE
 			{
-				public static LocString NAME = "High Energy Particles";
+				public static LocString NAME = "Radbolts";
 
 				public static LocString DESC = string.Concat(new string[]
 				{
 					"A concentrated field of ",
-					UI.FormatAsLink("High Enery Particles", "HIGHENERGYPARTICLES"),
+					UI.FormatAsKeyWord("Radbolts"),
 					" that can be largely redirected using a ",
-					UI.FormatAsLink("Particle Reflector", "PARTICLEREFLECTOR"),
+					UI.FormatAsLink("Radbolt Reflector", "HIGHENERGYPARTICLEREDIRECTOR"),
 					"."
 				});
 			}

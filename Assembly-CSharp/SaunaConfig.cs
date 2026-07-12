@@ -18,15 +18,14 @@ public class SaunaConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, none, 0.2f);
-		buildingDef.DlcId = "PACK1";
 		buildingDef.ViewMode = OverlayModes.GasConduits.ID;
 		buildingDef.Floodable = true;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Overheatable = true;
 		buildingDef.InputConduitType = ConduitType.Gas;
-		buildingDef.UtilityInputOffset = new CellOffset(1, 1);
-		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 0);
+		buildingDef.OutputConduitType = ConduitType.Liquid;
+		buildingDef.UtilityOutputOffset = new CellOffset(1, 0);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(0, 2);
 		buildingDef.EnergyConsumptionWhenActive = 60f;

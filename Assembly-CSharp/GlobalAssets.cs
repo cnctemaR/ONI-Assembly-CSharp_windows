@@ -47,18 +47,28 @@ public class GlobalAssets : KMonoBehaviour
 						{
 							string text;
 							eventDescription.getPath(out text);
-							string text2 = Assets.GetSimpleSoundEventName(text);
-							text2 = text2.ToLowerInvariant();
-							if (text2.Length > 0 && !GlobalAssets.SoundTable.ContainsKey(text2))
+							if (text == null)
 							{
-								GlobalAssets.SoundTable[text2] = text;
-								if (text.ToLower().Contains("lowpriority") || text2.Contains("lowpriority"))
+								bank.getPath(out text);
+								Guid guid;
+								eventDescription.getID(out guid);
+								global::Debug.LogError(string.Format("Got a FMOD event with a null path! {0} {1} in bank {2}", eventDescription.ToString(), guid, text));
+							}
+							else
+							{
+								string text2 = Assets.GetSimpleSoundEventName(text);
+								text2 = text2.ToLowerInvariant();
+								if (text2.Length > 0 && !GlobalAssets.SoundTable.ContainsKey(text2))
 								{
-									GlobalAssets.LowPrioritySounds.Add(text);
-								}
-								else if (text.ToLower().Contains("highpriority") || text2.Contains("highpriority"))
-								{
-									GlobalAssets.HighPrioritySounds.Add(text);
+									GlobalAssets.SoundTable[text2] = text;
+									if (text.ToLower().Contains("lowpriority") || text2.Contains("lowpriority"))
+									{
+										GlobalAssets.LowPrioritySounds.Add(text);
+									}
+									else if (text.ToLower().Contains("highpriority") || text2.Contains("highpriority"))
+									{
+										GlobalAssets.HighPrioritySounds.Add(text);
+									}
 								}
 							}
 						}
@@ -69,25 +79,31 @@ public class GlobalAssets : KMonoBehaviour
 		SetDefaults.Initialize();
 		GraphicsOptionsScreen.SetColorModeFromPrefs();
 		this.AddColorModeStyles();
-		LocString.CreateLocStringKeys(typeof(DUPLICANTS), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(MISC), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(UI), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(ELEMENTS), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(CREATURES), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(SETITEMS), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(RESEARCH), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(ITEMS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(INPUT), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(INPUT_BINDINGS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(GAMEPLAY_EVENTS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(ROOMS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(BUILDING.STATUSITEMS), "STRINGS.BUILDING.");
 		LocString.CreateLocStringKeys(typeof(BUILDING.DETAILS), "STRINGS.BUILDING.");
+		LocString.CreateLocStringKeys(typeof(SETITEMS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(COLONY_ACHIEVEMENTS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(CREATURES), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(RESEARCH), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(DUPLICANTS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(ITEMS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(ROBOTS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(ELEMENTS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(MISC), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(VIDEOS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(NAMEGEN), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(WORLDS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(CLUSTER_NAMES), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(SUBWORLDS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(WORLD_TRAITS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(INPUT_BINDINGS), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(LORE), "STRINGS.");
 		LocString.CreateLocStringKeys(typeof(CODEX), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(WORLDS), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(WORLD_TRAITS), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(COLONY_ACHIEVEMENTS), "STRINGS.");
-		LocString.CreateLocStringKeys(typeof(VIDEOS), "STRINGS.");
+		LocString.CreateLocStringKeys(typeof(SUBWORLDS), "STRINGS.");
 	}
 
 	private void AddColorModeStyles()

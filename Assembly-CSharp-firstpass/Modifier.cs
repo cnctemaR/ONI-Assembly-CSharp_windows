@@ -6,5 +6,6 @@ public enum Modifier
 	Alt,
 	Ctrl,
 	Shift = 4,
-	CapsLock = 8
+	CapsLock = 8,
+	Backtick = 16
 }

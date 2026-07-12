@@ -117,7 +117,7 @@ namespace UnityEngine.UI
 				return;
 			}
 			this.m_IsOn = value;
-			if (this.m_Group != null && this.IsActive() && (this.m_IsOn || (!this.m_Group.AnyTogglesOn() && !this.m_Group.allowSwitchOff)))
+			if (this.m_Group != null && this.m_Group.isActiveAndEnabled && this.IsActive() && (this.m_IsOn || (!this.m_Group.AnyTogglesOn() && !this.m_Group.allowSwitchOff)))
 			{
 				this.m_IsOn = true;
 				this.m_Group.NotifyToggleOn(this, sendCallback);

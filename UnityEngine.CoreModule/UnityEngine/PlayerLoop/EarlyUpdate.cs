@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	[RequiredByNativeCode]
+	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	public struct EarlyUpdate
 	{
 		[RequiredByNativeCode]
@@ -153,8 +153,14 @@ namespace UnityEngine.PlayerLoop
 		{
 		}
 
+		[Obsolete("TangoUpdate has been deprecated. Use ARCoreUpdate instead (UnityUpgradable) -> UnityEngine.PlayerLoop.EarlyUpdate/ARCoreUpdate", false)]
 		[RequiredByNativeCode]
 		public struct TangoUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct ARCoreUpdate
 		{
 		}
 

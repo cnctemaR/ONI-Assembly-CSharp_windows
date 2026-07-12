@@ -5,7 +5,7 @@ public class PeeChoreMonitor : GameStateMachine<PeeChoreMonitor, PeeChoreMonitor
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.building;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.building.Update(delegate(PeeChoreMonitor.Instance smi, float dt)
 		{
 			this.pee_fuse.Delta(-dt, smi);

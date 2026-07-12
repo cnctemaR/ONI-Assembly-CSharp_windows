@@ -36,13 +36,17 @@ public class CircuitManager
 		this.dirty = true;
 	}
 
-	public void Disconnect(IEnergyConsumer consumer)
+	public void Disconnect(IEnergyConsumer consumer, bool isDestroy)
 	{
 		if (Game.IsQuitting())
 		{
 			return;
 		}
 		this.consumers.Remove(consumer);
+		if (!isDestroy)
+		{
+			consumer.SetConnectionStatus(CircuitManager.ConnectionStatus.NotConnected);
+		}
 		this.dirty = true;
 	}
 
@@ -74,6 +78,21 @@ public class CircuitManager
 	{
 		UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(cell);
 		return (ushort)((networkForCell == null) ? 65535 : networkForCell.id);
+	}
+
+	public ushort GetVirtualCircuitID(object virtualKey)
+	{
+		UtilityNetwork networkForVirtualKey = Game.Instance.electricalConduitSystem.GetNetworkForVirtualKey(virtualKey);
+		return (ushort)((networkForVirtualKey == null) ? 65535 : networkForVirtualKey.id);
+	}
+
+	public ushort GetCircuitID(ICircuitConnected ent)
+	{
+		if (!ent.IsVirtual)
+		{
+			return this.GetCircuitID(ent.PowerCell);
+		}
+		return this.GetVirtualCircuitID(ent.VirtualCircuitKey);
 	}
 
 	public void Sim200msFirst(float dt)
@@ -134,28 +153,23 @@ public class CircuitManager
 		this.consumersShadow.AddRange(this.consumers);
 		foreach (IEnergyConsumer energyConsumer in this.consumersShadow)
 		{
-			int powerCell = energyConsumer.PowerCell;
-			ushort circuitID = this.GetCircuitID(powerCell);
+			ushort circuitID = this.GetCircuitID(energyConsumer);
 			if (circuitID != 65535)
 			{
 				Battery battery = energyConsumer as Battery;
 				if (battery != null)
 				{
-					Operational component = battery.GetComponent<Operational>();
-					if (component == null || component.IsOperational)
+					CircuitManager.CircuitInfo circuitInfo2 = this.circuitInfo[(int)circuitID];
+					if (battery.powerTransformer != null)
 					{
-						CircuitManager.CircuitInfo circuitInfo2 = this.circuitInfo[(int)circuitID];
-						if (battery.powerTransformer != null)
-						{
-							circuitInfo2.inputTransformers.Add(battery);
-						}
-						else
-						{
-							circuitInfo2.batteries.Add(battery);
-							circuitInfo2.minBatteryPercentFull = Mathf.Min(this.circuitInfo[(int)circuitID].minBatteryPercentFull, battery.PercentFull);
-						}
-						this.circuitInfo[(int)circuitID] = circuitInfo2;
+						circuitInfo2.inputTransformers.Add(battery);
 					}
+					else
+					{
+						circuitInfo2.batteries.Add(battery);
+						circuitInfo2.minBatteryPercentFull = Mathf.Min(this.circuitInfo[(int)circuitID].minBatteryPercentFull, battery.PercentFull);
+					}
+					this.circuitInfo[(int)circuitID] = circuitInfo2;
 				}
 				else
 				{
@@ -170,8 +184,7 @@ public class CircuitManager
 		}
 		foreach (Generator generator in this.generators)
 		{
-			int powerCell2 = generator.PowerCell;
-			ushort circuitID2 = this.GetCircuitID(powerCell2);
+			ushort circuitID2 = this.GetCircuitID(generator);
 			if (circuitID2 != 65535)
 			{
 				if (generator.GetType() == typeof(PowerTransformer))
@@ -186,10 +199,7 @@ public class CircuitManager
 		}
 		foreach (WireUtilityNetworkLink wireUtilityNetworkLink in this.bridges)
 		{
-			int num;
-			int num2;
-			wireUtilityNetworkLink.GetCells(out num, out num2);
-			ushort circuitID3 = this.GetCircuitID(num);
+			ushort circuitID3 = this.GetCircuitID(wireUtilityNetworkLink);
 			if (circuitID3 != 65535)
 			{
 				Wire.WattageRating maxWattageRating = wireUtilityNetworkLink.GetMaxWattageRating();
@@ -496,7 +506,7 @@ public class CircuitManager
 				{
 					battery.SetConnectionStatus(is_connected_to_something_useful ? CircuitManager.ConnectionStatus.Powered : CircuitManager.ConnectionStatus.NotConnected);
 				}
-				else if ((int)this.GetCircuitID(battery.PowerCell) == circuit_id)
+				else if ((int)this.GetCircuitID(battery) == circuit_id)
 				{
 					battery.SetConnectionStatus(is_connected_to_something_useful ? CircuitManager.ConnectionStatus.Powered : CircuitManager.ConnectionStatus.Unpowered);
 				}
@@ -589,7 +599,7 @@ public class CircuitManager
 		float num = 0f;
 		foreach (Generator generator in this.circuitInfo[(int)circuitID].generators)
 		{
-			if (!(generator == null) && generator.GetComponent<Operational>().IsActive)
+			if (!(generator == null) && generator.IsProducingPower())
 			{
 				num += generator.WattageRating;
 			}
@@ -609,33 +619,6 @@ public class CircuitManager
 			num += generator.WattageRating;
 		}
 		return num;
-	}
-
-	public bool HasPowerSource(ushort circuitID)
-	{
-		if (circuitID == 65535)
-		{
-			return false;
-		}
-		List<Generator> list = this.circuitInfo[(int)circuitID].generators;
-		List<Battery> batteries = this.circuitInfo[(int)circuitID].batteries;
-		return (list.Count > 0 && list.Find(new Predicate<Generator>(this.FindActiveGenerator)) != null) || (batteries.Count > 0 && batteries.Find(new Predicate<Battery>(this.FindActiveBattery)) != null);
-	}
-
-	private bool FindActiveGenerator(Generator g)
-	{
-		Operational component = g.GetComponent<Operational>();
-		ManualGenerator component2 = g.GetComponent<ManualGenerator>();
-		if (component2 == null)
-		{
-			return component.IsActive;
-		}
-		return component.IsOperational && component2.IsPowered;
-	}
-
-	private bool FindActiveBattery(Battery b)
-	{
-		return b.GetComponent<Operational>().IsOperational && b.PercentFull > 0f;
 	}
 
 	public float GetJoulesAvailableOnCircuit(ushort circuitID)

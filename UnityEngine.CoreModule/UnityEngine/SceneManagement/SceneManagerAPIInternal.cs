@@ -4,10 +4,22 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.SceneManagement
 {
-	[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
+	[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 	internal static class SceneManagerAPIInternal
 	{
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetNumScenesInBuildSettings();
+
+		[NativeThrows]
+		public static Scene GetSceneByBuildIndex(int buildIndex)
+		{
+			Scene scene;
+			SceneManagerAPIInternal.GetSceneByBuildIndex_Injected(buildIndex, out scene);
+			return scene;
+		}
+
 		[NativeThrows]
 		public static AsyncOperation LoadSceneAsyncNameIndexInternal(string sceneName, int sceneBuildIndex, LoadSceneParameters parameters, bool mustCompleteNextFrame)
 		{
@@ -17,6 +29,9 @@ namespace UnityEngine.SceneManagement
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AsyncOperation UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex, bool immediately, UnloadSceneOptions options, out bool outSuccess);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSceneByBuildIndex_Injected(int buildIndex, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AsyncOperation LoadSceneAsyncNameIndexInternal_Injected(string sceneName, int sceneBuildIndex, ref LoadSceneParameters parameters, bool mustCompleteNextFrame);

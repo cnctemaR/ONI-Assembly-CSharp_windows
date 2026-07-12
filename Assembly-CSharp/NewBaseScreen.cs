@@ -1,6 +1,7 @@
 ﻿using System;
 using FMODUnity;
 using Klei.AI;
+using ProcGenGame;
 using UnityEngine;
 
 public class NewBaseScreen : KScreen
@@ -49,9 +50,10 @@ public class NewBaseScreen : KScreen
 		this.Final();
 	}
 
-	public void SetStartingMinionStats(ITelepadDeliverable[] stats)
+	public void Init(Cluster clusterLayout, ITelepadDeliverable[] startingMinionStats)
 	{
-		this.minionStartingStats = stats;
+		this.m_clusterLayout = clusterLayout;
+		this.m_minionStartingStats = startingMinionStats;
 	}
 
 	protected override void OnDeactivate()
@@ -114,11 +116,11 @@ public class NewBaseScreen : KScreen
 		{
 			return;
 		}
-		int baseLeft = SaveGame.Instance.worldGen.BaseLeft;
-		int baseRight = SaveGame.Instance.worldGen.BaseRight;
+		int baseLeft = this.m_clusterLayout.currentWorld.BaseLeft;
+		int baseRight = this.m_clusterLayout.currentWorld.BaseRight;
 		Effect a_new_hope = Db.Get().effects.Get("AnewHope");
 		Action<object> <>9__0;
-		for (int i = 0; i < this.minionStartingStats.Length; i++)
+		for (int i = 0; i < this.m_minionStartingStats.Length; i++)
 		{
 			int num3 = num + i % (baseRight - baseLeft) + 1;
 			int num4 = num2;
@@ -127,7 +129,7 @@ public class NewBaseScreen : KScreen
 			Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num5, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
-			((MinionStartingStats)this.minionStartingStats[i]).Apply(gameObject);
+			((MinionStartingStats)this.m_minionStartingStats[i]).Apply(gameObject);
 			GameScheduler instance = GameScheduler.Instance;
 			string text = "ANewHope";
 			float num6 = 3f + 0.5f * (float)i;
@@ -146,6 +148,7 @@ public class NewBaseScreen : KScreen
 			}
 			instance.Schedule(text, num6, action, gameObject, null);
 		}
+		ClusterManager.Instance.activeWorld.SetDupeVisited();
 	}
 
 	public static NewBaseScreen Instance;
@@ -159,5 +162,7 @@ public class NewBaseScreen : KScreen
 	[EventRef]
 	public string BuildBaseSoundMigrated;
 
-	private ITelepadDeliverable[] minionStartingStats;
+	private ITelepadDeliverable[] m_minionStartingStats;
+
+	private Cluster m_clusterLayout;
 }

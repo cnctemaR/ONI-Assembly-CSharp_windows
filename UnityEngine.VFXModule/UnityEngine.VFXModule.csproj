@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C719CBCE-289E-47FB-962B-EC461A7D5B71}</ProjectGuid>
+    <ProjectGuid>{DD3DEF40-76A7-4169-85C9-351C4936F1A7}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnityEngine</RootNamespace>
+    <RootNamespace>UnityEngine.VFXModule</RootNamespace>
     <AssemblyName>UnityEngine.VFXModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
@@ -14,37 +14,39 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="Experimental\VFX\VFXManager.cs" />
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VFX\VFXCameraBufferTypes.cs" />
-    <Compile Include="VFX\VFXCullingFlags.cs" />
-    <Compile Include="VFX\VFXEventAttribute.cs" />
-    <Compile Include="VFX\VFXExposedProperty.cs" />
-    <Compile Include="VFX\VFXExpressionMesh.cs" />
-    <Compile Include="VFX\VFXExpressionNoise.cs" />
-    <Compile Include="VFX\VFXExpressionOperation.cs" />
-    <Compile Include="VFX\VFXExpressionValues.cs" />
-    <Compile Include="VFX\VFXManager.cs" />
-    <Compile Include="VFX\VFXRenderer.cs" />
-    <Compile Include="VFX\VFXSpawnerCallbacks.cs" />
-    <Compile Include="VFX\VFXSpawnerLoopState.cs" />
-    <Compile Include="VFX\VFXSpawnerState.cs" />
-    <Compile Include="VFX\VFXSystemFlag.cs" />
-    <Compile Include="VFX\VFXSystemType.cs" />
-    <Compile Include="VFX\VFXTaskType.cs" />
-    <Compile Include="VFX\VFXUpdateMode.cs" />
-    <Compile Include="VFX\VFXValueType.cs" />
-    <Compile Include="VFX\VisualEffect.cs" />
-    <Compile Include="VFX\VisualEffectAsset.cs" />
-    <Compile Include="VFX\VisualEffectObject.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsReadOnlyAttribute.cs" />
+    <Compile Include="UnityEngine\Experimental\VFX\VFXManager.cs" />
+    <Compile Include="UnityEngine\VFX\VFXCameraBufferTypes.cs" />
+    <Compile Include="UnityEngine\VFX\VFXCullingFlags.cs" />
+    <Compile Include="UnityEngine\VFX\VFXEventAttribute.cs" />
+    <Compile Include="UnityEngine\VFX\VFXExposedProperty.cs" />
+    <Compile Include="UnityEngine\VFX\VFXExpressionOperation.cs" />
+    <Compile Include="UnityEngine\VFX\VFXExpressionValues.cs" />
+    <Compile Include="UnityEngine\VFX\VFXManager.cs" />
+    <Compile Include="UnityEngine\VFX\VFXOutputEventArgs.cs" />
+    <Compile Include="UnityEngine\VFX\VFXParticleSystemInfo.cs" />
+    <Compile Include="UnityEngine\VFX\VFXRenderer.cs" />
+    <Compile Include="UnityEngine\VFX\VFXSpawnerCallbacks.cs" />
+    <Compile Include="UnityEngine\VFX\VFXSpawnerLoopState.cs" />
+    <Compile Include="UnityEngine\VFX\VFXSpawnerState.cs" />
+    <Compile Include="UnityEngine\VFX\VFXSystemFlag.cs" />
+    <Compile Include="UnityEngine\VFX\VFXSystemType.cs" />
+    <Compile Include="UnityEngine\VFX\VFXTaskType.cs" />
+    <Compile Include="UnityEngine\VFX\VFXUpdateMode.cs" />
+    <Compile Include="UnityEngine\VFX\VFXValueType.cs" />
+    <Compile Include="UnityEngine\VFX\VisualEffect.cs" />
+    <Compile Include="UnityEngine\VFX\VisualEffectAsset.cs" />
+    <Compile Include="UnityEngine\VFX\VisualEffectObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B43}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F175}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B57}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F18B}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

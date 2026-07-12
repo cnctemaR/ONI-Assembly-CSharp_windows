@@ -94,6 +94,9 @@ public class AudioMixerSnapshots : ScriptableObject
 	public string MENUStarmapSnapshot;
 
 	[EventRef]
+	public string MENUStarmapNotPausedSnapshot;
+
+	[EventRef]
 	public string GameNotFocusedSnapshot;
 
 	[EventRef]
@@ -119,6 +122,9 @@ public class AudioMixerSnapshots : ScriptableObject
 
 	[EventRef]
 	public string MuteDynamicMusicSnapshot;
+
+	[EventRef]
+	public string ActiveBaseChangeSnapshot;
 
 	[SerializeField]
 	[EventRef]

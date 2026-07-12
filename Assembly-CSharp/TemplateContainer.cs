@@ -8,11 +8,6 @@ using UnityEngine;
 [Serializable]
 public class TemplateContainer
 {
-	public TemplateContainer()
-	{
-		this.Init();
-	}
-
 	public string name { get; private set; }
 
 	public int priority { get; set; }
@@ -31,39 +26,41 @@ public class TemplateContainer
 
 	public void Init(List<Cell> _cells, List<Prefab> _buildings, List<Prefab> _pickupables, List<Prefab> _elementalOres, List<Prefab> _otherEntities)
 	{
-		this.cells = _cells;
-		this.buildings = _buildings;
-		this.pickupables = _pickupables;
-		this.elementalOres = _elementalOres;
-		this.otherEntities = _otherEntities;
+		if (_cells != null && _cells.Count > 0)
+		{
+			this.cells = _cells;
+		}
+		if (_buildings != null && _buildings.Count > 0)
+		{
+			this.buildings = _buildings;
+		}
+		if (_pickupables != null && _pickupables.Count > 0)
+		{
+			this.pickupables = _pickupables;
+		}
+		if (_elementalOres != null && _elementalOres.Count > 0)
+		{
+			this.elementalOres = _elementalOres;
+		}
+		if (_otherEntities != null && _otherEntities.Count > 0)
+		{
+			this.otherEntities = _otherEntities;
+		}
 		this.info = new TemplateContainer.Info();
 		this.RefreshInfo();
 	}
 
-	public void Init()
+	public RectInt GetTemplateBounds(int padding = 0)
 	{
-		this.cells = new List<Cell>();
-		this.buildings = new List<Prefab>();
-		this.pickupables = new List<Prefab>();
-		this.elementalOres = new List<Prefab>();
-		this.otherEntities = new List<Prefab>();
-		this.info = new TemplateContainer.Info();
+		return this.GetTemplateBounds(Vector2I.zero, padding);
 	}
 
-	public void Init(TemplateContainer template)
+	public RectInt GetTemplateBounds(Vector2 position, int padding = 0)
 	{
-		this.cells = new List<Cell>(template.cells);
-		this.buildings = new List<Prefab>(template.buildings);
-		this.pickupables = new List<Prefab>(template.pickupables);
-		this.elementalOres = new List<Prefab>(template.elementalOres);
-		this.otherEntities = new List<Prefab>(template.otherEntities);
-		this.info = new TemplateContainer.Info();
-		this.info.size = template.info.size;
-		this.info.area = template.info.area;
-		this.info.tags = (Tag[])template.info.tags.Clone();
+		return this.GetTemplateBounds(new Vector2I((int)position.x, (int)position.y), padding);
 	}
 
-	public void RefreshInfo()
+	public RectInt GetTemplateBounds(Vector2I position, int padding = 0)
 	{
 		int num = 1;
 		int num2 = -1;
@@ -87,29 +84,51 @@ public class TemplateContainer
 			{
 				num4 = cell.location_y;
 			}
-			this.info.size = new Vector2((float)(1 + (num2 - num)), (float)(1 + (num4 - num3)));
-			this.info.area = this.cells.Count;
 		}
+		return new RectInt(position.x + num - padding, position.y + num3 - padding, (int)this.info.size.x + padding * 2, (int)this.info.size.y + padding * 2);
+	}
+
+	public void RefreshInfo()
+	{
+		if (this.cells == null)
+		{
+			return;
+		}
+		int num = 1;
+		int num2 = -1;
+		int num3 = 1;
+		int num4 = -1;
+		foreach (Cell cell in this.cells)
+		{
+			if (cell.location_x < num)
+			{
+				num = cell.location_x;
+			}
+			if (cell.location_x > num2)
+			{
+				num2 = cell.location_x;
+			}
+			if (cell.location_y < num3)
+			{
+				num3 = cell.location_y;
+			}
+			if (cell.location_y > num4)
+			{
+				num4 = cell.location_y;
+			}
+		}
+		this.info.size = new Vector2((float)(1 + (num2 - num)), (float)(1 + (num4 - num3)));
+		this.info.area = this.cells.Count;
 	}
 
 	public void SaveToYaml(string save_name)
 	{
-		string text = save_name;
-		while (text.Contains("/"))
+		string text = TemplateCache.RewriteTemplatePath(save_name);
+		if (!Directory.Exists(Path.GetDirectoryName(text)))
 		{
-			int num = text.IndexOf('/') + 1;
-			if (text.Length > num)
-			{
-				text = text.Substring(num);
-			}
+			Directory.CreateDirectory(Path.GetDirectoryName(text));
 		}
-		this.name = text;
-		string templatePath = TemplateCache.GetTemplatePath();
-		if (!File.Exists(templatePath))
-		{
-			Directory.CreateDirectory(templatePath);
-		}
-		YamlIO.Save<TemplateContainer>(this, templatePath + "/" + save_name + ".yaml", null);
+		YamlIO.Save<TemplateContainer>(this, text + ".yaml", null);
 	}
 
 	[Serializable]

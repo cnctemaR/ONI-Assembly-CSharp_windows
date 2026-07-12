@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
-	[RequireComponent(typeof(Transform))]
 	[NativeType(Header = "Modules/Grid/Public/Grid.h")]
+	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	public sealed class Grid : GridLayout
 	{
 		public Vector3 GetCellCenterLocal(Vector3Int position)

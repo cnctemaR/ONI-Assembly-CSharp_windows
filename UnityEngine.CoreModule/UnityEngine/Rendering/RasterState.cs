@@ -10,9 +10,9 @@ namespace UnityEngine.Rendering
 			this.m_OffsetUnits = offsetUnits;
 			this.m_OffsetFactor = offsetFactor;
 			this.m_DepthClip = Convert.ToByte(depthClip);
+			this.m_Conservative = Convert.ToByte(false);
 			this.m_Padding1 = 0;
 			this.m_Padding2 = 0;
-			this.m_Padding3 = 0;
 		}
 
 		public CullMode cullingMode
@@ -36,6 +36,18 @@ namespace UnityEngine.Rendering
 			set
 			{
 				this.m_DepthClip = Convert.ToByte(value);
+			}
+		}
+
+		public bool conservative
+		{
+			get
+			{
+				return Convert.ToBoolean(this.m_Conservative);
+			}
+			set
+			{
+				this.m_Conservative = Convert.ToByte(value);
 			}
 		}
 
@@ -65,7 +77,7 @@ namespace UnityEngine.Rendering
 
 		public bool Equals(RasterState other)
 		{
-			return this.m_CullingMode == other.m_CullingMode && this.m_OffsetUnits == other.m_OffsetUnits && this.m_OffsetFactor.Equals(other.m_OffsetFactor) && this.m_DepthClip == other.m_DepthClip;
+			return this.m_CullingMode == other.m_CullingMode && this.m_OffsetUnits == other.m_OffsetUnits && this.m_OffsetFactor.Equals(other.m_OffsetFactor) && this.m_DepthClip == other.m_DepthClip && this.m_Conservative == other.m_Conservative;
 		}
 
 		public override bool Equals(object obj)
@@ -79,7 +91,8 @@ namespace UnityEngine.Rendering
 			int num = (int)this.m_CullingMode;
 			num = (num * 397) ^ this.m_OffsetUnits;
 			num = (num * 397) ^ this.m_OffsetFactor.GetHashCode();
-			return (num * 397) ^ this.m_DepthClip.GetHashCode();
+			num = (num * 397) ^ this.m_DepthClip.GetHashCode();
+			return (num * 397) ^ this.m_Conservative.GetHashCode();
 		}
 
 		public static bool operator ==(RasterState left, RasterState right)
@@ -102,10 +115,10 @@ namespace UnityEngine.Rendering
 
 		private byte m_DepthClip;
 
+		private byte m_Conservative;
+
 		private byte m_Padding1;
 
 		private byte m_Padding2;
-
-		private byte m_Padding3;
 	}
 }

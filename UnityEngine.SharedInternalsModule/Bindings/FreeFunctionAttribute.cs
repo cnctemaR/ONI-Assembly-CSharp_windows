@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[AttributeUsage(AttributeTargets.Method)]
 	[VisibleToOtherModules]
+	[AttributeUsage(AttributeTargets.Method)]
 	internal class FreeFunctionAttribute : NativeMethodAttribute
 	{
 		public FreeFunctionAttribute()

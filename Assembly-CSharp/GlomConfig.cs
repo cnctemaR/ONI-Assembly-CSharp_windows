@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class GlomConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = global::STRINGS.CREATURES.SPECIES.GLOM.NAME;
@@ -44,14 +49,14 @@ public class GlomConfig : IEntityConfig
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_land", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_expel", NOISE_POLLUTION.CREATURES.TIER4);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new TrappedStates.Def(), true).Add(new BaggedStates.Def(), true)
-			.Add(new FallStates.Def(), true)
-			.Add(new StunnedStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new FleeStates.Def(), true)
-			.Add(new DropElementStates.Def(), true)
-			.Add(new IdleStates.Def(), true);
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new TrappedStates.Def(), true, -1).Add(new BaggedStates.Def(), true, -1)
+			.Add(new FallStates.Def(), true, -1)
+			.Add(new StunnedStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new FleeStates.Def(), true, -1)
+			.Add(new DropElementStates.Def(), true, -1)
+			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.GlomSpecies, null);
 		return gameObject;
 	}

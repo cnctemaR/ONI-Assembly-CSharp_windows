@@ -8,11 +8,11 @@ using UnityEngine.Video;
 
 namespace UnityEngine.Experimental.Video
 {
-	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
-	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
-	[NativeHeader("Modules/Video/Public/VideoClip.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("VideoClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
+	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
+	[NativeHeader("Modules/Video/Public/VideoClip.h")]
 	[RequiredByNativeCode]
 	public struct VideoClipPlayable : IPlayable, IEquatable<VideoClipPlayable>
 	{
@@ -125,7 +125,7 @@ namespace UnityEngine.Experimental.Video
 			bool flag = this.m_Handle.GetPlayState() == PlayState.Playing && (value < 0.05 || (pauseDelayInternal != 0.0 && pauseDelayInternal < 0.05));
 			if (flag)
 			{
-				throw new ArgumentException("VideoClipPlayable.pauseDelay: Setting new delay when existing delay is too small or 0.0 (" + pauseDelayInternal + "), Video system will not be able to change in time");
+				throw new ArgumentException("VideoClipPlayable.pauseDelay: Setting new delay when existing delay is too small or 0.0 (" + pauseDelayInternal.ToString() + "), Video system will not be able to change in time");
 			}
 			VideoClipPlayable.SetPauseDelayInternal(ref this.m_Handle, value);
 		}
@@ -160,7 +160,7 @@ namespace UnityEngine.Experimental.Video
 			bool flag = this.IsPlaying() && (startDelay < 0.05 || (startDelayInternal >= 1E-05 && startDelayInternal < 0.05));
 			if (flag)
 			{
-				Debug.LogWarning("VideoClipPlayable.StartDelay: Setting new delay when existing delay is too small or 0.0 (" + startDelayInternal + "), Video system will not be able to change in time");
+				Debug.LogWarning("VideoClipPlayable.StartDelay: Setting new delay when existing delay is too small or 0.0 (" + startDelayInternal.ToString() + "), Video system will not be able to change in time");
 			}
 		}
 

@@ -80,6 +80,10 @@ public class OverlayMenu : KIconToggleMenu
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.LOGIC.BUTTON, "overlay_logic", OverlayModes.Logic.ID, "AutomationOverlay", global::Action.Overlay13, UI.TOOLTIPS.LOGICOVERLAYSTRING, UI.OVERLAYS.LOGIC.BUTTON),
 			new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.CONVEYOR.BUTTON, "overlay_conveyor", OverlayModes.SolidConveyor.ID, "ConveyorOverlay", global::Action.Overlay14, UI.TOOLTIPS.CONVEYOR_OVERLAY_STRING, UI.OVERLAYS.CONVEYOR.BUTTON)
 		};
+		if (Sim.IsRadiationEnabled())
+		{
+			this.overlayToggleInfos.Add(new OverlayMenu.OverlayToggleInfo(UI.OVERLAYS.RADIATION.BUTTON, "overlay_radiation", OverlayModes.Radiation.ID, "", global::Action.Overlay15, UI.TOOLTIPS.RADIATIONOVERLAYSTRING, UI.OVERLAYS.RADIATION.BUTTON));
+		}
 	}
 
 	private void OnToggleSelect(KIconToggleMenu.ToggleInfo toggle_info)
@@ -169,7 +173,7 @@ public class OverlayMenu : KIconToggleMenu
 	private class OverlayToggleInfo : KIconToggleMenu.ToggleInfo
 	{
 		public OverlayToggleInfo(string text, string icon_name, HashedString sim_view, string required_tech_item = "", global::Action hotKey = global::Action.NumActions, string tooltip = "", string tooltip_header = "")
-			: base(text, icon_name, null, hotKey, tooltip, tooltip_header)
+			: base(text, icon_name, null, hotKey, GameUtil.ReplaceHotkeyString(tooltip, hotKey), tooltip_header)
 		{
 			this.simView = sim_view;
 			this.requiredTechItem = required_tech_item;

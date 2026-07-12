@@ -28,14 +28,14 @@ namespace UnityEngine.Networking
 			return (SourceID)((long)SystemInfo.deviceUniqueIdentifier.GetHashCode());
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This function is unused and should not be referenced in code. Please sign in and setup your project in the editor instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void SetAppID(AppID newAppID)
 		{
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This function is unused and should not be referenced in code. Please sign in and setup your project in the editor instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static AppID GetAppID()
 		{
 			return AppID.Invalid;

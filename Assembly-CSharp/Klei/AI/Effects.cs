@@ -76,16 +76,9 @@ namespace Klei.AI
 			}
 			bool flag = true;
 			Traits component = base.GetComponent<Traits>();
-			if (component != null)
+			if (component != null && component.IsEffectIgnored(effect))
 			{
-				foreach (Trait trait in component.TraitList)
-				{
-					if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
-					{
-						flag = false;
-						break;
-					}
-				}
+				flag = false;
 			}
 			if (flag)
 			{
@@ -242,6 +235,18 @@ namespace Klei.AI
 		public List<EffectInstance> GetTimeLimitedEffects()
 		{
 			return this.effectsThatExpire;
+		}
+
+		public void CopyEffects(Effects source)
+		{
+			foreach (EffectInstance effectInstance in source.effects)
+			{
+				this.Add(effectInstance.effect, effectInstance.shouldSave).timeRemaining = effectInstance.timeRemaining;
+			}
+			foreach (EffectInstance effectInstance2 in source.effectsThatExpire)
+			{
+				this.Add(effectInstance2.effect, effectInstance2.shouldSave).timeRemaining = effectInstance2.timeRemaining;
+			}
 		}
 
 		[Serialize]

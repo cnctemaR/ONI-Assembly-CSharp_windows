@@ -23,44 +23,7 @@ public class FilteredStorage
 		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
 		this.storage = root.GetComponent<Storage>();
 		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
-		if (FilteredStorage.capacityStatusItem == null)
-		{
-			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
-			FilteredStorage.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
-			{
-				FilteredStorage filteredStorage = (FilteredStorage)data;
-				float num = filteredStorage.GetAmountStored();
-				float num2 = filteredStorage.storage.capacityKg;
-				if (num > num2 - filteredStorage.storage.storageFullMargin && num < num2)
-				{
-					num = num2;
-				}
-				else
-				{
-					num = Mathf.Floor(num);
-				}
-				string text = Util.FormatWholeNumber(num);
-				IUserControlledCapacity component = filteredStorage.root.GetComponent<IUserControlledCapacity>();
-				if (component != null)
-				{
-					num2 = Mathf.Min(component.UserMaxCapacity, num2);
-				}
-				string text2 = Util.FormatWholeNumber(num2);
-				str = str.Replace("{Stored}", text);
-				str = str.Replace("{Capacity}", text2);
-				if (component != null)
-				{
-					str = str.Replace("{Units}", component.CapacityUnits);
-				}
-				else
-				{
-					str = str.Replace("{Units}", GameUtil.GetCurrentMassUnit(false));
-				}
-				return str;
-			};
-			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
-		}
-		root.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, FilteredStorage.capacityStatusItem, this);
+		this.storage.Subscribe(-1852328367, new Action<object>(this.OnFunctionalChanged));
 	}
 
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
@@ -131,6 +94,11 @@ public class FilteredStorage
 		this.UpdateMeter();
 	}
 
+	private void OnFunctionalChanged(object data)
+	{
+		this.OnFilterChanged(this.filterable.GetTags());
+	}
+
 	private void UpdateMeter()
 	{
 		float maxCapacityMinusStorageMargin = this.GetMaxCapacityMinusStorageMargin();
@@ -182,11 +150,15 @@ public class FilteredStorage
 		return num;
 	}
 
+	private bool IsFunctional()
+	{
+		Operational component = this.storage.GetComponent<Operational>();
+		return component == null || component.IsFunctional;
+	}
+
 	private void OnFilterChanged(Tag[] tags)
 	{
-		KAnimControllerBase component = this.root.GetComponent<KBatchedAnimController>();
 		bool flag = tags != null && tags.Length != 0;
-		component.TintColour = (flag ? this.filterTint : this.noFilterTint);
 		if (this.fetchList != null)
 		{
 			this.fetchList.Cancel("");
@@ -195,7 +167,7 @@ public class FilteredStorage
 		float maxCapacityMinusStorageMargin = this.GetMaxCapacityMinusStorageMargin();
 		float amountStored = this.GetAmountStored();
 		float num = Mathf.Max(0f, maxCapacityMinusStorageMargin - amountStored);
-		if (num > 0f && flag)
+		if (num > 0f && flag && this.IsFunctional())
 		{
 			num = Mathf.Max(0f, this.GetMaxCapacity() - amountStored);
 			this.fetchList = new FetchList2(this.storage, this.choreType);
@@ -203,7 +175,6 @@ public class FilteredStorage
 			this.fetchList.Add(tags, this.requiredTags, this.forbiddenTags, num, FetchOrder2.OperationalRequirement.Functional);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
-		this.root.GetComponent<KSelectable>().ToggleStatusItem(FilteredStorage.noFilterStatusItem, !flag, this);
 	}
 
 	public void SetLogicMeter(bool on)
@@ -230,14 +201,6 @@ public class FilteredStorage
 
 	private MeterController logicMeter;
 
-	public static readonly Color32 FILTER_TINT = Color.white;
-
-	public static readonly Color32 NO_FILTER_TINT = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-
-	public Color32 filterTint = FilteredStorage.FILTER_TINT;
-
-	public Color32 noFilterTint = FilteredStorage.NO_FILTER_TINT;
-
 	private Tag[] requiredTags;
 
 	private Tag[] forbiddenTags;
@@ -245,10 +208,6 @@ public class FilteredStorage
 	private bool hasMeter = true;
 
 	private bool useLogicMeter;
-
-	private static StatusItem capacityStatusItem;
-
-	private static StatusItem noFilterStatusItem;
 
 	private ChoreType choreType;
 }

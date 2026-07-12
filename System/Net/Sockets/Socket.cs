@@ -3371,6 +3371,8 @@ namespace System.Net.Sockets
 
 		internal bool connect_in_progress;
 
+		internal readonly int ID;
+
 		private static AsyncCallback AcceptAsyncCallback = delegate(IAsyncResult ares)
 		{
 			SocketAsyncEventArgs e = (SocketAsyncEventArgs)((SocketAsyncResult)ares).AsyncState;

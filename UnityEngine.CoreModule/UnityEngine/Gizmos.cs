@@ -5,8 +5,8 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Gizmos/Gizmos.bindings.h")]
 	[StaticAccessor("GizmoBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Export/Gizmos/Gizmos.bindings.h")]
 	public sealed class Gizmos
 	{
 		[NativeThrows]
@@ -103,6 +103,12 @@ namespace UnityEngine
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		public static extern float probeSize
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		public static void DrawFrustum(Vector3 center, float fov, float maxRange, float minRange, float aspect)

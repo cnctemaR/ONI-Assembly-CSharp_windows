@@ -37,6 +37,8 @@ public class CreatureFeederConfig : IBuildingConfig
 		storage.showDescriptor = true;
 		storage.allowItemRemoval = false;
 		storage.allowSettingOnlyFetchMarkedItems = false;
+		storage.showCapacityStatusItem = true;
+		storage.showCapacityAsMainStatus = true;
 		go.AddOrGet<StorageLocker>().choreTypeID = Db.Get().ChoreTypes.RanchingFetch.Id;
 		go.AddOrGet<UserNameable>();
 		go.AddOrGet<TreeFilterable>();
@@ -56,7 +58,9 @@ public class CreatureFeederConfig : IBuildingConfig
 			GameTags.Creatures.Species.LightBugSpecies,
 			GameTags.Creatures.Species.HatchSpecies,
 			GameTags.Creatures.Species.MoleSpecies,
-			GameTags.Creatures.Species.CrabSpecies
+			GameTags.Creatures.Species.CrabSpecies,
+			GameTags.Creatures.Species.StaterpillarSpecies,
+			GameTags.Creatures.Species.DivergentSpecies
 		}))
 		{
 			list.Add(keyValuePair.Key);

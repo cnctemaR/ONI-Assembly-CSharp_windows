@@ -6,15 +6,15 @@ namespace UnityEngine
 {
 	public struct RenderTextureDescriptor
 	{
-		public int width { get; set; }
+		public int width { readonly get; set; }
 
-		public int height { get; set; }
+		public int height { readonly get; set; }
 
-		public int msaaSamples { get; set; }
+		public int msaaSamples { readonly get; set; }
 
-		public int volumeDepth { get; set; }
+		public int volumeDepth { readonly get; set; }
 
-		public int mipCount { get; set; }
+		public int mipCount { readonly get; set; }
 
 		public GraphicsFormat graphicsFormat
 		{
@@ -29,7 +29,7 @@ namespace UnityEngine
 			}
 		}
 
-		public GraphicsFormat stencilFormat { get; set; }
+		public GraphicsFormat stencilFormat { readonly get; set; }
 
 		public RenderTextureFormat colorFormat
 		{
@@ -83,11 +83,11 @@ namespace UnityEngine
 			}
 		}
 
-		public TextureDimension dimension { get; set; }
+		public TextureDimension dimension { readonly get; set; }
 
-		public ShadowSamplingMode shadowSamplingMode { get; set; }
+		public ShadowSamplingMode shadowSamplingMode { readonly get; set; }
 
-		public VRTextureUsage vrUsage { get; set; }
+		public VRTextureUsage vrUsage { readonly get; set; }
 
 		public RenderTextureCreationFlags flags
 		{
@@ -97,7 +97,7 @@ namespace UnityEngine
 			}
 		}
 
-		public RenderTextureMemoryless memoryless { get; set; }
+		public RenderTextureMemoryless memoryless { readonly get; set; }
 
 		public RenderTextureDescriptor(int width, int height)
 		{

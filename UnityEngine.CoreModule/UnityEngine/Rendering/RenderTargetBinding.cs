@@ -76,6 +76,18 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public RenderTargetFlags flags
+		{
+			get
+			{
+				return this.m_Flags;
+			}
+			set
+			{
+				this.m_Flags = value;
+			}
+		}
+
 		public RenderTargetBinding(RenderTargetIdentifier[] colorRenderTargets, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
 		{
 			this.m_ColorRenderTargets = colorRenderTargets;
@@ -84,6 +96,7 @@ namespace UnityEngine.Rendering
 			this.m_ColorStoreActions = colorStoreActions;
 			this.m_DepthLoadAction = depthLoadAction;
 			this.m_DepthStoreAction = depthStoreAction;
+			this.m_Flags = RenderTargetFlags.None;
 		}
 
 		public RenderTargetBinding(RenderTargetIdentifier colorRenderTarget, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderTargetIdentifier depthRenderTarget, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
@@ -103,6 +116,7 @@ namespace UnityEngine.Rendering
 			this.m_ColorStoreActions = (RenderBufferStoreAction[])setup.colorStore.Clone();
 			this.m_DepthLoadAction = setup.depthLoad;
 			this.m_DepthStoreAction = setup.depthStore;
+			this.m_Flags = RenderTargetFlags.None;
 		}
 
 		private RenderTargetIdentifier[] m_ColorRenderTargets;
@@ -116,5 +130,7 @@ namespace UnityEngine.Rendering
 		private RenderBufferLoadAction m_DepthLoadAction;
 
 		private RenderBufferStoreAction m_DepthStoreAction;
+
+		private RenderTargetFlags m_Flags;
 	}
 }

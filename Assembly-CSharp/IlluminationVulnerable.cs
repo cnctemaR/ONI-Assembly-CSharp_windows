@@ -7,6 +7,18 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
 {
+	public int LightIntensityThreshold
+	{
+		get
+		{
+			if (this.minLuxAttributeInstance != null)
+			{
+				return Mathf.RoundToInt(this.minLuxAttributeInstance.GetTotalValue());
+			}
+			return Mathf.RoundToInt(base.GetComponent<Modifiers>().GetPreModifiedAttributeValue(Db.Get().PlantAttributes.MinLightLux));
+		}
+	}
+
 	private OccupyArea occupyArea
 	{
 		get
@@ -23,6 +35,7 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 	{
 		base.OnPrefabInit();
 		base.gameObject.GetAmounts().Add(new AmountInstance(Db.Get().Amounts.Illumination, base.gameObject));
+		this.minLuxAttributeInstance = base.gameObject.GetAttributes().Add(Db.Get().PlantAttributes.MinLightLux);
 	}
 
 	protected override void OnSpawn()
@@ -46,9 +59,9 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 	{
 		if (this.prefersDarkness)
 		{
-			return (float)Grid.LightIntensity[cell] <= this.lightIntensityThreshold;
+			return Grid.LightIntensity[cell] == 0;
 		}
-		return (float)Grid.LightIntensity[cell] > this.lightIntensityThreshold;
+		return Grid.LightIntensity[cell] > this.LightIntensityThreshold;
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions
@@ -69,11 +82,11 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 		{
 			if (base.smi.IsInsideState(base.smi.sm.too_bright))
 			{
-				return Db.Get().CreatureStatusItems.Crop_Too_Bright.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_BRIGHT.NAME, this);
+				return Db.Get().CreatureStatusItems.Crop_Too_Bright.GetName(this);
 			}
 			if (base.smi.IsInsideState(base.smi.sm.too_dark))
 			{
-				return Db.Get().CreatureStatusItems.Crop_Too_Dark.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_DARK.NAME, this);
+				return Db.Get().CreatureStatusItems.Crop_Too_Dark.GetName(this);
 			}
 			return "";
 		}
@@ -95,17 +108,17 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 		}
 		return new List<Descriptor>
 		{
-			new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT, Descriptor.DescriptorType.Requirement, false)
+			new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT.Replace("{Lux}", GameUtil.GetFormattedLux(this.LightIntensityThreshold)), UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT.Replace("{Lux}", GameUtil.GetFormattedLux(this.LightIntensityThreshold)), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
-
-	public float lightIntensityThreshold;
 
 	private OccupyArea _occupyArea;
 
 	private SchedulerHandle handle;
 
 	public bool prefersDarkness;
+
+	private AttributeInstance minLuxAttributeInstance;
 
 	public class StatesInstance : GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.GameInstance
 	{

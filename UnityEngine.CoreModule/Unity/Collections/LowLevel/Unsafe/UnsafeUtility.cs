@@ -62,7 +62,7 @@ namespace Unity.Collections.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ReleaseGCObject(ulong gcHandle);
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void CopyObjectAddressToPtr(object target, void* dstPtr);
 
@@ -71,11 +71,11 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return UnsafeUtility.IsBlittable(typeof(T));
 		}
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void* Malloc(long size, int alignment, Allocator allocator);
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void Free(void* memory, Allocator allocator);
 
@@ -84,23 +84,23 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return allocator > Allocator.None;
 		}
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void MemCpy(void* destination, void* source, long size);
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void MemCpyReplicate(void* destination, void* source, int size, int count);
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void MemCpyStride(void* destination, int destinationStride, void* source, int sourceStride, int elementSize, int count);
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void MemMove(void* destination, void* source, long size);
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void MemSet(void* destination, byte value, long size);
 
@@ -109,7 +109,7 @@ namespace Unity.Collections.LowLevel.Unsafe
 			UnsafeUtility.MemSet(destination, 0, size);
 		}
 
-		[ThreadSafe]
+		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern int MemCmp(void* ptr1, void* ptr2, long size);
 
@@ -302,6 +302,21 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return sizeof(T);
 		}
 
+		public static ref T As<U, T>(ref U from)
+		{
+			return ref from;
+		}
+
+		public unsafe static ref T AsRef<T>(void* ptr) where T : struct
+		{
+			return ref *(T*)ptr;
+		}
+
+		public unsafe static ref T ArrayElementAsRef<T>(void* ptr, int index) where T : struct
+		{
+			return ref *(T*)((byte*)ptr + (long)index * (long)sizeof(T));
+		}
+
 		public static int EnumToInt<T>(T enumValue) where T : struct, IConvertible
 		{
 			int num = 0;
@@ -312,6 +327,11 @@ namespace Unity.Collections.LowLevel.Unsafe
 		private static void InternalEnumToInt<T>(ref T enumValue, ref int intValue)
 		{
 			intValue = enumValue;
+		}
+
+		public static bool EnumEquals<T>(T lhs, T rhs) where T : struct, IConvertible
+		{
+			return lhs == rhs;
 		}
 
 		internal struct IsUnmanagedCache<T>

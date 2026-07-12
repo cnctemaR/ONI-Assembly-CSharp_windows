@@ -12,7 +12,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Internal_SubsystemDescriptors.GetId(this.m_Ptr);
+				return SubsystemDescriptorBindings.GetId(this.m_Ptr);
 			}
 		}
 

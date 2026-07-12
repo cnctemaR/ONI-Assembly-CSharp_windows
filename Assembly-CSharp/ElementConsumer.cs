@@ -31,7 +31,10 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IGameObjectEffectDes
 		{
 			throw new ArgumentException("No consumable elements specified");
 		}
-		base.Subscribe<ElementConsumer>(824508782, ElementConsumer.OnActiveChangedDelegate);
+		if (!this.ignoreActiveChanged)
+		{
+			base.Subscribe<ElementConsumer>(824508782, ElementConsumer.OnActiveChangedDelegate);
+		}
 		if (this.capacityKG != float.PositiveInfinity)
 		{
 			this.hasAvailableCapacity = !this.IsStorageFull();
@@ -348,6 +351,8 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IGameObjectEffectDes
 	private KSelectable selectable;
 
 	private HandleVector<int>.Handle accumulator = HandleVector<int>.InvalidHandle;
+
+	public bool ignoreActiveChanged;
 
 	private Guid statusHandle;
 

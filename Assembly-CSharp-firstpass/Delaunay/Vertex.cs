@@ -59,7 +59,7 @@ namespace Delaunay
 
 		public override string ToString()
 		{
-			return "Vertex (" + this._vertexIndex + ")";
+			return "Vertex (" + this._vertexIndex.ToString() + ")";
 		}
 
 		public static Vertex Intersect(Halfedge halfedge0, Halfedge halfedge1)

@@ -31,6 +31,12 @@ namespace UnityEngine.UI
 			base.Start();
 		}
 
+		protected override void OnEnable()
+		{
+			this.EnsureValidState();
+			base.OnEnable();
+		}
+
 		private void ValidateToggleIsInGroup(Toggle toggle)
 		{
 			if (toggle == null || !this.m_Toggles.Contains(toggle))
@@ -81,6 +87,18 @@ namespace UnityEngine.UI
 				this.m_Toggles[0].isOn = true;
 				this.NotifyToggleOn(this.m_Toggles[0], true);
 			}
+			IEnumerable<Toggle> enumerable = this.ActiveToggles();
+			if (enumerable.Count<Toggle>() > 1)
+			{
+				Toggle firstActiveToggle = this.GetFirstActiveToggle();
+				foreach (Toggle toggle in enumerable)
+				{
+					if (!(toggle == firstActiveToggle))
+					{
+						toggle.isOn = false;
+					}
+				}
+			}
 		}
 
 		public bool AnyTogglesOn()
@@ -91,6 +109,16 @@ namespace UnityEngine.UI
 		public IEnumerable<Toggle> ActiveToggles()
 		{
 			return this.m_Toggles.Where<Toggle>((Toggle x) => x.isOn);
+		}
+
+		public Toggle GetFirstActiveToggle()
+		{
+			IEnumerable<Toggle> enumerable = this.ActiveToggles();
+			if (enumerable.Count<Toggle>() <= 0)
+			{
+				return null;
+			}
+			return enumerable.First<Toggle>();
 		}
 
 		public void SetAllTogglesOff(bool sendCallback = true)

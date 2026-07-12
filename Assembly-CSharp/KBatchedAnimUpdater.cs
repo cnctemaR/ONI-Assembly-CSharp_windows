@@ -26,6 +26,13 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	public Vector2I GetVisibleSize()
 	{
+		if (CameraController.Instance != null)
+		{
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			CameraController.Instance.GetWorldCamera(out vector2I, out vector2I2);
+			return new Vector2I((int)((float)(vector2I2.x + vector2I.x) * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x), (int)((float)(vector2I2.y + vector2I.y) * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y));
+		}
 		return new Vector2I((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x), (int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y));
 	}
 
@@ -159,6 +166,10 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			{
 				value.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
 				list.Remove(linkedListNode);
+			}
+			else if (value.forceUseGameTime)
+			{
+				value.UpdateAnim(Time.deltaTime);
 			}
 			else
 			{
@@ -416,6 +427,19 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
 		min.x -= 4;
 		min.y -= 4;
+		if (CameraController.Instance != null)
+		{
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			CameraController.Instance.GetWorldCamera(out vector2I, out vector2I2);
+			min.x = Math.Min(vector2I.x + vector2I2.x - 1, Math.Max(vector2I.x, min.x));
+			min.y = Math.Min(vector2I.y + vector2I2.y - 1, Math.Max(vector2I.y, min.y));
+			max.x += 4;
+			max.y += 4;
+			max.x = Math.Min(vector2I.x + vector2I2.x - 1, Math.Max(vector2I.x, max.x));
+			max.y = Math.Min(vector2I.y + vector2I2.y - 1, Math.Max(vector2I.y, max.y));
+			return;
+		}
 		min.x = Math.Min((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x) - 1, Math.Max(0, min.x));
 		min.y = Math.Min((int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y) - 1, Math.Max(0, min.y));
 		max.x += 4;

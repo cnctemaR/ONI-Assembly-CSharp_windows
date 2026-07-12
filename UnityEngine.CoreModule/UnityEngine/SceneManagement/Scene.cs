@@ -66,6 +66,11 @@ namespace UnityEngine.SceneManagement
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetRootGameObjectsInternal(int sceneHandle, object resultRootList);
 
+		internal Scene(int handle)
+		{
+			this.m_Handle = handle;
+		}
+
 		public int handle
 		{
 			get
@@ -231,6 +236,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		[SerializeField]
+		[HideInInspector]
 		private int m_Handle;
 
 		internal enum LoadingState

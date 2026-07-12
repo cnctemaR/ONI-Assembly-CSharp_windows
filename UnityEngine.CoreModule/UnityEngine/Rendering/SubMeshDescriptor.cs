@@ -15,19 +15,19 @@ namespace UnityEngine.Rendering
 			this.vertexCount = 0;
 		}
 
-		public Bounds bounds { get; set; }
+		public Bounds bounds { readonly get; set; }
 
-		public MeshTopology topology { get; set; }
+		public MeshTopology topology { readonly get; set; }
 
-		public int indexStart { get; set; }
+		public int indexStart { readonly get; set; }
 
-		public int indexCount { get; set; }
+		public int indexCount { readonly get; set; }
 
-		public int baseVertex { get; set; }
+		public int baseVertex { readonly get; set; }
 
-		public int firstVertex { get; set; }
+		public int firstVertex { readonly get; set; }
 
-		public int vertexCount { get; set; }
+		public int vertexCount { readonly get; set; }
 
 		public override string ToString()
 		{

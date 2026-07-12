@@ -46,6 +46,17 @@ namespace UnityEngine.Networking
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool IsDone();
 
+		public string error
+		{
+			get
+			{
+				return this.GetErrorMsg();
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern string GetErrorMsg();
+
 		public byte[] data
 		{
 			get
@@ -113,6 +124,10 @@ namespace UnityEngine.Networking
 						{
 							Debug.LogWarning(string.Format("Unsupported encoding '{0}': {1}", text, ex.Message));
 						}
+						catch (NotSupportedException ex2)
+						{
+							Debug.LogWarning(string.Format("Unsupported encoding '{0}': {1}", text, ex2.Message));
+						}
 					}
 				}
 			}
@@ -162,16 +177,16 @@ namespace UnityEngine.Networking
 			{
 				throw new InvalidOperationException("Cannot get content from an unfinished UnityWebRequest object");
 			}
-			bool isNetworkError = www.isNetworkError;
-			if (isNetworkError)
+			bool flag3 = www.result == UnityWebRequest.Result.ProtocolError;
+			if (flag3)
 			{
 				throw new InvalidOperationException(www.error);
 			}
 			return (T)((object)www.downloadHandler);
 		}
 
-		[VisibleToOtherModules]
 		[NativeThrows]
+		[VisibleToOtherModules]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern byte[] InternalGetByteArray(DownloadHandler dh);
 

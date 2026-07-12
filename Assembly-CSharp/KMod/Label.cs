@@ -24,16 +24,16 @@ namespace KMod
 		{
 			get
 			{
-				return FileSystem.Normalize(Path.Combine(Path.Combine(Manager.GetDirectory(), this.distribution_platform_name), this.id));
+				return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), this.distribution_platform_name, this.id));
 			}
 		}
 
 		[JsonIgnore]
-		public global::System.DateTime time_stamp
+		public string defaultStaticID
 		{
 			get
 			{
-				return global::System.DateTime.FromFileTimeUtc(this.version);
+				return this.id + "." + this.distribution_platform.ToString();
 			}
 		}
 
@@ -51,9 +51,9 @@ namespace KMod
 
 		public string id;
 
-		public long version;
-
 		public string title;
+
+		public long version;
 
 		public enum DistributionPlatform
 		{

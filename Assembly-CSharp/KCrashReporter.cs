@@ -81,6 +81,7 @@ public class KCrashReporter : MonoBehaviour
 
 	private void OnDisable()
 	{
+		Application.logMessageReceived -= this.HandleLog;
 	}
 
 	private void HandleLog(string msg, string stack_trace, LogType type)
@@ -257,14 +258,15 @@ public class KCrashReporter : MonoBehaviour
 	{
 		if (DistributionPlatform.Initialized)
 		{
-			return string.Concat(new object[]
-			{
-				DistributionPlatform.Inst.Name,
-				"ID_",
-				DistributionPlatform.Inst.LocalUser.Name,
-				"_",
-				DistributionPlatform.Inst.LocalUser.Id
-			});
+			string[] array = new string[5];
+			array[0] = DistributionPlatform.Inst.Name;
+			array[1] = "ID_";
+			array[2] = DistributionPlatform.Inst.LocalUser.Name;
+			array[3] = "_";
+			int num = 4;
+			DistributionPlatform.UserId id = DistributionPlatform.Inst.LocalUser.Id;
+			array[num] = ((id != null) ? id.ToString() : null);
+			return string.Concat(array);
 		}
 		return "LocalUser";
 	}
@@ -340,7 +342,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = "CS-" + 469300U.ToString();
+				string text3 = LaunchInitializer.BuildPrefix() + "-" + 471531U.ToString();
 				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
@@ -381,6 +383,14 @@ public class KCrashReporter : MonoBehaviour
 			{
 				userMessage = "";
 			}
+			else
+			{
+				userMessage = "[" + BuildWatermark.GetBuildText() + "] " + userMessage;
+				if (!string.IsNullOrEmpty(save_file_hash))
+				{
+					userMessage = userMessage + "\nsave_hash: " + save_file_hash;
+				}
+			}
 			KCrashReporter.Error error = new KCrashReporter.Error();
 			error.user = KCrashReporter.GetUserID();
 			error.callstack = stack_trace;
@@ -389,7 +399,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 469300;
+			error.build = 471531;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;

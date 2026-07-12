@@ -54,12 +54,13 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 			this.headingRight.Set(!this.headingRight.Get(smi), smi);
 		}).OnAnimQueueComplete(this.pause);
 		this.redirected.StopMoving().GoTo(this.emoteRedirected);
-		this.sweep.Enter(delegate(SweepStates.Instance smi)
+		this.sweep.PlayAnim("pickup").ToggleEffect("BotSweeping").Enter(delegate(SweepStates.Instance smi)
 		{
 			this.StopMoveSound(smi);
 			smi.sm.bored.Set(false, smi);
 			smi.sm.timeUntilBored.Set(30f, smi);
-		}).PlayAnim("pickup").OnAnimQueueComplete(this.moving);
+		})
+			.OnAnimQueueComplete(this.moving);
 		this.pause.Enter(delegate(SweepStates.Instance smi)
 		{
 			if (Grid.IsLiquid(Grid.PosToCell(smi)))
@@ -74,12 +75,13 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 			}
 			smi.GoTo(this.moving);
 		});
-		this.mopping.PlayAnim("mop_pre", KAnim.PlayMode.Once).QueueAnim("mop_loop", true, null).Enter(delegate(SweepStates.Instance smi)
-		{
-			smi.sm.timeUntilBored.Set(30f, smi);
-			smi.sm.bored.Set(false, smi);
-			this.StopMoveSound(smi);
-		})
+		this.mopping.PlayAnim("mop_pre", KAnim.PlayMode.Once).QueueAnim("mop_loop", true, null).ToggleEffect("BotMopping")
+			.Enter(delegate(SweepStates.Instance smi)
+			{
+				smi.sm.timeUntilBored.Set(30f, smi);
+				smi.sm.bored.Set(false, smi);
+				this.StopMoveSound(smi);
+			})
 			.Update(delegate(SweepStates.Instance smi, float dt)
 			{
 				if (smi.timeinstate > 16f || !Grid.IsLiquid(Grid.PosToCell(smi)))
@@ -164,15 +166,13 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 			{
 				pickupable.GetComponent<EntitySplitter>();
 				pickupable = EntitySplitter.Split(pickupable, Mathf.Min(10f, storage.RemainingCapacity()), null);
-				float value = smi.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id);
-				smi.gameObject.GetAmounts().SetValue(Db.Get().Amounts.InternalBattery.Id, Mathf.Max(0f, value - pickupable.GetComponent<PrimaryElement>().Mass * 1f));
+				smi.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id);
 				storage.Store(pickupable.gameObject, false, false, true, false);
 				flag = true;
 			}
 			else
 			{
-				float value2 = smi.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id);
-				smi.gameObject.GetAmounts().SetValue(Db.Get().Amounts.InternalBattery.Id, Mathf.Max(0f, value2 - pickupable.GetComponent<PrimaryElement>().Mass * 1f));
+				smi.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id);
 				storage.Store(pickupable.gameObject, false, false, true, false);
 				flag = true;
 			}
@@ -213,8 +213,6 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		}
 		return num;
 	}
-
-	public const float JOULES_SPENT_PER_KILOGRAM = 1f;
 
 	public const float TIME_UNTIL_BORED = 30f;
 

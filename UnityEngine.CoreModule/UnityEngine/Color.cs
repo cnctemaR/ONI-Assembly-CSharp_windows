@@ -5,10 +5,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeClass("ColorRGBAf")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Math/Color.h")]
-	[NativeClass("ColorRGBAf")]
-	public struct Color : IEquatable<Color>
+	public struct Color : IEquatable<Color>, IFormattable
 	{
 		public Color(float r, float g, float b, float a)
 		{
@@ -28,17 +28,27 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("RGBA({0:F3}, {1:F3}, {2:F3}, {3:F3})", new object[] { this.r, this.g, this.b, this.a });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F3";
+			}
 			return UnityString.Format("RGBA({0}, {1}, {2}, {3})", new object[]
 			{
-				this.r.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.g.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.b.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.a.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
+				this.r.ToString(format, formatProvider),
+				this.g.ToString(format, formatProvider),
+				this.b.ToString(format, formatProvider),
+				this.a.ToString(format, formatProvider)
 			});
 		}
 
@@ -274,7 +284,7 @@ namespace UnityEngine
 					num = this.a;
 					break;
 				default:
-					throw new IndexOutOfRangeException("Invalid Color index(" + index + ")!");
+					throw new IndexOutOfRangeException("Invalid Color index(" + index.ToString() + ")!");
 				}
 				return num;
 			}
@@ -295,7 +305,7 @@ namespace UnityEngine
 					this.a = value;
 					break;
 				default:
-					throw new IndexOutOfRangeException("Invalid Color index(" + index + ")!");
+					throw new IndexOutOfRangeException("Invalid Color index(" + index.ToString() + ")!");
 				}
 			}
 		}

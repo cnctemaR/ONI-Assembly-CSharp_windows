@@ -15,25 +15,36 @@ namespace UnityEngine
 		}
 
 		[Conditional("UNITY_EDITOR")]
+		public static void TryRegisterProperty(Object driver, Object target, string propertyPath)
+		{
+			DrivenPropertyManager.TryRegisterPropertyPartial(driver, target, propertyPath);
+		}
+
+		[Conditional("UNITY_EDITOR")]
 		public static void UnregisterProperty(Object driver, Object target, string propertyPath)
 		{
 			DrivenPropertyManager.UnregisterPropertyPartial(driver, target, propertyPath);
 		}
 
-		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
 		[Conditional("UNITY_EDITOR")]
 		[NativeConditional("UNITY_EDITOR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void UnregisterProperties([NotNull] Object driver);
-
 		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
-		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void RegisterPropertyPartial([NotNull] Object driver, [NotNull] Object target, [NotNull] string propertyPath);
+		public static extern void UnregisterProperties([NotNull("ArgumentNullException")] Object driver);
 
 		[NativeConditional("UNITY_EDITOR")]
 		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void UnregisterPropertyPartial([NotNull] Object driver, [NotNull] Object target, [NotNull] string propertyPath);
+		private static extern void RegisterPropertyPartial([NotNull("ArgumentNullException")] Object driver, [NotNull("ArgumentNullException")] Object target, [NotNull("ArgumentNullException")] string propertyPath);
+
+		[NativeConditional("UNITY_EDITOR")]
+		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void TryRegisterPropertyPartial([NotNull("ArgumentNullException")] Object driver, [NotNull("ArgumentNullException")] Object target, [NotNull("ArgumentNullException")] string propertyPath);
+
+		[StaticAccessor("GetDrivenPropertyManager()", StaticAccessorType.Dot)]
+		[NativeConditional("UNITY_EDITOR")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UnregisterPropertyPartial([NotNull("ArgumentNullException")] Object driver, [NotNull("ArgumentNullException")] Object target, [NotNull("ArgumentNullException")] string propertyPath);
 	}
 }

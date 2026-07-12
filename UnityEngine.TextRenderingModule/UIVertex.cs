@@ -14,13 +14,13 @@ namespace UnityEngine
 
 		public Color32 color;
 
-		public Vector2 uv0;
+		public Vector4 uv0;
 
-		public Vector2 uv1;
+		public Vector4 uv1;
 
-		public Vector2 uv2;
+		public Vector4 uv2;
 
-		public Vector2 uv3;
+		public Vector4 uv3;
 
 		private static readonly Color32 s_DefaultColor = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
@@ -32,10 +32,10 @@ namespace UnityEngine
 			normal = Vector3.back,
 			tangent = UIVertex.s_DefaultTangent,
 			color = UIVertex.s_DefaultColor,
-			uv0 = Vector2.zero,
-			uv1 = Vector2.zero,
-			uv2 = Vector2.zero,
-			uv3 = Vector2.zero
+			uv0 = Vector4.zero,
+			uv1 = Vector4.zero,
+			uv2 = Vector4.zero,
+			uv3 = Vector4.zero
 		};
 	}
 }

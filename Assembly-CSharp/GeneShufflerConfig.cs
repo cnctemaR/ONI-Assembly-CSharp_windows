@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class GeneShufflerConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "GeneShuffler";
@@ -16,7 +21,7 @@ public class GeneShufflerConfig : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("geneshuffler_kanim"), "on", Grid.SceneLayer.Building, 4, 3, tier, tier2, SimHashes.Creature, null, 293f);
 		gameObject.AddTag(GameTags.NotRoomAssignable);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Unobtanium, true);
 		component.Temperature = 294.15f;
 		gameObject.AddOrGet<Operational>();
 		gameObject.AddOrGet<Notifier>();

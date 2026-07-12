@@ -43,7 +43,7 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 			this.root.EventTransition(GameHashes.ScheduleBlocksChanged, this.idle, (BalloonArtistChore.StatesInstance smi) => !smi.IsRecTime());
 			this.idle.DoNothing();
 			this.goToStand.Transition(null, (BalloonArtistChore.StatesInstance smi) => !smi.HasBalloonStallCell(), UpdateRate.SIM_200ms).MoveTo((BalloonArtistChore.StatesInstance smi) => smi.GetBalloonStallCell(), this.balloonStand, null, false);
-			this.balloonStand.ToggleAnims("anim_interacts_balloon_artist_kanim", 0f).Enter(delegate(BalloonArtistChore.StatesInstance smi)
+			this.balloonStand.ToggleAnims("anim_interacts_balloon_artist_kanim", 0f, "").Enter(delegate(BalloonArtistChore.StatesInstance smi)
 			{
 				smi.SpawnBalloonStand();
 			}).Exit(delegate(BalloonArtistChore.StatesInstance smi)

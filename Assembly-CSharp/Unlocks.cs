@@ -29,7 +29,7 @@ public class Unlocks : KMonoBehaviour
 		base.OnSpawn();
 		this.UnlockCycleCodexes();
 		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
-		base.Subscribe<Unlocks>(-1056989049, Unlocks.OnLaunchRocketDelegate);
+		base.Subscribe<Unlocks>(-1277991738, Unlocks.OnLaunchRocketDelegate);
 		base.Subscribe<Unlocks>(282337316, Unlocks.OnDuplicantDiedDelegate);
 		base.Subscribe<Unlocks>(-818188514, Unlocks.OnDiscoveredSpaceDelegate);
 		Components.LiveMinionIdentities.OnAdd += this.OnNewDupe;
@@ -40,11 +40,21 @@ public class Unlocks : KMonoBehaviour
 		return !string.IsNullOrEmpty(unlockID) && (DebugHandler.InstantBuildMode || this.unlocked.Contains(unlockID));
 	}
 
+	public void Lock(string unlockID)
+	{
+		if (this.unlocked.Contains(unlockID))
+		{
+			this.unlocked.Remove(unlockID);
+			this.SaveUnlocks();
+			Game.Instance.Trigger(1594320620, unlockID);
+		}
+	}
+
 	public void Unlock(string unlockID)
 	{
 		if (string.IsNullOrEmpty(unlockID))
 		{
-			DebugUtil.DevAssert(false, "Unlock called with null or empty string");
+			DebugUtil.DevAssert(false, "Unlock called with null or empty string", null);
 			return;
 		}
 		if (!this.unlocked.Contains(unlockID))
@@ -56,6 +66,29 @@ public class Unlocks : KMonoBehaviour
 			if (messageNotification != null)
 			{
 				base.GetComponent<Notifier>().Add(messageNotification, "");
+			}
+		}
+		this.EvalMetaCategories();
+	}
+
+	private void EvalMetaCategories()
+	{
+		foreach (Unlocks.MetaUnlockCategory metaUnlockCategory in this.MetaUnlockCategories)
+		{
+			string metaCollectionID = metaUnlockCategory.metaCollectionID;
+			string mesaCollectionID = metaUnlockCategory.mesaCollectionID;
+			int mesaUnlockCount = metaUnlockCategory.mesaUnlockCount;
+			int num = 0;
+			foreach (string text in this.lockCollections[mesaCollectionID])
+			{
+				if (this.IsUnlocked(text))
+				{
+					num++;
+				}
+			}
+			if (num >= mesaUnlockCount)
+			{
+				this.UnlockNext(metaCollectionID);
 			}
 		}
 	}
@@ -325,6 +358,11 @@ public class Unlocks : KMonoBehaviour
 
 	private List<string> unlocked = new List<string>();
 
+	private List<Unlocks.MetaUnlockCategory> MetaUnlockCategories = new List<Unlocks.MetaUnlockCategory>
+	{
+		new Unlocks.MetaUnlockCategory("dimensionalloreMeta", "dimensionallore", 4)
+	};
+
 	public Dictionary<string, string[]> lockCollections = new Dictionary<string, string[]>
 	{
 		{
@@ -333,7 +371,7 @@ public class Unlocks : KMonoBehaviour
 			{
 				"email_thermodynamiclaws", "email_security2", "email_pens2", "email_atomiconrecruitment", "email_devonsblog", "email_researchgiant", "email_thejanitor", "email_newemployee", "email_timeoffapproved", "email_security3",
 				"email_preliminarycalculations", "email_hollandsdog", "email_temporalbowupdate", "email_retemporalbowupdate", "email_memorychip", "email_arthistoryrequest", "email_AIcontrol", "email_AIcontrol2", "email_friendlyemail", "email_AIcontrol3",
-				"email_AIcontrol4"
+				"email_AIcontrol4", "email_engineeringcandidate"
 			}
 		},
 		{
@@ -342,7 +380,8 @@ public class Unlocks : KMonoBehaviour
 			{
 				"journal_timesarrowthoughts", "journal_A046_1", "journal_B835_1", "journal_sunflowerseeds", "journal_B327_1", "journal_B556_1", "journal_employeeprocessing", "journal_B327_2", "journal_A046_2", "journal_elliesbirthday1",
 				"journal_B835_2", "journal_ants", "journal_pipedream", "journal_B556_2", "journal_movedrats", "journal_B835_3", "journal_A046_3", "journal_B556_3", "journal_B327_3", "journal_B835_4",
-				"journal_cleanup", "journal_A046_4", "journal_B327_4", "journal_revisitednumbers", "journal_B556_4", "journal_B835_5", "journal_elliesbirthday2", "journal_B111_1", "journal_revisitednumbers2", "journal_timemusings"
+				"journal_cleanup", "journal_A046_4", "journal_B327_4", "journal_revisitednumbers", "journal_B556_4", "journal_B835_5", "journal_elliesbirthday2", "journal_B111_1", "journal_revisitednumbers2", "journal_timemusings",
+				"journal_evil"
 			}
 		},
 		{
@@ -350,12 +389,24 @@ public class Unlocks : KMonoBehaviour
 			new string[]
 			{
 				"notes_clonedrats", "notes_agriculture1", "notes_husbandry1", "notes_hibiscus3", "notes_husbandry2", "notes_agriculture2", "notes_geneticooze", "notes_agriculture3", "notes_husbandry3", "notes_memoryimplantation",
-				"notes_husbandry4", "notes_agriculture4", "notes_neutronium", "notes_firstsuccess", "notes_neutroniumapplications"
+				"notes_husbandry4", "notes_agriculture4", "notes_neutronium", "notes_firstsuccess", "notes_neutroniumapplications", "notes_teleportation", "notes_AI", "cryotank_warning"
 			}
 		},
 		{
 			"misc",
 			new string[] { "misc_newsecurity", "misc_mailroometiquette", "misc_unattendedcultures", "misc_politerequest", "misc_casualfriday", "misc_dishbot" }
+		},
+		{
+			"dimensionallore",
+			new string[] { "notes_clonedrabbits", "notes_clonedraccoons", "journal_movedrabbits", "journal_movedraccoons", "journal_strawberries", "journal_shrimp" }
+		},
+		{
+			"dimensionalloreMeta",
+			new string[] { "log9" }
+		},
+		{
+			"space",
+			new string[] { "display_spaceprop1", "notice_pilot", "journal_inspace", "notes_firstcolony" }
 		}
 	};
 
@@ -388,4 +439,20 @@ public class Unlocks : KMonoBehaviour
 	{
 		component.OnDiscoveredSpace(data);
 	});
+
+	private class MetaUnlockCategory
+	{
+		public MetaUnlockCategory(string metaCollectionID, string mesaCollectionID, int mesaUnlockCount)
+		{
+			this.metaCollectionID = metaCollectionID;
+			this.mesaCollectionID = mesaCollectionID;
+			this.mesaUnlockCount = mesaUnlockCount;
+		}
+
+		public string metaCollectionID;
+
+		public string mesaCollectionID;
+
+		public int mesaUnlockCount;
+	}
 }

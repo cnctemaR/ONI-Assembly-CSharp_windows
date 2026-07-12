@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
@@ -106,7 +108,15 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 			KPrefabID component = base.GetComponent<KPrefabID>();
 			if (this.targetCraft.Get() == null)
 			{
-				if (SaveGame.Instance.GetComponent<SeasonManager>().TimeUntilNextBombardment() <= detectTime)
+				SaveGame.Instance.GetComponent<GameplayEventManager>().GetActiveEventsOfType<MeteorShowerEvent>(this.GetMyWorldId(), ref this.meteorShowers);
+				float num = float.MaxValue;
+				foreach (GameplayEventInstance gameplayEventInstance in this.meteorShowers)
+				{
+					MeteorShowerEvent.StatesInstance statesInstance = gameplayEventInstance.smi as MeteorShowerEvent.StatesInstance;
+					num = Mathf.Min(num, statesInstance.TimeUntilNextShower());
+				}
+				this.meteorShowers.Clear();
+				if (num < detectTime)
 				{
 					component.AddTag(GameTags.Detecting, false);
 					return;
@@ -179,5 +189,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 		private DetectorNetwork.Def detectorNetworkDef;
 
 		private DetectorNetwork.Instance detectorNetwork;
+
+		private List<GameplayEventInstance> meteorShowers = new List<GameplayEventInstance>();
 	}
 }

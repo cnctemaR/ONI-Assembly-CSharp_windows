@@ -6,6 +6,7 @@ namespace UnityEngine
 	{
 		WideAngle = 1,
 		Telephoto,
-		ColorAndDepth
+		ColorAndDepth,
+		UltraWideAngle
 	}
 }

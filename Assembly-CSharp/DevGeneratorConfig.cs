@@ -20,6 +20,8 @@ public class DevGeneratorConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.GeneratorWattageRating = 100000f;
 		buildingDef.GeneratorBaseCapacity = 200000f;
+		buildingDef.RequiresPowerOutput = true;
+		buildingDef.PowerOutputOffset = new CellOffset(0, 0);
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
@@ -30,11 +32,9 @@ public class DevGeneratorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
-		energyGenerator.hasMeter = false;
-		energyGenerator.ignoreBatteryRefillPercent = true;
-		energyGenerator.formula = default(EnergyGenerator.Formula);
-		energyGenerator.powerDistributionOrder = 9;
+		DevGenerator devGenerator = go.AddOrGet<DevGenerator>();
+		devGenerator.powerDistributionOrder = 9;
+		devGenerator.wattageRating = 100000f;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

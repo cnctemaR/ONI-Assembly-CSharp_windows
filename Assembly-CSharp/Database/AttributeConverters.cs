@@ -39,6 +39,8 @@ namespace Database
 			this.TemperatureInsulation = this.Create("TemperatureInsulation", "Temperature Insulation", DUPLICANTS.ATTRIBUTES.INSULATION.SPEEDMODIFIER, Db.Get().Attributes.Insulation, 0.1f, 0f, toPercentAttributeFormatter);
 			this.SeedHarvestChance = this.Create("SeedHarvestChance", "Seed Harvest Chance", DUPLICANTS.ATTRIBUTES.BOTANIST.BONUS_SEEDS, Db.Get().Attributes.Botanist, 0.033f, 0f, toPercentAttributeFormatter);
 			this.RanchingEffectDuration = this.Create("RanchingEffectDuration", "Ranching Effect Duration", DUPLICANTS.ATTRIBUTES.RANCHING.EFFECTMODIFIER, Db.Get().Attributes.Ranching, 0.1f, 0f, toPercentAttributeFormatter);
+			this.FarmedEffectDuration = this.Create("FarmedEffectDuration", "Farmer's Touch Duration", DUPLICANTS.ATTRIBUTES.BOTANIST.TINKER_EFFECT_MODIFIER, Db.Get().Attributes.Botanist, 0.1f, 0f, toPercentAttributeFormatter);
+			this.PowerTinkerEffectDuration = this.Create("PowerTinkerEffectDuration", "Engie's Tune-Up Effect Duration", DUPLICANTS.ATTRIBUTES.MACHINERY.TINKER_EFFECT_MODIFIER, Db.Get().Attributes.Machinery, 0.025f, 0f, toPercentAttributeFormatter);
 		}
 
 		public List<AttributeConverter> GetConvertersForAttribute(Klei.AI.Attribute attrib)
@@ -93,5 +95,9 @@ namespace Database
 		public AttributeConverter SeedHarvestChance;
 
 		public AttributeConverter RanchingEffectDuration;
+
+		public AttributeConverter FarmedEffectDuration;
+
+		public AttributeConverter PowerTinkerEffectDuration;
 	}
 }

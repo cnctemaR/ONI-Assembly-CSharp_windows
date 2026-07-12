@@ -9,7 +9,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			bool flag = BatchQueryJobStruct<T>.jobReflectionData == IntPtr.Zero;
 			if (flag)
 			{
-				BatchQueryJobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), JobType.ParallelFor, null, null, null);
+				BatchQueryJobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), null, null, null);
 			}
 			return BatchQueryJobStruct<T>.jobReflectionData;
 		}

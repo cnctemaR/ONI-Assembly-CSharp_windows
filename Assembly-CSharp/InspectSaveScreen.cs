@@ -18,7 +18,7 @@ public class InspectSaveScreen : KModalScreen
 	private void CloseScreen()
 	{
 		LoadScreen.Instance.Show(true);
-		base.Show(false);
+		this.Show(false);
 	}
 
 	protected override void OnShow(bool show)
@@ -36,13 +36,13 @@ public class InspectSaveScreen : KModalScreen
 		if (string.IsNullOrEmpty(path))
 		{
 			global::Debug.LogError("The directory path provided is empty.");
-			base.Show(false);
+			this.Show(false);
 			return;
 		}
 		if (!Directory.Exists(path))
 		{
 			global::Debug.LogError("The directory provided does not exist.");
-			base.Show(false);
+			this.Show(false);
 			return;
 		}
 		if (this.buttonPool == null)
@@ -71,7 +71,7 @@ public class InspectSaveScreen : KModalScreen
 				this.AddNewSave(this.buttonPool.GetFreeElement(this.buttonGroup, true), list[i]);
 			}
 		}
-		base.Show(true);
+		this.Show(true);
 	}
 
 	private void ConfirmDoAction(string message, global::System.Action action)

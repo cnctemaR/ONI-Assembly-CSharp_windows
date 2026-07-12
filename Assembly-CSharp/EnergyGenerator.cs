@@ -253,7 +253,7 @@ public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSl
 	{
 		if (EnergyGenerator.batteriesSufficientlyFull == null)
 		{
-			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		}
 	}
 

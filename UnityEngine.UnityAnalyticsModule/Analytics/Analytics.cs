@@ -7,9 +7,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Analytics
 {
-	[NativeHeader("Modules/UnityAnalytics/Public/Events/UserCustomEvent.h")]
 	[NativeHeader("Modules/UnityConnect/UnityConnectSettings.h")]
 	[NativeHeader("Modules/UnityAnalytics/Public/UnityAnalytics.h")]
+	[NativeHeader("Modules/UnityAnalytics/Public/Events/UserCustomEvent.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public static class Analytics
 	{
@@ -45,8 +45,8 @@ namespace UnityEngine.Analytics
 			return analyticsResult;
 		}
 
-		[NativeMethod("ResumeInitialization")]
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		[NativeMethod("ResumeInitialization")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AnalyticsResult ResumeInitializationInternal();
 
@@ -96,6 +96,14 @@ namespace UnityEngine.Analytics
 		private static extern string configUrlInternal
 		{
 			[NativeMethod("GetConfigUrl")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[StaticAccessor("GetUnityConnectSettings()", StaticAccessorType.Dot)]
+		private static extern string dashboardUrlInternal
+		{
+			[NativeMethod("GetDashboardUrl")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -163,8 +171,8 @@ namespace UnityEngine.Analytics
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AnalyticsResult RegisterEventsWithLimit(string[] eventName, int maxEventPerHour, int maxItems, string vendorKey, int ver, string prefix, string assemblyInfo, bool notifyServer);
 
-		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[ThreadSafe]
+		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern AnalyticsResult SendEventWithLimit(string eventName, object parameters, int ver, string prefix);
 
@@ -205,6 +213,24 @@ namespace UnityEngine.Analytics
 				else
 				{
 					text = Analytics.eventUrlInternal;
+				}
+				return text;
+			}
+		}
+
+		public static string dashboardUrl
+		{
+			get
+			{
+				bool flag = !Analytics.IsInitialized();
+				string text;
+				if (flag)
+				{
+					text = string.Empty;
+				}
+				else
+				{
+					text = Analytics.dashboardUrlInternal;
 				}
 				return text;
 			}

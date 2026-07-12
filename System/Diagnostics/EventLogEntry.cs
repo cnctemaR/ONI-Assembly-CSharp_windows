@@ -7,8 +7,8 @@ using Unity;
 
 namespace System.Diagnostics
 {
-	[DesignTimeVisible(false)]
 	[ToolboxItem(false)]
+	[DesignTimeVisible(false)]
 	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
 	[Serializable]
 	public sealed class EventLogEntry : Component, ISerializable
@@ -72,8 +72,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Obsolete("Use InstanceId")]
 		[MonitoringDescription("An ID number for this event entry.")]
+		[Obsolete("Use InstanceId")]
 		public int EventID
 		{
 			get

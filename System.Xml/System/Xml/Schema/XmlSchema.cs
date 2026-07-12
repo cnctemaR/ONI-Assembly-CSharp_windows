@@ -171,8 +171,8 @@ namespace System.Xml.Schema
 			this.isCompiledBySet = compiler.Compile();
 		}
 
-		[XmlAttribute("attributeFormDefault")]
 		[DefaultValue(XmlSchemaForm.None)]
+		[XmlAttribute("attributeFormDefault")]
 		public XmlSchemaForm AttributeFormDefault
 		{
 			get
@@ -185,8 +185,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("blockDefault")]
 		[DefaultValue(XmlSchemaDerivationMethod.None)]
+		[XmlAttribute("blockDefault")]
 		public XmlSchemaDerivationMethod BlockDefault
 		{
 			get
@@ -199,8 +199,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("finalDefault")]
 		[DefaultValue(XmlSchemaDerivationMethod.None)]
+		[XmlAttribute("finalDefault")]
 		public XmlSchemaDerivationMethod FinalDefault
 		{
 			get
@@ -213,8 +213,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("elementFormDefault")]
 		[DefaultValue(XmlSchemaForm.None)]
+		[XmlAttribute("elementFormDefault")]
 		public XmlSchemaForm ElementFormDefault
 		{
 			get
@@ -264,14 +264,14 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("annotation", typeof(XmlSchemaAnnotation))]
+		[XmlElement("notation", typeof(XmlSchemaNotation))]
+		[XmlElement("group", typeof(XmlSchemaGroup))]
+		[XmlElement("element", typeof(XmlSchemaElement))]
 		[XmlElement("attribute", typeof(XmlSchemaAttribute))]
 		[XmlElement("attributeGroup", typeof(XmlSchemaAttributeGroup))]
-		[XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
-		[XmlElement("element", typeof(XmlSchemaElement))]
-		[XmlElement("group", typeof(XmlSchemaGroup))]
-		[XmlElement("notation", typeof(XmlSchemaNotation))]
 		[XmlElement("complexType", typeof(XmlSchemaComplexType))]
+		[XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
+		[XmlElement("annotation", typeof(XmlSchemaAnnotation))]
 		public XmlSchemaObjectCollection Items
 		{
 			get

@@ -33,6 +33,7 @@ public class SteamTurbineConfig2 : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.RequiresPowerOutput = true;
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);
 		buildingDef.OverheatTemperature = 1273.15f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
@@ -89,6 +90,10 @@ public class SteamTurbineConfig2 : IBuildingConfig
 	public const string ID = "SteamTurbine2";
 
 	public static float MAX_WATTAGE = 850f;
+
+	private const int HEIGHT = 3;
+
+	private const int WIDTH = 5;
 
 	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
 	{

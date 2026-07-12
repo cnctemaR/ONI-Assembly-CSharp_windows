@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DateTime : KScreen
@@ -18,7 +17,7 @@ public class DateTime : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.tooltip.OnComplexToolTip = new Func<List<global::Tuple<string, ScriptableObject>>>(SaveGame.Instance.GetColonyToolTip);
+		this.tooltip.OnComplexToolTip = new ToolTip.ComplexTooltipDelegate(SaveGame.Instance.GetColonyToolTip);
 	}
 
 	private void Update()

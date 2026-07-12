@@ -9,6 +9,7 @@ namespace UnityEngine.Timeline
 {
 	[TrackClipType(typeof(AnimationPlayableAsset), false)]
 	[TrackBindingType(typeof(Animator))]
+	[ExcludeFromPreset]
 	[Serializable]
 	public class AnimationTrack : TrackAsset, ILayerable
 	{
@@ -319,7 +320,7 @@ namespace UnityEngine.Timeline
 		{
 		}
 
-		private Playable CompileTrackPlayable(PlayableGraph graph, TrackAsset track, GameObject go, IntervalTree<RuntimeElement> tree, AppliedOffsetMode mode)
+		private Playable CompileTrackPlayable(PlayableGraph graph, AnimationTrack track, GameObject go, IntervalTree<RuntimeElement> tree, AppliedOffsetMode mode)
 		{
 			AnimationMixerPlayable animationMixerPlayable = AnimationMixerPlayable.Create(graph, track.clips.Length, false);
 			for (int i = 0; i < track.clips.Length; i++)
@@ -343,6 +344,10 @@ namespace UnityEngine.Timeline
 					}
 				}
 			}
+			if (!track.AnimatesRootTransform())
+			{
+				return animationMixerPlayable;
+			}
 			return this.ApplyTrackOffset(graph, animationMixerPlayable, go, mode);
 		}
 
@@ -362,32 +367,44 @@ namespace UnityEngine.Timeline
 			{
 				list.Add(this);
 			}
+			Transform genericRootNode = this.GetGenericRootNode(go);
 			bool flag = this.AnimatesRootTransform();
+			bool flag2 = flag && !this.IsRootTransformDisabledByMask(go, genericRootNode);
 			foreach (TrackAsset trackAsset in base.GetChildTracks())
 			{
 				AnimationTrack animationTrack = trackAsset as AnimationTrack;
 				if (animationTrack != null && animationTrack.CanCompileClips())
 				{
+					bool flag3 = animationTrack.AnimatesRootTransform();
 					flag |= animationTrack.AnimatesRootTransform();
+					flag2 |= flag3 && !animationTrack.IsRootTransformDisabledByMask(go, genericRootNode);
 					list.Add(animationTrack);
 				}
 			}
-			AppliedOffsetMode offsetMode = this.GetOffsetMode(go, flag);
-			AnimationLayerMixerPlayable animationLayerMixerPlayable = AnimationTrack.CreateGroupMixer(graph, go, list.Count);
+			AppliedOffsetMode offsetMode = this.GetOffsetMode(go, flag2);
+			int defaultBlendCount = this.GetDefaultBlendCount();
+			AnimationLayerMixerPlayable animationLayerMixerPlayable = AnimationTrack.CreateGroupMixer(graph, go, list.Count + defaultBlendCount);
 			for (int i = 0; i < list.Count; i++)
 			{
-				Playable playable = (list[i].inClipMode ? this.CompileTrackPlayable(graph, list[i], go, tree, offsetMode) : list[i].CreateInfiniteTrackPlayable(graph, go, tree, offsetMode));
-				graph.Connect<Playable, AnimationLayerMixerPlayable>(playable, 0, animationLayerMixerPlayable, i);
-				animationLayerMixerPlayable.SetInputWeight(i, (float)(list[i].inClipMode ? 0 : 1));
+				int num = i + defaultBlendCount;
+				AppliedOffsetMode appliedOffsetMode = offsetMode;
+				if (offsetMode != AppliedOffsetMode.NoRootTransform && list[i].IsRootTransformDisabledByMask(go, genericRootNode))
+				{
+					appliedOffsetMode = AppliedOffsetMode.NoRootTransform;
+				}
+				Playable playable = (list[i].inClipMode ? this.CompileTrackPlayable(graph, list[i], go, tree, appliedOffsetMode) : list[i].CreateInfiniteTrackPlayable(graph, go, tree, appliedOffsetMode));
+				graph.Connect<Playable, AnimationLayerMixerPlayable>(playable, 0, animationLayerMixerPlayable, num);
+				animationLayerMixerPlayable.SetInputWeight(num, (float)(list[i].inClipMode ? 0 : 1));
 				if (list[i].applyAvatarMask && list[i].avatarMask != null)
 				{
-					animationLayerMixerPlayable.SetLayerMaskFromAvatarMask((uint)i, list[i].avatarMask);
+					animationLayerMixerPlayable.SetLayerMaskFromAvatarMask((uint)num, list[i].avatarMask);
 				}
 			}
-			bool flag2 = this.RequiresMotionXPlayable(offsetMode, go);
+			bool flag4 = this.RequiresMotionXPlayable(offsetMode, go);
+			flag4 |= defaultBlendCount > 0 && this.RequiresMotionXPlayable(this.GetOffsetMode(go, flag), go);
+			this.AttachDefaultBlend(graph, animationLayerMixerPlayable, flag4);
 			Playable playable2 = animationLayerMixerPlayable;
-			playable2 = this.CreateDefaultBlend(graph, go, playable2, flag2);
-			if (flag2)
+			if (flag4)
 			{
 				AnimationMotionXToDeltaPlayable animationMotionXToDeltaPlayable = AnimationMotionXToDeltaPlayable.Create(graph);
 				graph.Connect<Playable, AnimationMotionXToDeltaPlayable>(playable2, 0, animationMotionXToDeltaPlayable, 0);
@@ -398,9 +415,13 @@ namespace UnityEngine.Timeline
 			return playable2;
 		}
 
-		private Playable CreateDefaultBlend(PlayableGraph graph, GameObject go, Playable mixer, bool requireOffset)
+		private int GetDefaultBlendCount()
 		{
-			return mixer;
+			return 0;
+		}
+
+		private void AttachDefaultBlend(PlayableGraph graph, AnimationLayerMixerPlayable mixer, bool requireOffset)
+		{
 		}
 
 		private Playable AttachOffsetPlayable(PlayableGraph graph, Playable playable, Vector3 pos, Quaternion rot)
@@ -484,12 +505,16 @@ namespace UnityEngine.Timeline
 				graph.Connect<Playable, AnimationMixerPlayable>(playable, 0, animationMixerPlayable, 0);
 				animationMixerPlayable.SetInputWeight(0, 1f);
 			}
-			return this.ApplyTrackOffset(graph, animationMixerPlayable, go, mode);
+			if (!this.AnimatesRootTransform())
+			{
+				return animationMixerPlayable;
+			}
+			return (base.isSubTrack ? ((AnimationTrack)base.parent) : this).ApplyTrackOffset(graph, animationMixerPlayable, go, mode);
 		}
 
 		private Playable ApplyTrackOffset(PlayableGraph graph, Playable root, GameObject go, AppliedOffsetMode mode)
 		{
-			if (mode == AppliedOffsetMode.SceneOffsetLegacy || mode == AppliedOffsetMode.SceneOffset || mode == AppliedOffsetMode.NoRootTransform || !this.AnimatesRootTransform())
+			if (mode == AppliedOffsetMode.SceneOffsetLegacy || mode == AppliedOffsetMode.SceneOffset || mode == AppliedOffsetMode.NoRootTransform)
 			{
 				return root;
 			}
@@ -608,6 +633,62 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		private bool IsRootTransformDisabledByMask(GameObject gameObject, Transform genericRootNode)
+		{
+			if (this.avatarMask == null || !this.applyAvatarMask)
+			{
+				return false;
+			}
+			Animator binding = this.GetBinding((gameObject != null) ? gameObject.GetComponent<PlayableDirector>() : null);
+			if (binding == null)
+			{
+				return false;
+			}
+			if (binding.isHuman)
+			{
+				return !this.avatarMask.GetHumanoidBodyPartActive(AvatarMaskBodyPart.Root);
+			}
+			if (this.avatarMask.transformCount == 0)
+			{
+				return false;
+			}
+			if (genericRootNode == null)
+			{
+				return string.IsNullOrEmpty(this.avatarMask.GetTransformPath(0)) && !this.avatarMask.GetTransformActive(0);
+			}
+			for (int i = 0; i < this.avatarMask.transformCount; i++)
+			{
+				if (genericRootNode == binding.transform.Find(this.avatarMask.GetTransformPath(i)))
+				{
+					return !this.avatarMask.GetTransformActive(i);
+				}
+			}
+			return false;
+		}
+
+		private Transform GetGenericRootNode(GameObject gameObject)
+		{
+			Animator binding = this.GetBinding((gameObject != null) ? gameObject.GetComponent<PlayableDirector>() : null);
+			if (binding == null)
+			{
+				return null;
+			}
+			if (binding.isHuman)
+			{
+				return null;
+			}
+			if (binding.avatar == null)
+			{
+				return null;
+			}
+			string rootMotionBoneName = binding.avatar.humanDescription.m_RootMotionBoneName;
+			if (rootMotionBoneName == binding.name || string.IsNullOrEmpty(rootMotionBoneName))
+			{
+				return null;
+			}
+			return AnimationTrack.FindInHierarchyBreadthFirst(binding.transform, rootMotionBoneName);
+		}
+
 		internal bool AnimatesRootTransform()
 		{
 			if (AnimationPlayableAsset.HasRootTransforms(this.m_InfiniteClip))
@@ -623,6 +704,25 @@ namespace UnityEngine.Timeline
 				}
 			}
 			return false;
+		}
+
+		private static Transform FindInHierarchyBreadthFirst(Transform t, string name)
+		{
+			AnimationTrack.s_CachedQueue.Clear();
+			AnimationTrack.s_CachedQueue.Enqueue(t);
+			while (AnimationTrack.s_CachedQueue.Count > 0)
+			{
+				Transform transform = AnimationTrack.s_CachedQueue.Dequeue();
+				if (transform.name == name)
+				{
+					return transform;
+				}
+				for (int i = 0; i < transform.childCount; i++)
+				{
+					AnimationTrack.s_CachedQueue.Enqueue(transform.GetChild(i));
+				}
+			}
+			return null;
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -767,6 +867,8 @@ namespace UnityEngine.Timeline
 		[SerializeField]
 		[HideInInspector]
 		private AnimationClip m_InfiniteClip;
+
+		private static readonly Queue<Transform> s_CachedQueue = new Queue<Transform>(100);
 
 		[SerializeField]
 		[Obsolete("Use m_InfiniteClipOffsetEulerAngles Instead", false)]

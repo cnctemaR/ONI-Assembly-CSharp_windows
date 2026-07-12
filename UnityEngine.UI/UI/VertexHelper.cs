@@ -14,10 +14,15 @@ namespace UnityEngine.UI
 			this.InitializeListIfRequired();
 			this.m_Positions.AddRange(m.vertices);
 			this.m_Colors.AddRange(m.colors32);
-			this.m_Uv0S.AddRange(m.uv);
-			this.m_Uv1S.AddRange(m.uv2);
-			this.m_Uv2S.AddRange(m.uv3);
-			this.m_Uv3S.AddRange(m.uv4);
+			List<Vector4> list = new List<Vector4>();
+			m.GetUVs(0, list);
+			this.m_Uv0S.AddRange(list);
+			m.GetUVs(1, list);
+			this.m_Uv1S.AddRange(list);
+			m.GetUVs(2, list);
+			this.m_Uv2S.AddRange(list);
+			m.GetUVs(3, list);
+			this.m_Uv3S.AddRange(list);
 			this.m_Normals.AddRange(m.normals);
 			this.m_Tangents.AddRange(m.tangents);
 			this.m_Indices.AddRange(m.GetIndices(0));
@@ -29,10 +34,10 @@ namespace UnityEngine.UI
 			{
 				this.m_Positions = ListPool<Vector3>.Get();
 				this.m_Colors = ListPool<Color32>.Get();
-				this.m_Uv0S = ListPool<Vector2>.Get();
-				this.m_Uv1S = ListPool<Vector2>.Get();
-				this.m_Uv2S = ListPool<Vector2>.Get();
-				this.m_Uv3S = ListPool<Vector2>.Get();
+				this.m_Uv0S = ListPool<Vector4>.Get();
+				this.m_Uv1S = ListPool<Vector4>.Get();
+				this.m_Uv2S = ListPool<Vector4>.Get();
+				this.m_Uv3S = ListPool<Vector4>.Get();
 				this.m_Normals = ListPool<Vector3>.Get();
 				this.m_Tangents = ListPool<Vector4>.Get();
 				this.m_Indices = ListPool<int>.Get();
@@ -46,10 +51,10 @@ namespace UnityEngine.UI
 			{
 				ListPool<Vector3>.Release(this.m_Positions);
 				ListPool<Color32>.Release(this.m_Colors);
-				ListPool<Vector2>.Release(this.m_Uv0S);
-				ListPool<Vector2>.Release(this.m_Uv1S);
-				ListPool<Vector2>.Release(this.m_Uv2S);
-				ListPool<Vector2>.Release(this.m_Uv3S);
+				ListPool<Vector4>.Release(this.m_Uv0S);
+				ListPool<Vector4>.Release(this.m_Uv1S);
+				ListPool<Vector4>.Release(this.m_Uv2S);
+				ListPool<Vector4>.Release(this.m_Uv3S);
 				ListPool<Vector3>.Release(this.m_Normals);
 				ListPool<Vector4>.Release(this.m_Tangents);
 				ListPool<int>.Release(this.m_Indices);
@@ -152,7 +157,7 @@ namespace UnityEngine.UI
 			mesh.RecalculateBounds();
 		}
 
-		public void AddVert(Vector3 position, Color32 color, Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector3 normal, Vector4 tangent)
+		public void AddVert(Vector3 position, Color32 color, Vector4 uv0, Vector4 uv1, Vector4 uv2, Vector4 uv3, Vector3 normal, Vector4 tangent)
 		{
 			this.InitializeListIfRequired();
 			this.m_Positions.Add(position);
@@ -165,14 +170,14 @@ namespace UnityEngine.UI
 			this.m_Tangents.Add(tangent);
 		}
 
-		public void AddVert(Vector3 position, Color32 color, Vector2 uv0, Vector2 uv1, Vector3 normal, Vector4 tangent)
+		public void AddVert(Vector3 position, Color32 color, Vector4 uv0, Vector4 uv1, Vector3 normal, Vector4 tangent)
 		{
-			this.AddVert(position, color, uv0, uv1, Vector2.zero, Vector2.zero, normal, tangent);
+			this.AddVert(position, color, uv0, uv1, Vector4.zero, Vector4.zero, normal, tangent);
 		}
 
-		public void AddVert(Vector3 position, Color32 color, Vector2 uv0)
+		public void AddVert(Vector3 position, Color32 color, Vector4 uv0)
 		{
-			this.AddVert(position, color, uv0, Vector2.zero, VertexHelper.s_DefaultNormal, VertexHelper.s_DefaultTangent);
+			this.AddVert(position, color, uv0, Vector4.zero, VertexHelper.s_DefaultNormal, VertexHelper.s_DefaultTangent);
 		}
 
 		public void AddVert(UIVertex v)
@@ -236,13 +241,13 @@ namespace UnityEngine.UI
 
 		private List<Color32> m_Colors;
 
-		private List<Vector2> m_Uv0S;
+		private List<Vector4> m_Uv0S;
 
-		private List<Vector2> m_Uv1S;
+		private List<Vector4> m_Uv1S;
 
-		private List<Vector2> m_Uv2S;
+		private List<Vector4> m_Uv2S;
 
-		private List<Vector2> m_Uv3S;
+		private List<Vector4> m_Uv3S;
 
 		private List<Vector3> m_Normals;
 

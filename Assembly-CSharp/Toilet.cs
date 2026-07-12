@@ -52,11 +52,12 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
 		float num = 0f;
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.Dirt).tag;
+		float num2;
 		SimUtil.DiseaseInfo diseaseInfo;
-		this.storage.ConsumeAndGetDisease(tag, base.smi.DirtUsedPerFlush(), out diseaseInfo, out num);
+		this.storage.ConsumeAndGetDisease(tag, base.smi.DirtUsedPerFlush(), out num2, out diseaseInfo, out num);
 		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
-		float num2 = base.smi.MassPerFlush() + base.smi.DirtUsedPerFlush();
-		GameObject gameObject = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID).substance.SpawnResource(base.transform.GetPosition(), num2, this.solidWasteTemperature, index, this.diseasePerFlush, true, false, false);
+		float num3 = base.smi.MassPerFlush() + num2;
+		GameObject gameObject = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID).substance.SpawnResource(base.transform.GetPosition(), num3, this.solidWasteTemperature, index, this.diseasePerFlush, true, false, false);
 		gameObject.GetComponent<PrimaryElement>().AddDisease(diseaseInfo.idx, diseaseInfo.count, "Toilet.Flush");
 		this.storage.Store(gameObject, false, false, true, false);
 		worker.GetComponent<PrimaryElement>().AddDisease(index, this.diseaseOnDupePerFlush, "Toilet.Flush");
@@ -100,7 +101,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), Descriptor.DescriptorType.Effect, false));
 		Disease disease = Db.Get().Diseases.Get(this.diseaseId);
 		int num2 = this.diseasePerFlush + this.diseaseOnDupePerFlush;
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num2)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num2)), Descriptor.DescriptorType.DiseaseSource, false));
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num2, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num2, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.DiseaseSource, false));
 		return list;
 	}
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using KMod;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -41,8 +42,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.Textures = this.TextureAssets.Where<Texture2D>((Texture2D x) => x != null).ToList<Texture2D>();
 		Assets.TextureAtlases = this.TextureAtlasAssets.Where<TextureAtlas>((TextureAtlas x) => x != null).ToList<TextureAtlas>();
 		Assets.BlockTileDecorInfos = this.BlockTileDecorInfoAssets.Where<BlockTileDecorInfo>((BlockTileDecorInfo x) => x != null).ToList<BlockTileDecorInfo>();
-		Assets.Anims = this.AnimAssets.Where<KAnimFile>((KAnimFile x) => x != null).ToList<KAnimFile>();
-		Assets.Anims.AddRange(Assets.ModLoadedKAnims);
+		this.LoadAnims();
 		Assets.UIPrefabs = this.UIPrefabAssets;
 		Assets.DebugFont = this.DebugFontAsset;
 		AsyncLoadManager<IGlobalAsyncLoader>.Run();
@@ -56,15 +56,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 				Assets.AddPrefab(kprefabID);
 			}
 		}
-		Assets.AnimTable.Clear();
-		foreach (KAnimFile kanimFile in Assets.Anims)
-		{
-			if (kanimFile != null)
-			{
-				HashedString hashedString2 = kanimFile.name;
-				Assets.AnimTable[hashedString2] = kanimFile;
-			}
-		}
 		this.CreatePrefabs();
 	}
 
@@ -72,6 +63,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		Db.Get();
 		LegacyModMain.Load();
+		Db.Get().Techs.PostProcess();
 	}
 
 	protected override void OnSpawn()
@@ -102,12 +94,55 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		return Assets.CountableTags.Contains(tag);
 	}
 
+	private void LoadAnims()
+	{
+		KAnimBatchManager.DestroyInstance();
+		KAnimGroupFile.DestroyInstance();
+		KGlobalAnimParser.DestroyInstance();
+		KAnimBatchManager.CreateInstance();
+		KGlobalAnimParser.CreateInstance();
+		KAnimGroupFile.LoadGroupResourceFile();
+		if (BundledAssetsLoader.instance.Expansion1Assets != null)
+		{
+			this.AnimAssets.AddRange(BundledAssetsLoader.instance.Expansion1Assets.AnimAssets);
+		}
+		Assets.Anims = this.AnimAssets.Where<KAnimFile>((KAnimFile x) => x != null).ToList<KAnimFile>();
+		Assets.Anims.AddRange(Assets.ModLoadedKAnims);
+		Assets.AnimTable.Clear();
+		foreach (KAnimFile kanimFile in Assets.Anims)
+		{
+			if (kanimFile != null)
+			{
+				HashedString hashedString = kanimFile.name;
+				Assets.AnimTable[hashedString] = kanimFile;
+			}
+		}
+		KAnimGroupFile.MapNamesToAnimFiles(Assets.AnimTable);
+		Global.Instance.modManager.Load(Content.Animation);
+		Assets.Anims.AddRange(Assets.ModLoadedKAnims);
+		foreach (KAnimFile kanimFile2 in Assets.ModLoadedKAnims)
+		{
+			if (kanimFile2 != null)
+			{
+				HashedString hashedString2 = kanimFile2.name;
+				Assets.AnimTable[hashedString2] = kanimFile2;
+			}
+		}
+		global::Debug.Assert(Assets.AnimTable.Count > 0, "Anim Assets not yet loaded");
+		KAnimGroupFile.LoadAll();
+		KAnimBatchManager.Instance().CompleteInit();
+	}
+
 	private void SubstanceListHookup()
 	{
+		Dictionary<string, SubstanceTable> dictionary = new Dictionary<string, SubstanceTable> { { "", this.substanceTable } };
+		if (BundledAssetsLoader.instance.Expansion1Assets != null)
+		{
+			dictionary["EXPANSION1_ID"] = BundledAssetsLoader.instance.Expansion1Assets.SubstanceTable;
+		}
 		Hashtable hashtable = new Hashtable();
 		ElementsAudio.Instance.LoadData(AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<ElementAudioFileLoader>.Get().entries);
-		ElementLoader.Load(ref hashtable, this.substanceTable);
-		Assets.SubstanceTable = this.substanceTable;
+		ElementLoader.Load(ref hashtable, dictionary);
 	}
 
 	public static string GetSimpleSoundEventName(string path)
@@ -210,7 +245,9 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		prefab.UpdateSaveLoadTag();
 		if (Assets.PrefabsByTag.ContainsKey(prefab.PrefabTag))
 		{
-			global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag);
+			string text = "Tried loading prefab with duplicate tag, ignoring: ";
+			Tag prefabTag = prefab.PrefabTag;
+			global::Debug.LogWarning(text + prefabTag.ToString());
 			return;
 		}
 		Assets.PrefabsByTag[prefab.PrefabTag] = prefab;
@@ -254,7 +291,9 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		GameObject gameObject = Assets.TryGetPrefab(tag);
 		if (gameObject == null)
 		{
-			global::Debug.LogWarning("Missing prefab: " + tag);
+			string text = "Missing prefab: ";
+			Tag tag2 = tag;
+			global::Debug.LogWarning(text + tag2.ToString());
 		}
 		return gameObject;
 	}
@@ -294,6 +333,13 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 			}
 		}
 		return list;
+	}
+
+	public static GameObject GetPrefabWithComponent<Type>()
+	{
+		List<GameObject> prefabsWithComponent = Assets.GetPrefabsWithComponent<Type>();
+		global::Debug.Assert(prefabsWithComponent.Count > 0, "There are no prefabs of type " + typeof(Type).Name);
+		return prefabsWithComponent[0];
 	}
 
 	public static List<Tag> GetPrefabTagsWithComponent<Type>()
@@ -370,6 +416,18 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 			global::Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab");
 		}
 		return kanimFile;
+	}
+
+	public static bool TryGetAnim(HashedString name, out KAnimFile anim)
+	{
+		if (!name.IsValid)
+		{
+			global::Debug.LogWarning("Invalid hash name");
+			anim = null;
+			return false;
+		}
+		Assets.AnimTable.TryGetValue(name, out anim);
+		return anim != null;
 	}
 
 	public void OnAfterDeserialize()
@@ -450,19 +508,17 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private static Dictionary<Tag, List<KPrefabID>> PrefabsByAdditionalTags = new Dictionary<Tag, List<KPrefabID>>();
 
-	private static Dictionary<HashedString, KAnimFile> AnimTable = new Dictionary<HashedString, KAnimFile>();
-
 	public List<KAnimFile> AnimAssets;
 
 	public static List<KAnimFile> Anims;
+
+	private static Dictionary<HashedString, KAnimFile> AnimTable = new Dictionary<HashedString, KAnimFile>();
 
 	public Font DebugFontAsset;
 
 	public static Font DebugFont;
 
 	public SubstanceTable substanceTable;
-
-	public static SubstanceTable SubstanceTable;
 
 	[SerializeField]
 	public TextAsset elementAudio;

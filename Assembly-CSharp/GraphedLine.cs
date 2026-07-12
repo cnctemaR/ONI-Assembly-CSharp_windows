@@ -47,24 +47,31 @@ public class GraphedLine : KMonoBehaviour
 
 	public void HidePointHighlight()
 	{
-		this.highlightPoint.SetActive(false);
+		if (this.highlightPoint != null)
+		{
+			this.highlightPoint.SetActive(false);
+		}
 	}
 
 	public void SetPointHighlight(Vector2 point)
 	{
+		if (this.highlightPoint == null)
+		{
+			return;
+		}
 		this.highlightPoint.SetActive(true);
 		Vector2 relativePosition = this.layer.graph.GetRelativePosition(point);
 		this.highlightPoint.rectTransform().SetLocalPosition(new Vector2(relativePosition.x * this.layer.graph.rectTransform().sizeDelta.x - this.layer.graph.rectTransform().sizeDelta.x / 2f, relativePosition.y * this.layer.graph.rectTransform().sizeDelta.y - this.layer.graph.rectTransform().sizeDelta.y / 2f));
 		ToolTip component = this.layer.graph.GetComponent<ToolTip>();
 		component.ClearMultiStringTooltip();
 		component.tooltipPositionOffset = new Vector2(this.highlightPoint.rectTransform().localPosition.x, this.layer.graph.rectTransform().rect.height / 2f - 12f);
-		component.SetSimpleTooltip(string.Concat(new object[]
+		component.SetSimpleTooltip(string.Concat(new string[]
 		{
 			this.layer.graph.axis_x.name,
 			" ",
-			point.x,
+			point.x.ToString(),
 			", ",
-			Mathf.RoundToInt(point.y),
+			Mathf.RoundToInt(point.y).ToString(),
 			" ",
 			this.layer.graph.axis_y.name
 		}));

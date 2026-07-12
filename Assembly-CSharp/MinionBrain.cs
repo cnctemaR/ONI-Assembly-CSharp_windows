@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using ProcGen;
+using STRINGS;
 using UnityEngine;
 
 public class MinionBrain : Brain
@@ -127,9 +129,41 @@ public class MinionBrain : Brain
 		}
 	}
 
+	public Notification CreateCollapseNotification()
+	{
+		MinionIdentity component = base.GetComponent<MinionIdentity>();
+		return new Notification(MISC.NOTIFICATIONS.TILECOLLAPSE.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.TILECOLLAPSE.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), true, 0f, null, null, null, true);
+	}
+
+	public void RemoveCollapseNotification(Notification notification)
+	{
+		Vector3 position = notification.clickFocus.GetPosition();
+		position.z = -40f;
+		WorldContainer myWorld = notification.clickFocus.gameObject.GetMyWorld();
+		if (myWorld != null && myWorld.IsDiscovered)
+		{
+			CameraController.Instance.ActiveWorldStarWipe(myWorld.id, position, 10f, null);
+		}
+		base.gameObject.AddOrGet<Notifier>().Remove(notification);
+	}
+
 	private void OnUnstableGroundImpact(object data)
 	{
-		this.RegisterReactEmotePair("UnstableGroundShock", "anim_react_shock_kanim", 1f);
+		GameObject telepad = GameUtil.GetTelepad(base.gameObject.GetMyWorld().id);
+		Navigator component = base.GetComponent<Navigator>();
+		Assignable assignable = base.GetComponent<MinionIdentity>().GetSoleOwner().GetAssignable(Db.Get().AssignableSlots.Bed);
+		bool flag = assignable != null && component.CanReach(Grid.PosToCell(assignable.transform.GetPosition()));
+		bool flag2 = telepad != null && component.CanReach(Grid.PosToCell(telepad.transform.GetPosition()));
+		if (!flag && !flag2)
+		{
+			this.RegisterReactEmotePair("UnstableGroundShock", "anim_react_shock_kanim", 1f);
+			Notification notification = this.CreateCollapseNotification();
+			notification.customClickCallback = delegate(object o)
+			{
+				this.RemoveCollapseNotification(notification);
+			};
+			base.gameObject.AddOrGet<Notifier>().Add(notification, "");
+		}
 	}
 
 	protected override void OnCleanUp()

@@ -5,20 +5,10 @@ using UnityEngine.Bindings;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Export/Random/Random.bindings.h")]
-	public sealed class Random
+	public static class Random
 	{
-		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
-		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
-		public static extern int seed
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
 		[NativeMethod("SetSeed")]
+		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void InitState(int seed);
 
@@ -39,16 +29,16 @@ namespace UnityEngine
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float Range(float min, float max);
+		public static extern float Range(float minInclusive, float maxInclusive);
 
-		public static int Range(int min, int max)
+		public static int Range(int minInclusive, int maxExclusive)
 		{
-			return Random.RandomRangeInt(min, max);
+			return Random.RandomRangeInt(minInclusive, maxExclusive);
 		}
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int RandomRangeInt(int min, int max);
+		private static extern int RandomRangeInt(int minInclusive, int maxExclusive);
 
 		public static extern float value
 		{
@@ -113,6 +103,16 @@ namespace UnityEngine
 				Random.get_rotationUniform_Injected(out quaternion);
 				return quaternion;
 			}
+		}
+
+		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
+		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
+		public static extern int seed
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		[Obsolete("Use Random.Range instead")]

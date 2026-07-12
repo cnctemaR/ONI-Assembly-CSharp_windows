@@ -12,7 +12,7 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 		this.root.Enter(new StateMachine<BabyMonitor, BabyMonitor.Instance, IStateMachineTarget, BabyMonitor.Def>.State.Callback(BabyMonitor.AddBabyEffect));
 		this.baby.Transition(this.spawnadult, new StateMachine<BabyMonitor, BabyMonitor.Instance, IStateMachineTarget, BabyMonitor.Def>.Transition.ConditionCallback(BabyMonitor.IsReadyToSpawnAdult), UpdateRate.SIM_4000ms);
 		this.spawnadult.ToggleBehaviour(GameTags.Creatures.Behaviours.GrowUpBehaviour, (BabyMonitor.Instance smi) => true, null);
-		this.babyEffect = new Effect("IsABaby", CREATURES.MODIFIERS.BABY.NAME, CREATURES.MODIFIERS.BABY.TOOLTIP, 0f, true, false, false, null, 0f, null);
+		this.babyEffect = new Effect("IsABaby", CREATURES.MODIFIERS.BABY.NAME, CREATURES.MODIFIERS.BABY.TOOLTIP, 0f, true, false, false, null, 0f, null, "");
 		this.babyEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -0.9f, CREATURES.MODIFIERS.BABY.NAME, true, false, true));
 		this.babyEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 5f, CREATURES.MODIFIERS.BABY.NAME, false, false, true));
 	}
@@ -25,7 +25,7 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 	private static bool IsReadyToSpawnAdult(BabyMonitor.Instance smi)
 	{
 		AmountInstance amountInstance = Db.Get().Amounts.Age.Lookup(smi.gameObject);
-		float num = 5f;
+		float num = smi.def.adultThreshold;
 		if (GenericGameSettings.instance.acceleratedLifecycle)
 		{
 			num = 0.005f;
@@ -44,6 +44,10 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 		public Tag adultPrefab;
 
 		public string onGrowDropID;
+
+		public bool forceAdultNavType;
+
+		public float adultThreshold = 5f;
 	}
 
 	public new class Instance : GameStateMachine<BabyMonitor, BabyMonitor.Instance, IStateMachineTarget, BabyMonitor.Def>.GameInstance
@@ -73,8 +77,11 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 					amountInstance2.value = num * amountInstance2.GetMax();
 				}
 			}
-			Navigator component = base.smi.GetComponent<Navigator>();
-			gameObject.GetComponent<Navigator>().SetCurrentNavType(component.CurrentNavType);
+			if (!base.smi.def.forceAdultNavType)
+			{
+				Navigator component = base.smi.GetComponent<Navigator>();
+				gameObject.GetComponent<Navigator>().SetCurrentNavType(component.CurrentNavType);
+			}
 			gameObject.Trigger(-2027483228, base.gameObject);
 			KSelectable component2 = base.gameObject.GetComponent<KSelectable>();
 			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component2)

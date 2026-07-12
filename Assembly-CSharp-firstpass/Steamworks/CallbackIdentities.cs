@@ -10,7 +10,7 @@ namespace Steamworks
 			int num = 0;
 			if (num >= customAttributes.Length)
 			{
-				throw new Exception("Callback number not found for struct " + callbackStruct);
+				throw new Exception("Callback number not found for struct " + ((callbackStruct != null) ? callbackStruct.ToString() : null));
 			}
 			return ((CallbackIdentityAttribute)customAttributes[num]).Identity;
 		}

@@ -111,8 +111,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeName("xAdvance")]
 		private float m_XAdvance;
 
-		[NativeName("yAdvance")]
 		[SerializeField]
+		[NativeName("yAdvance")]
 		private float m_YAdvance;
 	}
 }

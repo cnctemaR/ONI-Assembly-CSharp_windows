@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class TelescopeConfig : IBuildingConfig
 {
+	public override string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_VANILLA_ONLY;
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "Telescope";

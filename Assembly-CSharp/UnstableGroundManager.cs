@@ -10,6 +10,7 @@ public class UnstableGroundManager : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
+		this.fallingTileOffset = new Vector3(0.5f, 0f, 0f);
 		UnstableGroundManager.EffectInfo[] array = this.effects;
 		for (int i = 0; i < array.Length; i++)
 		{
@@ -166,16 +167,21 @@ public class UnstableGroundManager : KMonoBehaviour
 			{
 				Vector3 position = gameObject.transform.GetPosition();
 				int cell = Grid.PosToCell(position);
+				Grid.CellRight(cell);
+				Grid.CellLeft(cell);
 				int num = Grid.CellBelow(cell);
+				Grid.CellRight(num);
+				Grid.CellLeft(num);
+				int cell2 = cell;
 				if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Properties[num] & 4) != 0)
 				{
 					UnstableGround component = gameObject.GetComponent<UnstableGround>();
-					this.pendingCells.Add(cell);
+					this.pendingCells.Add(cell2);
 					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
 					{
 						this.RemoveFromPending(cell);
 					}, false));
-					SimMessages.AddRemoveSubstance(cell, component.element, CellEventLogger.Instance.UnstableGround, component.mass, component.temperature, component.diseaseIdx, component.diseaseCount, true, handle.index);
+					SimMessages.AddRemoveSubstance(cell2, component.element, CellEventLogger.Instance.UnstableGround, component.mass, component.temperature, component.diseaseIdx, component.diseaseCount, true, handle.index);
 					ListPool<ScenePartitionerEntry, UnstableGroundManager>.PooledList pooledList = ListPool<ScenePartitionerEntry, UnstableGroundManager>.Allocate();
 					Vector2I vector2I = Grid.CellToXY(cell);
 					vector2I.x = Mathf.Max(0, vector2I.x - 1);
@@ -265,6 +271,8 @@ public class UnstableGroundManager : KMonoBehaviour
 
 	[SerializeField]
 	private Vector3 landEffectOffset;
+
+	private Vector3 fallingTileOffset;
 
 	[SerializeField]
 	private UnstableGroundManager.EffectInfo[] effects;

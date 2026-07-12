@@ -57,6 +57,8 @@ public static class CodexCache
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.GEYSERS, CodexEntryGenerator.GenerateGeyserEntries(), Assets.GetSprite("codexIconGeysers"), true, true, null));
 		text = CodexCache.FormatLinkID("equipment");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.EQUIPMENT, CodexEntryGenerator.GenerateEquipmentEntries(), Assets.GetSprite("codexIconEquipment"), true, true, null));
+		text = CodexCache.FormatLinkID("biomes");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BIOMES, CodexEntryGenerator.GenerateBiomeEntries(), Assets.GetSprite("codexIconGeysers"), true, true, null));
 		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID("HOME"), UI.CODEX.CATEGORYNAMES.ROOT, dictionary, null, true, true, null);
 		CodexEntryGenerator.GeneratePageNotFound();
 		List<CategoryEntry> list = new List<CategoryEntry>();
@@ -356,6 +358,7 @@ public static class CodexCache
 		id = CodexCache.FormatLinkID(entry.id);
 		entry.id = id;
 		CodexEntry codexEntry = CodexCache.entries[id];
+		codexEntry.dlcIds = entry.dlcIds;
 		for (int i = 0; i < entry.log.modificationRecords.Count; i++)
 		{
 		}

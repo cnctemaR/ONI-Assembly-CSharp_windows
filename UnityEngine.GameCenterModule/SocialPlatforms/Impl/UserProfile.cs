@@ -36,7 +36,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		public override string ToString()
 		{
-			return string.Concat(new object[]
+			return string.Concat(new string[]
 			{
 				this.id,
 				" - ",
@@ -44,7 +44,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 				" - ",
 				this.isFriend.ToString(),
 				" - ",
-				this.state
+				this.state.ToString()
 			});
 		}
 
@@ -99,6 +99,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 			}
 		}
 
+		[Obsolete("legacyId returns playerID from GKPlayer, which became obsolete in iOS 12.4 . id returns playerID for devices running versions before iOS 12.4, and the newer teamPlayerID for later versions. Please use IUserProfile.id or UserProfile.id instead (UnityUpgradable) -> id")]
 		public string legacyId
 		{
 			get

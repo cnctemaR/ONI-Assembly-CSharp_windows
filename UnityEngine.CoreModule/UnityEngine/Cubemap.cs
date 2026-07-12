@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/CubemapTexture.h")]
 	[ExcludeFromPreset]
+	[NativeHeader("Runtime/Graphics/CubemapTexture.h")]
 	public sealed class Cubemap : Texture
 	{
 		public extern TextureFormat format
@@ -97,6 +97,15 @@ namespace UnityEngine
 			this.SetPixels(colors, face, 0);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetWritableImageData(int frame);
+
+		internal extern bool isPreProcessed
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public extern bool streamingMipmaps
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -180,9 +189,10 @@ namespace UnityEngine
 
 		public Cubemap(int width, GraphicsFormat format, TextureCreationFlags flags, int mipCount)
 		{
-			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
-			if (flag)
+			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			if (!flag)
 			{
+				Cubemap.ValidateIsNotCrunched(flags);
 				Cubemap.Internal_Create(this, width, mipCount, format, flags, IntPtr.Zero);
 			}
 		}
@@ -199,6 +209,7 @@ namespace UnityEngine
 				{
 					textureCreationFlags |= TextureCreationFlags.Crunch;
 				}
+				Cubemap.ValidateIsNotCrunched(textureCreationFlags);
 				Cubemap.Internal_Create(this, width, mipCount, graphicsFormat, textureCreationFlags, nativeTex);
 			}
 		}
@@ -263,6 +274,21 @@ namespace UnityEngine
 			this.SetPixelDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), mipLevel, (int)face, UnsafeUtility.SizeOf<T>(), data.Length, sourceDataStartIndex);
 		}
 
+		public unsafe NativeArray<T> GetPixelData<T>(int mipLevel, CubemapFace face) where T : struct
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			int pixelDataOffset = base.GetPixelDataOffset(base.mipmapCount, (int)face);
+			int pixelDataOffset2 = base.GetPixelDataOffset(mipLevel, (int)face);
+			int pixelDataSize = base.GetPixelDataSize(mipLevel, (int)face);
+			int num = UnsafeUtility.SizeOf<T>();
+			IntPtr intPtr = new IntPtr(this.GetWritableImageData(0).ToInt64() + (long)(pixelDataOffset * (int)face + pixelDataOffset2));
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, pixelDataSize / num, Allocator.None);
+		}
+
 		public void SetPixel(CubemapFace face, int x, int y, Color color)
 		{
 			bool flag = !this.isReadable;
@@ -301,6 +327,15 @@ namespace UnityEngine
 		public void Apply()
 		{
 			this.Apply(true, false);
+		}
+
+		private static void ValidateIsNotCrunched(TextureCreationFlags flags)
+		{
+			bool flag = (flags &= TextureCreationFlags.Crunch) > TextureCreationFlags.None;
+			if (flag)
+			{
+				throw new ArgumentException("Crunched Cubemap is not supported for textures created from script.");
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

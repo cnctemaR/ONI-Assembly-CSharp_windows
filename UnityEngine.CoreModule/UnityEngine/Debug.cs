@@ -44,7 +44,7 @@ namespace UnityEngine
 			Debug.DrawLine(start, end, white, num, flag);
 		}
 
-		[FreeFunction("DebugDrawLine")]
+		[FreeFunction("DebugDrawLine", IsThreadSafe = true)]
 		public static void DrawLine(Vector3 start, Vector3 end, [UnityEngine.Internal.DefaultValue("Color.white")] Color color, [UnityEngine.Internal.DefaultValue("0.0f")] float duration, [UnityEngine.Internal.DefaultValue("true")] bool depthTest)
 		{
 			Debug.DrawLine_Injected(ref start, ref end, ref color, duration, depthTest);
@@ -85,6 +85,10 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DebugBreak();
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern int ExtractStackTraceNoAlloc(byte* buffer, int bufferMax, string projectFolder);
 
 		public static void Log(object message)
 		{
@@ -285,8 +289,8 @@ namespace UnityEngine
 			Debug.unityLogger.LogFormat(LogType.Assert, context, format, args);
 		}
 
-		[StaticAccessor("GetBuildSettings()", StaticAccessorType.Dot)]
 		[NativeProperty(TargetType = TargetType.Field)]
+		[StaticAccessor("GetBuildSettings()", StaticAccessorType.Dot)]
 		public static extern bool isDebugBuild
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -311,7 +315,7 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static bool CallOverridenDebugHandler(Exception exception, Object obj)
 		{
-			bool flag = Debug.s_Logger.logHandler is DebugLogHandler;
+			bool flag = Debug.unityLogger.logHandler is DebugLogHandler;
 			bool flag2;
 			if (flag)
 			{
@@ -319,14 +323,38 @@ namespace UnityEngine
 			}
 			else
 			{
-				Debug.s_Logger.LogException(exception, obj);
+				try
+				{
+					Debug.unityLogger.LogException(exception, obj);
+				}
+				catch (Exception ex)
+				{
+					Debug.s_DefaultLogger.LogError(string.Format("Invalid exception thrown from custom {0}.LogException(). Message: {1}", Debug.unityLogger.logHandler.GetType(), ex), obj);
+					return false;
+				}
 				flag2 = true;
 			}
 			return flag2;
 		}
 
-		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
+		[RequiredByNativeCode]
+		internal static bool IsLoggingEnabled()
+		{
+			bool flag = Debug.unityLogger.logHandler is DebugLogHandler;
+			bool flag2;
+			if (flag)
+			{
+				flag2 = Debug.unityLogger.logEnabled;
+			}
+			else
+			{
+				flag2 = Debug.s_DefaultLogger.logEnabled;
+			}
+			return flag2;
+		}
+
 		[Conditional("UNITY_ASSERTIONS")]
+		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void Assert(bool condition, string format, params object[] args)
 		{
@@ -349,6 +377,8 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DrawLine_Injected(ref Vector3 start, ref Vector3 end, [UnityEngine.Internal.DefaultValue("Color.white")] ref Color color, [UnityEngine.Internal.DefaultValue("0.0f")] float duration, [UnityEngine.Internal.DefaultValue("true")] bool depthTest);
+
+		internal static readonly ILogger s_DefaultLogger = new Logger(new DebugLogHandler());
 
 		internal static ILogger s_Logger = new Logger(new DebugLogHandler());
 	}

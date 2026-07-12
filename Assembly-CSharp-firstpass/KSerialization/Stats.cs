@@ -45,16 +45,19 @@ namespace KSerialization
 			string text = header + "\n";
 			foreach (KeyValuePair<Type, Stats.StatInfo> keyValuePair in stats)
 			{
-				text = string.Concat(new object[]
-				{
-					text,
-					keyValuePair.Key.ToString(),
-					",",
-					keyValuePair.Value.numOccurrences,
-					",",
-					keyValuePair.Value.numBytes,
-					"\n"
-				});
+				string[] array = new string[7];
+				array[0] = text;
+				array[1] = keyValuePair.Key.ToString();
+				array[2] = ",";
+				int num = 3;
+				Stats.StatInfo statInfo = keyValuePair.Value;
+				array[num] = statInfo.numOccurrences.ToString();
+				array[4] = ",";
+				int num2 = 5;
+				statInfo = keyValuePair.Value;
+				array[num2] = statInfo.numBytes.ToString();
+				array[6] = "\n";
+				text = string.Concat(array);
 			}
 			DebugUtil.LogArgs(new object[] { text });
 		}

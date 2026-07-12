@@ -48,6 +48,14 @@ public class EffectConfigs : IMultiEntityConfig
 				initialAnim = "loop",
 				initialMode = KAnim.PlayMode.Loop,
 				destroyOnAnimComplete = false
+			},
+			new
+			{
+				id = EffectConfigs.DemolishSplashId,
+				animFiles = new string[] { "poi_demolish_impact_kanim" },
+				initialAnim = "POI_demolish_impact",
+				initialMode = KAnim.PlayMode.Loop,
+				destroyOnAnimComplete = false
 			}
 		};
 		for (int i = 0; i < anon.Length; i++)
@@ -92,4 +100,6 @@ public class EffectConfigs : IMultiEntityConfig
 	public static string PlantDeathId = "PlantDeathFx";
 
 	public static string BuildSplashId = "BuildSplashFx";
+
+	public static string DemolishSplashId = "DemolishSplashFx";
 }

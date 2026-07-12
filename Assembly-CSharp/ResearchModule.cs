@@ -9,8 +9,8 @@ public class ResearchModule : KMonoBehaviour
 	{
 		base.OnSpawn();
 		base.GetComponent<KBatchedAnimController>().Play("grounded", KAnim.PlayMode.Loop, 1f, 0f);
-		base.Subscribe<ResearchModule>(-1056989049, ResearchModule.OnLaunchDelegate);
-		base.Subscribe<ResearchModule>(238242047, ResearchModule.OnLandDelegate);
+		base.Subscribe<ResearchModule>(-1277991738, ResearchModule.OnLaunchDelegate);
+		base.Subscribe<ResearchModule>(-887025858, ResearchModule.OnLandDelegate);
 	}
 
 	public void OnLaunch(object data)
@@ -19,22 +19,25 @@ public class ResearchModule : KMonoBehaviour
 
 	public void OnLand(object data)
 	{
-		SpaceDestination.ResearchOpportunity researchOpportunity = SpacecraftManager.instance.GetSpacecraftDestination(SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<LaunchableRocket>())).TryCompleteResearchOpportunity();
-		if (researchOpportunity != null)
+		if (!DlcManager.FeatureClusterSpaceEnabled())
 		{
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab("ResearchDatabank"), base.gameObject.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0);
-			gameObject.SetActive(true);
-			gameObject.GetComponent<PrimaryElement>().Mass = (float)researchOpportunity.dataValue;
-			if (!string.IsNullOrEmpty(researchOpportunity.discoveredRareItem))
+			SpaceDestination.ResearchOpportunity researchOpportunity = SpacecraftManager.instance.GetSpacecraftDestination(SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<ILaunchableRocket>())).TryCompleteResearchOpportunity();
+			if (researchOpportunity != null)
 			{
-				GameObject prefab = Assets.GetPrefab(researchOpportunity.discoveredRareItem);
-				if (prefab == null)
+				GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab("ResearchDatabank"), base.gameObject.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0);
+				gameObject.SetActive(true);
+				gameObject.GetComponent<PrimaryElement>().Mass = (float)researchOpportunity.dataValue;
+				if (!string.IsNullOrEmpty(researchOpportunity.discoveredRareItem))
 				{
-					KCrashReporter.Assert(false, "Missing prefab: " + researchOpportunity.discoveredRareItem);
-				}
-				else
-				{
-					GameUtil.KInstantiate(prefab, base.gameObject.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0).SetActive(true);
+					GameObject prefab = Assets.GetPrefab(researchOpportunity.discoveredRareItem);
+					if (prefab == null)
+					{
+						KCrashReporter.Assert(false, "Missing prefab: " + researchOpportunity.discoveredRareItem);
+					}
+					else
+					{
+						GameUtil.KInstantiate(prefab, base.gameObject.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0).SetActive(true);
+					}
 				}
 			}
 		}

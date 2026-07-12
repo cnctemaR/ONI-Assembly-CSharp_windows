@@ -199,7 +199,7 @@ namespace System.Net.Sockets
 		{
 			this.SetResults(SocketError.Success, bytesTransferred, flags);
 			this.current_socket = connectSocket;
-			this.OnCompleted(this);
+			this.Complete();
 		}
 
 		internal void SetResults(SocketError socketError, int bytesTransferred, SocketFlags flags)

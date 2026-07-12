@@ -1,23 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using KSerialization;
-using Satsuma;
 using UnityEngine;
 
 namespace ProcGen.Map
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class MapGraph : Graph
+	public class MapGraph : Graph<Cell, Edge>
 	{
-		public List<Cell> cells
-		{
-			get
-			{
-				return this.cellList;
-			}
-		}
-
 		public List<Corner> corners
 		{
 			get
@@ -26,75 +16,37 @@ namespace ProcGen.Map
 			}
 		}
 
-		public List<Edge> edges
-		{
-			get
-			{
-				return this.edgeList;
-			}
-		}
-
 		public MapGraph(int seed)
 			: base(seed)
 		{
-			this.cellList = new List<Cell>();
 			this.cornerList = new List<Corner>();
-			this.edgeList = new List<Edge>();
 		}
 
-		public Edge GetEdge(Corner corner0, Corner corner1, bool createOK = true)
+		public Edge GetEdge(Cell site0, Cell site1)
 		{
-			bool flag;
-			return this.GetEdge(corner0, corner1, createOK, out flag);
+			return base.GetArc(site0, site1);
 		}
 
-		public Edge GetEdge(Corner corner0, Corner corner1, bool createOK, out bool didCreate)
+		public Edge AddEdge(Cell site0, Cell site1, Corner corner0, Corner corner1)
 		{
-			didCreate = false;
-			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 && e.corner1 == corner1) || (e.corner1 == corner0 && e.corner0 == corner1));
+			Edge edge = base.AddArc(site0, site1, "Edge");
+			edge.SetCorners(corner0, corner1);
+			return edge;
+		}
+
+		public Edge AddOrGetEdge(Cell site0, Cell site1, Corner corner0, Corner corner1)
+		{
+			Edge edge = base.GetArc(site0, site1);
 			if (edge != null)
 			{
 				return edge;
 			}
-			if (!createOK)
-			{
-				global::Debug.LogWarning("Cant create Edge but no edge found");
-				return null;
-			}
-			edge = new Edge(base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected), corner0, corner1);
-			this.arcList.Add(edge);
-			this.edgeList.Add(edge);
-			didCreate = true;
+			edge = base.AddArc(site0, site1, "Edge");
+			edge.SetCorners(corner0, corner1);
 			return edge;
 		}
 
-		public Edge GetEdge(Corner corner0, Corner corner1, Cell site0, Cell site1, bool createOK = true)
-		{
-			bool flag;
-			return this.GetEdge(corner0, corner1, site0, site1, createOK, out flag);
-		}
-
-		public Edge GetEdge(Corner corner0, Corner corner1, Cell site0, Cell site1, bool createOK, out bool didCreate)
-		{
-			didCreate = false;
-			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 && e.corner1 == corner1) || (e.corner1 == corner0 && e.corner0 == corner1));
-			if (edge != null)
-			{
-				return edge;
-			}
-			if (!createOK)
-			{
-				global::Debug.LogWarning("Cant create Edge but no edge found");
-				return null;
-			}
-			edge = new Edge(base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected), corner0, corner1, site0, site1);
-			this.arcList.Add(edge);
-			this.edgeList.Add(edge);
-			didCreate = true;
-			return edge;
-		}
-
-		public Corner GetCorner(Vector2 position, bool createOK = true)
+		public Corner AddOrGetCorner(Vector2 position)
 		{
 			Corner corner = this.cornerList.Find(delegate(Corner c)
 			{
@@ -103,109 +55,58 @@ namespace ProcGen.Map
 			});
 			if (corner == null)
 			{
-				if (!createOK)
-				{
-					global::Debug.LogWarning("Cant create Corner but no corner found");
-					return null;
-				}
-				corner = new Corner(base.baseGraph.AddNode());
-				this.nodeList.Add(corner);
-				corner.SetPosition(position);
+				corner = new Corner(position);
 				this.cornerList.Add(corner);
 			}
 			return corner;
 		}
 
-		public Cell GetCell(Node node)
-		{
-			return this.cellList.Find((Cell c) => c.node == node);
-		}
-
-		public Cell GetCell(Vector2 position)
-		{
-			return this.cellList.Find(delegate(Cell c)
-			{
-				Vector2 vector = c.position - position;
-				return vector.x < 1f && vector.x > -1f && vector.y < 1f && vector.y > -1f;
-			});
-		}
-
-		public Cell GetCell(Vector2 position, Node node, bool createOK = true)
-		{
-			bool flag;
-			return this.GetCell(position, node, createOK, out flag);
-		}
-
-		public Cell GetCell(Vector2 position, Node node, bool createOK, out bool didCreate)
-		{
-			Cell cell = this.cellList.Find(delegate(Cell c)
-			{
-				Vector2 vector = c.position - position;
-				return vector.x < 1f && vector.x > -1f && vector.y < 1f && vector.y > -1f;
-			});
-			didCreate = false;
-			if (cell == null)
-			{
-				if (!createOK)
-				{
-					global::Debug.LogWarning("Cant create Cell but no cell found");
-					return null;
-				}
-				cell = this.cellList.Find((Cell c) => c.node == node);
-				if (cell == null)
-				{
-					cell = new Cell(node);
-					didCreate = true;
-					cell.SetPosition(position);
-					this.cellList.Add(cell);
-				}
-				else
-				{
-					global::Debug.LogWarning("GetCell Same node [" + node.Id + "] differnt position!");
-				}
-			}
-			return cell;
-		}
-
 		public List<Edge> GetEdgesWithTag(Tag tag)
 		{
-			List<Edge> list = new List<Edge>();
-			for (int i = 0; i < this.edgeList.Count; i++)
-			{
-				if (this.edgeList[i].tags.Contains(tag))
-				{
-					list.Add(this.edgeList[i]);
-				}
-			}
-			return list;
+			return base.GetArcsWithTag(tag);
 		}
 
-		public void Remove(Edge n)
+		public void ClearEdgesAndCorners()
 		{
-			n.site0.Remove(n);
-			n.site1.Remove(n);
-			this.edges.Remove(n);
+			foreach (Edge edge in this.arcList)
+			{
+				base.baseGraph.DeleteArc(edge.arc);
+			}
+			this.arcList.Clear();
+			this.cornerList.Clear();
+		}
+
+		public void ClearTags()
+		{
+			foreach (Cell cell in this.nodeList)
+			{
+				cell.tags.Clear();
+			}
+			foreach (Edge edge in this.arcList)
+			{
+				edge.tags.Clear();
+			}
 		}
 
 		public void Validate()
 		{
-			for (int i = 0; i < this.cellList.Count; i++)
+			for (int i = 0; i < this.nodeList.Count; i++)
 			{
-				for (int j = 0; j < this.cellList.Count; j++)
+				for (int j = 0; j < this.nodeList.Count; j++)
 				{
 					if (j != i)
 					{
-						if (this.cellList[i] == this.cellList[j])
+						if (this.nodeList[i] == this.nodeList[j])
 						{
-							global::Debug.LogError("Duplicate cell (class)");
+							global::Debug.LogError("Duplicate cell (instance)");
 							return;
 						}
-						if (this.cellList[i].position == this.cellList[j].position)
+						if (this.nodeList[i].position == this.nodeList[j].position)
 						{
 							global::Debug.LogError("Duplicate cell (position)");
 							return;
 						}
-						if (this.cellList[i].node == this.cellList[j].node)
+						if (this.nodeList[i].node == this.nodeList[j].node)
 						{
 							global::Debug.LogError("Duplicate cell (node)");
 							return;
@@ -221,7 +122,7 @@ namespace ProcGen.Map
 					{
 						if (this.cornerList[k] == this.cornerList[l])
 						{
-							global::Debug.LogError("Duplicate corner (class)");
+							global::Debug.LogError("Duplicate corner (instance)");
 							return;
 						}
 						if (this.cornerList[k].position == this.cornerList[l].position)
@@ -229,40 +130,31 @@ namespace ProcGen.Map
 							global::Debug.LogError("Duplicate corner (position)");
 							return;
 						}
-						if (this.cornerList[k].node == this.cornerList[l].node)
-						{
-							global::Debug.LogError("Duplicate corner (node)");
-							return;
-						}
 					}
 				}
 			}
-			for (int m = 0; m < this.edgeList.Count; m++)
+			for (int m = 0; m < this.arcList.Count; m++)
 			{
-				for (int n = 0; n < this.edgeList.Count; n++)
+				for (int n = 0; n < this.arcList.Count; n++)
 				{
 					if (n != m)
 					{
-						Edge edge = this.edgeList[m];
-						Edge edge2 = this.edgeList[n];
+						Edge edge = this.arcList[m];
+						Edge edge2 = this.arcList[n];
 						if (edge == edge2)
 						{
-							global::Debug.LogError("Duplicate edge (class)");
+							global::Debug.LogError("Duplicate edge (instance)");
 							return;
 						}
 						if (edge.arc == edge2.arc)
 						{
-							global::Debug.LogError(string.Concat(new object[]
+							global::Debug.LogError(string.Concat(new string[]
 							{
 								"Duplicate EDGE [",
-								edge.arc,
+								edge.arc.ToString(),
 								"] & [",
-								edge2.arc,
-								"] - (ARC) [",
-								edge.site0.node.Id,
-								"] &  [",
-								edge.site1.node.Id,
-								"]"
+								edge2.arc.ToString(),
+								"] - (ARC)"
 							}));
 							return;
 						}
@@ -276,113 +168,34 @@ namespace ProcGen.Map
 							global::Debug.LogError("Duplicate edge (corner different order)");
 							return;
 						}
-						if (edge.site0 != edge.site1 && edge2.site0 != edge2.site1)
+						List<Cell> nodes = base.GetNodes(edge);
+						List<Cell> nodes2 = base.GetNodes(edge2);
+						if (nodes[0] == nodes2[0] && nodes[1] == nodes2[1])
 						{
-							if (edge.site0 == edge2.site0 && edge.site1 == edge2.site1)
-							{
-								global::Debug.LogError("Duplicate edge (site same order)");
-								return;
-							}
-							if (edge.site0 == edge2.site1 && edge.site1 == edge2.site0)
-							{
-								global::Debug.LogError(string.Concat(new object[]
-								{
-									"Duplicate Edge [",
-									edge.arc.Id,
-									"] -> [",
-									edge.corner0.node.Id,
-									"<-->",
-									edge.corner1.node.Id,
-									"] sites: [",
-									edge.site0.node.Id,
-									" -- ",
-									edge.site1.node.Id,
-									"] and [",
-									edge2.arc.Id,
-									"] -> [",
-									edge2.corner0.node.Id,
-									"<-->",
-									edge2.corner1.node.Id,
-									"] sites: [",
-									edge2.site0.node.Id,
-									" -- ",
-									edge2.site1.node.Id,
-									"] - (site differnt order)"
-								}));
-								global::Debug.Log(string.Concat(new object[]
-								{
-									"CE 0: ",
-									edge.corner0.position,
-									" 1: ",
-									edge.corner1.position
-								}));
-								global::Debug.Log(string.Concat(new object[]
-								{
-									"OE 0: ",
-									edge2.corner0.position,
-									" 1: ",
-									edge2.corner1.position
-								}));
-								global::Debug.Log(string.Concat(new object[]
-								{
-									"Sites C 0: ",
-									edge.site0.position,
-									" 1: ",
-									edge.site1.position
-								}));
-								DebugExtension.DebugCircle2d(edge.site0.position, Color.red, 1f, 15f, true, 4f);
-								DebugExtension.DebugCircle2d(edge.site1.position, Color.magenta, 2f, 15f, true, 4f);
-								global::Debug.Log(string.Concat(new object[]
-								{
-									"Sites O 0: ",
-									edge2.site0.position,
-									" 1: ",
-									edge2.site1.position
-								}));
-								DebugExtension.DebugCircle2d(edge2.site0.position, Color.green, 3f, 15f, true, 4f);
-								DebugExtension.DebugCircle2d(edge2.site1.position, Color.cyan, 4f, 15f, true, 4f);
-							}
-							else
-							{
-								if (edge.site0.node == edge2.site0.node && edge.site1.node == edge2.site1.node)
-								{
-									global::Debug.LogError("Duplicate edge (site node same order)");
-									return;
-								}
-								if (edge.site1.node == edge2.site0.node && edge.site0.node == edge2.site1.node)
-								{
-									global::Debug.LogError("Duplicate edge (site node differnt order)");
-									return;
-								}
-							}
+							global::Debug.LogError("Duplicate edge (site same order)");
+							return;
+						}
+						if (nodes[0] == nodes2[1] && nodes[1] == nodes2[0])
+						{
+							global::Debug.LogError("Duplicate Edge (site differnt order)");
+							return;
+						}
+						if (nodes[0].node == nodes2[0].node && nodes[1].node == nodes2[1].node)
+						{
+							global::Debug.LogError("Duplicate edge (site node same order)");
+							return;
+						}
+						if (nodes[0].node == nodes2[1].node && nodes[1].node == nodes2[0].node)
+						{
+							global::Debug.LogError("Duplicate edge (site node differnt order)");
+							return;
 						}
 					}
 				}
 			}
 		}
 
-		[OnDeserialized]
-		internal new void OnDeserializedMethod()
-		{
-			try
-			{
-				base.OnDeserializedMethod();
-			}
-			catch (Exception ex)
-			{
-				string message = ex.Message;
-				string stackTrace = ex.StackTrace;
-				global::Debug.Log("Error deserialising " + message + "\n" + stackTrace);
-			}
-		}
-
-		[Serialize]
-		public List<Cell> cellList;
-
 		[Serialize]
 		public List<Corner> cornerList;
-
-		[Serialize]
-		public List<Edge> edgeList;
 	}
 }

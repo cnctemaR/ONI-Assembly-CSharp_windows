@@ -31,11 +31,12 @@ public class SodaFountainWorkable : Workable, IWorkerPrioritizable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Storage component = base.GetComponent<Storage>();
-		SimUtil.DiseaseInfo diseaseInfo;
 		float num;
-		component.ConsumeAndGetDisease(GameTags.Water, this.sodaFountain.waterMassPerUse, out diseaseInfo, out num);
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num2;
+		component.ConsumeAndGetDisease(GameTags.Water, this.sodaFountain.waterMassPerUse, out num, out diseaseInfo, out num2);
 		SimUtil.DiseaseInfo diseaseInfo2;
-		component.ConsumeAndGetDisease(this.sodaFountain.ingredientTag, this.sodaFountain.ingredientMassPerUse, out diseaseInfo2, out num);
+		component.ConsumeAndGetDisease(this.sodaFountain.ingredientTag, this.sodaFountain.ingredientMassPerUse, out num, out diseaseInfo2, out num2);
 		GermExposureMonitor.Instance smi = worker.GetSMI<GermExposureMonitor.Instance>();
 		if (smi != null)
 		{

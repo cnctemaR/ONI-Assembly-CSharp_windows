@@ -24,13 +24,13 @@ public class VictoryScreen : KModalScreen
 	{
 		if (RetireColonyUtility.SaveColonySummaryData())
 		{
-			base.Show(false);
+			this.Show(false);
 		}
 	}
 
 	private void Dismiss()
 	{
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public void SetAchievements(string[] achievementIDs)

@@ -104,7 +104,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.empty;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.empty.PlayAnim("open").Enter("CreateFetchTask", delegate(Grave.StatesInstance smi)
 			{
 				smi.CreateFetchTask();

@@ -2,8 +2,8 @@
 
 namespace System.ComponentModel.Design.Serialization
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
 	[Obsolete("This attribute has been deprecated. Use DesignerSerializerAttribute instead.  For example, to specify a root designer for CodeDom, use DesignerSerializerAttribute(...,typeof(TypeCodeDomSerializer)).  http://go.microsoft.com/fwlink/?linkid=14202")]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
 	public sealed class RootDesignerSerializerAttribute : Attribute
 	{
 		public RootDesignerSerializerAttribute(Type serializerType, Type baseSerializerType, bool reloadable)

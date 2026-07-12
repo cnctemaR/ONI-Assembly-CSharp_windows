@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class RevealAsteriod : ColonyAchievementRequirement
+	public class RevealAsteriod : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public RevealAsteriod(float percentToReveal)
 		{
@@ -26,12 +25,7 @@ namespace Database
 			return num / (float)Grid.Visible.Length > this.percentToReveal;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.percentToReveal);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.percentToReveal = reader.ReadSingle();
 		}

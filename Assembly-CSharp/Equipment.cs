@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using Klei.AI;
 using KSerialization;
 using UnityEngine;
@@ -8,7 +9,7 @@ public class Equipment : Assignables
 {
 	public bool destroyed { get; private set; }
 
-	private GameObject GetTargetGameObject()
+	public GameObject GetTargetGameObject()
 	{
 		MinionAssignablesProxy minionAssignablesProxy = (MinionAssignablesProxy)base.GetAssignableIdentity();
 		if (minionAssignablesProxy)
@@ -40,9 +41,32 @@ public class Equipment : Assignables
 
 	public void Equip(Equippable equippable)
 	{
+		GameObject targetGameObject = this.GetTargetGameObject();
+		KBatchedAnimController component = targetGameObject.GetComponent<KBatchedAnimController>();
+		bool flag = component == null;
+		if (!flag)
+		{
+			PrimaryElement component2 = equippable.GetComponent<PrimaryElement>();
+			SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
+			invalid.idx = component2.DiseaseIdx;
+			invalid.count = (int)((float)component2.DiseaseCount * 0.33f);
+			PrimaryElement component3 = targetGameObject.GetComponent<PrimaryElement>();
+			SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
+			invalid2.idx = component3.DiseaseIdx;
+			invalid2.count = (int)((float)component3.DiseaseCount * 0.33f);
+			component3.ModifyDiseaseCount(-invalid2.count, "Equipment.Equip");
+			component2.ModifyDiseaseCount(-invalid.count, "Equipment.Equip");
+			if (invalid2.count > 0)
+			{
+				component2.AddDisease(invalid2.idx, invalid2.count, "Equipment.Equip");
+			}
+			if (invalid.count > 0)
+			{
+				component3.AddDisease(invalid.idx, invalid.count, "Equipment.Equip");
+			}
+		}
 		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
 		slot.Assign(equippable);
-		GameObject targetGameObject = this.GetTargetGameObject();
 		global::Debug.Assert(targetGameObject, "GetTargetGameObject returned null in Equip");
 		targetGameObject.Trigger(-448952673, equippable.GetComponent<KPrefabID>());
 		equippable.Trigger(-1617557748, this);
@@ -54,26 +78,25 @@ public class Equipment : Assignables
 				attributes.Add(attributeModifier);
 			}
 		}
-		SnapOn component = targetGameObject.GetComponent<SnapOn>();
-		if (component != null)
+		SnapOn component4 = targetGameObject.GetComponent<SnapOn>();
+		if (component4 != null)
 		{
-			component.AttachSnapOnByName(equippable.def.SnapOn);
+			component4.AttachSnapOnByName(equippable.def.SnapOn);
 			if (equippable.def.SnapOn1 != null)
 			{
-				component.AttachSnapOnByName(equippable.def.SnapOn1);
+				component4.AttachSnapOnByName(equippable.def.SnapOn1);
 			}
 		}
-		KBatchedAnimController component2 = targetGameObject.GetComponent<KBatchedAnimController>();
-		if (component2 != null && equippable.def.BuildOverride != null)
+		if (component != null && equippable.def.BuildOverride != null)
 		{
-			component2.GetComponent<SymbolOverrideController>().AddBuildOverride(equippable.def.BuildOverride.GetData(), equippable.def.BuildOverridePriority);
+			component.GetComponent<SymbolOverrideController>().AddBuildOverride(equippable.def.BuildOverride.GetData(), equippable.def.BuildOverridePriority);
 		}
 		if (equippable.transform.parent)
 		{
-			Storage component3 = equippable.transform.parent.GetComponent<Storage>();
-			if (component3)
+			Storage component5 = equippable.transform.parent.GetComponent<Storage>();
+			if (component5)
 			{
-				component3.Drop(equippable.gameObject, true);
+				component5.Drop(equippable.gameObject, true);
 			}
 		}
 		equippable.transform.parent = slot.gameObject.transform;
@@ -86,7 +109,7 @@ public class Equipment : Assignables
 			this.refreshHandle.ClearScheduler();
 		}
 		CreatureSimTemperatureTransfer transferer = targetGameObject.GetComponent<CreatureSimTemperatureTransfer>();
-		if (!(component2 == null))
+		if (!flag)
 		{
 			this.refreshHandle = GameScheduler.Instance.Schedule("ChangeEquipment", 2f, delegate(object obj)
 			{
@@ -101,7 +124,8 @@ public class Equipment : Assignables
 
 	public void Unequip(Equippable equippable)
 	{
-		base.GetSlot(equippable.slot).Unassign(true);
+		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
+		slot.Unassign(true);
 		equippable.Trigger(-170173755, this);
 		GameObject targetGameObject = this.GetTargetGameObject();
 		if (!targetGameObject)
@@ -164,13 +188,39 @@ public class Equipment : Assignables
 					GameObject gameObject = ((instance != null) ? instance.GetTargetGameObject() : null);
 					if (gameObject)
 					{
-						CreatureSimTemperatureTransfer component5 = gameObject.GetComponent<CreatureSimTemperatureTransfer>();
-						if (component5 != null)
+						CreatureSimTemperatureTransfer component8 = gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+						if (component8 != null)
 						{
-							component5.RefreshRegistration();
+							component8.RefreshRegistration();
 						}
 					}
 				}, null, null);
+			}
+			if (!slot.IsUnassigning())
+			{
+				PrimaryElement component5 = equippable.GetComponent<PrimaryElement>();
+				SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
+				invalid.idx = component5.DiseaseIdx;
+				invalid.count = (int)((float)component5.DiseaseCount * 0.33f);
+				PrimaryElement component6 = targetGameObject.GetComponent<PrimaryElement>();
+				SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
+				invalid2.idx = component6.DiseaseIdx;
+				invalid2.count = (int)((float)component6.DiseaseCount * 0.33f);
+				component6.ModifyDiseaseCount(-invalid2.count, "Equipment.Unequip");
+				component5.ModifyDiseaseCount(-invalid.count, "Equipment.Unequip");
+				if (invalid2.count > 0)
+				{
+					component5.AddDisease(invalid2.idx, invalid2.count, "Equipment.Unequip");
+				}
+				if (invalid.count > 0)
+				{
+					component6.AddDisease(invalid.idx, invalid.count, "Equipment.Unequip");
+				}
+				Durability component7 = equippable.GetComponent<Durability>();
+				if (component7 != null && component7.IsWornOut())
+				{
+					component7.ConvertToWornObject();
+				}
 			}
 		}
 		Game.Instance.Trigger(-2146166042, null);

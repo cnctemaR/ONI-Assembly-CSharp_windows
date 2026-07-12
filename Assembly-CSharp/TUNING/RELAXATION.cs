@@ -21,6 +21,8 @@ namespace TUNING
 			public static int TIER4 = 40;
 
 			public static int TIER5 = 50;
+
+			public static int SPECIAL_EVENT = 100;
 		}
 	}
 }

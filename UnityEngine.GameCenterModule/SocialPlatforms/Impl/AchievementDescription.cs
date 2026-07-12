@@ -17,7 +17,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		public override string ToString()
 		{
-			return string.Concat(new object[]
+			return string.Concat(new string[]
 			{
 				this.id,
 				" - ",
@@ -27,7 +27,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 				" - ",
 				this.unachievedDescription,
 				" - ",
-				this.points,
+				this.points.ToString(),
 				" - ",
 				this.hidden.ToString()
 			});

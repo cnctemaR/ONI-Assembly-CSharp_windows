@@ -123,13 +123,10 @@ namespace UnityEngine.Timeline
 			bool flag = false;
 			if (!playable3.IsValid<Playable>())
 			{
-				throw new InvalidOperationException(string.Concat(new object[]
-				{
-					track.name,
-					"(",
-					track.GetType(),
-					") did not produce a valid playable. Use the compilable property to indicate whether the track is valid for processing"
-				}));
+				string name = track.name;
+				string text = "(";
+				Type type = track.GetType();
+				throw new InvalidOperationException(name + text + ((type != null) ? type.ToString() : null) + ") did not produce a valid playable. Use the compilable property to indicate whether the track is valid for processing");
 			}
 			if (playable2.IsValid<Playable>() && playable3.IsValid<Playable>())
 			{

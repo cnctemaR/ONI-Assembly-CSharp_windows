@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine.Animations;
-using UnityEngine.Experimental.Animations;
 using UnityEngine.Playables;
 
 namespace UnityEngine.Timeline

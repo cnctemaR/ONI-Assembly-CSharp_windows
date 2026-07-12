@@ -18,8 +18,8 @@ namespace System.Net
 	[Serializable]
 	public abstract class WebRequest : MarshalByRefObject, ISerializable
 	{
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		public virtual IWebRequestCreate CreatorInstance
 		{
 			get

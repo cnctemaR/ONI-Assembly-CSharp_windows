@@ -72,9 +72,9 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		private struct LureIterator : GameScenePartitioner.Iterator
 		{
-			public int cost { get; private set; }
+			public int cost { readonly get; private set; }
 
-			public GameObject result { get; private set; }
+			public GameObject result { readonly get; private set; }
 
 			public LureIterator(Navigator navigator, Tag[] lures)
 			{

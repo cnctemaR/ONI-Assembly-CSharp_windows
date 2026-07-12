@@ -469,17 +469,6 @@ namespace VoronoiTree
 			}
 		}
 
-		public override Tree Split(Node.SplitCommand cmd)
-		{
-			if (cmd.SplitFunction != null)
-			{
-				cmd.SplitFunction(this, cmd);
-			}
-			this.ComputeChildrenRecursive(0, false);
-			this.RelaxRecursive(0, 3, 1f, false);
-			return this;
-		}
-
 		public Tree ReplaceLeafWithTree(Leaf leaf)
 		{
 			for (int i = 0; i < this.children.Count; i++)
@@ -568,6 +557,11 @@ namespace VoronoiTree
 					action(this.children[i]);
 				}
 			}
+		}
+
+		public List<Node> ImmediateChildren()
+		{
+			return new List<Node>(this.children);
 		}
 
 		public void GetLeafNodes(List<Node> nodes, Tree.LeafNodeTest test = null)

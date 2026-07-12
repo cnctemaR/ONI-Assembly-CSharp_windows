@@ -40,6 +40,10 @@ namespace TUNING
 
 		public const float RANCHING_DURATION_MULTIPLIER_BONUS_PER_POINT = 0.1f;
 
+		public const float FARMING_DURATION_MULTIPLIER_BONUS_PER_POINT = 0.1f;
+
+		public const float POWER_DURATION_MULTIPLIER_BONUS_PER_POINT = 0.025f;
+
 		public const float STRESS_BELOW_EXPECTATIONS_FOOD = 0.25f;
 
 		public const float STRESS_ABOVE_EXPECTATIONS_FOOD = -0.5f;
@@ -55,7 +59,7 @@ namespace TUNING
 		public static readonly string[] ALL_ATTRIBUTES = new string[]
 		{
 			"Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art", "Ranching",
-			"Athletics"
+			"Athletics", "SpaceNavigation"
 		};
 
 		public static readonly string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art", "Ranching" };
@@ -68,17 +72,105 @@ namespace TUNING
 
 		public static float ROLLED_ATTRIBUTE_POWER = 4f;
 
-		public static float PROBABILITY_MINISCULE = 2f;
+		public static Dictionary<string, List<string>> ARCHETYPE_TRAIT_EXCLUSIONS = new Dictionary<string, List<string>>
+		{
+			{
+				"Mining",
+				new List<string> { "Anemic", "DiggingDown", "Narcolepsy" }
+			},
+			{
+				"Building",
+				new List<string> { "Anemic", "NoodleArms", "ConstructionDown", "DiggingDown", "Narcolepsy" }
+			},
+			{
+				"Farming",
+				new List<string> { "Anemic", "NoodleArms", "BotanistDown", "RanchingDown", "Narcolepsy" }
+			},
+			{
+				"Ranching",
+				new List<string> { "RanchingDown", "BotanistDown", "Narcolepsy" }
+			},
+			{
+				"Cooking",
+				new List<string> { "NoodleArms", "CookingDown" }
+			},
+			{
+				"Art",
+				new List<string> { "ArtDown", "DecorDown" }
+			},
+			{
+				"Research",
+				new List<string> { "SlowLearner" }
+			},
+			{
+				"Suits",
+				new List<string> { "Anemic", "NoodleArms" }
+			},
+			{
+				"Hauling",
+				new List<string> { "Anemic", "NoodleArms", "Narcolepsy" }
+			},
+			{
+				"Technicals",
+				new List<string> { "MachineryDown" }
+			},
+			{
+				"MedicalAid",
+				new List<string> { "CaringDown", "WeakImmuneSystem" }
+			},
+			{
+				"Basekeeping",
+				new List<string> { "Anemic", "NoodleArms" }
+			},
+			{
+				"Rocketry",
+				new List<string>()
+			}
+		};
 
-		public static float PROBABILITY_LOW = 1.5f;
+		public static int RARITY_LEGENDARY = 5;
 
-		public static float PROBABILITY_MED = 1f;
+		public static int RARITY_EPIC = 4;
+
+		public static int RARITY_RARE = 3;
+
+		public static int RARITY_UNCOMMON = 2;
+
+		public static int RARITY_COMMON = 1;
+
+		public static int NO_STATPOINT_BONUS = 0;
 
 		public static int TINY_STATPOINT_BONUS = 1;
 
 		public static int SMALL_STATPOINT_BONUS = 2;
 
 		public static int MEDIUM_STATPOINT_BONUS = 3;
+
+		public static int LARGE_STATPOINT_BONUS = 4;
+
+		public static int HUGE_STATPOINT_BONUS = 5;
+
+		public static int COMMON = 1;
+
+		public static int UNCOMMON = 2;
+
+		public static int RARE = 3;
+
+		public static int EPIC = 4;
+
+		public static int LEGENDARY = 5;
+
+		public static global::Tuple<int, int> TRAITS_ONE_POSITIVE_ONE_NEGATIVE = new global::Tuple<int, int>(1, 1);
+
+		public static global::Tuple<int, int> TRAITS_TWO_POSITIVE_ONE_NEGATIVE = new global::Tuple<int, int>(2, 1);
+
+		public static global::Tuple<int, int> TRAITS_ONE_POSITIVE_TWO_NEGATIVE = new global::Tuple<int, int>(1, 2);
+
+		public static global::Tuple<int, int> TRAITS_TWO_POSITIVE_TWO_NEGATIVE = new global::Tuple<int, int>(2, 2);
+
+		public static global::Tuple<int, int> TRAITS_THREE_POSITIVE_ONE_NEGATIVE = new global::Tuple<int, int>(3, 1);
+
+		public static global::Tuple<int, int> TRAITS_ONE_POSITIVE_THREE_NEGATIVE = new global::Tuple<int, int>(1, 3);
 
 		public static int MIN_STAT_POINTS = 0;
 
@@ -87,6 +179,58 @@ namespace TUNING
 		public static int MAX_TRAITS = 4;
 
 		public static int APTITUDE_BONUS = 1;
+
+		public static List<int> RARITY_DECK = new List<int>
+		{
+			DUPLICANTSTATS.RARITY_COMMON,
+			DUPLICANTSTATS.RARITY_COMMON,
+			DUPLICANTSTATS.RARITY_COMMON,
+			DUPLICANTSTATS.RARITY_COMMON,
+			DUPLICANTSTATS.RARITY_COMMON,
+			DUPLICANTSTATS.RARITY_COMMON,
+			DUPLICANTSTATS.RARITY_COMMON,
+			DUPLICANTSTATS.RARITY_UNCOMMON,
+			DUPLICANTSTATS.RARITY_UNCOMMON,
+			DUPLICANTSTATS.RARITY_UNCOMMON,
+			DUPLICANTSTATS.RARITY_UNCOMMON,
+			DUPLICANTSTATS.RARITY_UNCOMMON,
+			DUPLICANTSTATS.RARITY_UNCOMMON,
+			DUPLICANTSTATS.RARITY_RARE,
+			DUPLICANTSTATS.RARITY_RARE,
+			DUPLICANTSTATS.RARITY_RARE,
+			DUPLICANTSTATS.RARITY_RARE,
+			DUPLICANTSTATS.RARITY_EPIC,
+			DUPLICANTSTATS.RARITY_EPIC,
+			DUPLICANTSTATS.RARITY_LEGENDARY
+		};
+
+		public static List<int> rarityDeckActive = new List<int>(DUPLICANTSTATS.RARITY_DECK);
+
+		public static List<global::Tuple<int, int>> POD_TRAIT_CONFIGURATIONS_DECK = new List<global::Tuple<int, int>>
+		{
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_TWO_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_TWO_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_TWO_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_TWO_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_TWO_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_TWO_POSITIVE_TWO_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_THREE_POSITIVE_ONE_NEGATIVE,
+			DUPLICANTSTATS.TRAITS_ONE_POSITIVE_THREE_NEGATIVE
+		};
+
+		public static List<global::Tuple<int, int>> podTraitConfigurationsActive = new List<global::Tuple<int, int>>(DUPLICANTSTATS.POD_TRAIT_CONFIGURATIONS_DECK);
 
 		public static readonly List<string> CONTRACTEDTRAITS_HEALING = new List<string> { "IrritableBowel", "Aggressive", "SlowLearner", "WeakImmuneSystem", "Snorer", "CantDig" };
 
@@ -124,117 +268,210 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantResearch",
-				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW,
-				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
+				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
+				mutuallyExclusiveAptitudes = new List<HashedString> { "Research" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantDig",
-				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW,
-				requiredNonPositiveAptitudes = new List<HashedString> { "Mining" }
+				statBonus = DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
+				mutuallyExclusiveAptitudes = new List<HashedString> { "Mining" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantCook",
-				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW,
-				requiredNonPositiveAptitudes = new List<HashedString> { "Cooking" }
+				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveAptitudes = new List<HashedString> { "Cooking" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantBuild",
-				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW,
-				requiredNonPositiveAptitudes = new List<HashedString> { "Building" }
+				statBonus = DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
+				mutuallyExclusiveAptitudes = new List<HashedString> { "Building" },
+				mutuallyExclusiveTraits = new List<string> { "GrantSkill_Engineering1" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Hemophobia",
+				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveAptitudes = new List<HashedString> { "MedicalAid" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "ScaredyCat",
+				statBonus = DUPLICANTSTATS.NO_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveAptitudes = new List<HashedString> { "Mining" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "ConstructionDown",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW,
-				requiredNonPositiveAptitudes = new List<HashedString> { "MedicalAid" }
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantBuild" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Narcolepsy",
+				id = "RanchingDown",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "CaringDown",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "Hemophobia" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BotanistDown",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "ArtDown",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "CookingDown",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantCook" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "MachineryDown",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DiggingDown",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_LOW
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantDig" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Flatulence",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				id = "SlowLearner",
+				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantResearch" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "IrritableBowel",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				id = "NoodleArms",
+				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Snorer",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "MouthBreather",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "SmallBladder",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "CalorieBurner",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				id = "DecorDown",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Anemic",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				statBonus = DUPLICANTSTATS.HUGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Flatulence",
+				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "IrritableBowel",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Snorer",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "MouthBreather",
+				statBonus = DUPLICANTSTATS.HUGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "SmallBladder",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "CalorieBurner",
+				statBonus = DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "WeakImmuneSystem",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "SlowLearner",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "NoodleArms",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "ScaredyCat",
-				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				requiredNonPositiveAptitudes = new List<HashedString> { "Mining" }
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Allergies",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "NightLight",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Narcolepsy",
+				statBonus = DUPLICANTSTATS.HUGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = ""
 			}
 		};
 
@@ -242,19 +479,23 @@ namespace TUNING
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Aggressive"
+				id = "Aggressive",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "StressVomiter"
+				id = "StressVomiter",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "UglyCrier"
+				id = "UglyCrier",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "BingeEater"
+				id = "BingeEater",
+				dlcId = ""
 			}
 		};
 
@@ -262,19 +503,23 @@ namespace TUNING
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "BalloonArtist"
+				id = "BalloonArtist",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "SparkleStreaker"
+				id = "SparkleStreaker",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "StickerBomber"
+				id = "StickerBomber",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "SuperProductive"
+				id = "SuperProductive",
+				dlcId = ""
 			}
 		};
 
@@ -282,19 +527,23 @@ namespace TUNING
 		{
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Regeneration"
+				id = "Regeneration",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "DeeperDiversLungs"
+				id = "DeeperDiversLungs",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "SunnyDisposition"
+				id = "SunnyDisposition",
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "RockCrusher"
+				id = "RockCrusher",
+				dlcId = ""
 			}
 		};
 
@@ -303,106 +552,248 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Twinkletoes",
-				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Anemic" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "StrongArm",
-				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "NoodleArms" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Greasemonkey",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "MachineryDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "DiversLung",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "MouthBreather" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "IronGut",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "StrongImmuneSystem",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "WeakImmuneSystem" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "EarlyBird",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "NightOwl" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "NightOwl",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "EarlyBird" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "MoleHands",
-				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				mutuallyExclusiveTraits = new List<string> { "CantDig" }
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantDig", "DiggingDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "FastLearner",
-				statBonus = -DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_RARE,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "SlowLearner", "CantResearch" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "InteriorDecorator",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "Uncultured", "ArtDown" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Uncultured",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator" },
-				requiredNonPositiveAptitudes = new List<HashedString> { "Art" }
+				mutuallyExclusiveAptitudes = new List<HashedString> { "Art" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "SimpleTastes",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Foodie" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Foodie",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				mutuallyExclusiveTraits = new List<string> { "SimpleTastes", "CantCook" },
-				requiredNonPositiveAptitudes = new List<HashedString> { "Cooking" }
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "SimpleTastes", "CantCook", "CookingDown" },
+				mutuallyExclusiveAptitudes = new List<HashedString> { "Cooking" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "BedsideManner",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "Hemophobia", "CaringDown" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DecorUp",
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "DecorDown" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Thriver",
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GreenThumb",
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "BotanistDown" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "ConstructionUp",
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "ConstructionDown" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "RanchingUp",
+				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "RanchingDown" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Mining1",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantDig" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Mining2",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantDig" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Mining3",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_LEGENDARY,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantDig" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Farming2",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Ranching1",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Cooking1",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "CantCook" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Arting1",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Arting2",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Arting3",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Suits1",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Technicals2",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Engineering1",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = ""
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Basekeeping2",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "Anemic" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Medicine2",
+				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "Hemophobia" }
 			}
 		};
@@ -412,44 +803,46 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Claustrophobic",
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "PrefersWarmer",
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "PrefersColder" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "PrefersColder",
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = "",
 				mutuallyExclusiveTraits = new List<string> { "PrefersWarmer" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "SensitiveFeet",
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Fashionable",
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "Climacophobic",
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "SolitarySleeper",
-				probability = DUPLICANTSTATS.PROBABILITY_MED
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "Workaholic",
-				probability = DUPLICANTSTATS.PROBABILITY_MED
+				rarity = DUPLICANTSTATS.RARITY_COMMON,
+				dlcId = ""
 			}
 		};
 
@@ -504,6 +897,21 @@ namespace TUNING
 			public const float CARRY_CAPACITY = 200f;
 
 			public const float HIT_POINTS = 100f;
+
+			public const float RADIATION_RESISTANCE = 0f;
+
+			public const float RADIATION_RECOVERY = -0.16666667f;
+		}
+
+		public class RADIATION_EXPOSURE_LEVELS
+		{
+			public const float LOW = 100f;
+
+			public const float MODERATE = 300f;
+
+			public const float HIGH = 600f;
+
+			public const float DEADLY = 900f;
 		}
 
 		public class CALORIES
@@ -750,11 +1158,15 @@ namespace TUNING
 
 			public int statBonus;
 
-			public float probability;
+			public int impact;
+
+			public int rarity;
+
+			public string dlcId;
 
 			public List<string> mutuallyExclusiveTraits;
 
-			public List<HashedString> requiredNonPositiveAptitudes;
+			public List<HashedString> mutuallyExclusiveAptitudes;
 		}
 
 		public class ATTRIBUTE_LEVELING

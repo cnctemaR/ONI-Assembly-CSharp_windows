@@ -578,12 +578,12 @@ public static class Util
 
 	public static string LogFilePath()
 	{
-		return Application.consoleLogPath;
+		return Util.consoleLogPath;
 	}
 
 	public static string LogsFolder()
 	{
-		return Path.GetDirectoryName(Application.consoleLogPath);
+		return Path.GetDirectoryName(Util.consoleLogPath);
 	}
 
 	public static string CacheFolder()
@@ -657,11 +657,18 @@ public static class Util
 		}
 	}
 
+	public static bool IsNullOrDestroyed(this object obj)
+	{
+		return obj == null || (obj is global::UnityEngine.Object && obj as global::UnityEngine.Object == null);
+	}
+
 	private static HashSet<char> defaultInvalidUserInputChars = new HashSet<char>(Path.GetInvalidPathChars());
 
-	private static HashSet<char> additionalInvalidUserInputChars = new HashSet<char>(new char[] { '<', '>', ':', '"', '/', '?', '*', '\\', '!' });
+	private static HashSet<char> additionalInvalidUserInputChars = new HashSet<char>(new char[] { '<', '>', ':', '"', '/', '?', '*', '\\', '!', '.' });
 
 	private static global::System.Random random = new global::System.Random();
 
 	private static string defaultRootFolder = Application.persistentDataPath;
+
+	private static string consoleLogPath = Application.consoleLogPath;
 }

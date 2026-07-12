@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using FMOD.Studio;
 using ProcGenGame;
 using UnityEngine;
 
@@ -15,12 +14,21 @@ public class WorldGenScreen : NewGameFlowScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (MainMenu.Instance != null)
+		{
+			MainMenu.Instance.StopAmbience();
+		}
 		this.TriggerLoadingMusic();
 		global::UnityEngine.Object.FindObjectOfType<FrontEndBackground>().gameObject.SetActive(false);
 		SaveLoader.SetActiveSaveFilePath(null);
 		try
 		{
-			File.Delete(WorldGen.SIM_SAVE_FILENAME);
+			int num = 0;
+			while (File.Exists(WorldGen.GetSIMSaveFilename(num)))
+			{
+				File.Delete(WorldGen.GetSIMSaveFilename(num));
+				num++;
+			}
 		}
 		catch (Exception ex)
 		{
@@ -33,8 +41,7 @@ public class WorldGenScreen : NewGameFlowScreen
 	{
 		if (AudioDebug.Get().musicEnabled && !MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
 		{
-			MusicManager.instance.StopSong("Music_TitleTheme", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			MainMenu.Instance.StopMainMenuMusic();
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot);
 			MusicManager.instance.PlaySong("Music_FrontEnd", false);
 			MusicManager.instance.SetSongParameter("Music_FrontEnd", "songSection", 1f, true);

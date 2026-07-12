@@ -30,16 +30,14 @@ public class BuildTool : DragTool
 		}
 		this.active = true;
 		base.OnActivateTool();
-		this.placementPivot = this.def.placementPivot;
-		Vector3 cursorPos = PlayerController.GetCursorPos(KInputManager.GetMousePos());
-		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, cursorPos, Grid.SceneLayer.Ore, null, LayerMask.NameToLayer("Place"));
+		Vector3 vector = base.ClampPositionToWorld(PlayerController.GetCursorPos(KInputManager.GetMousePos()), ClusterManager.Instance.activeWorld);
+		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, vector, Grid.SceneLayer.Ore, null, LayerMask.NameToLayer("Place"));
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
 			component.visibilityType = KAnimControllerBase.VisibilityType.Always;
 			component.isMovable = true;
 			component.Offset = this.def.GetVisualizerOffset();
-			component.Offset += this.def.placementPivot;
 			component.name = component.GetComponent<KPrefabID>().GetDebugName() + "_visualizer";
 		}
 		Rotatable component2 = this.visualizer.GetComponent<Rotatable>();
@@ -49,7 +47,7 @@ public class BuildTool : DragTool
 			component2.SetOrientation(this.buildingOrientation);
 		}
 		this.visualizer.SetActive(true);
-		this.UpdateVis(cursorPos);
+		this.UpdateVis(vector);
 		base.GetComponent<BuildToolHoverTextCard>().currentDef = this.def;
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
 		if (component == null)
@@ -84,11 +82,10 @@ public class BuildTool : DragTool
 		base.OnDeactivateTool(new_tool);
 	}
 
-	public void Activate(BuildingDef def, IList<Tag> selected_elements, GameObject source = null)
+	public void Activate(BuildingDef def, IList<Tag> selected_elements)
 	{
 		this.selectedElements = selected_elements;
 		this.def = def;
-		this.source = source;
 		this.viewMode = def.ViewMode;
 		ResourceRemainingDisplayScreen.instance.SetResources(selected_elements, def.CraftRecipe);
 		PlayerController.Instance.ActivateTool(this);
@@ -100,7 +97,6 @@ public class BuildTool : DragTool
 		this.selectedElements = null;
 		SelectTool.Instance.Activate();
 		this.def = null;
-		this.source = null;
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 	}
 
@@ -148,8 +144,8 @@ public class BuildTool : DragTool
 
 	public override void OnMouseMove(Vector3 cursorPos)
 	{
-		cursorPos -= this.placementPivot;
 		base.OnMouseMove(cursorPos);
+		cursorPos = base.ClampPositionToWorld(cursorPos, ClusterManager.Instance.activeWorld);
 		this.UpdateVis(cursorPos);
 	}
 
@@ -285,10 +281,6 @@ public class BuildTool : DragTool
 			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation, out text))
 			{
 				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false, GameClock.Instance.GetTime());
-				if (this.source != null)
-				{
-					this.source.DeleteObject();
-				}
 			}
 		}
 		else
@@ -321,15 +313,11 @@ public class BuildTool : DragTool
 						component2.SetMasterPriority(PlanScreen.Instance.GetBuildingPriority());
 					}
 				}
-				if (this.source != null)
-				{
-					this.source.Trigger(2121280625, gameObject);
-				}
 			}
 		}
 		if (gameObject != null)
 		{
-			if (this.def.MaterialsAvailable(this.selectedElements) || DebugHandler.InstantBuildMode)
+			if (this.def.MaterialsAvailable(this.selectedElements, ClusterManager.Instance.activeWorld) || DebugHandler.InstantBuildMode)
 			{
 				this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
 				if (this.placeSound != null)
@@ -353,6 +341,10 @@ public class BuildTool : DragTool
 			if (component3 != null)
 			{
 				component3.SetOrientation(this.buildingOrientation);
+			}
+			if (this.def.OnePerWorld)
+			{
+				PlayerController.Instance.ActivateTool(SelectTool.Instance);
 			}
 		}
 	}
@@ -444,8 +436,6 @@ public class BuildTool : DragTool
 	private BuildingDef def;
 
 	private Orientation buildingOrientation;
-
-	private GameObject source;
 
 	private ToolTip tooltip;
 

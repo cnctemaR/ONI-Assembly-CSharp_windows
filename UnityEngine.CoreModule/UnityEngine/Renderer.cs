@@ -11,10 +11,10 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Renderer.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Graphics/Renderer.h")]
 	public class Renderer : Component
 	{
 		[Obsolete("Use shadowCastingMode instead.", false)]
@@ -100,7 +100,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "RendererScripting::SetMaterialArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMaterialArray([NotNull] Material[] m);
+		private extern void SetMaterialArray([NotNull("ArgumentNullException")] Material[] m);
 
 		[FreeFunction(Name = "RendererScripting::SetPropertyBlock", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -108,7 +108,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "RendererScripting::GetPropertyBlock", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_GetPropertyBlock([NotNull] MaterialPropertyBlock dest);
+		internal extern void Internal_GetPropertyBlock([NotNull("ArgumentNullException")] MaterialPropertyBlock dest);
 
 		[FreeFunction(Name = "RendererScripting::SetPropertyBlockMaterialIndex", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -116,7 +116,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "RendererScripting::GetPropertyBlockMaterialIndex", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_GetPropertyBlockMaterialIndex([NotNull] MaterialPropertyBlock dest, int materialIndex);
+		internal extern void Internal_GetPropertyBlockMaterialIndex([NotNull("ArgumentNullException")] MaterialPropertyBlock dest, int materialIndex);
 
 		[FreeFunction(Name = "RendererScripting::HasPropertyBlock", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using STRINGS;
 using UnityEngine;
@@ -67,6 +68,55 @@ namespace Klei.AI
 			for (int num3 = 0; num3 != this.Modifiers.Count; num3++)
 			{
 				AttributeModifier attributeModifier = this.Modifiers[num3];
+				if (!attributeModifier.UIOnly)
+				{
+					if (!attributeModifier.IsMultiplier)
+					{
+						num += attributeModifier.Value;
+					}
+					else
+					{
+						num2 += attributeModifier.Value;
+					}
+				}
+			}
+			if (num2 != 0f)
+			{
+				num += Mathf.Abs(num) * num2;
+			}
+			return num;
+		}
+
+		public static float GetTotalDisplayValue(Attribute attribute, List<AttributeModifier> modifiers)
+		{
+			float num = attribute.BaseValue;
+			float num2 = 0f;
+			for (int num3 = 0; num3 != modifiers.Count; num3++)
+			{
+				AttributeModifier attributeModifier = modifiers[num3];
+				if (!attributeModifier.IsMultiplier)
+				{
+					num += attributeModifier.Value;
+				}
+				else
+				{
+					num2 += attributeModifier.Value;
+				}
+			}
+			if (num2 != 0f)
+			{
+				num += Mathf.Abs(num) * num2;
+			}
+			return num;
+		}
+
+		public static float GetTotalValue(Attribute attribute, List<AttributeModifier> modifiers)
+		{
+			float num = attribute.BaseValue;
+			float num2 = 0f;
+			for (int num3 = 0; num3 != modifiers.Count; num3++)
+			{
+				AttributeModifier attributeModifier = modifiers[num3];
 				if (!attributeModifier.UIOnly)
 				{
 					if (!attributeModifier.IsMultiplier)

@@ -38,29 +38,29 @@ public static class BasePuftConfig
 		{
 			text = "PuftBaby_air_intake";
 		}
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
-			.Add(new IncubatingStates.Def(), true)
-			.Add(new BaggedStates.Def(), true)
-			.Add(new StunnedStates.Def(), true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new BaggedStates.Def(), true, -1)
+			.Add(new StunnedStates.Def(), true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
 			.PushInterruptGroup()
-			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new RanchedStates.Def(), true)
-			.Add(new UpTopPoopStates.Def(), true)
-			.Add(new LayEggStates.Def(), true)
+			.Add(new CreatureSleepStates.Def(), true, -1)
+			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new UpTopPoopStates.Def(), true, -1)
+			.Add(new LayEggStates.Def(), true, -1)
 			.Add(new InhaleStates.Def
 			{
 				inhaleSound = text
-			}, true)
-			.Add(new MoveToLureStates.Def(), true)
-			.Add(new CallAdultStates.Def(), true)
+			}, true, -1)
+			.Add(new MoveToLureStates.Def(), true, -1)
+			.Add(new CallAdultStates.Def(), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BasePuftConfig.CustomIdleAnim)
-			}, true);
+			}, true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PuftSpecies, symbol_override_prefix);
 		return gameObject;
 	}

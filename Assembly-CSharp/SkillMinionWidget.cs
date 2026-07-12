@@ -9,12 +9,13 @@ using UnityEngine.UI;
 [AddComponentMenu("KMonoBehaviour/scripts/SkillMinionWidget")]
 public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerClickHandler
 {
-	public IAssignableIdentity minion { get; private set; }
+	public IAssignableIdentity assignableIdentity { get; private set; }
 
 	public void SetMinon(IAssignableIdentity identity)
 	{
-		this.minion = identity;
-		this.portrait.SetIdentityObject(this.minion, true);
+		this.assignableIdentity = identity;
+		this.portrait.SetIdentityObject(this.assignableIdentity, true);
+		base.GetComponent<NotificationHighlightTarget>().targetKey = identity.GetSoleOwner().gameObject.GetInstanceID().ToString();
 	}
 
 	public void OnPointerEnter(PointerEventData eventData)
@@ -29,7 +30,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 
 	private void ToggleHover(bool on)
 	{
-		if (this.skillsScreen.CurrentlySelectedMinion != this.minion)
+		if (this.skillsScreen.CurrentlySelectedMinion != this.assignableIdentity)
 		{
 			this.SetColor(on ? this.hover_color : this.unselected_color);
 		}
@@ -38,7 +39,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 	private void SetColor(Color color)
 	{
 		this.background.color = color;
-		if (this.minion != null && this.minion as StoredMinionIdentity != null)
+		if (this.assignableIdentity != null && this.assignableIdentity as StoredMinionIdentity != null)
 		{
 			base.GetComponent<CanvasGroup>().alpha = 0.6f;
 		}
@@ -46,18 +47,21 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		this.skillsScreen.CurrentlySelectedMinion = this.minion;
+		this.skillsScreen.CurrentlySelectedMinion = this.assignableIdentity;
+		base.GetComponent<NotificationHighlightTarget>().View();
 		KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 	}
 
 	public void Refresh()
 	{
-		if (this.minion == null)
+		if (this.assignableIdentity == null)
 		{
 			return;
 		}
-		this.portrait.SetIdentityObject(this.minion, true);
-		MinionIdentity minionIdentity = this.minion as MinionIdentity;
+		this.portrait.SetIdentityObject(this.assignableIdentity, true);
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.skillsScreen.GetMinionIdentity(this.assignableIdentity, out minionIdentity, out storedMinionIdentity);
 		this.hatDropDown.gameObject.SetActive(true);
 		string text;
 		if (minionIdentity != null)
@@ -78,20 +82,24 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 					list.Add(new SkillListable(keyValuePair.Key));
 				}
 			}
-			this.hatDropDown.Initialize(list, new Action<IListableOption, object>(this.OnHatDropEntryClick), new Func<IListableOption, IListableOption, object, int>(this.hatDropDownSort), new Action<DropDownEntry, object>(this.hatDropEntryRefreshAction), false, this.minion);
+			this.hatDropDown.Initialize(list, new Action<IListableOption, object>(this.OnHatDropEntryClick), new Func<IListableOption, IListableOption, object, int>(this.hatDropDownSort), new Action<DropDownEntry, object>(this.hatDropEntryRefreshAction), false, minionIdentity);
 			text = (string.IsNullOrEmpty(component.TargetHat) ? component.CurrentHat : component.TargetHat);
 		}
 		else
 		{
-			StoredMinionIdentity storedMinionIdentity = this.minion as StoredMinionIdentity;
 			ToolTip component2 = base.GetComponent<ToolTip>();
 			component2.ClearMultiStringTooltip();
-			component2.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, storedMinionIdentity.GetStorageReason(), this.minion.GetProperName()), null);
+			component2.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.INFORMATION_NOT_AVAILABLE_TOOLTIP, storedMinionIdentity.GetStorageReason(), storedMinionIdentity.GetProperName()), null);
 			text = (string.IsNullOrEmpty(storedMinionIdentity.targetHat) ? storedMinionIdentity.currentHat : storedMinionIdentity.targetHat);
 			this.masteryPoints.text = UI.TABLESCREENS.NA;
 			this.morale.text = UI.TABLESCREENS.NA;
 		}
-		this.SetColor((this.skillsScreen.CurrentlySelectedMinion == this.minion) ? this.selected_color : this.unselected_color);
+		bool flag = this.skillsScreen.CurrentlySelectedMinion == this.assignableIdentity;
+		if (this.skillsScreen.CurrentlySelectedMinion != null && this.assignableIdentity != null)
+		{
+			flag = flag || this.skillsScreen.CurrentlySelectedMinion.GetSoleOwner() == this.assignableIdentity.GetSoleOwner();
+		}
+		this.SetColor(flag ? this.selected_color : this.unselected_color);
 		HierarchyReferences component3 = base.GetComponent<HierarchyReferences>();
 		this.RefreshHat(text);
 		component3.GetReference("openButton").gameObject.SetActive(minionIdentity != null);
@@ -105,7 +113,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 			AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(resume);
 			ToolTip component = base.GetComponent<ToolTip>();
 			component.ClearMultiStringTooltip();
-			component.AddMultiStringTooltip(this.minion.GetProperName() + "\n\n", this.TooltipTextStyle_Header);
+			component.AddMultiStringTooltip(this.assignableIdentity.GetProperName() + "\n\n", this.TooltipTextStyle_Header);
 			component.AddMultiStringTooltip(string.Format(UI.SKILLS_SCREEN.CURRENT_MORALE, attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue()), null);
 			component.AddMultiStringTooltip("\n" + UI.DETAILTABS.STATS.NAME + "\n\n", this.TooltipTextStyle_Header);
 			foreach (AttributeInstance attributeInstance3 in resume.GetAttributes())
@@ -121,13 +129,13 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 					{
 						text = UIConstants.ColorPrefixRed;
 					}
-					component.AddMultiStringTooltip(string.Concat(new object[]
+					component.AddMultiStringTooltip(string.Concat(new string[]
 					{
 						"    • ",
 						attributeInstance3.Name,
 						": ",
 						text,
-						attributeInstance3.GetTotalValue(),
+						attributeInstance3.GetTotalValue().ToString(),
 						UIConstants.ColorSuffix
 					}), null);
 				}
@@ -143,7 +151,9 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 
 	private void OnHatDropEntryClick(IListableOption skill, object data)
 	{
-		MinionIdentity minionIdentity = this.minion as MinionIdentity;
+		MinionIdentity minionIdentity;
+		StoredMinionIdentity storedMinionIdentity;
+		this.skillsScreen.GetMinionIdentity(this.assignableIdentity, out minionIdentity, out storedMinionIdentity);
 		if (minionIdentity == null)
 		{
 			return;
@@ -173,10 +183,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 				component.ApplyTargetHat();
 			}
 		}
-		if (this.minion == this.skillsScreen.CurrentlySelectedMinion)
-		{
-			this.skillsScreen.selectedHat.sprite = Assets.GetSprite(string.IsNullOrEmpty(component.TargetHat) ? "hat_role_none" : component.TargetHat);
-		}
+		this.skillsScreen.RefreshAll();
 	}
 
 	private void hatDropEntryRefreshAction(DropDownEntry entry, object targetData)

@@ -93,9 +93,10 @@ public class TelepadSideScreen : SideScreenContent
 	{
 		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
 		{
-			if (colonyAchievement.isVictoryCondition)
+			if (colonyAchievement.isVictoryCondition && !colonyAchievement.Disabled)
 			{
 				Dictionary<ColonyAchievementRequirement, GameObject> dictionary = new Dictionary<ColonyAchievementRequirement, GameObject>();
+				this.victoryAchievementWidgets.Add(colonyAchievement, dictionary);
 				GameObject gameObject = Util.KInstantiateUI(this.conditionContainerTemplate, this.victoryConditionsContainer, true);
 				gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").SetText(colonyAchievement.Name);
 				foreach (ColonyAchievementRequirement colonyAchievementRequirement in colonyAchievement.requirementChecklist)
@@ -122,12 +123,19 @@ public class TelepadSideScreen : SideScreenContent
 	{
 		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
 		{
-			if (colonyAchievement.isVictoryCondition)
+			if (colonyAchievement.isVictoryCondition && !colonyAchievement.Disabled)
 			{
 				foreach (ColonyAchievementRequirement colonyAchievementRequirement in colonyAchievement.requirementChecklist)
 				{
 					this.entries[colonyAchievement.Id][colonyAchievementRequirement].GetComponent<HierarchyReferences>().GetReference<Image>("Check").enabled = colonyAchievementRequirement.Success();
 				}
+			}
+		}
+		foreach (KeyValuePair<ColonyAchievement, Dictionary<ColonyAchievementRequirement, GameObject>> keyValuePair in this.victoryAchievementWidgets)
+		{
+			foreach (KeyValuePair<ColonyAchievementRequirement, GameObject> keyValuePair2 in keyValuePair.Value)
+			{
+				keyValuePair2.Value.GetComponent<ToolTip>().SetSimpleTooltip(keyValuePair2.Key.GetProgress(keyValuePair2.Key.Success()));
 			}
 		}
 	}
@@ -186,4 +194,6 @@ public class TelepadSideScreen : SideScreenContent
 	private GameObject checkboxLinePrefab;
 
 	private Dictionary<string, Dictionary<ColonyAchievementRequirement, GameObject>> entries = new Dictionary<string, Dictionary<ColonyAchievementRequirement, GameObject>>();
+
+	private Dictionary<ColonyAchievement, Dictionary<ColonyAchievementRequirement, GameObject>> victoryAchievementWidgets = new Dictionary<ColonyAchievement, Dictionary<ColonyAchievementRequirement, GameObject>>();
 }

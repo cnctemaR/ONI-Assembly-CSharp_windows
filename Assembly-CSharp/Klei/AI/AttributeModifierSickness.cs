@@ -47,7 +47,7 @@ namespace Klei.AI
 			foreach (AttributeModifier attributeModifier in this.attributeModifiers)
 			{
 				Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
-				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.ATTRIBUTE_MODIFIER_SYMPTOMS, attribute.Name, attributeModifier.GetFormattedString(null)), string.Format(DUPLICANTS.DISEASES.ATTRIBUTE_MODIFIER_SYMPTOMS_TOOLTIP, attribute.Name, attributeModifier.GetFormattedString(null)), Descriptor.DescriptorType.Symptom, false));
+				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.ATTRIBUTE_MODIFIER_SYMPTOMS, attribute.Name, attributeModifier.GetFormattedString()), string.Format(DUPLICANTS.DISEASES.ATTRIBUTE_MODIFIER_SYMPTOMS_TOOLTIP, attribute.Name, attributeModifier.GetFormattedString()), Descriptor.DescriptorType.Symptom, false));
 			}
 			return list;
 		}

@@ -12,7 +12,7 @@ public class FacilityBackWallWindowConfig : IBuildingConfig
 		string text2 = "gravitas_window_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] glasses = MATERIALS.GLASSES;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.NotInTiles;
@@ -32,8 +32,9 @@ public class FacilityBackWallWindowConfig : IBuildingConfig
 	{
 		go.AddOrGet<AnimTileable>().objectLayer = ObjectLayer.Backwall;
 		go.AddComponent<ZoneTile>();
-		go.GetComponent<PrimaryElement>().SetElement(SimHashes.Steel);
+		go.GetComponent<PrimaryElement>().SetElement(SimHashes.Glass, true);
 		go.GetComponent<PrimaryElement>().Temperature = 273f;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Gravitas, false);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 	}
 

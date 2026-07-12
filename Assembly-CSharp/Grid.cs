@@ -59,11 +59,17 @@ public class Grid
 		Grid.suitMarkers.Clear();
 	}
 
+	public static bool DEBUG_GetRestrictions(int cell, out Grid.Restriction restriction)
+	{
+		return Grid.restrictions.TryGetValue(cell, out restriction);
+	}
+
 	public static void RegisterRestriction(int cell, Grid.Restriction.Orientation orientation)
 	{
+		Grid.HasAccessDoor[cell] = true;
 		Grid.restrictions[cell] = new Grid.Restriction
 		{
-			directionMasks = new Dictionary<int, Grid.Restriction.Directions>(),
+			DirectionMasksForMinionInstanceID = new Dictionary<int, Grid.Restriction.Directions>(),
 			orientation = orientation
 		};
 	}
@@ -71,55 +77,62 @@ public class Grid
 	public static void UnregisterRestriction(int cell)
 	{
 		Grid.restrictions.Remove(cell);
+		Grid.HasAccessDoor[cell] = false;
 	}
 
-	public static void SetRestriction(int cell, int minion, Grid.Restriction.Directions directions)
+	public static void SetRestriction(int cell, int minionInstanceID, Grid.Restriction.Directions directions)
 	{
-		Grid.restrictions[cell].directionMasks[minion] = directions;
+		Grid.restrictions[cell].DirectionMasksForMinionInstanceID[minionInstanceID] = directions;
 	}
 
-	public static void ClearRestriction(int cell, int minion)
+	public static void ClearRestriction(int cell, int minionInstanceID)
 	{
-		Grid.restrictions[cell].directionMasks.Remove(minion);
+		Grid.restrictions[cell].DirectionMasksForMinionInstanceID.Remove(minionInstanceID);
 	}
 
-	public static bool HasPermission(int cell, int minion, int fromCell)
+	public static bool HasPermission(int cell, int minionInstanceID, int fromCell, NavType fromNavType)
 	{
-		DebugUtil.Assert(Grid.HasAccessDoor[cell]);
+		if (!Grid.HasAccessDoor[cell])
+		{
+			return true;
+		}
 		Grid.Restriction restriction = Grid.restrictions[cell];
 		Vector2I vector2I = Grid.CellToXY(cell);
 		Vector2I vector2I2 = Grid.CellToXY(fromCell);
 		Grid.Restriction.Directions directions = (Grid.Restriction.Directions)0;
-		Grid.Restriction.Orientation orientation = restriction.orientation;
-		if (orientation != Grid.Restriction.Orientation.Vertical)
+		int num = vector2I.x - vector2I2.x;
+		int num2 = vector2I.y - vector2I2.y;
+		switch (restriction.orientation)
 		{
-			if (orientation == Grid.Restriction.Orientation.Horizontal)
-			{
-				int num = vector2I.y - vector2I2.y;
-				if (num > 0)
-				{
-					directions |= Grid.Restriction.Directions.Left;
-				}
-				if (num < 0)
-				{
-					directions |= Grid.Restriction.Directions.Right;
-				}
-			}
-		}
-		else
-		{
-			int num2 = vector2I.x - vector2I2.x;
-			if (num2 < 0)
+		case Grid.Restriction.Orientation.Vertical:
+			if (num < 0)
 			{
 				directions |= Grid.Restriction.Directions.Left;
 			}
-			if (num2 > 0)
+			if (num > 0)
 			{
 				directions |= Grid.Restriction.Directions.Right;
 			}
+			break;
+		case Grid.Restriction.Orientation.Horizontal:
+			if (num2 > 0)
+			{
+				directions |= Grid.Restriction.Directions.Left;
+			}
+			if (num2 < 0)
+			{
+				directions |= Grid.Restriction.Directions.Right;
+			}
+			break;
+		case Grid.Restriction.Orientation.SingleCell:
+			if (Math.Abs(num) != 1 && Math.Abs(num2) != 1 && fromNavType != NavType.Teleport)
+			{
+				directions |= Grid.Restriction.Directions.Teleport;
+			}
+			break;
 		}
 		Grid.Restriction.Directions directions2 = (Grid.Restriction.Directions)0;
-		return (!restriction.directionMasks.TryGetValue(minion, out directions2) && !restriction.directionMasks.TryGetValue(-1, out directions2)) || (directions2 & directions) == (Grid.Restriction.Directions)0;
+		return (!restriction.DirectionMasksForMinionInstanceID.TryGetValue(minionInstanceID, out directions2) && !restriction.DirectionMasksForMinionInstanceID.TryGetValue(-1, out directions2)) || (directions2 & directions) == (Grid.Restriction.Directions)0;
 	}
 
 	public static void RegisterTubeEntrance(int cell, int reservationCapacity)
@@ -129,7 +142,7 @@ public class Grid
 		Grid.tubeEntrances[cell] = new Grid.TubeEntrance
 		{
 			reservationCapacity = reservationCapacity,
-			reservations = new HashSet<int>()
+			reservedInstanceIDs = new HashSet<int>()
 		};
 	}
 
@@ -140,20 +153,20 @@ public class Grid
 		Grid.tubeEntrances.Remove(cell);
 	}
 
-	public static bool ReserveTubeEntrance(int cell, int minion, bool reserve)
+	public static bool ReserveTubeEntrance(int cell, int minionInstanceID, bool reserve)
 	{
 		Grid.TubeEntrance tubeEntrance = Grid.tubeEntrances[cell];
-		HashSet<int> reservations = tubeEntrance.reservations;
+		HashSet<int> reservedInstanceIDs = tubeEntrance.reservedInstanceIDs;
 		if (!reserve)
 		{
-			return reservations.Remove(minion);
+			return reservedInstanceIDs.Remove(minionInstanceID);
 		}
 		DebugUtil.Assert(Grid.HasTubeEntrance[cell]);
-		if (reservations.Count == tubeEntrance.reservationCapacity)
+		if (reservedInstanceIDs.Count == tubeEntrance.reservationCapacity)
 		{
 			return false;
 		}
-		DebugUtil.Assert(reservations.Add(minion));
+		DebugUtil.Assert(reservedInstanceIDs.Add(minionInstanceID));
 		return true;
 	}
 
@@ -165,7 +178,7 @@ public class Grid
 		Grid.tubeEntrances[cell] = tubeEntrance;
 	}
 
-	public static bool HasUsableTubeEntrance(int cell, int minion)
+	public static bool HasUsableTubeEntrance(int cell, int minionInstanceID)
 	{
 		if (!Grid.HasTubeEntrance[cell])
 		{
@@ -176,14 +189,14 @@ public class Grid
 		{
 			return false;
 		}
-		HashSet<int> reservations = tubeEntrance.reservations;
-		return reservations.Count < tubeEntrance.reservationCapacity || reservations.Contains(minion);
+		HashSet<int> reservedInstanceIDs = tubeEntrance.reservedInstanceIDs;
+		return reservedInstanceIDs.Count < tubeEntrance.reservationCapacity || reservedInstanceIDs.Contains(minionInstanceID);
 	}
 
-	public static bool HasReservedTubeEntrance(int cell, int minion)
+	public static bool HasReservedTubeEntrance(int cell, int minionInstanceID)
 	{
 		DebugUtil.Assert(Grid.HasTubeEntrance[cell]);
-		return Grid.tubeEntrances[cell].reservations.Contains(minion);
+		return Grid.tubeEntrances[cell].reservedInstanceIDs.Contains(minionInstanceID);
 	}
 
 	public static void SetTubeEntranceOperational(int cell, bool operational)
@@ -203,8 +216,8 @@ public class Grid
 			suitCount = 0,
 			lockerCount = 0,
 			flags = Grid.SuitMarker.Flags.Operational,
-			suitReservations = new HashSet<int>(),
-			emptyLockerReservations = new HashSet<int>()
+			minionIDsWithSuitReservations = new HashSet<int>(),
+			minionIDsWithEmptyLockerReservations = new HashSet<int>()
 		};
 	}
 
@@ -215,37 +228,37 @@ public class Grid
 		Grid.suitMarkers.Remove(cell);
 	}
 
-	public static bool ReserveSuit(int cell, int minion, bool reserve)
+	public static bool ReserveSuit(int cell, int minionInstanceID, bool reserve)
 	{
 		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
 		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
-		HashSet<int> suitReservations = suitMarker.suitReservations;
+		HashSet<int> minionIDsWithSuitReservations = suitMarker.minionIDsWithSuitReservations;
 		if (!reserve)
 		{
-			return suitReservations.Remove(minion);
+			return minionIDsWithSuitReservations.Remove(minionInstanceID);
 		}
-		if (suitReservations.Count == suitMarker.suitCount)
+		if (minionIDsWithSuitReservations.Count == suitMarker.suitCount)
 		{
 			return false;
 		}
-		DebugUtil.Assert(suitReservations.Add(minion));
+		DebugUtil.Assert(minionIDsWithSuitReservations.Add(minionInstanceID));
 		return true;
 	}
 
-	public static bool ReserveEmptyLocker(int cell, int minion, bool reserve)
+	public static bool ReserveEmptyLocker(int cell, int minionInstanceID, bool reserve)
 	{
 		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
 		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
-		HashSet<int> emptyLockerReservations = suitMarker.emptyLockerReservations;
+		HashSet<int> minionIDsWithEmptyLockerReservations = suitMarker.minionIDsWithEmptyLockerReservations;
 		if (!reserve)
 		{
-			return emptyLockerReservations.Remove(minion);
+			return minionIDsWithEmptyLockerReservations.Remove(minionInstanceID);
 		}
-		if (emptyLockerReservations.Count == suitMarker.emptyLockerCount)
+		if (minionIDsWithEmptyLockerReservations.Count == suitMarker.emptyLockerCount)
 		{
 			return false;
 		}
-		DebugUtil.Assert(emptyLockerReservations.Add(minion));
+		DebugUtil.Assert(minionIDsWithEmptyLockerReservations.Add(minionInstanceID));
 		return true;
 	}
 
@@ -273,26 +286,26 @@ public class Grid
 		return false;
 	}
 
-	public static bool HasSuit(int cell, int minion)
+	public static bool HasSuit(int cell, int minionInstanceID)
 	{
 		if (!Grid.HasSuitMarker[cell])
 		{
 			return false;
 		}
 		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
-		HashSet<int> suitReservations = suitMarker.suitReservations;
-		return suitReservations.Count < suitMarker.suitCount || suitReservations.Contains(minion);
+		HashSet<int> minionIDsWithSuitReservations = suitMarker.minionIDsWithSuitReservations;
+		return minionIDsWithSuitReservations.Count < suitMarker.suitCount || minionIDsWithSuitReservations.Contains(minionInstanceID);
 	}
 
-	public static bool HasEmptyLocker(int cell, int minion)
+	public static bool HasEmptyLocker(int cell, int minionInstanceID)
 	{
 		if (!Grid.HasSuitMarker[cell])
 		{
 			return false;
 		}
 		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
-		HashSet<int> emptyLockerReservations = suitMarker.emptyLockerReservations;
-		return emptyLockerReservations.Count < suitMarker.emptyLockerCount || emptyLockerReservations.Contains(minion);
+		HashSet<int> minionIDsWithEmptyLockerReservations = suitMarker.minionIDsWithEmptyLockerReservations;
+		return minionIDsWithEmptyLockerReservations.Count < suitMarker.emptyLockerCount || minionIDsWithEmptyLockerReservations.Contains(minionInstanceID);
 	}
 
 	public unsafe static void InitializeCells()
@@ -500,12 +513,37 @@ public class Grid
 
 	public static bool IsValidBuildingCell(int cell)
 	{
-		return cell >= 0 && cell < Grid.CellCount - Grid.WidthInCells * Grid.TopBorderHeight;
+		if (!Grid.IsWorldValidCell(cell))
+		{
+			return false;
+		}
+		WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[cell]);
+		if (world == null)
+		{
+			return false;
+		}
+		Vector2I vector2I = Grid.CellToXY(cell);
+		return (float)vector2I.x >= world.minimumBounds.x && (float)vector2I.x <= world.maximumBounds.x && (float)vector2I.y >= world.minimumBounds.y && (float)vector2I.y <= world.maximumBounds.y - (float)Grid.TopBorderHeight;
+	}
+
+	public static bool IsWorldValidCell(int cell)
+	{
+		return Grid.IsValidCell(cell) && Grid.WorldIdx[cell] != ClusterManager.INVALID_WORLD_IDX;
 	}
 
 	public static bool IsValidCell(int cell)
 	{
 		return cell >= 0 && cell < Grid.CellCount;
+	}
+
+	public static bool IsActiveWorld(int cell)
+	{
+		return ClusterManager.Instance != null && ClusterManager.Instance.activeWorldId == (int)Grid.WorldIdx[cell];
+	}
+
+	public static bool AreCellsInSameWorld(int cell, int world_cell)
+	{
+		return Grid.IsValidCell(cell) && Grid.IsValidCell(world_cell) && Grid.WorldIdx[cell] == Grid.WorldIdx[world_cell];
 	}
 
 	public static bool IsCellOpenToSpace(int cell)
@@ -801,6 +839,21 @@ public class Grid
 		return Grid.TestLineOfSight(x, y, x2, y2, Grid.PhysicalBlockingDelegate, blocking_tile_visible);
 	}
 
+	public static void CollectCellsInLine(int startCell, int endCell, HashSet<int> outputCells)
+	{
+		int num = 2;
+		int cellDistance = Grid.GetCellDistance(startCell, endCell);
+		Vector2 vector = (Grid.CellToPos(endCell) - Grid.CellToPos(startCell)).normalized;
+		for (float num2 = 0f; num2 < (float)cellDistance; num2 = Mathf.Min(num2 + 1f / (float)num, (float)cellDistance))
+		{
+			int num3 = Grid.PosToCell(Grid.CellToPos(startCell) + vector * num2);
+			if (Grid.GetCellDistance(startCell, num3) <= cellDistance)
+			{
+				outputCells.Add(num3);
+			}
+		}
+	}
+
 	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false)
 	{
 		int num = x;
@@ -880,6 +933,35 @@ public class Grid
 		return true;
 	}
 
+	public static bool GetFreeGridSpace(Vector2I size, out Vector2I offset)
+	{
+		Vector2I gridOffset = BestFit.GetGridOffset(ClusterManager.Instance.WorldContainers, size, out offset);
+		if (gridOffset.X <= Grid.WidthInCells && gridOffset.Y <= Grid.HeightInCells)
+		{
+			SimMessages.SimDataResizeGridAndInitializeVacuumCells(gridOffset, size.x, size.y, offset.x, offset.y);
+			Game.Instance.roomProber.Refresh();
+			return true;
+		}
+		return false;
+	}
+
+	public static void FreeGridSpace(Vector2I size, Vector2I offset)
+	{
+		SimMessages.SimDataFreeCells(size.x, size.y, offset.x, offset.y);
+		for (int i = offset.y; i < size.y + offset.y + 1; i++)
+		{
+			for (int j = offset.x - 1; j < size.x + offset.x + 1; j++)
+			{
+				int num = Grid.XYToCell(j, i);
+				if (Grid.IsValidCell(num))
+				{
+					Grid.Element[num] = ElementLoader.FindElementByHash(SimHashes.Vacuum);
+				}
+			}
+		}
+		Game.Instance.roomProber.Refresh();
+	}
+
 	[Conditional("UNITY_EDITOR")]
 	public static void DrawBoxOnCell(int cell, Color color, float offset = 0f)
 	{
@@ -946,11 +1028,13 @@ public class Grid
 
 	public static Grid.NavValidatorFlagsTubeIndexer HasTube;
 
+	public static Grid.NavValidatorFlagsNavTeleporterIndexer HasNavTeleporter;
+
 	public static Grid.NavValidatorFlagsUnderConstructionIndexer IsTileUnderConstruction;
 
 	public static Grid.NavFlags[] NavMasks;
 
-	public static Grid.NavFlagsAccessDoorIndexer HasAccessDoor;
+	private static Grid.NavFlagsAccessDoorIndexer HasAccessDoor;
 
 	public static Grid.NavFlagsTubeEntranceIndexer HasTubeEntrance;
 
@@ -969,6 +1053,8 @@ public class Grid
 	public unsafe static byte* elementIdx;
 
 	public unsafe static float* temperature;
+
+	public unsafe static float* radiation;
 
 	public unsafe static float* mass;
 
@@ -996,13 +1082,13 @@ public class Grid
 
 	public static bool[] GravitasFacility;
 
+	public static byte[] WorldIdx;
+
 	public static float[] Loudness;
 
 	public static Element[] Element;
 
 	public static int[] LightCount;
-
-	public static int[] RadiationCount;
 
 	public static Grid.PressureIndexer Pressure;
 
@@ -1011,6 +1097,8 @@ public class Grid
 	public static Grid.ElementIdxIndexer ElementIdx;
 
 	public static Grid.TemperatureIndexer Temperature;
+
+	public static Grid.RadiationIndexer Radiation;
 
 	public static Grid.MassIndexer Mass;
 
@@ -1226,7 +1314,8 @@ public class Grid
 		Ladder = 1,
 		Pole = 2,
 		Tube = 4,
-		UnderConstruction = 8
+		NavTeleporter = 8,
+		UnderConstruction = 16
 	}
 
 	public struct NavValidatorFlagsLadderIndexer
@@ -1270,6 +1359,21 @@ public class Grid
 			set
 			{
 				Grid.UpdateNavValidatorMask(i, Grid.NavValidatorFlags.Tube, value);
+			}
+		}
+	}
+
+	public struct NavValidatorFlagsNavTeleporterIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.NavTeleporter) > (Grid.NavValidatorFlags)0;
+			}
+			set
+			{
+				Grid.UpdateNavValidatorMask(i, Grid.NavValidatorFlags.NavTeleporter, value);
 			}
 		}
 	}
@@ -1378,7 +1482,7 @@ public class Grid
 	{
 		public const int DefaultID = -1;
 
-		public Dictionary<int, Grid.Restriction.Directions> directionMasks;
+		public Dictionary<int, Grid.Restriction.Directions> DirectionMasksForMinionInstanceID;
 
 		public Grid.Restriction.Orientation orientation;
 
@@ -1386,13 +1490,15 @@ public class Grid
 		public enum Directions : byte
 		{
 			Left = 1,
-			Right = 2
+			Right = 2,
+			Teleport = 4
 		}
 
 		public enum Orientation : byte
 		{
 			Vertical,
-			Horizontal
+			Horizontal,
+			SingleCell
 		}
 	}
 
@@ -1402,7 +1508,7 @@ public class Grid
 
 		public int reservationCapacity;
 
-		public HashSet<int> reservations;
+		public HashSet<int> reservedInstanceIDs;
 	}
 
 	public struct SuitMarker
@@ -1423,9 +1529,9 @@ public class Grid
 
 		public PathFinder.PotentialPath.Flags pathFlags;
 
-		public HashSet<int> suitReservations;
+		public HashSet<int> minionIDsWithSuitReservations;
 
-		public HashSet<int> emptyLockerReservations;
+		public HashSet<int> minionIDsWithEmptyLockerReservations;
 
 		[Flags]
 		public enum Flags : byte
@@ -1501,6 +1607,17 @@ public class Grid
 			get
 			{
 				return Grid.temperature[i];
+			}
+		}
+	}
+
+	public struct RadiationIndexer
+	{
+		public unsafe float this[int i]
+		{
+			get
+			{
+				return Grid.radiation[i];
 			}
 		}
 	}
@@ -1608,7 +1725,8 @@ public class Grid
 
 	public enum SceneLayer
 	{
-		NoLayer = -2,
+		WorldSelection = -3,
+		NoLayer,
 		Background,
 		Backwall = 1,
 		Gas,

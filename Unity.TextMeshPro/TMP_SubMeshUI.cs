@@ -5,6 +5,7 @@ using UnityEngine.UI;
 namespace TMPro
 {
 	[ExecuteInEditMode]
+	[RequireComponent(typeof(CanvasRenderer))]
 	public class TMP_SubMeshUI : MaskableGraphic, IClippable, IMaskable, IMaterialModifier
 	{
 		public TMP_FontAsset fontAsset

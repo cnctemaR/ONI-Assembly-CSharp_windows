@@ -17,6 +17,18 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public bool wrapAround
+		{
+			get
+			{
+				return this.m_WrapAround;
+			}
+			set
+			{
+				this.m_WrapAround = value;
+			}
+		}
+
 		public Selectable selectOnUp
 		{
 			get
@@ -71,7 +83,8 @@ namespace UnityEngine.UI
 			{
 				return new Navigation
 				{
-					m_Mode = Navigation.Mode.Automatic
+					m_Mode = Navigation.Mode.Automatic,
+					m_WrapAround = false
 				};
 			}
 		}
@@ -83,6 +96,10 @@ namespace UnityEngine.UI
 
 		[SerializeField]
 		private Navigation.Mode m_Mode;
+
+		[Tooltip("Enables navigation to wrap around from last to first or first to last element. Does not work for automatic grid navigation")]
+		[SerializeField]
+		private bool m_WrapAround;
 
 		[SerializeField]
 		private Selectable m_SelectOnUp;

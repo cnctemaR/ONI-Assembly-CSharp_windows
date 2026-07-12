@@ -52,14 +52,17 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 	public void BindStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State parent_state, object state_machine)
 	{
-		foreach (FieldInfo fieldInfo in state_machine.GetType().GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+		foreach (FieldInfo fieldInfo in state_machine.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
 		{
 			if (fieldInfo.FieldType.IsSubclassOf(typeof(StateMachine.BaseState)))
 			{
 				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)fieldInfo.GetValue(state_machine);
-				string name = fieldInfo.Name;
-				this.BindState(parent_state, state, name);
-				this.BindStates(state, state);
+				if (state != parent_state)
+				{
+					string name = fieldInfo.Name;
+					this.BindState(parent_state, state, name);
+					this.BindStates(state, state);
+				}
 			}
 		}
 	}
@@ -355,9 +358,12 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 							this.stateMachine.ToString(),
 							".",
 							state.name,
-							".",
-							actions[this.currentActionIdx].name
+							"."
 						});
+						if (this.currentActionIdx > 0 && this.currentActionIdx < actions.Count)
+						{
+							text2 += actions[this.currentActionIdx].name;
+						}
 						DebugUtil.LogException(this.controller, text2, ex);
 					}
 				}
@@ -412,7 +418,8 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public override SchedulerHandle Schedule(float time, Action<object> callback, object callback_data = null)
 		{
-			return Singleton<StateMachineManager>.Instance.Schedule(this.GetCurrentState().longName, time, callback, callback_data, this.currentSchedulerGroup);
+			string text = null;
+			return Singleton<StateMachineManager>.Instance.Schedule(text, time, callback, callback_data, this.currentSchedulerGroup);
 		}
 
 		public override void StartSM()
@@ -823,7 +830,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				writer.Write(this.value ? 1 : 0);
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
 				this.value = reader.ReadByte() > 0;
 			}
@@ -864,7 +871,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				writer.Write(this.value.z);
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
 				this.value.x = reader.ReadSingle();
 				this.value.y = reader.ReadSingle();
@@ -901,7 +908,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				writer.Write((int)((object)this.value));
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
 				this.value = (EnumType)((object)reader.ReadInt32());
 			}
@@ -957,7 +964,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				writer.Write(this.value);
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
 				this.value = reader.ReadSingle();
 			}
@@ -1004,7 +1011,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				writer.Write(this.value);
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
 				this.value = reader.ReadInt32();
 			}
@@ -1051,7 +1058,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				writer.WriteKleiString(text);
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
 				string text = reader.ReadKleiString();
 				if (text != "")
@@ -1059,6 +1066,45 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 					ResourceGuid resourceGuid = new ResourceGuid(text, null);
 					this.value = Db.Get().GetResource<ResourceType>(resourceGuid);
 				}
+			}
+
+			public override void ShowEditor(StateMachine.Instance base_smi)
+			{
+			}
+		}
+	}
+
+	public class TagParameter : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<Tag>
+	{
+		public TagParameter()
+		{
+		}
+
+		public TagParameter(Tag default_value)
+			: base(default_value)
+		{
+		}
+
+		public override StateMachine.Parameter.Context CreateContext()
+		{
+			return new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagParameter.Context(this, this.defaultValue);
+		}
+
+		public new class Context : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<Tag>.Context
+		{
+			public Context(StateMachine.Parameter parameter, Tag default_value)
+				: base(parameter, default_value)
+			{
+			}
+
+			public override void Serialize(BinaryWriter writer)
+			{
+				writer.Write(this.value.GetHash());
+			}
+
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
+			{
+				this.value = new Tag(reader.ReadInt32());
 			}
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
@@ -1088,10 +1134,12 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void Serialize(BinaryWriter writer)
 			{
+				DebugUtil.DevLogError("ObjectParameter cannot be serialized");
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
+				DebugUtil.DevLogError("ObjectParameter cannot be serialized");
 			}
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
@@ -1142,6 +1190,21 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			return default(ComponentType);
 		}
 
+		public ComponentType AddOrGet<ComponentType>(StateMachineInstanceType smi) where ComponentType : Component
+		{
+			GameObject gameObject = base.Get(smi);
+			if (gameObject != null)
+			{
+				ComponentType componentType = gameObject.GetComponent<ComponentType>();
+				if (componentType == null)
+				{
+					componentType = gameObject.AddComponent<ComponentType>();
+				}
+				return componentType;
+			}
+			return default(ComponentType);
+		}
+
 		public void Set(KMonoBehaviour value, StateMachineInstanceType smi)
 		{
 			GameObject gameObject = null;
@@ -1166,10 +1229,38 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void Serialize(BinaryWriter writer)
 			{
+				if (this.value != null)
+				{
+					int instanceID = this.value.GetComponent<KPrefabID>().InstanceID;
+					writer.Write(instanceID);
+					return;
+				}
+				writer.Write(0);
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
+				try
+				{
+					int num = reader.ReadInt32();
+					if (num != 0)
+					{
+						KPrefabID instance = KPrefabIDTracker.Get().GetInstance(num);
+						if (instance != null)
+						{
+							this.value = instance.gameObject;
+							this.objectDestroyedHandler = instance.Subscribe(1969584890, new Action<object>(this.OnObjectDestroyed));
+						}
+						this.m_smi = (StateMachineInstanceType)((object)smi);
+					}
+				}
+				catch (Exception ex)
+				{
+					if (!SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 20))
+					{
+						global::Debug.LogWarning("Missing statemachine target params. " + ex.Message);
+					}
+				}
 			}
 
 			public override void Cleanup()
@@ -1184,7 +1275,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void Set(GameObject value, StateMachineInstanceType smi)
 			{
-				this.smi = smi;
+				this.m_smi = smi;
 				if (this.value != null)
 				{
 					this.value.GetComponent<KMonoBehaviour>().Unsubscribe(this.objectDestroyedHandler);
@@ -1199,14 +1290,14 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			private void OnObjectDestroyed(object data)
 			{
-				this.Set(null, this.smi);
+				this.Set(null, this.m_smi);
 			}
 
 			public override void ShowEditor(StateMachine.Instance base_smi)
 			{
 			}
 
-			private StateMachineInstanceType smi;
+			private StateMachineInstanceType m_smi;
 
 			private int objectDestroyedHandler;
 		}
@@ -1245,7 +1336,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 			}
 
-			public override void Deserialize(IReader reader)
+			public override void Deserialize(IReader reader, StateMachine.Instance smi)
 			{
 			}
 

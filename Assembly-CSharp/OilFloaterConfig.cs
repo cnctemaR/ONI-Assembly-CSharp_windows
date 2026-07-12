@@ -9,7 +9,7 @@ public class OilFloaterConfig : IEntityConfig
 	public static GameObject CreateOilFloater(string id, string name, string desc, string anim_file, bool is_baby)
 	{
 		GameObject gameObject = BaseOilFloaterConfig.BaseOilFloater(id, name, desc, anim_file, "OilfloaterBaseTrait", 323.15f, 413.15f, is_baby, null);
-		EntityTemplates.ExtendEntityToWildCreature(gameObject, OilFloaterTuning.PEN_SIZE_PER_CREATURE, 100f);
+		EntityTemplates.ExtendEntityToWildCreature(gameObject, OilFloaterTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("OilfloaterBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, OilFloaterTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -OilFloaterTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
@@ -18,10 +18,15 @@ public class OilFloaterConfig : IEntityConfig
 		return BaseOilFloaterConfig.SetupDiet(gameObject, SimHashes.CarbonDioxide.CreateTag(), SimHashes.CrudeOil.CreateTag(), OilFloaterConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, OilFloaterConfig.MIN_POOP_SIZE_IN_KG);
 	}
 
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = OilFloaterConfig.CreateOilFloater("Oilfloater", global::STRINGS.CREATURES.SPECIES.OILFLOATER.NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.DESC, "oilfloater_kanim", false);
-		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "OilfloaterEgg", global::STRINGS.CREATURES.SPECIES.OILFLOATER.EGG_NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.DESC, "egg_oilfloater_kanim", OilFloaterTuning.EGG_MASS, "OilfloaterBaby", 60.000004f, 20f, OilFloaterTuning.EGG_CHANCES_BASE, OilFloaterConfig.EGG_SORT_ORDER, true, false, true, 1f);
+		EntityTemplates.ExtendEntityToFertileCreature(gameObject, "OilfloaterEgg", global::STRINGS.CREATURES.SPECIES.OILFLOATER.EGG_NAME, global::STRINGS.CREATURES.SPECIES.OILFLOATER.DESC, "egg_oilfloater_kanim", OilFloaterTuning.EGG_MASS, "OilfloaterBaby", 60.000004f, 20f, OilFloaterTuning.EGG_CHANCES_BASE, OilFloaterConfig.EGG_SORT_ORDER, true, false, true, 1f, false);
 		return gameObject;
 	}
 

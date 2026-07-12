@@ -132,8 +132,8 @@ namespace System.Threading
 
 		public ExecutionContext ExecutionContext
 		{
-			[SecuritySafeCritical]
 			[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+			[SecuritySafeCritical]
 			get
 			{
 				ExecutionContext executionContext;
@@ -174,8 +174,8 @@ namespace System.Threading
 			this.ExecutionContextBelongsToCurrentScope = belongsToCurrentScope;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecurityCritical]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		internal void SetExecutionContext(ExecutionContext.Reader value, bool belongsToCurrentScope)
 		{
 			this.m_ExecutionContext = value.DangerousGetRawExecutionContext();
@@ -189,8 +189,8 @@ namespace System.Threading
 			throw new InvalidOperationException(Environment.GetResourceString("Use CompressedStack.(Capture/Run) or ExecutionContext.(Capture/Run) APIs instead."));
 		}
 
-		[SecurityCritical]
 		[Obsolete("Thread.GetCompressedStack is no longer supported. Please use the System.Threading.CompressedStack class")]
+		[SecurityCritical]
 		public CompressedStack GetCompressedStack()
 		{
 			throw new InvalidOperationException(Environment.GetResourceString("Use CompressedStack.(Capture/Run) or ExecutionContext.(Capture/Run) APIs instead."));
@@ -226,8 +226,8 @@ namespace System.Threading
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SuspendInternal();
 
-		[Obsolete("Thread.Resume has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
 		[SecuritySafeCritical]
+		[Obsolete("Thread.Resume has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
 		[SecurityPermission(SecurityAction.Demand, ControlThread = true)]
 		public void Resume()
 		{

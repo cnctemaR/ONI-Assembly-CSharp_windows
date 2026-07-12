@@ -13,13 +13,13 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 	{
 		get
 		{
-			return this.checkBox.isOn;
+			return this.checkBox.CurrentState == 1;
 		}
 	}
 
 	public event Action<Tag, bool> OnSelectionChanged;
 
-	public KToggle GetCheckboxToggle()
+	public MultiToggle GetCheckboxToggle()
 	{
 		return this.checkBox;
 	}
@@ -43,7 +43,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 			return;
 		}
 		this.checkBoxImg = this.checkBox.gameObject.GetComponentInChildrenOnly<KImage>();
-		this.checkBox.onClick += this.CheckBoxClicked;
+		this.checkBox.onClick = new global::System.Action(this.CheckBoxClicked);
 		this.initialized = true;
 	}
 
@@ -70,16 +70,17 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 
 	public void SetSprite(Tag t)
 	{
-		Element element = ElementLoader.GetElement(t);
-		Sprite sprite = ((element != null) ? Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false, "") : this.GetStorageObjectSprite(t));
-		this.elementImg.sprite = sprite;
-		this.elementImg.enabled = sprite != null;
+		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(t, "ui", false);
+		this.elementImg.sprite = uisprite.first;
+		this.elementImg.color = uisprite.second;
+		this.elementImg.gameObject.SetActive(true);
 	}
 
 	public void SetTag(Tag newTag)
 	{
 		this.Initialize();
 		this.elementTag = newTag;
+		this.SetSprite(this.elementTag);
 		string text = this.elementTag.ProperName();
 		if (this.parent.IsStorage)
 		{
@@ -96,7 +97,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 
 	public void SetCheckBox(bool checkBoxState)
 	{
-		this.checkBox.isOn = checkBoxState;
+		this.checkBox.ChangeState(checkBoxState ? 1 : 0);
 		this.checkBoxImg.enabled = checkBoxState;
 		if (this.OnSelectionChanged != null)
 		{
@@ -108,7 +109,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 	private LocText elementName;
 
 	[SerializeField]
-	private KToggle checkBox;
+	private MultiToggle checkBox;
 
 	[SerializeField]
 	private KImage elementImg;

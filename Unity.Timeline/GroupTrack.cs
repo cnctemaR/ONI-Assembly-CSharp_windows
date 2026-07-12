@@ -6,6 +6,7 @@ namespace UnityEngine.Timeline
 {
 	[TrackClipType(typeof(TrackAsset))]
 	[SupportsChildTracks(null, 2147483647)]
+	[ExcludeFromPreset]
 	[Serializable]
 	public class GroupTrack : TrackAsset
 	{

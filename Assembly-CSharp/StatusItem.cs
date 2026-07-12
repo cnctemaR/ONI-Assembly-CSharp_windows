@@ -12,7 +12,7 @@ public class StatusItem : Resource
 		this.tooltipText = Strings.Get(composed_prefix + ".TOOLTIP");
 	}
 
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 129022)
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 129022, Func<string, object, string> resolve_string_callback = null)
 		: this(id, "STRINGS." + prefix + ".STATUSITEMS." + id.ToUpper())
 	{
 		switch (icon_type)
@@ -32,13 +32,14 @@ public class StatusItem : Resource
 		this.render_overlay = render_overlay;
 		this.showShowWorldIcon = showWorldIcon;
 		this.status_overlays = status_overlays;
+		this.resolveStringCallback = resolve_string_callback;
 		if (this.sprite == null)
 		{
 			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
 		}
 	}
 
-	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 129022)
+	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 129022, bool showWorldIcon = true, Func<string, object, string> resolve_string_callback = null)
 		: base(id, name)
 	{
 		switch (icon_type)
@@ -58,20 +59,20 @@ public class StatusItem : Resource
 		this.allowMultiples = allow_multiples;
 		this.render_overlay = render_overlay;
 		this.status_overlays = status_overlays;
+		this.showShowWorldIcon = showWorldIcon;
+		this.resolveStringCallback = resolve_string_callback;
 		if (this.sprite == null)
 		{
 			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
 		}
 	}
 
-	public void AddNotification(string sound_path = null, string notification_text = null, string notification_tooltip = null, float notification_delay = 0f)
+	public void AddNotification(string sound_path = null, string notification_text = null, string notification_tooltip = null)
 	{
 		this.shouldNotify = true;
-		this.notificationDelay = notification_delay;
 		if (sound_path == null)
 		{
-			NotificationType notificationType = this.notificationType;
-			if (notificationType == NotificationType.Bad)
+			if (this.notificationType == NotificationType.Bad)
 			{
 				this.soundPath = "Warning";
 			}
@@ -183,7 +184,9 @@ public class StatusItem : Resource
 		StatusItem.StatusItemOverlays statusItemOverlays;
 		if (!StatusItem.overlayBitfieldMap.TryGetValue(mode, out statusItemOverlays))
 		{
-			global::Debug.LogWarning("ViewMode " + mode + " has no StatusItemOverlay value");
+			string text = "ViewMode ";
+			HashedString hashedString = mode;
+			global::Debug.LogWarning(text + hashedString.ToString() + " has no StatusItemOverlay value");
 			statusItemOverlays = StatusItem.StatusItemOverlays.None;
 		}
 		return statusItemOverlays;
@@ -194,8 +197,6 @@ public class StatusItem : Resource
 	public string notificationText;
 
 	public string notificationTooltipText;
-
-	public float notificationDelay;
 
 	public string soundPath;
 
@@ -296,6 +297,10 @@ public class StatusItem : Resource
 		{
 			OverlayModes.TileMode.ID,
 			StatusItem.StatusItemOverlays.None
+		},
+		{
+			OverlayModes.Radiation.ID,
+			StatusItem.StatusItemOverlays.Radiation
 		}
 	};
 

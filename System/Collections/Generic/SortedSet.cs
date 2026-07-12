@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
 	[Serializable]
 	public class SortedSet<T> : ISet<T>, ICollection<T>, IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
 	{

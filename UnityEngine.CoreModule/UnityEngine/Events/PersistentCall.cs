@@ -5,13 +5,26 @@ using UnityEngine.Serialization;
 namespace UnityEngine.Events
 {
 	[Serializable]
-	internal class PersistentCall
+	internal class PersistentCall : ISerializationCallbackReceiver
 	{
 		public Object target
 		{
 			get
 			{
 				return this.m_Target;
+			}
+		}
+
+		public string targetAssemblyTypeName
+		{
+			get
+			{
+				bool flag = string.IsNullOrEmpty(this.m_TargetAssemblyTypeName) && this.m_Target != null;
+				if (flag)
+				{
+					this.m_TargetAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_Target.GetType().AssemblyQualifiedName);
+				}
+				return this.m_TargetAssemblyTypeName;
 			}
 		}
 
@@ -57,7 +70,7 @@ namespace UnityEngine.Events
 
 		public bool IsValid()
 		{
-			return this.target != null && !string.IsNullOrEmpty(this.methodName);
+			return !string.IsNullOrEmpty(this.targetAssemblyTypeName) && !string.IsNullOrEmpty(this.methodName);
 		}
 
 		public BaseInvokableCall GetRuntimeCall(UnityEventBase theEvent)
@@ -78,28 +91,29 @@ namespace UnityEngine.Events
 				}
 				else
 				{
+					Object @object = (methodInfo.IsStatic ? null : this.target);
 					switch (this.m_Mode)
 					{
 					case PersistentListenerMode.EventDefined:
-						baseInvokableCall = theEvent.GetDelegate(this.target, methodInfo);
+						baseInvokableCall = theEvent.GetDelegate(@object, methodInfo);
 						break;
 					case PersistentListenerMode.Void:
-						baseInvokableCall = new InvokableCall(this.target, methodInfo);
+						baseInvokableCall = new InvokableCall(@object, methodInfo);
 						break;
 					case PersistentListenerMode.Object:
-						baseInvokableCall = PersistentCall.GetObjectCall(this.target, methodInfo, this.m_Arguments);
+						baseInvokableCall = PersistentCall.GetObjectCall(@object, methodInfo, this.m_Arguments);
 						break;
 					case PersistentListenerMode.Int:
-						baseInvokableCall = new CachedInvokableCall<int>(this.target, methodInfo, this.m_Arguments.intArgument);
+						baseInvokableCall = new CachedInvokableCall<int>(@object, methodInfo, this.m_Arguments.intArgument);
 						break;
 					case PersistentListenerMode.Float:
-						baseInvokableCall = new CachedInvokableCall<float>(this.target, methodInfo, this.m_Arguments.floatArgument);
+						baseInvokableCall = new CachedInvokableCall<float>(@object, methodInfo, this.m_Arguments.floatArgument);
 						break;
 					case PersistentListenerMode.String:
-						baseInvokableCall = new CachedInvokableCall<string>(this.target, methodInfo, this.m_Arguments.stringArgument);
+						baseInvokableCall = new CachedInvokableCall<string>(@object, methodInfo, this.m_Arguments.stringArgument);
 						break;
 					case PersistentListenerMode.Bool:
-						baseInvokableCall = new CachedInvokableCall<bool>(this.target, methodInfo, this.m_Arguments.boolArgument);
+						baseInvokableCall = new CachedInvokableCall<bool>(@object, methodInfo, this.m_Arguments.boolArgument);
 						break;
 					default:
 						baseInvokableCall = null;
@@ -135,9 +149,10 @@ namespace UnityEngine.Events
 			return constructor.Invoke(new object[] { target, method, @object }) as BaseInvokableCall;
 		}
 
-		public void RegisterPersistentListener(Object ttarget, string mmethodName)
+		public void RegisterPersistentListener(Object ttarget, Type targetType, string mmethodName)
 		{
 			this.m_Target = ttarget;
+			this.m_TargetAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(targetType.AssemblyQualifiedName);
 			this.m_MethodName = mmethodName;
 		}
 
@@ -145,6 +160,17 @@ namespace UnityEngine.Events
 		{
 			this.m_MethodName = string.Empty;
 			this.m_Target = null;
+			this.m_TargetAssemblyTypeName = string.Empty;
+		}
+
+		public void OnBeforeSerialize()
+		{
+			this.m_TargetAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_TargetAssemblyTypeName);
+		}
+
+		public void OnAfterDeserialize()
+		{
+			this.m_TargetAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_TargetAssemblyTypeName);
 		}
 
 		[SerializeField]
@@ -152,15 +178,18 @@ namespace UnityEngine.Events
 		private Object m_Target;
 
 		[SerializeField]
+		private string m_TargetAssemblyTypeName;
+
 		[FormerlySerializedAs("methodName")]
+		[SerializeField]
 		private string m_MethodName;
 
 		[SerializeField]
 		[FormerlySerializedAs("mode")]
 		private PersistentListenerMode m_Mode = PersistentListenerMode.EventDefined;
 
-		[FormerlySerializedAs("arguments")]
 		[SerializeField]
+		[FormerlySerializedAs("arguments")]
 		private ArgumentCache m_Arguments = new ArgumentCache();
 
 		[FormerlySerializedAs("m_Enabled")]

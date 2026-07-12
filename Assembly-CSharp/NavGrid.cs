@@ -66,8 +66,8 @@ public class NavGrid
 		this.Links = new NavGrid.Link[this.maxLinksPerCell * Grid.CellCount];
 		this.NavTable = new NavTable(Grid.CellCount);
 		this.transitions = transitions;
-		this.transitionsByNavType = new NavGrid.Transition[10][];
-		for (int k = 0; k < 10; k++)
+		this.transitionsByNavType = new NavGrid.Transition[11][];
+		for (int k = 0; k < 11; k++)
 		{
 			List<NavGrid.Transition> list2 = new List<NavGrid.Transition>();
 			NavType navType2 = (NavType)k;
@@ -147,7 +147,7 @@ public class NavGrid
 
 	public void UpdateGraph(HashSet<int> dirty_nav_cells)
 	{
-		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, dirty_nav_cells);
+		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, this.teleportTransitions, dirty_nav_cells);
 		if (this.OnNavGridUpdateComplete != null)
 		{
 			this.OnNavGridUpdateComplete(dirty_nav_cells);
@@ -177,7 +177,7 @@ public class NavGrid
 		int cellCount = Grid.CellCount;
 		for (int i = 0; i < cellCount; i++)
 		{
-			for (int j = 0; j < 10; j++)
+			for (int j = 0; j < 11; j++)
 			{
 				NavType navType = (NavType)j;
 				if (this.NavTable.IsValid(i, navType) && this.DrawNavTypeCell(navType, ref white))
@@ -270,10 +270,10 @@ public class NavGrid
 	{
 		if (this.debugColorLookup == null)
 		{
-			this.debugColorLookup = new Color[10];
-			for (int i = 0; i < 10; i++)
+			this.debugColorLookup = new Color[11];
+			for (int i = 0; i < 11; i++)
 			{
-				double num = (double)i / 10.0;
+				double num = (double)i / 11.0;
 				IList<double> list = ColorConverter.HUSLToRGB(new double[]
 				{
 					num * 360.0,
@@ -305,6 +305,8 @@ public class NavGrid
 	public static int InvalidIdx = -1;
 
 	public static int InvalidCell = -1;
+
+	public Dictionary<int, int> teleportTransitions = new Dictionary<int, int>();
 
 	public NavGrid.Link[] Links;
 
@@ -395,16 +397,19 @@ public class NavGrid
 
 	public struct Transition
 	{
+		public override string ToString()
+		{
+			return string.Format("{0}: {1}->{2} ({3}); offset {4},{5}", new object[] { this.id, this.start, this.end, this.startAxis, this.x, this.y });
+		}
+
 		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool critter = false, float animSpeed = 1f)
 		{
-			DebugUtil.Assert(x <= 127 && x >= -128);
-			DebugUtil.Assert(y <= 127 && y >= -128);
 			DebugUtil.Assert(cost <= 255 && cost >= 0);
 			this.id = byte.MaxValue;
 			this.start = start;
 			this.end = end;
-			this.x = (sbyte)x;
-			this.y = (sbyte)y;
+			this.x = x;
+			this.y = y;
 			this.startAxis = start_axis;
 			this.isLooping = is_looping;
 			this.isEscape = is_escape;
@@ -413,15 +418,15 @@ public class NavGrid
 			this.cost = (byte)cost;
 			if (string.IsNullOrEmpty(this.anim))
 			{
-				this.anim = string.Concat(new object[]
+				this.anim = string.Concat(new string[]
 				{
 					start.ToString().ToLower(),
 					"_",
 					end.ToString().ToLower(),
 					"_",
-					x,
+					x.ToString(),
 					"_",
-					y
+					y.ToString()
 				});
 			}
 			if (this.isLooping)
@@ -446,11 +451,11 @@ public class NavGrid
 
 		public int IsValid(int cell, NavTable nav_table)
 		{
-			if (!Grid.IsCellOffsetValid(cell, (int)this.x, (int)this.y))
+			if (!Grid.IsCellOffsetValid(cell, this.x, this.y))
 			{
 				return Grid.InvalidCell;
 			}
-			int num = Grid.OffsetCell(cell, (int)this.x, (int)this.y);
+			int num = Grid.OffsetCell(cell, this.x, this.y);
 			if (!nav_table.IsValid(num, this.end))
 			{
 				return Grid.InvalidCell;
@@ -554,7 +559,7 @@ public class NavGrid
 							if ((flag && j == 0) || (!flag && j == 1))
 							{
 								int num11 = ((this.x > 0) ? 1 : (-1));
-								for (int k = 0; k < Mathf.Abs((int)this.x); k++)
+								for (int k = 0; k < Mathf.Abs(this.x); k++)
 								{
 									UtilityConnections connections = Game.Instance.travelTubeSystem.GetConnections(num10, false);
 									if (num11 > 0 && (connections & UtilityConnections.Right) == (UtilityConnections)0)
@@ -571,7 +576,7 @@ public class NavGrid
 							else
 							{
 								int num12 = ((this.y > 0) ? 1 : (-1));
-								for (int l = 0; l < Mathf.Abs((int)this.y); l++)
+								for (int l = 0; l < Mathf.Abs(this.y); l++)
 								{
 									UtilityConnections connections2 = Game.Instance.travelTubeSystem.GetConnections(num10, false);
 									if (num12 > 0 && (connections2 & UtilityConnections.Up) == (UtilityConnections)0)
@@ -627,7 +632,7 @@ public class NavGrid
 			}
 			else if (this.start == NavType.Floor && this.end == NavType.Tube)
 			{
-				int num13 = Grid.OffsetCell(cell, (int)this.x, (int)this.y);
+				int num13 = Grid.OffsetCell(cell, this.x, this.y);
 				if (Game.Instance.travelTubeSystem.GetConnections(num13, false) != UtilityConnections.Up)
 				{
 					return Grid.InvalidCell;
@@ -642,9 +647,9 @@ public class NavGrid
 
 		public NavAxis startAxis;
 
-		public sbyte x;
+		public int x;
 
-		public sbyte y;
+		public int y;
 
 		public byte id;
 

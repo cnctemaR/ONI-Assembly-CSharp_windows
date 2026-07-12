@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
@@ -8,13 +9,37 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Graphics/Graphics.bindings.h")]
 	[NativeAsStruct]
+	[NativeHeader("Runtime/Export/Graphics/Graphics.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class LightProbes : Object
 	{
 		private LightProbes()
 		{
+		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action tetrahedralizationCompleted;
+
+		private static void Internal_CallTetrahedralizationCompletedFunction()
+		{
+			bool flag = LightProbes.tetrahedralizationCompleted != null;
+			if (flag)
+			{
+				LightProbes.tetrahedralizationCompleted();
+			}
+		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action needsRetetrahedralization;
+
+		private static void Internal_CallNeedsRetetrahedralizationFunction()
+		{
+			bool flag = LightProbes.needsRetetrahedralization != null;
+			if (flag)
+			{
+				LightProbes.needsRetetrahedralization();
+			}
 		}
 
 		[FreeFunction]
@@ -103,35 +128,35 @@ namespace UnityEngine
 			LightProbes.CalculateInterpolatedLightAndOcclusionProbes_Internal(NoAllocHelpers.ExtractArrayFromListT<Vector3>(positions), positions.Count, NoAllocHelpers.ExtractArrayFromListT<SphericalHarmonicsL2>(lightProbes), NoAllocHelpers.ExtractArrayFromListT<Vector4>(occlusionProbes));
 		}
 
-		[FreeFunction]
 		[NativeName("CalculateInterpolatedLightAndOcclusionProbes")]
+		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void CalculateInterpolatedLightAndOcclusionProbes_Internal(Vector3[] positions, int positionsCount, SphericalHarmonicsL2[] lightProbes, Vector4[] occlusionProbes);
 
 		public extern Vector3[] positions
 		{
-			[NativeName("GetLightProbePositions")]
 			[FreeFunction(HasExplicitThis = true)]
+			[NativeName("GetLightProbePositions")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern SphericalHarmonicsL2[] bakedProbes
 		{
-			[FreeFunction(HasExplicitThis = true)]
 			[NativeName("GetBakedCoefficients")]
+			[FreeFunction(HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[NativeName("SetBakedCoefficients")]
 			[FreeFunction(HasExplicitThis = true)]
+			[NativeName("SetBakedCoefficients")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern int count
 		{
-			[NativeName("GetLightProbeCount")]
 			[FreeFunction(HasExplicitThis = true)]
+			[NativeName("GetLightProbeCount")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -144,19 +169,19 @@ namespace UnityEngine
 			get;
 		}
 
-		[NativeName("GetLightProbeCount")]
 		[FreeFunction]
+		[NativeName("GetLightProbeCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int GetCount();
 
-		[Obsolete("Use GetInterpolatedProbe instead.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use GetInterpolatedProbe instead.", true)]
 		public void GetInterpolatedLightProbe(Vector3 position, Renderer renderer, float[] coefficients)
 		{
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use bakedProbes instead.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public float[] coefficients
 		{
 			get

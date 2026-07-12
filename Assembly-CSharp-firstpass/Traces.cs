@@ -32,13 +32,13 @@ public class Traces : KMonoBehaviour
 		}
 		Traces.Entry entry = new Traces.Entry
 		{
-			Name = string.Concat(new object[]
+			Name = string.Concat(new string[]
 			{
-				Time.frameCount,
+				Time.frameCount.ToString(),
 				" ",
 				go.name,
 				" [",
-				go.GetInstanceID(),
+				go.GetInstanceID().ToString(),
 				"]"
 			}),
 			StackTrace = stack_trace

@@ -30,7 +30,7 @@ namespace UnityEngine.U2D
 			bool flag = spriteRenderer.sprite == null;
 			if (flag)
 			{
-				throw new ArgumentException(string.Format("spriteRenderer does not have a valid sprite set.", new object[0]));
+				throw new InvalidOperationException("spriteRenderer does not have a valid sprite set.");
 			}
 			bool flag2 = src.Length != spriteRenderer.sprite.GetVertexCount();
 			if (flag2)
@@ -40,16 +40,30 @@ namespace UnityEngine.U2D
 			SpriteRendererDataAccessExtensions.SetDeformableBuffer(spriteRenderer, src.GetUnsafeReadOnlyPtr<Vector3>(), src.Length);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DeactivateDeformableBuffer([NotNull] this SpriteRenderer renderer);
+		internal static void SetBatchDeformableBufferAndLocalAABBArray(SpriteRenderer[] spriteRenderers, NativeArray<IntPtr> buffers, NativeArray<int> bufferSizes, NativeArray<Bounds> bounds)
+		{
+			int num = spriteRenderers.Length;
+			bool flag = num != buffers.Length || num != bufferSizes.Length || num != bounds.Length;
+			if (flag)
+			{
+				throw new ArgumentException("Input array sizes are not the same.");
+			}
+			SpriteRendererDataAccessExtensions.SetBatchDeformableBufferAndLocalAABBArray(spriteRenderers, buffers.GetUnsafeReadOnlyPtr<IntPtr>(), bufferSizes.GetUnsafeReadOnlyPtr<int>(), bounds.GetUnsafeReadOnlyPtr<Bounds>(), num);
+		}
 
-		internal static void SetLocalAABB([NotNull] this SpriteRenderer renderer, Bounds aabb)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void DeactivateDeformableBuffer([NotNull("ArgumentNullException")] this SpriteRenderer renderer);
+
+		internal static void SetLocalAABB([NotNull("ArgumentNullException")] this SpriteRenderer renderer, Bounds aabb)
 		{
 			SpriteRendererDataAccessExtensions.SetLocalAABB_Injected(renderer, ref aabb);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetDeformableBuffer([NotNull] SpriteRenderer spriteRenderer, void* src, int count);
+		private unsafe static extern void SetDeformableBuffer([NotNull("ArgumentNullException")] SpriteRenderer spriteRenderer, void* src, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void SetBatchDeformableBufferAndLocalAABBArray(SpriteRenderer[] spriteRenderers, void* buffers, void* bufferSizes, void* bounds, int count);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLocalAABB_Injected(SpriteRenderer renderer, ref Bounds aabb);

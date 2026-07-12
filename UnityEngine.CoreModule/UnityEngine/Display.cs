@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/DisplayManager.h")]
+	[UsedByNativeCode]
 	public class Display
 	{
 		internal Display()
@@ -98,6 +98,17 @@ namespace UnityEngine
 		{
 			get
 			{
+				int num = this.nativeDisplay.ToInt32();
+				bool flag = num < HDROutputSettings.displays.Length;
+				if (flag)
+				{
+					bool flag2 = HDROutputSettings.displays[num].available && HDROutputSettings.displays[num].active;
+					bool flag3 = flag2;
+					if (flag3)
+					{
+						return true;
+					}
+				}
 				return Display.RequiresBlitToBackbufferImpl(this.nativeDisplay);
 			}
 		}

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Globalization;
 
 namespace UnityEngine
 {
-	public struct Ray
+	public struct Ray : IFormattable
 	{
 		public Ray(Vector3 origin, Vector3 direction)
 		{
@@ -41,15 +42,25 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("Origin: {0}, Dir: {1}", new object[] { this.m_Origin, this.m_Direction });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F1";
+			}
 			return UnityString.Format("Origin: {0}, Dir: {1}", new object[]
 			{
-				this.m_Origin.ToString(format),
-				this.m_Direction.ToString(format)
+				this.m_Origin.ToString(format, formatProvider),
+				this.m_Direction.ToString(format, formatProvider)
 			});
 		}
 

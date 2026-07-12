@@ -80,7 +80,7 @@ public class CharacterSelectionController : KModalScreen
 				characterContainer.ForceStopEditingTitle();
 			}
 		}
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public void RemoveLast()

@@ -1,43 +1,43 @@
 ﻿using System;
 using STRINGS;
 
-public class ConditionSufficientFood : RocketLaunchCondition
+public class ConditionSufficientFood : ProcessCondition
 {
 	public ConditionSufficientFood(CommandModule module)
 	{
 		this.module = module;
 	}
 
-	public override RocketLaunchCondition GetParentCondition()
-	{
-		return null;
-	}
-
-	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
+	public override ProcessCondition.Status EvaluateCondition()
 	{
 		if (this.module.storage.GetAmountAvailable(GameTags.Edible) <= 1f)
 		{
-			return RocketLaunchCondition.LaunchStatus.Failure;
+			return ProcessCondition.Status.Failure;
 		}
-		return RocketLaunchCondition.LaunchStatus.Ready;
+		return ProcessCondition.Status.Ready;
 	}
 
-	public override string GetLaunchStatusMessage(bool ready)
+	public override string GetStatusMessage(ProcessCondition.Status status)
 	{
-		if (ready)
+		if (status == ProcessCondition.Status.Ready)
 		{
 			return UI.STARMAP.HASFOOD.NAME;
 		}
 		return UI.STARMAP.NOFOOD.NAME;
 	}
 
-	public override string GetLaunchStatusTooltip(bool ready)
+	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
-		if (ready)
+		if (status == ProcessCondition.Status.Ready)
 		{
 			return UI.STARMAP.HASFOOD.TOOLTIP;
 		}
 		return UI.STARMAP.NOFOOD.TOOLTIP;
+	}
+
+	public override bool ShowInUI()
+	{
+		return true;
 	}
 
 	private CommandModule module;

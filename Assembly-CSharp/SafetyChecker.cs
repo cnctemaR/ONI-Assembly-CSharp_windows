@@ -28,9 +28,9 @@ public class SafetyChecker
 
 	public struct Condition
 	{
-		public SafetyChecker.Condition.Callback callback { get; private set; }
+		public SafetyChecker.Condition.Callback callback { readonly get; private set; }
 
-		public int mask { get; private set; }
+		public int mask { readonly get; private set; }
 
 		public Condition(string id, int condition_mask, SafetyChecker.Condition.Callback condition_callback)
 		{

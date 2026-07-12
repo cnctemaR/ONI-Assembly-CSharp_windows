@@ -147,7 +147,7 @@ public class BrushTool : InterfaceTool
 	{
 		foreach (int num in this.cellsInRadius)
 		{
-			if (Grid.IsValidCell(num) && (!Grid.Foundation[num] || this.affectFoundation))
+			if (Grid.IsValidCell(num) && (int)Grid.WorldIdx[num] == ClusterManager.Instance.activeWorldId && (!Grid.Foundation[num] || this.affectFoundation))
 			{
 				this.OnPaintCell(num, Grid.GetCellDistance(this.currentCell, num));
 			}
@@ -162,7 +162,11 @@ public class BrushTool : InterfaceTool
 		this.cellsInRadius.Clear();
 		foreach (Vector2 vector in this.brushOffsets)
 		{
-			this.cellsInRadius.Add(Grid.OffsetCell(Grid.PosToCell(cursorPos), new CellOffset((int)vector.x, (int)vector.y)));
+			int num2 = Grid.OffsetCell(Grid.PosToCell(cursorPos), new CellOffset((int)vector.x, (int)vector.y));
+			if (Grid.IsValidCell(num2) && (int)Grid.WorldIdx[num2] == ClusterManager.Instance.activeWorldId)
+			{
+				this.cellsInRadius.Add(Grid.OffsetCell(Grid.PosToCell(cursorPos), new CellOffset((int)vector.x, (int)vector.y)));
+			}
 		}
 		if (!this.dragging)
 		{

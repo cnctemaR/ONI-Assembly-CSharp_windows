@@ -3,6 +3,8 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Authentication;
+using System.Threading;
+using System.Threading.Tasks;
 using Mono.Security.Interface;
 
 namespace Mono.Net.Security
@@ -45,8 +47,9 @@ namespace Mono.Net.Security
 			ChainValidationHelper.Create(this.provider, ref this.settings, this);
 		}
 
-		internal Stream CreateStream(byte[] buffer)
+		internal async Task<Stream> CreateStream(WebConnectionTunnel tunnel, CancellationToken cancellationToken)
 		{
+			Socket socket = this.networkStream.InternalSocket;
 			this.sslStream = this.provider.CreateSslStream(this.networkStream, false, this.settings);
 			try
 			{
@@ -59,12 +62,19 @@ namespace Mono.Net.Security
 						text = text.Substring(0, num);
 					}
 				}
-				this.sslStream.AuthenticateAsClient(text, this.request.ClientCertificates, (SslProtocols)ServicePointManager.SecurityProtocol, ServicePointManager.CheckCertificateRevocationList);
+				await this.sslStream.AuthenticateAsClientAsync(text, this.request.ClientCertificates, (SslProtocols)ServicePointManager.SecurityProtocol, ServicePointManager.CheckCertificateRevocationList).ConfigureAwait(false);
 				this.status = WebExceptionStatus.Success;
 			}
-			catch
+			catch (Exception)
 			{
-				this.status = WebExceptionStatus.SecureChannelFailure;
+				if (socket.CleanedUp)
+				{
+					this.status = WebExceptionStatus.RequestCanceled;
+				}
+				else
+				{
+					this.status = WebExceptionStatus.SecureChannelFailure;
+				}
 				throw;
 			}
 			finally
@@ -85,9 +95,9 @@ namespace Mono.Net.Security
 			}
 			try
 			{
-				if (buffer != null)
+				if (((tunnel != null) ? tunnel.Data : null) != null)
 				{
-					this.sslStream.Write(buffer, 0, buffer.Length);
+					await this.sslStream.WriteAsync(tunnel.Data, 0, tunnel.Data.Length, cancellationToken).ConfigureAwait(false);
 				}
 			}
 			catch

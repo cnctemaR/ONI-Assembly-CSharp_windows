@@ -4,10 +4,10 @@ using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
+	[Guid("82840be1-d273-11d2-b94a-00600893b17a")]
+	[ComVisible(true)]
 	[MonoTODO("not implemented")]
 	[Obsolete("use PerformanceCounter")]
-	[ComVisible(true)]
-	[Guid("82840be1-d273-11d2-b94a-00600893b17a")]
 	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
 	public sealed class PerformanceCounterManager : ICollectData
 	{

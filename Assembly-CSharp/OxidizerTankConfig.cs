@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
 public class OxidizerTankConfig : IBuildingConfig
 {
+	public override string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_VANILLA_ONLY;
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "OxidizerTank";
@@ -13,15 +19,15 @@ public class OxidizerTankConfig : IBuildingConfig
 		string text2 = "rocket_oxidizer_tank_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
-		float[] fuel_TANK_DRY_MASS = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_DRY_MASS;
+		float[] fuel_TANK_DRY_MASS = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_DRY_MASS;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, fuel_TANK_DRY_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, fuel_TANK_DRY_MASS, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.DefaultAnimState = "grounded";
-		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -29,6 +35,8 @@ public class OxidizerTankConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.CanMove = true;
+		buildingDef.Cancellable = false;
+		buildingDef.ShowInBuildMenu = !DlcManager.FeatureClusterSpaceEnabled();
 		return buildingDef;
 	}
 
@@ -47,25 +55,24 @@ public class OxidizerTankConfig : IBuildingConfig
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 2700f;
-		storage.allowSublimation = false;
 		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
 		{
 			Storage.StoredItemModifier.Hide,
 			Storage.StoredItemModifier.Seal,
 			Storage.StoredItemModifier.Insulate
 		});
-		go.AddOrGet<OxidizerTank>().storage = storage;
+		FlatTagFilterable flatTagFilterable = go.AddOrGet<FlatTagFilterable>();
+		flatTagFilterable.tagOptions = new List<Tag> { SimHashes.OxyRock.CreateTag() };
+		flatTagFilterable.headerText = global::STRINGS.BUILDINGS.PREFABS.OXIDIZERTANK.UI_FILTER_CATEGORY;
+		OxidizerTank oxidizerTank = go.AddOrGet<OxidizerTank>();
+		oxidizerTank.consumeOnLand = !DlcManager.FeatureClusterSpaceEnabled();
+		oxidizerTank.storage = storage;
+		oxidizerTank.supportsMultipleOxidizers = true;
+		oxidizerTank.maxFillMass = 2700f;
+		oxidizerTank.targetFillMass = 2700f;
 		go.AddOrGet<CopyBuildingSettings>();
 		go.AddOrGet<DropToUserCapacity>();
-		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
-		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = ElementLoader.FindElementByHash(SimHashes.OxyRock).tag;
-		manualDeliveryKG.refillMass = storage.capacityKg;
-		manualDeliveryKG.capacity = storage.capacityKg;
-		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_oxidizer_tank_bg_kanim"));
-		EntityTemplates.ExtendBuildingToRocketModule(go);
+		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_oxidizer_tank_bg_kanim", false);
 	}
 
 	public const string ID = "OxidizerTank";

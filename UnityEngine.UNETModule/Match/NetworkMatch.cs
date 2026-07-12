@@ -65,7 +65,9 @@ namespace UnityEngine.Networking.Match
 			else
 			{
 				Uri uri = new Uri(this.baseUri, "/json/reply/CreateMatchRequest");
-				Debug.Log("MatchMakingClient Create :" + uri);
+				string text = "MatchMakingClient Create :";
+				Uri uri2 = uri;
+				Debug.Log(text + ((uri2 != null) ? uri2.ToString() : null));
 				WWWForm wwwform = new WWWForm();
 				wwwform.AddField("version", Request.currentVersion);
 				wwwform.AddField("projectId", Application.cloudProjectId);
@@ -121,7 +123,9 @@ namespace UnityEngine.Networking.Match
 			else
 			{
 				Uri uri = new Uri(this.baseUri, "/json/reply/JoinMatchRequest");
-				Debug.Log("MatchMakingClient Join :" + uri);
+				string text = "MatchMakingClient Join :";
+				Uri uri2 = uri;
+				Debug.Log(text + ((uri2 != null) ? uri2.ToString() : null));
 				WWWForm wwwform = new WWWForm();
 				wwwform.AddField("version", Request.currentVersion);
 				wwwform.AddField("projectId", Application.cloudProjectId);
@@ -171,7 +175,9 @@ namespace UnityEngine.Networking.Match
 			else
 			{
 				Uri uri = new Uri(this.baseUri, "/json/reply/DestroyMatchRequest");
-				Debug.Log("MatchMakingClient Destroy :" + uri.ToString());
+				string text = "MatchMakingClient Destroy :";
+				Uri uri2 = uri;
+				Debug.Log(text + ((uri2 != null) ? uri2.ToString() : null));
 				WWWForm wwwform = new WWWForm();
 				wwwform.AddField("version", Request.currentVersion);
 				wwwform.AddField("projectId", Application.cloudProjectId);
@@ -213,7 +219,9 @@ namespace UnityEngine.Networking.Match
 			else
 			{
 				Uri uri = new Uri(this.baseUri, "/json/reply/DropConnectionRequest");
-				Debug.Log("MatchMakingClient DropConnection :" + uri);
+				string text = "MatchMakingClient DropConnection :";
+				Uri uri2 = uri;
+				Debug.Log(text + ((uri2 != null) ? uri2.ToString() : null));
 				WWWForm wwwform = new WWWForm();
 				wwwform.AddField("version", Request.currentVersion);
 				wwwform.AddField("projectId", Application.cloudProjectId);
@@ -270,7 +278,9 @@ namespace UnityEngine.Networking.Match
 			else
 			{
 				Uri uri = new Uri(this.baseUri, "/json/reply/ListMatchRequest");
-				Debug.Log("MatchMakingClient ListMatches :" + uri);
+				string text = "MatchMakingClient ListMatches :";
+				Uri uri2 = uri;
+				Debug.Log(text + ((uri2 != null) ? uri2.ToString() : null));
 				WWWForm wwwform = new WWWForm();
 				wwwform.AddField("version", Request.currentVersion);
 				wwwform.AddField("projectId", Application.cloudProjectId);
@@ -321,7 +331,9 @@ namespace UnityEngine.Networking.Match
 			else
 			{
 				Uri uri = new Uri(this.baseUri, "/json/reply/SetMatchAttributesRequest");
-				Debug.Log("MatchMakingClient SetMatchAttributes :" + uri);
+				string text = "MatchMakingClient SetMatchAttributes :";
+				Uri uri2 = uri;
+				Debug.Log(text + ((uri2 != null) ? uri2.ToString() : null));
 				WWWForm wwwform = new WWWForm();
 				wwwform.AddField("version", Request.currentVersion);
 				wwwform.AddField("projectId", Application.cloudProjectId);
@@ -346,7 +358,7 @@ namespace UnityEngine.Networking.Match
 		{
 			yield return client.SendWebRequest();
 			JSONRESPONSE jsonInterface = new JSONRESPONSE();
-			bool flag = !client.isNetworkError && !client.isHttpError;
+			bool flag = client.result == UnityWebRequest.Result.Success;
 			if (flag)
 			{
 				try

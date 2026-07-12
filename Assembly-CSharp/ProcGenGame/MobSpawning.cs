@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ProcGen;
+using ProcGen.Map;
 using STRINGS;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace ProcGenGame
 		public static Dictionary<int, string> PlaceFeatureAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug)
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
-			Node node = tc.node;
+			Cell node = tc.node;
 			HashSet<int> hashSet = new HashSet<int>();
 			FeatureSettings featureSettings = null;
 			foreach (Tag tag in node.featureSpecificTags)
@@ -40,12 +41,12 @@ namespace ProcGenGame
 					availableSpawnCellsFeature.RemoveAt(i);
 				}
 			}
-			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)availableSpawnCellsFeature.Count);
+			tc.LogInfo("mob spawns", "Id:" + node.NodeId.ToString() + " possible cells", (float)availableSpawnCellsFeature.Count);
 			if (availableSpawnCellsFeature.Count == 0)
 			{
 				if (isDebug)
 				{
-					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.node.Id + "]");
+					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.NodeId.ToString() + "]");
 				}
 				return null;
 			}
@@ -67,7 +68,7 @@ namespace ProcGenGame
 					}
 					else
 					{
-						tc.LogInfo("\t\tpossible", string.Concat(new object[] { mobReference.type, " mps: ", mobPossibleSpawnPoints.Count, " ps:" }), (float)availableSpawnCellsFeature.Count);
+						tc.LogInfo("\t\tpossible", mobReference.type + " mps: " + mobPossibleSpawnPoints.Count.ToString() + " ps:", (float)availableSpawnCellsFeature.Count);
 						int num2 = Mathf.RoundToInt(mobReference.count.GetRandomValueWithinRange(rnd));
 						tc.LogInfo("\t\tcount", mobReference.type, (float)num2);
 						Tag tag2 = ((mob.prefabName == null) ? new Tag(mobReference.type) : new Tag(mob.prefabName));
@@ -81,12 +82,12 @@ namespace ProcGenGame
 		public static Dictionary<int, string> PlaceBiomeAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug)
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
-			Node node = tc.node;
+			Cell node = tc.node;
 			HashSet<int> hashSet = new HashSet<int>();
 			List<Tag> list = new List<Tag>();
 			if (node.biomeSpecificTags == null)
 			{
-				tc.LogInfo("PlaceBiomeAmbientMobs", "No tags", (float)node.node.Id);
+				tc.LogInfo("PlaceBiomeAmbientMobs", "No tags", (float)node.NodeId);
 				return null;
 			}
 			foreach (Tag tag in node.biomeSpecificTags)
@@ -98,7 +99,7 @@ namespace ProcGenGame
 			}
 			if (list.Count <= 0)
 			{
-				tc.LogInfo("PlaceBiomeAmbientMobs", "No biome MOBS", (float)node.node.Id);
+				tc.LogInfo("PlaceBiomeAmbientMobs", "No biome MOBS", (float)node.NodeId);
 				return null;
 			}
 			List<int> list2 = (node.tags.Contains(WorldGenTags.PreventAmbientMobsInFeature) ? tc.GetAvailableSpawnCellsBiome() : tc.GetAvailableSpawnCellsAll());
@@ -111,12 +112,12 @@ namespace ProcGenGame
 					list2.RemoveAt(i);
 				}
 			}
-			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)list2.Count);
+			tc.LogInfo("mob spawns", "Id:" + node.NodeId.ToString() + " possible cells", (float)list2.Count);
 			if (list2.Count == 0)
 			{
 				if (isDebug)
 				{
-					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.node.Id + "]");
+					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.NodeId.ToString() + "]");
 				}
 				return null;
 			}
@@ -139,13 +140,7 @@ namespace ProcGenGame
 					}
 					else
 					{
-						tc.LogInfo("\t\tpossible", string.Concat(new object[]
-						{
-							list[j].ToString(),
-							" mps: ",
-							mobPossibleSpawnPoints.Count,
-							" ps:"
-						}), (float)list2.Count);
+						tc.LogInfo("\t\tpossible", list[j].ToString() + " mps: " + mobPossibleSpawnPoints.Count.ToString() + " ps:", (float)list2.Count);
 						float num2 = mob.density.GetRandomValueWithinRange(rnd) * MobSettings.AmbientMobDensity;
 						if (num2 > 1f)
 						{
@@ -215,35 +210,155 @@ namespace ProcGenGame
 					}
 				}
 			}
+			Element element = ElementLoader.elements[(int)cells[cell].elementIdx];
+			Element element2 = ElementLoader.elements[(int)cells[Grid.CellAbove(cell)].elementIdx];
+			Element element3 = ElementLoader.elements[(int)cells[Grid.CellBelow(cell)].elementIdx];
 			switch (mob.location)
 			{
 			case Mob.Location.Floor:
-				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)] && !Grid.IsLiquid(cell);
-			case Mob.Location.Ceiling:
-				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && Grid.Solid[Grid.CellAbove(cell)] && !Grid.Solid[Grid.CellBelow(cell)] && !Grid.IsLiquid(cell);
-			case Mob.Location.Air:
-				return !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && !Grid.IsLiquid(cell);
-			case Mob.Location.Solid:
-				return !MobSpawning.isNaturalCavity(cell) && Grid.Solid[cell];
-			case Mob.Location.Water:
-				return (Grid.Element[cell].id == SimHashes.Water || Grid.Element[cell].id == SimHashes.DirtyWater) && (Grid.Element[Grid.CellAbove(cell)].id == SimHashes.Water || Grid.Element[Grid.CellAbove(cell)].id == SimHashes.DirtyWater);
-			case Mob.Location.Surface:
 			{
 				bool flag = true;
-				for (int k = 0; k < mob.width; k++)
+				for (int k = 0; k < mob.height; k++)
 				{
-					int num2 = MobSpawning.MobWidthOffset(cell, k);
-					flag = flag && Grid.Element[num2].id == SimHashes.Vacuum;
-					flag = flag && Grid.Solid[Grid.CellBelow(num2)];
+					for (int l = 0; l < mob.width; l++)
+					{
+						int num2 = Grid.OffsetCell(cell, l, k);
+						Element element4 = ElementLoader.elements[(int)cells[num2].elementIdx];
+						Element element5 = ElementLoader.elements[(int)cells[Grid.CellAbove(num2)].elementIdx];
+						Element element6 = ElementLoader.elements[(int)cells[Grid.CellBelow(num2)].elementIdx];
+						flag = flag && MobSpawning.isNaturalCavity(num2);
+						flag = flag && !element4.IsSolid;
+						flag = flag && !element4.IsLiquid;
+						flag = flag && !element5.IsSolid;
+						if (k == 0)
+						{
+							flag = flag && element6.IsSolid;
+						}
+						if (!flag)
+						{
+							break;
+						}
+					}
+					if (!flag)
+					{
+						break;
+					}
 				}
 				return flag;
 			}
-			case Mob.Location.LiquidFloor:
-				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)] && Grid.IsLiquid(cell);
-			case Mob.Location.AnyFloor:
-				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)];
+			case Mob.Location.Ceiling:
+			{
+				bool flag2 = true;
+				for (int m = 0; m < mob.height; m++)
+				{
+					for (int n = 0; n < mob.width; n++)
+					{
+						int num3 = Grid.OffsetCell(cell, n, m);
+						Element element7 = ElementLoader.elements[(int)cells[num3].elementIdx];
+						Element element8 = ElementLoader.elements[(int)cells[Grid.CellAbove(num3)].elementIdx];
+						Element element9 = ElementLoader.elements[(int)cells[Grid.CellBelow(num3)].elementIdx];
+						flag2 = flag2 && MobSpawning.isNaturalCavity(num3);
+						flag2 = flag2 && !element7.IsSolid;
+						flag2 = flag2 && !element7.IsLiquid;
+						flag2 = flag2 && !element9.IsSolid;
+						if (m == mob.height - 1)
+						{
+							flag2 = flag2 && element8.IsSolid;
+						}
+						if (!flag2)
+						{
+							break;
+						}
+					}
+					if (!flag2)
+					{
+						break;
+					}
+				}
+				return flag2;
 			}
-			return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell];
+			case Mob.Location.Air:
+				return !element.IsSolid && !element2.IsSolid && !element.IsLiquid;
+			case Mob.Location.Solid:
+				return !MobSpawning.isNaturalCavity(cell) && element.IsSolid;
+			case Mob.Location.Water:
+				return (element.id == SimHashes.Water || element.id == SimHashes.DirtyWater) && (element2.id == SimHashes.Water || element2.id == SimHashes.DirtyWater);
+			case Mob.Location.Surface:
+			{
+				bool flag3 = true;
+				for (int num4 = 0; num4 < mob.width; num4++)
+				{
+					int num5 = MobSpawning.MobWidthOffset(cell, num4);
+					Element element10 = ElementLoader.elements[(int)cells[num5].elementIdx];
+					Element element11 = ElementLoader.elements[(int)cells[Grid.CellBelow(num5)].elementIdx];
+					flag3 = flag3 && element10.id == SimHashes.Vacuum;
+					flag3 = flag3 && element11.IsSolid;
+				}
+				return flag3;
+			}
+			case Mob.Location.LiquidFloor:
+			{
+				bool flag4 = true;
+				for (int num6 = 0; num6 < mob.height; num6++)
+				{
+					for (int num7 = 0; num7 < mob.width; num7++)
+					{
+						int num8 = Grid.OffsetCell(cell, num7, num6);
+						Element element12 = ElementLoader.elements[(int)cells[num8].elementIdx];
+						Element element13 = ElementLoader.elements[(int)cells[Grid.CellAbove(num8)].elementIdx];
+						Element element14 = ElementLoader.elements[(int)cells[Grid.CellBelow(num8)].elementIdx];
+						flag4 = flag4 && MobSpawning.isNaturalCavity(cell);
+						flag4 = flag4 && !element12.IsSolid;
+						flag4 = flag4 && !element13.IsSolid;
+						if (num6 == 0)
+						{
+							flag4 = flag4 && element12.IsLiquid;
+							flag4 = flag4 && element14.IsSolid;
+						}
+						if (!flag4)
+						{
+							break;
+						}
+					}
+					if (!flag4)
+					{
+						break;
+					}
+				}
+				return flag4;
+			}
+			case Mob.Location.AnyFloor:
+			{
+				bool flag5 = true;
+				for (int num9 = 0; num9 < mob.height; num9++)
+				{
+					for (int num10 = 0; num10 < mob.width; num10++)
+					{
+						int num11 = Grid.OffsetCell(cell, num10, num9);
+						Element element15 = ElementLoader.elements[(int)cells[num11].elementIdx];
+						Element element16 = ElementLoader.elements[(int)cells[Grid.CellAbove(num11)].elementIdx];
+						Element element17 = ElementLoader.elements[(int)cells[Grid.CellBelow(num11)].elementIdx];
+						flag5 = flag5 && MobSpawning.isNaturalCavity(cell);
+						flag5 = flag5 && !element15.IsSolid;
+						flag5 = flag5 && !element16.IsSolid;
+						if (num9 == 0)
+						{
+							flag5 = flag5 && element17.IsSolid;
+						}
+						if (!flag5)
+						{
+							break;
+						}
+					}
+					if (!flag5)
+					{
+						break;
+					}
+				}
+				return flag5;
+			}
+			}
+			return MobSpawning.isNaturalCavity(cell) && !element.IsSolid;
 		}
 
 		public static bool isNaturalCavity(int cell)
@@ -251,15 +366,17 @@ namespace ProcGenGame
 			return MobSpawning.NaturalCavities != null && MobSpawning.allNaturalCavityCells.Contains(cell);
 		}
 
-		public static void DetectNaturalCavities(List<TerrainCell> terrainCells, WorldGen.OfflineCallbackFunction updateProgressFn)
+		public static void DetectNaturalCavities(List<TerrainCell> terrainCells, WorldGen.OfflineCallbackFunction updateProgressFn, Sim.Cell[] cells)
 		{
-			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, 0.8f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, 0f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+			MobSpawning.NaturalCavities.Clear();
+			MobSpawning.allNaturalCavityCells.Clear();
 			HashSet<int> invalidCells = new HashSet<int>();
 			Func<int, bool> <>9__0;
 			for (int i = 0; i < terrainCells.Count; i++)
 			{
 				TerrainCell terrainCell = terrainCells[i];
-				float num = (float)i / (float)terrainCells.Count * 100f;
+				float num = (float)i / (float)terrainCells.Count;
 				updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, num, WorldGenProgressStages.Stages.DetectNaturalCavities);
 				MobSpawning.NaturalCavities.Add(terrainCell, new List<HashSet<int>>());
 				invalidCells.Clear();
@@ -267,13 +384,17 @@ namespace ProcGenGame
 				for (int j = 0; j < allCells.Count; j++)
 				{
 					int num2 = allCells[j];
-					if (!Grid.Solid[num2] && !invalidCells.Contains(num2))
+					if (!ElementLoader.elements[(int)cells[num2].elementIdx].IsSolid && !invalidCells.Contains(num2))
 					{
 						int num3 = num2;
 						Func<int, bool> func;
 						if ((func = <>9__0) == null)
 						{
-							func = (<>9__0 = (int checkCell) => !invalidCells.Contains(checkCell) && !Grid.Solid[checkCell]);
+							func = (<>9__0 = delegate(int checkCell)
+							{
+								Element element = ElementLoader.elements[(int)cells[checkCell].elementIdx];
+								return !invalidCells.Contains(checkCell) && !element.IsSolid;
+							});
 						}
 						HashSet<int> hashSet = GameUtil.FloodCollectCells(num3, func, 300, invalidCells, true);
 						if (hashSet != null && hashSet.Count > 0)
@@ -284,7 +405,7 @@ namespace ProcGenGame
 					}
 				}
 			}
-			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, 100f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, 1f, WorldGenProgressStages.Stages.DetectNaturalCavities);
 		}
 
 		public static Dictionary<TerrainCell, List<HashSet<int>>> NaturalCavities = new Dictionary<TerrainCell, List<HashSet<int>>>();

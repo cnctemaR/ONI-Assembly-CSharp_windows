@@ -20,7 +20,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 	{
 		base.OnPrefabInit();
 		this.simRenderLoadBalance = true;
-		this.growingBranchesStatusItem = new StatusItem("GROWINGBRANCHES", "MISC", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+		this.growingBranchesStatusItem = new StatusItem("GROWINGBRANCHES", "MISC", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022, null);
 		base.Subscribe<BuddingTrunk>(1119167081, BuddingTrunk.OnNewGameSpawnDelegate);
 	}
 
@@ -227,7 +227,7 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 	{
 		if (idx < 0 || idx >= this.buds.Length)
 		{
-			global::Debug.Assert(false, "invalid branch index " + idx);
+			global::Debug.Assert(false, "invalid branch index " + idx.ToString());
 		}
 		HarvestDesignatable component = treeBud.GetComponent<HarvestDesignatable>();
 		HarvestDesignatable harvestDesignatable = ((this.buds[idx] != null) ? this.buds[idx].Get() : null);

@@ -36,10 +36,13 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		PlayerController.Instance = this;
 		for (int i = 0; i < this.tools.Length; i++)
 		{
-			GameObject gameObject = Util.KInstantiate(this.tools[i].gameObject, base.gameObject, null);
-			this.tools[i] = gameObject.GetComponent<InterfaceTool>();
-			this.tools[i].gameObject.SetActive(true);
-			this.tools[i].gameObject.SetActive(false);
+			if (DlcManager.IsDlcListValidForCurrentContent(this.tools[i].DlcIDs))
+			{
+				GameObject gameObject = Util.KInstantiate(this.tools[i].gameObject, base.gameObject, null);
+				this.tools[i] = gameObject.GetComponent<InterfaceTool>();
+				this.tools[i].gameObject.SetActive(true);
+				this.tools[i].gameObject.SetActive(false);
+			}
 		}
 	}
 
@@ -164,10 +167,6 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private void StartDrag(global::Action action)
 	{
-		if (!this.draggingAllowed)
-		{
-			return;
-		}
 		if (this.dragAction == global::Action.Invalid)
 		{
 			this.dragAction = action;
@@ -178,10 +177,6 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private void UpdateDrag()
 	{
-		if (!this.draggingAllowed)
-		{
-			return;
-		}
 		this.dragDelta = Vector2.zero;
 		Vector3 mousePos = KInputManager.GetMousePos();
 		if (!this.dragging && this.dragAction != global::Action.Invalid && ((mousePos - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
@@ -229,6 +224,18 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 			DebugHandler.ToggleScreenshotMode();
 			return;
 		}
+		if (e.IsAction(global::Action.MouseLeft) || e.IsAction(global::Action.ShiftMouseLeft))
+		{
+			this.StartDrag(global::Action.MouseLeft);
+		}
+		else if (e.IsAction(global::Action.MouseRight))
+		{
+			this.StartDrag(global::Action.MouseRight);
+		}
+		else if (e.IsAction(global::Action.MouseMiddle))
+		{
+			this.StartDrag(global::Action.MouseMiddle);
+		}
 		if (this.activeTool == null || !this.activeTool.enabled)
 		{
 			return;
@@ -247,19 +254,12 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		}
 		if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
 		{
-			this.StartDrag(global::Action.MouseLeft);
 			this.activeTool.OnLeftClickDown(this.GetCursorPos());
 			return;
 		}
 		if (e.IsAction(global::Action.MouseRight))
 		{
-			this.StartDrag(global::Action.MouseRight);
 			this.activeTool.OnRightClickDown(this.GetCursorPos(), e);
-			return;
-		}
-		if (e.IsAction(global::Action.MouseMiddle))
-		{
-			this.StartDrag(global::Action.MouseMiddle);
 			return;
 		}
 		this.activeTool.OnKeyDown(e);
@@ -307,7 +307,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public bool IsDragging()
 	{
-		return this.dragAction > global::Action.Invalid;
+		return this.draggingAllowed && this.dragAction > global::Action.Invalid;
 	}
 
 	public void AllowDragging(bool allow)
@@ -322,6 +322,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public Vector3 GetWorldDragDelta()
 	{
+		if (!this.draggingAllowed)
+		{
+			return Vector3.zero;
+		}
 		return this.worldDragDelta;
 	}
 

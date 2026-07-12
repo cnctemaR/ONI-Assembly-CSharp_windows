@@ -27,7 +27,20 @@ namespace Klei.AI
 
 		public string GetTooltip()
 		{
-			return this.description + this.GetAttributeModifiersString(true) + this.GetDisabledChoresString(true) + this.GetIgnoredEffectsString(true) + this.GetExtendedTooltipStr();
+			string text;
+			if (this.TooltipCB != null)
+			{
+				text = this.TooltipCB();
+			}
+			else
+			{
+				text = this.description;
+				text += this.GetAttributeModifiersString(true);
+				text += this.GetDisabledChoresString(true);
+				text += this.GetIgnoredEffectsString(true);
+				text += this.GetExtendedTooltipStr();
+			}
+			return text;
 		}
 
 		public string GetAttributeModifiersString(bool list_entry)
@@ -40,7 +53,7 @@ namespace Klei.AI
 				{
 					text += DUPLICANTS.TRAITS.TRAIT_DESCRIPTION_LIST_ENTRY;
 				}
-				text += string.Format(DUPLICANTS.TRAITS.ATTRIBUTE_MODIFIERS, attribute.Name, attributeModifier.GetFormattedString(null));
+				text += string.Format(DUPLICANTS.TRAITS.ATTRIBUTE_MODIFIERS, attribute.Name, attributeModifier.GetFormattedString());
 			}
 			return text;
 		}
@@ -133,6 +146,8 @@ namespace Klei.AI
 		public bool ValidStarterTrait;
 
 		public Action<GameObject> OnAddTrait;
+
+		public Func<string> TooltipCB;
 
 		public Func<string> ExtendedTooltip;
 

@@ -5,7 +5,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/Workable/Door")]
-public class Door : Workable, ISaveLoadable, ISim200ms
+public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 {
 	private void OnCopySettings(object data)
 	{
@@ -121,7 +121,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		foreach (int num5 in this.building.PlacementCells)
 		{
 			Grid.HasDoor[num5] = true;
-			Grid.HasAccessDoor[num5] = base.GetComponent<AccessControl>() != null;
 			if (this.rotatable.IsRotated)
 			{
 				list.Add(Grid.CellAbove(num5));
@@ -168,7 +167,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		foreach (int num2 in this.building.PlacementCells)
 		{
 			Grid.HasDoor[num2] = false;
-			Grid.HasAccessDoor[num2] = false;
 			Game.Instance.SetDupePassableSolid(num2, false, Grid.Solid[num2]);
 			Grid.CritterImpassable[num2] = false;
 			Grid.DupeImpassable[num2] = false;
@@ -424,7 +422,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		this.ApplyRequestedControlState(false);
 	}
 
-	public float Open()
+	public void Open()
 	{
 		if (this.openCount == 0 && Door.DisplacesGas(this.doorType))
 		{
@@ -453,23 +451,12 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			}
 		}
 		this.openCount++;
-		float num4 = 1f;
-		if (this.consumer != null)
-		{
-			num4 = (this.consumer.IsPowered ? 1f : 0.5f);
-		}
 		Door.ControlState controlState = this.controlState;
 		if (controlState > Door.ControlState.Opened)
 		{
-			if (controlState != Door.ControlState.Locked)
-			{
-			}
+			return;
 		}
-		else
-		{
-			this.controller.sm.isOpen.Set(true, this.controller);
-		}
-		return num4;
+		this.controller.sm.isOpen.Set(true, this.controller);
 	}
 
 	public void Close()
@@ -584,6 +571,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				}
 			}
 		}
+	}
+
+	bool INavDoor.get_isSpawned()
+	{
+		return base.isSpawned;
 	}
 
 	[MyCmpReq]
@@ -702,7 +694,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			default_state = this.closed;
 			this.root.Update("RefreshIsBlocked", delegate(Door.Controller.Instance smi, float dt)
 			{
@@ -875,7 +867,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				bool flag = false;
 				foreach (int num in base.master.GetComponent<Building>().PlacementCells)
 				{
-					if (Grid.Objects[num, 0] != null)
+					if (Grid.Objects[num, 40] != null)
 					{
 						flag = true;
 						break;

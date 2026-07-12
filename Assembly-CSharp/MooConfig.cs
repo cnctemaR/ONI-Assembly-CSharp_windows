@@ -9,7 +9,7 @@ public class MooConfig : IEntityConfig
 	public static GameObject CreateMoo(string id, string name, string desc, string anim_file, bool is_baby)
 	{
 		GameObject gameObject = BaseMooConfig.BaseMoo(id, name, CREATURES.SPECIES.MOO.DESC, "MooBaseTrait", anim_file, is_baby, null);
-		EntityTemplates.ExtendEntityToWildCreature(gameObject, MooTuning.PEN_SIZE_PER_CREATURE, 75f);
+		EntityTemplates.ExtendEntityToWildCreature(gameObject, MooTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("MooBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, MooTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -MooTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
@@ -24,6 +24,11 @@ public class MooConfig : IEntityConfig
 		def.minPoopSizeInCalories = MooConfig.MIN_POOP_SIZE_IN_CALORIES;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return gameObject;
+	}
+
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public GameObject CreatePrefab()

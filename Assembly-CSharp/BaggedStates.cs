@@ -8,7 +8,7 @@ public class BaggedStates : GameStateMachine<BaggedStates, BaggedStates.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.bagged;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.ToggleStatusItem(CREATURES.STATUSITEMS.BAGGED.NAME, CREATURES.STATUSITEMS.BAGGED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.bagged.Enter(new StateMachine<BaggedStates, BaggedStates.Instance, IStateMachineTarget, BaggedStates.Def>.State.Callback(BaggedStates.BagStart)).ToggleTag(GameTags.Creatures.Deliverable).PlayAnim("trussed", KAnim.PlayMode.Loop)
 			.TagTransition(GameTags.Creatures.Bagged, null, true)

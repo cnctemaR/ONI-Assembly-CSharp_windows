@@ -1095,7 +1095,7 @@ namespace System
 			}
 			DateTime utcDateTime = dateTimeOffset.UtcDateTime;
 			bool flag;
-			TimeSpan utcOffset = destinationTimeZone.GetUtcOffset(utcDateTime, out flag);
+			TimeSpan utcOffset = destinationTimeZone.GetUtcOffset(utcDateTime, out flag, false);
 			return new DateTimeOffset(DateTime.SpecifyKind(utcDateTime, DateTimeKind.Unspecified) + utcOffset, utcOffset);
 		}
 
@@ -1197,7 +1197,7 @@ namespace System
 				return dateTime;
 			}
 			bool flag;
-			TimeSpan utcOffset = sourceTimeZone.GetUtcOffset(dateTime, out flag);
+			TimeSpan utcOffset = sourceTimeZone.GetUtcOffset(dateTime, out flag, false);
 			DateTime dateTime2;
 			TimeZoneInfo.TryAddTicks(dateTime, -utcOffset.Ticks, out dateTime2, DateTimeKind.Utc);
 			return dateTime2;
@@ -1453,16 +1453,16 @@ namespace System
 		public TimeSpan GetUtcOffset(DateTime dateTime)
 		{
 			bool flag;
-			return this.GetUtcOffset(dateTime, out flag);
+			return this.GetUtcOffset(dateTime, out flag, false);
 		}
 
 		public TimeSpan GetUtcOffset(DateTimeOffset dateTimeOffset)
 		{
 			bool flag;
-			return this.GetUtcOffset(dateTimeOffset.UtcDateTime, out flag);
+			return this.GetUtcOffset(dateTimeOffset.UtcDateTime, out flag, false);
 		}
 
-		private TimeSpan GetUtcOffset(DateTime dateTime, out bool isDST)
+		private TimeSpan GetUtcOffset(DateTime dateTime, out bool isDST, bool forOffset = false)
 		{
 			isDST = false;
 			TimeZoneInfo timeZoneInfo = this;
@@ -1475,7 +1475,7 @@ namespace System
 				timeZoneInfo = TimeZoneInfo.Local;
 			}
 			bool flag;
-			TimeSpan utcOffsetHelper = TimeZoneInfo.GetUtcOffsetHelper(dateTime, timeZoneInfo, out flag);
+			TimeSpan utcOffsetHelper = TimeZoneInfo.GetUtcOffsetHelper(dateTime, timeZoneInfo, out flag, forOffset);
 			if (timeZoneInfo == this)
 			{
 				isDST = flag;
@@ -1486,10 +1486,10 @@ namespace System
 			{
 				return this.BaseUtcOffset;
 			}
-			return TimeZoneInfo.GetUtcOffsetHelper(dateTime2, this, out isDST);
+			return TimeZoneInfo.GetUtcOffsetHelper(dateTime2, this, out isDST, forOffset);
 		}
 
-		private static TimeSpan GetUtcOffsetHelper(DateTime dateTime, TimeZoneInfo tz, out bool isDST)
+		private static TimeSpan GetUtcOffsetHelper(DateTime dateTime, TimeZoneInfo tz, out bool isDST, bool forOffset = false)
 		{
 			if (dateTime.Kind == DateTimeKind.Local && tz != TimeZoneInfo.Local)
 			{
@@ -1501,7 +1501,7 @@ namespace System
 				return TimeSpan.Zero;
 			}
 			TimeSpan timeSpan;
-			if (tz.TryGetTransitionOffset(dateTime, out timeSpan, out isDST))
+			if (tz.TryGetTransitionOffset(dateTime, out timeSpan, out isDST, forOffset))
 			{
 				return timeSpan;
 			}
@@ -1532,9 +1532,13 @@ namespace System
 				{
 					return tz.BaseUtcOffset;
 				}
-				isDST = true;
+				if (forOffset)
+				{
+					isDST = true;
+				}
 				if (tz.IsInDST(applicableRule2, minValue))
 				{
+					isDST = true;
 					return tz.BaseUtcOffset + applicableRule2.DaylightDelta;
 				}
 				return tz.BaseUtcOffset;
@@ -1595,7 +1599,33 @@ namespace System
 			if (applicableRule != null)
 			{
 				DateTime dateTime2 = TimeZoneInfo.TransitionPoint(applicableRule.DaylightTransitionEnd, dateTime.Year);
-				if (dateTime > dateTime2 - applicableRule.DaylightDelta && dateTime <= dateTime2)
+				if (dateTime >= dateTime2 - applicableRule.DaylightDelta && dateTime < dateTime2)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private bool IsAmbiguousLocalDstFromUtc(DateTime dateTime)
+		{
+			if (dateTime.Kind == DateTimeKind.Local)
+			{
+				return false;
+			}
+			if (this == TimeZoneInfo.Utc)
+			{
+				return false;
+			}
+			TimeZoneInfo.AdjustmentRule applicableRule = this.GetApplicableRule(dateTime);
+			if (applicableRule != null)
+			{
+				DateTime dateTime2;
+				if (!TimeZoneInfo.TryAddTicks(TimeZoneInfo.TransitionPoint(applicableRule.DaylightTransitionEnd, dateTime.Year), -(this.BaseUtcOffset.Ticks + applicableRule.DaylightDelta.Ticks), out dateTime2, DateTimeKind.Utc))
+				{
+					return false;
+				}
+				if (dateTime >= dateTime2 - applicableRule.DaylightDelta && dateTime < dateTime2)
 				{
 					return true;
 				}
@@ -1610,7 +1640,7 @@ namespace System
 
 		private bool IsInDST(TimeZoneInfo.AdjustmentRule rule, DateTime dateTime)
 		{
-			return this.IsInDSTForYear(rule, dateTime, dateTime.Year) || (dateTime.Year > 1 && this.IsInDSTForYear(rule, dateTime, dateTime.Year - 1));
+			return this.IsInDSTForYear(rule, dateTime, dateTime.Year) || (dateTime.Year > 1 && this.IsInDSTForYear(rule, dateTime, dateTime.Year - 1)) || (dateTime.Kind == DateTimeKind.Local && this.IsAmbiguousTime(dateTime) && dateTime.IsAmbiguousDaylightSavingTime());
 		}
 
 		private bool IsInDSTForYear(TimeZoneInfo.AdjustmentRule rule, DateTime dateTime, int year)
@@ -1620,8 +1650,9 @@ namespace System
 			if (dateTime.Kind == DateTimeKind.Utc)
 			{
 				dateTime2 -= this.BaseUtcOffset;
-				dateTime3 -= this.BaseUtcOffset + rule.DaylightDelta;
+				dateTime3 -= this.BaseUtcOffset;
 			}
+			dateTime3 -= rule.DaylightDelta;
 			return dateTime >= dateTime2 && dateTime < dateTime3;
 		}
 
@@ -1640,7 +1671,7 @@ namespace System
 				return false;
 			}
 			bool flag;
-			this.GetUtcOffset(dateTime, out flag);
+			this.GetUtcOffset(dateTime, out flag, false);
 			return flag;
 		}
 
@@ -1651,7 +1682,22 @@ namespace System
 
 		public bool IsDaylightSavingTime(DateTimeOffset dateTimeOffset)
 		{
-			return this.IsDaylightSavingTime(dateTimeOffset.DateTime);
+			DateTime dateTime = dateTimeOffset.DateTime;
+			if (dateTime.Kind == DateTimeKind.Local && this.IsInvalidTime(dateTime))
+			{
+				throw new ArgumentException("dateTime is invalid and Kind is Local");
+			}
+			if (this == TimeZoneInfo.Utc)
+			{
+				return false;
+			}
+			if (!this.SupportsDaylightSavingTime)
+			{
+				return false;
+			}
+			bool flag;
+			this.GetUtcOffset(dateTime, out flag, true);
+			return flag;
 		}
 
 		internal DaylightTime GetDaylightChanges(int year)
@@ -1920,7 +1966,7 @@ namespace System
 			return null;
 		}
 
-		private bool TryGetTransitionOffset(DateTime dateTime, out TimeSpan offset, out bool isDst)
+		private bool TryGetTransitionOffset(DateTime dateTime, out TimeSpan offset, out bool isDst, bool forOffset = false)
 		{
 			offset = this.BaseUtcOffset;
 			isDst = false;
@@ -1933,19 +1979,47 @@ namespace System
 			{
 				return false;
 			}
-			if (dateTime.Kind != DateTimeKind.Utc && !TimeZoneInfo.TryAddTicks(dateTime2, -this.BaseUtcOffset.Ticks, out dateTime2, DateTimeKind.Utc))
+			bool flag = false;
+			if (dateTime.Kind != DateTimeKind.Utc)
 			{
-				return false;
+				if (!TimeZoneInfo.TryAddTicks(dateTime2, -this.BaseUtcOffset.Ticks, out dateTime2, DateTimeKind.Utc))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				flag = true;
 			}
 			TimeZoneInfo.AdjustmentRule applicableRule = this.GetApplicableRule(dateTime2);
 			if (applicableRule != null)
 			{
 				DateTime dateTime3 = TimeZoneInfo.TransitionPoint(applicableRule.DaylightTransitionStart, dateTime2.Year);
 				DateTime dateTime4 = TimeZoneInfo.TransitionPoint(applicableRule.DaylightTransitionEnd, dateTime2.Year);
+				TimeZoneInfo.TryAddTicks(dateTime3, -this.BaseUtcOffset.Ticks, out dateTime3, DateTimeKind.Utc);
+				TimeZoneInfo.TryAddTicks(dateTime4, -this.BaseUtcOffset.Ticks, out dateTime4, DateTimeKind.Utc);
 				if (dateTime2 >= dateTime3 && dateTime2 <= dateTime4)
 				{
-					offset = this.baseUtcOffset + applicableRule.DaylightDelta;
-					isDst = true;
+					if (forOffset)
+					{
+						isDst = true;
+					}
+					offset = this.baseUtcOffset;
+					if (flag || dateTime2 >= new DateTime(dateTime3.Ticks + applicableRule.DaylightDelta.Ticks, DateTimeKind.Utc))
+					{
+						offset += applicableRule.DaylightDelta;
+						isDst = true;
+					}
+					if (dateTime2 >= new DateTime(dateTime4.Ticks - applicableRule.DaylightDelta.Ticks, DateTimeKind.Utc))
+					{
+						offset = this.baseUtcOffset;
+						isDst = false;
+					}
+					if (!isDst && dateTime.Kind == DateTimeKind.Local && this.IsAmbiguousTime(dateTime) && dateTime.IsAmbiguousDaylightSavingTime())
+					{
+						offset += applicableRule.DaylightDelta;
+						isDst = true;
+					}
 					return true;
 				}
 			}
@@ -1956,19 +2030,21 @@ namespace System
 		{
 			if (transition.IsFixedDateRule)
 			{
-				return new DateTime(year, transition.Month, transition.Day) + transition.TimeOfDay.TimeOfDay;
+				int num = DateTime.DaysInMonth(year, transition.Month);
+				int num2 = ((transition.Day <= num) ? transition.Day : num);
+				return new DateTime(year, transition.Month, num2) + transition.TimeOfDay.TimeOfDay;
 			}
 			DayOfWeek dayOfWeek = new DateTime(year, transition.Month, 1).DayOfWeek;
-			int num = 1 + (transition.Week - 1) * 7 + (transition.DayOfWeek - dayOfWeek + 7) % 7;
-			if (num > DateTime.DaysInMonth(year, transition.Month))
+			int num3 = 1 + (transition.Week - 1) * 7 + (transition.DayOfWeek - dayOfWeek + 7) % 7;
+			if (num3 > DateTime.DaysInMonth(year, transition.Month))
 			{
-				num -= 7;
+				num3 -= 7;
 			}
-			if (num < 1)
+			if (num3 < 1)
 			{
-				num += 7;
+				num3 += 7;
 			}
-			return new DateTime(year, transition.Month, num) + transition.TimeOfDay.TimeOfDay;
+			return new DateTime(year, transition.Month, num3) + transition.TimeOfDay.TimeOfDay;
 		}
 
 		private static TimeZoneInfo.AdjustmentRule[] ValidateRules(List<TimeZoneInfo.AdjustmentRule> adjustmentRules)
@@ -2231,13 +2307,13 @@ namespace System
 		internal static TimeSpan GetLocalUtcOffset(DateTime dateTime, TimeZoneInfoOptions flags)
 		{
 			bool flag;
-			return TimeZoneInfo.Local.GetUtcOffset(dateTime, out flag);
+			return TimeZoneInfo.Local.GetUtcOffset(dateTime, out flag, false);
 		}
 
 		internal TimeSpan GetUtcOffset(DateTime dateTime, TimeZoneInfoOptions flags)
 		{
 			bool flag;
-			return this.GetUtcOffset(dateTime, out flag);
+			return this.GetUtcOffset(dateTime, out flag, false);
 		}
 
 		internal static TimeSpan GetUtcOffsetFromUtc(DateTime time, TimeZoneInfo zone, out bool isDaylightSavings, out bool isAmbiguousLocalDst)
@@ -2245,11 +2321,11 @@ namespace System
 			isDaylightSavings = false;
 			isAmbiguousLocalDst = false;
 			TimeSpan timeSpan = zone.BaseUtcOffset;
-			if (zone.IsAmbiguousTime(time))
+			if (zone.IsAmbiguousLocalDstFromUtc(time))
 			{
 				isAmbiguousLocalDst = true;
 			}
-			return zone.GetUtcOffset(time, out isDaylightSavings);
+			return zone.GetUtcOffset(time, out isDaylightSavings, false);
 		}
 
 		internal TimeZoneInfo()

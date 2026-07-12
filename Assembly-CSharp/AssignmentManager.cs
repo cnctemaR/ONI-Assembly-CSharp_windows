@@ -11,6 +11,27 @@ public class AssignmentManager : KMonoBehaviour
 		return this.assignables.GetEnumerator();
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		Game.Instance.Subscribe<AssignmentManager>(586301400, AssignmentManager.MinionMigrationDelegate);
+	}
+
+	protected void MinionMigration(object data)
+	{
+		foreach (Assignable assignable in this.assignables)
+		{
+			if (assignable.assignee != null)
+			{
+				Ownables soleOwner = assignable.assignee.GetSoleOwner();
+				if (soleOwner != null && soleOwner.GetComponent<MinionAssignablesProxy>() != null && assignable.assignee.GetSoleOwner().GetComponent<MinionAssignablesProxy>().GetTargetGameObject() == ((MinionIdentity)data).gameObject)
+				{
+					assignable.Unassign();
+				}
+			}
+		}
+	}
+
 	public void Add(Assignable assignable)
 	{
 		this.assignables.Add(assignable);
@@ -21,13 +42,23 @@ public class AssignmentManager : KMonoBehaviour
 		this.assignables.Remove(assignable);
 	}
 
-	public void AddAssignmentGroup(string id, IAssignableIdentity[] members, string name)
+	public AssignmentGroup TryCreateAssignmentGroup(string id, IAssignableIdentity[] members, string name)
 	{
 		if (this.assignment_groups.ContainsKey(id))
 		{
+			return this.assignment_groups[id];
+		}
+		return new AssignmentGroup(id, members, name);
+	}
+
+	public void RemoveAssignmentGroup(string id)
+	{
+		if (!this.assignment_groups.ContainsKey(id))
+		{
+			global::Debug.LogError("Assignment group with id " + id + " doesn't exists");
 			return;
 		}
-		this.assignment_groups.Add(id, new AssignmentGroup(id, members, name));
+		this.assignment_groups.Remove(id);
 	}
 
 	public void AddToAssignmentGroup(string group_id, IAssignableIdentity member)
@@ -56,6 +87,21 @@ public class AssignmentManager : KMonoBehaviour
 			if (keyValuePair.Value.HasMember(member))
 			{
 				keyValuePair.Value.RemoveMember(member);
+			}
+		}
+	}
+
+	public void RemoveFromWorld(IAssignableIdentity minionIdentity, int world_id)
+	{
+		foreach (Assignable assignable in this.assignables)
+		{
+			if (assignable.assignee != null)
+			{
+				Ownables soleOwner = assignable.assignee.GetSoleOwner();
+				if (soleOwner != null && soleOwner.GetComponent<MinionAssignablesProxy>() != null && assignable.assignee == minionIdentity && assignable.GetMyWorldId() == world_id)
+				{
+					assignable.Unassign();
+				}
 			}
 		}
 	}
@@ -129,6 +175,11 @@ public class AssignmentManager : KMonoBehaviour
 		"public",
 		new AssignmentGroup("public", new IAssignableIdentity[0], UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.PUBLIC)
 	} };
+
+	private static readonly EventSystem.IntraObjectHandler<AssignmentManager> MinionMigrationDelegate = new EventSystem.IntraObjectHandler<AssignmentManager>(delegate(AssignmentManager component, object data)
+	{
+		component.MinionMigration(data);
+	});
 
 	private List<Assignable> PreferredAssignableResults = new List<Assignable>();
 }

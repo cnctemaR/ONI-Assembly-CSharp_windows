@@ -52,6 +52,7 @@ public class CO2ScrubberConfig : IBuildingConfig
 		passiveElementConsumer.isRequired = false;
 		passiveElementConsumer.storeOnConsume = true;
 		passiveElementConsumer.showDescriptor = false;
+		passiveElementConsumer.ignoreActiveChanged = true;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{

@@ -70,7 +70,7 @@ namespace UnityEngine
 
 		[NativeMethod("SetPath_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetPath_Internal(int index, [NotNull] Vector2[] points);
+		private extern void SetPath_Internal(int index, [NotNull("ArgumentNullException")] Vector2[] points);
 
 		public int GetPath(int index, List<Vector2> points)
 		{
@@ -89,7 +89,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetPathList_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetPathList_Internal(int index, [NotNull] List<Vector2> points);
+		private extern int GetPathList_Internal(int index, [NotNull("ArgumentNullException")] List<Vector2> points);
 
 		public void SetPath(int index, List<Vector2> points)
 		{
@@ -103,7 +103,7 @@ namespace UnityEngine
 
 		[NativeMethod("SetPathList_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetPathList_Internal(int index, [NotNull] List<Vector2> points);
+		private extern void SetPathList_Internal(int index, [NotNull("ArgumentNullException")] List<Vector2> points);
 
 		[ExcludeFromDocs]
 		public void CreatePrimitive(int sides)

@@ -9,7 +9,7 @@ public class DreckoConfig : IEntityConfig
 	public static GameObject CreateDrecko(string id, string name, string desc, string anim_file, bool is_baby)
 	{
 		GameObject gameObject = BaseDreckoConfig.BaseDrecko(id, name, desc, anim_file, "DreckoBaseTrait", is_baby, "fbr_", 308.15f, 363.15f);
-		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, DreckoTuning.PEN_SIZE_PER_CREATURE, 150f);
+		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, DreckoTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("DreckoBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, DreckoTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -DreckoTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
@@ -37,6 +37,11 @@ public class DreckoConfig : IEntityConfig
 		return gameObject;
 	}
 
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public virtual GameObject CreatePrefab()
 	{
 		GameObject gameObject = DreckoConfig.CreateDrecko("Drecko", CREATURES.SPECIES.DRECKO.NAME, CREATURES.SPECIES.DRECKO.DESC, "drecko_kanim", false);
@@ -49,7 +54,7 @@ public class DreckoConfig : IEntityConfig
 		float num = 90f;
 		float num2 = 30f;
 		int egg_SORT_ORDER = DreckoConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

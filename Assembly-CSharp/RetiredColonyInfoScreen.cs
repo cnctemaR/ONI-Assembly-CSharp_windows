@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Database;
 using FMOD.Studio;
+using ProcGen;
+using ProcGenGame;
 using STRINGS;
 using TMPro;
 using UnityEngine;
@@ -75,7 +77,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.closeButton.ClearOnClick();
 		this.closeButton.onClick += delegate
 		{
-			base.Show(false);
+			this.Show(false);
 		};
 		this.viewOtherColoniesButton.ClearOnClick();
 		this.viewOtherColoniesButton.onClick += delegate
@@ -90,7 +92,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.closeScreenButton.ClearOnClick();
 		this.closeScreenButton.onClick += delegate
 		{
-			base.Show(false);
+			this.Show(false);
 		};
 		this.viewOtherColoniesButton.gameObject.SetActive(false);
 		if (Game.Instance != null)
@@ -203,6 +205,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	{
 		this.colonyName.text = data.colonyName.ToUpper();
 		this.cycleCount.text = string.Format(UI.RETIRED_COLONY_INFO_SCREEN.CYCLE_COUNT, data.cycleCount.ToString());
+		this.focusedWorld = data.startWorld;
 		this.ToggleExplorer(false);
 		this.RefreshUIScale(null);
 		if (Game.Instance == null)
@@ -252,7 +255,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private bool LoadSlideshow(RetiredColonyData data)
 	{
 		this.clearCurrentSlideshow();
-		this.currentSlideshowFiles = RetireColonyUtility.LoadColonySlideshowFiles(data.colonyName);
+		this.currentSlideshowFiles = RetireColonyUtility.LoadColonySlideshowFiles(data.colonyName, this.focusedWorld);
 		this.slideshow.SetFiles(this.currentSlideshowFiles, -1);
 		return this.currentSlideshowFiles != null && this.currentSlideshowFiles.Length != 0;
 	}
@@ -262,10 +265,10 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.currentSlideshowFiles = new string[0];
 	}
 
-	private bool LoadScreenshot(RetiredColonyData data)
+	private bool LoadScreenshot(RetiredColonyData data, string world)
 	{
 		this.clearCurrentSlideshow();
-		Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(data.colonyName);
+		Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(data.colonyName, world);
 		if (sprite != null)
 		{
 			this.slideshow.setSlide(sprite);
@@ -460,13 +463,22 @@ public class RetiredColonyInfoScreen : KModalScreen
 		Vector2 sizeDelta = this.slideshow.transform.parent.GetComponent<RectTransform>().sizeDelta;
 		Vector2 fittedSize = this.slideshow.GetFittedSize(sprite, sizeDelta.x, sizeDelta.y);
 		LayoutElement component = this.slideshow.GetComponent<LayoutElement>();
+		if (fittedSize.y > component.preferredHeight)
+		{
+			component.minHeight = component.preferredHeight / (fittedSize.y / fittedSize.x);
+			component.minHeight = component.preferredHeight;
+			return;
+		}
 		component.minWidth = (component.preferredWidth = fittedSize.x);
 		component.minHeight = (component.preferredHeight = fittedSize.y);
 	}
 
 	private void DisplayTimelapse(RetiredColonyData data, GameObject container)
 	{
-		RectTransform reference = container.GetComponent<HierarchyReferences>().GetReference<RectTransform>("PlayIcon");
+		container.GetComponent<HierarchyReferences>().GetReference<LocText>("Title").SetText(UI.RETIRED_COLONY_INFO_SCREEN.TITLES.TIMELAPSE);
+		RectTransform reference = container.GetComponent<HierarchyReferences>().GetReference<RectTransform>("Worlds");
+		this.DisplayWorlds(data, reference.gameObject);
+		RectTransform reference2 = container.GetComponent<HierarchyReferences>().GetReference<RectTransform>("PlayIcon");
 		this.slideshow = container.GetComponent<HierarchyReferences>().GetReference<Slideshow>("Slideshow");
 		this.slideshow.updateType = SlideshowUpdateType.loadOnDemand;
 		this.slideshow.SetPaused(true);
@@ -476,16 +488,16 @@ public class RetiredColonyInfoScreen : KModalScreen
 		};
 		this.slideshow.onEndingPlay = delegate
 		{
-			this.LoadScreenshot(data);
+			this.LoadScreenshot(data, this.focusedWorld);
 		};
-		if (!this.LoadScreenshot(data))
+		if (!this.LoadScreenshot(data, this.focusedWorld))
 		{
 			this.slideshow.gameObject.SetActive(false);
-			reference.gameObject.SetActive(false);
+			reference2.gameObject.SetActive(false);
 			return;
 		}
 		this.slideshow.gameObject.SetActive(true);
-		reference.gameObject.SetActive(true);
+		reference2.gameObject.SetActive(true);
 	}
 
 	private void DisplayDuplicants(RetiredColonyData data, GameObject container, int range_min = -1, int range_max = -1)
@@ -514,6 +526,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 				componentInChildren.SetSymbolVisiblity("snapTo_neck", false);
 				componentInChildren.SetSymbolVisiblity("snapTo_goggles", false);
 				componentInChildren.SetSymbolVisiblity("snapTo_hat", false);
+				componentInChildren.SetSymbolVisiblity("snapTo_headfx", false);
 				componentInChildren.SetSymbolVisiblity("snapTo_hat_hair", false);
 				foreach (KeyValuePair<string, string> keyValuePair in retiredDuplicantData.accessories)
 				{
@@ -534,12 +547,19 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private IEnumerator ActivatePortraitsWhenReady(GameObject container)
 	{
 		yield return 0;
-		for (int i = 0; i < container.transform.childCount; i++)
+		if (container == null)
 		{
-			KBatchedAnimController componentInChildren = container.transform.GetChild(i).GetComponentInChildren<KBatchedAnimController>();
-			if (componentInChildren != null)
+			global::Debug.LogError("RetiredColonyInfoScreen minion container is null");
+		}
+		else
+		{
+			for (int i = 0; i < container.transform.childCount; i++)
 			{
-				componentInChildren.transform.localScale = Vector3.one;
+				KBatchedAnimController componentInChildren = container.transform.GetChild(i).GetComponentInChildren<KBatchedAnimController>();
+				if (componentInChildren != null)
+				{
+					componentInChildren.transform.localScale = Vector3.one;
+				}
 			}
 		}
 		yield break;
@@ -567,11 +587,47 @@ public class RetiredColonyInfoScreen : KModalScreen
 		foreach (global::Tuple<string, int> tuple in data.buildings)
 		{
 			GameObject prefab = Assets.GetPrefab(tuple.first);
-			HierarchyReferences component = global::Util.KInstantiateUI(this.buildingPrefab, container, true).GetComponent<HierarchyReferences>();
-			component.GetReference<LocText>("NameLabel").SetText(GameUtil.ApplyBoldString(prefab.GetProperName()));
-			component.GetReference<LocText>("CountLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.BUILDING_COUNT, tuple.second.ToString()));
-			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
-			component.GetReference<Image>("Portrait").sprite = uisprite.first;
+			if (!(prefab == null))
+			{
+				HierarchyReferences component = global::Util.KInstantiateUI(this.buildingPrefab, container, true).GetComponent<HierarchyReferences>();
+				component.GetReference<LocText>("NameLabel").SetText(GameUtil.ApplyBoldString(prefab.GetProperName()));
+				component.GetReference<LocText>("CountLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.BUILDING_COUNT, tuple.second.ToString()));
+				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
+				component.GetReference<Image>("Portrait").sprite = uisprite.first;
+			}
+		}
+	}
+
+	private void DisplayWorlds(RetiredColonyData data, GameObject container)
+	{
+		container.SetActive(data.worldIdentities.Count > 0);
+		for (int i = container.transform.childCount - 1; i >= 0; i--)
+		{
+			global::UnityEngine.Object.Destroy(container.transform.GetChild(i).gameObject);
+		}
+		if (data.worldIdentities.Count <= 0)
+		{
+			return;
+		}
+		using (Dictionary<string, string>.Enumerator enumerator = data.worldIdentities.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				KeyValuePair<string, string> worldPair = enumerator.Current;
+				GameObject gameObject = global::Util.KInstantiateUI(this.worldPrefab, container, true);
+				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+				global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(worldPair.Value);
+				Sprite sprite = ((worldData != null) ? ColonyDestinationAsteroidBeltData.GetUISprite(worldData.asteroidIcon) : null);
+				if (sprite != null)
+				{
+					component.GetReference<Image>("Portrait").sprite = sprite;
+				}
+				gameObject.GetComponent<KButton>().onClick += delegate
+				{
+					this.focusedWorld = worldPair.Key;
+					this.LoadScreenshot(data, this.focusedWorld);
+				};
+			}
 		}
 	}
 
@@ -653,6 +709,10 @@ public class RetiredColonyInfoScreen : KModalScreen
 		LineLayer componentInChildren2 = gameObject.GetComponentInChildren<LineLayer>();
 		componentInChildren.axis_y.min_value = 0f;
 		componentInChildren.axis_y.max_value = statistic.GetByMaxValue().second * 1.2f;
+		if (float.IsNaN(componentInChildren.axis_y.max_value))
+		{
+			componentInChildren.axis_y.max_value = 1f;
+		}
 		componentInChildren.axis_x.min_value = 0f;
 		componentInChildren.axis_x.max_value = statistic.GetByMaxKey().first;
 		componentInChildren.axis_x.guide_frequency = (componentInChildren.axis_x.max_value - componentInChildren.axis_x.min_value) / 10f;
@@ -681,6 +741,10 @@ public class RetiredColonyInfoScreen : KModalScreen
 
 	private void ToggleExplorer(bool active)
 	{
+		if (active && Game.Instance == null)
+		{
+			WorldGen.LoadSettings();
+		}
 		this.ConfigButtons();
 		this.explorerRoot.SetActive(active);
 		this.colonyDataRoot.SetActive(!active);
@@ -714,7 +778,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			RetiredColonyData data = retiredColonyData;
 			GameObject gameObject = global::Util.KInstantiateUI(this.colonyButtonPrefab, this.explorerGrid, true);
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(RetireColonyUtility.StripInvalidCharacters(data.colonyName));
+			Sprite sprite = RetireColonyUtility.LoadRetiredColonyPreview(RetireColonyUtility.StripInvalidCharacters(data.colonyName), data.startWorld);
 			Image reference = component.GetReference<Image>("ColonyImage");
 			RectTransform reference2 = component.GetReference<RectTransform>("PreviewUnavailableText");
 			if (sprite != null)
@@ -740,7 +804,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			while (this.explorerColonyWidgets.ContainsKey(text))
 			{
 				num++;
-				text = retiredColonyData.colonyName + "_" + num;
+				text = retiredColonyData.colonyName + "_" + num.ToString();
 			}
 			this.explorerColonyWidgets.Add(text, gameObject);
 		}
@@ -815,6 +879,11 @@ public class RetiredColonyInfoScreen : KModalScreen
 	[Header("Timelapse References")]
 	[SerializeField]
 	private Slideshow slideshow;
+
+	[SerializeField]
+	private GameObject worldPrefab;
+
+	private string focusedWorld;
 
 	private string[] currentSlideshowFiles = new string[0];
 

@@ -33,7 +33,7 @@ public class GameOverScreen : KModalScreen
 
 	private void Dismiss()
 	{
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public KButton DismissButton;

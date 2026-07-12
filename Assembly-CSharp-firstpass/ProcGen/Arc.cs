@@ -9,6 +9,18 @@ namespace ProcGen
 	{
 		public Arc arc { get; private set; }
 
+		public void SetArc(Arc arc)
+		{
+			Debug.Assert(!this.arcSet, "Tried setting up an Arc twice, no go.");
+			this.arc = arc;
+			this.arcSet = true;
+		}
+
+		public void SetType(string type)
+		{
+			this.type = type;
+		}
+
 		public Arc()
 		{
 		}
@@ -23,6 +35,8 @@ namespace ProcGen
 			this.arc = arc;
 			this.type = type;
 		}
+
+		private bool arcSet;
 
 		[Serialize]
 		public string type = "";

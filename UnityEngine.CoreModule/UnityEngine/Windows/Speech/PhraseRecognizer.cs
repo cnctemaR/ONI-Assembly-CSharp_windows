@@ -19,6 +19,7 @@ namespace UnityEngine.Windows.Speech
 		protected static extern IntPtr CreateFromGrammarFile(object self, string grammarFilePath, ConfidenceLevel minimumConfidence);
 
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Start_Internal(IntPtr recognizer);
 

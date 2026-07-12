@@ -9,7 +9,7 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.neutral;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.TagTransition(GameTags.Dead, null, false);
 		this.neutral.EventHandler(GameHashes.SleepFinished, delegate(JoyBehaviourMonitor.Instance smi)
 		{

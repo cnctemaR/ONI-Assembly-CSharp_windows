@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class ForestTreeBranchConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "ForestTreeBranch";
@@ -14,7 +19,7 @@ public class ForestTreeBranchConfig : IEntityConfig
 		float num = 8f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("tree_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 1, tier, default(EffectorValues), SimHashes.Creature, new List<Tag>(), 298.15f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, false, true, 12000f);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, false, true, 12000f, 0f, 980f, "ForestTreeBranchOriginal", global::STRINGS.CREATURES.SPECIES.WOOD_TREE.NAME);
 		gameObject.AddOrGet<TreeBud>();
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<BudUprootedMonitor>();

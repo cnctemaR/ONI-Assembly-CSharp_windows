@@ -250,7 +250,7 @@ public class KAnim
 		{
 			if (index < 0 || index >= this.textureCount)
 			{
-				global::Debug.LogError("Invalid texture index:" + index);
+				global::Debug.LogError("Invalid texture index:" + index.ToString());
 			}
 			return KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag).GetTexure(this.textureStartIdx + index);
 		}

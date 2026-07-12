@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class TuneUpGenerator : ColonyAchievementRequirement
+	public class TuneUpGenerator : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public TuneUpGenerator(float numChoreseToComplete)
 		{
@@ -42,12 +41,7 @@ namespace Database
 			return Math.Abs(num) >= this.numChoreseToComplete;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.numChoreseToComplete);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.numChoreseToComplete = reader.ReadSingle();
 		}

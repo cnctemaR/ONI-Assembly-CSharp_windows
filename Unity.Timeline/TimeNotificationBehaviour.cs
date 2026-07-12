@@ -37,11 +37,15 @@ namespace UnityEngine.Timeline
 		public override void OnGraphStart(Playable playable)
 		{
 			this.SortNotifications();
+			double time = playable.GetTime<Playable>();
 			for (int i = 0; i < this.m_Notifications.Count; i++)
 			{
-				TimeNotificationBehaviour.NotificationEntry notificationEntry = this.m_Notifications[i];
-				notificationEntry.notificationFired = false;
-				this.m_Notifications[i] = notificationEntry;
+				if (this.m_Notifications[i].time > time && !this.m_Notifications[i].triggerOnce)
+				{
+					TimeNotificationBehaviour.NotificationEntry notificationEntry = this.m_Notifications[i];
+					notificationEntry.notificationFired = false;
+					this.m_Notifications[i] = notificationEntry;
+				}
 			}
 			this.m_PreviousTime = playable.GetTime<Playable>();
 		}

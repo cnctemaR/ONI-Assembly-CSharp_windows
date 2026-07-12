@@ -31,14 +31,15 @@ public class JuicerWorkable : Workable, IWorkerPrioritizable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Storage component = base.GetComponent<Storage>();
-		SimUtil.DiseaseInfo diseaseInfo;
 		float num;
-		component.ConsumeAndGetDisease(GameTags.Water, this.juicer.waterMassPerUse, out diseaseInfo, out num);
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num2;
+		component.ConsumeAndGetDisease(GameTags.Water, this.juicer.waterMassPerUse, out num, out diseaseInfo, out num2);
 		GermExposureMonitor.Instance smi = worker.GetSMI<GermExposureMonitor.Instance>();
 		for (int i = 0; i < this.juicer.ingredientTags.Length; i++)
 		{
 			SimUtil.DiseaseInfo diseaseInfo2;
-			component.ConsumeAndGetDisease(this.juicer.ingredientTags[i], this.juicer.ingredientMassesPerUse[i], out diseaseInfo2, out num);
+			component.ConsumeAndGetDisease(this.juicer.ingredientTags[i], this.juicer.ingredientMassesPerUse[i], out num, out diseaseInfo2, out num2);
 			if (smi != null)
 			{
 				smi.TryInjectDisease(diseaseInfo2.idx, diseaseInfo2.count, this.juicer.ingredientTags[i], Sickness.InfectionVector.Digestion);

@@ -79,7 +79,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 		int num = Grid.PosToCell(base.gameObject);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("TouristModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnGantryChanged));
 		this.OnGantryChanged(null);
-		base.Subscribe<TouristModule>(-1056989049, TouristModule.OnSuspendDelegate);
+		base.Subscribe<TouristModule>(-1277991738, TouristModule.OnSuspendDelegate);
 		base.Subscribe<TouristModule>(684616645, TouristModule.OnAssigneeChangedDelegate);
 	}
 
@@ -153,7 +153,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 		public StatesInstance(TouristModule smi)
 			: base(smi)
 		{
-			smi.gameObject.Subscribe(238242047, delegate(object data)
+			smi.gameObject.Subscribe(-887025858, delegate(object data)
 			{
 				smi.SetSuspended(false);
 				smi.ReleaseAstronaut(null, true);
@@ -169,7 +169,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 			default_state = this.idle;
 			this.idle.PlayAnim("grounded", KAnim.PlayMode.Loop).GoTo(this.awaitingTourist);
 			this.awaitingTourist.PlayAnim("grounded", KAnim.PlayMode.Loop).ToggleChore((TouristModule.StatesInstance smi) => smi.master.CreateWorkChore(), this.hasTourist);
-			this.hasTourist.PlayAnim("grounded", KAnim.PlayMode.Loop).EventTransition(GameHashes.LandRocket, this.idle, null).EventTransition(GameHashes.AssigneeChanged, this.idle, null);
+			this.hasTourist.PlayAnim("grounded", KAnim.PlayMode.Loop).EventTransition(GameHashes.RocketLanded, this.idle, null).EventTransition(GameHashes.AssigneeChanged, this.idle, null);
 		}
 
 		public GameStateMachine<TouristModule.States, TouristModule.StatesInstance, TouristModule, object>.State idle;

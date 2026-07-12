@@ -34,7 +34,7 @@ public class ProductInfoScreen : KScreen
 			ToolMenu.Instance.ClearSelection();
 		}
 		this.ClearLabels();
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public new void Awake()
@@ -138,7 +138,7 @@ public class ProductInfoScreen : KScreen
 
 	private void Update()
 	{
-		if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive && this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null && !MaterialSelector.AllowInsufficientMaterialBuild() && this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement))
+		if (!DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive && this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null && !MaterialSelector.AllowInsufficientMaterialBuild() && this.currentDef.Mass[0] > ClusterManager.Instance.activeWorld.worldInventory.GetAmount(this.materialSelectionPanel.CurrentSelectedElement, true))
 		{
 			this.materialSelectionPanel.AutoSelectAvailableMaterial();
 		}
@@ -147,7 +147,7 @@ public class ProductInfoScreen : KScreen
 	private void SetTitle(BuildingDef def)
 	{
 		this.titleBar.SetTitle(def.Name);
-		bool flag = (PlanScreen.Instance != null && PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete);
+		bool flag = (PlanScreen.Instance != null && PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.IsDefBuildable(def)) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete);
 		this.titleBar.GetComponentInChildren<KImage>().ColorState = (flag ? KImage.ColorSelector.Active : KImage.ColorSelector.Disabled);
 	}
 
@@ -224,15 +224,15 @@ public class ProductInfoScreen : KScreen
 				if (dictionary2.TryGetValue(keyValuePair.Key, out num5))
 				{
 					num5 = Mathf.Abs(num4 * num5);
-					text2 = "(+" + num5 + ")";
+					text2 = "(+" + num5.ToString() + ")";
 				}
-				text = string.Concat(new object[]
+				text = string.Concat(new string[]
 				{
 					text,
 					"\n",
 					keyValuePair.Key.Name,
 					": ",
-					num4 + num5,
+					(num4 + num5).ToString(),
 					text2
 				});
 			}
@@ -297,22 +297,12 @@ public class ProductInfoScreen : KScreen
 		this.materialSelectionPanel.gameObject.SetActive(true);
 		Recipe craftRecipe = def.CraftRecipe;
 		this.materialSelectionPanel.ClearSelectActions();
-		this.materialSelectionPanel.ConfigureScreen(craftRecipe);
+		this.materialSelectionPanel.ConfigureScreen(craftRecipe, new MaterialSelectionPanel.GetBuildableStateDelegate(PlanScreen.Instance.IsDefBuildable), new MaterialSelectionPanel.GetBuildableTooltipDelegate(PlanScreen.Instance.GetTooltipForBuildable));
 		this.materialSelectionPanel.ToggleShowDescriptorPanels(false);
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.RefreshScreen));
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.onMenuMaterialChanged));
 		this.materialSelectionPanel.AutoSelectAvailableMaterial();
 		this.ActivateAppropriateTool(def);
-	}
-
-	private bool BuildRequirementsMet(BuildingDef def)
-	{
-		if (DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
-		{
-			return true;
-		}
-		Recipe craftRecipe = def.CraftRecipe;
-		return this.materialSelectionPanel.CanBuild(craftRecipe) && Db.Get().TechItems.IsTechItemComplete(def.PrefabID);
 	}
 
 	private void onMenuMaterialChanged()
@@ -328,7 +318,7 @@ public class ProductInfoScreen : KScreen
 	private void ActivateAppropriateTool(BuildingDef def)
 	{
 		global::Debug.Assert(def != null, "def was null");
-		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(def))
+		if (((PlanScreen.Instance != null) ? PlanScreen.Instance.IsDefBuildable(def) : (BuildMenu.Instance != null && BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete)) && this.materialSelectionPanel.AllSelectorsSelected())
 		{
 			this.onElementsFullySelected.Signal();
 			return;
@@ -339,14 +329,7 @@ public class ProductInfoScreen : KScreen
 			{
 				BuildTool.Instance.Deactivate();
 			}
-			if (PlanScreen.Instance != null)
-			{
-				PrebuildTool.Instance.Activate(def, PlanScreen.Instance.BuildableState(def));
-			}
-			if (BuildMenu.Instance != null)
-			{
-				PrebuildTool.Instance.Activate(def, BuildMenu.Instance.BuildableState(def));
-			}
+			PrebuildTool.Instance.Activate(def, PlanScreen.Instance.GetTooltipForBuildable(def));
 		}
 	}
 
@@ -381,7 +364,7 @@ public class ProductInfoScreen : KScreen
 			return;
 		}
 		this.ClearProduct(true);
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public TitleBar titleBar;

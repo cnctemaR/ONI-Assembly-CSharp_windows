@@ -95,17 +95,23 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			}
 		}
 		Navigator component3 = smi.GetComponent<Navigator>();
+		DrowningMonitor component4 = smi.GetComponent<DrowningMonitor>();
+		bool flag = component4 != null && component4.canDrownToDeath && !component4.livesUnderWater;
 		smi.targetEdible = null;
 		int num6 = -1;
 		foreach (KMonoBehaviour kmonoBehaviour2 in pooledList)
 		{
 			if (!(kmonoBehaviour2 == null))
 			{
-				int navigationCost = component3.GetNavigationCost(Grid.PosToCell(kmonoBehaviour2.gameObject.transform.GetPosition()));
-				if (navigationCost != -1 && (navigationCost < num6 || num6 == -1))
+				int num7 = Grid.PosToCell(kmonoBehaviour2.gameObject.transform.GetPosition());
+				if (!flag || component4.IsCellSafe(num7))
 				{
-					num6 = navigationCost;
-					smi.targetEdible = kmonoBehaviour2.gameObject;
+					int navigationCost = component3.GetNavigationCost(num7);
+					if (navigationCost != -1 && (navigationCost < num6 || num6 == -1))
+					{
+						num6 = navigationCost;
+						smi.targetEdible = kmonoBehaviour2.gameObject;
+					}
 				}
 			}
 		}

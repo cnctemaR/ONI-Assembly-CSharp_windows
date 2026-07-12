@@ -105,15 +105,15 @@ namespace UnityEngine.Jobs
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Add(IntPtr transformArrayIntPtr, Transform transform);
 
-		[NativeMethod(Name = "TransformAccessArrayBindings::RemoveAtSwapBack", IsFreeFunction = true)]
+		[NativeMethod(Name = "TransformAccessArrayBindings::RemoveAtSwapBack", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void RemoveAtSwapBack(IntPtr transformArrayIntPtr, int index);
 
-		[NativeMethod(Name = "TransformAccessArrayBindings::GetSortedTransformAccess", IsThreadSafe = true, IsFreeFunction = true)]
+		[NativeMethod(Name = "TransformAccessArrayBindings::GetSortedTransformAccess", IsThreadSafe = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern IntPtr GetSortedTransformAccess(IntPtr transformArrayIntPtr);
 
-		[NativeMethod(Name = "TransformAccessArrayBindings::GetSortedToUserIndex", IsThreadSafe = true, IsFreeFunction = true)]
+		[NativeMethod(Name = "TransformAccessArrayBindings::GetSortedToUserIndex", IsThreadSafe = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern IntPtr GetSortedToUserIndex(IntPtr transformArrayIntPtr);
 
@@ -129,11 +129,11 @@ namespace UnityEngine.Jobs
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SetCapacity(IntPtr transformArrayIntPtr, int capacity);
 
-		[NativeMethod(Name = "TransformAccessArrayBindings::GetTransform", IsFreeFunction = true)]
+		[NativeMethod(Name = "TransformAccessArrayBindings::GetTransform", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Transform GetTransform(IntPtr transformArrayIntPtr, int index);
 
-		[NativeMethod(Name = "TransformAccessArrayBindings::SetTransform", IsFreeFunction = true)]
+		[NativeMethod(Name = "TransformAccessArrayBindings::SetTransform", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SetTransform(IntPtr transformArrayIntPtr, int index, Transform transform);
 

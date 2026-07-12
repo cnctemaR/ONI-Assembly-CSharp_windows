@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class TouristModuleConfig : IBuildingConfig
 {
+	public override string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_VANILLA_ONLY;
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "TouristModule";
@@ -15,11 +20,11 @@ public class TouristModuleConfig : IBuildingConfig
 		float[] command_MODULE_MASS = BUILDINGS.ROCKETRY_MASS_KG.COMMAND_MODULE_MASS;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, command_MODULE_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -27,6 +32,7 @@ public class TouristModuleConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.CanMove = true;
+		buildingDef.Cancellable = false;
 		return buildingDef;
 	}
 
@@ -35,7 +41,6 @@ public class TouristModuleConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_tourist_bg_kanim"));
 		go.AddOrGet<TouristModule>();
 		go.AddOrGet<CommandModuleWorkable>();
 		go.AddOrGet<ArtifactFinder>();
@@ -49,10 +54,10 @@ public class TouristModuleConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_tourist_bg_kanim", false);
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.RocketCommandModule.Id;
 		ownable.canBePublic = false;
-		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 
 	public const string ID = "TouristModule";

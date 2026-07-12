@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
@@ -16,19 +17,28 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 20))
+		{
+			this.filterByStorageCategoriesOnSpawn = false;
+		}
+	}
+
 	private void OnDiscover(Tag category_tag, Tag tag)
 	{
 		if (this.storage.storageFilters.Contains(category_tag))
 		{
 			bool flag = false;
-			if (WorldInventory.Instance.GetDiscoveredResourcesFromTag(category_tag).Count <= 1)
+			if (DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(category_tag).Count <= 1)
 			{
 				foreach (Tag tag2 in this.storage.storageFilters)
 				{
-					if (!(tag2 == category_tag) && WorldInventory.Instance.IsDiscovered(tag2))
+					if (!(tag2 == category_tag) && DiscoveredResources.Instance.IsDiscovered(tag2))
 					{
 						flag = true;
-						foreach (Tag tag3 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2))
+						foreach (Tag tag3 in DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(tag2))
 						{
 							if (!this.acceptedTags.Contains(tag3))
 							{
@@ -42,7 +52,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 					return;
 				}
 			}
-			foreach (Tag tag4 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(category_tag))
+			foreach (Tag tag4 in DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(category_tag))
 			{
 				if (!(tag4 == tag) && !this.acceptedTags.Contains(tag4))
 				{
@@ -61,8 +71,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnSpawn()
 	{
-		WorldInventory.Instance.OnDiscover += this.OnDiscover;
-		if (this.storage != null)
+		DiscoveredResources.Instance.OnDiscover += this.OnDiscover;
+		if (this.autoSelectStoredOnLoad && this.storage != null)
 		{
 			List<Tag> list = new List<Tag>();
 			list.AddRange(this.acceptedTags);
@@ -73,7 +83,11 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		{
 			this.OnFilterChanged(this.acceptedTags.ToArray());
 		}
-		this.RemoveIncorrectAcceptedTags();
+		this.RefreshTint();
+		if (this.filterByStorageCategoriesOnSpawn)
+		{
+			this.RemoveIncorrectAcceptedTags();
+		}
 	}
 
 	private void RemoveIncorrectAcceptedTags()
@@ -84,7 +98,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 			bool flag = false;
 			foreach (Tag tag2 in this.storage.storageFilters)
 			{
-				if (WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2).Contains(tag))
+				if (DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(tag2).Contains(tag))
 				{
 					flag = true;
 					break;
@@ -103,7 +117,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
-		WorldInventory.Instance.OnDiscover -= this.OnDiscover;
+		DiscoveredResources.Instance.OnDiscover -= this.OnDiscover;
 		base.OnCleanUp();
 	}
 
@@ -154,7 +168,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		{
 			this.OnFilterChanged(this.acceptedTags.ToArray());
 		}
-		if (this.storage != null && this.storage.items != null)
+		this.RefreshTint();
+		if (this.dropIncorrectOnFilterChange && this.storage != null && this.storage.items != null)
 		{
 			List<GameObject> list = new List<GameObject>();
 			foreach (GameObject gameObject in this.storage.items)
@@ -209,13 +224,36 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		return text;
 	}
 
+	private void RefreshTint()
+	{
+		bool flag = this.acceptedTags != null && this.acceptedTags.Count != 0;
+		base.GetComponent<KBatchedAnimController>().TintColour = (flag ? this.filterTint : this.noFilterTint);
+		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);
+	}
+
 	[MyCmpReq]
 	private Storage storage;
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;
 
+	public static readonly Color32 FILTER_TINT = Color.white;
+
+	public static readonly Color32 NO_FILTER_TINT = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
+
+	public Color32 filterTint = TreeFilterable.FILTER_TINT;
+
+	public Color32 noFilterTint = TreeFilterable.NO_FILTER_TINT;
+
+	[SerializeField]
+	public bool dropIncorrectOnFilterChange = true;
+
+	[SerializeField]
+	public bool autoSelectStoredOnLoad = true;
+
 	public bool showUserMenu = true;
+
+	public bool filterByStorageCategoriesOnSpawn = true;
 
 	[SerializeField]
 	[Serialize]

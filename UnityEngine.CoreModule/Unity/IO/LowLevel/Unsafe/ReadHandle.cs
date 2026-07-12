@@ -62,22 +62,22 @@ namespace Unity.IO.LowLevel.Unsafe
 			return ReadHandle.GetReadStatus_Injected(ref handle);
 		}
 
-		[ThreadAndSerializationSafe]
 		[FreeFunction("AsyncReadManagerManaged::ReleaseReadHandle", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
 		private static void ReleaseReadHandle(ReadHandle handle)
 		{
 			ReadHandle.ReleaseReadHandle_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::IsReadHandleValid", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::IsReadHandleValid", IsThreadSafe = true)]
 		private static bool IsReadHandleValid(ReadHandle handle)
 		{
 			return ReadHandle.IsReadHandleValid_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::GetJobHandle", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetJobHandle", IsThreadSafe = true)]
 		private static JobHandle GetJobHandle(ReadHandle handle)
 		{
 			JobHandle jobHandle;

@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class RequireAttachedComponent : RocketLaunchCondition
+public class RequireAttachedComponent : ProcessCondition
 {
 	public Type RequiredType
 	{
@@ -27,7 +27,7 @@ public class RequireAttachedComponent : RocketLaunchCondition
 		this.typeNameString = type_name_string;
 	}
 
-	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
+	public override ProcessCondition.Status EvaluateCondition()
 	{
 		if (this.myAttachable != null)
 		{
@@ -37,31 +37,32 @@ public class RequireAttachedComponent : RocketLaunchCondition
 				{
 					if (enumerator.Current.GetComponent(this.requiredType))
 					{
-						return RocketLaunchCondition.LaunchStatus.Ready;
+						return ProcessCondition.Status.Ready;
 					}
 				}
 			}
-			return RocketLaunchCondition.LaunchStatus.Failure;
+			return ProcessCondition.Status.Failure;
 		}
-		return RocketLaunchCondition.LaunchStatus.Failure;
+		return ProcessCondition.Status.Failure;
 	}
 
-	public override string GetLaunchStatusMessage(bool ready)
+	public override string GetStatusMessage(ProcessCondition.Status status)
 	{
-		if (ready)
-		{
-			return this.typeNameString + " " + UI.STARMAP.LAUNCHCHECKLIST.REQUIRED;
-		}
-		return this.typeNameString + " " + UI.STARMAP.LAUNCHCHECKLIST.INSTALLED;
+		return this.typeNameString;
 	}
 
-	public override string GetLaunchStatusTooltip(bool ready)
+	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
-		if (ready)
+		if (status == ProcessCondition.Status.Ready)
 		{
-			return string.Format(UI.STARMAP.LAUNCHCHECKLIST.INSTALLED_TOOLTIP, this.typeNameString);
+			return string.Format(UI.STARMAP.LAUNCHCHECKLIST.INSTALLED_TOOLTIP, this.typeNameString.ToLower());
 		}
-		return string.Format(UI.STARMAP.LAUNCHCHECKLIST.REQUIRED_TOOLTIP, this.typeNameString);
+		return string.Format(UI.STARMAP.LAUNCHCHECKLIST.MISSING_TOOLTIP, this.typeNameString.ToLower());
+	}
+
+	public override bool ShowInUI()
+	{
+		return true;
 	}
 
 	private string typeNameString;

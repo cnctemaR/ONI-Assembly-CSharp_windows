@@ -6,6 +6,7 @@ namespace UnityEngine.Timeline
 {
 	[TrackBindingType(typeof(GameObject))]
 	[HideInMenu]
+	[ExcludeFromPreset]
 	[Serializable]
 	public class MarkerTrack : TrackAsset
 	{

@@ -6,6 +6,12 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/SweepBotStation")]
 public class SweepBotStation : KMonoBehaviour
 {
+	public void SetStorages(Storage botMaterialStorage, Storage sweepStorage)
+	{
+		this.botMaterialStorage = botMaterialStorage;
+		this.sweepStorage = sweepStorage;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		this.Initialize(false);
@@ -22,8 +28,6 @@ public class SweepBotStation : KMonoBehaviour
 	{
 		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		this.meter = new MeterController(base.gameObject.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_frame", "meter_level" });
-		this.botMaterialStorage = base.GetComponents<Storage>()[0];
-		this.sweepStorage = base.GetComponents<Storage>()[1];
 		if (this.sweepBot == null || this.sweepBot.Get() == null)
 		{
 			this.RequestNewSweepBot(null);
@@ -211,9 +215,11 @@ public class SweepBotStation : KMonoBehaviour
 
 	private MeterController meter;
 
-	private Storage sweepStorage;
-
+	[SerializeField]
 	private Storage botMaterialStorage;
+
+	[SerializeField]
+	private Storage sweepStorage;
 
 	private SchedulerHandle newSweepyHandle;
 

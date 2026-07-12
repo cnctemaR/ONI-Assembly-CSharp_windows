@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Klei;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGen;
@@ -38,16 +36,62 @@ public class CustomGameSettings : KMonoBehaviour
 			}
 			this.CurrentQualityLevelsBySetting.Remove("CarePackages ");
 		}
+		this.CurrentQualityLevelsBySetting.Remove("Expansion1Active");
+		if (!DlcManager.IsExpansion1Active())
+		{
+			foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
+			{
+				SettingConfig value = keyValuePair.Value;
+				if (!DlcManager.IsVanillaId(value.required_content))
+				{
+					global::Debug.Assert(value.required_content == "EXPANSION1_ID", "A new expansion setting has been added, but its deserialization has not been implemented.");
+					if (this.CurrentQualityLevelsBySetting.ContainsKey(value.id))
+					{
+						global::Debug.Assert(this.CurrentQualityLevelsBySetting[value.id] == value.missing_content_default, string.Format("This save has Expansion1 content disabled, but its expansion1-dependent setting {0} is set to {1}", value.id, this.CurrentQualityLevelsBySetting[value.id]));
+					}
+					else
+					{
+						this.SetQualitySetting(value, value.missing_content_default);
+					}
+				}
+			}
+		}
+		string clusterDefaultName;
+		this.CurrentQualityLevelsBySetting.TryGetValue(CustomGameSettingConfigs.ClusterLayout.id, out clusterDefaultName);
+		if (clusterDefaultName.IsNullOrWhiteSpace())
+		{
+			DebugUtil.DevAssert(!DlcManager.IsExpansion1Active(), "Deserializing CustomGameSettings.ClusterLayout: ClusterLayout is blank, using default cluster instead", null);
+			clusterDefaultName = WorldGenSettings.ClusterDefaultName;
+			this.SetQualitySetting(CustomGameSettingConfigs.ClusterLayout, clusterDefaultName);
+		}
+		if (!SettingsCache.clusterLayouts.clusterCache.ContainsKey(clusterDefaultName))
+		{
+			global::Debug.Log("Deserializing CustomGameSettings.ClusterLayout: '" + clusterDefaultName + "' doesn't exist in the clusterCache, trying to rewrite path to scoped path.");
+			string text = SettingsCache.GetScope("EXPANSION1_ID") + clusterDefaultName;
+			if (SettingsCache.clusterLayouts.clusterCache.ContainsKey(text))
+			{
+				global::Debug.Log(string.Concat(new string[] { "Deserializing CustomGameSettings.ClusterLayout: Success in rewriting ClusterLayout '", clusterDefaultName, "' to '", text, "'" }));
+				this.SetQualitySetting(CustomGameSettingConfigs.ClusterLayout, text);
+			}
+			else
+			{
+				global::Debug.LogWarning("Deserializing CustomGameSettings.ClusterLayout: Failed to find cluster '" + clusterDefaultName + "' including the scoped path, setting to default cluster name.");
+				global::Debug.Log("ClusterCache: " + string.Join(",", SettingsCache.clusterLayouts.clusterCache.Keys));
+				this.SetQualitySetting(CustomGameSettingConfigs.ClusterLayout, WorldGenSettings.ClusterDefaultName);
+			}
+		}
+		this.CheckCustomGameMode();
 	}
 
 	protected override void OnPrefabInit()
 	{
 		CustomGameSettings.instance = this;
-		this.AddSettingConfig(CustomGameSettingConfigs.World);
+		this.AddSettingConfig(CustomGameSettingConfigs.ClusterLayout);
 		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
 		this.AddSettingConfig(CustomGameSettingConfigs.ImmuneSystem);
 		this.AddSettingConfig(CustomGameSettingConfigs.CalorieBurn);
 		this.AddSettingConfig(CustomGameSettingConfigs.Morale);
+		this.AddSettingConfig(CustomGameSettingConfigs.Durability);
 		this.AddSettingConfig(CustomGameSettingConfigs.Stress);
 		this.AddSettingConfig(CustomGameSettingConfigs.StressBreaks);
 		this.AddSettingConfig(CustomGameSettingConfigs.CarePackages);
@@ -57,6 +101,10 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			this.AddSettingConfig(CustomGameSettingConfigs.SaveToCloud);
 		}
+		if (DlcManager.IsExpansion1Active())
+		{
+			this.AddSettingConfig(CustomGameSettingConfigs.Teleporters);
+		}
 		this.VerifySettingCoordinates();
 	}
 
@@ -65,7 +113,7 @@ public class CustomGameSettings : KMonoBehaviour
 		this.customGameMode = CustomGameSettings.CustomGameMode.Survival;
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
-			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.default_level_id);
+			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.GetDefaultLevelId());
 		}
 	}
 
@@ -74,7 +122,7 @@ public class CustomGameSettings : KMonoBehaviour
 		this.customGameMode = CustomGameSettings.CustomGameMode.Nosweat;
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
-			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.nosweat_default_level_id);
+			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.GetNoSweatDefaultLevelId());
 		}
 	}
 
@@ -93,6 +141,15 @@ public class CustomGameSettings : KMonoBehaviour
 	public void SetQualitySetting(SettingConfig config, string value)
 	{
 		this.CurrentQualityLevelsBySetting[config.id] = value;
+		this.CheckCustomGameMode();
+		if (this.OnSettingChanged != null)
+		{
+			this.OnSettingChanged(config, this.GetCurrentQualitySetting(config));
+		}
+	}
+
+	private void CheckCustomGameMode()
+	{
 		bool flag = true;
 		bool flag2 = true;
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
@@ -103,11 +160,11 @@ public class CustomGameSettings : KMonoBehaviour
 			}
 			else if (this.QualitySettings[keyValuePair.Key].triggers_custom_game)
 			{
-				if (keyValuePair.Value != this.QualitySettings[keyValuePair.Key].default_level_id)
+				if (keyValuePair.Value != this.QualitySettings[keyValuePair.Key].GetDefaultLevelId())
 				{
 					flag = false;
 				}
-				if (keyValuePair.Value != this.QualitySettings[keyValuePair.Key].nosweat_default_level_id)
+				if (keyValuePair.Value != this.QualitySettings[keyValuePair.Key].GetNoSweatDefaultLevelId())
 				{
 					flag2 = false;
 				}
@@ -135,10 +192,6 @@ public class CustomGameSettings : KMonoBehaviour
 			DebugUtil.LogArgs(new object[] { "Game mode changed from", this.customGameMode, "to", customGameMode });
 			this.customGameMode = customGameMode;
 		}
-		if (this.OnSettingChanged != null)
-		{
-			this.OnSettingChanged(config, this.GetCurrentQualitySetting(config));
-		}
 	}
 
 	public SettingLevel GetCurrentQualitySetting(SettingConfig setting)
@@ -151,17 +204,17 @@ public class CustomGameSettings : KMonoBehaviour
 		SettingConfig settingConfig = this.QualitySettings[setting_id];
 		if (this.customGameMode == CustomGameSettings.CustomGameMode.Survival && settingConfig.triggers_custom_game)
 		{
-			return settingConfig.GetLevel(settingConfig.default_level_id);
+			return settingConfig.GetLevel(settingConfig.GetDefaultLevelId());
 		}
 		if (this.customGameMode == CustomGameSettings.CustomGameMode.Nosweat && settingConfig.triggers_custom_game)
 		{
-			return settingConfig.GetLevel(settingConfig.nosweat_default_level_id);
+			return settingConfig.GetLevel(settingConfig.GetNoSweatDefaultLevelId());
 		}
 		if (!this.CurrentQualityLevelsBySetting.ContainsKey(setting_id))
 		{
-			this.CurrentQualityLevelsBySetting[setting_id] = this.QualitySettings[setting_id].default_level_id;
+			this.CurrentQualityLevelsBySetting[setting_id] = this.QualitySettings[setting_id].GetDefaultLevelId();
 		}
-		string text = this.CurrentQualityLevelsBySetting[setting_id];
+		string text = (DlcManager.IsContentActive(settingConfig.required_content) ? this.CurrentQualityLevelsBySetting[setting_id] : settingConfig.GetDefaultLevelId());
 		return this.QualitySettings[setting_id].GetLevel(text);
 	}
 
@@ -205,36 +258,22 @@ public class CustomGameSettings : KMonoBehaviour
 		this.QualitySettings.Add(config.id, config);
 		if (!this.CurrentQualityLevelsBySetting.ContainsKey(config.id) || string.IsNullOrEmpty(this.CurrentQualityLevelsBySetting[config.id]))
 		{
-			this.CurrentQualityLevelsBySetting[config.id] = config.default_level_id;
+			this.CurrentQualityLevelsBySetting[config.id] = config.GetDefaultLevelId();
 		}
 	}
 
-	private static void AddWorldMods(object user_data, List<SettingLevel> levels)
+	public void LoadClusters()
 	{
-		string text = FileSystem.Normalize(global::System.IO.Path.Combine(SettingsCache.GetPath(), "worlds"));
-		ListPool<string, CustomGameSettings>.PooledList pooledList = ListPool<string, CustomGameSettings>.Allocate();
-		FileSystem.GetFiles(text, "*.yaml", pooledList);
-		foreach (string text2 in pooledList)
-		{
-			global::ProcGen.World world = YamlIO.LoadFile<global::ProcGen.World>(text2, null, null);
-			string worldName = Worlds.GetWorldName(text2);
-			levels.Add(new SettingLevel(worldName, world.name, world.description, 0, user_data));
-		}
-		pooledList.Recycle();
-	}
-
-	public void LoadWorlds()
-	{
-		Dictionary<string, global::ProcGen.World> worldCache = SettingsCache.worlds.worldCache;
-		List<SettingLevel> list = new List<SettingLevel>(worldCache.Count);
-		foreach (KeyValuePair<string, global::ProcGen.World> keyValuePair in worldCache)
+		Dictionary<string, ClusterLayout> clusterCache = SettingsCache.clusterLayouts.clusterCache;
+		List<SettingLevel> list = new List<SettingLevel>(clusterCache.Count);
+		foreach (KeyValuePair<string, ClusterLayout> keyValuePair in clusterCache)
 		{
 			StringEntry stringEntry;
 			string text = (Strings.TryGet(new StringKey(keyValuePair.Value.name), out stringEntry) ? stringEntry.ToString() : keyValuePair.Value.name);
 			string text2 = (Strings.TryGet(new StringKey(keyValuePair.Value.description), out stringEntry) ? stringEntry.ToString() : keyValuePair.Value.description);
 			list.Add(new SettingLevel(keyValuePair.Key, text, text2, 0, null));
 		}
-		CustomGameSettingConfigs.World.StompLevels(list, "worlds/SandstoneDefault", "worlds/SandstoneDefault");
+		CustomGameSettingConfigs.ClusterLayout.StompLevels(list, WorldGenSettings.ClusterDefaultName, WorldGenSettings.ClusterDefaultName);
 	}
 
 	public void Print()
@@ -259,12 +298,12 @@ public class CustomGameSettings : KMonoBehaviour
 				{
 					if (mode == CustomGameSettings.CustomGameMode.Nosweat)
 					{
-						text = keyValuePair.Value.nosweat_default_level_id;
+						text = keyValuePair.Value.GetNoSweatDefaultLevelId();
 					}
 				}
 				else
 				{
-					text = keyValuePair.Value.default_level_id;
+					text = keyValuePair.Value.GetDefaultLevelId();
 				}
 				if (data.ContainsKey(keyValuePair.Key) && data[keyValuePair.Key] != text)
 				{
@@ -330,13 +369,13 @@ public class CustomGameSettings : KMonoBehaviour
 				if (keyValuePair.Value.coordinate_dimension_width < levels.Count)
 				{
 					flag = true;
-					global::Debug.Assert(false, string.Concat(new object[]
+					global::Debug.Assert(false, string.Concat(new string[]
 					{
 						keyValuePair.Value.id,
 						": Range between coordinate min and max insufficient for all levels (",
-						keyValuePair.Value.coordinate_dimension_width,
+						keyValuePair.Value.coordinate_dimension_width.ToString(),
 						"<",
-						levels.Count,
+						levels.Count.ToString(),
 						")"
 					}));
 				}
@@ -351,7 +390,7 @@ public class CustomGameSettings : KMonoBehaviour
 					}
 					else if (settingLevel.coordinate_offset == 0)
 					{
-						if (settingLevel.id != keyValuePair.Value.default_level_id)
+						if (settingLevel.id != keyValuePair.Value.GetDefaultLevelId())
 						{
 							flag = true;
 							global::Debug.Assert(false, text + ": Only the default level should have a coordinate offset of 0");
@@ -367,7 +406,7 @@ public class CustomGameSettings : KMonoBehaviour
 						string text2;
 						bool flag2 = !dictionary.TryGetValue(num, out text2);
 						dictionary[num] = text;
-						if (settingLevel.id == keyValuePair.Value.default_level_id)
+						if (settingLevel.id == keyValuePair.Value.GetDefaultLevelId())
 						{
 							flag = true;
 							global::Debug.Assert(false, text + ": Default level must be coordinate 0");
@@ -384,7 +423,7 @@ public class CustomGameSettings : KMonoBehaviour
 		return flag;
 	}
 
-	public string[] ParseSettingCoordinate(string coord)
+	public static string[] ParseSettingCoordinate(string coord)
 	{
 		Match match = new Regex("(.*)-(.*)-(.*)").Match(coord);
 		string[] array = new string[match.Groups.Count];
@@ -397,10 +436,18 @@ public class CustomGameSettings : KMonoBehaviour
 
 	public string GetSettingsCoordinate()
 	{
-		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id);
-		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout);
+		if (currentQualitySetting == null)
+		{
+			DebugUtil.DevLogError("GetSettingsCoordinate: clusterLayoutSetting is null, returning '0' coordinate");
+			CustomGameSettings.Instance.Print();
+			global::Debug.Log("ClusterCache: " + string.Join(",", SettingsCache.clusterLayouts.clusterCache.Keys));
+			return "0-0-0";
+		}
+		ClusterLayout clusterData = SettingsCache.clusterLayouts.GetClusterData(currentQualitySetting.id);
+		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
 		string otherSettingsCode = this.GetOtherSettingsCode();
-		return string.Format("{0}-{1}-{2}", worldData.GetCoordinatePrefix(), currentQualitySetting.id, otherSettingsCode);
+		return string.Format("{0}-{1}-{2}", clusterData.GetCoordinatePrefix(), currentQualitySetting2.id, otherSettingsCode);
 	}
 
 	public void ParseAndApplySettingsCode(string code)

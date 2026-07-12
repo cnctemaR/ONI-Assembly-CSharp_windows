@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class ChlorineGeyserConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "ChlorineGeyser";
@@ -16,7 +21,7 @@ public class ChlorineGeyserConfig : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("geyser_side_chlorine_kanim"), "inactive", Grid.SceneLayer.BuildingBack, 4, 2, tier, tier2, SimHashes.Creature, null, 293f);
 		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.DeprecatedContent, false);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.IgneousRock);
+		component.SetElement(SimHashes.IgneousRock, true);
 		component.Temperature = 372.15f;
 		gameObject.AddOrGet<Geyser>().outputOffset = new Vector2I(0, 1);
 		GeyserConfigurator geyserConfigurator = gameObject.AddOrGet<GeyserConfigurator>();

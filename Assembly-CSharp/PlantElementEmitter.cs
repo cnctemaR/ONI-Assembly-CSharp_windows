@@ -43,7 +43,7 @@ public class PlantElementEmitter : StateMachineComponent<PlantElementEmitter.Sta
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.healthy;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.healthy.EventTransition(GameHashes.Wilt, this.wilted, (PlantElementEmitter.StatesInstance smi) => smi.IsWilting()).Update("PlantEmit", delegate(PlantElementEmitter.StatesInstance smi, float dt)
 			{
 				SimMessages.EmitMass(Grid.PosToCell(smi.master.gameObject), ElementLoader.FindElementByHash(smi.master.emittedElement).idx, smi.master.emitRate * dt, ElementLoader.FindElementByHash(smi.master.emittedElement).defaultValues.temperature, byte.MaxValue, 0, -1);

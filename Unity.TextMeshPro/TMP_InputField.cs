@@ -1463,7 +1463,7 @@ namespace TMPro
 				if (type - EventType.ValidateCommand <= 1)
 				{
 					string commandName = this.m_ProcessingEvent.commandName;
-					if (commandName == "SelectAll")
+					if (commandName != null && commandName == "SelectAll")
 					{
 						this.SelectAll();
 						flag = true;
@@ -2556,17 +2556,19 @@ namespace TMPro
 				catch (Exception ex)
 				{
 					Debug.LogWarning(ex);
-					Debug.LogWarning("textInfo.characterInfo= " + textInfo.characterInfo);
+					string text = "textInfo.characterInfo= ";
+					TMP_CharacterInfo[] characterInfo = textInfo.characterInfo;
+					Debug.LogWarning(text + ((characterInfo != null) ? characterInfo.ToString() : null));
 					Debug.LogWarning("caretSelectPositionInternal= " + this.caretSelectPositionInternal.ToString());
 					Debug.LogWarning("textInfo.characterInfo.Length= " + textInfo.characterInfo.Length.ToString());
-					string text = "";
+					string text2 = "";
 					Transform transform = base.transform;
 					while (transform != null)
 					{
-						text = transform.name + "." + text;
+						text2 = transform.name + "." + text2;
 						transform = transform.parent;
 					}
-					Debug.LogWarning(text);
+					Debug.LogWarning(text2);
 					num = tmp_CharacterInfo2.ascender - tmp_CharacterInfo2.descender;
 				}
 			}

@@ -130,17 +130,7 @@ namespace UnityEngine.TextCore
 		public static bool IsMaskingEnabled(Material material)
 		{
 			bool flag = material == null || !material.HasProperty(ShaderUtilities.ID_ClipRect);
-			bool flag2;
-			if (flag)
-			{
-				flag2 = false;
-			}
-			else
-			{
-				bool flag3 = material.shaderKeywords.Contains(ShaderUtilities.Keyword_MASK_SOFT) || material.shaderKeywords.Contains(ShaderUtilities.Keyword_MASK_HARD) || material.shaderKeywords.Contains(ShaderUtilities.Keyword_MASK_TEX);
-				flag2 = flag3;
-			}
-			return flag2;
+			return !flag && (material.shaderKeywords.Contains(ShaderUtilities.Keyword_MASK_SOFT) || material.shaderKeywords.Contains(ShaderUtilities.Keyword_MASK_HARD) || material.shaderKeywords.Contains(ShaderUtilities.Keyword_MASK_TEX));
 		}
 
 		public static float GetPadding(Material material, bool enableExtraPadding, bool isBold)

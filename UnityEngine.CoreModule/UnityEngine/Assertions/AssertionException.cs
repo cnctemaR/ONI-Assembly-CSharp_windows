@@ -18,7 +18,7 @@ namespace UnityEngine.Assertions
 				bool flag = this.m_UserMessage != null;
 				if (flag)
 				{
-					text = text + "\n" + this.m_UserMessage;
+					text = this.m_UserMessage + "\n" + text;
 				}
 				return text;
 			}

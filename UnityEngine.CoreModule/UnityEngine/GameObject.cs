@@ -10,8 +10,8 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Export/Scripting/GameObject.bindings.h")]
+	[ExcludeFromPreset]
 	[UsedByNativeCode]
 	public sealed class GameObject : Object
 	{
@@ -46,8 +46,8 @@ namespace UnityEngine
 			return this.GetComponentByName(type);
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::GetComponentInChildren", HasExplicitThis = true, ThrowsException = true)]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		[FreeFunction(Name = "GameObjectBindings::GetComponentInChildren", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Component GetComponentInChildren(Type type, bool includeInactive);
 
@@ -69,14 +69,27 @@ namespace UnityEngine
 			return (T)((object)this.GetComponentInChildren(typeof(T), includeInactive));
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[FreeFunction(Name = "GameObjectBindings::GetComponentInParent", HasExplicitThis = true, ThrowsException = true)]
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Component GetComponentInParent(Type type);
+		public extern Component GetComponentInParent(Type type, bool includeInactive);
 
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		public Component GetComponentInParent(Type type)
+		{
+			return this.GetComponentInParent(type, false);
+		}
+
+		[ExcludeFromDocs]
 		public T GetComponentInParent<T>()
 		{
-			return (T)((object)this.GetComponentInParent(typeof(T)));
+			bool flag = false;
+			return this.GetComponentInParent<T>(flag);
+		}
+
+		public T GetComponentInParent<T>([DefaultValue("false")] bool includeInactive)
+		{
+			return (T)((object)this.GetComponentInParent(typeof(T), includeInactive));
 		}
 
 		[FreeFunction(Name = "GameObjectBindings::GetComponentsInternal", HasExplicitThis = true, ThrowsException = true)]
@@ -100,7 +113,7 @@ namespace UnityEngine
 
 		public void GetComponents<T>(List<T> results)
 		{
-			this.GetComponentsInternal(typeof(T), false, false, true, false, results);
+			this.GetComponentsInternal(typeof(T), true, false, true, false, results);
 		}
 
 		[ExcludeFromDocs]
@@ -270,8 +283,8 @@ namespace UnityEngine
 			get;
 		}
 
-		[NativeMethod(Name = "SetActiveRecursivelyDeprecated")]
 		[Obsolete("gameObject.SetActiveRecursively() is obsolete. Use GameObject.SetActive(), which is now inherited by children.")]
+		[NativeMethod(Name = "SetActiveRecursivelyDeprecated")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetActiveRecursively(bool state);
 

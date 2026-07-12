@@ -38,17 +38,17 @@ namespace UnityEngine
 			bool flag2 = lengthSec <= 0;
 			if (flag2)
 			{
-				throw new ArgumentException("Length of recording must be greater than zero seconds (was: " + lengthSec + " seconds)");
+				throw new ArgumentException("Length of recording must be greater than zero seconds (was: " + lengthSec.ToString() + " seconds)");
 			}
 			bool flag3 = lengthSec > 3600;
 			if (flag3)
 			{
-				throw new ArgumentException("Length of recording must be less than one hour (was: " + lengthSec + " seconds)");
+				throw new ArgumentException("Length of recording must be less than one hour (was: " + lengthSec.ToString() + " seconds)");
 			}
 			bool flag4 = frequency <= 0;
 			if (flag4)
 			{
-				throw new ArgumentException("Frequency of recording must be greater than zero (was: " + frequency + " Hz)");
+				throw new ArgumentException("Frequency of recording must be greater than zero (was: " + frequency.ToString() + " Hz)");
 			}
 			return Microphone.StartRecord(microphoneDeviceIDFromName, loop, (float)lengthSec, frequency);
 		}

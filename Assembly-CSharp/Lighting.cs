@@ -23,12 +23,14 @@ public class Lighting : MonoBehaviour
 	{
 		Shader.SetGlobalInt("_LiquidZ", -28);
 		Shader.SetGlobalInt("_SceneLayerMax", 34);
-		Shader.SetGlobalColor("_StateTransitionColour", this.Settings.StateTransitionColor);
 		Shader.SetGlobalVector("_DigMapMapParameters", new Vector4(this.Settings.DigMapColour.r, this.Settings.DigMapColour.g, this.Settings.DigMapColour.b, this.Settings.DigMapScale));
 		Shader.SetGlobalTexture("_DigDamageMap", this.Settings.DigDamageMap);
 		Shader.SetGlobalTexture("_StateTransitionMap", this.Settings.StateTransitionMap);
 		Shader.SetGlobalColor("_StateTransitionColor", this.Settings.StateTransitionColor);
 		Shader.SetGlobalVector("_StateTransitionParameters", new Vector4(1f / this.Settings.StateTransitionUVScale, this.Settings.StateTransitionUVOffsetRate.x, this.Settings.StateTransitionUVOffsetRate.y, 0f));
+		Shader.SetGlobalTexture("_FallingSolidMap", this.Settings.FallingSolidMap);
+		Shader.SetGlobalColor("_FallingSolidColor", this.Settings.FallingSolidColor);
+		Shader.SetGlobalVector("_FallingSolidParameters", new Vector4(1f / this.Settings.FallingSolidUVScale, this.Settings.FallingSolidUVOffsetRate.x, this.Settings.FallingSolidUVOffsetRate.y, 0f));
 		Shader.SetGlobalColor("_WaterTrimColor", this.Settings.WaterTrimColor);
 		Shader.SetGlobalVector("_WaterParameters2", new Vector4(this.Settings.WaterTrimSize, this.Settings.WaterAlphaTrimSize, 0f, this.Settings.WaterAlphaThreshold));
 		Shader.SetGlobalVector("_WaterWaveParameters", new Vector4(this.Settings.WaterWaveAmplitude, this.Settings.WaterWaveFrequency, this.Settings.WaterWaveSpeed, 0f));
@@ -99,7 +101,7 @@ public class Lighting : MonoBehaviour
 		}
 	}
 
-	public LightingSettings Settings;
+	public global::LightingSettings Settings;
 
 	public static Lighting Instance;
 

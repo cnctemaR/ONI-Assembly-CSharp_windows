@@ -7,12 +7,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
-	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	[NativeHeader("Runtime/Camera/LightProbeProxyVolume.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
 	public class Graphics
 	{
 		[FreeFunction("GraphicsScripting::GetMaxDrawMeshInstanceCount")]
@@ -40,8 +40,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[NativeMethod(Name = "GetPreserveFramebufferAlpha")]
+		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool GetPreserveFramebufferAlpha();
 
@@ -50,6 +50,19 @@ namespace UnityEngine
 			get
 			{
 				return Graphics.GetPreserveFramebufferAlpha();
+			}
+		}
+
+		[NativeMethod(Name = "GetMinOpenGLESVersion")]
+		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern OpenGLESVersion GetMinOpenGLESVersion();
+
+		public static OpenGLESVersion minOpenGLESVersion
+		{
+			get
+			{
+				return Graphics.GetMinOpenGLESVersion();
 			}
 		}
 
@@ -80,13 +93,13 @@ namespace UnityEngine
 		}
 
 		[NativeMethod(Name = "GraphicsScripting::SetMRTSimple", IsFreeFunction = true, ThrowsException = true)]
-		private static void Internal_SetMRTSimple([NotNull] RenderBuffer[] color, RenderBuffer depth, int mip, CubemapFace face, int depthSlice)
+		private static void Internal_SetMRTSimple([NotNull("ArgumentNullException")] RenderBuffer[] color, RenderBuffer depth, int mip, CubemapFace face, int depthSlice)
 		{
 			Graphics.Internal_SetMRTSimple_Injected(color, ref depth, mip, face, depthSlice);
 		}
 
 		[NativeMethod(Name = "GraphicsScripting::SetMRTFull", IsFreeFunction = true, ThrowsException = true)]
-		private static void Internal_SetMRTFullSetup([NotNull] RenderBuffer[] color, RenderBuffer depth, int mip, CubemapFace face, int depthSlice, [NotNull] RenderBufferLoadAction[] colorLA, [NotNull] RenderBufferStoreAction[] colorSA, RenderBufferLoadAction depthLA, RenderBufferStoreAction depthSA)
+		private static void Internal_SetMRTFullSetup([NotNull("ArgumentNullException")] RenderBuffer[] color, RenderBuffer depth, int mip, CubemapFace face, int depthSlice, [NotNull("ArgumentNullException")] RenderBufferLoadAction[] colorLA, [NotNull("ArgumentNullException")] RenderBufferStoreAction[] colorSA, RenderBufferLoadAction depthLA, RenderBufferStoreAction depthSA)
 		{
 			Graphics.Internal_SetMRTFullSetup_Injected(color, ref depth, mip, face, depthSlice, colorLA, colorSA, depthLA, depthSA);
 		}
@@ -98,6 +111,10 @@ namespace UnityEngine
 		[FreeFunction("GraphicsScripting::SetRandomWriteTargetBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_SetRandomWriteTargetBuffer(int index, ComputeBuffer uav, bool preserveCounterValue);
+
+		[FreeFunction("GraphicsScripting::SetRandomWriteTargetBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetRandomWriteTargetGraphicsBuffer(int index, GraphicsBuffer uav, bool preserveCounterValue);
 
 		[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -128,19 +145,19 @@ namespace UnityEngine
 		private static extern bool ConvertTexture_Slice(Texture src, int srcElement, Texture dst, int dstElement);
 
 		[FreeFunction("GraphicsScripting::DrawMeshNow")]
-		private static void Internal_DrawMeshNow1(Mesh mesh, int subsetIndex, Vector3 position, Quaternion rotation)
+		private static void Internal_DrawMeshNow1([NotNull("NullExceptionObject")] Mesh mesh, int subsetIndex, Vector3 position, Quaternion rotation)
 		{
 			Graphics.Internal_DrawMeshNow1_Injected(mesh, subsetIndex, ref position, ref rotation);
 		}
 
 		[FreeFunction("GraphicsScripting::DrawMeshNow")]
-		private static void Internal_DrawMeshNow2(Mesh mesh, int subsetIndex, Matrix4x4 matrix)
+		private static void Internal_DrawMeshNow2([NotNull("NullExceptionObject")] Mesh mesh, int subsetIndex, Matrix4x4 matrix)
 		{
 			Graphics.Internal_DrawMeshNow2_Injected(mesh, subsetIndex, ref matrix);
 		}
 
-		[FreeFunction("GraphicsScripting::DrawTexture")]
 		[VisibleToOtherModules(new string[] { "UnityEngine.IMGUIModule" })]
+		[FreeFunction("GraphicsScripting::DrawTexture")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_DrawTexture(ref Internal_DrawTextureArguments args);
 
@@ -152,18 +169,24 @@ namespace UnityEngine
 
 		[FreeFunction("GraphicsScripting::DrawMeshInstanced")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_DrawMeshInstanced(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume);
+		private static extern void Internal_DrawMeshInstanced([NotNull("NullExceptionObject")] Mesh mesh, int submeshIndex, [NotNull("NullExceptionObject")] Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume);
 
 		[FreeFunction("GraphicsScripting::DrawMeshInstancedProcedural")]
-		private static void Internal_DrawMeshInstancedProcedural(Mesh mesh, int submeshIndex, Material material, Bounds bounds, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
+		private static void Internal_DrawMeshInstancedProcedural([NotNull("NullExceptionObject")] Mesh mesh, int submeshIndex, [NotNull("NullExceptionObject")] Material material, Bounds bounds, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
 		{
 			Graphics.Internal_DrawMeshInstancedProcedural_Injected(mesh, submeshIndex, material, ref bounds, count, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
 		}
 
 		[FreeFunction("GraphicsScripting::DrawMeshInstancedIndirect")]
-		private static void Internal_DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
+		private static void Internal_DrawMeshInstancedIndirect([NotNull("NullExceptionObject")] Mesh mesh, int submeshIndex, [NotNull("NullExceptionObject")] Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
 		{
 			Graphics.Internal_DrawMeshInstancedIndirect_Injected(mesh, submeshIndex, material, ref bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
+		}
+
+		[FreeFunction("GraphicsScripting::DrawMeshInstancedIndirect")]
+		private static void Internal_DrawMeshInstancedIndirectGraphicsBuffer([NotNull("NullExceptionObject")] Mesh mesh, int submeshIndex, [NotNull("NullExceptionObject")] Material material, Bounds bounds, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume)
+		{
+			Graphics.Internal_DrawMeshInstancedIndirectGraphicsBuffer_Injected(mesh, submeshIndex, material, ref bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
 		}
 
 		[FreeFunction("GraphicsScripting::DrawProceduralNow")]
@@ -181,6 +204,14 @@ namespace UnityEngine
 		[FreeFunction("GraphicsScripting::DrawProceduralIndexedIndirectNow")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_DrawProceduralIndexedIndirectNow(MeshTopology topology, GraphicsBuffer indexBuffer, ComputeBuffer bufferWithArgs, int argsOffset);
+
+		[FreeFunction("GraphicsScripting::DrawProceduralIndirectNow")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndirectNowGraphicsBuffer(MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset);
+
+		[FreeFunction("GraphicsScripting::DrawProceduralIndexedIndirectNow")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndexedIndirectNowGraphicsBuffer(MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer bufferWithArgs, int argsOffset);
 
 		[FreeFunction("GraphicsScripting::DrawProcedural")]
 		private static void Internal_DrawProcedural(Material material, Bounds bounds, MeshTopology topology, int vertexCount, int instanceCount, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer)
@@ -208,19 +239,19 @@ namespace UnityEngine
 
 		[FreeFunction("GraphicsScripting::BlitMaterial")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_BlitMaterial5(Texture source, RenderTexture dest, [NotNull] Material mat, int pass, bool setRT);
+		private static extern void Internal_BlitMaterial5(Texture source, RenderTexture dest, [NotNull("ArgumentNullException")] Material mat, int pass, bool setRT);
 
 		[FreeFunction("GraphicsScripting::BlitMaterial")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_BlitMaterial6(Texture source, RenderTexture dest, [NotNull] Material mat, int pass, bool setRT, int destDepthSlice);
+		private static extern void Internal_BlitMaterial6(Texture source, RenderTexture dest, [NotNull("ArgumentNullException")] Material mat, int pass, bool setRT, int destDepthSlice);
 
 		[FreeFunction("GraphicsScripting::BlitMultitap")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_BlitMultiTap4(Texture source, RenderTexture dest, [NotNull] Material mat, [NotNull] Vector2[] offsets);
+		private static extern void Internal_BlitMultiTap4(Texture source, RenderTexture dest, [NotNull("ArgumentNullException")] Material mat, [NotNull("ArgumentNullException")] Vector2[] offsets);
 
 		[FreeFunction("GraphicsScripting::BlitMultitap")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_BlitMultiTap5(Texture source, RenderTexture dest, [NotNull] Material mat, [NotNull] Vector2[] offsets, int destDepthSlice);
+		private static extern void Internal_BlitMultiTap5(Texture source, RenderTexture dest, [NotNull("ArgumentNullException")] Material mat, [NotNull("ArgumentNullException")] Vector2[] offsets, int destDepthSlice);
 
 		[FreeFunction("GraphicsScripting::Blit")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -252,11 +283,11 @@ namespace UnityEngine
 
 		[NativeMethod(Name = "GraphicsScripting::ExecuteCommandBuffer", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void ExecuteCommandBuffer([NotNull] CommandBuffer buffer);
+		public static extern void ExecuteCommandBuffer([NotNull("ArgumentNullException")] CommandBuffer buffer);
 
 		[NativeMethod(Name = "GraphicsScripting::ExecuteCommandBufferAsync", IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void ExecuteCommandBufferAsync([NotNull] CommandBuffer buffer, ComputeQueueType queueType);
+		public static extern void ExecuteCommandBufferAsync([NotNull("ArgumentNullException")] CommandBuffer buffer, ComputeQueueType queueType);
 
 		internal static void CheckLoadActionValid(RenderBufferLoadAction load, string bufferType)
 		{
@@ -398,6 +429,26 @@ namespace UnityEngine
 				throw new ArgumentOutOfRangeException("index", string.Format("must be non-negative less than {0}.", SystemInfo.supportedRandomWriteTargetCount));
 			}
 			Graphics.Internal_SetRandomWriteTargetBuffer(index, uav, preserveCounterValue);
+		}
+
+		public static void SetRandomWriteTarget(int index, GraphicsBuffer uav, [DefaultValue("false")] bool preserveCounterValue)
+		{
+			bool flag = uav == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("uav");
+			}
+			bool flag2 = uav.m_Ptr == IntPtr.Zero;
+			if (flag2)
+			{
+				throw new ObjectDisposedException("uav");
+			}
+			bool flag3 = index < 0 || index >= SystemInfo.supportedRandomWriteTargetCount;
+			if (flag3)
+			{
+				throw new ArgumentOutOfRangeException("index", string.Format("must be non-negative less than {0}.", SystemInfo.supportedRandomWriteTargetCount));
+			}
+			Graphics.Internal_SetRandomWriteTargetGraphicsBuffer(index, uav, preserveCounterValue);
 		}
 
 		public static void CopyTexture(Texture src, Texture dst)
@@ -700,6 +751,41 @@ namespace UnityEngine
 			Graphics.Internal_DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
 		}
 
+		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, GraphicsBuffer bufferWithArgs, [DefaultValue("0")] int argsOffset, [DefaultValue("null")] MaterialPropertyBlock properties, [DefaultValue("ShadowCastingMode.On")] ShadowCastingMode castShadows, [DefaultValue("true")] bool receiveShadows, [DefaultValue("0")] int layer, [DefaultValue("null")] Camera camera, [DefaultValue("LightProbeUsage.BlendProbes")] LightProbeUsage lightProbeUsage, [DefaultValue("null")] LightProbeProxyVolume lightProbeProxyVolume)
+		{
+			bool flag = !SystemInfo.supportsInstancing;
+			if (flag)
+			{
+				throw new InvalidOperationException("Instancing is not supported.");
+			}
+			bool flag2 = mesh == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("mesh");
+			}
+			bool flag3 = submeshIndex < 0 || submeshIndex >= mesh.subMeshCount;
+			if (flag3)
+			{
+				throw new ArgumentOutOfRangeException("submeshIndex", "submeshIndex out of range.");
+			}
+			bool flag4 = material == null;
+			if (flag4)
+			{
+				throw new ArgumentNullException("material");
+			}
+			bool flag5 = bufferWithArgs == null;
+			if (flag5)
+			{
+				throw new ArgumentNullException("bufferWithArgs");
+			}
+			bool flag6 = lightProbeUsage == LightProbeUsage.UseProxyVolume && lightProbeProxyVolume == null;
+			if (flag6)
+			{
+				throw new ArgumentException("Argument lightProbeProxyVolume must not be null if lightProbeUsage is set to UseProxyVolume.", "lightProbeProxyVolume");
+			}
+			Graphics.Internal_DrawMeshInstancedIndirectGraphicsBuffer(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
+		}
+
 		public static void DrawProceduralNow(MeshTopology topology, int vertexCount, int instanceCount = 1)
 		{
 			Graphics.Internal_DrawProceduralNow(topology, vertexCount, instanceCount);
@@ -738,6 +824,31 @@ namespace UnityEngine
 				throw new ArgumentNullException("bufferWithArgs");
 			}
 			Graphics.Internal_DrawProceduralIndexedIndirectNow(topology, indexBuffer, bufferWithArgs, argsOffset);
+		}
+
+		public static void DrawProceduralIndirectNow(MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset = 0)
+		{
+			bool flag = bufferWithArgs == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("bufferWithArgs");
+			}
+			Graphics.Internal_DrawProceduralIndirectNowGraphicsBuffer(topology, bufferWithArgs, argsOffset);
+		}
+
+		public static void DrawProceduralIndirectNow(MeshTopology topology, GraphicsBuffer indexBuffer, GraphicsBuffer bufferWithArgs, int argsOffset = 0)
+		{
+			bool flag = indexBuffer == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("indexBuffer");
+			}
+			bool flag2 = bufferWithArgs == null;
+			if (flag2)
+			{
+				throw new ArgumentNullException("bufferWithArgs");
+			}
+			Graphics.Internal_DrawProceduralIndexedIndirectNowGraphicsBuffer(topology, indexBuffer, bufferWithArgs, argsOffset);
 		}
 
 		public static void DrawProcedural(Material material, Bounds bounds, MeshTopology topology, int vertexCount, int instanceCount = 1, Camera camera = null, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0)
@@ -1060,49 +1171,13 @@ namespace UnityEngine
 		}
 
 		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs)
+		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset = 0, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0, Camera camera = null, LightProbeUsage lightProbeUsage = LightProbeUsage.BlendProbes)
 		{
-			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, 0, null, ShadowCastingMode.On, true, 0, null, LightProbeUsage.BlendProbes, null);
+			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, null);
 		}
 
 		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset)
-		{
-			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, null, ShadowCastingMode.On, true, 0, null, LightProbeUsage.BlendProbes, null);
-		}
-
-		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
-		{
-			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, ShadowCastingMode.On, true, 0, null, LightProbeUsage.BlendProbes, null);
-		}
-
-		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows)
-		{
-			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, true, 0, null, LightProbeUsage.BlendProbes, null);
-		}
-
-		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows)
-		{
-			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, 0, null, LightProbeUsage.BlendProbes, null);
-		}
-
-		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer)
-		{
-			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, null, LightProbeUsage.BlendProbes, null);
-		}
-
-		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera)
-		{
-			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, LightProbeUsage.BlendProbes, null);
-		}
-
-		[ExcludeFromDocs]
-		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage)
+		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, GraphicsBuffer bufferWithArgs, int argsOffset = 0, MaterialPropertyBlock properties = null, ShadowCastingMode castShadows = ShadowCastingMode.On, bool receiveShadows = true, int layer = 0, Camera camera = null, LightProbeUsage lightProbeUsage = LightProbeUsage.BlendProbes)
 		{
 			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, null);
 		}
@@ -1197,6 +1272,12 @@ namespace UnityEngine
 			Graphics.SetRandomWriteTarget(index, uav, false);
 		}
 
+		[ExcludeFromDocs]
+		public static void SetRandomWriteTarget(int index, GraphicsBuffer uav)
+		{
+			Graphics.SetRandomWriteTarget(index, uav, false);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetActiveColorBuffer_Injected(out RenderBuffer ret);
 
@@ -1226,6 +1307,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_DrawMeshInstancedIndirect_Injected(Mesh mesh, int submeshIndex, Material material, ref Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawMeshInstancedIndirectGraphicsBuffer_Injected(Mesh mesh, int submeshIndex, Material material, ref Bounds bounds, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage, LightProbeProxyVolume lightProbeProxyVolume);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_DrawProcedural_Injected(Material material, ref Bounds bounds, MeshTopology topology, int vertexCount, int instanceCount, Camera camera, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer);

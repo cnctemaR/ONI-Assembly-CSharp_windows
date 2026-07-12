@@ -33,30 +33,45 @@ public class RotPile : StateMachineComponent<RotPile.StatesInstance>
 		Util.KDestroyGameObject(base.smi.gameObject);
 	}
 
+	private static string OnRottenTooltip(List<Notification> notifications, object data)
+	{
+		string text = "";
+		foreach (Notification notification in notifications)
+		{
+			if (notification.tooltipData != null)
+			{
+				text = text + "\n• " + (string)notification.tooltipData + " ";
+			}
+		}
+		return string.Format(MISC.NOTIFICATIONS.FOODROT.TOOLTIP, text);
+	}
+
+	public void TryClearNotification()
+	{
+		if (this.notification != null)
+		{
+			base.gameObject.AddOrGet<Notifier>().Remove(this.notification);
+		}
+	}
+
+	public void TryCreateNotification()
+	{
+		WorldContainer myWorld = base.smi.master.GetMyWorld();
+		if (myWorld != null && myWorld.worldInventory.IsReachable(base.smi.master.gameObject.GetComponent<Pickupable>()))
+		{
+			this.notification = new Notification(MISC.NOTIFICATIONS.FOODROT.NAME, NotificationType.BadMinor, new Func<List<Notification>, object, string>(RotPile.OnRottenTooltip), null, true, 0f, null, null, null, true);
+			this.notification.tooltipData = base.smi.master.gameObject.GetProperName();
+			base.gameObject.AddOrGet<Notifier>().Add(this.notification, "");
+		}
+	}
+
+	private Notification notification;
+
 	public class StatesInstance : GameStateMachine<RotPile.States, RotPile.StatesInstance, RotPile, object>.GameInstance
 	{
-		private static string OnRottenTooltip(List<Notification> notifications, object data)
-		{
-			string text = "";
-			foreach (Notification notification in notifications)
-			{
-				if (notification.tooltipData != null)
-				{
-					text = text + "\n• " + (string)notification.tooltipData + " ";
-				}
-			}
-			return string.Format(MISC.NOTIFICATIONS.FOODROT.TOOLTIP, text);
-		}
-
 		public StatesInstance(RotPile master)
 			: base(master)
 		{
-			if (WorldInventory.Instance.IsReachable(base.smi.master.gameObject.GetComponent<Pickupable>()))
-			{
-				Notification notification = new Notification(MISC.NOTIFICATIONS.FOODROT.NAME, NotificationType.BadMinor, HashedString.Invalid, new Func<List<Notification>, object, string>(RotPile.StatesInstance.OnRottenTooltip), null, true, 0f, null, null, null, true);
-				notification.tooltipData = master.gameObject.GetProperName();
-				base.gameObject.AddOrGet<Notifier>().Add(notification, "");
-			}
 		}
 
 		public AttributeModifier baseDecomposeRate;
@@ -67,11 +82,18 @@ public class RotPile : StateMachineComponent<RotPile.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.decomposing;
-			base.serializable = true;
-			this.decomposing.ParamTransition<float>(this.decompositionAmount, this.convertDestroy, (RotPile.StatesInstance smi, float p) => p >= 600f).Update("Decomposing", delegate(RotPile.StatesInstance smi, float dt)
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
+			this.decomposing.Enter(delegate(RotPile.StatesInstance smi)
 			{
-				this.decompositionAmount.Delta(dt, smi);
-			}, UpdateRate.SIM_200ms, false);
+				smi.master.TryCreateNotification();
+			}).Exit(delegate(RotPile.StatesInstance smi)
+			{
+				smi.master.TryClearNotification();
+			}).ParamTransition<float>(this.decompositionAmount, this.convertDestroy, (RotPile.StatesInstance smi, float p) => p >= 600f)
+				.Update("Decomposing", delegate(RotPile.StatesInstance smi, float dt)
+				{
+					this.decompositionAmount.Delta(dt, smi);
+				}, UpdateRate.SIM_200ms, false);
 			this.convertDestroy.Enter(delegate(RotPile.StatesInstance smi)
 			{
 				smi.master.ConvertToElement();

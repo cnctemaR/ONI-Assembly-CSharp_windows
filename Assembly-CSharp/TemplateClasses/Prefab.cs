@@ -4,19 +4,15 @@ using System.Collections.Generic;
 namespace TemplateClasses
 {
 	[Serializable]
-	public class Prefab : ICloneable
+	public class Prefab
 	{
 		public Prefab()
 		{
-			this.rottable = new Rottable();
-			this.storage = new List<StorageItem>();
 			this.type = Prefab.Type.Other;
 		}
 
 		public Prefab(string _id, Prefab.Type _type, int loc_x, int loc_y, SimHashes _element, float _temperature = -1f, float _units = 1f, string _disease = null, int _disease_count = 0, Orientation _rotation = Orientation.Neutral, Prefab.template_amount_value[] _amount_values = null, Prefab.template_amount_value[] _other_values = null, int _connections = 0)
 		{
-			this.rottable = new Rottable();
-			this.storage = new List<StorageItem>();
 			this.id = _id;
 			this.type = _type;
 			this.location_x = loc_x;
@@ -28,32 +24,32 @@ namespace TemplateClasses
 			this.diseaseName = _disease;
 			this.diseaseCount = _disease_count;
 			this.rotationOrientation = _rotation;
-			this.amounts = _amount_values;
-			this.other_values = _other_values;
+			if (_amount_values != null && _amount_values.Length != 0)
+			{
+				this.amounts = _amount_values;
+			}
+			if (_other_values != null && _other_values.Length != 0)
+			{
+				this.other_values = _other_values;
+			}
 		}
 
-		public object Clone()
-		{
-			return this.Clone(Vector2I.zero);
-		}
-
-		public object Clone(Vector2I offset)
+		public Prefab Clone(Vector2I offset)
 		{
 			Prefab prefab = new Prefab(this.id, this.type, offset.x + this.location_x, offset.y + this.location_y, this.element, this.temperature, this.units, this.diseaseName, this.diseaseCount, this.rotationOrientation, this.amounts, this.other_values, this.connections);
-			prefab.rottable.rotAmount = this.rottable.rotAmount;
-			prefab.storage = new List<StorageItem>();
-			foreach (StorageItem storageItem in this.storage)
+			if (this.rottable != null)
 			{
-				prefab.storage.Add((StorageItem)storageItem.Clone());
+				prefab.rottable = new Rottable();
+				prefab.rottable.rotAmount = this.rottable.rotAmount;
 			}
-			return prefab;
-		}
-
-		public object Clone(int offset_x, int offset_y)
-		{
-			Prefab prefab = (Prefab)this.Clone();
-			prefab.location_x += offset_x;
-			prefab.location_y += offset_y;
+			if (this.storage != null && this.storage.Count > 0)
+			{
+				prefab.storage = new List<StorageItem>();
+				foreach (StorageItem storageItem in this.storage)
+				{
+					prefab.storage.Add(storageItem.Clone());
+				}
+			}
 			return prefab;
 		}
 

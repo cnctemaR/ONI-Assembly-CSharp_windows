@@ -22,14 +22,14 @@ namespace VoronoiTree
 		public Node()
 		{
 			this.type = Node.NodeType.Unknown;
-			this.log = new LoggerSSF("VoronoiNode", 35);
+			this.log = new LoggerSSF("VoronoiNode", 100);
 		}
 
 		public Node(Node.NodeType type)
 		{
 			this.type = type;
 			this.tags = new TagSet();
-			this.log = new LoggerSSF("VoronoiNode", 35);
+			this.log = new LoggerSSF("VoronoiNode", 100);
 		}
 
 		protected Node(Diagram.Site site, Node.NodeType type, Tree parent)
@@ -38,7 +38,7 @@ namespace VoronoiTree
 			this.site = site;
 			this.type = type;
 			this.parent = parent;
-			this.log = new LoggerSSF("VoronoiNode", 35);
+			this.log = new LoggerSSF("VoronoiNode", 100);
 		}
 
 		public Node GetNeighbour(uint id)
@@ -237,11 +237,11 @@ namespace VoronoiTree
 				return false;
 			}
 			this.visited = Node.VisitedType.VisitedSuccess;
-			List<Site> list = new List<Site>();
+			List<PowerDiagramSite> list = new List<PowerDiagramSite>();
 			for (int i = 0; i < diagramSites.Count; i++)
 			{
-				Site site = new Site(diagramSites[i].id, diagramSites[i].position, diagramSites[i].weight);
-				list.Add(site);
+				PowerDiagramSite powerDiagramSite = new PowerDiagramSite(diagramSites[i].id, diagramSites[i].position, diagramSites[i].weight);
+				list.Add(powerDiagramSite);
 			}
 			PowerDiagram powerDiagram = new PowerDiagram(this.site.poly, list);
 			powerDiagram.ComputeVD();
@@ -299,9 +299,16 @@ namespace VoronoiTree
 						global::Debug.LogError("FilterNeighbours neighbour.poly == null");
 					}
 					int num = -1;
-					if (home.poly.SharesEdge(site.poly, ref num) == Polygon.Commonality.Edge)
+					Polygon.DebugLog(string.Format("Testing for {0} common edge with {1}", home.id, site.id));
+					LineSegment lineSegment;
+					if (home.poly.SharesEdge(site.poly, ref num, out lineSegment) == Polygon.Commonality.Edge)
 					{
 						hashSet.Add(new KeyValuePair<uint, int>(niter.Current, num));
+						Polygon.DebugLog(string.Format(" -> {0} common edge with {1}: {2}", home.id, site.id, num));
+					}
+					else
+					{
+						Polygon.DebugLog(string.Format(" -> {0} NO COMMON with {1}: {2}", home.id, site.id, num));
 					}
 				}
 			}
@@ -346,11 +353,6 @@ namespace VoronoiTree
 			{
 				this.GetNeighbour(keyValuePair.Key).AddTag(tag);
 			}
-		}
-
-		public virtual Tree Split(Node.SplitCommand cmd = null)
-		{
-			return null;
 		}
 
 		public static int maxDepth;

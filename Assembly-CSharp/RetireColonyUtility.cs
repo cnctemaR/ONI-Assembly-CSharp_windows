@@ -74,7 +74,20 @@ public static class RetireColonyUtility
 		{
 			array2[j] = Components.BuildingCompletes[j];
 		}
-		return new RetiredColonyData(SaveGame.Instance.BaseName, GameClock.Instance.GetCycle(), global::System.DateTime.Now.ToShortDateString(), list.ToArray(), array, array2);
+		string text = null;
+		Dictionary<string, string> dictionary = new Dictionary<string, string>();
+		foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+		{
+			if (worldContainer.IsDiscovered && !worldContainer.IsModuleInterior)
+			{
+				dictionary.Add(worldContainer.GetComponent<ClusterGridEntity>().Name, worldContainer.worldName);
+				if (worldContainer.IsStartWorld)
+				{
+					text = worldContainer.GetComponent<ClusterGridEntity>().Name;
+				}
+			}
+		}
+		return new RetiredColonyData(SaveGame.Instance.BaseName, GameClock.Instance.GetCycle(), global::System.DateTime.Now.ToShortDateString(), list.ToArray(), array, array2, text, dictionary);
 	}
 
 	private static RetiredColonyData LoadRetiredColony(string file, bool skipStats, Encoding enc)
@@ -91,6 +104,7 @@ public static class RetireColonyUtility
 					List<global::Tuple<string, int>> list2 = new List<global::Tuple<string, int>>();
 					List<RetiredColonyData.RetiredDuplicantData> list3 = new List<RetiredColonyData.RetiredDuplicantData>();
 					List<RetiredColonyData.RetiredColonyStatistic> list4 = new List<RetiredColonyData.RetiredColonyStatistic>();
+					Dictionary<string, string> dictionary = new Dictionary<string, string>();
 					while (jsonReader.Read())
 					{
 						JsonToken jsonToken = jsonReader.TokenType;
@@ -262,11 +276,37 @@ public static class RetireColonyUtility
 							retiredColonyStatistic.value = list5.ToArray();
 							list4.Add(retiredColonyStatistic);
 						}
+						if (jsonToken == JsonToken.StartObject && text == "worldIdentities")
+						{
+							string text9 = null;
+							while (jsonReader.Read())
+							{
+								jsonToken = jsonReader.TokenType;
+								if (jsonToken == JsonToken.EndObject)
+								{
+									break;
+								}
+								if (jsonToken == JsonToken.PropertyName)
+								{
+									text9 = jsonReader.Value.ToString();
+								}
+								if (text9 != null && jsonReader.Value != null && jsonToken == JsonToken.String)
+								{
+									string text10 = jsonReader.Value.ToString();
+									dictionary.Add(text9, text10);
+								}
+							}
+						}
+						if (jsonToken == JsonToken.String && text == "startWorld")
+						{
+							retiredColonyData.startWorld = jsonReader.Value.ToString();
+						}
 					}
 					retiredColonyData.Duplicants = list3.ToArray();
 					retiredColonyData.Stats = list4.ToArray();
 					retiredColonyData.achievements = list.ToArray();
 					retiredColonyData.buildings = list2;
+					retiredColonyData.worldIdentities = dictionary;
 				}
 			}
 		}
@@ -325,10 +365,14 @@ public static class RetireColonyUtility
 		return list.ToArray();
 	}
 
-	public static string[] LoadColonySlideshowFiles(string colonyName)
+	public static string[] LoadColonySlideshowFiles(string colonyName, string world_name)
 	{
 		string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
 		string text2 = Path.Combine(Path.Combine(Util.RootFolder(), Util.GetRetiredColoniesFolderName()), text);
+		if (!world_name.IsNullOrWhiteSpace())
+		{
+			text2 = Path.Combine(text2, world_name);
+		}
 		List<string> list = new List<string>();
 		if (Directory.Exists(text2))
 		{
@@ -372,12 +416,16 @@ public static class RetireColonyUtility
 		return list.ToArray();
 	}
 
-	public static Sprite LoadRetiredColonyPreview(string colonyName)
+	public static Sprite LoadRetiredColonyPreview(string colonyName, string startName = null)
 	{
 		try
 		{
 			string text = RetireColonyUtility.StripInvalidCharacters(colonyName);
 			string text2 = Path.Combine(Path.Combine(Util.RootFolder(), Util.GetRetiredColoniesFolderName()), text);
+			if (!startName.IsNullOrWhiteSpace())
+			{
+				text2 = Path.Combine(text2, startName);
+			}
 			List<string> list = new List<string>();
 			if (Directory.Exists(text2))
 			{
@@ -443,7 +491,9 @@ public static class RetireColonyUtility
 			}
 			catch (Exception ex)
 			{
-				global::Debug.Log("failed to load preview image!? " + ex);
+				string text2 = "failed to load preview image!? ";
+				Exception ex2 = ex;
+				global::Debug.Log(text2 + ((ex2 != null) ? ex2.ToString() : null));
 			}
 		}
 		if (!fallbackToTimelapse)
@@ -452,11 +502,11 @@ public static class RetireColonyUtility
 		}
 		try
 		{
-			return RetireColonyUtility.LoadRetiredColonyPreview(colonyName);
+			return RetireColonyUtility.LoadRetiredColonyPreview(colonyName, null);
 		}
-		catch (Exception ex2)
+		catch (Exception ex3)
 		{
-			global::Debug.Log(string.Format("failed to load fallback timelapse image!? {0}", ex2));
+			global::Debug.Log(string.Format("failed to load fallback timelapse image!? {0}", ex3));
 		}
 		return null;
 	}

@@ -19,11 +19,16 @@ public class DirtyWaterConfig : IOreConfig
 		}
 	}
 
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLiquidOreEntity(this.ElementID, null);
 		Sublimates sublimates = gameObject.AddOrGet<Sublimates>();
-		sublimates.spawnFXHash = SpawnFXHashes.ContaminatedOxygenBubble;
+		sublimates.spawnFXHash = SpawnFXHashes.ContaminatedOxygenBubbleWater;
 		sublimates.info = new Sublimates.Info(4.0000006E-05f, 0.025f, 1.8f, 1f, this.SublimeElementID, byte.MaxValue, 0);
 		return gameObject;
 	}

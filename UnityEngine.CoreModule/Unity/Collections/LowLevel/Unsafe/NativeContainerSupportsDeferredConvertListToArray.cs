@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	[RequiredByNativeCode]
 	[AttributeUsage(AttributeTargets.Struct)]
+	[RequiredByNativeCode]
 	public sealed class NativeContainerSupportsDeferredConvertListToArray : Attribute
 	{
 	}

@@ -36,21 +36,33 @@ namespace System
 			this.ReadNames(buffer, ref this.booleansOffset);
 		}
 
+		private void DetermineVersion(short magic)
+		{
+			if (magic == 282)
+			{
+				this.intOffset = 2;
+				return;
+			}
+			if (magic == 542)
+			{
+				this.intOffset = 4;
+				return;
+			}
+			throw new Exception(string.Format("Magic number is wrong: {0}", magic));
+		}
+
 		private void ReadHeader(byte[] buffer, ref int position)
 		{
 			short @int = this.GetInt16(buffer, position);
 			position += 2;
-			if (@int != 282)
-			{
-				throw new Exception(string.Format("Magic number is wrong: {0}", @int));
-			}
+			this.DetermineVersion(@int);
 			this.GetInt16(buffer, position);
 			position += 2;
-			this.boolSize = this.GetInt16(buffer, position);
+			this.boolSize = (int)this.GetInt16(buffer, position);
 			position += 2;
-			this.numSize = this.GetInt16(buffer, position);
+			this.numSize = (int)this.GetInt16(buffer, position);
 			position += 2;
-			this.strOffsets = this.GetInt16(buffer, position);
+			this.strOffsets = (int)this.GetInt16(buffer, position);
 			position += 2;
 			this.GetInt16(buffer, position);
 			position += 2;
@@ -79,13 +91,13 @@ namespace System
 			{
 				return -1;
 			}
-			int num = this.booleansOffset + (int)this.boolSize;
+			int num = this.booleansOffset + this.boolSize;
 			if (num % 2 == 1)
 			{
 				num++;
 			}
-			num = (int)(num + number * TermInfoNumbers.Lines);
-			return (int)this.GetInt16(this.buffer, num);
+			num = (int)(num + number * (TermInfoNumbers)this.intOffset);
+			return this.GetInteger(this.buffer, num);
 		}
 
 		public string Get(TermInfoStrings tstr)
@@ -94,18 +106,18 @@ namespace System
 			{
 				return null;
 			}
-			int num = this.booleansOffset + (int)this.boolSize;
+			int num = this.booleansOffset + this.boolSize;
 			if (num % 2 == 1)
 			{
 				num++;
 			}
-			num += (int)(this.numSize * 2);
+			num += this.numSize * this.intOffset;
 			int @int = (int)this.GetInt16(this.buffer, (int)(num + tstr * TermInfoStrings.CarriageReturn));
 			if (@int == -1)
 			{
 				return null;
 			}
-			return this.GetString(this.buffer, num + (int)(this.strOffsets * 2) + @int);
+			return this.GetString(this.buffer, num + this.strOffsets * 2 + @int);
 		}
 
 		public byte[] GetStringBytes(TermInfoStrings tstr)
@@ -114,18 +126,18 @@ namespace System
 			{
 				return null;
 			}
-			int num = this.booleansOffset + (int)this.boolSize;
+			int num = this.booleansOffset + this.boolSize;
 			if (num % 2 == 1)
 			{
 				num++;
 			}
-			num += (int)(this.numSize * 2);
+			num += this.numSize * this.intOffset;
 			int @int = (int)this.GetInt16(this.buffer, (int)(num + tstr * TermInfoStrings.CarriageReturn));
 			if (@int == -1)
 			{
 				return null;
 			}
-			return this.GetStringBytes(this.buffer, num + (int)(this.strOffsets * 2) + @int);
+			return this.GetStringBytes(this.buffer, num + this.strOffsets * 2 + @int);
 		}
 
 		private short GetInt16(byte[] buffer, int offset)
@@ -137,6 +149,28 @@ namespace System
 				return -1;
 			}
 			return (short)(num + num2 * 256);
+		}
+
+		private int GetInt32(byte[] buffer, int offset)
+		{
+			int num = (int)buffer[offset];
+			int num2 = (int)buffer[offset + 1];
+			int num3 = (int)buffer[offset + 2];
+			int num4 = (int)buffer[offset + 3];
+			if (num == 255 && num2 == 255 && num3 == 255 && num4 == 255)
+			{
+				return -1;
+			}
+			return num + num2 << 8 + num3 << 16 + num4 << 24;
+		}
+
+		private int GetInteger(byte[] buffer, int offset)
+		{
+			if (this.intOffset == 2)
+			{
+				return (int)this.GetInt16(buffer, offset);
+			}
+			return this.GetInt32(buffer, offset);
 		}
 
 		private string GetString(byte[] buffer, int offset)
@@ -180,14 +214,16 @@ namespace System
 			return stringBuilder.ToString();
 		}
 
-		private short boolSize;
+		private int boolSize;
 
-		private short numSize;
+		private int numSize;
 
-		private short strOffsets;
+		private int strOffsets;
 
 		private byte[] buffer;
 
 		private int booleansOffset;
+
+		private int intOffset;
 	}
 }

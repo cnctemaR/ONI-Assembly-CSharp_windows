@@ -58,8 +58,15 @@ namespace UnityEngine.UI
 			Material material = baseMaterial;
 			if (this.m_ShouldRecalculateStencil)
 			{
-				Transform transform = MaskUtilities.FindRootSortOverrideCanvas(base.transform);
-				this.m_StencilValue = (this.maskable ? MaskUtilities.GetStencilDepth(base.transform, transform) : 0);
+				if (this.maskable)
+				{
+					Transform transform = MaskUtilities.FindRootSortOverrideCanvas(base.transform);
+					this.m_StencilValue = MaskUtilities.GetStencilDepth(base.transform, transform);
+				}
+				else
+				{
+					this.m_StencilValue = 0;
+				}
 				this.m_ShouldRecalculateStencil = false;
 			}
 			if (this.m_StencilValue > 0 && !this.isMaskingGraphic)

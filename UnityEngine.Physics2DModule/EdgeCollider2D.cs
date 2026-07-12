@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 
@@ -37,5 +38,69 @@ namespace UnityEngine
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		[NativeMethod("GetPoints_Binding")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetPoints([NotNull("ArgumentNullException")] List<Vector2> points);
+
+		[NativeMethod("SetPoints_Binding")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool SetPoints([NotNull("ArgumentNullException")] List<Vector2> points);
+
+		public extern bool useAdjacentStartPoint
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern bool useAdjacentEndPoint
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public Vector2 adjacentStartPoint
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_adjacentStartPoint_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_adjacentStartPoint_Injected(ref value);
+			}
+		}
+
+		public Vector2 adjacentEndPoint
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_adjacentEndPoint_Injected(out vector);
+				return vector;
+			}
+			set
+			{
+				this.set_adjacentEndPoint_Injected(ref value);
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_adjacentStartPoint_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_adjacentStartPoint_Injected(ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_adjacentEndPoint_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void set_adjacentEndPoint_Injected(ref Vector2 value);
 	}
 }

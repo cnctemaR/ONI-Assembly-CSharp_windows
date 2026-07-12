@@ -12,7 +12,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.fertile;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.DefaultState(this.fertile);
 		this.fertile.ToggleBehaviour(GameTags.Creatures.Fertile, (FertilityMonitor.Instance smi) => smi.IsReadyToLayEgg(), null).ToggleEffect((FertilityMonitor.Instance smi) => smi.fertileEffect).Transition(this.infertile, GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.Not(new StateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.Transition.ConditionCallback(FertilityMonitor.IsFertile)), UpdateRate.SIM_1000ms);
 		this.infertile.Transition(this.fertile, new StateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.Transition.ConditionCallback(FertilityMonitor.IsFertile), UpdateRate.SIM_1000ms);
@@ -60,7 +60,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 				this.fertility.deltaAttribute.Add(new AttributeModifier(this.fertility.deltaAttribute.Id, 33.333332f, "Accelerated Lifecycle", false, false, true));
 			}
 			float num = 100f / (def.baseFertileCycles * 600f);
-			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, 0f, null);
+			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, 0f, null, "");
 			this.fertileEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num, CREATURES.MODIFIERS.BASE_FERTILITY.NAME, false, false, true));
 			this.InitializeBreedingChances();
 		}
@@ -180,6 +180,18 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			}
 			this.NormalizeBreedingChances();
 			base.master.Trigger(1059811075, this.breedingChances);
+		}
+
+		public float GetBreedingChance(Tag type)
+		{
+			foreach (FertilityMonitor.BreedingChance breedingChance in this.breedingChances)
+			{
+				if (breedingChance.egg == type)
+				{
+					return breedingChance.weight;
+				}
+			}
+			return -1f;
 		}
 
 		private void NormalizeBreedingChances()

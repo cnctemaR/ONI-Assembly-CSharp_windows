@@ -20,12 +20,26 @@ namespace UnityEngine
 			}
 		}
 
-		[SecuritySafeCritical]
 		[RequiredByNativeCode]
-		public static string ExtractStackTrace()
+		[SecuritySafeCritical]
+		public unsafe static string ExtractStackTrace()
 		{
-			StackTrace stackTrace = new StackTrace(1, true);
-			return StackTraceUtility.ExtractFormattedStackTrace(stackTrace).ToString();
+			int num = 16384;
+			byte* ptr = stackalloc byte[(UIntPtr)num];
+			int num2 = Debug.ExtractStackTraceNoAlloc(ptr, num, StackTraceUtility.projectFolder);
+			bool flag = num2 > 0;
+			string text;
+			if (flag)
+			{
+				text = new string((sbyte*)ptr, 0, num2, Encoding.UTF8);
+			}
+			else
+			{
+				StackTrace stackTrace = new StackTrace(1, true);
+				string text2 = StackTraceUtility.ExtractFormattedStackTrace(stackTrace);
+				text = text2;
+			}
+			return text;
 		}
 
 		public static string ExtractStringFromException(object exception)
@@ -36,8 +50,8 @@ namespace UnityEngine
 			return text + "\n" + text2;
 		}
 
-		[RequiredByNativeCode]
 		[SecuritySafeCritical]
+		[RequiredByNativeCode]
 		internal static void ExtractStringFromExceptionInternal(object exceptiono, out string message, out string stackTrace)
 		{
 			bool flag = exceptiono == null;
@@ -108,7 +122,7 @@ namespace UnityEngine
 					if (!flag2)
 					{
 						string @namespace = declaringType.Namespace;
-						bool flag3 = @namespace != null && @namespace.Length != 0;
+						bool flag3 = !string.IsNullOrEmpty(@namespace);
 						if (flag3)
 						{
 							stringBuilder.Append(@namespace);

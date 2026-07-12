@@ -181,8 +181,8 @@ namespace System.Reflection
 			}
 		}
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public object Invoke(object obj, object[] parameters)
 		{
 			return this.Invoke(obj, BindingFlags.Default, null, parameters, null);

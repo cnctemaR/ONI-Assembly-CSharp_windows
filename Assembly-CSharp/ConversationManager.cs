@@ -36,13 +36,14 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 			else
 			{
 				bool flag = true;
-				if (conversation.numUtterances == 0 && GameClock.Instance.GetTime() > conversation.lastTalkedTime + TuningData<ConversationManager.Tuning>.Get().delayBeforeStart)
+				bool flag2 = conversation.minions.Find((MinionIdentity match) => !match.HasTag(GameTags.Partying)) == null;
+				if ((conversation.numUtterances == 0 && flag2 && GameClock.Instance.GetTime() > conversation.lastTalkedTime) || GameClock.Instance.GetTime() > conversation.lastTalkedTime + TuningData<ConversationManager.Tuning>.Get().delayBeforeStart)
 				{
 					MinionIdentity minionIdentity = conversation.minions[global::UnityEngine.Random.Range(0, conversation.minions.Count)];
 					conversation.conversationType.NewTarget(minionIdentity);
 					flag = this.DoTalking(conversation, minionIdentity);
 				}
-				else if (conversation.numUtterances > 0 && conversation.numUtterances < TuningData<ConversationManager.Tuning>.Get().maxUtterances && GameClock.Instance.GetTime() > conversation.lastTalkedTime + TuningData<ConversationManager.Tuning>.Get().speakTime + TuningData<ConversationManager.Tuning>.Get().delayBetweenUtterances)
+				else if (conversation.numUtterances > 0 && conversation.numUtterances < TuningData<ConversationManager.Tuning>.Get().maxUtterances && ((flag2 && GameClock.Instance.GetTime() > conversation.lastTalkedTime + TuningData<ConversationManager.Tuning>.Get().speakTime / 4f) || GameClock.Instance.GetTime() > conversation.lastTalkedTime + TuningData<ConversationManager.Tuning>.Get().speakTime + TuningData<ConversationManager.Tuning>.Get().delayBetweenUtterances))
 				{
 					int num = (conversation.minions.IndexOf(conversation.lastTalked) + global::UnityEngine.Random.Range(1, conversation.minions.Count)) % conversation.minions.Count;
 					MinionIdentity minionIdentity2 = conversation.minions[num];
@@ -140,7 +141,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		{
 			if (!minionIdentity)
 			{
-				DebugUtil.DevAssert(false, "minion in setup.minions was null");
+				DebugUtil.DevAssert(false, "minion in setup.minions was null", null);
 			}
 			else
 			{
@@ -168,7 +169,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 	{
 		if (string.IsNullOrEmpty(topic.topic))
 		{
-			DebugUtil.DevAssert(false, "topic.topic was null");
+			DebugUtil.DevAssert(false, "topic.topic was null", null);
 			return null;
 		}
 		Sprite sprite = setup.conversationType.GetSprite(topic.topic);

@@ -6,24 +6,17 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/CargoBay")]
 public class CargoBay : KMonoBehaviour
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		base.GetComponent<KBatchedAnimController>().Play("grounded", KAnim.PlayMode.Loop, 1f, 0f);
-		base.Subscribe<CargoBay>(-1056989049, CargoBay.OnLaunchDelegate);
-		base.Subscribe<CargoBay>(238242047, CargoBay.OnLandDelegate);
+		base.Subscribe<CargoBay>(-1277991738, CargoBay.OnLaunchDelegate);
+		base.Subscribe<CargoBay>(-887025858, CargoBay.OnLandDelegate);
 		base.Subscribe<CargoBay>(493375141, CargoBay.OnRefreshUserMenuDelegate);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 		this.meter.gameObject.GetComponent<KBatchedAnimTracker>().matchParentOffset = true;
-		base.Subscribe(-1697596308, delegate(object data)
-		{
-			this.meter.SetPositionPercent(this.storage.MassStored() / this.storage.Capacity());
-		});
+		this.OnStorageChange(null);
+		base.Subscribe<CargoBay>(-1697596308, CargoBay.OnStorageChangeDelegate);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -35,19 +28,28 @@ public class CargoBay : KMonoBehaviour
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
-	protected override void OnCleanUp()
+	private void OnStorageChange(object data)
 	{
-		base.OnCleanUp();
+		this.meter.SetPositionPercent(this.storage.MassStored() / this.storage.Capacity());
 	}
 
 	public void SpawnResources(object data)
 	{
-		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<LaunchableRocket>()));
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			return;
+		}
+		ILaunchableRocket component = base.GetComponent<RocketModule>().conditionManager.GetComponent<ILaunchableRocket>();
+		if (component.registerType == LaunchableRocketRegisterType.Clustercraft)
+		{
+			return;
+		}
+		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(SpacecraftManager.instance.GetSpacecraftID(component));
 		int num = Grid.PosToCell(base.gameObject);
-		foreach (KeyValuePair<SimHashes, float> keyValuePair in spacecraftDestination.GetMissionResourceResult(this.storage.RemainingCapacity(), this.storageType == CargoBay.CargoType.solids, this.storageType == CargoBay.CargoType.liquids, this.storageType == CargoBay.CargoType.gasses))
+		foreach (KeyValuePair<SimHashes, float> keyValuePair in spacecraftDestination.GetMissionResourceResult(this.storage.RemainingCapacity(), this.storageType == CargoBay.CargoType.Solids, this.storageType == CargoBay.CargoType.Liquids, this.storageType == CargoBay.CargoType.Gasses))
 		{
 			Element element = ElementLoader.FindElementByHash(keyValuePair.Key);
-			if (this.storageType == CargoBay.CargoType.solids && element.IsSolid)
+			if (this.storageType == CargoBay.CargoType.Solids && element.IsSolid)
 			{
 				GameObject gameObject = Scenario.SpawnPrefab(num, 0, 0, element.tag.Name, Grid.SceneLayer.Ore);
 				gameObject.GetComponent<PrimaryElement>().Mass = keyValuePair.Value;
@@ -55,16 +57,16 @@ public class CargoBay : KMonoBehaviour
 				gameObject.SetActive(true);
 				this.storage.Store(gameObject, false, false, true, false);
 			}
-			else if (this.storageType == CargoBay.CargoType.liquids && element.IsLiquid)
+			else if (this.storageType == CargoBay.CargoType.Liquids && element.IsLiquid)
 			{
 				this.storage.AddLiquid(keyValuePair.Key, keyValuePair.Value, ElementLoader.FindElementByHash(keyValuePair.Key).defaultValues.temperature, byte.MaxValue, 0, false, true);
 			}
-			else if (this.storageType == CargoBay.CargoType.gasses && element.IsGas)
+			else if (this.storageType == CargoBay.CargoType.Gasses && element.IsGas)
 			{
 				this.storage.AddGasChunk(keyValuePair.Key, keyValuePair.Value, ElementLoader.FindElementByHash(keyValuePair.Key).defaultValues.temperature, byte.MaxValue, 0, false, true);
 			}
 		}
-		if (this.storageType == CargoBay.CargoType.entities)
+		if (this.storageType == CargoBay.CargoType.Entities)
 		{
 			foreach (KeyValuePair<Tag, int> keyValuePair2 in spacecraftDestination.GetMissionEntityResult())
 			{
@@ -80,10 +82,10 @@ public class CargoBay : KMonoBehaviour
 						GameObject gameObject2 = Util.KInstantiate(prefab, base.transform.position);
 						gameObject2.SetActive(true);
 						this.storage.Store(gameObject2, false, false, true, false);
-						Baggable component = gameObject2.GetComponent<Baggable>();
-						if (component != null)
+						Baggable component2 = gameObject2.GetComponent<Baggable>();
+						if (component2 != null)
 						{
-							component.SetWrangled();
+							component2.SetWrangled();
 						}
 					}
 				}
@@ -103,7 +105,16 @@ public class CargoBay : KMonoBehaviour
 
 	private void ReserveResources()
 	{
-		int spacecraftID = SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<LaunchableRocket>());
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			return;
+		}
+		ILaunchableRocket component = base.GetComponent<RocketModule>().conditionManager.GetComponent<ILaunchableRocket>();
+		if (component.registerType == LaunchableRocketRegisterType.Clustercraft)
+		{
+			return;
+		}
+		int spacecraftID = SpacecraftManager.instance.GetSpacecraftID(component);
 		SpacecraftManager.instance.GetSpacecraftDestination(spacecraftID).UpdateRemainingResources(this);
 	}
 
@@ -114,12 +125,12 @@ public class CargoBay : KMonoBehaviour
 		if (component != null)
 		{
 			CargoBay.CargoType cargoType = this.storageType;
-			if (cargoType == CargoBay.CargoType.liquids)
+			if (cargoType == CargoBay.CargoType.Liquids)
 			{
 				component.conduitType = ConduitType.Liquid;
 				return;
 			}
-			if (cargoType == CargoBay.CargoType.gasses)
+			if (cargoType == CargoBay.CargoType.Gasses)
 			{
 				component.conduitType = ConduitType.Gas;
 				return;
@@ -133,6 +144,22 @@ public class CargoBay : KMonoBehaviour
 	private MeterController meter;
 
 	public CargoBay.CargoType storageType;
+
+	public static Dictionary<Element.State, CargoBay.CargoType> ElementStateToCargoTypes = new Dictionary<Element.State, CargoBay.CargoType>
+	{
+		{
+			Element.State.Gas,
+			CargoBay.CargoType.Gasses
+		},
+		{
+			Element.State.Liquid,
+			CargoBay.CargoType.Liquids
+		},
+		{
+			Element.State.Solid,
+			CargoBay.CargoType.Solids
+		}
+	};
 
 	private static readonly EventSystem.IntraObjectHandler<CargoBay> OnLaunchDelegate = new EventSystem.IntraObjectHandler<CargoBay>(delegate(CargoBay component, object data)
 	{
@@ -149,11 +176,16 @@ public class CargoBay : KMonoBehaviour
 		component.OnRefreshUserMenu(data);
 	});
 
+	private static readonly EventSystem.IntraObjectHandler<CargoBay> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<CargoBay>(delegate(CargoBay component, object data)
+	{
+		component.OnStorageChange(data);
+	});
+
 	public enum CargoType
 	{
-		solids,
-		liquids,
-		gasses,
-		entities
+		Solids,
+		Liquids,
+		Gasses,
+		Entities
 	}
 }

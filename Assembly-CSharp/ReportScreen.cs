@@ -16,6 +16,10 @@ public class ReportScreen : KScreen
 	{
 		base.OnPrefabInit();
 		ReportScreen.Instance = this;
+		this.closeButton.onClick += delegate
+		{
+			ManagementMenu.Instance.CloseAll();
+		};
 		this.prevButton.onClick += delegate
 		{
 			this.ShowReport(this.currentReport.day - 1);
@@ -147,7 +151,7 @@ public class ReportScreen : KScreen
 		if (gameObject == null)
 		{
 			gameObject = Util.KInstantiateUI(this.lineItemHeader, this.contentFolder, true);
-			gameObject.name = "LineItemHeader" + this.lineItems.Count;
+			gameObject.name = "LineItemHeader" + this.lineItems.Count.ToString();
 			this.lineItems[reportGroup.stringKey] = gameObject;
 		}
 		gameObject.SetActive(true);
@@ -171,7 +175,7 @@ public class ReportScreen : KScreen
 			if (gameObject == null)
 			{
 				gameObject = Util.KInstantiateUI(this.lineItem, this.contentFolder, true);
-				gameObject.name = "LineItem" + this.lineItems.Count;
+				gameObject.name = "LineItem" + this.lineItems.Count.ToString();
 				this.lineItems[reportGroup.stringKey] = gameObject;
 			}
 			gameObject.SetActive(true);
@@ -183,11 +187,14 @@ public class ReportScreen : KScreen
 	private void OnClickClose()
 	{
 		base.PlaySound3D(GlobalAssets.GetSound("HUD_Click_Close", false));
-		base.Show(false);
+		this.Show(false);
 	}
 
 	[SerializeField]
 	private LocText title;
+
+	[SerializeField]
+	private KButton closeButton;
 
 	[SerializeField]
 	private KButton prevButton;

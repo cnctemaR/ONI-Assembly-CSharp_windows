@@ -49,7 +49,6 @@ public class GlassForgeConfig : IBuildingConfig
 		glassForge.outStorage.SetDefaultStoredItemModifiers(GlassForgeConfig.RefineryStoredItemModifiers);
 		glassForge.outputOffset = new Vector3(1f, 0.5f);
 		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
-		glassForge.resultState = ComplexFabricator.ResultState.Melted;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.storage = glassForge.outStorage;
 		conduitDispenser.conduitType = ConduitType.Liquid;
@@ -61,11 +60,11 @@ public class GlassForgeConfig : IBuildingConfig
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.MoltenGlass).tag, 25f)
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.MoltenGlass).tag, 25f, ComplexRecipe.RecipeElement.TemperatureOperation.Melted, false)
 		};
 		string text = ComplexRecipeManager.MakeObsoleteRecipeID("GlassForge", array[0].material);
 		string text2 = ComplexRecipeManager.MakeRecipeID("GlassForge", array, array2);
-		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2, 0);
 		complexRecipe.time = 40f;
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.GLASSFORGE.RECIPE_DESCRIPTION, ElementLoader.GetElement(array2[0].material).name, ElementLoader.GetElement(array[0].material).name);

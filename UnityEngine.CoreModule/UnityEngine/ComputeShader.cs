@@ -7,12 +7,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[UsedByNativeCode]
 	public sealed class ComputeShader : Object
 	{
-		[RequiredByNativeCode]
 		[NativeMethod(Name = "ComputeShaderScripting::FindKernel", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
+		[RequiredByNativeCode]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int FindKernel(string name);
 
@@ -58,11 +59,11 @@ namespace UnityEngine
 
 		[NativeMethod(Name = "ComputeShaderScripting::SetTexture", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetTexture(int kernelIndex, int nameID, [NotNull] Texture texture, int mipLevel);
+		public extern void SetTexture(int kernelIndex, int nameID, [NotNull("ArgumentNullException")] Texture texture, int mipLevel);
 
 		[NativeMethod(Name = "ComputeShaderScripting::SetRenderTexture", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTexture(int kernelIndex, int nameID, [NotNull] RenderTexture texture, int mipLevel, RenderTextureSubElement element);
+		private extern void SetRenderTexture(int kernelIndex, int nameID, [NotNull("ArgumentNullException")] RenderTexture texture, int mipLevel, RenderTextureSubElement element);
 
 		[NativeMethod(Name = "ComputeShaderScripting::SetTextureFromGlobal", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -70,7 +71,29 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "ComputeShaderScripting::SetBuffer", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBuffer(int kernelIndex, int nameID, [NotNull] ComputeBuffer buffer);
+		private extern void Internal_SetBuffer(int kernelIndex, int nameID, [NotNull("ArgumentNullException")] ComputeBuffer buffer);
+
+		[FreeFunction(Name = "ComputeShaderScripting::SetBuffer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Internal_SetGraphicsBuffer(int kernelIndex, int nameID, [NotNull("ArgumentNullException")] GraphicsBuffer buffer);
+
+		public void SetBuffer(int kernelIndex, int nameID, ComputeBuffer buffer)
+		{
+			this.Internal_SetBuffer(kernelIndex, nameID, buffer);
+		}
+
+		public void SetBuffer(int kernelIndex, int nameID, GraphicsBuffer buffer)
+		{
+			this.Internal_SetGraphicsBuffer(kernelIndex, nameID, buffer);
+		}
+
+		[FreeFunction(Name = "ComputeShaderScripting::SetConstantBuffer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstantComputeBuffer(int nameID, [NotNull("ArgumentNullException")] ComputeBuffer buffer, int offset, int size);
+
+		[FreeFunction(Name = "ComputeShaderScripting::SetConstantBuffer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstantGraphicsBuffer(int nameID, [NotNull("ArgumentNullException")] GraphicsBuffer buffer, int offset, int size);
 
 		[NativeMethod(Name = "ComputeShaderScripting::GetKernelThreadGroupSizes", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -82,7 +105,43 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "ComputeShaderScripting::DispatchIndirect", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DispatchIndirect(int kernelIndex, [NotNull] ComputeBuffer argsBuffer, uint argsOffset);
+		private extern void Internal_DispatchIndirect(int kernelIndex, [NotNull("ArgumentNullException")] ComputeBuffer argsBuffer, uint argsOffset);
+
+		[FreeFunction(Name = "ComputeShaderScripting::DispatchIndirect", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Internal_DispatchIndirectGraphicsBuffer(int kernelIndex, [NotNull("ArgumentNullException")] GraphicsBuffer argsBuffer, uint argsOffset);
+
+		[FreeFunction("ComputeShaderScripting::EnableKeyword", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void EnableKeyword(string keyword);
+
+		[FreeFunction("ComputeShaderScripting::DisableKeyword", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void DisableKeyword(string keyword);
+
+		[FreeFunction("ComputeShaderScripting::IsKeywordEnabled", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool IsKeywordEnabled(string keyword);
+
+		[FreeFunction("ComputeShaderScripting::GetShaderKeywords", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern string[] GetShaderKeywords();
+
+		[FreeFunction("ComputeShaderScripting::SetShaderKeywords", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetShaderKeywords(string[] names);
+
+		public string[] shaderKeywords
+		{
+			get
+			{
+				return this.GetShaderKeywords();
+			}
+			set
+			{
+				this.SetShaderKeywords(value);
+			}
+		}
 
 		private ComputeShader()
 		{
@@ -183,6 +242,31 @@ namespace UnityEngine
 			this.SetBuffer(kernelIndex, Shader.PropertyToID(name), buffer);
 		}
 
+		public void SetBuffer(int kernelIndex, string name, GraphicsBuffer buffer)
+		{
+			this.SetBuffer(kernelIndex, Shader.PropertyToID(name), buffer);
+		}
+
+		public void SetConstantBuffer(int nameID, ComputeBuffer buffer, int offset, int size)
+		{
+			this.SetConstantComputeBuffer(nameID, buffer, offset, size);
+		}
+
+		public void SetConstantBuffer(string name, ComputeBuffer buffer, int offset, int size)
+		{
+			this.SetConstantBuffer(Shader.PropertyToID(name), buffer, offset, size);
+		}
+
+		public void SetConstantBuffer(int nameID, GraphicsBuffer buffer, int offset, int size)
+		{
+			this.SetConstantGraphicsBuffer(nameID, buffer, offset, size);
+		}
+
+		public void SetConstantBuffer(string name, GraphicsBuffer buffer, int offset, int size)
+		{
+			this.SetConstantBuffer(Shader.PropertyToID(name), buffer, offset, size);
+		}
+
 		public void DispatchIndirect(int kernelIndex, ComputeBuffer argsBuffer, [DefaultValue("0")] uint argsOffset)
 		{
 			bool flag = argsBuffer == null;
@@ -200,6 +284,27 @@ namespace UnityEngine
 
 		[ExcludeFromDocs]
 		public void DispatchIndirect(int kernelIndex, ComputeBuffer argsBuffer)
+		{
+			this.DispatchIndirect(kernelIndex, argsBuffer, 0U);
+		}
+
+		public void DispatchIndirect(int kernelIndex, GraphicsBuffer argsBuffer, [DefaultValue("0")] uint argsOffset)
+		{
+			bool flag = argsBuffer == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("argsBuffer");
+			}
+			bool flag2 = argsBuffer.m_Ptr == IntPtr.Zero;
+			if (flag2)
+			{
+				throw new ObjectDisposedException("argsBuffer");
+			}
+			this.Internal_DispatchIndirectGraphicsBuffer(kernelIndex, argsBuffer, argsOffset);
+		}
+
+		[ExcludeFromDocs]
+		public void DispatchIndirect(int kernelIndex, GraphicsBuffer argsBuffer)
 		{
 			this.DispatchIndirect(kernelIndex, argsBuffer, 0U);
 		}

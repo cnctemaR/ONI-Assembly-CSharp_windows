@@ -21,7 +21,7 @@ public class FilterSideScreen : SideScreenContent
 		}
 		else
 		{
-			flag = target.GetComponent<ElementFilter>() != null;
+			flag = target.GetComponent<ElementFilter>() != null || target.GetComponent<RocketConduitStorageAccess>();
 		}
 		return flag && target.GetComponent<Filterable>() != null;
 	}
@@ -127,7 +127,7 @@ public class FilterSideScreen : SideScreenContent
 					while (enumerator4.MoveNext())
 					{
 						KeyValuePair<Tag, FilterSideScreenRow> keyValuePair2 = enumerator4.Current;
-						keyValuePair2.Value.name = "ELE " + num2;
+						keyValuePair2.Value.name = "ELE " + num2.ToString();
 						keyValuePair2.Value.transform.SetSiblingIndex(num2++);
 						keyValuePair2.Value.gameObject.SetActive(tagOptions[keyValuePair.Key].Contains(keyValuePair2.Value.tag));
 						if (keyValuePair2.Key != GameTags.Void && keyValuePair2.Key == this.targetFilterable.SelectedTag)

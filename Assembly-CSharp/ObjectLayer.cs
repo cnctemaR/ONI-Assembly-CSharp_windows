@@ -42,5 +42,7 @@ public enum ObjectLayer
 	TravelTubeConnection,
 	AttachableBuilding,
 	Gantry,
+	Mover,
+	Rover,
 	NumLayers
 }

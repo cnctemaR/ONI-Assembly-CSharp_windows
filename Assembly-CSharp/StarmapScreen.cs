@@ -12,6 +12,11 @@ using UnityEngine.UI;
 
 public class StarmapScreen : KModalScreen
 {
+	public override float GetSortKey()
+	{
+		return 20f;
+	}
+
 	public static void DestroyInstance()
 	{
 		StarmapScreen.Instance = null;
@@ -378,18 +383,8 @@ public class StarmapScreen : KModalScreen
 		rectTransform.SetLocalPosition(new Vector3(rectTransform.localPosition.x, rectTransform.rect.height - this.Map.rect.height, rectTransform.localPosition.z));
 	}
 
-	public override float GetSortKey()
-	{
-		return 100f;
-	}
-
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed && (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape)))
-		{
-			ManagementMenu.Instance.CloseAll();
-			return;
-		}
 		if (this.CheckBlockedInput())
 		{
 			if (!e.Consumed)
@@ -696,26 +691,26 @@ public class StarmapScreen : KModalScreen
 
 	private void FillChecklist(LaunchConditionManager launchConditionManager)
 	{
-		foreach (RocketLaunchCondition rocketLaunchCondition in launchConditionManager.GetLaunchConditionList())
+		foreach (ProcessCondition processCondition in launchConditionManager.GetLaunchConditionList())
 		{
 			BreakdownListRow breakdownListRow = this.rocketDetailsChecklist.AddRow();
-			string launchStatusMessage = rocketLaunchCondition.GetLaunchStatusMessage(true);
-			RocketLaunchCondition.LaunchStatus launchStatus = rocketLaunchCondition.EvaluateLaunchCondition();
-			BreakdownListRow.Status status = BreakdownListRow.Status.Green;
-			if (launchStatus == RocketLaunchCondition.LaunchStatus.Failure)
+			string statusMessage = processCondition.GetStatusMessage(ProcessCondition.Status.Ready);
+			ProcessCondition.Status status = processCondition.EvaluateCondition();
+			BreakdownListRow.Status status2 = BreakdownListRow.Status.Green;
+			if (status == ProcessCondition.Status.Failure)
 			{
-				status = BreakdownListRow.Status.Red;
+				status2 = BreakdownListRow.Status.Red;
 			}
-			else if (launchStatus == RocketLaunchCondition.LaunchStatus.Warning)
+			else if (status == ProcessCondition.Status.Warning)
 			{
-				status = BreakdownListRow.Status.Yellow;
+				status2 = BreakdownListRow.Status.Yellow;
 			}
-			breakdownListRow.ShowCheckmarkData(launchStatusMessage, "", status);
-			if (launchStatus != RocketLaunchCondition.LaunchStatus.Ready)
+			breakdownListRow.ShowCheckmarkData(statusMessage, "", status2);
+			if (status != ProcessCondition.Status.Ready)
 			{
 				breakdownListRow.SetHighlighted(true);
 			}
-			breakdownListRow.AddTooltip(rocketLaunchCondition.GetLaunchStatusTooltip(launchStatus == RocketLaunchCondition.LaunchStatus.Failure));
+			breakdownListRow.AddTooltip(processCondition.GetStatusTooltip(status));
 		}
 	}
 
@@ -739,7 +734,7 @@ public class StarmapScreen : KModalScreen
 		}
 		if (this.rangeRowTotal != null && this.selectedDestination != null && this.currentCommandModule != null)
 		{
-			this.rangeRowTotal.SetStatusColor(this.currentCommandModule.reachable.CanReachDestination(this.selectedDestination) ? BreakdownListRow.Status.Green : BreakdownListRow.Status.Red);
+			this.rangeRowTotal.SetStatusColor(this.currentCommandModule.conditions.reachable.CanReachSpacecraftDestination(this.selectedDestination) ? BreakdownListRow.Status.Green : BreakdownListRow.Status.Red);
 		}
 		this.UpdateDestinationStates();
 		this.Refresh(null);
@@ -755,7 +750,7 @@ public class StarmapScreen : KModalScreen
 			MultiToggle component2 = keyValuePair.Value.GetReference<RectTransform>("LaunchRocketButton").GetComponent<MultiToggle>();
 			bool flag = key.state == Spacecraft.MissionState.Grounded;
 			SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(launchConditions);
-			bool flag2 = spacecraftDestination != null && component.reachable.CanReachDestination(spacecraftDestination);
+			bool flag2 = spacecraftDestination != null && component.conditions.reachable.CanReachSpacecraftDestination(spacecraftDestination);
 			bool flag3 = launchConditions.CheckReadyToLaunch();
 			component2.ChangeState((flag && flag2 && flag3) ? 0 : 1);
 		}
@@ -909,15 +904,15 @@ public class StarmapScreen : KModalScreen
 		Tag engineFuelTag = this.currentCommandModule.rocketStats.GetEngineFuelTag();
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.currentCommandModule.GetComponent<AttachableBuilding>()))
 		{
-			FuelTank component = gameObject.GetComponent<FuelTank>();
-			if (component != null)
+			IFuelTank component = gameObject.GetComponent<IFuelTank>();
+			if (!component.IsNullOrDestroyed())
 			{
 				BreakdownListRow breakdownListRow = this.rocketDetailsFuel.AddRow();
 				if (engineFuelTag.IsValid)
 				{
 					Element element = ElementLoader.GetElement(engineFuelTag);
 					global::Debug.Assert(element != null, "fuel_element");
-					breakdownListRow.ShowData(gameObject.gameObject.GetProperName() + " (" + element.name + ")", GameUtil.GetFormattedMass(component.GetAmountAvailable(engineFuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
+					breakdownListRow.ShowData(gameObject.gameObject.GetProperName() + " (" + element.name + ")", GameUtil.GetFormattedMass(component.Storage.GetAmountAvailable(engineFuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
 				}
 				else
 				{

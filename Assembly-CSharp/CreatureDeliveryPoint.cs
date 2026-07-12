@@ -16,7 +16,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		Prioritizable.AddRef(base.gameObject);
 		if (CreatureDeliveryPoint.capacityStatusItem == null)
 		{
-			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			CreatureDeliveryPoint.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				IUserControlledCapacity userControlledCapacity = (IUserControlledCapacity)data;
@@ -56,7 +56,6 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	private void OnFilterChanged(Tag[] tags)
 	{
-		base.GetComponent<KBatchedAnimController>().TintColour = ((tags != null && tags.Length != 0) ? this.filterTint : this.noFilterTint);
 		this.ClearFetches();
 		this.RebalanceFetches();
 	}
@@ -223,12 +222,6 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	[MyCmpAdd]
 	private Prioritizable prioritizable;
-
-	[SerializeField]
-	public Color noFilterTint = FilteredStorage.NO_FILTER_TINT;
-
-	[SerializeField]
-	public Color filterTint = FilteredStorage.FILTER_TINT;
 
 	[Serialize]
 	private int creatureLimit = 20;

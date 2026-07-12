@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Security;
 using System.Text;
 using UnityEngine.Bindings;
 using UnityEngine.Diagnostics;
@@ -15,24 +14,24 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Network/NetworkUtility.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
-	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
 	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
-	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
-	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
-	[NativeHeader("Runtime/Misc/Player.h")]
-	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
+	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
 	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Runtime/Misc/BuildSettings.h")]
+	[NativeHeader("Runtime/Utilities/Argv.h")]
 	[NativeHeader("Runtime/Logging/LogSystem.h")]
+	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
+	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
+	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
+	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
+	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
-	[NativeHeader("Runtime/Network/NetworkUtility.h")]
-	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
-	[NativeHeader("Runtime/Utilities/Argv.h")]
-	[NativeHeader("Runtime/Utilities/URLUtility.h")]
-	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
-	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
+	[NativeHeader("Runtime/Misc/Player.h")]
+	[NativeHeader("Runtime/Misc/BuildSettings.h")]
+	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
 	public class Application
 	{
 		[FreeFunction("GetInputManager().QuitApplication")]
@@ -120,7 +119,7 @@ namespace UnityEngine
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsPlaying(Object obj);
+		public static extern bool IsPlaying([NotNull("NullExceptionObject")] Object obj);
 
 		public static extern bool isFocused
 		{
@@ -201,7 +200,6 @@ namespace UnityEngine
 			get;
 		}
 
-		[SecurityCritical]
 		public static extern string persistentDataPath
 		{
 			[FreeFunction("GetPersistentDataPathApplicationSpecific")]
@@ -241,6 +239,27 @@ namespace UnityEngine
 		public static extern string unityVersion
 		{
 			[FreeFunction("Application_Bindings::GetUnityVersion", IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		internal static extern int unityVersionVer
+		{
+			[FreeFunction("Application_Bindings::GetUnityVersionVer", IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		internal static extern int unityVersionMaj
+		{
+			[FreeFunction("Application_Bindings::GetUnityVersionMaj", IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		internal static extern int unityVersionMin
+		{
+			[FreeFunction("Application_Bindings::GetUnityVersionMin", IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -415,7 +434,8 @@ namespace UnityEngine
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				return platform == RuntimePlatform.IPhonePlayer || platform == RuntimePlatform.Android || (platform - RuntimePlatform.MetroPlayerX86 <= 2 && SystemInfo.deviceType == DeviceType.Handheld);
+				RuntimePlatform runtimePlatform = platform;
+				return runtimePlatform == RuntimePlatform.IPhonePlayer || runtimePlatform == RuntimePlatform.Android || (runtimePlatform - RuntimePlatform.MetroPlayerX86 <= 2 && SystemInfo.deviceType == DeviceType.Handheld);
 			}
 		}
 
@@ -686,6 +706,9 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action quitting;
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action unloading;
+
 		[RequiredByNativeCode]
 		private static bool Internal_ApplicationWantsToQuit()
 		{
@@ -718,6 +741,16 @@ namespace UnityEngine
 			if (flag)
 			{
 				Application.quitting();
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void Internal_ApplicationUnload()
+		{
+			bool flag = Application.unloading != null;
+			if (flag)
+			{
+				Application.unloading();
 			}
 		}
 

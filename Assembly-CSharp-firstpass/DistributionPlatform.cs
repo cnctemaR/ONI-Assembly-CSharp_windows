@@ -41,6 +41,16 @@ public class DistributionPlatform : MonoBehaviour
 		}
 	}
 
+	public static event global::System.Action onDlcAuthenticationFailed;
+
+	public static void TriggerDlcAuthenticationFailed()
+	{
+		if (DistributionPlatform.onDlcAuthenticationFailed != null)
+		{
+			DistributionPlatform.onDlcAuthenticationFailed();
+		}
+	}
+
 	private static DistributionPlatform.Implementation Impl
 	{
 		get
@@ -73,11 +83,11 @@ public class DistributionPlatform : MonoBehaviour
 
 		void GetAuthTicket(DistributionPlatform.AuthTicketHandler callback);
 
-		bool PurchasedDLC { get; }
+		bool IsDLCPurchased(string dlcID);
 
-		bool IsExpansion1Active { get; }
+		bool IsDLCSubscribed(string dlcID);
 
-		void ToggleDLC();
+		void ToggleDLCSubscription(string dlcID);
 	}
 
 	public delegate void AuthTicketHandler(byte[] ticket);

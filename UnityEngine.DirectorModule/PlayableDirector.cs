@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[NativeHeader("Modules/Director/PlayableDirector.h")]
-	[RequiredByNativeCode]
 	public class PlayableDirector : Behaviour, IExposedPropertyTable
 	{
 		public PlayState state
@@ -125,9 +125,11 @@ namespace UnityEngine.Playables
 			get;
 		}
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Evaluate();
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Play();
 
@@ -140,6 +142,7 @@ namespace UnityEngine.Playables
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Resume();
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RebuildGraph();
 
@@ -166,6 +169,7 @@ namespace UnityEngine.Playables
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ClearGenericBinding(Object key);
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RebindPlayableGraphOutputs();
 
@@ -185,6 +189,7 @@ namespace UnityEngine.Playables
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern DirectorWrapMode GetWrapMode();
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void EvaluateNextFrame();
 
@@ -201,6 +206,7 @@ namespace UnityEngine.Playables
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool GetPlayOnAwake();
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_SetGenericBinding(Object key, Object value);
 

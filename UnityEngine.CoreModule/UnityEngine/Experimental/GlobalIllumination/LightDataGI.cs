@@ -6,16 +6,18 @@ namespace UnityEngine.Experimental.GlobalIllumination
 	[UsedByNativeCode]
 	public struct LightDataGI
 	{
-		public void Init(ref DirectionalLight light)
+		public void Init(ref DirectionalLight light, ref Cookie cookie)
 		{
 			this.instanceID = light.instanceID;
+			this.cookieID = cookie.instanceID;
+			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
-			this.orientation.SetLookRotation(light.direction, Vector3.up);
-			this.position = Vector3.zero;
+			this.orientation = light.orientation;
+			this.position = light.position;
 			this.range = 0f;
-			this.coneAngle = 0f;
-			this.innerConeAngle = 0f;
+			this.coneAngle = cookie.sizes.x;
+			this.innerConeAngle = cookie.sizes.y;
 			this.shape0 = light.penumbraWidthRadian;
 			this.shape1 = 0f;
 			this.type = LightType.Directional;
@@ -24,9 +26,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.falloff = FalloffType.Undefined;
 		}
 
-		public void Init(ref PointLight light)
+		public void Init(ref PointLight light, ref Cookie cookie)
 		{
 			this.instanceID = light.instanceID;
+			this.cookieID = cookie.instanceID;
+			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
 			this.orientation = Quaternion.identity;
@@ -42,9 +46,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.falloff = light.falloff;
 		}
 
-		public void Init(ref SpotLight light)
+		public void Init(ref SpotLight light, ref Cookie cookie)
 		{
 			this.instanceID = light.instanceID;
+			this.cookieID = cookie.instanceID;
+			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
 			this.orientation = light.orientation;
@@ -60,9 +66,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.falloff = light.falloff;
 		}
 
-		public void Init(ref RectangleLight light)
+		public void Init(ref RectangleLight light, ref Cookie cookie)
 		{
 			this.instanceID = light.instanceID;
+			this.cookieID = cookie.instanceID;
+			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
 			this.orientation = light.orientation;
@@ -78,9 +86,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.falloff = light.falloff;
 		}
 
-		public void Init(ref DiscLight light)
+		public void Init(ref DiscLight light, ref Cookie cookie)
 		{
 			this.instanceID = light.instanceID;
+			this.cookieID = cookie.instanceID;
+			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
 			this.orientation = light.orientation;
@@ -96,9 +106,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.falloff = light.falloff;
 		}
 
-		public void Init(ref SpotLightBoxShape light)
+		public void Init(ref SpotLightBoxShape light, ref Cookie cookie)
 		{
 			this.instanceID = light.instanceID;
+			this.cookieID = cookie.instanceID;
+			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
 			this.orientation = light.orientation;
@@ -114,9 +126,11 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.falloff = FalloffType.Undefined;
 		}
 
-		public void Init(ref SpotLightPyramidShape light)
+		public void Init(ref SpotLightPyramidShape light, ref Cookie cookie)
 		{
 			this.instanceID = light.instanceID;
+			this.cookieID = cookie.instanceID;
+			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
 			this.orientation = light.orientation;
@@ -132,6 +146,48 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.falloff = light.falloff;
 		}
 
+		public void Init(ref DirectionalLight light)
+		{
+			Cookie cookie = Cookie.Defaults();
+			this.Init(ref light, ref cookie);
+		}
+
+		public void Init(ref PointLight light)
+		{
+			Cookie cookie = Cookie.Defaults();
+			this.Init(ref light, ref cookie);
+		}
+
+		public void Init(ref SpotLight light)
+		{
+			Cookie cookie = Cookie.Defaults();
+			this.Init(ref light, ref cookie);
+		}
+
+		public void Init(ref RectangleLight light)
+		{
+			Cookie cookie = Cookie.Defaults();
+			this.Init(ref light, ref cookie);
+		}
+
+		public void Init(ref DiscLight light)
+		{
+			Cookie cookie = Cookie.Defaults();
+			this.Init(ref light, ref cookie);
+		}
+
+		public void Init(ref SpotLightBoxShape light)
+		{
+			Cookie cookie = Cookie.Defaults();
+			this.Init(ref light, ref cookie);
+		}
+
+		public void Init(ref SpotLightPyramidShape light)
+		{
+			Cookie cookie = Cookie.Defaults();
+			this.Init(ref light, ref cookie);
+		}
+
 		public void InitNoBake(int lightInstanceID)
 		{
 			this.instanceID = lightInstanceID;
@@ -139,6 +195,10 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		}
 
 		public int instanceID;
+
+		public int cookieID;
+
+		public float cookieScale;
 
 		public LinearColor color;
 

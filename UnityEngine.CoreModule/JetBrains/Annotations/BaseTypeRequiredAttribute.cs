@@ -2,8 +2,8 @@
 
 namespace JetBrains.Annotations
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	[BaseTypeRequired(typeof(Attribute))]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	public sealed class BaseTypeRequiredAttribute : Attribute
 	{
 		public BaseTypeRequiredAttribute([NotNull] Type baseType)

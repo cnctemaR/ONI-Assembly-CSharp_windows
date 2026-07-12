@@ -3,12 +3,21 @@ using UnityEngine;
 
 public class TechItem : Resource
 {
-	public TechItem(string id, ResourceSet parent, string name, string description, Func<string, bool, Sprite> getUISprite, Tech parentTech)
+	public TechItem(string id, ResourceSet parent, string name, string description, Func<string, bool, Sprite> getUISprite, string parentTechId, string[] dlcIds)
 		: base(id, parent, name)
 	{
 		this.description = description;
 		this.getUISprite = getUISprite;
-		this.parentTech = parentTech;
+		this.parentTechId = parentTechId;
+		this.dlcIds = dlcIds;
+	}
+
+	public Tech ParentTech
+	{
+		get
+		{
+			return Db.Get().Techs.Get(this.parentTechId);
+		}
 	}
 
 	public Sprite UISprite()
@@ -18,12 +27,14 @@ public class TechItem : Resource
 
 	public bool IsComplete()
 	{
-		return this.parentTech.IsComplete();
+		return this.ParentTech.IsComplete();
 	}
 
 	public string description;
 
 	public Func<string, bool, Sprite> getUISprite;
 
-	public Tech parentTech;
+	public string parentTechId;
+
+	public string[] dlcIds;
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Steamworks;
 using UnityEngine;
 
@@ -71,7 +72,7 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 			string text;
 			SteamApps.GetCurrentBetaName(out text, 100);
 			global::Debug.Log("Checking which steam branch we're on. Got: [" + text + "]");
-			return !(text == "default") && !(text == "release");
+			return !(text == "") && !(text == "default") && !(text == "release");
 		}
 	}
 
@@ -93,40 +94,44 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 		handler(array2);
 	}
 
-	public bool PurchasedDLC
+	public bool IsDLCPurchased(string dlcID)
 	{
-		get
+		bool purchasedDLC = false;
+		if (SteamManager.Initialized)
 		{
-			bool purchasedDLC = false;
-			if (SteamManager.Initialized)
+			uint steamDlcID = this.DLCtoSteamIDMap[dlcID];
+			this.GetAuthTicket(delegate(byte[] ticket)
 			{
-				this.GetAuthTicket(delegate(byte[] ticket)
-				{
-					CSteamID steamID = global::Steamworks.SteamUser.GetSteamID();
-					global::Steamworks.SteamUser.BeginAuthSession(ticket, ticket.Length, steamID);
-					EUserHasLicenseForAppResult euserHasLicenseForAppResult = global::Steamworks.SteamUser.UserHasLicenseForApp(steamID, new AppId_t(1452490U));
-					purchasedDLC = euserHasLicenseForAppResult == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
-					global::Steamworks.SteamUser.EndAuthSession(steamID);
-				});
-			}
-			return purchasedDLC;
+				CSteamID steamID = global::Steamworks.SteamUser.GetSteamID();
+				global::Steamworks.SteamUser.BeginAuthSession(ticket, ticket.Length, steamID);
+				EUserHasLicenseForAppResult euserHasLicenseForAppResult = global::Steamworks.SteamUser.UserHasLicenseForApp(steamID, new AppId_t(steamDlcID));
+				purchasedDLC = euserHasLicenseForAppResult == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
+				global::Steamworks.SteamUser.EndAuthSession(steamID);
+			});
 		}
+		else if (Application.isEditor)
+		{
+			purchasedDLC = true;
+		}
+		return purchasedDLC;
 	}
 
-	public bool IsExpansion1Active
+	public bool IsDLCSubscribed(string dlcID)
 	{
-		get
+		uint num = this.DLCtoSteamIDMap[dlcID];
+		if (SteamManager.Initialized)
 		{
-			return false;
+			return SteamApps.BIsSubscribedApp(new AppId_t(num));
 		}
+		return Application.isEditor;
 	}
 
-	public void ToggleDLC()
+	public void ToggleDLCSubscription(string dlcID)
 	{
-		global::Debug.Log("Steam: Toggling DLC");
-		if (this.PurchasedDLC)
+		global::Debug.Log("Steam: Toggling DLC " + dlcID);
+		if (this.IsDLCPurchased(dlcID))
 		{
-			if (this.IsExpansion1Active)
+			if (this.IsDLCSubscribed(dlcID))
 			{
 				SteamApps.UninstallDLC(new AppId_t(1452490U));
 				global::Debug.Log("Switching to base game");
@@ -134,10 +139,10 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 			else
 			{
 				SteamApps.InstallDLC(new AppId_t(1452490U));
-				global::Debug.Log("Switching to Spaced Out");
+				global::Debug.Log("Switching to " + dlcID);
 			}
 			SteamApps.MarkContentCorrupt(false);
-			Application.OpenURL("steam://rungameid/" + 457140U);
+			Application.OpenURL("steam://rungameid/" + 457140U.ToString());
 			App.Quit();
 		}
 	}
@@ -153,6 +158,8 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 	}
 
 	private SteamDistributionPlatform.SteamUser mLocalUser;
+
+	private Dictionary<string, uint> DLCtoSteamIDMap = new Dictionary<string, uint> { { "EXPANSION1_ID", 1452490U } };
 
 	public class SteamUserId : DistributionPlatform.UserId
 	{

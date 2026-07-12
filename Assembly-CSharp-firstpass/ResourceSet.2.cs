@@ -70,6 +70,18 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 		return default(T);
 	}
 
+	public T TryGet(HashedString id)
+	{
+		foreach (T t in this.resources)
+		{
+			if (t.IdHash == id)
+			{
+				return t;
+			}
+		}
+		return default(T);
+	}
+
 	public T Get(HashedString id)
 	{
 		foreach (T t in this.resources)
@@ -79,13 +91,11 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 				return t;
 			}
 		}
-		Debug.LogError(string.Concat(new object[]
-		{
-			"Could not find ",
-			typeof(T).ToString(),
-			": ",
-			id
-		}));
+		string text = "Could not find ";
+		string text2 = typeof(T).ToString();
+		string text3 = ": ";
+		HashedString hashedString = id;
+		Debug.LogError(text + text2 + text3 + hashedString.ToString());
 		return default(T);
 	}
 
@@ -100,6 +110,16 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 		}
 		Debug.LogError("Could not find " + typeof(T).ToString() + ": " + id);
 		return default(T);
+	}
+
+	public override void Remove(Resource resource)
+	{
+		T t = resource as T;
+		if (t == null)
+		{
+			Debug.LogError("Resource type mismatch: " + resource.GetType().Name + " does not match " + typeof(T).Name);
+		}
+		this.resources.Remove(t);
 	}
 
 	public override Resource Add(Resource resource)

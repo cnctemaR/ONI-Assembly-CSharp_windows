@@ -5,8 +5,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.U2D
 {
-	[NativeHeader("Modules/SpriteShape/Public/SpriteShapeUtility.h")]
 	[MovedFrom("UnityEngine.Experimental.U2D")]
+	[NativeHeader("Modules/SpriteShape/Public/SpriteShapeUtility.h")]
 	public class SpriteShapeUtility
 	{
 		[FreeFunction("SpriteShapeUtility::Generate")]

@@ -5,9 +5,9 @@ namespace ProcGen
 	[Serializable]
 	public struct MinMax
 	{
-		public float min { get; private set; }
+		public float min { readonly get; private set; }
 
-		public float max { get; private set; }
+		public float max { readonly get; private set; }
 
 		public MinMax(float min, float max)
 		{

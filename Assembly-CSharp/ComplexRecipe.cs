@@ -13,11 +13,12 @@ public class ComplexRecipe
 		}
 	}
 
-	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results)
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP = 0)
 	{
 		this.id = id;
 		this.ingredients = ingredients;
 		this.results = results;
+		this.consumedHEP = consumedHEP;
 		ComplexRecipeManager.Get().Add(this);
 	}
 
@@ -91,6 +92,20 @@ public class ComplexRecipe
 				});
 			}
 			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_WITH, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
+		case ComplexRecipe.RecipeNameDisplay.Composite:
+			if (includeAmounts)
+			{
+				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_COMPOSITE_INCLUDE_AMOUNTS, new object[]
+				{
+					this.ingredients[0].material.ProperName(),
+					this.results[0].material.ProperName(),
+					this.results[1].material.ProperName(),
+					this.ingredients[0].amount,
+					this.results[0].amount,
+					this.results[1].amount
+				});
+			}
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_COMPOSITE, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName(), this.results[1].material.ProperName());
 		}
 		if (includeAmounts)
 		{
@@ -109,6 +124,8 @@ public class ComplexRecipe
 
 	public GameObject FabricationVisualizer;
 
+	public int consumedHEP;
+
 	public ComplexRecipe.RecipeNameDisplay nameDisplay;
 
 	public string description;
@@ -124,19 +141,50 @@ public class ComplexRecipe
 		Ingredient,
 		Result,
 		IngredientToResult,
-		ResultWithIngredient
+		ResultWithIngredient,
+		Composite
 	}
 
 	public class RecipeElement
 	{
+		public RecipeElement(Tag material, float amount, bool inheritElement)
+		{
+			this.material = material;
+			this.amount = amount;
+			this.temperatureOperation = ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature;
+			this.inheritElement = inheritElement;
+		}
+
 		public RecipeElement(Tag material, float amount)
 		{
 			this.material = material;
 			this.amount = amount;
+			this.temperatureOperation = ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature;
+		}
+
+		public RecipeElement(Tag material, float amount, ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation, bool storeElement = false)
+		{
+			this.material = material;
+			this.amount = amount;
+			this.temperatureOperation = temperatureOperation;
+			this.storeElement = storeElement;
 		}
 
 		public float amount { get; private set; }
 
 		public Tag material;
+
+		public ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation;
+
+		public bool storeElement;
+
+		public bool inheritElement;
+
+		public enum TemperatureOperation
+		{
+			AverageTemperature,
+			Heated,
+			Melted
+		}
 	}
 }

@@ -53,6 +53,15 @@ public class Worker : KMonoBehaviour
 			}
 			this.DetachAnimOverrides();
 			this.workable.CompleteWork(this);
+			if (this.workable.worker != null && !(this.workable is Constructable) && !(this.workable is Deconstructable) && !(this.workable is Repairable) && !(this.workable is Disinfectable))
+			{
+				BonusEvent.GameplayEventData gameplayEventData = new BonusEvent.GameplayEventData();
+				gameplayEventData.workable = this.workable;
+				gameplayEventData.worker = this.workable.worker;
+				gameplayEventData.building = this.workable.GetComponent<BuildingComplete>();
+				gameplayEventData.eventTrigger = GameHashes.UseBuilding;
+				GameplayEventManager.Instance.Trigger(1175726587, gameplayEventData);
+			}
 		}
 		this.InternalStopWork(this.workable, false);
 	}
@@ -308,7 +317,7 @@ public class Worker : KMonoBehaviour
 				Vector3 workOffset = this.workable.GetWorkOffset();
 				this.workAnimOffset = workOffset;
 				component.Offset += workOffset;
-				if (this.usesMultiTool && this.animInfo.smi == null && workAnims != null)
+				if (this.usesMultiTool && this.animInfo.smi == null && workAnims != null && this.resume != null)
 				{
 					if (this.workable.synchronizeAnims)
 					{
@@ -351,6 +360,22 @@ public class Worker : KMonoBehaviour
 			string text2 = "Exception in: Worker.StartWork(" + name + ")";
 			DebugUtil.LogErrorArgs(this, new object[] { text2 + "\n" + ex.ToString() });
 			throw;
+		}
+	}
+
+	private void Update()
+	{
+		if (this.state == Worker.State.Working)
+		{
+			this.ForceSyncAnims();
+		}
+	}
+
+	private void ForceSyncAnims()
+	{
+		if (Time.deltaTime > 0f && this.kanimSynchronizer != null)
+		{
+			this.kanimSynchronizer.SyncTime();
 		}
 	}
 
@@ -432,7 +457,8 @@ public class Worker : KMonoBehaviour
 				anim = "react",
 				startcb = new Action<GameObject>(this.GetReactionEffect)
 			}).AddThought(Db.Get().Thoughts.Encourage).AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor))
-				.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsFacingMe));
+				.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsFacingMe))
+				.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsntPartying));
 		}
 	}
 
@@ -450,6 +476,12 @@ public class Worker : KMonoBehaviour
 	{
 		Facing component = reactor.GetComponent<Facing>();
 		return base.transform.GetPosition().x < reactor.transform.GetPosition().x == component.GetFacing();
+	}
+
+	private bool ReactorIsntPartying(GameObject reactor, Navigator.ActiveTransition transition)
+	{
+		ChoreConsumer component = reactor.GetComponent<ChoreConsumer>();
+		return component.choreDriver.HasChore() && component.choreDriver.GetCurrentChore().choreType != Db.Get().ChoreTypes.Party;
 	}
 
 	public void ClearPasserbyReactable()

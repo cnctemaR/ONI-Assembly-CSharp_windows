@@ -92,17 +92,6 @@ public class ValveSideScreen : SideScreenContent
 		yield break;
 	}
 
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		global::Debug.Log("ValveSideScreen OnKeyDown");
-		if (this.isEditing)
-		{
-			e.Consumed = true;
-			return;
-		}
-		base.OnKeyDown(e);
-	}
-
 	private Valve targetValve;
 
 	[Header("Slider")]
@@ -121,8 +110,6 @@ public class ValveSideScreen : SideScreenContent
 
 	[SerializeField]
 	private LocText unitsLabel;
-
-	private bool isEditing;
 
 	private float targetFlow;
 }

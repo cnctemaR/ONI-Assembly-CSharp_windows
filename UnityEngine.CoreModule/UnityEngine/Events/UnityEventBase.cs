@@ -25,7 +25,12 @@ namespace UnityEngine.Events
 			this.DirtyPersistentCalls();
 		}
 
-		protected abstract MethodInfo FindMethod_Impl(string name, object targetObj);
+		protected MethodInfo FindMethod_Impl(string name, object targetObj)
+		{
+			return this.FindMethod_Impl(name, targetObj.GetType());
+		}
+
+		protected abstract MethodInfo FindMethod_Impl(string name, Type targetObjType);
 
 		internal abstract BaseInvokableCall GetDelegate(object target, MethodInfo theFunction);
 
@@ -37,34 +42,35 @@ namespace UnityEngine.Events
 			{
 				type = Type.GetType(call.arguments.unityObjectArgumentAssemblyTypeName, false) ?? typeof(Object);
 			}
-			return this.FindMethod(call.methodName, call.target, call.mode, type);
+			Type type2 = ((call.target != null) ? call.target.GetType() : Type.GetType(call.targetAssemblyTypeName, false));
+			return this.FindMethod(call.methodName, type2, call.mode, type);
 		}
 
-		internal MethodInfo FindMethod(string name, object listener, PersistentListenerMode mode, Type argumentType)
+		internal MethodInfo FindMethod(string name, Type listenerType, PersistentListenerMode mode, Type argumentType)
 		{
 			MethodInfo methodInfo;
 			switch (mode)
 			{
 			case PersistentListenerMode.EventDefined:
-				methodInfo = this.FindMethod_Impl(name, listener);
+				methodInfo = this.FindMethod_Impl(name, listenerType);
 				break;
 			case PersistentListenerMode.Void:
-				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[0]);
+				methodInfo = UnityEventBase.GetValidMethodInfo(listenerType, name, new Type[0]);
 				break;
 			case PersistentListenerMode.Object:
-				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { argumentType ?? typeof(Object) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listenerType, name, new Type[] { argumentType ?? typeof(Object) });
 				break;
 			case PersistentListenerMode.Int:
-				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(int) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listenerType, name, new Type[] { typeof(int) });
 				break;
 			case PersistentListenerMode.Float:
-				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(float) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listenerType, name, new Type[] { typeof(float) });
 				break;
 			case PersistentListenerMode.String:
-				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(string) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listenerType, name, new Type[] { typeof(string) });
 				break;
 			case PersistentListenerMode.Bool:
-				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(bool) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listenerType, name, new Type[] { typeof(bool) });
 				break;
 			default:
 				methodInfo = null;
@@ -159,10 +165,14 @@ namespace UnityEngine.Events
 
 		public static MethodInfo GetValidMethodInfo(object obj, string functionName, Type[] argumentTypes)
 		{
-			Type type = obj.GetType();
-			while (type != typeof(object) && type != null)
+			return UnityEventBase.GetValidMethodInfo(obj.GetType(), functionName, argumentTypes);
+		}
+
+		public static MethodInfo GetValidMethodInfo(Type objectType, string functionName, Type[] argumentTypes)
+		{
+			while (objectType != typeof(object) && objectType != null)
 			{
-				MethodInfo method = type.GetMethod(functionName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, argumentTypes, null);
+				MethodInfo method = objectType.GetMethod(functionName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, argumentTypes, null);
 				bool flag = method != null;
 				if (flag)
 				{
@@ -171,9 +181,9 @@ namespace UnityEngine.Events
 					int num = 0;
 					foreach (ParameterInfo parameterInfo in parameters)
 					{
-						Type type2 = argumentTypes[num];
+						Type type = argumentTypes[num];
 						Type parameterType = parameterInfo.ParameterType;
-						flag2 = type2.IsPrimitive == parameterType.IsPrimitive;
+						flag2 = type.IsPrimitive == parameterType.IsPrimitive;
 						bool flag3 = !flag2;
 						if (flag3)
 						{
@@ -187,15 +197,15 @@ namespace UnityEngine.Events
 						return method;
 					}
 				}
-				type = type.BaseType;
+				objectType = objectType.BaseType;
 			}
 			return null;
 		}
 
 		private InvokableCallList m_Calls;
 
-		[SerializeField]
 		[FormerlySerializedAs("m_PersistentListeners")]
+		[SerializeField]
 		private PersistentCallGroup m_PersistentCalls;
 
 		private bool m_CallsDirty = true;

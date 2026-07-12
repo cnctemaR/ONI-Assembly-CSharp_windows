@@ -6,7 +6,7 @@ public class SolidBooster : RocketEngine
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.gameObject.Subscribe(1366341636, new Action<object>(this.OnReturn));
+		base.Subscribe<SolidBooster>(-887025858, SolidBooster.OnRocketLandedDelegate);
 	}
 
 	[ContextMenu("Fill Tank")]
@@ -20,7 +20,7 @@ public class SolidBooster : RocketEngine
 		this.fuelStorage.Store(gameObject, false, false, true, false);
 	}
 
-	private void OnReturn(object data)
+	private void OnRocketLanded(object data)
 	{
 		if (this.fuelStorage != null && this.fuelStorage.items != null)
 		{
@@ -33,4 +33,9 @@ public class SolidBooster : RocketEngine
 	}
 
 	public Storage fuelStorage;
+
+	private static readonly EventSystem.IntraObjectHandler<SolidBooster> OnRocketLandedDelegate = new EventSystem.IntraObjectHandler<SolidBooster>(delegate(SolidBooster component, object data)
+	{
+		component.OnRocketLanded(data);
+	});
 }

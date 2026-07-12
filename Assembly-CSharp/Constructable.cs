@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using TUNING;
@@ -92,7 +93,7 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						if (this != null && this.gameObject != null)
 						{
-							this.FinishConstruction(connections);
+							this.FinishConstruction(connections, worker);
 						}
 					});
 				}
@@ -108,13 +109,13 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						component5.Subscribe(-21016276, delegate(object data)
 						{
-							this.FinishConstruction(connections);
+							this.FinishConstruction(connections, worker);
 						});
 					}
 					else
 					{
 						global::Debug.LogWarning("Why am I trying to replace a: " + replacementCandidate.name);
-						this.FinishConstruction(connections);
+						this.FinishConstruction(connections, worker);
 					}
 				}
 				KAnimGraphTileVisualizer component6 = replacementCandidate.GetComponent<KAnimGraphTileVisualizer>();
@@ -133,18 +134,24 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		if (flag2)
 		{
-			this.FinishConstruction(connections);
+			this.FinishConstruction(connections, worker);
 		}
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), base.transform, 1.5f, false);
 	}
 
-	private void FinishConstruction(UtilityConnections connections)
+	private void FinishConstruction(UtilityConnections connections, Worker workerForGameplayEvent)
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((component != null) ? component.GetOrientation() : Orientation.Neutral);
 		int num = Grid.PosToCell(base.transform.GetLocalPosition());
 		this.UnmarkArea();
 		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, true, GameClock.Instance.GetTime());
+		BonusEvent.GameplayEventData gameplayEventData = new BonusEvent.GameplayEventData();
+		gameplayEventData.building = gameObject.GetComponent<BuildingComplete>();
+		gameplayEventData.workable = this;
+		gameplayEventData.worker = workerForGameplayEvent;
+		gameplayEventData.eventTrigger = GameHashes.NewBuilding;
+		GameplayEventManager.Instance.Trigger(-1661515756, gameplayEventData);
 		gameObject.transform.rotation = base.transform.rotation;
 		Rotatable component2 = gameObject.GetComponent<Rotatable>();
 		if (component2 != null)
@@ -166,6 +173,7 @@ public class Constructable : Workable, ISaveLoadable
 				((SelectTool)PlayerController.Instance.ActiveTool).SelectNextFrame(gameObject.GetComponent<KSelectable>(), false);
 			}
 		}
+		gameObject.Trigger(2121280625, this);
 		this.storage.ConsumeAllIgnoringDisease();
 		this.finished = true;
 		this.DeleteObject();
@@ -174,7 +182,7 @@ public class Constructable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
+		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
 		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
 		if (this.building.Def.IsTilePiece)
 		{
@@ -188,6 +196,10 @@ public class Constructable : Workable, ISaveLoadable
 		if (this.rotatable == null)
 		{
 			this.MarkArea();
+		}
+		if (Db.Get().TechItems.GetTechTierForItem(this.building.Def.PrefabID) > 1)
+		{
+			this.requireMinionToWork = true;
 		}
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Building;
 		this.workingStatusItem = null;
@@ -221,7 +233,7 @@ public class Constructable : Workable, ISaveLoadable
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElementsTags))
 		{
 			this.fetchList.Add(ingredient.tag, null, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
-			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, ingredient.amount);
+			MaterialNeeds.UpdateNeed(ingredient.tag, ingredient.amount, base.gameObject.GetMyWorldId());
 		}
 		if (!this.building.Def.IsTilePiece)
 		{
@@ -552,7 +564,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.SelectedElementsTags))
 		{
-			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, -ingredient.amount);
+			MaterialNeeds.UpdateNeed(ingredient.tag, -ingredient.amount, base.gameObject.GetMyWorldId());
 		}
 		this.materialNeedsCleared = true;
 	}

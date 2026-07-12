@@ -61,7 +61,7 @@ public class AlarmSideScreen : SideScreenContent
 				{
 					NotificationType type = enumerator.Current;
 					GameObject gameObject = Util.KInstantiateUI(this.typeButtonPrefab, this.typeButtonPrefab.transform.parent.gameObject, true);
-					gameObject.name = "TypeButton: " + type;
+					gameObject.name = "TypeButton: " + type.ToString();
 					HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 					Color notificationBGColour = NotificationScreen.Instance.GetNotificationBGColour(type);
 					Color notificationColour = NotificationScreen.Instance.GetNotificationColour(type);

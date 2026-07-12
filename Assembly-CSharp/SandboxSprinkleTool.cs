@@ -143,6 +143,22 @@ public class SandboxSprinkleTool : BrushTool
 		this.SetBrushSize(this.brushRadius);
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.TryConsume(global::Action.SandboxCopyElement))
+		{
+			int num = Grid.PosToCell(PlayerController.GetCursorPos(KInputManager.GetMousePos()));
+			if (Grid.IsValidCell(num))
+			{
+				SandboxSampleTool.Sample(num);
+			}
+		}
+		if (!e.Consumed)
+		{
+			base.OnKeyDown(e);
+		}
+	}
+
 	public static SandboxSprinkleTool instance;
 
 	protected HashSet<int> recentlyAffectedCells = new HashSet<int>();

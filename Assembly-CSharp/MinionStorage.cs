@@ -55,6 +55,7 @@ public class MinionStorage : KMonoBehaviour
 		}
 		MinionResume component4 = src_id.GetComponent<MinionResume>();
 		dest_id.MasteryBySkillID = component4.MasteryBySkillID;
+		dest_id.grantedSkillIDs = component4.GrantedSkillIDs;
 		dest_id.AptitudeBySkillGroup = component4.AptitudeBySkillGroup;
 		dest_id.TotalExperienceGained = component4.TotalExperienceGained;
 		dest_id.currentHat = component4.CurrentHat;
@@ -115,7 +116,7 @@ public class MinionStorage : KMonoBehaviour
 		if (src_id.MasteryBySkillID != null)
 		{
 			MinionResume component2 = dest_id.GetComponent<MinionResume>();
-			component2.RestoreResume(src_id.MasteryBySkillID, src_id.AptitudeBySkillGroup, src_id.TotalExperienceGained);
+			component2.RestoreResume(src_id.MasteryBySkillID, src_id.AptitudeBySkillGroup, src_id.grantedSkillIDs, src_id.TotalExperienceGained);
 			component2.SetHats(src_id.currentHat, src_id.targetHat);
 		}
 		if (src_id.choreGroupPriorities != null)
@@ -238,6 +239,11 @@ public class MinionStorage : KMonoBehaviour
 	public List<MinionStorage.Info> GetStoredMinionInfo()
 	{
 		return this.serializedMinions;
+	}
+
+	public void SetStoredMinionInfo(List<MinionStorage.Info> info)
+	{
+		this.serializedMinions = info;
 	}
 
 	[Serialize]

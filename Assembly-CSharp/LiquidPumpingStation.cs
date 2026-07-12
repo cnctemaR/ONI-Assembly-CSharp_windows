@@ -10,20 +10,12 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		base.OnPrefabInit();
 		this.resetProgressOnStop = true;
 		this.showProgressBar = false;
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < LiquidPumpingStation.floorOffsets.Length; i++)
-		{
-			int num2 = Grid.OffsetCell(num, LiquidPumpingStation.floorOffsets[i]);
-			Grid.FakeFloor[num2] = true;
-			Pathfinding.Instance.AddDirtyNavGridCell(num2);
-		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.infos = new LiquidPumpingStation.LiquidInfo[LiquidPumpingStation.liquidOffsets.Length * 2];
-		base.GetComponent<KSelectable>().SetStatusIndicatorOffset(base.GetComponent<Building>().Def.placementPivot);
 		this.RefreshStatusItem();
 		this.Sim200ms(0f);
 		base.SetWorkTime(10f);
@@ -284,20 +276,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				this.infos[i].source.DeleteObject();
 			}
 		}
-		int num = Grid.PosToCell(this);
-		for (int j = 0; j < LiquidPumpingStation.floorOffsets.Length; j++)
-		{
-			int num2 = Grid.OffsetCell(num, LiquidPumpingStation.floorOffsets[j]);
-			Grid.FakeFloor[num2] = false;
-			Pathfinding.Instance.AddDirtyNavGridCell(num2);
-		}
 	}
-
-	private static readonly CellOffset[] floorOffsets = new CellOffset[]
-	{
-		new CellOffset(0, 0),
-		new CellOffset(1, 0)
-	};
 
 	private static readonly CellOffset[] liquidOffsets = new CellOffset[]
 	{

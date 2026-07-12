@@ -8,6 +8,12 @@ using UnityEngine.UI;
 
 public class ModeSelectScreen : NewGameFlowScreen
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.LoadWorldAndClusterData();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -51,18 +57,22 @@ public class ModeSelectScreen : NewGameFlowScreen
 	private void OnClickSurvival()
 	{
 		this.Deactivate();
-		this.LoadWorldsData();
 		CustomGameSettings.Instance.SetSurvivalDefaults();
 		base.NavigateForward();
 	}
 
-	private void LoadWorldsData()
+	private void LoadWorldAndClusterData()
 	{
+		if (ModeSelectScreen.dataLoaded)
+		{
+			return;
+		}
 		Global.Instance.modManager.Load(Content.LayerableFiles);
 		SettingsCache.Clear();
 		WorldGen.LoadSettings();
-		CustomGameSettings.Instance.LoadWorlds();
+		CustomGameSettings.Instance.LoadClusters();
 		Global.Instance.modManager.Report(base.gameObject);
+		ModeSelectScreen.dataLoaded = true;
 	}
 
 	private void OnHoverEnterNosweat()
@@ -84,7 +94,6 @@ public class ModeSelectScreen : NewGameFlowScreen
 	private void OnClickNosweat()
 	{
 		this.Deactivate();
-		this.LoadWorldsData();
 		CustomGameSettings.Instance.SetNosweatDefaults();
 		base.NavigateForward();
 	}
@@ -114,4 +123,6 @@ public class ModeSelectScreen : NewGameFlowScreen
 
 	[SerializeField]
 	private KBatchedAnimController survivalAnim;
+
+	private static bool dataLoaded;
 }

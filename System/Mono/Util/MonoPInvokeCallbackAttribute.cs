@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 namespace Mono.Util
 {
-	[Conditional("MONOTOUCH")]
 	[AttributeUsage(AttributeTargets.Method)]
+	[Conditional("MONOTOUCH")]
 	[Conditional("FULL_AOT_RUNTIME")]
 	[Conditional("UNITY")]
 	internal sealed class MonoPInvokeCallbackAttribute : Attribute

@@ -97,6 +97,27 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.JOULES_PER_KILOGRAM, GameUtil.GetFormattedJoules(num, "F1", GameUtil.TimeSlice.None));
 	}
 
+	private static string TotalRadiation(List<int> cells)
+	{
+		float num = 0f;
+		foreach (int num2 in cells)
+		{
+			num += Grid.Radiation[num2];
+		}
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_RADS, GameUtil.GetFormattedRads(num, GameUtil.TimeSlice.None));
+	}
+
+	private static string AverageRadiation(List<int> cells)
+	{
+		float num = 0f;
+		foreach (int num2 in cells)
+		{
+			num += Grid.Radiation[num2];
+		}
+		num /= (float)cells.Count;
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.AVERAGE_RADS, GameUtil.GetFormattedRads(num, GameUtil.TimeSlice.None));
+	}
+
 	private static string MassPerElement(List<int> cells)
 	{
 		TemplateSelectionInfoPanel.mass_per_element.Clear();
@@ -163,7 +184,9 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageTemperature),
 		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalJoules),
 		new Func<List<int>, string>(TemplateSelectionInfoPanel.JoulesPerKilogram),
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.MassPerElement)
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.MassPerElement),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalRadiation),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageRadiation)
 	};
 
 	private static List<global::Tuple<Element, float>> mass_per_element = new List<global::Tuple<Element, float>>();

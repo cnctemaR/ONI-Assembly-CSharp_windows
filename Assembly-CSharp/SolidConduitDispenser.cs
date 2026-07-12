@@ -5,8 +5,24 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/SolidConduitDispenser")]
-public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
+public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 {
+	public Storage Storage
+	{
+		get
+		{
+			return this.storage;
+		}
+	}
+
+	public ConduitType ConduitType
+	{
+		get
+		{
+			return ConduitType.Solid;
+		}
+	}
+
 	public SolidConduitFlow.ConduitContents ConduitContents
 	{
 		get
@@ -31,7 +47,7 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
+		this.utilityCell = this.GetOutputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[20];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("SolidConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitFlow().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Dispense);
@@ -76,15 +92,27 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 		this.dispensing = flag;
 	}
 
+	private bool isSolid(GameObject o)
+	{
+		PrimaryElement component = o.GetComponent<PrimaryElement>();
+		return component == null || component.Element.IsLiquid || component.Element.IsGas;
+	}
+
 	private Pickupable FindSuitableItem()
 	{
-		List<GameObject> items = this.storage.items;
-		if (items.Count < 1)
+		List<GameObject> list = this.storage.items;
+		if (this.solidOnly)
+		{
+			List<GameObject> list2 = new List<GameObject>(list);
+			list2.RemoveAll(new Predicate<GameObject>(this.isSolid));
+			list = list2;
+		}
+		if (list.Count < 1)
 		{
 			return null;
 		}
-		this.round_robin_index %= items.Count;
-		GameObject gameObject = items[this.round_robin_index];
+		this.round_robin_index %= list.Count;
+		GameObject gameObject = list[this.round_robin_index];
 		this.round_robin_index++;
 		if (!gameObject)
 		{
@@ -114,6 +142,17 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 		return utilityNetwork.id;
 	}
 
+	private int GetOutputCell()
+	{
+		Building component = base.GetComponent<Building>();
+		if (this.useSecondaryOutput)
+		{
+			ISecondaryOutput component2 = base.GetComponent<ISecondaryOutput>();
+			return Grid.OffsetCell(component.NaturalBuildingCell(), component2.GetSecondaryConduitOffset(ConduitType.Solid));
+		}
+		return component.GetUtilityOutputCell();
+	}
+
 	[SerializeField]
 	public SimHashes[] elementFilter;
 
@@ -122,6 +161,12 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 
 	[SerializeField]
 	public bool alwaysDispense;
+
+	[SerializeField]
+	public bool useSecondaryOutput;
+
+	[SerializeField]
+	public bool solidOnly;
 
 	private static readonly Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 
@@ -138,6 +183,4 @@ public class SolidConduitDispenser : KMonoBehaviour, ISaveLoadable
 	private bool dispensing;
 
 	private int round_robin_index;
-
-	private const float MaxMass = 20f;
 }

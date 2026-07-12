@@ -34,7 +34,7 @@ public class SkillPerkMissingComplainer : KMonoBehaviour
 		{
 			return;
 		}
-		bool flag = MinionResume.AnyMinionHasPerk(this.requiredSkillPerk);
+		bool flag = MinionResume.AnyMinionHasPerk(this.requiredSkillPerk, this.GetMyWorldId());
 		if (!flag && this.workStatusItemHandle == Guid.Empty)
 		{
 			this.workStatusItemHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.ColonyLacksRequiredSkillPerk, this.requiredSkillPerk);

@@ -1,0 +1,75 @@
+﻿using System;
+
+public class RocketPassengerMonitor : GameStateMachine<RocketPassengerMonitor, RocketPassengerMonitor.Instance>
+{
+	public override void InitializeStates(out StateMachine.BaseState default_state)
+	{
+		default_state = this.satisfied;
+		base.serializable = StateMachine.SerializeType.ParamsOnly;
+		this.satisfied.ParamTransition<int>(this.targetCell, this.moving, (RocketPassengerMonitor.Instance smi, int p) => p != Grid.InvalidCell);
+		this.moving.ParamTransition<int>(this.targetCell, this.satisfied, (RocketPassengerMonitor.Instance smi, int p) => p == Grid.InvalidCell).ToggleChore((RocketPassengerMonitor.Instance smi) => this.CreateChore(smi), this.satisfied).Exit(delegate(RocketPassengerMonitor.Instance smi)
+		{
+			this.targetCell.Set(Grid.InvalidCell, smi);
+		});
+	}
+
+	public Chore CreateChore(RocketPassengerMonitor.Instance smi)
+	{
+		MoveChore moveChore = new MoveChore(smi.master, Db.Get().ChoreTypes.RocketEnterExit, (MoveChore.StatesInstance mover_smi) => this.targetCell.Get(smi), false);
+		moveChore.AddPrecondition(ChorePreconditions.instance.CanMoveToCell, this.targetCell.Get(smi));
+		return moveChore;
+	}
+
+	public StateMachine<RocketPassengerMonitor, RocketPassengerMonitor.Instance, IStateMachineTarget, object>.IntParameter targetCell = new StateMachine<RocketPassengerMonitor, RocketPassengerMonitor.Instance, IStateMachineTarget, object>.IntParameter(Grid.InvalidCell);
+
+	public GameStateMachine<RocketPassengerMonitor, RocketPassengerMonitor.Instance, IStateMachineTarget, object>.State satisfied;
+
+	public GameStateMachine<RocketPassengerMonitor, RocketPassengerMonitor.Instance, IStateMachineTarget, object>.State moving;
+
+	public new class Instance : GameStateMachine<RocketPassengerMonitor, RocketPassengerMonitor.Instance, IStateMachineTarget, object>.GameInstance
+	{
+		public Instance(IStateMachineTarget master)
+			: base(master)
+		{
+		}
+
+		public bool ShouldMoveThroughRocketDoor()
+		{
+			int num = base.sm.targetCell.Get(this);
+			if (!Grid.IsValidCell(num))
+			{
+				return false;
+			}
+			if ((int)Grid.WorldIdx[num] == this.GetMyWorldId())
+			{
+				base.sm.targetCell.Set(Grid.InvalidCell, this);
+				return false;
+			}
+			return true;
+		}
+
+		public void SetMoveTarget(int cell)
+		{
+			if ((int)Grid.WorldIdx[cell] == this.GetMyWorldId())
+			{
+				return;
+			}
+			base.sm.targetCell.Set(cell, this);
+		}
+
+		public void ClearMoveTarget(int testCell)
+		{
+			int num = base.sm.targetCell.Get(this);
+			if (Grid.IsValidCell(num) && Grid.WorldIdx[num] == Grid.WorldIdx[testCell])
+			{
+				base.sm.targetCell.Set(Grid.InvalidCell, this);
+				if (base.IsInsideState(base.sm.moving))
+				{
+					this.GoTo(base.sm.satisfied);
+				}
+			}
+		}
+
+		public int lastWorldID;
+	}
+}

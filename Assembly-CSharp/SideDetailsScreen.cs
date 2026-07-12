@@ -33,7 +33,7 @@ public class SideDetailsScreen : KScreen
 		});
 		this.backButton.onClick += delegate
 		{
-			base.Show(false);
+			this.Show(false);
 		};
 	}
 

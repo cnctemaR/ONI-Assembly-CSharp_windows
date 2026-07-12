@@ -20,7 +20,7 @@ public class ComicViewer : KScreen
 			this.closeButton.onClick += delegate
 			{
 				this.Stop();
-				base.Show(false);
+				this.Show(false);
 			};
 			return;
 		}
@@ -33,7 +33,7 @@ public class ComicViewer : KScreen
 	public void Stop()
 	{
 		this.OnStop();
-		base.Show(false);
+		this.Show(false);
 		base.gameObject.SetActive(false);
 	}
 

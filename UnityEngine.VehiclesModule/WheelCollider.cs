@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("PhysicsScriptingClasses.h")]
 	[NativeHeader("Modules/Vehicles/WheelCollider.h")]
+	[NativeHeader("PhysicsScriptingClasses.h")]
 	public class WheelCollider : Collider
 	{
 		public Vector3 center
@@ -50,6 +50,14 @@ namespace UnityEngine
 			{
 				this.set_suspensionSpring_Injected(ref value);
 			}
+		}
+
+		public extern bool suspensionExpansionLimited
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		public extern float forceAppPointDistance
@@ -145,7 +153,12 @@ namespace UnityEngine
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ResetSprungMasses();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ConfigureVehicleSubsteps(float speedThreshold, int stepsBelowThreshold, int stepsAboveThreshold);

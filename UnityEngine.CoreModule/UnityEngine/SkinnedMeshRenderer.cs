@@ -71,8 +71,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetBlendShapeWeight(int index, float value);
 
+		public void BakeMesh(Mesh mesh)
+		{
+			this.BakeMesh(mesh, false);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void BakeMesh(Mesh mesh);
+		public extern void BakeMesh([NotNull("NullExceptionObject")] Mesh mesh, bool useScale);
 
 		[FreeFunction(Name = "SkinnedMeshRendererScripting::GetLocalAABB", HasExplicitThis = true)]
 		private Bounds GetLocalAABB()

@@ -7,7 +7,7 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		base.serializable = false;
+		base.serializable = StateMachine.SerializeType.Never;
 		this.root.EventHandler(GameHashes.AssignablesChanged, delegate(SleepChoreMonitor.Instance smi)
 		{
 			smi.UpdateBed();

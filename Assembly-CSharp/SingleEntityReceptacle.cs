@@ -51,6 +51,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		}
 	}
 
+	public bool HasDepositTag(Tag tag)
+	{
+		return this.possibleDepositTagsList.Contains(tag);
+	}
+
 	public SingleEntityReceptacle.ReceptacleDirection Direction
 	{
 		get
@@ -73,9 +78,13 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			this.SubscribeToOccupant();
 		}
 		this.UpdateStatusItem();
+		if (this.occupyingObject == null && !this.requestedEntityTag.IsValid)
+		{
+			this.requestedEntityAdditionalFilterTag = null;
+		}
 		if (this.occupyingObject == null && this.requestedEntityTag.IsValid)
 		{
-			this.CreateOrder(this.requestedEntityTag);
+			this.CreateOrder(this.requestedEntityTag, this.requestedEntityAdditionalFilterTag);
 		}
 		base.Subscribe<SingleEntityReceptacle>(-592767678, SingleEntityReceptacle.OnOperationalChangedDelegate);
 	}
@@ -94,10 +103,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 	}
 
-	public virtual void CreateOrder(Tag entityTag)
+	public virtual void CreateOrder(Tag entityTag, Tag additionalFilterTag)
 	{
 		this.requestedEntityTag = entityTag;
-		this.CreateFetchChore(this.requestedEntityTag);
+		this.requestedEntityAdditionalFilterTag = additionalFilterTag;
+		this.CreateFetchChore(this.requestedEntityTag, this.requestedEntityAdditionalFilterTag);
 		this.SetPreview(entityTag, true);
 		this.UpdateStatusItem();
 	}
@@ -123,12 +133,23 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		bool flag = this.fetchChore.fetcher != null;
 		if (!flag)
 		{
-			foreach (Tag tag in this.fetchChore.tags)
+			Tag[] tags = this.fetchChore.tags;
+			int i = 0;
+			while (i < tags.Length)
 			{
-				if (WorldInventory.Instance.GetTotalAmount(tag) > 0f)
+				Tag tag = tags[i];
+				if (this.GetMyWorld().worldInventory.GetTotalAmount(tag, true) > 0f)
 				{
-					flag = true;
+					if (this.GetMyWorld().worldInventory.GetTotalAmount(this.requestedEntityAdditionalFilterTag, true) > 0f || this.requestedEntityAdditionalFilterTag == Tag.Invalid)
+					{
+						flag = true;
+						break;
+					}
 					break;
+				}
+				else
+				{
+					i++;
 				}
 			}
 		}
@@ -140,18 +161,34 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, this.statusItemNoneAvailable, null);
 	}
 
-	protected void CreateFetchChore(Tag entityTag)
+	protected void CreateFetchChore(Tag entityTag, Tag additionalRequiredTag)
 	{
 		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
-			this.fetchChore = new FetchChore(Db.Get().ChoreTypes.FarmFetch, this.storage, 1f, new Tag[] { entityTag }, null, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
+			ChoreType farmFetch = Db.Get().ChoreTypes.FarmFetch;
+			Storage storage = this.storage;
+			float num = 1f;
+			Tag[] array = new Tag[] { entityTag };
+			Tag[] array2;
+			if (!additionalRequiredTag.IsValid || !(additionalRequiredTag != GameTags.Empty))
+			{
+				array2 = null;
+			}
+			else
+			{
+				Tag[] array3 = new Tag[2];
+				array3[0] = entityTag;
+				array2 = array3;
+				array3[1] = additionalRequiredTag;
+			}
+			this.fetchChore = new FetchChore(farmFetch, storage, num, array, array2, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
 			{
 				this.UpdateStatusItem();
 			}, delegate(Chore chore)
 			{
 				this.UpdateStatusItem();
 			}, FetchOrder2.OperationalRequirement.Functional, 0);
-			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, 1f);
+			MaterialNeeds.UpdateNeed(this.requestedEntityTag, 1f, base.gameObject.GetMyWorldId());
 			this.UpdateStatusItem();
 		}
 	}
@@ -165,6 +202,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.occupyingObject)
 		{
+			this.UnsubscribeFromOccupant();
 			this.storage.DropAll(false, false, default(Vector3), true);
 		}
 		this.occupyingObject = null;
@@ -177,7 +215,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.fetchChore != null)
 		{
-			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, -1f);
+			MaterialNeeds.UpdateNeed(this.requestedEntityTag, -1f, base.gameObject.GetMyWorldId());
 			this.fetchChore.Cancel("User canceled");
 			this.fetchChore = null;
 		}
@@ -192,7 +230,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.ClearOccupant();
 		if (this.autoReplaceEntity && this.requestedEntityTag.IsValid && this.requestedEntityTag != GameTags.Empty)
 		{
-			this.CreateOrder(this.requestedEntityTag);
+			this.CreateOrder(this.requestedEntityTag, this.requestedEntityAdditionalFilterTag);
 		}
 	}
 
@@ -224,26 +262,31 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			global::Debug.LogWarningFormat(base.gameObject, "{0} OnFetchComplete fetchChore.fetchTarget null", new object[] { base.gameObject });
 			return;
 		}
-		this.OnDepositObject(this.fetchChore.fetchTarget.GetComponent<Pickupable>());
+		this.OnDepositObject(this.fetchChore.fetchTarget.gameObject);
 	}
 
-	public void ForceDepositPickupable(Pickupable pickupable)
+	public void ForceDeposit(GameObject depositedObject)
 	{
-		this.OnDepositObject(pickupable);
+		if (this.occupyingObject != null)
+		{
+			this.ClearOccupant();
+		}
+		this.OnDepositObject(depositedObject);
 	}
 
-	private void OnDepositObject(Pickupable pickupable)
+	private void OnDepositObject(GameObject depositedObject)
 	{
 		this.SetPreview(Tag.Invalid, false);
-		MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, -1f);
-		KBatchedAnimController component = pickupable.GetComponent<KBatchedAnimController>();
+		MaterialNeeds.UpdateNeed(this.requestedEntityTag, -1f, base.gameObject.GetMyWorldId());
+		KBatchedAnimController component = depositedObject.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
 			component.GetBatchInstanceData().ClearOverrideTransformMatrix();
 		}
-		this.occupyingObject = this.SpawnOccupyingObject(pickupable.gameObject);
+		this.occupyingObject = this.SpawnOccupyingObject(depositedObject);
 		if (this.occupyingObject != null)
 		{
+			this.ConfigureOccupyingObject(this.occupyingObject);
 			this.occupyingObject.SetActive(true);
 			this.PositionOccupyingObject();
 			this.SubscribeToOccupant();
@@ -265,14 +308,18 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.UpdateStatusItem();
 		if (this.destroyEntityOnDeposit)
 		{
-			Util.KDestroyGameObject(pickupable.gameObject);
+			Util.KDestroyGameObject(depositedObject);
 		}
 		base.Trigger(-731304873, this.occupyingObject);
 	}
 
-	public virtual GameObject SpawnOccupyingObject(GameObject depositedEntity)
+	protected virtual GameObject SpawnOccupyingObject(GameObject depositedEntity)
 	{
 		return depositedEntity;
+	}
+
+	protected virtual void ConfigureOccupyingObject(GameObject source)
+	{
 	}
 
 	protected virtual void PositionOccupyingObject()
@@ -334,6 +381,9 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 
 	[Serialize]
 	public Tag requestedEntityTag;
+
+	[Serialize]
+	public Tag requestedEntityAdditionalFilterTag;
 
 	[Serialize]
 	protected Ref<KSelectable> occupyObjectRef = new Ref<KSelectable>();

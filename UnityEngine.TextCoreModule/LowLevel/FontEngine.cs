@@ -72,6 +72,15 @@ namespace UnityEngine.TextCore.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int LoadFontFace_With_Size_Internal(string filePath, int pointSize);
 
+		public static FontEngineError LoadFontFace(string filePath, int pointSize, int faceIndex)
+		{
+			return (FontEngineError)FontEngine.LoadFontFace_With_Size_And_FaceIndex_Internal(filePath, pointSize, faceIndex);
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_And_FaceIndex_Internal(string filePath, int pointSize, int faceIndex);
+
 		public static FontEngineError LoadFontFace(byte[] sourceFontFile)
 		{
 			bool flag = sourceFontFile.Length == 0;
@@ -110,6 +119,25 @@ namespace UnityEngine.TextCore.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int LoadFontFace_With_Size_FromSourceFontFile_Internal(byte[] sourceFontFile, int pointSize);
 
+		public static FontEngineError LoadFontFace(byte[] sourceFontFile, int pointSize, int faceIndex)
+		{
+			bool flag = sourceFontFile.Length == 0;
+			FontEngineError fontEngineError;
+			if (flag)
+			{
+				fontEngineError = FontEngineError.Invalid_File;
+			}
+			else
+			{
+				fontEngineError = (FontEngineError)FontEngine.LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal(sourceFontFile, pointSize, faceIndex);
+			}
+			return fontEngineError;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal(byte[] sourceFontFile, int pointSize, int faceIndex);
+
 		public static FontEngineError LoadFontFace(Font font)
 		{
 			return (FontEngineError)FontEngine.LoadFontFace_FromFont_Internal(font);
@@ -127,6 +155,84 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int LoadFontFace_With_Size_FromFont_Internal(Font font, int pointSize);
+
+		public static FontEngineError LoadFontFace(Font font, int pointSize, int faceIndex)
+		{
+			return (FontEngineError)FontEngine.LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal(font, pointSize, faceIndex);
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal(Font font, int pointSize, int faceIndex);
+
+		public static FontEngineError LoadFontFace(string familyName, string styleName)
+		{
+			return (FontEngineError)FontEngine.LoadFontFace_by_FamilyName_and_StyleName_Internal(familyName, styleName);
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_by_FamilyName_and_StyleName_Internal(string familyName, string styleName);
+
+		public static FontEngineError LoadFontFace(string familyName, string styleName, int pointSize)
+		{
+			return (FontEngineError)FontEngine.LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal(familyName, styleName, pointSize);
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal(string familyName, string styleName, int pointSize);
+
+		public static FontEngineError UnloadFontFace()
+		{
+			return (FontEngineError)FontEngine.UnloadFontFace_Internal();
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::UnloadFontFace", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int UnloadFontFace_Internal();
+
+		public static FontEngineError UnloadAllFontFaces()
+		{
+			return (FontEngineError)FontEngine.UnloadAllFontFaces_Internal();
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::UnloadAllFontFaces", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int UnloadAllFontFaces_Internal();
+
+		public static string[] GetSystemFontNames()
+		{
+			string[] systemFontNames_Internal = FontEngine.GetSystemFontNames_Internal();
+			bool flag = systemFontNames_Internal != null && systemFontNames_Internal.Length == 0;
+			string[] array;
+			if (flag)
+			{
+				array = null;
+			}
+			else
+			{
+				array = systemFontNames_Internal;
+			}
+			return array;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetSystemFontNames", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetSystemFontNames_Internal();
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetSystemFontReferences", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern FontReference[] GetSystemFontReferences();
+
+		internal static bool TryGetSystemFontReference(string familyName, string styleName, out FontReference fontRef)
+		{
+			return FontEngine.TryGetSystemFontReference_Internal(familyName, styleName, out fontRef);
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::TryGetSystemFontReference", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetSystemFontReference_Internal(string familyName, string styleName, out FontReference fontRef);
 
 		public static FontEngineError SetFaceSize(int pointSize)
 		{
@@ -147,6 +253,30 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeMethod(Name = "TextCore::FontEngine::GetFaceInfo", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetFaceInfo_Internal(ref FaceInfo faceInfo);
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetFaceCount", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int GetFaceCount();
+
+		public static string[] GetFontFaces()
+		{
+			string[] fontFaces_Internal = FontEngine.GetFontFaces_Internal();
+			bool flag = fontFaces_Internal != null && fontFaces_Internal.Length == 0;
+			string[] array;
+			if (flag)
+			{
+				array = null;
+			}
+			else
+			{
+				array = fontFaces_Internal;
+			}
+			return array;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetFontFaces", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetFontFaces_Internal();
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetGlyphIndex", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]

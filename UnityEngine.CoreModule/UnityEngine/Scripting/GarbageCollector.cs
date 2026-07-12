@@ -54,15 +54,16 @@ namespace UnityEngine.Scripting
 			set;
 		}
 
-		[NativeMethod("CollectIncrementalWrapper")]
 		[NativeThrows]
+		[NativeMethod("CollectIncrementalWrapper")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool CollectIncremental(ulong nanoseconds);
+		public static extern bool CollectIncremental(ulong nanoseconds = 0UL);
 
 		public enum Mode
 		{
 			Disabled,
-			Enabled
+			Enabled,
+			Manual
 		}
 	}
 }

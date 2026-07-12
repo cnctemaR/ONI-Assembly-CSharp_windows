@@ -69,7 +69,7 @@ namespace Satsuma.IO
 		public void Save(TextWriter writer)
 		{
 			Regex regex = new Regex("\\s");
-			writer.WriteLine(this.Graph.NodeCount() + " " + this.Graph.ArcCount(ArcFilter.All));
+			writer.WriteLine(this.Graph.NodeCount().ToString() + " " + this.Graph.ArcCount(ArcFilter.All).ToString());
 			Dictionary<Node, long> dictionary = new Dictionary<Node, long>();
 			long num = (long)this.StartIndex;
 			foreach (Arc arc in this.Graph.Arcs(ArcFilter.All))
@@ -96,7 +96,7 @@ namespace Satsuma.IO
 					num4 = num5;
 					dictionary3[node4] = num5;
 				}
-				writer.Write(num2 + " " + num4);
+				writer.Write(num2.ToString() + " " + num4.ToString());
 				foreach (Dictionary<Arc, string> dictionary4 in this.Extensions)
 				{
 					string text;

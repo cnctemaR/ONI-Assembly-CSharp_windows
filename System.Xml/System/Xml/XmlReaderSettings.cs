@@ -1,11 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Security;
 using System.Security.Permissions;
 using System.Xml.Schema;
 using System.Xml.XmlConfiguration;
-using Microsoft.Win32;
 
 namespace System.Xml
 {
@@ -631,34 +629,8 @@ namespace System.Xml
 				XmlReaderSettings.s_enableLegacyXmlSettings = new bool?(true);
 				return XmlReaderSettings.s_enableLegacyXmlSettings.Value;
 			}
-			bool flag = false;
-			if (!XmlReaderSettings.ReadSettingsFromRegistry(Registry.LocalMachine, ref flag))
-			{
-				XmlReaderSettings.ReadSettingsFromRegistry(Registry.CurrentUser, ref flag);
-			}
-			XmlReaderSettings.s_enableLegacyXmlSettings = new bool?(flag);
+			XmlReaderSettings.s_enableLegacyXmlSettings = new bool?(false);
 			return XmlReaderSettings.s_enableLegacyXmlSettings.Value;
-		}
-
-		[SecuritySafeCritical]
-		[RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-		private static bool ReadSettingsFromRegistry(RegistryKey hive, ref bool value)
-		{
-			try
-			{
-				using (RegistryKey registryKey = hive.OpenSubKey("SOFTWARE\\Microsoft\\.NETFramework\\XML", false))
-				{
-					if (registryKey != null && registryKey.GetValueKind("EnableLegacyXmlSettings") == RegistryValueKind.DWord)
-					{
-						value = (int)registryKey.GetValue("EnableLegacyXmlSettings") == 1;
-						return true;
-					}
-				}
-			}
-			catch
-			{
-			}
-			return false;
 		}
 
 		private bool useAsync;

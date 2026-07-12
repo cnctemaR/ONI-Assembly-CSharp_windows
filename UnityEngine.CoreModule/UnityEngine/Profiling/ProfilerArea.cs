@@ -16,6 +16,7 @@ namespace UnityEngine.Profiling
 		NetworkOperations,
 		UI,
 		UIDetails,
-		GlobalIllumination
+		GlobalIllumination,
+		VirtualTexturing
 	}
 }

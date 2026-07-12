@@ -1,17 +1,43 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace Unity.Baselib.LowLevel
 {
-	[NativeHeader("External/baselib/builds/CSharp/UnityBinding/Baselib_RegisteredNetwork.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/UnityBinding/Baselib_SourceLocation.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/UnityBinding/Baselib_ErrorCode.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/UnityBinding/Baselib_ErrorState.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/UnityBinding/Baselib_NetworkAddress.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/UnityBinding/Baselib_Memory.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ErrorState.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_DynamicLibrary.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ThreadLocalStorage.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Memory.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_RegisteredNetwork.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Timer.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Socket.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_SourceLocation.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ErrorCode.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Thread.gen.binding.h")]
+	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_NetworkAddress.gen.binding.h")]
 	internal static class Binding
 	{
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_Open(byte* pathname, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_DynamicLibrary_Handle baselib_DynamicLibrary_Handle;
+			Binding.Baselib_DynamicLibrary_Open_Injected(pathname, errorState, out baselib_DynamicLibrary_Handle);
+			return baselib_DynamicLibrary_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static IntPtr Baselib_DynamicLibrary_GetFunction(Binding.Baselib_DynamicLibrary_Handle handle, byte* functionName, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_DynamicLibrary_GetFunction_Injected(ref handle, functionName, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_DynamicLibrary_Close(Binding.Baselib_DynamicLibrary_Handle handle)
+		{
+			Binding.Baselib_DynamicLibrary_Close_Injected(ref handle);
+		}
+
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern uint Baselib_ErrorState_Explain(Binding.Baselib_ErrorState* errorState, byte* buffer, uint bufferLen, Binding.Baselib_ErrorState_ExplainVerbosity verbosity);
@@ -190,6 +216,133 @@ namespace Unity.Baselib.LowLevel
 			Binding.Baselib_RegisteredNetwork_Socket_UDP_Close_Injected(ref socket);
 		}
 
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_Socket_Handle Baselib_Socket_Create(Binding.Baselib_NetworkAddress_Family family, Binding.Baselib_Socket_Protocol protocol, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Socket_Handle baselib_Socket_Handle;
+			Binding.Baselib_Socket_Create_Injected(family, protocol, errorState, out baselib_Socket_Handle);
+			return baselib_Socket_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_Socket_Bind(Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Socket_Bind_Injected(ref socket, address, addressReuse, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_Socket_TCP_Connect(Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Socket_TCP_Connect_Injected(ref socket, address, addressReuse, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void Baselib_Socket_Poll(Binding.Baselib_Socket_PollFd* sockets, uint socketsCount, uint timeoutInMilliseconds, Binding.Baselib_ErrorState* errorState);
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_Socket_GetAddress(Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Socket_GetAddress_Injected(ref socket, address, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_Socket_TCP_Listen(Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Socket_TCP_Listen_Injected(ref socket, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_Socket_Handle Baselib_Socket_TCP_Accept(Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Socket_Handle baselib_Socket_Handle;
+			Binding.Baselib_Socket_TCP_Accept_Injected(ref socket, errorState, out baselib_Socket_Handle);
+			return baselib_Socket_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static uint Baselib_Socket_UDP_Send(Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_Socket_UDP_Send_Injected(ref socket, messages, messagesCount, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static uint Baselib_Socket_TCP_Send(Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_Socket_TCP_Send_Injected(ref socket, data, dataLen, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static uint Baselib_Socket_UDP_Recv(Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_Socket_UDP_Recv_Injected(ref socket, messages, messagesCount, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static uint Baselib_Socket_TCP_Recv(Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_Socket_TCP_Recv_Injected(ref socket, data, dataLen, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_Socket_Close(Binding.Baselib_Socket_Handle socket)
+		{
+			Binding.Baselib_Socket_Close_Injected(ref socket);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Baselib_Thread_YieldExecution();
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern IntPtr Baselib_Thread_GetCurrentThreadId();
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern UIntPtr Baselib_TLS_Alloc();
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Baselib_TLS_Free(UIntPtr handle);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Baselib_TLS_Set(UIntPtr handle, UIntPtr value);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern UIntPtr Baselib_TLS_Get(UIntPtr handle);
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static Binding.Baselib_Timer_TickToNanosecondConversionRatio Baselib_Timer_GetTicksToNanosecondsConversionRatio()
+		{
+			Binding.Baselib_Timer_TickToNanosecondConversionRatio baselib_Timer_TickToNanosecondConversionRatio;
+			Binding.Baselib_Timer_GetTicksToNanosecondsConversionRatio_Injected(out baselib_Timer_TickToNanosecondConversionRatio);
+			return baselib_Timer_TickToNanosecondConversionRatio;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern ulong Baselib_Timer_GetHighPrecisionTimerTicks();
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Baselib_Timer_WaitForAtLeast(uint timeInMilliseconds);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern double Baselib_Timer_GetTimeSinceStartupInSeconds();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_DynamicLibrary_Open_Injected(byte* pathname, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_DynamicLibrary_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern IntPtr Baselib_DynamicLibrary_GetFunction_Injected(ref Binding.Baselib_DynamicLibrary_Handle handle, byte* functionName, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_DynamicLibrary_Close_Injected(ref Binding.Baselib_DynamicLibrary_Handle handle);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void Baselib_Memory_AllocatePages_Injected(ulong pageSize, ulong pageCount, ulong alignmentInMultipleOfPageSize, Binding.Baselib_Memory_PageState pageState, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Memory_PageAllocation ret);
 
@@ -250,9 +403,45 @@ namespace Unity.Baselib.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Baselib_RegisteredNetwork_Socket_UDP_Close_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_Socket_Create_Injected(Binding.Baselib_NetworkAddress_Family family, Binding.Baselib_Socket_Protocol protocol, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Socket_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_Socket_Bind_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_Socket_TCP_Connect_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_Socket_GetAddress_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_Socket_TCP_Listen_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_Socket_TCP_Accept_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Socket_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern uint Baselib_Socket_UDP_Send_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern uint Baselib_Socket_TCP_Send_Injected(ref Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern uint Baselib_Socket_UDP_Recv_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern uint Baselib_Socket_TCP_Recv_Injected(ref Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_Socket_Close_Injected(ref Binding.Baselib_Socket_Handle socket);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_Timer_GetTicksToNanosecondsConversionRatio_Injected(out Binding.Baselib_Timer_TickToNanosecondConversionRatio ret);
+
 		public static readonly UIntPtr Baselib_Memory_MaxAlignment = new UIntPtr(65536U);
 
-		public static readonly Binding.Baselib_Memory_PageAllocation Baselib_Memory_PageAllocation_Invalid = default(Binding.Baselib_Memory_PageAllocation);
+		public static readonly UIntPtr Baselib_Memory_MinGuaranteedAlignment = new UIntPtr(8U);
 
 		public const uint Baselib_NetworkAddress_IpMaxStringLength = 46U;
 
@@ -260,7 +449,52 @@ namespace Unity.Baselib.LowLevel
 
 		public const uint Baselib_RegisteredNetwork_Endpoint_MaxSize = 28U;
 
+		public static readonly IntPtr Baselib_Thread_InvalidId = IntPtr.Zero;
+
+		public const uint Baselib_TLS_MinimumGuaranteedSlots = 100U;
+
+		public const ulong Baselib_SecondsPerMinute = 60UL;
+
+		public const ulong Baselib_MillisecondsPerSecond = 1000UL;
+
+		public const ulong Baselib_MillisecondsPerMinute = 60000UL;
+
+		public const ulong Baselib_MicrosecondsPerMillisecond = 1000UL;
+
+		public const ulong Baselib_MicrosecondsPerSecond = 1000000UL;
+
+		public const ulong Baselib_MicrosecondsPerMinute = 60000000UL;
+
+		public const ulong Baselib_NanosecondsPerMicrosecond = 1000UL;
+
+		public const ulong Baselib_NanosecondsPerMillisecond = 1000000UL;
+
+		public const ulong Baselib_NanosecondsPerSecond = 1000000000UL;
+
+		public const ulong Baselib_NanosecondsPerMinute = 60000000000UL;
+
+		public const ulong Baselib_Timer_MaxNumberOfNanosecondsPerTick = 1000UL;
+
+		public const double Baselib_Timer_MinNumberOfNanosecondsPerTick = 0.01;
+
+		public static readonly Binding.Baselib_Memory_PageAllocation Baselib_Memory_PageAllocation_Invalid = default(Binding.Baselib_Memory_PageAllocation);
+
 		public static readonly Binding.Baselib_RegisteredNetwork_Socket_UDP Baselib_RegisteredNetwork_Socket_UDP_Invalid = default(Binding.Baselib_RegisteredNetwork_Socket_UDP);
+
+		public static readonly Binding.Baselib_Socket_Handle Baselib_Socket_Handle_Invalid = new Binding.Baselib_Socket_Handle
+		{
+			handle = (IntPtr)(-1)
+		};
+
+		public static readonly Binding.Baselib_DynamicLibrary_Handle Baselib_DynamicLibrary_Handle_Invalid = new Binding.Baselib_DynamicLibrary_Handle
+		{
+			handle = (IntPtr)(-1)
+		};
+
+		public struct Baselib_DynamicLibrary_Handle
+		{
+			public IntPtr handle;
+		}
 
 		public enum Baselib_ErrorCode
 		{
@@ -277,13 +511,17 @@ namespace Unity.Baselib.LowLevel
 			InvalidPageSize,
 			InvalidPageCount,
 			UnsupportedPageState,
-			UninitializedThreadConfig = 50331648,
-			ThreadEntryPointFunctionNotSet,
-			ThreadCannotJoinSelf,
+			ThreadCannotJoinSelf = 50331648,
 			NetworkInitializationError = 67108864,
 			AddressInUse,
 			AddressUnreachable,
 			AddressFamilyNotSupported,
+			Disconnected,
+			InvalidPathname = 83886080,
+			RequestedAccessIsNotAllowed,
+			IOError,
+			FailedToOpenDynamicLibrary = 100663296,
+			FunctionNotFound,
 			UnexpectedError = -1
 		}
 
@@ -293,15 +531,26 @@ namespace Unity.Baselib.LowLevel
 			PlatformDefined
 		}
 
+		public enum Baselib_ErrorState_ExtraInformationType : byte
+		{
+			None,
+			StaticString,
+			GenerationCounter
+		}
+
 		public struct Baselib_ErrorState
 		{
+			public Binding.Baselib_SourceLocation sourceLocation;
+
+			public ulong nativeErrorCode;
+
+			public ulong extraInformation;
+
 			public Binding.Baselib_ErrorCode code;
 
 			public Binding.Baselib_ErrorState_NativeErrorCodeType nativeErrorCodeType;
 
-			public ulong nativeErrorCode;
-
-			public Binding.Baselib_SourceLocation sourceLocation;
+			public Binding.Baselib_ErrorState_ExtraInformationType extraInformationType;
 		}
 
 		public enum Baselib_ErrorState_ExplainVerbosity
@@ -355,46 +604,147 @@ namespace Unity.Baselib.LowLevel
 			IPv6
 		}
 
+		[StructLayout(LayoutKind.Explicit)]
 		public struct Baselib_NetworkAddress
 		{
+			[FieldOffset(0)]
 			public byte data0;
 
+			[FieldOffset(1)]
 			public byte data1;
 
+			[FieldOffset(2)]
 			public byte data2;
 
+			[FieldOffset(3)]
 			public byte data3;
 
+			[FieldOffset(4)]
 			public byte data4;
 
+			[FieldOffset(5)]
 			public byte data5;
 
+			[FieldOffset(6)]
 			public byte data6;
 
+			[FieldOffset(7)]
 			public byte data7;
 
+			[FieldOffset(8)]
 			public byte data8;
 
+			[FieldOffset(9)]
 			public byte data9;
 
+			[FieldOffset(10)]
 			public byte data10;
 
+			[FieldOffset(11)]
 			public byte data11;
 
+			[FieldOffset(12)]
 			public byte data12;
 
+			[FieldOffset(13)]
 			public byte data13;
 
+			[FieldOffset(14)]
 			public byte data14;
 
+			[FieldOffset(15)]
 			public byte data15;
 
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(0)]
+			public byte ipv6_0;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(1)]
+			public byte ipv6_1;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(2)]
+			public byte ipv6_2;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(3)]
+			public byte ipv6_3;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(4)]
+			public byte ipv6_4;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(5)]
+			public byte ipv6_5;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(6)]
+			public byte ipv6_6;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(7)]
+			public byte ipv6_7;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(8)]
+			public byte ipv6_8;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(9)]
+			public byte ipv6_9;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(10)]
+			public byte ipv6_10;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(11)]
+			public byte ipv6_11;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(12)]
+			public byte ipv6_12;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(13)]
+			public byte ipv6_13;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(14)]
+			public byte ipv6_14;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(15)]
+			public byte ipv6_15;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(0)]
+			public byte ipv4_0;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(1)]
+			public byte ipv4_1;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(2)]
+			public byte ipv4_2;
+
+			[Ignore(DoesNotContributeToSize = true)]
+			[FieldOffset(3)]
+			public byte ipv4_3;
+
+			[FieldOffset(16)]
 			public byte port0;
 
+			[FieldOffset(17)]
 			public byte port1;
 
+			[FieldOffset(18)]
 			public byte family;
 
+			[FieldOffset(19)]
 			public byte _padding;
 		}
 
@@ -458,7 +808,8 @@ namespace Unity.Baselib.LowLevel
 
 		public enum Baselib_RegisteredNetwork_ProcessStatus
 		{
-			Done,
+			NonePendingImmediately,
+			Done = 0,
 			Pending
 		}
 
@@ -468,6 +819,44 @@ namespace Unity.Baselib.LowLevel
 			ResultsAvailable
 		}
 
+		public struct Baselib_Socket_Handle
+		{
+			public IntPtr handle;
+		}
+
+		public enum Baselib_Socket_Protocol
+		{
+			UDP = 1,
+			TCP
+		}
+
+		public struct Baselib_Socket_Message
+		{
+			public unsafe Binding.Baselib_NetworkAddress* address;
+
+			public IntPtr data;
+
+			public uint dataLen;
+		}
+
+		public enum Baselib_Socket_PollEvents
+		{
+			Readable = 1,
+			Writable,
+			Connected = 4
+		}
+
+		public struct Baselib_Socket_PollFd
+		{
+			public Binding.Baselib_Socket_Handle handle;
+
+			public Binding.Baselib_Socket_PollEvents requestedEvents;
+
+			public Binding.Baselib_Socket_PollEvents resultEvents;
+
+			public unsafe Binding.Baselib_ErrorState* errorState;
+		}
+
 		public struct Baselib_SourceLocation
 		{
 			public unsafe byte* file;
@@ -475,6 +864,13 @@ namespace Unity.Baselib.LowLevel
 			public unsafe byte* function;
 
 			public uint lineNumber;
+		}
+
+		public struct Baselib_Timer_TickToNanosecondConversionRatio
+		{
+			public ulong ticksToNanosecondsNumerator;
+
+			public ulong ticksToNanosecondsDenominator;
 		}
 	}
 }

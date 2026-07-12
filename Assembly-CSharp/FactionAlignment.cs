@@ -23,7 +23,7 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
 		}
-		GameUtil.SubscribeToTags<FactionAlignment>(this, FactionAlignment.OnDeadTagChangedDelegate);
+		GameUtil.SubscribeToTags<FactionAlignment>(this, FactionAlignment.OnDeadTagAddedDelegate, true);
 		this.UpdateStatusItem();
 	}
 
@@ -53,9 +53,14 @@ public class FactionAlignment : KMonoBehaviour
 		return FactionManager.Instance.GetFaction(this.Alignment).Members.Contains(this);
 	}
 
+	public bool IsPlayerTargeted()
+	{
+		return this.targeted;
+	}
+
 	public void SetPlayerTargetable(bool state)
 	{
-		this.targetable = state;
+		this.targetable = state && this.canBePlayerTargeted;
 		if (!state)
 		{
 			this.SetPlayerTargeted(false);
@@ -98,6 +103,10 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			return;
 		}
+		if (!this.canBePlayerTargeted)
+		{
+			return;
+		}
 		if (!this.IsAlignmentActive())
 		{
 			return;
@@ -112,18 +121,21 @@ public class FactionAlignment : KMonoBehaviour
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
+	[SerializeField]
+	public bool canBePlayerTargeted = true;
+
 	[Serialize]
 	private bool alignmentActive = true;
 
 	public FactionManager.FactionID Alignment;
 
 	[Serialize]
-	public bool targeted;
+	private bool targeted;
 
 	[Serialize]
-	public bool targetable = true;
+	private bool targetable = true;
 
-	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnDeadTagChangedDelegate = GameUtil.CreateHasTagHandler<FactionAlignment>(GameTags.Dead, delegate(FactionAlignment component, object data)
+	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnDeadTagAddedDelegate = GameUtil.CreateHasTagHandler<FactionAlignment>(GameTags.Dead, delegate(FactionAlignment component, object data)
 	{
 		component.OnDeath(data);
 	});

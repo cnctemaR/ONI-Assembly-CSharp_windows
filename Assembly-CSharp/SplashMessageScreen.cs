@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using FMOD.Studio;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,64 +10,40 @@ public class SplashMessageScreen : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.forumButton.onClick += delegate
+		{
+			Application.OpenURL("https://forums.kleientertainment.com/forums/forum/118-oxygen-not-included/");
+		};
 		this.confirmButton.onClick += delegate
 		{
 			base.gameObject.SetActive(false);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWelcomeScreenSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		};
+		this.bodyText.text = UI.DEVELOPMENTBUILDS.ALPHA.LOADING.BODY;
 	}
 
 	private void OnEnable()
 	{
-		LayoutElement component = this.confirmButton.GetComponent<LayoutElement>();
-		LocText componentInChildren = this.confirmButton.GetComponentInChildren<LocText>();
-		if (Screen.width > 2560)
-		{
-			component.minWidth = 720f;
-			component.minHeight = 128f;
-			this.bodyText.minWidth = 840f;
-			componentInChildren.fontSizeMax = 24f;
-			return;
-		}
-		if (Screen.width > 1920)
-		{
-			component.minWidth = 720f;
-			component.minHeight = 128f;
-			this.bodyText.minWidth = 700f;
-			componentInChildren.fontSizeMax = 24f;
-			return;
-		}
-		if (Screen.width > 1280)
-		{
-			component.minWidth = 440f;
-			component.minHeight = 64f;
-			this.bodyText.minWidth = 480f;
-			componentInChildren.fontSizeMax = 18f;
-			return;
-		}
-		component.minWidth = 300f;
-		component.minHeight = 48f;
-		this.bodyText.minWidth = 300f;
-		componentInChildren.fontSizeMax = 16f;
+		this.confirmButton.GetComponent<LayoutElement>();
+		this.confirmButton.GetComponentInChildren<LocText>();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (!DlcManager.IsExpansion1Active())
+		{
+			global::UnityEngine.Object.Destroy(base.gameObject);
+			return;
+		}
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndWelcomeScreenSnapshot);
-		base.StartCoroutine(this.ShowMessage());
 	}
 
-	private IEnumerator ShowMessage()
-	{
-		yield return null;
-		base.GetComponentInChildren<KScreen>(true).Show(true);
-		yield break;
-	}
+	public KButton forumButton;
 
 	public KButton confirmButton;
 
-	public LayoutElement bodyText;
+	public LocText bodyText;
 
 	public bool previewInEditor;
 }

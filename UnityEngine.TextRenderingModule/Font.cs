@@ -10,8 +10,8 @@ namespace UnityEngine
 {
 	[StaticAccessor("TextRenderingPrivate", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/TextRendering/Public/FontImpl.h")]
-	[NativeClass("TextRendering::Font")]
 	[NativeHeader("Modules/TextRendering/Public/Font.h")]
+	[NativeClass("TextRendering::Font")]
 	public sealed class Font : Object
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

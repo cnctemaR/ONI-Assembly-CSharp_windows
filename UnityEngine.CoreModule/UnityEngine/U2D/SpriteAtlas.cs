@@ -28,7 +28,7 @@ namespace UnityEngine.U2D
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool CanBindTo([NotNull] Sprite sprite);
+		public extern bool CanBindTo([NotNull("ArgumentNullException")] Sprite sprite);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Sprite GetSprite(string name);

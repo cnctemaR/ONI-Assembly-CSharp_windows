@@ -9,8 +9,8 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeClass("Unity::Component")]
 	[RequiredByNativeCode]
+	[NativeClass("Unity::Component")]
 	[NativeHeader("Runtime/Export/Scripting/Component.bindings.h")]
 	public class Component : Object
 	{

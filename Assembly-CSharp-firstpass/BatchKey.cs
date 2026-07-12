@@ -97,21 +97,24 @@ public struct BatchKey : IEquatable<BatchKey>
 
 	public override string ToString()
 	{
-		return string.Concat(new object[]
-		{
-			"[",
-			this.idx.x,
-			",",
-			this.idx.y,
-			"] [",
-			this.groupID.HashValue,
-			"] [",
-			this.layer,
-			"] [",
-			this.z,
-			"]",
-			this.materialType.ToString()
-		});
+		string[] array = new string[12];
+		array[0] = "[";
+		int num = 1;
+		Vector2I vector2I = this.idx;
+		array[num] = vector2I.x.ToString();
+		array[2] = ",";
+		int num2 = 3;
+		vector2I = this.idx;
+		array[num2] = vector2I.y.ToString();
+		array[4] = "] [";
+		array[5] = this.groupID.HashValue.ToString();
+		array[6] = "] [";
+		array[7] = this.layer.ToString();
+		array[8] = "] [";
+		array[9] = this.z.ToString();
+		array[10] = "]";
+		array[11] = this.materialType.ToString();
+		return string.Concat(array);
 	}
 
 	private float _z;

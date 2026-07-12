@@ -47,13 +47,17 @@ public class OffsetTracker
 	{
 	}
 
-	public void DebugDrawOffsets(int cell)
+	public virtual void DebugDrawEditor()
+	{
+	}
+
+	public virtual void DebugDrawOffsets(int cell)
 	{
 		foreach (CellOffset cellOffset in this.GetOffsets(cell))
 		{
 			int num = Grid.OffsetCell(cell, cellOffset);
 			Gizmos.color = new Color(0f, 1f, 0f, 0.25f);
-			Gizmos.DrawCube(Grid.CellToPosCCC(num, Grid.SceneLayer.Move), new Vector3(1f, 1f, 1f));
+			Gizmos.DrawWireCube(Grid.CellToPosCCC(num, Grid.SceneLayer.Move), new Vector3(0.95f, 0.95f, 0.95f));
 		}
 	}
 
@@ -61,5 +65,5 @@ public class OffsetTracker
 
 	protected CellOffset[] offsets;
 
-	private int previousCell = Grid.InvalidCell;
+	protected int previousCell = Grid.InvalidCell;
 }

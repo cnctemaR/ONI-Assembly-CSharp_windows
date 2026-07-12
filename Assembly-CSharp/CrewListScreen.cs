@@ -151,8 +151,8 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 		List<EntryType> list = new List<EntryType>(this.EntryObjects);
 		list.Sort(delegate(EntryType a, EntryType b)
 		{
-			string text = a.Identity.GetProperName() + a.gameObject.GetInstanceID();
-			string text2 = b.Identity.GetProperName() + b.gameObject.GetInstanceID();
+			string text = a.Identity.GetProperName() + a.gameObject.GetInstanceID().ToString();
+			string text2 = b.Identity.GetProperName() + b.gameObject.GetInstanceID().ToString();
 			return text.CompareTo(text2);
 		});
 		this.ReorderEntries(list, reverse);

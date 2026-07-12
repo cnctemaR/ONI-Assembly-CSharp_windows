@@ -113,7 +113,6 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 						this.co2Items.RemoveAt(num);
 						break;
 					}
-					DebugUtil.LogWarningArgs(new object[] { "Couldn't emit CO2" });
 					break;
 				}
 				else

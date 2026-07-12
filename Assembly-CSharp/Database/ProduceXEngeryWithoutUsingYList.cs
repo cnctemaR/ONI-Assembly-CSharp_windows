@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using KSerialization;
 
 namespace Database
 {
-	public class ProduceXEngeryWithoutUsingYList : ColonyAchievementRequirement
+	public class ProduceXEngeryWithoutUsingYList : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public ProduceXEngeryWithoutUsingYList(float amountToProduce, List<Tag> disallowedBuildings)
 		{
@@ -39,19 +37,7 @@ namespace Database
 			return false;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.disallowedBuildings.Count);
-			foreach (Tag tag in this.disallowedBuildings)
-			{
-				writer.WriteKleiString(tag.ToString());
-			}
-			writer.Write((double)this.amountProduced);
-			writer.Write((double)this.amountToProduce);
-			writer.Write(this.usedDisallowedBuilding ? 1 : 0);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			int num = reader.ReadInt32();
 			this.disallowedBuildings = new List<Tag>(num);

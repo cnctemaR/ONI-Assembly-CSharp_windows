@@ -201,14 +201,14 @@ namespace UnityEngine.Timeline
 		{
 			get
 			{
-				ClipCaps clipCaps = ClipCaps.All;
-				if (this.m_Clip == null || this.m_Loop == AnimationPlayableAsset.LoopMode.Off || (this.m_Loop == AnimationPlayableAsset.LoopMode.UseSourceAsset && !this.m_Clip.isLooping))
+				ClipCaps clipCaps = ClipCaps.Extrapolation | ClipCaps.SpeedMultiplier | ClipCaps.Blending;
+				if (this.m_Clip != null && this.m_Loop != AnimationPlayableAsset.LoopMode.Off && (this.m_Loop != AnimationPlayableAsset.LoopMode.UseSourceAsset || this.m_Clip.isLooping))
 				{
-					clipCaps &= ~ClipCaps.Looping;
+					clipCaps |= ClipCaps.Looping;
 				}
-				if (this.m_Clip == null || this.m_Clip.empty)
+				if (this.m_Clip != null && !this.m_Clip.empty)
 				{
-					clipCaps &= ~ClipCaps.ClipIn;
+					clipCaps |= ClipCaps.ClipIn;
 				}
 				return clipCaps;
 			}

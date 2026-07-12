@@ -13,6 +13,9 @@ namespace UnityEngine
 	public sealed class Canvas : Behaviour
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Canvas.WillRenderCanvases preWillRenderCanvases;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Canvas.WillRenderCanvases willRenderCanvases;
 
 		public extern RenderMode renderMode
@@ -145,6 +148,16 @@ namespace UnityEngine
 			get;
 		}
 
+		public Vector2 renderingDisplaySize
+		{
+			get
+			{
+				Vector2 vector;
+				this.get_renderingDisplaySize_Injected(out vector);
+				return vector;
+			}
+		}
+
 		[NativeProperty("Camera", false, TargetType.Function)]
 		public extern Camera worldCamera
 		{
@@ -163,8 +176,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
 		[Obsolete("Setting normalizedSize via a int is not supported. Please use normalizedSortingGridSize", false)]
+		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
 		public extern int sortingGridNormalizedSize
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -173,8 +186,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[FreeFunction("UI::GetDefaultUIMaterial")]
 		[Obsolete("Shared default material now used for text and general UI elements, call Canvas.GetDefaultCanvasMaterial()", false)]
+		[FreeFunction("UI::GetDefaultUIMaterial")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Material GetDefaultCanvasTextMaterial();
 
@@ -186,9 +199,23 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Material GetETC1SupportedCanvasMaterial();
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void UpdateCanvasRectTransform(bool alignWithCamera);
+
 		public static void ForceUpdateCanvases()
 		{
+			Canvas.SendPreWillRenderCanvases();
 			Canvas.SendWillRenderCanvases();
+		}
+
+		[RequiredByNativeCode]
+		private static void SendPreWillRenderCanvases()
+		{
+			Canvas.WillRenderCanvases willRenderCanvases = Canvas.preWillRenderCanvases;
+			if (willRenderCanvases != null)
+			{
+				willRenderCanvases();
+			}
 		}
 
 		[RequiredByNativeCode]
@@ -203,6 +230,9 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_pixelRect_Injected(out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_renderingDisplaySize_Injected(out Vector2 ret);
 
 		public delegate void WillRenderCanvases();
 	}

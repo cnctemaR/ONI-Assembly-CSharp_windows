@@ -107,12 +107,12 @@ public class KAnimBatch
 		int width = this.dataTex.width;
 		if (width == 0)
 		{
-			global::Debug.LogWarning(string.Concat(new object[]
+			global::Debug.LogWarning(string.Concat(new string[]
 			{
 				"Empty group [",
-				this.group.batchID,
+				this.group.batchID.ToString(),
 				"] ",
-				this.batchset.idx,
+				this.batchset.idx.ToString(),
 				" (probably just anims)"
 			}));
 			return;

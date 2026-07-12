@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
-	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
-	[NativeType("Runtime/Graphics/SpriteFrame.h")]
-	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
+	[ExcludeFromPreset]
+	[NativeType("Runtime/Graphics/SpriteFrame.h")]
+	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
+	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]
@@ -109,6 +109,9 @@ namespace UnityEngine
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Texture2D GetSecondaryTexture(int index);
 
 		public extern float pixelsPerUnit
 		{

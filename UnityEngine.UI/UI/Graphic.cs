@@ -9,7 +9,6 @@ using UnityEngine.UI.CoroutineTween;
 namespace UnityEngine.UI
 {
 	[DisallowMultipleComponent]
-	[RequireComponent(typeof(CanvasRenderer))]
 	[RequireComponent(typeof(RectTransform))]
 	[ExecuteAlways]
 	public abstract class Graphic : UIBehaviour, ICanvasElement
@@ -49,7 +48,30 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				this.m_RaycastTarget = value;
+				if (value != this.m_RaycastTarget)
+				{
+					if (this.m_RaycastTarget)
+					{
+						GraphicRegistry.UnregisterRaycastGraphicForCanvas(this.canvas, this);
+					}
+					this.m_RaycastTarget = value;
+					if (this.m_RaycastTarget && base.isActiveAndEnabled)
+					{
+						GraphicRegistry.RegisterRaycastGraphicForCanvas(this.canvas, this);
+					}
+				}
+			}
+		}
+
+		public Vector4 raycastPadding
+		{
+			get
+			{
+				return this.m_RaycastPadding;
+			}
+			set
+			{
+				this.m_RaycastPadding = value;
 			}
 		}
 
@@ -205,6 +227,10 @@ namespace UnityEngine.UI
 						this.m_Canvas = list[i];
 						break;
 					}
+					if (i == list.Count - 1)
+					{
+						this.m_Canvas = null;
+					}
 				}
 			}
 			else
@@ -221,6 +247,10 @@ namespace UnityEngine.UI
 				if (this.m_CanvasRenderer == null)
 				{
 					this.m_CanvasRenderer = base.GetComponent<CanvasRenderer>();
+					if (this.m_CanvasRenderer == null)
+					{
+						this.m_CanvasRenderer = base.gameObject.AddComponent<CanvasRenderer>();
+					}
 				}
 				return this.m_CanvasRenderer;
 			}
@@ -648,6 +678,9 @@ namespace UnityEngine.UI
 
 		[SerializeField]
 		private bool m_RaycastTarget = true;
+
+		[SerializeField]
+		private Vector4 m_RaycastPadding;
 
 		[NonSerialized]
 		private RectTransform m_RectTransform;

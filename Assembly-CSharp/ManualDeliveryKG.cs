@@ -7,6 +7,14 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/ManualDeliveryKG")]
 public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 {
+	public bool IsPaused
+	{
+		get
+		{
+			return this.paused;
+		}
+	}
+
 	public float Capacity
 	{
 		get
@@ -25,6 +33,19 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		{
 			this.requestedItemTag = value;
 			this.AbortDelivery("Requested Item Tag Changed");
+		}
+	}
+
+	public Tag[] ForbiddenTags
+	{
+		get
+		{
+			return this.forbiddenTags;
+		}
+		set
+		{
+			this.forbiddenTags = value;
+			this.AbortDelivery("Forbidden Tags Changed");
 		}
 	}
 
@@ -84,10 +105,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		if (this.storage != null && base.isSpawned)
 		{
 			global::Debug.Assert(this.onStorageChangeSubscription == -1);
-			this.onStorageChangeSubscription = this.storage.Subscribe(-1697596308, delegate(object eventData)
-			{
-				this.OnStorageChanged(this.storage);
-			});
+			this.onStorageChangeSubscription = this.storage.Subscribe<ManualDeliveryKG>(-1697596308, ManualDeliveryKG.OnStorageChangedDelegate);
 		}
 	}
 
@@ -137,7 +155,11 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 			this.fetchList = new FetchList2(this.storage, byHash);
 			this.fetchList.ShowStatusItem = this.ShowStatusItem;
 			this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.minimumMass);
-			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, null, num, FetchOrder2.OperationalRequirement.None);
+			FetchList2 fetchList = this.fetchList;
+			Tag[] array = new Tag[] { this.requestedItemTag };
+			Tag[] array2 = null;
+			float num2 = num;
+			fetchList.Add(array, array2, this.forbiddenTags, num2, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(null, false);
 		}
 	}
@@ -193,12 +215,9 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		}
 	}
 
-	private void OnStorageChanged(Storage storage)
+	protected void OnStorageChanged(object data)
 	{
-		if (storage == this.storage)
-		{
-			this.UpdateDeliveryState();
-		}
+		this.UpdateDeliveryState();
 	}
 
 	private void OnPause()
@@ -236,6 +255,8 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 
 	[SerializeField]
 	public Tag requestedItemTag;
+
+	private Tag[] forbiddenTags;
 
 	[SerializeField]
 	public float capacity = 100f;
@@ -275,5 +296,10 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	private static readonly EventSystem.IntraObjectHandler<ManualDeliveryKG> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<ManualDeliveryKG>(delegate(ManualDeliveryKG component, object data)
 	{
 		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<ManualDeliveryKG> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<ManualDeliveryKG>(delegate(ManualDeliveryKG component, object data)
+	{
+		component.OnStorageChanged(data);
 	});
 }

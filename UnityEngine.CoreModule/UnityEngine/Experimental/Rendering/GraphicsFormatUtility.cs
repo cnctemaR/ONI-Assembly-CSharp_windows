@@ -5,14 +5,14 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	[NativeHeader("Runtime/Graphics/Format.h")]
-	[NativeHeader("Runtime/Graphics/TextureFormat.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
+	[NativeHeader("Runtime/Graphics/TextureFormat.h")]
+	[NativeHeader("Runtime/Graphics/Format.h")]
 	public class GraphicsFormatUtility
 	{
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern GraphicsFormat GetFormat(Texture texture);
+		internal static extern GraphicsFormat GetFormat([NotNull("NullExceptionObject")] Texture texture);
 
 		public static GraphicsFormat GetGraphicsFormat(TextureFormat format, bool isSRGB)
 		{

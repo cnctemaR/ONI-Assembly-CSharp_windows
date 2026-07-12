@@ -661,7 +661,7 @@ namespace TMPro
 						tmp_FontAsset = TMP_FontUtilities.SearchForGlyph(this.m_currentFontAsset, num4, out tmp_Glyph);
 						if (!TMP_Settings.warningsDisabled)
 						{
-							Debug.LogWarning("Character with ASCII value of " + num7 + " was not found in the Font Asset Glyph Table. It was replaced by a space.", this);
+							Debug.LogWarning("Character with ASCII value of " + num7.ToString() + " was not found in the Font Asset Glyph Table. It was replaced by a space.", this);
 						}
 					}
 				}
@@ -890,7 +890,7 @@ namespace TMPro
 		{
 			if (this.m_fontAsset == null || this.m_fontAsset.characterDictionary == null)
 			{
-				Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID());
+				Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID().ToString());
 				return;
 			}
 			if (this.m_textInfo != null)
@@ -1011,23 +1011,23 @@ namespace TMPro
 					this.m_textElementType = this.m_textInfo.characterInfo[this.m_characterCount].elementType;
 					this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
 					this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
-					goto IL_059F;
+					goto IL_05A3;
 				}
 				this.m_isParsingText = true;
 				this.m_textElementType = TMP_TextElementType.Character;
 				if (!base.ValidateHtmlTag(this.m_char_buffer, num14 + 1, out num13))
 				{
-					goto IL_059F;
+					goto IL_05A3;
 				}
 				num14 = num13;
 				if (this.m_textElementType != TMP_TextElementType.Character)
 				{
-					goto IL_059F;
+					goto IL_05A3;
 				}
-				IL_30FF:
+				IL_3103:
 				num14++;
 				continue;
-				IL_059F:
+				IL_05A3:
 				int currentMaterialIndex = this.m_currentMaterialIndex;
 				bool isUsingAlternateTypeface = this.m_textInfo.characterInfo[this.m_characterCount].isUsingAlternateTypeface;
 				this.m_isParsingText = false;
@@ -1036,7 +1036,7 @@ namespace TMPro
 					this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
 					this.m_textInfo.characterInfo[this.m_characterCount].character = '\u200b';
 					this.m_characterCount++;
-					goto IL_30FF;
+					goto IL_3103;
 				}
 				float num16 = 1f;
 				if (this.m_textElementType == TMP_TextElementType.Character)
@@ -1068,7 +1068,7 @@ namespace TMPro
 					TMP_Sprite tmp_Sprite = this.m_currentSpriteAsset.spriteInfoList[this.m_spriteIndex];
 					if (tmp_Sprite == null)
 					{
-						goto IL_30FF;
+						goto IL_3103;
 					}
 					if (num15 == 60)
 					{
@@ -1094,7 +1094,7 @@ namespace TMPro
 					this.m_cached_TextElement = this.m_textInfo.characterInfo[this.m_characterCount].textElement;
 					if (this.m_cached_TextElement == null)
 					{
-						goto IL_30FF;
+						goto IL_3103;
 					}
 					this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
 					this.m_currentMaterial = this.m_textInfo.characterInfo[this.m_characterCount].material;
@@ -1376,7 +1376,7 @@ namespace TMPro
 							this.m_maxLineAscender = TMP_Text.k_LargeNegativeFloat;
 							this.m_maxLineDescender = TMP_Text.k_LargePositiveFloat;
 							this.m_xAdvance = 0f + this.tag_Indent;
-							goto IL_30FF;
+							goto IL_3103;
 						}
 						else if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
 						{
@@ -1642,7 +1642,7 @@ namespace TMPro
 								num10 = 0f;
 								this.m_lineNumber++;
 								this.m_pageNumber++;
-								goto IL_30FF;
+								goto IL_3103;
 							}
 							break;
 						case TextOverflowModes.Linked:
@@ -1777,7 +1777,7 @@ namespace TMPro
 						this.m_xAdvance = 0f + this.tag_LineIndent + this.tag_Indent;
 						num8 = this.m_characterCount - 1;
 						this.m_characterCount++;
-						goto IL_30FF;
+						goto IL_3103;
 					}
 				}
 				if (this.m_textInfo.characterInfo[this.m_characterCount].isVisible)
@@ -1832,7 +1832,7 @@ namespace TMPro
 					}
 				}
 				this.m_characterCount++;
-				goto IL_30FF;
+				goto IL_3103;
 			}
 			float num40 = this.m_maxFontSize - this.m_minFontSize;
 			if (!this.m_isCharacterWrappingEnabled && this.m_enableAutoSizing && num40 > 0.051f && this.m_fontSize < this.m_fontSizeMax)
@@ -1869,31 +1869,31 @@ namespace TMPro
 						{
 							if (textAlignment - TextAlignmentOptions.TopLeft > 1 && textAlignment != TextAlignmentOptions.TopRight && textAlignment != TextAlignmentOptions.TopJustified)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
 						}
 						else if (textAlignment <= TextAlignmentOptions.TopGeoAligned)
 						{
 							if (textAlignment != TextAlignmentOptions.TopFlush && textAlignment != TextAlignmentOptions.TopGeoAligned)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
 						}
 						else
 						{
 							if (textAlignment - TextAlignmentOptions.Left > 1 && textAlignment != TextAlignmentOptions.Right)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
-							goto IL_3504;
+							goto IL_3508;
 						}
 						if (this.m_overflowMode != TextOverflowModes.Page)
 						{
 							vector10 = rectTransformCorners[1] + new Vector3(0f + margin.x, 0f - this.m_maxAscender - margin.y, 0f);
-							goto IL_37B7;
+							goto IL_37BB;
 						}
 						vector10 = rectTransformCorners[1] + new Vector3(0f + margin.x, 0f - this.m_textInfo.pageInfo[num6].ascender - margin.y, 0f);
-						goto IL_37B7;
+						goto IL_37BB;
 					}
 					else
 					{
@@ -1903,19 +1903,19 @@ namespace TMPro
 							{
 								if (textAlignment != TextAlignmentOptions.Justified && textAlignment != TextAlignmentOptions.Flush)
 								{
-									goto IL_37B7;
+									goto IL_37BB;
 								}
-								goto IL_3504;
+								goto IL_3508;
 							}
 							else
 							{
 								if (textAlignment == TextAlignmentOptions.CenterGeoAligned)
 								{
-									goto IL_3504;
+									goto IL_3508;
 								}
 								if (textAlignment - TextAlignmentOptions.BottomLeft > 1)
 								{
-									goto IL_37B7;
+									goto IL_37BB;
 								}
 							}
 						}
@@ -1923,22 +1923,22 @@ namespace TMPro
 						{
 							if (textAlignment != TextAlignmentOptions.BottomRight && textAlignment != TextAlignmentOptions.BottomJustified)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
 						}
 						else if (textAlignment != TextAlignmentOptions.BottomFlush && textAlignment != TextAlignmentOptions.BottomGeoAligned)
 						{
-							goto IL_37B7;
+							goto IL_37BB;
 						}
 						if (this.m_overflowMode != TextOverflowModes.Page)
 						{
 							vector10 = rectTransformCorners[0] + new Vector3(0f + margin.x, 0f - num11 + margin.w, 0f);
-							goto IL_37B7;
+							goto IL_37BB;
 						}
 						vector10 = rectTransformCorners[0] + new Vector3(0f + margin.x, 0f - this.m_textInfo.pageInfo[num6].descender + margin.w, 0f);
-						goto IL_37B7;
+						goto IL_37BB;
 					}
-					IL_3504:
+					IL_3508:
 					if (this.m_overflowMode != TextOverflowModes.Page)
 					{
 						vector10 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f - (this.m_maxAscender + margin.y + num11 - margin.w) / 2f, 0f);
@@ -1956,26 +1956,26 @@ namespace TMPro
 						{
 							if (textAlignment - TextAlignmentOptions.BaselineLeft > 1 && textAlignment != TextAlignmentOptions.BaselineRight && textAlignment != TextAlignmentOptions.BaselineJustified)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
 						}
 						else if (textAlignment <= TextAlignmentOptions.BaselineGeoAligned)
 						{
 							if (textAlignment != TextAlignmentOptions.BaselineFlush && textAlignment != TextAlignmentOptions.BaselineGeoAligned)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
 						}
 						else
 						{
 							if (textAlignment - TextAlignmentOptions.MidlineLeft > 1 && textAlignment != TextAlignmentOptions.MidlineRight)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
-							goto IL_36DC;
+							goto IL_36E0;
 						}
 						vector10 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f, 0f);
-						goto IL_37B7;
+						goto IL_37BB;
 					}
 					if (textAlignment <= TextAlignmentOptions.Capline)
 					{
@@ -1983,19 +1983,19 @@ namespace TMPro
 						{
 							if (textAlignment != TextAlignmentOptions.MidlineJustified && textAlignment != TextAlignmentOptions.MidlineFlush)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
-							goto IL_36DC;
+							goto IL_36E0;
 						}
 						else
 						{
 							if (textAlignment == TextAlignmentOptions.MidlineGeoAligned)
 							{
-								goto IL_36DC;
+								goto IL_36E0;
 							}
 							if (textAlignment - TextAlignmentOptions.CaplineLeft > 1)
 							{
-								goto IL_37B7;
+								goto IL_37BB;
 							}
 						}
 					}
@@ -2003,19 +2003,19 @@ namespace TMPro
 					{
 						if (textAlignment != TextAlignmentOptions.CaplineRight && textAlignment != TextAlignmentOptions.CaplineJustified)
 						{
-							goto IL_37B7;
+							goto IL_37BB;
 						}
 					}
 					else if (textAlignment != TextAlignmentOptions.CaplineFlush && textAlignment != TextAlignmentOptions.CaplineGeoAligned)
 					{
-						goto IL_37B7;
+						goto IL_37BB;
 					}
 					vector10 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f - (this.m_maxCapHeight - margin.y - margin.w) / 2f, 0f);
-					goto IL_37B7;
-					IL_36DC:
+					goto IL_37BB;
+					IL_36E0:
 					vector10 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f - (this.m_meshExtents.max.y + margin.y + this.m_meshExtents.min.y - margin.w) / 2f, 0f);
 				}
-				IL_37B7:
+				IL_37BB:
 				Vector3 vector11 = Vector3.zero;
 				Vector3 vector12 = Vector3.zero;
 				int num42 = 0;
@@ -2057,17 +2057,17 @@ namespace TMPro
 								switch (alignment)
 								{
 								case TextAlignmentOptions.TopLeft:
-									goto IL_3ABC;
+									goto IL_3AC0;
 								case TextAlignmentOptions.Top:
-									goto IL_3B0A;
+									goto IL_3B0E;
 								case (TextAlignmentOptions)259:
 									break;
 								case TextAlignmentOptions.TopRight:
-									goto IL_3B98;
+									goto IL_3B9C;
 								default:
 									if (alignment == TextAlignmentOptions.TopJustified || alignment == TextAlignmentOptions.TopFlush)
 									{
-										goto IL_3BF2;
+										goto IL_3BF6;
 									}
 									break;
 								}
@@ -2076,22 +2076,22 @@ namespace TMPro
 							{
 								if (alignment == TextAlignmentOptions.TopGeoAligned)
 								{
-									goto IL_3B43;
+									goto IL_3B47;
 								}
 								switch (alignment)
 								{
 								case TextAlignmentOptions.Left:
-									goto IL_3ABC;
+									goto IL_3AC0;
 								case TextAlignmentOptions.Center:
-									goto IL_3B0A;
+									goto IL_3B0E;
 								case (TextAlignmentOptions)515:
 									break;
 								case TextAlignmentOptions.Right:
-									goto IL_3B98;
+									goto IL_3B9C;
 								default:
 									if (alignment == TextAlignmentOptions.Justified)
 									{
-										goto IL_3BF2;
+										goto IL_3BF6;
 									}
 									break;
 								}
@@ -2101,31 +2101,31 @@ namespace TMPro
 						{
 							if (alignment == TextAlignmentOptions.Flush)
 							{
-								goto IL_3BF2;
+								goto IL_3BF6;
 							}
 							if (alignment == TextAlignmentOptions.CenterGeoAligned)
 							{
-								goto IL_3B43;
+								goto IL_3B47;
 							}
 							switch (alignment)
 							{
 							case TextAlignmentOptions.BottomLeft:
-								goto IL_3ABC;
+								goto IL_3AC0;
 							case TextAlignmentOptions.Bottom:
-								goto IL_3B0A;
+								goto IL_3B0E;
 							case TextAlignmentOptions.BottomRight:
-								goto IL_3B98;
+								goto IL_3B9C;
 							}
 						}
 						else
 						{
 							if (alignment == TextAlignmentOptions.BottomJustified || alignment == TextAlignmentOptions.BottomFlush)
 							{
-								goto IL_3BF2;
+								goto IL_3BF6;
 							}
 							if (alignment == TextAlignmentOptions.BottomGeoAligned)
 							{
-								goto IL_3B43;
+								goto IL_3B47;
 							}
 						}
 					}
@@ -2136,17 +2136,17 @@ namespace TMPro
 							switch (alignment)
 							{
 							case TextAlignmentOptions.BaselineLeft:
-								goto IL_3ABC;
+								goto IL_3AC0;
 							case TextAlignmentOptions.Baseline:
-								goto IL_3B0A;
+								goto IL_3B0E;
 							case (TextAlignmentOptions)2051:
 								break;
 							case TextAlignmentOptions.BaselineRight:
-								goto IL_3B98;
+								goto IL_3B9C;
 							default:
 								if (alignment == TextAlignmentOptions.BaselineJustified || alignment == TextAlignmentOptions.BaselineFlush)
 								{
-									goto IL_3BF2;
+									goto IL_3BF6;
 								}
 								break;
 							}
@@ -2155,22 +2155,22 @@ namespace TMPro
 						{
 							if (alignment == TextAlignmentOptions.BaselineGeoAligned)
 							{
-								goto IL_3B43;
+								goto IL_3B47;
 							}
 							switch (alignment)
 							{
 							case TextAlignmentOptions.MidlineLeft:
-								goto IL_3ABC;
+								goto IL_3AC0;
 							case TextAlignmentOptions.Midline:
-								goto IL_3B0A;
+								goto IL_3B0E;
 							case (TextAlignmentOptions)4099:
 								break;
 							case TextAlignmentOptions.MidlineRight:
-								goto IL_3B98;
+								goto IL_3B9C;
 							default:
 								if (alignment == TextAlignmentOptions.MidlineJustified)
 								{
-									goto IL_3BF2;
+									goto IL_3BF6;
 								}
 								break;
 							}
@@ -2180,34 +2180,34 @@ namespace TMPro
 					{
 						if (alignment == TextAlignmentOptions.MidlineFlush)
 						{
-							goto IL_3BF2;
+							goto IL_3BF6;
 						}
 						if (alignment == TextAlignmentOptions.MidlineGeoAligned)
 						{
-							goto IL_3B43;
+							goto IL_3B47;
 						}
 						switch (alignment)
 						{
 						case TextAlignmentOptions.CaplineLeft:
-							goto IL_3ABC;
+							goto IL_3AC0;
 						case TextAlignmentOptions.Capline:
-							goto IL_3B0A;
+							goto IL_3B0E;
 						case TextAlignmentOptions.CaplineRight:
-							goto IL_3B98;
+							goto IL_3B9C;
 						}
 					}
 					else
 					{
 						if (alignment == TextAlignmentOptions.CaplineJustified || alignment == TextAlignmentOptions.CaplineFlush)
 						{
-							goto IL_3BF2;
+							goto IL_3BF6;
 						}
 						if (alignment == TextAlignmentOptions.CaplineGeoAligned)
 						{
-							goto IL_3B43;
+							goto IL_3B47;
 						}
 					}
-					IL_3E71:
+					IL_3E75:
 					vector12 = vector10 + vector11;
 					bool isVisible = characterInfo[i].isVisible;
 					if (isVisible)
@@ -2708,32 +2708,32 @@ namespace TMPro
 					num46 = lineNumber4;
 					i++;
 					continue;
-					IL_3ABC:
+					IL_3AC0:
 					if (!this.m_isRightToLeft)
 					{
 						vector11 = new Vector3(0f + tmp_LineInfo.marginLeft, 0f, 0f);
-						goto IL_3E71;
+						goto IL_3E75;
 					}
 					vector11 = new Vector3(0f - tmp_LineInfo.maxAdvance, 0f, 0f);
-					goto IL_3E71;
-					IL_3B0A:
+					goto IL_3E75;
+					IL_3B0E:
 					vector11 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width / 2f - tmp_LineInfo.maxAdvance / 2f, 0f, 0f);
-					goto IL_3E71;
-					IL_3B43:
+					goto IL_3E75;
+					IL_3B47:
 					vector11 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width / 2f - (tmp_LineInfo.lineExtents.min.x + tmp_LineInfo.lineExtents.max.x) / 2f, 0f, 0f);
-					goto IL_3E71;
-					IL_3B98:
+					goto IL_3E75;
+					IL_3B9C:
 					if (!this.m_isRightToLeft)
 					{
 						vector11 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width - tmp_LineInfo.maxAdvance, 0f, 0f);
-						goto IL_3E71;
+						goto IL_3E75;
 					}
 					vector11 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width, 0f, 0f);
-					goto IL_3E71;
-					IL_3BF2:
+					goto IL_3E75;
+					IL_3BF6:
 					if (character3 == '\u00ad' || character3 == '\u200b' || character3 == '\u2060')
 					{
-						goto IL_3E71;
+						goto IL_3E75;
 					}
 					char character4 = characterInfo[tmp_LineInfo.lastCharacterIndex].character;
 					bool flag17 = (alignment & (TextAlignmentOptions)16) == (TextAlignmentOptions)16;
@@ -2750,7 +2750,7 @@ namespace TMPro
 								vector11 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width, 0f, 0f);
 							}
 							flag10 = char.IsSeparator(character3);
-							goto IL_3E71;
+							goto IL_3E75;
 						}
 						float num95 = ((!this.m_isRightToLeft) ? (tmp_LineInfo.width - tmp_LineInfo.maxAdvance) : (tmp_LineInfo.width + tmp_LineInfo.maxAdvance));
 						int num96 = tmp_LineInfo.visibleCharacterCount - 1 + tmp_LineInfo.controlCharacterCount;
@@ -2770,20 +2770,20 @@ namespace TMPro
 							if (!this.m_isRightToLeft)
 							{
 								vector11 += new Vector3(num95 * (1f - num98) / (float)num97, 0f, 0f);
-								goto IL_3E71;
+								goto IL_3E75;
 							}
 							vector11 -= new Vector3(num95 * (1f - num98) / (float)num97, 0f, 0f);
-							goto IL_3E71;
+							goto IL_3E75;
 						}
 						else
 						{
 							if (!this.m_isRightToLeft)
 							{
 								vector11 += new Vector3(num95 * num98 / (float)num96, 0f, 0f);
-								goto IL_3E71;
+								goto IL_3E75;
 							}
 							vector11 -= new Vector3(num95 * num98 / (float)num96, 0f, 0f);
-							goto IL_3E71;
+							goto IL_3E75;
 						}
 					}
 					else
@@ -2791,10 +2791,10 @@ namespace TMPro
 						if (!this.m_isRightToLeft)
 						{
 							vector11 = new Vector3(tmp_LineInfo.marginLeft, 0f, 0f);
-							goto IL_3E71;
+							goto IL_3E75;
 						}
 						vector11 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width, 0f, 0f);
-						goto IL_3E71;
+						goto IL_3E75;
 					}
 				}
 				this.m_textInfo.characterCount = this.m_characterCount;
@@ -2895,7 +2895,7 @@ namespace TMPro
 			int num = 1;
 			while (num < this.m_subTextObjects.Length && this.m_subTextObjects[num] != null)
 			{
-				Debug.Log("Destroying Sub Text object[" + num + "].");
+				Debug.Log("Destroying Sub Text object[" + num.ToString() + "].");
 				global::UnityEngine.Object.DestroyImmediate(this.m_subTextObjects[num]);
 				num++;
 			}

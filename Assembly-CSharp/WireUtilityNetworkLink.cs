@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveUtilityNetworkMgr, IUtilityNetworkItem, IBridgedNetworkItem
+public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveUtilityNetworkMgr, IBridgedNetworkItem, ICircuitConnected
 {
 	public Wire.WattageRating GetMaxWattageRating()
 	{
@@ -31,28 +31,22 @@ public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveU
 		return Game.Instance.electricalConduitSystem;
 	}
 
-	public ushort NetworkID
+	public bool IsVirtual { get; private set; }
+
+	public int PowerCell
 	{
 		get
 		{
-			int num;
-			int num2;
-			base.GetCells(out num, out num2);
-			ElectricalUtilityNetwork electricalUtilityNetwork = Game.Instance.electricalConduitSystem.GetNetworkForCell(num) as ElectricalUtilityNetwork;
-			if (electricalUtilityNetwork == null)
-			{
-				return ushort.MaxValue;
-			}
-			return (ushort)electricalUtilityNetwork.id;
+			return base.GetNetworkCell();
 		}
 	}
 
+	public object VirtualCircuitKey { get; private set; }
+
 	public void AddNetworks(ICollection<UtilityNetwork> networks)
 	{
-		int num;
-		int num2;
-		base.GetCells(out num, out num2);
-		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(num);
+		int networkCell = base.GetNetworkCell();
+		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(networkCell);
 		if (networkForCell != null)
 		{
 			networks.Add(networkForCell);
@@ -61,10 +55,8 @@ public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveU
 
 	public bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
 	{
-		int num;
-		int num2;
-		base.GetCells(out num, out num2);
-		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(num);
+		int networkCell = base.GetNetworkCell();
+		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(networkCell);
 		return networks.Contains(networkForCell);
 	}
 

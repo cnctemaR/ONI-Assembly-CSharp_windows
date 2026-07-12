@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.U2D
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/2D/Renderer/SpriteRendererGroup.h")]
+	[RequiredByNativeCode]
 	internal struct SpriteIntermediateRendererInfo
 	{
 		public int SpriteID;

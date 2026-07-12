@@ -13,7 +13,7 @@ public static class PointGenerator
 		float num4 = num2 / 2f;
 		int num5 = (int)Mathf.Floor(num * num2 / density);
 		uint num6 = (uint)Mathf.Sqrt((float)num5);
-		int num7 = 10;
+		int num7 = 20;
 		uint num8 = (uint)((float)num5 * 0.98f);
 		Vector2 min = boundingArea.bounds.min;
 		Vector2 max = boundingArea.bounds.max;

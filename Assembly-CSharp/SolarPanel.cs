@@ -12,38 +12,12 @@ public class SolarPanel : Generator
 		this.smi = new SolarPanel.StatesInstance(this);
 		this.smi.StartSM();
 		this.accumulator = Game.Instance.accumulators.Add("Element", this);
-		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < def.WidthInCells; i++)
-		{
-			int num2 = i - (def.WidthInCells - 1) / 2;
-			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.SetCellProperties(num3, 39);
-			Grid.Foundation[num3] = true;
-			Grid.SetSolid(num3, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
-			World.Instance.OnSolidChanged(num3);
-			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
-			Grid.RenderedByWorld[num3] = false;
-		}
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 	}
 
 	protected override void OnCleanUp()
 	{
 		this.smi.StopSM("cleanup");
-		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < def.WidthInCells; i++)
-		{
-			int num2 = i - (def.WidthInCells - 1) / 2;
-			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.ClearCellProperties(num3, 39);
-			Grid.Foundation[num3] = false;
-			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
-			World.Instance.OnSolidChanged(num3);
-			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
-			Grid.RenderedByWorld[num3] = true;
-		}
 		Game.Instance.accumulators.Remove(this.accumulator);
 		base.OnCleanUp();
 	}
@@ -111,8 +85,6 @@ public class SolarPanel : Generator
 	private SolarPanel.StatesInstance smi;
 
 	private Guid statusHandle;
-
-	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
 
 	private CellOffset[] solarCellOffsets = new CellOffset[]
 	{

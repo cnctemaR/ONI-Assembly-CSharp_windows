@@ -104,9 +104,29 @@ namespace System
 		private static bool return_type_match(Type delReturnType, Type returnType)
 		{
 			bool flag = returnType == delReturnType;
-			if (!flag && !returnType.IsValueType && delReturnType.IsAssignableFrom(returnType))
+			if (!flag)
 			{
-				flag = true;
+				if (!returnType.IsValueType && delReturnType.IsAssignableFrom(returnType))
+				{
+					flag = true;
+				}
+				else
+				{
+					bool isEnum = delReturnType.IsEnum;
+					bool isEnum2 = returnType.IsEnum;
+					if (isEnum2 && isEnum)
+					{
+						flag = Enum.GetUnderlyingType(delReturnType) == Enum.GetUnderlyingType(returnType);
+					}
+					else if (isEnum && Enum.GetUnderlyingType(delReturnType) == returnType)
+					{
+						flag = true;
+					}
+					else if (isEnum2 && Enum.GetUnderlyingType(returnType) == delReturnType)
+					{
+						flag = true;
+					}
+				}
 			}
 			return flag;
 		}

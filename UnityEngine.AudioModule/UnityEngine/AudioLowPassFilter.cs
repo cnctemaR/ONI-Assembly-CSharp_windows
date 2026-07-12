@@ -13,7 +13,7 @@ namespace UnityEngine
 		[NativeThrows]
 		[NativeMethod(Name = "AudioLowPassFilterBindings::SetCustomLowpassLevelCurveHelper", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetCustomLowpassLevelCurveHelper(AudioLowPassFilter source, AnimationCurve curve);
+		private static extern void SetCustomLowpassLevelCurveHelper([NotNull("NullExceptionObject")] AudioLowPassFilter source, AnimationCurve curve);
 
 		public AnimationCurve customCutoffCurve
 		{

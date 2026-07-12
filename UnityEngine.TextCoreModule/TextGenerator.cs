@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine.Bindings;
 using UnityEngine.TextCore.LowLevel;
 
 namespace UnityEngine.TextCore
 {
-	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal class TextGenerator
 	{
 		private static TextGenerator GetTextGenerator()
@@ -282,7 +280,7 @@ namespace UnityEngine.TextCore
 								bool flag13 = this.m_TextElementType == TextElementType.Character;
 								if (flag13)
 								{
-									goto IL_323E;
+									goto IL_3246;
 								}
 							}
 							goto IL_054D;
@@ -291,7 +289,7 @@ namespace UnityEngine.TextCore
 						this.m_CurrentMaterialIndex = textInfo.textElementInfo[this.m_CharacterCount].materialReferenceIndex;
 						this.m_CurrentFontAsset = textInfo.textElementInfo[this.m_CharacterCount].fontAsset;
 						goto IL_054D;
-						IL_323E:
+						IL_3246:
 						num13++;
 						continue;
 						IL_054D:
@@ -304,7 +302,7 @@ namespace UnityEngine.TextCore
 							textInfo.textElementInfo[this.m_CharacterCount].isVisible = false;
 							textInfo.textElementInfo[this.m_CharacterCount].character = '\u200b';
 							this.m_CharacterCount++;
-							goto IL_323E;
+							goto IL_3246;
 						}
 						float num16 = 1f;
 						bool flag15 = this.m_TextElementType == TextElementType.Character;
@@ -354,7 +352,7 @@ namespace UnityEngine.TextCore
 							bool flag23 = spriteCharacter == null;
 							if (flag23)
 							{
-								goto IL_323E;
+								goto IL_3246;
 							}
 							bool flag24 = num14 == 60;
 							if (flag24)
@@ -385,7 +383,7 @@ namespace UnityEngine.TextCore
 								bool flag26 = this.m_CachedTextElement == null;
 								if (flag26)
 								{
-									goto IL_323E;
+									goto IL_3246;
 								}
 								this.m_CurrentFontAsset = textInfo.textElementInfo[this.m_CharacterCount].fontAsset;
 								this.m_CurrentMaterial = textInfo.textElementInfo[this.m_CharacterCount].material;
@@ -705,7 +703,7 @@ namespace UnityEngine.TextCore
 									this.m_MaxLineAscender = -32767f;
 									this.m_MaxLineDescender = 32767f;
 									this.m_XAdvance = 0f + this.m_TagIndent;
-									goto IL_323E;
+									goto IL_3246;
 								}
 								else
 								{
@@ -1031,7 +1029,7 @@ namespace UnityEngine.TextCore
 										num10 = 0f;
 										this.m_LineNumber++;
 										this.m_PageNumber++;
-										goto IL_323E;
+										goto IL_3246;
 									}
 									break;
 								}
@@ -1184,7 +1182,7 @@ namespace UnityEngine.TextCore
 								this.m_XAdvance = 0f + this.m_TagLineIndent + this.m_TagIndent;
 								num8 = this.m_CharacterCount - 1;
 								this.m_CharacterCount++;
-								goto IL_323E;
+								goto IL_3246;
 							}
 						}
 						bool isVisible2 = textInfo.textElementInfo[this.m_CharacterCount].isVisible;
@@ -1262,7 +1260,7 @@ namespace UnityEngine.TextCore
 							}
 						}
 						this.m_CharacterCount++;
-						goto IL_323E;
+						goto IL_3246;
 					}
 					float num41 = this.m_MaxFontSize - this.m_MinFontSize;
 					bool flag113 = !this.m_IsCharacterWrappingEnabled && generationSettings.autoSize && num41 > 0.051f && this.m_FontSize < generationSettings.fontSizeMax;
@@ -1292,31 +1290,32 @@ namespace UnityEngine.TextCore
 							Vector3 vector10 = Vector3.zero;
 							Vector3[] rectTransformCorners = this.m_RectTransformCorners;
 							TextAlignment textAlignment = generationSettings.textAlignment;
-							if (textAlignment <= TextAlignment.BottomGeoAligned)
+							TextAlignment textAlignment2 = textAlignment;
+							if (textAlignment2 <= TextAlignment.BottomGeoAligned)
 							{
-								if (textAlignment <= TextAlignment.MiddleRight)
+								if (textAlignment2 <= TextAlignment.MiddleRight)
 								{
-									if (textAlignment <= TextAlignment.TopJustified)
+									if (textAlignment2 <= TextAlignment.TopJustified)
 									{
-										if (textAlignment - TextAlignment.TopLeft > 1 && textAlignment != TextAlignment.TopRight && textAlignment != TextAlignment.TopJustified)
+										if (textAlignment2 - TextAlignment.TopLeft > 1 && textAlignment2 != TextAlignment.TopRight && textAlignment2 != TextAlignment.TopJustified)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
 									}
-									else if (textAlignment <= TextAlignment.TopGeoAligned)
+									else if (textAlignment2 <= TextAlignment.TopGeoAligned)
 									{
-										if (textAlignment != TextAlignment.TopFlush && textAlignment != TextAlignment.TopGeoAligned)
+										if (textAlignment2 != TextAlignment.TopFlush && textAlignment2 != TextAlignment.TopGeoAligned)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
 									}
 									else
 									{
-										if (textAlignment - TextAlignment.MiddleLeft > 1 && textAlignment != TextAlignment.MiddleRight)
+										if (textAlignment2 - TextAlignment.MiddleLeft > 1 && textAlignment2 != TextAlignment.MiddleRight)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
-										goto IL_3684;
+										goto IL_3690;
 									}
 									bool flag116 = generationSettings.overflowMode != TextOverflowMode.Page;
 									if (flag116)
@@ -1327,40 +1326,40 @@ namespace UnityEngine.TextCore
 									{
 										vector10 = rectTransformCorners[1] + new Vector3(0f + margins.x, 0f - textInfo.pageInfo[num6].ascender - margins.y, 0f);
 									}
-									goto IL_3936;
+									goto IL_3942;
 								}
-								if (textAlignment <= TextAlignment.BottomCenter)
+								if (textAlignment2 <= TextAlignment.BottomCenter)
 								{
-									if (textAlignment <= TextAlignment.MiddleFlush)
+									if (textAlignment2 <= TextAlignment.MiddleFlush)
 									{
-										if (textAlignment != TextAlignment.MiddleJustified && textAlignment != TextAlignment.MiddleFlush)
+										if (textAlignment2 != TextAlignment.MiddleJustified && textAlignment2 != TextAlignment.MiddleFlush)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
-										goto IL_3684;
+										goto IL_3690;
 									}
 									else
 									{
-										if (textAlignment == TextAlignment.MiddleGeoAligned)
+										if (textAlignment2 == TextAlignment.MiddleGeoAligned)
 										{
-											goto IL_3684;
+											goto IL_3690;
 										}
-										if (textAlignment - TextAlignment.BottomLeft > 1)
+										if (textAlignment2 - TextAlignment.BottomLeft > 1)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
 									}
 								}
-								else if (textAlignment <= TextAlignment.BottomJustified)
+								else if (textAlignment2 <= TextAlignment.BottomJustified)
 								{
-									if (textAlignment != TextAlignment.BottomRight && textAlignment != TextAlignment.BottomJustified)
+									if (textAlignment2 != TextAlignment.BottomRight && textAlignment2 != TextAlignment.BottomJustified)
 									{
-										goto IL_3936;
+										goto IL_3942;
 									}
 								}
-								else if (textAlignment != TextAlignment.BottomFlush && textAlignment != TextAlignment.BottomGeoAligned)
+								else if (textAlignment2 != TextAlignment.BottomFlush && textAlignment2 != TextAlignment.BottomGeoAligned)
 								{
-									goto IL_3936;
+									goto IL_3942;
 								}
 								bool flag117 = generationSettings.overflowMode != TextOverflowMode.Page;
 								if (flag117)
@@ -1371,8 +1370,8 @@ namespace UnityEngine.TextCore
 								{
 									vector10 = rectTransformCorners[0] + new Vector3(0f + margins.x, 0f - textInfo.pageInfo[num6].descender + margins.w, 0f);
 								}
-								goto IL_3936;
-								IL_3684:
+								goto IL_3942;
+								IL_3690:
 								bool flag118 = generationSettings.overflowMode != TextOverflowMode.Page;
 								if (flag118)
 								{
@@ -1385,72 +1384,72 @@ namespace UnityEngine.TextCore
 							}
 							else
 							{
-								if (textAlignment <= TextAlignment.MidlineRight)
+								if (textAlignment2 <= TextAlignment.MidlineRight)
 								{
-									if (textAlignment <= TextAlignment.BaselineJustified)
+									if (textAlignment2 <= TextAlignment.BaselineJustified)
 									{
-										if (textAlignment - TextAlignment.BaselineLeft > 1 && textAlignment != TextAlignment.BaselineRight && textAlignment != TextAlignment.BaselineJustified)
+										if (textAlignment2 - TextAlignment.BaselineLeft > 1 && textAlignment2 != TextAlignment.BaselineRight && textAlignment2 != TextAlignment.BaselineJustified)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
 									}
-									else if (textAlignment <= TextAlignment.BaselineGeoAligned)
+									else if (textAlignment2 <= TextAlignment.BaselineGeoAligned)
 									{
-										if (textAlignment != TextAlignment.BaselineFlush && textAlignment != TextAlignment.BaselineGeoAligned)
+										if (textAlignment2 != TextAlignment.BaselineFlush && textAlignment2 != TextAlignment.BaselineGeoAligned)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
 									}
 									else
 									{
-										if (textAlignment - TextAlignment.MidlineLeft > 1 && textAlignment != TextAlignment.MidlineRight)
+										if (textAlignment2 - TextAlignment.MidlineLeft > 1 && textAlignment2 != TextAlignment.MidlineRight)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
-										goto IL_3859;
+										goto IL_3865;
 									}
 									vector10 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margins.x, 0f, 0f);
-									goto IL_3936;
+									goto IL_3942;
 								}
-								if (textAlignment <= TextAlignment.CaplineCenter)
+								if (textAlignment2 <= TextAlignment.CaplineCenter)
 								{
-									if (textAlignment <= TextAlignment.MidlineFlush)
+									if (textAlignment2 <= TextAlignment.MidlineFlush)
 									{
-										if (textAlignment != TextAlignment.MidlineJustified && textAlignment != TextAlignment.MidlineFlush)
+										if (textAlignment2 != TextAlignment.MidlineJustified && textAlignment2 != TextAlignment.MidlineFlush)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
-										goto IL_3859;
+										goto IL_3865;
 									}
 									else
 									{
-										if (textAlignment == TextAlignment.MidlineGeoAligned)
+										if (textAlignment2 == TextAlignment.MidlineGeoAligned)
 										{
-											goto IL_3859;
+											goto IL_3865;
 										}
-										if (textAlignment - TextAlignment.CaplineLeft > 1)
+										if (textAlignment2 - TextAlignment.CaplineLeft > 1)
 										{
-											goto IL_3936;
+											goto IL_3942;
 										}
 									}
 								}
-								else if (textAlignment <= TextAlignment.CaplineJustified)
+								else if (textAlignment2 <= TextAlignment.CaplineJustified)
 								{
-									if (textAlignment != TextAlignment.CaplineRight && textAlignment != TextAlignment.CaplineJustified)
+									if (textAlignment2 != TextAlignment.CaplineRight && textAlignment2 != TextAlignment.CaplineJustified)
 									{
-										goto IL_3936;
+										goto IL_3942;
 									}
 								}
-								else if (textAlignment != TextAlignment.CaplineFlush && textAlignment != TextAlignment.CaplineGeoAligned)
+								else if (textAlignment2 != TextAlignment.CaplineFlush && textAlignment2 != TextAlignment.CaplineGeoAligned)
 								{
-									goto IL_3936;
+									goto IL_3942;
 								}
 								vector10 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margins.x, 0f - (this.m_MaxCapHeight - margins.y - margins.w) / 2f, 0f);
-								goto IL_3936;
-								IL_3859:
+								goto IL_3942;
+								IL_3865:
 								vector10 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margins.x, 0f - (this.m_MeshExtents.max.y + margins.y + this.m_MeshExtents.min.y - margins.w) / 2f, 0f);
 							}
-							IL_3936:
+							IL_3942:
 							Vector3 vector11 = Vector3.zero;
 							int num43 = 0;
 							int num44 = 0;
@@ -1479,167 +1478,168 @@ namespace UnityEngine.TextCore
 								LineInfo lineInfo3 = textInfo.lineInfo[lineNumber3];
 								num44 = lineNumber3 + 1;
 								TextAlignment alignment = lineInfo3.alignment;
-								TextAlignment textAlignment2 = alignment;
-								if (textAlignment2 <= TextAlignment.BottomGeoAligned)
+								TextAlignment textAlignment3 = alignment;
+								TextAlignment textAlignment4 = textAlignment3;
+								if (textAlignment4 <= TextAlignment.BottomGeoAligned)
 								{
-									if (textAlignment2 <= TextAlignment.MiddleJustified)
+									if (textAlignment4 <= TextAlignment.MiddleJustified)
 									{
-										if (textAlignment2 <= TextAlignment.TopFlush)
+										if (textAlignment4 <= TextAlignment.TopFlush)
 										{
-											switch (textAlignment2)
+											switch (textAlignment4)
 											{
 											case TextAlignment.TopLeft:
-												goto IL_3C28;
+												goto IL_3C38;
 											case TextAlignment.TopCenter:
-												goto IL_3C7A;
+												goto IL_3C8A;
 											case (TextAlignment)259:
 												break;
 											case TextAlignment.TopRight:
-												goto IL_3D08;
+												goto IL_3D18;
 											default:
-												if (textAlignment2 == TextAlignment.TopJustified || textAlignment2 == TextAlignment.TopFlush)
+												if (textAlignment4 == TextAlignment.TopJustified || textAlignment4 == TextAlignment.TopFlush)
 												{
-													goto IL_3D66;
+													goto IL_3D76;
 												}
 												break;
 											}
 										}
 										else
 										{
-											if (textAlignment2 == TextAlignment.TopGeoAligned)
+											if (textAlignment4 == TextAlignment.TopGeoAligned)
 											{
-												goto IL_3CB3;
+												goto IL_3CC3;
 											}
-											switch (textAlignment2)
+											switch (textAlignment4)
 											{
 											case TextAlignment.MiddleLeft:
-												goto IL_3C28;
+												goto IL_3C38;
 											case TextAlignment.MiddleCenter:
-												goto IL_3C7A;
+												goto IL_3C8A;
 											case (TextAlignment)515:
 												break;
 											case TextAlignment.MiddleRight:
-												goto IL_3D08;
+												goto IL_3D18;
 											default:
-												if (textAlignment2 == TextAlignment.MiddleJustified)
+												if (textAlignment4 == TextAlignment.MiddleJustified)
 												{
-													goto IL_3D66;
+													goto IL_3D76;
 												}
 												break;
 											}
 										}
 									}
-									else if (textAlignment2 <= TextAlignment.BottomRight)
+									else if (textAlignment4 <= TextAlignment.BottomRight)
 									{
-										if (textAlignment2 == TextAlignment.MiddleFlush)
+										if (textAlignment4 == TextAlignment.MiddleFlush)
 										{
-											goto IL_3D66;
+											goto IL_3D76;
 										}
-										if (textAlignment2 == TextAlignment.MiddleGeoAligned)
+										if (textAlignment4 == TextAlignment.MiddleGeoAligned)
 										{
-											goto IL_3CB3;
+											goto IL_3CC3;
 										}
-										switch (textAlignment2)
+										switch (textAlignment4)
 										{
 										case TextAlignment.BottomLeft:
-											goto IL_3C28;
+											goto IL_3C38;
 										case TextAlignment.BottomCenter:
-											goto IL_3C7A;
+											goto IL_3C8A;
 										case TextAlignment.BottomRight:
-											goto IL_3D08;
+											goto IL_3D18;
 										}
 									}
 									else
 									{
-										if (textAlignment2 == TextAlignment.BottomJustified || textAlignment2 == TextAlignment.BottomFlush)
+										if (textAlignment4 == TextAlignment.BottomJustified || textAlignment4 == TextAlignment.BottomFlush)
 										{
-											goto IL_3D66;
+											goto IL_3D76;
 										}
-										if (textAlignment2 == TextAlignment.BottomGeoAligned)
+										if (textAlignment4 == TextAlignment.BottomGeoAligned)
 										{
-											goto IL_3CB3;
+											goto IL_3CC3;
 										}
 									}
 								}
-								else if (textAlignment2 <= TextAlignment.MidlineJustified)
+								else if (textAlignment4 <= TextAlignment.MidlineJustified)
 								{
-									if (textAlignment2 <= TextAlignment.BaselineFlush)
+									if (textAlignment4 <= TextAlignment.BaselineFlush)
 									{
-										switch (textAlignment2)
+										switch (textAlignment4)
 										{
 										case TextAlignment.BaselineLeft:
-											goto IL_3C28;
+											goto IL_3C38;
 										case TextAlignment.BaselineCenter:
-											goto IL_3C7A;
+											goto IL_3C8A;
 										case (TextAlignment)2051:
 											break;
 										case TextAlignment.BaselineRight:
-											goto IL_3D08;
+											goto IL_3D18;
 										default:
-											if (textAlignment2 == TextAlignment.BaselineJustified || textAlignment2 == TextAlignment.BaselineFlush)
+											if (textAlignment4 == TextAlignment.BaselineJustified || textAlignment4 == TextAlignment.BaselineFlush)
 											{
-												goto IL_3D66;
+												goto IL_3D76;
 											}
 											break;
 										}
 									}
 									else
 									{
-										if (textAlignment2 == TextAlignment.BaselineGeoAligned)
+										if (textAlignment4 == TextAlignment.BaselineGeoAligned)
 										{
-											goto IL_3CB3;
+											goto IL_3CC3;
 										}
-										switch (textAlignment2)
+										switch (textAlignment4)
 										{
 										case TextAlignment.MidlineLeft:
-											goto IL_3C28;
+											goto IL_3C38;
 										case TextAlignment.MidlineCenter:
-											goto IL_3C7A;
+											goto IL_3C8A;
 										case (TextAlignment)4099:
 											break;
 										case TextAlignment.MidlineRight:
-											goto IL_3D08;
+											goto IL_3D18;
 										default:
-											if (textAlignment2 == TextAlignment.MidlineJustified)
+											if (textAlignment4 == TextAlignment.MidlineJustified)
 											{
-												goto IL_3D66;
+												goto IL_3D76;
 											}
 											break;
 										}
 									}
 								}
-								else if (textAlignment2 <= TextAlignment.CaplineRight)
+								else if (textAlignment4 <= TextAlignment.CaplineRight)
 								{
-									if (textAlignment2 == TextAlignment.MidlineFlush)
+									if (textAlignment4 == TextAlignment.MidlineFlush)
 									{
-										goto IL_3D66;
+										goto IL_3D76;
 									}
-									if (textAlignment2 == TextAlignment.MidlineGeoAligned)
+									if (textAlignment4 == TextAlignment.MidlineGeoAligned)
 									{
-										goto IL_3CB3;
+										goto IL_3CC3;
 									}
-									switch (textAlignment2)
+									switch (textAlignment4)
 									{
 									case TextAlignment.CaplineLeft:
-										goto IL_3C28;
+										goto IL_3C38;
 									case TextAlignment.CaplineCenter:
-										goto IL_3C7A;
+										goto IL_3C8A;
 									case TextAlignment.CaplineRight:
-										goto IL_3D08;
+										goto IL_3D18;
 									}
 								}
 								else
 								{
-									if (textAlignment2 == TextAlignment.CaplineJustified || textAlignment2 == TextAlignment.CaplineFlush)
+									if (textAlignment4 == TextAlignment.CaplineJustified || textAlignment4 == TextAlignment.CaplineFlush)
 									{
-										goto IL_3D66;
+										goto IL_3D76;
 									}
-									if (textAlignment2 == TextAlignment.CaplineGeoAligned)
+									if (textAlignment4 == TextAlignment.CaplineGeoAligned)
 									{
-										goto IL_3CB3;
+										goto IL_3CC3;
 									}
 								}
-								IL_40D2:
+								IL_4102:
 								Vector3 vector12 = vector10 + vector11;
 								bool isVisible3 = textElementInfo[i].isVisible;
 								bool flag121 = isVisible3;
@@ -1647,9 +1647,10 @@ namespace UnityEngine.TextCore
 								{
 									TextElementType elementType = textElementInfo[i].elementType;
 									TextElementType textElementType = elementType;
-									if (textElementType != TextElementType.Character)
+									TextElementType textElementType2 = textElementType;
+									if (textElementType2 != TextElementType.Character)
 									{
-										if (textElementType != TextElementType.Sprite)
+										if (textElementType2 != TextElementType.Sprite)
 										{
 										}
 									}
@@ -2240,7 +2241,7 @@ namespace UnityEngine.TextCore
 								num45 = lineNumber3;
 								i++;
 								continue;
-								IL_3C28:
+								IL_3C38:
 								bool flag179 = !generationSettings.isRightToLeft;
 								if (flag179)
 								{
@@ -2250,14 +2251,14 @@ namespace UnityEngine.TextCore
 								{
 									vector11 = new Vector3(0f - lineInfo3.maxAdvance, 0f, 0f);
 								}
-								goto IL_40D2;
-								IL_3C7A:
+								goto IL_4102;
+								IL_3C8A:
 								vector11 = new Vector3(lineInfo3.marginLeft + lineInfo3.width / 2f - lineInfo3.maxAdvance / 2f, 0f, 0f);
-								goto IL_40D2;
-								IL_3CB3:
+								goto IL_4102;
+								IL_3CC3:
 								vector11 = new Vector3(lineInfo3.marginLeft + lineInfo3.width / 2f - (lineInfo3.lineExtents.min.x + lineInfo3.lineExtents.max.x) / 2f, 0f, 0f);
-								goto IL_40D2;
-								IL_3D08:
+								goto IL_4102;
+								IL_3D18:
 								bool flag180 = !generationSettings.isRightToLeft;
 								if (flag180)
 								{
@@ -2267,12 +2268,12 @@ namespace UnityEngine.TextCore
 								{
 									vector11 = new Vector3(lineInfo3.marginLeft + lineInfo3.width, 0f, 0f);
 								}
-								goto IL_40D2;
-								IL_3D66:
+								goto IL_4102;
+								IL_3D76:
 								bool flag181 = character3 == '\u00ad' || character3 == '\u200b' || character3 == '\u2060';
 								if (flag181)
 								{
-									goto IL_40D2;
+									goto IL_4102;
 								}
 								char character4 = textElementInfo[lineInfo3.lastCharacterIndex].character;
 								bool flag182 = (alignment & (TextAlignment)16) == (TextAlignment)16;
@@ -2350,7 +2351,7 @@ namespace UnityEngine.TextCore
 										vector11 = new Vector3(lineInfo3.marginLeft + lineInfo3.width, 0f, 0f);
 									}
 								}
-								goto IL_40D2;
+								goto IL_4102;
 							}
 							textInfo.characterCount = this.m_CharacterCount;
 							textInfo.spriteCount = this.m_SpriteCount;
@@ -2583,7 +2584,7 @@ namespace UnityEngine.TextCore
 							if (flag13)
 							{
 								flag2 = true;
-								goto IL_032A;
+								goto IL_0329;
 							}
 						}
 						bool flag14 = b == 2;
@@ -2626,7 +2627,7 @@ namespace UnityEngine.TextCore
 						}
 					}
 				}
-				IL_032A:
+				IL_0329:
 				readIndex++;
 			}
 			bool flag19 = !flag;
@@ -2901,17 +2902,18 @@ namespace UnityEngine.TextCore
 				return true;
 			}
 			TagHashCode nameHashCode = (TagHashCode)this.m_XmlAttribute[0].nameHashCode;
-			if (nameHashCode <= TagHashCode.SLASH_BOLD)
+			TagHashCode tagHashCode = nameHashCode;
+			if (tagHashCode <= TagHashCode.SLASH_BOLD)
 			{
-				if (nameHashCode <= TagHashCode.SPRITE)
+				if (tagHashCode <= TagHashCode.SPRITE)
 				{
-					if (nameHashCode <= TagHashCode.LOWERCASE)
+					if (tagHashCode <= TagHashCode.LOWERCASE)
 					{
-						if (nameHashCode <= TagHashCode.ACTION)
+						if (tagHashCode <= TagHashCode.ACTION)
 						{
-							if (nameHashCode <= TagHashCode.FONT_WEIGHT)
+							if (tagHashCode <= TagHashCode.FONT_WEIGHT)
 							{
-								if (nameHashCode == TagHashCode.GRADIENT)
+								if (tagHashCode == TagHashCode.GRADIENT)
 								{
 									int valueHashCode = this.m_XmlAttribute[0].valueHashCode;
 									TextGradientPreset textGradientPreset;
@@ -2938,19 +2940,20 @@ namespace UnityEngine.TextCore
 									this.m_ColorGradientStack.Add(this.m_ColorGradientPreset);
 									return true;
 								}
-								if (nameHashCode != TagHashCode.FONT_WEIGHT)
+								if (tagHashCode != TagHashCode.FONT_WEIGHT)
 								{
-									goto IL_37DF;
+									goto IL_3827;
 								}
 								float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 								int num12 = (int)num11;
-								if (num12 <= 400)
+								int num13 = num12;
+								if (num13 <= 400)
 								{
-									if (num12 <= 200)
+									if (num13 <= 200)
 									{
-										if (num12 != 100)
+										if (num13 != 100)
 										{
-											if (num12 == 200)
+											if (num13 == 200)
 											{
 												this.m_FontWeightInternal = FontWeight.ExtraLight;
 											}
@@ -2960,9 +2963,9 @@ namespace UnityEngine.TextCore
 											this.m_FontWeightInternal = FontWeight.Thin;
 										}
 									}
-									else if (num12 != 300)
+									else if (num13 != 300)
 									{
-										if (num12 == 400)
+										if (num13 == 400)
 										{
 											this.m_FontWeightInternal = FontWeight.Regular;
 										}
@@ -2972,11 +2975,11 @@ namespace UnityEngine.TextCore
 										this.m_FontWeightInternal = FontWeight.Light;
 									}
 								}
-								else if (num12 <= 600)
+								else if (num13 <= 600)
 								{
-									if (num12 != 500)
+									if (num13 != 500)
 									{
-										if (num12 == 600)
+										if (num13 == 600)
 										{
 											this.m_FontWeightInternal = FontWeight.SemiBold;
 										}
@@ -2986,11 +2989,11 @@ namespace UnityEngine.TextCore
 										this.m_FontWeightInternal = FontWeight.Medium;
 									}
 								}
-								else if (num12 != 700)
+								else if (num13 != 700)
 								{
-									if (num12 != 800)
+									if (num13 != 800)
 									{
-										if (num12 == 900)
+										if (num13 == 900)
 										{
 											this.m_FontWeightInternal = FontWeight.Black;
 										}
@@ -3009,14 +3012,14 @@ namespace UnityEngine.TextCore
 							}
 							else
 							{
-								if (nameHashCode == TagHashCode.SLASH_GRADIENT)
+								if (tagHashCode == TagHashCode.SLASH_GRADIENT)
 								{
 									this.m_ColorGradientPreset = this.m_ColorGradientStack.Remove();
 									return true;
 								}
-								if (nameHashCode != TagHashCode.ACTION)
+								if (tagHashCode != TagHashCode.ACTION)
 								{
-									goto IL_37DF;
+									goto IL_3827;
 								}
 								int valueHashCode2 = this.m_XmlAttribute[0].valueHashCode;
 								bool isParsingText = this.m_IsParsingText;
@@ -3027,28 +3030,28 @@ namespace UnityEngine.TextCore
 								return false;
 							}
 						}
-						else if (nameHashCode <= TagHashCode.SLASH_MONOSPACE)
+						else if (tagHashCode <= TagHashCode.SLASH_MONOSPACE)
 						{
-							if (nameHashCode == TagHashCode.SLASH_MARGIN)
+							if (tagHashCode == TagHashCode.SLASH_MARGIN)
 							{
 								this.m_MarginLeft = 0f;
 								this.m_MarginRight = 0f;
 								return true;
 							}
-							if (nameHashCode != TagHashCode.SLASH_MONOSPACE)
+							if (tagHashCode != TagHashCode.SLASH_MONOSPACE)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							this.m_MonoSpacing = 0f;
 							return true;
 						}
-						else if (nameHashCode != TagHashCode.CHARACTER_SPACE)
+						else if (tagHashCode != TagHashCode.CHARACTER_SPACE)
 						{
-							if (nameHashCode != TagHashCode.INDENT)
+							if (tagHashCode != TagHashCode.INDENT)
 							{
-								if (nameHashCode != TagHashCode.LOWERCASE)
+								if (tagHashCode != TagHashCode.LOWERCASE)
 								{
-									goto IL_37DF;
+									goto IL_3827;
 								}
 								this.m_FontStyleInternal |= FontStyles.LowerCase;
 								this.m_FontStyleStack.Add(FontStyles.LowerCase);
@@ -3103,18 +3106,18 @@ namespace UnityEngine.TextCore
 							return true;
 						}
 					}
-					else if (nameHashCode <= TagHashCode.MARGIN)
+					else if (tagHashCode <= TagHashCode.MARGIN)
 					{
-						if (nameHashCode <= TagHashCode.SLASH_LOWERCASE)
+						if (tagHashCode <= TagHashCode.SLASH_LOWERCASE)
 						{
-							if (nameHashCode == TagHashCode.SLASH_INDENT)
+							if (tagHashCode == TagHashCode.SLASH_INDENT)
 							{
 								this.m_TagIndent = this.m_IndentStack.Remove();
 								return true;
 							}
-							if (nameHashCode != TagHashCode.SLASH_LOWERCASE)
+							if (tagHashCode != TagHashCode.SLASH_LOWERCASE)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							bool flag35 = (generationSettings.fontStyle & FontStyles.LowerCase) != FontStyles.LowerCase;
 							if (flag35)
@@ -3127,11 +3130,11 @@ namespace UnityEngine.TextCore
 							}
 							return true;
 						}
-						else if (nameHashCode != TagHashCode.SLASH_CHARACTER_SPACE)
+						else if (tagHashCode != TagHashCode.SLASH_CHARACTER_SPACE)
 						{
-							if (nameHashCode != TagHashCode.MARGIN)
+							if (tagHashCode != TagHashCode.MARGIN)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 							bool flag37 = num11 == -32767f;
@@ -3170,13 +3173,13 @@ namespace UnityEngine.TextCore
 							return true;
 						}
 					}
-					else if (nameHashCode <= TagHashCode.SLASH_ACTION)
+					else if (tagHashCode <= TagHashCode.SLASH_ACTION)
 					{
-						if (nameHashCode != TagHashCode.MONOSPACE)
+						if (tagHashCode != TagHashCode.MONOSPACE)
 						{
-							if (nameHashCode != TagHashCode.SLASH_ACTION)
+							if (tagHashCode != TagHashCode.SLASH_ACTION)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							this.m_ActionStack.Remove();
 							return false;
@@ -3206,18 +3209,18 @@ namespace UnityEngine.TextCore
 					}
 					else
 					{
-						if (nameHashCode == TagHashCode.SLASH_MATERIAL)
+						if (tagHashCode == TagHashCode.SLASH_MATERIAL)
 						{
 							MaterialReference materialReference = this.m_MaterialReferenceStack.Remove();
 							this.m_CurrentMaterial = materialReference.material;
 							this.m_CurrentMaterialIndex = materialReference.index;
 							return true;
 						}
-						if (nameHashCode != TagHashCode.ROTATE)
+						if (tagHashCode != TagHashCode.ROTATE)
 						{
-							if (nameHashCode != TagHashCode.SPRITE)
+							if (tagHashCode != TagHashCode.SPRITE)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							int valueHashCode3 = this.m_XmlAttribute[0].valueHashCode;
 							this.m_SpriteIndex = -1;
@@ -3287,88 +3290,89 @@ namespace UnityEngine.TextCore
 							bool flag50 = this.m_XmlAttribute[0].valueType == TagValueType.NumericalValue;
 							if (flag50)
 							{
-								int num13 = (int)TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
-								bool flag51 = (float)num13 == -32767f;
+								int num14 = (int)TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
+								bool flag51 = (float)num14 == -32767f;
 								if (flag51)
 								{
 									return false;
 								}
-								bool flag52 = num13 > this.m_CurrentSpriteAsset.spriteCharacterTable.Count - 1;
+								bool flag52 = num14 > this.m_CurrentSpriteAsset.spriteCharacterTable.Count - 1;
 								if (flag52)
 								{
 									return false;
 								}
-								this.m_SpriteIndex = num13;
+								this.m_SpriteIndex = num14;
 							}
 							this.m_SpriteColor = Color.white;
 							this.m_TintSprite = false;
-							int num14 = 0;
-							while (num14 < this.m_XmlAttribute.Length && this.m_XmlAttribute[num14].nameHashCode != 0)
+							int num15 = 0;
+							while (num15 < this.m_XmlAttribute.Length && this.m_XmlAttribute[num15].nameHashCode != 0)
 							{
-								int nameHashCode2 = this.m_XmlAttribute[num14].nameHashCode;
-								TagHashCode tagHashCode = (TagHashCode)nameHashCode2;
-								if (tagHashCode <= TagHashCode.NAME)
+								int nameHashCode2 = this.m_XmlAttribute[num15].nameHashCode;
+								TagHashCode tagHashCode2 = (TagHashCode)nameHashCode2;
+								TagHashCode tagHashCode3 = tagHashCode2;
+								if (tagHashCode3 <= TagHashCode.NAME)
 								{
-									if (tagHashCode != TagHashCode.ANIM)
+									if (tagHashCode3 != TagHashCode.ANIM)
 									{
-										if (tagHashCode != TagHashCode.NAME)
+										if (tagHashCode3 != TagHashCode.NAME)
 										{
-											goto IL_308E;
+											goto IL_30C6;
 										}
-										int num15;
-										this.m_CurrentSpriteAsset = TextSpriteAsset.SearchForSpriteByHashCode(this.m_CurrentSpriteAsset, this.m_XmlAttribute[num14].valueHashCode, true, out num15);
-										bool flag53 = num15 == -1;
+										int num16;
+										this.m_CurrentSpriteAsset = TextSpriteAsset.SearchForSpriteByHashCode(this.m_CurrentSpriteAsset, this.m_XmlAttribute[num15].valueHashCode, true, out num16);
+										bool flag53 = num16 == -1;
 										if (flag53)
 										{
 											return false;
 										}
-										this.m_SpriteIndex = num15;
+										this.m_SpriteIndex = num16;
 									}
 									else
 									{
 										Debug.LogWarning("Sprite animations are not currently supported in TextCore");
 									}
 								}
-								else if (tagHashCode != TagHashCode.TINT)
+								else if (tagHashCode3 != TagHashCode.TINT)
 								{
-									if (tagHashCode != TagHashCode.COLOR)
+									if (tagHashCode3 != TagHashCode.COLOR)
 									{
-										if (tagHashCode != TagHashCode.INDEX)
+										if (tagHashCode3 != TagHashCode.INDEX)
 										{
-											goto IL_308E;
+											goto IL_30C6;
 										}
-										int num15 = (int)TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[1].valueStartIndex, this.m_XmlAttribute[1].valueLength);
-										bool flag54 = (float)num15 == -32767f;
+										int num16 = (int)TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[1].valueStartIndex, this.m_XmlAttribute[1].valueLength);
+										bool flag54 = (float)num16 == -32767f;
 										if (flag54)
 										{
 											return false;
 										}
-										bool flag55 = num15 > this.m_CurrentSpriteAsset.spriteCharacterTable.Count - 1;
+										bool flag55 = num16 > this.m_CurrentSpriteAsset.spriteCharacterTable.Count - 1;
 										if (flag55)
 										{
 											return false;
 										}
-										this.m_SpriteIndex = num15;
+										this.m_SpriteIndex = num16;
 									}
 									else
 									{
-										this.m_SpriteColor = TextGeneratorUtilities.HexCharsToColor(this.m_RichTextTag, this.m_XmlAttribute[num14].valueStartIndex, this.m_XmlAttribute[num14].valueLength);
+										this.m_SpriteColor = TextGeneratorUtilities.HexCharsToColor(this.m_RichTextTag, this.m_XmlAttribute[num15].valueStartIndex, this.m_XmlAttribute[num15].valueLength);
 									}
 								}
 								else
 								{
-									this.m_TintSprite = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[num14].valueStartIndex, this.m_XmlAttribute[num14].valueLength) != 0f;
+									this.m_TintSprite = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[num15].valueStartIndex, this.m_XmlAttribute[num15].valueLength) != 0f;
 								}
-								IL_30AA:
-								num14++;
+								IL_30E2:
+								num15++;
 								continue;
-								IL_308E:
+								IL_30C6:
 								bool flag56 = nameHashCode2 != -991527447;
 								if (flag56)
 								{
 									return false;
 								}
-								goto IL_30AA;
+								goto IL_30E2;
 							}
 							bool flag57 = this.m_SpriteIndex == -1;
 							if (flag57)
@@ -3395,17 +3399,17 @@ namespace UnityEngine.TextCore
 				}
 				else
 				{
-					if (nameHashCode <= TagHashCode.NO_PARSE)
+					if (tagHashCode <= TagHashCode.NO_PARSE)
 					{
-						if (nameHashCode <= TagHashCode.SMALLCAPS)
+						if (tagHashCode <= TagHashCode.SMALLCAPS)
 						{
-							if (nameHashCode <= TagHashCode.LINE_HEIGHT)
+							if (tagHashCode <= TagHashCode.LINE_HEIGHT)
 							{
-								if (nameHashCode != TagHashCode.LINE_INDENT)
+								if (tagHashCode != TagHashCode.LINE_INDENT)
 								{
-									if (nameHashCode != TagHashCode.LINE_HEIGHT)
+									if (tagHashCode != TagHashCode.LINE_HEIGHT)
 									{
-										goto IL_37DF;
+										goto IL_3827;
 									}
 									float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 									bool flag59 = num11 == -32767f || num11 == 0f;
@@ -3450,27 +3454,27 @@ namespace UnityEngine.TextCore
 									return true;
 								}
 							}
-							else if (nameHashCode != TagHashCode.SLASH_ALLCAPS)
+							else if (tagHashCode != TagHashCode.SLASH_ALLCAPS)
 							{
-								if (nameHashCode != TagHashCode.SMALLCAPS)
+								if (tagHashCode != TagHashCode.SMALLCAPS)
 								{
-									goto IL_37DF;
+									goto IL_3827;
 								}
 								this.m_FontStyleInternal |= FontStyles.SmallCaps;
 								this.m_FontStyleStack.Add(FontStyles.SmallCaps);
 								return true;
 							}
 						}
-						else if (nameHashCode <= TagHashCode.SLASH_FONT_WEIGHT)
+						else if (tagHashCode <= TagHashCode.SLASH_FONT_WEIGHT)
 						{
-							if (nameHashCode == TagHashCode.SLASH_ROTATE)
+							if (tagHashCode == TagHashCode.SLASH_ROTATE)
 							{
 								this.m_IsFxMatrixSet = false;
 								return true;
 							}
-							if (nameHashCode != TagHashCode.SLASH_FONT_WEIGHT)
+							if (tagHashCode != TagHashCode.SLASH_FONT_WEIGHT)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							this.m_FontWeightStack.Remove();
 							bool flag61 = this.m_FontStyleInternal == FontStyles.Bold;
@@ -3484,13 +3488,13 @@ namespace UnityEngine.TextCore
 							}
 							return true;
 						}
-						else if (nameHashCode != TagHashCode.SLASH_UPPERCASE)
+						else if (tagHashCode != TagHashCode.SLASH_UPPERCASE)
 						{
-							if (nameHashCode != TagHashCode.MARGIN_RIGHT)
+							if (tagHashCode != TagHashCode.MARGIN_RIGHT)
 							{
-								if (nameHashCode != TagHashCode.NO_PARSE)
+								if (tagHashCode != TagHashCode.NO_PARSE)
 								{
-									goto IL_37DF;
+									goto IL_3827;
 								}
 								this.m_TagNoParsing = true;
 								return true;
@@ -3528,15 +3532,15 @@ namespace UnityEngine.TextCore
 						}
 						return true;
 					}
-					if (nameHashCode <= TagHashCode.BOLD)
+					if (tagHashCode <= TagHashCode.BOLD)
 					{
-						if (nameHashCode <= TagHashCode.MARGIN_LEFT)
+						if (tagHashCode <= TagHashCode.MARGIN_LEFT)
 						{
-							if (nameHashCode != TagHashCode.UPPERCASE)
+							if (tagHashCode != TagHashCode.UPPERCASE)
 							{
-								if (nameHashCode != TagHashCode.MARGIN_LEFT)
+								if (tagHashCode != TagHashCode.MARGIN_LEFT)
 								{
-									goto IL_37DF;
+									goto IL_3827;
 								}
 								float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 								bool flag65 = num11 == -32767f;
@@ -3560,18 +3564,18 @@ namespace UnityEngine.TextCore
 						}
 						else
 						{
-							if (nameHashCode == TagHashCode.SLASH_VERTICAL_OFFSET)
+							if (tagHashCode == TagHashCode.SLASH_VERTICAL_OFFSET)
 							{
 								this.m_BaselineOffset = 0f;
 								return true;
 							}
-							if (nameHashCode == TagHashCode.A)
+							if (tagHashCode == TagHashCode.A)
 							{
 								return false;
 							}
-							if (nameHashCode != TagHashCode.BOLD)
+							if (tagHashCode != TagHashCode.BOLD)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							this.m_FontStyleInternal |= FontStyles.Bold;
 							this.m_FontStyleStack.Add(FontStyles.Bold);
@@ -3579,17 +3583,17 @@ namespace UnityEngine.TextCore
 							return true;
 						}
 					}
-					else if (nameHashCode <= TagHashCode.STRIKETHROUGH)
+					else if (tagHashCode <= TagHashCode.STRIKETHROUGH)
 					{
-						if (nameHashCode == TagHashCode.ITALIC)
+						if (tagHashCode == TagHashCode.ITALIC)
 						{
 							this.m_FontStyleInternal |= FontStyles.Italic;
 							this.m_FontStyleStack.Add(FontStyles.Italic);
 							return true;
 						}
-						if (nameHashCode != TagHashCode.STRIKETHROUGH)
+						if (tagHashCode != TagHashCode.STRIKETHROUGH)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						this.m_FontStyleInternal |= FontStyles.Strikethrough;
 						this.m_FontStyleStack.Add(FontStyles.Strikethrough);
@@ -3608,7 +3612,7 @@ namespace UnityEngine.TextCore
 					}
 					else
 					{
-						if (nameHashCode == TagHashCode.UNDERLINE)
+						if (tagHashCode == TagHashCode.UNDERLINE)
 						{
 							this.m_FontStyleInternal |= FontStyles.Underline;
 							this.m_FontStyleStack.Add(FontStyles.Underline);
@@ -3625,7 +3629,7 @@ namespace UnityEngine.TextCore
 							this.m_UnderlineColorStack.Add(this.m_UnderlineColor);
 							return true;
 						}
-						if (nameHashCode == TagHashCode.SLASH_ITALIC)
+						if (tagHashCode == TagHashCode.SLASH_ITALIC)
 						{
 							bool flag68 = (generationSettings.fontStyle & FontStyles.Italic) != FontStyles.Italic;
 							if (flag68)
@@ -3638,9 +3642,9 @@ namespace UnityEngine.TextCore
 							}
 							return true;
 						}
-						if (nameHashCode != TagHashCode.SLASH_BOLD)
+						if (tagHashCode != TagHashCode.SLASH_BOLD)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						bool flag70 = (generationSettings.fontStyle & FontStyles.Bold) != FontStyles.Bold;
 						if (flag70)
@@ -3656,21 +3660,21 @@ namespace UnityEngine.TextCore
 					}
 				}
 			}
-			else if (nameHashCode <= TagHashCode.SLASH_LINK)
+			else if (tagHashCode <= TagHashCode.SLASH_LINK)
 			{
-				if (nameHashCode <= TagHashCode.SLASH_POSITION)
+				if (tagHashCode <= TagHashCode.SLASH_POSITION)
 				{
-					if (nameHashCode <= TagHashCode.POSITION)
+					if (tagHashCode <= TagHashCode.POSITION)
 					{
-						if (nameHashCode <= TagHashCode.SLASH_UNDERLINE)
+						if (tagHashCode <= TagHashCode.SLASH_UNDERLINE)
 						{
-							if (nameHashCode == TagHashCode.SLASH_A)
+							if (tagHashCode == TagHashCode.SLASH_A)
 							{
 								return true;
 							}
-							if (nameHashCode != TagHashCode.SLASH_UNDERLINE)
+							if (tagHashCode != TagHashCode.SLASH_UNDERLINE)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							bool flag72 = (generationSettings.fontStyle & FontStyles.Underline) != FontStyles.Underline;
 							if (flag72)
@@ -3686,7 +3690,7 @@ namespace UnityEngine.TextCore
 						}
 						else
 						{
-							if (nameHashCode == TagHashCode.SLASH_STRIKETHROUGH)
+							if (tagHashCode == TagHashCode.SLASH_STRIKETHROUGH)
 							{
 								bool flag74 = (generationSettings.fontStyle & FontStyles.Strikethrough) != FontStyles.Strikethrough;
 								if (flag74)
@@ -3699,9 +3703,9 @@ namespace UnityEngine.TextCore
 								}
 								return true;
 							}
-							if (nameHashCode != TagHashCode.POSITION)
+							if (tagHashCode != TagHashCode.POSITION)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 							bool flag76 = num11 == -32767f;
@@ -3725,9 +3729,9 @@ namespace UnityEngine.TextCore
 							}
 						}
 					}
-					else if (nameHashCode <= TagHashCode.SUPERSCRIPT)
+					else if (tagHashCode <= TagHashCode.SUPERSCRIPT)
 					{
-						if (nameHashCode == TagHashCode.SUBSCRIPT)
+						if (tagHashCode == TagHashCode.SUBSCRIPT)
 						{
 							this.m_FontScaleMultiplier *= ((this.m_CurrentFontAsset.faceInfo.subscriptSize > 0f) ? this.m_CurrentFontAsset.faceInfo.subscriptSize : 1f);
 							this.m_BaselineOffsetStack.Push(this.m_BaselineOffset);
@@ -3736,9 +3740,9 @@ namespace UnityEngine.TextCore
 							this.m_FontStyleInternal |= FontStyles.Subscript;
 							return true;
 						}
-						if (nameHashCode != TagHashCode.SUPERSCRIPT)
+						if (tagHashCode != TagHashCode.SUPERSCRIPT)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						this.m_FontScaleMultiplier *= ((this.m_CurrentFontAsset.faceInfo.superscriptSize > 0f) ? this.m_CurrentFontAsset.faceInfo.superscriptSize : 1f);
 						this.m_BaselineOffsetStack.Push(this.m_BaselineOffset);
@@ -3749,7 +3753,7 @@ namespace UnityEngine.TextCore
 					}
 					else
 					{
-						if (nameHashCode == TagHashCode.SLASH_SUBSCRIPT)
+						if (tagHashCode == TagHashCode.SLASH_SUBSCRIPT)
 						{
 							bool flag77 = (this.m_FontStyleInternal & FontStyles.Subscript) == FontStyles.Subscript;
 							if (flag77)
@@ -3768,7 +3772,7 @@ namespace UnityEngine.TextCore
 							}
 							return true;
 						}
-						if (nameHashCode == TagHashCode.SLASH_SUPERSCRIPT)
+						if (tagHashCode == TagHashCode.SLASH_SUPERSCRIPT)
 						{
 							bool flag80 = (this.m_FontStyleInternal & FontStyles.Superscript) == FontStyles.Superscript;
 							if (flag80)
@@ -3787,22 +3791,22 @@ namespace UnityEngine.TextCore
 							}
 							return true;
 						}
-						if (nameHashCode != TagHashCode.SLASH_POSITION)
+						if (tagHashCode != TagHashCode.SLASH_POSITION)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						return true;
 					}
 				}
-				else if (nameHashCode <= TagHashCode.PAGE)
+				else if (tagHashCode <= TagHashCode.PAGE)
 				{
-					if (nameHashCode <= TagHashCode.LINK)
+					if (tagHashCode <= TagHashCode.LINK)
 					{
-						if (nameHashCode != TagHashCode.FONT)
+						if (tagHashCode != TagHashCode.FONT)
 						{
-							if (nameHashCode != TagHashCode.LINK)
+							if (tagHashCode != TagHashCode.LINK)
 							{
-								goto IL_37DF;
+								goto IL_3827;
 							}
 							bool flag83 = this.m_IsParsingText && !this.m_IsCalculatingPreferredValues;
 							if (flag83)
@@ -3825,7 +3829,7 @@ namespace UnityEngine.TextCore
 						{
 							int valueHashCode4 = this.m_XmlAttribute[0].valueHashCode;
 							int nameHashCode3 = this.m_XmlAttribute[1].nameHashCode;
-							int num16 = this.m_XmlAttribute[1].valueHashCode;
+							int num17 = this.m_XmlAttribute[1].valueHashCode;
 							bool flag85 = valueHashCode4 == -620974005;
 							if (flag85)
 							{
@@ -3848,7 +3852,7 @@ namespace UnityEngine.TextCore
 								}
 								MaterialReferenceManager.AddFontAsset(fontAsset);
 							}
-							bool flag88 = nameHashCode3 == 0 && num16 == 0;
+							bool flag88 = nameHashCode3 == 0 && num17 == 0;
 							if (flag88)
 							{
 								this.m_CurrentMaterial = fontAsset.material;
@@ -3863,7 +3867,7 @@ namespace UnityEngine.TextCore
 									return false;
 								}
 								Material material;
-								bool flag90 = MaterialReferenceManager.TryGetMaterial(num16, out material);
+								bool flag90 = MaterialReferenceManager.TryGetMaterial(num17, out material);
 								if (flag90)
 								{
 									this.m_CurrentMaterial = material;
@@ -3878,7 +3882,7 @@ namespace UnityEngine.TextCore
 									{
 										return false;
 									}
-									MaterialReferenceManager.AddFontMaterial(num16, material);
+									MaterialReferenceManager.AddFontMaterial(num17, material);
 									this.m_CurrentMaterial = material;
 									this.m_CurrentMaterialIndex = MaterialReference.AddMaterialReference(this.m_CurrentMaterial, fontAsset, this.m_MaterialReferences, this.m_MaterialReferenceIndexLookup);
 									this.m_MaterialReferenceStack.Add(this.m_MaterialReferences[this.m_CurrentMaterialIndex]);
@@ -3891,7 +3895,7 @@ namespace UnityEngine.TextCore
 					}
 					else
 					{
-						if (nameHashCode == TagHashCode.MARK)
+						if (tagHashCode == TagHashCode.MARK)
 						{
 							this.m_FontStyleInternal |= FontStyles.Highlight;
 							this.m_FontStyleStack.Add(FontStyles.Highlight);
@@ -3900,9 +3904,9 @@ namespace UnityEngine.TextCore
 							this.m_HighlightColorStack.Add(this.m_HighlightColor);
 							return true;
 						}
-						if (nameHashCode != TagHashCode.PAGE)
+						if (tagHashCode != TagHashCode.PAGE)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						bool flag92 = generationSettings.overflowMode == TextOverflowMode.Page;
 						if (flag92)
@@ -3915,16 +3919,16 @@ namespace UnityEngine.TextCore
 						return true;
 					}
 				}
-				else if (nameHashCode <= TagHashCode.SIZE)
+				else if (tagHashCode <= TagHashCode.SIZE)
 				{
-					if (nameHashCode == TagHashCode.NO_BREAK)
+					if (tagHashCode == TagHashCode.NO_BREAK)
 					{
 						this.m_IsNonBreakingSpace = true;
 						return true;
 					}
-					if (nameHashCode != TagHashCode.SIZE)
+					if (tagHashCode != TagHashCode.SIZE)
 					{
-						goto IL_37DF;
+						goto IL_3827;
 					}
 					float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 					bool flag93 = num11 == -32767f;
@@ -3973,12 +3977,12 @@ namespace UnityEngine.TextCore
 				}
 				else
 				{
-					if (nameHashCode == TagHashCode.SLASH_NO_BREAK)
+					if (tagHashCode == TagHashCode.SLASH_NO_BREAK)
 					{
 						this.m_IsNonBreakingSpace = false;
 						return true;
 					}
-					if (nameHashCode == TagHashCode.SLASH_MARK)
+					if (tagHashCode == TagHashCode.SLASH_MARK)
 					{
 						bool flag96 = (generationSettings.fontStyle & FontStyles.Highlight) != FontStyles.Highlight;
 						if (flag96)
@@ -3992,9 +3996,9 @@ namespace UnityEngine.TextCore
 						}
 						return true;
 					}
-					if (nameHashCode != TagHashCode.SLASH_LINK)
+					if (tagHashCode != TagHashCode.SLASH_LINK)
 					{
-						goto IL_37DF;
+						goto IL_3827;
 					}
 					bool flag98 = this.m_IsParsingText && !this.m_IsCalculatingPreferredValues;
 					if (flag98)
@@ -4009,13 +4013,13 @@ namespace UnityEngine.TextCore
 					return true;
 				}
 			}
-			else if (nameHashCode <= TagHashCode.SCALE)
+			else if (tagHashCode <= TagHashCode.SCALE)
 			{
-				if (nameHashCode <= TagHashCode.ALPHA)
+				if (tagHashCode <= TagHashCode.ALPHA)
 				{
-					if (nameHashCode <= TagHashCode.SLASH_SIZE)
+					if (tagHashCode <= TagHashCode.SLASH_SIZE)
 					{
-						if (nameHashCode == TagHashCode.SLASH_FONT)
+						if (tagHashCode == TagHashCode.SLASH_FONT)
 						{
 							MaterialReference materialReference2 = this.m_MaterialReferenceStack.Remove();
 							this.m_CurrentFontAsset = materialReference2.fontAsset;
@@ -4024,9 +4028,9 @@ namespace UnityEngine.TextCore
 							this.m_FontScale = this.m_CurrentFontSize / (float)this.m_CurrentFontAsset.faceInfo.pointSize * this.m_CurrentFontAsset.faceInfo.scale;
 							return true;
 						}
-						if (nameHashCode != TagHashCode.SLASH_SIZE)
+						if (tagHashCode != TagHashCode.SLASH_SIZE)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						this.m_CurrentFontSize = this.m_SizeStack.Remove();
 						this.m_FontScale = this.m_CurrentFontSize / (float)this.m_CurrentFontAsset.faceInfo.pointSize * this.m_CurrentFontAsset.faceInfo.scale;
@@ -4034,18 +4038,19 @@ namespace UnityEngine.TextCore
 					}
 					else
 					{
-						if (nameHashCode == TagHashCode.ALIGN)
+						if (tagHashCode == TagHashCode.ALIGN)
 						{
 							TagHashCode valueHashCode5 = (TagHashCode)this.m_XmlAttribute[0].valueHashCode;
-							if (valueHashCode5 <= TagHashCode.LEFT)
+							TagHashCode tagHashCode4 = valueHashCode5;
+							if (tagHashCode4 <= TagHashCode.LEFT)
 							{
-								if (valueHashCode5 == TagHashCode.CENTER)
+								if (tagHashCode4 == TagHashCode.CENTER)
 								{
 									this.m_LineJustification = TextAlignment.MiddleCenter;
 									this.m_LineJustificationStack.Add(this.m_LineJustification);
 									return true;
 								}
-								if (valueHashCode5 == TagHashCode.LEFT)
+								if (tagHashCode4 == TagHashCode.LEFT)
 								{
 									this.m_LineJustification = TextAlignment.MiddleLeft;
 									this.m_LineJustificationStack.Add(this.m_LineJustification);
@@ -4054,19 +4059,19 @@ namespace UnityEngine.TextCore
 							}
 							else
 							{
-								if (valueHashCode5 == TagHashCode.FLUSH)
+								if (tagHashCode4 == TagHashCode.FLUSH)
 								{
 									this.m_LineJustification = TextAlignment.MiddleFlush;
 									this.m_LineJustificationStack.Add(this.m_LineJustification);
 									return true;
 								}
-								if (valueHashCode5 == TagHashCode.RIGHT)
+								if (tagHashCode4 == TagHashCode.RIGHT)
 								{
 									this.m_LineJustification = TextAlignment.MiddleRight;
 									this.m_LineJustificationStack.Add(this.m_LineJustification);
 									return true;
 								}
-								if (valueHashCode5 == TagHashCode.JUSTIFIED)
+								if (tagHashCode4 == TagHashCode.JUSTIFIED)
 								{
 									this.m_LineJustification = TextAlignment.MiddleJustified;
 									this.m_LineJustificationStack.Add(this.m_LineJustification);
@@ -4075,9 +4080,9 @@ namespace UnityEngine.TextCore
 							}
 							return false;
 						}
-						if (nameHashCode != TagHashCode.ALPHA)
+						if (tagHashCode != TagHashCode.ALPHA)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						bool flag100 = this.m_XmlAttribute[0].valueLength != 3;
 						if (flag100)
@@ -4088,13 +4093,13 @@ namespace UnityEngine.TextCore
 						return true;
 					}
 				}
-				else if (nameHashCode <= TagHashCode.CLASS)
+				else if (tagHashCode <= TagHashCode.CLASS)
 				{
-					if (nameHashCode != TagHashCode.COLOR)
+					if (tagHashCode != TagHashCode.COLOR)
 					{
-						if (nameHashCode != TagHashCode.CLASS)
+						if (tagHashCode != TagHashCode.CLASS)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						return false;
 					}
@@ -4129,17 +4134,18 @@ namespace UnityEngine.TextCore
 							return true;
 						}
 						TagHashCode valueHashCode6 = (TagHashCode)this.m_XmlAttribute[0].valueHashCode;
-						if (valueHashCode6 <= TagHashCode.RED)
+						TagHashCode tagHashCode5 = valueHashCode6;
+						if (tagHashCode5 <= TagHashCode.RED)
 						{
-							if (valueHashCode6 <= TagHashCode.ORANGE)
+							if (tagHashCode5 <= TagHashCode.ORANGE)
 							{
-								if (valueHashCode6 == TagHashCode.PURPLE)
+								if (tagHashCode5 == TagHashCode.PURPLE)
 								{
 									this.m_HtmlColor = new Color32(160, 32, 240, byte.MaxValue);
 									this.m_ColorStack.Add(this.m_HtmlColor);
 									return true;
 								}
-								if (valueHashCode6 == TagHashCode.ORANGE)
+								if (tagHashCode5 == TagHashCode.ORANGE)
 								{
 									this.m_HtmlColor = new Color32(byte.MaxValue, 128, 0, byte.MaxValue);
 									this.m_ColorStack.Add(this.m_HtmlColor);
@@ -4148,13 +4154,13 @@ namespace UnityEngine.TextCore
 							}
 							else
 							{
-								if (valueHashCode6 == TagHashCode.YELLOW)
+								if (tagHashCode5 == TagHashCode.YELLOW)
 								{
 									this.m_HtmlColor = Color.yellow;
 									this.m_ColorStack.Add(this.m_HtmlColor);
 									return true;
 								}
-								if (valueHashCode6 == TagHashCode.RED)
+								if (tagHashCode5 == TagHashCode.RED)
 								{
 									this.m_HtmlColor = Color.red;
 									this.m_ColorStack.Add(this.m_HtmlColor);
@@ -4162,15 +4168,15 @@ namespace UnityEngine.TextCore
 								}
 							}
 						}
-						else if (valueHashCode6 <= TagHashCode.BLACK)
+						else if (tagHashCode5 <= TagHashCode.BLACK)
 						{
-							if (valueHashCode6 == TagHashCode.BLUE)
+							if (tagHashCode5 == TagHashCode.BLUE)
 							{
 								this.m_HtmlColor = Color.blue;
 								this.m_ColorStack.Add(this.m_HtmlColor);
 								return true;
 							}
-							if (valueHashCode6 == TagHashCode.BLACK)
+							if (tagHashCode5 == TagHashCode.BLACK)
 							{
 								this.m_HtmlColor = Color.black;
 								this.m_ColorStack.Add(this.m_HtmlColor);
@@ -4179,13 +4185,13 @@ namespace UnityEngine.TextCore
 						}
 						else
 						{
-							if (valueHashCode6 == TagHashCode.GREEN)
+							if (tagHashCode5 == TagHashCode.GREEN)
 							{
 								this.m_HtmlColor = Color.green;
 								this.m_ColorStack.Add(this.m_HtmlColor);
 								return true;
 							}
-							if (valueHashCode6 == TagHashCode.WHITE)
+							if (tagHashCode5 == TagHashCode.WHITE)
 							{
 								this.m_HtmlColor = Color.white;
 								this.m_ColorStack.Add(this.m_HtmlColor);
@@ -4197,16 +4203,16 @@ namespace UnityEngine.TextCore
 				}
 				else
 				{
-					if (nameHashCode == TagHashCode.SLASH_LINE_INDENT)
+					if (tagHashCode == TagHashCode.SLASH_LINE_INDENT)
 					{
 						this.m_TagLineIndent = 0f;
 						return true;
 					}
-					if (nameHashCode != TagHashCode.SPACE)
+					if (tagHashCode != TagHashCode.SPACE)
 					{
-						if (nameHashCode != TagHashCode.SCALE)
+						if (tagHashCode != TagHashCode.SCALE)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 						bool flag105 = num11 == -32767f;
@@ -4242,15 +4248,15 @@ namespace UnityEngine.TextCore
 					}
 				}
 			}
-			else if (nameHashCode <= TagHashCode.MATERIAL)
+			else if (tagHashCode <= TagHashCode.MATERIAL)
 			{
-				if (nameHashCode <= TagHashCode.SLASH_SMALLCAPS)
+				if (tagHashCode <= TagHashCode.SLASH_SMALLCAPS)
 				{
-					if (nameHashCode != TagHashCode.WIDTH)
+					if (tagHashCode != TagHashCode.WIDTH)
 					{
-						if (nameHashCode != TagHashCode.SLASH_SMALLCAPS)
+						if (tagHashCode != TagHashCode.SLASH_SMALLCAPS)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
 						bool flag107 = (generationSettings.fontStyle & FontStyles.SmallCaps) != FontStyles.SmallCaps;
 						if (flag107)
@@ -4287,19 +4293,19 @@ namespace UnityEngine.TextCore
 				}
 				else
 				{
-					if (nameHashCode == TagHashCode.SLASH_LINE_HEIGHT)
+					if (tagHashCode == TagHashCode.SLASH_LINE_HEIGHT)
 					{
 						this.m_LineHeight = -32767f;
 						return true;
 					}
-					if (nameHashCode != TagHashCode.ALLCAPS)
+					if (tagHashCode != TagHashCode.ALLCAPS)
 					{
-						if (nameHashCode != TagHashCode.MATERIAL)
+						if (tagHashCode != TagHashCode.MATERIAL)
 						{
-							goto IL_37DF;
+							goto IL_3827;
 						}
-						int num16 = this.m_XmlAttribute[0].valueHashCode;
-						bool flag110 = num16 == -620974005;
+						int num17 = this.m_XmlAttribute[0].valueHashCode;
+						bool flag110 = num17 == -620974005;
 						if (flag110)
 						{
 							this.m_CurrentMaterial = this.m_MaterialReferences[0].material;
@@ -4308,7 +4314,7 @@ namespace UnityEngine.TextCore
 							return true;
 						}
 						Material material;
-						bool flag111 = MaterialReferenceManager.TryGetMaterial(num16, out material);
+						bool flag111 = MaterialReferenceManager.TryGetMaterial(num17, out material);
 						if (flag111)
 						{
 							this.m_CurrentMaterial = material;
@@ -4323,7 +4329,7 @@ namespace UnityEngine.TextCore
 							{
 								return false;
 							}
-							MaterialReferenceManager.AddFontMaterial(num16, material);
+							MaterialReferenceManager.AddFontMaterial(num17, material);
 							this.m_CurrentMaterial = material;
 							this.m_CurrentMaterialIndex = MaterialReference.AddMaterialReference(this.m_CurrentMaterial, this.m_CurrentFontAsset, this.m_MaterialReferences, this.m_MaterialReferenceIndexLookup);
 							this.m_MaterialReferenceStack.Add(this.m_MaterialReferences[this.m_CurrentMaterialIndex]);
@@ -4332,35 +4338,35 @@ namespace UnityEngine.TextCore
 					}
 				}
 			}
-			else if (nameHashCode <= TagHashCode.SLASH_ALIGN)
+			else if (tagHashCode <= TagHashCode.SLASH_ALIGN)
 			{
-				if (nameHashCode == TagHashCode.SLASH_COLOR)
+				if (tagHashCode == TagHashCode.SLASH_COLOR)
 				{
 					this.m_HtmlColor = this.m_ColorStack.Remove();
 					return true;
 				}
-				if (nameHashCode != TagHashCode.SLASH_ALIGN)
+				if (tagHashCode != TagHashCode.SLASH_ALIGN)
 				{
-					goto IL_37DF;
+					goto IL_3827;
 				}
 				this.m_LineJustification = this.m_LineJustificationStack.Remove();
 				return true;
 			}
 			else
 			{
-				if (nameHashCode == TagHashCode.SLASH_WIDTH)
+				if (tagHashCode == TagHashCode.SLASH_WIDTH)
 				{
 					this.m_Width = -1f;
 					return true;
 				}
-				if (nameHashCode == TagHashCode.SLASH_SCALE)
+				if (tagHashCode == TagHashCode.SLASH_SCALE)
 				{
 					this.m_IsFxMatrixSet = false;
 					return true;
 				}
-				if (nameHashCode != TagHashCode.VERTICAL_OFFSET)
+				if (tagHashCode != TagHashCode.VERTICAL_OFFSET)
 				{
-					goto IL_37DF;
+					goto IL_3827;
 				}
 				float num11 = TextGeneratorUtilities.ConvertToFloat(this.m_RichTextTag, this.m_XmlAttribute[0].valueStartIndex, this.m_XmlAttribute[0].valueLength);
 				bool flag113 = num11 == -32767f;
@@ -4385,7 +4391,7 @@ namespace UnityEngine.TextCore
 			this.m_FontStyleInternal |= FontStyles.UpperCase;
 			this.m_FontStyleStack.Add(FontStyles.UpperCase);
 			return true;
-			IL_37DF:
+			IL_3827:
 			return false;
 		}
 
@@ -4936,7 +4942,7 @@ namespace UnityEngine.TextCore
 						bool flag34 = !TextSettings.warningsDisabled;
 						if (flag34)
 						{
-							Debug.LogWarning("Character with ASCII value of " + num7 + " was not found in the Font Asset Glyph Table. It was replaced by a space.");
+							Debug.LogWarning("Character with ASCII value of " + num7.ToString() + " was not found in the Font Asset Glyph Table. It was replaced by a space.");
 						}
 					}
 				}

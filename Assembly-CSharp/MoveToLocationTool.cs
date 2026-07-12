@@ -35,6 +35,10 @@ public class MoveToLocationTool : InterfaceTool
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
+		if (this.targetNavigator != null && new_tool == SelectTool.Instance)
+		{
+			SelectTool.Instance.SelectNextFrame(this.targetNavigator.GetComponent<KSelectable>(), true);
+		}
 		this.visualizer.gameObject.SetActive(false);
 	}
 

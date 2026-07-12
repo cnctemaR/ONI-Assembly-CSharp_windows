@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei;
 using Klei.AI;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -92,12 +93,29 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		{
 			default_state = this.moveto;
 			base.Target(this.vomiter);
-			this.root.ToggleAnims("anim_emotes_default_kanim", 0f);
-			this.moveto.TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk).ToggleAnims("anim_loco_vomiter_kanim", 0f)
+			this.root.ToggleAnims("anim_emotes_default_kanim", 0f, "");
+			this.moveto.TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk, null).ToggleAnims("anim_loco_vomiter_kanim", 0f, "")
 				.MoveTo((VomitChore.StatesInstance smi) => smi.GetVomitCell(), this.vomit, this.vomit, false);
-			this.vomit.DefaultState(this.vomit.buildup).ToggleAnims("anim_vomit_kanim", 0f).ToggleStatusItem((VomitChore.StatesInstance smi) => smi.statusItem, null)
+			this.vomit.DefaultState(this.vomit.buildup).ToggleAnims("anim_vomit_kanim", 0f, "").ToggleStatusItem((VomitChore.StatesInstance smi) => smi.statusItem, null)
 				.DoNotification((VomitChore.StatesInstance smi) => smi.notification)
-				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping);
+				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
+				.Enter(delegate(VomitChore.StatesInstance smi)
+				{
+					if (smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance).value > 0f)
+					{
+						smi.master.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, null);
+					}
+				})
+				.Exit(delegate(VomitChore.StatesInstance smi)
+				{
+					smi.master.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
+					float num = Mathf.Min(smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance.Id).value, 20f);
+					smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance.Id).ApplyDelta(-num);
+					if (num >= 1f)
+					{
+						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, Mathf.FloorToInt(num).ToString() + UI.UNITSUFFIXES.RADIATION.RADS, smi.master.transform, 1.5f, false);
+					}
+				});
 			this.vomit.buildup.PlayAnim("vomit_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.vomit.release);
 			this.vomit.release.ToggleEffect("Vomiting").PlayAnim("vomit_loop", KAnim.PlayMode.Once).Update("SpawnDirtyWater", delegate(VomitChore.StatesInstance smi, float dt)
 			{

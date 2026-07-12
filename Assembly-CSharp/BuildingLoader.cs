@@ -42,7 +42,6 @@ public class BuildingLoader : KMonoBehaviour
 		gameObject.AddOrGet<BuildingUnderConstruction>();
 		gameObject.AddOrGet<Constructable>();
 		gameObject.AddComponent<Storage>().doDiseaseTransfer = false;
-		gameObject.AddOrGet<Cancellable>();
 		gameObject.AddOrGet<Prioritizable>();
 		gameObject.AddOrGet<Notifier>();
 		gameObject.AddOrGet<SaveLoadRoot>();
@@ -153,8 +152,13 @@ public class BuildingLoader : KMonoBehaviour
 			gameObject.GetComponent<PrimaryElement>().MassPerUnit += def.Mass[i];
 		}
 		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "UnderConstruction");
+		kprefabID.AddTag(GameTags.UnderConstruction, false);
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, def.CheckRequiresBuildingCellVisualizer());
 		gameObject.GetComponent<Constructable>().SetWorkTime(def.ConstructionTime);
+		if (def.Cancellable)
+		{
+			gameObject.AddOrGet<Cancellable>();
+		}
 		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations > PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
@@ -172,6 +176,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		Assets.AddPrefab(kprefabID);
 		gameObject.PreInit();
+		GeneratedBuildings.InitializeHighEnergyParticlePorts(gameObject, def);
 		GeneratedBuildings.InitializeLogicPorts(gameObject, def);
 		return gameObject;
 	}
@@ -271,6 +276,7 @@ public class BuildingLoader : KMonoBehaviour
 		kprefabID.defaultLayer = num;
 		Assets.AddPrefab(kprefabID);
 		go.PreInit();
+		GeneratedBuildings.InitializeHighEnergyParticlePorts(go, def);
 		GeneratedBuildings.InitializeLogicPorts(go, def);
 		return go;
 	}
@@ -305,6 +311,7 @@ public class BuildingLoader : KMonoBehaviour
 			GeneratedBuildings.RegisterSingleLogicInputPort(gameObject);
 		}
 		gameObject.PreInit();
+		GeneratedBuildings.InitializeHighEnergyParticlePorts(gameObject, def);
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 		GeneratedBuildings.InitializeLogicPorts(gameObject, def);
 		return gameObject;

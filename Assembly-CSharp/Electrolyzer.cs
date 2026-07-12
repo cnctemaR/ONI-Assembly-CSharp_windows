@@ -37,7 +37,7 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 		get
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
-			num = Grid.CellAbove(num);
+			num = Grid.OffsetCell(num, this.emissionOffset);
 			return !GameUtil.FloodFillCheck<Electrolyzer>(new Func<int, Electrolyzer, bool>(Electrolyzer.OverPressure), this, num, 3, true, true);
 		}
 	}
@@ -52,6 +52,9 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 
 	[SerializeField]
 	public bool hasMeter = true;
+
+	[SerializeField]
+	public CellOffset emissionOffset = CellOffset.none;
 
 	[MyCmpAdd]
 	private Storage storage;

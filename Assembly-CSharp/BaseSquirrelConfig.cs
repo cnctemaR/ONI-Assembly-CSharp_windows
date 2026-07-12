@@ -48,28 +48,28 @@ public static class BaseSquirrelConfig
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
-			.Add(new TrappedStates.Def(), true)
-			.Add(new IncubatingStates.Def(), true)
-			.Add(new BaggedStates.Def(), true)
-			.Add(new FallStates.Def(), true)
-			.Add(new StunnedStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new FleeStates.Def(), true)
-			.Add(new AttackStates.Def(), true)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
+			.Add(new TrappedStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new BaggedStates.Def(), true, -1)
+			.Add(new FallStates.Def(), true, -1)
+			.Add(new StunnedStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new FleeStates.Def(), true, -1)
+			.Add(new AttackStates.Def("eat_pre", "eat_pst", null), true, -1)
 			.PushInterruptGroup()
-			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new RanchedStates.Def(), true)
-			.Add(new LayEggStates.Def(), true)
-			.Add(new TreeClimbStates.Def(), true)
-			.Add(new EatStates.Def(), true)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
-			.Add(new CallAdultStates.Def(), true)
-			.Add(new SeedPlantingStates.Def(), true)
+			.Add(new CreatureSleepStates.Def(), true, -1)
+			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new TreeClimbStates.Def(), true, -1)
+			.Add(new EatStates.Def(), true, -1)
+			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new CallAdultStates.Def(), true, -1)
+			.Add(new SeedPlantingStates.Def(), true, -1)
 			.PopInterruptGroup()
-			.Add(new IdleStates.Def(), true);
+			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.SquirrelSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

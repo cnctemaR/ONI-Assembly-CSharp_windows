@@ -31,9 +31,16 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		if (component.Replanted)
 		{
 			component2.consumptionRate = this.consumptionRate;
-			return;
 		}
-		component2.consumptionRate = this.consumptionRate * 0.25f;
+		else
+		{
+			component2.consumptionRate = this.consumptionRate * 0.25f;
+		}
+		if (this.radiationEmitter != null)
+		{
+			this.radiationEmitter.emitRads = 48f;
+			this.radiationEmitter.Refresh();
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -59,6 +66,14 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		{
 			new Descriptor(UI.GAMEOBJECTEFFECTS.COLDBREATHER, UI.GAMEOBJECTEFFECTS.TOOLTIPS.COLDBREATHER, Descriptor.DescriptorType.Effect, false)
 		};
+	}
+
+	private void SetEmitting(bool emitting)
+	{
+		if (this.radiationEmitter != null)
+		{
+			this.radiationEmitter.SetEmitting(emitting);
+		}
 	}
 
 	private void Exhale()
@@ -118,6 +133,9 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	[MyCmpReq]
 	private ElementConsumer elementConsumer;
 
+	[MyCmpGet]
+	private RadiationEmitter radiationEmitter;
+
 	[MyCmpReq]
 	private ReceptacleMonitor receptacleMonitor;
 
@@ -154,9 +172,9 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			default_state = this.grow;
-			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022, true, null);
 			this.dead.ToggleStatusItem(CREATURES.STATUSITEMS.DEAD.NAME, CREATURES.STATUSITEMS.DEAD.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).Enter(delegate(ColdBreather.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
@@ -183,12 +201,17 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 				.Enter(delegate(ColdBreather.StatesInstance smi)
 				{
 					smi.master.elementConsumer.EnableConsumption(true);
+					smi.master.SetEmitting(true);
 				})
 				.Exit(delegate(ColdBreather.StatesInstance smi)
 				{
 					smi.master.elementConsumer.EnableConsumption(false);
+					smi.master.SetEmitting(false);
 				});
-			this.alive.wilting.PlayAnim("wilt1").EventTransition(GameHashes.WiltRecover, this.alive.mature, (ColdBreather.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
+			this.alive.wilting.PlayAnim("wilt1").EventTransition(GameHashes.WiltRecover, this.alive.mature, (ColdBreather.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).Enter(delegate(ColdBreather.StatesInstance smi)
+			{
+				smi.master.SetEmitting(false);
+			});
 		}
 
 		public GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.State grow;

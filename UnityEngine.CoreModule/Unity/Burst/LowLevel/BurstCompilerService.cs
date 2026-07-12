@@ -7,8 +7,8 @@ using UnityEngine.Bindings;
 
 namespace Unity.Burst.LowLevel
 {
-	[NativeHeader("Runtime/Burst/BurstDelegateCache.h")]
 	[StaticAccessor("BurstCompilerService::Get()", StaticAccessorType.Arrow)]
+	[NativeHeader("Runtime/Burst/BurstDelegateCache.h")]
 	[NativeHeader("Runtime/Burst/Burst.h")]
 	internal static class BurstCompilerService
 	{
@@ -50,6 +50,13 @@ namespace Unity.Burst.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern uint GetCurrentExecutionMode();
 
+		[FreeFunction("DefaultBurstLogCallback", true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void Log(void* userData, BurstCompilerService.BurstLogType logType, byte* message, byte* filename, int lineNumber);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool LoadBurstLibrary(string fullPathToLibBurstGenerated);
+
 		public static void Initialize(string folderRuntime, BurstCompilerService.ExtractCompilerFlags extractCompilerFlags)
 		{
 			bool flag = folderRuntime == null;
@@ -79,5 +86,12 @@ namespace Unity.Burst.LowLevel
 		}
 
 		public delegate bool ExtractCompilerFlags(Type jobType, out string flags);
+
+		public enum BurstLogType
+		{
+			Info,
+			Warning,
+			Error
+		}
 	}
 }

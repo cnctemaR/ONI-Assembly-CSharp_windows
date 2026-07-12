@@ -25,13 +25,13 @@ public class Weapon : KMonoBehaviour
 		this.properties.effects.Add(new AttackEffect(effectID, probability));
 	}
 
-	public void AttackArea(Vector3 centerPoint)
+	public int AttackArea(Vector3 centerPoint)
 	{
 		Vector3 vector = Vector3.zero;
 		this.alignment = base.GetComponent<FactionAlignment>();
 		if (this.alignment == null)
 		{
-			return;
+			return 0;
 		}
 		List<GameObject> list = new List<GameObject>();
 		foreach (Health health in Components.Health.Items)
@@ -51,6 +51,7 @@ public class Weapon : KMonoBehaviour
 			}
 		}
 		this.AttackTargets(list.ToArray());
+		return list.Count;
 	}
 
 	public void AttackTarget(GameObject target)

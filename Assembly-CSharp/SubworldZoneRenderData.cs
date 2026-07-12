@@ -10,11 +10,70 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		ShaderReloader.Register(new global::System.Action(this.OnShadersReloaded));
 		this.GenerateTexture();
+		this.OnActiveWorldChanged();
+		Game.Instance.Subscribe(1983128072, delegate(object worlds)
+		{
+			this.OnActiveWorldChanged();
+		});
+	}
+
+	public void OnActiveWorldChanged()
+	{
+		byte[] rawTextureData = this.colourTex.GetRawTextureData();
+		byte[] rawTextureData2 = this.indexTex.GetRawTextureData();
+		WorldDetailSave clusterDetailSave = SaveLoader.Instance.clusterDetailSave;
+		Vector2 zero = Vector2.zero;
+		for (int i = 0; i < clusterDetailSave.overworldCells.Count; i++)
+		{
+			WorldDetailSave.OverworldCell overworldCell = clusterDetailSave.overworldCells[i];
+			Polygon poly = overworldCell.poly;
+			zero.y = (float)((int)Mathf.Floor(poly.bounds.yMin));
+			while (zero.y < Mathf.Ceil(poly.bounds.yMax))
+			{
+				zero.x = (float)((int)Mathf.Floor(poly.bounds.xMin));
+				while (zero.x < Mathf.Ceil(poly.bounds.xMax))
+				{
+					if (poly.Contains(zero))
+					{
+						int num = Grid.XYToCell((int)zero.x, (int)zero.y);
+						if (Grid.IsValidCell(num))
+						{
+							if (Grid.IsActiveWorld(num))
+							{
+								rawTextureData2[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)overworldCell.zoneType));
+								Color32 color = this.zoneColours[(int)overworldCell.zoneType];
+								rawTextureData[num * 3] = color.r;
+								rawTextureData[num * 3 + 1] = color.g;
+								rawTextureData[num * 3 + 2] = color.b;
+							}
+							else
+							{
+								rawTextureData2[num] = byte.MaxValue;
+								Color32 color2 = this.zoneColours[7];
+								rawTextureData[num * 3] = color2.r;
+								rawTextureData[num * 3 + 1] = color2.g;
+								rawTextureData[num * 3 + 2] = color2.b;
+							}
+						}
+					}
+					zero.x += 1f;
+				}
+				zero.y += 1f;
+			}
+		}
+		this.colourTex.LoadRawTextureData(rawTextureData);
+		this.indexTex.LoadRawTextureData(rawTextureData2);
+		this.colourTex.Apply();
+		this.indexTex.Apply();
+		this.OnShadersReloaded();
 	}
 
 	public void GenerateTexture()
 	{
+		byte[] array = new byte[Grid.WidthInCells * Grid.HeightInCells];
+		byte[] array2 = new byte[Grid.WidthInCells * Grid.HeightInCells * 3];
 		this.colourTex = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, TextureFormat.RGB24, false);
 		this.colourTex.name = "SubworldRegionColourData";
 		this.colourTex.filterMode = FilterMode.Bilinear;
@@ -25,14 +84,24 @@ public class SubworldZoneRenderData : KMonoBehaviour
 		this.indexTex.filterMode = FilterMode.Point;
 		this.indexTex.wrapMode = TextureWrapMode.Clamp;
 		this.indexTex.anisoLevel = 0;
-		byte[] array = new byte[Grid.WidthInCells * Grid.HeightInCells * 3];
-		byte[] array2 = new byte[Grid.WidthInCells * Grid.HeightInCells];
-		this.worldZoneTypes = new SubWorld.ZoneType[Grid.CellCount];
-		WorldDetailSave worldDetailSave = SaveLoader.Instance.worldDetailSave;
-		Vector2 zero = Vector2.zero;
-		for (int i = 0; i < worldDetailSave.overworldCells.Count; i++)
+		for (int i = 0; i < Grid.CellCount; i++)
 		{
-			WorldDetailSave.OverworldCell overworldCell = worldDetailSave.overworldCells[i];
+			array[i] = byte.MaxValue;
+			Color32 color = this.zoneColours[7];
+			array2[i * 3] = color.r;
+			array2[i * 3 + 1] = color.g;
+			array2[i * 3 + 2] = color.b;
+		}
+		this.colourTex.LoadRawTextureData(array2);
+		this.indexTex.LoadRawTextureData(array);
+		this.colourTex.Apply();
+		this.indexTex.Apply();
+		this.worldZoneTypes = new SubWorld.ZoneType[Grid.CellCount];
+		WorldDetailSave clusterDetailSave = SaveLoader.Instance.clusterDetailSave;
+		Vector2 zero = Vector2.zero;
+		for (int j = 0; j < clusterDetailSave.overworldCells.Count; j++)
+		{
+			WorldDetailSave.OverworldCell overworldCell = clusterDetailSave.overworldCells[j];
 			Polygon poly = overworldCell.poly;
 			zero.y = (float)((int)Mathf.Floor(poly.bounds.yMin));
 			while (zero.y < Mathf.Ceil(poly.bounds.yMax))
@@ -42,16 +111,11 @@ public class SubworldZoneRenderData : KMonoBehaviour
 				{
 					if (poly.Contains(zero))
 					{
-						int num = (int)(zero.x + zero.y * (float)Grid.WidthInCells);
-						array2[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)overworldCell.zoneType));
-						Color32 color = this.zoneColours[(int)overworldCell.zoneType];
-						array[num * 3] = color.r;
-						array[num * 3 + 1] = color.g;
-						array[num * 3 + 2] = color.b;
-						int num2 = Grid.XYToCell((int)zero.x, (int)zero.y);
-						if (Grid.IsValidCell(num2))
+						int num = Grid.XYToCell((int)zero.x, (int)zero.y);
+						if (Grid.IsValidCell(num))
 						{
-							this.worldZoneTypes[num2] = overworldCell.zoneType;
+							array[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)overworldCell.zoneType));
+							this.worldZoneTypes[num] = overworldCell.zoneType;
 						}
 					}
 					zero.x += 1f;
@@ -59,13 +123,7 @@ public class SubworldZoneRenderData : KMonoBehaviour
 				zero.y += 1f;
 			}
 		}
-		this.colourTex.LoadRawTextureData(array);
-		this.indexTex.LoadRawTextureData(array2);
-		this.colourTex.Apply();
-		this.indexTex.Apply();
-		this.OnShadersReloaded();
-		ShaderReloader.Register(new global::System.Action(this.OnShadersReloaded));
-		this.InitSimZones(array2);
+		this.InitSimZones(array);
 	}
 
 	private void OnShadersReloaded()
@@ -85,14 +143,14 @@ public class SubworldZoneRenderData : KMonoBehaviour
 
 	private SubWorld.ZoneType GetSubWorldZoneType(Vector2I pos)
 	{
-		WorldDetailSave worldDetailSave = SaveLoader.Instance.worldDetailSave;
-		if (worldDetailSave != null)
+		WorldDetailSave clusterDetailSave = SaveLoader.Instance.clusterDetailSave;
+		if (clusterDetailSave != null)
 		{
-			for (int i = 0; i < worldDetailSave.overworldCells.Count; i++)
+			for (int i = 0; i < clusterDetailSave.overworldCells.Count; i++)
 			{
-				if (worldDetailSave.overworldCells[i].poly.Contains(pos))
+				if (clusterDetailSave.overworldCells[i].poly.Contains(pos))
 				{
-					return worldDetailSave.overworldCells[i].zoneType;
+					return clusterDetailSave.overworldCells[i].zoneType;
 				}
 			}
 		}
@@ -102,13 +160,10 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	private Color32 GetZoneColor(SubWorld.ZoneType zone_type)
 	{
 		Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 3);
-		global::Debug.Assert(zone_type < (SubWorld.ZoneType)this.zoneColours.Length, string.Concat(new object[]
-		{
-			"Need to add more colours to handle this zone",
-			(int)zone_type,
-			"<",
-			this.zoneColours.Length
-		}));
+		bool flag = zone_type < (SubWorld.ZoneType)this.zoneColours.Length;
+		string text = "Need to add more colours to handle this zone";
+		int num = (int)zone_type;
+		global::Debug.Assert(flag, text + num.ToString() + "<" + this.zoneColours.Length.ToString());
 		return color;
 	}
 
@@ -152,6 +207,12 @@ public class SubworldZoneRenderData : KMonoBehaviour
 		new Color32(byte.MaxValue, 0, 0, 7),
 		new Color32(201, 201, 151, 8),
 		new Color32(236, 90, 110, 9),
-		new Color32(110, 236, 110, 10)
+		new Color32(110, 236, 110, 10),
+		new Color32(145, 198, 213, 11),
+		new Color32(145, 198, 213, 12),
+		new Color32(145, 198, 213, 13),
+		new Color32(173, 222, 212, 14)
 	};
+
+	private const int NUM_COLOUR_BYTES = 3;
 }

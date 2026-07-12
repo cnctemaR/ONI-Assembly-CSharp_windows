@@ -382,7 +382,7 @@ public class BuildMenu : KScreen
 			((this.selectedBuilding.BuildingComplete.GetComponent<Wire>() != null) ? WireBuildTool.Instance : UtilityBuildTool.Instance).Activate(this.selectedBuilding, getSelectedElementAsList);
 			return;
 		}
-		BuildTool.Instance.Activate(this.selectedBuilding, this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList, null);
+		BuildTool.Instance.Activate(this.selectedBuilding, this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList);
 	}
 
 	private void OnBuildingSelected(BuildingDef def)
@@ -595,7 +595,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("MetalTile", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("GlassTile", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("BunkerTile", global::Action.BuildMenuKeyB),
-				new BuildMenu.BuildingInfo("CarpetTile", global::Action.BuildMenuKeyL)
+				new BuildMenu.BuildingInfo("CarpetTile", global::Action.BuildMenuKeyL),
+				new BuildMenu.BuildingInfo("ExobaseHeadquarters", global::Action.BuildMenuKeyP)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Ladders"), "icon_category_base", global::Action.BuildCategoryLadders, KKeyCode.A, new List<BuildMenu.BuildingInfo>
 			{
@@ -625,6 +626,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("ResearchCenter", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("AdvancedResearchCenter", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("CosmicResearchCenter", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("NuclearResearchCenter", global::Action.BuildMenuKeyN),
 				new BuildMenu.BuildingInfo("Telescope", global::Action.BuildMenuKeyT)
 			})
 		}),
@@ -678,7 +680,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo(ShowerConfig.ID, global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("WashBasin", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("WashSink", global::Action.BuildMenuKeyW),
-				new BuildMenu.BuildingInfo("HandSanitizer", global::Action.BuildMenuKeyA)
+				new BuildMenu.BuildingInfo("HandSanitizer", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("DecontaminationShower", global::Action.BuildMenuKeyD)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Furniture"), "icon_category_furniture", global::Action.BuildCategoryFurniture, KKeyCode.F, new List<BuildMenu.BuildingInfo>
 			{
@@ -735,6 +738,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("ManualGenerator", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("Generator", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("WoodGasGenerator", global::Action.BuildMenuKeyW),
+				new BuildMenu.BuildingInfo("NuclearReactor", global::Action.BuildMenuKeyN),
 				new BuildMenu.BuildingInfo("HydrogenGenerator", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("MethaneGenerator", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("PetroleumGenerator", global::Action.BuildMenuKeyR),
@@ -778,7 +782,10 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("LiquidVent", global::Action.BuildMenuKeyV),
 				new BuildMenu.BuildingInfo("LiquidFilter", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("LiquidConduitPreferentialFlow", global::Action.BuildMenuKeyW),
-				new BuildMenu.BuildingInfo("LiquidConduitOverflow", global::Action.BuildMenuKeyR)
+				new BuildMenu.BuildingInfo("LiquidConduitOverflow", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("LiquidLimitValve", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("ModularLaunchpadPortLiquid", global::Action.BuildMenuKeyM),
+				new BuildMenu.BuildingInfo("ModularLaunchpadPortLiquidUnloader", global::Action.BuildMenuKeyU)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Ventilation Structures"), "icon_category_ventilation", global::Action.BuildCategoryVentilationStructures, KKeyCode.V, new List<BuildMenu.BuildingInfo>
 			{
@@ -792,7 +799,10 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("GasBottler", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("BottleEmptierGas", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("GasConduitPreferentialFlow", global::Action.BuildMenuKeyW),
-				new BuildMenu.BuildingInfo("GasConduitOverflow", global::Action.BuildMenuKeyR)
+				new BuildMenu.BuildingInfo("GasConduitOverflow", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("GasLimitValve", global::Action.BuildMenuKeyL),
+				new BuildMenu.BuildingInfo("ModularLaunchpadPortGas", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("ModularLaunchpadPortGasUnloader", global::Action.BuildMenuKeyU)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Industrial"), "icon_category_refinery", global::Action.Plan5, KKeyCode.None, new List<BuildMenu.DisplayInfo>
@@ -800,6 +810,7 @@ public class BuildMenu : KScreen
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Oxygen"), "icon_category_oxygen", global::Action.BuildCategoryOxygen, KKeyCode.X, new List<BuildMenu.BuildingInfo>
 			{
 				new BuildMenu.BuildingInfo("MineralDeoxidizer", global::Action.BuildMenuKeyX),
+				new BuildMenu.BuildingInfo("SublimationStation", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("AlgaeHabitat", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("AirFilter", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("CO2Scrubber", global::Action.BuildMenuKeyC),
@@ -816,7 +827,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("LiquidConditioner", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("OreScrubber", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("ThermalBlock", global::Action.BuildMenuKeyF),
-				new BuildMenu.BuildingInfo("ExteriorWall", global::Action.BuildMenuKeyD)
+				new BuildMenu.BuildingInfo("ExteriorWall", global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo("HighEnergyParticleRedirector", global::Action.BuildMenuKeyP)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Refining"), "icon_category_refinery", global::Action.BuildCategoryRefining, KKeyCode.R, new List<BuildMenu.BuildingInfo>
 			{
@@ -824,6 +836,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("AlgaeDistillery", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("EthanolDistillery", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("RockCrusher", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("SludgePress", global::Action.BuildMenuKeyP),
 				new BuildMenu.BuildingInfo("Kiln", global::Action.BuildMenuKeyZ),
 				new BuildMenu.BuildingInfo("OilWellCap", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("OilRefinery", global::Action.BuildMenuKeyR),
@@ -831,7 +844,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("MetalRefinery", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("GlassForge", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("OxyliteRefinery", global::Action.BuildMenuKeyO),
-				new BuildMenu.BuildingInfo("SupermaterialRefinery", global::Action.BuildMenuKeyS)
+				new BuildMenu.BuildingInfo("SupermaterialRefinery", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("UraniumCentrifuge", global::Action.BuildMenuKeyU)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Equipment"), "icon_category_misc", global::Action.BuildCategoryEquipment, KKeyCode.S, new List<BuildMenu.BuildingInfo>
 			{
@@ -840,12 +854,17 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("PowerControlStation", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("AstronautTrainingCenter", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("ResetSkillsStation", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("CraftingTable", global::Action.BuildMenuKeyZ),
+				new BuildMenu.BuildingInfo("OxygenMaskMarker", global::Action.BuildMenuKeyQ),
+				new BuildMenu.BuildingInfo("OxygenMaskLocker", global::Action.BuildMenuKeyY),
 				new BuildMenu.BuildingInfo("ClothingFabricator", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SuitFabricator", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("SuitMarker", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("SuitLocker", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("JetSuitMarker", global::Action.BuildMenuKeyJ),
-				new BuildMenu.BuildingInfo("JetSuitLocker", global::Action.BuildMenuKeyO)
+				new BuildMenu.BuildingInfo("JetSuitLocker", global::Action.BuildMenuKeyO),
+				new BuildMenu.BuildingInfo("LeadSuitMarker", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("LeadSuitLocker", global::Action.BuildMenuKeyD)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Rocketry"), "icon_category_rocketry", global::Action.BuildCategoryRocketry, KKeyCode.C, new List<BuildMenu.BuildingInfo>
 			{
@@ -861,7 +880,9 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("CommandModule", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("TouristModule", global::Action.BuildMenuKeyY),
 				new BuildMenu.BuildingInfo("ResearchModule", global::Action.BuildMenuKeyR),
-				new BuildMenu.BuildingInfo("HydrogenEngine", global::Action.BuildMenuKeyH)
+				new BuildMenu.BuildingInfo("HydrogenEngine", global::Action.BuildMenuKeyH),
+				new BuildMenu.BuildingInfo("RailGun", global::Action.BuildMenuKeyP),
+				new BuildMenu.BuildingInfo("LandingBeacon", global::Action.BuildMenuKeyL)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Logistics"), "icon_category_ventilation", global::Action.Plan6, KKeyCode.None, new List<BuildMenu.DisplayInfo>
@@ -880,8 +901,11 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("SolidConduitOutbox", global::Action.BuildMenuKeyO),
 				new BuildMenu.BuildingInfo("SolidVent", global::Action.BuildMenuKeyV),
 				new BuildMenu.BuildingInfo("SolidLogicValve", global::Action.BuildMenuKeyL),
+				new BuildMenu.BuildingInfo("SolidLimitValve", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("SolidConduitBridge", global::Action.BuildMenuKeyB),
-				new BuildMenu.BuildingInfo("AutoMiner", global::Action.BuildMenuKeyM)
+				new BuildMenu.BuildingInfo("AutoMiner", global::Action.BuildMenuKeyM),
+				new BuildMenu.BuildingInfo("ModularLaunchpadPortSolid", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("ModularLaunchpadPortSolidUnloader", global::Action.BuildMenuKeyU)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("LogicWiring"), "icon_category_automation", global::Action.BuildCategoryLogicWiring, KKeyCode.W, new List<BuildMenu.BuildingInfo>
 			{

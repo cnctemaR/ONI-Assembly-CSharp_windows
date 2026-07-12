@@ -80,6 +80,46 @@ namespace ProcGen.Noise
 			}
 		}
 
+		public void CreateEmptyLists()
+		{
+			if (this.links == null)
+			{
+				this.links = new List<NodeLink>();
+			}
+			if (this.primitives == null)
+			{
+				this.primitives = new Dictionary<string, Primitive>();
+			}
+			if (this.filters == null)
+			{
+				this.filters = new Dictionary<string, Filter>();
+			}
+			if (this.transformers == null)
+			{
+				this.transformers = new Dictionary<string, Transformer>();
+			}
+			if (this.selectors == null)
+			{
+				this.selectors = new Dictionary<string, Selector>();
+			}
+			if (this.modifiers == null)
+			{
+				this.modifiers = new Dictionary<string, Modifier>();
+			}
+			if (this.combiners == null)
+			{
+				this.combiners = new Dictionary<string, Combiner>();
+			}
+			if (this.floats == null)
+			{
+				this.floats = new Dictionary<string, FloatList>();
+			}
+			if (this.controlpoints == null)
+			{
+				this.controlpoints = new Dictionary<string, ControlPointList>();
+			}
+		}
+
 		private IModule3D GetModuleFromLink(Link link)
 		{
 			if (link == null)
@@ -210,7 +250,7 @@ namespace ProcGen.Noise
 						IModule3D module3D2 = this.GetModuleFromLink(nodeLink.source0);
 						IModule3D module3D3 = this.GetModuleFromLink(nodeLink.source1);
 						IModule3D module3D4 = this.GetModuleFromLink(nodeLink.source2);
-						this.selectors[nodeLink.target.name].SetSouces(moduleFromLink, module3D2, module3D3, module3D4);
+						this.selectors[nodeLink.target.name].SetSouces(moduleFromLink, module3D4, module3D2, module3D3);
 						break;
 					}
 					case Link.Type.Modifier:
@@ -222,9 +262,9 @@ namespace ProcGen.Noise
 							controlPointList = this.controlpoints[nodeLink.source1.name];
 						}
 						FloatList floatList = null;
-						if (nodeLink.source2 != null && nodeLink.source2.type == Link.Type.FloatPoints && this.controlpoints.ContainsKey(nodeLink.source2.name))
+						if (nodeLink.source1 != null && nodeLink.source1.type == Link.Type.FloatPoints && this.floats.ContainsKey(nodeLink.source1.name))
 						{
-							floatList = this.floats[nodeLink.source2.name];
+							floatList = this.floats[nodeLink.source1.name];
 						}
 						this.modifiers[nodeLink.target.name].SetSouces(moduleFromLink, module3D2, floatList, controlPointList);
 						break;

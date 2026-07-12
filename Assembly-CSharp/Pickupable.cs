@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using FMOD.Studio;
+using KSerialization;
 using STRINGS;
 using UnityEngine;
 
@@ -16,7 +17,17 @@ public class Pickupable : Workable, IHasSortOrder
 		}
 	}
 
-	public int sortOrder { get; set; }
+	public int sortOrder
+	{
+		get
+		{
+			return this._sortOrder;
+		}
+		set
+		{
+			this._sortOrder = value;
+		}
+	}
 
 	public Storage storage { get; set; }
 
@@ -221,7 +232,7 @@ public class Pickupable : Workable, IHasSortOrder
 	{
 		base.OnSpawn();
 		int num = Grid.PosToCell(this);
-		if (!Grid.IsValidCell(num))
+		if (!Grid.IsValidCell(num) && this.deleteOffGrid)
 		{
 			base.gameObject.DeleteObject();
 			return;
@@ -349,7 +360,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			Vector2 vector = new Vector2(-0.1f * (float)Grid.WidthInCells, 1.1f * (float)Grid.WidthInCells);
 			Vector2 vector2 = new Vector2(-0.1f * (float)Grid.HeightInCells, 1.1f * (float)Grid.HeightInCells);
-			if (position.x < vector.x || vector.y < position.x || position.y < vector2.x || vector2.y < position.y)
+			if (this.deleteOffGrid && (position.x < vector.x || vector.y < position.x || position.y < vector2.x || vector2.y < position.y))
 			{
 				this.DeleteObject();
 				return;
@@ -445,7 +456,7 @@ public class Pickupable : Workable, IHasSortOrder
 			return false;
 		}
 		this.Absorb(other);
-		if (!hide_effects && EffectPrefabs.Instance != null)
+		if (!hide_effects && EffectPrefabs.Instance != null && !this.storage)
 		{
 			Vector3 position = base.transform.GetPosition();
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
@@ -524,7 +535,12 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void RefreshStorageTags(object data = null)
 	{
-		if (!(data is Storage) && (data == null || !(bool)data))
+		bool flag = data is Storage || (data != null && (bool)data);
+		if (flag && data is Storage && ((Storage)data).gameObject == base.gameObject)
+		{
+			return;
+		}
+		if (!flag)
 		{
 			this.KPrefabID.RemoveTag(GameTags.Stored);
 			this.KPrefabID.RemoveTag(GameTags.StoredPrivate);
@@ -598,6 +614,12 @@ public class Pickupable : Workable, IHasSortOrder
 		base.gameObject.transform.rotation = Quaternion.identity;
 		this.RegisterListeners();
 		component.GetBatchInstanceData().ClearOverrideTransformMatrix();
+	}
+
+	public void UpdateCachedCellFromStoragePosition()
+	{
+		global::Debug.Assert(this.storage != null, "Only call UpdateCachedCellFromStoragePosition on pickupables in storage!");
+		this.UpdateCachedCell(Grid.PosToCell(this.storage));
 	}
 
 	private void UpdateCachedCell(int cell)
@@ -817,6 +839,9 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public const float WorkTime = 1.5f;
 
+	[SerializeField]
+	private int _sortOrder;
+
 	[MyCmpReq]
 	[NonSerialized]
 	public KPrefabID KPrefabID;
@@ -869,6 +894,9 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private int nextTicketNumber;
 
+	[Serialize]
+	public bool deleteOffGrid = true;
+
 	private List<Pickupable.Reservation> reservations = new List<Pickupable.Reservation>();
 
 	private HandleVector<int>.Handle solidPartitionerEntry;
@@ -920,13 +948,13 @@ public class Pickupable : Workable, IHasSortOrder
 
 		public override string ToString()
 		{
-			return string.Concat(new object[]
+			return string.Concat(new string[]
 			{
 				this.reserver.name,
 				", ",
-				this.amount,
+				this.amount.ToString(),
 				", ",
-				this.ticket
+				this.ticket.ToString()
 			});
 		}
 

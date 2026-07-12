@@ -40,16 +40,13 @@ public class DoctorStation : Workable
 		this.treatments_available.Clear();
 		foreach (GameObject gameObject in this.storage.items)
 		{
-			if (gameObject.HasTag(GameTags.MedicalSupplies))
+			MedicinalPill component = gameObject.GetComponent<MedicinalPill>();
+			if (component != null)
 			{
 				Tag tag = gameObject.PrefabID();
-				if (tag == "IntermediateCure")
+				foreach (string text in component.info.curedSicknesses)
 				{
-					this.AddTreatment("SlimeSickness", tag);
-				}
-				if (tag == "AdvancedCure")
-				{
-					this.AddTreatment("ZombieSickness", tag);
+					this.AddTreatment(text, tag);
 				}
 			}
 		}
@@ -165,9 +162,6 @@ public class DoctorStation : Workable
 
 	private DoctorStationDoctorWorkable doctor_workable;
 
-	[SerializeField]
-	public Tag supplyTag;
-
 	private Dictionary<HashedString, Tag> treatments_available = new Dictionary<HashedString, Tag>();
 
 	private DoctorStation.StatesInstance smi;
@@ -196,7 +190,7 @@ public class DoctorStation : Workable
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			base.serializable = false;
+			base.serializable = StateMachine.SerializeType.Never;
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (DoctorStation.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.operational.EventTransition(GameHashes.OperationalChanged, this.operational, (DoctorStation.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.operational.not_ready);

@@ -28,9 +28,15 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			{
 				DebugUtil.DevLogError("Invalid units value for element, setting Units to 0");
 				this._units = 0f;
-				return;
 			}
-			this._units = value;
+			else
+			{
+				this._units = value;
+			}
+			if (this.onDataChanged != null)
+			{
+				this.onDataChanged(this);
+			}
 		}
 	}
 
@@ -155,16 +161,12 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (this._Temperature <= 0f)
 		{
-			DebugUtil.DevLogErrorFormat(base.gameObject, "{0} is attempting to serialize a temperature of <= 0K. Resetting to default.", new object[] { base.gameObject.name });
+			DebugUtil.DevLogError(base.gameObject.name + " is attempting to serialize a temperature of <= 0K. Resetting to default. world=" + base.gameObject.DebugGetMyWorldName());
 			this._Temperature = this.Element.defaultValues.temperature;
 		}
 		if (this.Mass > PrimaryElement.MAX_MASS)
 		{
-			DebugUtil.DevLogErrorFormat(base.gameObject, "{0} is attempting to serialize very large mass {1}. Resetting to default.", new object[]
-			{
-				base.gameObject.name,
-				this.Mass
-			});
+			DebugUtil.DevLogError(string.Format("{0} is attempting to serialize very large mass {1}. Resetting to default. world={2}", base.gameObject.name, this.Mass, base.gameObject.DebugGetMyWorldName()));
 			this.Mass = this.Element.defaultValues.mass;
 		}
 	}
@@ -207,7 +209,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
 		{
-			DebugUtil.LogErrorArgs(base.gameObject, new object[] { "Invalid temperature [" + temperature + "]" });
+			DebugUtil.LogErrorArgs(base.gameObject, new object[] { "Invalid temperature [" + temperature.ToString() + "]" });
 			return;
 		}
 		if (temperature <= 0f)
@@ -327,10 +329,13 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		base.OnCleanUp();
 	}
 
-	public void SetElement(SimHashes element_id)
+	public void SetElement(SimHashes element_id, bool addTags = true)
 	{
 		this.ElementID = element_id;
-		this.UpdateTags();
+		if (addTags)
+		{
+			this.UpdateTags();
+		}
 	}
 
 	public void UpdateTags()

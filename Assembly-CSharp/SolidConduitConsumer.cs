@@ -3,8 +3,24 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [AddComponentMenu("KMonoBehaviour/scripts/SolidConduitConsumer")]
-public class SolidConduitConsumer : KMonoBehaviour
+public class SolidConduitConsumer : KMonoBehaviour, IConduitConsumer
 {
+	public Storage Storage
+	{
+		get
+		{
+			return this.storage;
+		}
+	}
+
+	public ConduitType ConduitType
+	{
+		get
+		{
+			return ConduitType.Solid;
+		}
+	}
+
 	public bool IsConsuming
 	{
 		get
@@ -30,7 +46,7 @@ public class SolidConduitConsumer : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.utilityCell = this.building.GetUtilityInputCell();
+		this.utilityCell = this.GetInputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[20];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("SolidConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitFlow().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
@@ -96,6 +112,16 @@ public class SolidConduitConsumer : KMonoBehaviour
 		return utilityNetwork.id;
 	}
 
+	private int GetInputCell()
+	{
+		if (this.useSecondaryInput)
+		{
+			ISecondaryInput component = base.GetComponent<ISecondaryInput>();
+			return Grid.OffsetCell(this.building.NaturalBuildingCell(), component.GetSecondaryConduitOffset(ConduitType.Solid));
+		}
+		return this.building.GetUtilityInputCell();
+	}
+
 	[SerializeField]
 	public Tag capacityTag = GameTags.Any;
 
@@ -104,6 +130,9 @@ public class SolidConduitConsumer : KMonoBehaviour
 
 	[SerializeField]
 	public bool alwaysConsume;
+
+	[SerializeField]
+	public bool useSecondaryInput;
 
 	[MyCmpReq]
 	private Operational operational;

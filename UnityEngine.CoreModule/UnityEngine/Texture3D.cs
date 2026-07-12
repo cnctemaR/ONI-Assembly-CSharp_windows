@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Graphics/Texture3D.h")]
+	[ExcludeFromPreset]
 	public sealed class Texture3D : Texture
 	{
 		public extern int depth
@@ -58,16 +58,20 @@ namespace UnityEngine
 
 		[FreeFunction("Texture3DScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_CreateImpl([Writable] Texture3D mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureCreationFlags flags);
+		private static extern bool Internal_CreateImpl([Writable] Texture3D mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex);
 
-		private static void Internal_Create([Writable] Texture3D mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureCreationFlags flags)
+		private static void Internal_Create([Writable] Texture3D mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex)
 		{
-			bool flag = !Texture3D.Internal_CreateImpl(mono, w, h, d, mipCount, format, flags);
+			bool flag = !Texture3D.Internal_CreateImpl(mono, w, h, d, mipCount, format, flags, nativeTex);
 			if (flag)
 			{
 				throw new UnityException("Failed to create texture because of invalid parameters.");
 			}
 		}
+
+		[FreeFunction("Texture3DScripting::UpdateExternalTexture", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void UpdateExternalTexture(IntPtr nativeTex);
 
 		[FreeFunction(Name = "Texture3DScripting::Apply", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -117,6 +121,9 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool SetPixelDataImpl(IntPtr data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetImageDataPointer();
+
 		public Texture3D(int width, int height, int depth, DefaultFormat format, TextureCreationFlags flags)
 			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format), flags)
 		{
@@ -130,10 +137,11 @@ namespace UnityEngine
 
 		public Texture3D(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags, int mipCount)
 		{
-			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
-			if (flag)
+			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			if (!flag)
 			{
-				Texture3D.Internal_Create(this, width, height, depth, mipCount, format, flags);
+				Texture3D.ValidateIsNotCrunched(flags);
+				Texture3D.Internal_Create(this, width, height, depth, mipCount, format, flags, IntPtr.Zero);
 			}
 		}
 
@@ -149,13 +157,46 @@ namespace UnityEngine
 				{
 					textureCreationFlags |= TextureCreationFlags.Crunch;
 				}
-				Texture3D.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, textureCreationFlags);
+				Texture3D.ValidateIsNotCrunched(textureCreationFlags);
+				Texture3D.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, textureCreationFlags, IntPtr.Zero);
+			}
+		}
+
+		public Texture3D(int width, int height, int depth, TextureFormat textureFormat, int mipCount, IntPtr nativeTex)
+		{
+			bool flag = !base.ValidateFormat(textureFormat);
+			if (!flag)
+			{
+				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, false);
+				TextureCreationFlags textureCreationFlags = ((mipCount != 1) ? TextureCreationFlags.MipChain : TextureCreationFlags.None);
+				bool flag2 = GraphicsFormatUtility.IsCrunchFormat(textureFormat);
+				if (flag2)
+				{
+					textureCreationFlags |= TextureCreationFlags.Crunch;
+				}
+				Texture3D.ValidateIsNotCrunched(textureCreationFlags);
+				Texture3D.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, textureCreationFlags, nativeTex);
 			}
 		}
 
 		public Texture3D(int width, int height, int depth, TextureFormat textureFormat, bool mipChain)
 			: this(width, height, depth, textureFormat, mipChain ? (-1) : 1)
 		{
+		}
+
+		public Texture3D(int width, int height, int depth, TextureFormat textureFormat, bool mipChain, IntPtr nativeTex)
+			: this(width, height, depth, textureFormat, mipChain ? (-1) : 1, nativeTex)
+		{
+		}
+
+		public static Texture3D CreateExternalTexture(int width, int height, int depth, TextureFormat format, bool mipChain, IntPtr nativeTex)
+		{
+			bool flag = nativeTex == IntPtr.Zero;
+			if (flag)
+			{
+				throw new ArgumentException("nativeTex may not be zero");
+			}
+			return new Texture3D(width, height, depth, format, mipChain ? (-1) : 1, nativeTex);
 		}
 
 		public void Apply([DefaultValue("true")] bool updateMipmaps, [DefaultValue("false")] bool makeNoLongerReadable)
@@ -276,6 +317,29 @@ namespace UnityEngine
 				throw new UnityException("No texture data provided to SetPixelData.");
 			}
 			this.SetPixelDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), mipLevel, UnsafeUtility.SizeOf<T>(), data.Length, sourceDataStartIndex);
+		}
+
+		public unsafe NativeArray<T> GetPixelData<T>(int mipLevel) where T : struct
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			int pixelDataOffset = base.GetPixelDataOffset(mipLevel, 0);
+			int pixelDataSize = base.GetPixelDataSize(mipLevel, 0);
+			int num = UnsafeUtility.SizeOf<T>();
+			IntPtr intPtr = new IntPtr(this.GetImageDataPointer().ToInt64() + (long)pixelDataOffset);
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, pixelDataSize / num, Allocator.None);
+		}
+
+		private static void ValidateIsNotCrunched(TextureCreationFlags flags)
+		{
+			bool flag = (flags &= TextureCreationFlags.Crunch) > TextureCreationFlags.None;
+			if (flag)
+			{
+				throw new ArgumentException("Crunched Texture3D is not supported.");
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

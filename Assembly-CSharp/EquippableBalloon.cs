@@ -32,7 +32,7 @@ public class EquippableBalloon : StateMachineComponent<EquippableBalloon.StatesI
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.root;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.root.Transition(this.destroy, (EquippableBalloon.StatesInstance smi) => GameClock.Instance.GetTime() >= smi.transitionTime, UpdateRate.SIM_200ms);
 			this.destroy.Enter(delegate(EquippableBalloon.StatesInstance smi)
 			{

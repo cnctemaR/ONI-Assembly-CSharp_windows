@@ -4,12 +4,69 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
+using UnityEngine.SubsystemsImplementation;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Modules/Subsystems/SubsystemManager.h")]
+	[NativeHeader("Modules/Subsystems/SubsystemManager.h")]
 	public static class SubsystemManager
 	{
+		[RequiredByNativeCode]
+		private static void ReloadSubsystemsStarted()
+		{
+			bool flag = SubsystemManager.reloadSubsytemsStarted != null;
+			if (flag)
+			{
+				SubsystemManager.reloadSubsytemsStarted();
+			}
+			bool flag2 = SubsystemManager.beforeReloadSubsystems != null;
+			if (flag2)
+			{
+				SubsystemManager.beforeReloadSubsystems();
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void ReloadSubsystemsCompleted()
+		{
+			bool flag = SubsystemManager.reloadSubsytemsCompleted != null;
+			if (flag)
+			{
+				SubsystemManager.reloadSubsytemsCompleted();
+			}
+			bool flag2 = SubsystemManager.afterReloadSubsystems != null;
+			if (flag2)
+			{
+				SubsystemManager.afterReloadSubsystems();
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void InitializeIntegratedSubsystem(IntPtr ptr, IntegratedSubsystem subsystem)
+		{
+			subsystem.m_Ptr = ptr;
+			subsystem.SetHandle(subsystem);
+			SubsystemManager.s_IntegratedSubsystems.Add(subsystem);
+		}
+
+		[RequiredByNativeCode]
+		private static void ClearSubsystems()
+		{
+			foreach (IntegratedSubsystem integratedSubsystem in SubsystemManager.s_IntegratedSubsystems)
+			{
+				integratedSubsystem.m_Ptr = IntPtr.Zero;
+			}
+			SubsystemManager.s_IntegratedSubsystems.Clear();
+			SubsystemManager.s_StandaloneSubsystems.Clear();
+			SubsystemManager.s_DeprecatedSubsystems.Clear();
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StaticConstructScriptingClassMap();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void ReportSingleSubsystemAnalytics(string id);
+
 		static SubsystemManager()
 		{
 			SubsystemManager.StaticConstructScriptingClassMap();
@@ -17,92 +74,139 @@ namespace UnityEngine
 
 		public static void GetAllSubsystemDescriptors(List<ISubsystemDescriptor> descriptors)
 		{
-			descriptors.Clear();
-			foreach (ISubsystemDescriptorImpl subsystemDescriptorImpl in Internal_SubsystemDescriptors.s_IntegratedSubsystemDescriptors)
-			{
-				descriptors.Add(subsystemDescriptorImpl);
-			}
-			foreach (ISubsystemDescriptor subsystemDescriptor in Internal_SubsystemDescriptors.s_StandaloneSubsystemDescriptors)
-			{
-				descriptors.Add(subsystemDescriptor);
-			}
+			SubsystemDescriptorStore.GetAllSubsystemDescriptors(descriptors);
 		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ReportSingleSubsystemAnalytics(string id);
 
 		public static void GetSubsystemDescriptors<T>(List<T> descriptors) where T : ISubsystemDescriptor
 		{
-			descriptors.Clear();
-			foreach (ISubsystemDescriptorImpl subsystemDescriptorImpl in Internal_SubsystemDescriptors.s_IntegratedSubsystemDescriptors)
-			{
-				bool flag = subsystemDescriptorImpl is T;
-				if (flag)
-				{
-					descriptors.Add((T)((object)subsystemDescriptorImpl));
-				}
-			}
-			foreach (ISubsystemDescriptor subsystemDescriptor in Internal_SubsystemDescriptors.s_StandaloneSubsystemDescriptors)
-			{
-				bool flag2 = subsystemDescriptor is T;
-				if (flag2)
-				{
-					descriptors.Add((T)((object)subsystemDescriptor));
-				}
-			}
+			SubsystemDescriptorStore.GetSubsystemDescriptors<T>(descriptors);
 		}
 
-		public static void GetInstances<T>(List<T> instances) where T : ISubsystem
+		public static void GetSubsystems<T>(List<T> subsystems) where T : ISubsystem
 		{
-			instances.Clear();
-			foreach (ISubsystem subsystem in Internal_SubsystemInstances.s_IntegratedSubsystemInstances)
+			subsystems.Clear();
+			SubsystemManager.AddSubsystemSubset<IntegratedSubsystem, T>(SubsystemManager.s_IntegratedSubsystems, subsystems);
+			SubsystemManager.AddSubsystemSubset<SubsystemWithProvider, T>(SubsystemManager.s_StandaloneSubsystems, subsystems);
+			SubsystemManager.AddSubsystemSubset<Subsystem, T>(SubsystemManager.s_DeprecatedSubsystems, subsystems);
+		}
+
+		private static void AddSubsystemSubset<TBaseTypeInList, TQueryType>(List<TBaseTypeInList> copyFrom, List<TQueryType> copyTo) where TBaseTypeInList : ISubsystem where TQueryType : ISubsystem
+		{
+			foreach (TBaseTypeInList tbaseTypeInList in copyFrom)
 			{
-				bool flag = subsystem is T;
-				if (flag)
+				TQueryType tqueryType;
+				bool flag;
+				if (tbaseTypeInList is TQueryType)
 				{
-					instances.Add((T)((object)subsystem));
+					tqueryType = tbaseTypeInList as TQueryType;
+					flag = true;
 				}
-			}
-			foreach (ISubsystem subsystem2 in Internal_SubsystemInstances.s_StandaloneSubsystemInstances)
-			{
-				bool flag2 = subsystem2 is T;
+				else
+				{
+					flag = false;
+				}
+				bool flag2 = flag;
 				if (flag2)
 				{
-					instances.Add((T)((object)subsystem2));
+					copyTo.Add(tqueryType);
 				}
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void DestroyInstance_Internal(IntPtr instancePtr);
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action beforeReloadSubsystems;
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void StaticConstructScriptingClassMap();
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action afterReloadSubsystems;
+
+		internal static IntegratedSubsystem GetIntegratedSubsystemByPtr(IntPtr ptr)
+		{
+			foreach (IntegratedSubsystem integratedSubsystem in SubsystemManager.s_IntegratedSubsystems)
+			{
+				bool flag = integratedSubsystem.m_Ptr == ptr;
+				if (flag)
+				{
+					return integratedSubsystem;
+				}
+			}
+			return null;
+		}
+
+		internal static void RemoveIntegratedSubsystemByPtr(IntPtr ptr)
+		{
+			for (int i = 0; i < SubsystemManager.s_IntegratedSubsystems.Count; i++)
+			{
+				bool flag = SubsystemManager.s_IntegratedSubsystems[i].m_Ptr != ptr;
+				if (!flag)
+				{
+					SubsystemManager.s_IntegratedSubsystems[i].m_Ptr = IntPtr.Zero;
+					SubsystemManager.s_IntegratedSubsystems.RemoveAt(i);
+					break;
+				}
+			}
+		}
+
+		internal static void AddStandaloneSubsystem(SubsystemWithProvider subsystem)
+		{
+			SubsystemManager.s_StandaloneSubsystems.Add(subsystem);
+		}
+
+		internal static bool RemoveStandaloneSubsystem(SubsystemWithProvider subsystem)
+		{
+			return SubsystemManager.s_StandaloneSubsystems.Remove(subsystem);
+		}
+
+		internal static SubsystemWithProvider FindStandaloneSubsystemByDescriptor(SubsystemDescriptorWithProvider descriptor)
+		{
+			foreach (SubsystemWithProvider subsystemWithProvider in SubsystemManager.s_StandaloneSubsystems)
+			{
+				bool flag = subsystemWithProvider.descriptor == descriptor;
+				if (flag)
+				{
+					return subsystemWithProvider;
+				}
+			}
+			return null;
+		}
+
+		public static void GetInstances<T>(List<T> subsystems) where T : ISubsystem
+		{
+			SubsystemManager.GetSubsystems<T>(subsystems);
+		}
+
+		internal static void AddDeprecatedSubsystem(Subsystem subsystem)
+		{
+			SubsystemManager.s_DeprecatedSubsystems.Add(subsystem);
+		}
+
+		internal static bool RemoveDeprecatedSubsystem(Subsystem subsystem)
+		{
+			return SubsystemManager.s_DeprecatedSubsystems.Remove(subsystem);
+		}
+
+		internal static Subsystem FindDeprecatedSubsystemByDescriptor(SubsystemDescriptor descriptor)
+		{
+			foreach (Subsystem subsystem in SubsystemManager.s_DeprecatedSubsystems)
+			{
+				bool flag = subsystem.m_SubsystemDescriptor == descriptor;
+				if (flag)
+				{
+					return subsystem;
+				}
+			}
+			return null;
+		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action reloadSubsytemsStarted;
 
-		[RequiredByNativeCode]
-		private static void Internal_ReloadSubsystemsStarted()
-		{
-			bool flag = SubsystemManager.reloadSubsytemsStarted != null;
-			if (flag)
-			{
-				SubsystemManager.reloadSubsytemsStarted();
-			}
-		}
-
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action reloadSubsytemsCompleted;
 
-		[RequiredByNativeCode]
-		private static void Internal_ReloadSubsystemsCompleted()
-		{
-			bool flag = SubsystemManager.reloadSubsytemsCompleted != null;
-			if (flag)
-			{
-				SubsystemManager.reloadSubsytemsCompleted();
-			}
-		}
+		private static List<IntegratedSubsystem> s_IntegratedSubsystems = new List<IntegratedSubsystem>();
+
+		private static List<SubsystemWithProvider> s_StandaloneSubsystems = new List<SubsystemWithProvider>();
+
+		private static List<Subsystem> s_DeprecatedSubsystems = new List<Subsystem>();
 	}
 }

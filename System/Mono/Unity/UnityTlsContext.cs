@@ -484,15 +484,20 @@ namespace Mono.Unity
 			UnityTls.unitytls_x509verify_result unitytls_x509verify_result;
 			try
 			{
-				X509CertificateCollection x509CertificateCollection = CertHelper.NativeChainToManagedCollection(chain, errorState);
-				this.remoteCertificate = new X509Certificate(x509CertificateCollection[0]);
-				if (base.ValidateCertificate(x509CertificateCollection))
+				using (X509ChainImplUnityTls x509ChainImplUnityTls = new X509ChainImplUnityTls(chain))
 				{
-					unitytls_x509verify_result = UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_SUCCESS;
-				}
-				else
-				{
-					unitytls_x509verify_result = UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_NOT_TRUSTED;
+					using (X509Chain x509Chain = new X509Chain(x509ChainImplUnityTls))
+					{
+						this.remoteCertificate = x509Chain.ChainElements[0].Certificate;
+						if (base.ValidateCertificate(this.remoteCertificate, x509Chain))
+						{
+							unitytls_x509verify_result = UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_SUCCESS;
+						}
+						else
+						{
+							unitytls_x509verify_result = UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_NOT_TRUSTED;
+						}
+					}
 				}
 			}
 			catch (Exception ex)

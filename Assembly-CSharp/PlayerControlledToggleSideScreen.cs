@@ -7,7 +7,7 @@ public class PlayerControlledToggleSideScreen : SideScreenContent, IRenderEveryT
 	{
 		base.OnSpawn();
 		this.toggleButton.onClick += this.ClickToggle;
-		this.togglePendingStatusItem = new StatusItem("PlayerControlledToggleSideScreen", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+		this.togglePendingStatusItem = new StatusItem("PlayerControlledToggleSideScreen", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 	}
 
 	public override bool IsValidForTarget(GameObject target)

@@ -56,6 +56,11 @@ namespace UnityEngine
 		Switch,
 		Lumin,
 		Stadia,
-		CloudRendering
+		CloudRendering,
+		[Obsolete("GameCoreScarlett is deprecated, please use GameCoreXboxSeries (UnityUpgradable) -> GameCoreXboxSeries", false)]
+		GameCoreScarlett,
+		GameCoreXboxSeries = 36,
+		GameCoreXboxOne,
+		PS5
 	}
 }

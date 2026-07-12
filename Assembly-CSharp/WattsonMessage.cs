@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
 using FMODUnity;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,12 @@ public class WattsonMessage : KScreen
 	{
 		base.OnPrefabInit();
 		Game.Instance.Subscribe(-122303817, new Action<object>(this.OnNewBaseCreated));
+		if (DlcManager.IsExpansion1Active())
+		{
+			this.message.SetText(UI.WELCOMEMESSAGEBODY_SPACEDOUT);
+			return;
+		}
+		this.message.SetText(UI.WELCOMEMESSAGEBODY);
 	}
 
 	private IEnumerator ExpandPanel()
@@ -63,10 +70,16 @@ public class WattsonMessage : KScreen
 		this.hideScreensWhileActive.Add(ManagementMenu.Instance);
 		this.hideScreensWhileActive.Add(ToolMenu.Instance);
 		this.hideScreensWhileActive.Add(ToolMenu.Instance.PriorityScreen);
-		this.hideScreensWhileActive.Add(ResourceCategoryScreen.Instance);
+		this.hideScreensWhileActive.Add(PinnedResourcesPanel.Instance);
 		this.hideScreensWhileActive.Add(TopLeftControlScreen.Instance);
 		this.hideScreensWhileActive.Add(global::DateTime.Instance);
 		this.hideScreensWhileActive.Add(BuildWatermark.Instance);
+		this.hideScreensWhileActive.Add(BuildWatermark.Instance);
+		this.hideScreensWhileActive.Add(ColonyDiagnosticScreen.Instance);
+		if (WorldSelector.Instance != null)
+		{
+			this.hideScreensWhileActive.Add(WorldSelector.Instance);
+		}
 		foreach (KScreen kscreen in this.hideScreensWhileActive)
 		{
 			kscreen.Show(false);
@@ -101,7 +114,7 @@ public class WattsonMessage : KScreen
 		};
 		this.dialog.GetComponent<KScreen>().Show(false);
 		this.startFade = false;
-		GameObject telepad = GameUtil.GetTelepad();
+		GameObject telepad = GameUtil.GetTelepad(0);
 		if (telepad != null)
 		{
 			KAnimControllerBase kac = telepad.GetComponent<KAnimControllerBase>();
@@ -113,15 +126,15 @@ public class WattsonMessage : KScreen
 				minionIdentity.gameObject.transform.SetPosition(new Vector3(telepad.transform.GetPosition().x + (float)idx - 1.5f, telepad.transform.GetPosition().y, minionIdentity.gameObject.transform.GetPosition().z));
 				GameObject gameObject = minionIdentity.gameObject;
 				ChoreProvider chore_provider = gameObject.GetComponent<ChoreProvider>();
-				EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop, false);
+				EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx.ToString() }, KAnim.PlayMode.Loop, false);
 				UIScheduler.Instance.Schedule("DupeBirth", (float)idx * 0.5f, delegate(object data)
 				{
 					chorePre.Cancel("Done looping");
-					EmoteChore emoteChore = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
+					EmoteChore emoteChore = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx.ToString() }, null);
 					emoteChore.onComplete = (Action<Chore>)Delegate.Combine(emoteChore.onComplete, new Action<Chore>(delegate(Chore param)
 					{
 						this.birthsComplete++;
-						if (this.birthsComplete == Components.LiveMinionIdentities.Count - 1)
+						if (this.birthsComplete == Components.LiveMinionIdentities.Count - 1 && base.IsActive())
 						{
 							this.PauseAndShowMessage();
 						}
@@ -137,6 +150,7 @@ public class WattsonMessage : KScreen
 		else
 		{
 			global::Debug.LogWarning("Failed to spawn telepad - does the starting base template lack a 'Headquarters' ?");
+			this.PauseAndShowMessage();
 		}
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("GoHome", 0.1f, delegate(object data)
 		{
@@ -176,14 +190,17 @@ public class WattsonMessage : KScreen
 		{
 			foreach (KScreen kscreen in this.hideScreensWhileActive)
 			{
-				kscreen.SetShouldFadeIn(true);
-				kscreen.Show(true);
+				if (!(kscreen == null))
+				{
+					kscreen.SetShouldFadeIn(true);
+					kscreen.Show(true);
+				}
 			}
 			CameraController.Instance.SetMaxOrthographicSize(20f);
 			Game.Instance.StartDelayedInitialSave();
 			UIScheduler.Instance.Schedule("InitialScreenshot", 1f, delegate(object data)
 			{
-				Game.Instance.timelapser.SaveScreenshot();
+				Game.Instance.timelapser.InitialScreenshot();
 			}, null, null);
 			GameScheduler.Instance.Schedule("BasicTutorial", 1.5f, delegate(object data)
 			{
@@ -238,6 +255,9 @@ public class WattsonMessage : KScreen
 
 	[SerializeField]
 	private RectTransform content;
+
+	[SerializeField]
+	private LocText message;
 
 	[SerializeField]
 	private Image bg;

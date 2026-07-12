@@ -54,26 +54,29 @@ namespace UnityEngine
 			bool flag2 = ex != null;
 			if (flag2)
 			{
-				throw new TargetInvocationException(string.Concat(new object[]
-				{
-					base.GetType(),
-					".",
-					methodName,
-					"(",
-					string.Join(",", array2),
-					")"
-				}), ex);
+				string[] array3 = new string[6];
+				int num = 0;
+				Type type = base.GetType();
+				array3[num] = ((type != null) ? type.ToString() : null);
+				array3[1] = ".";
+				array3[2] = methodName;
+				array3[3] = "(";
+				array3[4] = string.Join(",", array2);
+				array3[5] = ")";
+				throw new TargetInvocationException(string.Concat(array3), ex);
 			}
-			AndroidReflection.SetNativeExceptionOnProxy(this.GetRawProxy(), new Exception(string.Concat(new object[]
-			{
-				"No such proxy method: ",
-				base.GetType(),
-				".",
-				methodName,
-				"(",
-				string.Join(",", array2),
-				")"
-			})), true);
+			IntPtr rawProxy = this.GetRawProxy();
+			string[] array4 = new string[7];
+			array4[0] = "No such proxy method: ";
+			int num2 = 1;
+			Type type2 = base.GetType();
+			array4[num2] = ((type2 != null) ? type2.ToString() : null);
+			array4[2] = ".";
+			array4[3] = methodName;
+			array4[4] = "(";
+			array4[5] = string.Join(",", array2);
+			array4[6] = ")";
+			AndroidReflection.SetNativeExceptionOnProxy(rawProxy, new Exception(string.Concat(array4)), true);
 			return null;
 		}
 
@@ -111,7 +114,7 @@ namespace UnityEngine
 
 		public virtual string toString()
 		{
-			return this.ToString() + " <c# proxy java object>";
+			return ((this != null) ? this.ToString() : null) + " <c# proxy java object>";
 		}
 
 		internal AndroidJavaObject GetProxyObject()

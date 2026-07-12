@@ -141,7 +141,7 @@ public class SteamUGCService : MonoBehaviour
 		foreach (SteamUGCDetails_t steamUGCDetails_t in this.previews)
 		{
 			mod = this.FindMod(steamUGCDetails_t.m_nPublishedFileId);
-			DebugUtil.DevAssert(mod != null, "expect mod with pending preview to be published");
+			DebugUtil.DevAssert(mod != null, "expect mod with pending preview to be published", null);
 			mod.previewImage = this.LoadPreviewImage(steamUGCDetails_t);
 			if (mod.previewImage != null)
 			{
@@ -262,34 +262,43 @@ public class SteamUGCService : MonoBehaviour
 		{
 			if (eResult != EResult.k_EResultBusy)
 			{
-				global::Debug.Log(string.Concat(new object[]
-				{
-					"Steam: [OnSteamUGCQueryDetailsCompleted] - handle: ",
-					pCallback.m_handle,
-					" -- Result: ",
-					pCallback.m_eResult,
-					" -- NUm results: ",
-					pCallback.m_unNumResultsReturned,
-					" --Total Matching: ",
-					pCallback.m_unTotalMatchingResults,
-					" -- cached: ",
-					pCallback.m_bCachedData.ToString()
-				}));
+				string[] array = new string[10];
+				array[0] = "Steam: [OnSteamUGCQueryDetailsCompleted] - handle: ";
+				int num = 1;
+				UGCQueryHandle_t ugcqueryHandle_t = pCallback.m_handle;
+				array[num] = ugcqueryHandle_t.ToString();
+				array[2] = " -- Result: ";
+				array[3] = pCallback.m_eResult.ToString();
+				array[4] = " -- NUm results: ";
+				array[5] = pCallback.m_unNumResultsReturned.ToString();
+				array[6] = " --Total Matching: ";
+				array[7] = pCallback.m_unTotalMatchingResults.ToString();
+				array[8] = " -- cached: ";
+				array[9] = pCallback.m_bCachedData.ToString();
+				global::Debug.Log(string.Concat(array));
 				HashSet<PublishedFileId_t> hashSet = this.proxies;
 				this.proxies = this.queries;
 				this.queries = hashSet;
 			}
 			else
 			{
-				global::Debug.Log(string.Concat(new object[] { "Steam: [OnSteamUGCQueryDetailsCompleted] - handle: ", pCallback.m_handle, " -- Result: ", pCallback.m_eResult, " Resending" }));
+				string[] array2 = new string[5];
+				array2[0] = "Steam: [OnSteamUGCQueryDetailsCompleted] - handle: ";
+				int num2 = 1;
+				UGCQueryHandle_t ugcqueryHandle_t = pCallback.m_handle;
+				array2[num2] = ugcqueryHandle_t.ToString();
+				array2[2] = " -- Result: ";
+				array2[3] = pCallback.m_eResult.ToString();
+				array2[4] = " Resending";
+				global::Debug.Log(string.Concat(array2));
 			}
 		}
 		else
 		{
-			for (uint num = 0U; num < pCallback.m_unNumResultsReturned; num += 1U)
+			for (uint num3 = 0U; num3 < pCallback.m_unNumResultsReturned; num3 += 1U)
 			{
 				SteamUGCDetails_t steamUGCDetails_t = default(SteamUGCDetails_t);
-				SteamUGC.GetQueryUGCResult(this.details_query, num, out steamUGCDetails_t);
+				SteamUGC.GetQueryUGCResult(this.details_query, num3, out steamUGCDetails_t);
 				if (!this.removals.Contains(steamUGCDetails_t.m_nPublishedFileId))
 				{
 					this.publishes.Add(steamUGCDetails_t);

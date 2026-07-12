@@ -14,7 +14,9 @@ namespace UnityEngine.Networking.PlayerConnection
 			bool flag = !enumerable.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>();
 			if (flag)
 			{
-				Debug.LogError("No actions found for messageId: " + messageId);
+				string text = "No actions found for messageId: ";
+				Guid messageId2 = messageId;
+				Debug.LogError(text + messageId2.ToString());
 			}
 			else
 			{

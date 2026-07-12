@@ -31,10 +31,12 @@ public class MineralDeoxidizerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		CellOffset cellOffset = new CellOffset(0, 1);
 		Prioritizable.AddRef(go);
 		Electrolyzer electrolyzer = go.AddOrGet<Electrolyzer>();
 		electrolyzer.maxMass = 1.8f;
 		electrolyzer.hasMeter = false;
+		electrolyzer.emissionOffset = cellOffset;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 330f;
 		storage.showInUI = true;
@@ -45,7 +47,7 @@ public class MineralDeoxidizerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.5f, SimHashes.Oxygen, 303.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.5f, SimHashes.Oxygen, 303.15f, false, false, (float)cellOffset.x, (float)cellOffset.y, 1f, byte.MaxValue, 0)
 		};
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);

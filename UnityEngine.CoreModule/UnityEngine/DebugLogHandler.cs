@@ -13,7 +13,7 @@ namespace UnityEngine
 
 		[ThreadAndSerializationSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Internal_LogException(Exception exception, Object obj);
+		internal static extern void Internal_LogException(Exception ex, Object obj);
 
 		public void LogFormat(LogType logType, Object context, string format, params object[] args)
 		{

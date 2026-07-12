@@ -19,10 +19,10 @@ namespace KMod
 			{
 				return null;
 			}
-			string id = subscribed.fileId.m_PublishedFileId.ToString();
+			string steamModID = subscribed.fileId.m_PublishedFileId.ToString();
 			Label label = new Label
 			{
-				id = id,
+				id = steamModID,
 				distribution_platform = Label.DistributionPlatform.Steam,
 				version = (long)subscribed.lastUpdateTime,
 				title = subscribed.title
@@ -39,9 +39,12 @@ namespace KMod
 				});
 				return null;
 			}
-			return new Mod(label, subscribed.description, new ZipFile(text), UI.FRONTEND.MODS.TOOLTIPS.MANAGE_STEAM_SUBSCRIPTION, delegate
+			ZipFile zipFile = new ZipFile(text);
+			KModHeader header = KModUtil.GetHeader(zipFile, label.defaultStaticID, subscribed.title, subscribed.description);
+			label.title = header.title;
+			return new Mod(label, header.staticID, header.description, zipFile, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_STEAM_SUBSCRIPTION, delegate
 			{
-				Application.OpenURL("https://steamcommunity.com/sharedfiles/filedetails/?id=" + id);
+				Application.OpenURL("https://steamcommunity.com/sharedfiles/filedetails/?id=" + steamModID);
 			});
 		}
 
@@ -52,7 +55,7 @@ namespace KMod
 				SteamUGCService.Mod mod = SteamUGCService.Instance.FindMod(publishedFileId_t);
 				if (mod == null)
 				{
-					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!");
+					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!", null);
 				}
 				else
 				{
@@ -68,7 +71,7 @@ namespace KMod
 				SteamUGCService.Mod mod3 = SteamUGCService.Instance.FindMod(publishedFileId_t2);
 				if (mod3 == null)
 				{
-					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!");
+					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!", null);
 				}
 				else
 				{

@@ -50,14 +50,18 @@ public class ConduitPreferentialFlow : KMonoBehaviour, ISecondaryInput
 		}
 	}
 
-	public ConduitType GetSecondaryConduitType()
+	public bool HasSecondaryConduitType(ConduitType type)
 	{
-		return this.portInfo.conduitType;
+		return this.portInfo.conduitType == type;
 	}
 
-	public CellOffset GetSecondaryConduitOffset()
+	public CellOffset GetSecondaryConduitOffset(ConduitType type)
 	{
-		return this.portInfo.offset;
+		if (this.portInfo.conduitType == type)
+		{
+			return this.portInfo.offset;
+		}
+		return CellOffset.none;
 	}
 
 	[SerializeField]

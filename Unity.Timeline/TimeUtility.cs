@@ -93,9 +93,9 @@ namespace UnityEngine.Timeline
 			string text2;
 			if (num2 > 0)
 			{
-				text2 = string.Concat(new object[]
+				text2 = string.Concat(new string[]
 				{
-					num2,
+					num2.ToString(),
 					":",
 					num3.ToString("D2"),
 					":",
@@ -104,7 +104,7 @@ namespace UnityEngine.Timeline
 			}
 			else if (num3 > 0)
 			{
-				text2 = num3 + ":" + num4.ToString("D2");
+				text2 = num3.ToString() + ":" + num4.ToString("D2");
 			}
 			else
 			{

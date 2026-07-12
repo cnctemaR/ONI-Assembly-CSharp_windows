@@ -13,14 +13,21 @@ namespace ProcGen
 			}
 		}
 
+		public static string ClusterDefaultName
+		{
+			get
+			{
+				if (!DlcManager.FeatureClusterSpaceEnabled())
+				{
+					return "clusters/SandstoneDefault";
+				}
+				return "expansion1::clusters/SandstoneStartCluster";
+			}
+		}
+
 		public WorldGenSettings(string worldName, List<string> traits, bool assertMissingTraits)
 		{
-			if (!SettingsCache.worlds.HasWorld(worldName))
-			{
-				DebugUtil.LogWarningArgs(new object[] { string.Format("Failed to get worldGen data for {0}. Using {1} instead", worldName, "worlds/SandstoneDefault") });
-				DebugUtil.Assert(SettingsCache.worlds.HasWorld("worlds/SandstoneDefault"));
-				worldName = "worlds/SandstoneDefault";
-			}
+			DebugUtil.Assert(SettingsCache.worlds.HasWorld(worldName), "Failed to load world " + worldName);
 			World worldData = SettingsCache.worlds.GetWorldData(worldName);
 			List<WorldTrait> list = new List<WorldTrait>();
 			if (!worldData.disableWorldTraits && traits != null)
@@ -41,13 +48,13 @@ namespace ProcGen
 							list.Add(cachedTrait);
 						}
 					}
-					goto IL_00D3;
+					goto IL_00A8;
 				}
 			}
 			Debug.Log("Generating a world without traits. Either this world has traits disabled or none were specified.");
-			IL_00D3:
+			IL_00A8:
 			this.mutatedWorldData = new MutatedWorldData(worldData, list);
-			Debug.Log("Set world to [" + worldName + "] " + SettingsCache.GetPath());
+			Debug.Log("Set world to [" + worldName + "]");
 		}
 
 		public BaseLocation GetBaseLocation()
@@ -78,6 +85,16 @@ namespace ProcGen
 				return this.world.defaultsOverrides.defaultMoveTags;
 			}
 			return SettingsCache.defaults.defaultMoveTags;
+		}
+
+		public List<StartingWorldElementSetting> GetDefaultStartingElements()
+		{
+			if (this.world != null && this.world.defaultsOverrides != null && this.world.defaultsOverrides.startingWorldElements != null)
+			{
+				DebugUtil.LogArgs(new object[] { string.Format("World '{0}' is overriding startingWorldElements", this.world.name) });
+				return this.world.defaultsOverrides.startingWorldElements;
+			}
+			return SettingsCache.defaults.startingWorldElements;
 		}
 
 		public string[] GetTraitIDs()
@@ -123,10 +140,6 @@ namespace ProcGen
 				if (!this.GetSetting<T>(this.world.defaultsOverrides, target, parser, out t))
 				{
 					this.GetSetting<T>(SettingsCache.defaults, target, parser, out t);
-				}
-				else
-				{
-					DebugUtil.LogArgs(new object[] { string.Format("World '{0}' is overriding setting '{1}'", this.world.name, target) });
 				}
 			}
 			else if (!this.GetSetting<T>(SettingsCache.defaults, target, parser, out t))
@@ -223,16 +236,16 @@ namespace ProcGen
 			return subWorld;
 		}
 
-		public List<WeightedSubWorld> GetSubworldsForWorld(List<WeightedName> subworldList)
+		public List<WeightedSubWorld> GetSubworldsForWorld(List<WeightedSubworldName> subworldList)
 		{
 			List<WeightedSubWorld> list = new List<WeightedSubWorld>();
 			foreach (KeyValuePair<string, SubWorld> keyValuePair in this.mutatedWorldData.subworlds)
 			{
-				foreach (WeightedName weightedName in subworldList)
+				foreach (WeightedSubworldName weightedSubworldName in subworldList)
 				{
-					if (keyValuePair.Key == weightedName.name)
+					if (keyValuePair.Key == weightedSubworldName.name)
 					{
-						list.Add(new WeightedSubWorld(weightedName.weight, keyValuePair.Value));
+						list.Add(new WeightedSubWorld(weightedSubworldName.weight, keyValuePair.Value, weightedSubworldName.overridePower, weightedSubworldName.minCount, weightedSubworldName.maxCount, weightedSubworldName.priority));
 					}
 				}
 			}
@@ -260,8 +273,6 @@ namespace ProcGen
 		}
 
 		private MutatedWorldData mutatedWorldData;
-
-		public const string defaultWorldName = "worlds/SandstoneDefault";
 
 		private delegate bool ParserFn<T>(string input, out T res);
 	}

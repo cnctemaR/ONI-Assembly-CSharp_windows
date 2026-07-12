@@ -9,10 +9,10 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode(GenerateProxy = true)]
 	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
-	[NativeHeader("Runtime/Export/Scripting/UnityEngineObject.bindings.h")]
 	[NativeHeader("Runtime/GameCode/CloneObject.h")]
+	[RequiredByNativeCode(GenerateProxy = true)]
+	[NativeHeader("Runtime/Export/Scripting/UnityEngineObject.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Object
 	{
@@ -255,14 +255,19 @@ namespace UnityEngine
 			Object.DestroyImmediate(obj, flag);
 		}
 
+		public static Object[] FindObjectsOfType(Type type)
+		{
+			return Object.FindObjectsOfType(type, false);
+		}
+
 		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfType")]
 		[TypeInferenceRule(TypeInferenceRules.ArrayOfTypeReferencedByFirstArgument)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Object[] FindObjectsOfType(Type type);
+		public static extern Object[] FindObjectsOfType(Type type, bool includeInactive);
 
-		[FreeFunction("GetSceneManager().DontDestroyOnLoad")]
+		[FreeFunction("GetSceneManager().DontDestroyOnLoad", ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DontDestroyOnLoad(Object target);
+		public static extern void DontDestroyOnLoad([NotNull("NullExceptionObject")] Object target);
 
 		public extern HideFlags hideFlags
 		{
@@ -278,18 +283,19 @@ namespace UnityEngine
 			Object.Destroy(obj, t);
 		}
 
-		[ExcludeFromDocs]
 		[Obsolete("use Object.Destroy instead.")]
+		[ExcludeFromDocs]
 		public static void DestroyObject(Object obj)
 		{
 			float num = 0f;
 			Object.Destroy(obj, num);
 		}
 
-		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfType")]
 		[Obsolete("warning use Object.FindObjectsOfType instead.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Object[] FindSceneObjectsOfType(Type type);
+		public static Object[] FindSceneObjectsOfType(Type type)
+		{
+			return Object.FindObjectsOfType(type);
+		}
 
 		[FreeFunction("UnityEngineObjectBindings::FindObjectsOfTypeIncludingAssets")]
 		[Obsolete("use Resources.FindObjectsOfTypeAll instead.")]
@@ -298,12 +304,22 @@ namespace UnityEngine
 
 		public static T[] FindObjectsOfType<T>() where T : Object
 		{
-			return Resources.ConvertObjects<T>(Object.FindObjectsOfType(typeof(T)));
+			return Resources.ConvertObjects<T>(Object.FindObjectsOfType(typeof(T), false));
+		}
+
+		public static T[] FindObjectsOfType<T>(bool includeInactive) where T : Object
+		{
+			return Resources.ConvertObjects<T>(Object.FindObjectsOfType(typeof(T), includeInactive));
 		}
 
 		public static T FindObjectOfType<T>() where T : Object
 		{
-			return (T)((object)Object.FindObjectOfType(typeof(T)));
+			return (T)((object)Object.FindObjectOfType(typeof(T), false));
+		}
+
+		public static T FindObjectOfType<T>(bool includeInactive) where T : Object
+		{
+			return (T)((object)Object.FindObjectOfType(typeof(T), includeInactive));
 		}
 
 		[Obsolete("Please use Resources.FindObjectsOfTypeAll instead")]
@@ -324,7 +340,24 @@ namespace UnityEngine
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		public static Object FindObjectOfType(Type type)
 		{
-			Object[] array = Object.FindObjectsOfType(type);
+			Object[] array = Object.FindObjectsOfType(type, false);
+			bool flag = array.Length != 0;
+			Object @object;
+			if (flag)
+			{
+				@object = array[0];
+			}
+			else
+			{
+				@object = null;
+			}
+			return @object;
+		}
+
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		public static Object FindObjectOfType(Type type, bool includeInactive)
+		{
+			Object[] array = Object.FindObjectsOfType(type, includeInactive);
 			bool flag = array.Length != 0;
 			Object @object;
 			if (flag)
@@ -363,20 +396,20 @@ namespace UnityEngine
 
 		[FreeFunction("CloneObject")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Object Internal_CloneSingle(Object data);
+		private static extern Object Internal_CloneSingle([NotNull("NullExceptionObject")] Object data);
 
 		[FreeFunction("CloneObject")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Object Internal_CloneSingleWithParent(Object data, Transform parent, bool worldPositionStays);
+		private static extern Object Internal_CloneSingleWithParent([NotNull("NullExceptionObject")] Object data, [NotNull("NullExceptionObject")] Transform parent, bool worldPositionStays);
 
 		[FreeFunction("InstantiateObject")]
-		private static Object Internal_InstantiateSingle(Object data, Vector3 pos, Quaternion rot)
+		private static Object Internal_InstantiateSingle([NotNull("NullExceptionObject")] Object data, Vector3 pos, Quaternion rot)
 		{
 			return Object.Internal_InstantiateSingle_Injected(data, ref pos, ref rot);
 		}
 
 		[FreeFunction("InstantiateObject")]
-		private static Object Internal_InstantiateSingleWithParent(Object data, Transform parent, Vector3 pos, Quaternion rot)
+		private static Object Internal_InstantiateSingleWithParent([NotNull("NullExceptionObject")] Object data, [NotNull("NullExceptionObject")] Transform parent, Vector3 pos, Quaternion rot)
 		{
 			return Object.Internal_InstantiateSingleWithParent_Injected(data, parent, ref pos, ref rot);
 		}
@@ -387,22 +420,22 @@ namespace UnityEngine
 
 		[FreeFunction("UnityEngineObjectBindings::GetName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetName(Object obj);
+		private static extern string GetName([NotNull("NullExceptionObject")] Object obj);
 
 		[FreeFunction("UnityEngineObjectBindings::IsPersistent")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool IsPersistent(Object obj);
+		internal static extern bool IsPersistent([NotNull("NullExceptionObject")] Object obj);
 
 		[FreeFunction("UnityEngineObjectBindings::SetName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetName(Object obj, string name);
+		private static extern void SetName([NotNull("NullExceptionObject")] Object obj, string name);
 
 		[NativeMethod(Name = "UnityEngineObjectBindings::DoesObjectWithInstanceIDExist", IsFreeFunction = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool DoesObjectWithInstanceIDExist(int instanceID);
 
-		[VisibleToOtherModules]
 		[FreeFunction("UnityEngineObjectBindings::FindObjectFromInstanceID")]
+		[VisibleToOtherModules]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Object FindObjectFromInstanceID(int instanceID);
 

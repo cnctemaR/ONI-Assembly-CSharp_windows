@@ -16,7 +16,7 @@ namespace UnityEngine.Rendering
 				bool flag = !ex.Data.Contains("InvalidImport") || !(ex.Data["InvalidImport"] is int) || (int)ex.Data["InvalidImport"] != 1;
 				if (flag)
 				{
-					Debug.LogError(ex);
+					Debug.LogException(ex);
 				}
 			}
 			return renderPipeline;

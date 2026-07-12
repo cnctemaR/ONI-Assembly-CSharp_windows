@@ -59,8 +59,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue(typeof(PerformanceCounterType), "NumberOfItems32")]
 		[MonitoringDescription("Type of this counter.")]
+		[DefaultValue(typeof(PerformanceCounterType), "NumberOfItems32")]
 		public PerformanceCounterType CounterType
 		{
 			get

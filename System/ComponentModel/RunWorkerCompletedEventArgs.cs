@@ -21,8 +21,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public new object UserState
 		{
 			get

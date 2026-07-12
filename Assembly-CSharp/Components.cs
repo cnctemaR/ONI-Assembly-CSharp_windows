@@ -34,6 +34,8 @@ public class Components
 
 	public static Components.Cmps<Ladder> Ladders = new Components.Cmps<Ladder>();
 
+	public static Components.Cmps<NavTeleporter> NavTeleporters = new Components.Cmps<NavTeleporter>();
+
 	public static Components.Cmps<ITravelTubePiece> ITravelTubePieces = new Components.Cmps<ITravelTubePiece>();
 
 	public static Components.Cmps<CreatureFeeder> CreatureFeeders = new Components.Cmps<CreatureFeeder>();
@@ -46,7 +48,7 @@ public class Components
 
 	public static Components.Cmps<Diggable> Diggables = new Components.Cmps<Diggable>();
 
-	public static Components.Cmps<ResearchCenter> ResearchCenters = new Components.Cmps<ResearchCenter>();
+	public static Components.Cmps<IResearchCenter> ResearchCenters = new Components.Cmps<IResearchCenter>();
 
 	public static Components.Cmps<Harvestable> Harvestables = new Components.Cmps<Harvestable>();
 
@@ -112,9 +114,41 @@ public class Components
 
 	public static Components.Cmps<BuildingComplete> TemplateBuildings = new Components.Cmps<BuildingComplete>();
 
+	public static Components.Cmps<Teleporter> Teleporters = new Components.Cmps<Teleporter>();
+
+	public static Components.Cmps<MutantPlant> MutantPlants = new Components.Cmps<MutantPlant>();
+
+	public static Components.Cmps<LandingBeacon.Instance> LandingBeacons = new Components.Cmps<LandingBeacon.Instance>();
+
+	public static Components.Cmps<HighEnergyParticle> HighEnergyParticles = new Components.Cmps<HighEnergyParticle>();
+
+	public static Components.Cmps<HighEnergyParticlePort> HighEnergyParticlePorts = new Components.Cmps<HighEnergyParticlePort>();
+
+	public static Components.Cmps<Clustercraft> Clustercrafts = new Components.Cmps<Clustercraft>();
+
+	public static Components.Cmps<ClustercraftInteriorDoor> ClusterCraftInteriorDoors = new Components.Cmps<ClustercraftInteriorDoor>();
+
+	public static Components.Cmps<PassengerRocketModule> PassengerRocketModules = new Components.Cmps<PassengerRocketModule>();
+
+	public static Components.Cmps<LaunchPad> LaunchPads = new Components.Cmps<LaunchPad>();
+
+	public static Components.Cmps<WarpReceiver> WarpReceivers = new Components.Cmps<WarpReceiver>();
+
+	public static Components.Cmps<RocketControlStation> RocketControlStations = new Components.Cmps<RocketControlStation>();
+
+	public static Components.Cmps<Reactor> NuclearReactors = new Components.Cmps<Reactor>();
+
+	public static Components.Cmps<BuildingComplete> EntombedBuildings = new Components.Cmps<BuildingComplete>();
+
+	public static Components.Cmps<SpaceArtifact> SpaceArtifacts = new Components.Cmps<SpaceArtifact>();
+
+	public static Components.Cmps<ArtifactAnalysisStationWorkable> ArtifactAnalysisStations = new Components.Cmps<ArtifactAnalysisStationWorkable>();
+
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 
 	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
+
+	public static Components.Cmps<BeeHive.StatesInstance> BeeHives = new Components.Cmps<BeeHive.StatesInstance>();
 
 	public class Cmps<T> : ICollection, IEnumerable
 	{
@@ -195,6 +229,24 @@ public class Components
 		{
 			this.OnAdd -= on_add;
 			this.OnRemove -= on_remove;
+		}
+
+		public List<T> GetWorldItems(int worldId, bool checkChildWorlds = false)
+		{
+			List<T> list = new List<T>();
+			foreach (T t in this.Items)
+			{
+				bool flag = (t as KMonoBehaviour).GetMyWorldId() == worldId;
+				if (!flag && checkChildWorlds && (t as KMonoBehaviour).GetMyWorld().ParentWorldId == worldId)
+				{
+					flag = true;
+				}
+				if (flag)
+				{
+					list.Add(t);
+				}
+			}
+			return list;
 		}
 
 		public event Action<T> OnAdd;

@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
+	[NativeHeader("Runtime/Profiler/Marker.h")]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Profiler/Marker.h")]
 	public sealed class CustomSampler : Sampler
 	{
 		internal CustomSampler()
@@ -20,9 +20,9 @@ namespace UnityEngine.Profiling
 			this.m_Ptr = ptr;
 		}
 
-		public static CustomSampler Create(string name)
+		public static CustomSampler Create(string name, bool collectGpuData = false)
 		{
-			IntPtr intPtr = CustomSampler.CreateInternal(name);
+			IntPtr intPtr = CustomSampler.CreateInternal(name, collectGpuData);
 			bool flag = intPtr == IntPtr.Zero;
 			CustomSampler customSampler;
 			if (flag)
@@ -38,27 +38,37 @@ namespace UnityEngine.Profiling
 
 		[NativeMethod(Name = "ProfilerBindings::CreateCustomSamplerInternal", IsFreeFunction = true, ThrowsException = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr CreateInternal([NotNull] string name);
+		private static extern IntPtr CreateInternal([NotNull("ArgumentNullException")] string name, bool collectGpuData);
 
 		[Conditional("ENABLE_PROFILER")]
-		[NativeMethod(Name = "ProfilerBindings::CustomSampler_Begin", IsFreeFunction = true, HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Begin();
+		public void Begin()
+		{
+			CustomSampler.Begin_Internal(this.m_Ptr);
+		}
 
 		[Conditional("ENABLE_PROFILER")]
 		public void Begin(Object targetObject)
 		{
-			this.BeginWithObject(targetObject);
+			CustomSampler.BeginWithObject_Internal(this.m_Ptr, targetObject);
 		}
 
-		[NativeMethod(Name = "ProfilerBindings::CustomSampler_BeginWithObject", IsFreeFunction = true, HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void BeginWithObject(Object targetObject);
-
-		[NativeMethod(Name = "ProfilerBindings::CustomSampler_End", IsFreeFunction = true, HasExplicitThis = true, IsThreadSafe = true)]
 		[Conditional("ENABLE_PROFILER")]
+		public void End()
+		{
+			CustomSampler.End_Internal(this.m_Ptr);
+		}
+
+		[NativeMethod(Name = "ProfilerBindings::CustomSampler_Begin", IsFreeFunction = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void End();
+		private static extern void Begin_Internal(IntPtr ptr);
+
+		[NativeMethod(Name = "ProfilerBindings::CustomSampler_BeginWithObject", IsFreeFunction = true, IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginWithObject_Internal(IntPtr ptr, Object targetObject);
+
+		[NativeMethod(Name = "ProfilerBindings::CustomSampler_End", IsFreeFunction = true, IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void End_Internal(IntPtr ptr);
 
 		internal static CustomSampler s_InvalidCustomSampler = new CustomSampler();
 	}

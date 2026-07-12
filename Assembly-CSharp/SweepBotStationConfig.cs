@@ -35,7 +35,7 @@ public class SweepBotStationConfig : IBuildingConfig
 		storage.showInUI = true;
 		storage.allowItemRemoval = false;
 		storage.ignoreSourcePriority = true;
-		storage.showDescriptor = true;
+		storage.showDescriptor = false;
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage.fetchCategory = Storage.FetchCategory.Building;
@@ -51,8 +51,9 @@ public class SweepBotStationConfig : IBuildingConfig
 		storage2.fetchCategory = Storage.FetchCategory.StorageSweepOnly;
 		storage2.capacityKg = 1000f;
 		storage2.allowClearable = true;
-		go.AddOrGet<CharacterOverlay>();
-		go.AddOrGet<SweepBotStation>();
+		storage2.showCapacityStatusItem = true;
+		go.AddOrGet<CharacterOverlay>().shouldShowName = true;
+		go.AddOrGet<SweepBotStation>().SetStorages(storage, storage2);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -61,4 +62,6 @@ public class SweepBotStationConfig : IBuildingConfig
 	}
 
 	public const string ID = "SweepBotStation";
+
+	public const float POWER_USAGE = 240f;
 }

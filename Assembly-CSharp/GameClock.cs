@@ -97,6 +97,11 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		return this.timeSinceStartOfCycle + (float)this.cycle * 600f;
 	}
 
+	public float GetTimeInCycles()
+	{
+		return (float)this.cycle + this.GetCurrentCycleAsPercentage();
+	}
+
 	public int GetFrame()
 	{
 		return this.frame;
@@ -110,6 +115,11 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 	public bool IsNighttime()
 	{
 		return GameClock.Instance.GetCurrentCycleAsPercentage() >= 0.875f;
+	}
+
+	public float GetDaytimeDurationInPercentage()
+	{
+		return 0.875f;
 	}
 
 	public void SetTime(float new_time)
@@ -155,7 +165,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		while (File.Exists(text))
 		{
 			text = text2.Replace(".sav", "");
-			text = SaveScreen.GetValidSaveFilename(string.Concat(new object[] { text2, " (", num3, ")" }));
+			text = SaveScreen.GetValidSaveFilename(text2 + " (" + num3.ToString() + ")");
 			num3++;
 		}
 		Game.Instance.StartDelayedSave(text, true, false);

@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class LightBugBabyConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = LightBugConfig.CreateLightBug("LightBugBaby", CREATURES.SPECIES.LIGHTBUG.BABY.NAME, CREATURES.SPECIES.LIGHTBUG.BABY.DESC, "baby_lightbug_kanim", true);
-		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "LightBug", null);
+		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "LightBug", null, false, 5f);
 		gameObject.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightSource, false);
 		return gameObject;
 	}

@@ -114,6 +114,21 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		return null;
 	}
 
+	protected static KleiMetrics.ExpansionsMetricsData[] Expansions()
+	{
+		List<string> ownedDLCIds = DlcManager.GetOwnedDLCIds();
+		KleiMetrics.ExpansionsMetricsData[] array = new KleiMetrics.ExpansionsMetricsData[ownedDLCIds.Count];
+		for (int i = 0; i < ownedDLCIds.Count; i++)
+		{
+			array[i] = new KleiMetrics.ExpansionsMetricsData
+			{
+				Name = ownedDLCIds[i],
+				Activated = DlcManager.IsContentActive(ownedDLCIds[i])
+			};
+		}
+		return array;
+	}
+
 	public void SetLastUserAction(long lastUserActionTicks)
 	{
 		if (!this.enabled)
@@ -254,6 +269,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			this.SetStaticSessionVariable("KU", KleiAccount.KleiUserID);
 		}
+		this.SetStaticSessionVariable("Expansions", KleiMetrics.Expansions());
 	}
 
 	private Dictionary<string, object> GetUserSession()
@@ -597,6 +613,8 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	public const string SaveFolderWriteTest = "SaveFolderWriteTest";
 
+	public const string ExpansionsFieldName = "Expansions";
+
 	private string PlatformUserIDFieldName;
 
 	private static int sessionID = -1;
@@ -646,5 +664,12 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		public string clientKey;
 
 		public Dictionary<string, object> metricData;
+	}
+
+	protected struct ExpansionsMetricsData
+	{
+		public string Name;
+
+		public bool Activated;
 	}
 }

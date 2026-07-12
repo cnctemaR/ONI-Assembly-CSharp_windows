@@ -162,7 +162,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.requiredTagBits = new TagBits(required_tags);
 		this.forbiddenTagBits = new TagBits(forbidden_tags);
 		this.tagBitsHash = this.tagBits.GetHashCode();
-		DebugUtil.DevAssert(!this.tagBits.HasAny(ref FetchManager.disallowedTagBits), "Fetch chore fetching invalid tags.");
+		DebugUtil.DevAssert(!this.tagBits.HasAny(ref FetchManager.disallowedTagBits), "Fetch chore fetching invalid tags.", null);
 		if (destination.GetOnlyFetchMarkedItems())
 		{
 			this.requiredTagBits.SetTag(GameTags.Garbage);

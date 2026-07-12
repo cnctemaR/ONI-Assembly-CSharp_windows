@@ -16,7 +16,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 				bool flag = value < 0f || value > 1f;
 				if (flag)
 				{
-					throw new ArgumentOutOfRangeException("Red color (" + value + ") must be in range [0;1].");
+					throw new ArgumentOutOfRangeException("Red color (" + value.ToString() + ") must be in range [0;1].");
 				}
 				this.m_red = value;
 			}
@@ -33,7 +33,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 				bool flag = value < 0f || value > 1f;
 				if (flag)
 				{
-					throw new ArgumentOutOfRangeException("Green color (" + value + ") must be in range [0;1].");
+					throw new ArgumentOutOfRangeException("Green color (" + value.ToString() + ") must be in range [0;1].");
 				}
 				this.m_green = value;
 			}
@@ -50,7 +50,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 				bool flag = value < 0f || value > 1f;
 				if (flag)
 				{
-					throw new ArgumentOutOfRangeException("Blue color (" + value + ") must be in range [0;1].");
+					throw new ArgumentOutOfRangeException("Blue color (" + value.ToString() + ") must be in range [0;1].");
 				}
 				this.m_blue = value;
 			}
@@ -67,7 +67,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 				bool flag = value < 0f;
 				if (flag)
 				{
-					throw new ArgumentOutOfRangeException("Intensity (" + value + ") must be positive.");
+					throw new ArgumentOutOfRangeException("Intensity (" + value.ToString() + ") must be positive.");
 				}
 				this.m_intensity = value;
 			}
@@ -77,9 +77,23 @@ namespace UnityEngine.Experimental.GlobalIllumination
 		{
 			Color color2 = (GraphicsSettings.lightsUseLinearIntensity ? color.linear.RGBMultiplied(intensity) : color.RGBMultiplied(intensity).linear);
 			float maxColorComponent = color2.maxColorComponent;
-			bool flag = maxColorComponent <= 0f;
-			LinearColor linearColor;
+			bool flag = color2.r < 0f || color2.g < 0f || color2.b < 0f;
 			if (flag)
+			{
+				throw new ArgumentOutOfRangeException(string.Concat(new string[]
+				{
+					"The input color to be converted must not contain negative values (red: ",
+					color2.r.ToString(),
+					", green: ",
+					color2.g.ToString(),
+					", blue: ",
+					color2.b.ToString(),
+					")."
+				}));
+			}
+			bool flag2 = maxColorComponent <= 1E-20f;
+			LinearColor linearColor;
+			if (flag2)
 			{
 				linearColor = LinearColor.Black();
 			}

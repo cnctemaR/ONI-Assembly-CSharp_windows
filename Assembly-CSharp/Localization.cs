@@ -1023,7 +1023,16 @@ public static class Localization
 
 		public override string ToString()
 		{
-			return string.Concat(new object[] { this.mCode, ":", this.mLanguage, ":", this.mDirection, ":", this.mFontName });
+			return string.Concat(new string[]
+			{
+				this.mCode,
+				":",
+				this.mLanguage.ToString(),
+				":",
+				this.mDirection.ToString(),
+				":",
+				this.mFontName
+			});
 		}
 
 		private Localization.Language mLanguage;

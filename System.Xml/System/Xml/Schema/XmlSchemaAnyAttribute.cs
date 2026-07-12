@@ -19,8 +19,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("processContents")]
 		[DefaultValue(XmlSchemaContentProcessing.None)]
+		[XmlAttribute("processContents")]
 		public XmlSchemaContentProcessing ProcessContents
 		{
 			get

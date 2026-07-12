@@ -392,26 +392,42 @@ namespace UnityEngine.UI
 			Vector3 vector = Quaternion.Inverse(base.transform.rotation) * dir;
 			Vector3 vector2 = base.transform.TransformPoint(Selectable.GetPointOnRectEdge(base.transform as RectTransform, vector));
 			float num = float.NegativeInfinity;
+			float num2 = float.NegativeInfinity;
+			bool flag = this.navigation.wrapAround && (this.m_Navigation.mode == Navigation.Mode.Vertical || this.m_Navigation.mode == Navigation.Mode.Horizontal);
 			Selectable selectable = null;
+			Selectable selectable2 = null;
 			for (int i = 0; i < Selectable.s_SelectableCount; i++)
 			{
-				Selectable selectable2 = Selectable.s_Selectables[i];
-				if (!(selectable2 == this) && selectable2.IsInteractable() && selectable2.navigation.mode != Navigation.Mode.None)
+				Selectable selectable3 = Selectable.s_Selectables[i];
+				if (!(selectable3 == this) && selectable3.IsInteractable() && selectable3.navigation.mode != Navigation.Mode.None)
 				{
-					RectTransform rectTransform = selectable2.transform as RectTransform;
+					RectTransform rectTransform = selectable3.transform as RectTransform;
 					Vector3 vector3 = ((rectTransform != null) ? rectTransform.rect.center : Vector3.zero);
-					Vector3 vector4 = selectable2.transform.TransformPoint(vector3) - vector2;
-					float num2 = Vector3.Dot(dir, vector4);
-					if (num2 > 0f)
+					Vector3 vector4 = selectable3.transform.TransformPoint(vector3) - vector2;
+					float num3 = Vector3.Dot(dir, vector4);
+					if (flag && num3 < 0f)
 					{
-						float num3 = num2 / vector4.sqrMagnitude;
-						if (num3 > num)
+						float num4 = -num3 * vector4.sqrMagnitude;
+						if (num4 > num2)
 						{
-							num = num3;
-							selectable = selectable2;
+							num2 = num4;
+							selectable2 = selectable3;
+						}
+					}
+					else if (num3 > 0f)
+					{
+						float num4 = num3 / vector4.sqrMagnitude;
+						if (num4 > num)
+						{
+							num = num4;
+							selectable = selectable3;
 						}
 					}
 				}
+			}
+			if (flag && null == selectable)
+			{
+				return selectable2;
 			}
 			return selectable;
 		}

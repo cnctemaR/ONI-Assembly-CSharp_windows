@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace UnityEngine.Rendering
 {
 	public abstract class RenderPipeline
 	{
 		protected abstract void Render(ScriptableRenderContext context, Camera[] cameras);
+
+		protected virtual void ProcessRenderRequests(ScriptableRenderContext context, Camera camera, List<Camera.RenderRequest> renderRequests)
+		{
+		}
 
 		protected static void BeginFrameRendering(ScriptableRenderContext context, Camera[] cameras)
 		{
@@ -34,6 +39,16 @@ namespace UnityEngine.Rendering
 				throw new ObjectDisposedException(string.Format("{0} has been disposed. Do not call Render on disposed a RenderPipeline.", this));
 			}
 			this.Render(context, cameras);
+		}
+
+		internal void InternalRenderWithRequests(ScriptableRenderContext context, Camera[] cameras, List<Camera.RenderRequest> renderRequests)
+		{
+			bool disposed = this.disposed;
+			if (disposed)
+			{
+				throw new ObjectDisposedException(string.Format("{0} has been disposed. Do not call Render on disposed a RenderPipeline.", this));
+			}
+			this.ProcessRenderRequests(context, (cameras == null || cameras.Length == 0) ? null : cameras[0], renderRequests);
 		}
 
 		public bool disposed { get; private set; }

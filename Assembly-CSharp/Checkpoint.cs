@@ -20,7 +20,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		base.smi.StartSM();
 		if (Checkpoint.infoStatusItem_Logic == null)
 		{
-			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			Checkpoint.infoStatusItem_Logic = new StatusItem("CheckpointLogic", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			Checkpoint.infoStatusItem_Logic.resolveStringCallback = new Func<string, object, string>(Checkpoint.ResolveInfoStatusItem_Logic);
 		}
 		this.Refresh(this.redLight);

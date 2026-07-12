@@ -51,7 +51,7 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 			default_state = this.drink_move;
 			base.Target(this.drinker);
 			this.drink_move.InitializeStates(this.drinker, this.masterTarget, this.drink, null, null, null);
-			this.drink.ToggleAnims("anim_interacts_watercooler_kanim", 0f).DefaultState(this.drink.drink);
+			this.drink.ToggleAnims("anim_interacts_watercooler_kanim", 0f, "").DefaultState(this.drink.drink);
 			this.drink.drink.Face(this.masterTarget, 0.5f).PlayAnim("working_pre").QueueAnim("working_loop", false, null)
 				.OnAnimQueueComplete(this.drink.post);
 			this.drink.post.Enter("Drink", new StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State.Callback(this.Drink)).PlayAnim("working_pst").OnAnimQueueComplete(this.chat_move);
@@ -64,9 +64,10 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 		{
 			Storage storage = this.masterTarget.Get<Storage>(smi);
 			Worker worker = this.stateTarget.Get<Worker>(smi);
-			SimUtil.DiseaseInfo diseaseInfo;
 			float num;
-			storage.ConsumeAndGetDisease(GameTags.Water, 1f, out diseaseInfo, out num);
+			SimUtil.DiseaseInfo diseaseInfo;
+			float num2;
+			storage.ConsumeAndGetDisease(GameTags.Water, 1f, out num, out diseaseInfo, out num2);
 			GermExposureMonitor.Instance smi2 = worker.GetSMI<GermExposureMonitor.Instance>();
 			if (smi2 != null)
 			{

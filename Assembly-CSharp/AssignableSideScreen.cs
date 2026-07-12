@@ -52,7 +52,7 @@ public class AssignableSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<Assignable>() != null;
+		return target.GetComponent<Assignable>() != null && target.GetComponent<Assignable>().CanBeAssigned && target.GetComponent<AssignmentGroupController>() == null;
 	}
 
 	public override void SetTarget(GameObject target)

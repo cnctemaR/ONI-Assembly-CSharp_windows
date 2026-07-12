@@ -137,7 +137,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 			{
 				return;
 			}
-			ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
+			ushort circuitID = circuitManager.GetCircuitID(this.generator);
 			bool flag = circuitManager.HasBatteries(circuitID);
 			bool flag2 = false;
 			if (!flag && circuitManager.HasConsumers(circuitID))
@@ -183,7 +183,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		bool flag = false;
 		if (circuitManager != null)
 		{
-			ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
+			ushort circuitID = circuitManager.GetCircuitID(this.generator);
 			bool flag2 = circuitManager.HasBatteries(circuitID);
 			flag = (flag2 && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < 1f) || (!flag2 && circuitManager.HasConsumers(circuitID));
 		}
@@ -262,7 +262,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.off;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.off.EventTransition(GameHashes.OperationalChanged, this.on, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsOperational).PlayAnim("off");
 			this.on.EventTransition(GameHashes.OperationalChanged, this.off, (ManualGenerator.GeneratePowerSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.working.pre, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsActive).PlayAnim("on");
 			this.working.DefaultState(this.working.pre);

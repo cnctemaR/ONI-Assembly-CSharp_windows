@@ -11,8 +11,8 @@ namespace System.Diagnostics
 		{
 		}
 
-		[MonitoringDescription("The base priority of this thread.")]
 		[MonoTODO]
+		[MonitoringDescription("The base priority of this thread.")]
 		public int BasePriority
 		{
 			get
@@ -31,8 +31,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("The ID of this thread.")]
+		[MonoTODO]
 		public int Id
 		{
 			get
@@ -50,8 +50,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("Thread gets a priority boot when interactively used by a user.")]
+		[MonoTODO]
 		public bool PriorityBoostEnabled
 		{
 			get
@@ -115,8 +115,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[MonitoringDescription("The current state of this thread.")]
+		[MonoTODO]
 		public ThreadState ThreadState
 		{
 			get
@@ -125,8 +125,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The total amount of CPU time used.")]
 		[MonoTODO]
+		[MonitoringDescription("The total amount of CPU time used.")]
 		public TimeSpan TotalProcessorTime
 		{
 			get
@@ -145,8 +145,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The reason why this thread is waiting.")]
 		[MonoTODO]
+		[MonitoringDescription("The reason why this thread is waiting.")]
 		public ThreadWaitReason WaitReason
 		{
 			get

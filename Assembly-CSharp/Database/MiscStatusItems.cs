@@ -14,12 +14,12 @@ namespace Database
 
 		private StatusItem CreateStatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 129022)
 		{
-			return base.Add(new StatusItem(id, prefix, icon, icon_type, notification_type, allow_multiples, render_overlay, showWorldIcon, status_overlays));
+			return base.Add(new StatusItem(id, prefix, icon, icon_type, notification_type, allow_multiples, render_overlay, showWorldIcon, status_overlays, null));
 		}
 
 		private StatusItem CreateStatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 129022)
 		{
-			return base.Add(new StatusItem(id, name, tooltip, icon, icon_type, notification_type, allow_multiples, render_overlay, status_overlays));
+			return base.Add(new StatusItem(id, name, tooltip, icon, icon_type, notification_type, allow_multiples, render_overlay, status_overlays, true, null));
 		}
 
 		private void CreateStatusItems()
@@ -229,6 +229,26 @@ namespace Database
 			this.RegionIsBlocked = this.CreateStatusItem("RegionIsBlocked", "MISC", "status_item_solids_blocking", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.AwaitingStudy = this.CreateStatusItem("AwaitingStudy", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.Studied = this.CreateStatusItem("Studied", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.HighEnergyParticleCount = this.CreateStatusItem("HighEnergyParticleCount", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.HighEnergyParticleCount.resolveStringCallback = (string str, object data) => GameUtil.GetFormattedHighEnergyParticles(((GameObject)data).GetComponent<HighEnergyParticle>().payload, GameUtil.TimeSlice.None);
+			this.Durability = this.CreateStatusItem("Durability", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.Durability.resolveStringCallback = delegate(string str, object data)
+			{
+				Durability component6 = ((GameObject)data).GetComponent<Durability>();
+				str = str.Replace("{durability}", GameUtil.GetFormattedPercent(component6.GetDurability() * 100f, GameUtil.TimeSlice.None));
+				return str;
+			};
+			this.StoredItemDurability = this.CreateStatusItem("StoredItemDurability", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.StoredItemDurability.resolveStringCallback = delegate(string str, object data)
+			{
+				Durability component7 = ((GameObject)data).GetComponent<Durability>();
+				float num = ((component7 != null) ? (component7.GetDurability() * 100f) : 100f);
+				str = str.Replace("{durability}", GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None));
+				return str;
+			};
+			this.ArtifactEntombed = this.CreateStatusItem("ArtifactEntombed", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.TearOpen = this.CreateStatusItem("TearOpen", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.TearClosed = this.CreateStatusItem("TearClosed", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 		}
 
 		public StatusItem MarkedForDisinfection;
@@ -312,5 +332,17 @@ namespace Database
 		public StatusItem StudiedGeyserTimeRemaining;
 
 		public StatusItem Space;
+
+		public StatusItem HighEnergyParticleCount;
+
+		public StatusItem Durability;
+
+		public StatusItem StoredItemDurability;
+
+		public StatusItem ArtifactEntombed;
+
+		public StatusItem TearOpen;
+
+		public StatusItem TearClosed;
 	}
 }

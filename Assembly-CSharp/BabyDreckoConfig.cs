@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class BabyDreckoConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = DreckoConfig.CreateDrecko("DreckoBaby", CREATURES.SPECIES.DRECKO.BABY.NAME, CREATURES.SPECIES.DRECKO.BABY.DESC, "baby_drecko_kanim", true);
-		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "Drecko", null);
+		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "Drecko", null, false, 5f);
 		return gameObject;
 	}
 

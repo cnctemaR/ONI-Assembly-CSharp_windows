@@ -39,7 +39,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			KAnimControllerBase kanimControllerBase = component;
 			kanimControllerBase.OnUpdateBounds = (Action<Bounds>)Delegate.Combine(kanimControllerBase.OnUpdateBounds, new Action<Bounds>(this.OnUpdateBounds));
 		}
-		GameUtil.SubscribeToTags<MinionIdentity>(this, MinionIdentity.OnDeadTagChangedDelegate);
+		GameUtil.SubscribeToTags<MinionIdentity>(this, MinionIdentity.OnDeadTagAddedDelegate, true);
 	}
 
 	protected override void OnSpawn()
@@ -378,7 +378,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	private static MinionIdentity.NameList femaleNameList;
 
-	private static readonly EventSystem.IntraObjectHandler<MinionIdentity> OnDeadTagChangedDelegate = GameUtil.CreateHasTagHandler<MinionIdentity>(GameTags.Dead, delegate(MinionIdentity component, object data)
+	private static readonly EventSystem.IntraObjectHandler<MinionIdentity> OnDeadTagAddedDelegate = GameUtil.CreateHasTagHandler<MinionIdentity>(GameTags.Dead, delegate(MinionIdentity component, object data)
 	{
 		component.OnDied(data);
 	});

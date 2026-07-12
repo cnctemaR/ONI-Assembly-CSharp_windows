@@ -19,13 +19,6 @@ public class Turbine : KMonoBehaviour
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			this.srcCells[i] = Grid.OffsetCell(num, new CellOffset(num2, -1));
 			this.destCells[i] = Grid.OffsetCell(num, new CellOffset(num2, def.HeightInCells - 1));
-			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.SetCellProperties(num3, 39);
-			Grid.Foundation[num3] = true;
-			Grid.SetSolid(num3, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
-			Grid.RenderedByWorld[num3] = false;
-			World.Instance.OnSolidChanged(num3);
-			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
 		this.smi = new Turbine.Instance(this);
 		this.smi.StartSM();
@@ -43,19 +36,6 @@ public class Turbine : KMonoBehaviour
 		if (this.smi != null)
 		{
 			this.smi.StopSM("cleanup");
-		}
-		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < def.WidthInCells; i++)
-		{
-			int num2 = i - (def.WidthInCells - 1) / 2;
-			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.ClearCellProperties(num3, 39);
-			Grid.Foundation[num3] = false;
-			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
-			Grid.RenderedByWorld[num3] = true;
-			World.Instance.OnSolidChanged(num3);
-			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
 		Game.Instance.massEmitCallbackManager.Release(this.simEmitCBHandle, "Turbine");
 		this.simEmitCBHandle.Clear();
@@ -136,17 +116,17 @@ public class Turbine : KMonoBehaviour
 
 	public static void InitializeStatusItems()
 	{
-		Turbine.inputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_INPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
-		Turbine.outputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_OUTPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
-		Turbine.spinningUpStatusItem = new StatusItem("TURBINE_SPINNING_UP", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
-		Turbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+		Turbine.inputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_INPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
+		Turbine.outputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_OUTPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
+		Turbine.spinningUpStatusItem = new StatusItem("TURBINE_SPINNING_UP", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022, null);
+		Turbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022, null);
 		Turbine.activeStatusItem.resolveStringCallback = delegate(string str, object data)
 		{
 			Turbine turbine = (Turbine)data;
 			str = string.Format(str, (int)turbine.currentRPM);
 			return str;
 		};
-		Turbine.insufficientMassStatusItem = new StatusItem("TURBINE_INSUFFICIENT_MASS", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
+		Turbine.insufficientMassStatusItem = new StatusItem("TURBINE_INSUFFICIENT_MASS", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022, null);
 		Turbine.insufficientMassStatusItem.resolveTooltipCallback = delegate(string str, object data)
 		{
 			Turbine turbine2 = (Turbine)data;
@@ -154,7 +134,7 @@ public class Turbine : KMonoBehaviour
 			str = str.Replace("{SRC_ELEMENT}", ElementLoader.FindElementByHash(turbine2.srcElem).name);
 			return str;
 		};
-		Turbine.insufficientTemperatureStatusItem = new StatusItem("TURBINE_INSUFFICIENT_TEMPERATURE", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
+		Turbine.insufficientTemperatureStatusItem = new StatusItem("TURBINE_INSUFFICIENT_TEMPERATURE", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022, null);
 		Turbine.insufficientTemperatureStatusItem.resolveStringCallback = new Func<string, object, string>(Turbine.ResolveStrings);
 		Turbine.insufficientTemperatureStatusItem.resolveTooltipCallback = new Func<string, object, string>(Turbine.ResolveStrings);
 	}
@@ -227,8 +207,6 @@ public class Turbine : KMonoBehaviour
 
 	private static StatusItem spinningUpStatusItem;
 
-	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
-
 	private MeterController meter;
 
 	private HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle simEmitCBHandle = HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.InvalidHandle;
@@ -239,7 +217,7 @@ public class Turbine : KMonoBehaviour
 		{
 			Turbine.InitializeStatusItems();
 			default_state = this.operational;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.inoperational.EventTransition(GameHashes.OperationalChanged, this.operational.spinningUp, (Turbine.Instance smi) => smi.master.GetComponent<Operational>().IsOperational).QueueAnim("off", false, null).Enter(delegate(Turbine.Instance smi)
 			{
 				smi.master.currentRPM = 0f;

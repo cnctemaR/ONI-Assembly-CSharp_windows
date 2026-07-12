@@ -8,7 +8,7 @@ public class YellowAlertManager : GameStateMachine<YellowAlertManager, YellowAle
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.off;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.off.ParamTransition<bool>(this.isOn, this.on, GameStateMachine<YellowAlertManager, YellowAlertManager.Instance, IStateMachineTarget, object>.IsTrue);
 		this.on.Enter("EnterEvent", delegate(YellowAlertManager.Instance smi)
 		{
@@ -83,6 +83,6 @@ public class YellowAlertManager : GameStateMachine<YellowAlertManager, YellowAle
 
 		private bool hasTopPriorityChore;
 
-		public Notification notification = new Notification(MISC.NOTIFICATIONS.YELLOWALERT.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.YELLOWALERT.TOOLTIP, null, false, 0f, null, null, null, true);
+		public Notification notification = new Notification(MISC.NOTIFICATIONS.YELLOWALERT.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.YELLOWALERT.TOOLTIP, null, false, 0f, null, null, null, true);
 	}
 }

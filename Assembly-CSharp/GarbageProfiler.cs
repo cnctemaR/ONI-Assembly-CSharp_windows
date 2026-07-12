@@ -70,13 +70,13 @@ public static class GarbageProfiler
 						MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(typeData.type, GarbageProfiler.previousSnapshot.types);
 						num = typeData.instanceCount - typeData2.instanceCount;
 					}
-					streamWriter.WriteLine(string.Concat(new object[]
+					streamWriter.WriteLine(string.Concat(new string[]
 					{
-						num,
+						num.ToString(),
 						",",
-						typeData.instanceCount,
+						typeData.instanceCount.ToString(),
 						",",
-						typeData.numArrayEntries,
+						typeData.numArrayEntries.ToString(),
 						",\"",
 						typeData.type.ToString(),
 						"\""
@@ -103,11 +103,11 @@ public static class GarbageProfiler
 								num2 = keyValuePair.Value - num3;
 							}
 						}
-						streamWriter2.WriteLine(string.Concat(new object[]
+						streamWriter2.WriteLine(string.Concat(new string[]
 						{
-							num2,
+							num2.ToString(),
 							",",
-							keyValuePair.Value,
+							keyValuePair.Value.ToString(),
 							", \"",
 							typeData3.type.ToString(),
 							": ",
@@ -142,11 +142,11 @@ public static class GarbageProfiler
 						MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(typeData.type, GarbageProfiler.previousSnapshot.types);
 						num = typeData.instanceCount - typeData2.instanceCount;
 					}
-					streamWriter.WriteLine(string.Concat(new object[]
+					streamWriter.WriteLine(string.Concat(new string[]
 					{
-						num,
+						num.ToString(),
 						", ",
-						typeData.instanceCount,
+						typeData.instanceCount.ToString(),
 						", \"",
 						typeData.type.ToString(),
 						"\""
@@ -167,11 +167,11 @@ public static class GarbageProfiler
 						MemorySnapshot.TypeData typeData4 = MemorySnapshot.GetTypeData(typeData3.type, GarbageProfiler.previousSnapshot.types);
 						num2 = typeData3.refCount - typeData4.refCount;
 					}
-					streamWriter2.WriteLine(string.Concat(new object[]
+					streamWriter2.WriteLine(string.Concat(new string[]
 					{
-						num2,
+						num2.ToString(),
 						", ",
-						typeData3.refCount,
+						typeData3.refCount.ToString(),
 						", \"",
 						typeData3.type.ToString(),
 						"\""
@@ -198,7 +198,15 @@ public static class GarbageProfiler
 						}
 					}
 				}
-				streamWriter3.WriteLine(string.Concat(new object[] { num3, ", ", fieldCount.count, ", \"", fieldCount.name, "\"" }));
+				streamWriter3.WriteLine(string.Concat(new string[]
+				{
+					num3.ToString(),
+					", ",
+					fieldCount.count.ToString(),
+					", \"",
+					fieldCount.name,
+					"\""
+				}));
 			}
 		}
 		memorySnapshot.WriteTypeDetails(GarbageProfiler.previousSnapshot);

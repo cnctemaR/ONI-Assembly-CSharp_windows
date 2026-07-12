@@ -62,7 +62,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		get
 		{
-			return this.TotalSkillPointsGained - this.SkillsMastered;
+			return this.TotalSkillPointsGained - this.SkillsMastered + ((this.GrantedSkillIDs == null) ? 0 : this.GrantedSkillIDs.Count);
 		}
 	}
 
@@ -94,11 +94,27 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (this.GrantedSkillIDs == null)
+		{
+			this.GrantedSkillIDs = new List<string>();
+		}
+		List<string> list = new List<string>();
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
-			if (keyValuePair.Value)
+			if (keyValuePair.Value && Db.Get().Skills.Get(keyValuePair.Key).deprecated)
 			{
-				Skill skill = Db.Get().Skills.Get(keyValuePair.Key);
+				list.Add(keyValuePair.Key);
+			}
+		}
+		foreach (string text in list)
+		{
+			this.UnmasterSkill(text);
+		}
+		foreach (KeyValuePair<string, bool> keyValuePair2 in this.MasteryBySkillID)
+		{
+			if (keyValuePair2.Value)
+			{
+				Skill skill = Db.Get().Skills.Get(keyValuePair2.Key);
 				foreach (SkillPerk skillPerk in skill.perks)
 				{
 					if (skillPerk.OnRemove != null)
@@ -120,11 +136,13 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		this.UpdateMorale();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		MinionResume.ApplyHat(this.currentHat, component);
+		this.ShowNewSkillPointNotification();
 	}
 
-	public void RestoreResume(Dictionary<string, bool> MasteryBySkillID, Dictionary<HashedString, float> AptitudeBySkillGroup, float totalExperienceGained)
+	public void RestoreResume(Dictionary<string, bool> MasteryBySkillID, Dictionary<HashedString, float> AptitudeBySkillGroup, List<string> GrantedSkillIDs, float totalExperienceGained)
 	{
 		this.MasteryBySkillID = MasteryBySkillID;
+		this.GrantedSkillIDs = ((GrantedSkillIDs != null) ? GrantedSkillIDs : new List<string>());
 		this.AptitudeBySkillGroup = AptitudeBySkillGroup;
 		this.totalExperienceGained = totalExperienceGained;
 	}
@@ -237,21 +255,11 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		string choreGroupID = Db.Get().SkillGroups.Get(skill.skillGroup).choreGroupID;
 		if (!string.IsNullOrEmpty(choreGroupID))
 		{
-			foreach (Trait trait in base.GetComponent<Traits>().TraitList)
+			Traits component = base.GetComponent<Traits>();
+			if (component != null && component.IsChoreGroupDisabled(choreGroupID))
 			{
-				if (trait.disabledChoreGroups != null)
-				{
-					ChoreGroup[] disabledChoreGroups = trait.disabledChoreGroups;
-					for (int i = 0; i < disabledChoreGroups.Length; i++)
-					{
-						if (disabledChoreGroups[i].Id == choreGroupID)
-						{
-							return false;
-						}
-					}
-				}
+				return false;
 			}
-			return true;
 		}
 		return true;
 	}
@@ -288,6 +296,16 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	public bool HasSkillAptitude(Skill skill)
 	{
 		return this.AptitudeBySkillGroup.ContainsKey(skill.skillGroup) && this.AptitudeBySkillGroup[skill.skillGroup] > 0f;
+	}
+
+	public bool HasBeenGrantedSkill(Skill skill)
+	{
+		return this.GrantedSkillIDs != null && this.GrantedSkillIDs.Contains(skill.Id);
+	}
+
+	public bool HasBeenGrantedSkill(string id)
+	{
+		return this.GrantedSkillIDs != null && this.GrantedSkillIDs.Contains(id);
 	}
 
 	public MinionResume.SkillMasteryConditions[] GetSkillMasteryConditions(string skillId)
@@ -381,6 +399,27 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
+	public void GrantSkill(string skillId)
+	{
+		if (this.GrantedSkillIDs == null)
+		{
+			this.GrantedSkillIDs = new List<string>();
+		}
+		if (!this.HasBeenGrantedSkill(skillId))
+		{
+			this.MasteryBySkillID[skillId] = true;
+			this.ApplySkillPerks(skillId);
+			this.GrantedSkillIDs.Add(skillId);
+			this.UpdateExpectations();
+			this.UpdateMorale();
+			this.TriggerMasterSkillEvents();
+			if (!this.ownedHats.ContainsKey(Db.Get().Skills.Get(skillId).hat))
+			{
+				this.ownedHats.Add(Db.Get().Skills.Get(skillId).hat, false);
+			}
+		}
+	}
+
 	private void TriggerMasterSkillEvents()
 	{
 		base.Trigger(540773776, null);
@@ -407,7 +446,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		int num = 0;
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
-			if (keyValuePair.Value)
+			if (keyValuePair.Value && !this.HasBeenGrantedSkill(keyValuePair.Key))
 			{
 				Skill skill = Db.Get().Skills.Get(keyValuePair.Key);
 				num += skill.tier + 1;
@@ -431,7 +470,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		int num = 0;
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
-			if (keyValuePair.Value)
+			if (keyValuePair.Value && !this.HasBeenGrantedSkill(keyValuePair.Key))
 			{
 				Skill skill = Db.Get().Skills.Get(keyValuePair.Key);
 				float num2 = 0f;
@@ -457,19 +496,25 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	private void OnSkillPointGained()
 	{
 		Game.Instance.Trigger(1505456302, this);
+		this.ShowNewSkillPointNotification();
+		if (PopFXManager.Instance != null)
+		{
+			string text = MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME.Replace("{Duplicant}", this.identity.GetProperName());
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, text, base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+		}
+		new UpgradeFX.Instance(base.gameObject.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f)).StartSM();
+	}
+
+	private void ShowNewSkillPointNotification()
+	{
 		if (this.AvailableSkillpoints == 1)
 		{
-			this.lastSkillNotification = new Notification(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME.Replace("{Duplicant}", this.identity.GetProperName()), NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip), this.identity, true, 0f, delegate(object d)
+			this.lastSkillNotification = new ManagementMenuNotification(global::Action.ManageSkills, NotificationValence.Good, this.identity.GetSoleOwner().gameObject.GetInstanceID().ToString(), MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME.Replace("{Duplicant}", this.identity.GetProperName()), NotificationType.Good, new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip), this.identity, true, 0f, delegate(object d)
 			{
 				ManagementMenu.Instance.OpenSkills(this.identity);
 			}, null, null, true);
-			Game.Instance.GetComponent<Notifier>().Add(this.lastSkillNotification, "");
+			base.GetComponent<Notifier>().Add(this.lastSkillNotification, "");
 		}
-		if (PopFXManager.Instance != null)
-		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME.Replace("{Duplicant}", this.identity.GetProperName()), base.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
-		}
-		new UpgradeFX.Instance(base.gameObject.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f)).StartSM();
 	}
 
 	private string GetSkillPointGainedTooltip(List<Notification> notifications, object data)
@@ -494,7 +539,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		float num = this.totalExperienceGained;
 		float num2 = MinionResume.CalculateNextExperienceBar(this.TotalSkillPointsGained);
 		this.totalExperienceGained += amount;
-		if (this.totalExperienceGained >= num2 && num < num2)
+		if (base.isSpawned && this.totalExperienceGained >= num2 && num < num2)
 		{
 			this.OnSkillPointGained();
 		}
@@ -612,9 +657,9 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		return string.Format(DUPLICANTS.NEEDS.QUALITYOFLIFE.TOTAL_SKILL_POINTS, this.TotalSkillPointsGained);
 	}
 
-	public static bool AnyMinionHasPerk(string perk)
+	public static bool AnyMinionHasPerk(string perk, int worldId = -1)
 	{
-		using (List<MinionResume>.Enumerator enumerator = Components.MinionResumes.Items.GetEnumerator())
+		using (List<MinionResume>.Enumerator enumerator = ((worldId >= 0) ? Components.MinionResumes.GetWorldItems(worldId, true) : Components.MinionResumes.Items).GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
@@ -663,6 +708,9 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	[Serialize]
 	public Dictionary<string, bool> MasteryBySkillID = new Dictionary<string, bool>();
+
+	[Serialize]
+	public List<string> GrantedSkillIDs = new List<string>();
 
 	[Serialize]
 	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();

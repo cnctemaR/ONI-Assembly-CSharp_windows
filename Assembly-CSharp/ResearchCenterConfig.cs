@@ -43,13 +43,13 @@ public class ResearchCenterConfig : IBuildingConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
 		ResearchCenter researchCenter = go.AddOrGet<ResearchCenter>();
 		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research_center_kanim") };
-		researchCenter.research_point_type_id = "alpha";
+		researchCenter.research_point_type_id = "basic";
 		researchCenter.inputMaterial = ResearchCenterConfig.INPUT_MATERIAL;
 		researchCenter.mass_per_point = 50f;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(ResearchCenterConfig.INPUT_MATERIAL, 1.16f)
+			new ElementConverter.ConsumedElement(ResearchCenterConfig.INPUT_MATERIAL, 1.1111112f)
 		};
 		elementConverter.showDescriptors = false;
 		go.AddOrGetDef<PoweredController.Def>();
@@ -59,11 +59,11 @@ public class ResearchCenterConfig : IBuildingConfig
 	{
 	}
 
-	public const float BASE_RESEARCH_SPEED = 1.16f;
-
-	public const float MIN_RESEARCH_SPEED = 0.2f;
+	public const float BASE_SECONDS_PER_POINT = 45f;
 
 	public const float MASS_PER_POINT = 50f;
+
+	public const float BASE_MASS_PER_SECOND = 1.1111112f;
 
 	public static readonly Tag INPUT_MATERIAL = GameTags.Dirt;
 

@@ -6,8 +6,8 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaAttribute : XmlSchemaAnnotated
 	{
-		[DefaultValue(null)]
 		[XmlAttribute("default")]
+		[DefaultValue(null)]
 		public string DefaultValue
 		{
 			get

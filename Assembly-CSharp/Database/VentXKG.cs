@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class VentXKG : ColonyAchievementRequirement
+	public class VentXKG : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public VentXKG(SimHashes element, float kilogramsToVent)
 		{
@@ -33,13 +32,7 @@ namespace Database
 			return num >= this.kilogramsToVent;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write((int)this.element);
-			writer.Write(this.kilogramsToVent);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.element = (SimHashes)reader.ReadInt32();
 			this.kilogramsToVent = reader.ReadSingle();

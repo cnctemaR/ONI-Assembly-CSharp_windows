@@ -1092,6 +1092,8 @@ namespace STRINGS
 		{
 			public static LocString PLANETOID_PREFIX = UI.CLUSTERMAP.PLANETOID + ": ";
 
+			public static LocString SPACECRAFT_PREFIX = "Spacecraft: ";
+
 			public static LocString WORLDDIVIDER_TOOLTIP = "Duplicants on the " + UI.CLUSTERMAP.PLANETOID_KEYWORD + " {0}";
 
 			public static LocString NO_DUPES_ON_PLANET = "Nobody here...";
@@ -1115,6 +1117,10 @@ namespace STRINGS
 				public static LocString MAGMA = "Fier\nMagm\nToast\nScorch\nBurn\nChar\n";
 
 				public static LocString SWAMP = "Goop\nMud\nMuck\nGross\nStink\nSmell\nYuck\nReek\nOoz\n";
+
+				public static LocString MOO = "Moom\nGas\nUdder\nCalf\nBull\n";
+
+				public static LocString WATER = "Wat\nHydrAu\n";
 			}
 
 			public class SUFFIXES

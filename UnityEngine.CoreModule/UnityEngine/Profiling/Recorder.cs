@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Recorder.bindings.h")]
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/Recorder.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Recorder
@@ -101,9 +101,21 @@ namespace UnityEngine.Profiling
 			}
 		}
 
+		public long gpuElapsedNanoseconds
+		{
+			get
+			{
+				return this.isValid ? this.GetGpuElapsedNanoseconds() : 0L;
+			}
+		}
+
 		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern long GetElapsedNanoseconds();
+
+		[NativeMethod(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern long GetGpuElapsedNanoseconds();
 
 		public int sampleBlockCount
 		{
@@ -113,9 +125,21 @@ namespace UnityEngine.Profiling
 			}
 		}
 
+		public int gpuSampleBlockCount
+		{
+			get
+			{
+				return this.isValid ? this.GetGpuSampleBlockCount() : 0;
+			}
+		}
+
 		[NativeMethod(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetSampleBlockCount();
+
+		[NativeMethod(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetGpuSampleBlockCount();
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]

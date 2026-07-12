@@ -26,7 +26,11 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 			{
 				component.RemoveTag(RoomConstraints.ConstraintTags.Decor20);
 			}
-			Game.Instance.roomProber.SolidChangedEvent(Grid.PosToCell(this), true);
+			int num = Grid.PosToCell(this);
+			if (Grid.IsValidCell(num))
+			{
+				Game.Instance.roomProber.SolidChangedEvent(num, true);
+			}
 		}
 	}
 
@@ -225,7 +229,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	private struct Splat
 	{
-		public float decor { get; private set; }
+		public float decor { readonly get; private set; }
 
 		public Splat(DecorProvider provider)
 		{

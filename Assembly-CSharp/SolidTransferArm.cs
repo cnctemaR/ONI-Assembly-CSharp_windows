@@ -126,13 +126,16 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			{
 				this.choreDriver.SetChore(context);
 				FetchChore fetchChore = context.chore as FetchChore;
-				this.storage.DropUnlessHasTags(fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, true);
+				this.storage.DropUnlessHasTags(fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, true, false);
 				this.arm_anim_ctrl.enabled = false;
 				this.arm_anim_ctrl.enabled = true;
 			}
 			else
 			{
-				global::Debug.Assert(false, "I am but a lowly transfer arm. I should only acquire FetchChores: " + context.chore);
+				bool flag = false;
+				string text = "I am but a lowly transfer arm. I should only acquire FetchChores: ";
+				Chore chore = context.chore;
+				global::Debug.Assert(flag, text + ((chore != null) ? chore.ToString() : null));
 			}
 		}
 		this.operational.SetActive(this.choreDriver.HasChore(), false);

@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Playables
 {
 	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[UsedByNativeCode]
 	public struct PlayableOutputHandle : IEquatable<PlayableOutputHandle>
 	{
 		public static PlayableOutputHandle Null

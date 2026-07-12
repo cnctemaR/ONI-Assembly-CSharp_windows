@@ -75,7 +75,7 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 		{
 			Rotatable component2 = data.go.GetComponent<Rotatable>();
 			Orientation orientation = ((component2 != null) ? component2.GetOrientation() : Orientation.Neutral);
-			bool flag = BuildingDef.CheckFoundation(data.cell, orientation, data.buildRule, data.width, data.height);
+			bool flag = BuildingDef.CheckFoundation(data.cell, orientation, data.buildRule, data.width, data.height, default(Tag));
 			this.UpdateSolidState(flag, ref data);
 			base.SetData(h, data);
 		}

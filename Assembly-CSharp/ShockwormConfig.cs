@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class ShockwormConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "ShockWorm";

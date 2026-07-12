@@ -1,9 +1,7 @@
 ﻿using System;
-using UnityEngine.Bindings;
 
 namespace UnityEngine.TextCore
 {
-	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal static class TextGeneratorUtilities
 	{
 		public static bool Approximately(float a, float b)
@@ -330,11 +328,12 @@ namespace UnityEngine.TextCore
 					if (flag3)
 					{
 						int num2 = (int)sourceText[i + 1];
-						if (num2 <= 92)
+						int num3 = num2;
+						if (num3 <= 92)
 						{
-							if (num2 != 85)
+							if (num3 != 85)
 							{
-								if (num2 == 92)
+								if (num3 == 92)
 								{
 									bool flag4 = !generationSettings.parseControlCharacters;
 									if (!flag4)
@@ -351,7 +350,7 @@ namespace UnityEngine.TextCore
 											charBuffer[num + 1] = (int)sourceText[i + 2];
 											i += 2;
 											num += 2;
-											goto IL_037D;
+											goto IL_0381;
 										}
 									}
 								}
@@ -369,13 +368,13 @@ namespace UnityEngine.TextCore
 									charBuffer[num] = TextGeneratorUtilities.GetUtf32(sourceText, i + 2);
 									i += 9;
 									num++;
-									goto IL_037D;
+									goto IL_0381;
 								}
 							}
 						}
-						else if (num2 != 110)
+						else if (num3 != 110)
 						{
-							switch (num2)
+							switch (num3)
 							{
 							case 114:
 							{
@@ -390,7 +389,7 @@ namespace UnityEngine.TextCore
 									charBuffer[num] = 13;
 									i++;
 									num++;
-									goto IL_037D;
+									goto IL_0381;
 								}
 								break;
 							}
@@ -407,7 +406,7 @@ namespace UnityEngine.TextCore
 									charBuffer[num] = 9;
 									i++;
 									num++;
-									goto IL_037D;
+									goto IL_0381;
 								}
 								break;
 							}
@@ -424,7 +423,7 @@ namespace UnityEngine.TextCore
 									charBuffer[num] = (int)((ushort)TextGeneratorUtilities.GetUtf16(sourceText, i + 2));
 									i += 5;
 									num++;
-									goto IL_037D;
+									goto IL_0381;
 								}
 								break;
 							}
@@ -443,16 +442,16 @@ namespace UnityEngine.TextCore
 								charBuffer[num] = 10;
 								i++;
 								num++;
-								goto IL_037D;
+								goto IL_0381;
 							}
 						}
-						goto IL_024D;
+						goto IL_0251;
 					}
-					goto IL_024D;
-					IL_037D:
+					goto IL_0251;
+					IL_0381:
 					i++;
 					continue;
-					IL_024D:
+					IL_0251:
 					bool flag17 = char.IsHighSurrogate(sourceText[i]) && char.IsLowSurrogate(sourceText[i + 1]);
 					if (flag17)
 					{
@@ -464,7 +463,7 @@ namespace UnityEngine.TextCore
 						charBuffer[num] = char.ConvertToUtf32(sourceText[i], sourceText[i + 1]);
 						i++;
 						num++;
-						goto IL_037D;
+						goto IL_0381;
 					}
 					bool flag19 = sourceText[i] == '<' && generationSettings.richText;
 					if (flag19)
@@ -480,17 +479,17 @@ namespace UnityEngine.TextCore
 							charBuffer[num] = 10;
 							num++;
 							i += 3;
-							goto IL_037D;
+							goto IL_0381;
 						}
 						bool flag22 = TextGeneratorUtilities.IsTagName(ref sourceText, "<STYLE=", i);
 						if (flag22)
 						{
-							int num3;
-							bool flag23 = TextGeneratorUtilities.ReplaceOpeningStyleTag(ref sourceText, i, out num3, ref charBuffer, ref num, ref styleStack);
+							int num4;
+							bool flag23 = TextGeneratorUtilities.ReplaceOpeningStyleTag(ref sourceText, i, out num4, ref charBuffer, ref num, ref styleStack);
 							if (flag23)
 							{
-								i = num3;
-								goto IL_037D;
+								i = num4;
+								goto IL_0381;
 							}
 						}
 						else
@@ -500,7 +499,7 @@ namespace UnityEngine.TextCore
 							{
 								TextGeneratorUtilities.ReplaceClosingStyleTag(ref charBuffer, ref num, ref styleStack);
 								i += 7;
-								goto IL_037D;
+								goto IL_0381;
 							}
 						}
 					}
@@ -511,7 +510,7 @@ namespace UnityEngine.TextCore
 					}
 					charBuffer[num] = (int)sourceText[i];
 					num++;
-					goto IL_037D;
+					goto IL_0381;
 				}
 				bool flag26 = num == charBuffer.Length;
 				if (flag26)

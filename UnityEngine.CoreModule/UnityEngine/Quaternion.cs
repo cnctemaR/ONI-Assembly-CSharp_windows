@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Runtime/Math/Quaternion.h")]
-	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[Il2CppEagerStaticClassConstruction]
 	[UsedByNativeCode]
-	public struct Quaternion : IEquatable<Quaternion>
+	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[NativeType(Header = "Runtime/Math/Quaternion.h")]
+	public struct Quaternion : IEquatable<Quaternion>, IFormattable
 	{
 		[FreeFunction("FromToQuaternionSafe", IsThreadSafe = true)]
 		public static Quaternion FromToRotation(Vector3 fromDirection, Vector3 toDirection)
@@ -232,6 +234,7 @@ namespace UnityEngine
 			this = Quaternion.LookRotation(view, up);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float Angle(Quaternion a, Quaternion b)
 		{
 			float num = Quaternion.Dot(a, b);
@@ -306,6 +309,7 @@ namespace UnityEngine
 			return Quaternion.Internal_FromEulerRad(euler * 0.017453292f);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void ToAngleAxis(out float angle, out Vector3 axis)
 		{
 			Quaternion.Internal_ToAxisAngleRad(this, out axis, out angle);
@@ -380,17 +384,27 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("({0:F1}, {1:F1}, {2:F1}, {3:F1})", new object[] { this.x, this.y, this.z, this.w });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F1";
+			}
 			return UnityString.Format("({0}, {1}, {2}, {3})", new object[]
 			{
-				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.z.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.w.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
+				this.x.ToString(format, formatProvider),
+				this.y.ToString(format, formatProvider),
+				this.z.ToString(format, formatProvider),
+				this.w.ToString(format, formatProvider)
 			});
 		}
 

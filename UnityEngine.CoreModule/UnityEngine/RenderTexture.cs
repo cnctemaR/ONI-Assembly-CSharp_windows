@@ -9,11 +9,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
-	[NativeHeader("Runtime/Graphics/RenderBufferManager.h")]
-	[NativeHeader("Runtime/Camera/Camera.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
+	[NativeHeader("Runtime/Graphics/RenderBufferManager.h")]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[UsedByNativeCode]
 	public class RenderTexture : Texture
 	{
 		public override extern int width
@@ -265,6 +265,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void GenerateMips();
 
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ConvertToEquirect(RenderTexture equirect, Camera.MonoOrStereoscopicEye eye = Camera.MonoOrStereoscopicEye.Mono);
 
@@ -412,7 +413,7 @@ namespace UnityEngine
 			bool flag = !SystemInfo.IsFormatSupported(desc.graphicsFormat, FormatUsage.Render);
 			if (flag)
 			{
-				throw new ArgumentException("RenderTextureDesc graphicsFormat must be a supported GraphicsFormat. " + desc.graphicsFormat + " is not supported.", "desc.graphicsFormat");
+				throw new ArgumentException("RenderTextureDesc graphicsFormat must be a supported GraphicsFormat. " + desc.graphicsFormat.ToString() + " is not supported.", "desc.graphicsFormat");
 			}
 			bool flag2 = desc.width <= 0;
 			if (flag2)

@@ -196,7 +196,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.root.DefaultState(this.idle).Enter(delegate(Geyser.StatesInstance smi)
 			{
 				smi.master.emitter.SetEmitting(false);

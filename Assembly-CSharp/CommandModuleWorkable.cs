@@ -12,11 +12,6 @@ public class CommandModuleWorkable : Workable
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_incubator_kanim") };
 		base.SetWorkTime(float.PositiveInfinity);
 		this.showProgressBar = false;
-		base.Subscribe<CommandModuleWorkable>(-1056989049, CommandModuleWorkable.OnLaunchDelegate);
-	}
-
-	private void OnLaunch(object data)
-	{
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -26,14 +21,21 @@ public class CommandModuleWorkable : Workable
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		if (worker != null)
+		if (!(worker != null))
+		{
+			return base.OnWorkTick(worker, dt);
+		}
+		if (DlcManager.IsExpansion1Active())
 		{
 			GameObject gameObject = worker.gameObject;
 			base.CompleteWork(worker);
-			base.GetComponent<MinionStorage>().SerializeMinion(gameObject);
+			base.GetComponent<ClustercraftExteriorDoor>().FerryMinion(gameObject);
 			return true;
 		}
-		return base.OnWorkTick(worker, dt);
+		GameObject gameObject2 = worker.gameObject;
+		base.CompleteWork(worker);
+		base.GetComponent<MinionStorage>().SerializeMinion(gameObject2);
+		return true;
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -53,9 +55,4 @@ public class CommandModuleWorkable : Workable
 		new CellOffset(0, 3),
 		new CellOffset(0, 4)
 	};
-
-	private static readonly EventSystem.IntraObjectHandler<CommandModuleWorkable> OnLaunchDelegate = new EventSystem.IntraObjectHandler<CommandModuleWorkable>(delegate(CommandModuleWorkable component, object data)
-	{
-		component.OnLaunch(data);
-	});
 }

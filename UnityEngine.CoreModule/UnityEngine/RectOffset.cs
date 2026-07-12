@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
@@ -10,7 +11,7 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
-	public class RectOffset
+	public class RectOffset : IFormattable
 	{
 		public RectOffset()
 		{
@@ -51,7 +52,23 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[] { this.left, this.right, this.top, this.bottom });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format)
+		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			return UnityString.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[]
+			{
+				this.left.ToString(format, formatProvider),
+				this.right.ToString(format, formatProvider),
+				this.top.ToString(format, formatProvider),
+				this.bottom.ToString(format, formatProvider)
+			});
 		}
 
 		private void Destroy()

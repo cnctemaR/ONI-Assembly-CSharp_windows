@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Playables
 {
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Export/Director/PlayableHandle.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	public struct PlayableHandle : IEquatable<PlayableHandle>
 	{
 		internal T GetObject<T>() where T : class, IPlayableBehaviour
@@ -148,12 +148,12 @@ namespace UnityEngine.Playables
 				bool flag4 = this.GetInputCount() <= inputIndex;
 				if (flag4)
 				{
-					throw new IndexOutOfRangeException(string.Concat(new object[]
+					throw new IndexOutOfRangeException(string.Concat(new string[]
 					{
 						"inputIndex ",
-						inputIndex,
+						inputIndex.ToString(),
 						" is greater than the number of available inputs (",
-						this.GetInputCount(),
+						this.GetInputCount().ToString(),
 						")."
 					}));
 				}
@@ -174,8 +174,8 @@ namespace UnityEngine.Playables
 			return PlayableHandle.IsValid_Injected(ref this);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetPlayableType", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal Type GetPlayableType()
 		{
 			return PlayableHandle.GetPlayableType_Injected(ref this);
@@ -195,8 +195,8 @@ namespace UnityEngine.Playables
 			PlayableHandle.SetScriptInstance_Injected(ref this, scriptInstance);
 		}
 
-		[FreeFunction("PlayableHandleBindings::CanChangeInputs", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::CanChangeInputs", HasExplicitThis = true, ThrowsException = true)]
 		internal bool CanChangeInputs()
 		{
 			return PlayableHandle.CanChangeInputs_Injected(ref this);
@@ -209,22 +209,22 @@ namespace UnityEngine.Playables
 			return PlayableHandle.CanSetWeights_Injected(ref this);
 		}
 
-		[FreeFunction("PlayableHandleBindings::CanDestroy", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::CanDestroy", HasExplicitThis = true, ThrowsException = true)]
 		internal bool CanDestroy()
 		{
 			return PlayableHandle.CanDestroy_Injected(ref this);
 		}
 
-		[FreeFunction("PlayableHandleBindings::GetPlayState", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetPlayState", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayState GetPlayState()
 		{
 			return PlayableHandle.GetPlayState_Injected(ref this);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::Play", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal void Play()
 		{
 			PlayableHandle.Play_Injected(ref this);
@@ -237,8 +237,8 @@ namespace UnityEngine.Playables
 			PlayableHandle.Pause_Injected(ref this);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetSpeed", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal double GetSpeed()
 		{
 			return PlayableHandle.GetSpeed_Injected(ref this);
@@ -251,8 +251,8 @@ namespace UnityEngine.Playables
 			PlayableHandle.SetSpeed_Injected(ref this, value);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetTime", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal double GetTime()
 		{
 			return PlayableHandle.GetTime_Injected(ref this);
@@ -272,15 +272,15 @@ namespace UnityEngine.Playables
 			return PlayableHandle.IsDone_Injected(ref this);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetDone", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal void SetDone(bool value)
 		{
 			PlayableHandle.SetDone_Injected(ref this, value);
 		}
 
-		[FreeFunction("PlayableHandleBindings::GetDuration", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetDuration", HasExplicitThis = true, ThrowsException = true)]
 		internal double GetDuration()
 		{
 			return PlayableHandle.GetDuration_Injected(ref this);
@@ -330,8 +330,8 @@ namespace UnityEngine.Playables
 			PlayableHandle.SetInputCount_Injected(ref this, value);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetOutputCount", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal int GetOutputCount()
 		{
 			return PlayableHandle.GetOutputCount_Injected(ref this);
@@ -351,8 +351,8 @@ namespace UnityEngine.Playables
 			PlayableHandle.SetInputWeight_Injected(ref this, ref input, weight);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetDelay", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal void SetDelay(double delay)
 		{
 			PlayableHandle.SetDelay_Injected(ref this, delay);
@@ -372,8 +372,8 @@ namespace UnityEngine.Playables
 			return PlayableHandle.IsDelayed_Injected(ref this);
 		}
 
-		[FreeFunction("PlayableHandleBindings::GetPreviousTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetPreviousTime", HasExplicitThis = true, ThrowsException = true)]
 		internal double GetPreviousTime()
 		{
 			return PlayableHandle.GetPreviousTime_Injected(ref this);
@@ -400,15 +400,15 @@ namespace UnityEngine.Playables
 			return PlayableHandle.GetTraversalMode_Injected(ref this);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetTraversalMode", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal void SetTraversalMode(PlayableTraversalMode mode)
 		{
 			PlayableHandle.SetTraversalMode_Injected(ref this, mode);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetJobData", HasExplicitThis = true, ThrowsException = true)]
+		[VisibleToOtherModules]
 		internal IntPtr GetJobData()
 		{
 			return PlayableHandle.GetJobData_Injected(ref this);

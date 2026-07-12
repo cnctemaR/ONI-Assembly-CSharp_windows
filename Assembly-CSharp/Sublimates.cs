@@ -1,5 +1,6 @@
 ﻿using System;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -25,12 +26,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 	{
 		base.OnSpawn();
 		this.flowAccumulator = Game.Instance.accumulators.Add("EmittedMass", this);
-		if (this.info.sublimatedElement == SimHashes.Oxygen)
-		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingOxygenAvg, this);
-			return;
-		}
-		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingGasAvg, this);
+		this.RefreshStatusItem(Sublimates.EmitState.Emitting);
 	}
 
 	protected override void OnCleanUp()
@@ -76,8 +72,21 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 		{
 			return;
 		}
-		if (this.HasTag(GameTags.Sealed))
+		bool flag = this.HasTag(GameTags.Sealed);
+		Pickupable component = base.GetComponent<Pickupable>();
+		Storage storage = ((component != null) ? component.storage : null);
+		if (flag && !this.decayStorage)
 		{
+			return;
+		}
+		if (flag && storage != null && storage.HasTag(GameTags.CorrosionProof))
+		{
+			return;
+		}
+		Element element = ElementLoader.FindElementByHash(this.info.sublimatedElement);
+		if (this.primaryElement.Temperature <= element.lowTemp)
+		{
+			this.RefreshStatusItem(Sublimates.EmitState.BlockedOnTemperature);
 			return;
 		}
 		float num2 = Grid.Mass[num];
@@ -110,12 +119,25 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 						num7 = (int)((float)this.info.diseaseCount * num8);
 					}
 					float num9 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - num2);
-					if (num9 > 0f)
+					if (num9 <= 0f)
 					{
-						this.Emit(num, num9, this.primaryElement.Temperature, b, num7);
-						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
-						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
-						this.UpdateStorage();
+						this.RefreshStatusItem(Sublimates.EmitState.BlockedOnPressure);
+						return;
+					}
+					this.Emit(num, num9, this.primaryElement.Temperature, b, num7);
+					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
+					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
+					this.UpdateStorage();
+					this.RefreshStatusItem(Sublimates.EmitState.Emitting);
+					if (flag && this.decayStorage && storage != null)
+					{
+						storage.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+						{
+							damage = 1,
+							source = BUILDINGS.DAMAGESOURCES.CORROSIVE_ELEMENT,
+							popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CORROSIVE_ELEMENT,
+							fullDamageEffectName = "smoke_damage_kanim"
+						});
 						return;
 					}
 				}
@@ -129,13 +151,21 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num10);
 					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num10);
 					this.UpdateStorage();
+					this.RefreshStatusItem(Sublimates.EmitState.Emitting);
 					return;
 				}
+				this.RefreshStatusItem(Sublimates.EmitState.BlockedOnPressure);
+				return;
 			}
 			else if (!this.primaryElement.KeepZeroMassObject)
 			{
 				Util.KDestroyGameObject(base.gameObject);
+				return;
 			}
+		}
+		else
+		{
+			this.RefreshStatusItem(Sublimates.EmitState.BlockedOnPressure);
 		}
 	}
 
@@ -164,6 +194,34 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 		return Game.Instance.accumulators.GetAverageRate(this.flowAccumulator);
 	}
 
+	private void RefreshStatusItem(Sublimates.EmitState newEmitState)
+	{
+		if (newEmitState == this.lastEmitState)
+		{
+			return;
+		}
+		switch (newEmitState)
+		{
+		case Sublimates.EmitState.Emitting:
+			if (this.info.sublimatedElement == SimHashes.Oxygen)
+			{
+				this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingOxygenAvg, this);
+			}
+			else
+			{
+				this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingGasAvg, this);
+			}
+			break;
+		case Sublimates.EmitState.BlockedOnPressure:
+			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingBlockedHighPressure, this);
+			break;
+		case Sublimates.EmitState.BlockedOnTemperature:
+			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.EmittingBlockedLowTemperature, this);
+			break;
+		}
+		this.lastEmitState = newEmitState;
+	}
+
 	[MyCmpReq]
 	private PrimaryElement primaryElement;
 
@@ -173,6 +231,8 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 	[SerializeField]
 	public SpawnFXHashes spawnFXHash;
 
+	public bool decayStorage;
+
 	[SerializeField]
 	public Sublimates.Info info;
 
@@ -180,6 +240,8 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 	private float sublimatedMass;
 
 	private HandleVector<int>.Handle flowAccumulator = HandleVector<int>.InvalidHandle;
+
+	private Sublimates.EmitState lastEmitState = (Sublimates.EmitState)(-1);
 
 	private static readonly EventSystem.IntraObjectHandler<Sublimates> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<Sublimates>(delegate(Sublimates component, object data)
 	{
@@ -219,5 +281,12 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 
 		[HashedEnum]
 		public SimHashes sublimatedElement;
+	}
+
+	private enum EmitState
+	{
+		Emitting,
+		BlockedOnPressure,
+		BlockedOnTemperature
 	}
 }

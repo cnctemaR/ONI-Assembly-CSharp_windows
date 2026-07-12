@@ -57,8 +57,8 @@ public class DesalinatorConfig : IBuildingConfig
 		};
 		elementConverter2.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(3.5f, SimHashes.Water, 313.15f, false, true, 0f, 0.5f, 0.75f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(1.5f, SimHashes.Salt, 313.15f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(3.5f, SimHashes.Water, 0f, false, true, 0f, 0.5f, 0.75f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(1.5f, SimHashes.Salt, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0)
 		};
 		DesalinatorWorkableEmpty desalinatorWorkableEmpty = go.AddOrGet<DesalinatorWorkableEmpty>();
 		desalinatorWorkableEmpty.workTime = 90f;

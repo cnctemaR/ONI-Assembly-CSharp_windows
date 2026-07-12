@@ -6,6 +6,11 @@ using UnityEngine;
 
 public static class Sim
 {
+	public static bool IsRadiationEnabled()
+	{
+		return DlcManager.FeatureRadiationEnabled();
+	}
+
 	public static bool IsValidHandle(int h)
 	{
 		return h != -1 && h != -2;
@@ -26,7 +31,7 @@ public static class Sim
 	public unsafe static extern IntPtr SIM_HandleMessage(int sim_msg_id, int msg_length, byte* msg);
 
 	[DllImport("SimDLL")]
-	private unsafe static extern byte* SIM_BeginSave(int* size);
+	private unsafe static extern byte* SIM_BeginSave(int* size, int x, int y);
 
 	[DllImport("SimDLL")]
 	private static extern void SIM_EndSave();
@@ -53,15 +58,54 @@ public static class Sim
 		return intPtr;
 	}
 
-	public unsafe static void Save(BinaryWriter writer)
+	public unsafe static void Save(BinaryWriter writer, int x, int y)
 	{
 		int num;
-		void* ptr = (void*)Sim.SIM_BeginSave(&num);
+		void* ptr = (void*)Sim.SIM_BeginSave(&num, x, y);
 		byte[] array = new byte[num];
 		Marshal.Copy((IntPtr)ptr, array, 0, num);
 		Sim.SIM_EndSave();
 		writer.Write(num);
 		writer.Write(array);
+	}
+
+	public unsafe static int LoadWorld(IReader reader)
+	{
+		int num = reader.ReadInt32();
+		byte[] array;
+		byte* ptr;
+		if ((array = reader.ReadBytes(num)) == null || array.Length == 0)
+		{
+			ptr = null;
+		}
+		else
+		{
+			ptr = &array[0];
+		}
+		IntPtr intPtr = Sim.SIM_HandleMessage(-672538170, num, ptr);
+		array = null;
+		if (intPtr == IntPtr.Zero)
+		{
+			return -1;
+		}
+		return 0;
+	}
+
+	public static void AllocateCells(int width, int height, bool headless = false)
+	{
+		using (MemoryStream memoryStream = new MemoryStream(8))
+		{
+			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+			{
+				binaryWriter.Write(width);
+				binaryWriter.Write(height);
+				bool flag = Sim.IsRadiationEnabled();
+				binaryWriter.Write(flag);
+				binaryWriter.Write(headless);
+				binaryWriter.Flush();
+				Sim.HandleMessage(SimMessageHashes.AllocateCells, (int)memoryStream.Length, memoryStream.GetBuffer());
+			}
+		}
 	}
 
 	public unsafe static int Load(IReader reader)
@@ -83,21 +127,26 @@ public static class Sim
 		{
 			return -1;
 		}
-		Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
-		Grid.elementIdx = ptr2->elementIdx;
-		Grid.temperature = ptr2->temperature;
-		Grid.mass = ptr2->mass;
-		Grid.properties = ptr2->properties;
-		Grid.strengthInfo = ptr2->strengthInfo;
-		Grid.insulation = ptr2->insulation;
-		Grid.diseaseIdx = ptr2->diseaseIdx;
-		Grid.diseaseCount = ptr2->diseaseCount;
-		Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
-		PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
-		PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
-		PropertyTextures.externalExposedToSunlight = ptr2->propertyTextureExposedToSunlight;
-		Grid.InitializeCells();
 		return 0;
+	}
+
+	public unsafe static void Start()
+	{
+		Sim.GameDataUpdate* ptr = (Sim.GameDataUpdate*)(void*)Sim.SIM_HandleMessage(-931446686, 0, null);
+		Grid.elementIdx = ptr->elementIdx;
+		Grid.temperature = ptr->temperature;
+		Grid.radiation = ptr->radiation;
+		Grid.mass = ptr->mass;
+		Grid.properties = ptr->properties;
+		Grid.strengthInfo = ptr->strengthInfo;
+		Grid.insulation = ptr->insulation;
+		Grid.diseaseIdx = ptr->diseaseIdx;
+		Grid.diseaseCount = ptr->diseaseCount;
+		Grid.AccumulatedFlowValues = ptr->accumulatedFlow;
+		PropertyTextures.externalFlowTex = ptr->propertyTextureFlow;
+		PropertyTextures.externalLiquidTex = ptr->propertyTextureLiquid;
+		PropertyTextures.externalExposedToSunlight = ptr->propertyTextureExposedToSunlight;
+		Grid.InitializeCells();
 	}
 
 	public static void Shutdown()
@@ -133,9 +182,9 @@ public static class Sim
 			}
 			else
 			{
-				object obj = Marshal.PtrToStringAnsi(ptr2->file);
+				string text5 = Marshal.PtrToStringAnsi(ptr2->file);
 				int line = ptr2->line;
-				text4 = obj + ":" + line;
+				text4 = text5 + ":" + line.ToString();
 			}
 			KCrashReporter.ReportSimDLLCrash(text3, text4, null);
 			return 0;
@@ -170,6 +219,10 @@ public static class Sim
 	public const float MaxTemperature = 10000f;
 
 	public const float MinTemperature = 0f;
+
+	public const float MaxRadiation = 9000000f;
+
+	public const float MinRadiation = 0f;
 
 	public const float MaxMass = 10000f;
 
@@ -257,6 +310,7 @@ public static class Sim
 			this.temperature = pd.temperature;
 			this.mass = pd.mass;
 			this.insulation = byte.MaxValue;
+			DebugUtil.Assert(this.temperature > 0f || this.mass == 0f, "A non-zero mass cannot have a <= 0 temperature");
 		}
 
 		public void SetValues(byte new_elem_idx, float new_temperature, float new_mass)
@@ -265,6 +319,7 @@ public static class Sim
 			this.temperature = new_temperature;
 			this.mass = new_mass;
 			this.insulation = byte.MaxValue;
+			DebugUtil.Assert(this.temperature > 0f || this.mass == 0f, "A non-zero mass cannot have a <= 0 temperature");
 		}
 
 		public byte elementIdx;
@@ -287,7 +342,8 @@ public static class Sim
 			Unbreakable = 8,
 			Transparent = 16,
 			Opaque = 32,
-			NotifyOnMelt = 64
+			NotifyOnMelt = 64,
+			Constructed = 128
 		}
 	}
 
@@ -325,8 +381,8 @@ public static class Sim
 			this.highTempTransitionOreMassConversion = e.highTempTransitionOreMassConversion;
 			this.lowTempTransitionOreID = e.lowTempTransitionOreID;
 			this.lowTempTransitionOreMassConversion = e.lowTempTransitionOreMassConversion;
-			this.sublimateIndex = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.sublimateId);
-			this.convertIndex = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.convertId);
+			this.sublimateIndex = (byte)elements.FindIndex((global::Element ele) => ele.id == e.sublimateId);
+			this.convertIndex = (byte)elements.FindIndex((global::Element ele) => ele.id == e.convertId);
 			this.pack0 = 0;
 			this.pack1 = 0;
 			if (e.substance == null)
@@ -339,7 +395,13 @@ public static class Sim
 				this.colour = (uint)(((int)color.a << 24) | ((int)color.b << 16) | ((int)color.g << 8) | (int)color.r);
 			}
 			this.sublimateFX = e.sublimateFX;
+			this.sublimateRate = e.sublimateRate;
+			this.sublimateEfficiency = e.sublimateEfficiency;
+			this.sublimateProbability = e.sublimateProbability;
+			this.offGasProbability = e.offGasPercentage;
 			this.lightAbsorptionFactor = e.lightAbsorptionFactor;
+			this.radiationAbsorptionFactor = e.radiationAbsorptionFactor;
+			this.radiationPer1000Mass = e.radiationPer1000Mass;
 			this.defaultValues = e.defaultValues;
 		}
 
@@ -347,8 +409,8 @@ public static class Sim
 		{
 			writer.Write((int)this.id);
 			writer.Write(this.state);
-			writer.Write((sbyte)this.lowTempTransitionIdx);
-			writer.Write((sbyte)this.highTempTransitionIdx);
+			writer.Write(this.lowTempTransitionIdx);
+			writer.Write(this.highTempTransitionIdx);
 			writer.Write(this.elementsTableIdx);
 			writer.Write(this.specificHeatCapacity);
 			writer.Write(this.thermalConductivity);
@@ -374,7 +436,13 @@ public static class Sim
 			writer.Write(this.pack1);
 			writer.Write(this.colour);
 			writer.Write((int)this.sublimateFX);
+			writer.Write(this.sublimateRate);
+			writer.Write(this.sublimateEfficiency);
+			writer.Write(this.sublimateProbability);
+			writer.Write(this.offGasProbability);
 			writer.Write(this.lightAbsorptionFactor);
+			writer.Write(this.radiationAbsorptionFactor);
+			writer.Write(this.radiationPer1000Mass);
 			this.defaultValues.Write(writer);
 		}
 
@@ -424,9 +492,9 @@ public static class Sim
 
 		public float highTempTransitionOreMassConversion;
 
-		public sbyte sublimateIndex;
+		public byte sublimateIndex;
 
-		public sbyte convertIndex;
+		public byte convertIndex;
 
 		public byte pack0;
 
@@ -436,7 +504,19 @@ public static class Sim
 
 		public SpawnFXHashes sublimateFX;
 
+		public float sublimateRate;
+
+		public float sublimateEfficiency;
+
+		public float sublimateProbability;
+
+		public float offGasProbability;
+
 		public float lightAbsorptionFactor;
+
+		public float radiationAbsorptionFactor;
+
+		public float radiationPer1000Mass;
 
 		public Sim.PhysicsData defaultValues;
 	}
@@ -531,6 +611,8 @@ public static class Sim
 		public unsafe byte* insulation;
 
 		public unsafe byte* strengthInfo;
+
+		public unsafe float* radiation;
 
 		public unsafe byte* diseaseIdx;
 
@@ -639,6 +721,10 @@ public static class Sim
 		public int numDiseaseConsumedInfos;
 
 		public unsafe Sim.DiseaseConsumedInfo* diseaseConsumedInfos;
+
+		public int numRadiationConsumedCallbacks;
+
+		public unsafe Sim.ConsumedRadiationCallback* radiationConsumedCallbacks;
 
 		public unsafe float* accumulatedFlow;
 
@@ -957,5 +1043,15 @@ public static class Sim
 		private byte pad2;
 
 		public int count;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct ConsumedRadiationCallback
+	{
+		public int callbackIdx;
+
+		public int gameCell;
+
+		public float radiation;
 	}
 }

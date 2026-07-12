@@ -40,7 +40,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 
 	public TimeOfDay.TimeRegion GetCurrentTimeRegion()
 	{
-		if (GameClock.Instance.GetCurrentCycleAsPercentage() >= 0.875f)
+		if (GameClock.Instance.IsNighttime())
 		{
 			return TimeOfDay.TimeRegion.Night;
 		}
@@ -84,17 +84,22 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 		this.UpdateSunlightIntensity();
 	}
 
+	public void SetEclipse(bool eclipse)
+	{
+		this.isEclipse = eclipse;
+	}
+
 	private float UpdateSunlightIntensity()
 	{
-		float num = 0.875f;
-		float num2 = GameClock.Instance.GetCurrentCycleAsPercentage() / num;
-		if (num2 >= 1f)
+		float daytimeDurationInPercentage = GameClock.Instance.GetDaytimeDurationInPercentage();
+		float num = GameClock.Instance.GetCurrentCycleAsPercentage() / daytimeDurationInPercentage;
+		if (num >= 1f || this.isEclipse)
 		{
-			num2 = 0f;
+			num = 0f;
 		}
-		float num3 = Mathf.Sin(num2 * 3.1415927f);
-		Game.Instance.currentSunlightIntensity = num3 * 80000f;
-		return num3;
+		float num2 = Mathf.Sin(num * 3.1415927f);
+		Game.Instance.currentSunlightIntensity = num2 * 80000f;
+		return num2;
 	}
 
 	private void TriggerSoundChange(TimeOfDay.TimeRegion new_region)
@@ -131,6 +136,8 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	private EventInstance nightLPEvent;
 
 	public static TimeOfDay Instance;
+
+	private bool isEclipse;
 
 	public enum TimeRegion
 	{

@@ -62,7 +62,7 @@ public static class LightGridManager
 
 		public void AddToGrid(bool update_lit_cells)
 		{
-			DebugUtil.DevAssert(!update_lit_cells || this.litCells.Count == 0, "adding an already added emitter");
+			DebugUtil.DevAssert(!update_lit_cells || this.litCells.Count == 0, "adding an already added emitter", null);
 			if (update_lit_cells)
 			{
 				this.UpdateLitCells();

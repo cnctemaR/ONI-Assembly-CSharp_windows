@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Bindings;
 using UnityEngine.TextCore.LowLevel;
 
 namespace UnityEngine.TextCore
 {
-	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	[Serializable]
 	internal class FontAsset : ScriptableObject
 	{
@@ -427,7 +425,7 @@ namespace UnityEngine.TextCore
 				new GlyphRect(0, 0, atlasWidth - num, atlasHeight - num)
 			};
 			fontAsset.usedGlyphRects = new List<GlyphRect>();
-			fontAsset.InitializeDictionaryLookupTables();
+			fontAsset.ReadFontAssetDefinition();
 			return fontAsset;
 		}
 
@@ -513,7 +511,14 @@ namespace UnityEngine.TextCore
 						bool flag9 = !TextSettings.warningsDisabled;
 						if (flag9)
 						{
-							Debug.LogWarning(string.Concat(new object[] { "Kerning Key for [", kerningPairKey.ascii_Left, "] and [", kerningPairKey.ascii_Right, "] already exists." }));
+							Debug.LogWarning(string.Concat(new string[]
+							{
+								"Kerning Key for [",
+								kerningPairKey.ascii_Left.ToString(),
+								"] and [",
+								kerningPairKey.ascii_Right.ToString(),
+								"] already exists."
+							}));
 						}
 					}
 				}
@@ -607,33 +612,13 @@ namespace UnityEngine.TextCore
 		internal bool HasCharacter(int character)
 		{
 			bool flag = this.m_CharacterLookupDictionary == null;
-			bool flag2;
-			if (flag)
-			{
-				flag2 = false;
-			}
-			else
-			{
-				bool flag3 = this.m_CharacterLookupDictionary.ContainsKey((uint)character);
-				flag2 = flag3;
-			}
-			return flag2;
+			return !flag && this.m_CharacterLookupDictionary.ContainsKey((uint)character);
 		}
 
 		internal bool HasCharacter(char character)
 		{
 			bool flag = this.m_CharacterLookupDictionary == null;
-			bool flag2;
-			if (flag)
-			{
-				flag2 = false;
-			}
-			else
-			{
-				bool flag3 = this.m_CharacterLookupDictionary.ContainsKey((uint)character);
-				flag2 = flag3;
-			}
-			return flag2;
+			return !flag && this.m_CharacterLookupDictionary.ContainsKey((uint)character);
 		}
 
 		internal bool HasCharacter(char character, bool searchFallbacks)
@@ -773,8 +758,7 @@ namespace UnityEngine.TextCore
 						missingCharacters.Add(text[i]);
 					}
 				}
-				bool flag4 = missingCharacters.Count == 0;
-				flag2 = flag4;
+				flag2 = missingCharacters.Count == 0;
 			}
 			return flag2;
 		}
@@ -836,7 +820,7 @@ namespace UnityEngine.TextCore
 				bool flag2 = !this.m_GlyphLookupDictionary.ContainsKey(index);
 				if (flag2)
 				{
-					bool flag3 = glyph.glyphRect.width == 0 || glyph.glyphRect.width == 0;
+					bool flag3 = glyph.glyphRect.width == 0 || glyph.glyphRect.height == 0;
 					if (flag3)
 					{
 						this.m_GlyphTable.Add(glyph);
@@ -1318,7 +1302,6 @@ namespace UnityEngine.TextCore
 
 		private List<Glyph> m_GlyphsToRender = new List<Glyph>();
 
-		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal enum AtlasPopulationMode
 		{
 			Static,

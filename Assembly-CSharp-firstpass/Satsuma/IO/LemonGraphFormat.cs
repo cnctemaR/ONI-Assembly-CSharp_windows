@@ -165,71 +165,74 @@ namespace Satsuma.IO
 					}
 					else
 					{
-						if (!(text == "nodes") && !(text == "red_nodes") && !(text == "blue_nodes"))
+						if (text != null)
 						{
-							if (!(text == "arcs") && !(text == "edges"))
+							if (!(text == "nodes") && !(text == "red_nodes") && !(text == "blue_nodes"))
 							{
-								if (text == "attributes")
+								if (!(text == "arcs") && !(text == "edges"))
 								{
-									this.Attributes[list2[0]] = list2[1];
+									if (text == "attributes")
+									{
+										this.Attributes[list2[0]] = list2[1];
+									}
+								}
+								else
+								{
+									if (flag)
+									{
+										list = list2;
+										using (List<string>.Enumerator enumerator = list.GetEnumerator())
+										{
+											while (enumerator.MoveNext())
+											{
+												string text4 = enumerator.Current;
+												if (!this.ArcMaps.ContainsKey(text4))
+												{
+													this.ArcMaps[text4] = new Dictionary<Arc, string>();
+												}
+											}
+											goto IL_0323;
+										}
+									}
+									Node node = dictionary[list2[0]];
+									Node node2 = dictionary[list2[1]];
+									Arc arc = buildableGraph.AddArc(node, node2, directedness2);
+									for (int i = 2; i < list2.Count; i++)
+									{
+										this.ArcMaps[list[i - 2]][arc] = list2[i];
+									}
+								}
+							}
+							else if (flag)
+							{
+								list = list2;
+								for (int j = 0; j < list.Count; j++)
+								{
+									string text5 = list[j];
+									if (text5 == "label")
+									{
+										num = j;
+									}
+									if (!this.NodeMaps.ContainsKey(text5))
+									{
+										this.NodeMaps[text5] = new Dictionary<Node, string>();
+									}
 								}
 							}
 							else
 							{
-								if (flag)
+								Node node3 = buildableGraph.AddNode();
+								for (int k = 0; k < list2.Count; k++)
 								{
-									list = list2;
-									using (List<string>.Enumerator enumerator = list.GetEnumerator())
+									this.NodeMaps[list[k]][node3] = list2[k];
+									if (k == num)
 									{
-										while (enumerator.MoveNext())
-										{
-											string text4 = enumerator.Current;
-											if (!this.ArcMaps.ContainsKey(text4))
-											{
-												this.ArcMaps[text4] = new Dictionary<Arc, string>();
-											}
-										}
-										goto IL_031D;
+										dictionary[list2[k]] = node3;
 									}
 								}
-								Node node = dictionary[list2[0]];
-								Node node2 = dictionary[list2[1]];
-								Arc arc = buildableGraph.AddArc(node, node2, directedness2);
-								for (int i = 2; i < list2.Count; i++)
-								{
-									this.ArcMaps[list[i - 2]][arc] = list2[i];
-								}
 							}
 						}
-						else if (flag)
-						{
-							list = list2;
-							for (int j = 0; j < list.Count; j++)
-							{
-								string text5 = list[j];
-								if (text5 == "label")
-								{
-									num = j;
-								}
-								if (!this.NodeMaps.ContainsKey(text5))
-								{
-									this.NodeMaps[text5] = new Dictionary<Node, string>();
-								}
-							}
-						}
-						else
-						{
-							Node node3 = buildableGraph.AddNode();
-							for (int k = 0; k < list2.Count; k++)
-							{
-								this.NodeMaps[list[k]][node3] = list2[k];
-								if (k == num)
-								{
-									dictionary[list2[k]] = node3;
-								}
-							}
-						}
-						IL_031D:
+						IL_0323:
 						flag = false;
 					}
 				}

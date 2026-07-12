@@ -45,9 +45,10 @@ namespace UnityEngine.EventSystems
 
 		private void Execute(EventTriggerType id, BaseEventData eventData)
 		{
-			int i = 0;
 			int count = this.triggers.Count;
-			while (i < count)
+			int i = 0;
+			int count2 = this.triggers.Count;
+			while (i < count2)
 			{
 				EventTrigger.Entry entry = this.triggers[i];
 				if (entry.eventID == id && entry.callback != null)

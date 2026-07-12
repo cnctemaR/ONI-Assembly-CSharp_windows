@@ -6,12 +6,12 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
-	[NativeHeader("Runtime/Input/GetInput.h")]
-	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
-	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
+	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
+	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
+	[NativeHeader("Runtime/Input/GetInput.h")]
 	public sealed class SystemInfo
 	{
 		[NativeProperty]
@@ -314,6 +314,14 @@ namespace UnityEngine
 			}
 		}
 
+		public static bool supportsCompressed3DTextures
+		{
+			get
+			{
+				return SystemInfo.SupportsCompressed3DTextures();
+			}
+		}
+
 		public static bool supports2DArrayTextures
 		{
 			get
@@ -367,6 +375,14 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.SupportsTessellationShaders();
+			}
+		}
+
+		public static bool supportsRenderTargetArrayIndexFromVertexShader
+		{
+			get
+			{
+				return SystemInfo.SupportsRenderTargetArrayIndexFromVertexShader();
 			}
 		}
 
@@ -431,6 +447,14 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.SupportsMultisampledTextures();
+			}
+		}
+
+		public static bool supportsMultisampled2DArrayTextures
+		{
+			get
+			{
+				return SystemInfo.SupportsMultisampled2DArrayTextures();
 			}
 		}
 
@@ -638,6 +662,14 @@ namespace UnityEngine
 			}
 		}
 
+		public static bool supportsGpuRecorder
+		{
+			get
+			{
+				return SystemInfo.SupportsGpuRecorder();
+			}
+		}
+
 		public static bool supportsGraphicsFence
 		{
 			get
@@ -670,11 +702,20 @@ namespace UnityEngine
 			}
 		}
 
-		public static bool minConstantBufferOffsetAlignment
+		public static int constantBufferOffsetAlignment
 		{
 			get
 			{
 				return SystemInfo.MinConstantBufferOffsetAlignment();
+			}
+		}
+
+		[Obsolete("Use SystemInfo.constantBufferOffsetAlignment instead.")]
+		public static bool minConstantBufferOffsetAlignment
+		{
+			get
+			{
+				return false;
 			}
 		}
 
@@ -708,6 +749,38 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.UsesLoadStoreActions();
+			}
+		}
+
+		public static HDRDisplaySupportFlags hdrDisplaySupportFlags
+		{
+			get
+			{
+				return SystemInfo.GetHDRDisplaySupportFlags();
+			}
+		}
+
+		public static bool supportsConservativeRaster
+		{
+			get
+			{
+				return SystemInfo.SupportsConservativeRaster();
+			}
+		}
+
+		public static bool supportsMultiview
+		{
+			get
+			{
+				return SystemInfo.SupportsMultiview();
+			}
+		}
+
+		public static bool supportsStoreAndResolveAction
+		{
+			get
+			{
+				return SystemInfo.SupportsStoreAndResolveAction();
 			}
 		}
 
@@ -856,6 +929,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool Supports3DTextures();
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsCompressed3DTextures")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsCompressed3DTextures();
+
 		[FreeFunction("ScriptingGraphicsCaps::Supports2DArrayTextures")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool Supports2DArrayTextures();
@@ -883,6 +960,10 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::SupportsTessellationShaders")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsTessellationShaders();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsRenderTargetArrayIndexFromVertexShader")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsRenderTargetArrayIndexFromVertexShader();
 
 		[FreeFunction("ScriptingGraphicsCaps::SupportsInstancing")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -939,6 +1020,10 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampledTextures")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int SupportsMultisampledTextures();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampled2DArrayTextures")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMultisampled2DArrayTextures();
 
 		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampleAutoResolve")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1004,6 +1089,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsAsyncCompute();
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsGpuRecorder")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsGpuRecorder();
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsGPUFence")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsGPUFence();
@@ -1022,7 +1111,7 @@ namespace UnityEngine
 
 		[FreeFunction("ScriptingGraphicsCaps::MinConstantBufferOffsetAlignment")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool MinConstantBufferOffsetAlignment();
+		private static extern int MinConstantBufferOffsetAlignment();
 
 		[FreeFunction("ScriptingGraphicsCaps::HasMipMaxLevel")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1044,9 +1133,31 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern GraphicsFormat GetGraphicsFormat(DefaultFormat format);
 
+		[FreeFunction("ScriptingGraphicsCaps::GetRenderTextureSupportedMSAASampleCount")]
+		public static int GetRenderTextureSupportedMSAASampleCount(RenderTextureDescriptor desc)
+		{
+			return SystemInfo.GetRenderTextureSupportedMSAASampleCount_Injected(ref desc);
+		}
+
 		[FreeFunction("ScriptingGraphicsCaps::UsesLoadStoreActions")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool UsesLoadStoreActions();
+
+		[FreeFunction("ScriptingGraphicsCaps::GetHDRDisplaySupportFlags")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern HDRDisplaySupportFlags GetHDRDisplaySupportFlags();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsConservativeRaster")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsConservativeRaster();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMultiview")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMultiview();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsStoreAndResolveAction")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsStoreAndResolveAction();
 
 		[Obsolete("SystemInfo.supportsGPUFence has been deprecated, use SystemInfo.supportsGraphicsFence instead (UnityUpgradable) ->  supportsGraphicsFence", true)]
 		public static bool supportsGPUFence
@@ -1056,6 +1167,9 @@ namespace UnityEngine
 				return false;
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetRenderTextureSupportedMSAASampleCount_Injected(ref RenderTextureDescriptor desc);
 
 		public const string unsupportedIdentifier = "n/a";
 	}

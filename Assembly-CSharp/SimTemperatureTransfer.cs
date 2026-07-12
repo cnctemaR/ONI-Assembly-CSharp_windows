@@ -55,7 +55,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		SimTemperatureTransfer.handleInstanceMap.Clear();
 	}
 
-	public static void DoStateTransition(int sim_handle)
+	public static void DoOreMeltTransition(int sim_handle)
 	{
 		SimTemperatureTransfer simTemperatureTransfer = null;
 		if (!SimTemperatureTransfer.handleInstanceMap.TryGetValue(sim_handle, out simTemperatureTransfer))
@@ -72,13 +72,46 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		}
 		PrimaryElement component = simTemperatureTransfer.GetComponent<PrimaryElement>();
 		Element element = component.Element;
-		if (element.highTempTransitionTarget == SimHashes.Unobtanium)
+		bool flag = component.Temperature >= element.highTemp;
+		bool flag2 = component.Temperature <= element.lowTemp;
+		DebugUtil.DevAssert(flag || flag2, "An ore got a melt message from the sim but it's still the correct temperature for its state!", component);
+		if (flag && element.highTempTransitionTarget == SimHashes.Unobtanium)
+		{
+			return;
+		}
+		if (flag2 && element.lowTempTransitionTarget == SimHashes.Unobtanium)
 		{
 			return;
 		}
 		if (component.Mass > 0f)
 		{
-			SimMessages.AddRemoveSubstance(Grid.PosToCell(simTemperatureTransfer.transform.GetPosition()), element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, -1);
+			int num = Grid.PosToCell(simTemperatureTransfer.transform.GetPosition());
+			float num2 = component.Mass;
+			int num3 = component.DiseaseCount;
+			SimHashes simHashes = (flag ? element.highTempTransitionTarget : element.lowTempTransitionTarget);
+			SimHashes simHashes2 = (flag ? element.highTempTransitionOreID : element.lowTempTransitionOreID);
+			float num4 = (flag ? element.highTempTransitionOreMassConversion : element.lowTempTransitionOreMassConversion);
+			if ((byte)simHashes2 != 255)
+			{
+				float num5 = num2 * num4;
+				int num6 = (int)((float)num3 * num4);
+				if (num5 > 0.001f)
+				{
+					num2 -= num5;
+					num3 -= num6;
+					Element element2 = ElementLoader.FindElementByHash(simHashes2);
+					if (element2.IsSolid)
+					{
+						GameObject gameObject = element2.substance.SpawnResource(simTemperatureTransfer.transform.GetPosition(), num5, component.Temperature, component.DiseaseIdx, num6, true, false, true);
+						element2.substance.ActivateSubstanceGameObject(gameObject, component.DiseaseIdx, num6);
+					}
+					else
+					{
+						SimMessages.AddRemoveSubstance(num, element2.id, CellEventLogger.Instance.OreMelted, num5, component.Temperature, component.DiseaseIdx, num6, true, -1);
+					}
+				}
+			}
+			SimMessages.AddRemoveSubstance(num, simHashes, CellEventLogger.Instance.OreMelted, num2, component.Temperature, component.DiseaseIdx, num3, true, -1);
 		}
 		simTemperatureTransfer.OnCleanUp();
 		Util.KDestroyGameObject(simTemperatureTransfer.gameObject);
@@ -98,7 +131,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		Element element = component.Element;
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "SimTemperatureTransfer.OnSpawn");
-		if (component.Element.HasTag(GameTags.Special) || element.specificHeatCapacity == 0f)
+		if (!Grid.IsValidCell(Grid.PosToCell(this)) || component.Element.HasTag(GameTags.Special) || element.specificHeatCapacity == 0f)
 		{
 			base.enabled = false;
 		}
@@ -108,6 +141,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
+		this.SimRegister();
 		if (Sim.IsValidHandle(this.simHandle))
 		{
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
@@ -135,6 +169,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			base.enabled = false;
 			return;
 		}
+		this.SimRegister();
 		if (Sim.IsValidHandle(this.simHandle))
 		{
 			SimMessages.MoveElementChunk(this.simHandle, num);
@@ -273,6 +308,8 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			SimMessages.RemoveElementChunk(handle, -1);
 		}
 	}
+
+	private const float SIM_FREEZE_SPAWN_ORE_PERCENT = 0.8f;
 
 	private const float MIN_MASS_FOR_TEMPERATURE_TRANSFER = 0.01f;
 

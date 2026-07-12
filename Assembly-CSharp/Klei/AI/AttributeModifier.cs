@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using UnityEngine;
 
 namespace Klei.AI
 {
@@ -56,7 +55,7 @@ namespace Klei.AI
 			return this.DescriptionCB();
 		}
 
-		public string GetFormattedString(GameObject parent_instance)
+		public string GetFormattedString()
 		{
 			IAttributeFormatter attributeFormatter = null;
 			Attribute attribute = Db.Get().Attributes.TryGet(this.AttributeId);
@@ -73,12 +72,20 @@ namespace Klei.AI
 					{
 						attributeFormatter = attribute.formatter;
 					}
+					else
+					{
+						attribute = Db.Get().PlantAttributes.TryGet(this.AttributeId);
+						if (attribute != null)
+						{
+							attributeFormatter = attribute.formatter;
+						}
+					}
 				}
 			}
 			string text = "";
 			if (attributeFormatter != null)
 			{
-				text = attributeFormatter.GetFormattedModifier(this, parent_instance);
+				text = attributeFormatter.GetFormattedModifier(this);
 			}
 			else if (this.IsMultiplier)
 			{

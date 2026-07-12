@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class RockCometConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(RockCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.ROCKCOMET.NAME, true);
@@ -23,7 +28,7 @@ public class RockCometConfig : IEntityConfig
 		comet.flyingSoundID = 2;
 		comet.explosionEffectHash = SpawnFXHashes.MeteorImpactDirt;
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
-		primaryElement.SetElement(SimHashes.Regolith);
+		primaryElement.SetElement(SimHashes.Regolith, true);
 		primaryElement.Temperature = (comet.temperatureRange.x + comet.temperatureRange.y) / 2f;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("meteor_rock_kanim") };
@@ -31,6 +36,7 @@ public class RockCometConfig : IEntityConfig
 		kbatchedAnimController.initialAnim = "fall_loop";
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
 		gameObject.AddOrGet<KCircleCollider2D>().radius = 0.5f;
+		gameObject.AddTag(GameTags.Comet);
 		return gameObject;
 	}
 

@@ -5,8 +5,24 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/ConduitDispenser")]
-public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
+public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 {
+	public Storage Storage
+	{
+		get
+		{
+			return this.storage;
+		}
+	}
+
+	public ConduitType ConduitType
+	{
+		get
+		{
+			return this.conduitType;
+		}
+	}
+
 	public ConduitType TypeOfConduit
 	{
 		get
@@ -54,7 +70,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Plumbing, true);
 		}, null, null);
-		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
+		this.utilityCell = this.GetOutputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType == ConduitType.Gas) ? 12 : 16];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Dispense);
@@ -90,7 +106,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 			PrimaryElement primaryElement = this.FindSuitableElement();
 			if (primaryElement != null)
 			{
-				primaryElement.KeepZeroMassObject = true;
+				this.empty = false;
 				float num = this.GetConduitManager().AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount);
 				if (num > 0f)
 				{
@@ -101,6 +117,11 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 					return;
 				}
 				this.blocked = true;
+				return;
+			}
+			else
+			{
+				this.empty = true;
 			}
 		}
 	}
@@ -143,6 +164,17 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	private int GetOutputCell()
+	{
+		Building component = base.GetComponent<Building>();
+		if (this.useSecondaryOutput)
+		{
+			ISecondaryOutput component2 = base.GetComponent<ISecondaryOutput>();
+			return Grid.OffsetCell(component.NaturalBuildingCell(), component2.GetSecondaryConduitOffset(this.conduitType));
+		}
+		return component.GetUtilityOutputCell();
+	}
+
 	[SerializeField]
 	public ConduitType conduitType;
 
@@ -160,6 +192,12 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 
 	[SerializeField]
 	public bool blocked;
+
+	[SerializeField]
+	public bool empty = true;
+
+	[SerializeField]
+	public bool useSecondaryOutput;
 
 	private static readonly Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 

@@ -75,64 +75,26 @@ namespace UnityEngine.Events
 			}
 		}
 
-		private void TidyAssemblyTypeName()
-		{
-			bool flag = string.IsNullOrEmpty(this.m_ObjectArgumentAssemblyTypeName);
-			if (!flag)
-			{
-				int num = int.MaxValue;
-				int num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", Version=");
-				bool flag2 = num2 != -1;
-				if (flag2)
-				{
-					num = Math.Min(num2, num);
-				}
-				num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", Culture=");
-				bool flag3 = num2 != -1;
-				if (flag3)
-				{
-					num = Math.Min(num2, num);
-				}
-				num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", PublicKeyToken=");
-				bool flag4 = num2 != -1;
-				if (flag4)
-				{
-					num = Math.Min(num2, num);
-				}
-				bool flag5 = num != int.MaxValue;
-				if (flag5)
-				{
-					this.m_ObjectArgumentAssemblyTypeName = this.m_ObjectArgumentAssemblyTypeName.Substring(0, num);
-				}
-				num2 = this.m_ObjectArgumentAssemblyTypeName.IndexOf(", UnityEngine.");
-				bool flag6 = num2 != -1 && this.m_ObjectArgumentAssemblyTypeName.EndsWith("Module");
-				if (flag6)
-				{
-					this.m_ObjectArgumentAssemblyTypeName = this.m_ObjectArgumentAssemblyTypeName.Substring(0, num2) + ", UnityEngine";
-				}
-			}
-		}
-
 		public void OnBeforeSerialize()
 		{
-			this.TidyAssemblyTypeName();
+			this.m_ObjectArgumentAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_ObjectArgumentAssemblyTypeName);
 		}
 
 		public void OnAfterDeserialize()
 		{
-			this.TidyAssemblyTypeName();
+			this.m_ObjectArgumentAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_ObjectArgumentAssemblyTypeName);
 		}
 
 		[SerializeField]
 		[FormerlySerializedAs("objectArgument")]
 		private Object m_ObjectArgument;
 
-		[SerializeField]
 		[FormerlySerializedAs("objectArgumentAssemblyTypeName")]
+		[SerializeField]
 		private string m_ObjectArgumentAssemblyTypeName;
 
-		[FormerlySerializedAs("intArgument")]
 		[SerializeField]
+		[FormerlySerializedAs("intArgument")]
 		private int m_IntArgument;
 
 		[FormerlySerializedAs("floatArgument")]

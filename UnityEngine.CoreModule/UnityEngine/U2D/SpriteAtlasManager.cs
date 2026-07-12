@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.U2D
 {
+	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
 	[StaticAccessor("GetSpriteAtlasManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
-	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
 	public class SpriteAtlasManager
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

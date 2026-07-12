@@ -15,6 +15,17 @@ namespace UnityEngine.Rendering
 			this.m_DepthSlice = 0;
 		}
 
+		public RenderTargetIdentifier(BuiltinRenderTextureType type, int mipLevel = 0, CubemapFace cubeFace = CubemapFace.Unknown, int depthSlice = 0)
+		{
+			this.m_Type = type;
+			this.m_NameID = -1;
+			this.m_InstanceID = 0;
+			this.m_BufferPointer = IntPtr.Zero;
+			this.m_MipLevel = mipLevel;
+			this.m_CubeFace = cubeFace;
+			this.m_DepthSlice = depthSlice;
+		}
+
 		public RenderTargetIdentifier(string name)
 		{
 			this.m_Type = BuiltinRenderTextureType.PropertyName;
@@ -162,7 +173,7 @@ namespace UnityEngine.Rendering
 
 		public override string ToString()
 		{
-			return UnityString.Format("Type {0} NameID {1} InstanceID {2}", new object[] { this.m_Type, this.m_NameID, this.m_InstanceID });
+			return UnityString.Format("Type {0} NameID {1} InstanceID {2} BufferPointer {3} MipLevel {4} CubeFace {5} DepthSlice {6}", new object[] { this.m_Type, this.m_NameID, this.m_InstanceID, this.m_BufferPointer, this.m_MipLevel, this.m_CubeFace, this.m_DepthSlice });
 		}
 
 		public override int GetHashCode()
@@ -200,6 +211,8 @@ namespace UnityEngine.Rendering
 		{
 			return !lhs.Equals(rhs);
 		}
+
+		public const int AllDepthSlices = -1;
 
 		private BuiltinRenderTextureType m_Type;
 

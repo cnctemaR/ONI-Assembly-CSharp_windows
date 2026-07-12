@@ -383,7 +383,7 @@ public class AmbienceManager : KMonoBehaviour
 
 		public AmbienceManager.Layer facilityLayer;
 
-		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[13];
+		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[16];
 
 		private List<AmbienceManager.Layer> allLayers = new List<AmbienceManager.Layer>();
 

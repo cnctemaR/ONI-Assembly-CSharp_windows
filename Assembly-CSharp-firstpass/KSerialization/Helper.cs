@@ -260,7 +260,7 @@ namespace KSerialization
 					writer.BaseStream.Position = position6;
 					return;
 				}
-				writer.Write(4);
+				writer.Write(0);
 				writer.Write(-1);
 				return;
 			case SerializationTypeInfo.Pair:
@@ -314,7 +314,7 @@ namespace KSerialization
 					writer.BaseStream.Position = position12;
 					return;
 				}
-				writer.Write(4);
+				writer.Write(0);
 				writer.Write(-1);
 				return;
 			case SerializationTypeInfo.List:
@@ -358,7 +358,7 @@ namespace KSerialization
 					writer.BaseStream.Position = position15;
 					return;
 				}
-				writer.Write(4);
+				writer.Write(0);
 				writer.Write(-1);
 				return;
 			case SerializationTypeInfo.HashSet:
@@ -399,7 +399,7 @@ namespace KSerialization
 					writer.BaseStream.Position = position18;
 					return;
 				}
-				writer.Write(4);
+				writer.Write(0);
 				writer.Write(-1);
 				return;
 			case SerializationTypeInfo.Queue:
@@ -443,7 +443,7 @@ namespace KSerialization
 					writer.BaseStream.Position = position21;
 					return;
 				}
-				writer.Write(4);
+				writer.Write(0);
 				writer.Write(-1);
 				return;
 			case SerializationTypeInfo.Colour:

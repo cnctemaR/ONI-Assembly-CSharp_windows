@@ -108,11 +108,11 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				if (this.wholeNumbers)
+				if (!this.wholeNumbers)
 				{
-					return Mathf.Round(this.m_Value);
+					return this.m_Value;
 				}
-				return this.m_Value;
+				return Mathf.Round(this.m_Value);
 			}
 			set
 			{

@@ -77,7 +77,7 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
-		this.SetArrowToggleState(false);
+		this.SetArrowToggleState(this.GetState() > TreeFilterableSideScreenRow.State.Off);
 	}
 
 	protected override void OnCmpDisable()
@@ -93,7 +93,6 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		this.arrowToggle.onClick -= this.ArrowToggleClicked;
 	}
 
 	public void UpdateCheckBoxVisualState()
@@ -124,21 +123,21 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 
 	private void ArrowToggleClicked()
 	{
+		this.SetArrowToggleState(this.arrowToggle.CurrentState != 1);
 		this.UpdateArrowToggleState();
 	}
 
 	private void SetArrowToggleState(bool state)
 	{
-		this.arrowToggle.isOn = state;
+		this.arrowToggle.ChangeState(state ? 1 : 0);
 		this.UpdateArrowToggleState();
 	}
 
 	private void UpdateArrowToggleState()
 	{
-		bool isOn = this.arrowToggle.isOn;
-		this.arrowToggle.GetComponent<ImageToggleState>().SetActiveState(isOn);
-		this.elementGroup.SetActive(isOn);
-		this.bgImg.enabled = isOn;
+		bool currentState = this.arrowToggle.CurrentState != 0;
+		this.elementGroup.SetActive(currentState);
+		this.bgImg.enabled = currentState;
 	}
 
 	private void ArrowToggleDisabledClick()
@@ -164,7 +163,6 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		this.subTags.Clear();
 		this.rowElements.Clear();
 		this.elementName.text = mainElementTag.ProperName();
-		this.arrowToggle.ClearOnClick();
 		this.bgImg.enabled = false;
 		string text = string.Format(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.CATEGORYBUTTONTOOLTIP, mainElementTag.ProperName());
 		this.checkBoxToggle.GetComponent<ToolTip>().SetSimpleTooltip(text);
@@ -174,15 +172,13 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 			{
 				this.elementGroup.SetActive(false);
 			}
-			this.arrowToggle.interactable = false;
-			this.arrowToggle.onClick += this.ArrowToggleDisabledClick;
-			this.arrowToggle.GetComponent<ImageToggleState>().SetDisabled();
+			this.arrowToggle.onClick = new global::System.Action(this.ArrowToggleDisabledClick);
+			this.arrowToggle.ChangeState(0);
 		}
 		else
 		{
-			this.arrowToggle.interactable = true;
-			this.arrowToggle.onClick += this.ArrowToggleClicked;
-			this.arrowToggle.GetComponent<ImageToggleState>().SetActiveState(false);
+			this.arrowToggle.onClick = new global::System.Action(this.ArrowToggleClicked);
+			this.arrowToggle.ChangeState(0);
 			foreach (KeyValuePair<Tag, bool> keyValuePair in filterMap)
 			{
 				TreeFilterableSideScreenElement freeElement = this.parent.elementPool.GetFreeElement(this.elementGroup, true);
@@ -210,7 +206,7 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 	private MultiToggle checkBoxToggle;
 
 	[SerializeField]
-	private KToggle arrowToggle;
+	private MultiToggle arrowToggle;
 
 	[SerializeField]
 	private KImage bgImg;

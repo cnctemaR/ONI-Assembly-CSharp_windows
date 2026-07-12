@@ -255,8 +255,9 @@ namespace UnityEngine.EventSystems
 		{
 			List<IEventSystemHandler> list = ExecuteEvents.s_HandlerListPool.Get();
 			ExecuteEvents.GetEventList<T>(target, list);
+			int count = list.Count;
 			int i = 0;
-			while (i < list.Count)
+			while (i < count)
 			{
 				T t;
 				try
@@ -267,13 +268,13 @@ namespace UnityEngine.EventSystems
 				{
 					IEventSystemHandler eventSystemHandler = list[i];
 					Debug.LogException(new Exception(string.Format("Type {0} expected {1} received.", typeof(T).Name, eventSystemHandler.GetType().Name), ex));
-					goto IL_0074;
+					goto IL_007D;
 				}
-				goto IL_0062;
-				IL_0074:
+				goto IL_006B;
+				IL_007D:
 				i++;
 				continue;
-				IL_0062:
+				IL_006B:
 				try
 				{
 					functor(t, eventData);
@@ -282,17 +283,18 @@ namespace UnityEngine.EventSystems
 				{
 					Debug.LogException(ex2);
 				}
-				goto IL_0074;
+				goto IL_007D;
 			}
-			int count = list.Count;
+			int count2 = list.Count;
 			ExecuteEvents.s_HandlerListPool.Release(list);
-			return count > 0;
+			return count2 > 0;
 		}
 
 		public static GameObject ExecuteHierarchy<T>(GameObject root, BaseEventData eventData, ExecuteEvents.EventFunction<T> callbackFunction) where T : IEventSystemHandler
 		{
 			ExecuteEvents.GetEventChain(root, ExecuteEvents.s_InternalTransformList);
-			for (int i = 0; i < ExecuteEvents.s_InternalTransformList.Count; i++)
+			int count = ExecuteEvents.s_InternalTransformList.Count;
+			for (int i = 0; i < count; i++)
 			{
 				Transform transform = ExecuteEvents.s_InternalTransformList[i];
 				if (ExecuteEvents.Execute<T>(transform.gameObject, eventData, callbackFunction))
@@ -325,7 +327,8 @@ namespace UnityEngine.EventSystems
 			}
 			List<Component> list = ListPool<Component>.Get();
 			go.GetComponents<Component>(list);
-			for (int i = 0; i < list.Count; i++)
+			int count = list.Count;
+			for (int i = 0; i < count; i++)
 			{
 				if (ExecuteEvents.ShouldSendToComponent<T>(list[i]))
 				{

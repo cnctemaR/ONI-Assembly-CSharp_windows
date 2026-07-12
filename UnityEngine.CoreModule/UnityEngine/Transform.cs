@@ -8,9 +8,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Transform/Transform.h")]
-	[NativeHeader("Configuration/UnityConfigure.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Configuration/UnityConfigure.h")]
 	public class Transform : Component, IEnumerable
 	{
 		protected Transform()
@@ -169,8 +169,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern int GetRotationOrderInternal();
 
-		[NativeConditional("UNITY_EDITOR")]
 		[NativeMethod("SetRotationOrder")]
+		[NativeConditional("UNITY_EDITOR")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void SetRotationOrderInternal(RotationOrder rotationOrder);
 
@@ -501,12 +501,16 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetSiblingIndex(int index);
 
+		[NativeMethod("MoveAfterSiblingInternal")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void MoveAfterSibling(Transform transform, bool notifyEditorAndMarkDirty);
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetSiblingIndex();
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Transform FindRelativeTransformWithPath(Transform transform, string path, [DefaultValue("false")] bool isActiveOnly);
+		private static extern Transform FindRelativeTransformWithPath([NotNull("NullExceptionObject")] Transform transform, string path, [DefaultValue("false")] bool isActiveOnly);
 
 		public Transform Find(string n)
 		{
@@ -535,7 +539,7 @@ namespace UnityEngine
 
 		[FreeFunction("Internal_IsChildOrSameTransform", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsChildOf([NotNull] Transform parent);
+		public extern bool IsChildOf([NotNull("ArgumentNullException")] Transform parent);
 
 		[NativeProperty("HasChangedDeprecated")]
 		public extern bool hasChanged
@@ -569,13 +573,13 @@ namespace UnityEngine
 			this.RotateAroundLocal_Injected(ref axis, angle);
 		}
 
-		[NativeThrows]
 		[FreeFunction("GetChild", HasExplicitThis = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Transform GetChild(int index);
 
-		[Obsolete("warning use Transform.childCount instead (UnityUpgradable) -> Transform.childCount", false)]
 		[NativeMethod("GetChildrenCount")]
+		[Obsolete("warning use Transform.childCount instead (UnityUpgradable) -> Transform.childCount", false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetChildCount();
 

@@ -175,11 +175,16 @@ public class ToolMenu : KScreen
 		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.SPRINKLE.NAME, "sprinkle", global::Action.SandboxSprinkle, "SandboxSprinkleTool", UI.SANDBOXTOOLS.SETTINGS.SPRINKLE.TOOLTIP, false));
 		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.FLOOD.NAME, "flood", global::Action.SandboxFlood, "SandboxFloodTool", UI.SANDBOXTOOLS.SETTINGS.FLOOD.TOOLTIP, false));
 		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.SAMPLE.NAME, "sample", global::Action.SandboxSample, "SandboxSampleTool", UI.SANDBOXTOOLS.SETTINGS.SAMPLE.TOOLTIP, false));
-		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.HEATGUN.NAME, "brush", global::Action.SandboxHeatGun, "SandboxHeatTool", UI.SANDBOXTOOLS.SETTINGS.HEATGUN.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.HEATGUN.NAME, "temperature", global::Action.SandboxHeatGun, "SandboxHeatTool", UI.SANDBOXTOOLS.SETTINGS.HEATGUN.TOOLTIP, false));
+		if (DlcManager.FeatureRadiationEnabled())
+		{
+			this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.RADSTOOL.NAME, "radiation", global::Action.SandboxRadsTool, "SandboxRadsTool", UI.SANDBOXTOOLS.SETTINGS.RADSTOOL.TOOLTIP, false));
+		}
 		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.SPAWNER.NAME, "spawn", global::Action.SandboxSpawnEntity, "SandboxSpawnerTool", UI.SANDBOXTOOLS.SETTINGS.SPAWNER.TOOLTIP, false));
 		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.CLEAR_FLOOR.NAME, "clear_floor", global::Action.SandboxClearFloor, "SandboxClearFloorTool", UI.SANDBOXTOOLS.SETTINGS.CLEAR_FLOOR.TOOLTIP, false));
 		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.DESTROY.NAME, "destroy", global::Action.SandboxDestroy, "SandboxDestroyerTool", UI.SANDBOXTOOLS.SETTINGS.DESTROY.TOOLTIP, false));
-		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.FOW.NAME, "brush", global::Action.SandboxReveal, "SandboxFOWTool", UI.SANDBOXTOOLS.SETTINGS.FOW.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.FOW.NAME, "reveal", global::Action.SandboxReveal, "SandboxFOWTool", UI.SANDBOXTOOLS.SETTINGS.FOW.TOOLTIP, false));
+		this.sandboxTools.Add(ToolMenu.CreateToolCollection(UI.TOOLS.SANDBOX.CRITTER.NAME, "critter", global::Action.SandboxCritterTool, "SandboxCritterTool", UI.SANDBOXTOOLS.SETTINGS.CRITTER.TOOLTIP, false));
 	}
 
 	private void CreateBasicTools()
@@ -624,13 +629,10 @@ public class ToolMenu : KScreen
 			if (!(toolCollection.toggle == null))
 			{
 				GameObject toggle = toolCollection.toggle;
-				foreach (Sprite sprite in this.icons)
+				Sprite sprite = Assets.GetSprite(toolCollection.icon);
+				if (sprite != null)
 				{
-					if (sprite != null && sprite.name == toolCollection.icon)
-					{
-						toggle.transform.Find("FG").GetComponent<Image>().sprite = sprite;
-						break;
-					}
+					toggle.transform.Find("FG").GetComponent<Image>().sprite = sprite;
 				}
 				Transform transform = toggle.transform.Find("Text");
 				if (transform != null)
@@ -673,13 +675,10 @@ public class ToolMenu : KScreen
 				for (int j = 0; j < toolCollection.tools.Count; j++)
 				{
 					GameObject gameObject = toolCollection.tools[j].toggle.gameObject;
-					foreach (Sprite sprite in this.icons)
+					Sprite sprite = Assets.GetSprite(toolCollection.icon);
+					if (sprite != null)
 					{
-						if (sprite != null && sprite.name == toolCollection.tools[j].icon)
-						{
-							gameObject.transform.Find("FG").GetComponent<Image>().sprite = sprite;
-							break;
-						}
+						gameObject.transform.Find("FG").GetComponent<Image>().sprite = sprite;
 					}
 					Transform transform = gameObject.transform.Find("Text");
 					if (transform != null)
@@ -762,9 +761,6 @@ public class ToolMenu : KScreen
 	public GameObject smallToolTopRow;
 
 	public GameObject sandboxToolSet;
-
-	[SerializeField]
-	private List<Sprite> icons = new List<Sprite>();
 
 	private PriorityScreen priorityScreen;
 

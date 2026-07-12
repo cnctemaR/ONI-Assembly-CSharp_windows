@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Math/Rect.h")]
-	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	public struct Rect : IEquatable<Rect>
+	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
+	public struct Rect : IEquatable<Rect>, IFormattable
 	{
 		public Rect(float x, float y, float width, float height)
 		{
@@ -240,14 +240,9 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag3 = false;
-				bool flag4 = (this.width < 0f && point.x <= this.xMin && point.x > this.xMax) || (this.width >= 0f && point.x >= this.xMin && point.x < this.xMax);
-				if (flag4)
-				{
-					flag3 = true;
-				}
-				bool flag5 = flag3 && ((this.height < 0f && point.y <= this.yMin && point.y > this.yMax) || (this.height >= 0f && point.y >= this.yMin && point.y < this.yMax));
-				flag2 = flag5;
+				bool flag3 = (this.width < 0f && point.x <= this.xMin && point.x > this.xMax) || (this.width >= 0f && point.x >= this.xMin && point.x < this.xMax);
+				bool flag4 = (this.height < 0f && point.y <= this.yMin && point.y > this.yMax) || (this.height >= 0f && point.y >= this.yMin && point.y < this.yMax);
+				flag2 = flag3 && flag4;
 			}
 			return flag2;
 		}
@@ -325,17 +320,27 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("(x:{0:F2}, y:{1:F2}, width:{2:F2}, height:{3:F2})", new object[] { this.x, this.y, this.width, this.height });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F2";
+			}
 			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
 			{
-				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.width.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.height.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
+				this.x.ToString(format, formatProvider),
+				this.y.ToString(format, formatProvider),
+				this.width.ToString(format, formatProvider),
+				this.height.ToString(format, formatProvider)
 			});
 		}
 

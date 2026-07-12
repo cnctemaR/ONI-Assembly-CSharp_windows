@@ -3,14 +3,14 @@ using KSerialization;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/RationBox")]
-public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
+public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms, IRottable
 {
 	protected override void OnPrefabInit()
 	{
 		this.filteredStorage = new FilteredStorage(this, null, new Tag[] { GameTags.Compostable }, this, false, Db.Get().ChoreTypes.FoodFetch);
 		base.Subscribe<RationBox>(-592767678, RationBox.OnOperationalChangedDelegate);
 		base.Subscribe<RationBox>(-905833192, RationBox.OnCopySettingsDelegate);
-		WorldInventory.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);
+		DiscoveredResources.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);
 	}
 
 	protected override void OnSpawn()
@@ -48,7 +48,7 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 
 	public void Render1000ms(float dt)
 	{
-		Rottable.SetStatusItems(base.GetComponent<KSelectable>(), Rottable.IsRefrigerated(base.gameObject), Rottable.AtmosphereQuality(base.gameObject));
+		Rottable.SetStatusItems(this);
 	}
 
 	public float UserMaxCapacity
@@ -102,6 +102,27 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 		{
 			return GameUtil.GetCurrentMassUnit(false);
 		}
+	}
+
+	public float RotTemperature
+	{
+		get
+		{
+			return 277.15f;
+		}
+	}
+
+	public float PreserveTemperature
+	{
+		get
+		{
+			return 255.15f;
+		}
+	}
+
+	GameObject IRottable.get_gameObject()
+	{
+		return base.gameObject;
 	}
 
 	[MyCmpReq]

@@ -10,6 +10,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Graphics/CubemapArrayTexture.h")]
 	public sealed class CubemapArray : Texture
 	{
@@ -93,6 +94,9 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool SetPixelDataImpl(IntPtr data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetImageDataPointer();
+
 		public CubemapArray(int width, int cubemapCount, DefaultFormat format, TextureCreationFlags flags)
 			: this(width, cubemapCount, SystemInfo.GetGraphicsFormat(format), flags)
 		{
@@ -106,9 +110,10 @@ namespace UnityEngine
 
 		public CubemapArray(int width, int cubemapCount, GraphicsFormat format, TextureCreationFlags flags, int mipCount)
 		{
-			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
-			if (flag)
+			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			if (!flag)
 			{
+				CubemapArray.ValidateIsNotCrunched(flags);
 				CubemapArray.Internal_Create(this, width, cubemapCount, mipCount, format, flags);
 			}
 		}
@@ -125,6 +130,7 @@ namespace UnityEngine
 				{
 					textureCreationFlags |= TextureCreationFlags.Crunch;
 				}
+				CubemapArray.ValidateIsNotCrunched(textureCreationFlags);
 				CubemapArray.Internal_Create(this, width, cubemapCount, mipCount, graphicsFormat, textureCreationFlags);
 			}
 		}
@@ -197,6 +203,31 @@ namespace UnityEngine
 				throw new UnityException("No texture data provided to SetPixelData.");
 			}
 			this.SetPixelDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), mipLevel, (int)face, element, UnsafeUtility.SizeOf<T>(), data.Length, sourceDataStartIndex);
+		}
+
+		public unsafe NativeArray<T> GetPixelData<T>(int mipLevel, CubemapFace face, int element) where T : struct
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			int num = (int)(element * 6 + face);
+			int pixelDataOffset = base.GetPixelDataOffset(base.mipmapCount, num);
+			int pixelDataOffset2 = base.GetPixelDataOffset(mipLevel, num);
+			int pixelDataSize = base.GetPixelDataSize(mipLevel, num);
+			int num2 = UnsafeUtility.SizeOf<T>();
+			IntPtr intPtr = new IntPtr(this.GetImageDataPointer().ToInt64() + (long)(pixelDataOffset * num + pixelDataOffset2));
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, pixelDataSize / num2, Allocator.None);
+		}
+
+		private static void ValidateIsNotCrunched(TextureCreationFlags flags)
+		{
+			bool flag = (flags &= TextureCreationFlags.Crunch) > TextureCreationFlags.None;
+			if (flag)
+			{
+				throw new ArgumentException("Crunched TextureCubeArray is not supported.");
+			}
 		}
 	}
 }

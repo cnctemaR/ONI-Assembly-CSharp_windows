@@ -29,11 +29,12 @@ public class ResearchEntry : KMonoBehaviour
 				zero2 = new Vector2(0f, 20f);
 			}
 			UILineRenderer component = Util.KInstantiateUI(this.linePrefab, this.lineContainer.gameObject, true).GetComponent<UILineRenderer>();
+			float num2 = 32f;
 			component.Points = new Vector2[]
 			{
 				new Vector2(0f, 0f) + zero,
-				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), 0f) + zero,
-				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), tech.center.y - this.targetTech.center.y) + zero2,
+				new Vector2(-num2, 0f) + zero,
+				new Vector2(-num2, tech.center.y - this.targetTech.center.y) + zero2,
 				new Vector2(-(this.targetTech.center.x - num - (tech.center.x + num)) + 2f, tech.center.y - this.targetTech.center.y) + zero2
 			};
 			component.LineThickness = (float)this.lineThickness_inactive;
@@ -92,16 +93,21 @@ public class ResearchEntry : KMonoBehaviour
 		string text = "";
 		foreach (TechItem techItem in this.targetTech.unlockedItems)
 		{
-			KImage componentInChildrenOnly = this.GetFreeIcon().GetComponentInChildrenOnly<KImage>();
-			componentInChildrenOnly.transform.parent.gameObject.SetActive(true);
+			HierarchyReferences component2 = this.GetFreeIcon().GetComponent<HierarchyReferences>();
 			if (text != "")
 			{
 				text += ", ";
 			}
 			text += techItem.Name;
+			component2.GetReference<KImage>("Icon").sprite = techItem.UISprite();
+			component2.GetReference<KImage>("Background");
+			component2.GetReference<KImage>("DLCOverlay").gameObject.SetActive(!DlcManager.IsValidForVanilla(techItem.dlcIds));
 			string text2 = string.Format("{0}\n{1}", techItem.Name, techItem.description);
-			componentInChildrenOnly.GetComponent<ToolTip>().toolTip = text2;
-			componentInChildrenOnly.sprite = techItem.UISprite();
+			if (!DlcManager.IsValidForVanilla(techItem.dlcIds))
+			{
+				text2 += RESEARCH.MESSAGING.DLC.EXPANSION1;
+			}
+			component2.GetComponent<ToolTip>().toolTip = text2;
 		}
 		text = string.Format(UI.RESEARCHSCREEN_UNLOCKSTOOLTIP, text);
 		this.researchName.GetComponent<ToolTip>().toolTip = string.Format("{0}\n{1}\n\n{2}", this.targetTech.Name, this.targetTech.desc, text);
@@ -151,7 +157,7 @@ public class ResearchEntry : KMonoBehaviour
 		this.isOn = true;
 	}
 
-	private void OnHover(bool entered, Tech hoverSource)
+	public void OnHover(bool entered, Tech hoverSource)
 	{
 		this.SetEverythingOn();
 		foreach (Tech tech in this.targetTech.requiredTech)
@@ -247,31 +253,9 @@ public class ResearchEntry : KMonoBehaviour
 		}
 	}
 
-	public void UpdateFilterState(string filter_string)
+	public void UpdateFilterState(bool state)
 	{
-		bool flag = false;
-		if (!string.IsNullOrEmpty(filter_string))
-		{
-			flag = UI.StripLinkFormatting(this.researchName.text).ToLower().Contains(filter_string);
-			if (!flag)
-			{
-				foreach (TechItem techItem in this.targetTech.unlockedItems)
-				{
-					if (UI.StripLinkFormatting(techItem.Name).ToLower().Contains(filter_string))
-					{
-						flag = true;
-						break;
-					}
-					if (UI.StripLinkFormatting(techItem.description).ToLower().Contains(filter_string))
-					{
-						flag = true;
-						break;
-					}
-				}
-			}
-		}
-		this.filterHighlight.gameObject.SetActive(flag);
-		this.filterLowlight.gameObject.SetActive(!flag && !string.IsNullOrEmpty(filter_string));
+		this.filterLowlight.gameObject.SetActive(!state);
 	}
 
 	public void SetPercentage(float percent)
@@ -287,7 +271,7 @@ public class ResearchEntry : KMonoBehaviour
 			if (this.targetTech.IsComplete())
 			{
 				num = 1f;
-				child.GetComponentInChildren<LocText>().text = this.targetTech.costsByResearchTypeID[keyValuePair.Key] + "/" + this.targetTech.costsByResearchTypeID[keyValuePair.Key];
+				child.GetComponentInChildren<LocText>().text = this.targetTech.costsByResearchTypeID[keyValuePair.Key].ToString() + "/" + this.targetTech.costsByResearchTypeID[keyValuePair.Key].ToString();
 			}
 			else
 			{
@@ -296,7 +280,7 @@ public class ResearchEntry : KMonoBehaviour
 				{
 					continue;
 				}
-				child.GetComponentInChildren<LocText>().text = orAdd.progressInventory.PointsByTypeID[keyValuePair.Key] + "/" + this.targetTech.costsByResearchTypeID[keyValuePair.Key];
+				child.GetComponentInChildren<LocText>().text = orAdd.progressInventory.PointsByTypeID[keyValuePair.Key].ToString() + "/" + this.targetTech.costsByResearchTypeID[keyValuePair.Key].ToString();
 				num = orAdd.progressInventory.PointsByTypeID[keyValuePair.Key] / this.targetTech.costsByResearchTypeID[keyValuePair.Key];
 			}
 			child.GetComponentsInChildren<Image>()[2].fillAmount = num;
@@ -306,7 +290,9 @@ public class ResearchEntry : KMonoBehaviour
 
 	private GameObject GetFreeIcon()
 	{
-		return Util.KInstantiateUI(this.iconPrefab, this.iconPanel, false);
+		GameObject gameObject = Util.KInstantiateUI(this.iconPrefab, this.iconPanel, false);
+		gameObject.SetActive(true);
+		return gameObject;
 	}
 
 	private Image GetFreeLine()

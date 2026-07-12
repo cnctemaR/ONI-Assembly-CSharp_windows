@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[AssetFileNameExtension("playable", new string[] { })]
 	[RequiredByNativeCode]
+	[AssetFileNameExtension("playable", new string[] { })]
 	[Serializable]
 	public abstract class PlayableAsset : ScriptableObject, IPlayableAsset
 	{

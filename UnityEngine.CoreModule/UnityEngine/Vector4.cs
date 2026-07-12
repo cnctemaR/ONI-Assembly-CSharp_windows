@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeClass("Vector4f")]
+	[Il2CppEagerStaticClassConstruction]
 	[NativeHeader("Runtime/Math/Vector4.h")]
-	public struct Vector4 : IEquatable<Vector4>
+	[NativeClass("Vector4f")]
+	public struct Vector4 : IEquatable<Vector4>, IFormattable
 	{
 		public float this[int index]
 		{
@@ -99,6 +102,7 @@ namespace UnityEngine
 			return new Vector4(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t, a.w + (b.w - a.w) * t);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 MoveTowards(Vector4 current, Vector4 target, float maxDistanceDelta)
 		{
 			float num = target.x - current.x;
@@ -144,6 +148,7 @@ namespace UnityEngine
 			return !flag && this.Equals((Vector4)other);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public bool Equals(Vector4 other)
 		{
 			return this.x == other.x && this.y == other.y && this.z == other.z && this.w == other.w;
@@ -192,11 +197,13 @@ namespace UnityEngine
 			return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 Project(Vector4 a, Vector4 b)
 		{
 			return b * (Vector4.Dot(a, b) / Vector4.Dot(b, b));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float Distance(Vector4 a, Vector4 b)
 		{
 			return Vector4.Magnitude(a - b);
@@ -223,11 +230,13 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 Min(Vector4 lhs, Vector4 rhs)
 		{
 			return new Vector4(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y), Mathf.Min(lhs.z, rhs.z), Mathf.Min(lhs.w, rhs.w));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 Max(Vector4 lhs, Vector4 rhs)
 		{
 			return new Vector4(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y), Mathf.Max(lhs.z, rhs.z), Mathf.Max(lhs.w, rhs.w));
@@ -265,36 +274,43 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 operator +(Vector4 a, Vector4 b)
 		{
 			return new Vector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 operator -(Vector4 a, Vector4 b)
 		{
 			return new Vector4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 operator -(Vector4 a)
 		{
 			return new Vector4(-a.x, -a.y, -a.z, -a.w);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 operator *(Vector4 a, float d)
 		{
 			return new Vector4(a.x * d, a.y * d, a.z * d, a.w * d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 operator *(float d, Vector4 a)
 		{
 			return new Vector4(a.x * d, a.y * d, a.z * d, a.w * d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector4 operator /(Vector4 a, float d)
 		{
 			return new Vector4(a.x / d, a.y / d, a.z / d, a.w / d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static bool operator ==(Vector4 lhs, Vector4 rhs)
 		{
 			float num = lhs.x - rhs.x;
@@ -305,6 +321,7 @@ namespace UnityEngine
 			return num5 < 9.9999994E-11f;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static bool operator !=(Vector4 lhs, Vector4 rhs)
 		{
 			return !(lhs == rhs);
@@ -332,17 +349,27 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("({0:F1}, {1:F1}, {2:F1}, {3:F1})", new object[] { this.x, this.y, this.z, this.w });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F1";
+			}
 			return UnityString.Format("({0}, {1}, {2}, {3})", new object[]
 			{
-				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.z.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.w.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
+				this.x.ToString(format, formatProvider),
+				this.y.ToString(format, formatProvider),
+				this.z.ToString(format, formatProvider),
+				this.w.ToString(format, formatProvider)
 			});
 		}
 

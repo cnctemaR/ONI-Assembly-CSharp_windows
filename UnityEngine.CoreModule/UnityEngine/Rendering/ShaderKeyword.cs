@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Shaders/ShaderKeywords.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/ShaderKeywords.h")]
 	[UsedByNativeCode]
 	public struct ShaderKeyword
 	{
@@ -17,6 +17,10 @@ namespace UnityEngine.Rendering
 		[FreeFunction("ShaderScripting::GetKeywordIndex")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int GetKeywordIndex(Shader shader, string keyword);
+
+		[FreeFunction("ShaderScripting::GetKeywordIndex")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int GetComputeShaderKeywordIndex(ComputeShader shader, string keyword);
 
 		[FreeFunction("ShaderScripting::GetGlobalKeywordName")]
 		public static string GetGlobalKeywordName(ShaderKeyword index)
@@ -48,6 +52,28 @@ namespace UnityEngine.Rendering
 			return ShaderKeyword.GetKeywordType_Injected(shader, ref index);
 		}
 
+		[FreeFunction("ShaderScripting::GetKeywordName")]
+		internal static string GetComputeShaderKeywordName(ComputeShader shader, ShaderKeyword index)
+		{
+			return ShaderKeyword.GetComputeShaderKeywordName_Injected(shader, ref index);
+		}
+
+		[FreeFunction("ShaderScripting::GetKeywordType")]
+		internal static ShaderKeywordType GetComputeShaderKeywordType(ComputeShader shader, ShaderKeyword index)
+		{
+			return ShaderKeyword.GetComputeShaderKeywordType_Injected(shader, ref index);
+		}
+
+		public static string GetKeywordName(ComputeShader shader, ShaderKeyword index)
+		{
+			return ShaderKeyword.GetComputeShaderKeywordName(shader, index);
+		}
+
+		public static ShaderKeywordType GetKeywordType(ComputeShader shader, ShaderKeyword index)
+		{
+			return ShaderKeyword.GetComputeShaderKeywordType(shader, index);
+		}
+
 		internal ShaderKeyword(int keywordIndex)
 		{
 			this.m_KeywordIndex = keywordIndex;
@@ -63,9 +89,14 @@ namespace UnityEngine.Rendering
 			this.m_KeywordIndex = ShaderKeyword.GetKeywordIndex(shader, keywordName);
 		}
 
+		public ShaderKeyword(ComputeShader shader, string keywordName)
+		{
+			this.m_KeywordIndex = ShaderKeyword.GetComputeShaderKeywordIndex(shader, keywordName);
+		}
+
 		public bool IsValid()
 		{
-			return this.m_KeywordIndex >= 0 && this.m_KeywordIndex < 320 && this.m_KeywordIndex != -1;
+			return this.m_KeywordIndex >= 0 && this.m_KeywordIndex < 448 && this.m_KeywordIndex != -1;
 		}
 
 		public int index
@@ -109,7 +140,13 @@ namespace UnityEngine.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern ShaderKeywordType GetKeywordType_Injected(Shader shader, ref ShaderKeyword index);
 
-		internal const int k_MaxShaderKeywords = 320;
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetComputeShaderKeywordName_Injected(ComputeShader shader, ref ShaderKeyword index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShaderKeywordType GetComputeShaderKeywordType_Injected(ComputeShader shader, ref ShaderKeyword index);
+
+		internal const int k_MaxShaderKeywords = 448;
 
 		private const int k_InvalidKeyword = -1;
 

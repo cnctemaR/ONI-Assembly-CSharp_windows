@@ -8,6 +8,8 @@ namespace TUNING
 {
 	public class CREATURES
 	{
+		public const float WILD_GROWTH_RATE_MODIFIER = 0.25f;
+
 		public const int DEFAULT_PROBING_RADIUS = 32;
 
 		public const float FERTILITY_TIME_BY_LIFESPAN = 0.6f;
@@ -19,6 +21,8 @@ namespace TUNING
 		public const float WILD_CALORIE_BURN_RATIO = 0.25f;
 
 		public const float VIABILITY_LOSS_RATE = -0.016666668f;
+
+		public const float STATERPILLAR_POWER_CHARGE_LOSS_RATE = -0.055555556f;
 
 		public class HITPOINTS
 		{
@@ -54,6 +58,10 @@ namespace TUNING
 
 		public class TEMPERATURE
 		{
+			public static float FREEZING_10 = 173f;
+
+			public static float FREEZING_9 = 183f;
+
 			public static float FREEZING_3 = 243f;
 
 			public static float FREEZING_2 = 253f;
@@ -109,6 +117,8 @@ namespace TUNING
 
 		public class SPACE_REQUIREMENTS
 		{
+			public static int TIER1 = 4;
+
 			public static int TIER2 = 8;
 
 			public static int TIER3 = 12;
@@ -221,6 +231,45 @@ namespace TUNING
 				};
 			}
 
+			private static global::System.Action CreateCropTendedModifier(string id, Tag eggTag, TagBits cropTags, float modifierPerEvent)
+			{
+				FertilityModifier.FertilityModFn <>9__2;
+				return delegate
+				{
+					string text = CREATURES.FERTILITY_MODIFIERS.CROPTENDING.NAME;
+					string text2 = CREATURES.FERTILITY_MODIFIERS.CROPTENDING.DESC;
+					List<Tag> plantTagsActual = cropTags.GetTagsVerySlow();
+					ModifierSet modifierSet = Db.Get();
+					string id2 = id;
+					Tag eggTag2 = eggTag;
+					string text3 = text;
+					string text4 = text2;
+					Func<string, string> func = delegate(string descStr)
+					{
+						string text5 = string.Join(", ", plantTagsActual.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
+						descStr = string.Format(descStr, text5);
+						return descStr;
+					};
+					FertilityModifier.FertilityModFn fertilityModFn;
+					if ((fertilityModFn = <>9__2) == null)
+					{
+						fertilityModFn = (<>9__2 = delegate(FertilityMonitor.Instance inst, Tag eggType)
+						{
+							inst.gameObject.Subscribe(90606262, delegate(object data)
+							{
+								CropTendingStates.CropTendingEventData cropTendingEventData = (CropTendingStates.CropTendingEventData)data;
+								TagBits tagBits = new TagBits(cropTendingEventData.cropId);
+								if (cropTags.HasAny(ref tagBits))
+								{
+									inst.AddBreedingChance(eggType, modifierPerEvent);
+								}
+							});
+						});
+					}
+					modifierSet.CreateFertilityModifier(id2, eggTag2, text3, text4, func, fertilityModFn);
+				};
+			}
+
 			private static global::System.Action CreateTemperatureModifier(string id, Tag eggTag, float minTemp, float maxTemp, float modifierPerSecond, bool alsoInvert)
 			{
 				Func<string, string> <>9__1;
@@ -292,7 +341,12 @@ namespace TUNING
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("LightBugCrystal", "LightBugCrystalEgg".ToTag(), "CookedMeat".ToTag(), 0.00125f),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("PacuTropical", "PacuTropicalEgg".ToTag(), 308.15f, 353.15f, 8.333333E-05f, false),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("PacuCleaner", "PacuCleanerEgg".ToTag(), 243.15f, 278.15f, 8.333333E-05f, false),
-				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("DreckoPlastic", "DreckoPlasticEgg".ToTag(), "BasicSingleHarvestPlant".ToTag(), 0.025f / DreckoTuning.STANDARD_CALORIES_PER_CYCLE)
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("DreckoPlastic", "DreckoPlasticEgg".ToTag(), "BasicSingleHarvestPlant".ToTag(), 0.025f / DreckoTuning.STANDARD_CALORIES_PER_CYCLE),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateCropTendedModifier("DivergentWorm", "DivergentWormEgg".ToTag(), new TagBits(new Tag[]
+				{
+					"WormPlant".ToTag(),
+					"SuperWormPlant".ToTag()
+				}), 0.05f / (float)DivergentTuning.TIMES_TENDED_PER_CYCLE_FOR_EVOLUTION)
 			};
 		}
 	}

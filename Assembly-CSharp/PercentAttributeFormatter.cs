@@ -1,6 +1,5 @@
 ﻿using System;
 using Klei.AI;
-using UnityEngine;
 
 public class PercentAttributeFormatter : StandardAttributeFormatter
 {
@@ -11,15 +10,15 @@ public class PercentAttributeFormatter : StandardAttributeFormatter
 
 	public override string GetFormattedAttribute(AttributeInstance instance)
 	{
-		return this.GetFormattedValue(instance.GetTotalDisplayValue(), base.DeltaTimeSlice, instance.gameObject);
+		return this.GetFormattedValue(instance.GetTotalDisplayValue(), base.DeltaTimeSlice);
 	}
 
-	public override string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
+	public override string GetFormattedModifier(AttributeModifier modifier)
 	{
-		return this.GetFormattedValue(modifier.Value, base.DeltaTimeSlice, parent_instance);
+		return this.GetFormattedValue(modifier.Value, base.DeltaTimeSlice);
 	}
 
-	public override string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice, GameObject parent_instance)
+	public override string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice)
 	{
 		return GameUtil.GetFormattedPercent(value * 100f, timeSlice);
 	}

@@ -58,7 +58,7 @@ namespace UnityEngine
 
 		[NativeMethod(Name = "ImageConversionBindings::LoadImage", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool LoadImage([NotNull] this Texture2D tex, byte[] data, bool markNonReadable);
+		public static extern bool LoadImage([NotNull("ArgumentNullException")] this Texture2D tex, byte[] data, bool markNonReadable);
 
 		public static bool LoadImage(this Texture2D tex, byte[] data)
 		{

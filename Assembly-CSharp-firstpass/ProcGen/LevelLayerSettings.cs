@@ -11,9 +11,10 @@ namespace ProcGen
 			this.LevelLayers = new LevelLayer();
 		}
 
-		public void Merge(LevelLayerSettings other)
+		public LevelLayerSettings Merge(LevelLayerSettings other)
 		{
 			this.LevelLayers.Merge(other.LevelLayers);
+			return this;
 		}
 	}
 }

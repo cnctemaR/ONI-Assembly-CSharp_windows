@@ -23,9 +23,9 @@ namespace UnityEngine.Events
 			base.RemoveListener(call.Target, call.Method);
 		}
 
-		protected override MethodInfo FindMethod_Impl(string name, object targetObj)
+		protected override MethodInfo FindMethod_Impl(string name, Type targetObjType)
 		{
-			return UnityEventBase.GetValidMethodInfo(targetObj, name, new Type[0]);
+			return UnityEventBase.GetValidMethodInfo(targetObjType, name, new Type[0]);
 		}
 
 		internal override BaseInvokableCall GetDelegate(object target, MethodInfo theFunction)

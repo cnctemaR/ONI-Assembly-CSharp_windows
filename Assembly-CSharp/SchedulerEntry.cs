@@ -3,7 +3,7 @@ using UnityEngine;
 
 public struct SchedulerEntry
 {
-	public SchedulerEntry.Details details { get; private set; }
+	public SchedulerEntry.Details details { readonly get; private set; }
 
 	public SchedulerEntry(string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
 	{

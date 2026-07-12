@@ -515,6 +515,10 @@ public class GroundRenderer : KMonoBehaviour
 					int num9 = -1;
 					int biomeIdx = GroundRenderer.WorldChunk.GetBiomeIdx(i * Grid.WidthInCells + j);
 					GroundMasks.BiomeMaskData biomeMaskData = biomeMasks[biomeIdx];
+					if (biomeMaskData == null)
+					{
+						biomeMaskData = biomeMasks[3];
+					}
 					for (int k = 0; k < GroundRenderer.WorldChunk.uniqueElements.Length; k++)
 					{
 						Element element = GroundRenderer.WorldChunk.uniqueElements[k];

@@ -54,37 +54,34 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IGameO
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.waiting;
-			this.waiting.EventTransition(GameHashes.OnStorageChange, this.hasfilter, (AirFilter.StatesInstance smi) => smi.master.HasFilter() && smi.master.operational.IsOperational).EventTransition(GameHashes.OperationalChanged, this.hasfilter, (AirFilter.StatesInstance smi) => smi.master.HasFilter() && smi.master.operational.IsOperational);
-			this.hasfilter.EventTransition(GameHashes.OnStorageChange, this.converting, (AirFilter.StatesInstance smi) => smi.master.IsConvertable()).EventTransition(GameHashes.OperationalChanged, this.waiting, (AirFilter.StatesInstance smi) => !smi.master.operational.IsOperational).Enter("EnableConsumption", delegate(AirFilter.StatesInstance smi)
+			this.waiting.EventTransition(GameHashes.OnStorageChange, this.hasFilter, (AirFilter.StatesInstance smi) => smi.master.HasFilter() && smi.master.operational.IsOperational).EventTransition(GameHashes.OperationalChanged, this.hasFilter, (AirFilter.StatesInstance smi) => smi.master.HasFilter() && smi.master.operational.IsOperational);
+			this.hasFilter.EventTransition(GameHashes.OperationalChanged, this.waiting, (AirFilter.StatesInstance smi) => !smi.master.operational.IsOperational).Enter("EnableConsumption", delegate(AirFilter.StatesInstance smi)
 			{
 				smi.master.elementConsumer.EnableConsumption(true);
+			}).Exit("DisableConsumption", delegate(AirFilter.StatesInstance smi)
+			{
+				smi.master.elementConsumer.EnableConsumption(false);
 			})
-				.Exit("DisableConsumption", delegate(AirFilter.StatesInstance smi)
-				{
-					smi.master.elementConsumer.EnableConsumption(false);
-				});
-			this.converting.Enter("SetActive(true)", delegate(AirFilter.StatesInstance smi)
+				.DefaultState(this.hasFilter.idle);
+			this.hasFilter.idle.EventTransition(GameHashes.OnStorageChange, this.hasFilter.converting, (AirFilter.StatesInstance smi) => smi.master.IsConvertable());
+			this.hasFilter.converting.Enter("SetActive(true)", delegate(AirFilter.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
 			}).Exit("SetActive(false)", delegate(AirFilter.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
-			}).Enter("EnableConsumption", delegate(AirFilter.StatesInstance smi)
-			{
-				smi.master.elementConsumer.EnableConsumption(true);
-			})
-				.Exit("DisableConsumption", delegate(AirFilter.StatesInstance smi)
-				{
-					smi.master.elementConsumer.EnableConsumption(false);
-				})
-				.EventTransition(GameHashes.OnStorageChange, this.waiting, (AirFilter.StatesInstance smi) => !smi.master.IsConvertable())
-				.EventTransition(GameHashes.OperationalChanged, this.waiting, (AirFilter.StatesInstance smi) => !smi.master.operational.IsOperational);
+			}).EventTransition(GameHashes.OnStorageChange, this.hasFilter.idle, (AirFilter.StatesInstance smi) => !smi.master.IsConvertable());
 		}
+
+		public AirFilter.States.ReadyStates hasFilter;
 
 		public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State waiting;
 
-		public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State hasfilter;
+		public class ReadyStates : GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State
+		{
+			public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State idle;
 
-		public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State converting;
+			public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State converting;
+		}
 	}
 }

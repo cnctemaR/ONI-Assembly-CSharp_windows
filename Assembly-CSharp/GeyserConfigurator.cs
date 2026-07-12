@@ -27,7 +27,7 @@ public class GeyserConfigurator : KMonoBehaviour
 
 	private GeyserConfigurator.GeyserInstanceConfiguration CreateRandomInstance(HashedString typeId, float min, float max)
 	{
-		global::System.Random random = new global::System.Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed + (int)base.transform.GetPosition().x + (int)base.transform.GetPosition().y);
+		global::System.Random random = new global::System.Random(SaveLoader.Instance.clusterDetailSave.globalWorldSeed + (int)base.transform.GetPosition().x + (int)base.transform.GetPosition().y);
 		return new GeyserConfigurator.GeyserInstanceConfiguration
 		{
 			typeId = typeId,
@@ -54,7 +54,7 @@ public class GeyserConfigurator : KMonoBehaviour
 
 	public class GeyserType
 	{
-		public GeyserType(string id, SimHashes element, float temperature, float minRatePerCycle, float maxRatePerCycle, float maxPressure, float minIterationLength = 60f, float maxIterationLength = 1140f, float minIterationPercent = 0.1f, float maxIterationPercent = 0.9f, float minYearLength = 15000f, float maxYearLength = 135000f, float minYearPercent = 0.4f, float maxYearPercent = 0.8f)
+		public GeyserType(string id, SimHashes element, float temperature, float minRatePerCycle, float maxRatePerCycle, float maxPressure, float minIterationLength = 60f, float maxIterationLength = 1140f, float minIterationPercent = 0.1f, float maxIterationPercent = 0.9f, float minYearLength = 15000f, float maxYearLength = 135000f, float minYearPercent = 0.4f, float maxYearPercent = 0.8f, float geyserTemperature = 99f, string DlcID = "")
 		{
 			this.id = id;
 			this.idHash = id;
@@ -71,6 +71,8 @@ public class GeyserConfigurator : KMonoBehaviour
 			this.maxYearLength = maxYearLength;
 			this.minYearPercent = minYearPercent;
 			this.maxYearPercent = maxYearPercent;
+			this.DlcID = DlcID;
+			this.geyserTemperature = geyserTemperature;
 			if (GeyserConfigurator.geyserTypes == null)
 			{
 				GeyserConfigurator.geyserTypes = new List<GeyserConfigurator.GeyserType>();
@@ -115,6 +117,10 @@ public class GeyserConfigurator : KMonoBehaviour
 		public float minYearPercent;
 
 		public float maxYearPercent;
+
+		public float geyserTemperature;
+
+		public string DlcID;
 	}
 
 	[Serializable]

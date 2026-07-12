@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 public class FullMinionUIPortrait : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(FullMinionUIPortrait.ID, FullMinionUIPortrait.ID, true);
@@ -27,8 +32,8 @@ public class FullMinionUIPortrait : IEntityConfig
 		kbatchedAnimController.AnimFiles = new KAnimFile[]
 		{
 			Assets.GetAnim("body_comp_default_kanim"),
-			Assets.GetAnim("anim_construction_default_kanim"),
 			Assets.GetAnim("anim_idles_default_kanim"),
+			Assets.GetAnim("anim_idle_healthy_kanim"),
 			Assets.GetAnim("anim_cheer_kanim")
 		};
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject);

@@ -35,7 +35,6 @@ public class KilnConfig : IBuildingConfig
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = false;
 		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
-		complexFabricator.resultState = ComplexFabricator.ResultState.Heated;
 		complexFabricator.heatedTemperature = 353.15f;
 		complexFabricator.duplicantOperated = false;
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
@@ -60,11 +59,11 @@ public class KilnConfig : IBuildingConfig
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(tag, num)
+			new ComplexRecipe.RecipeElement(tag, num, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
 		string text = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag);
 		string text2 = ComplexRecipeManager.MakeRecipeID("Kiln", array, array2);
-		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2, 0);
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Clay).name, ElementLoader.FindElementByHash(SimHashes.Ceramic).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("Kiln") };
@@ -77,11 +76,11 @@ public class KilnConfig : IBuildingConfig
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(tag4, num)
+			new ComplexRecipe.RecipeElement(tag4, num, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
 		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag4);
 		string text4 = ComplexRecipeManager.MakeRecipeID("Kiln", array3, array4);
-		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
+		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4, 0);
 		complexRecipe2.time = 40f;
 		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Carbon).name, ElementLoader.FindElementByHash(SimHashes.RefinedCarbon).name);
 		complexRecipe2.fabricators = new List<Tag> { TagManager.Create("Kiln") };

@@ -68,11 +68,12 @@ namespace UnityEngine.UI
 			this.CleanInvalidItems();
 			this.m_PerformingLayoutUpdate = true;
 			this.m_LayoutRebuildQueue.Sort(CanvasUpdateRegistry.s_SortLayoutFunction);
+			int count = this.m_LayoutRebuildQueue.Count;
 			for (int i = 0; i <= 2; i++)
 			{
-				for (int j = 0; j < this.m_LayoutRebuildQueue.Count; j++)
+				for (int j = 0; j < count; j++)
 				{
-					ICanvasElement canvasElement = CanvasUpdateRegistry.instance.m_LayoutRebuildQueue[j];
+					ICanvasElement canvasElement = this.m_LayoutRebuildQueue[j];
 					try
 					{
 						if (this.ObjectValidForUpdate(canvasElement))
@@ -86,23 +87,24 @@ namespace UnityEngine.UI
 					}
 				}
 			}
-			for (int k = 0; k < this.m_LayoutRebuildQueue.Count; k++)
+			for (int k = 0; k < count; k++)
 			{
 				this.m_LayoutRebuildQueue[k].LayoutComplete();
 			}
-			CanvasUpdateRegistry.instance.m_LayoutRebuildQueue.Clear();
+			this.m_LayoutRebuildQueue.Clear();
 			this.m_PerformingLayoutUpdate = false;
 			UISystemProfilerApi.EndSample(UISystemProfilerApi.SampleType.Layout);
 			UISystemProfilerApi.BeginSample(UISystemProfilerApi.SampleType.Render);
 			ClipperRegistry.instance.Cull();
 			this.m_PerformingGraphicUpdate = true;
+			int count2 = this.m_GraphicRebuildQueue.Count;
 			for (int l = 3; l < 5; l++)
 			{
-				for (int m = 0; m < CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Count; m++)
+				for (int m = 0; m < count2; m++)
 				{
 					try
 					{
-						ICanvasElement canvasElement2 = CanvasUpdateRegistry.instance.m_GraphicRebuildQueue[m];
+						ICanvasElement canvasElement2 = this.m_GraphicRebuildQueue[m];
 						if (this.ObjectValidForUpdate(canvasElement2))
 						{
 							canvasElement2.Rebuild((CanvasUpdate)l);
@@ -110,15 +112,15 @@ namespace UnityEngine.UI
 					}
 					catch (Exception ex2)
 					{
-						Debug.LogException(ex2, CanvasUpdateRegistry.instance.m_GraphicRebuildQueue[m].transform);
+						Debug.LogException(ex2, this.m_GraphicRebuildQueue[m].transform);
 					}
 				}
 			}
-			for (int n = 0; n < this.m_GraphicRebuildQueue.Count; n++)
+			for (int n = 0; n < count2; n++)
 			{
 				this.m_GraphicRebuildQueue[n].GraphicUpdateComplete();
 			}
-			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Clear();
+			this.m_GraphicRebuildQueue.Clear();
 			this.m_PerformingGraphicUpdate = false;
 			UISystemProfilerApi.EndSample(UISystemProfilerApi.SampleType.Render);
 		}

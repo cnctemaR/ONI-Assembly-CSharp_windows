@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class BasicSingleHarvestPlantConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "BasicSingleHarvestPlant";
@@ -19,9 +24,8 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, "BasicPlantFood", true, false, true, true, 2400f);
+		}, true, 0f, 0.15f, "BasicPlantFood", true, false, true, true, 2400f, 0f, 460f, "BasicSingleHarvestPlantOriginal", global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.NAME);
 		gameObject.AddOrGet<StandardCropPlant>();
-		gameObject.AddOrGet<KAnimControllerBase>().randomiseLoopedOffset = true;
 		gameObject.AddOrGet<LoopingSounds>();
 		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "BasicSingleHarvestPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.BASICSINGLEHARVESTPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.BASICSINGLEHARVESTPLANT.DESC, Assets.GetAnim("seed_meallice_kanim"), "object", 0, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]

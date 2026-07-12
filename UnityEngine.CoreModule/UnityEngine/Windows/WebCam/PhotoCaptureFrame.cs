@@ -107,8 +107,8 @@ namespace UnityEngine.Windows.WebCam
 			return flag3;
 		}
 
-		[ThreadAndSerializationSafe]
 		[NativeConditional("PLATFORM_WIN && !PLATFORM_XBOXONE", "Matrix4x4f()")]
+		[ThreadAndSerializationSafe]
 		private Matrix4x4 GetProjection()
 		{
 			Matrix4x4 matrix4x;
@@ -137,8 +137,8 @@ namespace UnityEngine.Windows.WebCam
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void UploadImageDataToTexture_Internal(Texture2D targetTexture);
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[ThreadAndSerializationSafe]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetUnsafePointerToBuffer();
 
@@ -160,8 +160,8 @@ namespace UnityEngine.Windows.WebCam
 			byteBuffer.AddRange(array);
 		}
 
-		[ThreadAndSerializationSafe]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[ThreadAndSerializationSafe]
 		[NativeName("CopyRawImageDataIntoBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void CopyRawImageDataIntoBuffer_Internal([Out] byte[] byteArray);
@@ -186,9 +186,9 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
+		[ThreadAndSerializationSafe]
 		[NativeName("Dispose")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[ThreadAndSerializationSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Dispose_Internal();
 

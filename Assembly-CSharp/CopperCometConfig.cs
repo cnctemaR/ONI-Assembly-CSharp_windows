@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class CopperCometConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(CopperCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.COPPERCOMET.NAME, true);
@@ -20,7 +25,7 @@ public class CopperCometConfig : IEntityConfig
 		comet.flyingSoundID = 1;
 		comet.explosionEffectHash = SpawnFXHashes.MeteorImpactMetal;
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
-		primaryElement.SetElement(SimHashes.Cuprite);
+		primaryElement.SetElement(SimHashes.Cuprite, true);
 		primaryElement.Temperature = (comet.temperatureRange.x + comet.temperatureRange.y) / 2f;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("meteor_copper_kanim") };
@@ -30,6 +35,7 @@ public class CopperCometConfig : IEntityConfig
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
 		gameObject.AddOrGet<KCircleCollider2D>().radius = 0.5f;
 		gameObject.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+		gameObject.AddTag(GameTags.Comet);
 		return gameObject;
 	}
 

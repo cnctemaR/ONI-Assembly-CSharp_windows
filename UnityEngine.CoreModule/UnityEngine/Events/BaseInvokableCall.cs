@@ -11,13 +11,25 @@ namespace UnityEngine.Events
 
 		protected BaseInvokableCall(object target, MethodInfo function)
 		{
-			bool flag = target == null;
-			if (flag)
+			bool isStatic = function.IsStatic;
+			if (isStatic)
 			{
-				throw new ArgumentNullException("target");
+				bool flag = target != null;
+				if (flag)
+				{
+					throw new ArgumentException("target must be null");
+				}
 			}
-			bool flag2 = function == null;
-			if (flag2)
+			else
+			{
+				bool flag2 = target == null;
+				if (flag2)
+				{
+					throw new ArgumentNullException("target");
+				}
+			}
+			bool flag3 = function == null;
+			if (flag3)
 			{
 				throw new ArgumentNullException("function");
 			}

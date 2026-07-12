@@ -13,5 +13,7 @@ namespace ProcGen
 		public List<string> defaultMoveTags { get; private set; }
 
 		public List<string> overworldAddTags { get; private set; }
+
+		public List<StartingWorldElementSetting> startingWorldElements { get; private set; }
 	}
 }

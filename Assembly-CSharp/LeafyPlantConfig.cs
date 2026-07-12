@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class LeafyPlantConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "LeafyPlant";
@@ -21,12 +26,11 @@ public class LeafyPlantConfig : IEntityConfig
 			SimHashes.CarbonDioxide,
 			SimHashes.ChlorineGas,
 			SimHashes.Hydrogen
-		}, true, 0f, 0.15f, null, true, false, true, true, 2400f);
+		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 220f, "LeafyPlantOriginal", global::STRINGS.CREATURES.SPECIES.LEAFYPLANT.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		prickleGrass.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "LeafyPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.DESC, Assets.GetAnim("seed_potted_leafy_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 7, global::STRINGS.CREATURES.SPECIES.LEAFYPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.6f, null, "", false), "LeafyPlant_preview", Assets.GetAnim("potted_leafy_kanim"), "place", 1, 1);
-		gameObject.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "LeafyPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.LEAFYPLANT.DESC, Assets.GetAnim("seed_potted_leafy_kanim"), "object", 1, new List<Tag> { GameTags.DecorSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 12, global::STRINGS.CREATURES.SPECIES.LEAFYPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.6f, null, "", false), "LeafyPlant_preview", Assets.GetAnim("potted_leafy_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

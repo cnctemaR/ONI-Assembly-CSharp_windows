@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using TemplateClasses;
 using UnityEngine;
@@ -7,35 +8,36 @@ public static class TemplateLoader
 {
 	public static void Stamp(TemplateContainer template, Vector2 rootLocation, global::System.Action on_complete_callback)
 	{
-		TemplateLoader.template = template;
-		TemplateLoader.BuildPhase1((int)rootLocation.x, (int)rootLocation.y, delegate
-		{
-			TemplateLoader.BuildPhase2((int)rootLocation.x, (int)rootLocation.y, delegate
-			{
-				TemplateLoader.BuildPhase3((int)rootLocation.x, (int)rootLocation.y, delegate
-				{
-					TemplateLoader.BuildPhase4((int)rootLocation.x, (int)rootLocation.y, on_complete_callback);
-				});
-			});
-		});
+		TemplateLoader.ActiveStamp activeStamp = new TemplateLoader.ActiveStamp(template, rootLocation, on_complete_callback);
+		TemplateLoader.activeStamps.Add(activeStamp);
 	}
 
-	private static void BuildPhase1(int baseX, int baseY, global::System.Action callback)
+	private static void StampComplete(TemplateLoader.ActiveStamp stamp)
+	{
+		TemplateLoader.activeStamps.Remove(stamp);
+	}
+
+	private static void BuildPhase1(int baseX, int baseY, TemplateContainer template, global::System.Action callback)
 	{
 		if (Grid.WidthInCells < 16)
 		{
 			return;
 		}
-		CellOffset[] array = new CellOffset[TemplateLoader.template.cells.Count];
-		for (int i = 0; i < TemplateLoader.template.cells.Count; i++)
+		if (template.cells == null)
 		{
-			array[i] = new CellOffset(TemplateLoader.template.cells[i].location_x, TemplateLoader.template.cells[i].location_y);
+			callback();
+			return;
+		}
+		CellOffset[] array = new CellOffset[template.cells.Count];
+		for (int i = 0; i < template.cells.Count; i++)
+		{
+			array[i] = new CellOffset(template.cells[i].location_x, template.cells[i].location_y);
 		}
 		TemplateLoader.ClearPickups(baseX, baseY, array);
-		if (TemplateLoader.template.cells.Count > 0)
+		if (template.cells.Count > 0)
 		{
-			TemplateLoader.ApplyGridProperties(baseX, baseY, TemplateLoader.template);
-			TemplateLoader.PlaceCells(baseX, baseY, TemplateLoader.template, callback);
+			TemplateLoader.ApplyGridProperties(baseX, baseY, template);
+			TemplateLoader.PlaceCells(baseX, baseY, template, callback);
 			TemplateLoader.ClearEntities<Crop>(baseX, baseY, array);
 			TemplateLoader.ClearEntities<Health>(baseX, baseY, array);
 			TemplateLoader.ClearEntities<Geyser>(baseX, baseY, array);
@@ -44,18 +46,18 @@ public static class TemplateLoader
 		callback();
 	}
 
-	private static void BuildPhase2(int baseX, int baseY, global::System.Action callback)
+	private static void BuildPhase2(int baseX, int baseY, TemplateContainer template, global::System.Action callback)
 	{
 		int num = Grid.OffsetCell(0, baseX, baseY);
-		if (TemplateLoader.template == null)
+		if (template == null)
 		{
 			global::Debug.LogError("No stamp template");
 		}
-		if (TemplateLoader.template.buildings != null)
+		if (template.buildings != null)
 		{
-			for (int i = 0; i < TemplateLoader.template.buildings.Count; i++)
+			for (int i = 0; i < template.buildings.Count; i++)
 			{
-				TemplateLoader.PlaceBuilding(TemplateLoader.template.buildings[i], num);
+				TemplateLoader.PlaceBuilding(template.buildings[i], num);
 			}
 		}
 		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
@@ -134,37 +136,40 @@ public static class TemplateLoader
 			{
 				Prefab.template_amount_value template_amount_value2 = array[j];
 				string id = template_amount_value2.id;
-				if (!(id == "joulesAvailable"))
+				if (id != null)
 				{
-					if (!(id == "sealedDoorDirection"))
+					if (!(id == "joulesAvailable"))
 					{
-						if (id == "switchSetting")
+						if (!(id == "sealedDoorDirection"))
 						{
-							LogicSwitch s = gameObject.GetComponent<LogicSwitch>();
-							if (s && ((s.IsSwitchedOn && template_amount_value2.value == 0f) || (!s.IsSwitchedOn && template_amount_value2.value == 1f)))
+							if (id == "switchSetting")
 							{
-								s.SetFirstFrameCallback(delegate
+								LogicSwitch s = gameObject.GetComponent<LogicSwitch>();
+								if (s && ((s.IsSwitchedOn && template_amount_value2.value == 0f) || (!s.IsSwitchedOn && template_amount_value2.value == 1f)))
 								{
-									s.HandleToggle();
-								});
+									s.SetFirstFrameCallback(delegate
+									{
+										s.HandleToggle();
+									});
+								}
+							}
+						}
+						else
+						{
+							Unsealable component4 = gameObject.GetComponent<Unsealable>();
+							if (component4)
+							{
+								component4.facingRight = template_amount_value2.value != 0f;
 							}
 						}
 					}
 					else
 					{
-						Unsealable component4 = gameObject.GetComponent<Unsealable>();
-						if (component4)
+						Battery component5 = gameObject.GetComponent<Battery>();
+						if (component5)
 						{
-							component4.facingRight = template_amount_value2.value != 0f;
+							component5.AddEnergy(template_amount_value2.value);
 						}
-					}
-				}
-				else
-				{
-					Battery component5 = gameObject.GetComponent<Battery>();
-					if (component5)
-					{
-						component5.AddEnergy(template_amount_value2.value);
 					}
 				}
 			}
@@ -185,7 +190,7 @@ public static class TemplateLoader
 				if (storageItem.isOre)
 				{
 					gameObject2 = ElementLoader.FindElementByHash(storageItem.element).substance.SpawnResource(Vector3.zero, storageItem.units, storageItem.temperature, Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, false, false, false);
-					goto IL_0496;
+					goto IL_049D;
 				}
 				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Ore);
 				if (gameObject2 == null)
@@ -203,21 +208,21 @@ public static class TemplateLoader
 					if (smi != null)
 					{
 						smi.RotValue = storageItem.rottable.rotAmount;
-						goto IL_0496;
+						goto IL_049D;
 					}
-					goto IL_0496;
+					goto IL_049D;
 				}
-				IL_04BD:
+				IL_04C4:
 				k++;
 				continue;
-				IL_0496:
+				IL_049D:
 				GameObject gameObject3 = component6.Store(gameObject2, true, true, true, false);
 				if (gameObject3 != null)
 				{
 					gameObject3.GetComponent<Pickupable>().OnStore(component6);
-					goto IL_04BD;
+					goto IL_04C4;
 				}
-				goto IL_04BD;
+				goto IL_04C4;
 			}
 		}
 		if (prefab.connections != 0)
@@ -232,163 +237,166 @@ public static class TemplateLoader
 		int cell = Grid.OffsetCell(root_cell, bc.location_x, bc.location_y);
 		UtilityConnections connection = (UtilityConnections)bc.connections;
 		string id = bc.id;
-		uint num = <PrivateImplementationDetails>.ComputeStringHash(id);
-		if (num <= 1827504487U)
+		if (id != null)
 		{
-			if (num <= 609727380U)
+			uint num = <PrivateImplementationDetails>.ComputeStringHash(id);
+			if (num <= 1213766155U)
 			{
-				if (num != 379600269U)
+				if (num > 379600269U)
 				{
 					if (num != 609727380U)
 					{
-						return;
-					}
-					if (!(id == "GasConduit"))
-					{
-						return;
-					}
-				}
-				else
-				{
-					if (!(id == "LiquidConduit"))
-					{
-						return;
-					}
-					goto IL_0189;
-				}
-			}
-			else if (num != 848332507U)
-			{
-				if (num != 1213766155U)
-				{
-					if (num != 1827504487U)
-					{
-						return;
-					}
-					if (!(id == "InsulatedWire"))
-					{
-						return;
-					}
-					goto IL_014F;
-				}
-				else
-				{
-					if (!(id == "TravelTube"))
-					{
-						return;
-					}
-					spawned.GetComponent<TravelTube>().SetFirstFrameCallback(delegate
-					{
-						Game.Instance.travelTubeSystem.SetConnections(connection, cell, true);
-						KAnimGraphTileVisualizer component = spawned.GetComponent<KAnimGraphTileVisualizer>();
-						if (component != null)
+						if (num != 848332507U)
 						{
-							component.Refresh();
+							if (num != 1213766155U)
+							{
+								return;
+							}
+							if (!(id == "TravelTube"))
+							{
+								return;
+							}
+							spawned.GetComponent<TravelTube>().SetFirstFrameCallback(delegate
+							{
+								Game.Instance.travelTubeSystem.SetConnections(connection, cell, true);
+								KAnimGraphTileVisualizer component = spawned.GetComponent<KAnimGraphTileVisualizer>();
+								if (component != null)
+								{
+									component.Refresh();
+								}
+							});
+							return;
+						}
+						else if (!(id == "InsulatedGasConduit"))
+						{
+							return;
+						}
+					}
+					else if (!(id == "GasConduit"))
+					{
+						return;
+					}
+					spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
+					{
+						Game.Instance.gasConduitSystem.SetConnections(connection, cell, true);
+						KAnimGraphTileVisualizer component2 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+						if (component2 != null)
+						{
+							component2.Refresh();
 						}
 					});
 					return;
 				}
+				if (num != 301047391U)
+				{
+					if (num != 379600269U)
+					{
+						return;
+					}
+					if (!(id == "LiquidConduit"))
+					{
+						return;
+					}
+					goto IL_01AB;
+				}
+				else if (!(id == "WireRefined"))
+				{
+					return;
+				}
 			}
-			else if (!(id == "InsulatedGasConduit"))
+			else if (num <= 3228988836U)
 			{
-				return;
+				if (num != 1827504487U)
+				{
+					if (num != 1938276536U)
+					{
+						if (num != 3228988836U)
+						{
+							return;
+						}
+						if (!(id == "LogicWire"))
+						{
+							return;
+						}
+						spawned.GetComponent<LogicWire>().SetFirstFrameCallback(delegate
+						{
+							Game.Instance.logicCircuitSystem.SetConnections(connection, cell, true);
+							KAnimGraphTileVisualizer component3 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+							if (component3 != null)
+							{
+								component3.Refresh();
+							}
+						});
+						return;
+					}
+					else if (!(id == "Wire"))
+					{
+						return;
+					}
+				}
+				else if (!(id == "InsulatedWire"))
+				{
+					return;
+				}
 			}
+			else if (num != 3711470516U)
+			{
+				if (num != 3716494409U)
+				{
+					if (num != 4113070310U)
+					{
+						return;
+					}
+					if (!(id == "SolidConduit"))
+					{
+						return;
+					}
+					spawned.GetComponent<SolidConduit>().SetFirstFrameCallback(delegate
+					{
+						Game.Instance.solidConduitSystem.SetConnections(connection, cell, true);
+						KAnimGraphTileVisualizer component4 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+						if (component4 != null)
+						{
+							component4.Refresh();
+						}
+					});
+					return;
+				}
+				else if (!(id == "HighWattageWire"))
+				{
+					return;
+				}
+			}
+			else
+			{
+				if (!(id == "InsulatedLiquidConduit"))
+				{
+					return;
+				}
+				goto IL_01AB;
+			}
+			spawned.GetComponent<Wire>().SetFirstFrameCallback(delegate
+			{
+				Game.Instance.electricalConduitSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component5 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component5 != null)
+				{
+					component5.Refresh();
+				}
+			});
+			return;
+			IL_01AB:
 			spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
 			{
-				Game.Instance.gasConduitSystem.SetConnections(connection, cell, true);
-				KAnimGraphTileVisualizer component2 = spawned.GetComponent<KAnimGraphTileVisualizer>();
-				if (component2 != null)
+				Game.Instance.liquidConduitSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component6 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component6 != null)
 				{
-					component2.Refresh();
+					component6.Refresh();
 				}
 			});
 			return;
 		}
-		if (num <= 3228988836U)
-		{
-			if (num != 1938276536U)
-			{
-				if (num != 3228988836U)
-				{
-					return;
-				}
-				if (!(id == "LogicWire"))
-				{
-					return;
-				}
-				spawned.GetComponent<LogicWire>().SetFirstFrameCallback(delegate
-				{
-					Game.Instance.logicCircuitSystem.SetConnections(connection, cell, true);
-					KAnimGraphTileVisualizer component3 = spawned.GetComponent<KAnimGraphTileVisualizer>();
-					if (component3 != null)
-					{
-						component3.Refresh();
-					}
-				});
-				return;
-			}
-			else if (!(id == "Wire"))
-			{
-				return;
-			}
-		}
-		else if (num != 3711470516U)
-		{
-			if (num != 3716494409U)
-			{
-				if (num != 4113070310U)
-				{
-					return;
-				}
-				if (!(id == "SolidConduit"))
-				{
-					return;
-				}
-				spawned.GetComponent<SolidConduit>().SetFirstFrameCallback(delegate
-				{
-					Game.Instance.solidConduitSystem.SetConnections(connection, cell, true);
-					KAnimGraphTileVisualizer component4 = spawned.GetComponent<KAnimGraphTileVisualizer>();
-					if (component4 != null)
-					{
-						component4.Refresh();
-					}
-				});
-				return;
-			}
-			else if (!(id == "HighWattageWire"))
-			{
-				return;
-			}
-		}
-		else
-		{
-			if (!(id == "InsulatedLiquidConduit"))
-			{
-				return;
-			}
-			goto IL_0189;
-		}
-		IL_014F:
-		spawned.GetComponent<Wire>().SetFirstFrameCallback(delegate
-		{
-			Game.Instance.electricalConduitSystem.SetConnections(connection, cell, true);
-			KAnimGraphTileVisualizer component5 = spawned.GetComponent<KAnimGraphTileVisualizer>();
-			if (component5 != null)
-			{
-				component5.Refresh();
-			}
-		});
-		return;
-		IL_0189:
-		spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
-		{
-			Game.Instance.liquidConduitSystem.SetConnections(connection, cell, true);
-			KAnimGraphTileVisualizer component6 = spawned.GetComponent<KAnimGraphTileVisualizer>();
-			if (component6 != null)
-			{
-				component6.Refresh();
-			}
-		});
 	}
 
 	public static GameObject PlacePickupables(Prefab prefab, int root_cell)
@@ -483,9 +491,9 @@ public static class TemplateLoader
 		return substance.SpawnResource(vector, prefab.units, prefab.temperature, index, prefab.diseaseCount, false, false, false);
 	}
 
-	private static void BuildPhase3(int baseX, int baseY, global::System.Action callback)
+	private static void BuildPhase3(int baseX, int baseY, TemplateContainer template, global::System.Action callback)
 	{
-		if (TemplateLoader.template != null)
+		if (template != null)
 		{
 			int num = Grid.OffsetCell(0, baseX, baseY);
 			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
@@ -496,18 +504,24 @@ public static class TemplateLoader
 					component.Refresh();
 				}
 			}
-			for (int i = 0; i < TemplateLoader.template.pickupables.Count; i++)
+			if (template.pickupables != null)
 			{
-				if (TemplateLoader.template.pickupables[i] != null && !(TemplateLoader.template.pickupables[i].id == ""))
+				for (int i = 0; i < template.pickupables.Count; i++)
 				{
-					TemplateLoader.PlacePickupables(TemplateLoader.template.pickupables[i], num);
+					if (template.pickupables[i] != null && !(template.pickupables[i].id == ""))
+					{
+						TemplateLoader.PlacePickupables(template.pickupables[i], num);
+					}
 				}
 			}
-			for (int j = 0; j < TemplateLoader.template.elementalOres.Count; j++)
+			if (template.elementalOres != null)
 			{
-				if (TemplateLoader.template.elementalOres[j] != null && !(TemplateLoader.template.elementalOres[j].id == ""))
+				for (int j = 0; j < template.elementalOres.Count; j++)
 				{
-					TemplateLoader.PlaceElementalOres(TemplateLoader.template.elementalOres[j], num);
+					if (template.elementalOres[j] != null && !(template.elementalOres[j].id == ""))
+					{
+						TemplateLoader.PlaceElementalOres(template.elementalOres[j], num);
+					}
 				}
 			}
 		}
@@ -517,19 +531,22 @@ public static class TemplateLoader
 		}
 	}
 
-	private static void BuildPhase4(int baseX, int baseY, global::System.Action callback)
+	private static void BuildPhase4(int baseX, int baseY, TemplateContainer template, global::System.Action callback)
 	{
-		if (TemplateLoader.template != null)
+		if (template != null)
 		{
 			int num = Grid.OffsetCell(0, baseX, baseY);
-			for (int i = 0; i < TemplateLoader.template.otherEntities.Count; i++)
+			if (template.otherEntities != null)
 			{
-				if (TemplateLoader.template.otherEntities[i] != null && !(TemplateLoader.template.otherEntities[i].id == ""))
+				for (int i = 0; i < template.otherEntities.Count; i++)
 				{
-					TemplateLoader.PlaceOtherEntities(TemplateLoader.template.otherEntities[i], num);
+					if (template.otherEntities[i] != null && !(template.otherEntities[i].id == ""))
+					{
+						TemplateLoader.PlaceOtherEntities(template.otherEntities[i], num);
+					}
 				}
 			}
-			TemplateLoader.template = null;
+			template = null;
 		}
 		if (callback != null)
 		{
@@ -565,11 +582,16 @@ public static class TemplateLoader
 
 	private static void PlaceCells(int baseX, int baseY, TemplateContainer template, global::System.Action callback)
 	{
-		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
 		if (template == null)
 		{
 			global::Debug.LogError("Template Loader does not have template.");
 		}
+		if (template.cells == null)
+		{
+			callback();
+			return;
+		}
+		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
 		for (int i = 0; i < template.cells.Count; i++)
 		{
 			int num = Grid.XYToCell(template.cells[i].location_x + baseX, template.cells[i].location_y + baseY);
@@ -596,6 +618,10 @@ public static class TemplateLoader
 
 	public static void ApplyGridProperties(int baseX, int baseY, TemplateContainer template)
 	{
+		if (template.cells == null)
+		{
+			return;
+		}
 		for (int i = 0; i < template.cells.Count; i++)
 		{
 			int num = Grid.XYToCell(template.cells[i].location_x + baseX, template.cells[i].location_y + baseY);
@@ -607,5 +633,51 @@ public static class TemplateLoader
 		}
 	}
 
-	private static TemplateContainer template;
+	private static List<TemplateLoader.ActiveStamp> activeStamps = new List<TemplateLoader.ActiveStamp>();
+
+	private class ActiveStamp
+	{
+		public ActiveStamp(TemplateContainer template, Vector2 rootLocation, global::System.Action onCompleteCallback)
+		{
+			this.m_template = template;
+			this.m_rootLocation = new Vector2I((int)rootLocation.x, (int)rootLocation.y);
+			this.m_onCompleteCallback = onCompleteCallback;
+			this.NextPhase();
+		}
+
+		private void NextPhase()
+		{
+			this.currentPhase++;
+			switch (this.currentPhase)
+			{
+			case 1:
+				TemplateLoader.BuildPhase1(this.m_rootLocation.x, this.m_rootLocation.y, this.m_template, new global::System.Action(this.NextPhase));
+				return;
+			case 2:
+				TemplateLoader.BuildPhase2(this.m_rootLocation.x, this.m_rootLocation.y, this.m_template, new global::System.Action(this.NextPhase));
+				return;
+			case 3:
+				TemplateLoader.BuildPhase3(this.m_rootLocation.x, this.m_rootLocation.y, this.m_template, new global::System.Action(this.NextPhase));
+				return;
+			case 4:
+				TemplateLoader.BuildPhase4(this.m_rootLocation.x, this.m_rootLocation.y, this.m_template, new global::System.Action(this.NextPhase));
+				return;
+			case 5:
+				this.m_onCompleteCallback();
+				TemplateLoader.StampComplete(this);
+				return;
+			default:
+				global::Debug.Assert(false, "How did we get here?? Something's wrong!");
+				return;
+			}
+		}
+
+		private TemplateContainer m_template;
+
+		private Vector2I m_rootLocation;
+
+		private global::System.Action m_onCompleteCallback;
+
+		private int currentPhase;
+	}
 }

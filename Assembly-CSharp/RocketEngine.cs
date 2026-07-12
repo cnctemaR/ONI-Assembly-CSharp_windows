@@ -11,8 +11,7 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>
 		base.smi.StartSM();
 		if (this.mainEngine)
 		{
-			RequireAttachedComponent requireAttachedComponent = new RequireAttachedComponent(base.gameObject.GetComponent<AttachableBuilding>(), typeof(FuelTank), UI.STARMAP.COMPONENT.FUEL_TANK);
-			base.GetComponent<RocketModule>().AddLaunchCondition(requireAttachedComponent);
+			base.GetComponent<RocketModule>().AddModuleCondition(ProcessCondition.ProcessConditionType.RocketPrep, new RequireAttachedComponent(base.gameObject.GetComponent<AttachableBuilding>(), typeof(FuelTank), UI.STARMAP.COMPONENT.FUEL_TANK));
 		}
 	}
 
@@ -46,7 +45,7 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>
 		{
 			default_state = this.idle;
 			this.idle.PlayAnim("grounded", KAnim.PlayMode.Loop).EventTransition(GameHashes.IgniteEngine, this.burning, null);
-			this.burning.EventTransition(GameHashes.LandRocket, this.burnComplete, null).PlayAnim("launch_pre").QueueAnim("launch_loop", true, null)
+			this.burning.EventTransition(GameHashes.RocketLanded, this.burnComplete, null).PlayAnim("launch_pre").QueueAnim("launch_loop", true, null)
 				.Update(delegate(RocketEngine.StatesInstance smi, float dt)
 				{
 					int num = Grid.PosToCell(smi.master.gameObject.transform.GetPosition() + smi.master.GetComponent<KBatchedAnimController>().Offset);

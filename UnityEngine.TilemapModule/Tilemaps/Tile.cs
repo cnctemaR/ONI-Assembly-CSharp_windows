@@ -3,6 +3,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
+	[HelpURL("https://docs.unity3d.com/Manual/Tilemap-TileAsset.html")]
 	[RequiredByNativeCode]
 	[Serializable]
 	public class Tile : TileBase

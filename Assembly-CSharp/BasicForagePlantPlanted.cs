@@ -37,7 +37,7 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.seed_grow;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.seed_grow.PlayAnim("idle", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null);
 			this.alive.InitializeStates(this.masterTarget, this.dead);
 			this.alive.idle.PlayAnim("idle").EventTransition(GameHashes.Harvest, this.alive.harvest, null).Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)

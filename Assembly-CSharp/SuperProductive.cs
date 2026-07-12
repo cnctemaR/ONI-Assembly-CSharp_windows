@@ -29,17 +29,21 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 		this.overjoyed.superProductive.Enter(delegate(SuperProductive.Instance smi)
 		{
 			Worker component = smi.GetComponent<Worker>();
-			if (component.state == Worker.State.Working)
+			if (component != null && component.state == Worker.State.Working)
 			{
-				float num = component.workable.WorkTimeRemaining;
-				if (component.workable.GetComponent<Diggable>() != null)
+				Workable workable = component.workable;
+				if (workable != null)
 				{
-					num = Diggable.GetApproximateDigTime(Grid.PosToCell(component.workable));
-				}
-				if (num > 1f && smi.ShouldSkipWork() && component.InstantlyFinish())
-				{
-					smi.ReactSuperProductive();
-					smi.fx.sm.wasProductive.Trigger(smi.fx);
+					float num = workable.WorkTimeRemaining;
+					if (workable.GetComponent<Diggable>() != null)
+					{
+						num = Diggable.GetApproximateDigTime(Grid.PosToCell(workable));
+					}
+					if (num > 1f && smi.ShouldSkipWork() && component.InstantlyFinish())
+					{
+						smi.ReactSuperProductive();
+						smi.fx.sm.wasProductive.Trigger(smi.fx);
+					}
 				}
 			}
 			smi.GoTo(this.overjoyed.idle);
@@ -68,7 +72,7 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 
 		public bool ShouldSkipWork()
 		{
-			return global::UnityEngine.Random.Range(0f, 100f) <= TRAITS.JOY_REACTIONS.SUPER_PRODUCTIVE.INSTANT_SUCCESS_CHANCE;
+			return 0f <= TRAITS.JOY_REACTIONS.SUPER_PRODUCTIVE.INSTANT_SUCCESS_CHANCE;
 		}
 
 		public void ReactSuperProductive()

@@ -40,7 +40,9 @@ namespace UnityEngine.Playables
 			PlayableHandle playableHandle;
 			if (flag2)
 			{
-				Debug.LogError("Could not create a ScriptPlayable of Type " + typeof(T).ToString());
+				string text = "Could not create a ScriptPlayable of Type ";
+				Type typeFromHandle = typeof(T);
+				Debug.LogError(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null));
 				playableHandle = PlayableHandle.Null;
 			}
 			else

@@ -50,7 +50,7 @@ namespace UnityEngine
 			bool flag2;
 			if (flag)
 			{
-				Debug.LogError(string.Format("SparseTexture creation failed. The minimum size in bytes of a SparseTexture is 64KB.", new object[0]), this);
+				Debug.LogError("SparseTexture creation failed. The minimum size in bytes of a SparseTexture is 64KB.", this);
 				flag2 = false;
 			}
 			else
@@ -58,6 +58,15 @@ namespace UnityEngine
 				flag2 = true;
 			}
 			return flag2;
+		}
+
+		private static void ValidateIsNotCrunched(TextureFormat textureFormat)
+		{
+			bool flag = GraphicsFormatUtility.IsCrunchFormat(textureFormat);
+			if (flag)
+			{
+				throw new ArgumentException("Crunched SparseTexture is not supported.");
+			}
 		}
 
 		public SparseTexture(int width, int height, DefaultFormat format, int mipCount)
@@ -88,6 +97,7 @@ namespace UnityEngine
 			bool flag = !base.ValidateFormat(textureFormat);
 			if (!flag)
 			{
+				SparseTexture.ValidateIsNotCrunched(textureFormat);
 				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
 				bool flag2 = !this.ValidateSize(width, height, graphicsFormat);
 				if (!flag2)

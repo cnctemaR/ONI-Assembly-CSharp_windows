@@ -477,7 +477,9 @@ namespace UnityEngine.Networking
 			bool flag2 = !Enum.IsDefined(typeof(QosType), value);
 			if (flag2)
 			{
-				throw new ArgumentOutOfRangeException("requested qos type doesn't exist: " + (int)value);
+				string text = "requested qos type doesn't exist: ";
+				int num = (int)value;
+				throw new ArgumentOutOfRangeException(text + num.ToString());
 			}
 			ChannelQOS channelQOS = new ChannelQOS(value);
 			this.m_Channels.Add(channelQOS);
@@ -503,18 +505,18 @@ namespace UnityEngine.Networking
 				bool flag3 = (int)b2 >= this.m_Channels.Count;
 				if (flag3)
 				{
-					throw new ArgumentOutOfRangeException("Shared order channel list contains wrong channel index " + b2);
+					throw new ArgumentOutOfRangeException("Shared order channel list contains wrong channel index " + b2.ToString());
 				}
 				ChannelQOS channelQOS = this.m_Channels[(int)b2];
 				bool belongsToSharedOrderChannel = channelQOS.BelongsToSharedOrderChannel;
 				if (belongsToSharedOrderChannel)
 				{
-					throw new ArgumentException("Channel with index " + b2 + " has been already included to other shared order channel");
+					throw new ArgumentException("Channel with index " + b2.ToString() + " has been already included to other shared order channel");
 				}
 				bool flag4 = channelQOS.QOS != QosType.Reliable && channelQOS.QOS > QosType.Unreliable;
 				if (flag4)
 				{
-					throw new ArgumentException("Only Reliable and Unreliable QoS are allowed for shared order channel, wrong channel is with index " + b2);
+					throw new ArgumentException("Only Reliable and Unreliable QoS are allowed for shared order channel, wrong channel is with index " + b2.ToString());
 				}
 				b += 1;
 			}

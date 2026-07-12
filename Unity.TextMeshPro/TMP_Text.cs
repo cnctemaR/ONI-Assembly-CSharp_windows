@@ -3267,7 +3267,7 @@ namespace TMPro
 		{
 			if (this.m_fontAsset == null || this.m_fontAsset.characterDictionary == null)
 			{
-				Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID());
+				Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID().ToString());
 				return Vector2.zero;
 			}
 			if (this.m_char_buffer == null || this.m_char_buffer.Length == 0 || this.m_char_buffer[0] == 0)
@@ -3336,23 +3336,23 @@ namespace TMPro
 					this.m_textElementType = this.m_textInfo.characterInfo[this.m_characterCount].elementType;
 					this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
 					this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
-					goto IL_03AA;
+					goto IL_03AE;
 				}
 				this.m_isParsingText = true;
 				this.m_textElementType = TMP_TextElementType.Character;
 				if (!this.ValidateHtmlTag(this.m_char_buffer, num10 + 1, out num9))
 				{
-					goto IL_03AA;
+					goto IL_03AE;
 				}
 				num10 = num9;
 				if (this.m_textElementType != TMP_TextElementType.Character)
 				{
-					goto IL_03AA;
+					goto IL_03AE;
 				}
-				IL_13B0:
+				IL_13B4:
 				num10++;
 				continue;
-				IL_03AA:
+				IL_03AE:
 				int currentMaterialIndex = this.m_currentMaterialIndex;
 				bool isUsingAlternateTypeface = this.m_textInfo.characterInfo[this.m_characterCount].isUsingAlternateTypeface;
 				this.m_isParsingText = false;
@@ -3386,7 +3386,7 @@ namespace TMPro
 					TMP_Sprite tmp_Sprite = this.m_currentSpriteAsset.spriteInfoList[this.m_spriteIndex];
 					if (tmp_Sprite == null)
 					{
-						goto IL_13B0;
+						goto IL_13B4;
 					}
 					if (num11 == 60)
 					{
@@ -3405,7 +3405,7 @@ namespace TMPro
 					this.m_cached_TextElement = this.m_textInfo.characterInfo[this.m_characterCount].textElement;
 					if (this.m_cached_TextElement == null)
 					{
-						goto IL_13B0;
+						goto IL_13B4;
 					}
 					this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
 					this.m_fontScale = this.m_currentFontSize * num12 / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
@@ -3559,7 +3559,7 @@ namespace TMPro
 							this.m_maxLineAscender = TMP_Text.k_LargeNegativeFloat;
 							this.m_maxLineDescender = TMP_Text.k_LargePositiveFloat;
 							this.m_xAdvance = 0f + this.tag_Indent;
-							goto IL_13B0;
+							goto IL_13B4;
 						}
 						else if (!ignoreTextAutoSizing && defaultFontSize > this.m_fontSizeMin)
 						{
@@ -3657,7 +3657,7 @@ namespace TMPro
 						this.m_startOfLineAscender = num17;
 						this.m_xAdvance = 0f + this.tag_LineIndent + this.tag_Indent;
 						this.m_characterCount++;
-						goto IL_13B0;
+						goto IL_13B4;
 					}
 				}
 				if (this.m_enableWordWrapping || this.m_overflowMode == TextOverflowModes.Truncate || this.m_overflowMode == TextOverflowModes.Ellipsis)
@@ -3683,7 +3683,7 @@ namespace TMPro
 					}
 				}
 				this.m_characterCount++;
-				goto IL_13B0;
+				goto IL_13B4;
 			}
 			float num33 = this.m_maxFontSize - this.m_minFontSize;
 			if (this.m_isCharacterWrappingEnabled || ignoreTextAutoSizing || num33 <= 0.051f || defaultFontSize >= this.m_fontSizeMax)
@@ -4856,25 +4856,26 @@ namespace TMPro
 				this.m_colorStack.Add(this.m_htmlColor);
 				return true;
 			}
-			int num10 = this.m_xmlAttribute[0].nameHashCode;
+			int nameHashCode = this.m_xmlAttribute[0].nameHashCode;
+			int num11;
 			float num13;
-			if (num10 <= 186622)
+			if (nameHashCode <= 186622)
 			{
-				if (num10 <= 2963)
+				if (nameHashCode <= 2963)
 				{
-					if (num10 > 98)
+					if (nameHashCode > 98)
 					{
-						if (num10 <= 434)
+						if (nameHashCode <= 434)
 						{
-							if (num10 <= 402)
+							if (nameHashCode <= 402)
 							{
-								if (num10 <= 115)
+								if (nameHashCode <= 115)
 								{
-									if (num10 == 105)
+									if (nameHashCode == 105)
 									{
 										goto IL_129F;
 									}
-									if (num10 != 115)
+									if (nameHashCode != 115)
 									{
 										return false;
 									}
@@ -4882,13 +4883,13 @@ namespace TMPro
 								}
 								else
 								{
-									if (num10 == 117)
+									if (nameHashCode == 117)
 									{
 										goto IL_13E5;
 									}
-									if (num10 != 395)
+									if (nameHashCode != 395)
 									{
-										if (num10 != 402)
+										if (nameHashCode != 402)
 										{
 											return false;
 										}
@@ -4896,13 +4897,13 @@ namespace TMPro
 									}
 								}
 							}
-							else if (num10 <= 414)
+							else if (nameHashCode <= 414)
 							{
-								if (num10 == 412)
+								if (nameHashCode == 412)
 								{
 									goto IL_13B8;
 								}
-								if (num10 != 414)
+								if (nameHashCode != 414)
 								{
 									return false;
 								}
@@ -4910,13 +4911,13 @@ namespace TMPro
 							}
 							else
 							{
-								if (num10 == 426)
+								if (nameHashCode == 426)
 								{
 									return true;
 								}
-								if (num10 != 427)
+								if (nameHashCode != 427)
 								{
-									if (num10 != 434)
+									if (nameHashCode != 434)
 									{
 										return false;
 									}
@@ -4939,15 +4940,15 @@ namespace TMPro
 							}
 							return true;
 						}
-						if (num10 <= 670)
+						if (nameHashCode <= 670)
 						{
-							if (num10 <= 446)
+							if (nameHashCode <= 446)
 							{
-								if (num10 == 444)
+								if (nameHashCode == 444)
 								{
 									goto IL_13B8;
 								}
-								if (num10 != 446)
+								if (nameHashCode != 446)
 								{
 									return false;
 								}
@@ -4955,77 +4956,77 @@ namespace TMPro
 							}
 							else
 							{
-								if (num10 == 656)
+								if (nameHashCode == 656)
 								{
-									goto IL_3906;
+									goto IL_38E6;
 								}
-								if (num10 == 660)
+								if (nameHashCode == 660)
 								{
 									return true;
 								}
-								if (num10 != 670)
+								if (nameHashCode != 670)
 								{
 									return false;
 								}
 							}
 						}
-						else if (num10 <= 916)
+						else if (nameHashCode <= 916)
 						{
-							if (num10 == 912)
+							if (nameHashCode == 912)
 							{
-								goto IL_3906;
+								goto IL_38E6;
 							}
-							if (num10 != 916)
+							if (nameHashCode != 916)
 							{
 								return false;
 							}
 							return true;
 						}
-						else if (num10 != 926)
+						else if (nameHashCode != 926)
 						{
-							if (num10 == 2959)
+							if (nameHashCode == 2959)
 							{
 								return true;
 							}
-							if (num10 != 2963)
+							if (nameHashCode != 2963)
 							{
 								return false;
 							}
 							return true;
 						}
 						return true;
-						IL_3906:
-						int num11 = 1;
-						while (num11 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num11].nameHashCode != 0)
+						IL_38E6:
+						int num10 = 1;
+						while (num10 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num10].nameHashCode != 0)
 						{
-							num10 = this.m_xmlAttribute[num11].nameHashCode;
-							if (num10 != 275917)
+							num11 = this.m_xmlAttribute[num10].nameHashCode;
+							if (num11 != 275917)
 							{
-								if (num10 == 327550)
+								if (num11 == 327550)
 								{
-									float num12 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num11].valueStartIndex, this.m_xmlAttribute[num11].valueLength);
+									float num12 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num10].valueStartIndex, this.m_xmlAttribute[num10].valueLength);
 									switch (tagUnits)
 									{
 									case TagUnits.Pixels:
-										Debug.Log("Table width = " + num12 + "px.");
+										Debug.Log("Table width = " + num12.ToString() + "px.");
 										break;
 									case TagUnits.FontUnits:
-										Debug.Log("Table width = " + num12 + "em.");
+										Debug.Log("Table width = " + num12.ToString() + "em.");
 										break;
 									case TagUnits.Percentage:
-										Debug.Log("Table width = " + num12 + "%.");
+										Debug.Log("Table width = " + num12.ToString() + "%.");
 										break;
 									}
 								}
 							}
 							else
 							{
-								num10 = this.m_xmlAttribute[num11].valueHashCode;
-								if (num10 <= -458210101)
+								int valueHashCode = this.m_xmlAttribute[num10].valueHashCode;
+								if (valueHashCode <= -458210101)
 								{
-									if (num10 != -523808257)
+									if (valueHashCode != -523808257)
 									{
-										if (num10 == -458210101)
+										if (valueHashCode == -458210101)
 										{
 											Debug.Log("TD align=\"center\".");
 										}
@@ -5035,9 +5036,9 @@ namespace TMPro
 										Debug.Log("TD align=\"justified\".");
 									}
 								}
-								else if (num10 != 3774683)
+								else if (valueHashCode != 3774683)
 								{
-									if (num10 == 136703040)
+									if (valueHashCode == 136703040)
 									{
 										Debug.Log("TD align=\"right\".");
 									}
@@ -5047,7 +5048,7 @@ namespace TMPro
 									Debug.Log("TD align=\"left\".");
 								}
 							}
-							num11++;
+							num10++;
 						}
 						return true;
 						IL_13B8:
@@ -5067,43 +5068,43 @@ namespace TMPro
 						}
 						return true;
 					}
-					if (num10 <= -855002522)
+					if (nameHashCode <= -855002522)
 					{
-						if (num10 <= -1690034531)
+						if (nameHashCode <= -1690034531)
 						{
-							if (num10 <= -1883544150)
+							if (nameHashCode <= -1883544150)
 							{
-								if (num10 == -1885698441)
+								if (nameHashCode == -1885698441)
 								{
 									goto IL_19AD;
 								}
-								if (num10 != -1883544150)
+								if (nameHashCode != -1883544150)
 								{
 									return false;
 								}
 							}
 							else
 							{
-								if (num10 == -1847322671)
+								if (nameHashCode == -1847322671)
 								{
 									goto IL_32F5;
 								}
-								if (num10 == -1831660941)
+								if (nameHashCode == -1831660941)
 								{
 									goto IL_32B6;
 								}
-								if (num10 != -1690034531)
+								if (nameHashCode != -1690034531)
 								{
 									return false;
 								}
 								goto IL_34F9;
 							}
 						}
-						else if (num10 <= -1632103439)
+						else if (nameHashCode <= -1632103439)
 						{
-							if (num10 != -1668324918)
+							if (nameHashCode != -1668324918)
 							{
-								if (num10 != -1632103439)
+								if (nameHashCode != -1632103439)
 								{
 									return false;
 								}
@@ -5112,15 +5113,15 @@ namespace TMPro
 						}
 						else
 						{
-							if (num10 == -1616441709)
+							if (nameHashCode == -1616441709)
 							{
 								goto IL_32B6;
 							}
-							if (num10 == -884817987)
+							if (nameHashCode == -884817987)
 							{
 								goto IL_34F9;
 							}
-							if (num10 != -855002522)
+							if (nameHashCode != -855002522)
 							{
 								return false;
 							}
@@ -5158,13 +5159,13 @@ namespace TMPro
 					}
 					else
 					{
-						if (num10 > -330774850)
+						if (nameHashCode > -330774850)
 						{
-							if (num10 <= 73)
+							if (nameHashCode <= 73)
 							{
-								if (num10 != 66)
+								if (nameHashCode != 66)
 								{
-									if (num10 != 73)
+									if (nameHashCode != 73)
 									{
 										return false;
 									}
@@ -5173,15 +5174,15 @@ namespace TMPro
 							}
 							else
 							{
-								if (num10 == 83)
+								if (nameHashCode == 83)
 								{
 									goto IL_12DB;
 								}
-								if (num10 == 85)
+								if (nameHashCode == 85)
 								{
 									goto IL_13E5;
 								}
-								if (num10 != 98)
+								if (nameHashCode != 98)
 								{
 									return false;
 								}
@@ -5192,13 +5193,13 @@ namespace TMPro
 							this.m_fontWeightStack.Add(700);
 							return true;
 						}
-						if (num10 <= -842656867)
+						if (nameHashCode <= -842656867)
 						{
-							if (num10 == -842693512)
+							if (nameHashCode == -842693512)
 							{
 								goto IL_35D9;
 							}
-							if (num10 != -842656867)
+							if (nameHashCode != -842656867)
 							{
 								return false;
 							}
@@ -5206,15 +5207,15 @@ namespace TMPro
 						}
 						else
 						{
-							if (num10 == -445573839)
+							if (nameHashCode == -445573839)
 							{
 								goto IL_368B;
 							}
-							if (num10 == -445537194)
+							if (nameHashCode == -445537194)
 							{
 								goto IL_2DB1;
 							}
-							if (num10 != -330774850)
+							if (nameHashCode != -330774850)
 							{
 								return false;
 							}
@@ -5254,62 +5255,62 @@ namespace TMPro
 					this.m_underlineColorStack.Add(this.m_underlineColor);
 					return true;
 				}
-				if (num10 > 31169)
+				if (nameHashCode > 31169)
 				{
-					if (num10 > 143092)
+					if (nameHashCode > 143092)
 					{
-						if (num10 <= 155892)
+						if (nameHashCode <= 155892)
 						{
-							if (num10 <= 144016)
+							if (nameHashCode <= 144016)
 							{
-								if (num10 == 143113)
+								if (nameHashCode == 143113)
 								{
 									goto IL_250E;
 								}
-								if (num10 != 144016)
+								if (nameHashCode != 144016)
 								{
 									return false;
 								}
 							}
 							else
 							{
-								if (num10 == 145592)
+								if (nameHashCode == 145592)
 								{
 									goto IL_1DCC;
 								}
-								if (num10 == 154158)
+								if (nameHashCode == 154158)
 								{
 									goto IL_2101;
 								}
-								if (num10 != 155892)
+								if (nameHashCode != 155892)
 								{
 									return false;
 								}
 								goto IL_15A0;
 							}
 						}
-						else if (num10 <= 156816)
+						else if (nameHashCode <= 156816)
 						{
-							if (num10 == 155913)
+							if (nameHashCode == 155913)
 							{
 								goto IL_250E;
 							}
-							if (num10 != 156816)
+							if (nameHashCode != 156816)
 							{
 								return false;
 							}
 						}
 						else
 						{
-							if (num10 == 158392)
+							if (nameHashCode == 158392)
 							{
 								goto IL_1DCC;
 							}
-							if (num10 == 186285)
+							if (nameHashCode == 186285)
 							{
 								goto IL_2594;
 							}
-							if (num10 != 186622)
+							if (nameHashCode != 186622)
 							{
 								return false;
 							}
@@ -5329,13 +5330,13 @@ namespace TMPro
 						}
 						return true;
 					}
-					if (num10 <= 43066)
+					if (nameHashCode <= 43066)
 					{
-						if (num10 <= 32745)
+						if (nameHashCode <= 32745)
 						{
-							if (num10 != 31191)
+							if (nameHashCode != 31191)
 							{
-								if (num10 != 32745)
+								if (nameHashCode != 32745)
 								{
 									return false;
 								}
@@ -5344,43 +5345,43 @@ namespace TMPro
 						}
 						else
 						{
-							if (num10 == 41311)
+							if (nameHashCode == 41311)
 							{
 								goto IL_1E22;
 							}
-							if (num10 == 43045)
+							if (nameHashCode == 43045)
 							{
 								goto IL_14FB;
 							}
-							if (num10 != 43066)
+							if (nameHashCode != 43066)
 							{
 								return false;
 							}
 							goto IL_23D4;
 						}
 					}
-					else if (num10 <= 43991)
+					else if (nameHashCode <= 43991)
 					{
-						if (num10 == 43969)
+						if (nameHashCode == 43969)
 						{
 							goto IL_1B56;
 						}
-						if (num10 != 43991)
+						if (nameHashCode != 43991)
 						{
 							return false;
 						}
 					}
 					else
 					{
-						if (num10 == 45545)
+						if (nameHashCode == 45545)
 						{
 							goto IL_1B68;
 						}
-						if (num10 == 141358)
+						if (nameHashCode == 141358)
 						{
 							goto IL_2101;
 						}
-						if (num10 != 143092)
+						if (nameHashCode != 143092)
 						{
 							return false;
 						}
@@ -5452,32 +5453,32 @@ namespace TMPro
 					this.m_fontScale = this.m_currentFontSize / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * (this.m_isOrthographic ? 1f : 0.1f);
 					return true;
 				}
-				if (num10 > 6566)
+				if (nameHashCode > 6566)
 				{
-					if (num10 <= 22673)
+					if (nameHashCode <= 22673)
 					{
-						if (num10 <= 20849)
+						if (nameHashCode <= 20849)
 						{
-							if (num10 == 20677)
+							if (nameHashCode == 20677)
 							{
 								goto IL_1A7D;
 							}
-							if (num10 != 20849)
+							if (nameHashCode != 20849)
 							{
 								return false;
 							}
 						}
 						else
 						{
-							if (num10 == 20863)
+							if (nameHashCode == 20863)
 							{
 								goto IL_17B4;
 							}
-							if (num10 == 22501)
+							if (nameHashCode == 22501)
 							{
 								goto IL_1A7D;
 							}
-							if (num10 != 22673)
+							if (nameHashCode != 22673)
 							{
 								return false;
 							}
@@ -5499,11 +5500,11 @@ namespace TMPro
 						this.m_isIgnoringAlignment = false;
 						return true;
 					}
-					if (num10 <= 28511)
+					if (nameHashCode <= 28511)
 					{
-						if (num10 != 22687)
+						if (nameHashCode != 22687)
 						{
-							if (num10 != 28511)
+							if (nameHashCode != 28511)
 							{
 								return false;
 							}
@@ -5512,15 +5513,15 @@ namespace TMPro
 					}
 					else
 					{
-						if (num10 == 30245)
+						if (nameHashCode == 30245)
 						{
 							goto IL_14FB;
 						}
-						if (num10 == 30266)
+						if (nameHashCode == 30266)
 						{
 							goto IL_23D4;
 						}
-						if (num10 != 31169)
+						if (nameHashCode != 31169)
 						{
 							return false;
 						}
@@ -5541,13 +5542,13 @@ namespace TMPro
 					}
 					return true;
 				}
-				if (num10 <= 4556)
+				if (nameHashCode <= 4556)
 				{
-					if (num10 <= 3215)
+					if (nameHashCode <= 3215)
 					{
-						if (num10 != 2973)
+						if (nameHashCode != 2973)
 						{
-							if (num10 != 3215)
+							if (nameHashCode != 3215)
 							{
 								return false;
 							}
@@ -5556,13 +5557,13 @@ namespace TMPro
 					}
 					else
 					{
-						if (num10 == 3219)
+						if (nameHashCode == 3219)
 						{
 							return true;
 						}
-						if (num10 != 3229)
+						if (nameHashCode != 3229)
 						{
-							if (num10 != 4556)
+							if (nameHashCode != 4556)
 							{
 								return false;
 							}
@@ -5571,11 +5572,11 @@ namespace TMPro
 					}
 					return true;
 				}
-				if (num10 <= 4742)
+				if (nameHashCode <= 4742)
 				{
-					if (num10 != 4728)
+					if (nameHashCode != 4728)
 					{
-						if (num10 != 4742)
+						if (nameHashCode != 4742)
 						{
 							return false;
 						}
@@ -5584,13 +5585,13 @@ namespace TMPro
 				}
 				else
 				{
-					if (num10 == 6380)
+					if (nameHashCode == 6380)
 					{
 						goto IL_19DC;
 					}
-					if (num10 != 6552)
+					if (nameHashCode != 6552)
 					{
-						if (num10 != 6566)
+						if (nameHashCode != 6566)
 						{
 							return false;
 						}
@@ -5641,10 +5642,10 @@ namespace TMPro
 				this.m_isNonBreakingSpace = true;
 				return true;
 				IL_1E22:
-				int valueHashCode = this.m_xmlAttribute[0].valueHashCode;
-				int nameHashCode = this.m_xmlAttribute[1].nameHashCode;
+				int valueHashCode2 = this.m_xmlAttribute[0].valueHashCode;
+				int nameHashCode2 = this.m_xmlAttribute[1].nameHashCode;
 				int num14 = this.m_xmlAttribute[1].valueHashCode;
-				if (valueHashCode == 764638571 || valueHashCode == 523367755)
+				if (valueHashCode2 == 764638571 || valueHashCode2 == 523367755)
 				{
 					this.m_currentFontAsset = this.m_materialReferences[0].fontAsset;
 					this.m_currentMaterial = this.m_materialReferences[0].material;
@@ -5654,7 +5655,7 @@ namespace TMPro
 					return true;
 				}
 				TMP_FontAsset tmp_FontAsset;
-				if (!MaterialReferenceManager.TryGetFontAsset(valueHashCode, out tmp_FontAsset))
+				if (!MaterialReferenceManager.TryGetFontAsset(valueHashCode2, out tmp_FontAsset))
 				{
 					tmp_FontAsset = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength));
 					if (tmp_FontAsset == null)
@@ -5663,7 +5664,7 @@ namespace TMPro
 					}
 					MaterialReferenceManager.AddFontAsset(tmp_FontAsset);
 				}
-				if (nameHashCode == 0 && num14 == 0)
+				if (nameHashCode2 == 0 && num14 == 0)
 				{
 					this.m_currentMaterial = tmp_FontAsset.material;
 					this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, this.m_materialReferences, this.m_materialReferenceIndexLookup);
@@ -5671,7 +5672,7 @@ namespace TMPro
 				}
 				else
 				{
-					if (nameHashCode != 103415287 && nameHashCode != 72669687)
+					if (nameHashCode2 != 103415287 && nameHashCode2 != 72669687)
 					{
 						return false;
 					}
@@ -5715,21 +5716,21 @@ namespace TMPro
 				}
 				return true;
 			}
-			if (num10 <= 6886018)
+			if (nameHashCode <= 6886018)
 			{
-				if (num10 <= 1071884)
+				if (nameHashCode <= 1071884)
 				{
-					if (num10 > 315682)
+					if (nameHashCode > 315682)
 					{
-						if (num10 <= 982252)
+						if (nameHashCode <= 982252)
 						{
-							if (num10 <= 320078)
+							if (nameHashCode <= 320078)
 							{
-								if (num10 == 317446)
+								if (nameHashCode == 317446)
 								{
-									goto IL_3842;
+									goto IL_3826;
 								}
-								if (num10 != 320078)
+								if (nameHashCode != 320078)
 								{
 									return false;
 								}
@@ -5737,13 +5738,13 @@ namespace TMPro
 							}
 							else
 							{
-								if (num10 == 327550)
+								if (nameHashCode == 327550)
 								{
 									goto IL_2698;
 								}
-								if (num10 != 976214)
+								if (nameHashCode != 976214)
 								{
-									if (num10 != 982252)
+									if (nameHashCode != 982252)
 									{
 										return false;
 									}
@@ -5751,13 +5752,13 @@ namespace TMPro
 								}
 							}
 						}
-						else if (num10 <= 1017743)
+						else if (nameHashCode <= 1017743)
 						{
-							if (num10 == 1015979)
+							if (nameHashCode == 1015979)
 							{
-								goto IL_37C6;
+								goto IL_37AA;
 							}
-							if (num10 != 1017743)
+							if (nameHashCode != 1017743)
 							{
 								return false;
 							}
@@ -5765,13 +5766,13 @@ namespace TMPro
 						}
 						else
 						{
-							if (num10 == 1027847)
+							if (nameHashCode == 1027847)
 							{
 								goto IL_270A;
 							}
-							if (num10 != 1065846)
+							if (nameHashCode != 1065846)
 							{
-								if (num10 != 1071884)
+								if (nameHashCode != 1071884)
 								{
 									return false;
 								}
@@ -5784,43 +5785,43 @@ namespace TMPro
 						this.m_htmlColor = this.m_colorStack.Remove();
 						return true;
 					}
-					if (num10 <= 237918)
+					if (nameHashCode <= 237918)
 					{
-						if (num10 <= 226050)
+						if (nameHashCode <= 226050)
 						{
-							if (num10 != 192323)
+							if (nameHashCode != 192323)
 							{
-								if (num10 != 226050)
+								if (nameHashCode != 226050)
 								{
 									return false;
 								}
-								goto IL_375C;
+								goto IL_3740;
 							}
 						}
 						else
 						{
-							if (num10 == 227814)
+							if (nameHashCode == 227814)
 							{
-								goto IL_3842;
+								goto IL_3826;
 							}
-							if (num10 == 230446)
+							if (nameHashCode == 230446)
 							{
 								goto IL_22F2;
 							}
-							if (num10 != 237918)
+							if (nameHashCode != 237918)
 							{
 								return false;
 							}
 							goto IL_2698;
 						}
 					}
-					else if (num10 <= 276254)
+					else if (nameHashCode <= 276254)
 					{
-						if (num10 == 275917)
+						if (nameHashCode == 275917)
 						{
 							goto IL_2594;
 						}
-						if (num10 != 276254)
+						if (nameHashCode != 276254)
 						{
 							return false;
 						}
@@ -5828,17 +5829,17 @@ namespace TMPro
 					}
 					else
 					{
-						if (num10 == 280416)
+						if (nameHashCode == 280416)
 						{
 							return false;
 						}
-						if (num10 != 281955)
+						if (nameHashCode != 281955)
 						{
-							if (num10 != 315682)
+							if (nameHashCode != 315682)
 							{
 								return false;
 							}
-							goto IL_375C;
+							goto IL_3740;
 						}
 					}
 					if (this.m_htmlTag[6] == '#' && num == 10)
@@ -5865,18 +5866,18 @@ namespace TMPro
 						this.m_colorStack.Add(this.m_htmlColor);
 						return true;
 					}
-					num10 = this.m_xmlAttribute[0].valueHashCode;
-					if (num10 <= 26556144)
+					num11 = this.m_xmlAttribute[0].valueHashCode;
+					if (num11 <= 26556144)
 					{
-						if (num10 <= 125395)
+						if (num11 <= 125395)
 						{
-							if (num10 == -36881330)
+							if (num11 == -36881330)
 							{
 								this.m_htmlColor = new Color32(160, 32, 240, byte.MaxValue);
 								this.m_colorStack.Add(this.m_htmlColor);
 								return true;
 							}
-							if (num10 == 125395)
+							if (num11 == 125395)
 							{
 								this.m_htmlColor = Color.red;
 								this.m_colorStack.Add(this.m_htmlColor);
@@ -5885,13 +5886,13 @@ namespace TMPro
 						}
 						else
 						{
-							if (num10 == 3573310)
+							if (num11 == 3573310)
 							{
 								this.m_htmlColor = Color.blue;
 								this.m_colorStack.Add(this.m_htmlColor);
 								return true;
 							}
-							if (num10 == 26556144)
+							if (num11 == 26556144)
 							{
 								this.m_htmlColor = new Color32(byte.MaxValue, 128, 0, byte.MaxValue);
 								this.m_colorStack.Add(this.m_htmlColor);
@@ -5899,15 +5900,15 @@ namespace TMPro
 							}
 						}
 					}
-					else if (num10 <= 121463835)
+					else if (num11 <= 121463835)
 					{
-						if (num10 == 117905991)
+						if (num11 == 117905991)
 						{
 							this.m_htmlColor = Color.black;
 							this.m_colorStack.Add(this.m_htmlColor);
 							return true;
 						}
-						if (num10 == 121463835)
+						if (num11 == 121463835)
 						{
 							this.m_htmlColor = Color.green;
 							this.m_colorStack.Add(this.m_htmlColor);
@@ -5916,13 +5917,13 @@ namespace TMPro
 					}
 					else
 					{
-						if (num10 == 140357351)
+						if (num11 == 140357351)
 						{
 							this.m_htmlColor = Color.white;
 							this.m_colorStack.Add(this.m_htmlColor);
 							return true;
 						}
-						if (num10 == 554054276)
+						if (num11 == 554054276)
 						{
 							this.m_htmlColor = Color.yellow;
 							this.m_colorStack.Add(this.m_htmlColor);
@@ -5930,7 +5931,7 @@ namespace TMPro
 						}
 					}
 					return false;
-					IL_375C:
+					IL_3740:
 					num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
 					if (num13 == -9999f)
 					{
@@ -5976,37 +5977,36 @@ namespace TMPro
 						break;
 					}
 					return true;
-					IL_3842:
-					num10 = this.m_xmlAttribute[1].nameHashCode;
-					if (num10 == 327550)
+					IL_3826:
+					if (this.m_xmlAttribute[1].nameHashCode == 327550)
 					{
 						float num15 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[1].valueStartIndex, this.m_xmlAttribute[1].valueLength);
 						switch (tagUnits)
 						{
 						case TagUnits.Pixels:
-							Debug.Log("Table width = " + num15 + "px.");
+							Debug.Log("Table width = " + num15.ToString() + "px.");
 							break;
 						case TagUnits.FontUnits:
-							Debug.Log("Table width = " + num15 + "em.");
+							Debug.Log("Table width = " + num15.ToString() + "em.");
 							break;
 						case TagUnits.Percentage:
-							Debug.Log("Table width = " + num15 + "%.");
+							Debug.Log("Table width = " + num15.ToString() + "%.");
 							break;
 						}
 					}
 					return true;
 				}
-				if (num10 <= 1619421)
+				if (nameHashCode <= 1619421)
 				{
-					if (num10 <= 1356515)
+					if (nameHashCode <= 1356515)
 					{
-						if (num10 <= 1107375)
+						if (nameHashCode <= 1107375)
 						{
-							if (num10 == 1105611)
+							if (nameHashCode == 1105611)
 							{
-								goto IL_37C6;
+								goto IL_37AA;
 							}
-							if (num10 != 1107375)
+							if (nameHashCode != 1107375)
 							{
 								return false;
 							}
@@ -6014,27 +6014,27 @@ namespace TMPro
 						}
 						else
 						{
-							if (num10 == 1117479)
+							if (nameHashCode == 1117479)
 							{
 								goto IL_270A;
 							}
-							if (num10 == 1286342)
+							if (nameHashCode == 1286342)
 							{
 								goto IL_36A1;
 							}
-							if (num10 != 1356515)
+							if (nameHashCode != 1356515)
 							{
 								return false;
 							}
 						}
 					}
-					else if (num10 <= 1482398)
+					else if (nameHashCode <= 1482398)
 					{
-						if (num10 == 1441524)
+						if (nameHashCode == 1441524)
 						{
 							goto IL_2C18;
 						}
-						if (num10 != 1482398)
+						if (nameHashCode != 1482398)
 						{
 							return false;
 						}
@@ -6042,71 +6042,71 @@ namespace TMPro
 					}
 					else
 					{
-						if (num10 == 1524585)
+						if (nameHashCode == 1524585)
 						{
 							goto IL_2B5E;
 						}
-						if (num10 == 1600507)
+						if (nameHashCode == 1600507)
 						{
-							goto IL_37CF;
+							goto IL_37B3;
 						}
-						if (num10 != 1619421)
+						if (nameHashCode != 1619421)
 						{
 							return false;
 						}
 						goto IL_2DBE;
 					}
 				}
-				else if (num10 <= 2109854)
+				else if (nameHashCode <= 2109854)
 				{
-					if (num10 <= 1913798)
+					if (nameHashCode <= 1913798)
 					{
-						if (num10 == 1750458)
+						if (nameHashCode == 1750458)
 						{
 							return false;
 						}
-						if (num10 != 1913798)
+						if (nameHashCode != 1913798)
 						{
 							return false;
 						}
 						goto IL_36A1;
 					}
-					else if (num10 != 1983971)
+					else if (nameHashCode != 1983971)
 					{
-						if (num10 == 2068980)
+						if (nameHashCode == 2068980)
 						{
 							goto IL_2C18;
 						}
-						if (num10 != 2109854)
+						if (nameHashCode != 2109854)
 						{
 							return false;
 						}
 						goto IL_3315;
 					}
 				}
-				else if (num10 <= 2227963)
+				else if (nameHashCode <= 2227963)
 				{
-					if (num10 == 2152041)
+					if (nameHashCode == 2152041)
 					{
 						goto IL_2B5E;
 					}
-					if (num10 != 2227963)
+					if (nameHashCode != 2227963)
 					{
 						return false;
 					}
-					goto IL_37CF;
+					goto IL_37B3;
 				}
 				else
 				{
-					if (num10 == 2246877)
+					if (nameHashCode == 2246877)
 					{
 						goto IL_2DBE;
 					}
-					if (num10 == 6815845)
+					if (nameHashCode == 6815845)
 					{
-						goto IL_3703;
+						goto IL_36F1;
 					}
-					if (num10 != 6886018)
+					if (nameHashCode != 6886018)
 					{
 						return false;
 					}
@@ -6172,7 +6172,7 @@ namespace TMPro
 				this.m_xAdvance = this.tag_Indent;
 				return true;
 				IL_2DBE:
-				int valueHashCode2 = this.m_xmlAttribute[0].valueHashCode;
+				int valueHashCode3 = this.m_xmlAttribute[0].valueHashCode;
 				this.m_spriteIndex = -1;
 				TMP_SpriteAsset tmp_SpriteAsset;
 				if (this.m_xmlAttribute[0].valueType == TagType.None || this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
@@ -6202,7 +6202,7 @@ namespace TMPro
 						return false;
 					}
 				}
-				else if (MaterialReferenceManager.TryGetSpriteAsset(valueHashCode2, out tmp_SpriteAsset))
+				else if (MaterialReferenceManager.TryGetSpriteAsset(valueHashCode3, out tmp_SpriteAsset))
 				{
 					this.m_currentSpriteAsset = tmp_SpriteAsset;
 				}
@@ -6216,7 +6216,7 @@ namespace TMPro
 					{
 						return false;
 					}
-					MaterialReferenceManager.AddSpriteAsset(valueHashCode2, tmp_SpriteAsset);
+					MaterialReferenceManager.AddSpriteAsset(valueHashCode3, tmp_SpriteAsset);
 					this.m_currentSpriteAsset = tmp_SpriteAsset;
 				}
 				if (this.m_xmlAttribute[0].valueType == TagType.NumericalValue)
@@ -6237,32 +6237,32 @@ namespace TMPro
 				int num17 = 0;
 				while (num17 < this.m_xmlAttribute.Length && this.m_xmlAttribute[num17].nameHashCode != 0)
 				{
-					int nameHashCode2 = this.m_xmlAttribute[num17].nameHashCode;
+					int nameHashCode3 = this.m_xmlAttribute[num17].nameHashCode;
 					int num18 = 0;
-					if (nameHashCode2 <= 43347)
+					if (nameHashCode3 <= 43347)
 					{
-						if (nameHashCode2 <= 30547)
+						if (nameHashCode3 <= 30547)
 						{
-							if (nameHashCode2 == 26705)
+							if (nameHashCode3 == 26705)
 							{
 								goto IL_315F;
 							}
-							if (nameHashCode2 != 30547)
+							if (nameHashCode3 != 30547)
 							{
 								goto IL_31E2;
 							}
 						}
 						else
 						{
-							if (nameHashCode2 == 33019)
+							if (nameHashCode3 == 33019)
 							{
 								goto IL_30DF;
 							}
-							if (nameHashCode2 == 39505)
+							if (nameHashCode3 == 39505)
 							{
 								goto IL_315F;
 							}
-							if (nameHashCode2 != 43347)
+							if (nameHashCode3 != 43347)
 							{
 								goto IL_31E2;
 							}
@@ -6287,26 +6287,26 @@ namespace TMPro
 					}
 					else
 					{
-						if (nameHashCode2 <= 192323)
+						if (nameHashCode3 <= 192323)
 						{
-							if (nameHashCode2 == 45819)
+							if (nameHashCode3 == 45819)
 							{
 								goto IL_30DF;
 							}
-							if (nameHashCode2 != 192323)
+							if (nameHashCode3 != 192323)
 							{
 								goto IL_31E2;
 							}
 						}
 						else
 						{
-							if (nameHashCode2 != 205930)
+							if (nameHashCode3 != 205930)
 							{
-								if (nameHashCode2 == 281955)
+								if (nameHashCode3 == 281955)
 								{
 									goto IL_3124;
 								}
-								if (nameHashCode2 != 295562)
+								if (nameHashCode3 != 295562)
 								{
 									goto IL_31E2;
 								}
@@ -6333,7 +6333,7 @@ namespace TMPro
 					this.m_tintSprite = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[num17].valueStartIndex, this.m_xmlAttribute[num17].valueLength) != 0f;
 					goto IL_31F6;
 					IL_31E2:
-					if (nameHashCode2 != 2246877 && nameHashCode2 != 1619421)
+					if (nameHashCode3 != 2246877 && nameHashCode3 != 1619421)
 					{
 						return false;
 					}
@@ -6366,14 +6366,14 @@ namespace TMPro
 				this.m_marginRight = this.m_marginLeft;
 				return true;
 				IL_36A1:
-				int valueHashCode3 = this.m_xmlAttribute[0].valueHashCode;
+				int valueHashCode4 = this.m_xmlAttribute[0].valueHashCode;
 				if (this.m_isParsingText)
 				{
-					this.m_actionStack.Add(valueHashCode3);
-					Debug.Log(string.Concat(new object[] { "Action ID: [", valueHashCode3, "] First character index: ", this.m_characterCount }));
+					this.m_actionStack.Add(valueHashCode4);
+					Debug.Log("Action ID: [" + valueHashCode4.ToString() + "] First character index: " + this.m_characterCount.ToString());
 				}
 				return true;
-				IL_37CF:
+				IL_37B3:
 				num13 = this.ConvertToFloat(this.m_htmlTag, this.m_xmlAttribute[0].valueStartIndex, this.m_xmlAttribute[0].valueLength);
 				if (num13 == -9999f)
 				{
@@ -6385,36 +6385,36 @@ namespace TMPro
 				IL_270A:
 				this.m_width = -1f;
 				return true;
-				IL_37C6:
+				IL_37AA:
 				this.m_isFXMatrixSet = false;
 				return true;
 			}
-			if (num10 > 54741026)
+			if (nameHashCode > 54741026)
 			{
-				if (num10 <= 514803617)
+				if (nameHashCode <= 514803617)
 				{
-					if (num10 <= 340349191)
+					if (nameHashCode <= 340349191)
 					{
-						if (num10 <= 72669687)
+						if (nameHashCode <= 72669687)
 						{
-							if (num10 == 69403544)
+							if (nameHashCode == 69403544)
 							{
 								goto IL_29BD;
 							}
-							if (num10 != 72669687)
+							if (nameHashCode != 72669687)
 							{
 								return false;
 							}
 						}
 						else
 						{
-							if (num10 == 100149144)
+							if (nameHashCode == 100149144)
 							{
 								goto IL_29BD;
 							}
-							if (num10 != 103415287)
+							if (nameHashCode != 103415287)
 							{
-								if (num10 != 340349191)
+								if (nameHashCode != 340349191)
 								{
 									return false;
 								}
@@ -6450,9 +6450,9 @@ namespace TMPro
 						}
 						return true;
 						IL_29BD:
-						int valueHashCode4 = this.m_xmlAttribute[0].valueHashCode;
+						int valueHashCode5 = this.m_xmlAttribute[0].valueHashCode;
 						TMP_ColorGradient tmp_ColorGradient;
-						if (MaterialReferenceManager.TryGetColorGradientPreset(valueHashCode4, out tmp_ColorGradient))
+						if (MaterialReferenceManager.TryGetColorGradientPreset(valueHashCode5, out tmp_ColorGradient))
 						{
 							this.m_colorGradientPreset = tmp_ColorGradient;
 						}
@@ -6466,30 +6466,30 @@ namespace TMPro
 							{
 								return false;
 							}
-							MaterialReferenceManager.AddColorGradientPreset(valueHashCode4, tmp_ColorGradient);
+							MaterialReferenceManager.AddColorGradientPreset(valueHashCode5, tmp_ColorGradient);
 							this.m_colorGradientPreset = tmp_ColorGradient;
 						}
 						this.m_colorGradientStack.Add(this.m_colorGradientPreset);
 						return true;
 					}
-					if (num10 <= 371094791)
+					if (nameHashCode <= 371094791)
 					{
-						if (num10 != 343615334)
+						if (nameHashCode != 343615334)
 						{
-							if (num10 != 371094791)
+							if (nameHashCode != 371094791)
 							{
 								return false;
 							}
 							goto IL_2A5D;
 						}
 					}
-					else if (num10 != 374360934)
+					else if (nameHashCode != 374360934)
 					{
-						if (num10 == 457225591)
+						if (nameHashCode == 457225591)
 						{
 							goto IL_19AD;
 						}
-						if (num10 != 514803617)
+						if (nameHashCode != 514803617)
 						{
 							return false;
 						}
@@ -6503,13 +6503,13 @@ namespace TMPro
 					this.m_colorGradientPreset = this.m_colorGradientStack.Remove();
 					return true;
 				}
-				if (num10 <= 781906058)
+				if (nameHashCode <= 781906058)
 				{
-					if (num10 <= 566686826)
+					if (nameHashCode <= 566686826)
 					{
-						if (num10 != 551025096)
+						if (nameHashCode != 551025096)
 						{
-							if (num10 != 566686826)
+							if (nameHashCode != 566686826)
 							{
 								return false;
 							}
@@ -6518,13 +6518,13 @@ namespace TMPro
 					}
 					else
 					{
-						if (num10 == 730022849)
+						if (nameHashCode == 730022849)
 						{
 							goto IL_325B;
 						}
-						if (num10 != 766244328)
+						if (nameHashCode != 766244328)
 						{
-							if (num10 != 781906058)
+							if (nameHashCode != 781906058)
 							{
 								return false;
 							}
@@ -6535,17 +6535,17 @@ namespace TMPro
 					this.m_fontStyleStack.Add(FontStyles.SmallCaps);
 					return true;
 				}
-				if (num10 <= 1109386397)
+				if (nameHashCode <= 1109386397)
 				{
-					if (num10 == 1100728678)
+					if (nameHashCode == 1100728678)
 					{
 						goto IL_3419;
 					}
-					if (num10 == 1109349752)
+					if (nameHashCode == 1109349752)
 					{
 						goto IL_35D9;
 					}
-					if (num10 != 1109386397)
+					if (nameHashCode != 1109386397)
 					{
 						return false;
 					}
@@ -6553,15 +6553,15 @@ namespace TMPro
 				}
 				else
 				{
-					if (num10 == 1897350193)
+					if (nameHashCode == 1897350193)
 					{
 						goto IL_368B;
 					}
-					if (num10 == 1897386838)
+					if (nameHashCode == 1897386838)
 					{
 						goto IL_2DB1;
 					}
-					if (num10 != 2012149182)
+					if (nameHashCode != 2012149182)
 					{
 						return false;
 					}
@@ -6572,42 +6572,42 @@ namespace TMPro
 				this.m_fontStyleStack.Add(FontStyles.LowerCase);
 				return true;
 			}
-			if (num10 <= 7757466)
+			if (nameHashCode <= 7757466)
 			{
-				if (num10 <= 7443301)
+				if (nameHashCode <= 7443301)
 				{
-					if (num10 <= 7011901)
+					if (nameHashCode <= 7011901)
 					{
-						if (num10 == 6971027)
+						if (nameHashCode == 6971027)
 						{
 							goto IL_2CE0;
 						}
-						if (num10 != 7011901)
+						if (nameHashCode != 7011901)
 						{
 							return false;
 						}
 						goto IL_3401;
 					}
-					else if (num10 != 7054088)
+					else if (nameHashCode != 7054088)
 					{
-						if (num10 == 7130010)
+						if (nameHashCode == 7130010)
 						{
-							goto IL_3839;
+							goto IL_381D;
 						}
-						if (num10 != 7443301)
+						if (nameHashCode != 7443301)
 						{
 							return false;
 						}
-						goto IL_3703;
+						goto IL_36F1;
 					}
 				}
-				else if (num10 <= 7598483)
+				else if (nameHashCode <= 7598483)
 				{
-					if (num10 == 7513474)
+					if (nameHashCode == 7513474)
 					{
 						goto IL_2B08;
 					}
-					if (num10 != 7598483)
+					if (nameHashCode != 7598483)
 					{
 						return false;
 					}
@@ -6615,17 +6615,17 @@ namespace TMPro
 				}
 				else
 				{
-					if (num10 == 7639357)
+					if (nameHashCode == 7639357)
 					{
 						goto IL_3401;
 					}
-					if (num10 != 7681544)
+					if (nameHashCode != 7681544)
 					{
-						if (num10 != 7757466)
+						if (nameHashCode != 7757466)
 						{
 							return false;
 						}
-						goto IL_3839;
+						goto IL_381D;
 					}
 				}
 				this.m_monoSpacing = 0f;
@@ -6637,34 +6637,34 @@ namespace TMPro
 				this.m_marginLeft = 0f;
 				this.m_marginRight = 0f;
 				return true;
-				IL_3839:
+				IL_381D:
 				this.m_isFXMatrixSet = false;
 				return true;
 			}
-			if (num10 <= 15115642)
+			if (nameHashCode <= 15115642)
 			{
-				if (num10 <= 10723418)
+				if (nameHashCode <= 10723418)
 				{
-					if (num10 == 9133802)
+					if (nameHashCode == 9133802)
 					{
 						goto IL_3297;
 					}
-					if (num10 != 10723418)
+					if (nameHashCode != 10723418)
 					{
 						return false;
 					}
 				}
 				else
 				{
-					if (num10 == 11642281)
+					if (nameHashCode == 11642281)
 					{
 						goto IL_1A86;
 					}
-					if (num10 == 13526026)
+					if (nameHashCode == 13526026)
 					{
 						goto IL_3297;
 					}
-					if (num10 != 15115642)
+					if (nameHashCode != 15115642)
 					{
 						return false;
 					}
@@ -6672,15 +6672,15 @@ namespace TMPro
 				this.tag_NoParsing = true;
 				return true;
 			}
-			if (num10 > 47840323)
+			if (nameHashCode > 47840323)
 			{
-				if (num10 != 50348802)
+				if (nameHashCode != 50348802)
 				{
-					if (num10 == 52232547)
+					if (nameHashCode == 52232547)
 					{
 						goto IL_32B6;
 					}
-					if (num10 != 54741026)
+					if (nameHashCode != 54741026)
 					{
 						return false;
 					}
@@ -6688,9 +6688,9 @@ namespace TMPro
 				this.m_baselineOffset = 0f;
 				return true;
 			}
-			if (num10 != 16034505)
+			if (nameHashCode != 16034505)
 			{
-				if (num10 != 47840323)
+				if (nameHashCode != 47840323)
 				{
 					return false;
 				}
@@ -6731,16 +6731,10 @@ namespace TMPro
 			}
 			this.m_cSpacing = 0f;
 			return true;
-			IL_3703:
+			IL_36F1:
 			if (this.m_isParsingText)
 			{
-				Debug.Log(string.Concat(new object[]
-				{
-					"Action ID: [",
-					this.m_actionStack.CurrentItem(),
-					"] Last character index: ",
-					this.m_characterCount - 1
-				}));
+				Debug.Log("Action ID: [" + this.m_actionStack.CurrentItem().ToString() + "] Last character index: " + (this.m_characterCount - 1).ToString());
 			}
 			this.m_actionStack.Remove();
 			return true;
@@ -6755,14 +6749,14 @@ namespace TMPro
 				return true;
 			}
 			this.m_style &= (FontStyles)(-2);
-			num10 = (int)num13;
-			if (num10 <= 400)
+			num11 = (int)num13;
+			if (num11 <= 400)
 			{
-				if (num10 <= 200)
+				if (num11 <= 200)
 				{
-					if (num10 != 100)
+					if (num11 != 100)
 					{
-						if (num10 == 200)
+						if (num11 == 200)
 						{
 							this.m_fontWeightInternal = 200;
 						}
@@ -6772,9 +6766,9 @@ namespace TMPro
 						this.m_fontWeightInternal = 100;
 					}
 				}
-				else if (num10 != 300)
+				else if (num11 != 300)
 				{
-					if (num10 == 400)
+					if (num11 == 400)
 					{
 						this.m_fontWeightInternal = 400;
 					}
@@ -6784,11 +6778,11 @@ namespace TMPro
 					this.m_fontWeightInternal = 300;
 				}
 			}
-			else if (num10 <= 600)
+			else if (num11 <= 600)
 			{
-				if (num10 != 500)
+				if (num11 != 500)
 				{
-					if (num10 == 600)
+					if (num11 == 600)
 					{
 						this.m_fontWeightInternal = 600;
 					}
@@ -6798,11 +6792,11 @@ namespace TMPro
 					this.m_fontWeightInternal = 500;
 				}
 			}
-			else if (num10 != 700)
+			else if (num11 != 700)
 			{
-				if (num10 != 800)
+				if (num11 != 800)
 				{
-					if (num10 == 900)
+					if (num11 == 900)
 					{
 						this.m_fontWeightInternal = 900;
 					}
@@ -6834,16 +6828,16 @@ namespace TMPro
 			this.m_htmlColor.a = (byte)(this.HexToInt(this.m_htmlTag[7]) * 16 + this.HexToInt(this.m_htmlTag[8]));
 			return true;
 			IL_2594:
-			num10 = this.m_xmlAttribute[0].valueHashCode;
-			if (num10 <= -458210101)
+			num11 = this.m_xmlAttribute[0].valueHashCode;
+			if (num11 <= -458210101)
 			{
-				if (num10 == -523808257)
+				if (num11 == -523808257)
 				{
 					this.m_lineJustification = TextAlignmentOptions.Justified;
 					this.m_lineJustificationStack.Add(this.m_lineJustification);
 					return true;
 				}
-				if (num10 == -458210101)
+				if (num11 == -458210101)
 				{
 					this.m_lineJustification = TextAlignmentOptions.Center;
 					this.m_lineJustificationStack.Add(this.m_lineJustification);
@@ -6852,19 +6846,19 @@ namespace TMPro
 			}
 			else
 			{
-				if (num10 == 3774683)
+				if (num11 == 3774683)
 				{
 					this.m_lineJustification = TextAlignmentOptions.Left;
 					this.m_lineJustificationStack.Add(this.m_lineJustification);
 					return true;
 				}
-				if (num10 == 122383428)
+				if (num11 == 122383428)
 				{
 					this.m_lineJustification = TextAlignmentOptions.Flush;
 					this.m_lineJustificationStack.Add(this.m_lineJustification);
 					return true;
 				}
-				if (num10 == 136703040)
+				if (num11 == 136703040)
 				{
 					this.m_lineJustification = TextAlignmentOptions.Right;
 					this.m_lineJustificationStack.Add(this.m_lineJustification);

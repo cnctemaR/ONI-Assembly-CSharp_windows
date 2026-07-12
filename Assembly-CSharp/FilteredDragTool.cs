@@ -172,72 +172,102 @@ public class FilteredDragTool : DragTool
 	private ObjectLayer GetObjectLayerFromFilterLayer(string filter_layer)
 	{
 		string text = filter_layer.ToLower();
-		uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
-		if (num <= 2200975418U)
+		if (text != null)
 		{
-			if (num <= 388608975U)
+			uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
+			ObjectLayer objectLayer;
+			if (num <= 2200975418U)
 			{
-				if (num != 25076977U)
+				if (num <= 388608975U)
 				{
-					if (num == 388608975U)
+					if (num != 25076977U)
 					{
-						if (text == "solidconduits")
+						if (num != 388608975U)
 						{
-							return ObjectLayer.SolidConduit;
+							goto IL_012D;
 						}
+						if (!(text == "solidconduits"))
+						{
+							goto IL_012D;
+						}
+						objectLayer = ObjectLayer.SolidConduit;
 					}
-				}
-				else if (text == "wires")
-				{
-					return ObjectLayer.Wire;
-				}
-			}
-			else if (num != 614364310U)
-			{
-				if (num == 2200975418U)
-				{
-					if (text == "backwall")
+					else
 					{
-						return ObjectLayer.Backwall;
+						if (!(text == "wires"))
+						{
+							goto IL_012D;
+						}
+						objectLayer = ObjectLayer.Wire;
 					}
 				}
-			}
-			else if (text == "liquidpipes")
-			{
-				return ObjectLayer.LiquidConduit;
-			}
-		}
-		else if (num <= 2875565775U)
-		{
-			if (num != 2366751346U)
-			{
-				if (num == 2875565775U)
+				else if (num != 614364310U)
 				{
-					if (text == "gaspipes")
+					if (num != 2200975418U)
 					{
-						return ObjectLayer.GasConduit;
+						goto IL_012D;
 					}
+					if (!(text == "backwall"))
+					{
+						goto IL_012D;
+					}
+					objectLayer = ObjectLayer.Backwall;
 				}
-			}
-			else if (text == "buildings")
-			{
-				return ObjectLayer.Building;
-			}
-		}
-		else if (num != 3464443665U)
-		{
-			if (num == 4178729166U)
-			{
-				if (text == "tiles")
+				else
 				{
-					return ObjectLayer.FoundationTile;
+					if (!(text == "liquidpipes"))
+					{
+						goto IL_012D;
+					}
+					objectLayer = ObjectLayer.LiquidConduit;
 				}
 			}
+			else if (num <= 2875565775U)
+			{
+				if (num != 2366751346U)
+				{
+					if (num != 2875565775U)
+					{
+						goto IL_012D;
+					}
+					if (!(text == "gaspipes"))
+					{
+						goto IL_012D;
+					}
+					objectLayer = ObjectLayer.GasConduit;
+				}
+				else
+				{
+					if (!(text == "buildings"))
+					{
+						goto IL_012D;
+					}
+					objectLayer = ObjectLayer.Building;
+				}
+			}
+			else if (num != 3464443665U)
+			{
+				if (num != 4178729166U)
+				{
+					goto IL_012D;
+				}
+				if (!(text == "tiles"))
+				{
+					goto IL_012D;
+				}
+				objectLayer = ObjectLayer.FoundationTile;
+			}
+			else
+			{
+				if (!(text == "logic"))
+				{
+					goto IL_012D;
+				}
+				objectLayer = ObjectLayer.LogicWire;
+			}
+			return objectLayer;
 		}
-		else if (text == "logic")
-		{
-			return ObjectLayer.LogicWire;
-		}
+		IL_012D:
 		throw new ArgumentException("Invalid filter layer: " + filter_layer);
 	}
 

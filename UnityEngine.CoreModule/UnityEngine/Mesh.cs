@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -12,8 +13,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	public sealed class Mesh : Object
 	{
 		[FreeFunction("MeshScripting::CreateMesh")]
@@ -38,6 +39,9 @@ namespace UnityEngine
 			set;
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern uint GetTotalIndexCount();
+
 		[FreeFunction(Name = "MeshScripting::SetIndexBufferParams", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetIndexBufferParams(int indexCount, IndexFormat format);
@@ -50,9 +54,13 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetIndexBufferDataFromArray(Array data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
 
-		[FreeFunction(Name = "MeshScripting::SetVertexBufferParams", HasExplicitThis = true, ThrowsException = true)]
+		[FreeFunction(Name = "MeshScripting::SetVertexBufferParamsFromPtr", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetVertexBufferParams(int vertexCount, params VertexAttributeDescriptor[] attributes);
+		private extern void SetVertexBufferParamsFromPtr(int vertexCount, IntPtr attributesPtr, int attributesCount);
+
+		[FreeFunction(Name = "MeshScripting::SetVertexBufferParamsFromArray", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetVertexBufferParamsFromArray(int vertexCount, params VertexAttributeDescriptor[] attributes);
 
 		[FreeFunction(Name = "MeshScripting::InternalSetVertexBufferData", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -68,17 +76,17 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVertexAttributesArray([NotNull] VertexAttributeDescriptor[] attributes);
+		private extern int GetVertexAttributesArray([NotNull("ArgumentNullException")] VertexAttributeDescriptor[] attributes);
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesList", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVertexAttributesList([NotNull] List<VertexAttributeDescriptor> attributes);
+		private extern int GetVertexAttributesList([NotNull("ArgumentNullException")] List<VertexAttributeDescriptor> attributes);
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesCount", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int GetVertexAttributeCountImpl();
 
-		[FreeFunction(Name = "MeshScripting::GetVertexAttributeByIndex", HasExplicitThis = true)]
+		[FreeFunction(Name = "MeshScripting::GetVertexAttributeByIndex", HasExplicitThis = true, ThrowsException = true)]
 		public VertexAttributeDescriptor GetVertexAttribute(int index)
 		{
 			VertexAttributeDescriptor vertexAttributeDescriptor;
@@ -110,11 +118,11 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int[] GetIndicesImpl(int submesh, bool applyBaseVertex);
 
-		[FreeFunction(Name = "SetMeshIndicesFromScript", HasExplicitThis = true)]
+		[FreeFunction(Name = "SetMeshIndicesFromScript", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetIndicesImpl(int submesh, MeshTopology topology, IndexFormat indicesFormat, Array indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex);
 
-		[FreeFunction(Name = "SetMeshIndicesFromNativeArray", HasExplicitThis = true)]
+		[FreeFunction(Name = "SetMeshIndicesFromNativeArray", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetIndicesNativeArrayImpl(int submesh, MeshTopology topology, IndexFormat indicesFormat, IntPtr indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex);
 
@@ -152,11 +160,11 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "SetMeshComponentFromArrayFromScript", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int arraySize, int valuesStart, int valuesCount);
+		private extern void SetArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags);
 
 		[FreeFunction(Name = "SetMeshComponentFromNativeArrayFromScript", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetNativeArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, IntPtr values, int arraySize, int valuesStart, int valuesCount);
+		private extern void SetNativeArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, IntPtr values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags);
 
 		[FreeFunction(Name = "AllocExtractMeshComponentFromScript", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -193,7 +201,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ClearBlendShapes();
 
-		[FreeFunction(Name = "MeshScripting::GetBlendShapeName", HasExplicitThis = true)]
+		[FreeFunction(Name = "MeshScripting::GetBlendShapeName", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string GetBlendShapeName(int shapeIndex);
 
@@ -201,19 +209,19 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetBlendShapeIndex(string blendShapeName);
 
-		[FreeFunction(Name = "MeshScripting::GetBlendShapeFrameCount", HasExplicitThis = true)]
+		[FreeFunction(Name = "MeshScripting::GetBlendShapeFrameCount", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetBlendShapeFrameCount(int shapeIndex);
 
-		[FreeFunction(Name = "MeshScripting::GetBlendShapeFrameWeight", HasExplicitThis = true)]
+		[FreeFunction(Name = "MeshScripting::GetBlendShapeFrameWeight", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetBlendShapeFrameWeight(int shapeIndex, int frameIndex);
 
-		[FreeFunction(Name = "GetBlendShapeFrameVerticesFromScript", HasExplicitThis = true)]
+		[FreeFunction(Name = "GetBlendShapeFrameVerticesFromScript", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void GetBlendShapeFrameVertices(int shapeIndex, int frameIndex, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents);
 
-		[FreeFunction(Name = "AddBlendShapeFrameFromScript", HasExplicitThis = true)]
+		[FreeFunction(Name = "AddBlendShapeFrameFromScript", HasExplicitThis = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void AddBlendShapeFrame(string shapeName, float frameWeight, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents);
 
@@ -234,8 +242,8 @@ namespace UnityEngine
 			this.InternalSetBoneWeights((IntPtr)bonesPerVertex.GetUnsafeReadOnlyPtr<byte>(), bonesPerVertex.Length, (IntPtr)weights.GetUnsafeReadOnlyPtr<BoneWeight1>(), weights.Length);
 		}
 
-		[SecurityCritical]
 		[FreeFunction(Name = "MeshScripting::SetBoneWeights", HasExplicitThis = true)]
+		[SecurityCritical]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetBoneWeights(IntPtr bonesPerVertex, int bonesPerVertexSize, IntPtr weights, int weightsSize);
 
@@ -259,8 +267,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetAllBoneWeightsArray();
 
-		[FreeFunction(Name = "MeshScripting::GetBonesPerVertexArray", HasExplicitThis = true)]
 		[SecurityCritical]
+		[FreeFunction(Name = "MeshScripting::GetBonesPerVertexArray", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern IntPtr GetBonesPerVertexArray();
 
@@ -329,6 +337,14 @@ namespace UnityEngine
 			return subMeshDescriptor;
 		}
 
+		[FreeFunction("MeshScripting::SetAllSubMeshesAtOnceFromArray", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetAllSubMeshesAtOnceFromArray(SubMeshDescriptor[] desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+
+		[FreeFunction("MeshScripting::SetAllSubMeshesAtOnceFromNativeArray", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetAllSubMeshesAtOnceFromNativeArray(IntPtr desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+
 		public Bounds bounds
 		{
 			get
@@ -349,15 +365,15 @@ namespace UnityEngine
 
 		[NativeMethod("RecalculateBounds")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateBoundsImpl();
+		private extern void RecalculateBoundsImpl(MeshUpdateFlags flags);
 
 		[NativeMethod("RecalculateNormals")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateNormalsImpl();
+		private extern void RecalculateNormalsImpl(MeshUpdateFlags flags);
 
 		[NativeMethod("RecalculateTangents")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateTangentsImpl();
+		private extern void RecalculateTangentsImpl(MeshUpdateFlags flags);
 
 		[NativeMethod("MarkDynamic")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -375,11 +391,19 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern MeshTopology GetTopologyImpl(int submesh);
 
+		[NativeMethod("RecalculateMeshMetric")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void RecalculateUVDistributionMetricImpl(int uvSetIndex, float uvAreaThreshold);
+
+		[NativeMethod("RecalculateMeshMetrics")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void RecalculateUVDistributionMetricsImpl(float uvAreaThreshold);
+
 		[NativeMethod("GetMeshMetric")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern float GetUVDistributionMetric(int uvSetIndex);
 
-		[FreeFunction(Name = "MeshScripting::CombineMeshes", HasExplicitThis = true)]
+		[NativeMethod(Name = "MeshScripting::CombineMeshes", IsFreeFunction = true, ThrowsException = true, HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void CombineMeshesImpl(CombineInstance[] combine, bool mergeSubMeshes, bool useMatrices, bool hasLightmapData);
 
@@ -395,7 +419,7 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void OptimizeReorderVertexBufferImpl();
 
-		internal VertexAttribute GetUVChannel(int uvIndex)
+		internal static VertexAttribute GetUVChannel(int uvIndex)
 		{
 			bool flag = uvIndex < 0 || uvIndex > 7;
 			if (flag)
@@ -456,7 +480,7 @@ namespace UnityEngine
 			return this.GetAllocArrayFromChannel<T>(channel, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(channel));
 		}
 
-		private void SetSizedArrayForChannel(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int valuesArrayLength, int valuesStart, int valuesCount)
+		private void SetSizedArrayForChannel(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int valuesArrayLength, int valuesStart, int valuesCount, MeshUpdateFlags flags)
 		{
 			bool canAccess = this.canAccess;
 			if (canAccess)
@@ -486,7 +510,7 @@ namespace UnityEngine
 				{
 					valuesStart = 0;
 				}
-				this.SetArrayForChannelImpl(channel, format, dim, values, valuesArrayLength, valuesStart, valuesCount);
+				this.SetArrayForChannelImpl(channel, format, dim, values, valuesArrayLength, valuesStart, valuesCount, flags);
 			}
 			else
 			{
@@ -494,7 +518,7 @@ namespace UnityEngine
 			}
 		}
 
-		private void SetSizedNativeArrayForChannel(VertexAttribute channel, VertexAttributeFormat format, int dim, IntPtr values, int valuesArrayLength, int valuesStart, int valuesCount)
+		private void SetSizedNativeArrayForChannel(VertexAttribute channel, VertexAttributeFormat format, int dim, IntPtr values, int valuesArrayLength, int valuesStart, int valuesCount, MeshUpdateFlags flags)
 		{
 			bool canAccess = this.canAccess;
 			if (canAccess)
@@ -519,7 +543,7 @@ namespace UnityEngine
 				{
 					throw new ArgumentOutOfRangeException("valuesCount", valuesStart + valuesCount, "Mesh data array start+count is outside of array size.");
 				}
-				this.SetNativeArrayForChannelImpl(channel, format, dim, values, valuesArrayLength, valuesStart, valuesCount);
+				this.SetNativeArrayForChannelImpl(channel, format, dim, values, valuesArrayLength, valuesStart, valuesCount, flags);
 			}
 			else
 			{
@@ -527,26 +551,26 @@ namespace UnityEngine
 			}
 		}
 
-		private void SetArrayForChannel<T>(VertexAttribute channel, VertexAttributeFormat format, int dim, T[] values)
+		private void SetArrayForChannel<T>(VertexAttribute channel, VertexAttributeFormat format, int dim, T[] values, MeshUpdateFlags flags = MeshUpdateFlags.Default)
 		{
 			int num = NoAllocHelpers.SafeLength(values);
-			this.SetSizedArrayForChannel(channel, format, dim, values, num, 0, num);
+			this.SetSizedArrayForChannel(channel, format, dim, values, num, 0, num, flags);
 		}
 
-		private void SetArrayForChannel<T>(VertexAttribute channel, T[] values)
+		private void SetArrayForChannel<T>(VertexAttribute channel, T[] values, MeshUpdateFlags flags = MeshUpdateFlags.Default)
 		{
 			int num = NoAllocHelpers.SafeLength(values);
-			this.SetSizedArrayForChannel(channel, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(channel), values, num, 0, num);
+			this.SetSizedArrayForChannel(channel, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(channel), values, num, 0, num, flags);
 		}
 
-		private void SetListForChannel<T>(VertexAttribute channel, VertexAttributeFormat format, int dim, List<T> values, int start, int length)
+		private void SetListForChannel<T>(VertexAttribute channel, VertexAttributeFormat format, int dim, List<T> values, int start, int length, MeshUpdateFlags flags)
 		{
-			this.SetSizedArrayForChannel(channel, format, dim, NoAllocHelpers.ExtractArrayFromList(values), NoAllocHelpers.SafeLength<T>(values), start, length);
+			this.SetSizedArrayForChannel(channel, format, dim, NoAllocHelpers.ExtractArrayFromList(values), NoAllocHelpers.SafeLength<T>(values), start, length, flags);
 		}
 
-		private void SetListForChannel<T>(VertexAttribute channel, List<T> values, int start, int length)
+		private void SetListForChannel<T>(VertexAttribute channel, List<T> values, int start, int length, MeshUpdateFlags flags)
 		{
-			this.SetSizedArrayForChannel(channel, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(channel), NoAllocHelpers.ExtractArrayFromList(values), NoAllocHelpers.SafeLength<T>(values), start, length);
+			this.SetSizedArrayForChannel(channel, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(channel), NoAllocHelpers.ExtractArrayFromList(values), NoAllocHelpers.SafeLength<T>(values), start, length, flags);
 		}
 
 		private void GetListForChannel<T>(List<T> buffer, int capacity, VertexAttribute channel, int dim)
@@ -581,7 +605,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector3>(VertexAttribute.Position, value);
+				this.SetArrayForChannel<Vector3>(VertexAttribute.Position, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -593,7 +617,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector3>(VertexAttribute.Normal, value);
+				this.SetArrayForChannel<Vector3>(VertexAttribute.Normal, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -605,7 +629,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector4>(VertexAttribute.Tangent, value);
+				this.SetArrayForChannel<Vector4>(VertexAttribute.Tangent, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -617,7 +641,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord0, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord0, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -629,7 +653,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord1, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord1, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -641,7 +665,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord2, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord2, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -653,7 +677,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord3, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord3, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -665,7 +689,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord4, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord4, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -677,7 +701,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord5, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord5, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -689,7 +713,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord6, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord6, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -701,7 +725,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord7, value);
+				this.SetArrayForChannel<Vector2>(VertexAttribute.TexCoord7, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -713,7 +737,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Color>(VertexAttribute.Color, value);
+				this.SetArrayForChannel<Color>(VertexAttribute.Color, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -725,7 +749,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.SetArrayForChannel<Color32>(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, value);
+				this.SetArrayForChannel<Color32>(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, value, MeshUpdateFlags.Default);
 			}
 		}
 
@@ -734,7 +758,7 @@ namespace UnityEngine
 			bool flag = vertices == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result vertices list cannot be null.", "vertices");
+				throw new ArgumentNullException("vertices", "The result vertices list cannot be null.");
 			}
 			this.GetListForChannel<Vector3>(vertices, this.vertexCount, VertexAttribute.Position, Mesh.DefaultDimensionForChannel(VertexAttribute.Position));
 		}
@@ -744,9 +768,15 @@ namespace UnityEngine
 			this.SetVertices(inVertices, 0, NoAllocHelpers.SafeLength<Vector3>(inVertices));
 		}
 
+		[ExcludeFromDocs]
 		public void SetVertices(List<Vector3> inVertices, int start, int length)
 		{
-			this.SetListForChannel<Vector3>(VertexAttribute.Position, inVertices, start, length);
+			this.SetVertices(inVertices, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetVertices(List<Vector3> inVertices, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetListForChannel<Vector3>(VertexAttribute.Position, inVertices, start, length, flags);
 		}
 
 		public void SetVertices(Vector3[] inVertices)
@@ -754,9 +784,15 @@ namespace UnityEngine
 			this.SetVertices(inVertices, 0, NoAllocHelpers.SafeLength(inVertices));
 		}
 
+		[ExcludeFromDocs]
 		public void SetVertices(Vector3[] inVertices, int start, int length)
 		{
-			this.SetSizedArrayForChannel(VertexAttribute.Position, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Position), inVertices, NoAllocHelpers.SafeLength(inVertices), start, length);
+			this.SetVertices(inVertices, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetVertices(Vector3[] inVertices, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetSizedArrayForChannel(VertexAttribute.Position, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Position), inVertices, NoAllocHelpers.SafeLength(inVertices), start, length, flags);
 		}
 
 		public void SetVertices<T>(NativeArray<T> inVertices) where T : struct
@@ -764,14 +800,20 @@ namespace UnityEngine
 			this.SetVertices<T>(inVertices, 0, inVertices.Length);
 		}
 
+		[ExcludeFromDocs]
 		public void SetVertices<T>(NativeArray<T> inVertices, int start, int length) where T : struct
+		{
+			this.SetVertices<T>(inVertices, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetVertices<T>(NativeArray<T> inVertices, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags) where T : struct
 		{
 			bool flag = UnsafeUtility.SizeOf<T>() != 12;
 			if (flag)
 			{
 				throw new ArgumentException("SetVertices with NativeArray should use struct type that is 12 bytes (3x float) in size");
 			}
-			this.SetSizedNativeArrayForChannel(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, (IntPtr)inVertices.GetUnsafeReadOnlyPtr<T>(), inVertices.Length, start, length);
+			this.SetSizedNativeArrayForChannel(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, (IntPtr)inVertices.GetUnsafeReadOnlyPtr<T>(), inVertices.Length, start, length, flags);
 		}
 
 		public void GetNormals(List<Vector3> normals)
@@ -779,7 +821,7 @@ namespace UnityEngine
 			bool flag = normals == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result normals list cannot be null.", "normals");
+				throw new ArgumentNullException("normals", "The result normals list cannot be null.");
 			}
 			this.GetListForChannel<Vector3>(normals, this.vertexCount, VertexAttribute.Normal, Mesh.DefaultDimensionForChannel(VertexAttribute.Normal));
 		}
@@ -789,9 +831,15 @@ namespace UnityEngine
 			this.SetNormals(inNormals, 0, NoAllocHelpers.SafeLength<Vector3>(inNormals));
 		}
 
+		[ExcludeFromDocs]
 		public void SetNormals(List<Vector3> inNormals, int start, int length)
 		{
-			this.SetListForChannel<Vector3>(VertexAttribute.Normal, inNormals, start, length);
+			this.SetNormals(inNormals, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetNormals(List<Vector3> inNormals, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetListForChannel<Vector3>(VertexAttribute.Normal, inNormals, start, length, flags);
 		}
 
 		public void SetNormals(Vector3[] inNormals)
@@ -799,9 +847,15 @@ namespace UnityEngine
 			this.SetNormals(inNormals, 0, NoAllocHelpers.SafeLength(inNormals));
 		}
 
+		[ExcludeFromDocs]
 		public void SetNormals(Vector3[] inNormals, int start, int length)
 		{
-			this.SetSizedArrayForChannel(VertexAttribute.Normal, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Normal), inNormals, NoAllocHelpers.SafeLength(inNormals), start, length);
+			this.SetNormals(inNormals, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetNormals(Vector3[] inNormals, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetSizedArrayForChannel(VertexAttribute.Normal, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Normal), inNormals, NoAllocHelpers.SafeLength(inNormals), start, length, flags);
 		}
 
 		public void SetNormals<T>(NativeArray<T> inNormals) where T : struct
@@ -809,14 +863,20 @@ namespace UnityEngine
 			this.SetNormals<T>(inNormals, 0, inNormals.Length);
 		}
 
+		[ExcludeFromDocs]
 		public void SetNormals<T>(NativeArray<T> inNormals, int start, int length) where T : struct
+		{
+			this.SetNormals<T>(inNormals, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetNormals<T>(NativeArray<T> inNormals, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags) where T : struct
 		{
 			bool flag = UnsafeUtility.SizeOf<T>() != 12;
 			if (flag)
 			{
 				throw new ArgumentException("SetNormals with NativeArray should use struct type that is 12 bytes (3x float) in size");
 			}
-			this.SetSizedNativeArrayForChannel(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3, (IntPtr)inNormals.GetUnsafeReadOnlyPtr<T>(), inNormals.Length, start, length);
+			this.SetSizedNativeArrayForChannel(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3, (IntPtr)inNormals.GetUnsafeReadOnlyPtr<T>(), inNormals.Length, start, length, flags);
 		}
 
 		public void GetTangents(List<Vector4> tangents)
@@ -824,7 +884,7 @@ namespace UnityEngine
 			bool flag = tangents == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result tangents list cannot be null.", "tangents");
+				throw new ArgumentNullException("tangents", "The result tangents list cannot be null.");
 			}
 			this.GetListForChannel<Vector4>(tangents, this.vertexCount, VertexAttribute.Tangent, Mesh.DefaultDimensionForChannel(VertexAttribute.Tangent));
 		}
@@ -834,9 +894,15 @@ namespace UnityEngine
 			this.SetTangents(inTangents, 0, NoAllocHelpers.SafeLength<Vector4>(inTangents));
 		}
 
+		[ExcludeFromDocs]
 		public void SetTangents(List<Vector4> inTangents, int start, int length)
 		{
-			this.SetListForChannel<Vector4>(VertexAttribute.Tangent, inTangents, start, length);
+			this.SetTangents(inTangents, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetTangents(List<Vector4> inTangents, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetListForChannel<Vector4>(VertexAttribute.Tangent, inTangents, start, length, flags);
 		}
 
 		public void SetTangents(Vector4[] inTangents)
@@ -844,9 +910,15 @@ namespace UnityEngine
 			this.SetTangents(inTangents, 0, NoAllocHelpers.SafeLength(inTangents));
 		}
 
+		[ExcludeFromDocs]
 		public void SetTangents(Vector4[] inTangents, int start, int length)
 		{
-			this.SetSizedArrayForChannel(VertexAttribute.Tangent, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Tangent), inTangents, NoAllocHelpers.SafeLength(inTangents), start, length);
+			this.SetTangents(inTangents, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetTangents(Vector4[] inTangents, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetSizedArrayForChannel(VertexAttribute.Tangent, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Tangent), inTangents, NoAllocHelpers.SafeLength(inTangents), start, length, flags);
 		}
 
 		public void SetTangents<T>(NativeArray<T> inTangents) where T : struct
@@ -854,14 +926,20 @@ namespace UnityEngine
 			this.SetTangents<T>(inTangents, 0, inTangents.Length);
 		}
 
+		[ExcludeFromDocs]
 		public void SetTangents<T>(NativeArray<T> inTangents, int start, int length) where T : struct
+		{
+			this.SetTangents<T>(inTangents, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetTangents<T>(NativeArray<T> inTangents, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags) where T : struct
 		{
 			bool flag = UnsafeUtility.SizeOf<T>() != 16;
 			if (flag)
 			{
 				throw new ArgumentException("SetTangents with NativeArray should use struct type that is 16 bytes (4x float) in size");
 			}
-			this.SetSizedNativeArrayForChannel(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4, (IntPtr)inTangents.GetUnsafeReadOnlyPtr<T>(), inTangents.Length, start, length);
+			this.SetSizedNativeArrayForChannel(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4, (IntPtr)inTangents.GetUnsafeReadOnlyPtr<T>(), inTangents.Length, start, length, flags);
 		}
 
 		public void GetColors(List<Color> colors)
@@ -869,7 +947,7 @@ namespace UnityEngine
 			bool flag = colors == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result colors list cannot be null.", "colors");
+				throw new ArgumentNullException("colors", "The result colors list cannot be null.");
 			}
 			this.GetListForChannel<Color>(colors, this.vertexCount, VertexAttribute.Color, Mesh.DefaultDimensionForChannel(VertexAttribute.Color));
 		}
@@ -879,9 +957,15 @@ namespace UnityEngine
 			this.SetColors(inColors, 0, NoAllocHelpers.SafeLength<Color>(inColors));
 		}
 
+		[ExcludeFromDocs]
 		public void SetColors(List<Color> inColors, int start, int length)
 		{
-			this.SetListForChannel<Color>(VertexAttribute.Color, inColors, start, length);
+			this.SetColors(inColors, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetColors(List<Color> inColors, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetListForChannel<Color>(VertexAttribute.Color, inColors, start, length, flags);
 		}
 
 		public void SetColors(Color[] inColors)
@@ -889,9 +973,15 @@ namespace UnityEngine
 			this.SetColors(inColors, 0, NoAllocHelpers.SafeLength(inColors));
 		}
 
+		[ExcludeFromDocs]
 		public void SetColors(Color[] inColors, int start, int length)
 		{
-			this.SetSizedArrayForChannel(VertexAttribute.Color, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Color), inColors, NoAllocHelpers.SafeLength(inColors), start, length);
+			this.SetColors(inColors, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetColors(Color[] inColors, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetSizedArrayForChannel(VertexAttribute.Color, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(VertexAttribute.Color), inColors, NoAllocHelpers.SafeLength(inColors), start, length, flags);
 		}
 
 		public void GetColors(List<Color32> colors)
@@ -899,7 +989,7 @@ namespace UnityEngine
 			bool flag = colors == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result colors list cannot be null.", "colors");
+				throw new ArgumentNullException("colors", "The result colors list cannot be null.");
 			}
 			this.GetListForChannel<Color32>(colors, this.vertexCount, VertexAttribute.Color, 4, VertexAttributeFormat.UNorm8);
 		}
@@ -909,9 +999,15 @@ namespace UnityEngine
 			this.SetColors(inColors, 0, NoAllocHelpers.SafeLength<Color32>(inColors));
 		}
 
+		[ExcludeFromDocs]
 		public void SetColors(List<Color32> inColors, int start, int length)
 		{
-			this.SetListForChannel<Color32>(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, inColors, start, length);
+			this.SetColors(inColors, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetColors(List<Color32> inColors, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetListForChannel<Color32>(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, inColors, start, length, flags);
 		}
 
 		public void SetColors(Color32[] inColors)
@@ -919,9 +1015,15 @@ namespace UnityEngine
 			this.SetColors(inColors, 0, NoAllocHelpers.SafeLength(inColors));
 		}
 
+		[ExcludeFromDocs]
 		public void SetColors(Color32[] inColors, int start, int length)
 		{
-			this.SetSizedArrayForChannel(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, inColors, NoAllocHelpers.SafeLength(inColors), start, length);
+			this.SetColors(inColors, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetColors(Color32[] inColors, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetSizedArrayForChannel(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, inColors, NoAllocHelpers.SafeLength(inColors), start, length, flags);
 		}
 
 		public void SetColors<T>(NativeArray<T> inColors) where T : struct
@@ -929,7 +1031,13 @@ namespace UnityEngine
 			this.SetColors<T>(inColors, 0, inColors.Length);
 		}
 
+		[ExcludeFromDocs]
 		public void SetColors<T>(NativeArray<T> inColors, int start, int length) where T : struct
+		{
+			this.SetColors<T>(inColors, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetColors<T>(NativeArray<T> inColors, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags) where T : struct
 		{
 			int num = UnsafeUtility.SizeOf<T>();
 			bool flag = num != 16 && num != 4;
@@ -937,10 +1045,10 @@ namespace UnityEngine
 			{
 				throw new ArgumentException("SetColors with NativeArray should use struct type that is 16 bytes (4x float) or 4 bytes (4x unorm) in size");
 			}
-			this.SetSizedNativeArrayForChannel(VertexAttribute.Color, (num == 4) ? VertexAttributeFormat.UNorm8 : VertexAttributeFormat.Float32, 4, (IntPtr)inColors.GetUnsafeReadOnlyPtr<T>(), inColors.Length, start, length);
+			this.SetSizedNativeArrayForChannel(VertexAttribute.Color, (num == 4) ? VertexAttributeFormat.UNorm8 : VertexAttributeFormat.Float32, 4, (IntPtr)inColors.GetUnsafeReadOnlyPtr<T>(), inColors.Length, start, length, flags);
 		}
 
-		private void SetUvsImpl<T>(int uvIndex, int dim, List<T> uvs, int start, int length)
+		private void SetUvsImpl<T>(int uvIndex, int dim, List<T> uvs, int start, int length, MeshUpdateFlags flags)
 		{
 			bool flag = uvIndex < 0 || uvIndex > 7;
 			if (flag)
@@ -949,7 +1057,7 @@ namespace UnityEngine
 			}
 			else
 			{
-				this.SetListForChannel<T>(this.GetUVChannel(uvIndex), VertexAttributeFormat.Float32, dim, uvs, start, length);
+				this.SetListForChannel<T>(Mesh.GetUVChannel(uvIndex), VertexAttributeFormat.Float32, dim, uvs, start, length, flags);
 			}
 		}
 
@@ -968,29 +1076,47 @@ namespace UnityEngine
 			this.SetUVs(channel, uvs, 0, NoAllocHelpers.SafeLength<Vector4>(uvs));
 		}
 
+		[ExcludeFromDocs]
 		public void SetUVs(int channel, List<Vector2> uvs, int start, int length)
 		{
-			this.SetUvsImpl<Vector2>(channel, 2, uvs, start, length);
+			this.SetUVs(channel, uvs, start, length, MeshUpdateFlags.Default);
 		}
 
+		public void SetUVs(int channel, List<Vector2> uvs, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetUvsImpl<Vector2>(channel, 2, uvs, start, length, flags);
+		}
+
+		[ExcludeFromDocs]
 		public void SetUVs(int channel, List<Vector3> uvs, int start, int length)
 		{
-			this.SetUvsImpl<Vector3>(channel, 3, uvs, start, length);
+			this.SetUVs(channel, uvs, start, length, MeshUpdateFlags.Default);
 		}
 
+		public void SetUVs(int channel, List<Vector3> uvs, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetUvsImpl<Vector3>(channel, 3, uvs, start, length, flags);
+		}
+
+		[ExcludeFromDocs]
 		public void SetUVs(int channel, List<Vector4> uvs, int start, int length)
 		{
-			this.SetUvsImpl<Vector4>(channel, 4, uvs, start, length);
+			this.SetUVs(channel, uvs, start, length, MeshUpdateFlags.Default);
 		}
 
-		private void SetUvsImpl(int uvIndex, int dim, Array uvs, int arrayStart, int arraySize)
+		public void SetUVs(int channel, List<Vector4> uvs, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetUvsImpl<Vector4>(channel, 4, uvs, start, length, flags);
+		}
+
+		private void SetUvsImpl(int uvIndex, int dim, Array uvs, int arrayStart, int arraySize, MeshUpdateFlags flags)
 		{
 			bool flag = uvIndex < 0 || uvIndex > 7;
 			if (flag)
 			{
 				throw new ArgumentOutOfRangeException("uvIndex", uvIndex, "The uv index is invalid. Must be in the range 0 to 7.");
 			}
-			this.SetSizedArrayForChannel(this.GetUVChannel(uvIndex), VertexAttributeFormat.Float32, dim, uvs, NoAllocHelpers.SafeLength(uvs), arrayStart, arraySize);
+			this.SetSizedArrayForChannel(Mesh.GetUVChannel(uvIndex), VertexAttributeFormat.Float32, dim, uvs, NoAllocHelpers.SafeLength(uvs), arrayStart, arraySize, flags);
 		}
 
 		public void SetUVs(int channel, Vector2[] uvs)
@@ -1008,19 +1134,37 @@ namespace UnityEngine
 			this.SetUVs(channel, uvs, 0, NoAllocHelpers.SafeLength(uvs));
 		}
 
+		[ExcludeFromDocs]
 		public void SetUVs(int channel, Vector2[] uvs, int start, int length)
 		{
-			this.SetUvsImpl(channel, 2, uvs, start, length);
+			this.SetUVs(channel, uvs, start, length, MeshUpdateFlags.Default);
 		}
 
+		public void SetUVs(int channel, Vector2[] uvs, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetUvsImpl(channel, 2, uvs, start, length, flags);
+		}
+
+		[ExcludeFromDocs]
 		public void SetUVs(int channel, Vector3[] uvs, int start, int length)
 		{
-			this.SetUvsImpl(channel, 3, uvs, start, length);
+			this.SetUVs(channel, uvs, start, length, MeshUpdateFlags.Default);
 		}
 
+		public void SetUVs(int channel, Vector3[] uvs, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetUvsImpl(channel, 3, uvs, start, length, flags);
+		}
+
+		[ExcludeFromDocs]
 		public void SetUVs(int channel, Vector4[] uvs, int start, int length)
 		{
-			this.SetUvsImpl(channel, 4, uvs, start, length);
+			this.SetUVs(channel, uvs, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetUVs(int channel, Vector4[] uvs, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
+		{
+			this.SetUvsImpl(channel, 4, uvs, start, length, flags);
 		}
 
 		public void SetUVs<T>(int channel, NativeArray<T> uvs) where T : struct
@@ -1028,7 +1172,13 @@ namespace UnityEngine
 			this.SetUVs<T>(channel, uvs, 0, uvs.Length);
 		}
 
+		[ExcludeFromDocs]
 		public void SetUVs<T>(int channel, NativeArray<T> uvs, int start, int length) where T : struct
+		{
+			this.SetUVs<T>(channel, uvs, start, length, MeshUpdateFlags.Default);
+		}
+
+		public void SetUVs<T>(int channel, NativeArray<T> uvs, int start, int length, [DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags) where T : struct
 		{
 			bool flag = channel < 0 || channel > 7;
 			if (flag)
@@ -1047,7 +1197,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentException("SetUVs with NativeArray should use struct type that is 1..4 floats in size");
 			}
-			this.SetSizedNativeArrayForChannel(this.GetUVChannel(channel), VertexAttributeFormat.Float32, num2, (IntPtr)uvs.GetUnsafeReadOnlyPtr<T>(), uvs.Length, start, length);
+			this.SetSizedNativeArrayForChannel(Mesh.GetUVChannel(channel), VertexAttributeFormat.Float32, num2, (IntPtr)uvs.GetUnsafeReadOnlyPtr<T>(), uvs.Length, start, length, flags);
 		}
 
 		private void GetUVsImpl<T>(int uvIndex, List<T> uvs, int dim)
@@ -1055,14 +1205,14 @@ namespace UnityEngine
 			bool flag = uvs == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result uvs list cannot be null.", "uvs");
+				throw new ArgumentNullException("uvs", "The result uvs list cannot be null.");
 			}
 			bool flag2 = uvIndex < 0 || uvIndex > 7;
 			if (flag2)
 			{
 				throw new IndexOutOfRangeException("The uv index is invalid. Must be in the range 0 to 7.");
 			}
-			this.GetListForChannel<T>(uvs, this.vertexCount, this.GetUVChannel(uvIndex), dim);
+			this.GetListForChannel<T>(uvs, this.vertexCount, Mesh.GetUVChannel(uvIndex), dim);
 		}
 
 		public void GetUVs(int channel, List<Vector2> uvs)
@@ -1101,6 +1251,16 @@ namespace UnityEngine
 		public int GetVertexAttributes(List<VertexAttributeDescriptor> attributes)
 		{
 			return this.GetVertexAttributesList(attributes);
+		}
+
+		public void SetVertexBufferParams(int vertexCount, params VertexAttributeDescriptor[] attributes)
+		{
+			this.SetVertexBufferParamsFromArray(vertexCount, attributes);
+		}
+
+		public void SetVertexBufferParams(int vertexCount, NativeArray<VertexAttributeDescriptor> attributes)
+		{
+			this.SetVertexBufferParamsFromPtr(vertexCount, (IntPtr)attributes.GetUnsafeReadOnlyPtr<VertexAttributeDescriptor>(), attributes.Length);
 		}
 
 		public void SetVertexBufferData<T>(NativeArray<T> data, int dataStart, int meshBufferStart, int count, int stream = 0, MeshUpdateFlags flags = MeshUpdateFlags.Default) where T : struct
@@ -1156,6 +1316,81 @@ namespace UnityEngine
 				throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (dataStart:{0} meshBufferStart:{1} count:{2})", dataStart, meshBufferStart, count));
 			}
 			this.InternalSetVertexBufferDataFromArray(stream, NoAllocHelpers.ExtractArrayFromList(data), dataStart, meshBufferStart, count, UnsafeUtility.SizeOf<T>(), flags);
+		}
+
+		public static Mesh.MeshDataArray AcquireReadOnlyMeshData(Mesh mesh)
+		{
+			return new Mesh.MeshDataArray(mesh, true);
+		}
+
+		public static Mesh.MeshDataArray AcquireReadOnlyMeshData(Mesh[] meshes)
+		{
+			bool flag = meshes == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("meshes", "Mesh array is null");
+			}
+			return new Mesh.MeshDataArray(meshes, meshes.Length, true);
+		}
+
+		public static Mesh.MeshDataArray AcquireReadOnlyMeshData(List<Mesh> meshes)
+		{
+			bool flag = meshes == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("meshes", "Mesh list is null");
+			}
+			return new Mesh.MeshDataArray(NoAllocHelpers.ExtractArrayFromListT<Mesh>(meshes), meshes.Count, true);
+		}
+
+		public static Mesh.MeshDataArray AllocateWritableMeshData(int meshCount)
+		{
+			return new Mesh.MeshDataArray(meshCount);
+		}
+
+		public static void ApplyAndDisposeWritableMeshData(Mesh.MeshDataArray data, Mesh mesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			bool flag = mesh == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("mesh", "Mesh is null");
+			}
+			bool flag2 = data.Length != 1;
+			if (flag2)
+			{
+				throw new InvalidOperationException(string.Format("{0} length must be 1 to apply to one mesh, was {1}", "MeshDataArray", data.Length));
+			}
+			data.ApplyToMeshAndDispose(mesh, flags);
+		}
+
+		public static void ApplyAndDisposeWritableMeshData(Mesh.MeshDataArray data, Mesh[] meshes, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			bool flag = meshes == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("meshes", "Mesh array is null");
+			}
+			bool flag2 = data.Length != meshes.Length;
+			if (flag2)
+			{
+				throw new InvalidOperationException(string.Format("{0} length ({1}) must match destination meshes array length ({2})", "MeshDataArray", data.Length, meshes.Length));
+			}
+			data.ApplyToMeshesAndDispose(meshes, flags);
+		}
+
+		public static void ApplyAndDisposeWritableMeshData(Mesh.MeshDataArray data, List<Mesh> meshes, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			bool flag = meshes == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("meshes", "Mesh list is null");
+			}
+			bool flag2 = data.Length != meshes.Count;
+			if (flag2)
+			{
+				throw new InvalidOperationException(string.Format("{0} length ({1}) must match destination meshes list length ({2})", "MeshDataArray", data.Length, meshes.Count));
+			}
+			data.ApplyToMeshesAndDispose(NoAllocHelpers.ExtractArrayFromListT<Mesh>(meshes), flags);
 		}
 
 		private void PrintErrorCantAccessIndices()
@@ -1249,7 +1484,7 @@ namespace UnityEngine
 			bool flag = triangles == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result triangles list cannot be null.", "triangles");
+				throw new ArgumentNullException("triangles", "The result triangles list cannot be null.");
 			}
 			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
 			if (flag2)
@@ -1265,7 +1500,7 @@ namespace UnityEngine
 			bool flag = triangles == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result triangles list cannot be null.", "triangles");
+				throw new ArgumentNullException("triangles", "The result triangles list cannot be null.");
 			}
 			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
 			if (flag2)
@@ -1298,7 +1533,7 @@ namespace UnityEngine
 			bool flag = indices == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result indices list cannot be null.", "indices");
+				throw new ArgumentNullException("indices", "The result indices list cannot be null.");
 			}
 			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
 			if (flag2)
@@ -1314,7 +1549,7 @@ namespace UnityEngine
 			bool flag = indices == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result indices list cannot be null.", "indices");
+				throw new ArgumentNullException("indices", "The result indices list cannot be null.");
 			}
 			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
 			if (flag2)
@@ -1624,12 +1859,77 @@ namespace UnityEngine
 			}
 		}
 
+		public void SetSubMeshes(SubMeshDescriptor[] desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			bool flag = count > 0 && desc == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("desc", "Array of submeshes cannot be null unless count is zero.");
+			}
+			int num = ((desc != null) ? desc.Length : 0);
+			bool flag2 = start < 0 || count < 0 || start + count > num;
+			if (flag2)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (start:{0} count:{1} desc.Length:{2})", start, count, num));
+			}
+			for (int i = start; i < start + count; i++)
+			{
+				MeshTopology topology = desc[i].topology;
+				bool flag3 = topology < MeshTopology.Triangles || topology > MeshTopology.Points;
+				if (flag3)
+				{
+					throw new ArgumentException("desc", string.Format("{0}-th submesh descriptor has invalid topology ({1}).", i, (int)topology));
+				}
+				bool flag4 = topology == (MeshTopology)1;
+				if (flag4)
+				{
+					throw new ArgumentException("desc", string.Format("{0}-th submesh descriptor has triangles strip topology, which is no longer supported.", i));
+				}
+			}
+			this.SetAllSubMeshesAtOnceFromArray(desc, start, count, flags);
+		}
+
+		public void SetSubMeshes(SubMeshDescriptor[] desc, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.SetSubMeshes(desc, 0, (desc != null) ? desc.Length : 0, flags);
+		}
+
+		public void SetSubMeshes(List<SubMeshDescriptor> desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.SetSubMeshes(NoAllocHelpers.ExtractArrayFromListT<SubMeshDescriptor>(desc), start, count, flags);
+		}
+
+		public void SetSubMeshes(List<SubMeshDescriptor> desc, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.SetSubMeshes(NoAllocHelpers.ExtractArrayFromListT<SubMeshDescriptor>(desc), 0, (desc != null) ? desc.Count : 0, flags);
+		}
+
+		public void SetSubMeshes<T>(NativeArray<T> desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default) where T : struct
+		{
+			bool flag = UnsafeUtility.SizeOf<T>() != UnsafeUtility.SizeOf<SubMeshDescriptor>();
+			if (flag)
+			{
+				throw new ArgumentException(string.Format("{0} with NativeArray should use struct type that is {1} bytes in size", "SetSubMeshes", UnsafeUtility.SizeOf<SubMeshDescriptor>()));
+			}
+			bool flag2 = start < 0 || count < 0 || start + count > desc.Length;
+			if (flag2)
+			{
+				throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (start:{0} count:{1} desc.Length:{2})", start, count, desc.Length));
+			}
+			this.SetAllSubMeshesAtOnceFromNativeArray((IntPtr)desc.GetUnsafeReadOnlyPtr<T>(), start, count, MeshUpdateFlags.Default);
+		}
+
+		public void SetSubMeshes<T>(NativeArray<T> desc, MeshUpdateFlags flags = MeshUpdateFlags.Default) where T : struct
+		{
+			this.SetSubMeshes<T>(desc, 0, desc.Length, flags);
+		}
+
 		public void GetBindposes(List<Matrix4x4> bindposes)
 		{
 			bool flag = bindposes == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result bindposes list cannot be null.", "bindposes");
+				throw new ArgumentNullException("bindposes", "The result bindposes list cannot be null.");
 			}
 			NoAllocHelpers.EnsureListElemCount<Matrix4x4>(bindposes, this.GetBindposeCount());
 			this.GetBindposesNonAllocImpl(NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(bindposes));
@@ -1640,7 +1940,7 @@ namespace UnityEngine
 			bool flag = boneWeights == null;
 			if (flag)
 			{
-				throw new ArgumentNullException("The result boneWeights list cannot be null.", "boneWeights");
+				throw new ArgumentNullException("boneWeights", "The result boneWeights list cannot be null.");
 			}
 			bool flag2 = this.HasBoneWeights();
 			if (flag2)
@@ -1673,12 +1973,30 @@ namespace UnityEngine
 			this.ClearImpl(true);
 		}
 
+		[ExcludeFromDocs]
 		public void RecalculateBounds()
+		{
+			this.RecalculateBounds(MeshUpdateFlags.Default);
+		}
+
+		[ExcludeFromDocs]
+		public void RecalculateNormals()
+		{
+			this.RecalculateNormals(MeshUpdateFlags.Default);
+		}
+
+		[ExcludeFromDocs]
+		public void RecalculateTangents()
+		{
+			this.RecalculateTangents(MeshUpdateFlags.Default);
+		}
+
+		public void RecalculateBounds([DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
 		{
 			bool canAccess = this.canAccess;
 			if (canAccess)
 			{
-				this.RecalculateBoundsImpl();
+				this.RecalculateBoundsImpl(flags);
 			}
 			else
 			{
@@ -1686,12 +2004,12 @@ namespace UnityEngine
 			}
 		}
 
-		public void RecalculateNormals()
+		public void RecalculateNormals([DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
 		{
 			bool canAccess = this.canAccess;
 			if (canAccess)
 			{
-				this.RecalculateNormalsImpl();
+				this.RecalculateNormalsImpl(flags);
 			}
 			else
 			{
@@ -1699,16 +2017,42 @@ namespace UnityEngine
 			}
 		}
 
-		public void RecalculateTangents()
+		public void RecalculateTangents([DefaultValue("MeshUpdateFlags.Default")] MeshUpdateFlags flags)
 		{
 			bool canAccess = this.canAccess;
 			if (canAccess)
 			{
-				this.RecalculateTangentsImpl();
+				this.RecalculateTangentsImpl(flags);
 			}
 			else
 			{
 				Debug.LogError(string.Format("Not allowed to call RecalculateTangents() on mesh '{0}'", base.name));
+			}
+		}
+
+		public void RecalculateUVDistributionMetric(int uvSetIndex, float uvAreaThreshold = 1E-09f)
+		{
+			bool canAccess = this.canAccess;
+			if (canAccess)
+			{
+				this.RecalculateUVDistributionMetricImpl(uvSetIndex, uvAreaThreshold);
+			}
+			else
+			{
+				Debug.LogError(string.Format("Not allowed to call RecalculateUVDistributionMetric() on mesh '{0}'", base.name));
+			}
+		}
+
+		public void RecalculateUVDistributionMetrics(float uvAreaThreshold = 1E-09f)
+		{
+			bool canAccess = this.canAccess;
+			if (canAccess)
+			{
+				this.RecalculateUVDistributionMetricsImpl(uvAreaThreshold);
+			}
+			else
+			{
+				Debug.LogError(string.Format("Not allowed to call RecalculateUVDistributionMetrics() on mesh '{0}'", base.name));
 			}
 		}
 
@@ -1775,7 +2119,7 @@ namespace UnityEngine
 			MeshTopology meshTopology;
 			if (flag)
 			{
-				Debug.LogError(string.Format("Failed getting topology. Submesh index is out of bounds.", new object[0]), this);
+				Debug.LogError("Failed getting topology. Submesh index is out of bounds.", this);
 				meshTopology = MeshTopology.Triangles;
 			}
 			else
@@ -1822,5 +2166,479 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_bounds_Injected(ref Bounds value);
+
+		[StaticAccessor("MeshDataBindings", StaticAccessorType.DoubleColon)]
+		[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+		public struct MeshData
+		{
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern bool HasVertexAttribute(IntPtr self, VertexAttribute attr);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetVertexAttributeDimension(IntPtr self, VertexAttribute attr);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern VertexAttributeFormat GetVertexAttributeFormat(IntPtr self, VertexAttribute attr);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetVertexCount(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetVertexBufferCount(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern IntPtr GetVertexDataPtr(IntPtr self, int stream);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ulong GetVertexDataSize(IntPtr self, int stream);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void CopyAttributeIntoPtr(IntPtr self, VertexAttribute attr, VertexAttributeFormat format, int dim, IntPtr dst);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void CopyIndicesIntoPtr(IntPtr self, int submesh, bool applyBaseVertex, int dstStride, IntPtr dst);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern IndexFormat GetIndexFormat(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetIndexCount(IntPtr self, int submesh);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern IntPtr GetIndexDataPtr(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern ulong GetIndexDataSize(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetSubMeshCount(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
+			private static SubMeshDescriptor GetSubMesh(IntPtr self, int index)
+			{
+				SubMeshDescriptor subMeshDescriptor;
+				Mesh.MeshData.GetSubMesh_Injected(self, index, out subMeshDescriptor);
+				return subMeshDescriptor;
+			}
+
+			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetVertexBufferParamsFromPtr(IntPtr self, int vertexCount, IntPtr attributesPtr, int attributesCount);
+
+			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetVertexBufferParamsFromArray(IntPtr self, int vertexCount, params VertexAttributeDescriptor[] attributes);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetIndexBufferParamsImpl(IntPtr self, int indexCount, IndexFormat indexFormat);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetSubMeshCount(IntPtr self, int count);
+
+			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
+			private static void SetSubMeshImpl(IntPtr self, int index, SubMeshDescriptor desc, MeshUpdateFlags flags)
+			{
+				Mesh.MeshData.SetSubMeshImpl_Injected(self, index, ref desc, flags);
+			}
+
+			public int vertexCount
+			{
+				get
+				{
+					return Mesh.MeshData.GetVertexCount(this.m_Ptr);
+				}
+			}
+
+			public int vertexBufferCount
+			{
+				get
+				{
+					return Mesh.MeshData.GetVertexBufferCount(this.m_Ptr);
+				}
+			}
+
+			public bool HasVertexAttribute(VertexAttribute attr)
+			{
+				return Mesh.MeshData.HasVertexAttribute(this.m_Ptr, attr);
+			}
+
+			public int GetVertexAttributeDimension(VertexAttribute attr)
+			{
+				return Mesh.MeshData.GetVertexAttributeDimension(this.m_Ptr, attr);
+			}
+
+			public VertexAttributeFormat GetVertexAttributeFormat(VertexAttribute attr)
+			{
+				return Mesh.MeshData.GetVertexAttributeFormat(this.m_Ptr, attr);
+			}
+
+			public void GetVertices(NativeArray<Vector3> outVertices)
+			{
+				this.CopyAttributeInto<Vector3>(outVertices, VertexAttribute.Position, VertexAttributeFormat.Float32, 3);
+			}
+
+			public void GetNormals(NativeArray<Vector3> outNormals)
+			{
+				this.CopyAttributeInto<Vector3>(outNormals, VertexAttribute.Normal, VertexAttributeFormat.Float32, 3);
+			}
+
+			public void GetTangents(NativeArray<Vector4> outTangents)
+			{
+				this.CopyAttributeInto<Vector4>(outTangents, VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4);
+			}
+
+			public void GetColors(NativeArray<Color> outColors)
+			{
+				this.CopyAttributeInto<Color>(outColors, VertexAttribute.Color, VertexAttributeFormat.Float32, 4);
+			}
+
+			public void GetColors(NativeArray<Color32> outColors)
+			{
+				this.CopyAttributeInto<Color32>(outColors, VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4);
+			}
+
+			public void GetUVs(int channel, NativeArray<Vector2> outUVs)
+			{
+				bool flag = channel < 0 || channel > 7;
+				if (flag)
+				{
+					throw new ArgumentOutOfRangeException("channel", channel, "The uv index is invalid. Must be in the range 0 to 7.");
+				}
+				this.CopyAttributeInto<Vector2>(outUVs, Mesh.GetUVChannel(channel), VertexAttributeFormat.Float32, 2);
+			}
+
+			public void GetUVs(int channel, NativeArray<Vector3> outUVs)
+			{
+				bool flag = channel < 0 || channel > 7;
+				if (flag)
+				{
+					throw new ArgumentOutOfRangeException("channel", channel, "The uv index is invalid. Must be in the range 0 to 7.");
+				}
+				this.CopyAttributeInto<Vector3>(outUVs, Mesh.GetUVChannel(channel), VertexAttributeFormat.Float32, 3);
+			}
+
+			public void GetUVs(int channel, NativeArray<Vector4> outUVs)
+			{
+				bool flag = channel < 0 || channel > 7;
+				if (flag)
+				{
+					throw new ArgumentOutOfRangeException("channel", channel, "The uv index is invalid. Must be in the range 0 to 7.");
+				}
+				this.CopyAttributeInto<Vector4>(outUVs, Mesh.GetUVChannel(channel), VertexAttributeFormat.Float32, 4);
+			}
+
+			public unsafe NativeArray<T> GetVertexData<T>([DefaultValue("0")] int stream = 0) where T : struct
+			{
+				bool flag = stream < 0 || stream >= this.vertexBufferCount;
+				if (flag)
+				{
+					throw new ArgumentOutOfRangeException(string.Format("{0} out of bounds, should be below {1} but was {2}", "stream", this.vertexBufferCount, stream));
+				}
+				ulong vertexDataSize = Mesh.MeshData.GetVertexDataSize(this.m_Ptr, stream);
+				ulong num = (ulong)((long)UnsafeUtility.SizeOf<T>());
+				bool flag2 = vertexDataSize % num > 0UL;
+				if (flag2)
+				{
+					throw new ArgumentException(string.Format("Type passed to {0} can't capture the vertex buffer. Mesh vertex buffer size is {1} which is not a multiple of type size {2}", "GetVertexData", vertexDataSize, num));
+				}
+				ulong num2 = vertexDataSize / num;
+				return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)Mesh.MeshData.GetVertexDataPtr(this.m_Ptr, stream), (int)num2, Allocator.None);
+			}
+
+			private void CopyAttributeInto<T>(NativeArray<T> buffer, VertexAttribute channel, VertexAttributeFormat format, int dim) where T : struct
+			{
+				bool flag = !this.HasVertexAttribute(channel);
+				if (flag)
+				{
+					throw new InvalidOperationException(string.Format("Mesh data does not have {0} vertex component", channel));
+				}
+				bool flag2 = buffer.Length < this.vertexCount;
+				if (flag2)
+				{
+					throw new InvalidOperationException(string.Format("Not enough space in output buffer (need {0}, has {1})", this.vertexCount, buffer.Length));
+				}
+				Mesh.MeshData.CopyAttributeIntoPtr(this.m_Ptr, channel, format, dim, (IntPtr)buffer.GetUnsafePtr<T>());
+			}
+
+			public void SetVertexBufferParams(int vertexCount, params VertexAttributeDescriptor[] attributes)
+			{
+				Mesh.MeshData.SetVertexBufferParamsFromArray(this.m_Ptr, vertexCount, attributes);
+			}
+
+			public void SetVertexBufferParams(int vertexCount, NativeArray<VertexAttributeDescriptor> attributes)
+			{
+				Mesh.MeshData.SetVertexBufferParamsFromPtr(this.m_Ptr, vertexCount, (IntPtr)attributes.GetUnsafeReadOnlyPtr<VertexAttributeDescriptor>(), attributes.Length);
+			}
+
+			public void SetIndexBufferParams(int indexCount, IndexFormat format)
+			{
+				Mesh.MeshData.SetIndexBufferParamsImpl(this.m_Ptr, indexCount, format);
+			}
+
+			public IndexFormat indexFormat
+			{
+				get
+				{
+					return Mesh.MeshData.GetIndexFormat(this.m_Ptr);
+				}
+			}
+
+			public void GetIndices(NativeArray<ushort> outIndices, int submesh, [DefaultValue("true")] bool applyBaseVertex = true)
+			{
+				bool flag = submesh < 0 || submesh >= this.subMeshCount;
+				if (flag)
+				{
+					throw new IndexOutOfRangeException(string.Format("Specified submesh ({0}) is out of range. Must be greater or equal to 0 and less than subMeshCount ({1}).", submesh, this.subMeshCount));
+				}
+				int indexCount = Mesh.MeshData.GetIndexCount(this.m_Ptr, submesh);
+				bool flag2 = outIndices.Length < indexCount;
+				if (flag2)
+				{
+					throw new InvalidOperationException(string.Format("Not enough space in output buffer (need {0}, has {1})", indexCount, outIndices.Length));
+				}
+				Mesh.MeshData.CopyIndicesIntoPtr(this.m_Ptr, submesh, applyBaseVertex, 2, (IntPtr)outIndices.GetUnsafePtr<ushort>());
+			}
+
+			public void GetIndices(NativeArray<int> outIndices, int submesh, [DefaultValue("true")] bool applyBaseVertex = true)
+			{
+				bool flag = submesh < 0 || submesh >= this.subMeshCount;
+				if (flag)
+				{
+					throw new IndexOutOfRangeException(string.Format("Specified submesh ({0}) is out of range. Must be greater or equal to 0 and less than subMeshCount ({1}).", submesh, this.subMeshCount));
+				}
+				int indexCount = Mesh.MeshData.GetIndexCount(this.m_Ptr, submesh);
+				bool flag2 = outIndices.Length < indexCount;
+				if (flag2)
+				{
+					throw new InvalidOperationException(string.Format("Not enough space in output buffer (need {0}, has {1})", indexCount, outIndices.Length));
+				}
+				Mesh.MeshData.CopyIndicesIntoPtr(this.m_Ptr, submesh, applyBaseVertex, 4, (IntPtr)outIndices.GetUnsafePtr<int>());
+			}
+
+			public unsafe NativeArray<T> GetIndexData<T>() where T : struct
+			{
+				ulong indexDataSize = Mesh.MeshData.GetIndexDataSize(this.m_Ptr);
+				ulong num = (ulong)((long)UnsafeUtility.SizeOf<T>());
+				bool flag = indexDataSize % num > 0UL;
+				if (flag)
+				{
+					throw new ArgumentException(string.Format("Type passed to {0} can't capture the index buffer. Mesh index buffer size is {1} which is not a multiple of type size {2}", "GetIndexData", indexDataSize, num));
+				}
+				ulong num2 = indexDataSize / num;
+				return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)Mesh.MeshData.GetIndexDataPtr(this.m_Ptr), (int)num2, Allocator.None);
+			}
+
+			public int subMeshCount
+			{
+				get
+				{
+					return Mesh.MeshData.GetSubMeshCount(this.m_Ptr);
+				}
+				set
+				{
+					Mesh.MeshData.SetSubMeshCount(this.m_Ptr, value);
+				}
+			}
+
+			public SubMeshDescriptor GetSubMesh(int index)
+			{
+				return Mesh.MeshData.GetSubMesh(this.m_Ptr, index);
+			}
+
+			public void SetSubMesh(int index, SubMeshDescriptor desc, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+			{
+				Mesh.MeshData.SetSubMeshImpl(this.m_Ptr, index, desc, flags);
+			}
+
+			[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+			private void CheckReadAccess()
+			{
+			}
+
+			[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+			private void CheckWriteAccess()
+			{
+			}
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void GetSubMesh_Injected(IntPtr self, int index, out SubMeshDescriptor ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetSubMeshImpl_Injected(IntPtr self, int index, ref SubMeshDescriptor desc, MeshUpdateFlags flags);
+
+			[NativeDisableUnsafePtrRestriction]
+			internal IntPtr m_Ptr;
+		}
+
+		[NativeContainer]
+		[StaticAccessor("MeshDataArrayBindings", StaticAccessorType.DoubleColon)]
+		[NativeContainerSupportsMinMaxWriteRestriction]
+		public struct MeshDataArray : IDisposable
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void AcquireReadOnlyMeshData([NotNull("ArgumentNullException")] Mesh mesh, IntPtr* datas);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void AcquireReadOnlyMeshDatas([NotNull("ArgumentNullException")] Mesh[] meshes, IntPtr* datas, int count);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void ReleaseMeshDatas(IntPtr* datas, int count);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void CreateNewMeshDatas(IntPtr* datas, int count);
+
+			[NativeThrows]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void ApplyToMeshesImpl([NotNull("ArgumentNullException")] Mesh[] meshes, IntPtr* datas, int count, MeshUpdateFlags flags);
+
+			[NativeThrows]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void ApplyToMeshImpl([NotNull("ArgumentNullException")] Mesh mesh, IntPtr data, MeshUpdateFlags flags);
+
+			public int Length
+			{
+				get
+				{
+					return this.m_Length;
+				}
+			}
+
+			public unsafe Mesh.MeshData this[int index]
+			{
+				get
+				{
+					Mesh.MeshData meshData;
+					meshData.m_Ptr = this.m_Ptrs[(IntPtr)index * (IntPtr)sizeof(IntPtr) / (IntPtr)sizeof(IntPtr)];
+					return meshData;
+				}
+			}
+
+			public unsafe void Dispose()
+			{
+				bool flag = this.m_Length != 0;
+				if (flag)
+				{
+					Mesh.MeshDataArray.ReleaseMeshDatas(this.m_Ptrs, this.m_Length);
+					UnsafeUtility.Free((void*)this.m_Ptrs, Allocator.Persistent);
+				}
+				this.m_Ptrs = null;
+				this.m_Length = 0;
+			}
+
+			internal unsafe void ApplyToMeshAndDispose(Mesh mesh, MeshUpdateFlags flags)
+			{
+				bool flag = !mesh.canAccess;
+				if (flag)
+				{
+					throw new InvalidOperationException("Not allowed to access vertex data on mesh '" + mesh.name + "' (isReadable is false; Read/Write must be enabled in import settings)");
+				}
+				Mesh.MeshDataArray.ApplyToMeshImpl(mesh, *this.m_Ptrs, flags);
+				this.Dispose();
+			}
+
+			internal void ApplyToMeshesAndDispose(Mesh[] meshes, MeshUpdateFlags flags)
+			{
+				for (int i = 0; i < this.m_Length; i++)
+				{
+					Mesh mesh = meshes[i];
+					bool flag = mesh == null;
+					if (flag)
+					{
+						throw new ArgumentNullException("meshes", string.Format("Mesh at index {0} is null", i));
+					}
+					bool flag2 = !mesh.canAccess;
+					if (flag2)
+					{
+						throw new InvalidOperationException(string.Format("Not allowed to access vertex data on mesh '{0}' at array index {1} (isReadable is false; Read/Write must be enabled in import settings)", mesh.name, i));
+					}
+				}
+				Mesh.MeshDataArray.ApplyToMeshesImpl(meshes, this.m_Ptrs, this.m_Length, flags);
+				this.Dispose();
+			}
+
+			internal unsafe MeshDataArray(Mesh mesh, bool checkReadWrite = true)
+			{
+				bool flag = mesh == null;
+				if (flag)
+				{
+					throw new ArgumentNullException("mesh", "Mesh is null");
+				}
+				bool flag2 = checkReadWrite && !mesh.canAccess;
+				if (flag2)
+				{
+					throw new InvalidOperationException("Not allowed to access vertex data on mesh '" + mesh.name + "' (isReadable is false; Read/Write must be enabled in import settings)");
+				}
+				this.m_Length = 1;
+				int num = UnsafeUtility.SizeOf<IntPtr>();
+				this.m_Ptrs = (IntPtr*)UnsafeUtility.Malloc((long)num, UnsafeUtility.AlignOf<IntPtr>(), Allocator.Persistent);
+				Mesh.MeshDataArray.AcquireReadOnlyMeshData(mesh, this.m_Ptrs);
+			}
+
+			internal unsafe MeshDataArray(Mesh[] meshes, int meshesCount, bool checkReadWrite = true)
+			{
+				bool flag = meshes.Length < meshesCount;
+				if (flag)
+				{
+					throw new InvalidOperationException(string.Format("Meshes array size ({0}) is smaller than meshes count ({1})", meshes.Length, meshesCount));
+				}
+				for (int i = 0; i < meshesCount; i++)
+				{
+					Mesh mesh = meshes[i];
+					bool flag2 = mesh == null;
+					if (flag2)
+					{
+						throw new ArgumentNullException("meshes", string.Format("Mesh at index {0} is null", i));
+					}
+					bool flag3 = checkReadWrite && !mesh.canAccess;
+					if (flag3)
+					{
+						throw new InvalidOperationException(string.Format("Not allowed to access vertex data on mesh '{0}' at array index {1} (isReadable is false; Read/Write must be enabled in import settings)", mesh.name, i));
+					}
+				}
+				this.m_Length = meshesCount;
+				int num = UnsafeUtility.SizeOf<IntPtr>() * meshesCount;
+				this.m_Ptrs = (IntPtr*)UnsafeUtility.Malloc((long)num, UnsafeUtility.AlignOf<IntPtr>(), Allocator.Persistent);
+				Mesh.MeshDataArray.AcquireReadOnlyMeshDatas(meshes, this.m_Ptrs, meshesCount);
+			}
+
+			internal unsafe MeshDataArray(int meshesCount)
+			{
+				bool flag = meshesCount < 0;
+				if (flag)
+				{
+					throw new InvalidOperationException(string.Format("Mesh count can not be negative (was {0})", meshesCount));
+				}
+				this.m_Length = meshesCount;
+				int num = UnsafeUtility.SizeOf<IntPtr>() * meshesCount;
+				this.m_Ptrs = (IntPtr*)UnsafeUtility.Malloc((long)num, UnsafeUtility.AlignOf<IntPtr>(), Allocator.Persistent);
+				Mesh.MeshDataArray.CreateNewMeshDatas(this.m_Ptrs, meshesCount);
+			}
+
+			[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+			private void CheckElementReadAccess(int index)
+			{
+			}
+
+			[NativeDisableUnsafePtrRestriction]
+			private unsafe IntPtr* m_Ptrs;
+
+			internal int m_Length;
+		}
 	}
 }

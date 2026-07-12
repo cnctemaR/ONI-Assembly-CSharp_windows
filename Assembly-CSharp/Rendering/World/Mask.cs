@@ -5,15 +5,15 @@ namespace Rendering.World
 {
 	public struct Mask
 	{
-		public Vector2 UV0 { get; private set; }
+		public Vector2 UV0 { readonly get; private set; }
 
-		public Vector2 UV1 { get; private set; }
+		public Vector2 UV1 { readonly get; private set; }
 
-		public Vector2 UV2 { get; private set; }
+		public Vector2 UV2 { readonly get; private set; }
 
-		public Vector2 UV3 { get; private set; }
+		public Vector2 UV3 { readonly get; private set; }
 
-		public bool IsOpaque { get; private set; }
+		public bool IsOpaque { readonly get; private set; }
 
 		public Mask(TextureAtlas atlas, int texture_idx, bool transpose, bool flip_x, bool flip_y, bool is_opaque)
 		{

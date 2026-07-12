@@ -93,7 +93,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.empty;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.empty.Enter("empty", delegate(Compost.StatesInstance smi)
 			{
 				smi.ResetWorkable();

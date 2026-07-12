@@ -10,8 +10,8 @@ namespace UnityEngine.Windows.Speech
 	{
 		public static extern bool isSupported
 		{
-			[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 			[ThreadSafe]
+			[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -23,6 +23,7 @@ namespace UnityEngine.Windows.Speech
 			get;
 		}
 
+		[NativeThrows]
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Restart();

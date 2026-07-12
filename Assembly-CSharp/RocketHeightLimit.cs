@@ -1,0 +1,30 @@
+﻿using System;
+using STRINGS;
+using UnityEngine;
+
+public class RocketHeightLimit : SelectModuleCondition
+{
+	public override bool EvaluateCondition(GameObject existingModule, BuildingDef selectedPart, SelectModuleCondition.SelectionContext selectionContext)
+	{
+		int num = selectedPart.HeightInCells;
+		if (selectionContext == SelectModuleCondition.SelectionContext.ReplaceModule)
+		{
+			num -= existingModule.GetComponent<Building>().Def.HeightInCells;
+		}
+		if (existingModule == null)
+		{
+			return true;
+		}
+		RocketModuleCluster component = existingModule.GetComponent<RocketModuleCluster>();
+		return component == null || component.CraftInterface.MaxHeight == -1 || component.CraftInterface.RocketHeight + num <= component.CraftInterface.MaxHeight;
+	}
+
+	public override string GetStatusTooltip(bool ready, BuildingDef selectedPart)
+	{
+		if (ready)
+		{
+			return UI.UISIDESCREENS.SELECTMODULESIDESCREEN.CONSTRAINTS.MAX_HEIGHT.COMPLETE;
+		}
+		return UI.UISIDESCREENS.SELECTMODULESIDESCREEN.CONSTRAINTS.MAX_HEIGHT.FAILED;
+	}
+}

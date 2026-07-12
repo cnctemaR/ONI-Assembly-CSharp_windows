@@ -19,8 +19,8 @@ namespace System.Xml.Schema
 		}
 
 		[XmlElement("sequence", typeof(XmlSchemaSequence))]
-		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("all", typeof(XmlSchemaAll))]
+		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		public XmlSchemaGroupBase Particle
 		{
 			get

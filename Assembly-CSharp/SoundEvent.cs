@@ -85,6 +85,10 @@ public class SoundEvent : AnimEvent
 		Vector3 offset = controller.Offset;
 		position.x += offset.x;
 		position.y += offset.y;
+		if (!SoundCuller.IsAudibleWorld(position))
+		{
+			return false;
+		}
 		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
 		if (is_dynamic)
 		{
@@ -136,7 +140,17 @@ public class SoundEvent : AnimEvent
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
-			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", vector }));
+			string[] array = new string[7];
+			array[0] = behaviour.name;
+			array[1] = ", ";
+			array[2] = sound;
+			array[3] = ", ";
+			array[4] = base.frame.ToString();
+			array[5] = ", ";
+			int num = 6;
+			Vector3 vector2 = vector;
+			array[num] = vector2.ToString();
+			global::Debug.Log(string.Concat(array));
 		}
 		try
 		{
@@ -245,7 +259,17 @@ public class SoundEvent : AnimEvent
 	{
 		if (sound != null)
 		{
-			global::Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", base.frame, ", ", sound_pos }));
+			string[] array = new string[7];
+			array[0] = anim_name;
+			array[1] = ", ";
+			array[2] = sound_name;
+			array[3] = ", ";
+			array[4] = base.frame.ToString();
+			array[5] = ", ";
+			int num = 6;
+			Vector3 vector = sound_pos;
+			array[num] = vector.ToString();
+			global::Debug.Log(string.Concat(array));
 			return;
 		}
 		global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name);

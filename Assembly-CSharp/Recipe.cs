@@ -164,7 +164,7 @@ public class Recipe : IHasSortOrder
 				{
 					if (component2.GetComponent<ElementChunk>() != null)
 					{
-						component2.SetElement(this.ResultElementOverride);
+						component2.SetElement(this.ResultElementOverride, true);
 					}
 					else
 					{

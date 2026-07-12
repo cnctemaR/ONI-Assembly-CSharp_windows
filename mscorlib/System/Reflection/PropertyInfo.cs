@@ -99,8 +99,8 @@ namespace System.Reflection
 			this.SetValue(obj, value, BindingFlags.Default, null, index, null);
 		}
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public void SetValue(object obj, object value)
 		{
 			this.SetValue(obj, value, BindingFlags.Default, null, null, null);

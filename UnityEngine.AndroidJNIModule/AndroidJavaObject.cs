@@ -137,16 +137,17 @@ namespace UnityEngine
 					stringBuilder.Append(", ");
 					stringBuilder.Append((obj == null) ? "<null>" : obj.GetType().ToString());
 				}
-				Debug.Log(string.Concat(new string[]
-				{
-					call,
-					"(\"",
-					methodName,
-					"\"",
-					stringBuilder.ToString(),
-					") = ",
-					signature
-				}));
+				string[] array = new string[7];
+				array[0] = call;
+				array[1] = "(\"";
+				array[2] = methodName;
+				array[3] = "\"";
+				int num = 4;
+				StringBuilder stringBuilder2 = stringBuilder;
+				array[num] = ((stringBuilder2 != null) ? stringBuilder2.ToString() : null);
+				array[5] = ") = ";
+				array[6] = signature;
+				Debug.Log(string.Concat(array));
 			}
 		}
 
@@ -160,6 +161,7 @@ namespace UnityEngine
 			}
 			IntPtr intPtr = AndroidJNISafe.FindClass(className.Replace('.', '/'));
 			this.m_jclass = new GlobalJavaObjectRef(intPtr);
+			AndroidJNISafe.DeleteLocalRef(intPtr);
 			jvalue[] array = AndroidJNIHelper.CreateJNIArgArray(args);
 			try
 			{
@@ -350,7 +352,9 @@ namespace UnityEngine
 								bool flag15 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(ReturnType));
 								if (!flag15)
 								{
-									throw new Exception("JNI: Unknown return type '" + typeof(ReturnType) + "'");
+									string text = "JNI: Unknown return type '";
+									Type typeFromHandle = typeof(ReturnType);
+									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
 								IntPtr intPtr3 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, array);
 								returnType = ((intPtr3 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJNIHelper.ConvertFromJNIArray<ReturnType>(intPtr3))));
@@ -476,7 +480,9 @@ namespace UnityEngine
 							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
 							if (!flag14)
 							{
-								throw new Exception("JNI: Unknown field type '" + typeof(FieldType) + "'");
+								string text = "JNI: Unknown field type '";
+								Type typeFromHandle = typeof(FieldType);
+								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 							}
 							IntPtr objectField3 = AndroidJNISafe.GetObjectField(this.m_jobject, fieldID);
 							fieldType = ((objectField3 == IntPtr.Zero) ? default(FieldType) : ((FieldType)((object)AndroidJNIHelper.ConvertFromJNIArray<FieldType>(objectField3))));
@@ -590,7 +596,9 @@ namespace UnityEngine
 							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
 							if (!flag14)
 							{
-								throw new Exception("JNI: Unknown field type '" + typeof(FieldType) + "'");
+								string text = "JNI: Unknown field type '";
+								Type typeFromHandle = typeof(FieldType);
+								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 							}
 							IntPtr intPtr = AndroidJNIHelper.ConvertToJNIArray((Array)((object)val));
 							AndroidJNISafe.SetObjectField(this.m_jclass, fieldID, intPtr);
@@ -737,7 +745,9 @@ namespace UnityEngine
 								bool flag15 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(ReturnType));
 								if (!flag15)
 								{
-									throw new Exception("JNI: Unknown return type '" + typeof(ReturnType) + "'");
+									string text = "JNI: Unknown return type '";
+									Type typeFromHandle = typeof(ReturnType);
+									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
 								IntPtr intPtr3 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, array);
 								returnType = ((intPtr3 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJNIHelper.ConvertFromJNIArray<ReturnType>(intPtr3))));
@@ -863,7 +873,9 @@ namespace UnityEngine
 							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
 							if (!flag14)
 							{
-								throw new Exception("JNI: Unknown field type '" + typeof(FieldType) + "'");
+								string text = "JNI: Unknown field type '";
+								Type typeFromHandle = typeof(FieldType);
+								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 							}
 							IntPtr staticObjectField3 = AndroidJNISafe.GetStaticObjectField(this.m_jclass, fieldID);
 							fieldType = ((staticObjectField3 == IntPtr.Zero) ? default(FieldType) : ((FieldType)((object)AndroidJNIHelper.ConvertFromJNIArray<FieldType>(staticObjectField3))));
@@ -977,7 +989,9 @@ namespace UnityEngine
 							bool flag14 = AndroidReflection.IsAssignableFrom(typeof(Array), typeof(FieldType));
 							if (!flag14)
 							{
-								throw new Exception("JNI: Unknown field type '" + typeof(FieldType) + "'");
+								string text = "JNI: Unknown field type '";
+								Type typeFromHandle = typeof(FieldType);
+								throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 							}
 							IntPtr intPtr = AndroidJNIHelper.ConvertToJNIArray((Array)((object)val));
 							AndroidJNISafe.SetStaticObjectField(this.m_jclass, fieldID, intPtr);

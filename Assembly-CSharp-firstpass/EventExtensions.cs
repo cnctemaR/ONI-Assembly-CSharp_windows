@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class EventExtensions
 {
-	public static int Subscribe<ComponentType>(this GameObject go, int hash, EventSystem.IntraObjectHandler<ComponentType> handler)
+	public static int Subscribe<ComponentType>(this GameObject go, int hash, EventSystem.IntraObjectHandler<ComponentType> handler) where ComponentType : Component
 	{
 		return KObjectManager.Instance.GetOrCreateObject(go).GetEventSystem().Subscribe<ComponentType>(hash, handler);
 	}

@@ -6,14 +6,14 @@ namespace UnityEngine.Rendering
 	[UsedByNativeCode]
 	public struct PlatformKeywordSet
 	{
-		private uint ComputeKeywordMask(BuiltinShaderDefine define)
+		private ulong ComputeKeywordMask(BuiltinShaderDefine define)
 		{
-			return 1U << (int)(define % (BuiltinShaderDefine)32);
+			return (ulong)(1L << (int)((define % (BuiltinShaderDefine)64) & BuiltinShaderDefine.SHADER_API_GLES30));
 		}
 
 		public bool IsEnabled(BuiltinShaderDefine define)
 		{
-			return (this.m_Bits & this.ComputeKeywordMask(define)) > 0U;
+			return (this.m_Bits & this.ComputeKeywordMask(define)) > 0UL;
 		}
 
 		public void Enable(BuiltinShaderDefine define)
@@ -26,8 +26,8 @@ namespace UnityEngine.Rendering
 			this.m_Bits &= ~this.ComputeKeywordMask(define);
 		}
 
-		private const int k_SizeInBits = 32;
+		private const int k_SizeInBits = 64;
 
-		internal uint m_Bits;
+		internal ulong m_Bits;
 	}
 }

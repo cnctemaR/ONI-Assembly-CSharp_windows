@@ -146,18 +146,20 @@ namespace UnityEngine.UI
 			base.OnEnable();
 			this.m_Canvas = base.GetComponent<Canvas>();
 			this.Handle();
+			Canvas.preWillRenderCanvases += this.Canvas_preWillRenderCanvases;
+		}
+
+		private void Canvas_preWillRenderCanvases()
+		{
+			this.Handle();
 		}
 
 		protected override void OnDisable()
 		{
 			this.SetScaleFactor(1f);
 			this.SetReferencePixelsPerUnit(100f);
+			Canvas.preWillRenderCanvases -= this.Canvas_preWillRenderCanvases;
 			base.OnDisable();
-		}
-
-		protected virtual void Update()
-		{
-			this.Handle();
 		}
 
 		protected virtual void Handle()
@@ -201,29 +203,29 @@ namespace UnityEngine.UI
 
 		protected virtual void HandleScaleWithScreenSize()
 		{
-			Vector2 vector = new Vector2((float)Screen.width, (float)Screen.height);
+			Vector2 renderingDisplaySize = this.m_Canvas.renderingDisplaySize;
 			int targetDisplay = this.m_Canvas.targetDisplay;
 			if (targetDisplay > 0 && targetDisplay < Display.displays.Length)
 			{
 				Display display = Display.displays[targetDisplay];
-				vector = new Vector2((float)display.renderingWidth, (float)display.renderingHeight);
+				renderingDisplaySize = new Vector2((float)display.renderingWidth, (float)display.renderingHeight);
 			}
 			float num = 0f;
 			switch (this.m_ScreenMatchMode)
 			{
 			case CanvasScaler.ScreenMatchMode.MatchWidthOrHeight:
 			{
-				float num2 = Mathf.Log(vector.x / this.m_ReferenceResolution.x, 2f);
-				float num3 = Mathf.Log(vector.y / this.m_ReferenceResolution.y, 2f);
+				float num2 = Mathf.Log(renderingDisplaySize.x / this.m_ReferenceResolution.x, 2f);
+				float num3 = Mathf.Log(renderingDisplaySize.y / this.m_ReferenceResolution.y, 2f);
 				float num4 = Mathf.Lerp(num2, num3, this.m_MatchWidthOrHeight);
 				num = Mathf.Pow(2f, num4);
 				break;
 			}
 			case CanvasScaler.ScreenMatchMode.Expand:
-				num = Mathf.Min(vector.x / this.m_ReferenceResolution.x, vector.y / this.m_ReferenceResolution.y);
+				num = Mathf.Min(renderingDisplaySize.x / this.m_ReferenceResolution.x, renderingDisplaySize.y / this.m_ReferenceResolution.y);
 				break;
 			case CanvasScaler.ScreenMatchMode.Shrink:
-				num = Mathf.Max(vector.x / this.m_ReferenceResolution.x, vector.y / this.m_ReferenceResolution.y);
+				num = Mathf.Max(renderingDisplaySize.x / this.m_ReferenceResolution.x, renderingDisplaySize.y / this.m_ReferenceResolution.y);
 				break;
 			}
 			this.SetScaleFactor(num);
@@ -327,6 +329,9 @@ namespace UnityEngine.UI
 
 		[NonSerialized]
 		private float m_PrevReferencePixelsPerUnit = 100f;
+
+		[SerializeField]
+		protected bool m_PresetInfoIsWorld;
 
 		public enum ScaleMode
 		{

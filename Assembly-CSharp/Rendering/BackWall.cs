@@ -8,20 +8,19 @@ namespace rendering
 	{
 		private void Awake()
 		{
-			DebugUtil.DevAssert(this.backwallMaterial != null, "Expected a backwall material!");
-			DebugUtil.DevAssert(this.images.Count > 0, "Expected backwall images (at least one)!");
-			Texture2D texture2D = this.images[0];
+			DebugUtil.DevAssert(this.backwallMaterial != null, "Expected a backwall material!", null);
+			DebugUtil.DevAssert(this.images.Count > 0, "Expected backwall images (at least one)!", null);
+			BackWallImage backWallImage = this.images[0];
 			int count = this.images.Count;
-			int mipmapCount = texture2D.mipmapCount;
+			int mipmapCount = backWallImage.image.mipmapCount;
 			bool flag = mipmapCount > 0;
-			this.textureArray = new Texture2DArray(texture2D.width, texture2D.height, count, TextureFormat.RGB24, flag);
+			this.textureArray = new Texture2DArray(backWallImage.image.width, backWallImage.image.height, count, TextureFormat.RGB24, flag);
 			for (int i = 0; i < count; i++)
 			{
-				Texture2D texture2D2 = this.images[i];
-				global::Debug.Log(string.Format("copying image {0} type {1} size {2}x{3}", new object[] { texture2D2.name, texture2D2.format, texture2D2.width, texture2D2.height }));
+				BackWallImage backWallImage2 = this.images[i];
 				for (int j = 0; j < mipmapCount; j++)
 				{
-					this.textureArray.SetPixels(texture2D2.GetPixels(j), i, j);
+					this.textureArray.SetPixels(backWallImage2.image.GetPixels(j), i, j);
 				}
 			}
 			this.textureArray.Apply();
@@ -32,7 +31,7 @@ namespace rendering
 		public Material backwallMaterial;
 
 		[SerializeField]
-		public List<Texture2D> images;
+		public List<BackWallImage> images;
 
 		private Texture2DArray textureArray;
 	}

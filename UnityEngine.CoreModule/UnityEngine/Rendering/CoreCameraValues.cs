@@ -8,7 +8,7 @@ namespace UnityEngine.Rendering
 	{
 		public bool Equals(CoreCameraValues other)
 		{
-			return this.filterMode == other.filterMode && this.cullingMask == other.cullingMask && this.instanceID == other.instanceID && this.renderImmediateObjects == other.renderImmediateObjects;
+			return this.filterMode == other.filterMode && this.cullingMask == other.cullingMask && this.instanceID == other.instanceID;
 		}
 
 		public override bool Equals(object obj)
@@ -21,8 +21,7 @@ namespace UnityEngine.Rendering
 		{
 			int num = this.filterMode;
 			num = (num * 397) ^ (int)this.cullingMask;
-			num = (num * 397) ^ this.instanceID;
-			return (num * 397) ^ this.renderImmediateObjects;
+			return (num * 397) ^ this.instanceID;
 		}
 
 		public static bool operator ==(CoreCameraValues left, CoreCameraValues right)
@@ -40,7 +39,5 @@ namespace UnityEngine.Rendering
 		private uint cullingMask;
 
 		private int instanceID;
-
-		private int renderImmediateObjects;
 	}
 }

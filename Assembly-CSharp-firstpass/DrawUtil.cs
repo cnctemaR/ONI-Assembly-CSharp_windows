@@ -65,6 +65,16 @@ public static class DrawUtil
 	{
 	}
 
+	public static void Cell(int gridWidth, int cell, Color color, float inset = 0f, float time = 0f)
+	{
+		DrawUtil.CellXY(cell % gridWidth, cell / gridWidth, color, inset, time);
+	}
+
+	public static void CellXY(int x, int y, Color color, float inset = 0f, float time = 0f)
+	{
+		new Vector2((float)x, (float)y);
+	}
+
 	private static Vector3[] sphere_verts = new Vector3[]
 	{
 		new Vector3(-1f, 0f, 0f),

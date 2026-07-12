@@ -217,8 +217,8 @@ namespace UnityEngine.Rendering
 
 		private int m_UseSrpBatcher;
 
-		[CompilerGenerated]
 		[UnsafeValueType]
+		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 64)]
 		public struct <shaderPassNames>e__FixedBuffer
 		{

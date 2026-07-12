@@ -46,9 +46,13 @@ namespace UnityEngine.Rendering
 
 		public bool terrainDetailUnsupported { get; set; } = false;
 
+		public bool rendersUIOverlay { get; set; }
+
 		public bool overridesEnvironmentLighting { get; set; } = false;
 
 		public bool overridesFog { get; set; } = false;
+
+		public bool overridesRealtimeReflectionProbes { get; set; } = false;
 
 		public bool overridesOtherLightingSettings { get; set; } = false;
 
@@ -57,6 +61,36 @@ namespace UnityEngine.Rendering
 		public bool overridesLODBias { get; set; } = false;
 
 		public bool overridesMaximumLODLevel { get; set; } = false;
+
+		public bool rendererProbes { get; set; } = true;
+
+		public bool particleSystemInstancing { get; set; } = true;
+
+		public bool autoAmbientProbeBaking { get; set; } = true;
+
+		public bool autoDefaultReflectionProbeBaking { get; set; } = true;
+
+		public bool overridesShadowmask { get; set; } = false;
+
+		public string overrideShadowmaskMessage { get; set; } = "";
+
+		public string shadowmaskMessage
+		{
+			get
+			{
+				bool flag = !this.overridesShadowmask;
+				string text;
+				if (flag)
+				{
+					text = "The Shadowmask Mode used at run time can be set in the Quality Settings panel.";
+				}
+				else
+				{
+					text = this.overrideShadowmaskMessage;
+				}
+				return text;
+			}
+		}
 
 		internal unsafe static MixedLightingMode FallbackMixedLightingMode()
 		{
@@ -73,9 +107,10 @@ namespace UnityEngine.Rendering
 			if (flag)
 			{
 				SupportedRenderingFeatures.LightmapMixedBakeModes defaultMixedLightingModes = SupportedRenderingFeatures.active.defaultMixedLightingModes;
-				if (defaultMixedLightingModes != SupportedRenderingFeatures.LightmapMixedBakeModes.Subtractive)
+				SupportedRenderingFeatures.LightmapMixedBakeModes lightmapMixedBakeModes = defaultMixedLightingModes;
+				if (lightmapMixedBakeModes != SupportedRenderingFeatures.LightmapMixedBakeModes.Subtractive)
 				{
-					if (defaultMixedLightingModes != SupportedRenderingFeatures.LightmapMixedBakeModes.Shadowmask)
+					if (lightmapMixedBakeModes != SupportedRenderingFeatures.LightmapMixedBakeModes.Shadowmask)
 					{
 						*ptr = MixedLightingMode.IndirectOnly;
 					}
@@ -156,7 +191,7 @@ namespace UnityEngine.Rendering
 				}
 			}
 			*ptr = (SupportedRenderingFeatures.active.lightmapBakeTypes & bakeType) == bakeType;
-			bool flag4 = bakeType == LightmapBakeType.Realtime && !SupportedRenderingFeatures.active.enlighten && !GraphicsSettings.AllowEnlightenSupportForUpgradedProject();
+			bool flag4 = bakeType == LightmapBakeType.Realtime && !SupportedRenderingFeatures.active.enlighten;
 			if (flag4)
 			{
 				*ptr = false;
@@ -188,7 +223,28 @@ namespace UnityEngine.Rendering
 		internal unsafe static void IsLightmapperSupportedByRef(int lightmapper, IntPtr isSupportedPtr)
 		{
 			bool* ptr = (bool*)(void*)isSupportedPtr;
-			*ptr = ((lightmapper == 0 && !SupportedRenderingFeatures.active.enlighten && !GraphicsSettings.AllowEnlightenSupportForUpgradedProject()) ? false : true);
+			*ptr = ((lightmapper == 0 && !SupportedRenderingFeatures.active.enlighten) ? false : true);
+		}
+
+		[RequiredByNativeCode]
+		internal unsafe static void IsUIOverlayRenderedBySRP(IntPtr isSupportedPtr)
+		{
+			bool* ptr = (bool*)(void*)isSupportedPtr;
+			*ptr = SupportedRenderingFeatures.active.rendersUIOverlay;
+		}
+
+		[RequiredByNativeCode]
+		internal unsafe static void IsAutoAmbientProbeBakingSupported(IntPtr isSupportedPtr)
+		{
+			bool* ptr = (bool*)(void*)isSupportedPtr;
+			*ptr = SupportedRenderingFeatures.active.autoAmbientProbeBaking;
+		}
+
+		[RequiredByNativeCode]
+		internal unsafe static void IsAutoDefaultReflectionProbeBakingSupported(IntPtr isSupportedPtr)
+		{
+			bool* ptr = (bool*)(void*)isSupportedPtr;
+			*ptr = SupportedRenderingFeatures.active.autoDefaultReflectionProbeBaking;
 		}
 
 		internal unsafe static int FallbackLightmapper()

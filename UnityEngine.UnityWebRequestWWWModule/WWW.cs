@@ -131,22 +131,22 @@ namespace UnityEngine
 					{
 						return null;
 					}
-					bool isNetworkError = this._uwr.isNetworkError;
-					if (isNetworkError)
+					bool flag3 = this._uwr.result == UnityWebRequest.Result.ConnectionError;
+					if (flag3)
 					{
 						return null;
 					}
 					DownloadHandlerAssetBundle downloadHandlerAssetBundle = this._uwr.downloadHandler as DownloadHandlerAssetBundle;
-					bool flag3 = downloadHandlerAssetBundle != null;
-					if (flag3)
+					bool flag4 = downloadHandlerAssetBundle != null;
+					if (flag4)
 					{
 						this._assetBundle = downloadHandlerAssetBundle.assetBundle;
 					}
 					else
 					{
 						byte[] bytes = this.bytes;
-						bool flag4 = bytes == null;
-						if (flag4)
+						bool flag5 = bytes == null;
+						if (flag5)
 						{
 							return null;
 						}
@@ -179,16 +179,16 @@ namespace UnityEngine
 				}
 				else
 				{
-					bool isNetworkError = this._uwr.isNetworkError;
-					if (isNetworkError)
+					bool flag2 = this._uwr.result == UnityWebRequest.Result.ConnectionError;
+					if (flag2)
 					{
 						array = new byte[0];
 					}
 					else
 					{
 						DownloadHandler downloadHandler = this._uwr.downloadHandler;
-						bool flag2 = downloadHandler == null;
-						if (flag2)
+						bool flag3 = downloadHandler == null;
+						if (flag3)
 						{
 							array = new byte[0];
 						}
@@ -241,15 +241,15 @@ namespace UnityEngine
 				}
 				else
 				{
-					bool isNetworkError = this._uwr.isNetworkError;
-					if (isNetworkError)
+					bool flag2 = this._uwr.result == UnityWebRequest.Result.ConnectionError;
+					if (flag2)
 					{
 						text = this._uwr.error;
 					}
 					else
 					{
-						bool flag2 = this._uwr.responseCode >= 400L;
-						if (flag2)
+						bool flag3 = this._uwr.responseCode >= 400L;
+						if (flag3)
 						{
 							string httpstatusString = UnityWebRequest.GetHTTPStatusString(this._uwr.responseCode);
 							text = string.Format("{0} {1}", this._uwr.responseCode, httpstatusString);
@@ -341,16 +341,16 @@ namespace UnityEngine
 				}
 				else
 				{
-					bool isNetworkError = this._uwr.isNetworkError;
-					if (isNetworkError)
+					bool flag2 = this._uwr.result == UnityWebRequest.Result.ConnectionError;
+					if (flag2)
 					{
 						text = "";
 					}
 					else
 					{
 						DownloadHandler downloadHandler = this._uwr.downloadHandler;
-						bool flag2 = downloadHandler == null;
-						if (flag2)
+						bool flag3 = downloadHandler == null;
+						if (flag3)
 						{
 							text = "";
 						}
@@ -374,16 +374,16 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool isNetworkError = this._uwr.isNetworkError;
-				if (isNetworkError)
+				bool flag2 = this._uwr.result == UnityWebRequest.Result.ConnectionError;
+				if (flag2)
 				{
 					texture2D = null;
 				}
 				else
 				{
 					DownloadHandler downloadHandler = this._uwr.downloadHandler;
-					bool flag2 = downloadHandler == null;
-					if (flag2)
+					bool flag3 = downloadHandler == null;
+					if (flag3)
 					{
 						texture2D = null;
 					}
@@ -419,16 +419,16 @@ namespace UnityEngine
 			bool flag = !this.WaitUntilDoneIfPossible();
 			if (!flag)
 			{
-				bool isNetworkError = this._uwr.isNetworkError;
-				if (isNetworkError)
+				bool flag2 = this._uwr.result == UnityWebRequest.Result.ConnectionError;
+				if (flag2)
 				{
 					Debug.LogError("Cannot load image: download failed");
 				}
 				else
 				{
 					DownloadHandler downloadHandler = this._uwr.downloadHandler;
-					bool flag2 = downloadHandler == null;
-					if (flag2)
+					bool flag3 = downloadHandler == null;
+					if (flag3)
 					{
 						Debug.LogError("Cannot load image: internal error");
 					}

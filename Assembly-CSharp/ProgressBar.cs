@@ -40,7 +40,24 @@ public class ProgressBar : KMonoBehaviour
 				base.gameObject.SetActive(false);
 			}
 		}
+		Game.Instance.Subscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
+		this.SetWorldActive(ClusterManager.Instance.activeWorldId);
 		base.enabled = this.updatePercentFull != null;
+	}
+
+	private void OnActiveWorldChanged(object data)
+	{
+		global::Tuple<int, int> tuple = (global::Tuple<int, int>)data;
+		this.SetWorldActive(tuple.first);
+	}
+
+	private void SetWorldActive(int worldId)
+	{
+		base.gameObject.SetActive(this.GetMyWorldId() == worldId);
+		if (this.updatePercentFull == null || this.updatePercentFull.Target.IsNullOrDestroyed())
+		{
+			base.gameObject.SetActive(false);
+		}
 	}
 
 	public void SetUpdateFunc(Func<float> func)
@@ -51,7 +68,7 @@ public class ProgressBar : KMonoBehaviour
 
 	public virtual void Update()
 	{
-		if (this.updatePercentFull != null)
+		if (this.updatePercentFull != null && !this.updatePercentFull.Target.IsNullOrDestroyed())
 		{
 			this.PercentFull = this.updatePercentFull();
 		}
@@ -83,6 +100,7 @@ public class ProgressBar : KMonoBehaviour
 		{
 			Game.Instance.Unsubscribe(this.overlayUpdateHandle);
 		}
+		Game.Instance.Unsubscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
 		base.OnCleanUp();
 	}
 
@@ -96,7 +114,7 @@ public class ProgressBar : KMonoBehaviour
 		base.enabled = true;
 	}
 
-	public static ProgressBar CreateProgressBar(KMonoBehaviour entity, Func<float> updateFunc)
+	public static ProgressBar CreateProgressBar(GameObject entity, Func<float> updateFunc)
 	{
 		ProgressBar progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
 		progressBar.SetUpdateFunc(updateFunc);
@@ -108,7 +126,7 @@ public class ProgressBar : KMonoBehaviour
 		Building component = entity.GetComponent<Building>();
 		if (component != null)
 		{
-			vector = vector - Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2) + component.Def.placementPivot;
+			vector -= Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2);
 		}
 		else
 		{

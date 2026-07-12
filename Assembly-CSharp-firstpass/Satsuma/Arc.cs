@@ -4,7 +4,7 @@ namespace Satsuma
 {
 	public struct Arc : IEquatable<Arc>
 	{
-		public long Id { get; private set; }
+		public long Id { readonly get; private set; }
 
 		public Arc(long id)
 		{
@@ -37,7 +37,7 @@ namespace Satsuma
 
 		public override string ToString()
 		{
-			return "|" + this.Id;
+			return "|" + this.Id.ToString();
 		}
 
 		public static bool operator ==(Arc a, Arc b)

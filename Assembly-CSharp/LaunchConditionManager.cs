@@ -40,21 +40,12 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.launchable = base.GetComponent<LaunchableRocket>();
+		this.launchable = base.GetComponent<ILaunchableRocket>();
 		this.FindModules();
 		base.GetComponent<AttachableBuilding>().onAttachmentNetworkChanged = delegate(AttachableBuilding data)
 		{
 			this.FindModules();
 		};
-		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
-	}
-
-	private void OnTagsChanged(object data)
-	{
-		foreach (RocketModule rocketModule in this.rocketModules)
-		{
-			rocketModule.OnConditionManagerTagsChanged(data);
-		}
 	}
 
 	protected override void OnCleanUp()
@@ -69,6 +60,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		{
 			return;
 		}
+		global::Debug.Assert(!DlcManager.FeatureClusterSpaceEnabled());
 		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(spacecraftFromLaunchConditionManager.id);
 		if (base.gameObject.GetComponent<LogicPorts>().GetInputValue(this.triggerPort) == 1 && spacecraftDestination != null && spacecraftDestination.id != -1)
 		{
@@ -78,8 +70,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 
 	public void FindModules()
 	{
-		List<GameObject> attachedNetwork = AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>());
-		foreach (GameObject gameObject in attachedNetwork)
+		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
 		{
 			RocketModule component = gameObject.GetComponent<RocketModule>();
 			if (component != null && component.conditionManager == null)
@@ -87,11 +78,6 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 				component.conditionManager = this;
 				component.RegisterWithConditionManager();
 			}
-		}
-		Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
-		if (spacecraftFromLaunchConditionManager != null)
-		{
-			spacecraftFromLaunchConditionManager.moduleCount = attachedNetwork.Count;
 		}
 	}
 
@@ -108,14 +94,18 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		this.rocketModules.Remove(module);
 	}
 
-	public List<RocketLaunchCondition> GetLaunchConditionList()
+	public List<ProcessCondition> GetLaunchConditionList()
 	{
-		List<RocketLaunchCondition> list = new List<RocketLaunchCondition>();
+		List<ProcessCondition> list = new List<ProcessCondition>();
 		foreach (RocketModule rocketModule in this.rocketModules)
 		{
-			foreach (RocketLaunchCondition rocketLaunchCondition in rocketModule.launchConditions)
+			foreach (ProcessCondition processCondition in rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketPrep))
 			{
-				list.Add(rocketLaunchCondition);
+				list.Add(processCondition);
+			}
+			foreach (ProcessCondition processCondition2 in rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketStorage))
+			{
+				list.Add(processCondition2);
 			}
 		}
 		return list;
@@ -133,7 +123,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		}
 		if (DebugHandler.InstantBuildMode || (this.CheckReadyToLaunch() && this.CheckAbleToFly()))
 		{
-			this.launchable.Trigger(-1056989049, null);
+			this.launchable.LaunchableGameObject.Trigger(705820818, null);
 			SpacecraftManager.instance.SetSpacecraftDestination(this, destination);
 			SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this).BeginMission(destination);
 		}
@@ -143,15 +133,29 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	{
 		foreach (RocketModule rocketModule in this.rocketModules)
 		{
-			using (List<RocketLaunchCondition>.Enumerator enumerator2 = rocketModule.launchConditions.GetEnumerator())
+			using (List<ProcessCondition>.Enumerator enumerator2 = rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketPrep).GetEnumerator())
 			{
 				while (enumerator2.MoveNext())
 				{
-					if (enumerator2.Current.EvaluateLaunchCondition() == RocketLaunchCondition.LaunchStatus.Failure)
+					if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
 					{
 						return false;
 					}
 				}
+			}
+			using (List<ProcessCondition>.Enumerator enumerator2 = rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketStorage).GetEnumerator())
+			{
+				while (enumerator2.MoveNext())
+				{
+					if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
+					{
+						return false;
+					}
+				}
+			}
+			if (this.launchable.registerType == LaunchableRocketRegisterType.Spacecraft)
+			{
+				return this.CheckAbleToFly();
 			}
 		}
 		return true;
@@ -161,11 +165,11 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	{
 		foreach (RocketModule rocketModule in this.rocketModules)
 		{
-			using (List<RocketFlightCondition>.Enumerator enumerator2 = rocketModule.flightConditions.GetEnumerator())
+			using (List<ProcessCondition>.Enumerator enumerator2 = rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketFlight).GetEnumerator())
 			{
 				while (enumerator2.MoveNext())
 				{
-					if (!enumerator2.Current.EvaluateFlightCondition())
+					if (enumerator2.Current.EvaluateCondition() == ProcessCondition.Status.Failure)
 					{
 						return false;
 					}
@@ -178,7 +182,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 	private void ClearFlightStatuses()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
-		foreach (KeyValuePair<RocketFlightCondition, Guid> keyValuePair in this.conditionStatuses)
+		foreach (KeyValuePair<ProcessCondition, Guid> keyValuePair in this.conditionStatuses)
 		{
 			component.RemoveStatusItem(keyValuePair.Value, false);
 		}
@@ -206,20 +210,20 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 				while (enumerator.MoveNext())
 				{
 					RocketModule rocketModule = enumerator.Current;
-					foreach (RocketFlightCondition rocketFlightCondition in rocketModule.flightConditions)
+					foreach (ProcessCondition processCondition in rocketModule.GetConditionSet(ProcessCondition.ProcessConditionType.RocketFlight))
 					{
-						if (!rocketFlightCondition.EvaluateFlightCondition())
+						if (processCondition.EvaluateCondition() == ProcessCondition.Status.Failure)
 						{
-							if (!this.conditionStatuses.ContainsKey(rocketFlightCondition))
+							if (!this.conditionStatuses.ContainsKey(processCondition))
 							{
-								StatusItem failureStatusItem = rocketFlightCondition.GetFailureStatusItem();
-								this.conditionStatuses[rocketFlightCondition] = component2.AddStatusItem(failureStatusItem, rocketFlightCondition);
+								StatusItem statusItem = processCondition.GetStatusItem(ProcessCondition.Status.Failure);
+								this.conditionStatuses[processCondition] = component2.AddStatusItem(statusItem, processCondition);
 							}
 						}
-						else if (this.conditionStatuses.ContainsKey(rocketFlightCondition))
+						else if (this.conditionStatuses.ContainsKey(processCondition))
 						{
-							component2.RemoveStatusItem(this.conditionStatuses[rocketFlightCondition], false);
-							this.conditionStatuses.Remove(rocketFlightCondition);
+							component2.RemoveStatusItem(this.conditionStatuses[processCondition], false);
+							this.conditionStatuses.Remove(processCondition);
 						}
 					}
 				}
@@ -234,10 +238,16 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 
 	public HashedString statusPort;
 
-	private LaunchableRocket launchable;
+	private ILaunchableRocket launchable;
 
 	[Serialize]
 	private List<global::Tuple<string, string, string>> DEBUG_ModuleDestructions;
 
-	private Dictionary<RocketFlightCondition, Guid> conditionStatuses = new Dictionary<RocketFlightCondition, Guid>();
+	private Dictionary<ProcessCondition, Guid> conditionStatuses = new Dictionary<ProcessCondition, Guid>();
+
+	public enum ConditionType
+	{
+		Launch,
+		Flight
+	}
 }

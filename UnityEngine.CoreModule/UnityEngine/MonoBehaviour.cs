@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
 	[ExtensionOfNativeClass]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[RequiredByNativeCode]
 	public class MonoBehaviour : Behaviour
 	{
@@ -142,27 +142,27 @@ namespace UnityEngine
 
 		[FreeFunction("CancelInvoke")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_CancelInvokeAll(MonoBehaviour self);
+		private static extern void Internal_CancelInvokeAll([NotNull("NullExceptionObject")] MonoBehaviour self);
 
 		[FreeFunction("IsInvoking")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_IsInvokingAll(MonoBehaviour self);
+		private static extern bool Internal_IsInvokingAll([NotNull("NullExceptionObject")] MonoBehaviour self);
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InvokeDelayed(MonoBehaviour self, string methodName, float time, float repeatRate);
+		private static extern void InvokeDelayed([NotNull("NullExceptionObject")] MonoBehaviour self, string methodName, float time, float repeatRate);
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CancelInvoke(MonoBehaviour self, string methodName);
+		private static extern void CancelInvoke([NotNull("NullExceptionObject")] MonoBehaviour self, string methodName);
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsInvoking(MonoBehaviour self, string methodName);
+		private static extern bool IsInvoking([NotNull("NullExceptionObject")] MonoBehaviour self, string methodName);
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsObjectMonoBehaviour(Object obj);
+		private static extern bool IsObjectMonoBehaviour([NotNull("NullExceptionObject")] Object obj);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Coroutine StartCoroutineManaged(string methodName, object value);

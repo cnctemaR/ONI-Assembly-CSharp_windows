@@ -9,6 +9,18 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/Comet")]
 public class Comet : KMonoBehaviour, ISim33ms
 {
+	public Vector2 Velocity
+	{
+		get
+		{
+			return this.velocity;
+		}
+		set
+		{
+			this.velocity = value;
+		}
+	}
+
 	private float GetVolume(GameObject gameObject)
 	{
 		float num = 1f;
@@ -25,31 +37,36 @@ public class Comet : KMonoBehaviour, ISim33ms
 		this.remainingTileDamage = this.totalTileDamage;
 		this.loopingSounds = base.gameObject.GetComponent<LoopingSounds>();
 		this.flyingSound = GlobalAssets.GetSound("Meteor_LP", false);
+		this.RandomizeVelocity();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.RandomizeValues();
+		this.RandomizeMassAndTemperature();
 		this.StartLoopingSound();
 	}
 
-	public void RandomizeValues()
+	public virtual void RandomizeVelocity()
+	{
+		float num = global::UnityEngine.Random.Range(this.spawnAngle.x, this.spawnAngle.y);
+		float num2 = num * 3.1415927f / 180f;
+		float num3 = global::UnityEngine.Random.Range(this.spawnVelocity.x, this.spawnVelocity.y);
+		this.velocity = new Vector2(-Mathf.Cos(num2) * num3, Mathf.Sin(num2) * num3);
+		base.GetComponent<KBatchedAnimController>().Rotation = -num - 90f;
+	}
+
+	public void RandomizeMassAndTemperature()
 	{
 		float num = global::UnityEngine.Random.Range(this.massRange.x, this.massRange.y);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		component.Mass = num;
 		component.Temperature = global::UnityEngine.Random.Range(this.temperatureRange.x, this.temperatureRange.y);
-		float num2 = global::UnityEngine.Random.Range(this.spawnAngle.x, this.spawnAngle.y);
-		float num3 = num2 * 3.1415927f / 180f;
-		float num4 = global::UnityEngine.Random.Range(this.spawnVelocity.x, this.spawnVelocity.y);
-		this.velocity = new Vector2(-Mathf.Cos(num3) * num4, Mathf.Sin(num3) * num4);
-		base.GetComponent<KBatchedAnimController>().Rotation = -num2 - 90f;
 		if (this.addTiles > 0)
 		{
-			float num5 = global::UnityEngine.Random.Range(0.95f, 0.98f);
-			this.explosionMass = num * (1f - num5);
-			this.addTileMass = num * num5;
+			float num2 = global::UnityEngine.Random.Range(0.95f, 0.98f);
+			this.explosionMass = num * (1f - num2);
+			this.addTileMass = num * num2;
 			return;
 		}
 		this.explosionMass = num;
@@ -123,18 +140,23 @@ public class Comet : KMonoBehaviour, ISim33ms
 		}
 		if (this.addTiles > 0)
 		{
-			int depthOfElement = this.GetDepthOfElement(cell, element);
-			float num7 = 1f - (float)(depthOfElement - this.addTilesMinHeight) / (float)(this.addTilesMaxHeight - this.addTilesMinHeight);
-			int num8 = Mathf.Min(this.addTiles, Mathf.Clamp(Mathf.RoundToInt((float)this.addTiles * num7), 1, this.addTiles));
+			float depthOfElement = (float)this.GetDepthOfElement(cell, element);
+			float num7 = 1f;
+			float num8 = (depthOfElement - (float)this.addTilesMinHeight) / (float)(this.addTilesMaxHeight - this.addTilesMinHeight);
+			if (!float.IsNaN(num8))
+			{
+				num7 -= num8;
+			}
+			int num9 = Mathf.Min(this.addTiles, Mathf.Clamp(Mathf.RoundToInt((float)this.addTiles * num7), 1, this.addTiles));
 			HashSetPool<int, Comet>.PooledHashSet pooledHashSet = HashSetPool<int, Comet>.Allocate();
 			HashSetPool<int, Comet>.PooledHashSet pooledHashSet2 = HashSetPool<int, Comet>.Allocate();
 			QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
-			int num9 = -1;
-			int num10 = 1;
+			int num10 = -1;
+			int num11 = 1;
 			if (this.velocity.x < 0f)
 			{
-				num9 *= -1;
 				num10 *= -1;
+				num11 *= -1;
 			}
 			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 			{
@@ -143,29 +165,63 @@ public class Comet : KMonoBehaviour, ISim33ms
 			});
 			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 			{
-				cell = Grid.OffsetCell(prev_cell, new CellOffset(num9, 0)),
+				cell = Grid.OffsetCell(prev_cell, new CellOffset(num10, 0)),
 				depth = 0
 			});
 			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 			{
-				cell = Grid.OffsetCell(prev_cell, new CellOffset(num10, 0)),
+				cell = Grid.OffsetCell(prev_cell, new CellOffset(num11, 0)),
 				depth = 0
 			});
 			GameUtil.FloodFillConditional(pooledQueue, new Func<int, bool>(this.SpawnTilesCellTest), pooledHashSet2, pooledHashSet, 10);
-			float num11 = ((num8 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
-			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
-			foreach (int num12 in pooledHashSet)
+			float num12 = ((num9 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
+			int num13 = this.addDiseaseCount / num9;
+			if (element.HasTag(GameTags.Unstable))
 			{
-				if (num8 <= 0)
+				UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
+				using (HashSet<int>.Enumerator enumerator2 = pooledHashSet.GetEnumerator())
+				{
+					while (enumerator2.MoveNext())
+					{
+						int num14 = enumerator2.Current;
+						if (num9 <= 0)
+						{
+							break;
+						}
+						component.Spawn(num14, element, num12, num6, byte.MaxValue, 0);
+						num9--;
+					}
+					goto IL_05A6;
+				}
+			}
+			foreach (int num15 in pooledHashSet)
+			{
+				if (num9 <= 0)
 				{
 					break;
 				}
-				component.Spawn(num12, element, num11, num6, byte.MaxValue, 0);
-				num8--;
+				SimMessages.AddRemoveSubstance(num15, element.id, CellEventLogger.Instance.ElementEmitted, num12, num6, this.diseaseIdx, num13, true, -1);
+				num9--;
 			}
+			IL_05A6:
 			pooledHashSet.Recycle();
 			pooledHashSet2.Recycle();
 			pooledQueue.Recycle();
+		}
+		this.SpawnCraterPrefabs();
+		if (this.OnImpact != null)
+		{
+			this.OnImpact();
+		}
+	}
+
+	protected virtual void SpawnCraterPrefabs()
+	{
+		if (this.craterPrefabs != null && this.craterPrefabs.Length != 0)
+		{
+			GameObject gameObject = global::Util.KInstantiate(Assets.GetPrefab(this.craterPrefabs[global::UnityEngine.Random.Range(0, this.craterPrefabs.Length)]), Grid.CellToPos(Grid.PosToCell(this)));
+			gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, -19.5f);
+			gameObject.SetActive(true);
 		}
 	}
 
@@ -254,14 +310,14 @@ public class Comet : KMonoBehaviour, ISim33ms
 		return input_damage * (1f - num6);
 	}
 
-	private void DamageThings(Vector3 pos, int cell, int damage)
+	private void DamageThings(Vector3 pos, int cell, int damage, GameObject ignoreObject = null)
 	{
 		if (!Grid.IsValidCell(cell))
 		{
 			return;
 		}
 		GameObject gameObject = Grid.Objects[cell, 1];
-		if (gameObject != null)
+		if (gameObject != null && gameObject != ignoreObject)
 		{
 			BuildingHP component = gameObject.GetComponent<BuildingHP>();
 			Building component2 = gameObject.GetComponent<Building>();
@@ -378,10 +434,10 @@ public class Comet : KMonoBehaviour, ISim33ms
 		Vector3 vector3 = position + new Vector3(this.velocity.x * dt, this.velocity.y * dt, 0f);
 		int num = Grid.PosToCell(vector3);
 		this.loopingSounds.UpdateVelocity(this.flyingSound, vector3 - position);
-		Element element = ElementLoader.FindElementByHash(SimHashes.CarbonDioxide);
-		if (Grid.IsValidCell(num) && !Grid.Solid[num])
+		Element element = ElementLoader.FindElementByHash(this.EXHAUST_ELEMENT);
+		if (this.EXHAUST_ELEMENT != SimHashes.Void && Grid.IsValidCell(num) && !Grid.Solid[num])
 		{
-			SimMessages.EmitMass(num, element.idx, dt * 50f, element.defaultValues.temperature, 0, 0, -1);
+			SimMessages.EmitMass(num, element.idx, dt * this.EXHAUST_RATE, element.defaultValues.temperature, this.diseaseIdx, Mathf.RoundToInt((float)this.addDiseaseCount * dt), -1);
 		}
 		if (vector3.x < vector.x || vector2.x < vector3.x || vector3.y < vector.y)
 		{
@@ -399,17 +455,32 @@ public class Comet : KMonoBehaviour, ISim33ms
 				{
 					this.Explode(position, num2, num3, component.Element);
 					this.hasExploded = true;
-					global::Util.KDestroyGameObject(base.gameObject);
+					if (this.destroyOnExplode)
+					{
+						global::Util.KDestroyGameObject(base.gameObject);
+					}
 					return;
 				}
 			}
 			else
 			{
-				this.DamageThings(position, num2, this.entityDamage);
+				GameObject gameObject = ((this.ignoreObstacleForDamage.Get() == null) ? null : this.ignoreObstacleForDamage.Get().gameObject);
+				this.DamageThings(position, num2, this.entityDamage, gameObject);
 			}
+		}
+		if (this.canHitDuplicants && this.age > 0.25f && Grid.Objects[Grid.PosToCell(position), 0] != null)
+		{
+			base.transform.position = Grid.CellToPos(Grid.PosToCell(position));
+			this.Explode(position, num2, num3, base.GetComponent<PrimaryElement>().Element);
+			if (this.destroyOnExplode)
+			{
+				global::Util.KDestroyGameObject(base.gameObject);
+			}
+			return;
 		}
 		this.previousPosition = position;
 		base.transform.SetPosition(vector3);
+		this.age += dt;
 	}
 
 	private void PlayImpactSound(Vector3 pos)
@@ -436,9 +507,9 @@ public class Comet : KMonoBehaviour, ISim33ms
 		this.loopingSounds.UpdateFirstParameter(this.flyingSound, this.FLYING_SOUND_ID_PARAMETER, (float)this.flyingSoundID);
 	}
 
-	private const SimHashes EXHAUST_ELEMENT = SimHashes.CarbonDioxide;
+	public SimHashes EXHAUST_ELEMENT = SimHashes.CarbonDioxide;
 
-	private const float EXHAUST_RATE = 50f;
+	public float EXHAUST_RATE = 50f;
 
 	public Vector2 spawnVelocity = new Vector2(12f, 15f);
 
@@ -464,6 +535,10 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	private float addTileMass;
 
+	public int addDiseaseCount;
+
+	public byte diseaseIdx = byte.MaxValue;
+
 	public Vector2 elementReplaceTileTemperatureRange = new Vector2(800f, 1000f);
 
 	public Vector2I explosionOreCount = new Vector2I(0, 0);
@@ -487,7 +562,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 	private HashedString FLYING_SOUND_ID_PARAMETER = "meteorType";
 
 	[Serialize]
-	private Vector2 velocity;
+	protected Vector2 velocity;
 
 	[Serialize]
 	private float remainingTileDamage;
@@ -495,6 +570,18 @@ public class Comet : KMonoBehaviour, ISim33ms
 	private Vector3 previousPosition;
 
 	private bool hasExploded;
+
+	public bool canHitDuplicants;
+
+	public string[] craterPrefabs;
+
+	public bool destroyOnExplode = true;
+
+	private float age;
+
+	public global::System.Action OnImpact;
+
+	public Ref<KPrefabID> ignoreObstacleForDamage = new Ref<KPrefabID>();
 
 	private LoopingSounds loopingSounds;
 

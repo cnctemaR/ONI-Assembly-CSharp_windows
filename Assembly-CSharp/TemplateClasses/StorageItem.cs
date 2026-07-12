@@ -3,7 +3,7 @@
 namespace TemplateClasses
 {
 	[Serializable]
-	public class StorageItem : ICloneable
+	public class StorageItem
 	{
 		public StorageItem()
 		{
@@ -38,7 +38,7 @@ namespace TemplateClasses
 
 		public Rottable rottable { get; set; }
 
-		public object Clone()
+		public StorageItem Clone()
 		{
 			return new StorageItem(this.id, this.units, this.temperature, this.element, this.diseaseName, this.diseaseCount, this.isOre)
 			{

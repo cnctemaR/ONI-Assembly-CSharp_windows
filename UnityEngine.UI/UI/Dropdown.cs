@@ -151,8 +151,6 @@ namespace UnityEngine.UI
 
 		protected override void Awake()
 		{
-			this.m_AlphaTweenRunner = new TweenRunner<FloatTween>();
-			this.m_AlphaTweenRunner.Init(this);
 			if (this.m_CaptionImage)
 			{
 				this.m_CaptionImage.enabled = this.m_CaptionImage.sprite != null;
@@ -222,7 +220,8 @@ namespace UnityEngine.UI
 
 		public void AddOptions(List<string> options)
 		{
-			for (int i = 0; i < options.Count; i++)
+			int count = options.Count;
+			for (int i = 0; i < count; i++)
 			{
 				this.options.Add(new Dropdown.OptionData(options[i]));
 			}
@@ -231,7 +230,8 @@ namespace UnityEngine.UI
 
 		public void AddOptions(List<Sprite> options)
 		{
-			for (int i = 0; i < options.Count; i++)
+			int count = options.Count;
+			for (int i = 0; i < count; i++)
 			{
 				this.options.Add(new Dropdown.OptionData(options[i]));
 			}
@@ -360,10 +360,11 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			Canvas canvas = list[list.Count - 1];
-			for (int i = 0; i < list.Count; i++)
+			int count = list.Count;
+			Canvas canvas = list[count - 1];
+			for (int i = 0; i < count; i++)
 			{
-				if (list[i].isRootCanvas)
+				if (list[i].isRootCanvas || list[i].overrideSorting)
 				{
 					canvas = list[i];
 					break;
@@ -395,7 +396,8 @@ namespace UnityEngine.UI
 			Vector2 size = rect2.size;
 			this.m_Items.Clear();
 			Toggle toggle = null;
-			for (int j = 0; j < this.options.Count; j++)
+			int count2 = this.options.Count;
+			for (int j = 0; j < count2; j++)
 			{
 				Dropdown.OptionData optionData = this.options[j];
 				Dropdown.DropdownItem item = this.AddItem(optionData, this.value == j, componentInChildren, this.m_Items);
@@ -455,12 +457,13 @@ namespace UnityEngine.UI
 					RectTransformUtility.FlipLayoutOnAxis(rectTransform, k, false, false);
 				}
 			}
-			for (int m = 0; m < this.m_Items.Count; m++)
+			int count3 = this.m_Items.Count;
+			for (int m = 0; m < count3; m++)
 			{
 				RectTransform rectTransform4 = this.m_Items[m].rectTransform;
 				rectTransform4.anchorMin = new Vector2(rectTransform4.anchorMin.x, 0f);
 				rectTransform4.anchorMax = new Vector2(rectTransform4.anchorMax.x, 0f);
-				rectTransform4.anchoredPosition = new Vector2(rectTransform4.anchoredPosition.x, vector.y + size.y * (float)(this.m_Items.Count - 1 - m) + size.y * rectTransform4.pivot.y);
+				rectTransform4.anchoredPosition = new Vector2(rectTransform4.anchoredPosition.x, vector.y + size.y * (float)(count3 - 1 - m) + size.y * rectTransform4.pivot.y);
 				rectTransform4.sizeDelta = new Vector2(rectTransform4.sizeDelta.x, size.y);
 			}
 			this.AlphaFadeList(this.m_AlphaFadeSpeed, 0f, 1f);
@@ -544,7 +547,7 @@ namespace UnityEngine.UI
 			Dropdown.DropdownItem dropdownItem = this.CreateItem(itemTemplate);
 			dropdownItem.rectTransform.SetParent(itemTemplate.rectTransform.parent, false);
 			dropdownItem.gameObject.SetActive(true);
-			dropdownItem.gameObject.name = "Item " + items.Count + ((data.text != null) ? (": " + data.text) : "");
+			dropdownItem.gameObject.name = "Item " + items.Count.ToString() + ((data.text != null) ? (": " + data.text) : "");
 			if (dropdownItem.toggle != null)
 			{
 				dropdownItem.toggle.isOn = false;
@@ -621,7 +624,8 @@ namespace UnityEngine.UI
 
 		private void ImmediateDestroyDropdownList()
 		{
-			for (int i = 0; i < this.m_Items.Count; i++)
+			int count = this.m_Items.Count;
+			for (int i = 0; i < count; i++)
 			{
 				if (this.m_Items[i] != null)
 				{

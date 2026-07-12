@@ -255,8 +255,8 @@ public class FetchOrder2
 		{
 			text = text + "\nDestination: " + this.Destination.name;
 		}
-		text = text + "\nTotal Amount: " + this.TotalAmount;
-		text = text + "\nUnfetched Amount: " + this._UnfetchedAmount;
+		text = text + "\nTotal Amount: " + this.TotalAmount.ToString();
+		text = text + "\nUnfetched Amount: " + this._UnfetchedAmount.ToString();
 		global::Debug.LogError(text);
 	}
 

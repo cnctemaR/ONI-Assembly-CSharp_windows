@@ -23,13 +23,13 @@ public class CellModifyMassEvent : CellEvent
 	{
 		CellEventInstance cellEventInstance = ev as CellEventInstance;
 		SimHashes data = (SimHashes)cellEventInstance.data;
-		return string.Concat(new object[]
+		return string.Concat(new string[]
 		{
 			base.GetMessagePrefix(),
 			"Element=",
 			data.ToString(),
 			", Mass=",
-			(float)cellEventInstance.data2 / 1000f,
+			((float)cellEventInstance.data2 / 1000f).ToString(),
 			" (",
 			this.reason,
 			")"

@@ -80,7 +80,7 @@ public class PageView : KMonoBehaviour
 				base.transform.GetChild(i).gameObject.SetActive(true);
 			}
 		}
-		this.pageLabel.SetText(this.currentPage % this.pageCount + 1 + "/" + this.pageCount);
+		this.pageLabel.SetText((this.currentPage % this.pageCount + 1).ToString() + "/" + this.pageCount.ToString());
 	}
 
 	[SerializeField]

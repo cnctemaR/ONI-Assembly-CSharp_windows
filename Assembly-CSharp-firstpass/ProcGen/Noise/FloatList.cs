@@ -18,6 +18,8 @@ namespace ProcGen.Noise
 		public FloatList()
 		{
 			this.points = new List<float>();
+			this.points.Add(0f);
+			this.points.Add(1f);
 		}
 	}
 }

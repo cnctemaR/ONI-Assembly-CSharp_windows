@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -34,22 +35,40 @@ public class MeterScreen : KScreen, IRender1000ms
 		this.SickTooltip.OnToolTip = new Func<string>(this.OnSickTooltip);
 		this.RationsTooltip.OnToolTip = new Func<string>(this.OnRationsTooltip);
 		this.RedAlertTooltip.OnToolTip = new Func<string>(this.OnRedAlertTooltip);
-		this.RedAlertButton.onClick += delegate
+		MultiToggle redAlertButton = this.RedAlertButton;
+		redAlertButton.onClick = (global::System.Action)Delegate.Combine(redAlertButton.onClick, new global::System.Action(delegate
 		{
 			this.OnRedAlertClick();
-		};
+		}));
+		Game.Instance.Subscribe(1983128072, delegate(object data)
+		{
+			this.Refresh();
+		});
+		Game.Instance.Subscribe(1585324898, delegate(object data)
+		{
+			this.RefreshRedAlertButtonState();
+		});
+		Game.Instance.Subscribe(-1393151672, delegate(object data)
+		{
+			this.RefreshRedAlertButtonState();
+		});
 	}
 
 	private void OnRedAlertClick()
 	{
-		bool flag = !VignetteManager.Instance.Get().IsRedAlertToggledOn();
-		VignetteManager.Instance.Get().ToggleRedAlert(flag);
+		bool flag = !ClusterManager.Instance.activeWorld.AlertManager.IsRedAlertToggledOn();
+		ClusterManager.Instance.activeWorld.AlertManager.ToggleRedAlert(flag);
 		if (flag)
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
 			return;
 		}
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+	}
+
+	private void RefreshRedAlertButtonState()
+	{
+		this.RedAlertButton.ChangeState(ClusterManager.Instance.activeWorld.IsRedAlert() ? 1 : 0);
 	}
 
 	public void Render1000ms(float dt)
@@ -69,28 +88,42 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private void Refresh()
 	{
+		this.worldLiveMinionIdentities = Components.LiveMinionIdentities.GetWorldItems(ClusterManager.Instance.activeWorldId, false);
 		this.RefreshMinions();
 		this.RefreshRations();
 		this.RefreshStress();
 		this.RefreshSick();
+		this.RefreshRedAlertButtonState();
 	}
 
 	private void RefreshMinions()
 	{
 		int count = Components.LiveMinionIdentities.Count;
-		if (count == this.cachedMinionCount)
+		int count2 = this.worldLiveMinionIdentities.Count;
+		if (count2 == this.cachedMinionCount)
 		{
 			return;
 		}
-		this.cachedMinionCount = count;
-		this.currentMinions.text = count.ToString("0");
+		this.cachedMinionCount = count2;
+		string text;
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			ClusterGridEntity component = ClusterManager.Instance.activeWorld.GetComponent<ClusterGridEntity>();
+			text = string.Format(UI.TOOLTIPS.METERSCREEN_POPULATION_CLUSTER, component.Name, count2, count);
+			this.currentMinions.text = string.Format("{0}/{1}", count2, count);
+		}
+		else
+		{
+			this.currentMinions.text = string.Format("{0}", count);
+			text = string.Format(UI.TOOLTIPS.METERSCREEN_POPULATION, count.ToString("0"));
+		}
 		this.MinionsTooltip.ClearMultiStringTooltip();
-		this.MinionsTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_POPULATION, count.ToString("0")), this.ToolTipStyle_Header);
+		this.MinionsTooltip.AddMultiStringTooltip(text, this.ToolTipStyle_Header);
 	}
 
 	private void RefreshSick()
 	{
-		int num = MeterScreen.CountSickDupes();
+		int num = this.CountSickDupes();
 		this.SickText.text = num.ToString();
 	}
 
@@ -98,26 +131,28 @@ public class MeterScreen : KScreen, IRender1000ms
 	{
 		if (this.RationsText != null && RationTracker.Get() != null)
 		{
-			long num = (long)RationTracker.Get().CountRations(null, true);
+			long num = (long)RationTracker.Get().CountRations(null, ClusterManager.Instance.activeWorld.worldInventory, true);
 			if (this.cachedCalories != num)
 			{
 				this.RationsText.text = GameUtil.GetFormattedCalories((float)num, GameUtil.TimeSlice.None, true);
 				this.cachedCalories = num;
 			}
 		}
+		this.rationsSpark.GetComponentInChildren<SparkLayer>().SetColor(((float)this.cachedCalories > (float)Components.LiveMinionIdentities.GetWorldItems(ClusterManager.Instance.activeWorldId, false).Count * 1000000f) ? Constants.NEUTRAL_COLOR : Constants.NEGATIVE_COLOR);
+		this.rationsSpark.GetComponentInChildren<LineLayer>().RefreshLine(TrackerTool.Instance.GetWorldTracker<KCalTracker>(ClusterManager.Instance.activeWorldId).ChartableData(600f), "kcal");
 	}
 
 	private IList<MinionIdentity> GetStressedMinions()
 	{
 		Amount stress_amount = Db.Get().Amounts.Stress;
-		return new List<MinionIdentity>(new List<MinionIdentity>(Components.LiveMinionIdentities.Items).OrderByDescending<MinionIdentity, float>((MinionIdentity x) => stress_amount.Lookup(x).value));
+		return new List<MinionIdentity>(this.worldLiveMinionIdentities).OrderByDescending<MinionIdentity, float>((MinionIdentity x) => stress_amount.Lookup(x).value).ToList<MinionIdentity>();
 	}
 
 	private string OnStressTooltip()
 	{
-		float maxStress = GameUtil.GetMaxStress();
+		float maxSressInActiveWorld = GameUtil.GetMaxSressInActiveWorld();
 		this.StressTooltip.ClearMultiStringTooltip();
-		this.StressTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_AVGSTRESS, Mathf.Round(maxStress).ToString() + "%"), this.ToolTipStyle_Header);
+		this.StressTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_AVGSTRESS, Mathf.Round(maxSressInActiveWorld).ToString() + "%"), this.ToolTipStyle_Header);
 		Amount stress = Db.Get().Amounts.Stress;
 		IList<MinionIdentity> stressedMinions = this.GetStressedMinions();
 		for (int i = 0; i < stressedMinions.Count; i++)
@@ -131,12 +166,12 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private string OnSickTooltip()
 	{
-		int num = MeterScreen.CountSickDupes();
+		int num = this.CountSickDupes();
 		this.SickTooltip.ClearMultiStringTooltip();
 		this.SickTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_SICK_DUPES, num.ToString()), this.ToolTipStyle_Header);
-		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
+		for (int i = 0; i < this.worldLiveMinionIdentities.Count; i++)
 		{
-			MinionIdentity minionIdentity = Components.LiveMinionIdentities[i];
+			MinionIdentity minionIdentity = this.worldLiveMinionIdentities[i];
 			string text = minionIdentity.GetComponent<KSelectable>().GetName();
 			Sicknesses sicknesses = minionIdentity.GetComponent<MinionModifiers>().sicknesses;
 			if (sicknesses.IsInfected())
@@ -156,10 +191,10 @@ public class MeterScreen : KScreen, IRender1000ms
 		return "";
 	}
 
-	private static int CountSickDupes()
+	private int CountSickDupes()
 	{
 		int num = 0;
-		using (List<MinionIdentity>.Enumerator enumerator = Components.LiveMinionIdentities.Items.GetEnumerator())
+		using (List<MinionIdentity>.Enumerator enumerator = this.worldLiveMinionIdentities.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
@@ -191,7 +226,7 @@ public class MeterScreen : KScreen, IRender1000ms
 	private string OnRationsTooltip()
 	{
 		this.rationsDict.Clear();
-		float num = RationTracker.Get().CountRations(this.rationsDict, true);
+		float num = RationTracker.Get().CountRations(this.rationsDict, ClusterManager.Instance.activeWorld.worldInventory, true);
 		this.RationsText.text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 		this.RationsTooltip.ClearMultiStringTooltip();
 		this.RationsTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_MEALHISTORY, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true)), this.ToolTipStyle_Header);
@@ -218,8 +253,11 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private void RefreshStress()
 	{
-		float maxStress = GameUtil.GetMaxStress();
-		this.StressText.text = Mathf.Round(maxStress).ToString();
+		float maxSressInActiveWorld = GameUtil.GetMaxSressInActiveWorld();
+		this.StressText.text = Mathf.Round(maxSressInActiveWorld).ToString();
+		WorldTracker worldTracker = TrackerTool.Instance.GetWorldTracker<StressTracker>(ClusterManager.Instance.activeWorldId);
+		this.stressSpark.GetComponentInChildren<SparkLayer>().SetColor((worldTracker.GetCurrentValue() >= STRESS.ACTING_OUT_RESET) ? Constants.NEGATIVE_COLOR : Constants.NEUTRAL_COLOR);
+		this.stressSpark.GetComponentInChildren<LineLayer>().RefreshLine(worldTracker.ChartableData(600f), "stressData");
 	}
 
 	public void OnClickStress(BaseEventData base_ev_data)
@@ -232,7 +270,7 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private IList<MinionIdentity> GetSickMinions()
 	{
-		return Components.LiveMinionIdentities.Items;
+		return this.worldLiveMinionIdentities;
 	}
 
 	public void OnClickImmunity(BaseEventData base_ev_data)
@@ -261,13 +299,13 @@ public class MeterScreen : KScreen, IRender1000ms
 		}
 		else
 		{
-			if (Components.LiveMinionIdentities.Count < display_info.selectedIndex)
+			if (this.worldLiveMinionIdentities.Count < display_info.selectedIndex)
 			{
 				display_info.selectedIndex = -1;
 			}
-			if (Components.LiveMinionIdentities.Count > 0)
+			if (this.worldLiveMinionIdentities.Count > 0)
 			{
-				display_info.selectedIndex = (display_info.selectedIndex + 1) % Components.LiveMinionIdentities.Count;
+				display_info.selectedIndex = (display_info.selectedIndex + 1) % this.worldLiveMinionIdentities.Count;
 				MinionIdentity minionIdentity = minions[display_info.selectedIndex];
 				SelectTool.Instance.SelectAndFocus(minionIdentity.transform.GetPosition(), minionIdentity.GetComponent<KSelectable>(), new Vector3(5f, 0f, 0f));
 				return;
@@ -284,9 +322,13 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	public ToolTip StressTooltip;
 
+	public GameObject stressSpark;
+
 	public LocText RationsText;
 
 	public ToolTip RationsTooltip;
+
+	public GameObject rationsSpark;
 
 	public LocText SickText;
 
@@ -298,8 +340,7 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private bool startValuesSet;
 
-	[SerializeField]
-	private KToggle RedAlertButton;
+	public MultiToggle RedAlertButton;
 
 	public ToolTip RedAlertTooltip;
 
@@ -312,6 +353,8 @@ public class MeterScreen : KScreen, IRender1000ms
 	{
 		selectedIndex = -1
 	};
+
+	private List<MinionIdentity> worldLiveMinionIdentities;
 
 	private int cachedMinionCount = -1;
 

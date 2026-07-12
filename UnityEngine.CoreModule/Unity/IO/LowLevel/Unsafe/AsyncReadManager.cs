@@ -10,19 +10,19 @@ namespace Unity.IO.LowLevel.Unsafe
 	{
 		[FreeFunction("AsyncReadManagerManaged::Read", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
-		private unsafe static ReadHandle ReadInternal(string filename, void* cmds, uint cmdCount)
+		private unsafe static ReadHandle ReadInternal(string filename, void* cmds, uint cmdCount, string assetName, ulong typeID, AssetLoadingSubsystem subsystem)
 		{
 			ReadHandle readHandle;
-			AsyncReadManager.ReadInternal_Injected(filename, cmds, cmdCount, out readHandle);
+			AsyncReadManager.ReadInternal_Injected(filename, cmds, cmdCount, assetName, typeID, subsystem, out readHandle);
 			return readHandle;
 		}
 
-		public unsafe static ReadHandle Read(string filename, ReadCommand* readCmds, uint readCmdCount)
+		public unsafe static ReadHandle Read(string filename, ReadCommand* readCmds, uint readCmdCount, string assetName = "", ulong typeID = 0UL, AssetLoadingSubsystem subsystem = AssetLoadingSubsystem.Scripts)
 		{
-			return AsyncReadManager.ReadInternal(filename, (void*)readCmds, readCmdCount);
+			return AsyncReadManager.ReadInternal(filename, (void*)readCmds, readCmdCount, assetName, typeID, subsystem);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void ReadInternal_Injected(string filename, void* cmds, uint cmdCount, out ReadHandle ret);
+		private unsafe static extern void ReadInternal_Injected(string filename, void* cmds, uint cmdCount, string assetName, ulong typeID, AssetLoadingSubsystem subsystem, out ReadHandle ret);
 	}
 }

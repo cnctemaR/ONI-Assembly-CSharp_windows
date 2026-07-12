@@ -166,7 +166,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			this.fetch.InitializeStates(this.eater, this.ediblesource, this.ediblechunk, this.requestedfoodunits, this.actualfoodunits, this.eatatmessstation, null);
 			this.eatatmessstation.DefaultState(this.eatatmessstation.moveto).ParamTransition<GameObject>(this.messstation, this.eatonfloorstate, (EatChore.StatesInstance smi, GameObject p) => p == null);
 			this.eatatmessstation.moveto.InitializeStates(this.eater, this.messstation, this.eatatmessstation.eat, this.eatonfloorstate, null, null);
-			this.eatatmessstation.eat.ToggleAnims("anim_eat_table_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null).Enter(delegate(EatChore.StatesInstance smi)
+			this.eatatmessstation.eat.ToggleAnims("anim_eat_table_kanim", 0f, "").DoEat(this.ediblechunk, this.actualfoodunits, null, null).Enter(delegate(EatChore.StatesInstance smi)
 			{
 				smi.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
 				smi.ApplyRoomEffects();
@@ -184,7 +184,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				smi.DestroyLocator();
 			});
 			this.eatonfloorstate.moveto.InitializeStates(this.eater, this.locator, this.eatonfloorstate.eat, this.eatonfloorstate.eat, null, null);
-			this.eatonfloorstate.eat.ToggleAnims("anim_eat_floor_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null);
+			this.eatonfloorstate.eat.ToggleAnims("anim_eat_floor_kanim", 0f, "").DoEat(this.ediblechunk, this.actualfoodunits, null, null);
 		}
 
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.TargetParameter eater;

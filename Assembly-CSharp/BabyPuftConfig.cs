@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class BabyPuftConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = PuftConfig.CreatePuft("PuftBaby", CREATURES.SPECIES.PUFT.BABY.NAME, CREATURES.SPECIES.PUFT.BABY.DESC, "baby_puft_kanim", true);
-		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "Puft", null);
+		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "Puft", null, false, 5f);
 		return gameObject;
 	}
 

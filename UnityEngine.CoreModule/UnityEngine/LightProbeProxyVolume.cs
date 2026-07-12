@@ -127,6 +127,14 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern LightProbeProxyVolume.DataFormat dataFormat
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public void Update()
 		{
 			this.SetDirtyFlag(true);
@@ -180,6 +188,12 @@ namespace UnityEngine
 		{
 			Low,
 			Normal
+		}
+
+		public enum DataFormat
+		{
+			HalfFloat,
+			Float
 		}
 	}
 }

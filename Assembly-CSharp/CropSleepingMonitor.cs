@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class CropSleepingMonitor : GameStateMachine<CropSleepingMonitor, CropSleepingMonitor.Instance, IStateMachineTarget, CropSleepingMonitor.Def>
@@ -7,7 +9,7 @@ public class CropSleepingMonitor : GameStateMachine<CropSleepingMonitor, CropSle
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.awake;
-		base.serializable = false;
+		base.serializable = StateMachine.SerializeType.Never;
 		this.root.Update("CropSleepingMonitor.root", delegate(CropSleepingMonitor.Instance smi, float dt)
 		{
 			int num = Grid.PosToCell(smi.master.gameObject);
@@ -26,10 +28,21 @@ public class CropSleepingMonitor : GameStateMachine<CropSleepingMonitor, CropSle
 	{
 		public List<Descriptor> GetDescriptors(GameObject obj)
 		{
-			return null;
+			if (this.prefersDarkness)
+			{
+				return new List<Descriptor>
+				{
+					new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_DARKNESS, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_DARKNESS, Descriptor.DescriptorType.Requirement, false)
+				};
+			}
+			Klei.AI.Attribute minLightLux = Db.Get().PlantAttributes.MinLightLux;
+			AttributeInstance attributeInstance = minLightLux.Lookup(obj);
+			int num = Mathf.RoundToInt((attributeInstance != null) ? attributeInstance.GetTotalValue() : obj.GetComponent<Modifiers>().GetPreModifiedAttributeValue(minLightLux));
+			return new List<Descriptor>
+			{
+				new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT.Replace("{Lux}", GameUtil.GetFormattedLux(num)), UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT.Replace("{Lux}", GameUtil.GetFormattedLux(num)), Descriptor.DescriptorType.Requirement, false)
+			};
 		}
-
-		public float lightIntensityThreshold;
 
 		public bool prefersDarkness;
 	}
@@ -48,12 +61,13 @@ public class CropSleepingMonitor : GameStateMachine<CropSleepingMonitor, CropSle
 
 		public bool IsCellSafe(int cell)
 		{
-			float num = (float)Grid.LightIntensity[cell];
+			AttributeInstance attributeInstance = Db.Get().PlantAttributes.MinLightLux.Lookup(base.gameObject);
+			int num = Grid.LightIntensity[cell];
 			if (!base.def.prefersDarkness)
 			{
-				return num >= base.def.lightIntensityThreshold;
+				return (float)num >= attributeInstance.GetTotalValue();
 			}
-			return num <= base.def.lightIntensityThreshold;
+			return num == 0;
 		}
 	}
 }

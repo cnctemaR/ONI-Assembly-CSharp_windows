@@ -4,29 +4,28 @@ using System.Linq;
 using ClipperLib;
 using Delaunay.Geo;
 using MIConvexHull;
-using ProcGen.Map;
 using UnityEngine;
 
 namespace VoronoiTree
 {
 	public class PowerDiagram
 	{
-		public VoronoiMesh<PowerDiagram.DualSite2d, Site, VoronoiEdge<PowerDiagram.DualSite2d, Site>> voronoiMesh { get; private set; }
+		public VoronoiMesh<PowerDiagram.DualSite2d, PowerDiagramSite, VoronoiEdge<PowerDiagram.DualSite2d, PowerDiagramSite>> voronoiMesh { get; private set; }
 
-		public List<Site> GetSites()
+		public List<PowerDiagramSite> GetSites()
 		{
 			return this.sites;
 		}
 
 		public int completedIterations { get; set; }
 
-		public PowerDiagram(Polygon polyBounds, IEnumerable<Site> newSites)
+		public PowerDiagram(Polygon polyBounds, IEnumerable<PowerDiagramSite> newSites)
 		{
 			this.bounds = polyBounds;
 			this.bounds.ForceWinding(Winding.COUNTERCLOCKWISE);
 			this.weightSum = 0f;
 			this.sites.Clear();
-			IEnumerator<Site> enumerator = newSites.GetEnumerator();
+			IEnumerator<PowerDiagramSite> enumerator = newSites.GetEnumerator();
 			int num = 0;
 			while (enumerator.MoveNext())
 			{
@@ -50,19 +49,19 @@ namespace VoronoiTree
 				Vector2 vector2 = this.bounds.Vertices[i];
 				Vector2 vector3 = this.bounds.Vertices[(i < this.bounds.Vertices.Count - 1) ? (i + 1) : 0];
 				Vector2 vector4 = (vector2 - vector).normalized * 1000f;
-				Site site = new Site(vector2 + vector4);
-				site.dummy = true;
-				this.externalEdgePoints.Add(site);
-				site.weight = Mathf.Epsilon;
-				site.currentWeight = Mathf.Epsilon;
-				this.dualSites.Add(new PowerDiagram.DualSite2d(site));
+				PowerDiagramSite powerDiagramSite = new PowerDiagramSite(vector2 + vector4);
+				powerDiagramSite.dummy = true;
+				this.externalEdgePoints.Add(powerDiagramSite);
+				powerDiagramSite.weight = Mathf.Epsilon;
+				powerDiagramSite.currentWeight = Mathf.Epsilon;
+				this.dualSites.Add(new PowerDiagram.DualSite2d(powerDiagramSite));
 				Vector2 vector5 = ((vector3 - vector2) * 0.5f + vector3 - vector).normalized * 1000f;
-				Site site2 = new Site(vector3 + vector5);
-				site2.dummy = true;
-				site2.weight = Mathf.Epsilon;
-				site2.currentWeight = Mathf.Epsilon;
-				this.externalEdgePoints.Add(site2);
-				this.dualSites.Add(new PowerDiagram.DualSite2d(site2));
+				PowerDiagramSite powerDiagramSite2 = new PowerDiagramSite(vector3 + vector5);
+				powerDiagramSite2.dummy = true;
+				powerDiagramSite2.weight = Mathf.Epsilon;
+				powerDiagramSite2.currentWeight = Mathf.Epsilon;
+				this.externalEdgePoints.Add(powerDiagramSite2);
+				this.dualSites.Add(new PowerDiagram.DualSite2d(powerDiagramSite2));
 			}
 		}
 
@@ -70,13 +69,17 @@ namespace VoronoiTree
 		{
 			this.completedIterations = 0;
 			float num = 0f;
-			foreach (Site site in this.sites)
+			foreach (PowerDiagramSite powerDiagramSite in this.sites)
 			{
-				if (site.poly == null)
+				if (powerDiagramSite.poly == null)
 				{
-					throw new Exception(string.Concat(new object[] { "site poly is null for [", site.id, "]", site.position }));
+					string text = "site poly is null for [";
+					string text2 = powerDiagramSite.id.ToString();
+					string text3 = "]";
+					Vector2 position = powerDiagramSite.position;
+					throw new Exception(text + text2 + text3 + position.ToString());
 				}
-				site.position = site.poly.Centroid();
+				powerDiagramSite.position = powerDiagramSite.poly.Centroid();
 			}
 			for (int i = 0; i <= maxIterations; i++)
 			{
@@ -87,14 +90,26 @@ namespace VoronoiTree
 				}
 				catch (Exception ex)
 				{
-					global::Debug.LogError(string.Concat(new object[] { "Error [", num, "] iters ", this.completedIterations, "/", maxIterations, " Exception:", ex.Message, "\n", ex.StackTrace }));
+					global::Debug.LogError(string.Concat(new string[]
+					{
+						"Error [",
+						num.ToString(),
+						"] iters ",
+						this.completedIterations.ToString(),
+						"/",
+						maxIterations.ToString(),
+						" Exception:",
+						ex.Message,
+						"\n",
+						ex.StackTrace
+					}));
 					break;
 				}
 				num = 0f;
-				foreach (Site site2 in this.sites)
+				foreach (PowerDiagramSite powerDiagramSite2 in this.sites)
 				{
-					float num2 = ((site2.poly == null) ? 0.1f : site2.poly.Area());
-					float num3 = site2.weight / this.weightSum * this.bounds.Area();
+					float num2 = ((powerDiagramSite2.poly == null) ? 0.1f : powerDiagramSite2.poly.Area());
+					float num3 = powerDiagramSite2.weight / this.weightSum * this.bounds.Area();
 					num = Mathf.Max(Mathf.Abs(num2 - num3) / num3, num);
 				}
 				if (num < threashold)
@@ -109,12 +124,11 @@ namespace VoronoiTree
 
 		public void ComputeVD()
 		{
-			this.voronoiMesh = VoronoiMesh.Create<PowerDiagram.DualSite2d, Site>(this.dualSites);
-			foreach (Site site in this.voronoiMesh.Vertices)
+			this.voronoiMesh = VoronoiMesh.Create<PowerDiagram.DualSite2d, PowerDiagramSite>(this.dualSites);
+			foreach (PowerDiagramSite powerDiagramSite in this.voronoiMesh.Vertices)
 			{
-				Vector2 circumcenter = site.Circumcenter;
-				Cell cell = this.mg.GetCell(circumcenter);
-				foreach (PowerDiagram.DualSite2d dualSite2d in site.Vertices)
+				Vector2 circumcenter = powerDiagramSite.Circumcenter;
+				foreach (PowerDiagram.DualSite2d dualSite2d in powerDiagramSite.Vertices)
 				{
 					if (!dualSite2d.visited)
 					{
@@ -122,25 +136,12 @@ namespace VoronoiTree
 						if (!dualSite2d.site.dummy)
 						{
 							List<Vector2> list = new List<Vector2>();
-							dualSite2d.site.neighbours = this.TouchingFaces(dualSite2d, site);
-							foreach (Site site2 in dualSite2d.site.neighbours)
+							dualSite2d.site.neighbours = this.TouchingFaces(dualSite2d, powerDiagramSite);
+							foreach (PowerDiagramSite powerDiagramSite2 in dualSite2d.site.neighbours)
 							{
-								Vector2 circumcenter2 = site2.Circumcenter;
+								Vector2 circumcenter2 = powerDiagramSite2.Circumcenter;
 								Color.red.a = 0.3f;
 								list.Add(circumcenter2);
-								Vector2 vector = circumcenter2;
-								Cell cell2 = this.mg.GetCell(vector);
-								if (cell != null && cell2 != null)
-								{
-									cell.Add(cell2);
-									cell2.Add(cell);
-									Corner corner = this.mg.GetCorner(circumcenter, true);
-									Corner corner2 = this.mg.GetCorner(vector, true);
-									cell.Add(corner);
-									cell.Add(corner2);
-									cell2.Add(corner);
-									cell2.Add(corner2);
-								}
 							}
 							if (list.Count > 0)
 							{
@@ -151,15 +152,14 @@ namespace VoronoiTree
 					}
 				}
 			}
-			this.ClipNeighbors();
 		}
 
 		public void ComputeVD3d()
 		{
 			List<PowerDiagram.DualSite3d> list = new List<PowerDiagram.DualSite3d>();
-			foreach (Site site in this.sites)
+			foreach (PowerDiagramSite powerDiagramSite in this.sites)
 			{
-				list.Add(site.ToDualSite());
+				list.Add(powerDiagramSite.ToDualSite());
 			}
 			for (int i = 0; i < this.externalEdgePoints.Count; i++)
 			{
@@ -177,7 +177,7 @@ namespace VoronoiTree
 			}
 		}
 
-		private bool ContainsVert(Site face, PowerDiagram.DualSite2d target)
+		private bool ContainsVert(PowerDiagramSite face, PowerDiagram.DualSite2d target)
 		{
 			if (face == null || face.Vertices == null)
 			{
@@ -193,7 +193,7 @@ namespace VoronoiTree
 			return false;
 		}
 
-		private void AddSite(Site site)
+		private void AddSite(PowerDiagramSite site)
 		{
 			this.weightSum += site.weight;
 			site.currentWeight = site.weight;
@@ -201,55 +201,27 @@ namespace VoronoiTree
 			this.dualSites.Add(new PowerDiagram.DualSite2d(site));
 		}
 
-		private List<Site> TouchingFaces(PowerDiagram.DualSite2d site, Site startingFace)
+		private List<PowerDiagramSite> TouchingFaces(PowerDiagram.DualSite2d site, PowerDiagramSite startingFace)
 		{
-			List<Site> list = new List<Site>();
-			Stack<Site> stack = new Stack<Site>();
+			List<PowerDiagramSite> list = new List<PowerDiagramSite>();
+			Stack<PowerDiagramSite> stack = new Stack<PowerDiagramSite>();
 			stack.Push(startingFace);
 			while (stack.Count > 0)
 			{
-				Site site2 = stack.Pop();
-				if (this.ContainsVert(site2, site) && !list.Contains(site2))
+				PowerDiagramSite powerDiagramSite = stack.Pop();
+				if (this.ContainsVert(powerDiagramSite, site) && !list.Contains(powerDiagramSite))
 				{
-					list.Add(site2);
-					for (int i = 0; i < site2.Adjacency.Length; i++)
+					list.Add(powerDiagramSite);
+					for (int i = 0; i < powerDiagramSite.Adjacency.Length; i++)
 					{
-						if (this.ContainsVert(site2.Adjacency[i], site))
+						if (this.ContainsVert(powerDiagramSite.Adjacency[i], site))
 						{
-							stack.Push(site2.Adjacency[i]);
+							stack.Push(powerDiagramSite.Adjacency[i]);
 						}
 					}
 				}
 			}
 			return list;
-		}
-
-		private void ClipNeighbors()
-		{
-			foreach (Site site in this.sites)
-			{
-				Cell cell = this.mg.GetCell(site.position);
-				if (cell != null && cell.corners != null && cell.corners.Count > 2)
-				{
-					Cell cell2 = this.mg.GetCell(site.position);
-					if (site.poly != null)
-					{
-						foreach (ProcGen.Map.Edge edge in cell2.edges)
-						{
-							LineSegment lineSegment = new LineSegment(new Vector2?(edge.corner0.position), new Vector2?(edge.corner1.position));
-							LineSegment lineSegment2 = new LineSegment(null, null);
-							Vector2 zero = Vector2.zero;
-							Vector2 zero2 = Vector2.zero;
-							bool flag = site.poly.ClipSegment(lineSegment, ref lineSegment2, ref zero, ref zero2);
-							if (lineSegment2.p0 != null && lineSegment2.p1 != null && flag)
-							{
-								edge.corner0.SetPosition(lineSegment2.p0.Value);
-								edge.corner1.SetPosition(lineSegment2.p1.Value);
-							}
-						}
-					}
-				}
-			}
 		}
 
 		private PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d> GetNeigborFaceForEdge(PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d> currentFace, PowerDiagram.DualSite3d sharedVert0, PowerDiagram.DualSite3d sharedVert1)
@@ -338,9 +310,9 @@ namespace VoronoiTree
 			return list;
 		}
 
-		private List<Site> GenerateNeighbors(PowerDiagram.DualSite3d dualSite, PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d> startingFace)
+		private List<PowerDiagramSite> GenerateNeighbors(PowerDiagram.DualSite3d dualSite, PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d> startingFace)
 		{
-			List<Site> list = new List<Site>();
+			List<PowerDiagramSite> list = new List<PowerDiagramSite>();
 			List<PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d>> list2 = new List<PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d>>();
 			Stack<PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d>> stack = new Stack<PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d>>();
 			stack.Push(startingFace);
@@ -367,9 +339,9 @@ namespace VoronoiTree
 		private void ComputePD()
 		{
 			List<PowerDiagram.DualSite3d> list = new List<PowerDiagram.DualSite3d>();
-			foreach (Site site in this.sites)
+			foreach (PowerDiagramSite powerDiagramSite in this.sites)
 			{
-				list.Add(site.ToDualSite());
+				list.Add(powerDiagramSite.ToDualSite());
 			}
 			for (int i = 0; i < this.externalEdgePoints.Count; i++)
 			{
@@ -394,17 +366,14 @@ namespace VoronoiTree
 								Vector2 dualPoint = convexFaceExt2.GetDualPoint();
 								list2.Add(dualPoint);
 							}
-							Polygon polygon = PowerDiagram.PolyForRandomPoints(list2);
-							Polygon polygon2 = polygon.Clip(this.bounds, ClipType.ctIntersection);
-							if (polygon2 == null)
+							Polygon polygon = PowerDiagram.PolyForRandomPoints(list2).Clip(this.bounds, ClipType.ctIntersection);
+							if (polygon == null)
 							{
-								polygon.DebugDraw(Color.yellow, false, 1f, 0f);
-								dualSite3d.site.poly.DebugDraw(Color.black, false, 1f, 2f);
 								DebugExtension.DebugCircle2d(dualSite3d.site.position, Color.magenta, 5f, 0f, true, 20f);
 							}
 							else
 							{
-								dualSite3d.site.poly = polygon2;
+								dualSite3d.site.poly = polygon;
 							}
 						}
 					}
@@ -413,53 +382,57 @@ namespace VoronoiTree
 			this.debug_LastHull = convexHull;
 		}
 
-		private void UpdateWeights(List<Site> sites)
+		private void UpdateWeights(List<PowerDiagramSite> sites)
 		{
-			foreach (Site site in sites)
+			foreach (PowerDiagramSite powerDiagramSite in sites)
 			{
-				if (site.poly == null)
+				if (powerDiagramSite.poly == null)
 				{
-					throw new Exception(string.Concat(new object[] { "site poly is null for [", site.id, "]", site.position }));
+					string text = "site poly is null for [";
+					string text2 = powerDiagramSite.id.ToString();
+					string text3 = "]";
+					Vector2 position = powerDiagramSite.position;
+					throw new Exception(text + text2 + text3 + position.ToString());
 				}
-				site.position = site.poly.Centroid();
-				site.currentWeight = Mathf.Max(site.currentWeight, 1f);
+				powerDiagramSite.position = powerDiagramSite.poly.Centroid();
+				powerDiagramSite.currentWeight = Mathf.Max(powerDiagramSite.currentWeight, 1f);
 			}
 			float num = 0f;
-			foreach (Site site2 in sites)
+			foreach (PowerDiagramSite powerDiagramSite2 in sites)
 			{
-				float num2 = ((site2.poly == null) ? 0.1f : site2.poly.Area());
-				float num3 = site2.weight / this.weightSum * this.bounds.Area();
+				float num2 = ((powerDiagramSite2.poly == null) ? 0.1f : powerDiagramSite2.poly.Area());
+				float num3 = powerDiagramSite2.weight / this.weightSum * this.bounds.Area();
 				float num4 = Mathf.Sqrt(num2 / 3.1415927f);
 				float num5 = Mathf.Sqrt(num3 / 3.1415927f);
 				float num6 = num4 - num5;
 				float num7 = num3 / num2;
-				if (((double)num7 > 1.1 && (double)site2.previousWeightAdaption < 0.9) || ((double)num7 < 0.9 && (double)site2.previousWeightAdaption > 1.1))
+				if (((double)num7 > 1.1 && (double)powerDiagramSite2.previousWeightAdaption < 0.9) || ((double)num7 < 0.9 && (double)powerDiagramSite2.previousWeightAdaption > 1.1))
 				{
 					num7 = Mathf.Sqrt(num7);
 				}
-				if ((double)num7 < 1.1 && (double)num7 > 0.9 && site2.currentWeight != 1f)
+				if ((double)num7 < 1.1 && (double)num7 > 0.9 && powerDiagramSite2.currentWeight != 1f)
 				{
 					num7 = Mathf.Sqrt(num7);
 				}
-				if (site2.currentWeight < 10f)
+				if (powerDiagramSite2.currentWeight < 10f)
 				{
 					num7 *= num7;
 				}
-				if (site2.currentWeight > 10f)
+				if (powerDiagramSite2.currentWeight > 10f)
 				{
 					num7 = Mathf.Sqrt(num7);
 				}
-				site2.previousWeightAdaption = num7;
-				site2.currentWeight *= num7;
-				if (site2.currentWeight < 1f)
+				powerDiagramSite2.previousWeightAdaption = num7;
+				powerDiagramSite2.currentWeight *= num7;
+				if (powerDiagramSite2.currentWeight < 1f)
 				{
-					float num8 = Mathf.Sqrt(site2.currentWeight) - num6;
+					float num8 = Mathf.Sqrt(powerDiagramSite2.currentWeight) - num6;
 					if (num8 < 0f)
 					{
-						site2.currentWeight = -(num8 * num8);
-						if (site2.currentWeight < num)
+						powerDiagramSite2.currentWeight = -(num8 * num8);
+						if (powerDiagramSite2.currentWeight < num)
 						{
-							num = site2.currentWeight;
+							num = powerDiagramSite2.currentWeight;
 						}
 					}
 				}
@@ -467,26 +440,26 @@ namespace VoronoiTree
 			if (num < 0f)
 			{
 				num = -num;
-				foreach (Site site3 in sites)
+				foreach (PowerDiagramSite powerDiagramSite3 in sites)
 				{
-					site3.currentWeight += num + 1f;
+					powerDiagramSite3.currentWeight += num + 1f;
 				}
 			}
 			float num9 = 1f;
-			foreach (Site site4 in sites)
+			foreach (PowerDiagramSite powerDiagramSite4 in sites)
 			{
-				foreach (Site site5 in site4.neighbours)
+				foreach (PowerDiagramSite powerDiagramSite5 in powerDiagramSite4.neighbours)
 				{
-					float num10 = (site4.position - site5.position).sqrMagnitude / (Mathf.Abs(site4.currentWeight - site5.currentWeight) + 1f);
+					float num10 = (powerDiagramSite4.position - powerDiagramSite5.position).sqrMagnitude / (Mathf.Abs(powerDiagramSite4.currentWeight - powerDiagramSite5.currentWeight) + 1f);
 					if (num10 < num9)
 					{
 						num9 = num10;
 					}
 				}
 			}
-			foreach (Site site6 in sites)
+			foreach (PowerDiagramSite powerDiagramSite6 in sites)
 			{
-				site6.currentWeight *= num9;
+				powerDiagramSite6.currentWeight *= num9;
 			}
 		}
 
@@ -551,15 +524,13 @@ namespace VoronoiTree
 
 		public const Winding ForcedWinding = Winding.COUNTERCLOCKWISE;
 
-		public MapGraph mg = new MapGraph(0);
-
 		private Polygon bounds;
 
-		private List<Site> externalEdgePoints = new List<Site>();
+		private List<PowerDiagramSite> externalEdgePoints = new List<PowerDiagramSite>();
 
 		private float weightSum;
 
-		private List<Site> sites = new List<Site>();
+		private List<PowerDiagramSite> sites = new List<PowerDiagramSite>();
 
 		private List<PowerDiagram.DualSite2d> dualSites = new List<PowerDiagram.DualSite2d>();
 
@@ -703,7 +674,7 @@ namespace VoronoiTree
 				}
 			}
 
-			private Site site;
+			private PowerDiagramSite site;
 
 			private Vector2 dualPoint;
 
@@ -775,11 +746,11 @@ namespace VoronoiTree
 				}
 			}
 
-			public Site site { get; set; }
+			public PowerDiagramSite site { get; set; }
 
 			public bool visited { get; set; }
 
-			public DualSite2d(Site site)
+			public DualSite2d(PowerDiagramSite site)
 			{
 				this.site = site;
 				this.visited = false;
@@ -803,7 +774,7 @@ namespace VoronoiTree
 
 			public Vector3 coord { get; set; }
 
-			public Site site { get; set; }
+			public PowerDiagramSite site { get; set; }
 
 			public bool visited { get; set; }
 
@@ -824,7 +795,7 @@ namespace VoronoiTree
 				this.visited = false;
 			}
 
-			public DualSite3d(double _x, double _y, double _z, Site _originalSite)
+			public DualSite3d(double _x, double _y, double _z, PowerDiagramSite _originalSite)
 				: this(_x, _y, _z)
 			{
 				this.site = _originalSite;

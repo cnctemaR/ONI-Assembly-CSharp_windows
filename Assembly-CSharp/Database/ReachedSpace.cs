@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class ReachedSpace : VictoryColonyAchievementRequirement
+	public class ReachedSpace : VictoryColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public ReachedSpace(SpaceDestinationType destinationType = null)
 		{
@@ -50,16 +48,7 @@ namespace Database
 			return SpacecraftManager.instance.hasVisitedWormHole;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write((this.destinationType == null) ? 1 : 0);
-			if (this.destinationType != null)
-			{
-				writer.WriteKleiString(this.destinationType.Id);
-			}
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			if (reader.ReadByte() <= 0)
 			{

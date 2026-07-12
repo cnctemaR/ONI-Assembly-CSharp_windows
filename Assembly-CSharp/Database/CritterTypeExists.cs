@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class CritterTypeExists : ColonyAchievementRequirement
+	public class CritterTypeExists : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public CritterTypeExists(List<Tag> critterTypes)
 		{
@@ -25,16 +23,7 @@ namespace Database
 			return false;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.critterTypes.Count);
-			foreach (Tag tag in this.critterTypes)
-			{
-				writer.WriteKleiString(tag.ToString());
-			}
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			int num = reader.ReadInt32();
 			this.critterTypes = new List<Tag>(num);

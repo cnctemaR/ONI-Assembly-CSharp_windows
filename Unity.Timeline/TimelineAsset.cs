@@ -4,6 +4,7 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Timeline
 {
+	[ExcludeFromPreset]
 	[Serializable]
 	public class TimelineAsset : PlayableAsset, ISerializationCallbackReceiver, ITimelineClipAsset, IPropertyPreview
 	{
@@ -23,11 +24,16 @@ namespace UnityEngine.Timeline
 		{
 			get
 			{
-				if (this.m_DurationMode == TimelineAsset.DurationMode.BasedOnClips)
+				if (this.m_DurationMode != TimelineAsset.DurationMode.BasedOnClips)
 				{
-					return this.CalculateDuration();
+					return this.m_FixedDuration;
 				}
-				return this.m_FixedDuration;
+				DiscreteTime discreteTime = this.CalculateItemsDuration();
+				if (discreteTime <= 0)
+				{
+					return 0.0;
+				}
+				return (double)discreteTime.OneTickBefore();
 			}
 		}
 
@@ -117,7 +123,7 @@ namespace UnityEngine.Timeline
 			this.editorSettings.fps = TimelineAsset.GetValidFramerate(this.editorSettings.fps);
 		}
 
-		private static float GetValidFramerate(float framerate)
+		internal static float GetValidFramerate(float framerate)
 		{
 			return Mathf.Clamp(framerate, TimelineAsset.EditorSettings.kMinFps, TimelineAsset.EditorSettings.kMaxFps);
 		}
@@ -286,7 +292,10 @@ namespace UnityEngine.Timeline
 		{
 			foreach (TrackAsset trackAsset in this.GetOutputTracks())
 			{
-				trackAsset.GatherProperties(director, driver);
+				if (!trackAsset.mutedInHierarchy)
+				{
+					trackAsset.GatherProperties(director, driver);
+				}
 			}
 		}
 
@@ -309,7 +318,12 @@ namespace UnityEngine.Timeline
 			this.m_CacheFlattenedTracks = null;
 		}
 
-		private double CalculateDuration()
+		internal void UpdateFixedDurationWithItemsDuration()
+		{
+			this.m_FixedDuration = (double)this.CalculateItemsDuration();
+		}
+
+		private DiscreteTime CalculateItemsDuration()
 		{
 			DiscreteTime discreteTime = new DiscreteTime(0);
 			foreach (TrackAsset trackAsset in this.flattenedTracks)
@@ -321,9 +335,9 @@ namespace UnityEngine.Timeline
 			}
 			if (discreteTime <= 0)
 			{
-				return 0.0;
+				return new DiscreteTime(0);
 			}
-			return (double)discreteTime.OneTickBefore();
+			return discreteTime;
 		}
 
 		private static void AddSubTracksRecursive(TrackAsset track, ref List<TrackAsset> allTracks)
@@ -405,12 +419,12 @@ namespace UnityEngine.Timeline
 			}
 			if (clip.curves != null)
 			{
-				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.curves, "Delete Curves");
+				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.curves);
 			}
 			if (clip.asset != null)
 			{
 				this.DeleteRecordedAnimation(clip);
-				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.asset, "Delete Clip Asset");
+				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.asset);
 			}
 			TrackAsset parentTrack = clip.parentTrack;
 			parentTrack.RemoveClip(clip);
@@ -435,7 +449,7 @@ namespace UnityEngine.Timeline
 				this.DeleteClip(timelineClip);
 			}
 			this.RemoveTrack(track);
-			TimelineUndo.PushDestroyUndo(this, this, track, "Delete Track");
+			TimelineUndo.PushDestroyUndo(this, this, track);
 			return true;
 		}
 
@@ -493,11 +507,11 @@ namespace UnityEngine.Timeline
 			AnimationTrack animationTrack = track as AnimationTrack;
 			if (animationTrack != null && animationTrack.infiniteClip != null)
 			{
-				TimelineUndo.PushDestroyUndo(this, track, animationTrack.infiniteClip, "Delete Track");
+				TimelineUndo.PushDestroyUndo(this, track, animationTrack.infiniteClip);
 			}
 			if (track.curves != null)
 			{
-				TimelineUndo.PushDestroyUndo(this, track, track.curves, "Delete Track Parameters");
+				TimelineUndo.PushDestroyUndo(this, track, track.curves);
 			}
 		}
 
@@ -509,7 +523,7 @@ namespace UnityEngine.Timeline
 			}
 			if (clip.curves != null)
 			{
-				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.curves, "Delete Clip Parameters");
+				TimelineUndo.PushDestroyUndo(this, clip.parentTrack, clip.curves);
 			}
 			if (!clip.recordable)
 			{
@@ -520,7 +534,7 @@ namespace UnityEngine.Timeline
 			{
 				return;
 			}
-			TimelineUndo.PushDestroyUndo(this, animationPlayableAsset, animationPlayableAsset.clip, "Delete Recording");
+			TimelineUndo.PushDestroyUndo(this, animationPlayableAsset, animationPlayableAsset.clip);
 		}
 
 		private const int k_LatestVersion = 0;
@@ -603,6 +617,18 @@ namespace UnityEngine.Timeline
 				}
 			}
 
+			public bool scenePreview
+			{
+				get
+				{
+					return this.m_ScenePreview;
+				}
+				set
+				{
+					this.m_ScenePreview = value;
+				}
+			}
+
 			internal static readonly float kMinFps = (float)TimeUtility.kFrameRateEpsilon;
 
 			internal static readonly float kMaxFps = 1000f;
@@ -612,6 +638,10 @@ namespace UnityEngine.Timeline
 			[HideInInspector]
 			[SerializeField]
 			private float m_Framerate = TimelineAsset.EditorSettings.kDefaultFps;
+
+			[HideInInspector]
+			[SerializeField]
+			private bool m_ScenePreview = true;
 		}
 	}
 }

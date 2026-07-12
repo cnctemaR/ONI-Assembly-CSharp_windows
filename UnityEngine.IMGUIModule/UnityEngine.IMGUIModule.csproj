@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C719CBCE-289E-47FB-962B-EC461A7D5B4C}</ProjectGuid>
+    <ProjectGuid>{DD3DEF40-76A7-4169-85C9-351C4936F17F}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnityEngine</RootNamespace>
+    <RootNamespace>UnityEngine.IMGUIModule</RootNamespace>
     <AssemblyName>UnityEngine.IMGUIModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
@@ -14,59 +14,65 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="Event.cs" />
-    <Compile Include="EventCommandNames.cs" />
-    <Compile Include="EventInterests.cs" />
-    <Compile Include="EventModifiers.cs" />
-    <Compile Include="EventType.cs" />
-    <Compile Include="ExitGUIException.cs" />
-    <Compile Include="FocusType.cs" />
-    <Compile Include="GUI.cs" />
-    <Compile Include="GUIAspectSizer.cs" />
-    <Compile Include="GUIClip.cs" />
-    <Compile Include="GUIContent.cs" />
-    <Compile Include="GUIDebugger.cs" />
-    <Compile Include="GUIElement.cs" />
-    <Compile Include="GUIGridSizer.cs" />
-    <Compile Include="GUILayer.cs" />
-    <Compile Include="GUILayout.cs" />
-    <Compile Include="GUILayoutEntry.cs" />
-    <Compile Include="GUILayoutGroup.cs" />
-    <Compile Include="GUILayoutOption.cs" />
-    <Compile Include="GUILayoutUtility.cs" />
-    <Compile Include="GUIScrollGroup.cs" />
-    <Compile Include="GUISettings.cs" />
-    <Compile Include="GUISkin.cs" />
-    <Compile Include="GUIStateObjects.cs" />
-    <Compile Include="GUIStyle.cs" />
-    <Compile Include="GUIStyleState.cs" />
-    <Compile Include="GUITargetAttribute.cs" />
-    <Compile Include="GUITexture.cs" />
-    <Compile Include="GUIUtility.cs" />
-    <Compile Include="GUIWordWrapSizer.cs" />
-    <Compile Include="ImagePosition.cs" />
-    <Compile Include="ObjectGUIState.cs" />
-    <Compile Include="PlatformSelection.cs" />
-    <Compile Include="PointerType.cs" />
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScaleMode.cs" />
-    <Compile Include="ScrollViewState.cs" />
-    <Compile Include="SliderHandler.cs" />
-    <Compile Include="SliderState.cs" />
-    <Compile Include="TextClipping.cs" />
-    <Compile Include="TextEditor.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsReadOnlyAttribute.cs" />
+    <Compile Include="UnityEngine\Event.cs" />
+    <Compile Include="UnityEngine\EventCommandNames.cs" />
+    <Compile Include="UnityEngine\EventInterests.cs" />
+    <Compile Include="UnityEngine\EventModifiers.cs" />
+    <Compile Include="UnityEngine\EventType.cs" />
+    <Compile Include="UnityEngine\ExitGUIException.cs" />
+    <Compile Include="UnityEngine\FocusType.cs" />
+    <Compile Include="UnityEngine\GUI.cs" />
+    <Compile Include="UnityEngine\GUIAspectSizer.cs" />
+    <Compile Include="UnityEngine\GUIClip.cs" />
+    <Compile Include="UnityEngine\GUIContent.cs" />
+    <Compile Include="UnityEngine\GUIDebugger.cs" />
+    <Compile Include="UnityEngine\GUIElement.cs" />
+    <Compile Include="UnityEngine\GUIGridSizer.cs" />
+    <Compile Include="UnityEngine\GUILayer.cs" />
+    <Compile Include="UnityEngine\GUILayout.cs" />
+    <Compile Include="UnityEngine\GUILayoutEntry.cs" />
+    <Compile Include="UnityEngine\GUILayoutGroup.cs" />
+    <Compile Include="UnityEngine\GUILayoutOption.cs" />
+    <Compile Include="UnityEngine\GUILayoutUtility.cs" />
+    <Compile Include="UnityEngine\GUIScrollGroup.cs" />
+    <Compile Include="UnityEngine\GUISettings.cs" />
+    <Compile Include="UnityEngine\GUISkin.cs" />
+    <Compile Include="UnityEngine\GUIStateObjects.cs" />
+    <Compile Include="UnityEngine\GUIStyle.cs" />
+    <Compile Include="UnityEngine\GUIStyleState.cs" />
+    <Compile Include="UnityEngine\GUITargetAttribute.cs" />
+    <Compile Include="UnityEngine\GUITexture.cs" />
+    <Compile Include="UnityEngine\GUIUtility.cs" />
+    <Compile Include="UnityEngine\GUIWordWrapSizer.cs" />
+    <Compile Include="UnityEngine\ImagePosition.cs" />
+    <Compile Include="UnityEngine\ObjectGUIState.cs" />
+    <Compile Include="UnityEngine\PlatformSelection.cs" />
+    <Compile Include="UnityEngine\PointerType.cs" />
+    <Compile Include="UnityEngine\ScaleMode.cs" />
+    <Compile Include="UnityEngine\ScrollViewState.cs" />
+    <Compile Include="UnityEngine\SliderHandler.cs" />
+    <Compile Include="UnityEngine\SliderState.cs" />
+    <Compile Include="UnityEngine\TextClipping.cs" />
+    <Compile Include="UnityEngine\TextEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B43}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F175}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F180}</Project>
+      <Name>UnityEngine.InputLegacyModule</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B57}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F18B}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B60}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F194}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
   </ItemGroup>

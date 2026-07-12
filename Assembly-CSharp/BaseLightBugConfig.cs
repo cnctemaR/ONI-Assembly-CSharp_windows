@@ -36,6 +36,16 @@ public static class BaseLightBugConfig
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
+		if (DlcManager.FeatureRadiationEnabled())
+		{
+			RadiationEmitter radiationEmitter = gameObject.AddOrGet<RadiationEmitter>();
+			radiationEmitter.emitType = RadiationEmitter.RadiationEmitterType.Constant;
+			radiationEmitter.radiusProportionalToRads = false;
+			radiationEmitter.emitRadiusX = 6;
+			radiationEmitter.emitRadiusY = radiationEmitter.emitRadiusX;
+			radiationEmitter.emitRads = 12f;
+			radiationEmitter.emissionOffset = new Vector3(0f, 0f, 0f);
+		}
 		if (is_baby)
 		{
 			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
@@ -57,22 +67,22 @@ public static class BaseLightBugConfig
 			gameObject.AddOrGet<LightSymbolTracker>().targetSymbol = "snapTo_light_locator";
 			gameObject.AddOrGetDef<CreatureLightToggleController.Def>();
 		}
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
-			.Add(new IncubatingStates.Def(), true)
-			.Add(new BaggedStates.Def(), true)
-			.Add(new StunnedStates.Def(), true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new BaggedStates.Def(), true, -1)
+			.Add(new StunnedStates.Def(), true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
 			.PushInterruptGroup()
-			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new RanchedStates.Def(), true)
-			.Add(new LayEggStates.Def(), true)
-			.Add(new EatStates.Def(), true)
-			.Add(new MoveToLureStates.Def(), true)
-			.Add(new CallAdultStates.Def(), true)
+			.Add(new CreatureSleepStates.Def(), true, -1)
+			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new EatStates.Def(), true, -1)
+			.Add(new MoveToLureStates.Def(), true, -1)
+			.Add(new CallAdultStates.Def(), true, -1)
 			.PopInterruptGroup()
-			.Add(new IdleStates.Def(), true);
+			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.LightBugSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

@@ -118,8 +118,7 @@ namespace UnityEngine.EventSystems
 
 		private bool ShouldIgnoreEventsOnNoFocus()
 		{
-			OperatingSystemFamily operatingSystemFamily = SystemInfo.operatingSystemFamily;
-			return operatingSystemFamily - OperatingSystemFamily.MacOSX <= 2;
+			return true;
 		}
 
 		public override void UpdateModule()
@@ -141,17 +140,18 @@ namespace UnityEngine.EventSystems
 		{
 			ExecuteEvents.Execute<IPointerUpHandler>(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
 			GameObject eventHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentOverGo);
-			if (pointerEvent.pointerPress == eventHandler && pointerEvent.eligibleForClick)
+			if (pointerEvent.pointerClick == eventHandler && pointerEvent.eligibleForClick)
 			{
-				ExecuteEvents.Execute<IPointerClickHandler>(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
+				ExecuteEvents.Execute<IPointerClickHandler>(pointerEvent.pointerClick, pointerEvent, ExecuteEvents.pointerClickHandler);
 			}
-			else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
+			if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
 			{
 				ExecuteEvents.ExecuteHierarchy<IDropHandler>(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
 			}
 			pointerEvent.eligibleForClick = false;
 			pointerEvent.pointerPress = null;
 			pointerEvent.rawPointerPress = null;
+			pointerEvent.pointerClick = null;
 			if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
 			{
 				ExecuteEvents.Execute<IEndDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
@@ -281,9 +281,10 @@ namespace UnityEngine.EventSystems
 					pointerEvent.pointerEnter = gameObject;
 				}
 				GameObject gameObject2 = ExecuteEvents.ExecuteHierarchy<IPointerDownHandler>(gameObject, pointerEvent, ExecuteEvents.pointerDownHandler);
+				GameObject eventHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
 				if (gameObject2 == null)
 				{
-					gameObject2 = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
+					gameObject2 = eventHandler;
 				}
 				float unscaledTime = Time.unscaledTime;
 				if (gameObject2 == pointerEvent.lastPress)
@@ -305,29 +306,30 @@ namespace UnityEngine.EventSystems
 				}
 				pointerEvent.pointerPress = gameObject2;
 				pointerEvent.rawPointerPress = gameObject;
+				pointerEvent.pointerClick = eventHandler;
 				pointerEvent.clickTime = unscaledTime;
 				pointerEvent.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(gameObject);
 				if (pointerEvent.pointerDrag != null)
 				{
 					ExecuteEvents.Execute<IInitializePotentialDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
 				}
-				this.m_InputPointerEvent = pointerEvent;
 			}
 			if (released)
 			{
 				ExecuteEvents.Execute<IPointerUpHandler>(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
-				GameObject eventHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
-				if (pointerEvent.pointerPress == eventHandler && pointerEvent.eligibleForClick)
+				GameObject eventHandler2 = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
+				if (pointerEvent.pointerClick == eventHandler2 && pointerEvent.eligibleForClick)
 				{
-					ExecuteEvents.Execute<IPointerClickHandler>(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
+					ExecuteEvents.Execute<IPointerClickHandler>(pointerEvent.pointerClick, pointerEvent, ExecuteEvents.pointerClickHandler);
 				}
-				else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
+				if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
 				{
 					ExecuteEvents.ExecuteHierarchy<IDropHandler>(gameObject, pointerEvent, ExecuteEvents.dropHandler);
 				}
 				pointerEvent.eligibleForClick = false;
 				pointerEvent.pointerPress = null;
 				pointerEvent.rawPointerPress = null;
+				pointerEvent.pointerClick = null;
 				if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
 				{
 					ExecuteEvents.Execute<IEndDragHandler>(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
@@ -336,8 +338,8 @@ namespace UnityEngine.EventSystems
 				pointerEvent.pointerDrag = null;
 				ExecuteEvents.ExecuteHierarchy<IPointerExitHandler>(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
 				pointerEvent.pointerEnter = null;
-				this.m_InputPointerEvent = pointerEvent;
 			}
+			this.m_InputPointerEvent = pointerEvent;
 		}
 
 		protected bool SendSubmitEventToSelectedObject()
@@ -482,9 +484,10 @@ namespace UnityEngine.EventSystems
 				buttonData.pointerPressRaycast = buttonData.pointerCurrentRaycast;
 				base.DeselectIfSelectionChanged(gameObject, buttonData);
 				GameObject gameObject2 = ExecuteEvents.ExecuteHierarchy<IPointerDownHandler>(gameObject, buttonData, ExecuteEvents.pointerDownHandler);
+				GameObject eventHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
 				if (gameObject2 == null)
 				{
-					gameObject2 = ExecuteEvents.GetEventHandler<IPointerClickHandler>(gameObject);
+					gameObject2 = eventHandler;
 				}
 				float unscaledTime = Time.unscaledTime;
 				if (gameObject2 == buttonData.lastPress)
@@ -507,6 +510,7 @@ namespace UnityEngine.EventSystems
 				}
 				buttonData.pointerPress = gameObject2;
 				buttonData.rawPointerPress = gameObject;
+				buttonData.pointerClick = eventHandler;
 				buttonData.clickTime = unscaledTime;
 				buttonData.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(gameObject);
 				if (buttonData.pointerDrag != null)

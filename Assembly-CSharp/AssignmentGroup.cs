@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 public class AssignmentGroup : IAssignableIdentity
 {
@@ -15,6 +16,11 @@ public class AssignmentGroup : IAssignableIdentity
 		{
 			this.members.Add(assignableIdentity);
 		}
+		if (Game.Instance != null)
+		{
+			Game.Instance.assignmentManager.assignment_groups.Add(id, this);
+			Game.Instance.Trigger(-1123234494, this);
+		}
 	}
 
 	public void AddMember(IAssignableIdentity member)
@@ -23,11 +29,13 @@ public class AssignmentGroup : IAssignableIdentity
 		{
 			this.members.Add(member);
 		}
+		Game.Instance.Trigger(-1123234494, this);
 	}
 
 	public void RemoveMember(IAssignableIdentity member)
 	{
 		this.members.Remove(member);
+		Game.Instance.Trigger(-1123234494, this);
 	}
 
 	public string GetProperName()
@@ -43,6 +51,11 @@ public class AssignmentGroup : IAssignableIdentity
 	public bool IsNull()
 	{
 		return false;
+	}
+
+	public ReadOnlyCollection<IAssignableIdentity> GetMembers()
+	{
+		return this.members.AsReadOnly();
 	}
 
 	public List<Ownables> GetOwners()

@@ -56,11 +56,15 @@ namespace ProcGen.Noise
 				blend.ControlModule = controlModule;
 				blend.RightModule = rightModule;
 				blend.LeftModule = leftModule;
+				return;
 			}
-			Select select = target as Select;
-			select.ControlModule = controlModule;
-			select.RightModule = rightModule;
-			select.LeftModule = leftModule;
+			if (this.selectType == Selector.SelectType.Select)
+			{
+				Select select = target as Select;
+				select.ControlModule = controlModule;
+				select.RightModule = rightModule;
+				select.LeftModule = leftModule;
+			}
 		}
 
 		public enum SelectType

@@ -30,22 +30,22 @@ public static class BaseMooConfig
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
 		gameObject.AddOrGetDef<RanchableMonitor.Def>();
 		gameObject.AddOrGetDef<FixedCapturableMonitor.Def>();
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new BaggedStates.Def(), true)
-			.Add(new StunnedStates.Def(), true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new BaggedStates.Def(), true, -1)
+			.Add(new StunnedStates.Def(), true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
 			.PushInterruptGroup()
-			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new RanchedStates.Def(), true)
-			.Add(new EatStates.Def(), true)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP), true)
-			.Add(new MoveToLureStates.Def(), true)
+			.Add(new CreatureSleepStates.Def(), true, -1)
+			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new EatStates.Def(), true, -1)
+			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP), true, -1)
+			.Add(new MoveToLureStates.Def(), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMooConfig.CustomIdleAnim)
-			}, true);
+			}, true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MooSpecies, symbol_override_prefix);
 		return gameObject;
 	}

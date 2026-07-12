@@ -12,7 +12,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.normal;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.EventHandler(GameHashes.CaloriesConsumed, delegate(CreatureCalorieMonitor.Instance smi, object data)
 		{
 			smi.OnCaloriesConsumed(data);
@@ -31,13 +31,13 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		}).Transition(this.hungry.outofcalories.starvedtodeath, (CreatureCalorieMonitor.Instance smi) => smi.GetDeathTimeRemaining() <= 0f, UpdateRate.SIM_1000ms)
 			.TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.wild, false)
 			.ToggleStatusItem(global::STRINGS.CREATURES.STATUSITEMS.STARVING.NAME, global::STRINGS.CREATURES.STATUSITEMS.STARVING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.BadMinor, false, default(HashedString), 129022, (string str, CreatureCalorieMonitor.Instance smi) => str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(smi.GetDeathTimeRemaining(), "F1", false)), null, null)
-			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(global::STRINGS.CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notifications, object data) => global::STRINGS.CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null, null, true))
+			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(global::STRINGS.CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, (List<Notification> notifications, object data) => global::STRINGS.CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null, null, true))
 			.ToggleEffect((CreatureCalorieMonitor.Instance smi) => this.outOfCaloriesTame);
 		this.hungry.outofcalories.starvedtodeath.Enter(delegate(CreatureCalorieMonitor.Instance smi)
 		{
 			smi.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Starvation);
 		});
-		this.outOfCaloriesTame = new Effect("OutOfCaloriesTame", global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.NAME, global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.TOOLTIP, 0f, false, false, false, null, 0f, null);
+		this.outOfCaloriesTame = new Effect("OutOfCaloriesTame", global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.NAME, global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.TOOLTIP, 0f, false, false, false, null, 0f, null, "");
 		this.outOfCaloriesTame.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.NAME, false, false, true));
 	}
 
@@ -140,6 +140,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		public float minimumTimeBeforePooping = 10f;
 
 		public float deathTimer = 6000f;
+
+		public bool storePoop;
 	}
 
 	public class HungryStates : GameStateMachine<CreatureCalorieMonitor, CreatureCalorieMonitor.Instance, IStateMachineTarget, CreatureCalorieMonitor.Def>.State
@@ -163,11 +165,12 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 	{
 		public Diet diet { get; private set; }
 
-		public Stomach(Diet diet, GameObject owner, float min_poop_size_in_calories)
+		public Stomach(Diet diet, GameObject owner, float min_poop_size_in_calories, bool storePoop)
 		{
 			this.diet = diet;
 			this.owner = owner;
 			this.minPoopSizeInCalories = min_poop_size_in_calories;
+			this.storePoop = storePoop;
 		}
 
 		public void Poop()
@@ -203,7 +206,24 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			global::Debug.Assert(element != null, "TODO: implement non-element tag spawning");
 			int num3 = Grid.PosToCell(this.owner.transform.GetPosition());
 			float temperature = this.owner.GetComponent<PrimaryElement>().Temperature;
-			if (element.IsLiquid)
+			DebugUtil.DevAssert(!this.storePoop || !flag, "Stomach cannot both store poop & create a solid tile.", null);
+			if (this.storePoop)
+			{
+				Storage component = this.owner.GetComponent<Storage>();
+				if (element.IsLiquid)
+				{
+					component.AddLiquid(element.id, num, temperature, b, num2, false, true);
+				}
+				else if (element.IsGas)
+				{
+					component.AddGasChunk(element.id, num, temperature, b, num2, false, true);
+				}
+				else
+				{
+					component.AddOre(element.id, num, temperature, b, num2, false, true);
+				}
+			}
+			else if (element.IsLiquid)
 			{
 				FallingWater.instance.AddParticle(num3, element.idx, num, temperature, b, num2, true, false, false, false);
 			}
@@ -225,13 +245,13 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			{
 				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Ore), num, temperature, b, num2, false, false, false);
 			}
-			KPrefabID component = this.owner.GetComponent<KPrefabID>();
-			if (!Game.Instance.savedInfo.creaturePoopAmount.ContainsKey(component.PrefabTag))
+			KPrefabID component2 = this.owner.GetComponent<KPrefabID>();
+			if (!Game.Instance.savedInfo.creaturePoopAmount.ContainsKey(component2.PrefabTag))
 			{
-				Game.Instance.savedInfo.creaturePoopAmount.Add(component.PrefabTag, 0f);
+				Game.Instance.savedInfo.creaturePoopAmount.Add(component2.PrefabTag, 0f);
 			}
 			Dictionary<Tag, float> creaturePoopAmount = Game.Instance.savedInfo.creaturePoopAmount;
-			Tag prefabTag = component.PrefabTag;
+			Tag prefabTag = component2.PrefabTag;
 			creaturePoopAmount[prefabTag] += num;
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, element.name, this.owner.transform, 1.5f, false);
 		}
@@ -311,6 +331,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 		private GameObject owner;
 
+		private bool storePoop;
+
 		[Serializable]
 		public struct CaloriesConsumedEntry
 		{
@@ -327,7 +349,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		{
 			this.calories = Db.Get().Amounts.Calories.Lookup(base.gameObject);
 			this.calories.value = this.calories.GetMax() * 0.9f;
-			this.stomach = new CreatureCalorieMonitor.Stomach(def.diet, master.gameObject, def.minPoopSizeInCalories);
+			this.stomach = new CreatureCalorieMonitor.Stomach(def.diet, master.gameObject, def.minPoopSizeInCalories, def.storePoop);
 			this.metabolism = base.gameObject.GetAttributes().Add(Db.Get().CritterAttributes.Metabolism);
 			this.deltaCalorieMetabolismModifier = new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, 1f, DUPLICANTS.MODIFIERS.METABOLISM_CALORIE_MODIFIER.NAME, true, false, false);
 			this.calories.deltaAttribute.Add(this.deltaCalorieMetabolismModifier);
@@ -352,7 +374,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			this.stomach.Poop();
 		}
 
-		private float GetCalories0to1()
+		public float GetCalories0to1()
 		{
 			return this.calories.value / this.calories.GetMax();
 		}

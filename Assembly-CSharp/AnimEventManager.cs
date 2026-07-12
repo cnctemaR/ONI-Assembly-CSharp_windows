@@ -189,9 +189,9 @@ public class AnimEventManager
 	[DebuggerDisplay("{controller.name}, Anim={currentAnim}, Frame={currentFrame}, Mode={mode}")]
 	public struct EventPlayerData
 	{
-		public int currentFrame { get; set; }
+		public int currentFrame { readonly get; set; }
 
-		public int previousFrame { get; set; }
+		public int previousFrame { readonly get; set; }
 
 		public ComponentType GetComponent<ComponentType>()
 		{

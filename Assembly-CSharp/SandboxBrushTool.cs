@@ -112,6 +112,22 @@ public class SandboxBrushTool : BrushTool
 		SimMessages.ReplaceElement(cell2, id, sandBoxTool, floatSetting, floatSetting2, b, this.settings.GetIntSetting("SandboxTools.DiseaseCount"), num);
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.TryConsume(global::Action.SandboxCopyElement))
+		{
+			int num = Grid.PosToCell(PlayerController.GetCursorPos(KInputManager.GetMousePos()));
+			if (Grid.IsValidCell(num))
+			{
+				SandboxSampleTool.Sample(num);
+			}
+		}
+		if (!e.Consumed)
+		{
+			base.OnKeyDown(e);
+		}
+	}
+
 	public static SandboxBrushTool instance;
 
 	protected HashSet<int> recentlyAffectedCells = new HashSet<int>();

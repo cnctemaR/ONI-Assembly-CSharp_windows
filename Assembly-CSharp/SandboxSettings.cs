@@ -18,12 +18,12 @@ public class SandboxSettings
 		SandboxSettings.Setting<int> setting = this.intSettings.Find((SandboxSettings.Setting<int> match) => match.PrefsKey == prefsKey);
 		if (setting == null)
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				"No intSetting named: ",
 				prefsKey,
 				" could be found amongst ",
-				this.intSettings.Count,
+				this.intSettings.Count.ToString(),
 				" int settings."
 			}));
 		}
@@ -60,12 +60,12 @@ public class SandboxSettings
 		SandboxSettings.Setting<float> setting = this.floatSettings.Find((SandboxSettings.Setting<float> match) => match.PrefsKey == prefsKey);
 		if (setting == null)
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				"No KPlayerPrefs float setting named: ",
 				prefsKey,
 				" could be found amongst ",
-				this.floatSettings.Count,
+				this.floatSettings.Count.ToString(),
 				" float settings."
 			}));
 		}
@@ -102,12 +102,12 @@ public class SandboxSettings
 		SandboxSettings.Setting<string> setting = this.stringSettings.Find((SandboxSettings.Setting<string> match) => match.PrefsKey == prefsKey);
 		if (setting == null)
 		{
-			Debug.LogError(string.Concat(new object[]
+			Debug.LogError(string.Concat(new string[]
 			{
 				"No KPlayerPrefs string setting named: ",
 				prefsKey,
 				" could be found amongst ",
-				this.stringSettings.Count,
+				this.stringSettings.Count.ToString(),
 				" settings."
 			}));
 		}
@@ -182,6 +182,11 @@ public class SandboxSettings
 			KPlayerPrefs.SetFloat("SandbosTools.TemperatureAdditive", val);
 			this.OnChangeAdditiveTemperature();
 		}, 5f);
+		this.AddFloatSetting("SandbosTools.RadiationAdditive", delegate(float val)
+		{
+			KPlayerPrefs.SetFloat("SandbosTools.RadiationAdditive", val);
+			this.OnChangeAdditiveRadiation();
+		}, 50f);
 	}
 
 	public void RestorePrefs()
@@ -230,6 +235,8 @@ public class SandboxSettings
 
 	public global::System.Action OnChangeAdditiveTemperature;
 
+	public global::System.Action OnChangeAdditiveRadiation;
+
 	public const string KEY_SELECTED_ENTITY = "SandboxTools.SelectedEntity";
 
 	public const string KEY_SELECTED_ELEMENT = "SandboxTools.SelectedElement";
@@ -249,6 +256,8 @@ public class SandboxSettings
 	public const string KEY_TEMPERATURE = "SandbosTools.Temperature";
 
 	public const string KEY_TEMPERATURE_ADDITIVE = "SandbosTools.TemperatureAdditive";
+
+	public const string KEY_RADIATION_ADDITIVE = "SandbosTools.RadiationAdditive";
 
 	public class Setting<T>
 	{

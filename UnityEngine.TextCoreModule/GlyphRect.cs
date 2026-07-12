@@ -109,8 +109,8 @@ namespace UnityEngine.TextCore
 		[NativeName("x")]
 		private int m_X;
 
-		[SerializeField]
 		[NativeName("y")]
+		[SerializeField]
 		private int m_Y;
 
 		[SerializeField]

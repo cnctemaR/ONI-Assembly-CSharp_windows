@@ -95,7 +95,12 @@ namespace Klei.AI
 
 		private void ConfigureStatusItem()
 		{
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.effect.description, "", this.effect.isBad ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, this.effect.isBad ? NotificationType.Bad : NotificationType.Neutral, false, OverlayModes.None.ID, 2);
+			StatusItem.IconType iconType = (this.effect.isBad ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info);
+			if (!this.effect.customIcon.IsNullOrWhiteSpace())
+			{
+				iconType = StatusItem.IconType.Custom;
+			}
+			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.effect.description, this.effect.customIcon, iconType, this.effect.isBad ? NotificationType.Bad : NotificationType.Neutral, false, OverlayModes.None.ID, 2, false, null);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
 		}
@@ -109,14 +114,14 @@ namespace Klei.AI
 		{
 			string text = str;
 			EffectInstance effectInstance = (EffectInstance)data;
-			string text2 = Effect.CreateTooltip(effectInstance.effect, false, "\n");
+			string text2 = Effect.CreateTooltip(effectInstance.effect, false, "\n    • ", true);
 			if (!string.IsNullOrEmpty(text2))
 			{
-				text = text + "\n" + text2;
+				text = text + "\n\n" + text2;
 			}
 			if (effectInstance.effect.duration > 0f)
 			{
-				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_REMAINING, GameUtil.GetFormattedCycles(this.GetTimeRemaining(), "F1", false));
+				text = text + "\n\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_REMAINING, GameUtil.GetFormattedCycles(this.GetTimeRemaining(), "F1", false));
 			}
 			return text;
 		}

@@ -92,14 +92,18 @@ public class JetSuitLocker : StateMachineComponent<JetSuitLocker.StatesInstance>
 		component2.amount += num;
 	}
 
-	ConduitType ISecondaryInput.GetSecondaryConduitType()
+	bool ISecondaryInput.HasSecondaryConduitType(ConduitType type)
 	{
-		return this.portInfo.conduitType;
+		return this.portInfo.conduitType == type;
 	}
 
-	CellOffset ISecondaryInput.GetSecondaryConduitOffset()
+	public CellOffset GetSecondaryConduitOffset(ConduitType type)
 	{
-		return this.portInfo.offset;
+		if (this.portInfo.conduitType == type)
+		{
+			return this.portInfo.offset;
+		}
+		return CellOffset.none;
 	}
 
 	public bool HasFuel()
@@ -172,7 +176,7 @@ public class JetSuitLocker : StateMachineComponent<JetSuitLocker.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.empty;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.root.Update("RefreshMeter", delegate(JetSuitLocker.StatesInstance smi, float dt)
 			{
 				smi.master.RefreshMeter();

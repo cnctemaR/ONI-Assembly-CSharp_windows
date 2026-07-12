@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -9,11 +8,11 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 	{
 		default_state = this.root;
 		this.root.Update(new Action<OvercrowdingMonitor.Instance, float>(OvercrowdingMonitor.UpdateState), UpdateRate.SIM_1000ms, true);
-		OvercrowdingMonitor.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null);
+		OvercrowdingMonitor.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
 		OvercrowdingMonitor.futureOvercrowdedEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -1f, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, true, false, true));
-		OvercrowdingMonitor.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null);
+		OvercrowdingMonitor.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
 		OvercrowdingMonitor.overcrowdedEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, true));
-		OvercrowdingMonitor.stuckEffect = new Effect("Confined", CREATURES.MODIFIERS.CONFINED.NAME, CREATURES.MODIFIERS.CONFINED.TOOLTIP, 0f, true, false, true, null, 0f, null);
+		OvercrowdingMonitor.stuckEffect = new Effect("Confined", CREATURES.MODIFIERS.CONFINED.NAME, CREATURES.MODIFIERS.CONFINED.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
 		OvercrowdingMonitor.stuckEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, CREATURES.MODIFIERS.CONFINED.NAME, false, false, true));
 	}
 
@@ -77,15 +76,6 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		component.Remove(effect);
 	}
 
-	private static List<KPrefabID> GetCreatureCollection(OvercrowdingMonitor.Instance smi, CavityInfo cavity_info)
-	{
-		if (smi.HasTag(GameTags.Egg))
-		{
-			return cavity_info.eggs;
-		}
-		return cavity_info.creatures;
-	}
-
 	private static void UpdateCavity(OvercrowdingMonitor.Instance smi, float dt)
 	{
 		CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(smi));
@@ -94,13 +84,27 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			KPrefabID component = smi.GetComponent<KPrefabID>();
 			if (smi.cavity != null)
 			{
-				OvercrowdingMonitor.GetCreatureCollection(smi, smi.cavity).Remove(component);
+				if (smi.HasTag(GameTags.Egg))
+				{
+					smi.cavity.eggs.Remove(component);
+				}
+				else
+				{
+					smi.cavity.creatures.Remove(component);
+				}
 				Game.Instance.roomProber.UpdateRoom(cavityForCell);
 			}
 			smi.cavity = cavityForCell;
 			if (smi.cavity != null)
 			{
-				OvercrowdingMonitor.GetCreatureCollection(smi, smi.cavity).Add(component);
+				if (smi.HasTag(GameTags.Egg))
+				{
+					smi.cavity.eggs.Add(component);
+				}
+				else
+				{
+					smi.cavity.creatures.Add(component);
+				}
 				Game.Instance.roomProber.UpdateRoom(smi.cavity);
 			}
 		}
@@ -133,7 +137,12 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			KPrefabID component = base.master.GetComponent<KPrefabID>();
 			if (this.cavity != null)
 			{
-				OvercrowdingMonitor.GetCreatureCollection(this, this.cavity).Remove(component);
+				if (base.HasTag(GameTags.Egg))
+				{
+					this.cavity.eggs.Remove(component);
+					return;
+				}
+				this.cavity.creatures.Remove(component);
 			}
 		}
 

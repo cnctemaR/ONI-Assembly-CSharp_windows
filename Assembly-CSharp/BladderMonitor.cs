@@ -47,10 +47,10 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 
 		public bool NeedsToPee()
 		{
-			DebugUtil.DevAssert(base.master != null, "master ref null");
-			DebugUtil.DevAssert(!base.master.isNull, "master isNull");
+			DebugUtil.DevAssert(base.master != null, "master ref null", null);
+			DebugUtil.DevAssert(!base.master.isNull, "master isNull", null);
 			KPrefabID component = base.master.GetComponent<KPrefabID>();
-			DebugUtil.DevAssert(component, "kpid was null");
+			DebugUtil.DevAssert(component, "kpid was null", null);
 			return !component.HasTag(GameTags.Asleep) && this.bladder.value >= 100f;
 		}
 

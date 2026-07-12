@@ -35,11 +35,11 @@ namespace Klei.AI
 			string text;
 			if (this.formatter != null)
 			{
-				text = this.formatter.GetFormattedValue(value, this.formatter.DeltaTimeSlice, go);
+				text = this.formatter.GetFormattedValue(value, this.formatter.DeltaTimeSlice);
 			}
 			else if (this.attribute.formatter != null)
 			{
-				text = this.attribute.formatter.GetFormattedValue(value, this.attribute.formatter.DeltaTimeSlice, go);
+				text = this.attribute.formatter.GetFormattedValue(value, this.attribute.formatter.DeltaTimeSlice);
 			}
 			else
 			{

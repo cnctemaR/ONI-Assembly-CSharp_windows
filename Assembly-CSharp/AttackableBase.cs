@@ -15,7 +15,7 @@ public class AttackableBase : Workable, IApproachable
 		this.skillExperienceMultiplier = SKILLS.BARELY_EVER_EXPERIENCE;
 		this.SetupScenePartitioner(null);
 		base.Subscribe<AttackableBase>(1088554450, AttackableBase.OnCellChangedDelegate);
-		GameUtil.SubscribeToTags<AttackableBase>(this, AttackableBase.OnDeadTagChangedDelegate);
+		GameUtil.SubscribeToTags<AttackableBase>(this, AttackableBase.OnDeadTagAddedDelegate, true);
 		base.Subscribe<AttackableBase>(-1506500077, AttackableBase.OnDefeatedDelegate);
 		base.Subscribe<AttackableBase>(-1256572400, AttackableBase.SetupScenePartitionerDelegate);
 	}
@@ -48,8 +48,9 @@ public class AttackableBase : Workable, IApproachable
 
 	protected override void OnCleanUp()
 	{
+		base.Unsubscribe<AttackableBase>(1088554450, AttackableBase.OnCellChangedDelegate, false);
+		GameUtil.UnsubscribeToTags<AttackableBase>(this, AttackableBase.OnDeadTagAddedDelegate);
 		base.Unsubscribe<AttackableBase>(-1506500077, AttackableBase.OnDefeatedDelegate, false);
-		base.Unsubscribe<AttackableBase>(1623392196, AttackableBase.OnDefeatedDelegate, false);
 		base.Unsubscribe<AttackableBase>(-1256572400, AttackableBase.SetupScenePartitionerDelegate, false);
 		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		base.OnCleanUp();
@@ -57,7 +58,7 @@ public class AttackableBase : Workable, IApproachable
 
 	private HandleVector<int>.Handle scenePartitionerEntry;
 
-	private static readonly EventSystem.IntraObjectHandler<AttackableBase> OnDeadTagChangedDelegate = GameUtil.CreateHasTagHandler<AttackableBase>(GameTags.Dead, delegate(AttackableBase component, object data)
+	private static readonly EventSystem.IntraObjectHandler<AttackableBase> OnDeadTagAddedDelegate = GameUtil.CreateHasTagHandler<AttackableBase>(GameTags.Dead, delegate(AttackableBase component, object data)
 	{
 		component.OnDefeated(data);
 	});

@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class OxyfernConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "Oxyfern";
@@ -14,14 +19,7 @@ public class OxyfernConfig : IEntityConfig
 		float num = 1f;
 		EffectorValues tier = DECOR.PENALTY.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("oxy_fern_kanim"), "idle_full", Grid.SceneLayer.BuildingBack, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		gameObject.AddOrGet<ReceptacleMonitor>();
-		gameObject.AddOrGet<EntombVulnerable>();
-		gameObject.AddOrGet<WiltCondition>();
-		gameObject.AddOrGet<Prioritizable>();
-		gameObject.AddOrGet<Uprootable>();
-		gameObject.AddOrGet<UprootedMonitor>();
-		gameObject.AddOrGet<DrowningMonitor>();
-		gameObject.AddOrGet<TemperatureVulnerable>().Configure(273.15f, 253.15f, 313.15f, 373.15f);
+		gameObject = EntityTemplates.ExtendEntityToBasicPlant(gameObject, 253.15f, 273.15f, 313.15f, 373.15f, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.025f, null, true, false, true, true, 2400f, 0f, 220f, "OxyfernOriginal", global::STRINGS.CREATURES.SPECIES.OXYFERN.NAME);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
@@ -40,13 +38,6 @@ public class OxyfernConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<Oxyfern>();
-		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
-		gameObject.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
-		gameObject.AddOrGet<PressureVulnerable>().Configure(0.025f, 0f, 10f, 30f, new SimHashes[] { SimHashes.CarbonDioxide });
-		gameObject.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
-		{
-			inst.GetComponent<PressureVulnerable>().safe_atmospheres.Add(ElementLoader.FindElementByHash(SimHashes.CarbonDioxide));
-		};
 		gameObject.AddOrGet<LoopingSounds>();
 		Storage storage = gameObject.AddOrGet<Storage>();
 		storage.showInUI = false;
@@ -71,7 +62,7 @@ public class OxyfernConfig : IEntityConfig
 		{
 			new ElementConverter.OutputElement(0.031250004f, SimHashes.Oxygen, 0f, true, false, 0f, 1f, 0.75f, byte.MaxValue, 0)
 		};
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "OxyfernSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.DESC, Assets.GetAnim("seed_oxyfern_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, global::STRINGS.CREATURES.SPECIES.OXYFERN.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "Oxyfern_preview", Assets.GetAnim("oxy_fern_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "OxyfernSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.DESC, Assets.GetAnim("seed_oxyfern_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 20, global::STRINGS.CREATURES.SPECIES.OXYFERN.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "Oxyfern_preview", Assets.GetAnim("oxy_fern_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;

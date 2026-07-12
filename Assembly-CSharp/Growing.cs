@@ -21,9 +21,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	protected override void OnPrefabInit()
 	{
 		Amounts amounts = base.gameObject.GetAmounts();
-		this.maturity = amounts.Add(new AmountInstance(Db.Get().Amounts.Maturity, base.gameObject));
-		this.baseMaturityMax = new AttributeModifier(this.maturity.maxAttribute.Id, this.growthTime / 600f, null, false, false, true);
-		this.maturity.maxAttribute.Add(this.baseMaturityMax);
+		this.maturity = amounts.Get(Db.Get().Amounts.Maturity);
 		this.oldAge = amounts.Add(new AmountInstance(Db.Get().Amounts.OldAge, base.gameObject));
 		this.oldAge.maxAttribute.ClearModifiers();
 		this.oldAge.maxAttribute.Add(new AttributeModifier(Db.Get().Amounts.OldAge.maxAttribute.Id, this.maxAge, null, false, false, true));
@@ -75,6 +73,11 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		this.maturity.value = this.maturity.GetMax();
 	}
 
+	public float GetMaxMaturity()
+	{
+		return this.maturity.GetMax();
+	}
+
 	public float PercentOfCurrentHarvest()
 	{
 		return this.maturity.value / this.maturity.GetMax();
@@ -116,10 +119,10 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		return new List<Descriptor>
-		{
-			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "", false)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "", false)), Descriptor.DescriptorType.Requirement, false)
-		};
+		List<Descriptor> list = new List<Descriptor>();
+		Klei.AI.Attribute maxAttribute = Db.Get().Amounts.Maturity.maxAttribute;
+		list.Add(new Descriptor(go.GetComponent<Modifiers>().GetPreModifiedAttributeDescription(maxAttribute), go.GetComponent<Modifiers>().GetPreModifiedAttributeToolTip(maxAttribute), Descriptor.DescriptorType.Requirement, false));
+		return list;
 	}
 
 	public void ConsumeMass(float mass_to_consume)
@@ -130,8 +133,6 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		base.gameObject.Trigger(-1793167409, null);
 	}
 
-	public float growthTime;
-
 	public bool shouldGrowOld = true;
 
 	public float maxAge = 2400f;
@@ -139,8 +140,6 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	private AmountInstance maturity;
 
 	private AmountInstance oldAge;
-
-	private AttributeModifier baseMaturityMax;
 
 	[MyCmpGet]
 	private WiltCondition wiltCondition;
@@ -219,7 +218,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.growing;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.growing.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).EventTransition(GameHashes.CropSleep, this.stalled, (Growing.StatesInstance smi) => smi.IsSleeping()).EventTransition(GameHashes.PlanterStorage, this.growing.planted, (Growing.StatesInstance smi) => smi.master.rm.Replanted)
 				.EventTransition(GameHashes.PlanterStorage, this.growing.wild, (Growing.StatesInstance smi) => !smi.master.rm.Replanted)
 				.TriggerOnEnter(GameHashes.Grow, null)

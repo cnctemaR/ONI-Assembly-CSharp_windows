@@ -14,7 +14,7 @@ namespace Klei.AI
 			}, 10800f, "ZombieSicknessRecovery")
 		{
 			base.AddSicknessComponent(new CustomSickEffectSickness("spore_fx_kanim", "working_loop"));
-			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_spores_kanim", "anim_loco_spore_kanim" }, Db.Get().Expressions.Zombie));
+			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_spores_kanim", "anim_loco_spore_kanim" }, Db.Get().Expressions.SickSpores));
 			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]
 			{
 				new AttributeModifier(Db.Get().Attributes.Athletics.Id, -10f, DUPLICANTS.DISEASES.ZOMBIESICKNESS.NAME, false, false, true),

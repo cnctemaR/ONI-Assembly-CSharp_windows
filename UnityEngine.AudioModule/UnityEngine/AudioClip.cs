@@ -16,10 +16,10 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetData(AudioClip clip, [Out] float[] data, int numSamples, int samplesOffset);
+		private static extern bool GetData([NotNull("NullExceptionObject")] AudioClip clip, [Out] float[] data, int numSamples, int samplesOffset);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SetData(AudioClip clip, float[] data, int numsamples, int samplesOffset);
+		private static extern bool SetData([NotNull("NullExceptionObject")] AudioClip clip, float[] data, int numsamples, int samplesOffset);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AudioClip Construct_Internal();

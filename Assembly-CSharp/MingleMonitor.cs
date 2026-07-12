@@ -5,7 +5,7 @@ public class MingleMonitor : GameStateMachine<MingleMonitor, MingleMonitor.Insta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.mingle;
-		base.serializable = false;
+		base.serializable = StateMachine.SerializeType.Never;
 		this.mingle.ToggleRecurringChore(new Func<MingleMonitor.Instance, Chore>(this.CreateMingleChore), null);
 	}
 

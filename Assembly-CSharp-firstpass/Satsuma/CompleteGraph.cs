@@ -13,7 +13,7 @@ namespace Satsuma
 			this.Directed = directedness == Directedness.Directed;
 			if (nodeCount < 0)
 			{
-				throw new ArgumentException("Invalid node count: " + nodeCount);
+				throw new ArgumentException("Invalid node count: " + nodeCount.ToString());
 			}
 			long num = (long)nodeCount * (long)(nodeCount - 1);
 			if (!this.Directed)
@@ -22,7 +22,7 @@ namespace Satsuma
 			}
 			if (num > 2147483647L)
 			{
-				throw new ArgumentException("Too many nodes: " + nodeCount);
+				throw new ArgumentException("Too many nodes: " + nodeCount.ToString());
 			}
 		}
 

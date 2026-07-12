@@ -17,7 +17,13 @@ namespace UnityEngine
 
 		[NativeName("TriggerUpdate")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Update(int count);
+		private extern void TriggerUpdate(int count);
+
+		public void Update(int count)
+		{
+			CustomRenderTextureManager.InvokeTriggerUpdate(this, count);
+			this.TriggerUpdate(count);
+		}
 
 		public void Update()
 		{
@@ -26,7 +32,13 @@ namespace UnityEngine
 
 		[NativeName("TriggerInitialization")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Initialize();
+		private extern void TriggerInitialization();
+
+		public void Initialize()
+		{
+			this.TriggerInitialization();
+			CustomRenderTextureManager.InvokeTriggerInitialize(this);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ClearUpdateZones();
@@ -57,7 +69,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "CustomRenderTextureScripting::GetUpdateZonesInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetUpdateZonesInternal([NotNull] object updateZones);
+		internal extern void GetUpdateZonesInternal([NotNull("ArgumentNullException")] object updateZones);
 
 		public void GetUpdateZones(List<CustomRenderTextureUpdateZone> updateZones)
 		{
@@ -67,6 +79,13 @@ namespace UnityEngine
 		[FreeFunction(Name = "CustomRenderTextureScripting::SetUpdateZonesInternal", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetUpdateZonesInternal(CustomRenderTextureUpdateZone[] updateZones);
+
+		[FreeFunction(Name = "CustomRenderTextureScripting::GetDoubleBufferRenderTexture", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern RenderTexture GetDoubleBufferRenderTexture();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void EnsureDoubleBufferConsistency();
 
 		public void SetUpdateZones(CustomRenderTextureUpdateZone[] updateZones)
 		{
@@ -149,6 +168,14 @@ namespace UnityEngine
 		}
 
 		public extern bool wrapUpdateZones
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern float updatePeriod
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;

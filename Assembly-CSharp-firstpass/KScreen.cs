@@ -23,8 +23,30 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		}
 	}
 
+	protected bool isEditing
+	{
+		get
+		{
+			return this._isEditing;
+		}
+		set
+		{
+			this._isEditing = value;
+			KScreenManager.Instance.RefreshStack();
+		}
+	}
+
+	public void SetIsEditing(bool state)
+	{
+		this.isEditing = state;
+	}
+
 	public virtual float GetSortKey()
 	{
+		if (this.isEditing)
+		{
+			return 50f;
+		}
 		return 0f;
 	}
 
@@ -96,7 +118,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		{
 			this._rectTransform = this._canvas.GetComponentInParent<RectTransform>();
 		}
-		if (this.activateOnSpawn && KScreenManager.Instance != null)
+		if (this.activateOnSpawn && KScreenManager.Instance != null && !this.isActive)
 		{
 			this.Activate();
 		}
@@ -108,14 +130,42 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 
 	public virtual void OnKeyDown(KButtonEvent e)
 	{
+		if (this.isEditing)
+		{
+			e.Consumed = true;
+		}
 		if (this.mouseOver && this.ConsumeMouseScroll && !e.Consumed && !e.TryConsume(global::Action.ZoomIn))
 		{
 			e.TryConsume(global::Action.ZoomOut);
+		}
+		if (!e.Consumed)
+		{
+			KScrollRect[] componentsInChildren = base.GetComponentsInChildren<KScrollRect>();
+			for (int i = 0; i < componentsInChildren.Length; i++)
+			{
+				componentsInChildren[i].OnKeyDown(e);
+				if (e.Consumed)
+				{
+					break;
+				}
+			}
 		}
 	}
 
 	public virtual void OnKeyUp(KButtonEvent e)
 	{
+		if (!e.Consumed)
+		{
+			KScrollRect[] componentsInChildren = base.GetComponentsInChildren<KScrollRect>();
+			for (int i = 0; i < componentsInChildren.Length; i++)
+			{
+				componentsInChildren[i].OnKeyUp(e);
+				if (e.Consumed)
+				{
+					break;
+				}
+			}
+		}
 	}
 
 	public virtual bool IsModal()
@@ -197,7 +247,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		}
 	}
 
-	public void Show(bool show = true)
+	public virtual void Show(bool show = true)
 	{
 		this.mouseOver = false;
 		base.gameObject.SetActive(show);
@@ -217,6 +267,14 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 
 	[SerializeField]
 	public bool activateOnSpawn;
+
+	private bool _isEditing;
+
+	public const float MODAL_SCREEN_SORT_KEY = 100f;
+
+	public const float EDITING_SCREEN_SORT_KEY = 50f;
+
+	public const float FULLSCREEN_SCREEN_SORT_KEY = 20f;
 
 	private Canvas _canvas;
 

@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Streaming/TextureStreamingManager.h")]
 	public class Texture : Object
 	{
@@ -16,6 +16,7 @@ namespace UnityEngine
 		{
 		}
 
+		[NativeProperty("GlobalMasterTextureLimit")]
 		public static extern int masterTextureLimit
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -195,7 +196,7 @@ namespace UnityEngine
 
 		internal ColorSpace activeTextureColorSpace
 		{
-			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "Unity.UIElements" })]
 			get
 			{
 				return (this.Internal_GetActiveTextureColorSpace() == 0) ? ColorSpace.Linear : ColorSpace.Gamma;
@@ -312,6 +313,12 @@ namespace UnityEngine
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetPixelDataSize(int mipLevel, int element = 0);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetPixelDataOffset(int mipLevel, int element = 0);
 
 		internal bool ValidateFormat(RenderTextureFormat format)
 		{

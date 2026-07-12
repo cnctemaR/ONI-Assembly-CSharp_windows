@@ -265,7 +265,7 @@ public class Repairable : Workable
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.repaired;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.forbidden.OnSignal(this.allow, this.repaired);
 			this.allowed.Enter(delegate(Repairable.SMInstance smi)
 			{

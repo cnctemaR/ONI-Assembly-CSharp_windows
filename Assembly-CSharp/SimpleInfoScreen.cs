@@ -6,8 +6,10 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SimpleInfoScreen : TargetScreen
+public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 {
+	public GameObject StoragePanel { get; private set; }
+
 	public SimpleInfoScreen()
 	{
 		this.onStorageChangeDelegate = new Action<object>(this.OnStorageChange);
@@ -21,11 +23,18 @@ public class SimpleInfoScreen : TargetScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.processConditionContainer = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.PROCESS_CONDITIONS.NAME;
 		this.statusItemPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.statusItemPanel.Content.GetComponent<VerticalLayoutGroup>().padding.bottom = 10;
 		this.statusItemPanel.HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_STATUS;
 		this.statusItemPanel.scalerMask.hoverLock = true;
 		this.statusItemsFolder = this.statusItemPanel.Content.gameObject;
+		this.spaceSimpleInfoPOIPanel = new SpacePOISimpleInfoPanel(this);
+		this.spacePOIPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.rocketSimpleInfoPanel = new RocketSimpleInfoPanel(this);
+		this.rocketStatusContainer = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.rocketStatusContainer.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ROCKET);
 		this.vitalsPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.vitalsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
 		this.vitalsContainer = Util.KInstantiateUI(this.VitalsPanelTemplate, this.vitalsPanel.Content.gameObject, false).GetComponent<MinionVitalsPanel>();
@@ -35,7 +44,15 @@ public class SimpleInfoScreen : TargetScreen
 		this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION;
 		GameObject gameObject = this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject;
 		this.descriptionContainer = Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
-		this.storagePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldLifePanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldLifePanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_LIFE);
+		this.worldElementsPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldElementsPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_ELEMENTS);
+		this.worldGeysersPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldGeysersPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_GEYSERS);
+		this.worldBiomesPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.worldBiomesPanel.SetTitle(UI.DETAILTABS.SIMPLEINFO.GROUPNAME_BIOMES);
+		this.StoragePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stressPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stressDrawer = new DetailsPanelDrawer(this.attributesLabelTemplate, this.stressPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject);
 		this.stampContainer = Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
@@ -80,6 +97,8 @@ public class SimpleInfoScreen : TargetScreen
 		this.statusItemPanel.gameObject.SetActive(true);
 		this.statusItemPanel.scalerMask.UpdateSize();
 		this.Refresh(true);
+		this.RefreshWorld();
+		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
 	}
 
 	public override void OnDeselectTarget(GameObject target)
@@ -137,7 +156,11 @@ public class SimpleInfoScreen : TargetScreen
 		Color color;
 		if (status_item.item.notificationType == NotificationType.BadMinor || status_item.item.notificationType == NotificationType.Bad || status_item.item.notificationType == NotificationType.DuplicantThreatening)
 		{
-			color = this.statusItemTextColor_bad;
+			color = GlobalAssets.Instance.colorSet.statusItemBad;
+		}
+		else if (status_item.item.notificationType == NotificationType.Event)
+		{
+			color = GlobalAssets.Instance.colorSet.statusItemEvent;
 		}
 		else
 		{
@@ -225,6 +248,7 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		this.RefreshStress();
 		this.RefreshStorage();
+		this.rocketSimpleInfoPanel.Refresh(this.rocketStatusContainer, this.selectedTarget);
 	}
 
 	private void SetPanels(GameObject target)
@@ -237,6 +261,7 @@ public class SimpleInfoScreen : TargetScreen
 		CellSelectionObject component5 = target.GetComponent<CellSelectionObject>();
 		InfoDescription component6 = target.GetComponent<InfoDescription>();
 		Edible component7 = target.GetComponent<Edible>();
+		bool component8 = target.GetComponent<IProcessConditionSet>() != null;
 		this.attributeLabels.ForEach(delegate(LocText x)
 		{
 			global::UnityEngine.Object.Destroy(x.gameObject);
@@ -248,15 +273,24 @@ public class SimpleInfoScreen : TargetScreen
 		if (amounts != null)
 		{
 			this.vitalsContainer.selectedEntity = this.selectedTarget;
-			Uprootable component8 = this.selectedTarget.gameObject.GetComponent<Uprootable>();
-			if (component8 != null)
+			Uprootable component9 = this.selectedTarget.gameObject.GetComponent<Uprootable>();
+			if (component9 != null)
 			{
-				this.vitalsPanel.gameObject.SetActive(component8.GetPlanterStorage != null);
+				this.vitalsPanel.gameObject.SetActive(component9.GetPlanterStorage != null);
 			}
 			if (this.selectedTarget.gameObject.GetComponent<WiltCondition>() != null)
 			{
 				this.vitalsPanel.gameObject.SetActive(true);
 			}
+		}
+		if (component8)
+		{
+			this.processConditionContainer.SetActive(true);
+			this.RefreshProcessConditions();
+		}
+		else
+		{
+			this.processConditionContainer.SetActive(false);
 		}
 		if (component)
 		{
@@ -300,7 +334,8 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		this.descriptionContainer.description.text = text;
 		this.descriptionContainer.flavour.text = text2;
-		this.infoPanel.gameObject.SetActive(component == null);
+		bool flag2 = text.IsNullOrWhiteSpace() && text2.IsNullOrWhiteSpace() && !flag;
+		this.infoPanel.gameObject.SetActive(component == null && !flag2);
 		this.descriptionContainer.gameObject.SetActive(this.infoPanel.activeSelf);
 		this.descriptionContainer.flavour.gameObject.SetActive(text2 != "" && text2 != "\n");
 		if (this.vitalsPanel.gameObject.activeSelf && amounts.Count == 0)
@@ -333,11 +368,11 @@ public class SimpleInfoScreen : TargetScreen
 				{
 					text += string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_MOD_FORMAT, fertilityModifier.GetTooltip());
 				}
-				this.fertilityPanel.SetLabel("breeding_" + num++, string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None), text));
+				this.fertilityPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None), text));
 			}
 			else
 			{
-				this.fertilityPanel.SetLabel("breeding_" + num++, string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP_NOMOD, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)));
+				this.fertilityPanel.SetLabel("breeding_" + num++.ToString(), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.EGG_CHANCES.CHANCE_FORMAT_TOOLTIP_NOMOD, breedingChance.egg.ProperName(), GameUtil.GetFormattedPercent(breedingChance.weight * 100f, GameUtil.TimeSlice.None)));
 			}
 		}
 		this.fertilityPanel.Commit();
@@ -347,91 +382,251 @@ public class SimpleInfoScreen : TargetScreen
 	{
 		if (this.selectedTarget == null)
 		{
-			this.storagePanel.gameObject.SetActive(false);
+			this.StoragePanel.gameObject.SetActive(false);
 			return;
 		}
-		Storage[] array = this.selectedTarget.GetComponentsInChildren<Storage>();
+		IStorage[] array = this.selectedTarget.GetComponentsInChildren<IStorage>();
 		if (array == null)
 		{
-			this.storagePanel.gameObject.SetActive(false);
+			this.StoragePanel.gameObject.SetActive(false);
 			return;
 		}
-		array = Array.FindAll<Storage>(array, (Storage n) => n.showInUI);
+		array = Array.FindAll<IStorage>(array, (IStorage n) => n.ShouldShowInUI());
 		if (array.Length == 0)
 		{
-			this.storagePanel.gameObject.SetActive(false);
+			this.StoragePanel.gameObject.SetActive(false);
 			return;
 		}
-		this.storagePanel.gameObject.SetActive(true);
+		this.StoragePanel.gameObject.SetActive(true);
 		string text = ((this.selectedTarget.GetComponent<MinionIdentity>() != null) ? UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS);
-		this.storagePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = text;
+		this.StoragePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = text;
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
 		{
 			keyValuePair.Value.SetActive(false);
 		}
 		int num = 0;
-		foreach (Storage storage in array)
+		foreach (IStorage storage in array)
 		{
-			foreach (GameObject gameObject in storage.items)
+			ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.PooledList pooledList = ListPool<global::Tuple<string, TextStyleSetting>, SimpleInfoScreen>.Allocate();
+			foreach (GameObject gameObject in storage.GetItems())
 			{
 				if (!(gameObject == null))
 				{
-					GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "storage_" + num.ToString());
-					num++;
-					if (storage.allowUIItemRemoval)
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					if (!(component != null) || component.Mass != 0f)
 					{
-						Transform transform = gameObject2.transform.Find("removeAttributeButton");
-						if (transform != null)
+						Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
+						HighEnergyParticleStorage component2 = gameObject.GetComponent<HighEnergyParticleStorage>();
+						string text2 = "";
+						pooledList.Clear();
+						if (component != null && component2 == null)
 						{
-							KButton component = transform.GetComponent<KButton>();
-							component.enabled = true;
-							component.gameObject.SetActive(true);
-							GameObject select_item = gameObject;
-							Storage selected_storage = storage;
-							component.onClick += delegate
+							text2 = GameUtil.GetUnitFormattedName(gameObject, false);
+							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+						}
+						if (component2 != null)
+						{
+							text2 = ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME;
+							text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedHighEnergyParticles(component2.Particles, GameUtil.TimeSlice.None));
+						}
+						if (smi != null)
+						{
+							string text3 = smi.StateString();
+							if (!string.IsNullOrEmpty(text3))
 							{
-								selected_storage.Drop(select_item, true);
-							};
+								text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text3);
+							}
+							pooledList.Add(new global::Tuple<string, TextStyleSetting>(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting));
 						}
-					}
-					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-					Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
-					gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
-					string text2 = GameUtil.GetUnitFormattedName(gameObject, false);
-					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component2.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-					if (smi != null)
-					{
-						string text3 = smi.StateString();
-						if (!string.IsNullOrEmpty(text3))
+						if (component.DiseaseIdx != 255)
 						{
-							text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, text3);
+							text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
+							string formattedDisease = GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
+							pooledList.Add(new global::Tuple<string, TextStyleSetting>(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting));
 						}
-						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting);
+						GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.StoragePanel, "storage_" + num.ToString());
+						num++;
+						gameObject2.GetComponentInChildren<LocText>().text = text2;
+						gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
+						foreach (global::Tuple<string, TextStyleSetting> tuple in pooledList)
+						{
+							gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(tuple.first, tuple.second);
+						}
+						KButton component3 = gameObject2.GetComponent<KButton>();
+						GameObject select_target = gameObject;
+						component3.onClick += delegate
+						{
+							SelectTool.Instance.Select(select_target.GetComponent<KSelectable>(), false);
+						};
+						if (storage.allowUIItemRemoval)
+						{
+							Transform transform = gameObject2.transform.Find("removeAttributeButton");
+							if (transform != null)
+							{
+								KButton component4 = transform.GetComponent<KButton>();
+								component4.enabled = true;
+								component4.gameObject.SetActive(true);
+								GameObject select_item = gameObject;
+								IStorage selected_storage = storage;
+								component4.onClick += delegate
+								{
+									selected_storage.Drop(select_item, true);
+								};
+							}
+						}
 					}
-					if (component2.DiseaseIdx != 255)
-					{
-						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, false));
-						string formattedDisease = GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true);
-						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting);
-					}
-					gameObject2.GetComponentInChildren<LocText>().text = text2;
-					KButton component3 = gameObject2.GetComponent<KButton>();
-					GameObject select_target = gameObject;
-					component3.onClick += delegate
-					{
-						SelectTool.Instance.Select(select_target.GetComponent<KSelectable>(), false);
-					};
 				}
 			}
+			pooledList.Recycle();
 		}
 		if (num == 0)
 		{
-			this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "empty").GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
+			this.AddOrGetStorageLabel(this.storageLabels, this.StoragePanel, "empty").GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
 		}
 	}
 
-	private GameObject AddOrGetStorageLabel(Dictionary<string, GameObject> labels, GameObject panel, string id)
+	private void RefreshWorld()
+	{
+		WorldContainer worldContainer = ((this.selectedTarget == null) ? null : this.selectedTarget.GetComponent<WorldContainer>());
+		AsteroidGridEntity asteroidGridEntity = ((this.selectedTarget == null) ? null : this.selectedTarget.GetComponent<AsteroidGridEntity>());
+		bool flag = worldContainer != null && asteroidGridEntity != null;
+		this.worldBiomesPanel.gameObject.SetActive(flag);
+		this.worldGeysersPanel.gameObject.SetActive(flag);
+		if (!flag)
+		{
+			return;
+		}
+		foreach (KeyValuePair<Tag, GameObject> keyValuePair in this.biomeRows)
+		{
+			keyValuePair.Value.SetActive(false);
+		}
+		if (worldContainer.Biomes != null)
+		{
+			using (List<string>.Enumerator enumerator2 = worldContainer.Biomes.GetEnumerator())
+			{
+				while (enumerator2.MoveNext())
+				{
+					string text = enumerator2.Current;
+					Sprite biomeSprite = GameUtil.GetBiomeSprite(text);
+					if (!this.biomeRows.ContainsKey(text))
+					{
+						this.biomeRows.Add(text, Util.KInstantiateUI(this.bigIconLabelRow, this.worldBiomesPanel.Content.gameObject, true));
+						HierarchyReferences component = this.biomeRows[text].GetComponent<HierarchyReferences>();
+						component.GetReference<Image>("Icon").sprite = biomeSprite;
+						component.GetReference<LocText>("NameLabel").SetText(UI.FormatAsLink(Strings.Get("STRINGS.SUBWORLDS." + text.ToUpper() + ".NAME"), "BIOME" + text.ToUpper()));
+						component.GetReference<LocText>("DescriptionLabel").SetText(Strings.Get("STRINGS.SUBWORLDS." + text.ToUpper() + ".DESC"));
+					}
+					this.biomeRows[text].SetActive(true);
+				}
+				goto IL_0209;
+			}
+		}
+		this.worldBiomesPanel.gameObject.SetActive(false);
+		IL_0209:
+		List<Tag> list = new List<Tag>();
+		foreach (Geyser geyser in global::UnityEngine.Object.FindObjectsOfType<Geyser>())
+		{
+			if (geyser.GetMyWorldId() == worldContainer.id)
+			{
+				list.Add(geyser.PrefabID());
+			}
+		}
+		list.AddRange(SaveGame.Instance.worldGenSpawner.GetUnspawnedWithType<Geyser>(worldContainer.id));
+		list.AddRange(SaveGame.Instance.worldGenSpawner.GetSpawnersWithTag("OilWell", worldContainer.id, true));
+		foreach (KeyValuePair<Tag, GameObject> keyValuePair2 in this.geyserRows)
+		{
+			keyValuePair2.Value.SetActive(false);
+		}
+		foreach (Tag tag in list)
+		{
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(tag, "ui", false);
+			if (!this.geyserRows.ContainsKey(tag))
+			{
+				this.geyserRows.Add(tag, Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
+				HierarchyReferences component2 = this.geyserRows[tag].GetComponent<HierarchyReferences>();
+				component2.GetReference<Image>("Icon").sprite = uisprite.first;
+				component2.GetReference<Image>("Icon").color = uisprite.second;
+				component2.GetReference<LocText>("NameLabel").SetText(Assets.GetPrefab(tag).GetProperName());
+				component2.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+			}
+			this.geyserRows[tag].SetActive(true);
+		}
+		Tag tag2 = "NoGeysers";
+		if (!this.geyserRows.ContainsKey(tag2))
+		{
+			this.geyserRows.Add(tag2, Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
+			HierarchyReferences component3 = this.geyserRows[tag2].GetComponent<HierarchyReferences>();
+			component3.GetReference<Image>("Icon").sprite = Assets.GetSprite("icon_action_cancel");
+			component3.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.NO_GEYSERS);
+			component3.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+		}
+		this.geyserRows[tag2].gameObject.SetActive(list.Count == 0);
+	}
+
+	private void RefreshProcessConditions()
+	{
+		foreach (GameObject gameObject in this.processConditionRows)
+		{
+			Util.KDestroyGameObject(gameObject);
+		}
+		this.processConditionRows.Clear();
+		if (!DlcManager.FeatureClusterSpaceEnabled())
+		{
+			if (this.selectedTarget.GetComponent<LaunchableRocket>() != null)
+			{
+				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketPrep);
+				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketStorage);
+				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketBoard);
+				return;
+			}
+			this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.All);
+			return;
+		}
+		else
+		{
+			if (this.selectedTarget.GetComponent<LaunchPad>() != null || this.selectedTarget.GetComponent<RocketProcessConditionDisplayTarget>() != null)
+			{
+				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketFlight);
+				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketPrep);
+				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketStorage);
+				this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.RocketBoard);
+				return;
+			}
+			this.RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType.All);
+			return;
+		}
+	}
+
+	private void RefreshProcessConditionsForType(ProcessCondition.ProcessConditionType conditionType)
+	{
+		List<ProcessCondition> conditionSet = this.selectedTarget.GetComponent<IProcessConditionSet>().GetConditionSet(conditionType);
+		if (conditionSet.Count == 0)
+		{
+			return;
+		}
+		HierarchyReferences hierarchyReferences = Util.KInstantiateUI<HierarchyReferences>(this.processConditionHeader.gameObject, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
+		hierarchyReferences.GetReference<LocText>("Label").text = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper());
+		hierarchyReferences.GetComponent<ToolTip>().toolTip = Strings.Get("STRINGS.UI.DETAILTABS.PROCESS_CONDITIONS." + conditionType.ToString().ToUpper() + "_TOOLTIP");
+		this.processConditionRows.Add(hierarchyReferences.gameObject);
+		List<ProcessCondition> list = new List<ProcessCondition>();
+		using (List<ProcessCondition>.Enumerator enumerator = conditionSet.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				ProcessCondition condition = enumerator.Current;
+				if (condition.ShowInUI() && (condition.GetType() == typeof(RequireAttachedComponent) || list.Find((ProcessCondition match) => match.GetType() == condition.GetType()) == null))
+				{
+					list.Add(condition);
+					GameObject gameObject = Util.KInstantiateUI(this.processConditionRow, this.processConditionContainer.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, true);
+					this.processConditionRows.Add(gameObject);
+					ConditionListSideScreen.SetRowState(gameObject, condition);
+				}
+			}
+		}
+	}
+
+	public GameObject AddOrGetStorageLabel(Dictionary<string, GameObject> labels, GameObject panel, string id)
 	{
 		GameObject gameObject;
 		if (labels.ContainsKey(id))
@@ -530,6 +725,20 @@ public class SimpleInfoScreen : TargetScreen
 		target.GetComponent<BuildingComplete>() != null;
 	}
 
+	public void Sim1000ms(float dt)
+	{
+		if (this.selectedTarget != null && this.selectedTarget.GetComponent<IProcessConditionSet>() != null)
+		{
+			this.RefreshProcessConditions();
+		}
+	}
+
+	public void Sim4000ms(float dt)
+	{
+		this.RefreshWorld();
+		this.spaceSimpleInfoPOIPanel.Refresh(this.spacePOIPanel, this.selectedTarget);
+	}
+
 	public GameObject attributesLabelTemplate;
 
 	public GameObject attributesLabelButtonTemplate;
@@ -552,13 +761,48 @@ public class SimpleInfoScreen : TargetScreen
 
 	public Sprite statusWarningIcon;
 
+	private RocketSimpleInfoPanel rocketSimpleInfoPanel;
+
+	private SpacePOISimpleInfoPanel spaceSimpleInfoPOIPanel;
+
+	[SerializeField]
+	private HierarchyReferences processConditionHeader;
+
+	[SerializeField]
+	private GameObject processConditionRow;
+
 	private CollapsibleDetailContentPanel statusItemPanel;
 
 	private CollapsibleDetailContentPanel vitalsPanel;
 
 	private CollapsibleDetailContentPanel fertilityPanel;
 
-	private GameObject storagePanel;
+	private CollapsibleDetailContentPanel rocketStatusContainer;
+
+	private CollapsibleDetailContentPanel worldLifePanel;
+
+	private CollapsibleDetailContentPanel worldElementsPanel;
+
+	private CollapsibleDetailContentPanel worldBiomesPanel;
+
+	private CollapsibleDetailContentPanel worldGeysersPanel;
+
+	private CollapsibleDetailContentPanel spacePOIPanel;
+
+	[SerializeField]
+	public GameObject iconLabelRow;
+
+	[SerializeField]
+	public GameObject bigIconLabelRow;
+
+	private Dictionary<Tag, GameObject> lifeformRows = new Dictionary<Tag, GameObject>();
+
+	private Dictionary<Tag, GameObject> biomeRows = new Dictionary<Tag, GameObject>();
+
+	private Dictionary<Tag, GameObject> geyserRows = new Dictionary<Tag, GameObject>();
+
+	[SerializeField]
+	public GameObject spacerRow;
 
 	private GameObject infoPanel;
 
@@ -571,6 +815,8 @@ public class SimpleInfoScreen : TargetScreen
 	private GameObject statusItemsFolder;
 
 	public GameObject TextContainerPrefab;
+
+	private GameObject processConditionContainer;
 
 	private GameObject stressPanel;
 
@@ -586,8 +832,6 @@ public class SimpleInfoScreen : TargetScreen
 
 	public Color statusItemTextColor_regular = Color.black;
 
-	public Color statusItemTextColor_bad = new Color(0.95686275f, 0.2901961f, 0.2784314f);
-
 	public Color statusItemTextColor_old = new Color(0.8235294f, 0.8235294f, 0.8235294f);
 
 	private GameObject lastTarget;
@@ -599,6 +843,8 @@ public class SimpleInfoScreen : TargetScreen
 	private List<SimpleInfoScreen.StatusItemEntry> oldStatusItems = new List<SimpleInfoScreen.StatusItemEntry>();
 
 	private List<LocText> attributeLabels = new List<LocText>();
+
+	private List<GameObject> processConditionRows = new List<GameObject>();
 
 	private Action<object> onStorageChangeDelegate;
 

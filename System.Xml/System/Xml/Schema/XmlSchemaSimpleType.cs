@@ -5,8 +5,8 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaSimpleType : XmlSchemaType
 	{
-		[XmlElement("union", typeof(XmlSchemaSimpleTypeUnion))]
 		[XmlElement("restriction", typeof(XmlSchemaSimpleTypeRestriction))]
+		[XmlElement("union", typeof(XmlSchemaSimpleTypeUnion))]
 		[XmlElement("list", typeof(XmlSchemaSimpleTypeList))]
 		public XmlSchemaSimpleTypeContent Content
 		{

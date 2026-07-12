@@ -8,7 +8,14 @@ namespace ProcGen
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Node
 	{
-		public Node node { get; private set; }
+		internal Node node { get; private set; }
+
+		public void SetNode(Node node)
+		{
+			global::Debug.Assert(!this.nodeSet, "Tried initializing a Node twice, that ain't gonna work.");
+			this.node = node;
+			this.nodeSet = true;
+		}
 
 		[Serialize]
 		public string type { get; private set; }
@@ -16,6 +23,42 @@ namespace ProcGen
 		public void SetType(string newtype)
 		{
 			this.type = newtype;
+		}
+
+		public string GetSubworld()
+		{
+			foreach (Tag tag in this.tags)
+			{
+				if (tag.Name.Contains("subworlds/"))
+				{
+					return tag.Name;
+				}
+			}
+			return "MISSING";
+		}
+
+		public string GetBiome()
+		{
+			foreach (Tag tag in this.tags)
+			{
+				if (tag.Name.Contains("biomes/"))
+				{
+					return tag.Name;
+				}
+			}
+			return "MISSING";
+		}
+
+		public string GetFeature()
+		{
+			foreach (Tag tag in this.tags)
+			{
+				if (tag.Name.Contains("features/"))
+				{
+					return tag.Name;
+				}
+			}
+			return null;
 		}
 
 		[Serialize]
@@ -45,17 +88,25 @@ namespace ProcGen
 			this.biomeSpecificTags = new TagSet(other.biomeSpecificTags);
 		}
 
-		public Node(Node node, string type)
+		public Node(Node node, string type, Vector2 position = default(Vector2))
 		{
 			this.node = node;
 			this.type = type;
+			this.position = position;
 		}
+
+		private bool nodeSet;
 
 		[Serialize]
 		public TagSet tags = new TagSet();
 
+		[Serialize]
+		public Tag templateTag = Tag.Invalid;
+
+		[Serialize]
 		public TagSet featureSpecificTags = new TagSet();
 
+		[Serialize]
 		public TagSet biomeSpecificTags = new TagSet();
 	}
 }

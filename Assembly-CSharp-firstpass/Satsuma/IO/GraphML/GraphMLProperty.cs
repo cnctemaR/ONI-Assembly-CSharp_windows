@@ -33,19 +33,22 @@ namespace Satsuma.IO.GraphML
 
 		protected static PropertyDomain ParseDomain(string s)
 		{
-			if (s == "node")
+			if (s != null)
 			{
-				return PropertyDomain.Node;
+				if (s == "node")
+				{
+					return PropertyDomain.Node;
+				}
+				if (s == "edge")
+				{
+					return PropertyDomain.Arc;
+				}
+				if (s == "graph")
+				{
+					return PropertyDomain.Graph;
+				}
 			}
-			if (s == "edge")
-			{
-				return PropertyDomain.Arc;
-			}
-			if (!(s == "graph"))
-			{
-				return PropertyDomain.All;
-			}
-			return PropertyDomain.Graph;
+			return PropertyDomain.All;
 		}
 
 		protected virtual void LoadFromKeyElement(XElement xKey)

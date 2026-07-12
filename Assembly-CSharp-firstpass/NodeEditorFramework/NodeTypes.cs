@@ -66,7 +66,7 @@ namespace NodeEditorFramework
 					NodeInput nodeInput = node.Inputs[i];
 					if (nodeInput == null)
 					{
-						throw new UnityException("Input " + i + " is null!");
+						throw new UnityException("Input " + i.ToString() + " is null!");
 					}
 					if (nodeInput.typeData.Type.IsAssignableFrom(nodeOutput.typeData.Type))
 					{

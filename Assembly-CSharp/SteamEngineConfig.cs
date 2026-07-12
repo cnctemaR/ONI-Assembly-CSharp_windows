@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class SteamEngineConfig : IBuildingConfig
 {
+	public override string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_VANILLA_ONLY;
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "SteamEngine";
@@ -16,20 +21,21 @@ public class SteamEngineConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER7;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
-		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
+		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.UtilityInputOffset = new CellOffset(2, 3);
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = true;
+		buildingDef.Cancellable = false;
 		return buildingDef;
 	}
 
@@ -61,25 +67,31 @@ public class SteamEngineConfig : IBuildingConfig
 		rocketEngine.requireOxidizer = false;
 		rocketEngine.exhaustElement = SimHashes.Steam;
 		rocketEngine.exhaustTemperature = ElementLoader.FindElementByHash(SimHashes.Steam).lowTemp + 50f;
-		FuelTank fuelTank = go.AddOrGet<FuelTank>();
-		fuelTank.capacityKg = fuelTank.minimumLaunchMass;
-		fuelTank.FuelType = ElementLoader.FindElementByHash(SimHashes.Steam).tag;
-		fuelTank.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		Storage storage = go.AddOrGet<Storage>();
+		storage.capacityKg = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
+		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
 		{
 			Storage.StoredItemModifier.Hide,
 			Storage.StoredItemModifier.Seal,
 			Storage.StoredItemModifier.Insulate
 		});
+		FuelTank fuelTank = go.AddOrGet<FuelTank>();
+		fuelTank.consumeFuelOnLand = !DlcManager.FeatureClusterSpaceEnabled();
+		fuelTank.storage = storage;
+		fuelTank.FuelType = ElementLoader.FindElementByHash(SimHashes.Steam).tag;
+		fuelTank.physicalFuelCapacity = storage.capacityKg;
 		go.AddOrGet<CopyBuildingSettings>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 10f;
 		conduitConsumer.capacityTag = fuelTank.FuelType;
-		conduitConsumer.capacityKG = fuelTank.capacityKg;
+		conduitConsumer.capacityKG = storage.capacityKg;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
-		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_steam_engine_bg_kanim"));
-		EntityTemplates.ExtendBuildingToRocketModule(go);
+		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_steam_engine_bg_kanim", false);
+		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
+		{
+		};
 	}
 
 	public const string ID = "SteamEngine";

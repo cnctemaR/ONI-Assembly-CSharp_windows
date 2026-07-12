@@ -135,10 +135,27 @@ public class TerrainBG : KMonoBehaviour
 		{
 			return;
 		}
-		this.starsMaterial.renderQueue = RenderQueues.Stars;
-		this.starsMaterial.SetTexture("_NoiseVolume", this.noiseVolume);
+		Material material = this.starsMaterial_surface;
+		if (ClusterManager.Instance.activeWorld.IsModuleInterior)
+		{
+			Clustercraft component = ClusterManager.Instance.activeWorld.GetComponent<Clustercraft>();
+			if (component.Status != Clustercraft.CraftStatus.InFlight)
+			{
+				material = this.starsMaterial_surface;
+			}
+			else if (ClusterGrid.Instance.GetVisibleEntityOfLayerAtAdjacentCell(component.Location, EntityLayer.Asteroid) != null)
+			{
+				material = this.starsMaterial_orbit;
+			}
+			else
+			{
+				material = this.starsMaterial_space;
+			}
+		}
+		material.renderQueue = RenderQueues.Stars;
+		material.SetTexture("_NoiseVolume", this.noiseVolume);
 		Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background) + 1f);
-		Graphics.DrawMesh(this.starsPlane, vector, Quaternion.identity, this.starsMaterial, this.layer);
+		Graphics.DrawMesh(this.starsPlane, vector, Quaternion.identity, material, this.layer);
 		this.backgroundMaterial.renderQueue = RenderQueues.Backwall;
 		for (int i = 0; i < Lighting.Instance.Settings.BackgroundLayers; i++)
 		{
@@ -165,7 +182,11 @@ public class TerrainBG : KMonoBehaviour
 		Graphics.DrawMesh(this.gasPlane, vector4, Quaternion.identity, this.gasMaterial, this.layer);
 	}
 
-	public Material starsMaterial;
+	public Material starsMaterial_surface;
+
+	public Material starsMaterial_orbit;
+
+	public Material starsMaterial_space;
 
 	public Material backgroundMaterial;
 

@@ -1,21 +1,8 @@
 ﻿using System;
-using KMod;
 using UnityEngine;
 
 public class NativeAnimBatchLoader : MonoBehaviour
 {
-	private void Awake()
-	{
-		KAnimBatchManager.DestroyInstance();
-		KAnimGroupFile.DestroyInstance();
-		KGlobalAnimParser.DestroyInstance();
-		KAnimBatchManager.CreateInstance();
-		KGlobalAnimParser.CreateInstance();
-		Global.Instance.modManager.Load(Content.Animation);
-		KAnimGroupFile.GetGroupFile().LoadAll();
-		KAnimBatchManager.Instance().CompleteInit();
-	}
-
 	private void Start()
 	{
 		if (this.generateObjects)

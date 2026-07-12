@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Threading;
 using Klei.CustomSettings;
-using ProcGen;
 using ProcGenGame;
 using STRINGS;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using VoronoiTree;
 
 [AddComponentMenu("KMonoBehaviour/scripts/OfflineWorldGen")]
 public class OfflineWorldGen : KMonoBehaviour
@@ -27,7 +24,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		if (!flag)
 		{
 			SaveLoader.SetActiveSaveFilePath(null);
-			flag = WorldGen.CanLoad(WorldGen.SIM_SAVE_FILENAME);
+			flag = WorldGen.CanLoad(WorldGen.GetSIMSaveFilename(0));
 		}
 		return flag;
 	}
@@ -74,7 +71,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			this.titleText.text = UI.FRONTEND.WORLDGENSCREEN.LOADINGGAME.ToString();
 			this.mainText.gameObject.SetActive(false);
 			this.currentConvertedCurrentStage = UI.WORLDGEN.COMPLETE.key;
-			this.currentPercent = 100f;
+			this.currentPercent = 1f;
 			this.updateText.gameObject.SetActive(false);
 			this.percentText.gameObject.SetActive(false);
 			this.RemoveButtons();
@@ -106,99 +103,6 @@ public class OfflineWorldGen : KMonoBehaviour
 		}
 	}
 
-	private void ChooseBaseLocation(global::VoronoiTree.Node startNode)
-	{
-		this.worldGen.ChooseBaseLocation(startNode);
-		this.DoRenderWorld();
-		this.RemoveLocationButtons();
-	}
-
-	private void ShowStartingLocationChoices()
-	{
-		if (this.titleText != null)
-		{
-			this.titleText.text = "Choose Starting Location";
-		}
-		this.startNodes = this.worldGen.WorldLayout.GetStartNodes();
-		this.startNodes.Shuffle<global::VoronoiTree.Node>();
-		if (this.startNodes.Count == 0)
-		{
-			this.DoRenderWorld();
-			this.RemoveLocationButtons();
-			return;
-		}
-		if (this.startNodes.Count > 0)
-		{
-			this.ChooseBaseLocation(this.startNodes[0]);
-			return;
-		}
-		List<SubWorld> list = new List<SubWorld>();
-		int i = 0;
-		while (i < this.startNodes.Count)
-		{
-			Tree tree = this.startNodes[i] as Tree;
-			if (tree != null)
-			{
-				goto IL_00CC;
-			}
-			tree = this.worldGen.GetOverworldForNode(this.startNodes[i] as Leaf);
-			if (tree != null)
-			{
-				goto IL_00CC;
-			}
-			IL_01E1:
-			i++;
-			continue;
-			IL_00CC:
-			SubWorld subWorldForNode = this.worldGen.GetSubWorldForNode(tree);
-			if (subWorldForNode != null && !list.Contains(subWorldForNode))
-			{
-				list.Add(subWorldForNode);
-				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.locationButtonPrefab);
-				RectTransform component = gameObject.GetComponent<RectTransform>();
-				component.SetParent(this.chooseLocationPanel);
-				component.localScale = Vector3.one;
-				Text componentInChildren = gameObject.GetComponentInChildren<Text>();
-				SubWorld subWorld = null;
-				Tree tree2 = this.startNodes[i].parent;
-				while (subWorld == null && tree2 != null)
-				{
-					subWorld = this.worldGen.GetSubWorldForNode(tree2);
-					if (subWorld == null)
-					{
-						tree2 = tree2.parent;
-					}
-				}
-				TagSet tagSet = new TagSet(this.startNodes[i].tags);
-				tagSet.Remove(WorldGenTags.Feature);
-				tagSet.Remove(WorldGenTags.StartLocation);
-				tagSet.Remove(WorldGenTags.IgnoreCaveOverride);
-				componentInChildren.text = tagSet.ToString();
-				int idx = i;
-				Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
-				buttonClickedEvent.AddListener(delegate
-				{
-					this.ChooseBaseLocation(this.startNodes[idx]);
-				});
-				gameObject.GetComponent<Button>().onClick = buttonClickedEvent;
-				goto IL_01E1;
-			}
-			goto IL_01E1;
-		}
-	}
-
-	private void RemoveLocationButtons()
-	{
-		for (int i = this.chooseLocationPanel.childCount - 1; i >= 0; i--)
-		{
-			global::UnityEngine.Object.Destroy(this.chooseLocationPanel.GetChild(i).gameObject);
-		}
-		if (this.titleText != null && this.titleText.gameObject != null)
-		{
-			global::UnityEngine.Object.DestroyImmediate(this.titleText.gameObject);
-		}
-	}
-
 	private bool UpdateProgress(StringKey stringKeyRoot, float completePercent, WorldGenProgressStages.Stages stage)
 	{
 		if (this.currentStage != stage)
@@ -212,7 +116,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		}
 		else
 		{
-			int num = (int)completePercent / 10;
+			int num = (int)completePercent * 10;
 			LocString locString = this.convertList.Find((LocString s) => s.key.Hash == stringKeyRoot.Hash);
 			if (num != 0 && locString != null)
 			{
@@ -224,13 +128,13 @@ public class OfflineWorldGen : KMonoBehaviour
 		float num4 = WorldGenProgressStages.StageWeights[(int)stage].Value * completePercent;
 		for (int i = 0; i < WorldGenProgressStages.StageWeights.Length; i++)
 		{
-			num3 += WorldGenProgressStages.StageWeights[i].Value * 100f;
+			num3 += WorldGenProgressStages.StageWeights[i].Value;
 			if (i < (int)this.currentStage)
 			{
-				num2 += WorldGenProgressStages.StageWeights[i].Value * 100f;
+				num2 += WorldGenProgressStages.StageWeights[i].Value;
 			}
 		}
-		float num5 = 100f * ((num2 + num4) / num3);
+		float num5 = (num2 + num4) / num3;
 		this.currentPercent = num5;
 		return !this.shouldStop;
 	}
@@ -254,7 +158,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			return;
 		}
 		this.updateText.text = Strings.Get(this.currentConvertedCurrentStage.String);
-		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 100f)
+		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 1f && this.clusterLayout.IsGenerationComplete)
 		{
 			if (KCrashReporter.terminateOnError && KCrashReporter.hasCrash)
 			{
@@ -276,29 +180,8 @@ public class OfflineWorldGen : KMonoBehaviour
 			{
 				this.percentText.gameObject.SetActive(false);
 			}
-			this.percentText.text = GameUtil.GetFormattedPercent(this.currentPercent, GameUtil.TimeSlice.None);
-			this.meterAnim.SetPositionPercent(this.currentPercent / 100f);
-			if (this.firstPassGeneration)
-			{
-				this.generateThreadComplete = this.worldGen.IsGenerateComplete();
-				if (!this.generateThreadComplete)
-				{
-					this.renderThreadComplete = false;
-				}
-			}
-			if (this.secondPassGeneration)
-			{
-				this.renderThreadComplete = this.worldGen.IsRenderComplete();
-			}
-			if (!this.shownStartingLocations && this.firstPassGeneration && this.generateThreadComplete)
-			{
-				this.shownStartingLocations = true;
-				this.ShowStartingLocationChoices();
-			}
-			if (this.renderThreadComplete)
-			{
-				int num = 0 + 1;
-			}
+			this.percentText.text = GameUtil.GetFormattedPercent(this.currentPercent * 100f, GameUtil.TimeSlice.None);
+			this.meterAnim.SetPositionPercent(this.currentPercent);
 			return;
 		}
 	}
@@ -310,7 +193,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		{
 			foreach (OfflineWorldGen.ErrorInfo errorInfo in this.errors)
 			{
-				global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true).PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null);
+				Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true).PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null);
 			}
 		}
 		this.errorMutex.ReleaseMutex();
@@ -350,23 +233,11 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private void DoWorldGenInitialize()
 	{
-		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World);
-		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
-		this.seed = int.Parse(currentQualitySetting2.id);
-		List<string> randomTraits = SettingsCache.GetRandomTraits(this.seed);
-		this.worldGen = new WorldGen(currentQualitySetting.id, randomTraits, true);
-		Vector2I worldsize = this.worldGen.Settings.world.worldsize;
-		GridSettings.Reset(worldsize.x, worldsize.y);
-		this.worldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.seed, this.seed, this.seed, this.seed);
-		this.firstPassGeneration = true;
-		this.worldGen.GenerateOfflineThreaded();
-	}
-
-	private void DoRenderWorld()
-	{
-		this.firstPassGeneration = false;
-		this.secondPassGeneration = true;
-		this.worldGen.RenderWorldThreaded();
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
+		this.seed = int.Parse(currentQualitySetting.id);
+		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout);
+		this.clusterLayout = new Cluster(currentQualitySetting2.id, this.seed, true);
+		this.clusterLayout.Generate(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.seed, this.seed, this.seed, this.seed, true, false);
 	}
 
 	private void OnError(OfflineWorldGen.ErrorInfo error)
@@ -441,9 +312,7 @@ public class OfflineWorldGen : KMonoBehaviour
 	[SerializeField]
 	private KBatchedAnimController asteriodAnim;
 
-	private WorldGen worldGen;
-
-	private List<global::VoronoiTree.Node> startNodes;
+	private Cluster clusterLayout;
 
 	private StringKey currentStringKeyRoot;
 
@@ -463,17 +332,7 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private bool loadTriggered;
 
-	private bool shownStartingLocations;
-
 	private bool startedExitFlow;
-
-	private bool generateThreadComplete;
-
-	private bool renderThreadComplete;
-
-	private bool firstPassGeneration;
-
-	private bool secondPassGeneration;
 
 	private int seed;
 

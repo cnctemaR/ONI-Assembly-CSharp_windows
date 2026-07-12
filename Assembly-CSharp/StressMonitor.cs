@@ -6,13 +6,13 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		default_state = this.satisfied;
 		this.root.Update("StressMonitor", delegate(StressMonitor.Instance smi, float dt)
 		{
 			smi.ReportStress(dt);
 		}, UpdateRate.SIM_200ms, false);
-		this.satisfied.Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value >= 60f, UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Neutral, null);
+		this.satisfied.TriggerOnEnter(GameHashes.NotStressed, null).Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value >= 60f, UpdateRate.SIM_200ms).ToggleExpression(Db.Get().Expressions.Neutral, null);
 		this.stressed.ToggleStatusItem(Db.Get().DuplicantStatusItems.Stressed, null).Transition(this.satisfied, (StressMonitor.Instance smi) => smi.stress.value < 60f, UpdateRate.SIM_200ms).ToggleReactable((StressMonitor.Instance smi) => smi.CreateConcernReactable())
 			.TriggerOnEnter(GameHashes.Stressed, null);
 		this.stressed.tier1.Transition(this.stressed.tier2, (StressMonitor.Instance smi) => smi.HasHadEnough(), UpdateRate.SIM_200ms);
@@ -60,7 +60,7 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 			for (int num = 0; num != this.stress.deltaAttribute.Modifiers.Count; num++)
 			{
 				AttributeModifier attributeModifier = this.stress.deltaAttribute.Modifiers[num];
-				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, "Reporting stress for multipliers not supported yet.");
+				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, "Reporting stress for multipliers not supported yet.", null);
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, attributeModifier.Value * dt, attributeModifier.GetDescription(), base.gameObject.GetProperName());
 			}
 		}

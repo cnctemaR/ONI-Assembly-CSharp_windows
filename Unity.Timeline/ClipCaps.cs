@@ -11,6 +11,7 @@ namespace UnityEngine.Timeline
 		ClipIn = 4,
 		SpeedMultiplier = 8,
 		Blending = 16,
+		AutoScale = 40,
 		All = -1
 	}
 }

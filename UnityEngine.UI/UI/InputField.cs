@@ -76,11 +76,15 @@ namespace UnityEngine.UI
 			}
 		}
 
-		private bool shouldActivateOnSelect
+		public virtual bool shouldActivateOnSelect
 		{
 			get
 			{
-				return Application.platform != RuntimePlatform.tvOS;
+				return this.m_ShouldActivateOnSelect && Application.platform != RuntimePlatform.tvOS;
+			}
+			set
+			{
+				this.m_ShouldActivateOnSelect = value;
 			}
 		}
 
@@ -850,7 +854,9 @@ namespace UnityEngine.UI
 			}
 			else if (this.m_HideMobileInput && this.m_Keyboard.canSetSelection)
 			{
-				this.m_Keyboard.selection = new RangeInt(this.caretPositionInternal, this.caretSelectPositionInternal - this.caretPositionInternal);
+				int num = Mathf.Min(this.caretSelectPositionInternal, this.caretPositionInternal);
+				int num2 = Mathf.Abs(this.caretSelectPositionInternal - this.caretPositionInternal);
+				this.m_Keyboard.selection = new RangeInt(num, num2);
 			}
 			else if (this.m_Keyboard.canGetSelection && !this.m_HideMobileInput)
 			{
@@ -1083,6 +1089,7 @@ namespace UnityEngine.UI
 			bool flag2 = (modifiers & EventModifiers.Shift) > EventModifiers.None;
 			bool flag3 = (modifiers & EventModifiers.Alt) > EventModifiers.None;
 			bool flag4 = flag && !flag3 && !flag2;
+			bool flag5 = flag2 && !flag && !flag3;
 			KeyCode keyCode = evt.keyCode;
 			if (keyCode <= KeyCode.A)
 			{
@@ -1095,7 +1102,7 @@ namespace UnityEngine.UI
 					}
 					if (keyCode != KeyCode.Return)
 					{
-						goto IL_01C4;
+						goto IL_0213;
 					}
 				}
 				else
@@ -1107,14 +1114,14 @@ namespace UnityEngine.UI
 					}
 					if (keyCode != KeyCode.A)
 					{
-						goto IL_01C4;
+						goto IL_0213;
 					}
 					if (flag4)
 					{
 						this.SelectAll();
 						return InputField.EditState.Continue;
 					}
-					goto IL_01C4;
+					goto IL_0213;
 				}
 			}
 			else if (keyCode <= KeyCode.V)
@@ -1123,7 +1130,7 @@ namespace UnityEngine.UI
 				{
 					if (keyCode != KeyCode.V)
 					{
-						goto IL_01C4;
+						goto IL_0213;
 					}
 					if (flag4)
 					{
@@ -1131,7 +1138,7 @@ namespace UnityEngine.UI
 						this.UpdateLabel();
 						return InputField.EditState.Continue;
 					}
-					goto IL_01C4;
+					goto IL_0213;
 				}
 				else
 				{
@@ -1147,7 +1154,7 @@ namespace UnityEngine.UI
 						}
 						return InputField.EditState.Continue;
 					}
-					goto IL_01C4;
+					goto IL_0213;
 				}
 			}
 			else if (keyCode != KeyCode.X)
@@ -1162,8 +1169,7 @@ namespace UnityEngine.UI
 				case KeyCode.KeypadEnter:
 					break;
 				case KeyCode.KeypadEquals:
-				case KeyCode.Insert:
-					goto IL_01C4;
+					goto IL_0213;
 				case KeyCode.UpArrow:
 					this.MoveUp(flag2);
 					return InputField.EditState.Continue;
@@ -1176,6 +1182,26 @@ namespace UnityEngine.UI
 				case KeyCode.LeftArrow:
 					this.MoveLeft(flag2, flag);
 					return InputField.EditState.Continue;
+				case KeyCode.Insert:
+					if (flag4)
+					{
+						if (this.inputType != InputField.InputType.Password)
+						{
+							InputField.clipboard = this.GetSelectedString();
+						}
+						else
+						{
+							InputField.clipboard = "";
+						}
+						return InputField.EditState.Continue;
+					}
+					if (flag5)
+					{
+						this.Append(InputField.clipboard);
+						this.UpdateLabel();
+						return InputField.EditState.Continue;
+					}
+					goto IL_0213;
 				case KeyCode.Home:
 					this.MoveTextStart(flag2);
 					return InputField.EditState.Continue;
@@ -1183,7 +1209,7 @@ namespace UnityEngine.UI
 					this.MoveTextEnd(flag2);
 					return InputField.EditState.Continue;
 				default:
-					goto IL_01C4;
+					goto IL_0213;
 				}
 			}
 			else
@@ -1203,13 +1229,13 @@ namespace UnityEngine.UI
 					this.SendOnValueChangedAndUpdateLabel();
 					return InputField.EditState.Continue;
 				}
-				goto IL_01C4;
+				goto IL_0213;
 			}
 			if (this.lineType != InputField.LineType.MultiLineNewline)
 			{
 				return InputField.EditState.Finish;
 			}
-			IL_01C4:
+			IL_0213:
 			char c = evt.character;
 			if (!this.multiLine && (c == '\t' || c == '\r' || c == '\n'))
 			{
@@ -1262,7 +1288,7 @@ namespace UnityEngine.UI
 				if (type - EventType.ValidateCommand <= 1)
 				{
 					string commandName = this.m_ProcessingEvent.commandName;
-					if (commandName == "SelectAll")
+					if (commandName != null && commandName == "SelectAll")
 					{
 						this.SelectAll();
 						flag = true;
@@ -1634,13 +1660,25 @@ namespace UnityEngine.UI
 				return;
 			}
 			int num = Math.Min(this.selectionFocusPosition, this.selectionAnchorPosition);
+			string text = this.text;
+			if (this.selectionFocusPosition != this.selectionAnchorPosition)
+			{
+				if (this.caretPositionInternal < this.caretSelectPositionInternal)
+				{
+					text = this.text.Substring(0, this.caretPositionInternal) + this.text.Substring(this.caretSelectPositionInternal, this.text.Length - this.caretSelectPositionInternal);
+				}
+				else
+				{
+					text = this.text.Substring(0, this.caretSelectPositionInternal) + this.text.Substring(this.caretPositionInternal, this.text.Length - this.caretPositionInternal);
+				}
+			}
 			if (this.onValidateInput != null)
 			{
-				input = this.onValidateInput(this.text, num, input);
+				input = this.onValidateInput(text, num, input);
 			}
 			else if (this.characterValidation != InputField.CharacterValidation.None)
 			{
-				input = this.Validate(this.text, num, input);
+				input = this.Validate(text, num, input);
 			}
 			if (input == '\0')
 			{
@@ -2550,6 +2588,9 @@ namespace UnityEngine.UI
 
 		[SerializeField]
 		private bool m_ReadOnly;
+
+		[SerializeField]
+		private bool m_ShouldActivateOnSelect = true;
 
 		protected int m_CaretPosition;
 

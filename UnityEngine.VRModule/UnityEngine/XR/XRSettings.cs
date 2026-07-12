@@ -5,23 +5,23 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("Modules/VR/ScriptBindings/XR.bindings.h")]
-	[NativeHeader("Runtime/Interfaces/IVRDevice.h")]
 	[NativeHeader("Modules/VR/VRModule.h")]
 	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
+	[NativeHeader("Modules/VR/ScriptBindings/XR.bindings.h")]
+	[NativeHeader("Runtime/Interfaces/IVRDevice.h")]
 	[NativeConditional("ENABLE_VR")]
 	public static class XRSettings
 	{
 		public static extern bool enabled
 		{
-			[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+			[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern GameViewRenderMode gameViewRenderMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -30,15 +30,15 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("Active")]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool isDeviceActive
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool showDeviceView
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -47,18 +47,8 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[Obsolete("renderScale is deprecated, use XRSettings.eyeTextureResolutionScale instead (UnityUpgradable) -> eyeTextureResolutionScale", false)]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
-		public static extern float renderScale
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("RenderScale")]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float eyeTextureResolutionScale
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -67,22 +57,22 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern int eyeTextureWidth
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern int eyeTextureHeight
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeConditional("ENABLE_VR", "RenderTextureDesc()")]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("IntermediateEyeTextureDesc")]
 		public static RenderTextureDescriptor eyeTextureDesc
 		{
@@ -95,7 +85,7 @@ namespace UnityEngine.XR
 		}
 
 		[NativeName("DeviceEyeTextureDimension")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern TextureDimension deviceEyeTextureDimension
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -120,7 +110,7 @@ namespace UnityEngine.XR
 		}
 
 		[NativeName("RenderViewportScale")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		internal static extern float renderViewportScaleInternal
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -147,8 +137,8 @@ namespace UnityEngine.XR
 			set;
 		}
 
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("DeviceName")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern string loadedDeviceName
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -169,7 +159,7 @@ namespace UnityEngine.XR
 			get;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern XRSettings.StereoRenderingMode stereoRenderingMode
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]

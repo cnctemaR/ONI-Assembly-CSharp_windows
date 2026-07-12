@@ -5,6 +5,11 @@ public class CancellableDig : Cancellable
 {
 	protected override void OnCancel(object data)
 	{
+		if (data != null && (bool)data)
+		{
+			this.OnAnimationDone("ScaleDown");
+			return;
+		}
 		EasingAnimations componentInChildren = base.GetComponentInChildren<EasingAnimations>();
 		componentInChildren.OnAnimationDone = (Action<string>)Delegate.Combine(componentInChildren.OnAnimationDone, new Action<string>(this.OnAnimationDone));
 		componentInChildren.PlayAnimation("ScaleDown", 0.1f);

@@ -196,7 +196,8 @@ public class KGlobalAnimParser
 		int num = reader.ReadInt32();
 		if (num != 10 && num != 9)
 		{
-			global::Debug.LogError(string.Concat(new object[] { fileNameHash, " has invalid build.bytes version [", num, "]" }));
+			KAnimHashedString kanimHashedString = fileNameHash;
+			global::Debug.LogError(kanimHashedString.ToString() + " has invalid build.bytes version [" + num.ToString() + "]");
 			return -1;
 		}
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(data.groupID);
@@ -220,10 +221,10 @@ public class KGlobalAnimParser
 		int num4 = 0;
 		for (int i = 0; i < build.symbols.Length; i++)
 		{
-			KAnimHashedString kanimHashedString = new KAnimHashedString(reader.ReadInt32());
+			KAnimHashedString kanimHashedString2 = new KAnimHashedString(reader.ReadInt32());
 			KAnim.Build.Symbol symbol = new KAnim.Build.Symbol();
 			symbol.build = build;
-			symbol.hash = kanimHashedString;
+			symbol.hash = kanimHashedString2;
 			if (num > 9)
 			{
 				symbol.path = new KAnimHashedString(reader.ReadInt32());
@@ -287,7 +288,14 @@ public class KGlobalAnimParser
 			KAnim.Build.Symbol symbol = data.GetSymbol(i);
 			if (symbol == null)
 			{
-				global::Debug.LogWarning(string.Concat(new object[] { "Symbol null for [", data.groupID, "] idx: [", i, "]" }));
+				global::Debug.LogWarning(string.Concat(new string[]
+				{
+					"Symbol null for [",
+					data.groupID.ToString(),
+					"] idx: [",
+					i.ToString(),
+					"]"
+				}));
 			}
 			else
 			{
@@ -304,18 +312,19 @@ public class KGlobalAnimParser
 				symbol.frameLookup = new int[symbol.numLookupFrames];
 				if (symbol.numLookupFrames <= 0)
 				{
-					global::Debug.LogWarning(string.Concat(new object[]
-					{
-						"No lookup frames for  [",
-						data.groupID,
-						"] build: [",
-						symbol.build.name,
-						"] idx: [",
-						i,
-						"] id: [",
-						symbol.hash,
-						"]"
-					}));
+					string[] array = new string[9];
+					array[0] = "No lookup frames for  [";
+					array[1] = data.groupID.ToString();
+					array[2] = "] build: [";
+					array[3] = symbol.build.name;
+					array[4] = "] idx: [";
+					array[5] = i.ToString();
+					array[6] = "] id: [";
+					int num2 = 7;
+					KAnimHashedString kanimHashedString = symbol.hash;
+					array[num2] = kanimHashedString.ToString();
+					array[8] = "]";
+					global::Debug.LogWarning(string.Concat(array));
 				}
 				else
 				{
@@ -328,7 +337,17 @@ public class KGlobalAnimParser
 						KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = data.GetSymbolFrameInstance(l);
 						if (symbolFrameInstance2.symbolFrame == null)
 						{
-							global::Debug.LogWarning(string.Concat(new object[] { "No symbol frame  [", data.groupID, "] symFrameIdx: [", l, "] id: [", symbol.hash, "]" }));
+							string[] array2 = new string[7];
+							array2[0] = "No symbol frame  [";
+							array2[1] = data.groupID.ToString();
+							array2[2] = "] symFrameIdx: [";
+							array2[3] = l.ToString();
+							array2[4] = "] id: [";
+							int num3 = 5;
+							KAnimHashedString kanimHashedString = symbol.hash;
+							array2[num3] = kanimHashedString.ToString();
+							array2[6] = "]";
+							global::Debug.LogWarning(string.Concat(array2));
 						}
 						else
 						{
@@ -336,20 +355,21 @@ public class KGlobalAnimParser
 							{
 								if (m >= symbol.frameLookup.Length)
 								{
-									global::Debug.LogWarning(string.Concat(new object[]
-									{
-										"Too many lookup frames [",
-										m,
-										">=",
-										symbol.frameLookup.Length,
-										"] for  [",
-										data.groupID,
-										"] idx: [",
-										i,
-										"] id: [",
-										symbol.hash,
-										"]"
-									}));
+									string[] array3 = new string[11];
+									array3[0] = "Too many lookup frames [";
+									array3[1] = m.ToString();
+									array3[2] = ">=";
+									array3[3] = symbol.frameLookup.Length.ToString();
+									array3[4] = "] for  [";
+									array3[5] = data.groupID.ToString();
+									array3[6] = "] idx: [";
+									array3[7] = i.ToString();
+									array3[8] = "] id: [";
+									int num4 = 9;
+									KAnimHashedString kanimHashedString = symbol.hash;
+									array3[num4] = kanimHashedString.ToString();
+									array3[10] = "]";
+									global::Debug.LogWarning(string.Concat(array3));
 								}
 								else
 								{
@@ -361,10 +381,10 @@ public class KGlobalAnimParser
 					string text = HashCache.Get().Get(symbol.path);
 					if (!string.IsNullOrEmpty(text))
 					{
-						int num2 = text.IndexOf("/");
-						if (num2 != -1)
+						int num5 = text.IndexOf("/");
+						if (num5 != -1)
 						{
-							string text2 = text.Substring(0, num2);
+							string text2 = text.Substring(0, num5);
 							symbol.folder = new KAnimHashedString(text2);
 							HashCache.Get().Add(symbol.folder.HashValue, text2);
 						}

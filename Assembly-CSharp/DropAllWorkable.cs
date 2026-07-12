@@ -1,11 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/DropAllWorkable")]
 public class DropAllWorkable : Workable
 {
+	private Chore Chore
+	{
+		get
+		{
+			return this._chore;
+		}
+		set
+		{
+			this._chore = value;
+			this.markedForDrop = this._chore != null;
+		}
+	}
+
 	protected DropAllWorkable()
 	{
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
@@ -18,7 +32,7 @@ public class DropAllWorkable : Workable
 		base.Subscribe<DropAllWorkable>(-1697596308, DropAllWorkable.OnStorageChangeDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
 		this.synchronizeAnims = false;
-		base.SetWorkTime(0.1f);
+		base.SetWorkTime(this.dropWorkTime);
 		Prioritizable.AddRef(base.gameObject);
 	}
 
@@ -35,6 +49,10 @@ public class DropAllWorkable : Workable
 	{
 		base.OnSpawn();
 		this.showCmd = this.GetNewShowCmd();
+		if (this.markedForDrop)
+		{
+			this.DropAll();
+		}
 	}
 
 	public void DropAll()
@@ -42,17 +60,20 @@ public class DropAllWorkable : Workable
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.OnCompleteWork(null);
-			return;
 		}
-		if (this.chore == null)
+		else if (this.Chore == null)
 		{
-			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-			return;
+			ChoreType choreType = ((!string.IsNullOrEmpty(this.choreTypeID)) ? Db.Get().ChoreTypes.Get(this.choreTypeID) : Db.Get().ChoreTypes.EmptyStorage);
+			this.Chore = new WorkChore<DropAllWorkable>(choreType, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
-		this.chore.Cancel("Cancelled emptying");
-		this.chore = null;
-		base.GetComponent<KSelectable>().RemoveStatusItem(this.workerStatusItem, false);
-		base.ShowProgressBar(false);
+		else
+		{
+			this.Chore.Cancel("Cancelled emptying");
+			this.Chore = null;
+			base.GetComponent<KSelectable>().RemoveStatusItem(this.workerStatusItem, false);
+			base.ShowProgressBar(false);
+		}
+		this.RefreshStatusItem();
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -74,7 +95,8 @@ public class DropAllWorkable : Workable
 				}
 			}
 		}
-		this.chore = null;
+		this.Chore = null;
+		this.RefreshStatusItem();
 		base.Trigger(-1957399615, null);
 	}
 
@@ -82,7 +104,7 @@ public class DropAllWorkable : Workable
 	{
 		if (this.showCmd)
 		{
-			KIconButtonMenu.ButtonInfo buttonInfo = ((this.chore == null) ? new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF, true));
+			KIconButtonMenu.ButtonInfo buttonInfo = ((this.Chore == null) ? new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF, true));
 			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 		}
 	}
@@ -108,11 +130,33 @@ public class DropAllWorkable : Workable
 		}
 	}
 
-	private Chore chore;
+	private void RefreshStatusItem()
+	{
+		if (this.Chore != null && this.statusItem == Guid.Empty)
+		{
+			KSelectable component = base.GetComponent<KSelectable>();
+			this.statusItem = component.AddStatusItem(Db.Get().BuildingStatusItems.AwaitingEmptyBuilding, null);
+			return;
+		}
+		if (this.Chore == null && this.statusItem != Guid.Empty)
+		{
+			KSelectable component2 = base.GetComponent<KSelectable>();
+			this.statusItem = component2.RemoveStatusItem(this.statusItem, false);
+		}
+	}
+
+	[Serialize]
+	private bool markedForDrop;
+
+	private Chore _chore;
 
 	private bool showCmd;
 
 	private Storage[] storages;
+
+	public float dropWorkTime = 0.1f;
+
+	public string choreTypeID;
 
 	[MyCmpAdd]
 	private Prioritizable _prioritizable;
@@ -126,4 +170,6 @@ public class DropAllWorkable : Workable
 	{
 		component.OnStorageChange(data);
 	});
+
+	private Guid statusItem;
 }

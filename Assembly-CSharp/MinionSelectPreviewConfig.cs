@@ -5,6 +5,11 @@ using UnityEngine.UI;
 
 public class MinionSelectPreviewConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(MinionSelectPreviewConfig.ID, MinionSelectPreviewConfig.ID, true);
@@ -20,7 +25,7 @@ public class MinionSelectPreviewConfig : IEntityConfig
 		gameObject.AddOrGet<Effects>();
 		gameObject.AddOrGet<Traits>();
 		MinionModifiers minionModifiers = gameObject.AddOrGet<MinionModifiers>();
-		minionModifiers.initialTraits = new string[] { MinionConfig.MINION_BASE_TRAIT_ID };
+		minionModifiers.initialTraits.Add(MinionConfig.MINION_BASE_TRAIT_ID);
 		MinionConfig.AddMinionAmounts(minionModifiers);
 		gameObject.AddOrGet<AttributeLevels>();
 		gameObject.AddOrGet<AttributeConverters>();

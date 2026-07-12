@@ -52,8 +52,8 @@ namespace System.Reflection
 			}
 		}
 
-		[DebuggerHidden]
 		[DebuggerStepThrough]
+		[DebuggerHidden]
 		public virtual void AddEventHandler(object target, Delegate handler)
 		{
 			if (this.cached_add_event == null)

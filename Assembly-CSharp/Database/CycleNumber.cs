@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class CycleNumber : VictoryColonyAchievementRequirement
+	public class CycleNumber : VictoryColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public override string Name()
 		{
@@ -26,12 +25,7 @@ namespace Database
 			return GameClock.Instance.GetCycle() + 1 >= this.cycleNumber;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.cycleNumber);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.cycleNumber = reader.ReadInt32();
 		}

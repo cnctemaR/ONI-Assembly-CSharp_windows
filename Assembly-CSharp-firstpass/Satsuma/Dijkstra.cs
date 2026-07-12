@@ -29,7 +29,7 @@ namespace Satsuma
 		{
 			if (this.Mode == DijkstraMode.Sum && c < 0.0)
 			{
-				throw new InvalidOperationException("Invalid cost: " + c);
+				throw new InvalidOperationException("Invalid cost: " + c.ToString());
 			}
 		}
 

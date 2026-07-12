@@ -37,7 +37,7 @@ namespace MIConvexHull
 			}
 			if (this.NumberOfVertices <= this.NumOfDimensions)
 			{
-				throw new ArgumentException(string.Concat(new object[] { "There are too few vertices (m) for the n-dimensional space. (m must be greater than the n, but m is ", this.NumberOfVertices, " and n is ", this.NumOfDimensions }));
+				throw new ArgumentException("There are too few vertices (m) for the n-dimensional space. (m must be greater than the n, but m is " + this.NumberOfVertices.ToString() + " and n is " + this.NumOfDimensions.ToString());
 			}
 			this.PlaneDistanceTolerance = PlaneDistanceTolerance;
 			this.UnprocessedFaces = new FaceList();
@@ -431,12 +431,12 @@ namespace MIConvexHull
 			}
 			if (list.Count <= this.NumOfDimensions && this.IsLifted)
 			{
-				throw new ArgumentException(string.Concat(new object[]
+				throw new ArgumentException(string.Concat(new string[]
 				{
 					"The input data is degenerate. It appears to exist in ",
-					this.NumOfDimensions,
+					this.NumOfDimensions.ToString(),
 					" dimensions, but it is a ",
-					this.NumOfDimensions - 1,
+					(this.NumOfDimensions - 1).ToString(),
 					" dimensional set (i.e. the point of collinear, coplanar, or co-hyperplanar.)"
 				}));
 			}

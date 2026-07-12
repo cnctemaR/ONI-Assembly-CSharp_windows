@@ -36,9 +36,10 @@ public class AdvancedDoctorStationConfig : IBuildingConfig
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
+		Tag supplyTagForStation = MedicineInfo.GetSupplyTagForStation("AdvancedDoctorStation");
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = AdvancedDoctorStationConfig.SUPPLY_TAG;
+		manualDeliveryKG.requestedItemTag = supplyTagForStation;
 		manualDeliveryKG.capacity = 10f;
 		manualDeliveryKG.refillMass = 5f;
 		manualDeliveryKG.minimumMass = 1f;
@@ -47,7 +48,6 @@ public class AdvancedDoctorStationConfig : IBuildingConfig
 		DoctorStation doctorStation = go.AddOrGet<DoctorStation>();
 		doctorStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_medical_bed_kanim") };
 		doctorStation.workLayer = Grid.SceneLayer.BuildingFront;
-		doctorStation.supplyTag = AdvancedDoctorStationConfig.SUPPLY_TAG;
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Hospital.Id;
 		roomTracker.requirement = RoomTracker.Requirement.CustomRecommended;
@@ -59,6 +59,4 @@ public class AdvancedDoctorStationConfig : IBuildingConfig
 	}
 
 	public const string ID = "AdvancedDoctorStation";
-
-	private static Tag SUPPLY_TAG = "AdvancedCure";
 }

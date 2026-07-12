@@ -7,13 +7,13 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/ResourceManager.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/Shader.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
+	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Shaders/Shader.h")]
 	public sealed class Shader : Object
 	{
 		[Obsolete("Use Graphics.activeTier instead (UnityUpgradable) -> UnityEngine.Graphics.activeTier", false)]
@@ -29,9 +29,10 @@ namespace UnityEngine
 			}
 		}
 
-		[FreeFunction("GetScriptMapper().FindShader")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Shader Find(string name);
+		public static Shader Find(string name)
+		{
+			return ResourcesAPI.ActiveAPI.FindShaderByName(name);
+		}
 
 		[FreeFunction("GetBuiltinResource<Shader>")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -168,9 +169,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalBufferImpl(int name, ComputeBuffer value);
 
+		[FreeFunction("ShaderScripting::SetGlobalBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalGraphicsBufferImpl(int name, GraphicsBuffer value);
+
 		[FreeFunction("ShaderScripting::SetGlobalConstantBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGlobalConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
+
+		[FreeFunction("ShaderScripting::SetGlobalConstantBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
 
 		[FreeFunction("ShaderScripting::GetGlobalFloat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -435,9 +444,34 @@ namespace UnityEngine
 			Shader.SetGlobalBufferImpl(nameID, value);
 		}
 
+		public static void SetGlobalBuffer(string name, GraphicsBuffer value)
+		{
+			Shader.SetGlobalGraphicsBufferImpl(Shader.PropertyToID(name), value);
+		}
+
+		public static void SetGlobalBuffer(int nameID, GraphicsBuffer value)
+		{
+			Shader.SetGlobalGraphicsBufferImpl(nameID, value);
+		}
+
+		public static void SetGlobalConstantBuffer(string name, ComputeBuffer value, int offset, int size)
+		{
+			Shader.SetGlobalConstantBufferImpl(Shader.PropertyToID(name), value, offset, size);
+		}
+
 		public static void SetGlobalConstantBuffer(int nameID, ComputeBuffer value, int offset, int size)
 		{
 			Shader.SetGlobalConstantBufferImpl(nameID, value, offset, size);
+		}
+
+		public static void SetGlobalConstantBuffer(string name, GraphicsBuffer value, int offset, int size)
+		{
+			Shader.SetGlobalConstantGraphicsBufferImpl(Shader.PropertyToID(name), value, offset, size);
+		}
+
+		public static void SetGlobalConstantBuffer(int nameID, GraphicsBuffer value, int offset, int size)
+		{
+			Shader.SetGlobalConstantGraphicsBufferImpl(nameID, value, offset, size);
 		}
 
 		public static void SetGlobalFloatArray(string name, List<float> values)
@@ -626,30 +660,30 @@ namespace UnityEngine
 
 		[FreeFunction("ShaderScripting::GetPropertyName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetPropertyName([NotNull] Shader shader, int propertyIndex);
+		private static extern string GetPropertyName([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
 		[FreeFunction("ShaderScripting::GetPropertyNameId")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetPropertyNameId([NotNull] Shader shader, int propertyIndex);
+		private static extern int GetPropertyNameId([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
 		[FreeFunction("ShaderScripting::GetPropertyType")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderPropertyType GetPropertyType([NotNull] Shader shader, int propertyIndex);
+		private static extern ShaderPropertyType GetPropertyType([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
 		[FreeFunction("ShaderScripting::GetPropertyDescription")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetPropertyDescription([NotNull] Shader shader, int propertyIndex);
+		private static extern string GetPropertyDescription([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
 		[FreeFunction("ShaderScripting::GetPropertyFlags")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderPropertyFlags GetPropertyFlags([NotNull] Shader shader, int propertyIndex);
+		private static extern ShaderPropertyFlags GetPropertyFlags([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
 		[FreeFunction("ShaderScripting::GetPropertyAttributes")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string[] GetPropertyAttributes([NotNull] Shader shader, int propertyIndex);
+		private static extern string[] GetPropertyAttributes([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
 		[FreeFunction("ShaderScripting::GetPropertyDefaultValue")]
-		private static Vector4 GetPropertyDefaultValue([NotNull] Shader shader, int propertyIndex)
+		private static Vector4 GetPropertyDefaultValue([NotNull("ArgumentNullException")] Shader shader, int propertyIndex)
 		{
 			Vector4 vector;
 			Shader.GetPropertyDefaultValue_Injected(shader, propertyIndex, out vector);
@@ -658,11 +692,15 @@ namespace UnityEngine
 
 		[FreeFunction("ShaderScripting::GetPropertyTextureDimension")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern TextureDimension GetPropertyTextureDimension([NotNull] Shader shader, int propertyIndex);
+		private static extern TextureDimension GetPropertyTextureDimension([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
 
 		[FreeFunction("ShaderScripting::GetPropertyTextureDefaultName")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetPropertyTextureDefaultName([NotNull] Shader shader, int propertyIndex);
+		private static extern string GetPropertyTextureDefaultName([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+
+		[FreeFunction("ShaderScripting::FindTextureStack")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool FindTextureStackImpl([NotNull("ArgumentNullException")] Shader s, int propertyIdx, out string stackName, out int layerIndex);
 
 		private static void CheckPropertyIndex(Shader s, int propertyIndex)
 		{
@@ -772,6 +810,18 @@ namespace UnityEngine
 				throw new ArgumentException("Property type is not Texture.");
 			}
 			return Shader.GetPropertyTextureDefaultName(this, propertyIndex);
+		}
+
+		public bool FindTextureStack(int propertyIndex, out string stackName, out int layerIndex)
+		{
+			Shader.CheckPropertyIndex(this, propertyIndex);
+			ShaderPropertyType propertyType = this.GetPropertyType(propertyIndex);
+			bool flag = propertyType != ShaderPropertyType.Texture;
+			if (flag)
+			{
+				throw new ArgumentException("Property type is not Texture.");
+			}
+			return Shader.FindTextureStackImpl(this, propertyIndex, out stackName, out layerIndex);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

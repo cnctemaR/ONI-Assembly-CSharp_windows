@@ -1,11 +1,10 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 using UnityEngine;
 
 namespace Database
 {
-	public class AutomateABuilding : ColonyAchievementRequirement
+	public class AutomateABuilding : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public override bool Success()
 		{
@@ -43,11 +42,7 @@ namespace Database
 			return false;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 		}
 

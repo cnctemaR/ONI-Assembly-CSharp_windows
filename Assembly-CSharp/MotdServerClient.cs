@@ -35,13 +35,7 @@ public class MotdServerClient
 
 	private static string MotdLocalImagePath(int imageVersion, Localization.Locale locale)
 	{
-		return string.Concat(new object[]
-		{
-			"motd_local/",
-			MotdServerClient.GetLocalePathModifier(locale),
-			"image_",
-			imageVersion
-		});
+		return "motd_local/" + MotdServerClient.GetLocalePathModifier(locale) + "image_" + imageVersion.ToString();
 	}
 
 	private static string GetLocalePathModifier()
@@ -128,7 +122,7 @@ public class MotdServerClient
 		{
 			MotdServerClient.<>c__DisplayClass16_1 CS$<>8__locals2 = new MotdServerClient.<>c__DisplayClass16_1();
 			CS$<>8__locals2.CS$<>8__locals1 = CS$<>8__locals1;
-			DebugUtil.DevAssert(CS$<>8__locals1.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded");
+			DebugUtil.DevAssert(CS$<>8__locals1.localMotd.image_texture != null, "Local MOTD image_texture is no longer loaded", null);
 			if (CS$<>8__locals1.localMotd.image_texture == null)
 			{
 				CS$<>8__locals1.cb(null, "Local image_texture has been unloaded since we requested the MOTD");
@@ -153,13 +147,7 @@ public class MotdServerClient
 			}
 			if (CS$<>8__locals2.responseStruct.version <= CS$<>8__locals1.localMotd.version)
 			{
-				global::Debug.Log(string.Concat(new object[]
-				{
-					"Using local MOTD at version: ",
-					CS$<>8__locals1.localMotd.version,
-					", web version at ",
-					CS$<>8__locals2.responseStruct.version
-				}));
+				global::Debug.Log("Using local MOTD at version: " + CS$<>8__locals1.localMotd.version.ToString() + ", web version at " + CS$<>8__locals2.responseStruct.version.ToString());
 				CS$<>8__locals1.cb(CS$<>8__locals1.localMotd, null);
 				return;
 			}
@@ -170,13 +158,7 @@ public class MotdServerClient
 				string text = null;
 				if (string.IsNullOrEmpty(wr.error))
 				{
-					global::Debug.Log(string.Concat(new object[]
-					{
-						"Using web MOTD at version: ",
-						CS$<>8__locals2.responseStruct.version,
-						", local version at ",
-						CS$<>8__locals2.CS$<>8__locals1.localMotd.version
-					}));
+					global::Debug.Log("Using web MOTD at version: " + CS$<>8__locals2.responseStruct.version.ToString() + ", local version at " + CS$<>8__locals2.CS$<>8__locals1.localMotd.version.ToString());
 					CS$<>8__locals2.responseStruct.image_texture = DownloadHandlerTexture.GetContent(wr);
 				}
 				else

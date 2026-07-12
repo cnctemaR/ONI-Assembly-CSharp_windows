@@ -8,8 +8,13 @@ namespace UnityEngine.PlayerLoop
 	[RequiredByNativeCode]
 	public struct Initialization
 	{
-		[RequiredByNativeCode]
+		[Obsolete("PlayerUpdateTime player loop component has been moved to its own category called TimeUpdate. (UnityUpgradable) -> UnityEngine.PlayerLoop.TimeUpdate/WaitForLastPresentationAndUpdateTime", true)]
 		public struct PlayerUpdateTime
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct UpdateCameraMotionVectors
 		{
 		}
 

@@ -27,11 +27,14 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 		{
 			foreach (GameObject gameObject in instantiation.prefabs)
 			{
-				Vector3 vector = gameObject.rectTransform().anchoredPosition;
-				GameObject gameObject2 = Util.KInstantiateUI(gameObject, instantiation.parent.gameObject, false);
-				gameObject2.rectTransform().anchoredPosition = vector;
-				gameObject2.rectTransform().localScale = Vector3.one;
-				this.instantiatedObjects.Add(gameObject2);
+				if (DlcManager.IsContentActive(instantiation.RequiredDlcId))
+				{
+					Vector3 vector = gameObject.rectTransform().anchoredPosition;
+					GameObject gameObject2 = Util.KInstantiateUI(gameObject, instantiation.parent.gameObject, false);
+					gameObject2.rectTransform().anchoredPosition = vector;
+					gameObject2.rectTransform().localScale = Vector3.one;
+					this.instantiatedObjects.Add(gameObject2);
+				}
 			}
 		}
 		if (!this.InstantiateOnAwake)
@@ -72,5 +75,7 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 		public GameObject[] prefabs;
 
 		public Transform parent;
+
+		public string RequiredDlcId;
 	}
 }

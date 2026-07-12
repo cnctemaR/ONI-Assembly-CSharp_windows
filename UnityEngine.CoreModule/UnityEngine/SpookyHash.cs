@@ -9,7 +9,15 @@ namespace UnityEngine
 		private static bool AttemptDetectAllowUnalignedRead()
 		{
 			string processorType = SystemInfo.processorType;
-			return processorType == "x86" || processorType == "AMD64";
+			string text = processorType;
+			if (text != null)
+			{
+				if (text == "x86" || text == "AMD64")
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public unsafe static void Hash(void* message, ulong length, ulong* hash1, ulong* hash2)
@@ -169,77 +177,79 @@ namespace UnityEngine
 			num5 += length << 56;
 			ulong num6 = num;
 			ulong num7 = num6;
-			if (num7 <= 15UL)
+			ulong num8 = num7;
+			if (num8 <= 15UL)
 			{
-				switch ((uint)num7)
+				switch ((uint)num8)
 				{
 				case 0U:
 					num4 += 16045690984833335023UL;
 					num5 += 16045690984833335023UL;
-					goto IL_0313;
+					goto IL_02F9;
 				case 1U:
-					goto IL_02E6;
+					goto IL_02CC;
 				case 2U:
-					goto IL_02D3;
+					goto IL_02B9;
 				case 3U:
 					num4 += (ulong)u.p8[2] << 16;
-					goto IL_02D3;
+					goto IL_02B9;
 				case 4U:
-					goto IL_02AD;
+					goto IL_0296;
 				case 5U:
-					goto IL_0296;
+					goto IL_0282;
 				case 6U:
-					num4 += (ulong)u.p8[5] << 40;
-					goto IL_0296;
+					goto IL_026E;
 				case 7U:
 					num4 += (ulong)u.p8[6] << 48;
-					goto IL_0243;
+					goto IL_026E;
 				case 8U:
-					goto IL_0257;
+					goto IL_0249;
 				case 9U:
-					goto IL_0243;
+					goto IL_0238;
 				case 10U:
-					goto IL_022C;
+					goto IL_0224;
 				case 11U:
 					num5 += (ulong)u.p8[10] << 16;
-					goto IL_022C;
+					goto IL_0224;
 				case 12U:
-					goto IL_01F1;
+					goto IL_01EC;
 				case 13U:
-					goto IL_01D9;
+					goto IL_01D7;
 				case 14U:
 					break;
 				case 15U:
 					num5 += (ulong)u.p8[14] << 48;
 					break;
 				default:
-					goto IL_0313;
+					goto IL_02F9;
 				}
 				num5 += (ulong)u.p8[13] << 40;
-				IL_01D9:
+				IL_01D7:
 				num5 += (ulong)u.p8[12] << 32;
-				IL_01F1:
+				IL_01EC:
 				num5 += (ulong)u.p32[2];
 				num4 += *u.p64;
-				goto IL_0313;
-				IL_022C:
+				goto IL_02F9;
+				IL_0224:
 				num5 += (ulong)u.p8[9] << 8;
-				IL_0243:
+				IL_0238:
 				num5 += (ulong)u.p8[8];
-				IL_0257:
+				IL_0249:
 				num4 += *u.p64;
-				goto IL_0313;
-				IL_0296:
+				goto IL_02F9;
+				IL_026E:
+				num4 += (ulong)u.p8[5] << 40;
+				IL_0282:
 				num4 += (ulong)u.p8[4] << 32;
-				IL_02AD:
+				IL_0296:
 				num4 += (ulong)(*u.p32);
-				goto IL_0313;
-				IL_02D3:
+				goto IL_02F9;
+				IL_02B9:
 				num4 += (ulong)u.p8[1] << 8;
-				IL_02E6:
+				IL_02CC:
 				num4 += (ulong)(*u.p8);
 			}
-			IL_0313:
+			IL_02F9:
 			SpookyHash.ShortEnd(ref num2, ref num3, ref num4, ref num5);
 			*hash1 = num2;
 			*hash2 = num3;
@@ -428,11 +438,11 @@ namespace UnityEngine
 				this.p32 = null;
 				this.p64 = null;
 				this.i = 0UL;
-				this.p8 = p8;
+				this.p8 = (byte*)p8;
 			}
 
 			[FieldOffset(0)]
-			public unsafe ushort* p8;
+			public unsafe byte* p8;
 
 			[FieldOffset(0)]
 			public unsafe uint* p32;

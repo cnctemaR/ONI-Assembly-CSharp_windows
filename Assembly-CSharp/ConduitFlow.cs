@@ -244,7 +244,7 @@ public class ConduitFlow : IConduitFlow
 		}
 		if (conduitContents.mass > 0f && conduitContents.temperature <= 0f)
 		{
-			global::Debug.LogError("unexpected temperature");
+			global::Debug.LogError(string.Format("unexpected temperature {0}", conduitContents.temperature));
 		}
 		return conduitContents;
 	}
@@ -743,6 +743,10 @@ public class ConduitFlow : IConduitFlow
 			conduitGO.Trigger(-1152799878, null);
 		}
 	}
+
+	public const float MAX_LIQUID_MASS = 10f;
+
+	public const float MAX_GAS_MASS = 1f;
 
 	private ConduitType conduitType;
 
@@ -1562,7 +1566,7 @@ public class ConduitFlow : IConduitFlow
 		public float GetEffectiveCapacity(float maximum_capacity)
 		{
 			float mass = this.mass;
-			DebugUtil.DevAssert(mass <= maximum_capacity, "Effective mass cannot be greater than capacity!");
+			DebugUtil.DevAssert(mass <= maximum_capacity, string.Format("Effective mass cannot be greater than capacity! mass={0}, capcity={1}", mass, maximum_capacity), null);
 			return Mathf.Max(0f, maximum_capacity - mass);
 		}
 
@@ -2064,10 +2068,9 @@ public class ConduitFlow : IConduitFlow
 				{
 					while (enumerator.MoveNext())
 					{
-						ConduitFlow.BuildNetworkTask.Graph.<>c__DisplayClass24_0 CS$<>8__locals1 = new ConduitFlow.BuildNetworkTask.Graph.<>c__DisplayClass24_0();
-						CS$<>8__locals1.inverted_edge = enumerator.Current;
-						ConduitFlow.BuildNetworkTask.Graph.Edge candidate = CS$<>8__locals1.inverted_edge.Invert();
-						if (!this.edges.Any<ConduitFlow.BuildNetworkTask.Graph.Edge>((ConduitFlow.BuildNetworkTask.Graph.Edge edge) => edge.Equals(CS$<>8__locals1.inverted_edge) || edge.Equals(candidate)))
+						ConduitFlow.BuildNetworkTask.Graph.Edge inverted_edge2 = enumerator.Current;
+						ConduitFlow.BuildNetworkTask.Graph.Edge candidate = inverted_edge2.Invert();
+						if (!this.edges.Any<ConduitFlow.BuildNetworkTask.Graph.Edge>((ConduitFlow.BuildNetworkTask.Graph.Edge edge) => edge.Equals(inverted_edge2) || edge.Equals(candidate)))
 						{
 							this.edges.Add(candidate);
 							this.vertex_cells.Add(candidate.vertices[0].cell);

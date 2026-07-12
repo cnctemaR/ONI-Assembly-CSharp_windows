@@ -8,8 +8,8 @@ using UnityEngine.Bindings;
 namespace UnityEngine.Rendering
 {
 	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
-	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
 	[NativeHeader("Runtime/Scripting/ScriptingCommonStructDefinitions.h")]
+	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
 	public struct CullingResults : IEquatable<CullingResults>
 	{
 		[FreeFunction("ScriptableRenderPipeline_Bindings::GetLightIndexCount")]
@@ -23,6 +23,10 @@ namespace UnityEngine.Rendering
 		[FreeFunction("FillLightAndReflectionProbeIndices")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void FillLightAndReflectionProbeIndices(IntPtr cullingResultsPtr, ComputeBuffer computeBuffer);
+
+		[FreeFunction("FillLightAndReflectionProbeIndices")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FillLightAndReflectionProbeIndicesGraphicsBuffer(IntPtr cullingResultsPtr, GraphicsBuffer buffer);
 
 		[FreeFunction("GetLightIndexMapSize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -122,6 +126,11 @@ namespace UnityEngine.Rendering
 		public void FillLightAndReflectionProbeIndices(ComputeBuffer computeBuffer)
 		{
 			CullingResults.FillLightAndReflectionProbeIndices(this.ptr, computeBuffer);
+		}
+
+		public void FillLightAndReflectionProbeIndices(GraphicsBuffer buffer)
+		{
+			CullingResults.FillLightAndReflectionProbeIndicesGraphicsBuffer(this.ptr, buffer);
 		}
 
 		public NativeArray<int> GetLightIndexMap(Allocator allocator)

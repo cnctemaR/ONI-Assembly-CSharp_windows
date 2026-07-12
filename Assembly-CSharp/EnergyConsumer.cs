@@ -8,7 +8,7 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name} {WattsUsed}W")]
 [AddComponentMenu("KMonoBehaviour/scripts/EnergyConsumer")]
-public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IGameObjectEffectDescriptor
+public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, ICircuitConnected, IGameObjectEffectDescriptor
 {
 	public int PowerSortOrder
 	{
@@ -56,6 +56,10 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IG
 		}
 	}
 
+	public bool IsVirtual { get; private set; }
+
+	public object VirtualCircuitKey { get; private set; }
+
 	public ushort CircuitID { get; private set; }
 
 	public float BaseWattageRating
@@ -90,14 +94,6 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IG
 		}
 	}
 
-	public float BaseWattsNeededWhenActive
-	{
-		get
-		{
-			return this.building.Def.EnergyConsumptionWhenActive;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		this.CircuitID = ushort.MaxValue;
@@ -118,14 +114,14 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IG
 	protected override void OnCleanUp()
 	{
 		Game.Instance.energySim.RemoveEnergyConsumer(this);
-		Game.Instance.circuitManager.Disconnect(this);
+		Game.Instance.circuitManager.Disconnect(this, true);
 		Components.EnergyConsumers.Remove(this);
 		base.OnCleanUp();
 	}
 
 	public virtual void EnergySim200ms(float dt)
 	{
-		this.CircuitID = Game.Instance.circuitManager.GetCircuitID(this.PowerCell);
+		this.CircuitID = Game.Instance.circuitManager.GetCircuitID(this);
 		if (!this.IsConnected)
 		{
 			this.IsPowered = false;

@@ -8,18 +8,18 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetUtility.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleUtility.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleSaveAndLoadHelper.h")]
-	[NativeHeader("AssetBundleScriptingClasses.h")]
-	[NativeHeader("Runtime/Scripting/ScriptingUtility.h")]
-	[NativeHeader("Runtime/Scripting/ScriptingObjectWithIntPtrField.h")]
-	[NativeHeader("Runtime/Scripting/ScriptingExportUtility.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetOperation.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromManagedStreamAsyncOperation.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromMemoryAsyncOperation.h")]
+	[ExcludeFromPreset]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetOperation.h")]
+	[NativeHeader("Runtime/Scripting/ScriptingExportUtility.h")]
+	[NativeHeader("Runtime/Scripting/ScriptingObjectWithIntPtrField.h")]
+	[NativeHeader("Runtime/Scripting/ScriptingUtility.h")]
+	[NativeHeader("AssetBundleScriptingClasses.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleSaveAndLoadHelper.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleUtility.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetUtility.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromFileAsyncOperation.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromManagedStreamAsyncOperation.h")]
 	public class AssetBundle : Object
 	{
 		private AssetBundle()
@@ -37,7 +37,7 @@ namespace UnityEngine
 
 		[FreeFunction("LoadMainObjectFromAssetBundle", true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Object returnMainAsset(AssetBundle bundle);
+		internal static extern Object returnMainAsset([NotNull("NullExceptionObject")] AssetBundle bundle);
 
 		[FreeFunction("UnloadAllAssetBundles")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -192,15 +192,15 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool Contains(string name);
 
-		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		public Object Load(string name)
 		{
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public Object Load<T>(string name)
 		{
 			return null;
@@ -234,8 +234,8 @@ namespace UnityEngine
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public T[] LoadAll<T>() where T : Object
 		{
 			return null;
@@ -272,9 +272,9 @@ namespace UnityEngine
 			return this.LoadAsset_Internal(name, type);
 		}
 
-		[NativeThrows]
-		[NativeMethod("LoadAsset_Internal")]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
+		[NativeMethod("LoadAsset_Internal")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Object LoadAsset_Internal(string name, Type type);
 
@@ -434,8 +434,8 @@ namespace UnityEngine
 			return this.GetAllAssetNames();
 		}
 
-		[NativeThrows]
 		[NativeMethod("LoadAssetAsync_Internal")]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern AssetBundleRequest LoadAssetAsync_Internal(string name, Type type);
 
@@ -456,8 +456,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Object[] LoadAssetWithSubAssets_Internal(string name, Type type);
 
-		[NativeMethod("LoadAssetWithSubAssetsAsync_Internal")]
 		[NativeThrows]
+		[NativeMethod("LoadAssetWithSubAssetsAsync_Internal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern AssetBundleRequest LoadAssetWithSubAssetsAsync_Internal(string name, Type type);
 

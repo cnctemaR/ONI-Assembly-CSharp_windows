@@ -3,7 +3,7 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
-[DebuggerDisplay("{name} visible={visible} suspendUpdates={suspendUpdates} moving={moving}")]
+[DebuggerDisplay("{name} visible={isVisible} suspendUpdates={suspendUpdates} moving={moving}")]
 public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimConverter
 {
 	public int GetCurrentFrameIndex()
@@ -137,7 +137,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		HashedString hashedString = kafd.build.batchTag;
 		if (group.renderType == KAnimBatchGroup.RendererType.DontRender || group.renderType == KAnimBatchGroup.RendererType.AnimOnly)
 		{
-			global::Debug.Assert(group.swapTarget.IsValid, "Invalid swap target fro group [" + group.id + "]");
+			bool isValid = group.swapTarget.IsValid;
+			string text = "Invalid swap target fro group [";
+			HashedString id = group.id;
+			global::Debug.Assert(isValid, text + id.ToString() + "]");
 			hashedString = group.swapTarget;
 		}
 		this.batchGroupID = hashedString;

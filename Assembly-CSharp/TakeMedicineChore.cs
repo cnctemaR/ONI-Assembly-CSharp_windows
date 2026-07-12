@@ -3,7 +3,7 @@ using STRINGS;
 
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
-	public TakeMedicineChore(MedicinalPill master)
+	public TakeMedicineChore(MedicinalPillWorkable master)
 		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		this.medicine = master;
@@ -25,7 +25,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 
 	private Pickupable pickupable;
 
-	private MedicinalPill medicine;
+	private MedicinalPillWorkable medicine;
 
 	public static readonly Chore.Precondition CanCure = new Chore.Precondition
 	{
@@ -64,10 +64,10 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 			default_state = this.fetch;
 			base.Target(this.eater);
 			this.fetch.InitializeStates(this.eater, this.source, this.chunk, this.requestedpillcount, this.actualpillcount, this.takemedicine, null);
-			this.takemedicine.ToggleAnims("anim_eat_floor_kanim", 0f).ToggleTag(GameTags.TakingMedicine).ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
+			this.takemedicine.ToggleAnims("anim_eat_floor_kanim", 0f, "").ToggleTag(GameTags.TakingMedicine).ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
 			{
-				MedicinalPill medicinalPill = this.chunk.Get<MedicinalPill>(smi);
-				this.eater.Get<Worker>(smi).StartWork(new Worker.StartWorkInfo(medicinalPill));
+				MedicinalPillWorkable medicinalPillWorkable = this.chunk.Get<MedicinalPillWorkable>(smi);
+				this.eater.Get<Worker>(smi).StartWork(new Worker.StartWorkInfo(medicinalPillWorkable));
 			}, (TakeMedicineChore.StatesInstance smi) => this.chunk.Get<MedicinalPill>(smi) != null, null, null);
 		}
 

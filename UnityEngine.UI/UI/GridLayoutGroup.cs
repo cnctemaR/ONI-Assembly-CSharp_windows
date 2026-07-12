@@ -135,9 +135,10 @@ namespace UnityEngine.UI
 
 		private void SetCellsAlongAxis(int axis)
 		{
+			int count = base.rectChildren.Count;
 			if (axis == 0)
 			{
-				for (int i = 0; i < base.rectChildren.Count; i++)
+				for (int i = 0; i < count; i++)
 				{
 					RectTransform rectTransform = base.rectChildren[i];
 					this.m_Tracker.Add(this, rectTransform, DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.AnchoredPositionY | DrivenTransformProperties.AnchorMinX | DrivenTransformProperties.AnchorMinY | DrivenTransformProperties.AnchorMaxX | DrivenTransformProperties.AnchorMaxY | DrivenTransformProperties.SizeDeltaX | DrivenTransformProperties.SizeDeltaY);
@@ -154,17 +155,17 @@ namespace UnityEngine.UI
 			if (this.m_Constraint == GridLayoutGroup.Constraint.FixedColumnCount)
 			{
 				num = this.m_ConstraintCount;
-				if (base.rectChildren.Count > num)
+				if (count > num)
 				{
-					num2 = base.rectChildren.Count / num + ((base.rectChildren.Count % num > 0) ? 1 : 0);
+					num2 = count / num + ((count % num > 0) ? 1 : 0);
 				}
 			}
 			else if (this.m_Constraint == GridLayoutGroup.Constraint.FixedRowCount)
 			{
 				num2 = this.m_ConstraintCount;
-				if (base.rectChildren.Count > num2)
+				if (count > num2)
 				{
-					num = base.rectChildren.Count / num2 + ((base.rectChildren.Count % num2 > 0) ? 1 : 0);
+					num = count / num2 + ((count % num2 > 0) ? 1 : 0);
 				}
 			}
 			else
@@ -194,18 +195,18 @@ namespace UnityEngine.UI
 			if (this.startAxis == GridLayoutGroup.Axis.Horizontal)
 			{
 				num5 = num;
-				num6 = Mathf.Clamp(num, 1, base.rectChildren.Count);
-				num7 = Mathf.Clamp(num2, 1, Mathf.CeilToInt((float)base.rectChildren.Count / (float)num5));
+				num6 = Mathf.Clamp(num, 1, count);
+				num7 = Mathf.Clamp(num2, 1, Mathf.CeilToInt((float)count / (float)num5));
 			}
 			else
 			{
 				num5 = num2;
-				num7 = Mathf.Clamp(num2, 1, base.rectChildren.Count);
-				num6 = Mathf.Clamp(num, 1, Mathf.CeilToInt((float)base.rectChildren.Count / (float)num5));
+				num7 = Mathf.Clamp(num2, 1, count);
+				num6 = Mathf.Clamp(num, 1, Mathf.CeilToInt((float)count / (float)num5));
 			}
 			Vector2 vector = new Vector2((float)num6 * this.cellSize.x + (float)(num6 - 1) * this.spacing.x, (float)num7 * this.cellSize.y + (float)(num7 - 1) * this.spacing.y);
 			Vector2 vector2 = new Vector2(base.GetStartOffset(0, vector.x), base.GetStartOffset(1, vector.y));
-			for (int j = 0; j < base.rectChildren.Count; j++)
+			for (int j = 0; j < count; j++)
 			{
 				int num8;
 				int num9;

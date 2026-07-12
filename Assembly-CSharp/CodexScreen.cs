@@ -62,7 +62,7 @@ public class CodexScreen : KScreen
 
 	public override float GetSortKey()
 	{
-		return 10000f;
+		return 50f;
 	}
 
 	private void CodexScreenInit()
@@ -118,16 +118,19 @@ public class CodexScreen : KScreen
 		input = input.ToLower();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
 		{
-			if (input == "")
+			if (DlcManager.IsDlcListValidForCurrentContent(keyValuePair.Value.GetDlcIds()))
 			{
-				if (!keyValuePair.Value.searchOnly)
+				if (input == "")
+				{
+					if (!keyValuePair.Value.searchOnly)
+					{
+						this.searchResults.Add(keyValuePair.Value);
+					}
+				}
+				else if (input == keyValuePair.Value.name.ToLower() || input.Contains(keyValuePair.Value.name.ToLower()) || keyValuePair.Value.name.ToLower().Contains(input))
 				{
 					this.searchResults.Add(keyValuePair.Value);
 				}
-			}
-			else if (input == keyValuePair.Value.name.ToLower() || input.Contains(keyValuePair.Value.name.ToLower()) || keyValuePair.Value.name.ToLower().Contains(input))
-			{
-				this.searchResults.Add(keyValuePair.Value);
 			}
 		}
 		foreach (KeyValuePair<string, SubEntry> keyValuePair2 in CodexCache.subEntries)

@@ -117,8 +117,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue(false)]
 		[XmlAttribute("mixed")]
+		[DefaultValue(false)]
 		public override bool IsMixed
 		{
 			get
@@ -136,8 +136,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("complexContent", typeof(XmlSchemaComplexContent))]
 		[XmlElement("simpleContent", typeof(XmlSchemaSimpleContent))]
+		[XmlElement("complexContent", typeof(XmlSchemaComplexContent))]
 		public XmlSchemaContentModel ContentModel
 		{
 			get
@@ -151,9 +151,9 @@ namespace System.Xml.Schema
 		}
 
 		[XmlElement("group", typeof(XmlSchemaGroupRef))]
-		[XmlElement("sequence", typeof(XmlSchemaSequence))]
-		[XmlElement("all", typeof(XmlSchemaAll))]
 		[XmlElement("choice", typeof(XmlSchemaChoice))]
+		[XmlElement("all", typeof(XmlSchemaAll))]
+		[XmlElement("sequence", typeof(XmlSchemaSequence))]
 		public XmlSchemaParticle Particle
 		{
 			get

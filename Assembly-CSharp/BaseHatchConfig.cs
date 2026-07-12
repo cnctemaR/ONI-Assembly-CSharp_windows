@@ -44,29 +44,29 @@ public static class BaseHatchConfig
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
 		bool flag = !is_baby;
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new ExitBurrowStates.Def(), flag)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Burrowed, true, "idle_mound", global::STRINGS.CREATURES.STATUSITEMS.BURROWED.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWED.TOOLTIP), flag)
-			.Add(new GrowUpStates.Def(), true)
-			.Add(new TrappedStates.Def(), true)
-			.Add(new IncubatingStates.Def(), true)
-			.Add(new BaggedStates.Def(), true)
-			.Add(new FallStates.Def(), true)
-			.Add(new StunnedStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new FleeStates.Def(), true)
-			.Add(new AttackStates.Def(), flag)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new ExitBurrowStates.Def(), flag, -1)
+			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Burrowed, true, "idle_mound", global::STRINGS.CREATURES.STATUSITEMS.BURROWED.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWED.TOOLTIP), flag, -1)
+			.Add(new GrowUpStates.Def(), true, -1)
+			.Add(new TrappedStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new BaggedStates.Def(), true, -1)
+			.Add(new FallStates.Def(), true, -1)
+			.Add(new StunnedStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new FleeStates.Def(), true, -1)
+			.Add(new AttackStates.Def("eat_pre", "eat_pst", null), flag, -1)
 			.PushInterruptGroup()
-			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new RanchedStates.Def(), true)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.WantsToEnterBurrow, false, "hide", global::STRINGS.CREATURES.STATUSITEMS.BURROWING.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWING.TOOLTIP), flag)
-			.Add(new LayEggStates.Def(), true)
-			.Add(new EatStates.Def(), true)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
-			.Add(new CallAdultStates.Def(), true)
+			.Add(new CreatureSleepStates.Def(), true, -1)
+			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new PlayAnimsStates.Def(GameTags.Creatures.WantsToEnterBurrow, false, "hide", global::STRINGS.CREATURES.STATUSITEMS.BURROWING.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWING.TOOLTIP), flag, -1)
+			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new EatStates.Def(), true, -1)
+			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new CallAdultStates.Def(), true, -1)
 			.PopInterruptGroup()
-			.Add(new IdleStates.Def(), true);
+			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.HatchSpecies, symbolOverridePrefix);
 		return gameObject;
 	}
@@ -129,7 +129,7 @@ public static class BaseHatchConfig
 	public static List<Diet.Info> FoodDiet(Tag poopTag, float caloriesPerKg, float producedConversionRate, string diseaseId, float diseasePerKgProduced)
 	{
 		List<Diet.Info> list = new List<Diet.Info>();
-		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
+		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.GetAllFoodTypes())
 		{
 			if (foodInfo.CaloriesPerUnit > 0f)
 			{

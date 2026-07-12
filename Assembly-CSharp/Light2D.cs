@@ -200,7 +200,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		DebugUtil.DevAssert(this.isRegistered, "shouldn't be refreshing if we aren't spawned and enabled");
+		DebugUtil.DevAssert(this.isRegistered, "shouldn't be refreshing if we aren't spawned and enabled", null);
 		this.RefreshShapeAndPosition();
 		this.emitter.Refresh(this.pending_emitter_state, true);
 	}

@@ -37,7 +37,12 @@ public class BuildingConfigManager : KMonoBehaviour
 
 	public void RegisterBuilding(IBuildingConfig config)
 	{
+		if (!DlcManager.IsDlcListValidForCurrentContent(config.GetDlcIds()))
+		{
+			return;
+		}
 		BuildingDef buildingDef = config.CreateBuildingDef();
+		buildingDef.RequiredDlcIds = config.GetDlcIds();
 		this.configTable[config] = buildingDef;
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.baseTemplate);
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
@@ -168,7 +173,7 @@ public class BuildingConfigManager : KMonoBehaviour
 
 	private Dictionary<IBuildingConfig, BuildingDef> configTable = new Dictionary<IBuildingConfig, BuildingDef>();
 
-	private string[] NonBuildableBuildings = new string[] { "Headquarters", "POIBunkerExteriorDoor" };
+	private string[] NonBuildableBuildings = new string[] { "Headquarters" };
 
 	private HashSet<Type> defaultKComponents = new HashSet<Type>();
 

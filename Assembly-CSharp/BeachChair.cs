@@ -24,7 +24,7 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IGam
 		LocString locString2 = (high_lux ? BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_HIGH_TOOLTIP : BUILDINGS.PREFABS.BEACHCHAIR.LIGHTEFFECT_LOW_TOOLTIP);
 		foreach (AttributeModifier attributeModifier in modifier.SelfModifiers)
 		{
-			Descriptor descriptor = new Descriptor(locString.Replace("{attrib}", Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME")).Replace("{amount}", attributeModifier.GetFormattedString(null)).Replace("{lux}", GameUtil.GetFormattedLux(10000)), locString2.Replace("{attrib}", Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME")).Replace("{amount}", attributeModifier.GetFormattedString(null)).Replace("{lux}", GameUtil.GetFormattedLux(10000)), Descriptor.DescriptorType.Effect, false);
+			Descriptor descriptor = new Descriptor(locString.Replace("{attrib}", Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME")).Replace("{amount}", attributeModifier.GetFormattedString()).Replace("{lux}", GameUtil.GetFormattedLux(10000)), locString2.Replace("{attrib}", Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME")).Replace("{amount}", attributeModifier.GetFormattedString()).Replace("{lux}", GameUtil.GetFormattedLux(10000)), Descriptor.DescriptorType.Effect, false);
 			descriptor.IncreaseIndent();
 			descs.Add(descriptor);
 		}

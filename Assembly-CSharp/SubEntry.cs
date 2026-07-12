@@ -53,6 +53,13 @@ public class SubEntry
 
 	public string lockID { get; set; }
 
+	public string[] dlcIds { get; set; }
+
+	public string[] GetDlcIds()
+	{
+		return this.dlcIds;
+	}
+
 	public string sortString { get; set; }
 
 	public bool showBeforeGeneratedCategoryLinks { get; set; }

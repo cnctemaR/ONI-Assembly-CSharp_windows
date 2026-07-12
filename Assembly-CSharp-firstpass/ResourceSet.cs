@@ -14,6 +14,8 @@ public abstract class ResourceSet : Resource
 
 	public abstract Resource Add(Resource resource);
 
+	public abstract void Remove(Resource resource);
+
 	public abstract int Count { get; }
 
 	public abstract Resource GetResource(int idx);

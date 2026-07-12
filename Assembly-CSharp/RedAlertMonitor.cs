@@ -5,9 +5,9 @@ public class RedAlertMonitor : GameStateMachine<RedAlertMonitor, RedAlertMonitor
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.off;
-		base.serializable = true;
-		this.off.EventTransition(GameHashes.EnteredRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.on, (RedAlertMonitor.Instance smi) => VignetteManager.Instance.Get().IsRedAlert());
-		this.on.EventTransition(GameHashes.ExitedRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.off, (RedAlertMonitor.Instance smi) => !VignetteManager.Instance.Get().IsRedAlert()).Enter("EnableRedAlert", delegate(RedAlertMonitor.Instance smi)
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
+		this.off.EventTransition(GameHashes.EnteredRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.on, (RedAlertMonitor.Instance smi) => smi.master.gameObject.GetMyWorld().AlertManager.IsRedAlert());
+		this.on.EventTransition(GameHashes.ExitedRedAlert, (RedAlertMonitor.Instance smi) => Game.Instance, this.off, (RedAlertMonitor.Instance smi) => !smi.master.gameObject.GetMyWorld().AlertManager.IsRedAlert()).Enter("EnableRedAlert", delegate(RedAlertMonitor.Instance smi)
 		{
 			smi.EnableRedAlert();
 		}).ToggleEffect("RedAlert")

@@ -1,7 +1,6 @@
 ﻿using System;
 using Klei.CustomSettings;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class NewGameSettingList : NewGameSettingWidget
 {
@@ -12,8 +11,9 @@ public class NewGameSettingList : NewGameSettingWidget
 		this.CycleRight.onClick += this.DoCycleRight;
 	}
 
-	public void Initialize(ListSettingConfig config)
+	public void Initialize(ListSettingConfig config, NewGameSettingsPanel panel, string disabledDefault)
 	{
+		base.Initialize(config, panel, disabledDefault);
 		this.config = config;
 		this.Label.text = config.label;
 		this.ToolTip.toolTip = config.tooltip;
@@ -21,6 +21,7 @@ public class NewGameSettingList : NewGameSettingWidget
 
 	public override void Refresh()
 	{
+		base.Refresh();
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(this.config);
 		this.ValueLabel.text = currentQualitySetting.label;
 		this.ValueToolTip.toolTip = currentQualitySetting.tooltip;
@@ -30,14 +31,20 @@ public class NewGameSettingList : NewGameSettingWidget
 
 	private void DoCycleLeft()
 	{
-		CustomGameSettings.Instance.CycleSettingLevel(this.config, -1);
-		this.Refresh();
+		if (base.IsEnabled())
+		{
+			CustomGameSettings.Instance.CycleSettingLevel(this.config, -1);
+			base.RefreshAll();
+		}
 	}
 
 	private void DoCycleRight()
 	{
-		CustomGameSettings.Instance.CycleSettingLevel(this.config, 1);
-		this.Refresh();
+		if (base.IsEnabled())
+		{
+			CustomGameSettings.Instance.CycleSettingLevel(this.config, 1);
+			base.RefreshAll();
+		}
 	}
 
 	[SerializeField]
@@ -57,9 +64,6 @@ public class NewGameSettingList : NewGameSettingWidget
 
 	[SerializeField]
 	private KButton CycleRight;
-
-	[SerializeField]
-	private Image BG;
 
 	private ListSettingConfig config;
 }

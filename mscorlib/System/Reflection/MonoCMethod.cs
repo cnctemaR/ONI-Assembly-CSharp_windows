@@ -100,8 +100,8 @@ namespace System.Reflection
 			return obj2;
 		}
 
-		[DebuggerStepThrough]
 		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public override object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
 		{
 			return this.DoInvoke(null, invokeAttr, binder, parameters, culture);

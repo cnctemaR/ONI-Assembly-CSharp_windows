@@ -54,7 +54,6 @@ public class SpaceDestination
 		SpaceDestinationType destinationType = this.GetDestinationType();
 		this.availableMass = (float)(destinationType.maxiumMass - destinationType.minimumMass);
 		this.GenerateSurfaceElements();
-		this.GenerateMissions();
 		this.GenerateResearchOpportunities();
 	}
 
@@ -71,12 +70,6 @@ public class SpaceDestination
 	public SpaceDestinationType GetDestinationType()
 	{
 		return Db.Get().SpaceDestinationTypes.Get(this.type);
-	}
-
-	public float GetCurrentOrbitPercentage()
-	{
-		float num = 0.1f * Mathf.Pow((float)this.OneBasedDistance, 2f);
-		return ((float)GameClock.Instance.GetCycle() + GameClock.Instance.GetCurrentCycleAsPercentage() + this.startingOrbitPercentage * num) % num / num;
 	}
 
 	public SpaceDestination.ResearchOpportunity TryCompleteResearchOpportunity()
@@ -134,25 +127,6 @@ public class SpaceDestination
 		{
 			int num4 = global::UnityEngine.Random.Range(0, this.researchOpportunities.Count);
 			this.researchOpportunities[num4].discoveredRareItem = SpaceDestination.RARE_ITEMS[global::UnityEngine.Random.Range(0, SpaceDestination.RARE_ITEMS.Count)].first;
-		}
-	}
-
-	public void GenerateMissions()
-	{
-		bool flag = true;
-		using (List<SpaceMission>.Enumerator enumerator = this.missions.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
-			{
-				if (enumerator.Current.craft == null)
-				{
-					flag = false;
-				}
-			}
-		}
-		if (flag)
-		{
-			this.missions.Add(new SpaceMission(this));
 		}
 	}
 
@@ -231,7 +205,7 @@ public class SpaceDestination
 	{
 		foreach (KeyValuePair<SimHashes, float> keyValuePair in this.recoverableElements)
 		{
-			if ((ElementLoader.FindElementByHash(keyValuePair.Key).IsSolid && type == CargoBay.CargoType.solids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsLiquid && type == CargoBay.CargoType.liquids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsGas && type == CargoBay.CargoType.gasses))
+			if ((ElementLoader.FindElementByHash(keyValuePair.Key).IsSolid && type == CargoBay.CargoType.Solids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsLiquid && type == CargoBay.CargoType.Liquids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsGas && type == CargoBay.CargoType.Gasses))
 			{
 				return true;
 			}
@@ -254,7 +228,7 @@ public class SpaceDestination
 		float totalMass = this.GetTotalMass();
 		foreach (KeyValuePair<SimHashes, float> keyValuePair in this.recoverableElements)
 		{
-			if ((ElementLoader.FindElementByHash(keyValuePair.Key).IsSolid && cargoType == CargoBay.CargoType.solids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsLiquid && cargoType == CargoBay.CargoType.liquids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsGas && cargoType == CargoBay.CargoType.gasses))
+			if ((ElementLoader.FindElementByHash(keyValuePair.Key).IsSolid && cargoType == CargoBay.CargoType.Solids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsLiquid && cargoType == CargoBay.CargoType.Liquids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsGas && cargoType == CargoBay.CargoType.Gasses))
 			{
 				num += this.GetResourceValue(keyValuePair.Key, keyValuePair.Value) / totalMass;
 			}
@@ -321,8 +295,6 @@ public class SpaceDestination
 
 	[Serialize]
 	public List<SpaceDestination.ResearchOpportunity> researchOpportunities = new List<SpaceDestination.ResearchOpportunity>();
-
-	public List<SpaceMission> missions = new List<SpaceMission>();
 
 	[Serialize]
 	private float availableMass;

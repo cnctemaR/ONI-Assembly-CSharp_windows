@@ -102,16 +102,19 @@ public class SculptingSoundEvent : SoundEvent
 					if (component2 != null)
 					{
 						string name = component2.Def.name;
-						if (!(name == "MetalSculpture"))
+						if (name != null)
 						{
-							if (name == "MarbleSculpture")
+							if (!(name == "MetalSculpture"))
 							{
-								text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
+								if (name == "MarbleSculpture")
+								{
+									text = GlobalAssets.GetSound("Hammer_sculpture_marble", false);
+								}
 							}
-						}
-						else
-						{
-							text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
+							else
+							{
+								text = GlobalAssets.GetSound("Hammer_sculpture_metal", false);
+							}
 						}
 					}
 				}

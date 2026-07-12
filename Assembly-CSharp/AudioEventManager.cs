@@ -200,7 +200,7 @@ public class AudioEventManager : KMonoBehaviour
 
 	private static void SoundLog(long itemId, string message)
 	{
-		global::Debug.Log(string.Concat(new object[] { " [", itemId, "] \t", message }));
+		global::Debug.Log(" [" + itemId.ToString() + "] \t" + message);
 	}
 
 	public const float NO_NOISE_EFFECTORS = 0f;

@@ -284,35 +284,31 @@ namespace UnityEngine.Networking
 					throw new ArgumentException("Cannot set a UnityWebRequest's method to an empty or null string");
 				}
 				string text = value.ToUpper();
-				if (!(text == "GET"))
+				string text2 = text;
+				if (text2 != null)
 				{
-					if (!(text == "POST"))
+					if (text2 == "GET")
 					{
-						if (!(text == "PUT"))
-						{
-							if (!(text == "HEAD"))
-							{
-								this.InternalSetCustomMethod(value.ToUpper());
-							}
-							else
-							{
-								this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Head);
-							}
-						}
-						else
-						{
-							this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Put);
-						}
+						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Get);
+						return;
 					}
-					else
+					if (text2 == "POST")
 					{
 						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Post);
+						return;
+					}
+					if (text2 == "PUT")
+					{
+						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Put);
+						return;
+					}
+					if (text2 == "HEAD")
+					{
+						this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Head);
+						return;
 					}
 				}
-				else
-				{
-					this.InternalSetMethod(UnityWebRequest.UnityWebRequestMethod.Get);
-				}
+				this.InternalSetCustomMethod(value.ToUpper());
 			}
 		}
 
@@ -323,24 +319,23 @@ namespace UnityEngine.Networking
 		{
 			get
 			{
-				bool flag = !this.isNetworkError && !this.isHttpError;
+				UnityWebRequest.Result result = this.result;
+				UnityWebRequest.Result result2 = result;
 				string text;
-				if (flag)
+				if (result2 > UnityWebRequest.Result.Success)
 				{
-					text = null;
-				}
-				else
-				{
-					bool isHttpError = this.isHttpError;
-					if (isHttpError)
-					{
-						string httpstatusString = UnityWebRequest.GetHTTPStatusString(this.responseCode);
-						text = string.Format("HTTP/1.1 {0} {1}", this.responseCode, httpstatusString);
-					}
-					else
+					if (result2 != UnityWebRequest.Result.ProtocolError)
 					{
 						text = UnityWebRequest.GetWebErrorString(this.GetError());
 					}
+					else
+					{
+						text = string.Format("HTTP/1.1 {0} {1}", this.responseCode, UnityWebRequest.GetHTTPStatusString(this.responseCode));
+					}
+				}
+				else
+				{
+					text = null;
 				}
 				return text;
 			}
@@ -460,23 +455,35 @@ namespace UnityEngine.Networking
 			get;
 		}
 
-		public extern bool isDone
+		public bool isDone
 		{
-			[NativeMethod("IsDone")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return this.result > UnityWebRequest.Result.InProgress;
+			}
 		}
 
-		public extern bool isNetworkError
+		[Obsolete("UnityWebRequest.isNetworkError is deprecated. Use (UnityWebRequest.result == UnityWebRequest.Result.ConnectionError) instead.", false)]
+		public bool isNetworkError
 		{
-			[NativeMethod("IsNetworkError")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return this.result == UnityWebRequest.Result.ConnectionError;
+			}
 		}
 
-		public extern bool isHttpError
+		[Obsolete("UnityWebRequest.isHttpError is deprecated. Use (UnityWebRequest.result == UnityWebRequest.Result.ProtocolError) instead.", false)]
+		public bool isHttpError
 		{
-			[NativeMethod("IsHttpError")]
+			get
+			{
+				return this.result == UnityWebRequest.Result.ProtocolError;
+			}
+		}
+
+		public extern UnityWebRequest.Result result
+		{
+			[NativeMethod("GetResult")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -787,8 +794,8 @@ namespace UnityEngine.Networking
 			return new UnityWebRequest(uri, "HEAD");
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestTexture.GetTexture(*)", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static UnityWebRequest GetTexture(string uri)
 		{
 			throw new NotSupportedException("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead.");
@@ -836,8 +843,8 @@ namespace UnityEngine.Networking
 			return null;
 		}
 
-		[Obsolete("UnityWebRequest.GetAssetBundle is obsolete. Use UnityWebRequestAssetBundle.GetAssetBundle instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestAssetBundle.GetAssetBundle(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("UnityWebRequest.GetAssetBundle is obsolete. Use UnityWebRequestAssetBundle.GetAssetBundle instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestAssetBundle.GetAssetBundle(*)", true)]
 		public static UnityWebRequest GetAssetBundle(string uri, CachedAssetBundle cachedAssetBundle, uint crc)
 		{
 			return null;
@@ -1231,6 +1238,15 @@ namespace UnityEngine.Networking
 			LoginFailed,
 			SSLShutdownFailed,
 			NoInternetConnection
+		}
+
+		public enum Result
+		{
+			InProgress,
+			Success,
+			ConnectionError,
+			ProtocolError,
+			DataProcessingError
 		}
 	}
 }

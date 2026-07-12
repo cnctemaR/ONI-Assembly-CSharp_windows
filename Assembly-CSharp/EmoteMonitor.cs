@@ -6,7 +6,7 @@ public class EmoteMonitor : GameStateMachine<EmoteMonitor, EmoteMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.satisfied.ScheduleGoTo((float)global::UnityEngine.Random.Range(30, 90), this.ready);
 		this.ready.ToggleUrge(Db.Get().Urges.Emote).EventHandler(GameHashes.BeginChore, delegate(EmoteMonitor.Instance smi, object o)
 		{

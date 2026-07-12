@@ -38,13 +38,14 @@ public class ChoreTable
 			return this;
 		}
 
-		public ChoreTable.Builder Add(StateMachine.BaseDef def, bool condition = true)
+		public ChoreTable.Builder Add(StateMachine.BaseDef def, bool condition = true, int forcePriority = -1)
 		{
 			if (condition)
 			{
 				ChoreTable.Builder.Info info = new ChoreTable.Builder.Info
 				{
 					interruptGroupId = this.interruptGroupId,
+					forcePriority = forcePriority,
 					def = def
 				};
 				this.infos.Add(info);
@@ -57,27 +58,29 @@ public class ChoreTable
 			DebugUtil.Assert(this.interruptGroupId == 0);
 			ChoreTable.Entry[] array = new ChoreTable.Entry[this.infos.Count];
 			Stack<int> stack = new Stack<int>();
+			int num = 10000;
 			for (int i = 0; i < this.infos.Count; i++)
 			{
-				int num = 10000 - i * 100;
-				int num2 = 10000 - i * 100;
-				int num3 = this.infos[i].interruptGroupId;
-				if (num3 != 0)
+				int num2 = ((this.infos[i].forcePriority != -1) ? this.infos[i].forcePriority : (num - 100));
+				num = num2;
+				int num3 = 10000 - i * 100;
+				int num4 = this.infos[i].interruptGroupId;
+				if (num4 != 0)
 				{
-					if (stack.Count != num3)
+					if (stack.Count != num4)
 					{
-						stack.Push(num2);
+						stack.Push(num3);
 					}
 					else
 					{
-						num2 = stack.Peek();
+						num3 = stack.Peek();
 					}
 				}
 				else if (stack.Count > 0)
 				{
 					stack.Pop();
 				}
-				array[i] = new ChoreTable.Entry(this.infos[i].def, num, num2);
+				array[i] = new ChoreTable.Entry(this.infos[i].def, num2, num3);
 			}
 			return new ChoreTable(array);
 		}
@@ -86,9 +89,13 @@ public class ChoreTable
 
 		private List<ChoreTable.Builder.Info> infos = new List<ChoreTable.Builder.Info>();
 
+		private const int INVALID_PRIORITY = -1;
+
 		private struct Info
 		{
 			public int interruptGroupId;
+
+			public int forcePriority;
 
 			public StateMachine.BaseDef def;
 		}

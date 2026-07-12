@@ -28,34 +28,37 @@ public static class BasePacuConfig
 			component2.animWidth = 0.5f;
 			component2.animHeight = 0.5f;
 		}
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
-			.Add(new TrappedStates.Def(), true)
-			.Add(new IncubatingStates.Def(), true)
-			.Add(new BaggedStates.Def(), true)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
+			.Add(new TrappedStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new FallStates.Def
 			{
 				getLandAnim = new Func<FallStates.Instance, string>(BasePacuConfig.GetLandAnim)
-			}, true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new FlopStates.Def(), true)
+			}, true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new FlopStates.Def(), true, -1)
 			.PushInterruptGroup()
-			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new LayEggStates.Def(), true)
-			.Add(new EatStates.Def(), true)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
-			.Add(new MoveToLureStates.Def(), true)
+			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new EatStates.Def(), true, -1)
+			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new MoveToLureStates.Def(), true, -1)
 			.PopInterruptGroup()
-			.Add(new IdleStates.Def(), true);
+			.Add(new IdleStates.Def(), true, -1);
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
-		Diet diet = new Diet(new Diet.Info[]
-		{
-			new Diet.Info(new HashSet<Tag> { SimHashes.Algae.CreateTag() }, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false)
-		});
+		Tag tag = SimHashes.ToxicSand.CreateTag();
+		HashSet<Tag> hashSet = new HashSet<Tag>();
+		hashSet.Add(SimHashes.Algae.CreateTag());
+		List<Diet.Info> list = new List<Diet.Info>();
+		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false));
+		list.AddRange(BasePacuConfig.SeedDiet(tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.KG_ORE_EATEN_PER_CYCLE * 4f, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
+		Diet diet = new Diet(list.ToArray());
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
 		def.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
@@ -66,6 +69,19 @@ public static class BasePacuConfig
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_prefix, null, 0);
 		}
 		return gameObject;
+	}
+
+	public static List<Diet.Info> SeedDiet(Tag poopTag, float caloriesPerSeed, float producedConversionRate)
+	{
+		List<Diet.Info> list = new List<Diet.Info>();
+		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Seed))
+		{
+			list.Add(new Diet.Info(new HashSet<Tag>
+			{
+				new Tag(gameObject.GetComponent<KPrefabID>().PrefabID())
+			}, poopTag, caloriesPerSeed, producedConversionRate, null, 0f, false, false));
+		}
+		return list;
 	}
 
 	private static string GetLandAnim(FallStates.Instance smi)

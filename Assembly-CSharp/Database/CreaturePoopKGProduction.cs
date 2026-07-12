@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class CreaturePoopKGProduction : ColonyAchievementRequirement
+	public class CreaturePoopKGProduction : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public CreaturePoopKGProduction(Tag poopElement, float amountToPoop)
 		{
@@ -18,13 +16,7 @@ namespace Database
 			return Game.Instance.savedInfo.creaturePoopAmount.ContainsKey(this.poopElement) && Game.Instance.savedInfo.creaturePoopAmount[this.poopElement] >= this.amountToPoop;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.amountToPoop);
-			writer.WriteKleiString(this.poopElement.ToString());
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.amountToPoop = reader.ReadSingle();
 			string text = reader.ReadKleiString();

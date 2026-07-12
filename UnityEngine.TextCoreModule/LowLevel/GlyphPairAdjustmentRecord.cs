@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
-	[DebuggerDisplay("First glyphIndex = {m_FirstAdjustmentRecord.m_GlyphIndex},  Second glyphIndex = {m_SecondAdjustmentRecord.m_GlyphIndex}")]
 	[UsedByNativeCode]
+	[DebuggerDisplay("First glyphIndex = {m_FirstAdjustmentRecord.m_GlyphIndex},  Second glyphIndex = {m_SecondAdjustmentRecord.m_GlyphIndex}")]
 	[Serializable]
 	public struct GlyphPairAdjustmentRecord
 	{

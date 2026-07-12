@@ -32,7 +32,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		foreach (BuildMenu.BuildingInfo buildingInfo in building_infos)
 		{
 			BuildingDef def = Assets.GetBuildingDef(buildingInfo.id);
-			if (def.ShowInBuildMenu && !def.Deprecated && (!def.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed))
+			if (def.ShouldShowInBuildMenu() && def.IsAvailable())
 			{
 				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(def.Name, new BuildMenuBuildingsScreen.UserData(def, PlanScreen.RequirementsState.Tech), def.HotKey, () => def.GetUISprite("ui", false));
 				list.Add(toggleInfo);
@@ -96,7 +96,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		BuildingDef def = (info.userData as BuildMenuBuildingsScreen.UserData).def;
 		TechItem techItem = Db.Get().TechItems.TryGet(def.PrefabID);
 		bool flag = DebugHandler.InstantBuildMode || techItem == null || techItem.IsComplete();
-		bool flag2 = flag || techItem == null || techItem.parentTech.ArePrerequisitesComplete();
+		bool flag2 = flag || techItem == null || techItem.ParentTech.ArePrerequisitesComplete();
 		KToggle toggle = info.toggle;
 		if (toggle.gameObject.activeSelf != flag2)
 		{
@@ -181,7 +181,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 		{
 			fgImage.sprite = this.Overlay_NeedTech;
 			fgImage.gameObject.SetActive(true);
-			string text2 = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
+			string text2 = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.ParentTech.Name);
 			component.AddMultiStringTooltip("\n", this.buildingToolTipSettings.ResearchRequirement);
 			component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
 			return;
@@ -203,7 +203,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 
 	public void ClearUI()
 	{
-		base.Show(false);
+		this.Show(false);
 		this.ClearButtons();
 	}
 
@@ -271,7 +271,7 @@ public class BuildMenuBuildingsScreen : KIconToggleMenu
 			this.RefreshToggle(toggleInfo);
 			BuildMenuBuildingsScreen.UserData userData = toggleInfo.userData as BuildMenuBuildingsScreen.UserData;
 			BuildingDef def = userData.def;
-			if (!def.Deprecated)
+			if (def.IsAvailable())
 			{
 				PlanScreen.RequirementsState requirementsState = BuildMenu.Instance.BuildableState(def);
 				if (requirementsState != userData.requirementsState)

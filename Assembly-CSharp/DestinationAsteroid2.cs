@@ -1,11 +1,12 @@
 ﻿using System;
+using ProcGen;
 using UnityEngine;
 using UnityEngine.UI;
 
 [AddComponentMenu("KMonoBehaviour/scripts/DestinationAsteroid2")]
 public class DestinationAsteroid2 : KMonoBehaviour
 {
-	public event Action<ColonyDestinationAsteroidData> OnClicked;
+	public event Action<ColonyDestinationAsteroidBeltData> OnClicked;
 
 	protected override void OnPrefabInit()
 	{
@@ -13,12 +14,33 @@ public class DestinationAsteroid2 : KMonoBehaviour
 		this.button.onClick += this.OnClickInternal;
 	}
 
-	public void SetAsteroid(ColonyDestinationAsteroidData newAsteroidData)
+	public void SetAsteroid(ColonyDestinationAsteroidBeltData newAsteroidData)
 	{
-		if (newAsteroidData != this.asteroidData)
+		if (this.asteroidData == null || newAsteroidData.beltPath != this.asteroidData.beltPath)
 		{
 			this.asteroidData = newAsteroidData;
-			this.asteroidImage.sprite = Assets.GetSprite(this.asteroidData.sprite);
+			global::ProcGen.World getStartWorld = newAsteroidData.GetStartWorld;
+			KAnimFile kanimFile;
+			Assets.TryGetAnim(getStartWorld.asteroidIcon.IsNullOrWhiteSpace() ? AsteroidGridEntity.DEFAULT_ASTEROID_ICON_ANIM : getStartWorld.asteroidIcon, out kanimFile);
+			if (DlcManager.FeatureClusterSpaceEnabled() && kanimFile != null)
+			{
+				this.asteroidImage.gameObject.SetActive(false);
+				this.animController.AnimFiles = new KAnimFile[] { kanimFile };
+				this.animController.initialMode = KAnim.PlayMode.Loop;
+				this.animController.initialAnim = "idle_loop";
+				this.animController.gameObject.SetActive(true);
+				if (this.animController.HasAnimation(this.animController.initialAnim))
+				{
+					this.animController.Play(this.animController.initialAnim, KAnim.PlayMode.Loop, 1f, 0f);
+					return;
+				}
+			}
+			else
+			{
+				this.animController.gameObject.SetActive(false);
+				this.asteroidImage.gameObject.SetActive(true);
+				this.asteroidImage.sprite = this.asteroidData.sprite;
+			}
 		}
 	}
 
@@ -26,8 +48,8 @@ public class DestinationAsteroid2 : KMonoBehaviour
 	{
 		DebugUtil.LogArgs(new object[]
 		{
-			"Clicked asteroid",
-			this.asteroidData.worldPath
+			"Clicked asteroid belt",
+			this.asteroidData.beltPath
 		});
 		this.OnClicked(this.asteroidData);
 	}
@@ -38,5 +60,8 @@ public class DestinationAsteroid2 : KMonoBehaviour
 	[SerializeField]
 	private KButton button;
 
-	private ColonyDestinationAsteroidData asteroidData;
+	[SerializeField]
+	private KBatchedAnimController animController;
+
+	private ColonyDestinationAsteroidBeltData asteroidData;
 }

@@ -5,7 +5,7 @@ public class EmoteHighPriorityMonitor : GameStateMachine<EmoteHighPriorityMonito
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.ready;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.ready.ToggleUrge(Db.Get().Urges.EmoteHighPriority).EventHandler(GameHashes.BeginChore, delegate(EmoteHighPriorityMonitor.Instance smi, object o)
 		{
 			smi.OnStartChore(o);

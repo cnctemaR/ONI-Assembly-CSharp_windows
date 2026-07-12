@@ -96,10 +96,9 @@ namespace Klei.AI
 			string name = disease.Name;
 			string text = name;
 			NotificationType notificationType = ((disease.severity <= Sickness.Severity.Minor) ? NotificationType.BadMinor : NotificationType.Bad);
-			HashedString invalid = HashedString.Invalid;
 			object sourceInfo = this.exposureInfo.sourceInfo;
-			this.notification = new Notification(text, notificationType, invalid, func, sourceInfo, true, 0f, null, null, null, true);
-			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, "", (disease.severity <= Sickness.Severity.Minor) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (disease.severity <= Sickness.Severity.Minor) ? NotificationType.BadMinor : NotificationType.Bad, false, OverlayModes.None.ID, 129022);
+			this.notification = new Notification(text, notificationType, func, sourceInfo, true, 0f, null, null, null, true);
+			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, "", (disease.severity <= Sickness.Severity.Minor) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (disease.severity <= Sickness.Severity.Minor) ? NotificationType.BadMinor : NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, null);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveString);
 			if (this.smi != null)
 			{
@@ -293,7 +292,7 @@ namespace Klei.AI
 			public override void InitializeStates(out StateMachine.BaseState default_state)
 			{
 				default_state = this.infected;
-				base.serializable = true;
+				base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 				this.infected.Enter("Infect", delegate(SicknessInstance.StatesInstance smi)
 				{
 					smi.Infect();

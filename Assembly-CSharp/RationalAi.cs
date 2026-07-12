@@ -34,14 +34,16 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new BladderMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SteppedInMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new LightMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new RadiationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new RedAlertMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new CringeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new HygieneMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new FallMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new FallMonitor.Instance(smi.master, true, "anim_emotes_default_kanim"))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master, new ThreatMonitor.Def()))
 			.ToggleStateMachine((RationalAi.Instance smi) => new WoundMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TiredMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new RocketPassengerMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SuitWearer.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master))
@@ -49,7 +51,10 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new MournMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SpeechMonitor.Instance(smi.master, new SpeechMonitor.Def()))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BlinkMonitor.Instance(smi.master, new BlinkMonitor.Def()))
-			.ToggleStateMachine((RationalAi.Instance smi) => new ConversationMonitor.Instance(smi.master, new ConversationMonitor.Def()));
+			.ToggleStateMachine((RationalAi.Instance smi) => new ConversationMonitor.Instance(smi.master, new ConversationMonitor.Def()))
+			.ToggleStateMachine((RationalAi.Instance smi) => new CoughMonitor.Instance(smi.master, new CoughMonitor.Def()))
+			.ToggleStateMachine((RationalAi.Instance smi) => new GameplayEventMonitor.Instance(smi.master, new GameplayEventMonitor.Def()))
+			.ToggleStateMachine((RationalAi.Instance smi) => new GasLiquidExposureMonitor.Instance(smi.master, new GasLiquidExposureMonitor.Def()));
 		this.dead.ToggleStateMachine((RationalAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).ToggleBrain("dead").Enter("RefreshUserMenu", delegate(RationalAi.Instance smi)
 		{
 			smi.RefreshUserMenu();

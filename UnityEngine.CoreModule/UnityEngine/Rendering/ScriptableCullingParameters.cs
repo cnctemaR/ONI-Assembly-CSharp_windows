@@ -397,8 +397,8 @@ namespace UnityEngine.Rendering
 
 		private int m_maximumVisibleLights;
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]
 		public struct <m_CullingPlanes>e__FixedBuffer
 		{

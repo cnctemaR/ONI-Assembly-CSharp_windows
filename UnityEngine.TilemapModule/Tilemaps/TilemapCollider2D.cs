@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Tilemaps
 {
-	[NativeType(Header = "Modules/Tilemap/Public/TilemapCollider2D.h")]
 	[RequireComponent(typeof(Tilemap))]
+	[NativeType(Header = "Modules/Tilemap/Public/TilemapCollider2D.h")]
 	public sealed class TilemapCollider2D : Collider2D
 	{
 		public extern uint maximumTileChangeCount
@@ -23,5 +23,16 @@ namespace UnityEngine.Tilemaps
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		public extern bool hasTilemapChanges
+		{
+			[NativeMethod("HasTilemapChanges")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[NativeMethod(Name = "ProcessTileChangeQueue")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void ProcessTilemapChanges();
 	}
 }

@@ -6,15 +6,6 @@ using UnityEngine.UI;
 
 public class SelectedRecipeQueueScreen : KScreen
 {
-	public override float GetSortKey()
-	{
-		if (this.isEditing)
-		{
-			return 100f;
-		}
-		return base.GetSortKey();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -46,14 +37,14 @@ public class SelectedRecipeQueueScreen : KScreen
 		};
 		this.QueueCount.onEndEdit += delegate
 		{
-			this.isEditing = false;
+			base.isEditing = false;
 			this.target.SetRecipeQueueCount(this.selectedRecipe, Mathf.RoundToInt(this.QueueCount.currentValue));
 			this.RefreshQueueCountDisplay();
 			this.ownerScreen.RefreshQueueCountDisplayForRecipe(this.selectedRecipe, this.target);
 		};
 		this.QueueCount.onStartEdit += delegate
 		{
-			this.isEditing = true;
+			base.isEditing = true;
 			KScreenManager.Instance.RefreshStack();
 		};
 	}
@@ -143,21 +134,17 @@ public class SelectedRecipeQueueScreen : KScreen
 		{
 			GameObject prefab = Assets.GetPrefab(recipeElement.material);
 			string formattedByTag = GameUtil.GetFormattedByTag(recipeElement.material, recipeElement.amount, GameUtil.TimeSlice.None);
-			string formattedByTag2 = GameUtil.GetFormattedByTag(recipeElement.material, WorldInventory.Instance.GetAmount(recipeElement.material), GameUtil.TimeSlice.None);
-			string text = ((WorldInventory.Instance.GetAmount(recipeElement.material) >= recipeElement.amount) ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) : ("<color=#F44A47>" + string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) + "</color>"));
+			float amount = this.target.GetMyWorld().worldInventory.GetAmount(recipeElement.material, true);
+			string formattedByTag2 = GameUtil.GetFormattedByTag(recipeElement.material, amount, GameUtil.TimeSlice.None);
+			string text = ((amount >= recipeElement.amount) ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) : ("<color=#F44A47>" + string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, prefab.GetProperName(), formattedByTag, formattedByTag2) + "</color>"));
 			list.Add(new Descriptor(text, text, Descriptor.DescriptorType.Requirement, false));
 		}
-		return list;
-	}
-
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		if (this.isEditing)
+		if (recipe.consumedHEP > 0)
 		{
-			e.Consumed = true;
-			return;
+			HighEnergyParticleStorage component = this.target.GetComponent<HighEnergyParticleStorage>();
+			list.Add(new Descriptor(string.Format("<b>{0}</b>: {1} / {2}", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, component.Particles, recipe.consumedHEP), string.Format("<b>{0}</b>: {1} / {2}", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, component.Particles, recipe.consumedHEP), Descriptor.DescriptorType.Requirement, false));
 		}
-		base.OnKeyDown(e);
+		return list;
 	}
 
 	public Image recipeIcon;
@@ -183,6 +170,4 @@ public class SelectedRecipeQueueScreen : KScreen
 	private ComplexFabricatorSideScreen ownerScreen;
 
 	private ComplexRecipe selectedRecipe;
-
-	private bool isEditing;
 }

@@ -7,15 +7,15 @@ namespace UnityEngine
 {
 	public sealed class Security
 	{
-		[Obsolete("This was an internal method which is no longer used", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This was an internal method which is no longer used", true)]
 		public static Assembly LoadAndVerifyAssembly(byte[] assemblyData, string authorizationKey)
 		{
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This was an internal method which is no longer used", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static Assembly LoadAndVerifyAssembly(byte[] assemblyData)
 		{
 			return null;

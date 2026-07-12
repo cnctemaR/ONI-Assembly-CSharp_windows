@@ -23,8 +23,8 @@ namespace System.Reflection
 			throw new ArgumentException(string.Format(CultureInfo.CurrentUICulture, Environment.GetResourceString("Field '{0}' defined on type '{1}' is not a field on the target object which is of type '{2}'."), this.Name, this.DeclaringType, target.GetType()));
 		}
 
-		[DebuggerHidden]
 		[DebuggerStepThrough]
+		[DebuggerHidden]
 		internal void UnsafeSetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture)
 		{
 			bool flag = false;

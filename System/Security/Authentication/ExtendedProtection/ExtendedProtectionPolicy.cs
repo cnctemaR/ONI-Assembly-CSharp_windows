@@ -6,8 +6,8 @@ using System.Security.Permissions;
 
 namespace System.Security.Authentication.ExtendedProtection
 {
-	[MonoTODO]
 	[TypeConverter(typeof(ExtendedProtectionPolicyTypeConverter))]
+	[MonoTODO]
 	[Serializable]
 	public class ExtendedProtectionPolicy : ISerializable
 	{

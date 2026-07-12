@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-	[DebuggerTypeProxy(typeof(BlockingCollectionDebugView<>))]
 	[DebuggerDisplay("Count = {Count}, Type = {_collection}")]
+	[DebuggerTypeProxy(typeof(BlockingCollectionDebugView<>))]
 	public class BlockingCollection<T> : IEnumerable<T>, IEnumerable, ICollection, IDisposable, IReadOnlyCollection<T>
 	{
 		public int BoundedCapacity

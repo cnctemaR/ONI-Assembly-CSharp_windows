@@ -2,30 +2,25 @@
 using STRINGS;
 using UnityEngine;
 
-public class ConditionHasMinimumMass : RocketLaunchCondition
+public class ConditionHasMinimumMass : ProcessCondition
 {
 	public ConditionHasMinimumMass(CommandModule command)
 	{
 		this.commandModule = command;
 	}
 
-	public override RocketLaunchCondition GetParentCondition()
-	{
-		return null;
-	}
-
-	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
+	public override ProcessCondition.Status EvaluateCondition()
 	{
 		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
 		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
 		if (spacecraftDestination != null && SpacecraftManager.instance.GetDestinationAnalysisState(spacecraftDestination) == SpacecraftManager.DestinationAnalysisState.Complete && spacecraftDestination.AvailableMass >= ConditionHasMinimumMass.CargoCapacity(spacecraftDestination, this.commandModule))
 		{
-			return RocketLaunchCondition.LaunchStatus.Ready;
+			return ProcessCondition.Status.Ready;
 		}
-		return RocketLaunchCondition.LaunchStatus.Warning;
+		return ProcessCondition.Status.Warning;
 	}
 
-	public override string GetLaunchStatusMessage(bool ready)
+	public override string GetStatusMessage(ProcessCondition.Status status)
 	{
 		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
 		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
@@ -40,7 +35,7 @@ public class ConditionHasMinimumMass : RocketLaunchCondition
 		return string.Format(UI.STARMAP.LAUNCHCHECKLIST.MINIMUM_MASS, UI.STARMAP.COMPOSITION_UNDISCOVERED_AMOUNT);
 	}
 
-	public override string GetLaunchStatusTooltip(bool ready)
+	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
 		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
 		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
@@ -107,6 +102,11 @@ public class ConditionHasMinimumMass : RocketLaunchCondition
 			}
 		}
 		return num;
+	}
+
+	public override bool ShowInUI()
+	{
+		return true;
 	}
 
 	private CommandModule commandModule;

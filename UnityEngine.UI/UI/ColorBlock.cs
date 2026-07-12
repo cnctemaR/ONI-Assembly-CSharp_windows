@@ -90,23 +90,6 @@ namespace UnityEngine.UI
 			}
 		}
 
-		public static ColorBlock defaultColorBlock
-		{
-			get
-			{
-				return new ColorBlock
-				{
-					m_NormalColor = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue),
-					m_HighlightedColor = new Color32(245, 245, 245, byte.MaxValue),
-					m_PressedColor = new Color32(200, 200, 200, byte.MaxValue),
-					m_SelectedColor = new Color32(245, 245, 245, byte.MaxValue),
-					m_DisabledColor = new Color32(200, 200, 200, 128),
-					colorMultiplier = 1f,
-					fadeDuration = 0.1f
-				};
-			}
-		}
-
 		public override bool Equals(object obj)
 		{
 			return obj is ColorBlock && this.Equals((ColorBlock)obj);
@@ -159,5 +142,16 @@ namespace UnityEngine.UI
 		[FormerlySerializedAs("fadeDuration")]
 		[SerializeField]
 		private float m_FadeDuration;
+
+		public static ColorBlock defaultColorBlock = new ColorBlock
+		{
+			m_NormalColor = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue),
+			m_HighlightedColor = new Color32(245, 245, 245, byte.MaxValue),
+			m_PressedColor = new Color32(200, 200, 200, byte.MaxValue),
+			m_SelectedColor = new Color32(245, 245, 245, byte.MaxValue),
+			m_DisabledColor = new Color32(200, 200, 200, 128),
+			colorMultiplier = 1f,
+			fadeDuration = 0.1f
+		};
 	}
 }

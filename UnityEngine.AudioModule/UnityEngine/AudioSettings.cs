@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Audio/Public/ScriptBindings/Audio.bindings.h")]
 	[StaticAccessor("GetAudioManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Modules/Audio/Public/ScriptBindings/Audio.bindings.h")]
 	public sealed class AudioSettings
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

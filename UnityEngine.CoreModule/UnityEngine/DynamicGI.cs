@@ -39,7 +39,7 @@ namespace UnityEngine
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetEnvironmentData([NotNull] float[] input);
+		public static extern void SetEnvironmentData([NotNull("ArgumentNullException")] float[] input);
 
 		public static extern bool synchronousMode
 		{
@@ -84,8 +84,8 @@ namespace UnityEngine
 		{
 		}
 
-		[Obsolete("DynamicGI.UpdateMaterials(Terrain, int, int, int, int) is deprecated; instead, use extension method from TerrainExtensions: 'terrain.UpdateGIMaterials(x, y, width, height)' (UnityUpgradable).", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("DynamicGI.UpdateMaterials(Terrain, int, int, int, int) is deprecated; instead, use extension method from TerrainExtensions: 'terrain.UpdateGIMaterials(x, y, width, height)' (UnityUpgradable).", true)]
 		public static void UpdateMaterials(Object renderer, int x, int y, int width, int height)
 		{
 		}

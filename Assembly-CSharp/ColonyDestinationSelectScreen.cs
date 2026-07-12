@@ -34,6 +34,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.RefreshCloudLocalIcon();
 		this.newGameSettings.Init();
 		this.newGameSettings.SetCloseAction(new global::System.Action(this.CustomizeClose));
+		this.destinationMapPanel.Init();
 		CustomGameSettings.Instance.OnSettingChanged += this.SettingChanged;
 		this.ShuffleClicked();
 	}
@@ -126,23 +127,28 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 
 	private void CoordinateChanged(string text)
 	{
-		string[] array = CustomGameSettings.Instance.ParseSettingCoordinate(text);
+		string[] array = CustomGameSettings.ParseSettingCoordinate(text);
 		if (array.Length != 4)
 		{
 			return;
 		}
-		global::ProcGen.World world = null;
-		foreach (string text2 in SettingsCache.GetWorldNames())
+		int num;
+		if (!int.TryParse(array[2], out num))
 		{
-			global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(text2);
-			if (worldData.coordinatePrefix == array[1])
+			return;
+		}
+		ClusterLayout clusterLayout = null;
+		foreach (string text2 in SettingsCache.GetClusterNames())
+		{
+			ClusterLayout clusterData = SettingsCache.clusterLayouts.GetClusterData(text2);
+			if (clusterData.coordinatePrefix == array[1])
 			{
-				world = worldData;
+				clusterLayout = clusterData;
 			}
 		}
-		if (world != null)
+		if (clusterLayout != null)
 		{
-			this.newGameSettings.SetSetting(CustomGameSettingConfigs.World, world.filePath);
+			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, clusterLayout.filePath);
 		}
 		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, array[2]);
 		this.newGameSettings.ConsumeSettingsCode(array[3]);
@@ -170,17 +176,29 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		{
 			this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
 		}
-		string setting = this.newGameSettings.GetSetting(CustomGameSettingConfigs.World);
+		string setting = this.newGameSettings.GetSetting(CustomGameSettingConfigs.ClusterLayout);
+		string setting2 = this.newGameSettings.GetSetting(CustomGameSettingConfigs.WorldgenSeed);
+		this.destinationMapPanel.UpdateDisplayedClusters();
 		int num;
-		int.TryParse(this.newGameSettings.GetSetting(CustomGameSettingConfigs.WorldgenSeed), out num);
-		ColonyDestinationAsteroidData colonyDestinationAsteroidData = this.destinationMapPanel.SelectAsteroid(setting, num);
-		this.destinationProperties.SetDescriptors(colonyDestinationAsteroidData.GetParamDescriptors());
-		this.startLocationProperties.SetDescriptors(colonyDestinationAsteroidData.GetTraitDescriptors());
+		int.TryParse(setting2, out num);
+		ColonyDestinationAsteroidBeltData colonyDestinationAsteroidBeltData;
+		try
+		{
+			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectAsteroid(setting, num);
+		}
+		catch
+		{
+			string defaultAsteroid = this.destinationMapPanel.GetDefaultAsteroid();
+			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, defaultAsteroid);
+			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectAsteroid(defaultAsteroid, num);
+		}
+		this.destinationProperties.SetDescriptors(colonyDestinationAsteroidBeltData.GetParamDescriptors());
+		this.startLocationProperties.SetDescriptors(colonyDestinationAsteroidBeltData.GetTraitDescriptors());
 	}
 
-	private void OnAsteroidClicked(ColonyDestinationAsteroidData asteroid)
+	private void OnAsteroidClicked(ColonyDestinationAsteroidBeltData asteroid)
 	{
-		this.newGameSettings.SetSetting(CustomGameSettingConfigs.World, asteroid.worldPath);
+		this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, asteroid.beltPath);
 		this.ShuffleClicked();
 	}
 

@@ -72,25 +72,23 @@ public class UniformPoissonDiskSampler
 		bool flag = false;
 		while (!flag)
 		{
-			float num = this.myRandom.RandomValue();
-			float num2 = settings.TopLeft.x + settings.Dimensions.x * num;
-			num = this.myRandom.RandomValue();
-			float num3 = settings.TopLeft.y + settings.Dimensions.y * num;
-			Vector2 vector = new Vector2(num2, num3);
+			float num = Mathf.Min(settings.Dimensions.x, settings.Dimensions.y) / 2f;
+			Vector2 vector = new Vector2(this.myRandom.RandomValue(), this.myRandom.RandomValue());
+			Vector2 vector2 = settings.Center + vector * num;
 			if (settings.RejectionSqDistance != null)
 			{
-				float num4 = Vector2.SqrMagnitude(settings.Center - vector);
+				float num2 = Vector2.SqrMagnitude(settings.Center - vector2);
 				float? rejectionSqDistance = settings.RejectionSqDistance;
-				if ((num4 > rejectionSqDistance.GetValueOrDefault()) & (rejectionSqDistance != null))
+				if ((num2 > rejectionSqDistance.GetValueOrDefault()) & (rejectionSqDistance != null))
 				{
 					continue;
 				}
 			}
 			flag = true;
-			Vector2 vector2 = UniformPoissonDiskSampler.Denormalize(vector, settings.TopLeft, (double)settings.CellSize);
-			state.Grid[(int)vector2.x, (int)vector2.y] = new Vector2?(vector);
-			state.ActivePoints.Add(vector);
-			state.Points.Add(vector);
+			Vector2 vector3 = UniformPoissonDiskSampler.Denormalize(vector2, settings.TopLeft, (double)settings.CellSize);
+			state.Grid[(int)vector3.x, (int)vector3.y] = new Vector2?(vector2);
+			state.ActivePoints.Add(vector2);
+			state.Points.Add(vector2);
 		}
 	}
 

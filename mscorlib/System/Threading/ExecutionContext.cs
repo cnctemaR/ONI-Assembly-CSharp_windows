@@ -255,8 +255,8 @@ namespace System.Threading
 			ExecutionContext.Run(executionContext, callback, state, false);
 		}
 
-		[SecurityCritical]
 		[FriendAccessAllowed]
+		[SecurityCritical]
 		internal static void Run(ExecutionContext executionContext, ContextCallback callback, object state, bool preserveSyncCtx)
 		{
 			ExecutionContext.RunInternal(executionContext, callback, state, preserveSyncCtx);
@@ -311,8 +311,8 @@ namespace System.Threading
 			ecsw.thread = currentThread;
 		}
 
-		[HandleProcessCorruptedStateExceptions]
 		[SecurityCritical]
+		[HandleProcessCorruptedStateExceptions]
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		internal static ExecutionContextSwitcher SetExecutionContext(ExecutionContext executionContext, bool preserveSyncCtx)
 		{

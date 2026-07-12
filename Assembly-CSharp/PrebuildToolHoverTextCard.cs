@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
+using UnityEngine;
 
 public class PrebuildToolHoverTextCard : HoverTextConfiguration
 {
@@ -8,21 +8,25 @@ public class PrebuildToolHoverTextCard : HoverTextConfiguration
 	{
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
-		hoverTextDrawer.BeginShadowBar(false);
-		PlanScreen.RequirementsState requirementsState = this.currentReqState;
-		if (requirementsState != PlanScreen.RequirementsState.Tech)
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
+		if (!Grid.IsValidCell(num) || (int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId)
 		{
-			if (requirementsState - PlanScreen.RequirementsState.Materials <= 1)
-			{
-				hoverTextDrawer.DrawText(UI.TOOLTIPS.NOMATERIAL.text.ToUpper(), this.HoverTextStyleSettings[0]);
-				hoverTextDrawer.NewLine(26);
-				hoverTextDrawer.DrawText(UI.TOOLTIPS.SELECTAMATERIAL, this.HoverTextStyleSettings[1]);
-			}
+			hoverTextDrawer.EndDrawing();
+			return;
 		}
-		else
+		hoverTextDrawer.BeginShadowBar(false);
+		if (!this.errorMessage.IsNullOrWhiteSpace())
 		{
-			Tech parentTech = Db.Get().TechItems.Get(this.currentDef.PrefabID).parentTech;
-			hoverTextDrawer.DrawText(string.Format(UI.PRODUCTINFO_RESEARCHREQUIRED, parentTech.Name).ToUpper(), this.HoverTextStyleSettings[0]);
+			bool flag = true;
+			foreach (string text in this.errorMessage.Split(new char[] { '\n' }))
+			{
+				if (!flag)
+				{
+					hoverTextDrawer.NewLine(26);
+				}
+				hoverTextDrawer.DrawText(text.ToUpper(), this.HoverTextStyleSettings[flag ? 0 : 1]);
+				flag = false;
+			}
 		}
 		hoverTextDrawer.NewLine(26);
 		hoverTextDrawer.DrawIcon(instance.GetSprite("icon_mouse_right"), 18);
@@ -31,7 +35,7 @@ public class PrebuildToolHoverTextCard : HoverTextConfiguration
 		hoverTextDrawer.EndDrawing();
 	}
 
-	public PlanScreen.RequirementsState currentReqState;
+	public string errorMessage;
 
 	public BuildingDef currentDef;
 }

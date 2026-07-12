@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C719CBCE-289E-47FB-962B-EC461A7D5B1F}</ProjectGuid>
+    <ProjectGuid>{DD3DEF40-76A7-4169-85C9-351C4936F151}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -23,6 +23,8 @@
     <Compile Include="AsyncLoader.cs" />
     <Compile Include="AsyncLoadManager.cs" />
     <Compile Include="Audio.cs" />
+    <Compile Include="AxialI.cs" />
+    <Compile Include="AxialUtil.cs" />
     <Compile Include="Axis.cs" />
     <Compile Include="BaseLocation.cs" />
     <Compile Include="BatchGroupKey.cs" />
@@ -66,8 +68,6 @@
     <Compile Include="ClipperLib\PolyType.cs" />
     <Compile Include="ClipperLib\Scanbeam.cs" />
     <Compile Include="ClipperLib\TEdge.cs" />
-    <Compile Include="CmpFns.cs" />
-    <Compile Include="CmpUtil.cs" />
     <Compile Include="ColorStyleSetting.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ContainerPool.2.cs" />
@@ -1218,6 +1218,7 @@
     <Compile Include="HighlightOnHover.cs" />
     <Compile Include="HoverCallback.cs" />
     <Compile Include="HUSL\ColorConverter.cs" />
+    <Compile Include="IAttributeManager.cs" />
     <Compile Include="IComponentManager.cs" />
     <Compile Include="ICPULoad.cs" />
     <Compile Include="IGlobalAsyncLoader.cs" />
@@ -1397,6 +1398,8 @@
     <Compile Include="MIConvexHull\VoronoiMesh.2.cs" />
     <Compile Include="MIConvexHull\VoronoiMesh.cs" />
     <Compile Include="Modifier.cs" />
+    <Compile Include="MyAttributeManager.cs" />
+    <Compile Include="MyAttributes.cs" />
     <Compile Include="MyCmp.cs" />
     <Compile Include="MyCmpAdd.cs" />
     <Compile Include="MyCmpGet.cs" />
@@ -1453,6 +1456,8 @@
     <Compile Include="ProcGen\Arc.cs" />
     <Compile Include="ProcGen\BiomeSettings.cs" />
     <Compile Include="ProcGen\ChangeFloats.cs" />
+    <Compile Include="ProcGen\ClusterLayout.cs" />
+    <Compile Include="ProcGen\ClusterLayouts.cs" />
     <Compile Include="ProcGen\ComposableDictionary.cs" />
     <Compile Include="ProcGen\DefaultSettings.cs" />
     <Compile Include="ProcGen\ElementChoiceGroup.cs" />
@@ -1467,6 +1472,7 @@
     <Compile Include="ProcGen\Map\Edge.cs" />
     <Compile Include="ProcGen\Map\MapGraph.cs" />
     <Compile Include="ProcGen\MinMax.cs" />
+    <Compile Include="ProcGen\MinMaxI.cs" />
     <Compile Include="ProcGen\Mob.cs" />
     <Compile Include="ProcGen\MobReference.cs" />
     <Compile Include="ProcGen\MobSettings.cs" />
@@ -1492,6 +1498,8 @@
     <Compile Include="ProcGen\SampleDescriber.cs" />
     <Compile Include="ProcGen\Segment.cs" />
     <Compile Include="ProcGen\SettingsCache.cs" />
+    <Compile Include="ProcGen\SpaceMapPOIPlacement.cs" />
+    <Compile Include="ProcGen\StartingWorldElementSetting.cs" />
     <Compile Include="ProcGen\SubWorld.cs" />
     <Compile Include="ProcGen\Temperature.cs" />
     <Compile Include="ProcGen\TerrainElementBandSettings.cs" />
@@ -1502,10 +1510,12 @@
     <Compile Include="ProcGen\WeightedRandom.cs" />
     <Compile Include="ProcGen\WeightedSimHash.cs" />
     <Compile Include="ProcGen\WeightedSubWorld.cs" />
+    <Compile Include="ProcGen\WeightedSubworldName.cs" />
     <Compile Include="ProcGen\World.cs" />
     <Compile Include="ProcGen\WorldDisplayInfo.cs" />
     <Compile Include="ProcGen\WorldGenSettings.cs" />
     <Compile Include="ProcGen\WorldGenTags.cs" />
+    <Compile Include="ProcGen\WorldPlacement.cs" />
     <Compile Include="ProcGen\Worlds.cs" />
     <Compile Include="ProcGen\WorldTrait.cs" />
     <Compile Include="ProfilerBase.cs" />
@@ -2069,6 +2079,7 @@
     <Compile Include="TabHeaderIcon.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="TagBits.cs" />
+    <Compile Include="TagChangedEventData.cs" />
     <Compile Include="TagDescriptions.cs" />
     <Compile Include="TagExtensions.cs" />
     <Compile Include="TagManager.cs" />
@@ -2122,7 +2133,7 @@
     <Compile Include="VoronoiTree\Leaf.cs" />
     <Compile Include="VoronoiTree\Node.cs" />
     <Compile Include="VoronoiTree\PowerDiagram.cs" />
-    <Compile Include="VoronoiTree\Site.cs" />
+    <Compile Include="VoronoiTree\PowerDiagramSite.cs" />
     <Compile Include="VoronoiTree\Tree.cs" />
     <Compile Include="WidgetSoundPlayer.cs" />
     <Compile Include="WidgetTransition.cs" />
@@ -2341,71 +2352,71 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B21}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F153}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B25}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F157}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B26}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F158}</Project>
       <Name>LibNoiseDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B29}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F15B}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B2A}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F15C}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B2C}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F15E}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B36}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F168}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B35}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F167}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B2E}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F160}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B37}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F169}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B3C}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F16E}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B43}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F175}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B4C}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F17F}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B4D}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F180}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B60}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F194}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B65}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F19A}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B63}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F197}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

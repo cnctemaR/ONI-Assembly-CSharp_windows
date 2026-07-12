@@ -391,7 +391,9 @@ namespace UnityEngine.Timeline
 			}
 			if (type == null)
 			{
-				Debug.LogWarning("Cannot create a default clip for type " + base.GetType());
+				string text = "Cannot create a default clip for type ";
+				Type type2 = base.GetType();
+				Debug.LogWarning(text + ((type2 != null) ? type2.ToString() : null));
 				return null;
 			}
 			return this.CreateAndAddNewClipOfType(type);
@@ -400,6 +402,15 @@ namespace UnityEngine.Timeline
 		public TimelineClip CreateClip<T>() where T : ScriptableObject, IPlayableAsset
 		{
 			return this.CreateClip(typeof(T));
+		}
+
+		public bool DeleteClip(TimelineClip clip)
+		{
+			if (!this.m_Clips.Contains(clip))
+			{
+				throw new InvalidOperationException("Cannot delete clip since it is not a child of the TrackAsset.");
+			}
+			return this.timelineAsset != null && this.timelineAsset.DeleteClip(clip);
 		}
 
 		public IMarker CreateMarker(Type type, double time)
@@ -438,13 +449,11 @@ namespace UnityEngine.Timeline
 			{
 				return this.CreateAndAddNewClipOfType(requestedType);
 			}
-			throw new InvalidOperationException(string.Concat(new object[]
-			{
-				"Clips of type ",
-				requestedType,
-				" are not permitted on tracks of type ",
-				base.GetType()
-			}));
+			string text = "Clips of type ";
+			string text2 = ((requestedType != null) ? requestedType.ToString() : null);
+			string text3 = " are not permitted on tracks of type ";
+			Type type = base.GetType();
+			throw new InvalidOperationException(text + text2 + text3 + ((type != null) ? type.ToString() : null));
 		}
 
 		internal TimelineClip CreateAndAddNewClipOfType(Type requestedType)
@@ -458,13 +467,11 @@ namespace UnityEngine.Timeline
 		{
 			if (!this.ValidateClipType(requestedType))
 			{
-				throw new InvalidOperationException(string.Concat(new object[]
-				{
-					"Clips of type ",
-					requestedType,
-					" are not permitted on tracks of type ",
-					base.GetType()
-				}));
+				string text = "Clips of type ";
+				string text2 = ((requestedType != null) ? requestedType.ToString() : null);
+				string text3 = " are not permitted on tracks of type ";
+				Type type = base.GetType();
+				throw new InvalidOperationException(text + text2 + text3 + ((type != null) ? type.ToString() : null));
 			}
 			ScriptableObject scriptableObject = ScriptableObject.CreateInstance(requestedType);
 			if (scriptableObject == null)
@@ -488,13 +495,12 @@ namespace UnityEngine.Timeline
 			}
 			if (!this.ValidateClipType(asset.GetType()))
 			{
-				throw new InvalidOperationException(string.Concat(new object[]
-				{
-					"Clips of type ",
-					asset.GetType(),
-					" are not permitted on tracks of type ",
-					base.GetType()
-				}));
+				string text = "Clips of type ";
+				Type type = asset.GetType();
+				string text2 = ((type != null) ? type.ToString() : null);
+				string text3 = " are not permitted on tracks of type ";
+				Type type2 = base.GetType();
+				throw new InvalidOperationException(text + text2 + text3 + ((type2 != null) ? type2.ToString() : null));
 			}
 			return this.CreateClipFromAsset(asset as ScriptableObject);
 		}
@@ -602,6 +608,7 @@ namespace UnityEngine.Timeline
 				playable = this.OnCreateClipPlayableGraph(graph, go, tree);
 			}
 			Playable playable2 = this.CreateNotificationsPlayable(graph, playable, go, timelinePlayable);
+			TrackAsset.s_BuildData.Clear();
 			if (!playable2.IsValid<Playable>() && !playable.IsValid<Playable>())
 			{
 				Debug.LogErrorFormat("Track {0} of type {1} has no notifications and returns an invalid mixer Playable", new object[]

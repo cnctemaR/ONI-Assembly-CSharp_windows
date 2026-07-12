@@ -30,7 +30,7 @@ public class KInputField : KScreen
 
 	private void OnEditStart()
 	{
-		this.isEditing = true;
+		base.isEditing = true;
 		this.inputField.Select();
 		this.inputField.ActivateInputField();
 		KScreenManager.Instance.RefreshStack();
@@ -53,7 +53,7 @@ public class KInputField : KScreen
 
 	private IEnumerator DelayedEndEdit()
 	{
-		if (this.isEditing)
+		if (base.isEditing)
 		{
 			yield return new WaitForEndOfFrame();
 			this.StopEditing();
@@ -63,7 +63,7 @@ public class KInputField : KScreen
 
 	private void StopEditing()
 	{
-		this.isEditing = false;
+		base.isEditing = false;
 		this.inputField.DeactivateInputField();
 		if (this.onEndEdit != null)
 		{
@@ -80,27 +80,6 @@ public class KInputField : KScreen
 	{
 		this.inputField.text = input;
 	}
-
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		if (this.isEditing)
-		{
-			e.Consumed = true;
-			return;
-		}
-		base.OnKeyDown(e);
-	}
-
-	public override float GetSortKey()
-	{
-		if (this.isEditing)
-		{
-			return 10f;
-		}
-		return base.GetSortKey();
-	}
-
-	private bool isEditing;
 
 	[SerializeField]
 	private TMP_InputField inputField;

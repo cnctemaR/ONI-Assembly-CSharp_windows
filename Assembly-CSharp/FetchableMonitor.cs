@@ -5,7 +5,7 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.unfetchable;
-		base.serializable = false;
+		base.serializable = StateMachine.SerializeType.Never;
 		this.fetchable.Enter("RegisterFetchable", delegate(FetchableMonitor.Instance smi)
 		{
 			smi.RegisterFetchable();

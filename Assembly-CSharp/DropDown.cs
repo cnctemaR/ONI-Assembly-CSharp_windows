@@ -90,17 +90,13 @@ public class DropDown : KMonoBehaviour
 			this.emptyRow.GetComponent<KButton>().onClick += delegate
 			{
 				this.onEntrySelectedAction(null, this.targetData);
+				if (this.displaySelectedValueWhenClosed)
+				{
+					this.selectedLabel.text = this.emptyRowLabel ?? UI.DROPDOWN.NONE;
+				}
 				this.Close();
 			};
-			string text;
-			if (this.emptyRowLabel != null)
-			{
-				text = this.emptyRowLabel;
-			}
-			else
-			{
-				text = UI.DROPDOWN.NONE;
-			}
+			string text = this.emptyRowLabel ?? UI.DROPDOWN.NONE;
 			this.emptyRow.GetComponent<DropDownEntry>().label.text = text;
 			if (this.emptyRowSprite != null)
 			{
@@ -171,6 +167,10 @@ public class DropDown : KMonoBehaviour
 
 	public void Open()
 	{
+		if (this.open)
+		{
+			return;
+		}
 		if (!this.built)
 		{
 			this.Build(this.entries);
@@ -195,6 +195,10 @@ public class DropDown : KMonoBehaviour
 
 	public void Close()
 	{
+		if (!this.open)
+		{
+			return;
+		}
 		this.open = false;
 		foreach (KeyValuePair<IListableOption, GameObject> keyValuePair in this.rowLookup)
 		{
@@ -203,9 +207,7 @@ public class DropDown : KMonoBehaviour
 		this.scrollRect.SetActive(false);
 	}
 
-	public RectTransform targetDropDownContainer;
-
-	public IListableOption selectedEntry;
+	public GameObject targetDropDownContainer;
 
 	public LocText selectedLabel;
 

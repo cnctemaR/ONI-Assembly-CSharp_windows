@@ -6,8 +6,8 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaElement : XmlSchemaParticle
 	{
-		[DefaultValue(false)]
 		[XmlAttribute("abstract")]
+		[DefaultValue(false)]
 		public bool IsAbstract
 		{
 			get
@@ -21,8 +21,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlAttribute("block")]
 		[DefaultValue(XmlSchemaDerivationMethod.None)]
+		[XmlAttribute("block")]
 		public XmlSchemaDerivationMethod Block
 		{
 			get
@@ -49,8 +49,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		[XmlAttribute("final")]
+		[DefaultValue(XmlSchemaDerivationMethod.None)]
 		public XmlSchemaDerivationMethod Final
 		{
 			get
@@ -191,9 +191,9 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("unique", typeof(XmlSchemaUnique))]
-		[XmlElement("keyref", typeof(XmlSchemaKeyref))]
 		[XmlElement("key", typeof(XmlSchemaKey))]
+		[XmlElement("keyref", typeof(XmlSchemaKeyref))]
+		[XmlElement("unique", typeof(XmlSchemaUnique))]
 		public XmlSchemaObjectCollection Constraints
 		{
 			get

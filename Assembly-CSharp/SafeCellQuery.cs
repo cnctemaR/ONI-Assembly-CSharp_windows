@@ -34,7 +34,7 @@ public class SafeCellQuery : PathFinderQuery
 		bool flag5 = brain.OxygenBreather.IsBreathableElementAtCell(cell, Grid.DefaultOffset);
 		bool flag6 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder) && !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Pole);
 		bool flag7 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Tube);
-		bool flag8 = !avoid_light || SleepChore.IsLightLevelOk(cell);
+		bool flag8 = !avoid_light || SleepChore.IsDarkAtCell(cell);
 		if (cell == Grid.PosToCell(brain))
 		{
 			flag5 = !brain.OxygenBreather.IsSuffocating;

@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/LOD/LODGroup.h")]
 	[StaticAccessor("GetLODGroupManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/LOD/LODUtility.h")]
-	[NativeHeader("Runtime/Graphics/LOD/LODGroup.h")]
 	[NativeHeader("Runtime/Graphics/LOD/LODGroupManager.h")]
 	public class LODGroup : Component
 	{
@@ -94,10 +94,23 @@ namespace UnityEngine
 			set;
 		}
 
+		internal Vector3 worldReferencePoint
+		{
+			get
+			{
+				Vector3 vector;
+				this.get_worldReferencePoint_Injected(out vector);
+				return vector;
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_localReferencePoint_Injected(out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void set_localReferencePoint_Injected(ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void get_worldReferencePoint_Injected(out Vector3 ret);
 	}
 }

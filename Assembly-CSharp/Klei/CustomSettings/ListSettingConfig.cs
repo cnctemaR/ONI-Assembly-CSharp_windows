@@ -8,8 +8,8 @@ namespace Klei.CustomSettings
 	{
 		public List<SettingLevel> levels { get; private set; }
 
-		public ListSettingConfig(string id, string label, string tooltip, List<SettingLevel> levels, string default_level_id, string nosweat_default_level_id, int coordinate_dimension = -1, int coordinate_dimension_width = -1, bool debug_only = false, bool triggers_custom_game = true)
-			: base(id, label, tooltip, default_level_id, nosweat_default_level_id, coordinate_dimension, coordinate_dimension_width, debug_only, triggers_custom_game)
+		public ListSettingConfig(string id, string label, string tooltip, List<SettingLevel> levels, string default_level_id, string nosweat_default_level_id, int coordinate_dimension = -1, int coordinate_dimension_width = -1, bool debug_only = false, bool triggers_custom_game = true, string required_content = "", string missing_content_default = "", bool editor_only = false)
+			: base(id, label, tooltip, default_level_id, nosweat_default_level_id, coordinate_dimension, coordinate_dimension_width, debug_only, triggers_custom_game, required_content, missing_content_default, editor_only)
 		{
 			this.levels = levels;
 		}
@@ -17,8 +17,8 @@ namespace Klei.CustomSettings
 		public void StompLevels(List<SettingLevel> levels, string default_level_id, string nosweat_default_level_id)
 		{
 			this.levels = levels;
-			base.default_level_id = default_level_id;
-			base.nosweat_default_level_id = nosweat_default_level_id;
+			this.default_level_id = default_level_id;
+			this.nosweat_default_level_id = nosweat_default_level_id;
 		}
 
 		public override SettingLevel GetLevel(string level_id)
@@ -32,7 +32,7 @@ namespace Klei.CustomSettings
 			}
 			for (int j = 0; j < this.levels.Count; j++)
 			{
-				if (this.levels[j].id == base.default_level_id)
+				if (this.levels[j].id == this.default_level_id)
 				{
 					return this.levels[j];
 				}

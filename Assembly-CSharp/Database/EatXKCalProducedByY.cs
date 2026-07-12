@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class EatXKCalProducedByY : ColonyAchievementRequirement
+	public class EatXKCalProducedByY : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public EatXKCalProducedByY(int numCalories, List<Tag> foodProducers)
 		{
@@ -37,17 +35,7 @@ namespace Database
 			return RationTracker.Get().GetCaloiresConsumedByFood(list.Distinct<string>().ToList<string>()) / 1000f > (float)this.numCalories;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.foodProducers.Count);
-			foreach (Tag tag in this.foodProducers)
-			{
-				writer.WriteKleiString(tag.ToString());
-			}
-			writer.Write(this.numCalories);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			int num = reader.ReadInt32();
 			this.foodProducers = new List<Tag>(num);
@@ -69,7 +57,10 @@ namespace Database
 					text += COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.PREPARED_SEPARATOR;
 				}
 				BuildingDef buildingDef = Assets.GetBuildingDef(this.foodProducers[i].Name);
-				text += buildingDef.Name;
+				if (buildingDef != null)
+				{
+					text += buildingDef.Name;
+				}
 			}
 			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CONSUME_ITEM, text);
 		}

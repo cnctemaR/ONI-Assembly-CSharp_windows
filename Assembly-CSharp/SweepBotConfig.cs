@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class SweepBotConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "SweepBot";
@@ -22,19 +27,21 @@ public class SweepBotConfig : IEntityConfig
 		gameObject.AddComponent<Pickupable>();
 		gameObject.AddOrGet<Clearable>().isClearable = false;
 		Trait trait = Db.Get().CreateTrait("SweepBotBaseTrait", this.name, this.name, null, false, null, true, true);
-		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalBattery.maxAttribute.Id, 21000f, this.name, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalBattery.deltaAttribute.Id, -40f, this.name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalBattery.maxAttribute.Id, 9000f, this.name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.InternalBattery.deltaAttribute.Id, -17.142857f, this.name, false, false, true));
 		Modifiers modifiers = gameObject.AddOrGet<Modifiers>();
-		modifiers.initialTraits = new string[] { "SweepBotBaseTrait" };
+		modifiers.initialTraits.Add("SweepBotBaseTrait");
 		modifiers.initialAmounts.Add(Db.Get().Amounts.HitPoints.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.InternalBattery.Id);
 		gameObject.AddOrGet<KBatchedAnimController>().SetSymbolVisiblity("snapto_pivot", false);
 		gameObject.AddOrGet<Traits>();
-		gameObject.AddOrGet<CharacterOverlay>();
 		gameObject.AddOrGet<Effects>();
 		gameObject.AddOrGetDef<AnimInterruptMonitor.Def>();
 		gameObject.AddOrGetDef<StorageUnloadMonitor.Def>();
-		gameObject.AddOrGetDef<RobotBatteryMonitor.Def>();
+		RobotBatteryMonitor.Def def = gameObject.AddOrGetDef<RobotBatteryMonitor.Def>();
+		def.batteryAmountId = Db.Get().Amounts.InternalBattery.Id;
+		def.canCharge = true;
+		def.lowBatteryWarningPercent = 0.5f;
 		gameObject.AddOrGetDef<SweetBotReactMonitor.Def>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGetDef<SweepBotTrappedMonitor.Def>();
@@ -66,11 +73,11 @@ public class SweepBotConfig : IEntityConfig
 		navigator.maxProbingRadius = 32;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		kprefabID.AddTag(GameTags.Creatures.Walker, false);
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new FallStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new SweepBotTrappedStates.Def(), true)
-			.Add(new DeliverToSweepLockerStates.Def(), true)
-			.Add(new ReturnToChargeStationStates.Def(), true)
-			.Add(new SweepStates.Def(), true)
-			.Add(new IdleStates.Def(), true);
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new FallStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new SweepBotTrappedStates.Def(), true, -1)
+			.Add(new DeliverToSweepLockerStates.Def(), true, -1)
+			.Add(new ReturnToChargeStationStates.Def(), true, -1)
+			.Add(new SweepStates.Def(), true, -1)
+			.Add(new IdleStates.Def(), true, -1);
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Robots.Models.SweepBot, null);
 		return gameObject;
@@ -94,17 +101,17 @@ public class SweepBotConfig : IEntityConfig
 
 	public const float STORAGE_CAPACITY = 500f;
 
-	public const float BATTERY_DEPLETION_RATE = 40f;
+	public const float BATTERY_CAPACITY = 9000f;
 
-	public const float BATTERY_CAPACITY = 21000f;
+	public const float BATTERY_DEPLETION_RATE = 17.142857f;
 
 	public const float MAX_SWEEP_AMOUNT = 10f;
 
 	public const float MOP_SPEED = 10f;
 
-	private string name = ROBOTS.MODELS.SWEEPBOT.NAME;
+	private string name = global::STRINGS.ROBOTS.MODELS.SWEEPBOT.NAME;
 
-	private string desc = ROBOTS.MODELS.SWEEPBOT.DESC;
+	private string desc = global::STRINGS.ROBOTS.MODELS.SWEEPBOT.DESC;
 
 	public static float MASS = 25f;
 }

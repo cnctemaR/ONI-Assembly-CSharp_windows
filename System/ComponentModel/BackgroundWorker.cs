@@ -4,8 +4,8 @@ using System.Threading;
 
 namespace System.ComponentModel
 {
-	[DefaultEvent("DoWork")]
 	[SRDescription("Executes an operation on a separate thread.")]
+	[DefaultEvent("DoWork")]
 	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class BackgroundWorker : Component
 	{
@@ -23,8 +23,8 @@ namespace System.ComponentModel
 			this.OnRunWorkerCompleted((RunWorkerCompletedEventArgs)arg);
 		}
 
-		[Browsable(false)]
 		[SRDescription("Has the user attempted to cancel the operation? To be accessed from DoWork event handler.")]
+		[Browsable(false)]
 		public bool CancellationPending
 		{
 			get
@@ -56,8 +56,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		[Browsable(false)]
 		[SRDescription("Is the worker still currently working on a background operation?")]
+		[Browsable(false)]
 		public bool IsBusy
 		{
 			get
@@ -163,9 +163,9 @@ namespace System.ComponentModel
 			}
 		}
 
-		[DefaultValue(false)]
-		[SRDescription("Whether the worker will report progress.")]
 		[SRCategory("Asynchronous")]
+		[SRDescription("Whether the worker will report progress.")]
+		[DefaultValue(false)]
 		public bool WorkerReportsProgress
 		{
 			get
@@ -178,9 +178,9 @@ namespace System.ComponentModel
 			}
 		}
 
-		[SRCategory("Asynchronous")]
-		[SRDescription("Whether the worker supports cancellation.")]
 		[DefaultValue(false)]
+		[SRDescription("Whether the worker supports cancellation.")]
+		[SRCategory("Asynchronous")]
 		public bool WorkerSupportsCancellation
 		{
 			get

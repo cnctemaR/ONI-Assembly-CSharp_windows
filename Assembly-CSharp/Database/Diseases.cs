@@ -6,19 +6,23 @@ namespace Database
 {
 	public class Diseases : ResourceSet<Disease>
 	{
-		public Diseases(ResourceSet parent)
+		public Diseases(ResourceSet parent, bool statsOnly = false)
 			: base("Diseases", parent)
 		{
-			this.FoodGerms = base.Add(new FoodGerms());
-			this.SlimeGerms = base.Add(new SlimeGerms());
-			this.PollenGerms = base.Add(new PollenGerms());
-			this.ZombieSpores = base.Add(new ZombieSpores());
+			this.FoodGerms = base.Add(new FoodGerms(statsOnly));
+			this.SlimeGerms = base.Add(new SlimeGerms(statsOnly));
+			this.PollenGerms = base.Add(new PollenGerms(statsOnly));
+			this.ZombieSpores = base.Add(new ZombieSpores(statsOnly));
+			if (DlcManager.FeatureRadiationEnabled())
+			{
+				this.RadiationPoisoning = base.Add(new RadiationPoisoning(statsOnly));
+			}
 		}
 
-		public static bool IsValidID(string id)
+		public bool IsValidID(string id)
 		{
 			bool flag = false;
-			using (List<Disease>.Enumerator enumerator = Db.Get().Diseases.resources.GetEnumerator())
+			using (List<Disease>.Enumerator enumerator = this.resources.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
@@ -33,11 +37,10 @@ namespace Database
 
 		public byte GetIndex(int hash)
 		{
-			Diseases diseases = Db.Get().Diseases;
 			byte b = 0;
-			while ((int)b < diseases.Count)
+			while ((int)b < this.resources.Count)
 			{
-				Disease disease = diseases[(int)b];
+				Disease disease = this.resources[(int)b];
 				if (hash == disease.id.GetHashCode())
 				{
 					return b;
@@ -59,5 +62,7 @@ namespace Database
 		public Disease PollenGerms;
 
 		public Disease ZombieSpores;
+
+		public Disease RadiationPoisoning;
 	}
 }

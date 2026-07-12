@@ -9,6 +9,11 @@ namespace UnityEngine.PlayerLoop
 	public struct PreLateUpdate
 	{
 		[RequiredByNativeCode]
+		public struct Physics2DLateUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct AIUpdatePostScript
 		{
 		}
@@ -30,6 +35,11 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct DirectorDeferredEvaluate
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct UIElementsUpdatePanels
 		{
 		}
 

@@ -123,7 +123,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 				Attributes attributes = base.gameObject.GetAttributes();
 				if (nowInTube)
 				{
-					this.hadSuitTank = this.HasSuitTank();
+					this.hadSuitTank = base.HasTag(GameTags.HasSuitTank);
 					if (!this.hadSuitTank)
 					{
 						base.GetComponent<OxygenBreather>().SetGasProvider(base.sm);
@@ -139,7 +139,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 							AttributeModifier attributeModifier = enumerator2.Current;
 							attributes.Add(attributeModifier);
 						}
-						goto IL_0162;
+						goto IL_0167;
 					}
 				}
 				if (!this.hadSuitTank)
@@ -154,19 +154,13 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 				{
 					attributes.Remove(attributeModifier2);
 				}
-				IL_0162:
+				IL_0167:
 				CreatureSimTemperatureTransfer component2 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
 				if (component2 != null)
 				{
 					component2.RefreshRegistration();
 				}
 			}
-		}
-
-		private bool HasSuitTank()
-		{
-			AssignableSlotInstance slot = base.GetComponent<MinionIdentity>().GetEquipment().GetSlot(Db.Get().AssignableSlots.Suit);
-			return slot != null && slot.assignable != null && slot.assignable.GetComponent<SuitTank>() != null;
 		}
 
 		private List<TravelTubeEntrance> reservations = new List<TravelTubeEntrance>();

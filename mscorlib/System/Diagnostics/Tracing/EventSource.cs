@@ -443,9 +443,9 @@ namespace System.Diagnostics.Tracing
 			this.DispatchToAllListeners(-1, pActivityId, e);
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[SecurityCritical]
 		[NonEvent]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		private unsafe void WriteCleanup(GCHandle* pPins, int cPins)
 		{
 			DataCollector.ThreadInstance.Disable();

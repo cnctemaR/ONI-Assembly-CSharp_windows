@@ -5,11 +5,11 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaChoice : XmlSchemaGroupBase
 	{
-		[XmlElement("group", typeof(XmlSchemaGroupRef))]
-		[XmlElement("element", typeof(XmlSchemaElement))]
-		[XmlElement("any", typeof(XmlSchemaAny))]
-		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("sequence", typeof(XmlSchemaSequence))]
+		[XmlElement("element", typeof(XmlSchemaElement))]
+		[XmlElement("group", typeof(XmlSchemaGroupRef))]
+		[XmlElement("choice", typeof(XmlSchemaChoice))]
+		[XmlElement("any", typeof(XmlSchemaAny))]
 		public override XmlSchemaObjectCollection Items
 		{
 			get

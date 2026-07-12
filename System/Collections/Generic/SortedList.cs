@@ -5,8 +5,8 @@ using System.Threading;
 
 namespace System.Collections.Generic
 {
-	[DebuggerDisplay("Count = {Count}")]
 	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
+	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
 	public class SortedList<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
 	{
@@ -922,8 +922,8 @@ namespace System.Collections.Generic
 			private TValue _currentValue;
 		}
 
-		[DebuggerDisplay("Count = {Count}")]
 		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
+		[DebuggerDisplay("Count = {Count}")]
 		[Serializable]
 		private sealed class KeyList : IList<TKey>, ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection
 		{

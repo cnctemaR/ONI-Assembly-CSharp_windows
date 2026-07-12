@@ -84,6 +84,7 @@ public class Accessorizer : KMonoBehaviour
 		fd.body = HashedString.Invalid;
 		fd.arms = HashedString.Invalid;
 		fd.hat = HashedString.Invalid;
+		fd.faceFX = HashedString.Invalid;
 		for (int i = 0; i < this.accessories.Count; i++)
 		{
 			Accessory accessory = this.accessories[i].Get();
@@ -120,6 +121,10 @@ public class Accessorizer : KMonoBehaviour
 				else if (accessory.slot.Id == "Hat")
 				{
 					fd.hat = HashedString.Invalid;
+				}
+				else if (accessory.slot.Id == "FaceEffect")
+				{
+					fd.faceFX = HashedString.Invalid;
 				}
 			}
 		}

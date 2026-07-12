@@ -17,30 +17,30 @@ public static class BaseMoleConfig
 		gameObject.AddOrGetDef<DiggerMonitor.Def>().depthToDig = MoleTuning.DEPTH_TO_HIDE;
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Walker, false);
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new FallStates.Def(), true)
-			.Add(new StunnedStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
-			.Add(new DiggerStates.Def(), true)
-			.Add(new GrowUpStates.Def(), true)
-			.Add(new TrappedStates.Def(), true)
-			.Add(new IncubatingStates.Def(), true)
-			.Add(new BaggedStates.Def(), true)
-			.Add(new DebugGoToStates.Def(), true)
-			.Add(new FleeStates.Def(), true)
-			.Add(new AttackStates.Def(), !is_baby)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new FallStates.Def(), true, -1)
+			.Add(new StunnedStates.Def(), true, -1)
+			.Add(new DrowningStates.Def(), true, -1)
+			.Add(new DiggerStates.Def(), true, -1)
+			.Add(new GrowUpStates.Def(), true, -1)
+			.Add(new TrappedStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new BaggedStates.Def(), true, -1)
+			.Add(new DebugGoToStates.Def(), true, -1)
+			.Add(new FleeStates.Def(), true, -1)
+			.Add(new AttackStates.Def("eat_pre", "eat_pst", null), !is_baby, -1)
 			.PushInterruptGroup()
-			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new RanchedStates.Def(), true)
-			.Add(new LayEggStates.Def(), true)
-			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new EatStates.Def(), true)
-			.Add(new NestingPoopState.Def(is_baby ? Tag.Invalid : SimHashes.Regolith.CreateTag()), true)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
+			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new CreatureSleepStates.Def(), true, -1)
+			.Add(new EatStates.Def(), true, -1)
+			.Add(new NestingPoopState.Def(is_baby ? Tag.Invalid : SimHashes.Regolith.CreateTag()), true, -1)
+			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMoleConfig.CustomIdleAnim)
-			}, true);
+			}, true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MoleSpecies, null);
 		return gameObject;
 	}

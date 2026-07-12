@@ -67,16 +67,16 @@ namespace System.Net
 			Interlocked.Decrement(ref this.m_CallNesting);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool AllowReadStreamBuffering { get; set; }
 
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool AllowWriteStreamBuffering { get; set; }
 
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		public event WriteStreamClosedEventHandler WriteStreamClosed
 		{
 			add
@@ -87,8 +87,8 @@ namespace System.Net
 			}
 		}
 
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
 		protected virtual void OnWriteStreamClosed(WriteStreamClosedEventArgs e)
 		{
 		}
@@ -1502,21 +1502,14 @@ namespace System.Net
 
 		private void OpenReadAsyncCallback(IAsyncResult result)
 		{
-			AsyncOperation asyncOperation = (AsyncOperation)result.AsyncState;
-			WebRequest webRequest;
-			if (result is WebAsyncResult)
-			{
-				webRequest = ((WebAsyncResult)result).AsyncObject;
-			}
-			else
-			{
-				webRequest = (WebRequest)((LazyAsyncResult)result).AsyncObject;
-			}
+			Tuple<WebRequest, AsyncOperation> tuple = (Tuple<WebRequest, AsyncOperation>)result.AsyncState;
+			WebRequest item = tuple.Item1;
+			AsyncOperation item2 = tuple.Item2;
 			Stream stream = null;
 			Exception ex = null;
 			try
 			{
-				stream = (this.m_WebResponse = this.GetWebResponse(webRequest, result)).GetResponseStream();
+				stream = (this.m_WebResponse = this.GetWebResponse(item, result)).GetResponseStream();
 			}
 			catch (Exception ex2)
 			{
@@ -1530,8 +1523,8 @@ namespace System.Net
 					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
 				}
 			}
-			OpenReadCompletedEventArgs e = new OpenReadCompletedEventArgs(stream, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.openReadOperationCompleted, e);
+			OpenReadCompletedEventArgs e = new OpenReadCompletedEventArgs(stream, ex, this.m_Cancelled, item2.UserSuppliedState);
+			this.InvokeOperationCompleted(item2, this.openReadOperationCompleted, e);
 		}
 
 		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
@@ -1554,7 +1547,8 @@ namespace System.Net
 			this.m_AsyncOp = asyncOperation;
 			try
 			{
-				(this.m_WebRequest = this.GetWebRequest(this.GetUri(address))).BeginGetResponse(new AsyncCallback(this.OpenReadAsyncCallback), asyncOperation);
+				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
+				webRequest.BeginGetResponse(new AsyncCallback(this.OpenReadAsyncCallback), new Tuple<WebRequest, AsyncOperation>(webRequest, asyncOperation));
 			}
 			catch (Exception ex)
 			{
@@ -1589,14 +1583,14 @@ namespace System.Net
 
 		private void OpenWriteAsyncCallback(IAsyncResult result)
 		{
-			WebAsyncResult webAsyncResult = (WebAsyncResult)result;
-			AsyncOperation asyncOperation = (AsyncOperation)webAsyncResult.AsyncState;
-			WebRequest asyncObject = webAsyncResult.AsyncObject;
+			Tuple<WebRequest, AsyncOperation> tuple = (Tuple<WebRequest, AsyncOperation>)result.AsyncState;
+			WebRequest item = tuple.Item1;
+			AsyncOperation item2 = tuple.Item2;
 			WebClient.WebClientWriteStream webClientWriteStream = null;
 			Exception ex = null;
 			try
 			{
-				webClientWriteStream = new WebClient.WebClientWriteStream(asyncObject.EndGetRequestStream(result), asyncObject, this);
+				webClientWriteStream = new WebClient.WebClientWriteStream(item.EndGetRequestStream(result), item, this);
 			}
 			catch (Exception ex2)
 			{
@@ -1610,8 +1604,8 @@ namespace System.Net
 					ex = new WebException(global::SR.GetString("An exception occurred during a WebClient request."), ex2);
 				}
 			}
-			OpenWriteCompletedEventArgs e = new OpenWriteCompletedEventArgs(webClientWriteStream, ex, this.m_Cancelled, asyncOperation.UserSuppliedState);
-			this.InvokeOperationCompleted(asyncOperation, this.openWriteOperationCompleted, e);
+			OpenWriteCompletedEventArgs e = new OpenWriteCompletedEventArgs(webClientWriteStream, ex, this.m_Cancelled, item2.UserSuppliedState);
+			this.InvokeOperationCompleted(item2, this.openWriteOperationCompleted, e);
 		}
 
 		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
@@ -1645,7 +1639,8 @@ namespace System.Net
 			try
 			{
 				this.m_Method = method;
-				(this.m_WebRequest = this.GetWebRequest(this.GetUri(address))).BeginGetRequestStream(new AsyncCallback(this.OpenWriteAsyncCallback), asyncOperation);
+				WebRequest webRequest = (this.m_WebRequest = this.GetWebRequest(this.GetUri(address)));
+				webRequest.BeginGetRequestStream(new AsyncCallback(this.OpenWriteAsyncCallback), new Tuple<WebRequest, AsyncOperation>(webRequest, asyncOperation));
 			}
 			catch (Exception ex)
 			{

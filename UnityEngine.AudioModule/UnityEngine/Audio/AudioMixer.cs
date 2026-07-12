@@ -5,9 +5,9 @@ using UnityEngine.Bindings;
 namespace UnityEngine.Audio
 {
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioMixer.bindings.h")]
-	[NativeHeader("Modules/Audio/Public/AudioMixer.h")]
-	[ExcludeFromObjectFactory]
 	[ExcludeFromPreset]
+	[ExcludeFromObjectFactory]
+	[NativeHeader("Modules/Audio/Public/AudioMixer.h")]
 	public class AudioMixer : Object
 	{
 		internal AudioMixer()

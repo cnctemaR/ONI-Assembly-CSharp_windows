@@ -18,7 +18,7 @@ namespace ProcGen
 
 		public MinMax startingBasePositionVerticalMod { get; private set; }
 
-		public List<WeightedName> additionalSubworldFiles { get; private set; }
+		public List<WeightedSubworldName> additionalSubworldFiles { get; private set; }
 
 		public List<World.AllowedCellsFilter> additionalUnknownCellFilters { get; private set; }
 
@@ -30,7 +30,7 @@ namespace ProcGen
 
 		public WorldTrait()
 		{
-			this.additionalSubworldFiles = new List<WeightedName>();
+			this.additionalSubworldFiles = new List<WeightedSubworldName>();
 			this.additionalUnknownCellFilters = new List<World.AllowedCellsFilter>();
 			this.globalFeatureTemplateMods = new Dictionary<string, int>();
 			this.globalFeatureMods = new Dictionary<string, int>();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI
 {
+	[RequireComponent(typeof(CanvasRenderer))]
 	[AddComponentMenu("UI/Text", 10)]
 	public class Text : MaskableGraphic, ILayoutElement
 	{
@@ -88,9 +89,15 @@ namespace UnityEngine.UI
 				{
 					return;
 				}
-				FontUpdateTracker.UntrackText(this);
+				if (base.isActiveAndEnabled)
+				{
+					FontUpdateTracker.UntrackText(this);
+				}
 				this.m_FontData.font = value;
-				FontUpdateTracker.TrackText(this);
+				if (base.isActiveAndEnabled)
+				{
+					FontUpdateTracker.TrackText(this);
+				}
 				this.SetAllDirty();
 			}
 		}

@@ -27,7 +27,7 @@ namespace UnityEngine.UI
 
 		public static void RegisterGraphicForCanvas(Canvas c, Graphic graphic)
 		{
-			if (c == null)
+			if (c == null || graphic == null)
 			{
 				return;
 			}
@@ -36,11 +36,31 @@ namespace UnityEngine.UI
 			if (indexedSet != null)
 			{
 				indexedSet.AddUnique(graphic);
+				GraphicRegistry.RegisterRaycastGraphicForCanvas(c, graphic);
 				return;
 			}
 			indexedSet = new IndexedSet<Graphic>();
 			indexedSet.Add(graphic);
 			GraphicRegistry.instance.m_Graphics.Add(c, indexedSet);
+			GraphicRegistry.RegisterRaycastGraphicForCanvas(c, graphic);
+		}
+
+		public static void RegisterRaycastGraphicForCanvas(Canvas c, Graphic graphic)
+		{
+			if (c == null || graphic == null || !graphic.raycastTarget)
+			{
+				return;
+			}
+			IndexedSet<Graphic> indexedSet;
+			GraphicRegistry.instance.m_RaycastableGraphics.TryGetValue(c, out indexedSet);
+			if (indexedSet != null)
+			{
+				indexedSet.AddUnique(graphic);
+				return;
+			}
+			indexedSet = new IndexedSet<Graphic>();
+			indexedSet.Add(graphic);
+			GraphicRegistry.instance.m_RaycastableGraphics.Add(c, indexedSet);
 		}
 
 		public static void UnregisterGraphicForCanvas(Canvas c, Graphic graphic)
@@ -57,6 +77,24 @@ namespace UnityEngine.UI
 				{
 					GraphicRegistry.instance.m_Graphics.Remove(c);
 				}
+				GraphicRegistry.UnregisterRaycastGraphicForCanvas(c, graphic);
+			}
+		}
+
+		public static void UnregisterRaycastGraphicForCanvas(Canvas c, Graphic graphic)
+		{
+			if (c == null || !graphic.raycastTarget)
+			{
+				return;
+			}
+			IndexedSet<Graphic> indexedSet;
+			if (GraphicRegistry.instance.m_RaycastableGraphics.TryGetValue(c, out indexedSet))
+			{
+				indexedSet.Remove(graphic);
+				if (indexedSet.Count == 0)
+				{
+					GraphicRegistry.instance.m_RaycastableGraphics.Remove(c);
+				}
 			}
 		}
 
@@ -70,9 +108,21 @@ namespace UnityEngine.UI
 			return GraphicRegistry.s_EmptyList;
 		}
 
+		public static IList<Graphic> GetRaycastableGraphicsForCanvas(Canvas canvas)
+		{
+			IndexedSet<Graphic> indexedSet;
+			if (GraphicRegistry.instance.m_RaycastableGraphics.TryGetValue(canvas, out indexedSet))
+			{
+				return indexedSet;
+			}
+			return GraphicRegistry.s_EmptyList;
+		}
+
 		private static GraphicRegistry s_Instance;
 
 		private readonly Dictionary<Canvas, IndexedSet<Graphic>> m_Graphics = new Dictionary<Canvas, IndexedSet<Graphic>>();
+
+		private readonly Dictionary<Canvas, IndexedSet<Graphic>> m_RaycastableGraphics = new Dictionary<Canvas, IndexedSet<Graphic>>();
 
 		private static readonly List<Graphic> s_EmptyList = new List<Graphic>();
 	}

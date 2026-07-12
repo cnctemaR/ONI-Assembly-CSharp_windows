@@ -18,25 +18,19 @@ public class PlaceTool : DragTool
 	{
 		this.active = true;
 		base.OnActivateTool();
-		this.visualizer = GameUtil.KInstantiate(Assets.GetPrefab(this.previewTag), Grid.SceneLayer.Front, null, LayerMask.NameToLayer("Place"));
-		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
-		if (component != null)
-		{
-			component.visibilityType = KAnimControllerBase.VisibilityType.Always;
-			component.isMovable = true;
-		}
+		this.visualizer = new GameObject("PlaceToolVisualizer");
+		this.visualizer.SetActive(false);
+		this.visualizer.SetLayerRecursively(LayerMask.NameToLayer("Place"));
+		KBatchedAnimController kbatchedAnimController = this.visualizer.AddComponent<KBatchedAnimController>();
+		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
+		kbatchedAnimController.isMovable = true;
+		kbatchedAnimController.SetLayer(LayerMask.NameToLayer("Place"));
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(this.source.kAnimName) };
+		kbatchedAnimController.initialAnim = this.source.animName;
 		this.visualizer.SetActive(true);
 		this.ShowToolTip();
-		base.GetComponent<BuildToolHoverTextCard>().currentDef = null;
+		base.GetComponent<PlaceToolHoverTextCard>().currentPlaceable = this.source;
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
-		if (component == null)
-		{
-			this.visualizer.SetLayerRecursively(LayerMask.NameToLayer("Place"));
-		}
-		else
-		{
-			component.SetLayer(LayerMask.NameToLayer("Place"));
-		}
 		GridCompositor.Instance.ToggleMajor(true);
 	}
 
@@ -48,22 +42,16 @@ public class PlaceTool : DragTool
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 		global::UnityEngine.Object.Destroy(this.visualizer);
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(this.GetDeactivateSound(), false));
+		this.source = null;
+		this.onPlacedCallback = null;
 		base.OnDeactivateTool(new_tool);
 	}
 
-	public void Activate(Placeable source, Tag previewTag)
+	public void Activate(Placeable source, Action<Placeable, int> onPlacedCallback)
 	{
 		this.source = source;
-		this.previewTag = previewTag;
+		this.onPlacedCallback = onPlacedCallback;
 		PlayerController.Instance.ActivateTool(this);
-	}
-
-	public void Deactivate()
-	{
-		SelectTool.Instance.Activate();
-		this.source = null;
-		this.previewTag = Tag.Invalid;
-		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
@@ -73,21 +61,15 @@ public class PlaceTool : DragTool
 			return;
 		}
 		bool flag = false;
-		if (this.visualizer.GetComponent<EntityPreview>().Valid)
+		string text;
+		if (this.source.IsValidPlaceLocation(cell, out text))
 		{
-			if (DebugHandler.InstantBuildMode)
-			{
-				this.source.Place(cell);
-			}
-			else
-			{
-				this.source.QueuePlacement(cell);
-			}
+			this.onPlacedCallback(this.source, cell);
 			flag = true;
 		}
 		if (flag)
 		{
-			this.Deactivate();
+			base.DeactivateTool(null);
 		}
 	}
 
@@ -104,6 +86,23 @@ public class PlaceTool : DragTool
 	private void HideToolTip()
 	{
 		ToolTipScreen.Instance.ClearToolTip(this.tooltip);
+	}
+
+	public override void OnMouseMove(Vector3 cursorPos)
+	{
+		cursorPos = base.ClampPositionToWorld(cursorPos, ClusterManager.Instance.activeWorld);
+		int num = Grid.PosToCell(cursorPos);
+		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
+		string text;
+		if (this.source.IsValidPlaceLocation(num, out text))
+		{
+			component.TintColour = Color.white;
+		}
+		else
+		{
+			component.TintColour = Color.red;
+		}
+		base.OnMouseMove(cursorPos);
 	}
 
 	public void Update()
@@ -126,7 +125,7 @@ public class PlaceTool : DragTool
 	[SerializeField]
 	private TextStyleSetting tooltipStyle;
 
-	private Tag previewTag;
+	private Action<Placeable, int> onPlacedCallback;
 
 	private Placeable source;
 

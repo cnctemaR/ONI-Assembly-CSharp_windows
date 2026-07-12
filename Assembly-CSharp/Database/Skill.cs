@@ -6,16 +6,25 @@ namespace Database
 {
 	public class Skill : Resource
 	{
-		public Skill(string id, string name, string description, int tier, string hat, string badge, string skillGroup)
+		public Skill(string id, string name, string description, string dlcId, int tier, string hat, string badge, string skillGroup, List<SkillPerk> perks = null, List<string> priorSkills = null)
 			: base(id, name)
 		{
 			this.description = description;
+			this.dlcId = dlcId;
 			this.tier = tier;
 			this.hat = hat;
 			this.badge = badge;
 			this.skillGroup = skillGroup;
-			this.perks = new List<SkillPerk>();
-			this.priorSkills = new List<string>();
+			this.perks = perks;
+			if (this.perks == null)
+			{
+				this.perks = new List<SkillPerk>();
+			}
+			this.priorSkills = priorSkills;
+			if (this.priorSkills == null)
+			{
+				this.priorSkills = new List<string>();
+			}
 		}
 
 		public int GetMoraleExpectation()
@@ -45,6 +54,8 @@ namespace Database
 
 		public string description;
 
+		public string dlcId;
+
 		public string skillGroup;
 
 		public string hat;
@@ -52,6 +63,8 @@ namespace Database
 		public string badge;
 
 		public int tier;
+
+		public bool deprecated;
 
 		public List<SkillPerk> perks;
 

@@ -43,7 +43,7 @@ public class OffsetTableTracker : OffsetTracker
 		this.offsets = null;
 	}
 
-	private static bool IsValidRow(int current_cell, CellOffset[] row)
+	private static bool IsValidRow(int current_cell, CellOffset[] row, int rowIdx, int[] debugIdxs)
 	{
 		for (int i = 1; i < row.Length; i++)
 		{
@@ -65,15 +65,16 @@ public class OffsetTableTracker : OffsetTracker
 		HashSetPool<CellOffset, OffsetTableTracker>.PooledHashSet pooledHashSet = HashSetPool<CellOffset, OffsetTableTracker>.Allocate();
 		if (Grid.IsValidCell(cell))
 		{
-			foreach (CellOffset[] array in table)
+			for (int i = 0; i < table.Length; i++)
 			{
+				CellOffset[] array = table[i];
 				if (!pooledHashSet.Contains(array[0]))
 				{
 					int num = Grid.OffsetCell(cell, array[0]);
 					for (int j = 0; j < OffsetTableTracker.navGrid.ValidNavTypes.Length; j++)
 					{
 						NavType navType = OffsetTableTracker.navGrid.ValidNavTypes[j];
-						if (navType != NavType.Tube && OffsetTableTracker.navGrid.NavTable.IsValid(num, navType) && OffsetTableTracker.IsValidRow(cell, array))
+						if (navType != NavType.Tube && OffsetTableTracker.navGrid.NavTable.IsValid(num, navType) && OffsetTableTracker.IsValidRow(cell, array, i, this.DEBUG_rowValidIdx))
 						{
 							pooledHashSet.Add(array[0]);
 							break;
@@ -121,4 +122,6 @@ public class OffsetTableTracker : OffsetTracker
 	private static NavGrid navGridImpl;
 
 	private KMonoBehaviour cmp;
+
+	private int[] DEBUG_rowValidIdx;
 }

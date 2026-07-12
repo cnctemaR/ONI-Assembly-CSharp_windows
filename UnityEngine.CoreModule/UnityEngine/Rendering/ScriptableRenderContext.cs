@@ -7,12 +7,12 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Rendering
 {
+	[NativeHeader("Modules/UI/Canvas.h")]
+	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderContext.bindings.h")]
 	[NativeType("Runtime/Graphics/ScriptableRenderLoop/ScriptableRenderContext.h")]
 	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableDrawRenderersUtility.h")]
 	[NativeHeader("Modules/UI/CanvasManager.h")]
 	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
-	[NativeHeader("Modules/UI/Canvas.h")]
-	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderContext.bindings.h")]
 	public struct ScriptableRenderContext : IEquatable<ScriptableRenderContext>
 	{
 		[FreeFunction("ScriptableRenderContext::BeginRenderPass")]
@@ -21,7 +21,7 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction("ScriptableRenderContext::BeginSubPass")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void BeginSubPass_Internal(IntPtr self, IntPtr colors, int colorCount, IntPtr inputs, int inputCount, bool isDepthReadOnly);
+		private static extern void BeginSubPass_Internal(IntPtr self, IntPtr colors, int colorCount, IntPtr inputs, int inputCount, bool isDepthReadOnly, bool isStencilReadOnly);
 
 		[FreeFunction("ScriptableRenderContext::EndSubPass")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -56,9 +56,9 @@ namespace UnityEngine.Rendering
 			return ScriptableRenderContext.GetCamera_Internal_Injected(ref this, index);
 		}
 
-		private void DrawRenderers_Internal(IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, IntPtr renderTypes, IntPtr stateBlocks, int stateCount)
+		private void DrawRenderers_Internal(IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ShaderTagId tagName, bool isPassTagName, IntPtr tagValues, IntPtr stateBlocks, int stateCount)
 		{
-			ScriptableRenderContext.DrawRenderers_Internal_Injected(ref this, cullResults, ref drawingSettings, ref filteringSettings, renderTypes, stateBlocks, stateCount);
+			ScriptableRenderContext.DrawRenderers_Internal_Injected(ref this, cullResults, ref drawingSettings, ref filteringSettings, ref tagName, isPassTagName, tagValues, stateBlocks, stateCount);
 		}
 
 		private void DrawShadows_Internal(IntPtr shadowDrawingSettings)
@@ -66,37 +66,43 @@ namespace UnityEngine.Rendering
 			ScriptableRenderContext.DrawShadows_Internal_Injected(ref this, shadowDrawingSettings);
 		}
 
+		[FreeFunction("PlayerEmitCanvasGeometryForCamera")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void EmitGeometryForCamera(Camera camera);
+
+		[NativeThrows]
 		private void ExecuteCommandBuffer_Internal(CommandBuffer commandBuffer)
 		{
 			ScriptableRenderContext.ExecuteCommandBuffer_Internal_Injected(ref this, commandBuffer);
 		}
 
+		[NativeThrows]
 		private void ExecuteCommandBufferAsync_Internal(CommandBuffer commandBuffer, ComputeQueueType queueType)
 		{
 			ScriptableRenderContext.ExecuteCommandBufferAsync_Internal_Injected(ref this, commandBuffer, queueType);
 		}
 
-		private void SetupCameraProperties_Internal(Camera camera, bool stereoSetup, int eye)
+		private void SetupCameraProperties_Internal([NotNull("NullExceptionObject")] Camera camera, bool stereoSetup, int eye)
 		{
 			ScriptableRenderContext.SetupCameraProperties_Internal_Injected(ref this, camera, stereoSetup, eye);
 		}
 
-		private void StereoEndRender_Internal(Camera camera, int eye, bool isFinalPass)
+		private void StereoEndRender_Internal([NotNull("NullExceptionObject")] Camera camera, int eye, bool isFinalPass)
 		{
 			ScriptableRenderContext.StereoEndRender_Internal_Injected(ref this, camera, eye, isFinalPass);
 		}
 
-		private void StartMultiEye_Internal(Camera camera, int eye)
+		private void StartMultiEye_Internal([NotNull("NullExceptionObject")] Camera camera, int eye)
 		{
 			ScriptableRenderContext.StartMultiEye_Internal_Injected(ref this, camera, eye);
 		}
 
-		private void StopMultiEye_Internal(Camera camera)
+		private void StopMultiEye_Internal([NotNull("NullExceptionObject")] Camera camera)
 		{
 			ScriptableRenderContext.StopMultiEye_Internal_Injected(ref this, camera);
 		}
 
-		private void DrawSkybox_Internal(Camera camera)
+		private void DrawSkybox_Internal([NotNull("NullExceptionObject")] Camera camera)
 		{
 			ScriptableRenderContext.DrawSkybox_Internal_Injected(ref this, camera);
 		}
@@ -106,9 +112,19 @@ namespace UnityEngine.Rendering
 			ScriptableRenderContext.InvokeOnRenderObjectCallback_Internal_Injected(ref this);
 		}
 
-		private void DrawGizmos_Internal(Camera camera, GizmoSubset gizmoSubset)
+		private void DrawGizmos_Internal([NotNull("NullExceptionObject")] Camera camera, GizmoSubset gizmoSubset)
 		{
 			ScriptableRenderContext.DrawGizmos_Internal_Injected(ref this, camera, gizmoSubset);
+		}
+
+		private void DrawWireOverlay_Impl([NotNull("NullExceptionObject")] Camera camera)
+		{
+			ScriptableRenderContext.DrawWireOverlay_Impl_Injected(ref this, camera);
+		}
+
+		private void DrawUIOverlay_Internal([NotNull("NullExceptionObject")] Camera camera)
+		{
+			ScriptableRenderContext.DrawUIOverlay_Internal_Injected(ref this, camera);
 		}
 
 		internal IntPtr Internal_GetPtr()
@@ -132,25 +148,47 @@ namespace UnityEngine.Rendering
 			return new ScopedRenderPass(this);
 		}
 
-		public void BeginSubPass(NativeArray<int> colors, NativeArray<int> inputs, bool isDepthReadOnly = false)
+		public void BeginSubPass(NativeArray<int> colors, NativeArray<int> inputs, bool isDepthReadOnly, bool isStencilReadOnly)
 		{
-			ScriptableRenderContext.BeginSubPass_Internal(this.m_Ptr, (IntPtr)colors.GetUnsafeReadOnlyPtr<int>(), colors.Length, (IntPtr)inputs.GetUnsafeReadOnlyPtr<int>(), inputs.Length, isDepthReadOnly);
+			ScriptableRenderContext.BeginSubPass_Internal(this.m_Ptr, (IntPtr)colors.GetUnsafeReadOnlyPtr<int>(), colors.Length, (IntPtr)inputs.GetUnsafeReadOnlyPtr<int>(), inputs.Length, isDepthReadOnly, isStencilReadOnly);
 		}
 
-		public void BeginSubPass(NativeArray<int> colors, bool isDepthReadOnly = false)
+		public void BeginSubPass(NativeArray<int> colors, NativeArray<int> inputs, bool isDepthStencilReadOnly = false)
 		{
-			ScriptableRenderContext.BeginSubPass_Internal(this.m_Ptr, (IntPtr)colors.GetUnsafeReadOnlyPtr<int>(), colors.Length, IntPtr.Zero, 0, isDepthReadOnly);
+			ScriptableRenderContext.BeginSubPass_Internal(this.m_Ptr, (IntPtr)colors.GetUnsafeReadOnlyPtr<int>(), colors.Length, (IntPtr)inputs.GetUnsafeReadOnlyPtr<int>(), inputs.Length, isDepthStencilReadOnly, isDepthStencilReadOnly);
 		}
 
-		public ScopedSubPass BeginScopedSubPass(NativeArray<int> colors, NativeArray<int> inputs, bool isDepthReadOnly = false)
+		public void BeginSubPass(NativeArray<int> colors, bool isDepthReadOnly, bool isStencilReadOnly)
 		{
-			this.BeginSubPass(colors, inputs, isDepthReadOnly);
+			ScriptableRenderContext.BeginSubPass_Internal(this.m_Ptr, (IntPtr)colors.GetUnsafeReadOnlyPtr<int>(), colors.Length, IntPtr.Zero, 0, isDepthReadOnly, isStencilReadOnly);
+		}
+
+		public void BeginSubPass(NativeArray<int> colors, bool isDepthStencilReadOnly = false)
+		{
+			ScriptableRenderContext.BeginSubPass_Internal(this.m_Ptr, (IntPtr)colors.GetUnsafeReadOnlyPtr<int>(), colors.Length, IntPtr.Zero, 0, isDepthStencilReadOnly, isDepthStencilReadOnly);
+		}
+
+		public ScopedSubPass BeginScopedSubPass(NativeArray<int> colors, NativeArray<int> inputs, bool isDepthReadOnly, bool isStencilReadOnly)
+		{
+			this.BeginSubPass(colors, inputs, isDepthReadOnly, isStencilReadOnly);
 			return new ScopedSubPass(this);
 		}
 
-		public ScopedSubPass BeginScopedSubPass(NativeArray<int> colors, bool isDepthReadOnly = false)
+		public ScopedSubPass BeginScopedSubPass(NativeArray<int> colors, NativeArray<int> inputs, bool isDepthStencilReadOnly = false)
 		{
-			this.BeginSubPass(colors, isDepthReadOnly);
+			this.BeginSubPass(colors, inputs, isDepthStencilReadOnly);
+			return new ScopedSubPass(this);
+		}
+
+		public ScopedSubPass BeginScopedSubPass(NativeArray<int> colors, bool isDepthReadOnly, bool isStencilReadOnly)
+		{
+			this.BeginSubPass(colors, isDepthReadOnly, isStencilReadOnly);
+			return new ScopedSubPass(this);
+		}
+
+		public ScopedSubPass BeginScopedSubPass(NativeArray<int> colors, bool isDepthStencilReadOnly = false)
+		{
+			this.BeginSubPass(colors, isDepthStencilReadOnly);
 			return new ScopedSubPass(this);
 		}
 
@@ -181,7 +219,7 @@ namespace UnityEngine.Rendering
 
 		public void DrawRenderers(CullingResults cullingResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings)
 		{
-			this.DrawRenderers_Internal(cullingResults.ptr, ref drawingSettings, ref filteringSettings, IntPtr.Zero, IntPtr.Zero, 0);
+			this.DrawRenderers_Internal(cullingResults.ptr, ref drawingSettings, ref filteringSettings, ShaderTagId.none, false, IntPtr.Zero, IntPtr.Zero, 0);
 		}
 
 		public unsafe void DrawRenderers(CullingResults cullingResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ref RenderStateBlock stateBlock)
@@ -190,7 +228,7 @@ namespace UnityEngine.Rendering
 			fixed (RenderStateBlock* ptr = &stateBlock)
 			{
 				RenderStateBlock* ptr2 = ptr;
-				this.DrawRenderers_Internal(cullingResults.ptr, ref drawingSettings, ref filteringSettings, (IntPtr)((void*)(&shaderTagId)), (IntPtr)((void*)ptr2), 1);
+				this.DrawRenderers_Internal(cullingResults.ptr, ref drawingSettings, ref filteringSettings, ShaderTagId.none, false, (IntPtr)((void*)(&shaderTagId)), (IntPtr)((void*)ptr2), 1);
 			}
 		}
 
@@ -201,7 +239,17 @@ namespace UnityEngine.Rendering
 			{
 				throw new ArgumentException(string.Format("Arrays {0} and {1} should have same length, but {2} had length {3} while {4} had length {5}.", new object[] { "renderTypes", "stateBlocks", "renderTypes", renderTypes.Length, "stateBlocks", stateBlocks.Length }));
 			}
-			this.DrawRenderers_Internal(cullingResults.ptr, ref drawingSettings, ref filteringSettings, (IntPtr)renderTypes.GetUnsafeReadOnlyPtr<ShaderTagId>(), (IntPtr)stateBlocks.GetUnsafeReadOnlyPtr<RenderStateBlock>(), renderTypes.Length);
+			this.DrawRenderers_Internal(cullingResults.ptr, ref drawingSettings, ref filteringSettings, ScriptableRenderContext.kRenderTypeTag, false, (IntPtr)renderTypes.GetUnsafeReadOnlyPtr<ShaderTagId>(), (IntPtr)stateBlocks.GetUnsafeReadOnlyPtr<RenderStateBlock>(), renderTypes.Length);
+		}
+
+		public void DrawRenderers(CullingResults cullingResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ShaderTagId tagName, bool isPassTagName, NativeArray<ShaderTagId> tagValues, NativeArray<RenderStateBlock> stateBlocks)
+		{
+			bool flag = tagValues.Length != stateBlocks.Length;
+			if (flag)
+			{
+				throw new ArgumentException(string.Format("Arrays {0} and {1} should have same length, but {2} had length {3} while {4} had length {5}.", new object[] { "tagValues", "stateBlocks", "tagValues", tagValues.Length, "stateBlocks", stateBlocks.Length }));
+			}
+			this.DrawRenderers_Internal(cullingResults.ptr, ref drawingSettings, ref filteringSettings, tagName, isPassTagName, (IntPtr)tagValues.GetUnsafeReadOnlyPtr<ShaderTagId>(), (IntPtr)stateBlocks.GetUnsafeReadOnlyPtr<RenderStateBlock>(), tagValues.Length);
 		}
 
 		public unsafe void DrawShadows(ref ShadowDrawingSettings settings)
@@ -288,6 +336,16 @@ namespace UnityEngine.Rendering
 			this.DrawGizmos_Internal(camera, gizmoSubset);
 		}
 
+		public void DrawWireOverlay(Camera camera)
+		{
+			this.DrawWireOverlay_Impl(camera);
+		}
+
+		public void DrawUIOverlay(Camera camera)
+		{
+			this.DrawUIOverlay_Internal(camera);
+		}
+
 		public unsafe CullingResults Cull(ref ScriptableCullingParameters parameters)
 		{
 			CullingResults cullingResults = default(CullingResults);
@@ -339,7 +397,7 @@ namespace UnityEngine.Rendering
 		private static extern Camera GetCamera_Internal_Injected(ref ScriptableRenderContext _unity_self, int index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawRenderers_Internal_Injected(ref ScriptableRenderContext _unity_self, IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, IntPtr renderTypes, IntPtr stateBlocks, int stateCount);
+		private static extern void DrawRenderers_Internal_Injected(ref ScriptableRenderContext _unity_self, IntPtr cullResults, ref DrawingSettings drawingSettings, ref FilteringSettings filteringSettings, ref ShaderTagId tagName, bool isPassTagName, IntPtr tagValues, IntPtr stateBlocks, int stateCount);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DrawShadows_Internal_Injected(ref ScriptableRenderContext _unity_self, IntPtr shadowDrawingSettings);
@@ -370,6 +428,14 @@ namespace UnityEngine.Rendering
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DrawGizmos_Internal_Injected(ref ScriptableRenderContext _unity_self, Camera camera, GizmoSubset gizmoSubset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DrawWireOverlay_Impl_Injected(ref ScriptableRenderContext _unity_self, Camera camera);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DrawUIOverlay_Internal_Injected(ref ScriptableRenderContext _unity_self, Camera camera);
+
+		private static readonly ShaderTagId kRenderTypeTag = new ShaderTagId("RenderType");
 
 		private IntPtr m_Ptr;
 	}

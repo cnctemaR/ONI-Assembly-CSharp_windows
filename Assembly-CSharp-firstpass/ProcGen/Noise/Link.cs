@@ -8,6 +8,16 @@ namespace ProcGen.Noise
 
 		public string name { get; set; }
 
+		public Link()
+		{
+		}
+
+		public Link(Link.Type type, string name)
+		{
+			this.type = type;
+			this.name = name;
+		}
+
 		public enum Type
 		{
 			None,

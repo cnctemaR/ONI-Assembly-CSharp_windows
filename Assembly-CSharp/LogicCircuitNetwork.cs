@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class LogicCircuitNetwork : UtilityNetwork
 {
-	public override void AddItem(int cell, object item)
+	public override void AddItem(object item)
 	{
 		if (item is LogicWire)
 		{
@@ -35,7 +35,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 		}
 	}
 
-	public override void RemoveItem(int cell, object item)
+	public override void RemoveItem(object item)
 	{
 		if (item is LogicWire)
 		{
@@ -56,7 +56,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 		}
 	}
 
-	public override void ConnectItem(int cell, object item)
+	public override void ConnectItem(object item)
 	{
 		if (item is ILogicEventReceiver)
 		{
@@ -69,7 +69,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 		}
 	}
 
-	public override void DisconnectItem(int cell, object item)
+	public override void DisconnectItem(object item)
 	{
 		if (item is ILogicEventReceiver)
 		{
@@ -302,7 +302,7 @@ public class LogicCircuitNetwork : UtilityNetwork
 				if (this.overloadedNotification == null)
 				{
 					this.timeOverloadNotificationDisplayed = 0f;
-					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.LOGIC_CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, this.targetOverloadedWire.transform, true);
+					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.LOGIC_CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, null, null, true, 0f, null, null, this.targetOverloadedWire.transform, true);
 					Game.Instance.FindOrAdd<Notifier>().Add(this.overloadedNotification, "");
 					return;
 				}

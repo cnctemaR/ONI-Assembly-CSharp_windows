@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using Mono.Security.Interface;
 
 namespace Mono.Unity
@@ -132,6 +133,36 @@ namespace Mono.Unity
 				monoSslPolicyErrors |= MonoSslPolicyErrors.RemoteCertificateChainErrors;
 			}
 			return monoSslPolicyErrors;
+		}
+
+		public static X509ChainStatusFlags VerifyResultToChainStatus(UnityTls.unitytls_x509verify_result verifyResult)
+		{
+			if (verifyResult == UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_SUCCESS)
+			{
+				return X509ChainStatusFlags.NoError;
+			}
+			if (verifyResult == (UnityTls.unitytls_x509verify_result)4294967295U)
+			{
+				return X509ChainStatusFlags.UntrustedRoot;
+			}
+			X509ChainStatusFlags x509ChainStatusFlags = X509ChainStatusFlags.NoError;
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_EXPIRED))
+			{
+				x509ChainStatusFlags |= X509ChainStatusFlags.NotTimeValid;
+			}
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_REVOKED))
+			{
+				x509ChainStatusFlags |= X509ChainStatusFlags.Revoked;
+			}
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_CN_MISMATCH))
+			{
+				x509ChainStatusFlags |= X509ChainStatusFlags.UntrustedRoot;
+			}
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_NOT_TRUSTED))
+			{
+				x509ChainStatusFlags |= X509ChainStatusFlags.UntrustedRoot;
+			}
+			return x509ChainStatusFlags;
 		}
 	}
 }

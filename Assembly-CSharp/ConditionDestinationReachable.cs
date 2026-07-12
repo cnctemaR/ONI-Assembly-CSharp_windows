@@ -1,66 +1,119 @@
 ﻿using System;
 using STRINGS;
 
-public class ConditionDestinationReachable : RocketLaunchCondition
+public class ConditionDestinationReachable : ProcessCondition
 {
-	public ConditionDestinationReachable(CommandModule module)
+	public ConditionDestinationReachable(RocketModule module)
 	{
-		this.commandModule = module;
+		this.module = module;
+		this.craftRegisterType = module.GetComponent<ILaunchableRocket>().registerType;
 	}
 
-	public override RocketLaunchCondition GetParentCondition()
+	public override ProcessCondition.Status EvaluateCondition()
 	{
-		return null;
-	}
-
-	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
-	{
-		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
-		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
-		if (spacecraftDestination != null && this.CanReachDestination(spacecraftDestination) && spacecraftDestination.GetDestinationType().visitable)
+		ProcessCondition.Status status = ProcessCondition.Status.Failure;
+		LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
+		if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
 		{
-			return RocketLaunchCondition.LaunchStatus.Ready;
+			if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft)
+			{
+				if (!this.module.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<RocketClusterDestinationSelector>().IsAtDestination())
+				{
+					status = ProcessCondition.Status.Ready;
+				}
+			}
 		}
-		return RocketLaunchCondition.LaunchStatus.Failure;
+		else
+		{
+			int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.module.GetComponent<LaunchConditionManager>()).id;
+			SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
+			if (spacecraftDestination != null && this.CanReachSpacecraftDestination(spacecraftDestination) && spacecraftDestination.GetDestinationType().visitable)
+			{
+				status = ProcessCondition.Status.Ready;
+			}
+		}
+		return status;
 	}
 
-	public bool CanReachDestination(SpaceDestination destination)
+	public bool CanReachSpacecraftDestination(SpaceDestination destination)
 	{
-		float rocketMaxDistance = this.commandModule.rocketStats.GetRocketMaxDistance();
+		Debug.Assert(!DlcManager.FeatureClusterSpaceEnabled());
+		float rocketMaxDistance = this.module.GetComponent<CommandModule>().rocketStats.GetRocketMaxDistance();
 		return (float)destination.OneBasedDistance * 10000f <= rocketMaxDistance;
 	}
 
-	public SpaceDestination GetDestination()
+	public SpaceDestination GetSpacecraftDestination()
 	{
-		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
+		Debug.Assert(!DlcManager.FeatureClusterSpaceEnabled());
+		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.module.GetComponent<LaunchConditionManager>()).id;
 		return SpacecraftManager.instance.GetSpacecraftDestination(id);
 	}
 
-	public override string GetLaunchStatusMessage(bool ready)
+	public override string GetStatusMessage(ProcessCondition.Status status)
 	{
-		if (ready && this.GetDestination() != null)
+		string text = "";
+		LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
+		if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
 		{
-			return UI.STARMAP.DESTINATIONSELECTION.REACHABLE;
+			if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft)
+			{
+				text = UI.STARMAP.DESTINATIONSELECTION.REACHABLE;
+			}
 		}
-		if (this.GetDestination() != null)
+		else if (status == ProcessCondition.Status.Ready && this.GetSpacecraftDestination() != null)
 		{
-			return UI.STARMAP.DESTINATIONSELECTION.UNREACHABLE;
+			text = UI.STARMAP.DESTINATIONSELECTION.REACHABLE;
 		}
-		return UI.STARMAP.DESTINATIONSELECTION.NOTSELECTED;
+		else if (this.GetSpacecraftDestination() != null)
+		{
+			text = UI.STARMAP.DESTINATIONSELECTION.UNREACHABLE;
+		}
+		else
+		{
+			text = UI.STARMAP.DESTINATIONSELECTION.NOTSELECTED;
+		}
+		return text;
 	}
 
-	public override string GetLaunchStatusTooltip(bool ready)
+	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
-		if (ready && this.GetDestination() != null)
+		string text = "";
+		LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
+		if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
 		{
-			return UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.REACHABLE;
+			if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft)
+			{
+				if (status == ProcessCondition.Status.Ready)
+				{
+					text = UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.REACHABLE;
+				}
+				else
+				{
+					text = UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.NOTSELECTED;
+				}
+			}
 		}
-		if (this.GetDestination() != null)
+		else if (status == ProcessCondition.Status.Ready && this.GetSpacecraftDestination() != null)
 		{
-			return UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.UNREACHABLE;
+			text = UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.REACHABLE;
 		}
-		return UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.NOTSELECTED;
+		else if (this.GetSpacecraftDestination() != null)
+		{
+			text = UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.UNREACHABLE;
+		}
+		else
+		{
+			text = UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.NOTSELECTED;
+		}
+		return text;
 	}
 
-	private CommandModule commandModule;
+	public override bool ShowInUI()
+	{
+		return true;
+	}
+
+	private LaunchableRocketRegisterType craftRegisterType;
+
+	private RocketModule module;
 }

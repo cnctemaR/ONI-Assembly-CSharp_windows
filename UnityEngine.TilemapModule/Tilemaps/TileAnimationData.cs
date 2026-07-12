@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
-	[NativeType(Header = "Modules/Tilemap/TilemapScripting.h")]
 	[RequiredByNativeCode]
+	[NativeType(Header = "Modules/Tilemap/TilemapScripting.h")]
 	public struct TileAnimationData
 	{
 		public Sprite[] animatedSprites

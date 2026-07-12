@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Graphics/Director/TextureMixerPlayable.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("TextureMixerPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Director/TextureMixerPlayable.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Graphics/Director/TextureMixerPlayable.h")]
 	public struct TextureMixerPlayable : IPlayable, IEquatable<TextureMixerPlayable>
 	{
 		public static TextureMixerPlayable Create(PlayableGraph graph)

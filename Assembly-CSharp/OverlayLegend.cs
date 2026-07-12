@@ -99,7 +99,7 @@ public class OverlayLegend : KScreen
 			this.ClearLegend();
 			return;
 		}
-		base.Show(true);
+		this.Show(true);
 		this.title.text = overlayInfo.name;
 		if (overlayInfo.isProgrammaticallyPopulated)
 		{
@@ -160,7 +160,7 @@ public class OverlayLegend : KScreen
 		Vector2 sizeDelta = this.diagramsParent.GetComponent<RectTransform>().sizeDelta;
 		sizeDelta.y = 0f;
 		this.diagramsParent.GetComponent<RectTransform>().sizeDelta = sizeDelta;
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public OverlayLegend.OverlayInfo GetOverlayInfo(OverlayModes.Mode mode)
@@ -301,7 +301,7 @@ public class OverlayLegend : KScreen
 	{
 		this.currentMode.OnFiltersChanged();
 		this.PopulateGeneratedLegend(this.GetOverlayInfo(this.currentMode), true);
-		Game.Instance.ForceOverlayUpdate();
+		Game.Instance.ForceOverlayUpdate(false);
 	}
 
 	private void DisableOverlay()

@@ -89,10 +89,10 @@ namespace Microsoft.Win32
 			}
 		}
 
-		[MonoTODO("Currently does nothing on Mono")]
-		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Browsable(false)]
 		[Obsolete("")]
+		[MonoTODO("Currently does nothing on Mono")]
 		public static event EventHandler LowMemory
 		{
 			add

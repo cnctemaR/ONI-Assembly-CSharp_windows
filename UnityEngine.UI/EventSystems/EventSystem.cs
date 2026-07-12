@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.EventSystems
 {
 	[AddComponentMenu("Event/Event System")]
+	[DisallowMultipleComponent]
 	public class EventSystem : UIBehaviour
 	{
 		public static EventSystem current
@@ -21,10 +22,15 @@ namespace UnityEngine.EventSystems
 			set
 			{
 				int num = EventSystem.m_EventSystems.IndexOf(value);
-				if (num >= 0)
+				if (num > 0)
 				{
 					EventSystem.m_EventSystems.RemoveAt(num);
 					EventSystem.m_EventSystems.Insert(0, value);
+					return;
+				}
+				if (num < 0)
+				{
+					Debug.LogError("Failed setting EventSystem.current to unknown EventSystem " + ((value != null) ? value.ToString() : null));
 				}
 			}
 		}
@@ -126,7 +132,7 @@ namespace UnityEngine.EventSystems
 		{
 			if (this.m_SelectionGuard)
 			{
-				Debug.LogError("Attempting to select " + selected + "while already selecting an object.");
+				Debug.LogError("Attempting to select " + ((selected != null) ? selected.ToString() : null) + "while already selecting an object.");
 				return;
 			}
 			this.m_SelectionGuard = true;
@@ -213,7 +219,8 @@ namespace UnityEngine.EventSystems
 		{
 			raycastResults.Clear();
 			List<BaseRaycaster> raycasters = RaycasterManager.GetRaycasters();
-			for (int i = 0; i < raycasters.Count; i++)
+			int count = raycasters.Count;
+			for (int i = 0; i < count; i++)
 			{
 				BaseRaycaster baseRaycaster = raycasters[i];
 				if (!(baseRaycaster == null) && baseRaycaster.IsActive())
@@ -231,7 +238,7 @@ namespace UnityEngine.EventSystems
 
 		public bool IsPointerOverGameObject(int pointerId)
 		{
-			return !(this.m_CurrentInputModule == null) && this.m_CurrentInputModule.IsPointerOverGameObject(pointerId);
+			return this.m_CurrentInputModule != null && this.m_CurrentInputModule.IsPointerOverGameObject(pointerId);
 		}
 
 		protected override void OnEnable()
@@ -253,7 +260,8 @@ namespace UnityEngine.EventSystems
 
 		private void TickModules()
 		{
-			for (int i = 0; i < this.m_SystemInputModules.Count; i++)
+			int count = this.m_SystemInputModules.Count;
+			for (int i = 0; i < count; i++)
 			{
 				if (this.m_SystemInputModules[i] != null)
 				{
@@ -265,6 +273,10 @@ namespace UnityEngine.EventSystems
 		protected virtual void OnApplicationFocus(bool hasFocus)
 		{
 			this.m_HasFocus = hasFocus;
+			if (!this.m_HasFocus)
+			{
+				this.TickModules();
+			}
 		}
 
 		protected virtual void Update()
@@ -275,8 +287,9 @@ namespace UnityEngine.EventSystems
 			}
 			this.TickModules();
 			bool flag = false;
+			int count = this.m_SystemInputModules.Count;
 			int i = 0;
-			while (i < this.m_SystemInputModules.Count)
+			while (i < count)
 			{
 				BaseInputModule baseInputModule = this.m_SystemInputModules[i];
 				if (baseInputModule.IsModuleSupported() && baseInputModule.ShouldActivateModule())
@@ -296,7 +309,7 @@ namespace UnityEngine.EventSystems
 			}
 			if (this.m_CurrentInputModule == null)
 			{
-				for (int j = 0; j < this.m_SystemInputModules.Count; j++)
+				for (int j = 0; j < count; j++)
 				{
 					BaseInputModule baseInputModule2 = this.m_SystemInputModules[j];
 					if (baseInputModule2.IsModuleSupported())
@@ -333,7 +346,9 @@ namespace UnityEngine.EventSystems
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("<b>Selected:</b>" + this.currentSelectedGameObject);
+			string text = "<b>Selected:</b>";
+			GameObject currentSelectedGameObject = this.currentSelectedGameObject;
+			stringBuilder.AppendLine(text + ((currentSelectedGameObject != null) ? currentSelectedGameObject.ToString() : null));
 			stringBuilder.AppendLine();
 			stringBuilder.AppendLine();
 			stringBuilder.AppendLine((this.m_CurrentInputModule != null) ? this.m_CurrentInputModule.ToString() : "No module");

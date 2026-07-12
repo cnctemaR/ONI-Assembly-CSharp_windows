@@ -212,6 +212,12 @@ public class LogicPorts : KMonoBehaviour, IGameObjectEffectDescriptor, IRenderEv
 		return false;
 	}
 
+	public void OnMove()
+	{
+		this.DestroyPhysicalPorts();
+		this.CreatePhysicalPorts();
+	}
+
 	private void OnLogicNetworkConnectionChanged(int cell, bool connected)
 	{
 		this.UpdateMissingWireIcon();

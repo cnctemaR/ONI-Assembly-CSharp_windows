@@ -89,8 +89,8 @@ namespace UnityEngine.Experimental.Rendering
 		R10G10B10_XRUNormPack32,
 		A10R10G10B10_XRSRGBPack32,
 		A10R10G10B10_XRUNormPack32,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_SRGB has been deprecated. Use GraphicsFormat.RGBA_DXT1_SRGB instead (UnityUpgradable) -> RGBA_DXT1_SRGB", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		RGB_DXT1_SRGB = 96,
 		RGBA_DXT1_SRGB = 96,
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -139,6 +139,12 @@ namespace UnityEngine.Experimental.Rendering
 		RGBA_ASTC10X10_SRGB,
 		RGBA_ASTC10X10_UNorm,
 		RGBA_ASTC12X12_SRGB,
-		RGBA_ASTC12X12_UNorm
+		RGBA_ASTC12X12_UNorm,
+		RGBA_ASTC4X4_UFloat = 145,
+		RGBA_ASTC5X5_UFloat,
+		RGBA_ASTC6X6_UFloat,
+		RGBA_ASTC8X8_UFloat,
+		RGBA_ASTC10X10_UFloat,
+		RGBA_ASTC12X12_UFloat
 	}
 }

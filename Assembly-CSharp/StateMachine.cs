@@ -34,7 +34,7 @@ public abstract class StateMachine
 
 	public int version { get; protected set; }
 
-	public bool serializable { get; protected set; }
+	public StateMachine.SerializeType serializable { get; protected set; }
 
 	public virtual void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -202,6 +202,7 @@ public abstract class StateMachine
 
 		public void GoTo(string state_name)
 		{
+			DebugUtil.DevAssert(!KMonoBehaviour.isLoadingScene, "Using Goto while scene was loaded", null);
 			StateMachine.BaseState state = this.stateMachine.GetState(state_name);
 			this.GoTo(state);
 		}
@@ -284,9 +285,11 @@ public abstract class StateMachine
 		{
 			if (!this.IsRunning())
 			{
+				StateMachineController component = this.GetComponent<StateMachineController>();
+				MyAttributes.OnStart(this, component);
 				StateMachine.BaseState defaultState = this.stateMachine.GetDefaultState();
 				DebugUtil.Assert(defaultState != null);
-				if (!this.GetComponent<StateMachineController>().Restore(this))
+				if (!component.Restore(this))
 				{
 					this.GoTo(defaultState);
 				}
@@ -376,6 +379,8 @@ public abstract class StateMachine
 				return this.gameObject.transform;
 			}
 		}
+
+		public string serializationSuffix;
 
 		protected LoggerFSSSS log;
 
@@ -574,7 +579,7 @@ public abstract class StateMachine
 
 			public abstract void Serialize(BinaryWriter writer);
 
-			public abstract void Deserialize(IReader reader);
+			public abstract void Deserialize(IReader reader, StateMachine.Instance smi);
 
 			public virtual void Cleanup()
 			{
@@ -584,5 +589,13 @@ public abstract class StateMachine
 
 			public StateMachine.Parameter parameter;
 		}
+	}
+
+	public enum SerializeType
+	{
+		Never,
+		ParamsOnly,
+		CurrentStateOnly_DEPRECATED,
+		Both_DEPRECATED
 	}
 }

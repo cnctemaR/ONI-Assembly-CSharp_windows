@@ -41,7 +41,7 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.alive.seed_grow;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.root.Enter(delegate(JungleGasPlant.StatesInstance smi)
 			{
 				if (smi.master.rm.Replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -11,19 +12,37 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.amount = this.capacity;
 		base.Subscribe<SuitTank>(-1617557748, SuitTank.OnEquippedDelegate);
 		base.Subscribe<SuitTank>(-170173755, SuitTank.OnUnequippedDelegate);
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (this.amount != 0f)
+		{
+			this.storage.AddGasChunk(SimHashes.Oxygen, this.amount, base.GetComponent<PrimaryElement>().Temperature, byte.MaxValue, 0, false, true);
+			this.amount = 0f;
+		}
+	}
+
+	public float GetTankAmount()
+	{
+		if (this.storage == null)
+		{
+			this.storage = base.GetComponent<Storage>();
+		}
+		return this.storage.GetMassAvailable(this.elementTag);
+	}
+
 	public float PercentFull()
 	{
-		return this.amount / this.capacity;
+		return this.GetTankAmount() / this.capacity;
 	}
 
 	public bool IsEmpty()
 	{
-		return this.amount <= 0f;
+		return this.GetTankAmount() <= 0f;
 	}
 
 	public bool IsFull()
@@ -39,9 +58,9 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		if (this.element.ToLower() == "oxygen")
+		if (this.elementTag == GameTags.Breathable)
 		{
-			string text = (this.underwaterSupport ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGEN_TANK_UNDERWATER, GameUtil.GetFormattedMass(this.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")) : string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGEN_TANK, GameUtil.GetFormattedMass(this.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
+			string text = (this.underwaterSupport ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGEN_TANK_UNDERWATER, GameUtil.GetFormattedMass(this.GetTankAmount(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")) : string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGEN_TANK, GameUtil.GetFormattedMass(this.GetTankAmount(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
 			list.Add(new Descriptor(text, text, Descriptor.DescriptorType.Effect, false));
 		}
 		return list;
@@ -55,6 +74,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		if (component != null)
 		{
 			component.SetGasProvider(this);
+			component.AddTag(GameTags.HasSuitTank);
 		}
 	}
 
@@ -68,6 +88,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 			if (component != null)
 			{
 				component.SetGasProvider(new GasBreatherFromWorldProvider());
+				component.RemoveTag(GameTags.HasSuitTank);
 			}
 		}
 	}
@@ -90,10 +111,13 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		{
 			return false;
 		}
-		gas_consumed = Mathf.Min(gas_consumed, this.amount);
-		this.amount -= gas_consumed;
-		Game.Instance.accumulators.Accumulate(oxygen_breather.O2Accumulator, gas_consumed);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -gas_consumed, oxygen_breather.GetProperName(), null);
+		float num;
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num2;
+		this.storage.ConsumeAndGetDisease(this.elementTag, gas_consumed, out num, out diseaseInfo, out num2);
+		Game.Instance.accumulators.Accumulate(oxygen_breather.O2Accumulator, num);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -num, oxygen_breather.GetProperName(), null);
+		base.Trigger(608245985, base.gameObject);
 		return true;
 	}
 
@@ -110,13 +134,18 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	[ContextMenu("SetToRefillAmount")]
 	public void SetToRefillAmount()
 	{
-		this.amount = 0.25f * this.capacity;
+		float tankAmount = this.GetTankAmount();
+		float num = 0.25f * this.capacity;
+		if (tankAmount > num)
+		{
+			this.storage.ConsumeIgnoringDisease(this.elementTag, tankAmount - num);
+		}
 	}
 
 	[ContextMenu("Empty")]
 	public void Empty()
 	{
-		this.amount = 0f;
+		this.storage.ConsumeIgnoringDisease(this.elementTag, this.GetTankAmount());
 	}
 
 	[Serialize]
@@ -124,6 +153,11 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 
 	[Serialize]
 	public float amount;
+
+	public Tag elementTag;
+
+	[MyCmpReq]
+	public Storage storage;
 
 	public float capacity;
 

@@ -44,8 +44,30 @@ public class GantryConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<Gantry>();
+		go.AddOrGetDef<MakeBaseSolid.Def>().solidOffsets = GantryConfig.SOLID_OFFSETS;
+		FakeFloorAdder fakeFloorAdder = go.AddOrGet<FakeFloorAdder>();
+		fakeFloorAdder.floorOffsets = new CellOffset[]
+		{
+			new CellOffset(0, 1),
+			new CellOffset(1, 1),
+			new CellOffset(2, 1),
+			new CellOffset(3, 1)
+		};
+		fakeFloorAdder.initiallyActive = false;
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicOperationalController>());
 	}
 
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		base.DoPostConfigurePreview(def, go);
+		go.AddOrGetDef<MakeBaseSolid.Def>().solidOffsets = GantryConfig.SOLID_OFFSETS;
+	}
+
 	public const string ID = "Gantry";
+
+	private static readonly CellOffset[] SOLID_OFFSETS = new CellOffset[]
+	{
+		new CellOffset(-2, 1),
+		new CellOffset(-1, 1)
+	};
 }

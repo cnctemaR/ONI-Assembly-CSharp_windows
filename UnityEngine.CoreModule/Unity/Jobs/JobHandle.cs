@@ -139,6 +139,7 @@ namespace Unity.Jobs
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CheckFenceIsDependencyOrDidSyncFence_Injected(ref JobHandle jobHandle, ref JobHandle dependsOn);
 
+		[NativeDisableUnsafePtrRestriction]
 		internal IntPtr jobGroup;
 
 		internal int version;

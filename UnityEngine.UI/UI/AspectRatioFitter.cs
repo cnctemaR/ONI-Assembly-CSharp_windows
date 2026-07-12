@@ -58,7 +58,17 @@ namespace UnityEngine.UI
 		protected override void OnEnable()
 		{
 			base.OnEnable();
+			this.m_DoesParentExist = this.rectTransform.parent;
 			this.SetDirty();
+		}
+
+		protected override void Start()
+		{
+			base.Start();
+			if (!this.IsComponentValidOnObject() || !this.IsAspectModeValid())
+			{
+				base.enabled = false;
+			}
 		}
 
 		protected override void OnDisable()
@@ -66,6 +76,13 @@ namespace UnityEngine.UI
 			this.m_Tracker.Clear();
 			LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
 			base.OnDisable();
+		}
+
+		protected override void OnTransformParentChanged()
+		{
+			base.OnTransformParentChanged();
+			this.m_DoesParentExist = this.rectTransform.parent;
+			this.SetDirty();
 		}
 
 		protected virtual void Update()
@@ -84,7 +101,7 @@ namespace UnityEngine.UI
 
 		private void UpdateRect()
 		{
-			if (!this.IsActive())
+			if (!this.IsActive() || !this.IsComponentValidOnObject())
 			{
 				return;
 			}
@@ -101,24 +118,25 @@ namespace UnityEngine.UI
 				return;
 			case AspectRatioFitter.AspectMode.FitInParent:
 			case AspectRatioFitter.AspectMode.EnvelopeParent:
-			{
-				this.m_Tracker.Add(this, this.rectTransform, DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.AnchoredPositionY | DrivenTransformProperties.AnchorMinX | DrivenTransformProperties.AnchorMinY | DrivenTransformProperties.AnchorMaxX | DrivenTransformProperties.AnchorMaxY | DrivenTransformProperties.SizeDeltaX | DrivenTransformProperties.SizeDeltaY);
-				this.rectTransform.anchorMin = Vector2.zero;
-				this.rectTransform.anchorMax = Vector2.one;
-				this.rectTransform.anchoredPosition = Vector2.zero;
-				Vector2 zero = Vector2.zero;
-				Vector2 parentSize = this.GetParentSize();
-				if ((parentSize.y * this.aspectRatio < parentSize.x) ^ (this.m_AspectMode == AspectRatioFitter.AspectMode.FitInParent))
+				if (this.DoesParentExists())
 				{
-					zero.y = this.GetSizeDeltaToProduceSize(parentSize.x / this.aspectRatio, 1);
+					this.m_Tracker.Add(this, this.rectTransform, DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.AnchoredPositionY | DrivenTransformProperties.AnchorMinX | DrivenTransformProperties.AnchorMinY | DrivenTransformProperties.AnchorMaxX | DrivenTransformProperties.AnchorMaxY | DrivenTransformProperties.SizeDeltaX | DrivenTransformProperties.SizeDeltaY);
+					this.rectTransform.anchorMin = Vector2.zero;
+					this.rectTransform.anchorMax = Vector2.one;
+					this.rectTransform.anchoredPosition = Vector2.zero;
+					Vector2 zero = Vector2.zero;
+					Vector2 parentSize = this.GetParentSize();
+					if ((parentSize.y * this.aspectRatio < parentSize.x) ^ (this.m_AspectMode == AspectRatioFitter.AspectMode.FitInParent))
+					{
+						zero.y = this.GetSizeDeltaToProduceSize(parentSize.x / this.aspectRatio, 1);
+					}
+					else
+					{
+						zero.x = this.GetSizeDeltaToProduceSize(parentSize.y * this.aspectRatio, 0);
+					}
+					this.rectTransform.sizeDelta = zero;
 				}
-				else
-				{
-					zero.x = this.GetSizeDeltaToProduceSize(parentSize.y * this.aspectRatio, 0);
-				}
-				this.rectTransform.sizeDelta = zero;
 				return;
-			}
 			default:
 				return;
 			}
@@ -132,11 +150,11 @@ namespace UnityEngine.UI
 		private Vector2 GetParentSize()
 		{
 			RectTransform rectTransform = this.rectTransform.parent as RectTransform;
-			if (!rectTransform)
+			if (rectTransform)
 			{
-				return Vector2.zero;
+				return rectTransform.rect.size;
 			}
-			return rectTransform.rect.size;
+			return Vector2.zero;
 		}
 
 		public virtual void SetLayoutHorizontal()
@@ -152,6 +170,22 @@ namespace UnityEngine.UI
 			this.UpdateRect();
 		}
 
+		public bool IsComponentValidOnObject()
+		{
+			Canvas component = base.gameObject.GetComponent<Canvas>();
+			return !component || !component.isRootCanvas || component.renderMode == RenderMode.WorldSpace;
+		}
+
+		public bool IsAspectModeValid()
+		{
+			return this.DoesParentExists() || (this.aspectMode != AspectRatioFitter.AspectMode.EnvelopeParent && this.aspectMode != AspectRatioFitter.AspectMode.FitInParent);
+		}
+
+		private bool DoesParentExists()
+		{
+			return this.m_DoesParentExist;
+		}
+
 		[SerializeField]
 		private AspectRatioFitter.AspectMode m_AspectMode;
 
@@ -162,6 +196,8 @@ namespace UnityEngine.UI
 		private RectTransform m_Rect;
 
 		private bool m_DelayedSetDirty;
+
+		private bool m_DoesParentExist;
 
 		private DrivenRectTransformTracker m_Tracker;
 

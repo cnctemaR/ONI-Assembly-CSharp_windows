@@ -24,22 +24,21 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	{
 		base.OnSpawn();
 		this.Initialize();
-		this.reshuffleButton.onClick += delegate
-		{
-			this.Reshuffle(true);
-		};
 		base.StartCoroutine(this.DelayedGeneration());
 	}
 
 	public override float GetSortKey()
 	{
-		return 100f;
+		return 50f;
 	}
 
 	private IEnumerator DelayedGeneration()
 	{
 		yield return new WaitForEndOfFrame();
-		this.GenerateCharacter(this.controller.IsStarterMinion);
+		if (this.controller != null)
+		{
+			this.GenerateCharacter(this.controller.IsStarterMinion);
+		}
 		yield break;
 	}
 
@@ -211,19 +210,19 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, this.info.quantity.ToString());
 	}
 
-	private string GetCurrentQuantity()
+	private string GetCurrentQuantity(WorldInventory inventory)
 	{
 		if (ElementLoader.GetElement(this.info.id.ToTag()) != null)
 		{
-			float amount = WorldInventory.Instance.GetAmount(this.info.id.ToTag());
+			float amount = inventory.GetAmount(this.info.id.ToTag(), false);
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		}
 		if (EdiblesManager.GetFoodInfo(this.info.id) != null)
 		{
-			float num = RationTracker.Get().CountRationsByFoodType(this.info.id, true);
+			float num = RationTracker.Get().CountRationsByFoodType(this.info.id, inventory, true);
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
 		}
-		float amount2 = WorldInventory.Instance.GetAmount(this.info.id.ToTag());
+		float amount2 = inventory.GetAmount(this.info.id.ToTag(), false);
 		return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, amount2.ToString());
 	}
 
@@ -266,7 +265,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		this.description.SetText(this.GetSpawnableDescription());
 		this.itemName.SetText(this.GetSpawnableName());
 		this.quantity.SetText(this.GetSpawnableQuantityOnly());
-		this.currentQuantity.SetText(this.GetCurrentQuantity());
+		this.currentQuantity.SetText(this.GetCurrentQuantity(ClusterManager.Instance.activeWorld.worldInventory));
 	}
 
 	public void SelectDeliverable()

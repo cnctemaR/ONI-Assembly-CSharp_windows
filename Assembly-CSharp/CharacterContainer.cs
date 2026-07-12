@@ -51,7 +51,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	public override float GetSortKey()
 	{
-		return 100f;
+		return 50f;
 	}
 
 	private IEnumerator DelayedGeneration()
@@ -180,7 +180,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			locText2.gameObject.SetActive(true);
 			locText2.text = this.stats.Traits[i].Name;
 			locText2.color = (trait.PositiveTrait ? Constants.POSITIVE_COLOR : Constants.NEGATIVE_COLOR);
-			locText2.GetComponent<ToolTip>().SetSimpleTooltip(trait.description);
+			locText2.GetComponent<ToolTip>().SetSimpleTooltip(trait.GetTooltip());
 			for (int j = 0; j < trait.SelfModifiers.Count; j++)
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.attributeLabelTrait.gameObject, locText.transform.parent.gameObject, false);
@@ -197,7 +197,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 					"\n\n",
 					Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + trait.SelfModifiers[j].AttributeId.ToUpper() + ".NAME"),
 					": ",
-					trait.SelfModifiers[j].GetFormattedString(null)
+					trait.SelfModifiers[j].GetFormattedString()
 				});
 				List<AttributeConverter> convertersForAttribute = Db.Get().AttributeConverters.GetConvertersForAttribute(attribute);
 				for (int k = 0; k < convertersForAttribute.Count; k++)
@@ -301,24 +301,18 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 						text8 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, DUPLICANTSTATS.APTITUDE_BONUS);
 					}
 					locText3.GetComponent<ToolTip>().SetSimpleTooltip(text8);
-					float num = (float)DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[this.stats.skillAptitudes.Count - 1];
+					float num = (float)this.stats.StartingLevels[keyValuePair.Key.relevantAttributes[0].Id];
 					LocText locText4 = Util.KInstantiateUI<LocText>(this.attributeLabelAptitude.gameObject, gameObject5, false);
 					locText4.gameObject.SetActive(true);
-					locText4.text = string.Concat(new object[]
-					{
-						"+",
-						num,
-						" ",
-						keyValuePair.Key.relevantAttributes[0].Name
-					});
+					locText4.text = "+" + num.ToString() + " " + keyValuePair.Key.relevantAttributes[0].Name;
 					string text9 = keyValuePair.Key.relevantAttributes[0].Description;
-					text9 = string.Concat(new object[]
+					text9 = string.Concat(new string[]
 					{
 						text9,
 						"\n\n",
 						keyValuePair.Key.relevantAttributes[0].Name,
 						": +",
-						DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[this.stats.skillAptitudes.Count - 1]
+						num.ToString()
 					});
 					List<AttributeConverter> convertersForAttribute2 = Db.Get().AttributeConverters.GetConvertersForAttribute(keyValuePair.Key.relevantAttributes[0]);
 					for (int n = 0; n < convertersForAttribute2.Count; n++)
@@ -550,7 +544,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	private bool IsCharacterRedundant()
 	{
-		return CharacterContainer.containers.Find((CharacterContainer c) => c != null && c.stats != null && c != this && c.stats.Name == this.stats.Name) != null || Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.GetProperName() == this.stats.Name);
+		return CharacterContainer.containers.Find((CharacterContainer c) => c != null && c.stats != null && c != this && c.stats.Name == this.stats.Name && c.stats.IsValid) != null || Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.GetProperName() == this.stats.Name);
 	}
 
 	public string GetValueColor(bool isPositive)

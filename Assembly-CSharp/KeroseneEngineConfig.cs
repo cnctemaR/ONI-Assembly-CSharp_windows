@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class KeroseneEngineConfig : IBuildingConfig
 {
+	public override string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_VANILLA_ONLY;
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "KeroseneEngine";
@@ -15,11 +20,11 @@ public class KeroseneEngineConfig : IBuildingConfig
 		float[] engine_MASS_SMALL = BUILDINGS.ROCKETRY_MASS_KG.ENGINE_MASS_SMALL;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, engine_MASS_SMALL, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -27,6 +32,7 @@ public class KeroseneEngineConfig : IBuildingConfig
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = true;
+		buildingDef.Cancellable = false;
 		return buildingDef;
 	}
 
@@ -47,8 +53,10 @@ public class KeroseneEngineConfig : IBuildingConfig
 		rocketEngine.fuelTag = ElementLoader.FindElementByHash(SimHashes.Petroleum).tag;
 		rocketEngine.efficiency = ROCKETRY.ENGINE_EFFICIENCY.MEDIUM;
 		rocketEngine.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
-		EntityTemplates.ExtendBuildingToRocketModule(go);
-		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_petroleum_engine_bg_kanim"));
+		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_petroleum_engine_bg_kanim", false);
+		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
+		{
+		};
 	}
 
 	public const string ID = "KeroseneEngine";

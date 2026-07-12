@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -178,7 +180,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void BakeMesh([NotNull] Mesh mesh, [NotNull] Camera camera, bool useTransform = false);
+		public extern void BakeMesh([NotNull("ArgumentNullException")] Mesh mesh, [NotNull("ArgumentNullException")] Camera camera, bool useTransform = false);
 
 		public AnimationCurve widthCurve
 		{
@@ -208,21 +210,21 @@ namespace UnityEngine
 		private extern AnimationCurve GetWidthCurveCopy();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetWidthCurve([NotNull] AnimationCurve curve);
+		private extern void SetWidthCurve([NotNull("ArgumentNullException")] AnimationCurve curve);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Gradient GetColorGradientCopy();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColorGradient([NotNull] Gradient curve);
+		private extern void SetColorGradient([NotNull("ArgumentNullException")] Gradient curve);
 
 		[FreeFunction(Name = "TrailRendererScripting::GetPositions", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetPositions([NotNull] [Out] Vector3[] positions);
+		public extern int GetPositions([NotNull("ArgumentNullException")] [Out] Vector3[] positions);
 
 		[FreeFunction(Name = "TrailRendererScripting::SetPositions", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPositions([NotNull] Vector3[] positions);
+		public extern void SetPositions([NotNull("ArgumentNullException")] Vector3[] positions);
 
 		[FreeFunction(Name = "TrailRendererScripting::AddPosition", HasExplicitThis = true)]
 		public void AddPosition(Vector3 position)
@@ -232,7 +234,49 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "TrailRendererScripting::AddPositions", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void AddPositions([NotNull] Vector3[] positions);
+		public extern void AddPositions([NotNull("ArgumentNullException")] Vector3[] positions);
+
+		public void SetPositions(NativeArray<Vector3> positions)
+		{
+			this.SetPositionsWithNativeContainer((IntPtr)positions.GetUnsafeReadOnlyPtr<Vector3>(), positions.Length);
+		}
+
+		public void SetPositions(NativeSlice<Vector3> positions)
+		{
+			this.SetPositionsWithNativeContainer((IntPtr)positions.GetUnsafeReadOnlyPtr<Vector3>(), positions.Length);
+		}
+
+		public int GetPositions([Out] NativeArray<Vector3> positions)
+		{
+			return this.GetPositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
+		}
+
+		public int GetPositions([Out] NativeSlice<Vector3> positions)
+		{
+			return this.GetPositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
+		}
+
+		public void AddPositions([Out] NativeArray<Vector3> positions)
+		{
+			this.AddPositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
+		}
+
+		public void AddPositions([Out] NativeSlice<Vector3> positions)
+		{
+			this.AddPositionsWithNativeContainer((IntPtr)positions.GetUnsafePtr<Vector3>(), positions.Length);
+		}
+
+		[FreeFunction(Name = "TrailRendererScripting::SetPositionsWithNativeContainer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetPositionsWithNativeContainer(IntPtr positions, int count);
+
+		[FreeFunction(Name = "TrailRendererScripting::GetPositionsWithNativeContainer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetPositionsWithNativeContainer(IntPtr positions, int length);
+
+		[FreeFunction(Name = "TrailRendererScripting::AddPositionsWithNativeContainer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void AddPositionsWithNativeContainer(IntPtr positions, int length);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void get_startColor_Injected(out Color ret);

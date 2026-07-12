@@ -89,6 +89,18 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public bool reverseArrangement
+		{
+			get
+			{
+				return this.m_ReverseArrangement;
+			}
+			set
+			{
+				base.SetProperty<bool>(ref this.m_ReverseArrangement, value);
+			}
+		}
+
 		protected void CalcAlongAxis(int axis, bool isVertical)
 		{
 			float num = (float)((axis == 0) ? base.padding.horizontal : base.padding.vertical);
@@ -99,7 +111,8 @@ namespace UnityEngine.UI
 			float num3 = num;
 			float num4 = 0f;
 			bool flag4 = isVertical ^ (axis == 1);
-			for (int i = 0; i < base.rectChildren.Count; i++)
+			int count = base.rectChildren.Count;
+			for (int i = 0; i < count; i++)
 			{
 				RectTransform rectTransform = base.rectChildren[i];
 				float num5;
@@ -142,70 +155,78 @@ namespace UnityEngine.UI
 			bool flag2 = ((axis == 0) ? this.m_ChildScaleWidth : this.m_ChildScaleHeight);
 			bool flag3 = ((axis == 0) ? this.m_ChildForceExpandWidth : this.m_ChildForceExpandHeight);
 			float alignmentOnAxis = base.GetAlignmentOnAxis(axis);
-			if (isVertical ^ (axis == 1))
+			bool flag4 = isVertical ^ (axis == 1);
+			int num2 = (this.m_ReverseArrangement ? (base.rectChildren.Count - 1) : 0);
+			int num3 = (this.m_ReverseArrangement ? 0 : base.rectChildren.Count);
+			int num4 = (this.m_ReverseArrangement ? (-1) : 1);
+			if (flag4)
 			{
-				float num2 = num - (float)((axis == 0) ? base.padding.horizontal : base.padding.vertical);
-				for (int i = 0; i < base.rectChildren.Count; i++)
+				float num5 = num - (float)((axis == 0) ? base.padding.horizontal : base.padding.vertical);
+				int num6 = num2;
+				while (this.m_ReverseArrangement ? (num6 >= num3) : (num6 < num3))
 				{
-					RectTransform rectTransform = base.rectChildren[i];
-					float num3;
-					float num4;
-					float num5;
-					this.GetChildSizes(rectTransform, axis, flag, flag3, out num3, out num4, out num5);
-					float num6 = (flag2 ? rectTransform.localScale[axis] : 1f);
-					float num7 = Mathf.Clamp(num2, num3, (num5 > 0f) ? num : num4);
-					float startOffset = base.GetStartOffset(axis, num7 * num6);
+					RectTransform rectTransform = base.rectChildren[num6];
+					float num7;
+					float num8;
+					float num9;
+					this.GetChildSizes(rectTransform, axis, flag, flag3, out num7, out num8, out num9);
+					float num10 = (flag2 ? rectTransform.localScale[axis] : 1f);
+					float num11 = Mathf.Clamp(num5, num7, (num9 > 0f) ? num : num8);
+					float startOffset = base.GetStartOffset(axis, num11 * num10);
 					if (flag)
 					{
-						base.SetChildAlongAxisWithScale(rectTransform, axis, startOffset, num7, num6);
+						base.SetChildAlongAxisWithScale(rectTransform, axis, startOffset, num11, num10);
 					}
 					else
 					{
-						float num8 = (num7 - rectTransform.sizeDelta[axis]) * alignmentOnAxis;
-						base.SetChildAlongAxisWithScale(rectTransform, axis, startOffset + num8, num6);
+						float num12 = (num11 - rectTransform.sizeDelta[axis]) * alignmentOnAxis;
+						base.SetChildAlongAxisWithScale(rectTransform, axis, startOffset + num12, num10);
 					}
+					num6 += num4;
 				}
 				return;
 			}
-			float num9 = (float)((axis == 0) ? base.padding.left : base.padding.top);
-			float num10 = 0f;
-			float num11 = num - base.GetTotalPreferredSize(axis);
-			if (num11 > 0f)
+			float num13 = (float)((axis == 0) ? base.padding.left : base.padding.top);
+			float num14 = 0f;
+			float num15 = num - base.GetTotalPreferredSize(axis);
+			if (num15 > 0f)
 			{
 				if (base.GetTotalFlexibleSize(axis) == 0f)
 				{
-					num9 = base.GetStartOffset(axis, base.GetTotalPreferredSize(axis) - (float)((axis == 0) ? base.padding.horizontal : base.padding.vertical));
+					num13 = base.GetStartOffset(axis, base.GetTotalPreferredSize(axis) - (float)((axis == 0) ? base.padding.horizontal : base.padding.vertical));
 				}
 				else if (base.GetTotalFlexibleSize(axis) > 0f)
 				{
-					num10 = num11 / base.GetTotalFlexibleSize(axis);
+					num14 = num15 / base.GetTotalFlexibleSize(axis);
 				}
 			}
-			float num12 = 0f;
+			float num16 = 0f;
 			if (base.GetTotalMinSize(axis) != base.GetTotalPreferredSize(axis))
 			{
-				num12 = Mathf.Clamp01((num - base.GetTotalMinSize(axis)) / (base.GetTotalPreferredSize(axis) - base.GetTotalMinSize(axis)));
+				num16 = Mathf.Clamp01((num - base.GetTotalMinSize(axis)) / (base.GetTotalPreferredSize(axis) - base.GetTotalMinSize(axis)));
 			}
-			for (int j = 0; j < base.rectChildren.Count; j++)
+			int num17 = num2;
+			while (this.m_ReverseArrangement ? (num17 >= num3) : (num17 < num3))
 			{
-				RectTransform rectTransform2 = base.rectChildren[j];
-				float num13;
-				float num14;
-				float num15;
-				this.GetChildSizes(rectTransform2, axis, flag, flag3, out num13, out num14, out num15);
-				float num16 = (flag2 ? rectTransform2.localScale[axis] : 1f);
-				float num17 = Mathf.Lerp(num13, num14, num12);
-				num17 += num15 * num10;
+				RectTransform rectTransform2 = base.rectChildren[num17];
+				float num18;
+				float num19;
+				float num20;
+				this.GetChildSizes(rectTransform2, axis, flag, flag3, out num18, out num19, out num20);
+				float num21 = (flag2 ? rectTransform2.localScale[axis] : 1f);
+				float num22 = Mathf.Lerp(num18, num19, num16);
+				num22 += num20 * num14;
 				if (flag)
 				{
-					base.SetChildAlongAxisWithScale(rectTransform2, axis, num9, num17, num16);
+					base.SetChildAlongAxisWithScale(rectTransform2, axis, num13, num22, num21);
 				}
 				else
 				{
-					float num18 = (num17 - rectTransform2.sizeDelta[axis]) * alignmentOnAxis;
-					base.SetChildAlongAxisWithScale(rectTransform2, axis, num9 + num18, num16);
+					float num23 = (num22 - rectTransform2.sizeDelta[axis]) * alignmentOnAxis;
+					base.SetChildAlongAxisWithScale(rectTransform2, axis, num13 + num23, num21);
 				}
-				num9 += num17 * num16 + this.spacing;
+				num13 += num22 * num21 + this.spacing;
+				num17 += num4;
 			}
 		}
 
@@ -249,5 +270,8 @@ namespace UnityEngine.UI
 
 		[SerializeField]
 		protected bool m_ChildScaleHeight;
+
+		[SerializeField]
+		protected bool m_ReverseArrangement;
 	}
 }

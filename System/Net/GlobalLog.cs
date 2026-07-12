@@ -75,8 +75,8 @@ namespace System.Net
 		{
 		}
 
-		[Conditional("_FORCE_ASSERTS")]
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
+		[Conditional("_FORCE_ASSERTS")]
 		[Conditional("DEBUG")]
 		public static void Assert(bool condition, string messageFormat, params object[] data)
 		{
@@ -91,16 +91,16 @@ namespace System.Net
 			}
 		}
 
-		[Conditional("DEBUG")]
 		[Conditional("_FORCE_ASSERTS")]
+		[Conditional("DEBUG")]
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		public static void Assert(string message)
 		{
 		}
 
-		[Conditional("_FORCE_ASSERTS")]
 		[Conditional("DEBUG")]
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
+		[Conditional("_FORCE_ASSERTS")]
 		public static void Assert(string message, string detailMessage)
 		{
 			try

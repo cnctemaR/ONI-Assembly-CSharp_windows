@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Profiling
 {
-	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
 	[NativeHeader("Runtime/Profiler/Marker.h")]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
 	[UsedByNativeCode]
 	public class Sampler
 	{
@@ -84,7 +84,7 @@ namespace UnityEngine.Profiling
 
 		[NativeMethod(Name = "ProfilerBindings::GetSamplerInternal", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetSamplerInternal([NotNull] string name);
+		private static extern IntPtr GetSamplerInternal([NotNull("ArgumentNullException")] string name);
 
 		[NativeMethod(Name = "ProfilerBindings::GetSamplerNamesInternal", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]

@@ -41,7 +41,7 @@ public class SaltPlant : StateMachineComponent<SaltPlant.StatesInstance>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			default_state = this.alive;
 			this.alive.DoNothing();
 		}

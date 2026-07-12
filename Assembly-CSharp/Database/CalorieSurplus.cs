@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class CalorieSurplus : ColonyAchievementRequirement
+	public class CalorieSurplus : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public CalorieSurplus(float surplusAmount)
 		{
@@ -13,7 +12,7 @@ namespace Database
 
 		public override bool Success()
 		{
-			return (double)(RationTracker.Get().CountRations(null, true) / 1000f) >= this.surplusAmount;
+			return (double)(ClusterManager.Instance.CountAllRations() / 1000f) >= this.surplusAmount;
 		}
 
 		public override bool Fail()
@@ -21,19 +20,14 @@ namespace Database
 			return !this.Success();
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.surplusAmount);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.surplusAmount = reader.ReadDouble();
 		}
 
 		public override string GetProgress(bool complete)
 		{
-			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CALORIE_SURPLUS, GameUtil.GetFormattedCalories(complete ? ((float)this.surplusAmount) : RationTracker.Get().CountRations(null, true), GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories((float)this.surplusAmount, GameUtil.TimeSlice.None, true));
+			return string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.CALORIE_SURPLUS, GameUtil.GetFormattedCalories(complete ? ((float)this.surplusAmount) : ClusterManager.Instance.CountAllRations(), GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories((float)this.surplusAmount, GameUtil.TimeSlice.None, true));
 		}
 
 		private double surplusAmount;

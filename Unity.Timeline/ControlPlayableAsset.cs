@@ -82,7 +82,7 @@ namespace UnityEngine.Timeline
 				}
 				else
 				{
-					list6 = this.GetParticleSystemRoots(gameObject);
+					list6 = this.GetControllableParticleSystems(gameObject);
 				}
 				IList<ParticleSystem> list7 = list6;
 				this.UpdateDurationAndLoopFlag(list4, list7);
@@ -110,7 +110,7 @@ namespace UnityEngine.Timeline
 				}
 				if (this.updateParticle)
 				{
-					this.SearchHiearchyAndConnectParticleSystem(list7, graph, list);
+					this.SearchHierarchyAndConnectParticleSystem(list7, graph, list);
 				}
 				if (this.updateITimeControl)
 				{
@@ -149,7 +149,7 @@ namespace UnityEngine.Timeline
 			}
 		}
 
-		private void SearchHiearchyAndConnectParticleSystem(IEnumerable<ParticleSystem> particleSystems, PlayableGraph graph, List<Playable> outplayables)
+		private void SearchHierarchyAndConnectParticleSystem(IEnumerable<ParticleSystem> particleSystems, PlayableGraph graph, List<Playable> outplayables)
 		{
 			foreach (ParticleSystem particleSystem in particleSystems)
 			{
@@ -211,7 +211,7 @@ namespace UnityEngine.Timeline
 			return list;
 		}
 
-		private static IEnumerable<MonoBehaviour> GetControlableScripts(GameObject root)
+		internal static IEnumerable<MonoBehaviour> GetControlableScripts(GameObject root)
 		{
 			if (root == null)
 			{
@@ -258,28 +258,40 @@ namespace UnityEngine.Timeline
 			this.m_SupportLoop = flag;
 		}
 
-		private IList<ParticleSystem> GetParticleSystemRoots(GameObject go)
+		private IList<ParticleSystem> GetControllableParticleSystems(GameObject go)
 		{
-			if (this.searchHierarchy)
+			List<ParticleSystem> list = new List<ParticleSystem>();
+			if (this.searchHierarchy || go.GetComponent<ParticleSystem>() != null)
 			{
-				List<ParticleSystem> list = new List<ParticleSystem>();
-				ControlPlayableAsset.GetParticleSystemRoots(go.transform, list);
-				return list;
+				ControlPlayableAsset.GetControllableParticleSystems(go.transform, list, ControlPlayableAsset.s_SubEmitterCollector);
+				ControlPlayableAsset.s_SubEmitterCollector.Clear();
 			}
-			return this.GetComponent<ParticleSystem>(go);
+			return list;
 		}
 
-		private static void GetParticleSystemRoots(Transform t, ICollection<ParticleSystem> roots)
+		private static void GetControllableParticleSystems(Transform t, ICollection<ParticleSystem> roots, HashSet<ParticleSystem> subEmitters)
 		{
 			ParticleSystem component = t.GetComponent<ParticleSystem>();
-			if (component != null)
+			if (component != null && !subEmitters.Contains(component))
 			{
 				roots.Add(component);
-				return;
+				ControlPlayableAsset.CacheSubEmitters(component, subEmitters);
 			}
 			for (int i = 0; i < t.childCount; i++)
 			{
-				ControlPlayableAsset.GetParticleSystemRoots(t.GetChild(i), roots);
+				ControlPlayableAsset.GetControllableParticleSystems(t.GetChild(i), roots, subEmitters);
+			}
+		}
+
+		private static void CacheSubEmitters(ParticleSystem ps, HashSet<ParticleSystem> subEmitters)
+		{
+			if (ps == null)
+			{
+				return;
+			}
+			for (int i = 0; i < ps.subEmitters.subEmittersCount; i++)
+			{
+				subEmitters.Add(ps.subEmitters.GetSubEmitterSystem(i));
 			}
 		}
 
@@ -299,47 +311,70 @@ namespace UnityEngine.Timeline
 			{
 				if (this.updateParticle)
 				{
-					foreach (ParticleSystem particleSystem in gameObject.GetComponentsInChildren<ParticleSystem>(true))
-					{
-						driver.AddFromName<ParticleSystem>(particleSystem.gameObject, "randomSeed");
-						driver.AddFromName<ParticleSystem>(particleSystem.gameObject, "autoRandomSeed");
-					}
+					ControlPlayableAsset.PreviewParticles(driver, gameObject.GetComponentsInChildren<ParticleSystem>(true));
 				}
 				if (this.active)
 				{
-					driver.AddFromName(gameObject, "m_IsActive");
+					ControlPlayableAsset.PreviewActivation(driver, new GameObject[] { gameObject });
 				}
 				if (this.updateITimeControl)
 				{
-					foreach (MonoBehaviour monoBehaviour in ControlPlayableAsset.GetControlableScripts(gameObject))
-					{
-						IPropertyPreview propertyPreview = monoBehaviour as IPropertyPreview;
-						if (propertyPreview != null)
-						{
-							propertyPreview.GatherProperties(director, driver);
-						}
-						else
-						{
-							driver.AddFromComponent(monoBehaviour.gameObject, monoBehaviour);
-						}
-					}
+					ControlPlayableAsset.PreviewTimeControl(driver, director, ControlPlayableAsset.GetControlableScripts(gameObject));
 				}
 				if (this.updateDirector)
 				{
-					foreach (PlayableDirector playableDirector in this.GetComponent<PlayableDirector>(gameObject))
-					{
-						if (!(playableDirector == null))
-						{
-							TimelineAsset timelineAsset = playableDirector.playableAsset as TimelineAsset;
-							if (!(timelineAsset == null))
-							{
-								timelineAsset.GatherProperties(playableDirector, driver);
-							}
-						}
-					}
+					ControlPlayableAsset.PreviewDirectors(driver, this.GetComponent<PlayableDirector>(gameObject));
 				}
 			}
 			ControlPlayableAsset.s_ProcessedDirectors.Remove(director);
+		}
+
+		internal static void PreviewParticles(IPropertyCollector driver, IEnumerable<ParticleSystem> particles)
+		{
+			foreach (ParticleSystem particleSystem in particles)
+			{
+				driver.AddFromName<ParticleSystem>(particleSystem.gameObject, "randomSeed");
+				driver.AddFromName<ParticleSystem>(particleSystem.gameObject, "autoRandomSeed");
+			}
+		}
+
+		internal static void PreviewActivation(IPropertyCollector driver, IEnumerable<GameObject> objects)
+		{
+			foreach (GameObject gameObject in objects)
+			{
+				driver.AddFromName(gameObject, "m_IsActive");
+			}
+		}
+
+		internal static void PreviewTimeControl(IPropertyCollector driver, PlayableDirector director, IEnumerable<MonoBehaviour> scripts)
+		{
+			foreach (MonoBehaviour monoBehaviour in scripts)
+			{
+				IPropertyPreview propertyPreview = monoBehaviour as IPropertyPreview;
+				if (propertyPreview != null)
+				{
+					propertyPreview.GatherProperties(director, driver);
+				}
+				else
+				{
+					driver.AddFromComponent(monoBehaviour.gameObject, monoBehaviour);
+				}
+			}
+		}
+
+		internal static void PreviewDirectors(IPropertyCollector driver, IEnumerable<PlayableDirector> directors)
+		{
+			foreach (PlayableDirector playableDirector in directors)
+			{
+				if (!(playableDirector == null))
+				{
+					TimelineAsset timelineAsset = playableDirector.playableAsset as TimelineAsset;
+					if (!(timelineAsset == null))
+					{
+						timelineAsset.GatherProperties(playableDirector, driver);
+					}
+				}
+			}
 		}
 
 		private const int k_MaxRandInt = 10000;
@@ -347,6 +382,8 @@ namespace UnityEngine.Timeline
 		private static readonly List<PlayableDirector> k_EmptyDirectorsList = new List<PlayableDirector>(0);
 
 		private static readonly List<ParticleSystem> k_EmptyParticlesList = new List<ParticleSystem>(0);
+
+		private static readonly HashSet<ParticleSystem> s_SubEmitterCollector = new HashSet<ParticleSystem>();
 
 		[SerializeField]
 		public ExposedReference<GameObject> sourceGameObject;
@@ -367,7 +404,7 @@ namespace UnityEngine.Timeline
 		public bool updateITimeControl = true;
 
 		[SerializeField]
-		public bool searchHierarchy = true;
+		public bool searchHierarchy;
 
 		[SerializeField]
 		public bool active = true;

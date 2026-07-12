@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-public class ConditionHasAtmoSuit : RocketLaunchCondition
+public class ConditionHasAtmoSuit : ProcessCondition
 {
 	public ConditionHasAtmoSuit(CommandModule module)
 	{
@@ -15,36 +15,36 @@ public class ConditionHasAtmoSuit : RocketLaunchCondition
 		manualDeliveryKG.capacity = 1f;
 	}
 
-	public override RocketLaunchCondition GetParentCondition()
-	{
-		return null;
-	}
-
-	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
+	public override ProcessCondition.Status EvaluateCondition()
 	{
 		if (this.module.storage.GetAmountAvailable(GameTags.AtmoSuit) < 1f)
 		{
-			return RocketLaunchCondition.LaunchStatus.Failure;
+			return ProcessCondition.Status.Failure;
 		}
-		return RocketLaunchCondition.LaunchStatus.Ready;
+		return ProcessCondition.Status.Ready;
 	}
 
-	public override string GetLaunchStatusMessage(bool ready)
+	public override string GetStatusMessage(ProcessCondition.Status status)
 	{
-		if (ready)
+		if (status == ProcessCondition.Status.Ready)
 		{
 			return UI.STARMAP.HASSUIT.NAME;
 		}
 		return UI.STARMAP.NOSUIT.NAME;
 	}
 
-	public override string GetLaunchStatusTooltip(bool ready)
+	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
-		if (ready)
+		if (status == ProcessCondition.Status.Ready)
 		{
 			return UI.STARMAP.HASSUIT.TOOLTIP;
 		}
 		return UI.STARMAP.NOSUIT.TOOLTIP;
+	}
+
+	public override bool ShowInUI()
+	{
+		return true;
 	}
 
 	private CommandModule module;

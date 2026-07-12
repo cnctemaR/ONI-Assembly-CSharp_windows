@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeClass("Vector2f")]
+	[Il2CppEagerStaticClassConstruction]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	public struct Vector2 : IEquatable<Vector2>
+	[NativeClass("Vector2f")]
+	public struct Vector2 : IEquatable<Vector2>, IFormattable
 	{
 		public float this[int index]
 		{
@@ -45,24 +48,28 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public Vector2(float x, float y)
 		{
 			this.x = x;
 			this.y = y;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void Set(float newX, float newY)
 		{
 			this.x = newX;
 			this.y = newY;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 Lerp(Vector2 a, Vector2 b, float t)
 		{
 			t = Mathf.Clamp01(t);
 			return new Vector2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 LerpUnclamped(Vector2 a, Vector2 b, float t)
 		{
 			return new Vector2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
@@ -87,11 +94,13 @@ namespace UnityEngine
 			return vector;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 Scale(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x * b.x, a.y * b.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void Scale(Vector2 scale)
 		{
 			this.x *= scale.x;
@@ -124,15 +133,25 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("({0:F1}, {1:F1})", new object[] { this.x, this.y });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F1";
+			}
 			return UnityString.Format("({0}, {1})", new object[]
 			{
-				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
+				this.x.ToString(format, formatProvider),
+				this.y.ToString(format, formatProvider)
 			});
 		}
 
@@ -147,6 +166,7 @@ namespace UnityEngine
 			return !flag && this.Equals((Vector2)other);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public bool Equals(Vector2 other)
 		{
 			return this.x == other.x && this.y == other.y;
@@ -158,11 +178,13 @@ namespace UnityEngine
 			return new Vector2(num * inNormal.x + inDirection.x, num * inNormal.y + inDirection.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 Perpendicular(Vector2 inDirection)
 		{
 			return new Vector2(-inDirection.y, inDirection.x);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float Dot(Vector2 lhs, Vector2 rhs)
 		{
 			return lhs.x * rhs.x + lhs.y * rhs.y;
@@ -184,6 +206,7 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float Angle(Vector2 from, Vector2 to)
 		{
 			float num = (float)Math.Sqrt((double)(from.sqrMagnitude * to.sqrMagnitude));
@@ -311,46 +334,55 @@ namespace UnityEngine
 			return new Vector2(num12, num13);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator +(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x + b.x, a.y + b.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator -(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x - b.x, a.y - b.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator *(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x * b.x, a.y * b.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator /(Vector2 a, Vector2 b)
 		{
 			return new Vector2(a.x / b.x, a.y / b.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator -(Vector2 a)
 		{
 			return new Vector2(-a.x, -a.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator *(Vector2 a, float d)
 		{
 			return new Vector2(a.x * d, a.y * d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator *(float d, Vector2 a)
 		{
 			return new Vector2(a.x * d, a.y * d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector2 operator /(Vector2 a, float d)
 		{
 			return new Vector2(a.x / d, a.y / d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static bool operator ==(Vector2 lhs, Vector2 rhs)
 		{
 			float num = lhs.x - rhs.x;
@@ -358,16 +390,19 @@ namespace UnityEngine
 			return num * num + num2 * num2 < 9.9999994E-11f;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static bool operator !=(Vector2 lhs, Vector2 rhs)
 		{
 			return !(lhs == rhs);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static implicit operator Vector2(Vector3 v)
 		{
 			return new Vector2(v.x, v.y);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static implicit operator Vector3(Vector2 v)
 		{
 			return new Vector3(v.x, v.y, 0f);

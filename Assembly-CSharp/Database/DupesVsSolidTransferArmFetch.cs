@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Database
 {
-	public class DupesVsSolidTransferArmFetch : ColonyAchievementRequirement
+	public class DupesVsSolidTransferArmFetch : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public DupesVsSolidTransferArmFetch(float percentage, int numCycles)
 		{
@@ -38,13 +37,7 @@ namespace Database
 			return false;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.numCycles);
-			writer.Write(this.percentage);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.numCycles = reader.ReadInt32();
 			this.percentage = reader.ReadSingle();

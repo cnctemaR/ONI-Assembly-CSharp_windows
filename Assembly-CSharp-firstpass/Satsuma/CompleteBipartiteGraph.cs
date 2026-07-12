@@ -15,11 +15,11 @@ namespace Satsuma
 		{
 			if (redNodeCount < 0 || blueNodeCount < 0)
 			{
-				throw new ArgumentException(string.Concat(new object[] { "Invalid node count: ", redNodeCount, ";", blueNodeCount }));
+				throw new ArgumentException("Invalid node count: " + redNodeCount.ToString() + ";" + blueNodeCount.ToString());
 			}
 			if ((long)redNodeCount + (long)blueNodeCount > 2147483647L || (long)redNodeCount * (long)blueNodeCount > 2147483647L)
 			{
-				throw new ArgumentException(string.Concat(new object[] { "Too many nodes: ", redNodeCount, ";", blueNodeCount }));
+				throw new ArgumentException("Too many nodes: " + redNodeCount.ToString() + ";" + blueNodeCount.ToString());
 			}
 			this.RedNodeCount = redNodeCount;
 			this.BlueNodeCount = blueNodeCount;

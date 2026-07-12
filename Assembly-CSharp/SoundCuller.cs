@@ -3,9 +3,20 @@ using UnityEngine;
 
 public struct SoundCuller
 {
+	public static bool IsAudibleWorld(Vector2 pos)
+	{
+		bool flag = false;
+		int num = Grid.PosToCell(pos);
+		if (Grid.IsValidCell(num) && (int)Grid.WorldIdx[num] == ClusterManager.Instance.activeWorldId)
+		{
+			flag = true;
+		}
+		return flag;
+	}
+
 	public bool IsAudible(Vector2 pos)
 	{
-		return this.min.LessEqual(pos) && pos.LessEqual(this.max);
+		return SoundCuller.IsAudibleWorld(pos) && this.min.LessEqual(pos) && pos.LessEqual(this.max);
 	}
 
 	public bool IsAudibleNoCameraScaling(Vector2 pos, float falloff_distance_sq)
@@ -15,6 +26,10 @@ public struct SoundCuller
 
 	public bool IsAudible(Vector2 pos, float falloff_distance_sq)
 	{
+		if (!SoundCuller.IsAudibleWorld(pos))
+		{
+			return false;
+		}
 		pos = this.GetVerticallyScaledPosition(pos, false);
 		return this.IsAudibleNoCameraScaling(pos, falloff_distance_sq);
 	}

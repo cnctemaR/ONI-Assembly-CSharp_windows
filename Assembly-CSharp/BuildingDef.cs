@@ -66,6 +66,16 @@ public class BuildingDef : Def
 		return false;
 	}
 
+	public bool IsAvailable()
+	{
+		return !this.Deprecated && (!this.DebugOnly || Game.Instance.DebugOnlyBuildingsAllowed);
+	}
+
+	public bool ShouldShowInBuildMenu()
+	{
+		return this.ShowInBuildMenu;
+	}
+
 	public bool IsReplacementLayerOccupied(int cell)
 	{
 		if (Grid.Objects[cell, (int)this.ReplacementLayer] != null)
@@ -125,9 +135,10 @@ public class BuildingDef : Def
 			{
 				foreach (Recipe.Ingredient ingredient in allIngredients)
 				{
-					SimUtil.DiseaseInfo diseaseInfo2;
 					float num;
-					resource_storage.ConsumeAndGetDisease(ingredient.tag, ingredient.amount, out diseaseInfo2, out num);
+					SimUtil.DiseaseInfo diseaseInfo2;
+					float num2;
+					resource_storage.ConsumeAndGetDisease(ingredient.tag, ingredient.amount, out num, out diseaseInfo2, out num2);
 					diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo, diseaseInfo2);
 				}
 			}
@@ -179,12 +190,15 @@ public class BuildingDef : Def
 				TileVisualizer.RefreshCell(c, this.TileLayer, this.ReplacementLayer);
 			});
 		}
-		string sound = GlobalAssets.GetSound("Finish_Building_" + this.AudioSize, false);
-		if (playsound && sound != null)
+		if (this.PlayConstructionSounds)
 		{
-			Vector3 position = gameObject.transform.GetPosition();
-			position.z = 0f;
-			KFMOD.PlayOneShot(sound, position, 1f);
+			string sound = GlobalAssets.GetSound("Finish_Building_" + this.AudioSize, false);
+			if (playsound && sound != null)
+			{
+				Vector3 position = gameObject.transform.GetPosition();
+				position.z = 0f;
+				KFMOD.PlayOneShot(sound, position, 1f);
+			}
 		}
 		Deconstructable component2 = gameObject.GetComponent<Deconstructable>();
 		if (component2 != null)
@@ -258,6 +272,11 @@ public class BuildingDef : Def
 				break;
 			}
 			int num = Grid.OffsetCell(cell, rotatedCellOffset);
+			if ((int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId)
+			{
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
+				return false;
+			}
 			if (!Grid.IsValidBuildingCell(num))
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
@@ -274,7 +293,7 @@ public class BuildingDef : Def
 			if (!replace_tile && !flag2)
 			{
 				GameObject gameObject = Grid.Objects[num, (int)layer];
-				if (gameObject != null)
+				if (gameObject != null && gameObject != source_go)
 				{
 					if (gameObject.GetComponent<Wire>() == null || this.BuildingComplete.GetComponent<Wire>() == null)
 					{
@@ -306,9 +325,10 @@ public class BuildingDef : Def
 				if (layer == ObjectLayer.Gantry)
 				{
 					bool flag3 = false;
-					for (int j = 0; j < Gantry.TileOffsets.Length; j++)
+					MakeBaseSolid.Def def = source_go.GetDef<MakeBaseSolid.Def>();
+					for (int j = 0; j < def.solidOffsets.Length; j++)
 					{
-						CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(Gantry.TileOffsets[j], orientation);
+						CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(def.solidOffsets[j], orientation);
 						flag3 |= rotatedCellOffset2 == rotatedCellOffset;
 					}
 					if (flag3 && !this.IsValidTileLocation(source_go, num, ref fail_reason))
@@ -494,7 +514,7 @@ public class BuildingDef : Def
 			this.MarkOverlappingPorts(Grid.Objects[num4, 29], go);
 			Grid.Objects[num4, 29] = go;
 		}
-		if (this.RequiresPowerOutput || this.GeneratorWattageRating > 0f)
+		if (this.RequiresPowerOutput)
 		{
 			CellOffset rotatedCellOffset5 = Rotatable.GetRotatedCellOffset(this.PowerOutputOffset, orientation);
 			int num5 = Grid.OffsetCell(cell, rotatedCellOffset5);
@@ -529,20 +549,34 @@ public class BuildingDef : Def
 		ISecondaryInput component2 = this.BuildingComplete.GetComponent<ISecondaryInput>();
 		if (component2 != null)
 		{
-			ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(component2.GetSecondaryConduitType());
-			CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(), orientation);
-			int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
-			this.MarkOverlappingPorts(Grid.Objects[num9, (int)objectLayerForConduitType3], go);
-			Grid.Objects[num9, (int)objectLayerForConduitType3] = go;
+			for (int k = 0; k < 4; k++)
+			{
+				ConduitType conduitType = (ConduitType)k;
+				if (conduitType != ConduitType.None && component2.HasSecondaryConduitType(conduitType))
+				{
+					ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(conduitType);
+					CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(conduitType), orientation);
+					int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
+					this.MarkOverlappingPorts(Grid.Objects[num9, (int)objectLayerForConduitType3], go);
+					Grid.Objects[num9, (int)objectLayerForConduitType3] = go;
+				}
+			}
 		}
 		ISecondaryOutput component3 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
 		if (component3 != null)
 		{
-			ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(component3.GetSecondaryConduitType());
-			CellOffset rotatedCellOffset8 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(), orientation);
-			int num10 = Grid.OffsetCell(cell, rotatedCellOffset8);
-			this.MarkOverlappingPorts(Grid.Objects[num10, (int)objectLayerForConduitType4], go);
-			Grid.Objects[num10, (int)objectLayerForConduitType4] = go;
+			for (int l = 0; l < 4; l++)
+			{
+				ConduitType conduitType2 = (ConduitType)l;
+				if (conduitType2 != ConduitType.None && component3.HasSecondaryConduitType(conduitType2))
+				{
+					ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(conduitType2);
+					CellOffset rotatedCellOffset8 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(conduitType2), orientation);
+					int num10 = Grid.OffsetCell(cell, rotatedCellOffset8);
+					this.MarkOverlappingPorts(Grid.Objects[num10, (int)objectLayerForConduitType4], go);
+					Grid.Objects[num10, (int)objectLayerForConduitType4] = go;
+				}
+			}
 		}
 	}
 
@@ -550,9 +584,13 @@ public class BuildingDef : Def
 	{
 		if (existing == null)
 		{
-			return;
+			if (replaced != null)
+			{
+				replaced.RemoveTag(GameTags.HasInvalidPorts);
+				return;
+			}
 		}
-		if (existing != replaced)
+		else if (existing != replaced)
 		{
 			existing.AddTag(GameTags.HasInvalidPorts);
 		}
@@ -560,6 +598,10 @@ public class BuildingDef : Def
 
 	public void UnmarkArea(int cell, Orientation orientation, ObjectLayer layer, GameObject go)
 	{
+		if (cell == Grid.InvalidCell)
+		{
+			return;
+		}
 		for (int i = 0; i < this.PlacementOffsets.Length; i++)
 		{
 			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.PlacementOffsets[i], orientation);
@@ -598,7 +640,7 @@ public class BuildingDef : Def
 				Grid.Objects[num4, 29] = null;
 			}
 		}
-		if (this.RequiresPowerOutput || this.GeneratorWattageRating > 0f)
+		if (this.RequiresPowerOutput)
 		{
 			CellOffset rotatedCellOffset5 = Rotatable.GetRotatedCellOffset(this.PowerOutputOffset, orientation);
 			int num5 = Grid.OffsetCell(cell, rotatedCellOffset5);
@@ -624,23 +666,37 @@ public class BuildingDef : Def
 		ISecondaryInput component = this.BuildingComplete.GetComponent<ISecondaryInput>();
 		if (component != null)
 		{
-			ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(component.GetSecondaryConduitType());
-			CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(component.GetSecondaryConduitOffset(), orientation);
-			int num8 = Grid.OffsetCell(cell, rotatedCellOffset6);
-			if (Grid.Objects[num8, (int)objectLayerForConduitType3] == go)
+			for (int j = 0; j < 4; j++)
 			{
-				Grid.Objects[num8, (int)objectLayerForConduitType3] = null;
+				ConduitType conduitType = (ConduitType)j;
+				if (conduitType != ConduitType.None && component.HasSecondaryConduitType(conduitType))
+				{
+					ObjectLayer objectLayerForConduitType3 = Grid.GetObjectLayerForConduitType(conduitType);
+					CellOffset rotatedCellOffset6 = Rotatable.GetRotatedCellOffset(component.GetSecondaryConduitOffset(conduitType), orientation);
+					int num8 = Grid.OffsetCell(cell, rotatedCellOffset6);
+					if (Grid.Objects[num8, (int)objectLayerForConduitType3] == go)
+					{
+						Grid.Objects[num8, (int)objectLayerForConduitType3] = null;
+					}
+				}
 			}
 		}
 		ISecondaryOutput component2 = this.BuildingComplete.GetComponent<ISecondaryOutput>();
 		if (component2 != null)
 		{
-			ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(component2.GetSecondaryConduitType());
-			CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(), orientation);
-			int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
-			if (Grid.Objects[num9, (int)objectLayerForConduitType4] == go)
+			for (int k = 0; k < 4; k++)
 			{
-				Grid.Objects[num9, (int)objectLayerForConduitType4] = null;
+				ConduitType conduitType2 = (ConduitType)k;
+				if (conduitType2 != ConduitType.None && component2.HasSecondaryConduitType(conduitType2))
+				{
+					ObjectLayer objectLayerForConduitType4 = Grid.GetObjectLayerForConduitType(conduitType2);
+					CellOffset rotatedCellOffset7 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(conduitType2), orientation);
+					int num9 = Grid.OffsetCell(cell, rotatedCellOffset7);
+					if (Grid.Objects[num9, (int)objectLayerForConduitType4] == go)
+					{
+						Grid.Objects[num9, (int)objectLayerForConduitType4] = null;
+					}
+				}
 			}
 		}
 	}
@@ -655,62 +711,69 @@ public class BuildingDef : Def
 		return Vector3.right * (0.5f * (float)((this.WidthInCells + 1) % 2));
 	}
 
-	public bool IsValidPlaceLocation(GameObject go, Vector3 pos, Orientation orientation, out string fail_reason)
+	public bool IsValidPlaceLocation(GameObject source_go, Vector3 pos, Orientation orientation, out string fail_reason)
 	{
 		int num = Grid.PosToCell(pos);
-		return this.IsValidPlaceLocation(go, num, orientation, false, out fail_reason);
+		return this.IsValidPlaceLocation(source_go, num, orientation, false, out fail_reason);
 	}
 
-	public bool IsValidPlaceLocation(GameObject go, Vector3 pos, Orientation orientation, bool replace_tile, out string fail_reason)
+	public bool IsValidPlaceLocation(GameObject source_go, Vector3 pos, Orientation orientation, bool replace_tile, out string fail_reason)
 	{
 		int num = Grid.PosToCell(pos);
-		return this.IsValidPlaceLocation(go, num, orientation, replace_tile, out fail_reason);
+		return this.IsValidPlaceLocation(source_go, num, orientation, replace_tile, out fail_reason);
 	}
 
-	public bool IsValidPlaceLocation(GameObject go, int cell, Orientation orientation, out string fail_reason)
+	public bool IsValidPlaceLocation(GameObject source_go, int cell, Orientation orientation, out string fail_reason)
+	{
+		return this.IsValidPlaceLocation(source_go, cell, orientation, false, out fail_reason);
+	}
+
+	public bool IsValidPlaceLocation(GameObject source_go, int cell, Orientation orientation, bool replace_tile, out string fail_reason)
 	{
 		if (!Grid.IsValidBuildingCell(cell))
 		{
 			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
 			return false;
 		}
-		if (this.BuildLocationRule == BuildLocationRule.OnWall)
-		{
-			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
-			{
-				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_WALL;
-				return false;
-			}
-		}
-		else if (this.BuildLocationRule == BuildLocationRule.InCorner && !BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
-		{
-			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_CORNER;
-			return false;
-		}
-		return this.IsAreaClear(go, cell, orientation, this.ObjectLayer, this.TileLayer, false, out fail_reason);
-	}
-
-	public bool IsValidPlaceLocation(GameObject go, int cell, Orientation orientation, bool replace_tile, out string fail_reason)
-	{
-		if (!Grid.IsValidBuildingCell(cell))
+		if ((int)Grid.WorldIdx[cell] != ClusterManager.Instance.activeWorldId)
 		{
 			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_INVALID_CELL;
 			return false;
 		}
-		if (this.BuildLocationRule == BuildLocationRule.OnWall)
+		if (this.BuildLocationRule == BuildLocationRule.OnRocketEnvelope)
 		{
-			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, GameTags.RocketEnvelopeTile))
+			{
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_ONROCKETENVELOPE;
+				return false;
+			}
+		}
+		else if (this.BuildLocationRule == BuildLocationRule.OnWall)
+		{
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_WALL;
 				return false;
 			}
 		}
-		else if (this.BuildLocationRule == BuildLocationRule.InCorner && !BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
+		else if (this.BuildLocationRule == BuildLocationRule.InCorner)
 		{
-			fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_CORNER;
-			return false;
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
+			{
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_CORNER;
+				return false;
+			}
 		}
-		return this.IsAreaClear(go, cell, orientation, this.ObjectLayer, this.TileLayer, replace_tile, out fail_reason);
+		else if (this.BuildLocationRule == BuildLocationRule.BelowRocketCeiling)
+		{
+			WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[cell]);
+			if ((float)(Grid.CellToXY(cell).y + 35 + source_go.GetComponent<Building>().Def.HeightInCells) >= world.maximumBounds.y - (float)Grid.TopBorderHeight)
+			{
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_BELOWROCKETCEILING;
+				return false;
+			}
+		}
+		return this.IsAreaClear(source_go, cell, orientation, this.ObjectLayer, this.TileLayer, replace_tile, out fail_reason);
 	}
 
 	public bool IsValidReplaceLocation(Vector3 pos, Orientation orientation, ObjectLayer replace_layer, ObjectLayer obj_layer)
@@ -772,14 +835,14 @@ public class BuildingDef : Def
 		case BuildLocationRule.OnFloor:
 		case BuildLocationRule.OnCeiling:
 		case BuildLocationRule.OnFoundationRotatable:
-			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_FLOOR;
 			}
 			break;
 		case BuildLocationRule.OnFloorOverSpace:
-			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_FLOOR;
@@ -791,14 +854,14 @@ public class BuildingDef : Def
 			}
 			break;
 		case BuildLocationRule.OnWall:
-			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_WALL;
 			}
 			break;
 		case BuildLocationRule.InCorner:
-			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells))
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_CORNER;
@@ -871,7 +934,7 @@ public class BuildingDef : Def
 			break;
 		}
 		case BuildLocationRule.OnFloorOrBuildingAttachPoint:
-			if (!BuildingDef.CheckFoundation(cell, orientation, BuildLocationRule.OnFloor, this.WidthInCells, this.HeightInCells))
+			if (!BuildingDef.CheckFoundation(cell, orientation, BuildLocationRule.OnFloor, this.WidthInCells, this.HeightInCells, default(Tag)))
 			{
 				flag = false;
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_FLOOR_OR_ATTACHPOINT;
@@ -896,6 +959,13 @@ public class BuildingDef : Def
 			else
 			{
 				flag = true;
+			}
+			break;
+		case BuildLocationRule.OnRocketEnvelope:
+			if (!BuildingDef.CheckFoundation(cell, orientation, this.BuildLocationRule, this.WidthInCells, this.HeightInCells, GameTags.RocketEnvelopeTile))
+			{
+				flag = false;
+				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_ONROCKETENVELOPE;
 			}
 			break;
 		}
@@ -951,7 +1021,7 @@ public class BuildingDef : Def
 				return false;
 			}
 		}
-		if (this.RequiresPowerOutput || this.GeneratorWattageRating > 0f)
+		if (this.RequiresPowerOutput)
 		{
 			CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(this.PowerOutputOffset, orientation);
 			int num2 = Grid.OffsetCell(cell, rotatedCellOffset2);
@@ -991,10 +1061,16 @@ public class BuildingDef : Def
 			ISecondaryInput component2 = component.Def.BuildingComplete.GetComponent<ISecondaryInput>();
 			if (component2 != null)
 			{
-				ConduitType secondaryConduitType = component2.GetSecondaryConduitType();
-				CellOffset rotatedCellOffset3 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(), orientation);
-				int num3 = Grid.OffsetCell(cell, rotatedCellOffset3);
-				flag = this.IsValidConduitConnection(source_go, secondaryConduitType, num3, ref fail_reason);
+				for (int i = 0; i < 4; i++)
+				{
+					ConduitType conduitType = (ConduitType)i;
+					if (conduitType != ConduitType.None && component2.HasSecondaryConduitType(conduitType))
+					{
+						CellOffset rotatedCellOffset3 = Rotatable.GetRotatedCellOffset(component2.GetSecondaryConduitOffset(conduitType), orientation);
+						int num3 = Grid.OffsetCell(cell, rotatedCellOffset3);
+						flag = this.IsValidConduitConnection(source_go, conduitType, num3, ref fail_reason);
+					}
+				}
 			}
 		}
 		if (flag)
@@ -1002,10 +1078,16 @@ public class BuildingDef : Def
 			ISecondaryOutput component3 = component.Def.BuildingComplete.GetComponent<ISecondaryOutput>();
 			if (component3 != null)
 			{
-				ConduitType secondaryConduitType2 = component3.GetSecondaryConduitType();
-				CellOffset rotatedCellOffset4 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(), orientation);
-				int num4 = Grid.OffsetCell(cell, rotatedCellOffset4);
-				flag = this.IsValidConduitConnection(source_go, secondaryConduitType2, num4, ref fail_reason);
+				for (int j = 0; j < 4; j++)
+				{
+					ConduitType conduitType2 = (ConduitType)j;
+					if (conduitType2 != ConduitType.None && component3.HasSecondaryConduitType(conduitType2))
+					{
+						CellOffset rotatedCellOffset4 = Rotatable.GetRotatedCellOffset(component3.GetSecondaryConduitOffset(conduitType2), orientation);
+						int num4 = Grid.OffsetCell(cell, rotatedCellOffset4);
+						flag = this.IsValidConduitConnection(source_go, conduitType2, num4, ref fail_reason);
+					}
+				}
 			}
 		}
 		return flag;
@@ -1184,7 +1266,7 @@ public class BuildingDef : Def
 		return -(width - 1) / 2;
 	}
 
-	public static bool CheckFoundation(int cell, Orientation orientation, BuildLocationRule location_rule, int width, int height)
+	public static bool CheckFoundation(int cell, Orientation orientation, BuildLocationRule location_rule, int width, int height, Tag optionalFoundationRequiredTag = default(Tag))
 	{
 		if (location_rule == BuildLocationRule.OnWall)
 		{
@@ -1192,12 +1274,12 @@ public class BuildingDef : Def
 		}
 		if (location_rule == BuildLocationRule.InCorner)
 		{
-			return BuildingDef.CheckBaseFoundation(cell, orientation, BuildLocationRule.OnCeiling, width, height) && BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
+			return BuildingDef.CheckBaseFoundation(cell, orientation, BuildLocationRule.OnCeiling, width, height, optionalFoundationRequiredTag) && BuildingDef.CheckWallFoundation(cell, width, height, orientation != Orientation.FlipH);
 		}
-		return BuildingDef.CheckBaseFoundation(cell, orientation, location_rule, width, height);
+		return BuildingDef.CheckBaseFoundation(cell, orientation, location_rule, width, height, optionalFoundationRequiredTag);
 	}
 
-	public static bool CheckBaseFoundation(int cell, Orientation orientation, BuildLocationRule location_rule, int width, int height)
+	public static bool CheckBaseFoundation(int cell, Orientation orientation, BuildLocationRule location_rule, int width, int height, Tag optionalFoundationRequiredTag = default(Tag))
 	{
 		int num = -(width - 1) / 2;
 		int num2 = width / 2;
@@ -1206,6 +1288,10 @@ public class BuildingDef : Def
 			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset((location_rule == BuildLocationRule.OnCeiling) ? new CellOffset(i, height) : new CellOffset(i, -1), orientation);
 			int num3 = Grid.OffsetCell(cell, rotatedCellOffset);
 			if (!Grid.IsValidBuildingCell(num3) || !Grid.Solid[num3])
+			{
+				return false;
+			}
+			if (optionalFoundationRequiredTag.IsValid && (!Grid.ObjectLayers[9].ContainsKey(num3) || !Grid.ObjectLayers[9][num3].HasTag(optionalFoundationRequiredTag)))
 			{
 				return false;
 			}
@@ -1300,16 +1386,16 @@ public class BuildingDef : Def
 		}
 		if (!this.Deprecated)
 		{
-			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite));
+			Db.Get().TechItems.AddTechItem(this.PrefabID, this.Name, this.Effect, new Func<string, bool, Sprite>(this.GetUISprite), this.RequiredDlcIds);
 		}
 	}
 
-	public bool MaterialsAvailable(IList<Tag> selected_elements)
+	public bool MaterialsAvailable(IList<Tag> selected_elements, WorldContainer world)
 	{
 		bool flag = true;
 		foreach (Recipe.Ingredient ingredient in this.CraftRecipe.GetAllIngredients(selected_elements))
 		{
-			if (WorldInventory.Instance.GetAmount(ingredient.tag) < ingredient.amount)
+			if (world.worldInventory.GetAmount(ingredient.tag, true) < ingredient.amount)
 			{
 				flag = false;
 				break;
@@ -1320,7 +1406,7 @@ public class BuildingDef : Def
 
 	public bool CheckRequiresBuildingCellVisualizer()
 	{
-		return this.CheckRequiresPowerInput() || this.CheckRequiresPowerOutput() || this.CheckRequiresGasInput() || this.CheckRequiresGasOutput() || this.CheckRequiresLiquidInput() || this.CheckRequiresLiquidOutput() || this.CheckRequiresSolidInput() || this.CheckRequiresSolidOutput() || this.DiseaseCellVisName != null;
+		return this.CheckRequiresPowerInput() || this.CheckRequiresPowerOutput() || this.CheckRequiresGasInput() || this.CheckRequiresGasOutput() || this.CheckRequiresLiquidInput() || this.CheckRequiresLiquidOutput() || this.CheckRequiresSolidInput() || this.CheckRequiresSolidOutput() || this.CheckRequiresHighEnergyParticleInput() || this.CheckRequiresHighEnergyParticleOutput() || this.DiseaseCellVisName != null;
 	}
 
 	public bool CheckRequiresPowerInput()
@@ -1330,7 +1416,7 @@ public class BuildingDef : Def
 
 	public bool CheckRequiresPowerOutput()
 	{
-		return this.GeneratorWattageRating > 0f || this.RequiresPowerOutput;
+		return this.RequiresPowerOutput;
 	}
 
 	public bool CheckRequiresGasInput()
@@ -1363,7 +1449,17 @@ public class BuildingDef : Def
 		return this.OutputConduitType == ConduitType.Solid;
 	}
 
-	public string DlcId;
+	public bool CheckRequiresHighEnergyParticleInput()
+	{
+		return this.UseHighEnergyParticleInputPort;
+	}
+
+	public bool CheckRequiresHighEnergyParticleOutput()
+	{
+		return this.UseHighEnergyParticleOutputPort;
+	}
+
+	public string[] RequiredDlcIds;
 
 	public float EnergyConsumptionWhenActive;
 
@@ -1439,6 +1535,12 @@ public class BuildingDef : Def
 
 	public bool CanMove;
 
+	public bool Cancellable = true;
+
+	public bool OnePerWorld;
+
+	public bool PlayConstructionSounds = true;
+
 	public List<Tag> ReplacementTags;
 
 	public List<ObjectLayer> ReplacementCandidateLayers;
@@ -1456,8 +1558,6 @@ public class BuildingDef : Def
 	public ObjectLayer TileLayer = ObjectLayer.NumLayers;
 
 	public ObjectLayer ReplacementLayer = ObjectLayer.NumLayers;
-
-	public Vector3 placementPivot;
 
 	public string DiseaseCellVisName;
 
@@ -1488,6 +1588,14 @@ public class BuildingDef : Def
 	public Orientation InitialOrientation;
 
 	public bool Deprecated;
+
+	public bool UseHighEnergyParticleInputPort;
+
+	public bool UseHighEnergyParticleOutputPort;
+
+	public CellOffset HighEnergyParticleInputOffset;
+
+	public CellOffset HighEnergyParticleOutputOffset;
 
 	public CellOffset PowerInputOffset;
 

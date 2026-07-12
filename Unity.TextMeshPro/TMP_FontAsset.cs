@@ -235,7 +235,14 @@ namespace TMPro
 				}
 				else if (!TMP_Settings.warningsDisabled)
 				{
-					Debug.LogWarning(string.Concat(new object[] { "Kerning Key for [", kerningPairKey.ascii_Left, "] and [", kerningPairKey.ascii_Right, "] already exists." }));
+					Debug.LogWarning(string.Concat(new string[]
+					{
+						"Kerning Key for [",
+						kerningPairKey.ascii_Left.ToString(),
+						"] and [",
+						kerningPairKey.ascii_Right.ToString(),
+						"] already exists."
+					}));
 				}
 			}
 			this.hashCode = TMP_TextUtilities.GetSimpleHashCode(base.name);

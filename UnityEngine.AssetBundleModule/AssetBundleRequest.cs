@@ -9,13 +9,18 @@ namespace UnityEngine
 	[RequiredByNativeCode]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetOperation.h")]
 	[StructLayout(LayoutKind.Sequential)]
-	public class AssetBundleRequest : AsyncOperation
+	public class AssetBundleRequest : ResourceRequest
 	{
-		public extern Object asset
+		[NativeMethod("GetLoadedAsset")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		protected override extern Object GetResult();
+
+		public new Object asset
 		{
-			[NativeMethod("GetLoadedAsset")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return this.GetResult();
+			}
 		}
 
 		public extern Object[] allAssets

@@ -40,7 +40,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		{
 			return;
 		}
-		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		this.operatingEnergyStatusItem.resolveStringCallback = delegate(string str, object ev_data)
 		{
 			int num = (int)ev_data;

@@ -54,7 +54,7 @@ public class InitializeCheck : MonoBehaviour
 			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, SaveLoader.GetSavePrefix());
 			break;
 		case InitializeCheck.SavePathIssue.WorldGenFilesFail:
-			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FILES, WorldGen.WORLDGEN_SAVE_FILENAME + "\n" + WorldGen.SIM_SAVE_FILENAME);
+			text = string.Format(UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FILES, WorldGen.WORLDGEN_SAVE_FILENAME + "\n" + WorldGen.GetSIMSaveFilename(-1));
 			break;
 		}
 		if (text != null)
@@ -84,7 +84,7 @@ public class InitializeCheck : MonoBehaviour
 		catch
 		{
 			InitializeCheck.savePathState = InitializeCheck.SavePathIssue.WriteTestFail;
-			goto IL_00E6;
+			goto IL_00E7;
 		}
 		using (FileStream fileStream2 = File.Open(savePrefix + InitializeCheck.testSave, FileMode.Create, FileAccess.Write))
 		{
@@ -98,7 +98,7 @@ public class InitializeCheck : MonoBehaviour
 			{
 				fileStream2.Close();
 				InitializeCheck.savePathState = InitializeCheck.SavePathIssue.SpaceTestFail;
-				goto IL_00E6;
+				goto IL_00E7;
 			}
 		}
 		try
@@ -106,7 +106,7 @@ public class InitializeCheck : MonoBehaviour
 			using (File.Open(WorldGen.WORLDGEN_SAVE_FILENAME, FileMode.Append))
 			{
 			}
-			using (File.Open(WorldGen.SIM_SAVE_FILENAME, FileMode.Append))
+			using (File.Open(WorldGen.GetSIMSaveFilename(-1), FileMode.Append))
 			{
 			}
 		}
@@ -114,7 +114,7 @@ public class InitializeCheck : MonoBehaviour
 		{
 			InitializeCheck.savePathState = InitializeCheck.SavePathIssue.WorldGenFilesFail;
 		}
-		IL_00E6:
+		IL_00E7:
 		try
 		{
 			if (File.Exists(savePrefix + InitializeCheck.testFile))

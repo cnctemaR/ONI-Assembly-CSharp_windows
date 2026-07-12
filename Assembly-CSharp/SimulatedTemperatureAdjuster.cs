@@ -11,15 +11,10 @@ public class SimulatedTemperatureAdjuster
 		this.heatCapacity = heat_capacity;
 		this.thermalConductivity = thermal_conductivity;
 		this.storage = storage;
-		storage.gameObject.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		storage.gameObject.Subscribe(824508782, new Action<object>(this.OnActivechanged));
 		storage.gameObject.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
-		this.operational = true;
 		Operational component = storage.gameObject.GetComponent<Operational>();
-		if (component != null)
-		{
-			this.operational = component.IsOperational;
-		}
-		this.OnOperationalChanged(this.operational);
+		this.OnActivechanged(component);
 	}
 
 	public List<Descriptor> GetDescriptors()
@@ -66,7 +61,7 @@ public class SimulatedTemperatureAdjuster
 			float num = this.temperature;
 			float num2 = this.heatCapacity;
 			float num3 = this.thermalConductivity;
-			if (!this.operational)
+			if (!this.active)
 			{
 				num = 0f;
 				num2 = 0f;
@@ -76,10 +71,11 @@ public class SimulatedTemperatureAdjuster
 		}
 	}
 
-	private void OnOperationalChanged(object data)
+	private void OnActivechanged(object data)
 	{
-		this.operational = (bool)data;
-		if (this.operational)
+		Operational operational = (Operational)data;
+		this.active = operational.IsActive;
+		if (this.active)
 		{
 			using (List<GameObject>.Enumerator enumerator = this.storage.items.GetEnumerator())
 			{
@@ -131,7 +127,7 @@ public class SimulatedTemperatureAdjuster
 		{
 			return;
 		}
-		if (this.operational && component2.storage == this.storage)
+		if (this.active && component2.storage == this.storage)
 		{
 			this.Register(component);
 			return;
@@ -145,7 +141,7 @@ public class SimulatedTemperatureAdjuster
 
 	private float thermalConductivity;
 
-	private bool operational;
+	private bool active;
 
 	private Storage storage;
 }

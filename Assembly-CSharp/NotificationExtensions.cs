@@ -20,7 +20,15 @@ public static class NotificationExtensions
 		{
 			if (countNames)
 			{
-				text = string.Concat(new object[] { text, "\n", keyValuePair.Key, "(", keyValuePair.Value, ")" });
+				text = string.Concat(new string[]
+				{
+					text,
+					"\n",
+					keyValuePair.Key,
+					"(",
+					keyValuePair.Value.ToString(),
+					")"
+				});
 			}
 			else
 			{

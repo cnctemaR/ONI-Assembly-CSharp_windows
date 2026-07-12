@@ -551,7 +551,9 @@ public static class DebugExtension
 		{
 			if (includeInfo)
 			{
-				text = text + methods[i] + "\n";
+				string text2 = text;
+				MethodInfo methodInfo = methods[i];
+				text = text2 + ((methodInfo != null) ? methodInfo.ToString() : null) + "\n";
 			}
 			else
 			{
@@ -569,7 +571,9 @@ public static class DebugExtension
 		{
 			if (includeInfo)
 			{
-				text = text + methods[i] + "\n";
+				string text2 = text;
+				MethodInfo methodInfo = methods[i];
+				text = text2 + ((methodInfo != null) ? methodInfo.ToString() : null) + "\n";
 			}
 			else
 			{

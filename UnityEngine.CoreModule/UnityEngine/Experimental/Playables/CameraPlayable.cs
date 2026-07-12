@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
+	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
 	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[RequiredByNativeCode]
 	public struct CameraPlayable : IPlayable, IEquatable<CameraPlayable>
 	{
 		public static CameraPlayable Create(PlayableGraph graph, Camera camera)

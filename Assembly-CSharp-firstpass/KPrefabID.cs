@@ -173,7 +173,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		if (this.Tags.Add(tag))
 		{
 			this.dirtyTagBits = true;
-			base.Trigger(-1582839653, null);
+			base.Trigger(-1582839653, new TagChangedEventData(tag, true));
 		}
 		if (serialize)
 		{
@@ -186,7 +186,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		if (this.Tags.Remove(tag))
 		{
 			this.dirtyTagBits = true;
-			base.Trigger(-1582839653, null);
+			base.Trigger(-1582839653, new TagChangedEventData(tag, false));
 		}
 		this.serializedTags.Remove(tag);
 	}
@@ -238,6 +238,32 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		return this.tagBits.HasAny(ref search_tags);
 	}
 
+	public bool HasAllTags(List<Tag> search_tags)
+	{
+		this.InitializeTags(false);
+		foreach (Tag tag in search_tags)
+		{
+			if (!this.tags.Contains(tag))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public bool HasAllTags(Tag[] search_tags)
+	{
+		this.InitializeTags(false);
+		foreach (Tag tag in search_tags)
+		{
+			if (!this.tags.Contains(tag))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public bool HasAllTags(ref TagBits search_tags)
 	{
 		this.UpdateTagBits();
@@ -272,7 +298,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public string GetDebugName()
 	{
-		return string.Concat(new object[] { base.name, "(", this.InstanceID, ")" });
+		return base.name + "(" + this.InstanceID.ToString() + ")";
 	}
 
 	protected override void OnCleanUp()

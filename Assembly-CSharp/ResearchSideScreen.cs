@@ -58,7 +58,7 @@ public class ResearchSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<ResearchCenter>() != null;
+		return target.GetComponent<ResearchCenter>() != null || target.GetComponent<NuclearResearchCenter>() != null;
 	}
 
 	private void RefreshDisplayState(object data = null)
@@ -67,57 +67,67 @@ public class ResearchSideScreen : SideScreenContent
 		{
 			return;
 		}
+		string text = "";
 		ResearchCenter component = SelectTool.Instance.selected.GetComponent<ResearchCenter>();
-		if (component == null)
+		NuclearResearchCenter component2 = SelectTool.Instance.selected.GetComponent<NuclearResearchCenter>();
+		if (component != null)
+		{
+			text = component.research_point_type_id;
+		}
+		if (component2 != null)
+		{
+			text = component2.researchTypeID;
+		}
+		if (component == null && component2 == null)
 		{
 			return;
 		}
-		this.researchButtonIcon.sprite = Research.Instance.researchTypes.GetResearchType(component.research_point_type_id).sprite;
+		this.researchButtonIcon.sprite = Research.Instance.researchTypes.GetResearchType(text).sprite;
 		TechInstance activeResearch = Research.Instance.GetActiveResearch();
 		if (activeResearch == null)
 		{
 			this.DescriptionText.text = "<b>" + UI.UISIDESCREENS.RESEARCHSIDESCREEN.NOSELECTEDRESEARCH + "</b>";
 			return;
 		}
-		string text = "";
-		if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
+		string text2 = "";
+		if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(text) || activeResearch.tech.costsByResearchTypeID[text] <= 0f)
 		{
-			text += "<color=#7f7f7f>";
+			text2 += "<color=#7f7f7f>";
 		}
-		text = text + "<b>" + activeResearch.tech.Name + "</b>";
-		if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
+		text2 = text2 + "<b>" + activeResearch.tech.Name + "</b>";
+		if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(text) || activeResearch.tech.costsByResearchTypeID[text] <= 0f)
 		{
-			text += "</color>";
+			text2 += "</color>";
 		}
 		foreach (KeyValuePair<string, float> keyValuePair in activeResearch.tech.costsByResearchTypeID)
 		{
 			if (keyValuePair.Value != 0f)
 			{
-				bool flag = keyValuePair.Key == component.research_point_type_id;
-				text += "\n   ";
-				text += "<b>";
+				bool flag = keyValuePair.Key == text;
+				text2 += "\n   ";
+				text2 += "<b>";
 				if (!flag)
 				{
-					text += "<color=#7f7f7f>";
+					text2 += "<color=#7f7f7f>";
 				}
-				text = string.Concat(new object[]
+				text2 = string.Concat(new string[]
 				{
-					text,
+					text2,
 					"- ",
 					Research.Instance.researchTypes.GetResearchType(keyValuePair.Key).name,
 					": ",
-					activeResearch.progressInventory.PointsByTypeID[keyValuePair.Key],
+					activeResearch.progressInventory.PointsByTypeID[keyValuePair.Key].ToString(),
 					"/",
-					activeResearch.tech.costsByResearchTypeID[keyValuePair.Key]
+					activeResearch.tech.costsByResearchTypeID[keyValuePair.Key].ToString()
 				});
 				if (!flag)
 				{
-					text += "</color>";
+					text2 += "</color>";
 				}
-				text += "</b>";
+				text2 += "</b>";
 			}
 		}
-		this.DescriptionText.text = text;
+		this.DescriptionText.text = text2;
 	}
 
 	public KButton selectResearchButton;

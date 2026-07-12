@@ -19,8 +19,8 @@ namespace UnityEngineInternal
 			}
 		}
 
-		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[NativeMethod(Name = "GetFramebufferDepthMemorylessMode")]
+		[StaticAccessor("GetPlayerSettings()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern MemorylessMode GetFramebufferDepthMemorylessMode();
 

@@ -17,25 +17,18 @@ namespace KMod
 			return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), this.folder));
 		}
 
-		private void Subscribe(string id, long timestamp, IFileSource file_source)
+		private void Subscribe(string directoryName, long timestamp, IFileSource file_source)
 		{
-			FileHandle fileHandle = file_source.GetFileSystem().FindFileHandle(Path.Combine(file_source.GetRoot(), "mod.yaml"));
-			Local.Header header = ((fileHandle.full_path != null) ? YamlIO.LoadFile<Local.Header>(fileHandle, null, null) : null);
-			if (header == null)
+			Label label = new Label
 			{
-				header = new Local.Header
-				{
-					title = id,
-					description = id
-				};
-			}
-			Mod mod = new Mod(new Label
-			{
-				id = id,
+				id = directoryName,
 				distribution_platform = this.distribution_platform,
-				version = (long)id.GetHashCode(),
-				title = header.title
-			}, header.description, file_source, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_LOCAL_MOD, delegate
+				version = (long)directoryName.GetHashCode(),
+				title = directoryName
+			};
+			KModHeader header = KModUtil.GetHeader(file_source, label.defaultStaticID, directoryName, directoryName);
+			label.title = header.title;
+			Mod mod = new Mod(label, header.staticID, header.description, file_source, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_LOCAL_MOD, delegate
 			{
 				Application.OpenURL("file://" + file_source.GetRoot());
 			});
@@ -60,13 +53,6 @@ namespace KMod
 				string name = directoryInfo2.Name;
 				this.Subscribe(name, directoryInfo2.LastWriteTime.ToFileTime(), new Directory(directoryInfo2.FullName));
 			}
-		}
-
-		private class Header
-		{
-			public string title { get; set; }
-
-			public string description { get; set; }
 		}
 	}
 }

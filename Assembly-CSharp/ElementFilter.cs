@@ -183,7 +183,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 	{
 		if (ElementFilter.filterStatusItem == null)
 		{
-			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.LiquidConduits.ID, true, 129022);
+			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.LiquidConduits.ID, true, 129022, null);
 			ElementFilter.filterStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementFilter elementFilter = (ElementFilter)data;
@@ -219,12 +219,12 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 		return flag;
 	}
 
-	public ConduitType GetSecondaryConduitType()
+	public bool HasSecondaryConduitType(ConduitType type)
 	{
-		return this.portInfo.conduitType;
+		return this.portInfo.conduitType == type;
 	}
 
-	public CellOffset GetSecondaryConduitOffset()
+	public CellOffset GetSecondaryConduitOffset(ConduitType type)
 	{
 		return this.portInfo.offset;
 	}

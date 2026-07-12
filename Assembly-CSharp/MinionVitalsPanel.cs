@@ -16,6 +16,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.Wildness, null);
 		this.AddAmountLine(Db.Get().Amounts.Incubation, null);
 		this.AddAmountLine(Db.Get().Amounts.Viability, null);
+		this.AddAmountLine(Db.Get().Amounts.PowerCharge, null);
 		this.AddAmountLine(Db.Get().Amounts.Fertility, null);
 		this.AddAmountLine(Db.Get().Amounts.Age, null);
 		this.AddAmountLine(Db.Get().Amounts.Stress, null);
@@ -27,6 +28,12 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, null);
 		this.AddAmountLine(Db.Get().Amounts.Temperature, null);
 		this.AddAmountLine(Db.Get().Amounts.Decor, null);
+		this.AddAmountLine(Db.Get().Amounts.InternalBattery, null);
+		this.AddAmountLine(Db.Get().Amounts.InternalChemicalBattery, null);
+		if (DlcManager.FeatureRadiationEnabled())
+		{
+			this.AddAmountLine(Db.Get().Amounts.RadiationBalance, null);
+		}
 		this.AddCheckboxLine(Db.Get().Amounts.AirPressure, this.conditionsContainerNormal, (GameObject go) => this.GetAirPressureLabel(go), delegate(GameObject go)
 		{
 			if (go.GetComponent<PressureVulnerable>() != null && go.GetComponent<PressureVulnerable>().pressure_sensitive)
@@ -73,6 +80,15 @@ public class MinionVitalsPanel : KMonoBehaviour
 			return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
 		}, (GameObject go) => this.check_irrigation(go), (GameObject go) => this.GetIrrigationTooltip(go));
 		this.AddCheckboxLine(Db.Get().Amounts.Illumination, this.conditionsContainerNormal, (GameObject go) => this.GetIlluminationLabel(go), (GameObject go) => MinionVitalsPanel.CheckboxLineDisplayType.Normal, (GameObject go) => this.check_illumination(go), (GameObject go) => this.GetIlluminationTooltip(go));
+		this.AddCheckboxLine(null, this.conditionsContainerNormal, (GameObject go) => this.GetRadiationLabel(go), delegate(GameObject go)
+		{
+			AttributeInstance attributeInstance = go.GetAttributes().Get(Db.Get().PlantAttributes.MaxRadiationThreshold);
+			if (attributeInstance != null && attributeInstance.GetTotalValue() > 0f)
+			{
+				return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
+			}
+			return MinionVitalsPanel.CheckboxLineDisplayType.Hidden;
+		}, (GameObject go) => this.check_radiation(go), (GameObject go) => this.GetRadiationTooltip(go));
 	}
 
 	protected override void OnCmpEnable()
@@ -275,8 +291,8 @@ public class MinionVitalsPanel : KMonoBehaviour
 				reference.text = (flag4 ? string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_DECOR.BASE, Array.Empty<object>()) : string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 0.25f * 100f)));
 				reference.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.WILD_INSTANT.TOOLTIP, Array.Empty<object>()));
 				LocText reference2 = this.conditionsContainerAdditional.GetComponent<HierarchyReferences>().GetReference<LocText>("Label");
-				reference2.color = (this.selectedEntity.GetComponent<ReceptacleMonitor>().Replanted ? Color.black : Color.grey);
-				reference2.text = "";
+				ReceptacleMonitor component3 = this.selectedEntity.GetComponent<ReceptacleMonitor>();
+				reference2.color = ((component3 == null || component3.Replanted) ? Color.black : Color.grey);
 				reference2.text = string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.BASE, Util.FormatTwoDecimalPlace(num * 100f));
 				reference2.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.VITALSSCREEN.CONDITIONS_GROWING.ADDITIONAL_DOMESTIC_INSTANT.TOOLTIP, Array.Empty<object>()));
 			}
@@ -357,6 +373,30 @@ public class MinionVitalsPanel : KMonoBehaviour
 		return UI.TOOLTIPS.VITALS_CHECKBOX_ILLUMINATION_LIGHT;
 	}
 
+	private string GetRadiationTooltip(GameObject go)
+	{
+		int num = Grid.PosToCell(go);
+		float num2 = (Grid.IsValidCell(num) ? Grid.Radiation[num] : 0f);
+		AttributeInstance attributeInstance = go.GetAttributes().Get(Db.Get().PlantAttributes.MinRadiationThreshold);
+		AttributeInstance attributeInstance2 = go.GetAttributes().Get(Db.Get().PlantAttributes.MaxRadiationThreshold);
+		MutantPlant component = go.GetComponent<MutantPlant>();
+		bool flag = component != null && component.IsOriginal;
+		string text;
+		if (attributeInstance.GetTotalValue() == 0f)
+		{
+			text = UI.TOOLTIPS.VITALS_CHECKBOX_RADIATION_NO_MIN.Replace("{rads}", GameUtil.GetFormattedRads(num2, GameUtil.TimeSlice.None)).Replace("{maxRads}", attributeInstance2.GetFormattedValue());
+		}
+		else
+		{
+			text = UI.TOOLTIPS.VITALS_CHECKBOX_RADIATION.Replace("{rads}", GameUtil.GetFormattedRads(num2, GameUtil.TimeSlice.None)).Replace("{minRads}", attributeInstance.GetFormattedValue()).Replace("{maxRads}", attributeInstance2.GetFormattedValue());
+		}
+		if (flag)
+		{
+			text += UI.GAMEOBJECTEFFECTS.TOOLTIPS.MUTANT_SEED_TOOLTIP;
+		}
+		return text;
+	}
+
 	private string GetReceptacleTooltip(GameObject go)
 	{
 		ReceptacleMonitor component = go.GetComponent<ReceptacleMonitor>();
@@ -401,9 +441,9 @@ public class MinionVitalsPanel : KMonoBehaviour
 		{
 			Db.Get().Amounts.Temperature.Name,
 			"\n    • ",
-			GameUtil.GetFormattedTemperature(component.internalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false, false),
+			GameUtil.GetFormattedTemperature(component.TemperatureWarningLow, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false, false),
 			" - ",
-			GameUtil.GetFormattedTemperature(component.internalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)
+			GameUtil.GetFormattedTemperature(component.TemperatureWarningHigh, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)
 		});
 	}
 
@@ -411,6 +451,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 	{
 		StateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.GenericInstance smi = go.GetSMI<FertilizationMonitor.Instance>();
 		string text = Db.Get().Amounts.Fertilization.Name;
+		float totalValue = go.GetAttributes().Get(Db.Get().PlantAttributes.FertilizerUsageMod).GetTotalValue();
 		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in smi.def.consumedElements)
 		{
 			text = string.Concat(new string[]
@@ -419,7 +460,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 				"\n    • ",
 				ElementLoader.GetElement(consumeInfo.tag).name,
 				" ",
-				GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
+				GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate * totalValue, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
 			});
 		}
 		return text;
@@ -427,21 +468,27 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	private string GetIrrigationLabel(GameObject go)
 	{
-		IrrigationMonitor.Instance smi = go.GetSMI<IrrigationMonitor.Instance>();
-		return string.Concat(new string[]
+		StateMachine<IrrigationMonitor, IrrigationMonitor.Instance, IStateMachineTarget, IrrigationMonitor.Def>.GenericInstance smi = go.GetSMI<IrrigationMonitor.Instance>();
+		string text = Db.Get().Amounts.Irrigation.Name;
+		float totalValue = go.GetAttributes().Get(Db.Get().PlantAttributes.FertilizerUsageMod).GetTotalValue();
+		foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in smi.def.consumedElements)
 		{
-			Db.Get().Amounts.Irrigation.Name,
-			"\n    • ",
-			ElementLoader.GetElement(smi.def.consumedElements[0].tag).name,
-			": ",
-			GameUtil.GetFormattedMass(smi.def.consumedElements[0].massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
-		});
+			text = string.Concat(new string[]
+			{
+				text,
+				"\n    • ",
+				ElementLoader.GetElement(consumeInfo.tag).name,
+				": ",
+				GameUtil.GetFormattedMass(consumeInfo.massConsumptionRate * totalValue, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
+			});
+		}
+		return text;
 	}
 
 	private string GetIlluminationLabel(GameObject go)
 	{
 		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
-		return Db.Get().Amounts.Illumination.Name + "\n    • " + (component.prefersDarkness ? UI.GAMEOBJECTEFFECTS.DARKNESS : UI.GAMEOBJECTEFFECTS.LIGHT);
+		return Db.Get().Amounts.Illumination.Name + "\n    • " + (component.prefersDarkness ? UI.GAMEOBJECTEFFECTS.DARKNESS.ToString() : GameUtil.GetFormattedLux(component.LightIntensityThreshold));
 	}
 
 	private string GetAtmosphereLabel(GameObject go)
@@ -453,6 +500,17 @@ public class MinionVitalsPanel : KMonoBehaviour
 			text = text + "\n    • " + element.name;
 		}
 		return text;
+	}
+
+	private string GetRadiationLabel(GameObject go)
+	{
+		AttributeInstance attributeInstance = go.GetAttributes().Get(Db.Get().PlantAttributes.MinRadiationThreshold);
+		AttributeInstance attributeInstance2 = go.GetAttributes().Get(Db.Get().PlantAttributes.MaxRadiationThreshold);
+		if (attributeInstance.GetTotalValue() == 0f)
+		{
+			return UI.GAMEOBJECTEFFECTS.AMBIENT_RADIATION + "\n    • " + UI.GAMEOBJECTEFFECTS.AMBIENT_NO_MIN_RADIATION_FMT.Replace("{maxRads}", attributeInstance2.GetFormattedValue());
+		}
+		return UI.GAMEOBJECTEFFECTS.AMBIENT_RADIATION + "\n    • " + UI.GAMEOBJECTEFFECTS.AMBIENT_RADIATION_FMT.Replace("{minRads}", attributeInstance.GetFormattedValue()).Replace("{maxRads}", attributeInstance2.GetFormattedValue());
 	}
 
 	private bool check_pressure(GameObject go)
@@ -477,6 +535,17 @@ public class MinionVitalsPanel : KMonoBehaviour
 	{
 		IlluminationVulnerable component = go.GetComponent<IlluminationVulnerable>();
 		return !(component != null) || component.IsComfortable();
+	}
+
+	private bool check_radiation(GameObject go)
+	{
+		AttributeInstance attributeInstance = go.GetAttributes().Get(Db.Get().PlantAttributes.MinRadiationThreshold);
+		if (attributeInstance != null && attributeInstance.GetTotalValue() != 0f)
+		{
+			int num = Grid.PosToCell(go);
+			return (Grid.IsValidCell(num) ? Grid.Radiation[num] : 0f) >= attributeInstance.GetTotalValue();
+		}
+		return true;
 	}
 
 	private bool check_receptacle(GameObject go)

@@ -11,7 +11,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		base.serializable = false;
+		base.serializable = StateMachine.SerializeType.Never;
 		this.root.Update(delegate(GermExposureMonitor.Instance smi, float dt)
 		{
 			smi.OnInhaleExposureTick(dt);
@@ -302,7 +302,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 
 		public void ContractGerms(string germ_id)
 		{
-			DebugUtil.DevAssert(this.GetExposureState(germ_id) == GermExposureMonitor.ExposureState.Exposed, "Duplicant is contracting a sickness but was never exposed to it!");
+			DebugUtil.DevAssert(this.GetExposureState(germ_id) == GermExposureMonitor.ExposureState.Exposed, "Duplicant is contracting a sickness but was never exposed to it!", null);
 			this.SetExposureState(germ_id, GermExposureMonitor.ExposureState.Contracted);
 		}
 
@@ -382,7 +382,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				Guid guid2;
 				this.statusItemHandles.TryGetValue(exposureType.germ_id, out guid2);
 				GermExposureMonitor.ExposureState exposureState = this.GetExposureState(exposureType.germ_id);
-				if (guid2 == Guid.Empty && (exposureState == GermExposureMonitor.ExposureState.Exposed || exposureState == GermExposureMonitor.ExposureState.Contracted))
+				if (guid2 == Guid.Empty && (exposureState == GermExposureMonitor.ExposureState.Exposed || exposureState == GermExposureMonitor.ExposureState.Contracted) && !string.IsNullOrEmpty(exposureType.sickness_id))
 				{
 					guid2 = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, new GermExposureMonitor.ExposureStatusData
 					{
@@ -397,11 +397,14 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 				this.statusItemHandles[exposureType.germ_id] = guid2;
 				if (guid == Guid.Empty && exposureState == GermExposureMonitor.ExposureState.Contact)
 				{
-					guid = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ContactWithGerms, new GermExposureMonitor.ExposureStatusData
+					if (!string.IsNullOrEmpty(exposureType.sickness_id))
 					{
-						exposure_type = exposureType,
-						owner = this
-					});
+						guid = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ContactWithGerms, new GermExposureMonitor.ExposureStatusData
+						{
+							exposure_type = exposureType,
+							owner = this
+						});
+					}
 				}
 				else if (guid != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Contact)
 				{
@@ -439,7 +442,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		{
 			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
-				if (!exposureType.infect_immediately)
+				if (!exposureType.infect_immediately && exposureType.sickness_id != null)
 				{
 					GermExposureMonitor.ExposureState exposureState = this.GetExposureState(exposureType.germ_id);
 					if (exposureState == GermExposureMonitor.ExposureState.Exposed)

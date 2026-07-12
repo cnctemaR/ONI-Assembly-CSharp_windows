@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[DesignerCategory("Component")]
 	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[DesignerCategory("Component")]
 	[ComVisible(true)]
 	public class Component : MarshalByRefObject, IComponent, IDisposable
 	{
@@ -97,8 +97,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IContainer Container
 		{
 			get

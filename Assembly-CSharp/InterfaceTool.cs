@@ -14,6 +14,14 @@ public class InterfaceTool : KMonoBehaviour
 		}
 	}
 
+	public virtual string[] DlcIDs
+	{
+		get
+		{
+			return DlcManager.AVAILABLE_ALL_VERSIONS;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -29,14 +37,19 @@ public class InterfaceTool : KMonoBehaviour
 
 	public virtual bool ShowHoverUI()
 	{
+		Vector3 vector = Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos());
+		if (OverlayScreen.Instance == null || !ClusterManager.Instance.IsPositionInActiveWorld(vector) || vector.x < 0f || vector.x > Grid.WidthInMeters || vector.y < 0f || vector.y > Grid.HeightInMeters)
+		{
+			return false;
+		}
 		bool flag = false;
 		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
 		if (current != null)
 		{
-			Vector3 vector = new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, 0f);
+			Vector3 vector2 = new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, 0f);
 			current.RaycastAll(new PointerEventData(current)
 			{
-				position = vector
+				position = vector2
 			}, this.castResults);
 			flag = this.castResults.Count == 0;
 		}
@@ -130,6 +143,13 @@ public class InterfaceTool : KMonoBehaviour
 	{
 		Vector3 vector = new Vector3(Grid.HalfCellSizeInMeters, Grid.HalfCellSizeInMeters, 0f);
 		return Grid.CellToPosCCC(Grid.PosToCell(input), Grid.SceneLayer.Background) + (minimize ? (-vector) : vector);
+	}
+
+	protected Vector2 GetWorldRestrictedPosition(Vector2 input)
+	{
+		input.x = Mathf.Clamp(input.x, ClusterManager.Instance.activeWorld.minimumBounds.x, ClusterManager.Instance.activeWorld.maximumBounds.x);
+		input.y = Mathf.Clamp(input.y, ClusterManager.Instance.activeWorld.minimumBounds.y, ClusterManager.Instance.activeWorld.maximumBounds.y);
+		return input;
 	}
 
 	protected void SetCursor(Texture2D new_cursor, Vector2 offset, CursorMode mode)

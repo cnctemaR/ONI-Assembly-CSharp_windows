@@ -1,13 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using FMOD.Studio;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesInstance>
+public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesInstance>, ILaunchableRocket
 {
+	public LaunchableRocketRegisterType registerType
+	{
+		get
+		{
+			return LaunchableRocketRegisterType.Spacecraft;
+		}
+	}
+
+	public GameObject LaunchableGameObject
+	{
+		get
+		{
+			return base.gameObject;
+		}
+	}
+
+	public float rocketSpeed { get; private set; }
+
+	public bool isLanding { get; private set; }
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -48,10 +67,6 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 	[Serialize]
 	private float flightAnimOffset;
 
-	private bool isLanding;
-
-	private float rocketSpeed;
-
 	private GameObject soundSpeakerObject;
 
 	public class StatesInstance : GameStateMachine<LaunchableRocket.States, LaunchableRocket.StatesInstance, LaunchableRocket, object>.GameInstance
@@ -77,8 +92,8 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.grounded;
-			base.serializable = true;
-			this.grounded.EventTransition(GameHashes.LaunchRocket, this.not_grounded.launch_pre, null).Enter(delegate(LaunchableRocket.StatesInstance smi)
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
+			this.grounded.EventTransition(GameHashes.DoLaunchRocket, this.not_grounded.launch_pre, null).Enter(delegate(LaunchableRocket.StatesInstance smi)
 			{
 				smi.master.rocketSpeed = 0f;
 				foreach (GameObject gameObject in smi.master.parts)
@@ -105,18 +120,18 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 				{
 					gameObject2.Trigger(-1358394196, null);
 				}
-				Game.Instance.Trigger(-1056989049, this);
+				Game.Instance.Trigger(705820818, this);
 				foreach (GameObject gameObject3 in smi.master.parts)
 				{
 					if (!(gameObject3 == null))
 					{
 						smi.master.takeOffLocation = Grid.PosToCell(smi.master.gameObject);
-						gameObject3.Trigger(-1056989049, null);
+						gameObject3.Trigger(705820818, null);
 					}
 				}
 				smi.SetMissionState(Spacecraft.MissionState.Launching);
 			}).ScheduleGoTo(5f, this.not_grounded.launch_loop);
-			this.not_grounded.launch_loop.EventTransition(GameHashes.ReturnRocket, this.not_grounded.returning, null).Update(delegate(LaunchableRocket.StatesInstance smi, float dt)
+			this.not_grounded.launch_loop.EventTransition(GameHashes.DoReturnRocket, this.not_grounded.returning, null).Update(delegate(LaunchableRocket.StatesInstance smi, float dt)
 			{
 				smi.master.isLanding = false;
 				bool flag = true;
@@ -138,7 +153,6 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 						smi.master.soundSpeakerObject.transform.SetLocalPosition(smi.master.flightAnimOffset * Vector3.up);
 						if (Grid.PosToXY(positionIncludingOffset).y > Singleton<KBatchedAnimUpdater>.Instance.GetVisibleSize().y)
 						{
-							gameObject4.GetComponent<RocketModule>().OnSuspend(null);
 							gameObject4.GetComponent<KBatchedAnimController>().enabled = false;
 						}
 						else
@@ -165,7 +179,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 					}
 				}
 				smi.SetMissionState(Spacecraft.MissionState.Underway);
-			}).EventTransition(GameHashes.ReturnRocket, this.not_grounded.returning, (LaunchableRocket.StatesInstance smi) => smi.IsMissionState(Spacecraft.MissionState.WaitingToLand));
+			}).EventTransition(GameHashes.DoReturnRocket, this.not_grounded.returning, (LaunchableRocket.StatesInstance smi) => smi.IsMissionState(Spacecraft.MissionState.WaitingToLand));
 			this.not_grounded.returning.Enter(delegate(LaunchableRocket.StatesInstance smi)
 			{
 				smi.master.isLanding = true;
@@ -246,7 +260,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 					{
 						if (!(gameObject8 == null))
 						{
-							gameObject8.Trigger(238242047, null);
+							gameObject8.Trigger(-887025858, null);
 						}
 					}
 					smi.GoTo(this.grounded);
@@ -314,138 +328,6 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 			public GameStateMachine<LaunchableRocket.States, LaunchableRocket.StatesInstance, LaunchableRocket, object>.State returning;
 
 			public GameStateMachine<LaunchableRocket.States, LaunchableRocket.StatesInstance, LaunchableRocket, object>.State landing_loop;
-		}
-	}
-
-	private class UpdateRocketLandingParameter : LoopingSoundParameterUpdater
-	{
-		public UpdateRocketLandingParameter()
-			: base("rocketLanding")
-		{
-		}
-
-		public override void Add(LoopingSoundParameterUpdater.Sound sound)
-		{
-			LaunchableRocket.UpdateRocketLandingParameter.Entry entry = new LaunchableRocket.UpdateRocketLandingParameter.Entry
-			{
-				rocketModule = sound.transform.GetComponent<RocketModule>(),
-				ev = sound.ev,
-				parameterId = sound.description.GetParameterId(base.parameter)
-			};
-			this.entries.Add(entry);
-		}
-
-		public override void Update(float dt)
-		{
-			foreach (LaunchableRocket.UpdateRocketLandingParameter.Entry entry in this.entries)
-			{
-				if (!(entry.rocketModule == null))
-				{
-					LaunchConditionManager conditionManager = entry.rocketModule.conditionManager;
-					if (!(conditionManager == null))
-					{
-						LaunchableRocket component = conditionManager.GetComponent<LaunchableRocket>();
-						if (!(component == null))
-						{
-							if (component.isLanding)
-							{
-								EventInstance eventInstance = entry.ev;
-								eventInstance.setParameterByID(entry.parameterId, 1f, false);
-							}
-							else
-							{
-								EventInstance eventInstance = entry.ev;
-								eventInstance.setParameterByID(entry.parameterId, 0f, false);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		public override void Remove(LoopingSoundParameterUpdater.Sound sound)
-		{
-			for (int i = 0; i < this.entries.Count; i++)
-			{
-				if (this.entries[i].ev.handle == sound.ev.handle)
-				{
-					this.entries.RemoveAt(i);
-					return;
-				}
-			}
-		}
-
-		private List<LaunchableRocket.UpdateRocketLandingParameter.Entry> entries = new List<LaunchableRocket.UpdateRocketLandingParameter.Entry>();
-
-		private struct Entry
-		{
-			public RocketModule rocketModule;
-
-			public EventInstance ev;
-
-			public PARAMETER_ID parameterId;
-		}
-	}
-
-	private class UpdateRocketSpeedParameter : LoopingSoundParameterUpdater
-	{
-		public UpdateRocketSpeedParameter()
-			: base("rocketSpeed")
-		{
-		}
-
-		public override void Add(LoopingSoundParameterUpdater.Sound sound)
-		{
-			LaunchableRocket.UpdateRocketSpeedParameter.Entry entry = new LaunchableRocket.UpdateRocketSpeedParameter.Entry
-			{
-				rocketModule = sound.transform.GetComponent<RocketModule>(),
-				ev = sound.ev,
-				parameterId = sound.description.GetParameterId(base.parameter)
-			};
-			this.entries.Add(entry);
-		}
-
-		public override void Update(float dt)
-		{
-			foreach (LaunchableRocket.UpdateRocketSpeedParameter.Entry entry in this.entries)
-			{
-				if (!(entry.rocketModule == null))
-				{
-					LaunchConditionManager conditionManager = entry.rocketModule.conditionManager;
-					if (!(conditionManager == null))
-					{
-						LaunchableRocket component = conditionManager.GetComponent<LaunchableRocket>();
-						if (!(component == null))
-						{
-							EventInstance ev = entry.ev;
-							ev.setParameterByID(entry.parameterId, component.rocketSpeed, false);
-						}
-					}
-				}
-			}
-		}
-
-		public override void Remove(LoopingSoundParameterUpdater.Sound sound)
-		{
-			for (int i = 0; i < this.entries.Count; i++)
-			{
-				if (this.entries[i].ev.handle == sound.ev.handle)
-				{
-					this.entries.RemoveAt(i);
-					return;
-				}
-			}
-		}
-
-		private List<LaunchableRocket.UpdateRocketSpeedParameter.Entry> entries = new List<LaunchableRocket.UpdateRocketSpeedParameter.Entry>();
-
-		private struct Entry
-		{
-			public RocketModule rocketModule;
-
-			public EventInstance ev;
-
-			public PARAMETER_ID parameterId;
 		}
 	}
 }

@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine.Assertions;
 using UnityEngine.Bindings;
 using UnityEngine.Profiling.Experimental;
 using UnityEngine.Scripting;
@@ -22,9 +21,9 @@ namespace UnityEngine.Profiling.Memory.Experimental
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<MetaData> createMetaData;
 
-		[NativeConditional("ENABLE_PROFILER")]
 		[NativeMethod("StartOperation")]
 		[StaticAccessor("profiling::memory::GetMemorySnapshotManager()", StaticAccessorType.Dot)]
+		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void StartOperation(uint captureFlag, bool requestScreenshot, string path, bool isRemote);
 
@@ -89,8 +88,6 @@ namespace UnityEngine.Profiling.Memory.Experimental
 				num4 = MemoryProfiler.WriteStringToByteArray(array2, num4, metaData.content);
 				num4 = MemoryProfiler.WriteIntToByteArray(array2, num4, metaData.platform.Length);
 				num4 = MemoryProfiler.WriteStringToByteArray(array2, num4, metaData.platform);
-				num4 = MemoryProfiler.WriteIntToByteArray(array2, num4, 0);
-				Assert.AreEqual(array2.Length, num4);
 				array = array2;
 			}
 			return array;

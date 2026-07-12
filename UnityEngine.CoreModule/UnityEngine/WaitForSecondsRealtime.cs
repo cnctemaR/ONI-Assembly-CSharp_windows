@@ -19,7 +19,7 @@ namespace UnityEngine
 				bool flag3 = !flag2;
 				if (flag3)
 				{
-					this.m_WaitUntilTime = -1f;
+					this.Reset();
 				}
 				return flag2;
 			}
@@ -28,6 +28,11 @@ namespace UnityEngine
 		public WaitForSecondsRealtime(float time)
 		{
 			this.waitTime = time;
+		}
+
+		public override void Reset()
+		{
+			this.m_WaitUntilTime = -1f;
 		}
 
 		private float m_WaitUntilTime = -1f;

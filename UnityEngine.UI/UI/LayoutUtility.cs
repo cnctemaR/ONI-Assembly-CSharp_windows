@@ -7,29 +7,29 @@ namespace UnityEngine.UI
 	{
 		public static float GetMinSize(RectTransform rect, int axis)
 		{
-			if (axis == 0)
+			if (axis != 0)
 			{
-				return LayoutUtility.GetMinWidth(rect);
+				return LayoutUtility.GetMinHeight(rect);
 			}
-			return LayoutUtility.GetMinHeight(rect);
+			return LayoutUtility.GetMinWidth(rect);
 		}
 
 		public static float GetPreferredSize(RectTransform rect, int axis)
 		{
-			if (axis == 0)
+			if (axis != 0)
 			{
-				return LayoutUtility.GetPreferredWidth(rect);
+				return LayoutUtility.GetPreferredHeight(rect);
 			}
-			return LayoutUtility.GetPreferredHeight(rect);
+			return LayoutUtility.GetPreferredWidth(rect);
 		}
 
 		public static float GetFlexibleSize(RectTransform rect, int axis)
 		{
-			if (axis == 0)
+			if (axis != 0)
 			{
-				return LayoutUtility.GetFlexibleWidth(rect);
+				return LayoutUtility.GetFlexibleHeight(rect);
 			}
-			return LayoutUtility.GetFlexibleHeight(rect);
+			return LayoutUtility.GetFlexibleWidth(rect);
 		}
 
 		public static float GetMinWidth(RectTransform rect)
@@ -79,7 +79,8 @@ namespace UnityEngine.UI
 			int num2 = int.MinValue;
 			List<Component> list = ListPool<Component>.Get();
 			rect.GetComponents(typeof(ILayoutElement), list);
-			for (int i = 0; i < list.Count; i++)
+			int count = list.Count;
+			for (int i = 0; i < count; i++)
 			{
 				ILayoutElement layoutElement = list[i] as ILayoutElement;
 				if (!(layoutElement is Behaviour) || ((Behaviour)layoutElement).isActiveAndEnabled)

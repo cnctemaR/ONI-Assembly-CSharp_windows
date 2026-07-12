@@ -17,7 +17,7 @@ public class FlowUtilityNetwork : UtilityNetwork
 		return this.sinks.Count;
 	}
 
-	public override void AddItem(int cell, object generic_item)
+	public override void AddItem(object generic_item)
 	{
 		FlowUtilityNetwork.IItem item = (FlowUtilityNetwork.IItem)generic_item;
 		if (item != null)

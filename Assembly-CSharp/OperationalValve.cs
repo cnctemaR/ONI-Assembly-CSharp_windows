@@ -36,33 +36,30 @@ public class OperationalValve : ValveBase
 		this.operational.SetActive(flag, false);
 	}
 
+	protected override void OnMassTransfer(float amount)
+	{
+		this.isDispensing = amount > 0f;
+	}
+
 	public override void UpdateAnim()
 	{
-		float averageRate = Game.Instance.accumulators.GetAverageRate(this.flowAccumulator);
-		if (this.operational.IsOperational)
+		if (!this.operational.IsOperational)
 		{
-			if (averageRate > 0f)
-			{
-				this.controller.Queue("on_flow", KAnim.PlayMode.Loop, 1f, 0f);
-				return;
-			}
-			this.controller.Queue("on", KAnim.PlayMode.Once, 1f, 0f);
-			return;
-		}
-		else
-		{
-			if (averageRate > 0f)
-			{
-				this.controller.Queue("off_flow", KAnim.PlayMode.Loop, 1f, 0f);
-				return;
-			}
 			this.controller.Queue("off", KAnim.PlayMode.Once, 1f, 0f);
 			return;
 		}
+		if (this.isDispensing)
+		{
+			this.controller.Queue("on_flow", KAnim.PlayMode.Loop, 1f, 0f);
+			return;
+		}
+		this.controller.Queue("on", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	[MyCmpReq]
 	private Operational operational;
+
+	private bool isDispensing;
 
 	private static readonly EventSystem.IntraObjectHandler<OperationalValve> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<OperationalValve>(delegate(OperationalValve component, object data)
 	{

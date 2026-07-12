@@ -5,11 +5,13 @@ using System.Globalization;
 using System.IO;
 using System.Net.Cache;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Mono.Security.Interface;
 using Unity;
 
@@ -1027,11 +1029,46 @@ namespace System.Net
 			this.webHeaders.ChangeInternal("Range", text);
 		}
 
-		public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
+		private WebOperation SendRequest(bool redirecting, BufferOffsetSize writeBuffer, CancellationToken cancellationToken)
+		{
+			object obj = this.locker;
+			WebOperation webOperation2;
+			lock (obj)
+			{
+				if (!redirecting && this.requestSent)
+				{
+					WebOperation webOperation = this.currentOperation;
+					if (webOperation == null)
+					{
+						throw new InvalidOperationException("Should never happen!");
+					}
+					webOperation2 = webOperation;
+				}
+				else
+				{
+					WebOperation webOperation = new WebOperation(this, writeBuffer, false, cancellationToken);
+					if (Interlocked.CompareExchange<WebOperation>(ref this.currentOperation, webOperation, null) != null)
+					{
+						throw new InvalidOperationException("Invalid nested call.");
+					}
+					this.requestSent = true;
+					if (!redirecting)
+					{
+						this.redirects = 0;
+					}
+					this.servicePoint = this.GetServicePoint();
+					this.servicePoint.SendRequest(webOperation, this.connectionGroup);
+					webOperation2 = webOperation;
+				}
+			}
+			return webOperation2;
+		}
+
+		private async Task<Stream> MyGetRequestStreamAsync(CancellationToken cancellationToken)
 		{
 			if (this.Aborted)
 			{
-				throw new WebException("The request was canceled.", WebExceptionStatus.RequestCanceled);
+				throw HttpWebRequest.CreateRequestAbortedException();
 			}
 			bool flag = !(this.method == "GET") && !(this.method == "CONNECT") && !(this.method == "HEAD") && !(this.method == "TRACE");
 			if (this.method == null || !flag)
@@ -1048,40 +1085,31 @@ namespace System.Net
 				throw new ProtocolViolationException("SendChunked should be true.");
 			}
 			object obj = this.locker;
-			IAsyncResult asyncResult;
+			WebOperation webOperation;
 			lock (obj)
 			{
 				if (this.getResponseCalled)
 				{
 					throw new InvalidOperationException("The operation cannot be performed once the request has been submitted.");
 				}
-				if (this.asyncWrite != null)
+				webOperation = this.currentOperation;
+				if (webOperation == null)
 				{
-					throw new InvalidOperationException("Cannot re-call start of asynchronous method while a previous call is still in progress.");
-				}
-				this.asyncWrite = new WebAsyncResult(this, callback, state);
-				this.initialMethod = this.method;
-				if (this.haveRequest && this.writeStream != null)
-				{
-					this.asyncWrite.SetCompleted(true, this.writeStream);
-					this.asyncWrite.DoCallback();
-					asyncResult = this.asyncWrite;
-				}
-				else
-				{
+					this.initialMethod = this.method;
 					this.gotRequestStream = true;
-					IAsyncResult asyncResult2 = this.asyncWrite;
-					if (!this.requestSent)
-					{
-						this.requestSent = true;
-						this.redirects = 0;
-						this.servicePoint = this.GetServicePoint();
-						this.abortHandler = this.servicePoint.SendRequest(this, this.connectionGroup);
-					}
-					asyncResult = asyncResult2;
+					webOperation = this.SendRequest(false, null, cancellationToken);
 				}
 			}
-			return asyncResult;
+			return await webOperation.GetRequestStream().ConfigureAwait(false);
+		}
+
+		public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
+		{
+			if (this.Aborted)
+			{
+				throw HttpWebRequest.CreateRequestAbortedException();
+			}
+			return TaskToApm.Begin(this.RunWithTimeout<Stream>(new Func<CancellationToken, Task<Stream>>(this.MyGetRequestStreamAsync)), callback, state);
 		}
 
 		public override Stream EndGetRequestStream(IAsyncResult asyncResult)
@@ -1090,35 +1118,30 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("asyncResult");
 			}
-			WebAsyncResult webAsyncResult = asyncResult as WebAsyncResult;
-			if (webAsyncResult == null)
+			Stream stream;
+			try
 			{
-				throw new ArgumentException("Invalid IAsyncResult");
+				stream = TaskToApm.End<Stream>(asyncResult);
 			}
-			this.asyncWrite = webAsyncResult;
-			webAsyncResult.WaitUntilComplete();
-			Exception exception = webAsyncResult.Exception;
-			if (exception != null)
+			catch (Exception ex)
 			{
-				throw exception;
+				throw HttpWebRequest.FlattenException(ex);
 			}
-			return webAsyncResult.WriteStream;
+			return stream;
 		}
 
 		public override Stream GetRequestStream()
 		{
-			IAsyncResult asyncResult = this.asyncWrite;
-			if (asyncResult == null)
+			Stream result;
+			try
 			{
-				asyncResult = this.BeginGetRequestStream(null, null);
-				this.asyncWrite = (WebAsyncResult)asyncResult;
+				result = this.GetRequestStreamAsync().Result;
 			}
-			if (!asyncResult.IsCompleted && !asyncResult.AsyncWaitHandle.WaitOne(this.timeout, false))
+			catch (Exception ex)
 			{
-				this.Abort();
-				throw new WebException("The request timed out", WebExceptionStatus.Timeout);
+				throw HttpWebRequest.FlattenException(ex);
 			}
-			return this.EndGetRequestStream(asyncResult);
+			return result;
 		}
 
 		[MonoTODO]
@@ -1127,28 +1150,57 @@ namespace System.Net
 			throw new NotImplementedException();
 		}
 
-		private bool CheckIfForceWrite(SimpleAsyncResult result)
+		internal static async Task<T> RunWithTimeout<T>(Func<CancellationToken, Task<T>> func, int timeout, Action abort)
 		{
-			if (this.writeStream == null || this.writeStream.RequestWritten || !this.InternalAllowBuffering)
+			T result;
+			using (CancellationTokenSource cts = new CancellationTokenSource())
 			{
-				return false;
+				Task timeoutTask = Task.Delay(timeout);
+				Task<T> workerTask = func(cts.Token);
+				ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter = Task.WhenAny(new Task[] { workerTask, timeoutTask }).ConfigureAwait(false).GetAwaiter();
+				if (!configuredTaskAwaiter.IsCompleted)
+				{
+					await configuredTaskAwaiter;
+					ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
+					configuredTaskAwaiter = configuredTaskAwaiter2;
+					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<Task>.ConfiguredTaskAwaiter);
+				}
+				if (configuredTaskAwaiter.GetResult() == timeoutTask)
+				{
+					try
+					{
+						cts.Cancel();
+						abort();
+					}
+					catch
+					{
+					}
+					workerTask.ContinueWith<int?>(delegate(Task<T> t)
+					{
+						AggregateException exception = t.Exception;
+						if (exception == null)
+						{
+							return null;
+						}
+						return new int?(exception.GetHashCode());
+					}, TaskContinuationOptions.OnlyOnFaulted);
+					throw new WebException("The operation has timed out.", WebExceptionStatus.Timeout);
+				}
+				result = workerTask.Result;
 			}
-			if (this.contentLength < 0L && this.writeStream.CanWrite && this.writeStream.WriteBufferLength < 0)
-			{
-				return false;
-			}
-			if (this.contentLength < 0L && this.writeStream.WriteBufferLength >= 0)
-			{
-				this.InternalContentLength = (long)this.writeStream.WriteBufferLength;
-			}
-			return ((long)this.writeStream.WriteBufferLength == this.contentLength || (this.contentLength == -1L && !this.writeStream.CanWrite)) && this.writeStream.WriteRequestAsync(result);
+			return result;
 		}
 
-		public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
+		private Task<T> RunWithTimeout<T>(Func<CancellationToken, Task<T>> func)
+		{
+			return HttpWebRequest.RunWithTimeout<T>(func, this.timeout, new Action(this.Abort));
+		}
+
+		private async Task<HttpWebResponse> MyGetResponseAsync(CancellationToken cancellationToken)
 		{
 			if (this.Aborted)
 			{
-				throw new WebException("The request was canceled.", WebExceptionStatus.RequestCanceled);
+				throw HttpWebRequest.CreateRequestAbortedException();
 			}
 			if (this.method == null)
 			{
@@ -1159,66 +1211,226 @@ namespace System.Net
 			{
 				throw new ProtocolViolationException("SendChunked should be true.");
 			}
-			Monitor.Enter(this.locker);
-			this.getResponseCalled = true;
-			if (this.asyncRead != null && !this.haveResponse)
+			WebCompletionSource completion = new WebCompletionSource();
+			object obj = this.locker;
+			WebOperation operation;
+			lock (obj)
 			{
-				Monitor.Exit(this.locker);
-				throw new InvalidOperationException("Cannot re-call start of asynchronous method while a previous call is still in progress.");
+				this.getResponseCalled = true;
+				WebCompletionSource webCompletionSource = Interlocked.CompareExchange<WebCompletionSource>(ref this.responseTask, completion, null);
+				if (webCompletionSource != null)
+				{
+					webCompletionSource.ThrowOnError();
+					if (this.haveResponse && webCompletionSource.IsCompleted)
+					{
+						return this.webResponse;
+					}
+					throw new InvalidOperationException("Cannot re-call start of asynchronous method while a previous call is still in progress.");
+				}
+				else
+				{
+					operation = this.currentOperation;
+					if (this.currentOperation != null)
+					{
+						this.writeStream = this.currentOperation.WriteStream;
+					}
+					this.initialMethod = this.method;
+					operation = this.SendRequest(false, null, cancellationToken);
+				}
 			}
-			this.asyncRead = new WebAsyncResult(this, callback, state);
-			WebAsyncResult aread = this.asyncRead;
-			this.initialMethod = this.method;
-			SimpleAsyncResult.RunWithLock(this.locker, new Func<SimpleAsyncResult, bool>(this.CheckIfForceWrite), delegate(SimpleAsyncResult inner)
+			HttpWebResponse httpWebResponse;
+			for (;;)
 			{
-				bool completedSynchronouslyPeek = inner.CompletedSynchronouslyPeek;
-				if (inner.GotException)
+				WebException throwMe = null;
+				HttpWebResponse response = null;
+				WebResponseStream stream = null;
+				bool redirect = false;
+				bool mustReadAll = false;
+				WebOperation ntlm = null;
+				BufferOffsetSize writeBuffer = null;
+				try
 				{
-					aread.SetCompleted(completedSynchronouslyPeek, inner.Exception);
-					aread.DoCallback();
-					return;
+					cancellationToken.ThrowIfCancellationRequested();
+					WebRequestStream webRequestStream = await operation.GetRequestStream();
+					this.writeStream = webRequestStream;
+					await this.writeStream.WriteRequestAsync(cancellationToken).ConfigureAwait(false);
+					stream = await operation.GetResponseStream();
+					ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation> valueTuple = await this.GetResponseFromData(stream, cancellationToken).ConfigureAwait(false);
+					response = valueTuple.Item1;
+					redirect = valueTuple.Item2;
+					mustReadAll = valueTuple.Item3;
+					writeBuffer = valueTuple.Item4;
+					ntlm = valueTuple.Item5;
 				}
-				if (this.haveResponse)
+				catch (Exception ex)
 				{
-					Exception ex = this.saved_exc;
-					if (this.webResponse != null)
-					{
-						if (ex == null)
-						{
-							aread.SetCompleted(completedSynchronouslyPeek, this.webResponse);
-						}
-						else
-						{
-							aread.SetCompleted(completedSynchronouslyPeek, ex);
-						}
-						aread.DoCallback();
-						return;
-					}
-					if (ex != null)
-					{
-						aread.SetCompleted(completedSynchronouslyPeek, ex);
-						aread.DoCallback();
-						return;
-					}
+					throwMe = this.GetWebException(ex);
 				}
-				if (this.requestSent)
+				obj = this.locker;
+				lock (obj)
 				{
-					return;
+					if (throwMe != null)
+					{
+						this.haveResponse = true;
+						completion.TrySetException(throwMe);
+						throw throwMe;
+					}
+					if (!redirect)
+					{
+						this.haveResponse = true;
+						this.webResponse = response;
+						completion.TrySetCompleted();
+						httpWebResponse = response;
+						break;
+					}
+					this.finished_reading = false;
+					this.haveResponse = false;
+					this.webResponse = null;
+					this.currentOperation = ntlm;
 				}
 				try
 				{
-					this.requestSent = true;
-					this.redirects = 0;
-					this.servicePoint = this.GetServicePoint();
-					this.abortHandler = this.servicePoint.SendRequest(this, this.connectionGroup);
+					if (mustReadAll)
+					{
+						await stream.ReadAllAsync(redirect || ntlm != null, cancellationToken).ConfigureAwait(false);
+					}
+					operation.CompleteResponseRead(true, null);
+					response.Close();
 				}
 				catch (Exception ex2)
 				{
-					aread.SetCompleted(completedSynchronouslyPeek, ex2);
-					aread.DoCallback();
+					throwMe = this.GetWebException(ex2);
 				}
-			});
-			return aread;
+				obj = this.locker;
+				lock (obj)
+				{
+					if (throwMe != null)
+					{
+						this.haveResponse = true;
+						WebResponseStream webResponseStream = stream;
+						if (webResponseStream != null)
+						{
+							webResponseStream.Close();
+						}
+						completion.TrySetException(throwMe);
+						throw throwMe;
+					}
+					if (ntlm == null)
+					{
+						operation = this.SendRequest(true, writeBuffer, cancellationToken);
+					}
+					else
+					{
+						operation = ntlm;
+					}
+				}
+				throwMe = null;
+				response = null;
+				stream = null;
+				ntlm = null;
+				writeBuffer = null;
+			}
+			return httpWebResponse;
+		}
+
+		[return: TupleElementNames(new string[] { "response", "redirect", "mustReadAll", "writeBuffer", "ntlm" })]
+		private async Task<ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation>> GetResponseFromData(WebResponseStream stream, CancellationToken cancellationToken)
+		{
+			HttpWebResponse response = new HttpWebResponse(this.actualUri, this.method, stream, this.cookieContainer);
+			WebException throwMe = null;
+			bool redirect = false;
+			bool mustReadAll = false;
+			WebOperation webOperation = null;
+			Task<BufferOffsetSize> rewriteHandler = null;
+			BufferOffsetSize writeBuffer = null;
+			object obj = this.locker;
+			lock (obj)
+			{
+				ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException> valueTuple = this.CheckFinalStatus(response);
+				redirect = valueTuple.Item1;
+				mustReadAll = valueTuple.Item2;
+				rewriteHandler = valueTuple.Item3;
+				throwMe = valueTuple.Item4;
+			}
+			if (throwMe != null)
+			{
+				if (mustReadAll)
+				{
+					await stream.ReadAllAsync(false, cancellationToken).ConfigureAwait(false);
+				}
+				throw throwMe;
+			}
+			if (rewriteHandler != null)
+			{
+				writeBuffer = await rewriteHandler.ConfigureAwait(false);
+			}
+			obj = this.locker;
+			lock (obj)
+			{
+				bool flag2 = this.ProxyQuery && this.proxy != null && !this.proxy.IsBypassed(this.actualUri);
+				if (!redirect)
+				{
+					if ((flag2 ? this.proxy_auth_state : this.auth_state).IsNtlmAuthenticated && response.StatusCode < HttpStatusCode.BadRequest)
+					{
+						stream.Connection.NtlmAuthenticated = true;
+					}
+					if (this.writeStream != null)
+					{
+						this.writeStream.KillBuffer();
+					}
+					return new ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation>(response, false, false, writeBuffer, null);
+				}
+				if (this.sendChunked)
+				{
+					this.sendChunked = false;
+					this.webHeaders.RemoveInternal("Transfer-Encoding");
+				}
+				webOperation = this.HandleNtlmAuth(stream, response, writeBuffer, cancellationToken).Item1;
+			}
+			return new ValueTuple<HttpWebResponse, bool, bool, BufferOffsetSize, WebOperation>(response, true, mustReadAll, writeBuffer, webOperation);
+		}
+
+		internal static Exception FlattenException(Exception e)
+		{
+			AggregateException ex;
+			if ((ex = e as AggregateException) != null)
+			{
+				ex = ex.Flatten();
+				if (ex.InnerExceptions.Count == 1)
+				{
+					return ex.InnerException;
+				}
+			}
+			return e;
+		}
+
+		private WebException GetWebException(Exception e)
+		{
+			e = HttpWebRequest.FlattenException(e);
+			WebException ex;
+			if ((ex = e as WebException) != null && (!this.Aborted || ex.Status == WebExceptionStatus.RequestCanceled || ex.Status == WebExceptionStatus.Timeout))
+			{
+				return ex;
+			}
+			if (this.Aborted || e is OperationCanceledException || e is ObjectDisposedException)
+			{
+				return HttpWebRequest.CreateRequestAbortedException();
+			}
+			return new WebException(e.Message, e, WebExceptionStatus.UnknownError, null);
+		}
+
+		internal static WebException CreateRequestAbortedException()
+		{
+			return new WebException(global::SR.Format("The request was aborted: The request was canceled.", WebExceptionStatus.RequestCanceled), WebExceptionStatus.RequestCanceled);
+		}
+
+		public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
+		{
+			if (this.Aborted)
+			{
+				throw HttpWebRequest.CreateRequestAbortedException();
+			}
+			return TaskToApm.Begin(this.RunWithTimeout<HttpWebResponse>(new Func<CancellationToken, Task<HttpWebResponse>>(this.MyGetResponseAsync)), callback, state);
 		}
 
 		public override WebResponse EndGetResponse(IAsyncResult asyncResult)
@@ -1227,33 +1439,40 @@ namespace System.Net
 			{
 				throw new ArgumentNullException("asyncResult");
 			}
-			WebAsyncResult webAsyncResult = asyncResult as WebAsyncResult;
-			if (webAsyncResult == null)
+			WebResponse webResponse;
+			try
 			{
-				throw new ArgumentException("Invalid IAsyncResult", "asyncResult");
+				webResponse = TaskToApm.End<HttpWebResponse>(asyncResult);
 			}
-			if (!webAsyncResult.WaitUntilComplete(this.timeout, false))
+			catch (Exception ex)
 			{
-				this.Abort();
-				throw new WebException("The request timed out", WebExceptionStatus.Timeout);
+				throw HttpWebRequest.FlattenException(ex);
 			}
-			if (webAsyncResult.GotException)
-			{
-				throw webAsyncResult.Exception;
-			}
-			return webAsyncResult.Response;
+			return webResponse;
 		}
 
 		public Stream EndGetRequestStream(IAsyncResult asyncResult, out TransportContext context)
 		{
+			if (asyncResult == null)
+			{
+				throw new ArgumentNullException("asyncResult");
+			}
 			context = null;
 			return this.EndGetRequestStream(asyncResult);
 		}
 
 		public override WebResponse GetResponse()
 		{
-			WebAsyncResult webAsyncResult = (WebAsyncResult)this.BeginGetResponse(null, null);
-			return this.EndGetResponse(webAsyncResult);
+			WebResponse result;
+			try
+			{
+				result = this.GetResponseAsync().Result;
+			}
+			catch (Exception ex)
+			{
+				throw HttpWebRequest.FlattenException(ex);
+			}
+			return result;
 		}
 
 		internal bool FinishedReading
@@ -1282,66 +1501,16 @@ namespace System.Net
 			{
 				return;
 			}
-			if (this.haveResponse && this.finished_reading)
-			{
-				return;
-			}
 			this.haveResponse = true;
-			if (this.abortHandler != null)
+			WebOperation webOperation = this.currentOperation;
+			if (webOperation != null)
 			{
-				try
-				{
-					this.abortHandler(this, EventArgs.Empty);
-				}
-				catch (Exception)
-				{
-				}
-				this.abortHandler = null;
+				webOperation.Abort();
 			}
-			if (this.asyncWrite != null)
+			WebCompletionSource webCompletionSource = this.responseTask;
+			if (webCompletionSource != null)
 			{
-				WebAsyncResult webAsyncResult = this.asyncWrite;
-				if (!webAsyncResult.IsCompleted)
-				{
-					try
-					{
-						WebException ex = new WebException("Aborted.", WebExceptionStatus.RequestCanceled);
-						webAsyncResult.SetCompleted(false, ex);
-						webAsyncResult.DoCallback();
-					}
-					catch
-					{
-					}
-				}
-				this.asyncWrite = null;
-			}
-			if (this.asyncRead != null)
-			{
-				WebAsyncResult webAsyncResult2 = this.asyncRead;
-				if (!webAsyncResult2.IsCompleted)
-				{
-					try
-					{
-						WebException ex2 = new WebException("Aborted.", WebExceptionStatus.RequestCanceled);
-						webAsyncResult2.SetCompleted(false, ex2);
-						webAsyncResult2.DoCallback();
-					}
-					catch
-					{
-					}
-				}
-				this.asyncRead = null;
-			}
-			if (this.writeStream != null)
-			{
-				try
-				{
-					this.writeStream.Close();
-					this.writeStream = null;
-				}
-				catch
-				{
-				}
+				webCompletionSource.TrySetCanceled();
 			}
 			if (this.webResponse != null)
 			{
@@ -1409,7 +1578,7 @@ namespace System.Net
 			this.sendChunked = false;
 		}
 
-		private bool Redirect(WebAsyncResult result, HttpStatusCode code, WebResponse response)
+		private bool Redirect(HttpStatusCode code, WebResponse response)
 		{
 			this.redirects++;
 			Exception ex = null;
@@ -1440,9 +1609,9 @@ namespace System.Net
 			}
 			ex = new ProtocolViolationException("Invalid status code: " + (int)code);
 			IL_0094:
-			if (this.method != "GET" && !this.InternalAllowBuffering && (this.writeStream.WriteBufferLength > 0 || this.contentLength > 0L))
+			if (this.method != "GET" && !this.InternalAllowBuffering && this.ResendContentFactory == null && (this.writeStream.WriteBufferLength > 0 || this.contentLength > 0L))
 			{
-				ex = new WebException("The request requires buffering data to succeed.", null, WebExceptionStatus.ProtocolError, this.webResponse);
+				ex = new WebException("The request requires buffering data to succeed.", null, WebExceptionStatus.ProtocolError, response);
 			}
 			if (ex != null)
 			{
@@ -1452,10 +1621,10 @@ namespace System.Net
 			{
 				this.contentLength = -1L;
 			}
-			text = this.webResponse.Headers["Location"];
+			text = response.Headers["Location"];
 			if (text == null)
 			{
-				throw new WebException("No Location header found for " + (int)code, WebExceptionStatus.ProtocolError);
+				throw new WebException(string.Format("No Location header found for {0}", (int)code), null, WebExceptionStatus.ProtocolError, response);
 			}
 			Uri uri = this.actualUri;
 			try
@@ -1464,7 +1633,7 @@ namespace System.Net
 			}
 			catch (Exception)
 			{
-				throw new WebException(string.Format("Invalid URL ({0}) for {1}", text, (int)code), WebExceptionStatus.ProtocolError);
+				throw new WebException(string.Format("Invalid URL ({0}) for {1}", text, (int)code), null, WebExceptionStatus.ProtocolError, response);
 			}
 			this.hostChanged = this.actualUri.Scheme != uri.Scheme || this.Host != uri.Authority;
 			return true;
@@ -1584,37 +1753,6 @@ namespace System.Net
 			this.usedPreAuth = true;
 		}
 
-		internal void SetWriteStreamError(WebExceptionStatus status, Exception exc)
-		{
-			if (this.Aborted)
-			{
-				return;
-			}
-			WebAsyncResult webAsyncResult = this.asyncWrite;
-			if (webAsyncResult == null)
-			{
-				webAsyncResult = this.asyncRead;
-			}
-			if (webAsyncResult != null)
-			{
-				WebException ex;
-				if (exc == null)
-				{
-					ex = new WebException("Error: " + status, status);
-				}
-				else
-				{
-					ex = exc as WebException;
-					if (ex == null)
-					{
-						ex = new WebException(string.Format("Error: {0} ({1})", status, exc.Message), status, WebExceptionInternalStatus.RequestFatal, exc);
-					}
-				}
-				webAsyncResult.SetCompleted(false, ex);
-				webAsyncResult.DoCallback();
-			}
-		}
-
 		internal byte[] GetRequestHeaders()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -1647,294 +1785,23 @@ namespace System.Net
 			return Encoding.UTF8.GetBytes(text2);
 		}
 
-		internal void SetWriteStream(WebConnectionStream stream)
+		private ValueTuple<WebOperation, bool> HandleNtlmAuth(WebResponseStream stream, HttpWebResponse response, BufferOffsetSize writeBuffer, CancellationToken cancellationToken)
 		{
-			if (this.Aborted)
+			bool flag = response.StatusCode == HttpStatusCode.ProxyAuthenticationRequired;
+			if ((flag ? this.proxy_auth_state : this.auth_state).NtlmAuthState == HttpWebRequest.NtlmAuthState.None)
 			{
-				return;
+				return new ValueTuple<WebOperation, bool>(null, false);
 			}
-			this.writeStream = stream;
-			if (this.bodyBuffer != null)
+			bool flag2 = this.auth_state.NtlmAuthState == HttpWebRequest.NtlmAuthState.Challenge || this.proxy_auth_state.NtlmAuthState == HttpWebRequest.NtlmAuthState.Challenge;
+			WebOperation webOperation = new WebOperation(this, writeBuffer, flag2, cancellationToken);
+			stream.Operation.SetPriorityRequest(webOperation);
+			ICredentials credentials = ((!flag || this.proxy == null) ? this.credentials : this.proxy.Credentials);
+			if (credentials != null)
 			{
-				this.webHeaders.RemoveInternal("Transfer-Encoding");
-				this.contentLength = (long)this.bodyBufferLength;
-				this.writeStream.SendChunked = false;
+				stream.Connection.NtlmCredential = credentials.GetCredential(this.requestUri, "NTLM");
+				stream.Connection.UnsafeAuthenticatedConnectionSharing = this.unsafe_auth_blah;
 			}
-			this.writeStream.SetHeadersAsync(false, delegate(SimpleAsyncResult result)
-			{
-				if (result.GotException)
-				{
-					this.SetWriteStreamError(result.Exception);
-					return;
-				}
-				this.haveRequest = true;
-				this.SetWriteStreamInner(delegate(SimpleAsyncResult inner)
-				{
-					if (inner.GotException)
-					{
-						this.SetWriteStreamError(inner.Exception);
-						return;
-					}
-					if (this.asyncWrite != null)
-					{
-						this.asyncWrite.SetCompleted(inner.CompletedSynchronouslyPeek, this.writeStream);
-						this.asyncWrite.DoCallback();
-						this.asyncWrite = null;
-					}
-				});
-			});
-		}
-
-		private void SetWriteStreamInner(SimpleAsyncCallback callback)
-		{
-			SimpleAsyncResult.Run(delegate(SimpleAsyncResult result)
-			{
-				if (this.bodyBuffer != null)
-				{
-					if (this.auth_state.NtlmAuthState != HttpWebRequest.NtlmAuthState.Challenge && this.proxy_auth_state.NtlmAuthState != HttpWebRequest.NtlmAuthState.Challenge)
-					{
-						this.writeStream.Write(this.bodyBuffer, 0, this.bodyBufferLength);
-						this.bodyBuffer = null;
-						this.writeStream.Close();
-					}
-				}
-				else if (this.MethodWithBuffer && this.getResponseCalled && !this.writeStream.RequestWritten)
-				{
-					return this.writeStream.WriteRequestAsync(result);
-				}
-				return false;
-			}, callback);
-		}
-
-		private void SetWriteStreamError(Exception exc)
-		{
-			WebException ex = exc as WebException;
-			if (ex != null)
-			{
-				this.SetWriteStreamError(ex.Status, ex);
-				return;
-			}
-			this.SetWriteStreamError(WebExceptionStatus.SendFailure, exc);
-		}
-
-		internal void SetResponseError(WebExceptionStatus status, Exception e, string where)
-		{
-			if (this.Aborted)
-			{
-				return;
-			}
-			object obj = this.locker;
-			lock (obj)
-			{
-				string text = string.Format("Error getting response stream ({0}): {1}", where, status);
-				WebAsyncResult webAsyncResult = this.asyncRead;
-				if (webAsyncResult == null)
-				{
-					webAsyncResult = this.asyncWrite;
-				}
-				WebException ex;
-				if (e is WebException)
-				{
-					ex = (WebException)e;
-				}
-				else
-				{
-					ex = new WebException(text, e, status, null);
-				}
-				if (webAsyncResult != null)
-				{
-					if (!webAsyncResult.IsCompleted)
-					{
-						webAsyncResult.SetCompleted(false, ex);
-						webAsyncResult.DoCallback();
-					}
-					else if (webAsyncResult == this.asyncWrite)
-					{
-						this.saved_exc = ex;
-					}
-					this.haveResponse = true;
-					this.asyncRead = null;
-					this.asyncWrite = null;
-				}
-				else
-				{
-					this.haveResponse = true;
-					this.saved_exc = ex;
-				}
-			}
-		}
-
-		private void CheckSendError(WebConnectionData data)
-		{
-			int statusCode = data.StatusCode;
-			if (statusCode < 400 || statusCode == 401 || statusCode == 407)
-			{
-				return;
-			}
-			if (this.writeStream != null && this.asyncRead == null && !this.writeStream.CompleteRequestWritten)
-			{
-				this.saved_exc = new WebException(data.StatusDescription, null, WebExceptionStatus.ProtocolError, this.webResponse);
-				if (this.allowBuffering || this.sendChunked || this.writeStream.totalWritten >= this.contentLength)
-				{
-					this.webResponse.ReadAll();
-					return;
-				}
-				this.writeStream.IgnoreIOErrors = true;
-			}
-		}
-
-		private bool HandleNtlmAuth(WebAsyncResult r)
-		{
-			bool flag = this.webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired;
-			if ((flag ? this.proxy_auth_state.NtlmAuthState : this.auth_state.NtlmAuthState) == HttpWebRequest.NtlmAuthState.None)
-			{
-				return false;
-			}
-			WebConnectionStream webConnectionStream = this.webResponse.GetResponseStream() as WebConnectionStream;
-			if (webConnectionStream != null)
-			{
-				WebConnection connection = webConnectionStream.Connection;
-				connection.PriorityRequest = this;
-				ICredentials credentials = ((!flag || this.proxy == null) ? this.credentials : this.proxy.Credentials);
-				if (credentials != null)
-				{
-					connection.NtlmCredential = credentials.GetCredential(this.requestUri, "NTLM");
-					connection.UnsafeAuthenticatedConnectionSharing = this.unsafe_auth_blah;
-				}
-			}
-			r.Reset();
-			this.finished_reading = false;
-			this.haveResponse = false;
-			this.webResponse.ReadAll();
-			this.webResponse = null;
-			return true;
-		}
-
-		internal void SetResponseData(WebConnectionData data)
-		{
-			object obj = this.locker;
-			lock (obj)
-			{
-				if (this.Aborted)
-				{
-					if (data.stream != null)
-					{
-						data.stream.Close();
-					}
-				}
-				else
-				{
-					WebException ex = null;
-					try
-					{
-						this.webResponse = new HttpWebResponse(this.actualUri, this.method, data, this.cookieContainer);
-					}
-					catch (Exception ex2)
-					{
-						ex = new WebException(ex2.Message, ex2, WebExceptionStatus.ProtocolError, null);
-						if (data.stream != null)
-						{
-							data.stream.Close();
-						}
-					}
-					if (ex == null && (this.method == "POST" || this.method == "PUT"))
-					{
-						this.CheckSendError(data);
-						if (this.saved_exc != null)
-						{
-							ex = (WebException)this.saved_exc;
-						}
-					}
-					WebAsyncResult webAsyncResult = this.asyncRead;
-					bool flag2 = false;
-					if (webAsyncResult == null && this.webResponse != null)
-					{
-						flag2 = true;
-						webAsyncResult = new WebAsyncResult(null, null);
-						webAsyncResult.SetCompleted(false, this.webResponse);
-					}
-					if (webAsyncResult != null)
-					{
-						if (ex != null)
-						{
-							this.haveResponse = true;
-							if (!webAsyncResult.IsCompleted)
-							{
-								webAsyncResult.SetCompleted(false, ex);
-							}
-							webAsyncResult.DoCallback();
-						}
-						else
-						{
-							bool flag3 = this.ProxyQuery && this.proxy != null && !this.proxy.IsBypassed(this.actualUri);
-							try
-							{
-								if (!this.CheckFinalStatus(webAsyncResult))
-								{
-									if ((flag3 ? this.proxy_auth_state.IsNtlmAuthenticated : this.auth_state.IsNtlmAuthenticated) && this.webResponse != null && this.webResponse.StatusCode < HttpStatusCode.BadRequest)
-									{
-										WebConnectionStream webConnectionStream = this.webResponse.GetResponseStream() as WebConnectionStream;
-										if (webConnectionStream != null)
-										{
-											webConnectionStream.Connection.NtlmAuthenticated = true;
-										}
-									}
-									if (this.writeStream != null)
-									{
-										this.writeStream.KillBuffer();
-									}
-									this.haveResponse = true;
-									webAsyncResult.SetCompleted(false, this.webResponse);
-									webAsyncResult.DoCallback();
-								}
-								else
-								{
-									if (this.sendChunked)
-									{
-										this.sendChunked = false;
-										this.webHeaders.RemoveInternal("Transfer-Encoding");
-									}
-									if (this.webResponse != null)
-									{
-										if (this.HandleNtlmAuth(webAsyncResult))
-										{
-											return;
-										}
-										this.webResponse.Close();
-									}
-									this.finished_reading = false;
-									this.haveResponse = false;
-									this.webResponse = null;
-									webAsyncResult.Reset();
-									this.servicePoint = this.GetServicePoint();
-									this.abortHandler = this.servicePoint.SendRequest(this, this.connectionGroup);
-								}
-							}
-							catch (WebException ex3)
-							{
-								if (flag2)
-								{
-									this.saved_exc = ex3;
-									this.haveResponse = true;
-								}
-								webAsyncResult.SetCompleted(false, ex3);
-								webAsyncResult.DoCallback();
-							}
-							catch (Exception ex4)
-							{
-								ex = new WebException(ex4.Message, ex4, WebExceptionStatus.ProtocolError, null);
-								if (flag2)
-								{
-									this.saved_exc = ex;
-									this.haveResponse = true;
-								}
-								webAsyncResult.SetCompleted(false, ex);
-								webAsyncResult.DoCallback();
-							}
-						}
-					}
-				}
-			}
+			return new ValueTuple<WebOperation, bool>(webOperation, flag2);
 		}
 
 		private bool CheckAuthorization(WebResponse response, HttpStatusCode code)
@@ -1946,115 +1813,123 @@ namespace System.Net
 			return this.proxy_auth_state.CheckAuthorization(response, code);
 		}
 
-		private bool CheckFinalStatus(WebAsyncResult result)
+		[return: TupleElementNames(new string[] { "task", "throwMe" })]
+		private ValueTuple<Task<BufferOffsetSize>, WebException> GetRewriteHandler(HttpWebResponse response, bool redirect)
 		{
-			if (result.GotException)
+			if (redirect)
 			{
-				this.bodyBuffer = null;
-				throw result.Exception;
-			}
-			Exception ex = result.Exception;
-			HttpWebResponse response = result.Response;
-			WebExceptionStatus webExceptionStatus = WebExceptionStatus.ProtocolError;
-			HttpStatusCode httpStatusCode = (HttpStatusCode)0;
-			if (ex == null && this.webResponse != null)
-			{
-				httpStatusCode = this.webResponse.StatusCode;
-				if (((!this.auth_state.IsCompleted && httpStatusCode == HttpStatusCode.Unauthorized && this.credentials != null) || (this.ProxyQuery && !this.proxy_auth_state.IsCompleted && httpStatusCode == HttpStatusCode.ProxyAuthenticationRequired)) && !this.usedPreAuth && this.CheckAuthorization(this.webResponse, httpStatusCode))
+				if (!this.MethodWithBuffer)
 				{
-					if (this.MethodWithBuffer)
-					{
-						if (this.AllowWriteStreamBuffering)
-						{
-							if (this.writeStream.WriteBufferLength > 0)
-							{
-								this.bodyBuffer = this.writeStream.WriteBuffer;
-								this.bodyBufferLength = this.writeStream.WriteBufferLength;
-							}
-							return true;
-						}
-						if (this.ResendContentFactory != null)
-						{
-							using (MemoryStream memoryStream = new MemoryStream())
-							{
-								this.ResendContentFactory(memoryStream);
-								this.bodyBuffer = memoryStream.ToArray();
-								this.bodyBufferLength = this.bodyBuffer.Length;
-							}
-							return true;
-						}
-					}
-					else if (this.method != "PUT" && this.method != "POST")
-					{
-						this.bodyBuffer = null;
-						return true;
-					}
-					if (!this.ThrowOnError)
-					{
-						return false;
-					}
-					this.writeStream.InternalClose();
-					this.writeStream = null;
-					this.webResponse.Close();
-					this.webResponse = null;
-					this.bodyBuffer = null;
-					throw new WebException("This request requires buffering of data for authentication or redirection to be sucessful.");
+					return new ValueTuple<Task<BufferOffsetSize>, WebException>(null, null);
 				}
-				else
+				if (this.writeStream.WriteBufferLength == 0 || this.contentLength == 0L)
 				{
-					this.bodyBuffer = null;
-					if (httpStatusCode >= HttpStatusCode.BadRequest)
-					{
-						ex = new WebException(string.Format("The remote server returned an error: ({0}) {1}.", (int)httpStatusCode, this.webResponse.StatusDescription), null, webExceptionStatus, this.webResponse);
-						this.webResponse.ReadAll();
-					}
-					else if (httpStatusCode == HttpStatusCode.NotModified && this.allowAutoRedirect)
-					{
-						ex = new WebException(string.Format("The remote server returned an error: ({0}) {1}.", (int)httpStatusCode, this.webResponse.StatusDescription), null, webExceptionStatus, this.webResponse);
-					}
-					else if (httpStatusCode >= HttpStatusCode.MultipleChoices && this.allowAutoRedirect && this.redirects >= this.maxAutoRedirect)
-					{
-						ex = new WebException("Max. redirections exceeded.", null, webExceptionStatus, this.webResponse);
-						this.webResponse.ReadAll();
-					}
+					return new ValueTuple<Task<BufferOffsetSize>, WebException>(null, null);
 				}
 			}
-			this.bodyBuffer = null;
-			if (ex == null)
+			if (this.AllowWriteStreamBuffering)
 			{
-				bool flag = false;
-				int num = (int)httpStatusCode;
-				if (this.allowAutoRedirect && num >= 300)
-				{
-					flag = this.Redirect(result, httpStatusCode, this.webResponse);
-					if (this.InternalAllowBuffering && this.writeStream.WriteBufferLength > 0)
-					{
-						this.bodyBuffer = this.writeStream.WriteBuffer;
-						this.bodyBufferLength = this.writeStream.WriteBufferLength;
-					}
-					if (flag && !this.unsafe_auth_blah)
-					{
-						this.auth_state.Reset();
-						this.proxy_auth_state.Reset();
-					}
-				}
-				if (response != null && num >= 300 && num != 304)
-				{
-					response.ReadAll();
-				}
-				return flag;
+				return new ValueTuple<Task<BufferOffsetSize>, WebException>(Task.FromResult<BufferOffsetSize>(this.writeStream.GetWriteBuffer()), null);
 			}
-			if (!this.ThrowOnError)
+			if (this.ResendContentFactory == null)
 			{
-				return false;
+				return new ValueTuple<Task<BufferOffsetSize>, WebException>(null, new WebException("The request requires buffering data to succeed.", null, WebExceptionStatus.ProtocolError, response));
 			}
-			if (this.writeStream != null)
+			return new ValueTuple<Task<BufferOffsetSize>, WebException>(async delegate
 			{
+				BufferOffsetSize bufferOffsetSize;
+				using (MemoryStream ms = new MemoryStream())
+				{
+					await this.ResendContentFactory(ms).ConfigureAwait(false);
+					byte[] array = ms.ToArray();
+					bufferOffsetSize = new BufferOffsetSize(array, 0, array.Length, false);
+				}
+				return bufferOffsetSize;
+			}(), null);
+		}
+
+		[return: TupleElementNames(new string[] { "redirect", "mustReadAll", "writeBuffer", "throwMe" })]
+		private ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException> CheckFinalStatus(HttpWebResponse response)
+		{
+			WebException ex = null;
+			bool flag = false;
+			Task<BufferOffsetSize> task = null;
+			HttpStatusCode statusCode = response.StatusCode;
+			if (((!this.auth_state.IsCompleted && statusCode == HttpStatusCode.Unauthorized && this.credentials != null) || (this.ProxyQuery && !this.proxy_auth_state.IsCompleted && statusCode == HttpStatusCode.ProxyAuthenticationRequired)) && !this.usedPreAuth && this.CheckAuthorization(response, statusCode))
+			{
+				flag = true;
+				if (!this.MethodWithBuffer)
+				{
+					return new ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException>(true, flag, null, null);
+				}
+				ValueTuple<Task<BufferOffsetSize>, WebException> rewriteHandler = this.GetRewriteHandler(response, false);
+				task = rewriteHandler.Item1;
+				ex = rewriteHandler.Item2;
+				if (ex == null)
+				{
+					return new ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException>(true, flag, task, null);
+				}
+				if (!this.ThrowOnError)
+				{
+					return new ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException>(false, flag, null, null);
+				}
 				this.writeStream.InternalClose();
 				this.writeStream = null;
+				response.Close();
+				return new ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException>(false, flag, null, ex);
 			}
-			this.webResponse = null;
-			throw ex;
+			else
+			{
+				if (statusCode >= HttpStatusCode.BadRequest)
+				{
+					ex = new WebException(string.Format("The remote server returned an error: ({0}) {1}.", (int)statusCode, response.StatusDescription), null, WebExceptionStatus.ProtocolError, response);
+					flag = true;
+				}
+				else if (statusCode == HttpStatusCode.NotModified && this.allowAutoRedirect)
+				{
+					ex = new WebException(string.Format("The remote server returned an error: ({0}) {1}.", (int)statusCode, response.StatusDescription), null, WebExceptionStatus.ProtocolError, response);
+				}
+				else if (statusCode >= HttpStatusCode.MultipleChoices && this.allowAutoRedirect && this.redirects >= this.maxAutoRedirect)
+				{
+					ex = new WebException("Max. redirections exceeded.", null, WebExceptionStatus.ProtocolError, response);
+					flag = true;
+				}
+				if (ex == null)
+				{
+					int num = (int)statusCode;
+					bool flag2 = false;
+					if (this.allowAutoRedirect && num >= 300)
+					{
+						flag2 = this.Redirect(statusCode, response);
+						ValueTuple<Task<BufferOffsetSize>, WebException> rewriteHandler2 = this.GetRewriteHandler(response, true);
+						task = rewriteHandler2.Item1;
+						ex = rewriteHandler2.Item2;
+						if (flag2 && !this.unsafe_auth_blah)
+						{
+							this.auth_state.Reset();
+							this.proxy_auth_state.Reset();
+						}
+					}
+					if (num >= 300 && num != 304)
+					{
+						flag = true;
+					}
+					if (ex == null)
+					{
+						return new ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException>(flag2, flag, task, null);
+					}
+				}
+				if (!this.ThrowOnError)
+				{
+					return new ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException>(false, flag, null, null);
+				}
+				if (this.writeStream != null)
+				{
+					this.writeStream.InternalClose();
+					this.writeStream = null;
+				}
+				return new ValueTuple<bool, bool, Task<BufferOffsetSize>, WebException>(false, flag, null, ex);
+			}
 		}
 
 		internal bool ReuseConnection { get; set; }
@@ -2103,8 +1978,6 @@ namespace System.Net
 
 		private bool haveResponse;
 
-		private bool haveRequest;
-
 		private bool requestSent;
 
 		private WebHeaderCollection webHeaders;
@@ -2139,15 +2012,13 @@ namespace System.Net
 
 		private int timeout;
 
-		private WebConnectionStream writeStream;
+		private WebRequestStream writeStream;
 
 		private HttpWebResponse webResponse;
 
-		private WebAsyncResult asyncWrite;
+		private WebCompletionSource responseTask;
 
-		private WebAsyncResult asyncRead;
-
-		private EventHandler abortHandler;
+		private WebOperation currentOperation;
 
 		private int aborted;
 
@@ -2157,19 +2028,11 @@ namespace System.Net
 
 		private bool expectContinue;
 
-		private byte[] bodyBuffer;
-
-		private int bodyBufferLength;
-
 		private bool getResponseCalled;
-
-		private Exception saved_exc;
 
 		private object locker;
 
 		private bool finished_reading;
-
-		internal WebConnection WebConnection;
 
 		private DecompressionMethods auto_decomp;
 
@@ -2192,11 +2055,11 @@ namespace System.Net
 		private string host;
 
 		[NonSerialized]
-		internal Action<Stream> ResendContentFactory;
+		internal Func<Stream, Task> ResendContentFactory;
+
+		internal readonly int ID;
 
 		private bool unsafe_auth_blah;
-
-		internal WebConnection StoredConnection;
 
 		private enum NtlmAuthState
 		{

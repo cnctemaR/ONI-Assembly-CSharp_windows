@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class TechInstance
 {
@@ -18,6 +19,15 @@ public class TechInstance
 		{
 			this.complete = true;
 		}
+	}
+
+	public float PercentageCompleteResearchType(string type)
+	{
+		if (!this.tech.RequiresResearchType(type))
+		{
+			return 1f;
+		}
+		return Mathf.Clamp01(this.progressInventory.PointsByTypeID[type] / this.tech.costsByResearchTypeID[type]);
 	}
 
 	public TechInstance.SaveData Save()

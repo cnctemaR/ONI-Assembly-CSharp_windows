@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
+public class GlobalChoreProvider : ChoreProvider, IRender200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -100,33 +100,6 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 		GlobalChoreProvider.Instance = null;
 	}
 
-	public void Sim200ms(float time_delta)
-	{
-		GlobalChoreProvider.find_top_priority_job.Reset(null);
-		GlobalChoreProvider.FindTopPriorityTask.abort = false;
-		int num = 512;
-		for (int i = 0; i < Components.Prioritizables.Items.Count; i += num)
-		{
-			int num2 = i + num;
-			if (Components.Prioritizables.Items.Count < num2)
-			{
-				num2 = Components.Prioritizables.Items.Count;
-			}
-			GlobalChoreProvider.find_top_priority_job.Add(new GlobalChoreProvider.FindTopPriorityTask(i, num2));
-		}
-		GlobalJobManager.Run(GlobalChoreProvider.find_top_priority_job);
-		bool flag = false;
-		for (int num3 = 0; num3 != GlobalChoreProvider.find_top_priority_job.Count; num3++)
-		{
-			if (GlobalChoreProvider.find_top_priority_job.GetWorkItem(num3).found)
-			{
-				flag = true;
-				break;
-			}
-		}
-		VignetteManager.Instance.Get().HasTopPriorityChore(flag);
-	}
-
 	public void Render200ms(float dt)
 	{
 		this.UpdateStorageFetchableBits();
@@ -168,8 +141,6 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 	private ClearableManager clearableManager;
 
 	private TagBits storageFetchableBits;
-
-	private static WorkItemCollection<GlobalChoreProvider.FindTopPriorityTask, object> find_top_priority_job = new WorkItemCollection<GlobalChoreProvider.FindTopPriorityTask, object>();
 
 	public struct Fetch
 	{
@@ -240,10 +211,11 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 
 	private struct FindTopPriorityTask : IWorkItem<object>
 	{
-		public FindTopPriorityTask(int start, int end)
+		public FindTopPriorityTask(int start, int end, List<Prioritizable> worldCollection)
 		{
 			this.start = start;
 			this.end = end;
+			this.worldCollection = worldCollection;
 			this.found = false;
 		}
 
@@ -253,13 +225,15 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 			{
 				return;
 			}
-			for (int num = this.start; num != this.end; num++)
+			int num = this.start;
+			while (num != this.end && this.worldCollection.Count > num)
 			{
-				if (Components.Prioritizables.Items[num].IsTopPriority())
+				if (!(this.worldCollection[num] == null) && this.worldCollection[num].IsTopPriority())
 				{
 					this.found = true;
 					break;
 				}
+				num++;
 			}
 			if (this.found)
 			{
@@ -270,6 +244,8 @@ public class GlobalChoreProvider : ChoreProvider, ISim200ms, IRender200ms
 		private int start;
 
 		private int end;
+
+		private List<Prioritizable> worldCollection;
 
 		public bool found;
 

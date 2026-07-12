@@ -13,6 +13,8 @@ namespace UnityEngine
 
 			public int additionalVertexStreamsMeshInstanceID;
 
+			public int enlightenVertexStreamMeshInstanceID;
+
 			public Matrix4x4 transform;
 
 			public Vector4 lightmapScaleOffset;

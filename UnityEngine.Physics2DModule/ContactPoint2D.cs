@@ -4,9 +4,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics2D/Public/PhysicsScripting2D.h")]
-	[NativeClass("ScriptingContactPoint2D", "struct ScriptingContactPoint2D;")]
 	[RequiredByNativeCode(Optional = false, GenerateProxy = true)]
+	[NativeClass("ScriptingContactPoint2D", "struct ScriptingContactPoint2D;")]
+	[NativeHeader("Modules/Physics2D/Public/PhysicsScripting2D.h")]
 	public struct ContactPoint2D
 	{
 		public Vector2 point

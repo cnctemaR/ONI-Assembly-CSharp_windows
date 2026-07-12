@@ -9,48 +9,24 @@ namespace UnityEngine.XR
 	[NativeConditional("ENABLE_VR")]
 	public static class XRDevice
 	{
-		[NativeName("DeviceConnected")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
-		public static extern bool isPresent
+		[Obsolete("This is obsolete, and should no longer be used. Instead, find the active XRDisplaySubsystem and check that the running property is true (for details, see XRDevice.isPresent documentation).", true)]
+		public static bool isPresent
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				throw new NotSupportedException("XRDevice is Obsolete. Instead, find the active XRDisplaySubsystem and check to see if it is running.");
+			}
 		}
 
-		[Obsolete("This is obsolete, and should no longer be used.  Please use CommonUsages.userPresence.")]
-		public static extern UserPresenceState userPresence
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		[NativeName("DeviceName")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
-		[Obsolete("family is deprecated.  Use XRSettings.loadedDeviceName instead.", false)]
-		public static extern string family
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		[NativeName("DeviceModel")]
-		[Obsolete("This is obsolete, and should no longer be used.  Please use InputDevice.name.")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
-		public static extern string model
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("DeviceRefreshRate")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float refreshRate
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern IntPtr GetNativePtr();
 
@@ -64,13 +40,13 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool SetTrackingSpaceType(TrackingSpaceType trackingSpaceType);
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("DisableAutoVRCameraTracking")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DisableAutoXRCameraTracking([NotNull] Camera camera, bool disabled);
+		public static extern void DisableAutoXRCameraTracking([NotNull("ArgumentNullException")] Camera camera, bool disabled);
 
 		[NativeName("UpdateEyeTextureMSAASetting")]
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UpdateEyeTextureMSAASetting();
 
@@ -79,16 +55,9 @@ namespace UnityEngine.XR
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[NativeName("SetProjectionZoomFactor")]
-			[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+			[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
-		}
-
-		[Obsolete("This is obsolete, and should no longer be used.  Please use XRInputSubsystem.GetTrackingOriginMode.")]
-		public static extern TrackingOriginMode trackingOriginMode
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
 		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

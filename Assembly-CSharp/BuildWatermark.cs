@@ -17,34 +17,43 @@ public class BuildWatermark : KScreen
 		this.RefreshText();
 	}
 
-	public void RefreshText()
+	public static string GetBuildText()
 	{
-		string text = "CS-";
-		bool flag = true;
-		bool flag2 = DistributionPlatform.Initialized && DistributionPlatform.Inst.IsArchiveBranch;
-		this.button.ClearOnClick();
+		string text = LaunchInitializer.BuildPrefix() + "-";
 		if (Application.isEditor)
 		{
 			text += "<EDITOR>";
 		}
 		else
 		{
-			text += 469300U.ToString();
+			text += 471531U.ToString();
 			if (DebugHandler.enabled)
 			{
 				text += "-D";
 			}
 		}
+		return text;
+	}
+
+	public void RefreshText()
+	{
+		bool flag = true;
+		bool flag2 = DistributionPlatform.Initialized && DistributionPlatform.Inst.IsArchiveBranch;
+		string buildText = BuildWatermark.GetBuildText();
+		this.button.ClearOnClick();
 		if (flag)
 		{
-			this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.WATERMARK, text));
+			this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.WATERMARK, buildText));
 			this.toolTip.ClearMultiStringTooltip();
 		}
 		else
 		{
-			this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.TESTING_WATERMARK, text));
+			this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.TESTING_WATERMARK, buildText));
 			this.toolTip.SetSimpleTooltip(UI.DEVELOPMENTBUILDS.TESTING_TOOLTIP);
-			this.button.onClick += this.ShowTestingMessage;
+			if (this.interactable)
+			{
+				this.button.onClick += this.ShowTestingMessage;
+			}
 		}
 		foreach (GameObject gameObject in this.archiveIcons)
 		{
@@ -61,6 +70,8 @@ public class BuildWatermark : KScreen
 		{
 		}, null, null, UI.DEVELOPMENTBUILDS.TESTING_MESSAGE_TITLE, UI.DEVELOPMENTBUILDS.TESTING_MORE_INFO, null, null);
 	}
+
+	public bool interactable = true;
 
 	public LocText textDisplay;
 

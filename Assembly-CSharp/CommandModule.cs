@@ -10,9 +10,8 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.characterOverlay = base.gameObject.AddComponent<CharacterOverlay>();
-		this.characterOverlay.Register();
 		this.rocketStats = new RocketStats(this);
+		this.conditions = base.GetComponent<RocketCommandConditions>();
 	}
 
 	public void ReleaseAstronaut(bool fill_bladder)
@@ -57,13 +56,6 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		int num = Grid.PosToCell(base.gameObject);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("CommandModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnGantryChanged));
 		this.OnGantryChanged(null);
-		RocketModule component = base.GetComponent<RocketModule>();
-		this.reachable = (ConditionDestinationReachable)component.AddLaunchCondition(new ConditionDestinationReachable(this));
-		this.hasAstronaut = (ConditionHasAstronaut)component.AddLaunchCondition(new ConditionHasAstronaut(this));
-		this.hasSuit = (ConditionHasAtmoSuit)component.AddLaunchCondition(new ConditionHasAtmoSuit(this));
-		this.cargoEmpty = (CargoBayIsEmpty)component.AddLaunchCondition(new CargoBayIsEmpty(this));
-		this.destHasResources = (ConditionHasMinimumMass)component.AddLaunchCondition(new ConditionHasMinimumMass(this));
-		this.flightPathIsClear = (ConditionFlightPathIsClear)component.AddFlightCondition(new ConditionFlightPathIsClear(base.gameObject, 1));
 	}
 
 	private bool CanAssignTo(MinionAssignablesProxy worker)
@@ -78,7 +70,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	private static bool HasValidGantry(GameObject go)
 	{
 		int num = Grid.OffsetCell(Grid.PosToCell(go), 0, -1);
-		return Grid.FakeFloor[num];
+		return Grid.IsValidCell(num) && Grid.FakeFloor[num];
 	}
 
 	private void OnGantryChanged(object data)
@@ -120,25 +112,13 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 	public RocketStats rocketStats;
 
+	public RocketCommandConditions conditions;
+
 	private bool releasingAstronaut;
 
 	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
 
-	public ConditionDestinationReachable reachable;
-
-	public ConditionHasAstronaut hasAstronaut;
-
-	public ConditionHasAtmoSuit hasSuit;
-
-	public CargoBayIsEmpty cargoEmpty;
-
-	public ConditionHasMinimumMass destHasResources;
-
-	public ConditionFlightPathIsClear flightPathIsClear;
-
 	public Assignable assignable;
-
-	private CharacterOverlay characterOverlay;
 
 	private HandleVector<int>.Handle partitionerEntry;
 

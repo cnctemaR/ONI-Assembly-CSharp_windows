@@ -109,14 +109,19 @@ namespace VoronoiTree
 			float num9 = 1f;
 			for (int l = 0; l < sites.Count; l++)
 			{
-				Diagram.<>c__DisplayClass17_0 CS$<>8__locals1 = new Diagram.<>c__DisplayClass17_0();
 				Diagram.Site site3 = sites[l];
-				CS$<>8__locals1.neighbours = this.diagram.ListNeighborSitesIDsForSite(this.points[l]);
+				List<uint> neighbours = this.diagram.ListNeighborSitesIDsForSite(this.points[l]);
 				int nIndex2;
 				int nIndex;
-				for (nIndex = 0; nIndex < CS$<>8__locals1.neighbours.Count; nIndex = nIndex2 + 1)
+				Predicate<Diagram.Site> <>9__0;
+				for (nIndex = 0; nIndex < neighbours.Count; nIndex = nIndex2 + 1)
 				{
-					Diagram.Site site4 = sites.Find((Diagram.Site s) => s.id == CS$<>8__locals1.neighbours[nIndex]);
+					Predicate<Diagram.Site> predicate;
+					if ((predicate = <>9__0) == null)
+					{
+						predicate = (<>9__0 = (Diagram.Site s) => s.id == neighbours[nIndex]);
+					}
+					Diagram.Site site4 = sites.Find(predicate);
 					float num10 = (site3.position - site4.position).sqrMagnitude / (Mathf.Abs(site3.currentWeight - site4.currentWeight) + 1f);
 					if (num10 < num9)
 					{

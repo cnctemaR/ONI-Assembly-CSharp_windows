@@ -26,7 +26,19 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		public override string ToString()
 		{
-			return string.Concat(new object[] { "Rank: '", this.m_Rank, "' Value: '", this.value, "' Category: '", this.leaderboardID, "' PlayerID: '", this.m_UserID, "' Date: '", this.m_Date });
+			return string.Concat(new string[]
+			{
+				"Rank: '",
+				this.m_Rank.ToString(),
+				"' Value: '",
+				this.value.ToString(),
+				"' Category: '",
+				this.leaderboardID,
+				"' PlayerID: '",
+				this.m_UserID,
+				"' Date: '",
+				this.m_Date.ToString()
+			});
 		}
 
 		public void ReportScore(Action<bool> callback)

@@ -667,12 +667,12 @@ namespace UnityEngine.UI
 			this.UpdateBounds();
 			float num = this.m_ContentBounds.size[axis] - this.m_ViewBounds.size[axis];
 			float num2 = this.m_ViewBounds.min[axis] - value * num;
-			float num3 = this.m_Content.localPosition[axis] + num2 - this.m_ContentBounds.min[axis];
-			Vector3 localPosition = this.m_Content.localPosition;
-			if (Mathf.Abs(localPosition[axis] - num3) > 0.01f)
+			float num3 = this.m_Content.anchoredPosition[axis] + num2 - this.m_ContentBounds.min[axis];
+			Vector3 vector = this.m_Content.anchoredPosition;
+			if (Mathf.Abs(vector[axis] - num3) > 0.01f)
 			{
-				localPosition[axis] = num3;
-				this.m_Content.localPosition = localPosition;
+				vector[axis] = num3;
+				this.m_Content.anchoredPosition = vector;
 				this.m_Velocity[axis] = 0f;
 				this.UpdateBounds();
 			}
@@ -771,6 +771,7 @@ namespace UnityEngine.UI
 		public virtual void SetLayoutHorizontal()
 		{
 			this.m_Tracker.Clear();
+			this.UpdateCachedData();
 			if (this.m_HSliderExpand || this.m_VSliderExpand)
 			{
 				this.m_Tracker.Add(this, this.viewRect, DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.AnchoredPositionY | DrivenTransformProperties.AnchorMinX | DrivenTransformProperties.AnchorMinY | DrivenTransformProperties.AnchorMaxX | DrivenTransformProperties.AnchorMaxY | DrivenTransformProperties.SizeDeltaX | DrivenTransformProperties.SizeDeltaY);

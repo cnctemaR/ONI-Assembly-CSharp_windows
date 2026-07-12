@@ -17,11 +17,11 @@ namespace Steamworks
 			{
 				if (addressFamily != AddressFamily.InterNetworkV6)
 				{
-					throw new TypeInitializationException("SteamIPAddress_t: Unexpected address family " + iPAddress.AddressFamily, null);
+					throw new TypeInitializationException("SteamIPAddress_t: Unexpected address family " + iPAddress.AddressFamily.ToString(), null);
 				}
 				if (addressBytes.Length != 16)
 				{
-					throw new TypeInitializationException("SteamIPAddress_t: Unexpected byte length for Ipv6: " + addressBytes.Length, null);
+					throw new TypeInitializationException("SteamIPAddress_t: Unexpected byte length for Ipv6: " + addressBytes.Length.ToString(), null);
 				}
 				this.m_ip0 = (long)(((int)addressBytes[1] << 24) | ((int)addressBytes[0] << 16) | ((int)addressBytes[3] << 8) | (int)addressBytes[2] | ((int)addressBytes[5] << 24) | ((int)addressBytes[4] << 16) | ((int)addressBytes[7] << 8) | (int)addressBytes[6]);
 				this.m_ip1 = (long)(((int)addressBytes[9] << 24) | ((int)addressBytes[8] << 16) | ((int)addressBytes[11] << 8) | (int)addressBytes[10] | ((int)addressBytes[13] << 24) | ((int)addressBytes[12] << 16) | ((int)addressBytes[15] << 8) | (int)addressBytes[14]);
@@ -32,7 +32,7 @@ namespace Steamworks
 			{
 				if (addressBytes.Length != 4)
 				{
-					throw new TypeInitializationException("SteamIPAddress_t: Unexpected byte length for Ipv4." + addressBytes.Length, null);
+					throw new TypeInitializationException("SteamIPAddress_t: Unexpected byte length for Ipv4." + addressBytes.Length.ToString(), null);
 				}
 				this.m_ip0 = (long)(((int)addressBytes[0] << 24) | ((int)addressBytes[1] << 16) | ((int)addressBytes[2] << 8) | (int)addressBytes[3]);
 				this.m_ip1 = 0L;

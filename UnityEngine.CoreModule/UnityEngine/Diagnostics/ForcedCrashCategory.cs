@@ -7,6 +7,7 @@ namespace UnityEngine.Diagnostics
 		AccessViolation,
 		FatalError,
 		Abort,
-		PureVirtualFunction
+		PureVirtualFunction,
+		MonoAbort
 	}
 }

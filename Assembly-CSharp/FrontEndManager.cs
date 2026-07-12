@@ -8,6 +8,15 @@ public class FrontEndManager : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		FrontEndManager.Instance = this;
+		string highestActiveDlcId = DlcManager.GetHighestActiveDlcId();
+		if (highestActiveDlcId == null || (highestActiveDlcId != null && highestActiveDlcId.Length == 0) || !(highestActiveDlcId == "EXPANSION1_ID"))
+		{
+			Util.KInstantiateUI(this.mainMenuVanilla, base.gameObject, true);
+		}
+		else
+		{
+			Util.KInstantiateUI(this.mainMenuExpansion1, base.gameObject, true);
+		}
 		if (this.SpawnOnLoadScreens != null && this.SpawnOnLoadScreens.Length != 0)
 		{
 			foreach (GameObject gameObject in this.SpawnOnLoadScreens)
@@ -21,7 +30,7 @@ public class FrontEndManager : KMonoBehaviour
 		if (FrontEndManager.firstInit)
 		{
 			FrontEndManager.firstInit = false;
-			if (this.SpawnOnLaunchScreens != null && this.SpawnOnLoadScreens.Length != 0)
+			if (this.SpawnOnLaunchScreens != null && this.SpawnOnLaunchScreens.Length != 0)
 			{
 				foreach (GameObject gameObject2 in this.SpawnOnLaunchScreens)
 				{
@@ -48,6 +57,10 @@ public class FrontEndManager : KMonoBehaviour
 	public static FrontEndManager Instance;
 
 	public static bool firstInit = true;
+
+	public GameObject mainMenuVanilla;
+
+	public GameObject mainMenuExpansion1;
 
 	public GameObject[] SpawnOnLoadScreens;
 

@@ -2,12 +2,18 @@
 using STRINGS;
 using UnityEngine;
 
+[EntityConfigOrder(1)]
 public class BabyPacuCleanerConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = PacuCleanerConfig.CreatePacu("PacuCleanerBaby", CREATURES.SPECIES.PACU.VARIANT_CLEANER.BABY.NAME, CREATURES.SPECIES.PACU.VARIANT_CLEANER.BABY.DESC, "baby_pacu_kanim", true);
-		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "PacuCleaner", null);
+		EntityTemplates.ExtendEntityToBeingABaby(gameObject, "PacuCleaner", null, false, 5f);
 		return gameObject;
 	}
 

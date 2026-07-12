@@ -6,28 +6,33 @@ namespace Database
 	{
 		public Faces()
 		{
-			this.Neutral = base.Add(new Face("Neutral"));
-			this.Happy = base.Add(new Face("Happy"));
-			this.Uncomfortable = base.Add(new Face("Uncomfortable"));
-			this.Cold = base.Add(new Face("Cold"));
-			this.Hot = base.Add(new Face("Hot"));
-			this.Tired = base.Add(new Face("Tired"));
-			this.Sleep = base.Add(new Face("Sleep"));
-			this.Hungry = base.Add(new Face("Hungry"));
-			this.Angry = base.Add(new Face("Angry"));
-			this.Suffocate = base.Add(new Face("Suffocate"));
-			this.Sick = base.Add(new Face("Sick"));
-			this.SickSpores = base.Add(new Face("Spores"));
-			this.Zombie = base.Add(new Face("Zombie"));
-			this.SickFierySkin = base.Add(new Face("Fiery"));
-			this.SickCold = base.Add(new Face("Cold"));
-			this.Dead = base.Add(new Face("Death"));
-			this.Productive = base.Add(new Face("Productive"));
-			this.Determined = base.Add(new Face("Determined"));
-			this.Sticker = base.Add(new Face("Sticker"));
-			this.Sparkle = base.Add(new Face("Sparkle"));
-			this.Balloon = base.Add(new Face("Balloon"));
-			this.Tickled = base.Add(new Face("Tickled"));
+			this.Neutral = base.Add(new Face("Neutral", null));
+			this.Happy = base.Add(new Face("Happy", null));
+			this.Uncomfortable = base.Add(new Face("Uncomfortable", null));
+			this.Cold = base.Add(new Face("Cold", null));
+			this.Hot = base.Add(new Face("Hot", "headfx_sweat"));
+			this.Tired = base.Add(new Face("Tired", null));
+			this.Sleep = base.Add(new Face("Sleep", null));
+			this.Hungry = base.Add(new Face("Hungry", null));
+			this.Angry = base.Add(new Face("Angry", null));
+			this.Suffocate = base.Add(new Face("Suffocate", null));
+			this.Sick = base.Add(new Face("Sick", "headfx_sick"));
+			this.SickSpores = base.Add(new Face("Spores", "headfx_spores"));
+			this.Zombie = base.Add(new Face("Zombie", null));
+			this.SickFierySkin = base.Add(new Face("Fiery", "headfx_fiery"));
+			this.SickCold = base.Add(new Face("SickCold", "headfx_sickcold"));
+			this.Pollen = base.Add(new Face("Pollen", "headfx_pollen"));
+			this.Dead = base.Add(new Face("Death", null));
+			this.Productive = base.Add(new Face("Productive", null));
+			this.Determined = base.Add(new Face("Determined", null));
+			this.Sticker = base.Add(new Face("Sticker", null));
+			this.Sparkle = base.Add(new Face("Sparkle", null));
+			this.Balloon = base.Add(new Face("Balloon", null));
+			this.Tickled = base.Add(new Face("Tickled", null));
+			this.Radiation1 = base.Add(new Face("Radiation1", "headfx_radiation1"));
+			this.Radiation2 = base.Add(new Face("Radiation2", "headfx_radiation2"));
+			this.Radiation3 = base.Add(new Face("Radiation3", "headfx_radiation3"));
+			this.Radiation4 = base.Add(new Face("Radiation4", "headfx_radiation4"));
 		}
 
 		public Face Neutral;
@@ -62,6 +67,8 @@ namespace Database
 
 		public Face SickCold;
 
+		public Face Pollen;
+
 		public Face Productive;
 
 		public Face Determined;
@@ -73,5 +80,13 @@ namespace Database
 		public Face Sparkle;
 
 		public Face Tickled;
+
+		public Face Radiation1;
+
+		public Face Radiation2;
+
+		public Face Radiation3;
+
+		public Face Radiation4;
 	}
 }

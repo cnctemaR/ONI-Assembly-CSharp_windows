@@ -92,7 +92,14 @@ public struct CellOffset : IEquatable<CellOffset>
 
 	public override string ToString()
 	{
-		return string.Concat(new object[] { "(", this.x, ",", this.y, ")" });
+		return string.Concat(new string[]
+		{
+			"(",
+			this.x.ToString(),
+			",",
+			this.y.ToString(),
+			")"
+		});
 	}
 
 	public int x;

@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Events
 {
 	[Serializable]
-	public abstract class UnityEvent<T0> : UnityEventBase
+	public class UnityEvent<T0> : UnityEventBase
 	{
 		[RequiredByNativeCode]
 		public UnityEvent()
@@ -23,9 +23,9 @@ namespace UnityEngine.Events
 			base.RemoveListener(call.Target, call.Method);
 		}
 
-		protected override MethodInfo FindMethod_Impl(string name, object targetObj)
+		protected override MethodInfo FindMethod_Impl(string name, Type targetObjType)
 		{
-			return UnityEventBase.GetValidMethodInfo(targetObj, name, new Type[] { typeof(T0) });
+			return UnityEventBase.GetValidMethodInfo(targetObjType, name, new Type[] { typeof(T0) });
 		}
 
 		internal override BaseInvokableCall GetDelegate(object target, MethodInfo theFunction)

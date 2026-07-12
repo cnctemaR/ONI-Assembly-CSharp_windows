@@ -51,6 +51,12 @@ public class HoverTextConfiguration : KMonoBehaviour
 	{
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
+		if (!Grid.IsValidCell(num) || (int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId)
+		{
+			hoverTextDrawer.EndDrawing();
+			return;
+		}
 		hoverTextDrawer.BeginShadowBar(false);
 		this.DrawTitle(instance, hoverTextDrawer);
 		this.DrawInstructions(HoverTextScreen.Instance, hoverTextDrawer);
@@ -79,6 +85,8 @@ public class HoverTextConfiguration : KMonoBehaviour
 	public HoverTextConfiguration.TextStylePair Styles_BodyText;
 
 	public HoverTextConfiguration.TextStylePair Styles_Instruction;
+
+	public HoverTextConfiguration.TextStylePair Styles_Warning;
 
 	public HoverTextConfiguration.ValuePropertyTextStyles Styles_Values;
 

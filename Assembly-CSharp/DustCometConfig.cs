@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class DustCometConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateEntity(DustCometConfig.ID, UI.SPACEDESTINATIONS.COMETS.DUSTCOMET.NAME, true);
@@ -19,7 +24,7 @@ public class DustCometConfig : IEntityConfig
 		comet.flyingSoundID = 0;
 		comet.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
-		primaryElement.SetElement(SimHashes.Regolith);
+		primaryElement.SetElement(SimHashes.Regolith, true);
 		primaryElement.Temperature = (comet.temperatureRange.x + comet.temperatureRange.y) / 2f;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("meteor_sand_kanim") };
@@ -29,6 +34,7 @@ public class DustCometConfig : IEntityConfig
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
 		gameObject.AddOrGet<KCircleCollider2D>().radius = 0.5f;
 		gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
+		gameObject.AddTag(GameTags.Comet);
 		return gameObject;
 	}
 

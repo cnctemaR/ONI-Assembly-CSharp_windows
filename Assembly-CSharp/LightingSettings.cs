@@ -26,6 +26,15 @@ public class LightingSettings : ScriptableObject
 
 	public Vector2 StateTransitionUVOffsetRate;
 
+	[Header("Falling Solids")]
+	public Texture2D FallingSolidMap;
+
+	public Color FallingSolidColor;
+
+	public float FallingSolidUVScale;
+
+	public Vector2 FallingSolidUVOffsetRate;
+
 	[Header("Metal Shine")]
 	public Vector2 ShineCenter;
 
@@ -119,9 +128,9 @@ public class LightingSettings : ScriptableObject
 
 	public float BackgroundUVScale;
 
-	public LightingSettings.EdgeLighting substanceEdgeParameters;
+	public global::LightingSettings.EdgeLighting substanceEdgeParameters;
 
-	public LightingSettings.EdgeLighting tileEdgeParameters;
+	public global::LightingSettings.EdgeLighting tileEdgeParameters;
 
 	public float AnimIntensity;
 
@@ -131,7 +140,7 @@ public class LightingSettings : ScriptableObject
 
 	public Color[] DarkenTints;
 
-	public LightingSettings.LightingColours characterLighting;
+	public global::LightingSettings.LightingColours characterLighting;
 
 	public Color BrightenOverlayColour;
 

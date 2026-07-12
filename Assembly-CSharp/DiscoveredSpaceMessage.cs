@@ -50,7 +50,6 @@ public class DiscoveredSpaceMessage : Message
 		KFMOD.PlayUISound(GlobalAssets.GetSound(this.GetSound(), false));
 		MusicManager.instance.PlaySong("Stinger_Surface", false);
 		CameraController.Instance.SetTargetPos(this.cameraFocusPos, 8f, true);
-		SaveGame.Instance.GetComponent<SeasonManager>().ForceBeginMeteorSeasonWithShower();
 	}
 
 	[Serialize]

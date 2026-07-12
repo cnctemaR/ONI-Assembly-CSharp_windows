@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class WoodLogConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("WoodLog", ITEMS.INDUSTRIAL_PRODUCTS.WOOD.NAME, ITEMS.INDUSTRIAL_PRODUCTS.WOOD.DESC, 1f, false, Assets.GetAnim("wood_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, true, 0, SimHashes.Creature, new List<Tag>

@@ -11,7 +11,7 @@ namespace FMODUnity
 		}
 
 		public EventNotFoundException(Guid guid)
-			: base(("[FMOD] Event not found " + guid.ToString("b")) ?? "")
+			: base("[FMOD] Event not found " + guid.ToString("b"))
 		{
 			this.Guid = guid;
 		}

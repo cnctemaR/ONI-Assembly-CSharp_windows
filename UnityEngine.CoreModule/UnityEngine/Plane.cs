@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[UsedByNativeCode]
-	public struct Plane
+	public struct Plane : IFormattable
 	{
 		public Vector3 normal
 		{
@@ -128,23 +129,25 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("(normal:({0:F1}, {1:F1}, {2:F1}), distance:{3:F1})", new object[]
-			{
-				this.m_Normal.x,
-				this.m_Normal.y,
-				this.m_Normal.z,
-				this.m_Distance
-			});
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
-			return UnityString.Format("(normal:({0}, {1}, {2}), distance:{3})", new object[]
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
 			{
-				this.m_Normal.x.ToString(format),
-				this.m_Normal.y.ToString(format),
-				this.m_Normal.z.ToString(format),
-				this.m_Distance.ToString(format)
+				format = "F1";
+			}
+			return UnityString.Format("(normal:{0}, distance:{1})", new object[]
+			{
+				this.m_Normal.ToString(format, formatProvider),
+				this.m_Distance.ToString(format, formatProvider)
 			});
 		}
 

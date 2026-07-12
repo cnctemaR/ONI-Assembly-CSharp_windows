@@ -4,89 +4,42 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-[AddComponentMenu("KMonoBehaviour/Workable/MedicinalPill")]
-public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableUIItem
+[AddComponentMenu("KMonoBehaviour/game/MedicinalPill")]
+public class MedicinalPill : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.SetWorkTime(10f);
-		this.showProgressBar = false;
-		this.synchronizeAnims = false;
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
-		this.CreateChore();
-	}
-
-	protected override void OnCompleteWork(Worker worker)
-	{
-		if (!string.IsNullOrEmpty(this.info.effect))
-		{
-			Effects component = worker.GetComponent<Effects>();
-			EffectInstance effectInstance = component.Get(this.info.effect);
-			if (effectInstance != null)
-			{
-				effectInstance.timeRemaining = effectInstance.effect.duration;
-			}
-			else
-			{
-				component.Add(this.info.effect, true);
-			}
-		}
-		Sicknesses sicknesses = worker.GetSicknesses();
-		foreach (string text in this.info.curedSicknesses)
-		{
-			SicknessInstance sicknessInstance = sicknesses.Get(text);
-			if (sicknessInstance != null)
-			{
-				Game.Instance.savedInfo.curedDisease = true;
-				sicknessInstance.Cure();
-			}
-		}
-		base.gameObject.DeleteObject();
-	}
-
-	private void CreateChore()
-	{
-		new TakeMedicineChore(this);
-	}
-
-	public bool CanBeTakenBy(GameObject consumer)
-	{
-		if (!string.IsNullOrEmpty(this.info.effect))
-		{
-			Effects component = consumer.GetComponent<Effects>();
-			if (component == null || component.HasEffect(this.info.effect))
-			{
-				return false;
-			}
-		}
-		if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
-		{
-			return true;
-		}
-		Sicknesses sicknesses = consumer.GetSicknesses();
-		if (this.info.medicineType == MedicineInfo.MedicineType.CureAny && sicknesses.Count > 0)
-		{
-			return true;
-		}
-		foreach (SicknessInstance sicknessInstance in sicknesses)
-		{
-			if (this.info.curedSicknesses.Contains(sicknessInstance.modifier.Id))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public List<Descriptor> EffectDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
+		if (string.IsNullOrEmpty(this.info.doctorStationId))
+		{
+			if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
+			{
+				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.SELF_ADMINISTERED_BOOSTER, Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.SELF_ADMINISTERED_BOOSTER_TOOLTIP, Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
+			}
+			else
+			{
+				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.SELF_ADMINISTERED_CURE, Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.SELF_ADMINISTERED_CURE_TOOLTIP, Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
+			}
+		}
+		else
+		{
+			string properName = Assets.GetPrefab(this.info.doctorStationId).GetProperName();
+			if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
+			{
+				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.DOCTOR_ADMINISTERED_BOOSTER.Replace("{Station}", properName), Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.DOCTOR_ADMINISTERED_BOOSTER_TOOLTIP.Replace("{Station}", properName), Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
+			}
+			else
+			{
+				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.DOCTOR_ADMINISTERED_CURE.Replace("{Station}", properName), Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.DOCTOR_ADMINISTERED_CURE_TOOLTIP.Replace("{Station}", properName), Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
+			}
+		}
 		switch (this.info.medicineType)
 		{
-		case MedicineInfo.MedicineType.Booster:
-			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER, Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER_TOOLTIP, Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
-			break;
 		case MedicineInfo.MedicineType.CureAny:
 			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY, Array.Empty<object>()), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY_TOOLTIP, Array.Empty<object>()), Descriptor.DescriptorType.Effect, false));
 			break;
@@ -105,54 +58,14 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 		if (!string.IsNullOrEmpty(this.info.effect))
 		{
 			Effect effect = Db.Get().effects.Get(this.info.effect);
-			list.Add(new Descriptor(string.Format(DUPLICANTS.MODIFIERS.MEDICINE_GENERICPILL.EFFECT_DESC, effect.Name), string.Format("{0}\n{1}", effect.description, Effect.CreateTooltip(effect, true, "\n")), Descriptor.DescriptorType.Effect, false));
+			list.Add(new Descriptor(string.Format(DUPLICANTS.MODIFIERS.MEDICINE_GENERICPILL.EFFECT_DESC, effect.Name), string.Format("{0}\n{1}", effect.description, Effect.CreateTooltip(effect, true, "\n    • ", true)), Descriptor.DescriptorType.Effect, false));
 		}
 		return list;
 	}
 
-	public new List<Descriptor> GetDescriptors(GameObject go)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return this.EffectDescriptors(go);
-	}
-
-	public string ConsumableId
-	{
-		get
-		{
-			return this.PrefabID().Name;
-		}
-	}
-
-	public string ConsumableName
-	{
-		get
-		{
-			return this.GetProperName();
-		}
-	}
-
-	public int MajorOrder
-	{
-		get
-		{
-			return (int)(this.info.medicineType + 1000);
-		}
-	}
-
-	public int MinorOrder
-	{
-		get
-		{
-			return 0;
-		}
-	}
-
-	public bool Display
-	{
-		get
-		{
-			return true;
-		}
 	}
 
 	public MedicineInfo info;

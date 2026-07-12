@@ -11,7 +11,7 @@ namespace Klei.AI
 		{
 			float num = 0.025f;
 			base.AddSicknessComponent(new CommonSickEffectSickness());
-			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_allergies_kanim" }, Db.Get().Expressions.Uncomfortable));
+			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_allergies_kanim" }, Db.Get().Expressions.Pollen));
 			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]
 			{
 				new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, num, DUPLICANTS.DISEASES.ALLERGIES.NAME, false, false, true),

@@ -56,10 +56,10 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Base"), false, new List<string>
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
-				"BunkerTile", "CarpetTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir",
-				"ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
-			}),
-			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }),
+				"BunkerTile", "CarpetTile", "ExobaseHeadquarters", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir",
+				"GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+			}, ""),
+			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, ""),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
 			{
 				"DevGenerator",
@@ -90,12 +90,12 @@ namespace TUNING
 				TemperatureControlledSwitchConfig.ID,
 				PressureSwitchLiquidConfig.ID,
 				PressureSwitchGasConfig.ID
-			}),
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
 				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint",
 				"CreatureFeeder", "FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure", "FlyingCreatureBait"
-			}),
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
 				"Outhouse",
@@ -115,10 +115,13 @@ namespace TUNING
 				"LiquidFilter",
 				"LiquidValve",
 				"LiquidLogicValve",
+				"LiquidLimitValve",
 				LiquidConduitElementSensorConfig.ID,
 				LiquidConduitDiseaseSensorConfig.ID,
-				LiquidConduitTemperatureSensorConfig.ID
-			}),
+				LiquidConduitTemperatureSensorConfig.ID,
+				"ModularLaunchpadPortLiquid",
+				"ModularLaunchpadPortLiquidUnloader"
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("HVAC"), false, new List<string>
 			{
 				"GasConduit",
@@ -134,18 +137,21 @@ namespace TUNING
 				"GasFilter",
 				"GasValve",
 				"GasLogicValve",
+				"GasLimitValve",
 				"GasBottler",
 				"BottleEmptierGas",
+				"ModularLaunchpadPortGas",
+				"ModularLaunchpadPortGasUnloader",
 				GasConduitElementSensorConfig.ID,
 				GasConduitDiseaseSensorConfig.ID,
 				GasConduitTemperatureSensorConfig.ID
-			}),
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
-				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge",
-				"OilRefinery", "Polymerizer", "OxyliteRefinery", "SupermaterialRefinery"
-			}),
-			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot", "MassageTable", "Grave" }),
+				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress", "MetalRefinery",
+				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "SupermaterialRefinery", "DiamondPress"
+			}, ""),
+			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "DecontaminationShower", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot", "MassageTable", "Grave" }, ""),
 			new PlanScreen.PlanInfo(new HashedString("Furniture"), false, new List<string>
 			{
 				BedConfig.ID,
@@ -185,17 +191,18 @@ namespace TUNING
 				"MonumentMiddle",
 				"MonumentTop",
 				"ParkSign"
-			}),
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
-				"ResearchCenter", "AdvancedResearchCenter", "CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation",
-				"ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "AstronautTrainingCenter"
-			}),
+				"ResearchCenter", "AdvancedResearchCenter", "NuclearResearchCenter", "OrbitalResearchCenter", "CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "GeneticAnalysisStation", "RanchStation",
+				"ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "CraftingTable", "ClothingFabricator", "SuitFabricator", "OxygenMaskMarker", "OxygenMaskLocker", "SuitMarker",
+				"SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
 				"SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock",
 				"ExteriorWall", "SweepBotStation"
-			}),
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
 				"LogicWire",
@@ -214,6 +221,7 @@ namespace TUNING
 				LogicElementSensorGasConfig.ID,
 				LogicElementSensorLiquidConfig.ID,
 				LogicCritterCountSensorConfig.ID,
+				LogicRadiationSensorConfig.ID,
 				LogicCounterConfig.ID,
 				LogicAlarmConfig.ID,
 				LogicHammerConfig.ID,
@@ -231,27 +239,57 @@ namespace TUNING
 				LogicMemoryConfig.ID,
 				"LogicGateMultiplexer",
 				"LogicGateDemultiplexer"
-			}),
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string>
 			{
 				"SolidTransferArm",
 				"SolidConduit",
+				"SolidConduitBridge",
 				"SolidConduitInbox",
 				"SolidConduitOutbox",
 				"SolidFilter",
 				"SolidVent",
 				"SolidLogicValve",
-				"SolidConduitBridge",
+				"SolidLimitValve",
 				SolidConduitDiseaseSensorConfig.ID,
 				SolidConduitElementSensorConfig.ID,
 				SolidConduitTemperatureSensorConfig.ID,
-				"AutoMiner"
-			}),
+				"AutoMiner",
+				"ModularLaunchpadPortSolid",
+				"ModularLaunchpadPortSolidUnloader"
+			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Rocketry"), true, new List<string>
 			{
-				"Gantry", "SteamEngine", "KeroseneEngine", "SolidBooster", "LiquidFuelTank", "OxidizerTank", "OxidizerTankLiquid", "CargoBay", "GasCargoBay", "LiquidCargoBay",
-				"CommandModule", "TouristModule", "ResearchModule", "SpecialCargoBay", "HydrogenEngine"
-			})
+				"ClusterTelescope",
+				"LaunchPad",
+				"Gantry",
+				"SteamEngine",
+				"KeroseneEngine",
+				"SolidBooster",
+				"LiquidFuelTank",
+				"OxidizerTank",
+				"OxidizerTankLiquid",
+				"CargoBay",
+				"GasCargoBay",
+				"LiquidCargoBay",
+				"CommandModule",
+				"TouristModule",
+				"ResearchModule",
+				"SpecialCargoBay",
+				"HydrogenEngine",
+				RocketControlStationConfig.ID,
+				"RocketInteriorPowerPlug",
+				"RocketInteriorLiquidInput",
+				"RocketInteriorLiquidOutput",
+				"RocketInteriorGasInput",
+				"RocketInteriorGasOutput",
+				"RocketInteriorSolidInput",
+				"RocketInteriorSolidOutput",
+				"RailGun",
+				"RailGunPayloadOpener",
+				"LandingBeacon"
+			}, ""),
+			new PlanScreen.PlanInfo(new HashedString("HEP"), true, new List<string> { "NuclearReactor", "UraniumCentrifuge", "HighEnergyParticleSpawner", "HighEnergyParticleRedirector", "DevRadiationGenerator" }, "EXPANSION1_ID")
 		};
 
 		public static List<Type> COMPONENT_DESCRIPTION_ORDER = new List<Type>
@@ -261,6 +299,7 @@ namespace TUNING
 			typeof(GourmetCookingStation),
 			typeof(RoleStation),
 			typeof(ResearchCenter),
+			typeof(NuclearResearchCenter),
 			typeof(LiquidCooledFan),
 			typeof(HandSanitizer),
 			typeof(HandSanitizer.Work),
@@ -322,7 +361,11 @@ namespace TUNING
 			typeof(MechanicalSurfboard),
 			typeof(BottleEmptier),
 			typeof(AccessControl),
-			typeof(FuelTank),
+			typeof(GammaRayOven),
+			typeof(Reactor),
+			typeof(HighEnergyParticlePort),
+			typeof(LeadSuitTank),
+			typeof(ActiveParticleConsumer.Def),
 			typeof(WaterCooler),
 			typeof(Edible),
 			typeof(PlantableSeed),
@@ -364,6 +407,16 @@ namespace TUNING
 				public const float TIER1 = 100f;
 
 				public const float TIER2 = 200f;
+			}
+		}
+
+		public class NUCLEAR_REACTOR
+		{
+			public class REACTOR_MASSES
+			{
+				public const float MIN = 1f;
+
+				public const float MAX = 10f;
 			}
 		}
 
@@ -452,15 +505,37 @@ namespace TUNING
 
 			public static float[] CARGO_MASS = new float[] { 1000f, 1000f };
 
+			public static float[] CARGO_MASS_SMALL = new float[] { 400f, 400f };
+
 			public static float[] FUEL_TANK_DRY_MASS = new float[] { 100f };
 
 			public static float[] FUEL_TANK_WET_MASS = new float[] { 900f };
+
+			public static float[] FUEL_TANK_WET_MASS_SMALL = new float[] { 300f };
+
+			public static float[] FUEL_TANK_WET_MASS_GAS = new float[] { 100f };
+
+			public static float[] FUEL_TANK_WET_MASS_GAS_LARGE = new float[] { 150f };
 
 			public static float[] OXIDIZER_TANK_OXIDIZER_MASS = new float[] { 900f };
 
 			public static float[] ENGINE_MASS_SMALL = new float[] { 200f };
 
 			public static float[] ENGINE_MASS_LARGE = new float[] { 500f };
+
+			public static float[] HOLLOW_TIER1 = new float[] { 200f, 100f };
+
+			public static float[] HOLLOW_TIER2 = new float[] { 400f, 200f };
+
+			public static float[] HOLLOW_TIER3 = new float[] { 800f, 400f };
+
+			public static float[] DENSE_TIER0 = new float[] { 200f };
+
+			public static float[] DENSE_TIER1 = new float[] { 500f };
+
+			public static float[] DENSE_TIER2 = new float[] { 1000f };
+
+			public static float[] DENSE_TIER3 = new float[] { 2000f };
 		}
 
 		public class ENERGY_CONSUMPTION_WHEN_ACTIVE
@@ -593,6 +668,8 @@ namespace TUNING
 			public const int HIGH_LIQUID_PRESSURE = 10;
 
 			public const int MICROMETEORITE = 1;
+
+			public const int CORROSIVE_ELEMENT = 1;
 		}
 
 		public class RELOCATION_TIME_SECONDS
@@ -619,6 +696,8 @@ namespace TUNING
 
 		public class FABRICATION_TIME_SECONDS
 		{
+			public const float VERY_SHORT = 20f;
+
 			public const float SHORT = 40f;
 
 			public const float MODERATE = 80f;

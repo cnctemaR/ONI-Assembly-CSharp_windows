@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
-	[NativeHeader("Runtime/Utilities/BitUtility.h")]
-	[NativeHeader("Runtime/Math/PerlinNoise.h")]
 	[NativeHeader("Runtime/Math/FloatConversion.h")]
+	[Il2CppEagerStaticClassConstruction]
+	[NativeHeader("Runtime/Utilities/BitUtility.h")]
+	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
+	[NativeHeader("Runtime/Math/PerlinNoise.h")]
 	public struct Mathf
 	{
 		[FreeFunction(IsThreadSafe = true)]
@@ -403,16 +405,11 @@ namespace UnityEngine
 
 		public static float Gamma(float value, float absmax, float gamma)
 		{
-			bool flag = false;
-			bool flag2 = value < 0f;
-			if (flag2)
-			{
-				flag = true;
-			}
+			bool flag = value < 0f;
 			float num = Mathf.Abs(value);
-			bool flag3 = num > absmax;
+			bool flag2 = num > absmax;
 			float num2;
-			if (flag3)
+			if (flag2)
 			{
 				num2 = (flag ? (-num) : num);
 			}

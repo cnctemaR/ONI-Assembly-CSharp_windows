@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace System.IO
 {
-	[DefaultEvent("Changed")]
 	[IODescription("")]
+	[DefaultEvent("Changed")]
 	public class FileSystemWatcher : Component, ISupportInitialize
 	{
 		public FileSystemWatcher()
@@ -103,8 +103,8 @@ namespace System.IO
 			}
 		}
 
-		[Conditional("TRACE")]
 		[Conditional("DEBUG")]
+		[Conditional("TRACE")]
 		private void ShowWatcherInfo()
 		{
 			Console.WriteLine("Watcher implementation: {0}", (FileSystemWatcher.watcher != null) ? FileSystemWatcher.watcher.GetType().ToString() : "<none>");
@@ -205,10 +205,10 @@ namespace System.IO
 			}
 		}
 
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[SettingsBindable(true)]
-		[IODescription("File name filter pattern")]
 		[DefaultValue("*.*")]
+		[IODescription("File name filter pattern")]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string Filter
 		{
 			get
@@ -303,10 +303,10 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue("")]
 		[IODescription("The directory to monitor")]
 		[SettingsBindable(true)]
 		[Editor("System.Diagnostics.Design.FSWPathEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[DefaultValue("")]
 		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string Path
 		{
@@ -360,9 +360,9 @@ namespace System.IO
 			}
 		}
 
+		[Browsable(false)]
 		[DefaultValue(null)]
 		[IODescription("The object used to marshal the event handler calls resulting from a directory change")]
-		[Browsable(false)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get

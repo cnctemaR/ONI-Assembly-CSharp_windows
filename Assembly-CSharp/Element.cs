@@ -144,7 +144,7 @@ public class Element : IComparable<Element>
 			foreach (AttributeModifier attributeModifier in this.attributeModifiers)
 			{
 				string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
-				string formattedString = attributeModifier.GetFormattedString(null);
+				string formattedString = attributeModifier.GetFormattedString();
 				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, formattedString);
 			}
 		}
@@ -235,7 +235,19 @@ public class Element : IComparable<Element>
 
 	public SpawnFXHashes sublimateFX;
 
+	public float sublimateRate;
+
+	public float sublimateEfficiency;
+
+	public float sublimateProbability;
+
+	public float offGasPercentage;
+
 	public float lightAbsorptionFactor;
+
+	public float radiationAbsorptionFactor;
+
+	public float radiationPer1000Mass;
 
 	public Sim.PhysicsData defaultValues;
 
@@ -247,11 +259,15 @@ public class Element : IComparable<Element>
 
 	public int buildMenuSort;
 
+	public ElementLoader.ElementComposition[] elementComposition;
+
 	public Tag[] oreTags = new Tag[0];
 
 	public List<AttributeModifier> attributeModifiers = new List<AttributeModifier>();
 
 	public bool disabled;
+
+	public string dlcId;
 
 	public const byte StateMask = 3;
 

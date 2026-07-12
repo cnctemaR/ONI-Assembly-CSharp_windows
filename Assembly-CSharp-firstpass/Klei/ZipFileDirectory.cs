@@ -77,6 +77,10 @@ namespace Klei
 		{
 			if (this.mountPoint.Length > 0)
 			{
+				if (this.mountPoint.Length > path.Length)
+				{
+					Debug.LogError("Tried finding an invalid path inside a matching mount point!\n" + path + "\n" + this.mountPoint);
+				}
 				path = path.Substring(this.mountPoint.Length);
 			}
 			return this.zipfile.ContainsEntry(path);
@@ -88,6 +92,10 @@ namespace Klei
 			{
 				if (this.mountPoint.Length > 0)
 				{
+					if (this.mountPoint.Length > path.Length)
+					{
+						Debug.LogError("Tried finding an invalid path inside a matching mount point!\n" + path + "\n" + this.mountPoint);
+					}
 					path = path.Substring(this.mountPoint.Length);
 				}
 				return new FileHandle

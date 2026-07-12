@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C719CBCE-289E-47FB-962B-EC461A7D5B44}</ProjectGuid>
+    <ProjectGuid>{DD3DEF40-76A7-4169-85C9-351C4936F176}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.CrashReportHandler</RootNamespace>
     <AssemblyName>UnityEngine.CrashReportingModule</AssemblyName>
@@ -19,7 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B57}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F18B}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

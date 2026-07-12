@@ -19,6 +19,7 @@ namespace ProcGen
 			ExtremelyCold,
 			VeryCold,
 			Cold,
+			Chilly,
 			Cool,
 			Mild,
 			Room,

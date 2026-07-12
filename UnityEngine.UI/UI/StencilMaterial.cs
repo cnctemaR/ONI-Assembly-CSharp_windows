@@ -55,7 +55,8 @@ namespace UnityEngine.UI
 				Debug.LogWarning("Material " + baseMat.name + " doesn't have _ColorMask property", baseMat);
 				return baseMat;
 			}
-			for (int i = 0; i < StencilMaterial.m_List.Count; i++)
+			int count = StencilMaterial.m_List.Count;
+			for (int i = 0; i < count; i++)
 			{
 				StencilMaterial.MatEntry matEntry = StencilMaterial.m_List[i];
 				if (matEntry.baseMat == baseMat && matEntry.stencilId == stencilID && matEntry.operation == operation && matEntry.compareFunction == compareFunction && matEntry.readMask == readMask && matEntry.writeMask == writeMask && matEntry.colorMask == colorWriteMask)
@@ -102,7 +103,8 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			for (int i = 0; i < StencilMaterial.m_List.Count; i++)
+			int count = StencilMaterial.m_List.Count;
+			for (int i = 0; i < count; i++)
 			{
 				StencilMaterial.MatEntry matEntry = StencilMaterial.m_List[i];
 				if (!(matEntry.customMat != customMat))
@@ -123,7 +125,8 @@ namespace UnityEngine.UI
 
 		public static void ClearAll()
 		{
-			for (int i = 0; i < StencilMaterial.m_List.Count; i++)
+			int count = StencilMaterial.m_List.Count;
+			for (int i = 0; i < count; i++)
 			{
 				StencilMaterial.MatEntry matEntry = StencilMaterial.m_List[i];
 				Misc.DestroyImmediate(matEntry.customMat);

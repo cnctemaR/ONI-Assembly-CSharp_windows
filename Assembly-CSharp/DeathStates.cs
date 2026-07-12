@@ -11,11 +11,7 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 		{
 			smi.EnableGravityIfNecessary();
 		}).PlayAnim("Death")
-			.OnAnimQueueComplete(this.pst)
-			.Exit("DisableGravity", delegate(DeathStates.Instance smi)
-			{
-				smi.DisableGravity();
-			});
+			.OnAnimQueueComplete(this.pst);
 		this.pst.TriggerOnEnter(GameHashes.DeathAnimComplete, null).TriggerOnEnter(GameHashes.Died, null).Enter("Butcher", delegate(DeathStates.Instance smi)
 		{
 			if (smi.gameObject.GetComponent<Butcherable>() != null)
@@ -50,7 +46,10 @@ public class DeathStates : GameStateMachine<DeathStates, DeathStates.Instance, I
 		{
 			if (base.HasTag(GameTags.Creatures.Flyer))
 			{
-				GameComps.Gravities.Add(base.smi.gameObject, Vector2.zero, null);
+				GameComps.Gravities.Add(base.smi.gameObject, Vector2.zero, delegate
+				{
+					base.smi.DisableGravity();
+				});
 			}
 		}
 

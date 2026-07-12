@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Timers
 {
-	[DefaultProperty("Interval")]
 	[DefaultEvent("Elapsed")]
+	[DefaultProperty("Interval")]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class Timer : Component, ISupportInitialize
 	{
@@ -31,8 +31,8 @@ namespace System.Timers
 			this.interval = (double)Timer.CalculateRoundedInterval(interval, true);
 		}
 
-		[DefaultValue(true)]
 		[TimersDescription("Indicates whether the timer will be restarted when it is enabled.")]
+		[DefaultValue(true)]
 		[Category("Behavior")]
 		public bool AutoReset
 		{
@@ -58,8 +58,8 @@ namespace System.Timers
 			}
 		}
 
-		[DefaultValue(false)]
 		[TimersDescription("Indicates whether the timer is enabled to fire events at a defined interval.")]
+		[DefaultValue(false)]
 		[Category("Behavior")]
 		public bool Enabled
 		{
@@ -133,10 +133,10 @@ namespace System.Timers
 			this.timer.Change(num, this.autoReset ? num : (-1));
 		}
 
-		[SettingsBindable(true)]
 		[TimersDescription("The number of milliseconds between timer events.")]
-		[Category("Behavior")]
+		[SettingsBindable(true)]
 		[DefaultValue(100.0)]
+		[Category("Behavior")]
 		public double Interval
 		{
 			get
@@ -157,8 +157,8 @@ namespace System.Timers
 			}
 		}
 
-		[TimersDescription("Occurs when the Interval has elapsed.")]
 		[Category("Behavior")]
+		[TimersDescription("Occurs when the Interval has elapsed.")]
 		public event ElapsedEventHandler Elapsed
 		{
 			add
@@ -188,8 +188,8 @@ namespace System.Timers
 		}
 
 		[TimersDescription("The object used to marshal the event handler calls issued when an interval has elapsed.")]
-		[Browsable(false)]
 		[DefaultValue(null)]
+		[Browsable(false)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get

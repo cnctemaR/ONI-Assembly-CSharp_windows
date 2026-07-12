@@ -19,7 +19,7 @@ namespace KMod
 			return Path.Combine(Util.RootFolder(), "mods/");
 		}
 
-		public Manager()
+		public void LoadModDBAndInitialize()
 		{
 			string filename = this.GetFilename();
 			try
@@ -158,7 +158,7 @@ namespace KMod
 			List<Mod> list = new List<Mod>();
 			foreach (Mod mod in this.mods)
 			{
-				if (mod.status != Mod.Status.NotInstalled && mod.IsActive() && !mod.HasOnlyTranslationContent())
+				if (mod.DevModCrashTriggered || (mod.status != Mod.Status.NotInstalled && mod.IsActive() && !mod.HasOnlyTranslationContent()))
 				{
 					list.Add(mod);
 				}
@@ -301,7 +301,7 @@ namespace KMod
 		{
 			global::Debug.LogFormat("Update mod {0}", new object[] { mod.title });
 			Mod mod2 = this.mods.Find((Mod candidate) => mod.label.Match(candidate.label));
-			DebugUtil.DevAssert(!string.IsNullOrEmpty(mod2.label.id), "Should be subscribed to a mod we are getting an Update notification for");
+			DebugUtil.DevAssert(!string.IsNullOrEmpty(mod2.label.id), "Should be subscribed to a mod we are getting an Update notification for", null);
 			if (mod2.status == Mod.Status.UninstallPending)
 			{
 				return;
@@ -423,28 +423,39 @@ namespace KMod
 					mod.Load(content);
 				}
 			}
-			bool flag = false;
-			foreach (Mod mod2 in this.mods)
+			if ((content & Content.DLL) != (Content)0)
 			{
-				Content content2 = mod2.loaded_content & content;
-				Content content3 = mod2.available_content & content;
-				if (mod2.IsEnabledForActiveDlc() && content2 != content3)
+				IReadOnlyList<Mod> readOnlyList = this.mods.AsReadOnly();
+				foreach (Mod mod2 in this.mods)
 				{
-					mod2.SetCrashed();
-					if (!mod2.IsEnabledForActiveDlc())
+					if (mod2.IsEnabledForActiveDlc())
+					{
+						mod2.PostLoad(readOnlyList);
+					}
+				}
+			}
+			bool flag = false;
+			foreach (Mod mod3 in this.mods)
+			{
+				Content content2 = mod3.loaded_content & content;
+				Content content3 = mod3.available_content & content;
+				if (mod3.IsEnabledForActiveDlc() && content2 != content3)
+				{
+					mod3.SetCrashed();
+					if (!mod3.IsEnabledForActiveDlc())
 					{
 						flag = true;
 						this.events.Add(new Event
 						{
 							event_type = EventType.Deactivated,
-							mod = mod2.label
+							mod = mod3.label
 						});
 					}
-					global::Debug.LogFormat("Failed to load mod {0}...disabling", new object[] { mod2.title });
+					global::Debug.LogFormat("Failed to load mod {0}...disabling", new object[] { mod3.title });
 					this.events.Add(new Event
 					{
 						event_type = EventType.LoadError,
-						mod = mod2.label
+						mod = mod3.label
 					});
 				}
 			}
@@ -983,22 +994,26 @@ namespace KMod
 			return true;
 		}
 
-		public void Reinsert(int source_index, int target_index, object caller)
+		public void Reinsert(int source_index, int target_index, bool move_to_end, object caller)
 		{
+			if (move_to_end)
+			{
+				target_index = this.mods.Count;
+			}
 			DebugUtil.Assert(source_index != target_index);
 			if (source_index < -1 || this.mods.Count <= source_index)
 			{
 				return;
 			}
-			if (target_index < -1 || this.mods.Count < target_index)
+			if (target_index < -1 || this.mods.Count <= target_index)
 			{
 				return;
 			}
 			Mod mod = this.mods[source_index];
 			this.mods.RemoveAt(source_index);
-			if (source_index < target_index)
+			if (source_index > target_index)
 			{
-				target_index--;
+				target_index++;
 			}
 			if (target_index == this.mods.Count)
 			{

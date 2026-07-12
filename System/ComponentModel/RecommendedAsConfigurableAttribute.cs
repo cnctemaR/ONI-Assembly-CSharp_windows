@@ -2,8 +2,8 @@
 
 namespace System.ComponentModel
 {
-	[AttributeUsage(AttributeTargets.Property)]
 	[Obsolete("Use System.ComponentModel.SettingsBindableAttribute instead to work with the new settings model.")]
+	[AttributeUsage(AttributeTargets.Property)]
 	public class RecommendedAsConfigurableAttribute : Attribute
 	{
 		public RecommendedAsConfigurableAttribute(bool recommendedAsConfigurable)

@@ -13,7 +13,7 @@ public class JobsTableScreen : TableScreen
 {
 	public override float GetSortKey()
 	{
-		return 101f;
+		return 22f;
 	}
 
 	public static List<JobsTableScreen.PriorityInfo> priorityInfo
@@ -62,8 +62,11 @@ public class JobsTableScreen : TableScreen
 			select @group;
 		foreach (ChoreGroup choreGroup in list)
 		{
-			PrioritizationGroupTableColumn prioritizationGroupTableColumn = new PrioritizationGroupTableColumn(choreGroup, new Action<IAssignableIdentity, GameObject>(this.LoadValue), new Action<object, int>(this.ChangePersonalPriority), new Func<object, string>(this.HoverPersonalPriority), new Action<object, int>(this.ChangeColumnPriority), new Func<object, string>(this.HoverChangeColumnPriorityButton), new Action<object>(this.OnSortClicked), new Func<object, string>(this.OnSortHovered));
-			base.RegisterColumn(choreGroup.Id, prioritizationGroupTableColumn);
+			if (choreGroup.userPrioritizable)
+			{
+				PrioritizationGroupTableColumn prioritizationGroupTableColumn = new PrioritizationGroupTableColumn(choreGroup, new Action<IAssignableIdentity, GameObject>(this.LoadValue), new Action<object, int>(this.ChangePersonalPriority), new Func<object, string>(this.HoverPersonalPriority), new Action<object, int>(this.ChangeColumnPriority), new Func<object, string>(this.HoverChangeColumnPriorityButton), new Action<object>(this.OnSortClicked), new Func<object, string>(this.OnSortHovered));
+				base.RegisterColumn(choreGroup.Id, prioritizationGroupTableColumn);
+			}
 		}
 		PrioritizeRowTableColumn prioritizeRowTableColumn = new PrioritizeRowTableColumn(null, new Action<object, int>(this.ChangeRowPriority), new Func<object, int, string>(this.HoverChangeRowPriorityButton));
 		base.RegisterColumn("prioritize_row", prioritizeRowTableColumn);
@@ -128,26 +131,8 @@ public class JobsTableScreen : TableScreen
 			string priorityValue = this.GetPriorityValue(personalPriority);
 			if (priorityManager.IsChoreGroupDisabled(choreGroup))
 			{
-				Trait trait = null;
-				foreach (Trait trait2 in minionIdentity.GetComponent<Traits>().TraitList)
-				{
-					if (trait2.disabledChoreGroups != null)
-					{
-						ChoreGroup[] disabledChoreGroups = trait2.disabledChoreGroups;
-						for (int i = 0; i < disabledChoreGroups.Length; i++)
-						{
-							if (disabledChoreGroups[i].IdHash == choreGroup.IdHash)
-							{
-								trait = trait2;
-								break;
-							}
-						}
-						if (trait != null)
-						{
-							break;
-						}
-					}
-				}
+				Trait trait;
+				minionIdentity.GetComponent<Traits>().IsChoreGroupDisabled(choreGroup, out trait);
 				text = UI.JOBSSCREEN.TRAIT_DISABLED.ToString();
 				text = text.Replace("{Name}", minionIdentity.GetProperName());
 				text = text.Replace("{Job}", choreGroup.Name);
@@ -399,8 +384,7 @@ public class JobsTableScreen : TableScreen
 		{
 			return;
 		}
-		TableRow.RowType rowType = base.GetWidgetRow(gameObject).rowType;
-		if (rowType != TableRow.RowType.Header)
+		if (base.GetWidgetRow(gameObject).rowType != TableRow.RowType.Header)
 		{
 			global::Debug.Assert(false);
 		}
@@ -845,13 +829,13 @@ public class JobsTableScreen : TableScreen
 							{
 								text = UIConstants.ColorPrefixRed;
 							}
-							stringBuilder.Append(string.Concat(new object[]
+							stringBuilder.Append(string.Concat(new string[]
 							{
 								"\n    • ",
 								attributeInstance.Name,
 								": ",
 								text,
-								attributeInstance.GetTotalValue(),
+								attributeInstance.GetTotalValue().ToString(),
 								UIConstants.ColorSuffix
 							}));
 						}
@@ -932,7 +916,7 @@ public class JobsTableScreen : TableScreen
 						Immigration.Instance.ApplyDefaultPersonalPriorities(minionIdentity.gameObject);
 					}
 				}
-				goto IL_00F8;
+				goto IL_0101;
 			}
 		}
 		foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities.Items)
@@ -942,11 +926,14 @@ public class JobsTableScreen : TableScreen
 				ChoreConsumer component = minionIdentity2.GetComponent<ChoreConsumer>();
 				foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 				{
-					component.SetPersonalPriority(choreGroup, 3);
+					if (choreGroup.userPrioritizable)
+					{
+						component.SetPersonalPriority(choreGroup, 3);
+					}
 				}
 			}
 		}
-		IL_00F8:
+		IL_0101:
 		base.MarkRowsDirty();
 	}
 

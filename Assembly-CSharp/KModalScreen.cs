@@ -126,27 +126,13 @@ public class KModalScreen : KScreen
 		{
 			this.Deactivate();
 		}
-		if (!e.Consumed)
-		{
-			KScrollRect componentInChildren = base.GetComponentInChildren<KScrollRect>();
-			if (componentInChildren != null)
-			{
-				componentInChildren.OnKeyDown(e);
-			}
-		}
+		base.OnKeyDown(e);
 		e.Consumed = true;
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (!e.Consumed)
-		{
-			KScrollRect componentInChildren = base.GetComponentInChildren<KScrollRect>();
-			if (componentInChildren != null)
-			{
-				componentInChildren.OnKeyUp(e);
-			}
-		}
+		base.OnKeyUp(e);
 		e.Consumed = true;
 	}
 
@@ -155,6 +141,4 @@ public class KModalScreen : KScreen
 	public bool pause = true;
 
 	private RectTransform backgroundRectTransform;
-
-	public const float SCREEN_SORT_KEY = 100f;
 }

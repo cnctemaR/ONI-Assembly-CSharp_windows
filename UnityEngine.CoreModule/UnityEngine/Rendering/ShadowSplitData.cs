@@ -141,6 +141,8 @@ namespace UnityEngine.Rendering
 
 		private float m_ShadowCascadeBlendCullingFactor;
 
+		private float m_CullingNearPlane;
+
 		[UnsafeValueType]
 		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]

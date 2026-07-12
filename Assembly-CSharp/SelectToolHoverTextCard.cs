@@ -18,18 +18,23 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			int num2 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
 			return Grid.Element[num2].IsGas;
 		});
-		this.overlayFilterMap.Add(OverlayModes.LiquidConduits.ID, delegate
+		this.overlayFilterMap.Add(OverlayModes.Radiation.ID, delegate
 		{
 			int num3 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
-			return Grid.Element[num3].IsLiquid;
+			return Grid.Radiation[num3] > 0f;
+		});
+		this.overlayFilterMap.Add(OverlayModes.LiquidConduits.ID, delegate
+		{
+			int num4 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
+			return Grid.Element[num4].IsLiquid;
 		});
 		this.overlayFilterMap.Add(OverlayModes.Decor.ID, () => false);
 		this.overlayFilterMap.Add(OverlayModes.Rooms.ID, () => false);
 		this.overlayFilterMap.Add(OverlayModes.Logic.ID, () => false);
 		this.overlayFilterMap.Add(OverlayModes.TileMode.ID, delegate
 		{
-			int num4 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
-			Element element = Grid.Element[num4];
+			int num5 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
+			Element element = Grid.Element[num5];
 			foreach (Tag tag in Game.Instance.tileOverlayFilters)
 			{
 				if (element.HasTag(tag))
@@ -85,11 +90,15 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		HashedString mode = SimDebugView.Instance.GetMode();
 		bool flag = mode == OverlayModes.Disease.ID;
 		bool flag2 = true;
-		if (Grid.DupePassable[num])
+		if (Grid.DupePassable[num] && Grid.Solid[num])
 		{
 			flag2 = false;
 		}
 		bool flag3 = Grid.IsVisible(num);
+		if ((int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId)
+		{
+			flag3 = false;
+		}
 		if (!flag3)
 		{
 			flag2 = false;
@@ -316,6 +325,18 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				});
 				hoverTextDrawer.BeginShadowBar(false);
 				hoverTextDrawer.DrawText(UI.OVERLAYS.LIGHTING.HOVERTITLE, this.Styles_Title.Standard);
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawText(text, this.Styles_BodyText.Standard);
+				hoverTextDrawer.EndShadowBar();
+			}
+		}
+		else if (mode == OverlayModes.Radiation.ID)
+		{
+			if (flag3)
+			{
+				text += UI.OVERLAYS.RADIATION.DESC.Replace("{rads}", GameUtil.GetFormattedRads(Grid.Radiation[num], GameUtil.TimeSlice.None)).Replace("{description}", GameUtil.GetRadiationDescription(Grid.Radiation[num]));
+				hoverTextDrawer.BeginShadowBar(false);
+				hoverTextDrawer.DrawText(UI.OVERLAYS.RADIATION.HOVERTITLE, this.Styles_Title.Standard);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawText(text, this.Styles_BodyText.Standard);
 				hoverTextDrawer.EndShadowBar();
@@ -550,7 +571,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						hoverTextDrawer.DrawText(GameUtil.GetFormattedTemperature(num7, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.Styles_BodyText.Standard);
 					}
 					BuildingComplete component7 = kselectable3.GetComponent<BuildingComplete>();
-					if (component7 != null && component7.Def.IsFoundation)
+					if (component7 != null && component7.Def.IsFoundation && Grid.Element[num].IsSolid)
 					{
 						flag2 = false;
 					}
@@ -601,7 +622,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				hoverTextDrawer.DrawText(ElementLoader.elements[(int)Grid.ElementIdx[num]].GetMaterialCategoryTag().ProperName(), this.Styles_BodyText.Standard);
 			}
-			string[] array = WorldInspector.MassStringsReadOnly(num);
+			string[] array = HoverTextHelper.MassStringsReadOnly(num);
 			hoverTextDrawer.NewLine(26);
 			hoverTextDrawer.DrawIcon(this.iconDash, 18);
 			for (int m = 0; m < array.Length; m++)
@@ -675,7 +696,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			}
 			hoverTextDrawer.EndShadowBar();
 		}
-		else if (!flag3)
+		else if (!flag3 && (int)Grid.WorldIdx[num] == ClusterManager.Instance.activeWorldId)
 		{
 			hoverTextDrawer.BeginShadowBar(false);
 			hoverTextDrawer.DrawIcon(this.iconWarning, 18);
@@ -751,7 +772,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 
 	private static bool ShouldShowRadiationOverlay(KSelectable selectable)
 	{
-		return selectable.GetComponent<Light2D>() != null;
+		return selectable.GetComponent<HighEnergyParticle>() != null || selectable.GetComponent<HighEnergyParticlePort>();
 	}
 
 	private static bool ShouldShowGasConduitOverlay(KSelectable selectable)

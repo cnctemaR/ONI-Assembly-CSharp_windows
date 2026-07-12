@@ -40,88 +40,95 @@ public class Def : ScriptableObject
 			}
 			return new global::Tuple<Sprite, Color>(null, Color.clear);
 		}
-		else if (item is GameObject)
+		else
 		{
-			GameObject gameObject = item as GameObject;
-			if (ElementLoader.GetElement(gameObject.PrefabID()) != null)
+			if (item is AsteroidGridEntity)
 			{
-				return Def.GetUISprite(ElementLoader.GetElement(gameObject.PrefabID()), animName, centered);
+				return new global::Tuple<Sprite, Color>(((AsteroidGridEntity)item).GetUISprite(), Color.white);
 			}
-			CreatureBrain creatureBrain = gameObject.GetComponent<CreatureBrain>();
-			if (creatureBrain != null)
+			if (item is GameObject)
 			{
-				animName = creatureBrain.symbolPrefix + "ui";
-			}
-			SpaceArtifact component = gameObject.GetComponent<SpaceArtifact>();
-			if (component != null)
-			{
-				animName = component.GetUIAnim();
-			}
-			if (gameObject.HasTag(GameTags.Egg))
-			{
-				IncubationMonitor.Def def = gameObject.GetDef<IncubationMonitor.Def>();
-				if (def != null)
+				GameObject gameObject = item as GameObject;
+				if (ElementLoader.GetElement(gameObject.PrefabID()) != null)
 				{
-					GameObject prefab = Assets.GetPrefab(def.spawnedCreature);
-					if (prefab)
+					return Def.GetUISprite(ElementLoader.GetElement(gameObject.PrefabID()), animName, centered);
+				}
+				CreatureBrain creatureBrain = gameObject.GetComponent<CreatureBrain>();
+				if (creatureBrain != null)
+				{
+					animName = creatureBrain.symbolPrefix + "ui";
+				}
+				SpaceArtifact component = gameObject.GetComponent<SpaceArtifact>();
+				if (component != null)
+				{
+					animName = component.GetUIAnim();
+				}
+				if (gameObject.HasTag(GameTags.Egg))
+				{
+					IncubationMonitor.Def def = gameObject.GetDef<IncubationMonitor.Def>();
+					if (def != null)
 					{
-						creatureBrain = prefab.GetComponent<CreatureBrain>();
-						if (creatureBrain && !string.IsNullOrEmpty(creatureBrain.symbolPrefix))
+						GameObject prefab = Assets.GetPrefab(def.spawnedCreature);
+						if (prefab)
 						{
-							animName = creatureBrain.symbolPrefix + animName;
+							creatureBrain = prefab.GetComponent<CreatureBrain>();
+							if (creatureBrain && !string.IsNullOrEmpty(creatureBrain.symbolPrefix))
+							{
+								animName = creatureBrain.symbolPrefix + animName;
+							}
 						}
 					}
 				}
-			}
-			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-			if (component2)
-			{
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered, "");
-				return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (uispriteFromMultiObjectAnim != null) ? Color.white : Color.clear);
-			}
-			if (gameObject.GetComponent<Building>() != null)
-			{
-				Sprite uisprite = gameObject.GetComponent<Building>().Def.GetUISprite(animName, centered);
-				return new global::Tuple<Sprite, Color>(uisprite, (uisprite != null) ? Color.white : Color.clear);
-			}
-			global::Debug.LogWarningFormat("Can't get sprite for type {0} (no KBatchedAnimController)", new object[] { item.ToString() });
-			return null;
-		}
-		else
-		{
-			if (!(item is string))
-			{
-				if (item is Tag)
+				KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+				if (component2)
 				{
-					if (ElementLoader.GetElement((Tag)item) != null)
-					{
-						return Def.GetUISprite(ElementLoader.GetElement((Tag)item), animName, centered);
-					}
-					if (Assets.GetPrefab((Tag)item) != null)
-					{
-						return Def.GetUISprite(Assets.GetPrefab((Tag)item), animName, centered);
-					}
-					if (Assets.GetSprite(((Tag)item).Name) != null)
-					{
-						return new global::Tuple<Sprite, Color>(Assets.GetSprite(((Tag)item).Name), Color.white);
-					}
+					Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered, "");
+					return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (uispriteFromMultiObjectAnim != null) ? Color.white : Color.clear);
 				}
-				DebugUtil.DevAssertArgs(false, new object[]
+				if (gameObject.GetComponent<Building>() != null)
 				{
-					"Can't get sprite for type ",
-					item.ToString()
-				});
-				return null;
+					Sprite uisprite = gameObject.GetComponent<Building>().Def.GetUISprite(animName, centered);
+					return new global::Tuple<Sprite, Color>(uisprite, (uisprite != null) ? Color.white : Color.clear);
+				}
+				global::Debug.LogWarningFormat("Can't get sprite for type {0} (no KBatchedAnimController)", new object[] { item.ToString() });
+				return new global::Tuple<Sprite, Color>(Assets.GetSprite("unknown"), Color.grey);
 			}
-			if (Db.Get().Amounts.Exists(item as string))
+			else
 			{
-				return new global::Tuple<Sprite, Color>(Assets.GetSprite(Db.Get().Amounts.Get(item as string).uiSprite), Color.white);
+				if (!(item is string))
+				{
+					if (item is Tag)
+					{
+						if (ElementLoader.GetElement((Tag)item) != null)
+						{
+							return Def.GetUISprite(ElementLoader.GetElement((Tag)item), animName, centered);
+						}
+						if (Assets.GetPrefab((Tag)item) != null)
+						{
+							return Def.GetUISprite(Assets.GetPrefab((Tag)item), animName, centered);
+						}
+						if (Assets.GetSprite(((Tag)item).Name) != null)
+						{
+							return new global::Tuple<Sprite, Color>(Assets.GetSprite(((Tag)item).Name), Color.white);
+						}
+					}
+					DebugUtil.DevAssertArgs(false, new object[]
+					{
+						"Can't get sprite for type ",
+						item.ToString()
+					});
+					return new global::Tuple<Sprite, Color>(Assets.GetSprite("unknown"), Color.grey);
+				}
+				if (Db.Get().Amounts.Exists(item as string))
+				{
+					return new global::Tuple<Sprite, Color>(Assets.GetSprite(Db.Get().Amounts.Get(item as string).uiSprite), Color.white);
+				}
+				if (Db.Get().Attributes.Exists(item as string))
+				{
+					return new global::Tuple<Sprite, Color>(Assets.GetSprite(Db.Get().Attributes.Get(item as string).uiSprite), Color.white);
+				}
+				return Def.GetUISprite((item as string).ToTag(), animName, centered);
 			}
-			if (Db.Get().Attributes.Exists(item as string))
-			{
-				return new global::Tuple<Sprite, Color>(Assets.GetSprite(Db.Get().Attributes.Get(item as string).uiSprite), Color.white);
-			}
-			return Def.GetUISprite((item as string).ToTag(), animName, centered);
 		}
 	}
 
@@ -135,17 +142,17 @@ public class Def : ScriptableObject
 		if (animFile == null)
 		{
 			DebugUtil.LogWarningArgs(new object[] { animName, "missing Anim File" });
-			return null;
+			return Assets.GetSprite("unknown");
 		}
 		KAnimFileData data = animFile.GetData();
 		if (data == null)
 		{
 			DebugUtil.LogWarningArgs(new object[] { animName, "KAnimFileData is null" });
-			return null;
+			return Assets.GetSprite("unknown");
 		}
 		if (data.build == null)
 		{
-			return null;
+			return Assets.GetSprite("unknown");
 		}
 		KAnim.Anim.Frame frame = KAnim.Anim.Frame.InvalidFrame;
 		for (int i = 0; i < data.animCount; i++)
@@ -159,32 +166,33 @@ public class Def : ScriptableObject
 		if (!frame.IsValid())
 		{
 			DebugUtil.LogWarningArgs(new object[] { string.Format("missing '{0}' anim in '{1}'", animName, animFile) });
-			return null;
+			return Assets.GetSprite("unknown");
 		}
 		if (data.elementCount == 0)
 		{
-			return null;
+			return Assets.GetSprite("unknown");
 		}
 		KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
 		if (string.IsNullOrEmpty(symbolName))
 		{
 			symbolName = animName;
 		}
-		frameElement = data.FindAnimFrameElement(symbolName);
-		KAnim.Build.Symbol symbol = data.build.GetSymbol(frameElement.symbol);
+		KAnimHashedString kanimHashedString = new KAnimHashedString(symbolName);
+		KAnim.Build.Symbol symbol = data.build.GetSymbol(kanimHashedString);
 		if (symbol == null)
 		{
 			DebugUtil.LogWarningArgs(new object[] { animFile.name, animName, "placeSymbol [", frameElement.symbol, "] is missing" });
-			return null;
+			return Assets.GetSprite("unknown");
 		}
 		int frame2 = frameElement.frame;
 		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frame2).symbolFrame;
 		if (symbolFrame == null)
 		{
 			DebugUtil.LogWarningArgs(new object[] { animName, "SymbolFrame [", frameElement.frame, "] is missing" });
-			return null;
+			return Assets.GetSprite("unknown");
 		}
 		Texture2D texture = data.build.GetTexture(0);
+		global::Debug.Assert(texture != null, "Invalid texture on " + animFile.name);
 		float x = symbolFrame.uvMin.x;
 		float x2 = symbolFrame.uvMax.x;
 		float y = symbolFrame.uvMax.y;
@@ -219,4 +227,6 @@ public class Def : ScriptableObject
 	public Tag Tag;
 
 	private static Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite> knownUISprites = new Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite>();
+
+	private const string DEFAULT_SPRITE = "unknown";
 }

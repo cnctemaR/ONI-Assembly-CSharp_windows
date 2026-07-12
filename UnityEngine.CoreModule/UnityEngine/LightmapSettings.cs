@@ -17,7 +17,7 @@ namespace UnityEngine
 			[FreeFunction]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[FreeFunction]
+			[FreeFunction(ThrowsException = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -35,8 +35,8 @@ namespace UnityEngine
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[NativeName("SetLightProbes")]
 			[FreeFunction]
+			[NativeName("SetLightProbes")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

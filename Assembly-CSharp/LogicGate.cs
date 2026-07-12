@@ -205,8 +205,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		if (base.RequiresFourInputs && base.RequiresControlInputs)
 		{
 			this.outputValueOne = 0;
-			LogicGateBase.Op op = this.op;
-			if (op == LogicGateBase.Op.Multiplexer)
+			if (this.op == LogicGateBase.Op.Multiplexer)
 			{
 				if (!LogicCircuitNetwork.IsBitActive(0, num5))
 				{
@@ -238,8 +237,7 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			this.outputThreeSender.SetValue(0);
 			this.outputValueFour = 0;
 			this.outputFourSender.SetValue(0);
-			LogicGateBase.Op op = this.op;
-			if (op == LogicGateBase.Op.Demultiplexer)
+			if (this.op == LogicGateBase.Op.Demultiplexer)
 			{
 				if (!LogicCircuitNetwork.IsBitActive(0, num4))
 				{

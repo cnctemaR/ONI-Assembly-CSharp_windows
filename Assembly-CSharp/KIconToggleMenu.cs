@@ -75,19 +75,6 @@ public class KIconToggleMenu : KScreen
 					component.text = toggleInfo.text;
 				}
 			}
-			ToolTip component2 = ktoggle2.GetComponent<ToolTip>();
-			if (component2)
-			{
-				if (toggleInfo.tooltipHeader != "")
-				{
-					component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (this.ToggleToolTipHeaderTextStyleSetting != null) ? this.ToggleToolTipHeaderTextStyleSetting : this.ToggleToolTipTextStyleSetting);
-					if (this.ToggleToolTipHeaderTextStyleSetting == null)
-					{
-						global::Debug.Log("!");
-					}
-				}
-				component2.AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(toggleInfo.tooltip, toggleInfo.hotKey), this.ToggleToolTipTextStyleSetting);
-			}
 			if (toggleInfo.getSpriteCB != null)
 			{
 				ktoggle2.fgImage.sprite = toggleInfo.getSpriteCB();
@@ -96,7 +83,7 @@ public class KIconToggleMenu : KScreen
 			{
 				ktoggle2.fgImage.sprite = Assets.GetSprite(toggleInfo.icon);
 			}
-			toggleInfo.toggle = ktoggle2;
+			toggleInfo.SetToggle(ktoggle2);
 			this.toggles.Add(ktoggle2);
 		}
 	}
@@ -184,7 +171,7 @@ public class KIconToggleMenu : KScreen
 	public virtual void Close()
 	{
 		this.ClearSelection();
-		base.Show(false);
+		this.Show(false);
 	}
 
 	[SerializeField]
@@ -230,6 +217,7 @@ public class KIconToggleMenu : KScreen
 			this.hotKey = hotkey;
 			this.tooltip = tooltip;
 			this.tooltipHeader = tooltip_header;
+			this.getTooltipText = new ToolTip.ComplexTooltipDelegate(this.DefaultGetTooltipText);
 		}
 
 		public ToggleInfo(string text, object user_data, global::Action hotkey, Func<Sprite> get_sprite_cb)
@@ -238,6 +226,23 @@ public class KIconToggleMenu : KScreen
 			this.userData = user_data;
 			this.hotKey = hotkey;
 			this.getSpriteCB = get_sprite_cb;
+		}
+
+		public virtual void SetToggle(KToggle toggle)
+		{
+			this.toggle = toggle;
+			toggle.GetComponent<ToolTip>().OnComplexToolTip = this.getTooltipText;
+		}
+
+		protected virtual List<global::Tuple<string, TextStyleSetting>> DefaultGetTooltipText()
+		{
+			List<global::Tuple<string, TextStyleSetting>> list = new List<global::Tuple<string, TextStyleSetting>>();
+			if (this.tooltipHeader != null)
+			{
+				list.Add(new global::Tuple<string, TextStyleSetting>(this.tooltipHeader, ToolTipScreen.Instance.defaultTooltipHeaderStyle));
+			}
+			list.Add(new global::Tuple<string, TextStyleSetting>(this.tooltip, ToolTipScreen.Instance.defaultTooltipBodyStyle));
+			return list;
 		}
 
 		public string text;
@@ -253,6 +258,8 @@ public class KIconToggleMenu : KScreen
 		public KToggle toggle;
 
 		public global::Action hotKey;
+
+		public ToolTip.ComplexTooltipDelegate getTooltipText;
 
 		public Func<Sprite> getSpriteCB;
 

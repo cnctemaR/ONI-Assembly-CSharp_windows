@@ -444,7 +444,7 @@ namespace TMPro
 			TMP_Dropdown.DropdownItem dropdownItem = this.CreateItem(itemTemplate);
 			dropdownItem.rectTransform.SetParent(itemTemplate.rectTransform.parent, false);
 			dropdownItem.gameObject.SetActive(true);
-			dropdownItem.gameObject.name = "Item " + items.Count + ((data.text != null) ? (": " + data.text) : "");
+			dropdownItem.gameObject.name = "Item " + items.Count.ToString() + ((data.text != null) ? (": " + data.text) : "");
 			if (dropdownItem.toggle != null)
 			{
 				dropdownItem.toggle.isOn = false;

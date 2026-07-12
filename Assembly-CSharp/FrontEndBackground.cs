@@ -8,20 +8,26 @@ public class FrontEndBackground : UIDupeRandomizer
 	protected override void Start()
 	{
 		this.tuning = TuningData<FrontEndBackground.Tuning>.Get();
-		this.SetupCameras();
 		base.Start();
 		for (int i = 0; i < this.anims.Length; i++)
 		{
 			int minionIndex = i;
-			this.anims[i].minions[0].onAnimComplete += delegate(HashedString name)
+			KBatchedAnimController kbatchedAnimController = this.anims[i].minions[0];
+			if (kbatchedAnimController.gameObject.activeInHierarchy)
 			{
-				this.WaitForABit(minionIndex, name);
-			};
-			this.WaitForABit(i, HashedString.Invalid);
+				kbatchedAnimController.onAnimComplete += delegate(HashedString name)
+				{
+					this.WaitForABit(minionIndex, name);
+				};
+				this.WaitForABit(i, HashedString.Invalid);
+			}
 		}
 		this.dreckoController = base.transform.GetChild(0).Find("startmenu_drecko").GetComponent<KBatchedAnimController>();
-		this.dreckoController.enabled = false;
-		this.nextDreckoTime = global::UnityEngine.Random.Range(this.tuning.minFirstDreckoInterval, this.tuning.maxFirstDreckoInterval) + Time.unscaledTime;
+		if (this.dreckoController.gameObject.activeInHierarchy)
+		{
+			this.dreckoController.enabled = false;
+			this.nextDreckoTime = global::UnityEngine.Random.Range(this.tuning.minFirstDreckoInterval, this.tuning.maxFirstDreckoInterval) + Time.unscaledTime;
+		}
 	}
 
 	protected override void Update()
@@ -32,7 +38,7 @@ public class FrontEndBackground : UIDupeRandomizer
 
 	private void UpdateDrecko()
 	{
-		if (Time.unscaledTime > this.nextDreckoTime)
+		if (this.dreckoController.gameObject.activeInHierarchy && Time.unscaledTime > this.nextDreckoTime)
 		{
 			this.dreckoController.enabled = true;
 			this.dreckoController.Play("idle", KAnim.PlayMode.Once, 1f, 0f);
@@ -63,27 +69,11 @@ public class FrontEndBackground : UIDupeRandomizer
 		yield break;
 	}
 
-	private void SetupCameras()
-	{
-		GameObject gameObject = new GameObject();
-		gameObject.name = "Cameras";
-		gameObject.transform.parent = base.transform.parent;
-		Util.Reset(gameObject.transform);
-		this.baseCamera = base.GetComponentInChildren<Camera>();
-		this.baseCamera.name = "BaseCamera";
-		this.baseCamera.transform.SetParent(gameObject.transform);
-		this.baseCamera.transparencySortMode = TransparencySortMode.Orthographic;
-		this.baseCamera.tag = "Untagged";
-	}
-
 	private KBatchedAnimController dreckoController;
 
 	private float nextDreckoTime;
 
 	private FrontEndBackground.Tuning tuning;
-
-	[NonSerialized]
-	public Camera baseCamera;
 
 	public class Tuning : TuningData<FrontEndBackground.Tuning>
 	{

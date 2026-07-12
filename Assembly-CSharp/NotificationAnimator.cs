@@ -4,14 +4,39 @@ using UnityEngine.UI;
 
 public class NotificationAnimator : MonoBehaviour
 {
-	public void Init()
+	public void Begin(bool startOffset = true)
 	{
+		this.Reset();
+		this.animating = true;
+		if (startOffset)
+		{
+			this.layoutElement.minWidth = 100f;
+			return;
+		}
+		this.layoutElement.minWidth = 1f;
+		this.speed = -10f;
+	}
+
+	private void Reset()
+	{
+		this.bounceCount = 2;
 		this.layoutElement = base.GetComponent<LayoutElement>();
-		this.layoutElement.minWidth = 100f;
+		this.layoutElement.minWidth = 0f;
+		this.speed = 1f;
+	}
+
+	public void Stop()
+	{
+		this.Reset();
+		this.animating = false;
 	}
 
 	private void LateUpdate()
 	{
+		if (!this.animating)
+		{
+			return;
+		}
 		this.layoutElement.minWidth -= this.speed;
 		this.speed += 0.5f;
 		if (this.layoutElement.minWidth <= 0f)
@@ -24,7 +49,7 @@ public class NotificationAnimator : MonoBehaviour
 				return;
 			}
 			this.layoutElement.minWidth = 0f;
-			base.enabled = false;
+			this.Stop();
 		}
 	}
 
@@ -43,4 +68,7 @@ public class NotificationAnimator : MonoBehaviour
 	private int bounceCount = 2;
 
 	private LayoutElement layoutElement;
+
+	[SerializeField]
+	private bool animating = true;
 }

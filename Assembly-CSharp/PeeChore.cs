@@ -45,7 +45,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 			}
 		}
 
-		public Notification stressfullyEmptyingBladder = new Notification(DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
+		public Notification stressfullyEmptyingBladder = new Notification(DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
 
 		public AmountInstance bladder;
 
@@ -58,7 +58,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 		{
 			default_state = this.running;
 			base.Target(this.worker);
-			this.running.ToggleAnims("anim_expel_kanim", 0f).ToggleEffect("StressfulyEmptyingBladder").DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
+			this.running.ToggleAnims("anim_expel_kanim", 0f, "").ToggleEffect("StressfulyEmptyingBladder").DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
 				.DoReport(ReportManager.ReportType.ToiletIncident, (PeeChore.StatesInstance smi) => 1f, (PeeChore.StatesInstance smi) => this.masterTarget.Get(smi).GetProperName())
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
 				.Transition(null, (PeeChore.StatesInstance smi) => smi.IsDonePeeing(), UpdateRate.SIM_200ms)
@@ -66,7 +66,25 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 				{
 					smi.SpawnDirtyWater(dt);
 				}, UpdateRate.SIM_200ms, false)
-				.PlayAnim("working_loop", KAnim.PlayMode.Loop);
+				.PlayAnim("working_loop", KAnim.PlayMode.Loop)
+				.ToggleTag(GameTags.MakingMess)
+				.Enter(delegate(PeeChore.StatesInstance smi)
+				{
+					if (smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance).value > 0f)
+					{
+						smi.master.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, null);
+					}
+				})
+				.Exit(delegate(PeeChore.StatesInstance smi)
+				{
+					smi.master.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
+					float num = Mathf.Min(smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance.Id).value, 60f);
+					smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance.Id).ApplyDelta(-num);
+					if (num >= 1f)
+					{
+						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, Mathf.FloorToInt(num).ToString() + UI.UNITSUFFIXES.RADIATION.RADS, smi.master.transform, 1.5f, false);
+					}
+				});
 		}
 
 		public StateMachine<PeeChore.States, PeeChore.StatesInstance, PeeChore, object>.TargetParameter worker;

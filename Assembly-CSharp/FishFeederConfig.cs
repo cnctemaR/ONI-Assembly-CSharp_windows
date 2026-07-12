@@ -42,6 +42,8 @@ public class FishFeederConfig : IBuildingConfig
 		storage.showDescriptor = true;
 		storage.allowItemRemoval = false;
 		storage.allowSettingOnlyFetchMarkedItems = false;
+		storage.showCapacityStatusItem = true;
+		storage.showCapacityAsMainStatus = true;
 		Storage storage2 = go.AddComponent<Storage>();
 		storage2.capacityKg = 200f;
 		storage2.showInUI = true;
@@ -49,7 +51,7 @@ public class FishFeederConfig : IBuildingConfig
 		storage2.allowItemRemoval = false;
 		go.AddOrGet<StorageLocker>().choreTypeID = Db.Get().ChoreTypes.RanchingFetch.Id;
 		go.AddOrGet<UserNameable>();
-		Effect effect = new Effect("AteFromFeeder", global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.TOOLTIP, 600f, true, false, false, null, 0f, null);
+		Effect effect = new Effect("AteFromFeeder", global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.TOOLTIP, 600f, true, false, false, null, 0f, null, "");
 		effect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.033333335f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));
 		effect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 2f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));
 		Db.Get().effects.Add(effect);
@@ -61,7 +63,10 @@ public class FishFeederConfig : IBuildingConfig
 	{
 		go.AddOrGetDef<StorageController.Def>();
 		go.AddOrGetDef<FishFeeder.Def>();
-		go.AddOrGetDef<MakeBaseSolid.Def>();
+		go.AddOrGetDef<MakeBaseSolid.Def>().solidOffsets = new CellOffset[]
+		{
+			new CellOffset(0, 0)
+		};
 		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 

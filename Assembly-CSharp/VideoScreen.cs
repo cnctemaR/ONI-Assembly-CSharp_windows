@@ -34,7 +34,7 @@ public class VideoScreen : KModalScreen
 			}
 		};
 		VideoScreen.Instance = this;
-		base.Show(false);
+		this.Show(false);
 	}
 
 	protected override void OnShow(bool show)
@@ -53,7 +53,7 @@ public class VideoScreen : KModalScreen
 
 	public void PlaySlideShow(Sprite[] sprites)
 	{
-		base.Show(true);
+		this.Show(true);
 		this.DisableAllMedia();
 		this.slideshow.updateType = SlideshowUpdateType.preloadedSprites;
 		this.slideshow.gameObject.SetActive(true);
@@ -63,17 +63,12 @@ public class VideoScreen : KModalScreen
 
 	public void PlaySlideShow(string[] files)
 	{
-		base.Show(true);
+		this.Show(true);
 		this.DisableAllMedia();
 		this.slideshow.updateType = SlideshowUpdateType.loadOnDemand;
 		this.slideshow.gameObject.SetActive(true);
 		this.slideshow.SetFiles(files, 0);
 		this.slideshow.SetPaused(false);
-	}
-
-	public override float GetSortKey()
-	{
-		return 100000f;
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -99,11 +94,12 @@ public class VideoScreen : KModalScreen
 
 	public void PlayVideo(VideoClip clip, bool unskippable = false, string overrideAudioSnapshot = "", bool showProceedButton = false)
 	{
+		global::Debug.Assert(clip != null);
 		for (int i = 0; i < this.overlayContainer.childCount; i++)
 		{
 			global::UnityEngine.Object.Destroy(this.overlayContainer.GetChild(i).gameObject);
 		}
-		base.Show(true);
+		this.Show(true);
 		this.videoPlayer.isLooping = false;
 		this.activeAudioSnapshot = (string.IsNullOrEmpty(overrideAudioSnapshot) ? AudioMixerSnapshots.Get().TutorialVideoPlayingSnapshot : overrideAudioSnapshot);
 		AudioMixer.instance.Start(this.activeAudioSnapshot);
@@ -194,7 +190,7 @@ public class VideoScreen : KModalScreen
 		{
 			this.OnStop();
 		}
-		base.Show(false);
+		this.Show(false);
 	}
 
 	public override void ScreenUpdate(bool topLevel)

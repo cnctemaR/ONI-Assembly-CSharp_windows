@@ -80,7 +80,7 @@ namespace UnityEngine.Timeline
 			{
 				this.m_Events.signals[idx] = newKey;
 			}
-			if (flag)
+			if (newKey != null && flag)
 			{
 				throw new ArgumentException("SignalAsset already used.");
 			}

@@ -24,11 +24,6 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 				")"
 			}));
 		}
-		if (GameUtil.GetTelepad() != null)
-		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, string.Format(BUILDINGS.PREFABS.HEADQUARTERSCOMPLETE.UNIQUE_POPTEXT, this.GetProperName()), null, base.transform.GetPosition(), 1.5f, false, false);
-			Util.KDestroyGameObject(base.gameObject);
-		}
 	}
 
 	protected override void OnSpawn()
@@ -52,7 +47,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		{
 			return;
 		}
-		if (Immigration.Instance.ImmigrantsAvailable)
+		if (Immigration.Instance.ImmigrantsAvailable && base.GetComponent<Operational>().IsOperational)
 		{
 			base.smi.sm.openPortal.Trigger(base.smi);
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.NewDuplicantsAvailable, this);
@@ -84,7 +79,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		if (component != null)
 		{
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.PersonalTime, GameClock.Instance.GetTimeSinceStartOfReport(), string.Format(UI.ENDOFDAYREPORT.NOTES.PERSONAL_TIME, DUPLICANTS.CHORES.NOT_EXISTING_TASK), gameObject.GetProperName());
-			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.GetWorldItems(base.gameObject.GetComponent<KSelectable>().GetMyWorldId(), false))
 			{
 				minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", true);
 			}
@@ -145,7 +140,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.root.OnSignal(this.idlePortal, this.resetToIdle);
 			this.resetToIdle.GoTo(this.idle);
 			this.idle.Enter(delegate(Telepad.StatesInstance smi)
@@ -159,13 +154,8 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 				.OnSignal(this.openPortal, this.opening);
 			this.unoperational.PlayAnim("idle").Enter("StopImmigration", delegate(Telepad.StatesInstance smi)
 			{
-				Immigration.Instance.Stop();
 				smi.master.meter.SetPositionPercent(0f);
-			}).Exit("StartImmigration", delegate(Telepad.StatesInstance smi)
-			{
-				Immigration.Instance.Restart();
-			})
-				.EventTransition(GameHashes.OperationalChanged, this.idle, (Telepad.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
+			}).EventTransition(GameHashes.OperationalChanged, this.idle, (Telepad.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
 			this.opening.Enter(delegate(Telepad.StatesInstance smi)
 			{
 				smi.master.meter.SetPositionPercent(1f);

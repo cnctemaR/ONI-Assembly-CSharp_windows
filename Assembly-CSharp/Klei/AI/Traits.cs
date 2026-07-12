@@ -68,6 +68,7 @@ namespace Klei.AI
 
 		public void Add(Trait trait)
 		{
+			DebugUtil.Assert(base.IsInitialized() || base.GetComponent<Modifiers>().IsInitialized(), "Tried adding a trait on a prefab, use Modifiers.initialTraits instead!", trait.Name, base.gameObject.name);
 			if (trait.ShouldSave)
 			{
 				this.TraitIds.Add(trait.Id);
@@ -127,6 +128,56 @@ namespace Klei.AI
 					return;
 				}
 			}
+		}
+
+		public bool IsEffectIgnored(Effect effect)
+		{
+			foreach (Trait trait in this.TraitList)
+			{
+				if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public bool IsChoreGroupDisabled(ChoreGroup choreGroup)
+		{
+			Trait trait;
+			return this.IsChoreGroupDisabled(choreGroup, out trait);
+		}
+
+		public bool IsChoreGroupDisabled(ChoreGroup choreGroup, out Trait disablingTrait)
+		{
+			return this.IsChoreGroupDisabled(choreGroup.IdHash, out disablingTrait);
+		}
+
+		public bool IsChoreGroupDisabled(HashedString choreGroupId)
+		{
+			Trait trait;
+			return this.IsChoreGroupDisabled(choreGroupId, out trait);
+		}
+
+		public bool IsChoreGroupDisabled(HashedString choreGroupId, out Trait disablingTrait)
+		{
+			foreach (Trait trait in this.TraitList)
+			{
+				if (trait.disabledChoreGroups != null)
+				{
+					ChoreGroup[] disabledChoreGroups = trait.disabledChoreGroups;
+					for (int i = 0; i < disabledChoreGroups.Length; i++)
+					{
+						if (disabledChoreGroups[i].IdHash == choreGroupId)
+						{
+							disablingTrait = trait;
+							return true;
+						}
+					}
+				}
+			}
+			disablingTrait = null;
+			return false;
 		}
 
 		public List<Trait> TraitList = new List<Trait>();

@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Video
 {
-	[RequiredByNativeCode]
-	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
+	[RequiredByNativeCode]
 	public sealed class VideoPlayer : Behaviour
 	{
 		public extern VideoSource source

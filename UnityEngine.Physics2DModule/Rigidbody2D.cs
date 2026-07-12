@@ -292,7 +292,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsTouching([NotNull] [Writable] Collider2D collider);
+		public extern bool IsTouching([NotNull("ArgumentNullException")] [Writable] Collider2D collider);
 
 		public bool IsTouching([Writable] Collider2D collider, ContactFilter2D contactFilter)
 		{
@@ -300,7 +300,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("IsTouching")]
-		private bool IsTouching_OtherColliderWithFilter_Internal([Writable] [NotNull] Collider2D collider, ContactFilter2D contactFilter)
+		private bool IsTouching_OtherColliderWithFilter_Internal([Writable] [NotNull("ArgumentNullException")] Collider2D collider, ContactFilter2D contactFilter)
 		{
 			return this.IsTouching_OtherColliderWithFilter_Internal_Injected(collider, ref contactFilter);
 		}
@@ -346,7 +346,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("Distance")]
-		private ColliderDistance2D Distance_Internal([Writable] [NotNull] Collider2D collider)
+		private ColliderDistance2D Distance_Internal([Writable] [NotNull("ArgumentNullException")] Collider2D collider)
 		{
 			ColliderDistance2D colliderDistance2D;
 			this.Distance_Internal_Injected(collider, out colliderDistance2D);
@@ -448,7 +448,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("OverlapColliderArray_Binding")]
-		private int OverlapColliderArray_Internal(ContactFilter2D contactFilter, [NotNull] Collider2D[] results)
+		private int OverlapColliderArray_Internal(ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] Collider2D[] results)
 		{
 			return this.OverlapColliderArray_Internal_Injected(ref contactFilter, results);
 		}
@@ -459,7 +459,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("OverlapColliderList_Binding")]
-		private int OverlapColliderList_Internal(ContactFilter2D contactFilter, [NotNull] List<Collider2D> results)
+		private int OverlapColliderList_Internal(ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<Collider2D> results)
 		{
 			return this.OverlapColliderList_Internal_Injected(ref contactFilter, results);
 		}
@@ -511,7 +511,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetAttachedCollidersArray_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetAttachedCollidersArray_Internal([NotNull] Collider2D[] results);
+		private extern int GetAttachedCollidersArray_Internal([NotNull("ArgumentNullException")] Collider2D[] results);
 
 		public int GetAttachedColliders(List<Collider2D> results)
 		{
@@ -520,7 +520,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetAttachedCollidersList_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetAttachedCollidersList_Internal([NotNull] List<Collider2D> results);
+		private extern int GetAttachedCollidersList_Internal([NotNull("ArgumentNullException")] List<Collider2D> results);
 
 		[ExcludeFromDocs]
 		public int Cast(Vector2 direction, RaycastHit2D[] results)
@@ -534,7 +534,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastArray_Binding")]
-		private int CastArray_Internal(Vector2 direction, float distance, [NotNull] RaycastHit2D[] results)
+		private int CastArray_Internal(Vector2 direction, float distance, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
 		{
 			return this.CastArray_Internal_Injected(ref direction, distance, results);
 		}
@@ -545,7 +545,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastList_Binding")]
-		private int CastList_Internal(Vector2 direction, float distance, [NotNull] List<RaycastHit2D> results)
+		private int CastList_Internal(Vector2 direction, float distance, [NotNull("ArgumentNullException")] List<RaycastHit2D> results)
 		{
 			return this.CastList_Internal_Injected(ref direction, distance, results);
 		}
@@ -562,7 +562,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastFilteredArray_Binding")]
-		private int CastFilteredArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull] RaycastHit2D[] results)
+		private int CastFilteredArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
 		{
 			return this.CastFilteredArray_Internal_Injected(ref direction, distance, ref contactFilter, results);
 		}
@@ -573,7 +573,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastFilteredList_Binding")]
-		private int CastFilteredList_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull] List<RaycastHit2D> results)
+		private int CastFilteredList_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<RaycastHit2D> results)
 		{
 			return this.CastFilteredList_Internal_Injected(ref direction, distance, ref contactFilter, results);
 		}

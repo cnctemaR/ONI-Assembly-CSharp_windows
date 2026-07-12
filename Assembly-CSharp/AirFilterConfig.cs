@@ -21,8 +21,11 @@ public class AirFilterConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = OverlayModes.Oxygen.ID;
 		buildingDef.AudioCategory = "Metal";
-		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
-		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
+		buildingDef.RequiresPowerInput = true;
+		buildingDef.PowerInputOffset = new CellOffset(0, 0);
+		buildingDef.EnergyConsumptionWhenActive = 5f;
+		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
+		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		return buildingDef;
 	}
 
@@ -36,13 +39,15 @@ public class AirFilterConfig : IBuildingConfig
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.ContaminatedOxygen;
-		elementConsumer.consumptionRate = 0.1f;
+		elementConsumer.consumptionRate = 0.5f;
+		elementConsumer.capacityKG = 0.5f;
 		elementConsumer.consumptionRadius = 3;
 		elementConsumer.showInStatusPanel = true;
 		elementConsumer.sampleCellOffset = new Vector3(0f, 0f, 0f);
 		elementConsumer.isRequired = false;
 		elementConsumer.storeOnConsume = true;
 		elementConsumer.showDescriptor = false;
+		elementConsumer.ignoreActiveChanged = true;
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = 10f;
 		elementDropper.emitTag = new Tag("Clay");

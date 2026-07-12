@@ -95,8 +95,8 @@ namespace System.ComponentModel.Design
 
 		private DesignerOptionService.DesignerOptionCollection _options;
 
-		[TypeConverter(typeof(DesignerOptionService.DesignerOptionConverter))]
 		[Editor("", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[TypeConverter(typeof(DesignerOptionService.DesignerOptionConverter))]
 		public sealed class DesignerOptionCollection : IList, ICollection, IEnumerable
 		{
 			internal DesignerOptionCollection(DesignerOptionService service, DesignerOptionService.DesignerOptionCollection parent, string name, object value)

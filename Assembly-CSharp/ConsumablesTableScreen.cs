@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,14 +21,14 @@ public class ConsumablesTableScreen : TableScreen
 		}, new Comparison<IAssignableIdentity>(base.compare_rows_alphabetical), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_name), new Action<IAssignableIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically), false);
 		base.AddLabelColumn("QOLExpectations", new Action<IAssignableIdentity, GameObject>(this.on_load_qualityoflife_expectations), new Func<IAssignableIdentity, GameObject, string>(this.get_value_qualityoflife_label), new Comparison<IAssignableIdentity>(this.compare_rows_qualityoflife_expectations), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_qualityoflife_expectations), new Action<IAssignableIdentity, GameObject, ToolTip>(this.on_tooltip_sort_qualityoflife_expectations), 96, true);
 		List<IConsumableUIItem> list = new List<IConsumableUIItem>();
-		for (int i = 0; i < FOOD.FOOD_TYPES_LIST.Count; i++)
+		for (int i = 0; i < EdiblesManager.GetAllFoodTypes().Count; i++)
 		{
-			list.Add(FOOD.FOOD_TYPES_LIST[i]);
+			list.Add(EdiblesManager.GetAllFoodTypes()[i]);
 		}
 		List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(GameTags.Medicine);
 		for (int j = 0; j < prefabsWithTag.Count; j++)
 		{
-			MedicinalPill component = prefabsWithTag[j].GetComponent<MedicinalPill>();
+			MedicinalPillWorkable component = prefabsWithTag[j].GetComponent<MedicinalPillWorkable>();
 			if (component)
 			{
 				list.Add(component);
@@ -60,7 +59,7 @@ public class ConsumablesTableScreen : TableScreen
 			{
 				if (list[k].MajorOrder != num && k != 0)
 				{
-					string text = "QualityDivider_" + list[k].MajorOrder;
+					string text = "QualityDivider_" + list[k].MajorOrder.ToString();
 					ConsumableInfoTableColumn[] quality_group_columns = list4.ToArray();
 					DividerColumn dividerColumn = new DividerColumn(delegate
 					{
@@ -96,7 +95,7 @@ public class ConsumablesTableScreen : TableScreen
 	private void refresh_scrollers()
 	{
 		int num = 0;
-		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
+		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.GetAllFoodTypes())
 		{
 			if (DebugHandler.InstantBuildMode || ConsumerManager.instance.isDiscovered(foodInfo.ConsumableId.ToTag()))
 			{
@@ -277,7 +276,7 @@ public class ConsumablesTableScreen : TableScreen
 		{
 		case TableRow.RowType.Header:
 			this.set_value_consumable_info(this.default_row.GetComponent<TableRow>().GetWidget(consumableInfoTableColumn), new_value);
-			base.StartCoroutine(base.CascadeSetColumnCheckBoxes(this.sortable_rows, consumableInfoTableColumn, new_value, widget_go));
+			base.StartCoroutine(base.CascadeSetColumnCheckBoxes(this.all_sortable_rows, consumableInfoTableColumn, new_value, widget_go));
 			return;
 		case TableRow.RowType.Default:
 		{
@@ -437,12 +436,12 @@ public class ConsumablesTableScreen : TableScreen
 			tooltip.AddMultiStringTooltip(consumableInfoTableColumn.consumable_info.ConsumableName, null);
 			if (foodInfo != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedCalories(WorldInventory.Instance.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag()) * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedCalories(ClusterManager.Instance.activeWorld.worldInventory.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag(), false) * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), null);
 				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY, GameUtil.AddPositiveSign(num.ToString(), num > 0)), null);
 				tooltip.AddMultiStringTooltip("\n" + foodInfo.Description, null);
 				return;
 			}
-			tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedUnits(WorldInventory.Instance.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag()), GameUtil.TimeSlice.None, true)), null);
+			tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedUnits(ClusterManager.Instance.activeWorld.worldInventory.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag(), false), GameUtil.TimeSlice.None, true, "")), null);
 			return;
 		case TableRow.RowType.Default:
 			if (consumableInfoTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
@@ -541,7 +540,7 @@ public class ConsumablesTableScreen : TableScreen
 				image.sprite = uispriteFromMultiObjectAnim;
 			}
 			image.color = Color.white;
-			image.material = ((WorldInventory.Instance.GetAmount(consumable_info.ConsumableId.ToTag()) > 0f) ? Assets.UIPrefabs.TableScreenWidgets.DefaultUIMaterial : Assets.UIPrefabs.TableScreenWidgets.DesaturatedUIMaterial);
+			image.material = ((ClusterManager.Instance.activeWorld.worldInventory.GetAmount(consumable_info.ConsumableId.ToTag(), false) > 0f) ? Assets.UIPrefabs.TableScreenWidgets.DefaultUIMaterial : Assets.UIPrefabs.TableScreenWidgets.DesaturatedUIMaterial);
 			break;
 		}
 		case TableRow.RowType.Default:

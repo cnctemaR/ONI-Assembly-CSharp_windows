@@ -131,7 +131,7 @@ namespace HUSL
 				double num = tuple[j];
 				if (num < -0.0001 || num > 1.0001)
 				{
-					throw new Exception("Illegal rgb value: " + num);
+					throw new Exception("Illegal rgb value: " + num.ToString());
 				}
 			}
 			int[] array = new int[tuple.Count];

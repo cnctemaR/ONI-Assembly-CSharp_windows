@@ -7,7 +7,7 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.light_on;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.light_off.Enter(delegate(CreatureLightToggleController.Instance smi)
 		{
 			smi.SwitchLight(false);

@@ -138,8 +138,7 @@ namespace KSerialization
 					case SerializationTypeInfo.Queue:
 					{
 						int num = reader.ReadInt32();
-						reader.ReadInt32();
-						if (num > 0)
+						if (reader.ReadInt32() > -1)
 						{
 							reader.SkipBytes(num);
 							continue;

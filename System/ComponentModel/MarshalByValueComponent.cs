@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
+	[ComVisible(true)]
+	[Designer("System.Windows.Forms.Design.ComponentDocumentDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(IRootDesigner))]
 	[TypeConverter(typeof(ComponentConverter))]
 	[DesignerCategory("Component")]
-	[Designer("System.Windows.Forms.Design.ComponentDocumentDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(IRootDesigner))]
-	[ComVisible(true)]
 	public class MarshalByValueComponent : IComponent, IDisposable, IServiceProvider
 	{
 		~MarshalByValueComponent()
@@ -81,8 +81,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public virtual IContainer Container
 		{
 			get
@@ -105,8 +105,8 @@ namespace System.ComponentModel
 			return null;
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public virtual bool DesignMode
 		{
 			get

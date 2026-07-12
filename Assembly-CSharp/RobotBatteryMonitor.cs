@@ -5,55 +5,94 @@ public class RobotBatteryMonitor : GameStateMachine<RobotBatteryMonitor, RobotBa
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.highBattery;
-		this.lowBatteryStates.ToggleBehaviour(GameTags.Robots.Behaviours.RechargeBehaviour, (RobotBatteryMonitor.Instance data) => true, null).Enter(delegate(RobotBatteryMonitor.Instance smi)
+		default_state = this.drainingStates;
+		this.drainingStates.DefaultState(this.drainingStates.highBattery).Transition(this.deadBattery, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.BatteryDead), UpdateRate.SIM_200ms).Transition(this.needsRechargeStates, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.NeedsRecharge), UpdateRate.SIM_200ms);
+		this.drainingStates.highBattery.Transition(this.drainingStates.lowBattery, GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Not(new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeDecent)), UpdateRate.SIM_200ms);
+		this.drainingStates.lowBattery.Transition(this.drainingStates.highBattery, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeDecent), UpdateRate.SIM_200ms).ToggleStatusItem(delegate(RobotBatteryMonitor.Instance smi)
 		{
-		});
-		this.lowBatteryStates.lowBattery.ToggleStatusItem(Db.Get().RobotStatusItems.LowBattery, (RobotBatteryMonitor.Instance smi) => smi.gameObject).Transition(this.lowBatteryStates.mediumBattery, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeDecent), UpdateRate.SIM_200ms).Exit(delegate(RobotBatteryMonitor.Instance smi)
+			if (!smi.def.canCharge)
+			{
+				return Db.Get().RobotStatusItems.LowBatteryNoCharge;
+			}
+			return Db.Get().RobotStatusItems.LowBattery;
+		}, (RobotBatteryMonitor.Instance smi) => smi.gameObject);
+		this.needsRechargeStates.DefaultState(this.needsRechargeStates.lowBattery).Transition(this.deadBattery, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.BatteryDead), UpdateRate.SIM_200ms).Transition(this.drainingStates, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeComplete), UpdateRate.SIM_200ms)
+			.ToggleBehaviour(GameTags.Robots.Behaviours.RechargeBehaviour, (RobotBatteryMonitor.Instance smi) => smi.def.canCharge, null);
+		this.needsRechargeStates.lowBattery.ToggleStatusItem(delegate(RobotBatteryMonitor.Instance smi)
 		{
+			if (!smi.def.canCharge)
+			{
+				return Db.Get().RobotStatusItems.LowBatteryNoCharge;
+			}
+			return Db.Get().RobotStatusItems.LowBattery;
+		}, (RobotBatteryMonitor.Instance smi) => smi.gameObject).Transition(this.needsRechargeStates.mediumBattery, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeDecent), UpdateRate.SIM_200ms);
+		this.needsRechargeStates.mediumBattery.Transition(this.needsRechargeStates.lowBattery, GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Not(new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeDecent)), UpdateRate.SIM_200ms).Transition(this.needsRechargeStates.trickleCharge, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeFull), UpdateRate.SIM_200ms);
+		this.needsRechargeStates.trickleCharge.Transition(this.needsRechargeStates.mediumBattery, GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Not(new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeFull)), UpdateRate.SIM_200ms);
+		this.deadBattery.ToggleStatusItem(Db.Get().RobotStatusItems.DeadBattery, (RobotBatteryMonitor.Instance smi) => smi.gameObject).Enter(delegate(RobotBatteryMonitor.Instance smi)
+		{
+			if (smi.GetSMI<DeathMonitor.Instance>() != null)
+			{
+				smi.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.DeadBattery);
+			}
 		});
-		this.lowBatteryStates.mediumBattery.Transition(this.lowBatteryStates.lowBattery, GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Not(new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeDecent)), UpdateRate.SIM_200ms).Transition(this.highBattery, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.ChargeComplete), UpdateRate.SIM_200ms);
-		this.scheduledBatteryCharge.ToggleBehaviour(GameTags.Robots.Behaviours.RechargeBehaviour, (RobotBatteryMonitor.Instance data) => true, null).Transition(this.highBattery, GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Not(new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.IsScheduledRecharge)), UpdateRate.SIM_200ms);
-		this.highBattery.Transition(this.lowBatteryStates.lowBattery, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.NeedsRecharge), UpdateRate.SIM_200ms).Transition(this.scheduledBatteryCharge, new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.Transition.ConditionCallback(RobotBatteryMonitor.IsScheduledRecharge), UpdateRate.SIM_200ms);
 	}
 
 	public static bool NeedsRecharge(RobotBatteryMonitor.Instance smi)
 	{
-		return smi.master.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id) <= 0f;
-	}
-
-	public static bool IsScheduledRecharge(RobotBatteryMonitor.Instance smi)
-	{
-		return GameClock.Instance.IsNighttime();
+		return smi.amountInstance.value <= 0f || GameClock.Instance.IsNighttime();
 	}
 
 	public static bool ChargeDecent(RobotBatteryMonitor.Instance smi)
 	{
-		return smi.master.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id) >= smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.InternalBattery.Id).GetMax() * 0.5f;
+		return smi.amountInstance.value >= smi.amountInstance.GetMax() * smi.def.lowBatteryWarningPercent;
+	}
+
+	public static bool ChargeFull(RobotBatteryMonitor.Instance smi)
+	{
+		return smi.amountInstance.value >= smi.amountInstance.GetMax();
 	}
 
 	public static bool ChargeComplete(RobotBatteryMonitor.Instance smi)
 	{
-		return smi.master.gameObject.GetAmounts().GetValue(Db.Get().Amounts.InternalBattery.Id) >= smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.InternalBattery.Id).GetMax();
+		return smi.amountInstance.value >= smi.amountInstance.GetMax() && !GameClock.Instance.IsNighttime();
+	}
+
+	public static bool BatteryDead(RobotBatteryMonitor.Instance smi)
+	{
+		return !smi.def.canCharge && smi.amountInstance.value == 0f;
 	}
 
 	public StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.ObjectParameter<Storage> internalStorage = new StateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.ObjectParameter<Storage>();
 
-	public RobotBatteryMonitor.LowBatteryStates lowBatteryStates;
+	public RobotBatteryMonitor.NeedsRechargeStates needsRechargeStates;
 
-	public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State scheduledBatteryCharge;
+	public RobotBatteryMonitor.DrainingStates drainingStates;
 
-	public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State highBattery;
+	public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State deadBattery;
 
 	public class Def : StateMachine.BaseDef
 	{
+		public string batteryAmountId;
+
+		public float lowBatteryWarningPercent;
+
+		public bool canCharge;
 	}
 
-	public class LowBatteryStates : GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State
+	public class DrainingStates : GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State
+	{
+		public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State highBattery;
+
+		public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State lowBattery;
+	}
+
+	public class NeedsRechargeStates : GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State
 	{
 		public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State lowBattery;
 
 		public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State mediumBattery;
+
+		public GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.State trickleCharge;
 	}
 
 	public new class Instance : GameStateMachine<RobotBatteryMonitor, RobotBatteryMonitor.Instance, IStateMachineTarget, RobotBatteryMonitor.Def>.GameInstance
@@ -61,8 +100,10 @@ public class RobotBatteryMonitor : GameStateMachine<RobotBatteryMonitor, RobotBa
 		public Instance(IStateMachineTarget master, RobotBatteryMonitor.Def def)
 			: base(master, def)
 		{
-			AmountInstance amountInstance = Db.Get().Amounts.InternalBattery.Lookup(base.gameObject);
-			amountInstance.value = amountInstance.GetMax();
+			this.amountInstance = Db.Get().Amounts.Get(def.batteryAmountId).Lookup(base.gameObject);
+			this.amountInstance.SetValue(this.amountInstance.GetMax());
 		}
+
+		public AmountInstance amountInstance;
 	}
 }

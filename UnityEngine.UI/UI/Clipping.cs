@@ -18,7 +18,8 @@ namespace UnityEngine.UI
 			float num2 = rect.xMax - vector.z;
 			float num3 = rect.yMin + vector.y;
 			float num4 = rect.yMax - vector.w;
-			for (int i = 1; i < rectMaskParents.Count; i++)
+			int count = rectMaskParents.Count;
+			for (int i = 1; i < count; i++)
 			{
 				rect = rectMaskParents[i].canvasRect;
 				vector = rectMaskParents[i].padding;
@@ -40,11 +41,11 @@ namespace UnityEngine.UI
 				}
 			}
 			validRect = num2 > num && num4 > num3;
-			if (validRect)
+			if (!validRect)
 			{
-				return new Rect(num, num3, num2 - num, num4 - num3);
+				return default(Rect);
 			}
-			return default(Rect);
+			return new Rect(num, num3, num2 - num, num4 - num3);
 		}
 	}
 }

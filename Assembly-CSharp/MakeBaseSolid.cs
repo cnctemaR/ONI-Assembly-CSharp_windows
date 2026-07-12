@@ -10,33 +10,56 @@ public class MakeBaseSolid : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Insta
 
 	private static void ConvertToSolid(MakeBaseSolid.Instance smi)
 	{
+		if (smi.buildingComplete == null)
+		{
+			return;
+		}
 		int num = Grid.PosToCell(smi.gameObject);
 		PrimaryElement component = smi.GetComponent<PrimaryElement>();
-		SimMessages.ReplaceAndDisplaceElement(num, component.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, component.Mass, component.Temperature, byte.MaxValue, 0, -1);
-		Grid.Objects[num, 9] = smi.gameObject;
-		Grid.Foundation[num] = true;
-		Grid.SetSolid(num, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
-		SimMessages.SetCellProperties(num, 64);
-		Grid.RenderedByWorld[num] = false;
-		World.Instance.OnSolidChanged(num);
-		GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.solidChangedLayer, null);
+		Building component2 = smi.GetComponent<Building>();
+		foreach (CellOffset cellOffset in smi.def.solidOffsets)
+		{
+			CellOffset rotatedOffset = component2.GetRotatedOffset(cellOffset);
+			int num2 = Grid.OffsetCell(num, rotatedOffset);
+			SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, component.Mass, component.Temperature, byte.MaxValue, 0, -1);
+			Grid.Objects[num2, 9] = smi.gameObject;
+			Grid.Foundation[num2] = true;
+			Grid.SetSolid(num2, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
+			SimMessages.SetCellProperties(num2, 103);
+			Grid.RenderedByWorld[num2] = false;
+			World.Instance.OnSolidChanged(num2);
+			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);
+		}
 	}
 
 	private static void ConvertToVacuum(MakeBaseSolid.Instance smi)
 	{
+		if (smi.buildingComplete == null)
+		{
+			return;
+		}
 		int num = Grid.PosToCell(smi.gameObject);
-		SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierOnSpawn, 0f, -1f, byte.MaxValue, 0, -1);
-		Grid.Objects[num, 9] = null;
-		Grid.Foundation[num] = false;
-		Grid.SetSolid(num, false, CellEventLogger.Instance.SimCellOccupierDestroy);
-		SimMessages.ClearCellProperties(num, 64);
-		Grid.RenderedByWorld[num] = true;
-		World.Instance.OnSolidChanged(num);
-		GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.solidChangedLayer, null);
+		Building component = smi.GetComponent<Building>();
+		foreach (CellOffset cellOffset in smi.def.solidOffsets)
+		{
+			CellOffset rotatedOffset = component.GetRotatedOffset(cellOffset);
+			int num2 = Grid.OffsetCell(num, rotatedOffset);
+			SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierOnSpawn, 0f, -1f, byte.MaxValue, 0, -1);
+			Grid.Objects[num2, 9] = null;
+			Grid.Foundation[num2] = false;
+			Grid.SetSolid(num2, false, CellEventLogger.Instance.SimCellOccupierDestroy);
+			SimMessages.ClearCellProperties(num2, 103);
+			Grid.RenderedByWorld[num2] = true;
+			World.Instance.OnSolidChanged(num2);
+			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);
+		}
 	}
+
+	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)103;
 
 	public class Def : StateMachine.BaseDef
 	{
+		public CellOffset[] solidOffsets;
 	}
 
 	public new class Instance : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Instance, IStateMachineTarget, MakeBaseSolid.Def>.GameInstance
@@ -45,5 +68,8 @@ public class MakeBaseSolid : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Insta
 			: base(master, def)
 		{
 		}
+
+		[MyCmpGet]
+		public BuildingComplete buildingComplete;
 	}
 }

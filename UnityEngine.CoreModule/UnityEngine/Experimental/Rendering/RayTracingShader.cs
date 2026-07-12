@@ -4,9 +4,9 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/RayTracingAccelerationStructure.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
 	public sealed class RayTracingShader : Object
 	{
 		public extern float maxRecursionDepth
@@ -51,28 +51,45 @@ namespace UnityEngine.Experimental.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetMatrixArray(int nameID, Matrix4x4[] values);
 
-		[NativeMethod(Name = "RayTracingShaderScripting::SetTexture", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
+		[NativeMethod(Name = "RayTracingShaderScripting::SetTexture", HasExplicitThis = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetTexture(int nameID, [NotNull] Texture texture);
+		public extern void SetTexture(int nameID, [NotNull("ArgumentNullException")] Texture texture);
 
-		[NativeMethod(Name = "RayTracingShaderScripting::SetBuffer", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
+		[NativeMethod(Name = "RayTracingShaderScripting::SetBuffer", HasExplicitThis = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBuffer(int nameID, [NotNull] ComputeBuffer buffer);
+		public extern void SetBuffer(int nameID, [NotNull("ArgumentNullException")] ComputeBuffer buffer);
 
-		[NativeMethod(Name = "RayTracingShaderScripting::SetAccelerationStructure", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
+		[NativeMethod(Name = "RayTracingShaderScripting::SetBuffer", HasExplicitThis = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetAccelerationStructure(int nameID, [NotNull] RayTracingAccelerationStructure accelerationStrucure);
+		private extern void SetGraphicsBuffer(int nameID, [NotNull("ArgumentNullException")] GraphicsBuffer buffer);
+
+		[FreeFunction(Name = "RayTracingShaderScripting::SetConstantBuffer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstantComputeBuffer(int nameID, [NotNull("ArgumentNullException")] ComputeBuffer buffer, int offset, int size);
+
+		[FreeFunction(Name = "RayTracingShaderScripting::SetConstantBuffer", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstantGraphicsBuffer(int nameID, [NotNull("ArgumentNullException")] GraphicsBuffer buffer, int offset, int size);
+
+		[NativeMethod(Name = "RayTracingShaderScripting::SetAccelerationStructure", HasExplicitThis = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetAccelerationStructure(int nameID, [NotNull("ArgumentNullException")] RayTracingAccelerationStructure accelerationStructure);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetShaderPass(string passName);
 
-		[NativeMethod(Name = "RayTracingShaderScripting::SetTextureFromGlobal", HasExplicitThis = true, IsFreeFunction = true, ThrowsException = true)]
+		[NativeMethod(Name = "RayTracingShaderScripting::SetTextureFromGlobal", HasExplicitThis = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetTextureFromGlobal(int nameID, int globalTextureNameID);
 
-		[NativeName("DispatchRayTracingShader")]
+		[NativeName("DispatchRays")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Dispatch(string rayGenFunctionName, int width, int height, int depth, Camera camera = null);
+
+		public void SetBuffer(int nameID, GraphicsBuffer buffer)
+		{
+			this.SetGraphicsBuffer(nameID, buffer);
+		}
 
 		private RayTracingShader()
 		{
@@ -138,14 +155,39 @@ namespace UnityEngine.Experimental.Rendering
 			this.SetInt(nameID, val ? 1 : 0);
 		}
 
-		public void SetTexture(string resourceName, Texture texture)
+		public void SetTexture(string name, Texture texture)
 		{
-			this.SetTexture(Shader.PropertyToID(resourceName), texture);
+			this.SetTexture(Shader.PropertyToID(name), texture);
 		}
 
-		public void SetBuffer(string resourceName, ComputeBuffer buffer)
+		public void SetBuffer(string name, ComputeBuffer buffer)
 		{
-			this.SetBuffer(Shader.PropertyToID(resourceName), buffer);
+			this.SetBuffer(Shader.PropertyToID(name), buffer);
+		}
+
+		public void SetBuffer(string name, GraphicsBuffer buffer)
+		{
+			this.SetBuffer(Shader.PropertyToID(name), buffer);
+		}
+
+		public void SetConstantBuffer(int nameID, ComputeBuffer buffer, int offset, int size)
+		{
+			this.SetConstantComputeBuffer(nameID, buffer, offset, size);
+		}
+
+		public void SetConstantBuffer(string name, ComputeBuffer buffer, int offset, int size)
+		{
+			this.SetConstantComputeBuffer(Shader.PropertyToID(name), buffer, offset, size);
+		}
+
+		public void SetConstantBuffer(int nameID, GraphicsBuffer buffer, int offset, int size)
+		{
+			this.SetConstantGraphicsBuffer(nameID, buffer, offset, size);
+		}
+
+		public void SetConstantBuffer(string name, GraphicsBuffer buffer, int offset, int size)
+		{
+			this.SetConstantGraphicsBuffer(Shader.PropertyToID(name), buffer, offset, size);
 		}
 
 		public void SetAccelerationStructure(string name, RayTracingAccelerationStructure accelerationStructure)
@@ -153,9 +195,9 @@ namespace UnityEngine.Experimental.Rendering
 			this.SetAccelerationStructure(Shader.PropertyToID(name), accelerationStructure);
 		}
 
-		public void SetTextureFromGlobal(string resourceName, string globalTextureName)
+		public void SetTextureFromGlobal(string name, string globalTextureName)
 		{
-			this.SetTextureFromGlobal(Shader.PropertyToID(resourceName), Shader.PropertyToID(globalTextureName));
+			this.SetTextureFromGlobal(Shader.PropertyToID(name), Shader.PropertyToID(globalTextureName));
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

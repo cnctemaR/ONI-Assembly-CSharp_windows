@@ -210,19 +210,23 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			for (int num = 0; num != this.brains.Count; num++)
 			{
 				this.ClampBrainIndex(ref this.nextPathProbeBrain);
-				Navigator component = this.brains[this.nextPathProbeBrain].GetComponent<Navigator>();
-				this.IncrementBrainIndex(ref this.nextPathProbeBrain);
-				if (component != null)
+				Brain brain = this.brains[this.nextPathProbeBrain];
+				if (brain.IsRunning())
 				{
-					component.executePathProbeTaskAsync = true;
-					component.PathProber.potentialCellsPerUpdate = this.probeSize;
-					component.pathProbeTask.Update();
-					this.pathProbeJob.Add(component.pathProbeTask);
-					if (this.pathProbeJob.Count == this.probeCount)
+					Navigator component = brain.GetComponent<Navigator>();
+					if (component != null)
 					{
-						break;
+						component.executePathProbeTaskAsync = true;
+						component.PathProber.potentialCellsPerUpdate = this.probeSize;
+						component.pathProbeTask.Update();
+						this.pathProbeJob.Add(component.pathProbeTask);
+						if (this.pathProbeJob.Count == this.probeCount)
+						{
+							break;
+						}
 					}
 				}
+				this.IncrementBrainIndex(ref this.nextPathProbeBrain);
 			}
 			CPUBudget.Start(this);
 			GlobalJobManager.Run(this.pathProbeJob);
@@ -239,14 +243,14 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			int num2 = 0;
 			while (num2 != this.brains.Count && num != 0)
 			{
-				this.ClampBrainIndex(ref this.nextPathProbeBrain);
+				this.ClampBrainIndex(ref this.nextUpdateBrain);
 				Brain brain = this.brains[this.nextUpdateBrain];
-				this.IncrementBrainIndex(ref this.nextUpdateBrain);
 				if (brain.IsRunning())
 				{
 					brain.UpdateBrain();
 					num--;
 				}
+				this.IncrementBrainIndex(ref this.nextUpdateBrain);
 				num2++;
 			}
 		}

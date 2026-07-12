@@ -5,7 +5,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Modules/Subsystems/SubsystemDescriptor.h")]
+	[NativeHeader("Modules/Subsystems/SubsystemDescriptor.h")]
 	[UsedByNativeCode("SubsystemDescriptor")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class IntegratedSubsystemDescriptor<TSubsystem> : IntegratedSubsystemDescriptor where TSubsystem : IntegratedSubsystem
@@ -17,12 +17,12 @@ namespace UnityEngine
 
 		public TSubsystem Create()
 		{
-			IntPtr intPtr = Internal_SubsystemDescriptors.Create(this.m_Ptr);
-			TSubsystem tsubsystem = (TSubsystem)((object)Internal_SubsystemInstances.Internal_GetInstanceByPtr(intPtr));
+			IntPtr intPtr = SubsystemDescriptorBindings.Create(this.m_Ptr);
+			TSubsystem tsubsystem = (TSubsystem)((object)SubsystemManager.GetIntegratedSubsystemByPtr(intPtr));
 			bool flag = tsubsystem != null;
 			if (flag)
 			{
-				tsubsystem.m_subsystemDescriptor = this;
+				tsubsystem.m_SubsystemDescriptor = this;
 			}
 			return tsubsystem;
 		}

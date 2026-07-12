@@ -6,7 +6,7 @@ public class PatchNotesScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.changesLabel.text = this.m_patchNotesText;
+		this.changesLabel.text = PatchNotesScreen.m_patchNotesText;
 		this.closeButton.onClick += this.MarkAsReadAndClose;
 		this.closeButton.soundPlayer.widget_sound_events()[0].OverrideAssetName = "HUD_Click_Close";
 		this.okButton.onClick += this.MarkAsReadAndClose;
@@ -15,6 +15,12 @@ public class PatchNotesScreen : KModalScreen
 			Application.OpenURL("http://support.kleientertainment.com/customer/portal/articles/2776550");
 		};
 		this.fullPatchNotes.onClick += this.OnPatchNotesClick;
+		PatchNotesScreen.instance = this;
+	}
+
+	protected override void OnCleanUp()
+	{
+		PatchNotesScreen.instance = null;
 	}
 
 	public static bool ShouldShowScreen()
@@ -25,19 +31,22 @@ public class PatchNotesScreen : KModalScreen
 	private void MarkAsReadAndClose()
 	{
 		KPlayerPrefs.SetInt("PatchNotesVersion", PatchNotesScreen.PatchNotesVersion);
-		base.gameObject.SetActive(false);
+		this.Deactivate();
 	}
 
-	public void UpdatePatchNotes(string patchNotesSummary, string url)
+	public static void UpdatePatchNotes(string patchNotesSummary, string url)
 	{
-		this.m_patchNotesUrl = url;
-		this.m_patchNotesText = patchNotesSummary;
-		this.changesLabel.text = this.m_patchNotesText;
+		PatchNotesScreen.m_patchNotesUrl = url;
+		PatchNotesScreen.m_patchNotesText = patchNotesSummary;
+		if (PatchNotesScreen.instance != null)
+		{
+			PatchNotesScreen.instance.changesLabel.text = PatchNotesScreen.m_patchNotesText;
+		}
 	}
 
 	private void OnPatchNotesClick()
 	{
-		Application.OpenURL(this.m_patchNotesUrl);
+		Application.OpenURL(PatchNotesScreen.m_patchNotesUrl);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -65,9 +74,11 @@ public class PatchNotesScreen : KModalScreen
 	[SerializeField]
 	private LocText changesLabel;
 
-	private string m_patchNotesUrl;
+	private static string m_patchNotesUrl;
 
-	private string m_patchNotesText;
+	private static string m_patchNotesText;
 
 	private static int PatchNotesVersion = 9;
+
+	private static PatchNotesScreen instance;
 }

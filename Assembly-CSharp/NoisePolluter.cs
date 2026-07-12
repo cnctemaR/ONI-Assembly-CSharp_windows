@@ -110,14 +110,14 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		base.OnSpawn();
 		if (this.radius == 0 || this.noise == 0)
 		{
-			global::Debug.LogWarning(string.Concat(new object[]
+			global::Debug.LogWarning(string.Concat(new string[]
 			{
 				"Noisepollutor::OnSpawn [",
 				this.GetName(),
 				"] noise: [",
-				this.noise,
+				this.noise.ToString(),
 				"] radius: [",
-				this.radius,
+				this.radius.ToString(),
 				"]"
 			}));
 			global::UnityEngine.Object.Destroy(this);
@@ -148,14 +148,14 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		}
 		else
 		{
-			global::Debug.LogWarning(string.Concat(new object[]
+			global::Debug.LogWarning(string.Concat(new string[]
 			{
 				"Noisepollutor::OnSpawn [",
 				this.GetName(),
 				"] radius: [",
-				this.radius,
+				this.radius.ToString(),
 				"] noise: [",
-				this.noise,
+				this.noise.ToString(),
 				"]"
 			}));
 		}

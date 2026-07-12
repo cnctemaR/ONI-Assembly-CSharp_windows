@@ -6,13 +6,13 @@ namespace UnityEngine.Rendering
 	[UsedByNativeCode]
 	public struct VertexAttributeDescriptor : IEquatable<VertexAttributeDescriptor>
 	{
-		public VertexAttribute attribute { get; set; }
+		public VertexAttribute attribute { readonly get; set; }
 
-		public VertexAttributeFormat format { get; set; }
+		public VertexAttributeFormat format { readonly get; set; }
 
-		public int dimension { get; set; }
+		public int dimension { readonly get; set; }
 
-		public int stream { get; set; }
+		public int stream { readonly get; set; }
 
 		public VertexAttributeDescriptor(VertexAttribute attribute = VertexAttribute.Position, VertexAttributeFormat format = VertexAttributeFormat.Float32, int dimension = 3, int stream = 0)
 		{

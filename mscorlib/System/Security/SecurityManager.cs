@@ -158,8 +158,8 @@ namespace System.Security
 			return permissionSet;
 		}
 
-		[Obsolete]
 		[MonoTODO("(2.0) more tests are needed")]
+		[Obsolete]
 		public static PermissionSet ResolvePolicy(Evidence[] evidences)
 		{
 			if (evidences == null || evidences.Length == 0 || (evidences.Length == 1 && evidences[0].Count == 0))

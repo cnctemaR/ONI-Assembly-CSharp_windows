@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using System.Threading;
 using Unity;
 
 namespace System.Net
@@ -11,15 +12,26 @@ namespace System.Net
 	[Serializable]
 	public class HttpWebResponse : WebResponse, ISerializable, IDisposable
 	{
-		internal HttpWebResponse(Uri uri, string method, WebConnectionData data, CookieContainer container)
+		internal HttpWebResponse(Uri uri, string method, HttpStatusCode status, WebHeaderCollection headers)
 		{
 			this.uri = uri;
 			this.method = method;
-			this.webHeaders = data.Headers;
-			this.version = data.Version;
-			this.statusCode = (HttpStatusCode)data.StatusCode;
-			this.statusDescription = data.StatusDescription;
-			this.stream = data.stream;
+			this.statusCode = status;
+			this.statusDescription = HttpStatusDescription.Get(status);
+			this.webHeaders = headers;
+			this.version = HttpVersion.Version10;
+			this.contentLength = -1L;
+		}
+
+		internal HttpWebResponse(Uri uri, string method, WebResponseStream stream, CookieContainer container)
+		{
+			this.uri = uri;
+			this.method = method;
+			this.stream = stream;
+			this.webHeaders = stream.Headers ?? new WebHeaderCollection();
+			this.version = stream.Version;
+			this.statusCode = stream.StatusCode;
+			this.statusDescription = stream.StatusDescription ?? HttpStatusDescription.Get(this.statusCode);
 			this.contentLength = -1L;
 			try
 			{
@@ -39,15 +51,15 @@ namespace System.Net
 				this.FillCookies();
 			}
 			string text2 = this.webHeaders["Content-Encoding"];
-			if (text2 == "gzip" && (data.request.AutomaticDecompression & DecompressionMethods.GZip) != DecompressionMethods.None)
+			if (text2 == "gzip" && (stream.Request.AutomaticDecompression & DecompressionMethods.GZip) != DecompressionMethods.None)
 			{
-				this.stream = new GZipStream(this.stream, CompressionMode.Decompress);
+				this.stream = new GZipStream(stream, CompressionMode.Decompress);
 				this.webHeaders.Remove(HttpRequestHeader.ContentEncoding);
 				return;
 			}
-			if (text2 == "deflate" && (data.request.AutomaticDecompression & DecompressionMethods.Deflate) != DecompressionMethods.None)
+			if (text2 == "deflate" && (stream.Request.AutomaticDecompression & DecompressionMethods.Deflate) != DecompressionMethods.None)
 			{
-				this.stream = new DeflateStream(this.stream, CompressionMode.Decompress);
+				this.stream = new DeflateStream(stream, CompressionMode.Decompress);
 				this.webHeaders.Remove(HttpRequestHeader.ContentEncoding);
 			}
 		}
@@ -255,22 +267,6 @@ namespace System.Net
 			return text;
 		}
 
-		internal void ReadAll()
-		{
-			WebConnectionStream webConnectionStream = this.stream as WebConnectionStream;
-			if (webConnectionStream == null)
-			{
-				return;
-			}
-			try
-			{
-				webConnectionStream.ReadAll();
-			}
-			catch
-			{
-			}
-		}
-
 		public override Stream GetResponseStream()
 		{
 			this.CheckDisposed();
@@ -305,14 +301,10 @@ namespace System.Net
 
 		public override void Close()
 		{
-			if (this.stream != null)
+			Stream stream = Interlocked.Exchange<Stream>(ref this.stream, null);
+			if (stream != null)
 			{
-				Stream stream = this.stream;
-				this.stream = null;
-				if (stream != null)
-				{
-					stream.Close();
-				}
+				stream.Close();
 			}
 		}
 
@@ -375,8 +367,8 @@ namespace System.Net
 			this.cookieCollection = cookieCollection;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public HttpWebResponse()
 		{
 			global::Unity.ThrowStub.ThrowNotSupportedException();

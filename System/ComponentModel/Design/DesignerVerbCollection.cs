@@ -6,9 +6,9 @@ using System.Security.Permissions;
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class DesignerVerbCollection : CollectionBase
 	{
 		public DesignerVerbCollection()

@@ -14,7 +14,6 @@ public class Tinkerable : Workable
 		Tinkerable tinkerable = prefab.AddOrGet<Tinkerable>();
 		tinkerable.tinkerMaterialTag = PowerControlStationConfig.TINKER_TOOLS;
 		tinkerable.tinkerMaterialAmount = 1f;
-		tinkerable.addedEffect = "PowerTinker";
 		tinkerable.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
 		tinkerable.SetWorkTime(180f);
 		tinkerable.workerStatusItem = Db.Get().DuplicantStatusItems.Tinkering;
@@ -22,6 +21,9 @@ public class Tinkerable : Workable
 		tinkerable.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.PowerTinker.IdHash;
 		tinkerable.choreTypeFetch = Db.Get().ChoreTypes.PowerFetch.IdHash;
+		tinkerable.addedEffect = "PowerTinker";
+		tinkerable.effectAttributeId = Db.Get().Attributes.Machinery.Id;
+		tinkerable.effectMultiplier = 0.025f;
 		tinkerable.multitoolContext = "powertinker";
 		tinkerable.multitoolHitEffectTag = "fx_powertinker_splash";
 		tinkerable.shouldShowSkillPerkStatusItem = false;
@@ -42,9 +44,11 @@ public class Tinkerable : Workable
 		Tinkerable tinkerable = prefab.AddOrGet<Tinkerable>();
 		tinkerable.tinkerMaterialTag = FarmStationConfig.TINKER_TOOLS;
 		tinkerable.tinkerMaterialAmount = 1f;
-		tinkerable.addedEffect = "FarmTinker";
 		tinkerable.requiredSkillPerk = Db.Get().SkillPerks.CanFarmTinker.Id;
 		tinkerable.workerStatusItem = Db.Get().DuplicantStatusItems.Tinkering;
+		tinkerable.addedEffect = "FarmTinker";
+		tinkerable.effectAttributeId = Db.Get().Attributes.Botanist.Id;
+		tinkerable.effectMultiplier = 0.1f;
 		tinkerable.SetWorkTime(15f);
 		tinkerable.attributeConverter = Db.Get().AttributeConverters.PlantTendSpeed;
 		tinkerable.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
@@ -189,13 +193,13 @@ public class Tinkerable : Workable
 	{
 		if (shouldReserve && !this.hasReservedMaterial)
 		{
-			MaterialNeeds.Instance.UpdateNeed(this.tinkerMaterialTag, this.tinkerMaterialAmount);
+			MaterialNeeds.UpdateNeed(this.tinkerMaterialTag, this.tinkerMaterialAmount, base.gameObject.GetMyWorldId());
 			this.hasReservedMaterial = shouldReserve;
 			return;
 		}
 		if (!shouldReserve && this.hasReservedMaterial)
 		{
-			MaterialNeeds.Instance.UpdateNeed(this.tinkerMaterialTag, -this.tinkerMaterialAmount);
+			MaterialNeeds.UpdateNeed(this.tinkerMaterialTag, -this.tinkerMaterialAmount, base.gameObject.GetMyWorldId());
 			this.hasReservedMaterial = shouldReserve;
 		}
 	}
@@ -211,7 +215,8 @@ public class Tinkerable : Workable
 	{
 		base.OnCompleteWork(worker);
 		this.storage.ConsumeIgnoringDisease(this.tinkerMaterialTag, this.tinkerMaterialAmount);
-		this.effects.Add(this.addedEffect, true);
+		float totalValue = worker.GetAttributes().Get(Db.Get().Attributes.Get(this.effectAttributeId)).GetTotalValue();
+		this.effects.Add(this.addedEffect, true).timeRemaining *= 1f + totalValue * this.effectMultiplier;
 		this.UpdateMaterialReservation(false);
 		this.chore = null;
 		this.UpdateChore();
@@ -243,6 +248,10 @@ public class Tinkerable : Workable
 	public float tinkerMaterialAmount;
 
 	public string addedEffect;
+
+	public string effectAttributeId;
+
+	public float effectMultiplier;
 
 	public HashedString choreTypeTinker = Db.Get().ChoreTypes.PowerTinker.IdHash;
 

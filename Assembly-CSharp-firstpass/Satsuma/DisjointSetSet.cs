@@ -4,7 +4,7 @@ namespace Satsuma
 {
 	public struct DisjointSetSet<T> : IEquatable<DisjointSetSet<T>>
 	{
-		public T Representative { get; private set; }
+		public T Representative { readonly get; private set; }
 
 		public DisjointSetSet(T representative)
 		{
@@ -41,7 +41,9 @@ namespace Satsuma
 
 		public override string ToString()
 		{
-			return "[DisjointSetSet:" + this.Representative + "]";
+			string text = "[DisjointSetSet:";
+			T representative = this.Representative;
+			return text + ((representative != null) ? representative.ToString() : null) + "]";
 		}
 	}
 }

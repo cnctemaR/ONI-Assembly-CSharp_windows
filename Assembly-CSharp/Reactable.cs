@@ -119,11 +119,6 @@ public abstract class Reactable
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
-	public void Sim1000ms(float dt)
-	{
-		this.UpdateLocation();
-	}
-
 	private void UpdateLocation()
 	{
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);

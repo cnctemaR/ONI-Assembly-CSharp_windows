@@ -88,5 +88,14 @@ namespace UnityEngine
 		[FreeFunction("PlayerConnection_Bindings::DisconnectAll")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DisconnectAll();
+
+		[Flags]
+		public enum MulticastFlags
+		{
+			kRequestImmediateConnect = 1,
+			kSupportsProfile = 2,
+			kCustomMessage = 4,
+			kUseAlternateIP = 8
+		}
 	}
 }

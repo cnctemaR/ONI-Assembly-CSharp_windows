@@ -1,7 +1,6 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
-using UnityEngine;
 
 public class MaturityDisplayer : AsPercentAmountDisplayer
 {
@@ -43,7 +42,7 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 		Growing component = instance.gameObject.GetComponent<Growing>();
 		if (component != null && component.IsGrowing())
 		{
-			return string.Format(CREATURES.STATS.MATURITY.AMOUNT_DESC_FMT, master.Name, this.formatter.GetFormattedValue(base.ToPercent(instance.value, instance), GameUtil.TimeSlice.None, null), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1", false));
+			return string.Format(CREATURES.STATS.MATURITY.AMOUNT_DESC_FMT, master.Name, this.formatter.GetFormattedValue(base.ToPercent(instance.value, instance), GameUtil.TimeSlice.None), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1", false));
 		}
 		return base.GetDescription(master, instance);
 	}
@@ -55,7 +54,7 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 		{
 		}
 
-		public override string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
+		public override string GetFormattedModifier(AttributeModifier modifier)
 		{
 			float num = modifier.Value;
 			GameUtil.TimeSlice timeSlice = base.DeltaTimeSlice;
@@ -64,7 +63,7 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 				num *= 100f;
 				timeSlice = GameUtil.TimeSlice.None;
 			}
-			return this.GetFormattedValue(num, timeSlice, parent_instance);
+			return this.GetFormattedValue(num, timeSlice);
 		}
 	}
 }

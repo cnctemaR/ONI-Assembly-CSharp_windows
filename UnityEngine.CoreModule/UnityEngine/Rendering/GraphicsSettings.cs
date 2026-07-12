@@ -59,6 +59,14 @@ namespace UnityEngine.Rendering
 			set;
 		}
 
+		public static extern uint defaultRenderingLayerMask
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public static extern bool useScriptableRenderPipelineBatching
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -75,8 +83,19 @@ namespace UnityEngine.Rendering
 			set;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool AllowEnlightenSupportForUpgradedProject();
+		public static extern bool disableBuiltinCustomRenderTextureUpdate
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public static extern VideoShadersIncludeMode videoShadersIncludeMode
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasShaderDefine(GraphicsTier tier, BuiltinShaderDefine defineHash);
@@ -148,7 +167,7 @@ namespace UnityEngine.Rendering
 
 		[FreeFunction]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Object GetGraphicsSettings();
+		public static extern Object GetGraphicsSettings();
 
 		[NativeName("SetShaderModeScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]

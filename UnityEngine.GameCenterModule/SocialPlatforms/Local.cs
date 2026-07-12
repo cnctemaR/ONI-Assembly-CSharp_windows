@@ -180,7 +180,7 @@ namespace UnityEngine.SocialPlatforms
 					if (flag2)
 					{
 						List<Score> list = new List<Score>((Score[])leaderboard.scores);
-						list.Add(new Score(board, score, this.localUser.id, DateTime.Now, score + " points", 0));
+						list.Add(new Score(board, score, this.localUser.id, DateTime.Now, score.ToString() + " points", 0));
 						Leaderboard leaderboard2 = leaderboard;
 						IScore[] array = list.ToArray();
 						leaderboard2.SetScores(array);

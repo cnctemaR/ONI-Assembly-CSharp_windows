@@ -196,15 +196,6 @@ namespace UnityEngine
 			}
 		}
 
-		public void LogFormat(LogType logType, string format, params object[] args)
-		{
-			bool flag = this.IsLogTypeAllowed(logType);
-			if (flag)
-			{
-				this.logHandler.LogFormat(logType, null, format, args);
-			}
-		}
-
 		public void LogException(Exception exception)
 		{
 			bool logEnabled = this.logEnabled;
@@ -214,21 +205,30 @@ namespace UnityEngine
 			}
 		}
 
-		public void LogFormat(LogType logType, Object context, string format, params object[] args)
-		{
-			bool flag = this.IsLogTypeAllowed(logType);
-			if (flag)
-			{
-				this.logHandler.LogFormat(logType, context, format, args);
-			}
-		}
-
 		public void LogException(Exception exception, Object context)
 		{
 			bool logEnabled = this.logEnabled;
 			if (logEnabled)
 			{
 				this.logHandler.LogException(exception, context);
+			}
+		}
+
+		public void LogFormat(LogType logType, string format, params object[] args)
+		{
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
+			{
+				this.logHandler.LogFormat(logType, null, format, args);
+			}
+		}
+
+		public void LogFormat(LogType logType, Object context, string format, params object[] args)
+		{
+			bool flag = this.IsLogTypeAllowed(logType);
+			if (flag)
+			{
+				this.logHandler.LogFormat(logType, context, format, args);
 			}
 		}
 

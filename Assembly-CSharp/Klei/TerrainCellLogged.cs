@@ -1,5 +1,6 @@
 ﻿using System;
-using ProcGen;
+using System.Collections.Generic;
+using ProcGen.Map;
 using ProcGenGame;
 using VoronoiTree;
 
@@ -11,8 +12,8 @@ namespace Klei
 		{
 		}
 
-		public TerrainCellLogged(global::ProcGen.Node node, Diagram.Site site)
-			: base(node, site)
+		public TerrainCellLogged(Cell node, Diagram.Site site, Dictionary<Tag, int> distancesToTags)
+			: base(node, site, distancesToTags)
 		{
 		}
 

@@ -21,7 +21,6 @@ public class MinionSelectScreen : CharacterSelectionController
 		this.backButton.onClick += delegate
 		{
 			LoadScreen.ForceStopGame();
-			SaveGame.Instance.worldGen.Reset();
 			App.LoadScene("frontend");
 		};
 		this.InitializeContainers();
@@ -76,7 +75,7 @@ public class MinionSelectScreen : CharacterSelectionController
 			CharacterContainer characterContainer = (CharacterContainer)telepadDeliverableContainer;
 			this.selectedDeliverables.Add(characterContainer.Stats);
 		}
-		NewBaseScreen.Instance.SetStartingMinionStats(this.selectedDeliverables.ToArray());
+		NewBaseScreen.Instance.Init(SaveLoader.Instance.ClusterLayout, this.selectedDeliverables.ToArray());
 		if (this.OnProceedEvent != null)
 		{
 			this.OnProceedEvent();

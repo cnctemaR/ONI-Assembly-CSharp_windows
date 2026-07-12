@@ -17,6 +17,6 @@ namespace UnityEngine.Experimental.Rendering
 		MSAA2x,
 		MSAA4x,
 		MSAA8x,
-		StencilSampling = 15
+		StencilSampling = 16
 	}
 }

@@ -39,6 +39,10 @@ public class UpdateBucketWithUpdater<DataType> : StateMachineUpdater.BaseUpdateB
 
 	public override void Update(float dt)
 	{
+		if (KMonoBehaviour.isLoadingScene)
+		{
+			return;
+		}
 		List<UpdateBucketWithUpdater<DataType>.Entry> dataList = this.entries.GetDataList();
 		foreach (HandleVector<int>.Handle handle in this.pendingRemovals)
 		{

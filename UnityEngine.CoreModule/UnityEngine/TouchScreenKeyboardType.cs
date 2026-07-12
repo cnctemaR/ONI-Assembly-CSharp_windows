@@ -16,6 +16,7 @@ namespace UnityEngine
 		NintendoNetworkAccount,
 		Social,
 		Search,
-		DecimalPad
+		DecimalPad,
+		OneTimeCode
 	}
 }

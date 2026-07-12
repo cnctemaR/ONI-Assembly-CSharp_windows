@@ -597,8 +597,8 @@ namespace System.Reflection.Emit
 			});
 		}
 
-		[SecuritySafeCritical]
 		[MonoTODO]
+		[SecuritySafeCritical]
 		public override bool Equals(object obj)
 		{
 			return base.Equals(obj);

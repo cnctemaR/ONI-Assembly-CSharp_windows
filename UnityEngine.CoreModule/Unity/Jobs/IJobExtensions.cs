@@ -8,7 +8,7 @@ namespace Unity.Jobs
 	{
 		public static JobHandle Schedule<T>(this T jobData, JobHandle dependsOn = default(JobHandle)) where T : struct, IJob
 		{
-			JobsUtility.JobScheduleParameters jobScheduleParameters = new JobsUtility.JobScheduleParameters(UnsafeUtility.AddressOf<T>(ref jobData), IJobExtensions.JobStruct<T>.Initialize(), dependsOn, ScheduleMode.Batched);
+			JobsUtility.JobScheduleParameters jobScheduleParameters = new JobsUtility.JobScheduleParameters(UnsafeUtility.AddressOf<T>(ref jobData), IJobExtensions.JobStruct<T>.Initialize(), dependsOn, ScheduleMode.Single);
 			return JobsUtility.Schedule(ref jobScheduleParameters);
 		}
 
@@ -25,7 +25,7 @@ namespace Unity.Jobs
 				bool flag = IJobExtensions.JobStruct<T>.jobReflectionData == IntPtr.Zero;
 				if (flag)
 				{
-					IJobExtensions.JobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), JobType.Single, new IJobExtensions.JobStruct<T>.ExecuteJobFunction(IJobExtensions.JobStruct<T>.Execute), null, null);
+					IJobExtensions.JobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), new IJobExtensions.JobStruct<T>.ExecuteJobFunction(IJobExtensions.JobStruct<T>.Execute), null, null);
 				}
 				return IJobExtensions.JobStruct<T>.jobReflectionData;
 			}

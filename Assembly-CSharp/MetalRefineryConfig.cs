@@ -68,25 +68,28 @@ public class MetalRefineryConfig : IBuildingConfig
 		conduitDispenser.alwaysDispense = true;
 		foreach (Element element in ElementLoader.elements.FindAll((Element e) => e.IsSolid && e.HasTag(GameTags.Metal)))
 		{
-			Element lowTempTransition = element.highTempTransition.lowTempTransition;
-			if (lowTempTransition != element)
+			if (!element.HasTag(GameTags.Noncrushable))
 			{
-				ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
+				Element lowTempTransition = element.highTempTransition.lowTempTransition;
+				if (lowTempTransition != element)
 				{
-					new ComplexRecipe.RecipeElement(element.tag, 100f)
-				};
-				ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
-				{
-					new ComplexRecipe.RecipeElement(lowTempTransition.tag, 100f)
-				};
-				string text = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element.tag);
-				string text2 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array, array2);
-				ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
-				complexRecipe.time = 40f;
-				complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name);
-				complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
-				complexRecipe.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
-				ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
+					ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
+					{
+						new ComplexRecipe.RecipeElement(element.tag, 100f)
+					};
+					ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+					{
+						new ComplexRecipe.RecipeElement(lowTempTransition.tag, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+					};
+					string text = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element.tag);
+					string text2 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array, array2);
+					ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2, 0);
+					complexRecipe.time = 40f;
+					complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name);
+					complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
+					complexRecipe.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
+					ComplexRecipeManager.Get().AddObsoleteIDMapping(text, text2);
+				}
 			}
 		}
 		Element element2 = ElementLoader.FindElementByHash(SimHashes.Steel);
@@ -98,11 +101,11 @@ public class MetalRefineryConfig : IBuildingConfig
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Steel).tag, 100f)
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Steel).tag, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
 		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element2.tag);
 		string text4 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array3, array4);
-		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
+		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4, 0);
 		complexRecipe2.time = 40f;
 		complexRecipe2.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Steel).name, ElementLoader.FindElementByHash(SimHashes.Iron).name);

@@ -157,7 +157,7 @@ namespace UnityEngine.UI
 						maskableGraphic.SetClipRect(rect, flag);
 						maskableGraphic.Cull(rect, flag);
 					}
-					goto IL_01C7;
+					goto IL_01B5;
 				}
 			}
 			if (this.m_ForceClip)
@@ -177,17 +177,14 @@ namespace UnityEngine.UI
 							maskableGraphic2.Cull(rect, flag);
 						}
 					}
-					goto IL_01C7;
+					goto IL_01B5;
 				}
 			}
 			foreach (MaskableGraphic maskableGraphic3 in this.m_MaskableTargets)
 			{
-				if (maskableGraphic3.canvasRenderer.hasMoved)
-				{
-					maskableGraphic3.Cull(rect, flag);
-				}
+				maskableGraphic3.Cull(rect, flag);
 			}
-			IL_01C7:
+			IL_01B5:
 			this.m_LastClipRectCanvasSpace = rect;
 			this.m_ForceClip = false;
 			this.UpdateClipSoftness();

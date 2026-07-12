@@ -96,7 +96,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetPathArray_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetPathArray_Internal(int index, [NotNull] Vector2[] points);
+		private extern int GetPathArray_Internal(int index, [NotNull("ArgumentNullException")] Vector2[] points);
 
 		public int GetPath(int index, List<Vector2> points)
 		{
@@ -115,7 +115,7 @@ namespace UnityEngine
 
 		[NativeMethod("GetPathList_Binding")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetPathList_Internal(int index, [NotNull] List<Vector2> points);
+		private extern int GetPathList_Internal(int index, [NotNull("ArgumentNullException")] List<Vector2> points);
 
 		public enum GeometryType
 		{

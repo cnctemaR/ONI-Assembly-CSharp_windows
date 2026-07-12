@@ -1,0 +1,14 @@
+﻿using System;
+
+namespace Microsoft.Cci.Pdb
+{
+	internal enum DEBUG_S_SUBSECTION_TYPE : uint
+	{
+		DEBUG_S_IGNORE = 2147483648U,
+		DEBUG_S_SYMBOLS = 241U,
+		DEBUG_S_LINES,
+		DEBUG_S_STRINGTABLE,
+		DEBUG_S_FILECHKSMS,
+		DEBUG_S_FRAMEDATA
+	}
+}

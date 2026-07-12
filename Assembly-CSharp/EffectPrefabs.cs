@@ -17,4 +17,8 @@ public class EffectPrefabs : MonoBehaviour
 	public GameObject MeteorBackground;
 
 	public GameObject SparkleStreakFX;
+
+	public GameObject GameplayEventDisplay;
+
+	public GameObject OpenTemporalTearBeam;
 }

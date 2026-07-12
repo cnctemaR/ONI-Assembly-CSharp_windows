@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [AddComponentMenu("KMonoBehaviour/scripts/ResourceCategoryHeader")]
-public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
+public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, ISim4000ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -28,6 +28,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 		base.OnSpawn();
 		this.tooltip.OnToolTip = new Func<string>(this.OnTooltip);
 		this.UpdateContents();
+		this.RefreshChart();
 	}
 
 	private void SetInteractable(bool state)
@@ -110,9 +111,9 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 	{
 		this.Background.color = (is_hovering ? this.BackgroundHoverColor : new Color(0f, 0f, 0f, 0f));
 		ICollection<Pickupable> collection = null;
-		if (WorldInventory.Instance != null)
+		if (ClusterManager.Instance.activeWorld.worldInventory != null)
 		{
-			collection = WorldInventory.Instance.GetPickupables(this.ResourceCategoryTag);
+			collection = ClusterManager.Instance.activeWorld.worldInventory.GetPickupables(this.ResourceCategoryTag, false);
 		}
 		if (collection == null)
 		{
@@ -166,7 +167,7 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 		total = 0f;
 		reserved = 0f;
 		HashSet<Tag> hashSet = null;
-		if (!WorldInventory.Instance.TryGetDiscoveredResourcesFromTag(this.ResourceCategoryTag, out hashSet))
+		if (!DiscoveredResources.Instance.TryGetDiscoveredResourcesFromTag(this.ResourceCategoryTag, out hashSet))
 		{
 			return;
 		}
@@ -248,7 +249,18 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 		float num2;
 		float num3;
 		this.GetAmounts(true, out num, out num2, out num3);
-		return this.elements.LabelText.text + "\n" + string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
+		string text = this.elements.LabelText.text + "\n";
+		text += string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num3, this.Measure), ResourceCategoryScreen.QuantityTextForMeasure(num2, this.Measure));
+		float delta = TrackerTool.Instance.GetResourceStatistic(ClusterManager.Instance.activeWorldId, this.ResourceCategoryTag).GetDelta(150f);
+		if (delta != 0f)
+		{
+			text = text + "\n\n" + string.Format(UI.RESOURCESCREEN.TREND_TOOLTIP, (delta > 0f) ? UI.RESOURCESCREEN.INCREASING_STR : UI.RESOURCESCREEN.DECREASING_STR, GameUtil.GetFormattedMass(Mathf.Abs(delta), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+		}
+		else
+		{
+			text = text + "\n\n" + UI.RESOURCESCREEN.TREND_TOOLTIP_NO_CHANGE;
+		}
+		return text;
 	}
 
 	private ResourceEntry NewResourceEntry(Tag resourceTag, GameUtil.MeasureUnit measure)
@@ -256,6 +268,21 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 		ResourceEntry component = Util.KInstantiateUI(this.Prefab_ResourceEntry, this.EntryContainer.gameObject, true).GetComponent<ResourceEntry>();
 		component.SetTag(resourceTag, measure);
 		return component;
+	}
+
+	public void Sim4000ms(float dt)
+	{
+		this.RefreshChart();
+	}
+
+	private void RefreshChart()
+	{
+		if (this.sparkChart != null)
+		{
+			ResourceTracker resourceStatistic = TrackerTool.Instance.GetResourceStatistic(ClusterManager.Instance.activeWorldId, this.ResourceCategoryTag);
+			this.sparkChart.GetComponentInChildren<LineLayer>().RefreshLine(resourceStatistic.ChartableData(3000f), "resourceAmount");
+			this.sparkChart.GetComponentInChildren<SparkLayer>().SetColor(Constants.NEUTRAL_COLOR);
+		}
 	}
 
 	public GameObject Prefab_ResourceEntry;
@@ -286,6 +313,8 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 
 	private bool anyDiscovered;
 
+	public const float chartHistoryLength = 3000f;
+
 	[MyCmpGet]
 	private ToolTip tooltip;
 
@@ -303,6 +332,8 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IEve
 
 	[SerializeField]
 	private Image Background;
+
+	public GameObject sparkChart;
 
 	private float cachedAvailable = float.MinValue;
 

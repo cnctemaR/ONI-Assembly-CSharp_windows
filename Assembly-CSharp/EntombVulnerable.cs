@@ -47,6 +47,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 		this.CheckEntombed();
 		if (this.isEntombed)
 		{
+			base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed, false);
 			base.Trigger(-1089732772, true);
 		}
 	}

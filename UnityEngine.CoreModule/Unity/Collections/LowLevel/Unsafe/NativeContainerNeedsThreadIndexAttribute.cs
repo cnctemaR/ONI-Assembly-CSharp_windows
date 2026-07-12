@@ -3,9 +3,9 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	[RequiredByNativeCode]
-	[AttributeUsage(AttributeTargets.Struct)]
 	[Obsolete("Use NativeSetThreadIndexAttribute instead")]
+	[AttributeUsage(AttributeTargets.Struct)]
+	[RequiredByNativeCode]
 	public sealed class NativeContainerNeedsThreadIndexAttribute : Attribute
 	{
 	}

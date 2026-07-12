@@ -9,51 +9,45 @@ public class KAnimGroupFile : ScriptableObject
 		KAnimGroupFile.groupfile = null;
 	}
 
-	public static string GetFilePath()
+	public static string GetFilePath(string contentDir = "")
 	{
-		return "Assets/anim/resources/animgrouptags.asset";
+		if (string.IsNullOrEmpty(contentDir))
+		{
+			return "Assets/anim/base/resources/animgrouptags.asset";
+		}
+		return "Assets/anim" + string.Format("/{0}/", contentDir) + "animgrouptags.asset";
 	}
 
 	public static KAnimGroupFile GetGroupFile()
 	{
-		if (KAnimGroupFile.groupfile == null)
-		{
-			KAnimGroupFile.groupfile = (KAnimGroupFile)Resources.Load("animgrouptags", typeof(KAnimGroupFile));
-		}
+		global::Debug.Assert(KAnimGroupFile.groupfile != null, "Cannot GetGroupFile before it is loaded.");
 		return KAnimGroupFile.groupfile;
-	}
-
-	public static void SetGroupFile(KAnimGroupFile file)
-	{
-		KAnimGroupFile.groupfile = file;
-		KAnimGroupFile.groupfile.Sort();
 	}
 
 	public static KAnimGroupFile.Group GetGroup(HashedString tag)
 	{
-		KAnimGroupFile.Group group = null;
-		KAnimGroupFile.GetGroupFile();
+		global::Debug.Assert(KAnimGroupFile.groupfile != null, "GetGroup called before LoadAll called");
 		List<KAnimGroupFile.Group> list = KAnimGroupFile.groupfile.groups;
 		global::Debug.Assert(list != null, list.Count > 0);
 		for (int i = 0; i < list.Count; i++)
 		{
-			KAnimGroupFile.Group group2 = list[i];
-			if (group2.id == tag || group2.target == tag)
+			KAnimGroupFile.Group group = list[i];
+			if (group.id == tag || group.target == tag)
 			{
-				group = group2;
-				break;
+				return group;
 			}
 		}
-		return group;
+		return null;
 	}
 
-	public HashedString GetGroupForHomeDirectory(HashedString homedirectory)
+	public static HashedString GetGroupForHomeDirectory(HashedString homedirectory)
 	{
-		for (int i = 0; i < this.currentGroup.Count; i++)
+		List<Pair<HashedString, HashedString>> list = KAnimGroupFile.groupfile.currentGroup;
+		for (int i = 0; i < list.Count; i++)
 		{
-			if (this.currentGroup[i].first == homedirectory)
+			if (list[i].first == homedirectory)
 			{
-				return this.currentGroup[i].second;
+				return list[i].second;
 			}
 		}
 		return default(HashedString);
@@ -120,7 +114,7 @@ public class KAnimGroupFile : ScriptableObject
 
 	private bool AddFile(int groupIndex, KAnimFile file)
 	{
-		if (!this.groups[groupIndex].files.Contains(file))
+		if (!this.groups[groupIndex].animNames.Contains(file.name))
 		{
 			Pair<HashedString, HashedString> pair = new Pair<HashedString, HashedString>(file.homedirectory, this.groups[groupIndex].id);
 			bool flag = false;
@@ -137,7 +131,8 @@ public class KAnimGroupFile : ScriptableObject
 			{
 				this.currentGroup.Add(pair);
 			}
-			this.groups[groupIndex].files.Add(file);
+			this.groups[groupIndex].animFiles.Add(file);
+			this.groups[groupIndex].animNames.Add(file.name);
 			return true;
 		}
 		return false;
@@ -150,19 +145,52 @@ public class KAnimGroupFile : ScriptableObject
 		global::Debug.Assert(akf != null, gf.groupID);
 		int num = this.AddGroup(akf, gf, file);
 		string name = file.GetData().name;
-		int num2 = this.groups[num].files.FindIndex((KAnimFile candidate) => candidate != null && candidate.GetData().name == name);
+		int num2 = this.groups[num].animFiles.FindIndex((KAnimFile candidate) => candidate != null && candidate.GetData().name == name);
 		if (num2 == -1)
 		{
-			this.groups[num].files.Add(file);
+			this.groups[num].animFiles.Add(file);
+			this.groups[num].animNames.Add(file.GetData().name);
 			return KAnimGroupFile.AddModResult.Added;
 		}
-		this.groups[num].files[num2].mod = file.mod;
+		this.groups[num].animFiles[num2].mod = file.mod;
 		return KAnimGroupFile.AddModResult.Replaced;
 	}
 
-	public void LoadAll()
+	public static void LoadGroupResourceFile()
 	{
-		global::Debug.Assert(!KAnimGroupFile.hasCompletedLoadAll, "You cannot load all the anim data twice!");
+		KAnimGroupFile.groupfile = (KAnimGroupFile)Resources.Load("animgrouptags", typeof(KAnimGroupFile));
+	}
+
+	public static void LoadAll()
+	{
+		KAnimGroupFile.groupfile.Load();
+	}
+
+	public static void MapNamesToAnimFiles(Dictionary<HashedString, KAnimFile> animTable)
+	{
+		KAnimGroupFile.groupfile.DoMapNamesToAnimFiles(animTable);
+	}
+
+	private void DoMapNamesToAnimFiles(Dictionary<HashedString, KAnimFile> animTable)
+	{
+		for (int i = 0; i < this.groups.Count; i++)
+		{
+			this.groups[i].animFiles = new List<KAnimFile>();
+			for (int j = 0; j < this.groups[i].animNames.Count; j++)
+			{
+				HashedString hashedString = this.groups[i].animNames[j];
+				KAnimFile kanimFile = null;
+				animTable.TryGetValue(hashedString, out kanimFile);
+				if (kanimFile != null)
+				{
+					this.groups[i].animFiles.Add(kanimFile);
+				}
+			}
+		}
+	}
+
+	private void Load()
+	{
 		this.fileData.Clear();
 		int i = 0;
 		while (i < this.groups.Count)
@@ -183,21 +211,21 @@ public class KAnimGroupFile : ScriptableObject
 			HashedString hashedString = this.groups[i].id;
 			if (this.groups[i].renderType != KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				goto IL_0118;
+				goto IL_0106;
 			}
 			if (this.groups[i].swapTarget.IsValid)
 			{
 				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget);
 				hashedString = this.groups[i].swapTarget;
-				goto IL_0118;
+				goto IL_0106;
 			}
-			IL_0233:
+			IL_0221:
 			i++;
 			continue;
-			IL_0118:
-			for (int j = 0; j < this.groups[i].files.Count; j++)
+			IL_0106:
+			for (int j = 0; j < this.groups[i].animFiles.Count; j++)
 			{
-				KAnimFile kanimFile = this.groups[i].files[j];
+				KAnimFile kanimFile = this.groups[i].animFiles[j];
 				if (kanimFile != null && kanimFile.buildBytes != null && !this.fileData.ContainsKey(kanimFile.GetInstanceID()))
 				{
 					if (kanimFile.buildBytes.Length == 0)
@@ -216,7 +244,7 @@ public class KAnimGroupFile : ScriptableObject
 					}
 				}
 			}
-			goto IL_0233;
+			goto IL_0221;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
@@ -288,9 +316,9 @@ public class KAnimGroupFile : ScriptableObject
 						global::Debug.LogErrorFormat("Anim group is null for [{0}]", new object[] { this.groups[num].id });
 					}
 				}
-				for (int num2 = 0; num2 < this.groups[num].files.Count; num2++)
+				for (int num2 = 0; num2 < this.groups[num].animFiles.Count; num2++)
 				{
-					KAnimFile kanimFile2 = this.groups[num].files[num2];
+					KAnimFile kanimFile2 = this.groups[num].animFiles[num2];
 					if (kanimFile2 != null && kanimFile2.animBytes != null)
 					{
 						if (kanimFile2.animBytes.Length == 0)
@@ -344,28 +372,6 @@ public class KAnimGroupFile : ScriptableObject
 			}
 			KGlobalAnimParser.PostParse(kbatchGroupData3);
 		}
-		KAnimGroupFile.hasCompletedLoadAll = true;
-	}
-
-	private void Sort()
-	{
-		for (int i = 0; i < this.groups.Count; i++)
-		{
-			this.groups[i].files.RemoveAll((KAnimFile f) => f == null || f.name == null);
-		}
-		this.groups.RemoveAll((KAnimGroupFile.Group f) => f == null || f.files.Count == 0);
-		this.groups.Sort((KAnimGroupFile.Group file0, KAnimGroupFile.Group file1) => file0.id.HashValue.CompareTo(file1.id.HashValue));
-		for (int j = 0; j < this.groups.Count; j++)
-		{
-			if (this.groups[j].files.Count != 1)
-			{
-				List<KAnimFile> list = this.groups[j].files.FindAll((KAnimFile f) => f.buildBytes != null);
-				this.groups[j].files.RemoveAll((KAnimFile f) => f.buildBytes != null);
-				list.Sort((KAnimFile file0, KAnimFile file1) => (file0.homedirectory + file0.name).CompareTo(file1.homedirectory + file1.name));
-				this.groups[j].files.Sort((KAnimFile file0, KAnimFile file1) => (file0.homedirectory + file0.name).CompareTo(file1.homedirectory + file1.name));
-				this.groups[j].files.InsertRange(0, list);
-			}
-		}
 	}
 
 	private const string MASTER_GROUP_FILE = "animgrouptags";
@@ -382,8 +388,6 @@ public class KAnimGroupFile : ScriptableObject
 	[SerializeField]
 	private List<Pair<HashedString, HashedString>> currentGroup = new List<Pair<HashedString, HashedString>>();
 
-	private static bool hasCompletedLoadAll;
-
 	[Serializable]
 	public class Group
 	{
@@ -399,7 +403,7 @@ public class KAnimGroupFile : ScriptableObject
 		public string commandDirectory = "";
 
 		[SerializeField]
-		public List<KAnimFile> files = new List<KAnimFile>();
+		public List<HashedString> animNames = new List<HashedString>();
 
 		[SerializeField]
 		public KAnimBatchGroup.RendererType renderType;
@@ -418,6 +422,9 @@ public class KAnimGroupFile : ScriptableObject
 
 		[SerializeField]
 		public HashedString animTarget;
+
+		[NonSerialized]
+		public List<KAnimFile> animFiles = new List<KAnimFile>();
 	}
 
 	public class GroupFile

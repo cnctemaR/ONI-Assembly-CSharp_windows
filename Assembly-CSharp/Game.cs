@@ -137,8 +137,6 @@ public class Game : KMonoBehaviour
 		this.accumulators = new Accumulators();
 		this.plantElementAbsorbers = new PlantElementAbsorbers();
 		this.activeFX = new ushort[Grid.CellCount];
-		this.simActiveRegionMax = new Vector2I(0, 0);
-		this.simActiveRegionMin = new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1);
 		this.UnsafePrefabInit();
 		Shader.SetGlobalVector("_MetalParameters", new Vector4(0f, 0f, 0f, 0f));
 		Shader.SetGlobalVector("_WaterParameters", new Vector4(0f, 0f, 0f, 0f));
@@ -171,6 +169,7 @@ public class Game : KMonoBehaviour
 	protected override void OnLoadLevel()
 	{
 		base.Unsubscribe<Game>(1798162660, Game.MarkStatusItemRendererDirtyDelegate, false);
+		base.Unsubscribe<Game>(1983128072, Game.ActiveWorldChangedDelegate, false);
 		base.OnLoadLevel();
 	}
 
@@ -217,15 +216,19 @@ public class Game : KMonoBehaviour
 		SpeedControlScreen.Instance.Pause(false);
 		LightGridManager.Initialise();
 		RadiationGridManager.Initialise();
+		this.RefreshRadiationLoop();
 		this.UnsafeOnSpawn();
 		Time.timeScale = 0f;
 		if (this.tempIntroScreenPrefab != null)
 		{
 			global::Util.KInstantiate(this.tempIntroScreenPrefab, null, null);
 		}
-		if (SaveLoader.Instance.cachedGSD != null)
+		if (SaveLoader.Instance.ClusterLayout != null)
 		{
-			this.Reset(SaveLoader.Instance.cachedGSD);
+			foreach (WorldGen worldGen in SaveLoader.Instance.ClusterLayout.worlds)
+			{
+				this.Reset(worldGen.data.gameSpawnData, worldGen.WorldOffset);
+			}
 			NewBaseScreen.SetInitialCamera();
 		}
 		TagManager.FillMissingProperNames();
@@ -236,13 +239,13 @@ public class Game : KMonoBehaviour
 			base.Trigger(-1992507039, null);
 			base.Trigger(-838649377, null);
 		}
-		this.LocalPlayer.ScreenManager.StartScreen(ScreenPrefabs.Instance.ResourceCategoryScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).transform.SetSiblingIndex(1);
 		global::UnityEngine.Object[] array = Resources.FindObjectsOfTypeAll(typeof(MeshRenderer));
 		for (int i = 0; i < array.Length; i++)
 		{
 			((MeshRenderer)array[i]).reflectionProbeUsage = ReflectionProbeUsage.Off;
 		}
 		base.Subscribe<Game>(1798162660, Game.MarkStatusItemRendererDirtyDelegate);
+		base.Subscribe<Game>(1983128072, Game.ActiveWorldChangedDelegate);
 		this.solidConduitFlow.Initialize();
 		SimAndRenderScheduler.instance.Add(this.roomProber, false);
 		SimAndRenderScheduler.instance.Add(KComponentSpawn.instance, false);
@@ -280,6 +283,15 @@ public class Game : KMonoBehaviour
 	private void UnsafeOnSpawn()
 	{
 		this.world.UpdateCellInfo(this.gameSolidInfo, this.callbackInfo, 0, null, 0, null);
+	}
+
+	private void RefreshRadiationLoop()
+	{
+		GameScheduler.Instance.Schedule("UpdateRadiation", 1f, delegate(object obj)
+		{
+			RadiationGridManager.Refresh();
+			this.RefreshRadiationLoop();
+		}, null, null);
 	}
 
 	public void SetMusicEnabled(bool enabled)
@@ -338,6 +350,7 @@ public class Game : KMonoBehaviour
 				Grid.elementIdx = ptr2->elementIdx;
 				Grid.temperature = ptr2->temperature;
 				Grid.mass = ptr2->mass;
+				Grid.radiation = ptr2->radiation;
 				Grid.properties = ptr2->properties;
 				Grid.strengthInfo = ptr2->strengthInfo;
 				Grid.insulation = ptr2->insulation;
@@ -494,30 +507,42 @@ public class Game : KMonoBehaviour
 						}
 					}
 				}
-				int numElementChunkMeltedInfos = ptr2->numElementChunkMeltedInfos;
-				for (int num9 = 0; num9 < numElementChunkMeltedInfos; num9++)
+				int numRadiationConsumedCallbacks = ptr2->numRadiationConsumedCallbacks;
+				HandleVector<Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback>>.Handle handle6 = default(HandleVector<Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback>>.Handle);
+				for (int num9 = 0; num9 < numRadiationConsumedCallbacks; num9++)
 				{
-					SimTemperatureTransfer.DoStateTransition(ptr2->elementChunkMeltedInfos[num9].handle);
+					Sim.ConsumedRadiationCallback consumedRadiationCallback = ptr2->radiationConsumedCallbacks[num9];
+					handle6.index = consumedRadiationCallback.callbackIdx;
+					Game.ComplexCallbackInfo<Sim.ConsumedRadiationCallback> complexCallbackInfo3 = this.radiationConsumedCallbackManager.Release(handle6, "radiationConsumedCB");
+					if (complexCallbackInfo3.cb != null)
+					{
+						complexCallbackInfo3.cb(consumedRadiationCallback, complexCallbackInfo3.callbackData);
+					}
+				}
+				int numElementChunkMeltedInfos = ptr2->numElementChunkMeltedInfos;
+				for (int num10 = 0; num10 < numElementChunkMeltedInfos; num10++)
+				{
+					SimTemperatureTransfer.DoOreMeltTransition(ptr2->elementChunkMeltedInfos[num10].handle);
 				}
 				int numBuildingOverheatInfos = ptr2->numBuildingOverheatInfos;
-				for (int num10 = 0; num10 < numBuildingOverheatInfos; num10++)
+				for (int num11 = 0; num11 < numBuildingOverheatInfos; num11++)
 				{
-					StructureTemperatureComponents.DoOverheat(ptr2->buildingOverheatInfos[num10].handle);
+					StructureTemperatureComponents.DoOverheat(ptr2->buildingOverheatInfos[num11].handle);
 				}
 				int numBuildingNoLongerOverheatedInfos = ptr2->numBuildingNoLongerOverheatedInfos;
-				for (int num11 = 0; num11 < numBuildingNoLongerOverheatedInfos; num11++)
+				for (int num12 = 0; num12 < numBuildingNoLongerOverheatedInfos; num12++)
 				{
-					StructureTemperatureComponents.DoNoLongerOverheated(ptr2->buildingNoLongerOverheatedInfos[num11].handle);
+					StructureTemperatureComponents.DoNoLongerOverheated(ptr2->buildingNoLongerOverheatedInfos[num12].handle);
 				}
 				int numBuildingMeltedInfos = ptr2->numBuildingMeltedInfos;
-				for (int num12 = 0; num12 < numBuildingMeltedInfos; num12++)
+				for (int num13 = 0; num13 < numBuildingMeltedInfos; num13++)
 				{
-					StructureTemperatureComponents.DoStateTransition(ptr2->buildingMeltedInfos[num12].handle);
+					StructureTemperatureComponents.DoStateTransition(ptr2->buildingMeltedInfos[num13].handle);
 				}
 				int numCellMeltedInfos = ptr2->numCellMeltedInfos;
-				for (int num13 = 0; num13 < numCellMeltedInfos; num13++)
+				for (int num14 = 0; num14 < numCellMeltedInfos; num14++)
 				{
-					int gameCell = ptr2->cellMeltedInfos[num13].gameCell;
+					int gameCell = ptr2->cellMeltedInfos[num14].gameCell;
 					GameObject gameObject = Grid.Objects[gameCell, 9];
 					if (gameObject != null)
 					{
@@ -573,14 +598,6 @@ public class Game : KMonoBehaviour
 		this.solidChangedFilter.Remove(cell);
 	}
 
-	public void UpdateGameActiveRegion(int x0, int y0, int x1, int y1)
-	{
-		this.simActiveRegionMin.x = Mathf.Max(0, Mathf.Min(x0, this.simActiveRegionMin.x));
-		this.simActiveRegionMin.y = Mathf.Max(0, Mathf.Min(y0, this.simActiveRegionMin.y));
-		this.simActiveRegionMax.x = Mathf.Min(Grid.WidthInCells - 1, Mathf.Max(x1, this.simActiveRegionMax.x));
-		this.simActiveRegionMax.y = Mathf.Min(Grid.HeightInCells - 1, Mathf.Max(y1, this.simActiveRegionMax.y));
-	}
-
 	public void SetIsLoading()
 	{
 		this.isLoading = true;
@@ -597,13 +614,13 @@ public class Game : KMonoBehaviour
 		int num = 0;
 		int num2 = 0;
 		Grid.CellToXY(mouseCell, out num, out num2);
-		string text = string.Concat(new object[]
+		string text = string.Concat(new string[]
 		{
 			mouseCell.ToString(),
 			" (",
-			num,
+			num.ToString(),
 			", ",
-			num2,
+			num2.ToString(),
 			")"
 		});
 		DebugText.Instance.Draw(text, Grid.CellToPosCCC(mouseCell, Grid.SceneLayer.Move), Color.white);
@@ -636,13 +653,6 @@ public class Game : KMonoBehaviour
 		this.circuitManager.RenderEveryTick(deltaTime);
 		this.logicCircuitManager.RenderEveryTick(deltaTime);
 		this.solidConduitFlow.RenderEveryTick(deltaTime);
-		if (this.forceActiveArea)
-		{
-			this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
-			this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
-		}
-		this.simActiveRegionMin = new Vector2I(0, 0);
-		this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
 		Pathfinding.Instance.RenderEveryTick();
 		Singleton<CellChangeMonitor>.Instance.RenderEveryTick();
 		this.SimEveryTick(deltaTime);
@@ -677,7 +687,16 @@ public class Game : KMonoBehaviour
 
 	private unsafe void UnsafeSim200ms(float dt)
 	{
-		SimMessages.NewGameFrame(dt, this.simActiveRegionMin, this.simActiveRegionMax);
+		this.simActiveRegions.Clear();
+		foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+		{
+			if (worldContainer.IsDiscovered)
+			{
+				this.simActiveRegions.Add(new Pair<Vector2I, Vector2I>(worldContainer.WorldOffset, worldContainer.WorldOffset + worldContainer.WorldSize));
+			}
+		}
+		global::Debug.Assert(this.simActiveRegions.Count > 0, "Cannot send a frame to the sim with zero active regions");
+		SimMessages.NewGameFrame(dt, this.simActiveRegions);
 		Sim.GameDataUpdate* ptr = this.StepTheSim(dt);
 		if (ptr == null)
 		{
@@ -747,9 +766,13 @@ public class Game : KMonoBehaviour
 		this.lastDrawnOverlayMode = mode;
 	}
 
-	public void ForceOverlayUpdate()
+	public void ForceOverlayUpdate(bool clearLastMode = false)
 	{
 		this.previousOverlayMode = OverlayModes.None.ID;
+		if (clearLastMode)
+		{
+			this.lastDrawnOverlayMode = OverlayModes.None.ID;
+		}
 	}
 
 	private void LateUpdate()
@@ -815,6 +838,10 @@ public class Game : KMonoBehaviour
 		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
 		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
 		Shader.SetGlobalVector("_WsToCs", new Vector4(vector.x / (float)Grid.WidthInCells, vector.y / (float)Grid.HeightInCells, (vector2.x - vector.x) / (float)Grid.WidthInCells, (vector2.y - vector.y) / (float)Grid.HeightInCells));
+		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
+		Vector2I worldOffset = activeWorld.WorldOffset;
+		Vector2I worldSize = activeWorld.WorldSize;
+		Shader.SetGlobalVector("_WsToCcs", new Vector4(vector.x / (float)(worldSize.x + worldOffset.x), vector.y / (float)(worldSize.y + worldOffset.y), (vector2.x - vector.x) / (float)(worldSize.x + worldOffset.x), (vector2.y - vector.y) / (float)(worldSize.y + worldOffset.y)));
 		if (this.drawStatusItems)
 		{
 			this.statusItemRenderer.RenderEveryTick();
@@ -848,7 +875,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 469300U;
+		uint num = 471531U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -906,7 +933,7 @@ public class Game : KMonoBehaviour
 		App.Quit();
 	}
 
-	public void Reset(GameSpawnData gsd)
+	public void Reset(GameSpawnData gsd, Vector2I world_offset)
 	{
 		using (new KProfiler.Region("World.Reset", null))
 		{
@@ -916,7 +943,8 @@ public class Game : KMonoBehaviour
 				{
 					if (keyValuePair.Value)
 					{
-						Grid.PreventFogOfWarReveal[Grid.PosToCell(keyValuePair.Key)] = keyValuePair.Value;
+						Vector2I vector2I = new Vector2I(keyValuePair.Key.X + world_offset.X, keyValuePair.Key.Y + world_offset.Y);
+						Grid.PreventFogOfWarReveal[Grid.PosToCell(vector2I)] = keyValuePair.Value;
 					}
 				}
 			}
@@ -1053,11 +1081,9 @@ public class Game : KMonoBehaviour
 		Game.GameSaveData gameSaveData = new Game.GameSaveData();
 		gameSaveData.gasConduitFlow = this.gasConduitFlow;
 		gameSaveData.liquidConduitFlow = this.liquidConduitFlow;
-		gameSaveData.simActiveRegionMin = this.simActiveRegionMin;
-		gameSaveData.simActiveRegionMax = this.simActiveRegionMax;
 		gameSaveData.fallingWater = this.world.GetComponent<FallingWater>();
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
-		gameSaveData.worldDetail = SaveLoader.Instance.worldDetailSave;
+		gameSaveData.worldDetail = SaveLoader.Instance.clusterDetailSave;
 		gameSaveData.debugWasUsed = this.debugWasUsed;
 		gameSaveData.customGameSettings = CustomGameSettings.Instance;
 		gameSaveData.autoPrioritizeRoles = this.autoPrioritizeRoles;
@@ -1076,8 +1102,6 @@ public class Game : KMonoBehaviour
 		Game.GameSaveData gameSaveData = new Game.GameSaveData();
 		gameSaveData.gasConduitFlow = this.gasConduitFlow;
 		gameSaveData.liquidConduitFlow = this.liquidConduitFlow;
-		gameSaveData.simActiveRegionMin = new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1);
-		gameSaveData.simActiveRegionMax = new Vector2I(0, 0);
 		gameSaveData.fallingWater = this.world.GetComponent<FallingWater>();
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = new WorldDetailSave();
@@ -1085,8 +1109,6 @@ public class Game : KMonoBehaviour
 		deserializer.Deserialize(gameSaveData);
 		this.gasConduitFlow = gameSaveData.gasConduitFlow;
 		this.liquidConduitFlow = gameSaveData.liquidConduitFlow;
-		this.simActiveRegionMin = gameSaveData.simActiveRegionMin;
-		this.simActiveRegionMax = gameSaveData.simActiveRegionMax;
 		this.debugWasUsed = gameSaveData.debugWasUsed;
 		this.autoPrioritizeRoles = gameSaveData.autoPrioritizeRoles;
 		this.advancedPersonalPriorities = gameSaveData.advancedPersonalPriorities;
@@ -1222,10 +1244,7 @@ public class Game : KMonoBehaviour
 		{
 			MusicManager.instance.StopSong("Music_FrontEnd", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		}
-		if (MusicManager.instance.SongIsPlaying("Music_TitleTheme"))
-		{
-			MusicManager.instance.StopSong("Music_TitleTheme", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		}
+		MainMenu.Instance.StopMainMenuMusic();
 	}
 
 	public void StartBE()
@@ -1365,7 +1384,6 @@ public class Game : KMonoBehaviour
 		Infrared.DestroyInstance();
 		KPrefabIDTracker.DestroyInstance();
 		ManagementMenu.DestroyInstance();
-		MaterialNeeds.DestroyInstance();
 		Messenger.DestroyInstance();
 		LoopingSoundManager.DestroyInstance();
 		MeterScreen.DestroyInstance();
@@ -1383,7 +1401,6 @@ public class Game : KMonoBehaviour
 		PropertyTextures.DestroyInstance();
 		RationTracker.DestroyInstance();
 		ReportManager.DestroyInstance();
-		VignetteManager.Instance.DestroyInstance();
 		Research.DestroyInstance();
 		RootMenu.DestroyInstance();
 		SaveLoader.DestroyInstance();
@@ -1404,6 +1421,8 @@ public class Game : KMonoBehaviour
 		ChorePreconditions.DestroyInstance();
 		SandboxBrushTool.DestroyInstance();
 		SandboxHeatTool.DestroyInstance();
+		SandboxRadsTool.DestroyInstance();
+		SandboxCritterTool.DestroyInstance();
 		SandboxClearFloorTool.DestroyInstance();
 		GameScreenManager.DestroyInstance();
 		GameScheduler.DestroyInstance();
@@ -1423,6 +1442,9 @@ public class Game : KMonoBehaviour
 		MoveToLocationTool.DestroyInstance();
 		PlaceTool.DestroyInstance();
 		SpacecraftManager.DestroyInstance();
+		GameplayEventManager.DestroyInstance();
+		BuildingInventory.DestroyInstance();
+		PlantSubSpeciesCatalog.DestroyInstance();
 		SandboxDestroyerTool.DestroyInstance();
 		SandboxFOWTool.DestroyInstance();
 		SandboxFloodTool.DestroyInstance();
@@ -1453,7 +1475,7 @@ public class Game : KMonoBehaviour
 		DeserializeWarnings.DestroyInstance();
 		UISounds.DestroyInstance();
 		RenderTextureDestroyer.DestroyInstance();
-		WorldInspector.DestroyStatics();
+		HoverTextHelper.DestroyStatics();
 		LoadScreen.DestroyInstance();
 		LoadingOverlay.DestroyInstance();
 		SimAndRenderScheduler.DestroyInstance();
@@ -1464,6 +1486,8 @@ public class Game : KMonoBehaviour
 		MaterialSelectionPanel.ClearStatics();
 		StarmapScreen.DestroyInstance();
 		SpacecraftManager.DestroyInstance();
+		ClusterManager.DestroyInstance();
+		ClusterGrid.DestroyInstance();
 		Game.Instance = null;
 		Grid.OnReveal = null;
 		this.VisualTunerElement = null;
@@ -1474,6 +1498,8 @@ public class Game : KMonoBehaviour
 	}
 
 	private static readonly string NextUniqueIDKey = "NextUniqueID";
+
+	public static string clusterId = null;
 
 	private PlayerController playerController;
 
@@ -1541,6 +1567,8 @@ public class Game : KMonoBehaviour
 	public Game.ComplexCallbackHandleVector<Sim.MassEmittedCallback> massEmitCallbackManager = new Game.ComplexCallbackHandleVector<Sim.MassEmittedCallback>(64);
 
 	public Game.ComplexCallbackHandleVector<Sim.DiseaseConsumptionCallback> diseaseConsumptionCallbackManager = new Game.ComplexCallbackHandleVector<Sim.DiseaseConsumptionCallback>(64);
+
+	public Game.ComplexCallbackHandleVector<Sim.ConsumedRadiationCallback> radiationConsumedCallbackManager = new Game.ComplexCallbackHandleVector<Sim.ConsumedRadiationCallback>(256);
 
 	[NonSerialized]
 	public Player LocalPlayer;
@@ -1669,24 +1697,18 @@ public class Game : KMonoBehaviour
 		component.MarkStatusItemRendererDirty(data);
 	});
 
+	private static readonly EventSystem.IntraObjectHandler<Game> ActiveWorldChangedDelegate = new EventSystem.IntraObjectHandler<Game>(delegate(Game component, object data)
+	{
+		component.ForceOverlayUpdate(true);
+	});
+
 	private ushort[] activeFX;
-
-	private Vector2I simActiveRegionMin;
-
-	private Vector2I simActiveRegionMax;
 
 	public bool debugWasUsed;
 
-	[SerializeField]
-	private bool forceActiveArea;
-
-	[SerializeField]
-	private Vector2 minForcedActiveArea = new Vector2(0f, 0f);
-
-	[SerializeField]
-	private Vector2 maxForcedActiveArea = new Vector2(128f, 128f);
-
 	private bool isLoading;
+
+	private List<Pair<Vector2I, Vector2I>> simActiveRegions = new List<Pair<Vector2I, Vector2I>>();
 
 	private HashedString previousOverlayMode = OverlayModes.None.ID;
 
@@ -1892,6 +1914,45 @@ public class Game : KMonoBehaviour
 		public Vector2 overlayMassScaleValues = new Vector2f(0.1f, 1f);
 	}
 
+	private class WorldRegion
+	{
+		public Vector2I regionMin
+		{
+			get
+			{
+				return this.min;
+			}
+		}
+
+		public Vector2I regionMax
+		{
+			get
+			{
+				return this.max;
+			}
+		}
+
+		public void UpdateGameActiveRegion(int x0, int y0, int x1, int y1)
+		{
+			this.min.x = Mathf.Max(0, x0);
+			this.min.y = Mathf.Max(0, y0);
+			this.max.x = Mathf.Max(x1, this.regionMax.x);
+			this.max.y = Mathf.Max(y1, this.regionMax.y);
+		}
+
+		public void UpdateGameActiveRegion(Vector2I simActiveRegionMin, Vector2I simActiveRegionMax)
+		{
+			this.min = simActiveRegionMin;
+			this.max = simActiveRegionMax;
+		}
+
+		private Vector2I min;
+
+		private Vector2I max;
+
+		public bool isActive;
+	}
+
 	private enum SpawnRotationConfig
 	{
 		Normal,
@@ -1952,10 +2013,6 @@ public class Game : KMonoBehaviour
 		public ConduitFlow gasConduitFlow;
 
 		public ConduitFlow liquidConduitFlow;
-
-		public Vector2I simActiveRegionMin;
-
-		public Vector2I simActiveRegionMax;
 
 		public FallingWater fallingWater;
 

@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class LiquidFuelTankConfig : IBuildingConfig
 {
+	public override string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_VANILLA_ONLY;
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "LiquidFuelTank";
@@ -16,11 +21,11 @@ public class LiquidFuelTankConfig : IBuildingConfig
 		float[] fuel_TANK_DRY_MASS = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_DRY_MASS;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, fuel_TANK_DRY_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -30,6 +35,7 @@ public class LiquidFuelTankConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.CanMove = true;
+		buildingDef.Cancellable = false;
 		return buildingDef;
 	}
 
@@ -46,31 +52,34 @@ public class LiquidFuelTankConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		FuelTank fuelTank = go.AddOrGet<FuelTank>();
-		fuelTank.capacityKg = fuelTank.minimumLaunchMass;
-		fuelTank.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		Storage storage = go.AddOrGet<Storage>();
+		storage.capacityKg = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
+		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
 		{
 			Storage.StoredItemModifier.Hide,
 			Storage.StoredItemModifier.Seal,
 			Storage.StoredItemModifier.Insulate
 		});
+		FuelTank fuelTank = go.AddOrGet<FuelTank>();
+		fuelTank.consumeFuelOnLand = !DlcManager.FeatureClusterSpaceEnabled();
+		fuelTank.storage = storage;
+		fuelTank.physicalFuelCapacity = storage.capacityKg;
 		go.AddOrGet<CopyBuildingSettings>();
 		go.AddOrGet<DropToUserCapacity>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
-		manualDeliveryKG.SetStorage(fuelTank);
-		manualDeliveryKG.refillMass = fuelTank.capacityKg;
-		manualDeliveryKG.capacity = fuelTank.capacityKg;
+		manualDeliveryKG.SetStorage(storage);
+		manualDeliveryKG.refillMass = storage.capacityKg;
+		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
 		conduitConsumer.capacityTag = GameTags.Liquid;
-		conduitConsumer.capacityKG = fuelTank.capacityKg;
+		conduitConsumer.capacityKG = storage.capacityKg;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
-		go.AddOrGet<RocketModule>().SetBGKAnim(Assets.GetAnim("rocket_liquid_fuel_tank_bg_kanim"));
-		EntityTemplates.ExtendBuildingToRocketModule(go);
+		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_liquid_fuel_tank_bg_kanim", false);
 	}
 
 	public const string ID = "LiquidFuelTank";

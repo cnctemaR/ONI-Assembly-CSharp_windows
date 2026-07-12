@@ -4,7 +4,6 @@ using Klei.AI;
 using STRINGS;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class DebugPaintElementScreen : KScreen
@@ -25,6 +24,17 @@ public class DebugPaintElementScreen : KScreen
 		this.inputFields.Add(this.temperatureInput);
 		this.inputFields.Add(this.diseaseCountInput);
 		this.inputFields.Add(this.filterInput);
+		foreach (TMP_InputField tmp_InputField in this.inputFields)
+		{
+			tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
+			{
+				base.isEditing = true;
+			}));
+			tmp_InputField.onEndEdit.AddListener(delegate(string value)
+			{
+				base.isEditing = false;
+			});
+		}
 		base.gameObject.SetActive(false);
 		this.activateOnSpawn = true;
 		base.ConsumeMouseScroll = true;
@@ -45,15 +55,11 @@ public class DebugPaintElementScreen : KScreen
 		this.diseaseButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.DISEASE;
 		this.paintButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.PAINT;
 		this.fillButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.FILL;
+		this.spawnButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.SPAWN_ALL;
 		this.sampleButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.SAMPLE;
 		this.storeButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.STORE;
 		this.affectBuildings.transform.parent.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.BUILDINGS;
 		this.affectCells.transform.parent.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.PAINT_ELEMENTS_SCREEN.CELLS;
-	}
-
-	public override float GetSortKey()
-	{
-		return 100000f;
 	}
 
 	protected override void OnSpawn()
@@ -76,7 +82,10 @@ public class DebugPaintElementScreen : KScreen
 		this.fillButton.onClick += this.OnClickFill;
 		this.sampleButton.onClick += this.OnClickSample;
 		this.storeButton.onClick += this.OnClickStore;
-		this.spawnButton.enabled = false;
+		if (SaveGame.Instance.worldGenSpawner.SpawnsRemain())
+		{
+			this.spawnButton.onClick += this.OnClickSpawn;
+		}
 		KPopupMenu kpopupMenu2 = this.elementPopup;
 		kpopupMenu2.OnSelect = (Action<string, int>)Delegate.Combine(kpopupMenu2.OnSelect, new Action<string, int>(this.OnSelectElement));
 		this.elementButton.onClick += this.elementPopup.OnClick;
@@ -160,8 +169,12 @@ public class DebugPaintElementScreen : KScreen
 
 	private void OnClickSpawn()
 	{
+		foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+		{
+			worldContainer.SetDiscovered(true);
+		}
 		SaveGame.Instance.worldGenSpawner.SpawnEverything();
-		this.spawnButton.enabled = false;
+		this.spawnButton.GetComponent<KButton>().isInteractable = false;
 	}
 
 	private void OnClickPaint()
@@ -295,59 +308,6 @@ public class DebugPaintElementScreen : KScreen
 	{
 		this.filter = (string.IsNullOrEmpty(this.filterInput.text) ? null : this.filterInput.text);
 		this.FilterElements(this.filter);
-	}
-
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		if (this.CheckBlockedInput())
-		{
-			if (!e.Consumed)
-			{
-				e.Consumed = true;
-				return;
-			}
-		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
-	}
-
-	public override void OnKeyUp(KButtonEvent e)
-	{
-		if (this.CheckBlockedInput())
-		{
-			if (!e.Consumed)
-			{
-				e.Consumed = true;
-				return;
-			}
-		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
-	}
-
-	private bool CheckBlockedInput()
-	{
-		bool flag = false;
-		if (global::UnityEngine.EventSystems.EventSystem.current != null)
-		{
-			GameObject currentSelectedGameObject = global::UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
-			if (currentSelectedGameObject != null)
-			{
-				foreach (TMP_InputField tmp_InputField in this.inputFields)
-				{
-					if (currentSelectedGameObject == tmp_InputField.gameObject)
-					{
-						flag = true;
-						break;
-					}
-				}
-			}
-		}
-		return flag;
 	}
 
 	public void SampleCell(int cell)

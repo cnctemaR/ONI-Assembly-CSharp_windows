@@ -235,11 +235,11 @@ namespace UnityEngine.Timeline
 				{
 					return 0.0;
 				}
-				return Math.Min(Math.Max(this.m_EaseInDuration, 0.0), this.duration * 0.49);
+				return Math.Min(Math.Max(this.m_EaseInDuration, 0.0), this.duration);
 			}
 			set
 			{
-				this.m_EaseInDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseInDuration), this.duration * 0.49)) : 0.0);
+				this.m_EaseInDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseInDuration), this.duration)) : 0.0);
 			}
 		}
 
@@ -251,11 +251,11 @@ namespace UnityEngine.Timeline
 				{
 					return 0.0;
 				}
-				return Math.Min(Math.Max(this.m_EaseOutDuration, 0.0), this.duration * 0.49);
+				return Math.Min(Math.Max(this.m_EaseOutDuration, 0.0), this.duration);
 			}
 			set
 			{
-				this.m_EaseOutDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseOutDuration), this.duration * 0.49)) : 0.0);
+				this.m_EaseOutDuration = (this.clipCaps.HasAny(ClipCaps.Blending) ? Math.Max(0.0, Math.Min(TimelineClip.SanitizeTimeValue(value, this.m_EaseOutDuration), this.duration)) : 0.0);
 			}
 		}
 
@@ -732,6 +732,33 @@ namespace UnityEngine.Timeline
 		public override string ToString()
 		{
 			return UnityString.Format("{0} ({1:F2}, {2:F2}):{3:F2} | {4}", new object[] { this.displayName, this.start, this.end, this.clipIn, this.parentTrack });
+		}
+
+		public void ConformEaseValues()
+		{
+			if (this.m_EaseInDuration + this.m_EaseOutDuration > this.duration)
+			{
+				double num = TimelineClip.CalculateEasingRatio(this.m_EaseInDuration, this.m_EaseOutDuration);
+				this.m_EaseInDuration = this.duration * num;
+				this.m_EaseOutDuration = this.duration * (1.0 - num);
+			}
+		}
+
+		private static double CalculateEasingRatio(double easeIn, double easeOut)
+		{
+			if (Math.Abs(easeIn - easeOut) < TimeUtility.kTimeEpsilon)
+			{
+				return 0.5;
+			}
+			if (easeIn == 0.0)
+			{
+				return 0.0;
+			}
+			if (easeOut == 0.0)
+			{
+				return 1.0;
+			}
+			return easeIn / (easeIn + easeOut);
 		}
 
 		private void UpdateDirty(double oldValue, double newValue)

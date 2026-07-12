@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
-	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
 	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
+	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
 	internal class HostTopologyInternal : IDisposable
 	{
 		public HostTopologyInternal(HostTopology topology)

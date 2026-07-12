@@ -18,7 +18,7 @@ public class LoadProfiler : ProfilerBase
 				LoadProfiler.instance = new LoadProfiler("load_stats_");
 				if (!Stopwatch.IsHighResolution)
 				{
-					global::UnityEngine.Debug.LogWarning("Low resolution timer! [" + Stopwatch.Frequency + "] ticks per second");
+					global::UnityEngine.Debug.LogWarning("Low resolution timer! [" + Stopwatch.Frequency.ToString() + "] ticks per second");
 				}
 			}
 			return LoadProfiler.instance;

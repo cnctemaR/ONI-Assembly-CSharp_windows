@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
+	[VisibleToOtherModules]
 	internal class NativeMethodAttribute : Attribute, IBindingsNameProviderAttribute, IBindingsAttribute, IBindingsIsThreadSafeProviderAttribute, IBindingsIsFreeFunctionProviderAttribute, IBindingsThrowsProviderAttribute
 	{
 		public string Name { get; set; }

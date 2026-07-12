@@ -25,11 +25,16 @@ public class StressEmoteChore : Chore<StressEmoteChore.StatesInstance>
 
 	public override string ToString()
 	{
+		HashedString hashedString;
 		if (base.smi.emoteKAnim.IsValid)
 		{
-			return "StressEmoteChore<" + base.smi.emoteKAnim + ">";
+			string text = "StressEmoteChore<";
+			hashedString = base.smi.emoteKAnim;
+			return text + hashedString.ToString() + ">";
 		}
-		return "StressEmoteChore<" + base.smi.emoteAnims[0] + ">";
+		string text2 = "StressEmoteChore<";
+		hashedString = base.smi.emoteAnims[0];
+		return text2 + hashedString.ToString() + ">";
 	}
 
 	private Func<StatusItem> getStatusItem;

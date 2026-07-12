@@ -283,7 +283,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 						SimMessages.AddRemoveSubstance(num17, outputElement.elementHash, CellEventLogger.Instance.OxygenModifierSimUpdate, num15, num16, diseaseInfo2.idx, diseaseInfo2.count, true, -1);
 					}
 				}
-				if (outputElement.elementHash == SimHashes.Oxygen)
+				if (outputElement.elementHash == SimHashes.Oxygen || outputElement.elementHash == SimHashes.ContaminatedOxygen)
 				{
 					ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num15, base.gameObject.GetProperName(), null);
 				}
@@ -299,7 +299,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		this.machinerySpeedAttribute = attributes.Add(Db.Get().Attributes.MachinerySpeed);
 		if (ElementConverter.ElementConverterInput == null)
 		{
-			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 129022).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 129022, null).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
 				str = str.Replace("{ElementTypes}", consumedElement.Name);
@@ -309,7 +309,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		}
 		if (ElementConverter.ElementConverterOutput == null)
 		{
-			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 129022).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 129022, null).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.OutputElement outputElement = (ElementConverter.OutputElement)data;
 				str = str.Replace("{ElementTypes}", outputElement.Name);

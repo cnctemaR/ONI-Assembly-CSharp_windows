@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
@@ -10,14 +11,14 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
-	[NativeHeader("Runtime/Camera/Camera.h")]
-	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
-	[NativeHeader("Runtime/Camera/RenderManager.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
+	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Camera/RenderManager.h")]
 	public sealed class Camera : Behaviour
 	{
 		[NativeProperty("Near")]
@@ -217,13 +218,20 @@ namespace UnityEngine
 			set;
 		}
 
+		[NativeConditional("UNITY_EDITOR")]
+		internal extern ulong sceneCullingMask
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[FreeFunction("CameraScripting::GetLayerCullDistances", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern float[] GetLayerCullDistances();
 
 		[FreeFunction("CameraScripting::SetLayerCullDistances", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLayerCullDistances([NotNull] float[] d);
+		private extern void SetLayerCullDistances([NotNull("ArgumentNullException")] float[] d);
 
 		public float[] layerCullDistances
 		{
@@ -743,7 +751,7 @@ namespace UnityEngine
 
 		public static extern Camera current
 		{
-			[FreeFunction("GetCurrentCameraPtr")]
+			[FreeFunction("GetCurrentCameraPPtr")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -856,7 +864,7 @@ namespace UnityEngine
 
 		[FreeFunction("CameraScripting::GetAllCameras")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetAllCamerasImpl([NotNull] [Out] Camera[] cam);
+		private static extern int GetAllCamerasImpl([NotNull("ArgumentNullException")] [Out] Camera[] cam);
 
 		public static int allCamerasCount
 		{
@@ -936,6 +944,28 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RenderDontRestore();
 
+		public void SubmitRenderRequests(List<Camera.RenderRequest> renderRequests)
+		{
+			bool flag = renderRequests == null || renderRequests.Count == 0;
+			if (flag)
+			{
+				throw new ArgumentException("SubmitRenderRequests has been invoked with invalid renderRequests");
+			}
+			bool flag2 = GraphicsSettings.currentRenderPipeline == null;
+			if (flag2)
+			{
+				Debug.LogWarning("Trying to invoke 'SubmitRenderRequests' when no SRP is set. A scriptable render pipeline is needed for this function call");
+			}
+			else
+			{
+				this.SubmitRenderRequestsInternal(renderRequests);
+			}
+		}
+
+		[FreeFunction("CameraScripting::SubmitRenderRequests", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SubmitRenderRequestsInternal(object requests);
+
 		[FreeFunction("CameraScripting::SetupCurrent")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetupCurrent(Camera cur);
@@ -958,15 +988,15 @@ namespace UnityEngine
 
 		[NativeName("AddCommandBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddCommandBufferImpl(CameraEvent evt, [NotNull] CommandBuffer buffer);
+		private extern void AddCommandBufferImpl(CameraEvent evt, [NotNull("ArgumentNullException")] CommandBuffer buffer);
 
 		[NativeName("AddCommandBufferAsync")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddCommandBufferAsyncImpl(CameraEvent evt, [NotNull] CommandBuffer buffer, ComputeQueueType queueType);
+		private extern void AddCommandBufferAsyncImpl(CameraEvent evt, [NotNull("ArgumentNullException")] CommandBuffer buffer, ComputeQueueType queueType);
 
 		[NativeName("RemoveCommandBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RemoveCommandBufferImpl(CameraEvent evt, [NotNull] CommandBuffer buffer);
+		private extern void RemoveCommandBufferImpl(CameraEvent evt, [NotNull("ArgumentNullException")] CommandBuffer buffer);
 
 		public void AddCommandBuffer(CameraEvent evt, CommandBuffer buffer)
 		{
@@ -1065,8 +1095,8 @@ namespace UnityEngine
 			return Camera.GetCullingParameters_Internal(this, stereoAware, out cullingParameters, sizeof(ScriptableCullingParameters));
 		}
 
-		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
 		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
+		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetCullingParameters_Internal(Camera camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize);
 
@@ -1238,9 +1268,9 @@ namespace UnityEngine
 
 		public struct GateFitParameters
 		{
-			public Camera.GateFitMode mode { get; set; }
+			public Camera.GateFitMode mode { readonly get; set; }
 
-			public float aspect { get; set; }
+			public float aspect { readonly get; set; }
 
 			public GateFitParameters(Camera.GateFitMode mode, float aspect)
 			{
@@ -1260,6 +1290,93 @@ namespace UnityEngine
 			Left,
 			Right,
 			Mono
+		}
+
+		public enum RenderRequestMode
+		{
+			None,
+			ObjectId,
+			Depth,
+			VertexNormal,
+			WorldPosition,
+			EntityId,
+			BaseColor,
+			SpecularColor,
+			Metallic,
+			Emission,
+			Normal,
+			Smoothness,
+			Occlusion,
+			DiffuseColor
+		}
+
+		public enum RenderRequestOutputSpace
+		{
+			ScreenSpace = -1,
+			UV0,
+			UV1,
+			UV2,
+			UV3,
+			UV4,
+			UV5,
+			UV6,
+			UV7,
+			UV8
+		}
+
+		public struct RenderRequest
+		{
+			public RenderRequest(Camera.RenderRequestMode mode, RenderTexture rt)
+			{
+				this.m_CameraRenderMode = mode;
+				this.m_ResultRT = rt;
+				this.m_OutputSpace = Camera.RenderRequestOutputSpace.ScreenSpace;
+			}
+
+			public RenderRequest(Camera.RenderRequestMode mode, Camera.RenderRequestOutputSpace space, RenderTexture rt)
+			{
+				this.m_CameraRenderMode = mode;
+				this.m_ResultRT = rt;
+				this.m_OutputSpace = space;
+			}
+
+			public bool isValid
+			{
+				get
+				{
+					return this.m_CameraRenderMode != Camera.RenderRequestMode.None && this.m_ResultRT != null;
+				}
+			}
+
+			public Camera.RenderRequestMode mode
+			{
+				get
+				{
+					return this.m_CameraRenderMode;
+				}
+			}
+
+			public RenderTexture result
+			{
+				get
+				{
+					return this.m_ResultRT;
+				}
+			}
+
+			public Camera.RenderRequestOutputSpace outputSpace
+			{
+				get
+				{
+					return this.m_OutputSpace;
+				}
+			}
+
+			private readonly Camera.RenderRequestMode m_CameraRenderMode;
+
+			private readonly RenderTexture m_ResultRT;
+
+			private readonly Camera.RenderRequestOutputSpace m_OutputSpace;
 		}
 
 		public delegate void CameraCallback(Camera cam);

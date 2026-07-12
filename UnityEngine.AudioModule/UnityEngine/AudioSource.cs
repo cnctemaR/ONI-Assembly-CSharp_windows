@@ -7,41 +7,41 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[StaticAccessor("AudioSourceBindings", StaticAccessorType.DoubleColon)]
+	[RequireComponent(typeof(Transform))]
 	public sealed class AudioSource : AudioBehaviour
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float GetPitch([NotNull] AudioSource source);
+		private static extern float GetPitch([NotNull("ArgumentNullException")] AudioSource source);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetPitch([NotNull] AudioSource source, float pitch);
+		private static extern void SetPitch([NotNull("ArgumentNullException")] AudioSource source, float pitch);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PlayHelper([NotNull] AudioSource source, ulong delay);
+		private static extern void PlayHelper([NotNull("ArgumentNullException")] AudioSource source, ulong delay);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Play(double delay);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PlayOneShotHelper([NotNull] AudioSource source, AudioClip clip, float volumeScale);
+		private static extern void PlayOneShotHelper([NotNull("ArgumentNullException")] AudioSource source, [NotNull("NullExceptionObject")] AudioClip clip, float volumeScale);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Stop(bool stopOneShots);
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetCustomCurveHelper([NotNull] AudioSource source, AudioSourceCurveType type, AnimationCurve curve);
+		private static extern void SetCustomCurveHelper([NotNull("ArgumentNullException")] AudioSource source, AudioSourceCurveType type, AnimationCurve curve);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AnimationCurve GetCustomCurveHelper([NotNull] AudioSource source, AudioSourceCurveType type);
+		private static extern AnimationCurve GetCustomCurveHelper([NotNull("ArgumentNullException")] AudioSource source, AudioSourceCurveType type);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetOutputDataHelper([NotNull] AudioSource source, [Out] float[] samples, int channel);
+		private static extern void GetOutputDataHelper([NotNull("ArgumentNullException")] AudioSource source, [Out] float[] samples, int channel);
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetSpectrumDataHelper([NotNull] AudioSource source, [Out] float[] samples, int channel, FFTWindow window);
+		private static extern void GetSpectrumDataHelper([NotNull("ArgumentNullException")] AudioSource source, [Out] float[] samples, int channel, FFTWindow window);
 
 		public extern float volume
 		{

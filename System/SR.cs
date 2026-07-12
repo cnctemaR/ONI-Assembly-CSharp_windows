@@ -2978,6 +2978,8 @@ internal static class SR
 
 	public const string net_log_set_socketoption_reuseport = "net_log_set_socketoption_reuseport";
 
+	public const string net_reqaborted = "The request was aborted: The request was canceled.";
+
 	public const string BlockingCollection_Add_ConcurrentCompleteAdd = "CompleteAdding may not be used concurrently with additions to the collection.";
 
 	public const string BlockingCollection_Add_Failed = "The underlying collection didn't accept the item.";

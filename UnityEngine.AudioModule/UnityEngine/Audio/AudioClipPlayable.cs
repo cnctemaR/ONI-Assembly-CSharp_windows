@@ -8,10 +8,10 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Audio
 {
 	[StaticAccessor("AudioClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[RequiredByNativeCode]
 	public struct AudioClipPlayable : IPlayable, IEquatable<AudioClipPlayable>
 	{
 		public static AudioClipPlayable Create(PlayableGraph graph, AudioClip clip, bool looping)
@@ -106,7 +106,7 @@ namespace UnityEngine.Audio
 			bool flag = value < 0f || value > 1f;
 			if (flag)
 			{
-				throw new ArgumentException("Trying to set AudioClipPlayable volume outside of range (0.0 - 1.0): " + value);
+				throw new ArgumentException("Trying to set AudioClipPlayable volume outside of range (0.0 - 1.0): " + value.ToString());
 			}
 			AudioClipPlayable.SetVolumeInternal(ref this.m_Handle, value);
 		}
@@ -121,7 +121,7 @@ namespace UnityEngine.Audio
 			bool flag = value < -1f || value > 1f;
 			if (flag)
 			{
-				throw new ArgumentException("Trying to set AudioClipPlayable stereo pan outside of range (-1.0 - 1.0): " + value);
+				throw new ArgumentException("Trying to set AudioClipPlayable stereo pan outside of range (-1.0 - 1.0): " + value.ToString());
 			}
 			AudioClipPlayable.SetStereoPanInternal(ref this.m_Handle, value);
 		}
@@ -136,13 +136,13 @@ namespace UnityEngine.Audio
 			bool flag = value < 0f || value > 1f;
 			if (flag)
 			{
-				throw new ArgumentException("Trying to set AudioClipPlayable spatial blend outside of range (0.0 - 1.0): " + value);
+				throw new ArgumentException("Trying to set AudioClipPlayable spatial blend outside of range (0.0 - 1.0): " + value.ToString());
 			}
 			AudioClipPlayable.SetSpatialBlendInternal(ref this.m_Handle, value);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("IsPlaying() has been deprecated. Use IsChannelPlaying() instead (UnityUpgradable) -> IsChannelPlaying()", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool IsPlaying()
 		{
 			return this.IsChannelPlaying();
@@ -174,7 +174,7 @@ namespace UnityEngine.Audio
 			bool flag = this.m_Handle.GetPlayState() == PlayState.Playing && (value < 0.05 || (pauseDelayInternal != 0.0 && pauseDelayInternal < 0.05));
 			if (flag)
 			{
-				throw new ArgumentException("AudioClipPlayable.pauseDelay: Setting new delay when existing delay is too small or 0.0 (" + pauseDelayInternal + "), audio system will not be able to change in time");
+				throw new ArgumentException("AudioClipPlayable.pauseDelay: Setting new delay when existing delay is too small or 0.0 (" + pauseDelayInternal.ToString() + "), audio system will not be able to change in time");
 			}
 			AudioClipPlayable.SetPauseDelayInternal(ref this.m_Handle, value);
 		}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
@@ -18,54 +19,64 @@ public class UprootedMonitor : KMonoBehaviour
 		base.OnSpawn();
 		base.Subscribe<UprootedMonitor>(-216549700, UprootedMonitor.OnUprootedDelegate);
 		this.position = Grid.PosToCell(base.gameObject);
-		this.ground = Grid.OffsetCell(this.position, this.monitorCell);
-		if (Grid.IsValidCell(this.position) && Grid.IsValidCell(this.ground))
+		foreach (CellOffset cellOffset in this.monitorCells)
 		{
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, this.ground, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGroundChanged));
+			int num = Grid.OffsetCell(this.position, cellOffset);
+			if (Grid.IsValidCell(this.position) && Grid.IsValidCell(num))
+			{
+				this.partitionerEntries.Add(GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGroundChanged)));
+			}
+			this.OnGroundChanged(null);
 		}
-		this.OnGroundChanged(null);
 	}
 
 	protected override void OnCleanUp()
 	{
-		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		foreach (HandleVector<int>.Handle handle in this.partitionerEntries)
+		{
+			GameScenePartitioner.Instance.Free(ref handle);
+		}
 		base.OnCleanUp();
 	}
 
 	public bool CheckTileGrowable()
 	{
-		return !this.canBeUprooted || (!this.uprooted && this.IsCellSafe(this.position));
+		return !this.canBeUprooted || (!this.uprooted && this.IsSuitableFoundation(this.position));
 	}
 
-	public bool IsCellSafe(int cell)
+	public bool IsSuitableFoundation(int cell)
 	{
-		if (!Grid.IsCellOffsetValid(cell, this.monitorCell))
+		bool flag = true;
+		foreach (CellOffset cellOffset in this.monitorCells)
 		{
-			return false;
+			if (!Grid.IsCellOffsetValid(cell, cellOffset))
+			{
+				return false;
+			}
+			int num = Grid.OffsetCell(cell, cellOffset);
+			flag = Grid.Solid[num];
+			if (!flag)
+			{
+				break;
+			}
 		}
-		int num = Grid.OffsetCell(cell, this.monitorCell);
-		return Grid.Solid[num];
+		return flag;
 	}
 
 	public void OnGroundChanged(object callbackData)
 	{
 		if (!this.CheckTileGrowable())
 		{
-			base.GetComponent<KPrefabID>().AddTag(GameTags.Uprooted, false);
 			this.uprooted = true;
+		}
+		if (this.uprooted)
+		{
+			base.GetComponent<KPrefabID>().AddTag(GameTags.Uprooted, false);
 			base.Trigger(-216549700, null);
 		}
 	}
 
-	public static bool IsObjectUprooted(GameObject plant)
-	{
-		UprootedMonitor component = plant.GetComponent<UprootedMonitor>();
-		return !(component == null) && component.IsUprooted;
-	}
-
 	private int position;
-
-	private int ground;
 
 	[Serialize]
 	public bool canBeUprooted = true;
@@ -73,9 +84,12 @@ public class UprootedMonitor : KMonoBehaviour
 	[Serialize]
 	private bool uprooted;
 
-	public CellOffset monitorCell = new CellOffset(0, -1);
+	public CellOffset[] monitorCells = new CellOffset[]
+	{
+		new CellOffset(0, -1)
+	};
 
-	private HandleVector<int>.Handle partitionerEntry;
+	private List<HandleVector<int>.Handle> partitionerEntries = new List<HandleVector<int>.Handle>();
 
 	private static readonly EventSystem.IntraObjectHandler<UprootedMonitor> OnUprootedDelegate = new EventSystem.IntraObjectHandler<UprootedMonitor>(delegate(UprootedMonitor component, object data)
 	{

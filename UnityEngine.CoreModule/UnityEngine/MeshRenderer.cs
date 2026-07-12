@@ -21,6 +21,14 @@ namespace UnityEngine
 			set;
 		}
 
+		public extern Mesh enlightenVertexStream
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		public extern int subMeshStartIndex
 		{
 			[NativeName("GetSubMeshStartIndex")]

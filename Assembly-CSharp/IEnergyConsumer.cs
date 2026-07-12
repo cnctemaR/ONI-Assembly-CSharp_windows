@@ -1,6 +1,6 @@
 ﻿using System;
 
-public interface IEnergyConsumer
+public interface IEnergyConsumer : ICircuitConnected
 {
 	float WattsUsed { get; }
 
@@ -11,8 +11,6 @@ public interface IEnergyConsumer
 	void SetConnectionStatus(CircuitManager.ConnectionStatus status);
 
 	string Name { get; }
-
-	int PowerCell { get; }
 
 	bool IsConnected { get; }
 

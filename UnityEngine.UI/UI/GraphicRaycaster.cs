@@ -57,6 +57,18 @@ namespace UnityEngine.UI
 			}
 		}
 
+		public LayerMask blockingMask
+		{
+			get
+			{
+				return this.m_BlockingMask;
+			}
+			set
+			{
+				this.m_BlockingMask = value;
+			}
+		}
+
 		protected GraphicRaycaster()
 		{
 		}
@@ -80,8 +92,8 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
-			IList<Graphic> graphicsForCanvas = GraphicRegistry.GetGraphicsForCanvas(this.canvas);
-			if (graphicsForCanvas == null || graphicsForCanvas.Count == 0)
+			IList<Graphic> raycastableGraphicsForCanvas = GraphicRegistry.GetRaycastableGraphicsForCanvas(this.canvas);
+			if (raycastableGraphicsForCanvas == null || raycastableGraphicsForCanvas.Count == 0)
 			{
 				return;
 			}
@@ -159,7 +171,7 @@ namespace UnityEngine.UI
 				}
 			}
 			this.m_RaycastResults.Clear();
-			GraphicRaycaster.Raycast(this.canvas, eventCamera, vector, graphicsForCanvas, this.m_RaycastResults);
+			GraphicRaycaster.Raycast(this.canvas, eventCamera, vector, raycastableGraphicsForCanvas, this.m_RaycastResults);
 			int count = this.m_RaycastResults.Count;
 			for (int i = 0; i < count; i++)
 			{
@@ -222,15 +234,13 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				if (this.canvas.renderMode == RenderMode.ScreenSpaceOverlay || (this.canvas.renderMode == RenderMode.ScreenSpaceCamera && this.canvas.worldCamera == null))
+				Canvas canvas = this.canvas;
+				RenderMode renderMode = canvas.renderMode;
+				if (renderMode == RenderMode.ScreenSpaceOverlay || (renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null))
 				{
 					return null;
 				}
-				if (!(this.canvas.worldCamera != null))
-				{
-					return Camera.main;
-				}
-				return this.canvas.worldCamera;
+				return canvas.worldCamera ?? Camera.main;
 			}
 		}
 
@@ -240,7 +250,7 @@ namespace UnityEngine.UI
 			for (int i = 0; i < num; i++)
 			{
 				Graphic graphic = foundGraphics[i];
-				if (graphic.raycastTarget && !graphic.canvasRenderer.cull && graphic.depth != -1 && RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, pointerPosition, eventCamera) && (!(eventCamera != null) || eventCamera.WorldToScreenPoint(graphic.rectTransform.position).z <= eventCamera.farClipPlane) && graphic.Raycast(pointerPosition, eventCamera))
+				if (graphic.raycastTarget && !graphic.canvasRenderer.cull && graphic.depth != -1 && RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, pointerPosition, eventCamera, graphic.raycastPadding) && (!(eventCamera != null) || eventCamera.WorldToScreenPoint(graphic.rectTransform.position).z <= eventCamera.farClipPlane) && graphic.Raycast(pointerPosition, eventCamera))
 				{
 					GraphicRaycaster.s_SortedGraphics.Add(graphic);
 				}

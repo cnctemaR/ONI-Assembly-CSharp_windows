@@ -99,7 +99,18 @@ namespace UnityEngine.UI
 				{
 					if (!(list[j] is ILayoutSelfController))
 					{
-						action(list[j]);
+						Component component = list[j];
+						if (component && component is ScrollRect)
+						{
+							if (((ScrollRect)component).content != rect)
+							{
+								action(list[j]);
+							}
+						}
+						else
+						{
+							action(list[j]);
+						}
 					}
 				}
 				for (int k = 0; k < rect.childCount; k++)
@@ -221,7 +232,9 @@ namespace UnityEngine.UI
 
 		public override string ToString()
 		{
-			return "(Layout Rebuilder for) " + this.m_ToRebuild;
+			string text = "(Layout Rebuilder for) ";
+			RectTransform toRebuild = this.m_ToRebuild;
+			return text + ((toRebuild != null) ? toRebuild.ToString() : null);
 		}
 
 		private RectTransform m_ToRebuild;

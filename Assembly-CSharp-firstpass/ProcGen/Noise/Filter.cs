@@ -11,7 +11,7 @@ namespace ProcGen.Noise
 			return typeof(Filter);
 		}
 
-		public NoiseFilter filter { get; set; }
+		public Filter.NoiseFilter filter { get; set; }
 
 		public float frequency { get; set; }
 
@@ -25,15 +25,21 @@ namespace ProcGen.Noise
 
 		public float exponent { get; set; }
 
+		public float scale { get; set; }
+
+		public float bias { get; set; }
+
 		public Filter()
 		{
-			this.filter = NoiseFilter.RidgedMultiFractal;
-			this.frequency = 10f;
+			this.filter = Filter.NoiseFilter.RidgedMultiFractal;
+			this.frequency = 0.1f;
 			this.lacunarity = 3f;
-			this.octaves = 10;
+			this.octaves = 0;
 			this.offset = 1f;
-			this.gain = 0f;
-			this.exponent = 0f;
+			this.gain = 1f;
+			this.exponent = 0.9f;
+			this.scale = 1f;
+			this.bias = 0f;
 		}
 
 		public Filter(Filter src)
@@ -50,43 +56,34 @@ namespace ProcGen.Noise
 		public IModule3D CreateModule()
 		{
 			FilterModule filterModule = null;
-			NoiseFilter filter = this.filter;
-			switch (filter)
+			switch (this.filter)
 			{
-			case NoiseFilter.Pipe:
+			case Filter.NoiseFilter.Pipe:
 				filterModule = new Pipe();
 				break;
-			case NoiseFilter.SumFractal:
+			case Filter.NoiseFilter.SumFractal:
 				filterModule = new SumFractal();
 				break;
-			case NoiseFilter.SinFractal:
+			case Filter.NoiseFilter.SinFractal:
 				filterModule = new SinFractal();
 				break;
-			default:
-				switch (filter)
-				{
-				case NoiseFilter.Billow:
-					filterModule = new Billow();
-					break;
-				case NoiseFilter.MultiFractal:
-					filterModule = new MultiFractal();
-					break;
-				case NoiseFilter.HeterogeneousMultiFractal:
-					filterModule = new HeterogeneousMultiFractal();
-					break;
-				case NoiseFilter.HybridMultiFractal:
-					filterModule = new HybridMultiFractal();
-					break;
-				case NoiseFilter.RidgedMultiFractal:
-					filterModule = new RidgedMultiFractal();
-					break;
-				default:
-					if (filter == NoiseFilter.Voronoi)
-					{
-						filterModule = new Voronoi();
-					}
-					break;
-				}
+			case Filter.NoiseFilter.Billow:
+				filterModule = new Billow();
+				break;
+			case Filter.NoiseFilter.MultiFractal:
+				filterModule = new MultiFractal();
+				break;
+			case Filter.NoiseFilter.HeterogeneousMultiFractal:
+				filterModule = new HeterogeneousMultiFractal();
+				break;
+			case Filter.NoiseFilter.HybridMultiFractal:
+				filterModule = new HybridMultiFractal();
+				break;
+			case Filter.NoiseFilter.RidgedMultiFractal:
+				filterModule = new RidgedMultiFractal();
+				break;
+			case Filter.NoiseFilter.Voronoi:
+				filterModule = new Voronoi();
 				break;
 			}
 			if (filterModule != null)
@@ -96,6 +93,13 @@ namespace ProcGen.Noise
 				filterModule.OctaveCount = (float)this.octaves;
 				filterModule.Offset = this.offset;
 				filterModule.Gain = this.gain;
+				filterModule.SpectralExponent = this.exponent;
+				if (this.filter == Filter.NoiseFilter.Billow)
+				{
+					Billow billow = (Billow)filterModule;
+					billow.Scale = this.scale;
+					billow.Bias = this.bias;
+				}
 			}
 			return (IModule3D)filterModule;
 		}
@@ -103,6 +107,20 @@ namespace ProcGen.Noise
 		public void SetSouces(IModule3D target, IModule3D sourceModule)
 		{
 			(target as FilterModule).Primitive3D = sourceModule;
+		}
+
+		public enum NoiseFilter
+		{
+			_UNSET_,
+			Pipe,
+			SumFractal,
+			SinFractal,
+			Billow,
+			MultiFractal,
+			HeterogeneousMultiFractal,
+			HybridMultiFractal,
+			RidgedMultiFractal,
+			Voronoi
 		}
 	}
 }

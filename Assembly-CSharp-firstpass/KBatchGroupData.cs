@@ -281,14 +281,14 @@ public class KBatchGroupData
 		int num = 1 + ((animFrames.Count == 0) ? this.symbolFrameInstances.Count : animFrames.Count);
 		if (animFrames.Count == 0 && this.symbolFrameInstances.Count == 0 && animFrameElements.Count == 0)
 		{
-			global::Debug.LogError(string.Concat(new object[]
+			global::Debug.LogError(string.Concat(new string[]
 			{
 				"Eh, no data ",
-				animFrames.Count,
+				animFrames.Count.ToString(),
 				" ",
-				this.symbolFrameInstances.Count,
+				this.symbolFrameInstances.Count.ToString(),
 				" ",
-				animFrameElements.Count
+				animFrameElements.Count.ToString()
 			}));
 		}
 		data[start_index++] = (float)num;
@@ -326,14 +326,15 @@ public class KBatchGroupData
 				KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(frameElement.symbolIdx);
 				if (buildSymbol == null)
 				{
-					global::Debug.LogError(string.Concat(new object[]
-					{
-						"Missing symbol for Anim Frame Element: [",
-						HashCache.Get().Get(frameElement.symbol),
-						": ",
-						frameElement.symbol,
-						"]"
-					}));
+					string[] array = new string[5];
+					array[0] = "Missing symbol for Anim Frame Element: [";
+					array[1] = HashCache.Get().Get(frameElement.symbol);
+					array[2] = ": ";
+					int num2 = 3;
+					KAnimHashedString symbol = frameElement.symbol;
+					array[num2] = symbol.ToString();
+					array[4] = "]";
+					global::Debug.LogError(string.Concat(array));
 				}
 				int frameIdx = buildSymbol.GetFrameIdx(frameElement.frame);
 				this.Write(data, start_index, frameIdx, l, frameElement);

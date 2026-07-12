@@ -56,12 +56,13 @@ public class MechanicalSurfboardWorkable : Workable, IWorkerPrioritizable
 		int num2 = widthInCells / 2;
 		int num3 = global::UnityEngine.Random.Range(num, num2);
 		float num4 = component2.waterSpillRateKG * dt;
-		SimUtil.DiseaseInfo diseaseInfo;
 		float num5;
-		base.GetComponent<Storage>().ConsumeAndGetDisease(SimHashes.Water.CreateTag(), num4, out diseaseInfo, out num5);
-		int num6 = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(num3, 0));
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num6;
+		base.GetComponent<Storage>().ConsumeAndGetDisease(SimHashes.Water.CreateTag(), num4, out num5, out diseaseInfo, out num6);
+		int num7 = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(num3, 0));
 		int elementIndex = ElementLoader.GetElementIndex(SimHashes.Water);
-		FallingWater.instance.AddParticle(num6, (byte)elementIndex, num4, num5, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
+		FallingWater.instance.AddParticle(num7, (byte)elementIndex, num5, num6, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
 		return false;
 	}
 

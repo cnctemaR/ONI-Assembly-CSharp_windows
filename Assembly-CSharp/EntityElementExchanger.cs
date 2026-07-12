@@ -72,7 +72,7 @@ public class EntityElementExchanger : StateMachineComponent<EntityElementExchang
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.exchanging;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.exchanging.Enter(delegate(EntityElementExchanger.StatesInstance smi)
 			{
 				WiltCondition component = smi.master.gameObject.GetComponent<WiltCondition>();

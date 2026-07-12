@@ -98,7 +98,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 		this.AddMultiStringTooltip(message, PluginAssets.Instance.defaultTextStyleSetting);
 	}
 
-	public void AddMultiStringTooltip(string newString, ScriptableObject styleSetting)
+	public void AddMultiStringTooltip(string newString, TextStyleSetting styleSetting)
 	{
 		this.multiStringToolTips.Add(newString);
 		this.styleSettings.Add(styleSetting);
@@ -115,7 +115,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 		return this.multiStringToolTips[idx];
 	}
 
-	public ScriptableObject GetStyleSetting(int idx)
+	public TextStyleSetting GetStyleSetting(int idx)
 	{
 		return this.styleSettings[idx];
 	}
@@ -142,7 +142,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 		else if (this.OnComplexToolTip != null)
 		{
 			this.ClearMultiStringTooltip();
-			foreach (global::Tuple<string, ScriptableObject> tuple in this.OnComplexToolTip())
+			foreach (global::Tuple<string, TextStyleSetting> tuple in this.OnComplexToolTip())
 			{
 				this.AddMultiStringTooltip(tuple.first, tuple.second);
 			}
@@ -240,7 +240,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 
 	private List<string> multiStringToolTips = new List<string>();
 
-	private List<ScriptableObject> styleSettings = new List<ScriptableObject>();
+	private List<TextStyleSetting> styleSettings = new List<TextStyleSetting>();
 
 	public bool worldSpace;
 
@@ -268,7 +268,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 
 	private Func<string> _OnToolTip;
 
-	public Func<List<global::Tuple<string, ScriptableObject>>> OnComplexToolTip;
+	public ToolTip.ComplexTooltipDelegate OnComplexToolTip;
 
 	private static readonly global::EventSystem.IntraObjectHandler<ToolTip> OnClickDelegate = new global::EventSystem.IntraObjectHandler<ToolTip>(delegate(ToolTip component, object data)
 	{
@@ -291,4 +291,6 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 		MaxWidthWrapContent,
 		DynamicWidthNoWrap
 	}
+
+	public delegate List<global::Tuple<string, TextStyleSetting>> ComplexTooltipDelegate();
 }

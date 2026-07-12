@@ -8,6 +8,7 @@ public class Meter : KMonoBehaviour
 	{
 		Infront,
 		Behind,
-		UserSpecified
+		UserSpecified,
+		NoChange
 	}
 }

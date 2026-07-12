@@ -16,12 +16,12 @@ namespace Database
 
 		private StatusItem CreateStatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 2)
 		{
-			return base.Add(new StatusItem(id, prefix, icon, icon_type, notification_type, allow_multiples, render_overlay, showWorldIcon, status_overlays));
+			return base.Add(new StatusItem(id, prefix, icon, icon_type, notification_type, allow_multiples, render_overlay, showWorldIcon, status_overlays, null));
 		}
 
 		private StatusItem CreateStatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 2)
 		{
-			return base.Add(new StatusItem(id, name, tooltip, icon, icon_type, notification_type, allow_multiples, render_overlay, status_overlays));
+			return base.Add(new StatusItem(id, name, tooltip, icon, icon_type, notification_type, allow_multiples, render_overlay, status_overlays, true, null));
 		}
 
 		private void CreateStatusItems()
@@ -54,34 +54,34 @@ namespace Database
 				return str;
 			};
 			this.BedUnreachable = this.CreateStatusItem("BedUnreachable", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.BedUnreachable.AddNotification(null, null, null, 0f);
+			this.BedUnreachable.AddNotification(null, null, null);
 			this.DailyRationLimitReached = this.CreateStatusItem("DailyRationLimitReached", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.DailyRationLimitReached.AddNotification(null, null, null, 0f);
+			this.DailyRationLimitReached.AddNotification(null, null, null);
 			this.HoldingBreath = this.CreateStatusItem("HoldingBreath", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Hungry = this.CreateStatusItem("Hungry", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Unhappy = this.CreateStatusItem("Unhappy", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.Unhappy.AddNotification(null, null, null, 0f);
+			this.Unhappy.AddNotification(null, null, null);
 			this.NervousBreakdown = this.CreateStatusItem("NervousBreakdown", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
-			this.NervousBreakdown.AddNotification(null, null, null, 0f);
+			this.NervousBreakdown.AddNotification(null, null, null);
 			this.NoRationsAvailable = this.CreateStatusItem("NoRationsAvailable", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
 			this.PendingPacification = this.CreateStatusItem("PendingPacification", "DUPLICANTS", "status_item_pending_pacification", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.QuarantineAreaUnassigned = this.CreateStatusItem("QuarantineAreaUnassigned", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.QuarantineAreaUnassigned.AddNotification(null, null, null, 0f);
+			this.QuarantineAreaUnassigned.AddNotification(null, null, null);
 			this.QuarantineAreaUnreachable = this.CreateStatusItem("QuarantineAreaUnreachable", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.QuarantineAreaUnreachable.AddNotification(null, null, null, 0f);
+			this.QuarantineAreaUnreachable.AddNotification(null, null, null);
 			this.Quarantined = this.CreateStatusItem("Quarantined", "DUPLICANTS", "status_item_quarantined", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.RationsUnreachable = this.CreateStatusItem("RationsUnreachable", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.RationsUnreachable.AddNotification(null, null, null, 0f);
+			this.RationsUnreachable.AddNotification(null, null, null);
 			this.RationsNotPermitted = this.CreateStatusItem("RationsNotPermitted", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.RationsNotPermitted.AddNotification(null, null, null, 0f);
+			this.RationsNotPermitted.AddNotification(null, null, null);
 			this.Rotten = this.CreateStatusItem("Rotten", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Starving = this.CreateStatusItem("Starving", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
-			this.Starving.AddNotification(null, null, null, 0f);
+			this.Starving.AddNotification(null, null, null);
 			this.Suffocating = this.CreateStatusItem("Suffocating", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
-			this.Suffocating.AddNotification(null, null, null, 0f);
+			this.Suffocating.AddNotification(null, null, null);
 			this.Tired = this.CreateStatusItem("Tired", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Idle = this.CreateStatusItem("Idle", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.Idle.AddNotification(null, null, null, 0f);
+			this.Idle.AddNotification(null, null, null);
 			this.Pacified = this.CreateStatusItem("Pacified", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Dead = this.CreateStatusItem("Dead", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Dead.resolveStringCallback = delegate(string str, object data)
@@ -93,11 +93,11 @@ namespace Database
 			this.DroppingUnusedInventory = this.CreateStatusItem("DroppingUnusedInventory", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.MovingToSafeArea = this.CreateStatusItem("MovingToSafeArea", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.ToiletUnreachable = this.CreateStatusItem("ToiletUnreachable", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.ToiletUnreachable.AddNotification(null, null, null, 0f);
+			this.ToiletUnreachable.AddNotification(null, null, null);
 			this.NoUsableToilets = this.CreateStatusItem("NoUsableToilets", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.NoUsableToilets.AddNotification(null, null, null, 0f);
+			this.NoUsableToilets.AddNotification(null, null, null);
 			this.NoToilets = this.CreateStatusItem("NoToilets", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.NoToilets.AddNotification(null, null, null, 0f);
+			this.NoToilets.AddNotification(null, null, null);
 			this.BreathingO2 = this.CreateStatusItem("BreathingO2", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 130);
 			this.BreathingO2.resolveStringCallback = delegate(string str, object data)
 			{
@@ -114,7 +114,7 @@ namespace Database
 			this.Vomiting = this.CreateStatusItem("Vomiting", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.Coughing = this.CreateStatusItem("Coughing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.LowOxygen = this.CreateStatusItem("LowOxygen", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.LowOxygen.AddNotification(null, null, null, 0f);
+			this.LowOxygen.AddNotification(null, null, null);
 			this.RedAlert = this.CreateStatusItem("RedAlert", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Sleeping = this.CreateStatusItem("Sleeping", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Sleeping.resolveTooltipCallback = delegate(string str, object data)
@@ -133,6 +133,7 @@ namespace Database
 			};
 			this.SleepingInterruptedByNoise = this.CreateStatusItem("SleepingInterruptedByNoise", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.SleepingInterruptedByLight = this.CreateStatusItem("SleepingInterruptedByLight", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.SleepingInterruptedByFearOfDark = this.CreateStatusItem("SleepingInterruptedByFearOfDark", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Eating = this.CreateStatusItem("Eating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Eating.resolveStringCallback = func;
 			this.Digging = this.CreateStatusItem("Digging", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -236,7 +237,7 @@ namespace Database
 						"    • ",
 						attributeModifier.GetDescription(),
 						" <b>",
-						attributeModifier.GetFormattedString(attributeInstance.gameObject),
+						attributeModifier.GetFormattedString(),
 						"</b>"
 					});
 				}
@@ -261,7 +262,7 @@ namespace Database
 						"    • ",
 						attributeModifier2.GetDescription(),
 						" <b>",
-						attributeModifier2.GetFormattedString(attributeInstance2.gameObject),
+						attributeModifier2.GetFormattedString(),
 						"</b>"
 					});
 				}
@@ -277,7 +278,7 @@ namespace Database
 			this.BodyRegulatingCooling = this.CreateStatusItem("BodyRegulatingCooling", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BodyRegulatingCooling.resolveStringCallback = this.BodyRegulatingHeating.resolveStringCallback;
 			this.EntombedChore = this.CreateStatusItem("EntombedChore", "DUPLICANTS", "status_item_entombed", StatusItem.IconType.Custom, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
-			this.EntombedChore.AddNotification(null, null, null, 0f);
+			this.EntombedChore.AddNotification(null, null, null);
 			this.EarlyMorning = this.CreateStatusItem("EarlyMorning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.NightTime = this.CreateStatusItem("NightTime", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.PoorDecor = this.CreateStatusItem("PoorDecor", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -287,9 +288,9 @@ namespace Database
 			this.Arting = this.CreateStatusItem("Arting", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Arting.resolveStringCallback = func;
 			this.SevereWounds = this.CreateStatusItem("SevereWounds", "DUPLICANTS", "status_item_broken", StatusItem.IconType.Custom, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
-			this.SevereWounds.AddNotification(null, null, null, 0f);
+			this.SevereWounds.AddNotification(null, null, null);
 			this.Incapacitated = this.CreateStatusItem("Incapacitated", "DUPLICANTS", "status_item_broken", StatusItem.IconType.Custom, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
-			this.Incapacitated.AddNotification(null, null, null, 0f);
+			this.Incapacitated.AddNotification(null, null, null);
 			this.Incapacitated.resolveStringCallback = delegate(string str, object data)
 			{
 				IncapacitationMonitor.Instance instance = (IncapacitationMonitor.Instance)data;
@@ -300,15 +301,15 @@ namespace Database
 			this.Relocating = this.CreateStatusItem("Relocating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Relocating.resolveStringCallback = func;
 			this.Fighting = this.CreateStatusItem("Fighting", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
-			this.Fighting.AddNotification(null, null, null, 0f);
+			this.Fighting.AddNotification(null, null, null);
 			this.Fleeing = this.CreateStatusItem("Fleeing", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
-			this.Fleeing.AddNotification(null, null, null, 0f);
+			this.Fleeing.AddNotification(null, null, null);
 			this.Stressed = this.CreateStatusItem("Stressed", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
-			this.Stressed.AddNotification(null, null, null, 0f);
+			this.Stressed.AddNotification(null, null, null);
 			this.LashingOut = this.CreateStatusItem("LashingOut", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
-			this.LashingOut.AddNotification(null, null, null, 0f);
+			this.LashingOut.AddNotification(null, null, null);
 			this.LowImmunity = this.CreateStatusItem("LowImmunity", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
-			this.LowImmunity.AddNotification(null, null, null, 0f);
+			this.LowImmunity.AddNotification(null, null, null);
 			this.Studying = this.CreateStatusItem("Studying", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Socializing = this.CreateStatusItem("Socializing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Mingling = this.CreateStatusItem("Mingling", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
@@ -373,6 +374,40 @@ namespace Database
 			this.BeingProductive = this.CreateStatusItem("BeingProductive", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BalloonArtistPlanning = this.CreateStatusItem("BalloonArtistPlanning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.BalloonArtistHandingOut = this.CreateStatusItem("BalloonArtistHandingOut", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.Partying = this.CreateStatusItem("Partying", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.GasLiquidIrritation = this.CreateStatusItem("GasLiquidIrritated", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
+			this.GasLiquidIrritation.resolveStringCallback = (string str, object data) => ((GasLiquidExposureMonitor.Instance)data).IsMajorIrritation() ? DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MAJOR : DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MINOR;
+			this.GasLiquidIrritation.resolveTooltipCallback = delegate(string str, object data)
+			{
+				GasLiquidExposureMonitor.Instance instance2 = (GasLiquidExposureMonitor.Instance)data;
+				string text5 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
+				string text6 = "";
+				Effect appliedEffect = instance2.sm.GetAppliedEffect(instance2);
+				if (appliedEffect != null)
+				{
+					text6 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
+				}
+				string text7 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance2.CurrentlyExposedToElement().name);
+				float currentExposure = instance2.sm.GetCurrentExposure(instance2);
+				if (currentExposure < 0f)
+				{
+					text7 = text7.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
+				}
+				else if (currentExposure > 0f)
+				{
+					text7 = text7.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_INCREASE);
+				}
+				else
+				{
+					text7 = text7.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
+				}
+				float num7 = (instance2.exposure - instance2.minorIrritationThreshold) / Math.Abs(instance2.exposureRate);
+				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num7, "F0"));
+				return string.Concat(new string[] { text5, "\n\n", text6, "\n\n", text7, "\n\n", text8 });
+			};
+			this.ExpellingRads = this.CreateStatusItem("ExpellingRads", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.AnalyzingGenes = this.CreateStatusItem("AnalyzingGenes", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.AnalyzingArtifact = this.CreateStatusItem("AnalyzingArtifact", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 		}
 
 		public StatusItem Idle;
@@ -454,6 +489,8 @@ namespace Database
 		public StatusItem SleepingInterruptedByLight;
 
 		public StatusItem SleepingInterruptedByNoise;
+
+		public StatusItem SleepingInterruptedByFearOfDark;
 
 		public StatusItem SleepingPeacefully;
 
@@ -558,6 +595,16 @@ namespace Database
 		public StatusItem BalloonArtistPlanning;
 
 		public StatusItem BalloonArtistHandingOut;
+
+		public StatusItem Partying;
+
+		public StatusItem GasLiquidIrritation;
+
+		public StatusItem ExpellingRads;
+
+		public StatusItem AnalyzingGenes;
+
+		public StatusItem AnalyzingArtifact;
 
 		private const int NONE_OVERLAY = 0;
 	}

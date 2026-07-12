@@ -10,6 +10,12 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 	{
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		HoverTextDrawer hoverTextDrawer = instance.BeginDrawing();
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
+		if (!Grid.IsValidCell(num) || (int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId)
+		{
+			hoverTextDrawer.EndDrawing();
+			return;
+		}
 		hoverTextDrawer.BeginShadowBar(false);
 		this.ActionName = ((this.currentDef != null && this.currentDef.DragBuild) ? UI.TOOLS.BUILD.TOOLACTION_DRAG : UI.TOOLS.BUILD.TOOLACTION);
 		if (this.currentDef != null && this.currentDef.Name != null)
@@ -18,7 +24,6 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 		}
 		base.DrawTitle(instance, hoverTextDrawer);
 		base.DrawInstructions(instance, hoverTextDrawer);
-		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
 		int num2 = 26;
 		int num3 = 8;
 		if (this.currentDef != null)
@@ -156,7 +161,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							hoverTextDrawer.EndShadowBar();
 						}
 					}
-					goto IL_06FB;
+					goto IL_071D;
 				}
 			}
 			if (mode == OverlayModes.Power.ID)
@@ -176,7 +181,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 				}
 			}
 		}
-		IL_06FB:
+		IL_071D:
 		hoverTextDrawer.EndDrawing();
 	}
 

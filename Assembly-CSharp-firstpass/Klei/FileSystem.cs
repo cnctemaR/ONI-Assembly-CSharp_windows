@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -135,6 +136,11 @@ namespace Klei
 			return filename.Replace("\\", "/");
 		}
 
+		public static string CombineAndNormalize(params string[] paths)
+		{
+			return FileSystem.Normalize(Path.Combine(paths));
+		}
+
 		private static void GetFilesSearchParams(string path, string filename_glob_pattern, out string normalized_path, out Regex filename_regex)
 		{
 			normalized_path = null;
@@ -162,6 +168,11 @@ namespace Klei
 				.Replace("+", "\\+");
 			text2 = text2 + "/" + text + "$";
 			filename_regex = new Regex(text2);
+		}
+
+		[Conditional("UNITY_EDITOR_WIN")]
+		public static void CheckForCaseSensitiveErrors(string filename)
+		{
 		}
 
 		public static List<IFileDirectory> file_sources = new List<IFileDirectory>();

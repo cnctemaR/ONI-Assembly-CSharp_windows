@@ -69,7 +69,7 @@ namespace NodeEditorFramework.Standard
 		{
 			GUILayout.Label(new GUIContent("Node Editor (" + this.canvas.name + ")", "The currently opened canvas in the Node Editor"), Array.Empty<GUILayoutOption>());
 			this.screenSize = GUILayout.Toggle(this.screenSize, "Adapt to Screen", Array.Empty<GUILayoutOption>());
-			GUILayout.Label("FPS: " + FPSCounter.currentFPS, Array.Empty<GUILayoutOption>());
+			GUILayout.Label("FPS: " + FPSCounter.currentFPS.ToString(), Array.Empty<GUILayoutOption>());
 			GUILayout.Label(new GUIContent("Node Editor (" + this.canvas.name + ")"), NodeEditorGUI.nodeLabelBold, Array.Empty<GUILayoutOption>());
 			if (GUILayout.Button(new GUIContent("New Canvas", "Loads an empty Canvas"), Array.Empty<GUILayoutOption>()))
 			{

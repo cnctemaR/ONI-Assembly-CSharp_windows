@@ -3,8 +3,8 @@ using System.Runtime.CompilerServices;
 
 namespace System.Windows.Markup
 {
-	[TypeForwardedFrom("WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
+	[TypeForwardedFrom("WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
 	public sealed class ValueSerializerAttribute : Attribute
 	{
 		public ValueSerializerAttribute(Type valueSerializerType)

@@ -18,13 +18,13 @@ namespace UnityEngine.Experimental.Video
 			bool flag = trackIndex >= controlledAudioTrackCount;
 			if (flag)
 			{
-				throw new ArgumentOutOfRangeException("trackIndex", trackIndex, "VideoPlayer is currently configured with " + controlledAudioTrackCount + " tracks.");
+				throw new ArgumentOutOfRangeException("trackIndex", trackIndex, "VideoPlayer is currently configured with " + controlledAudioTrackCount.ToString() + " tracks.");
 			}
 			VideoAudioOutputMode audioOutputMode = vp.audioOutputMode;
 			bool flag2 = audioOutputMode != VideoAudioOutputMode.APIOnly;
 			if (flag2)
 			{
-				throw new InvalidOperationException("VideoPlayer.GetAudioSampleProvider requires audioOutputMode to be APIOnly. Current: " + audioOutputMode);
+				throw new InvalidOperationException("VideoPlayer.GetAudioSampleProvider requires audioOutputMode to be APIOnly. Current: " + audioOutputMode.ToString());
 			}
 			AudioSampleProvider audioSampleProvider = AudioSampleProvider.Lookup(vp.InternalGetAudioSampleProviderId(trackIndex), vp, trackIndex);
 			bool flag3 = audioSampleProvider == null;
@@ -40,12 +40,12 @@ namespace UnityEngine.Experimental.Video
 			bool flag5 = audioSampleProvider.trackIndex != trackIndex;
 			if (flag5)
 			{
-				throw new InvalidOperationException(string.Concat(new object[] { "Internal error: VideoPlayer.GetAudioSampleProvider got provider for track ", audioSampleProvider.trackIndex, " instead of ", trackIndex }));
+				throw new InvalidOperationException("Internal error: VideoPlayer.GetAudioSampleProvider got provider for track " + audioSampleProvider.trackIndex.ToString() + " instead of " + trackIndex.ToString());
 			}
 			return audioSampleProvider;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint InternalGetAudioSampleProviderId(this VideoPlayer vp, ushort trackIndex);
+		internal static extern uint InternalGetAudioSampleProviderId([NotNull("NullExceptionObject")] this VideoPlayer vp, ushort trackIndex);
 	}
 }

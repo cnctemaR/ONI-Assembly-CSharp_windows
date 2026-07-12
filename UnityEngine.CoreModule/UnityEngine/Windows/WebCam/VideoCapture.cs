@@ -10,8 +10,8 @@ using UnityEngine.Scripting.APIUpdating;
 namespace UnityEngine.Windows.WebCam
 {
 	[NativeHeader("PlatformDependent/Win/Webcam/VideoCaptureBindings.h")]
-	[StaticAccessor("VideoCaptureBindings", StaticAccessorType.DoubleColon)]
 	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
+	[StaticAccessor("VideoCaptureBindings", StaticAccessorType.DoubleColon)]
 	[StructLayout(LayoutKind.Sequential)]
 	public class VideoCapture : IDisposable
 	{
@@ -72,8 +72,8 @@ namespace UnityEngine.Windows.WebCam
 
 		public extern bool IsRecording
 		{
-			[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 			[NativeMethod("VideoCaptureBindings::IsRecording", HasExplicitThis = true)]
+			[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -85,6 +85,7 @@ namespace UnityEngine.Windows.WebCam
 			{
 				throw new ArgumentNullException("onCreatedCallback");
 			}
+			showHolograms = false;
 			VideoCapture.Instantiate_Internal(showHolograms, onCreatedCallback);
 		}
 
@@ -155,10 +156,10 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::StopVideoMode", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StopVideoModeAsync([NotNull] VideoCapture.OnVideoModeStoppedCallback onVideoModeStoppedCallback);
+		public extern void StopVideoModeAsync([NotNull("ArgumentNullException")] VideoCapture.OnVideoModeStoppedCallback onVideoModeStoppedCallback);
 
 		[RequiredByNativeCode]
 		private static void InvokeOnVideoModeStoppedDelegate(VideoCapture.OnVideoModeStoppedCallback callback, long hResult)
@@ -178,7 +179,6 @@ namespace UnityEngine.Windows.WebCam
 			{
 				throw new ArgumentNullException("filename");
 			}
-			filename = filename.Replace("/", "\\");
 			string directoryName = Path.GetDirectoryName(filename);
 			bool flag3 = !string.IsNullOrEmpty(directoryName) && !Directory.Exists(directoryName);
 			if (flag3)
@@ -191,7 +191,7 @@ namespace UnityEngine.Windows.WebCam
 			{
 				throw new ArgumentException("Cannot write to the file because it is read-only.", "filename");
 			}
-			this.StartRecordingVideoToDisk_Internal(filename, onStartedRecordingVideoCallback);
+			this.StartRecordingVideoToDisk_Internal(fileInfo.FullName, onStartedRecordingVideoCallback);
 		}
 
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
@@ -208,7 +208,7 @@ namespace UnityEngine.Windows.WebCam
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::StopRecordingVideoToDisk", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StopRecordingAsync([NotNull] VideoCapture.OnStoppedRecordingVideoCallback onStoppedRecordingVideoCallback);
+		public extern void StopRecordingAsync([NotNull("ArgumentNullException")] VideoCapture.OnStoppedRecordingVideoCallback onStoppedRecordingVideoCallback);
 
 		[RequiredByNativeCode]
 		private static void InvokeOnStoppedRecordingVideoToDiskDelegate(VideoCapture.OnStoppedRecordingVideoCallback callback, long hResult)
@@ -216,9 +216,9 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[ThreadAndSerializationSafe]
 		[NativeMethod("VideoCaptureBindings::GetUnsafePointerToVideoDeviceController", HasExplicitThis = true)]
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern IntPtr GetUnsafePointerToVideoDeviceController();
 
@@ -255,9 +255,9 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[NativeMethod("VideoCaptureBindings::DisposeThreaded", HasExplicitThis = true)]
-		[ThreadAndSerializationSafe]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[ThreadAndSerializationSafe]
+		[NativeMethod("VideoCaptureBindings::DisposeThreaded", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void DisposeThreaded_Internal();
 

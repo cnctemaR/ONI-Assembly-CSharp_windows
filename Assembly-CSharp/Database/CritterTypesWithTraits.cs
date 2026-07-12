@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using KSerialization;
 
 namespace Database
 {
-	public class CritterTypesWithTraits : ColonyAchievementRequirement
+	public class CritterTypesWithTraits : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
-		public CritterTypesWithTraits(List<Tag> critterTypes, bool hasTrait = true)
+		public CritterTypesWithTraits(List<Tag> critterTypes)
 		{
 			foreach (Tag tag in critterTypes)
 			{
@@ -16,26 +14,16 @@ namespace Database
 					this.critterTypesToCheck.Add(tag, false);
 				}
 			}
-			this.hasTrait = hasTrait;
+			this.hasTrait = false;
 			this.trait = GameTags.Creatures.Wild;
-		}
-
-		public override void Update()
-		{
-			foreach (Capturable capturable in Components.Capturables.Items)
-			{
-				if (capturable.HasTag(this.trait) == this.hasTrait && this.critterTypesToCheck.ContainsKey(capturable.PrefabID()))
-				{
-					this.critterTypesToCheck[capturable.PrefabID()] = true;
-				}
-			}
 		}
 
 		public override bool Success()
 		{
+			HashSet<Tag> tamedCritterTypes = SaveGame.Instance.GetComponent<ColonyAchievementTracker>().tamedCritterTypes;
 			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
 			{
-				if (!keyValuePair.Value)
+				if (!tamedCritterTypes.Contains(keyValuePair.Key))
 				{
 					return false;
 				}
@@ -43,18 +31,7 @@ namespace Database
 			return true;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.critterTypesToCheck.Count);
-			foreach (KeyValuePair<Tag, bool> keyValuePair in this.critterTypesToCheck)
-			{
-				writer.WriteKleiString(keyValuePair.Key.ToString());
-				writer.Write(keyValuePair.Value ? 1 : 0);
-			}
-			writer.Write(this.hasTrait ? 1 : 0);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.critterTypesToCheck = new Dictionary<Tag, bool>();
 			int num = reader.ReadInt32();

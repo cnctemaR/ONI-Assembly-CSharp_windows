@@ -6,6 +6,7 @@ using UnityEngine.U2D;
 
 namespace UnityEngine.UI
 {
+	[RequireComponent(typeof(CanvasRenderer))]
 	[AddComponentMenu("UI/Image", 11)]
 	public class Image : MaskableGraphic, ISerializationCallbackReceiver, ILayoutElement, ICanvasRaycastFilter
 	{
@@ -270,6 +271,7 @@ namespace UnityEngine.UI
 			set
 			{
 				this.m_PixelsPerUnitMultiplier = Mathf.Max(0.01f, value);
+				this.SetVerticesDirty();
 			}
 		}
 
@@ -1263,7 +1265,7 @@ namespace UnityEngine.UI
 			for (int i = Image.m_TrackedTexturelessImages.Count - 1; i >= 0; i--)
 			{
 				Image image = Image.m_TrackedTexturelessImages[i];
-				if (spriteAtlas.CanBindTo(image.activeSprite))
+				if (null != image.activeSprite && spriteAtlas.CanBindTo(image.activeSprite))
 				{
 					image.SetAllDirty();
 					Image.m_TrackedTexturelessImages.RemoveAt(i);

@@ -7,7 +7,7 @@ public static class Debug
 {
 	private static string TimeStamp()
 	{
-		return DateTime.UtcNow.ToString("[HH:mm:ss.fff] [") + Thread.CurrentThread.ManagedThreadId + "] ";
+		return DateTime.UtcNow.ToString("[HH:mm:ss.fff] [") + Thread.CurrentThread.ManagedThreadId.ToString() + "] ";
 	}
 
 	private static void WriteTimeStamped(params object[] objs)
@@ -215,7 +215,7 @@ public static class Debug
 	{
 		if (!condition)
 		{
-			global::Debug.LogError("Assert failed: " + message);
+			global::Debug.LogError("Assert failed: " + ((message != null) ? message.ToString() : null));
 			global::Debug.Break();
 		}
 	}
@@ -224,7 +224,7 @@ public static class Debug
 	{
 		if (!condition)
 		{
-			global::Debug.LogError("Assert failed: " + message, context);
+			global::Debug.LogError("Assert failed: " + ((message != null) ? message.ToString() : null), context);
 			global::Debug.Break();
 		}
 	}

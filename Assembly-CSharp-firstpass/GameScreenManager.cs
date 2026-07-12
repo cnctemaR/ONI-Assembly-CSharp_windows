@@ -137,7 +137,9 @@ public class GameScreenManager : KMonoBehaviour
 	[SerializeField]
 	private Color[] uiColors;
 
-	public Image fadePlane;
+	public Image fadePlaneBack;
+
+	public Image fadePlaneFront;
 
 	public enum UIRenderTarget
 	{

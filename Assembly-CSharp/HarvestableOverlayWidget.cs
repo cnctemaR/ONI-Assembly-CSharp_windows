@@ -25,7 +25,7 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 			GameObject gameObject = Util.KInstantiateUI(this.horizontal_container_prefab, this.vertical_container, false);
 			this.horizontal_containers[i] = gameObject;
 		}
-		for (int j = 0; j < 12; j++)
+		for (int j = 0; j < 13; j++)
 		{
 			if (this.condition_sprites.ContainsKey((WiltCondition.Condition)j))
 			{

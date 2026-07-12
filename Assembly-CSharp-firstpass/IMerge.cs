@@ -2,5 +2,5 @@
 
 public interface IMerge<T>
 {
-	void Merge(T other);
+	T Merge(T other);
 }

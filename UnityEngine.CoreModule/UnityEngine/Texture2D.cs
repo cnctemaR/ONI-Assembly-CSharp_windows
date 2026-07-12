@@ -11,9 +11,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Texture2D.h")]
 	[NativeHeader("Runtime/Graphics/GeneratedTextures.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/Texture2D.h")]
 	public sealed class Texture2D : Texture
 	{
 		public extern TextureFormat format
@@ -87,6 +87,14 @@ namespace UnityEngine
 			get;
 		}
 
+		[NativeConditional("ENABLE_VIRTUALTEXTURING && UNITY_EDITOR")]
+		[NativeName("VTOnly")]
+		public extern bool vtOnly
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[NativeName("Apply")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable);
@@ -119,7 +127,7 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "Texture2DScripting::ResizeWithFormat", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool ResizeWithFormatImpl(int width, int height, TextureFormat format, bool hasMipMap);
+		private extern bool ResizeWithFormatImpl(int width, int height, GraphicsFormat format, bool hasMipMap);
 
 		[FreeFunction(Name = "Texture2DScripting::ReadPixels", HasExplicitThis = true)]
 		private void ReadPixelsImpl(Rect source, int destX, int destY, bool recalculateMipMaps)
@@ -563,6 +571,20 @@ namespace UnityEngine
 			this.SetPixelDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), mipLevel, UnsafeUtility.SizeOf<T>(), data.Length, sourceDataStartIndex);
 		}
 
+		public unsafe NativeArray<T> GetPixelData<T>(int mipLevel) where T : struct
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			int pixelDataOffset = base.GetPixelDataOffset(mipLevel, 0);
+			int pixelDataSize = base.GetPixelDataSize(mipLevel, 0);
+			int num = UnsafeUtility.SizeOf<T>();
+			IntPtr intPtr = new IntPtr(this.GetWritableImageData(0).ToInt64() + (long)pixelDataOffset);
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, pixelDataSize / num, Allocator.None);
+		}
+
 		public unsafe NativeArray<T> GetRawTextureData<T>() where T : struct
 		{
 			bool flag = !this.isReadable;
@@ -605,6 +627,11 @@ namespace UnityEngine
 		}
 
 		public bool Resize(int width, int height, TextureFormat format, bool hasMipMap)
+		{
+			return this.ResizeWithFormatImpl(width, height, GraphicsFormatUtility.GetGraphicsFormat(format, base.activeTextureColorSpace == ColorSpace.Linear), hasMipMap);
+		}
+
+		public bool Resize(int width, int height, GraphicsFormat format, bool hasMipMap)
 		{
 			bool flag = !this.isReadable;
 			if (flag)

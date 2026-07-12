@@ -26,29 +26,32 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		public override string ToString()
 		{
-			return string.Concat(new object[]
-			{
-				"ID: '",
-				this.id,
-				"' Title: '",
-				this.m_Title,
-				"' Loading: '",
-				this.m_Loading.ToString(),
-				"' Range: [",
-				this.range.from,
-				",",
-				this.range.count,
-				"] MaxRange: '",
-				this.m_MaxRange,
-				"' Scores: '",
-				this.m_Scores.Length,
-				"' UserScope: '",
-				this.userScope,
-				"' TimeScope: '",
-				this.timeScope,
-				"' UserFilter: '",
-				this.m_UserIDs.Length
-			});
+			string[] array = new string[20];
+			array[0] = "ID: '";
+			array[1] = this.id;
+			array[2] = "' Title: '";
+			array[3] = this.m_Title;
+			array[4] = "' Loading: '";
+			array[5] = this.m_Loading.ToString();
+			array[6] = "' Range: [";
+			int num = 7;
+			Range range = this.range;
+			array[num] = range.from.ToString();
+			array[8] = ",";
+			int num2 = 9;
+			range = this.range;
+			array[num2] = range.count.ToString();
+			array[10] = "] MaxRange: '";
+			array[11] = this.m_MaxRange.ToString();
+			array[12] = "' Scores: '";
+			array[13] = this.m_Scores.Length.ToString();
+			array[14] = "' UserScope: '";
+			array[15] = this.userScope.ToString();
+			array[16] = "' TimeScope: '";
+			array[17] = this.timeScope.ToString();
+			array[18] = "' UserFilter: '";
+			array[19] = this.m_UserIDs.Length.ToString();
+			return string.Concat(array);
 		}
 
 		public void LoadScores(Action<bool> callback)

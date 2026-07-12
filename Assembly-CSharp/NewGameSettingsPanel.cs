@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei.CustomSettings;
 using KMod;
 using ProcGen;
+using ProcGenGame;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/NewGameSettingsPanel")]
@@ -22,17 +23,22 @@ public class NewGameSettingsPanel : KMonoBehaviour
 
 	public void Init()
 	{
+		Global.Instance.modManager.Load(Content.LayerableFiles);
+		SettingsCache.Clear();
+		WorldGen.LoadSettings();
+		CustomGameSettings.Instance.LoadClusters();
+		Global.Instance.modManager.Report(base.gameObject);
 		this.settings = CustomGameSettings.Instance;
 		this.widgets = new List<NewGameSettingWidget>();
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.settings.QualitySettings)
 		{
-			if (!keyValuePair.Value.debug_only || DebugHandler.enabled)
+			if ((!keyValuePair.Value.debug_only || DebugHandler.enabled) && (!keyValuePair.Value.editor_only || Application.isEditor) && DlcManager.IsContentActive(keyValuePair.Value.required_content))
 			{
 				ListSettingConfig listSettingConfig = keyValuePair.Value as ListSettingConfig;
 				if (listSettingConfig != null)
 				{
 					NewGameSettingList newGameSettingList = global::Util.KInstantiateUI<NewGameSettingList>(this.prefab_cycle_setting, this.content.gameObject, true);
-					newGameSettingList.Initialize(listSettingConfig);
+					newGameSettingList.Initialize(listSettingConfig, this, keyValuePair.Value.missing_content_default);
 					this.widgets.Add(newGameSettingList);
 				}
 				else
@@ -41,7 +47,7 @@ public class NewGameSettingsPanel : KMonoBehaviour
 					if (toggleSettingConfig != null)
 					{
 						NewGameSettingToggle newGameSettingToggle = global::Util.KInstantiateUI<NewGameSettingToggle>(this.prefab_checkbox_setting, this.content.gameObject, true);
-						newGameSettingToggle.Initialize(toggleSettingConfig);
+						newGameSettingToggle.Initialize(toggleSettingConfig, this, keyValuePair.Value.missing_content_default);
 						this.widgets.Add(newGameSettingToggle);
 					}
 					else

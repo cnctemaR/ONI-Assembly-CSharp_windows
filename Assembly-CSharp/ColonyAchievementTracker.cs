@@ -30,8 +30,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		{
 			if (!this.achievements.ContainsKey(colonyAchievement.Id))
 			{
-				ColonyAchievementStatus colonyAchievementStatus = new ColonyAchievementStatus();
-				colonyAchievementStatus.SetRequirements(colonyAchievement.requirementChecklist);
+				ColonyAchievementStatus colonyAchievementStatus = new ColonyAchievementStatus(colonyAchievement.Id);
 				this.achievements.Add(colonyAchievement.Id, colonyAchievementStatus);
 			}
 		}
@@ -142,6 +141,23 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		}));
 	}
 
+	public bool IsAchievementUnlocked(ColonyAchievement achievement)
+	{
+		foreach (KeyValuePair<string, ColonyAchievementStatus> keyValuePair in this.achievements)
+		{
+			if (keyValuePair.Key == achievement.Id)
+			{
+				if (keyValuePair.Value.success)
+				{
+					return true;
+				}
+				keyValuePair.Value.UpdateAchievement();
+				return keyValuePair.Value.success;
+			}
+		}
+		return false;
+	}
+
 	protected override void OnCleanUp()
 	{
 		this.victorySchedulerHandle.ClearScheduler();
@@ -221,8 +237,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		for (int i = 0; i < num; i++)
 		{
 			string text = reader.ReadKleiString();
-			ColonyAchievementStatus colonyAchievementStatus = new ColonyAchievementStatus();
-			colonyAchievementStatus.Deserialize(reader);
+			ColonyAchievementStatus colonyAchievementStatus = ColonyAchievementStatus.Deserialize(reader, text);
 			if (Db.Get().ColonyAchievements.Exists(text))
 			{
 				this.achievements.Add(text, colonyAchievementStatus);
@@ -257,6 +272,11 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 			int num2 = dictionary2[num];
 			dictionary2[num] = num2 + 1;
 		}
+	}
+
+	public void LogCritterTamed(Tag prefabId)
+	{
+		this.tamedCritterTypes.Add(prefabId);
 	}
 
 	public void LogSuitChore(ChoreDriver driver)
@@ -332,6 +352,9 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 
 	[Serialize]
 	public Dictionary<int, List<int>> dupesCompleteChoresInSuits = new Dictionary<int, List<int>>();
+
+	[Serialize]
+	public HashSet<Tag> tamedCritterTypes = new HashSet<Tag>();
 
 	private SchedulerHandle checkAchievementsHandle;
 

@@ -14,6 +14,10 @@ public class Spacecraft
 		this.launchConditions = launchConditions;
 	}
 
+	public Spacecraft()
+	{
+	}
+
 	public LaunchConditionManager launchConditions
 	{
 		get
@@ -131,12 +135,12 @@ public class Spacecraft
 
 	private void Land()
 	{
-		this.launchConditions.Trigger(1366341636, SpacecraftManager.instance.GetSpacecraftDestination(this.id));
+		this.launchConditions.Trigger(-1165815793, SpacecraftManager.instance.GetSpacecraftDestination(this.id));
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.launchConditions.GetComponent<AttachableBuilding>()))
 		{
 			if (gameObject != this.launchConditions.gameObject)
 			{
-				gameObject.Trigger(1366341636, SpacecraftManager.instance.GetSpacecraftDestination(this.id));
+				gameObject.Trigger(-1165815793, SpacecraftManager.instance.GetSpacecraftDestination(this.id));
 			}
 		}
 	}
@@ -175,9 +179,6 @@ public class Spacecraft
 
 	[Serialize]
 	public string rocketName = UI.STARMAP.DEFAULT_NAME;
-
-	[Serialize]
-	public int moduleCount;
 
 	[Serialize]
 	public Ref<LaunchConditionManager> refLaunchConditions = new Ref<LaunchConditionManager>();

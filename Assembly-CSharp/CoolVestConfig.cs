@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class CoolVestConfig : IEquipmentConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public EquipmentDef CreateEquipmentDef()
 	{
 		new Dictionary<string, float>().Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS);

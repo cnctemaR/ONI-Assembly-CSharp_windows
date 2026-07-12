@@ -40,6 +40,9 @@ public static class RailAPI
 	[DllImport("RailAPI")]
 	public static extern void RequestAuthTicket();
 
+	[DllImport("RailAPI")]
+	public static extern void QueryIsOwnedDlcsOnServer();
+
 	public enum Platform
 	{
 		TGP = 1,
@@ -49,7 +52,8 @@ public static class RailAPI
 	public enum Event
 	{
 		AuthTicketAcquired = 13001,
-		EventSystemChanged = 2
+		EventSystemChanged = 2,
+		QueryIsOwnedDlcsResult = 17007
 	}
 
 	[Serializable]
@@ -63,6 +67,14 @@ public static class RailAPI
 	public struct RailSystemStateChanged
 	{
 		public bool mRequestExit;
+	}
+
+	[Serializable]
+	public struct QueryIsOwnedDlcsResult
+	{
+		public int dlcGameId;
+
+		public bool isOwned;
 	}
 
 	public delegate void EventHandler(RailAPI.Event eventId, IntPtr data);

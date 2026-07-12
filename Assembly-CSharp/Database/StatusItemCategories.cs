@@ -25,6 +25,7 @@ namespace Database
 			this.RequiredRoom = new StatusItemCategory("RequiredRoom", this, "RequiredRoom");
 			this.Yield = new StatusItemCategory("Yield", this, "Yield");
 			this.Heat = new StatusItemCategory("Heat", this, "Heat");
+			this.Stored = new StatusItemCategory("Stored", this, "Stored");
 		}
 
 		public StatusItemCategory Main;
@@ -62,5 +63,7 @@ namespace Database
 		public StatusItemCategory Yield;
 
 		public StatusItemCategory Heat;
+
+		public StatusItemCategory Stored;
 	}
 }

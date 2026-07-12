@@ -18,6 +18,10 @@ public class EquipmentConfigManager : KMonoBehaviour
 
 	public void RegisterEquipment(IEquipmentConfig config)
 	{
+		if (!DlcManager.IsDlcListValidForCurrentContent(config.GetDlcIds()))
+		{
+			return;
+		}
 		EquipmentDef equipmentDef = config.CreateEquipmentDef();
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(equipmentDef.Id, equipmentDef.Name, equipmentDef.RecipeDescription, equipmentDef.Mass, true, equipmentDef.Anim, "object", Grid.SceneLayer.Ore, equipmentDef.CollisionShape, equipmentDef.width, equipmentDef.height, true, 0, equipmentDef.OutputElement, null);
 		Equippable equippable = gameObject.AddComponent<Equippable>();
@@ -27,6 +31,18 @@ public class EquipmentConfigManager : KMonoBehaviour
 		global::Debug.Assert(equippable.slot != null);
 		config.DoPostConfigure(gameObject);
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
+		if (equipmentDef.wornID != null)
+		{
+			GameObject gameObject2 = EntityTemplates.CreateLooseEntity(equipmentDef.wornID, equipmentDef.WornName, equipmentDef.WornDesc, equipmentDef.Mass, true, equipmentDef.Anim, "worn_out", Grid.SceneLayer.Ore, equipmentDef.CollisionShape, equipmentDef.width, equipmentDef.height, true, 0, SimHashes.Creature, null);
+			RepairableEquipment repairableEquipment = gameObject2.AddComponent<RepairableEquipment>();
+			repairableEquipment.def = equipmentDef;
+			global::Debug.Assert(repairableEquipment.def != null);
+			foreach (Tag tag in equipmentDef.AdditionalTags)
+			{
+				gameObject2.GetComponent<KPrefabID>().AddTag(tag, false);
+			}
+			Assets.AddPrefab(gameObject2.GetComponent<KPrefabID>());
+		}
 	}
 
 	private void LoadRecipe(EquipmentDef def, Equippable equippable)

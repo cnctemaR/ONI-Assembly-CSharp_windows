@@ -93,8 +93,8 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 				}
 				smi.GoTo(this.flee);
 			});
-			this.flee.InitializeStates(this.self, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).ToggleAnims("anim_loco_run_insane_kanim", 2f);
-			this.cower.ToggleAnims("anim_cringe_kanim", 4f).PlayAnim("cringe_pre").QueueAnim("cringe_loop", false, null)
+			this.flee.InitializeStates(this.self, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).ToggleAnims("anim_loco_run_insane_kanim", 2f, "");
+			this.cower.ToggleAnims("anim_cringe_kanim", 4f, "").PlayAnim("cringe_pre").QueueAnim("cringe_loop", false, null)
 				.QueueAnim("cringe_pst", false, null)
 				.OnAnimQueueComplete(this.end);
 			this.end.Enter(delegate(FleeChore.StatesInstance smi)

@@ -6,14 +6,16 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.TestTools
 {
-	[NativeType("Runtime/Scripting/ScriptingCoverage.h")]
 	[NativeClass("ScriptingCoverage")]
+	[NativeType("Runtime/Scripting/ScriptingCoverage.h")]
 	public static class Coverage
 	{
 		public static extern bool enabled
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		[FreeFunction("ScriptingCoverageGetCoverageForMethodInfoObject", ThrowsException = true)]

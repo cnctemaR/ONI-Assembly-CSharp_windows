@@ -1329,12 +1329,10 @@ public abstract class OverlayModes
 										if (component8.PrefabTag == bridge_id)
 										{
 											KBatchedAnimController component9 = root.GetComponent<KBatchedAnimController>();
-											int num3;
-											int num4;
-											root.GetComponent<LogicUtilityNetworkLink>().GetCells(out num3, out num4);
+											int networkCell2 = root.GetComponent<LogicUtilityNetworkLink>().GetNetworkCell();
 											this.bridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
 											{
-												cell = num3,
+												cell = networkCell2,
 												controller = component9
 											});
 											return;
@@ -1342,12 +1340,10 @@ public abstract class OverlayModes
 										if (component8.PrefabTag == ribbon_bridge_id)
 										{
 											KBatchedAnimController component10 = root.GetComponent<KBatchedAnimController>();
-											int num5;
-											int num6;
-											root.GetComponent<LogicUtilityNetworkLink>().GetCells(out num5, out num6);
+											int networkCell3 = root.GetComponent<LogicUtilityNetworkLink>().GetNetworkCell();
 											this.ribbonBridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
 											{
-												cell = num5,
+												cell = networkCell3,
 												controller = component10
 											});
 										}
@@ -1361,20 +1357,20 @@ public abstract class OverlayModes
 							base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
 							{
 								Vector3 position2 = root.transform.GetPosition();
-								float num7 = position2.z;
+								float num3 = position2.z;
 								KPrefabID component11 = root.GetComponent<KPrefabID>();
 								if (component11 != null)
 								{
 									if (component11.HasTag(GameTags.OverlayInFrontOfConduits))
 									{
-										num7 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) - 0.2f;
+										num3 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) - 0.2f;
 									}
 									else if (component11.HasTag(GameTags.OverlayBehindConduits))
 									{
-										num7 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) + 0.2f;
+										num3 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) + 0.2f;
 									}
 								}
-								position2.z = num7;
+								position2.z = num3;
 								root.transform.SetPosition(position2);
 								KBatchedAnimController component12 = root.GetComponent<KBatchedAnimController>();
 								component12.enabled = false;
@@ -1896,21 +1892,6 @@ public abstract class OverlayModes
 		public static readonly HashedString ID = "Light";
 	}
 
-	public class Radiation : OverlayModes.Mode
-	{
-		public override HashedString ViewMode()
-		{
-			return OverlayModes.Radiation.ID;
-		}
-
-		public override string GetSoundName()
-		{
-			return "Lights";
-		}
-
-		public static readonly HashedString ID = "Radiation";
-	}
-
 	public class Priorities : OverlayModes.Mode
 	{
 		public override HashedString ViewMode()
@@ -2140,14 +2121,14 @@ public abstract class OverlayModes
 				if (!(t == null))
 				{
 					Vector2I vector2I = Grid.PosToXY(t.transform.GetPosition());
-					if (!(vis_min <= vector2I) || !(vector2I <= vis_max))
+					if (!(vis_min <= vector2I) || !(vector2I <= vis_max) || t.gameObject.GetMyWorldId() != ClusterManager.Instance.activeWorldId)
 					{
 						OverlayModes.Mode.workingTargets.Add(t);
 					}
 					else
 					{
 						KPrefabID component = t.GetComponent<KPrefabID>();
-						if (item_ids != null && !item_ids.Contains(component.PrefabTag))
+						if (item_ids != null && !item_ids.Contains(component.PrefabTag) && t.gameObject.GetMyWorldId() != ClusterManager.Instance.activeWorldId)
 						{
 							OverlayModes.Mode.workingTargets.Add(t);
 						}
@@ -2334,7 +2315,7 @@ public abstract class OverlayModes
 				while ((float)num2 <= vector2.x)
 				{
 					int num3 = Grid.XYToCell(num2, num);
-					if (Grid.Visible[num3] > 20 || !PropertyTextures.IsFogOfWarEnabled)
+					if ((Grid.IsValidCell(num3) && Grid.Visible[num3] > 20 && (int)Grid.WorldIdx[num3] == ClusterManager.Instance.activeWorldId) || !PropertyTextures.IsFogOfWarEnabled)
 					{
 						flag = true;
 						break;
@@ -2537,7 +2518,7 @@ public abstract class OverlayModes
 				foreach (Battery battery in Components.Batteries.Items)
 				{
 					Vector2I vector2I3 = Grid.PosToXY(battery.transform.GetPosition());
-					if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
+					if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && battery.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 					{
 						SaveLoadRoot component4 = battery.GetComponent<SaveLoadRoot>();
 						if (!this.privateTargets.Contains(component4))
@@ -2550,7 +2531,7 @@ public abstract class OverlayModes
 				foreach (Generator generator in Components.Generators.Items)
 				{
 					Vector2I vector2I4 = Grid.PosToXY(generator.transform.GetPosition());
-					if (vector2I <= vector2I4 && vector2I4 <= vector2I2)
+					if (vector2I <= vector2I4 && vector2I4 <= vector2I2 && generator.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 					{
 						SaveLoadRoot component5 = generator.GetComponent<SaveLoadRoot>();
 						if (!this.privateTargets.Contains(component5))
@@ -2566,7 +2547,7 @@ public abstract class OverlayModes
 				foreach (EnergyConsumer energyConsumer in Components.EnergyConsumers.Items)
 				{
 					Vector2I vector2I5 = Grid.PosToXY(energyConsumer.transform.GetPosition());
-					if (vector2I <= vector2I5 && vector2I5 <= vector2I2)
+					if (vector2I <= vector2I5 && vector2I5 <= vector2I2 && energyConsumer.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 					{
 						SaveLoadRoot component6 = energyConsumer.GetComponent<SaveLoadRoot>();
 						if (!this.privateTargets.Contains(component6))
@@ -2611,12 +2592,13 @@ public abstract class OverlayModes
 				LocText unitLabel = updatePowerInfo.unitLabel;
 				Generator generator = updatePowerInfo.generator;
 				IEnergyConsumer consumer = updatePowerInfo.consumer;
-				if (updatePowerInfo.item == null)
+				if (updatePowerInfo.item == null || updatePowerInfo.item.gameObject.GetMyWorldId() != ClusterManager.Instance.activeWorldId)
 				{
 					powerLabel.gameObject.SetActive(false);
 				}
 				else
 				{
+					powerLabel.gameObject.SetActive(true);
 					if (generator != null && consumer == null)
 					{
 						int num;
@@ -2634,16 +2616,20 @@ public abstract class OverlayModes
 						Color color = ((component != null && !component.IsEnabled) ? GlobalAssets.Instance.colorSet.powerBuildingDisabled : GlobalAssets.Instance.colorSet.powerGenerator);
 						powerLabel.color = color;
 						unitLabel.color = color;
-						Image outputIcon = generator.GetComponent<BuildingCellVisualizer>().GetOutputIcon();
-						if (outputIcon != null)
+						BuildingCellVisualizer component2 = generator.GetComponent<BuildingCellVisualizer>();
+						if (component2 != null)
 						{
-							outputIcon.color = color;
+							Image outputIcon = component2.GetOutputIcon();
+							if (outputIcon != null)
+							{
+								outputIcon.color = color;
+							}
 						}
 					}
 					if (consumer != null)
 					{
-						BuildingEnabledButton component2 = item.GetComponent<BuildingEnabledButton>();
-						Color color2 = ((component2 != null && !component2.IsEnabled) ? GlobalAssets.Instance.colorSet.powerBuildingDisabled : GlobalAssets.Instance.colorSet.powerConsumer);
+						BuildingEnabledButton component3 = item.GetComponent<BuildingEnabledButton>();
+						Color color2 = ((component3 != null && !component3.IsEnabled) ? GlobalAssets.Instance.colorSet.powerBuildingDisabled : GlobalAssets.Instance.colorSet.powerConsumer);
 						int num2 = Mathf.Max(0, Mathf.RoundToInt(consumer.WattsNeededWhenActive));
 						string text = num2.ToString();
 						powerLabel.text = ((num2 != 0) ? ("-" + text) : text);
@@ -2665,42 +2651,45 @@ public abstract class OverlayModes
 
 		private void AddPowerLabels(KMonoBehaviour item)
 		{
-			IEnergyConsumer componentInChildren = item.gameObject.GetComponentInChildren<IEnergyConsumer>();
-			Generator componentInChildren2 = item.gameObject.GetComponentInChildren<Generator>();
-			if (componentInChildren != null || componentInChildren2 != null)
+			if (item.gameObject.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 			{
-				float num = -10f;
-				if (componentInChildren2 != null)
+				IEnergyConsumer componentInChildren = item.gameObject.GetComponentInChildren<IEnergyConsumer>();
+				Generator componentInChildren2 = item.gameObject.GetComponentInChildren<Generator>();
+				if (componentInChildren != null || componentInChildren2 != null)
 				{
-					LocText freePowerLabel = this.GetFreePowerLabel();
-					freePowerLabel.gameObject.SetActive(true);
-					freePowerLabel.gameObject.name = item.gameObject.name + "power label";
-					LocText component = freePowerLabel.transform.GetChild(0).GetComponent<LocText>();
-					component.gameObject.SetActive(true);
-					freePowerLabel.enabled = true;
-					component.enabled = true;
-					Vector3 vector = Grid.CellToPos(componentInChildren2.PowerCell, 0.5f, 0f, 0f);
-					freePowerLabel.rectTransform.SetPosition(vector + this.powerLabelOffset + Vector3.up * (num * 0.02f));
-					if (componentInChildren != null && componentInChildren.PowerCell == componentInChildren2.PowerCell)
+					float num = -10f;
+					if (componentInChildren2 != null)
 					{
-						num -= 15f;
+						LocText freePowerLabel = this.GetFreePowerLabel();
+						freePowerLabel.gameObject.SetActive(true);
+						freePowerLabel.gameObject.name = item.gameObject.name + "power label";
+						LocText component = freePowerLabel.transform.GetChild(0).GetComponent<LocText>();
+						component.gameObject.SetActive(true);
+						freePowerLabel.enabled = true;
+						component.enabled = true;
+						Vector3 vector = Grid.CellToPos(componentInChildren2.PowerCell, 0.5f, 0f, 0f);
+						freePowerLabel.rectTransform.SetPosition(vector + this.powerLabelOffset + Vector3.up * (num * 0.02f));
+						if (componentInChildren != null && componentInChildren.PowerCell == componentInChildren2.PowerCell)
+						{
+							num -= 15f;
+						}
+						this.SetToolTip(freePowerLabel, UI.OVERLAYS.POWER.WATTS_GENERATED);
+						this.updatePowerInfo.Add(new OverlayModes.Power.UpdatePowerInfo(item, freePowerLabel, component, componentInChildren2, null));
 					}
-					this.SetToolTip(freePowerLabel, UI.OVERLAYS.POWER.WATTS_GENERATED);
-					this.updatePowerInfo.Add(new OverlayModes.Power.UpdatePowerInfo(item, freePowerLabel, component, componentInChildren2, null));
-				}
-				if (componentInChildren != null && componentInChildren.GetType() != typeof(Battery))
-				{
-					LocText freePowerLabel2 = this.GetFreePowerLabel();
-					LocText component2 = freePowerLabel2.transform.GetChild(0).GetComponent<LocText>();
-					freePowerLabel2.gameObject.SetActive(true);
-					component2.gameObject.SetActive(true);
-					freePowerLabel2.gameObject.name = item.gameObject.name + "power label";
-					freePowerLabel2.enabled = true;
-					component2.enabled = true;
-					Vector3 vector2 = Grid.CellToPos(componentInChildren.PowerCell, 0.5f, 0f, 0f);
-					freePowerLabel2.rectTransform.SetPosition(vector2 + this.powerLabelOffset + Vector3.up * (num * 0.02f));
-					this.SetToolTip(freePowerLabel2, UI.OVERLAYS.POWER.WATTS_CONSUMED);
-					this.updatePowerInfo.Add(new OverlayModes.Power.UpdatePowerInfo(item, freePowerLabel2, component2, null, componentInChildren));
+					if (componentInChildren != null && componentInChildren.GetType() != typeof(Battery))
+					{
+						LocText freePowerLabel2 = this.GetFreePowerLabel();
+						LocText component2 = freePowerLabel2.transform.GetChild(0).GetComponent<LocText>();
+						freePowerLabel2.gameObject.SetActive(true);
+						component2.gameObject.SetActive(true);
+						freePowerLabel2.gameObject.name = item.gameObject.name + "power label";
+						freePowerLabel2.enabled = true;
+						component2.enabled = true;
+						Vector3 vector2 = Grid.CellToPos(componentInChildren.PowerCell, 0.5f, 0f, 0f);
+						freePowerLabel2.rectTransform.SetPosition(vector2 + this.powerLabelOffset + Vector3.up * (num * 0.02f));
+						this.SetToolTip(freePowerLabel2, UI.OVERLAYS.POWER.WATTS_CONSUMED);
+						this.updatePowerInfo.Add(new OverlayModes.Power.UpdatePowerInfo(item, freePowerLabel2, component2, null, componentInChildren));
+					}
 				}
 			}
 		}
@@ -2885,6 +2874,21 @@ public abstract class OverlayModes
 
 			public BatteryUI ui;
 		}
+	}
+
+	public class Radiation : OverlayModes.Mode
+	{
+		public override HashedString ViewMode()
+		{
+			return OverlayModes.Radiation.ID;
+		}
+
+		public override string GetSoundName()
+		{
+			return "Radiation";
+		}
+
+		public static readonly HashedString ID = "Radiation";
 	}
 
 	public class SolidConveyor : OverlayModes.Mode
@@ -3699,7 +3703,7 @@ public abstract class OverlayModes
 			}
 			base.DisableHighlightTypeOverlay<PrimaryElement>(this.layerTargets);
 			this.layerTargets.Clear();
-			Game.Instance.ForceOverlayUpdate();
+			Game.Instance.ForceOverlayUpdate(false);
 		}
 
 		public static readonly HashedString ID = "TileMode";

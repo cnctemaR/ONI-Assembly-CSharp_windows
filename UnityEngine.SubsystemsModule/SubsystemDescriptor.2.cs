@@ -11,7 +11,7 @@ namespace UnityEngine
 
 		public TSubsystem Create()
 		{
-			TSubsystem tsubsystem = Internal_SubsystemInstances.Internal_FindStandaloneSubsystemInstanceGivenDescriptor(this) as TSubsystem;
+			TSubsystem tsubsystem = SubsystemManager.FindDeprecatedSubsystemByDescriptor(this) as TSubsystem;
 			bool flag = tsubsystem != null;
 			TSubsystem tsubsystem2;
 			if (flag)
@@ -20,10 +20,10 @@ namespace UnityEngine
 			}
 			else
 			{
-				TSubsystem tsubsystem3 = Activator.CreateInstance(base.subsystemImplementationType) as TSubsystem;
-				tsubsystem3.m_subsystemDescriptor = this;
-				Internal_SubsystemInstances.Internal_AddStandaloneSubsystem(tsubsystem3);
-				tsubsystem2 = tsubsystem3;
+				tsubsystem = Activator.CreateInstance(base.subsystemImplementationType) as TSubsystem;
+				tsubsystem.m_SubsystemDescriptor = this;
+				SubsystemManager.AddDeprecatedSubsystem(tsubsystem);
+				tsubsystem2 = tsubsystem;
 			}
 			return tsubsystem2;
 		}

@@ -70,16 +70,19 @@ public class Ownable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 
 	private void UpdateTint()
 	{
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		if (component != null && component.HasBatchInstanceData)
+		if (this.tintWhenUnassigned)
 		{
-			component.TintColour = ((this.assignee == null) ? this.unownedTint : this.ownedTint);
-			return;
-		}
-		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
-		if (component2 != null && component2.HasBatchInstanceData)
-		{
-			component2.TintColour = ((this.assignee == null) ? this.unownedTint : this.ownedTint);
+			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+			if (component != null && component.HasBatchInstanceData)
+			{
+				component.TintColour = ((this.assignee == null) ? this.unownedTint : this.ownedTint);
+				return;
+			}
+			KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
+			if (component2 != null && component2.HasBatchInstanceData)
+			{
+				component2.TintColour = ((this.assignee == null) ? this.unownedTint : this.ownedTint);
+			}
 		}
 	}
 
@@ -121,6 +124,8 @@ public class Ownable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		list.Add(descriptor);
 		return list;
 	}
+
+	public bool tintWhenUnassigned = true;
 
 	private Color unownedTint = Color.gray;
 

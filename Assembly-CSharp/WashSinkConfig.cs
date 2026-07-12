@@ -36,7 +36,7 @@ public class WashSinkConfig : IBuildingConfig
 		handSanitizer.consumedElement = SimHashes.Water;
 		handSanitizer.outputElement = SimHashes.DirtyWater;
 		handSanitizer.diseaseRemovalCount = 120000;
-		handSanitizer.maxUses = 1;
+		handSanitizer.maxUses = 2;
 		handSanitizer.dirtyMeterOffset = Meter.Offset.Behind;
 		go.AddOrGet<DirectionControl>();
 		HandSanitizer.Work work = go.AddOrGet<HandSanitizer.Work>();
@@ -46,14 +46,13 @@ public class WashSinkConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
-		conduitConsumer.capacityKG = 5f;
+		conduitConsumer.capacityKG = 10f;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;
 		conduitDispenser.invertElementFilter = true;
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 25f;
 		storage.doDiseaseTransfer = false;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<LoopingSounds>();
@@ -70,7 +69,7 @@ public class WashSinkConfig : IBuildingConfig
 
 	public const float WATER_PER_USE = 5f;
 
-	public const int USES_PER_FLUSH = 1;
+	public const int USES_PER_FLUSH = 2;
 
 	public const float WORK_TIME = 5f;
 }

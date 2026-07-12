@@ -15,7 +15,7 @@ public class PathGrid
 		this.heightInCells = height_in_cells;
 		this.ValidNavTypes = valid_nav_types;
 		int num = 0;
-		this.NavTypeTable = new int[10];
+		this.NavTypeTable = new int[11];
 		for (int i = 0; i < this.NavTypeTable.Length; i++)
 		{
 			this.NavTypeTable[i] = -1;

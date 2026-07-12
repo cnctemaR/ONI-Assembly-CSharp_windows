@@ -7,9 +7,9 @@ using UnityEngine.Rendering;
 namespace UnityEngine
 {
 	[RequireComponent(typeof(Transform))]
-	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
 	[NativeHeader("Runtime/Camera/Light.h")]
+	[NativeHeader("Runtime/Export/Graphics/Light.bindings.h")]
+	[RequireComponent(typeof(Transform))]
 	public sealed class Light : Behaviour
 	{
 		[NativeProperty("LightType")]
@@ -112,6 +112,14 @@ namespace UnityEngine
 			{
 				this.set_boundingSphereOverride_Injected(ref value);
 			}
+		}
+
+		public extern bool useViewFrustumForShadowCasterCull
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		public extern int shadowCustomResolution
@@ -253,8 +261,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Shadow softness is removed in Unity 5.0+", true)]
 		public float shadowSoftness
 		{
 			get
@@ -314,8 +322,8 @@ namespace UnityEngine
 			set;
 		}
 
-		[Obsolete("warning bakedIndex has been removed please use bakingOutput.isBaked instead.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("warning bakedIndex has been removed please use bakingOutput.isBaked instead.", true)]
 		public int bakedIndex
 		{
 			get

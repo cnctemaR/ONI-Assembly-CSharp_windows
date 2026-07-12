@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	[RequiredByNativeCode]
+	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	public struct PostLateUpdate
 	{
 		[RequiredByNativeCode]
@@ -74,7 +74,17 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		public struct XRPostLateUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct UpdateAllRenderers
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct UpdateLightProbeProxyVolumes
 		{
 		}
 
@@ -190,6 +200,11 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct ExecuteGameCenterCallbacks
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct XRPreEndFrame
 		{
 		}
 

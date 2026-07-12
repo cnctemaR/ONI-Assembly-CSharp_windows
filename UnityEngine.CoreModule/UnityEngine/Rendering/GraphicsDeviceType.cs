@@ -31,6 +31,12 @@ namespace UnityEngine.Rendering
 		N3DS,
 		Vulkan = 21,
 		Switch,
-		XboxOneD3D12
+		XboxOneD3D12,
+		GameCoreXboxOne,
+		[Obsolete("GameCoreScarlett is deprecated, please use GameCoreXboxSeries (UnityUpgradable) -> GameCoreXboxSeries", false)]
+		GameCoreScarlett,
+		GameCoreXboxSeries = 25,
+		PlayStation5,
+		PlayStation5NGGC
 	}
 }

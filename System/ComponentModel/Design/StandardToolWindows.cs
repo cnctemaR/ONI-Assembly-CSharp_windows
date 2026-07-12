@@ -3,9 +3,9 @@ using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
+	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class StandardToolWindows
 	{
 		public static readonly Guid ObjectBrowser = new Guid("{970d9861-ee83-11d0-a778-00a0c91110c3}");

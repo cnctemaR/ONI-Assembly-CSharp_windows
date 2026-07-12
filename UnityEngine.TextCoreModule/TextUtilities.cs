@@ -49,27 +49,26 @@ namespace UnityEngine.TextCore
 			float num = Vector3.Dot(normal, vector);
 			float num2 = -Vector3.Dot(normal, vector2);
 			bool flag = Mathf.Abs(num) < Mathf.Epsilon;
-			bool flag3;
+			bool flag2;
 			if (flag)
 			{
-				bool flag2 = num2 == 0f;
-				flag3 = flag2;
+				flag2 = num2 == 0f;
 			}
 			else
 			{
 				float num3 = num2 / num;
-				bool flag4 = num3 < 0f || num3 > 1f;
-				if (flag4)
+				bool flag3 = num3 < 0f || num3 > 1f;
+				if (flag3)
 				{
-					flag3 = false;
+					flag2 = false;
 				}
 				else
 				{
 					intersectingPoint = line.Point1 + num3 * vector;
-					flag3 = true;
+					flag2 = true;
 				}
 			}
-			return flag3;
+			return flag2;
 		}
 
 		public static float DistanceToLine(Vector3 a, Vector3 b, Vector3 point)

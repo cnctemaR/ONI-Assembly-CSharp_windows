@@ -71,8 +71,8 @@ namespace UnityEngine.Rendering
 			return -1;
 		}
 
-		[FreeFunction("GPUFenceInternals::GetVersionNumber")]
 		[NativeThrows]
+		[FreeFunction("GPUFenceInternals::GetVersionNumber")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetVersionNumber(IntPtr fencePtr);
 

@@ -5,9 +5,9 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
 	[NativeHeader("Runtime/Export/TouchScreenKeyboard/TouchScreenKeyboard.bindings.h")]
 	[NativeHeader("Runtime/Input/KeyboardOnScreen.h")]
+	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
 	public class TouchScreenKeyboard
 	{
 		[FreeFunction("TouchScreenKeyboard_Destroy", IsThreadSafe = true)]
@@ -52,19 +52,27 @@ namespace UnityEngine
 			{
 				RuntimePlatform platform = Application.platform;
 				RuntimePlatform runtimePlatform = platform;
-				if (runtimePlatform <= RuntimePlatform.MetroPlayerARM)
+				RuntimePlatform runtimePlatform2 = runtimePlatform;
+				if (runtimePlatform2 <= RuntimePlatform.MetroPlayerARM)
 				{
-					if (runtimePlatform != RuntimePlatform.IPhonePlayer && runtimePlatform != RuntimePlatform.Android && runtimePlatform - RuntimePlatform.MetroPlayerX86 > 2)
+					if (runtimePlatform2 != RuntimePlatform.IPhonePlayer && runtimePlatform2 != RuntimePlatform.Android && runtimePlatform2 - RuntimePlatform.MetroPlayerX86 > 2)
 					{
-						goto IL_003F;
+						goto IL_004D;
 					}
 				}
-				else if (runtimePlatform != RuntimePlatform.PS4 && runtimePlatform - RuntimePlatform.tvOS > 1 && runtimePlatform != RuntimePlatform.Stadia)
+				else if (runtimePlatform2 <= RuntimePlatform.Switch)
 				{
-					goto IL_003F;
+					if (runtimePlatform2 != RuntimePlatform.PS4 && runtimePlatform2 - RuntimePlatform.tvOS > 1)
+					{
+						goto IL_004D;
+					}
+				}
+				else if (runtimePlatform2 != RuntimePlatform.Stadia && runtimePlatform2 != RuntimePlatform.PS5)
+				{
+					goto IL_004D;
 				}
 				return true;
-				IL_003F:
+				IL_004D:
 				return false;
 			}
 		}

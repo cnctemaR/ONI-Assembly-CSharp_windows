@@ -6,10 +6,13 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.alive;
-		base.serializable = true;
+		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.alive.ParamTransition<Death>(this.death, this.dying_duplicant, (DeathMonitor.Instance smi, Death p) => p != null && smi.IsDuplicant).ParamTransition<Death>(this.death, this.dying_creature, (DeathMonitor.Instance smi, Death p) => p != null && !smi.IsDuplicant);
-		this.dying_duplicant.ToggleAnims("anim_emotes_default_kanim", 0f).ToggleTag(GameTags.Dying).ToggleChore((DeathMonitor.Instance smi) => new DieChore(smi.master, this.death.Get(smi)), this.die);
-		this.dying_creature.ToggleBehaviour(GameTags.Creatures.Die, (DeathMonitor.Instance smi) => true, null);
+		this.dying_duplicant.ToggleAnims("anim_emotes_default_kanim", 0f, "").ToggleTag(GameTags.Dying).ToggleChore((DeathMonitor.Instance smi) => new DieChore(smi.master, this.death.Get(smi)), this.die);
+		this.dying_creature.ToggleBehaviour(GameTags.Creatures.Die, (DeathMonitor.Instance smi) => true, delegate(DeathMonitor.Instance smi)
+		{
+			smi.GoTo(this.dead_creature);
+		});
 		this.die.ToggleTag(GameTags.Dying).Enter("Die", delegate(DeathMonitor.Instance smi)
 		{
 			Death death = this.death.Get(smi);
@@ -20,9 +23,9 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 				KFMOD.PlayUISound(GlobalAssets.GetSound("Death_Notification_ST", false));
 				Messenger.Instance.QueueMessage(deathMessage);
 			}
-		}).TriggerOnExit(GameHashes.Died)
+		}).TriggerOnExit(GameHashes.Died, null)
 			.GoTo(this.dead);
-		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f).DefaultState(this.dead.ground).ToggleTag(GameTags.Dead)
+		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f, "").DefaultState(this.dead.ground).ToggleTag(GameTags.Dead)
 			.Enter(delegate(DeathMonitor.Instance smi)
 			{
 				smi.ApplyDeath();
@@ -40,7 +43,8 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 				smi.GetComponent<KAnimControllerBase>().Play(death2.loopAnim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 		}).EventTransition(GameHashes.OnStore, this.dead.carried, (DeathMonitor.Instance smi) => smi.IsDuplicant && smi.HasTag(GameTags.Stored));
-		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f).PlayAnim("idle_default", KAnim.PlayMode.Loop).EventTransition(GameHashes.OnStore, this.dead.ground, (DeathMonitor.Instance smi) => !smi.HasTag(GameTags.Stored));
+		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f, "").PlayAnim("idle_default", KAnim.PlayMode.Loop).EventTransition(GameHashes.OnStore, this.dead.ground, (DeathMonitor.Instance smi) => !smi.HasTag(GameTags.Stored));
+		this.dead_creature.ToggleTag(GameTags.Dead).PlayAnim("idle_dead", KAnim.PlayMode.Loop);
 	}
 
 	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State alive;
@@ -52,6 +56,8 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.State die;
 
 	public DeathMonitor.Dead dead;
+
+	public DeathMonitor.Dead dead_creature;
 
 	public StateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>.ResourceParameter<Death> death;
 
@@ -104,6 +110,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 		{
 			if (this.isDuplicant)
 			{
+				Game.Instance.assignmentManager.RemoveFromAllGroups(base.GetComponent<MinionIdentity>().assignableProxy.Get());
 				base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.Dead, base.smi.sm.death.Get(base.smi));
 				float num = 600f - GameClock.Instance.GetTimeSinceStartOfReport();
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.PersonalTime, num, string.Format(UI.ENDOFDAYREPORT.NOTES.PERSONAL_TIME, DUPLICANTS.CHORES.IS_DEAD_TASK), base.smi.master.gameObject.GetProperName());

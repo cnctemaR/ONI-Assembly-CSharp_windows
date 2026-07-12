@@ -19,28 +19,33 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 	{
 		base.OnPrefabInit();
 		SpacecraftManager.instance = this;
-		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
 		if (this.savedSpacecraftDestinations == null)
 		{
 			this.savedSpacecraftDestinations = new Dictionary<int, int>();
 		}
-		if (this.destinations == null)
+	}
+
+	private void GenerateFixedDestinations()
+	{
+		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
+		if (this.destinations != null)
 		{
-			this.destinations = new List<SpaceDestination>
-			{
-				new SpaceDestination(0, spaceDestinationTypes.CarbonaceousAsteroid.Id, 0),
-				new SpaceDestination(1, spaceDestinationTypes.CarbonaceousAsteroid.Id, 0),
-				new SpaceDestination(2, spaceDestinationTypes.MetallicAsteroid.Id, 1),
-				new SpaceDestination(3, spaceDestinationTypes.RockyAsteroid.Id, 2),
-				new SpaceDestination(4, spaceDestinationTypes.IcyDwarf.Id, 3),
-				new SpaceDestination(5, spaceDestinationTypes.OrganicDwarf.Id, 4)
-			};
+			return;
 		}
+		this.destinations = new List<SpaceDestination>
+		{
+			new SpaceDestination(0, spaceDestinationTypes.CarbonaceousAsteroid.Id, 0),
+			new SpaceDestination(1, spaceDestinationTypes.CarbonaceousAsteroid.Id, 0),
+			new SpaceDestination(2, spaceDestinationTypes.MetallicAsteroid.Id, 1),
+			new SpaceDestination(3, spaceDestinationTypes.RockyAsteroid.Id, 2),
+			new SpaceDestination(4, spaceDestinationTypes.IcyDwarf.Id, 3),
+			new SpaceDestination(5, spaceDestinationTypes.OrganicDwarf.Id, 4)
+		};
 	}
 
 	private void GenerateRandomDestinations()
 	{
-		global::System.Random random = new global::System.Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed);
+		global::System.Random random = new global::System.Random(SaveLoader.Instance.clusterDetailSave.globalWorldSeed);
 		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
 		List<List<string>> list = new List<List<string>>
 		{
@@ -175,34 +180,34 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		this.destinations.Add(new SpaceDestination(this.destinations.Count, Db.Get().SpaceDestinationTypes.Wormhole.Id, list.Count));
 	}
 
-	protected override void OnSpawn()
+	private void RestoreDestinations()
 	{
-		base.OnSpawn();
-		Game.Instance.spacecraftManager = this;
-		if (!this.destinationsGenerated)
+		if (this.destinationsGenerated)
 		{
-			this.GenerateRandomDestinations();
-			this.destinations.Sort((SpaceDestination a, SpaceDestination b) => a.distance.CompareTo(b.distance));
-			List<float> list = new List<float>();
-			for (int i = 0; i < 10; i++)
+			return;
+		}
+		this.GenerateFixedDestinations();
+		this.GenerateRandomDestinations();
+		this.destinations.Sort((SpaceDestination a, SpaceDestination b) => a.distance.CompareTo(b.distance));
+		List<float> list = new List<float>();
+		for (int i = 0; i < 10; i++)
+		{
+			list.Add((float)i / 10f);
+		}
+		for (int j = 0; j < 20; j++)
+		{
+			list.Shuffle<float>();
+			int num = 0;
+			foreach (SpaceDestination spaceDestination in this.destinations)
 			{
-				list.Add((float)i / 10f);
-			}
-			for (int j = 0; j < 20; j++)
-			{
-				list.Shuffle<float>();
-				int num = 0;
-				foreach (SpaceDestination spaceDestination in this.destinations)
+				if (spaceDestination.distance == j)
 				{
-					if (spaceDestination.distance == j)
-					{
-						num++;
-						spaceDestination.startingOrbitPercentage = list[num];
-					}
+					num++;
+					spaceDestination.startingOrbitPercentage = list[num];
 				}
 			}
-			this.destinationsGenerated = true;
 		}
+		this.destinationsGenerated = true;
 	}
 
 	public SpaceDestination GetSpacecraftDestination(LaunchConditionManager lcm)
@@ -275,17 +280,29 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		}
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		Game.Instance.spacecraftManager = this;
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			global::Debug.Assert(this.spacecraft == null || this.spacecraft.Count == 0);
+			return;
+		}
+		this.RestoreDestinations();
+	}
+
 	public void SetSpacecraftDestination(LaunchConditionManager lcm, SpaceDestination destination)
 	{
 		Spacecraft spacecraftFromLaunchConditionManager = this.GetSpacecraftFromLaunchConditionManager(lcm);
 		this.savedSpacecraftDestinations[spacecraftFromLaunchConditionManager.id] = destination.id;
 	}
 
-	public int GetSpacecraftID(LaunchableRocket rocket)
+	public int GetSpacecraftID(ILaunchableRocket rocket)
 	{
 		foreach (Spacecraft spacecraft in this.spacecraft)
 		{
-			if (spacecraft.launchConditions.gameObject == rocket.gameObject)
+			if (spacecraft.launchConditions.gameObject == rocket.LaunchableGameObject)
 			{
 				return spacecraft.id;
 			}
@@ -346,6 +363,10 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	public void Sim1000ms(float dt)
 	{
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			return;
+		}
 		foreach (Spacecraft spacecraft in this.spacecraft)
 		{
 			spacecraft.ProgressMission(dt);
@@ -358,7 +379,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	public void PushReadyToLandNotification(Spacecraft spacecraft)
 	{
-		Notification notification = new Notification(BUILDING.STATUSITEMS.SPACECRAFTREADYTOLAND.NOTIFICATION, NotificationType.Good, HashedString.Invalid, delegate(List<Notification> notificationList, object data)
+		Notification notification = new Notification(BUILDING.STATUSITEMS.SPACECRAFTREADYTOLAND.NOTIFICATION, NotificationType.Good, delegate(List<Notification> notificationList, object data)
 		{
 			string text = BUILDING.STATUSITEMS.SPACECRAFTREADYTOLAND.NOTIFICATION_TOOLTIP;
 			foreach (Notification notification2 in notificationList)
@@ -477,16 +498,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 	private List<Spacecraft> spacecraft = new List<Spacecraft>();
 
 	[Serialize]
-	public List<SpaceDestination> destinations;
-
-	[Serialize]
-	public Dictionary<int, int> savedSpacecraftDestinations;
-
-	[Serialize]
 	private int nextSpacecraftID;
-
-	[Serialize]
-	public bool destinationsGenerated;
 
 	public const int INVALID_DESTINATION_ID = -1;
 
@@ -495,6 +507,15 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	[Serialize]
 	public bool hasVisitedWormHole;
+
+	[Serialize]
+	public List<SpaceDestination> destinations;
+
+	[Serialize]
+	public Dictionary<int, int> savedSpacecraftDestinations;
+
+	[Serialize]
+	public bool destinationsGenerated;
 
 	[Serialize]
 	public Dictionary<int, float> destinationAnalysisScores = new Dictionary<int, float>();

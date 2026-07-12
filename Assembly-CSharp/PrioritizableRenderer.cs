@@ -60,7 +60,7 @@ public class PrioritizableRenderer
 					foreach (ScenePartitionerEntry scenePartitionerEntry in list)
 					{
 						Prioritizable prioritizable = (Prioritizable)scenePartitionerEntry.obj;
-						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable() && this.tool.IsActiveLayer(this.tool.GetFilterLayerFromGameObject(prioritizable.gameObject)))
+						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable() && this.tool.IsActiveLayer(this.tool.GetFilterLayerFromGameObject(prioritizable.gameObject)) && prioritizable.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 						{
 							this.prioritizables.Add(prioritizable);
 						}

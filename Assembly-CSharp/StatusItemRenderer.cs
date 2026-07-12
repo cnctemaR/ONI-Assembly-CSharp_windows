@@ -287,7 +287,7 @@ public class StatusItemRenderer
 				return;
 			}
 			int num = Grid.PosToCell(vector);
-			if (Grid.IsValidCell(num) && !Grid.IsVisible(num))
+			if (Grid.IsValidCell(num) && (!Grid.IsVisible(num) || (int)Grid.WorldIdx[num] != ClusterManager.Instance.activeWorldId))
 			{
 				return;
 			}
@@ -341,6 +341,19 @@ public class StatusItemRenderer
 					if (statusItem3.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem3.render_overlay != overlay))
 					{
 						float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
+						if (this.statusItems[j].sprite == null)
+						{
+							DebugUtil.DevLogError(string.Concat(new string[]
+							{
+								"Status Item ",
+								this.statusItems[j].Id,
+								" has null sprite for icon '",
+								this.statusItems[j].iconName,
+								"', you need to add the sprite to the TintedSprites list in the GameAssets prefab manually."
+							}));
+							this.statusItems[j].iconName = "status_item_exclamation";
+							this.statusItems[j].sprite = Assets.GetTintedSprite("status_item_exclamation");
+						}
 						Sprite sprite = this.statusItems[j].sprite.sprite;
 						meshBuilder.AddQuad(new Vector2(num7, 0f), new Vector2(num3, num3), num4, sprite, color);
 						num6++;

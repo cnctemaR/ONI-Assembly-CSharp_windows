@@ -33,11 +33,11 @@ public class ThreadedHttps<T> where T : class, new()
 			this.certFail = false;
 			for (int i = 0; i < chain.ChainStatus.Length; i++)
 			{
-				text = string.Concat(new object[]
+				text = string.Concat(new string[]
 				{
 					text,
 					"[",
-					i,
+					i.ToString(),
 					"] ",
 					chain.ChainStatus[i].Status.ToString(),
 					"\n"
@@ -230,13 +230,13 @@ public class ThreadedHttps<T> where T : class, new()
 					num++;
 					if (num > 3)
 					{
-						text = string.Concat(new object[]
+						text = string.Concat(new string[]
 						{
 							DateTime.Now.ToLongTimeString(),
 							" ",
 							this.serviceName,
 							": Max Retries (",
-							3,
+							3.ToString(),
 							") reached. Disabling ",
 							this.serviceName,
 							"..."
@@ -255,13 +255,13 @@ public class ThreadedHttps<T> where T : class, new()
 					string message4 = ex4.Message;
 					string stackTrace = ex4.StackTrace;
 					TimeSpan timeSpan = TimeSpan.FromSeconds(Math.Pow(2.0, (double)(num + 3)));
-					text = string.Concat(new object[]
+					text = string.Concat(new string[]
 					{
 						DateTime.Now.ToLongTimeString(),
 						" ",
 						this.serviceName,
 						": Exception (retrying in ",
-						timeSpan.TotalSeconds,
+						timeSpan.TotalSeconds.ToString(),
 						" seconds): ",
 						message4,
 						"\n",

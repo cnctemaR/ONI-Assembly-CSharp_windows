@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.Profiling;
 
 namespace UnityEngine
 {
@@ -6,12 +7,24 @@ namespace UnityEngine
 	{
 		public static void Combine(GameObject staticBatchRoot)
 		{
-			InternalStaticBatchingUtility.CombineRoot(staticBatchRoot, null);
+			using (StaticBatchingUtility.s_CombineMarker.Auto())
+			{
+				InternalStaticBatchingUtility.CombineRoot(staticBatchRoot, null);
+			}
 		}
 
 		public static void Combine(GameObject[] gos, GameObject staticBatchRoot)
 		{
-			InternalStaticBatchingUtility.CombineGameObjects(gos, staticBatchRoot, false, null);
+			using (StaticBatchingUtility.s_CombineMarker.Auto())
+			{
+				InternalStaticBatchingUtility.CombineGameObjects(gos, staticBatchRoot, false, null);
+			}
 		}
+
+		internal static ProfilerMarker s_CombineMarker = new ProfilerMarker("StaticBatching.Combine");
+
+		internal static ProfilerMarker s_SortMarker = new ProfilerMarker("StaticBatching.SortObjects");
+
+		internal static ProfilerMarker s_MakeBatchMarker = new ProfilerMarker("StaticBatching.MakeBatch");
 	}
 }

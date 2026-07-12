@@ -49,7 +49,7 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 					this.displayedDiseases.Add(image);
 				}
 				image.color = GlobalAssets.Instance.colorSet.GetColorByName(disease.overlayColourName);
-				image.GetComponent<ToolTip>().toolTip = disease.Name + " " + GameUtil.GetFormattedDiseaseAmount((int)value);
+				image.GetComponent<ToolTip>().toolTip = disease.Name + " " + GameUtil.GetFormattedDiseaseAmount((int)value, GameUtil.TimeSlice.None);
 				num2++;
 			}
 		}

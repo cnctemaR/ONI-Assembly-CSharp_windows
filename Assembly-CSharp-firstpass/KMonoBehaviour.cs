@@ -45,7 +45,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		}
 		this.obj = KMonoBehaviour.lastObj;
 		this.isInitialized = true;
-		MyCmp.OnAwake(this);
+		MyAttributes.OnAwake(this);
 		if (!KMonoBehaviour.isPoolPreInit)
 		{
 			try
@@ -135,7 +135,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		{
 			SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
 		}
-		MyCmp.OnStart(this);
+		MyAttributes.OnStart(this);
 		try
 		{
 			this.OnSpawn();
@@ -211,7 +211,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		return this.obj.GetEventSystem().Subscribe(target, hash, handler);
 	}
 
-	public int Subscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler)
+	public int Subscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler) where ComponentType : Component
 	{
 		return this.obj.GetEventSystem().Subscribe<ComponentType>(hash, handler);
 	}
@@ -234,7 +234,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		this.obj.GetEventSystem().Unsubscribe(target, hash, handler);
 	}
 
-	public void Unsubscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings = false)
+	public void Unsubscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings = false) where ComponentType : Component
 	{
 		if (this.obj != null)
 		{

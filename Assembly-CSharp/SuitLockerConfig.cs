@@ -47,7 +47,7 @@ public class SuitLockerConfig : IBuildingConfig
 			new Tag("SuitLocker"),
 			new Tag("SuitMarker")
 		};
-		go.AddOrGet<Storage>().capacityKg = 400f;
+		go.AddOrGet<Storage>();
 		Prioritizable.AddRef(go);
 	}
 

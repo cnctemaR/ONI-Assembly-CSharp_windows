@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C719CBCE-289E-47FB-962B-EC461A7D5B51}</ProjectGuid>
+    <ProjectGuid>{DD3DEF40-76A7-4169-85C9-351C4936F184}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnityEngine</RootNamespace>
+    <RootNamespace>UnityEngine.ParticleSystemModule</RootNamespace>
     <AssemblyName>UnityEngine.ParticleSystemModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
@@ -14,72 +14,75 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="ParticleCollisionEvent.cs" />
-    <Compile Include="ParticlePhysicsExtensions.cs" />
-    <Compile Include="ParticleSystem.cs" />
-    <Compile Include="ParticleSystemAnimationMode.cs" />
-    <Compile Include="ParticleSystemAnimationRowMode.cs" />
-    <Compile Include="ParticleSystemAnimationTimeMode.cs" />
-    <Compile Include="ParticleSystemAnimationType.cs" />
-    <Compile Include="ParticleSystemCollisionMode.cs" />
-    <Compile Include="ParticleSystemCollisionQuality.cs" />
-    <Compile Include="ParticleSystemCollisionType.cs" />
-    <Compile Include="ParticleSystemCullingMode.cs" />
-    <Compile Include="ParticleSystemCurveMode.cs" />
-    <Compile Include="ParticleSystemCustomData.cs" />
-    <Compile Include="ParticleSystemCustomDataMode.cs" />
-    <Compile Include="ParticleSystemEmissionType.cs" />
-    <Compile Include="ParticleSystemEmitterVelocityMode.cs" />
-    <Compile Include="ParticleSystemExtensionsImpl.cs" />
-    <Compile Include="ParticleSystemForceField.cs" />
-    <Compile Include="ParticleSystemForceFieldShape.cs" />
-    <Compile Include="ParticleSystemGameObjectFilter.cs" />
-    <Compile Include="ParticleSystemGradientMode.cs" />
-    <Compile Include="ParticleSystemInheritVelocityMode.cs" />
-    <Compile Include="ParticleSystemJobs\IJobParticleSystem.cs" />
-    <Compile Include="ParticleSystemJobs\IJobParticleSystemParallelFor.cs" />
-    <Compile Include="ParticleSystemJobs\IJobParticleSystemParallelForBatch.cs" />
-    <Compile Include="ParticleSystemJobs\IParticleSystemJobExtensions.cs" />
-    <Compile Include="ParticleSystemJobs\NativeListData.cs" />
-    <Compile Include="ParticleSystemJobs\NativeParticleData.cs" />
-    <Compile Include="ParticleSystemJobs\ParticleSystemJobData.cs" />
-    <Compile Include="ParticleSystemJobs\ParticleSystemJobStruct.cs" />
-    <Compile Include="ParticleSystemJobs\ParticleSystemNativeArray3.cs" />
-    <Compile Include="ParticleSystemJobs\ParticleSystemNativeArray4.cs" />
-    <Compile Include="ParticleSystemJobs\ParticleSystemParallelForBatchJobStruct.cs" />
-    <Compile Include="ParticleSystemJobs\ParticleSystemParallelForJobStruct.cs" />
-    <Compile Include="ParticleSystemMeshShapeType.cs" />
-    <Compile Include="ParticleSystemNoiseQuality.cs" />
-    <Compile Include="ParticleSystemOverlapAction.cs" />
-    <Compile Include="ParticleSystemRenderer.cs" />
-    <Compile Include="ParticleSystemRenderMode.cs" />
-    <Compile Include="ParticleSystemRenderSpace.cs" />
-    <Compile Include="ParticleSystemRingBufferMode.cs" />
-    <Compile Include="ParticleSystemScalingMode.cs" />
-    <Compile Include="ParticleSystemShapeMultiModeValue.cs" />
-    <Compile Include="ParticleSystemShapeTextureChannel.cs" />
-    <Compile Include="ParticleSystemShapeType.cs" />
-    <Compile Include="ParticleSystemSimulationSpace.cs" />
-    <Compile Include="ParticleSystemSortMode.cs" />
-    <Compile Include="ParticleSystemStopAction.cs" />
-    <Compile Include="ParticleSystemStopBehavior.cs" />
-    <Compile Include="ParticleSystemSubEmitterProperties.cs" />
-    <Compile Include="ParticleSystemSubEmitterType.cs" />
-    <Compile Include="ParticleSystemTrailMode.cs" />
-    <Compile Include="ParticleSystemTrailTextureMode.cs" />
-    <Compile Include="ParticleSystemTriggerEventType.cs" />
-    <Compile Include="ParticleSystemVertexStream.cs" />
-    <Compile Include="ParticleSystemVertexStreams.cs" />
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rendering\UVChannelFlags.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsReadOnlyAttribute.cs" />
+    <Compile Include="UnityEngine\ParticleCollisionEvent.cs" />
+    <Compile Include="UnityEngine\ParticlePhysicsExtensions.cs" />
+    <Compile Include="UnityEngine\ParticleSystem.cs" />
+    <Compile Include="UnityEngine\ParticleSystemAnimationMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemAnimationRowMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemAnimationTimeMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemAnimationType.cs" />
+    <Compile Include="UnityEngine\ParticleSystemColliderQueryMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemCollisionMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemCollisionQuality.cs" />
+    <Compile Include="UnityEngine\ParticleSystemCollisionType.cs" />
+    <Compile Include="UnityEngine\ParticleSystemCullingMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemCurveMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemCustomData.cs" />
+    <Compile Include="UnityEngine\ParticleSystemCustomDataMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemEmissionType.cs" />
+    <Compile Include="UnityEngine\ParticleSystemEmitterVelocityMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemExtensionsImpl.cs" />
+    <Compile Include="UnityEngine\ParticleSystemForceField.cs" />
+    <Compile Include="UnityEngine\ParticleSystemForceFieldShape.cs" />
+    <Compile Include="UnityEngine\ParticleSystemGameObjectFilter.cs" />
+    <Compile Include="UnityEngine\ParticleSystemGradientMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemInheritVelocityMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\IJobParticleSystem.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\IJobParticleSystemParallelFor.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\IJobParticleSystemParallelForBatch.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\IParticleSystemJobExtensions.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\NativeListData.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\NativeParticleData.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\ParticleSystemJobData.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\ParticleSystemJobStruct.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\ParticleSystemNativeArray3.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\ParticleSystemNativeArray4.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\ParticleSystemParallelForBatchJobStruct.cs" />
+    <Compile Include="UnityEngine\ParticleSystemJobs\ParticleSystemParallelForJobStruct.cs" />
+    <Compile Include="UnityEngine\ParticleSystemMeshShapeType.cs" />
+    <Compile Include="UnityEngine\ParticleSystemNoiseQuality.cs" />
+    <Compile Include="UnityEngine\ParticleSystemOverlapAction.cs" />
+    <Compile Include="UnityEngine\ParticleSystemRenderer.cs" />
+    <Compile Include="UnityEngine\ParticleSystemRenderMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemRenderSpace.cs" />
+    <Compile Include="UnityEngine\ParticleSystemRingBufferMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemScalingMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemShapeMultiModeValue.cs" />
+    <Compile Include="UnityEngine\ParticleSystemShapeTextureChannel.cs" />
+    <Compile Include="UnityEngine\ParticleSystemShapeType.cs" />
+    <Compile Include="UnityEngine\ParticleSystemSimulationSpace.cs" />
+    <Compile Include="UnityEngine\ParticleSystemSortMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemStopAction.cs" />
+    <Compile Include="UnityEngine\ParticleSystemStopBehavior.cs" />
+    <Compile Include="UnityEngine\ParticleSystemSubEmitterProperties.cs" />
+    <Compile Include="UnityEngine\ParticleSystemSubEmitterType.cs" />
+    <Compile Include="UnityEngine\ParticleSystemTrailMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemTrailTextureMode.cs" />
+    <Compile Include="UnityEngine\ParticleSystemTriggerEventType.cs" />
+    <Compile Include="UnityEngine\ParticleSystemVertexStream.cs" />
+    <Compile Include="UnityEngine\ParticleSystemVertexStreams.cs" />
+    <Compile Include="UnityEngine\Rendering\UVChannelFlags.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B43}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F175}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B57}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F18B}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

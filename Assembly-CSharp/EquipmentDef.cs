@@ -20,6 +20,22 @@ public class EquipmentDef : Def
 		}
 	}
 
+	public string WornName
+	{
+		get
+		{
+			return Strings.Get("STRINGS.EQUIPMENT.PREFABS." + this.Id.ToUpper() + ".WORN_NAME");
+		}
+	}
+
+	public string WornDesc
+	{
+		get
+		{
+			return Strings.Get("STRINGS.EQUIPMENT.PREFABS." + this.Id.ToUpper() + ".WORN_DESC");
+		}
+	}
+
 	public string Id;
 
 	public string Slot;
@@ -65,6 +81,8 @@ public class EquipmentDef : Def
 	public float height = 0.325f;
 
 	public Tag[] AdditionalTags;
+
+	public string wornID;
 
 	public List<Descriptor> additionalDescriptors = new List<Descriptor>();
 }

@@ -15,8 +15,6 @@ namespace ProcGen
 			this.location = location;
 		}
 
-		public MinMax units { get; private set; }
-
 		public string prefabName { get; private set; }
 
 		public int width { get; private set; }

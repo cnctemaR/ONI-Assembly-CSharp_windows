@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Klei;
 using ObjectCloner;
 using ProcGen.Noise;
@@ -24,19 +25,86 @@ namespace ProcGen
 
 		public static MobSettings mobs { get; private set; }
 
-		public static string GetPath()
+		public static string GetAbsoluteContentPath(string dlcId, string optionalSubpath = "")
 		{
-			if (SettingsCache.path == null)
+			string text;
+			if (!SettingsCache.s_cachedPaths.TryGetValue(dlcId, out text))
 			{
-				SettingsCache.path = FileSystem.Normalize(Path.Combine(Application.streamingAssetsPath, "worldgen/"));
+				if (dlcId == "")
+				{
+					text = FileSystem.Normalize(Path.Combine(new string[] { Application.streamingAssetsPath }));
+				}
+				else
+				{
+					string contentDirectoryName = DlcManager.GetContentDirectoryName(dlcId);
+					text = FileSystem.Normalize(Path.Combine(Application.streamingAssetsPath, "dlc", contentDirectoryName));
+				}
+				SettingsCache.s_cachedPaths[dlcId] = text;
 			}
-			return SettingsCache.path;
+			return FileSystem.Normalize(Path.Combine(text, optionalSubpath));
+		}
+
+		public static string RewriteWorldgenPath(string scopePath)
+		{
+			string text;
+			string text2;
+			SettingsCache.GetDlcIdAndPath(scopePath, out text, out text2);
+			return SettingsCache.GetAbsoluteContentPath(text, "worldgen/" + text2);
+		}
+
+		public static string RewriteWorldgenPathYaml(string scopePath)
+		{
+			return SettingsCache.RewriteWorldgenPath(scopePath) + ".yaml";
+		}
+
+		public static string GetScope(string dlcId)
+		{
+			if (dlcId == "")
+			{
+				return "";
+			}
+			return DlcManager.GetContentDirectoryName(dlcId) + "::";
+		}
+
+		public static void GetDlcIdAndPath(string scopePath, out string dlcId, out string path)
+		{
+			string[] array = scopePath.Split(SettingsCache.s_sourceDelimiter, StringSplitOptions.RemoveEmptyEntries);
+			if (array.Length == 1 && scopePath.EndsWith("::"))
+			{
+				dlcId = DlcManager.GetDlcIdFromContentDirectory(array[0]);
+				path = "";
+				return;
+			}
+			if (array.Length > 1)
+			{
+				dlcId = DlcManager.GetDlcIdFromContentDirectory(array[0]);
+				path = array[1];
+				return;
+			}
+			dlcId = "";
+			path = scopePath;
+		}
+
+		public static string GuessScopedPath(string path)
+		{
+			foreach (string text in DlcManager.RELEASE_ORDER)
+			{
+				if (DlcManager.IsContentActive(text))
+				{
+					string absoluteContentPath = SettingsCache.GetAbsoluteContentPath(text, "worldgen/");
+					if (path.StartsWith(absoluteContentPath))
+					{
+						return SettingsCache.GetScope(text) + path.Substring(absoluteContentPath.Length);
+					}
+				}
+			}
+			return null;
 		}
 
 		public static void CloneInToNewWorld(MutatedWorldData worldData)
 		{
 			worldData.subworlds = SerializingCloner.Copy<Dictionary<string, SubWorld>>(SettingsCache.subworlds);
-			worldData.features = SerializingCloner.Copy<Dictionary<string, FeatureSettings>>(SettingsCache.featuresettings);
+			worldData.features = SerializingCloner.Copy<Dictionary<string, FeatureSettings>>(SettingsCache.featureSettings);
 			worldData.biomes = SerializingCloner.Copy<TerrainElementBandSettings>(SettingsCache.biomes);
 			worldData.mobs = SerializingCloner.Copy<MobSettings>(SettingsCache.mobs);
 		}
@@ -44,7 +112,7 @@ namespace ProcGen
 		public static List<string> GetCachedFeatureNames()
 		{
 			List<string> list = new List<string>();
-			foreach (KeyValuePair<string, FeatureSettings> keyValuePair in SettingsCache.featuresettings)
+			foreach (KeyValuePair<string, FeatureSettings> keyValuePair in SettingsCache.featureSettings)
 			{
 				list.Add(keyValuePair.Key);
 			}
@@ -53,9 +121,9 @@ namespace ProcGen
 
 		public static FeatureSettings GetCachedFeature(string name)
 		{
-			if (SettingsCache.featuresettings.ContainsKey(name))
+			if (SettingsCache.featureSettings.ContainsKey(name))
 			{
-				return SettingsCache.featuresettings[name];
+				return SettingsCache.featureSettings[name];
 			}
 			throw new Exception("Couldnt get feature from cache [" + name + "]");
 		}
@@ -88,82 +156,62 @@ namespace ProcGen
 			throw new Exception("Couldnt get subworld [" + name + "]");
 		}
 
-		private static bool GetPathAndName(string srcPath, string srcName, out string name)
+		private static void SplitNameFromPath(string scopePath, out string path, out string name)
 		{
-			if (FileSystem.FileExists(srcPath + srcName + ".yaml"))
-			{
-				name = srcName;
-				return true;
-			}
-			string[] array = srcName.Split(new char[] { '/' });
-			name = array[0];
-			for (int i = 1; i < array.Length - 1; i++)
-			{
-				name = name + "/" + array[i];
-			}
-			if (FileSystem.FileExists(srcPath + name + ".yaml"))
-			{
-				return true;
-			}
-			name = srcName;
-			return false;
+			int num = scopePath.LastIndexOf('/');
+			name = scopePath.Substring(num + 1);
+			path = scopePath.Substring(0, num);
 		}
 
-		private static void LoadBiome(string longName, List<YamlIO.Error> errors)
+		private static bool LoadBiome(string longName, List<YamlIO.Error> errors)
 		{
-			string text = "";
-			if (!SettingsCache.GetPathAndName(SettingsCache.GetPath(), longName, out text))
-			{
-				return;
-			}
+			string text;
+			string text2;
+			SettingsCache.SplitNameFromPath(longName, out text, out text2);
 			if (SettingsCache.biomeSettingsCache.ContainsKey(text))
 			{
-				return;
+				return true;
 			}
-			BiomeSettings biomeSettings = SettingsCache.MergeLoad<BiomeSettings>(SettingsCache.GetPath() + text + ".yaml", errors);
+			string text3 = SettingsCache.RewriteWorldgenPathYaml(text);
+			BiomeSettings biomeSettings = SettingsCache.MergeLoad<BiomeSettings>(null, text3, errors);
 			if (biomeSettings == null)
 			{
-				global::Debug.LogWarning("WorldGen: Attempting to load biome: " + text + " failed");
-				return;
+				global::Debug.LogWarning("WorldGen: Attempting to load biome: " + text2 + " failed");
+				return false;
 			}
-			global::Debug.Assert(biomeSettings.TerrainBiomeLookupTable.Count > 0, longName);
+			global::Debug.Assert(biomeSettings.TerrainBiomeLookupTable.Count > 0, "Worldgen: TerrainBiomeLookupTable is empty: " + longName);
 			SettingsCache.biomeSettingsCache.Add(text, biomeSettings);
 			foreach (KeyValuePair<string, ElementBandConfiguration> keyValuePair in biomeSettings.TerrainBiomeLookupTable)
 			{
-				string text2 = text + "/" + keyValuePair.Key;
-				if (!SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(text2))
+				string text4 = text + "/" + keyValuePair.Key;
+				if (!SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(text4))
 				{
-					SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.Add(text2, keyValuePair.Value);
+					SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.Add(text4, keyValuePair.Value);
 				}
 			}
+			return true;
 		}
 
 		private static string LoadFeature(string longName, List<YamlIO.Error> errors)
 		{
-			string text = "";
-			if (!SettingsCache.GetPathAndName(SettingsCache.GetPath(), longName, out text))
+			if (SettingsCache.featureSettings.ContainsKey(longName))
 			{
-				global::Debug.LogWarning("LoadFeature GetPathAndName: Attempting to load feature: " + text + " failed");
 				return longName;
 			}
-			if (!SettingsCache.featuresettings.ContainsKey(text))
+			FeatureSettings featureSettings = YamlIO.LoadFile<FeatureSettings>(SettingsCache.RewriteWorldgenPathYaml(longName), null, null);
+			if (featureSettings != null)
 			{
-				FeatureSettings featureSettings = YamlIO.LoadFile<FeatureSettings>(SettingsCache.GetPath() + text + ".yaml", null, null);
-				if (featureSettings != null)
+				SettingsCache.featureSettings.Add(longName, featureSettings);
+				if (featureSettings.forceBiome != null)
 				{
-					SettingsCache.featuresettings.Add(text, featureSettings);
-					if (featureSettings.forceBiome != null)
-					{
-						SettingsCache.LoadBiome(featureSettings.forceBiome, errors);
-						DebugUtil.Assert(SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(featureSettings.forceBiome), longName, "(feature) referenced a missing biome named", featureSettings.forceBiome);
-					}
-				}
-				else
-				{
-					global::Debug.LogWarning("WorldGen: Attempting to load feature: " + text + " failed");
+					DebugUtil.Assert(SettingsCache.LoadBiome(featureSettings.forceBiome, errors), longName, "(feature) referenced a missing biome named", featureSettings.forceBiome);
 				}
 			}
-			return text;
+			else
+			{
+				global::Debug.LogWarning("WorldGen: Attempting to load feature: " + longName + " failed");
+			}
+			return longName;
 		}
 
 		public static void LoadFeatures(Dictionary<string, int> features, List<YamlIO.Error> errors)
@@ -174,67 +222,65 @@ namespace ProcGen
 			}
 		}
 
-		public static void LoadSubworlds(List<WeightedName> subworlds, List<YamlIO.Error> errors)
+		public static void LoadSubworlds(List<WeightedSubworldName> subworlds, string prefix, List<YamlIO.Error> errors)
 		{
-			foreach (WeightedName weightedName in subworlds)
+			foreach (WeightedSubworldName weightedSubworldName in subworlds)
 			{
 				SubWorld subWorld = null;
-				string text = weightedName.name;
-				if (weightedName.overrideName != null && weightedName.overrideName.Length > 0)
+				string text = weightedSubworldName.name;
+				if (weightedSubworldName.overrideName != null && weightedSubworldName.overrideName.Length > 0)
 				{
-					text = weightedName.overrideName;
+					text = weightedSubworldName.overrideName;
 				}
-				if (!SettingsCache.subworlds.ContainsKey(text))
+				SubWorld subWorld2 = YamlIO.LoadFile<SubWorld>(SettingsCache.RewriteWorldgenPathYaml(text), null, null);
+				if (subWorld2 != null)
 				{
-					SubWorld subWorld2 = YamlIO.LoadFile<SubWorld>(SettingsCache.path + weightedName.name + ".yaml", null, null);
-					if (subWorld2 != null)
-					{
-						subWorld = subWorld2;
-						subWorld.name = text;
-						SettingsCache.subworlds[text] = subWorld;
-						SettingsCache.noise.LoadTree(subWorld.biomeNoise, SettingsCache.path);
-						SettingsCache.noise.LoadTree(subWorld.densityNoise, SettingsCache.path);
-						SettingsCache.noise.LoadTree(subWorld.overrideNoise, SettingsCache.path);
-					}
-					else
-					{
-						global::Debug.LogWarning("WorldGen: Attempting to load subworld: " + weightedName.name + " failed");
-					}
-					if (subWorld.centralFeature != null)
-					{
-						subWorld.centralFeature.type = SettingsCache.LoadFeature(subWorld.centralFeature.type, errors);
-					}
-					foreach (WeightedBiome weightedBiome in subWorld.biomes)
-					{
-						SettingsCache.LoadBiome(weightedBiome.name, errors);
-						DebugUtil.Assert(SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(weightedBiome.name), subWorld.name, "(subworld) referenced a missing biome named", weightedBiome.name);
-					}
-					DebugUtil.Assert(subWorld.features != null, "Features list for subworld", subWorld.name, "was null! Either remove it from the .yaml or set it to the empty list []");
-					foreach (Feature feature in subWorld.features)
-					{
-						feature.type = SettingsCache.LoadFeature(feature.type, errors);
-					}
+					subWorld = subWorld2;
+					subWorld.name = text;
+					subWorld.EnforceTemplateSpawnRuleSelfConsistency();
+					SettingsCache.subworlds[text] = subWorld;
+					SettingsCache.noise.LoadTree(subWorld.biomeNoise);
+					SettingsCache.noise.LoadTree(subWorld.densityNoise);
+					SettingsCache.noise.LoadTree(subWorld.overrideNoise);
+				}
+				else
+				{
+					global::Debug.LogWarning("WorldGen: Attempting to load subworld: " + text + " failed");
+				}
+				if (subWorld.centralFeature != null)
+				{
+					subWorld.centralFeature.type = SettingsCache.LoadFeature(subWorld.centralFeature.type, errors);
+				}
+				foreach (WeightedBiome weightedBiome in subWorld.biomes)
+				{
+					SettingsCache.LoadBiome(weightedBiome.name, errors);
+					DebugUtil.Assert(SettingsCache.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(weightedBiome.name), subWorld.name, "(subworld) referenced a missing biome named", weightedBiome.name);
+				}
+				DebugUtil.Assert(subWorld.features != null, "Features list for subworld", subWorld.name, "was null! Either remove it from the .yaml or set it to the empty list []");
+				foreach (Feature feature in subWorld.features)
+				{
+					feature.type = SettingsCache.LoadFeature(feature.type, errors);
 				}
 			}
 		}
 
-		public static void LoadWorldTraits(List<YamlIO.Error> errors)
+		public static void LoadWorldTraits(string path, string prefix, List<YamlIO.Error> errors)
 		{
 			List<FileHandle> list = new List<FileHandle>();
-			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(SettingsCache.path, "traits")), "*.yaml", list);
+			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "traits")), "*.yaml", list);
 			foreach (FileHandle fileHandle in list)
 			{
-				SettingsCache.LoadWorldTrait(fileHandle, errors);
+				SettingsCache.LoadWorldTrait(fileHandle, path, prefix, errors);
 			}
 		}
 
-		public static void LoadWorldTrait(FileHandle file, List<YamlIO.Error> errors)
+		public static void LoadWorldTrait(FileHandle file, string path, string prefix, List<YamlIO.Error> errors)
 		{
 			WorldTrait worldTrait = YamlIO.LoadFile<WorldTrait>(file, delegate(YamlIO.Error error, bool force_log_as_warning)
 			{
 				errors.Add(error);
 			}, null);
-			int num = SettingsCache.FirstUncommonCharacter(SettingsCache.path, file.full_path);
+			int num = SettingsCache.FirstUncommonCharacter(path, file.full_path);
 			string text = ((num > -1) ? file.full_path.Substring(num) : file.full_path);
 			text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
 			text = text.Replace('\\', '/');
@@ -243,8 +289,8 @@ namespace ProcGen
 				DebugUtil.LogWarningArgs(new object[] { "Failed to load trait: ", text });
 				return;
 			}
+			worldTrait.filePath = prefix + text;
 			SettingsCache.traits[text] = worldTrait;
-			worldTrait.filePath = text;
 		}
 
 		public static List<string> GetWorldNames()
@@ -252,15 +298,9 @@ namespace ProcGen
 			return SettingsCache.worlds.GetNames();
 		}
 
-		public static void Save(string path)
+		public static List<string> GetClusterNames()
 		{
-			YamlIO.Save<LevelLayerSettings>(SettingsCache.layers, path + "layers.yaml", null);
-			YamlIO.Save<ComposableDictionary<string, River>>(SettingsCache.rivers, path + "rivers.yaml", null);
-			YamlIO.Save<ComposableDictionary<string, Room>>(SettingsCache.rooms, path + "rooms.yaml", null);
-			YamlIO.Save<ComposableDictionary<Temperature.Range, Temperature>>(SettingsCache.temperatures, path + "temperatures.yaml", null);
-			YamlIO.Save<ComposableDictionary<string, List<WeightedSimHash>>>(SettingsCache.borders, path + "borders.yaml", null);
-			YamlIO.Save<DefaultSettings>(SettingsCache.defaults, path + "defaults.yaml", null);
-			YamlIO.Save<MobSettings>(SettingsCache.mobs, path + "mobs.yaml", null);
+			return SettingsCache.clusterLayouts.GetNames();
 		}
 
 		public static void Clear()
@@ -276,49 +316,61 @@ namespace ProcGen
 			SettingsCache.noise.Clear();
 			SettingsCache.defaults = null;
 			SettingsCache.mobs = null;
-			SettingsCache.featuresettings.Clear();
+			SettingsCache.featureSettings.Clear();
 			SettingsCache.traits.Clear();
 			SettingsCache.subworlds.Clear();
+			SettingsCache.clusterLayouts.clusterCache.Clear();
 			DebugUtil.LogArgs(new object[] { "World Settings cleared!" });
 		}
 
-		private static T MergeLoad<T>(string filename, List<YamlIO.Error> errors) where T : class, IMerge<T>, new()
+		private static T MergeLoad<T>(T existing, string filename, List<YamlIO.Error> errors) where T : class, IMerge<T>, new()
 		{
 			ListPool<FileHandle, WorldGenSettings>.PooledList pooledList = ListPool<FileHandle, WorldGenSettings>.Allocate();
 			FileSystem.GetFiles(filename, pooledList);
 			if (pooledList.Count == 0)
 			{
 				pooledList.Recycle();
+				if (existing != null)
+				{
+					return existing;
+				}
 				throw new Exception(string.Format("File not found in any file system: {0}", filename));
 			}
-			pooledList.Reverse();
-			ListPool<T, WorldGenSettings>.PooledList pooledList2 = ListPool<T, WorldGenSettings>.Allocate();
-			pooledList2.Add(new T());
-			YamlIO.ErrorHandler <>9__0;
-			foreach (FileHandle fileHandle in pooledList)
+			else
 			{
-				YamlIO.ErrorHandler errorHandler;
-				if ((errorHandler = <>9__0) == null)
+				pooledList.Reverse();
+				ListPool<T, WorldGenSettings>.PooledList pooledList2 = ListPool<T, WorldGenSettings>.Allocate();
+				pooledList2.Add(new T());
+				YamlIO.ErrorHandler <>9__0;
+				foreach (FileHandle fileHandle in pooledList)
 				{
-					errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+					YamlIO.ErrorHandler errorHandler;
+					if ((errorHandler = <>9__0) == null)
 					{
-						errors.Add(error);
-					});
+						errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+						{
+							errors.Add(error);
+						});
+					}
+					T t = YamlIO.LoadFile<T>(fileHandle, errorHandler, null);
+					if (t != null)
+					{
+						pooledList2.Add(t);
+					}
 				}
-				T t = YamlIO.LoadFile<T>(fileHandle, errorHandler, null);
-				if (t != null)
+				pooledList.Recycle();
+				T t2 = pooledList2[0];
+				for (int num = 1; num != pooledList2.Count; num++)
 				{
-					pooledList2.Add(t);
+					t2.Merge(pooledList2[num]);
 				}
+				pooledList2.Recycle();
+				if (existing != null)
+				{
+					return existing.Merge(t2);
+				}
+				return t2;
 			}
-			pooledList.Recycle();
-			T t2 = pooledList2[0];
-			for (int num = 1; num != pooledList2.Count; num++)
-			{
-				t2.Merge(pooledList2[num]);
-			}
-			pooledList2.Recycle();
-			return t2;
 		}
 
 		private static int FirstUncommonCharacter(string a, string b)
@@ -341,35 +393,51 @@ namespace ProcGen
 			{
 				return false;
 			}
-			SettingsCache.worlds.LoadFiles(SettingsCache.GetPath(), errors);
-			SettingsCache.LoadWorldTraits(errors);
+			SettingsCache.defaults = YamlIO.LoadFile<DefaultSettings>(SettingsCache.GetAbsoluteContentPath("", "worldgen/") + "defaults.yaml", null, null);
+			foreach (string text in DlcManager.RELEASE_ORDER)
+			{
+				if (DlcManager.IsContentActive(text))
+				{
+					SettingsCache.LoadFiles(SettingsCache.GetAbsoluteContentPath(text, "worldgen/"), SettingsCache.GetScope(text), errors);
+				}
+			}
+			SettingsCache.worlds.Validate();
+			DebugUtil.LogArgs(new object[] { "World settings reload complete!" });
+			return true;
+		}
+
+		private static bool LoadFiles(string worldgenFolderPath, string addPrefix, List<YamlIO.Error> errors)
+		{
+			SettingsCache.clusterLayouts.LoadFiles(worldgenFolderPath, addPrefix, errors);
+			HashSet<string> hashSet = new HashSet<string>(from worldPlacment in SettingsCache.clusterLayouts.clusterCache.Values.SelectMany<ClusterLayout, WorldPlacement>((ClusterLayout clusterLayout) => clusterLayout.worldPlacements)
+				select worldPlacment.world);
+			SettingsCache.worlds.LoadReferencedWorlds(worldgenFolderPath, addPrefix, hashSet, errors);
+			SettingsCache.LoadWorldTraits(worldgenFolderPath, addPrefix, errors);
 			foreach (KeyValuePair<string, World> keyValuePair in SettingsCache.worlds.worldCache)
 			{
 				SettingsCache.LoadFeatures(keyValuePair.Value.globalFeatures, errors);
-				SettingsCache.LoadSubworlds(keyValuePair.Value.subworldFiles, errors);
+				SettingsCache.LoadSubworlds(keyValuePair.Value.subworldFiles, addPrefix, errors);
 			}
 			foreach (KeyValuePair<string, WorldTrait> keyValuePair2 in SettingsCache.traits)
 			{
 				SettingsCache.LoadFeatures(keyValuePair2.Value.globalFeatureMods, errors);
-				SettingsCache.LoadSubworlds(keyValuePair2.Value.additionalSubworldFiles, errors);
+				SettingsCache.LoadSubworlds(keyValuePair2.Value.additionalSubworldFiles, addPrefix, errors);
 			}
-			SettingsCache.layers = SettingsCache.MergeLoad<LevelLayerSettings>(SettingsCache.GetPath() + "layers.yaml", errors);
+			SettingsCache.layers = SettingsCache.MergeLoad<LevelLayerSettings>(SettingsCache.layers, worldgenFolderPath + "layers.yaml", errors);
 			SettingsCache.layers.LevelLayers.ConvertBandSizeToMaxSize();
-			SettingsCache.rivers = SettingsCache.MergeLoad<ComposableDictionary<string, River>>(SettingsCache.GetPath() + "rivers.yaml", errors);
-			SettingsCache.rooms = SettingsCache.MergeLoad<ComposableDictionary<string, Room>>(SettingsCache.path + "rooms.yaml", errors);
+			SettingsCache.rivers = SettingsCache.MergeLoad<ComposableDictionary<string, River>>(SettingsCache.rivers, worldgenFolderPath + "rivers.yaml", errors);
+			SettingsCache.rooms = SettingsCache.MergeLoad<ComposableDictionary<string, Room>>(SettingsCache.rooms, worldgenFolderPath + "rooms.yaml", errors);
 			foreach (KeyValuePair<string, Room> keyValuePair3 in SettingsCache.rooms)
 			{
 				keyValuePair3.Value.name = keyValuePair3.Key;
 			}
-			SettingsCache.temperatures = SettingsCache.MergeLoad<ComposableDictionary<Temperature.Range, Temperature>>(SettingsCache.GetPath() + "temperatures.yaml", errors);
-			SettingsCache.borders = SettingsCache.MergeLoad<ComposableDictionary<string, List<WeightedSimHash>>>(SettingsCache.GetPath() + "borders.yaml", errors);
-			SettingsCache.defaults = YamlIO.LoadFile<DefaultSettings>(SettingsCache.GetPath() + "defaults.yaml", null, null);
-			SettingsCache.mobs = SettingsCache.MergeLoad<MobSettings>(SettingsCache.GetPath() + "mobs.yaml", errors);
+			SettingsCache.temperatures = SettingsCache.MergeLoad<ComposableDictionary<Temperature.Range, Temperature>>(SettingsCache.temperatures, worldgenFolderPath + "temperatures.yaml", errors);
+			SettingsCache.borders = SettingsCache.MergeLoad<ComposableDictionary<string, List<WeightedSimHash>>>(SettingsCache.borders, worldgenFolderPath + "borders.yaml", errors);
+			SettingsCache.mobs = SettingsCache.MergeLoad<MobSettings>(SettingsCache.mobs, worldgenFolderPath + "mobs.yaml", errors);
 			foreach (KeyValuePair<string, Mob> keyValuePair4 in SettingsCache.mobs.MobLookupTable)
 			{
 				keyValuePair4.Value.name = keyValuePair4.Key;
 			}
-			DebugUtil.LogArgs(new object[] { "World settings reload complete!" });
 			return true;
 		}
 
@@ -402,21 +470,25 @@ namespace ProcGen
 			return list2;
 		}
 
-		public static TerrainElementBandSettings biomes = new TerrainElementBandSettings();
+		public static ClusterLayouts clusterLayouts = new ClusterLayouts();
 
 		public static Worlds worlds = new Worlds();
 
+		public static Dictionary<string, SubWorld> subworlds = new Dictionary<string, SubWorld>();
+
+		public static TerrainElementBandSettings biomes = new TerrainElementBandSettings();
+
 		public static NoiseTreeFiles noise = new NoiseTreeFiles();
 
-		private static Dictionary<string, FeatureSettings> featuresettings = new Dictionary<string, FeatureSettings>();
+		private static Dictionary<string, FeatureSettings> featureSettings = new Dictionary<string, FeatureSettings>();
 
 		private static Dictionary<string, WorldTrait> traits = new Dictionary<string, WorldTrait>();
 
-		public static Dictionary<string, SubWorld> subworlds = new Dictionary<string, SubWorld>();
-
-		private static string path = null;
-
 		private static Dictionary<string, BiomeSettings> biomeSettingsCache = new Dictionary<string, BiomeSettings>();
+
+		private static string[] s_sourceDelimiter = new string[] { "::" };
+
+		private static Dictionary<string, string> s_cachedPaths = new Dictionary<string, string>();
 
 		private const string LAYERS_FILE = "layers";
 

@@ -25,7 +25,7 @@ namespace Unity.Jobs
 				bool flag = IJobParallelForExtensions.ParallelForJobStruct<T>.jobReflectionData == IntPtr.Zero;
 				if (flag)
 				{
-					IJobParallelForExtensions.ParallelForJobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), JobType.ParallelFor, new IJobParallelForExtensions.ParallelForJobStruct<T>.ExecuteJobFunction(IJobParallelForExtensions.ParallelForJobStruct<T>.Execute), null, null);
+					IJobParallelForExtensions.ParallelForJobStruct<T>.jobReflectionData = JobsUtility.CreateJobReflectionData(typeof(T), new IJobParallelForExtensions.ParallelForJobStruct<T>.ExecuteJobFunction(IJobParallelForExtensions.ParallelForJobStruct<T>.Execute), null, null);
 				}
 				return IJobParallelForExtensions.ParallelForJobStruct<T>.jobReflectionData;
 			}

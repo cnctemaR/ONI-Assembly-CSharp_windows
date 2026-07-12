@@ -52,6 +52,6 @@ namespace UnityEngine
 
 		[FreeFunction("Scripting::ResetAndApplyDefaultInstances")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ResetAndApplyDefaultInstances(Object obj);
+		internal static extern void ResetAndApplyDefaultInstances([NotNull("NullExceptionObject")] Object obj);
 	}
 }

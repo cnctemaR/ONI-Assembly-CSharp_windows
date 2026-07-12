@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeHeader("Runtime/Interfaces/IPhysics2D.h")]
 	[NativeClass("RaycastHit2D", "struct RaycastHit2D;")]
+	[NativeHeader("Runtime/Interfaces/IPhysics2D.h")]
 	public struct RaycastHit2D
 	{
 		public Vector2 centroid

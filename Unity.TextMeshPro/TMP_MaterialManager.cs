@@ -148,23 +148,17 @@ namespace TMPro
 			if (TMP_MaterialManager.m_materialList[num].count > 1)
 			{
 				TMP_MaterialManager.m_materialList[num].count--;
-				Debug.Log(string.Concat(new object[]
+				Debug.Log(string.Concat(new string[]
 				{
 					"Removed (1) reference to ",
 					TMP_MaterialManager.m_materialList[num].stencilMaterial.name,
 					". There are ",
-					TMP_MaterialManager.m_materialList[num].count,
+					TMP_MaterialManager.m_materialList[num].count.ToString(),
 					" references left."
 				}));
 				return;
 			}
-			Debug.Log(string.Concat(new object[]
-			{
-				"Removed last reference to ",
-				TMP_MaterialManager.m_materialList[num].stencilMaterial.name,
-				" with ID ",
-				TMP_MaterialManager.m_materialList[num].stencilMaterial.GetInstanceID()
-			}));
+			Debug.Log("Removed last reference to " + TMP_MaterialManager.m_materialList[num].stencilMaterial.name + " with ID " + TMP_MaterialManager.m_materialList[num].stencilMaterial.GetInstanceID().ToString());
 			global::UnityEngine.Object.DestroyImmediate(TMP_MaterialManager.m_materialList[num].stencilMaterial);
 			TMP_MaterialManager.m_materialList.RemoveAt(num);
 		}

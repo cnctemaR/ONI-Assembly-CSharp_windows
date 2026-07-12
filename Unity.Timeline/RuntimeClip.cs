@@ -110,7 +110,7 @@ namespace UnityEngine.Timeline
 				this.mixer.SetInputWeight(this.playable, num);
 			}
 			double num2 = this.clip.ToLocalTime(localTime);
-			if (num2.CompareTo(0.0) >= 0)
+			if (num2 >= -DiscreteTime.tickValue / 2.0)
 			{
 				this.SetTime(num2);
 			}

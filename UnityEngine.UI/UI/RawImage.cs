@@ -3,6 +3,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
+	[RequireComponent(typeof(CanvasRenderer))]
 	[AddComponentMenu("UI/Raw Image", 12)]
 	public class RawImage : MaskableGraphic
 	{

@@ -108,7 +108,7 @@ namespace ProcGen
 			return this.add.GetEnumerator();
 		}
 
-		public void Merge(ComposableDictionary<Key, Value> other)
+		public ComposableDictionary<Key, Value> Merge(ComposableDictionary<Key, Value> other)
 		{
 			this.VerifyConsolidated();
 			foreach (Key key in other.remove)
@@ -128,6 +128,7 @@ namespace ProcGen
 				}
 				this.add.Add(keyValuePair.Key, keyValuePair.Value);
 			}
+			return this;
 		}
 	}
 }

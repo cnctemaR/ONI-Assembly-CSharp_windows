@@ -22,16 +22,34 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		base.Subscribe<SeedProducer>(-1072826864, SeedProducer.CropPickedDelegate);
 	}
 
-	public GameObject ProduceSeed(string seedId, int units = 1)
+	private GameObject ProduceSeed(string seedId, int units = 1, bool canMutate = true)
 	{
 		if (seedId != null && units > 0)
 		{
 			Vector3 vector = base.gameObject.transform.GetPosition() + new Vector3(0f, 0.5f, 0f);
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag(seedId)), vector, Grid.SceneLayer.Ore, null, 0);
-			PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
-			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-			component2.Temperature = component.Temperature;
-			component2.Units = (float)units;
+			MutantPlant component = base.GetComponent<MutantPlant>();
+			if (component != null)
+			{
+				MutantPlant component2 = gameObject.GetComponent<MutantPlant>();
+				bool flag = false;
+				if (canMutate && component2 != null && component2.IsOriginal)
+				{
+					flag = this.RollForMutation();
+				}
+				if (flag)
+				{
+					component2.Mutate();
+				}
+				else
+				{
+					component.CopyMutationsTo(component2);
+				}
+			}
+			PrimaryElement component3 = base.gameObject.GetComponent<PrimaryElement>();
+			PrimaryElement component4 = gameObject.GetComponent<PrimaryElement>();
+			component4.Temperature = component3.Temperature;
+			component4.Units = (float)units;
 			base.Trigger(472291861, gameObject.GetComponent<PlantableSeed>());
 			gameObject.SetActive(true);
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
@@ -46,7 +64,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1);
+		GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1, false);
 		base.Trigger(-1736624145, gameObject.GetComponent<PlantableSeed>());
 		this.droppedSeedAlready = true;
 	}
@@ -67,8 +85,16 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 				num += completed_by.GetComponent<AttributeConverters>().Get(Db.Get().AttributeConverters.SeedHarvestChance).Evaluate();
 			}
 			int num2 = ((global::UnityEngine.Random.Range(0f, 1f) <= num) ? 1 : 0);
-			this.ProduceSeed(this.seedInfo.seedId, num2);
+			this.ProduceSeed(this.seedInfo.seedId, num2, true);
 		}
+	}
+
+	public bool RollForMutation()
+	{
+		AttributeInstance attributeInstance = Db.Get().PlantAttributes.MaxRadiationThreshold.Lookup(this);
+		int num = Grid.PosToCell(base.gameObject);
+		float num2 = Mathf.Clamp(Grid.IsValidCell(num) ? Grid.Radiation[num] : 0f, 0f, attributeInstance.GetTotalValue()) / attributeInstance.GetTotalValue() * 0.8f;
+		return global::UnityEngine.Random.value < num2;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -87,6 +113,9 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			break;
 		case SeedProducer.ProductionType.Fruit:
 			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_FRUIT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_DIG_ONLY, Descriptor.DescriptorType.Lifecycle, true));
+			break;
+		case SeedProducer.ProductionType.Sterile:
+			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.MUTANT_STERILE, UI.GAMEOBJECTEFFECTS.TOOLTIPS.MUTANT_STERILE, Descriptor.DescriptorType.Effect, false));
 			break;
 		}
 		return list;
@@ -121,6 +150,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		Hidden,
 		DigOnly,
 		Harvest,
-		Fruit
+		Fruit,
+		Sterile
 	}
 }

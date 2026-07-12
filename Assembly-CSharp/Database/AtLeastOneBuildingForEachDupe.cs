@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class AtLeastOneBuildingForEachDupe : ColonyAchievementRequirement
+	public class AtLeastOneBuildingForEachDupe : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public AtLeastOneBuildingForEachDupe(List<Tag> validBuildingTypes)
 		{
@@ -40,7 +38,7 @@ namespace Database
 			return false;
 		}
 
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			int num = reader.ReadInt32();
 			this.validBuildingTypes = new List<Tag>(num);
@@ -48,15 +46,6 @@ namespace Database
 			{
 				string text = reader.ReadKleiString();
 				this.validBuildingTypes.Add(new Tag(text));
-			}
-		}
-
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.validBuildingTypes.Count);
-			foreach (Tag tag in this.validBuildingTypes)
-			{
-				writer.WriteKleiString(tag.ToString());
 			}
 		}
 

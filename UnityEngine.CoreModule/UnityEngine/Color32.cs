@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
@@ -7,7 +8,7 @@ namespace UnityEngine
 {
 	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Explicit)]
-	public struct Color32
+	public struct Color32 : IFormattable
 	{
 		public Color32(byte r, byte g, byte b, byte a)
 		{
@@ -59,7 +60,7 @@ namespace UnityEngine
 					b = this.a;
 					break;
 				default:
-					throw new IndexOutOfRangeException("Invalid Color32 index(" + index + ")!");
+					throw new IndexOutOfRangeException("Invalid Color32 index(" + index.ToString() + ")!");
 				}
 				return b;
 			}
@@ -80,7 +81,7 @@ namespace UnityEngine
 					this.a = value;
 					break;
 				default:
-					throw new IndexOutOfRangeException("Invalid Color32 index(" + index + ")!");
+					throw new IndexOutOfRangeException("Invalid Color32 index(" + index.ToString() + ")!");
 				}
 			}
 		}
@@ -93,17 +94,22 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("RGBA({0}, {1}, {2}, {3})", new object[] { this.r, this.g, this.b, this.a });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
 			return UnityString.Format("RGBA({0}, {1}, {2}, {3})", new object[]
 			{
-				this.r.ToString(format),
-				this.g.ToString(format),
-				this.b.ToString(format),
-				this.a.ToString(format)
+				this.r.ToString(format, formatProvider),
+				this.g.ToString(format, formatProvider),
+				this.b.ToString(format, formatProvider),
+				this.a.ToString(format, formatProvider)
 			});
 		}
 

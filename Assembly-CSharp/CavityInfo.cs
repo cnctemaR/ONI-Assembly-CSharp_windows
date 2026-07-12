@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class CavityInfo
 {
@@ -30,6 +31,11 @@ public class CavityInfo
 				kprefabID.Trigger(-832141045, data);
 			}
 		}
+	}
+
+	public Vector3 GetCenter()
+	{
+		return new Vector3((float)(this.minX + (this.maxX - this.minX) / 2), (float)(this.minY + (this.maxY - this.minY) / 2));
 	}
 
 	public HandleVector<int>.Handle handle;

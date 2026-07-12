@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[UsedByNativeCode]
-	public struct RectInt : IEquatable<RectInt>
+	public struct RectInt : IEquatable<RectInt>, IFormattable
 	{
 		public int x
 		{
@@ -208,7 +209,23 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[] { this.x, this.y, this.width, this.height });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format)
+		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
+			{
+				this.x.ToString(format, formatProvider),
+				this.y.ToString(format, formatProvider),
+				this.width.ToString(format, formatProvider),
+				this.height.ToString(format, formatProvider)
+			});
 		}
 
 		public bool Equals(RectInt other)
@@ -263,10 +280,15 @@ namespace UnityEngine
 					if (flag3)
 					{
 						this._current.x = this._min.x;
+						bool flag4 = this._current.x >= this._max.x;
+						if (flag4)
+						{
+							return false;
+						}
 						num = this._current.y;
 						this._current.y = num + 1;
-						bool flag4 = this._current.y >= this._max.y;
-						if (flag4)
+						bool flag5 = this._current.y >= this._max.y;
+						if (flag5)
 						{
 							return false;
 						}

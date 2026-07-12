@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine.Scripting;
 
@@ -85,7 +86,7 @@ namespace UnityEngine.Rendering
 		}
 
 		[RequiredByNativeCode]
-		private static void DoRenderLoop_Internal(RenderPipelineAsset pipe, IntPtr loopPtr)
+		private static void DoRenderLoop_Internal(RenderPipelineAsset pipe, IntPtr loopPtr, List<Camera.RenderRequest> renderRequests)
 		{
 			RenderPipelineManager.PrepareRenderPipeline(pipe);
 			bool flag = RenderPipelineManager.currentPipeline == null;
@@ -94,7 +95,15 @@ namespace UnityEngine.Rendering
 				ScriptableRenderContext scriptableRenderContext = new ScriptableRenderContext(loopPtr);
 				Array.Clear(RenderPipelineManager.s_Cameras, 0, RenderPipelineManager.s_Cameras.Length);
 				RenderPipelineManager.GetCameras(scriptableRenderContext);
-				RenderPipelineManager.currentPipeline.InternalRender(scriptableRenderContext, RenderPipelineManager.s_Cameras);
+				bool flag2 = renderRequests == null;
+				if (flag2)
+				{
+					RenderPipelineManager.currentPipeline.InternalRender(scriptableRenderContext, RenderPipelineManager.s_Cameras);
+				}
+				else
+				{
+					RenderPipelineManager.currentPipeline.InternalRenderWithRequests(scriptableRenderContext, RenderPipelineManager.s_Cameras, renderRequests);
+				}
 				Array.Clear(RenderPipelineManager.s_Cameras, 0, RenderPipelineManager.s_Cameras.Length);
 			}
 		}

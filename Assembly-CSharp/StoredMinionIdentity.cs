@@ -185,10 +185,10 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 		if (!flag2)
 		{
 			DebugUtil.LogWarningArgs(new object[] { "Found a stored minion that wasn't in any minion storage. Respawning them at the portal.", component.InstanceID, this.storedName });
-			GameObject telepad = GameUtil.GetTelepad();
-			if (telepad != null)
+			GameObject activeTelepad = GameUtil.GetActiveTelepad();
+			if (activeTelepad != null)
 			{
-				MinionStorage.DeserializeMinion(component.gameObject, telepad.transform.GetPosition());
+				MinionStorage.DeserializeMinion(component.gameObject, activeTelepad.transform.GetPosition());
 			}
 		}
 	}
@@ -354,6 +354,9 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	[Serialize]
 	public Dictionary<string, bool> MasteryBySkillID = new Dictionary<string, bool>();
+
+	[Serialize]
+	public List<string> grantedSkillIDs = new List<string>();
 
 	[Serialize]
 	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();

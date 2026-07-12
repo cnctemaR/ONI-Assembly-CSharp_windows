@@ -5,7 +5,7 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.unreachable;
-		base.serializable = false;
+		base.serializable = StateMachine.SerializeType.Never;
 		this.root.FastUpdate("UpdateReachability", ReachabilityMonitor.updateReachabilityCB, UpdateRate.SIM_1000ms, true);
 		this.reachable.ToggleTag(GameTags.Reachable).Enter("TriggerEvent", delegate(ReachabilityMonitor.Instance smi)
 		{

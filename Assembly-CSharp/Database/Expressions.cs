@@ -13,10 +13,15 @@ namespace Database
 			this.RecoverBreath = new Expression("RecoverBreath", this, faces.Uncomfortable);
 			this.RedAlert = new Expression("RedAlert", this, faces.Hot);
 			this.Hungry = new Expression("Hungry", this, faces.Hungry);
+			this.Radiation1 = new Expression("Radiation1", this, faces.Radiation1);
+			this.Radiation2 = new Expression("Radiation2", this, faces.Radiation2);
+			this.Radiation3 = new Expression("Radiation3", this, faces.Radiation3);
+			this.Radiation4 = new Expression("Radiation4", this, faces.Radiation4);
 			this.SickSpores = new Expression("SickSpores", this, faces.SickSpores);
 			this.Zombie = new Expression("Zombie", this, faces.Zombie);
 			this.SickFierySkin = new Expression("SickFierySkin", this, faces.SickFierySkin);
 			this.SickCold = new Expression("SickCold", this, faces.SickCold);
+			this.Pollen = new Expression("Pollen", this, faces.Pollen);
 			this.Sick = new Expression("Sick", this, faces.Sick);
 			this.Cold = new Expression("Cold", this, faces.Cold);
 			this.Hot = new Expression("Hot", this, faces.Hot);
@@ -75,6 +80,8 @@ namespace Database
 
 		public Expression SickCold;
 
+		public Expression Pollen;
+
 		public Expression Relief;
 
 		public Expression Productive;
@@ -88,5 +95,13 @@ namespace Database
 		public Expression Sparkle;
 
 		public Expression Tickled;
+
+		public Expression Radiation1;
+
+		public Expression Radiation2;
+
+		public Expression Radiation3;
+
+		public Expression Radiation4;
 	}
 }

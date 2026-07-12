@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Networking
 {
-	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
 	[NativeConditional("ENABLE_NETWORK && ENABLE_UNET", true)]
+	[NativeHeader("Modules/UNET/UNETConfiguration.h")]
 	internal class GlobalConfigInternal : IDisposable
 	{
 		public GlobalConfigInternal(GlobalConfig config)

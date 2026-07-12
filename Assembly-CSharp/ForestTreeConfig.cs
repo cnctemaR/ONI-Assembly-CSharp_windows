@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class ForestTreeConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "ForestTree";
@@ -14,7 +19,7 @@ public class ForestTreeConfig : IEntityConfig
 		float num = 2f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("tree_kanim"), "idle_empty", Grid.SceneLayer.Building, 1, 2, tier, default(EffectorValues), SimHashes.Creature, new List<Tag>(), 298.15f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, true, false, 2400f);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, true, false, 2400f, 0f, 980f, "ForestTreeOriginal", global::STRINGS.CREATURES.SPECIES.WOOD_TREE.NAME);
 		gameObject.AddOrGet<BuddingTrunk>();
 		gameObject.UpdateComponentRequirement<Harvestable>(false);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
@@ -35,7 +40,6 @@ public class ForestTreeConfig : IEntityConfig
 			}
 		});
 		gameObject.AddComponent<StandardCropPlant>();
-		gameObject.GetComponent<UprootedMonitor>().monitorCell = new CellOffset(0, -1);
 		gameObject.AddOrGet<BuddingTrunk>().budPrefabID = "ForestTreeBranch";
 		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "ForestTreeSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.WOOD_TREE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.WOOD_TREE.DESC, Assets.GetAnim("seed_tree_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.WOOD_TREE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "ForestTree_preview", Assets.GetAnim("tree_kanim"), "place", 3, 3);
 		return gameObject;

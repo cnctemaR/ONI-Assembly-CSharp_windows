@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace UnityEngine
 {
@@ -61,17 +62,44 @@ namespace UnityEngine
 		ASTC_HDR_8x8,
 		ASTC_HDR_10x10,
 		ASTC_HDR_12x12,
+		RG32,
+		RGB48,
+		RGBA64,
+		[Obsolete("Enum member TextureFormat.ASTC_RGB_4x4 has been deprecated. Use ASTC_4x4 instead (UnityUpgradable) -> ASTC_4x4")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		ASTC_RGB_4x4 = 48,
+		[Obsolete("Enum member TextureFormat.ASTC_RGB_5x5 has been deprecated. Use ASTC_5x5 instead (UnityUpgradable) -> ASTC_5x5")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		ASTC_RGB_5x5,
+		[Obsolete("Enum member TextureFormat.ASTC_RGB_6x6 has been deprecated. Use ASTC_6x6 instead (UnityUpgradable) -> ASTC_6x6")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		ASTC_RGB_6x6,
+		[Obsolete("Enum member TextureFormat.ASTC_RGB_8x8 has been deprecated. Use ASTC_8x8 instead (UnityUpgradable) -> ASTC_8x8")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		ASTC_RGB_8x8,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member TextureFormat.ASTC_RGB_10x10 has been deprecated. Use ASTC_10x10 instead (UnityUpgradable) -> ASTC_10x10")]
 		ASTC_RGB_10x10,
+		[Obsolete("Enum member TextureFormat.ASTC_RGB_12x12 has been deprecated. Use ASTC_12x12 instead (UnityUpgradable) -> ASTC_12x12")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		ASTC_RGB_12x12,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member TextureFormat.ASTC_RGBA_4x4 has been deprecated. Use ASTC_4x4 instead (UnityUpgradable) -> ASTC_4x4")]
 		ASTC_RGBA_4x4,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member TextureFormat.ASTC_RGBA_5x5 has been deprecated. Use ASTC_5x5 instead (UnityUpgradable) -> ASTC_5x5")]
 		ASTC_RGBA_5x5,
+		[Obsolete("Enum member TextureFormat.ASTC_RGBA_6x6 has been deprecated. Use ASTC_6x6 instead (UnityUpgradable) -> ASTC_6x6")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		ASTC_RGBA_6x6,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member TextureFormat.ASTC_RGBA_8x8 has been deprecated. Use ASTC_8x8 instead (UnityUpgradable) -> ASTC_8x8")]
 		ASTC_RGBA_8x8,
+		[Obsolete("Enum member TextureFormat.ASTC_RGBA_10x10 has been deprecated. Use ASTC_10x10 instead (UnityUpgradable) -> ASTC_10x10")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		ASTC_RGBA_10x10,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member TextureFormat.ASTC_RGBA_12x12 has been deprecated. Use ASTC_12x12 instead (UnityUpgradable) -> ASTC_12x12")]
 		ASTC_RGBA_12x12
 	}
 }

@@ -52,7 +52,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.UpdateSliderLabel();
 		this.uiScaleSlider.onValueChanged.AddListener(delegate(float data)
 		{
-			this.sliderLabel.text = this.uiScaleSlider.value + "%";
+			this.sliderLabel.text = this.uiScaleSlider.value.ToString() + "%";
 		});
 		this.uiScaleSlider.onReleaseHandle += delegate
 		{
@@ -225,7 +225,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		if (this.CanvasScalers != null && this.CanvasScalers.Length != 0 && this.CanvasScalers[0] != null)
 		{
 			this.uiScaleSlider.value = this.CanvasScalers[0].GetUserScale() * 100f;
-			this.sliderLabel.text = this.uiScaleSlider.value + "%";
+			this.sliderLabel.text = this.uiScaleSlider.value.ToString() + "%";
 		}
 	}
 
@@ -457,13 +457,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 			this.resolutionDropdown.value = resolutionIndex;
 		}
 		GlobalAssets.Instance.colorSet = GlobalAssets.Instance.colorSetOptions[new_settings.colorSetId];
-		global::Debug.Log(string.Concat(new object[]
-		{
-			"Applying low res settings ",
-			new_settings.lowRes,
-			" / existing is ",
-			QualitySettings.GetQualityLevel()
-		}));
+		global::Debug.Log("Applying low res settings " + new_settings.lowRes.ToString() + " / existing is " + QualitySettings.GetQualityLevel().ToString());
 		if (QualitySettings.GetQualityLevel() != new_settings.lowRes)
 		{
 			QualitySettings.SetQualityLevel(new_settings.lowRes, true);

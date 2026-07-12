@@ -69,7 +69,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 		{
 			default_state = this.findbreakable;
 			base.Target(this.breaker);
-			this.root.ToggleAnims("anim_loco_destructive_kanim", 0f);
+			this.root.ToggleAnims("anim_loco_destructive_kanim", 0f, "");
 			this.noTarget.Enter(delegate(AggressiveChore.StatesInstance smi)
 			{
 				smi.StopSM("complete/no more food");

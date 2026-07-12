@@ -25,10 +25,10 @@ public class SandboxSampleTool : InterfaceTool
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.DEBUG_TOOLS.INVALID_LOCATION, null, cursor_pos, 1.5f, false, true);
 			return;
 		}
-		this.Sample(num);
+		SandboxSampleTool.Sample(num);
 	}
 
-	private void Sample(int cell)
+	public static void Sample(int cell)
 	{
 		UISounds.PlaySound(UISounds.Sound.ClickObject);
 		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandboxTools.SelectedElement", (int)Grid.Element[cell].idx);

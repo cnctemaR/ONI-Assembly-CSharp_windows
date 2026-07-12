@@ -52,11 +52,11 @@ public static class DebugUtil
 		return text;
 	}
 
-	public static void DevAssert(bool test, string msg)
+	public static void DevAssert(bool test, string msg, global::UnityEngine.Object context = null)
 	{
 		if (!test)
 		{
-			global::Debug.LogWarning(msg);
+			global::Debug.LogWarning(msg, context);
 		}
 	}
 

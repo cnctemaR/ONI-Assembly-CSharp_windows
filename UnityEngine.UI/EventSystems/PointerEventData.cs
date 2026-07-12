@@ -14,6 +14,8 @@ namespace UnityEngine.EventSystems
 
 		public GameObject pointerDrag { get; set; }
 
+		public GameObject pointerClick { get; set; }
+
 		public RaycastResult pointerCurrentRaycast { get; set; }
 
 		public RaycastResult pointerPressRaycast { get; set; }
@@ -116,13 +118,21 @@ namespace UnityEngine.EventSystems
 		public override string ToString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("<b>Position</b>: " + this.position);
-			stringBuilder.AppendLine("<b>delta</b>: " + this.delta);
+			stringBuilder.AppendLine("<b>Position</b>: " + this.position.ToString());
+			stringBuilder.AppendLine("<b>delta</b>: " + this.delta.ToString());
 			stringBuilder.AppendLine("<b>eligibleForClick</b>: " + this.eligibleForClick.ToString());
-			stringBuilder.AppendLine("<b>pointerEnter</b>: " + this.pointerEnter);
-			stringBuilder.AppendLine("<b>pointerPress</b>: " + this.pointerPress);
-			stringBuilder.AppendLine("<b>lastPointerPress</b>: " + this.lastPress);
-			stringBuilder.AppendLine("<b>pointerDrag</b>: " + this.pointerDrag);
+			string text = "<b>pointerEnter</b>: ";
+			GameObject pointerEnter = this.pointerEnter;
+			stringBuilder.AppendLine(text + ((pointerEnter != null) ? pointerEnter.ToString() : null));
+			string text2 = "<b>pointerPress</b>: ";
+			GameObject pointerPress = this.pointerPress;
+			stringBuilder.AppendLine(text2 + ((pointerPress != null) ? pointerPress.ToString() : null));
+			string text3 = "<b>lastPointerPress</b>: ";
+			GameObject lastPress = this.lastPress;
+			stringBuilder.AppendLine(text3 + ((lastPress != null) ? lastPress.ToString() : null));
+			string text4 = "<b>pointerDrag</b>: ";
+			GameObject pointerDrag = this.pointerDrag;
+			stringBuilder.AppendLine(text4 + ((pointerDrag != null) ? pointerDrag.ToString() : null));
 			stringBuilder.AppendLine("<b>Use Drag Threshold</b>: " + this.useDragThreshold.ToString());
 			stringBuilder.AppendLine("<b>Current Raycast:</b>");
 			stringBuilder.AppendLine(this.pointerCurrentRaycast.ToString());

@@ -56,14 +56,15 @@ public class LegacyModMain
 		string text = "";
 		foreach (LegacyModMain.Entry entry in list)
 		{
-			text = string.Concat(new object[]
-			{
-				text,
-				entry.type.Name,
-				": ",
-				entry.count,
-				"\n"
-			});
+			string[] array2 = new string[5];
+			array2[0] = text;
+			array2[1] = entry.type.Name;
+			array2[2] = ": ";
+			int num2 = 3;
+			int i = entry.count;
+			array2[num2] = i.ToString();
+			array2[4] = "\n";
+			text = string.Concat(array2);
 		}
 		global::Debug.Log(text);
 	}
@@ -209,6 +210,11 @@ public class LegacyModMain
 				id = SimHashes.Ceramic,
 				overheatMod = 200f,
 				decor = 0.2f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.RefinedCarbon,
+				overheatMod = 900f
 			},
 			new LegacyModMain.ElementInfo
 			{

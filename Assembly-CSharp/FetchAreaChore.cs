@@ -167,7 +167,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				if (!(component.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f)
 				{
 					component.UpdateTagBits();
-					if (component.HasAllTags_AssumeLaundered(ref this.rootChore.requiredTagBits) && !component.HasAnyTags_AssumeLaundered(ref this.rootChore.forbiddenTagBits) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2))
+					if (component.HasAnyTags_AssumeLaundered(ref this.rootChore.tagBits) && component.HasAllTags_AssumeLaundered(ref this.rootChore.requiredTagBits) && !component.HasAnyTags_AssumeLaundered(ref this.rootChore.forbiddenTagBits) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2))
 					{
 						float unreservedAmount = pickupable2.UnreservedAmount;
 						list.Add(pickupable2);
@@ -198,7 +198,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				Chore.Precondition.Context context2 = pooledList[num10];
 				FetchChore fetchChore2 = context2.chore as FetchChore;
-				if (fetchChore2 != this.rootChore && context2.IsSuccess() && fetchChore2.overrideTarget == null && fetchChore2.driver == null && fetchChore2.tagBits.AreEqual(ref this.rootChore.tagBits))
+				if (fetchChore2 != this.rootChore && context2.IsSuccess() && fetchChore2.overrideTarget == null && fetchChore2.driver == null && fetchChore2.tagBits.AreEqual(ref this.rootChore.tagBits) && fetchChore2.requiredTagBits.AreEqual(ref this.rootChore.requiredTagBits) && fetchChore2.forbiddenTagBits.AreEqual(ref this.rootChore.forbiddenTagBits))
 				{
 					num8 = Mathf.Min(fetchChore2.originalAmount, num4 - num9);
 					if (minTakeAmount > 0f)
@@ -498,11 +498,11 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public struct Delivery
 		{
-			public Storage destination { get; private set; }
+			public Storage destination { readonly get; private set; }
 
-			public float amount { get; private set; }
+			public float amount { readonly get; private set; }
 
-			public FetchChore chore { get; private set; }
+			public FetchChore chore { readonly get; private set; }
 
 			public Delivery(Chore.Precondition.Context context, float amount_to_be_fetched, Action<FetchChore> on_cancelled)
 			{
@@ -592,16 +592,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public struct Reservation
 		{
-			public float amount { get; private set; }
+			public float amount { readonly get; private set; }
 
-			public Pickupable pickupable { get; private set; }
+			public Pickupable pickupable { readonly get; private set; }
 
 			public Reservation(ChoreConsumer consumer, Pickupable pickupable, float reservation_amount)
 			{
 				this = default(FetchAreaChore.StatesInstance.Reservation);
 				if (reservation_amount <= 0f)
 				{
-					global::Debug.LogError("Invalid amount: " + reservation_amount);
+					global::Debug.LogError("Invalid amount: " + reservation_amount.ToString());
 				}
 				this.amount = reservation_amount;
 				this.pickupable = pickupable;

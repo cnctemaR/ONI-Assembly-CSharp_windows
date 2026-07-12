@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class UpgradeAllBasicBuildings : ColonyAchievementRequirement
+	public class UpgradeAllBasicBuildings : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public UpgradeAllBasicBuildings(Tag basicBuilding, Tag upgradeBuilding)
 		{
@@ -31,18 +29,12 @@ namespace Database
 			return flag;
 		}
 
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			string text = reader.ReadKleiString();
 			this.basicBuilding = new Tag(text);
 			string text2 = reader.ReadKleiString();
 			this.upgradeBuilding = new Tag(text2);
-		}
-
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.WriteKleiString(this.basicBuilding.ToString());
-			writer.WriteKleiString(this.upgradeBuilding.ToString());
 		}
 
 		public override string GetProgress(bool complete)

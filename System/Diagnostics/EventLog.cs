@@ -41,9 +41,9 @@ namespace System.Diagnostics
 			this.Impl = EventLog.CreateEventLogImpl(this);
 		}
 
-		[MonitoringDescription("If enabled raises event when a log is written.")]
 		[Browsable(false)]
 		[DefaultValue(false)]
+		[MonitoringDescription("If enabled raises event when a log is written.")]
 		public bool EnableRaisingEvents
 		{
 			get
@@ -68,9 +68,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The entries in the log.")]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public EventLogEntryCollection Entries
 		{
 			get
@@ -117,9 +117,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[RecommendedAsConfigurable(true)]
 		[ReadOnly(true)]
 		[DefaultValue(".")]
-		[RecommendedAsConfigurable(true)]
 		[MonitoringDescription("Name of the machine that this log get written to.")]
 		public string MachineName
 		{
@@ -141,11 +141,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The application name that writes the log.")]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[RecommendedAsConfigurable(true)]
-		[DefaultValue("")]
 		[ReadOnly(true)]
+		[RecommendedAsConfigurable(true)]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[MonitoringDescription("The application name that writes the log.")]
+		[DefaultValue("")]
 		public string Source
 		{
 			get
@@ -171,9 +171,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[DefaultValue(null)]
 		[MonitoringDescription("An object that synchronizes event handler calls.")]
+		[Browsable(false)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get
@@ -186,9 +186,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ComVisible(false)]
-		[Browsable(false)]
 		[MonoTODO]
+		[Browsable(false)]
+		[ComVisible(false)]
 		public OverflowAction OverflowAction
 		{
 			get
@@ -197,9 +197,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
-		[ComVisible(false)]
 		[Browsable(false)]
+		[ComVisible(false)]
+		[MonoTODO]
 		public int MinimumRetentionDays
 		{
 			get
@@ -209,9 +209,9 @@ namespace System.Diagnostics
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
 		[ComVisible(false)]
 		[MonoTODO]
+		[Browsable(false)]
 		public long MaximumKilobytes
 		{
 			get

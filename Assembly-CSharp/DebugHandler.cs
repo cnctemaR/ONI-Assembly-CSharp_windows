@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using Klei;
 using STRINGS;
@@ -41,7 +40,7 @@ public class DebugHandler : IInputHandler
 		return Camera.main.ScreenToWorldPoint(mousePos);
 	}
 
-	private void SpawnMinion()
+	private void SpawnMinion(bool addAtmoSuit = false)
 	{
 		if (Immigration.Instance == null)
 		{
@@ -59,6 +58,23 @@ public class DebugHandler : IInputHandler
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
 		new MinionStartingStats(false, null).Apply(gameObject);
+		if (addAtmoSuit)
+		{
+			GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab("Atmo_Suit"), vector, Grid.SceneLayer.Creatures, null, 0);
+			gameObject2.SetActive(true);
+			SuitTank component = gameObject2.GetComponent<SuitTank>();
+			GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(GameTags.Oxygen), vector, Grid.SceneLayer.Ore, null, 0);
+			gameObject3.GetComponent<PrimaryElement>().Units = component.capacity;
+			gameObject3.SetActive(true);
+			component.storage.Store(gameObject3, true, false, true, false);
+			Equippable component2 = gameObject2.GetComponent<Equippable>();
+			gameObject.GetComponent<MinionIdentity>().ValidateProxy();
+			Equipment component3 = gameObject.GetComponent<MinionIdentity>().assignableProxy.Get().GetComponent<Equipment>();
+			component2.Assign(component3.GetComponent<IAssignableIdentity>());
+			gameObject2.GetComponent<EquippableWorkable>().CancelChore();
+			component3.Equip(component2);
+		}
+		gameObject.GetMyWorld().SetDupeVisited();
 	}
 
 	public static void SetDebugEnabled(bool debugEnabled)
@@ -74,13 +90,17 @@ public class DebugHandler : IInputHandler
 		}
 		if (e.TryConsume(global::Action.DebugSpawnMinion))
 		{
-			this.SpawnMinion();
+			this.SpawnMinion(false);
+		}
+		else if (e.TryConsume(global::Action.DebugSpawnMinionAtmoSuit))
+		{
+			this.SpawnMinion(true);
 		}
 		else if (e.TryConsume(global::Action.DebugSpawnStressTest))
 		{
 			for (int i = 0; i < 60; i++)
 			{
-				this.SpawnMinion();
+				this.SpawnMinion(false);
 			}
 		}
 		else if (e.TryConsume(global::Action.DebugSuperTestMode))
@@ -179,18 +199,18 @@ public class DebugHandler : IInputHandler
 		{
 			if (e.TryConsume(global::Action.DebugDiscoverAllElements))
 			{
-				if (!(WorldInventory.Instance != null))
+				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0A45;
+					goto IL_0A2F;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
 					while (enumerator.MoveNext())
 					{
 						Element element = enumerator.Current;
-						WorldInventory.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
+						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0A45;
+					goto IL_0A2F;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -221,7 +241,6 @@ public class DebugHandler : IInputHandler
 			{
 				if (Game.Instance != null)
 				{
-					Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
 					SaveGame.Instance.worldGenSpawner.SpawnEverything();
 				}
 				if (DebugPaintElementScreen.Instance != null)
@@ -238,6 +257,8 @@ public class DebugHandler : IInputHandler
 					{
 						CameraController.Instance.EnableFreeCamera(!activeSelf);
 					}
+					DebugHandler.RevealFogOfWar = !DebugHandler.RevealFogOfWar;
+					Game.Instance.Trigger(-1991583975, null);
 				}
 			}
 			else if (e.TryConsume(global::Action.DebugCollectGarbage))
@@ -294,7 +315,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0A45;
+						goto IL_0A2F;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -399,10 +420,7 @@ public class DebugHandler : IInputHandler
 						{
 							if (GenericGameSettings.instance.developerDebugEnable)
 							{
-								string text2 = Guid.NewGuid().ToString();
-								StackTrace stackTrace = new StackTrace(1, true);
-								text2 = text2 + "\n" + stackTrace.ToString();
-								KCrashReporter.ReportError("Debug crash with random stack", text2, null, ScreenPrefabs.Instance.ConfirmDialogScreen, GameObject.Find("ScreenSpaceOverlayCanvas"), "");
+								throw new ArgumentException("My test exception");
 							}
 						}
 						else if (e.TryConsume(global::Action.DebugTriggerError))
@@ -448,11 +466,15 @@ public class DebugHandler : IInputHandler
 						{
 							Chore.ENABLE_PERSONAL_PRIORITIES = !Chore.ENABLE_PERSONAL_PRIORITIES;
 						}
+						else if (e.TryConsume(global::Action.DebugToggleClusterFX))
+						{
+							CameraController.Instance.ToggleClusterFX();
+						}
 					}
 				}
 			}
 		}
-		IL_0A45:
+		IL_0A2F:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;
@@ -478,9 +500,19 @@ public class DebugHandler : IInputHandler
 		}
 	}
 
-	public static void SetTimelapseMode(bool enabled)
+	public static void SetTimelapseMode(bool enabled, int world_id = 0)
 	{
 		DebugHandler.TimelapseMode = enabled;
+		if (enabled)
+		{
+			DebugHandler.activeWorldBeforeOverride = ClusterManager.Instance.activeWorldId;
+			ClusterManager.Instance.TimelapseModeOverrideActiveWorld(world_id);
+		}
+		else
+		{
+			ClusterManager.Instance.TimelapseModeOverrideActiveWorld(DebugHandler.activeWorldBeforeOverride);
+		}
+		World.Instance.zoneRenderData.OnActiveWorldChanged();
 		DebugHandler.UpdateUI();
 	}
 
@@ -513,11 +545,15 @@ public class DebugHandler : IInputHandler
 
 	public static bool DebugNextCall;
 
+	public static bool RevealFogOfWar;
+
 	private bool superTestMode;
 
 	private bool ultraTestMode;
 
 	private bool slowTestMode;
+
+	private static int activeWorldBeforeOverride = -1;
 
 	public enum PaintMode
 	{

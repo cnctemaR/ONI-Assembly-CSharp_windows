@@ -21,11 +21,11 @@ namespace UnityEngine
 
 		[FreeFunction("MaterialScripting::CreateWithShader")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateWithShader([Writable] Material self, [NotNull] Shader shader);
+		private static extern void CreateWithShader([Writable] Material self, [NotNull("ArgumentNullException")] Shader shader);
 
 		[FreeFunction("MaterialScripting::CreateWithMaterial")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateWithMaterial([Writable] Material self, [NotNull] Material source);
+		private static extern void CreateWithMaterial([Writable] Material self, [NotNull("ArgumentNullException")] Material source);
 
 		[FreeFunction("MaterialScripting::CreateWithString")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -42,8 +42,8 @@ namespace UnityEngine
 			Material.CreateWithMaterial(this, source);
 		}
 
-		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
 		public Material(string contents)
 		{
 			Material.CreateWithString(this);
@@ -260,6 +260,7 @@ namespace UnityEngine
 
 		public extern int passCount
 		{
+			[NativeName("GetShader()->GetPassCount")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -295,8 +296,8 @@ namespace UnityEngine
 			return this.GetTagImpl(tag, !searchFallbacks, "");
 		}
 
-		[NativeThrows]
 		[FreeFunction("MaterialScripting::Lerp", HasExplicitThis = true)]
+		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Lerp(Material start, Material end, float t);
 
@@ -349,11 +350,21 @@ namespace UnityEngine
 
 		public void GetTexturePropertyNames(List<string> outNames)
 		{
+			bool flag = outNames == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("outNames");
+			}
 			this.GetTexturePropertyNamesInternal(outNames);
 		}
 
 		public void GetTexturePropertyNameIDs(List<int> outNames)
 		{
+			bool flag = outNames == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("outNames");
+			}
 			this.GetTexturePropertyNameIDsInternal(outNames);
 		}
 
@@ -385,9 +396,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetBufferImpl(int name, ComputeBuffer value);
 
+		[NativeName("SetGraphicsBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetGraphicsBufferImpl(int name, GraphicsBuffer value);
+
 		[NativeName("SetConstantBufferFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
+
+		[NativeName("SetConstantGraphicsBufferFromScript")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
 
 		[NativeName("GetFloatFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -725,6 +744,16 @@ namespace UnityEngine
 			this.SetBufferImpl(nameID, value);
 		}
 
+		public void SetBuffer(string name, GraphicsBuffer value)
+		{
+			this.SetGraphicsBufferImpl(Shader.PropertyToID(name), value);
+		}
+
+		public void SetBuffer(int nameID, GraphicsBuffer value)
+		{
+			this.SetGraphicsBufferImpl(nameID, value);
+		}
+
 		public void SetConstantBuffer(string name, ComputeBuffer value, int offset, int size)
 		{
 			this.SetConstantBufferImpl(Shader.PropertyToID(name), value, offset, size);
@@ -733,6 +762,16 @@ namespace UnityEngine
 		public void SetConstantBuffer(int nameID, ComputeBuffer value, int offset, int size)
 		{
 			this.SetConstantBufferImpl(nameID, value, offset, size);
+		}
+
+		public void SetConstantBuffer(string name, GraphicsBuffer value, int offset, int size)
+		{
+			this.SetConstantGraphicsBufferImpl(Shader.PropertyToID(name), value, offset, size);
+		}
+
+		public void SetConstantBuffer(int nameID, GraphicsBuffer value, int offset, int size)
+		{
+			this.SetConstantGraphicsBufferImpl(nameID, value, offset, size);
 		}
 
 		public void SetFloatArray(string name, List<float> values)

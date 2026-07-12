@@ -239,16 +239,20 @@ public class MemorySnapshot
 						}
 					}
 				}
-				streamWriter.Write(string.Concat(new object[]
-				{
-					num,
-					",",
-					keyValuePair.Value.count,
-					",",
-					keyValuePair.Value.numArrayEntries,
-					",",
-					keyValuePair.Key
-				}));
+				TextWriter textWriter = streamWriter;
+				string[] array = new string[7];
+				array[0] = num.ToString();
+				array[1] = ",";
+				int num2 = 2;
+				MemorySnapshot.DetailInfo detailInfo = keyValuePair.Value;
+				array[num2] = detailInfo.count.ToString();
+				array[3] = ",";
+				int num3 = 4;
+				detailInfo = keyValuePair.Value;
+				array[num3] = detailInfo.numArrayEntries.ToString();
+				array[5] = ",";
+				array[6] = keyValuePair.Key;
+				textWriter.Write(string.Concat(array));
 			}
 		}
 	}

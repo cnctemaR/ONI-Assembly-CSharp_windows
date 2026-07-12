@@ -60,21 +60,53 @@ namespace UnityEngine.Experimental.Rendering
 			this.Dispose();
 		}
 
-		[FreeFunction(Name = "RayTracingAccelerationStructure_Bindings::Build", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Build();
+		public void Build()
+		{
+			this.Build(Vector3.zero);
+		}
 
+		[Obsolete("Method Update has been deprecated. Use Build instead (UnityUpgradable) -> Build()", true)]
+		public void Update()
+		{
+			this.Build(Vector3.zero);
+		}
+
+		[FreeFunction(Name = "RayTracingAccelerationStructure_Bindings::Build", HasExplicitThis = true)]
+		public void Build(Vector3 relativeOrigin)
+		{
+			this.Build_Injected(ref relativeOrigin);
+		}
+
+		[Obsolete("Method Update has been deprecated. Use Build instead (UnityUpgradable) -> Build(*)", true)]
 		[FreeFunction(Name = "RayTracingAccelerationStructure_Bindings::Update", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Update();
+		public void Update(Vector3 relativeOrigin)
+		{
+			this.Update_Injected(ref relativeOrigin);
+		}
 
 		[FreeFunction(Name = "RayTracingAccelerationStructure_Bindings::AddInstance", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void AddInstance([NotNull] Renderer targetRenderer, bool[] subMeshMask = null, bool[] subMeshTransparencyFlags = null, bool enableTriangleCulling = true, bool frontTriangleCounterClockwise = false, uint mask = 255U);
+		public extern void AddInstance([NotNull("ArgumentNullException")] Renderer targetRenderer, bool[] subMeshMask = null, bool[] subMeshTransparencyFlags = null, bool enableTriangleCulling = true, bool frontTriangleCounterClockwise = false, uint mask = 255U);
+
+		public void AddInstance(GraphicsBuffer aabbBuffer, uint numElements, Material material, bool isCutOff, bool enableTriangleCulling = true, bool frontTriangleCounterClockwise = false, uint mask = 255U, bool reuseBounds = false)
+		{
+			this.AddInstance_Procedural(aabbBuffer, numElements, material, Matrix4x4.identity, isCutOff, enableTriangleCulling, frontTriangleCounterClockwise, mask, reuseBounds);
+		}
+
+		public void AddInstance(GraphicsBuffer aabbBuffer, uint numElements, Material material, Matrix4x4 instanceTransform, bool isCutOff, bool enableTriangleCulling = true, bool frontTriangleCounterClockwise = false, uint mask = 255U, bool reuseBounds = false)
+		{
+			this.AddInstance_Procedural(aabbBuffer, numElements, material, instanceTransform, isCutOff, enableTriangleCulling, frontTriangleCounterClockwise, mask, reuseBounds);
+		}
+
+		[FreeFunction(Name = "RayTracingAccelerationStructure_Bindings::AddInstance", HasExplicitThis = true)]
+		private void AddInstance_Procedural([NotNull("ArgumentNullException")] GraphicsBuffer aabbBuffer, uint numElements, [NotNull("ArgumentNullException")] Material material, Matrix4x4 instanceTransform, bool isCutOff, bool enableTriangleCulling = true, bool frontTriangleCounterClockwise = false, uint mask = 255U, bool reuseBounds = false)
+		{
+			this.AddInstance_Procedural_Injected(aabbBuffer, numElements, material, ref instanceTransform, isCutOff, enableTriangleCulling, frontTriangleCounterClockwise, mask, reuseBounds);
+		}
 
 		[FreeFunction(Name = "RayTracingAccelerationStructure_Bindings::UpdateInstanceTransform", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void UpdateInstanceTransform([NotNull] Renderer renderer);
+		public extern void UpdateInstanceTransform([NotNull("ArgumentNullException")] Renderer renderer);
 
 		[FreeFunction(Name = "RayTracingAccelerationStructure_Bindings::GetSize", HasExplicitThis = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -82,6 +114,15 @@ namespace UnityEngine.Experimental.Rendering
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Create_Injected(ref RayTracingAccelerationStructure.RASSettings desc);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Build_Injected(ref Vector3 relativeOrigin);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Update_Injected(ref Vector3 relativeOrigin);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void AddInstance_Procedural_Injected(GraphicsBuffer aabbBuffer, uint numElements, Material material, ref Matrix4x4 instanceTransform, bool isCutOff, bool enableTriangleCulling = true, bool frontTriangleCounterClockwise = false, uint mask = 255U, bool reuseBounds = false);
 
 		internal IntPtr m_Ptr;
 

@@ -81,6 +81,16 @@ public class Facing : KMonoBehaviour
 		return Grid.CellRight(num);
 	}
 
+	public int GetBackCell()
+	{
+		int num = Grid.PosToCell(this);
+		if (!this.GetFacing())
+		{
+			return Grid.CellLeft(num);
+		}
+		return Grid.CellRight(num);
+	}
+
 	[MyCmpGet]
 	private KAnimControllerBase kanimController;
 

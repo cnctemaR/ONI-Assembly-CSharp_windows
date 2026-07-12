@@ -9,8 +9,8 @@ namespace Klei.CustomSettings
 
 		public SettingLevel off_level { get; private set; }
 
-		public ToggleSettingConfig(string id, string label, string tooltip, SettingLevel off_level, SettingLevel on_level, string default_level_id, string nosweat_default_level_id, int coordinate_dimension = -1, int coordinate_dimension_width = -1, bool debug_only = false, bool triggers_custom_game = true)
-			: base(id, label, tooltip, default_level_id, nosweat_default_level_id, coordinate_dimension, coordinate_dimension_width, debug_only, triggers_custom_game)
+		public ToggleSettingConfig(string id, string label, string tooltip, SettingLevel off_level, SettingLevel on_level, string default_level_id, string nosweat_default_level_id, int coordinate_dimension = -1, int coordinate_dimension_width = -1, bool debug_only = false, bool triggers_custom_game = true, string required_content = "", string missing_content_default = "")
+			: base(id, label, tooltip, default_level_id, nosweat_default_level_id, coordinate_dimension, coordinate_dimension_width, debug_only, triggers_custom_game, required_content, missing_content_default, false)
 		{
 			this.off_level = off_level;
 			this.on_level = on_level;
@@ -26,12 +26,12 @@ namespace Klei.CustomSettings
 			{
 				return this.off_level;
 			}
-			if (base.default_level_id == this.on_level.id)
+			if (this.default_level_id == this.on_level.id)
 			{
 				Debug.LogWarning(string.Concat(new string[] { "Unable to find level for setting:", base.id, "(", level_id, ") Using default level." }));
 				return this.on_level;
 			}
-			if (base.default_level_id == this.off_level.id)
+			if (this.default_level_id == this.off_level.id)
 			{
 				Debug.LogWarning(string.Concat(new string[] { "Unable to find level for setting:", base.id, "(", level_id, ") Using default level." }));
 				return this.off_level;

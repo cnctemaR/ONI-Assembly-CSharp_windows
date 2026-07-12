@@ -113,10 +113,6 @@ public class AdditionalDetailsPanel : TargetScreen
 		{
 			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.AGE.NAME, Util.FormatTwoDecimalPlace((GameClock.Instance.GetTime() - num4) / 600f))).Tooltip(this.drawer.Format(UI.ELEMENTAL.AGE.TOOLTIP, Util.FormatTwoDecimalPlace((GameClock.Instance.GetTime() - num4) / 600f)));
 		}
-		else
-		{
-			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.AGE.NAME, UI.ELEMENTAL.AGE.UNKNOWN)).Tooltip(UI.ELEMENTAL.AGE.UNKNOWN_TOOLTIP);
-		}
 		int num5 = 5;
 		float num6;
 		float num7;
@@ -184,7 +180,7 @@ public class AdditionalDetailsPanel : TargetScreen
 				AttributeModifier attributeModifier = component.Element.attributeModifiers.Find((AttributeModifier m) => m.AttributeId == Db.Get().BuildingAttributes.OverheatTemperature.Id);
 				if (attributeModifier != null)
 				{
-					this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.NAME, attributeModifier.GetFormattedString(this.selectedTarget.gameObject))).Tooltip(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.TOOLTIP, attributeModifier.GetFormattedString(this.selectedTarget.gameObject)));
+					this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.NAME, attributeModifier.GetFormattedString())).Tooltip(this.drawer.Format(UI.ELEMENTAL.OVERHEATPOINT.TOOLTIP, attributeModifier.GetFormattedString()));
 				}
 			}
 		}

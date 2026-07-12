@@ -1,9 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using UnityEngine;
 
 public class Tech : Resource
 {
+	public bool FoundNode
+	{
+		get
+		{
+			return this.node != null;
+		}
+	}
+
 	public Vector2 center
 	{
 		get
@@ -36,11 +45,48 @@ public class Tech : Resource
 		}
 	}
 
-	public Tech(string id, ResourceSet parent, string name, string desc, ResourceTreeNode node)
-		: base(id, parent, name)
+	public Tech(string id, List<string> unlockedItemIDs, Techs techs, Dictionary<string, float> overrideDefaultCosts = null)
+		: base(id, techs, Strings.Get("STRINGS.RESEARCH.TECHS." + id.ToUpper() + ".NAME"))
 	{
-		this.desc = desc;
+		this.desc = Strings.Get("STRINGS.RESEARCH.TECHS." + id.ToUpper() + ".DESC");
+		this.unlockedItemIDs = unlockedItemIDs;
+		if (overrideDefaultCosts != null && DlcManager.IsExpansion1Active())
+		{
+			foreach (KeyValuePair<string, float> keyValuePair in overrideDefaultCosts)
+			{
+				this.costsByResearchTypeID.Add(keyValuePair.Key, keyValuePair.Value);
+			}
+		}
+	}
+
+	public void AddUnlockedItemIDs(params string[] ids)
+	{
+		foreach (string text in ids)
+		{
+			this.unlockedItemIDs.Add(text);
+		}
+	}
+
+	public void RemoveUnlockedItemIDs(params string[] ids)
+	{
+		foreach (string text in ids)
+		{
+			if (!this.unlockedItemIDs.Remove(text))
+			{
+				DebugUtil.DevLogError("Tech item '" + text + "' does not exist to remove");
+			}
+		}
+	}
+
+	public bool RequiresResearchType(string type)
+	{
+		return this.costsByResearchTypeID.ContainsKey(type);
+	}
+
+	public void SetNode(ResourceTreeNode node, string categoryID)
+	{
 		this.node = node;
+		this.category = categoryID;
 	}
 
 	public bool CanAfford(ResearchPointInventory pointInventory)
@@ -97,11 +143,17 @@ public class Tech : Resource
 
 	public List<TechItem> unlockedItems = new List<TechItem>();
 
+	public List<string> unlockedItemIDs = new List<string>();
+
 	public int tier;
 
 	public Dictionary<string, float> costsByResearchTypeID = new Dictionary<string, float>();
 
 	public string desc;
+
+	public string category;
+
+	public Tag[] tags;
 
 	private ResourceTreeNode node;
 }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C719CBCE-289E-47FB-962B-EC461A7D5B2E}</ProjectGuid>
+    <ProjectGuid>{DD3DEF40-76A7-4169-85C9-351C4936F160}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System</AssemblyName>
@@ -859,6 +859,7 @@
     <Compile Include="Mono\Unity\UnityTlsConversions.cs" />
     <Compile Include="Mono\Unity\UnityTlsProvider.cs" />
     <Compile Include="Mono\Unity\UnityTlsStream.cs" />
+    <Compile Include="Mono\Unity\X509ChainImplUnityTls.cs" />
     <Compile Include="Mono\Util\MonoPInvokeCallbackAttribute.cs" />
     <Compile Include="NetPipeStyleUriParser.cs" />
     <Compile Include="NetTcpStyleUriParser.cs" />
@@ -1048,7 +1049,6 @@
     <Compile Include="Net\IPEndPoint.cs" />
     <Compile Include="Net\IPHostEntry.cs" />
     <Compile Include="Net\IPv6AddressFormatter.cs" />
-    <Compile Include="Net\IWebConnectionState.cs" />
     <Compile Include="Net\IWebProxy.cs" />
     <Compile Include="Net\IWebProxyFinder.cs" />
     <Compile Include="Net\IWebProxyScript.cs" />
@@ -1286,8 +1286,7 @@
     <Compile Include="Net\ServiceNameStore.cs" />
     <Compile Include="Net\ServicePoint.cs" />
     <Compile Include="Net\ServicePointManager.cs" />
-    <Compile Include="Net\SimpleAsyncCallback.cs" />
-    <Compile Include="Net\SimpleAsyncResult.cs" />
+    <Compile Include="Net\ServicePointScheduler.cs" />
     <Compile Include="Net\SocketAddress.cs" />
     <Compile Include="Net\SocketPermission.cs" />
     <Compile Include="Net\SocketPermissionAttribute.cs" />
@@ -1354,18 +1353,18 @@
     <Compile Include="Net\UploadValuesCompletedEventHandler.cs" />
     <Compile Include="Net\UriScheme.cs" />
     <Compile Include="Net\ValidationHelper.cs" />
-    <Compile Include="Net\WebAsyncResult.cs" />
     <Compile Include="Net\WebClient.cs" />
+    <Compile Include="Net\WebCompletionSource.cs" />
     <Compile Include="Net\WebConnection.cs" />
-    <Compile Include="Net\WebConnectionData.cs" />
-    <Compile Include="Net\WebConnectionGroup.cs" />
     <Compile Include="Net\WebConnectionStream.cs" />
+    <Compile Include="Net\WebConnectionTunnel.cs" />
     <Compile Include="Net\WebException.cs" />
     <Compile Include="Net\WebExceptionInternalStatus.cs" />
     <Compile Include="Net\WebExceptionMapping.cs" />
     <Compile Include="Net\WebExceptionStatus.cs" />
     <Compile Include="Net\WebHeaderCollection.cs" />
     <Compile Include="Net\WebHeaderCollectionType.cs" />
+    <Compile Include="Net\WebOperation.cs" />
     <Compile Include="Net\WebParseError.cs" />
     <Compile Include="Net\WebParseErrorCode.cs" />
     <Compile Include="Net\WebParseErrorSection.cs" />
@@ -1377,7 +1376,9 @@
     <Compile Include="Net\WebRequest.cs" />
     <Compile Include="Net\WebRequestMethods.cs" />
     <Compile Include="Net\WebRequestPrefixElement.cs" />
+    <Compile Include="Net\WebRequestStream.cs" />
     <Compile Include="Net\WebResponse.cs" />
+    <Compile Include="Net\WebResponseStream.cs" />
     <Compile Include="Net\WebSockets\ClientWebSocket.cs" />
     <Compile Include="Net\WebSockets\ClientWebSocketOptions.cs" />
     <Compile Include="Net\WebSockets\HttpListenerWebSocketContext.cs" />
@@ -1590,19 +1591,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Security\Mono.Security.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B28}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F15A}</Project>
       <Name>Mono.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B29}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F15B}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B2B}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F15D}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{C719CBCE-289E-47FB-962B-EC461A7D5B35}</Project>
+      <Project>{DD3DEF40-76A7-4169-85C9-351C4936F167}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
   </ItemGroup>

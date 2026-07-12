@@ -5,9 +5,9 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
 	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Camera/RenderSettings.h")]
-	[NativeHeader("Runtime/Graphics/QualitySettingsTypes.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public sealed class RenderSettings : Object
 	{
@@ -191,6 +191,7 @@ namespace UnityEngine
 
 		public static SphericalHarmonicsL2 ambientProbe
 		{
+			[NativeMethod("GetFinalAmbientProbe")]
 			get
 			{
 				SphericalHarmonicsL2 sphericalHarmonicsL;

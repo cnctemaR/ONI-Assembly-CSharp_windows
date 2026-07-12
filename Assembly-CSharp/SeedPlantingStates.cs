@@ -124,7 +124,7 @@ public class SeedPlantingStates : GameStateMachine<SeedPlantingStates, SeedPlant
 			{
 				if (plantablePlot.Occupant == null)
 				{
-					plantablePlot.ForceDepositPickupable(smi.targetSeed);
+					plantablePlot.ForceDeposit(smi.targetSeed.gameObject);
 				}
 			}
 			else

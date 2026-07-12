@@ -34,7 +34,7 @@ public class MassiveHeatSinkConfig : IBuildingConfig
 		go.AddOrGet<MassiveHeatSink>();
 		go.AddOrGet<MinimumOperatingTemperature>().minimumTemperature = 100f;
 		PrimaryElement component = go.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Iron);
+		component.SetElement(SimHashes.Iron, true);
 		component.Temperature = 294.15f;
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Storage>().capacityKg = 0.099999994f;

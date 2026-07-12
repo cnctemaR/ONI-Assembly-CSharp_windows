@@ -1,10 +1,8 @@
 ﻿using System;
-using UnityEngine.Bindings;
 
 namespace UnityEngine.TextCore
 {
 	[Flags]
-	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal enum FontStyles
 	{
 		Normal = 0,

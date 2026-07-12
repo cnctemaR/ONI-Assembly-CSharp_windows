@@ -68,7 +68,7 @@ namespace NodeEditorFramework
 				{
 					string[] array = new string[memoryTexture.modifications.Length + 1];
 					memoryTexture.modifications.CopyTo(array, 0);
-					array[array.Length - 1] = "Rotation:" + rotationStepsAntiCW;
+					array[array.Length - 1] = "Rotation:" + rotationStepsAntiCW.ToString();
 					Texture2D texture = ResourceManager.GetTexture(memoryTexture.path, array);
 					if (texture != null)
 					{

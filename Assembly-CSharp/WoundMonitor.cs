@@ -5,7 +5,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.healthy;
-		this.root.ToggleAnims("anim_hits_kanim", 0f).EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi, object data)
+		this.root.ToggleAnims("anim_hits_kanim", 0f, "").ToggleAnims("anim_impact_kanim", 0f, "EXPANSION1_ID").EventHandler(GameHashes.HealthChanged, delegate(WoundMonitor.Instance smi, object data)
 		{
 			smi.OnHealthChanged(data);
 		});
@@ -30,8 +30,8 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		{
 			smi.GoToProperHeathState();
 		});
-		this.wounded.medium.ToggleAnims("anim_loco_wounded_kanim", 1f);
-		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f).Update("LookForAvailableClinic", delegate(WoundMonitor.Instance smi, float dt)
+		this.wounded.medium.ToggleAnims("anim_loco_wounded_kanim", 1f, "");
+		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f, "").Update("LookForAvailableClinic", delegate(WoundMonitor.Instance smi, float dt)
 		{
 			smi.FindAvailableMedicalBed();
 		}, UpdateRate.SIM_1000ms, false);
@@ -123,6 +123,10 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 				{
 					return;
 				}
+				if (text.Contains("impact"))
+				{
+					return;
+				}
 			}
 			string text2 = "hit";
 			AttackChore.StatesInstance smi = base.gameObject.GetSMI<AttackChore.StatesInstance>();
@@ -138,6 +142,70 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			{
 				text2 = "hit_pole";
 			}
+			kbatchedAnimController.Play(text2, KAnim.PlayMode.Once, 1f, 0f);
+			if (text != null)
+			{
+				kbatchedAnimController.Queue(text, playMode, 1f, 0f);
+			}
+		}
+
+		public void PlayKnockedOverImpactAnimation()
+		{
+			string text = null;
+			KBatchedAnimController kbatchedAnimController = base.smi.Get<KBatchedAnimController>();
+			if (kbatchedAnimController.CurrentAnim != null)
+			{
+				text = kbatchedAnimController.CurrentAnim.name;
+			}
+			KAnim.PlayMode playMode = kbatchedAnimController.PlayMode;
+			if (text != null)
+			{
+				if (text.Contains("impact"))
+				{
+					return;
+				}
+				if (text.Contains("2_0"))
+				{
+					return;
+				}
+				if (text.Contains("2_1"))
+				{
+					return;
+				}
+				if (text.Contains("2_-1"))
+				{
+					return;
+				}
+				if (text.Contains("2_-2"))
+				{
+					return;
+				}
+				if (text.Contains("1_-1"))
+				{
+					return;
+				}
+				if (text.Contains("1_-2"))
+				{
+					return;
+				}
+				if (text.Contains("1_1"))
+				{
+					return;
+				}
+				if (text.Contains("1_2"))
+				{
+					return;
+				}
+				if (text.Contains("breathe_"))
+				{
+					return;
+				}
+				if (text.Contains("death_"))
+				{
+					return;
+				}
+			}
+			string text2 = "impact";
 			kbatchedAnimController.Play(text2, KAnim.PlayMode.Once, 1f, 0f);
 			if (text != null)
 			{

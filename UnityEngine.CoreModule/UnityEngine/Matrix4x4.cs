@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[Il2CppEagerStaticClassConstruction]
 	[NativeClass("Matrix4x4f")]
-	public struct Matrix4x4 : IEquatable<Matrix4x4>
+	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	public struct Matrix4x4 : IEquatable<Matrix4x4>, IFormattable
 	{
 		[ThreadSafe]
 		private Quaternion GetRotation()
@@ -599,39 +601,40 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("{0:F5}\t{1:F5}\t{2:F5}\t{3:F5}\n{4:F5}\t{5:F5}\t{6:F5}\t{7:F5}\n{8:F5}\t{9:F5}\t{10:F5}\t{11:F5}\n{12:F5}\t{13:F5}\t{14:F5}\t{15:F5}\n", new object[]
-			{
-				this.m00, this.m01, this.m02, this.m03, this.m10, this.m11, this.m12, this.m13, this.m20, this.m21,
-				this.m22, this.m23, this.m30, this.m31, this.m32, this.m33
-			});
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
-			return UnityString.Format("{0}\t{1}\t{2}\t{3}\n{4}\t{5}\t{6}\t{7}\n{8}\t{9}\t{10}\t{11}\n{12}\t{13}\t{14}\t{15}\n", new object[]
-			{
-				this.ToInvariantString(format, this.m00),
-				this.ToInvariantString(format, this.m01),
-				this.ToInvariantString(format, this.m02),
-				this.ToInvariantString(format, this.m03),
-				this.ToInvariantString(format, this.m10),
-				this.ToInvariantString(format, this.m11),
-				this.ToInvariantString(format, this.m12),
-				this.ToInvariantString(format, this.m13),
-				this.ToInvariantString(format, this.m20),
-				this.ToInvariantString(format, this.m21),
-				this.ToInvariantString(format, this.m22),
-				this.ToInvariantString(format, this.m23),
-				this.ToInvariantString(format, this.m30),
-				this.ToInvariantString(format, this.m31),
-				this.ToInvariantString(format, this.m32),
-				this.ToInvariantString(format, this.m33)
-			});
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
-		private string ToInvariantString(string format, float val)
+		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			return val.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F5";
+			}
+			return UnityString.Format("{0}\t{1}\t{2}\t{3}\n{4}\t{5}\t{6}\t{7}\n{8}\t{9}\t{10}\t{11}\n{12}\t{13}\t{14}\t{15}\n", new object[]
+			{
+				this.m00.ToString(format, formatProvider),
+				this.m01.ToString(format, formatProvider),
+				this.m02.ToString(format, formatProvider),
+				this.m03.ToString(format, formatProvider),
+				this.m10.ToString(format, formatProvider),
+				this.m11.ToString(format, formatProvider),
+				this.m12.ToString(format, formatProvider),
+				this.m13.ToString(format, formatProvider),
+				this.m20.ToString(format, formatProvider),
+				this.m21.ToString(format, formatProvider),
+				this.m22.ToString(format, formatProvider),
+				this.m23.ToString(format, formatProvider),
+				this.m30.ToString(format, formatProvider),
+				this.m31.ToString(format, formatProvider),
+				this.m32.ToString(format, formatProvider),
+				this.m33.ToString(format, formatProvider)
+			});
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

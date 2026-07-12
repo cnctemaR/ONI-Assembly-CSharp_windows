@@ -110,9 +110,10 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
-		SimUtil.DiseaseInfo diseaseInfo;
 		float num;
-		this.storage.ConsumeAndGetDisease(this.inputMaterial, this.massPerTinker, out diseaseInfo, out num);
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num2;
+		this.storage.ConsumeAndGetDisease(this.inputMaterial, this.massPerTinker, out num, out diseaseInfo, out num2);
 		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0);
 		gameObject.GetComponent<PrimaryElement>().Temperature = this.outputTemperature;
 		gameObject.SetActive(true);
@@ -150,7 +151,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 
 	private bool ToolsRequested()
 	{
-		return MaterialNeeds.Instance.GetAmount(this.outputPrefab) > 0f && WorldInventory.Instance.GetAmount(this.outputPrefab) <= 0f;
+		return MaterialNeeds.GetAmount(this.outputPrefab, base.gameObject.GetMyWorldId(), false) > 0f && this.GetMyWorld().worldInventory.GetAmount(this.outputPrefab, true) <= 0f;
 	}
 
 	public override List<Descriptor> GetDescriptors(GameObject go)
@@ -171,7 +172,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		if (list.Count > 0)
 		{
 			Effect effect = Db.Get().effects.Get(list[0].addedEffect);
-			descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ADDED_EFFECT, effect.Name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ADDED_EFFECT, effect.Name, Effect.CreateTooltip(effect, true, "\n")), Descriptor.DescriptorType.Effect, false));
+			descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ADDED_EFFECT, effect.Name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ADDED_EFFECT, effect.Name, Effect.CreateTooltip(effect, true, "\n    • ", true)), Descriptor.DescriptorType.Effect, false));
 			descriptors.Add(new Descriptor(UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS, UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS, Descriptor.DescriptorType.Effect, false));
 			foreach (Tinkerable tinkerable in list)
 			{

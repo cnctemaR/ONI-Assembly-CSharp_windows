@@ -183,7 +183,9 @@ namespace UnityEngine
 											bool flag17 = obj is AndroidJavaRunnable;
 											if (!flag17)
 											{
-												throw new Exception("JNI; Unknown argument type '" + obj.GetType() + "'");
+												string text = "JNI; Unknown argument type '";
+												Type type = obj.GetType();
+												throw new Exception(text + ((type != null) ? type.ToString() : null) + "'");
 											}
 											array[num].l = AndroidJNIHelper.CreateJavaRunnable((AndroidJavaRunnable)obj);
 										}
@@ -489,7 +491,9 @@ namespace UnityEngine
 													bool flag11 = obj is char;
 													if (!flag11)
 													{
-														throw new Exception("JNI; Unknown argument type '" + obj.GetType() + "'");
+														string text = "JNI; Unknown argument type '";
+														Type type = obj.GetType();
+														throw new Exception(text + ((type != null) ? type.ToString() : null) + "'");
 													}
 													androidJavaObject = new AndroidJavaObject("java.lang.Character", new object[] { (char)obj });
 												}
@@ -541,7 +545,9 @@ namespace UnityEngine
 										bool flag17 = obj is AndroidJavaRunnable;
 										if (!flag17)
 										{
-											throw new Exception("JNI; Unknown argument type '" + obj.GetType() + "'");
+											string text2 = "JNI; Unknown argument type '";
+											Type type2 = obj.GetType();
+											throw new Exception(text2 + ((type2 != null) ? type2.ToString() : null) + "'");
 										}
 										androidJavaObject = AndroidJavaObject.AndroidJavaObjectDeleteLocalRef(AndroidJNIHelper.CreateJavaRunnable((AndroidJavaRunnable)obj));
 									}
@@ -673,7 +679,9 @@ namespace UnityEngine
 					bool flag12 = elementType == typeof(AndroidJavaObject);
 					if (!flag12)
 					{
-						throw new Exception("JNI; Unknown array type '" + elementType + "'");
+						string text = "JNI; Unknown array type '";
+						Type type = elementType;
+						throw new Exception(text + ((type != null) ? type.ToString() : null) + "'");
 					}
 					AndroidJavaObject[] array3 = (AndroidJavaObject[])array;
 					int length2 = array.GetLength(0);
@@ -816,7 +824,9 @@ namespace UnityEngine
 					bool flag12 = elementType == typeof(AndroidJavaObject);
 					if (!flag12)
 					{
-						throw new Exception("JNI: Unknown generic array type '" + elementType + "'");
+						string text = "JNI: Unknown generic array type '";
+						Type type = elementType;
+						throw new Exception(text + ((type != null) ? type.ToString() : null) + "'");
 					}
 					int arrayLength2 = AndroidJNISafe.GetArrayLength(array);
 					AndroidJavaObject[] array3 = new AndroidJavaObject[arrayLength2];
@@ -1098,15 +1108,16 @@ namespace UnityEngine
 								bool flag18 = AndroidReflection.IsAssignableFrom(typeof(Array), type);
 								if (!flag18)
 								{
-									throw new Exception(string.Concat(new object[]
-									{
-										"JNI: Unknown signature for type '",
-										type,
-										"' (obj = ",
-										obj,
-										") ",
-										(type == obj) ? "equal" : "instance"
-									}));
+									string[] array = new string[6];
+									array[0] = "JNI: Unknown signature for type '";
+									int num = 1;
+									Type type2 = type;
+									array[num] = ((type2 != null) ? type2.ToString() : null);
+									array[2] = "' (obj = ";
+									array[3] = ((obj != null) ? obj.ToString() : null);
+									array[4] = ") ";
+									array[5] = ((type == obj) ? "equal" : "instance");
+									throw new Exception(string.Concat(array));
 								}
 								bool flag19 = type.GetArrayRank() != 1;
 								if (flag19)

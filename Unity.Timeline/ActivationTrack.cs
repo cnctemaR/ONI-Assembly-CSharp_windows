@@ -5,6 +5,7 @@ namespace UnityEngine.Timeline
 {
 	[TrackClipType(typeof(ActivationPlayableAsset))]
 	[TrackBindingType(typeof(GameObject))]
+	[ExcludeFromPreset]
 	[Serializable]
 	public class ActivationTrack : TrackAsset
 	{

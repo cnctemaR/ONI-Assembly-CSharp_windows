@@ -359,9 +359,9 @@ namespace System.Text
 			return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
 		}
 
-		[CLSCompliant(false)]
 		[ComVisible(false)]
 		[SecurityCritical]
+		[CLSCompliant(false)]
 		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
 		{
 			if (bytes == null || chars == null)

@@ -29,7 +29,7 @@ namespace UnityEngine.Networking
 
 		public MultipartFormDataSection(string name, string data, Encoding encoding, string contentType)
 		{
-			bool flag = data == null || data.Length < 1;
+			bool flag = string.IsNullOrEmpty(data);
 			if (flag)
 			{
 				throw new ArgumentException("Cannot create a multipart form data section without body data");

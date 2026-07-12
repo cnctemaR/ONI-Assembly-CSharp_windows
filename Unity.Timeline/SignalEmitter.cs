@@ -4,6 +4,7 @@ using UnityEngine.Playables;
 namespace UnityEngine.Timeline
 {
 	[CustomStyle("SignalEmitter")]
+	[ExcludeFromPreset]
 	[Serializable]
 	public class SignalEmitter : Marker, INotification, INotificationOptionProvider
 	{

@@ -18,6 +18,18 @@ public class BuildingComplete : Building
 		position.z = Grid.GetLayerZ(this.Def.SceneLayer);
 		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		Rotatable component2 = base.GetComponent<Rotatable>();
+		if (component != null && component2 == null)
+		{
+			component.Offset = this.Def.GetVisualizerOffset();
+		}
+		KBoxCollider2D component3 = base.GetComponent<KBoxCollider2D>();
+		if (component3 != null)
+		{
+			Vector3 visualizerOffset = this.Def.GetVisualizerOffset();
+			component3.offset += new Vector2(visualizerOffset.x, visualizerOffset.y);
+		}
 		Attributes attributes = this.GetAttributes();
 		foreach (Klei.AI.Attribute attribute in this.Def.attributes)
 		{
@@ -42,6 +54,26 @@ public class BuildingComplete : Building
 			GameComps.StructureTemperatures.Add(base.gameObject);
 		}
 		base.Subscribe<BuildingComplete>(1606648047, BuildingComplete.OnObjectReplacedDelegate);
+		if (this.Def.Entombable)
+		{
+			base.Subscribe<BuildingComplete>(-1089732772, BuildingComplete.OnEntombedChange);
+		}
+	}
+
+	private void OnEntombedChanged()
+	{
+		if (base.gameObject.HasTag(GameTags.Entombed))
+		{
+			Components.EntombedBuildings.Add(this);
+			return;
+		}
+		Components.EntombedBuildings.Remove(this);
+	}
+
+	public override void UpdatePosition(int cell)
+	{
+		GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, cell);
+		base.UpdatePosition(cell);
 	}
 
 	private void OnObjectReplaced(object data)
@@ -53,19 +85,12 @@ public class BuildingComplete : Building
 	{
 		base.OnSpawn();
 		this.primaryElement = base.GetComponent<PrimaryElement>();
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		Rotatable component2 = base.GetComponent<Rotatable>();
-		if (component != null && component2 == null)
-		{
-			component.Offset = this.Def.GetVisualizerOffset() + this.Def.placementPivot;
-		}
-		KBoxCollider2D component3 = base.GetComponent<KBoxCollider2D>();
-		if (component3 != null)
-		{
-			Vector3 visualizerOffset = this.Def.GetVisualizerOffset();
-			component3.offset += new Vector2(visualizerOffset.x, visualizerOffset.y);
-		}
 		int num = Grid.PosToCell(base.transform.GetPosition());
+		int[] array = base.PlacementCells;
+		for (int i = 0; i < array.Length; i++)
+		{
+			SimMessages.SetCellProperties(array[i], 128);
+		}
 		if (this.Def.IsFoundation)
 		{
 			foreach (int num2 in base.PlacementCells)
@@ -74,8 +99,11 @@ public class BuildingComplete : Building
 				Game.Instance.roomProber.SolidChangedEvent(num2, false);
 			}
 		}
-		Vector3 vector = Grid.CellToPosCBC(num, this.Def.SceneLayer);
-		base.transform.SetPosition(vector);
+		if (Grid.IsValidCell(num))
+		{
+			Vector3 vector = Grid.CellToPosCBC(num, this.Def.SceneLayer);
+			base.transform.SetPosition(vector);
+		}
 		if (this.primaryElement != null)
 		{
 			if (this.primaryElement.Mass == 0f)
@@ -90,14 +118,17 @@ public class BuildingComplete : Building
 			PrimaryElement primaryElement = this.primaryElement;
 			primaryElement.setTemperatureCallback = (PrimaryElement.SetTemperatureCallback)Delegate.Combine(primaryElement.setTemperatureCallback, new PrimaryElement.SetTemperatureCallback(this.OnSetTemperature));
 		}
-		this.Def.MarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
-		if (this.Def.IsTilePiece)
+		if (!base.gameObject.HasTag(GameTags.RocketInSpace))
 		{
-			this.Def.MarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
-			this.Def.RunOnArea(num, base.Orientation, delegate(int c)
+			this.Def.MarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
+			if (this.Def.IsTilePiece)
 			{
-				TileVisualizer.RefreshCell(c, this.Def.TileLayer, this.Def.ReplacementLayer);
-			});
+				this.Def.MarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
+				this.Def.RunOnArea(num, base.Orientation, delegate(int c)
+				{
+					TileVisualizer.RefreshCell(c, this.Def.TileLayer, this.Def.ReplacementLayer);
+				});
+			}
 		}
 		base.RegisterBlockTileRenderer();
 		if (this.Def.PreventIdleTraversalPastBuilding)
@@ -106,11 +137,6 @@ public class BuildingComplete : Building
 			{
 				Grid.PreventIdleTraversal[base.PlacementCells[j]] = true;
 			}
-		}
-		KSelectable component4 = base.GetComponent<KSelectable>();
-		if (component4 != null)
-		{
-			component4.SetStatusIndicatorOffset(this.Def.placementPivot);
 		}
 		Components.BuildingCompletes.Add(this);
 		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
@@ -123,13 +149,13 @@ public class BuildingComplete : Building
 		Attributes attributes = this.GetAttributes();
 		if (attributes != null)
 		{
-			Deconstructable component5 = base.GetComponent<Deconstructable>();
-			if (component5 != null)
+			Deconstructable component = base.GetComponent<Deconstructable>();
+			if (component != null)
 			{
 				int k = 1;
-				while (k < component5.constructionElements.Length)
+				while (k < component.constructionElements.Length)
 				{
-					Tag tag = component5.constructionElements[k];
+					Tag tag = component.constructionElements[k];
 					Element element = ElementLoader.GetElement(tag);
 					if (element != null)
 					{
@@ -140,33 +166,34 @@ public class BuildingComplete : Building
 								AttributeModifier attributeModifier = enumerator.Current;
 								attributes.Add(attributeModifier);
 							}
-							goto IL_03D9;
+							goto IL_0363;
 						}
-						goto IL_0378;
+						goto IL_0303;
 					}
-					goto IL_0378;
-					IL_03D9:
+					goto IL_0303;
+					IL_0363:
 					k++;
 					continue;
-					IL_0378:
+					IL_0303:
 					GameObject gameObject = Assets.TryGetPrefab(tag);
 					if (!(gameObject != null))
 					{
-						goto IL_03D9;
+						goto IL_0363;
 					}
-					PrefabAttributeModifiers component6 = gameObject.GetComponent<PrefabAttributeModifiers>();
-					if (component6 != null)
+					PrefabAttributeModifiers component2 = gameObject.GetComponent<PrefabAttributeModifiers>();
+					if (component2 != null)
 					{
-						foreach (AttributeModifier attributeModifier2 in component6.descriptors)
+						foreach (AttributeModifier attributeModifier2 in component2.descriptors)
 						{
 							attributes.Add(attributeModifier2);
 						}
-						goto IL_03D9;
+						goto IL_0363;
 					}
-					goto IL_03D9;
+					goto IL_0363;
 				}
 			}
 		}
+		BuildingInventory.Instance.RegisterBuilding(this);
 	}
 
 	private void OnSetTemperature(PrimaryElement primary_element, float temperature)
@@ -200,7 +227,7 @@ public class BuildingComplete : Building
 			GameComps.StructureTemperatures.Remove(base.gameObject);
 		}
 		base.OnCleanUp();
-		if (!this.WasReplaced())
+		if (!this.WasReplaced() && base.gameObject.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX)
 		{
 			int num = Grid.PosToCell(this);
 			this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
@@ -238,16 +265,15 @@ public class BuildingComplete : Building
 			});
 		}
 		Components.BuildingCompletes.Remove(this);
+		Components.EntombedBuildings.Remove(this);
 		Components.TemplateBuildings.Remove(this);
 		base.UnregisterBlockTileRenderer();
+		BuildingInventory.Instance.UnregisterBuilding(this);
 		base.Trigger(-21016276, this);
 	}
 
 	[MyCmpReq]
 	private Modifiers modifiers;
-
-	[MyCmpGet]
-	public Assignable assignable;
 
 	[MyCmpGet]
 	public KPrefabID prefabid;
@@ -266,6 +292,11 @@ public class BuildingComplete : Building
 	private ObjectLayer replacingTileLayer = ObjectLayer.NumLayers;
 
 	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingComplete> OnEntombedChange = new EventSystem.IntraObjectHandler<BuildingComplete>(delegate(BuildingComplete component, object data)
+	{
+		component.OnEntombedChanged();
+	});
 
 	private static readonly EventSystem.IntraObjectHandler<BuildingComplete> OnObjectReplacedDelegate = new EventSystem.IntraObjectHandler<BuildingComplete>(delegate(BuildingComplete component, object data)
 	{

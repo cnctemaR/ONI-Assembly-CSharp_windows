@@ -101,6 +101,9 @@ namespace UnityEngine
 			this.SetPixels32(colors, arrayElement, 0);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetImageDataPointer();
+
 		public Texture2DArray(int width, int height, int depth, DefaultFormat format, TextureCreationFlags flags)
 			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format), flags)
 		{
@@ -114,9 +117,10 @@ namespace UnityEngine
 
 		public Texture2DArray(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags, int mipCount)
 		{
-			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
-			if (flag)
+			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			if (!flag)
 			{
+				Texture2DArray.ValidateIsNotCrunched(flags);
 				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, format, flags);
 			}
 		}
@@ -133,6 +137,7 @@ namespace UnityEngine
 				{
 					textureCreationFlags |= TextureCreationFlags.Crunch;
 				}
+				Texture2DArray.ValidateIsNotCrunched(textureCreationFlags);
 				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, textureCreationFlags);
 			}
 		}
@@ -197,6 +202,21 @@ namespace UnityEngine
 			this.SetPixelDataImpl((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), mipLevel, element, UnsafeUtility.SizeOf<T>(), data.Length, sourceDataStartIndex);
 		}
 
+		public unsafe NativeArray<T> GetPixelData<T>(int mipLevel, int element) where T : struct
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			int pixelDataOffset = base.GetPixelDataOffset(base.mipmapCount, element);
+			int pixelDataOffset2 = base.GetPixelDataOffset(mipLevel, element);
+			int pixelDataSize = base.GetPixelDataSize(mipLevel, element);
+			int num = UnsafeUtility.SizeOf<T>();
+			IntPtr intPtr = new IntPtr(this.GetImageDataPointer().ToInt64() + (long)(pixelDataOffset * element + pixelDataOffset2));
+			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, pixelDataSize / num, Allocator.None);
+		}
+
 		public void Apply(bool updateMipmaps)
 		{
 			this.Apply(updateMipmaps, false);
@@ -205,6 +225,15 @@ namespace UnityEngine
 		public void Apply()
 		{
 			this.Apply(true, false);
+		}
+
+		private static void ValidateIsNotCrunched(TextureCreationFlags flags)
+		{
+			bool flag = (flags &= TextureCreationFlags.Crunch) > TextureCreationFlags.None;
+			if (flag)
+			{
+				throw new ArgumentException("Crunched Texture2DArray is not supported.");
+			}
 		}
 	}
 }

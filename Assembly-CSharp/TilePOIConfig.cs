@@ -13,12 +13,11 @@ public class TilePOIConfig : IBuildingConfig
 		int num3 = 100;
 		float num4 = 30f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
-		string[] all_METALS = MATERIALS.ALL_METALS;
+		string[] all_MINERALS = MATERIALS.ALL_MINERALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
-		buildingDef.ShowInBuildMenu = false;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, tier, all_MINERALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
@@ -35,6 +34,7 @@ public class TilePOIConfig : IBuildingConfig
 		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isSolidTile = true;
+		buildingDef.DebugOnly = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_POI");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_POI");
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");

@@ -54,6 +54,11 @@ public abstract class AssignableSlotInstance
 		return this.assignable != null;
 	}
 
+	public bool IsUnassigning()
+	{
+		return this.unassigning;
+	}
+
 	public AssignableSlot slot;
 
 	public Assignable assignable;

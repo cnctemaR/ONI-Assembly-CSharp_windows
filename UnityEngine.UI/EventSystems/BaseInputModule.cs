@@ -70,7 +70,8 @@ namespace UnityEngine.EventSystems
 
 		protected static RaycastResult FindFirstRaycast(List<RaycastResult> candidates)
 		{
-			for (int i = 0; i < candidates.Count; i++)
+			int count = candidates.Count;
+			for (int i = 0; i < count; i++)
 			{
 				if (!(candidates[i].gameObject == null))
 				{
@@ -93,19 +94,19 @@ namespace UnityEngine.EventSystems
 			}
 			if (Mathf.Abs(x) > Mathf.Abs(y))
 			{
-				if (x > 0f)
+				if (x <= 0f)
 				{
-					return MoveDirection.Right;
+					return MoveDirection.Left;
 				}
-				return MoveDirection.Left;
+				return MoveDirection.Right;
 			}
 			else
 			{
-				if (y > 0f)
+				if (y <= 0f)
 				{
-					return MoveDirection.Up;
+					return MoveDirection.Down;
 				}
-				return MoveDirection.Down;
+				return MoveDirection.Up;
 			}
 		}
 
@@ -136,7 +137,8 @@ namespace UnityEngine.EventSystems
 		{
 			if (newEnterTarget == null || currentPointerData.pointerEnter == null)
 			{
-				for (int i = 0; i < currentPointerData.hovered.Count; i++)
+				int count = currentPointerData.hovered.Count;
+				for (int i = 0; i < count; i++)
 				{
 					ExecuteEvents.Execute<IPointerExitHandler>(currentPointerData.hovered[i], currentPointerData, ExecuteEvents.pointerExitHandler);
 				}

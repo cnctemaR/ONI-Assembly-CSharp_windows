@@ -59,7 +59,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 		{
 			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, ElementLoader.FindElementByHash(this.outputElement).name, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, ElementLoader.FindElementByHash(this.outputElement).name, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect, false));
 		}
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount)), Descriptor.DescriptorType.Effect, false));
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
 		return list;
 	}
 
@@ -179,7 +179,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.notready;
-			base.serializable = true;
+			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.notoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.notready, false);
 			this.notready.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.ready, (OreScrubber.SMInstance smi) => smi.HasSufficientMass()).ToggleStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, (OreScrubber.SMInstance smi) => smi.GetNeededMass())
 				.TagTransition(GameTags.Operational, this.notoperational, true);
@@ -243,11 +243,12 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 			float num2 = component.massConsumedPerUse * dt / this.workTime;
 			SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
 			float num3;
-			component2.ConsumeAndGetDisease(ElementLoader.FindElementByHash(component.consumedElement).tag, num2, out diseaseInfo, out num3);
+			float num4;
+			component2.ConsumeAndGetDisease(ElementLoader.FindElementByHash(component.consumedElement).tag, num2, out num3, out diseaseInfo, out num4);
 			if (component.outputElement != SimHashes.Vacuum)
 			{
 				diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(invalid, diseaseInfo);
-				component2.AddLiquid(component.outputElement, num2, num3, diseaseInfo.idx, diseaseInfo.count, false, true);
+				component2.AddLiquid(component.outputElement, num3, num4, diseaseInfo.idx, diseaseInfo.count, false, true);
 			}
 			return this.diseaseRemoved > component.diseaseRemovalCount;
 		}

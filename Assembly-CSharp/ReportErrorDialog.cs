@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using KMod;
 using STRINGS;
 using TMPro;
@@ -30,8 +28,6 @@ public class ReportErrorDialog : MonoBehaviour
 		this.continueGameButton.gameObject.SetActive(this.continueAction != null);
 		this.continueGameButton.onClick += this.OnSelect_CONTINUE;
 		this.quitButton.onClick += this.OnSelect_QUIT;
-		this.uploadSaveButton.onClick += this.OnSelect_UPLOADSAVE;
-		this.skipUploadSaveButton.onClick += this.OnSelect_SKIPUPLOADSAVE;
 		this.messageInputField.text = UI.CRASHSCREEN.BODY;
 	}
 
@@ -120,7 +116,7 @@ public class ReportErrorDialog : MonoBehaviour
 	public void OnSelect_COPYTOCLIPBOARD()
 	{
 		TextEditor textEditor = new TextEditor();
-		textEditor.text = this.m_stackTrace;
+		textEditor.text = this.m_stackTrace + string.Format("\nBuild: {0}", 471531U) + (DebugHandler.enabled ? "-D" : "");
 		textEditor.SelectAll();
 		textEditor.Copy();
 	}
@@ -129,26 +125,7 @@ public class ReportErrorDialog : MonoBehaviour
 	{
 		this.submitButton.GetComponentInChildren<LocText>().text = UI.CRASHSCREEN.REPORTING;
 		this.submitButton.GetComponent<KButton>().isInteractable = false;
-		base.StartCoroutine(this.WaitForUIUpdateBeforeReporting());
-	}
-
-	private IEnumerator WaitForUIUpdateBeforeReporting()
-	{
-		yield return new WaitForEndOfFrame();
-		yield return new WaitForEndOfFrame();
-		bool flag = false;
-		if (ReportErrorDialog.MOST_RECENT_SAVEFILE != null && File.Exists(ReportErrorDialog.MOST_RECENT_SAVEFILE))
-		{
-			flag = true;
-			long length = new FileInfo(ReportErrorDialog.MOST_RECENT_SAVEFILE).Length;
-			this.saveFileInfoLabel.text = Path.GetFileName(ReportErrorDialog.MOST_RECENT_SAVEFILE) + " " + length.ToString() + " bytes";
-			this.uploadSaveDialog.SetActive(true);
-		}
-		if (!flag)
-		{
-			this.Submit();
-		}
-		yield break;
+		this.Submit();
 	}
 
 	public void OnSelect_QUIT()
@@ -178,27 +155,11 @@ public class ReportErrorDialog : MonoBehaviour
 		return this.messageInputField.text;
 	}
 
-	private void OnSelect_UPLOADSAVE()
-	{
-		this.uploadSaveDialog.SetActive(false);
-		KCrashReporter.MOST_RECENT_SAVEFILE = ReportErrorDialog.MOST_RECENT_SAVEFILE;
-		this.Submit();
-	}
-
-	private void OnSelect_SKIPUPLOADSAVE()
-	{
-		this.uploadSaveDialog.SetActive(false);
-		KCrashReporter.MOST_RECENT_SAVEFILE = null;
-		this.Submit();
-	}
-
 	private void Submit()
 	{
 		this.submitAction();
 		this.OpenRefMessage();
 	}
-
-	public static string MOST_RECENT_SAVEFILE;
 
 	private global::System.Action submitAction;
 
@@ -235,18 +196,6 @@ public class ReportErrorDialog : MonoBehaviour
 
 	[SerializeField]
 	private GameObject StackTrace;
-
-	[SerializeField]
-	private GameObject uploadSaveDialog;
-
-	[SerializeField]
-	private KButton uploadSaveButton;
-
-	[SerializeField]
-	private KButton skipUploadSaveButton;
-
-	[SerializeField]
-	private LocText saveFileInfoLabel;
 
 	[SerializeField]
 	private GameObject modEntryPrefab;

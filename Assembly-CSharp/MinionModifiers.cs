@@ -19,19 +19,16 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 					this.attributes.Add(attribute);
 				}
 			}
-			Traits component = base.GetComponent<Traits>();
-			Trait trait = Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID);
-			component.Add(trait);
 			foreach (Disease disease in Db.Get().Diseases.resources)
 			{
 				AmountInstance amountInstance = this.AddAmount(disease.amount);
 				this.attributes.Add(disease.cureSpeedBase);
 				amountInstance.SetValue(0f);
 			}
-			ChoreConsumer component2 = base.GetComponent<ChoreConsumer>();
-			if (component2 != null)
+			ChoreConsumer component = base.GetComponent<ChoreConsumer>();
+			if (component != null)
 			{
-				component2.AddProvider(GlobalChoreProvider.Instance);
+				component.AddProvider(GlobalChoreProvider.Instance);
 				base.gameObject.AddComponent<QualityOfLifeNeed>();
 			}
 		}
@@ -76,7 +73,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 
 	private void OnDeath(object data)
 	{
-		global::Debug.LogFormat("OnDeath {0}", new object[] { data });
+		global::Debug.LogFormat("OnDeath {0} -- {1} has died!", new object[] { data, base.name });
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			minionIdentity.GetComponent<Effects>().Add("Mourning", true);

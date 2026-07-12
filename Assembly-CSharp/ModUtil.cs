@@ -14,7 +14,7 @@ public static class ModUtil
 		{
 			return;
 		}
-		(BUILDINGS.PLANORDER[num].data as IList<string>).Add(building_id);
+		((ICollection<string>)BUILDINGS.PLANORDER[num].data).Add(building_id);
 	}
 
 	public static void AddBuildingToHotkeyBuildMenu(HashedString category, string building_id, global::Action hotkey)

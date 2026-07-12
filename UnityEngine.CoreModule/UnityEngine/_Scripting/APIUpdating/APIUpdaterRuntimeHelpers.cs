@@ -47,63 +47,71 @@ namespace UnityEngine._Scripting.APIUpdating
 			{
 				ObsoleteAttribute obsoleteAttribute = (ObsoleteAttribute)customAttributes[0];
 				string message = obsoleteAttribute.Message;
-				string text = "(UnityUpgradable) -> ";
-				int num = message.IndexOf(text);
-				bool flag3 = num >= 0;
+				bool flag3 = string.IsNullOrEmpty(message);
 				if (flag3)
 				{
-					string text2 = message.Substring(num + text.Length).Trim();
-					bool flag4 = text2.Length == 0;
-					if (flag4)
-					{
-						flag2 = false;
-					}
-					else
-					{
-						bool flag5 = text2[0] == '[';
-						int num2;
-						if (flag5)
-						{
-							num2 = text2.IndexOf(']');
-							bool flag6 = num2 == -1;
-							if (flag6)
-							{
-								return false;
-							}
-							assemblyName = text2.Substring(1, num2 - 1);
-							text2 = text2.Substring(num2 + 1).Trim();
-						}
-						else
-						{
-							assemblyName = sourceType.Assembly.GetName().Name;
-						}
-						num2 = text2.LastIndexOf('.');
-						bool flag7 = num2 > -1;
-						if (flag7)
-						{
-							className = text2.Substring(num2 + 1);
-							text2 = text2.Substring(0, num2);
-						}
-						else
-						{
-							className = text2;
-							text2 = "";
-						}
-						bool flag8 = text2.Length > 0;
-						if (flag8)
-						{
-							nsp = text2;
-						}
-						else
-						{
-							nsp = sourceType.Namespace;
-						}
-						flag2 = true;
-					}
+					flag2 = false;
 				}
 				else
 				{
-					flag2 = false;
+					string text = "(UnityUpgradable) -> ";
+					int num = message.IndexOf(text);
+					bool flag4 = num >= 0;
+					if (flag4)
+					{
+						string text2 = message.Substring(num + text.Length).Trim();
+						bool flag5 = text2.Length == 0;
+						if (flag5)
+						{
+							flag2 = false;
+						}
+						else
+						{
+							bool flag6 = text2[0] == '[';
+							int num2;
+							if (flag6)
+							{
+								num2 = text2.IndexOf(']');
+								bool flag7 = num2 == -1;
+								if (flag7)
+								{
+									return false;
+								}
+								assemblyName = text2.Substring(1, num2 - 1);
+								text2 = text2.Substring(num2 + 1).Trim();
+							}
+							else
+							{
+								assemblyName = sourceType.Assembly.GetName().Name;
+							}
+							num2 = text2.LastIndexOf('.');
+							bool flag8 = num2 > -1;
+							if (flag8)
+							{
+								className = text2.Substring(num2 + 1);
+								text2 = text2.Substring(0, num2);
+							}
+							else
+							{
+								className = text2;
+								text2 = "";
+							}
+							bool flag9 = text2.Length > 0;
+							if (flag9)
+							{
+								nsp = text2;
+							}
+							else
+							{
+								nsp = sourceType.Namespace;
+							}
+							flag2 = true;
+						}
+					}
+					else
+					{
+						flag2 = false;
+					}
 				}
 			}
 			return flag2;

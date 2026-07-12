@@ -39,11 +39,15 @@ public class SliderSet
 			component.SetSimpleTooltip(target.GetSliderTooltip());
 		}
 		this.unitsLabel.text = target.SliderUnits;
-		this.minLabel.text = target.GetSliderMin(this.index) + target.SliderUnits;
-		this.maxLabel.text = target.GetSliderMax(this.index) + target.SliderUnits;
+		this.minLabel.text = target.GetSliderMin(this.index).ToString() + target.SliderUnits;
+		this.maxLabel.text = target.GetSliderMax(this.index).ToString() + target.SliderUnits;
 		this.numberInput.minValue = target.GetSliderMin(this.index);
 		this.numberInput.maxValue = target.GetSliderMax(this.index);
 		this.numberInput.decimalPlaces = target.SliderDecimalPlaces(this.index);
+		this.numberInput.field.characterLimit = Mathf.FloorToInt(1f + Mathf.Log10(this.numberInput.maxValue + (float)this.numberInput.decimalPlaces));
+		Vector2 sizeDelta = this.numberInput.GetComponent<RectTransform>().sizeDelta;
+		sizeDelta.x = (float)((this.numberInput.field.characterLimit + 1) * 10);
+		this.numberInput.GetComponent<RectTransform>().sizeDelta = sizeDelta;
 		this.valueSlider.minValue = target.GetSliderMin(this.index);
 		this.valueSlider.maxValue = target.GetSliderMax(this.index);
 		this.valueSlider.value = target.GetSliderValue(this.index);

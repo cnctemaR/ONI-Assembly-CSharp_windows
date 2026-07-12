@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -25,24 +26,15 @@ public class EventSystem
 				EventSystem.intraObjectDispatcher[hash][this.intraObjectRoutes[num].handlerIndex].Trigger(go, data);
 			}
 		}
-		int size = this.entries.size;
-		if (EventSystem.ENABLE_DETAILED_EVENT_PROFILE_INFO)
+		List<EventSystem.Entry> list;
+		if (this.entryMap.TryGetValue(hash, out list))
 		{
-			for (int i = 0; i < size; i++)
+			int count = list.Count;
+			for (int i = 0; i < count; i++)
 			{
-				if (this.entries[i].hash == hash && this.entries[i].handler != null)
+				if (list[i].hash == hash && list[i].handler != null)
 				{
-					this.entries[i].handler(data);
-				}
-			}
-		}
-		else
-		{
-			for (int j = 0; j < size; j++)
-			{
-				if (this.entries[j].hash == hash && this.entries[j].handler != null)
-				{
-					this.entries[j].handler(data);
+					list[i].handler(data);
 				}
 			}
 		}
@@ -50,7 +42,11 @@ public class EventSystem
 		if (this.dirty && this.currentlyTriggering == 0)
 		{
 			this.dirty = false;
-			this.entries.RemoveAllSwap((EventSystem.Entry x) => x.handler == null);
+			List<EventSystem.Entry> list2;
+			if (this.entryMap.TryGetValue(hash, out list2))
+			{
+				list2.RemoveAll((EventSystem.Entry x) => x.handler == null);
+			}
 			this.intraObjectRoutes.RemoveAllSwap((EventSystem.IntraObjectRoute route) => !route.IsValid());
 		}
 	}
@@ -65,13 +61,18 @@ public class EventSystem
 				this.Unsubscribe(subscribedEntry.go, subscribedEntry.hash, subscribedEntry.handler);
 			}
 		}
-		for (int j = 0; j < this.entries.size; j++)
+		foreach (KeyValuePair<int, List<EventSystem.Entry>> keyValuePair in this.entryMap)
 		{
-			EventSystem.Entry entry = this.entries[j];
-			entry.handler = null;
-			this.entries[j] = entry;
+			List<EventSystem.Entry> value = keyValuePair.Value;
+			for (int j = 0; j < value.Count; j++)
+			{
+				EventSystem.Entry entry = value[j];
+				entry.handler = null;
+				value[j] = entry;
+			}
+			value.Clear();
 		}
-		this.entries.Clear();
+		this.entryMap.Clear();
 		this.subscribedEvents.Clear();
 		this.intraObjectRoutes.Clear();
 	}
@@ -97,58 +98,76 @@ public class EventSystem
 	{
 		int num = this.nextId + 1;
 		this.nextId = num;
-		this.entries.Add(new EventSystem.Entry(hash, handler, num));
+		EventSystem.Entry entry = new EventSystem.Entry(hash, handler, num);
+		List<EventSystem.Entry> list;
+		if (!this.entryMap.TryGetValue(hash, out list))
+		{
+			list = new List<EventSystem.Entry>();
+			this.entryMap.Add(hash, list);
+		}
+		list.Add(entry);
+		this.idMap.Add(entry.id, entry.hash);
 		return this.nextId;
 	}
 
 	public void Unsubscribe(int hash, Action<object> handler)
 	{
-		int i = 0;
-		while (i < this.entries.size)
+		List<EventSystem.Entry> list;
+		if (this.entryMap.TryGetValue(hash, out list))
 		{
-			if (this.entries[i].hash == hash && this.entries[i].handler == handler)
+			int i = 0;
+			while (i < list.Count)
 			{
-				if (this.currentlyTriggering == 0)
+				if (list[i].hash == hash && list[i].handler == handler)
 				{
-					this.entries.RemoveAt(i);
+					if (this.currentlyTriggering == 0)
+					{
+						list.RemoveAt(i);
+						return;
+					}
+					this.dirty = true;
+					EventSystem.Entry entry = list[i];
+					entry.handler = null;
+					list[i] = entry;
 					return;
 				}
-				this.dirty = true;
-				EventSystem.Entry entry = this.entries[i];
-				entry.handler = null;
-				this.entries[i] = entry;
-				return;
-			}
-			else
-			{
-				i++;
+				else
+				{
+					i++;
+				}
 			}
 		}
 	}
 
 	public void Unsubscribe(int id)
 	{
-		int i = 0;
-		while (i < this.entries.size)
+		int num = -1;
+		List<EventSystem.Entry> list;
+		if (this.idMap.TryGetValue(id, out num) && this.entryMap.TryGetValue(num, out list))
 		{
-			if (this.entries[i].id == id)
+			int i = 0;
+			while (i < list.Count)
 			{
-				if (this.currentlyTriggering == 0)
+				if (list[i].id == id)
 				{
-					this.entries.RemoveAt(i);
-					return;
+					if (this.currentlyTriggering == 0)
+					{
+						list.RemoveAt(i);
+						break;
+					}
+					this.dirty = true;
+					EventSystem.Entry entry = list[i];
+					entry.handler = null;
+					list[i] = entry;
+					break;
 				}
-				this.dirty = true;
-				EventSystem.Entry entry = this.entries[i];
-				entry.handler = null;
-				this.entries[i] = entry;
-				return;
-			}
-			else
-			{
-				i++;
+				else
+				{
+					i++;
+				}
 			}
 		}
+		this.idMap.Remove(id);
 	}
 
 	public int Subscribe(GameObject target, int eventName, Action<object> handler)
@@ -157,7 +176,7 @@ public class EventSystem
 		return KObjectManager.Instance.GetOrCreateObject(target).GetEventSystem().Subscribe(eventName, handler);
 	}
 
-	public int Subscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler)
+	public int Subscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler) where ComponentType : Component
 	{
 		List<EventSystem.IntraObjectHandlerBase> list;
 		if (!EventSystem.intraObjectDispatcher.TryGetValue(eventName, out list))
@@ -205,7 +224,7 @@ public class EventSystem
 		this.intraObjectRoutes[num] = default(EventSystem.IntraObjectRoute);
 	}
 
-	public void Unsubscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings)
+	public void Unsubscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings) where ComponentType : Component
 	{
 		List<EventSystem.IntraObjectHandlerBase> list;
 		if (!EventSystem.intraObjectDispatcher.TryGetValue(eventName, out list))
@@ -237,7 +256,15 @@ public class EventSystem
 		}
 	}
 
-	private static bool ENABLE_DETAILED_EVENT_PROFILE_INFO = false;
+	[Conditional("ENABLE_DETAILED_EVENT_PROFILE_INFO")]
+	private static void BeginDetailedSample(string region_name)
+	{
+	}
+
+	[Conditional("ENABLE_DETAILED_EVENT_PROFILE_INFO")]
+	private static void EndDetailedSample(string region_name)
+	{
+	}
 
 	private int nextId;
 
@@ -247,7 +274,9 @@ public class EventSystem
 
 	private ArrayRef<EventSystem.SubscribedEntry> subscribedEvents;
 
-	private ArrayRef<EventSystem.Entry> entries;
+	private Dictionary<int, List<EventSystem.Entry>> entryMap = new Dictionary<int, List<EventSystem.Entry>>();
+
+	private Dictionary<int, int> idMap = new Dictionary<int, int>();
 
 	private ArrayRef<EventSystem.IntraObjectRoute> intraObjectRoutes;
 
@@ -310,7 +339,7 @@ public class EventSystem
 		public abstract void Trigger(GameObject gameObject, object eventData);
 	}
 
-	public class IntraObjectHandler<ComponentType> : EventSystem.IntraObjectHandlerBase
+	public class IntraObjectHandler<ComponentType> : EventSystem.IntraObjectHandlerBase where ComponentType : Component
 	{
 		public static bool IsStatic(Delegate del)
 		{
@@ -320,7 +349,7 @@ public class EventSystem
 
 		public IntraObjectHandler(Action<ComponentType, object> handler)
 		{
-			global::Debug.Assert(EventSystem.IntraObjectHandler<ComponentType>.IsStatic(handler));
+			global::Debug.Assert(EventSystem.IntraObjectHandler<ComponentType>.IsStatic(handler), "IntraObjectHandler method must be static to avoid allocations");
 			this.handler = handler;
 		}
 

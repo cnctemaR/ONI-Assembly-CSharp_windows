@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class ResearchComplete : ColonyAchievementRequirement
+	public class ResearchComplete : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public override bool Success()
 		{
@@ -22,11 +21,7 @@ namespace Database
 			return true;
 		}
 
-		public override void Deserialize(IReader reader)
-		{
-		}
-
-		public override void Serialize(BinaryWriter writer)
+		public void Deserialize(IReader reader)
 		{
 		}
 

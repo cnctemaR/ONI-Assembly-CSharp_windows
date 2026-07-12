@@ -9,7 +9,7 @@ public class EnergyInfoScreen : TargetScreen
 {
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<Generator>() != null || target.GetComponent<Wire>() != null || target.GetComponent<Battery>() != null || target.GetComponent<EnergyConsumer>() != null;
+		return target.GetComponent<ICircuitConnected>() != null || target.GetComponent<Wire>() != null;
 	}
 
 	protected override void OnPrefabInit()
@@ -71,23 +71,10 @@ public class EnergyInfoScreen : TargetScreen
 		}
 		CircuitManager circuitManager = Game.Instance.circuitManager;
 		ushort num = ushort.MaxValue;
-		EnergyConsumer component = this.selectedTarget.GetComponent<EnergyConsumer>();
+		ICircuitConnected component = this.selectedTarget.GetComponent<ICircuitConnected>();
 		if (component != null)
 		{
-			num = component.CircuitID;
-		}
-		else
-		{
-			Generator component2 = this.selectedTarget.GetComponent<Generator>();
-			if (component2 != null)
-			{
-				num = component2.CircuitID;
-			}
-		}
-		if (num == 65535)
-		{
-			int num2 = Grid.PosToCell(this.selectedTarget.transform.GetPosition());
-			num = circuitManager.GetCircuitID(num2);
+			num = circuitManager.GetCircuitID(component);
 		}
 		if (num != 65535)
 		{
@@ -141,7 +128,7 @@ public class EnergyInfoScreen : TargetScreen
 						if (generator != null && generator.GetComponent<Battery>() == null)
 						{
 							gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, generator.gameObject.GetInstanceID().ToString());
-							if (generator.GetComponent<Operational>().IsActive)
+							if (generator.IsProducingPower())
 							{
 								gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", generator.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedWattage(generator.WattageRating, GameUtil.WattageFormatterUnit.Automatic, true));
 							}
@@ -153,13 +140,13 @@ public class EnergyInfoScreen : TargetScreen
 							gameObject.GetComponent<LocText>().fontStyle = ((generator.gameObject == this.selectedTarget) ? FontStyles.Bold : FontStyles.Normal);
 						}
 					}
-					goto IL_055F;
+					goto IL_050C;
 				}
 			}
 			gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, "nogenerators");
 			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOGENERATORS;
 			gameObject.SetActive(true);
-			IL_055F:
+			IL_050C:
 			if (consumersOnCircuit.Count > 0 || transformersOnCircuit.Count > 0)
 			{
 				foreach (IEnergyConsumer energyConsumer in consumersOnCircuit)
@@ -173,13 +160,13 @@ public class EnergyInfoScreen : TargetScreen
 						IEnergyConsumer energyConsumer2 = enumerator4.Current;
 						this.AddConsumerInfo(energyConsumer2, gameObject);
 					}
-					goto IL_0614;
+					goto IL_05C1;
 				}
 			}
 			gameObject = this.AddOrGetLabel(this.consumersLabels, this.consumersPanel, "noconsumers");
 			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOCONSUMERS;
 			gameObject.SetActive(true);
-			IL_0614:
+			IL_05C1:
 			if (batteriesOnCircuit.Count > 0)
 			{
 				using (List<Battery>.Enumerator enumerator5 = batteriesOnCircuit.GetEnumerator())

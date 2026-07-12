@@ -209,8 +209,8 @@ public class SimAndRenderScheduler
 	{
 		string text = SimAndRenderScheduler.MakeBucketId(typeof(T), this.GetUpdateRate<UpdateInterface>());
 		SimAndRenderScheduler.Entry entry = this.ManifestEntry<UpdateInterface>(text, false);
-		DebugUtil.DevAssert(this.GetImplementedInterfaces(typeof(T)).Contains(this.GetUpdateRate<UpdateInterface>()), "T does not implement the UpdateInterface it is registering for BatchUpdate under");
-		DebugUtil.DevAssert(entry.buckets.Length == 1, "don't do a batch update with load balancing because load balancing will produce many small batches which is inefficient");
+		DebugUtil.DevAssert(this.GetImplementedInterfaces(typeof(T)).Contains(this.GetUpdateRate<UpdateInterface>()), "T does not implement the UpdateInterface it is registering for BatchUpdate under", null);
+		DebugUtil.DevAssert(entry.buckets.Length == 1, "don't do a batch update with load balancing because load balancing will produce many small batches which is inefficient", null);
 		((UpdateBucketWithUpdater<UpdateInterface>)entry.buckets[0]).batch_update_delegate = batch_update;
 		this.bucketTable[text] = entry;
 	}

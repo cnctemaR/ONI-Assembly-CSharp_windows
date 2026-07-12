@@ -15,6 +15,7 @@ namespace UnityEngine
 			IntPtr intPtr = AndroidJNISafe.FindClass(className.Replace('.', '/'));
 			this.m_jclass = new GlobalJavaObjectRef(intPtr);
 			this.m_jobject = new GlobalJavaObjectRef(IntPtr.Zero);
+			AndroidJNISafe.DeleteLocalRef(intPtr);
 		}
 
 		internal AndroidJavaClass(IntPtr jclass)

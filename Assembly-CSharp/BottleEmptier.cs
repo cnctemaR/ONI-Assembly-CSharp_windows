@@ -29,8 +29,14 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 	private void OnRefreshUserMenu(object data)
 	{
-		KIconButtonMenu.ButtonInfo buttonInfo = (this.allowManualPumpingStationFetching ? new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.TOOLTIP, true));
-		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 0.4f);
+		if (this.isGasEmptier)
+		{
+			KIconButtonMenu.ButtonInfo buttonInfo = (this.allowManualPumpingStationFetching ? new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED_GAS.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED_GAS.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED_GAS.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED_GAS.TOOLTIP, true));
+			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 0.4f);
+			return;
+		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = (this.allowManualPumpingStationFetching ? new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.TOOLTIP, true) : new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.TOOLTIP, true));
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 0.4f);
 	}
 
 	private void OnCopySettings(object data)
@@ -46,12 +52,6 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	public bool allowManualPumpingStationFetching;
 
 	public bool isGasEmptier;
-
-	[SerializeField]
-	public Color noFilterTint = FilteredStorage.NO_FILTER_TINT;
-
-	[SerializeField]
-	public Color filterTint = FilteredStorage.FILTER_TINT;
 
 	private static readonly EventSystem.IntraObjectHandler<BottleEmptier> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<BottleEmptier>(delegate(BottleEmptier component, object data)
 	{
@@ -79,14 +79,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 		public void CreateChore()
 		{
-			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+			base.GetComponent<KBatchedAnimController>();
 			Tag[] tags = base.GetComponent<TreeFilterable>().GetTags();
-			if (tags == null || tags.Length == 0)
-			{
-				component.TintColour = base.master.noFilterTint;
-				return;
-			}
-			component.TintColour = base.master.filterTint;
 			Tag[] array;
 			if (!base.master.allowManualPumpingStationFetching)
 			{
@@ -96,8 +90,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			{
 				array = new Tag[0];
 			}
-			Storage component2 = base.GetComponent<Storage>();
-			this.chore = new FetchChore(Db.Get().ChoreTypes.StorageFetch, component2, component2.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			Storage component = base.GetComponent<Storage>();
+			this.chore = new FetchChore(Db.Get().ChoreTypes.StorageFetch, component, component.Capacity(), tags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 		}
 
 		public void CancelChore()
@@ -174,26 +168,27 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				return;
 			}
 			Tag prefabTag = firstPrimaryElement.GetComponent<KPrefabID>().PrefabTag;
-			SimUtil.DiseaseInfo diseaseInfo;
 			float num2;
-			component.ConsumeAndGetDisease(prefabTag, num, out diseaseInfo, out num2);
+			SimUtil.DiseaseInfo diseaseInfo;
+			float num3;
+			component.ConsumeAndGetDisease(prefabTag, num, out num2, out diseaseInfo, out num3);
 			Vector3 position = base.transform.GetPosition();
 			position.y += 1.8f;
 			bool flag = base.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH;
 			position.x += (flag ? (-0.2f) : 0.2f);
-			int num3 = Grid.PosToCell(position) + (flag ? (-1) : 1);
-			if (Grid.Solid[num3])
+			int num4 = Grid.PosToCell(position) + (flag ? (-1) : 1);
+			if (Grid.Solid[num4])
 			{
-				num3 += (flag ? 1 : (-1));
+				num4 += (flag ? 1 : (-1));
 			}
 			Element element = firstPrimaryElement.Element;
 			byte idx = element.idx;
 			if (element.IsLiquid)
 			{
-				FallingWater.instance.AddParticle(num3, idx, num, num2, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
+				FallingWater.instance.AddParticle(num4, idx, num2, num3, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
 				return;
 			}
-			SimMessages.ModifyCell(num3, (int)idx, num2, num, diseaseInfo.idx, diseaseInfo.count, SimMessages.ReplaceType.None, false, -1);
+			SimMessages.ModifyCell(num4, (int)idx, num3, num2, diseaseInfo.idx, diseaseInfo.count, SimMessages.ReplaceType.None, false, -1);
 		}
 
 		private FetchChore chore;
@@ -204,7 +199,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.waitingfordelivery;
-			this.statusItem = new StatusItem("BottleEmptier", "", "", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.statusItem = new StatusItem("BottleEmptier", "", "", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022, true, null);
 			this.statusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				BottleEmptier bottleEmptier = (BottleEmptier)data;

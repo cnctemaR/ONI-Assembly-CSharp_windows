@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class SaltPlantConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "SaltPlant";
@@ -15,7 +20,7 @@ public class SaltPlantConfig : IEntityConfig
 		EffectorValues tier = DECOR.PENALTY.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("saltplant_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, new List<Tag> { GameTags.Hanging }, 258.15f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 2);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 198.15f, 248.15f, 323.15f, 393.15f, null, true, 0f, 0.15f, SimHashes.Salt.ToString(), true, true, true, true, 2400f);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 198.15f, 248.15f, 323.15f, 393.15f, null, true, 0f, 0.15f, SimHashes.Salt.ToString(), true, true, true, true, 2400f, 0f, 740f, "SaltPlantOriginal", global::STRINGS.CREATURES.SPECIES.SALTPLANT.NAME);
 		gameObject.AddOrGet<SaltPlant>();
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
@@ -42,9 +47,12 @@ public class SaltPlantConfig : IEntityConfig
 		elementConsumer.consumptionRadius = 4;
 		elementConsumer.sampleCellOffset = new Vector3(0f, -1f);
 		elementConsumer.consumptionRate = 0.006f;
-		gameObject.GetComponent<UprootedMonitor>().monitorCell = new CellOffset(0, 1);
+		gameObject.GetComponent<UprootedMonitor>().monitorCells = new CellOffset[]
+		{
+			new CellOffset(0, 1)
+		};
 		gameObject.AddOrGet<StandardCropPlant>();
-		EntityTemplates.MakeHangingOffsets(EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SaltPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SALTPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SALTPLANT.DESC, Assets.GetAnim("seed_saltplant_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SALTPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false), "SaltPlant_preview", Assets.GetAnim("saltplant_kanim"), "place", 1, 2), 1, 2);
+		EntityTemplates.MakeHangingOffsets(EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SaltPlantSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SALTPLANT.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SALTPLANT.DESC, Assets.GetAnim("seed_saltplant_kanim"), "object", 1, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 5, global::STRINGS.CREATURES.SPECIES.SALTPLANT.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.35f, 0.35f, null, "", false), "SaltPlant_preview", Assets.GetAnim("saltplant_kanim"), "place", 1, 2), 1, 2);
 		return gameObject;
 	}
 

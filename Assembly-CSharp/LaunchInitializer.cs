@@ -5,6 +5,15 @@ using UnityEngine;
 
 public class LaunchInitializer : MonoBehaviour
 {
+	public static string BuildPrefix()
+	{
+		if (!DlcManager.IsExpansion1Active())
+		{
+			return "FA";
+		}
+		return "EX1 S14";
+	}
+
 	private void Update()
 	{
 		if (this.numWaitFrames > Time.renderedFrameCount)
@@ -17,9 +26,14 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		GraphicsOptionsScreen.SetSettingsFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("release Build: CS-" + 469300U.ToString());
+		global::Debug.Log("Current date: " + global::System.DateTime.Now.ToString());
+		global::Debug.Log("release Build: " + 471531U.ToString());
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
+		DistributionPlatform.Initialize();
+		global::Debug.Log("DistributionPlatform initialized.");
+		global::Debug.Log("release Build: " + LaunchInitializer.BuildPrefix() + "-" + 471531U.ToString());
+		global::Debug.Log(string.Format("EXPANSION1 installed: {0}  active: {1}", DlcManager.IsExpansion1Installed(), DlcManager.IsExpansion1Active()));
 		KFMOD.Initialize();
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)
 		{
@@ -54,7 +68,9 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "CS";
+	private const string BASE_BUILD_PREFIX = "FA";
+
+	private const string EXPANSION1_BUILD_PREFIX = "EX1 S14";
 
 	public GameObject[] SpawnPrefabs;
 

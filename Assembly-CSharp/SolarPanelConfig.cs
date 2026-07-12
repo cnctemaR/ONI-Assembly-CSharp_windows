@@ -24,6 +24,8 @@ public class SolarPanelConfig : IBuildingConfig
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.BuildLocationRule = BuildLocationRule.Anywhere;
 		buildingDef.HitPoints = 10;
+		buildingDef.RequiresPowerOutput = true;
+		buildingDef.PowerOutputOffset = new CellOffset(0, 0);
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
@@ -42,6 +44,12 @@ public class SolarPanelConfig : IBuildingConfig
 		go.AddOrGet<Repairable>().expectedRepairTime = 52.5f;
 		go.AddOrGet<SolarPanel>().powerDistributionOrder = 9;
 		go.AddOrGetDef<PoweredActiveController.Def>();
+		MakeBaseSolid.Def def = go.AddOrGetDef<MakeBaseSolid.Def>();
+		def.solidOffsets = new CellOffset[7];
+		for (int i = 0; i < 7; i++)
+		{
+			def.solidOffsets[i] = new CellOffset(i - 3, 0);
+		}
 	}
 
 	public const string ID = "SolarPanel";
@@ -49,4 +57,6 @@ public class SolarPanelConfig : IBuildingConfig
 	public const float WATTS_PER_LUX = 0.00053f;
 
 	public const float MAX_WATTS = 380f;
+
+	private const int WIDTH = 7;
 }

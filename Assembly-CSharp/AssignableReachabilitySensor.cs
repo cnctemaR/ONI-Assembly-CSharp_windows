@@ -38,7 +38,7 @@ public class AssignableReachabilitySensor : Sensor
 				return this.slots[i].isReachable;
 			}
 		}
-		Debug.LogError("Could not find slot: " + slot);
+		Debug.LogError("Could not find slot: " + ((slot != null) ? slot.ToString() : null));
 		return false;
 	}
 

@@ -10,7 +10,7 @@ namespace UnityEngine
 		[FreeFunction("ToJsonInternal", true)]
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string ToJsonInternal([NotNull] object obj, bool prettyPrint);
+		private static extern string ToJsonInternal([NotNull("ArgumentNullException")] object obj, bool prettyPrint);
 
 		[FreeFunction("FromJsonInternal", true, ThrowsException = true)]
 		[ThreadSafe]

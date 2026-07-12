@@ -158,11 +158,35 @@ public class FaceGraph : KMonoBehaviour
 			this.currentExpression = expression;
 			this.m_symbolOverrideController.MarkDirty();
 		}
-	}
-
-	public Expression GetCurrentExpression()
-	{
-		return this.currentExpression;
+		AccessorySlot headEffects = Db.Get().AccessorySlots.HeadEffects;
+		if (this.currentExpression != null)
+		{
+			Accessory accessory = this.m_accessorizer.GetAccessory(Db.Get().AccessorySlots.HeadEffects);
+			HashedString hashedString = HashedString.Invalid;
+			foreach (Expression expression2 in this.expressions)
+			{
+				if (expression2.face.headFXHash.IsValid)
+				{
+					hashedString = expression2.face.headFXHash;
+					break;
+				}
+			}
+			Accessory accessory2 = ((hashedString != HashedString.Invalid) ? headEffects.Lookup(hashedString) : null);
+			if (accessory != accessory2)
+			{
+				if (accessory != null)
+				{
+					this.m_accessorizer.RemoveAccessory(accessory);
+				}
+				if (accessory2 != null)
+				{
+					this.m_accessorizer.AddAccessory(accessory2);
+				}
+			}
+			this.m_controller.SetSymbolVisiblity(headEffects.targetSymbolId, accessory2 != null);
+			return;
+		}
+		this.m_controller.SetSymbolVisiblity(headEffects.targetSymbolId, false);
 	}
 
 	private List<Expression> expressions = new List<Expression>();

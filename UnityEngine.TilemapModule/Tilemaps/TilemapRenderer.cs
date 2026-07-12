@@ -6,11 +6,11 @@ using UnityEngine.U2D;
 
 namespace UnityEngine.Tilemaps
 {
-	[NativeHeader("Modules/Tilemap/TilemapRendererJobs.h")]
-	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
-	[NativeType(Header = "Modules/Tilemap/Public/TilemapRenderer.h")]
 	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
+	[NativeHeader("Modules/Tilemap/TilemapRendererJobs.h")]
+	[NativeType(Header = "Modules/Tilemap/Public/TilemapRenderer.h")]
 	[RequireComponent(typeof(Tilemap))]
+	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
 	public sealed class TilemapRenderer : Renderer
 	{
 		public Vector3Int chunkSize

@@ -4,7 +4,7 @@ using System.IO;
 using STRINGS;
 using UnityEngine;
 
-public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveLoadableDetails, ISim4000ms
+public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveLoadableDetails
 {
 	public KMonoBehaviour target { get; set; }
 
@@ -62,13 +62,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.transitionDriver = new TransitionDriver(this);
 		this.targetLocator = Util.KInstantiate(Assets.GetPrefab(TargetLocator.ID), null, null).GetComponent<KPrefabID>();
 		this.targetLocator.gameObject.SetActive(true);
-		this.log = new LoggerFS("Navigator", 35);
+		this.log = new LoggerFSS("Navigator", 35);
 		this.simRenderLoadBalance = true;
 		this.autoRegisterSimRender = false;
 		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
 		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
 		this.distanceTravelledByNavType = new Dictionary<NavType, int>();
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 11; i++)
 		{
 			this.distanceTravelledByNavType.Add((NavType)i, 0);
 		}
@@ -92,7 +92,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public bool IsMoving()
 	{
-		return base.smi.IsInsideState(base.smi.sm.moving);
+		return base.smi.IsInsideState(base.smi.sm.normal.moving);
 	}
 
 	public bool GoTo(int cell, CellOffset[] offsets = null)
@@ -126,7 +126,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			tactic = NavigationTactics.ReduceTravelDistance;
 		}
-		base.smi.GoTo(base.smi.sm.moving);
+		base.smi.GoTo(base.smi.sm.normal.moving);
 		base.smi.sm.moveTarget.Set(target.gameObject, base.smi);
 		this.tactic = tactic;
 		this.target = target;
@@ -139,7 +139,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	public void BeginTransition(NavGrid.Transition transition)
 	{
 		this.transitionDriver.EndTransition();
-		base.smi.GoTo(base.smi.sm.moving);
+		base.smi.GoTo(base.smi.sm.normal.moving);
 		Navigator.ActiveTransition activeTransition = new Navigator.ActiveTransition(transition, this.defaultSpeed);
 		this.transitionDriver.BeginTransition(this, activeTransition);
 	}
@@ -252,13 +252,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		}
 		if (arrived_at_destination)
 		{
-			base.smi.GoTo(base.smi.sm.arrived);
+			base.smi.GoTo(base.smi.sm.normal.arrived);
 			return;
 		}
-		if (base.smi.GetCurrentState() == base.smi.sm.moving)
+		if (base.smi.GetCurrentState() == base.smi.sm.normal.moving)
 		{
 			this.ClearReservedCell();
-			base.smi.GoTo(base.smi.sm.failed);
+			base.smi.GoTo(base.smi.sm.normal.failed);
 		}
 	}
 
@@ -290,6 +290,16 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			NavPathDrawer.Instance.DrawPath(base.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), this.path);
 		}
+	}
+
+	public void Pause(string reason)
+	{
+		base.smi.sm.isPaused.Set(true, base.smi);
+	}
+
+	public void Unpause(string reason)
+	{
+		base.smi.sm.isPaused.Set(false, base.smi);
 	}
 
 	private void OnDefeated(object data)
@@ -497,7 +507,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public PathFinder.PotentialPath.Flags flags;
 
-	private LoggerFS log;
+	private LoggerFSS log;
 
 	public Dictionary<NavType, int> distanceTravelledByNavType;
 
@@ -549,8 +559,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		public ActiveTransition(NavGrid.Transition transition, float default_speed)
 		{
-			this.x = (int)transition.x;
-			this.y = (int)transition.y;
+			this.x = transition.x;
+			this.y = transition.y;
 			this.isLooping = transition.isLooping;
 			this.start = transition.start;
 			this.end = transition.end;
@@ -596,9 +606,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.stopped;
+			default_state = this.normal.stopped;
 			this.saveHistory = true;
-			this.moving.Enter(delegate(Navigator.StatesInstance smi)
+			this.normal.ParamTransition<bool>(this.isPaused, this.paused, GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.IsTrue).Update("NavigatorProber", delegate(Navigator.StatesInstance smi, float dt)
+			{
+				smi.master.Sim4000ms(dt);
+			}, UpdateRate.SIM_4000ms, false);
+			this.normal.moving.Enter(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
 			}).Update("UpdateNavigator", delegate(Navigator.StatesInstance smi, float dt)
@@ -608,20 +622,30 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
 			});
-			this.arrived.TriggerOnEnter(GameHashes.DestinationReached, null).GoTo(this.stopped);
-			this.failed.TriggerOnEnter(GameHashes.NavigationFailed, null).GoTo(this.stopped);
-			this.stopped.DoNothing();
+			this.normal.arrived.TriggerOnEnter(GameHashes.DestinationReached, null).GoTo(this.normal.stopped);
+			this.normal.failed.TriggerOnEnter(GameHashes.NavigationFailed, null).GoTo(this.normal.stopped);
+			this.normal.stopped.DoNothing();
+			this.paused.ParamTransition<bool>(this.isPaused, this.paused, GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.IsFalse);
 		}
 
 		public StateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.TargetParameter moveTarget;
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State moving;
+		public StateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.BoolParameter isPaused = new StateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.BoolParameter(false);
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State arrived;
+		public Navigator.States.NormalStates normal;
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State failed;
+		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State paused;
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State stopped;
+		public class NormalStates : GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State
+		{
+			public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State moving;
+
+			public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State arrived;
+
+			public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State failed;
+
+			public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State stopped;
+		}
 	}
 
 	public struct PathProbeTask : IWorkItem<object>

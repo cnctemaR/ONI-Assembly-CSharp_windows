@@ -29,17 +29,17 @@ namespace UnityEngine.SocialPlatforms.Impl
 
 		public override string ToString()
 		{
-			return string.Concat(new object[]
+			return string.Concat(new string[]
 			{
 				this.id,
 				" - ",
-				this.percentCompleted,
+				this.percentCompleted.ToString(),
 				" - ",
 				this.completed.ToString(),
 				" - ",
 				this.hidden.ToString(),
 				" - ",
-				this.lastReportedDate
+				this.lastReportedDate.ToString()
 			});
 		}
 

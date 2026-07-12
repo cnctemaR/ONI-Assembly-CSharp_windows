@@ -70,8 +70,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 					smi.GoTo(this.idle.move);
 				}
 			}, UpdateRate.SIM_1000ms, false);
-			this.idle.move.Transition(this.idle, (IdleChore.StatesInstance smi) => !smi.HasIdleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk)
-				.ToggleAnims("anim_loco_walk_kanim", 0f)
+			this.idle.move.Transition(this.idle, (IdleChore.StatesInstance smi) => !smi.HasIdleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk, null)
+				.ToggleAnims("anim_loco_walk_kanim", 0f, "")
 				.MoveTo((IdleChore.StatesInstance smi) => smi.GetIdleCell(), this.idle, this.idle, false)
 				.Exit("UpdateNavType", delegate(IdleChore.StatesInstance smi)
 				{

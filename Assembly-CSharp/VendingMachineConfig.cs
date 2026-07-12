@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
 
 public class VendingMachineConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string text = "VendingMachine";
@@ -13,9 +19,9 @@ public class VendingMachineConfig : IEntityConfig
 		float num = 100f;
 		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("vendingmachine_kanim"), "on", Grid.SceneLayer.Building, 2, 3, tier, tier2, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("vendingmachine_kanim"), "on", Grid.SceneLayer.Building, 2, 3, tier, tier2, SimHashes.Creature, new List<Tag> { GameTags.Gravitas }, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Unobtanium);
+		component.SetElement(SimHashes.Unobtanium, true);
 		component.Temperature = 294.15f;
 		Workable workable = gameObject.AddOrGet<Workable>();
 		workable.synchronizeAnims = false;
@@ -24,7 +30,6 @@ public class VendingMachineConfig : IEntityConfig
 		setLocker.machineSound = "VendingMachine_LP";
 		setLocker.overrideAnim = "anim_break_kanim";
 		setLocker.dropOffset = new Vector2I(1, 1);
-		setLocker.possible_contents_ids = new string[] { "FieldRation" };
 		gameObject.AddOrGet<LoreBearer>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
@@ -33,6 +38,9 @@ public class VendingMachineConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject inst)
 	{
+		SetLocker component = inst.GetComponent<SetLocker>();
+		component.possible_contents_ids = new string[][] { new string[] { "FieldRation" } };
+		component.ChooseContents();
 	}
 
 	public void OnSpawn(GameObject inst)

@@ -14,31 +14,35 @@ public class GeneratedOre
 			{
 				IOreConfig oreConfig = Activator.CreateInstance(type) as IOreConfig;
 				SimHashes elementID = oreConfig.ElementID;
-				if (elementID != SimHashes.Void)
+				Element element = ElementLoader.FindElementByHash(elementID);
+				if (element != null && DlcManager.IsContentActive(element.dlcId))
 				{
-					hashSet.Add(elementID);
+					if (elementID != SimHashes.Void)
+					{
+						hashSet.Add(elementID);
+					}
+					Assets.AddPrefab(oreConfig.CreatePrefab().GetComponent<KPrefabID>());
 				}
-				Assets.AddPrefab(oreConfig.CreatePrefab().GetComponent<KPrefabID>());
 			}
 		}
-		foreach (Element element in ElementLoader.elements)
+		foreach (Element element2 in ElementLoader.elements)
 		{
-			if (element != null && !hashSet.Contains(element.id))
+			if (element2 != null && !hashSet.Contains(element2.id) && DlcManager.IsContentActive(element2.dlcId))
 			{
-				if (element.substance != null && element.substance.anim != null)
+				if (element2.substance != null && element2.substance.anim != null)
 				{
 					GameObject gameObject = null;
-					if (element.IsSolid)
+					if (element2.IsSolid)
 					{
-						gameObject = EntityTemplates.CreateSolidOreEntity(element.id, null);
+						gameObject = EntityTemplates.CreateSolidOreEntity(element2.id, null);
 					}
-					else if (element.IsLiquid)
+					else if (element2.IsLiquid)
 					{
-						gameObject = EntityTemplates.CreateLiquidOreEntity(element.id, null);
+						gameObject = EntityTemplates.CreateLiquidOreEntity(element2.id, null);
 					}
-					else if (element.IsGas)
+					else if (element2.IsGas)
 					{
-						gameObject = EntityTemplates.CreateGasOreEntity(element.id, null);
+						gameObject = EntityTemplates.CreateGasOreEntity(element2.id, null);
 					}
 					if (gameObject != null)
 					{
@@ -47,7 +51,7 @@ public class GeneratedOre
 				}
 				else
 				{
-					global::Debug.LogError("Missing substance or anim for element [" + element.name + "]");
+					global::Debug.LogError("Missing substance or anim for element [" + element2.name + "]");
 				}
 			}
 		}

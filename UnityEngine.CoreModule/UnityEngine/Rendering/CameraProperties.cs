@@ -237,8 +237,8 @@ namespace UnityEngine.Rendering
 
 		private int isImplicitProjectionMatrix;
 
-		[CompilerGenerated]
 		[UnsafeValueType]
+		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 96)]
 		public struct <m_ShadowCullPlanes>e__FixedBuffer
 		{
@@ -253,8 +253,8 @@ namespace UnityEngine.Rendering
 			public byte FixedElementField;
 		}
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 128)]
 		public struct <layerCullDistances>e__FixedBuffer
 		{

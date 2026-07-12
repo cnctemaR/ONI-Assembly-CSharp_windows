@@ -59,15 +59,15 @@ namespace UnityEngine
 			return this.AddKey_Internal_Injected(ref key);
 		}
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::MoveKey", HasExplicitThis = true, IsThreadSafe = true)]
+		[NativeThrows]
 		public int MoveKey(int index, Keyframe key)
 		{
 			return this.MoveKey_Injected(index, ref key);
 		}
 
-		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
+		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void RemoveKey(int index);
 
@@ -90,8 +90,8 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetKeys(Keyframe[] keys);
 
-		[FreeFunction("AnimationCurveBindings::GetKey", HasExplicitThis = true, IsThreadSafe = true)]
 		[NativeThrows]
+		[FreeFunction("AnimationCurveBindings::GetKey", HasExplicitThis = true, IsThreadSafe = true)]
 		private Keyframe GetKey(int index)
 		{
 			Keyframe keyframe;

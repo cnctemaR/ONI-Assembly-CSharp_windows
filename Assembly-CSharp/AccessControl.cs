@@ -35,7 +35,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022, true, null);
 		}
 		base.Subscribe<AccessControl>(279163026, AccessControl.OnControlStateChangedDelegate);
 		base.Subscribe<AccessControl>(-905833192, AccessControl.OnCopySettingsDelegate);
@@ -43,12 +43,12 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 
 	protected override void OnSpawn()
 	{
+		this.isTeleporter = base.GetComponent<NavTeleporter>() != null;
 		base.OnSpawn();
-		this.RegisterInGrid(true);
-		this.SetGridRestrictions(null, this.DefaultPermission);
-		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
+		if (this.registered)
 		{
-			this.SetGridRestrictions(keyValuePair.Key.Get(), keyValuePair.Value);
+			this.RegisterInGrid(true);
+			this.RestorePermissions();
 		}
 		ListPool<global::Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.PooledList pooledList = ListPool<global::Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.Allocate();
 		for (int i = this.savedPermissions.Count - 1; i >= 0; i--)
@@ -102,6 +102,20 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		}
 	}
 
+	public void SetRegistered(bool newRegistered)
+	{
+		if (newRegistered && !this.registered)
+		{
+			this.RegisterInGrid(true);
+			this.RestorePermissions();
+			return;
+		}
+		if (!newRegistered && this.registered)
+		{
+			this.RegisterInGrid(false);
+		}
+	}
+
 	public void SetPermission(MinionAssignablesProxy key, AccessControl.Permission permission)
 	{
 		KPrefabID component = key.GetComponent<KPrefabID>();
@@ -128,36 +142,96 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 		this.SetGridRestrictions(component, permission);
 	}
 
+	private void RestorePermissions()
+	{
+		this.SetGridRestrictions(null, this.DefaultPermission);
+		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
+		{
+			this.SetGridRestrictions(keyValuePair.Key.Get(), keyValuePair.Value);
+		}
+	}
+
 	private void RegisterInGrid(bool register)
 	{
 		Building component = base.GetComponent<Building>();
-		if (component == null)
+		OccupyArea component2 = base.GetComponent<OccupyArea>();
+		if (component2 == null && component == null)
 		{
 			return;
 		}
-		int[] array;
 		if (register)
 		{
-			Rotatable component2 = base.GetComponent<Rotatable>();
-			Grid.Restriction.Orientation orientation = ((component2 == null || component2.GetOrientation() == Orientation.Neutral) ? Grid.Restriction.Orientation.Vertical : Grid.Restriction.Orientation.Horizontal);
-			array = component.PlacementCells;
-			for (int i = 0; i < array.Length; i++)
+			Rotatable component3 = base.GetComponent<Rotatable>();
+			Grid.Restriction.Orientation orientation;
+			if (!this.isTeleporter)
 			{
-				Grid.RegisterRestriction(array[i], orientation);
+				orientation = ((component3 == null || component3.GetOrientation() == Orientation.Neutral) ? Grid.Restriction.Orientation.Vertical : Grid.Restriction.Orientation.Horizontal);
 			}
-			return;
+			else
+			{
+				orientation = Grid.Restriction.Orientation.SingleCell;
+			}
+			if (component != null)
+			{
+				int[] array = component.PlacementCells;
+				for (int i = 0; i < array.Length; i++)
+				{
+					Grid.RegisterRestriction(array[i], orientation);
+				}
+			}
+			else
+			{
+				foreach (CellOffset cellOffset in component2.OccupiedCellsOffsets)
+				{
+					Grid.RegisterRestriction(Grid.OffsetCell(Grid.PosToCell(component2), cellOffset), orientation);
+				}
+			}
+			if (this.isTeleporter)
+			{
+				Grid.RegisterRestriction(base.GetComponent<NavTeleporter>().GetCell(), orientation);
+			}
 		}
-		array = component.PlacementCells;
-		for (int i = 0; i < array.Length; i++)
+		else
 		{
-			Grid.UnregisterRestriction(array[i]);
+			if (component != null)
+			{
+				if (component.GetMyWorldId() != (int)ClusterManager.INVALID_WORLD_IDX)
+				{
+					int[] array = component.PlacementCells;
+					for (int i = 0; i < array.Length; i++)
+					{
+						Grid.UnregisterRestriction(array[i]);
+					}
+				}
+			}
+			else
+			{
+				foreach (CellOffset cellOffset2 in component2.OccupiedCellsOffsets)
+				{
+					Grid.UnregisterRestriction(Grid.OffsetCell(Grid.PosToCell(component2), cellOffset2));
+				}
+			}
+			if (this.isTeleporter)
+			{
+				int cell = base.GetComponent<NavTeleporter>().GetCell();
+				if (cell != Grid.InvalidCell)
+				{
+					Grid.UnregisterRestriction(cell);
+				}
+			}
 		}
+		this.registered = register;
 	}
 
 	private void SetGridRestrictions(KPrefabID kpid, AccessControl.Permission permission)
 	{
+		if (!this.registered || !base.isSpawned)
+		{
+			return;
+		}
 		Building component = base.GetComponent<Building>();
-		if (component == null)
+		OccupyArea component2 = base.GetComponent<OccupyArea>();
+		if (component2 == null && component == null)
 		{
 			return;
 		}
@@ -178,25 +252,59 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 			directions = Grid.Restriction.Directions.Left | Grid.Restriction.Directions.Right;
 			break;
 		}
-		int[] placementCells = component.PlacementCells;
-		for (int i = 0; i < placementCells.Length; i++)
+		if (this.isTeleporter)
 		{
-			Grid.SetRestriction(placementCells[i], num, directions);
+			if (directions != (Grid.Restriction.Directions)0)
+			{
+				directions = Grid.Restriction.Directions.Teleport;
+			}
+			else
+			{
+				directions = (Grid.Restriction.Directions)0;
+			}
+		}
+		if (component != null)
+		{
+			int[] placementCells = component.PlacementCells;
+			for (int i = 0; i < placementCells.Length; i++)
+			{
+				Grid.SetRestriction(placementCells[i], num, directions);
+			}
+		}
+		else
+		{
+			foreach (CellOffset cellOffset in component2.OccupiedCellsOffsets)
+			{
+				Grid.SetRestriction(Grid.OffsetCell(Grid.PosToCell(component2), cellOffset), num, directions);
+			}
+		}
+		if (this.isTeleporter)
+		{
+			Grid.SetRestriction(base.GetComponent<NavTeleporter>().GetCell(), num, directions);
 		}
 	}
 
 	private void ClearGridRestrictions(KPrefabID kpid)
 	{
 		Building component = base.GetComponent<Building>();
-		if (component == null)
+		OccupyArea component2 = base.GetComponent<OccupyArea>();
+		if (component2 == null && component == null)
 		{
 			return;
 		}
 		int num = ((kpid != null) ? kpid.InstanceID : (-1));
-		int[] placementCells = component.PlacementCells;
-		for (int i = 0; i < placementCells.Length; i++)
+		if (component != null)
 		{
-			Grid.ClearRestriction(placementCells[i], num);
+			int[] placementCells = component.PlacementCells;
+			for (int i = 0; i < placementCells.Length; i++)
+			{
+				Grid.ClearRestriction(placementCells[i], num);
+			}
+			return;
+		}
+		foreach (CellOffset cellOffset in component2.OccupiedCellsOffsets)
+		{
+			Grid.ClearRestriction(Grid.OffsetCell(Grid.PosToCell(component2), cellOffset), num);
 		}
 	}
 
@@ -305,11 +413,16 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDes
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;
 
+	private bool isTeleporter;
+
 	[Serialize]
 	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions = new List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>>();
 
 	[Serialize]
 	private AccessControl.Permission _defaultPermission;
+
+	[Serialize]
+	public bool registered = true;
 
 	[Serialize]
 	public bool controlEnabled;

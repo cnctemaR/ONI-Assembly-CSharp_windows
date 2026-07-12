@@ -9,16 +9,39 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/WorldInventory")]
 public class WorldInventory : KMonoBehaviour, ISaveLoadable
 {
-	public static WorldInventory Instance { get; private set; }
+	public bool HasValidCount
+	{
+		get
+		{
+			return this.hasValidCount;
+		}
+	}
 
-	public event Action<Tag, Tag> OnDiscover;
+	private int worldId
+	{
+		get
+		{
+			WorldContainer component = base.GetComponent<WorldContainer>();
+			if (!(component != null))
+			{
+				return -1;
+			}
+			return component.id;
+		}
+	}
 
 	protected override void OnPrefabInit()
 	{
-		WorldInventory.Instance = this;
 		base.Subscribe(Game.Instance.gameObject, -1588644844, new Action<object>(this.OnAddedFetchable));
 		base.Subscribe(Game.Instance.gameObject, -1491270284, new Action<object>(this.OnRemovedFetchable));
 		base.Subscribe<WorldInventory>(631075836, WorldInventory.OnNewDayDelegate);
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.Unsubscribe(Game.Instance.gameObject, -1588644844, new Action<object>(this.OnAddedFetchable));
+		base.Unsubscribe(Game.Instance.gameObject, -1491270284, new Action<object>(this.OnRemovedFetchable));
+		base.OnCleanUp();
 	}
 
 	private void GenerateInventoryReport(object data)
@@ -85,18 +108,22 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return this.Prober.IsReachable(pickupable);
 	}
 
-	public float GetTotalAmount(Tag tag)
+	public float GetTotalAmount(Tag tag, bool includeRelatedWorlds)
 	{
 		float num = 0f;
 		this.accessibleAmounts.TryGetValue(tag, out num);
 		return num;
 	}
 
-	public ICollection<Pickupable> GetPickupables(Tag tag)
+	public ICollection<Pickupable> GetPickupables(Tag tag, bool includeRelatedWorlds = false)
 	{
-		HashSet<Pickupable> hashSet = null;
-		this.Inventory.TryGetValue(tag, out hashSet);
-		return hashSet;
+		if (!includeRelatedWorlds)
+		{
+			HashSet<Pickupable> hashSet = null;
+			this.Inventory.TryGetValue(tag, out hashSet);
+			return hashSet;
+		}
+		return ClusterUtil.GetPickupablesFromRelatedWorlds(this, tag);
 	}
 
 	public List<Pickupable> CreatePickupablesList(Tag tag)
@@ -113,7 +140,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	public List<Tag> GetPickupableTagsFromCategoryTag(Tag t)
 	{
 		List<Tag> list = new List<Tag>();
-		ICollection<Pickupable> pickupables = this.GetPickupables(t);
+		ICollection<Pickupable> pickupables = this.GetPickupables(t, false);
 		if (pickupables != null && pickupables.Count > 0)
 		{
 			foreach (Pickupable pickupable in pickupables)
@@ -124,102 +151,64 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return list;
 	}
 
-	public float GetAmount(Tag tag)
+	public float GetAmount(Tag tag, bool includeRelatedWorlds)
 	{
-		return Mathf.Max(this.GetTotalAmount(tag) - MaterialNeeds.Instance.GetAmount(tag), 0f);
-	}
-
-	public void Discover(Tag tag, Tag categoryTag)
-	{
-		bool flag = this.Discovered.Add(tag);
-		this.DiscoverCategory(categoryTag, tag);
-		if (flag && this.OnDiscover != null)
+		float num;
+		if (!includeRelatedWorlds)
 		{
-			this.OnDiscover(categoryTag, tag);
+			num = this.GetTotalAmount(tag, includeRelatedWorlds);
+			num -= MaterialNeeds.GetAmount(tag, this.worldId, includeRelatedWorlds);
 		}
-	}
-
-	private void DiscoverCategory(Tag category_tag, Tag item_tag)
-	{
-		HashSet<Tag> hashSet;
-		if (!this.DiscoveredCategories.TryGetValue(category_tag, out hashSet))
+		else
 		{
-			hashSet = new HashSet<Tag>();
-			this.DiscoveredCategories[category_tag] = hashSet;
+			num = ClusterUtil.GetAmountFromRelatedWorlds(this, tag);
 		}
-		hashSet.Add(item_tag);
+		return Mathf.Max(num, 0f);
 	}
 
-	public HashSet<Tag> GetDiscovered()
+	public int GetCountWithAdditionalTag(Tag tag, Tag additionalTag, bool includeRelatedWorlds = false)
 	{
-		return this.Discovered;
-	}
-
-	public bool IsDiscovered(Tag tag)
-	{
-		return this.Discovered.Contains(tag) || this.DiscoveredCategories.ContainsKey(tag);
-	}
-
-	public bool AnyDiscovered(ICollection<Tag> tags)
-	{
-		foreach (Tag tag in tags)
+		ICollection<Pickupable> collection;
+		if (!includeRelatedWorlds)
 		{
-			if (this.IsDiscovered(tag))
+			collection = this.GetPickupables(tag, false);
+		}
+		else
+		{
+			ICollection<Pickupable> pickupablesFromRelatedWorlds = ClusterUtil.GetPickupablesFromRelatedWorlds(this, tag);
+			collection = pickupablesFromRelatedWorlds;
+		}
+		ICollection<Pickupable> collection2 = collection;
+		int num = 0;
+		if (collection2 != null)
+		{
+			if (additionalTag.IsValid)
 			{
-				return true;
+				using (IEnumerator<Pickupable> enumerator = collection2.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						if (enumerator.Current.HasTag(additionalTag))
+						{
+							num++;
+						}
+					}
+					return num;
+				}
 			}
+			num = collection2.Count;
 		}
-		return false;
-	}
-
-	public bool Contains(Recipe.Ingredient[] ingredients)
-	{
-		bool flag = true;
-		foreach (Recipe.Ingredient ingredient in ingredients)
-		{
-			if (this.GetAmount(ingredient.tag) < ingredient.amount)
-			{
-				flag = false;
-				break;
-			}
-		}
-		return flag;
-	}
-
-	public bool TryGetDiscoveredResourcesFromTag(Tag tag, out HashSet<Tag> resources)
-	{
-		return this.DiscoveredCategories.TryGetValue(tag, out resources);
-	}
-
-	public HashSet<Tag> GetDiscoveredResourcesFromTag(Tag tag)
-	{
-		HashSet<Tag> hashSet;
-		if (this.DiscoveredCategories.TryGetValue(tag, out hashSet))
-		{
-			return hashSet;
-		}
-		return new HashSet<Tag>();
-	}
-
-	public Dictionary<Tag, HashSet<Tag>> GetDiscoveredResourcesFromTagSet(TagSet tagSet)
-	{
-		Dictionary<Tag, HashSet<Tag>> dictionary = new Dictionary<Tag, HashSet<Tag>>();
-		foreach (Tag tag in tagSet)
-		{
-			HashSet<Tag> hashSet;
-			if (this.DiscoveredCategories.TryGetValue(tag, out hashSet))
-			{
-				dictionary[tag] = hashSet;
-			}
-		}
-		return dictionary;
+		return num;
 	}
 
 	private void Update()
 	{
 		int num = 0;
-		foreach (KeyValuePair<Tag, HashSet<Pickupable>> keyValuePair in this.Inventory)
+		Dictionary<Tag, HashSet<Pickupable>>.Enumerator enumerator = this.Inventory.GetEnumerator();
+		int worldId = this.worldId;
+		while (enumerator.MoveNext())
 		{
+			KeyValuePair<Tag, HashSet<Pickupable>> keyValuePair = enumerator.Current;
 			if (num == this.accessibleUpdateIndex || this.firstUpdate)
 			{
 				Tag key = keyValuePair.Key;
@@ -227,9 +216,18 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 				float num2 = 0f;
 				foreach (Pickupable pickupable in value)
 				{
-					if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate))
+					if (pickupable != null && pickupable.GetMyWorldId() == worldId && !pickupable.HasTag(GameTags.StoredPrivate))
 					{
 						num2 += pickupable.TotalAmount;
+					}
+				}
+				if (!this.hasValidCount && this.accessibleUpdateIndex + 1 >= this.Inventory.Count)
+				{
+					this.hasValidCount = true;
+					if (this.worldId == ClusterManager.Instance.activeWorldId)
+					{
+						this.hasValidCount = true;
+						PinnedResourcesPanel.Instance.Refresh();
 					}
 				}
 				this.accessibleAmounts[key] = num2;
@@ -244,31 +242,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	protected override void OnLoadLevel()
 	{
 		base.OnLoadLevel();
-		WorldInventory.Instance = null;
-	}
-
-	public static Tag GetCategoryForTags(HashSet<Tag> tags)
-	{
-		Tag tag = Tag.Invalid;
-		foreach (Tag tag2 in tags)
-		{
-			if (GameTags.AllCategories.Contains(tag2))
-			{
-				tag = tag2;
-				break;
-			}
-		}
-		return tag;
-	}
-
-	public static Tag GetCategoryForEntity(KPrefabID entity)
-	{
-		ElementChunk component = entity.GetComponent<ElementChunk>();
-		if (component != null)
-		{
-			return component.GetComponent<PrimaryElement>().Element.materialCategory;
-		}
-		return WorldInventory.GetCategoryForTags(entity.Tags);
 	}
 
 	private void OnAddedFetchable(object data)
@@ -279,13 +252,17 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 			return;
 		}
 		Pickupable component = gameObject.GetComponent<Pickupable>();
+		if (component.GetMyWorldId() != this.worldId)
+		{
+			return;
+		}
 		KPrefabID component2 = component.GetComponent<KPrefabID>();
 		Tag tag = component2.PrefabID();
 		if (!this.Inventory.ContainsKey(tag))
 		{
-			Tag categoryForEntity = WorldInventory.GetCategoryForEntity(component2);
+			Tag categoryForEntity = DiscoveredResources.GetCategoryForEntity(component2);
 			DebugUtil.DevAssertArgs(categoryForEntity.IsValid, new object[] { component.name, "was found by worldinventory but doesn't have a category! Add it to the element definition." });
-			this.Discover(tag, categoryForEntity);
+			DiscoveredResources.Instance.Discover(tag, categoryForEntity);
 		}
 		foreach (Tag tag2 in component2.Tags)
 		{
@@ -318,16 +295,18 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	}
 
 	[Serialize]
-	private HashSet<Tag> Discovered = new HashSet<Tag>();
+	public List<Tag> pinnedResources = new List<Tag>();
 
 	[Serialize]
-	private Dictionary<Tag, HashSet<Tag>> DiscoveredCategories = new Dictionary<Tag, HashSet<Tag>>();
+	public List<Tag> notifyResources = new List<Tag>();
 
 	private Dictionary<Tag, HashSet<Pickupable>> Inventory = new Dictionary<Tag, HashSet<Pickupable>>();
 
 	private MinionGroupProber Prober;
 
 	private Dictionary<Tag, float> accessibleAmounts = new Dictionary<Tag, float>();
+
+	private bool hasValidCount;
 
 	private static readonly EventSystem.IntraObjectHandler<WorldInventory> OnNewDayDelegate = new EventSystem.IntraObjectHandler<WorldInventory>(delegate(WorldInventory component, object data)
 	{

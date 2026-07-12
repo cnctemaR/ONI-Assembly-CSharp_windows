@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Modules/Physics2D/Public/Collider2D.h")]
 	[RequiredByNativeCode(Optional = true)]
+	[NativeHeader("Modules/Physics2D/Public/Collider2D.h")]
+	[RequireComponent(typeof(Transform))]
 	public class Collider2D : Behaviour
 	{
 		public extern float density
@@ -131,7 +131,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsTouching([NotNull] [Writable] Collider2D collider);
+		public extern bool IsTouching([NotNull("ArgumentNullException")] [Writable] Collider2D collider);
 
 		public bool IsTouching([Writable] Collider2D collider, ContactFilter2D contactFilter)
 		{
@@ -139,7 +139,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("IsTouching")]
-		private bool IsTouching_OtherColliderWithFilter([Writable] [NotNull] Collider2D collider, ContactFilter2D contactFilter)
+		private bool IsTouching_OtherColliderWithFilter([NotNull("ArgumentNullException")] [Writable] Collider2D collider, ContactFilter2D contactFilter)
 		{
 			return this.IsTouching_OtherColliderWithFilter_Injected(collider, ref contactFilter);
 		}
@@ -268,7 +268,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastArray_Binding")]
-		private int CastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [NotNull] RaycastHit2D[] results)
+		private int CastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
 		{
 			return this.CastArray_Internal_Injected(ref direction, distance, ref contactFilter, ignoreSiblingColliders, results);
 		}
@@ -279,7 +279,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CastList_Binding")]
-		private int CastList_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [NotNull] List<RaycastHit2D> results)
+		private int CastList_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, bool ignoreSiblingColliders, [NotNull("ArgumentNullException")] List<RaycastHit2D> results)
 		{
 			return this.CastList_Internal_Injected(ref direction, distance, ref contactFilter, ignoreSiblingColliders, results);
 		}
@@ -330,7 +330,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("RaycastArray_Binding")]
-		private int RaycastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull] RaycastHit2D[] results)
+		private int RaycastArray_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] RaycastHit2D[] results)
 		{
 			return this.RaycastArray_Internal_Injected(ref direction, distance, ref contactFilter, results);
 		}
@@ -341,7 +341,7 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("RaycastList_Binding")]
-		private int RaycastList_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull] List<RaycastHit2D> results)
+		private int RaycastList_Internal(Vector2 direction, float distance, ContactFilter2D contactFilter, [NotNull("ArgumentNullException")] List<RaycastHit2D> results)
 		{
 			return this.RaycastList_Internal_Injected(ref direction, distance, ref contactFilter, results);
 		}

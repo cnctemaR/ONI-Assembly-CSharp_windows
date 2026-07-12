@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class SeaLettuceConfig : IEntityConfig
 {
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		string id = SeaLettuceConfig.ID;
@@ -19,7 +24,7 @@ public class SeaLettuceConfig : IEntityConfig
 			SimHashes.Water,
 			SimHashes.SaltWater,
 			SimHashes.Brine
-		}, false, 0f, 0.15f, "Lettuce", true, true, true, true, 2400f);
+		}, false, 0f, 0.15f, "Lettuce", true, true, true, true, 2400f, 0f, 740f, SeaLettuceConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.SEALETTUCE.NAME);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -39,9 +44,8 @@ public class SeaLettuceConfig : IEntityConfig
 		gameObject.GetComponent<DrowningMonitor>().canDrownToDeath = false;
 		gameObject.GetComponent<DrowningMonitor>().livesUnderWater = true;
 		gameObject.AddOrGet<StandardCropPlant>();
-		gameObject.AddOrGet<KAnimControllerBase>().randomiseLoopedOffset = true;
 		gameObject.AddOrGet<LoopingSounds>();
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, SeaLettuceConfig.ID + "Seed", global::STRINGS.CREATURES.SPECIES.SEEDS.SEALETTUCE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SEALETTUCE.DESC, Assets.GetAnim("seed_sealettuce_kanim"), "object", 0, new List<Tag> { GameTags.WaterSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 1, global::STRINGS.CREATURES.SPECIES.SEALETTUCE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false), SeaLettuceConfig.ID + "_preview", Assets.GetAnim("sea_lettuce_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, SeaLettuceConfig.ID + "Seed", global::STRINGS.CREATURES.SPECIES.SEEDS.SEALETTUCE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SEALETTUCE.DESC, Assets.GetAnim("seed_sealettuce_kanim"), "object", 0, new List<Tag> { GameTags.WaterSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 3, global::STRINGS.CREATURES.SPECIES.SEALETTUCE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "", false), SeaLettuceConfig.ID + "_preview", Assets.GetAnim("sea_lettuce_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("sea_lettuce_kanim", "SeaLettuce_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("sea_lettuce_kanim", "SeaLettuce_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

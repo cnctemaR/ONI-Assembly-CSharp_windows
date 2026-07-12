@@ -85,15 +85,12 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 
 	public void Initialize(ComplexFabricator target)
 	{
-		ComplexFabricatorSideScreen.<>c__DisplayClass33_0 CS$<>8__locals1 = new ComplexFabricatorSideScreen.<>c__DisplayClass33_0();
-		CS$<>8__locals1.target = target;
-		CS$<>8__locals1.<>4__this = this;
-		if (CS$<>8__locals1.target == null)
+		if (target == null)
 		{
 			global::Debug.LogError("ComplexFabricator provided was null.");
 			return;
 		}
-		this.targetFab = CS$<>8__locals1.target;
+		this.targetFab = target;
 		base.gameObject.SetActive(true);
 		this.recipeMap = new Dictionary<GameObject, ComplexRecipe>();
 		this.recipeToggles.ForEach(delegate(GameObject rbi)
@@ -128,37 +125,38 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		ComplexRecipe[] recipes = this.targetFab.GetRecipes();
 		for (int i = 0; i < recipes.Length; i++)
 		{
-			ComplexFabricatorSideScreen.<>c__DisplayClass33_1 CS$<>8__locals2 = new ComplexFabricatorSideScreen.<>c__DisplayClass33_1();
-			CS$<>8__locals2.CS$<>8__locals1 = CS$<>8__locals1;
-			CS$<>8__locals2.recipe = recipes[i];
+			ComplexRecipe recipe = recipes[i];
 			bool flag = false;
 			if (DebugHandler.InstantBuildMode)
 			{
 				flag = true;
 			}
-			else if (CS$<>8__locals2.recipe.RequiresTechUnlock() && CS$<>8__locals2.recipe.IsRequiredTechUnlocked())
+			else if (recipe.RequiresTechUnlock())
+			{
+				if (recipe.IsRequiredTechUnlocked())
+				{
+					flag = true;
+				}
+			}
+			else if (target.GetRecipeQueueCount(recipe) != 0)
 			{
 				flag = true;
 			}
-			else if (CS$<>8__locals2.CS$<>8__locals1.target.GetRecipeQueueCount(CS$<>8__locals2.recipe) != 0)
+			else if (this.AnyRecipeRequirementsDiscovered(recipe))
 			{
 				flag = true;
 			}
-			else if (this.AnyRecipeRequirementsDiscovered(CS$<>8__locals2.recipe))
-			{
-				flag = true;
-			}
-			else if (this.HasAnyRecipeRequirements(CS$<>8__locals2.recipe))
+			else if (this.HasAnyRecipeRequirements(recipe))
 			{
 				flag = true;
 			}
 			if (flag)
 			{
 				num++;
-				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(CS$<>8__locals2.recipe.ingredients[0].material, "ui", false);
-				global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(CS$<>8__locals2.recipe.results[0].material, "ui", false);
+				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(recipe.ingredients[0].material, "ui", false);
+				global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(recipe.results[0].material, "ui", false);
 				KToggle newToggle = null;
-				ComplexFabricatorSideScreen.StyleSetting sideScreenStyle = CS$<>8__locals2.CS$<>8__locals1.target.sideScreenStyle;
+				ComplexFabricatorSideScreen.StyleSetting sideScreenStyle = target.sideScreenStyle;
 				GameObject entryGO;
 				if (sideScreenStyle - ComplexFabricatorSideScreen.StyleSetting.ListInputOutput > 1)
 				{
@@ -167,7 +165,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 						newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 						entryGO = newToggle.gameObject;
 						Image componentInChildrenOnly = newToggle.gameObject.GetComponentInChildrenOnly<Image>();
-						if (CS$<>8__locals2.CS$<>8__locals1.target.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.GridInput || CS$<>8__locals2.CS$<>8__locals1.target.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.ListInput)
+						if (target.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.GridInput || target.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.ListInput)
 						{
 							componentInChildrenOnly.sprite = uisprite.first;
 							componentInChildrenOnly.color = uisprite.second;
@@ -182,9 +180,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					{
 						newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButtonQueueHybrid, this.recipeGrid, false);
 						entryGO = newToggle.gameObject;
-						this.recipeMap.Add(entryGO, CS$<>8__locals2.recipe);
+						this.recipeMap.Add(entryGO, recipe);
 						Image image = entryGO.GetComponentsInChildrenOnly<Image>()[2];
-						if (CS$<>8__locals2.recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient)
+						if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient)
 						{
 							image.sprite = uisprite.first;
 							image.color = uisprite.second;
@@ -194,19 +192,19 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 							image.sprite = uisprite2.first;
 							image.color = uisprite2.second;
 						}
-						entryGO.GetComponentInChildren<LocText>().text = CS$<>8__locals2.recipe.GetUIName(false);
-						bool flag2 = this.HasAllRecipeRequirements(CS$<>8__locals2.recipe);
+						entryGO.GetComponentInChildren<LocText>().text = recipe.GetUIName(false);
+						bool flag2 = this.HasAllRecipeRequirements(recipe);
 						image.material = (flag2 ? Assets.UIPrefabs.TableScreenWidgets.DefaultUIMaterial : Assets.UIPrefabs.TableScreenWidgets.DesaturatedUIMaterial);
 						this.RefreshQueueCountDisplay(entryGO, this.targetFab);
 						entryGO.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("DecrementButton").onClick = delegate
 						{
-							CS$<>8__locals2.CS$<>8__locals1.target.DecrementRecipeQueueCount(CS$<>8__locals2.recipe, false);
-							CS$<>8__locals2.CS$<>8__locals1.<>4__this.RefreshQueueCountDisplay(entryGO, CS$<>8__locals2.CS$<>8__locals1.target);
+							target.DecrementRecipeQueueCount(recipe, false);
+							this.RefreshQueueCountDisplay(entryGO, target);
 						};
 						entryGO.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("IncrementButton").onClick = delegate
 						{
-							CS$<>8__locals2.CS$<>8__locals1.target.IncrementRecipeQueueCount(CS$<>8__locals2.recipe);
-							CS$<>8__locals2.CS$<>8__locals1.<>4__this.RefreshQueueCountDisplay(entryGO, CS$<>8__locals2.CS$<>8__locals1.target);
+							target.IncrementRecipeQueueCount(recipe);
+							this.RefreshQueueCountDisplay(entryGO, target);
 						};
 						entryGO.gameObject.SetActive(true);
 					}
@@ -216,14 +214,14 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButtonMultiple, this.recipeGrid, false);
 					entryGO = newToggle.gameObject;
 					HierarchyReferences component2 = newToggle.GetComponent<HierarchyReferences>();
-					foreach (ComplexRecipe.RecipeElement recipeElement in CS$<>8__locals2.recipe.ingredients)
+					foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 					{
 						GameObject gameObject = global::Util.KInstantiateUI(component2.GetReference("FromIconPrefab").gameObject, component2.GetReference("FromIcons").gameObject, true);
 						gameObject.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement.material, "ui", false).first;
 						gameObject.GetComponent<Image>().color = Def.GetUISprite(recipeElement.material, "ui", false).second;
 						gameObject.gameObject.name = recipeElement.material.Name;
 					}
-					foreach (ComplexRecipe.RecipeElement recipeElement2 in CS$<>8__locals2.recipe.results)
+					foreach (ComplexRecipe.RecipeElement recipeElement2 in recipe.results)
 					{
 						GameObject gameObject2 = global::Util.KInstantiateUI(component2.GetReference("ToIconPrefab").gameObject, component2.GetReference("ToIcons").gameObject, true);
 						gameObject2.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement2.material, "ui", false).first;
@@ -233,11 +231,11 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				}
 				if (this.targetFab.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator)
 				{
-					newToggle.GetComponentInChildren<LocText>().text = CS$<>8__locals2.recipe.results[0].material.ProperName();
+					newToggle.GetComponentInChildren<LocText>().text = recipe.results[0].material.ProperName();
 				}
 				else if (this.targetFab.sideScreenStyle != ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid)
 				{
-					newToggle.GetComponentInChildren<LocText>().text = string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_WITH_NEWLINES, CS$<>8__locals2.recipe.ingredients[0].material.ProperName(), CS$<>8__locals2.recipe.results[0].material.ProperName());
+					newToggle.GetComponentInChildren<LocText>().text = string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_WITH_NEWLINES, recipe.ingredients[0].material.ProperName(), recipe.results[0].material.ProperName());
 				}
 				ToolTip component3 = entryGO.GetComponent<ToolTip>();
 				component3.toolTipPosition = ToolTip.TooltipPosition.Custom;
@@ -245,11 +243,11 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				component3.tooltipPivot = new Vector2(1f, 1f);
 				component3.tooltipPositionOffset = new Vector2(-24f, 20f);
 				component3.ClearMultiStringTooltip();
-				component3.AddMultiStringTooltip(CS$<>8__locals2.recipe.GetUIName(false), this.styleTooltipHeader);
-				component3.AddMultiStringTooltip(CS$<>8__locals2.recipe.description, this.styleTooltipBody);
+				component3.AddMultiStringTooltip(recipe.GetUIName(false), this.styleTooltipHeader);
+				component3.AddMultiStringTooltip(recipe.description, this.styleTooltipBody);
 				newToggle.onClick += delegate
 				{
-					CS$<>8__locals2.CS$<>8__locals1.<>4__this.ToggleClicked(newToggle);
+					this.ToggleClicked(newToggle);
 				};
 				entryGO.SetActive(true);
 				this.recipeToggles.Add(entryGO);
@@ -322,7 +320,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 	{
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
-			if (WorldInventory.Instance.GetAmount(recipeElement.material) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material) >= recipeElement.amount)
+			if (this.targetFab.GetMyWorld().worldInventory.GetAmount(recipeElement.material, true) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material) >= recipeElement.amount)
 			{
 				return true;
 			}
@@ -335,7 +333,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		bool flag = true;
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
-			if (WorldInventory.Instance.GetAmount(recipeElement.material) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
+			if (this.targetFab.GetMyWorld().worldInventory.GetAmount(recipeElement.material, true) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
 			{
 				flag = false;
 			}
@@ -347,7 +345,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 	{
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
-			if (WorldInventory.Instance.IsDiscovered(recipeElement.material))
+			if (DiscoveredResources.Instance.IsDiscovered(recipeElement.material))
 			{
 				return true;
 			}
@@ -460,9 +458,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 	[SerializeField]
 	private LocText noRecipesDiscoveredLabel;
 
-	public ScriptableObject styleTooltipHeader;
+	public TextStyleSetting styleTooltipHeader;
 
-	public ScriptableObject styleTooltipBody;
+	public TextStyleSetting styleTooltipBody;
 
 	private ComplexFabricator targetFab;
 

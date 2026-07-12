@@ -42,6 +42,11 @@ public class SaveLoadRoot : KMonoBehaviour
 		this.hasOnSpawnRun = true;
 	}
 
+	public void DeclareOptionalComponent<T>() where T : KMonoBehaviour
+	{
+		this.m_optionalComponentTypeNames.Add(typeof(T).ToString());
+	}
+
 	public void SetRegistered(bool registered)
 	{
 		if (this.registered != registered)
@@ -242,6 +247,17 @@ public class SaveLoadRoot : KMonoBehaviour
 						}
 					}
 				}
+				if (kmonoBehaviour == null && gameObject != null)
+				{
+					SaveLoadRoot component = gameObject.GetComponent<SaveLoadRoot>();
+					int num5;
+					if (component != null && (num5 = component.m_optionalComponentTypeNames.IndexOf(text)) != -1)
+					{
+						global::Debug.Assert(num3 == 0 && num4 == 0, string.Format("Implementation does not support multiple components with optional components, type {0}, {1}, {2}", text, num3, num4));
+						Type type2 = Type.GetType(component.m_optionalComponentTypeNames[num5]);
+						kmonoBehaviour = (KMonoBehaviour)gameObject.AddComponent(type2);
+					}
+				}
 				if (kmonoBehaviour == null)
 				{
 					reader.SkipBytes(num2);
@@ -284,6 +300,9 @@ public class SaveLoadRoot : KMonoBehaviour
 	private bool hasOnSpawnRun;
 
 	private bool registered = true;
+
+	[SerializeField]
+	private List<string> m_optionalComponentTypeNames = new List<string>();
 
 	private static Dictionary<string, ISerializableComponentManager> serializableComponentManagers;
 

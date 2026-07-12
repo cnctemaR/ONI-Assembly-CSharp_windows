@@ -56,6 +56,14 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		this.placementCells = new int[this.Def.PlacementOffsets.Length];
 		int num = Grid.PosToCell(this);
+		if (num < 0)
+		{
+			this.extents.x = -1;
+			this.extents.y = -1;
+			this.extents.width = this.Def.WidthInCells;
+			this.extents.height = this.Def.HeightInCells;
+			return;
+		}
 		Orientation orientation = this.Orientation;
 		for (int i = 0; i < this.Def.PlacementOffsets.Length; i++)
 		{
@@ -127,7 +135,7 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		if (this.Def.Deprecated && base.GetComponent<KSelectable>() != null)
 		{
 			KSelectable component3 = base.GetComponent<KSelectable>();
-			Building.deprecatedBuildingStatusItem = new StatusItem("BUILDING_DEPRECATED", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			Building.deprecatedBuildingStatusItem = new StatusItem("BUILDING_DEPRECATED", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			component3.AddStatusItem(Building.deprecatedBuildingStatusItem, null);
 		}
 	}
@@ -136,6 +144,11 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		base.OnCleanUp();
+	}
+
+	public virtual void UpdatePosition(int cell)
+	{
+		GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, cell);
 	}
 
 	protected void RegisterBlockTileRenderer()
@@ -186,6 +199,18 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		return Grid.OffsetCell(this.GetBottomLeftCell(), rotatedOffset);
 	}
 
+	public int GetHighEnergyParticleInputCell()
+	{
+		CellOffset rotatedOffset = this.GetRotatedOffset(this.Def.HighEnergyParticleInputOffset);
+		return Grid.OffsetCell(this.GetBottomLeftCell(), rotatedOffset);
+	}
+
+	public int GetHighEnergyParticleOutputCell()
+	{
+		CellOffset rotatedOffset = this.GetRotatedOffset(this.Def.HighEnergyParticleOutputOffset);
+		return Grid.OffsetCell(this.GetBottomLeftCell(), rotatedOffset);
+	}
+
 	public int GetUtilityOutputCell()
 	{
 		CellOffset rotatedOffset = this.GetRotatedOffset(this.Def.UtilityOutputOffset);
@@ -200,6 +225,16 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	public CellOffset GetUtilityOutputOffset()
 	{
 		return this.GetRotatedOffset(this.Def.UtilityOutputOffset);
+	}
+
+	public CellOffset GetHighEnergyParticleInputOffset()
+	{
+		return this.GetRotatedOffset(this.Def.HighEnergyParticleInputOffset);
+	}
+
+	public CellOffset GetHighEnergyParticleOutputOffset()
+	{
+		return this.GetRotatedOffset(this.Def.HighEnergyParticleOutputOffset);
 	}
 
 	protected void UnregisterBlockTileRenderer()

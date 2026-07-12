@@ -56,6 +56,10 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public StoryMessageScreen StoryMessageScreen;
 
+	public SubSpeciesInfoScreen SubSpeciesInfoScreen;
+
+	public GameplayEventInfoScreen GameplayEventInfoScreen;
+
 	public FileNameDialog FileNameDialog;
 
 	public TagFilterScreen TagFilterScreen;
@@ -65,6 +69,8 @@ public class ScreenPrefabs : KMonoBehaviour
 	public MessageDialogFrame MessageDialogFrame;
 
 	public ResourceCategoryScreen ResourceCategoryScreen;
+
+	public ColonyDiagnosticScreen ColonyDiagnosticScreen;
 
 	public LanguageOptionsScreen languageOptionsScreen;
 
@@ -91,8 +97,6 @@ public class ScreenPrefabs : KMonoBehaviour
 	public WorldGenScreen WorldGenScreen;
 
 	public ModeSelectScreen ModeSelectScreen;
-
-	public NewGameSettingsScreen NewGameSettingsScreen;
 
 	public ColonyDestinationSelectScreen ColonyDestinationSelectScreen;
 

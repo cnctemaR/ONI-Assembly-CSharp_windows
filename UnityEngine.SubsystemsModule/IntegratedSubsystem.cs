@@ -6,13 +6,13 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Modules/Subsystems/Subsystem.h")]
+	[NativeHeader("Modules/Subsystems/Subsystem.h")]
 	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class IntegratedSubsystem : ISubsystem
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetHandle(IntegratedSubsystem inst);
+		internal extern void SetHandle(IntegratedSubsystem subsystem);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Start();
@@ -23,8 +23,8 @@ namespace UnityEngine
 		public void Destroy()
 		{
 			IntPtr ptr = this.m_Ptr;
-			Internal_SubsystemInstances.Internal_RemoveInstanceByPtr(this.m_Ptr);
-			SubsystemManager.DestroyInstance_Internal(ptr);
+			SubsystemManager.RemoveIntegratedSubsystemByPtr(this.m_Ptr);
+			SubsystemBindings.DestroySubsystem(ptr);
 			this.m_Ptr = IntPtr.Zero;
 		}
 
@@ -32,7 +32,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.valid && this.Internal_IsRunning();
+				return this.valid && this.IsRunning();
 			}
 		}
 
@@ -45,10 +45,10 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern bool Internal_IsRunning();
+		internal extern bool IsRunning();
 
 		internal IntPtr m_Ptr;
 
-		internal ISubsystemDescriptor m_subsystemDescriptor;
+		internal ISubsystemDescriptor m_SubsystemDescriptor;
 	}
 }

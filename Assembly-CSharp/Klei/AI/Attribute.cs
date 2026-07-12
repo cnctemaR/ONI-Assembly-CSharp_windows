@@ -6,7 +6,7 @@ namespace Klei.AI
 {
 	public class Attribute : Resource
 	{
-		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession, float base_value = 0f, string uiSprite = null, string thoughtSprite = null)
+		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession, float base_value = 0f, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null)
 			: base(id, null, null)
 		{
 			string text = "STRINGS.DUPLICANTS.ATTRIBUTES." + id.ToUpper();
@@ -20,9 +20,10 @@ namespace Klei.AI
 			this.formatter = Attribute.defaultFormatter;
 			this.uiSprite = uiSprite;
 			this.thoughtSprite = thoughtSprite;
+			this.uiFullColourSprite = uiFullColourSprite;
 		}
 
-		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, Attribute.Display show_in_ui, bool is_trainable, string uiSprite = null, string thoughtSprite = null)
+		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, Attribute.Display show_in_ui, bool is_trainable, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null)
 			: base(id, name)
 		{
 			this.Description = attribute_description;
@@ -32,6 +33,7 @@ namespace Klei.AI
 			this.IsTrainable = is_trainable;
 			this.uiSprite = uiSprite;
 			this.thoughtSprite = thoughtSprite;
+			this.uiFullColourSprite = uiFullColourSprite;
 			if (this.ProfessionName == "")
 			{
 				this.ProfessionName = null;
@@ -87,6 +89,8 @@ namespace Klei.AI
 		public string uiSprite;
 
 		public string thoughtSprite;
+
+		public string uiFullColourSprite;
 
 		public IAttributeFormatter formatter;
 

@@ -31,11 +31,13 @@ public class Db : EntityModifierSet
 		this.Thoughts = new Thoughts(this.Root);
 		this.Deaths = new Deaths(this.Root);
 		this.StatusItemCategories = new StatusItemCategories(this.Root);
-		this.Techs = new Techs(this.Root);
-		this.Techs.Load(this.researchTreeFile);
 		this.TechTreeTitles = new TechTreeTitles(this.Root);
-		this.TechTreeTitles.Load(this.researchTreeFile);
+		this.TechTreeTitles.Load(DlcManager.IsExpansion1Active() ? this.researchTreeFileExpansion1 : this.researchTreeFileVanilla);
+		this.Techs = new Techs(this.Root);
 		this.TechItems = new TechItems(this.Root);
+		this.Techs.Init();
+		this.Techs.Load(DlcManager.IsExpansion1Active() ? this.researchTreeFileExpansion1 : this.researchTreeFileVanilla);
+		this.TechItems.Init();
 		this.Accessories = new Accessories(this.Root);
 		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
 		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
@@ -44,7 +46,7 @@ public class Db : EntityModifierSet
 		this.RoomTypes = new RoomTypes(this.Root);
 		this.ArtifactDropRates = new ArtifactDropRates(this.Root);
 		this.SpaceDestinationTypes = new SpaceDestinationTypes(this.Root);
-		this.Diseases = new Diseases(this.Root);
+		this.Diseases = new Diseases(this.Root, false);
 		this.Sicknesses = new global::Database.Sicknesses(this.Root);
 		this.SkillPerks = new SkillPerks(this.Root);
 		this.SkillGroups = new SkillGroups(this.Root);
@@ -55,7 +57,10 @@ public class Db : EntityModifierSet
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
 		this.RobotStatusItems = new RobotStatusItems(this.Root);
 		this.ChoreTypes = new ChoreTypes(this.Root);
-		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, 0f, null);
+		this.GameplayEvents = new GameplayEvents(this.Root);
+		this.GameplaySeasons = new GameplaySeasons(this.Root);
+		this.PlantMutations = new PlantMutations(this.Root);
+		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, 0f, null, "");
 		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
 		this.effects.Add(effect);
 		this.CollectResources(this.Root, this.ResourceTable);
@@ -82,7 +87,9 @@ public class Db : EntityModifierSet
 		Resource resource = this.ResourceTable.FirstOrDefault<Resource>((Resource s) => s.Guid == guid);
 		if (resource == null)
 		{
-			global::Debug.LogWarning("Could not find resource: " + guid);
+			string text = "Could not find resource: ";
+			ResourceGuid guid2 = guid;
+			global::Debug.LogWarning(text + ((guid2 != null) ? guid2.ToString() : null));
 			return default(ResourceType);
 		}
 		ResourceType resourceType = (ResourceType)((object)resource);
@@ -104,7 +111,9 @@ public class Db : EntityModifierSet
 
 	private static Db _Instance;
 
-	public TextAsset researchTreeFile;
+	public TextAsset researchTreeFileVanilla;
+
+	public TextAsset researchTreeFileExpansion1;
 
 	public Diseases Diseases;
 
@@ -140,10 +149,6 @@ public class Db : EntityModifierSet
 
 	public ChoreTypes ChoreTypes;
 
-	public Techs Techs;
-
-	public TechTreeTitles TechTreeTitles;
-
 	public TechItems TechItems;
 
 	public AccessorySlots AccessorySlots;
@@ -169,6 +174,16 @@ public class Db : EntityModifierSet
 	public Skills Skills;
 
 	public ColonyAchievements ColonyAchievements;
+
+	public GameplayEvents GameplayEvents;
+
+	public GameplaySeasons GameplaySeasons;
+
+	public PlantMutations PlantMutations;
+
+	public Techs Techs;
+
+	public TechTreeTitles TechTreeTitles;
 
 	[Serializable]
 	public class SlotInfo : Resource

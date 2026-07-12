@@ -9,9 +9,9 @@ namespace System.Diagnostics.Contracts
 {
 	public static class Contract
 	{
-		[Conditional("DEBUG")]
 		[Conditional("CONTRACTS_FULL")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[Conditional("DEBUG")]
 		public static void Assume(bool condition)
 		{
 			if (!condition)
@@ -20,9 +20,9 @@ namespace System.Diagnostics.Contracts
 			}
 		}
 
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[Conditional("DEBUG")]
 		[Conditional("CONTRACTS_FULL")]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public static void Assume(bool condition, string userMessage)
 		{
 			if (!condition)
@@ -42,8 +42,8 @@ namespace System.Diagnostics.Contracts
 			}
 		}
 
-		[Conditional("CONTRACTS_FULL")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[Conditional("CONTRACTS_FULL")]
 		[Conditional("DEBUG")]
 		public static void Assert(bool condition, string userMessage)
 		{
@@ -53,8 +53,8 @@ namespace System.Diagnostics.Contracts
 			}
 		}
 
-		[Conditional("CONTRACTS_FULL")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[Conditional("CONTRACTS_FULL")]
 		public static void Requires(bool condition)
 		{
 			Contract.AssertMustUseRewriter(ContractFailureKind.Precondition, "Requires");
@@ -133,8 +133,8 @@ namespace System.Diagnostics.Contracts
 			Contract.AssertMustUseRewriter(ContractFailureKind.Invariant, "Invariant");
 		}
 
-		[Conditional("CONTRACTS_FULL")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[Conditional("CONTRACTS_FULL")]
 		public static void Invariant(bool condition, string userMessage)
 		{
 			Contract.AssertMustUseRewriter(ContractFailureKind.Invariant, "Invariant");

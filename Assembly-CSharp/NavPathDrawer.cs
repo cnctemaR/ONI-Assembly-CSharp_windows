@@ -57,10 +57,13 @@ public class NavPathDrawer : KMonoBehaviour
 			GL.Vertex(NavTypeHelper.GetNavPos(path.nodes[1].cell, path.nodes[1].navType));
 			for (int i = 1; i < path.nodes.Count - 1; i++)
 			{
-				Vector3 navPos = NavTypeHelper.GetNavPos(path.nodes[i].cell, path.nodes[i].navType);
-				Vector3 navPos2 = NavTypeHelper.GetNavPos(path.nodes[i + 1].cell, path.nodes[i + 1].navType);
-				GL.Vertex(navPos);
-				GL.Vertex(navPos2);
+				if ((int)Grid.WorldIdx[path.nodes[i].cell] == ClusterManager.Instance.activeWorldId && (int)Grid.WorldIdx[path.nodes[i + 1].cell] == ClusterManager.Instance.activeWorldId)
+				{
+					Vector3 navPos = NavTypeHelper.GetNavPos(path.nodes[i].cell, path.nodes[i].navType);
+					Vector3 navPos2 = NavTypeHelper.GetNavPos(path.nodes[i + 1].cell, path.nodes[i + 1].navType);
+					GL.Vertex(navPos);
+					GL.Vertex(navPos2);
+				}
 			}
 			GL.End();
 			GL.PopMatrix();
@@ -110,15 +113,9 @@ public class NavPathDrawer : KMonoBehaviour
 			PathFinder.Path path = default(PathFinder.Path);
 			PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(mouseCell), ref path);
 			string text = "";
-			text = string.Concat(new object[]
-			{
-				text,
-				"Source: ",
-				Grid.PosToCell(component),
-				"\n"
-			});
-			text = string.Concat(new object[] { text, "Dest: ", mouseCell, "\n" });
-			text = text + "Cost: " + path.cost;
+			text = text + "Source: " + Grid.PosToCell(component).ToString() + "\n";
+			text = text + "Dest: " + mouseCell.ToString() + "\n";
+			text = text + "Cost: " + path.cost.ToString();
 			this.DrawPath(path, component.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), Color.green);
 			DebugText.Instance.Draw(text, Grid.CellToPosCCC(mouseCell, Grid.SceneLayer.Move), Color.white);
 		}

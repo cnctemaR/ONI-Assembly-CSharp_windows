@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+	[VisibleToOtherModules]
 	internal sealed class AssetFileNameExtensionAttribute : Attribute
 	{
 		public string preferredExtension { get; }

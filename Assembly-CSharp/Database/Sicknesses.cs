@@ -12,6 +12,10 @@ namespace Database
 			this.FoodSickness = base.Add(new FoodSickness());
 			this.SlimeSickness = base.Add(new SlimeSickness());
 			this.ZombieSickness = base.Add(new ZombieSickness());
+			if (DlcManager.FeatureRadiationEnabled())
+			{
+				this.RadiationSickness = base.Add(new RadiationSickness());
+			}
 			this.Allergies = base.Add(new Allergies());
 			this.ColdBrain = base.Add(new ColdBrain());
 			this.HeatRash = base.Add(new HeatRash());
@@ -41,6 +45,8 @@ namespace Database
 		public Sickness ZombieSickness;
 
 		public Sickness Allergies;
+
+		public Sickness RadiationSickness;
 
 		public Sickness ColdBrain;
 

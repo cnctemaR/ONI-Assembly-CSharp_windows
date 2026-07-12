@@ -6,7 +6,7 @@ public class PathFinder
 {
 	public static void Initialize()
 	{
-		NavType[] array = new NavType[10];
+		NavType[] array = new NavType[11];
 		for (int i = 0; i < array.Length; i++)
 		{
 			array[i] = (NavType)i;
@@ -339,7 +339,7 @@ public class PathFinder
 			return (this.flags & mask) > PathFinder.PotentialPath.Flags.None;
 		}
 
-		public PathFinder.PotentialPath.Flags flags { get; private set; }
+		public PathFinder.PotentialPath.Flags flags { readonly get; private set; }
 
 		public int cell;
 
@@ -351,7 +351,8 @@ public class PathFinder
 			None = 0,
 			HasAtmoSuit = 1,
 			HasJetPack = 2,
-			PerformSuitChecks = 4
+			HasOxygenMask = 4,
+			PerformSuitChecks = 8
 		}
 	}
 

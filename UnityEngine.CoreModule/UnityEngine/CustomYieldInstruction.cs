@@ -20,7 +20,7 @@ namespace UnityEngine
 			return this.keepWaiting;
 		}
 
-		public void Reset()
+		public virtual void Reset()
 		{
 		}
 	}

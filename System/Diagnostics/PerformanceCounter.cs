@@ -88,11 +88,11 @@ namespace System.Diagnostics
 			this.changed = false;
 		}
 
+		[SettingsBindable(true)]
+		[SRDescription("The category name for this performance counter.")]
+		[TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[DefaultValue("")]
 		[ReadOnly(true)]
-		[SRDescription("The category name for this performance counter.")]
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string CategoryName
 		{
 			get
@@ -110,10 +110,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("A description describing the counter.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[ReadOnly(true)]
 		[MonoTODO]
+		[ReadOnly(true)]
+		[MonitoringDescription("A description describing the counter.")]
 		public string CounterHelp
 		{
 			get
@@ -122,11 +122,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[SettingsBindable(true)]
-		[ReadOnly(true)]
-		[DefaultValue("")]
 		[TypeConverter("System.Diagnostics.Design.CounterNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[DefaultValue("")]
+		[SettingsBindable(true)]
 		[SRDescription("The name of this performance counter.")]
+		[ReadOnly(true)]
 		public string CounterName
 		{
 			get
@@ -144,8 +144,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The type of the counter.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The type of the counter.")]
 		public PerformanceCounterType CounterType
 		{
 			get
@@ -173,9 +173,9 @@ namespace System.Diagnostics
 		}
 
 		[SRDescription("The instance name for this performance counter.")]
-		[DefaultValue("")]
-		[ReadOnly(true)]
 		[SettingsBindable(true)]
+		[ReadOnly(true)]
+		[DefaultValue("")]
 		[TypeConverter("System.Diagnostics.Design.InstanceNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string InstanceName
 		{
@@ -194,11 +194,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[SRDescription("The machine where this performance counter resides.")]
-		[SettingsBindable(true)]
-		[Browsable(false)]
-		[DefaultValue(".")]
 		[MonoTODO("What's the machine name format?")]
+		[DefaultValue(".")]
+		[Browsable(false)]
+		[SettingsBindable(true)]
+		[SRDescription("The machine where this performance counter resides.")]
 		public string MachineName
 		{
 			get
@@ -250,9 +250,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[Browsable(false)]
 		[MonitoringDescription("The accessability level of the counter.")]
 		[DefaultValue(true)]
-		[Browsable(false)]
 		public bool ReadOnly
 		{
 			get

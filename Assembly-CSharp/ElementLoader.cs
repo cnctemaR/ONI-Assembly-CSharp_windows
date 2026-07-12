@@ -42,14 +42,14 @@ public class ElementLoader
 		return list;
 	}
 
-	public static void Load(ref Hashtable substanceList, SubstanceTable substanceTable)
+	public static void Load(ref Hashtable substanceList, Dictionary<string, SubstanceTable> substanceTablesByDlc)
 	{
 		ElementLoader.elements = new List<Element>();
 		ElementLoader.elementTable = new Dictionary<int, Element>();
 		foreach (ElementLoader.ElementEntry elementEntry in ElementLoader.CollectElementsFromYAML())
 		{
 			int num = Hash.SDBMLower(elementEntry.elementId);
-			if (!ElementLoader.elementTable.ContainsKey(num))
+			if (!ElementLoader.elementTable.ContainsKey(num) && substanceTablesByDlc.ContainsKey(elementEntry.dlcId))
 			{
 				Element element = new Element();
 				element.id = (SimHashes)num;
@@ -60,16 +60,13 @@ public class ElementLoader
 				ElementLoader.CopyEntryToElement(elementEntry, element);
 				ElementLoader.elements.Add(element);
 				ElementLoader.elementTable[num] = element;
+				if (!ElementLoader.ManifestSubstanceForElement(element, ref substanceList, substanceTablesByDlc[elementEntry.dlcId]))
+				{
+					global::Debug.LogWarning("Missing substance for element: " + element.id.ToString());
+				}
 			}
 		}
-		foreach (Element element2 in ElementLoader.elements)
-		{
-			if (!ElementLoader.ManifestSubstanceForElement(element2, ref substanceList, substanceTable))
-			{
-				global::Debug.LogWarning("Missing substance for element: " + element2.id.ToString());
-			}
-		}
-		ElementLoader.FinaliseElementsTable(ref substanceList, substanceTable);
+		ElementLoader.FinaliseElementsTable(ref substanceList);
 		WorldGen.SetupDefaultElements();
 	}
 
@@ -82,13 +79,13 @@ public class ElementLoader
 		elem.molarMass = entry.molarMass;
 		elem.strength = entry.strength;
 		elem.disabled = entry.isDisabled;
+		elem.dlcId = entry.dlcId;
 		elem.flow = entry.flow;
 		elem.maxMass = entry.maxMass;
 		elem.maxCompression = entry.liquidCompression;
 		elem.viscosity = entry.speed;
 		elem.minHorizontalFlow = entry.minHorizontalFlow;
 		elem.minVerticalFlow = entry.minVerticalFlow;
-		elem.maxMass = entry.maxMass;
 		elem.solidSurfaceAreaMultiplier = entry.solidSurfaceAreaMultiplier;
 		elem.liquidSurfaceAreaMultiplier = entry.liquidSurfaceAreaMultiplier;
 		elem.gasSurfaceAreaMultiplier = entry.gasSurfaceAreaMultiplier;
@@ -105,8 +102,15 @@ public class ElementLoader
 		elem.sublimateId = (SimHashes)Hash.SDBMLower(entry.sublimateId);
 		elem.convertId = (SimHashes)Hash.SDBMLower(entry.convertId);
 		elem.sublimateFX = (SpawnFXHashes)Hash.SDBMLower(entry.sublimateFx);
+		elem.sublimateRate = entry.sublimateRate;
+		elem.sublimateEfficiency = entry.sublimateEfficiency;
+		elem.sublimateProbability = entry.sublimateProbability;
+		elem.offGasPercentage = entry.offGasPercentage;
 		elem.lightAbsorptionFactor = entry.lightAbsorptionFactor;
+		elem.radiationAbsorptionFactor = entry.radiationAbsorptionFactor;
+		elem.radiationPer1000Mass = entry.radiationPer1000Mass;
 		elem.toxicity = entry.toxicity;
+		elem.elementComposition = entry.composition;
 		Tag tag = TagManager.Create(entry.state.ToString());
 		elem.materialCategory = ElementLoader.CreateMaterialCategoryTag(elem.id, tag, entry.materialCategory);
 		elem.oreTags = ElementLoader.CreateOreTags(elem.materialCategory, tag, entry.tags);
@@ -344,7 +348,7 @@ public class ElementLoader
 		return list.ToArray();
 	}
 
-	private static void FinaliseElementsTable(ref Hashtable substanceList, SubstanceTable substanceTable)
+	private static void FinaliseElementsTable(ref Hashtable substanceList)
 	{
 		foreach (Element element in ElementLoader.elements)
 		{
@@ -352,51 +356,47 @@ public class ElementLoader
 			{
 				if (element.substance == null)
 				{
-					if (substanceTable == null)
-					{
-						element.substance = new Substance();
-					}
-					else
-					{
-						ElementLoader.ManifestSubstanceForElement(element, ref substanceList, substanceTable);
-					}
+					global::Debug.LogWarning("Skipping finalise for missing element: " + element.id.ToString());
 				}
-				global::Debug.Assert(element.substance.nameTag.IsValid);
-				if (element.thermalConductivity == 0f)
+				else
 				{
-					element.state |= Element.State.TemperatureInsulated;
-				}
-				if (element.strength == 0f)
-				{
-					element.state |= Element.State.Unbreakable;
-				}
-				if (element.IsSolid)
-				{
-					Element element2 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
-					if (element2 != null)
+					global::Debug.Assert(element.substance.nameTag.IsValid);
+					if (element.thermalConductivity == 0f)
 					{
-						element.highTempTransition = element2;
+						element.state |= Element.State.TemperatureInsulated;
 					}
-				}
-				else if (element.IsLiquid)
-				{
-					Element element3 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
-					if (element3 != null)
+					if (element.strength == 0f)
 					{
-						element.highTempTransition = element3;
+						element.state |= Element.State.Unbreakable;
 					}
-					Element element4 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
-					if (element4 != null)
+					if (element.IsSolid)
 					{
-						element.lowTempTransition = element4;
+						Element element2 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
+						if (element2 != null)
+						{
+							element.highTempTransition = element2;
+						}
 					}
-				}
-				else if (element.IsGas)
-				{
-					Element element5 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
-					if (element5 != null)
+					else if (element.IsLiquid)
 					{
-						element.lowTempTransition = element5;
+						Element element3 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
+						if (element3 != null)
+						{
+							element.highTempTransition = element3;
+						}
+						Element element4 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
+						if (element4 != null)
+						{
+							element.lowTempTransition = element4;
+						}
+					}
+					else if (element.IsGas)
+					{
+						Element element5 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
+						if (element5 != null)
+						{
+							element.lowTempTransition = element5;
+						}
 					}
 				}
 			}
@@ -414,6 +414,49 @@ public class ElementLoader
 		}
 	}
 
+	private static void ValidateElements()
+	{
+		global::Debug.Log("------ Start Validating Elements ------");
+		foreach (Element element in ElementLoader.elements)
+		{
+			string text = string.Format("{0} ({1})", element.tag.ProperNameStripLink(), element.state);
+			if (element.IsLiquid && element.sublimateId != (SimHashes)0)
+			{
+				global::Debug.Assert(element.sublimateRate == 0f, text + ": Liquids don't use sublimateRate, use offGasPercentage instead.");
+				global::Debug.Assert(element.offGasPercentage > 0f, text + ": Missing offGasPercentage");
+			}
+			if (element.IsSolid && element.sublimateId != (SimHashes)0)
+			{
+				global::Debug.Assert(element.offGasPercentage == 0f, text + ": Solids don't use offGasPercentage, use sublimateRate instead.");
+				global::Debug.Assert(element.sublimateRate > 0f, text + ": Missing sublimationRate");
+				global::Debug.Assert(element.sublimateRate * element.sublimateEfficiency > 0.001f, text + ": Sublimation rate and efficiency will result in gas that will be obliterated because its less than 1g. Increase these values and use sublimateProbability if you want a low amount of sublimation");
+			}
+			if (element.highTempTransition != null && element.highTempTransition.lowTempTransition == element)
+			{
+				global::Debug.Assert(element.highTemp >= element.highTempTransition.lowTemp, text + ": highTemp is higher than transition element's (" + element.highTempTransition.tag.ProperNameStripLink() + ") lowTemp");
+			}
+			global::Debug.Assert(element.defaultValues.mass <= element.maxMass, text + ": Default mass should be less than max mass");
+			if (false)
+			{
+				if (element.IsSolid && element.highTempTransition != null && element.highTempTransition.IsLiquid && element.defaultValues.mass > element.highTempTransition.maxMass)
+				{
+					global::Debug.LogWarning(string.Format("{0} defaultMass {1} > {2}: maxMass {3}", new object[]
+					{
+						text,
+						element.defaultValues.mass,
+						element.highTempTransition.tag.ProperNameStripLink(),
+						element.highTempTransition.maxMass
+					}));
+				}
+				if (element.defaultValues.mass < element.maxMass && element.IsLiquid)
+				{
+					global::Debug.LogWarning(string.Format("{0} has defaultMass: {1} and maxMass {2}", element.tag.ProperNameStripLink(), element.defaultValues.mass, element.maxMass));
+				}
+			}
+		}
+		global::Debug.Log("------ End Validating Elements ------");
+	}
+
 	public static List<Element> elements;
 
 	public static Dictionary<int, Element> elementTable;
@@ -425,6 +468,13 @@ public class ElementLoader
 	public class ElementEntryCollection
 	{
 		public ElementLoader.ElementEntry[] elements { get; set; }
+	}
+
+	public class ElementComposition
+	{
+		public string elementID { get; set; }
+
+		public float percentage { get; set; }
 	}
 
 	public class ElementEntry
@@ -457,6 +507,10 @@ public class ElementLoader
 
 		public float lightAbsorptionFactor { get; set; }
 
+		public float radiationAbsorptionFactor { get; set; }
+
+		public float radiationPer1000Mass { get; set; }
+
 		public string lowTempTransitionTarget { get; set; }
 
 		public float lowTemp { get; set; }
@@ -476,6 +530,14 @@ public class ElementLoader
 		public string sublimateId { get; set; }
 
 		public string sublimateFx { get; set; }
+
+		public float sublimateRate { get; set; }
+
+		public float sublimateEfficiency { get; set; }
+
+		public float sublimateProbability { get; set; }
+
+		public float offGasPercentage { get; set; }
 
 		public string materialCategory { get; set; }
 
@@ -508,6 +570,10 @@ public class ElementLoader
 		public Element.State state { get; set; }
 
 		public string localizationID { get; set; }
+
+		public string dlcId { get; set; }
+
+		public ElementLoader.ElementComposition[] composition { get; set; }
 
 		public string description
 		{

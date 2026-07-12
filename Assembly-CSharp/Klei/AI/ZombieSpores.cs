@@ -5,8 +5,8 @@ namespace Klei.AI
 {
 	public class ZombieSpores : Disease
 	{
-		public ZombieSpores()
-			: base("ZombieSpores", 50, new Disease.RangeInfo(168.15f, 258.15f, 513.15f, 563.15f), new Disease.RangeInfo(10f, 1200f, 1200f, 10f), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent())
+		public ZombieSpores(bool statsOnly)
+			: base("ZombieSpores", 50, new Disease.RangeInfo(168.15f, 258.15f, 513.15f, 563.15f), new Disease.RangeInfo(10f, 1200f, 1200f, 10f), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent(), statsOnly)
 		{
 		}
 

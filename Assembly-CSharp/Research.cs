@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Database;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -12,6 +13,11 @@ public class Research : KMonoBehaviour, ISaveLoadable
 	public static void DestroyInstance()
 	{
 		Research.Instance = null;
+	}
+
+	public TechInstance GetTechInstance(string techID)
+	{
+		return this.techs.Find((TechInstance match) => match.tech.Id == techID);
 	}
 
 	public bool IsBeingResearched(Tech tech)
@@ -33,11 +39,11 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			this.globalPointInventory = new ResearchPointInventory();
 		}
 		base.Subscribe<Research>(-1523247426, Research.OnRolesUpdatedDelegate);
-		Components.ResearchCenters.OnAdd += new Action<ResearchCenter>(this.CheckResearchBuildings);
-		Components.ResearchCenters.OnRemove += new Action<ResearchCenter>(this.CheckResearchBuildings);
+		Components.ResearchCenters.OnAdd += new Action<IResearchCenter>(this.CheckResearchBuildings);
+		Components.ResearchCenters.OnRemove += new Action<IResearchCenter>(this.CheckResearchBuildings);
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
 		{
-			ResearchCenter component = kprefabID.GetComponent<ResearchCenter>();
+			IResearchCenter component = kprefabID.GetComponent<IResearchCenter>();
 			if (component != null)
 			{
 				this.researchCenterPrefabs.Add(component);
@@ -117,7 +123,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	public void CancelResearch(Tech tech, bool clickedEntry = true)
 	{
-		Research.<>c__DisplayClass25_0 CS$<>8__locals1 = new Research.<>c__DisplayClass25_0();
+		Research.<>c__DisplayClass26_0 CS$<>8__locals1 = new Research.<>c__DisplayClass26_0();
 		CS$<>8__locals1.tech = tech;
 		CS$<>8__locals1.ti = this.queuedTech.Find((TechInstance qt) => qt.tech == CS$<>8__locals1.tech);
 		if (CS$<>8__locals1.ti == null)
@@ -141,8 +147,17 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		this.queuedTech.Remove(CS$<>8__locals1.ti);
 		if (clickedEntry)
 		{
-			base.Trigger(-1914338957, this.queuedTech);
+			this.NotifyResearchCenters(GameHashes.ActiveResearchChanged, this.queuedTech);
 		}
+	}
+
+	private void NotifyResearchCenters(GameHashes hash, object data)
+	{
+		foreach (object obj in Components.ResearchCenters)
+		{
+			((KMonoBehaviour)obj).Trigger(-1914338957, data);
+		}
+		base.Trigger((int)hash, data);
 	}
 
 	public void SetActiveResearch(Tech tech, bool clearQueue = false)
@@ -168,39 +183,45 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		{
 			this.queuedTech.Clear();
 		}
-		base.Trigger(-1914338957, this.queuedTech);
+		this.NotifyResearchCenters(GameHashes.ActiveResearchChanged, this.queuedTech);
 		this.CheckBuyResearch();
 		this.CheckResearchBuildings(null);
-		if (this.activeResearch != null)
-		{
-			if (this.activeResearch.tech.costsByResearchTypeID.Count > 1)
-			{
-				if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id))
-				{
-					this.notifier.Remove(this.NoResearcherRole);
-					this.notifier.Add(this.NoResearcherRole, "");
-				}
-			}
-			else
-			{
-				this.notifier.Remove(this.NoResearcherRole);
-			}
-			if (this.activeResearch.tech.costsByResearchTypeID.Count <= 2)
-			{
-				this.notifier.Remove(this.NoResearcherRole);
-				return;
-			}
-			if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowInterstellarResearch.Id))
-			{
-				this.notifier.Remove(this.NoResearcherRole);
-				this.notifier.Add(this.NoResearcherRole, "");
-				return;
-			}
-		}
-		else
+		if (this.NoResearcherRole != null)
 		{
 			this.notifier.Remove(this.NoResearcherRole);
+			this.NoResearcherRole = null;
 		}
+		if (this.activeResearch != null)
+		{
+			Skill skill = null;
+			if (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("advanced") && this.activeResearch.tech.costsByResearchTypeID["advanced"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id, -1))
+			{
+				skill = Db.Get().Skills.GetSkillsWithPerk(Db.Get().SkillPerks.AllowAdvancedResearch)[0];
+			}
+			else if (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("space") && this.activeResearch.tech.costsByResearchTypeID["space"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowInterstellarResearch.Id, -1))
+			{
+				skill = Db.Get().Skills.GetSkillsWithPerk(Db.Get().SkillPerks.AllowInterstellarResearch)[0];
+			}
+			else if (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("nuclear") && this.activeResearch.tech.costsByResearchTypeID["nuclear"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowNuclearResearch.Id, -1))
+			{
+				skill = Db.Get().Skills.GetSkillsWithPerk(Db.Get().SkillPerks.AllowNuclearResearch)[0];
+			}
+			else if (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("orbital") && this.activeResearch.tech.costsByResearchTypeID["orbital"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowOrbitalResearch.Id, -1))
+			{
+				skill = Db.Get().Skills.GetSkillsWithPerk(Db.Get().SkillPerks.AllowOrbitalResearch)[0];
+			}
+			if (skill != null)
+			{
+				this.NoResearcherRole = new Notification(RESEARCH.MESSAGING.NO_RESEARCHER_SKILL, NotificationType.Bad, new Func<List<Notification>, object, string>(this.NoResearcherRoleTooltip), skill, false, 12f, null, null, null, true);
+				this.notifier.Add(this.NoResearcherRole, "");
+			}
+		}
+	}
+
+	private string NoResearcherRoleTooltip(List<Notification> list, object data)
+	{
+		Skill skill = (Skill)data;
+		return RESEARCH.MESSAGING.NO_RESEARCHER_SKILL_TOOLTIP.Replace("{ResearchType}", skill.Name);
 	}
 
 	public void AddResearchPoints(string researchTypeID, float points)
@@ -212,7 +233,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		}
 		(this.UseGlobalPointInventory ? this.globalPointInventory : this.activeResearch.progressInventory).AddResearchPoints(researchTypeID, points);
 		this.CheckBuyResearch();
-		base.Trigger(-125623018, null);
+		this.NotifyResearchCenters(GameHashes.ResearchPointsChanged, null);
 	}
 
 	private void CheckBuyResearch()
@@ -235,8 +256,8 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
-		Components.ResearchCenters.OnAdd -= new Action<ResearchCenter>(this.CheckResearchBuildings);
-		Components.ResearchCenters.OnRemove -= new Action<ResearchCenter>(this.CheckResearchBuildings);
+		Components.ResearchCenters.OnAdd -= new Action<IResearchCenter>(this.CheckResearchBuildings);
+		Components.ResearchCenters.OnRemove -= new Action<IResearchCenter>(this.CheckResearchBuildings);
 		base.OnCleanUp();
 	}
 
@@ -314,7 +335,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			this.notifier.Remove(this.NoResearcherRole);
 			return;
 		}
-		if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id))
+		if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id, -1))
 		{
 			this.notifier.Add(this.NoResearcherRole, "");
 			return;
@@ -330,11 +351,11 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			if (keyValuePair.Value > 0f)
 			{
 				flag = false;
-				using (List<ResearchCenter>.Enumerator enumerator2 = Components.ResearchCenters.Items.GetEnumerator())
+				using (List<IResearchCenter>.Enumerator enumerator2 = Components.ResearchCenters.Items.GetEnumerator())
 				{
 					while (enumerator2.MoveNext())
 					{
-						if (enumerator2.Current.research_point_type_id == keyValuePair.Key)
+						if (enumerator2.Current.GetResearchType() == keyValuePair.Key)
 						{
 							flag = true;
 							break;
@@ -344,11 +365,11 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			}
 			if (!flag)
 			{
-				foreach (ResearchCenter researchCenter in this.researchCenterPrefabs)
+				foreach (IResearchCenter researchCenter in this.researchCenterPrefabs)
 				{
-					if (researchCenter.research_point_type_id == keyValuePair.Key)
+					if (researchCenter.GetResearchType() == keyValuePair.Key)
 					{
-						return researchCenter.GetProperName();
+						return ((KMonoBehaviour)researchCenter).GetProperName();
 					}
 				}
 				return null;
@@ -383,11 +404,11 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	private TechInstance activeResearch;
 
-	private Notification NoResearcherRole = new Notification(RESEARCH.MESSAGING.NO_RESEARCHER_SKILL, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.NO_RESEARCHER_SKILL_TOOLTIP, null, false, 12f, null, null, null, true);
+	private Notification NoResearcherRole;
 
-	private Notification MissingResearchStation = new Notification(RESEARCH.MESSAGING.MISSING_RESEARCH_STATION, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.MISSING_RESEARCH_STATION_TOOLTIP.ToString().Replace("{0}", Research.Instance.GetMissingResearchBuildingName()), null, false, 11f, null, null, null, true);
+	private Notification MissingResearchStation = new Notification(RESEARCH.MESSAGING.MISSING_RESEARCH_STATION, NotificationType.Bad, (List<Notification> list, object data) => RESEARCH.MESSAGING.MISSING_RESEARCH_STATION_TOOLTIP.ToString().Replace("{0}", Research.Instance.GetMissingResearchBuildingName()), null, false, 11f, null, null, null, true);
 
-	private List<ResearchCenter> researchCenterPrefabs = new List<ResearchCenter>();
+	private List<IResearchCenter> researchCenterPrefabs = new List<IResearchCenter>();
 
 	public ResearchTypes researchTypes;
 

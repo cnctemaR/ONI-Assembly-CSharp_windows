@@ -63,11 +63,23 @@ public class AudioMixer
 			eventInstance.release();
 			this.activeSnapshots.Remove(snapshot);
 			flag = true;
-			AudioMixer.instance.Log(string.Concat(new object[] { "Stop Snapshot: [", snapshot, "] with fadeout mode: [", stop_mode, "]" }));
+			AudioMixer instance = AudioMixer.instance;
+			string[] array = new string[5];
+			array[0] = "Stop Snapshot: [";
+			int num = 1;
+			HashedString hashedString = snapshot;
+			array[num] = hashedString.ToString();
+			array[2] = "] with fadeout mode: [";
+			array[3] = stop_mode.ToString();
+			array[4] = "]";
+			instance.Log(string.Concat(array));
 		}
 		else
 		{
-			AudioMixer.instance.Log("Tried to stop snapshot: [" + snapshot + "] but it wasn't active.");
+			AudioMixer instance2 = AudioMixer.instance;
+			string text = "Tried to stop snapshot: [";
+			HashedString hashedString = snapshot;
+			instance2.Log(text + hashedString.ToString() + "] but it wasn't active.");
 		}
 		return flag;
 	}
@@ -110,7 +122,16 @@ public class AudioMixer
 			eventInstance.setParameterByName(parameter_name, parameter_value, false);
 			return;
 		}
-		this.Log(string.Concat(new object[] { "Tried to set [", parameter_name, "] to [", parameter_value, "] but [", snapshot_name, "] is not active." }));
+		this.Log(string.Concat(new string[]
+		{
+			"Tried to set [",
+			parameter_name,
+			"] to [",
+			parameter_value.ToString(),
+			"] but [",
+			snapshot_name,
+			"] is not active."
+		}));
 	}
 
 	public void StartPersistentSnapshots()
@@ -262,7 +283,14 @@ public class AudioMixer
 		}
 		else
 		{
-			this.Log(string.Concat(new object[] { "Tried to set [", bus, "] to [", value, "] but UserVolumeSettingsSnapshot is not active." }));
+			this.Log(string.Concat(new string[]
+			{
+				"Tried to set [",
+				bus,
+				"] to [",
+				value.ToString(),
+				"] but UserVolumeSettingsSnapshot is not active."
+			}));
 		}
 		if (bus == "Music")
 		{

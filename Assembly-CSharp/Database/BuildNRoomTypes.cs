@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class BuildNRoomTypes : ColonyAchievementRequirement
+	public class BuildNRoomTypes : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public BuildNRoomTypes(RoomType roomType, int numToCreate = 1)
 		{
@@ -30,13 +28,7 @@ namespace Database
 			return num >= this.numToCreate;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.WriteKleiString(this.roomType.Id);
-			writer.Write(this.numToCreate);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			string text = reader.ReadKleiString();
 			this.roomType = Db.Get().RoomTypes.Get(text);

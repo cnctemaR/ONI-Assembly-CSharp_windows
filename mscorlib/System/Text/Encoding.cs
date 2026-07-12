@@ -561,9 +561,9 @@ namespace System.Text
 
 		public abstract int GetByteCount(char[] chars, int index, int count);
 
-		[CLSCompliant(false)]
-		[ComVisible(false)]
 		[SecurityCritical]
+		[ComVisible(false)]
+		[CLSCompliant(false)]
 		public unsafe virtual int GetByteCount(char* chars, int count)
 		{
 			if (chars == null)
@@ -674,9 +674,9 @@ namespace System.Text
 
 		public abstract int GetCharCount(byte[] bytes, int index, int count);
 
+		[CLSCompliant(false)]
 		[ComVisible(false)]
 		[SecurityCritical]
-		[CLSCompliant(false)]
 		public unsafe virtual int GetCharCount(byte* bytes, int count)
 		{
 			if (bytes == null)
@@ -719,9 +719,9 @@ namespace System.Text
 
 		public abstract int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex);
 
-		[SecurityCritical]
-		[CLSCompliant(false)]
 		[ComVisible(false)]
+		[CLSCompliant(false)]
+		[SecurityCritical]
 		public unsafe virtual int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
 		{
 			if (chars == null || bytes == null)
@@ -756,9 +756,9 @@ namespace System.Text
 			return this.GetChars(bytes, byteCount, chars, charCount);
 		}
 
+		[CLSCompliant(false)]
 		[SecurityCritical]
 		[ComVisible(false)]
-		[CLSCompliant(false)]
 		public unsafe string GetString(byte* bytes, int byteCount)
 		{
 			if (bytes == null)

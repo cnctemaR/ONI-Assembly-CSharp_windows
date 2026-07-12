@@ -220,14 +220,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private void StartConsuming()
 	{
-		DebugUtil.DevAssert(!this.isBeingConsumed, "Can't StartConsuming()...we've already started");
+		DebugUtil.DevAssert(!this.isBeingConsumed, "Can't StartConsuming()...we've already started", null);
 		this.isBeingConsumed = true;
 		base.worker.Trigger(1406130139, this);
 	}
 
 	private void StopConsuming(Worker worker)
 	{
-		DebugUtil.DevAssert(this.isBeingConsumed, "StopConsuming() called without StartConsuming()");
+		DebugUtil.DevAssert(this.isBeingConsumed, "StopConsuming() called without StartConsuming()", null);
 		this.isBeingConsumed = false;
 		PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
 		if (component != null && component.DiseaseCount > 0)

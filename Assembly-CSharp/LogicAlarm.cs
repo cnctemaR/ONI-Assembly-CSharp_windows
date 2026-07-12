@@ -69,8 +69,7 @@ public class LogicAlarm : KMonoBehaviour, ISaveLoadable
 				}
 				if (this.zoomOnNotify)
 				{
-					Vector3 position = base.transform.position;
-					CameraController.Instance.SetTargetPos(position, 8f, true);
+					CameraController.Instance.ActiveWorldStarWipe(base.gameObject.GetMyWorldId(), base.transform.GetPosition(), 8f, null);
 				}
 				this.UpdateVisualState();
 				return;
@@ -105,7 +104,7 @@ public class LogicAlarm : KMonoBehaviour, ISaveLoadable
 	public Notification CreateNotification()
 	{
 		base.GetComponent<KSelectable>();
-		Notification notification = new Notification(this.notificationName, this.notificationType, HashedString.Invalid, (List<Notification> n, object d) => this.notificationTooltip, null, true, 0f, null, null, null, false);
+		Notification notification = new Notification(this.notificationName, this.notificationType, (List<Notification> n, object d) => this.notificationTooltip, null, true, 0f, null, null, null, false);
 		this.lastNotificationCreated = notification;
 		return notification;
 	}

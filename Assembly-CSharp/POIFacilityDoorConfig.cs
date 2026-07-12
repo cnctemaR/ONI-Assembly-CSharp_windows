@@ -38,7 +38,7 @@ public class POIFacilityDoorConfig : IBuildingConfig
 		go.AddOrGet<Workable>().workTime = 5f;
 		go.AddOrGet<KBatchedAnimController>().fgLayer = Grid.SceneLayer.BuildingFront;
 		PrimaryElement component = go.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Steel);
+		component.SetElement(SimHashes.Steel, true);
 		component.Temperature = 273f;
 	}
 

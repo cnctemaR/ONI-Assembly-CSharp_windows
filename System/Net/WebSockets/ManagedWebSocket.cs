@@ -451,7 +451,7 @@ namespace System.Net.WebSockets
 							Buffer.BlockCopy(this._receiveBuffer, this._receiveBufferOffset, payloadBuffer.Array, payloadBuffer.Offset, bytesToCopy);
 							this.ConsumeFromBuffer(bytesToCopy);
 							header.PayloadLength -= (long)bytesToCopy;
-							if (header.Opcode == ManagedWebSocket.MessageOpcode.Text && !ManagedWebSocket.TryValidateUtf8(new ArraySegment<byte>(payloadBuffer.Array, payloadBuffer.Offset, bytesToCopy), header.Fin, this._utf8TextState))
+							if (header.Opcode == ManagedWebSocket.MessageOpcode.Text && !ManagedWebSocket.TryValidateUtf8(new ArraySegment<byte>(payloadBuffer.Array, payloadBuffer.Offset, bytesToCopy), header.Fin && header.PayloadLength == 0L, this._utf8TextState))
 							{
 								await this.CloseWithReceiveErrorAndThrowAsync(WebSocketCloseStatus.InvalidPayloadData, WebSocketError.Faulted, cancellationToken, null).ConfigureAwait(false);
 							}

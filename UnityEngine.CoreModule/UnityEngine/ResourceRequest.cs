@@ -8,11 +8,16 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class ResourceRequest : AsyncOperation
 	{
+		protected virtual Object GetResult()
+		{
+			return Resources.Load(this.m_Path, this.m_Type);
+		}
+
 		public Object asset
 		{
 			get
 			{
-				return Resources.Load(this.m_Path, this.m_Type);
+				return this.GetResult();
 			}
 		}
 

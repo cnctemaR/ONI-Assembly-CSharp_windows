@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using UnityEngine;
+using System.Linq;
+using Klei;
 
 namespace ProcGen
 {
@@ -12,42 +12,17 @@ namespace ProcGen
 
 		public string description { get; private set; }
 
-		public string coordinatePrefix { get; private set; }
-
-		public string spriteName { get; private set; }
-
-		public int difficulty { get; private set; }
-
-		public int tier { get; private set; }
+		public string nameTable { get; private set; }
 
 		public bool disableWorldTraits { get; private set; }
 
-		public string GetCoordinatePrefix()
-		{
-			if (string.IsNullOrEmpty(this.coordinatePrefix))
-			{
-				string text = "";
-				string[] array = Strings.Get(this.name).String.Split(new char[] { ' ' });
-				int num = 5 - array.Length;
-				bool flag = true;
-				foreach (string text2 in array)
-				{
-					if (!flag)
-					{
-						text += "-";
-					}
-					string text3 = Regex.Replace(text2, "(a|e|i|o|u)", "");
-					text += text3.Substring(0, Mathf.Min(num, text3.Length)).ToUpper();
-					flag = false;
-				}
-				this.coordinatePrefix = text;
-			}
-			return this.coordinatePrefix;
-		}
+		public string asteroidIcon { get; private set; }
 
 		public World.Skip skip { get; private set; }
 
-		public bool noStart { get; private set; }
+		public bool moduleInterior { get; private set; }
+
+		public World.WorldCategory category { get; private set; }
 
 		public Vector2I worldsize { get; private set; }
 
@@ -55,7 +30,7 @@ namespace ProcGen
 
 		public World.LayoutMethod layoutMethod { get; private set; }
 
-		public List<WeightedName> subworldFiles { get; private set; }
+		public List<WeightedSubworldName> subworldFiles { get; private set; }
 
 		public List<World.AllowedCellsFilter> unknownCellsAllowedSubworlds { get; private set; }
 
@@ -67,18 +42,23 @@ namespace ProcGen
 
 		public MinMax startingBasePositionVertical { get; private set; }
 
-		public Dictionary<string, int> globalFeatureTemplates { get; private set; }
-
 		public Dictionary<string, int> globalFeatures { get; private set; }
+
+		public List<World.TemplateSpawnRules> worldTemplateRules { get; private set; }
+
+		public List<string> seasons { get; private set; }
+
+		public bool adjacentTemporalTear { get; private set; }
 
 		public World()
 		{
-			this.subworldFiles = new List<WeightedName>();
+			this.subworldFiles = new List<WeightedSubworldName>();
 			this.unknownCellsAllowedSubworlds = new List<World.AllowedCellsFilter>();
 			this.startingBasePositionHorizontal = new MinMax(0.5f, 0.5f);
 			this.startingBasePositionVertical = new MinMax(0.5f, 0.5f);
-			this.globalFeatureTemplates = new Dictionary<string, int>();
 			this.globalFeatures = new Dictionary<string, int>();
+			this.seasons = new List<string>();
+			this.category = World.WorldCategory.Asteroid;
 		}
 
 		public void ModStartLocation(MinMax hMod, MinMax vMod)
@@ -91,7 +71,41 @@ namespace ProcGen
 			this.startingBasePositionVertical = startingBasePositionVertical;
 		}
 
+		public void Validate()
+		{
+			if (this.unknownCellsAllowedSubworlds != null)
+			{
+				List<string> usedSubworldFiles = new List<string>();
+				this.subworldFiles.ForEach(delegate(WeightedSubworldName x)
+				{
+					usedSubworldFiles.Add(x.name);
+				});
+				foreach (World.AllowedCellsFilter allowedCellsFilter in this.unknownCellsAllowedSubworlds)
+				{
+					allowedCellsFilter.Validate(this.name, this.subworldFiles);
+					if (allowedCellsFilter.subworldNames != null)
+					{
+						foreach (string text in allowedCellsFilter.subworldNames)
+						{
+							usedSubworldFiles.Remove(text);
+						}
+					}
+				}
+				usedSubworldFiles.Remove(this.startSubworldName);
+				if (usedSubworldFiles.Count > 0)
+				{
+					DebugUtil.LogWarningArgs(new object[] { "World " + this.name + ": defines subworldNames that are not used in unknownCellsAllowedSubworlds: \n" + string.Join(", ", usedSubworldFiles) });
+				}
+			}
+		}
+
 		public string filePath;
+
+		public enum WorldCategory
+		{
+			Asteroid,
+			Moon
+		}
 
 		public enum Skip
 		{
@@ -110,6 +124,66 @@ namespace ProcGen
 		}
 
 		[Serializable]
+		public class TemplateSpawnRules
+		{
+			public TemplateSpawnRules()
+			{
+				this.times = 1;
+				this.allowedCellsFilter = new List<World.AllowedCellsFilter>();
+				this.allowDuplicates = false;
+				this.useRelaxedFiltering = false;
+			}
+
+			public List<string> names { get; private set; }
+
+			public World.TemplateSpawnRules.ListRule listRule { get; private set; }
+
+			public int someCount { get; private set; }
+
+			public int moreCount { get; private set; }
+
+			public int times { get; private set; }
+
+			public float priority { get; private set; }
+
+			public bool allowDuplicates { get; private set; }
+
+			public bool allowExtremeTemperatureOverlap { get; private set; }
+
+			public bool useRelaxedFiltering { get; private set; }
+
+			public List<World.AllowedCellsFilter> allowedCellsFilter { get; private set; }
+
+			public bool IsGuaranteeRule()
+			{
+				switch (this.listRule)
+				{
+				case World.TemplateSpawnRules.ListRule.GuaranteeOne:
+					return true;
+				case World.TemplateSpawnRules.ListRule.GuaranteeSome:
+					return true;
+				case World.TemplateSpawnRules.ListRule.GuaranteeSomeTryMore:
+					return true;
+				case World.TemplateSpawnRules.ListRule.GuaranteeAll:
+					return true;
+				default:
+					return false;
+				}
+			}
+
+			public enum ListRule
+			{
+				GuaranteeOne,
+				GuaranteeSome,
+				GuaranteeSomeTryMore,
+				GuaranteeAll,
+				TryOne,
+				TrySome,
+				TryAll
+			}
+		}
+
+		[Serializable]
 		public class AllowedCellsFilter
 		{
 			public AllowedCellsFilter()
@@ -117,6 +191,7 @@ namespace ProcGen
 				this.temperatureRanges = new List<Temperature.Range>();
 				this.zoneTypes = new List<SubWorld.ZoneType>();
 				this.subworldNames = new List<string>();
+				this.command = World.AllowedCellsFilter.Command.Replace;
 			}
 
 			public World.AllowedCellsFilter.TagCommand tagcommand { get; private set; }
@@ -127,8 +202,6 @@ namespace ProcGen
 
 			public int maxDistance { get; private set; }
 
-			public int distCmp { get; private set; }
-
 			public World.AllowedCellsFilter.Command command { get; private set; }
 
 			public List<Temperature.Range> temperatureRanges { get; private set; }
@@ -137,10 +210,27 @@ namespace ProcGen
 
 			public List<string> subworldNames { get; private set; }
 
+			public void Validate(string parentFile, List<WeightedSubworldName> parentCachedFiles)
+			{
+				if (this.subworldNames != null)
+				{
+					using (List<string>.Enumerator enumerator = this.subworldNames.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							string subworld = enumerator.Current;
+							DebugUtil.DevAssert(parentCachedFiles.Any<WeightedSubworldName>((WeightedSubworldName val) => val.name == subworld), string.Concat(new string[] { "World ", parentFile, ": should include ", subworld, " in its subworldFiles since it's used in a command" }), null);
+							DebugUtil.DevAssert(FileSystem.FileExists(SettingsCache.RewriteWorldgenPathYaml(subworld)), "World " + parentFile + ": Incorrect subworldFile " + subworld, null);
+						}
+					}
+				}
+			}
+
 			public enum TagCommand
 			{
 				Default,
 				AtTag,
+				NotAtTag,
 				DistanceFromTag
 			}
 
@@ -151,7 +241,8 @@ namespace ProcGen
 				UnionWith,
 				IntersectWith,
 				ExceptWith,
-				SymmetricExceptWith
+				SymmetricExceptWith,
+				All
 			}
 		}
 	}

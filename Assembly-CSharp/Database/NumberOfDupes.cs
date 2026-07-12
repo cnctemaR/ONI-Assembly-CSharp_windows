@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class NumberOfDupes : VictoryColonyAchievementRequirement
+	public class NumberOfDupes : VictoryColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public override string Name()
 		{
@@ -26,12 +25,7 @@ namespace Database
 			return Components.LiveMinionIdentities.Items.Count >= this.numDupes;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.numDupes);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.numDupes = reader.ReadInt32();
 		}

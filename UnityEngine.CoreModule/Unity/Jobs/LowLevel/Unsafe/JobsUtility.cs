@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace Unity.Jobs.LowLevel.Unsafe
 {
-	[NativeType(Header = "Runtime/Jobs/ScriptBindings/JobsBindings.h")]
 	[NativeHeader("Runtime/Jobs/JobSystem.h")]
+	[NativeType(Header = "Runtime/Jobs/ScriptBindings/JobsBindings.h")]
 	public static class JobsUtility
 	{
 		public unsafe static void GetJobRange(ref JobRanges ranges, int jobIndex, out int beginIndex, out int endIndex)
@@ -20,7 +20,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool GetWorkStealingRange(ref JobRanges ranges, int jobIndex, out int beginIndex, out int endIndex);
 
-		[FreeFunction("ScheduleManagedJob")]
+		[FreeFunction("ScheduleManagedJob", ThrowsException = true)]
 		public static JobHandle Schedule(ref JobsUtility.JobScheduleParameters parameters)
 		{
 			JobHandle jobHandle;
@@ -28,7 +28,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[FreeFunction("ScheduleManagedJobParallelFor")]
+		[FreeFunction("ScheduleManagedJobParallelFor", ThrowsException = true)]
 		public static JobHandle ScheduleParallelFor(ref JobsUtility.JobScheduleParameters parameters, int arrayLength, int innerloopBatchCount)
 		{
 			JobHandle jobHandle;
@@ -36,7 +36,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[FreeFunction("ScheduleManagedJobParallelForDeferArraySize")]
+		[FreeFunction("ScheduleManagedJobParallelForDeferArraySize", ThrowsException = true)]
 		public unsafe static JobHandle ScheduleParallelForDeferArraySize(ref JobsUtility.JobScheduleParameters parameters, int innerloopBatchCount, void* listData, void* listDataAtomicSafetyHandle)
 		{
 			JobHandle jobHandle;
@@ -44,11 +44,19 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[FreeFunction("ScheduleManagedJobParallelForTransform")]
+		[FreeFunction("ScheduleManagedJobParallelForTransform", ThrowsException = true)]
 		public static JobHandle ScheduleParallelForTransform(ref JobsUtility.JobScheduleParameters parameters, IntPtr transfromAccesssArray)
 		{
 			JobHandle jobHandle;
 			JobsUtility.ScheduleParallelForTransform_Injected(ref parameters, transfromAccesssArray, out jobHandle);
+			return jobHandle;
+		}
+
+		[FreeFunction("ScheduleManagedJobParallelForTransformReadOnly", ThrowsException = true)]
+		public static JobHandle ScheduleParallelForTransformReadOnly(ref JobsUtility.JobScheduleParameters parameters, IntPtr transfromAccesssArray, int innerloopBatchCount)
+		{
+			JobHandle jobHandle;
+			JobsUtility.ScheduleParallelForTransformReadOnly_Injected(ref parameters, transfromAccesssArray, innerloopBatchCount, out jobHandle);
 			return jobHandle;
 		}
 
@@ -57,18 +65,30 @@ namespace Unity.Jobs.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void PatchBufferMinMaxRanges(IntPtr bufferRangePatchData, void* jobdata, int startIndex, int rangeSize);
 
-		[FreeFunction]
+		[FreeFunction(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr CreateJobReflectionData(Type wrapperJobType, Type userJobType, JobType jobType, object managedJobFunction0, object managedJobFunction1, object managedJobFunction2);
+		private static extern IntPtr CreateJobReflectionData(Type wrapperJobType, Type userJobType, object managedJobFunction0, object managedJobFunction1, object managedJobFunction2);
 
+		[Obsolete("JobType is obsolete. The parameter should be removed. (UnityUpgradable) -> !1")]
 		public static IntPtr CreateJobReflectionData(Type type, JobType jobType, object managedJobFunction0, object managedJobFunction1 = null, object managedJobFunction2 = null)
 		{
-			return JobsUtility.CreateJobReflectionData(type, type, jobType, managedJobFunction0, managedJobFunction1, managedJobFunction2);
+			return JobsUtility.CreateJobReflectionData(type, type, managedJobFunction0, managedJobFunction1, managedJobFunction2);
 		}
 
+		public static IntPtr CreateJobReflectionData(Type type, object managedJobFunction0, object managedJobFunction1 = null, object managedJobFunction2 = null)
+		{
+			return JobsUtility.CreateJobReflectionData(type, type, managedJobFunction0, managedJobFunction1, managedJobFunction2);
+		}
+
+		[Obsolete("JobType is obsolete. The parameter should be removed. (UnityUpgradable) -> !2")]
 		public static IntPtr CreateJobReflectionData(Type wrapperJobType, Type userJobType, JobType jobType, object managedJobFunction0)
 		{
-			return JobsUtility.CreateJobReflectionData(wrapperJobType, userJobType, jobType, managedJobFunction0, null, null);
+			return JobsUtility.CreateJobReflectionData(wrapperJobType, userJobType, managedJobFunction0, null, null);
+		}
+
+		public static IntPtr CreateJobReflectionData(Type wrapperJobType, Type userJobType, object managedJobFunction0)
+		{
+			return JobsUtility.CreateJobReflectionData(wrapperJobType, userJobType, managedJobFunction0, null, null);
 		}
 
 		public static extern bool IsExecutingJob
@@ -125,10 +145,10 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			}
 			set
 			{
-				bool flag = value < 1 || value > JobsUtility.JobWorkerMaximumCount;
+				bool flag = value < 0 || value > JobsUtility.JobWorkerMaximumCount;
 				if (flag)
 				{
-					throw new ArgumentOutOfRangeException("JobWorkerCount", string.Format("Invalid JobWorkerCount {0} must be in the range 1 -> {1}", value, JobsUtility.JobWorkerMaximumCount));
+					throw new ArgumentOutOfRangeException("JobWorkerCount", string.Format("Invalid JobWorkerCount {0} must be in the range 0 -> {1}", value, JobsUtility.JobWorkerMaximumCount));
 				}
 				JobsUtility.SetJobQueueMaximumActiveThreadCount(value);
 			}
@@ -145,6 +165,9 @@ namespace Unity.Jobs.LowLevel.Unsafe
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ScheduleParallelForTransform_Injected(ref JobsUtility.JobScheduleParameters parameters, IntPtr transfromAccesssArray, out JobHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ScheduleParallelForTransformReadOnly_Injected(ref JobsUtility.JobScheduleParameters parameters, IntPtr transfromAccesssArray, int innerloopBatchCount, out JobHandle ret);
 
 		public const int MaxJobThreadCount = 128;
 

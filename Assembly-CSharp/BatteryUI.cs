@@ -23,7 +23,7 @@ public class BatteryUI : KMonoBehaviour
 
 	public void SetContent(Battery bat)
 	{
-		if (bat == null)
+		if (bat == null || bat.GetMyWorldId() != ClusterManager.Instance.activeWorldId)
 		{
 			if (base.gameObject.activeSelf)
 			{
@@ -31,6 +31,7 @@ public class BatteryUI : KMonoBehaviour
 			}
 			return;
 		}
+		base.gameObject.SetActive(true);
 		this.Initialize();
 		RectTransform component = this.batteryBG.GetComponent<RectTransform>();
 		float num = 0f;

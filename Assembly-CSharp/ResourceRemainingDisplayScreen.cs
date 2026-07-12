@@ -36,7 +36,7 @@ public class ResourceRemainingDisplayScreen : KScreen
 			this.selected_elements.Add(tag);
 		}
 		this.currentRecipe = recipe;
-		global::Debug.Assert(this.selected_elements.Count == recipe.Ingredients.Count);
+		global::Debug.Assert(this.selected_elements.Count == recipe.Ingredients.Count, string.Format("{0} Mismatch number of selected elements {1} and recipe requirements {2}", recipe.Name, this.selected_elements.Count, recipe.Ingredients.Count));
 	}
 
 	public void SetNumberOfPendingConstructions(int number)
@@ -75,18 +75,18 @@ public class ResourceRemainingDisplayScreen : KScreen
 			{
 				Tag tag = this.selected_elements[i];
 				float num = this.currentRecipe.Ingredients[i].amount * (float)this.numberOfPendingConstructions;
-				float num2 = WorldInventory.Instance.GetTotalAmount(tag) - WorldInventory.Instance.GetAmount(tag);
-				float num3 = WorldInventory.Instance.GetTotalAmount(tag) - (num2 + num);
-				if (num3 < 0f)
+				float num2 = ClusterManager.Instance.activeWorld.worldInventory.GetAmount(tag, true);
+				num2 -= num;
+				if (num2 < 0f)
 				{
-					num3 = 0f;
+					num2 = 0f;
 				}
 				text = string.Concat(new string[]
 				{
 					text,
 					tag.ProperName(),
 					": ",
-					GameUtil.GetFormattedMass(num3, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),
+					GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),
 					" / ",
 					GameUtil.GetFormattedMass(this.currentRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
 				});

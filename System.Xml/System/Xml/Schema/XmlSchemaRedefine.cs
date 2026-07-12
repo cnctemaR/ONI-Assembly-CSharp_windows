@@ -10,11 +10,11 @@ namespace System.Xml.Schema
 			base.Compositor = Compositor.Redefine;
 		}
 
-		[XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
-		[XmlElement("attributeGroup", typeof(XmlSchemaAttributeGroup))]
-		[XmlElement("complexType", typeof(XmlSchemaComplexType))]
-		[XmlElement("annotation", typeof(XmlSchemaAnnotation))]
 		[XmlElement("group", typeof(XmlSchemaGroup))]
+		[XmlElement("complexType", typeof(XmlSchemaComplexType))]
+		[XmlElement("attributeGroup", typeof(XmlSchemaAttributeGroup))]
+		[XmlElement("annotation", typeof(XmlSchemaAnnotation))]
+		[XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
 		public XmlSchemaObjectCollection Items
 		{
 			get

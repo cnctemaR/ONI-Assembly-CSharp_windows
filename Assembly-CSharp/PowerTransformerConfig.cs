@@ -19,6 +19,7 @@ public class PowerTransformerConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
+		buildingDef.RequiresPowerOutput = true;
 		buildingDef.UseWhitePowerOutputConnectorColour = true;
 		buildingDef.PowerInputOffset = new CellOffset(-1, 1);
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);

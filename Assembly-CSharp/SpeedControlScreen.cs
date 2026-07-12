@@ -258,6 +258,7 @@ public class SpeedControlScreen : KScreen
 
 	public void DebugStepFrame()
 	{
+		DebugUtil.LogArgs(new object[] { string.Format("Stepping one frame {0} ({1})", GameClock.Instance.GetTime(), GameClock.Instance.GetTime() / 600f) });
 		this.stepTime = Time.time;
 		this.Unpause(false);
 		base.StartCoroutine(this.DebugStepFrameDelay());

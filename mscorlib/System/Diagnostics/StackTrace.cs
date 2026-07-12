@@ -94,8 +94,8 @@ namespace System.Diagnostics
 			this.frames[0] = frame;
 		}
 
-		[Obsolete]
 		[MonoLimitation("Not possible to create StackTraces from other threads")]
+		[Obsolete]
 		public StackTrace(Thread targetThread, bool needFileInfo)
 		{
 			if (targetThread == Thread.CurrentThread)

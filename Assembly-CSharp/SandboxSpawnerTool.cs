@@ -70,6 +70,35 @@ public class SandboxSpawnerTool : InterfaceTool
 		new MinionStartingStats(false, null).Apply(gameObject);
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.TryConsume(global::Action.SandboxCopyElement))
+		{
+			int num = Grid.PosToCell(PlayerController.GetCursorPos(KInputManager.GetMousePos()));
+			List<ObjectLayer> list = new List<ObjectLayer>();
+			list.Add(ObjectLayer.Pickupables);
+			list.Add(ObjectLayer.Plants);
+			list.Add(ObjectLayer.Minion);
+			list.Add(ObjectLayer.Building);
+			if (Grid.IsValidCell(num))
+			{
+				foreach (ObjectLayer objectLayer in list)
+				{
+					GameObject gameObject = Grid.Objects[num, (int)objectLayer];
+					if (gameObject)
+					{
+						SandboxToolParameterMenu.instance.settings.SetStringSetting("SandboxTools.SelectedEntity", gameObject.PrefabID().ToString());
+						break;
+					}
+				}
+			}
+		}
+		if (!e.Consumed)
+		{
+			base.OnKeyDown(e);
+		}
+	}
+
 	protected Color radiusIndicatorColor = new Color(0.5f, 0.7f, 0.5f, 0.2f);
 
 	private int currentCell;

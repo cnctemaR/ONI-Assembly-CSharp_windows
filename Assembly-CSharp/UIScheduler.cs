@@ -19,6 +19,11 @@ public class UIScheduler : KMonoBehaviour, IScheduler
 		return this.scheduler.Schedule(name, time, callback, callback_data, group);
 	}
 
+	public SchedulerHandle ScheduleNextFrame(string name, Action<object> callback, object callback_data = null, SchedulerGroup group = null)
+	{
+		return this.scheduler.Schedule(name, 0f, callback, callback_data, group);
+	}
+
 	private void Update()
 	{
 		this.scheduler.Update();

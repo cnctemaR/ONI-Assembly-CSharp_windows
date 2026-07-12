@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class NoFarmables : ColonyAchievementRequirement
+	public class NoFarmables : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public override bool Success()
 		{
@@ -30,11 +29,7 @@ namespace Database
 			return !this.Success();
 		}
 
-		public override void Deserialize(IReader reader)
-		{
-		}
-
-		public override void Serialize(BinaryWriter writer)
+		public void Deserialize(IReader reader)
 		{
 		}
 

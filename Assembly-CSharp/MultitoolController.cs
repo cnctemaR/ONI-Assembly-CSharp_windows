@@ -12,7 +12,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		this.pre.Enter(delegate(MultitoolController.Instance smi)
 		{
 			smi.PlayPre();
-			this.worker.Get<Facing>(smi).Face(this.workable.Get(smi).transform.GetPosition());
+			this.worker.Get<Facing>(smi).Face(smi.workable.transform.GetPosition());
 		}).OnAnimQueueComplete(this.loop);
 		this.loop.Enter("PlayLoop", delegate(MultitoolController.Instance smi)
 		{
@@ -97,8 +97,6 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter worker;
 
-	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter workable;
-
 	private static readonly string[][][] ANIM_BASE = new string[][][]
 	{
 		new string[][]
@@ -148,7 +146,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			this.hitEffectPrefab = hit_effect;
 			worker.GetComponent<AnimEventHandler>().SetContext(context);
 			base.sm.worker.Set(worker, base.smi);
-			base.sm.workable.Set(workable, base.smi);
+			this.workable = workable;
 			this.anims = MultitoolController.GetAnimationStrings(workable, worker, "dig");
 		}
 
@@ -179,31 +177,29 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			{
 				return;
 			}
-			Workable workable = base.sm.workable.Get<Workable>(base.smi);
 			Worker worker = base.sm.worker.Get<Worker>(base.smi);
 			AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
-			Vector3 targetPoint = workable.GetTargetPoint();
-			worker.GetComponent<Facing>().Face(workable.transform.GetPosition());
-			this.anims = MultitoolController.GetAnimationStrings(workable, worker, "dig");
+			Vector3 targetPoint = this.workable.GetTargetPoint();
+			worker.GetComponent<Facing>().Face(this.workable.transform.GetPosition());
+			this.anims = MultitoolController.GetAnimationStrings(this.workable, worker, "dig");
 			this.PlayLoop();
 			component.SetTargetPos(targetPoint);
-			component.UpdateWorkTarget(workable.GetTargetPoint());
+			component.UpdateWorkTarget(this.workable.GetTargetPoint());
 			this.hitEffect.transform.SetPosition(targetPoint);
 		}
 
 		public void CreateHitEffect()
 		{
 			Worker worker = base.sm.worker.Get<Worker>(base.smi);
-			Workable workable = base.sm.workable.Get<Workable>(base.smi);
-			if (worker == null || workable == null)
+			if (worker == null || this.workable == null)
 			{
 				return;
 			}
-			if (Grid.PosToCell(workable) != Grid.PosToCell(worker))
+			if (Grid.PosToCell(this.workable) != Grid.PosToCell(worker))
 			{
 				worker.Trigger(-673283254, null);
 			}
-			Diggable diggable = workable as Diggable;
+			Diggable diggable = this.workable as Diggable;
 			if (diggable)
 			{
 				Element targetElement = diggable.GetTargetElement();
@@ -218,7 +214,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 				this.DestroyHitEffect();
 			}
 			AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
-			Vector3 targetPoint = workable.GetTargetPoint();
+			Vector3 targetPoint = this.workable.GetTargetPoint();
 			component.SetTargetPos(targetPoint);
 			this.hitEffect = GameUtil.KInstantiate(this.hitEffectPrefab, targetPoint, Grid.SceneLayer.FXFront2, null, 0);
 			KBatchedAnimController component2 = this.hitEffect.GetComponent<KBatchedAnimController>();
@@ -226,7 +222,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			component2.sceneLayer = Grid.SceneLayer.FXFront2;
 			component2.enabled = false;
 			component2.enabled = true;
-			component.UpdateWorkTarget(workable.GetTargetPoint());
+			component.UpdateWorkTarget(this.workable.GetTargetPoint());
 		}
 
 		public void DestroyHitEffect()
@@ -247,6 +243,8 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			}
 			this.hitEffect.DeleteObject();
 		}
+
+		public Workable workable;
 
 		private GameObject hitEffectPrefab;
 

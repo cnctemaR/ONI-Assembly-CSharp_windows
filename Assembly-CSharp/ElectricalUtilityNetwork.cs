@@ -6,19 +6,22 @@ using UnityEngine;
 
 public class ElectricalUtilityNetwork : UtilityNetwork
 {
-	public override void AddItem(int cell, object item)
+	public override void AddItem(object item)
 	{
-		Wire wire = (Wire)item;
-		Wire.WattageRating maxWattageRating = wire.MaxWattageRating;
-		List<Wire> list = this.wireGroups[(int)maxWattageRating];
-		if (list == null)
+		if (item.GetType() == typeof(Wire))
 		{
-			list = new List<Wire>();
-			this.wireGroups[(int)maxWattageRating] = list;
+			Wire wire = (Wire)item;
+			Wire.WattageRating maxWattageRating = wire.MaxWattageRating;
+			List<Wire> list = this.wireGroups[(int)maxWattageRating];
+			if (list == null)
+			{
+				list = new List<Wire>();
+				this.wireGroups[(int)maxWattageRating] = list;
+			}
+			list.Add(wire);
+			this.allWires.Add(wire);
+			this.timeOverloaded = Mathf.Max(this.timeOverloaded, wire.circuitOverloadTime);
 		}
-		list.Add(wire);
-		this.allWires.Add(wire);
-		this.timeOverloaded = Mathf.Max(this.timeOverloaded, wire.circuitOverloadTime);
 	}
 
 	public override void Reset(UtilityNetworkGridNode[] grid)
@@ -108,7 +111,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				if (this.overloadedNotification == null)
 				{
 					this.timeOverloadNotificationDisplayed = 0f;
-					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, this.targetOverloadedWire.transform, true);
+					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, null, null, true, 0f, null, null, this.targetOverloadedWire.transform, true);
 					GameScheduler.Instance.Schedule("Power Tutorial", 2f, delegate(object obj)
 					{
 						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Power, true);
@@ -151,7 +154,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 		return 0f;
 	}
 
-	public override void RemoveItem(int cell, object item)
+	public override void RemoveItem(object item)
 	{
 		if (item.GetType() == typeof(Wire))
 		{

@@ -62,7 +62,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.root;
-			this.root.ToggleAnims("anim_incapacitated_kanim", 0f).ToggleStatusItem(Db.Get().DuplicantStatusItems.Incapacitated, (BeIncapacitatedChore.StatesInstance smi) => smi.master.gameObject.GetSMI<IncapacitationMonitor.Instance>()).Enter(delegate(BeIncapacitatedChore.StatesInstance smi)
+			this.root.ToggleAnims("anim_incapacitated_kanim", 0f, "").ToggleStatusItem(Db.Get().DuplicantStatusItems.Incapacitated, (BeIncapacitatedChore.StatesInstance smi) => smi.master.gameObject.GetSMI<IncapacitationMonitor.Instance>()).Enter(delegate(BeIncapacitatedChore.StatesInstance smi)
 			{
 				smi.SetStatus(StateMachine.Status.Failed);
 				smi.GoTo(this.incapacitation_root.lookingForBed);

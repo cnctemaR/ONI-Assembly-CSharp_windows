@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using KSerialization;
 using STRINGS;
 
 namespace Database
 {
-	public class SkillBranchComplete : ColonyAchievementRequirement
+	public class SkillBranchComplete : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public SkillBranchComplete(List<Skill> skillsToMaster)
 		{
@@ -21,23 +19,27 @@ namespace Database
 				{
 					if (minionResume.HasMasteredSkill(skill.Id))
 					{
-						return true;
+						if (!minionResume.HasBeenGrantedSkill(skill))
+						{
+							return true;
+						}
+						List<Skill> allPriorSkills = Db.Get().Skills.GetAllPriorSkills(skill);
+						bool flag = true;
+						foreach (Skill skill2 in allPriorSkills)
+						{
+							flag = flag && minionResume.HasMasteredSkill(skill2.Id);
+						}
+						if (flag)
+						{
+							return true;
+						}
 					}
 				}
 			}
 			return false;
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.skillsToMaster.Count);
-			foreach (Skill skill in this.skillsToMaster)
-			{
-				writer.WriteKleiString(skill.Id);
-			}
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.skillsToMaster = new List<Skill>();
 			int num = reader.ReadInt32();

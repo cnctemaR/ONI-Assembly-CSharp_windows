@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 
 namespace UnityEngine.EventSystems
@@ -50,7 +51,19 @@ namespace UnityEngine.EventSystems
 				int num4 = num3;
 				while (i < num4)
 				{
-					SpriteRenderer component = this.m_Hits[i].collider.gameObject.GetComponent<SpriteRenderer>();
+					Renderer renderer = null;
+					Renderer component = this.m_Hits[i].collider.gameObject.GetComponent<Renderer>();
+					if (component != null)
+					{
+						if (component is SpriteRenderer)
+						{
+							renderer = component;
+						}
+						if (component is SpriteShapeRenderer)
+						{
+							renderer = component;
+						}
+					}
 					RaycastResult raycastResult = new RaycastResult
 					{
 						gameObject = this.m_Hits[i].collider.gameObject,
@@ -61,8 +74,8 @@ namespace UnityEngine.EventSystems
 						screenPosition = eventData.position,
 						displayIndex = num2,
 						index = (float)resultAppendList.Count,
-						sortingLayer = ((component != null) ? component.sortingLayerID : 0),
-						sortingOrder = ((component != null) ? component.sortingOrder : 0)
+						sortingLayer = ((renderer != null) ? renderer.sortingLayerID : 0),
+						sortingOrder = ((renderer != null) ? renderer.sortingOrder : 0)
 					};
 					resultAppendList.Add(raycastResult);
 					i++;

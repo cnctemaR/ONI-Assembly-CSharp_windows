@@ -41,33 +41,5 @@ namespace Mono.Unity
 				}
 			}
 		}
-
-		public unsafe static X509CertificateCollection NativeChainToManagedCollection(UnityTls.unitytls_x509list_ref nativeCertificateChain, UnityTls.unitytls_errorstate* errorState)
-		{
-			X509CertificateCollection x509CertificateCollection = new X509CertificateCollection();
-			UnityTls.unitytls_x509_ref unitytls_x509_ref = UnityTls.NativeInterface.unitytls_x509list_get_x509(nativeCertificateChain, (IntPtr)0, errorState);
-			int num = 0;
-			while (unitytls_x509_ref.handle != UnityTls.NativeInterface.UNITYTLS_INVALID_HANDLE)
-			{
-				IntPtr intPtr = UnityTls.NativeInterface.unitytls_x509_export_der(unitytls_x509_ref, null, (IntPtr)0, errorState);
-				byte[] array = new byte[(int)intPtr];
-				byte[] array2;
-				byte* ptr;
-				if ((array2 = array) == null || array2.Length == 0)
-				{
-					ptr = null;
-				}
-				else
-				{
-					ptr = &array2[0];
-				}
-				UnityTls.NativeInterface.unitytls_x509_export_der(unitytls_x509_ref, ptr, intPtr, errorState);
-				array2 = null;
-				x509CertificateCollection.Add(new X509Certificate(array));
-				unitytls_x509_ref = UnityTls.NativeInterface.unitytls_x509list_get_x509(nativeCertificateChain, (IntPtr)num, errorState);
-				num++;
-			}
-			return x509CertificateCollection;
-		}
 	}
 }

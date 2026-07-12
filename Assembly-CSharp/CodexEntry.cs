@@ -7,6 +7,7 @@ public class CodexEntry
 {
 	public CodexEntry()
 	{
+		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public CodexEntry(string category, List<ContentContainer> contentContainers, string name)
@@ -18,6 +19,7 @@ public class CodexEntry
 		{
 			this.sortString = UI.StripLinkFormatting(name);
 		}
+		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public CodexEntry(string category, string titleKey, List<ContentContainer> contentContainers)
@@ -29,6 +31,7 @@ public class CodexEntry
 		{
 			this.sortString = UI.StripLinkFormatting(this.title);
 		}
+		this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public List<ContentContainer> contentContainers
@@ -50,12 +53,12 @@ public class CodexEntry
 		{
 			if (contentContainer != null)
 			{
-				string text = string.Concat(new object[]
+				string text = string.Concat(new string[]
 				{
 					"<b>",
 					contentContainer.contentLayout.ToString(),
 					" container: ",
-					(contentContainer.content == null) ? 0 : contentContainer.content.Count,
+					((contentContainer.content == null) ? 0 : contentContainer.content.Count).ToString(),
 					" items</b>"
 				});
 				if (contentContainer.content != null)
@@ -160,6 +163,37 @@ public class CodexEntry
 			}
 		}
 		return null;
+	}
+
+	public string[] dlcIds
+	{
+		get
+		{
+			return this._dlcIds;
+		}
+		set
+		{
+			this._dlcIds = value;
+			string text = "";
+			for (int i = 0; i < value.Length; i++)
+			{
+				text += value[i];
+				if (i != value.Length - 1)
+				{
+					text += "\n";
+				}
+			}
+		}
+	}
+
+	public string[] GetDlcIds()
+	{
+		if (this._dlcIds == null)
+		{
+			DebugUtil.DevAssert(this._dlcIds != null, "Codex entry " + this.id + " has null dlcIds. Assigning to ALL", null);
+			this._dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+		}
+		return this._dlcIds;
 	}
 
 	public string id
@@ -345,6 +379,8 @@ public class CodexEntry
 	public EntryDevLog log = new EntryDevLog();
 
 	private List<ContentContainer> _contentContainers = new List<ContentContainer>();
+
+	private string[] _dlcIds;
 
 	private string _id;
 

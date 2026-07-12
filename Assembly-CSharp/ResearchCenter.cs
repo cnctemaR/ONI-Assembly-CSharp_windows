@@ -5,7 +5,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/ResearchCenter")]
-public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms
+public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, IResearchCenter
 {
 	protected override void OnPrefabInit()
 	{
@@ -22,8 +22,8 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Research.Instance.Subscribe(-1914338957, new Action<object>(this.UpdateWorkingState));
-		Research.Instance.Subscribe(-125623018, new Action<object>(this.UpdateWorkingState));
+		base.Subscribe<ResearchCenter>(-1914338957, ResearchCenter.UpdateWorkingStateDelegate);
+		base.Subscribe<ResearchCenter>(-125623018, ResearchCenter.UpdateWorkingStateDelegate);
 		base.Subscribe<ResearchCenter>(187661686, ResearchCenter.UpdateWorkingStateDelegate);
 		base.Subscribe<ResearchCenter>(-1697596308, ResearchCenter.CheckHasMaterialDelegate);
 		Components.ResearchCenters.Add(this);
@@ -195,6 +195,11 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms
 		Game.Instance.Trigger(-1974454597, null);
 	}
 
+	public string GetResearchType()
+	{
+		return this.research_point_type_id;
+	}
+
 	private void CheckHasMaterial(object o = null)
 	{
 		if (!this.HasMaterial() && this.chore != null)
@@ -238,13 +243,13 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms
 				if (Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key] != 0f && keyValuePair2.Key == this.research_point_type_id)
 				{
 					text = text + "\n   - " + Research.Instance.researchTypes.GetResearchType(keyValuePair2.Key).name;
-					text = string.Concat(new object[]
+					text = string.Concat(new string[]
 					{
 						text,
 						": ",
-						keyValuePair2.Value,
+						keyValuePair2.Value.ToString(),
 						"/",
-						Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key]
+						Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key].ToString()
 					});
 				}
 			}
@@ -272,6 +277,11 @@ public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms
 		descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedByTag(this.inputMaterial, this.mass_per_point, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedByTag(this.inputMaterial, this.mass_per_point, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Requirement, false));
 		descriptors.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect, false));
 		return descriptors;
+	}
+
+	public override bool InstantlyFinish(Worker worker)
+	{
+		return false;
 	}
 
 	private Chore chore;

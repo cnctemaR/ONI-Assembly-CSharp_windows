@@ -9,7 +9,7 @@ public class RetiredColonyData
 	{
 	}
 
-	public RetiredColonyData(string colonyName, int cycleCount, string date, string[] achievements, MinionAssignablesProxy[] minions, BuildingComplete[] buildingCompletes)
+	public RetiredColonyData(string colonyName, int cycleCount, string date, string[] achievements, MinionAssignablesProxy[] minions, BuildingComplete[] buildingCompletes, string startWorld, Dictionary<string, string> worldIdentities)
 	{
 		this.colonyName = colonyName;
 		this.cycleCount = cycleCount;
@@ -220,6 +220,8 @@ public class RetiredColonyData
 				new RetiredColonyData.RetiredColonyStatistic(RetiredColonyData.DataIDs.DomesticatedCritters, array14, UI.RETIRED_COLONY_INFO_SCREEN.STATS.NUMBER_DOMESTICATED_CRITTERS, UI.MATH_PICTURES.AXIS_LABELS.CYCLES, UI.UNITSUFFIXES.CRITTERS),
 				new RetiredColonyData.RetiredColonyStatistic(RetiredColonyData.DataIDs.WildCritters, array15, UI.RETIRED_COLONY_INFO_SCREEN.STATS.NUMBER_WILD_CRITTERS, UI.MATH_PICTURES.AXIS_LABELS.CYCLES, UI.UNITSUFFIXES.CRITTERS)
 			};
+			this.startWorld = startWorld;
+			this.worldIdentities = worldIdentities;
 		}
 	}
 
@@ -236,6 +238,10 @@ public class RetiredColonyData
 	public List<global::Tuple<string, int>> buildings { get; set; }
 
 	public RetiredColonyData.RetiredColonyStatistic[] Stats { get; set; }
+
+	public Dictionary<string, string> worldIdentities { get; set; }
+
+	public string startWorld { get; set; }
 
 	public static class DataIDs
 	{

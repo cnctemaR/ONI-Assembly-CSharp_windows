@@ -16,9 +16,9 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 
 	private bool AreAllDoorsOpen()
 	{
-		foreach (Door door in this.doors)
+		foreach (INavDoor navDoor in this.doors)
 		{
-			if (door != null && !door.IsOpen())
+			if (navDoor != null && !navDoor.IsOpen())
 			{
 				return false;
 			}
@@ -52,9 +52,9 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 			transition.y = 0;
 			transition.isCompleteCB = () => this.AreAllDoorsOpen();
 		}
-		foreach (Door door in this.doors)
+		foreach (INavDoor navDoor in this.doors)
 		{
-			door.Open();
+			navDoor.Open();
 		}
 	}
 
@@ -66,11 +66,11 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 	public override void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.EndTransition(navigator, transition);
-		foreach (Door door in this.doors)
+		foreach (INavDoor navDoor in this.doors)
 		{
-			if (door != null)
+			if (!navDoor.IsNullOrDestroyed())
 			{
-				door.Close();
+				navDoor.Close();
 			}
 		}
 		this.doors.Clear();
@@ -78,14 +78,14 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 
 	private void AddDoor(int cell)
 	{
-		Door door = this.GetDoor(cell);
-		if (door != null && !this.doors.Contains(door))
+		INavDoor door = this.GetDoor(cell);
+		if (!door.IsNullOrDestroyed() && !this.doors.Contains(door))
 		{
 			this.doors.Add(door);
 		}
 	}
 
-	private Door GetDoor(int cell)
+	private INavDoor GetDoor(int cell)
 	{
 		if (!Grid.HasDoor[cell])
 		{
@@ -94,16 +94,20 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 		GameObject gameObject = Grid.Objects[cell, 1];
 		if (gameObject != null)
 		{
-			Door component = gameObject.GetComponent<Door>();
-			if (component != null && component.isSpawned)
+			INavDoor navDoor = gameObject.GetComponent<INavDoor>();
+			if (navDoor == null)
 			{
-				return component;
+				navDoor = gameObject.GetSMI<INavDoor>();
+			}
+			if (navDoor != null && navDoor.isSpawned)
+			{
+				return navDoor;
 			}
 		}
 		return null;
 	}
 
-	private List<Door> doors = new List<Door>();
+	private List<INavDoor> doors = new List<INavDoor>();
 
-	private Door targetDoor;
+	private INavDoor targetDoor;
 }

@@ -11,7 +11,7 @@ public class MoleConfig : IEntityConfig
 	{
 		GameObject gameObject = BaseMoleConfig.BaseMole(id, name, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "MoleBaseTrait", anim_file, is_baby);
 		gameObject.AddTag(GameTags.Creatures.Digger);
-		EntityTemplates.ExtendEntityToWildCreature(gameObject, MoleTuning.PEN_SIZE_PER_CREATURE, 100f);
+		EntityTemplates.ExtendEntityToWildCreature(gameObject, MoleTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("MoleBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, MoleTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -MoleTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
@@ -32,6 +32,11 @@ public class MoleConfig : IEntityConfig
 		return gameObject;
 	}
 
+	public string[] GetDlcIds()
+	{
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
+	}
+
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = MoleConfig.CreateMole("Mole", global::STRINGS.CREATURES.SPECIES.MOLE.NAME, global::STRINGS.CREATURES.SPECIES.MOLE.DESC, "driller_kanim", false);
@@ -44,7 +49,7 @@ public class MoleConfig : IEntityConfig
 		float num = 60.000004f;
 		float num2 = 20f;
 		int egg_SORT_ORDER = MoleConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, MoleTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, text, text2, text3, text4, egg_MASS, text5, num, num2, MoleTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true, 1f, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

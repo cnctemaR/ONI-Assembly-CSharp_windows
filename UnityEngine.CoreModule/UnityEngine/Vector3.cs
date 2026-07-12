@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[Il2CppEagerStaticClassConstruction]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
 	[NativeHeader("Runtime/Math/Vector3.h")]
-	[NativeClass("Vector3f")]
 	[NativeType(Header = "Runtime/Math/Vector3.h")]
-	public struct Vector3 : IEquatable<Vector3>
+	[NativeClass("Vector3f")]
+	public struct Vector3 : IEquatable<Vector3>, IFormattable
 	{
 		[FreeFunction("VectorScripting::Slerp", IsThreadSafe = true)]
 		public static Vector3 Slerp(Vector3 a, Vector3 b, float t)
@@ -56,12 +58,14 @@ namespace UnityEngine
 			return vector;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 Lerp(Vector3 a, Vector3 b, float t)
 		{
 			t = Mathf.Clamp01(t);
 			return new Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 LerpUnclamped(Vector3 a, Vector3 b, float t)
 		{
 			return new Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
@@ -194,6 +198,7 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public Vector3(float x, float y, float z)
 		{
 			this.x = x;
@@ -201,6 +206,7 @@ namespace UnityEngine
 			this.z = z;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public Vector3(float x, float y)
 		{
 			this.x = x;
@@ -208,6 +214,7 @@ namespace UnityEngine
 			this.z = 0f;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void Set(float newX, float newY, float newZ)
 		{
 			this.x = newX;
@@ -215,11 +222,13 @@ namespace UnityEngine
 			this.z = newZ;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 Scale(Vector3 a, Vector3 b)
 		{
 			return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public void Scale(Vector3 scale)
 		{
 			this.x *= scale.x;
@@ -292,6 +301,7 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float Dot(Vector3 lhs, Vector3 rhs)
 		{
 			return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
@@ -386,6 +396,7 @@ namespace UnityEngine
 			return vector2;
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float Magnitude(Vector3 vector)
 		{
 			return (float)Math.Sqrt((double)(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z));
@@ -399,6 +410,7 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static float SqrMagnitude(Vector3 vector)
 		{
 			return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
@@ -412,11 +424,13 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 Min(Vector3 lhs, Vector3 rhs)
 		{
 			return new Vector3(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y), Mathf.Min(lhs.z, rhs.z));
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 Max(Vector3 lhs, Vector3 rhs)
 		{
 			return new Vector3(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y), Mathf.Max(lhs.z, rhs.z));
@@ -502,31 +516,37 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 operator +(Vector3 a, Vector3 b)
 		{
 			return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 operator -(Vector3 a, Vector3 b)
 		{
 			return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 operator -(Vector3 a)
 		{
 			return new Vector3(-a.x, -a.y, -a.z);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 operator *(Vector3 a, float d)
 		{
 			return new Vector3(a.x * d, a.y * d, a.z * d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 operator *(float d, Vector3 a)
 		{
 			return new Vector3(a.x * d, a.y * d, a.z * d);
 		}
 
+		[MethodImpl((MethodImplOptions)256)]
 		public static Vector3 operator /(Vector3 a, float d)
 		{
 			return new Vector3(a.x / d, a.y / d, a.z / d);
@@ -548,16 +568,26 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("({0:F1}, {1:F1}, {2:F1})", new object[] { this.x, this.y, this.z });
+			return this.ToString(null, CultureInfo.InvariantCulture.NumberFormat);
 		}
 
 		public string ToString(string format)
 		{
+			return this.ToString(format, CultureInfo.InvariantCulture.NumberFormat);
+		}
+
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			bool flag = string.IsNullOrEmpty(format);
+			if (flag)
+			{
+				format = "F1";
+			}
 			return UnityString.Format("({0}, {1}, {2})", new object[]
 			{
-				this.x.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.y.ToString(format, CultureInfo.InvariantCulture.NumberFormat),
-				this.z.ToString(format, CultureInfo.InvariantCulture.NumberFormat)
+				this.x.ToString(format, formatProvider),
+				this.y.ToString(format, formatProvider),
+				this.z.ToString(format, formatProvider)
 			});
 		}
 

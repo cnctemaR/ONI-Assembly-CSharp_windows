@@ -203,7 +203,7 @@ public class CrewJobsEntry : CrewListEntry
 				{
 					textStyleSetting = this.TooltipTextStyle_AbilityNegativeModifier;
 				}
-				b.tooltip.AddMultiStringTooltip(attribute.Name + " " + attributeInstance.GetTotalValue(), textStyleSetting);
+				b.tooltip.AddMultiStringTooltip(attribute.Name + " " + attributeInstance.GetTotalValue().ToString(), textStyleSetting);
 			}
 		}
 		return "";

@@ -121,10 +121,12 @@ namespace UnityEngine.EventSystems
 			this.m_RaycastResultCache.Clear();
 			PointerEventData pointerEventData2;
 			this.GetPointerData(-2, out pointerEventData2, true);
+			pointerEventData2.Reset();
 			this.CopyFromTo(pointerEventData, pointerEventData2);
 			pointerEventData2.button = PointerEventData.InputButton.Right;
 			PointerEventData pointerEventData3;
 			this.GetPointerData(-3, out pointerEventData3, true);
+			pointerEventData3.Reset();
 			this.CopyFromTo(pointerEventData, pointerEventData3);
 			pointerEventData3.button = PointerEventData.InputButton.Middle;
 			this.m_MouseState.SetButtonState(PointerEventData.InputButton.Left, this.StateForMouseButton(0), pointerEventData);
@@ -194,13 +196,15 @@ namespace UnityEngine.EventSystems
 
 		public override string ToString()
 		{
-			StringBuilder stringBuilder = new StringBuilder("<b>Pointer Input Module of type: </b>" + base.GetType());
+			string text = "<b>Pointer Input Module of type: </b>";
+			Type type = base.GetType();
+			StringBuilder stringBuilder = new StringBuilder(text + ((type != null) ? type.ToString() : null));
 			stringBuilder.AppendLine();
 			foreach (KeyValuePair<int, PointerEventData> keyValuePair in this.m_PointerData)
 			{
 				if (keyValuePair.Value != null)
 				{
-					stringBuilder.AppendLine("<B>Pointer:</b> " + keyValuePair.Key);
+					stringBuilder.AppendLine("<B>Pointer:</b> " + keyValuePair.Key.ToString());
 					stringBuilder.AppendLine(keyValuePair.Value.ToString());
 				}
 			}
@@ -262,7 +266,8 @@ namespace UnityEngine.EventSystems
 		{
 			public bool AnyPressesThisFrame()
 			{
-				for (int i = 0; i < this.m_TrackedButtons.Count; i++)
+				int count = this.m_TrackedButtons.Count;
+				for (int i = 0; i < count; i++)
 				{
 					if (this.m_TrackedButtons[i].eventData.PressedThisFrame())
 					{
@@ -274,7 +279,8 @@ namespace UnityEngine.EventSystems
 
 			public bool AnyReleasesThisFrame()
 			{
-				for (int i = 0; i < this.m_TrackedButtons.Count; i++)
+				int count = this.m_TrackedButtons.Count;
+				for (int i = 0; i < count; i++)
 				{
 					if (this.m_TrackedButtons[i].eventData.ReleasedThisFrame())
 					{
@@ -287,7 +293,8 @@ namespace UnityEngine.EventSystems
 			public PointerInputModule.ButtonState GetButtonState(PointerEventData.InputButton button)
 			{
 				PointerInputModule.ButtonState buttonState = null;
-				for (int i = 0; i < this.m_TrackedButtons.Count; i++)
+				int count = this.m_TrackedButtons.Count;
+				for (int i = 0; i < count; i++)
 				{
 					if (this.m_TrackedButtons[i].button == button)
 					{

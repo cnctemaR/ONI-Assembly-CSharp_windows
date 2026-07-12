@@ -9,7 +9,7 @@ namespace Klei.AI
 	[DebuggerDisplay("{Id}")]
 	public class Effect : Modifier
 	{
-		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emote_anim = null, float emote_cooldown = 0f, string stompGroup = null)
+		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emote_anim = null, float emote_cooldown = 0f, string stompGroup = null, string custom_icon = "")
 			: base(id, name, description)
 		{
 			this.duration = duration;
@@ -19,6 +19,7 @@ namespace Klei.AI
 			this.emoteAnim = emote_anim;
 			this.emoteCooldown = emote_cooldown;
 			this.stompGroup = stompGroup;
+			this.customIcon = custom_icon;
 		}
 
 		public override void AddTo(Attributes attributes)
@@ -40,9 +41,9 @@ namespace Klei.AI
 			this.emotePreconditions.Add(precon);
 		}
 
-		public static string CreateTooltip(Effect effect, bool showDuration, string linePrefix = "\n")
+		public static string CreateTooltip(Effect effect, bool showDuration, string linePrefix = "\n    • ", bool showHeader = true)
 		{
-			string text = "";
+			string text = (showHeader ? DUPLICANTS.MODIFIERS.EFFECT_HEADER.text : "");
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 			{
 				Attribute attribute = Db.Get().Attributes.TryGet(attributeModifier.AttributeId);
@@ -52,7 +53,7 @@ namespace Klei.AI
 				}
 				if (attribute != null && attribute.ShowInUI != Attribute.Display.Never)
 				{
-					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString(null));
+					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString());
 				}
 			}
 			StringEntry stringEntry;
@@ -62,16 +63,28 @@ namespace Klei.AI
 			}
 			if (showDuration && effect.duration > 0f)
 			{
-				text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1", false));
+				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1", false));
 			}
 			return text;
+		}
+
+		public static string CreateFullTooltip(Effect effect, bool showDuration)
+		{
+			return string.Concat(new string[]
+			{
+				effect.Name,
+				"\n\n",
+				effect.description,
+				"\n\n",
+				Effect.CreateTooltip(effect, showDuration, "\n    • ", true)
+			});
 		}
 
 		public static void AddModifierDescriptions(GameObject parent, List<Descriptor> descs, string effect_id, bool increase_indent = false)
 		{
 			foreach (AttributeModifier attributeModifier in Db.Get().effects.Get(effect_id).SelfModifiers)
 			{
-				Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(parent), "", Descriptor.DescriptorType.Effect, false);
+				Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(), "", Descriptor.DescriptorType.Effect, false);
 				if (increase_indent)
 				{
 					descriptor.IncreaseIndent();
@@ -87,6 +100,8 @@ namespace Klei.AI
 		public bool triggerFloatingText;
 
 		public bool isBad;
+
+		public string customIcon;
 
 		public string emoteAnim;
 

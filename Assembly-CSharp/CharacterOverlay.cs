@@ -21,5 +21,7 @@ public class CharacterOverlay : KMonoBehaviour
 		NameDisplayScreen.Instance.AddNewEntry(base.gameObject);
 	}
 
+	public bool shouldShowName;
+
 	private bool registered;
 }

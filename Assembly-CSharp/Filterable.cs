@@ -26,7 +26,7 @@ public class Filterable : KMonoBehaviour
 		Dictionary<Tag, HashSet<Tag>> dictionary = new Dictionary<Tag, HashSet<Tag>>();
 		if (this.filterElementState == Filterable.ElementState.Solid)
 		{
-			dictionary = WorldInventory.Instance.GetDiscoveredResourcesFromTagSet(Filterable.filterableCategories);
+			dictionary = DiscoveredResources.Instance.GetDiscoveredResourcesFromTagSet(Filterable.filterableCategories);
 		}
 		else
 		{

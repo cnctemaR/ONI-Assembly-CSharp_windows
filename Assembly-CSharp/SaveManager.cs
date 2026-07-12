@@ -107,7 +107,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(17);
+		writer.Write(25);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -199,9 +199,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 17)
+		if (num != 7 || num2 > 25)
 		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 17, num, num2 }) });
+			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 25, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -288,7 +288,19 @@ public class SaveManager : KMonoBehaviour
 
 	public const int SAVE_MINOR_VERSION_ADD_GUID_TO_HEADER = 17;
 
-	public const int SAVE_MINOR_VERSION = 17;
+	public const int SAVE_MINOR_VERSION_EXPANSION_1_INTRODUCED = 20;
+
+	public const int SAVE_MINOR_VERSION_CONTENT_SETTINGS = 21;
+
+	public const int SAVE_MINOR_VERSION_COLONY_REQ_REMOVE_SERIALIZATION = 22;
+
+	public const int SAVE_MINOR_VERSION_ROTTABLE_TUNING = 23;
+
+	public const int SAVE_MINOR_VERSION_LAUNCH_PAD_SOLIDITY = 24;
+
+	public const int SAVE_MINOR_VERSION_BASE_GAME_MERGEDOWN = 25;
+
+	public const int SAVE_MINOR_VERSION = 25;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 

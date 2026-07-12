@@ -26,12 +26,17 @@ public class SaveUpgradeWarning : KMonoBehaviour
 
 	private void OnLoad(Game.GameSaveData data)
 	{
-		foreach (SaveUpgradeWarning.Upgrade upgrade in new List<SaveUpgradeWarning.Upgrade>
+		List<SaveUpgradeWarning.Upgrade> list = new List<SaveUpgradeWarning.Upgrade>
 		{
 			new SaveUpgradeWarning.Upgrade(7, 5, new global::System.Action(this.SuddenMoraleHelper)),
 			new SaveUpgradeWarning.Upgrade(7, 13, new global::System.Action(this.BedAndBathHelper)),
 			new SaveUpgradeWarning.Upgrade(7, 16, new global::System.Action(this.NewAutomationWarning))
-		})
+		};
+		if (DlcManager.IsPureVanilla())
+		{
+			list.Add(new SaveUpgradeWarning.Upgrade(7, 25, new global::System.Action(this.MergedownWarning)));
+		}
+		foreach (SaveUpgradeWarning.Upgrade upgrade in list)
 		{
 			if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(upgrade.major, upgrade.minor))
 			{
@@ -92,7 +97,7 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		for (int i = 0; i < array.Length; i++)
 		{
 			BuildingDef buildingDef = Assets.GetBuildingDef(array[i]);
-			screen.AddSprite(buildingDef.GetUISprite("ui", false), buildingDef.Name);
+			screen.AddSprite(buildingDef.GetUISprite("ui", false), buildingDef.Name, -1f, -1f);
 		}
 		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING, UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING_TITLE);
 		base.StartCoroutine(this.SendAutomationWarningNotifications());
@@ -141,6 +146,25 @@ public class SaveUpgradeWarning : KMonoBehaviour
 			yield break;
 		}
 		yield break;
+	}
+
+	private void MergedownWarning()
+	{
+		SpriteListDialogScreen screen = Util.KInstantiateUI<SpriteListDialogScreen>(ScreenPrefabs.Instance.SpriteListDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, true);
+		screen.AddOption(UI.DEVELOPMENTBUILDS.FULL_PATCH_NOTES, delegate
+		{
+			Application.OpenURL("https://forums.kleientertainment.com/game-updates/oni-alpha/");
+		});
+		screen.AddOption(UI.CONFIRMDIALOG.OK, delegate
+		{
+			screen.Deactivate();
+		});
+		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_fridge"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_FOOD, 150f, 120f);
+		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_deodorizer"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_AIRFILTER, 150f, 120f);
+		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_steamturbine"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_SIMULATION, 150f, 120f);
+		screen.AddSprite(Assets.GetSprite("upgrade_mergedown_oxygen_meter"), UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_BUILDINGS, 150f, 120f);
+		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES, UI.FRONTEND.SAVEUPGRADEWARNINGS.MERGEDOWNCHANGES_TITLE);
+		base.StartCoroutine(this.SendAutomationWarningNotifications());
 	}
 
 	[MyCmpReq]

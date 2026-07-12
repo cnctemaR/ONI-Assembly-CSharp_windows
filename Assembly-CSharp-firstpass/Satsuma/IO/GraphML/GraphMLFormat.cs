@@ -143,7 +143,7 @@ namespace Satsuma.IO.GraphML
 			for (int i = 0; i < this.Properties.Count; i++)
 			{
 				GraphMLProperty graphMLProperty = this.Properties[i];
-				graphMLProperty.Id = "d" + i;
+				graphMLProperty.Id = "d" + i.ToString();
 				graphMLProperty.GetKeyElement().WriteTo(xml);
 			}
 			xml.WriteStartElement("graph", GraphMLFormat.xmlns.NamespaceName);

@@ -52,7 +52,7 @@ public class ItemPedestal : KMonoBehaviour
 	}
 
 	[MyCmpReq]
-	private SingleEntityReceptacle receptacle;
+	protected SingleEntityReceptacle receptacle;
 
 	[MyCmpReq]
 	private DecorProvider decorProvider;

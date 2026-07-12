@@ -61,7 +61,7 @@ public class CommandModuleSideScreen : SideScreenContent
 
 	private void ClearConditions()
 	{
-		foreach (KeyValuePair<RocketLaunchCondition, GameObject> keyValuePair in this.conditionTable)
+		foreach (KeyValuePair<ProcessCondition, GameObject> keyValuePair in this.conditionTable)
 		{
 			Util.KDestroyGameObject(keyValuePair.Value);
 		}
@@ -70,10 +70,10 @@ public class CommandModuleSideScreen : SideScreenContent
 
 	private void ConfigureConditions()
 	{
-		foreach (RocketLaunchCondition rocketLaunchCondition in this.target.GetLaunchConditionList())
+		foreach (ProcessCondition processCondition in this.target.GetLaunchConditionList())
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.prefabConditionLineItem, this.conditionListContainer, true);
-			this.conditionTable.Add(rocketLaunchCondition, gameObject);
+			this.conditionTable.Add(processCondition, gameObject);
 		}
 		this.RefreshConditions();
 	}
@@ -81,17 +81,17 @@ public class CommandModuleSideScreen : SideScreenContent
 	public void RefreshConditions()
 	{
 		bool flag = false;
-		List<RocketLaunchCondition> launchConditionList = this.target.GetLaunchConditionList();
-		foreach (RocketLaunchCondition rocketLaunchCondition in launchConditionList)
+		List<ProcessCondition> launchConditionList = this.target.GetLaunchConditionList();
+		foreach (ProcessCondition processCondition in launchConditionList)
 		{
-			if (!this.conditionTable.ContainsKey(rocketLaunchCondition))
+			if (!this.conditionTable.ContainsKey(processCondition))
 			{
 				flag = true;
 				break;
 			}
-			GameObject gameObject = this.conditionTable[rocketLaunchCondition];
+			GameObject gameObject = this.conditionTable[processCondition];
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			if (rocketLaunchCondition.GetParentCondition() != null && rocketLaunchCondition.GetParentCondition().EvaluateLaunchCondition() == RocketLaunchCondition.LaunchStatus.Failure)
+			if (processCondition.GetParentCondition() != null && processCondition.GetParentCondition().EvaluateCondition() == ProcessCondition.Status.Failure)
 			{
 				gameObject.SetActive(false);
 			}
@@ -99,14 +99,15 @@ public class CommandModuleSideScreen : SideScreenContent
 			{
 				gameObject.SetActive(true);
 			}
-			bool flag2 = rocketLaunchCondition.EvaluateLaunchCondition() != RocketLaunchCondition.LaunchStatus.Failure;
-			component.GetReference<LocText>("Label").text = rocketLaunchCondition.GetLaunchStatusMessage(flag2);
+			ProcessCondition.Status status = processCondition.EvaluateCondition();
+			bool flag2 = status == ProcessCondition.Status.Ready;
+			component.GetReference<LocText>("Label").text = processCondition.GetStatusMessage(status);
 			component.GetReference<LocText>("Label").color = (flag2 ? Color.black : Color.red);
 			component.GetReference<Image>("Box").color = (flag2 ? Color.black : Color.red);
 			component.GetReference<Image>("Check").gameObject.SetActive(flag2);
-			gameObject.GetComponent<ToolTip>().SetSimpleTooltip(rocketLaunchCondition.GetLaunchStatusTooltip(flag2));
+			gameObject.GetComponent<ToolTip>().SetSimpleTooltip(processCondition.GetStatusTooltip(status));
 		}
-		foreach (KeyValuePair<RocketLaunchCondition, GameObject> keyValuePair in this.conditionTable)
+		foreach (KeyValuePair<ProcessCondition, GameObject> keyValuePair in this.conditionTable)
 		{
 			if (!launchConditionList.Contains(keyValuePair.Key))
 			{
@@ -119,6 +120,7 @@ public class CommandModuleSideScreen : SideScreenContent
 			this.ClearConditions();
 			this.ConfigureConditions();
 		}
+		this.destinationButton.gameObject.SetActive(ManagementMenu.StarmapAvailable());
 		this.destinationButton.onClick = delegate
 		{
 			ManagementMenu.Instance.ToggleStarmap();
@@ -141,7 +143,10 @@ public class CommandModuleSideScreen : SideScreenContent
 
 	public MultiToggle debugVictoryButton;
 
-	private Dictionary<RocketLaunchCondition, GameObject> conditionTable = new Dictionary<RocketLaunchCondition, GameObject>();
+	[Tooltip("This list is indexed by the ProcessCondition.Status enum")]
+	public List<Color> statusColors;
+
+	private Dictionary<ProcessCondition, GameObject> conditionTable = new Dictionary<ProcessCondition, GameObject>();
 
 	private SchedulerHandle updateHandle;
 }

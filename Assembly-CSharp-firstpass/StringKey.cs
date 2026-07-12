@@ -11,12 +11,12 @@ public struct StringKey
 
 	public override string ToString()
 	{
-		return string.Concat(new object[]
+		return string.Concat(new string[]
 		{
 			"S: [",
 			this.String,
 			"] H: [",
-			this.Hash,
+			this.Hash.ToString(),
 			"] Value: [",
 			Strings.Get(this),
 			"]"

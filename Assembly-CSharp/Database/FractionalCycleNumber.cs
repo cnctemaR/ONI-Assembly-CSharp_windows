@@ -1,10 +1,9 @@
 ﻿using System;
-using System.IO;
 using STRINGS;
 
 namespace Database
 {
-	public class FractionalCycleNumber : ColonyAchievementRequirement
+	public class FractionalCycleNumber : ColonyAchievementRequirement, AchievementRequirementSerialization_Deprecated
 	{
 		public FractionalCycleNumber(float fractionalCycleNumber)
 		{
@@ -18,12 +17,7 @@ namespace Database
 			return (float)(GameClock.Instance.GetCycle() + 1) > this.fractionalCycleNumber || (GameClock.Instance.GetCycle() + 1 == num && GameClock.Instance.GetCurrentCycleAsPercentage() >= num2);
 		}
 
-		public override void Serialize(BinaryWriter writer)
-		{
-			writer.Write(this.fractionalCycleNumber);
-		}
-
-		public override void Deserialize(IReader reader)
+		public void Deserialize(IReader reader)
 		{
 			this.fractionalCycleNumber = reader.ReadSingle();
 		}

@@ -590,14 +590,14 @@ public class SolidConduitFlow : IConduitFlow
 	{
 		if (this.grid[cell_idx].conduitIdx == -1)
 		{
-			global::Debug.LogWarning("No conduit in cell: " + cell_idx);
+			global::Debug.LogWarning("No conduit in cell: " + cell_idx.ToString());
 			this.DumpPickupable(pickupable);
 			return;
 		}
 		SolidConduitFlow.ConduitContents contents = this.GetConduit(cell_idx).GetContents(this);
 		if (contents.pickupableHandle.IsValid())
 		{
-			global::Debug.LogWarning("Conduit already full: " + cell_idx);
+			global::Debug.LogWarning("Conduit already full: " + cell_idx.ToString());
 			this.DumpPickupable(pickupable);
 			return;
 		}
@@ -790,6 +790,8 @@ public class SolidConduitFlow : IConduitFlow
 		}
 		return pickupable;
 	}
+
+	public const float MAX_SOLID_MASS = 20f;
 
 	public const float TickRate = 1f;
 

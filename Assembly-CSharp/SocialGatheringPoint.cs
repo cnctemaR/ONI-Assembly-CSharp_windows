@@ -59,6 +59,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 		WorkChore<SocialGatheringPointWorkable> workChore = new WorkChore<SocialGatheringPointWorkable>(relax, stateMachineTarget, choreProvider, flag, action, action2, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, false);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		workChore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
+		workChore.AddPrecondition(ChorePreconditions.instance.IsNotARobot, workable);
 		return workChore;
 	}
 

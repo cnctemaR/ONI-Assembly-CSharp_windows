@@ -25,7 +25,7 @@ public class KInputController : IInputHandler
 		this.IsGamepad = is_gamepad;
 		this.mAxis = new float[4];
 		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[250];
+		this.mActionState = new bool[266];
 		this.mScrollState = new bool[2];
 		this.inputHandler = new KInputHandler(this, this);
 	}
@@ -131,6 +131,7 @@ public class KInputController : IInputHandler
 		this.CheckModifier(KInputController.ctrlCodes, Modifier.Ctrl);
 		this.CheckModifier(KInputController.shiftCodes, Modifier.Shift);
 		this.CheckModifier(KInputController.capsCodes, Modifier.CapsLock);
+		this.CheckModifier(KInputController.backtickCodes, Modifier.Backtick);
 	}
 
 	private void UpdateScrollStates()
@@ -269,6 +270,8 @@ public class KInputController : IInputHandler
 
 	private static readonly KKeyCode[] capsCodes = new KKeyCode[] { KKeyCode.CapsLock };
 
+	private static readonly KKeyCode[] backtickCodes = new KKeyCode[] { KKeyCode.BackQuote };
+
 	private enum Scroll
 	{
 		Up,
@@ -301,7 +304,7 @@ public class KInputController : IInputHandler
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[250];
+			this.mActionFlags = new bool[266];
 		}
 
 		public KKeyCode mKeyCode;

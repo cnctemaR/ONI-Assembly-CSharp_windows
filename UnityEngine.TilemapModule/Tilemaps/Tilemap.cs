@@ -4,13 +4,13 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Tilemaps
 {
+	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Modules/Tilemap/Public/TilemapTile.h")]
 	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
 	[NativeType(Header = "Modules/Tilemap/Public/Tilemap.h")]
-	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	[RequireComponent(typeof(Transform))]
-	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Modules/Grid/Public/Grid.h")]
+	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	public sealed class Tilemap : GridLayout
 	{
 		public extern Grid layoutGrid
@@ -310,7 +310,7 @@ namespace UnityEngine.Tilemaps
 		}
 
 		[NativeMethod(Name = "GetTileObjectToInstantiate")]
-		internal GameObject GetObjectToInstantiate(Vector3Int position)
+		public GameObject GetObjectToInstantiate(Vector3Int position)
 		{
 			return this.GetObjectToInstantiate_Injected(ref position);
 		}
@@ -347,6 +347,26 @@ namespace UnityEngine.Tilemaps
 		private void BoxFillTileAsset(Vector3Int position, Object tile, int startX, int startY, int endX, int endY)
 		{
 			this.BoxFillTileAsset_Injected(ref position, tile, startX, startY, endX, endY);
+		}
+
+		public void InsertCells(Vector3Int position, Vector3Int insertCells)
+		{
+			this.InsertCells(position, insertCells.x, insertCells.y, insertCells.z);
+		}
+
+		public void InsertCells(Vector3Int position, int numColumns, int numRows, int numLayers)
+		{
+			this.InsertCells_Injected(ref position, numColumns, numRows, numLayers);
+		}
+
+		public void DeleteCells(Vector3Int position, Vector3Int deleteCells)
+		{
+			this.DeleteCells(position, deleteCells.x, deleteCells.y, deleteCells.z);
+		}
+
+		public void DeleteCells(Vector3Int position, int numColumns, int numRows, int numLayers)
+		{
+			this.DeleteCells_Injected(ref position, numColumns, numRows, numLayers);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -453,6 +473,12 @@ namespace UnityEngine.Tilemaps
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void BoxFillTileAsset_Injected(ref Vector3Int position, Object tile, int startX, int startY, int endX, int endY);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void InsertCells_Injected(ref Vector3Int position, int numColumns, int numRows, int numLayers);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void DeleteCells_Injected(ref Vector3Int position, int numColumns, int numRows, int numLayers);
 
 		public enum Orientation
 		{

@@ -467,7 +467,7 @@ namespace ProcGenGame
 				errorDesc = string.Format(UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE, settingsCoordinate),
 				exception = e
 			});
-			KCrashReporter.ReportErrorDevNotification("WorldgenFailure", e.StackTrace, string.Format("{0} - {1} [Build: {2}]", settingsCoordinate, e.Message, 471531U));
+			KCrashReporter.ReportErrorDevNotification("WorldgenFailure", e.StackTrace, string.Format("{0} - {1} [Build: {2}]", settingsCoordinate, e.Message, 471618U));
 		}
 
 		public void SetWorldSize(int width, int height)

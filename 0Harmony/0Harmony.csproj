@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{076DCA07-EC3D-4C1D-9A35-9351FDAB3802}</ProjectGuid>
+    <ProjectGuid>{7212B6AF-89F1-46F4-8268-E4D09F87A048}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Harmony</RootNamespace>
     <AssemblyName>0Harmony</AssemblyName>

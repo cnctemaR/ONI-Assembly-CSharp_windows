@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{076DCA07-EC3D-4C1D-9A35-9351FDAB385A}</ProjectGuid>
+    <ProjectGuid>{7212B6AF-89F1-46F4-8268-E4D09F87A0A0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.XR</RootNamespace>
     <AssemblyName>UnityEngine.XRModule</AssemblyName>
@@ -56,19 +56,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{076DCA07-EC3D-4C1D-9A35-9351FDAB3828}</Project>
+      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A06E}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{076DCA07-EC3D-4C1D-9A35-9351FDAB3839}</Project>
+      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A07F}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{076DCA07-EC3D-4C1D-9A35-9351FDAB383C}</Project>
+      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A082}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SubsystemsModule\UnityEngine.SubsystemsModule.csproj">
-      <Project>{076DCA07-EC3D-4C1D-9A35-9351FDAB3841}</Project>
+      <Project>{7212B6AF-89F1-46F4-8268-E4D09F87A087}</Project>
       <Name>UnityEngine.SubsystemsModule</Name>
     </ProjectReference>
   </ItemGroup>

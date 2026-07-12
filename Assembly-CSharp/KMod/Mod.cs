@@ -200,10 +200,10 @@ namespace KMod
 					}
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion = (from v in list2
-						where (long)v.info.lastWorkingBuild >= 464364L
+						where (long)v.info.lastWorkingBuild >= 466292L
 						orderby v.info.lastWorkingBuild
 						select v).Concat<Mod.ArchivedVersion>(from v in list2
-						where (long)v.info.lastWorkingBuild < 464364L
+						where (long)v.info.lastWorkingBuild < 466292L
 						orderby v.info.lastWorkingBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion == null)

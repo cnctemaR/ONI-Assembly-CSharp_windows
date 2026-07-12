@@ -11,6 +11,10 @@ public class ConditionHasCargoBayForNoseconeHarvest : ProcessCondition
 
 	public override ProcessCondition.Status EvaluateCondition()
 	{
+		if (!this.HasHarvestNosecone())
+		{
+			return ProcessCondition.Status.Ready;
+		}
 		using (IEnumerator<Ref<RocketModuleCluster>> enumerator = this.launchable.parts.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
@@ -61,6 +65,11 @@ public class ConditionHasCargoBayForNoseconeHarvest : ProcessCondition
 	}
 
 	public override bool ShowInUI()
+	{
+		return this.HasHarvestNosecone();
+	}
+
+	private bool HasHarvestNosecone()
 	{
 		using (IEnumerator<Ref<RocketModuleCluster>> enumerator = this.launchable.parts.GetEnumerator())
 		{

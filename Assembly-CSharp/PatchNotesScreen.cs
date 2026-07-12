@@ -25,7 +25,7 @@ public class PatchNotesScreen : KModalScreen
 
 	public static bool ShouldShowScreen()
 	{
-		return KPlayerPrefs.GetInt("PatchNotesVersion") < PatchNotesScreen.PatchNotesVersion;
+		return false;
 	}
 
 	private void MarkAsReadAndClose()

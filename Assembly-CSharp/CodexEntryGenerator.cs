@@ -126,6 +126,7 @@ public static class CodexEntryGenerator
 			list6.Add(codexCollapsibleHeader2);
 			list6.Add(new CodexSpacer());
 			list6.Add(new CodexSpacer());
+			list6.Reverse();
 			list.Add(new ContentContainer(list6, ContentContainer.ContentLayout.Vertical));
 			list.Add(contentContainer2);
 		}
@@ -2107,6 +2108,12 @@ public static class CodexEntryGenerator
 		dictionary[bedType] = "Bed";
 		Tag lightSource = RoomConstraints.ConstraintTags.LightSource;
 		dictionary[lightSource] = "FloorLamp";
+		Tag rocketInterior = RoomConstraints.ConstraintTags.RocketInterior;
+		dictionary[rocketInterior] = RocketControlStationConfig.ID;
+		Tag creatureRelocator = RoomConstraints.ConstraintTags.CreatureRelocator;
+		dictionary[creatureRelocator] = "CreatureDeliveryPoint";
+		Tag cookTop = RoomConstraints.ConstraintTags.CookTop;
+		dictionary[cookTop] = "CookingStation";
 		CodexEntryGenerator.RoomConstrainTagIcons = dictionary;
 	}
 
@@ -2125,18 +2132,15 @@ public static class CodexEntryGenerator
 		RoomConstraints.ConstraintTags.Refrigerator,
 		RoomConstraints.ConstraintTags.FarmStationType,
 		RoomConstraints.ConstraintTags.LuxuryBedType,
-		RoomConstraints.ConstraintTags.DeStressingBuilding,
 		RoomConstraints.ConstraintTags.MassageTable,
 		RoomConstraints.ConstraintTags.MessTable,
 		RoomConstraints.ConstraintTags.NatureReserve,
 		RoomConstraints.ConstraintTags.Park,
 		RoomConstraints.ConstraintTags.PowerStation,
-		RoomConstraints.ConstraintTags.RocketInterior,
 		RoomConstraints.ConstraintTags.SpiceStation,
+		RoomConstraints.ConstraintTags.DeStressingBuilding,
 		RoomConstraints.ConstraintTags.Decor20,
-		RoomConstraints.ConstraintTags.MachineShopType,
-		RoomConstraints.ConstraintTags.CookTop,
-		RoomConstraints.ConstraintTags.CreatureRelocator
+		RoomConstraints.ConstraintTags.MachineShopType
 	};
 
 	public static Dictionary<Tag, Tag> RoomConstrainTagIcons;

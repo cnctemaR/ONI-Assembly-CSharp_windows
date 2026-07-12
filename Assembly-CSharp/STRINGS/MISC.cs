@@ -1471,7 +1471,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "COT") + " built";
 
-				public static LocString TOOLTIP = "My Duplicants would appreciate a place to sleep\n\n" + UI.FormatAsLink("Cots", "COTS") + " can be built from the " + UI.FormatAsBuildMenuTab("Furniture Tab", global::Action.Plan9);
+				public static LocString TOOLTIP = "My Duplicants would appreciate a place to sleep\n\n" + UI.FormatAsLink("Cots", "COT") + " can be built from the " + UI.FormatAsBuildMenuTab("Furniture Tab", global::Action.Plan9);
 			}
 
 			public class NEEDENERGYSOURCE

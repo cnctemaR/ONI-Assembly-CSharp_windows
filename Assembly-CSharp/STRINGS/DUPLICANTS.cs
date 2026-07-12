@@ -8544,7 +8544,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Calories",
 					UI.PST_KEYWORD,
-					"."
+					" and produces materials"
 				});
 			}
 

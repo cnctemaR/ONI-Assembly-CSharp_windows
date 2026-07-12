@@ -67,10 +67,6 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		{
 			return 0;
 		}
-		if (smi.cavity == null)
-		{
-			return 0;
-		}
 		FishOvercrowdingMonitor.Instance smi2 = smi.GetSMI<FishOvercrowdingMonitor.Instance>();
 		if (smi2 != null)
 		{
@@ -88,6 +84,10 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		}
 		else
 		{
+			if (smi.cavity == null)
+			{
+				return 0;
+			}
 			if (smi.cavity.creatures.Count <= 1)
 			{
 				return 0;

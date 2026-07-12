@@ -1235,6 +1235,32 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that generate power, manufacture equipment, refine resources, and provide other fundamental colony requirements.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString CONFLICTINGROOMS = string.Concat(new string[]
+				{
+					"    • ",
+					UI.FormatAsLink("Latrine", "LATRINE"),
+					"\n    • ",
+					UI.FormatAsLink("Washroom", "PLUMBEDBATHROOM"),
+					"\n    • ",
+					UI.FormatAsLink("Barracks", "BARRACKS"),
+					"\n    • ",
+					UI.FormatAsLink("Luxury Barracks", "BEDROOM"),
+					"\n    • ",
+					UI.FormatAsLink("Private Bedroom", "PRIVATE BEDROOM"),
+					"\n    • ",
+					UI.FormatAsLink("Mess Hall", "MESSHALL"),
+					"\n    • ",
+					UI.FormatAsLink("Great Hall", "GREATHALL"),
+					"\n    • ",
+					UI.FormatAsLink("Massage Clinic", "MASSAGE_CLINIC"),
+					"\n    • ",
+					UI.FormatAsLink("Hospital", "HOSPITAL"),
+					"\n    • ",
+					UI.FormatAsLink("Laboratory", "LABORATORY"),
+					"\n    • ",
+					UI.FormatAsLink("Recreation Room", "REC_ROOM")
+				});
 			}
 
 			public class RECBUILDING
@@ -1244,6 +1270,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that provide essential support for fragile Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Great Hall", "GREATHALL") + " \n    • " + UI.FormatAsLink("Recreation Room", "REC_ROOM");
 			}
 
 			public class CLINIC
@@ -1253,6 +1281,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings designed to help sick Duplicants heal and minimize the spread of " + UI.FormatAsLink("Disease", "DISEASE") + ".";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Hospital", "HOSPITAL");
 			}
 
 			public class WASHSTATION
@@ -1262,6 +1292,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that remove " + UI.FormatAsLink("disease", "DISEASE") + "-spreading germs from Duplicant bodies. Not all wash stations require plumbing.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Latrine", "LATRINE");
 			}
 
 			public class ADVANCEDWASHSTATION
@@ -1271,6 +1303,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that require plumbing in order to remove " + UI.FormatAsLink("disease", "DISEASE") + "-spreading germs from Duplicant bodies.";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Washroom", "PLUMBEDBATHROOM");
 			}
 
 			public class TOILETTYPE
@@ -1280,6 +1314,8 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Buildings that give Duplicants a sanitary and dignified place to conduct essential \"business.\"";
 
 				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Latrine", "LATRINE") + "\n    • " + UI.FormatAsLink("Hospital", "HOSPITAL");
 			}
 
 			public class FLUSHTOILETTYPE
@@ -1332,6 +1368,33 @@ namespace STRINGS
 				public static LocString TITLE = "Light Sources";
 
 				public static LocString DESCRIPTION = "Buildings that produce light, either by design or as a result of their primary operations.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class ROCKETINTERIOR
+			{
+				public static LocString TITLE = "Rocket Interior";
+
+				public static LocString DESCRIPTION = "Buildings that cannot be built anywhere other than inside a rocket.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class CREATURERELOCATOR
+			{
+				public static LocString TITLE = "Critter Relocator";
+
+				public static LocString DESCRIPTION = "Buildings that facilitate the movement of " + UI.FormatAsLink("Critters", "CREATURES") + " from one location to another.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class COOKTOP
+			{
+				public static LocString TITLE = "Cooking Stations";
+
+				public static LocString DESCRIPTION = "Buildings that transform individual ingredients into delicious meals.";
 
 				public static LocString FLAVOUR = "";
 			}

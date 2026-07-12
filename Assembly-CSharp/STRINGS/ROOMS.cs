@@ -303,7 +303,7 @@ namespace STRINGS
 
 			public static class DECORATION
 			{
-				public static LocString NAME = "Decor Item";
+				public static LocString NAME = UI.FormatAsLink("Decor Item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
 			}
 
 			public class CEILING_HEIGHT
@@ -329,33 +329,33 @@ namespace STRINGS
 
 			public class INDUSTRIALMACHINERY
 			{
-				public static LocString NAME = "Industrial Machinery";
+				public static LocString NAME = UI.FormatAsLink("Industrial machinery", "BUILDCATEGORYREQUIREMENTCLASSINDUSTRIALMACHINERY");
 			}
 
 			public class HAS_BED
 			{
-				public static LocString NAME = "One or more beds";
+				public static LocString NAME = "One or more " + UI.FormatAsLink("beds", "BUILDINGCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Requires at least one Cot or Comfy Bed";
 			}
 
 			public class HAS_LUXURY_BED
 			{
-				public static LocString NAME = "One or more Comfy Beds";
+				public static LocString NAME = "One or more " + UI.FormatAsLink("Comfy Beds", "LUXURYBED");
 
 				public static LocString DESCRIPTION = "Requires at least one Comfy Bed";
 			}
 
 			public class LUXURYBEDTYPE
 			{
-				public static LocString NAME = "Single Comfy Bed";
+				public static LocString NAME = "Single " + UI.FormatAsLink("Comfy Bed", "LUXURYBED");
 
 				public static LocString DESCRIPTION = "Must have no more than one Comfy Bed";
 			}
 
 			public class BED_SINGLE
 			{
-				public static LocString NAME = "Single bed";
+				public static LocString NAME = "Single " + UI.FormatAsLink("beds", "BUILDINGCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Must have no more than one Cot or Comfy Bed";
 			}
@@ -369,119 +369,119 @@ namespace STRINGS
 
 			public class NO_COTS
 			{
-				public static LocString NAME = "No Cots";
+				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "COT");
 
 				public static LocString DESCRIPTION = "Room cannot contain a Cot";
 			}
 
 			public class NO_LUXURY_BEDS
 			{
-				public static LocString NAME = "No Comfy Beds";
+				public static LocString NAME = "No " + UI.FormatAsLink("Comfy Beds", "LUXURYBED");
 
 				public static LocString DESCRIPTION = "Room cannot contain a Comfy Bed";
 			}
 
 			public class BEDTYPE
 			{
-				public static LocString NAME = "Beds";
+				public static LocString NAME = UI.FormatAsLink("Beds", "BUILDCATEGORYREQUIREMENTCLASSBEDTYPE");
 
 				public static LocString DESCRIPTION = "Requires two or more Cots or Comfy Beds";
 			}
 
 			public class BUILDING_DECOR_POSITIVE
 			{
-				public static LocString NAME = "Positive decor";
+				public static LocString NAME = "Positive " + UI.FormatAsLink("decor", "BUILDCATEGORYREQUIREMENTCLASSDECORATION");
 
 				public static LocString DESCRIPTION = "Requires at least one building with positive decor";
 			}
 
 			public class DECORATIVE_ITEM
 			{
-				public static LocString NAME = "Decor item ({0})";
+				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION") + " ({0})";
 
 				public static LocString DESCRIPTION = "Requires {0} or more Decor items";
 			}
 
 			public class DECOR20
 			{
-				public static LocString NAME = "Decor item: +{0} Decor";
+				public static LocString NAME = UI.FormatAsLink("Decor item", "BUILDCATEGORYREQUIREMENTCLASSDECORATION") + ": +{0} Decor";
 
 				public static LocString DESCRIPTION = "Requires a decorative item with a minimum Decor value of {0}";
 			}
 
 			public class CLINIC
 			{
-				public static LocString NAME = "Medical equipment";
+				public static LocString NAME = UI.FormatAsLink("Medical equipment", "BUILDCATEGORYREQUIREMENTCLASSCLINIC");
 
 				public static LocString DESCRIPTION = "Requires one or more Sick Bays or Disease Clinics";
 			}
 
 			public class POWERSTATION
 			{
-				public static LocString NAME = "Power Control Station";
+				public static LocString NAME = UI.FormatAsLink("Power Control Station", "POWERCONTROLSTATION");
 
 				public static LocString DESCRIPTION = "Requires a single Power Control Station";
 			}
 
 			public class FARMSTATIONTYPE
 			{
-				public static LocString NAME = "Farm Station";
+				public static LocString NAME = UI.FormatAsLink("Farm Station", "FARMSTATION");
 
 				public static LocString DESCRIPTION = "Requires a single Farm Station";
 			}
 
 			public class CREATURERELOCATOR
 			{
-				public static LocString NAME = "Critter Relocator";
+				public static LocString NAME = UI.FormatAsLink("Critter relocator", "BUILDCATEGORYREQUIREMENTCLASSCREATURERELOCATOR");
 
-				public static LocString DESCRIPTION = "Requires a single Critter Drop-Off";
+				public static LocString DESCRIPTION = "Requires a single Critter Drop-Off or Fish Release";
 			}
 
 			public class CREATURE_FEEDER
 			{
-				public static LocString NAME = "Critter Feeder";
+				public static LocString NAME = UI.FormatAsLink("Critter Feeder", "CREATUREFEEDER");
 
 				public static LocString DESCRIPTION = "Requires a single Critter Feeder";
 			}
 
 			public class RANCHSTATIONTYPE
 			{
-				public static LocString NAME = "Ranching building";
+				public static LocString NAME = UI.FormatAsLink("Ranching building", "BUILDCATEGORYREQUIREMENTCLASSRANCHSTATIONTYPE");
 
-				public static LocString DESCRIPTION = "Requires a single Grooming Station, Critter Condo, Critter Fountain, or Milking Station";
+				public static LocString DESCRIPTION = "Requires a single Grooming Station, Critter Condo, Critter Fountain, Shearing Station or Milking Station";
 			}
 
 			public class SPICESTATION
 			{
-				public static LocString NAME = "Spice Grinder";
+				public static LocString NAME = UI.FormatAsLink("Spice Grinder", "SPICEGRINDER");
 
 				public static LocString DESCRIPTION = "Requires a single Spice Grinder";
 			}
 
 			public class COOKTOP
 			{
-				public static LocString NAME = "Electric Grill or Gas Range";
+				public static LocString NAME = UI.FormatAsLink("Cooking station", "BUILDCATEGORYREQUIREMENTCLASSCOOKTOP");
 
 				public static LocString DESCRIPTION = "Requires a single Electric Grill or Gas Range";
 			}
 
 			public class REFRIGERATOR
 			{
-				public static LocString NAME = "Refrigerator";
+				public static LocString NAME = UI.FormatAsLink("Refrigerator", "REFRIGERATOR");
 
 				public static LocString DESCRIPTION = "Requires a single Refrigerator";
 			}
 
 			public class RECBUILDING
 			{
-				public static LocString NAME = "Recreational building";
+				public static LocString NAME = UI.FormatAsLink("Recreational building", "BUILDCATEGORYREQUIREMENTCLASSRECBUILDING");
 
 				public static LocString DESCRIPTION = "Requires one or more recreational buildings";
 			}
 
 			public class PARK
 			{
-				public static LocString NAME = "Park Sign";
+				public static LocString NAME = UI.FormatAsLink("Park Sign", "PARKSIGN");
 
 				public static LocString DESCRIPTION = "Requires one or more Park Signs";
 			}
@@ -502,42 +502,42 @@ namespace STRINGS
 
 			public class LIGHTSOURCE
 			{
-				public static LocString NAME = "Light source";
+				public static LocString NAME = UI.FormatAsLink("Light source", "BUILDCATEGORYREQUIREMENTCLASSLIGHTSOURCE");
 
 				public static LocString DESCRIPTION = "Requires one or more light sources";
 			}
 
 			public class DESTRESSINGBUILDING
 			{
-				public static LocString NAME = "De-Stressing Building";
+				public static LocString NAME = UI.FormatAsLink("De-Stressing Building", "MASSAGETABLE");
 
-				public static LocString DESCRIPTION = "Requires one or more De-Stressing Building";
+				public static LocString DESCRIPTION = "Requires one or more De-Stressing buildings";
 			}
 
 			public class MASSAGE_TABLE
 			{
-				public static LocString NAME = "Massage Table";
+				public static LocString NAME = UI.FormatAsLink("Massage Table", "MASSAGETABLE");
 
 				public static LocString DESCRIPTION = "Requires one or more Massage Tables";
 			}
 
 			public class MESSTABLE
 			{
-				public static LocString NAME = "Mess Table";
+				public static LocString NAME = UI.FormatAsLink("Mess Table", "DININGTABLE");
 
 				public static LocString DESCRIPTION = "Requires a single Mess Table";
 			}
 
 			public class NO_MESS_STATION
 			{
-				public static LocString NAME = "No Mess Table";
+				public static LocString NAME = "No " + UI.FormatAsLink("Mess Table", "DININGTABLE");
 
 				public static LocString DESCRIPTION = "Cannot contain a Mess Table";
 			}
 
 			public class MESS_STATION_MULTIPLE
 			{
-				public static LocString NAME = "Mess Tables";
+				public static LocString NAME = UI.FormatAsLink("Mess Tables", "DININGTABLE");
 
 				public static LocString DESCRIPTION = "Requires two or more Mess Tables";
 			}
@@ -565,7 +565,7 @@ namespace STRINGS
 
 			public class NO_OUTHOUSES
 			{
-				public static LocString NAME = "No Outhouses";
+				public static LocString NAME = "No " + UI.FormatAsLink("Outhouses", "OUTHOUSE");
 
 				public static LocString DESCRIPTION = "Cannot contain basic Outhouses";
 			}
@@ -586,7 +586,7 @@ namespace STRINGS
 
 			public class NO_INDUSTRIAL_MACHINERY
 			{
-				public static LocString NAME = "No industrial machinery";
+				public static LocString NAME = "No " + UI.FormatAsLink("industrial machinery", "BUILDCATEGORYREQUIREMENTCLASSINDUSTRIALMACHINERY");
 
 				public static LocString DESCRIPTION = "Cannot contain any building labeled Industrial Machinery";
 			}
@@ -621,23 +621,23 @@ namespace STRINGS
 
 			public class SCIENCEBUILDING
 			{
-				public static LocString NAME = "Science building";
+				public static LocString NAME = UI.FormatAsLink("Science building", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING");
 
 				public static LocString DESCRIPTION = "Requires one or more science buildings";
 			}
 
 			public class SCIENCE_BUILDINGS
 			{
-				public static LocString NAME = "Two science buildings";
+				public static LocString NAME = "Two " + UI.FormatAsLink("science buildings", "BUILDCATEGORYREQUIREMENTCLASSSCIENCEBUILDING");
 
 				public static LocString DESCRIPTION = "Requires two or more science buildings";
 			}
 
 			public class ROCKETINTERIOR
 			{
-				public static LocString NAME = "Rocket Interior";
+				public static LocString NAME = UI.FormatAsLink("Rocket interior", "BUILDCATEGORYREQUIREMENTCLASSROCKETINTERIOR");
 
-				public static LocString DESCRIPTION = "Requires to be built inside a rocket";
+				public static LocString DESCRIPTION = "Must be built inside a rocket";
 			}
 		}
 

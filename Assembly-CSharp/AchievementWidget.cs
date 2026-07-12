@@ -47,12 +47,12 @@ public class AchievementWidget : KMonoBehaviour
 		{
 			canvas = base.gameObject.AddComponent<Canvas>();
 		}
-		yield return new WaitForSecondsRealtime(startDelay);
+		yield return SequenceUtil.WaitForSecondsRealtime(startDelay);
 		KScrollRect component = base.transform.parent.parent.GetComponent<KScrollRect>();
 		float num = 1.1f;
 		float num2 = 1f + base.transform.localPosition.y * num / component.content.rect.height;
 		component.SetSmoothAutoScrollTarget(num2);
-		yield return new WaitForSecondsRealtime(0.5f);
+		yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
 		canvas.overrideSorting = true;
 		canvas.sortingOrder = 30;
 		GameObject icon = base.GetComponent<HierarchyReferences>().GetReference<Image>("icon").transform.parent.gameObject;
@@ -89,13 +89,13 @@ public class AchievementWidget : KMonoBehaviour
 				}
 				this.SetAchievedNow();
 			}
-			yield return 0;
+			yield return SequenceUtil.WaitForNextFrame;
 		}
 		icon.transform.localScale = Vector3.one;
 		canvas.overrideSorting = false;
 		for (float i = 0f; i < 0.6f; i += Time.unscaledDeltaTime)
 		{
-			yield return 0;
+			yield return SequenceUtil.WaitForNextFrame;
 		}
 		base.transform.localScale = Vector3.one;
 		yield break;

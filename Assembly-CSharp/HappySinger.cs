@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using UnityEngine;
 
 public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
@@ -64,11 +65,11 @@ public class HappySinger : GameStateMachine<HappySinger, HappySinger.Instance>
 		{
 			if (this.passerbyReactable == null)
 			{
-				this.passerbyReactable = new EmoteReactable(base.gameObject, "WorkPasserbyAcknowledgement", Db.Get().ChoreTypes.Emote, "anim_react_singer_kanim", 5, 5, 0f, 600f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "react",
-					startcb = new Action<GameObject>(this.AddReactionEffect)
-				}).AddThought(Db.Get().Thoughts.CatchyTune).AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
+				EmoteReactable emoteReactable = new EmoteReactable(base.gameObject, "WorkPasserbyAcknowledgement", Db.Get().ChoreTypes.Emote, 5, 5, 0f, 600f, float.PositiveInfinity, 0f);
+				Emote sing = Db.Get().Emotes.Minion.Sing;
+				emoteReactable.SetEmote(sing).SetThought(Db.Get().Thoughts.CatchyTune).AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
+				emoteReactable.RegisterEmoteStepCallbacks("react", new Action<GameObject>(this.AddReactionEffect), null);
+				this.passerbyReactable = emoteReactable;
 			}
 		}
 

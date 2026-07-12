@@ -35,7 +35,7 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 
 		public void SetDirtiness(float dirtiness)
 		{
-			base.sm.dirtiness.Set(dirtiness, this);
+			base.sm.dirtiness.Set(dirtiness, this, false);
 		}
 
 		public bool NeedsShower()

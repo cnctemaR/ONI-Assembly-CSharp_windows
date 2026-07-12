@@ -197,6 +197,16 @@ public static class Util
 		KMonoBehaviour.isPoolPreInit = false;
 	}
 
+	public static T KInstantiate<T>(GameObject original, GameObject parent = null, string name = null) where T : global::UnityEngine.Object
+	{
+		GameObject gameObject = Util.KInstantiate(original, parent, null);
+		if (!(gameObject == null))
+		{
+			return gameObject.GetComponent<T>();
+		}
+		return default(T);
+	}
+
 	public static GameObject KInstantiate(GameObject original, Vector3 position)
 	{
 		return Util.KInstantiate(original, position, Quaternion.identity, null, null, true, 0);
@@ -260,6 +270,7 @@ public static class Util
 				component.InstanceID = KPrefabID.GetUniqueID();
 				KPrefabIDTracker.Get().Register(component);
 			}
+			component.InitializeTags(true);
 			KPrefabID component2 = original.GetComponent<KPrefabID>();
 			component.CopyTags(component2);
 			component.CopyInitFunctions(component2);
@@ -671,6 +682,33 @@ public static class Util
 	public static bool IsNullOrDestroyed(this object obj)
 	{
 		return obj == null || (obj is global::UnityEngine.Object && obj as global::UnityEngine.Object == null);
+	}
+
+	public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> self, out TKey key, out TValue value)
+	{
+		key = self.Key;
+		value = self.Value;
+	}
+
+	public static void Deconstruct<T, U>(this Pair<T, U> self, out T first, out U second)
+	{
+		first = self.first;
+		second = self.second;
+	}
+
+	public static int IntPow(int x, int pow)
+	{
+		int num = 1;
+		while (pow != 0)
+		{
+			if ((pow & 1) == 1)
+			{
+				num *= x;
+			}
+			x *= x;
+			pow >>= 1;
+		}
+		return num;
 	}
 
 	private static HashSet<char> defaultInvalidUserInputChars = new HashSet<char>(Path.GetInvalidPathChars());

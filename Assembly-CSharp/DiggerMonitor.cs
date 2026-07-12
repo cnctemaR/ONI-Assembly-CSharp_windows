@@ -115,8 +115,8 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 			{
 				if (!Grid.HasDoor[cell] && !Grid.Foundation[cell])
 				{
-					byte b = Grid.ElementIdx[cell];
-					Element element = ElementLoader.elements[(int)b];
+					ushort num = Grid.ElementIdx[cell];
+					Element element = ElementLoader.elements[(int)num];
 					return Grid.Element[cell].hardness < 150 && !element.HasTag(GameTags.RefinedMetal);
 				}
 				GameObject gameObject = Grid.Objects[cell, 1];

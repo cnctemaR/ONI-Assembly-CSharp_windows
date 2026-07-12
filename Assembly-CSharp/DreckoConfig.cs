@@ -34,6 +34,7 @@ public class DreckoConfig : IEntityConfig
 		def2.itemDroppedOnShear = DreckoConfig.EMIT_ELEMENT;
 		def2.levelCount = 6;
 		def2.targetAtmosphere = SimHashes.Hydrogen;
+		gameObject.AddTag(GameTags.OriginalCreature);
 		return gameObject;
 	}
 

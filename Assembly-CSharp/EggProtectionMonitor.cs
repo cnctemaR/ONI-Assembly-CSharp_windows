@@ -161,7 +161,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		public void SetEggToGuard(GameObject egg)
 		{
 			this.eggToProtect = egg;
-			base.sm.hasEggToGuard.Set(egg != null, base.smi);
+			base.sm.hasEggToGuard.Set(egg != null, base.smi, false);
 		}
 
 		public void SetMainThreat(GameObject threat)
@@ -319,7 +319,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 			{
 				for (int num = this.start; num != this.end; num++)
 				{
-					if (prefab_ids[num].HasAnyTags(EggProtectionMonitor.Instance.FindEggsTask.EGG_TAG))
+					if (EggProtectionMonitor.Instance.FindEggsTask.EGG_TAG.Contains(prefab_ids[num].PrefabTag))
 					{
 						this.eggs.Add(num);
 					}

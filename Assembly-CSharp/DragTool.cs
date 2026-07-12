@@ -31,13 +31,9 @@ public class DragTool : InterfaceTool
 		KScreenManager.Instance.SetEventSystemEnabled(true);
 		if (KInputManager.currentControllerIsGamepad)
 		{
-			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = false;
+			base.SetCurrentVirtualInputModuleMousMovementMode(false, null);
 		}
-		if (this.areaVisualizerText != Guid.Empty)
-		{
-			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
-			this.areaVisualizerText = Guid.Empty;
-		}
+		this.RemoveCurrentAreaText();
 		base.OnDeactivateTool(new_tool);
 	}
 
@@ -82,15 +78,25 @@ public class DragTool : InterfaceTool
 		this.dragging = true;
 		this.downPos = cursor_pos;
 		this.previousCursorPos = cursor_pos;
+		if (this.currentVirtualInputInUse != null)
+		{
+			this.currentVirtualInputInUse.mouseMovementOnly = false;
+			this.currentVirtualInputInUse = null;
+		}
 		if (!KInputManager.currentControllerIsGamepad)
 		{
 			KScreenManager.Instance.SetEventSystemEnabled(false);
 		}
 		else
 		{
-			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = true;
+			global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
+			base.SetCurrentVirtualInputModuleMousMovementMode(true, delegate(VirtualInputModule module)
+			{
+				this.currentVirtualInputInUse = module;
+			});
 		}
 		this.hasFocus = true;
+		this.RemoveCurrentAreaText();
 		if (this.areaVisualizerTextPrefab != null)
 		{
 			this.areaVisualizerText = NameDisplayScreen.Instance.AddWorldText("", this.areaVisualizerTextPrefab);
@@ -120,12 +126,26 @@ public class DragTool : InterfaceTool
 		}
 	}
 
+	public void RemoveCurrentAreaText()
+	{
+		if (this.areaVisualizerText != Guid.Empty)
+		{
+			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
+			this.areaVisualizerText = Guid.Empty;
+		}
+	}
+
 	public void CancelDragging()
 	{
 		KScreenManager.Instance.SetEventSystemEnabled(true);
+		if (this.currentVirtualInputInUse != null)
+		{
+			this.currentVirtualInputInUse.mouseMovementOnly = false;
+			this.currentVirtualInputInUse = null;
+		}
 		if (KInputManager.currentControllerIsGamepad)
 		{
-			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = false;
+			base.SetCurrentVirtualInputModuleMousMovementMode(false, null);
 		}
 		this.dragAxis = DragTool.DragAxis.Invalid;
 		if (!this.dragging)
@@ -133,11 +153,7 @@ public class DragTool : InterfaceTool
 			return;
 		}
 		this.dragging = false;
-		if (this.areaVisualizerText != Guid.Empty)
-		{
-			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
-			this.areaVisualizerText = Guid.Empty;
-		}
+		this.RemoveCurrentAreaText();
 		if (this.GetMode() == DragTool.Mode.Box && this.areaVisualizer != null)
 		{
 			this.areaVisualizer.SetActive(false);
@@ -146,11 +162,15 @@ public class DragTool : InterfaceTool
 
 	public override void OnLeftClickUp(Vector3 cursor_pos)
 	{
-		cursor_pos = this.ClampPositionToWorld(cursor_pos, ClusterManager.Instance.activeWorld);
 		KScreenManager.Instance.SetEventSystemEnabled(true);
+		if (this.currentVirtualInputInUse != null)
+		{
+			this.currentVirtualInputInUse.mouseMovementOnly = false;
+			this.currentVirtualInputInUse = null;
+		}
 		if (KInputManager.currentControllerIsGamepad)
 		{
-			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = false;
+			base.SetCurrentVirtualInputModuleMousMovementMode(false, null);
 		}
 		this.dragAxis = DragTool.DragAxis.Invalid;
 		if (!this.dragging)
@@ -158,11 +178,8 @@ public class DragTool : InterfaceTool
 			return;
 		}
 		this.dragging = false;
-		if (this.areaVisualizerText != Guid.Empty)
-		{
-			NameDisplayScreen.Instance.RemoveWorldText(this.areaVisualizerText);
-			this.areaVisualizerText = Guid.Empty;
-		}
+		cursor_pos = this.ClampPositionToWorld(cursor_pos, ClusterManager.Instance.activeWorld);
+		this.RemoveCurrentAreaText();
 		if (this.GetMode() == DragTool.Mode.Box && this.areaVisualizer != null)
 		{
 			this.areaVisualizer.SetActive(false);
@@ -507,6 +524,8 @@ public class DragTool : InterfaceTool
 	protected bool canChangeDragAxis = true;
 
 	protected Vector3 downPos;
+
+	private VirtualInputModule currentVirtualInputInUse;
 
 	private enum DragAxis
 	{

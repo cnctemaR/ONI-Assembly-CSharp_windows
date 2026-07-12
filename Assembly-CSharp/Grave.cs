@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		base.GetComponent<Storage>().SetOffsets(Grave.DELIVERY_OFFSETS);
 		Storage component = base.GetComponent<Storage>();
 		Storage storage = component;
-		storage.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(storage.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkEvent));
+		storage.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(storage.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkEvent));
 		KAnimFile anim = Assets.GetAnim("anim_bury_dupe_kanim");
 		int num = 0;
 		KAnim.Anim anim2;
@@ -57,7 +58,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		}
 	}
 
-	private void OnWorkEvent(Workable.WorkableEvent evt)
+	private void OnWorkEvent(Workable workable, Workable.WorkableEvent evt)
 	{
 	}
 
@@ -86,7 +87,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 		public void CreateFetchTask()
 		{
-			this.chore = new FetchChore(Db.Get().ChoreTypes.FetchCritical, base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			this.chore = new FetchChore(Db.Get().ChoreTypes.FetchCritical, base.GetComponent<Storage>(), 1f, new HashSet<Tag> { GameTags.Minion }, FetchChore.MatchCriteria.MatchID, GameTags.Corpse, null, null, true, null, null, null, Operational.State.Operational, 0);
 			this.chore.allowMultifetch = false;
 		}
 

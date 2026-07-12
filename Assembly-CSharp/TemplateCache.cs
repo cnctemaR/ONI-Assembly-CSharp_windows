@@ -50,6 +50,7 @@ public static class TemplateCache
 			{
 				Debug.LogWarning("Missing template [" + text + "]");
 			}
+			templateContainer.name = templatePath;
 			TemplateCache.templates[templatePath] = templateContainer;
 		}
 		return TemplateCache.templates[templatePath];

@@ -8,10 +8,25 @@ public class ChoreTable
 		this.entries = entries;
 	}
 
+	public ref ChoreTable.Entry GetEntry<T>()
+	{
+		ref ChoreTable.Entry ptr = ref ChoreTable.InvalidEntry;
+		for (int i = 0; i < this.entries.Length; i++)
+		{
+			if (this.entries[i].stateMachineDef is T)
+			{
+				ptr = ref this.entries[i];
+				break;
+			}
+		}
+		return ref ptr;
+	}
+
 	public int GetChorePriority<StateMachineType>(ChoreConsumer chore_consumer)
 	{
-		foreach (ChoreTable.Entry entry in this.entries)
+		for (int i = 0; i < this.entries.Length; i++)
 		{
+			ChoreTable.Entry entry = this.entries[i];
 			if (entry.stateMachineDef.GetStateMachineType() == typeof(StateMachineType))
 			{
 				return entry.choreType.priority;
@@ -22,6 +37,8 @@ public class ChoreTable
 	}
 
 	private ChoreTable.Entry[] entries;
+
+	public static ChoreTable.Entry InvalidEntry;
 
 	public class Builder
 	{

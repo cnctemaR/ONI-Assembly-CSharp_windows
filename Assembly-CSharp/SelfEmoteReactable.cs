@@ -3,36 +3,36 @@ using UnityEngine;
 
 public class SelfEmoteReactable : EmoteReactable
 {
-	public SelfEmoteReactable(GameObject gameObject, HashedString id, ChoreType chore_type, HashedString animset, float min_reactable_time = 0f, float min_reactor_time = 20f, float max_trigger_time = float.PositiveInfinity)
-		: base(gameObject, id, chore_type, animset, 3, 3, min_reactable_time, min_reactor_time, max_trigger_time)
+	public SelfEmoteReactable(GameObject gameObject, HashedString id, ChoreType chore_type, float globalCooldown = 0f, float localCooldown = 20f, float lifeSpan = float.PositiveInfinity, float max_initial_delay = 0f)
+		: base(gameObject, id, chore_type, 3, 3, globalCooldown, localCooldown, lifeSpan, max_initial_delay)
 	{
 	}
 
 	public override bool InternalCanBegin(GameObject reactor, Navigator.ActiveTransition transition)
 	{
-		if (reactor == null)
+		if (reactor != this.gameObject)
 		{
 			return false;
 		}
 		Navigator component = reactor.GetComponent<Navigator>();
-		return !(component == null) && component.IsMoving() && this.gameObject == reactor;
+		return !(component == null) && component.IsMoving();
 	}
 
-	public void PairEmote(EmoteChore emote)
+	public void PairEmote(EmoteChore emoteChore)
 	{
-		this.emote = emote;
+		this.chore = emoteChore;
 	}
 
 	protected override void InternalEnd()
 	{
-		if (this.emote != null && this.emote.driver != null)
+		if (this.chore != null && this.chore.driver != null)
 		{
-			this.emote.PairReactable(null);
-			this.emote.Cancel("Reactable ended");
-			this.emote = null;
+			this.chore.PairReactable(null);
+			this.chore.Cancel("Reactable ended");
+			this.chore = null;
 		}
 		base.InternalEnd();
 	}
 
-	private EmoteChore emote;
+	private EmoteChore chore;
 }

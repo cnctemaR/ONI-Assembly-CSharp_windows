@@ -177,11 +177,12 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.DebugInstantBuildMode))
 		{
 			DebugHandler.InstantBuildMode = !DebugHandler.InstantBuildMode;
-			Game.Instance.Trigger(1557339983, null);
+			InterfaceTool.ToggleConfig(global::Action.DebugInstantBuildMode);
 			if (Game.Instance == null)
 			{
 				return;
 			}
+			Game.Instance.Trigger(1557339983, null);
 			if (PlanScreen.Instance != null)
 			{
 				PlanScreen.Instance.Refresh();
@@ -226,7 +227,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0B20;
+					goto IL_0B34;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -235,7 +236,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0B20;
+					goto IL_0B34;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -268,6 +269,7 @@ public class DebugHandler : IInputHandler
 				{
 					SaveGame.Instance.worldGenSpawner.SpawnEverything();
 				}
+				InterfaceTool.ToggleConfig(global::Action.DebugToggle);
 				if (DebugPaintElementScreen.Instance != null)
 				{
 					bool activeSelf = DebugPaintElementScreen.Instance.gameObject.activeSelf;
@@ -340,7 +342,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0B20;
+						goto IL_0B34;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -499,7 +501,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0B20:
+		IL_0B34:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

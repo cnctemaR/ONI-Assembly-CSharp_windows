@@ -37,7 +37,7 @@ public class SuperProductiveFX : GameStateMachine<SuperProductiveFX, SuperProduc
 			: base(master)
 		{
 			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("productive_fx_kanim", master.gameObject.transform.GetPosition() + offset, master.gameObject.transform, true, Grid.SceneLayer.Front, false);
-			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
+			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi, false);
 		}
 
 		public void DestroyFX()

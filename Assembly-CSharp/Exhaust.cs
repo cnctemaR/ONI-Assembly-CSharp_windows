@@ -180,7 +180,7 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 
 	private static Exhaust.EmitDelegate emit_particle = delegate(int cell, PrimaryElement primary_element)
 	{
-		FallingWater.instance.AddParticle(cell, (byte)ElementLoader.elements.IndexOf(primary_element.Element), primary_element.Mass, primary_element.Temperature, primary_element.DiseaseIdx, primary_element.DiseaseCount, true, false, true, false);
+		FallingWater.instance.AddParticle(cell, primary_element.Element.idx, primary_element.Mass, primary_element.Temperature, primary_element.DiseaseIdx, primary_element.DiseaseCount, true, false, true, false);
 	};
 
 	private delegate void EmitDelegate(int cell, PrimaryElement primary_element);

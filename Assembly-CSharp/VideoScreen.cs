@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -98,7 +99,7 @@ public class VideoScreen : KModalScreen
 		base.OnKeyDown(e);
 	}
 
-	public void PlayVideo(VideoClip clip, bool unskippable = false, string overrideAudioSnapshot = "", bool showProceedButton = false)
+	public void PlayVideo(VideoClip clip, bool unskippable = false, EventReference overrideAudioSnapshot = default(EventReference), bool showProceedButton = false)
 	{
 		global::Debug.Assert(clip != null);
 		for (int i = 0; i < this.overlayContainer.childCount; i++)
@@ -107,13 +108,14 @@ public class VideoScreen : KModalScreen
 		}
 		this.Show(true);
 		this.videoPlayer.isLooping = false;
-		this.activeAudioSnapshot = (string.IsNullOrEmpty(overrideAudioSnapshot) ? AudioMixerSnapshots.Get().TutorialVideoPlayingSnapshot : overrideAudioSnapshot);
+		this.activeAudioSnapshot = (overrideAudioSnapshot.IsNull ? AudioMixerSnapshots.Get().TutorialVideoPlayingSnapshot : overrideAudioSnapshot);
 		AudioMixer.instance.Start(this.activeAudioSnapshot);
 		this.DisableAllMedia();
 		this.videoPlayer.gameObject.SetActive(true);
 		this.renderTexture = new RenderTexture(Convert.ToInt32(clip.width), Convert.ToInt32(clip.height), 16);
 		this.screen.texture = this.renderTexture;
 		this.videoPlayer.targetTexture = this.renderTexture;
+		this.videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
 		this.videoPlayer.clip = clip;
 		this.videoPlayer.Play();
 		if (this.audioHandle.isValid())
@@ -163,7 +165,7 @@ public class VideoScreen : KModalScreen
 		for (float i = 0f; i < 1f; i += Time.unscaledDeltaTime)
 		{
 			this.fadeOverlay.color = new Color(color.r, color.g, color.b, i);
-			yield return 0;
+			yield return SequenceUtil.WaitForNextFrame;
 		}
 		this.fadeOverlay.color = new Color(color.r, color.g, color.b, 1f);
 		MusicManager.instance.PlaySong("Music_Victory_03_StoryAndSummary", false);
@@ -175,11 +177,11 @@ public class VideoScreen : KModalScreen
 		this.videoPlayer.isLooping = true;
 		this.videoPlayer.Play();
 		this.proceedButton.gameObject.SetActive(true);
-		yield return new WaitForSecondsRealtime(1f);
+		yield return SequenceUtil.WaitForSecondsRealtime(1f);
 		for (float i = 1f; i >= 0f; i -= Time.unscaledDeltaTime)
 		{
 			this.fadeOverlay.color = new Color(color.r, color.g, color.b, i);
-			yield return 0;
+			yield return SequenceUtil.WaitForNextFrame;
 		}
 		this.fadeOverlay.color = new Color(color.r, color.g, color.b, 0f);
 		yield break;
@@ -190,8 +192,11 @@ public class VideoScreen : KModalScreen
 		this.videoPlayer.Stop();
 		this.screen.texture = null;
 		this.videoPlayer.targetTexture = null;
-		AudioMixer.instance.Stop(this.activeAudioSnapshot, STOP_MODE.ALLOWFADEOUT);
-		this.audioHandle.stop(STOP_MODE.ALLOWFADEOUT);
+		if (!this.activeAudioSnapshot.IsNull)
+		{
+			AudioMixer.instance.Stop(this.activeAudioSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			this.audioHandle.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		}
 		if (this.OnStop != null)
 		{
 			this.OnStop();
@@ -247,7 +252,7 @@ public class VideoScreen : KModalScreen
 
 	private RenderTexture renderTexture;
 
-	private string activeAudioSnapshot;
+	private EventReference activeAudioSnapshot;
 
 	[SerializeField]
 	private Image fadeOverlay;

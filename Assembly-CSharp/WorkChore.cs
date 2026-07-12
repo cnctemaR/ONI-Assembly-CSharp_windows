@@ -72,7 +72,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.worker.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.worker.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 
@@ -139,7 +139,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 			: base(master)
 		{
 			this.overrideAnims = override_anims;
-			base.sm.workable.Set(workable, base.smi);
+			base.sm.workable.Set(workable, base.smi, false);
 		}
 
 		public void EnableAnimOverrides()

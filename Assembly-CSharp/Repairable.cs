@@ -301,8 +301,8 @@ public class Repairable : Workable
 			PrimaryElement component = smi.master.GetComponent<PrimaryElement>();
 			PrimaryElement primaryElement = smi.master.storageProxy.FindPrimaryElement(component.ElementID);
 			float num = component.Mass * 0.1f - ((primaryElement != null) ? primaryElement.Mass : 0f);
-			Tag[] array = new Tag[] { GameTagExtensions.Create(component.ElementID) };
-			return new FetchChore(Db.Get().ChoreTypes.RepairFetch, smi.master.storageProxy, num, array, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+			HashSet<Tag> hashSet = new HashSet<Tag> { GameTagExtensions.Create(component.ElementID) };
+			return new FetchChore(Db.Get().ChoreTypes.RepairFetch, smi.master.storageProxy, num, hashSet, FetchChore.MatchCriteria.MatchID, Tag.Invalid, null, null, true, null, null, null, Operational.State.None, 0);
 		}
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)

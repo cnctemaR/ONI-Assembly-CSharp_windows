@@ -10,6 +10,8 @@ public class EffectPrefabs : MonoBehaviour
 		EffectPrefabs.Instance = this;
 	}
 
+	public GameObject DreamBubble;
+
 	public GameObject ThoughtBubble;
 
 	public GameObject ThoughtBubbleConvo;

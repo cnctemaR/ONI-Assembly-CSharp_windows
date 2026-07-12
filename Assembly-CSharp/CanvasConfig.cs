@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -10,7 +9,7 @@ public class CanvasConfig : IBuildingConfig
 		string text = "Canvas";
 		int num = 2;
 		int num2 = 2;
-		string text2 = "painting_kanim";
+		string text2 = "painting_off_kanim";
 		int num3 = 30;
 		float num4 = 120f;
 		float[] array = new float[] { 400f, 1f };
@@ -42,16 +41,8 @@ public class CanvasConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		Painting painting = go.AddComponent<Painting>();
-		painting.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.CANVAS.NAME, "off", 0, false, Artable.Status.Ready));
-		painting.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.CANVAS.POORQUALITYNAME, "art_a", 5, false, Artable.Status.Ugly));
-		painting.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.CANVAS.AVERAGEQUALITYNAME, "art_b", 10, false, Artable.Status.Okay));
-		painting.stages.Add(new Artable.Stage("Good", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_c", 15, true, Artable.Status.Great));
-		painting.stages.Add(new Artable.Stage("Good2", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_d", 15, true, Artable.Status.Great));
-		painting.stages.Add(new Artable.Stage("Good3", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_e", 15, true, Artable.Status.Great));
-		painting.stages.Add(new Artable.Stage("Good4", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_f", 15, true, Artable.Status.Great));
-		painting.stages.Add(new Artable.Stage("Good5", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_g", 15, true, Artable.Status.Great));
-		painting.stages.Add(new Artable.Stage("Good6", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_h", 15, true, Artable.Status.Great));
+		SymbolOverrideControllerUtil.AddToPrefab(go);
+		go.AddComponent<Painting>().defaultAnimName = "off";
 	}
 
 	public const string ID = "Canvas";

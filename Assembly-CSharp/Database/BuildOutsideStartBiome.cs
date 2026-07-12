@@ -19,7 +19,7 @@ namespace Database
 						WorldDetailSave.OverworldCell overworldCell = clusterDetailSave.overworldCells[i];
 						if (overworldCell.tags != null && !overworldCell.tags.Contains(WorldGenTags.StartWorld) && overworldCell.poly.PointInPolygon(buildingComplete.transform.GetPosition()))
 						{
-							Game.Instance.unlocks.Unlock("buildoutsidestartingbiome");
+							Game.Instance.unlocks.Unlock("buildoutsidestartingbiome", true);
 							return true;
 						}
 					}

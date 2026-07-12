@@ -62,24 +62,24 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 
 		public void RegisterFetchable()
 		{
-			Game.Instance.Trigger(-1588644844, base.gameObject);
 			this.fetchable = Game.Instance.fetchManager.Add(this.pickupable);
+			Game.Instance.Trigger(-1588644844, base.gameObject);
 		}
 
 		public void UnregisterFetchable()
 		{
+			Game.Instance.fetchManager.Remove(base.smi.pickupable.KPrefabID.PrefabID(), this.fetchable);
 			Game.Instance.Trigger(-1491270284, base.gameObject);
-			Game.Instance.fetchManager.Remove(base.smi.pickupable.PrefabID(), this.fetchable);
 		}
 
 		public void SetForceUnfetchable(bool is_unfetchable)
 		{
-			base.sm.forceUnfetchable.Set(is_unfetchable, base.smi);
+			base.sm.forceUnfetchable.Set(is_unfetchable, base.smi, false);
 		}
 
 		public bool IsFetchable()
 		{
-			return !base.sm.forceUnfetchable.Get(this) && !this.pickupable.IsEntombed && this.pickupable.IsReachable() && (!(this.equippable != null) || !this.equippable.isEquipped) && !this.pickupable.HasTag(GameTags.StoredPrivate) && !this.pickupable.HasTag(GameTags.Creatures.ReservedByCreature);
+			return !base.sm.forceUnfetchable.Get(this) && !this.pickupable.IsEntombed && this.pickupable.IsReachable() && (!(this.equippable != null) || !this.equippable.isEquipped) && !this.pickupable.KPrefabID.HasTag(GameTags.StoredPrivate) && !this.pickupable.KPrefabID.HasTag(GameTags.Creatures.ReservedByCreature);
 		}
 
 		public Pickupable pickupable;

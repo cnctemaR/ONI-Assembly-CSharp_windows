@@ -303,6 +303,24 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return gameObject;
 	}
 
+	public PrimaryElement AddElement(SimHashes element, float mass, float temperature, byte disease_idx, int disease_count, bool keep_zero_mass = false, bool do_disease_transfer = true)
+	{
+		Element element2 = ElementLoader.FindElementByHash(element);
+		if (element2.IsGas)
+		{
+			return this.AddGasChunk(element, mass, temperature, disease_idx, disease_count, keep_zero_mass, do_disease_transfer);
+		}
+		if (element2.IsLiquid)
+		{
+			return this.AddLiquid(element, mass, temperature, disease_idx, disease_count, keep_zero_mass, do_disease_transfer);
+		}
+		if (element2.IsSolid)
+		{
+			return this.AddOre(element, mass, temperature, disease_idx, disease_count, keep_zero_mass, do_disease_transfer);
+		}
+		return null;
+	}
+
 	public PrimaryElement AddOre(SimHashes element, float mass, float temperature, byte disease_idx, int disease_count, bool keep_zero_mass = false, bool do_disease_transfer = true)
 	{
 		if (mass <= 0f)
@@ -435,26 +453,6 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 			}
 		}
 		return false;
-	}
-
-	public List<GameObject> FindSome(Tag tag, float amount)
-	{
-		float num = amount;
-		List<GameObject> list = new List<GameObject>();
-		ListPool<GameObject, Storage>.PooledList pooledList = ListPool<GameObject, Storage>.Allocate();
-		this.Find(tag, pooledList);
-		foreach (GameObject gameObject in pooledList)
-		{
-			Pickupable component = gameObject.GetComponent<Pickupable>();
-			if (component)
-			{
-				Pickupable pickupable = component.Take(num);
-				num -= pickupable.GetComponent<PrimaryElement>().Mass;
-				list.Add(pickupable.gameObject);
-			}
-		}
-		pooledList.Recycle();
-		return list;
 	}
 
 	public bool DropSome(Tag tag, float amount, bool ventGas = false, bool dumpLiquid = false, Vector3 offset = default(Vector3), bool doDiseaseTransfer = true, bool showInWorldNotification = false)
@@ -605,31 +603,40 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		pooledList.Recycle();
 	}
 
-	public void DropUnlessHasTags(TagBits any_tags, TagBits required_tags, TagBits forbidden_tags, bool do_disease_transfer = true, bool dumpElements = false)
+	public void DropUnlessMatching(FetchChore chore)
 	{
 		for (int i = 0; i < this.items.Count; i++)
 		{
 			if (!(this.items[i] == null))
 			{
 				KPrefabID component = this.items[i].GetComponent<KPrefabID>();
-				if (!component.HasAnyTags(ref any_tags) || !component.HasAllTags(ref required_tags) || component.HasAnyTags(ref forbidden_tags))
+				if (!(((chore.criteria == FetchChore.MatchCriteria.MatchID && chore.tags.Contains(component.PrefabTag)) || (chore.criteria == FetchChore.MatchCriteria.MatchTags && component.HasTag(chore.tagsFirst))) & (!chore.requiredTag.IsValid || component.HasTag(chore.requiredTag)) & !component.HasAnyTags(chore.forbiddenTags)))
 				{
 					GameObject gameObject = this.items[i];
 					this.items.RemoveAt(i);
 					i--;
-					if (do_disease_transfer)
-					{
-						this.TransferDiseaseWithObject(gameObject);
-					}
+					this.TransferDiseaseWithObject(gameObject);
 					this.MakeWorldActive(gameObject);
-					if (dumpElements)
-					{
-						Dumpable component2 = gameObject.GetComponent<Dumpable>();
-						if (component2 != null)
-						{
-							component2.Dump(base.transform.GetPosition());
-						}
-					}
+				}
+			}
+		}
+	}
+
+	public void DropUnlessHasTag(Tag tag)
+	{
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			if (!(this.items[i] == null) && !this.items[i].GetComponent<KPrefabID>().HasTag(tag))
+			{
+				GameObject gameObject = this.items[i];
+				this.items.RemoveAt(i);
+				i--;
+				this.TransferDiseaseWithObject(gameObject);
+				this.MakeWorldActive(gameObject);
+				Dumpable component = gameObject.GetComponent<Dumpable>();
+				if (component != null)
+				{
+					component.Dump(base.transform.GetPosition());
 				}
 			}
 		}
@@ -637,22 +644,23 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	public GameObject Drop(GameObject go, bool do_disease_transfer = true)
 	{
-		if (go != null)
+		if (go == null)
 		{
-			int count = this.items.Count;
-			for (int i = 0; i < count; i++)
+			return null;
+		}
+		int count = this.items.Count;
+		for (int i = 0; i < count; i++)
+		{
+			if (!(go != this.items[i]))
 			{
-				if (go == this.items[i])
+				this.items[i] = this.items[count - 1];
+				this.items.RemoveAt(count - 1);
+				if (do_disease_transfer)
 				{
-					this.items[i] = this.items[count - 1];
-					this.items.RemoveAt(count - 1);
-					if (do_disease_transfer)
-					{
-						this.TransferDiseaseWithObject(go);
-					}
-					this.MakeWorldActive(go);
-					break;
+					this.TransferDiseaseWithObject(go);
 				}
+				this.MakeWorldActive(go);
+				break;
 			}
 		}
 		return go;
@@ -763,18 +771,15 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return primaryElement;
 	}
 
-	public List<Tag> GetAllTagsInStorage()
+	public HashSet<Tag> GetAllIDsInStorage()
 	{
-		List<Tag> list = new List<Tag>();
+		HashSet<Tag> hashSet = new HashSet<Tag>();
 		for (int i = 0; i < this.items.Count; i++)
 		{
 			GameObject gameObject = this.items[i];
-			if (!list.Contains(gameObject.PrefabID()))
-			{
-				list.Add(gameObject.PrefabID());
-			}
+			hashSet.Add(gameObject.PrefabID());
 		}
-		return list;
+		return hashSet;
 	}
 
 	public GameObject Find(int ID)
@@ -792,9 +797,17 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 
 	public void ConsumeAllIgnoringDisease()
 	{
+		this.ConsumeAllIgnoringDisease(Tag.Invalid);
+	}
+
+	public void ConsumeAllIgnoringDisease(Tag tag)
+	{
 		for (int i = this.items.Count - 1; i >= 0; i--)
 		{
-			this.ConsumeIgnoringDisease(this.items[i]);
+			if (!(tag != Tag.Invalid) || this.items[i].HasTag(tag))
+			{
+				this.ConsumeIgnoringDisease(this.items[i]);
+			}
 		}
 	}
 
@@ -1146,23 +1159,6 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return num;
 	}
 
-	public bool IsMaterialOnStorage(Tag tag, ref float amount)
-	{
-		foreach (GameObject gameObject in this.items)
-		{
-			if (gameObject != null)
-			{
-				Pickupable component = gameObject.GetComponent<Pickupable>();
-				if (component != null && component.GetComponent<KPrefabID>().HasTag(tag))
-				{
-					amount = component.TotalAmount;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> descriptors = base.GetDescriptors(go);
@@ -1246,7 +1242,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		}
 	}
 
-	private void OnCopySettings(object data)
+	protected virtual void OnCopySettings(object data)
 	{
 		Storage component = ((GameObject)data).GetComponent<Storage>();
 		if (component != null)
@@ -1427,6 +1423,8 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	public bool showCapacityAsMainStatus;
 
 	public bool showUnreachableStatus;
+
+	public bool showSideScreenTitleBar;
 
 	public bool useWideOffsets;
 

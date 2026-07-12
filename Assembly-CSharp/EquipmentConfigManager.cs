@@ -37,6 +37,7 @@ public class EquipmentConfigManager : KMonoBehaviour
 			RepairableEquipment repairableEquipment = gameObject2.AddComponent<RepairableEquipment>();
 			repairableEquipment.def = equipmentDef;
 			global::Debug.Assert(repairableEquipment.def != null);
+			SymbolOverrideControllerUtil.AddToPrefab(gameObject2);
 			foreach (Tag tag in equipmentDef.AdditionalTags)
 			{
 				gameObject2.GetComponent<KPrefabID>().AddTag(tag, false);

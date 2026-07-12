@@ -34,6 +34,10 @@ public class EditableTitleBar : TitleBar
 			if (target.GetComponent<MinionBrain>() != null)
 			{
 				this.editNameButton.GetComponent<ToolTip>().toolTip = UI.TOOLTIPS.EDITNAME;
+			}
+			if (target.GetComponent<ClustercraftExteriorDoor>() != null || target.GetComponent<CommandModule>() != null)
+			{
+				this.editNameButton.GetComponent<ToolTip>().toolTip = UI.TOOLTIPS.EDITNAMEROCKET;
 				return;
 			}
 			this.editNameButton.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.EDITNAMEGENERIC, target.GetProperName());
@@ -70,7 +74,7 @@ public class EditableTitleBar : TitleBar
 		{
 			int num = i;
 			i = num + 1;
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 		}
 		this.EnableEditButtonClick();
 		if (this.randomNameButton != null)
@@ -82,7 +86,7 @@ public class EditableTitleBar : TitleBar
 
 	private IEnumerator PreToggleNameEditingRoutine()
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		this.ToggleNameEditing();
 		this.preToggleNameEditing = null;
 		yield break;

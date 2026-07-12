@@ -5,9 +5,9 @@ namespace Klei.AI
 {
 	public class PeriodicEmoteSickness : Sickness.SicknessComponent
 	{
-		public PeriodicEmoteSickness(HashedString kanim, HashedString[] anims, float cooldown)
+		public PeriodicEmoteSickness(Emote emote, float cooldown)
 		{
-			this.anims = anims;
+			this.emote = emote;
 			this.cooldown = cooldown;
 		}
 
@@ -23,7 +23,7 @@ namespace Klei.AI
 			((PeriodicEmoteSickness.StatesInstance)instance_data).StopSM("Cured");
 		}
 
-		private HashedString[] anims;
+		private Emote emote;
 
 		private float cooldown;
 
@@ -37,15 +37,7 @@ namespace Klei.AI
 
 			public Reactable GetReactable()
 			{
-				SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, "PeriodicEmoteSickness", Db.Get().ChoreTypes.Emote, "anim_sneeze_kanim", 0f, this.periodicEmoteSickness.cooldown, float.PositiveInfinity);
-				foreach (HashedString hashedString in this.periodicEmoteSickness.anims)
-				{
-					selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
-					{
-						anim = hashedString
-					});
-				}
-				return selfEmoteReactable;
+				return new SelfEmoteReactable(base.master.gameObject, "PeriodicEmoteSickness", Db.Get().ChoreTypes.Emote, 0f, this.periodicEmoteSickness.cooldown, float.PositiveInfinity, 0f).SetEmote(this.periodicEmoteSickness.emote).SetOverideAnimSet("anim_sneeze_kanim");
 			}
 
 			public PeriodicEmoteSickness periodicEmoteSickness;

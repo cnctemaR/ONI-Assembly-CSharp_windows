@@ -15,7 +15,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 			SocialGatheringPointWorkable socialGatheringPointWorkable = ChoreHelpers.CreateLocator("SocialGatheringPointWorkable", vector).AddOrGet<SocialGatheringPointWorkable>();
 			socialGatheringPointWorkable.basePriority = this.basePriority;
 			socialGatheringPointWorkable.specificEffect = this.socialEffect;
-			socialGatheringPointWorkable.OnWorkableEventCB = new Action<Workable.WorkableEvent>(this.OnWorkableEvent);
+			socialGatheringPointWorkable.OnWorkableEventCB = new Action<Workable, Workable.WorkableEvent>(this.OnWorkableEvent);
 			socialGatheringPointWorkable.SetWorkTime(this.workTime);
 			this.workables[i] = socialGatheringPointWorkable;
 		}
@@ -71,7 +71,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 		}
 	}
 
-	private void OnWorkableEvent(Workable.WorkableEvent workable_event)
+	private void OnWorkableEvent(Workable workable, Workable.WorkableEvent workable_event)
 	{
 		if (workable_event == Workable.WorkableEvent.WorkStarted)
 		{

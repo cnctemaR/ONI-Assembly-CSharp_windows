@@ -30,10 +30,10 @@ public class TravellingCargoLander : GameStateMachine<TravellingCargoLander, Tra
 		}).GoTo(this.landing.landing);
 		this.landing.Enter(delegate(TravellingCargoLander.StatesInstance smi)
 		{
-			this.isLanding.Set(true, smi);
+			this.isLanding.Set(true, smi, false);
 		}).Exit(delegate(TravellingCargoLander.StatesInstance smi)
 		{
-			this.isLanding.Set(false, smi);
+			this.isLanding.Set(false, smi, false);
 		});
 		this.landing.landing.PlayAnim("landing", KAnim.PlayMode.Loop).Enter(delegate(TravellingCargoLander.StatesInstance smi)
 		{
@@ -55,7 +55,7 @@ public class TravellingCargoLander : GameStateMachine<TravellingCargoLander, Tra
 			})
 			.Enter(delegate(TravellingCargoLander.StatesInstance smi)
 			{
-				this.isLanded.Set(true, smi);
+				this.isLanded.Set(true, smi, false);
 			});
 		this.grounded.loaded.PlayAnim("grounded").ParamTransition<bool>(this.hasCargo, this.grounded.empty, GameStateMachine<TravellingCargoLander, TravellingCargoLander.StatesInstance, IStateMachineTarget, TravellingCargoLander.Def>.IsFalse).OnSignal(this.emptyCargo, this.grounded.emptying)
 			.Enter(delegate(TravellingCargoLander.StatesInstance smi)
@@ -128,7 +128,7 @@ public class TravellingCargoLander : GameStateMachine<TravellingCargoLander, Tra
 		{
 			base.GetComponent<BallisticClusterGridEntity>().Configure(source, destination);
 			int asteroidWorldIdAtLocation = ClusterUtil.GetAsteroidWorldIdAtLocation(destination);
-			base.sm.destinationWorld.Set(asteroidWorldIdAtLocation, this);
+			base.sm.destinationWorld.Set(asteroidWorldIdAtLocation, this, false);
 			this.GoTo(base.sm.travel);
 		}
 
@@ -213,7 +213,7 @@ public class TravellingCargoLander : GameStateMachine<TravellingCargoLander, Tra
 			}
 			if (flag != base.sm.hasCargo.Get(this))
 			{
-				base.sm.hasCargo.Set(flag, this);
+				base.sm.hasCargo.Set(flag, this, false);
 			}
 			return flag;
 		}

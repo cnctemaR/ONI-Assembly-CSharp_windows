@@ -55,17 +55,17 @@ public class AirFilterConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("Filter"), 0.13333334f),
-			new ElementConverter.ConsumedElement(new Tag("ContaminatedOxygen"), 0.1f)
+			new ElementConverter.ConsumedElement(new Tag("Filter"), 0.13333334f, true),
+			new ElementConverter.ConsumedElement(new Tag("ContaminatedOxygen"), 0.1f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.14333335f, SimHashes.Clay, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.089999996f, SimHashes.Oxygen, 0f, false, false, 0f, 0f, 0.75f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.14333335f, SimHashes.Clay, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0, true),
+			new ElementConverter.OutputElement(0.089999996f, SimHashes.Oxygen, 0f, false, false, 0f, 0f, 0.75f, byte.MaxValue, 0, true)
 		};
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("Filter");
+		manualDeliveryKG.RequestedItemTag = new Tag("Filter");
 		manualDeliveryKG.capacity = 320.00003f;
 		manualDeliveryKG.refillMass = 32.000004f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;

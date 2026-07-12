@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 
 namespace Database
@@ -13,12 +14,14 @@ namespace Database
 				{
 					if (plantablePlot.Occupant != null)
 					{
-						Tag[] possibleDepositObjectTags = plantablePlot.possibleDepositObjectTags;
-						for (int i = 0; i < possibleDepositObjectTags.Length; i++)
+						using (IEnumerator<Tag> enumerator3 = plantablePlot.possibleDepositObjectTags.GetEnumerator())
 						{
-							if (possibleDepositObjectTags[i] != GameTags.DecorSeed)
+							while (enumerator3.MoveNext())
 							{
-								return false;
+								if (enumerator3.Current != GameTags.DecorSeed)
+								{
+									return false;
+								}
 							}
 						}
 					}

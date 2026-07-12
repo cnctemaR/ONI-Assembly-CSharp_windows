@@ -14,7 +14,7 @@ public class BalloonArtist : GameStateMachine<BalloonArtist, BalloonArtist.Insta
 			.Exit(delegate(BalloonArtist.Instance smi)
 			{
 				smi.numBalloonsGiven = 0;
-				this.balloonsGivenOut.Set(0, smi);
+				this.balloonsGivenOut.Set(0, smi, false);
 			});
 		this.overjoyed.idle.Enter(delegate(BalloonArtist.Instance smi)
 		{
@@ -55,7 +55,7 @@ public class BalloonArtist : GameStateMachine<BalloonArtist, BalloonArtist.Insta
 		[OnDeserialized]
 		private void OnDeserialized()
 		{
-			base.smi.sm.balloonsGivenOut.Set(this.numBalloonsGiven, base.smi);
+			base.smi.sm.balloonsGivenOut.Set(this.numBalloonsGiven, base.smi, false);
 		}
 
 		public bool IsRecTime()
@@ -66,7 +66,7 @@ public class BalloonArtist : GameStateMachine<BalloonArtist, BalloonArtist.Insta
 		public void GiveBalloon()
 		{
 			this.numBalloonsGiven++;
-			base.smi.sm.balloonsGivenOut.Set(this.numBalloonsGiven, base.smi);
+			base.smi.sm.balloonsGivenOut.Set(this.numBalloonsGiven, base.smi, false);
 		}
 
 		public void ExitJoyReactionEarly()

@@ -12,9 +12,9 @@ namespace FMODUnity
 			for (int i = 0; i < this.Emitters.Length; i++)
 			{
 				EmitterRef emitterRef = this.Emitters[i];
-				if (emitterRef.Target != null && !string.IsNullOrEmpty(emitterRef.Target.Event))
+				if (emitterRef.Target != null && !emitterRef.Target.EventReference.IsNull)
 				{
-					EventDescription eventDescription = RuntimeManager.GetEventDescription(emitterRef.Target.Event);
+					EventDescription eventDescription = RuntimeManager.GetEventDescription(emitterRef.Target.EventReference);
 					if (eventDescription.isValid())
 					{
 						for (int j = 0; j < this.Emitters[i].Params.Length; j++)

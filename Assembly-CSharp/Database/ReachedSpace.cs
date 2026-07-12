@@ -39,7 +39,7 @@ namespace Database
 					{
 						if (this.destinationType == Db.Get().SpaceDestinationTypes.Wormhole)
 						{
-							Game.Instance.unlocks.Unlock("temporaltear");
+							Game.Instance.unlocks.Unlock("temporaltear", true);
 						}
 						return true;
 					}

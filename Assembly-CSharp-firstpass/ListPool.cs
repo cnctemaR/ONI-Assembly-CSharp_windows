@@ -30,11 +30,16 @@ public static class ListPool<ObjectType, PoolIdentifier>
 	private static ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier> pool = new ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier>();
 
 	[DebuggerDisplay("Count={Count}")]
-	public class PooledList : List<ObjectType>
+	public class PooledList : List<ObjectType>, IDisposable
 	{
 		public void Recycle()
 		{
 			ListPool<ObjectType, PoolIdentifier>.Free(this);
+		}
+
+		public void Dispose()
+		{
+			this.Recycle();
 		}
 	}
 }

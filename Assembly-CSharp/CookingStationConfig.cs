@@ -43,6 +43,7 @@ public class CookingStationConfig : IBuildingConfig
 		this.ConfigureRecipes();
 		go.AddOrGetDef<PoweredController.Def>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, cookingStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.CookTop, false);
 	}
 
 	private void ConfigureRecipes()

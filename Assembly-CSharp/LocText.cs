@@ -144,142 +144,21 @@ public class LocText : TextMeshProUGUI
 			}
 			return m.Value;
 		});
-		if (text2.Contains('\\'))
+		text = "\\(ClickType/(\\w+)\\)";
+		return Regex.Replace(text2, text, delegate(Match m)
 		{
-			string[] array = text2.Split(new char[] { '\\' });
-			string text3 = string.Empty;
-			if (array.Length >= 3)
+			string value2 = m.Groups[1].Value;
+			Pair<string, string> pair;
+			if (!LocText.ClickLookup.TryGetValue(value2, out pair))
 			{
-				for (int i = 0; i < array.Length; i++)
-				{
-					if (i % 2 == 0)
-					{
-						text3 += array[i];
-					}
-					else if (KInputManager.currentControllerIsGamepad)
-					{
-						if (Enum.TryParse<UI.ClickType>(array[i], out LocText.clickCache))
-						{
-							switch (LocText.clickCache)
-							{
-							case UI.ClickType.Click:
-								text3 += UI.CONTROLS.PRESS;
-								break;
-							case UI.ClickType.Clicked:
-								text3 += UI.CONTROLS.PRESSED;
-								break;
-							case UI.ClickType.Clicking:
-								text3 += UI.CONTROLS.PRESSING;
-								break;
-							case UI.ClickType.Clickable:
-								text3 += UI.CONTROLS.PRESSABLE;
-								break;
-							case UI.ClickType.Clicks:
-								text3 += UI.CONTROLS.PRESSES;
-								break;
-							case UI.ClickType.click:
-								text3 += UI.CONTROLS.PRESSLOWER;
-								break;
-							case UI.ClickType.clicked:
-								text3 += UI.CONTROLS.PRESSEDLOWER;
-								break;
-							case UI.ClickType.clicking:
-								text3 += UI.CONTROLS.PRESSINGLOWER;
-								break;
-							case UI.ClickType.clickable:
-								text3 += UI.CONTROLS.PRESSABLELOWER;
-								break;
-							case UI.ClickType.clicks:
-								text3 += UI.CONTROLS.PRESSESLOWER;
-								break;
-							case UI.ClickType.CLICK:
-								text3 += UI.CONTROLS.PRESSUPPER;
-								break;
-							case UI.ClickType.CLICKED:
-								text3 += UI.CONTROLS.PRESSEDUPPER;
-								break;
-							case UI.ClickType.CLICKING:
-								text3 += UI.CONTROLS.PRESSINGUPPER;
-								break;
-							case UI.ClickType.CLICKABLE:
-								text3 += UI.CONTROLS.PRESSABLEUPPER;
-								break;
-							case UI.ClickType.CLICKS:
-								text3 += UI.CONTROLS.PRESSESUPPER;
-								break;
-							default:
-								text3 += array[i];
-								break;
-							}
-						}
-						else
-						{
-							text3 += array[i];
-						}
-					}
-					else if (Enum.TryParse<UI.ClickType>(array[i], out LocText.clickCache))
-					{
-						switch (LocText.clickCache)
-						{
-						case UI.ClickType.Click:
-							text3 += UI.CONTROLS.CLICK;
-							break;
-						case UI.ClickType.Clicked:
-							text3 += UI.CONTROLS.CLICKED;
-							break;
-						case UI.ClickType.Clicking:
-							text3 += UI.CONTROLS.CLICKING;
-							break;
-						case UI.ClickType.Clickable:
-							text3 += UI.CONTROLS.CLICKABLE;
-							break;
-						case UI.ClickType.Clicks:
-							text3 += UI.CONTROLS.CLICKS;
-							break;
-						case UI.ClickType.click:
-							text3 += UI.CONTROLS.CLICKLOWER;
-							break;
-						case UI.ClickType.clicked:
-							text3 += UI.CONTROLS.CLICKEDLOWER;
-							break;
-						case UI.ClickType.clicking:
-							text3 += UI.CONTROLS.CLICKINGLOWER;
-							break;
-						case UI.ClickType.clickable:
-							text3 += UI.CONTROLS.CLICKABLELOWER;
-							break;
-						case UI.ClickType.clicks:
-							text3 += UI.CONTROLS.CLICKSLOWER;
-							break;
-						case UI.ClickType.CLICK:
-							text3 += UI.CONTROLS.CLICKUPPER;
-							break;
-						case UI.ClickType.CLICKED:
-							text3 += UI.CONTROLS.CLICKEDUPPER;
-							break;
-						case UI.ClickType.CLICKING:
-							text3 += UI.CONTROLS.CLICKINGUPPER;
-							break;
-						case UI.ClickType.CLICKABLE:
-							text3 += UI.CONTROLS.CLICKABLEUPPER;
-							break;
-						case UI.ClickType.CLICKS:
-							text3 += UI.CONTROLS.CLICKSUPPER;
-							break;
-						default:
-							text3 += array[i];
-							break;
-						}
-					}
-					else
-					{
-						text3 += array[i];
-					}
-				}
-				text2 = text3;
+				return m.Value;
 			}
-		}
-		return text2;
+			if (KInputManager.currentControllerIsGamepad)
+			{
+				return pair.first;
+			}
+			return pair.second;
+		});
 	}
 
 	private void RefreshText()
@@ -352,12 +231,74 @@ public class LocText : TextMeshProUGUI
 
 	private string originalString = string.Empty;
 
-	private static UI.ClickType clickCache = UI.ClickType.click;
-
 	[SerializeField]
 	private bool allowLinksInternal;
 
 	private static readonly Dictionary<string, global::Action> ActionLookup = Enum.GetNames(typeof(global::Action)).ToDictionary<string, string, global::Action>((string x) => x, (string x) => (global::Action)Enum.Parse(typeof(global::Action), x), StringComparer.OrdinalIgnoreCase);
+
+	private static readonly Dictionary<string, Pair<string, string>> ClickLookup = new Dictionary<string, Pair<string, string>>
+	{
+		{
+			UI.ClickType.Click.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESS, UI.CONTROLS.CLICK)
+		},
+		{
+			UI.ClickType.Clickable.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSABLE, UI.CONTROLS.CLICKABLE)
+		},
+		{
+			UI.ClickType.Clicked.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSED, UI.CONTROLS.CLICKED)
+		},
+		{
+			UI.ClickType.Clicking.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSING, UI.CONTROLS.CLICKING)
+		},
+		{
+			UI.ClickType.Clicks.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSES, UI.CONTROLS.CLICKS)
+		},
+		{
+			UI.ClickType.click.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSLOWER, UI.CONTROLS.CLICKLOWER)
+		},
+		{
+			UI.ClickType.clickable.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSABLELOWER, UI.CONTROLS.CLICKABLELOWER)
+		},
+		{
+			UI.ClickType.clicked.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSEDLOWER, UI.CONTROLS.CLICKEDLOWER)
+		},
+		{
+			UI.ClickType.clicking.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSINGLOWER, UI.CONTROLS.CLICKINGLOWER)
+		},
+		{
+			UI.ClickType.clicks.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSESLOWER, UI.CONTROLS.CLICKSLOWER)
+		},
+		{
+			UI.ClickType.CLICK.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSUPPER, UI.CONTROLS.CLICKUPPER)
+		},
+		{
+			UI.ClickType.CLICKABLE.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSABLEUPPER, UI.CONTROLS.CLICKABLEUPPER)
+		},
+		{
+			UI.ClickType.CLICKED.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSEDUPPER, UI.CONTROLS.CLICKEDUPPER)
+		},
+		{
+			UI.ClickType.CLICKING.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSINGUPPER, UI.CONTROLS.CLICKINGUPPER)
+		},
+		{
+			UI.ClickType.CLICKS.ToString(),
+			new Pair<string, string>(UI.CONTROLS.PRESSESUPPER, UI.CONTROLS.CLICKSUPPER)
+		}
+	};
 
 	private const string linkPrefix_open = "<link=\"";
 

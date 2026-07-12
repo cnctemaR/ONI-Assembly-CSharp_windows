@@ -47,12 +47,12 @@ namespace ProcGenGame
 								if (Grid.IsValidCell(num) && !hashSet.Contains(num))
 								{
 									hashSet.Add(num);
-									byte b = (byte)ElementLoader.GetElementIndex(cell.element);
+									ushort elementIndex = ElementLoader.GetElementIndex(cell.element);
 									float temperature = cell.temperature;
 									float mass = cell.mass;
 									byte index = WorldGen.diseaseStats.GetIndex(cell.diseaseName);
 									int diseaseCount = cell.diseaseCount;
-									SimMessages.ModifyCell(num, (int)b, temperature, mass, index, diseaseCount, SimMessages.ReplaceType.Replace, false, -1);
+									SimMessages.ModifyCell(num, elementIndex, temperature, mass, index, diseaseCount, SimMessages.ReplaceType.Replace, false, -1);
 								}
 							}
 						}

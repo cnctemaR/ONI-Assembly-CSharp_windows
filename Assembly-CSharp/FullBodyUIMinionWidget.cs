@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class FullBodyUIMinionWidget : KMonoBehaviour
 {
+	public KBatchedAnimController animController { get; private set; }
+
 	protected override void OnSpawn()
 	{
 		this.TrySpawnDisplayMinion();
@@ -137,8 +139,6 @@ public class FullBodyUIMinionWidget : KMonoBehaviour
 
 	[SerializeField]
 	private GameObject duplicantAnimAnchor;
-
-	private KBatchedAnimController animController;
 
 	public const float UI_MINION_PORTRAIT_ANIM_SCALE = 0.38f;
 

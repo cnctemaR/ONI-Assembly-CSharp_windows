@@ -87,7 +87,7 @@ public class WorldDamage : KMonoBehaviour
 							if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Mass[num5] <= 100f)) && (Grid.Properties[num5] & 2) == 0 && !this.spawnTimes.ContainsKey(num5))
 							{
 								this.spawnTimes[num5] = Time.realtimeSinceStartup;
-								int idx = (int)element.idx;
+								ushort idx = element.idx;
 								float num6 = Grid.Temperature[src_cell];
 								base.StartCoroutine(this.DelayedSpawnFX(src_cell, num5, num4, element, idx, num6));
 							}
@@ -104,7 +104,7 @@ public class WorldDamage : KMonoBehaviour
 		go.DeleteObject();
 	}
 
-	private IEnumerator DelayedSpawnFX(int src_cell, int dest_cell, int offset, Element elem, int idx, float temperature)
+	private IEnumerator DelayedSpawnFX(int src_cell, int dest_cell, int offset, Element elem, ushort idx, float temperature)
 	{
 		float num = global::UnityEngine.Random.value * 0.25f;
 		yield return new WaitForSeconds(num);
@@ -121,7 +121,7 @@ public class WorldDamage : KMonoBehaviour
 			component.enabled = false;
 			component.enabled = true;
 			gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.right * 0.5f);
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
+			FallingWater.instance.AddParticle(dest_cell, idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		else if (offset == Grid.WidthInCells)
 		{
@@ -137,7 +137,7 @@ public class WorldDamage : KMonoBehaviour
 			component.enabled = false;
 			component.enabled = true;
 			gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
+			FallingWater.instance.AddParticle(dest_cell, idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		else
 		{
@@ -145,7 +145,7 @@ public class WorldDamage : KMonoBehaviour
 			component.enabled = false;
 			component.enabled = true;
 			gameObject.transform.SetPosition(gameObject.transform.GetPosition() - Vector3.right * 0.5f);
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
+			FallingWater.instance.AddParticle(dest_cell, idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		if (CameraController.Instance.IsAudibleSound(gameObject.transform.GetPosition(), this.leakSoundMigrated))
 		{
@@ -186,7 +186,7 @@ public class WorldDamage : KMonoBehaviour
 		Grid.Damage[cell] = 0f;
 	}
 
-	public void OnDigComplete(int cell, float mass, float temperature, byte element_idx, byte disease_idx, int disease_count)
+	public void OnDigComplete(int cell, float mass, float temperature, ushort element_idx, byte disease_idx, int disease_count)
 	{
 		Vector3 vector = Grid.CellToPos(cell, CellAlignment.RandomInternal, Grid.SceneLayer.Ore);
 		Element element = ElementLoader.elements[(int)element_idx];
@@ -199,7 +199,7 @@ public class WorldDamage : KMonoBehaviour
 		}
 		GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false, false);
 		Pickupable component = gameObject.GetComponent<Pickupable>();
-		if (component != null && component.GetMyWorld() != null && component.GetMyWorld().worldInventory.IsReachable(gameObject.GetComponent<Pickupable>()))
+		if (component != null && component.GetMyWorld() != null && component.GetMyWorld().worldInventory.IsReachable(component))
 		{
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
 		}
@@ -237,8 +237,7 @@ public class WorldDamage : KMonoBehaviour
 	private FMODAsset leakSound;
 
 	[SerializeField]
-	[EventRef]
-	private string leakSoundMigrated;
+	private EventReference leakSoundMigrated;
 
 	private float damageAmount = 0.00083333335f;
 

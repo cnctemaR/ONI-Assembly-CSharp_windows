@@ -90,18 +90,9 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 		return this;
 	}
 
-	public GameplayEvent SetVisuals(HashedString backgroundSpriteName, HashedString animFileName, Color32 tint)
+	public GameplayEvent SetVisuals(HashedString animFileName)
 	{
-		this.popupAnimFileName = animFileName;
-		this.popupBackgroundFileName = backgroundSpriteName;
-		this.popupBackgroundTint = tint;
-		return this;
-	}
-
-	public GameplayEvent SetVisuals(HashedString backgroundSpriteName, HashedString animFileName)
-	{
-		this.popupAnimFileName = animFileName;
-		this.popupBackgroundFileName = backgroundSpriteName;
+		this.animFileName = animFileName;
 		return this;
 	}
 
@@ -158,7 +149,7 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 		this.successEvents = new List<HashedString>();
 		this.failureEvents = new List<HashedString>();
 		this.importance = importance;
-		this.popupAnimFileName = id;
+		this.animFileName = id;
 	}
 
 	public abstract StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance);
@@ -195,15 +186,11 @@ public abstract class GameplayEvent : Resource, IComparable<GameplayEvent>
 
 	public List<HashedString> failureEvents;
 
-	public string popupTitle;
+	public string title;
 
-	public string popupDescription;
+	public string description;
 
-	public HashedString popupAnimFileName;
-
-	public HashedString popupBackgroundFileName;
-
-	public Color32 popupBackgroundTint;
+	public HashedString animFileName;
 
 	public List<Tag> tags;
 

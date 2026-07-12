@@ -6,14 +6,10 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/Workable/BeachChairWorkable")]
 public class BeachChairWorkable : Workable, IWorkerPrioritizable
 {
-	private BeachChairWorkable()
-	{
-		base.SetReportType(ReportManager.ReportType.PersonalTime);
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_beach_chair_kanim") };
 		this.workAnims = null;
 		this.workingPstComplete = null;

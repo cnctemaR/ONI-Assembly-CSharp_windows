@@ -15,6 +15,8 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.customizeButton.onClick += this.CustomizeClicked;
 		this.launchButton.onClick += this.LaunchClicked;
 		this.shuffleButton.onClick += this.ShuffleClicked;
+		this.storyTraitShuffleButton.onClick += this.StoryTraitShuffleClicked;
+		this.storyTraitShuffleButton.gameObject.SetActive(Db.Get().Stories.Count > 2);
 		this.destinationMapPanel.OnAsteroidClicked += this.OnAsteroidClicked;
 		KInputTextField kinputTextField = this.coordinate;
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(this.CoordinateEditStarted));
@@ -35,30 +37,49 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.newGameSettings.Init();
 		this.newGameSettings.SetCloseAction(new global::System.Action(this.CustomizeClose));
 		this.destinationMapPanel.Init();
-		CustomGameSettings.Instance.OnSettingChanged += this.SettingChanged;
+		CustomGameSettings.Instance.OnQualitySettingChanged += this.QualitySettingChanged;
+		CustomGameSettings.Instance.OnStorySettingChanged += this.QualitySettingChanged;
 		this.ShuffleClicked();
+		this.RefreshMenuTabs();
+		for (int i = 0; i < this.menuTabs.Length; i++)
+		{
+			int target = i;
+			this.menuTabs[i].onClick = delegate
+			{
+				this.selectedMenuTabIdx = target;
+				this.RefreshMenuTabs();
+			};
+		}
 		this.ResizeLayout();
+		this.storyContentPanel.Init();
+		this.storyContentPanel.SelectRandomStories(2, 2, true);
+		this.storyContentPanel.SelectDefault();
+		this.RefreshStoryLabel();
+		this.RefreshRowsAndDescriptions();
 	}
 
 	private void ResizeLayout()
 	{
 		Vector2 sizeDelta = this.destinationProperties.clusterDetailsButton.rectTransform().sizeDelta;
-		this.destinationProperties.clusterDetailsButton.rectTransform().sizeDelta = new Vector2(sizeDelta.x, (float)(DlcManager.FeatureClusterSpaceEnabled() ? 134 : 76));
+		this.destinationProperties.clusterDetailsButton.rectTransform().sizeDelta = new Vector2(sizeDelta.x, (float)(DlcManager.FeatureClusterSpaceEnabled() ? 164 : 76));
 		Vector2 sizeDelta2 = this.worldsScrollPanel.rectTransform().sizeDelta;
 		Vector2 anchoredPosition = this.worldsScrollPanel.rectTransform().anchoredPosition;
 		if (!DlcManager.FeatureClusterSpaceEnabled())
 		{
-			this.worldsScrollPanel.rectTransform().anchoredPosition = new Vector2(anchoredPosition.x, anchoredPosition.y + 58f);
+			this.worldsScrollPanel.rectTransform().anchoredPosition = new Vector2(anchoredPosition.x, anchoredPosition.y + 88f);
 		}
-		float num = (float)(DlcManager.FeatureClusterSpaceEnabled() ? 466 : 524);
+		float num = (float)(DlcManager.FeatureClusterSpaceEnabled() ? 436 : 524);
 		LayoutRebuilder.ForceRebuildLayoutImmediate(base.gameObject.rectTransform());
-		num = Mathf.Min(num, this.destinationInfoPanel.sizeDelta.y - (float)(DlcManager.FeatureClusterSpaceEnabled() ? 134 : 76) - 22f);
+		num = Mathf.Min(num, this.destinationInfoPanel.sizeDelta.y - (float)(DlcManager.FeatureClusterSpaceEnabled() ? 164 : 76) - 22f);
 		this.worldsScrollPanel.rectTransform().sizeDelta = new Vector2(sizeDelta2.x, num);
+		this.storyScrollPanel.rectTransform().sizeDelta = new Vector2(sizeDelta2.x, num);
 	}
 
 	protected override void OnCleanUp()
 	{
-		CustomGameSettings.Instance.OnSettingChanged -= this.SettingChanged;
+		CustomGameSettings.Instance.OnQualitySettingChanged -= this.QualitySettingChanged;
+		CustomGameSettings.Instance.OnStorySettingChanged -= this.QualitySettingChanged;
+		this.storyContentPanel.Cleanup();
 		base.OnCleanUp();
 	}
 
@@ -136,16 +157,34 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		base.NavigateForward();
 	}
 
+	private void RefreshMenuTabs()
+	{
+		for (int i = 0; i < this.menuTabs.Length; i++)
+		{
+			this.menuTabs[i].ChangeState((i == this.selectedMenuTabIdx) ? 1 : 0);
+			this.menuTabs[i].GetComponentInChildren<LocText>().color = ((i == this.selectedMenuTabIdx) ? Color.white : Color.grey);
+		}
+		this.destinationInfoPanel.gameObject.SetActive(this.selectedMenuTabIdx == 0);
+		this.storyInfoPanel.gameObject.SetActive(this.selectedMenuTabIdx == 1);
+		this.destinationDetailsHeader.SetParent((this.selectedMenuTabIdx == 0) ? this.destinationDetailsParent_Asteroid : this.destinationDetailsParent_Story);
+		this.destinationDetailsHeader.SetAsFirstSibling();
+	}
+
 	private void ShuffleClicked()
 	{
 		int num = this.random.Next();
 		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, num.ToString());
 	}
 
+	private void StoryTraitShuffleClicked()
+	{
+		this.storyContentPanel.SelectRandomStories(2, 2, false);
+	}
+
 	private void CoordinateChanged(string text)
 	{
 		string[] array = CustomGameSettings.ParseSettingCoordinate(text);
-		if (array.Length != 4)
+		if (array.Length != 4 && array.Length != 5)
 		{
 			return;
 		}
@@ -169,6 +208,8 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		}
 		this.newGameSettings.SetSetting(CustomGameSettingConfigs.WorldgenSeed, array[2]);
 		this.newGameSettings.ConsumeSettingsCode(array[3]);
+		string text3 = ((array.Length >= 5) ? array[4] : "0");
+		this.newGameSettings.ConsumeStoryTraitsCode(text3);
 	}
 
 	private void CoordinateEditStarted()
@@ -183,7 +224,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
 	}
 
-	private void SettingChanged(SettingConfig config, SettingLevel level)
+	private void QualitySettingChanged(SettingConfig config, SettingLevel level)
 	{
 		if (config == CustomGameSettingConfigs.SaveToCloud)
 		{
@@ -193,6 +234,11 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		{
 			this.coordinate.text = CustomGameSettings.Instance.GetSettingsCoordinate();
 		}
+		this.RefreshRowsAndDescriptions();
+	}
+
+	public void RefreshRowsAndDescriptions()
+	{
 		string setting = this.newGameSettings.GetSetting(CustomGameSettingConfigs.ClusterLayout);
 		string setting2 = this.newGameSettings.GetSetting(CustomGameSettingConfigs.WorldgenSeed);
 		this.destinationMapPanel.UpdateDisplayedClusters();
@@ -212,20 +258,29 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		if (DlcManager.IsContentActive("EXPANSION1_ID"))
 		{
 			this.destinationProperties.EnableClusterLocationLabels(true);
-			this.destinationProperties.RefreshAsteroidLines(cluster, this.selectedLocationProperties);
+			this.destinationProperties.RefreshAsteroidLines(cluster, this.selectedLocationProperties, this.storyContentPanel.GetActiveStories());
 			this.destinationProperties.EnableClusterDetails(true);
 			this.destinationProperties.SetClusterDetailLabels(cluster);
 			this.selectedLocationProperties.headerLabel.SetText(UI.FRONTEND.COLONYDESTINATIONSCREEN.SELECTED_CLUSTER_TRAITS_HEADER);
 			this.destinationProperties.clusterDetailsButton.onClick = delegate
 			{
-				this.destinationProperties.SelectWholeClusterDetails(cluster, this.selectedLocationProperties);
+				this.destinationProperties.SelectWholeClusterDetails(cluster, this.selectedLocationProperties, this.storyContentPanel.GetActiveStories());
 			};
-			return;
 		}
-		this.destinationProperties.EnableClusterDetails(false);
-		this.destinationProperties.EnableClusterLocationLabels(false);
-		this.destinationProperties.SetParameterDescriptors(cluster.GetParamDescriptors());
-		this.selectedLocationProperties.SetTraitDescriptors(cluster.GetTraitDescriptors(), true);
+		else
+		{
+			this.destinationProperties.EnableClusterDetails(false);
+			this.destinationProperties.EnableClusterLocationLabels(false);
+			this.destinationProperties.SetParameterDescriptors(cluster.GetParamDescriptors());
+			this.selectedLocationProperties.SetTraitDescriptors(cluster.GetTraitDescriptors(), this.storyContentPanel.GetActiveStories(), true);
+		}
+		this.RefreshStoryLabel();
+	}
+
+	public void RefreshStoryLabel()
+	{
+		this.storyTraitsDestinationDetailsLabel.SetText(this.storyContentPanel.GetTraitsString(false));
+		this.storyTraitsDestinationDetailsLabel.GetComponent<ToolTip>().SetSimpleTooltip(this.storyContentPanel.GetTraitsString(true));
 	}
 
 	private void OnAsteroidClicked(ColonyDestinationAsteroidBeltData cluster)
@@ -262,6 +317,11 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	private GameObject customSettings;
 
 	[SerializeField]
+	private MultiToggle[] menuTabs;
+
+	private int selectedMenuTabIdx;
+
+	[SerializeField]
 	private KButton backButton;
 
 	[SerializeField]
@@ -274,16 +334,31 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	private KButton shuffleButton;
 
 	[SerializeField]
+	private KButton storyTraitShuffleButton;
+
+	[SerializeField]
 	private HierarchyReferences locationIcons;
 
 	[SerializeField]
 	private RectTransform worldsScrollPanel;
 
-	private const int DESTINATION_HEADER_BUTTON_HEIGHT_CLUSTER = 134;
+	[SerializeField]
+	private RectTransform storyScrollPanel;
+
+	[SerializeField]
+	private RectTransform destinationDetailsParent_Asteroid;
+
+	[SerializeField]
+	private RectTransform destinationDetailsParent_Story;
+
+	[SerializeField]
+	private LocText storyTraitsDestinationDetailsLabel;
+
+	private const int DESTINATION_HEADER_BUTTON_HEIGHT_CLUSTER = 164;
 
 	private const int DESTINATION_HEADER_BUTTON_HEIGHT_BASE = 76;
 
-	private const int WORLDS_SCROLL_PANEL_HEIGHT_CLUSTER = 466;
+	private const int WORLDS_SCROLL_PANEL_HEIGHT_CLUSTER = 436;
 
 	private const int WORLDS_SCROLL_PANEL_HEIGHT_BASE = 524;
 
@@ -297,13 +372,22 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	private KInputTextField coordinate;
 
 	[SerializeField]
+	private RectTransform destinationDetailsHeader;
+
+	[SerializeField]
 	private RectTransform destinationInfoPanel;
 
+	[SerializeField]
+	private RectTransform storyInfoPanel;
+
 	[MyCmpReq]
-	private NewGameSettingsPanel newGameSettings;
+	public NewGameSettingsPanel newGameSettings;
 
 	[MyCmpReq]
 	private DestinationSelectPanel destinationMapPanel;
+
+	[SerializeField]
+	private StoryContentPanel storyContentPanel;
 
 	private KRandom random;
 

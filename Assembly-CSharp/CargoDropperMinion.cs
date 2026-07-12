@@ -25,7 +25,7 @@ public class CargoDropperMinion : GameStateMachine<CargoDropperMinion, CargoDrop
 		}, UpdateRate.SIM_200ms, false);
 		this.complete.Enter(delegate(CargoDropperMinion.StatesInstance smi)
 		{
-			this.hasLanded.Set(true, smi);
+			this.hasLanded.Set(true, smi, false);
 		});
 	}
 
@@ -106,7 +106,7 @@ public class CargoDropperMinion : GameStateMachine<CargoDropperMinion, CargoDrop
 
 		public Notification CreateCrashLandedNotification()
 		{
-			return new Notification(MISC.NOTIFICATIONS.DUPLICANT_CRASH_LANDED.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.DUPLICANT_CRASH_LANDED.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
+			return new Notification(MISC.NOTIFICATIONS.DUPLICANT_CRASH_LANDED.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.DUPLICANT_CRASH_LANDED.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false);
 		}
 
 		public MinionIdentity escapingMinion;

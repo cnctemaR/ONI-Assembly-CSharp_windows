@@ -18,7 +18,7 @@ namespace Klei.AI
 				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.HEATSICKNESS.NAME, false, false, true)
 			}));
 			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_hot_kanim", "anim_loco_run_hot_kanim", "anim_loco_walk_hot_kanim" }, Db.Get().Expressions.SickFierySkin));
-			base.AddSicknessComponent(new PeriodicEmoteSickness("anim_idle_hot_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 15f));
+			base.AddSicknessComponent(new PeriodicEmoteSickness(Db.Get().Emotes.Minion.Hot, 15f));
 		}
 
 		public const string ID = "HeatSickness";

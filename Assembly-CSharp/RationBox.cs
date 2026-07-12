@@ -7,7 +7,7 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms,
 {
 	protected override void OnPrefabInit()
 	{
-		this.filteredStorage = new FilteredStorage(this, null, new Tag[] { GameTags.Compostable }, this, false, Db.Get().ChoreTypes.FoodFetch);
+		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.Compostable }, this, false, Db.Get().ChoreTypes.FoodFetch);
 		base.Subscribe<RationBox>(-592767678, RationBox.OnOperationalChangedDelegate);
 		base.Subscribe<RationBox>(-905833192, RationBox.OnCopySettingsDelegate);
 		DiscoveredResources.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);

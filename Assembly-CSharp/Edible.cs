@@ -1,22 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using KSerialization;
 using STRINGS;
 using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Edible")]
-public class Edible : Workable, IGameObjectEffectDescriptor
+public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExtendSplitting
 {
 	public float Units
 	{
 		get
 		{
-			return base.GetComponent<PrimaryElement>().Units;
+			return this.primaryElement.Units;
 		}
 		set
 		{
-			base.GetComponent<PrimaryElement>().Units = value;
+			this.primaryElement.Units = value;
+		}
+	}
+
+	public float MassPerUnit
+	{
+		get
+		{
+			return this.primaryElement.MassPerUnit;
 		}
 	}
 
@@ -47,16 +56,13 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	public bool isBeingConsumed { get; private set; }
 
-	private Edible()
+	protected override void OnPrefabInit()
 	{
+		this.primaryElement = base.GetComponent<PrimaryElement>();
 		base.SetReportType(ReportManager.ReportType.PersonalTime);
 		this.showProgressBar = false;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		this.shouldTransferDiseaseWithWorker = false;
-	}
-
-	protected override void OnPrefabInit()
-	{
 		base.OnPrefabInit();
 		if (this.foodInfo == null)
 		{
@@ -77,6 +83,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.ToggleGenericSpicedTag(base.gameObject.HasTag(GameTags.SpicedFood));
+		if (this.spices != null)
+		{
+			for (int i = 0; i < this.spices.Count; i++)
+			{
+				this.ApplySpiceEffects(this.spices[i], SpiceGrinderConfig.SpicedStatus);
+			}
+		}
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.Edible, this);
 	}
 
@@ -218,6 +232,57 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		return flag;
 	}
 
+	public void SpiceEdible(SpiceInstance spice, StatusItem status)
+	{
+		this.spices.Add(spice);
+		this.ApplySpiceEffects(spice, status);
+	}
+
+	protected virtual void ApplySpiceEffects(SpiceInstance spice, StatusItem status)
+	{
+		base.GetComponent<KPrefabID>().AddTag(spice.Id, true);
+		this.ToggleGenericSpicedTag(true);
+		base.GetComponent<KSelectable>().AddStatusItem(status, this.spices);
+		if (spice.FoodModifier != null)
+		{
+			base.gameObject.GetAttributes().Add(spice.FoodModifier);
+		}
+		if (spice.CalorieModifier != null)
+		{
+			this.Calories += spice.CalorieModifier.Value;
+		}
+	}
+
+	private void ToggleGenericSpicedTag(bool isSpiced)
+	{
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		if (isSpiced)
+		{
+			component.RemoveTag(GameTags.UnspicedFood);
+			component.AddTag(GameTags.SpicedFood, true);
+			return;
+		}
+		component.RemoveTag(GameTags.SpicedFood);
+		component.AddTag(GameTags.UnspicedFood, false);
+	}
+
+	public bool CanAbsorb(Edible other)
+	{
+		bool flag = this.spices.Count == other.spices.Count;
+		int num = 0;
+		while (flag && num < this.spices.Count)
+		{
+			int num2 = 0;
+			while (flag && num2 < other.spices.Count)
+			{
+				flag = this.spices[num].Id == other.spices[num2].Id;
+				num2++;
+			}
+			num++;
+		}
+		return flag;
+	}
+
 	private void StartConsuming()
 	{
 		DebugUtil.DevAssert(!this.isBeingConsumed, "Can't StartConsuming()...we've already started", null);
@@ -229,17 +294,16 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	{
 		DebugUtil.DevAssert(this.isBeingConsumed, "StopConsuming() called without StartConsuming()", null);
 		this.isBeingConsumed = false;
-		PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
-		if (component != null && component.DiseaseCount > 0)
+		if (this.primaryElement != null && this.primaryElement.DiseaseCount > 0)
 		{
-			new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_contaminated_food_kanim", new HashedString[] { "react" }, null);
+			new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, Db.Get().Emotes.Minion.FoodPoisoning, 1, null);
 		}
 		for (int i = 0; i < this.foodInfo.Effects.Count; i++)
 		{
 			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);
 		}
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.EATEN, "{0}", this.GetProperName()), worker.GetProperName());
-		this.AddQualityEffects(worker);
+		this.AddOnConsumeEffects(worker);
 		worker.Trigger(1121894420, this);
 		base.Trigger(-10536414, worker.gameObject);
 		this.unitsConsumed = float.NaN;
@@ -257,11 +321,23 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		return Edible.qualityEffects[qualityLevel];
 	}
 
-	private void AddQualityEffects(Worker worker)
+	private void AddOnConsumeEffects(Worker worker)
 	{
 		int num = Mathf.RoundToInt(worker.GetAttributes().Add(Db.Get().Attributes.FoodExpectation).GetTotalValue());
 		int num2 = this.FoodInfo.Quality + num;
-		worker.GetComponent<Effects>().Add(Edible.GetEffectForFoodQuality(num2), true);
+		Effects component = worker.GetComponent<Effects>();
+		component.Add(Edible.GetEffectForFoodQuality(num2), true);
+		for (int i = 0; i < this.spices.Count; i++)
+		{
+			Effect statBonus = this.spices[i].StatBonus;
+			if (statBonus != null)
+			{
+				float duration = statBonus.duration;
+				statBonus.duration = this.caloriesConsumed * 0.001f / 1000f * 600f;
+				component.Add(statBonus, true);
+				statBonus.duration = duration;
+			}
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -299,6 +375,21 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		return list;
 	}
 
+	public void OnSplitTick(Pickupable thePieceTaken)
+	{
+		Edible component = thePieceTaken.GetComponent<Edible>();
+		if (this.spices != null)
+		{
+			for (int i = 0; i < this.spices.Count; i++)
+			{
+				SpiceInstance spiceInstance = this.spices[i];
+				component.SpiceEdible(spiceInstance, SpiceGrinderConfig.SpicedStatus);
+			}
+		}
+	}
+
+	private PrimaryElement primaryElement;
+
 	public string FoodID;
 
 	private EdiblesManager.FoodInfo foodInfo;
@@ -312,6 +403,9 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	private float totalUnits = float.NaN;
 
 	private float totalConsumableCalories = float.NaN;
+
+	[Serialize]
+	private List<SpiceInstance> spices = new List<SpiceInstance>();
 
 	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, true, true);
 

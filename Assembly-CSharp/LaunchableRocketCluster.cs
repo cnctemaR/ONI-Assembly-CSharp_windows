@@ -93,7 +93,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 			}
 			set
 			{
-				base.sm.distanceAboveGround.Set(value, this);
+				base.sm.distanceAboveGround.Set(value, this, false);
 			}
 		}
 
@@ -136,8 +136,8 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 		{
 			base.master.isLanding = false;
 			base.master.rocketSpeed = 0f;
-			base.sm.warmupTimeRemaining.Set(5f, this);
-			base.sm.distanceAboveGround.Set(0f, this);
+			base.sm.warmupTimeRemaining.Set(5f, this, false);
+			base.sm.distanceAboveGround.Set(0f, this, false);
 			if (base.master.soundSpeakerObject == null)
 			{
 				base.master.soundSpeakerObject = new GameObject("rocketSpeaker");
@@ -217,7 +217,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 		{
 			float num = base.master.InitialFlightAnimOffsetForLanding();
 			this.DistanceAboveGround = num;
-			base.sm.warmupTimeRemaining.Set(2f, this);
+			base.sm.warmupTimeRemaining.Set(2f, this, false);
 			base.master.isLanding = true;
 			base.master.rocketSpeed = 0f;
 			this.constantVelocityPhase_maxSpeed = 0f;
@@ -349,7 +349,7 @@ public class LaunchableRocketCluster : StateMachineComponent<LaunchableRocketClu
 			this.not_grounded.launch_setup.Enter(delegate(LaunchableRocketCluster.StatesInstance smi)
 			{
 				smi.SetupLaunch();
-				this.distanceToSpace.Set((float)ConditionFlightPathIsClear.PadTopEdgeDistanceToCeilingEdge(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.CurrentPad.gameObject), smi);
+				this.distanceToSpace.Set((float)ConditionFlightPathIsClear.PadTopEdgeDistanceToCeilingEdge(smi.master.gameObject.GetComponent<RocketModuleCluster>().CraftInterface.CurrentPad.gameObject), smi, false);
 				smi.GoTo(this.not_grounded.launch_loop);
 			});
 			this.not_grounded.launch_loop.EventTransition(GameHashes.DoReturnRocket, this.not_grounded.landing_setup, null).Enter(delegate(LaunchableRocketCluster.StatesInstance smi)

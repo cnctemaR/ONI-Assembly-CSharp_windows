@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class FilteredStorage
@@ -8,10 +10,9 @@ public class FilteredStorage
 		this.hasMeter = has_meter;
 	}
 
-	public FilteredStorage(KMonoBehaviour root, Tag[] required_tags, Tag[] forbidden_tags, IUserControlledCapacity capacity_control, bool use_logic_meter, ChoreType fetch_chore_type)
+	public FilteredStorage(KMonoBehaviour root, Tag[] forbidden_tags, IUserControlledCapacity capacity_control, bool use_logic_meter, ChoreType fetch_chore_type)
 	{
 		this.root = root;
-		this.requiredTags = required_tags;
 		this.forbiddenTags = forbidden_tags;
 		this.capacityControl = capacity_control;
 		this.useLogicMeter = use_logic_meter;
@@ -20,7 +21,7 @@ public class FilteredStorage
 		root.Subscribe(-543130682, new Action<object>(this.OnUserSettingsChanged));
 		this.filterable = root.FindOrAdd<TreeFilterable>();
 		TreeFilterable treeFilterable = this.filterable;
-		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+		treeFilterable.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 		this.storage = root.GetComponent<Storage>();
 		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		this.storage.Subscribe(-1852328367, new Action<object>(this.OnFunctionalChanged));
@@ -54,7 +55,7 @@ public class FilteredStorage
 		if (this.filterable != null)
 		{
 			TreeFilterable treeFilterable = this.filterable;
-			treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Remove(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+			treeFilterable.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Remove(treeFilterable.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 		}
 		if (this.fetchList != null)
 		{
@@ -156,9 +157,9 @@ public class FilteredStorage
 		return component == null || component.IsFunctional;
 	}
 
-	private void OnFilterChanged(Tag[] tags)
+	private void OnFilterChanged(HashSet<Tag> tags)
 	{
-		bool flag = tags != null && tags.Length != 0;
+		bool flag = tags != null && tags.Count != 0;
 		if (this.fetchList != null)
 		{
 			this.fetchList.Cancel("");
@@ -172,7 +173,7 @@ public class FilteredStorage
 			num = Mathf.Max(0f, this.GetMaxCapacity() - amountStored);
 			this.fetchList = new FetchList2(this.storage, this.choreType);
 			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, this.requiredTags, this.forbiddenTags, num, FetchOrder2.OperationalRequirement.Functional);
+			this.fetchList.Add(tags, this.forbiddenTags, num, Operational.State.Functional);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
 	}
@@ -182,6 +183,30 @@ public class FilteredStorage
 		if (this.logicMeter != null)
 		{
 			this.logicMeter.SetPositionPercent(on ? 1f : 0f);
+		}
+	}
+
+	public void AddForbiddenTag(Tag forbidden_tag)
+	{
+		if (this.forbiddenTags == null)
+		{
+			this.forbiddenTags = new Tag[0];
+		}
+		if (!this.forbiddenTags.Contains(forbidden_tag))
+		{
+			this.forbiddenTags = this.forbiddenTags.Append(forbidden_tag);
+			this.OnFilterChanged(this.filterable.GetTags());
+		}
+	}
+
+	public void RemoveForbiddenTag(Tag forbidden_tag)
+	{
+		if (this.forbiddenTags != null)
+		{
+			List<Tag> list = new List<Tag>(this.forbiddenTags);
+			list.Remove(forbidden_tag);
+			this.forbiddenTags = list.ToArray();
+			this.OnFilterChanged(this.filterable.GetTags());
 		}
 	}
 
@@ -200,8 +225,6 @@ public class FilteredStorage
 	private MeterController meter;
 
 	private MeterController logicMeter;
-
-	private Tag[] requiredTags;
 
 	private Tag[] forbiddenTags;
 

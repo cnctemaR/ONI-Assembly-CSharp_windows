@@ -18,6 +18,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	public string nameStringKey { get; set; }
 
 	[OnDeserialized]
+	[Obsolete]
 	private void OnDeserializedMethod()
 	{
 		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 7))
@@ -35,6 +36,11 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 			{
 				this.AptitudeBySkillGroup[keyValuePair2.Key] = keyValuePair2.Value;
 			}
+		}
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 29))
+		{
+			this.forbiddenTagSet = new HashSet<Tag>(this.forbiddenTags);
+			this.forbiddenTags = null;
 		}
 		this.OnDeserializeModifiers();
 	}
@@ -256,17 +262,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	public bool IsPermittedToConsume(string consumable)
 	{
-		using (List<Tag>.Enumerator enumerator = this.forbiddenTags.GetEnumerator())
-		{
-			while (enumerator.MoveNext())
-			{
-				if (enumerator.Current == consumable)
-				{
-					return false;
-				}
-			}
-		}
-		return true;
+		return !this.forbiddenTagSet.Contains(consumable);
 	}
 
 	public bool IsChoreGroupDisabled(ChoreGroup chore_group)
@@ -343,14 +339,21 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	[Serialize]
 	public List<ResourceRef<Accessory>> accessories;
 
+	[Obsolete("Deprecated, use forbiddenTagSet")]
 	[Serialize]
 	public List<Tag> forbiddenTags;
+
+	[Serialize]
+	public HashSet<Tag> forbiddenTagSet;
 
 	[Serialize]
 	public Ref<MinionAssignablesProxy> assignableProxy;
 
 	[Serialize]
 	public List<Effects.SaveLoadEffect> saveLoadEffects;
+
+	[Serialize]
+	public List<Effects.SaveLoadImmunities> saveLoadImmunities;
 
 	[Serialize]
 	public Dictionary<string, bool> MasteryByRoleID = new Dictionary<string, bool>();

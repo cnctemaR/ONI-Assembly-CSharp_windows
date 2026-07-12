@@ -16,19 +16,38 @@ namespace FMODUnity
 				{
 					return null;
 				}
+				Settings.Initialize();
+				return Settings.instance;
+			}
+		}
+
+		public static void Initialize()
+		{
+			if (Settings.instance == null)
+			{
+				Settings.isInitializing = true;
+				Settings.instance = Resources.Load("FMODStudioSettings") as Settings;
 				if (Settings.instance == null)
 				{
-					Settings.isInitializing = true;
-					Settings.instance = Resources.Load("FMODStudioSettings") as Settings;
-					if (Settings.instance == null)
-					{
-						global::UnityEngine.Debug.Log("[FMOD] Cannot find integration settings, creating default settings");
-						Settings.instance = ScriptableObject.CreateInstance<Settings>();
-						Settings.instance.name = "FMOD Studio Integration Settings";
-					}
-					Settings.isInitializing = false;
+					RuntimeUtils.DebugLog("[FMOD] Cannot find integration settings, creating default settings");
+					Settings.instance = ScriptableObject.CreateInstance<Settings>();
+					Settings.instance.name = "FMOD Studio Integration Settings";
+					Settings.instance.CurrentVersion = 131591;
+					Settings.instance.LastEventReferenceScanVersion = 131591;
 				}
-				return Settings.instance;
+				Settings.isInitializing = false;
+			}
+		}
+
+		public static IEditorSettings EditorSettings
+		{
+			get
+			{
+				return Settings.editorSettings;
+			}
+			set
+			{
+				Settings.editorSettings = value;
 			}
 		}
 
@@ -130,7 +149,7 @@ namespace FMODUnity
 			return this.Platforms;
 		}
 
-		private void AddPlatform(Platform platform)
+		public void AddPlatform(Platform platform)
 		{
 			if (this.PlatformExists(platform.Identifier))
 			{
@@ -144,26 +163,10 @@ namespace FMODUnity
 			this.Platforms.RemoveAll((Platform p) => p.Identifier == identifier);
 		}
 
-		public Platform DefaultPlatform
-		{
-			get
-			{
-				return this.defaultPlatform;
-			}
-		}
-
-		public Platform PlayInEditorPlatform
-		{
-			get
-			{
-				return this.playInEditorPlatform;
-			}
-		}
-
-		private void LinkPlatform(Platform platform)
+		public void LinkPlatform(Platform platform)
 		{
 			this.LinkPlatformToParent(platform);
-			platform.DeclareUnityMappings(this);
+			platform.DeclareRuntimePlatforms(this);
 		}
 
 		public void DeclareRuntimePlatform(RuntimePlatform runtimePlatform, Platform platform)
@@ -199,12 +202,12 @@ namespace FMODUnity
 					}
 				}
 			}
-			return this.defaultPlatform;
+			return this.DefaultPlatform;
 		}
 
 		public SPEAKERMODE GetEditorSpeakerMode()
 		{
-			return this.playInEditorPlatform.SpeakerMode;
+			return this.PlayInEditorPlatform.SpeakerMode;
 		}
 
 		private Settings()
@@ -239,7 +242,7 @@ namespace FMODUnity
 
 		public static void AddPlatformTemplate<T>(string identifier) where T : Platform
 		{
-			Settings.platformTemplates.Add(new Settings.PlatformTemplate
+			Settings.PlatformTemplates.Add(new Settings.PlatformTemplate
 			{
 				Identifier = identifier,
 				CreateInstance = () => Settings.CreatePlatformInstance<T>(identifier)
@@ -254,7 +257,7 @@ namespace FMODUnity
 			return t;
 		}
 
-		private void OnEnable()
+		public void OnEnable()
 		{
 			if (this.hasLoaded)
 			{
@@ -262,8 +265,8 @@ namespace FMODUnity
 			}
 			this.hasLoaded = true;
 			this.PopulatePlatformsFromAsset();
-			this.defaultPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformDefault);
-			this.playInEditorPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformPlayInEditor);
+			this.DefaultPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformDefault);
+			this.PlayInEditorPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformPlayInEditor);
 			this.ForEachPlatform(new Action<Platform>(this.LinkPlatform));
 		}
 
@@ -286,7 +289,7 @@ namespace FMODUnity
 					{
 						platform3 = platform;
 					}
-					global::UnityEngine.Debug.LogWarningFormat("FMOD: Cleaning up duplicate platform: ID  = {0}, name = '{1}', type = {2}", new object[]
+					RuntimeUtils.DebugLogWarningFormat("FMOD: Cleaning up duplicate platform: ID  = {0}, name = '{1}', type = {2}", new object[]
 					{
 						platform3.Identifier,
 						platform3.DisplayName,
@@ -302,9 +305,11 @@ namespace FMODUnity
 			}
 		}
 
-		private const string SettingsAssetName = "FMODStudioSettings";
+		public const string SettingsAssetName = "FMODStudioSettings";
 
 		private static Settings instance = null;
+
+		private static IEditorSettings editorSettings = null;
 
 		private static bool isInitializing = false;
 
@@ -353,6 +358,9 @@ namespace FMODUnity
 
 		[SerializeField]
 		public string TargetBankFolder = "";
+
+		[SerializeField]
+		public EventLinkage EventLinkage;
 
 		[SerializeField]
 		public DEBUG_FLAGS LoggingLevel = DEBUG_FLAGS.WARNING;
@@ -421,32 +429,39 @@ namespace FMODUnity
 		public double SharedLibraryTimeSinceStart;
 
 		[SerializeField]
+		public int CurrentVersion;
+
+		[SerializeField]
 		public bool HideSetupWizard;
 
 		[SerializeField]
-		private List<Platform> Platforms = new List<Platform>();
+		public int LastEventReferenceScanVersion;
 
-		private Dictionary<RuntimePlatform, List<Platform>> PlatformForRuntimePlatform = new Dictionary<RuntimePlatform, List<Platform>>();
+		[SerializeField]
+		public List<Platform> Platforms = new List<Platform>();
+
+		public Dictionary<RuntimePlatform, List<Platform>> PlatformForRuntimePlatform = new Dictionary<RuntimePlatform, List<Platform>>();
 
 		[NonSerialized]
-		private Platform defaultPlatform;
+		public Platform DefaultPlatform;
 
 		[NonSerialized]
-		private Platform playInEditorPlatform;
+		public Platform PlayInEditorPlatform;
 
-		private static List<Settings.PlatformTemplate> platformTemplates = new List<Settings.PlatformTemplate>();
+		public static List<Settings.PlatformTemplate> PlatformTemplates = new List<Settings.PlatformTemplate>();
 
 		[NonSerialized]
 		private bool hasLoaded;
 
 		public enum SharedLibraryUpdateStages
 		{
+			Start,
 			DisableExistingLibraries,
 			RestartUnity,
 			CopyNewLibraries
 		}
 
-		private struct PlatformTemplate
+		public struct PlatformTemplate
 		{
 			public string Identifier;
 

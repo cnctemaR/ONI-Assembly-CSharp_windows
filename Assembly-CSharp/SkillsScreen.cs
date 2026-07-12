@@ -494,7 +494,7 @@ public class SkillsScreen : KModalScreen
 
 	private IEnumerator DelayRefreshProgressBars()
 	{
-		yield return new WaitForSecondsRealtime(0.1f);
+		yield return SequenceUtil.WaitForSecondsRealtime(0.1f);
 		this.RefreshProgressBars();
 		yield break;
 	}

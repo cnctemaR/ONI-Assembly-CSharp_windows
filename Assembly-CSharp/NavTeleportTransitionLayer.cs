@@ -7,11 +7,6 @@ public class NavTeleportTransitionLayer : TransitionDriver.OverrideLayer
 	{
 	}
 
-	public override void Destroy()
-	{
-		base.Destroy();
-	}
-
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.BeginTransition(navigator, transition);

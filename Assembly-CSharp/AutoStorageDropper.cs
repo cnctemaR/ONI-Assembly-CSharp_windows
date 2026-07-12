@@ -92,7 +92,7 @@ public class AutoStorageDropper : GameStateMachine<AutoStorageDropper, AutoStora
 		{
 			int num = Grid.PosToCell(base.smi.GetDropPosition());
 			bool flag = Grid.IsSolidCell(num) || (base.def.blockedBySubstantialLiquid && Grid.IsSubstantialLiquid(num, 0.35f));
-			base.sm.isBlocked.Set(flag, base.smi);
+			base.sm.isBlocked.Set(flag, base.smi, false);
 		}
 
 		private bool IsFilteredElement(SimHashes element)

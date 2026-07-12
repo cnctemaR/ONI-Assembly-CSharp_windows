@@ -102,7 +102,7 @@ public class FuelTank : KMonoBehaviour, IUserControlledCapacity, IFuelTank
 			ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
 			if (component != null)
 			{
-				component.requestedItemTag = this.fuelType;
+				component.RequestedItemTag = this.fuelType;
 			}
 		}
 	}

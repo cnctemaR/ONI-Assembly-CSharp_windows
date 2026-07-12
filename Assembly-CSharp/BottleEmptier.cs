@@ -71,7 +71,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			: base(smi)
 		{
 			TreeFilterable component = base.master.GetComponent<TreeFilterable>();
-			component.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(component.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+			component.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(component.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 			base.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
@@ -79,8 +79,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 		public void CreateChore()
 		{
-			base.GetComponent<KBatchedAnimController>();
-			Tag[] tags = base.GetComponent<TreeFilterable>().GetTags();
+			HashSet<Tag> tags = base.GetComponent<TreeFilterable>().GetTags();
 			Tag[] array;
 			if (!base.master.allowManualPumpingStationFetching)
 			{
@@ -95,7 +94,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				array = new Tag[0];
 			}
 			Storage component = base.GetComponent<Storage>();
-			this.chore = new FetchChore(Db.Get().ChoreTypes.StorageFetch, component, component.Capacity(), tags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			this.chore = new FetchChore(Db.Get().ChoreTypes.StorageFetch, component, component.Capacity(), tags, FetchChore.MatchCriteria.MatchID, Tag.Invalid, array, null, true, null, null, null, Operational.State.Operational, 0);
 		}
 
 		public void CancelChore()
@@ -112,7 +111,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			this.GoTo(base.sm.unoperational);
 		}
 
-		private void OnFilterChanged(Tag[] tags)
+		private void OnFilterChanged(HashSet<Tag> tags)
 		{
 			this.RefreshChore();
 		}
@@ -186,13 +185,13 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				num4 += (flag ? 1 : (-1));
 			}
 			Element element = firstPrimaryElement.Element;
-			byte idx = element.idx;
+			ushort idx = element.idx;
 			if (element.IsLiquid)
 			{
 				FallingWater.instance.AddParticle(num4, idx, num2, num3, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
 				return;
 			}
-			SimMessages.ModifyCell(num4, (int)idx, num3, num2, diseaseInfo.idx, diseaseInfo.count, SimMessages.ReplaceType.None, false, -1);
+			SimMessages.ModifyCell(num4, idx, num3, num2, diseaseInfo.idx, diseaseInfo.count, SimMessages.ReplaceType.None, false, -1);
 		}
 
 		private FetchChore chore;

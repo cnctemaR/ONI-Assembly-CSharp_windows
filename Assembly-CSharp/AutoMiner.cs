@@ -38,7 +38,8 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 		this.arm_go.SetActive(false);
 		this.arm_go.transform.parent = component.transform;
 		this.looping_sounds = this.arm_go.AddComponent<LoopingSounds>();
-		this.rotateSound = GlobalAssets.GetSound(this.rotateSound, false);
+		string sound = GlobalAssets.GetSound(this.rotateSoundName, false);
+		this.rotateSound = RuntimeManager.PathToEventReference(sound);
 		this.arm_go.AddComponent<KPrefabID>().PrefabTag = new Tag(text);
 		this.arm_anim_ctrl = this.arm_go.AddComponent<KBatchedAnimController>();
 		this.arm_anim_ctrl.AnimFiles = new KAnimFile[] { component.AnimFiles[0] };
@@ -324,8 +325,9 @@ public class AutoMiner : StateMachineComponent<AutoMiner.Instance>, ISim1000ms
 
 	private LoopingSounds looping_sounds;
 
-	[EventRef]
-	private string rotateSound = "AutoMiner_rotate";
+	private string rotateSoundName = "AutoMiner_rotate";
+
+	private EventReference rotateSound;
 
 	private KAnimLink link;
 

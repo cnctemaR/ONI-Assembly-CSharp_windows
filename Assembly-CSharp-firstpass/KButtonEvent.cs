@@ -19,21 +19,11 @@ public class KButtonEvent : KInputEvent
 	{
 		if (base.Consumed)
 		{
-			return base.Consumed;
+			return false;
 		}
-		if (action != global::Action.NumActions)
+		if (action != global::Action.NumActions && this.IsAction(action))
 		{
-			if (this.mIsAction != null)
-			{
-				if (this.mIsAction[(int)action])
-				{
-					base.Consumed = true;
-				}
-			}
-			else if (this.mAction == action)
-			{
-				base.Consumed = true;
-			}
+			base.Consumed = true;
 		}
 		return base.Consumed;
 	}

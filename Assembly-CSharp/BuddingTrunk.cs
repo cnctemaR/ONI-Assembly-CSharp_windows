@@ -60,13 +60,13 @@ public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 		int num2;
 		for (int i = 0; i < this.buds.Length; i = num2 + 1)
 		{
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 			float num = global::UnityEngine.Random.Range(0f, 1f);
 			this.TrySpawnRandomBud(null, num);
 			num2 = i;
 		}
 		this.newGameSpawnRoutine = null;
-		yield return 0;
+		yield return SequenceUtil.WaitForNextFrame;
 		yield break;
 	}
 

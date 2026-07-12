@@ -40,18 +40,10 @@ public class CringeMonitor : GameStateMachine<CringeMonitor, CringeMonitor.Insta
 
 		public Reactable GetReactable()
 		{
-			EmoteReactable emoteReactable = new SelfEmoteReactable(base.master.gameObject, "Cringe", Db.Get().ChoreTypes.EmoteHighPriority, "anim_cringe_kanim", 0f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "cringe_pre"
-			}).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "cringe_loop"
-			}).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "cringe_pst"
-			});
-			emoteReactable.preventChoreInterruption = true;
-			return emoteReactable;
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, "Cringe", Db.Get().ChoreTypes.EmoteHighPriority, 0f, 0f, float.PositiveInfinity, 0f);
+			selfEmoteReactable.SetEmote(Db.Get().Emotes.Minion.Cringe);
+			selfEmoteReactable.preventChoreInterruption = true;
+			return selfEmoteReactable;
 		}
 
 		public StatusItem GetStatusItem()

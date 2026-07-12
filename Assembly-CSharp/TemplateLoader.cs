@@ -71,7 +71,8 @@ public static class TemplateLoader
 		{
 			return null;
 		}
-		if (Assets.GetBuildingDef(prefab.id) == null)
+		BuildingDef buildingDef = Assets.GetBuildingDef(prefab.id);
+		if (buildingDef == null)
 		{
 			return null;
 		}
@@ -81,7 +82,7 @@ public static class TemplateLoader
 		{
 			return null;
 		}
-		if (Assets.GetBuildingDef(prefab.id).WidthInCells >= 3)
+		if (buildingDef.WidthInCells >= 3)
 		{
 			num--;
 		}
@@ -190,7 +191,7 @@ public static class TemplateLoader
 				if (storageItem.isOre)
 				{
 					gameObject2 = ElementLoader.FindElementByHash(storageItem.element).substance.SpawnResource(Vector3.zero, storageItem.units, storageItem.temperature, Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, false, false, false);
-					goto IL_049D;
+					goto IL_049B;
 				}
 				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Ore);
 				if (gameObject2 == null)
@@ -208,21 +209,21 @@ public static class TemplateLoader
 					if (smi != null)
 					{
 						smi.RotValue = storageItem.rottable.rotAmount;
-						goto IL_049D;
+						goto IL_049B;
 					}
-					goto IL_049D;
+					goto IL_049B;
 				}
-				IL_04C4:
+				IL_04C2:
 				k++;
 				continue;
-				IL_049D:
+				IL_049B:
 				GameObject gameObject3 = component6.Store(gameObject2, true, true, true, false);
 				if (gameObject3 != null)
 				{
 					gameObject3.GetComponent<Pickupable>().OnStore(component6);
-					goto IL_04C4;
+					goto IL_04C2;
 				}
-				goto IL_04C4;
+				goto IL_04C2;
 			}
 		}
 		if (prefab.connections != 0)

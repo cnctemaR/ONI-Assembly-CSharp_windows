@@ -24,8 +24,9 @@ public class MiningSounds : KMonoBehaviour
 					return;
 				}
 				text = "Mine_" + text;
-				this.miningSoundEvent = GlobalAssets.GetSound(text, false);
-				if (this.miningSoundEvent != null)
+				string sound = GlobalAssets.GetSound(text, false);
+				this.miningSoundEvent = RuntimeManager.PathToEventReference(sound);
+				if (!this.miningSoundEvent.IsNull)
 				{
 					this.loopingSounds.StartSound(this.miningSoundEvent);
 				}
@@ -35,7 +36,7 @@ public class MiningSounds : KMonoBehaviour
 
 	private void OnStopMiningSound(object data)
 	{
-		if (this.miningSoundEvent != null)
+		if (!this.miningSoundEvent.IsNull)
 		{
 			this.loopingSounds.StopSound(this.miningSoundEvent);
 			this.miningSound = null;
@@ -54,8 +55,7 @@ public class MiningSounds : KMonoBehaviour
 
 	private FMODAsset miningSound;
 
-	[EventRef]
-	private string miningSoundEvent;
+	private EventReference miningSoundEvent;
 
 	private static readonly EventSystem.IntraObjectHandler<MiningSounds> OnStartMiningSoundDelegate = new EventSystem.IntraObjectHandler<MiningSounds>(delegate(MiningSounds component, object data)
 	{

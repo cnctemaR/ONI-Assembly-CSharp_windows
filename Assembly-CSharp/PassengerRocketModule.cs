@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMODUnity;
 using KSerialization;
 using UnityEngine;
 
@@ -265,7 +266,7 @@ public class PassengerRocketModule : KMonoBehaviour
 		}
 	}
 
-	public string interiorReverbSnapshot;
+	public EventReference interiorReverbSnapshot;
 
 	[Serialize]
 	private PassengerRocketModule.RequestCrewState passengersRequested;

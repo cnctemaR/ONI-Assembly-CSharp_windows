@@ -9,21 +9,6 @@ public class LadderDiseaseTransitionLayer : TransitionDriver.OverrideLayer
 	{
 	}
 
-	public override void Destroy()
-	{
-		base.Destroy();
-	}
-
-	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
-	{
-		base.BeginTransition(navigator, transition);
-	}
-
-	public override void UpdateTransition(Navigator navigator, Navigator.ActiveTransition transition)
-	{
-		base.UpdateTransition(navigator, transition);
-	}
-
 	public override void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.EndTransition(navigator, transition);

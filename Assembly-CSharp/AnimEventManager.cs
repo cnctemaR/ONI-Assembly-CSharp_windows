@@ -111,7 +111,7 @@ public class AnimEventManager
 		for (int i = 0; i < event_data.Count; i++)
 		{
 			AnimEventManager.EventPlayerData eventPlayerData = event_data[i];
-			if (!(eventPlayerData.controller == null))
+			if (!(eventPlayerData.controller == null) && eventPlayerData.mode != KAnim.PlayMode.Paused)
 			{
 				eventPlayerData.currentFrame = eventPlayerData.controller.GetFrameIdx(eventPlayerData.elapsedTime, false);
 				event_data[i] = eventPlayerData;
@@ -119,21 +119,18 @@ public class AnimEventManager
 				eventPlayerData.previousFrame = eventPlayerData.currentFrame;
 				eventPlayerData.elapsedTime += dt * eventPlayerData.controller.GetPlaySpeed();
 				event_data[i] = eventPlayerData;
-				if (eventPlayerData.mode != KAnim.PlayMode.Paused)
+				if (eventPlayerData.updatingEvents != null)
 				{
-					if (eventPlayerData.updatingEvents != null)
+					for (int j = 0; j < eventPlayerData.updatingEvents.Count; j++)
 					{
-						for (int j = 0; j < eventPlayerData.updatingEvents.Count; j++)
-						{
-							eventPlayerData.updatingEvents[j].OnUpdate(eventPlayerData);
-						}
+						eventPlayerData.updatingEvents[j].OnUpdate(eventPlayerData);
 					}
-					event_data[i] = eventPlayerData;
-					if (eventPlayerData.mode != KAnim.PlayMode.Loop && eventPlayerData.currentFrame >= anim_data[i].numFrames - 1)
-					{
-						this.StopEvents(eventPlayerData);
-						this.finishedCalls.Add(eventPlayerData.controller);
-					}
+				}
+				event_data[i] = eventPlayerData;
+				if (eventPlayerData.mode != KAnim.PlayMode.Loop && eventPlayerData.currentFrame >= anim_data[i].numFrames - 1)
+				{
+					this.StopEvents(eventPlayerData);
+					this.finishedCalls.Add(eventPlayerData.controller);
 				}
 			}
 		}
@@ -211,30 +208,6 @@ public class AnimEventManager
 			get
 			{
 				return this.elapsedTime / this.controller.CurrentAnim.totalTime;
-			}
-		}
-
-		public string currentAnimFile
-		{
-			get
-			{
-				return this.controller.currentAnimFile;
-			}
-		}
-
-		public KAnimHashedString currentAnimFileHash
-		{
-			get
-			{
-				return this.controller.currentAnimFileHash;
-			}
-		}
-
-		public string currentAnim
-		{
-			get
-			{
-				return this.controller.currentAnim;
 			}
 		}
 

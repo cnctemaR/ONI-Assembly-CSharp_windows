@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FMOD.Studio;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Serialization;
 using UnityEngine.Timeline;
 
 namespace FMODUnity
@@ -16,11 +17,11 @@ namespace FMODUnity
 		{
 			get
 			{
-				if (this.eventName == null)
+				if (this.EventReference.IsNull)
 				{
 					return base.duration;
 				}
-				return (double)this.eventLength;
+				return (double)this.EventLength;
 			}
 		}
 
@@ -36,52 +37,59 @@ namespace FMODUnity
 
 		public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 		{
-			if (!this.cachedParameters && !string.IsNullOrEmpty(this.eventName))
+			if (!this.CachedParameters && !this.EventReference.IsNull)
 			{
-				EventDescription eventDescription;
-				RuntimeManager.StudioSystem.getEvent(this.eventName, out eventDescription);
-				for (int i = 0; i < this.parameters.Length; i++)
+				EventDescription eventDescription = RuntimeManager.GetEventDescription(this.EventReference);
+				for (int i = 0; i < this.Parameters.Length; i++)
 				{
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
-					eventDescription.getParameterDescriptionByName(this.parameters[i].Name, out parameter_DESCRIPTION);
-					this.parameters[i].ID = parameter_DESCRIPTION.id;
+					eventDescription.getParameterDescriptionByName(this.Parameters[i].Name, out parameter_DESCRIPTION);
+					this.Parameters[i].ID = parameter_DESCRIPTION.id;
 				}
-				List<ParameterAutomationLink> parameterLinks = this.template.parameterLinks;
+				List<ParameterAutomationLink> parameterLinks = this.Template.ParameterLinks;
 				for (int j = 0; j < parameterLinks.Count; j++)
 				{
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION2;
 					eventDescription.getParameterDescriptionByName(parameterLinks[j].Name, out parameter_DESCRIPTION2);
 					parameterLinks[j].ID = parameter_DESCRIPTION2.id;
 				}
-				this.cachedParameters = true;
+				this.CachedParameters = true;
 			}
-			ScriptPlayable<FMODEventPlayableBehavior> scriptPlayable = ScriptPlayable<FMODEventPlayableBehavior>.Create(graph, this.template, 0);
+			ScriptPlayable<FMODEventPlayableBehavior> scriptPlayable = ScriptPlayable<FMODEventPlayableBehavior>.Create(graph, this.Template, 0);
 			this.behavior = scriptPlayable.GetBehaviour();
 			this.behavior.TrackTargetObject = this.TrackTargetObject;
-			this.behavior.eventName = this.eventName;
-			this.behavior.stopType = this.stopType;
-			this.behavior.parameters = this.parameters;
+			this.behavior.EventReference = this.EventReference;
+			this.behavior.StopType = this.StopType;
+			this.behavior.Parameters = this.Parameters;
 			this.behavior.OwningClip = this.OwningClip;
 			return scriptPlayable;
 		}
 
-		public FMODEventPlayableBehavior template = new FMODEventPlayableBehavior();
+		[FormerlySerializedAs("template")]
+		public FMODEventPlayableBehavior Template = new FMODEventPlayableBehavior();
 
-		public float eventLength;
+		[FormerlySerializedAs("eventLength")]
+		public float EventLength;
 
-		private FMODEventPlayableBehavior behavior;
-
-		[EventRef]
+		[Obsolete("Use the eventReference field instead")]
 		[SerializeField]
 		public string eventName;
 
+		[FormerlySerializedAs("eventReference")]
 		[SerializeField]
-		public STOP_MODE stopType;
+		public EventReference EventReference;
 
+		[FormerlySerializedAs("stopType")]
 		[SerializeField]
-		public ParamRef[] parameters = new ParamRef[0];
+		public STOP_MODE StopType;
+
+		[FormerlySerializedAs("parameters")]
+		[SerializeField]
+		public ParamRef[] Parameters = new ParamRef[0];
 
 		[NonSerialized]
-		public bool cachedParameters;
+		public bool CachedParameters;
+
+		private FMODEventPlayableBehavior behavior;
 	}
 }

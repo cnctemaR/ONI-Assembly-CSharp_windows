@@ -197,7 +197,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 				if (CommandModule.HasValidGantry(smi.gameObject))
 				{
 					smi.master.ReleaseAstronaut(this.accumulatedPee.Get(smi));
-					this.accumulatedPee.Set(false, smi);
+					this.accumulatedPee.Set(false, smi, false);
 					Game.Instance.userMenu.Refresh(smi.gameObject);
 					return true;
 				}
@@ -213,7 +213,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 			{
 				smi.SetSuspended(false);
 				Game.Instance.userMenu.Refresh(smi.gameObject);
-				this.accumulatedPee.Set(true, smi);
+				this.accumulatedPee.Set(true, smi, false);
 			}).GoTo(this.grounded.waitingToRelease);
 		}
 

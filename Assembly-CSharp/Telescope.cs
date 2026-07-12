@@ -28,7 +28,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 			Telescope.noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			Telescope.noVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
 		}
-		this.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+		this.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkableEvent));
 		this.operational = base.GetComponent<Operational>();
 		this.storage = base.GetComponent<Storage>();
 		this.UpdateWorkingState(null);
@@ -86,7 +86,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		return src_str.Replace("{VISIBILITY}", GameUtil.GetFormattedPercent(telescope.percentClear * 100f, GameUtil.TimeSlice.None)).Replace("{RADIUS}", telescope.clearScanCellRadius.ToString());
 	}
 
-	private void OnWorkableEvent(Workable.WorkableEvent ev)
+	private void OnWorkableEvent(Workable workable, Workable.WorkableEvent ev)
 	{
 		Worker worker = base.worker;
 		if (worker == null)

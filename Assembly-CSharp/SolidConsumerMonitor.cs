@@ -53,11 +53,13 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 						{
 							foreach (GameObject gameObject in storage.items)
 							{
-								KPrefabID component = gameObject.GetComponent<KPrefabID>();
-								component.UpdateTagBits();
-								if (!component.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.creatureMask) && diet.GetDietInfo(component.PrefabTag) != null)
+								if (!(gameObject == null))
 								{
-									pooledList.Add(gameObject);
+									KPrefabID component = gameObject.GetComponent<KPrefabID>();
+									if (!component.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(component.PrefabTag) != null)
+									{
+										pooledList.Add(gameObject);
+									}
 								}
 							}
 						}
@@ -76,10 +78,9 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				{
 					ScenePartitionerEntry scenePartitionerEntry = enumerator4.Current;
 					KPrefabID kprefabID = (KPrefabID)scenePartitionerEntry.obj;
-					kprefabID.UpdateTagBits();
-					if (!kprefabID.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.creatureMask) && diet.GetDietInfo(kprefabID.PrefabTag) != null)
+					if (!kprefabID.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(kprefabID.PrefabTag) != null)
 					{
-						if (kprefabID.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.plantMask))
+						if (kprefabID.HasTag(GameTags.Plant))
 						{
 							float num5 = 0.25f;
 							float num6 = 0f;
@@ -104,7 +105,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 						pooledList.Add(kprefabID.gameObject);
 					}
 				}
-				goto IL_0311;
+				goto IL_0306;
 			}
 		}
 		GameScenePartitioner.Instance.GatherEntries(num, num2, 16, 16, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
@@ -112,13 +113,12 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		{
 			Pickupable pickupable = (Pickupable)scenePartitionerEntry2.obj;
 			KPrefabID component3 = pickupable.GetComponent<KPrefabID>();
-			component3.UpdateTagBits();
-			if (!component3.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.creatureMask) && diet.GetDietInfo(component3.PrefabTag) != null)
+			if (!component3.HasAnyTags(SolidConsumerMonitor.creatureTags) && diet.GetDietInfo(component3.PrefabTag) != null)
 			{
 				pooledList.Add(pickupable.gameObject);
 			}
 		}
-		IL_0311:
+		IL_0306:
 		pooledList3.Recycle();
 		Navigator component4 = smi.GetComponent<Navigator>();
 		DrowningMonitor component5 = smi.GetComponent<DrowningMonitor>();
@@ -145,13 +145,11 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 
 	private GameStateMachine<SolidConsumerMonitor, SolidConsumerMonitor.Instance, IStateMachineTarget, SolidConsumerMonitor.Def>.State lookingforfood;
 
-	private static TagBits plantMask = new TagBits(GameTags.GrowingPlant);
-
-	private static TagBits creatureMask = new TagBits(new Tag[]
+	private static Tag[] creatureTags = new Tag[]
 	{
 		GameTags.Creatures.ReservedByCreature,
 		GameTags.CreatureBrain
-	});
+	};
 
 	public class Def : StateMachine.BaseDef
 	{

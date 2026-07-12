@@ -41,7 +41,7 @@ namespace FMODUnityResonance
 			RuntimeManager.CoreSystem.get3DListenerAttributes(0, out FmodResonanceAudio.listenerPositionFmod, out vector, out vector, out vector);
 			Vector3 vector2 = new Vector3(FmodResonanceAudio.listenerPositionFmod.x, FmodResonanceAudio.listenerPositionFmod.y, FmodResonanceAudio.listenerPositionFmod.z) - room.transform.position;
 			Quaternion quaternion = Quaternion.Inverse(room.transform.rotation);
-			FmodResonanceAudio.bounds.size = Vector3.Scale(room.transform.lossyScale, room.size);
+			FmodResonanceAudio.bounds.size = Vector3.Scale(room.transform.lossyScale, room.Size);
 			return FmodResonanceAudio.bounds.Contains(quaternion * vector2);
 		}
 
@@ -85,29 +85,29 @@ namespace FMODUnityResonance
 		{
 			Vector3 position = room.transform.position;
 			Quaternion rotation = room.transform.rotation;
-			Vector3 vector = Vector3.Scale(room.transform.lossyScale, room.size);
+			Vector3 vector = Vector3.Scale(room.transform.lossyScale, room.Size);
 			FmodResonanceAudio.ConvertAudioTransformFromUnity(ref position, ref rotation);
 			FmodResonanceAudio.RoomProperties roomProperties;
-			roomProperties.positionX = position.x;
-			roomProperties.positionY = position.y;
-			roomProperties.positionZ = position.z;
-			roomProperties.rotationX = rotation.x;
-			roomProperties.rotationY = rotation.y;
-			roomProperties.rotationZ = rotation.z;
-			roomProperties.rotationW = rotation.w;
-			roomProperties.dimensionsX = vector.x;
-			roomProperties.dimensionsY = vector.y;
-			roomProperties.dimensionsZ = vector.z;
-			roomProperties.materialLeft = room.leftWall;
-			roomProperties.materialRight = room.rightWall;
-			roomProperties.materialBottom = room.floor;
-			roomProperties.materialTop = room.ceiling;
-			roomProperties.materialFront = room.frontWall;
-			roomProperties.materialBack = room.backWall;
-			roomProperties.reverbGain = FmodResonanceAudio.ConvertAmplitudeFromDb(room.reverbGainDb);
-			roomProperties.reverbTime = room.reverbTime;
-			roomProperties.reverbBrightness = room.reverbBrightness;
-			roomProperties.reflectionScalar = room.reflectivity;
+			roomProperties.PositionX = position.x;
+			roomProperties.PositionY = position.y;
+			roomProperties.PositionZ = position.z;
+			roomProperties.RotationX = rotation.x;
+			roomProperties.RotationY = rotation.y;
+			roomProperties.RotationZ = rotation.z;
+			roomProperties.RotationW = rotation.w;
+			roomProperties.DimensionsX = vector.x;
+			roomProperties.DimensionsY = vector.y;
+			roomProperties.DimensionsZ = vector.z;
+			roomProperties.MaterialLeft = room.LeftWall;
+			roomProperties.MaterialRight = room.RightWall;
+			roomProperties.MaterialBottom = room.Floor;
+			roomProperties.MaterialTop = room.Ceiling;
+			roomProperties.MaterialFront = room.FrontWall;
+			roomProperties.MaterialBack = room.BackWall;
+			roomProperties.ReverbGain = FmodResonanceAudio.ConvertAmplitudeFromDb(room.ReverbGainDb);
+			roomProperties.ReverbTime = room.ReverbTime;
+			roomProperties.ReverbBrightness = room.ReverbBrightness;
+			roomProperties.ReflectionScalar = room.Reflectivity;
 			return roomProperties;
 		}
 
@@ -124,16 +124,15 @@ namespace FMODUnityResonance
 				Bus[] array2 = null;
 				array[i].getBusCount(out num2);
 				array[i].getBusList(out array2);
-				RuntimeManager.StudioSystem.flushCommands();
 				for (int j = 0; j < num2; j++)
 				{
 					string text = null;
 					array2[j].getPath(out text);
 					RuntimeManager.StudioSystem.getBus(text, out array2[j]);
+					array2[j].lockChannelGroup();
 					RuntimeManager.StudioSystem.flushCommands();
 					ChannelGroup channelGroup;
 					array2[j].getChannelGroup(out channelGroup);
-					RuntimeManager.StudioSystem.flushCommands();
 					if (channelGroup.hasHandle())
 					{
 						int num3 = 0;
@@ -151,23 +150,24 @@ namespace FMODUnityResonance
 							}
 						}
 					}
+					array2[j].unlockChannelGroup();
 				}
 			}
-			global::UnityEngine.Debug.LogError(FmodResonanceAudio.listenerPluginName + " not found in the FMOD project.");
+			RuntimeUtils.DebugLogError(FmodResonanceAudio.listenerPluginName + " not found in the FMOD project.");
 			return dsp;
 		}
 
-		public const float maxGainDb = 24f;
+		public const float MaxGainDb = 24f;
 
-		public const float minGainDb = -24f;
+		public const float MinGainDb = -24f;
 
-		public const float maxReverbBrightness = 1f;
+		public const float MaxReverbBrightness = 1f;
 
-		public const float minReverbBrightness = -1f;
+		public const float MinReverbBrightness = -1f;
 
-		public const float maxReverbTime = 3f;
+		public const float MaxReverbTime = 3f;
 
-		public const float maxReflectivity = 2f;
+		public const float MaxReflectivity = 2f;
 
 		private static readonly Matrix4x4 flipZ = Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
 
@@ -187,45 +187,45 @@ namespace FMODUnityResonance
 
 		private struct RoomProperties
 		{
-			public float positionX;
+			public float PositionX;
 
-			public float positionY;
+			public float PositionY;
 
-			public float positionZ;
+			public float PositionZ;
 
-			public float rotationX;
+			public float RotationX;
 
-			public float rotationY;
+			public float RotationY;
 
-			public float rotationZ;
+			public float RotationZ;
 
-			public float rotationW;
+			public float RotationW;
 
-			public float dimensionsX;
+			public float DimensionsX;
 
-			public float dimensionsY;
+			public float DimensionsY;
 
-			public float dimensionsZ;
+			public float DimensionsZ;
 
-			public FmodResonanceAudioRoom.SurfaceMaterial materialLeft;
+			public FmodResonanceAudioRoom.SurfaceMaterial MaterialLeft;
 
-			public FmodResonanceAudioRoom.SurfaceMaterial materialRight;
+			public FmodResonanceAudioRoom.SurfaceMaterial MaterialRight;
 
-			public FmodResonanceAudioRoom.SurfaceMaterial materialBottom;
+			public FmodResonanceAudioRoom.SurfaceMaterial MaterialBottom;
 
-			public FmodResonanceAudioRoom.SurfaceMaterial materialTop;
+			public FmodResonanceAudioRoom.SurfaceMaterial MaterialTop;
 
-			public FmodResonanceAudioRoom.SurfaceMaterial materialFront;
+			public FmodResonanceAudioRoom.SurfaceMaterial MaterialFront;
 
-			public FmodResonanceAudioRoom.SurfaceMaterial materialBack;
+			public FmodResonanceAudioRoom.SurfaceMaterial MaterialBack;
 
-			public float reflectionScalar;
+			public float ReflectionScalar;
 
-			public float reverbGain;
+			public float ReverbGain;
 
-			public float reverbTime;
+			public float ReverbTime;
 
-			public float reverbBrightness;
+			public float ReverbBrightness;
 		}
 	}
 }

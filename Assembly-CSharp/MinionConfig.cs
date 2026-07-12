@@ -201,7 +201,7 @@ public class MinionConfig : IEntityConfig
 				pointName = "snapTo_neck",
 				automatic = false,
 				context = "",
-				buildFile = Assets.GetAnim("helm_oxygen_kanim"),
+				buildFile = Assets.GetAnim("body_oxygen_kanim"),
 				overrideSymbol = "snapTo_neck"
 			},
 			new SnapOn.SnapPoint
@@ -275,9 +275,53 @@ public class MinionConfig : IEntityConfig
 		gameObject.AddOrGet<MinionResume>();
 		DuplicantNoiseLevels.SetupNoiseLevels();
 		this.SetupLaserEffects(gameObject);
+		this.SetupDreams(gameObject);
 		SymbolOverrideControllerUtil.AddToPrefab(gameObject).applySymbolOverridesEveryFrame = true;
 		MinionConfig.ConfigureSymbols(gameObject);
 		return gameObject;
+	}
+
+	private void SetupDreams(GameObject prefab)
+	{
+		GameObject gameObject = new GameObject("Dreams");
+		gameObject.transform.SetParent(prefab.transform, false);
+		KBatchedAnimEventToggler kbatchedAnimEventToggler = gameObject.AddComponent<KBatchedAnimEventToggler>();
+		kbatchedAnimEventToggler.eventSource = prefab;
+		kbatchedAnimEventToggler.enableEvent = "DreamsOn";
+		kbatchedAnimEventToggler.disableEvent = "DreamsOff";
+		kbatchedAnimEventToggler.entries = new List<KBatchedAnimEventToggler.Entry>();
+		MinionConfig.Dream[] array = new MinionConfig.Dream[]
+		{
+			new MinionConfig.Dream
+			{
+				id = "Common Dream",
+				animFile = "dream_tear_swirly_kanim",
+				anim = "dream_loop",
+				context = "sleep"
+			}
+		};
+		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+		foreach (MinionConfig.Dream dream in array)
+		{
+			GameObject gameObject2 = new GameObject(dream.id);
+			gameObject2.transform.SetParent(gameObject.transform, false);
+			gameObject2.AddOrGet<KPrefabID>().PrefabTag = new Tag(dream.id);
+			KBatchedAnimTracker kbatchedAnimTracker = gameObject2.AddOrGet<KBatchedAnimTracker>();
+			kbatchedAnimTracker.controller = component;
+			kbatchedAnimTracker.symbol = new HashedString("snapto_pivot");
+			kbatchedAnimTracker.offset = new Vector3(180f, -300f, 0f);
+			kbatchedAnimTracker.useTargetPoint = true;
+			KBatchedAnimController kbatchedAnimController = gameObject2.AddOrGet<KBatchedAnimController>();
+			kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(dream.animFile) };
+			KBatchedAnimEventToggler.Entry entry = new KBatchedAnimEventToggler.Entry
+			{
+				anim = dream.anim,
+				context = dream.context,
+				controller = kbatchedAnimController
+			};
+			kbatchedAnimEventToggler.entries.Add(entry);
+			gameObject2.AddOrGet<LoopingSounds>();
+		}
 	}
 
 	private void SetupLaserEffects(GameObject prefab)
@@ -551,6 +595,17 @@ public class MinionConfig : IEntityConfig
 	public const int MINION_SUIT_SYMBOL_LAYER = 6;
 
 	public struct LaserEffect
+	{
+		public string id;
+
+		public string animFile;
+
+		public string anim;
+
+		public HashedString context;
+	}
+
+	public struct Dream
 	{
 		public string id;
 

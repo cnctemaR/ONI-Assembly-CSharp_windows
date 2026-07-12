@@ -181,7 +181,7 @@ public class Element : IComparable<Element>
 
 	public Tag tag;
 
-	public byte idx;
+	public ushort idx;
 
 	public float specificHeatCapacity;
 

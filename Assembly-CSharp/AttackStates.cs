@@ -9,7 +9,7 @@ public class AttackStates : GameStateMachine<AttackStates, AttackStates.Instance
 		default_state = this.waitBeforeAttack;
 		this.root.Enter("SetTarget", delegate(AttackStates.Instance smi)
 		{
-			this.target.Set(smi.GetSMI<ThreatMonitor.Instance>().MainThreat, smi);
+			this.target.Set(smi.GetSMI<ThreatMonitor.Instance>().MainThreat, smi, false);
 			this.cellOffsets = smi.def.cellOffsets;
 		});
 		this.waitBeforeAttack.ScheduleGoTo((AttackStates.Instance smi) => global::UnityEngine.Random.Range(0f, 4f), this.approach);

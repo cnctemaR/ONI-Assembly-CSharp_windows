@@ -141,7 +141,6 @@ public class ClusterPOIManager : KMonoBehaviour
 
 	public void PopulatePOIsFromWorldGen(Cluster clusterLayout)
 	{
-		global::Debug.Log("PopulatePOIsFromWorldGen");
 		foreach (KeyValuePair<AxialI, string> keyValuePair in clusterLayout.poiPlacements)
 		{
 			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(keyValuePair.Value), null, null);

@@ -97,7 +97,11 @@ namespace Database
 				Db.Get().SkillPerks.IncreaseCookingSmall,
 				Db.Get().SkillPerks.CanElectricGrill
 			}, null));
-			this.Cooking2 = this.AddSkill(new Skill("Cooking2", DUPLICANTS.ROLES.COOK.NAME, DUPLICANTS.ROLES.COOK.DESCRIPTION, "", 1, "hat_role_cooking2", "skillbadge_role_cooking2", Db.Get().SkillGroups.Cooking.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseCookingMedium }, new List<string> { this.Cooking1.Id }));
+			this.Cooking2 = this.AddSkill(new Skill("Cooking2", DUPLICANTS.ROLES.COOK.NAME, DUPLICANTS.ROLES.COOK.DESCRIPTION, "", 1, "hat_role_cooking2", "skillbadge_role_cooking2", Db.Get().SkillGroups.Cooking.Id, new List<SkillPerk>
+			{
+				Db.Get().SkillPerks.IncreaseCookingMedium,
+				Db.Get().SkillPerks.CanSpiceGrinder
+			}, new List<string> { this.Cooking1.Id }));
 			this.Arting1 = this.AddSkill(new Skill("Arting1", DUPLICANTS.ROLES.JUNIOR_ARTIST.NAME, DUPLICANTS.ROLES.JUNIOR_ARTIST.DESCRIPTION, "", 0, "hat_role_art1", "skillbadge_role_art1", Db.Get().SkillGroups.Art.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.CanArt,

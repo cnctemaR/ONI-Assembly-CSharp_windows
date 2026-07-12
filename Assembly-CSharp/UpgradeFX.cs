@@ -22,7 +22,7 @@ public class UpgradeFX : GameStateMachine<UpgradeFX, UpgradeFX.Instance>
 			: base(master)
 		{
 			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("upgrade_fx_kanim", master.gameObject.transform.GetPosition() + offset, master.gameObject.transform, true, Grid.SceneLayer.Front, false);
-			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
+			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi, false);
 		}
 
 		public void DestroyFX()
@@ -32,16 +32,7 @@ public class UpgradeFX : GameStateMachine<UpgradeFX, UpgradeFX.Instance>
 
 		public Reactable CreateReactable()
 		{
-			return new EmoteReactable(base.master.gameObject, "UpgradeFX", Db.Get().ChoreTypes.Emote, "anim_cheer_kanim", 15, 8, 0f, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "cheer_pre"
-			}).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "cheer_loop"
-			}).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "cheer_pst"
-			});
+			return new EmoteReactable(base.master.gameObject, "UpgradeFX", Db.Get().ChoreTypes.Emote, 15, 8, 0f, 20f, float.PositiveInfinity, 0f).SetEmote(Db.Get().Emotes.Minion.Cheer);
 		}
 	}
 }

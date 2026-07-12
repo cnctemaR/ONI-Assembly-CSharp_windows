@@ -122,7 +122,7 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 
 		public void OnNewDay()
 		{
-			base.smi.sm.rationsAteToday.Set(0f, base.smi);
+			base.smi.sm.rationsAteToday.Set(0f, base.smi, false);
 		}
 
 		public void OnEatComplete(object data)

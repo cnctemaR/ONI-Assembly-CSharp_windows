@@ -14,6 +14,7 @@ public class BuildingLoader : KMonoBehaviour
 		BuildingLoader.Instance = this;
 		this.previewTemplate = this.CreatePreviewTemplate();
 		this.constructionTemplate = this.CreateConstructionTemplate();
+		global::UnityEngine.Object.DontDestroyOnLoad(this.previewTemplate);
 	}
 
 	private GameObject CreateTemplate()
@@ -139,6 +140,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		kprefabID.PrefabTag = new Tag(str);
 		kprefabID.SaveLoadTag = kprefabID.PrefabTag;
+		kprefabID.InitializeTags(true);
 		return kprefabID;
 	}
 

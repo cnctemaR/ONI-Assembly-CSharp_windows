@@ -9,11 +9,6 @@ public class SplashTransitionLayer : TransitionDriver.OverrideLayer
 		this.lastSplashTime = Time.time;
 	}
 
-	public override void Destroy()
-	{
-		base.Destroy();
-	}
-
 	private void RefreshSplashes(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		if (navigator == null)

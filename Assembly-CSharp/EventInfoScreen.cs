@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using FMOD.Studio;
-using STRINGS;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class GameplayEventInfoScreen : KModalScreen
+public class EventInfoScreen : KModalScreen
 {
 	public override bool IsModal()
 	{
 		return true;
 	}
 
-	public void SetEventData(GameplayEventPopupData data)
+	public void SetEventData(EventInfoData data)
 	{
 		data.FinalizeText();
-		this.eventHeader.text = string.Format(UI.GAMEPLAY_EVENT_INFO_SCREEN.TITLE, data.title);
+		this.eventHeader.text = data.title;
 		this.eventDescriptionLabel.text = data.description;
 		this.eventLocationLabel.text = data.location;
 		this.eventTimeLabel.text = data.whenDescription;
@@ -32,13 +31,13 @@ public class GameplayEventInfoScreen : KModalScreen
 		this.SetEventDataVisuals(data);
 	}
 
-	private void SetEventDataOptions(GameplayEventPopupData data)
+	private void SetEventDataOptions(EventInfoData data)
 	{
-		using (List<GameplayEventPopupData.PopupOption>.Enumerator enumerator = data.options.GetEnumerator())
+		using (List<EventInfoData.Option>.Enumerator enumerator = data.options.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
-				GameplayEventPopupData.PopupOption option = enumerator.Current;
+				EventInfoData.Option option = enumerator.Current;
 				GameObject gameObject = global::Util.KInstantiateUI(this.optionPrefab, this.buttonsGroup, false);
 				gameObject.name = "Option: " + option.mainText;
 				KButton component = gameObject.GetComponent<KButton>();
@@ -59,14 +58,14 @@ public class GameplayEventInfoScreen : KModalScreen
 				{
 					gameObject.GetComponent<ToolTip>().enabled = false;
 				}
-				foreach (GameplayEventPopupData.PopupOptionIcon popupOptionIcon in option.informationIcons)
+				foreach (EventInfoData.OptionIcon optionIcon in option.informationIcons)
 				{
-					this.CreateOptionIcon(gameObject, popupOptionIcon);
+					this.CreateOptionIcon(gameObject, optionIcon);
 				}
 				global::Util.KInstantiateUI(this.optionTextPrefab, gameObject, false).GetComponent<LocText>().text = ((option.description == null) ? ("<b>" + option.mainText + "</b>") : string.Concat(new string[] { "<b>", option.mainText, "</b>\n<i>(", option.description, ")</i>" }));
-				foreach (GameplayEventPopupData.PopupOptionIcon popupOptionIcon2 in option.consequenceIcons)
+				foreach (EventInfoData.OptionIcon optionIcon2 in option.consequenceIcons)
 				{
-					this.CreateOptionIcon(gameObject, popupOptionIcon2);
+					this.CreateOptionIcon(gameObject, optionIcon2);
 				}
 				gameObject.SetActive(true);
 			}
@@ -79,7 +78,7 @@ public class GameplayEventInfoScreen : KModalScreen
 		base.Deactivate();
 	}
 
-	private void CreateOptionIcon(GameObject option, GameplayEventPopupData.PopupOptionIcon optionIcon)
+	private void CreateOptionIcon(GameObject option, EventInfoData.OptionIcon optionIcon)
 	{
 		GameObject gameObject = global::Util.KInstantiateUI(this.optionIconPrefab, option, false);
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(optionIcon.tooltip);
@@ -94,7 +93,7 @@ public class GameplayEventInfoScreen : KModalScreen
 		Color32 color = Color.white;
 		switch (optionIcon.containerType)
 		{
-		case GameplayEventPopupData.PopupOptionIcon.ContainerType.Neutral:
+		case EventInfoData.OptionIcon.ContainerType.Neutral:
 			reference.sprite = Assets.GetSprite("container_fill_neutral");
 			reference2.sprite = Assets.GetSprite("container_border_neutral");
 			if (optionIcon.sprite == null)
@@ -103,7 +102,7 @@ public class GameplayEventInfoScreen : KModalScreen
 			}
 			color = GlobalAssets.Instance.colorSet.eventNeutral;
 			break;
-		case GameplayEventPopupData.PopupOptionIcon.ContainerType.Positive:
+		case EventInfoData.OptionIcon.ContainerType.Positive:
 			reference.sprite = Assets.GetSprite("container_fill_positive");
 			reference2.sprite = Assets.GetSprite("container_border_positive");
 			reference3.rectTransform.localPosition += Vector3.down * 1f;
@@ -113,7 +112,7 @@ public class GameplayEventInfoScreen : KModalScreen
 			}
 			color = GlobalAssets.Instance.colorSet.eventPositive;
 			break;
-		case GameplayEventPopupData.PopupOptionIcon.ContainerType.Negative:
+		case EventInfoData.OptionIcon.ContainerType.Negative:
 			reference.sprite = Assets.GetSprite("container_fill_negative");
 			reference2.sprite = Assets.GetSprite("container_border_negative");
 			reference3.rectTransform.localPosition += Vector3.up * 1f;
@@ -123,7 +122,7 @@ public class GameplayEventInfoScreen : KModalScreen
 				optionIcon.sprite = Assets.GetSprite("cancel");
 			}
 			break;
-		case GameplayEventPopupData.PopupOptionIcon.ContainerType.Information:
+		case EventInfoData.OptionIcon.ContainerType.Information:
 			reference.sprite = Assets.GetSprite("requirements");
 			reference2.enabled = false;
 			break;
@@ -136,38 +135,27 @@ public class GameplayEventInfoScreen : KModalScreen
 		}
 	}
 
-	private void SetEventDataVisuals(GameplayEventPopupData data)
+	private void SetEventDataVisuals(EventInfoData data)
 	{
 		this.createdAnimations.ForEach(delegate(KBatchedAnimController x)
 		{
 			global::UnityEngine.Object.Destroy(x);
 		});
 		this.createdAnimations.Clear();
-		Sprite sprite = Assets.GetSprite(data.backgroundFileName);
-		if (sprite != null)
-		{
-			this.backgroundImage1.sprite = sprite;
-			this.backgroundImage1.color = data.backgroundTint;
-		}
-		else
-		{
-			this.backgroundImage1.sprite = Assets.GetSprite("event_bg_01");
-			DebugUtil.LogWarningArgs(new object[] { "No background set for '" + data.title + "'" });
-		}
 		KAnimFile anim = Assets.GetAnim(data.animFileName);
 		if (anim == null)
 		{
 			global::Debug.LogWarning("Event " + data.title + " has no anim data");
 			return;
 		}
-		KBatchedAnimController component = this.CreateAnimLayer(this.midgroundGroup, anim, "event", null, null, null).transform.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController component = this.CreateAnimLayer(this.midgroundGroup, anim, data.mainAnim, null, null, null).transform.GetComponent<KBatchedAnimController>();
 		if (data.minions != null)
 		{
 			for (int i = 0; i < data.minions.Length; i++)
 			{
 				if (data.minions[i] == null)
 				{
-					DebugUtil.LogWarningArgs(new object[] { string.Format("GameplayEventInfoScreen unable to display minion {0}", i) });
+					DebugUtil.LogWarningArgs(new object[] { string.Format("EventInfoScreen unable to display minion {0}", i) });
 				}
 				string text = string.Format("dupe{0:D2}", i + 1);
 				if (component.HasAnimation(text))
@@ -191,13 +179,20 @@ public class GameplayEventInfoScreen : KModalScreen
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.animPrefab, parent);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		this.createdAnimations.Add(component);
-		component.AnimFiles = new KAnimFile[]
+		if (minion != null)
 		{
-			Assets.GetAnim("body_comp_default_kanim"),
-			Assets.GetAnim("head_swap_kanim"),
-			Assets.GetAnim("body_swap_kanim"),
-			animFile
-		};
+			component.AnimFiles = new KAnimFile[]
+			{
+				Assets.GetAnim("body_comp_default_kanim"),
+				Assets.GetAnim("head_swap_kanim"),
+				Assets.GetAnim("body_swap_kanim"),
+				animFile
+			};
+		}
+		else
+		{
+			component.AnimFiles = new KAnimFile[] { animFile };
+		}
 		if (minion != null)
 		{
 			SymbolOverrideController component2 = component.GetComponent<SymbolOverrideController>();
@@ -235,6 +230,49 @@ public class GameplayEventInfoScreen : KModalScreen
 		component.Play(animName, KAnim.PlayMode.Loop, 1f, 0f);
 		component.animScale = this.baseCharacterScale;
 		return gameObject;
+	}
+
+	public static EventInfoScreen ShowPopup(EventInfoData eventInfoData)
+	{
+		EventInfoScreen eventInfoScreen = (EventInfoScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.eventInfoScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject);
+		eventInfoScreen.SetEventData(eventInfoData);
+		AudioMixer.instance.Start(AudioMixerSnapshots.Get().EventPopupSnapshot);
+		if (eventInfoData.showCallback != null)
+		{
+			eventInfoData.showCallback();
+		}
+		if (eventInfoData.clickFocus != null)
+		{
+			WorldContainer myWorld = eventInfoData.clickFocus.gameObject.GetMyWorld();
+			if (myWorld != null && myWorld.IsDiscovered)
+			{
+				CameraController.Instance.ActiveWorldStarWipe(myWorld.id, eventInfoData.clickFocus.position, 10f, null);
+			}
+		}
+		return eventInfoScreen;
+	}
+
+	public static Notification CreateNotification(EventInfoData eventInfoData, Notification.ClickCallback clickCallback = null)
+	{
+		if (eventInfoData == null)
+		{
+			DebugUtil.LogWarningArgs(new object[] { "eventPopup is null in CreateStandardEventNotification" });
+			return null;
+		}
+		eventInfoData.FinalizeText();
+		Notification notification = new Notification(eventInfoData.title, NotificationType.Event, null, null, false, 0f, null, null, eventInfoData.clickFocus, true, false);
+		if (clickCallback == null)
+		{
+			notification.customClickCallback = delegate(object data)
+			{
+				EventInfoScreen.ShowPopup(eventInfoData);
+			};
+		}
+		else
+		{
+			notification.customClickCallback = clickCallback;
+		}
+		return notification;
 	}
 
 	[SerializeField]
@@ -296,19 +334,6 @@ public class GameplayEventInfoScreen : KModalScreen
 
 	[SerializeField]
 	private ColorStyleSetting goodButtonSetting;
-
-	[Header("Backgrounds")]
-	[SerializeField]
-	private Image foregroundImage2;
-
-	[SerializeField]
-	private Image foregroundImage1;
-
-	[SerializeField]
-	private Image backgroundImage1;
-
-	[SerializeField]
-	private Image backgroundImage2;
 
 	private List<KBatchedAnimController> createdAnimations = new List<KBatchedAnimController>();
 }

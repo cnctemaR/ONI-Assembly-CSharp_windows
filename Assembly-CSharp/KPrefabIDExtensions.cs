@@ -5,22 +5,32 @@ public static class KPrefabIDExtensions
 {
 	public static Tag PrefabID(this Component cmp)
 	{
-		return cmp.gameObject.PrefabID();
+		return cmp.GetComponent<KPrefabID>().PrefabID();
 	}
 
 	public static Tag PrefabID(this GameObject go)
 	{
-		return go.GetComponent<KPrefabID>().PrefabTag;
+		return go.GetComponent<KPrefabID>().PrefabID();
 	}
 
 	public static Tag PrefabID(this StateMachine.Instance smi)
 	{
-		return smi.GetComponent<KPrefabID>().PrefabTag;
+		return smi.GetComponent<KPrefabID>().PrefabID();
+	}
+
+	public static bool IsPrefabID(this Component cmp, Tag id)
+	{
+		return cmp.GetComponent<KPrefabID>().IsPrefabID(id);
+	}
+
+	public static bool IsPrefabID(this GameObject go, Tag id)
+	{
+		return go.GetComponent<KPrefabID>().IsPrefabID(id);
 	}
 
 	public static bool HasTag(this Component cmp, Tag tag)
 	{
-		return cmp.gameObject.HasTag(tag);
+		return cmp.GetComponent<KPrefabID>().HasTag(tag);
 	}
 
 	public static bool HasTag(this GameObject go, Tag tag)
@@ -30,7 +40,7 @@ public static class KPrefabIDExtensions
 
 	public static bool HasAnyTags(this Component cmp, Tag[] tags)
 	{
-		return cmp.gameObject.HasAnyTags(tags);
+		return cmp.GetComponent<KPrefabID>().HasAnyTags(tags);
 	}
 
 	public static bool HasAnyTags(this GameObject go, Tag[] tags)
@@ -40,7 +50,7 @@ public static class KPrefabIDExtensions
 
 	public static bool HasAllTags(this Component cmp, Tag[] tags)
 	{
-		return cmp.gameObject.HasAllTags(tags);
+		return cmp.GetComponent<KPrefabID>().HasAllTags(tags);
 	}
 
 	public static bool HasAllTags(this GameObject go, Tag[] tags)
@@ -55,7 +65,7 @@ public static class KPrefabIDExtensions
 
 	public static void AddTag(this Component cmp, Tag tag)
 	{
-		cmp.gameObject.AddTag(tag);
+		cmp.GetComponent<KPrefabID>().AddTag(tag, false);
 	}
 
 	public static void RemoveTag(this GameObject go, Tag tag)
@@ -65,6 +75,6 @@ public static class KPrefabIDExtensions
 
 	public static void RemoveTag(this Component cmp, Tag tag)
 	{
-		cmp.gameObject.RemoveTag(tag);
+		cmp.GetComponent<KPrefabID>().RemoveTag(tag);
 	}
 }

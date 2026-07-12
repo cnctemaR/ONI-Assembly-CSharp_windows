@@ -28,7 +28,7 @@ public class WattsonMessage : KScreen
 
 	private IEnumerator ExpandPanel()
 	{
-		yield return new WaitForSecondsRealtime(0.2f);
+		yield return SequenceUtil.WaitForSecondsRealtime(0.2f);
 		float height = 0f;
 		while (height < 299f)
 		{
@@ -154,7 +154,7 @@ public class WattsonMessage : KScreen
 		}
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("GoHome", 0.1f, delegate(object data)
 		{
-			CameraController.Instance.SetOrthographicsSize(TuningData<WattsonMessage.Tuning>.Get().initialOrthographicSize);
+			CameraController.Instance.OrthographicSize = TuningData<WattsonMessage.Tuning>.Get().initialOrthographicSize;
 			CameraController.Instance.CameraGoHome(0.5f);
 			this.startFade = true;
 			MusicManager.instance.PlaySong("Music_WattsonMessage", false);
@@ -266,8 +266,7 @@ public class WattsonMessage : KScreen
 	private KButton button;
 
 	[SerializeField]
-	[EventRef]
-	private string dialogSound;
+	private EventReference dialogSound;
 
 	private List<KScreen> hideScreensWhileActive = new List<KScreen>();
 

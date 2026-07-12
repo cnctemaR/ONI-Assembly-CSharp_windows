@@ -147,7 +147,7 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 	{
 		float num = this.storage.GetMassAvailable(this.gasElement) / this.maxGasPressure;
 		num = Mathf.Clamp01(num);
-		this.smi.sm.pressurePercent.Set(num, this.smi);
+		this.smi.sm.pressurePercent.Set(num, this.smi, false);
 		this.pressureMeter.SetPositionPercent(num);
 	}
 
@@ -166,13 +166,13 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.smi.sm.working.Set(true, this.smi);
+		this.smi.sm.working.Set(true, this.smi, false);
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
-		this.smi.sm.working.Set(false, this.smi);
+		this.smi.sm.working.Set(false, this.smi, false);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -291,7 +291,7 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 
 		private bool IsAbleToPump(OilWellCap.StatesInstance smi)
 		{
-			return smi.master.operational.IsOperational && smi.GetComponent<ElementConverter>().HasEnoughMassToStartConverting();
+			return smi.master.operational.IsOperational && smi.GetComponent<ElementConverter>().HasEnoughMassToStartConverting(false);
 		}
 
 		private bool MustStopPumping(OilWellCap.StatesInstance smi)

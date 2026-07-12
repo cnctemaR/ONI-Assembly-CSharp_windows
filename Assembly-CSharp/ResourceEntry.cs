@@ -76,7 +76,7 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 	{
 		while (this.cachedPickupables != null && this.lastClickTime != 0f && Time.unscaledTime - this.lastClickTime < 10f)
 		{
-			yield return new WaitForSeconds(1f);
+			yield return SequenceUtil.WaitForSeconds(1f);
 		}
 		this.cachedPickupables = null;
 		yield break;

@@ -310,14 +310,10 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		foreach (AssignableSlotInstance assignableSlotInstance in driver.GetComponent<MinionIdentity>().GetEquipment().Slots)
 		{
 			Equippable equippable = ((EquipmentSlotInstance)assignableSlotInstance).assignable as Equippable;
-			if (equippable)
+			if (equippable && equippable.GetComponent<KPrefabID>().IsAnyPrefabID(ColonyAchievementTracker.SuitTags))
 			{
-				KPrefabID component = equippable.GetComponent<KPrefabID>();
-				if (component.HasTag(GameTags.AtmoSuit) || component.HasTag(GameTags.JetSuit) || component.HasTag(GameTags.LeadSuit))
-				{
-					flag = true;
-					break;
-				}
+				flag = true;
+				break;
 			}
 		}
 		if (flag)
@@ -456,6 +452,13 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 		ColonyAchievementTracker.UnlockedAchievementKey,
 		null
 	} };
+
+	private static readonly Tag[] SuitTags = new Tag[]
+	{
+		GameTags.AtmoSuit,
+		GameTags.JetSuit,
+		GameTags.LeadSuit
+	};
 
 	private static readonly EventSystem.IntraObjectHandler<ColonyAchievementTracker> OnNewDayDelegate = new EventSystem.IntraObjectHandler<ColonyAchievementTracker>(delegate(ColonyAchievementTracker component, object data)
 	{

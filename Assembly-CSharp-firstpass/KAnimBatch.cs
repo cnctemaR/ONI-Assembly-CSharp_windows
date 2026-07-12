@@ -499,6 +499,11 @@ public class KAnimBatch
 			}
 		}
 
+		public List<Texture2D> GetTextures()
+		{
+			return this.atlases;
+		}
+
 		private List<Texture2D> atlases = new List<Texture2D>();
 
 		private int startIdx;

@@ -76,7 +76,7 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			{
 				return;
 			}
-			base.sm.automated.Set(base.sm.automated.Get(smi), this);
+			base.sm.automated.Set(base.sm.automated.Get(smi), this, false);
 		}
 
 		public Chore CreateChore()
@@ -217,7 +217,7 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 
 		void ICheckboxControl.SetCheckboxValue(bool value)
 		{
-			base.sm.automated.Set(value, this);
+			base.sm.automated.Set(value, this, false);
 		}
 	}
 }

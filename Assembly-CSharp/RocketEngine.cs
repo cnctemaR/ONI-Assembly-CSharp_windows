@@ -51,7 +51,7 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>
 					int num = Grid.PosToCell(smi.master.gameObject.transform.GetPosition() + smi.master.GetComponent<KBatchedAnimController>().Offset);
 					if (Grid.IsValidCell(num))
 					{
-						SimMessages.EmitMass(num, (byte)ElementLoader.GetElementIndex(smi.master.exhaustElement), dt * smi.master.exhaustEmitRate, smi.master.exhaustTemperature, 0, 0, -1);
+						SimMessages.EmitMass(num, ElementLoader.GetElementIndex(smi.master.exhaustElement), dt * smi.master.exhaustEmitRate, smi.master.exhaustTemperature, 0, 0, -1);
 					}
 					int num2 = 10;
 					for (int i = 1; i < num2; i++)

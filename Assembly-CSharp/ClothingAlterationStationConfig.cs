@@ -55,21 +55,18 @@ public class ClothingAlterationStationConfig : IBuildingConfig
 			new ComplexRecipe.RecipeElement("Funky_Vest".ToTag(), 1f, false),
 			new ComplexRecipe.RecipeElement("BasicFabric".ToTag(), 3f)
 		};
-		foreach (EquippableFacadeResource equippableFacadeResource in Db.Get().EquippableFacades.resources.FindAll((EquippableFacadeResource match) => match.DefID == "CustomClothing"))
+		foreach (EquippableFacadeResource equippableFacadeResource in Db.GetEquippableFacades().resources.FindAll((EquippableFacadeResource match) => match.DefID == "CustomClothing"))
 		{
 			ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 			{
 				new ComplexRecipe.RecipeElement("CustomClothing".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, equippableFacadeResource.Id, false)
 			};
-			string text = ComplexRecipeManager.MakeRecipeID("ClothingAlterationStation", array, array2, equippableFacadeResource.Id);
-			CustomClothingConfig.facadeRecipes.Add(new ComplexRecipe(text, array, array2)
-			{
-				time = global::TUNING.EQUIPMENT.VESTS.CUSTOM_CLOTHING_FABTIME,
-				description = global::STRINGS.EQUIPMENT.PREFABS.CUSTOMCLOTHING.RECIPE_DESC,
-				nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
-				fabricators = new List<Tag> { "ClothingAlterationStation" },
-				sortOrder = 1
-			});
+			ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingAlterationStation", array, array2, equippableFacadeResource.Id), array, array2);
+			complexRecipe.time = global::TUNING.EQUIPMENT.VESTS.CUSTOM_CLOTHING_FABTIME;
+			complexRecipe.description = global::STRINGS.EQUIPMENT.PREFABS.CUSTOMCLOTHING.RECIPE_DESC;
+			complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
+			complexRecipe.fabricators = new List<Tag> { "ClothingAlterationStation" };
+			complexRecipe.sortOrder = 1;
 		}
 	}
 
@@ -79,11 +76,12 @@ public class ClothingAlterationStationConfig : IBuildingConfig
 		{
 			ComplexFabricatorWorkable component = game_object.GetComponent<ComplexFabricatorWorkable>();
 			component.WorkerStatusItem = Db.Get().DuplicantStatusItems.Fabricating;
-			component.AttributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+			component.AttributeConverter = Db.Get().AttributeConverters.ArtSpeed;
 			component.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
-			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Technicals.Id;
+			component.SkillExperienceSkillGroup = Db.Get().SkillGroups.Art.Id;
 			component.SkillExperienceMultiplier = SKILLS.PART_DAY_EXPERIENCE;
 			component.requiredSkillPerk = Db.Get().SkillPerks.CanClothingAlteration.Id;
+			game_object.GetComponent<ComplexFabricator>().choreType = Db.Get().ChoreTypes.Art;
 		};
 	}
 

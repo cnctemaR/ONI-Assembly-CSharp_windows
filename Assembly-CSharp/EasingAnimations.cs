@@ -55,7 +55,7 @@ public class EasingAnimations : MonoBehaviour
 		float startTime = Time.realtimeSinceStartup;
 		while (Time.realtimeSinceStartup < startTime + delay)
 		{
-			yield return null;
+			yield return SequenceUtil.WaitForNextFrame;
 		}
 		startTime = Time.realtimeSinceStartup;
 		bool keepAnimating = true;
@@ -76,7 +76,7 @@ public class EasingAnimations : MonoBehaviour
 				this.currentAnimation.currentScale = this.currentAnimation.endScale;
 			}
 			base.transform.localScale = Vector3.one * this.currentAnimation.currentScale;
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 		}
 		this.animationCoroutine = null;
 		if (this.OnAnimationDone != null)

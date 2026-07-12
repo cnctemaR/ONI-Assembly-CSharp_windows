@@ -16,7 +16,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 		{
 			this.fuelDelivery.capacity = value * 2f;
 			this.fuelDelivery.refillMass = value * 0.2f;
-			this.fuelDelivery.minimumMass = value * 0.2f;
+			this.fuelDelivery.MinimumMass = value * 0.2f;
 			this.reactionMassTarget = value;
 		}
 	}
@@ -82,7 +82,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 	public Notification CreateMeltdownNotification()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
-		return new Notification(MISC.NOTIFICATIONS.REACTORMELTDOWN.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REACTORMELTDOWN.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), false, 0f, null, null, null, true);
+		return new Notification(MISC.NOTIFICATIONS.REACTORMELTDOWN.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REACTORMELTDOWN.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), false, 0f, null, null, null, true, false);
 	}
 
 	public void SetStorages(Storage supply, Storage reaction, Storage waste)
@@ -278,14 +278,14 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 		{
 			if (component.HasStatusItem(Db.Get().BuildingStatusItems.GasVentOverPressure))
 			{
-				base.smi.sm.canVent.Set(true, base.smi);
+				base.smi.sm.canVent.Set(true, base.smi, false);
 				component.RemoveStatusItem(Db.Get().BuildingStatusItems.GasVentOverPressure, false);
 				return;
 			}
 		}
 		else if (!component.HasStatusItem(Db.Get().BuildingStatusItems.GasVentOverPressure))
 		{
-			base.smi.sm.canVent.Set(false, base.smi);
+			base.smi.sm.canVent.Set(false, base.smi, false);
 			component.AddStatusItem(Db.Get().BuildingStatusItems.GasVentOverPressure, null);
 		}
 	}
@@ -453,7 +453,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 				}, UpdateRate.SIM_1000ms, false);
 			this.on.Enter(delegate(Reactor.StatesInstance smi)
 			{
-				smi.sm.reactionUnderway.Set(true, smi);
+				smi.sm.reactionUnderway.Set(true, smi, false);
 				smi.master.operational.SetActive(true, false);
 				smi.master.SetEmitRads(2400f);
 				smi.master.radEmitter.SetEmitting(true);
@@ -462,7 +462,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 				smi.master.numCyclesRunning++;
 			}).Exit(delegate(Reactor.StatesInstance smi)
 			{
-				smi.sm.reactionUnderway.Set(false, smi);
+				smi.sm.reactionUnderway.Set(false, smi, false);
 				smi.master.numCyclesRunning = 0;
 			})
 				.Update(delegate(Reactor.StatesInstance smi, float dt)
@@ -492,7 +492,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 						smi.master.temperatureMeter.SetPositionPercent(Mathf.Clamp01(activeFuel.Temperature / 3000f) / Reactor.meterFrameScaleHack);
 						if (activeFuel.Temperature >= 3000f)
 						{
-							smi.sm.meltdownMassRemaining.Set(10f + smi.master.supplyStorage.MassStored() + smi.master.reactionStorage.MassStored() + smi.master.wasteStorage.MassStored(), smi);
+							smi.sm.meltdownMassRemaining.Set(10f + smi.master.supplyStorage.MassStored() + smi.master.reactionStorage.MassStored() + smi.master.wasteStorage.MassStored(), smi, false);
 							smi.master.supplyStorage.ConsumeAllIgnoringDisease();
 							smi.master.reactionStorage.ConsumeAllIgnoringDisease();
 							smi.master.wasteStorage.ConsumeAllIgnoringDisease();
@@ -547,10 +547,10 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 					MusicManager.instance.SetSongParameter(Reactor.MELTDOWN_STINGER, "Music_PlayStinger", 1f, true);
 					MusicManager.instance.StopDynamicMusic(false);
 				}
-				this.meltingDown.Set(true, smi);
+				this.meltingDown.Set(true, smi, false);
 			}).Exit(delegate(Reactor.StatesInstance smi)
 			{
-				this.meltingDown.Set(false, smi);
+				this.meltingDown.Set(false, smi, false);
 				MusicManager.instance.SetSongParameter(Reactor.MELTDOWN_STINGER, "Music_NuclearMeltdownActive", 0f, true);
 			})
 				.Update(delegate(Reactor.StatesInstance smi, float dt)
@@ -596,7 +596,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 			{
 				smi.master.temperatureMeter.SetPositionPercent(1f / Reactor.meterFrameScaleHack);
 				smi.master.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.DeadReactorCoolingOff, smi);
-				this.melted.Set(true, smi);
+				this.melted.Set(true, smi, false);
 			})
 				.Exit(delegate(Reactor.StatesInstance smi)
 				{

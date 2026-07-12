@@ -40,13 +40,13 @@ public class AtmoicGardenConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		manualDeliveryKG.requestedItemTag = new Tag("Dirt");
+		manualDeliveryKG.RequestedItemTag = new Tag("Dirt");
 		manualDeliveryKG.capacity = 136.5f;
 		manualDeliveryKG.refillMass = 19.5f;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		manualDeliveryKG2.requestedItemTag = new Tag("Phosphorite");
+		manualDeliveryKG2.RequestedItemTag = new Tag("Phosphorite");
 		manualDeliveryKG2.capacity = 54.6f;
 		manualDeliveryKG2.refillMass = 7.7999997f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
@@ -59,13 +59,13 @@ public class AtmoicGardenConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 0.039f),
-			new ElementConverter.ConsumedElement(new Tag("Dirt"), 0.065f),
-			new ElementConverter.ConsumedElement(new Tag("Phosphorite"), 0.025999999f)
+			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 0.039f, true),
+			new ElementConverter.ConsumedElement(new Tag("Dirt"), 0.065f, true),
+			new ElementConverter.ConsumedElement(new Tag("Phosphorite"), 0.025999999f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.12f, SimHashes.Fertilizer, 323.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.12f, SimHashes.Fertilizer, 323.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0, true)
 		};
 		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
 		buildingElementEmitter.emitRate = 0.01f;

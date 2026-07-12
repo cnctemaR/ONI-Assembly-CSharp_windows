@@ -20,7 +20,7 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 		public StatesInstance(BansheeChore master, GameObject wailer, Notification notification)
 			: base(master)
 		{
-			base.sm.wailer.Set(wailer, base.smi);
+			base.sm.wailer.Set(wailer, base.smi, false);
 			this.notification = notification;
 		}
 
@@ -51,7 +51,7 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 			{
 				num3 = this.FindIdleCell();
 			}
-			base.sm.targetWailLocation.Set(num3, base.smi);
+			base.sm.targetWailLocation.Set(num3, base.smi, false);
 			this.GoTo(base.sm.moveToAudience);
 		}
 
@@ -112,10 +112,10 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 		{
 			default_state = this.findAudience;
 			base.Target(this.wailer);
-			this.wailPreEffect = new Effect("BansheeWailing", DUPLICANTS.MODIFIERS.BANSHEE_WAILING.NAME, DUPLICANTS.MODIFIERS.BANSHEE_WAILING.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
+			this.wailPreEffect = new Effect("BansheeWailing", DUPLICANTS.MODIFIERS.BANSHEE_WAILING.NAME, DUPLICANTS.MODIFIERS.BANSHEE_WAILING.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 			this.wailPreEffect.Add(new AttributeModifier("AirConsumptionRate", 7.5f, null, false, false, true));
 			Db.Get().effects.Add(this.wailPreEffect);
-			this.wailRecoverEffect = new Effect("BansheeWailingRecovery", DUPLICANTS.MODIFIERS.BANSHEE_WAILING_RECOVERY.NAME, DUPLICANTS.MODIFIERS.BANSHEE_WAILING_RECOVERY.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
+			this.wailRecoverEffect = new Effect("BansheeWailingRecovery", DUPLICANTS.MODIFIERS.BANSHEE_WAILING_RECOVERY.NAME, DUPLICANTS.MODIFIERS.BANSHEE_WAILING_RECOVERY.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 			this.wailRecoverEffect.Add(new AttributeModifier("AirConsumptionRate", 1f, null, false, false, true));
 			Db.Get().effects.Add(this.wailRecoverEffect);
 			this.findAudience.Enter("FindAudience", delegate(BansheeChore.StatesInstance smi)

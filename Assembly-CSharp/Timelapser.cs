@@ -110,7 +110,7 @@ public class Timelapser : KMonoBehaviour
 					this.worldsToScreenshot.Clear();
 					return;
 				}
-				if (!PlayerController.Instance.IsDragging())
+				if (!PlayerController.Instance.CanDrag())
 				{
 					CameraController.Instance.ForcePanningState(false);
 					this.screenshotToday = false;
@@ -132,10 +132,9 @@ public class Timelapser : KMonoBehaviour
 
 	private IEnumerator Render()
 	{
-		WaitForEndOfFrame wait = new WaitForEndOfFrame();
 		for (;;)
 		{
-			yield return wait;
+			yield return SequenceUtil.WaitForEndOfFrame;
 			if (this.screenshotPending)
 			{
 				int num = (this.previewScreenshot ? ClusterManager.Instance.GetStartWorld().id : this.worldsToScreenshot[0]);
@@ -204,7 +203,7 @@ public class Timelapser : KMonoBehaviour
 		this.camPosition = CameraController.Instance.transform.position;
 		if (!world.IsStartWorld)
 		{
-			CameraController.Instance.SetOrthographicsSize((float)(world.WorldSize.y / 2));
+			CameraController.Instance.OrthographicSize = (float)(world.WorldSize.y / 2);
 			CameraController.Instance.SetPosition(new Vector3((float)(world.WorldOffset.x + world.WorldSize.x / 2), (float)(world.WorldOffset.y + world.WorldSize.y / 2), CameraController.Instance.transform.position.z));
 			return;
 		}
@@ -228,7 +227,7 @@ public class Timelapser : KMonoBehaviour
 		}
 		num += 10f;
 		num = Mathf.Max(num, 18f);
-		CameraController.Instance.SetOrthographicsSize(num);
+		CameraController.Instance.OrthographicSize = num;
 		CameraController.Instance.SetPosition(new Vector3(telepad.transform.position.x, telepad.transform.position.y, CameraController.Instance.transform.position.z));
 	}
 
@@ -259,7 +258,7 @@ public class Timelapser : KMonoBehaviour
 		RenderTexture.active = this.bufferRenderTexture;
 		CameraController.Instance.RenderForTimelapser(ref this.bufferRenderTexture);
 		this.WriteToPng(this.bufferRenderTexture, world_id);
-		CameraController.Instance.SetOrthographicsSize(this.camSize);
+		CameraController.Instance.OrthographicSize = this.camSize;
 		CameraController.Instance.SetPosition(this.camPosition);
 		RenderTexture.active = active;
 	}

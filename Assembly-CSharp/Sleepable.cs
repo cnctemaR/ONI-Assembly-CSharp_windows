@@ -6,15 +6,11 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/Workable/Sleepable")]
 public class Sleepable : Workable
 {
-	private Sleepable()
-	{
-		base.SetReportType(ReportManager.ReportType.PersonalTime);
-		this.showProgressBar = false;
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+		this.showProgressBar = false;
 		this.workerStatusItem = null;
 		this.synchronizeAnims = false;
 		this.triggerWorkReactions = false;
@@ -70,12 +66,13 @@ public class Sleepable : Workable
 	{
 		if (this.isDoneSleeping)
 		{
-			if (Time.time > this.wakeTime)
-			{
-				return true;
-			}
+			return Time.time > this.wakeTime;
 		}
-		else if (worker.GetSMI<StaminaMonitor.Instance>().ShouldExitSleep())
+		if (this.Dreamable != null && !this.Dreamable.DreamIsDisturbed)
+		{
+			this.Dreamable.WorkTick(worker, dt);
+		}
+		if (worker.GetSMI<StaminaMonitor.Instance>().ShouldExitSleep())
 		{
 			this.isDoneSleeping = true;
 			this.wakeTime = Time.time + global::UnityEngine.Random.value * 3f;
@@ -104,7 +101,7 @@ public class Sleepable : Workable
 			}
 			if (this.stretchOnWake && global::UnityEngine.Random.value < 0.33f)
 			{
-				new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_morning_stretch_kanim", new HashedString[] { "react" }, null);
+				new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, Db.Get().Emotes.Minion.MorningStretch, 1, null);
 			}
 			if (worker.GetAmounts().Get(Db.Get().Amounts.Stamina).value < worker.GetAmounts().Get(Db.Get().Amounts.Stamina).GetMax())
 			{
@@ -151,6 +148,8 @@ public class Sleepable : Workable
 	private float wakeTime;
 
 	private bool isDoneSleeping;
+
+	public ClinicDreamable Dreamable;
 
 	private static readonly HashedString[] normalWorkAnims = new HashedString[] { "working_pre", "working_loop" };
 

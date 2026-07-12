@@ -10,7 +10,7 @@ public class RadiationLight : StateMachineComponent<RadiationLight.StatesInstanc
 
 	public bool HasEnoughFuel()
 	{
-		return this.elementConverter.HasEnoughMassToStartConverting();
+		return this.elementConverter.HasEnoughMassToStartConverting(false);
 	}
 
 	protected override void OnSpawn()

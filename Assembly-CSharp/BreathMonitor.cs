@@ -89,7 +89,7 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		{
 			num = PathFinder.InvalidCell;
 		}
-		smi.sm.recoverBreathCell.Set(num, smi);
+		smi.sm.recoverBreathCell.Set(num, smi, false);
 	}
 
 	public BreathMonitor.SatisfiedState satisfied;

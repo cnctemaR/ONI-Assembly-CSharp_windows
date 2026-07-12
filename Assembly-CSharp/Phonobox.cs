@@ -91,13 +91,13 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IGameObj
 	public void AddWorker(Worker player)
 	{
 		this.players.Add(player);
-		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
+		base.smi.sm.playerCount.Set(this.players.Count, base.smi, false);
 	}
 
 	public void RemoveWorker(Worker player)
 	{
 		this.players.Remove(player);
-		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
+		base.smi.sm.playerCount.Set(this.players.Count, base.smi, false);
 	}
 
 	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)

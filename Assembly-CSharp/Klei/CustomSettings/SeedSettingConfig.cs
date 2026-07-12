@@ -6,13 +6,13 @@ namespace Klei.CustomSettings
 	public class SeedSettingConfig : SettingConfig
 	{
 		public SeedSettingConfig(string id, string label, string tooltip, bool debug_only = false, bool triggers_custom_game = true)
-			: base(id, label, tooltip, "", "", -1, -1, debug_only, triggers_custom_game, "", "", false)
+			: base(id, label, tooltip, "", "", -1L, -1L, debug_only, triggers_custom_game, "", "", false)
 		{
 		}
 
 		public override SettingLevel GetLevel(string level_id)
 		{
-			return new SettingLevel(level_id, level_id, level_id, 0, null);
+			return new SettingLevel(level_id, level_id, level_id, 0L, null);
 		}
 
 		public override List<SettingLevel> GetLevels()

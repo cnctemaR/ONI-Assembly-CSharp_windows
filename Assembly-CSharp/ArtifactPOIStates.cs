@@ -47,7 +47,7 @@ public class ArtifactPOIStates : GameStateMachine<ArtifactPOIStates, ArtifactPOI
 			set
 			{
 				this._poiCharge = value;
-				base.smi.sm.poiCharge.Set(value, base.smi);
+				base.smi.sm.poiCharge.Set(value, base.smi, false);
 			}
 		}
 

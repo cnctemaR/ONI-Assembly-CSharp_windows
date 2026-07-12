@@ -61,8 +61,8 @@ public class MechanicalSurfboardWorkable : Workable, IWorkerPrioritizable
 		float num6;
 		base.GetComponent<Storage>().ConsumeAndGetDisease(SimHashes.Water.CreateTag(), num4, out num5, out diseaseInfo, out num6);
 		int num7 = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(num3, 0));
-		int elementIndex = ElementLoader.GetElementIndex(SimHashes.Water);
-		FallingWater.instance.AddParticle(num7, (byte)elementIndex, num5, num6, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
+		ushort elementIndex = ElementLoader.GetElementIndex(SimHashes.Water);
+		FallingWater.instance.AddParticle(num7, elementIndex, num5, num6, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
 		return false;
 	}
 

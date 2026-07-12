@@ -32,13 +32,13 @@ public class StoryMessageScreen : KScreen
 	{
 		base.OnSpawn();
 		StoryMessageScreen.HideInterface(true);
-		CameraController.Instance.FadeOut(0.5f, 1f);
+		CameraController.Instance.FadeOut(0.5f, 1f, null);
 	}
 
 	private IEnumerator ExpandPanel()
 	{
 		this.content.gameObject.SetActive(true);
-		yield return new WaitForSecondsRealtime(0.25f);
+		yield return SequenceUtil.WaitForSecondsRealtime(0.25f);
 		float height = 0f;
 		while (height < 299f)
 		{
@@ -46,7 +46,7 @@ public class StoryMessageScreen : KScreen
 			this.dialog.rectTransform().sizeDelta = new Vector2(this.dialog.rectTransform().sizeDelta.x, height);
 			yield return 0;
 		}
-		CameraController.Instance.FadeOut(0.5f, 1f);
+		CameraController.Instance.FadeOut(0.5f, 1f, null);
 		yield return null;
 		yield break;
 	}
@@ -144,7 +144,7 @@ public class StoryMessageScreen : KScreen
 		if (this.restoreInterfaceOnClose)
 		{
 			CameraController.Instance.DisableUserCameraControl = false;
-			CameraController.Instance.FadeIn(0f, 1f);
+			CameraController.Instance.FadeIn(0f, 1f, null);
 			StoryMessageScreen.HideInterface(false);
 		}
 	}
@@ -175,8 +175,7 @@ public class StoryMessageScreen : KScreen
 	private KButton button;
 
 	[SerializeField]
-	[EventRef]
-	private string dialogSound;
+	private EventReference dialogSound;
 
 	[SerializeField]
 	private LocText titleLabel;

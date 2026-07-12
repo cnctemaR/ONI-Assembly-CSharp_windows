@@ -141,7 +141,7 @@ public class SandboxSettings
 			KPlayerPrefs.SetInt("SandboxTools.SelectedElement", data);
 			this.OnChangeElement(this.hasRestoredElement);
 			this.hasRestoredElement = true;
-		}, ElementLoader.GetElementIndex(SimHashes.Oxygen));
+		}, (int)ElementLoader.GetElementIndex(SimHashes.Oxygen));
 		this.AddStringSetting("SandboxTools.SelectedDisease", delegate(string data)
 		{
 			KPlayerPrefs.SetString("SandboxTools.SelectedDisease", data);

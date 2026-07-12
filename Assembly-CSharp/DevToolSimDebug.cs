@@ -202,7 +202,7 @@ public class DevToolSimDebug : DevTool
 			if (this.showGridContents)
 			{
 				ImGui.Indent();
-				for (int i = 0; i < 42; i++)
+				for (int i = 0; i < 43; i++)
 				{
 					GameObject gameObject = Grid.Objects[num3, i];
 					ImGui.Text(Enum.GetName(typeof(ObjectLayer), i) + ": " + ((gameObject != null) ? gameObject.name : "None"));

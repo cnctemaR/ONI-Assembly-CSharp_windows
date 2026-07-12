@@ -42,7 +42,7 @@ public class ColonyRationMonitor : GameStateMachine<ColonyRationMonitor, ColonyR
 					}
 				}
 			}
-			base.smi.sm.isOutOfRations.Set(flag, base.smi);
+			base.smi.sm.isOutOfRations.Set(flag, base.smi, false);
 		}
 
 		public bool IsOutOfRations()

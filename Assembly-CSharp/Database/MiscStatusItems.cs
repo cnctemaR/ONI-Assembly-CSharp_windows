@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
@@ -24,6 +26,7 @@ namespace Database
 
 		private void CreateStatusItems()
 		{
+			this.AttentionRequired = this.CreateStatusItem("AttentionRequired", "MISC", "status_item_doubleexclamation", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.Edible = this.CreateStatusItem("Edible", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.Edible.resolveStringCallback = delegate(string str, object data)
 			{
@@ -202,6 +205,28 @@ namespace Database
 				return str;
 			};
 			this.SpoutDormant = this.CreateStatusItem("SpoutDormant", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.SpicedFood = this.CreateStatusItem("SpicedFood", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.SpicedFood.resolveTooltipCallback = delegate(string baseString, object data)
+			{
+				string text = baseString;
+				string text2 = "\n    • ";
+				foreach (SpiceInstance spiceInstance in ((List<SpiceInstance>)data))
+				{
+					string text3 = "STRINGS.ITEMS.SPICES.";
+					Tag id = spiceInstance.Id;
+					string text4 = text3 + id.Name.ToUpper() + ".NAME";
+					StringEntry stringEntry;
+					Strings.TryGet(text4, out stringEntry);
+					string text5 = ((stringEntry == null) ? ("MISSING " + text4) : stringEntry.String);
+					text = text + text2 + text5;
+					string text6 = "\n        • ";
+					if (spiceInstance.StatBonus != null)
+					{
+						text += Effect.CreateTooltip(spiceInstance.StatBonus, false, text6, false);
+					}
+				}
+				return text;
+			};
 			this.OrderAttack = this.CreateStatusItem("OrderAttack", "MISC", "status_item_attack", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.OrderCapture = this.CreateStatusItem("OrderCapture", "MISC", "status_item_capture", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.PendingHarvest = this.CreateStatusItem("PendingHarvest", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -255,6 +280,8 @@ namespace Database
 			this.TearClosed = this.CreateStatusItem("TearClosed", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 		}
 
+		public StatusItem AttentionRequired;
+
 		public StatusItem MarkedForDisinfection;
 
 		public StatusItem MarkedForCompost;
@@ -304,6 +331,8 @@ namespace Database
 		public StatusItem SpoutIdle;
 
 		public StatusItem SpoutDormant;
+
+		public StatusItem SpicedFood;
 
 		public StatusItem OrderAttack;
 

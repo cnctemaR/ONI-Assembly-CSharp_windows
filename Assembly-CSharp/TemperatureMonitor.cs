@@ -145,14 +145,14 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 		{
 			this.warmUpQuery.Reset();
 			this.navigator.RunQuery(this.warmUpQuery);
-			base.sm.warmUpCell.Set(this.warmUpQuery.GetResultCell(), base.smi);
+			base.sm.warmUpCell.Set(this.warmUpQuery.GetResultCell(), base.smi, false);
 		}
 
 		public void UpdateCoolDownCell()
 		{
 			this.coolDownQuery.Reset();
 			this.navigator.RunQuery(this.coolDownQuery);
-			base.sm.coolDownCell.Set(this.coolDownQuery.GetResultCell(), base.smi);
+			base.sm.coolDownCell.Set(this.coolDownQuery.GetResultCell(), base.smi, false);
 		}
 
 		public AmountInstance temperature;

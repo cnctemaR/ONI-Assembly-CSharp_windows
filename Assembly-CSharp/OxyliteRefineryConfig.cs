@@ -58,19 +58,19 @@ public class OxyliteRefineryConfig : IBuildingConfig
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = tag2;
+		manualDeliveryKG.RequestedItemTag = tag2;
 		manualDeliveryKG.refillMass = 1.8000001f;
 		manualDeliveryKG.capacity = 7.2000003f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(tag, 0.6f),
-			new ElementConverter.ConsumedElement(tag2, 0.003f)
+			new ElementConverter.ConsumedElement(tag, 0.6f, true),
+			new ElementConverter.ConsumedElement(tag2, 0.003f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.6f, SimHashes.OxyRock, 303.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.6f, SimHashes.OxyRock, 303.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0, true)
 		};
 		Prioritizable.AddRef(go);
 	}

@@ -70,8 +70,10 @@ namespace ProcGen
 			this.category = World.WorldCategory.Asteroid;
 			this.worldTraitScale = 1f;
 			this.iconScale = 1f;
-			this.worldTraitRules = new List<World.TraitRule>();
-			this.worldTraitRules.Add(new World.TraitRule(2, 4));
+			this.worldTraitRules = new List<World.TraitRule>
+			{
+				new World.TraitRule(2, 4)
+			};
 		}
 
 		public void ModStartLocation(MinMax hMod, MinMax vMod)

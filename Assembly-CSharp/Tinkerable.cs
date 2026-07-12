@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using TUNING;
 using UnityEngine;
@@ -114,7 +115,7 @@ public class Tinkerable : Workable
 
 	private void OnStorageChange(object data)
 	{
-		if (((GameObject)data).HasTag(this.tinkerMaterialTag))
+		if (((GameObject)data).IsPrefabID(this.tinkerMaterialTag))
 		{
 			this.QueueUpdateChore();
 		}
@@ -155,7 +156,7 @@ public class Tinkerable : Workable
 			}
 			else
 			{
-				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount, new Tag[] { this.tinkerMaterialTag }, null, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, FetchOrder2.OperationalRequirement.Functional, 0);
+				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount, new HashSet<Tag> { this.tinkerMaterialTag }, FetchChore.MatchCriteria.MatchID, Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, Operational.State.Functional, 0);
 			}
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 			if (!string.IsNullOrEmpty(base.GetComponent<RoomTracker>().requiredRoomType))

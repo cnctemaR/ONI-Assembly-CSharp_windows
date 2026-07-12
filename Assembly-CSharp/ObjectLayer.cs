@@ -44,5 +44,6 @@ public enum ObjectLayer
 	Gantry,
 	Mover,
 	Rover,
+	Critter,
 	NumLayers
 }

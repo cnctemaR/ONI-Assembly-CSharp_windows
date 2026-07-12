@@ -78,7 +78,7 @@ public class ArtifactAnalysisSideScreen : SideScreenContent
 		{
 			statesInstance.SetTextParameter("desc", text3);
 		}
-		statesInstance.ShowEventPopup(null);
+		statesInstance.ShowEventPopup();
 	}
 
 	public override void SetTarget(GameObject target)

@@ -150,7 +150,7 @@ public class RocketModuleSideScreen : SideScreenContent
 	{
 		if (SelectModuleSideScreen.Instance != null)
 		{
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 			SelectModuleSideScreen.Instance.mainContents.GetComponent<KScrollRect>().content.anchoredPosition = new Vector2(0f, scrollViewPosition);
 		}
 		yield break;

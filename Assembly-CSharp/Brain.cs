@@ -11,6 +11,8 @@ public class Brain : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
+		this.prefabId = base.GetComponent<KPrefabID>();
+		this.choreConsumer = base.GetComponent<ChoreConsumer>();
 		this.running = true;
 		Components.Brains.Add(this);
 	}
@@ -31,24 +33,24 @@ public class Brain : KMonoBehaviour
 
 	private bool FindBetterChore(ref Chore.Precondition.Context context)
 	{
-		return base.GetComponent<ChoreConsumer>().FindNextChore(ref context);
+		return this.choreConsumer.FindNextChore(ref context);
 	}
 
 	private void UpdateChores()
 	{
-		if (base.GetComponent<KPrefabID>().HasTag(GameTags.PreventChoreInterruption))
+		if (this.prefabId.HasTag(GameTags.PreventChoreInterruption))
 		{
 			return;
 		}
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
 		if (this.FindBetterChore(ref context))
 		{
-			if (this.HasTag(GameTags.PerformingWorkRequest))
+			if (this.prefabId.HasTag(GameTags.PerformingWorkRequest))
 			{
 				base.Trigger(1485595942, null);
 				return;
 			}
-			base.GetComponent<ChoreDriver>().SetChore(context);
+			this.choreConsumer.choreDriver.SetChore(context);
 		}
 	}
 
@@ -94,4 +96,8 @@ public class Brain : KMonoBehaviour
 	private bool running;
 
 	private bool suspend;
+
+	protected KPrefabID prefabId;
+
+	protected ChoreConsumer choreConsumer;
 }

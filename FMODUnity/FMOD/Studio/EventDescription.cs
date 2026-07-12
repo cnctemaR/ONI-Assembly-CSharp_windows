@@ -5,7 +5,7 @@ namespace FMOD.Studio
 {
 	public struct EventDescription
 	{
-		public RESULT getID(out Guid id)
+		public RESULT getID(out GUID id)
 		{
 			return EventDescription.FMOD_Studio_EventDescription_GetID(this.handle, out id);
 		}
@@ -60,6 +60,85 @@ namespace FMOD.Studio
 			return EventDescription.FMOD_Studio_EventDescription_GetParameterDescriptionByID(this.handle, id, out parameter);
 		}
 
+		public RESULT getParameterLabelByIndex(int index, int labelindex, out string label)
+		{
+			label = null;
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				RESULT result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByIndex(this.handle, index, labelindex, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByIndex(this.handle, index, labelindex, IntPtr.Zero, 0, out num);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByIndex(this.handle, index, labelindex, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					label = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
+			}
+			return result2;
+		}
+
+		public RESULT getParameterLabelByName(string name, int labelindex, out string label)
+		{
+			label = null;
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				byte[] array = freeHelper.byteFromStringUTF8(name);
+				RESULT result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByName(this.handle, array, labelindex, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByName(this.handle, array, labelindex, IntPtr.Zero, 0, out num);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByName(this.handle, array, labelindex, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					label = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
+			}
+			return result2;
+		}
+
+		public RESULT getParameterLabelByID(PARAMETER_ID id, int labelindex, out string label)
+		{
+			label = null;
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				RESULT result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByID(this.handle, id, labelindex, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByID(this.handle, id, labelindex, IntPtr.Zero, 0, out num);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = EventDescription.FMOD_Studio_EventDescription_GetParameterLabelByID(this.handle, id, labelindex, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					label = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
+			}
+			return result2;
+		}
+
 		public RESULT getUserPropertyCount(out int count)
 		{
 			return EventDescription.FMOD_Studio_EventDescription_GetUserPropertyCount(this.handle, out count);
@@ -85,14 +164,9 @@ namespace FMOD.Studio
 			return EventDescription.FMOD_Studio_EventDescription_GetLength(this.handle, out length);
 		}
 
-		public RESULT getMinimumDistance(out float distance)
+		public RESULT getMinMaxDistance(out float min, out float max)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetMinimumDistance(this.handle, out distance);
-		}
-
-		public RESULT getMaximumDistance(out float distance)
-		{
-			return EventDescription.FMOD_Studio_EventDescription_GetMaximumDistance(this.handle, out distance);
+			return EventDescription.FMOD_Studio_EventDescription_GetMinMaxDistance(this.handle, out min, out max);
 		}
 
 		public RESULT getSoundSize(out float size)
@@ -125,9 +199,9 @@ namespace FMOD.Studio
 			return EventDescription.FMOD_Studio_EventDescription_IsDopplerEnabled(this.handle, out doppler);
 		}
 
-		public RESULT hasCue(out bool cue)
+		public RESULT hasSustainPoint(out bool sustainPoint)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_HasCue(this.handle, out cue);
+			return EventDescription.FMOD_Studio_EventDescription_HasSustainPoint(this.handle, out sustainPoint);
 		}
 
 		public RESULT createInstance(out EventInstance instance)
@@ -212,7 +286,7 @@ namespace FMOD.Studio
 		private static extern bool FMOD_Studio_EventDescription_IsValid(IntPtr eventdescription);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetID(IntPtr eventdescription, out Guid id);
+		private static extern RESULT FMOD_Studio_EventDescription_GetID(IntPtr eventdescription, out GUID id);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetPath(IntPtr eventdescription, IntPtr path, int size, out int retrieved);
@@ -230,6 +304,15 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventDescription_GetParameterDescriptionByID(IntPtr eventdescription, PARAMETER_ID id, out PARAMETER_DESCRIPTION parameter);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventDescription_GetParameterLabelByIndex(IntPtr eventdescription, int index, int labelindex, IntPtr label, int size, out int retrieved);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventDescription_GetParameterLabelByName(IntPtr eventdescription, byte[] name, int labelindex, IntPtr label, int size, out int retrieved);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventDescription_GetParameterLabelByID(IntPtr eventdescription, PARAMETER_ID id, int labelindex, IntPtr label, int size, out int retrieved);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetUserPropertyCount(IntPtr eventdescription, out int count);
 
 		[DllImport("fmodstudio")]
@@ -242,10 +325,7 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventDescription_GetLength(IntPtr eventdescription, out int length);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetMinimumDistance(IntPtr eventdescription, out float distance);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetMaximumDistance(IntPtr eventdescription, out float distance);
+		private static extern RESULT FMOD_Studio_EventDescription_GetMinMaxDistance(IntPtr eventdescription, out float min, out float max);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetSoundSize(IntPtr eventdescription, out float size);
@@ -266,7 +346,7 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventDescription_IsDopplerEnabled(IntPtr eventdescription, out bool doppler);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_HasCue(IntPtr eventdescription, out bool cue);
+		private static extern RESULT FMOD_Studio_EventDescription_HasSustainPoint(IntPtr eventdescription, out bool sustainPoint);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_CreateInstance(IntPtr eventdescription, out IntPtr instance);

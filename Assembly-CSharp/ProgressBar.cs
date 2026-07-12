@@ -94,6 +94,21 @@ public class ProgressBar : KMonoBehaviour
 		}
 	}
 
+	public void Retarget(GameObject entity)
+	{
+		Vector3 vector = entity.transform.GetPosition() + Vector3.down * 0.5f;
+		Building component = entity.GetComponent<Building>();
+		if (component != null)
+		{
+			vector -= Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2);
+		}
+		else
+		{
+			vector -= Vector3.right * 0.5f;
+		}
+		base.transform.SetPosition(vector);
+	}
+
 	protected override void OnCleanUp()
 	{
 		if (this.overlayUpdateHandle != -1)
@@ -122,17 +137,7 @@ public class ProgressBar : KMonoBehaviour
 		progressBar.name = ((entity != null) ? (entity.name + "_") : "") + " ProgressBar";
 		progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
 		progressBar.Update();
-		Vector3 vector = entity.transform.GetPosition() + Vector3.down * 0.5f;
-		Building component = entity.GetComponent<Building>();
-		if (component != null)
-		{
-			vector -= Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2);
-		}
-		else
-		{
-			vector -= Vector3.right * 0.5f;
-		}
-		progressBar.transform.SetPosition(vector);
+		progressBar.Retarget(entity);
 		return progressBar;
 	}
 

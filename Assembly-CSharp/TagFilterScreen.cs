@@ -99,12 +99,12 @@ public class TagFilterScreen : SideScreenContent
 		this.rootTag = root_tag;
 	}
 
-	public void Filter(List<Tag> acceptedTags)
+	public void Filter(HashSet<Tag> acceptedTags)
 	{
 		this.acceptedTags = acceptedTags;
 	}
 
-	private void Filter(KTreeItem root, List<Tag> acceptedTags, bool parentEnabled)
+	private void Filter(KTreeItem root, HashSet<Tag> acceptedTags, bool parentEnabled)
 	{
 		root.checkboxChecked = parentEnabled || (root.userData != null && acceptedTags.Contains((Tag)root.userData));
 		foreach (KTreeItem ktreeItem in root.children)
@@ -129,39 +129,6 @@ public class TagFilterScreen : SideScreenContent
 		}
 	}
 
-	private void AddEnabledTags(KTreeItem root, List<Tag> tags)
-	{
-		bool flag = false;
-		if (root.userData != null)
-		{
-			Tag tag = (Tag)root.userData;
-			if (tag.IsValid && root.checkboxChecked)
-			{
-				flag = true;
-				tags.Add(tag);
-			}
-		}
-		if (!flag)
-		{
-			foreach (KTreeItem ktreeItem in root.children)
-			{
-				this.AddEnabledTags(ktreeItem, tags);
-			}
-		}
-	}
-
-	private void UpdateFilters()
-	{
-		if (this.targetFilterable == null)
-		{
-			global::Debug.LogError("Cannot update the filters on a null target.");
-			return;
-		}
-		List<Tag> list = new List<Tag>();
-		this.AddEnabledTags(this.treeControl.root, list);
-		this.targetFilterable.UpdateFilters(list);
-	}
-
 	[SerializeField]
 	private KTreeControl treeControl;
 
@@ -169,7 +136,7 @@ public class TagFilterScreen : SideScreenContent
 
 	private TagFilterScreen.TagEntry rootTag = TagFilterScreen.defaultRootTag;
 
-	private List<Tag> acceptedTags = new List<Tag>();
+	private HashSet<Tag> acceptedTags = new HashSet<Tag>();
 
 	private TreeFilterable targetFilterable;
 

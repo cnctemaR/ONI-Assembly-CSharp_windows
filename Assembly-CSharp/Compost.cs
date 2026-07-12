@@ -67,7 +67,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 
 		public bool CanStartConverting()
 		{
-			return base.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting();
+			return base.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting(false);
 		}
 
 		public bool CanContinueConverting()

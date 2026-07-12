@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
-using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -121,67 +120,6 @@ public class GameplayEventInstance : ISaveLoadable
 		}
 	}
 
-	public static GameplayEventInfoScreen ShowEventPopup(GameplayEventPopupData eventPopupData)
-	{
-		GameplayEventInfoScreen gameplayEventInfoScreen = (GameplayEventInfoScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.GameplayEventInfoScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject);
-		gameplayEventInfoScreen.SetEventData(eventPopupData);
-		AudioMixer.instance.Start(AudioMixerSnapshots.Get().EventPopupSnapshot);
-		if (eventPopupData.focus != null)
-		{
-			WorldContainer myWorld = eventPopupData.focus.gameObject.GetMyWorld();
-			if (myWorld != null && myWorld.IsDiscovered)
-			{
-				CameraController.Instance.ActiveWorldStarWipe(myWorld.id, eventPopupData.focus.position, 10f, null);
-			}
-		}
-		return gameplayEventInfoScreen;
-	}
-
-	public static Notification CreateStandardEventNotification(GameplayEventPopupData eventPopupData)
-	{
-		if (eventPopupData == null)
-		{
-			DebugUtil.LogWarningArgs(new object[] { "eventPopup is null in CreateStandardEventNotification" });
-			return null;
-		}
-		eventPopupData.FinalizeText();
-		return new Notification(eventPopupData.title, NotificationType.Event, null, null, false, 0f, null, null, eventPopupData.focus, true)
-		{
-			customClickCallback = delegate(object data)
-			{
-				GameplayEventInstance.ShowEventPopup(eventPopupData);
-			}
-		};
-	}
-
-	public static Notification CreateStandardEventChosenNotification(GameplayEventPopupData eventPopupData)
-	{
-		if (eventPopupData == null)
-		{
-			DebugUtil.LogWarningArgs(new object[] { "eventPopup is null in CreateStandardEventChosenNotification" });
-			return null;
-		}
-		eventPopupData.FinalizeText();
-		return new Notification(eventPopupData.title, NotificationType.Event, null, null, false, 0f, null, null, eventPopupData.focus, true)
-		{
-			customClickCallback = delegate(object data)
-			{
-				GameplayEventInstance.ShowEventPopup(eventPopupData);
-			}
-		};
-	}
-
-	public static Notification CreateStandardCancelledNotification(GameplayEventPopupData eventPopupData)
-	{
-		if (eventPopupData == null)
-		{
-			DebugUtil.LogWarningArgs(new object[] { "eventPopup is null in CreateStandardCancelledNotification" });
-			return null;
-		}
-		eventPopupData.FinalizeText();
-		return new Notification(string.Format(GAMEPLAY_EVENTS.CANCELED, eventPopupData.title), NotificationType.Event, (List<Notification> list, object data) => string.Format(GAMEPLAY_EVENTS.CANCELED_TOOLTIP, eventPopupData.title), null, true, 0f, null, null, null, true);
-	}
-
 	public float AgeInCycles()
 	{
 		return GameUtil.GetCurrentTimeInCycles() - this.eventStartTime;
@@ -208,5 +146,5 @@ public class GameplayEventInstance : ISaveLoadable
 
 	private GameplayEvent _gameplayEvent;
 
-	public delegate GameplayEventPopupData GameplayEventPopupDataCallback();
+	public delegate EventInfoData GameplayEventPopupDataCallback();
 }

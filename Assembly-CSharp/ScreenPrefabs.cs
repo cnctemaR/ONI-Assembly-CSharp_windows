@@ -58,7 +58,7 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public SubSpeciesInfoScreen SubSpeciesInfoScreen;
 
-	public GameplayEventInfoScreen GameplayEventInfoScreen;
+	public EventInfoScreen eventInfoScreen;
 
 	public FileNameDialog FileNameDialog;
 
@@ -109,4 +109,13 @@ public class ScreenPrefabs : KMonoBehaviour
 	public ComicViewer ComicViewer;
 
 	public GameObject OldVersionWarningScreen;
+
+	[Header("Main Menu")]
+	public GameObject MainMenuForVanilla;
+
+	public GameObject MainMenuForSpacedOut;
+
+	public GameObject MainMenuIntroShort;
+
+	public GameObject MainMenuHealthyGameMessage;
 }

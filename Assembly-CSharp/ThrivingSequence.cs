@@ -30,30 +30,34 @@ public static class ThrivingSequence
 				cameraTaget = telepad.gameObject;
 			}
 		}
-		CameraController.Instance.FadeOut(1f, 2f);
-		yield return new WaitForSecondsRealtime(1f);
-		CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 10f, false);
-		CameraController.Instance.SetOverrideZoomSpeed(10f);
-		yield return new WaitForSecondsRealtime(0.4f);
-		if (SpeedControlScreen.Instance.IsPaused)
+		if (cameraTaget != null)
 		{
-			SpeedControlScreen.Instance.Unpause(false);
-		}
-		SpeedControlScreen.Instance.SetSpeed(1);
-		CameraController.Instance.SetOverrideZoomSpeed(0.05f);
-		CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 20f, false);
-		CameraController.Instance.FadeIn(0f, 2f);
-		foreach (object obj2 in Components.LiveMinionIdentities)
-		{
-			MinionIdentity minionIdentity = (MinionIdentity)obj2;
-			if (minionIdentity != null)
+			CameraController.Instance.FadeOut(1f, 2f, null);
+			yield return SequenceUtil.WaitForSecondsRealtime(1f);
+			CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 10f, false);
+			CameraController.Instance.SetOverrideZoomSpeed(10f);
+			yield return SequenceUtil.WaitForSecondsRealtime(0.4f);
+			if (SpeedControlScreen.Instance.IsPaused)
 			{
-				minionIdentity.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
-				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+				SpeedControlScreen.Instance.Unpause(false);
 			}
+			SpeedControlScreen.Instance.SetSpeed(1);
+			CameraController.Instance.SetOverrideZoomSpeed(0.05f);
+			CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 20f, false);
+			CameraController.Instance.FadeIn(0f, 2f, null);
+			foreach (object obj2 in Components.LiveMinionIdentities)
+			{
+				MinionIdentity minionIdentity = (MinionIdentity)obj2;
+				if (minionIdentity != null)
+				{
+					minionIdentity.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
+					Db db = Db.Get();
+					new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 2, null);
+				}
+			}
+			yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
+			yield return SequenceUtil.WaitForSecondsRealtime(3f);
 		}
-		yield return new WaitForSecondsRealtime(0.5f);
-		yield return new WaitForSecondsRealtime(3f);
 		cameraTaget = null;
 		cameraTaget = null;
 		foreach (object obj3 in Components.ComplexFabricators)
@@ -88,25 +92,26 @@ public static class ThrivingSequence
 		}
 		if (cameraTaget != null)
 		{
-			CameraController.Instance.FadeOut(1f, 2f);
-			yield return new WaitForSecondsRealtime(1f);
+			CameraController.Instance.FadeOut(1f, 2f, null);
+			yield return SequenceUtil.WaitForSecondsRealtime(1f);
 			CameraController.Instance.SetTargetPos(cameraTaget.transform.position + cameraBiasUp, 10f, false);
 			CameraController.Instance.SetOverrideZoomSpeed(10f);
-			yield return new WaitForSecondsRealtime(0.4f);
+			yield return SequenceUtil.WaitForSecondsRealtime(0.4f);
 			CameraController.Instance.SetOverrideZoomSpeed(0.1f);
 			CameraController.Instance.SetTargetPos(cameraTaget.transform.position + cameraBiasUp, 20f, false);
-			CameraController.Instance.FadeIn(0f, 2f);
+			CameraController.Instance.FadeIn(0f, 2f, null);
 			foreach (object obj6 in Components.LiveMinionIdentities)
 			{
 				MinionIdentity minionIdentity2 = (MinionIdentity)obj6;
 				if (minionIdentity2 != null)
 				{
 					minionIdentity2.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
-					new EmoteChore(minionIdentity2.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+					Db db2 = Db.Get();
+					new EmoteChore(minionIdentity2.GetComponent<ChoreProvider>(), db2.ChoreTypes.EmoteHighPriority, db2.Emotes.Minion.Cheer, 2, null);
 				}
 			}
-			yield return new WaitForSecondsRealtime(0.5f);
-			yield return new WaitForSecondsRealtime(3f);
+			yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
+			yield return SequenceUtil.WaitForSecondsRealtime(3f);
 		}
 		cameraTaget = null;
 		cameraTaget = null;
@@ -118,30 +123,34 @@ public static class ThrivingSequence
 				cameraTaget = monumentPart.gameObject;
 			}
 		}
-		CameraController.Instance.FadeOut(1f, 2f);
-		yield return new WaitForSecondsRealtime(1f);
-		CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 15f, false);
-		CameraController.Instance.SetOverrideZoomSpeed(10f);
-		yield return new WaitForSecondsRealtime(0.4f);
-		CameraController.Instance.FadeIn(0f, 2f);
-		foreach (object obj8 in Components.LiveMinionIdentities)
+		if (cameraTaget != null)
 		{
-			MinionIdentity minionIdentity3 = (MinionIdentity)obj8;
-			if (minionIdentity3 != null)
+			CameraController.Instance.FadeOut(1f, 2f, null);
+			yield return SequenceUtil.WaitForSecondsRealtime(1f);
+			CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 15f, false);
+			CameraController.Instance.SetOverrideZoomSpeed(10f);
+			yield return SequenceUtil.WaitForSecondsRealtime(0.4f);
+			CameraController.Instance.FadeIn(0f, 2f, null);
+			foreach (object obj8 in Components.LiveMinionIdentities)
 			{
-				minionIdentity3.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
-				new EmoteChore(minionIdentity3.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+				MinionIdentity minionIdentity3 = (MinionIdentity)obj8;
+				if (minionIdentity3 != null)
+				{
+					minionIdentity3.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
+					Db db3 = Db.Get();
+					new EmoteChore(minionIdentity3.GetComponent<ChoreProvider>(), db3.ChoreTypes.EmoteHighPriority, db3.Emotes.Minion.Cheer, 2, null);
+				}
 			}
+			yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
+			CameraController.Instance.SetOverrideZoomSpeed(0.075f);
+			CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 25f, false);
+			yield return SequenceUtil.WaitForSecondsRealtime(5f);
 		}
-		yield return new WaitForSecondsRealtime(0.5f);
-		CameraController.Instance.SetOverrideZoomSpeed(0.075f);
-		CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 25f, false);
-		yield return new WaitForSecondsRealtime(5f);
 		cameraTaget = null;
-		CameraController.Instance.FadeOut(1f, 1f);
+		CameraController.Instance.FadeOut(1f, 1f, null);
 		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.Thriving.victoryNISSnapshot, STOP_MODE.ALLOWFADEOUT);
-		yield return new WaitForSecondsRealtime(2f);
+		yield return SequenceUtil.WaitForSecondsRealtime(2f);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
@@ -153,7 +162,7 @@ public static class ThrivingSequence
 		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);
-			CameraController.Instance.FadeIn(0f, 1f);
+			CameraController.Instance.FadeIn(0f, 1f, null);
 			CameraController.Instance.SetWorldInteractive(true);
 			CameraController.Instance.SetOverrideZoomSpeed(1f);
 			HoverTextScreen.Instance.Show(true);

@@ -216,7 +216,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 				bool flag = false;
 				foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in base.def.consumedElements)
 				{
-					if (manualDeliveryKG.requestedItemTag == consumeInfo.tag)
+					if (manualDeliveryKG.RequestedItemTag == consumeInfo.tag)
 					{
 						flag = true;
 						break;
@@ -278,8 +278,8 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 					break;
 				}
 			}
-			base.sm.hasCorrectFertilizer.Set(flag, base.smi);
-			base.sm.hasIncorrectFertilizer.Set(flag2, base.smi);
+			base.sm.hasCorrectFertilizer.Set(flag, base.smi, false);
+			base.sm.hasIncorrectFertilizer.Set(flag2, base.smi, false);
 		}
 
 		public void StartAbsorbing()

@@ -6,14 +6,10 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/Workable/ArcadeMachineWorkable")]
 public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 {
-	private ArcadeMachineWorkable()
-	{
-		base.SetReportType(ReportManager.ReportType.PersonalTime);
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
 		this.synchronizeAnims = false;
 		this.showProgressBar = true;
 		this.resetProgressOnStop = true;

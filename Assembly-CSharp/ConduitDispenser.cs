@@ -23,14 +23,6 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 		}
 	}
 
-	public ConduitType TypeOfConduit
-	{
-		get
-		{
-			return this.conduitType;
-		}
-	}
-
 	public ConduitFlow.ConduitContents ConduitContents
 	{
 		get
@@ -118,7 +110,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 					int num2 = (int)(num / primaryElement.Mass * (float)primaryElement.DiseaseCount);
 					primaryElement.ModifyDiseaseCount(-num2, "ConduitDispenser.ConduitUpdate");
 					primaryElement.Mass -= num;
-					base.Trigger(-1697596308, primaryElement.gameObject);
+					this.storage.Trigger(-1697596308, primaryElement.gameObject);
 					return;
 				}
 				this.blocked = true;

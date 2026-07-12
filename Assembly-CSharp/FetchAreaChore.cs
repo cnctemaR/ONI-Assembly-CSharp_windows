@@ -64,29 +64,19 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 	private static bool IsPickupableStillValidForChore(Pickupable pickupable, FetchChore chore)
 	{
 		KPrefabID component = pickupable.GetComponent<KPrefabID>();
-		component.UpdateTagBits();
-		if (!component.HasAnyTags_AssumeLaundered(ref chore.tagBits))
+		if ((chore.criteria == FetchChore.MatchCriteria.MatchID && !chore.tags.Contains(component.PrefabTag)) || (chore.criteria == FetchChore.MatchCriteria.MatchTags && !component.HasTag(chore.tagsFirst)))
 		{
-			List<Tag> tagsVerySlow = chore.tagBits.GetTagsVerySlow();
-			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has none of these tags: {1}", pickupable, string.Join<Tag>(",", tagsVerySlow)));
+			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it is not or does not contain one of these tags: {1}", pickupable, string.Join<Tag>(",", chore.tags)));
 			return false;
 		}
-		if (!component.HasAllTags_AssumeLaundered(ref chore.requiredTagBits))
+		if (chore.requiredTag.IsValid && !component.HasTag(chore.requiredTag))
 		{
-			ISet<Tag> pickupableTags2 = component.Tags;
-			List<Tag> list = (from x in chore.requiredTagBits.GetTagsVerySlow()
-				where !pickupableTags2.Contains(x)
-				select x).ToList<Tag>();
-			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it does not have the required tags: {1}", pickupable, string.Join<Tag>(",", list)));
+			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it does not have the required tag: {1}", pickupable, chore.requiredTag));
 			return false;
 		}
-		if (component.HasAnyTags_AssumeLaundered(ref chore.forbiddenTagBits))
+		if (component.HasAnyTags(chore.forbiddenTags))
 		{
-			ISet<Tag> pickupableTags = component.Tags;
-			List<Tag> list2 = (from x in chore.forbiddenTagBits.GetTagsVerySlow()
-				where pickupableTags.Contains(x)
-				select x).ToList<Tag>();
-			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has the forbidden tags: {1}", pickupable, string.Join<Tag>(",", list2)));
+			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has the forbidden tags: {1}", pickupable, string.Join<Tag>(",", chore.forbiddenTags)));
 			return false;
 		}
 		return true;
@@ -114,7 +104,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public void Begin(Chore.Precondition.Context context)
 		{
-			base.sm.fetcher.Set(context.consumerState.gameObject, base.smi);
+			base.sm.fetcher.Set(context.consumerState.gameObject, base.smi, false);
 			this.chores.Clear();
 			this.chores.Add(this.rootChore);
 			int num;
@@ -133,12 +123,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				global::Debug.Assert(pooledList.Count > 0, "succeeded_contexts was empty");
 				FetchChore fetchChore = (FetchChore)pooledList[0].chore;
 				global::Debug.Assert(fetchChore != null, "fetch_chore was null");
-				DebugUtil.LogWarningArgs(new object[]
-				{
-					"Missing root_fetchable for FetchAreaChore",
-					fetchChore.destination,
-					fetchChore.tags[0]
-				});
+				DebugUtil.LogWarningArgs(new object[] { "Missing root_fetchable for FetchAreaChore", fetchChore.destination, fetchChore.tagsFirst });
 				pickupable = fetchChore.FindFetchTarget(context.consumerState);
 			}
 			global::Debug.Assert(pickupable != null, "root_fetchable was null");
@@ -149,9 +134,9 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num5 = 0;
 			int num6 = 0;
 			Grid.CellToXY(Grid.PosToCell(pickupable.transform.GetPosition()), out num5, out num6);
-			int num7 = 6;
-			num5 -= num7 / 2;
-			num6 -= num7 / 2;
+			int num7 = 9;
+			num5 -= 3;
+			num6 -= 3;
 			ListPool<ScenePartitionerEntry, FetchAreaChore>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, FetchAreaChore>.Allocate();
 			GameScenePartitioner.Instance.GatherEntries(num5, num6, num7, num7, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
 			Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
@@ -164,18 +149,14 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 				Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
 				KPrefabID component = pickupable2.GetComponent<KPrefabID>();
-				if (!(component.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f)
+				if (!(component.PrefabTag != prefabTag) && pickupable2.UnreservedAmount > 0f && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchID || this.rootChore.tags.Contains(component.PrefabTag)) && (this.rootChore.criteria != FetchChore.MatchCriteria.MatchTags || component.HasTag(this.rootChore.tagsFirst)) && (!this.rootChore.requiredTag.IsValid || component.HasTag(this.rootChore.requiredTag)) && !component.HasAnyTags(this.rootChore.forbiddenTags) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2))
 				{
-					component.UpdateTagBits();
-					if (component.HasAnyTags_AssumeLaundered(ref this.rootChore.tagBits) && component.HasAllTags_AssumeLaundered(ref this.rootChore.requiredTagBits) && !component.HasAnyTags_AssumeLaundered(ref this.rootChore.forbiddenTagBits) && !list.Contains(pickupable2) && this.rootContext.consumerState.consumer.CanReach(pickupable2))
+					float unreservedAmount = pickupable2.UnreservedAmount;
+					list.Add(pickupable2);
+					num4 += unreservedAmount;
+					if (list.Count >= 10)
 					{
-						float unreservedAmount = pickupable2.UnreservedAmount;
-						list.Add(pickupable2);
-						num4 += unreservedAmount;
-						if (list.Count >= 10)
-						{
-							break;
-						}
+						break;
 					}
 				}
 			}
@@ -198,7 +179,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				Chore.Precondition.Context context2 = pooledList[num10];
 				FetchChore fetchChore2 = context2.chore as FetchChore;
-				if (fetchChore2 != this.rootChore && context2.IsSuccess() && fetchChore2.overrideTarget == null && fetchChore2.driver == null && fetchChore2.tagBits.AreEqual(ref this.rootChore.tagBits) && fetchChore2.requiredTagBits.AreEqual(ref this.rootChore.requiredTagBits) && fetchChore2.forbiddenTagBits.AreEqual(ref this.rootChore.forbiddenTagBits))
+				if (fetchChore2 != this.rootChore && fetchChore2.overrideTarget == null && fetchChore2.driver == null && fetchChore2.tagsHash == this.rootChore.tagsHash && fetchChore2.requiredTag == this.rootChore.requiredTag && fetchChore2.forbidHash == this.rootChore.forbidHash)
 				{
 					num8 = Mathf.Min(fetchChore2.originalAmount, num4 - num9);
 					if (minTakeAmount > 0f)
@@ -241,17 +222,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			this.deliveries.Clear();
 		}
 
-		private static TagBits CreateTransientDeliveryMask()
-		{
-			TagBits tagBits = new TagBits(new Tag[]
-			{
-				GameTags.Garbage,
-				GameTags.Creatures.Deliverable
-			});
-			tagBits.Complement();
-			return tagBits;
-		}
-
 		public void SetupDelivery()
 		{
 			if (this.deliveries.Count == 0)
@@ -260,7 +230,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				return;
 			}
 			FetchAreaChore.StatesInstance.Delivery nextDelivery = this.deliveries[0];
-			nextDelivery.chore.requiredTagBits.And(ref FetchAreaChore.StatesInstance.s_transientDeliveryMask);
+			if (FetchAreaChore.StatesInstance.s_transientDeliveryTags.Contains(nextDelivery.chore.requiredTag))
+			{
+				nextDelivery.chore.requiredTag = Tag.Invalid;
+			}
 			this.deliverables.RemoveAll(delegate(Pickupable x)
 			{
 				if (x == null || x.TotalAmount <= 0f)
@@ -308,7 +281,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			}
 			base.sm.fetchTarget.Set(this.reservations[0].pickupable, base.smi);
 			base.sm.fetchResultTarget.Set(null, base.smi);
-			base.sm.fetchAmount.Set(this.reservations[0].amount, base.smi);
+			base.sm.fetchAmount.Set(this.reservations[0].amount, base.smi, false);
 			if (!(this.reservations[0].pickupable != null))
 			{
 				this.GoTo(base.sm.fetching.fetchfail);
@@ -494,7 +467,11 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public bool pickingup;
 
-		private static TagBits s_transientDeliveryMask = FetchAreaChore.StatesInstance.CreateTransientDeliveryMask();
+		private static Tag[] s_transientDeliveryTags = new Tag[]
+		{
+			GameTags.Garbage,
+			GameTags.Creatures.Deliverable
+		};
 
 		public struct Delivery
 		{
@@ -535,7 +512,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 							{
 								if (num < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 								{
-									this.destination.ForceStore(this.chore.tags[0], num);
+									this.destination.ForceStore(this.chore.tagsFirst, num);
 								}
 							}
 							else if (!FetchAreaChore.IsPickupableStillValidForChore(deliverables[num2], this.chore))

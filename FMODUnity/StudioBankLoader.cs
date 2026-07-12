@@ -90,10 +90,10 @@ namespace FMODUnity
 				}
 				catch (BankLoadException ex)
 				{
-					Debug.LogException(ex);
+					RuntimeUtils.DebugLogException(ex);
 				}
 			}
-			RuntimeManager.WaitForAllLoads();
+			RuntimeManager.WaitForAllSampleLoading();
 		}
 
 		public void Unload()

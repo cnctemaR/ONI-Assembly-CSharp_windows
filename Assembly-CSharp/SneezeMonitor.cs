@@ -62,34 +62,24 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 
 		private void OnSneezyChange()
 		{
-			base.smi.sm.isSneezy.Set(this.sneezyness.GetTotalValue() > 0f, base.smi);
+			base.smi.sm.isSneezy.Set(this.sneezyness.GetTotalValue() > 0f, base.smi, false);
 		}
 
 		public Reactable GetReactable()
 		{
+			float num = this.NextSneezeInterval();
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, "Sneeze", Db.Get().ChoreTypes.Cough, 0f, num, float.PositiveInfinity, 0f);
+			string text = "sneeze";
+			string text2 = "sneeze_pst";
+			Emote emote = Db.Get().Emotes.Minion.Sneeze;
 			if (this.IsMinorSneeze())
 			{
-				float num = this.NextSneezeInterval();
-				return new SelfEmoteReactable(base.master.gameObject, "Sneeze", Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim", 0f, num, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "sneeze_short",
-					startcb = new Action<GameObject>(this.TriggerDisurbance)
-				}).AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "sneeze_short_pst",
-					finishcb = new Action<GameObject>(this.ResetSneeze)
-				});
+				text = "sneeze_short";
+				text2 = "sneeze_short_pst";
+				emote = Db.Get().Emotes.Minion.Sneeze_Short;
 			}
-			float num2 = this.NextSneezeInterval();
-			return new SelfEmoteReactable(base.master.gameObject, "Sneeze", Db.Get().ChoreTypes.Cough, "anim_sneeze_kanim", 0f, num2, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "sneeze",
-				startcb = new Action<GameObject>(this.TriggerDisurbance)
-			}).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "sneeze_pst",
-				finishcb = new Action<GameObject>(this.ResetSneeze)
-			});
+			selfEmoteReactable.SetEmote(emote);
+			return selfEmoteReactable.RegisterEmoteStepCallbacks(text, new Action<GameObject>(this.TriggerDisurbance), null).RegisterEmoteStepCallbacks(text2, null, new Action<GameObject>(this.ResetSneeze));
 		}
 
 		private void TriggerDisurbance(GameObject go)

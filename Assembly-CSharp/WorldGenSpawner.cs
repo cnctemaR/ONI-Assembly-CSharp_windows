@@ -45,6 +45,11 @@ public class WorldGenSpawner : KMonoBehaviour
 		}
 	}
 
+	public IReadOnlyList<WorldGenSpawner.Spawnable> GetSpawnables()
+	{
+		return this.spawnables;
+	}
+
 	protected override void OnSpawn()
 	{
 		if (!this.hasPlacedTemplates)
@@ -190,7 +195,7 @@ public class WorldGenSpawner : KMonoBehaviour
 
 	private List<WorldGenSpawner.Spawnable> spawnables = new List<WorldGenSpawner.Spawnable>();
 
-	private class Spawnable
+	public class Spawnable
 	{
 		public Prefab spawnInfo { get; private set; }
 

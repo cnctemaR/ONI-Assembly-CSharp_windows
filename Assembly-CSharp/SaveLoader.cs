@@ -903,7 +903,10 @@ public class SaveLoader : KMonoBehaviour
 		SceneInitializer.Instance.NewSaveGamePrefab();
 		this.cachedGSD = this.m_clusterLayout.currentWorld.SpawnData;
 		this.OnWorldGenComplete.Signal(this.m_clusterLayout);
-		ThreadedHttps<KleiMetrics>.Instance.StartNewGame();
+		OniMetrics.LogEvent(OniMetrics.Event.NewSave, "NewGame", true);
+		StoryManager.Instance.InitialSaveSetup();
+		ThreadedHttps<KleiMetrics>.Instance.IncrementGameCount();
+		OniMetrics.SendEvent(OniMetrics.Event.NewSave, "New Save");
 		pooledList.Recycle();
 		return true;
 	}

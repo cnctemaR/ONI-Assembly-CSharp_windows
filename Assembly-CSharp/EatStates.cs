@@ -18,7 +18,7 @@ public class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStateM
 
 	private static void SetTarget(EatStates.Instance smi)
 	{
-		smi.sm.target.Set(smi.GetSMI<SolidConsumerMonitor.Instance>().targetEdible, smi);
+		smi.sm.target.Set(smi.GetSMI<SolidConsumerMonitor.Instance>().targetEdible, smi, false);
 	}
 
 	private static void ReserveEdible(EatStates.Instance smi)

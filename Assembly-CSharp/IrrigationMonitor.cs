@@ -242,7 +242,7 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 				bool flag = false;
 				foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in base.def.consumedElements)
 				{
-					if (manualDeliveryKG.requestedItemTag == consumeInfo.tag)
+					if (manualDeliveryKG.RequestedItemTag == consumeInfo.tag)
 					{
 						flag = true;
 						break;
@@ -345,9 +345,9 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 				flag3 = false;
 				flag2 = false;
 			}
-			base.sm.hasCorrectLiquid.Set(flag, base.smi);
-			base.sm.hasIncorrectLiquid.Set(flag2, base.smi);
-			base.sm.enoughCorrectLiquidToRecover.Set(flag3 && flag, base.smi);
+			base.sm.hasCorrectLiquid.Set(flag, base.smi, false);
+			base.sm.hasIncorrectLiquid.Set(flag2, base.smi, false);
+			base.sm.enoughCorrectLiquidToRecover.Set(flag3 && flag, base.smi, false);
 		}
 
 		public void UpdateAbsorbing(bool allow)

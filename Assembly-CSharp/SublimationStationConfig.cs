@@ -48,15 +48,15 @@ public class SublimationStationConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(SimHashes.ToxicSand.CreateTag(), 1f)
+			new ElementConverter.ConsumedElement(SimHashes.ToxicSand.CreateTag(), 1f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.66f, SimHashes.ContaminatedOxygen, 303.15f, false, false, (float)cellOffset.x, (float)cellOffset.y, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.66f, SimHashes.ContaminatedOxygen, 303.15f, false, false, (float)cellOffset.x, (float)cellOffset.y, 1f, byte.MaxValue, 0, true)
 		};
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = SimHashes.ToxicSand.CreateTag();
+		manualDeliveryKG.RequestedItemTag = SimHashes.ToxicSand.CreateTag();
 		manualDeliveryKG.capacity = 600f;
 		manualDeliveryKG.refillMass = 240f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;

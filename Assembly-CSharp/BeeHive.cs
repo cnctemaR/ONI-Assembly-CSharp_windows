@@ -86,7 +86,7 @@ public class BeeHive : GameStateMachine<BeeHive, BeeHive.StatesInstance, IStateM
 
 		public void SetUpNewHive()
 		{
-			base.sm.hiveGrowth.Set(0f, this);
+			base.sm.hiveGrowth.Set(0f, this, false);
 		}
 
 		protected override void OnCleanUp()
@@ -124,7 +124,7 @@ public class BeeHive : GameStateMachine<BeeHive, BeeHive.StatesInstance, IStateM
 			float num = base.sm.hiveGrowth.Get(this);
 			num += delta;
 			Mathf.Clamp01(num);
-			base.sm.hiveGrowth.Set(num, this);
+			base.sm.hiveGrowth.Set(num, this, false);
 		}
 
 		public void SpawnNewLarvaFromHive()

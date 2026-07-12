@@ -50,7 +50,7 @@ public class GlobalAssets : KMonoBehaviour
 							if (text == null)
 							{
 								bank.getPath(out text);
-								Guid guid;
+								GUID guid;
 								eventDescription.getID(out guid);
 								global::Debug.LogError(string.Format("Got a FMOD event with a null path! {0} {1} in bank {2}", eventDescription.ToString(), guid, text));
 							}

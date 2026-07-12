@@ -227,7 +227,7 @@ public class JettisonableCargoModule : GameStateMachine<JettisonableCargoModule,
 			}
 			if (flag != base.sm.hasCargo.Get(this))
 			{
-				base.sm.hasCargo.Set(flag, this);
+				base.sm.hasCargo.Set(flag, this, false);
 			}
 			return flag;
 		}

@@ -196,6 +196,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Waiting for a Duplicant to change control state";
 			}
 
+			public class DISPENSEREQUESTED
+			{
+				public static LocString NAME = "Dispense Requested";
+
+				public static LocString TOOLTIP = "Waiting for a Duplicant to dispense the item";
+			}
+
 			public class SUIT_LOCKER
 			{
 				public class NEED_CONFIGURATION
@@ -327,8 +334,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Suits",
 					UI.PST_KEYWORD,
-					UI.HORIZONTAL_BR_RULE,
-					"When all available docks are full, Duplicants will unequip their ",
+					"\n\nWhen all available docks are full, Duplicants will unequip their ",
 					UI.PRE_KEYWORD,
 					"Suits",
 					UI.PST_KEYWORD,
@@ -347,7 +353,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Current State: {ControlState}";
 
-				public static LocString TOOLTIP = "Current State: {ControlState}" + UI.HORIZONTAL_BR_RULE + "Auto: Duplicants open and close this door as needed\nLocked: Nothing may pass through\nOpen: This door will remain open";
+				public static LocString TOOLTIP = "Current State: {ControlState}\n\nAuto: Duplicants open and close this door as needed\nLocked: Nothing may pass through\nOpen: This door will remain open";
 
 				public static LocString OPENED = "Opened";
 
@@ -507,11 +513,25 @@ namespace STRINGS
 				});
 			}
 
+			public class FISHFEEDERACCEPTSMUTANTSEEDS
+			{
+				public static LocString NAME = "Fish Feeder accepts mutant seeds";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This fish feeder is allowed to use ",
+					UI.PRE_KEYWORD,
+					"Mutant Seeds",
+					UI.PST_KEYWORD,
+					" as fish food"
+				});
+			}
+
 			public class INVALIDPORTOVERLAP
 			{
 				public static LocString NAME = "Invalid Port Overlap";
 
-				public static LocString TOOLTIP = "Ports on this building overlap those on another building" + UI.HORIZONTAL_BR_RULE + "This building must be rebuilt in a valid location";
+				public static LocString TOOLTIP = "Ports on this building overlap those on another building\n\nThis building must be rebuilt in a valid location";
 
 				public static LocString NOTIFICATION_NAME = "Building has overlapping ports";
 
@@ -788,9 +808,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Tile",
 					UI.PST_KEYWORD,
-					" beneath this building to regain function",
-					UI.HORIZONTAL_BR_RULE,
-					"Tile can be found in the ",
+					" beneath this building to regain function\n\nTile can be found in the ",
 					UI.FormatAsBuildMenuTab("Base Tab", global::Action.Plan1),
 					" of the Build Menu"
 				});
@@ -919,9 +937,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"Material cannot be fed onto this Conveyor system for transport",
-					UI.HORIZONTAL_BR_RULE,
-					"Enter the ",
+					"Material cannot be fed onto this Conveyor system for transport\n\nEnter the ",
 					UI.FormatAsBuildMenuTab("Shipping Tab", global::Action.Plan13),
 					" of the Build Menu to build and connect a ",
 					UI.PRE_KEYWORD,
@@ -936,9 +952,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"Material cannot be offloaded from this Conveyor system and will backup the rails",
-					UI.HORIZONTAL_BR_RULE,
-					"Enter the ",
+					"Material cannot be offloaded from this Conveyor system and will backup the rails\n\nEnter the ",
 					UI.FormatAsBuildMenuTab("Shipping Tab", global::Action.Plan13),
 					" of the Build Menu to build and connect a ",
 					UI.PRE_KEYWORD,
@@ -957,9 +971,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Conveyor Rail",
 					UI.PST_KEYWORD,
-					" cannot carry anymore material",
-					UI.HORIZONTAL_BR_RULE,
-					"Remove material from the ",
+					" cannot carry anymore material\n\nRemove material from the ",
 					UI.PRE_KEYWORD,
 					"Conveyor Receptacle",
 					UI.PST_KEYWORD,
@@ -1274,9 +1286,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Gas Pressure",
 					UI.PST_KEYWORD,
-					" is preventing this building from emitting gas",
-					UI.HORIZONTAL_BR_RULE,
-					"Reduce pressure by pumping ",
+					" is preventing this building from emitting gas\n\nReduce pressure by pumping ",
 					UI.PRE_KEYWORD,
 					"Gas",
 					UI.PST_KEYWORD,
@@ -1364,9 +1374,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This building requires Radbolts to function",
-					UI.HORIZONTAL_BR_RULE,
-					"Open the ",
+					"This building requires Radbolts to function\n\nOpen the ",
 					UI.FormatAsOverlay("Radiation Overlay"),
 					" ",
 					UI.FormatAsHotKey(global::Action.Overlay15),
@@ -1522,7 +1530,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Requires Emptying";
 
-				public static LocString TOOLTIP = "This amenity cannot be used while full" + UI.HORIZONTAL_BR_RULE + "Emptying it will produce " + UI.FormatAsLink("Polluted Dirt", "TOXICSAND");
+				public static LocString TOOLTIP = "This amenity cannot be used while full\n\nEmptying it will produce " + UI.FormatAsLink("Polluted Dirt", "TOXICSAND");
 			}
 
 			public class DESALINATORNEEDSEMPTYING
@@ -1542,7 +1550,7 @@ namespace STRINGS
 					UI.FormatAsLink("Algae Terrarium", "ALGAEHABITAT"),
 					" needs to be emptied of ",
 					UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
-					UI.HORIZONTAL_BR_RULE,
+					"\n\n",
 					UI.FormatAsLink("Bottle Emptiers", "BOTTLEEMPTIER"),
 					" can be used to transport and dispose of ",
 					UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
@@ -2221,8 +2229,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Access Permissions",
 						UI.PST_KEYWORD,
-						UI.HORIZONTAL_BR_RULE,
-						"All Duplicants are permitted to pass through it until ",
+						"\n\nAll Duplicants are permitted to pass through it until ",
 						UI.PRE_KEYWORD,
 						"Power",
 						UI.PST_KEYWORD,
@@ -2263,14 +2270,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony Lacks {Skills}";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"{Skills} Skill required to operate",
-					UI.HORIZONTAL_BR_RULE,
-					"Open the ",
-					UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills),
-					" to teach {Skills} to a Duplicant"
-				});
+				public static LocString TOOLTIP = "{Skills} Skill required to operate\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills) + " to teach {Skills} to a Duplicant";
 			}
 
 			public class CLUSTERCOLONYLACKSREQUIREDSKILLPERK
@@ -2727,6 +2727,47 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building requires <b>{1}</b> of {0} to operate";
 			}
 
+			public class MEGABRAINTANK
+			{
+				public class PROGRESS
+				{
+					public class PROGRESSIONRATE
+					{
+						public static LocString NAME = "Dream Journals: {ActivationProgress}";
+
+						public static LocString TOOLTIP = "Currently awaiting the Dream Journals necessary to restore this building to full functionality";
+					}
+
+					public class DREAMANALYSIS
+					{
+						public static LocString NAME = "Analyzing Dreams: {TimeToComplete}s";
+
+						public static LocString TOOLTIP = "Maximum Aptitude effect sustained while dream analysis continues";
+					}
+				}
+
+				public class COMPLETE
+				{
+					public static LocString NAME = "Fully Restored";
+
+					public static LocString TOOLTIP = "This building is functioning at full capacity";
+				}
+			}
+
+			public class MEGABRAINNOTENOUGHOXYGEN
+			{
+				public static LocString NAME = "Lacks Oxygen";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building needs ",
+					UI.PRE_KEYWORD,
+					"Oxygen",
+					UI.PST_KEYWORD,
+					" in order to function"
+				});
+			}
+
 			public class NOLOGICWIRECONNECTED
 			{
 				public static LocString NAME = "No Automation Wire Connected";
@@ -2818,9 +2859,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Egg",
 					UI.PST_KEYWORD,
-					" incubating cozily",
-					UI.HORIZONTAL_BR_RULE,
-					"It will hatch when ",
+					" incubating cozily\n\nIt will hatch when ",
 					UI.PRE_KEYWORD,
 					"Incubation",
 					UI.PST_KEYWORD,
@@ -2952,8 +2991,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Top Priority",
 					UI.PST_KEYWORD,
-					UI.HORIZONTAL_BR_RULE,
-					"The colony will be in ",
+					"\n\nThe colony will be in ",
 					UI.PRE_KEYWORD,
 					"Yellow Alert",
 					UI.PST_KEYWORD,
@@ -3111,7 +3149,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Destination Out Of Range";
 
-				public static LocString TOOLTIP = "This rocket lacks the range to reach its destination" + UI.HORIZONTAL_BR_RULE + "Rocket Range: {Range}\nDestination Distance: {Distance}";
+				public static LocString TOOLTIP = "This rocket lacks the range to reach its destination\n\nRocket Range: {Range}\nDestination Distance: {Distance}";
 			}
 
 			public class ROCKETSTRANDED
@@ -3280,8 +3318,7 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" has no ",
 					BUILDINGS.PREFABS.MODULARLAUNCHPADPORT.NAME,
-					" attached",
-					UI.HORIZONTAL_BR_RULE,
+					" attached\n\n",
 					UI.PRE_KEYWORD,
 					"Solid",
 					UI.PST_KEYWORD,
@@ -3402,6 +3439,85 @@ namespace STRINGS
 
 					public static LocString TALKING_TO_NUM = "Talking to {0} friends.";
 				}
+			}
+
+			public class CREATUREMANIPULATORPROGRESS
+			{
+				public static LocString NAME = "Collected Species Data {0}/{1}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building requires data from multiple ",
+					UI.PRE_KEYWORD,
+					"Critter",
+					UI.PST_KEYWORD,
+					" species to unlock its genetic manipulator\n\nSpecies scanned:"
+				});
+
+				public static LocString NO_DATA = "No species scanned";
+			}
+
+			public class CREATUREMANIPULATORMORPHMODELOCKED
+			{
+				public static LocString NAME = "Current Status: Offline";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building cannot operate until it collects more ",
+					UI.PRE_KEYWORD,
+					"Critter",
+					UI.PST_KEYWORD,
+					" DNA"
+				});
+			}
+
+			public class CREATUREMANIPULATORMORPHMODE
+			{
+				public static LocString NAME = "Current Status: Online";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is ready to manipulate ",
+					UI.PRE_KEYWORD,
+					"Critter",
+					UI.PST_KEYWORD,
+					" DNA"
+				});
+			}
+
+			public class CREATUREMANIPULATORWAITING
+			{
+				public static LocString NAME = "Waiting for a Critter";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is waiting for a ",
+					UI.PRE_KEYWORD,
+					"Critter",
+					UI.PST_KEYWORD,
+					" to get sucked into its scanning area"
+				});
+			}
+
+			public class CREATUREMANIPULATORWORKING
+			{
+				public static LocString NAME = "Poking and Prodding Critter";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is extracting genetic information from a ",
+					UI.PRE_KEYWORD,
+					"Critter",
+					UI.PST_KEYWORD,
+					" "
+				});
+			}
+
+			public class SPICEGRINDERNOSPICE
+			{
+				public static LocString NAME = "No Spice Selected";
+
+				public static LocString TOOLTIP = "Select a recipe to begin fabrication";
 			}
 		}
 

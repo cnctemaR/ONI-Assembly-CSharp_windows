@@ -34,7 +34,7 @@ public class WarpPortal : Workable
 	{
 		base.OnSpawn();
 		this.warpPortalSMI = new WarpPortal.WarpPortalSM.Instance(this);
-		this.warpPortalSMI.sm.isCharged.Set(!this.IsConsumed, this.warpPortalSMI);
+		this.warpPortalSMI.sm.isCharged.Set(!this.IsConsumed, this.warpPortalSMI, false);
 		this.warpPortalSMI.StartSM();
 		this.selectEventHandle = Game.Instance.Subscribe(-1503271301, new Action<object>(this.OnObjectSelected));
 	}
@@ -67,7 +67,7 @@ public class WarpPortal : Workable
 			ManagementMenu.Instance.OpenClusterMap();
 			ClusterMapScreen.Instance.SetTargetFocusPosition(ClusterManager.Instance.GetWorld(this.GetTargetWorldID()).GetMyWorldLocation(), 0.5f);
 		};
-		statesInstance.ShowEventPopup(this.GetTargetWorldID());
+		statesInstance.ShowEventPopup();
 		this.discovered = true;
 	}
 
@@ -133,7 +133,7 @@ public class WarpPortal : Workable
 
 	public IEnumerator DelayedWarp(WarpReceiver receiver)
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		int myWorldId = receiver.GetMyWorldId();
 		CameraController.Instance.ActiveWorldStarWipe(myWorldId, Grid.CellToPos(Grid.PosToCell(receiver)), 10f, null);
 		Worker worker = base.worker;
@@ -248,7 +248,7 @@ public class WarpPortal : Workable
 			this.idle.PlayAnim("idle", KAnim.PlayMode.Loop).Enter(delegate(WarpPortal.WarpPortalSM.Instance smi)
 			{
 				smi.master.IsConsumed = false;
-				smi.sm.isCharged.Set(true, smi);
+				smi.sm.isCharged.Set(true, smi, false);
 				smi.master.SetAssignable(true);
 			}).Exit(delegate(WarpPortal.WarpPortalSM.Instance smi)
 			{
@@ -285,14 +285,14 @@ public class WarpPortal : Workable
 			{
 				smi.master.SetAssignable(false);
 				smi.master.IsConsumed = true;
-				this.isCharged.Set(false, smi);
+				this.isCharged.Set(false, smi, false);
 			}).PlayAnim("recharge", KAnim.PlayMode.Loop).ToggleStatusItem(Db.Get().BuildingStatusItems.WarpPortalCharging, (WarpPortal.WarpPortalSM.Instance smi) => smi.master)
 				.Update(delegate(WarpPortal.WarpPortalSM.Instance smi, float dt)
 				{
 					smi.master.rechargeProgress += dt;
 					if (smi.master.rechargeProgress > 3000f)
 					{
-						this.isCharged.Set(true, smi);
+						this.isCharged.Set(true, smi, false);
 						smi.master.rechargeProgress = 0f;
 						smi.GoTo(this.idle);
 					}
@@ -333,7 +333,7 @@ public class WarpPortal : Workable
 			{
 				if (base.master.worker != null)
 				{
-					return new Notification(MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.NAME.Replace("{dupe}", base.master.worker.name), NotificationType.Neutral, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.TOOLTIP.Replace("{dupe}", base.master.worker.name), null, false, 0f, null, null, base.master.transform, true);
+					return new Notification(MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.NAME.Replace("{dupe}", base.master.worker.name), NotificationType.Neutral, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.TOOLTIP.Replace("{dupe}", base.master.worker.name), null, false, 0f, null, null, base.master.transform, true, false);
 				}
 				return null;
 			}

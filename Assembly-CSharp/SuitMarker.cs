@@ -84,7 +84,7 @@ public class SuitMarker : KMonoBehaviour
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
 			if (!(component == null))
 			{
-				if (!component.HasAnyTags(this.LockerTags))
+				if (!component.IsAnyPrefabID(this.LockerTags))
 				{
 					break;
 				}
@@ -249,7 +249,7 @@ public class SuitMarker : KMonoBehaviour
 	private class SuitMarkerReactable : Reactable
 	{
 		public SuitMarkerReactable(SuitMarker suit_marker)
-			: base(suit_marker.gameObject, "SuitMarkerReactable", Db.Get().ChoreTypes.SuitMarker, 1, 1, false, 0f, 0f, float.PositiveInfinity)
+			: base(suit_marker.gameObject, "SuitMarkerReactable", Db.Get().ChoreTypes.SuitMarker, 1, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
 		{
 			this.suitMarker = suit_marker;
 		}
@@ -378,7 +378,7 @@ public class SuitMarker : KMonoBehaviour
 			{
 				Assignable assignable = equipment.GetAssignable(Db.Get().AssignableSlots.Suit);
 				assignable.Unassign();
-				Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true);
+				Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true, false);
 				assignable.GetComponent<Notifier>().Add(notification, "");
 			}
 		}

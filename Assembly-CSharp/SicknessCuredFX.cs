@@ -21,7 +21,7 @@ public class SicknessCuredFX : GameStateMachine<SicknessCuredFX, SicknessCuredFX
 			: base(master)
 		{
 			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("recentlyhealed_fx_kanim", master.gameObject.transform.GetPosition() + offset, master.gameObject.transform, true, Grid.SceneLayer.Front, false);
-			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
+			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi, false);
 		}
 
 		public void DestroyFX()

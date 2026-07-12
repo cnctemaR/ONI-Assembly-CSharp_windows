@@ -51,7 +51,7 @@ public class DoctorStation : Workable
 			}
 		}
 		bool flag = this.treatments_available.Count > 0;
-		this.smi.sm.hasSupplies.Set(flag, this.smi);
+		this.smi.sm.hasSupplies.Set(flag, this.smi, false);
 	}
 
 	private void AddTreatment(string id, Tag tag)
@@ -65,13 +65,13 @@ public class DoctorStation : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.smi.sm.hasPatient.Set(true, this.smi);
+		this.smi.sm.hasPatient.Set(true, this.smi, false);
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
-		this.smi.sm.hasPatient.Set(false, this.smi);
+		this.smi.sm.hasPatient.Set(false, this.smi, false);
 	}
 
 	public override bool InstantlyFinish(Worker worker)
@@ -81,7 +81,7 @@ public class DoctorStation : Workable
 
 	public void SetHasDoctor(bool has)
 	{
-		this.smi.sm.hasDoctor.Set(has, this.smi);
+		this.smi.sm.hasDoctor.Set(has, this.smi, false);
 	}
 
 	public void CompleteDoctoring()

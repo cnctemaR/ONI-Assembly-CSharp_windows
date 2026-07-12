@@ -645,6 +645,7 @@ public class BuildMenu : KScreen
 			{
 				new BuildMenu.BuildingInfo("MicrobeMusher", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("CookingStation", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("SpiceGrinder", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("GourmetCookingStation", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("EggCracker", global::Action.BuildMenuKeyE)
 			}),

@@ -103,7 +103,7 @@ public class ChainedBuilding : GameStateMachine<ChainedBuilding, ChainedBuilding
 		{
 			foreach (ChainedBuilding.StatesInstance statesInstance in chain)
 			{
-				statesInstance.sm.isConnectedToHead.Set(foundHead, statesInstance);
+				statesInstance.sm.isConnectedToHead.Set(foundHead, statesInstance, false);
 			}
 		}
 
@@ -143,7 +143,8 @@ public class ChainedBuilding : GameStateMachine<ChainedBuilding, ChainedBuilding
 			{
 				return;
 			}
-			if (!gameObject.HasTag(base.def.linkBuildingTag) && !gameObject.HasTag(base.def.headBuildingTag))
+			KPrefabID component = gameObject.GetComponent<KPrefabID>();
+			if (!component.HasTag(base.def.linkBuildingTag) && !component.IsPrefabID(base.def.headBuildingTag))
 			{
 				return;
 			}

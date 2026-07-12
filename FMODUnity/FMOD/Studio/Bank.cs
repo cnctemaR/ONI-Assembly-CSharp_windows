@@ -5,7 +5,7 @@ namespace FMOD.Studio
 {
 	public struct Bank
 	{
-		public RESULT getID(out Guid id)
+		public RESULT getID(out GUID id)
 		{
 			return Bank.FMOD_Studio_Bank_GetID(this.handle, out id);
 		}
@@ -65,10 +65,10 @@ namespace FMOD.Studio
 			return Bank.FMOD_Studio_Bank_GetStringCount(this.handle, out count);
 		}
 
-		public RESULT getStringInfo(int index, out Guid id, out string path)
+		public RESULT getStringInfo(int index, out GUID id, out string path)
 		{
 			path = null;
-			id = Guid.Empty;
+			id = default(GUID);
 			RESULT result2;
 			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
@@ -219,7 +219,7 @@ namespace FMOD.Studio
 		private static extern bool FMOD_Studio_Bank_IsValid(IntPtr bank);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bank_GetID(IntPtr bank, out Guid id);
+		private static extern RESULT FMOD_Studio_Bank_GetID(IntPtr bank, out GUID id);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_Bank_GetPath(IntPtr bank, IntPtr path, int size, out int retrieved);
@@ -243,7 +243,7 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_Bank_GetStringCount(IntPtr bank, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bank_GetStringInfo(IntPtr bank, int index, out Guid id, IntPtr path, int size, out int retrieved);
+		private static extern RESULT FMOD_Studio_Bank_GetStringInfo(IntPtr bank, int index, out GUID id, IntPtr path, int size, out int retrieved);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_Bank_GetEventCount(IntPtr bank, out int count);

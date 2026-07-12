@@ -68,7 +68,7 @@ public class GeneShuffler : Workable
 
 	private void RefreshConsumedState()
 	{
-		this.geneShufflerSMI.sm.isCharged.Set(!this.IsConsumed, this.geneShufflerSMI);
+		this.geneShufflerSMI.sm.isCharged.Set(!this.IsConsumed, this.geneShufflerSMI, false);
 	}
 
 	private void OnStorageChange(object data)
@@ -83,7 +83,7 @@ public class GeneShuffler : Workable
 			for (int i = this.storage.items.Count - 1; i >= 0; i--)
 			{
 				GameObject gameObject = this.storage.items[i];
-				if (!(gameObject == null) && gameObject.HasTag(GeneShuffler.RechargeTag))
+				if (!(gameObject == null) && gameObject.IsPrefabID(GeneShuffler.RechargeTag))
 				{
 					this.storage.ConsumeIgnoringDisease(gameObject);
 					this.Recharge();
@@ -97,7 +97,7 @@ public class GeneShuffler : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null, null, true);
+		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null, null, true, false);
 		this.notifier.Add(this.notification, "");
 		this.DeSelectBuilding();
 	}

@@ -82,6 +82,7 @@ public static class Localization
 			else
 			{
 				string text3 = obj as string;
+				text3 = text3.Replace("\\", "\\\\");
 				text3 = text3.Replace("\"", "\\\"");
 				text3 = text3.Replace("\n", "\\n");
 				writer.WriteLine("#. " + text2);

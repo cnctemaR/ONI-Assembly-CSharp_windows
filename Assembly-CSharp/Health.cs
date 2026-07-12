@@ -119,26 +119,6 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		this.UpdateHealthBar();
 	}
 
-	public void RegisterHitReaction()
-	{
-		ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
-		if (smi != null)
-		{
-			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.gameObject, "Hit", Db.Get().ChoreTypes.Cough, "anim_hits_kanim", 0f, 1f, 1f);
-			selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "hit"
-			});
-			if (!base.gameObject.GetComponent<Navigator>().IsMoving())
-			{
-				EmoteChore emoteChore = new EmoteChore(base.gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteIdle, "anim_hits_kanim", new HashedString[] { "hit" }, null);
-				emoteChore.PairReactable(selfEmoteReactable);
-				selfEmoteReactable.PairEmote(emoteChore);
-			}
-			smi.AddOneshotReactable(selfEmoteReactable);
-		}
-	}
-
 	[ContextMenu("DoDamage")]
 	public void DoDamage()
 	{

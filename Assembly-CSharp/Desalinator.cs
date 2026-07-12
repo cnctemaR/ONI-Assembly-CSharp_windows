@@ -15,7 +15,7 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 		set
 		{
 			this._storageLeft = value;
-			base.smi.sm.saltStorageLeft.Set(value, base.smi);
+			base.smi.sm.saltStorageLeft.Set(value, base.smi, false);
 		}
 	}
 
@@ -33,7 +33,7 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 		bool flag = (bool)data;
 		foreach (ManualDeliveryKG manualDeliveryKG in this.deliveryComponents)
 		{
-			Element element = ElementLoader.GetElement(manualDeliveryKG.requestedItemTag);
+			Element element = ElementLoader.GetElement(manualDeliveryKG.RequestedItemTag);
 			if (element != null && element.IsLiquid)
 			{
 				manualDeliveryKG.Pause(flag, "pipe connected");
@@ -77,7 +77,7 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 		}
 		for (int i = 0; i < this.converters.Length; i++)
 		{
-			if (this.converters[i].HasEnoughMassToStartConverting())
+			if (this.converters[i].HasEnoughMassToStartConverting(false))
 			{
 				return true;
 			}
@@ -184,12 +184,12 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 			this.on.working.Enter(delegate(Desalinator.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
-			}).QueueAnim("working_loop", true, null).ParamTransition<float>(this.saltStorageLeft, this.full, (Desalinator.StatesInstance smi, float p) => smi.IsFull())
+			}).QueueAnim("working_loop", true, null).EventTransition(GameHashes.OnStorageChange, this.on.working_pst, (Desalinator.StatesInstance smi) => !smi.master.CheckCanConvert())
+				.ParamTransition<float>(this.saltStorageLeft, this.full, (Desalinator.StatesInstance smi, float p) => smi.IsFull())
 				.EventHandler(GameHashes.OnStorageChange, delegate(Desalinator.StatesInstance smi)
 				{
 					smi.UpdateStorageLeft();
 				})
-				.EventTransition(GameHashes.OnStorageChange, this.on.working_pst, (Desalinator.StatesInstance smi) => !smi.master.CheckCanConvert())
 				.Exit(delegate(Desalinator.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);

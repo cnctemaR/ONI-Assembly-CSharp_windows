@@ -31,7 +31,7 @@ public class CustomClothingConfig : IEquipmentConfig
 		};
 		equipmentDef.OnUnequipCallBack = new Action<Equippable>(CoolVestConfig.OnUnequipVest);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.CUSTOMCLOTHING.RECIPE_DESC;
-		foreach (EquippableFacadeResource equippableFacadeResource in Db.Get().EquippableFacades.resources)
+		foreach (EquippableFacadeResource equippableFacadeResource in Db.GetEquippableFacades().resources)
 		{
 			if (!(equippableFacadeResource.DefID != "CustomClothing"))
 			{
@@ -62,6 +62,4 @@ public class CustomClothingConfig : IEquipmentConfig
 	public const string ID = "CustomClothing";
 
 	public static ComplexRecipe recipe;
-
-	public static List<ComplexRecipe> facadeRecipes = new List<ComplexRecipe>();
 }

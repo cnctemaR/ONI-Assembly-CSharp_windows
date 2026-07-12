@@ -31,7 +31,7 @@ namespace STRINGS
 			{
 				public static LocString HEADER = "Preliminary Calculations";
 
-				public static LocString ENTRY = "TO: JSTERN@GRAVITASFACILITY.NOVA\nFROM: EJONES @GRAVITASFACILITY.NOVA\nSUBJECT: Preliminary Calculations\n\nDirector,\n\nEven with dramatic optimization we can't make the sheer volume of resources required to sustain a colony seed fit for even a small interplanetary travel duration. We'll need to consider serious changes if this is going to work.\n\nE Jones\nInformation and Statistics Department\nThe Gravitas Facility";
+				public static LocString ENTRY = "TO: JSTERN@GRAVITASFACILITY.NOVA\nFROM: EJONES@GRAVITASFACILITY.NOVA\nSUBJECT: Preliminary Calculations\n\nDirector,\n\nEven with dramatic optimization we can't make the sheer volume of resources required to sustain a colony seed fit for even a small interplanetary travel duration. We'll need to consider serious changes if this is going to work.\n\nE Jones\nInformation and Statistics Department\nThe Gravitas Facility";
 			}
 
 			public class SET_OBJECT
@@ -52,7 +52,7 @@ namespace STRINGS
 			{
 				public static LocString HEADER = "LOG FRAGMENT RECOVERED";
 
-				public static LocString ENTRY = "\"--fascinating that memories are not already inherent in our subjects; however, none as of yet have shown signs of recognition when introduced to familiar stimuli.\"\n\n\"Refer to Experiment 7D.\"\n\"Refer to Experiment 7F.\"\n\n\"Memories must be embedded physically within the brainmaps of our subjects. The only question remains is--\"";
+				public static LocString ENTRY = "\"--fascinating that memories are not already inherent in our subjects; however, none as of yet have shown signs of recognition when introduced to familiar stimuli.\"\n\n\"Refer to Experiment 7D.\"\n\"Refer to Experiment 7F.\"\n\n\"Memories <i>must</i> be embedded within the physical brainmaps of our subjects. The only question that remains is--\"";
 			}
 		}
 	}

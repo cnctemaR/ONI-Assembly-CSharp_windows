@@ -11,10 +11,10 @@ public class DeliverFoodChore : Chore<DeliverFoodChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.requestedrationcount.Set(base.smi.GetComponent<StateMachineController>().GetSMI<RationMonitor.Instance>().GetRationsRemaining(), base.smi);
+		base.smi.sm.requestedrationcount.Set(base.smi.GetComponent<StateMachineController>().GetSMI<RationMonitor.Instance>().GetRationsRemaining(), base.smi, false);
 		base.smi.sm.ediblesource.Set(context.consumerState.gameObject.GetComponent<Sensors>().GetSensor<ClosestEdibleSensor>().GetEdible(), base.smi);
-		base.smi.sm.deliverypoint.Set(this.gameObject, base.smi);
-		base.smi.sm.deliverer.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.deliverypoint.Set(this.gameObject, base.smi, false);
+		base.smi.sm.deliverer.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 

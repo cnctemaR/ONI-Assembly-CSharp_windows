@@ -126,11 +126,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public int currentFrame { get; protected set; }
 
-	public string currentAnim { get; protected set; }
-
-	public string currentAnimFile { get; protected set; }
-
-	public KAnimHashedString currentAnimFileHash { get; protected set; }
+	public HashedString currentAnim
+	{
+		get
+		{
+			return this.curAnim.hash;
+		}
+	}
 
 	public float PlaySpeedMultiplier { get; set; }
 
@@ -705,7 +707,107 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public bool HasAnimation(HashedString anim_name)
 	{
-		return this.anims.ContainsKey(anim_name) || this.overrideAnims.ContainsKey(anim_name);
+		bool flag = anim_name.IsValid;
+		if (flag)
+		{
+			bool flag2 = this.anims.ContainsKey(anim_name);
+			bool flag3 = !flag2 && this.overrideAnims.ContainsKey(anim_name);
+			flag = flag2 || flag3;
+		}
+		return flag;
+	}
+
+	public bool HasAnimationFile(KAnimHashedString anim_file_name)
+	{
+		KAnimFile kanimFile = null;
+		return this.TryGetAnimationFile(anim_file_name, out kanimFile);
+	}
+
+	public bool TryGetAnimationFile(KAnimHashedString anim_file_name, out KAnimFile match)
+	{
+		match = null;
+		if (!anim_file_name.IsValid())
+		{
+			return false;
+		}
+		KAnimFileData kanimFileData = null;
+		int num = 0;
+		int num2 = this.overrideAnimFiles.Count - 1;
+		int num3 = (int)((float)this.overrideAnimFiles.Count * 0.5f);
+		while (num3 > 0 && match == null && num < num3)
+		{
+			if (this.overrideAnimFiles[num].file != null)
+			{
+				kanimFileData = this.overrideAnimFiles[num].file.GetData();
+			}
+			if (kanimFileData != null && kanimFileData.hashName.HashValue == anim_file_name.HashValue)
+			{
+				match = this.overrideAnimFiles[num].file;
+				break;
+			}
+			if (this.overrideAnimFiles[num2].file != null)
+			{
+				kanimFileData = this.overrideAnimFiles[num2].file.GetData();
+			}
+			if (kanimFileData != null && kanimFileData.hashName.HashValue == anim_file_name.HashValue)
+			{
+				match = this.overrideAnimFiles[num2].file;
+			}
+			num++;
+			num2--;
+		}
+		if (match == null && this.overrideAnimFiles.Count % 2 != 0)
+		{
+			if (this.overrideAnimFiles[num].file != null)
+			{
+				kanimFileData = this.overrideAnimFiles[num].file.GetData();
+			}
+			if (kanimFileData != null && kanimFileData.hashName.HashValue == anim_file_name.HashValue)
+			{
+				match = this.overrideAnimFiles[num].file;
+			}
+		}
+		kanimFileData = null;
+		if (match == null && this.animFiles != null)
+		{
+			num = 0;
+			num2 = this.animFiles.Length - 1;
+			num3 = (int)((float)this.animFiles.Length * 0.5f);
+			while (num3 > 0 && match == null && num < num3)
+			{
+				if (this.animFiles[num] != null)
+				{
+					kanimFileData = this.animFiles[num].GetData();
+				}
+				if (kanimFileData != null && kanimFileData.hashName.HashValue == anim_file_name.HashValue)
+				{
+					match = this.animFiles[num];
+					break;
+				}
+				if (this.animFiles[num2] != null)
+				{
+					kanimFileData = this.animFiles[num2].GetData();
+				}
+				if (kanimFileData != null && kanimFileData.hashName.HashValue == anim_file_name.HashValue)
+				{
+					match = this.animFiles[num2];
+				}
+				num++;
+				num2--;
+			}
+			if (match == null && this.animFiles.Length % 2 != 0)
+			{
+				if (this.animFiles[num] != null)
+				{
+					kanimFileData = this.animFiles[num].GetData();
+				}
+				if (kanimFileData != null && kanimFileData.hashName.HashValue == anim_file_name.HashValue)
+				{
+					match = this.animFiles[num];
+				}
+			}
+		}
+		return match != null;
 	}
 
 	public void AddAnims(KAnimFile anim_file)

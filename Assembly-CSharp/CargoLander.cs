@@ -44,7 +44,7 @@ public class CargoLander : GameStateMachine<CargoLander, CargoLander.StatesInsta
 		})
 			.Enter(delegate(CargoLander.StatesInstance smi)
 			{
-				smi.sm.isLanded.Set(true, smi);
+				smi.sm.isLanded.Set(true, smi, false);
 			});
 		this.grounded.loaded.PlayAnim("grounded").ParamTransition<bool>(this.hasCargo, this.grounded.empty, GameStateMachine<CargoLander, CargoLander.StatesInstance, IStateMachineTarget, CargoLander.Def>.IsFalse).OnSignal(this.emptyCargo, this.grounded.emptying)
 			.Enter(delegate(CargoLander.StatesInstance smi)
@@ -123,7 +123,7 @@ public class CargoLander : GameStateMachine<CargoLander, CargoLander.StatesInsta
 			int num = Grid.PosToCell(base.gameObject.transform.GetPosition() + new Vector3(0f, this.flightAnimOffset, 0f));
 			if (Grid.IsValidCell(num))
 			{
-				SimMessages.EmitMass(num, (byte)ElementLoader.GetElementIndex(this.exhaustElement), dt * this.exhaustEmitRate, this.exhaustTemperature, 0, 0, -1);
+				SimMessages.EmitMass(num, ElementLoader.GetElementIndex(this.exhaustElement), dt * this.exhaustEmitRate, this.exhaustTemperature, 0, 0, -1);
 			}
 		}
 
@@ -157,7 +157,7 @@ public class CargoLander : GameStateMachine<CargoLander, CargoLander.StatesInsta
 			}
 			if (flag != base.sm.hasCargo.Get(this))
 			{
-				base.sm.hasCargo.Set(flag, this);
+				base.sm.hasCargo.Set(flag, this, false);
 			}
 			return flag;
 		}

@@ -28,9 +28,9 @@ public static class BasePacuConfig
 			component2.animWidth = 0.5f;
 			component2.animHeight = 0.5f;
 		}
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
-			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), is_baby, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new FallStates.Def
 			{
@@ -40,13 +40,15 @@ public static class BasePacuConfig
 			.Add(new FlopStates.Def(), true, -1)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true, -1)
-			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
+		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
+		def.canSwim = true;
+		def.checkHead = false;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
@@ -59,9 +61,9 @@ public static class BasePacuConfig
 		list.Add(new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false));
 		list.AddRange(BasePacuConfig.SeedDiet(tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.KG_ORE_EATEN_PER_CYCLE * 4f, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
 		Diet diet = new Diet(list.ToArray());
-		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def.diet = diet;
-		def.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
+		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def2.diet = diet;
+		def2.minPoopSizeInCalories = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))
@@ -86,7 +88,7 @@ public static class BasePacuConfig
 
 	private static string GetLandAnim(FallStates.Instance smi)
 	{
-		if (smi.GetSMI<CreatureFallMonitor.Instance>().CanSwimAtCurrentLocation(true))
+		if (smi.GetSMI<CreatureFallMonitor.Instance>().CanSwimAtCurrentLocation())
 		{
 			return "idle_loop";
 		}

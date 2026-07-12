@@ -52,7 +52,7 @@ public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSl
 	string ISliderControl.GetSliderTooltip()
 	{
 		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
-		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.MANUALDELIVERYGENERATORSIDESCREEN.TOOLTIP"), component.requestedItemTag.ProperName(), this.batteryRefillPercent * 100f);
+		return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.MANUALDELIVERYGENERATORSIDESCREEN.TOOLTIP"), component.RequestedItemTag.ProperName(), this.batteryRefillPercent * 100f);
 	}
 
 	public string GetSliderTooltipKey(int index)
@@ -309,8 +309,8 @@ public class EnergyGenerator : Generator, IGameObjectEffectDescriptor, ISingleSl
 			}
 			if (element.IsLiquid)
 			{
-				int elementIndex = ElementLoader.GetElementIndex(output.element);
-				FallingWater.instance.AddParticle(num2, (byte)elementIndex, num, num3, byte.MaxValue, 0, true, false, false, false);
+				ushort elementIndex = ElementLoader.GetElementIndex(output.element);
+				FallingWater.instance.AddParticle(num2, elementIndex, num, num3, byte.MaxValue, 0, true, false, false, false);
 				return;
 			}
 			element.substance.SpawnResource(Grid.CellToPosCCC(num2, Grid.SceneLayer.Front), num, num3, byte.MaxValue, 0, true, false, false);

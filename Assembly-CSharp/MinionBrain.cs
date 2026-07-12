@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using ProcGen;
 using STRINGS;
 using UnityEngine;
@@ -99,7 +100,7 @@ public class MinionBrain : Brain
 		}
 	}
 
-	private void RegisterReactEmotePair(string reactable_id, string kanim_file_name, float max_trigger_time)
+	private void RegisterReactEmotePair(string reactable_id, Emote emote, float max_trigger_time)
 	{
 		if (base.gameObject == null)
 		{
@@ -108,13 +109,10 @@ public class MinionBrain : Brain
 		ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
 		if (smi != null)
 		{
-			EmoteChore emoteChore = new EmoteChore(base.gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteIdle, kanim_file_name, new HashedString[] { "react" }, null);
-			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.gameObject, reactable_id, Db.Get().ChoreTypes.Cough, kanim_file_name, max_trigger_time, 20f, float.PositiveInfinity);
+			EmoteChore emoteChore = new EmoteChore(base.gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteIdle, emote, 1, null);
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.gameObject, reactable_id, Db.Get().ChoreTypes.Cough, max_trigger_time, 20f, float.PositiveInfinity, 0f);
 			emoteChore.PairReactable(selfEmoteReactable);
-			selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "react"
-			});
+			selfEmoteReactable.SetEmote(emote);
 			selfEmoteReactable.PairEmote(emoteChore);
 			smi.AddOneshotReactable(selfEmoteReactable);
 		}
@@ -124,7 +122,7 @@ public class MinionBrain : Brain
 	{
 		if (Time.time - this.lastResearchCompleteEmoteTime > 1f)
 		{
-			this.RegisterReactEmotePair("ResearchComplete", "anim_react_research_complete_kanim", 3f);
+			this.RegisterReactEmotePair("ResearchComplete", Db.Get().Emotes.Minion.ResearchComplete, 3f);
 			this.lastResearchCompleteEmoteTime = Time.time;
 		}
 	}
@@ -132,7 +130,7 @@ public class MinionBrain : Brain
 	public Notification CreateCollapseNotification()
 	{
 		MinionIdentity component = base.GetComponent<MinionIdentity>();
-		return new Notification(MISC.NOTIFICATIONS.TILECOLLAPSE.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.TILECOLLAPSE.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), true, 0f, null, null, null, true);
+		return new Notification(MISC.NOTIFICATIONS.TILECOLLAPSE.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.TILECOLLAPSE.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), true, 0f, null, null, null, true, false);
 	}
 
 	public void RemoveCollapseNotification(Notification notification)
@@ -156,7 +154,7 @@ public class MinionBrain : Brain
 		bool flag2 = telepad != null && component.CanReach(Grid.PosToCell(telepad.transform.GetPosition()));
 		if (!flag && !flag2)
 		{
-			this.RegisterReactEmotePair("UnstableGroundShock", "anim_react_shock_kanim", 1f);
+			this.RegisterReactEmotePair("UnstableGroundShock", Db.Get().Emotes.Minion.Shock, 1f);
 			Notification notification = this.CreateCollapseNotification();
 			notification.customClickCallback = delegate(object o)
 			{

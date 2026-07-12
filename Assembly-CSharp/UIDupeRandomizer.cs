@@ -40,7 +40,6 @@ public class UIDupeRandomizer : MonoBehaviour
 		if (this.applySuit && global::UnityEngine.Random.value < 0.15f)
 		{
 			component.AddBuildOverride(Assets.GetAnim("body_oxygen_kanim").GetData(), 6);
-			component.AddBuildOverride(Assets.GetAnim("helm_oxygen_kanim").GetData(), 6);
 			dupe.SetSymbolVisiblity("snapto_neck", true);
 		}
 		else

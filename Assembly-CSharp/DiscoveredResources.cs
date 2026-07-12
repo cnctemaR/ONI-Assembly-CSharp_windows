@@ -59,11 +59,25 @@ public class DiscoveredResources : KMonoBehaviour, ISaveLoadable, ISim4000ms
 				{
 					hashSet.Add(tag);
 				}
+				else if (gameObject == null)
+				{
+					hashSet.Add(tag);
+				}
 			}
 		}
 		foreach (Tag tag2 in hashSet)
 		{
 			this.Discovered.Remove(tag2);
+		}
+		foreach (KeyValuePair<Tag, HashSet<Tag>> keyValuePair in this.DiscoveredCategories)
+		{
+			foreach (Tag tag3 in hashSet)
+			{
+				if (keyValuePair.Value.Contains(tag3))
+				{
+					keyValuePair.Value.Remove(tag3);
+				}
+			}
 		}
 	}
 

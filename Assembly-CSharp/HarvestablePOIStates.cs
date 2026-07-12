@@ -47,7 +47,7 @@ public class HarvestablePOIStates : GameStateMachine<HarvestablePOIStates, Harve
 			set
 			{
 				this._poiCapacity = value;
-				base.smi.sm.poiCapacity.Set(value, base.smi);
+				base.smi.sm.poiCapacity.Set(value, base.smi, false);
 			}
 		}
 

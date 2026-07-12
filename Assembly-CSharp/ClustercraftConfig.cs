@@ -17,6 +17,7 @@ public class ClustercraftConfig : IEntityConfig
 		saveLoadRoot.DeclareOptionalComponent<OrbitalMechanics>();
 		gameObject.AddOrGet<Clustercraft>();
 		gameObject.AddOrGet<CraftModuleInterface>();
+		gameObject.AddOrGet<UserNameable>();
 		RocketClusterDestinationSelector rocketClusterDestinationSelector = gameObject.AddOrGet<RocketClusterDestinationSelector>();
 		rocketClusterDestinationSelector.requireLaunchPadOnAsteroidDestination = true;
 		rocketClusterDestinationSelector.assignable = true;

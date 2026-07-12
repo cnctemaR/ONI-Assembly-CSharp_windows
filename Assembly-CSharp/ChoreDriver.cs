@@ -28,7 +28,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			{
 				context.chore.PrepareChore(ref context);
 				this.context = context;
-				base.smi.sm.nextChore.Set(context.chore, base.smi);
+				base.smi.sm.nextChore.Set(context.chore, base.smi, false);
 				return;
 			}
 			string text = "Null";
@@ -58,22 +58,35 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 
 	public class StatesInstance : GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.GameInstance
 	{
+		public string masterProperName { get; private set; }
+
+		public KPrefabID masterPrefabId { get; private set; }
+
+		public Navigator navigator { get; private set; }
+
+		public Worker worker { get; private set; }
+
 		public StatesInstance(ChoreDriver master)
 			: base(master)
 		{
-			ChoreConsumer component = base.GetComponent<ChoreConsumer>();
-			component.choreRulesChanged = (global::System.Action)Delegate.Combine(component.choreRulesChanged, new global::System.Action(this.OnChoreRulesChanged));
+			this.masterProperName = base.master.GetProperName();
+			this.masterPrefabId = base.master.GetComponent<KPrefabID>();
+			this.navigator = base.master.GetComponent<Navigator>();
+			this.worker = base.master.GetComponent<Worker>();
+			this.choreConsumer = base.GetComponent<ChoreConsumer>();
+			ChoreConsumer choreConsumer = this.choreConsumer;
+			choreConsumer.choreRulesChanged = (global::System.Action)Delegate.Combine(choreConsumer.choreRulesChanged, new global::System.Action(this.OnChoreRulesChanged));
 		}
 
 		public void BeginChore()
 		{
 			Chore nextChore = this.GetNextChore();
-			Chore chore = base.smi.sm.currentChore.Set(nextChore, base.smi);
+			Chore chore = base.smi.sm.currentChore.Set(nextChore, base.smi, false);
 			if (chore != null && chore.IsPreemptable && chore.driver != null)
 			{
 				chore.Fail("Preemption!");
 			}
-			base.smi.sm.nextChore.Set(null, base.smi);
+			base.smi.sm.nextChore.Set(null, base.smi, false);
 			Chore chore2 = chore;
 			chore2.onExit = (Action<Chore>)Delegate.Combine(chore2.onExit, new Action<Chore>(this.OnChoreExit));
 			chore.Begin(base.master.context);
@@ -85,7 +98,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			if (this.GetCurrentChore() != null)
 			{
 				Chore currentChore = this.GetCurrentChore();
-				base.smi.sm.currentChore.Set(null, base.smi);
+				base.smi.sm.currentChore.Set(null, base.smi, false);
 				Chore chore = currentChore;
 				chore.onExit = (Action<Chore>)Delegate.Remove(chore.onExit, new Action<Chore>(this.OnChoreExit));
 				currentChore.Fail(reason);
@@ -111,11 +124,13 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 		private void OnChoreRulesChanged()
 		{
 			Chore currentChore = this.GetCurrentChore();
-			if (currentChore != null && !base.GetComponent<ChoreConsumer>().IsPermittedOrEnabled(currentChore.choreType, currentChore))
+			if (currentChore != null && !this.choreConsumer.IsPermittedOrEnabled(currentChore.choreType, currentChore))
 			{
 				this.EndChore("Permissions changed");
 			}
 		}
+
+		private ChoreConsumer choreConsumer;
 	}
 
 	public class States : GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>
@@ -126,7 +141,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			this.saveHistory = true;
 			this.nochore.Update(delegate(ChoreDriver.StatesInstance smi, float dt)
 			{
-				if (smi.master.HasTag(GameTags.Minion) && !smi.master.HasTag(GameTags.Dead))
+				if (smi.masterPrefabId.IsPrefabID(GameTags.Minion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
 				{
 					ReportManager.Instance.ReportValue(ReportManager.ReportType.WorkTime, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, DUPLICANTS.CHORES.THINKING.NAME), smi.master.GetProperName());
 				}
@@ -136,20 +151,20 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 				smi.BeginChore();
 			}).Update(delegate(ChoreDriver.StatesInstance smi, float dt)
 			{
-				if (smi.master.HasTag(GameTags.Minion) && !smi.master.HasTag(GameTags.Dead))
+				if (smi.masterPrefabId.IsPrefabID(GameTags.Minion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
 				{
 					Chore chore = this.currentChore.Get(smi);
 					if (chore == null)
 					{
 						return;
 					}
-					if (smi.master.GetComponent<Navigator>().IsMoving())
+					if (smi.navigator.IsMoving())
 					{
 						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, GameUtil.GetChoreName(chore, null), smi.master.GetProperName());
 						return;
 					}
 					ReportManager.ReportType reportType = chore.GetReportType();
-					Workable workable = smi.master.GetComponent<Worker>().workable;
+					Workable workable = smi.worker.workable;
 					if (workable != null)
 					{
 						ReportManager.ReportType reportType2 = workable.GetReportType();

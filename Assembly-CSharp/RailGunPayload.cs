@@ -12,7 +12,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.grounded.DefaultState(this.grounded.idle).Enter(delegate(RailGunPayload.StatesInstance smi)
 		{
-			this.onSurface.Set(true, smi);
+			this.onSurface.Set(true, smi, false);
 		}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.RailgunpayloadNeedsEmptying, null)
 			.ToggleTag(GameTags.RailGunPayloadEmptyable)
 			.ToggleTag(GameTags.ClusterEntityGrounded)
@@ -32,7 +32,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 			.EventTransition(GameHashes.OnStore, this.grounded.idle, null);
 		this.takeoff.DefaultState(this.takeoff.launch).Enter(delegate(RailGunPayload.StatesInstance smi)
 		{
-			this.onSurface.Set(false, smi);
+			this.onSurface.Set(false, smi, false);
 		}).PlayAnim("launching")
 			.OnSignal(this.beginTravelling, this.travel);
 		this.takeoff.launch.Enter(delegate(RailGunPayload.StatesInstance smi)
@@ -45,7 +45,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 		}, UpdateRate.SIM_EVERY_TICK, false);
 		this.travel.DefaultState(this.travel.travelling).Enter(delegate(RailGunPayload.StatesInstance smi)
 		{
-			this.onSurface.Set(false, smi);
+			this.onSurface.Set(false, smi, false);
 		}).Enter(delegate(RailGunPayload.StatesInstance smi)
 		{
 			smi.MoveToSpace();
@@ -149,7 +149,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 		{
 			base.GetComponent<BallisticClusterGridEntity>().Configure(source, destination);
 			int asteroidWorldIdAtLocation = ClusterUtil.GetAsteroidWorldIdAtLocation(destination);
-			base.sm.destinationWorld.Set(asteroidWorldIdAtLocation, this);
+			base.sm.destinationWorld.Set(asteroidWorldIdAtLocation, this, false);
 			this.GoTo(base.sm.takeoff);
 		}
 
@@ -157,7 +157,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 		{
 			base.GetComponent<BallisticClusterGridEntity>().Configure(source, destination);
 			int asteroidWorldIdAtLocation = ClusterUtil.GetAsteroidWorldIdAtLocation(destination);
-			base.sm.destinationWorld.Set(asteroidWorldIdAtLocation, this);
+			base.sm.destinationWorld.Set(asteroidWorldIdAtLocation, this, false);
 			this.GoTo(base.sm.travel);
 		}
 
@@ -198,7 +198,7 @@ public class RailGunPayload : GameStateMachine<RailGunPayload, RailGunPayload.St
 				GameComps.Fallers.Remove(base.gameObject);
 			}
 			GameComps.Fallers.Add(base.gameObject, new Vector2(0f, -10f));
-			base.sm.destinationWorld.Set(-1, this);
+			base.sm.destinationWorld.Set(-1, this, false);
 		}
 
 		public void UpdateLaunch(float dt)

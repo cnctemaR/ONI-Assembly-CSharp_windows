@@ -28,7 +28,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 		public StatesInstance(AggressiveChore master, GameObject breaker)
 			: base(master)
 		{
-			base.sm.breaker.Set(breaker, base.smi);
+			base.sm.breaker.Set(breaker, base.smi, false);
 		}
 
 		public void FindBreakable()
@@ -54,7 +54,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			if (breakable == null)
 			{
 				int num2 = GameUtil.FloodFillFind<object>((int cell, object arg) => !Grid.Solid[cell] && navigator.CanReach(cell) && ((Grid.IsValidCell(Grid.CellLeft(cell)) && Grid.Solid[Grid.CellLeft(cell)]) || (Grid.IsValidCell(Grid.CellRight(cell)) && Grid.Solid[Grid.CellRight(cell)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, 1, 1)) && Grid.Solid[Grid.OffsetCell(cell, 1, 1)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, -1, 1)) && Grid.Solid[Grid.OffsetCell(cell, -1, 1)])), null, Grid.PosToCell(navigator.gameObject), 128, true, true);
-				base.sm.moveToWallTarget.Set(num2, base.smi);
+				base.sm.moveToWallTarget.Set(num2, base.smi, false);
 				this.GoTo(base.sm.move_notarget);
 				return;
 			}

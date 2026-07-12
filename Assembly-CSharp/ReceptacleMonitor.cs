@@ -29,11 +29,11 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 	{
 		if (plot == null)
 		{
-			base.smi.sm.receptacle.Set(null, base.smi);
+			base.smi.sm.receptacle.Set(null, base.smi, false);
 			this.replanted = false;
 			return;
 		}
-		base.smi.sm.receptacle.Set(plot, base.smi);
+		base.smi.sm.receptacle.Set(plot, base.smi, false);
 		this.replanted = true;
 	}
 

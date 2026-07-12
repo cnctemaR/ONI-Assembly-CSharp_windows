@@ -38,15 +38,6 @@ public class DebugTool : DragTool
 		{
 			switch (this.type)
 			{
-			case DebugTool.Type.Dig:
-				SimMessages.Dig(cell, -1, false);
-				return;
-			case DebugTool.Type.Heat:
-				SimMessages.ModifyEnergy(cell, 10000f, 10000f, SimMessages.EnergySourceID.DebugHeat);
-				return;
-			case DebugTool.Type.Cool:
-				SimMessages.ModifyEnergy(cell, -10000f, 10000f, SimMessages.EnergySourceID.DebugCool);
-				return;
 			case DebugTool.Type.ReplaceSubstance:
 				this.DoReplaceSubstance(cell);
 				return;
@@ -67,14 +58,6 @@ public class DebugTool : DragTool
 				}, GameUtil.FloodFillVisited, null);
 				return;
 			}
-			case DebugTool.Type.AddPressure:
-				SimMessages.ModifyMass(cell, 10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 293f, SimHashes.Oxygen);
-				return;
-			case DebugTool.Type.RemovePressure:
-				SimMessages.ModifyMass(cell, -10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 0f, SimHashes.Oxygen);
-				return;
-			case DebugTool.Type.PaintPlant:
-				break;
 			case DebugTool.Type.Clear:
 				this.ClearCell(cell);
 				return;
@@ -95,6 +78,21 @@ public class DebugTool : DragTool
 				return;
 			case DebugTool.Type.StoreSubstance:
 				this.DoStoreSubstance(cell);
+				return;
+			case DebugTool.Type.Dig:
+				SimMessages.Dig(cell, -1, false);
+				return;
+			case DebugTool.Type.Heat:
+				SimMessages.ModifyEnergy(cell, 10000f, 10000f, SimMessages.EnergySourceID.DebugHeat);
+				return;
+			case DebugTool.Type.Cool:
+				SimMessages.ModifyEnergy(cell, -10000f, 10000f, SimMessages.EnergySourceID.DebugCool);
+				return;
+			case DebugTool.Type.AddPressure:
+				SimMessages.ModifyMass(cell, 10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 293f, SimHashes.Oxygen);
+				return;
+			case DebugTool.Type.RemovePressure:
+				SimMessages.ModifyMass(cell, -10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 0f, SimHashes.Oxygen);
 				break;
 			default:
 				return;
@@ -276,20 +274,20 @@ public class DebugTool : DragTool
 
 	public enum Type
 	{
-		Dig,
-		Heat,
-		Cool,
 		ReplaceSubstance,
 		FillReplaceSubstance,
-		AddPressure,
-		RemovePressure,
-		PaintPlant,
 		Clear,
 		AddSelection,
 		RemoveSelection,
 		Deconstruct,
 		Destroy,
 		Sample,
-		StoreSubstance
+		StoreSubstance,
+		Dig,
+		Heat,
+		Cool,
+		AddPressure,
+		RemovePressure,
+		PaintPlant
 	}
 }

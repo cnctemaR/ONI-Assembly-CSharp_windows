@@ -113,7 +113,7 @@ public class Ownable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		{
 			statusItem = Db.Get().BuildingStatusItems.Unassigned;
 		}
-		component.SetStatusItem(Db.Get().StatusItemCategories.Main, statusItem, this);
+		component.SetStatusItem(Db.Get().StatusItemCategories.Ownable, statusItem, this);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)

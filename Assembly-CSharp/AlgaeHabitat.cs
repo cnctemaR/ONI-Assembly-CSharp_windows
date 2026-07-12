@@ -68,7 +68,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 
 		public bool HasEnoughMass(Tag tag)
 		{
-			return this.converter.HasEnoughMass(tag);
+			return this.converter.HasEnoughMass(tag, false);
 		}
 
 		public bool NeedsEmptying()

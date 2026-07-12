@@ -87,6 +87,8 @@ public class GameTags
 
 	public static readonly Tag TerrestrialArtifact = TagManager.Create("TerrestrialArtifact");
 
+	public static readonly Tag Keepsake = TagManager.Create("Keepsake");
+
 	public static readonly Tag MiscPickupable = TagManager.Create("MiscPickupable");
 
 	public static readonly Tag CombustibleGas = TagManager.Create("CombustibleGas");
@@ -100,6 +102,8 @@ public class GameTags
 	public static readonly Tag Comet = TagManager.Create("Comet");
 
 	public static readonly Tag DeadReactor = TagManager.Create("DeadReactor");
+
+	public static readonly Tag Robot = TagManager.Create("Robot");
 
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
@@ -118,6 +122,8 @@ public class GameTags
 	public static readonly Tag PreventEmittingDisease = TagManager.Create("EmittingDisease");
 
 	public static readonly Tag Creature = TagManager.Create("Creature");
+
+	public static readonly Tag OriginalCreature = TagManager.Create("OriginalCreature");
 
 	public static readonly Tag Hexaped = TagManager.Create("Hexaped");
 
@@ -350,6 +356,10 @@ public class GameTags
 
 	public static readonly Tag Pickled = TagManager.Create("Pickled");
 
+	public static readonly Tag UnspicedFood = TagManager.Create("UnspicedFood");
+
+	public static readonly Tag SpicedFood = TagManager.Create("SpicedFood");
+
 	public static readonly Tag Dying = TagManager.Create("Dying");
 
 	public static readonly Tag Dead = TagManager.Create("Dead");
@@ -365,6 +375,8 @@ public class GameTags
 	public static readonly Tag NoOxygen = TagManager.Create("NoOxygen");
 
 	public static readonly Tag Idle = TagManager.Create("Idle");
+
+	public static readonly Tag StationaryIdling = TagManager.Create("StationaryIdling");
 
 	public static readonly Tag AlwaysConverse = TagManager.Create("AlwaysConverse");
 
@@ -419,6 +431,8 @@ public class GameTags
 	public static readonly Tag LongDistanceCall = TagManager.Create("LongDistanceCall");
 
 	public static readonly Tag Telepad = TagManager.Create("Telepad");
+
+	public static readonly Tag InTransitTube = TagManager.Create("InTransitTube");
 
 	public static readonly Tag Rocket = TagManager.Create("Rocket");
 
@@ -649,7 +663,7 @@ public class GameTags
 
 		public static readonly Tag WantsAHug = TagManager.Create("WantsAHug");
 
-		public static readonly Tag WantsToProducePower = TagManager.Create("WantsToProducePower");
+		public static readonly Tag WantsConduitConnection = TagManager.Create("WantsConduitConnection");
 
 		public static readonly Tag WantsToGoHome = TagManager.Create("WantsToGoHome");
 
@@ -658,6 +672,8 @@ public class GameTags
 		public static readonly Tag BeeWantsToSleep = TagManager.Create("BeeWantsToSleep");
 
 		public static readonly Tag WantsToTendCrops = TagManager.Create("WantsToTendPlants");
+
+		public static readonly Tag WantsToStore = TagManager.Create("WantsToStore");
 
 		public static readonly Tag Flee = TagManager.Create("Flee");
 

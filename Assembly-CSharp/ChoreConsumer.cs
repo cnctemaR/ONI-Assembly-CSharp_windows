@@ -30,6 +30,11 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		return this.lastSuccessfulPreconditionSnapshot.failedContexts;
 	}
 
+	public ChoreConsumer.PreconditionSnapshot GetLastSuccessfulPreconditionSnapshot()
+	{
+		return this.lastSuccessfulPreconditionSnapshot;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

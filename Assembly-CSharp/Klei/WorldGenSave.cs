@@ -20,5 +20,7 @@ namespace Klei
 		public string worldID;
 
 		public List<string> traitIDs;
+
+		public List<string> storyTraitIDs;
 	}
 }

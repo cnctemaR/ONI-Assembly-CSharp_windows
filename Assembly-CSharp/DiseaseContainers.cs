@@ -77,13 +77,13 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 
 	private static float CalculateDelta(DiseaseHeader header, ref DiseaseContainer container, Disease disease, float dt, bool radiation_enabled)
 	{
-		return DiseaseContainers.CalculateDelta(header.diseaseCount, (int)container.elemIdx, header.primaryElement.Mass, Grid.PosToCell(header.primaryElement.transform.GetPosition()), header.primaryElement.Temperature, container.instanceGrowthRate, disease, dt, radiation_enabled);
+		return DiseaseContainers.CalculateDelta(header.diseaseCount, container.elemIdx, header.primaryElement.Mass, Grid.PosToCell(header.primaryElement.transform.GetPosition()), header.primaryElement.Temperature, container.instanceGrowthRate, disease, dt, radiation_enabled);
 	}
 
-	public static float CalculateDelta(int disease_count, int element_idx, float mass, int environment_cell, float temperature, float tags_multiplier_base, Disease disease, float dt, bool radiation_enabled)
+	public static float CalculateDelta(int disease_count, ushort element_idx, float mass, int environment_cell, float temperature, float tags_multiplier_base, Disease disease, float dt, bool radiation_enabled)
 	{
 		float num = 0f;
-		ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[element_idx];
+		ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[(int)element_idx];
 		num += elemGrowthInfo.CalculateDiseaseCountDelta(disease_count, mass, dt);
 		float num2 = Disease.HalfLifeToGrowthRate(Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives), dt);
 		num += (float)disease_count * num2 - (float)disease_count;
@@ -91,15 +91,15 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 		num += (float)disease_count * num3 - (float)disease_count;
 		if (Grid.IsValidCell(environment_cell))
 		{
-			byte b = Grid.ElementIdx[environment_cell];
-			ElemExposureInfo elemExposureInfo = disease.elemExposureInfo[(int)b];
+			ushort num4 = Grid.ElementIdx[environment_cell];
+			ElemExposureInfo elemExposureInfo = disease.elemExposureInfo[(int)num4];
 			num += elemExposureInfo.CalculateExposureDiseaseCountDelta(disease_count, dt);
 			if (radiation_enabled)
 			{
-				float num4 = Grid.Radiation[environment_cell];
-				if (num4 > 0f)
+				float num5 = Grid.Radiation[environment_cell];
+				if (num5 > 0f)
 				{
-					num -= num4 * disease.radiationKillRate;
+					num -= num5 * disease.radiationKillRate;
 				}
 			}
 		}

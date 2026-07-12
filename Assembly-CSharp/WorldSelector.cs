@@ -50,6 +50,10 @@ public class WorldSelector : KScreen, ISim4000ms
 		{
 			this.RemoveWorld(data);
 		});
+		ClusterManager.Instance.Subscribe(1943181844, delegate(object data)
+		{
+			this.RefreshToggles();
+		});
 	}
 
 	private void SpawnToggles()

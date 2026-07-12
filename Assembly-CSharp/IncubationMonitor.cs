@@ -30,7 +30,7 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		this.hatching_pst.Enter(new StateMachine<IncubationMonitor, IncubationMonitor.Instance, IStateMachineTarget, IncubationMonitor.Def>.State.Callback(IncubationMonitor.SpawnBaby)).PlayAnim("hatching_pst").OnAnimQueueComplete(null)
 			.Exit(new StateMachine<IncubationMonitor, IncubationMonitor.Instance, IStateMachineTarget, IncubationMonitor.Def>.State.Callback(IncubationMonitor.DeleteSelf));
 		this.not_viable.Enter(new StateMachine<IncubationMonitor, IncubationMonitor.Instance, IStateMachineTarget, IncubationMonitor.Def>.State.Callback(IncubationMonitor.SpawnGenericEgg)).GoTo(null).Exit(new StateMachine<IncubationMonitor, IncubationMonitor.Instance, IStateMachineTarget, IncubationMonitor.Def>.State.Callback(IncubationMonitor.DeleteSelf));
-		this.suppressedEffect = new Effect("IncubationSuppressed", CREATURES.MODIFIERS.INCUBATING_SUPPRESSED.NAME, CREATURES.MODIFIERS.INCUBATING_SUPPRESSED.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
+		this.suppressedEffect = new Effect("IncubationSuppressed", CREATURES.MODIFIERS.INCUBATING_SUPPRESSED.NAME, CREATURES.MODIFIERS.INCUBATING_SUPPRESSED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 		this.suppressedEffect.Add(new AttributeModifier(Db.Get().Amounts.Viability.deltaAttribute.Id, -0.016666668f, CREATURES.MODIFIERS.INCUBATING_SUPPRESSED.NAME, false, false, true));
 	}
 
@@ -173,7 +173,7 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 				num = 33.333332f;
 			}
 			AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Incubation.deltaAttribute.Id, num, CREATURES.MODIFIERS.BASE_INCUBATION_RATE.NAME, false, false, true);
-			this.incubatingEffect = new Effect("Incubating", CREATURES.MODIFIERS.INCUBATING.NAME, CREATURES.MODIFIERS.INCUBATING.TOOLTIP, 0f, true, false, false, null, 0f, null, "");
+			this.incubatingEffect = new Effect("Incubating", CREATURES.MODIFIERS.INCUBATING.NAME, CREATURES.MODIFIERS.INCUBATING.TOOLTIP, 0f, true, false, false, null, -1f, 0f, null, "");
 			this.incubatingEffect.Add(attributeModifier);
 		}
 
@@ -205,12 +205,12 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		private void UpdateIncubationState(bool stored, EggIncubator incubator)
 		{
 			this.incubator = incubator;
-			base.smi.sm.inIncubator.Set(incubator != null, base.smi);
+			base.smi.sm.inIncubator.Set(incubator != null, base.smi, false);
 			bool flag = stored && !incubator;
-			base.smi.sm.isSuppressed.Set(flag, base.smi);
+			base.smi.sm.isSuppressed.Set(flag, base.smi, false);
 			Operational operational = (incubator ? incubator.GetComponent<Operational>() : null);
 			bool flag2 = incubator && (operational == null || operational.IsOperational);
-			base.smi.sm.incubatorIsActive.Set(flag2, base.smi);
+			base.smi.sm.incubatorIsActive.Set(flag2, base.smi, false);
 		}
 
 		public void ApplySongBuff()

@@ -2,16 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DoorTransitionLayer : TransitionDriver.OverrideLayer
+public class DoorTransitionLayer : TransitionDriver.InterruptOverrideLayer
 {
 	public DoorTransitionLayer(Navigator navigator)
 		: base(navigator)
 	{
-	}
-
-	public override void Destroy()
-	{
-		base.Destroy();
 	}
 
 	private bool AreAllDoorsOpen()
@@ -26,9 +21,17 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 		return true;
 	}
 
+	protected override bool IsOverrideComplete()
+	{
+		return base.IsOverrideComplete() && this.AreAllDoorsOpen();
+	}
+
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
-		base.BeginTransition(navigator, transition);
+		if (this.doors.Count > 0)
+		{
+			return;
+		}
 		int num = Grid.PosToCell(navigator);
 		int num2 = Grid.OffsetCell(num, transition.x, transition.y);
 		this.AddDoor(num2);
@@ -41,16 +44,16 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 			int num3 = Grid.OffsetCell(num, transition.navGridTransition.voidOffsets[i]);
 			this.AddDoor(num3);
 		}
-		if (this.doors.Count > 0 && !this.AreAllDoorsOpen())
+		if (this.doors.Count == 0)
 		{
+			return;
+		}
+		if (!this.AreAllDoorsOpen())
+		{
+			base.BeginTransition(navigator, transition);
 			transition.anim = navigator.NavGrid.GetIdleAnim(navigator.CurrentNavType);
-			transition.isLooping = false;
-			transition.end = transition.start;
-			transition.speed = 1f;
-			transition.animSpeed = 1f;
-			transition.x = 0;
-			transition.y = 0;
-			transition.isCompleteCB = () => this.AreAllDoorsOpen();
+			transition.start = this.originalTransition.start;
+			transition.end = this.originalTransition.start;
 		}
 		foreach (INavDoor navDoor in this.doors)
 		{
@@ -58,14 +61,13 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 		}
 	}
 
-	public override void UpdateTransition(Navigator navigator, Navigator.ActiveTransition transition)
-	{
-		base.UpdateTransition(navigator, transition);
-	}
-
 	public override void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.EndTransition(navigator, transition);
+		if (this.doors.Count == 0)
+		{
+			return;
+		}
 		foreach (INavDoor navDoor in this.doors)
 		{
 			if (!navDoor.IsNullOrDestroyed())
@@ -108,6 +110,4 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 	}
 
 	private List<INavDoor> doors = new List<INavDoor>();
-
-	private INavDoor targetDoor;
 }

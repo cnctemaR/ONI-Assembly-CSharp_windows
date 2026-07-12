@@ -29,7 +29,7 @@ public class FarmStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FarmStation, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FarmStationType, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -39,7 +39,7 @@ public class FarmStationConfig : IBuildingConfig
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = FarmStationConfig.MATERIAL_FOR_TINKER;
+		manualDeliveryKG.RequestedItemTag = FarmStationConfig.MATERIAL_FOR_TINKER;
 		manualDeliveryKG.refillMass = 5f;
 		manualDeliveryKG.capacity = 50f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FarmFetch.IdHash;

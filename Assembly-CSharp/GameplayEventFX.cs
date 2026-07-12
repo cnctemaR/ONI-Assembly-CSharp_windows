@@ -29,7 +29,7 @@ public class GameplayEventFX : GameStateMachine<GameplayEventFX, GameplayEventFX
 			: base(master)
 		{
 			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("event_alert_fx_kanim", base.smi.master.transform.GetPosition() + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
-			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
+			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi, false);
 		}
 
 		public void DestroyFX()

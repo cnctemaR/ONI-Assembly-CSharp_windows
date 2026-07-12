@@ -25,7 +25,7 @@ public class TreeClimbStates : GameStateMachine<TreeClimbStates, TreeClimbStates
 
 	private static void SetTarget(TreeClimbStates.Instance smi)
 	{
-		smi.sm.target.Set(smi.GetSMI<ClimbableTreeMonitor.Instance>().climbTarget, smi);
+		smi.sm.target.Set(smi.GetSMI<ClimbableTreeMonitor.Instance>().climbTarget, smi, false);
 	}
 
 	private static bool ReserveClimbable(TreeClimbStates.Instance smi)

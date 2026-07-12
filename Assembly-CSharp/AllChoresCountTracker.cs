@@ -12,7 +12,8 @@ public class AllChoresCountTracker : WorldTracker
 		float num = 0f;
 		for (int i = 0; i < Db.Get().ChoreGroups.Count; i++)
 		{
-			num += TrackerTool.Instance.GetChoreGroupTracker(base.WorldID, Db.Get().ChoreGroups[i]).GetCurrentValue();
+			Tracker choreGroupTracker = TrackerTool.Instance.GetChoreGroupTracker(base.WorldID, Db.Get().ChoreGroups[i]);
+			num += ((choreGroupTracker == null) ? 0f : choreGroupTracker.GetCurrentValue());
 		}
 		base.AddPoint(num);
 	}

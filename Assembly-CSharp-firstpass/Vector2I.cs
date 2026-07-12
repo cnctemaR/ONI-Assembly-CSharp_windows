@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
+using YamlDotNet.Serialization;
 
 [DebuggerDisplay("{x}, {y}")]
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -29,6 +30,33 @@ public struct Vector2I : IComparable<Vector2I>, IEquatable<Vector2I>
 		set
 		{
 			this.y = value;
+		}
+	}
+
+	[YamlIgnore]
+	public int sqrMagnitude
+	{
+		get
+		{
+			return Mathf.FloorToInt(Mathf.Pow((float)this.x, 2f) + Mathf.Pow((float)this.y, 2f));
+		}
+	}
+
+	[YamlIgnore]
+	public int magnitude
+	{
+		get
+		{
+			return Mathf.FloorToInt(Mathf.Sqrt((float)this.sqrMagnitude));
+		}
+	}
+
+	[YamlIgnore]
+	public Vector2I normalized
+	{
+		get
+		{
+			return this / this.magnitude;
 		}
 	}
 

@@ -9,8 +9,8 @@ public class ConditionHasAtmoSuit : ProcessCondition
 		ManualDeliveryKG manualDeliveryKG = this.module.FindOrAdd<ManualDeliveryKG>();
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.SetStorage(module.storage);
-		manualDeliveryKG.requestedItemTag = GameTags.AtmoSuit;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.RequestedItemTag = GameTags.AtmoSuit;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.refillMass = 0.1f;
 		manualDeliveryKG.capacity = 1f;
 	}

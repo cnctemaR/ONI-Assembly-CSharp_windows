@@ -18,7 +18,7 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.drinker.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.drinker.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 

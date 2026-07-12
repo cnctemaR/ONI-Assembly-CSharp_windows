@@ -23,6 +23,31 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 		return !smi.HasTag(GameTags.Creatures.Confined) && !smi.HasTag(GameTags.Creatures.Expecting);
 	}
 
+	public static Tag EggBreedingRoll(List<FertilityMonitor.BreedingChance> breedingChances, bool excludeOriginalCreature = false)
+	{
+		float num = global::UnityEngine.Random.value;
+		if (excludeOriginalCreature)
+		{
+			num *= 1f - breedingChances[0].weight;
+		}
+		foreach (FertilityMonitor.BreedingChance breedingChance in breedingChances)
+		{
+			if (excludeOriginalCreature)
+			{
+				excludeOriginalCreature = false;
+			}
+			else
+			{
+				num -= breedingChance.weight;
+				if (num <= 0f)
+				{
+					return breedingChance.egg;
+				}
+			}
+		}
+		return Tag.Invalid;
+	}
+
 	private GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.State fertile;
 
 	private GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.State infertile;
@@ -60,7 +85,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 				this.fertility.deltaAttribute.Add(new AttributeModifier(this.fertility.deltaAttribute.Id, 33.333332f, "Accelerated Lifecycle", false, false, true));
 			}
 			float num = 100f / (def.baseFertileCycles * 600f);
-			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, 0f, null, "");
+			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, -1f, 0f, null, "");
 			this.fertileEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num, CREATURES.MODIFIERS.BASE_FERTILITY.NAME, false, false, true));
 			this.InitializeBreedingChances();
 		}
@@ -122,31 +147,21 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			this.fertility.value = 0f;
 			Vector3 position = base.smi.transform.GetPosition();
 			position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
-			float num = global::UnityEngine.Random.value;
-			Tag invalid = Tag.Invalid;
-			foreach (FertilityMonitor.BreedingChance breedingChance in this.breedingChances)
-			{
-				num -= breedingChance.weight;
-				if (num <= 0f)
-				{
-					invalid = breedingChance.egg;
-					break;
-				}
-			}
+			Tag tag = FertilityMonitor.EggBreedingRoll(this.breedingChances, false);
 			if (GenericGameSettings.instance.acceleratedLifecycle)
 			{
-				float num2 = 0f;
-				foreach (FertilityMonitor.BreedingChance breedingChance2 in this.breedingChances)
+				float num = 0f;
+				foreach (FertilityMonitor.BreedingChance breedingChance in this.breedingChances)
 				{
-					if (breedingChance2.weight > num2)
+					if (breedingChance.weight > num)
 					{
-						num2 = breedingChance2.weight;
-						invalid = breedingChance2.egg;
+						num = breedingChance.weight;
+						tag = breedingChance.egg;
 					}
 				}
 			}
-			global::Debug.Assert(invalid != Tag.Invalid, "Didn't pick an egg to lay. Weights weren't normalized?");
-			GameObject prefab = Assets.GetPrefab(invalid);
+			global::Debug.Assert(tag != Tag.Invalid, "Didn't pick an egg to lay. Weights weren't normalized?");
+			GameObject prefab = Assets.GetPrefab(tag);
 			GameObject gameObject = Util.KInstantiate(prefab, position);
 			this.egg = gameObject;
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
@@ -195,7 +210,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			return -1f;
 		}
 
-		private void NormalizeBreedingChances()
+		public void NormalizeBreedingChances()
 		{
 			float num = 0f;
 			foreach (FertilityMonitor.BreedingChance breedingChance in this.breedingChances)

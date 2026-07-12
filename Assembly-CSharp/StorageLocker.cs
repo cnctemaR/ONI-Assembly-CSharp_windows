@@ -15,7 +15,7 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker", 35);
 		ChoreType choreType = Db.Get().ChoreTypes.Get(this.choreTypeID);
-		this.filteredStorage = new FilteredStorage(this, null, null, this, use_logic_meter, choreType);
+		this.filteredStorage = new FilteredStorage(this, null, this, use_logic_meter, choreType);
 		base.Subscribe<StorageLocker>(-905833192, StorageLocker.OnCopySettingsDelegate);
 	}
 
@@ -46,6 +46,16 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 			return;
 		}
 		this.UserMaxCapacity = component.UserMaxCapacity;
+	}
+
+	public void UpdateForbiddenTag(Tag game_tag, bool forbidden)
+	{
+		if (forbidden)
+		{
+			this.filteredStorage.RemoveForbiddenTag(game_tag);
+			return;
+		}
+		this.filteredStorage.AddForbiddenTag(game_tag);
 	}
 
 	public virtual float UserMaxCapacity

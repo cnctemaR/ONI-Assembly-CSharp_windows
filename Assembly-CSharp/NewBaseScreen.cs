@@ -32,7 +32,7 @@ public class NewBaseScreen : KScreen
 		CameraController.Instance.SetMaxOrthographicSize(40f);
 		CameraController.Instance.SnapTo(vector);
 		CameraController.Instance.SetTargetPos(vector, 20f, false);
-		CameraController.Instance.SetOrthographicsSize(40f);
+		CameraController.Instance.OrthographicSize = 40f;
 		CameraSaveData.valid = false;
 		return vector2I;
 	}
@@ -163,11 +163,9 @@ public class NewBaseScreen : KScreen
 	[SerializeField]
 	private CanvasGroup[] disabledUIElements;
 
-	[EventRef]
-	public string ScanSoundMigrated;
+	public EventReference ScanSoundMigrated;
 
-	[EventRef]
-	public string BuildBaseSoundMigrated;
+	public EventReference BuildBaseSoundMigrated;
 
 	private ITelepadDeliverable[] m_minionStartingStats;
 

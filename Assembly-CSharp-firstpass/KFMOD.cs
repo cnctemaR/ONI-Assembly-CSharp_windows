@@ -16,6 +16,17 @@ public class KFMOD
 		return KFMOD.soundDescriptions[path];
 	}
 
+	public static string GetEventReferencePath(EventReference event_ref)
+	{
+		EventDescription eventDescription = RuntimeManager.GetEventDescription(event_ref.Guid);
+		string text = "";
+		if (eventDescription.isValid())
+		{
+			eventDescription.getPath(out text);
+		}
+		return text;
+	}
+
 	public static void Initialize()
 	{
 		try
@@ -50,29 +61,51 @@ public class KFMOD
 		KFMOD.EndOneShot(KFMOD.BeginOneShot(sound, position, volume));
 	}
 
+	public static void PlayUISound(EventReference event_ref)
+	{
+		KFMOD.PlayUISound(KFMOD.GetEventReferencePath(event_ref));
+	}
+
 	public static void PlayUISound(string sound)
 	{
 		KFMOD.PlayOneShot(sound, Vector3.zero, 1f);
 	}
 
-	public static EventInstance BeginOneShot(string sound, Vector3 position, float volume = 1f)
+	public static EventInstance BeginOneShot(EventReference event_ref, Vector3 position, float volume = 1f)
 	{
-		if (string.IsNullOrEmpty(sound) || App.IsExiting || !RuntimeManager.IsInitialized)
+		if (event_ref.IsNull || App.IsExiting || !RuntimeManager.IsInitialized)
 		{
 			return default(EventInstance);
 		}
-		EventInstance eventInstance = KFMOD.CreateInstance(sound);
+		EventInstance eventInstance = KFMOD.CreateInstance(event_ref);
 		if (!eventInstance.isValid())
 		{
-			KFMODDebugger.instance != null;
+			if (KFMODDebugger.instance != null)
+			{
+				string text;
+				RuntimeManager.GetEventDescription(event_ref.Guid).getPath(out text);
+			}
 			return eventInstance;
 		}
 		Vector3 vector = new Vector3(position.x, position.y, position.z);
-		KFMODDebugger.instance != null;
+		if (KFMODDebugger.instance != null)
+		{
+			string text2;
+			RuntimeManager.GetEventDescription(event_ref.Guid).getPath(out text2);
+		}
 		ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
 		eventInstance.set3DAttributes(attributes_3D);
 		eventInstance.setVolume(volume);
 		return eventInstance;
+	}
+
+	public static EventInstance BeginOneShot(string sound, Vector3 position, float volume = 1f)
+	{
+		if (sound.IsNullOrWhiteSpace())
+		{
+			return default(EventInstance);
+		}
+		return KFMOD.BeginOneShot(RuntimeManager.PathToEventReference(sound), position, volume);
 	}
 
 	public static bool EndOneShot(EventInstance instance)
@@ -86,7 +119,7 @@ public class KFMOD
 		return true;
 	}
 
-	public static EventInstance CreateInstance(string path)
+	public static EventInstance CreateInstance(EventReference event_ref)
 	{
 		if (!RuntimeManager.IsInitialized)
 		{
@@ -96,7 +129,7 @@ public class KFMOD
 		EventInstance eventInstance2;
 		try
 		{
-			eventInstance2 = RuntimeManager.CreateInstance(path);
+			eventInstance2 = RuntimeManager.CreateInstance(event_ref);
 		}
 		catch (EventNotFoundException ex)
 		{
@@ -104,7 +137,11 @@ public class KFMOD
 			EventInstance eventInstance = default(EventInstance);
 			return eventInstance;
 		}
-		HashedString hashedString = path;
+		EventDescription eventDescription;
+		eventInstance2.getDescription(out eventDescription);
+		string text;
+		eventDescription.getPath(out text);
+		HashedString hashedString = text;
 		SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(hashedString);
 		OneShotSoundParameterUpdater.Sound sound = new OneShotSoundParameterUpdater.Sound
 		{
@@ -118,6 +155,11 @@ public class KFMOD
 			oneShotParameterUpdaters[i].Play(sound);
 		}
 		return eventInstance2;
+	}
+
+	public static EventInstance CreateInstance(string path)
+	{
+		return KFMOD.CreateInstance(RuntimeManager.PathToEventReference(path));
 	}
 
 	private static void CollectSoundDescriptions()
@@ -136,17 +178,18 @@ public class KFMOD
 				SoundDescription soundDescription = default(SoundDescription);
 				soundDescription.path = text;
 				float num = 0f;
-				eventDescription.getMaximumDistance(out num);
-				if (num == 0f)
+				float num2 = 0f;
+				eventDescription.getMinMaxDistance(out num, out num2);
+				if (num2 == 0f)
 				{
-					num = 60f;
+					num2 = 60f;
 				}
-				soundDescription.falloffDistanceSq = num * num;
+				soundDescription.falloffDistanceSq = num2 * num2;
 				List<OneShotSoundParameterUpdater> list = new List<OneShotSoundParameterUpdater>();
-				int num2 = 0;
-				eventDescription.getParameterDescriptionCount(out num2);
-				SoundDescription.Parameter[] array4 = new SoundDescription.Parameter[num2];
-				for (int k = 0; k < num2; k++)
+				int num3 = 0;
+				eventDescription.getParameterDescriptionCount(out num3);
+				SoundDescription.Parameter[] array4 = new SoundDescription.Parameter[num3];
+				for (int k = 0; k < num3; k++)
 				{
 					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
 					eventDescription.getParameterDescriptionByIndex(k, out parameter_DESCRIPTION);

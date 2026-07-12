@@ -14,7 +14,7 @@ public class BreathableAreaSensor : Sensor
 			this.breather = base.GetComponent<OxygenBreather>();
 		}
 		bool flag = this.isBreathable;
-		this.isBreathable = this.breather.IsBreathableElement;
+		this.isBreathable = this.breather.IsBreathableElement || this.breather.HasTag(GameTags.InTransitTube);
 		if (this.isBreathable != flag)
 		{
 			if (this.isBreathable)

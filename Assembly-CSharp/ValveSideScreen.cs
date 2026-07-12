@@ -86,7 +86,7 @@ public class ValveSideScreen : SideScreenContent
 		while (currentTime < startTime + delay)
 		{
 			currentTime += Time.unscaledDeltaTime;
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 		}
 		this.OnReleaseHandle();
 		yield break;

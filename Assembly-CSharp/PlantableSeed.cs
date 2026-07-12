@@ -51,7 +51,7 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 				base.GetComponent<MutantPlant>().CopyMutationsTo(component);
 			}
 			gameObject.SetActive(true);
-			Pickupable pickupable = base.GetComponent<Pickupable>().Take(1f);
+			Pickupable pickupable = this.pickupable.Take(1f);
 			if (pickupable != null)
 			{
 				gameObject.GetComponent<Crop>() != null;
@@ -146,4 +146,7 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 	public string domesticatedDescription;
 
 	public SingleEntityReceptacle.ReceptacleDirection direction;
+
+	[MyCmpGet]
+	private Pickupable pickupable;
 }

@@ -10,7 +10,13 @@ public class ImmigrantScreen : CharacterSelectionController
 		ImmigrantScreen.instance = null;
 	}
 
-	public Telepad telepad { get; private set; }
+	public Telepad Telepad
+	{
+		get
+		{
+			return this.telepad;
+		}
+	}
 
 	protected override void OnPrefabInit()
 	{
@@ -159,6 +165,8 @@ public class ImmigrantScreen : CharacterSelectionController
 	private KButton cancelRejectionBtn;
 
 	public static ImmigrantScreen instance;
+
+	private Telepad telepad;
 
 	private bool hasShown;
 }

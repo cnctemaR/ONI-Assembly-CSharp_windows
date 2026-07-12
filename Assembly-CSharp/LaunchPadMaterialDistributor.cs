@@ -45,8 +45,8 @@ public class LaunchPadMaterialDistributor : GameStateMachine<LaunchPadMaterialDi
 			.ParamTransition<bool>(this.emptyComplete, this.operational.hasRocket.transferring, GameStateMachine<LaunchPadMaterialDistributor, LaunchPadMaterialDistributor.Instance, IStateMachineTarget, LaunchPadMaterialDistributor.Def>.IsFalse);
 		this.operational.rocketLost.Enter(delegate(LaunchPadMaterialDistributor.Instance smi)
 		{
-			this.emptyComplete.Set(false, smi);
-			this.fillComplete.Set(false, smi);
+			this.emptyComplete.Set(false, smi, false);
+			this.fillComplete.Set(false, smi, false);
 			this.SetAttachedRocket(null, smi);
 		}).GoTo(this.operational.noRocket);
 	}
@@ -183,7 +183,7 @@ public class LaunchPadMaterialDistributor : GameStateMachine<LaunchPadMaterialDi
 			pooledDictionary[CargoBay.CargoType.Liquids].Recycle();
 			pooledDictionary[CargoBay.CargoType.Gasses].Recycle();
 			pooledDictionary.Recycle();
-			base.sm.emptyComplete.Set(!flag, this);
+			base.sm.emptyComplete.Set(!flag, this, false);
 		}
 
 		public void FillRocket(float dt)
@@ -243,7 +243,7 @@ public class LaunchPadMaterialDistributor : GameStateMachine<LaunchPadMaterialDi
 			pooledDictionary[CargoBay.CargoType.Liquids].Recycle();
 			pooledDictionary[CargoBay.CargoType.Gasses].Recycle();
 			pooledDictionary.Recycle();
-			base.sm.fillComplete.Set(!flag, base.smi);
+			base.sm.fillComplete.Set(!flag, base.smi, false);
 		}
 	}
 }

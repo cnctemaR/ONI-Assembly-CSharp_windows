@@ -28,7 +28,7 @@ public class DevToolPrintingPodDebug : DevTool
 		}
 		if (ImGui.Button("Shuffle Options"))
 		{
-			if (ImmigrantScreen.instance.telepad == null)
+			if (ImmigrantScreen.instance.Telepad == null)
 			{
 				ImmigrantScreen.InitializeImmigrantScreen(Components.Telepads[0]);
 				return;

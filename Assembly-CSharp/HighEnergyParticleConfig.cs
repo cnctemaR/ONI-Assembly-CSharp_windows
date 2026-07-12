@@ -14,7 +14,6 @@ public class HighEnergyParticleConfig : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreateBasicEntity("HighEnergyParticle", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, ITEMS.RADIATION.HIGHENERGYPARITCLE.DESC, 1f, false, Assets.GetAnim("spark_radial_high_energy_particles_kanim"), "travel_pre", Grid.SceneLayer.FXFront2, SimHashes.Creature, null, 293f);
 		EntityTemplates.AddCollision(gameObject, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f);
 		gameObject.AddOrGet<LoopingSounds>();
-		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 		RadiationEmitter radiationEmitter = gameObject.AddOrGet<RadiationEmitter>();
 		radiationEmitter.emitType = RadiationEmitter.RadiationEmitterType.Constant;
 		radiationEmitter.radiusProportionalToRads = false;

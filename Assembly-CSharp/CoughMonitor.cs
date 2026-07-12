@@ -28,7 +28,7 @@ public class CoughMonitor : GameStateMachine<CoughMonitor, CoughMonitor.Instance
 		smi.amountConsumed += massConsumedCallback.mass;
 		if (smi.amountConsumed >= 1f)
 		{
-			this.shouldCough.Set(true, smi);
+			this.shouldCough.Set(true, smi, false);
 			smi.lastConsumeTime = 0f;
 			smi.amountConsumed = 0f;
 		}
@@ -59,19 +59,17 @@ public class CoughMonitor : GameStateMachine<CoughMonitor, CoughMonitor.Instance
 
 		public Reactable GetReactable()
 		{
-			EmoteReactable emoteReactable = new SelfEmoteReactable(base.master.gameObject, "BadAirCough", Db.Get().ChoreTypes.Cough, "anim_slimelungcough_kanim", 0f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "react_small",
-				finishcb = new Action<GameObject>(this.FinishedCoughing)
-			});
-			emoteReactable.preventChoreInterruption = true;
-			return emoteReactable;
+			Emote cough_Small = Db.Get().Emotes.Minion.Cough_Small;
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, "BadAirCough", Db.Get().ChoreTypes.Cough, 0f, 0f, float.PositiveInfinity, 0f);
+			selfEmoteReactable.SetEmote(cough_Small);
+			selfEmoteReactable.preventChoreInterruption = true;
+			return selfEmoteReactable.RegisterEmoteStepCallbacks("react_small", null, new Action<GameObject>(this.FinishedCoughing));
 		}
 
 		private void FinishedCoughing(GameObject cougher)
 		{
 			cougher.GetComponent<Effects>().Add("ContaminatedLungs", true);
-			base.sm.shouldCough.Set(false, base.smi);
+			base.sm.shouldCough.Set(false, base.smi, false);
 			base.smi.lastCoughTime = GameClock.Instance.GetTimeInCycles();
 		}
 

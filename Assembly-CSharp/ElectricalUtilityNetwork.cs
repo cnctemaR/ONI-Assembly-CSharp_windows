@@ -111,7 +111,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				if (this.overloadedNotification == null)
 				{
 					this.timeOverloadNotificationDisplayed = 0f;
-					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, null, null, true, 0f, null, null, this.targetOverloadedWire.transform, true);
+					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, null, null, true, 0f, null, null, this.targetOverloadedWire.transform, true, false);
 					GameScheduler.Instance.Schedule("Power Tutorial", 2f, delegate(object obj)
 					{
 						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Power, true);

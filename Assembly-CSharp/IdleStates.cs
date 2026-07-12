@@ -20,6 +20,11 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 
 	public void MoveToNewCell(IdleStates.Instance smi)
 	{
+		if (smi.HasTag(GameTags.StationaryIdling))
+		{
+			smi.GoTo(smi.sm.loop);
+			return;
+		}
 		Navigator component = smi.GetComponent<Navigator>();
 		IdleStates.MoveCellQuery moveCellQuery = new IdleStates.MoveCellQuery(component.CurrentNavType);
 		moveCellQuery.allowLiquid = smi.gameObject.HasTag(GameTags.Amphibious);

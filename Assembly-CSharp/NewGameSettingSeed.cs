@@ -25,11 +25,6 @@ public class NewGameSettingSeed : NewGameSettingWidget
 	{
 		string currentQualitySettingLevelId = CustomGameSettings.Instance.GetCurrentQualitySettingLevelId(this.config);
 		this.Input.text = currentQualitySettingLevelId;
-		DebugUtil.LogArgs(new object[]
-		{
-			"Set worldgen seed to",
-			int.Parse(currentQualitySettingLevelId)
-		});
 	}
 
 	private char ValidateInput(string text, int charIndex, char addedChar)

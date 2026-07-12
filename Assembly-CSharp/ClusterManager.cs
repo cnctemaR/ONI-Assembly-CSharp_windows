@@ -564,6 +564,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		world.CancelChores();
 		HashSet<int> noRefundTiles;
 		world.DestroyWorldBuildings(out noRefundTiles);
+		this.UnregisterWorldContainer(world);
 		if (!flag)
 		{
 			GameScheduler.Instance.ScheduleNextFrame("ClusterManager.world.TransferResourcesToParentWorld", delegate(object obj)

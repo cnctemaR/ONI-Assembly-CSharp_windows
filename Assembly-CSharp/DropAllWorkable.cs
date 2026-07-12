@@ -87,6 +87,10 @@ public class DropAllWorkable : Workable
 				GameObject gameObject = array[i].Drop(list[j], true);
 				if (gameObject != null)
 				{
+					foreach (Tag tag in this.removeTags)
+					{
+						gameObject.RemoveTag(tag);
+					}
 					Pickupable component = gameObject.GetComponent<Pickupable>();
 					if (component != null)
 					{
@@ -160,6 +164,8 @@ public class DropAllWorkable : Workable
 
 	[MyCmpAdd]
 	private Prioritizable _prioritizable;
+
+	public List<Tag> removeTags;
 
 	private static readonly EventSystem.IntraObjectHandler<DropAllWorkable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<DropAllWorkable>(delegate(DropAllWorkable component, object data)
 	{

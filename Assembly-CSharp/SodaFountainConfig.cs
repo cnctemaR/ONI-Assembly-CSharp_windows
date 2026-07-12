@@ -43,10 +43,10 @@ public class SodaFountainConfig : IBuildingConfig
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = SimHashes.CarbonDioxide.CreateTag();
+		manualDeliveryKG.RequestedItemTag = SimHashes.CarbonDioxide.CreateTag();
 		manualDeliveryKG.capacity = 4f;
 		manualDeliveryKG.refillMass = 1f;
-		manualDeliveryKG.minimumMass = 0.5f;
+		manualDeliveryKG.MinimumMass = 0.5f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		go.AddOrGet<SodaFountainWorkable>().basePriority = RELAXATION.PRIORITY.TIER5;
 		SodaFountain sodaFountain = go.AddOrGet<SodaFountain>();

@@ -60,6 +60,7 @@ public class LeadSuitLockerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 
 	public const string ID = "LeadSuitLocker";

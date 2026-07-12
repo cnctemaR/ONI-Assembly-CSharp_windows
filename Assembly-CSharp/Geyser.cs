@@ -25,7 +25,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		}
 		this.emitter.emitRange = 2;
 		this.emitter.maxPressure = this.configuration.GetMaxPressure();
-		this.emitter.outputElement = new ElementConverter.OutputElement(this.configuration.GetEmitRate(), this.configuration.GetElement(), this.configuration.GetTemperature(), false, false, (float)this.outputOffset.x, (float)this.outputOffset.y, 1f, this.configuration.GetDiseaseIdx(), Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate()));
+		this.emitter.outputElement = new ElementConverter.OutputElement(this.configuration.GetEmitRate(), this.configuration.GetElement(), this.configuration.GetTemperature(), false, false, (float)this.outputOffset.x, (float)this.outputOffset.y, 1f, this.configuration.GetDiseaseIdx(), Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate()), true);
 		base.smi.StartSM();
 		Workable component3 = base.GetComponent<Studyable>();
 		if (component3 != null)

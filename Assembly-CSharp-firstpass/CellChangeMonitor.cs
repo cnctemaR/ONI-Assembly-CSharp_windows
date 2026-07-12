@@ -100,6 +100,12 @@ public class CellChangeMonitor : Singleton<CellChangeMonitor>
 		this.UnregisterCellChangedHandler(transform.GetInstanceID(), callback);
 	}
 
+	public void ClearLastKnownCell(Transform transform)
+	{
+		int instanceID = transform.GetInstanceID();
+		this.transformLastKnownCell.Remove(instanceID);
+	}
+
 	public int PosToCell(Vector3 pos)
 	{
 		float x = pos.x;

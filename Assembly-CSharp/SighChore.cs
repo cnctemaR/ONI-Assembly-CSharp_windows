@@ -14,7 +14,7 @@ public class SighChore : Chore<SighChore.StatesInstance>
 		public StatesInstance(SighChore master, GameObject sigher)
 			: base(master)
 		{
-			base.sm.sigher.Set(sigher, base.smi);
+			base.sm.sigher.Set(sigher, base.smi, false);
 		}
 	}
 

@@ -307,6 +307,7 @@ namespace TUNING
 			{ "ShearingStation", "work stations" },
 			{ "RoleStation", "work stations" },
 			{ "ResetSkillsStation", "work stations" },
+			{ "SpiceGrinder", "work stations" },
 			{ "CraftingTable", "suits general" },
 			{ "ClothingFabricator", "suits general" },
 			{ "ClothingAlterationStation", "suits general" },
@@ -542,8 +543,8 @@ namespace TUNING
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
-				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint",
-				"CreatureFeeder", "FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure", "FlyingCreatureBait"
+				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "SpiceGrinder", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint",
+				"FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure", "FlyingCreatureBait"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{

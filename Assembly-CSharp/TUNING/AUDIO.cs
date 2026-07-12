@@ -11,6 +11,8 @@ namespace TUNING
 			public const string HOLLOW_METAL = "HollowMetal";
 
 			public const string GLASS = "Glass";
+
+			public const string PLASTIC = "Plastic";
 		}
 
 		public class SIZE

@@ -18,15 +18,15 @@ internal class ClearableManager
 		this.markedClearables.Free(handle);
 	}
 
-	private static void CollectSortedClearables(Navigator navigator, KCompactedVector<ClearableManager.MarkedClearable> clearables, List<ClearableManager.SortedClearable> sorted_clearables)
+	public void CollectAndSortClearables(Navigator navigator)
 	{
-		sorted_clearables.Clear();
-		foreach (ClearableManager.MarkedClearable markedClearable in clearables.GetDataList())
+		this.sortedClearables.Clear();
+		foreach (ClearableManager.MarkedClearable markedClearable in this.markedClearables.GetDataList())
 		{
 			int navigationCost = markedClearable.pickupable.GetNavigationCost(navigator, markedClearable.pickupable.cachedCell);
 			if (navigationCost != -1)
 			{
-				sorted_clearables.Add(new ClearableManager.SortedClearable
+				this.sortedClearables.Add(new ClearableManager.SortedClearable
 				{
 					pickupable = markedClearable.pickupable,
 					masterPriority = markedClearable.prioritizable.GetMasterPriority(),
@@ -34,27 +34,28 @@ internal class ClearableManager
 				});
 			}
 		}
-		sorted_clearables.Sort(ClearableManager.SortedClearable.comparer);
+		this.sortedClearables.Sort(ClearableManager.SortedClearable.comparer);
 	}
 
-	public void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded, List<Chore.Precondition.Context> failed_contexts)
+	public void CollectChores(List<GlobalChoreProvider.Fetch> fetches, ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded, List<Chore.Precondition.Context> failed_contexts)
 	{
 		ChoreType transport = Db.Get().ChoreTypes.Transport;
 		int personalPriority = consumer_state.consumer.GetPersonalPriority(transport);
 		int num = (Game.Instance.advancedPersonalPriorities ? transport.explicitPriority : transport.priority);
-		ClearableManager.CollectSortedClearables(consumer_state.navigator, this.markedClearables, this.sortedClearables);
 		bool flag = false;
-		foreach (ClearableManager.SortedClearable sortedClearable in this.sortedClearables)
+		for (int i = 0; i < this.sortedClearables.Count; i++)
 		{
+			ClearableManager.SortedClearable sortedClearable = this.sortedClearables[i];
 			Pickupable pickupable = sortedClearable.pickupable;
 			PrioritySetting masterPriority = sortedClearable.masterPriority;
 			Chore.Precondition.Context context = default(Chore.Precondition.Context);
 			context.personalPriority = personalPriority;
 			KPrefabID kprefabID = pickupable.KPrefabID;
-			kprefabID.UpdateTagBits();
-			foreach (GlobalChoreProvider.Fetch fetch in GlobalChoreProvider.Instance.fetches)
+			int num2 = 0;
+			while (fetches != null && num2 < fetches.Count)
 			{
-				if (kprefabID.HasAnyTags_AssumeLaundered(ref fetch.chore.tagBits))
+				GlobalChoreProvider.Fetch fetch = fetches[num2];
+				if ((fetch.chore.criteria == FetchChore.MatchCriteria.MatchID && fetch.chore.tags.Contains(kprefabID.PrefabTag)) || (fetch.chore.criteria == FetchChore.MatchCriteria.MatchTags && kprefabID.HasTag(fetch.chore.tagsFirst)))
 				{
 					context.Set(fetch.chore, consumer_state, false, pickupable);
 					context.choreTypeForPermission = transport;
@@ -69,6 +70,7 @@ internal class ClearableManager
 						break;
 					}
 				}
+				num2++;
 			}
 			if (flag)
 			{

@@ -306,7 +306,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 					List<string> list = new List<string>();
 					foreach (KeyValuePair<string, SettingConfig> keyValuePair in CustomGameSettings.Instance.QualitySettings)
 					{
-						if (keyValuePair.Value.coordinate_dimension >= 0 && keyValuePair.Value.coordinate_dimension_width >= 0)
+						if (keyValuePair.Value.coordinate_dimension >= 0L && keyValuePair.Value.coordinate_dimension_width >= 0L)
 						{
 							SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(keyValuePair.Key);
 							if (currentQualitySetting.id != keyValuePair.Value.GetDefaultLevelId())

@@ -22,6 +22,10 @@ namespace Klei.AI
 
 		public static Amounts GetAmounts(this KMonoBehaviour cmp)
 		{
+			if (cmp is Modifiers)
+			{
+				return ((Modifiers)cmp).amounts;
+			}
 			return cmp.gameObject.GetAmounts();
 		}
 

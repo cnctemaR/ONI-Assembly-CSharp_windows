@@ -198,7 +198,7 @@ public static class Sim
 
 	public const byte InvalidDiseaseIdx = 255;
 
-	public const byte InvalidElementIdx = 255;
+	public const ushort InvalidElementIdx = 65535;
 
 	public const byte SpaceZoneID = 255;
 
@@ -295,6 +295,9 @@ public static class Sim
 			writer.Write(0);
 			writer.Write(this.insulation);
 			writer.Write(0);
+			writer.Write(this.pad0);
+			writer.Write(this.pad1);
+			writer.Write(this.pad2);
 			writer.Write(this.temperature);
 			writer.Write(this.mass);
 		}
@@ -306,14 +309,14 @@ public static class Sim
 
 		public void SetValues(global::Element elem, Sim.PhysicsData pd, List<global::Element> elements)
 		{
-			this.elementIdx = (byte)elements.IndexOf(elem);
+			this.elementIdx = (ushort)elements.IndexOf(elem);
 			this.temperature = pd.temperature;
 			this.mass = pd.mass;
 			this.insulation = byte.MaxValue;
 			DebugUtil.Assert(this.temperature > 0f || this.mass == 0f, "A non-zero mass cannot have a <= 0 temperature");
 		}
 
-		public void SetValues(byte new_elem_idx, float new_temperature, float new_mass)
+		public void SetValues(ushort new_elem_idx, float new_temperature, float new_mass)
 		{
 			this.elementIdx = new_elem_idx;
 			this.temperature = new_temperature;
@@ -322,13 +325,19 @@ public static class Sim
 			DebugUtil.Assert(this.temperature > 0f || this.mass == 0f, "A non-zero mass cannot have a <= 0 temperature");
 		}
 
-		public byte elementIdx;
+		public ushort elementIdx;
 
 		public byte properties;
 
 		public byte insulation;
 
 		public byte strengthInfo;
+
+		public byte pad0;
+
+		public byte pad1;
+
+		public byte pad2;
 
 		public float temperature;
 
@@ -360,9 +369,9 @@ public static class Sim
 			}
 			int num = elements.FindIndex((global::Element ele) => ele.id == e.lowTempTransitionTarget);
 			int num2 = elements.FindIndex((global::Element ele) => ele.id == e.highTempTransitionTarget);
-			this.lowTempTransitionIdx = (byte)((num >= 0) ? num : 255);
-			this.highTempTransitionIdx = (byte)((num2 >= 0) ? num2 : 255);
-			this.elementsTableIdx = (byte)elements.IndexOf(e);
+			this.lowTempTransitionIdx = (ushort)((num >= 0) ? num : 65535);
+			this.highTempTransitionIdx = (ushort)((num2 >= 0) ? num2 : 65535);
+			this.elementsTableIdx = (ushort)elements.IndexOf(e);
 			this.specificHeatCapacity = e.specificHeatCapacity;
 			this.thermalConductivity = e.thermalConductivity;
 			this.solidSurfaceAreaMultiplier = e.solidSurfaceAreaMultiplier;
@@ -381,10 +390,9 @@ public static class Sim
 			this.highTempTransitionOreMassConversion = e.highTempTransitionOreMassConversion;
 			this.lowTempTransitionOreID = e.lowTempTransitionOreID;
 			this.lowTempTransitionOreMassConversion = e.lowTempTransitionOreMassConversion;
-			this.sublimateIndex = (byte)elements.FindIndex((global::Element ele) => ele.id == e.sublimateId);
-			this.convertIndex = (byte)elements.FindIndex((global::Element ele) => ele.id == e.convertId);
+			this.sublimateIndex = (ushort)elements.FindIndex((global::Element ele) => ele.id == e.sublimateId);
+			this.convertIndex = (ushort)elements.FindIndex((global::Element ele) => ele.id == e.convertId);
 			this.pack0 = 0;
-			this.pack1 = 0;
 			if (e.substance == null)
 			{
 				this.colour = 0U;
@@ -408,10 +416,11 @@ public static class Sim
 		public void Write(BinaryWriter writer)
 		{
 			writer.Write((int)this.id);
-			writer.Write(this.state);
 			writer.Write(this.lowTempTransitionIdx);
 			writer.Write(this.highTempTransitionIdx);
 			writer.Write(this.elementsTableIdx);
+			writer.Write(this.state);
+			writer.Write(this.pack0);
 			writer.Write(this.specificHeatCapacity);
 			writer.Write(this.thermalConductivity);
 			writer.Write(this.molarMass);
@@ -432,8 +441,6 @@ public static class Sim
 			writer.Write(this.highTempTransitionOreMassConversion);
 			writer.Write(this.sublimateIndex);
 			writer.Write(this.convertIndex);
-			writer.Write(this.pack0);
-			writer.Write(this.pack1);
 			writer.Write(this.colour);
 			writer.Write((int)this.sublimateFX);
 			writer.Write(this.sublimateRate);
@@ -448,13 +455,15 @@ public static class Sim
 
 		public SimHashes id;
 
+		public ushort lowTempTransitionIdx;
+
+		public ushort highTempTransitionIdx;
+
+		public ushort elementsTableIdx;
+
 		public byte state;
 
-		public byte lowTempTransitionIdx;
-
-		public byte highTempTransitionIdx;
-
-		public byte elementsTableIdx;
+		public byte pack0;
 
 		public float specificHeatCapacity;
 
@@ -492,13 +501,9 @@ public static class Sim
 
 		public float highTempTransitionOreMassConversion;
 
-		public byte sublimateIndex;
+		public ushort sublimateIndex;
 
-		public byte convertIndex;
-
-		public byte pack0;
-
-		public byte pack1;
+		public ushort convertIndex;
 
 		public uint colour;
 
@@ -580,13 +585,9 @@ public static class Sim
 	{
 		public int cellIdx;
 
-		public byte oldElemIdx;
+		public ushort oldElemIdx;
 
-		public byte newElemIdx;
-
-		private byte pad0;
-
-		private byte pad1;
+		public ushort newElemIdx;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -600,7 +601,7 @@ public static class Sim
 	{
 		public int numFramesProcessed;
 
-		public unsafe byte* elementIdx;
+		public unsafe ushort* elementIdx;
 
 		public unsafe float* temperature;
 
@@ -740,13 +741,11 @@ public static class Sim
 	{
 		public int cellIdx;
 
-		public byte elemIdx;
+		public ushort elemIdx;
 
 		public byte diseaseIdx;
 
 		public byte pad0;
-
-		public byte pad1;
 
 		public float mass;
 
@@ -760,13 +759,11 @@ public static class Sim
 	{
 		public int cellIdx;
 
-		public byte elemIdx;
+		public ushort elemIdx;
 
 		public byte diseaseIdx;
 
 		private byte pad0;
-
-		private byte pad1;
 
 		public float mass;
 
@@ -790,13 +787,11 @@ public static class Sim
 	{
 		public int cellIdx;
 
+		public ushort elemIdx;
+
 		public byte fallingInfo;
 
-		public byte elemIdx;
-
 		public byte diseaseIdx;
-
-		private byte pad0;
 
 		public float mass;
 
@@ -850,13 +845,11 @@ public static class Sim
 	{
 		public int callbackIdx;
 
-		public byte elemIdx;
+		public ushort elemIdx;
 
 		public byte diseaseIdx;
 
 		private byte pad0;
-
-		private byte pad1;
 
 		public float mass;
 
@@ -870,13 +863,11 @@ public static class Sim
 	{
 		public int callbackIdx;
 
+		public ushort elemIdx;
+
 		public byte suceeded;
 
-		public byte elemIdx;
-
 		public byte diseaseIdx;
-
-		private byte pad0;
 
 		public float mass;
 
@@ -932,13 +923,11 @@ public static class Sim
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct EmittedMassInfo
 	{
-		public byte elemIdx;
+		public ushort elemIdx;
 
 		public byte diseaseIdx;
 
 		public byte pad0;
-
-		public byte pad1;
 
 		public float mass;
 
@@ -952,13 +941,11 @@ public static class Sim
 	{
 		public int simHandle;
 
-		public byte removedElemIdx;
+		public ushort removedElemIdx;
 
 		public byte diseaseIdx;
 
 		private byte pad0;
-
-		private byte pad1;
 
 		public float mass;
 

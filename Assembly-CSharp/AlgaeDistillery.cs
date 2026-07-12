@@ -56,7 +56,7 @@ public class AlgaeDistillery : StateMachineComponent<AlgaeDistillery.StatesInsta
 			this.waiting.Enter("Waiting", delegate(AlgaeDistillery.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
-			}).EventTransition(GameHashes.OnStorageChange, this.converting, (AlgaeDistillery.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
+			}).EventTransition(GameHashes.OnStorageChange, this.converting, (AlgaeDistillery.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting(false));
 			this.converting.Enter("Ready", delegate(AlgaeDistillery.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);

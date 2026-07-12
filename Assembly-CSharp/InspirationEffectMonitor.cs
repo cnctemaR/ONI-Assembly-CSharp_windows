@@ -10,7 +10,7 @@ public class InspirationEffectMonitor : GameStateMachine<InspirationEffectMonito
 		this.idle.EventHandler(GameHashes.CatchyTune, new GameStateMachine<InspirationEffectMonitor, InspirationEffectMonitor.Instance, IStateMachineTarget, InspirationEffectMonitor.Def>.GameEvent.Callback(this.OnCatchyTune)).ParamTransition<bool>(this.shouldCatchyTune, this.catchyTune, (InspirationEffectMonitor.Instance smi, bool shouldCatchyTune) => shouldCatchyTune);
 		this.catchyTune.Exit(delegate(InspirationEffectMonitor.Instance smi)
 		{
-			this.shouldCatchyTune.Set(false, smi);
+			this.shouldCatchyTune.Set(false, smi, false);
 		}).ToggleEffect("HeardJoySinger").ToggleThought(Db.Get().Thoughts.CatchyTune, null)
 			.EventHandler(GameHashes.StartWork, new GameStateMachine<InspirationEffectMonitor, InspirationEffectMonitor.Instance, IStateMachineTarget, InspirationEffectMonitor.Def>.GameEvent.Callback(this.TryThinkCatchyTune))
 			.Enter(delegate(InspirationEffectMonitor.Instance smi)
@@ -27,8 +27,8 @@ public class InspirationEffectMonitor : GameStateMachine<InspirationEffectMonito
 
 	private void OnCatchyTune(InspirationEffectMonitor.Instance smi, object data)
 	{
-		this.inspirationTimeRemaining.Set(600f, smi);
-		this.shouldCatchyTune.Set(true, smi);
+		this.inspirationTimeRemaining.Set(600f, smi, false);
+		this.shouldCatchyTune.Set(true, smi, false);
 	}
 
 	private void TryThinkCatchyTune(InspirationEffectMonitor.Instance smi, object data)

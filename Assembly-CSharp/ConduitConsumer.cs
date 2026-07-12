@@ -222,7 +222,7 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 			return;
 		}
 		this.IsSatisfied = true;
-		if (!this.alwaysConsume && !this.operational.IsOperational)
+		if (!this.alwaysConsume && !this.operational.MeetsRequirements(this.OperatingRequirement))
 		{
 			return;
 		}
@@ -332,6 +332,8 @@ public class ConduitConsumer : KMonoBehaviour, IConduitConsumer
 
 	[MyCmpReq]
 	private Building building;
+
+	public Operational.State OperatingRequirement;
 
 	public ISecondaryInput targetSecondaryInput;
 

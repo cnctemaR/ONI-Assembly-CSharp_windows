@@ -8,7 +8,55 @@ public static class StaterpillarTuning
 		new FertilityMonitor.BreedingChance
 		{
 			egg = "StaterpillarEgg".ToTag(),
-			weight = 1f
+			weight = 0.98f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarGasEgg".ToTag(),
+			weight = 0.02f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarLiquidEgg".ToTag(),
+			weight = 0.02f
+		}
+	};
+
+	public static List<FertilityMonitor.BreedingChance> EGG_CHANCES_GAS = new List<FertilityMonitor.BreedingChance>
+	{
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarEgg".ToTag(),
+			weight = 0.32f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarGasEgg".ToTag(),
+			weight = 0.66f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarLiquidEgg".ToTag(),
+			weight = 0.02f
+		}
+	};
+
+	public static List<FertilityMonitor.BreedingChance> EGG_CHANCES_LIQUID = new List<FertilityMonitor.BreedingChance>
+	{
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarEgg".ToTag(),
+			weight = 0.32f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarGasEgg".ToTag(),
+			weight = 0.02f
+		},
+		new FertilityMonitor.BreedingChance
+		{
+			egg = "StaterpillarLiquidEgg".ToTag(),
+			weight = 0.66f
 		}
 	};
 

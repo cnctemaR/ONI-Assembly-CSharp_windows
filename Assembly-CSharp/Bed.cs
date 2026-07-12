@@ -18,10 +18,10 @@ public class Bed : Workable, IGameObjectEffectDescriptor, IBasicBuilding
 		Components.BasicBuildings.Add(this);
 		this.sleepable = base.GetComponent<Sleepable>();
 		Sleepable sleepable = this.sleepable;
-		sleepable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(sleepable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+		sleepable.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(sleepable.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkableEvent));
 	}
 
-	private void OnWorkableEvent(Workable.WorkableEvent workable_event)
+	private void OnWorkableEvent(Workable workable, Workable.WorkableEvent workable_event)
 	{
 		if (workable_event == Workable.WorkableEvent.WorkStarted)
 		{
@@ -103,7 +103,7 @@ public class Bed : Workable, IGameObjectEffectDescriptor, IBasicBuilding
 		if (this.sleepable != null)
 		{
 			Sleepable sleepable = this.sleepable;
-			sleepable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Remove(sleepable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+			sleepable.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(sleepable.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkableEvent));
 		}
 	}
 

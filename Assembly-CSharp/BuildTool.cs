@@ -214,34 +214,57 @@ public class BuildTool : DragTool
 		}
 	}
 
+	public PermittedRotations? GetPermittedRotations()
+	{
+		if (this.visualizer == null)
+		{
+			return null;
+		}
+		Rotatable component = this.visualizer.GetComponent<Rotatable>();
+		if (component == null)
+		{
+			return null;
+		}
+		return new PermittedRotations?(component.permittedRotations);
+	}
+
+	public bool CanRotate()
+	{
+		return !(this.visualizer == null) && !(this.visualizer.GetComponent<Rotatable>() == null);
+	}
+
+	public void TryRotate()
+	{
+		if (this.visualizer == null)
+		{
+			return;
+		}
+		Rotatable component = this.visualizer.GetComponent<Rotatable>();
+		if (component == null)
+		{
+			return;
+		}
+		KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Rotate", false));
+		this.buildingOrientation = component.Rotate();
+		if (Grid.IsValidBuildingCell(this.lastCell))
+		{
+			Vector3 vector = Grid.CellToPosCCC(this.lastCell, Grid.SceneLayer.Building);
+			this.UpdateVis(vector);
+		}
+		if (base.Dragging && this.lastDragCell != -1)
+		{
+			this.TryBuild(this.lastDragCell);
+		}
+	}
+
 	public override void OnKeyDown(KButtonEvent e)
 	{
 		if (e.TryConsume(global::Action.RotateBuilding))
 		{
-			if (this.visualizer != null)
-			{
-				Rotatable component = this.visualizer.GetComponent<Rotatable>();
-				if (component != null)
-				{
-					KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Rotate", false));
-					this.buildingOrientation = component.Rotate();
-					if (Grid.IsValidBuildingCell(this.lastCell))
-					{
-						Vector3 vector = Grid.CellToPosCCC(this.lastCell, Grid.SceneLayer.Building);
-						this.UpdateVis(vector);
-					}
-					if (base.Dragging && this.lastDragCell != -1)
-					{
-						this.TryBuild(this.lastDragCell);
-						return;
-					}
-				}
-			}
+			this.TryRotate();
+			return;
 		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
+		base.OnKeyDown(e);
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)

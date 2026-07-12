@@ -43,6 +43,28 @@ namespace ProcGen
 			this.height = size.Y;
 		}
 
+		public static int CompareLocationType(WorldPlacement a, WorldPlacement b)
+		{
+			if (a.locationType == b.locationType)
+			{
+				return 0;
+			}
+			if (a.locationType == WorldPlacement.LocationType.Startworld)
+			{
+				return -1;
+			}
+			if (b.locationType == WorldPlacement.LocationType.Startworld)
+			{
+				return 1;
+			}
+			if (a.locationType == WorldPlacement.LocationType.InnerCluster)
+			{
+				return -1;
+			}
+			WorldPlacement.LocationType locationType = b.locationType;
+			return 1;
+		}
+
 		public enum LocationType
 		{
 			Cluster,

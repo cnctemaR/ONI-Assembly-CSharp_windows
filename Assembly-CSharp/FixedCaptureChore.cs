@@ -30,8 +30,8 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.rancher.Set(context.consumerState.gameObject, base.smi);
-		base.smi.sm.creature.Set(base.smi.fixedCapturePoint.targetCapturable.gameObject, base.smi);
+		base.smi.sm.rancher.Set(context.consumerState.gameObject, base.smi, false);
+		base.smi.sm.creature.Set(base.smi.fixedCapturePoint.targetCapturable.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 

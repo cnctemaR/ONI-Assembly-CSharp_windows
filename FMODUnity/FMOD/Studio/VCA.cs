@@ -5,7 +5,7 @@ namespace FMOD.Studio
 {
 	public struct VCA
 	{
-		public RESULT getID(out Guid id)
+		public RESULT getID(out GUID id)
 		{
 			return VCA.FMOD_Studio_VCA_GetID(this.handle, out id);
 		}
@@ -55,7 +55,7 @@ namespace FMOD.Studio
 		private static extern bool FMOD_Studio_VCA_IsValid(IntPtr vca);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_VCA_GetID(IntPtr vca, out Guid id);
+		private static extern RESULT FMOD_Studio_VCA_GetID(IntPtr vca, out GUID id);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_VCA_GetPath(IntPtr vca, IntPtr path, int size, out int retrieved);

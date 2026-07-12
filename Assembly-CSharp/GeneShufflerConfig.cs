@@ -37,9 +37,9 @@ public class GeneShufflerConfig : IEntityConfig
 		ManualDeliveryKG manualDeliveryKG = gameObject.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		manualDeliveryKG.requestedItemTag = new Tag("GeneShufflerRecharge");
+		manualDeliveryKG.RequestedItemTag = new Tag("GeneShufflerRecharge");
 		manualDeliveryKG.refillMass = 1f;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.capacity = 1f;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;

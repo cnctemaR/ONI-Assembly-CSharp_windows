@@ -991,7 +991,6 @@ namespace ProcGen
 		{
 			if (string.IsNullOrEmpty(this.worldGen.Settings.world.startSubworldName))
 			{
-				global::Debug.Log("World (" + this.worldGen.Settings.world.filePath + ") does not have a starting subworld specified");
 				return new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
 			}
 			Node node2 = this.FindFirstNodeWithTag(WorldGenTags.StartLocation);

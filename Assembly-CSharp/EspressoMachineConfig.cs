@@ -44,10 +44,10 @@ public class EspressoMachineConfig : IBuildingConfig
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("SpiceNut");
+		manualDeliveryKG.RequestedItemTag = new Tag("SpiceNut");
 		manualDeliveryKG.capacity = 10f;
 		manualDeliveryKG.refillMass = 5f;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		go.AddOrGet<EspressoMachineWorkable>();
 		go.AddOrGet<EspressoMachine>();

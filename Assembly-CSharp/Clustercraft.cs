@@ -186,6 +186,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 		{
 			this.UpdateStatusItem();
 		});
+		base.Subscribe<Clustercraft>(1102426921, Clustercraft.NameChangedHandler);
 		this.SetRocketName(this.m_name);
 		this.UpdateStatusItem();
 	}
@@ -258,6 +259,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 		this.UpdateStatusItem();
 	}
 
+	public void SetRocketName(object newName)
+	{
+		this.SetRocketName((string)newName);
+	}
+
 	public void SetRocketName(string newName)
 	{
 		this.m_name = newName;
@@ -271,6 +277,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 				break;
 			}
 		}
+		ClusterManager.Instance.Trigger(1943181844, newName);
 	}
 
 	public bool CheckPreppedForLaunch()
@@ -915,6 +922,11 @@ public class Clustercraft : ClusterGridEntity, IClusterRange, ISim4000ms
 	private static EventSystem.IntraObjectHandler<Clustercraft> ClusterDestinationReachedHandler = new EventSystem.IntraObjectHandler<Clustercraft>(delegate(Clustercraft cmp, object data)
 	{
 		cmp.OnClusterDestinationReached(data);
+	});
+
+	private static EventSystem.IntraObjectHandler<Clustercraft> NameChangedHandler = new EventSystem.IntraObjectHandler<Clustercraft>(delegate(Clustercraft cmp, object data)
+	{
+		cmp.SetRocketName(data);
 	});
 
 	public enum CraftStatus

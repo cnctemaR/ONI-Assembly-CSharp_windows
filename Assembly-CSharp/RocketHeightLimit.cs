@@ -48,9 +48,9 @@ public class RocketHeightLimit : SelectModuleCondition
 
 	public override string GetStatusTooltip(bool ready, GameObject moduleBase, BuildingDef selectedPart)
 	{
-		global::UnityEngine.Object component = moduleBase.GetComponent<RocketEngineCluster>();
-		RocketEngineCluster component2 = selectedPart.BuildingComplete.GetComponent<RocketEngineCluster>();
-		bool flag = component != null || component2 != null;
+		global::UnityEngine.Object engine = moduleBase.GetComponent<RocketModuleCluster>().CraftInterface.GetEngine();
+		RocketEngineCluster component = selectedPart.BuildingComplete.GetComponent<RocketEngineCluster>();
+		bool flag = engine != null || component != null;
 		if (ready)
 		{
 			return UI.UISIDESCREENS.SELECTMODULESIDESCREEN.CONSTRAINTS.MAX_HEIGHT.COMPLETE;

@@ -134,7 +134,7 @@ public class RailGun : StateMachineComponent<RailGun.StatesInstance>, ISim200ms,
 		int num = ((network != null) ? network.OutputValue : 1);
 		bool flag = LogicCircuitNetwork.IsBitActive(0, num);
 		this.isLogicActive = flag;
-		base.smi.sm.allowedFromLogic.Set(this.AllowLaunchingFromLogic, base.smi);
+		base.smi.sm.allowedFromLogic.Set(this.AllowLaunchingFromLogic, base.smi, false);
 		base.GetComponent<KSelectable>().ToggleStatusItem(RailGun.infoStatusItemLogic, network != null, this);
 	}
 
@@ -422,7 +422,7 @@ public class RailGun : StateMachineComponent<RailGun.StatesInstance>, ISim200ms,
 					smi.sm.payloadsFiredSinceCooldown.Delta(1, smi);
 					if (smi.sm.payloadsFiredSinceCooldown.Get(smi) >= 6)
 					{
-						smi.sm.cooldownTimer.Set(30f, smi);
+						smi.sm.cooldownTimer.Set(30f, smi, false);
 					}
 				}
 			}).GoTo(this.on.working.bounce);
@@ -436,7 +436,7 @@ public class RailGun : StateMachineComponent<RailGun.StatesInstance>, ISim200ms,
 			}, UpdateRate.SIM_1000ms, false);
 			this.on.cooldown.pst.PlayAnim("cooldown_pst").OnAnimQueueComplete(this.on.wait_for_storage).Exit(delegate(RailGun.StatesInstance smi)
 			{
-				smi.sm.payloadsFiredSinceCooldown.Set(0, smi);
+				smi.sm.payloadsFiredSinceCooldown.Set(0, smi, false);
 			});
 		}
 

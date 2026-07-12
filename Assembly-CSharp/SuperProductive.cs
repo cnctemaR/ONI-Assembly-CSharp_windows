@@ -80,12 +80,7 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 			ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
 			if (smi != null)
 			{
-				SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.gameObject, "SuperProductive", Db.Get().ChoreTypes.EmoteHighPriority, "anim_productive_kanim", 0f, 1f, 1f);
-				selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "productive"
-				});
-				smi.AddOneshotReactable(selfEmoteReactable);
+				smi.AddSelfEmoteReactable(base.gameObject, "SuperProductive", Db.Get().Emotes.Minion.ProductiveCheer, true, Db.Get().ChoreTypes.EmoteHighPriority, 0f, 1f, 1f, 0f, null);
 			}
 		}
 

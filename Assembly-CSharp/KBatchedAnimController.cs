@@ -405,8 +405,8 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			}
 			else
 			{
-				this.screenOffset.x = this.rootCanvas.rectTransform().rect.width / 2f;
-				this.screenOffset.y = this.rootCanvas.rectTransform().rect.height / 2f;
+				this.screenOffset.x = ((this.rootCanvas.renderMode == RenderMode.WorldSpace) ? 0f : (this.rootCanvas.rectTransform().rect.width / 2f));
+				this.screenOffset.y = ((this.rootCanvas.renderMode == RenderMode.WorldSpace) ? 0f : (this.rootCanvas.rectTransform().rect.height / 2f));
 			}
 			float num = 1f;
 			if (this.scaler != null)

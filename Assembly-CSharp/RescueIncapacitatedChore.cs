@@ -15,9 +15,9 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.rescuer.Set(context.consumerState.gameObject, base.smi);
-		base.smi.sm.rescueTarget.Set(this.gameObject, base.smi);
-		base.smi.sm.deliverTarget.Set(this.gameObject.GetSMI<BeIncapacitatedChore.StatesInstance>().master.GetChosenClinic(), base.smi);
+		base.smi.sm.rescuer.Set(context.consumerState.gameObject, base.smi, false);
+		base.smi.sm.rescueTarget.Set(this.gameObject, base.smi, false);
+		base.smi.sm.deliverTarget.Set(this.gameObject.GetSMI<BeIncapacitatedChore.StatesInstance>().master.GetChosenClinic(), base.smi, false);
 		base.Begin(context);
 	}
 

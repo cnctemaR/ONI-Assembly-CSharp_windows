@@ -223,4 +223,10 @@ public class BuildingTemplates
 		treeFilterable.autoSelectStoredOnLoad = false;
 		return template;
 	}
+
+	public static void ExtendBuildingToGravitas(GameObject template)
+	{
+		template.GetComponent<Deconstructable>().allowDeconstruction = false;
+		template.AddOrGet<Demolishable>();
+	}
 }

@@ -26,7 +26,7 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 		}).GoTo(this.burnt);
 		this.burnt.EventTransition(GameHashes.SicknessCured, this.unburnt, (LightMonitor.Instance smi) => !smi.gameObject.GetSicknesses().Has(Db.Get().Sicknesses.Sunburn)).Exit(delegate(LightMonitor.Instance smi)
 		{
-			smi.sm.burnResistance.Set(120f, smi);
+			smi.sm.burnResistance.Set(120f, smi, false);
 		});
 	}
 
@@ -35,13 +35,13 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 		KPrefabID component = smi.GetComponent<KPrefabID>();
 		if (component != null && component.HasTag(GameTags.Shaded))
 		{
-			smi.sm.lightLevel.Set(0f, smi);
+			smi.sm.lightLevel.Set(0f, smi, false);
 			return;
 		}
 		int num = Grid.PosToCell(smi.gameObject);
 		if (Grid.IsValidCell(num))
 		{
-			smi.sm.lightLevel.Set((float)Grid.LightIntensity[num], smi);
+			smi.sm.lightLevel.Set((float)Grid.LightIntensity[num], smi, false);
 		}
 	}
 

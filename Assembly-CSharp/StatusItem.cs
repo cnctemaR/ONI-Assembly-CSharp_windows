@@ -115,7 +115,7 @@ public class StatusItem : Resource
 
 	private string ResolveString(string str, object data)
 	{
-		if (this.resolveStringCallback != null && data != null)
+		if (this.resolveStringCallback != null && (data != null || this.resolveStringCallback_shouldStillCallIfDataIsNull))
 		{
 			return this.resolveStringCallback(str, data);
 		}
@@ -133,6 +133,17 @@ public class StatusItem : Resource
 			if (this.resolveStringCallback != null)
 			{
 				return this.resolveStringCallback(str, data);
+			}
+		}
+		else
+		{
+			if (this.resolveStringCallback_shouldStillCallIfDataIsNull && this.resolveStringCallback != null)
+			{
+				return this.resolveStringCallback(str, data);
+			}
+			if (this.resolveTooltipCallback_shouldStillCallIfDataIsNull && this.resolveTooltipCallback != null)
+			{
+				return this.resolveTooltipCallback(str, data);
 			}
 		}
 		return str;
@@ -215,6 +226,10 @@ public class StatusItem : Resource
 	public Func<string, object, string> resolveStringCallback;
 
 	public Func<string, object, string> resolveTooltipCallback;
+
+	public bool resolveStringCallback_shouldStillCallIfDataIsNull;
+
+	public bool resolveTooltipCallback_shouldStillCallIfDataIsNull;
 
 	public bool allowMultiples;
 

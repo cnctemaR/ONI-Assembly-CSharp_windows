@@ -12,12 +12,8 @@ public class HandSanitizerConfig : IBuildingConfig
 		string text2 = "handsanitizer_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		string[] array = new string[] { "Metal", "BleachStone" };
-		float[] array2 = new float[]
-		{
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
-		};
+		string[] array = new string[] { "Metal" };
+		float[] array2 = new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0] };
 		string[] array3 = array;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
@@ -46,11 +42,11 @@ public class HandSanitizerConfig : IBuildingConfig
 		go.AddOrGet<DirectionControl>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = GameTagExtensions.Create(SimHashes.BleachStone);
+		manualDeliveryKG.RequestedItemTag = GameTagExtensions.Create(SimHashes.BleachStone);
 		manualDeliveryKG.capacity = 15f;
 		manualDeliveryKG.refillMass = 3f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
-		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+		manualDeliveryKG.operationalRequirement = Operational.State.Functional;
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
 	}
 

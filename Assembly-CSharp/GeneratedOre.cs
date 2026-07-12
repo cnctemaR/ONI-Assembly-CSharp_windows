@@ -27,31 +27,24 @@ public class GeneratedOre
 		}
 		foreach (Element element2 in ElementLoader.elements)
 		{
-			if (element2 != null && !hashSet.Contains(element2.id) && DlcManager.IsContentActive(element2.dlcId))
+			if (element2 != null && !hashSet.Contains(element2.id) && DlcManager.IsContentActive(element2.dlcId) && element2.substance != null && element2.substance.anim != null)
 			{
-				if (element2.substance != null && element2.substance.anim != null)
+				GameObject gameObject = null;
+				if (element2.IsSolid)
 				{
-					GameObject gameObject = null;
-					if (element2.IsSolid)
-					{
-						gameObject = EntityTemplates.CreateSolidOreEntity(element2.id, null);
-					}
-					else if (element2.IsLiquid)
-					{
-						gameObject = EntityTemplates.CreateLiquidOreEntity(element2.id, null);
-					}
-					else if (element2.IsGas)
-					{
-						gameObject = EntityTemplates.CreateGasOreEntity(element2.id, null);
-					}
-					if (gameObject != null)
-					{
-						Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
-					}
+					gameObject = EntityTemplates.CreateSolidOreEntity(element2.id, null);
 				}
-				else
+				else if (element2.IsLiquid)
 				{
-					global::Debug.LogError("Missing substance or anim for element [" + element2.name + "]");
+					gameObject = EntityTemplates.CreateLiquidOreEntity(element2.id, null);
+				}
+				else if (element2.IsGas)
+				{
+					gameObject = EntityTemplates.CreateGasOreEntity(element2.id, null);
+				}
+				if (gameObject != null)
+				{
+					Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 				}
 			}
 		}

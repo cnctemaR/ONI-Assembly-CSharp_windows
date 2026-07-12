@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -34,6 +35,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	protected override void OnPrefabInit()
 	{
 		PlayerController.Instance = this;
+		InterfaceTool.InitializeConfigs(this.defaultConfigKey, this.interfaceConfigs);
 		this.vim = global::UnityEngine.Object.FindObjectOfType<VirtualInputModule>(true);
 		for (int i = 0; i < this.tools.Length; i++)
 		{
@@ -50,6 +52,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	protected override void OnSpawn()
 	{
 		this.ActivateTool(this.tools[0]);
+	}
+
+	private void InitializeConfigs()
+	{
 	}
 
 	private Vector3 GetCursorPos()
@@ -185,7 +191,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	{
 		this.dragDelta = Vector2.zero;
 		Vector3 mousePos = KInputManager.GetMousePos();
-		if (!this.dragging && this.dragAction != global::Action.Invalid && ((mousePos - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
+		if (!this.dragging && this.CanDrag() && ((mousePos - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
 		{
 			this.dragging = true;
 		}
@@ -226,6 +232,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		}
 	}
 
+	public void OnCancelInput()
+	{
+		this.CancelDragging();
+	}
+
 	public void OnKeyDown(KButtonEvent e)
 	{
 		if (e.TryConsume(global::Action.ToggleScreenshotMode))
@@ -238,6 +249,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 			DebugHandler.ToggleScreenshotMode();
 			return;
 		}
+		bool flag = true;
 		if (e.IsAction(global::Action.MouseLeft) || e.IsAction(global::Action.ShiftMouseLeft))
 		{
 			this.StartDrag(global::Action.MouseLeft);
@@ -249,6 +261,10 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		else if (e.IsAction(global::Action.MouseMiddle))
 		{
 			this.StartDrag(global::Action.MouseMiddle);
+		}
+		else
+		{
+			flag = false;
 		}
 		if (this.activeTool == null || !this.activeTool.enabled)
 		{
@@ -266,6 +282,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 				return;
 			}
 		}
+		if (flag && !this.draggingAllowed)
+		{
+			e.TryConsume(e.GetAction());
+			return;
+		}
 		if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
 		{
 			this.activeTool.OnLeftClickDown(this.GetCursorPos());
@@ -281,6 +302,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public void OnKeyUp(KButtonEvent e)
 	{
+		bool flag = true;
 		if (e.IsAction(global::Action.MouseLeft) || e.IsAction(global::Action.ShiftMouseLeft))
 		{
 			this.StopDrag(global::Action.MouseLeft);
@@ -293,12 +315,21 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		{
 			this.StopDrag(global::Action.MouseMiddle);
 		}
+		else
+		{
+			flag = false;
+		}
 		if (this.activeTool == null || !this.activeTool.enabled)
 		{
 			return;
 		}
 		if (!this.activeTool.hasFocus)
 		{
+			return;
+		}
+		if (flag && !this.draggingAllowed)
+		{
+			e.TryConsume(e.GetAction());
 			return;
 		}
 		if (!KInputManager.currentControllerIsGamepad)
@@ -340,6 +371,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	public bool IsDragging()
 	{
+		return this.dragging && this.CanDrag();
+	}
+
+	public bool CanDrag()
+	{
 		return this.draggingAllowed && this.dragAction > global::Action.Invalid;
 	}
 
@@ -361,6 +397,12 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		}
 		return this.worldDragDelta;
 	}
+
+	[SerializeField]
+	private global::Action defaultConfigKey;
+
+	[SerializeField]
+	private List<InterfaceToolConfig> interfaceConfigs;
 
 	public InterfaceTool[] tools;
 

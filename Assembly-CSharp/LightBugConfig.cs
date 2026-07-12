@@ -16,12 +16,14 @@ public class LightBugConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -LightBugTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 5f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
-		return BaseLightBugConfig.SetupDiet(gameObject, new HashSet<Tag>
+		GameObject gameObject2 = BaseLightBugConfig.SetupDiet(gameObject, new HashSet<Tag>
 		{
 			TagManager.Create(PrickleFruitConfig.ID),
 			TagManager.Create("GrilledPrickleFruit"),
 			SimHashes.Phosphorite.CreateTag()
 		}, Tag.Invalid, LightBugConfig.CALORIES_PER_KG_OF_ORE);
+		gameObject2.AddTag(GameTags.OriginalCreature);
+		return gameObject2;
 	}
 
 	public string[] GetDlcIds()

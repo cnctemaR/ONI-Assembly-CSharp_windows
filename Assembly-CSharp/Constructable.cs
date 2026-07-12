@@ -182,15 +182,7 @@ public class Constructable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
-		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
-		if (this.building.Def.IsTilePiece)
-		{
-			array = OffsetGroups.InvertedStandardTableWithCorners;
-		}
-		CellOffset[][] array2 = OffsetGroups.BuildReachabilityTable(this.building.Def.PlacementOffsets, array, this.building.Def.ConstructionOffsetFilter);
-		base.SetOffsetTable(array2);
-		this.storage.SetOffsetTable(array2);
+		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false);
 		this.faceTargetWhenWorking = true;
 		base.Subscribe<Constructable>(-1432940121, Constructable.OnReachableChangedDelegate);
 		if (this.rotatable == null)
@@ -219,6 +211,23 @@ public class Constructable : Workable, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
+		if (this.building.Def.IsTilePiece)
+		{
+			array = OffsetGroups.InvertedStandardTableWithCorners;
+		}
+		CellOffset[] array2 = this.building.Def.PlacementOffsets;
+		if (this.rotatable != null)
+		{
+			array2 = new CellOffset[this.building.Def.PlacementOffsets.Length];
+			for (int i = 0; i < array2.Length; i++)
+			{
+				array2[i] = this.rotatable.GetRotatedCellOffset(this.building.Def.PlacementOffsets[i]);
+			}
+		}
+		CellOffset[][] array3 = OffsetGroups.BuildReachabilityTable(array2, array, this.building.Def.ConstructionOffsetFilter);
+		base.SetOffsetTable(array3);
+		this.storage.SetOffsetTable(array3);
 		base.Subscribe<Constructable>(2127324410, Constructable.OnCancelDelegate);
 		if (this.rotatable != null)
 		{
@@ -232,7 +241,7 @@ public class Constructable : Workable, ISaveLoadable
 		component.Temperature = (component.Temperature = 293.15f);
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElementsTags))
 		{
-			this.fetchList.Add(ingredient.tag, null, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+			this.fetchList.Add(ingredient.tag, null, ingredient.amount, Operational.State.None);
 			MaterialNeeds.UpdateNeed(ingredient.tag, ingredient.amount, base.gameObject.GetMyWorldId());
 		}
 		if (!this.building.Def.IsTilePiece)

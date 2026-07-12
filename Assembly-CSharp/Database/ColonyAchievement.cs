@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMODUnity;
 
 namespace Database
 {
 	public class ColonyAchievement : Resource
 	{
-		public string victoryNISSnapshot { get; private set; }
+		public EventReference victoryNISSnapshot { get; private set; }
 
-		public ColonyAchievement(string Id, string platformAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, string victorySnapshot = "", string icon = "", string[] dlcIds = null)
+		public ColonyAchievement(string Id, string platformAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, EventReference victorySnapshot = default(EventReference), string icon = "", string[] dlcIds = null)
 			: base(Id, Name)
 		{
 			this.Id = Id;
@@ -21,7 +22,7 @@ namespace Database
 			this.shortVideoName = videoDataName;
 			this.loopVideoName = victoryLoopVideo;
 			this.victorySequence = VictorySequence;
-			this.victoryNISSnapshot = (string.IsNullOrEmpty(victorySnapshot) ? AudioMixerSnapshots.Get().VictoryNISGenericSnapshot : victorySnapshot);
+			this.victoryNISSnapshot = (victorySnapshot.IsNull ? AudioMixerSnapshots.Get().VictoryNISGenericSnapshot : victorySnapshot);
 			this.icon = icon;
 			this.dlcIds = dlcIds;
 			if (this.dlcIds == null)

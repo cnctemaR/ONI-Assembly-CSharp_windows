@@ -174,9 +174,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	public static HashSet<Tag> RadiationIDs = new HashSet<Tag>();
 
-	[EventRef]
 	[SerializeField]
-	public string techViewSoundPath;
+	public EventReference techViewSoundPath;
 
 	private EventInstance techViewSound;
 

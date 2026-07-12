@@ -7,7 +7,7 @@ public class SolidConduitInbox : StateMachineComponent<SolidConduitInbox.SMInsta
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.filteredStorage = new FilteredStorage(this, null, null, null, false, Db.Get().ChoreTypes.StorageFetch);
+		this.filteredStorage = new FilteredStorage(this, null, null, false, Db.Get().ChoreTypes.StorageFetch);
 	}
 
 	protected override void OnSpawn()

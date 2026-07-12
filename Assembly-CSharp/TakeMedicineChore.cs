@@ -17,9 +17,9 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.source.Set(this.pickupable.gameObject, base.smi);
-		base.smi.sm.requestedpillcount.Set(1f, base.smi);
-		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.source.Set(this.pickupable.gameObject, base.smi, false);
+		base.smi.sm.requestedpillcount.Set(1f, base.smi, false);
+		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 		new TakeMedicineChore(this.medicine);
 	}

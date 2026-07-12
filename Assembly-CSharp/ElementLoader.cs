@@ -46,6 +46,7 @@ public class ElementLoader
 	{
 		ElementLoader.elements = new List<Element>();
 		ElementLoader.elementTable = new Dictionary<int, Element>();
+		ElementLoader.elementTagTable = new Dictionary<Tag, Element>();
 		foreach (ElementLoader.ElementEntry elementEntry in ElementLoader.CollectElementsFromYAML())
 		{
 			int num = Hash.SDBMLower(elementEntry.elementId);
@@ -60,6 +61,7 @@ public class ElementLoader
 				ElementLoader.CopyEntryToElement(elementEntry, element);
 				ElementLoader.elements.Add(element);
 				ElementLoader.elementTable[num] = element;
+				ElementLoader.elementTagTable[element.tag] = element;
 				if (!ElementLoader.ManifestSubstanceForElement(element, ref substanceList, substanceTablesByDlc[elementEntry.dlcId]))
 				{
 					global::Debug.LogWarning("Missing substance for element: " + element.id.ToString());
@@ -198,55 +200,31 @@ public class ElementLoader
 		return element;
 	}
 
-	public static int GetElementIndex(SimHashes hash)
+	public static ushort GetElementIndex(SimHashes hash)
 	{
-		for (int num = 0; num != ElementLoader.elements.Count; num++)
+		Element element = null;
+		ElementLoader.elementTable.TryGetValue((int)hash, out element);
+		if (element != null)
 		{
-			if (ElementLoader.elements[num].id == hash)
-			{
-				return num;
-			}
+			return element.idx;
 		}
-		return -1;
-	}
-
-	public static byte GetElementIndex(Tag element_tag)
-	{
-		byte b = byte.MaxValue;
-		for (int i = 0; i < ElementLoader.elements.Count; i++)
-		{
-			Element element = ElementLoader.elements[i];
-			if (element_tag == element.tag)
-			{
-				b = (byte)i;
-				break;
-			}
-		}
-		return b;
+		return ushort.MaxValue;
 	}
 
 	public static Element GetElement(Tag tag)
 	{
-		for (int i = 0; i < ElementLoader.elements.Count; i++)
-		{
-			Element element = ElementLoader.elements[i];
-			if (tag == element.tag)
-			{
-				return element;
-			}
-		}
-		return null;
+		Element element;
+		ElementLoader.elementTagTable.TryGetValue(tag, out element);
+		return element;
 	}
 
 	public static SimHashes GetElementID(Tag tag)
 	{
-		for (int i = 0; i < ElementLoader.elements.Count; i++)
+		Element element;
+		ElementLoader.elementTagTable.TryGetValue(tag, out element);
+		if (element != null)
 		{
-			Element element = ElementLoader.elements[i];
-			if (tag == element.tag)
-			{
-				return element.id;
-			}
+			return element.id;
 		}
 		return SimHashes.Vacuum;
 	}
@@ -410,7 +388,7 @@ public class ElementLoader
 			{
 				ElementLoader.elements[i].substance.idx = i;
 			}
-			ElementLoader.elements[i].idx = (byte)i;
+			ElementLoader.elements[i].idx = (ushort)i;
 		}
 	}
 
@@ -460,6 +438,8 @@ public class ElementLoader
 	public static List<Element> elements;
 
 	public static Dictionary<int, Element> elementTable;
+
+	public static Dictionary<Tag, Element> elementTagTable;
 
 	private static string path = Application.streamingAssetsPath + "/elements/";
 

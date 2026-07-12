@@ -113,7 +113,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 	{
 		this.redLight = redLightState;
 		this.operational.SetActive(this.operational.IsOperational && this.redLight, false);
-		base.smi.sm.redLight.Set(this.redLight, base.smi);
+		base.smi.sm.redLight.Set(this.redLight, base.smi, false);
 		if (this.redLight)
 		{
 			this.CreateNewReactable();
@@ -155,7 +155,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 	private class CheckpointReactable : Reactable
 	{
 		public CheckpointReactable(Checkpoint checkpoint)
-			: base(checkpoint.gameObject, "CheckpointReactable", Db.Get().ChoreTypes.Checkpoint, 1, 1, false, 0f, 0f, float.PositiveInfinity)
+			: base(checkpoint.gameObject, "CheckpointReactable", Db.Get().ChoreTypes.Checkpoint, 1, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
 		{
 			this.checkpoint = checkpoint;
 			this.rotated = this.gameObject.GetComponent<Rotatable>().IsRotated;

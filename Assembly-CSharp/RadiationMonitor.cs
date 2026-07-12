@@ -19,10 +19,10 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 			.ParamTransition<float>(this.radiationExposure, this.active.sick.minor, RadiationMonitor.COMPARE_GTE_MINOR);
 		this.active.sick.ParamTransition<float>(this.radiationExposure, this.active.idle, RadiationMonitor.COMPARE_LT_MINOR).Enter(delegate(RadiationMonitor.Instance smi)
 		{
-			smi.sm.isSick.Set(true, smi);
+			smi.sm.isSick.Set(true, smi, false);
 		}).Exit(delegate(RadiationMonitor.Instance smi)
 		{
-			smi.sm.isSick.Set(false, smi);
+			smi.sm.isSick.Set(false, smi, false);
 		});
 		this.active.sick.minor.ToggleEffect(RadiationMonitor.minorSicknessEffect).ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
 			.ParamTransition<float>(this.radiationExposure, this.active.sick.major, RadiationMonitor.COMPARE_GTE_MAJOR)
@@ -53,7 +53,7 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 
 	private Chore CreateVomitChore(RadiationMonitor.Instance smi)
 	{
-		Notification notification = new Notification(DUPLICANTS.STATUSITEMS.RADIATIONVOMITING.NOTIFICATION_NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.RADIATIONVOMITING.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
+		Notification notification = new Notification(DUPLICANTS.STATUSITEMS.RADIATIONVOMITING.NOTIFICATION_NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.RADIATIONVOMITING.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false);
 		return new VomitChore(Db.Get().ChoreTypes.Vomit, smi.master, Db.Get().DuplicantStatusItems.Vomiting, notification, null);
 	}
 
@@ -76,31 +76,21 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 			float num3 = Grid.Radiation[num] * 1f * num2 / 600f * dt;
 			smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance).ApplyDelta(num3);
 			float num4 = num3 / dt * 600f;
-			smi.sm.currentExposurePerCycle.Set(num4, smi);
-			if (smi.sm.timeUntilNextExposureReact.Get(smi) <= 0f && RadiationMonitor.COMPARE_REACT(smi, num4))
+			smi.sm.currentExposurePerCycle.Set(num4, smi, false);
+			if (smi.sm.timeUntilNextExposureReact.Get(smi) <= 0f && !smi.HasTag(GameTags.InTransitTube) && RadiationMonitor.COMPARE_REACT(smi, num4))
 			{
-				smi.sm.timeUntilNextExposureReact.Set(120f, smi);
-				ReactionMonitor.Instance smi2 = smi.master.gameObject.GetSMI<ReactionMonitor.Instance>();
-				SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(smi.master.gameObject, "RadiationReact", Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_radiation_kanim", 0f, 20f, float.PositiveInfinity);
-				selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "react_radiation_glare"
-				});
-				smi2.AddOneshotReactable(selfEmoteReactable);
+				smi.sm.timeUntilNextExposureReact.Set(120f, smi, false);
+				Emote radiation_Glare = Db.Get().Emotes.Minion.Radiation_Glare;
+				smi.master.gameObject.GetSMI<ReactionMonitor.Instance>().AddSelfEmoteReactable(smi.master.gameObject, "RadiationReact", radiation_Glare, true, Db.Get().ChoreTypes.EmoteHighPriority, 0f, 20f, float.NegativeInfinity, 0f, null);
 			}
 		}
-		if (smi.sm.timeUntilNextSickReact.Get(smi) <= 0f && smi.sm.isSick.Get(smi))
+		if (smi.sm.timeUntilNextSickReact.Get(smi) <= 0f && smi.sm.isSick.Get(smi) && !smi.HasTag(GameTags.InTransitTube))
 		{
-			smi.sm.timeUntilNextSickReact.Set(60f, smi);
-			ReactionMonitor.Instance smi3 = smi.master.gameObject.GetSMI<ReactionMonitor.Instance>();
-			SelfEmoteReactable selfEmoteReactable2 = new SelfEmoteReactable(smi.master.gameObject, "RadiationReact", Db.Get().ChoreTypes.RadiationPain, "anim_react_radiation_kanim", 0f, 20f, float.PositiveInfinity);
-			selfEmoteReactable2.AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "react_radiation_itch"
-			});
-			smi3.AddOneshotReactable(selfEmoteReactable2);
+			smi.sm.timeUntilNextSickReact.Set(60f, smi, false);
+			Emote radiation_Itch = Db.Get().Emotes.Minion.Radiation_Itch;
+			smi.master.gameObject.GetSMI<ReactionMonitor.Instance>().AddSelfEmoteReactable(smi.master.gameObject, "RadiationReact", radiation_Itch, true, Db.Get().ChoreTypes.RadiationPain, 0f, 20f, float.NegativeInfinity, 0f, null);
 		}
-		smi.sm.radiationExposure.Set(smi.master.gameObject.GetComponent<KSelectable>().GetAmounts().GetValue("RadiationBalance"), smi);
+		smi.sm.radiationExposure.Set(smi.master.gameObject.GetComponent<KSelectable>().GetAmounts().GetValue("RadiationBalance"), smi, false);
 	}
 
 	public const float BASE_ABSORBTION_RATE = 1f;
@@ -223,16 +213,6 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 					}
 				}
 			}
-		}
-
-		public Reactable GetReactable()
-		{
-			EmoteReactable emoteReactable = new SelfEmoteReactable(base.master.gameObject, "RadiationSicknessReact", Db.Get().ChoreTypes.RadiationPain, "anim_react_radiation_kanim", 0f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "react_radiation_itch"
-			});
-			emoteReactable.preventChoreInterruption = false;
-			return emoteReactable;
 		}
 
 		public float SicknessSecondsRemaining()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FMODUnity
@@ -18,7 +19,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareUnityMappings(Settings settings)
+		public override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.WindowsPlayer, this);
 			settings.DeclareRuntimePlatform(RuntimePlatform.MetroPlayerX86, this);
@@ -30,5 +31,27 @@ namespace FMODUnity
 		{
 			return string.Format("{0}/X86_64/{1}.dll", this.GetPluginBasePath(), pluginName);
 		}
+
+		public override List<CodecChannelCount> DefaultCodecChannels
+		{
+			get
+			{
+				return PlatformWindows.staticCodecChannels;
+			}
+		}
+
+		private static List<CodecChannelCount> staticCodecChannels = new List<CodecChannelCount>
+		{
+			new CodecChannelCount
+			{
+				format = CodecType.FADPCM,
+				channels = 0
+			},
+			new CodecChannelCount
+			{
+				format = CodecType.Vorbis,
+				channels = 32
+			}
+		};
 	}
 }

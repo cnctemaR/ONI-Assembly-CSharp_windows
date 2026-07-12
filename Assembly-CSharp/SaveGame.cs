@@ -83,7 +83,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.clusterId, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, DlcManager.GetHighestActiveDlcId(), this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 514967U;
+		header.buildVersion = 525812U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);
@@ -206,10 +206,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			string[] worldTraits = SaveLoader.Instance.GameInfo.worldTraits;
 			for (int i = 0; i < worldTraits.Length; i++)
 			{
-				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(worldTraits[i], false);
-				if (cachedTrait != null)
+				WorldTrait cachedWorldTrait = SettingsCache.GetCachedWorldTrait(worldTraits[i], false);
+				if (cachedWorldTrait != null)
 				{
-					list.Add(new global::Tuple<string, TextStyleSetting>(Strings.Get(cachedTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+					list.Add(new global::Tuple<string, TextStyleSetting>(Strings.Get(cachedWorldTrait.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
 				}
 				else
 				{
@@ -221,10 +221,10 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		{
 			foreach (string text in world.WorldTraitIds)
 			{
-				WorldTrait cachedTrait2 = SettingsCache.GetCachedTrait(text, false);
-				if (cachedTrait2 != null)
+				WorldTrait cachedWorldTrait2 = SettingsCache.GetCachedWorldTrait(text, false);
+				if (cachedWorldTrait2 != null)
 				{
-					list.Add(new global::Tuple<string, TextStyleSetting>(Strings.Get(cachedTrait2.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
+					list.Add(new global::Tuple<string, TextStyleSetting>(Strings.Get(cachedWorldTrait2.name), ToolTipScreen.Instance.defaultTooltipBodyStyle));
 				}
 				else
 				{
@@ -307,7 +307,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.sandboxEnabled = sandboxEnabled;
 			this.dlcId = dlcId;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 28;
+			this.saveMinorVersion = 29;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)

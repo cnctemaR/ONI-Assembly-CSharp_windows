@@ -64,15 +64,9 @@ public class ResearchScreen : KModalScreen
 			return;
 		}
 		RectTransform component = this.scrollContent.GetComponent<RectTransform>();
-		if (!this.isDragging && (this.rightMouseDown || this.leftMouseDown) && Vector2.Distance(this.dragStartPosition, KInputManager.GetMousePos()) > 1f)
+		if (this.isDragging && !KInputManager.isFocused)
 		{
-			this.isDragging = true;
-		}
-		if (this.isDragging && !this.leftMouseDown && !this.rightMouseDown)
-		{
-			this.leftMouseDown = false;
-			this.rightMouseDown = false;
-			this.isDragging = false;
+			this.AbortDragging();
 		}
 		Vector2 anchoredPosition = component.anchoredPosition;
 		float num = Mathf.Min(this.effectiveZoomSpeed * Time.unscaledDeltaTime, 0.9f);
@@ -281,6 +275,18 @@ public class ResearchScreen : KModalScreen
 		this.Show(false);
 	}
 
+	public override void OnBeginDrag(PointerEventData eventData)
+	{
+		base.OnBeginDrag(eventData);
+		this.isDragging = true;
+	}
+
+	public override void OnEndDrag(PointerEventData eventData)
+	{
+		base.OnEndDrag(eventData);
+		this.AbortDragging();
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
@@ -292,7 +298,7 @@ public class ResearchScreen : KModalScreen
 
 	private IEnumerator WaitAndSetActiveResearch()
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		TechInstance targetResearch = Research.Instance.GetTargetResearch();
 		if (targetResearch != null)
 		{
@@ -477,6 +483,17 @@ public class ResearchScreen : KModalScreen
 		this.UpdatePointDisplay();
 	}
 
+	private void AbortDragging()
+	{
+		this.isDragging = false;
+		this.draggingJustEnded = true;
+	}
+
+	private void LateUpdate()
+	{
+		this.draggingJustEnded = false;
+	}
+
 	public override void OnKeyUp(KButtonEvent e)
 	{
 		if (!base.canvas.enabled)
@@ -485,20 +502,13 @@ public class ResearchScreen : KModalScreen
 		}
 		if (!e.Consumed)
 		{
-			if (e.IsAction(global::Action.MouseRight))
+			if (e.IsAction(global::Action.MouseRight) && !this.isDragging && !this.draggingJustEnded)
 			{
-				if (!this.isDragging)
-				{
-					ManagementMenu.Instance.CloseAll();
-				}
-				this.isDragging = false;
-				this.rightMouseDown = false;
+				ManagementMenu.Instance.CloseAll();
 			}
-			if (e.IsAction(global::Action.MouseRight) || e.IsAction(global::Action.MouseLeft))
+			if (e.IsAction(global::Action.MouseRight) || e.IsAction(global::Action.MouseLeft) || e.IsAction(global::Action.MouseMiddle))
 			{
-				this.isDragging = false;
-				this.rightMouseDown = false;
-				this.leftMouseDown = false;
+				this.AbortDragging();
 			}
 			if (this.panUp && e.TryConsume(global::Action.PanUp))
 			{
@@ -536,14 +546,12 @@ public class ResearchScreen : KModalScreen
 			{
 				this.dragStartPosition = KInputManager.GetMousePos();
 				this.dragLastPosition = KInputManager.GetMousePos();
-				this.rightMouseDown = true;
 				return;
 			}
 			if (e.TryConsume(global::Action.MouseLeft))
 			{
 				this.dragStartPosition = KInputManager.GetMousePos();
 				this.dragLastPosition = KInputManager.GetMousePos();
-				this.leftMouseDown = true;
 				return;
 			}
 			if (KInputManager.GetMousePos().x > this.sideBar.rectTransform().sizeDelta.x)
@@ -694,10 +702,6 @@ public class ResearchScreen : KModalScreen
 	[SerializeField]
 	private KChildFitter scrollContentChildFitter;
 
-	private bool rightMouseDown;
-
-	private bool leftMouseDown;
-
 	private bool isDragging;
 
 	private Vector3 dragStartPosition;
@@ -709,6 +713,8 @@ public class ResearchScreen : KModalScreen
 	private Vector2 forceTargetPosition;
 
 	private bool zoomingToTarget;
+
+	private bool draggingJustEnded;
 
 	private float targetZoom = 1f;
 

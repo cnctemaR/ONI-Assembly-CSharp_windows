@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public class DevToolManager
 	{
 		get
 		{
-			return this.showImgui;
+			return this.showImGui;
 		}
 	}
 
@@ -25,10 +26,18 @@ public class DevToolManager
 		this.RegisterDevTool(new DevToolBigBaseMutations(), "Debuggers/Big Base Mutation Utilities");
 		this.RegisterDevTool(new DevToolNavGrid(), "Debuggers/Nav Grid");
 		this.RegisterDevTool(new DevToolResearchDebugger(), "Debuggers/Research");
+		this.RegisterDevTool(new DevToolStatusItems(), "Debuggers/StatusItems");
+		this.RegisterDevTool(new DevToolUI(), "Debuggers/UI");
+		this.RegisterDevTool(new DevToolUnlockedIds(), "Debuggers/UnlockedIds List");
+		this.RegisterDevTool(new DevToolStringsTable(), "Debuggers/StringsTable");
+		this.RegisterDevTool(new DevToolChoreDebugger(), "Debuggers/Chore");
+		this.RegisterDevTool(new DevToolBatchedAnimDebug(), "Debuggers/Batched Anim");
+		this.RegisterDevTool(new DevTool_StoryTraits_Reveal(), "Debuggers/Story Traits Reveal");
+		this.RegisterDevTool(new DevTool_StoryTrait_CritterManipulator(), "Debuggers/Story Trait - Critter Manipulator");
 		this.RegisterDevTool(new DevToolSceneBrowser(), "Scene/Browser");
 		this.RegisterDevTool(new DevToolSceneInspector(), "Scene/Inspector");
-		this.RegisterDevTool(new DevToolInputDebugger(), "IMGUI/Input Debugger");
 		this.RegisterDevTool(this.warning, "Help/" + this.warning.Name);
+		this.RegisterDevTool(new DevToolCommandPalette(), "Help/Command Palette");
 	}
 
 	public void Init()
@@ -41,6 +50,7 @@ public class DevToolManager
 		string fileName = Path.GetFileName(location);
 		string directoryName = Path.GetDirectoryName(location);
 		tool.Name = fileName;
+		tool.FullPath = location;
 		this.tools.Add(tool);
 		DevToolManager.DevToolMenuNode devToolMenuNode = this.AddOrGetDevToolNode(directoryName);
 		if (devToolMenuNode.Nodes == null)
@@ -79,17 +89,22 @@ public class DevToolManager
 		return (T)((object)this.tools.Find((DevTool x) => x is T));
 	}
 
+	public IReadOnlyList<DevTool> GetDevTools()
+	{
+		return this.tools;
+	}
+
 	public void UpdateShouldShowTools()
 	{
 		if (!DebugHandler.enabled)
 		{
-			this.showImgui = false;
+			this.showImGui = false;
 			return;
 		}
 		bool flag = Input.GetKeyDown(KeyCode.BackQuote) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl));
 		if (!this.toggleKeyWasDown && flag)
 		{
-			this.showImgui = !this.showImgui;
+			this.showImGui = !this.showImGui;
 		}
 		this.toggleKeyWasDown = flag;
 	}
@@ -100,9 +115,13 @@ public class DevToolManager
 		{
 			return;
 		}
-		if (this.showImgui)
+		if (this.showImGui)
 		{
 			this.DrawMenu();
+			if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.Space))
+			{
+				DevToolCommandPalette.Init();
+			}
 			foreach (DevTool devTool in this.tools)
 			{
 				if (devTool.Enabled)
@@ -114,9 +133,8 @@ public class DevToolManager
 			{
 				if (ImGui.Begin("ImGui state", ref this.showImguiState))
 				{
-					ImGui.Checkbox("Game has focus", ref this.gameFocus);
-					ImGui.Checkbox("anyWindowFocus", ref this.anyWindowFocus);
-					ImGui.Checkbox("anyWindowHover", ref this.anyWindowHover);
+					ImGui.Checkbox("ImGui.GetIO().WantCaptureMouse", ImGui.GetIO().WantCaptureMouse);
+					ImGui.Checkbox("ImGui.GetIO().WantCaptureKeyboard", ImGui.GetIO().WantCaptureKeyboard);
 				}
 				ImGui.End();
 			}
@@ -125,41 +143,12 @@ public class DevToolManager
 				ImGui.ShowDemoWindow(ref this.showImguiDemo);
 			}
 		}
-		if (this.showImgui)
-		{
-			this.anyWindowFocus = ImGui.IsWindowFocused(ImGuiFocusedFlags.AnyWindow);
-			this.anyWindowHover = ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow) || ImGui.IsPopupOpen("", ImGuiPopupFlags.AnyPopup);
-			this.gameFocus = !this.anyWindowFocus;
-			if (this.anyWindowHover && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)))
-			{
-				this.gameFocus = false;
-			}
-			if (!this.anyWindowHover && (Input.GetKeyDown(KeyCode.Mouse1) || Input.GetKeyDown(KeyCode.Mouse2)))
-			{
-				ImGui.SetWindowFocus(null);
-				this.gameFocus = true;
-			}
-		}
-		else
-		{
-			this.gameFocus = true;
-		}
-		if (KInputManager.devToolFocus == this.gameFocus)
-		{
-			if (!this.gameFocus)
-			{
-				GameInputManager inputManager = Global.Instance.GetInputManager();
-				for (int i = 0; i < inputManager.GetControllerCount(); i++)
-				{
-					inputManager.GetController(i).HandleCancelInput();
-				}
-			}
-			KInputManager.devToolFocus = !this.gameFocus;
-		}
+		this.UpdateConsumingGameInputs();
 	}
 
 	private void DrawMenu()
 	{
+		this.menuFontSize.InitializeIfNeeded();
 		if (ImGui.BeginMainMenuBar())
 		{
 			if (!this.UserAcceptedWarning)
@@ -169,6 +158,7 @@ public class DevToolManager
 			else
 			{
 				this.DrawMenuNodes(this.rootMenuNode);
+				this.menuFontSize.DrawMenu();
 				if (ImGui.BeginMenu("IMGUI"))
 				{
 					ImGui.Checkbox("ImGui state", ref this.showImguiState);
@@ -209,19 +199,60 @@ public class DevToolManager
 		}
 	}
 
+	private unsafe void UpdateConsumingGameInputs()
+	{
+		this.doesImGuiWantInput = false;
+		if (this.showImGui)
+		{
+			this.doesImGuiWantInput = *ImGui.GetIO().WantCaptureMouse || *ImGui.GetIO().WantCaptureKeyboard;
+			if (!this.prevDoesImGuiWantInput && this.doesImGuiWantInput)
+			{
+				DevToolManager.<UpdateConsumingGameInputs>g__OnInputEnterImGui|27_0();
+			}
+			if (this.prevDoesImGuiWantInput && !this.doesImGuiWantInput)
+			{
+				DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|27_1();
+			}
+		}
+		if (this.prevShowImGui && this.prevDoesImGuiWantInput && !this.showImGui)
+		{
+			DevToolManager.<UpdateConsumingGameInputs>g__OnInputExitImGui|27_1();
+		}
+		this.prevShowImGui = this.showImGui;
+		this.prevDoesImGuiWantInput = this.doesImGuiWantInput;
+		KInputManager.devToolFocus = this.showImGui && this.doesImGuiWantInput;
+	}
+
+	[CompilerGenerated]
+	internal static void <UpdateConsumingGameInputs>g__OnInputEnterImGui|27_0()
+	{
+		UnityMouseCatcherUI.SetEnabled(true);
+		GameInputManager inputManager = Global.Instance.GetInputManager();
+		for (int i = 0; i < inputManager.GetControllerCount(); i++)
+		{
+			inputManager.GetController(i).HandleCancelInput();
+		}
+	}
+
+	[CompilerGenerated]
+	internal static void <UpdateConsumingGameInputs>g__OnInputExitImGui|27_1()
+	{
+		UnityMouseCatcherUI.SetEnabled(false);
+	}
+
 	public const string SHOW_DEVTOOLS = "ShowDevtools";
 
 	public static DevToolManager Instance;
 
-	private bool gameFocus;
-
-	private bool anyWindowFocus;
-
-	private bool anyWindowHover;
-
 	private bool toggleKeyWasDown;
 
-	private bool showImgui;
+	private bool showImGui;
+
+	private bool prevShowImGui;
+
+	private bool doesImGuiWantInput;
+
+	private bool prevDoesImGuiWantInput;
 
 	private bool showImguiState;
 
@@ -235,7 +266,9 @@ public class DevToolManager
 
 	private DevToolManager.DevToolMenuNode rootMenuNode;
 
-	private class DevToolMenuNode
+	private DevToolMenuFontSize menuFontSize = new DevToolMenuFontSize();
+
+	public class DevToolMenuNode
 	{
 		public DevToolMenuNode(string name)
 		{

@@ -15,15 +15,15 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 		public StatesInstance(IdleChore master, GameObject idler)
 			: base(master)
 		{
-			base.sm.idler.Set(idler, base.smi);
+			base.sm.idler.Set(idler, base.smi, false);
 			this.idleCellSensor = base.GetComponent<Sensors>().GetSensor<IdleCellSensor>();
 		}
 
 		public void UpdateNavType()
 		{
 			NavType currentNavType = base.GetComponent<Navigator>().CurrentNavType;
-			base.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, this);
-			base.sm.isOnTube.Set(currentNavType == NavType.Tube, this);
+			base.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, this, false);
+			base.sm.isOnTube.Set(currentNavType == NavType.Tube, this, false);
 		}
 
 		public int GetIdleCell()

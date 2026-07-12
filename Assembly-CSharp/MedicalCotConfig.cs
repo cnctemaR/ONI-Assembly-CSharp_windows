@@ -32,7 +32,7 @@ public class MedicalCotConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
-		go.GetComponent<KPrefabID>().AddTag(TagManager.Create("Bed"), false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.BedType, false);
 		Clinic clinic = go.AddOrGet<Clinic>();
 		clinic.doctorVisitInterval = 300f;
 		clinic.workerInjuredAnims = new KAnimFile[] { Assets.GetAnim("anim_healing_bed_kanim") };

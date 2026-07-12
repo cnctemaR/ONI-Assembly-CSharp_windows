@@ -93,11 +93,20 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 
 	private Reactable GetReactable(MinionIdentity minion)
 	{
-		return new SelfEmoteReactable(minion.gameObject, "NavigatorPassingGreeting", Db.Get().ChoreTypes.Emote, DupeGreetingManager.waveAnims[global::UnityEngine.Random.Range(0, DupeGreetingManager.waveAnims.Count)], 1000f, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+		if (DupeGreetingManager.emotes == null)
 		{
-			anim = "react",
-			startcb = new Action<GameObject>(this.BeginReacting)
-		}).AddThought(Db.Get().Thoughts.Chatty);
+			DupeGreetingManager.emotes = new List<Emote>
+			{
+				Db.Get().Emotes.Minion.Wave,
+				Db.Get().Emotes.Minion.Wave_Shy,
+				Db.Get().Emotes.Minion.FingerGuns
+			};
+		}
+		Emote emote = DupeGreetingManager.emotes[global::UnityEngine.Random.Range(0, DupeGreetingManager.emotes.Count)];
+		SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(minion.gameObject, "NavigatorPassingGreeting", Db.Get().ChoreTypes.Emote, 1000f, 20f, float.PositiveInfinity, 0f);
+		selfEmoteReactable.SetEmote(emote).SetThought(Db.Get().Thoughts.Chatty);
+		selfEmoteReactable.RegisterEmoteStepCallbacks("react", new Action<GameObject>(this.BeginReacting), null);
+		return selfEmoteReactable;
 	}
 
 	private void BeginReacting(GameObject minionGO)
@@ -142,7 +151,7 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 
 	private Dictionary<MinionIdentity, float> cooldowns;
 
-	private static readonly List<string> waveAnims = new List<string> { "anim_react_wave_kanim", "anim_react_wave_shy_kanim", "anim_react_fingerguns_kanim" };
+	private static List<Emote> emotes;
 
 	public class Tuning : TuningData<DupeGreetingManager.Tuning>
 	{

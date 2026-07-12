@@ -67,10 +67,7 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 
 		public Reactable CreateConcernReactable()
 		{
-			return new EmoteReactable(base.master.gameObject, "StressConcern", Db.Get().ChoreTypes.Emote, "anim_react_concern_kanim", 15, 8, 0f, 30f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "react"
-			});
+			return new EmoteReactable(base.master.gameObject, "StressConcern", Db.Get().ChoreTypes.Emote, 15, 8, 0f, 30f, float.PositiveInfinity, 0f).SetEmote(Db.Get().Emotes.Minion.Concern);
 		}
 
 		public AmountInstance stress;

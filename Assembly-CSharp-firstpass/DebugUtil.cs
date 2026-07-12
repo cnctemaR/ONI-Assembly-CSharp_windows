@@ -5,6 +5,11 @@ using UnityEngine;
 
 public static class DebugUtil
 {
+	public static void Separator()
+	{
+		global::Debug.Log(DebugUtil.LINE);
+	}
+
 	public static void Assert(bool test)
 	{
 		global::Debug.Assert(test);
@@ -209,9 +214,16 @@ public static class DebugUtil
 	{
 	}
 
+	public static KProfiler.Region ProfileRegion(string regionName, global::UnityEngine.Object profilerObj = null)
+	{
+		return new KProfiler.Region(regionName, profilerObj);
+	}
+
 	private static StringBuilder s_errorMessageBuilder = new StringBuilder();
 
 	private static Exception s_lastExceptionLogged;
+
+	public static string LINE = "-----------------------------------------------------------";
 
 	private static StringBuilder fullNameBuilder = new StringBuilder();
 }

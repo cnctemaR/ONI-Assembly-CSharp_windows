@@ -11,9 +11,9 @@ namespace Klei.AI
 		public PartyEvent()
 			: base("Party", 0, 0)
 		{
-			this.popupAnimFileName = "event_pop_up_assets_kanim";
-			this.popupTitle = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.NAME;
-			this.popupDescription = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.DESCRIPTION;
+			this.animFileName = "event_pop_up_assets_kanim";
+			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.NAME;
+			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.DESCRIPTION;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -142,8 +142,8 @@ namespace Klei.AI
 					}
 					smi.GoTo(this.ending);
 				});
-				this.planning.wait_for_input.ToggleNotification((PartyEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardEventNotification(this.GenerateEventPopupData(smi)));
-				this.warmup.ToggleNotification((PartyEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardEventChosenNotification(this.GenerateEventPopupData(smi)));
+				this.planning.wait_for_input.ToggleNotification((PartyEvent.StatesInstance smi) => EventInfoScreen.CreateNotification(this.GenerateEventPopupData(smi), null));
+				this.warmup.ToggleNotification((PartyEvent.StatesInstance smi) => EventInfoScreen.CreateNotification(this.GenerateEventPopupData(smi), null));
 				this.warmup.wait.ScheduleGoTo(60f, this.warmup.start);
 				this.warmup.start.Enter(new StateMachine<PartyEvent.States, PartyEvent.StatesInstance, GameplayEventManager, object>.State.Callback(this.PopulateTargetsAndText)).Enter(delegate(PartyEvent.StatesInstance smi)
 				{
@@ -154,12 +154,12 @@ namespace Klei.AI
 					}
 					smi.GoTo(this.partying);
 				});
-				this.partying.ToggleNotification((PartyEvent.StatesInstance smi) => new Notification(GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.UNDERWAY, NotificationType.Good, (List<Notification> a, object b) => GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.UNDERWAY_TOOLTIP, null, false, 0f, null, null, this.roomObject.Get(smi).transform, true)).Update(delegate(PartyEvent.StatesInstance smi, float dt)
+				this.partying.ToggleNotification((PartyEvent.StatesInstance smi) => new Notification(GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.UNDERWAY, NotificationType.Good, (List<Notification> a, object b) => GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.UNDERWAY_TOOLTIP, null, false, 0f, null, null, this.roomObject.Get(smi).transform, true, false)).Update(delegate(PartyEvent.StatesInstance smi, float dt)
 				{
 					smi.UpdateChores(this.GetChosenRoom(smi));
 				}, UpdateRate.SIM_4000ms, false).ScheduleGoTo(60f, this.ending);
 				this.ending.ReturnSuccess();
-				this.canceled.DoNotification((PartyEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardCancelledNotification(this.GenerateEventPopupData(smi))).Enter(delegate(PartyEvent.StatesInstance smi)
+				this.canceled.DoNotification((PartyEvent.StatesInstance smi) => GameplayEventManager.CreateStandardCancelledNotification(this.GenerateEventPopupData(smi))).Enter(delegate(PartyEvent.StatesInstance smi)
 				{
 					if (this.planner.Get(smi) != null)
 					{
@@ -177,46 +177,46 @@ namespace Klei.AI
 				return Game.Instance.roomProber.GetRoomOfGameObject(this.roomObject.Get(smi));
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(PartyEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(PartyEvent.StatesInstance smi)
 			{
-				GameplayEventPopupData gameplayEventPopupData = new GameplayEventPopupData(smi.gameplayEvent);
+				EventInfoData eventInfoData = new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName);
 				Room chosenRoom = this.GetChosenRoom(smi);
 				string text = ((chosenRoom != null) ? chosenRoom.GetProperName() : GAMEPLAY_EVENTS.LOCATIONS.NONE_AVAILABLE.ToString());
 				Effect effect = Db.Get().effects.Get("Socialized");
 				Effect effect2 = Db.Get().effects.Get("NoFunAllowed");
-				gameplayEventPopupData.location = text;
-				gameplayEventPopupData.whenDescription = string.Format(GAMEPLAY_EVENTS.TIMES.IN_CYCLES, 0.1f);
-				gameplayEventPopupData.minions = new GameObject[]
+				eventInfoData.location = text;
+				eventInfoData.whenDescription = string.Format(GAMEPLAY_EVENTS.TIMES.IN_CYCLES, 0.1f);
+				eventInfoData.minions = new GameObject[]
 				{
 					smi.sm.guest.Get(smi),
 					smi.sm.planner.Get(smi)
 				};
 				bool flag = true;
-				GameplayEventPopupData.PopupOption popupOption = gameplayEventPopupData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_NAME, GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_DESC);
-				popupOption.callback = delegate
+				EventInfoData.Option option = eventInfoData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_NAME, GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_DESC);
+				option.callback = delegate
 				{
 					smi.GoTo(smi.sm.warmup.wait);
 				};
-				popupOption.AddPositiveIcon(Assets.GetSprite("overlay_materials"), Effect.CreateFullTooltip(effect, true), 1f);
-				popupOption.tooltip = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_DESC;
+				option.AddPositiveIcon(Assets.GetSprite("overlay_materials"), Effect.CreateFullTooltip(effect, true), 1f);
+				option.tooltip = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_DESC;
 				if (!flag)
 				{
-					popupOption.AddInformationIcon("Cake must be built", 1f);
-					popupOption.allowed = false;
-					popupOption.tooltip = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_INVALID_TOOLTIP;
+					option.AddInformationIcon("Cake must be built", 1f);
+					option.allowed = false;
+					option.tooltip = GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.ACCEPT_OPTION_INVALID_TOOLTIP;
 				}
-				GameplayEventPopupData.PopupOption popupOption2 = gameplayEventPopupData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.REJECT_OPTION_NAME, GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.REJECT_OPTION_DESC);
-				popupOption2.callback = delegate
+				EventInfoData.Option option2 = eventInfoData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.REJECT_OPTION_NAME, GAMEPLAY_EVENTS.EVENT_TYPES.PARTY.REJECT_OPTION_DESC);
+				option2.callback = delegate
 				{
 					smi.GoTo(smi.sm.canceled);
 				};
-				popupOption2.AddNegativeIcon(Assets.GetSprite("overlay_decor"), Effect.CreateFullTooltip(effect2, true), 1f);
-				gameplayEventPopupData.AddDefaultConsiderLaterOption(null);
-				gameplayEventPopupData.SetTextParameter("host", this.planner.Get(smi).GetProperName());
-				gameplayEventPopupData.SetTextParameter("dupe", this.guest.Get(smi).GetProperName());
-				gameplayEventPopupData.SetTextParameter("goodEffect", effect.Name);
-				gameplayEventPopupData.SetTextParameter("badEffect", effect2.Name);
-				return gameplayEventPopupData;
+				option2.AddNegativeIcon(Assets.GetSprite("overlay_decor"), Effect.CreateFullTooltip(effect2, true), 1f);
+				eventInfoData.AddDefaultConsiderLaterOption(null);
+				eventInfoData.SetTextParameter("host", this.planner.Get(smi).GetProperName());
+				eventInfoData.SetTextParameter("dupe", this.guest.Get(smi).GetProperName());
+				eventInfoData.SetTextParameter("goodEffect", effect.Name);
+				eventInfoData.SetTextParameter("badEffect", effect2.Name);
+				return eventInfoData;
 			}
 
 			public void PopulateTargetsAndText(PartyEvent.StatesInstance smi)

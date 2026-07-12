@@ -85,7 +85,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		while (currentTime < startTime + delay)
 		{
 			currentTime += Time.unscaledDeltaTime;
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 		}
 		this.ConnectedEvent(cell);
 		string sound = GlobalAssets.GetSound(soundName, false);

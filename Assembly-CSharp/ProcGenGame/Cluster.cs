@@ -6,6 +6,7 @@ using System.Threading;
 using Klei;
 using KSerialization;
 using ProcGen;
+using STRINGS;
 using UnityEngine;
 
 namespace ProcGenGame
@@ -29,13 +30,24 @@ namespace ProcGenGame
 		{
 		}
 
-		public Cluster(string name, int seed, bool assertMissingTraits, bool skipWorldTraits)
+		public Cluster(string name, int seed, List<string> chosenStoryTraitIds, bool assertMissingTraits, bool skipWorldTraits)
 		{
 			DebugUtil.Assert(!string.IsNullOrEmpty(name), "Cluster file is missing");
 			this.seed = seed;
 			WorldGen.LoadSettings(false);
+			this.chosenStoryTraitIds = chosenStoryTraitIds;
+			this.unplacedStoryTraits = new List<WorldTrait>();
+			foreach (string text in chosenStoryTraitIds)
+			{
+				WorldTrait cachedStoryTrait = SettingsCache.GetCachedStoryTrait(text, assertMissingTraits);
+				if (cachedStoryTrait != null)
+				{
+					this.unplacedStoryTraits.Add(cachedStoryTrait);
+				}
+			}
 			this.clusterLayout = SettingsCache.clusterLayouts.clusterCache[name];
 			this.Id = name;
+			bool flag = seed > 0 && !skipWorldTraits;
 			for (int i = 0; i < this.clusterLayout.worldPlacements.Count; i++)
 			{
 				global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(this.clusterLayout.worldPlacements[i].world);
@@ -52,13 +64,13 @@ namespace ProcGenGame
 			foreach (WorldPlacement worldPlacement in this.clusterLayout.worldPlacements)
 			{
 				List<string> list = new List<string>();
-				if (seed > 0 && !skipWorldTraits)
+				if (flag)
 				{
 					global::ProcGen.World worldData2 = SettingsCache.worlds.GetWorldData(worldPlacement.world);
 					list = SettingsCache.GetRandomTraits(seed, worldData2);
 					seed++;
 				}
-				WorldGen worldGen = new WorldGen(worldPlacement.world, list, assertMissingTraits);
+				WorldGen worldGen = new WorldGen(worldPlacement.world, list, null, assertMissingTraits);
 				Vector2I worldsize = worldGen.Settings.world.worldsize;
 				worldGen.SetWorldSize(worldsize.x, worldsize.y);
 				worldGen.SetPosition(new Vector2I(worldPlacement.x, worldPlacement.y));
@@ -85,6 +97,25 @@ namespace ProcGenGame
 			this.worlds.Clear();
 		}
 
+		private void LogBeginGeneration()
+		{
+			string text = ((CustomGameSettings.Instance != null) ? CustomGameSettings.Instance.GetSettingsCoordinate() : this.seed.ToString());
+			Console.WriteLine("\n\n");
+			DebugUtil.LogArgs(new object[] { "WORLDGEN START" });
+			DebugUtil.LogArgs(new object[] { " - seed:     " + text });
+			DebugUtil.LogArgs(new object[] { " - cluster:  " + this.clusterLayout.filePath });
+			if (this.chosenStoryTraitIds.Count == 0)
+			{
+				DebugUtil.LogArgs(new object[] { " - storytraits: none" });
+				return;
+			}
+			DebugUtil.LogArgs(new object[] { " - storytraits:" });
+			foreach (string text2 in this.chosenStoryTraitIds)
+			{
+				DebugUtil.LogArgs(new object[] { "    - " + text2 });
+			}
+		}
+
 		public void Generate(WorldGen.OfflineCallbackFunction callbackFn, Action<OfflineWorldGen.ErrorInfo> error_cb, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1, bool doSimSettle = true, bool debug = false)
 		{
 			this.doSimSettle = doSimSettle;
@@ -100,28 +131,42 @@ namespace ProcGenGame
 
 		private void BeginGeneration()
 		{
+			this.LogBeginGeneration();
 			Sim.Cell[] array = null;
 			Sim.DiseaseCell[] array2 = null;
 			int num = 0;
-			for (int i = 0; i < this.worlds.Count; i++)
+			List<WorldGen> list = new List<WorldGen>(this.worlds);
+			list.Sort(delegate(WorldGen a, WorldGen b)
 			{
-				WorldGen worldGen = this.worlds[i];
-				if (this.ShouldSkipWorldCallback != null && this.ShouldSkipWorldCallback(i, worldGen))
+				WorldPlacement worldPlacement = this.clusterLayout.worldPlacements.Find((WorldPlacement x) => x.world == a.Settings.world.filePath);
+				WorldPlacement worldPlacement2 = this.clusterLayout.worldPlacements.Find((WorldPlacement x) => x.world == b.Settings.world.filePath);
+				return WorldPlacement.CompareLocationType(worldPlacement, worldPlacement2);
+			});
+			for (int i = 0; i < list.Count; i++)
+			{
+				WorldGen worldGen = list[i];
+				if (this.ShouldSkipWorldCallback == null || !this.ShouldSkipWorldCallback(i, worldGen))
 				{
-					global::Debug.Log("Skipping worldgen for " + worldGen.Settings.world.name);
-				}
-				else
-				{
+					DebugUtil.Separator();
+					DebugUtil.LogArgs(new object[] { "Generating world: " + worldGen.Settings.world.filePath });
+					if (worldGen.Settings.GetWorldTraitIDs().Length != 0)
+					{
+						DebugUtil.LogArgs(new object[] { " - worldtraits: " + string.Join(", ", worldGen.Settings.GetWorldTraitIDs().ToArray<string>()) });
+					}
 					if (this.PerWorldGenBeginCallback != null)
 					{
 						this.PerWorldGenBeginCallback(i, worldGen);
 					}
+					List<WorldTrait> list2 = new List<WorldTrait>();
+					list2.AddRange(this.unplacedStoryTraits);
+					worldGen.Settings.SetStoryTraitCandidates(list2);
 					GridSettings.Reset(worldGen.GetSize().x, worldGen.GetSize().y);
 					worldGen.GenerateOffline();
 					worldGen.FinalizeStartLocation();
 					array = null;
 					array2 = null;
-					if (!worldGen.RenderOffline(this.doSimSettle, ref array, ref array2, num, worldGen.isStartingWorld))
+					List<WorldTrait> list3 = new List<WorldTrait>();
+					if (!worldGen.RenderOffline(this.doSimSettle, ref array, ref array2, num, ref list3, worldGen.isStartingWorld))
 					{
 						this.thread = null;
 						return;
@@ -130,9 +175,31 @@ namespace ProcGenGame
 					{
 						this.PerWorldGenCompleteCallback(i, worldGen, array, array2);
 					}
+					foreach (WorldTrait worldTrait in list3)
+					{
+						this.unplacedStoryTraits.Remove(worldTrait);
+					}
 					num++;
 				}
 			}
+			if (this.unplacedStoryTraits.Count > 0)
+			{
+				List<string> list4 = new List<string>();
+				foreach (WorldTrait worldTrait2 in this.unplacedStoryTraits)
+				{
+					list4.Add(worldTrait2.filePath);
+				}
+				string text = "Story trait failure, unable to place on any world: " + string.Join(", ", list4.ToArray());
+				if (!this.worlds[0].isRunningDebugGen)
+				{
+					this.worlds[0].ReportWorldGenError(new Exception(text), UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE_STORY);
+				}
+				DebugUtil.LogWarningArgs(Array.Empty<object>());
+				this.thread = null;
+				return;
+			}
+			DebugUtil.Separator();
+			DebugUtil.LogArgs(new object[] { "Placing worlds on cluster map" });
 			if (!this.AssignClusterLocations())
 			{
 				this.thread = null;
@@ -140,6 +207,8 @@ namespace ProcGenGame
 			}
 			this.Save();
 			this.thread = null;
+			DebugUtil.Separator();
+			DebugUtil.LogArgs(new object[] { "WORLDGEN COMPLETE\n\n\n" });
 			this.IsGenerationComplete = true;
 		}
 
@@ -212,7 +281,7 @@ namespace ProcGenGame
 						DebugUtil.LogErrorArgs(new object[] { text });
 						if (!worldGen.isRunningDebugGen)
 						{
-							this.currentWorld.ReportWorldGenError(new Exception(text));
+							this.currentWorld.ReportWorldGenError(new Exception(text), null);
 						}
 						return false;
 					}
@@ -328,7 +397,8 @@ namespace ProcGenGame
 										stats = worldGen.stats,
 										name = worldGen.Settings.world.filePath,
 										isDiscovered = worldGen.isStartingWorld,
-										traits = worldGen.Settings.GetTraitIDs().ToList<string>()
+										traits = worldGen.Settings.GetWorldTraitIDs().ToList<string>(),
+										storyTraits = worldGen.Settings.GetStoryTraitIDs().ToList<string>()
 									});
 									if (worldGen == this.currentWorld)
 									{
@@ -378,7 +448,7 @@ namespace ProcGenGame
 					for (int num = 0; num != clusterLayoutSave.worlds.Count; num++)
 					{
 						ClusterLayoutSave.World world = clusterLayoutSave.worlds[num];
-						WorldGen worldGen2 = new WorldGen(world.name, world.data, world.stats, world.traits, false);
+						WorldGen worldGen2 = new WorldGen(world.name, world.data, world.stats, world.traits, world.storyTraits, false);
 						cluster.worlds.Add(worldGen2);
 						if (num == clusterLayoutSave.currentWorldIdx)
 						{
@@ -478,6 +548,10 @@ namespace ProcGenGame
 		public Dictionary<ClusterLayoutSave.POIType, List<AxialI>> poiLocations = new Dictionary<ClusterLayoutSave.POIType, List<AxialI>>();
 
 		public Dictionary<AxialI, string> poiPlacements = new Dictionary<AxialI, string>();
+
+		public List<WorldTrait> unplacedStoryTraits;
+
+		public List<string> chosenStoryTraitIds;
 
 		private Thread thread;
 	}

@@ -649,11 +649,11 @@ public class RetiredColonyInfoScreen : KModalScreen
 
 	private IEnumerator ComputeSizeStatGrid()
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		GridLayoutGroup component = this.statsContainer.GetComponent<GridLayoutGroup>();
 		component.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
 		component.constraintCount = ((Screen.width < 1920) ? 2 : 3);
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		float num = base.gameObject.rectTransform().rect.width - this.explorerRoot.transform.parent.rectTransform().rect.width - 50f;
 		num = Mathf.Min(830f, num);
 		this.achievementsSection.GetComponent<LayoutElement>().preferredWidth = num;
@@ -662,11 +662,11 @@ public class RetiredColonyInfoScreen : KModalScreen
 
 	private IEnumerator ComputeSizeExplorerGrid()
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		GridLayoutGroup component = this.explorerGrid.GetComponent<GridLayoutGroup>();
 		component.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
 		component.constraintCount = ((Screen.width < 1920) ? 2 : 3);
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		float num = base.gameObject.rectTransform().rect.width - this.explorerRoot.transform.parent.rectTransform().rect.width - 50f;
 		num = Mathf.Min(830f, num);
 		this.achievementsSection.GetComponent<LayoutElement>().preferredWidth = num;

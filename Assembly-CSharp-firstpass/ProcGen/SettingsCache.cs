@@ -128,27 +128,56 @@ namespace ProcGen
 			throw new Exception("Couldnt get feature from cache [" + name + "]");
 		}
 
-		public static List<string> GetCachedTraitNames()
+		public static List<string> GetCachedWorldTraitNames()
 		{
-			return new List<string>(SettingsCache.traits.Keys);
+			return new List<string>(SettingsCache.worldTraits.Keys);
 		}
 
-		public static List<WorldTrait> GetCachedTraits()
+		public static List<WorldTrait> GetCachedWorldTraits()
 		{
-			return new List<WorldTrait>(SettingsCache.traits.Values);
+			return new List<WorldTrait>(SettingsCache.worldTraits.Values);
 		}
 
-		public static WorldTrait GetCachedTrait(string name, bool assertMissingTrait)
+		public static WorldTrait GetCachedWorldTrait(string name, bool assertMissingTrait)
 		{
-			if (SettingsCache.traits.ContainsKey(name))
+			if (SettingsCache.worldTraits.ContainsKey(name))
 			{
-				return SettingsCache.traits[name];
+				return SettingsCache.worldTraits[name];
 			}
 			if (assertMissingTrait)
 			{
-				throw new Exception("Couldnt get trait [" + name + "]");
+				throw new Exception("Couldn't get trait [" + name + "]");
 			}
-			global::Debug.LogWarning("Couldnt get trait [" + name + "]");
+			global::Debug.LogWarning("Couldn't get trait [" + name + "]");
+			return null;
+		}
+
+		public static List<string> GetCachedStoryTraitNames()
+		{
+			return new List<string>(SettingsCache.storyTraits.Keys);
+		}
+
+		public static List<WorldTrait> GetCachedStoryTraits()
+		{
+			return new List<WorldTrait>(SettingsCache.storyTraits.Values);
+		}
+
+		public static Dictionary<string, WorldTrait> GetCachedStoryTraitsDictionary()
+		{
+			return SettingsCache.storyTraits;
+		}
+
+		public static WorldTrait GetCachedStoryTrait(string name, bool assertMissingTrait)
+		{
+			if (SettingsCache.storyTraits.ContainsKey(name))
+			{
+				return SettingsCache.storyTraits[name];
+			}
+			if (assertMissingTrait)
+			{
+				throw new Exception("Couldn't get story trait [" + name + "]");
+			}
+			global::Debug.LogWarning("Couldn't get story trait [" + name + "]");
 			return null;
 		}
 
@@ -276,11 +305,22 @@ namespace ProcGen
 			list.Sort((FileHandle s1, FileHandle s2) => string.Compare(s1.full_path, s2.full_path, StringComparison.OrdinalIgnoreCase));
 			foreach (FileHandle fileHandle in list)
 			{
-				SettingsCache.LoadWorldTrait(fileHandle, path, prefix, errors);
+				SettingsCache.LoadTrait(fileHandle, path, prefix, SettingsCache.worldTraits, errors);
 			}
 		}
 
-		public static void LoadWorldTrait(FileHandle file, string path, string prefix, List<YamlIO.Error> errors)
+		public static void LoadStoryTraits(string path, string prefix, List<YamlIO.Error> errors)
+		{
+			List<FileHandle> list = new List<FileHandle>();
+			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "storytraits")), "*.yaml", list);
+			list.Sort((FileHandle s1, FileHandle s2) => string.Compare(s1.full_path, s2.full_path, StringComparison.OrdinalIgnoreCase));
+			foreach (FileHandle fileHandle in list)
+			{
+				SettingsCache.LoadTrait(fileHandle, path, prefix, SettingsCache.storyTraits, errors);
+			}
+		}
+
+		public static void LoadTrait(FileHandle file, string path, string prefix, Dictionary<string, WorldTrait> traitsDict, List<YamlIO.Error> errors)
 		{
 			WorldTrait worldTrait = YamlIO.LoadFile<WorldTrait>(file, delegate(YamlIO.Error error, bool force_log_as_warning)
 			{
@@ -304,14 +344,9 @@ namespace ProcGen
 			text = Path.Combine(Path.GetDirectoryName(text), Path.GetFileNameWithoutExtension(text));
 			text = text.Replace('\\', '/');
 			text = prefix + text;
-			if (worldTrait == null)
-			{
-				DebugUtil.LogWarningArgs(new object[] { "Failed to load trait: ", text });
-				return;
-			}
 			worldTrait.filePath = text;
-			DebugUtil.DevAssert(!SettingsCache.traits.ContainsKey(text), "Overwriting trait " + text + " already exists", null);
-			SettingsCache.traits[text] = worldTrait;
+			DebugUtil.DevAssert(!traitsDict.ContainsKey(text), "Overwriting trait " + text + " already exists", null);
+			traitsDict[text] = worldTrait;
 		}
 
 		public static List<string> GetWorldNames()
@@ -338,7 +373,8 @@ namespace ProcGen
 			SettingsCache.defaults = null;
 			SettingsCache.mobs = null;
 			SettingsCache.featureSettings.Clear();
-			SettingsCache.traits.Clear();
+			SettingsCache.worldTraits.Clear();
+			SettingsCache.storyTraits.Clear();
 			SettingsCache.subworlds.Clear();
 			SettingsCache.clusterLayouts.clusterCache.Clear();
 			DebugUtil.LogArgs(new object[] { "World Settings cleared!" });
@@ -434,30 +470,36 @@ namespace ProcGen
 				select worldPlacment.world);
 			SettingsCache.worlds.LoadReferencedWorlds(worldgenFolderPath, addPrefix, hashSet, errors);
 			SettingsCache.LoadWorldTraits(worldgenFolderPath, addPrefix, errors);
+			SettingsCache.LoadStoryTraits(worldgenFolderPath, addPrefix, errors);
 			foreach (KeyValuePair<string, World> keyValuePair in SettingsCache.worlds.worldCache)
 			{
 				SettingsCache.LoadFeatures(keyValuePair.Value.globalFeatures, errors);
 				SettingsCache.LoadSubworlds(keyValuePair.Value.subworldFiles, addPrefix, errors);
 			}
-			foreach (KeyValuePair<string, WorldTrait> keyValuePair2 in SettingsCache.traits)
+			foreach (KeyValuePair<string, WorldTrait> keyValuePair2 in SettingsCache.worldTraits)
 			{
 				SettingsCache.LoadFeatures(keyValuePair2.Value.globalFeatureMods, errors);
 				SettingsCache.LoadSubworlds(keyValuePair2.Value.additionalSubworldFiles, addPrefix, errors);
+			}
+			foreach (KeyValuePair<string, WorldTrait> keyValuePair3 in SettingsCache.storyTraits)
+			{
+				SettingsCache.LoadFeatures(keyValuePair3.Value.globalFeatureMods, errors);
+				SettingsCache.LoadSubworlds(keyValuePair3.Value.additionalSubworldFiles, addPrefix, errors);
 			}
 			SettingsCache.layers = SettingsCache.MergeLoad<LevelLayerSettings>(SettingsCache.layers, worldgenFolderPath + "layers.yaml", errors);
 			SettingsCache.layers.LevelLayers.ConvertBandSizeToMaxSize();
 			SettingsCache.rivers = SettingsCache.MergeLoad<ComposableDictionary<string, River>>(SettingsCache.rivers, worldgenFolderPath + "rivers.yaml", errors);
 			SettingsCache.rooms = SettingsCache.MergeLoad<ComposableDictionary<string, Room>>(SettingsCache.rooms, worldgenFolderPath + "rooms.yaml", errors);
-			foreach (KeyValuePair<string, Room> keyValuePair3 in SettingsCache.rooms)
+			foreach (KeyValuePair<string, Room> keyValuePair4 in SettingsCache.rooms)
 			{
-				keyValuePair3.Value.name = keyValuePair3.Key;
+				keyValuePair4.Value.name = keyValuePair4.Key;
 			}
 			SettingsCache.temperatures = SettingsCache.MergeLoad<ComposableDictionary<Temperature.Range, Temperature>>(SettingsCache.temperatures, worldgenFolderPath + "temperatures.yaml", errors);
 			SettingsCache.borders = SettingsCache.MergeLoad<ComposableDictionary<string, List<WeightedSimHash>>>(SettingsCache.borders, worldgenFolderPath + "borders.yaml", errors);
 			SettingsCache.mobs = SettingsCache.MergeLoad<MobSettings>(SettingsCache.mobs, worldgenFolderPath + "mobs.yaml", errors);
-			foreach (KeyValuePair<string, Mob> keyValuePair4 in SettingsCache.mobs.MobLookupTable)
+			foreach (KeyValuePair<string, Mob> keyValuePair5 in SettingsCache.mobs.MobLookupTable)
 			{
-				keyValuePair4.Value.name = keyValuePair4.Key;
+				keyValuePair5.Value.name = keyValuePair5.Key;
 			}
 			return true;
 		}
@@ -469,7 +511,7 @@ namespace ProcGen
 				return new List<string>();
 			}
 			KRandom krandom = new KRandom(seed);
-			List<WorldTrait> list = new List<WorldTrait>(SettingsCache.traits.Values);
+			List<WorldTrait> list = new List<WorldTrait>(SettingsCache.worldTraits.Values);
 			List<WorldTrait> list2 = new List<WorldTrait>();
 			TagSet tagSet = new TagSet();
 			using (List<World.TraitRule>.Enumerator enumerator = world.worldTraitRules.GetEnumerator())
@@ -481,7 +523,15 @@ namespace ProcGen
 					{
 						foreach (string text in rule.specificTraits)
 						{
-							list2.Add(SettingsCache.traits[text]);
+							WorldTrait worldTrait;
+							if (SettingsCache.worldTraits.TryGetValue(text, out worldTrait))
+							{
+								list2.Add(SettingsCache.worldTraits[text]);
+							}
+							else
+							{
+								DebugUtil.DevLogError("World traits " + text + " doesn't exist, skipping.");
+							}
 						}
 					}
 					List<WorldTrait> list3 = new List<WorldTrait>(list);
@@ -493,9 +543,9 @@ namespace ProcGen
 					while (list2.Count < count + num && list3.Count > 0)
 					{
 						int num2 = krandom.Next(list3.Count);
-						WorldTrait worldTrait = list3[num2];
+						WorldTrait worldTrait2 = list3[num2];
 						bool flag = false;
-						using (List<string>.Enumerator enumerator2 = worldTrait.exclusiveWith.GetEnumerator())
+						using (List<string>.Enumerator enumerator2 = worldTrait2.exclusiveWith.GetEnumerator())
 						{
 							while (enumerator2.MoveNext())
 							{
@@ -507,7 +557,7 @@ namespace ProcGen
 								}
 							}
 						}
-						foreach (string text2 in worldTrait.exclusiveWithTags)
+						foreach (string text2 in worldTrait2.exclusiveWithTags)
 						{
 							if (tagSet.Contains(text2))
 							{
@@ -517,9 +567,9 @@ namespace ProcGen
 						}
 						if (!flag)
 						{
-							list2.Add(worldTrait);
-							list.Remove(worldTrait);
-							foreach (string text3 in worldTrait.exclusiveWithTags)
+							list2.Add(worldTrait2);
+							list.Remove(worldTrait2);
+							foreach (string text3 in worldTrait2.exclusiveWithTags)
 							{
 								tagSet.Add(text3);
 							}
@@ -533,16 +583,10 @@ namespace ProcGen
 				}
 			}
 			List<string> list4 = new List<string>();
-			foreach (WorldTrait worldTrait2 in list2)
+			foreach (WorldTrait worldTrait3 in list2)
 			{
-				list4.Add(worldTrait2.filePath);
+				list4.Add(worldTrait3.filePath);
 			}
-			DebugUtil.LogArgs(new object[]
-			{
-				"Getting traits for seed",
-				seed,
-				string.Join(", ", list4.ToArray())
-			});
 			return list4;
 		}
 
@@ -558,7 +602,9 @@ namespace ProcGen
 
 		private static Dictionary<string, FeatureSettings> featureSettings = new Dictionary<string, FeatureSettings>();
 
-		private static Dictionary<string, WorldTrait> traits = new Dictionary<string, WorldTrait>();
+		private static Dictionary<string, WorldTrait> worldTraits = new Dictionary<string, WorldTrait>();
+
+		private static Dictionary<string, WorldTrait> storyTraits = new Dictionary<string, WorldTrait>();
 
 		private static Dictionary<string, BiomeSettings> biomeSettingsCache = new Dictionary<string, BiomeSettings>();
 
@@ -580,6 +626,8 @@ namespace ProcGen
 
 		private const string MOBS_FILE = "mobs";
 
-		private const string TRAITS_PATH = "traits";
+		private const string WORLD_TRAITS_PATH = "traits";
+
+		private const string STORY_TRAITS_PATH = "storytraits";
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using FMODUnity;
 using UnityEngine;
 
 public class GravityComponents : KGameObjectComponentManager<GravityComponent>
@@ -66,10 +67,10 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 						AmbienceType ambience = Grid.Element[num6].substance.GetAmbience();
 						if (ambience != AmbienceType.None)
 						{
-							string text = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
-							if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector3, text))
+							EventReference eventReference = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
+							if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector3, eventReference))
 							{
-								SoundEvent.PlayOneShot(text, vector3, 1f);
+								SoundEvent.PlayOneShot(eventReference, vector3, 1f);
 							}
 						}
 					}

@@ -43,9 +43,9 @@ public class ArtifactAnalysisStationConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		manualDeliveryKG.requestedItemTag = GameTags.CharmedArtifact;
+		manualDeliveryKG.RequestedItemTag = GameTags.CharmedArtifact;
 		manualDeliveryKG.refillMass = 1f;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.capacity = 1f;
 	}
 

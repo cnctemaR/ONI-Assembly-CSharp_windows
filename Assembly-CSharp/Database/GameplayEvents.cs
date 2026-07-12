@@ -45,10 +45,9 @@ namespace Database
 			minMax = new MathUtil.MinMax(15f, 15f);
 			this.GassyMooteorEvent = base.Add(new MeteorShowerEvent(text6, num11, num12, new MathUtil.MinMax(1f, 1f), minMax).AddMeteor(GassyMooCometConfig.ID, 1f));
 			this.PrickleFlowerBlightEvent = base.Add(new PlantBlightEvent("PrickleFlowerBlightEvent", "PrickleFlower", 3600f, 30f));
-			this.CryoFriend = base.Add(new SimpleEvent("CryoFriend", GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.DESCRIPTION, GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.BUTTON, null).SetVisuals(null, "cryofriend_kanim"));
-			this.WarpWorldReveal = base.Add(new SimpleEvent("WarpWorldReveal", GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.DESCRIPTION, GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.BUTTON, null).SetVisuals(null, "warpworldreveal_kanim"));
-			this.ArtifactReveal = base.Add(new SimpleEvent("ArtifactReveal", GAMEPLAY_EVENTS.EVENT_TYPES.ARTIFACT_REVEAL.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.ARTIFACT_REVEAL.DESCRIPTION, GAMEPLAY_EVENTS.EVENT_TYPES.ARTIFACT_REVEAL.BUTTON, null).SetVisuals("event_bg_01", "analyzeartifact_kanim"));
-			this.BonusEvents();
+			this.CryoFriend = base.Add(new SimpleEvent("CryoFriend", GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.DESCRIPTION, "cryofriend_kanim", GAMEPLAY_EVENTS.EVENT_TYPES.CRYOFRIEND.BUTTON, null));
+			this.WarpWorldReveal = base.Add(new SimpleEvent("WarpWorldReveal", GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.DESCRIPTION, "warpworldreveal_kanim", GAMEPLAY_EVENTS.EVENT_TYPES.WARPWORLDREVEAL.BUTTON, null));
+			this.ArtifactReveal = base.Add(new SimpleEvent("ArtifactReveal", GAMEPLAY_EVENTS.EVENT_TYPES.ARTIFACT_REVEAL.NAME, GAMEPLAY_EVENTS.EVENT_TYPES.ARTIFACT_REVEAL.DESCRIPTION, "analyzeartifact_kanim", GAMEPLAY_EVENTS.EVENT_TYPES.ARTIFACT_REVEAL.BUTTON, null));
 		}
 
 		private void BonusEvents()
@@ -112,7 +111,10 @@ namespace Database
 		{
 			foreach (GameplayEvent gameplayEvent in this.resources)
 			{
-				gameplayEvent.popupAnimFileName == null;
+				if (gameplayEvent.animFileName == null)
+				{
+					DebugUtil.LogWarningArgs(new object[] { "Gameplay event anim missing: " + gameplayEvent.Id });
+				}
 				if (gameplayEvent is BonusEvent)
 				{
 					this.VerifyBonusEvent(gameplayEvent as BonusEvent);

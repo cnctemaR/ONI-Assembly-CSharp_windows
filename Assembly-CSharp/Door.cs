@@ -177,7 +177,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 
 	public void Seal()
 	{
-		this.controller.sm.isSealed.Set(true, this.controller);
+		this.controller.sm.isSealed.Set(true, this.controller, false);
 	}
 
 	public void OrderUnseal()
@@ -190,13 +190,13 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		switch (this.controlState)
 		{
 		case Door.ControlState.Auto:
-			this.controller.sm.isLocked.Set(false, this.controller);
+			this.controller.sm.isLocked.Set(false, this.controller, false);
 			break;
 		case Door.ControlState.Opened:
-			this.controller.sm.isLocked.Set(false, this.controller);
+			this.controller.sm.isLocked.Set(false, this.controller, false);
 			break;
 		case Door.ControlState.Locked:
-			this.controller.sm.isLocked.Set(true, this.controller);
+			this.controller.sm.isLocked.Set(true, this.controller, false);
 			break;
 		}
 		base.Trigger(279163026, this.controlState);
@@ -456,7 +456,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		{
 			return;
 		}
-		this.controller.sm.isOpen.Set(true, this.controller);
+		this.controller.sm.isOpen.Set(true, this.controller, false);
 	}
 
 	public void Close()
@@ -478,14 +478,14 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		case Door.ControlState.Auto:
 			if (this.openCount == 0)
 			{
-				this.controller.sm.isOpen.Set(false, this.controller);
+				this.controller.sm.isOpen.Set(false, this.controller, false);
 				Game.Instance.userMenu.Refresh(base.gameObject);
 			}
 			break;
 		case Door.ControlState.Opened:
 			break;
 		case Door.ControlState.Locked:
-			this.controller.sm.isOpen.Set(false, this.controller);
+			this.controller.sm.isOpen.Set(false, this.controller, false);
 			return;
 		default:
 			return;
@@ -768,7 +768,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				{
 					Grid.PreventFogOfWarReveal[Grid.OffsetCell(Grid.PosToCell(smi.master.gameObject), component.OccupiedCellsOffsets[i])] = false;
 				}
-				smi.sm.isLocked.Set(true, smi);
+				smi.sm.isLocked.Set(true, smi, false);
 				smi.master.controlState = Door.ControlState.Locked;
 				smi.master.RefreshControlState();
 				if (smi.master.GetComponent<Unsealable>().facingRight)
@@ -780,13 +780,13 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				smi.master.SetWorldState();
 			}).Exit(delegate(Door.Controller.Instance smi)
 			{
-				smi.sm.isLocked.Set(false, smi);
+				smi.sm.isLocked.Set(false, smi, false);
 				smi.master.GetComponent<AccessControl>().controlEnabled = true;
 				smi.master.controlState = Door.ControlState.Opened;
 				smi.master.RefreshControlState();
-				smi.sm.isOpen.Set(true, smi);
-				smi.sm.isLocked.Set(false, smi);
-				smi.sm.isSealed.Set(false, smi);
+				smi.sm.isOpen.Set(true, smi, false);
+				smi.sm.isLocked.Set(false, smi, false);
+				smi.sm.isSealed.Set(false, smi, false);
 			});
 			this.Sealed.closed.PlayAnim("sealed", KAnim.PlayMode.Once);
 			this.Sealed.awaiting_unlock.ToggleChore((Door.Controller.Instance smi) => this.CreateUnsealChore(smi, true), this.Sealed.chore_pst);
@@ -873,7 +873,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 						break;
 					}
 				}
-				base.sm.isBlocked.Set(flag, base.smi);
+				base.sm.isBlocked.Set(flag, base.smi, false);
 			}
 		}
 	}

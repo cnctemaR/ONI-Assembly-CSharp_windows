@@ -38,6 +38,8 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		return new Vector2I((int)((float)Grid.WidthInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.x), (int)((float)Grid.HeightInCells * KBatchedAnimUpdater.VISIBLE_RANGE_SCALE.y));
 	}
 
+	public event global::System.Action OnClear;
+
 	public void Clear()
 	{
 		foreach (KBatchedAnimController kbatchedAnimController in this.updateList)
@@ -62,6 +64,12 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		this.controllerGrid = null;
 		this.previouslyVisibleChunkGrid = null;
 		this.visibleChunkGrid = null;
+		global::System.Action onClear = this.OnClear;
+		if (onClear == null)
+		{
+			return;
+		}
+		onClear();
 	}
 
 	public void UpdateRegister(KBatchedAnimController controller)

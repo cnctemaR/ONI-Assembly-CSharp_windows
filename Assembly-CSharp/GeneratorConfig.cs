@@ -45,7 +45,7 @@ public class GeneratorConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("Coal");
+		manualDeliveryKG.RequestedItemTag = new Tag("Coal");
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 100f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.PowerFetch.IdHash;

@@ -173,8 +173,64 @@ namespace FMODUnity
 			int num;
 			int num2;
 			Memory.GetStats(out num, out num2, true);
-			Guid guid;
+			GUID guid;
 			Util.parseID("", out guid);
+		}
+
+		public static void DebugLog(string message)
+		{
+			if (Settings.Instance == null || Settings.Instance.LoggingLevel == DEBUG_FLAGS.LOG)
+			{
+				global::UnityEngine.Debug.Log(message);
+			}
+		}
+
+		public static void DebugLogFormat(string format, params object[] args)
+		{
+			if (Settings.Instance == null || Settings.Instance.LoggingLevel == DEBUG_FLAGS.LOG)
+			{
+				global::UnityEngine.Debug.LogFormat(format, args);
+			}
+		}
+
+		public static void DebugLogWarning(string message)
+		{
+			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.WARNING)
+			{
+				global::UnityEngine.Debug.LogWarning(message);
+			}
+		}
+
+		public static void DebugLogWarningFormat(string format, params object[] args)
+		{
+			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.WARNING)
+			{
+				global::UnityEngine.Debug.LogWarningFormat(format, args);
+			}
+		}
+
+		public static void DebugLogError(string message)
+		{
+			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
+			{
+				global::UnityEngine.Debug.LogError(message);
+			}
+		}
+
+		public static void DebugLogErrorFormat(string format, params object[] args)
+		{
+			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
+			{
+				global::UnityEngine.Debug.LogErrorFormat(format, args);
+			}
+		}
+
+		public static void DebugLogException(Exception e)
+		{
+			if (Settings.Instance == null || Settings.Instance.LoggingLevel >= DEBUG_FLAGS.ERROR)
+			{
+				global::UnityEngine.Debug.LogException(e);
+			}
 		}
 	}
 }

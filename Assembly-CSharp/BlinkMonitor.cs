@@ -28,7 +28,7 @@ public class BlinkMonitor : GameStateMachine<BlinkMonitor, BlinkMonitor.Instance
 	{
 		smi.eyes = Util.KInstantiate(Assets.GetPrefab(EyeAnimation.ID), null, null).GetComponent<KBatchedAnimController>();
 		smi.eyes.gameObject.SetActive(true);
-		smi.sm.eyes.Set(smi.eyes.gameObject, smi);
+		smi.sm.eyes.Set(smi.eyes.gameObject, smi, false);
 	}
 
 	private static void DestroyEyes(BlinkMonitor.Instance smi)

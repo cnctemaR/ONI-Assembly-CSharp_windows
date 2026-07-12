@@ -348,7 +348,7 @@ public class Global : MonoBehaviour
 				array4[4] = ", NAME:";
 				array4[5] = DistributionPlatform.Inst.LocalUser.Name;
 				global::Debug.Log(string.Concat(array4));
-				ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey));
+				ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey), false);
 			}
 		}
 		else
@@ -609,7 +609,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 514967U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 525812U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

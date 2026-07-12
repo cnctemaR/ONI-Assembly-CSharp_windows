@@ -88,7 +88,7 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 			this.waiting.Enter("Waiting", delegate(Electrolyzer.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
-			}).EventTransition(GameHashes.OnStorageChange, this.converting, (Electrolyzer.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
+			}).EventTransition(GameHashes.OnStorageChange, this.converting, (Electrolyzer.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting(false));
 			this.converting.Enter("Ready", delegate(Electrolyzer.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);

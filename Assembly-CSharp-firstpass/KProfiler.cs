@@ -163,10 +163,13 @@ public static class KProfiler
 	{
 		public Region(string region_name, global::UnityEngine.Object profiler_obj = null)
 		{
+			this.regionName = region_name;
 		}
 
 		public void Dispose()
 		{
 		}
+
+		private string regionName;
 	}
 }

@@ -16,7 +16,7 @@ public class EggCracker : KMonoBehaviour
 		this.workable.SkillExperienceSkillGroup = Db.Get().SkillGroups.Cooking.Id;
 		this.workable.SkillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
 		ComplexFabricatorWorkable complexFabricatorWorkable = this.workable;
-		complexFabricatorWorkable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(complexFabricatorWorkable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+		complexFabricatorWorkable.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(complexFabricatorWorkable.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkableEvent));
 	}
 
 	protected override void OnCleanUp()
@@ -26,7 +26,7 @@ public class EggCracker : KMonoBehaviour
 		this.tracker = null;
 	}
 
-	private void OnWorkableEvent(Workable.WorkableEvent e)
+	private void OnWorkableEvent(Workable workable, Workable.WorkableEvent e)
 	{
 		if (e == Workable.WorkableEvent.WorkStarted)
 		{

@@ -14,16 +14,44 @@ public class RanchableMonitor : GameStateMachine<RanchableMonitor, RanchableMoni
 
 	public new class Instance : GameStateMachine<RanchableMonitor, RanchableMonitor.Instance, IStateMachineTarget, RanchableMonitor.Def>.GameInstance
 	{
+		public ChoreConsumer ChoreConsumer { get; private set; }
+
+		public Navigator NavComponent
+		{
+			get
+			{
+				return this.navComponent;
+			}
+		}
+
+		public RanchedStates.Instance States
+		{
+			get
+			{
+				if (this.states == null)
+				{
+					this.states = this.controller.GetSMI<RanchedStates.Instance>();
+				}
+				return this.states;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, RanchableMonitor.Def def)
 			: base(master, def)
 		{
+			this.ChoreConsumer = base.GetComponent<ChoreConsumer>();
+			this.navComponent = base.GetComponent<Navigator>();
 		}
 
 		public bool ShouldGoGetRanched()
 		{
-			return this.targetRanchStation != null && this.targetRanchStation.IsRunning() && this.targetRanchStation.shouldCreatureGoGetRanched;
+			return this.TargetRanchStation != null && this.TargetRanchStation.IsRunning() && this.TargetRanchStation.HasRancher;
 		}
 
-		public RanchStation.Instance targetRanchStation;
+		public RanchStation.Instance TargetRanchStation;
+
+		private Navigator navComponent;
+
+		private RanchedStates.Instance states;
 	}
 }

@@ -312,8 +312,8 @@ public class Grid
 	{
 		for (int num = 0; num != Grid.WidthInCells * Grid.HeightInCells; num++)
 		{
-			byte b = Grid.elementIdx[num];
-			Element element = ElementLoader.elements[(int)b];
+			ushort num2 = Grid.elementIdx[num];
+			Element element = ElementLoader.elements[(int)num2];
 			Grid.Element[num] = element;
 			if (element.IsSolid)
 			{
@@ -348,6 +348,41 @@ public class Grid
 			return cell;
 		}
 		return -1;
+	}
+
+	public static bool Raycast(int cell, Vector2I direction, out int hitDistance, int maxDistance = 100, Grid.BuildFlags layerMask = Grid.BuildFlags.Any)
+	{
+		bool flag = false;
+		Vector2I vector2I = Grid.CellToXY(cell);
+		Vector2I vector2I2 = vector2I + direction * maxDistance;
+		int num = cell;
+		int num2 = Grid.XYToCell(vector2I2.x, vector2I2.y);
+		int num3 = 0;
+		int num4 = 0;
+		float num5 = (float)maxDistance * 0.5f;
+		while ((float)num3 < num5)
+		{
+			if (!Grid.IsValidCell(num) || (Grid.BuildMasks[num] & layerMask) != ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor))
+			{
+				flag = true;
+				break;
+			}
+			if (!Grid.IsValidCell(num2) || (Grid.BuildMasks[num2] & layerMask) != ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor))
+			{
+				num4 = maxDistance - num3;
+			}
+			vector2I += direction;
+			vector2I2 -= direction;
+			num = Grid.XYToCell(vector2I.x, vector2I.y);
+			num2 = Grid.XYToCell(vector2I2.x, vector2I2.y);
+			num3++;
+		}
+		if (!flag && maxDistance % 2 == 0)
+		{
+			flag = !Grid.IsValidCell(num2) || (Grid.BuildMasks[num2] & layerMask) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor);
+		}
+		hitDistance = (flag ? num3 : ((num4 > 0) ? num4 : maxDistance));
+		return flag | (hitDistance == num4);
 	}
 
 	public static int CellAbove(int cell)
@@ -750,10 +785,10 @@ public class Grid
 	{
 		if (Grid.IsValidCell(cell))
 		{
-			byte b = Grid.elementIdx[cell];
-			if ((int)b < ElementLoader.elements.Count)
+			ushort num = Grid.elementIdx[cell];
+			if ((int)num < ElementLoader.elements.Count)
 			{
-				Element element = ElementLoader.elements[(int)b];
+				Element element = ElementLoader.elements[(int)num];
 				if (element.IsLiquid && Grid.mass[cell] >= element.defaultValues.mass * threshold)
 				{
 					return true;
@@ -1055,7 +1090,7 @@ public class Grid
 
 	private static Dictionary<int, Grid.SuitMarker> suitMarkers = new Dictionary<int, Grid.SuitMarker>();
 
-	public unsafe static byte* elementIdx;
+	public unsafe static ushort* elementIdx;
 
 	public unsafe static float* temperature;
 
@@ -1140,7 +1175,8 @@ public class Grid
 		DupePassable = 8,
 		DupeImpassable = 16,
 		CritterImpassable = 32,
-		FakeFloor = 192
+		FakeFloor = 192,
+		Any = 255
 	}
 
 	public struct BuildFlagsFoundationIndexer
@@ -1608,7 +1644,7 @@ public class Grid
 
 	public struct ElementIdxIndexer
 	{
-		public unsafe byte this[int i]
+		public unsafe ushort this[int i]
 		{
 			get
 			{

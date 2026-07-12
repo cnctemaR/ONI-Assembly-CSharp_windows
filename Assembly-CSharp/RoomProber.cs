@@ -163,7 +163,7 @@ public class RoomProber : ISim1000ms
 							{
 								data.AddBuilding(component);
 							}
-							else if (component.HasTag(GameTags.Plant) && !component.HasTag("ForestTreeBranch".ToTag()))
+							else if (component.HasTag(GameTags.Plant) && !component.IsPrefabID("ForestTreeBranch".ToTag()))
 							{
 								data.AddPlants(component);
 							}
@@ -409,30 +409,26 @@ public class RoomProber : ISim1000ms
 
 		private static bool IsWall(int cell)
 		{
-			return (Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation)) != ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor) || Grid.HasDoor[cell];
+			return (Grid.BuildMasks[cell] & (Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation)) > ~(Grid.BuildFlags.Solid | Grid.BuildFlags.Foundation | Grid.BuildFlags.Door | Grid.BuildFlags.DupePassable | Grid.BuildFlags.DupeImpassable | Grid.BuildFlags.CritterImpassable | Grid.BuildFlags.FakeFloor) || Grid.HasDoor[cell];
 		}
 
 		public bool ShouldContinue(int flood_cell)
 		{
-			bool flag = false;
-			if (!RoomProber.CavityFloodFiller.IsWall(flood_cell))
-			{
-				flag = true;
-				this.grid[flood_cell] = this.cavityID;
-				int num = 0;
-				int num2 = 0;
-				Grid.CellToXY(flood_cell, out num, out num2);
-				this.minX = Math.Min(num, this.minX);
-				this.minY = Math.Min(num2, this.minY);
-				this.maxX = Math.Max(num, this.maxX);
-				this.maxY = Math.Max(num2, this.maxY);
-				this.numCells++;
-			}
-			else
+			if (RoomProber.CavityFloodFiller.IsWall(flood_cell))
 			{
 				this.grid[flood_cell] = HandleVector<int>.InvalidHandle;
+				return false;
 			}
-			return flag;
+			this.grid[flood_cell] = this.cavityID;
+			int num;
+			int num2;
+			Grid.CellToXY(flood_cell, out num, out num2);
+			this.minX = Math.Min(num, this.minX);
+			this.minY = Math.Min(num2, this.minY);
+			this.maxX = Math.Max(num, this.maxX);
+			this.maxY = Math.Max(num2, this.maxY);
+			this.numCells++;
+			return true;
 		}
 
 		public int NumCells

@@ -15,32 +15,75 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 		this.clearableManager = new ClearableManager();
 	}
 
+	protected override void OnWorldParentChanged(object data)
+	{
+		WorldParentChangedEventArgs e = data as WorldParentChangedEventArgs;
+		if (e == null || e.lastParentId == (int)ClusterManager.INVALID_WORLD_IDX)
+		{
+			return;
+		}
+		base.OnWorldParentChanged(data);
+		List<FetchChore> list;
+		if (!this.fetchMap.TryGetValue(e.lastParentId, out list))
+		{
+			return;
+		}
+		List<FetchChore> list2;
+		if (!this.fetchMap.TryGetValue(e.world.ParentWorldId, out list2))
+		{
+			list2 = (this.fetchMap[e.world.ParentWorldId] = new List<FetchChore>());
+		}
+		base.TransferChores<FetchChore>(list, list2, e.world.ParentWorldId);
+	}
+
 	public override void AddChore(Chore chore)
 	{
-		base.AddChore(chore);
 		FetchChore fetchChore = chore as FetchChore;
 		if (fetchChore != null)
 		{
-			this.fetchChores.Add(fetchChore);
+			int myParentWorldId = fetchChore.gameObject.GetMyParentWorldId();
+			List<FetchChore> list;
+			if (!this.fetchMap.TryGetValue(myParentWorldId, out list))
+			{
+				list = (this.fetchMap[myParentWorldId] = new List<FetchChore>());
+			}
+			chore.provider = this;
+			list.Add(fetchChore);
+			return;
 		}
+		base.AddChore(chore);
 	}
 
 	public override void RemoveChore(Chore chore)
 	{
-		base.RemoveChore(chore);
 		FetchChore fetchChore = chore as FetchChore;
 		if (fetchChore != null)
 		{
-			this.fetchChores.Remove(fetchChore);
+			int myParentWorldId = fetchChore.gameObject.GetMyParentWorldId();
+			List<FetchChore> list;
+			if (this.fetchMap.TryGetValue(myParentWorldId, out list))
+			{
+				list.Remove(fetchChore);
+			}
+			chore.provider = null;
+			return;
 		}
+		base.RemoveChore(chore);
 	}
 
 	public void UpdateFetches(PathProber path_prober)
 	{
+		List<FetchChore> list = null;
+		int myParentWorldId = path_prober.gameObject.GetMyParentWorldId();
+		if (!this.fetchMap.TryGetValue(myParentWorldId, out list))
+		{
+			return;
+		}
 		this.fetches.Clear();
 		Navigator component = path_prober.GetComponent<Navigator>();
-		foreach (FetchChore fetchChore in this.fetchChores)
+		for (int i = 0; i < list.Count; i++)
 		{
+			FetchChore fetchChore = list[i];
 			if (!(fetchChore.driver != null) && (!(fetchChore.automatable != null) || !fetchChore.automatable.GetAutomationOnly()))
 			{
 				Storage destination = fetchChore.destination;
@@ -52,7 +95,7 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 						this.fetches.Add(new GlobalChoreProvider.Fetch
 						{
 							chore = fetchChore,
-							tagBitsHash = fetchChore.tagBitsHash,
+							idsHash = fetchChore.tagsHash,
 							cost = navigationCost,
 							priority = fetchChore.masterPriority,
 							category = destination.fetchCategory
@@ -64,28 +107,29 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 		if (this.fetches.Count > 0)
 		{
 			this.fetches.Sort(GlobalChoreProvider.Comparer);
-			int i = 1;
+			int j = 1;
 			int num = 0;
-			while (i < this.fetches.Count)
+			while (j < this.fetches.Count)
 			{
-				if (!this.fetches[num].IsBetterThan(this.fetches[i]))
+				if (!this.fetches[num].IsBetterThan(this.fetches[j]))
 				{
 					num++;
-					this.fetches[num] = this.fetches[i];
+					this.fetches[num] = this.fetches[j];
 				}
-				i++;
+				j++;
 			}
 			this.fetches.RemoveRange(num + 1, this.fetches.Count - num - 1);
 		}
+		this.clearableManager.CollectAndSortClearables(component);
 	}
 
 	public override void CollectChores(ChoreConsumerState consumer_state, List<Chore.Precondition.Context> succeeded, List<Chore.Precondition.Context> failed_contexts)
 	{
 		base.CollectChores(consumer_state, succeeded, failed_contexts);
-		this.clearableManager.CollectChores(consumer_state, succeeded, failed_contexts);
-		foreach (GlobalChoreProvider.Fetch fetch in this.fetches)
+		this.clearableManager.CollectChores(this.fetches, consumer_state, succeeded, failed_contexts);
+		for (int i = 0; i < this.fetches.Count; i++)
 		{
-			fetch.chore.CollectChoresFromGlobalChoreProvider(consumer_state, succeeded, failed_contexts, false);
+			this.fetches[i].chore.CollectChoresFromGlobalChoreProvider(consumer_state, succeeded, failed_contexts, false);
 		}
 	}
 
@@ -114,15 +158,24 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 	{
 		ChoreType storageFetch = Db.Get().ChoreTypes.StorageFetch;
 		ChoreType foodFetch = Db.Get().ChoreTypes.FoodFetch;
-		this.storageFetchableBits.ClearAll();
-		foreach (FetchChore fetchChore in this.fetchChores)
+		this.storageFetchableTags.Clear();
+		List<int> worldIDsSorted = ClusterManager.Instance.GetWorldIDsSorted();
+		for (int i = 0; i < worldIDsSorted.Count; i++)
 		{
-			if ((fetchChore.choreType == storageFetch || fetchChore.choreType == foodFetch) && fetchChore.destination)
+			List<FetchChore> list;
+			if (this.fetchMap.TryGetValue(worldIDsSorted[i], out list))
 			{
-				int num = Grid.PosToCell(fetchChore.destination);
-				if (MinionGroupProber.Get().IsReachable(num, fetchChore.destination.GetOffsets(num)))
+				for (int j = 0; j < list.Count; j++)
 				{
-					this.storageFetchableBits.Or(ref fetchChore.tagBits);
+					FetchChore fetchChore = list[j];
+					if (fetchChore.choreType == storageFetch || fetchChore.choreType == foodFetch)
+					{
+						int num = Grid.PosToCell(fetchChore.destination);
+						if (MinionGroupProber.Get().IsReachable(num, fetchChore.destination.GetOffsets(num)))
+						{
+							this.storageFetchableTags.UnionWith(fetchChore.tags);
+						}
+					}
 				}
 			}
 		}
@@ -131,13 +184,12 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 	public bool ClearableHasDestination(Pickupable pickupable)
 	{
 		KPrefabID kprefabID = pickupable.KPrefabID;
-		kprefabID.UpdateTagBits();
-		return kprefabID.HasAnyTags_AssumeLaundered(ref this.storageFetchableBits);
+		return this.storageFetchableTags.Contains(kprefabID.PrefabTag);
 	}
 
 	public static GlobalChoreProvider Instance;
 
-	public List<FetchChore> fetchChores = new List<FetchChore>();
+	public Dictionary<int, List<FetchChore>> fetchMap = new Dictionary<int, List<FetchChore>>();
 
 	public List<GlobalChoreProvider.Fetch> fetches = new List<GlobalChoreProvider.Fetch>();
 
@@ -145,7 +197,7 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 
 	private ClearableManager clearableManager;
 
-	private TagBits storageFetchableBits;
+	private HashSet<Tag> storageFetchableTags = new HashSet<Tag>();
 
 	public struct Fetch
 	{
@@ -155,15 +207,11 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 			{
 				return false;
 			}
-			if (this.tagBitsHash != fetch.tagBitsHash)
+			if (this.idsHash != fetch.idsHash)
 			{
 				return false;
 			}
 			if (this.chore.choreType != fetch.chore.choreType)
-			{
-				return false;
-			}
-			if (!this.chore.tagBits.AreEqual(ref fetch.chore.tagBits))
 			{
 				return false;
 			}
@@ -187,7 +235,7 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 
 		public FetchChore chore;
 
-		public int tagBitsHash;
+		public int idsHash;
 
 		public int cost;
 

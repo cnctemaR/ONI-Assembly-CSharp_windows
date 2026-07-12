@@ -8,9 +8,11 @@ public class FetchOrder2
 
 	public int PriorityMod { get; set; }
 
-	public Tag[] Tags { get; protected set; }
+	public HashSet<Tag> Tags { get; protected set; }
 
-	public Tag[] RequiredTags { get; protected set; }
+	public FetchChore.MatchCriteria Criteria { get; protected set; }
+
+	public Tag RequiredTag { get; protected set; }
 
 	public Tag[] ForbiddenTags { get; protected set; }
 
@@ -30,21 +32,22 @@ public class FetchOrder2
 		}
 	}
 
-	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
+	public FetchOrder2(ChoreType chore_type, HashSet<Tag> tags, FetchChore.MatchCriteria criteria, Tag required_tag, Tag[] forbidden_tags, Storage destination, float amount, Operational.State operationalRequirementDEPRECATED = Operational.State.None, int priorityMod = 0)
 	{
 		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 		{
 			DebugUtil.LogWarningArgs(new object[] { string.Format("FetchOrder2 {0} is requesting {1} {2} to {3}", new object[]
 			{
 				chore_type.Id,
-				tags[0],
+				tags,
 				amount,
 				(destination != null) ? destination.name : "to nowhere"
 			}) });
 		}
 		this.choreType = chore_type;
 		this.Tags = tags;
-		this.RequiredTags = required_tags;
+		this.Criteria = criteria;
+		this.RequiredTag = required_tag;
 		this.ForbiddenTags = forbidden_tags;
 		this.Destination = destination;
 		this.TotalAmount = amount;
@@ -93,7 +96,7 @@ public class FetchOrder2
 
 	private void SetFetchTask(float amount)
 	{
-		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.RequiredTags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
+		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.Criteria, this.RequiredTag, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
 		this.Chores.Add(fetchChore);
 	}
 
@@ -272,12 +275,5 @@ public class FetchOrder2
 
 	private bool checkStorageContents;
 
-	private FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None;
-
-	public enum OperationalRequirement
-	{
-		Operational,
-		Functional,
-		None
-	}
+	private Operational.State operationalRequirement = Operational.State.None;
 }

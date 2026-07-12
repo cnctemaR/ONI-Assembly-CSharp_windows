@@ -141,7 +141,7 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 				Util.KDestroyGameObject(pickupable.gameObject);
 				PrimaryElement component = base.GetComponent<PrimaryElement>();
 				this.storage.AddLiquid(SimHashes.Resin, num, component.Temperature, byte.MaxValue, 0, true, false);
-				base.sm.storedSap.Set(this.storage.GetMassAvailable(SimHashes.Resin.CreateTag()), this);
+				base.sm.storedSap.Set(this.storage.GetMassAvailable(SimHashes.Resin.CreateTag()), this, false);
 			}
 		}
 
@@ -154,7 +154,7 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 			}
 			int num2 = Mathf.FloorToInt(GameClock.Instance.GetTime() % (float)base.def.oozeOffsets.Count);
 			this.storage.DropSome(SimHashes.Resin.CreateTag(), num, false, true, base.def.oozeOffsets[num2], true, false);
-			base.sm.storedSap.Set(this.storage.GetMassAvailable(SimHashes.Resin.CreateTag()), this);
+			base.sm.storedSap.Set(this.storage.GetMassAvailable(SimHashes.Resin.CreateTag()), this, false);
 		}
 
 		public void CheckForFood()
@@ -166,7 +166,7 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 				Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
 				if (pickupable.GetComponent<Edible>() != null)
 				{
-					base.sm.foodItem.Set(pickupable.gameObject, this);
+					base.sm.foodItem.Set(pickupable.gameObject, this, false);
 					return;
 				}
 			}
@@ -176,7 +176,7 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 		public bool DoAttack()
 		{
 			int num = this.weapon.AttackArea(base.transform.GetPosition());
-			base.sm.hasNearbyEnemy.Set(num > 0, this);
+			base.sm.hasNearbyEnemy.Set(num > 0, this, false);
 			return true;
 		}
 
@@ -184,7 +184,7 @@ public class SapTree : GameStateMachine<SapTree, SapTree.StatesInstance, IStateM
 		{
 			if (obj as GameObject != null)
 			{
-				base.sm.hasNearbyEnemy.Set(true, this);
+				base.sm.hasNearbyEnemy.Set(true, this, false);
 			}
 		}
 

@@ -17,7 +17,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		set
 		{
 			this._flushesUsed = value;
-			base.smi.sm.flushes.Set(value, base.smi);
+			base.smi.sm.flushes.Set(value, base.smi, false);
 		}
 	}
 
@@ -85,7 +85,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	public List<Descriptor> RequirementDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		string text = base.GetComponent<ManualDeliveryKG>().requestedItemTag.ProperName();
+		string text = base.GetComponent<ManualDeliveryKG>().RequestedItemTag.ProperName();
 		float num = base.smi.DirtUsedPerFlush();
 		Descriptor descriptor = default(Descriptor);
 		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);

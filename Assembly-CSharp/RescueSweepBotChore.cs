@@ -28,9 +28,9 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.rescuer.Set(context.consumerState.gameObject, base.smi);
-		base.smi.sm.rescueTarget.Set(this.gameObject, base.smi);
-		base.smi.sm.deliverTarget.Set(this.gameObject.GetSMI<SweepBotTrappedStates.Instance>().sm.GetSweepLocker(this.gameObject.GetSMI<SweepBotTrappedStates.Instance>()).gameObject, base.smi);
+		base.smi.sm.rescuer.Set(context.consumerState.gameObject, base.smi, false);
+		base.smi.sm.rescueTarget.Set(this.gameObject, base.smi, false);
+		base.smi.sm.deliverTarget.Set(this.gameObject.GetSMI<SweepBotTrappedStates.Instance>().sm.GetSweepLocker(this.gameObject.GetSMI<SweepBotTrappedStates.Instance>()).gameObject, base.smi, false);
 		base.Begin(context);
 	}
 

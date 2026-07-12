@@ -23,7 +23,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 		}
 		if (clinic != null && navigator.CanReach(clinic))
 		{
-			base.smi.sm.clinic.Set(clinic.gameObject, base.smi);
+			base.smi.sm.clinic.Set(clinic.gameObject, base.smi, false);
 			base.smi.GoTo(base.smi.sm.incapacitation_root.rescue.waitingForPickup);
 		}
 	}

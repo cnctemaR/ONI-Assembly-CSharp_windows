@@ -37,7 +37,7 @@ public class AdvancedResearchCenterConfig : IBuildingConfig
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = AdvancedResearchCenterConfig.INPUT_MATERIAL;
+		manualDeliveryKG.RequestedItemTag = AdvancedResearchCenterConfig.INPUT_MATERIAL;
 		manualDeliveryKG.refillMass = 150f;
 		manualDeliveryKG.capacity = 750f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
@@ -50,7 +50,7 @@ public class AdvancedResearchCenterConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(AdvancedResearchCenterConfig.INPUT_MATERIAL, 0.8333333f)
+			new ElementConverter.ConsumedElement(AdvancedResearchCenterConfig.INPUT_MATERIAL, 0.8333333f, true)
 		};
 		elementConverter.showDescriptors = false;
 		go.AddOrGetDef<PoweredController.Def>();

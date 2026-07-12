@@ -116,6 +116,7 @@ namespace Database
 			this.LowOxygen = this.CreateStatusItem("LowOxygen", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 2);
 			this.LowOxygen.AddNotification(null, null, null);
 			this.RedAlert = this.CreateStatusItem("RedAlert", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.Dreaming = this.CreateStatusItem("Dreaming", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Sleeping = this.CreateStatusItem("Sleeping", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Sleeping.resolveTooltipCallback = delegate(string str, object data)
 			{
@@ -217,6 +218,7 @@ namespace Database
 			this.Fabricating.resolveStringCallback = func2;
 			this.Processing = this.CreateStatusItem("Processing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Processing.resolveStringCallback = func2;
+			this.Spicing = this.CreateStatusItem("Spicing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Clearing = this.CreateStatusItem("Clearing", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Clearing.resolveStringCallback = func;
 			this.GeneratingPower = this.CreateStatusItem("GeneratingPower", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -410,6 +412,29 @@ namespace Database
 			this.ExpellingRads = this.CreateStatusItem("ExpellingRads", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.AnalyzingGenes = this.CreateStatusItem("AnalyzingGenes", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.AnalyzingArtifact = this.CreateStatusItem("AnalyzingArtifact", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.MegaBrainTank_Pajamas_Wearing = this.CreateStatusItem("MegaBrainTank_Pajamas_Wearing", DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.NAME, DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
+			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback_shouldStillCallIfDataIsNull = true;
+			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback = delegate(string str, object data)
+			{
+				string text9 = DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP;
+				Effect effect = Db.Get().effects.Get("SleepClinic");
+				string text10;
+				if (effect != null)
+				{
+					text10 = Effect.CreateTooltip(effect, false, "\n    • ", true);
+				}
+				else
+				{
+					text10 = "";
+				}
+				return text9 + "\n\n" + text10;
+			};
+			this.MegaBrainTank_Pajamas_Sleeping = this.CreateStatusItem("MegaBrainTank_Pajamas_Sleeping", DUPLICANTS.STATUSITEMS.DREAMING.NAME, DUPLICANTS.STATUSITEMS.DREAMING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
+			this.MegaBrainTank_Pajamas_Sleeping.resolveTooltipCallback = delegate(string str, object data)
+			{
+				ClinicDreamable clinicDreamable = (ClinicDreamable)data;
+				return str.Replace("{time}", GameUtil.GetFormattedTime(clinicDreamable.WorkTimeRemaining, "F0"));
+			};
 		}
 
 		public StatusItem Idle;
@@ -486,6 +511,8 @@ namespace Database
 
 		public StatusItem Eating;
 
+		public StatusItem Dreaming;
+
 		public StatusItem Sleeping;
 
 		public StatusItem SleepingInterruptedByLight;
@@ -550,6 +577,8 @@ namespace Database
 
 		public StatusItem Processing;
 
+		public StatusItem Spicing;
+
 		public StatusItem Clearing;
 
 		public StatusItem BodyRegulatingHeating;
@@ -611,6 +640,10 @@ namespace Database
 		public StatusItem AnalyzingGenes;
 
 		public StatusItem AnalyzingArtifact;
+
+		public StatusItem MegaBrainTank_Pajamas_Wearing;
+
+		public StatusItem MegaBrainTank_Pajamas_Sleeping;
 
 		private const int NONE_OVERLAY = 0;
 	}

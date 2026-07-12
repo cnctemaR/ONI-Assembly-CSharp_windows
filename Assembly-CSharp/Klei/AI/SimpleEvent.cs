@@ -6,13 +6,14 @@ namespace Klei.AI
 {
 	public class SimpleEvent : GameplayEvent<SimpleEvent.StatesInstance>
 	{
-		public SimpleEvent(string id, string title, string description, string buttonText = null, string buttonTooltip = null)
+		public SimpleEvent(string id, string title, string description, string animFileName, string buttonText = null, string buttonTooltip = null)
 			: base(id, 0, 0)
 		{
-			this.popupTitle = title;
-			this.popupDescription = description;
-			this.popupButtonText = buttonText;
-			this.popupButtonTooltip = buttonTooltip;
+			this.title = title;
+			this.description = description;
+			this.buttonText = buttonText;
+			this.buttonTooltip = buttonTooltip;
+			this.animFileName = animFileName;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -20,9 +21,9 @@ namespace Klei.AI
 			return new SimpleEvent.StatesInstance(manager, eventInstance, this);
 		}
 
-		private string popupButtonText;
+		private string buttonText;
 
-		private string popupButtonTooltip;
+		private string buttonTooltip;
 
 		public class States : GameplayEventStateMachine<SimpleEvent.States, SimpleEvent.StatesInstance, GameplayEventManager, SimpleEvent>
 		{
@@ -32,13 +33,13 @@ namespace Klei.AI
 				this.ending.ReturnSuccess();
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(SimpleEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(SimpleEvent.StatesInstance smi)
 			{
-				GameplayEventPopupData gameplayEventPopupData = new GameplayEventPopupData(smi.gameplayEvent);
-				gameplayEventPopupData.minions = smi.minions;
-				gameplayEventPopupData.artifact = smi.artifact;
-				GameplayEventPopupData.PopupOption popupOption = gameplayEventPopupData.AddOption(smi.gameplayEvent.popupButtonText, null);
-				popupOption.callback = delegate
+				EventInfoData eventInfoData = new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName);
+				eventInfoData.minions = smi.minions;
+				eventInfoData.artifact = smi.artifact;
+				EventInfoData.Option option = eventInfoData.AddOption(smi.gameplayEvent.buttonText, null);
+				option.callback = delegate
 				{
 					if (smi.callback != null)
 					{
@@ -46,15 +47,15 @@ namespace Klei.AI
 					}
 					smi.StopSM("SimpleEvent Finished");
 				};
-				popupOption.tooltip = smi.gameplayEvent.popupButtonTooltip;
+				option.tooltip = smi.gameplayEvent.buttonTooltip;
 				if (smi.textParameters != null)
 				{
 					foreach (global::Tuple<string, string> tuple in smi.textParameters)
 					{
-						gameplayEventPopupData.SetTextParameter(tuple.first, tuple.second);
+						eventInfoData.SetTextParameter(tuple.first, tuple.second);
 					}
 				}
-				return gameplayEventPopupData;
+				return eventInfoData;
 			}
 
 			public GameStateMachine<SimpleEvent.States, SimpleEvent.StatesInstance, GameplayEventManager, object>.State ending;
@@ -76,9 +77,9 @@ namespace Klei.AI
 				this.textParameters.Add(new global::Tuple<string, string>(key, value));
 			}
 
-			public void ShowEventPopup(object buttonCallBackData = null)
+			public void ShowEventPopup()
 			{
-				GameplayEventInstance.ShowEventPopup(base.smi.sm.GenerateEventPopupData(base.smi));
+				EventInfoScreen.ShowPopup(base.smi.sm.GenerateEventPopupData(base.smi));
 			}
 
 			public GameObject[] minions;

@@ -32,7 +32,7 @@ public class AutoPlumberSideScreen : SideScreenContent
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
 		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
-		Vector3 vector = Grid.CellToPos(Grid.PosToCell(this.building), CellAlignment.Center, Grid.SceneLayer.Move);
+		Vector3 vector = Grid.CellToPos(Grid.PosToCell(this.building), CellAlignment.Bottom, Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
 		new MinionStartingStats(false, null, null).Apply(gameObject);
@@ -51,17 +51,10 @@ public class AutoPlumberSideScreen : SideScreenContent
 	public override void SetTarget(GameObject target)
 	{
 		this.building = target.GetComponent<Building>();
-		this.Refresh();
 	}
 
 	public override void ClearTarget()
 	{
-	}
-
-	private void Refresh()
-	{
-		bool flag = this.building != null && this.building.Def.AvailableFacades.Count > 0;
-		this.applyTestFacade.gameObject.SetActive(flag);
 	}
 
 	public KButton activateButton;

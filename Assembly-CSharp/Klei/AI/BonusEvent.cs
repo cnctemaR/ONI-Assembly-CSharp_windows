@@ -11,12 +11,12 @@ namespace Klei.AI
 		public BonusEvent(string id, string overrideEffect = null, int numTimesAllowed = 1, bool preSelectMinion = false, int priority = 0)
 			: base(id, priority, 0)
 		{
-			this.popupTitle = Strings.Get("STRINGS.GAMEPLAY_EVENTS.BONUS." + id.ToUpper() + ".NAME");
-			this.popupDescription = Strings.Get("STRINGS.GAMEPLAY_EVENTS.BONUS." + id.ToUpper() + ".DESCRIPTION");
+			this.title = Strings.Get("STRINGS.GAMEPLAY_EVENTS.BONUS." + id.ToUpper() + ".NAME");
+			this.description = Strings.Get("STRINGS.GAMEPLAY_EVENTS.BONUS." + id.ToUpper() + ".DESCRIPTION");
 			this.effect = ((overrideEffect != null) ? overrideEffect : id);
 			this.numTimesAllowed = numTimesAllowed;
 			this.preSelectMinion = preSelectMinion;
-			this.popupAnimFileName = id.ToLower() + "_kanim";
+			this.animFileName = id.ToLower() + "_kanim";
 			base.AddPrecondition(GameplayEventPreconditions.Instance.LiveMinions(1));
 		}
 
@@ -151,7 +151,7 @@ namespace Klei.AI
 					if (gameObject == null)
 					{
 						gameObject = smi.gameplayEvent.GetRandomMinionPrioritizeFiltered().gameObject;
-						smi.sm.chosen.Set(gameObject, smi);
+						smi.sm.chosen.Set(gameObject, smi, false);
 					}
 				}).GoTo(this.active);
 				this.active.Enter(delegate(BonusEvent.StatesInstance smi)
@@ -177,7 +177,7 @@ namespace Klei.AI
 					.OnTargetLost(this.chosen, this.ending)
 					.Target(this.chosen)
 					.TagTransition(GameTags.Dead, this.ending, false);
-				this.active.notify.ToggleNotification((BonusEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardEventNotification(this.GenerateEventPopupData(smi)));
+				this.active.notify.ToggleNotification((BonusEvent.StatesInstance smi) => EventInfoScreen.CreateNotification(this.GenerateEventPopupData(smi), null));
 				this.active.seenNotification.Enter(delegate(BonusEvent.StatesInstance smi)
 				{
 					smi.eventInstance.seenNotification = true;
@@ -185,9 +185,9 @@ namespace Klei.AI
 				this.ending.ReturnSuccess();
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(BonusEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(BonusEvent.StatesInstance smi)
 			{
-				GameplayEventPopupData gameplayEventPopupData = new GameplayEventPopupData(smi.gameplayEvent);
+				EventInfoData eventInfoData = new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName);
 				GameObject gameObject = smi.sm.chosen.Get(smi);
 				if (gameObject == null)
 				{
@@ -199,14 +199,14 @@ namespace Klei.AI
 				{
 					return null;
 				}
-				gameplayEventPopupData.focus = gameObject.transform;
-				gameplayEventPopupData.minions = new GameObject[] { gameObject };
-				gameplayEventPopupData.SetTextParameter("dupe", gameObject.GetProperName());
+				eventInfoData.clickFocus = gameObject.transform;
+				eventInfoData.minions = new GameObject[] { gameObject };
+				eventInfoData.SetTextParameter("dupe", gameObject.GetProperName());
 				if (smi.building != null)
 				{
-					gameplayEventPopupData.SetTextParameter("building", UI.FormatAsLink(smi.building.GetProperName(), smi.building.GetProperName().ToUpper()));
+					eventInfoData.SetTextParameter("building", UI.FormatAsLink(smi.building.GetProperName(), smi.building.GetProperName().ToUpper()));
 				}
-				GameplayEventPopupData.PopupOption popupOption = gameplayEventPopupData.AddDefaultOption(delegate
+				EventInfoData.Option option = eventInfoData.AddDefaultOption(delegate
 				{
 					smi.GoTo(smi.sm.active.seenNotification);
 				});
@@ -217,16 +217,16 @@ namespace Klei.AI
 					string text = string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString());
 					text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1", false));
 					Sprite sprite = Assets.GetSprite(attribute.uiFullColourSprite);
-					popupOption.AddPositiveIcon(sprite, text, 1.75f);
+					option.AddPositiveIcon(sprite, text, 1.75f);
 				}
-				return gameplayEventPopupData;
+				return eventInfoData;
 			}
 
 			private void AssignPreSelectedMinionIfNeeded(BonusEvent.StatesInstance smi)
 			{
 				if (smi.gameplayEvent.preSelectMinion && smi.sm.chosen.Get(smi) == null)
 				{
-					smi.sm.chosen.Set(smi.gameplayEvent.GetRandomMinionPrioritizeFiltered().gameObject, smi);
+					smi.sm.chosen.Set(smi.gameplayEvent.GetRandomMinionPrioritizeFiltered().gameObject, smi, false);
 					smi.timesTriggered = 0;
 				}
 			}
@@ -239,7 +239,7 @@ namespace Klei.AI
 				}
 				if (GameUtil.GetCurrentTimeInCycles() - smi.lastTriggered > 5f && smi.PercentageUntilTriggered() < 0.5f)
 				{
-					smi.sm.chosen.Set(gameplayEventData.worker.gameObject, smi);
+					smi.sm.chosen.Set(gameplayEventData.worker.gameObject, smi, false);
 					smi.timesTriggered = 0;
 					return true;
 				}
@@ -291,7 +291,7 @@ namespace Klei.AI
 					return false;
 				}
 				smi.building = gameplayEventData.building;
-				smi.sm.chosen.Set(gameplayEventData.worker.gameObject, smi);
+				smi.sm.chosen.Set(gameplayEventData.worker.gameObject, smi, false);
 				return true;
 			}
 

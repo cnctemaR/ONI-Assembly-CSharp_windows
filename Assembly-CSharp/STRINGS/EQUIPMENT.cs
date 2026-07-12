@@ -52,6 +52,10 @@ namespace STRINGS
 					UI.FormatAsLink("Exosuit Forge", "SUITFABRICATOR"),
 					"."
 				});
+
+				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair" + EQUIPMENT.PREFABS.ATMO_SUIT.NAME;
+
+				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Worn Atmo Suit", "ATMO_SUIT") + " to working order.";
 			}
 
 			public class AQUA_SUIT
@@ -321,6 +325,26 @@ namespace STRINGS
 				public static LocString RECIPE_DESC = "Gives Duplicants a boost in brain function.\n\nSupplied by Duplicants with the Balloon Artist " + UI.FormatAsLink("Overjoyed", "MORALE") + " response";
 
 				public static LocString GENERICNAME = "Balloon Friend";
+			}
+
+			public class SLEEPCLINICPAJAMAS
+			{
+				public static LocString NAME = UI.FormatAsLink("Pajamas", "SLEEP_CLINIC_PAJAMAS");
+
+				public static LocString GENERICNAME = "Clothing";
+
+				public static LocString DESC = "A soft, fleecy ticket to dreamland.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Helps Duplicants fall asleep by reducing ",
+					UI.FormatAsLink("Stamina", "STAMINA"),
+					".\n\nEnables the wearer to dream and produce ",
+					UI.FormatAsLink("Dream Journals", "DREAMJOURNAL"),
+					"."
+				});
+
+				public static LocString DESTROY_TOAST = "Ripped Pajamas";
 			}
 		}
 	}

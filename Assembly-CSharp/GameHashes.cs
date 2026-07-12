@@ -94,6 +94,7 @@ public enum GameHashes
 	CreatureStatusChanged = -151109373,
 	LevelUp = -110704193,
 	NewDay = 631075836,
+	NewBlock = -1215042067,
 	ScheduleChanged = 467134493,
 	ScheduleBlocksTick = 1714332666,
 	ScheduleBlocksChanged = -894023145,
@@ -291,6 +292,7 @@ public enum GameHashes
 	RolesUpdated = -1523247426,
 	AssignedRoleChanged = 540773776,
 	OnlyFetchMarkedItemsSettingChanged = 644822890,
+	OnlyFetchSpicedItemsSettingChanged = 1163645216,
 	BuildingCompleteDestroyed = -21016276,
 	BehaviourTagComplete = -739654666,
 	CreatureArrivedAtRanchStation = -1357116271,
@@ -381,6 +383,7 @@ public enum GameHashes
 	WorldAdded = -1280433810,
 	WorldRemoved = -1078710002,
 	WorldParentChanged = 880851192,
+	WorldRenamed = 1943181844,
 	MinionMigration = 586301400,
 	MinionStorageChanged = -392340561,
 	NewWorldVisited = -434755240,
@@ -413,5 +416,8 @@ public enum GameHashes
 	PartyLineJoined = 564760259,
 	ScreenResolutionChanged = 445618876,
 	GamepadUIModeChanged = -442024484,
-	CatchyTune = -1278274506
+	CatchyTune = -1278274506,
+	MegaBrainTankCandidateDupesChanged = 374655100,
+	DreamsOn = -1768884913,
+	DreamsOff = 49503455
 }

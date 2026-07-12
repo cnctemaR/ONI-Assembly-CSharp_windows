@@ -866,6 +866,15 @@ namespace STRINGS
 				public static LocString EFFECT = "Allows Duplicants to play video games on their breaks.\n\nIncreases Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
 			}
 
+			public class SINGLEPLAYERARCADE
+			{
+				public static LocString NAME = UI.FormatAsLink("Single Player Arcade", "SINGLEPLAYERARCADE");
+
+				public static LocString DESC = "Space Brawler IV! For one player.";
+
+				public static LocString EFFECT = "Allows a Duplicant to play video games solo on their breaks.\n\nIncreases Duplicant " + UI.FormatAsLink("Morale", "MORALE") + ".";
+			}
+
 			public class PHONOBOX
 			{
 				public static LocString NAME = UI.FormatAsLink("Jukebot", "PHONOBOX");
@@ -3734,6 +3743,17 @@ namespace STRINGS
 				public static LocString EFFECT = "Radiates a moderate amount of " + UI.FormatAsLink("Heat", "HEAT") + ".";
 			}
 
+			public class SPICEGRINDER
+			{
+				public static LocString NAME = UI.FormatAsLink("Spice Grinder", "SPICEGRINDER");
+
+				public static LocString DESC = "Crushed seeds and other edibles make excellent meal-enhancing additives.";
+
+				public static LocString EFFECT = "Produces ingredients that add benefits to " + UI.FormatAsLink("foods", "FOOD") + " prepared at skilled cooking stations.";
+
+				public static LocString INGREDIENTHEADER = "Ingredients per 1000kcal:";
+			}
+
 			public class STORAGELOCKER
 			{
 				public static LocString NAME = UI.FormatAsLink("Storage Bin", "STORAGELOCKER");
@@ -6449,6 +6469,33 @@ namespace STRINGS
 				});
 			}
 
+			public class MEGABRAINTANK
+			{
+				public static LocString NAME = UI.FormatAsLink("Somnium Synthesizer", "MEGABRAINTANK");
+
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"An organic multi-cortex repository and processing system fuelled by ",
+					UI.FormatAsLink("Oxygen", "OXYGEN"),
+					".\n\nAnalyzes ",
+					UI.FormatAsLink("Dream Journals", "DREAMJOURNAL"),
+					" produced by Duplicants wearing ",
+					UI.FormatAsLink("Pajamas", "SLEEP_CLINIC_PAJAMAS"),
+					".\n\nProvides a sustainable boost to Duplicant skills and abilities throughout the colony."
+				});
+			}
+
+			public class GRAVITASCREATUREMANIPULATOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Critter Flux-O-Matic", "GRAVITASCREATUREMANIPULATOR");
+
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "An experimental DNA manipulator.\n\nAnalyzes " + UI.FormatAsLink("Critters", "CREATURES") + " to transform base morphs into random variants of their species.";
+			}
+
 			public class FACILITYBACKWALLWINDOW
 			{
 				public static LocString NAME = UI.FormatAsLink("Window", "FACILITYBACKWALLWINDOW");
@@ -6722,6 +6769,24 @@ namespace STRINGS
 				public static LocString EFFECT = "A regular wall that once existed in a working lab.";
 			}
 
+			public class GRAVITASCONTAINER
+			{
+				public static LocString NAME = "Pajama Cubby";
+
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "A clothing storage unit.\n\nIt contains ultra-soft sleepwear.";
+			}
+
+			public class GRAVITASLABLIGHT
+			{
+				public static LocString NAME = "LED Light";
+
+				public static LocString DESC = "";
+
+				public static LocString EFFECT = "An overhead light therapy lamp designed to soothe the minds.";
+			}
+
 			public class GRAVITASDOOR
 			{
 				public static LocString NAME = "Gravitas Door";
@@ -6766,6 +6831,27 @@ namespace STRINGS
 				public static LocString NAME = "Big Brain Jar";
 
 				public static LocString DESC = "An abnormally large brain floating in embalming liquid to prevent decomposition.";
+			}
+
+			public class PROPGRAVITASCREATUREPOSTER
+			{
+				public static LocString NAME = "Anatomy Poster";
+
+				public static LocString DESC = "An anatomical illustration of the very first " + UI.FormatAsLink("Hatch", "HATCH") + " ever produced.\n\nWhile the ratio of egg sac to brain may appear outlandish, it is in fact to scale.";
+			}
+
+			public class PROPGRAVITASDESKPODIUM
+			{
+				public static LocString NAME = "Computer Podium";
+
+				public static LocString DESC = "A clutter-proof desk to minimize distractions.\n\nThere appears to be something stored in the computer.";
+			}
+
+			public class PROPGRAVITASFIRSTAIDKIT
+			{
+				public static LocString NAME = "First Aid Kit";
+
+				public static LocString DESC = "It looks like it's been used a lot.";
 			}
 
 			public class PROPGRAVITASHANDSCANNER
@@ -6970,7 +7056,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Disable Manual";
 
-				public static LocString TOOLTIP = "This building's storage may be accessed by Auto-Sweepers only" + UI.HORIZONTAL_BR_RULE + "Duplicants will not be permitted to add or remove materials from this building";
+				public static LocString TOOLTIP = "This building's storage may be accessed by Auto-Sweepers only\n\nDuplicants will not be permitted to add or remove materials from this building";
 			}
 
 			public static class DISABLE_AUTOMATIONONLY

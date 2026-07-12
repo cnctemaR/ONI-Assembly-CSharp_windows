@@ -61,19 +61,11 @@ public class SparkleStreaker : GameStateMachine<SparkleStreaker, SparkleStreaker
 		{
 			if (this.passerbyReactable == null)
 			{
-				this.passerbyReactable = new EmoteReactable(base.gameObject, "WorkPasserbyAcknowledgement", Db.Get().ChoreTypes.Emote, "anim_cheer_kanim", 5, 5, 0f, 600f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "cheer_pre",
-					startcb = new Action<GameObject>(this.AddReactionEffect)
-				}).AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "cheer_loop"
-				}).AddStep(new EmoteReactable.EmoteStep
-				{
-					anim = "cheer_pst"
-				})
-					.AddThought(Db.Get().Thoughts.Happy)
-					.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
+				EmoteReactable emoteReactable = new EmoteReactable(base.gameObject, "WorkPasserbyAcknowledgement", Db.Get().ChoreTypes.Emote, 5, 5, 0f, 600f, float.PositiveInfinity, 0f);
+				Emote clapCheer = Db.Get().Emotes.Minion.ClapCheer;
+				emoteReactable.SetEmote(clapCheer).SetThought(Db.Get().Thoughts.Happy).AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
+				emoteReactable.RegisterEmoteStepCallbacks("clapcheer_pre", new Action<GameObject>(this.AddReactionEffect), null);
+				this.passerbyReactable = emoteReactable;
 			}
 		}
 

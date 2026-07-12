@@ -18,16 +18,7 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 
 	public Reactable CreateReactable()
 	{
-		return new EmoteReactable(base.gameObject, "UpgradeFX", Db.Get().ChoreTypes.Emote, "anim_cheer_kanim", 15, 8, 0f, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-		{
-			anim = "cheer_pre"
-		}).AddStep(new EmoteReactable.EmoteStep
-		{
-			anim = "cheer_loop"
-		}).AddStep(new EmoteReactable.EmoteStep
-		{
-			anim = "cheer_pst"
-		});
+		return new EmoteReactable(base.gameObject, "UpgradeFX", Db.Get().ChoreTypes.Emote, 15, 8, 0f, 20f, float.PositiveInfinity, 0f).SetEmote(Db.Get().Emotes.Minion.Cheer);
 	}
 
 	protected override void OnCleanUp()
@@ -73,7 +64,7 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 		component4.initialMode = KAnim.PlayMode.Loop;
 		if (!string.IsNullOrEmpty(this.facadeID))
 		{
-			component4.SwapAnims(new KAnimFile[] { Db.Get().EquippableFacades.Get(this.facadeID).AnimFile });
+			component4.SwapAnims(new KAnimFile[] { Db.GetEquippableFacades().Get(this.facadeID).AnimFile });
 			base.GetComponentsInChildren<KBatchedAnimController>()[1].SetSymbolVisiblity("object", false);
 		}
 		KBatchedAnimTracker component5 = gameObject.GetComponent<KBatchedAnimTracker>();
@@ -155,7 +146,7 @@ public class CarePackage : StateMachineComponent<CarePackage.SMInstance>
 			this.open.PlayAnim("portalbirth_pst").QueueAnim("object_idle_loop", false, null).Exit(delegate(CarePackage.SMInstance smi)
 			{
 				smi.master.SpawnContents();
-				this.spawnedContents.Set(true, smi);
+				this.spawnedContents.Set(true, smi, false);
 			})
 				.ScheduleGoTo(1f, this.pst);
 			this.pst.PlayAnim("object_idle_pst").ScheduleGoTo(5f, this.destroy);

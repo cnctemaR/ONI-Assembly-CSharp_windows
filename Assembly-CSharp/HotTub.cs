@@ -35,7 +35,7 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IGameObjectE
 			HotTubWorkable hotTubWorkable = gameObject.AddOrGet<HotTubWorkable>();
 			int player_index = i;
 			HotTubWorkable hotTubWorkable2 = hotTubWorkable;
-			hotTubWorkable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(hotTubWorkable2.OnWorkableEventCB, new Action<Workable.WorkableEvent>(delegate(Workable.WorkableEvent ev)
+			hotTubWorkable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(hotTubWorkable2.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(delegate(Workable workable, Workable.WorkableEvent ev)
 			{
 				this.OnWorkableEvent(player_index, ev);
 			}));
@@ -116,7 +116,7 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IGameObjectE
 		{
 			this.occupants.Remove(player);
 		}
-		base.smi.sm.userCount.Set(this.occupants.Count, base.smi);
+		base.smi.sm.userCount.Set(this.occupants.Count, base.smi, false);
 	}
 
 	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
@@ -329,17 +329,17 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IGameObjectE
 			if (!gameObject)
 			{
 				this.UpdateTemperatureMeter(num);
-				base.smi.sm.waterTooCold.Set(false, base.smi);
+				base.smi.sm.waterTooCold.Set(false, base.smi, false);
 				return;
 			}
 			num = gameObject.GetComponent<PrimaryElement>().Temperature;
 			this.UpdateTemperatureMeter(num);
 			if (num < base.smi.master.minimumWaterTemperature)
 			{
-				base.smi.sm.waterTooCold.Set(true, base.smi);
+				base.smi.sm.waterTooCold.Set(true, base.smi, false);
 				return;
 			}
-			base.smi.sm.waterTooCold.Set(false, base.smi);
+			base.smi.sm.waterTooCold.Set(false, base.smi, false);
 		}
 
 		public bool IsTubTooHot()

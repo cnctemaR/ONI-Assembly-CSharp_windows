@@ -13,7 +13,7 @@ public class StickerBombConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity("StickerBomb", global::STRINGS.BUILDINGS.PREFABS.STICKERBOMB.NAME, global::STRINGS.BUILDINGS.PREFABS.STICKERBOMB.DESC, 1f, true, Assets.GetAnim("sticker_kanim"), "off", Grid.SceneLayer.Backwall, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity("StickerBomb", global::STRINGS.BUILDINGS.PREFABS.STICKERBOMB.NAME, global::STRINGS.BUILDINGS.PREFABS.STICKERBOMB.DESC, 1f, true, Assets.GetAnim("sticker_a_kanim"), "off", Grid.SceneLayer.Backwall, SimHashes.Creature, null, 293f);
 		EntityTemplates.AddCollision(gameObject, EntityTemplates.CollisionShape.RECTANGLE, 1f, 1f);
 		gameObject.AddOrGet<StickerBomb>();
 		return gameObject;

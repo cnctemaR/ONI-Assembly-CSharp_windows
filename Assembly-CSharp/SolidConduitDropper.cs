@@ -23,8 +23,8 @@ public class SolidConduitDropper : StateMachineComponent<SolidConduitDropper.SMI
 
 	private void Update()
 	{
-		base.smi.sm.consuming.Set(this.consumer.IsConsuming, base.smi);
-		base.smi.sm.isclosed.Set(!this.operational.IsOperational, base.smi);
+		base.smi.sm.consuming.Set(this.consumer.IsConsuming, base.smi, false);
+		base.smi.sm.isclosed.Set(!this.operational.IsOperational, base.smi, false);
 		this.storage.DropAll(false, false, default(Vector3), true, null);
 	}
 

@@ -9,7 +9,7 @@ public class FlatTagFilterable : KMonoBehaviour
 		base.OnSpawn();
 		TreeFilterable component = base.GetComponent<TreeFilterable>();
 		component.filterByStorageCategoriesOnSpawn = false;
-		component.UpdateFilters(this.selectedTags);
+		component.UpdateFilters(new HashSet<Tag>(this.selectedTags));
 	}
 
 	public void SelectTag(Tag tag, bool state)
@@ -26,7 +26,7 @@ public class FlatTagFilterable : KMonoBehaviour
 		{
 			this.selectedTags.Remove(tag);
 		}
-		base.GetComponent<TreeFilterable>().UpdateFilters(this.selectedTags);
+		base.GetComponent<TreeFilterable>().UpdateFilters(new HashSet<Tag>(this.selectedTags));
 	}
 
 	public void ToggleTag(Tag tag)

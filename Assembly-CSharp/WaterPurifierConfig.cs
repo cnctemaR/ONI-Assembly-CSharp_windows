@@ -45,13 +45,13 @@ public class WaterPurifierConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("Filter"), 1f),
-			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 5f)
+			new ElementConverter.ConsumedElement(new Tag("Filter"), 1f, true),
+			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 5f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(5f, SimHashes.Water, 0f, false, true, 0f, 0.5f, 0.75f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.2f, SimHashes.ToxicSand, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(5f, SimHashes.Water, 0f, false, true, 0f, 0.5f, 0.75f, byte.MaxValue, 0, true),
+			new ElementConverter.OutputElement(0.2f, SimHashes.ToxicSand, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0, true)
 		};
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = 10f;
@@ -59,7 +59,7 @@ public class WaterPurifierConfig : IBuildingConfig
 		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("Filter");
+		manualDeliveryKG.RequestedItemTag = new Tag("Filter");
 		manualDeliveryKG.capacity = 1200f;
 		manualDeliveryKG.refillMass = 300f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;

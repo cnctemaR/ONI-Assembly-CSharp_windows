@@ -6,6 +6,8 @@ public class RoomType : Resource
 {
 	public string tooltip { get; private set; }
 
+	public string description { get; set; }
+
 	public string effect { get; private set; }
 
 	public RoomConstraints.Constraint primary_constraint { get; private set; }
@@ -28,10 +30,11 @@ public class RoomType : Resource
 
 	public int sortKey { get; private set; }
 
-	public RoomType(string id, string name, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false, string[] effects = null, int sortKey = 0)
+	public RoomType(string id, string name, string description, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false, string[] effects = null, int sortKey = 0)
 		: base(id, name)
 	{
 		this.tooltip = tooltip;
+		this.description = description;
 		this.effect = effect;
 		this.category = category;
 		this.primary_constraint = primary_constraint;
@@ -81,7 +84,7 @@ public class RoomType : Resource
 			this.Name,
 			"</b>\n",
 			this.tooltip,
-			UI.HORIZONTAL_BR_RULE,
+			"\n\n",
 			ROOMS.CRITERIA.HEADER
 		});
 		if (this == Db.Get().RoomTypes.Neutral)

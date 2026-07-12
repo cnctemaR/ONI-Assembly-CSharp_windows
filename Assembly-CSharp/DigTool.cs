@@ -16,50 +16,15 @@ public class DigTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		if (!Grid.Solid[cell])
-		{
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			int num;
-			int num2;
-			Grid.CellToXY(cell, out num, out num2);
-			GameScenePartitioner.Instance.GatherEntries(num, num2, 1, 1, GameScenePartitioner.Instance.plants, pooledList);
-			if (pooledList.Count > 0)
-			{
-				Uprootable component = (pooledList[0].obj as Component).GetComponent<Uprootable>();
-				if (component != null)
-				{
-					component.MarkForUproot(true);
-				}
-			}
-			pooledList.Recycle();
-		}
-		if (DebugHandler.InstantBuildMode)
-		{
-			if (Grid.IsValidCell(cell) && Grid.Solid[cell] && !Grid.Foundation[cell])
-			{
-				WorldDamage.Instance.DestroyCell(cell);
-				return;
-			}
-		}
-		else
-		{
-			GameObject gameObject = DigTool.PlaceDig(cell, distFromOrigin);
-			if (gameObject != null)
-			{
-				Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
-				if (component2 != null)
-				{
-					component2.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
-				}
-			}
-		}
+		InterfaceTool.ActiveConfig.DigAction.Uproot(cell);
+		InterfaceTool.ActiveConfig.DigAction.Dig(cell, distFromOrigin);
 	}
 
 	public static GameObject PlaceDig(int cell, int animationDelay = 0)
 	{
 		if (Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Objects[cell, 7] == null)
 		{
-			for (int i = 0; i < 42; i++)
+			for (int i = 0; i < 43; i++)
 			{
 				if (Grid.Objects[cell, i] != null && Grid.Objects[cell, i].GetComponent<Constructable>() != null)
 				{

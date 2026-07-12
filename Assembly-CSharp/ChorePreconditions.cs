@@ -57,9 +57,10 @@ public class ChorePreconditions
 		precondition = default(Chore.Precondition);
 		precondition.id = "IsValid";
 		precondition.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_VALID;
+		precondition.sortOrder = -4;
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return context.chore.IsValid();
+			return !context.chore.isNull && context.chore.IsValid();
 		};
 		this.IsValid = precondition;
 		precondition = default(Chore.Precondition);

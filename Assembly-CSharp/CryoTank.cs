@@ -73,7 +73,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		{
 			component.ForceAddSkillPoint();
 		}
-		base.smi.sm.defrostedDuplicant.Set(gameObject, base.smi);
+		base.smi.sm.defrostedDuplicant.Set(gameObject, base.smi, false);
 		gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
 		ChoreProvider component2 = gameObject.GetComponent<ChoreProvider>();
 		if (component2 != null)
@@ -96,7 +96,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 			statesInstance.minions = new GameObject[] { gameObject, this.opener };
 			statesInstance.SetTextParameter("dupe", this.opener.GetProperName());
 			statesInstance.SetTextParameter("friend", gameObject.GetProperName());
-			statesInstance.ShowEventPopup(null);
+			statesInstance.ShowEventPopup();
 		}
 	}
 
@@ -105,10 +105,11 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		GameObject gameObject = base.smi.sm.defrostedDuplicant.Get(base.smi);
 		if (this.opener != null && gameObject != null)
 		{
+			Db db = Db.Get();
 			this.opener.GetComponent<Effects>().Add(Db.Get().effects.Get("CryoFriend"), true);
+			new EmoteChore(this.opener.GetComponent<Effects>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 1, null);
 			gameObject.GetComponent<Effects>().Add(Db.Get().effects.Get("CryoFriend"), true);
-			new EmoteChore(this.opener.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-			new EmoteChore(gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+			new EmoteChore(gameObject.GetComponent<Effects>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 1, null);
 		}
 	}
 

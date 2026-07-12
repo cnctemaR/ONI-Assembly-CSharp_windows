@@ -58,7 +58,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			Element element = Grid.Element[num];
 			if (elementID == element.id && mass > 0.010000001f && Grid.Mass[num] + mass < element.maxMass)
 			{
-				SimMessages.AddRemoveSubstance(num, (int)ElementLoader.FindElementByHash(elementID).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, temperature, diseaseIdx, diseaseCount, true, -1);
+				SimMessages.AddRemoveSubstance(num, ElementLoader.FindElementByHash(elementID).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, temperature, diseaseIdx, diseaseCount, true, -1);
 			}
 			else
 			{
@@ -137,7 +137,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			this.RemoveItem(num2);
 			if (item.mass > 1E-45f)
 			{
-				SimMessages.AddRemoveSubstance(item.cell, (int)ElementLoader.FindElementByHash((SimHashes)item.elementId).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, false, -1);
+				SimMessages.AddRemoveSubstance(item.cell, ElementLoader.FindElementByHash((SimHashes)item.elementId).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, false, -1);
 			}
 		}
 		pooledList.Recycle();

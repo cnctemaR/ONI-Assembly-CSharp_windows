@@ -44,6 +44,26 @@ public static class ClusterUtil
 		return -1;
 	}
 
+	public static int GetMyParentWorldId(this StateMachine.Instance smi)
+	{
+		return smi.GetComponent<StateMachineController>().GetMyParentWorldId();
+	}
+
+	public static int GetMyParentWorldId(this KMonoBehaviour component)
+	{
+		return component.gameObject.GetMyParentWorldId();
+	}
+
+	public static int GetMyParentWorldId(this GameObject gameObject)
+	{
+		WorldContainer myWorld = gameObject.GetMyWorld();
+		if (myWorld == null)
+		{
+			return gameObject.GetMyWorldId();
+		}
+		return myWorld.ParentWorldId;
+	}
+
 	public static AxialI GetMyWorldLocation(this StateMachine.Instance smi)
 	{
 		return smi.GetComponent<StateMachineController>().GetMyWorldLocation();

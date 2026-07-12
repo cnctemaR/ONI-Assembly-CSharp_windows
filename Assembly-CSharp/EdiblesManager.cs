@@ -19,6 +19,17 @@ public class EdiblesManager : KMonoBehaviour
 		return foodInfo;
 	}
 
+	public static bool TryGetFoodInfo(string foodID, out EdiblesManager.FoodInfo info)
+	{
+		info = null;
+		if (string.IsNullOrEmpty(foodID))
+		{
+			return false;
+		}
+		info = EdiblesManager.GetFoodInfo(foodID);
+		return info != null;
+	}
+
 	private static List<EdiblesManager.FoodInfo> s_allFoodTypes = new List<EdiblesManager.FoodInfo>();
 
 	private static Dictionary<string, EdiblesManager.FoodInfo> s_allFoodMap = new Dictionary<string, EdiblesManager.FoodInfo>();

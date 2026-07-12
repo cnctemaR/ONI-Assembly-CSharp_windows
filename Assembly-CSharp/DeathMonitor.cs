@@ -90,7 +90,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 
 		public void Kill(Death death)
 		{
-			base.sm.death.Set(death, base.smi);
+			base.sm.death.Set(death, base.smi, false);
 		}
 
 		public void PickedUp(object data = null)

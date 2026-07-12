@@ -34,7 +34,7 @@ public class DevLifeSupportConfig : IBuildingConfig
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		CellOffset cellOffset = new CellOffset(0, 1);
 		ElementEmitter elementEmitter = go.AddOrGet<ElementEmitter>();
-		elementEmitter.outputElement = new ElementConverter.OutputElement(50.000004f, SimHashes.Oxygen, 303.15f, false, false, (float)cellOffset.x, (float)cellOffset.y, 1f, byte.MaxValue, 0);
+		elementEmitter.outputElement = new ElementConverter.OutputElement(50.000004f, SimHashes.Oxygen, 303.15f, false, false, (float)cellOffset.x, (float)cellOffset.y, 1f, byte.MaxValue, 0, true);
 		elementEmitter.emissionFrequency = 1f;
 		elementEmitter.maxPressure = 1.5f;
 		PassiveElementConsumer passiveElementConsumer = go.AddOrGet<PassiveElementConsumer>();

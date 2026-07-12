@@ -1,32 +1,31 @@
 ﻿using System;
 
-public class ReactableTransitionLayer : TransitionDriver.OverrideLayer
+public class ReactableTransitionLayer : TransitionDriver.InterruptOverrideLayer
 {
 	public ReactableTransitionLayer(Navigator navigator)
 		: base(navigator)
 	{
 	}
 
-	public override void Destroy()
+	protected override bool IsOverrideComplete()
 	{
-		base.Destroy();
+		return !this.reactionMonitor.IsReacting() && base.IsOverrideComplete();
 	}
 
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
-		base.BeginTransition(navigator, transition);
-		ReactionMonitor.Instance reaction_monitor = navigator.GetSMI<ReactionMonitor.Instance>();
-		reaction_monitor.PollForReactables(transition);
-		if (reaction_monitor.IsReacting())
+		if (this.reactionMonitor == null)
 		{
-			transition.anim = null;
-			transition.isLooping = false;
-			transition.end = transition.start;
-			transition.speed = 1f;
-			transition.animSpeed = 1f;
-			transition.x = 0;
-			transition.y = 0;
-			transition.isCompleteCB = () => !reaction_monitor.IsReacting();
+			this.reactionMonitor = navigator.GetSMI<ReactionMonitor.Instance>();
+		}
+		this.reactionMonitor.PollForReactables(transition);
+		if (this.reactionMonitor.IsReacting())
+		{
+			base.BeginTransition(navigator, transition);
+			transition.start = this.originalTransition.start;
+			transition.end = this.originalTransition.end;
 		}
 	}
+
+	private ReactionMonitor.Instance reactionMonitor;
 }

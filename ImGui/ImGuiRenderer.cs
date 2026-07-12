@@ -75,16 +75,38 @@ public class ImGuiRenderer : MonoBehaviour
 		return this.commandBuffers;
 	}
 
+	public static int GetIdealFontSize()
+	{
+		int num = 1920;
+		int num2 = 16;
+		int num3 = 0;
+		for (int i = 0; i < Display.displays.Length; i++)
+		{
+			int num4 = Mathf.CeilToInt((float)Display.displays[i].systemWidth * (float)num2 / (float)num);
+			if (num4 > num3)
+			{
+				num3 = num4;
+			}
+		}
+		return (num3 == 0) ? num2 : num3;
+	}
+
 	private unsafe void BuildFontAtlas()
 	{
 		ImGuiIOPtr io = ImGui.GetIO();
+		int idealFontSize = ImGuiRenderer.GetIdealFontSize();
+		int num = Mathf.CeilToInt((float)idealFontSize * 0.75f);
+		int num2 = Mathf.CeilToInt((float)idealFontSize * 1.5f);
+		io.Fonts.AddFontFromFileTTF(Application.streamingAssetsPath + "/fonts/NotoSansUI-Regular.ttf", (float)num);
+		io.Fonts.AddFontFromFileTTF(Application.streamingAssetsPath + "/fonts/NotoSansUI-Regular.ttf", (float)idealFontSize);
+		io.Fonts.AddFontFromFileTTF(Application.streamingAssetsPath + "/fonts/NotoSansUI-Regular.ttf", (float)num2);
 		byte* ptr;
-		int num;
-		int num2;
 		int num3;
-		io.Fonts.GetTexDataAsRGBA32(out ptr, out num, out num2, out num3);
-		Texture2D texture2D = new Texture2D(num, num2, TextureFormat.RGBA32, false);
-		texture2D.LoadRawTextureData((IntPtr)((void*)ptr), num * num2 * num3);
+		int num4;
+		int num5;
+		io.Fonts.GetTexDataAsRGBA32(out ptr, out num3, out num4, out num5);
+		Texture2D texture2D = new Texture2D(num3, num4, TextureFormat.RGBA32, false);
+		texture2D.LoadRawTextureData((IntPtr)((void*)ptr), num3 * num4 * num5);
 		texture2D.Apply();
 		this.texture_blah = texture2D;
 		if (this.fontTextureID != null)

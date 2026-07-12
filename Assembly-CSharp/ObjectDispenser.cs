@@ -67,7 +67,7 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 	{
 		base.OnPrefabInit();
 		this.log = new LoggerFS("ObjectDispenser", 35);
-		this.filteredStorage = new FilteredStorage(this, null, null, this, false, Db.Get().ChoreTypes.StorageFetch);
+		this.filteredStorage = new FilteredStorage(this, null, this, false, Db.Get().ChoreTypes.StorageFetch);
 		base.Subscribe<ObjectDispenser>(-905833192, ObjectDispenser.OnCopySettingsDelegate);
 	}
 
@@ -212,7 +212,7 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 			this.logic = base.GetComponent<LogicPorts>();
 			base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 			base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
-			base.smi.sm.should_open.Set(true, base.smi);
+			base.smi.sm.should_open.Set(true, base.smi, false);
 		}
 
 		public void UpdateState()
@@ -273,10 +273,10 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 			}
 			if (this.IsAutomated())
 			{
-				base.smi.sm.should_open.Set(this.logic_on, base.smi);
+				base.smi.sm.should_open.Set(this.logic_on, base.smi, false);
 				return;
 			}
-			base.smi.sm.should_open.Set(this.manual_on, base.smi);
+			base.smi.sm.should_open.Set(this.manual_on, base.smi, false);
 		}
 
 		private Operational operational;

@@ -9,8 +9,8 @@ namespace Klei.AI
 		public SatelliteCrashEvent()
 			: base("SatelliteCrash", 0, 0)
 		{
-			this.popupTitle = GAMEPLAY_EVENTS.EVENT_TYPES.SATELLITE_CRASH.NAME;
-			this.popupDescription = GAMEPLAY_EVENTS.EVENT_TYPES.SATELLITE_CRASH.DESCRIPTION;
+			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.SATELLITE_CRASH.NAME;
+			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.SATELLITE_CRASH.DESCRIPTION;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -30,7 +30,7 @@ namespace Klei.AI
 				Vector3 vector = new Vector3((float)(Grid.WidthInCells / 2 + global::UnityEngine.Random.Range(-Grid.WidthInCells / 3, Grid.WidthInCells / 3)), (float)(Grid.HeightInCells - 1), Grid.GetLayerZ(Grid.SceneLayer.FXFront));
 				GameObject spawn = Util.KInstantiate(Assets.GetPrefab(SatelliteCometConfig.ID), vector);
 				spawn.SetActive(true);
-				Notification notification = GameplayEventInstance.CreateStandardEventNotification(base.smi.sm.GenerateEventPopupData(base.smi));
+				Notification notification = EventInfoScreen.CreateNotification(base.smi.sm.GenerateEventPopupData(base.smi), null);
 				notification.clickFocus = spawn.transform;
 				Comet component = spawn.GetComponent<Comet>();
 				component.OnImpact = (global::System.Action)Delegate.Combine(component.OnImpact, new global::System.Action(delegate
@@ -53,16 +53,16 @@ namespace Klei.AI
 				this.ending.ReturnSuccess();
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(SatelliteCrashEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(SatelliteCrashEvent.StatesInstance smi)
 			{
-				GameplayEventPopupData gameplayEventPopupData = new GameplayEventPopupData(smi.gameplayEvent);
-				gameplayEventPopupData.location = GAMEPLAY_EVENTS.LOCATIONS.SURFACE;
-				gameplayEventPopupData.whenDescription = GAMEPLAY_EVENTS.TIMES.NOW;
-				gameplayEventPopupData.AddDefaultOption(delegate
+				EventInfoData eventInfoData = new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName);
+				eventInfoData.location = GAMEPLAY_EVENTS.LOCATIONS.SURFACE;
+				eventInfoData.whenDescription = GAMEPLAY_EVENTS.TIMES.NOW;
+				eventInfoData.AddDefaultOption(delegate
 				{
 					smi.GoTo(smi.sm.ending);
 				});
-				return gameplayEventPopupData;
+				return eventInfoData;
 			}
 
 			public GameStateMachine<SatelliteCrashEvent.States, SatelliteCrashEvent.StatesInstance, GameplayEventManager, object>.State notify;

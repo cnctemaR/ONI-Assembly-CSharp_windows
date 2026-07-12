@@ -40,6 +40,11 @@ public class Unlocks : KMonoBehaviour
 		return !string.IsNullOrEmpty(unlockID) && (DebugHandler.InstantBuildMode || this.unlocked.Contains(unlockID));
 	}
 
+	public IReadOnlyList<string> GetAllUnlockedIds()
+	{
+		return this.unlocked;
+	}
+
 	public void Lock(string unlockID)
 	{
 		if (this.unlocked.Contains(unlockID))
@@ -50,7 +55,7 @@ public class Unlocks : KMonoBehaviour
 		}
 	}
 
-	public void Unlock(string unlockID)
+	public void Unlock(string unlockID, bool shouldTryShowCodexNotification = true)
 	{
 		if (string.IsNullOrEmpty(unlockID))
 		{
@@ -62,10 +67,13 @@ public class Unlocks : KMonoBehaviour
 			this.unlocked.Add(unlockID);
 			this.SaveUnlocks();
 			Game.Instance.Trigger(1594320620, unlockID);
-			MessageNotification messageNotification = this.GenerateCodexUnlockNotification(unlockID);
-			if (messageNotification != null)
+			if (shouldTryShowCodexNotification)
 			{
-				base.GetComponent<Notifier>().Add(messageNotification, "");
+				MessageNotification messageNotification = this.GenerateCodexUnlockNotification(unlockID);
+				if (messageNotification != null)
+				{
+					base.GetComponent<Notifier>().Add(messageNotification, "");
+				}
 			}
 		}
 		this.EvalMetaCategories();
@@ -196,7 +204,7 @@ public class Unlocks : KMonoBehaviour
 			}
 			else if (!this.IsUnlocked(text))
 			{
-				this.Unlock(text);
+				this.Unlock(text, true);
 				return text;
 			}
 		}
@@ -249,7 +257,7 @@ public class Unlocks : KMonoBehaviour
 		{
 			if (GameClock.Instance.GetCycle() + 1 >= keyValuePair.Key)
 			{
-				this.Unlock(keyValuePair.Value);
+				this.Unlock(keyValuePair.Value, true);
 			}
 		}
 	}
@@ -261,30 +269,30 @@ public class Unlocks : KMonoBehaviour
 
 	private void OnLaunchRocket(object data)
 	{
-		this.Unlock("surfacebreach");
-		this.Unlock("firstrocketlaunch");
+		this.Unlock("surfacebreach", true);
+		this.Unlock("firstrocketlaunch", true);
 	}
 
 	private void OnDuplicantDied(object data)
 	{
-		this.Unlock("duplicantdeath");
+		this.Unlock("duplicantdeath", true);
 		if (Components.LiveMinionIdentities.Count == 1)
 		{
-			this.Unlock("onedupeleft");
+			this.Unlock("onedupeleft", true);
 		}
 	}
 
 	private void OnNewDupe(MinionIdentity minion_identity)
 	{
-		if (Components.LiveMinionIdentities.Count >= 35)
+		if (Components.LiveMinionIdentities.Count >= Db.Get().Personalities.Count)
 		{
-			this.Unlock("fulldupecolony");
+			this.Unlock("fulldupecolony", true);
 		}
 	}
 
 	private void OnDiscoveredSpace(object data)
 	{
-		this.Unlock("surfacebreach");
+		this.Unlock("surfacebreach", true);
 	}
 
 	public void Sim4000ms(float dt)
@@ -329,7 +337,7 @@ public class Unlocks : KMonoBehaviour
 				}
 				if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num9) == SubWorld.ZoneType.Space)
 				{
-					this.Unlock("nearingsurface");
+					this.Unlock("nearingsurface", true);
 					break;
 				}
 			}
@@ -347,7 +355,7 @@ public class Unlocks : KMonoBehaviour
 				}
 				if (global::World.Instance.zoneRenderData.GetSubWorldZoneType(num11) == SubWorld.ZoneType.ToxicJungle && Grid.Element[num11].id == SimHashes.Magma)
 				{
-					this.Unlock("nearingmagma");
+					this.Unlock("nearingmagma", true);
 					return;
 				}
 			}
@@ -407,6 +415,10 @@ public class Unlocks : KMonoBehaviour
 		{
 			"space",
 			new string[] { "display_spaceprop1", "notice_pilot", "journal_inspace", "notes_firstcolony" }
+		},
+		{
+			"storytraits",
+			new string[] { "story_trait_critter_manipulator_initial", "story_trait_critter_manipulator_complete", "storytrait_crittermanipulator_workiversary", "story_trait_mega_brain_tank_initial", "story_trait_mega_brain_tank_competed" }
 		}
 	};
 

@@ -42,7 +42,7 @@ public class DiningTableConfig : IBuildingConfig
 		storage.capacityKg = TableSaltTuning.SALTSHAKERSTORAGEMASS;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = TableSaltConfig.ID.ToTag();
+		manualDeliveryKG.RequestedItemTag = TableSaltConfig.ID.ToTag();
 		manualDeliveryKG.capacity = TableSaltTuning.SALTSHAKERSTORAGEMASS;
 		manualDeliveryKG.refillMass = TableSaltTuning.CONSUMABLE_RATE;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FoodFetch.IdHash;

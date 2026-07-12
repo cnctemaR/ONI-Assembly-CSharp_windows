@@ -9,9 +9,13 @@ namespace Database
 		{
 			foreach (Painting painting in Components.Paintings.Items)
 			{
-				if (painting != null && painting.CurrentStatus == Artable.Status.Great)
+				if (painting != null)
 				{
-					return true;
+					ArtableStage artableStage = Db.GetArtableStages().TryGet(painting.CurrentStage);
+					if (artableStage != null && artableStage.statusItem == Db.Get().ArtableStatuses.Great)
+					{
+						return true;
+					}
 				}
 			}
 			return false;

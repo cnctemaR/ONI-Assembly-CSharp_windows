@@ -66,7 +66,7 @@ public class AnimEvent
 
 	protected bool IsFilteredOut(AnimEventManager.EventPlayerData behaviour)
 	{
-		return this.file != null && behaviour.currentAnimFile != null && this.fileHash != behaviour.currentAnimFileHash;
+		return this.file != null && !behaviour.controller.HasAnimationFile(this.fileHash);
 	}
 
 	[SerializeField]

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class BrushTool : InterfaceTool
 {
@@ -53,7 +52,7 @@ public class BrushTool : InterfaceTool
 		KScreenManager.Instance.SetEventSystemEnabled(true);
 		if (KInputManager.currentControllerIsGamepad)
 		{
-			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = false;
+			base.SetCurrentVirtualInputModuleMousMovementMode(false, null);
 		}
 		base.OnDeactivateTool(new_tool);
 	}
@@ -103,7 +102,7 @@ public class BrushTool : InterfaceTool
 		}
 		else
 		{
-			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = true;
+			base.SetCurrentVirtualInputModuleMousMovementMode(true, null);
 		}
 		this.Paint();
 	}
@@ -114,7 +113,7 @@ public class BrushTool : InterfaceTool
 		KScreenManager.Instance.SetEventSystemEnabled(true);
 		if (KInputManager.currentControllerIsGamepad)
 		{
-			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = false;
+			base.SetCurrentVirtualInputModuleMousMovementMode(false, null);
 		}
 		if (!this.dragging)
 		{

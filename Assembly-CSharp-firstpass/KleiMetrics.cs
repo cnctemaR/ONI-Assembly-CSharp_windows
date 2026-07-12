@@ -75,7 +75,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		return KleiMetrics.sessionID;
 	}
 
-	private void IncrementGameCount()
+	public void IncrementGameCount()
 	{
 		KleiMetrics.gameID = KleiMetrics.GameID() + 1;
 		KleiMetrics.SetGameID(KleiMetrics.gameID);
@@ -595,7 +595,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	private const string SessionTimeFieldName = "SessionTimeSeconds";
 
-	private const string NewGameFieldName = "NewGame";
+	public const string NewGameFieldName = "NewGame";
 
 	private const string EndGameFieldName = "EndGame";
 

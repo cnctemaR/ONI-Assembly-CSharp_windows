@@ -183,7 +183,7 @@ namespace Klei.AI
 			{
 				infoArray[i] = default_value;
 			}
-			infoArray[ElementLoader.GetElementIndex(SimHashes.Polypropylene)] = new ElemGrowthInfo
+			infoArray[(int)ElementLoader.GetElementIndex(SimHashes.Polypropylene)] = new ElemGrowthInfo
 			{
 				underPopulationDeathRate = 2.6666667f,
 				populationHalfLife = 10f,
@@ -194,7 +194,7 @@ namespace Klei.AI
 				diffusionScale = 1f,
 				minDiffusionInfestationTickCount = byte.MaxValue
 			};
-			infoArray[ElementLoader.GetElementIndex(SimHashes.Vacuum)] = new ElemGrowthInfo
+			infoArray[(int)ElementLoader.GetElementIndex(SimHashes.Vacuum)] = new ElemGrowthInfo
 			{
 				underPopulationDeathRate = 0f,
 				populationHalfLife = 0f,

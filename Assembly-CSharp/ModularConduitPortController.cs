@@ -116,17 +116,17 @@ public class ModularConduitPortController : GameStateMachine<ModularConduitPortC
 
 		public void SetUnloading(bool isUnloading)
 		{
-			base.sm.isUnloading.Set(isUnloading, this);
+			base.sm.isUnloading.Set(isUnloading, this, false);
 		}
 
 		public void SetLoading(bool isLoading)
 		{
-			base.sm.isLoading.Set(isLoading, this);
+			base.sm.isLoading.Set(isLoading, this, false);
 		}
 
 		public void SetRocket(bool hasRocket)
 		{
-			base.sm.hasRocket.Set(hasRocket, this);
+			base.sm.hasRocket.Set(hasRocket, this, false);
 		}
 
 		public bool IsLoading()

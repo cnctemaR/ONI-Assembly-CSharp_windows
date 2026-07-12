@@ -75,7 +75,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 		bool flag = true;
 		if (element != null)
 		{
-			this.desiredElementIdx = (byte)ElementLoader.GetElementIndex(element.id);
+			this.desiredElementIdx = ElementLoader.GetElementIndex(element.id);
 			flag = element.id == SimHashes.Void || element.id == SimHashes.Vacuum;
 		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, flag, null);
@@ -103,7 +103,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 
 	private int sampleIdx;
 
-	private byte desiredElementIdx = byte.MaxValue;
+	private ushort desiredElementIdx = ushort.MaxValue;
 
 	private static readonly EventSystem.IntraObjectHandler<LogicElementSensor> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<LogicElementSensor>(delegate(LogicElementSensor component, object data)
 	{

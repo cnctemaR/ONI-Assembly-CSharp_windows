@@ -63,11 +63,11 @@ public class RailGunPayloadOpenerConfig : IBuildingConfig
 		railGunPayloadOpener.resourceStorage.capacityKg = 20000f;
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(railGunPayloadOpener.payloadStorage);
-		manualDeliveryKG.requestedItemTag = GameTags.RailGunPayloadEmptyable;
+		manualDeliveryKG.RequestedItemTag = GameTags.RailGunPayloadEmptyable;
 		manualDeliveryKG.capacity = 10f;
 		manualDeliveryKG.refillMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
+		manualDeliveryKG.operationalRequirement = Operational.State.None;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -34,6 +34,11 @@ public class KInputHandler
 			Action<KButtonEvent> action2 = (Action<KButtonEvent>)Delegate.CreateDelegate(typeof(Action<KButtonEvent>), obj, method2);
 			this.mOnKeyUpDelegates.Add(action2);
 		}
+		MethodInfo method3 = obj.GetType().GetMethod("OnCancelInput");
+		if (method3 != null)
+		{
+			this.mOnCancelInputDelegate = (KInputHandler.KCancelInputHandler)Delegate.CreateDelegate(typeof(KInputHandler.KCancelInputHandler), obj, method3);
+		}
 	}
 
 	public int HandleChildCount()
@@ -127,6 +132,21 @@ public class KInputHandler
 		{
 			this.mChildren.RemoveAt(0);
 		}
+	}
+
+	public void HandleCancelInput()
+	{
+		int num = 0;
+		while (this.mChildren != null && num < this.mChildren.Count)
+		{
+			this.mChildren[num].handler.HandleCancelInput();
+			num++;
+		}
+		if (this.mOnCancelInputDelegate == null)
+		{
+			return;
+		}
+		this.mOnCancelInputDelegate();
 	}
 
 	public void HandleEvent(KInputEvent e)
@@ -260,6 +280,8 @@ public class KInputHandler
 	private List<Action<KButtonEvent>> mOnKeyDownDelegates = new List<Action<KButtonEvent>>();
 
 	private List<Action<KButtonEvent>> mOnKeyUpDelegates = new List<Action<KButtonEvent>>();
+
+	private KInputHandler.KCancelInputHandler mOnCancelInputDelegate;
 
 	private List<KInputHandler.HandlerInfo> mChildren;
 

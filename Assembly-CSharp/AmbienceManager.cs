@@ -88,7 +88,7 @@ public class AmbienceManager : KMonoBehaviour
 
 	public class Layer : IComparable<AmbienceManager.Layer>
 	{
-		public Layer(string sound, string one_shot_sound)
+		public Layer(EventReference sound, EventReference one_shot_sound = default(EventReference))
 		{
 			this.sound = sound;
 			this.oneShotSound = one_shot_sound;
@@ -148,12 +148,14 @@ public class AmbienceManager : KMonoBehaviour
 		{
 			if (!this.isRunning)
 			{
-				if (this.oneShotSound != null)
+				if (!this.oneShotSound.IsNull)
 				{
 					EventInstance eventInstance = KFMOD.CreateInstance(this.oneShotSound);
 					if (!eventInstance.isValid())
 					{
-						global::Debug.LogWarning("Could not find event: " + this.oneShotSound);
+						string text = "Could not find event: ";
+						EventReference eventReference = this.oneShotSound;
+						global::Debug.LogWarning(text + eventReference.ToString());
 						return;
 					}
 					ATTRIBUTES_3D attributes_3D = new Vector3(emitter_position.x, emitter_position.y, 0f).To3DAttributes();
@@ -181,9 +183,9 @@ public class AmbienceManager : KMonoBehaviour
 
 		private const string AVERAGE_RADIATION_ID = "averageRadiation";
 
-		public string sound;
+		public EventReference sound;
 
-		public string oneShotSound;
+		public EventReference oneShotSound;
 
 		public int tileCount;
 
@@ -205,26 +207,19 @@ public class AmbienceManager : KMonoBehaviour
 	{
 		public string name;
 
-		[EventRef]
-		public string[] liquidSounds;
+		public EventReference[] liquidSounds;
 
-		[EventRef]
-		public string[] gasSounds;
+		public EventReference[] gasSounds;
 
-		[EventRef]
-		public string[] solidSounds;
+		public EventReference[] solidSounds;
 
-		[EventRef]
-		public string fogSound;
+		public EventReference fogSound;
 
-		[EventRef]
-		public string spaceSound;
+		public EventReference spaceSound;
 
-		[EventRef]
-		public string facilitySound;
+		public EventReference facilitySound;
 
-		[EventRef]
-		public string radiationSound;
+		public EventReference radiationSound;
 	}
 
 	public class Quadrant
@@ -232,25 +227,25 @@ public class AmbienceManager : KMonoBehaviour
 		public Quadrant(AmbienceManager.QuadrantDef def)
 		{
 			this.name = def.name;
-			this.fogLayer = new AmbienceManager.Layer(def.fogSound, null);
+			this.fogLayer = new AmbienceManager.Layer(def.fogSound, default(EventReference));
 			this.allLayers.Add(this.fogLayer);
 			this.loopingLayers.Add(this.fogLayer);
-			this.spaceLayer = new AmbienceManager.Layer(def.spaceSound, null);
+			this.spaceLayer = new AmbienceManager.Layer(def.spaceSound, default(EventReference));
 			this.allLayers.Add(this.spaceLayer);
 			this.loopingLayers.Add(this.spaceLayer);
-			this.facilityLayer = new AmbienceManager.Layer(def.facilitySound, null);
+			this.facilityLayer = new AmbienceManager.Layer(def.facilitySound, default(EventReference));
 			this.allLayers.Add(this.facilityLayer);
 			this.loopingLayers.Add(this.facilityLayer);
 			this.m_isRadiationEnabled = Sim.IsRadiationEnabled();
 			if (this.m_isRadiationEnabled)
 			{
-				this.radiationLayer = new AmbienceManager.Layer(def.radiationSound, null);
+				this.radiationLayer = new AmbienceManager.Layer(def.radiationSound, default(EventReference));
 				this.allLayers.Add(this.radiationLayer);
 			}
 			for (int i = 0; i < 4; i++)
 			{
-				this.gasLayers[i] = new AmbienceManager.Layer(def.gasSounds[i], null);
-				this.liquidLayers[i] = new AmbienceManager.Layer(def.liquidSounds[i], null);
+				this.gasLayers[i] = new AmbienceManager.Layer(def.gasSounds[i], default(EventReference));
+				this.liquidLayers[i] = new AmbienceManager.Layer(def.liquidSounds[i], default(EventReference));
 				this.allLayers.Add(this.gasLayers[i]);
 				this.allLayers.Add(this.liquidLayers[i]);
 				this.loopingLayers.Add(this.gasLayers[i]);
@@ -264,7 +259,7 @@ public class AmbienceManager : KMonoBehaviour
 					SolidAmbienceType solidAmbienceType = (SolidAmbienceType)j;
 					global::Debug.LogError(text + solidAmbienceType.ToString());
 				}
-				this.solidLayers[j] = new AmbienceManager.Layer(null, def.solidSounds[j]);
+				this.solidLayers[j] = new AmbienceManager.Layer(default(EventReference), def.solidSounds[j]);
 				this.allLayers.Add(this.solidLayers[j]);
 				this.oneShotLayers.Add(this.solidLayers[j]);
 			}

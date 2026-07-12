@@ -6,7 +6,7 @@ using UnityEngine;
 
 public static class BaseCrabConfig
 {
-	public static GameObject BaseCrab(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix = null, string onDeathDropID = "CrabShell")
+	public static GameObject BaseCrab(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix = null, string onDeathDropID = "CrabShell", int onDeathDropCount = 1)
 	{
 		float num = 100f;
 		int num2 = (is_baby ? 1 : 2);
@@ -17,7 +17,7 @@ public static class BaseCrabConfig
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, 1, false, false, 288.15f, 343.15f, 243.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, onDeathDropCount, false, false, 288.15f, 343.15f, 243.15f, 373.15f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
@@ -41,9 +41,9 @@ public static class BaseCrabConfig
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Walker, false);
 		component.AddTag(GameTags.Creatures.CrabFriend, false);
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
-			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), is_baby, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new FallStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
@@ -54,11 +54,11 @@ public static class BaseCrabConfig
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new FixedCaptureStates.Def(), true, -1)
-			.Add(new RanchedStates.Def(), true, -1)
-			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), !is_baby, -1)
+			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
-			.Add(new CallAdultStates.Def(), true, -1)
+			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureDiseaseCleaner.Def(30f), true, -1)
 			.Add(new IdleStates.Def(), true, -1);

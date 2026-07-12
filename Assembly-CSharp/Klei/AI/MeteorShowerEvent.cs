@@ -59,9 +59,9 @@ namespace Klei.AI
 				base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 				this.planning.Enter(delegate(MeteorShowerEvent.StatesInstance smi)
 				{
-					this.runTimeRemaining.Set(smi.gameplayEvent.duration, smi);
-					this.bombardTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOn.Get(), smi);
-					this.snoozeTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOff.Get(), smi);
+					this.runTimeRemaining.Set(smi.gameplayEvent.duration, smi, false);
+					this.bombardTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOn.Get(), smi, false);
+					this.snoozeTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOff.Get(), smi, false);
 				}).GoTo(this.running);
 				this.running.DefaultState(this.running.snoozing).Update(delegate(MeteorShowerEvent.StatesInstance smi, float dt)
 				{
@@ -75,7 +75,7 @@ namespace Klei.AI
 					smi.StopBackgroundEffects();
 				}).Exit(delegate(MeteorShowerEvent.StatesInstance smi)
 				{
-					this.bombardTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOn.Get(), smi);
+					this.bombardTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOn.Get(), smi, false);
 				})
 					.Update(delegate(MeteorShowerEvent.StatesInstance smi, float dt)
 					{
@@ -88,7 +88,7 @@ namespace Klei.AI
 					}, UpdateRate.SIM_200ms, false);
 				this.running.snoozing.Exit(delegate(MeteorShowerEvent.StatesInstance smi)
 				{
-					this.snoozeTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOff.Get(), smi);
+					this.snoozeTimeRemaining.Set(smi.gameplayEvent.secondsBombardmentOff.Get(), smi, false);
 				}).Update(delegate(MeteorShowerEvent.StatesInstance smi, float dt)
 				{
 					this.snoozeTimeRemaining.Delta(-dt, smi);

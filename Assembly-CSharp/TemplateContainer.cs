@@ -8,7 +8,7 @@ using UnityEngine;
 [Serializable]
 public class TemplateContainer
 {
-	public string name { get; private set; }
+	public string name { get; set; }
 
 	public int priority { get; set; }
 
@@ -62,30 +62,11 @@ public class TemplateContainer
 
 	public RectInt GetTemplateBounds(Vector2I position, int padding = 0)
 	{
-		int num = 1;
-		int num2 = -1;
-		int num3 = 1;
-		int num4 = -1;
-		foreach (Cell cell in this.cells)
+		if ((this.info.min - new Vector2f(0, 0)).sqrMagnitude <= 1E-06f)
 		{
-			if (cell.location_x < num)
-			{
-				num = cell.location_x;
-			}
-			if (cell.location_x > num2)
-			{
-				num2 = cell.location_x;
-			}
-			if (cell.location_y < num3)
-			{
-				num3 = cell.location_y;
-			}
-			if (cell.location_y > num4)
-			{
-				num4 = cell.location_y;
-			}
+			this.RefreshInfo();
 		}
-		return new RectInt(position.x + num - padding, position.y + num3 - padding, (int)this.info.size.x + padding * 2, (int)this.info.size.y + padding * 2);
+		return this.info.GetBounds(position, padding);
 	}
 
 	public void RefreshInfo()
@@ -118,6 +99,7 @@ public class TemplateContainer
 			}
 		}
 		this.info.size = new Vector2((float)(1 + (num2 - num)), (float)(1 + (num4 - num3)));
+		this.info.min = new Vector2((float)num, (float)num3);
 		this.info.area = this.cells.Count;
 	}
 
@@ -136,8 +118,15 @@ public class TemplateContainer
 	{
 		public Vector2f size { get; set; }
 
+		public Vector2f min { get; set; }
+
 		public int area { get; set; }
 
 		public Tag[] tags { get; set; }
+
+		public RectInt GetBounds(Vector2I position, int padding)
+		{
+			return new RectInt(position.x + (int)this.min.x - padding, position.y + (int)this.min.y - padding, (int)this.size.x + padding * 2, (int)this.size.y + padding * 2);
+		}
 	}
 }

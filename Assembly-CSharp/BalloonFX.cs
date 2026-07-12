@@ -21,7 +21,7 @@ public class BalloonFX : GameStateMachine<BalloonFX, BalloonFX.Instance>
 			: base(master)
 		{
 			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("balloon_anim_kanim", master.gameObject.transform.GetPosition() + new Vector3(0f, 0.3f, 1f), master.transform, true, Grid.SceneLayer.Creatures, false);
-			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
+			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi, false);
 			kbatchedAnimController.GetComponent<KBatchedAnimController>().defaultAnim = "idle_default";
 			master.GetComponent<KBatchedAnimController>().GetSynchronizer().Add(kbatchedAnimController.GetComponent<KBatchedAnimController>());
 		}

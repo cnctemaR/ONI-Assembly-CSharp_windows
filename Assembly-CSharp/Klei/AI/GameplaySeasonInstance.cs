@@ -51,9 +51,11 @@ namespace Klei.AI
 			float seasonPeriod = this.GetSeasonPeriod();
 			this.randomizedNextTime = global::UnityEngine.Random.Range(this.Season.randomizedEventStartTime.min, this.Season.randomizedEventStartTime.max);
 			float currentTimeInCycles = GameUtil.GetCurrentTimeInCycles();
-			while (this.nextPeriodTime < currentTimeInCycles || this.NextEventTime < this.Season.minCycle)
+			float num = this.nextPeriodTime + this.randomizedNextTime;
+			while (num < currentTimeInCycles || num < this.Season.minCycle)
 			{
 				this.nextPeriodTime += seasonPeriod;
+				num = this.nextPeriodTime + this.randomizedNextTime;
 			}
 		}
 

@@ -13,6 +13,8 @@ namespace ProcGen
 
 		public string colorHex { get; private set; }
 
+		public string icon { get; private set; }
+
 		public List<string> forbiddenDLCIds { get; private set; }
 
 		public List<string> exclusiveWith { get; private set; }
@@ -30,8 +32,6 @@ namespace ProcGen
 		public List<World.AllowedCellsFilter> additionalUnknownCellFilters { get; private set; }
 
 		public List<World.TemplateSpawnRules> additionalWorldTemplateRules { get; private set; }
-
-		public Dictionary<string, int> globalFeatureTemplateMods { get; private set; }
 
 		public Dictionary<string, int> globalFeatureMods { get; private set; }
 
@@ -57,12 +57,15 @@ namespace ProcGen
 			this.additionalUnknownCellFilters = new List<World.AllowedCellsFilter>();
 			this.additionalWorldTemplateRules = new List<World.TemplateSpawnRules>();
 			this.removeWorldTemplateRulesById = new List<string>();
-			this.globalFeatureTemplateMods = new Dictionary<string, int>();
 			this.globalFeatureMods = new Dictionary<string, int>();
 			this.elementBandModifiers = new List<WorldTrait.ElementBandModifier>();
 			this.exclusiveWith = new List<string>();
 			this.exclusiveWithTags = new List<string>();
 			this.forbiddenDLCIds = new List<string>();
+			this.traitTags = new List<string>();
+			this.name = "";
+			this.description = "";
+			this.icon = "";
 		}
 
 		public bool IsValid(World world, bool logErrors)

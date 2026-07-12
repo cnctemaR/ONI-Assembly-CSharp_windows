@@ -60,6 +60,11 @@ public static class Strings
 		Strings.RootTable.Print("");
 	}
 
+	public static void VisitEntries(StringTable.EntryVisitor visit)
+	{
+		Strings.RootTable.VisitEntries(visit);
+	}
+
 	private static StringTable RootTable = new StringTable();
 
 	private static HashSet<string> invalidKeys = new HashSet<string>();

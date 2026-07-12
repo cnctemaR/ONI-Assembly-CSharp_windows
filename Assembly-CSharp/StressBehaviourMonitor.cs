@@ -15,7 +15,7 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		this.stressed.tierOne.reprieve.ScheduleGoTo(30f, this.stressed.tierOne.actingOut);
 		this.stressed.tierTwo.DefaultState(this.stressed.tierTwo.actingOut).Update(delegate(StressBehaviourMonitor.Instance smi, float dt)
 		{
-			smi.sm.timeInTierTwoStressResponse.Set(smi.sm.timeInTierTwoStressResponse.Get(smi) + dt, smi);
+			smi.sm.timeInTierTwoStressResponse.Set(smi.sm.timeInTierTwoStressResponse.Get(smi) + dt, smi, false);
 		}, UpdateRate.SIM_200ms, false).Exit("ResetStress", delegate(StressBehaviourMonitor.Instance smi)
 		{
 			Db.Get().Amounts.Stress.Lookup(smi.gameObject).SetValue(STRESS.ACTING_OUT_RESET);
@@ -25,7 +25,7 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		{
 			if (smi.sm.timeInTierTwoStressResponse.Get(smi) >= 150f)
 			{
-				smi.sm.timeInTierTwoStressResponse.Set(0f, smi);
+				smi.sm.timeInTierTwoStressResponse.Set(0f, smi, false);
 				smi.GoTo(this.stressed);
 			}
 		}).ScheduleGoTo((StressBehaviourMonitor.Instance smi) => smi.tierTwoReprieveDuration, this.stressed.tierTwo);

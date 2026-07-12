@@ -33,6 +33,7 @@ public class MoleConfig : IEntityConfig
 		{
 			gameObject.GetComponent<KAnimControllerBase>().SetSymbolVisiblity(hashedString, false);
 		}
+		gameObject.AddTag(GameTags.OriginalCreature);
 		return gameObject;
 	}
 

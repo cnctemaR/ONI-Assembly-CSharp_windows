@@ -105,7 +105,7 @@ public class LogicAlarm : KMonoBehaviour, ISaveLoadable
 	public Notification CreateNotification()
 	{
 		base.GetComponent<KSelectable>();
-		Notification notification = new Notification(this.notificationName, this.notificationType, (List<Notification> n, object d) => this.notificationTooltip, null, true, 0f, null, null, null, false);
+		Notification notification = new Notification(this.notificationName, this.notificationType, (List<Notification> n, object d) => this.notificationTooltip, null, true, 0f, null, null, null, false, false);
 		this.lastNotificationCreated = notification;
 		return notification;
 	}

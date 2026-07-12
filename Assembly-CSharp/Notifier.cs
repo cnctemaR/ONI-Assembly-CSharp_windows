@@ -64,7 +64,6 @@ public class Notifier : KMonoBehaviour
 
 	public void Remove(Notification notification)
 	{
-		DebugUtil.DevAssert(notification != null, "Trying to remove null notification. It's safe to continue playing.", null);
 		if (notification == null)
 		{
 			return;

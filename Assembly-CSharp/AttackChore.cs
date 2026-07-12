@@ -13,7 +13,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new AttackChore.StatesInstance(this);
-		base.smi.sm.attackTarget.Set(enemy, base.smi);
+		base.smi.sm.attackTarget.Set(enemy, base.smi, false);
 		Game.Instance.Trigger(1980521255, enemy);
 		base.SetPrioritizable(enemy.GetComponent<Prioritizable>());
 	}
@@ -65,7 +65,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.attacker.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.attacker.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 

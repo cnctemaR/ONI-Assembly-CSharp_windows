@@ -15,12 +15,22 @@ public class Deconstructable : Workable
 			Building component = base.GetComponent<Building>();
 			if (component != null)
 			{
-				return component.Def.PlacementOffsets;
+				CellOffset[] array = component.Def.PlacementOffsets;
+				Rotatable component2 = component.GetComponent<Rotatable>();
+				if (component2 != null)
+				{
+					array = new CellOffset[component.Def.PlacementOffsets.Length];
+					for (int i = 0; i < array.Length; i++)
+					{
+						array[i] = component2.GetRotatedCellOffset(component.Def.PlacementOffsets[i]);
+					}
+				}
+				return array;
 			}
-			OccupyArea component2 = base.GetComponent<OccupyArea>();
-			if (component2 != null)
+			OccupyArea component3 = base.GetComponent<OccupyArea>();
+			if (component3 != null)
 			{
-				return component2.OccupiedCellsOffsets;
+				return component3.OccupiedCellsOffsets;
 			}
 			if (this.looseEntityDeconstructable)
 			{
@@ -49,26 +59,28 @@ public class Deconstructable : Workable
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
 		this.workingPstComplete = null;
 		this.workingPstFailed = null;
-		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
-		CellOffset[] array2 = null;
 		Building component = base.GetComponent<Building>();
 		if (component != null && component.Def.IsTilePiece)
 		{
-			array = OffsetGroups.InvertedStandardTableWithCorners;
-			array2 = component.Def.ConstructionOffsetFilter;
 			base.SetWorkTime(component.Def.ConstructionTime * 0.5f);
+			return;
 		}
-		else
-		{
-			base.SetWorkTime(30f);
-		}
-		CellOffset[][] array3 = OffsetGroups.BuildReachabilityTable(this.placementOffsets, array, array2);
-		base.SetOffsetTable(array3);
+		base.SetWorkTime(30f);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		CellOffset[] array = null;
+		CellOffset[][] array2 = OffsetGroups.InvertedStandardTable;
+		Building component = base.GetComponent<Building>();
+		if (component != null && component.Def.IsTilePiece)
+		{
+			array2 = OffsetGroups.InvertedStandardTableWithCorners;
+			array = component.Def.ConstructionOffsetFilter;
+		}
+		CellOffset[][] array3 = OffsetGroups.BuildReachabilityTable(this.placementOffsets, array2, array);
+		base.SetOffsetTable(array3);
 		base.Subscribe<Deconstructable>(493375141, Deconstructable.OnRefreshUserMenuDelegate);
 		base.Subscribe<Deconstructable>(-111137758, Deconstructable.OnRefreshUserMenuDelegate);
 		base.Subscribe<Deconstructable>(2127324410, Deconstructable.OnCancelDelegate);
@@ -227,6 +239,10 @@ public class Deconstructable : Workable
 	private List<GameObject> SpawnItemsFromConstruction(float temperature, byte disease_idx, int disease_count)
 	{
 		List<GameObject> list = new List<GameObject>();
+		if (!this.allowDeconstruction)
+		{
+			return list;
+		}
 		Building component = base.GetComponent<Building>();
 		float[] array;
 		if (component != null)

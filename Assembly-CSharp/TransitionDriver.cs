@@ -17,11 +17,22 @@ public class TransitionDriver
 		this.log = new LoggerFS("TransitionDriver", 35);
 	}
 
-	public void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
+	public void BeginTransition(Navigator navigator, NavGrid.Transition transition, float defaultSpeed)
 	{
+		Navigator.ActiveTransition instance = TransitionDriver.TransitionPool.GetInstance();
+		instance.Init(transition, defaultSpeed);
+		this.BeginTransition(navigator, instance);
+	}
+
+	private void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
+	{
+		int count = this.interruptOverrideStack.Count;
 		foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
 		{
-			overrideLayer.BeginTransition(navigator, transition);
+			if (count == 0 || !(overrideLayer is TransitionDriver.InterruptOverrideLayer))
+			{
+				overrideLayer.BeginTransition(navigator, transition);
+			}
 		}
 		this.navigator = navigator;
 		this.transition = transition;
@@ -112,7 +123,12 @@ public class TransitionDriver
 		}
 		foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
 		{
-			overrideLayer.UpdateTransition(this.navigator, this.transition);
+			int count = this.interruptOverrideStack.Count;
+			bool flag = overrideLayer is TransitionDriver.InterruptOverrideLayer;
+			if (count == 0 || !flag || this.interruptOverrideStack.Peek() == overrideLayer)
+			{
+				overrideLayer.UpdateTransition(this.navigator, this.transition);
+			}
 		}
 		if (!this.isComplete && this.transition.isCompleteCB != null)
 		{
@@ -120,7 +136,7 @@ public class TransitionDriver
 		}
 		if (this.brain != null)
 		{
-			bool flag = this.isComplete;
+			bool flag2 = this.isComplete;
 		}
 		if (this.transition.isLooping)
 		{
@@ -185,6 +201,32 @@ public class TransitionDriver
 		}
 	}
 
+	public void EndTransition()
+	{
+		if (this.navigator != null)
+		{
+			this.interruptOverrideStack.Clear();
+			foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
+			{
+				overrideLayer.EndTransition(this.navigator, this.transition);
+			}
+			this.navigator.GetComponent<KAnimControllerBase>().PlaySpeedMultiplier = 1f;
+			this.navigator.Unsubscribe(-1061186183, new Action<object>(this.OnAnimComplete));
+			if (this.brain != null)
+			{
+				this.brain.Resume("move_handler");
+			}
+			if (this.navigator.animEventHandler != null)
+			{
+				this.navigator.animEventHandler.SetDirty();
+			}
+			TransitionDriver.TransitionPool.ReleaseInstance(this.transition);
+			this.transition = null;
+			this.navigator = null;
+			this.brain = null;
+		}
+	}
+
 	private void OnAnimComplete(object data)
 	{
 		if (this.navigator != null)
@@ -194,29 +236,19 @@ public class TransitionDriver
 		this.isComplete = true;
 	}
 
-	public void EndTransition()
+	public static Navigator.ActiveTransition SwapTransitionWithEmpty(Navigator.ActiveTransition src)
 	{
-		if (this.navigator != null)
-		{
-			Navigator navigator = this.navigator;
-			foreach (TransitionDriver.OverrideLayer overrideLayer in this.overrideLayers)
-			{
-				overrideLayer.EndTransition(this.navigator, this.transition);
-			}
-			this.navigator = null;
-			navigator.GetComponent<KAnimControllerBase>().PlaySpeedMultiplier = 1f;
-			navigator.Unsubscribe(-1061186183, new Action<object>(this.OnAnimComplete));
-			Brain component = navigator.GetComponent<Brain>();
-			if (component != null)
-			{
-				component.Resume("move_handler");
-			}
-			if (navigator.animEventHandler != null)
-			{
-				navigator.animEventHandler.SetDirty();
-			}
-		}
+		Navigator.ActiveTransition instance = TransitionDriver.TransitionPool.GetInstance();
+		instance.Copy(src);
+		src.Copy(TransitionDriver.emptyTransition);
+		return instance;
 	}
+
+	private static Navigator.ActiveTransition emptyTransition = new Navigator.ActiveTransition();
+
+	public static ObjectPool<Navigator.ActiveTransition> TransitionPool = new ObjectPool<Navigator.ActiveTransition>(() => new Navigator.ActiveTransition(), 128);
+
+	private Stack<TransitionDriver.InterruptOverrideLayer> interruptOverrideStack = new Stack<TransitionDriver.InterruptOverrideLayer>(8);
 
 	private Navigator.ActiveTransition transition;
 
@@ -253,5 +285,62 @@ public class TransitionDriver
 		public virtual void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)
 		{
 		}
+	}
+
+	public class InterruptOverrideLayer : TransitionDriver.OverrideLayer
+	{
+		protected bool InterruptInProgress
+		{
+			get
+			{
+				return this.originalTransition != null;
+			}
+		}
+
+		public InterruptOverrideLayer(Navigator navigator)
+			: base(navigator)
+		{
+			this.driver = navigator.transitionDriver;
+		}
+
+		public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
+		{
+			this.driver.interruptOverrideStack.Push(this);
+			this.originalTransition = TransitionDriver.SwapTransitionWithEmpty(transition);
+		}
+
+		public override void UpdateTransition(Navigator navigator, Navigator.ActiveTransition transition)
+		{
+			if (!this.IsOverrideComplete())
+			{
+				return;
+			}
+			this.driver.interruptOverrideStack.Pop();
+			transition.Copy(this.originalTransition);
+			TransitionDriver.TransitionPool.ReleaseInstance(this.originalTransition);
+			this.originalTransition = null;
+			this.EndTransition(navigator, transition);
+			this.driver.BeginTransition(navigator, transition);
+		}
+
+		public override void EndTransition(Navigator navigator, Navigator.ActiveTransition transition)
+		{
+			base.EndTransition(navigator, transition);
+			if (this.originalTransition == null)
+			{
+				return;
+			}
+			TransitionDriver.TransitionPool.ReleaseInstance(this.originalTransition);
+			this.originalTransition = null;
+		}
+
+		protected virtual bool IsOverrideComplete()
+		{
+			return this.originalTransition != null && this.driver.interruptOverrideStack.Count != 0 && this.driver.interruptOverrideStack.Peek() == this;
+		}
+
+		protected Navigator.ActiveTransition originalTransition;
+
+		protected TransitionDriver driver;
 	}
 }

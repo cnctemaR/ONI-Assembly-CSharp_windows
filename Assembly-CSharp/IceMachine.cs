@@ -88,7 +88,7 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 					flag = true;
 				}
 			}
-			base.sm.doneFreezingIce.Set(flag, this);
+			base.sm.doneFreezingIce.Set(flag, this, false);
 		}
 
 		private MeterController meter;

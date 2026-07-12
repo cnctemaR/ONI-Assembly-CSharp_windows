@@ -82,7 +82,7 @@ public class NuclearReactorConfig : IBuildingConfig
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.PowerFetch.IdHash;
 		manualDeliveryKG.capacity = 180f;
-		manualDeliveryKG.minimumMass = 0.5f;
+		manualDeliveryKG.MinimumMass = 0.5f;
 		go.AddOrGet<Reactor>();
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);

@@ -22,7 +22,7 @@ public class CropTendingMonitor : GameStateMachine<CropTendingMonitor, CropTendi
 		});
 		this.reset.Exit(delegate(CropTendingMonitor.Instance smi)
 		{
-			this.cooldownTimer.Set(600f / smi.def.numCropsTendedPerCycle, smi);
+			this.cooldownTimer.Set(600f / smi.def.numCropsTendedPerCycle, smi, false);
 		}).GoTo(this.cooldown);
 	}
 

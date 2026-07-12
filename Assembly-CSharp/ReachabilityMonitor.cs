@@ -54,7 +54,7 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 				return;
 			}
 			int num = Grid.PosToCell(base.master);
-			base.sm.isReachable.Set(MinionGroupProber.Get().IsAllReachable(num, base.master.GetOffsets(num)), base.smi);
+			base.sm.isReachable.Set(MinionGroupProber.Get().IsAllReachable(num, base.master.GetOffsets(num)), base.smi, false);
 		}
 	}
 }

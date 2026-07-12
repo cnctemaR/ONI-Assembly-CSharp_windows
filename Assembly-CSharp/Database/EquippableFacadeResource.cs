@@ -12,7 +12,7 @@ namespace Database
 		public KAnimFile AnimFile { get; private set; }
 
 		public EquippableFacadeResource(string id, string buildOverride, string defID, string animFile)
-			: base(id, null, null)
+			: base(id, id)
 		{
 			this.DefID = defID;
 			this.BuildOverride = buildOverride;
@@ -21,6 +21,10 @@ namespace Database
 
 		public global::Tuple<Sprite, Color> GetUISprite()
 		{
+			if (this.AnimFile == null)
+			{
+				global::Debug.LogError("Facade AnimFile is null: " + this.DefID);
+			}
 			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(this.AnimFile, "ui", false, "");
 			return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (uispriteFromMultiObjectAnim != null) ? Color.white : Color.clear);
 		}

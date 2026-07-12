@@ -18,6 +18,8 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 	public class Def : StateMachine.BaseDef
 	{
 		public bool canSwim;
+
+		public bool checkHead = true;
 	}
 
 	public new class Instance : GameStateMachine<CreatureFallMonitor, CreatureFallMonitor.Instance, IStateMachineTarget, CreatureFallMonitor.Def>.GameInstance
@@ -61,7 +63,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			{
 				return false;
 			}
-			if (this.CanSwimAtCurrentLocation(true))
+			if (this.CanSwimAtCurrentLocation())
 			{
 				return false;
 			}
@@ -90,13 +92,13 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			return !Grid.IsValidCell(num2) || !Grid.Solid[num2];
 		}
 
-		public bool CanSwimAtCurrentLocation(bool check_head)
+		public bool CanSwimAtCurrentLocation()
 		{
 			if (base.def.canSwim)
 			{
 				Vector3 position = base.transform.GetPosition();
 				float num = 1f;
-				if (!check_head)
+				if (!base.def.checkHead)
 				{
 					num = 0.5f;
 				}

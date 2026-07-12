@@ -140,7 +140,7 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			{
 				NameDisplayScreen.Instance.SetThoughtBubbleDisplay(base.gameObject, true, thought.hoverText, thought.bubbleSprite, thought.sprite);
 			}
-			base.sm.thoughtDisplayTime.Set(thought.showTime, this);
+			base.sm.thoughtDisplayTime.Set(thought.showTime, this, false);
 			this.currentThought = thought;
 			if (thought.showImmediately)
 			{

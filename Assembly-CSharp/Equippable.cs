@@ -125,12 +125,13 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		}
 		base.GetComponent<KBatchedAnimController>().enabled = false;
 		base.GetComponent<KSelectable>().IsSelectable = false;
+		string name = base.GetComponent<KPrefabID>().PrefabTag.Name;
 		Effects component = slot.gameObject.GetComponent<MinionAssignablesProxy>().GetTargetGameObject().GetComponent<Effects>();
 		if (component != null)
 		{
 			foreach (Effect effect in this.def.EffectImmunites)
 			{
-				component.AddImmunity(effect);
+				component.AddImmunity(effect, name, true);
 			}
 		}
 		if (this.def.OnEquipCallBack != null)
@@ -150,6 +151,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Equipped);
 		base.GetComponent<KBatchedAnimController>().enabled = true;
 		base.GetComponent<KSelectable>().IsSelectable = true;
+		string name = base.GetComponent<KPrefabID>().PrefabTag.Name;
 		if (this.assignee != null)
 		{
 			Ownables soleOwner = this.assignee.GetSoleOwner();
@@ -163,7 +165,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 					{
 						foreach (Effect effect in this.def.EffectImmunites)
 						{
-							component.RemoveImmunity(effect);
+							component.RemoveImmunity(effect, name);
 						}
 					}
 				}

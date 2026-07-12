@@ -1,49 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class ObjectPool
+public class ObjectPool<T>
 {
-	public ObjectPool(Func<GameObject> instantiator, int initial_count = 0)
+	public ObjectPool(Func<T> instantiator, int initial_count = 0)
 	{
 		this.instantiator = instantiator;
-		this.unused = new List<GameObject>();
+		this.unused = new Stack<T>(initial_count);
 		for (int i = 0; i < initial_count; i++)
 		{
-			this.unused.Add(instantiator());
+			this.unused.Push(instantiator());
 		}
 	}
 
-	public GameObject GetInstance()
+	public virtual T GetInstance()
 	{
-		GameObject gameObject;
+		T t = default(T);
 		if (this.unused.Count > 0)
 		{
-			gameObject = this.unused[this.unused.Count - 1];
-			this.unused.RemoveAt(this.unused.Count - 1);
+			t = this.unused.Pop();
 		}
 		else
 		{
-			gameObject = this.instantiator();
+			t = this.instantiator();
 		}
-		return gameObject;
+		return t;
 	}
 
-	public void ReleaseInstance(GameObject go)
+	public void ReleaseInstance(T instance)
 	{
-		this.unused.Add(go);
-	}
-
-	public void Destroy()
-	{
-		for (int i = 0; i < this.unused.Count; i++)
+		if (object.Equals(instance, null))
 		{
-			global::UnityEngine.Object.Destroy(this.unused[i]);
+			return;
 		}
-		this.unused.Clear();
+		this.unused.Push(instance);
 	}
 
-	private List<GameObject> unused;
+	protected Stack<T> unused;
 
-	private Func<GameObject> instantiator;
+	protected Func<T> instantiator;
 }

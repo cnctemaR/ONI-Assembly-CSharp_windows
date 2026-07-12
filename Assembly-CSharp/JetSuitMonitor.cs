@@ -68,7 +68,7 @@ public class JetSuitMonitor : GameStateMachine<JetSuitMonitor, JetSuitMonitor.In
 		public Instance(IStateMachineTarget master, GameObject owner)
 			: base(master)
 		{
-			base.sm.owner.Set(owner, base.smi);
+			base.sm.owner.Set(owner, base.smi, false);
 			this.navigator = owner.GetComponent<Navigator>();
 			this.jet_suit_tank = master.GetComponent<JetSuitTank>();
 		}

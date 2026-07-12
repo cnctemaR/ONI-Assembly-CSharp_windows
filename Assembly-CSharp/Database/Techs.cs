@@ -148,7 +148,7 @@ namespace Database
 		{
 			new Tech("FarmingTech", new List<string> { "AlgaeHabitat", "PlanterBox", "RationBox", "Compost" }, this, null);
 			new Tech("FineDining", new List<string> { "CookingStation", "EggCracker", "DiningTable", "FarmTile" }, this, null);
-			new Tech("FoodRepurposing", new List<string> { "Juicer" }, this, null);
+			new Tech("FoodRepurposing", new List<string> { "Juicer", "SpiceGrinder" }, this, null);
 			new Tech("FinerDining", new List<string> { "GourmetCookingStation" }, this, null);
 			new Tech("Agriculture", new List<string> { "FarmStation", "FertilizerMaker", "Refrigerator", "HydroponicFarm", "ParkSign", "RadiationLight" }, this, null);
 			new Tech("Ranching", new List<string> { "RanchStation", "CreatureDeliveryPoint", "ShearingStation", "CreatureFeeder", "FlyingCreatureBait", "FishDeliveryPoint", "FishFeeder" }, this, null);

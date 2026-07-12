@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,7 +12,7 @@ public class IceSculptureConfig : IBuildingConfig
 		string text2 = "icesculpture_kanim";
 		int num3 = 10;
 		float num4 = 120f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] array = new string[] { "Ice" };
 		float num5 = 273.15f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
@@ -41,10 +40,7 @@ public class IceSculptureConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		Sculpture sculpture = go.AddComponent<Sculpture>();
-		sculpture.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.NAME, "slab", 0, false, Artable.Status.Ready));
-		sculpture.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.POORQUALITYNAME, "crap", 5, false, Artable.Status.Ugly));
-		sculpture.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.ICESCULPTURE.AVERAGEQUALITYNAME, "idle", 10, true, Artable.Status.Okay));
+		go.AddComponent<Sculpture>().defaultAnimName = "slab";
 	}
 
 	public const string ID = "IceSculpture";

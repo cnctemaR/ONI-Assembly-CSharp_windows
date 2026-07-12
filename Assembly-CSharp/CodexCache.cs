@@ -40,7 +40,7 @@ public static class CodexCache
 		text = CodexCache.FormatLinkID("creatures");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator.GenerateCreatureEntries(), Assets.GetSprite("codexIconCritters"), true, true, null));
 		text = CodexCache.FormatLinkID("plants");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), Assets.GetSprite("codexIconPlants"), true, true, null));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), null, true, true, null));
 		text = CodexCache.FormatLinkID("food");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.FOOD, CodexEntryGenerator.GenerateFoodEntries(), Assets.GetSprite("codexIconFood"), true, true, null));
 		text = CodexCache.FormatLinkID("buildings");
@@ -59,6 +59,10 @@ public static class CodexCache
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.EQUIPMENT, CodexEntryGenerator.GenerateEquipmentEntries(), Assets.GetSprite("codexIconEquipment"), true, true, null));
 		text = CodexCache.FormatLinkID("biomes");
 		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BIOMES, CodexEntryGenerator.GenerateBiomeEntries(), Assets.GetSprite("codexIconGeysers"), true, true, null));
+		text = CodexCache.FormatLinkID("rooms");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ROOMS, CodexEntryGenerator.GenerateRoomsEntries(), Assets.GetSprite("codexIconRooms"), true, true, null));
+		text = CodexCache.FormatLinkID("STORYTRAITS");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.STORYTRAITS, new Dictionary<string, CodexEntry>(), Assets.GetSprite("codexIconStoryTraits"), true, true, null));
 		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID("HOME"), UI.CODEX.CATEGORYNAMES.ROOT, dictionary, null, true, true, null);
 		CodexEntryGenerator.GeneratePageNotFound();
 		List<CategoryEntry> list = new List<CategoryEntry>();
@@ -317,17 +321,39 @@ public static class CodexCache
 		{
 			entry.name = Strings.Get(entry.title);
 		}
+		if (!string.IsNullOrEmpty(entry.iconAssetName))
+		{
+			try
+			{
+				entry.icon = Assets.GetSprite(entry.iconAssetName);
+				if (!entry.iconLockID.IsNullOrWhiteSpace())
+				{
+					entry.iconColor = (Game.Instance.unlocks.IsUnlocked(entry.iconLockID) ? Color.white : Color.black);
+				}
+				goto IL_016E;
+			}
+			catch
+			{
+				global::Debug.LogWarningFormat("Unable to get icon for asset name {0}", new object[] { entry.iconAssetName });
+				goto IL_016E;
+			}
+		}
 		if (!string.IsNullOrEmpty(entry.iconPrefabID))
 		{
 			try
 			{
 				entry.icon = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(entry.iconPrefabID).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, "");
+				if (!entry.iconLockID.IsNullOrWhiteSpace())
+				{
+					entry.iconColor = (Game.Instance.unlocks.IsUnlocked(entry.iconLockID) ? Color.white : Color.black);
+				}
 			}
 			catch
 			{
 				global::Debug.LogWarningFormat("Unable to get icon for prefabID {0}", new object[] { entry.iconPrefabID });
 			}
 		}
+		IL_016E:
 		if (!entry.parentId.IsNullOrWhiteSpace() && CodexCache.entries.ContainsKey(entry.parentId))
 		{
 			(CodexCache.entries[entry.parentId] as CategoryEntry).entriesInCategory.Add(entry);
@@ -428,22 +454,25 @@ public static class CodexCache
 		string text2 = folder.ToUpper();
 		foreach (string text3 in array)
 		{
-			try
+			if (!CodexCache.IsSubEntryAtPath(text3))
 			{
-				CodexEntry codexEntry = YamlIO.LoadFile<CodexEntry>(text3, new YamlIO.ErrorHandler(CodexCache.YamlParseErrorCB), CodexCache.widgetTagMappings);
-				if (codexEntry != null)
+				try
 				{
-					codexEntry.category = text2;
-					list.Add(codexEntry);
+					CodexEntry codexEntry = YamlIO.LoadFile<CodexEntry>(text3, new YamlIO.ErrorHandler(CodexCache.YamlParseErrorCB), CodexCache.widgetTagMappings);
+					if (codexEntry != null)
+					{
+						codexEntry.category = text2;
+						list.Add(codexEntry);
+					}
 				}
-			}
-			catch (Exception ex2)
-			{
-				DebugUtil.DevLogErrorFormat("CodexCache.CollectEntries failed to load [{0}]: {1}", new object[]
+				catch (Exception ex2)
 				{
-					text3,
-					ex2.ToString()
-				});
+					DebugUtil.DevLogErrorFormat("CodexCache.CollectEntries failed to load [{0}]: {1}", new object[]
+					{
+						text3,
+						ex2.ToString()
+					});
+				}
 			}
 		}
 		foreach (CodexEntry codexEntry2 in list)
@@ -472,25 +501,33 @@ public static class CodexCache
 		}
 		foreach (string text2 in array)
 		{
-			try
+			if (CodexCache.IsSubEntryAtPath(text2))
 			{
-				SubEntry subEntry = YamlIO.LoadFile<SubEntry>(text2, new YamlIO.ErrorHandler(CodexCache.YamlParseErrorCB), CodexCache.widgetTagMappings);
-				if (subEntry != null)
+				try
 				{
-					list.Add(subEntry);
+					SubEntry subEntry = YamlIO.LoadFile<SubEntry>(text2, new YamlIO.ErrorHandler(CodexCache.YamlParseErrorCB), CodexCache.widgetTagMappings);
+					if (subEntry != null)
+					{
+						list.Add(subEntry);
+					}
 				}
-			}
-			catch (Exception ex2)
-			{
-				DebugUtil.DevLogErrorFormat("CodexCache.CollectSubEntries failed to load [{0}]: {1}", new object[]
+				catch (Exception ex2)
 				{
-					text2,
-					ex2.ToString()
-				});
+					DebugUtil.DevLogErrorFormat("CodexCache.CollectSubEntries failed to load [{0}]: {1}", new object[]
+					{
+						text2,
+						ex2.ToString()
+					});
+				}
 			}
 		}
 		list.Sort((SubEntry x, SubEntry y) => x.title.CompareTo(y.title));
 		return list;
+	}
+
+	public static bool IsSubEntryAtPath(string path)
+	{
+		return Path.GetFileName(path).Contains("SubEntry");
 	}
 
 	private static string baseEntryPath;

@@ -35,8 +35,13 @@ public static class Debug
 		}
 	}
 
+	[Conditional("DEBUG")]
 	public static void Break()
 	{
+		if (Debugger.IsAttached)
+		{
+			Debugger.Break();
+		}
 	}
 
 	public static void LogException(Exception exception)
@@ -207,7 +212,6 @@ public static class Debug
 		if (!condition)
 		{
 			global::Debug.LogError("Assert failed");
-			global::Debug.Break();
 		}
 	}
 
@@ -216,7 +220,6 @@ public static class Debug
 		if (!condition)
 		{
 			global::Debug.LogError("Assert failed: " + ((message != null) ? message.ToString() : null));
-			global::Debug.Break();
 		}
 	}
 
@@ -225,7 +228,6 @@ public static class Debug
 		if (!condition)
 		{
 			global::Debug.LogError("Assert failed: " + ((message != null) ? message.ToString() : null), context);
-			global::Debug.Break();
 		}
 	}
 

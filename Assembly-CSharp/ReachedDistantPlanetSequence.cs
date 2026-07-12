@@ -37,13 +37,13 @@ public static class ReachedDistantPlanetSequence
 		}
 		CameraController.Instance.SetWorldInteractive(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, STOP_MODE.ALLOWFADEOUT);
-		CameraController.Instance.FadeOut(1f, 1f);
-		yield return new WaitForSecondsRealtime(3f);
+		CameraController.Instance.FadeOut(1f, 1f, null);
+		yield return SequenceUtil.WaitForSecondsRealtime(3f);
 		CameraController.Instance.SetTargetPos(cameraTagetMid, 15f, false);
 		CameraController.Instance.SetOverrideZoomSpeed(5f);
-		yield return new WaitForSecondsRealtime(1f);
+		yield return SequenceUtil.WaitForSecondsRealtime(1f);
 		AudioMixer.instance.Start(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot);
-		CameraController.Instance.FadeIn(0f, 1f);
+		CameraController.Instance.FadeIn(0f, 1f, null);
 		MusicManager.instance.PlaySong("Music_Victory_02_NIS", false);
 		foreach (object obj in Components.LiveMinionIdentities)
 		{
@@ -51,12 +51,14 @@ public static class ReachedDistantPlanetSequence
 			if (minionIdentity != null)
 			{
 				minionIdentity.GetComponent<Facing>().Face(cameraTagetMid.x);
-				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
-				new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+				Db db = Db.Get();
+				ChoreProvider component = minionIdentity.GetComponent<ChoreProvider>();
+				new EmoteChore(component, db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 2, null);
+				new EmoteChore(component, db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 2, null);
+				new EmoteChore(component, db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 2, null);
 			}
 		}
-		yield return new WaitForSecondsRealtime(0.5f);
+		yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
 		if (SpeedControlScreen.Instance.IsPaused)
 		{
 			SpeedControlScreen.Instance.Unpause(false);
@@ -68,28 +70,28 @@ public static class ReachedDistantPlanetSequence
 		int num;
 		for (int i = 0; i < 10; i = num + 1)
 		{
-			yield return new WaitForSecondsRealtime(0.5f);
+			yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
 			CameraController.Instance.SetOverrideZoomSpeed(baseZoomSpeed + (float)i * 0.006f);
 			num = i;
 		}
-		yield return new WaitForSecondsRealtime(6f);
-		CameraController.Instance.FadeOut(1f, 1f);
+		yield return SequenceUtil.WaitForSecondsRealtime(6f);
+		CameraController.Instance.FadeOut(1f, 1f, null);
 		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot, STOP_MODE.ALLOWFADEOUT);
-		yield return new WaitForSecondsRealtime(2f);
+		yield return SequenceUtil.WaitForSecondsRealtime(2f);
 		spacecraft.TemporallyTear();
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
 			SpeedControlScreen.Instance.Pause(false, false);
 		}
-		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
-		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.ReachedDistantPlanet.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false);
-		component.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.ReachedDistantPlanet.messageBody, Db.Get().ColonyAchievements.ReachedDistantPlanet.Id, Db.Get().ColonyAchievements.ReachedDistantPlanet.loopVideoName);
-		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
+		VideoScreen component2 = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
+		component2.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.ReachedDistantPlanet.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false);
+		component2.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.ReachedDistantPlanet.messageBody, Db.Get().ColonyAchievements.ReachedDistantPlanet.Id, Db.Get().ColonyAchievements.ReachedDistantPlanet.loopVideoName);
+		component2.OnStop = (global::System.Action)Delegate.Combine(component2.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);
-			CameraController.Instance.FadeIn(0f, 1f);
+			CameraController.Instance.FadeIn(0f, 1f, null);
 			CameraController.Instance.SetWorldInteractive(true);
 			HoverTextScreen.Instance.Show(true);
 			CameraController.Instance.SetOverrideZoomSpeed(1f);

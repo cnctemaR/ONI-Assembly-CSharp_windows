@@ -50,8 +50,8 @@ public class NoseconeHarvestConfig : IBuildingConfig
 		storage.useWideOffsets = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = SimHashes.Diamond.CreateTag();
-		manualDeliveryKG.minimumMass = storage.capacityKg;
+		manualDeliveryKG.RequestedItemTag = SimHashes.Diamond.CreateTag();
+		manualDeliveryKG.MinimumMass = storage.capacityKg;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = storage.capacityKg;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;

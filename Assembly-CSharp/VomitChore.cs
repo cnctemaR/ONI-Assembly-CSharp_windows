@@ -18,7 +18,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 		public StatesInstance(VomitChore master, GameObject vomiter, StatusItem status_item, Notification notification)
 			: base(master)
 		{
-			base.sm.vomiter.Set(vomiter, base.smi);
+			base.sm.vomiter.Set(vomiter, base.smi, false);
 			this.bodyTemperature = Db.Get().Amounts.Temperature.Lookup(vomiter);
 			this.statusItem = status_item;
 			this.notification = notification;

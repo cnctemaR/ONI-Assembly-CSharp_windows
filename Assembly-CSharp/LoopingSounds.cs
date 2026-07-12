@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMODUnity;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
@@ -52,9 +53,15 @@ public class LoopingSounds : KMonoBehaviour
 		return true;
 	}
 
+	public bool StartSound(EventReference event_ref)
+	{
+		string eventReferencePath = KFMOD.GetEventReferencePath(event_ref);
+		return this.StartSound(eventReferencePath);
+	}
+
 	public bool StartSound(string asset)
 	{
-		if (asset == null || asset == "")
+		if (asset.IsNullOrWhiteSpace())
 		{
 			global::Debug.LogWarning("Missing sound");
 			return false;
@@ -85,7 +92,7 @@ public class LoopingSounds : KMonoBehaviour
 
 	public bool StartSound(string asset, bool pause_on_game_pause = true, bool enable_culling = true, bool enable_camera_scaled_position = true)
 	{
-		if (asset == null || asset == "")
+		if (asset.IsNullOrWhiteSpace())
 		{
 			global::Debug.LogWarning("Missing sound");
 			return false;
@@ -155,6 +162,12 @@ public class LoopingSounds : KMonoBehaviour
 		LoopingSoundManager.StopSound(this.loopingSounds[i].handle);
 	}
 
+	public void StopSound(EventReference event_ref)
+	{
+		string eventReferencePath = KFMOD.GetEventReferencePath(event_ref);
+		this.StopSound(eventReferencePath);
+	}
+
 	public void StopSound(string asset)
 	{
 		for (int i = 0; i < this.loopingSounds.Count; i++)
@@ -193,6 +206,12 @@ public class LoopingSounds : KMonoBehaviour
 	{
 		base.OnCleanUp();
 		this.StopAllSounds();
+	}
+
+	public void SetParameter(EventReference event_ref, HashedString parameter, float value)
+	{
+		string eventReferencePath = KFMOD.GetEventReferencePath(event_ref);
+		this.SetParameter(eventReferencePath, parameter, value);
 	}
 
 	public void SetParameter(string path, HashedString parameter, float value)

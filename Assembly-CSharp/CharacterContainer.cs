@@ -57,7 +57,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	private IEnumerator DelayedGeneration()
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		this.GenerateCharacter(this.controller.IsStarterMinion, null);
 		yield break;
 	}

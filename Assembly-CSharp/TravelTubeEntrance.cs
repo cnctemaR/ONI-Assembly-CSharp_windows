@@ -218,7 +218,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private void UpdateCharge()
 	{
-		base.smi.sm.hasLaunchCharges.Set(this.HasLaunchPower, base.smi);
+		base.smi.sm.hasLaunchCharges.Set(this.HasLaunchPower, base.smi, false);
 		float num = Mathf.Clamp01(this.availableJoules / this.jouleCapacity);
 		this.meter.SetPositionPercent(num);
 		this.energyConsumer.UpdatePoweredStatus();
@@ -290,6 +290,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			: base(workable, "LaunchReactable", Db.Get().ChoreTypes.TravelTubeEntrance, WorkableReactable.AllowedDirection.Any)
 		{
 			this.entrance = entrance;
+			this.localCooldown = 2f;
 		}
 
 		public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
@@ -308,7 +309,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	private class WaitReactable : Reactable
 	{
 		public WaitReactable(TravelTubeEntrance entrance)
-			: base(entrance.gameObject, "WaitReactable", Db.Get().ChoreTypes.TravelTubeEntrance, 2, 1, false, 0f, 0f, float.PositiveInfinity)
+			: base(entrance.gameObject, "WaitReactable", Db.Get().ChoreTypes.TravelTubeEntrance, 2, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
 		{
 			this.entrance = entrance;
 			this.preventChoreInterruption = false;

@@ -1,4 +1,5 @@
 ﻿using System;
+using KSerialization;
 
 public class RepairableEquipment : KMonoBehaviour
 {
@@ -26,5 +27,19 @@ public class RepairableEquipment : KMonoBehaviour
 		}
 	}
 
+	protected override void OnSpawn()
+	{
+		if (!this.facadeID.IsNullOrWhiteSpace())
+		{
+			KAnim.Build.Symbol symbol = Db.GetEquippableFacades().Get(this.facadeID).AnimFile.GetData().build.GetSymbol("object");
+			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
+			component.TryRemoveSymbolOverride("object", 0);
+			component.AddSymbolOverride("object", symbol, 0);
+		}
+	}
+
 	public DefHandle defHandle;
+
+	[Serialize]
+	public string facadeID;
 }

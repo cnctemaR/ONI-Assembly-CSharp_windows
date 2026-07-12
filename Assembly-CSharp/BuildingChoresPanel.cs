@@ -9,7 +9,7 @@ public class BuildingChoresPanel : TargetScreen
 	public override bool IsValidForTarget(GameObject target)
 	{
 		KPrefabID component = target.GetComponent<KPrefabID>();
-		return component != null && component.HasTag(GameTags.HasChores) && !component.HasTag(GameTags.Minion);
+		return component != null && component.HasTag(GameTags.HasChores) && !component.IsPrefabID(GameTags.Minion);
 	}
 
 	protected override void OnPrefabInit()
@@ -42,12 +42,30 @@ public class BuildingChoresPanel : TargetScreen
 
 	private void RefreshDetails()
 	{
-		foreach (Chore chore in GlobalChoreProvider.Instance.chores)
+		int myParentWorldId = this.selectedTarget.GetMyParentWorldId();
+		List<Chore> list = null;
+		GlobalChoreProvider.Instance.choreWorldMap.TryGetValue(myParentWorldId, out list);
+		int num = 0;
+		while (list != null && num < list.Count)
 		{
+			Chore chore = list[num];
 			if (!chore.isNull && chore.gameObject == this.selectedTarget)
 			{
 				this.AddChoreEntry(chore);
 			}
+			num++;
+		}
+		List<FetchChore> list2 = null;
+		GlobalChoreProvider.Instance.fetchMap.TryGetValue(myParentWorldId, out list2);
+		int num2 = 0;
+		while (list2 != null && num2 < list2.Count)
+		{
+			FetchChore fetchChore = list2[num2];
+			if (!fetchChore.isNull && fetchChore.gameObject == this.selectedTarget)
+			{
+				this.AddChoreEntry(fetchChore);
+			}
+			num2++;
 		}
 		for (int i = this.activeDupeEntries; i < this.dupeEntries.Count; i++)
 		{

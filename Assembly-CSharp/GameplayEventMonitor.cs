@@ -42,7 +42,7 @@ public class GameplayEventMonitor : GameStateMachine<GameplayEventMonitor, Gamep
 	{
 		if (smi.fx != null)
 		{
-			smi.fx.sm.notificationCount.Set(smi.UnseenCount(), smi.fx);
+			smi.fx.sm.notificationCount.Set(smi.UnseenCount(), smi.fx, false);
 		}
 	}
 
@@ -142,7 +142,7 @@ public class GameplayEventMonitor : GameStateMachine<GameplayEventMonitor, Gamep
 				if (!gameplayEventInstance.seenNotification && gameplayEventInstance.GetEventPopupData != null)
 				{
 					gameplayEventInstance.seenNotification = true;
-					GameplayEventInstance.ShowEventPopup(gameplayEventInstance.GetEventPopupData());
+					EventInfoScreen.ShowPopup(gameplayEventInstance.GetEventPopupData());
 					break;
 				}
 			}

@@ -345,6 +345,30 @@ public class CodexEntry
 		}
 	}
 
+	public string iconLockID
+	{
+		get
+		{
+			return this._iconLockID;
+		}
+		set
+		{
+			this._iconLockID = value;
+		}
+	}
+
+	public string iconAssetName
+	{
+		get
+		{
+			return this._iconAssetName;
+		}
+		set
+		{
+			this._iconAssetName = value;
+		}
+	}
+
 	public bool disabled
 	{
 		get
@@ -434,6 +458,10 @@ public class CodexEntry
 	private Color _iconColor = Color.white;
 
 	private string _iconPrefabID;
+
+	private string _iconLockID;
+
+	private string _iconAssetName;
 
 	private bool _disabled;
 

@@ -310,6 +310,11 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		return this.sounds.Allocate(sound);
 	}
 
+	public static HandleVector<int>.Handle StartSound(EventReference event_ref, Vector3 pos, bool pause_on_game_pause = true, bool enable_culling = true)
+	{
+		return LoopingSoundManager.StartSound(KFMOD.GetEventReferencePath(event_ref), pos, pause_on_game_pause, enable_culling);
+	}
+
 	public static HandleVector<int>.Handle StartSound(string path, Vector3 pos, bool pause_on_game_pause = true, bool enable_culling = true)
 	{
 		if (string.IsNullOrEmpty(path))

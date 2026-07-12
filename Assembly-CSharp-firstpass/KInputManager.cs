@@ -79,6 +79,7 @@ public class KInputManager
 		KInputManager.SetUserActive();
 		if (!KInputManager.isFocused)
 		{
+			Input.ResetInputAxes();
 			foreach (KInputController kinputController in this.mControllers)
 			{
 				kinputController.HandleCancelInput();

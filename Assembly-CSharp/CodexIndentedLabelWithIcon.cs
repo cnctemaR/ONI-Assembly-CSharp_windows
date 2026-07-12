@@ -27,15 +27,16 @@ public class CodexIndentedLabelWithIcon : CodexWidget<CodexIndentedLabelWithIcon
 
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)
 	{
-		this.icon.ConfigureImage(contentGameObject.GetComponentInChildren<Image>());
+		Image componentInChildren = contentGameObject.GetComponentInChildren<Image>();
+		this.icon.ConfigureImage(componentInChildren);
+		this.label.ConfigureLabel(contentGameObject.GetComponentInChildren<LocText>(), textStyles);
 		if (this.icon.preferredWidth != -1 && this.icon.preferredHeight != -1)
 		{
-			LayoutElement component = contentGameObject.GetComponentInChildren<Image>().GetComponent<LayoutElement>();
+			LayoutElement component = componentInChildren.GetComponent<LayoutElement>();
 			component.minWidth = (float)this.icon.preferredHeight;
 			component.minHeight = (float)this.icon.preferredWidth;
 			component.preferredHeight = (float)this.icon.preferredHeight;
 			component.preferredWidth = (float)this.icon.preferredWidth;
 		}
-		this.label.ConfigureLabel(contentGameObject.GetComponentInChildren<LocText>(), textStyles);
 	}
 }

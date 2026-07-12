@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FMODUnity;
 using KMod;
 using UnityEngine;
 using UnityEngine.UI;
@@ -53,6 +54,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			if (!(kprefabID == null))
 			{
+				kprefabID.InitializeTags(true);
 				Assets.AddPrefab(kprefabID);
 			}
 		}
@@ -147,6 +149,11 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Hashtable hashtable = new Hashtable();
 		ElementsAudio.Instance.LoadData(AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<ElementAudioFileLoader>.Get().entries);
 		ElementLoader.Load(ref hashtable, dictionary);
+	}
+
+	public static string GetSimpleSoundEventName(EventReference event_ref)
+	{
+		return Assets.GetSimpleSoundEventName(KFMOD.GetEventReferencePath(event_ref));
 	}
 
 	public static string GetSimpleSoundEventName(string path)
@@ -246,6 +253,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			return;
 		}
+		prefab.InitializeTags(true);
 		prefab.UpdateSaveLoadTag();
 		if (Assets.PrefabsByTag.ContainsKey(prefab.PrefabTag))
 		{

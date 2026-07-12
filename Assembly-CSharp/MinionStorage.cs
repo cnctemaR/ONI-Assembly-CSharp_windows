@@ -49,9 +49,9 @@ public class MinionStorage : KMonoBehaviour
 		Accessorizer component2 = src_id.GetComponent<Accessorizer>();
 		dest_id.accessories = component2.GetAccessories();
 		ConsumableConsumer component3 = src_id.GetComponent<ConsumableConsumer>();
-		if (component3.forbiddenTags != null)
+		if (component3.forbiddenTagSet != null)
 		{
-			dest_id.forbiddenTags = new List<Tag>(component3.forbiddenTags);
+			dest_id.forbiddenTagSet = new HashSet<Tag>(component3.forbiddenTagSet);
 		}
 		MinionResume component4 = src_id.GetComponent<MinionResume>();
 		dest_id.MasteryBySkillID = component4.MasteryBySkillID;
@@ -67,6 +67,7 @@ public class MinionStorage : KMonoBehaviour
 		dest_id.attributeLevels = new List<AttributeLevels.LevelSaveLoad>(component6.SaveLoadLevels);
 		Effects component7 = src_id.GetComponent<Effects>();
 		dest_id.saveLoadEffects = component7.GetAllEffectsForSerialization();
+		dest_id.saveLoadImmunities = component7.GetAllImmunitiesForSerialization();
 		MinionStorage.StoreModifiers(src_id, dest_id);
 		Schedulable component8 = src_id.GetComponent<Schedulable>();
 		Schedule schedule = component8.GetSchedule();
@@ -111,9 +112,9 @@ public class MinionStorage : KMonoBehaviour
 			dest_id.GetComponent<Accessorizer>().SetAccessories(src_id.accessories);
 		}
 		ConsumableConsumer component = dest_id.GetComponent<ConsumableConsumer>();
-		if (src_id.forbiddenTags != null)
+		if (src_id.forbiddenTagSet != null)
 		{
-			component.forbiddenTags = src_id.forbiddenTags.ToArray();
+			component.forbiddenTagSet = new HashSet<Tag>(src_id.forbiddenTagSet);
 		}
 		if (src_id.MasteryBySkillID != null)
 		{
@@ -132,14 +133,25 @@ public class MinionStorage : KMonoBehaviour
 			component3.OnDeserialized();
 		}
 		Effects component4 = dest_id.GetComponent<Effects>();
+		if (src_id.saveLoadImmunities != null)
+		{
+			foreach (Effects.SaveLoadImmunities saveLoadImmunities in src_id.saveLoadImmunities)
+			{
+				if (Db.Get().effects.Exists(saveLoadImmunities.effectID))
+				{
+					Effect effect = Db.Get().effects.Get(saveLoadImmunities.effectID);
+					component4.AddImmunity(effect, saveLoadImmunities.giverID, saveLoadImmunities.saved);
+				}
+			}
+		}
 		if (src_id.saveLoadEffects != null)
 		{
 			foreach (Effects.SaveLoadEffect saveLoadEffect in src_id.saveLoadEffects)
 			{
 				if (Db.Get().effects.Exists(saveLoadEffect.id))
 				{
-					Effect effect = Db.Get().effects.Get(saveLoadEffect.id);
-					EffectInstance effectInstance = component4.Add(effect, saveLoadEffect.saved);
+					Effect effect2 = Db.Get().effects.Get(saveLoadEffect.id);
+					EffectInstance effectInstance = component4.Add(effect2, saveLoadEffect.saved);
 					if (effectInstance != null)
 					{
 						effectInstance.timeRemaining = saveLoadEffect.timeRemaining;

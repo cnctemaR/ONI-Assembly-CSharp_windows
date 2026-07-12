@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -55,6 +54,7 @@ public class OverlayLegend : KScreen
 
 	protected override void OnSpawn()
 	{
+		base.ConsumeMouseScroll = true;
 		base.OnSpawn();
 		if (OverlayLegend.Instance == null)
 		{
@@ -311,39 +311,6 @@ public class OverlayLegend : KScreen
 		this.filterMenu.ClearMenu();
 		this.filterMenu.gameObject.SetActive(false);
 		this.filterMenu = null;
-	}
-
-	private void PopulateNoiseLegend(OverlayLegend.OverlayInfo info)
-	{
-		if (info.infoUnits != null && info.infoUnits.Count > 0)
-		{
-			this.PopulateOverlayInfoUnits(info, false);
-		}
-		string[] names = Enum.GetNames(typeof(AudioEventManager.NoiseEffect));
-		Array values = Enum.GetValues(typeof(AudioEventManager.NoiseEffect));
-		Color[] dbColours = SimDebugView.dbColours;
-		for (int i = 0; i < names.Length; i++)
-		{
-			GameObject freeUnitObject = this.GetFreeUnitObject();
-			Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
-			component.gameObject.SetActive(true);
-			component.sprite = Assets.instance.LegendColourBox;
-			component.color = ((i == 0) ? new Color(1f, 1f, 1f, 0.7f) : Color.Lerp(dbColours[i * 2], dbColours[Mathf.Min(dbColours.Length - 1, i * 2 + 1)], 0.5f));
-			component.enabled = true;
-			component.type = Image.Type.Simple;
-			string text = names[i].ToUpper();
-			int num = (int)values.GetValue(i);
-			int num2 = (int)values.GetValue(i);
-			LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
-			componentInChildren.text = Strings.Get("STRINGS.UI.OVERLAYS.NOISE_POLLUTION.NAMES." + text) + " " + string.Format(UI.OVERLAYS.NOISE_POLLUTION.RANGE, num);
-			componentInChildren.color = Color.white;
-			componentInChildren.enabled = true;
-			ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
-			component2.enabled = true;
-			component2.toolTip = string.Format(Strings.Get("STRINGS.UI.OVERLAYS.NOISE_POLLUTION.TOOLTIPS." + text), num, num2);
-			freeUnitObject.SetActive(true);
-			freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
-		}
 	}
 
 	public static OverlayLegend Instance;

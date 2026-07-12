@@ -22,7 +22,7 @@ public class BlightVulnerable : StateMachineComponent<BlightVulnerable.StatesIns
 	public void MakeBlighted()
 	{
 		Debug.Log("Blighting plant", this);
-		base.smi.sm.isBlighted.Set(true, base.smi);
+		base.smi.sm.isBlighted.Set(true, base.smi, false);
 	}
 
 	private SchedulerHandle handle;

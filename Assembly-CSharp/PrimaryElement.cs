@@ -194,7 +194,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			DebugUtil.DevLogErrorFormat(base.gameObject, "{0} is getting an abnormal mass set {1}.", new object[]
 			{
 				base.gameObject.name,
-				this.Mass
+				mass
 			});
 		}
 		mass = Mathf.Clamp(mass, 0f, PrimaryElement.MAX_MASS);
@@ -349,9 +349,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		if (component != null)
 		{
 			List<Tag> list = new List<Tag>();
-			Element element = this.Element;
-			list.Add(GameTagExtensions.Create(element.id));
-			foreach (Tag tag in element.oreTags)
+			foreach (Tag tag in this.Element.oreTags)
 			{
 				list.Add(tag);
 			}

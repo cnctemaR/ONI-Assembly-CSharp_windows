@@ -48,10 +48,10 @@ public class IceMachineConfig : IBuildingConfig
 		iceMachine.heatRemovalRate = 20f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = GameTags.Water;
+		manualDeliveryKG.RequestedItemTag = GameTags.Water;
 		manualDeliveryKG.capacity = 30f;
 		manualDeliveryKG.refillMass = 6f;
-		manualDeliveryKG.minimumMass = 10f;
+		manualDeliveryKG.MinimumMass = 10f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 	}
 

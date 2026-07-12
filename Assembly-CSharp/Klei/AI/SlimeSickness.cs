@@ -17,7 +17,7 @@ namespace Klei.AI
 				new AttributeModifier("Athletics", -3f, DUPLICANTS.DISEASES.SLIMESICKNESS.NAME, false, false, true)
 			}));
 			base.AddSicknessComponent(new AnimatedSickness(new HashedString[] { "anim_idle_sick_kanim" }, Db.Get().Expressions.Sick));
-			base.AddSicknessComponent(new PeriodicEmoteSickness("anim_idle_sick_kanim", new HashedString[] { "idle_pre", "idle_default", "idle_pst" }, 50f));
+			base.AddSicknessComponent(new PeriodicEmoteSickness(Db.Get().Emotes.Minion.Sick, 50f));
 			base.AddSicknessComponent(new SlimeSickness.SlimeLungComponent());
 		}
 
@@ -62,14 +62,11 @@ namespace Klei.AI
 
 				public Reactable GetReactable()
 				{
-					return new SelfEmoteReactable(base.master.gameObject, "SlimeLungCough", Db.Get().ChoreTypes.Cough, "anim_slimelungcough_kanim", 0f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-					{
-						anim = "react",
-						finishcb = new Action<GameObject>(this.ProduceSlime)
-					}).AddStep(new EmoteReactable.EmoteStep
-					{
-						startcb = new Action<GameObject>(this.FinishedCoughing)
-					});
+					Emote cough = Db.Get().Emotes.Minion.Cough;
+					SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, "SlimeLungCough", Db.Get().ChoreTypes.Cough, 0f, 0f, float.PositiveInfinity, 0f);
+					selfEmoteReactable.SetEmote(cough);
+					selfEmoteReactable.RegisterEmoteStepCallbacks("react", null, new Action<GameObject>(this.FinishedCoughing));
+					return selfEmoteReactable;
 				}
 
 				private void ProduceSlime(GameObject cougher)
@@ -91,6 +88,7 @@ namespace Klei.AI
 
 				private void FinishedCoughing(GameObject cougher)
 				{
+					this.ProduceSlime(cougher);
 					base.sm.coughFinished.Trigger(this);
 				}
 

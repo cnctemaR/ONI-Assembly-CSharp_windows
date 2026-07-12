@@ -601,16 +601,16 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 				{
 					this.CreateWorldTraitRow();
 				}
-				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(worldTraitIds[j], false);
+				WorldTrait cachedWorldTrait = SettingsCache.GetCachedWorldTrait(worldTraitIds[j], false);
 				Image reference = this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<Image>("Icon");
-				if (cachedTrait != null)
+				if (cachedWorldTrait != null)
 				{
-					Sprite sprite = Assets.GetSprite(cachedTrait.filePath.Substring(cachedTrait.filePath.LastIndexOf("/") + 1));
+					Sprite sprite = Assets.GetSprite(cachedWorldTrait.filePath.Substring(cachedWorldTrait.filePath.LastIndexOf("/") + 1));
 					reference.gameObject.SetActive(true);
 					reference.sprite = ((sprite == null) ? Assets.GetSprite("unknown") : sprite);
-					reference.color = global::Util.ColorFromHex(cachedTrait.colorHex);
-					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(Strings.Get(cachedTrait.name));
-					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip(Strings.Get(cachedTrait.description));
+					reference.color = global::Util.ColorFromHex(cachedWorldTrait.colorHex);
+					this.worldTraitRows[j].GetComponent<HierarchyReferences>().GetReference<LocText>("NameLabel").SetText(Strings.Get(cachedWorldTrait.name));
+					this.worldTraitRows[j].AddOrGet<ToolTip>().SetSimpleTooltip(Strings.Get(cachedWorldTrait.description));
 				}
 				else
 				{
@@ -1082,6 +1082,14 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 
 		public void Destroy(bool immediate)
 		{
+			if (this.toolTip != null)
+			{
+				this.toolTip.OnToolTip = null;
+			}
+			if (this.button != null && this.button.enabled)
+			{
+				this.button.onClick -= this.OnClick;
+			}
 			if (immediate)
 			{
 				if (this.onDestroy != null)
@@ -1089,7 +1097,6 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 					this.onDestroy(this);
 				}
 				SimAndRenderScheduler.instance.Remove(this);
-				this.toolTip.OnToolTip = null;
 				global::UnityEngine.Object.Destroy(this.widget);
 				return;
 			}

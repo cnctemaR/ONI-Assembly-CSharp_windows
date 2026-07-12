@@ -107,7 +107,7 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		base.Subscribe<OxidizerTank>(-905833192, OxidizerTank.OnCopySettingsDelegate);
 		if (this.supportsMultipleOxidizers)
 		{
-			this.filteredStorage = new FilteredStorage(this, null, null, this, true, Db.Get().ChoreTypes.Fetch);
+			this.filteredStorage = new FilteredStorage(this, null, this, true, Db.Get().ChoreTypes.Fetch);
 		}
 	}
 

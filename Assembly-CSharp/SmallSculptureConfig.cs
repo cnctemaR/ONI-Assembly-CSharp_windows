@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,7 +12,7 @@ public class SmallSculptureConfig : IBuildingConfig
 		string text2 = "sculpture_1x2_kanim";
 		int num3 = 10;
 		float num4 = 60f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
@@ -41,13 +40,7 @@ public class SmallSculptureConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		Sculpture sculpture = go.AddComponent<Sculpture>();
-		sculpture.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.SMALLSCULPTURE.NAME, "slab", 0, false, Artable.Status.Ready));
-		sculpture.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.SMALLSCULPTURE.POORQUALITYNAME, "crap_1", 5, false, Artable.Status.Ugly));
-		sculpture.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.SMALLSCULPTURE.AVERAGEQUALITYNAME, "good_1", 10, false, Artable.Status.Okay));
-		sculpture.stages.Add(new Artable.Stage("Good", global::STRINGS.BUILDINGS.PREFABS.SMALLSCULPTURE.EXCELLENTQUALITYNAME, "amazing_1", 15, true, Artable.Status.Great));
-		sculpture.stages.Add(new Artable.Stage("Good2", global::STRINGS.BUILDINGS.PREFABS.SMALLSCULPTURE.EXCELLENTQUALITYNAME, "amazing_2", 15, true, Artable.Status.Great));
-		sculpture.stages.Add(new Artable.Stage("Good3", global::STRINGS.BUILDINGS.PREFABS.SMALLSCULPTURE.EXCELLENTQUALITYNAME, "amazing_3", 15, true, Artable.Status.Great));
+		go.AddComponent<Sculpture>().defaultAnimName = "slab";
 	}
 
 	public const string ID = "SmallSculpture";

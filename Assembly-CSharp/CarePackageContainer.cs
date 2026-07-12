@@ -35,7 +35,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 
 	private IEnumerator DelayedGeneration()
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		if (this.controller != null)
 		{
 			this.GenerateCharacter(this.controller.IsStarterMinion);
@@ -99,7 +99,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		this.carePackageInstanceData.info = this.info;
 		if (this.info.facadeID == "SELECTRANDOM")
 		{
-			this.carePackageInstanceData.facadeID = Db.Get().EquippableFacades.resources.FindAll((EquippableFacadeResource match) => match.DefID == this.info.id).GetRandom<EquippableFacadeResource>().Id;
+			this.carePackageInstanceData.facadeID = Db.GetEquippableFacades().resources.FindAll((EquippableFacadeResource match) => match.DefID == this.info.id).GetRandom<EquippableFacadeResource>().Id;
 		}
 		else
 		{

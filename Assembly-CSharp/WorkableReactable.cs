@@ -4,7 +4,7 @@ using UnityEngine;
 public class WorkableReactable : Reactable
 {
 	public WorkableReactable(Workable workable, HashedString id, ChoreType chore_type, WorkableReactable.AllowedDirection allowed_direction = WorkableReactable.AllowedDirection.Any)
-		: base(workable.gameObject, id, chore_type, 1, 1, false, 0f, 0f, float.PositiveInfinity)
+		: base(workable.gameObject, id, chore_type, 1, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
 	{
 		this.workable = workable;
 		this.allowedDirection = allowed_direction;

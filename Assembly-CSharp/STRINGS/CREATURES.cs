@@ -32,6 +32,8 @@ namespace STRINGS
 
 			public static LocString CRAB = UI.FormatAsLink("Pokeshell", "CRABSPECIES");
 
+			public static LocString STATERPILLAR = UI.FormatAsLink("Plug Slug", "STATERPILLARSPECIES");
+
 			public static LocString DIVERGENTSPECIES = UI.FormatAsLink("Divergent", "DIVERGENTSPECIES");
 
 			public static LocString SWEEPBOT = UI.FormatAsLink("Sweepies", "SWEEPBOT");
@@ -188,7 +190,7 @@ namespace STRINGS
 
 				public class VARIANT_WOOD
 				{
-					public static LocString NAME = UI.FormatAsLink("Oakshelll", "CRABWOOD");
+					public static LocString NAME = UI.FormatAsLink("Oakshell", "CRABWOOD");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
@@ -223,7 +225,7 @@ namespace STRINGS
 					{
 						"Sanishells are nonhostile critters that thrive in  ",
 						UI.FormatAsLink("Water", "WATER"),
-						" and eliminates ",
+						" and eliminate ",
 						UI.FormatAsLink("Germs", "DISEASE"),
 						" from any liquid it inhabits.\n\nThey eat ",
 						UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
@@ -425,6 +427,54 @@ namespace STRINGS
 					public static LocString NAME = UI.FormatAsLink("Plug Sluglet", "STATERPILLAR");
 
 					public static LocString DESC = "A chubby little Plug Sluglet.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Plug Slug", "STATERPILLAR") + ".";
+				}
+
+				public class VARIANT_GAS
+				{
+					public static LocString NAME = UI.FormatAsLink("Smog Slug", "STATERPILLAR");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"Smog Slugs are porous creatures that draw in unbreathable ",
+						UI.FormatAsLink("Gases", "ELEMENTS_GAS"),
+						" during the day.\n\nAt night, they sleep near exposed ",
+						UI.FormatAsLink("Gas Pipes,", "GASCONDUIT"),
+						" where they deposit their cache."
+					});
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Smog Slug Egg", "STATERPILLAR");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Smog Sluglet", "STATERPILLAR");
+
+						public static LocString DESC = "A tubby little Smog Sluglet.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Smog Slug", "STATERPILLAR") + ".";
+					}
+				}
+
+				public class VARIANT_LIQUID
+				{
+					public static LocString NAME = UI.FormatAsLink("Sponge Slug", "STATERPILLAR");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"Sponge Slugs are thirsty creatures that soak up ",
+						UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID"),
+						" during the day.\n\nThey deposit their stored ",
+						UI.FormatAsLink("Liquids", "ELEMENTS_LIQUID"),
+						" into the exposed ",
+						UI.FormatAsLink("Liquid Pipes", "LIQUIDCONDUIT"),
+						" they sleep next to at night."
+					});
+
+					public static LocString EGG_NAME = UI.FormatAsLink("Sponge Slug Egg", "STATERPILLAR");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Sponge Sluglet", "STATERPILLAR");
+
+						public static LocString DESC = "A chonky little Sponge Sluglet.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Sponge Slug", "STATERPILLAR") + ".";
+					}
 				}
 			}
 
@@ -2021,6 +2071,13 @@ namespace STRINGS
 		{
 			public static LocString NAME_NON_GROWING_PLANT = "Wilted";
 
+			public class DROWSY
+			{
+				public static LocString NAME = "Drowsy";
+
+				public static LocString TOOLTIP = "This critter is looking for a place to nap";
+			}
+
 			public class SLEEPING
 			{
 				public static LocString NAME = "Sleeping";
@@ -2174,6 +2231,34 @@ namespace STRINGS
 				public static LocString NAME = "Foraging";
 
 				public static LocString TOOLTIP = "This critter is hungry and looking for " + UI.PRE_KEYWORD + "Food" + UI.PST_KEYWORD;
+			}
+
+			public class LOOKINGFORLIQUID
+			{
+				public static LocString NAME = "Parched";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is looking for ",
+					UI.PRE_KEYWORD,
+					"Liquids",
+					UI.PST_KEYWORD,
+					" to mop up"
+				});
+			}
+
+			public class LOOKINGFORGAS
+			{
+				public static LocString NAME = "Seeking Gas";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is on the lookout for unbreathable ",
+					UI.PRE_KEYWORD,
+					"Gases",
+					UI.PST_KEYWORD,
+					" to collect"
+				});
 			}
 
 			public class IDLE
@@ -2613,9 +2698,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This farm is storing materials that are not suitable for this plant",
-					UI.HORIZONTAL_BR_RULE,
-					"Empty this building's ",
+					"This farm is storing materials that are not suitable for this plant\n\nEmpty this building's ",
 					UI.PRE_KEYWORD,
 					"Storage",
 					UI.PST_KEYWORD,
@@ -2629,7 +2712,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the unusable materials";
+				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant\n\nEmpty this building's storage to remove the unusable materials";
 
 				public static LocString LINE_ITEM = "            • {0}: {1}\n";
 			}
@@ -2640,8 +2723,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This farm is storing materials that are not suitable for this plant",
-					UI.HORIZONTAL_BR_RULE,
+					"This farm is storing materials that are not suitable for this plant\n\n",
 					UI.PRE_KEYWORD,
 					"Empty Storage",
 					UI.PST_KEYWORD,
@@ -2657,8 +2739,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This farm is storing materials that are not suitable for this plant",
-					UI.HORIZONTAL_BR_RULE,
+					"This farm is storing materials that are not suitable for this plant\n\n",
 					UI.PRE_KEYWORD,
 					"Empty Storage",
 					UI.PST_KEYWORD,
@@ -3025,7 +3106,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "External Temperature";
 
-				public static LocString TOOLTIP = "External Temperature" + UI.HORIZONTAL_BR_RULE + "This critter's environment is {0}";
+				public static LocString TOOLTIP = "External Temperature\n\nThis critter's environment is {0}";
 			}
 
 			public class RECEPTACLEOPERATIONAL
@@ -3209,6 +3290,13 @@ namespace STRINGS
 					" quills are fully grown\n\nPreferred food temperature range: {templo}-{temphi}"
 				});
 			}
+
+			public class GRAVITAS_CREATURE_MANIPULATOR_COOLDOWN
+			{
+				public static LocString NAME = "Processing Sample: {percent}";
+
+				public static LocString TOOLTIP = "This building is busy analyzing genetic data from a recently scanned specimen\n\nRemaining: {timeleft}";
+			}
 		}
 
 		public class STATS
@@ -3236,7 +3324,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Growth Progress";
 
-				public static LocString TOOLTIP = "Growth Progress" + UI.HORIZONTAL_BR_RULE;
+				public static LocString TOOLTIP = "Growth Progress\n\n";
 
 				public static LocString TOOLTIP_GROWING = "Predicted Maturation: <b>{0}</b>";
 
@@ -3526,6 +3614,20 @@ namespace STRINGS
 				public static LocString NAME = "Life Cycle";
 
 				public static LocString DESC = "The amount of time it takes this plant to grow.";
+			}
+
+			public class ROTDELTA
+			{
+				public static LocString NAME = "Freshness";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Food items become stale at fifty percent ",
+					UI.PRE_KEYWORD,
+					"Freshness",
+					UI.PST_KEYWORD,
+					", and rot at zero percent"
+				});
 			}
 		}
 
@@ -3817,6 +3919,10 @@ namespace STRINGS
 				public static LocString NAME = "Habitat";
 
 				public static LocString DESC = "Dwells in {0}";
+
+				public static LocString UNBREATHABLE = "Dwells in unbreathable" + UI.FormatAsLink("Gas", "UNBREATHABLE");
+
+				public static LocString LIQUID = "Dwells in " + UI.FormatAsLink("Liquid", "LIQUID");
 			}
 		}
 	}

@@ -46,6 +46,16 @@ namespace Klei.AI
 			this.Value = value;
 		}
 
+		public string GetName()
+		{
+			Attribute attribute = Db.Get().Attributes.TryGet(this.AttributeId);
+			if (attribute != null && attribute.ShowInUI != Attribute.Display.Never)
+			{
+				return attribute.Name;
+			}
+			return "";
+		}
+
 		public string GetDescription()
 		{
 			if (this.DescriptionCB == null)

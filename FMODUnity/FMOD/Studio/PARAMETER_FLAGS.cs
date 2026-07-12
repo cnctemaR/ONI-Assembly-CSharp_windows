@@ -8,6 +8,7 @@ namespace FMOD.Studio
 		READONLY = 1U,
 		AUTOMATIC = 2U,
 		GLOBAL = 4U,
-		DISCRETE = 8U
+		DISCRETE = 8U,
+		LABELED = 16U
 	}
 }

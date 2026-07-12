@@ -59,6 +59,7 @@ public class MaterialSelectionPanel : KScreen
 		this.ResearchRequired.SetActive(false);
 		this.priorityScreen = Util.KInstantiateUI<PriorityScreen>(this.priorityScreenPrefab.gameObject, this.priorityScreenParent, false);
 		this.priorityScreen.InstantiateButtons(new Action<PrioritySetting>(this.OnPriorityClicked), true);
+		this.priorityScreenParent.transform.SetAsLastSibling();
 		this.gameSubscriptionHandles.Add(Game.Instance.Subscribe(-107300940, delegate(object d)
 		{
 			this.RefreshSelectors();
@@ -150,6 +151,7 @@ public class MaterialSelectionPanel : KScreen
 			componentsInChildren[1].text = text;
 			componentsInChildren[1].color = Constants.NEGATIVE_COLOR;
 			this.priorityScreen.gameObject.SetActive(false);
+			this.buildToolRotateButton.gameObject.SetActive(false);
 			return;
 		}
 		this.ResearchRequired.SetActive(false);
@@ -159,7 +161,9 @@ public class MaterialSelectionPanel : KScreen
 			this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
 		}
 		this.priorityScreen.gameObject.SetActive(true);
-		this.priorityScreen.gameObject.transform.SetAsLastSibling();
+		this.priorityScreen.transform.SetAsLastSibling();
+		this.buildToolRotateButton.gameObject.SetActive(true);
+		this.buildToolRotateButton.transform.SetAsLastSibling();
 	}
 
 	public void UpdateResourceToggleValues()
@@ -286,6 +290,9 @@ public class MaterialSelectionPanel : KScreen
 
 	[SerializeField]
 	protected GameObject priorityScreenParent;
+
+	[SerializeField]
+	protected BuildToolRotateButtonUI buildToolRotateButton;
 
 	private PriorityScreen priorityScreen;
 

@@ -47,8 +47,8 @@ public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 			this.emoteKAnim = emote_kanim;
 			this.emoteAnims = emote_anims;
 			this.mode = mode;
-			base.sm.reactable.Set(reactable, base.smi);
-			base.sm.emoter.Set(emoter, base.smi);
+			base.sm.reactable.Set(reactable, base.smi, false);
+			base.sm.emoter.Set(emoter, base.smi, false);
 		}
 
 		public HashedString[] emoteAnims;

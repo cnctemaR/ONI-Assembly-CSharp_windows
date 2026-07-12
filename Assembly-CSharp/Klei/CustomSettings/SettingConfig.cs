@@ -5,7 +5,7 @@ namespace Klei.CustomSettings
 {
 	public abstract class SettingConfig
 	{
-		public SettingConfig(string id, string label, string tooltip, string default_level_id, string nosweat_default_level_id, int coordinate_dimension = -1, int coordinate_dimension_width = -1, bool debug_only = false, bool triggers_custom_game = true, string required_content = "", string missing_content_default = "", bool editor_only = false)
+		public SettingConfig(string id, string label, string tooltip, string default_level_id, string nosweat_default_level_id, long coordinate_dimension = -1L, long coordinate_dimension_width = -1L, bool debug_only = false, bool triggers_custom_game = true, string required_content = "", string missing_content_default = "", bool editor_only = false)
 		{
 			this.id = id;
 			this.label = label;
@@ -27,9 +27,9 @@ namespace Klei.CustomSettings
 
 		public string tooltip { get; private set; }
 
-		public int coordinate_dimension { get; protected set; }
+		public long coordinate_dimension { get; protected set; }
 
-		public int coordinate_dimension_width { get; protected set; }
+		public long coordinate_dimension_width { get; protected set; }
 
 		public string required_content { get; private set; }
 

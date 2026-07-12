@@ -969,7 +969,7 @@ namespace ProcGenGame
 		{
 			TerrainCell.SetValuesFunction setValuesFunction = delegate(int index, object elem, Sim.PhysicsData pd, Sim.DiseaseCell dc)
 			{
-				SimMessages.ModifyCell(index, ElementLoader.GetElementIndex((elem as Element).id), pd.temperature, pd.mass, dc.diseaseIdx, dc.elementCount, SimMessages.ReplaceType.Replace, false, -1);
+				SimMessages.ModifyCell(index, (elem as Element).idx, pd.temperature, pd.mass, dc.diseaseIdx, dc.elementCount, SimMessages.ReplaceType.Replace, false, -1);
 			};
 			this.DoProcess(worldGen, world, setValuesFunction, rnd);
 		}
@@ -982,16 +982,6 @@ namespace ProcGenGame
 				DebugUtil.DevLogError(string.Format("DistanceToTag could not find tag '{0}', did forget to include a start template?", tag));
 			}
 			return num;
-		}
-
-		public bool IsSafeToSpawnFeatureTemplate(Tag additionalTag)
-		{
-			return !this.node.tags.Contains(additionalTag) && !this.node.tags.ContainsOne(TerrainCell.noFeatureSpawnTagSet);
-		}
-
-		public bool IsSafeToSpawnFeatureTemplate(bool log = true)
-		{
-			return !this.node.tags.ContainsOne(TerrainCell.noFeatureSpawnTagSet);
 		}
 
 		public bool IsSafeToSpawnPOI(List<TerrainCell> allCells, bool log = true)
@@ -1030,17 +1020,6 @@ namespace ProcGenGame
 		private HashSet<int> availableSpawnPoints;
 
 		public const int DONT_SET_TEMPERATURE_DEFAULTS = -1;
-
-		private static readonly Tag[] noFeatureSpawnTags = new Tag[]
-		{
-			WorldGenTags.StartLocation,
-			WorldGenTags.AtStart,
-			WorldGenTags.NearStartLocation,
-			WorldGenTags.POI,
-			WorldGenTags.Feature
-		};
-
-		private static readonly TagSet noFeatureSpawnTagSet = new TagSet(TerrainCell.noFeatureSpawnTags);
 
 		private static readonly Tag[] noPOISpawnTags = new Tag[]
 		{

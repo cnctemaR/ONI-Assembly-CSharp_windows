@@ -38,8 +38,8 @@ public static class BasePuftConfig
 		{
 			text = "PuftBaby_air_intake";
 		}
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
-			.Add(new IncubatingStates.Def(), true, -1)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
+			.Add(new IncubatingStates.Def(), is_baby, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
@@ -47,15 +47,15 @@ public static class BasePuftConfig
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new FixedCaptureStates.Def(), true, -1)
-			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), !is_baby, -1)
 			.Add(new UpTopPoopStates.Def(), true, -1)
-			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new InhaleStates.Def
 			{
 				inhaleSound = text
 			}, true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
-			.Add(new CallAdultStates.Def(), true, -1)
+			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{

@@ -30,7 +30,7 @@ public abstract class GameplayEventStateMachine<StateMachineType, StateMachineIn
 		}
 	}
 
-	public virtual GameplayEventPopupData GenerateEventPopupData(StateMachineInstanceType smi)
+	public virtual EventInfoData GenerateEventPopupData(StateMachineInstanceType smi)
 	{
 		return null;
 	}

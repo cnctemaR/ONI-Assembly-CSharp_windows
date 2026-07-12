@@ -94,11 +94,11 @@ public class ArtifactHarvestModule : GameStateMachine<ArtifactHarvestModule, Art
 				ArtifactPOIStates.Instance smi = poiatCurrentLocation.GetSMI<ArtifactPOIStates.Instance>();
 				if (smi != null && smi.CanHarvestArtifact() && this.receptacle.Occupant == null)
 				{
-					base.sm.canHarvest.Set(true, this);
+					base.sm.canHarvest.Set(true, this, false);
 					return true;
 				}
 			}
-			base.sm.canHarvest.Set(false, this);
+			base.sm.canHarvest.Set(false, this, false);
 			return false;
 		}
 

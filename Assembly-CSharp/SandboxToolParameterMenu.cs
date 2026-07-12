@@ -256,7 +256,7 @@ public class SandboxToolParameterMenu : KScreen
 		searchFilter4 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.CREATURE, (object entity) => false, null, Def.GetUISprite(Assets.GetPrefab("Hatch"), "ui", false));
 		list.Add(searchFilter4);
 		List<Tag> list2 = new List<Tag>();
-		foreach (GameObject gameObject in Assets.GetPrefabsWithTag("CreatureBrain".ToTag()))
+		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.CreatureBrain))
 		{
 			CreatureBrain brain = gameObject.GetComponent<CreatureBrain>();
 			if (!list2.Contains(brain.species))
@@ -266,7 +266,7 @@ public class SandboxToolParameterMenu : KScreen
 				SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter5 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(Strings.Get("STRINGS.CREATURES.FAMILY_PLURAL." + brain.species.ToString().ToUpper()), delegate(object entity)
 				{
 					CreatureBrain component = Assets.GetPrefab((entity as KPrefabID).PrefabID()).GetComponent<CreatureBrain>();
-					return (entity as KPrefabID).HasTag("CreatureBrain".ToString()) && component.species == brain.species;
+					return (entity as KPrefabID).HasTag(GameTags.CreatureBrain) && component.species == brain.species;
 				}, searchFilter4, tuple);
 				list.Add(searchFilter5);
 			}

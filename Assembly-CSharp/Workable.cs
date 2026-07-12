@@ -186,7 +186,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 		if (this.OnWorkableEventCB != null)
 		{
-			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStarted);
+			this.OnWorkableEventCB(this, Workable.WorkableEvent.WorkStarted);
 		}
 		this.numberOfUses++;
 		if (this.worker != null)
@@ -300,7 +300,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 		if (this.OnWorkableEventCB != null)
 		{
-			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStopped);
+			this.OnWorkableEventCB(this, Workable.WorkableEvent.WorkStopped);
 		}
 		this.OnStopWork(workerToStop);
 		if (this.resetProgressOnStop)
@@ -344,11 +344,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		this.OnCompleteWork(worker);
 		if (this.OnWorkableEventCB != null)
 		{
-			this.OnWorkableEventCB(Workable.WorkableEvent.WorkCompleted);
-		}
-		if (this.OnWorkableEventCB != null)
-		{
-			this.OnWorkableEventCB(Workable.WorkableEvent.WorkStopped);
+			this.OnWorkableEventCB(this, Workable.WorkableEvent.WorkCompleted);
 		}
 		this.workTimeRemaining = this.GetWorkTime();
 		this.ShowProgressBar(false);
@@ -645,7 +641,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	[Serialize]
 	protected int numberOfUses;
 
-	public Action<Workable.WorkableEvent> OnWorkableEventCB;
+	public Action<Workable, Workable.WorkableEvent> OnWorkableEventCB;
 
 	private int skillsUpdateHandle = -1;
 

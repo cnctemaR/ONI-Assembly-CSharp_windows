@@ -148,11 +148,6 @@ public static class CodexEntryGenerator
 				if (gameObject.GetDef<BabyMonitor.Def>() == null)
 				{
 					Sprite sprite = null;
-					GameObject gameObject2 = Assets.TryGetPrefab(gameObject.PrefabID().ToString() + "Baby");
-					if (gameObject2 != null)
-					{
-						sprite = Def.GetUISprite(gameObject2, "ui", false).first;
-					}
 					CreatureBrain component = gameObject.GetComponent<CreatureBrain>();
 					if (!(component.species != speciesTag))
 					{
@@ -171,6 +166,11 @@ public static class CodexEntryGenerator
 						List<ContentContainer> list2 = new List<ContentContainer>();
 						string symbolPrefix = component.symbolPrefix;
 						Sprite first = Def.GetUISprite(gameObject, symbolPrefix + "ui", false).first;
+						GameObject gameObject2 = Assets.TryGetPrefab(gameObject.PrefabID().ToString() + "Baby");
+						if (gameObject2 != null)
+						{
+							sprite = Def.GetUISprite(gameObject2, "ui", false).first;
+						}
 						if (sprite)
 						{
 							CodexEntryGenerator.GenerateImageContainers(new Sprite[] { first, sprite }, list2, ContentContainer.ContentLayout.Horizontal);
@@ -205,6 +205,50 @@ public static class CodexEntryGenerator
 		action(GameTags.Creatures.Species.DivergentSpecies, global::STRINGS.CREATURES.FAMILY_PLURAL.DIVERGENTSPECIES);
 		action(GameTags.Robots.Models.SweepBot, global::STRINGS.CREATURES.FAMILY_PLURAL.SWEEPBOT);
 		return results;
+	}
+
+	public static Dictionary<string, CodexEntry> GenerateRoomsEntries()
+	{
+		Dictionary<string, CodexEntry> result = new Dictionary<string, CodexEntry>();
+		RoomTypes roomTypesData = Db.Get().RoomTypes;
+		string parentCategoryName = "ROOMS";
+		Action<RoomTypeCategory> action = delegate(RoomTypeCategory roomCategory)
+		{
+			bool flag = false;
+			List<ContentContainer> list = new List<ContentContainer>();
+			CodexEntry codexEntry = new CodexEntry(parentCategoryName, list, roomCategory.Id);
+			for (int i = 0; i < roomTypesData.Count; i++)
+			{
+				RoomType roomType = roomTypesData[i];
+				if (roomType.category.Id == roomCategory.Id)
+				{
+					if (!flag)
+					{
+						flag = true;
+						codexEntry.parentId = parentCategoryName;
+						CodexCache.AddEntry(parentCategoryName + roomCategory.Id, codexEntry, null);
+						result.Add(parentCategoryName + roomType.category.Id, codexEntry);
+					}
+					List<ContentContainer> list2 = new List<ContentContainer>();
+					CodexEntryGenerator.GenerateTitleContainers(roomType.Name, list2);
+					CodexEntryGenerator.GenerateRoomTypeDescriptionContainers(roomType, list2);
+					CodexEntryGenerator.GenerateRoomTypeDetailsContainers(roomType, list2);
+					SubEntry subEntry = new SubEntry(roomType.Id, parentCategoryName + roomType.category.Id, list2, roomType.Name);
+					subEntry.icon = Assets.GetSprite(roomCategory.icon);
+					subEntry.iconColor = Color.white;
+					codexEntry.subEntries.Add(subEntry);
+				}
+			}
+		};
+		action(Db.Get().RoomTypeCategories.Agricultural);
+		action(Db.Get().RoomTypeCategories.Bathroom);
+		action(Db.Get().RoomTypeCategories.Food);
+		action(Db.Get().RoomTypeCategories.Hospital);
+		action(Db.Get().RoomTypeCategories.Industrial);
+		action(Db.Get().RoomTypeCategories.Park);
+		action(Db.Get().RoomTypeCategories.Recreation);
+		action(Db.Get().RoomTypeCategories.Sleep);
+		return result;
 	}
 
 	public static Dictionary<string, CodexEntry> GeneratePlantEntries()
@@ -245,11 +289,127 @@ public static class CodexEntryGenerator
 				CodexEntryGenerator.GenerateFoodDescriptionContainers(foodInfo, list);
 				CodexEntryGenerator.GenerateRecipeContainers(foodInfo.ConsumableId.ToTag(), list);
 				CodexEntryGenerator.GenerateUsedInRecipeContainers(foodInfo.ConsumableId.ToTag(), list);
-				CodexEntry codexEntry = new CodexEntry("FOOD", list, foodInfo.Name);
+				CodexEntry codexEntry = new CodexEntry(CodexEntryGenerator.FOOD_CATEGORY_ID, list, foodInfo.Name);
 				codexEntry.icon = first;
-				codexEntry.parentId = "FOOD";
+				codexEntry.parentId = CodexEntryGenerator.FOOD_CATEGORY_ID;
 				CodexCache.AddEntry(foodInfo.Id, codexEntry, null);
 				dictionary.Add(foodInfo.Id, codexEntry);
+			}
+		}
+		CodexEntry codexEntry2 = CodexEntryGenerator.GenerateFoodEffectEntry();
+		CodexCache.AddEntry(CodexEntryGenerator.FOOD_EFFECTS_ENTRY_ID, codexEntry2, null);
+		dictionary.Add(CodexEntryGenerator.FOOD_EFFECTS_ENTRY_ID, codexEntry2);
+		CodexEntry codexEntry3 = CodexEntryGenerator.GenerateTabelSaltEntry();
+		CodexCache.AddEntry(CodexEntryGenerator.TABLE_SALT_ENTRY_ID, codexEntry3, null);
+		dictionary.Add(CodexEntryGenerator.TABLE_SALT_ENTRY_ID, codexEntry3);
+		return dictionary;
+	}
+
+	private static CodexEntry GenerateFoodEffectEntry()
+	{
+		List<ICodexWidget> list = new List<ICodexWidget>();
+		Dictionary<string, List<EdiblesManager.FoodInfo>> dictionary = new Dictionary<string, List<EdiblesManager.FoodInfo>>();
+		foreach (EdiblesManager.FoodInfo foodInfo in EdiblesManager.GetAllFoodTypes())
+		{
+			foreach (string text in foodInfo.Effects)
+			{
+				List<EdiblesManager.FoodInfo> list2;
+				if (!dictionary.TryGetValue(text, out list2))
+				{
+					list2 = new List<EdiblesManager.FoodInfo>();
+					dictionary[text] = list2;
+				}
+				list2.Add(foodInfo);
+			}
+		}
+		foreach (KeyValuePair<string, List<EdiblesManager.FoodInfo>> keyValuePair in dictionary)
+		{
+			string text2;
+			List<EdiblesManager.FoodInfo> list3;
+			keyValuePair.Deconstruct<string, List<EdiblesManager.FoodInfo>>(out text2, out list3);
+			string text3 = text2;
+			List<EdiblesManager.FoodInfo> list4 = list3;
+			global::Klei.AI.Modifier modifier = Db.Get().effects.Get(text3);
+			string text4 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text3.ToUpper() + ".NAME");
+			string text5 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text3.ToUpper() + ".DESCRIPTION");
+			list.Add(new CodexText(text4, CodexTextStyle.Title, null));
+			list.Add(new CodexText(text5, CodexTextStyle.Body, null));
+			foreach (AttributeModifier attributeModifier in modifier.SelfModifiers)
+			{
+				string text6 = Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME");
+				string text7 = Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".DESC");
+				list.Add(new CodexTextWithTooltip("    • " + text6 + ": " + attributeModifier.GetFormattedString(), text7, CodexTextStyle.Body));
+			}
+			list.Add(new CodexText(CODEX.HEADERS.FOODSWITHEFFECT + ": ", CodexTextStyle.Body, null));
+			foreach (EdiblesManager.FoodInfo foodInfo2 in list4)
+			{
+				list.Add(new CodexTextWithTooltip("    • " + foodInfo2.Name, foodInfo2.Description, CodexTextStyle.Body));
+			}
+			list.Add(new CodexSpacer());
+		}
+		return new CodexEntry(CodexEntryGenerator.FOOD_CATEGORY_ID, new List<ContentContainer>
+		{
+			new ContentContainer(list, ContentContainer.ContentLayout.Vertical)
+		}, CODEX.HEADERS.FOODEFFECTS)
+		{
+			parentId = CodexEntryGenerator.FOOD_CATEGORY_ID,
+			icon = Assets.GetSprite("icon_category_food")
+		};
+	}
+
+	private static CodexEntry GenerateTabelSaltEntry()
+	{
+		LocString name = ITEMS.INDUSTRIAL_PRODUCTS.TABLE_SALT.NAME;
+		LocString desc = ITEMS.INDUSTRIAL_PRODUCTS.TABLE_SALT.DESC;
+		Sprite sprite = Assets.GetSprite("ui_food_table_salt");
+		List<ContentContainer> list = new List<ContentContainer>();
+		CodexEntryGenerator.GenerateImageContainers(sprite, list);
+		list.Add(new ContentContainer(new List<ICodexWidget>
+		{
+			new CodexText(name, CodexTextStyle.Title, null),
+			new CodexText(desc, CodexTextStyle.Body, null)
+		}, ContentContainer.ContentLayout.Vertical));
+		return new CodexEntry(CodexEntryGenerator.FOOD_CATEGORY_ID, list, name)
+		{
+			parentId = CodexEntryGenerator.FOOD_CATEGORY_ID,
+			icon = sprite
+		};
+	}
+
+	public static Dictionary<string, CodexEntry> GenerateMinionModifierEntries()
+	{
+		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
+		foreach (Effect effect in Db.Get().effects.resources)
+		{
+			if (effect.triggerFloatingText || !effect.showInUI)
+			{
+				string id = effect.Id;
+				string text = "AVOID_COLLISIONS_" + id;
+				StringEntry stringEntry;
+				StringEntry stringEntry2;
+				if (Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + id.ToUpper() + ".NAME", out stringEntry) && (Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + id.ToUpper() + ".DESCRIPTION", out stringEntry2) || Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + id.ToUpper() + ".TOOLTIP", out stringEntry2)))
+				{
+					string @string = stringEntry.String;
+					string string2 = stringEntry2.String;
+					List<ContentContainer> list = new List<ContentContainer>();
+					ContentContainer contentContainer = new ContentContainer();
+					List<ICodexWidget> content = contentContainer.content;
+					content.Add(new CodexText(effect.Name, CodexTextStyle.Title, null));
+					content.Add(new CodexText(effect.description, CodexTextStyle.Body, null));
+					foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
+					{
+						string text2 = Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME");
+						string text3 = Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".DESC");
+						content.Add(new CodexTextWithTooltip("    • " + text2 + ": " + attributeModifier.GetFormattedString(), text3, CodexTextStyle.Body));
+					}
+					content.Add(new CodexSpacer());
+					list.Add(contentContainer);
+					CodexEntry codexEntry = new CodexEntry(CodexEntryGenerator.MINION_MODIFIERS_CATEGORY_ID, list, effect.Name);
+					codexEntry.icon = Assets.GetSprite(effect.customIcon);
+					codexEntry.parentId = CodexEntryGenerator.MINION_MODIFIERS_CATEGORY_ID;
+					CodexCache.AddEntry(text, codexEntry, null);
+					dictionary.Add(text, codexEntry);
+				}
 			}
 		}
 		return dictionary;
@@ -681,7 +841,7 @@ public static class CodexEntryGenerator
 				IEnumerable<ElementConverter.ConsumedElement> consumedElements = elementConverter.consumedElements;
 				foreach (ElementConverter.ConsumedElement consumedElement in (consumedElements ?? Enumerable.Empty<ElementConverter.ConsumedElement>()))
 				{
-					hashSet2.Add(new ElementUsage(consumedElement.tag, consumedElement.massConsumptionRate, true));
+					hashSet2.Add(new ElementUsage(consumedElement.Tag, consumedElement.MassConsumptionRate, true));
 				}
 				IEnumerable<ElementConverter.OutputElement> outputElements = elementConverter.outputElements;
 				foreach (ElementConverter.OutputElement outputElement in (outputElements ?? Enumerable.Empty<ElementConverter.OutputElement>()))
@@ -1001,7 +1161,7 @@ public static class CodexEntryGenerator
 		codexEntry2.category = text;
 		dictionary.Add(text8, codexEntry2);
 		Sprite sprite = Assets.GetSprite("ui_elements_classes");
-		var anon = new <>f__AnonymousType1<Tag, bool, bool, string>[]
+		var anon = new <>f__AnonymousType3<Tag, bool, bool, string>[]
 		{
 			new
 			{
@@ -1502,6 +1662,50 @@ public static class CodexEntryGenerator
 		}
 	}
 
+	private static void GenerateRoomTypeDetailsContainers(RoomType roomType, List<ContentContainer> containers)
+	{
+		ICodexWidget codexWidget = new CodexText(UI.CODEX.DETAILS, CodexTextStyle.Subtitle, null);
+		ICodexWidget codexWidget2 = new CodexDividerLine();
+		ContentContainer contentContainer = new ContentContainer(new List<ICodexWidget> { codexWidget, codexWidget2 }, ContentContainer.ContentLayout.Vertical);
+		containers.Add(contentContainer);
+		List<ICodexWidget> list = new List<ICodexWidget>();
+		if (!string.IsNullOrEmpty(roomType.effect))
+		{
+			string roomEffectsString = roomType.GetRoomEffectsString();
+			list.Add(new CodexText(roomEffectsString, CodexTextStyle.Body, null));
+			list.Add(new CodexSpacer());
+		}
+		if (roomType.primary_constraint != null || roomType.additional_constraints != null)
+		{
+			list.Add(new CodexText(ROOMS.CRITERIA.HEADER, CodexTextStyle.Body, null));
+			string text = "";
+			if (roomType.primary_constraint != null)
+			{
+				text = text + "    • " + roomType.primary_constraint.name;
+			}
+			if (roomType.additional_constraints != null)
+			{
+				for (int i = 0; i < roomType.additional_constraints.Length; i++)
+				{
+					text = text + "\n    • " + roomType.additional_constraints[i].name;
+				}
+			}
+			list.Add(new CodexText(text, CodexTextStyle.Body, null));
+		}
+		ContentContainer contentContainer2 = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
+		containers.Add(contentContainer2);
+	}
+
+	private static void GenerateRoomTypeDescriptionContainers(RoomType roomType, List<ContentContainer> containers)
+	{
+		ContentContainer contentContainer = new ContentContainer(new List<ICodexWidget>
+		{
+			new CodexText(roomType.description, CodexTextStyle.Body, null),
+			new CodexSpacer()
+		}, ContentContainer.ContentLayout.Vertical);
+		containers.Add(contentContainer);
+	}
+
 	private static void GeneratePlantDescriptionContainers(GameObject plant, List<ContentContainer> containers)
 	{
 		SeedProducer component = plant.GetComponent<SeedProducer>();
@@ -1563,6 +1767,10 @@ public static class CodexEntryGenerator
 
 	private static void GenerateCreatureDescriptionContainers(GameObject creature, List<ContentContainer> containers)
 	{
+		containers.Add(new ContentContainer(new List<ICodexWidget>
+		{
+			new CodexText(creature.GetComponent<InfoDescription>().description, CodexTextStyle.Body, null)
+		}, ContentContainer.ContentLayout.Vertical));
 		RobotBatteryMonitor.Def def = creature.GetDef<RobotBatteryMonitor.Def>();
 		if (def != null)
 		{
@@ -1611,10 +1819,44 @@ public static class CodexEntryGenerator
 				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.NON_LETHAL_RANGE, GameUtil.GetFormattedTemperature(component.TemperatureLethalLow, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(component.TemperatureLethalHigh, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body, null)
 			}, ContentContainer.ContentLayout.Vertical));
 		}
+		int num = 0;
+		string text = null;
+		Tag tag = default(Tag);
+		Butcherable component2 = creature.GetComponent<Butcherable>();
+		if (component2 != null && component2.drops != null)
+		{
+			num = component2.drops.Length;
+			if (num > 0)
+			{
+				text = (tag.Name = component2.drops[0]);
+			}
+		}
+		string text2 = null;
+		string text3 = null;
+		if (tag.IsValid)
+		{
+			text2 = TagManager.GetProperName(tag, false);
+			text3 = "\t" + GameUtil.GetFormattedByTag(tag, (float)num, GameUtil.TimeSlice.None);
+		}
+		if (!string.IsNullOrEmpty(text2) && !string.IsNullOrEmpty(text3))
+		{
+			ContentContainer contentContainer = new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexSpacer(),
+				new CodexText(CODEX.HEADERS.CRITTERDROPS, CodexTextStyle.Subtitle, null)
+			}, ContentContainer.ContentLayout.Vertical);
+			ContentContainer contentContainer2 = new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexIndentedLabelWithIcon(text2, CodexTextStyle.Body, Def.GetUISprite(text, "ui", false)),
+				new CodexText(text3, CodexTextStyle.Body, null)
+			}, ContentContainer.ContentLayout.Vertical);
+			containers.Add(contentContainer);
+			containers.Add(contentContainer2);
+		}
 		new List<Tag>();
+		Diet.Info[] array = null;
 		CreatureCalorieMonitor.Def def2 = creature.GetDef<CreatureCalorieMonitor.Def>();
 		BeehiveCalorieMonitor.Def def3 = creature.GetDef<BeehiveCalorieMonitor.Def>();
-		Diet.Info[] array = null;
 		if (def2 != null)
 		{
 			array = def2.diet.infos;
@@ -1625,12 +1867,12 @@ public static class CodexEntryGenerator
 		}
 		if (array != null && array.Length != 0)
 		{
-			float num = 0f;
+			float num2 = 0f;
 			foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(creature.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
 			{
 				if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
 				{
-					num = attributeModifier.Value;
+					num2 = attributeModifier.Value;
 				}
 			}
 			List<ICodexWidget> list = new List<ICodexWidget>();
@@ -1638,25 +1880,25 @@ public static class CodexEntryGenerator
 			{
 				if (info.consumedTags.Count != 0)
 				{
-					foreach (Tag tag in info.consumedTags)
+					foreach (Tag tag2 in info.consumedTags)
 					{
-						Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag));
-						if ((element.id != SimHashes.Vacuum && element.id != SimHashes.Void) || !(Assets.GetPrefab(tag) == null))
+						Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag2));
+						if ((element.id != SimHashes.Vacuum && element.id != SimHashes.Void) || !(Assets.GetPrefab(tag2) == null))
 						{
-							float num2 = -num / info.caloriesPerKg;
-							float num3 = num2 * info.producedConversionRate;
-							list.Add(new CodexConversionPanel(tag.ProperName(), tag, num2, true, info.producedElement, num3, true, creature));
+							float num3 = -num2 / info.caloriesPerKg;
+							float num4 = num3 * info.producedConversionRate;
+							list.Add(new CodexConversionPanel(tag2.ProperName(), tag2, num3, true, info.producedElement, num4, true, creature));
 						}
 					}
 				}
 			}
-			ContentContainer contentContainer = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
+			ContentContainer contentContainer3 = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
 				new CodexSpacer(),
-				new CodexCollapsibleHeader(CODEX.HEADERS.DIET, contentContainer)
+				new CodexCollapsibleHeader(CODEX.HEADERS.DIET, contentContainer3)
 			}, ContentContainer.ContentLayout.Vertical));
-			containers.Add(contentContainer);
+			containers.Add(contentContainer3);
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
 				new CodexSpacer(),
@@ -1685,7 +1927,7 @@ public static class CodexEntryGenerator
 
 	private static void GenerateFoodDescriptionContainers(EdiblesManager.FoodInfo food, List<ContentContainer> containers)
 	{
-		containers.Add(new ContentContainer(new List<ICodexWidget>
+		List<ICodexWidget> list = new List<ICodexWidget>
 		{
 			new CodexText(food.Description, CodexTextStyle.Body, null),
 			new CodexSpacer(),
@@ -1694,7 +1936,34 @@ public static class CodexEntryGenerator
 			new CodexSpacer(),
 			new CodexText(food.CanRot ? string.Format(UI.CODEX.FOOD.SPOILPROPERTIES, GameUtil.GetFormattedTemperature(food.RotTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(food.PreserveTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedCycles(food.SpoilTime, "F1", false)) : UI.CODEX.FOOD.NON_PERISHABLE.ToString(), CodexTextStyle.Body, null),
 			new CodexSpacer()
-		}, ContentContainer.ContentLayout.Vertical));
+		};
+		if (food.Effects.Count > 0)
+		{
+			list.Add(new CodexText(CODEX.HEADERS.FOODEFFECTS + ":", CodexTextStyle.Body, null));
+			foreach (string text in food.Effects)
+			{
+				global::Klei.AI.Modifier modifier = Db.Get().effects.Get(text);
+				string text2 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".NAME");
+				string text3 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".DESCRIPTION");
+				string text4 = "";
+				foreach (AttributeModifier attributeModifier in modifier.SelfModifiers)
+				{
+					text4 = string.Concat(new string[]
+					{
+						text4,
+						"\n    • ",
+						Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME"),
+						": ",
+						attributeModifier.GetFormattedString()
+					});
+				}
+				text3 += text4;
+				text2 = UI.FormatAsLink(text2, CodexEntryGenerator.FOOD_EFFECTS_ENTRY_ID);
+				list.Add(new CodexTextWithTooltip("    • " + text2, text3, CodexTextStyle.Body));
+			}
+			list.Add(new CodexSpacer());
+		}
+		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.Vertical));
 	}
 
 	private static void GenerateTechDescriptionContainers(Tech tech, List<ContentContainer> containers)
@@ -1742,21 +2011,10 @@ public static class CodexEntryGenerator
 			list.Add(new CodexSpacer());
 		}
 		KPrefabID component = def.BuildingComplete.GetComponent<KPrefabID>();
-		Pair<Tag, string>[] array = new Pair<Tag, string>[]
-		{
-			new Pair<Tag, string>(RoomConstraints.ConstraintTags.IndustrialMachinery, CODEX.BUILDING_TYPE.INDUSTRIAL_MACHINERY),
-			new Pair<Tag, string>(RoomConstraints.ConstraintTags.RecBuilding, ROOMS.CRITERIA.REC_BUILDING.NAME),
-			new Pair<Tag, string>(RoomConstraints.ConstraintTags.Clinic, ROOMS.CRITERIA.CLINIC.NAME),
-			new Pair<Tag, string>(RoomConstraints.ConstraintTags.WashStation, ROOMS.CRITERIA.WASH_STATION.NAME),
-			new Pair<Tag, string>(RoomConstraints.ConstraintTags.AdvancedWashStation, ROOMS.CRITERIA.ADVANCED_WASH_STATION.NAME),
-			new Pair<Tag, string>(RoomConstraints.ConstraintTags.Toilet, ROOMS.CRITERIA.TOILET.NAME),
-			new Pair<Tag, string>(RoomConstraints.ConstraintTags.FlushToilet, ROOMS.CRITERIA.FLUSH_TOILET.NAME),
-			new Pair<Tag, string>(GameTags.Decoration, ROOMS.CRITERIA.DECORATIVE_ITEM.NAME)
-		};
 		bool flag = false;
-		foreach (Pair<Tag, string> pair in array)
+		foreach (Tag tag in component.Tags)
 		{
-			if (component.HasTag(pair.first))
+			if (CodexEntryGenerator.room_constraint_to_building_label_dict.ContainsKey(tag))
 			{
 				flag = true;
 				break;
@@ -1765,11 +2023,12 @@ public static class CodexEntryGenerator
 		if (flag)
 		{
 			list.Add(new CodexText(CODEX.HEADERS.BUILDINGTYPE, CodexTextStyle.Subtitle, null));
-			foreach (Pair<Tag, string> pair2 in array)
+			foreach (Tag tag2 in component.Tags)
 			{
-				if (component.HasTag(pair2.first))
+				string text;
+				if (CodexEntryGenerator.room_constraint_to_building_label_dict.TryGetValue(tag2, out text))
 				{
-					list.Add(new CodexText("    " + pair2.second, CodexTextStyle.Body, null));
+					list.Add(new CodexText("    " + text, CodexTextStyle.Body, null));
 				}
 			}
 			list.Add(new CodexSpacer());
@@ -1859,11 +2118,10 @@ public static class CodexEntryGenerator
 			new CodexText(Strings.Get("STRINGS.CODEX.HEADERS.RECEPTACLE"), CodexTextStyle.Subtitle, null),
 			new CodexDividerLine()
 		}, ContentContainer.ContentLayout.Vertical));
-		Tag[] possibleDepositObjectTags = plot.possibleDepositObjectTags;
 		Predicate<GameObject> <>9__0;
-		for (int i = 0; i < possibleDepositObjectTags.Length; i++)
+		foreach (Tag tag in plot.possibleDepositObjectTags)
 		{
-			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(possibleDepositObjectTags[i]);
+			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
 			if (plot.rotatable == null)
 			{
 				List<GameObject> list = prefabsWithTag;
@@ -1889,7 +2147,40 @@ public static class CodexEntryGenerator
 		}
 	}
 
+	// Note: this type is marked as 'beforefieldinit'.
+	static CodexEntryGenerator()
+	{
+		Dictionary<Tag, string> dictionary = new Dictionary<Tag, string>();
+		Tag industrialMachinery = RoomConstraints.ConstraintTags.IndustrialMachinery;
+		dictionary[industrialMachinery] = CODEX.BUILDING_TYPE.INDUSTRIAL_MACHINERY;
+		Tag recBuilding = RoomConstraints.ConstraintTags.RecBuilding;
+		dictionary[recBuilding] = ROOMS.CRITERIA.REC_BUILDING.NAME;
+		Tag clinic = RoomConstraints.ConstraintTags.Clinic;
+		dictionary[clinic] = ROOMS.CRITERIA.CLINIC.NAME;
+		Tag washStation = RoomConstraints.ConstraintTags.WashStation;
+		dictionary[washStation] = ROOMS.CRITERIA.WASH_STATION.NAME;
+		Tag advancedWashStation = RoomConstraints.ConstraintTags.AdvancedWashStation;
+		dictionary[advancedWashStation] = ROOMS.CRITERIA.ADVANCED_WASH_STATION.NAME;
+		Tag toiletType = RoomConstraints.ConstraintTags.ToiletType;
+		dictionary[toiletType] = ROOMS.CRITERIA.TOILET.NAME;
+		Tag flushToiletType = RoomConstraints.ConstraintTags.FlushToiletType;
+		dictionary[flushToiletType] = ROOMS.CRITERIA.FLUSH_TOILET.NAME;
+		Tag decoration = GameTags.Decoration;
+		dictionary[decoration] = ROOMS.CRITERIA.DECORATIVE_ITEM.NAME;
+		CodexEntryGenerator.room_constraint_to_building_label_dict = dictionary;
+	}
+
 	private static string categoryPrefx = "BUILD_CATEGORY_";
+
+	public static readonly string FOOD_CATEGORY_ID = CodexCache.FormatLinkID("FOOD");
+
+	public static readonly string FOOD_EFFECTS_ENTRY_ID = CodexCache.FormatLinkID("id_food_effects");
+
+	public static readonly string TABLE_SALT_ENTRY_ID = CodexCache.FormatLinkID("id_table_salt");
+
+	public static readonly string MINION_MODIFIERS_CATEGORY_ID = CodexCache.FormatLinkID("MINION_MODIFIERS");
+
+	public static Dictionary<Tag, string> room_constraint_to_building_label_dict;
 
 	private class ConversionEntry
 	{

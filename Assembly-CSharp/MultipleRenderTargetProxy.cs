@@ -5,8 +5,11 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 {
 	private void Start()
 	{
-		ScreenResize instance = ScreenResize.Instance;
-		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+		if (ScreenResize.Instance != null)
+		{
+			ScreenResize instance = ScreenResize.Instance;
+			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+		}
 		this.CreateRenderTarget();
 		ShaderReloader.Register(new global::System.Action(this.OnShadersReloaded));
 	}
@@ -23,7 +26,7 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 		this.Textures[0] = this.RecreateRT(this.Textures[0], 24, RenderTextureFormat.ARGB32);
 		this.Textures[0].filterMode = FilterMode.Point;
 		this.Textures[0].name = "MRT0";
-		this.Textures[1] = this.RecreateRT(this.Textures[1], 0, RenderTextureFormat.ARGB32);
+		this.Textures[1] = this.RecreateRT(this.Textures[1], 0, RenderTextureFormat.R8);
 		this.Textures[1].filterMode = FilterMode.Point;
 		this.Textures[1].name = "MRT1";
 		array[0] = this.Textures[0].colorBuffer;

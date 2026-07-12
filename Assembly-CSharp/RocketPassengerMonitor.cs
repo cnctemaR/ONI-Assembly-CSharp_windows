@@ -9,18 +9,18 @@ public class RocketPassengerMonitor : GameStateMachine<RocketPassengerMonitor, R
 		this.satisfied.ParamTransition<int>(this.targetCell, this.moving, (RocketPassengerMonitor.Instance smi, int p) => p != Grid.InvalidCell);
 		this.moving.ParamTransition<int>(this.targetCell, this.satisfied, (RocketPassengerMonitor.Instance smi, int p) => p == Grid.InvalidCell).ToggleChore((RocketPassengerMonitor.Instance smi) => this.CreateChore(smi), this.satisfied).Exit(delegate(RocketPassengerMonitor.Instance smi)
 		{
-			this.targetCell.Set(Grid.InvalidCell, smi);
+			this.targetCell.Set(Grid.InvalidCell, smi, false);
 		});
 		this.movingToModuleDeployPre.Enter(delegate(RocketPassengerMonitor.Instance smi)
 		{
-			this.targetCell.Set(smi.moduleDeployTaskTargetMoveCell, smi);
+			this.targetCell.Set(smi.moduleDeployTaskTargetMoveCell, smi, false);
 			smi.GoTo(this.movingToModuleDeploy);
 		});
 		this.movingToModuleDeploy.ParamTransition<int>(this.targetCell, this.satisfied, (RocketPassengerMonitor.Instance smi, int p) => p == Grid.InvalidCell).ToggleChore((RocketPassengerMonitor.Instance smi) => this.CreateChore(smi), this.moduleDeploy);
 		this.moduleDeploy.Enter(delegate(RocketPassengerMonitor.Instance smi)
 		{
 			smi.moduleDeployCompleteCallback(null);
-			this.targetCell.Set(Grid.InvalidCell, smi);
+			this.targetCell.Set(Grid.InvalidCell, smi, false);
 			smi.moduleDeployCompleteCallback = null;
 			smi.GoTo(smi.sm.satisfied);
 		});
@@ -61,7 +61,7 @@ public class RocketPassengerMonitor : GameStateMachine<RocketPassengerMonitor, R
 			}
 			if ((int)Grid.WorldIdx[num] == this.GetMyWorldId())
 			{
-				base.sm.targetCell.Set(Grid.InvalidCell, this);
+				base.sm.targetCell.Set(Grid.InvalidCell, this, false);
 				return false;
 			}
 			return true;
@@ -73,7 +73,7 @@ public class RocketPassengerMonitor : GameStateMachine<RocketPassengerMonitor, R
 			{
 				return;
 			}
-			base.sm.targetCell.Set(cell, this);
+			base.sm.targetCell.Set(cell, this, false);
 		}
 
 		public void SetModuleDeployChore(int cell, Action<Chore> OnChoreCompleteCallback)
@@ -81,14 +81,14 @@ public class RocketPassengerMonitor : GameStateMachine<RocketPassengerMonitor, R
 			this.moduleDeployCompleteCallback = OnChoreCompleteCallback;
 			this.moduleDeployTaskTargetMoveCell = cell;
 			this.GoTo(base.sm.movingToModuleDeployPre);
-			base.sm.targetCell.Set(cell, this);
+			base.sm.targetCell.Set(cell, this, false);
 		}
 
 		public void CancelModuleDeployChore()
 		{
 			this.moduleDeployCompleteCallback = null;
 			this.moduleDeployTaskTargetMoveCell = Grid.InvalidCell;
-			base.sm.targetCell.Set(Grid.InvalidCell, base.smi);
+			base.sm.targetCell.Set(Grid.InvalidCell, base.smi, false);
 		}
 
 		public void ClearMoveTarget(int testCell)
@@ -96,7 +96,7 @@ public class RocketPassengerMonitor : GameStateMachine<RocketPassengerMonitor, R
 			int num = base.sm.targetCell.Get(this);
 			if (Grid.IsValidCell(num) && Grid.WorldIdx[num] == Grid.WorldIdx[testCell])
 			{
-				base.sm.targetCell.Set(Grid.InvalidCell, this);
+				base.sm.targetCell.Set(Grid.InvalidCell, this, false);
 				if (base.IsInsideState(base.sm.moving))
 				{
 					this.GoTo(base.sm.satisfied);

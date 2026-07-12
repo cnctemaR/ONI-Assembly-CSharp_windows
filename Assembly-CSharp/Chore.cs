@@ -43,8 +43,9 @@ public abstract class Chore
 
 	public bool IsPreemptable { get; protected set; }
 
-	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod, bool add_to_daily_report, ReportManager.ReportType report_type)
+	public Chore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod, bool add_to_daily_report, ReportManager.ReportType report_type)
 	{
+		this.target = target;
 		if (priority_value == 2147483647)
 		{
 			priority_class = PriorityScreen.PriorityClass.topPriority;
@@ -75,7 +76,6 @@ public abstract class Chore
 		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingEarly, null);
 		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingLate, null);
 		this.AddPrecondition(ChorePreconditions.instance.IsOverrideTargetNullOrMe, null);
-		this.AddPrecondition(ChorePreconditions.instance.IsInMyParentWorld, null);
 		chore_provider.AddChore(this);
 	}
 
@@ -613,6 +613,11 @@ public abstract class Chore
 			public static bool operator !=(Chore.Precondition.Context x, Chore.Precondition.Context y)
 			{
 				return x.CompareTo(y) != 0;
+			}
+
+			public static bool ShouldFilter(string filter, string text)
+			{
+				return !string.IsNullOrEmpty(filter) && (string.IsNullOrEmpty(text) || text.ToLower().IndexOf(filter) < 0);
 			}
 
 			public PrioritySetting masterPriority;

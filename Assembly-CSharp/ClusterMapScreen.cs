@@ -101,7 +101,7 @@ public class ClusterMapScreen : KScreen
 	private IEnumerator MoveToTargetRoutine(AxialI targetPosition, float delayBeforeMove)
 	{
 		delayBeforeMove = Mathf.Max(delayBeforeMove, 0f);
-		yield return new WaitForSecondsRealtime(delayBeforeMove);
+		yield return SequenceUtil.WaitForSecondsRealtime(delayBeforeMove);
 		this.targetNISPosition = AxialUtil.AxialToWorld((float)targetPosition.r, (float)targetPosition.q);
 		this.targetNISZoom = 150f;
 		this.movingToTargetNISPosition = true;

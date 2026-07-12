@@ -47,6 +47,11 @@ public class KInputController : IInputHandler
 		{
 			return;
 		}
+		this.QueueButtonEvent_Internal(key_def, is_down);
+	}
+
+	private void QueueButtonEvent_Internal(KInputController.KeyDef key_def, bool is_down)
+	{
 		bool[] mActionFlags = key_def.mActionFlags;
 		key_def.mIsDown = is_down;
 		InputEventType inputEventType = (is_down ? InputEventType.KeyDown : InputEventType.KeyUp);
@@ -244,10 +249,12 @@ public class KInputController : IInputHandler
 		{
 			if (keyDef.mIsDown && keyDef.mKeyCode < KKeyCode.KleiKeys && !Input.GetKey((KeyCode)keyDef.mKeyCode))
 			{
-				this.QueueButtonEvent(keyDef, false);
+				this.QueueButtonEvent_Internal(keyDef, false);
 			}
 		}
 		this.UpdateModifiers();
+		this.inputHandler.HandleCancelInput();
+		this.Dispatch();
 	}
 
 	public KKeyCode GetInputForAction(global::Action action)

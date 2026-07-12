@@ -47,7 +47,7 @@ public class MassiveHeatSinkConfig : IBuildingConfig
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		go.AddOrGet<ElementConverter>().consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(ElementLoader.FindElementByHash(SimHashes.Hydrogen).tag, 0.01f)
+			new ElementConverter.ConsumedElement(ElementLoader.FindElementByHash(SimHashes.Hydrogen).tag, 0.01f, true)
 		};
 		go.AddOrGetDef<PoweredActiveController.Def>();
 		go.GetComponent<Deconstructable>().allowDeconstruction = false;

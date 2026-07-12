@@ -17,6 +17,7 @@ public class PuftConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
 		GameObject gameObject2 = BasePuftConfig.SetupDiet(gameObject, SimHashes.ContaminatedOxygen.CreateTag(), SimHashes.SlimeMold.CreateTag(), PuftConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_2, "SlimeLung", 1000f, PuftConfig.MIN_POOP_SIZE_IN_KG);
 		gameObject2.AddOrGet<DiseaseSourceVisualizer>().alwaysShowDisease = "SlimeLung";
+		gameObject2.AddTag(GameTags.OriginalCreature);
 		return gameObject2;
 	}
 

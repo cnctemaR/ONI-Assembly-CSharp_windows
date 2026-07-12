@@ -8,13 +8,13 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 	{
 		default_state = this.root;
 		this.root.Update(new Action<OvercrowdingMonitor.Instance, float>(OvercrowdingMonitor.UpdateState), UpdateRate.SIM_1000ms, true);
-		OvercrowdingMonitor.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
+		OvercrowdingMonitor.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 		OvercrowdingMonitor.futureOvercrowdedEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -1f, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, true, false, true));
-		OvercrowdingMonitor.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
+		OvercrowdingMonitor.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 		OvercrowdingMonitor.overcrowdedEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, true));
-		OvercrowdingMonitor.fishOvercrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.FISHTOOLTIP, 0f, true, false, true, null, 0f, null, "");
+		OvercrowdingMonitor.fishOvercrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.FISHTOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 		OvercrowdingMonitor.fishOvercrowdedEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, true));
-		OvercrowdingMonitor.stuckEffect = new Effect("Confined", CREATURES.MODIFIERS.CONFINED.NAME, CREATURES.MODIFIERS.CONFINED.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
+		OvercrowdingMonitor.stuckEffect = new Effect("Confined", CREATURES.MODIFIERS.CONFINED.NAME, CREATURES.MODIFIERS.CONFINED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 		OvercrowdingMonitor.stuckEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, CREATURES.MODIFIERS.CONFINED.NAME, false, false, true));
 	}
 
@@ -63,11 +63,11 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		bool flag2 = OvercrowdingMonitor.IsOvercrowded(smi);
 		bool flag3 = !smi.isBaby && OvercrowdingMonitor.IsFutureOvercrowded(smi);
 		KPrefabID component = smi.gameObject.GetComponent<KPrefabID>();
+		Effect effect = (smi.isFish ? OvercrowdingMonitor.fishOvercrowdedEffect : OvercrowdingMonitor.overcrowdedEffect);
 		component.SetTag(GameTags.Creatures.Confined, flag);
 		component.SetTag(GameTags.Creatures.Overcrowded, flag2);
 		component.SetTag(GameTags.Creatures.Expecting, flag3);
 		OvercrowdingMonitor.SetEffect(smi, OvercrowdingMonitor.stuckEffect, flag);
-		Effect effect = (smi.isFish ? OvercrowdingMonitor.fishOvercrowdedEffect : OvercrowdingMonitor.overcrowdedEffect);
 		OvercrowdingMonitor.SetEffect(smi, effect, !flag && flag2);
 		OvercrowdingMonitor.SetEffect(smi, OvercrowdingMonitor.futureOvercrowdedEffect, !flag && flag3);
 	}
@@ -146,16 +146,17 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 		protected override void OnCleanUp()
 		{
-			KPrefabID component = base.master.GetComponent<KPrefabID>();
-			if (this.cavity != null)
+			if (this.cavity == null)
 			{
-				if (base.HasTag(GameTags.Egg))
-				{
-					this.cavity.RemoveFromCavity(component, this.cavity.eggs);
-					return;
-				}
-				this.cavity.RemoveFromCavity(component, this.cavity.creatures);
+				return;
 			}
+			KPrefabID component = base.master.GetComponent<KPrefabID>();
+			if (base.HasTag(GameTags.Egg))
+			{
+				this.cavity.RemoveFromCavity(component, this.cavity.eggs);
+				return;
+			}
+			this.cavity.RemoveFromCavity(component, this.cavity.creatures);
 		}
 
 		public void RoomRefreshUpdateCavity()

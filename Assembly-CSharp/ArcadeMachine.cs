@@ -27,7 +27,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 			kselectable.IsSelectable = false;
 			int player_index = i;
 			ArcadeMachineWorkable arcadeMachineWorkable2 = arcadeMachineWorkable;
-			arcadeMachineWorkable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(arcadeMachineWorkable2.OnWorkableEventCB, new Action<Workable.WorkableEvent>(delegate(Workable.WorkableEvent ev)
+			arcadeMachineWorkable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(arcadeMachineWorkable2.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(delegate(Workable workable, Workable.WorkableEvent ev)
 			{
 				this.OnWorkableEvent(player_index, ev);
 			}));
@@ -106,7 +106,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 		{
 			this.players.Remove(player);
 		}
-		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
+		base.smi.sm.playerCount.Set(this.players.Count, base.smi, false);
 	}
 
 	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)

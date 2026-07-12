@@ -14,7 +14,9 @@ public class SquirrelConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
 		Diet.Info[] array = BaseSquirrelConfig.BasicDiet(SimHashes.Dirt.CreateTag(), SquirrelConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, SquirrelConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f);
-		return BaseSquirrelConfig.SetupDiet(gameObject, array, SquirrelConfig.MIN_POOP_SIZE_KG);
+		GameObject gameObject2 = BaseSquirrelConfig.SetupDiet(gameObject, array, SquirrelConfig.MIN_POOP_SIZE_KG);
+		gameObject2.AddTag(GameTags.OriginalCreature);
+		return gameObject2;
 	}
 
 	public string[] GetDlcIds()

@@ -14,7 +14,7 @@ public class StressIdleChore : Chore<StressIdleChore.StatesInstance>
 		public StatesInstance(StressIdleChore master, GameObject idler)
 			: base(master)
 		{
-			base.sm.idler.Set(idler, base.smi);
+			base.sm.idler.Set(idler, base.smi, false);
 		}
 	}
 

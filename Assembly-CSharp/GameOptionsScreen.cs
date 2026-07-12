@@ -25,14 +25,6 @@ public class GameOptionsScreen : KModalButtonMenu
 		{
 			this.saveConfiguration.ToggleDisabledContent(false);
 		}
-		if (this.expansion1ContentToggle != null)
-		{
-			this.expansion1ContentToggle.SetActive(DlcManager.IsExpansion1Installed());
-			this.expansion1ContentToggle.GetComponentInChildren<ToolTip>().toolTip = UI.FRONTEND.GAME_OPTIONS_SCREEN.EXPANSION1_CONTENT_ENABLED_TOOLTIP;
-			this.expansion1ContentToggle.GetComponentInChildren<KButton>().onClick += this.OnExpansion1ContentClicked;
-			this.expansion1ContentToggle.GetComponentInChildren<LocText>().text = UI.FRONTEND.GAME_OPTIONS_SCREEN.EXPANSION1_CONTENT_ENABLED;
-			this.UpdateExpansion1ContentToggle();
-		}
 		this.resetTutorialButton.onClick += this.OnTutorialReset;
 		if (DistributionPlatform.Initialized && SteamUtils.IsSteamRunningOnSteamDeck())
 		{
@@ -103,20 +95,6 @@ public class GameOptionsScreen : KModalButtonMenu
 		component.Activate();
 	}
 
-	private void UpdateExpansion1ContentToggle()
-	{
-		bool flag = DlcManager.IsExpansion1Active();
-		this.expansion1ContentToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(flag);
-	}
-
-	private void OnExpansion1ContentClicked()
-	{
-		Canvas componentInParent = base.GetComponentInParent<Canvas>();
-		Util.KInstantiateUI<InfoDialogScreen>(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, componentInParent.gameObject, false).SetHeader(UI.FRONTEND.GAME_OPTIONS_SCREEN.EXPANSION1_CONTENT_TESTING_TITLE).AddPlainText(UI.FRONTEND.GAME_OPTIONS_SCREEN.EXPANSION1_CONTENT_TESTING_BODY)
-			.AddDefaultOK(false)
-			.gameObject.SetActive(true);
-	}
-
 	private void OnUnlockSandboxMode()
 	{
 		ConfirmDialogScreen component = base.ActivateChildScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<ConfirmDialogScreen>();
@@ -162,9 +140,6 @@ public class GameOptionsScreen : KModalButtonMenu
 
 	[SerializeField]
 	private UnitConfigurationScreen unitConfiguration;
-
-	[SerializeField]
-	private GameObject expansion1ContentToggle;
 
 	[SerializeField]
 	private KButton resetTutorialButton;

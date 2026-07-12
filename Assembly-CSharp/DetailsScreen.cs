@@ -59,9 +59,19 @@ public class DetailsScreen : KTabMenu
 		}
 		MinionIdentity component = this.target.GetComponent<MinionIdentity>();
 		UserNameable component2 = this.target.GetComponent<UserNameable>();
+		ClustercraftExteriorDoor component3 = this.target.GetComponent<ClustercraftExteriorDoor>();
+		CommandModule component4 = this.target.GetComponent<CommandModule>();
 		if (component != null)
 		{
 			component.SetName(newName);
+		}
+		else if (component4 != null)
+		{
+			SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(component4.GetComponent<LaunchConditionManager>()).SetRocketName(newName);
+		}
+		else if (component3 != null)
+		{
+			component3.GetTargetWorld().GetComponent<UserNameable>().SetName(newName);
 		}
 		else if (component2 != null)
 		{
@@ -162,6 +172,10 @@ public class DetailsScreen : KTabMenu
 		if (this.screens == null)
 		{
 			return;
+		}
+		if (this.target != go)
+		{
+			this.setRocketTitleHandle = -1;
 		}
 		this.target = go;
 		this.sortedSideScreens.Clear();
@@ -491,10 +505,14 @@ public class DetailsScreen : KTabMenu
 			this.TabTitle.SetTitle(this.target.GetProperName());
 			MinionIdentity minionIdentity = null;
 			UserNameable userNameable = null;
+			ClustercraftExteriorDoor clustercraftExteriorDoor = null;
+			CommandModule commandModule = null;
 			if (this.target != null)
 			{
 				minionIdentity = this.target.gameObject.GetComponent<MinionIdentity>();
 				userNameable = this.target.gameObject.GetComponent<UserNameable>();
+				clustercraftExteriorDoor = this.target.gameObject.GetComponent<ClustercraftExteriorDoor>();
+				commandModule = this.target.gameObject.GetComponent<CommandModule>();
 			}
 			if (minionIdentity != null)
 			{
@@ -506,6 +524,14 @@ public class DetailsScreen : KTabMenu
 				this.TabTitle.SetSubText("", "");
 				this.TabTitle.SetUserEditable(true);
 			}
+			else if (commandModule != null)
+			{
+				this.TrySetRocketTitle(commandModule);
+			}
+			else if (clustercraftExteriorDoor != null)
+			{
+				this.TrySetRocketTitle(clustercraftExteriorDoor);
+			}
 			else
 			{
 				this.TabTitle.SetSubText("", "");
@@ -513,6 +539,41 @@ public class DetailsScreen : KTabMenu
 			}
 			this.TabTitle.UpdateRenameTooltip(this.target);
 		}
+	}
+
+	private void TrySetRocketTitle(ClustercraftExteriorDoor clusterCraftDoor)
+	{
+		if (clusterCraftDoor.HasTargetWorld())
+		{
+			WorldContainer targetWorld = clusterCraftDoor.GetTargetWorld();
+			if (targetWorld != null)
+			{
+				this.TabTitle.SetTitle(targetWorld.GetComponent<ClusterGridEntity>().Name);
+				this.TabTitle.SetUserEditable(true);
+			}
+			this.TabTitle.SetSubText(this.target.GetProperName(), "");
+			this.setRocketTitleHandle = -1;
+			return;
+		}
+		if (this.setRocketTitleHandle == -1)
+		{
+			this.setRocketTitleHandle = this.target.Subscribe(-71801987, delegate(object clusterCraftDoor)
+			{
+				this.OnRefreshData(null);
+				this.target.Unsubscribe(this.setRocketTitleHandle);
+				this.setRocketTitleHandle = -1;
+			});
+		}
+	}
+
+	private void TrySetRocketTitle(CommandModule commandModule)
+	{
+		if (commandModule != null)
+		{
+			this.TabTitle.SetTitle(SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(commandModule.GetComponent<LaunchConditionManager>()).GetRocketName());
+			this.TabTitle.SetUserEditable(true);
+		}
+		this.TabTitle.SetSubText(this.target.GetProperName(), "");
 	}
 
 	public void SetTitle(string title)
@@ -588,6 +649,8 @@ public class DetailsScreen : KTabMenu
 	});
 
 	private List<KeyValuePair<GameObject, int>> sortedSideScreens = new List<KeyValuePair<GameObject, int>>();
+
+	private int setRocketTitleHandle = -1;
 
 	[Serializable]
 	private struct Screens

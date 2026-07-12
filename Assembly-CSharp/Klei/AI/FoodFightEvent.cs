@@ -10,8 +10,8 @@ namespace Klei.AI
 		public FoodFightEvent()
 			: base("FoodFight", 0, 0)
 		{
-			this.popupTitle = GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.NAME;
-			this.popupDescription = GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.DESCRIPTION;
+			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.NAME;
+			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.DESCRIPTION;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -84,8 +84,8 @@ namespace Klei.AI
 				{
 					smi.ClearChores();
 				});
-				this.planning.ToggleNotification((FoodFightEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardEventNotification(this.GenerateEventPopupData(smi)));
-				this.warmup.ToggleNotification((FoodFightEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardEventChosenNotification(this.GenerateEventPopupData(smi)));
+				this.planning.ToggleNotification((FoodFightEvent.StatesInstance smi) => EventInfoScreen.CreateNotification(this.GenerateEventPopupData(smi), null));
+				this.warmup.ToggleNotification((FoodFightEvent.StatesInstance smi) => EventInfoScreen.CreateNotification(this.GenerateEventPopupData(smi), null));
 				this.warmup.wait.ScheduleGoTo(60f, this.warmup.start);
 				this.warmup.start.Enter(delegate(FoodFightEvent.StatesInstance smi)
 				{
@@ -109,9 +109,9 @@ namespace Klei.AI
 						smi.GoTo(this.partying);
 					}
 				}, UpdateRate.RENDER_1000ms, false);
-				this.partying.ToggleNotification((FoodFightEvent.StatesInstance smi) => new Notification(GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.UNDERWAY, NotificationType.Good, (List<Notification> a, object b) => GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.UNDERWAY_TOOLTIP, null, true, 0f, null, null, null, true)).ScheduleGoTo(60f, this.ending);
+				this.partying.ToggleNotification((FoodFightEvent.StatesInstance smi) => new Notification(GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.UNDERWAY, NotificationType.Good, (List<Notification> a, object b) => GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.UNDERWAY_TOOLTIP, null, true, 0f, null, null, null, true, false)).ScheduleGoTo(60f, this.ending);
 				this.ending.ReturnSuccess();
-				this.canceled.DoNotification((FoodFightEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardCancelledNotification(this.GenerateEventPopupData(smi))).Enter(delegate(FoodFightEvent.StatesInstance smi)
+				this.canceled.DoNotification((FoodFightEvent.StatesInstance smi) => GameplayEventManager.CreateStandardCancelledNotification(this.GenerateEventPopupData(smi))).Enter(delegate(FoodFightEvent.StatesInstance smi)
 				{
 					foreach (object obj in Components.LiveMinionIdentities)
 					{
@@ -120,20 +120,20 @@ namespace Klei.AI
 				}).ReturnFailure();
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(FoodFightEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(FoodFightEvent.StatesInstance smi)
 			{
-				GameplayEventPopupData gameplayEventPopupData = new GameplayEventPopupData(smi.gameplayEvent);
-				gameplayEventPopupData.location = GAMEPLAY_EVENTS.LOCATIONS.PRINTING_POD;
-				gameplayEventPopupData.whenDescription = string.Format(GAMEPLAY_EVENTS.TIMES.IN_CYCLES, 0.1f);
-				gameplayEventPopupData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.ACCEPT_OPTION_NAME, null).callback = delegate
+				EventInfoData eventInfoData = new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName);
+				eventInfoData.location = GAMEPLAY_EVENTS.LOCATIONS.PRINTING_POD;
+				eventInfoData.whenDescription = string.Format(GAMEPLAY_EVENTS.TIMES.IN_CYCLES, 0.1f);
+				eventInfoData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.ACCEPT_OPTION_NAME, null).callback = delegate
 				{
 					smi.GoTo(smi.sm.warmup.wait);
 				};
-				gameplayEventPopupData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.REJECT_OPTION_NAME, null).callback = delegate
+				eventInfoData.AddOption(GAMEPLAY_EVENTS.EVENT_TYPES.FOOD_FIGHT.REJECT_OPTION_NAME, null).callback = delegate
 				{
 					smi.GoTo(smi.sm.canceled);
 				};
-				return gameplayEventPopupData;
+				return eventInfoData;
 			}
 
 			public GameStateMachine<FoodFightEvent.States, FoodFightEvent.StatesInstance, GameplayEventManager, object>.State planning;

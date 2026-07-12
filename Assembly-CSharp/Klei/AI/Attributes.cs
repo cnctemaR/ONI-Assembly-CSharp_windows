@@ -45,6 +45,19 @@ namespace Klei.AI
 			}
 		}
 
+		public void Remove(AttributeModifier modifier)
+		{
+			if (modifier == null)
+			{
+				return;
+			}
+			AttributeInstance attributeInstance = this.Get(modifier.AttributeId);
+			if (attributeInstance != null)
+			{
+				attributeInstance.Remove(modifier);
+			}
+		}
+
 		public float GetValuePercent(string attribute_id)
 		{
 			float num = 1f;
@@ -90,19 +103,6 @@ namespace Klei.AI
 				global::Debug.LogError("Could not find attribute " + id);
 			}
 			return num;
-		}
-
-		public void Remove(AttributeModifier modifier)
-		{
-			if (modifier == null)
-			{
-				return;
-			}
-			AttributeInstance attributeInstance = this.Get(modifier.AttributeId);
-			if (attributeInstance != null)
-			{
-				attributeInstance.Remove(modifier);
-			}
 		}
 
 		public AttributeInstance GetProfession()

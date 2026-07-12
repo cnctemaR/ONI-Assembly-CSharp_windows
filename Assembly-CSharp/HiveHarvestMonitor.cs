@@ -50,13 +50,13 @@ public class HiveHarvestMonitor : GameStateMachine<HiveHarvestMonitor, HiveHarve
 			{
 				Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.CANCELEMPTYBEEHIVE.NAME, delegate
 				{
-					base.sm.shouldHarvest.Set(false, this);
+					base.sm.shouldHarvest.Set(false, this, false);
 				}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELEMPTYBEEHIVE.TOOLTIP, true), 1f);
 				return;
 			}
 			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYBEEHIVE.NAME, delegate
 			{
-				base.sm.shouldHarvest.Set(true, this);
+				base.sm.shouldHarvest.Set(true, this, false);
 			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.EMPTYBEEHIVE.TOOLTIP, true), 1f);
 		}
 

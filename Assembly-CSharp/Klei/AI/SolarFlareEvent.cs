@@ -8,8 +8,8 @@ namespace Klei.AI
 		public SolarFlareEvent()
 			: base("SolarFlareEvent", 0, 0)
 		{
-			this.popupTitle = GAMEPLAY_EVENTS.EVENT_TYPES.SOLAR_FLARE.NAME;
-			this.popupDescription = GAMEPLAY_EVENTS.EVENT_TYPES.SOLAR_FLARE.DESCRIPTION;
+			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.SOLAR_FLARE.NAME;
+			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.SOLAR_FLARE.DESCRIPTION;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -40,9 +40,9 @@ namespace Klei.AI
 				this.finished.ReturnSuccess();
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(SolarFlareEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(SolarFlareEvent.StatesInstance smi)
 			{
-				return new GameplayEventPopupData(smi.gameplayEvent)
+				return new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName)
 				{
 					location = GAMEPLAY_EVENTS.LOCATIONS.SUN,
 					whenDescription = GAMEPLAY_EVENTS.TIMES.NOW

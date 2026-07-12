@@ -167,7 +167,7 @@ public class PlanScreen : KIconToggleMenu
 
 	private void OnClickCopyBuilding()
 	{
-		if (!this.LastSelectedBuilding.IsNullOrDestroyed())
+		if (!this.LastSelectedBuilding.IsNullOrDestroyed() && this.LastSelectedBuilding.gameObject.activeInHierarchy)
 		{
 			PlanScreen.Instance.CopyBuildingOrder(this.LastSelectedBuilding);
 			return;
@@ -209,7 +209,8 @@ public class PlanScreen : KIconToggleMenu
 		if (this.lastSelectedBuildingDef != null)
 		{
 			component.gameObject.SetActive(PlanScreen.Instance.gameObject.activeInHierarchy);
-			component.transform.Find("FG").GetComponent<Image>().sprite = this.lastSelectedBuildingDef.GetUISprite("ui", false);
+			Sprite uisprite = this.lastSelectedBuildingDef.GetUISprite("ui", false);
+			component.transform.Find("FG").GetComponent<Image>().sprite = uisprite;
 			component.transform.Find("FG").GetComponent<Image>().color = Color.white;
 			component.ChangeState(1);
 			return;
@@ -762,7 +763,7 @@ public class PlanScreen : KIconToggleMenu
 		foreach (KeyValuePair<string, string> keyValuePair in global::TUNING.BUILDINGS.PLANORDER.Find((PlanScreen.PlanInfo match) => match.category == plan_category).buildingAndSubcategoryData)
 		{
 			BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
-			if (buildingDef.IsAvailable() && buildingDef.ShowInBuildMenu)
+			if (buildingDef.IsAvailable() && buildingDef.ShouldShowInBuildMenu())
 			{
 				if (this.USE_SUB_CATEGORY_LAYOUT)
 				{

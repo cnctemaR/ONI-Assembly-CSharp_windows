@@ -5,7 +5,7 @@ namespace FMOD.Studio
 {
 	public struct Util
 	{
-		public static RESULT parseID(string idString, out Guid id)
+		public static RESULT parseID(string idString, out GUID id)
 		{
 			RESULT result;
 			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
@@ -16,6 +16,6 @@ namespace FMOD.Studio
 		}
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_ParseID(byte[] idString, out Guid id);
+		private static extern RESULT FMOD_Studio_ParseID(byte[] idString, out GUID id);
 	}
 }

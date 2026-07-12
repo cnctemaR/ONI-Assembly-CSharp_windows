@@ -67,7 +67,7 @@ public class FetchList2 : IFetchList
 		}
 	}
 
-	public void Add(Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None)
+	public void Add(HashSet<Tag> tags, Tag[] forbidden_tags = null, float amount = 1f, Operational.State operationalRequirementDEPRECATED = Operational.State.None)
 	{
 		foreach (Tag tag in tags)
 		{
@@ -76,13 +76,18 @@ public class FetchList2 : IFetchList
 				this.MinimumAmount[tag] = amount;
 			}
 		}
-		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, required_tags, forbidden_tags, this.Destination, amount, operationalRequirementDEPRECATED, this.PriorityMod);
+		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, FetchChore.MatchCriteria.MatchID, Tag.Invalid, forbidden_tags, this.Destination, amount, operationalRequirementDEPRECATED, this.PriorityMod);
 		this.FetchOrders.Add(fetchOrder);
 	}
 
-	public void Add(Tag tag, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None)
+	public void Add(Tag tag, Tag[] forbidden_tags = null, float amount = 1f, Operational.State operationalRequirementDEPRECATED = Operational.State.None)
 	{
-		this.Add(new Tag[] { tag }, required_tags, forbidden_tags, amount, operationalRequirementDEPRECATED);
+		if (!this.MinimumAmount.ContainsKey(tag))
+		{
+			this.MinimumAmount[tag] = amount;
+		}
+		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, new HashSet<Tag> { tag }, FetchChore.MatchCriteria.MatchTags, Tag.Invalid, forbidden_tags, this.Destination, amount, operationalRequirementDEPRECATED, this.PriorityMod);
+		this.FetchOrders.Add(fetchOrder);
 	}
 
 	public float GetMinimumAmount(Tag tag)
@@ -108,12 +113,12 @@ public class FetchList2 : IFetchList
 
 	public void Cancel(string reason)
 	{
+		FetchListStatusItemUpdater.instance.RemoveFetchList(this);
+		this.ClearStatus();
 		foreach (FetchOrder2 fetchOrder in this.FetchOrders)
 		{
 			fetchOrder.Cancel(reason);
 		}
-		this.ClearStatus();
-		FetchListStatusItemUpdater.instance.RemoveFetchList(this);
 	}
 
 	public void UpdateRemaining()
@@ -122,9 +127,8 @@ public class FetchList2 : IFetchList
 		for (int i = 0; i < this.FetchOrders.Count; i++)
 		{
 			FetchOrder2 fetchOrder = this.FetchOrders[i];
-			for (int j = 0; j < fetchOrder.Tags.Length; j++)
+			foreach (Tag tag in fetchOrder.Tags)
 			{
-				Tag tag = fetchOrder.Tags[j];
 				float num = 0f;
 				this.Remaining.TryGetValue(tag, out num);
 				this.Remaining[tag] = num + fetchOrder.AmountWaitingToFetch();
@@ -154,7 +158,12 @@ public class FetchList2 : IFetchList
 				Pickupable component = gameObject.GetComponent<Pickupable>();
 				if (component != null)
 				{
-					foreach (Tag tag2 in component.GetComponent<KPrefabID>().Tags)
+					KPrefabID kprefabID = component.KPrefabID;
+					if (dictionary.ContainsKey(kprefabID.PrefabTag))
+					{
+						dictionary[kprefabID.PrefabTag] = Math.Max(dictionary[kprefabID.PrefabTag] - component.TotalAmount, 0f);
+					}
+					foreach (Tag tag2 in kprefabID.Tags)
 					{
 						if (dictionary.ContainsKey(tag2))
 						{

@@ -45,9 +45,9 @@ public static class BaseDivergentConfig
 			hide_symbols_after_pre = new string[] { "flower", "flower_wilted" }
 		});
 		def.ignoreEffectGroup = BaseDivergentConfig.ignoreEffectGroup;
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
-			.Add(new IncubatingStates.Def(), true, -1)
+			.Add(new IncubatingStates.Def(), is_baby, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new FallStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
@@ -58,11 +58,11 @@ public static class BaseDivergentConfig
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new FixedCaptureStates.Def(), true, -1)
-			.Add(new RanchedStates.Def(), true, -1)
-			.Add(new LayEggStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), !is_baby, -1)
+			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
-			.Add(new CallAdultStates.Def(), true, -1)
+			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(def, !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);

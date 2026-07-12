@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class TopLeftControlScreen : KScreen
 {
@@ -17,12 +18,13 @@ public class TopLeftControlScreen : KScreen
 		this.RefreshName();
 		KInputManager.InputChange.AddListener(new UnityAction(this.ResetToolTip));
 		this.UpdateSandboxToggleState();
-		MultiToggle sandboxToggle = this.SandboxToggle;
-		sandboxToggle.onClick = (global::System.Action)Delegate.Combine(sandboxToggle.onClick, new global::System.Action(this.OnClickSandboxToggle));
+		MultiToggle multiToggle = this.sandboxToggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnClickSandboxToggle));
 		Game.Instance.Subscribe(-1948169901, delegate(object data)
 		{
 			this.UpdateSandboxToggleState();
 		});
+		LayoutRebuilder.ForceRebuildLayoutImmediate(this.secondaryRow);
 	}
 
 	protected override void OnForcedCleanUp()
@@ -43,25 +45,25 @@ public class TopLeftControlScreen : KScreen
 	{
 		if (this.CheckSandboxModeLocked())
 		{
-			this.SandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_LOCKED, global::Action.ToggleSandboxTools));
+			this.sandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_LOCKED, global::Action.ToggleSandboxTools));
 			return;
 		}
-		this.SandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_UNLOCKED, global::Action.ToggleSandboxTools));
+		this.sandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_UNLOCKED, global::Action.ToggleSandboxTools));
 	}
 
 	public void UpdateSandboxToggleState()
 	{
 		if (this.CheckSandboxModeLocked())
 		{
-			this.SandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_LOCKED, global::Action.ToggleSandboxTools));
-			this.SandboxToggle.ChangeState(0);
+			this.sandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_LOCKED, global::Action.ToggleSandboxTools));
+			this.sandboxToggle.ChangeState(0);
 		}
 		else
 		{
-			this.SandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_UNLOCKED, global::Action.ToggleSandboxTools));
-			this.SandboxToggle.ChangeState(Game.Instance.SandboxModeActive ? 2 : 1);
+			this.sandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_UNLOCKED, global::Action.ToggleSandboxTools));
+			this.sandboxToggle.ChangeState(Game.Instance.SandboxModeActive ? 2 : 1);
 		}
-		this.SandboxToggle.gameObject.SetActive(SaveGame.Instance.sandboxEnabled);
+		this.sandboxToggle.gameObject.SetActive(SaveGame.Instance.sandboxEnabled);
 	}
 
 	private void OnClickSandboxToggle()
@@ -86,8 +88,11 @@ public class TopLeftControlScreen : KScreen
 	public static TopLeftControlScreen Instance;
 
 	[SerializeField]
-	private MultiToggle SandboxToggle;
+	private MultiToggle sandboxToggle;
 
 	[SerializeField]
 	private LocText locText;
+
+	[SerializeField]
+	private RectTransform secondaryRow;
 }

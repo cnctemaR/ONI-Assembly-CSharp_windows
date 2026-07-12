@@ -106,7 +106,7 @@ public class BuildingInternalConstructor : GameStateMachine<BuildingInternalCons
 		{
 			FetchList2 fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.Fetch);
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
-			fetchList.Add(component.Element.tag, null, null, base.def.constructionMass, FetchOrder2.OperationalRequirement.None);
+			fetchList.Add(component.Element.tag, null, base.def.constructionMass, Operational.State.None);
 			return fetchList;
 		}
 
@@ -196,7 +196,7 @@ public class BuildingInternalConstructor : GameStateMachine<BuildingInternalCons
 
 		public void OnSidescreenButtonPressed()
 		{
-			base.smi.sm.constructionRequested.Set(!base.smi.sm.constructionRequested.Get(base.smi), base.smi);
+			base.smi.sm.constructionRequested.Set(!base.smi.sm.constructionRequested.Get(base.smi), base.smi, false);
 			if (DebugHandler.InstantBuildMode && base.smi.sm.constructionRequested.Get(base.smi) && !this.HasOutputInStorage())
 			{
 				this.ConstructionComplete(true);

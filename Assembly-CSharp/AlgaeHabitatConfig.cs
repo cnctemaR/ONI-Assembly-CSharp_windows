@@ -45,13 +45,13 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		storage2.storageFilters = list;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = tag;
+		manualDeliveryKG.RequestedItemTag = tag;
 		manualDeliveryKG.capacity = 90f;
 		manualDeliveryKG.refillMass = 18f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
-		manualDeliveryKG2.requestedItemTag = tag2;
+		manualDeliveryKG2.RequestedItemTag = tag2;
 		manualDeliveryKG2.capacity = 360f;
 		manualDeliveryKG2.refillMass = 72f;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
@@ -66,16 +66,16 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddComponent<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(tag, 0.030000001f),
-			new ElementConverter.ConsumedElement(tag2, 0.3f)
+			new ElementConverter.ConsumedElement(tag, 0.030000001f, true),
+			new ElementConverter.ConsumedElement(tag2, 0.3f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0, true)
 		};
 		go.AddComponent<ElementConverter>().outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.29033336f, SimHashes.DirtyWater, 303.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.29033336f, SimHashes.DirtyWater, 303.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0, true)
 		};
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;

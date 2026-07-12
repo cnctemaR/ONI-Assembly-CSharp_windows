@@ -75,7 +75,7 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 			: base(master)
 		{
 			this.mingler = mingler;
-			base.sm.mingler.Set(mingler, base.smi);
+			base.sm.mingler.Set(mingler, base.smi, false);
 			this.mingleCellSensor = base.GetComponent<Sensors>().GetSensor<MingleCellSensor>();
 		}
 

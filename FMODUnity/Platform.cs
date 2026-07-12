@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FMOD;
 using FMOD.Studio;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FMODUnity
 {
@@ -22,7 +23,7 @@ namespace FMODUnity
 
 		public abstract string DisplayName { get; }
 
-		public abstract void DeclareUnityMappings(Settings settings);
+		public abstract void DeclareRuntimePlatforms(Settings settings);
 
 		public virtual float Priority
 		{
@@ -66,11 +67,6 @@ namespace FMODUnity
 			return string.Format("{0}/Plugins", Application.dataPath);
 		}
 
-		protected virtual string GetEditorPluginBasePath()
-		{
-			return string.Format("{0}/FMOD/lib", this.GetPluginBasePath());
-		}
-
 		public virtual string GetPluginPath(string pluginName)
 		{
 			throw new NotImplementedException(string.Format("Plugins are not implemented on platform {0}", this.Identifier));
@@ -110,7 +106,7 @@ namespace FMODUnity
 		{
 			if (this.StaticPlugins.Count > 0)
 			{
-				global::UnityEngine.Debug.LogWarningFormat("FMOD: {0} static plugins specified, but static plugins are only supported on the IL2CPP scripting backend", new object[] { this.StaticPlugins.Count });
+				RuntimeUtils.DebugLogWarningFormat("FMOD: {0} static plugins specified, but static plugins are only supported on the IL2CPP scripting backend", new object[] { this.StaticPlugins.Count });
 			}
 		}
 
@@ -312,9 +308,9 @@ namespace FMODUnity
 
 		public OUTPUTTYPE GetOutputType()
 		{
-			if (Enum.IsDefined(typeof(OUTPUTTYPE), this.outputType))
+			if (Enum.IsDefined(typeof(OUTPUTTYPE), this.OutputTypeName))
 			{
-				return (OUTPUTTYPE)Enum.Parse(typeof(OUTPUTTYPE), this.outputType);
+				return (OUTPUTTYPE)Enum.Parse(typeof(OUTPUTTYPE), this.OutputTypeName);
 			}
 			return OUTPUTTYPE.AUTODETECT;
 		}
@@ -347,14 +343,42 @@ namespace FMODUnity
 			}
 		}
 
-		[SerializeField]
-		private string identifier;
+		public virtual List<CodecChannelCount> DefaultCodecChannels
+		{
+			get
+			{
+				return Platform.staticCodecChannels;
+			}
+		}
+
+		public List<CodecChannelCount> CodecChannels
+		{
+			get
+			{
+				if (this.codecChannels.HasValue)
+				{
+					return this.codecChannels.Value;
+				}
+				return this.DefaultCodecChannels;
+			}
+		}
+
+		public Platform.PropertyCodecChannels CodecChannelsProperty
+		{
+			get
+			{
+				return this.codecChannels;
+			}
+		}
 
 		public const float DefaultPriority = 0f;
 
 		public const string RegisterStaticPluginsClassName = "StaticPluginManager";
 
 		public const string RegisterStaticPluginsFunctionName = "Register";
+
+		[SerializeField]
+		private string identifier;
 
 		[SerializeField]
 		private string parentIdentifier;
@@ -365,16 +389,34 @@ namespace FMODUnity
 		[SerializeField]
 		protected Platform.PropertyStorage Properties = new Platform.PropertyStorage();
 
-		[NonSerialized]
-		public Platform Parent;
-
 		[SerializeField]
-		public string outputType;
+		[FormerlySerializedAs("outputType")]
+		public string OutputTypeName;
 
 		private static List<ThreadAffinityGroup> StaticThreadAffinities = new List<ThreadAffinityGroup>();
 
 		[SerializeField]
 		private Platform.PropertyThreadAffinityList threadAffinities = new Platform.PropertyThreadAffinityList();
+
+		[NonSerialized]
+		public Platform Parent;
+
+		private static List<CodecChannelCount> staticCodecChannels = new List<CodecChannelCount>
+		{
+			new CodecChannelCount
+			{
+				format = CodecType.FADPCM,
+				channels = 32
+			},
+			new CodecChannelCount
+			{
+				format = CodecType.Vorbis,
+				channels = 0
+			}
+		};
+
+		[SerializeField]
+		private Platform.PropertyCodecChannels codecChannels = new Platform.PropertyCodecChannels();
 
 		public class Property<T>
 		{
@@ -533,6 +575,11 @@ namespace FMODUnity
 
 		[Serializable]
 		public class PropertyThreadAffinityList : Platform.Property<List<ThreadAffinityGroup>>
+		{
+		}
+
+		[Serializable]
+		public class PropertyCodecChannels : Platform.Property<List<CodecChannelCount>>
 		{
 		}
 	}

@@ -17,7 +17,7 @@ public static class SimMessages
 		{
 			return;
 		}
-		int elementIndex = ElementLoader.GetElementIndex(element);
+		ushort elementIndex = ElementLoader.GetElementIndex(element);
 		SimMessages.AddElementConsumerMessage* ptr;
 		checked
 		{
@@ -25,7 +25,7 @@ public static class SimMessages
 			ptr->cellIdx = gameCell;
 		}
 		ptr->configuration = (byte)configuration;
-		ptr->elementIdx = (byte)elementIndex;
+		ptr->elementIdx = elementIndex;
 		ptr->radius = radius;
 		ptr->callbackIdx = cb_handle;
 		Sim.SIM_HandleMessage(2024405073, sizeof(SimMessages.AddElementConsumerMessage), (byte*)ptr);
@@ -83,7 +83,7 @@ public static class SimMessages
 		{
 			return;
 		}
-		int elementIndex = ElementLoader.GetElementIndex(element);
+		ushort elementIndex = ElementLoader.GetElementIndex(element);
 		SimMessages.ModifyElementEmitterMessage* ptr;
 		checked
 		{
@@ -94,8 +94,8 @@ public static class SimMessages
 			ptr->emitMass = emit_mass;
 			ptr->emitTemperature = emit_temperature;
 			ptr->maxPressure = max_pressure;
+			ptr->elementIdx = elementIndex;
 		}
-		ptr->elementIdx = (byte)elementIndex;
 		ptr->maxDepth = (byte)max_depth;
 		ptr->diseaseIdx = disease_idx;
 		ptr->diseaseCount = disease_count;
@@ -186,11 +186,10 @@ public static class SimMessages
 		}
 		if (mass * temperature > 0f)
 		{
-			int elementIndex = ElementLoader.GetElementIndex(element);
-			SimMessages.AddElementChunkMessage* ptr;
+			ushort elementIndex = ElementLoader.GetElementIndex(element);
 			checked
 			{
-				ptr = stackalloc SimMessages.AddElementChunkMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.AddElementChunkMessage)];
+				SimMessages.AddElementChunkMessage* ptr = stackalloc SimMessages.AddElementChunkMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.AddElementChunkMessage)];
 				ptr->gameCell = gameCell;
 				ptr->callbackIdx = cb_handle;
 				ptr->mass = mass;
@@ -198,9 +197,9 @@ public static class SimMessages
 				ptr->surfaceArea = surface_area;
 				ptr->thickness = thickness;
 				ptr->groundTransferScale = ground_transfer_scale;
+				ptr->elementIdx = elementIndex;
+				Sim.SIM_HandleMessage(1445724082, sizeof(SimMessages.AddElementChunkMessage), (byte*)ptr);
 			}
-			ptr->elementIdx = (byte)elementIndex;
-			Sim.SIM_HandleMessage(1445724082, sizeof(SimMessages.AddElementChunkMessage), (byte*)ptr);
 		}
 	}
 
@@ -286,7 +285,7 @@ public static class SimMessages
 		}
 	}
 
-	public unsafe static void AddBuildingHeatExchange(Extents extents, float mass, float temperature, float thermal_conductivity, float operating_kw, byte elem_idx, int callbackIdx = -1)
+	public unsafe static void AddBuildingHeatExchange(Extents extents, float mass, float temperature, float thermal_conductivity, float operating_kw, ushort elem_idx, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(Grid.XYToCell(extents.x, extents.y)))
 		{
@@ -320,7 +319,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(1739021608, sizeof(SimMessages.AddBuildingHeatExchangeMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float mass, float temperature, float thermal_conductivity, float overheat_temperature, float operating_kw, byte element_idx)
+	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float mass, float temperature, float thermal_conductivity, float overheat_temperature, float operating_kw, ushort element_idx)
 	{
 		int num = Grid.XYToCell(extents.x, extents.y);
 		Debug.Assert(Grid.IsValidCell(num));
@@ -452,7 +451,7 @@ public static class SimMessages
 	{
 		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(Sim.Element)) * elements.Count);
 		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-		Debug.Assert(elements.Count < 255, "SimDLL internals assume there are fewer than 255 elements");
+		Debug.Assert(elements.Count < 65535, "SimDLL internals assume there are fewer than 65535 elements");
 		binaryWriter.Write(elements.Count);
 		for (int i = 0; i < elements.Count; i++)
 		{
@@ -675,13 +674,13 @@ public static class SimMessages
 		}
 	}
 
-	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, byte disease_idx, int disease_count, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, bool do_vertical_solid_displacement = false, int callbackIdx = -1)
+	public unsafe static void ModifyCell(int gameCell, ushort elementIdx, float temperature, float mass, byte disease_idx, int disease_count, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, bool do_vertical_solid_displacement = false, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
 		}
-		Element element = ElementLoader.elements[elementIdx];
+		Element element = ElementLoader.elements[(int)elementIdx];
 		if (element.maxMass == 0f && mass > element.maxMass)
 		{
 			Debug.LogWarningFormat("Invalid cell modification (mass greater than element maximum): Cell={0}, EIdx={1}, T={2}, M={3}, {4} max mass = {5}", new object[] { gameCell, elementIdx, temperature, mass, element.id, element.maxMass });
@@ -721,8 +720,8 @@ public static class SimMessages
 			ptr->callbackIdx = callbackIdx;
 			ptr->temperature = temperature;
 			ptr->mass = mass;
+			ptr->elementIdx = elementIdx;
 		}
-		ptr->elementIdx = (byte)elementIdx;
 		ptr->replaceType = (byte)replace_type;
 		ptr->diseaseIdx = disease_idx;
 		ptr->diseaseCount = disease_count;
@@ -765,19 +764,9 @@ public static class SimMessages
 		}
 	}
 
-	public static int GetElementIndex(SimHashes element)
+	public static ushort GetElementIndex(SimHashes element)
 	{
-		int num = -1;
-		List<Element> elements = ElementLoader.elements;
-		for (int i = 0; i < elements.Count; i++)
-		{
-			if (elements[i].id == element)
-			{
-				num = i;
-				break;
-			}
-		}
-		return num;
+		return ElementLoader.GetElementIndex(element);
 	}
 
 	public unsafe static void ConsumeMass(int gameCell, SimHashes element, float mass, byte radius, int callbackIdx = -1)
@@ -786,21 +775,20 @@ public static class SimMessages
 		{
 			return;
 		}
-		int elementIndex = ElementLoader.GetElementIndex(element);
-		SimMessages.MassConsumptionMessage* ptr;
+		ushort elementIndex = ElementLoader.GetElementIndex(element);
 		checked
 		{
-			ptr = stackalloc SimMessages.MassConsumptionMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.MassConsumptionMessage)];
+			SimMessages.MassConsumptionMessage* ptr = stackalloc SimMessages.MassConsumptionMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.MassConsumptionMessage)];
 			ptr->cellIdx = gameCell;
 			ptr->callbackIdx = callbackIdx;
 			ptr->mass = mass;
+			ptr->elementIdx = elementIndex;
+			ptr->radius = radius;
+			Sim.SIM_HandleMessage(1727657959, sizeof(SimMessages.MassConsumptionMessage), (byte*)ptr);
 		}
-		ptr->elementIdx = (byte)elementIndex;
-		ptr->radius = radius;
-		Sim.SIM_HandleMessage(1727657959, sizeof(SimMessages.MassConsumptionMessage), (byte*)ptr);
 	}
 
-	public unsafe static void EmitMass(int gameCell, byte element_idx, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
+	public unsafe static void EmitMass(int gameCell, ushort element_idx, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -839,27 +827,27 @@ public static class SimMessages
 
 	public static void AddRemoveSubstance(int gameCell, SimHashes new_element, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, bool do_vertical_solid_displacement = true, int callbackIdx = -1)
 	{
-		int elementIndex = SimMessages.GetElementIndex(new_element);
+		ushort elementIndex = SimMessages.GetElementIndex(new_element);
 		SimMessages.AddRemoveSubstance(gameCell, elementIndex, ev, mass, temperature, disease_idx, disease_count, do_vertical_solid_displacement, callbackIdx);
 	}
 
-	public static void AddRemoveSubstance(int gameCell, int elementIdx, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, bool do_vertical_solid_displacement = true, int callbackIdx = -1)
+	public static void AddRemoveSubstance(int gameCell, ushort elementIdx, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, bool do_vertical_solid_displacement = true, int callbackIdx = -1)
 	{
-		if (elementIdx == -1)
+		if (elementIdx == 65535)
 		{
 			return;
 		}
-		Element element = ElementLoader.elements[elementIdx];
+		Element element = ElementLoader.elements[(int)elementIdx];
 		float num = ((temperature != -1f) ? temperature : element.defaultValues.temperature);
 		SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, do_vertical_solid_displacement, callbackIdx);
 	}
 
 	public static void ReplaceElement(int gameCell, SimHashes new_element, CellElementEvent ev, float mass, float temperature = -1f, byte diseaseIdx = 255, int diseaseCount = 0, int callbackIdx = -1)
 	{
-		int elementIndex = SimMessages.GetElementIndex(new_element);
-		if (elementIndex != -1)
+		ushort elementIndex = SimMessages.GetElementIndex(new_element);
+		if (elementIndex != 65535)
 		{
-			Element element = ElementLoader.elements[elementIndex];
+			Element element = ElementLoader.elements[(int)elementIndex];
 			float num = ((temperature != -1f) ? temperature : element.defaultValues.temperature);
 			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, diseaseIdx, diseaseCount, SimMessages.ReplaceType.Replace, false, callbackIdx);
 		}
@@ -867,10 +855,10 @@ public static class SimMessages
 
 	public static void ReplaceAndDisplaceElement(int gameCell, SimHashes new_element, CellElementEvent ev, float mass, float temperature = -1f, byte disease_idx = 255, int disease_count = 0, int callbackIdx = -1)
 	{
-		int elementIndex = SimMessages.GetElementIndex(new_element);
-		if (elementIndex != -1)
+		ushort elementIndex = SimMessages.GetElementIndex(new_element);
+		if (elementIndex != 65535)
 		{
-			Element element = ElementLoader.elements[elementIndex];
+			Element element = ElementLoader.elements[(int)elementIndex];
 			float num = ((temperature != -1f) ? temperature : element.defaultValues.temperature);
 			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.ReplaceAndDisplace, false, callbackIdx);
 		}
@@ -902,12 +890,12 @@ public static class SimMessages
 	{
 		if (element != SimHashes.Vacuum)
 		{
-			int elementIndex = SimMessages.GetElementIndex(element);
-			if (elementIndex != -1)
+			ushort elementIndex = SimMessages.GetElementIndex(element);
+			if (elementIndex != 65535)
 			{
 				if (temperature == -1f)
 				{
-					temperature = ElementLoader.elements[elementIndex].defaultValues.temperature;
+					temperature = ElementLoader.elements[(int)elementIndex].defaultValues.temperature;
 				}
 				SimMessages.ModifyCell(gameCell, elementIndex, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, false, -1);
 				return;
@@ -1006,9 +994,7 @@ public static class SimMessages
 
 		public byte configuration;
 
-		public byte elementIdx;
-
-		private byte pad0;
+		public ushort elementIdx;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -1058,13 +1044,11 @@ public static class SimMessages
 
 		public int diseaseCount;
 
-		public byte elementIdx;
+		public ushort elementIdx;
 
 		public byte maxDepth;
 
 		public byte diseaseIdx;
-
-		private byte pad0;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -1150,13 +1134,11 @@ public static class SimMessages
 
 		public float groundTransferScale;
 
-		public byte elementIdx;
+		public ushort elementIdx;
 
 		public byte pad0;
 
 		public byte pad1;
-
-		public byte pad2;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -1210,13 +1192,11 @@ public static class SimMessages
 	{
 		public int callbackIdx;
 
-		public byte elemIdx;
+		public ushort elemIdx;
 
 		public byte pad0;
 
 		public byte pad1;
-
-		public byte pad2;
 
 		public float mass;
 
@@ -1242,13 +1222,11 @@ public static class SimMessages
 	{
 		public int callbackIdx;
 
-		public byte elemIdx;
+		public ushort elemIdx;
 
 		public byte pad0;
 
 		public byte pad1;
-
-		public byte pad2;
 
 		public float mass;
 
@@ -1400,7 +1378,7 @@ public static class SimMessages
 
 		public int diseaseCount;
 
-		public byte elementIdx;
+		public ushort elementIdx;
 
 		public byte replaceType;
 
@@ -1465,7 +1443,7 @@ public static class SimMessages
 
 		public float mass;
 
-		public byte elementIdx;
+		public ushort elementIdx;
 
 		public byte radius;
 	}
@@ -1483,7 +1461,7 @@ public static class SimMessages
 
 		public int diseaseCount;
 
-		public byte elementIdx;
+		public ushort elementIdx;
 
 		public byte diseaseIdx;
 	}
@@ -1546,13 +1524,15 @@ public static class SimMessages
 	{
 		public uint interactionType;
 
-		public byte elemIdx1;
+		public ushort elemIdx1;
 
-		public byte elemIdx2;
+		public ushort elemIdx2;
 
-		public byte elemResultIdx;
+		public ushort elemResultIdx;
 
-		public byte pad;
+		public byte pad0;
+
+		public byte pad1;
 
 		public float minMass;
 

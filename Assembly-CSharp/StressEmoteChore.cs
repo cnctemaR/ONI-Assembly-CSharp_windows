@@ -47,7 +47,7 @@ public class StressEmoteChore : Chore<StressEmoteChore.StatesInstance>
 			this.emoteKAnim = emote_kanim;
 			this.emoteAnims = emote_anims;
 			this.mode = mode;
-			base.sm.emoter.Set(emoter, base.smi);
+			base.sm.emoter.Set(emoter, base.smi, false);
 		}
 
 		public HashedString[] emoteAnims;

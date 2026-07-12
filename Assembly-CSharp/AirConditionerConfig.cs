@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -37,7 +38,14 @@ public class AirConditionerConfig : IBuildingConfig
 		AirConditioner airConditioner = go.AddOrGet<AirConditioner>();
 		airConditioner.temperatureDelta = -14f;
 		airConditioner.maxEnvironmentDelta = -50f;
-		BuildingTemplates.CreateDefaultStorage(go, false).showInUI = true;
+		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
+		storage.showInUI = true;
+		storage.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Seal,
+			Storage.StoredItemModifier.Insulate
+		});
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 1f;

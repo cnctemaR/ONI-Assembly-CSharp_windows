@@ -37,7 +37,10 @@ public static class BaseMooConfig
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new FixedCaptureStates.Def(), true, -1)
-			.Add(new RanchedStates.Def(), true, -1)
+			.Add(new RanchedStates.Def
+			{
+				WaitCellOffset = 2
+			}, true, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)

@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class ComplexRecipe
 {
+	public bool ProductHasFacade { get; set; }
+
 	public Tag FirstResult
 	{
 		get
@@ -131,6 +133,8 @@ public class ComplexRecipe
 				});
 			}
 			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_HEP, this.ingredients[0].material.ProperName(), text);
+		case ComplexRecipe.RecipeNameDisplay.Custom:
+			return this.customName;
 		}
 		if (includeAmounts)
 		{
@@ -153,7 +157,11 @@ public class ComplexRecipe
 
 	public int producedHEP;
 
+	public string recipeCategoryID = "";
+
 	public ComplexRecipe.RecipeNameDisplay nameDisplay;
+
+	public string customName;
 
 	public string description;
 
@@ -170,7 +178,8 @@ public class ComplexRecipe
 		IngredientToResult,
 		ResultWithIngredient,
 		Composite,
-		HEP
+		HEP,
+		Custom
 	}
 
 	public class RecipeElement

@@ -15,7 +15,8 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			}
 			smi.GoTo(this.alive);
 		});
-		this.alive.TagTransition(GameTags.Dead, this.dead, false).ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master))
+		this.alive.TagTransition(GameTags.Dead, this.dead, false).ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new Dreamer.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new EmoteMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SneezeMonitor.Instance(smi.master))
@@ -44,7 +45,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new TiredMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new RocketPassengerMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master, new ReactionMonitor.Def()))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SuitWearer.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TubeTraveller.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MingleMonitor.Instance(smi.master))

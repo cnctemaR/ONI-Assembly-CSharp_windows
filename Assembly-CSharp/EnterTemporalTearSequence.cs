@@ -18,8 +18,8 @@ public static class EnterTemporalTearSequence
 		}
 		CameraController.Instance.SetWorldInteractive(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, STOP_MODE.ALLOWFADEOUT);
-		CameraController.Instance.FadeOut(1f, 1f);
-		yield return new WaitForSecondsRealtime(3f);
+		CameraController.Instance.FadeOut(1f, 1f, null);
+		yield return SequenceUtil.WaitForSecondsRealtime(3f);
 		ManagementMenu.Instance.CloseAll();
 		AudioMixer.instance.Start(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot);
 		MusicManager.instance.PlaySong("Music_Victory_02_NIS", false);
@@ -29,7 +29,7 @@ public static class EnterTemporalTearSequence
 		{
 			CameraController.Instance.SetTargetPos(cameraTaget.transform.position + cameraBiasUp, 10f, false);
 			CameraController.Instance.SetOverrideZoomSpeed(10f);
-			yield return new WaitForSecondsRealtime(0.4f);
+			yield return SequenceUtil.WaitForSecondsRealtime(0.4f);
 			if (SpeedControlScreen.Instance.IsPaused)
 			{
 				SpeedControlScreen.Instance.Unpause(false);
@@ -37,20 +37,21 @@ public static class EnterTemporalTearSequence
 			SpeedControlScreen.Instance.SetSpeed(1);
 			CameraController.Instance.SetOverrideZoomSpeed(0.1f);
 			CameraController.Instance.SetTargetPos(cameraTaget.transform.position + cameraBiasUp, 20f, false);
-			CameraController.Instance.FadeIn(0f, 2f);
+			CameraController.Instance.FadeIn(0f, 2f, null);
 			foreach (object obj in Components.LiveMinionIdentities)
 			{
 				MinionIdentity minionIdentity = (MinionIdentity)obj;
 				if (minionIdentity != null)
 				{
 					minionIdentity.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
-					new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+					Db db = Db.Get();
+					new EmoteChore(minionIdentity.GetComponent<ChoreProvider>(), db.ChoreTypes.EmoteHighPriority, db.Emotes.Minion.Cheer, 2, null);
 				}
 			}
-			yield return new WaitForSecondsRealtime(0.5f);
-			yield return new WaitForSecondsRealtime(1.5f);
-			CameraController.Instance.FadeOut(1f, 1f);
-			yield return new WaitForSecondsRealtime(1.5f);
+			yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
+			yield return SequenceUtil.WaitForSecondsRealtime(1.5f);
+			CameraController.Instance.FadeOut(1f, 1f, null);
+			yield return SequenceUtil.WaitForSecondsRealtime(1.5f);
 		}
 		cameraTaget = null;
 		cameraTaget = null;
@@ -62,7 +63,7 @@ public static class EnterTemporalTearSequence
 				cameraTaget = telepad.gameObject;
 				CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 10f, false);
 				CameraController.Instance.SetOverrideZoomSpeed(10f);
-				yield return new WaitForSecondsRealtime(0.4f);
+				yield return SequenceUtil.WaitForSecondsRealtime(0.4f);
 				if (SpeedControlScreen.Instance.IsPaused)
 				{
 					SpeedControlScreen.Instance.Unpause(false);
@@ -70,26 +71,28 @@ public static class EnterTemporalTearSequence
 				SpeedControlScreen.Instance.SetSpeed(1);
 				CameraController.Instance.SetOverrideZoomSpeed(0.05f);
 				CameraController.Instance.SetTargetPos(cameraTaget.transform.position, 20f, false);
-				CameraController.Instance.FadeIn(0f, 2f);
+				CameraController.Instance.FadeIn(0f, 2f, null);
 				foreach (object obj3 in Components.LiveMinionIdentities)
 				{
 					MinionIdentity minionIdentity2 = (MinionIdentity)obj3;
 					if (minionIdentity2 != null)
 					{
 						minionIdentity2.GetComponent<Facing>().Face(cameraTaget.transform.position.x);
-						new EmoteChore(minionIdentity2.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst", "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+						Db db2 = Db.Get();
+						new EmoteChore(minionIdentity2.GetComponent<ChoreProvider>(), db2.ChoreTypes.EmoteHighPriority, db2.Emotes.Minion.Cheer, 2, null);
 					}
 				}
-				yield return new WaitForSecondsRealtime(0.5f);
-				yield return new WaitForSecondsRealtime(1.5f);
-				CameraController.Instance.FadeOut(1f, 1f);
-				yield return new WaitForSecondsRealtime(1.5f);
+				yield return SequenceUtil.WaitForSecondsRealtime(0.5f);
+				yield return SequenceUtil.WaitForSecondsRealtime(1.5f);
+				CameraController.Instance.FadeOut(1f, 1f, null);
+				yield return SequenceUtil.WaitForSecondsRealtime(1.5f);
 			}
 		}
 		IEnumerator enumerator2 = null;
 		cameraTaget = null;
 		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
-		yield return new WaitForSecondsRealtime(2f);
+		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.ReachedDistantPlanet.victoryNISSnapshot, STOP_MODE.ALLOWFADEOUT);
+		yield return SequenceUtil.WaitForSecondsRealtime(2f);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
 		{
@@ -101,7 +104,7 @@ public static class EnterTemporalTearSequence
 		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);
-			CameraController.Instance.FadeIn(0f, 1f);
+			CameraController.Instance.FadeIn(0f, 1f, null);
 			CameraController.Instance.SetWorldInteractive(true);
 			HoverTextScreen.Instance.Show(true);
 			CameraController.Instance.SetOverrideZoomSpeed(1f);

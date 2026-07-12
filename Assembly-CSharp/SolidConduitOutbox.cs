@@ -37,7 +37,7 @@ public class SolidConduitOutbox : StateMachineComponent<SolidConduitOutbox.SMIns
 
 	private void UpdateConsuming()
 	{
-		base.smi.sm.consuming.Set(this.consumer.IsConsuming, base.smi);
+		base.smi.sm.consuming.Set(this.consumer.IsConsuming, base.smi, false);
 	}
 
 	[MyCmpReq]

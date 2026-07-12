@@ -17,7 +17,9 @@ public class DivergentBeetleConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
 		List<Diet.Info> list = BaseDivergentConfig.BasicSulfurDiet(SimHashes.Sucrose.CreateTag(), DivergentBeetleConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f);
-		return BaseDivergentConfig.SetupDiet(gameObject, list, DivergentBeetleConfig.CALORIES_PER_KG_OF_ORE, DivergentBeetleConfig.MIN_POOP_SIZE_IN_KG);
+		GameObject gameObject2 = BaseDivergentConfig.SetupDiet(gameObject, list, DivergentBeetleConfig.CALORIES_PER_KG_OF_ORE, DivergentBeetleConfig.MIN_POOP_SIZE_IN_KG);
+		gameObject2.AddTag(GameTags.OriginalCreature);
+		return gameObject2;
 	}
 
 	public string[] GetDlcIds()

@@ -49,7 +49,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			.Update(delegate(ResourceHarvestModule.StatesInstance smi, float dt)
 			{
 				smi.HarvestFromPOI(dt);
-				this.lastHarvestTime.Set(Time.time, smi);
+				this.lastHarvestTime.Set(Time.time, smi, false);
 			}, UpdateRate.SIM_4000ms, false)
 			.ParamTransition<bool>(this.canHarvest, this.not_grounded.not_harvesting, GameStateMachine<ResourceHarvestModule, ResourceHarvestModule.StatesInstance, IStateMachineTarget, ResourceHarvestModule.Def>.IsFalse);
 	}
@@ -198,12 +198,12 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 			Clustercraft component = base.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>();
 			if (component == null)
 			{
-				base.sm.canHarvest.Set(false, this);
+				base.sm.canHarvest.Set(false, this, false);
 				return false;
 			}
 			if (base.master.GetComponent<Storage>().MassStored() <= 0f)
 			{
-				base.sm.canHarvest.Set(false, this);
+				base.sm.canHarvest.Set(false, this, false);
 				return false;
 			}
 			ClusterGridEntity poiatCurrentLocation = component.GetPOIAtCurrentLocation();
@@ -213,7 +213,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 				HarvestablePOIStates.Instance smi = poiatCurrentLocation.GetSMI<HarvestablePOIStates.Instance>();
 				if (!smi.POICanBeHarvested())
 				{
-					base.sm.canHarvest.Set(false, this);
+					base.sm.canHarvest.Set(false, this, false);
 					return false;
 				}
 				foreach (KeyValuePair<SimHashes, float> keyValuePair in smi.configuration.GetElementsWithWeights())
@@ -240,7 +240,7 @@ public class ResourceHarvestModule : GameStateMachine<ResourceHarvestModule, Res
 					}
 				}
 			}
-			base.sm.canHarvest.Set(flag, this);
+			base.sm.canHarvest.Set(flag, this, false);
 			return flag;
 		}
 

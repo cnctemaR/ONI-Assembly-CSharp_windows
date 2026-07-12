@@ -91,7 +91,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			SimHashes simHashes = (flag ? element.highTempTransitionTarget : element.lowTempTransitionTarget);
 			SimHashes simHashes2 = (flag ? element.highTempTransitionOreID : element.lowTempTransitionOreID);
 			float num4 = (flag ? element.highTempTransitionOreMassConversion : element.lowTempTransitionOreMassConversion);
-			if ((byte)simHashes2 != 255)
+			if (simHashes2 != (SimHashes)0)
 			{
 				float num5 = num2 * num4;
 				int num6 = (int)((float)num3 * num4);

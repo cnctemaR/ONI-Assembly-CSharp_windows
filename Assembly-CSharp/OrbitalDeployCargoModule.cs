@@ -25,7 +25,7 @@ public class OrbitalDeployCargoModule : GameStateMachine<OrbitalDeployCargoModul
 		this.grounded.loaded.ParamTransition<bool>(this.hasCargo, this.grounded.empty, GameStateMachine<OrbitalDeployCargoModule, OrbitalDeployCargoModule.StatesInstance, IStateMachineTarget, OrbitalDeployCargoModule.Def>.IsFalse).EventTransition(GameHashes.OnStorageChange, this.grounded.loading, (OrbitalDeployCargoModule.StatesInstance smi) => smi.NeedsVisualUpdate());
 		this.grounded.empty.Enter(delegate(OrbitalDeployCargoModule.StatesInstance smi)
 		{
-			this.numVisualCapsules.Set(0, smi);
+			this.numVisualCapsules.Set(0, smi, false);
 		}).PlayAnim("deployed").ParamTransition<bool>(this.hasCargo, this.grounded.loaded, GameStateMachine<OrbitalDeployCargoModule, OrbitalDeployCargoModule.StatesInstance, IStateMachineTarget, OrbitalDeployCargoModule.Def>.IsTrue);
 		this.not_grounded.DefaultState(this.not_grounded.loaded).TagTransition(GameTags.RocketNotOnGround, this.grounded, true);
 		this.not_grounded.loaded.PlayAnim("loaded").ParamTransition<bool>(this.hasCargo, this.not_grounded.empty, GameStateMachine<OrbitalDeployCargoModule, OrbitalDeployCargoModule.StatesInstance, IStateMachineTarget, OrbitalDeployCargoModule.Def>.IsFalse).OnSignal(this.emptyCargo, this.not_grounded.emptying);
@@ -148,7 +148,7 @@ public class OrbitalDeployCargoModule : GameStateMachine<OrbitalDeployCargoModul
 			bool flag = this.storage.MassStored() > 0f;
 			if (flag != base.sm.hasCargo.Get(this))
 			{
-				base.sm.hasCargo.Set(flag, this);
+				base.sm.hasCargo.Set(flag, this, false);
 			}
 			return flag;
 		}

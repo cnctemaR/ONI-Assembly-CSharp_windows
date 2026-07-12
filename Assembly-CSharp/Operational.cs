@@ -208,6 +208,33 @@ public class Operational : KMonoBehaviour
 		return 0f;
 	}
 
+	public bool MeetsRequirements(Operational.State stateRequirement)
+	{
+		switch (stateRequirement)
+		{
+		case Operational.State.Operational:
+			return this.IsOperational;
+		case Operational.State.Functional:
+			return this.IsFunctional;
+		case Operational.State.Active:
+			return this.IsActive;
+		}
+		return true;
+	}
+
+	public static GameHashes GetEventForState(Operational.State state)
+	{
+		if (state == Operational.State.Operational)
+		{
+			return GameHashes.OperationalChanged;
+		}
+		if (state == Operational.State.Functional)
+		{
+			return GameHashes.FunctionalChanged;
+		}
+		return GameHashes.ActiveChanged;
+	}
+
 	[Serialize]
 	public float inactiveStartTime;
 
@@ -231,6 +258,14 @@ public class Operational : KMonoBehaviour
 	{
 		component.OnNewBuilding(data);
 	});
+
+	public enum State
+	{
+		Operational,
+		Functional,
+		Active,
+		None
+	}
 
 	public class Flag
 	{

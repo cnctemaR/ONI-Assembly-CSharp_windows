@@ -77,9 +77,8 @@ public class AtmoSuitConfig : IEquipmentConfig
 							component4.Remove("SoiledSuit");
 						}
 					}
-					TagBits tagBits = new TagBits(eq.GetComponent<SuitTank>().elementTag);
-					TagBits tagBits2 = default(TagBits);
-					eq.GetComponent<Storage>().DropUnlessHasTags(tagBits, tagBits2, tagBits2, true, true);
+					Tag elementTag = eq.GetComponent<SuitTank>().elementTag;
+					eq.GetComponent<Storage>().DropUnlessHasTag(elementTag);
 				}
 			}
 		};

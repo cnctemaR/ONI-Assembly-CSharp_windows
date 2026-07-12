@@ -12,6 +12,7 @@ public class BeeConfig : IEntityConfig
 		Trait trait = Db.Get().CreateTrait("BeeBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 5f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 5f, name, false, false, true));
+		gameObject.AddTag(GameTags.OriginalCreature);
 		return gameObject;
 	}
 

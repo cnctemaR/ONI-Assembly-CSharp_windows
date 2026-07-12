@@ -140,7 +140,7 @@ public class Def : ScriptableObject
 	{
 		if (Assets.GetPrefab(prefabID).GetComponent<Equippable>() != null && !facadeID.IsNullOrWhiteSpace())
 		{
-			return Db.Get().EquippableFacades.Get(facadeID).GetUISprite();
+			return Db.GetEquippableFacades().Get(facadeID).GetUISprite();
 		}
 		return Def.GetUISprite(prefabID, "ui", false);
 	}

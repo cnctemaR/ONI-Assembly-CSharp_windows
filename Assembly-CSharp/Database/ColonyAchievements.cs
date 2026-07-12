@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMODUnity;
 using STRINGS;
 using TUNING;
 
@@ -38,46 +39,46 @@ namespace Database
 			this.Survived100Cycles = base.Add(new ColonyAchievement("Survived100Cycles", "SURVIVE_HUNDRED_CYCLES", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_HUNDRED_CYCLES, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_HUNDRED_CYCLES_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CycleNumber(100)
-			}, "", "", "", "", null, "", "Turn_of_the_Century", null));
+			}, "", "", "", "", null, default(EventReference), "Turn_of_the_Century", null));
 			this.ReachedSpace = (DlcManager.IsExpansion1Active() ? base.Add(new ColonyAchievement("ReachedSpace", "REACH_SPACE_ANY_DESTINATION", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACH_SPACE_ANY_DESTINATION, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACH_SPACE_ANY_DESTINATION_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new LaunchedCraft()
-			}, "", "", "", "", null, "", "space_race", null)) : base.Add(new ColonyAchievement("ReachedSpace", "REACH_SPACE_ANY_DESTINATION", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACH_SPACE_ANY_DESTINATION, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACH_SPACE_ANY_DESTINATION_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			}, "", "", "", "", null, default(EventReference), "space_race", null)) : base.Add(new ColonyAchievement("ReachedSpace", "REACH_SPACE_ANY_DESTINATION", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACH_SPACE_ANY_DESTINATION, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACH_SPACE_ANY_DESTINATION_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new ReachedSpace(null)
-			}, "", "", "", "", null, "", "space_race", null)));
+			}, "", "", "", "", null, default(EventReference), "space_race", null)));
 			this.CompleteSkillBranch = base.Add(new ColonyAchievement("CompleteSkillBranch", "COMPLETED_SKILL_BRANCH", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COMPLETED_SKILL_BRANCH, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COMPLETED_SKILL_BRANCH_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new SkillBranchComplete(Db.Get().Skills.GetTerminalSkills())
-			}, "", "", "", "", null, "", "CompleteSkillBranch", null));
+			}, "", "", "", "", null, default(EventReference), "CompleteSkillBranch", null));
 			this.CompleteResearchTree = base.Add(new ColonyAchievement("CompleteResearchTree", "COMPLETED_RESEARCH", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COMPLETED_RESEARCH, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COMPLETED_RESEARCH_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new ResearchComplete()
-			}, "", "", "", "", null, "", "honorary_doctorate", null));
+			}, "", "", "", "", null, default(EventReference), "honorary_doctorate", null));
 			this.Clothe8Dupes = base.Add(new ColonyAchievement("Clothe8Dupes", "EQUIP_EIGHT_DUPES", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EQUIP_N_DUPES, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EQUIP_N_DUPES_DESCRIPTION, 8), false, new List<ColonyAchievementRequirement>
 			{
 				new EquipNDupes(Db.Get().AssignableSlots.Outfit, 8)
-			}, "", "", "", "", null, "", "and_nowhere_to_go", null));
+			}, "", "", "", "", null, default(EventReference), "and_nowhere_to_go", null));
 			this.TameAllBasicCritters = base.Add(new ColonyAchievement("TameAllBasicCritters", "TAME_BASIC_CRITTERS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TAME_BASIC_CRITTERS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TAME_BASIC_CRITTERS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CritterTypesWithTraits(new List<Tag> { "Drecko", "Hatch", "LightBug", "Mole", "Oilfloater", "Pacu", "Puft", "Moo", "Crab", "Squirrel" })
-			}, "", "", "", "", null, "", "Animal_friends", null));
+			}, "", "", "", "", null, default(EventReference), "Animal_friends", null));
 			this.Build4NatureReserves = base.Add(new ColonyAchievement("Build4NatureReserves", "BUILD_NATURE_RESERVES", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUILD_NATURE_RESERVES, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUILD_NATURE_RESERVES_DESCRIPTION, Db.Get().RoomTypes.NatureReserve.Name, 4), false, new List<ColonyAchievementRequirement>
 			{
 				new BuildNRoomTypes(Db.Get().RoomTypes.NatureReserve, 4)
-			}, "", "", "", "", null, "", "Some_Reservations", null));
+			}, "", "", "", "", null, default(EventReference), "Some_Reservations", null));
 			this.Minimum20LivingDupes = base.Add(new ColonyAchievement("Minimum20LivingDupes", "TWENTY_DUPES", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TWENTY_DUPES, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TWENTY_DUPES_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new NumberOfDupes(20)
-			}, "", "", "", "", null, "", "no_place_like_clone", null));
+			}, "", "", "", "", null, default(EventReference), "no_place_like_clone", null));
 			this.TameAGassyMoo = base.Add(new ColonyAchievement("TameAGassyMoo", "TAME_GASSYMOO", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TAME_GASSYMOO, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TAME_GASSYMOO_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CritterTypesWithTraits(new List<Tag> { "Moo" })
-			}, "", "", "", "", null, "", "moovin_on_up", null));
+			}, "", "", "", "", null, default(EventReference), "moovin_on_up", null));
 			this.CoolBuildingTo6K = base.Add(new ColonyAchievement("CoolBuildingTo6K", "SIXKELVIN_BUILDING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SIXKELVIN_BUILDING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SIXKELVIN_BUILDING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CoolBuildingToXKelvin(6)
-			}, "", "", "", "", null, "", "not_0k", null));
+			}, "", "", "", "", null, default(EventReference), "not_0k", null));
 			this.EatkCalFromMeatByCycle100 = base.Add(new ColonyAchievement("EatkCalFromMeatByCycle100", "EAT_MEAT", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EAT_MEAT, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EAT_MEAT_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new BeforeCycleNumber(100),
@@ -90,24 +91,24 @@ namespace Database
 					FOOD.FOOD_TYPES.SURF_AND_TURF.Id,
 					FOOD.FOOD_TYPES.BURGER.Id
 				})
-			}, "", "", "", "", null, "", "Carnivore", null));
+			}, "", "", "", "", null, default(EventReference), "Carnivore", null));
 			this.NoFarmTilesAndKCal = base.Add(new ColonyAchievement("NoFarmTilesAndKCal", "NO_PLANTERBOX", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.NO_PLANTERBOX, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.NO_PLANTERBOX_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new NoFarmables(),
 				new EatXCalories(400000)
-			}, "", "", "", "", null, "", "Locavore", null));
+			}, "", "", "", "", null, default(EventReference), "Locavore", null));
 			this.Generate240000kJClean = base.Add(new ColonyAchievement("Generate240000kJClean", "CLEAN_ENERGY", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAN_ENERGY, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAN_ENERGY_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new ProduceXEngeryWithoutUsingYList(240000f, new List<Tag> { "MethaneGenerator", "PetroleumGenerator", "WoodGasGenerator", "Generator" })
-			}, "", "", "", "", null, "", "sustainably_sustaining", null));
+			}, "", "", "", "", null, default(EventReference), "sustainably_sustaining", null));
 			this.BuildOutsideStartBiome = base.Add(new ColonyAchievement("BuildOutsideStartBiome", "BUILD_OUTSIDE_BIOME", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUILD_OUTSIDE_BIOME, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUILD_OUTSIDE_BIOME_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new BuildOutsideStartBiome()
-			}, "", "", "", "", null, "", "build_outside", null));
+			}, "", "", "", "", null, default(EventReference), "build_outside", null));
 			this.Travel10000InTubes = base.Add(new ColonyAchievement("Travel10000InTubes", "TUBE_TRAVEL_DISTANCE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TUBE_TRAVEL_DISTANCE, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.TUBE_TRAVEL_DISTANCE_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new TravelXUsingTransitTubes(NavType.Tube, 10000)
-			}, "", "", "", "", null, "", "Totally-Tubular", null));
+			}, "", "", "", "", null, default(EventReference), "Totally-Tubular", null));
 			this.VarietyOfRooms = base.Add(new ColonyAchievement("VarietyOfRooms", "VARIETY_OF_ROOMS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.VARIETY_OF_ROOMS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.VARIETY_OF_ROOMS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new BuildRoomType(Db.Get().RoomTypes.NatureReserve),
@@ -118,23 +119,23 @@ namespace Database
 				new BuildRoomType(Db.Get().RoomTypes.PlumbedBathroom),
 				new BuildRoomType(Db.Get().RoomTypes.Farm),
 				new BuildRoomType(Db.Get().RoomTypes.CreaturePen)
-			}, "", "", "", "", null, "", "Get-a-Room", null));
+			}, "", "", "", "", null, default(EventReference), "Get-a-Room", null));
 			this.SurviveOneYear = base.Add(new ColonyAchievement("SurviveOneYear", "SURVIVE_ONE_YEAR", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_ONE_YEAR, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_ONE_YEAR_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new FractionalCycleNumber(365.25f)
-			}, "", "", "", "", null, "", "One_year", null));
+			}, "", "", "", "", null, default(EventReference), "One_year", null));
 			this.ExploreOilBiome = base.Add(new ColonyAchievement("ExploreOilBiome", "EXPLORE_OIL_BIOME", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EXPLORE_OIL_BIOME, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EXPLORE_OIL_BIOME_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new ExploreOilFieldSubZone()
-			}, "", "", "", "", null, "", "enter_oil_biome", null));
+			}, "", "", "", "", null, default(EventReference), "enter_oil_biome", null));
 			this.EatCookedFood = base.Add(new ColonyAchievement("EatCookedFood", "COOKED_FOOD", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COOKED_FOOD, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COOKED_FOOD_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new EatXKCalProducedByY(1, new List<Tag> { "GourmetCookingStation", "CookingStation" })
-			}, "", "", "", "", null, "", "its_not_raw", null));
+			}, "", "", "", "", null, default(EventReference), "its_not_raw", null));
 			this.BasicPumping = base.Add(new ColonyAchievement("BasicPumping", "BASIC_PUMPING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_PUMPING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_PUMPING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new VentXKG(SimHashes.Oxygen, 1000f)
-			}, "", "", "", "", null, "", "BasicPumping", null));
+			}, "", "", "", "", null, default(EventReference), "BasicPumping", null));
 			this.BasicComforts = base.Add(new ColonyAchievement("BasicComforts", "BASIC_COMFORTS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_COMFORTS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_COMFORTS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new AtLeastOneBuildingForEachDupe(new List<Tag> { "FlushToilet", "Outhouse" }),
@@ -143,24 +144,24 @@ namespace Database
 					BedConfig.ID,
 					LuxuryBedConfig.ID
 				})
-			}, "", "", "", "", null, "", "1bed_1toilet", null));
+			}, "", "", "", "", null, default(EventReference), "1bed_1toilet", null));
 			this.PlumbedWashrooms = base.Add(new ColonyAchievement("PlumbedWashrooms", "PLUMBED_WASHROOMS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.PLUMBED_WASHROOMS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.PLUMBED_WASHROOMS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new UpgradeAllBasicBuildings("Outhouse", "FlushToilet"),
 				new UpgradeAllBasicBuildings("WashBasin", "WashSink")
-			}, "", "", "", "", null, "", "royal_flush", null));
+			}, "", "", "", "", null, default(EventReference), "royal_flush", null));
 			this.AutomateABuilding = base.Add(new ColonyAchievement("AutomateABuilding", "AUTOMATE_A_BUILDING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.AUTOMATE_A_BUILDING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.AUTOMATE_A_BUILDING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new AutomateABuilding()
-			}, "", "", "", "", null, "", "red_light_green_light", null));
+			}, "", "", "", "", null, default(EventReference), "red_light_green_light", null));
 			this.MasterpiecePainting = base.Add(new ColonyAchievement("MasterpiecePainting", "MASTERPIECE_PAINTING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MASTERPIECE_PAINTING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MASTERPIECE_PAINTING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CreateMasterPainting()
-			}, "", "", "", "", null, "", "art_underground", null));
+			}, "", "", "", "", null, default(EventReference), "art_underground", null));
 			this.InspectPOI = base.Add(new ColonyAchievement("InspectPOI", "INSPECT_POI", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.INSPECT_POI, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.INSPECT_POI_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new ActivateLorePOI()
-			}, "", "", "", "", null, "", "ghosts_of_gravitas", null));
+			}, "", "", "", "", null, default(EventReference), "ghosts_of_gravitas", null));
 			this.HatchACritter = base.Add(new ColonyAchievement("HatchACritter", "HATCH_A_CRITTER", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_A_CRITTER, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_A_CRITTER_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CritterTypeExists(new List<Tag>
@@ -168,46 +169,46 @@ namespace Database
 					"DreckoPlasticBaby", "HatchHardBaby", "HatchMetalBaby", "HatchVeggieBaby", "LightBugBlackBaby", "LightBugBlueBaby", "LightBugCrystalBaby", "LightBugOrangeBaby", "LightBugPinkBaby", "LightBugPurpleBaby",
 					"OilfloaterDecorBaby", "OilfloaterHighTempBaby", "PacuCleanerBaby", "PacuTropicalBaby", "PuftBleachstoneBaby", "PuftOxyliteBaby", "SquirrelHugBaby", "CrabWoodBaby", "CrabFreshWaterBaby", "MoleDelicacyBaby"
 				})
-			}, "", "", "", "", null, "", "good_egg", null));
+			}, "", "", "", "", null, default(EventReference), "good_egg", null));
 			this.CuredDisease = base.Add(new ColonyAchievement("CuredDisease", "CURED_DISEASE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CureDisease()
-			}, "", "", "", "", null, "", "medic", null));
+			}, "", "", "", "", null, default(EventReference), "medic", null));
 			this.GeneratorTuneup = base.Add(new ColonyAchievement("GeneratorTuneup", "GENERATOR_TUNEUP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GENERATOR_TUNEUP, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GENERATOR_TUNEUP_DESCRIPTION, 100), false, new List<ColonyAchievementRequirement>
 			{
 				new TuneUpGenerator(100f)
-			}, "", "", "", "", null, "", "tune_up_for_what", null));
+			}, "", "", "", "", null, default(EventReference), "tune_up_for_what", null));
 			this.ClearFOW = base.Add(new ColonyAchievement("ClearFOW", "CLEAR_FOW", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAR_FOW, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAR_FOW_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new RevealAsteriod(0.8f)
-			}, "", "", "", "", null, "", "pulling_back_the_veil", null));
+			}, "", "", "", "", null, default(EventReference), "pulling_back_the_veil", null));
 			this.HatchRefinement = base.Add(new ColonyAchievement("HatchRefinement", "HATCH_REFINEMENT", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_REFINEMENT, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_REFINEMENT_DESCRIPTION, GameUtil.GetFormattedMass(10000f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}")), false, new List<ColonyAchievementRequirement>
 			{
 				new CreaturePoopKGProduction("HatchMetal", 10000f)
-			}, "", "", "", "", null, "", "down_the_hatch", null));
+			}, "", "", "", "", null, default(EventReference), "down_the_hatch", null));
 			this.BunkerDoorDefense = base.Add(new ColonyAchievement("BunkerDoorDefense", "BUNKER_DOOR_DEFENSE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUNKER_DOOR_DEFENSE, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BUNKER_DOOR_DEFENSE_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new BlockedCometWithBunkerDoor()
-			}, "", "", "", "", null, "", "Immovable_Object", null));
+			}, "", "", "", "", null, default(EventReference), "Immovable_Object", null));
 			this.IdleDuplicants = base.Add(new ColonyAchievement("IdleDuplicants", "IDLE_DUPLICANTS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.IDLE_DUPLICANTS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.IDLE_DUPLICANTS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new DupesVsSolidTransferArmFetch(0.51f, 5)
-			}, "", "", "", "", null, "", "easy_livin", null));
+			}, "", "", "", "", null, default(EventReference), "easy_livin", null));
 			this.ExosuitCycles = base.Add(new ColonyAchievement("ExosuitCycles", "EXOSUIT_CYCLES", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EXOSUIT_CYCLES, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.EXOSUIT_CYCLES_DESCRIPTION, 10), false, new List<ColonyAchievementRequirement>
 			{
 				new DupesCompleteChoreInExoSuitForCycles(10)
-			}, "", "", "", "", null, "", "job_suitability", null));
+			}, "", "", "", "", null, default(EventReference), "job_suitability", null));
 			if (DlcManager.IsExpansion1Active())
 			{
 				this.FirstTeleport = base.Add(new ColonyAchievement("FirstTeleport", "FIRST_TELEPORT", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.FIRST_TELEPORT_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 				{
 					new TeleportDuplicant(),
 					new DefrostDuplicant()
-				}, "", "", "", "", null, "", "first_teleport_of_call", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "first_teleport_of_call", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.SoftLaunch = base.Add(new ColonyAchievement("SoftLaunch", "SOFT_LAUNCH", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SOFT_LAUNCH_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 				{
 					new BuildALaunchPad()
-				}, "", "", "", "", null, "", "soft_launch", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "soft_launch", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.GMOOK = base.Add(new ColonyAchievement("GMOOK", "GMO_OK", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GMO_OK_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 				{
 					new AnalyzeSeed(BasicFabricMaterialPlantConfig.ID),
@@ -223,31 +224,31 @@ namespace Database
 					new AnalyzeSeed("WormPlant"),
 					new AnalyzeSeed("ColdWheat"),
 					new AnalyzeSeed("BeanPlant")
-				}, "", "", "", "", null, "", "gmo_ok", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "gmo_ok", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.MineTheGap = base.Add(new ColonyAchievement("MineTheGap", "MINE_THE_GAP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MINE_THE_GAP_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 				{
 					new HarvestAmountFromSpacePOI(1000000f)
-				}, "", "", "", "", null, "", "mine_the_gap", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "mine_the_gap", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.LandedOnAllWorlds = base.Add(new ColonyAchievement("LandedOnAllWorlds", "LANDED_ON_ALL_WORLDS", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.LAND_ON_ALL_WORLDS_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 				{
 					new LandOnAllWorlds()
-				}, "", "", "", "", null, "", "land_on_all_worlds", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "land_on_all_worlds", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.RadicalTrip = base.Add(new ColonyAchievement("RadicalTrip", "RADICAL_TRIP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP_DESCRIPTION, 10), false, new List<ColonyAchievementRequirement>
 				{
 					new RadBoltTravelDistance(10000)
-				}, "", "", "", "", null, "", "radical_trip", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "radical_trip", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.SweeterThanHoney = base.Add(new ColonyAchievement("SweeterThanHoney", "SWEETER_THAN_HONEY", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 				{
 					new HarvestAHiveWithoutBeingStung()
-				}, "", "", "", "", null, "", "sweeter_than_honey", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "sweeter_than_honey", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.SurviveInARocket = base.Add(new ColonyAchievement("SurviveInARocket", "SURVIVE_IN_A_ROCKET", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET_DESCRIPTION, 10, 25), false, new List<ColonyAchievementRequirement>
 				{
 					new SurviveARocketWithMinimumMorale(25f, 10)
-				}, "", "", "", "", null, "", "survive_a_rocket", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "survive_a_rocket", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 				this.RunAReactor = base.Add(new ColonyAchievement("RunAReactor", "REACTOR_USAGE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE_DESCRIPTION, 5), false, new List<ColonyAchievementRequirement>
 				{
 					new RunReactorForXDays(5)
-				}, "", "", "", "", null, "", "thats_rad", DlcManager.AVAILABLE_EXPANSION1_ONLY));
+				}, "", "", "", "", null, default(EventReference), "thats_rad", DlcManager.AVAILABLE_EXPANSION1_ONLY));
 			}
 		}
 

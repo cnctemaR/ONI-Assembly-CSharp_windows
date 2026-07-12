@@ -13,14 +13,14 @@ public class BuzzStates : GameStateMachine<BuzzStates, BuzzStates.Instance, ISta
 		}).ToggleStatusItem(CREATURES.STATUSITEMS.IDLE.NAME, CREATURES.STATUSITEMS.IDLE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).ToggleTag(GameTags.Idle);
 		this.idle.Enter(new StateMachine<BuzzStates, BuzzStates.Instance, IStateMachineTarget, BuzzStates.Def>.State.Callback(this.PlayIdle)).ToggleScheduleCallback("DoBuzz", (BuzzStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(BuzzStates.Instance smi)
 		{
-			this.numMoves.Set(global::UnityEngine.Random.Range(4, 6), smi);
+			this.numMoves.Set(global::UnityEngine.Random.Range(4, 6), smi, false);
 			smi.GoTo(this.buzz.move);
 		});
 		this.buzz.ParamTransition<int>(this.numMoves, this.idle, (BuzzStates.Instance smi, int p) => p <= 0);
 		this.buzz.move.Enter(new StateMachine<BuzzStates, BuzzStates.Instance, IStateMachineTarget, BuzzStates.Def>.State.Callback(this.MoveToNewCell)).EventTransition(GameHashes.DestinationReached, this.buzz.pause, null).EventTransition(GameHashes.NavigationFailed, this.buzz.pause, null);
 		this.buzz.pause.Enter(delegate(BuzzStates.Instance smi)
 		{
-			this.numMoves.Set(this.numMoves.Get(smi) - 1, smi);
+			this.numMoves.Set(this.numMoves.Get(smi) - 1, smi, false);
 			smi.GoTo(this.buzz.move);
 		});
 	}

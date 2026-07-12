@@ -73,7 +73,8 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 	{
 		GasLiquidExposureMonitor.InitializeCustomRates();
 		float num = 0f;
-		smi.isAirtightSuit = false;
+		smi.isInAirtightEnvironment = false;
+		smi.isImmuneToIrritability = false;
 		int num2 = Grid.CellAbove(Grid.PosToCell(smi.gameObject));
 		if (Grid.IsValidCell(num2))
 		{
@@ -90,18 +91,26 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 					num3 = 2f;
 				}
 			}
-			if (smi.master.gameObject.HasTag(GameTags.HasSuitTank) && smi.gameObject.GetComponent<SuitEquipper>().IsWearingAirtightSuit())
+			if (smi.effects.HasImmunityTo(GasLiquidExposureMonitor.minorIrritationEffect) || smi.effects.HasImmunityTo(GasLiquidExposureMonitor.majorIrritationEffect))
 			{
-				smi.isAirtightSuit = true;
+				smi.isImmuneToIrritability = true;
 				num = GasLiquidExposureMonitor.customExposureRates[SimHashes.Oxygen];
 			}
-			else if (element.IsGas)
+			if ((smi.master.gameObject.HasTag(GameTags.HasSuitTank) && smi.gameObject.GetComponent<SuitEquipper>().IsWearingAirtightSuit()) || smi.master.gameObject.HasTag(GameTags.InTransitTube))
 			{
-				num = num3 * Grid.Mass[num2] / 1f;
+				smi.isInAirtightEnvironment = true;
+				num = GasLiquidExposureMonitor.customExposureRates[SimHashes.Oxygen];
 			}
-			else if (element.IsLiquid)
+			if (!smi.isInAirtightEnvironment && !smi.isImmuneToIrritability)
 			{
-				num = num3 * Grid.Mass[num2] / 1000f;
+				if (element.IsGas)
+				{
+					num = num3 * Grid.Mass[num2] / 1f;
+				}
+				else if (element.IsLiquid)
+				{
+					num = num3 * Grid.Mass[num2] / 1000f;
+				}
 			}
 		}
 		smi.exposureRate = num;
@@ -114,19 +123,26 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 	{
 		if (smi.IsMinorIrritation())
 		{
-			smi.effects.Add(GasLiquidExposureMonitor.minorIrritationEffect, true);
-			this.isIrritated.Set(true, smi);
-			return;
+			if (smi.effects.Add(GasLiquidExposureMonitor.minorIrritationEffect, true) != null)
+			{
+				this.isIrritated.Set(true, smi, false);
+				return;
+			}
 		}
-		if (smi.IsMajorIrritation())
+		else if (smi.IsMajorIrritation())
 		{
-			smi.effects.Add(GasLiquidExposureMonitor.majorIrritationEffect, true);
-			this.isIrritated.Set(true, smi);
-			return;
+			if (smi.effects.Add(GasLiquidExposureMonitor.majorIrritationEffect, true) != null)
+			{
+				this.isIrritated.Set(true, smi, false);
+				return;
+			}
 		}
-		smi.effects.Remove(GasLiquidExposureMonitor.minorIrritationEffect);
-		smi.effects.Remove(GasLiquidExposureMonitor.majorIrritationEffect);
-		this.isIrritated.Set(false, smi);
+		else
+		{
+			smi.effects.Remove(GasLiquidExposureMonitor.minorIrritationEffect);
+			smi.effects.Remove(GasLiquidExposureMonitor.majorIrritationEffect);
+			this.isIrritated.Set(false, smi, false);
+		}
 	}
 
 	public Effect GetAppliedEffect(GasLiquidExposureMonitor.Instance smi)
@@ -220,16 +236,15 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 
 		public Reactable GetReactable()
 		{
-			EmoteReactable emoteReactable = new SelfEmoteReactable(base.master.gameObject, "IrritatedEyes", Db.Get().ChoreTypes.Cough, "anim_irritated_eyes_kanim", 0f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+			Emote iritatedEyes = Db.Get().Emotes.Minion.IritatedEyes;
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.master.gameObject, "IrritatedEyes", Db.Get().ChoreTypes.Cough, 0f, 0f, float.PositiveInfinity, 0f);
+			selfEmoteReactable.SetEmote(iritatedEyes);
+			selfEmoteReactable.preventChoreInterruption = true;
+			selfEmoteReactable.RegisterEmoteStepCallbacks("irritated_eyes", null, delegate(GameObject go)
 			{
-				anim = "irritated_eyes",
-				finishcb = delegate(GameObject go)
-				{
-					base.sm.reactFinished.Trigger(this);
-				}
+				base.sm.reactFinished.Trigger(this);
 			});
-			emoteReactable.preventChoreInterruption = true;
-			return emoteReactable;
+			return selfEmoteReactable;
 		}
 
 		public bool IsMinorIrritation()
@@ -244,7 +259,7 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 
 		public Element CurrentlyExposedToElement()
 		{
-			if (this.isAirtightSuit)
+			if (this.isInAirtightEnvironment)
 			{
 				return ElementLoader.GetElement(SimHashes.Oxygen.CreateTag());
 			}
@@ -268,6 +283,8 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 
 		public Effects effects;
 
-		public bool isAirtightSuit;
+		public bool isInAirtightEnvironment;
+
+		public bool isImmuneToIrritability;
 	}
 }

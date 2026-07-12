@@ -71,7 +71,7 @@ public class LiquidFuelTankClusterConfig : IBuildingConfig
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.refillMass = storage.capacityKg;
 		manualDeliveryKG.capacity = storage.capacityKg;
-		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
+		manualDeliveryKG.operationalRequirement = Operational.State.None;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;

@@ -172,12 +172,7 @@ namespace Klei
 			}
 			normalized_path = (path = FileSystem.Normalize(path));
 			string text = filename_glob_pattern.Replace(".", "\\.").Replace("*", ".*");
-			string text2 = path.Replace("\\", "\\\\").Replace("/", "\\/").Replace("(", "\\(")
-				.Replace(")", "\\)")
-				.Replace("[", "\\[")
-				.Replace("]", "\\]")
-				.Replace(".", "\\.")
-				.Replace("+", "\\+");
+			string text2 = Regex.Escape(path);
 			text2 = text2 + "/" + text + "$";
 			filename_regex = new Regex(text2);
 		}

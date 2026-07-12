@@ -74,7 +74,7 @@ public class LeadSuitMonitor : GameStateMachine<LeadSuitMonitor, LeadSuitMonitor
 		public Instance(IStateMachineTarget master, GameObject owner)
 			: base(master)
 		{
-			base.sm.owner.Set(owner, base.smi);
+			base.sm.owner.Set(owner, base.smi, false);
 			this.navigator = owner.GetComponent<Navigator>();
 			this.lead_suit_tank = master.GetComponent<LeadSuitTank>();
 			this.noBatteryModifiers.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.INSULATION, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.LEADSUIT_INSULATION), global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.SUIT_OUT_OF_BATTERIES, false, false, true));

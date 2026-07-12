@@ -86,7 +86,7 @@ public class ClusterNameDisplayScreen : KScreen
 		this.m_entries.RemoveRange(num, this.m_entries.Count - num);
 	}
 
-	private void UpdateName(ClusterGridEntity representedObject)
+	public void UpdateName(ClusterGridEntity representedObject)
 	{
 		ClusterNameDisplayScreen.Entry entry = this.GetEntry(representedObject);
 		if (entry == null)

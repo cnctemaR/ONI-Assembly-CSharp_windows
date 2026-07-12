@@ -68,7 +68,7 @@ public class MournChore : Chore<MournChore.StatesInstance>
 			global::Debug.LogError("MournChore no grave");
 			return;
 		}
-		base.smi.sm.mourner.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.mourner.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 
@@ -116,7 +116,7 @@ public class MournChore : Chore<MournChore.StatesInstance>
 			Grid.Reserved[standableCell] = true;
 			Vector3 vector = Grid.CellToPosCBC(standableCell, Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("MournLocator", vector);
-			base.smi.sm.locator.Set(gameObject, base.smi);
+			base.smi.sm.locator.Set(gameObject, base.smi, false);
 			this.locatorCell = standableCell;
 			base.smi.GoTo(base.sm.moveto);
 		}

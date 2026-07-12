@@ -90,15 +90,20 @@ public class Durability : KMonoBehaviour
 		gameObject.transform.SetPosition(base.transform.GetPosition());
 		gameObject.GetComponent<PrimaryElement>().SetElement(base.GetComponent<PrimaryElement>().ElementID, false);
 		gameObject.SetActive(true);
-		Storage component = base.gameObject.GetComponent<Storage>();
-		if (component)
+		EquippableFacade component = base.GetComponent<EquippableFacade>();
+		if (component != null)
 		{
-			JetSuitTank component2 = base.gameObject.GetComponent<JetSuitTank>();
-			if (component2)
+			gameObject.GetComponent<RepairableEquipment>().facadeID = component.FacadeID;
+		}
+		Storage component2 = base.gameObject.GetComponent<Storage>();
+		if (component2)
+		{
+			JetSuitTank component3 = base.gameObject.GetComponent<JetSuitTank>();
+			if (component3)
 			{
-				component.AddLiquid(SimHashes.Petroleum, component2.amount, base.GetComponent<PrimaryElement>().Temperature, byte.MaxValue, 0, false, true);
+				component2.AddLiquid(SimHashes.Petroleum, component3.amount, base.GetComponent<PrimaryElement>().Temperature, byte.MaxValue, 0, false, true);
 			}
-			component.DropAll(false, false, default(Vector3), true, null);
+			component2.DropAll(false, false, default(Vector3), true, null);
 		}
 		Util.KDestroyGameObject(base.gameObject);
 	}

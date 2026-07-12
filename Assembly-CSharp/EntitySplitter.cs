@@ -62,21 +62,32 @@ public class EntitySplitter : KMonoBehaviour
 				return false;
 			}
 		}
-		if (pickupable.HasTag(GameTags.Seed) || pickupable.HasTag(GameTags.CropSeed) || pickupable.HasTag(GameTags.Compostable))
+		bool flag = component.HasTag(GameTags.SpicedFood);
+		if (flag != component2.HasTag(GameTags.SpicedFood))
 		{
-			MutantPlant component3 = pickupable.GetComponent<MutantPlant>();
-			MutantPlant component4 = other.GetComponent<MutantPlant>();
-			if (component3 != null || component4 != null)
+			return false;
+		}
+		Edible component3 = component.GetComponent<Edible>();
+		Edible component4 = component.GetComponent<Edible>();
+		if (flag && !component3.CanAbsorb(component4))
+		{
+			return false;
+		}
+		if (component.HasTag(GameTags.Seed) || component.HasTag(GameTags.CropSeed) || component.HasTag(GameTags.Compostable))
+		{
+			MutantPlant component5 = pickupable.GetComponent<MutantPlant>();
+			MutantPlant component6 = other.GetComponent<MutantPlant>();
+			if (component5 != null || component6 != null)
 			{
-				if (component3 == null != (component4 == null))
+				if (component5 == null != (component6 == null))
 				{
 					return false;
 				}
-				if (component3.HasTag(GameTags.UnidentifiedSeed) != component4.HasTag(GameTags.UnidentifiedSeed))
+				if (component.HasTag(GameTags.UnidentifiedSeed) != component2.HasTag(GameTags.UnidentifiedSeed))
 				{
 					return false;
 				}
-				if (component3.SubSpeciesID != component4.SubSpeciesID)
+				if (component5.SubSpeciesID != component6.SubSpeciesID)
 				{
 					return false;
 				}
@@ -121,6 +132,14 @@ public class EntitySplitter : KMonoBehaviour
 		{
 			storage.Trigger(-1697596308, pickupable.gameObject);
 			storage.Trigger(-778359855, storage);
+		}
+		IExtendSplitting[] components = pickupable.GetComponents<IExtendSplitting>();
+		if (components != null)
+		{
+			for (int i = 0; i < components.Length; i++)
+			{
+				components[i].OnSplitTick(component);
+			}
 		}
 		return component;
 	}

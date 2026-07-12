@@ -8,7 +8,7 @@ public class GravitasDoorConfig : IBuildingConfig
 {
 	public override string[] GetDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public override BuildingDef CreateBuildingDef()

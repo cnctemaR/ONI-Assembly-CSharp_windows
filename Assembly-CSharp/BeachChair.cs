@@ -41,7 +41,7 @@ public class BeachChair : StateMachineComponent<BeachChair.StatesInstance>, IGam
 
 	public void SetLit(bool v)
 	{
-		base.smi.sm.lit.Set(v, base.smi);
+		base.smi.sm.lit.Set(v, base.smi, false);
 	}
 
 	public void SetWorker(Worker worker)

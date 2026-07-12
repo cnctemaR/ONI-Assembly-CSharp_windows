@@ -34,11 +34,11 @@ public class PacuCleanerConfig : IEntityConfig
 			ElementConverter elementConverter = gameObject.AddOrGet<ElementConverter>();
 			elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 			{
-				new ElementConverter.ConsumedElement(SimHashes.DirtyWater.CreateTag(), 0.2f)
+				new ElementConverter.ConsumedElement(SimHashes.DirtyWater.CreateTag(), 0.2f, true)
 			};
 			elementConverter.outputElements = new ElementConverter.OutputElement[]
 			{
-				new ElementConverter.OutputElement(0.2f, SimHashes.Water, 0f, true, true, 0f, 0.5f, 1f, byte.MaxValue, 0)
+				new ElementConverter.OutputElement(0.2f, SimHashes.Water, 0f, true, true, 0f, 0.5f, 1f, byte.MaxValue, 0, true)
 			};
 		}
 		return gameObject;

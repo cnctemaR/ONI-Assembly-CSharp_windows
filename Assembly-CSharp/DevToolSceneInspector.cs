@@ -293,13 +293,15 @@ public class DevToolSceneInspector : DevTool
 	{
 		KPrefabID kprefabID = (KPrefabID)obj;
 		ImGui.BeginChild("ScrollRegion", new Vector2(0f, 0f), true, ImGuiWindowFlags.None);
+		string name = kprefabID.PrefabTag.Name;
+		ImGui.InputText("PrefabID: ", ref name, 128U);
 		int num = 0;
 		foreach (Tag tag in kprefabID.Tags)
 		{
-			string name = tag.Name;
-			if (!(filter != "") || name.IndexOf(filter, 0, StringComparison.CurrentCultureIgnoreCase) != -1)
+			string name2 = tag.Name;
+			if (!(filter != "") || name2.IndexOf(filter, 0, StringComparison.CurrentCultureIgnoreCase) != -1)
 			{
-				ImGui.InputText("[" + num.ToString() + "]", ref name, 128U);
+				ImGui.InputText("[" + num.ToString() + "]", ref name2, 128U);
 				num++;
 			}
 		}

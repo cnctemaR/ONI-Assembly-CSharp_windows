@@ -231,7 +231,7 @@ public class EventSystem
 		{
 			if (!suppressWarnings)
 			{
-				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNo subscriptions have been made to event");
+				global::Debug.LogWarning(string.Format("Failed to Unsubscribe event handler: {0}\nNo subscriptions have been made to event {1}", handler.ToString(), eventName));
 			}
 			return;
 		}
@@ -240,7 +240,7 @@ public class EventSystem
 		{
 			if (!suppressWarnings)
 			{
-				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNot subscribed to event");
+				global::Debug.LogWarning(string.Format("Failed to Unsubscribe event handler: {0}\nNot subscribed to event {1}", handler.ToString(), eventName));
 			}
 			return;
 		}

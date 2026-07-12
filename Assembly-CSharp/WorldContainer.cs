@@ -106,6 +106,14 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	public List<string> StoryTraitIds
+	{
+		get
+		{
+			return this.m_storyTraitIds;
+		}
+	}
+
 	public AlertStateManager.Instance AlertManager
 	{
 		get
@@ -174,7 +182,6 @@ public class WorldContainer : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		SaveGame.Instance.materialSelectorSerializer.WipeWorldSelectionData(this.id);
-		ClusterManager.Instance.UnregisterWorldContainer(this);
 		base.OnCleanUp();
 	}
 
@@ -320,8 +327,11 @@ public class WorldContainer : KMonoBehaviour
 
 	public void SetParentIdx(int parentIdx)
 	{
+		this.parentChangeArgs.lastParentId = this.ParentWorldId;
+		this.parentChangeArgs.world = this;
 		this.ParentWorldId = parentIdx;
-		Game.Instance.Trigger(880851192, this);
+		Game.Instance.Trigger(880851192, this.parentChangeArgs);
+		this.parentChangeArgs.lastParentId = (int)ClusterManager.INVALID_WORLD_IDX;
 	}
 
 	public Vector2 minimumBounds
@@ -571,7 +581,9 @@ public class WorldContainer : KMonoBehaviour
 				this.m_subworldNames.Add(text);
 			}
 			this.m_worldTraitIds = new List<string>();
-			this.m_worldTraitIds.AddRange(world.Settings.GetTraitIDs());
+			this.m_worldTraitIds.AddRange(world.Settings.GetWorldTraitIDs());
+			this.m_storyTraitIds = new List<string>();
+			this.m_storyTraitIds.AddRange(world.Settings.GetStoryTraitIDs());
 			return;
 		}
 		this.fullyEnclosedBorder = false;
@@ -825,7 +837,7 @@ public class WorldContainer : KMonoBehaviour
 				Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
 				if (pickupable != null)
 				{
-					if (pickupable.HasTag(GameTags.Minion))
+					if (pickupable.IsPrefabID(GameTags.Minion))
 					{
 						global::Util.KDestroyGameObject(pickupable.gameObject);
 					}
@@ -897,7 +909,7 @@ public class WorldContainer : KMonoBehaviour
 
 	public void CancelChores()
 	{
-		for (int i = 0; i < 42; i++)
+		for (int i = 0; i < 43; i++)
 		{
 			int num = (int)this.minimumBounds.x;
 			while ((float)num <= this.maximumBounds.x)
@@ -916,17 +928,29 @@ public class WorldContainer : KMonoBehaviour
 				num++;
 			}
 		}
-		List<Chore> list = new List<Chore>();
-		foreach (Chore chore in GlobalChoreProvider.Instance.chores)
+		List<Chore> list;
+		GlobalChoreProvider.Instance.choreWorldMap.TryGetValue(this.id, out list);
+		int num4 = 0;
+		while (list != null && num4 < list.Count)
 		{
-			if (chore != null && chore.target != null && !chore.isNull && chore.gameObject.GetMyWorldId() == this.id)
+			Chore chore = list[num4];
+			if (chore != null && chore.target != null && !chore.isNull)
 			{
-				list.Add(chore);
+				chore.Cancel("World destroyed");
 			}
+			num4++;
 		}
-		foreach (Chore chore2 in list)
+		List<FetchChore> list2;
+		GlobalChoreProvider.Instance.fetchMap.TryGetValue(this.id, out list2);
+		int num5 = 0;
+		while (list2 != null && num5 < list2.Count)
 		{
-			chore2.Cancel("World destroyed");
+			FetchChore fetchChore = list2[num5];
+			if (fetchChore != null && fetchChore.target != null && !fetchChore.isNull)
+			{
+				fetchChore.Cancel("World destroyed");
+			}
+			num5++;
 		}
 	}
 
@@ -1168,6 +1192,11 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	private List<string> m_worldTraitIds;
+
+	[Serialize]
+	private List<string> m_storyTraitIds;
+
+	private WorldParentChangedEventArgs parentChangeArgs = new WorldParentChangedEventArgs();
 
 	[MySmiReq]
 	private AlertStateManager.Instance m_alertManager;

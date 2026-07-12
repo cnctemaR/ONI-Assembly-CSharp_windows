@@ -67,13 +67,13 @@ public class SolidBoosterConfig : IBuildingConfig
 		solidBooster.fuelStorage = storage;
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = solidBooster.fuelTag;
+		manualDeliveryKG.RequestedItemTag = solidBooster.fuelTag;
 		manualDeliveryKG.refillMass = storage.capacityKg / 2f;
 		manualDeliveryKG.capacity = storage.capacityKg / 2f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
-		manualDeliveryKG2.requestedItemTag = ElementLoader.FindElementByHash(SimHashes.OxyRock).tag;
+		manualDeliveryKG2.RequestedItemTag = ElementLoader.FindElementByHash(SimHashes.OxyRock).tag;
 		manualDeliveryKG2.refillMass = storage.capacityKg / 2f;
 		manualDeliveryKG2.capacity = storage.capacityKg / 2f;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;

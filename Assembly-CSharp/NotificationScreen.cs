@@ -385,43 +385,49 @@ public class NotificationScreen : KScreen
 		if (nextClickedNotification.customClickCallback != null)
 		{
 			nextClickedNotification.customClickCallback(nextClickedNotification.customClickData);
-			return;
 		}
-		if (nextClickedNotification.clickFocus != null)
+		else
 		{
-			Vector3 position = nextClickedNotification.clickFocus.GetPosition();
-			position.z = -40f;
-			ClusterGridEntity component = nextClickedNotification.clickFocus.GetComponent<ClusterGridEntity>();
-			KSelectable component2 = nextClickedNotification.clickFocus.GetComponent<KSelectable>();
-			int myWorldId = nextClickedNotification.clickFocus.gameObject.GetMyWorldId();
-			if (myWorldId != -1)
+			if (nextClickedNotification.clickFocus != null)
 			{
-				CameraController.Instance.ActiveWorldStarWipe(myWorldId, position, 10f, null);
-			}
-			else if (DlcManager.FeatureClusterSpaceEnabled() && component != null && component.IsVisible)
-			{
-				ManagementMenu.Instance.OpenClusterMap();
-				ClusterMapScreen.Instance.SetTargetFocusPosition(component.Location, 0.5f);
-			}
-			if (component2 != null)
-			{
-				if (DlcManager.FeatureClusterSpaceEnabled() && component != null && component.IsVisible)
+				Vector3 position = nextClickedNotification.clickFocus.GetPosition();
+				position.z = -40f;
+				ClusterGridEntity component = nextClickedNotification.clickFocus.GetComponent<ClusterGridEntity>();
+				KSelectable component2 = nextClickedNotification.clickFocus.GetComponent<KSelectable>();
+				int myWorldId = nextClickedNotification.clickFocus.gameObject.GetMyWorldId();
+				if (myWorldId != -1)
 				{
-					ClusterMapSelectTool.Instance.Select(component2, false);
+					CameraController.Instance.ActiveWorldStarWipe(myWorldId, position, 10f, null);
 				}
-				else
+				else if (DlcManager.FeatureClusterSpaceEnabled() && component != null && component.IsVisible)
 				{
-					SelectTool.Instance.Select(component2, false);
+					ManagementMenu.Instance.OpenClusterMap();
+					ClusterMapScreen.Instance.SetTargetFocusPosition(component.Location, 0.5f);
+				}
+				if (component2 != null)
+				{
+					if (DlcManager.FeatureClusterSpaceEnabled() && component != null && component.IsVisible)
+					{
+						ClusterMapSelectTool.Instance.Select(component2, false);
+					}
+					else
+					{
+						SelectTool.Instance.Select(component2, false);
+					}
 				}
 			}
+			else if (nextClickedNotification.Notifier != null)
+			{
+				SelectTool.Instance.Select(nextClickedNotification.Notifier.GetComponent<KSelectable>(), false);
+			}
+			if (nextClickedNotification.Type == NotificationType.Messages)
+			{
+				this.ShowMessage((MessageNotification)nextClickedNotification);
+			}
 		}
-		else if (nextClickedNotification.Notifier != null)
+		if (nextClickedNotification.clearOnClick)
 		{
-			SelectTool.Instance.Select(nextClickedNotification.Notifier.GetComponent<KSelectable>(), false);
-		}
-		if (nextClickedNotification.Type == NotificationType.Messages)
-		{
-			this.ShowMessage((MessageNotification)nextClickedNotification);
+			nextClickedNotification.Clear();
 		}
 	}
 

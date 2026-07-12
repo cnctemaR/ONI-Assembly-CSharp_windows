@@ -54,10 +54,10 @@ public class HotTubConfig : IBuildingConfig
 		conduitDispenser.SetOnState(false);
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("BleachStone");
+		manualDeliveryKG.RequestedItemTag = new Tag("BleachStone");
 		manualDeliveryKG.capacity = 100f;
 		manualDeliveryKG.refillMass = 10f;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		HotTub hotTub = go.AddOrGet<HotTub>();
 		hotTub.waterStorage = storage;

@@ -48,7 +48,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			if (!(gameObject == null))
 			{
 				KPrefabID component = gameObject.GetComponent<KPrefabID>();
-				if (!(component == null) && component.HasAnyTags(this.OutfitTags))
+				if (!(component == null) && component.IsAnyPrefabID(this.OutfitTags))
 				{
 					return component;
 				}
@@ -113,7 +113,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private void CreateFetchChore()
 	{
-		this.fetchChore = new FetchChore(Db.Get().ChoreTypes.EquipmentFetch, base.GetComponent<Storage>(), 1f, this.OutfitTags, null, new Tag[] { GameTags.Assigned }, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+		this.fetchChore = new FetchChore(Db.Get().ChoreTypes.EquipmentFetch, base.GetComponent<Storage>(), 1f, new HashSet<Tag>(this.OutfitTags), FetchChore.MatchCriteria.MatchID, Tag.Invalid, new Tag[] { GameTags.Assigned }, null, true, null, null, null, Operational.State.None, 0);
 		this.fetchChore.allowMultifetch = false;
 	}
 
@@ -178,12 +178,12 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private void OnRequestOutfit()
 	{
-		base.smi.sm.isWaitingForSuit.Set(true, base.smi);
+		base.smi.sm.isWaitingForSuit.Set(true, base.smi, false);
 	}
 
 	private void OnCancelRequest()
 	{
-		base.smi.sm.isWaitingForSuit.Set(false, base.smi);
+		base.smi.sm.isWaitingForSuit.Set(false, base.smi, false);
 	}
 
 	public void DropSuit()
@@ -224,14 +224,14 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	public void ConfigRequestSuit()
 	{
-		base.smi.sm.isConfigured.Set(true, base.smi);
-		base.smi.sm.isWaitingForSuit.Set(true, base.smi);
+		base.smi.sm.isConfigured.Set(true, base.smi, false);
+		base.smi.sm.isWaitingForSuit.Set(true, base.smi, false);
 	}
 
 	public void ConfigNoSuit()
 	{
-		base.smi.sm.isConfigured.Set(true, base.smi);
-		base.smi.sm.isWaitingForSuit.Set(false, base.smi);
+		base.smi.sm.isConfigured.Set(true, base.smi, false);
+		base.smi.sm.isWaitingForSuit.Set(false, base.smi, false);
 	}
 
 	public bool CanDropOffSuit()
@@ -546,7 +546,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 					return false;
 				}
 				AssignableSlotInstance slot = equipment.GetSlot(Db.Get().AssignableSlots.Suit);
-				return !(slot.assignable == null) && slot.assignable.HasAnyTags(suitLocker.OutfitTags);
+				return !(slot.assignable == null) && slot.assignable.GetComponent<KPrefabID>().IsAnyPrefabID(suitLocker.OutfitTags);
 			};
 			this.SuitTypeMatchesLocker = precondition;
 			base..ctor();
@@ -659,7 +659,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				.QueueAnim("awaiting_suit", false, null)
 				.Exit("ClearIsWaitingForSuit", delegate(SuitLocker.StatesInstance smi)
 				{
-					this.isWaitingForSuit.Set(false, smi);
+					this.isWaitingForSuit.Set(false, smi, false);
 				})
 				.Exit("CancelFetchChore", delegate(SuitLocker.StatesInstance smi)
 				{
@@ -667,7 +667,17 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 				})
 				.ToggleStatusItem(BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.NAME, BUILDING.STATUSITEMS.SUIT_LOCKER.SUIT_REQUESTED.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 			this.charging.DefaultState(this.charging.pre).RefreshUserMenuOnEnter().EventTransition(GameHashes.OnStorageChange, this.empty, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit() == null)
-				.ToggleStatusItem(Db.Get().MiscStatusItems.StoredItemDurability, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit().gameObject);
+				.ToggleStatusItem(Db.Get().MiscStatusItems.StoredItemDurability, (SuitLocker.StatesInstance smi) => smi.master.GetStoredOutfit().gameObject)
+				.Enter(delegate(SuitLocker.StatesInstance smi)
+				{
+					KAnim.Build.Symbol symbol = smi.master.GetStoredOutfit().GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build.GetSymbol("suit");
+					SymbolOverrideController component = smi.GetComponent<SymbolOverrideController>();
+					component.TryRemoveSymbolOverride("suit_swap", 0);
+					if (symbol != null)
+					{
+						component.AddSymbolOverride("suit_swap", symbol, 0);
+					}
+				});
 			this.charging.pre.Enter(delegate(SuitLocker.StatesInstance smi)
 			{
 				if (smi.master.IsSuitFullyCharged())

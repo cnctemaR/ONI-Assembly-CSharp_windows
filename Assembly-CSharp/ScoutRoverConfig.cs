@@ -91,8 +91,10 @@ public class ScoutRoverConfig : IEntityConfig
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new RobotDeathStates.Def(), true, -1).Add(new FallStates.Def(), true, -1).Add(new DebugGoToStates.Def(), true, -1)
 			.Add(new IdleStates.Def(), true, Db.Get().ChoreTypes.Idle.priority);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Robots.Models.ScoutRover, null);
-		gameObject.AddOrGet<KPrefabID>().RemoveTag(GameTags.CreatureBrain);
-		gameObject.AddOrGet<KPrefabID>().AddTag(GameTags.DupeBrain, false);
+		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
+		kprefabID.RemoveTag(GameTags.CreatureBrain);
+		kprefabID.AddTag(GameTags.DupeBrain, false);
+		kprefabID.AddTag(GameTags.Robot, false);
 		Navigator navigator = gameObject.AddOrGet<Navigator>();
 		string text = "RobotNavGrid";
 		navigator.NavGridName = text;

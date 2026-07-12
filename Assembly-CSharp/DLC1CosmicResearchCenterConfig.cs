@@ -42,7 +42,7 @@ public class DLC1CosmicResearchCenterConfig : IBuildingConfig
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = DLC1CosmicResearchCenterConfig.INPUT_MATERIAL;
+		manualDeliveryKG.RequestedItemTag = DLC1CosmicResearchCenterConfig.INPUT_MATERIAL;
 		manualDeliveryKG.refillMass = 3f;
 		manualDeliveryKG.capacity = 300f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
@@ -56,7 +56,7 @@ public class DLC1CosmicResearchCenterConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(DLC1CosmicResearchCenterConfig.INPUT_MATERIAL, 0.02f)
+			new ElementConverter.ConsumedElement(DLC1CosmicResearchCenterConfig.INPUT_MATERIAL, 0.02f, true)
 		};
 		elementConverter.showDescriptors = false;
 		go.AddOrGetDef<PoweredController.Def>();

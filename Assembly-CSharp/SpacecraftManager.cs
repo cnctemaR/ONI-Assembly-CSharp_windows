@@ -387,7 +387,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 				text = text + "\n" + (string)notification2.tooltipData;
 			}
 			return text;
-		}, "• " + spacecraft.rocketName, true, 0f, null, null, null, true);
+		}, "• " + spacecraft.rocketName, true, 0f, null, null, null, true, false);
 		spacecraft.launchConditions.gameObject.AddOrGet<Notifier>().Add(notification, "");
 	}
 
@@ -433,11 +433,11 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 				{
 					if (SpacecraftManager.instance.GetDestination(starmapAnalysisDestinationID).type == Db.Get().SpaceDestinationTypes.Earth.Id)
 					{
-						Game.Instance.unlocks.Unlock("earth");
+						Game.Instance.unlocks.Unlock("earth", true);
 					}
 					if (SpacecraftManager.instance.GetDestination(starmapAnalysisDestinationID).type == Db.Get().SpaceDestinationTypes.Wormhole.Id)
 					{
-						Game.Instance.unlocks.Unlock("wormhole");
+						Game.Instance.unlocks.Unlock("wormhole", true);
 					}
 					SpacecraftManager.instance.SetStarmapAnalysisDestinationID(-1);
 				}

@@ -1,11 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Klei.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 [AddComponentMenu("KMonoBehaviour/scripts/InterfaceTool")]
 public class InterfaceTool : KMonoBehaviour
 {
+	public static InterfaceToolConfig ActiveConfig
+	{
+		get
+		{
+			if (InterfaceTool.interfaceConfigMap == null)
+			{
+				InterfaceTool.InitializeConfigs(global::Action.Invalid, null);
+			}
+			return InterfaceTool.activeConfigs[InterfaceTool.activeConfigs.Count - 1];
+		}
+	}
+
+	public static void ToggleConfig(global::Action configKey)
+	{
+		if (InterfaceTool.interfaceConfigMap == null)
+		{
+			InterfaceTool.InitializeConfigs(global::Action.Invalid, null);
+		}
+		InterfaceToolConfig interfaceToolConfig;
+		if (!InterfaceTool.interfaceConfigMap.TryGetValue(configKey, out interfaceToolConfig))
+		{
+			global::Debug.LogWarning(string.Format("[InterfaceTool] No config is associated with Key: {0}!", configKey) + " Are you sure the configs were initialized properly!");
+			return;
+		}
+		if (InterfaceTool.activeConfigs.BinarySearch(interfaceToolConfig, InterfaceToolConfig.ConfigComparer) <= 0)
+		{
+			global::Debug.Log(string.Format("[InterfaceTool] Pushing config with key: {0}", configKey));
+			InterfaceTool.activeConfigs.Add(interfaceToolConfig);
+			InterfaceTool.activeConfigs.Sort(InterfaceToolConfig.ConfigComparer);
+			return;
+		}
+		global::Debug.Log(string.Format("[InterfaceTool] Popping config with key: {0}", configKey));
+		InterfaceTool.activeConfigs.Remove(interfaceToolConfig);
+	}
+
+	public static void InitializeConfigs(global::Action defaultKey, List<InterfaceToolConfig> configs)
+	{
+		string text = ((configs == null) ? "null" : configs.Count.ToString());
+		global::Debug.Log(string.Format("[InterfaceTool] Initializing configs with values of DefaultKey: {0} Configs: {1}", defaultKey, text));
+		if (configs == null || configs.Count == 0)
+		{
+			InterfaceToolConfig interfaceToolConfig = ScriptableObject.CreateInstance<InterfaceToolConfig>();
+			InterfaceTool.interfaceConfigMap = new Dictionary<global::Action, InterfaceToolConfig>();
+			InterfaceTool.interfaceConfigMap[interfaceToolConfig.InputAction] = interfaceToolConfig;
+			return;
+		}
+		InterfaceTool.interfaceConfigMap = configs.ToDictionary<InterfaceToolConfig, global::Action>((InterfaceToolConfig x) => x.InputAction);
+		InterfaceTool.ToggleConfig(defaultKey);
+	}
+
 	public HashedString ViewMode
 	{
 		get
@@ -58,6 +110,23 @@ public class InterfaceTool : KMonoBehaviour
 			InterfaceTool.toolActivatedViewMode = this.viewMode;
 		}
 		this.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
+	}
+
+	public void SetCurrentVirtualInputModuleMousMovementMode(bool mouseMovementOnly, Action<VirtualInputModule> extraActions = null)
+	{
+		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
+		if (current != null && current.currentInputModule != null)
+		{
+			VirtualInputModule virtualInputModule = current.currentInputModule as VirtualInputModule;
+			if (virtualInputModule != null)
+			{
+				virtualInputModule.mouseMovementOnly = mouseMovementOnly;
+				if (extraActions != null)
+				{
+					extraActions(virtualInputModule);
+				}
+			}
+		}
 	}
 
 	public void DeactivateTool(InterfaceTool new_tool = null)
@@ -407,6 +476,10 @@ public class InterfaceTool : KMonoBehaviour
 			Game.Instance.Trigger(-1201923725, null);
 		}
 	}
+
+	private static Dictionary<global::Action, InterfaceToolConfig> interfaceConfigMap = null;
+
+	private static List<InterfaceToolConfig> activeConfigs = new List<InterfaceToolConfig>();
 
 	public const float MaxClickDistance = 0.02f;
 

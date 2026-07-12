@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3F735FDA-C479-4332-87DE-459D15749D15}</ProjectGuid>
+    <ProjectGuid>{F935F502-6824-4C02-9739-3112F08A6900}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Security</AssemblyName>
@@ -192,11 +192,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{3F735FDA-C479-4332-87DE-459D15749D16}</Project>
+      <Project>{F935F502-6824-4C02-9739-3112F08A6901}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{3F735FDA-C479-4332-87DE-459D15749D1B}</Project>
+      <Project>{F935F502-6824-4C02-9739-3112F08A6906}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

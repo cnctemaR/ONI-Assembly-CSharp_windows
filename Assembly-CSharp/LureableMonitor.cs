@@ -57,7 +57,7 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 			LureableMonitor.Instance.LureIterator lureIterator = new LureableMonitor.Instance.LureIterator(base.GetComponent<Navigator>(), base.def.lures);
 			GameScenePartitioner.Instance.Iterate<LureableMonitor.Instance.LureIterator>(Grid.PosToCell(base.smi.transform.GetPosition()), 1, GameScenePartitioner.Instance.lure, ref lureIterator);
 			lureIterator.Cleanup();
-			base.sm.targetLure.Set(lureIterator.result, this);
+			base.sm.targetLure.Set(lureIterator.result, this, false);
 		}
 
 		public bool HasLure()

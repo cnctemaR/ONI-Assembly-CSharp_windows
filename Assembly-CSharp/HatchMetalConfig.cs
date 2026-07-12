@@ -8,23 +8,23 @@ using UnityEngine;
 [EntityConfigOrder(1)]
 public class HatchMetalConfig : IEntityConfig
 {
-	public static TagBits METAL_ORE_TAGS
+	public static HashSet<Tag> METAL_ORE_TAGS
 	{
 		get
 		{
-			TagBits tagBits = new TagBits(new Tag[]
+			HashSet<Tag> hashSet = new HashSet<Tag>
 			{
 				SimHashes.Cuprite.CreateTag(),
 				SimHashes.GoldAmalgam.CreateTag(),
 				SimHashes.IronOre.CreateTag(),
 				SimHashes.Wolframite.CreateTag(),
 				SimHashes.AluminumOre.CreateTag()
-			});
+			};
 			if (DlcManager.IsExpansion1Active())
 			{
-				tagBits.SetTag(SimHashes.Cobaltite.CreateTag());
+				hashSet.Add(SimHashes.Cobaltite.CreateTag());
 			}
-			return tagBits;
+			return hashSet;
 		}
 	}
 

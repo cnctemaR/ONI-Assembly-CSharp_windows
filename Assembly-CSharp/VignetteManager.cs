@@ -143,9 +143,9 @@ public class VignetteManager : GameStateMachine<VignetteManager, VignetteManager
 
 		private void Refresh()
 		{
-			base.sm.isYellowAlert.Set(this.hasTopPriorityChore, base.smi);
-			base.sm.isRedAlert.Set(this.isToggled, base.smi);
-			base.sm.isOn.Set(this.hasTopPriorityChore || this.isToggled, base.smi);
+			base.sm.isYellowAlert.Set(this.hasTopPriorityChore, base.smi, false);
+			base.sm.isRedAlert.Set(this.isToggled, base.smi, false);
+			base.sm.isOn.Set(this.hasTopPriorityChore || this.isToggled, base.smi, false);
 		}
 
 		private static VignetteManager.Instance instance;
@@ -154,6 +154,6 @@ public class VignetteManager : GameStateMachine<VignetteManager, VignetteManager
 
 		private bool hasTopPriorityChore;
 
-		public Notification redAlertNotification = new Notification(MISC.NOTIFICATIONS.REDALERT.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REDALERT.TOOLTIP, null, false, 0f, null, null, null, true);
+		public Notification redAlertNotification = new Notification(MISC.NOTIFICATIONS.REDALERT.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REDALERT.TOOLTIP, null, false, 0f, null, null, null, true, false);
 	}
 }

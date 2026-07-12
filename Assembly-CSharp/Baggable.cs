@@ -55,7 +55,7 @@ public class Baggable : KMonoBehaviour
 		if (storage != null || (data != null && (bool)data))
 		{
 			base.gameObject.AddTag(GameTags.Creatures.Bagged);
-			if (storage && storage.HasTag(GameTags.Minion))
+			if (storage && storage.IsPrefabID(GameTags.Minion))
 			{
 				this.SetVisible(false);
 				return;

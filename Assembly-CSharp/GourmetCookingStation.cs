@@ -9,7 +9,7 @@ public class GourmetCookingStation : ComplexFabricator, IGameObjectEffectDescrip
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.keepAdditionalTags.SetTag(this.fuelTag);
+		this.keepAdditionalTag = this.fuelTag;
 		this.choreType = Db.Get().ChoreTypes.Cook;
 		this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.CookFetch.IdHash;
 	}

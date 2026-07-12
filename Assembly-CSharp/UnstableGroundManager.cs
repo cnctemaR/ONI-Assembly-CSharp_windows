@@ -18,7 +18,7 @@ public class UnstableGroundManager : KMonoBehaviour
 			GameObject prefab = effectInfo.prefab;
 			prefab.SetActive(false);
 			UnstableGroundManager.EffectRuntimeInfo effectRuntimeInfo = default(UnstableGroundManager.EffectRuntimeInfo);
-			ObjectPool pool = new ObjectPool(() => this.InstantiateObj(prefab), 16);
+			GameObjectPool pool = new GameObjectPool(() => this.InstantiateObj(prefab), 16);
 			effectRuntimeInfo.pool = pool;
 			effectRuntimeInfo.releaseFunc = delegate(GameObject go)
 			{
@@ -62,7 +62,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		this.fallingObjects.Add(kbatchedAnimController.gameObject);
 		this.SpawnPuff(vector, element, mass, temperature, disease_idx, disease_count);
 		Substance substance = element.substance;
-		if (substance != null && substance.fallingStartSound != null && CameraController.Instance.IsAudibleSound(vector, substance.fallingStartSound))
+		if (substance != null && !substance.fallingStartSound.IsNull && CameraController.Instance.IsAudibleSound(vector, substance.fallingStartSound))
 		{
 			SoundEvent.PlayOneShot(substance.fallingStartSound, vector, 1f);
 		}
@@ -196,7 +196,7 @@ public class UnstableGroundManager : KMonoBehaviour
 					}
 					pooledList.Recycle();
 					Element element = ElementLoader.FindElementByHash(component.element);
-					if (element != null && element.substance != null && element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, element.substance.fallingStopSound))
+					if (element != null && element.substance != null && !element.substance.fallingStopSound.IsNull && CameraController.Instance.IsAudibleSound(position, element.substance.fallingStopSound))
 					{
 						SoundEvent.PlayOneShot(element.substance.fallingStopSound, position, 1f);
 					}
@@ -297,7 +297,7 @@ public class UnstableGroundManager : KMonoBehaviour
 
 	private struct EffectRuntimeInfo
 	{
-		public ObjectPool pool;
+		public GameObjectPool pool;
 
 		public Action<GameObject> releaseFunc;
 	}

@@ -14,7 +14,7 @@ public class SwitchRoleHatChore : Chore<SwitchRoleHatChore.StatesInstance>
 		public StatesInstance(SwitchRoleHatChore master, GameObject duplicant)
 			: base(master)
 		{
-			base.sm.duplicant.Set(duplicant, base.smi);
+			base.sm.duplicant.Set(duplicant, base.smi, false);
 		}
 	}
 

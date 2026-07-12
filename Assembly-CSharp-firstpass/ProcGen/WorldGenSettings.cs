@@ -25,36 +25,35 @@ namespace ProcGen
 			}
 		}
 
-		public WorldGenSettings(string worldName, List<string> traits, bool assertMissingTraits)
+		public WorldGenSettings(string worldName, List<string> worldTraits, List<string> storyTraits, bool assertMissingTraits)
 		{
 			DebugUtil.Assert(SettingsCache.worlds.HasWorld(worldName), "Failed to load world " + worldName);
 			World worldData = SettingsCache.worlds.GetWorldData(worldName);
 			List<WorldTrait> list = new List<WorldTrait>();
-			if (traits != null)
+			if (worldTraits != null)
 			{
-				DebugUtil.LogArgs(new object[]
+				foreach (string text in worldTraits)
 				{
-					"Generating a world with the traits:",
-					string.Join(", ", traits.ToArray())
-				});
-				using (List<string>.Enumerator enumerator = traits.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
+					WorldTrait cachedWorldTrait = SettingsCache.GetCachedWorldTrait(text, assertMissingTraits);
+					if (cachedWorldTrait != null)
 					{
-						string text = enumerator.Current;
-						WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, assertMissingTraits);
-						if (cachedTrait != null)
-						{
-							list.Add(cachedTrait);
-						}
+						list.Add(cachedWorldTrait);
 					}
-					goto IL_00A0;
 				}
 			}
-			Debug.Log("Generating a world without traits. Either this world has traits disabled or none were specified.");
-			IL_00A0:
-			this.mutatedWorldData = new MutatedWorldData(worldData, list);
-			Debug.Log("Set world to [" + worldName + "]");
+			List<WorldTrait> list2 = new List<WorldTrait>();
+			if (storyTraits != null)
+			{
+				foreach (string text2 in storyTraits)
+				{
+					WorldTrait cachedStoryTrait = SettingsCache.GetCachedStoryTrait(text2, assertMissingTraits);
+					if (cachedStoryTrait != null)
+					{
+						list2.Add(cachedStoryTrait);
+					}
+				}
+			}
+			this.mutatedWorldData = new MutatedWorldData(worldData, list, list2);
 		}
 
 		public BaseLocation GetBaseLocation()
@@ -97,18 +96,61 @@ namespace ProcGen
 			return SettingsCache.defaults.startingWorldElements;
 		}
 
-		public string[] GetTraitIDs()
+		public string[] GetWorldTraitIDs()
 		{
-			if (this.mutatedWorldData.traits != null && this.mutatedWorldData.traits.Count > 0)
+			if (this.mutatedWorldData.worldTraits != null && this.mutatedWorldData.worldTraits.Count > 0)
 			{
-				string[] array = new string[this.mutatedWorldData.traits.Count];
-				for (int i = 0; i < this.mutatedWorldData.traits.Count; i++)
+				string[] array = new string[this.mutatedWorldData.worldTraits.Count];
+				for (int i = 0; i < this.mutatedWorldData.worldTraits.Count; i++)
 				{
-					array[i] = this.mutatedWorldData.traits[i].filePath;
+					array[i] = this.mutatedWorldData.worldTraits[i].filePath;
 				}
 				return array;
 			}
-			return new string[0];
+			return Array.Empty<string>();
+		}
+
+		public void SetStoryTraitCandidates(List<WorldTrait> storyTraits)
+		{
+			this.mutatedWorldData.storyTraitCandidates = storyTraits;
+		}
+
+		public List<WorldTrait> GetStoryTraitCandiates()
+		{
+			return this.mutatedWorldData.storyTraitCandidates;
+		}
+
+		public string[] GetStoryTraitCandidateIds()
+		{
+			if (this.mutatedWorldData.storyTraitCandidates != null && this.mutatedWorldData.storyTraitCandidates.Count > 0)
+			{
+				string[] array = new string[this.mutatedWorldData.storyTraitCandidates.Count];
+				for (int i = 0; i < this.mutatedWorldData.storyTraitCandidates.Count; i++)
+				{
+					array[i] = this.mutatedWorldData.storyTraitCandidates[i].filePath;
+				}
+				return array;
+			}
+			return Array.Empty<string>();
+		}
+
+		public void ApplyStoryTrait(WorldTrait storyTrait)
+		{
+			this.mutatedWorldData.storyTraits.Add(storyTrait);
+		}
+
+		public string[] GetStoryTraitIDs()
+		{
+			if (this.mutatedWorldData.storyTraits != null && this.mutatedWorldData.storyTraits.Count > 0)
+			{
+				string[] array = new string[this.mutatedWorldData.storyTraits.Count];
+				for (int i = 0; i < this.mutatedWorldData.storyTraits.Count; i++)
+				{
+					array[i] = this.mutatedWorldData.storyTraits[i].filePath;
+				}
+				return array;
+			}
+			return Array.Empty<string>();
 		}
 
 		private bool GetSetting<T>(DefaultSettings set, string target, WorldGenSettings.ParserFn<T> parser, out T res)

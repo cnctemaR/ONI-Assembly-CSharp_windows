@@ -102,7 +102,7 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 			this.OnLoadLevel();
 			return;
 		}
-		if (KObjectManager.Instance != null)
+		if (KObjectManager.Instance != null && !base.gameObject.activeSelf)
 		{
 			KObjectManager.Instance.QueueDestroy(this.obj);
 		}

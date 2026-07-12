@@ -27,23 +27,17 @@ public class GlobalResources : ScriptableObject
 
 	public Texture2D WhiteTexture;
 
-	[EventRef]
-	public string ConduitOverlaySoundLiquid;
+	public EventReference ConduitOverlaySoundLiquid;
 
-	[EventRef]
-	public string ConduitOverlaySoundGas;
+	public EventReference ConduitOverlaySoundGas;
 
-	[EventRef]
-	public string ConduitOverlaySoundSolid;
+	public EventReference ConduitOverlaySoundSolid;
 
-	[EventRef]
-	public string AcousticDisturbanceSound;
+	public EventReference AcousticDisturbanceSound;
 
-	[EventRef]
-	public string AcousticDisturbanceBubbleSound;
+	public EventReference AcousticDisturbanceBubbleSound;
 
-	[EventRef]
-	public string WallDamageLayerSound;
+	public EventReference WallDamageLayerSound;
 
 	public Sprite sadDupeAudio;
 

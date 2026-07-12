@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using STRINGS;
 
 public class GameplayEventManager : KMonoBehaviour
 {
@@ -76,9 +77,19 @@ public class GameplayEventManager : KMonoBehaviour
 		return gameplayEvent.CreateInstance(worldId);
 	}
 
-	public GameplayEventInstance GetGameplayEventInstance(HashedString eventID)
+	public GameplayEventInstance GetGameplayEventInstance(HashedString eventID, int worldId = -1)
 	{
-		return this.activeEvents.Find((GameplayEventInstance e) => e.eventID == eventID);
+		return this.activeEvents.Find((GameplayEventInstance e) => e.eventID == eventID && (worldId == -1 || e.worldId == worldId));
+	}
+
+	public GameplayEventInstance CreateOrGetEventInstance(GameplayEvent eventType, int worldId = -1)
+	{
+		GameplayEventInstance gameplayEventInstance = this.GetGameplayEventInstance(eventType.Id, worldId);
+		if (gameplayEventInstance == null)
+		{
+			gameplayEventInstance = this.StartNewEvent(eventType, worldId);
+		}
+		return gameplayEventInstance;
 	}
 
 	public GameplayEventInstance StartNewEvent(GameplayEvent eventType, int worldId = -1)
@@ -107,6 +118,17 @@ public class GameplayEventManager : KMonoBehaviour
 		int num;
 		this.pastEvents.TryGetValue(eventID, out num);
 		return num;
+	}
+
+	public static Notification CreateStandardCancelledNotification(EventInfoData eventInfoData)
+	{
+		if (eventInfoData == null)
+		{
+			DebugUtil.LogWarningArgs(new object[] { "eventPopup is null in CreateStandardCancelledNotification" });
+			return null;
+		}
+		eventInfoData.FinalizeText();
+		return new Notification(string.Format(GAMEPLAY_EVENTS.CANCELED, eventInfoData.title), NotificationType.Event, (List<Notification> list, object data) => string.Format(GAMEPLAY_EVENTS.CANCELED_TOOLTIP, eventInfoData.title), null, true, 0f, null, null, null, true, false);
 	}
 
 	public static GameplayEventManager Instance;

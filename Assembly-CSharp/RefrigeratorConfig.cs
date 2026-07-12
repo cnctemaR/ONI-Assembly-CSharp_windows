@@ -34,6 +34,11 @@ public class RefrigeratorConfig : IBuildingConfig
 		return buildingDef;
 	}
 
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		go.GetComponent<KPrefabID>();
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		Storage storage = go.AddOrGet<Storage>();
@@ -47,6 +52,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		storage.showCapacityStatusItem = true;
 		Prioritizable.AddRef(go);
 		go.AddOrGet<TreeFilterable>();
+		go.AddOrGet<FoodStorage>();
 		go.AddOrGet<Refrigerator>();
 		RefrigeratorController.Def def = go.AddOrGetDef<RefrigeratorController.Def>();
 		def.powerSaverEnergyUsage = 20f;

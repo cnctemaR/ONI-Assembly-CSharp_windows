@@ -130,7 +130,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		this.wiltTempRangeModAttribute = this.GetAttributes().Get(Db.Get().PlantAttributes.WiltTempRangeMod);
 		this.temperatureRangeModScalar = (this.internalTemperatureWarning_High - this.internalTemperatureWarning_Low) / 2f;
 		SlicedUpdaterSim1000ms<TemperatureVulnerable>.instance.RegisterUpdate1000ms(this);
-		base.smi.sm.internalTemp.Set(this.primaryElement.Temperature, base.smi);
+		base.smi.sm.internalTemp.Set(this.primaryElement.Temperature, base.smi, false);
 		base.smi.StartSM();
 	}
 
@@ -160,7 +160,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		{
 			return;
 		}
-		base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi);
+		base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi, false);
 		this.displayTemperatureAmount.value = this.InternalTemperature;
 		if (this.OnTemperature != null)
 		{

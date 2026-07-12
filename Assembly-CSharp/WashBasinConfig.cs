@@ -40,8 +40,8 @@ public class WashBasinConfig : IBuildingConfig
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = GameTagExtensions.Create(SimHashes.Water);
-		manualDeliveryKG.minimumMass = 5f;
+		manualDeliveryKG.RequestedItemTag = GameTagExtensions.Create(SimHashes.Water);
+		manualDeliveryKG.MinimumMass = 5f;
 		manualDeliveryKG.capacity = 200f;
 		manualDeliveryKG.refillMass = 40f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;

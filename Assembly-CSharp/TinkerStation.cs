@@ -51,7 +51,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 		if (this.useFilteredStorage)
 		{
 			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreType);
-			this.filteredStorage = new FilteredStorage(this, null, null, null, false, byHash);
+			this.filteredStorage = new FilteredStorage(this, null, null, false, byHash);
 		}
 		base.SetWorkTime(15f);
 		base.Subscribe<TinkerStation>(-592767678, TinkerStation.OnOperationalChangedDelegate);

@@ -97,54 +97,41 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 	public class TagTransitionData : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition
 	{
-		public TagTransitionData(GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State source_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State target_state, int idx, Tag[] tags, bool on_remove, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target)
-			: base(tags.ToString(), source_state, target_state, idx, null)
+		public TagTransitionData(string name, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State source_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State target_state, int idx, Tag[] tags, bool on_remove, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target, Func<StateMachineInstanceType, Tag[]> tags_callback = null)
+			: base(name, source_state, target_state, idx, null)
 		{
 			this.tags = tags;
 			this.onRemove = on_remove;
 			this.target = target;
+			this.tags_callback = tags_callback;
 		}
 
-		public override void Evaluate(StateMachineInstanceType smi)
+		public override void Evaluate(StateMachine.Instance smi)
 		{
+			StateMachineInstanceType stateMachineInstanceType = smi as StateMachineInstanceType;
+			global::Debug.Assert(stateMachineInstanceType != null);
 			if (!this.onRemove)
 			{
-				if (!this.HasAllTags(smi))
+				if (!this.HasAllTags(stateMachineInstanceType))
 				{
 					return;
 				}
 			}
-			else if (this.HasAnyTags(smi))
+			else if (this.HasAnyTags(stateMachineInstanceType))
 			{
 				return;
 			}
-			this.ExecuteTransition(smi);
+			this.ExecuteTransition(stateMachineInstanceType);
 		}
 
 		private bool HasAllTags(StateMachineInstanceType smi)
 		{
-			KPrefabID component = this.target.Get(smi).GetComponent<KPrefabID>();
-			for (int i = 0; i < this.tags.Length; i++)
-			{
-				if (!component.HasTag(this.tags[i]))
-				{
-					return false;
-				}
-			}
-			return true;
+			return this.target.Get(smi).GetComponent<KPrefabID>().HasAllTags((this.tags_callback != null) ? this.tags_callback(smi) : this.tags);
 		}
 
 		private bool HasAnyTags(StateMachineInstanceType smi)
 		{
-			KPrefabID component = this.target.Get(smi).GetComponent<KPrefabID>();
-			for (int i = 0; i < this.tags.Length; i++)
-			{
-				if (component.HasTag(this.tags[i]))
-				{
-					return true;
-				}
-			}
-			return false;
+			return this.target.Get(smi).GetComponent<KPrefabID>().HasAnyTags((this.tags_callback != null) ? this.tags_callback(smi) : this.tags);
 		}
 
 		private void ExecuteTransition(StateMachineInstanceType smi)
@@ -178,22 +165,26 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.ExecuteTransition(smi);
 		}
 
-		public override StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context Register(StateMachineInstanceType smi)
+		public override StateMachine.BaseTransition.Context Register(StateMachine.Instance smi)
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context context = base.Register(smi);
-			context.handlerId = this.target.Get(smi).Subscribe(-1582839653, delegate(object data)
+			StateMachineInstanceType smi_internal = smi as StateMachineInstanceType;
+			global::Debug.Assert(smi_internal != null);
+			StateMachine.BaseTransition.Context context = base.Register(smi_internal);
+			context.handlerId = this.target.Get(smi_internal).Subscribe(-1582839653, delegate(object data)
 			{
-				this.OnCallback(smi);
+				this.OnCallback(smi_internal);
 			});
 			return context;
 		}
 
-		public override void Unregister(StateMachineInstanceType smi, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context context)
+		public override void Unregister(StateMachine.Instance smi, StateMachine.BaseTransition.Context context)
 		{
-			base.Unregister(smi, context);
-			if (this.target.Get(smi) != null)
+			StateMachineInstanceType stateMachineInstanceType = smi as StateMachineInstanceType;
+			global::Debug.Assert(stateMachineInstanceType != null);
+			base.Unregister(stateMachineInstanceType, context);
+			if (this.target.Get(stateMachineInstanceType) != null)
 			{
-				this.target.Get(smi).Unsubscribe(context.handlerId);
+				this.target.Get(stateMachineInstanceType).Unsubscribe(context.handlerId);
 			}
 		}
 
@@ -204,6 +195,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target;
 
 		private bool is_executing;
+
+		private Func<StateMachineInstanceType, Tag[]> tags_callback;
 	}
 
 	public class EventTransitionData : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition
@@ -216,11 +209,13 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.globalEventSystemCallback = global_event_system_callback;
 		}
 
-		public override void Evaluate(StateMachineInstanceType smi)
+		public override void Evaluate(StateMachine.Instance smi)
 		{
-			if (this.condition != null && this.condition(smi))
+			StateMachineInstanceType stateMachineInstanceType = smi as StateMachineInstanceType;
+			global::Debug.Assert(stateMachineInstanceType != null);
+			if (this.condition != null && this.condition(stateMachineInstanceType))
 			{
-				this.ExecuteTransition(smi);
+				this.ExecuteTransition(stateMachineInstanceType);
 			}
 		}
 
@@ -237,21 +232,23 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			}
 		}
 
-		public override StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context Register(StateMachineInstanceType smi)
+		public override StateMachine.BaseTransition.Context Register(StateMachine.Instance smi)
 		{
-			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context context = base.Register(smi);
+			StateMachineInstanceType smi_internal = smi as StateMachineInstanceType;
+			global::Debug.Assert(smi_internal != null);
+			StateMachine.BaseTransition.Context context = base.Register(smi_internal);
 			Action<object> action = delegate(object d)
 			{
-				this.OnCallback(smi);
+				this.OnCallback(smi_internal);
 			};
 			GameObject gameObject;
 			if (this.globalEventSystemCallback != null)
 			{
-				gameObject = this.globalEventSystemCallback(smi).gameObject;
+				gameObject = this.globalEventSystemCallback(smi_internal).gameObject;
 			}
 			else
 			{
-				gameObject = this.target.Get(smi);
+				gameObject = this.target.Get(smi_internal);
 				if (gameObject == null)
 				{
 					throw new InvalidOperationException("TargetParameter: " + this.target.name + " is null");
@@ -261,13 +258,15 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return context;
 		}
 
-		public override void Unregister(StateMachineInstanceType smi, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context context)
+		public override void Unregister(StateMachine.Instance smi, StateMachine.BaseTransition.Context context)
 		{
-			base.Unregister(smi, context);
+			StateMachineInstanceType stateMachineInstanceType = smi as StateMachineInstanceType;
+			global::Debug.Assert(stateMachineInstanceType != null);
+			base.Unregister(stateMachineInstanceType, context);
 			GameObject gameObject = null;
 			if (this.globalEventSystemCallback != null)
 			{
-				KMonoBehaviour kmonoBehaviour = this.globalEventSystemCallback(smi);
+				KMonoBehaviour kmonoBehaviour = this.globalEventSystemCallback(stateMachineInstanceType);
 				if (kmonoBehaviour != null)
 				{
 					gameObject = kmonoBehaviour.gameObject;
@@ -275,7 +274,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			}
 			else
 			{
-				gameObject = this.target.Get(smi);
+				gameObject = this.target.Get(stateMachineInstanceType);
 			}
 			if (gameObject != null)
 			{
@@ -513,6 +512,30 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleAnims(Func<StateMachineInstanceType, KAnimFile> chooser_callback)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("EnableAnims()", delegate(StateMachineInstanceType smi)
+			{
+				KAnimFile kanimFile = chooser_callback(smi);
+				if (kanimFile == null)
+				{
+					return;
+				}
+				state_target.Get<KAnimControllerBase>(smi).AddAnimOverrides(kanimFile, 0f);
+			});
+			this.Exit("Disableanims()", delegate(StateMachineInstanceType smi)
+			{
+				KAnimFile kanimFile2 = chooser_callback(smi);
+				if (kanimFile2 == null)
+				{
+					return;
+				}
+				state_target.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(kanimFile2);
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleAnims(Func<StateMachineInstanceType, HashedString> chooser_callback)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
@@ -667,10 +690,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			int data_idx = this.CreateDataTableEntry();
 			this.Enter("Enter WorkableStartTransition(" + target_state.longName + ")", delegate(StateMachineInstanceType smi)
 			{
-				Workable workable = get_workable_callback(smi);
-				if (workable != null)
+				Workable workable3 = get_workable_callback(smi);
+				if (workable3 != null)
 				{
-					Action<Workable.WorkableEvent> action = delegate(Workable.WorkableEvent evt)
+					Action<Workable, Workable.WorkableEvent> action = delegate(Workable workable, Workable.WorkableEvent evt)
 					{
 						if (evt == Workable.WorkableEvent.WorkStarted)
 						{
@@ -678,19 +701,19 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 						}
 					};
 					smi.dataTable[data_idx] = action;
-					Workable workable2 = workable;
-					workable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(workable2.OnWorkableEventCB, action);
+					Workable workable2 = workable3;
+					workable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(workable2.OnWorkableEventCB, action);
 				}
 			});
 			this.Exit("Exit WorkableStartTransition(" + target_state.longName + ")", delegate(StateMachineInstanceType smi)
 			{
-				Workable workable3 = get_workable_callback(smi);
-				if (workable3 != null)
+				Workable workable4 = get_workable_callback(smi);
+				if (workable4 != null)
 				{
-					Action<Workable.WorkableEvent> action2 = (Action<Workable.WorkableEvent>)smi.dataTable[data_idx];
+					Action<Workable, Workable.WorkableEvent> action2 = (Action<Workable, Workable.WorkableEvent>)smi.dataTable[data_idx];
 					smi.dataTable[data_idx] = null;
-					Workable workable4 = workable3;
-					workable4.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Remove(workable4.OnWorkableEventCB, action2);
+					Workable workable5 = workable4;
+					workable5.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(workable5.OnWorkableEventCB, action2);
 				}
 			});
 			return this;
@@ -701,10 +724,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			int data_idx = this.CreateDataTableEntry();
 			this.Enter("Enter WorkableStopTransition(" + target_state.longName + ")", delegate(StateMachineInstanceType smi)
 			{
-				Workable workable = get_workable_callback(smi);
-				if (workable != null)
+				Workable workable3 = get_workable_callback(smi);
+				if (workable3 != null)
 				{
-					Action<Workable.WorkableEvent> action = delegate(Workable.WorkableEvent evt)
+					Action<Workable, Workable.WorkableEvent> action = delegate(Workable workable, Workable.WorkableEvent evt)
 					{
 						if (evt == Workable.WorkableEvent.WorkStopped)
 						{
@@ -712,19 +735,19 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 						}
 					};
 					smi.dataTable[data_idx] = action;
-					Workable workable2 = workable;
-					workable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(workable2.OnWorkableEventCB, action);
+					Workable workable2 = workable3;
+					workable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(workable2.OnWorkableEventCB, action);
 				}
 			});
 			this.Exit("Exit WorkableStopTransition(" + target_state.longName + ")", delegate(StateMachineInstanceType smi)
 			{
-				Workable workable3 = get_workable_callback(smi);
-				if (workable3 != null)
+				Workable workable4 = get_workable_callback(smi);
+				if (workable4 != null)
 				{
-					Action<Workable.WorkableEvent> action2 = (Action<Workable.WorkableEvent>)smi.dataTable[data_idx];
+					Action<Workable, Workable.WorkableEvent> action2 = (Action<Workable, Workable.WorkableEvent>)smi.dataTable[data_idx];
 					smi.dataTable[data_idx] = null;
-					Workable workable4 = workable3;
-					workable4.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Remove(workable4.OnWorkableEventCB, action2);
+					Workable workable5 = workable4;
+					workable5.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(workable5.OnWorkableEventCB, action2);
 				}
 			});
 			return this;
@@ -735,10 +758,10 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			int data_idx = this.CreateDataTableEntry();
 			this.Enter("Enter WorkableCompleteTransition(" + target_state.longName + ")", delegate(StateMachineInstanceType smi)
 			{
-				Workable workable = get_workable_callback(smi);
-				if (workable != null)
+				Workable workable3 = get_workable_callback(smi);
+				if (workable3 != null)
 				{
-					Action<Workable.WorkableEvent> action = delegate(Workable.WorkableEvent evt)
+					Action<Workable, Workable.WorkableEvent> action = delegate(Workable workable, Workable.WorkableEvent evt)
 					{
 						if (evt == Workable.WorkableEvent.WorkCompleted)
 						{
@@ -746,19 +769,19 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 						}
 					};
 					smi.dataTable[data_idx] = action;
-					Workable workable2 = workable;
-					workable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(workable2.OnWorkableEventCB, action);
+					Workable workable2 = workable3;
+					workable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(workable2.OnWorkableEventCB, action);
 				}
 			});
 			this.Exit("Exit WorkableCompleteTransition(" + target_state.longName + ")", delegate(StateMachineInstanceType smi)
 			{
-				Workable workable3 = get_workable_callback(smi);
-				if (workable3 != null)
+				Workable workable4 = get_workable_callback(smi);
+				if (workable4 != null)
 				{
-					Action<Workable.WorkableEvent> action2 = (Action<Workable.WorkableEvent>)smi.dataTable[data_idx];
+					Action<Workable, Workable.WorkableEvent> action2 = (Action<Workable, Workable.WorkableEvent>)smi.dataTable[data_idx];
 					smi.dataTable[data_idx] = null;
-					Workable workable4 = workable3;
-					workable4.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Remove(workable4.OnWorkableEventCB, action2);
+					Workable workable5 = workable4;
+					workable5.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Remove(workable5.OnWorkableEventCB, action2);
 				}
 			});
 			return this;
@@ -908,6 +931,25 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleMainStatusItem(Func<StateMachineInstanceType, StatusItem> status_item_cb, Func<StateMachineInstanceType, object> callback = null)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("AddMainStatusItem(DynamicGeneration)", delegate(StateMachineInstanceType smi)
+			{
+				object obj = ((callback != null) ? callback(smi) : smi);
+				state_target.Get<KSelectable>(smi).SetStatusItem(Db.Get().StatusItemCategories.Main, status_item_cb(smi), obj);
+			});
+			this.Exit("RemoveMainStatusItem(DynamicGeneration)", delegate(StateMachineInstanceType smi)
+			{
+				KSelectable kselectable = state_target.Get<KSelectable>(smi);
+				if (kselectable != null)
+				{
+					kselectable.SetStatusItem(Db.Get().StatusItemCategories.Main, null, null);
+				}
+			});
+			return this;
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleCategoryStatusItem(StatusItemCategory category, StatusItem status_item, object data = null)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
@@ -981,6 +1023,20 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Exit("RemoveTag(" + tag.Name + ")", delegate(StateMachineInstanceType smi)
 			{
 				state_target.Get<KPrefabID>(smi).RemoveTag(tag);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleTag(Func<StateMachineInstanceType, Tag> behaviour_tag_cb)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("AddTag(DynamicallyConstructed)", delegate(StateMachineInstanceType smi)
+			{
+				state_target.Get<KPrefabID>(smi).AddTag(behaviour_tag_cb(smi), false);
+			});
+			this.Exit("RemoveTag(DynamicallyConstructed)", delegate(StateMachineInstanceType smi)
+			{
+				state_target.Get<KPrefabID>(smi).RemoveTag(behaviour_tag_cb(smi));
 			});
 			return this;
 		}
@@ -1143,6 +1199,37 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				this.EventHandler(GameHashes.BehaviourTagComplete, delegate(StateMachineInstanceType smi, object data)
 				{
 					if ((Tag)data == behaviour_tag)
+					{
+						on_complete(smi);
+					}
+				});
+			}
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleBehaviour(Func<StateMachineInstanceType, Tag> behaviour_tag_cb, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.ConditionCallback precondition, Action<StateMachineInstanceType> on_complete = null)
+		{
+			Func<object, bool> precondition_cb = (object obj) => precondition(obj as StateMachineInstanceType);
+			this.Enter("AddPrecondition", delegate(StateMachineInstanceType smi)
+			{
+				if (smi.GetComponent<ChoreConsumer>() != null)
+				{
+					smi.GetComponent<ChoreConsumer>().AddBehaviourPrecondition(behaviour_tag_cb(smi), precondition_cb, smi);
+				}
+			});
+			this.Exit("RemovePrecondition", delegate(StateMachineInstanceType smi)
+			{
+				if (smi.GetComponent<ChoreConsumer>() != null)
+				{
+					smi.GetComponent<ChoreConsumer>().RemoveBehaviourPrecondition(behaviour_tag_cb(smi), precondition_cb, smi);
+				}
+			});
+			this.ToggleTag(behaviour_tag_cb);
+			if (on_complete != null)
+			{
+				this.EventHandler(GameHashes.BehaviourTagComplete, delegate(StateMachineInstanceType smi, object data)
+				{
+					if ((Tag)data == behaviour_tag_cb(smi))
 					{
 						on_complete(smi);
 					}
@@ -1530,7 +1617,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 						num3.ToString()
 					}));
 				}
-				actual_amount.Set(num3, smi);
+				actual_amount.Set(num3, smi, false);
 				int num4 = pickupable.Reserve("ToggleReserve", gameObject, num3);
 				smi.dataTable[data_idx] = num4;
 			});
@@ -1644,7 +1731,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				float num = amount.Get(smi);
 				worker.StartWork(new Pickupable.PickupableStartWorkInfo(pickupable, num, delegate(GameObject result)
 				{
-					result_target.Set(result, smi);
+					result_target.Set(result, smi, false);
 				}));
 			}, (StateMachineInstanceType smi) => source_target.Get<Pickupable>(smi) != null || result_target.Get<Pickupable>(smi) != null, success_state, failure_state);
 			return this;
@@ -1870,11 +1957,12 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ParamTransition<ParameterType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType> parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Callback callback)
 		{
 			DebugUtil.DevAssert(state != this, "Can't transition to self!", null);
-			if (this.parameterTransitions == null)
+			if (this.transitions == null)
 			{
-				this.parameterTransitions = new List<StateMachine.ParameterTransition>();
+				this.transitions = new List<StateMachine.BaseTransition>();
 			}
-			this.parameterTransitions.Add(new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Transition(parameter, state, callback));
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Transition transition = new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Transition(this.transitions.Count, parameter, state, callback);
+			this.transitions.Add(transition);
 			return this;
 		}
 
@@ -1949,10 +2037,17 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State StopMoving()
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter target = this.GetStateTarget();
-			this.Exit("StopMoving()", delegate(StateMachineInstanceType smi)
+			this.Enter("StopMoving()", delegate(StateMachineInstanceType smi)
 			{
 				target.Get<Navigator>(smi).Stop(false, true);
 			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleStationaryIdling()
+		{
+			this.GetStateTarget();
+			this.ToggleTag(GameTags.StationaryIdling);
 			return this;
 		}
 
@@ -2060,7 +2155,19 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			{
 				this.transitions = new List<StateMachine.BaseTransition>();
 			}
-			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData tagTransitionData = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData(this, state, this.transitions.Count, tags, on_remove, this.GetStateTarget());
+			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData tagTransitionData = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData(tags.ToString(), this, state, this.transitions.Count, tags, on_remove, this.GetStateTarget(), null);
+			this.transitions.Add(tagTransitionData);
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State TagTransition(Func<StateMachineInstanceType, Tag[]> tags_cb, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, bool on_remove = false)
+		{
+			DebugUtil.DevAssert(state != this, "Can't transition to self!", null);
+			if (this.transitions == null)
+			{
+				this.transitions = new List<StateMachine.BaseTransition>();
+			}
+			GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData tagTransitionData = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TagTransitionData("DynamicTransition", this, state, this.transitions.Count, null, on_remove, this.GetStateTarget(), tags_cb);
 			this.transitions.Add(tagTransitionData);
 			return this;
 		}

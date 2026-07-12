@@ -20,6 +20,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		if (response == null)
 		{
 			KleiAccount.KleiUserID = null;
+			KleiAccount.KleiToken = null;
 			this.gotUserID();
 			return;
 		}
@@ -33,6 +34,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		{
 			Debug.Log("[Account] Got login for user " + accountReply.UserID);
 			KleiAccount.KleiUserID = ((accountReply.UserID == "") ? null : accountReply.UserID);
+			KleiAccount.KleiToken = ((accountReply.Token == "") ? null : accountReply.Token);
 			this.gotUserID();
 		}
 		else
@@ -61,9 +63,9 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		return "OK";
 	}
 
-	public void AuthenticateUser(KleiAccount.GetUserIDdelegate cb)
+	public void AuthenticateUser(KleiAccount.GetUserIDdelegate cb, bool force = false)
 	{
-		if (KleiAccount.KleiUserID == null)
+		if (KleiAccount.KleiUserID == null || force)
 		{
 			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name);
 			this.gotUserID = cb;
@@ -139,6 +141,8 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 	private const string UserIDFieldName = "UserID";
 
 	public static string KleiUserID;
+
+	public static string KleiToken;
 
 	private KleiAccount.GetUserIDdelegate gotUserID;
 

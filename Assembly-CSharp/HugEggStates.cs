@@ -33,7 +33,7 @@ public class HugEggStates : GameStateMachine<HugEggStates, HugEggStates.Instance
 
 	private static void SetTarget(HugEggStates.Instance smi)
 	{
-		smi.sm.target.Set(smi.GetSMI<HugMonitor.Instance>().hugTarget, smi);
+		smi.sm.target.Set(smi.GetSMI<HugMonitor.Instance>().hugTarget, smi, false);
 	}
 
 	private static HugEggStates.AnimSet GetAnims(HugEggStates.Instance smi)

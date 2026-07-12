@@ -286,6 +286,7 @@ public class Pickupable : Workable, IHasSortOrder
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.OnCellChange");
 		Singleton<CellChangeMonitor>.Instance.MarkDirty(base.transform);
+		Singleton<CellChangeMonitor>.Instance.ClearLastKnownCell(base.transform);
 	}
 
 	public void UnregisterListeners()

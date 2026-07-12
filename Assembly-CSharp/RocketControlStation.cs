@@ -142,7 +142,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 				.Target(this.masterTarget)
 				.Exit(delegate(RocketControlStation.StatesInstance smi)
 				{
-					this.timeRemaining.Set(120f, smi);
+					this.timeRemaining.Set(120f, smi, false);
 				});
 			this.launch.Enter(delegate(RocketControlStation.StatesInstance smi)
 			{
@@ -156,7 +156,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			{
 				if (CameraController.Instance.cameraActiveCluster == this.clusterCraft.Get(smi).GetComponent<WorldContainer>().id)
 				{
-					CameraController.Instance.FadeIn(0f, 1f);
+					CameraController.Instance.FadeIn(0f, 1f, null);
 				}
 			});
 			this.running.PlayAnim("on").TagTransition(GameTags.Operational, this.unoperational, true).Transition(this.operational, GameStateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Not(new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.IsInFlight)), UpdateRate.SIM_200ms)
@@ -168,7 +168,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 				.Update("Decrement time", new Action<RocketControlStation.StatesInstance, float>(this.DecrementTime), UpdateRate.SIM_200ms, false)
 				.Exit(delegate(RocketControlStation.StatesInstance smi)
 				{
-					this.timeRemaining.Set(30f, smi);
+					this.timeRemaining.Set(30f, smi, false);
 				});
 			this.ready.TagTransition(GameTags.Operational, this.unoperational, true).DefaultState(this.ready.idle).ToggleChore(new Func<RocketControlStation.StatesInstance, Chore>(this.CreateChore), this.ready.post, this.ready)
 				.Transition(this.operational, GameStateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Not(new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.IsInFlight)), UpdateRate.SIM_200ms)
@@ -189,7 +189,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 				.WorkableStopTransition((RocketControlStation.StatesInstance smi) => smi.master.GetComponent<RocketControlStationIdleWorkable>(), this.ready.idle);
 			this.ready.post.PlayAnim("working_pst").OnAnimQueueComplete(this.running).Exit(delegate(RocketControlStation.StatesInstance smi)
 			{
-				this.timeRemaining.Set(120f, smi);
+				this.timeRemaining.Set(120f, smi, false);
 			});
 		}
 
@@ -198,7 +198,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			if (this.clusterCraft.IsNull(smi))
 			{
 				GameObject rocket = this.GetRocket(smi);
-				this.clusterCraft.Set(rocket, smi);
+				this.clusterCraft.Set(rocket, smi, false);
 				if (rocket != null)
 				{
 					rocket.Subscribe(-1582839653, new Action<object>(smi.master.OnTagsChanged));

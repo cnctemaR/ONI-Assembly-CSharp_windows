@@ -43,11 +43,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		}
 	}
 
-	public Tag[] possibleDepositObjectTags
+	public IReadOnlyList<Tag> possibleDepositObjectTags
 	{
 		get
 		{
-			return this.possibleDepositTagsList.ToArray();
+			return this.possibleDepositTagsList;
 		}
 	}
 
@@ -134,11 +134,8 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		WorldContainer myWorld = this.GetMyWorld();
 		if (!flag && myWorld != null)
 		{
-			Tag[] tags = this.fetchChore.tags;
-			int i = 0;
-			while (i < tags.Length)
+			foreach (Tag tag in this.fetchChore.tags)
 			{
-				Tag tag = tags[i];
 				if (myWorld.worldInventory.GetTotalAmount(tag, true) > 0f)
 				{
 					if (myWorld.worldInventory.GetTotalAmount(this.requestedEntityAdditionalFilterTag, true) > 0f || this.requestedEntityAdditionalFilterTag == Tag.Invalid)
@@ -147,10 +144,6 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 						break;
 					}
 					break;
-				}
-				else
-				{
-					i++;
 				}
 			}
 		}
@@ -166,29 +159,13 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
-			ChoreType choreType = this.choreType;
-			Storage storage = this.storage;
-			float num = 1f;
-			Tag[] array = new Tag[] { entityTag };
-			Tag[] array2;
-			if (!additionalRequiredTag.IsValid || !(additionalRequiredTag != GameTags.Empty))
-			{
-				array2 = null;
-			}
-			else
-			{
-				Tag[] array3 = new Tag[2];
-				array3[0] = entityTag;
-				array2 = array3;
-				array3[1] = additionalRequiredTag;
-			}
-			this.fetchChore = new FetchChore(choreType, storage, num, array, array2, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
+			this.fetchChore = new FetchChore(this.choreType, this.storage, 1f, new HashSet<Tag> { entityTag }, FetchChore.MatchCriteria.MatchID, (additionalRequiredTag.IsValid && additionalRequiredTag != GameTags.Empty) ? additionalRequiredTag : Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
 			{
 				this.UpdateStatusItem();
 			}, delegate(Chore chore)
 			{
 				this.UpdateStatusItem();
-			}, FetchOrder2.OperationalRequirement.Functional, 0);
+			}, Operational.State.Functional, 0);
 			MaterialNeeds.UpdateNeed(this.requestedEntityTag, 1f, base.gameObject.GetMyWorldId());
 			this.UpdateStatusItem();
 		}

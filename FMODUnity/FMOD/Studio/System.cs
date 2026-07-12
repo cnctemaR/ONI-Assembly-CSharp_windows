@@ -7,7 +7,7 @@ namespace FMOD.Studio
 	{
 		public static RESULT create(out FMOD.Studio.System system)
 		{
-			return FMOD.Studio.System.FMOD_Studio_System_Create(out system.handle, 131348U);
+			return FMOD.Studio.System.FMOD_Studio_System_Create(out system.handle, 131591U);
 		}
 
 		public RESULT setAdvancedSettings(ADVANCEDSETTINGS settings)
@@ -96,22 +96,22 @@ namespace FMOD.Studio
 			return result;
 		}
 
-		public RESULT getEventByID(Guid id, out EventDescription _event)
+		public RESULT getEventByID(GUID id, out EventDescription _event)
 		{
 			return FMOD.Studio.System.FMOD_Studio_System_GetEventByID(this.handle, ref id, out _event.handle);
 		}
 
-		public RESULT getBusByID(Guid id, out Bus bus)
+		public RESULT getBusByID(GUID id, out Bus bus)
 		{
 			return FMOD.Studio.System.FMOD_Studio_System_GetBusByID(this.handle, ref id, out bus.handle);
 		}
 
-		public RESULT getVCAByID(Guid id, out VCA vca)
+		public RESULT getVCAByID(GUID id, out VCA vca)
 		{
 			return FMOD.Studio.System.FMOD_Studio_System_GetVCAByID(this.handle, ref id, out vca.handle);
 		}
 
-		public RESULT getBankByID(Guid id, out Bank bank)
+		public RESULT getBankByID(GUID id, out Bank bank)
 		{
 			return FMOD.Studio.System.FMOD_Studio_System_GetBankByID(this.handle, ref id, out bank.handle);
 		}
@@ -141,6 +141,59 @@ namespace FMOD.Studio
 			return FMOD.Studio.System.FMOD_Studio_System_GetParameterDescriptionByID(this.handle, id, out parameter);
 		}
 
+		public RESULT getParameterLabelByName(string name, int labelindex, out string label)
+		{
+			label = null;
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				byte[] array = freeHelper.byteFromStringUTF8(name);
+				RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetParameterLabelByName(this.handle, array, labelindex, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					result = FMOD.Studio.System.FMOD_Studio_System_GetParameterLabelByName(this.handle, array, labelindex, IntPtr.Zero, 0, out num);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = FMOD.Studio.System.FMOD_Studio_System_GetParameterLabelByName(this.handle, array, labelindex, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					label = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
+			}
+			return result2;
+		}
+
+		public RESULT getParameterLabelByID(PARAMETER_ID id, int labelindex, out string label)
+		{
+			label = null;
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetParameterLabelByID(this.handle, id, labelindex, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					result = FMOD.Studio.System.FMOD_Studio_System_GetParameterLabelByID(this.handle, id, labelindex, IntPtr.Zero, 0, out num);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = FMOD.Studio.System.FMOD_Studio_System_GetParameterLabelByID(this.handle, id, labelindex, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					label = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
+			}
+			return result2;
+		}
+
 		public RESULT getParameterByID(PARAMETER_ID id, out float value)
 		{
 			float num;
@@ -155,6 +208,16 @@ namespace FMOD.Studio
 		public RESULT setParameterByID(PARAMETER_ID id, float value, bool ignoreseekspeed = false)
 		{
 			return FMOD.Studio.System.FMOD_Studio_System_SetParameterByID(this.handle, id, value, ignoreseekspeed);
+		}
+
+		public RESULT setParameterByIDWithLabel(PARAMETER_ID id, string label, bool ignoreseekspeed = false)
+		{
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.Studio.System.FMOD_Studio_System_SetParameterByIDWithLabel(this.handle, id, freeHelper.byteFromStringUTF8(label), ignoreseekspeed);
+			}
+			return result;
 		}
 
 		public RESULT setParametersByIDs(PARAMETER_ID[] ids, float[] values, int count, bool ignoreseekspeed = false)
@@ -188,7 +251,20 @@ namespace FMOD.Studio
 			return result;
 		}
 
-		public RESULT lookupID(string path, out Guid id)
+		public RESULT setParameterByNameWithLabel(string name, string label, bool ignoreseekspeed = false)
+		{
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				using (StringHelper.ThreadSafeEncoding freeHelper2 = StringHelper.GetFreeHelper())
+				{
+					result = FMOD.Studio.System.FMOD_Studio_System_SetParameterByNameWithLabel(this.handle, freeHelper.byteFromStringUTF8(name), freeHelper2.byteFromStringUTF8(label), ignoreseekspeed);
+				}
+			}
+			return result;
+		}
+
+		public RESULT lookupID(string path, out GUID id)
 		{
 			RESULT result;
 			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
@@ -198,7 +274,7 @@ namespace FMOD.Studio
 			return result;
 		}
 
-		public RESULT lookupPath(Guid id, out string path)
+		public RESULT lookupPath(GUID id, out string path)
 		{
 			path = null;
 			RESULT result2;
@@ -400,9 +476,9 @@ namespace FMOD.Studio
 			return RESULT.OK;
 		}
 
-		public RESULT getCPUUsage(out CPU_USAGE usage)
+		public RESULT getCPUUsage(out CPU_USAGE usage, out CPU_USAGE usage_core)
 		{
-			return FMOD.Studio.System.FMOD_Studio_System_GetCPUUsage(this.handle, out usage);
+			return FMOD.Studio.System.FMOD_Studio_System_GetCPUUsage(this.handle, out usage, out usage_core);
 		}
 
 		public RESULT getBufferUsage(out BUFFER_USAGE usage)
@@ -472,16 +548,16 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_System_GetBank(IntPtr system, byte[] path, out IntPtr bank);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_System_GetEventByID(IntPtr system, ref Guid id, out IntPtr _event);
+		private static extern RESULT FMOD_Studio_System_GetEventByID(IntPtr system, ref GUID id, out IntPtr _event);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_System_GetBusByID(IntPtr system, ref Guid id, out IntPtr bus);
+		private static extern RESULT FMOD_Studio_System_GetBusByID(IntPtr system, ref GUID id, out IntPtr bus);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_System_GetVCAByID(IntPtr system, ref Guid id, out IntPtr vca);
+		private static extern RESULT FMOD_Studio_System_GetVCAByID(IntPtr system, ref GUID id, out IntPtr vca);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_System_GetBankByID(IntPtr system, ref Guid id, out IntPtr bank);
+		private static extern RESULT FMOD_Studio_System_GetBankByID(IntPtr system, ref GUID id, out IntPtr bank);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetSoundInfo(IntPtr system, byte[] key, out SOUND_INFO info);
@@ -493,10 +569,19 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_System_GetParameterDescriptionByID(IntPtr system, PARAMETER_ID id, out PARAMETER_DESCRIPTION parameter);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_System_GetParameterLabelByName(IntPtr system, byte[] name, int labelindex, IntPtr label, int size, out int retrieved);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_System_GetParameterLabelByID(IntPtr system, PARAMETER_ID id, int labelindex, IntPtr label, int size, out int retrieved);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetParameterByID(IntPtr system, PARAMETER_ID id, out float value, out float finalvalue);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_SetParameterByID(IntPtr system, PARAMETER_ID id, float value, bool ignoreseekspeed);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_System_SetParameterByIDWithLabel(IntPtr system, PARAMETER_ID id, byte[] label, bool ignoreseekspeed);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_SetParametersByIDs(IntPtr system, PARAMETER_ID[] ids, float[] values, int count, bool ignoreseekspeed);
@@ -508,10 +593,13 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_System_SetParameterByName(IntPtr system, byte[] name, float value, bool ignoreseekspeed);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_System_LookupID(IntPtr system, byte[] path, out Guid id);
+		private static extern RESULT FMOD_Studio_System_SetParameterByNameWithLabel(IntPtr system, byte[] name, byte[] label, bool ignoreseekspeed);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_System_LookupPath(IntPtr system, ref Guid id, IntPtr path, int size, out int retrieved);
+		private static extern RESULT FMOD_Studio_System_LookupID(IntPtr system, byte[] path, out GUID id);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_System_LookupPath(IntPtr system, ref GUID id, IntPtr path, int size, out int retrieved);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetNumListeners(IntPtr system, out int numlisteners);
@@ -577,7 +665,7 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_System_GetParameterDescriptionList(IntPtr system, [Out] PARAMETER_DESCRIPTION[] array, int capacity, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_System_GetCPUUsage(IntPtr system, out CPU_USAGE usage);
+		private static extern RESULT FMOD_Studio_System_GetCPUUsage(IntPtr system, out CPU_USAGE usage, out CPU_USAGE usage_core);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBufferUsage(IntPtr system, out BUFFER_USAGE usage);

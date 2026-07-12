@@ -345,7 +345,6 @@ public class Components
 
 		public List<T> GetItems(int worldId)
 		{
-			ClusterManager.Instance.GetWorld(worldId);
 			return this.CreateOrGetCmps(worldId).Items;
 		}
 

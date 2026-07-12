@@ -78,7 +78,7 @@ public struct SoundCuller
 		soundCuller.max = new Vector3(vector.x, vector.y, 0f);
 		soundCuller.cameraPos = main.transform.GetPosition();
 		Audio audio = Audio.Get();
-		float num = CameraController.Instance.cameras[0].orthographicSize / (audio.listenerReferenceZ - audio.listenerMinZ);
+		float num = CameraController.Instance.OrthographicSize / (audio.listenerReferenceZ - audio.listenerMinZ);
 		if (num <= 0f)
 		{
 			num = 2f;

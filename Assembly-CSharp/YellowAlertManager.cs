@@ -76,13 +76,13 @@ public class YellowAlertManager : GameStateMachine<YellowAlertManager, YellowAle
 
 		private void Refresh()
 		{
-			base.sm.isOn.Set(this.hasTopPriorityChore, base.smi);
+			base.sm.isOn.Set(this.hasTopPriorityChore, base.smi, false);
 		}
 
 		private static YellowAlertManager.Instance instance;
 
 		private bool hasTopPriorityChore;
 
-		public Notification notification = new Notification(MISC.NOTIFICATIONS.YELLOWALERT.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.YELLOWALERT.TOOLTIP, null, false, 0f, null, null, null, true);
+		public Notification notification = new Notification(MISC.NOTIFICATIONS.YELLOWALERT.NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.YELLOWALERT.TOOLTIP, null, false, 0f, null, null, null, true, false);
 	}
 }

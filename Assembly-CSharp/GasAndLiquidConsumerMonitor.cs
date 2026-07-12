@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumerMonitor, GasAndLiquidConsumerMonitor.Instance, IStateMachineTarget, GasAndLiquidConsumerMonitor.Def>
 {
@@ -8,17 +9,17 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		this.cooldown.Enter("ClearTargetCell", delegate(GasAndLiquidConsumerMonitor.Instance smi)
 		{
 			smi.ClearTargetCell();
-		}).ScheduleGoTo((GasAndLiquidConsumerMonitor.Instance smi) => smi.def.mininmumTimeBetweenMeals, this.satisfied);
+		}).ScheduleGoTo((GasAndLiquidConsumerMonitor.Instance smi) => global::UnityEngine.Random.Range(smi.def.minCooldown, smi.def.maxCooldown), this.satisfied);
 		this.satisfied.Enter("ClearTargetCell", delegate(GasAndLiquidConsumerMonitor.Instance smi)
 		{
 			smi.ClearTargetCell();
-		}).TagTransition(GameTags.Creatures.Hungry, this.lookingforfood, false);
-		this.lookingforfood.ToggleBehaviour(GameTags.Creatures.WantsToEat, (GasAndLiquidConsumerMonitor.Instance smi) => smi.targetCell != -1, delegate(GasAndLiquidConsumerMonitor.Instance smi)
+		}).TagTransition((GasAndLiquidConsumerMonitor.Instance smi) => smi.def.transitionTag, this.looking, false);
+		this.looking.ToggleBehaviour((GasAndLiquidConsumerMonitor.Instance smi) => smi.def.behaviourTag, (GasAndLiquidConsumerMonitor.Instance smi) => smi.targetCell != -1, delegate(GasAndLiquidConsumerMonitor.Instance smi)
 		{
 			smi.GoTo(this.cooldown);
-		}).TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update("FindFood", delegate(GasAndLiquidConsumerMonitor.Instance smi, float dt)
+		}).TagTransition((GasAndLiquidConsumerMonitor.Instance smi) => smi.def.transitionTag, this.satisfied, true).Update("FindElement", delegate(GasAndLiquidConsumerMonitor.Instance smi, float dt)
 		{
-			smi.FindFood();
+			smi.FindElement();
 		}, UpdateRate.SIM_1000ms, false);
 	}
 
@@ -26,15 +27,23 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 
 	private GameStateMachine<GasAndLiquidConsumerMonitor, GasAndLiquidConsumerMonitor.Instance, IStateMachineTarget, GasAndLiquidConsumerMonitor.Def>.State satisfied;
 
-	private GameStateMachine<GasAndLiquidConsumerMonitor, GasAndLiquidConsumerMonitor.Instance, IStateMachineTarget, GasAndLiquidConsumerMonitor.Def>.State lookingforfood;
+	private GameStateMachine<GasAndLiquidConsumerMonitor, GasAndLiquidConsumerMonitor.Instance, IStateMachineTarget, GasAndLiquidConsumerMonitor.Def>.State looking;
 
 	public class Def : StateMachine.BaseDef
 	{
+		public Tag[] transitionTag = new Tag[] { GameTags.Creatures.Hungry };
+
+		public Tag behaviourTag = GameTags.Creatures.WantsToEat;
+
+		public float minCooldown = 5f;
+
+		public float maxCooldown = 5f;
+
 		public Diet diet;
 
 		public float consumptionRate = 0.5f;
 
-		public float mininmumTimeBetweenMeals = 5f;
+		public Tag consumableElementTag = Tag.Invalid;
 	}
 
 	public new class Instance : GameStateMachine<GasAndLiquidConsumerMonitor, GasAndLiquidConsumerMonitor.Instance, IStateMachineTarget, GasAndLiquidConsumerMonitor.Def>.GameInstance
@@ -43,6 +52,7 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 			: base(master, def)
 		{
 			this.navigator = base.smi.GetComponent<Navigator>();
+			DebugUtil.Assert(base.smi.def.diet != null || this.storage != null, "GasAndLiquidConsumerMonitor needs either a diet or a storage");
 		}
 
 		public void ClearTargetCell()
@@ -51,27 +61,38 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 			this.massUnavailableFrameCount = 0;
 		}
 
-		public void FindFood()
+		public void FindElement()
 		{
 			this.targetCell = -1;
-			this.FindTargetGasCell();
+			this.FindTargetCell();
 		}
 
 		public bool IsConsumableCell(int cell, out Element element)
 		{
 			element = Grid.Element[cell];
-			Diet.Info[] infos = base.smi.def.diet.infos;
-			for (int i = 0; i < infos.Length; i++)
+			bool flag = true;
+			bool flag2 = true;
+			if (base.smi.def.consumableElementTag != Tag.Invalid)
 			{
-				if (infos[i].IsMatch(element.tag))
+				flag = element.HasTag(base.smi.def.consumableElementTag);
+			}
+			if (base.smi.def.diet != null)
+			{
+				flag2 = false;
+				Diet.Info[] infos = base.smi.def.diet.infos;
+				for (int i = 0; i < infos.Length; i++)
 				{
-					return true;
+					if (infos[i].IsMatch(element.tag))
+					{
+						flag2 = true;
+						break;
+					}
 				}
 			}
-			return false;
+			return flag && flag2;
 		}
 
-		public void FindTargetGasCell()
+		public void FindTargetCell()
 		{
 			GasAndLiquidConsumerMonitor.ConsumableCellQuery consumableCellQuery = new GasAndLiquidConsumerMonitor.ConsumableCellQuery(base.smi, 25);
 			this.navigator.RunQuery(consumableCellQuery);
@@ -99,28 +120,39 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 			{
 				return;
 			}
-			if (mcd.mass <= 0f)
+			if (mcd.mass > 0f)
+			{
+				if (base.def.diet != null)
+				{
+					this.massUnavailableFrameCount = 0;
+					Diet.Info dietInfo = base.def.diet.GetDietInfo(this.targetElement.tag);
+					if (dietInfo == null)
+					{
+						return;
+					}
+					float num = dietInfo.ConvertConsumptionMassToCalories(mcd.mass);
+					CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
+					{
+						tag = this.targetElement.tag,
+						calories = num
+					};
+					base.Trigger(-2038961714, caloriesConsumedEvent);
+					return;
+				}
+				else if (this.storage != null)
+				{
+					this.storage.AddElement(this.targetElement.id, mcd.mass, mcd.temperature, mcd.diseaseIdx, mcd.diseaseCount, false, true);
+					return;
+				}
+			}
+			else
 			{
 				this.massUnavailableFrameCount++;
 				if (this.massUnavailableFrameCount >= 2)
 				{
 					base.Trigger(801383139, null);
 				}
-				return;
 			}
-			this.massUnavailableFrameCount = 0;
-			Diet.Info dietInfo = base.def.diet.GetDietInfo(this.targetElement.tag);
-			if (dietInfo == null)
-			{
-				return;
-			}
-			float num = dietInfo.ConvertConsumptionMassToCalories(mcd.mass);
-			CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = new CreatureCalorieMonitor.CaloriesConsumedEvent
-			{
-				tag = this.targetElement.tag,
-				calories = num
-			};
-			base.Trigger(-2038961714, caloriesConsumedEvent);
 		}
 
 		public int targetCell = -1;
@@ -130,6 +162,9 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		private Navigator navigator;
 
 		private int massUnavailableFrameCount;
+
+		[MyCmpGet]
+		private Storage storage;
 	}
 
 	public class ConsumableCellQuery : PathFinderQuery

@@ -5,7 +5,7 @@ using UnityEngine;
 public class HugMinionReactable : Reactable
 {
 	public HugMinionReactable(GameObject gameObject)
-		: base(gameObject, "HugMinionReactable", Db.Get().ChoreTypes.Hug, 1, 1, true, 1f, 0f, float.PositiveInfinity)
+		: base(gameObject, "HugMinionReactable", Db.Get().ChoreTypes.Hug, 1, 1, true, 1f, 0f, float.PositiveInfinity, 0f, ObjectLayer.Minion)
 	{
 	}
 

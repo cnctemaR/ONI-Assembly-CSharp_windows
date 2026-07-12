@@ -29,10 +29,9 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			global::UnityEngine.Object.Destroy(rbi.gameObject);
 		});
 		this.entityToggles.Clear();
-		Tag[] possibleDepositObjectTags = target.possibleDepositObjectTags;
-		for (int i = 0; i < possibleDepositObjectTags.Length; i++)
+		foreach (Tag tag in target.possibleDepositObjectTags)
 		{
-			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(possibleDepositObjectTags[i]);
+			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
 			if (this.targetReceptacle.rotatable == null)
 			{
 				prefabsWithTag.RemoveAll(delegate(GameObject go)
@@ -155,8 +154,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringCancelDeposit).ToString();
 			this.requestSelectedEntityBtn.isInteractable = true;
 			this.ToggleObjectPicker(false);
-			this.ConfigureActiveEntity(this.targetReceptacle.GetActiveRequest.tags[0]);
-			GameObject prefab = Assets.GetPrefab(this.targetReceptacle.GetActiveRequest.tags[0]);
+			this.ConfigureActiveEntity(this.targetReceptacle.GetActiveRequest.tagsFirst);
+			GameObject prefab = Assets.GetPrefab(this.targetReceptacle.GetActiveRequest.tagsFirst);
 			if (prefab != null)
 			{
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingDelivery).ToString(), prefab.GetProperName()));

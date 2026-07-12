@@ -98,7 +98,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 			{
 				float num3 = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + this.deltaEmitTemperature);
 				int num4 = Grid.PosToCell(base.transform.GetPosition() + this.emitOffsetCell);
-				byte idx = component.Element.idx;
+				ushort idx = component.Element.idx;
 				Game.Instance.massEmitCallbackManager.GetItem(this.simEmitCBHandle);
 				SimMessages.EmitMass(num4, idx, component.Mass, num3, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
 				this.lastEmitTag = component.Element.tag;

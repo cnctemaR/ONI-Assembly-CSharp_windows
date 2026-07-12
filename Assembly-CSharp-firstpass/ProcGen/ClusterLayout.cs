@@ -23,6 +23,8 @@ namespace ProcGen
 
 		public int difficulty { get; set; }
 
+		public bool disableStoryTraits { get; set; }
+
 		public ClusterLayout.Skip skip { get; private set; }
 
 		public int clusterCategory { get; private set; }

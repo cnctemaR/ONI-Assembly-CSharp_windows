@@ -56,19 +56,19 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		public StatesInstance(SleepChore master, GameObject sleeper, GameObject bed, bool bedIsLocator, bool isInterruptable)
 			: base(master)
 		{
-			base.sm.sleeper.Set(sleeper, base.smi);
-			base.sm.isInterruptable.Set(isInterruptable, base.smi);
+			base.sm.sleeper.Set(sleeper, base.smi, false);
+			base.sm.isInterruptable.Set(isInterruptable, base.smi, false);
 			Traits component = sleeper.GetComponent<Traits>();
 			if (component != null)
 			{
-				base.sm.needsNightLight.Set(component.HasTrait("NightLight"), base.smi);
+				base.sm.needsNightLight.Set(component.HasTrait("NightLight"), base.smi, false);
 			}
 			if (bedIsLocator)
 			{
 				this.AddLocator(bed);
 				return;
 			}
-			base.sm.bed.Set(bed, base.smi);
+			base.sm.bed.Set(bed, base.smi, false);
 		}
 
 		public void CheckLightLevel()
@@ -112,7 +112,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			this.locator = sleepable;
 			int num = Grid.PosToCell(this.locator);
 			Grid.Reserved[num] = true;
-			base.sm.bed.Set(this.locator, this);
+			base.sm.bed.Set(this.locator, this, false);
 		}
 
 		public void DestroyLocator()
@@ -188,19 +188,19 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 				.TriggerOnExit(GameHashes.SleepFinished, null)
 				.EventHandler(GameHashes.SleepDisturbedByLight, delegate(SleepChore.StatesInstance smi)
 				{
-					this.isDisturbedByLight.Set(true, smi);
+					this.isDisturbedByLight.Set(true, smi, false);
 				})
 				.EventHandler(GameHashes.SleepDisturbedByNoise, delegate(SleepChore.StatesInstance smi)
 				{
-					this.isDisturbedByNoise.Set(true, smi);
+					this.isDisturbedByNoise.Set(true, smi, false);
 				})
 				.EventHandler(GameHashes.SleepDisturbedByFearOfDark, delegate(SleepChore.StatesInstance smi)
 				{
-					this.isScaredOfDark.Set(true, smi);
+					this.isScaredOfDark.Set(true, smi, false);
 				})
 				.EventHandler(GameHashes.SleepDisturbedByMovement, delegate(SleepChore.StatesInstance smi)
 				{
-					this.isDisturbedByMovement.Set(true, smi);
+					this.isDisturbedByMovement.Set(true, smi, false);
 				});
 			this.sleep.uninterruptable.DoNothing();
 			this.sleep.normal.ParamTransition<bool>(this.isInterruptable, this.sleep.uninterruptable, GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.IsFalse).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null)
@@ -220,7 +220,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 					smi.master.GetComponent<Effects>().Add(Db.Get().effects.Get("BadSleepAfraidOfDark"), true);
 				}
 				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state = (smi.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Sleep) ? this.sleep.normal : this.success);
-				this.isScaredOfDark.Set(false, smi);
+				this.isScaredOfDark.Set(false, smi, false);
 				smi.GoTo(state);
 			});
 			this.sleep.interrupt_movement.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.SleepingInterruptedByMovement, null).PlayAnim("interrupt_light").OnAnimQueueComplete(this.sleep.interrupt_movement_transition)
@@ -239,7 +239,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 					smi.master.GetComponent<Effects>().Add(Db.Get().effects.Get("BadSleepMovement"), true);
 				}
 				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state2 = (smi.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Sleep) ? this.sleep.normal : this.success);
-				this.isDisturbedByMovement.Set(false, smi);
+				this.isDisturbedByMovement.Set(false, smi, false);
 				smi.GoTo(state2);
 			});
 			this.sleep.interrupt_noise.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.SleepingInterruptedByNoise, null).QueueAnim("interrupt_light", false, null).OnAnimQueueComplete(this.sleep.interrupt_noise_transition);
@@ -251,7 +251,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 				{
 					component.Remove(Db.Get().effects.Get("BadSleep"));
 				}
-				this.isDisturbedByNoise.Set(false, smi);
+				this.isDisturbedByNoise.Set(false, smi, false);
 				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state3 = (smi.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Sleep) ? this.sleep.normal : this.success);
 				smi.GoTo(state3);
 			});
@@ -263,7 +263,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 					smi.master.GetComponent<Effects>().Add(Db.Get().effects.Get("BadSleep"), true);
 				}
 				GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State state4 = (smi.master.GetComponent<Schedulable>().IsAllowed(Db.Get().ScheduleBlockTypes.Sleep) ? this.sleep.normal : this.success);
-				this.isDisturbedByLight.Set(false, smi);
+				this.isDisturbedByLight.Set(false, smi, false);
 				smi.GoTo(state4);
 			});
 			this.success.Enter(delegate(SleepChore.StatesInstance smi)

@@ -15,7 +15,7 @@ public class MoveChore : Chore<MoveChore.StatesInstance>
 			: base(master)
 		{
 			this.getCellCallback = get_cell_callback;
-			base.sm.mover.Set(mover, base.smi);
+			base.sm.mover.Set(mover, base.smi, false);
 		}
 
 		public Func<MoveChore.StatesInstance, int> getCellCallback;

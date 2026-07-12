@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using FMOD.Studio;
 using UnityEngine;
 
@@ -27,7 +26,7 @@ namespace FMODUnity
 
 		public bool IsActive { get; private set; }
 
-		public float MaxDistance
+		private float MaxDistance
 		{
 			get
 			{
@@ -40,8 +39,44 @@ namespace FMODUnity
 					this.Lookup();
 				}
 				float num;
-				this.eventDescription.getMaximumDistance(out num);
-				return num;
+				float num2;
+				this.eventDescription.getMinMaxDistance(out num, out num2);
+				return num2;
+			}
+		}
+
+		public static void UpdateActiveEmitters()
+		{
+			foreach (StudioEventEmitter studioEventEmitter in StudioEventEmitter.activeEmitters)
+			{
+				studioEventEmitter.UpdatePlayingStatus(false);
+			}
+		}
+
+		private static void RegisterActiveEmitter(StudioEventEmitter emitter)
+		{
+			if (!StudioEventEmitter.activeEmitters.Contains(emitter))
+			{
+				StudioEventEmitter.activeEmitters.Add(emitter);
+			}
+		}
+
+		private static void DeregisterActiveEmitter(StudioEventEmitter emitter)
+		{
+			StudioEventEmitter.activeEmitters.Remove(emitter);
+		}
+
+		private void UpdatePlayingStatus(bool force = false)
+		{
+			bool flag = StudioListener.DistanceToNearestListener(base.transform.position) <= this.MaxDistance;
+			if (force || flag != this.IsPlaying())
+			{
+				if (flag)
+				{
+					this.PlayInstance();
+					return;
+				}
+				this.StopInstance();
 			}
 		}
 
@@ -52,14 +87,6 @@ namespace FMODUnity
 			{
 				this.Lookup();
 				this.eventDescription.loadSampleData();
-				RuntimeManager.StudioSystem.update();
-				LOADING_STATE loading_STATE;
-				this.eventDescription.getSampleLoadingState(out loading_STATE);
-				while (loading_STATE == LOADING_STATE.LOADING)
-				{
-					Thread.Sleep(1);
-					this.eventDescription.getSampleLoadingState(out loading_STATE);
-				}
 			}
 			this.HandleGameEvent(EmitterGameEvent.ObjectStart);
 		}
@@ -83,7 +110,7 @@ namespace FMODUnity
 						this.instance.clearHandle();
 					}
 				}
-				RuntimeManager.DeregisterActiveEmitter(this);
+				StudioEventEmitter.DeregisterActiveEmitter(this);
 				if (this.Preload)
 				{
 					this.eventDescription.unloadSampleData();
@@ -105,7 +132,7 @@ namespace FMODUnity
 
 		private void Lookup()
 		{
-			this.eventDescription = RuntimeManager.GetEventDescription(this.Event);
+			this.eventDescription = RuntimeManager.GetEventDescription(this.EventReference);
 			if (this.eventDescription.isValid())
 			{
 				for (int i = 0; i < this.Params.Length; i++)
@@ -123,7 +150,7 @@ namespace FMODUnity
 			{
 				return;
 			}
-			if (string.IsNullOrEmpty(this.Event))
+			if (this.EventReference.IsNull)
 			{
 				return;
 			}
@@ -132,23 +159,25 @@ namespace FMODUnity
 			{
 				this.Lookup();
 			}
-			if (!this.Event.StartsWith("snapshot", StringComparison.CurrentCultureIgnoreCase))
+			bool flag;
+			this.eventDescription.isSnapshot(out flag);
+			if (!flag)
 			{
 				this.eventDescription.isOneshot(out this.isOneshot);
 			}
-			bool flag;
-			this.eventDescription.is3D(out flag);
+			bool flag2;
+			this.eventDescription.is3D(out flag2);
 			this.IsActive = true;
-			if (flag && !this.isOneshot && Settings.Instance.StopEventsOutsideMaxDistance)
+			if (flag2 && !this.isOneshot && Settings.Instance.StopEventsOutsideMaxDistance)
 			{
-				RuntimeManager.RegisterActiveEmitter(this);
-				RuntimeManager.UpdateActiveEmitter(this, true);
+				StudioEventEmitter.RegisterActiveEmitter(this);
+				this.UpdatePlayingStatus(true);
 				return;
 			}
 			this.PlayInstance();
 		}
 
-		public void PlayInstance()
+		private void PlayInstance()
 		{
 			if (!this.instance.isValid())
 			{
@@ -205,17 +234,17 @@ namespace FMODUnity
 
 		public void Stop()
 		{
-			RuntimeManager.DeregisterActiveEmitter(this);
+			StudioEventEmitter.DeregisterActiveEmitter(this);
 			this.IsActive = false;
 			this.cachedParams.Clear();
 			this.StopInstance();
 		}
 
-		public void StopInstance()
+		private void StopInstance()
 		{
 			if (this.TriggerOnce && this.hasTriggered)
 			{
-				RuntimeManager.DeregisterActiveEmitter(this);
+				StudioEventEmitter.DeregisterActiveEmitter(this);
 			}
 			if (this.instance.isValid())
 			{
@@ -280,7 +309,9 @@ namespace FMODUnity
 			return false;
 		}
 
-		[EventRef]
+		public EventReference EventReference;
+
+		[Obsolete("Use the EventReference field instead")]
 		public string Event = "";
 
 		public EmitterGameEvent PlayEvent;
@@ -312,6 +343,8 @@ namespace FMODUnity
 		private bool isOneshot;
 
 		private List<ParamRef> cachedParams = new List<ParamRef>();
+
+		private static List<StudioEventEmitter> activeEmitters = new List<StudioEventEmitter>();
 
 		private const string SnapshotString = "snapshot";
 	}

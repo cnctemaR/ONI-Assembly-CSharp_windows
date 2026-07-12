@@ -18,7 +18,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareUnityMappings(Settings settings)
+		public override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.WebGLPlayer, this);
 		}

@@ -65,7 +65,13 @@ public class PauseScreen : KModalButtonMenu
 			string settingsCoordinate = CustomGameSettings.Instance.GetSettingsCoordinate();
 			string[] array = CustomGameSettings.ParseSettingCoordinate(settingsCoordinate);
 			this.worldSeed.SetText(string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED, settingsCoordinate));
-			this.worldSeed.GetComponent<ToolTip>().toolTip = string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED_TOOLTIP, array[1], array[2], array[3]);
+			this.worldSeed.GetComponent<ToolTip>().toolTip = string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED_TOOLTIP, new object[]
+			{
+				array[1],
+				array[2],
+				array[3],
+				array[4]
+			});
 		}
 		catch (Exception ex)
 		{

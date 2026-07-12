@@ -49,7 +49,7 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		liquidCooledFan.minCoolingRange = new Vector2I(-2, 0);
 		liquidCooledFan.maxCoolingRange = new Vector2I(2, 4);
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
-		manualDeliveryKG.requestedItemTag = new Tag("Water");
+		manualDeliveryKG.RequestedItemTag = new Tag("Water");
 		manualDeliveryKG.capacity = 500f;
 		manualDeliveryKG.refillMass = 50f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;

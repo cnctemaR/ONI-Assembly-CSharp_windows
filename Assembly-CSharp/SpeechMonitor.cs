@@ -18,7 +18,7 @@ public class SpeechMonitor : GameStateMachine<SpeechMonitor, SpeechMonitor.Insta
 	{
 		smi.mouth = global::Util.KInstantiate(Assets.GetPrefab(MouthAnimation.ID), null, null).GetComponent<KBatchedAnimController>();
 		smi.mouth.gameObject.SetActive(true);
-		smi.sm.mouth.Set(smi.mouth.gameObject, smi);
+		smi.sm.mouth.Set(smi.mouth.gameObject, smi, false);
 	}
 
 	private static void DestroyMouth(SpeechMonitor.Instance smi)

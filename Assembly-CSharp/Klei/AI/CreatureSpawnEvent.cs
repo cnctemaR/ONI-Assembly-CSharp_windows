@@ -11,8 +11,8 @@ namespace Klei.AI
 		public CreatureSpawnEvent()
 			: base("HatchSpawnEvent", 0, 0)
 		{
-			this.popupTitle = GAMEPLAY_EVENTS.EVENT_TYPES.CREATURE_SPAWN.NAME;
-			this.popupDescription = GAMEPLAY_EVENTS.EVENT_TYPES.CREATURE_SPAWN.DESCRIPTION;
+			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.CREATURE_SPAWN.NAME;
+			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.CREATURE_SPAWN.DESCRIPTION;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -108,9 +108,9 @@ namespace Klei.AI
 				});
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(CreatureSpawnEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(CreatureSpawnEvent.StatesInstance smi)
 			{
-				return new GameplayEventPopupData(smi.gameplayEvent)
+				return new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName)
 				{
 					location = GAMEPLAY_EVENTS.LOCATIONS.PRINTING_POD,
 					whenDescription = GAMEPLAY_EVENTS.TIMES.NOW

@@ -9,20 +9,26 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/TreeFilterable")]
 public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 {
-	public List<Tag> AcceptedTags
+	public HashSet<Tag> AcceptedTags
 	{
 		get
 		{
-			return this.acceptedTags;
+			return this.acceptedTagSet;
 		}
 	}
 
 	[OnDeserialized]
+	[Obsolete]
 	private void OnDeserialized()
 	{
 		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 20))
 		{
 			this.filterByStorageCategoriesOnSpawn = false;
+		}
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 29))
+		{
+			this.acceptedTagSet.UnionWith(this.acceptedTags);
+			this.acceptedTags = null;
 		}
 	}
 
@@ -40,7 +46,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 						flag = true;
 						foreach (Tag tag3 in DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(tag2))
 						{
-							if (!this.acceptedTags.Contains(tag3))
+							if (!this.acceptedTagSet.Contains(tag3))
 							{
 								return;
 							}
@@ -54,7 +60,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 			}
 			foreach (Tag tag4 in DiscoveredResources.Instance.GetDiscoveredResourcesFromTag(category_tag))
 			{
-				if (!(tag4 == tag) && !this.acceptedTags.Contains(tag4))
+				if (!(tag4 == tag) && !this.acceptedTagSet.Contains(tag4))
 				{
 					return;
 				}
@@ -74,14 +80,13 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		DiscoveredResources.Instance.OnDiscover += this.OnDiscover;
 		if (this.autoSelectStoredOnLoad && this.storage != null)
 		{
-			List<Tag> list = new List<Tag>();
-			list.AddRange(this.acceptedTags);
-			list.AddRange(this.storage.GetAllTagsInStorage());
-			this.UpdateFilters(list.Distinct<Tag>().ToList<Tag>());
+			HashSet<Tag> hashSet = new HashSet<Tag>(this.acceptedTagSet);
+			hashSet.UnionWith(this.storage.GetAllIDsInStorage());
+			this.UpdateFilters(hashSet);
 		}
 		if (this.OnFilterChanged != null)
 		{
-			this.OnFilterChanged(this.acceptedTags.ToArray());
+			this.OnFilterChanged(this.acceptedTagSet);
 		}
 		this.RefreshTint();
 		if (this.filterByStorageCategoriesOnSpawn)
@@ -93,7 +98,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	private void RemoveIncorrectAcceptedTags()
 	{
 		List<Tag> list = new List<Tag>();
-		foreach (Tag tag in this.acceptedTags)
+		foreach (Tag tag in this.acceptedTagSet)
 		{
 			bool flag = false;
 			foreach (Tag tag2 in this.storage.storageFilters)
@@ -130,14 +135,14 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public Tag[] GetTags()
+	public HashSet<Tag> GetTags()
 	{
-		return this.acceptedTags.ToArray();
+		return this.acceptedTagSet;
 	}
 
 	public bool ContainsTag(Tag t)
 	{
-		return this.acceptedTags.Contains(t);
+		return this.acceptedTagSet.Contains(t);
 	}
 
 	public void AddTagToFilter(Tag t)
@@ -146,7 +151,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		{
 			return;
 		}
-		this.UpdateFilters(new List<Tag>(this.acceptedTags) { t });
+		this.UpdateFilters(new HashSet<Tag>(this.acceptedTagSet) { t });
 	}
 
 	public void RemoveTagFromFilter(Tag t)
@@ -155,46 +160,34 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		{
 			return;
 		}
-		List<Tag> list = new List<Tag>(this.acceptedTags);
-		list.Remove(t);
-		this.UpdateFilters(list);
+		HashSet<Tag> hashSet = new HashSet<Tag>(this.acceptedTagSet);
+		hashSet.Remove(t);
+		this.UpdateFilters(hashSet);
 	}
 
-	public void UpdateFilters(IList<Tag> filters)
+	public void UpdateFilters(HashSet<Tag> filters)
 	{
-		this.acceptedTags.Clear();
-		this.acceptedTags.AddRange(filters);
+		this.acceptedTagSet.Clear();
+		this.acceptedTagSet.UnionWith(filters);
 		if (this.OnFilterChanged != null)
 		{
-			this.OnFilterChanged(this.acceptedTags.ToArray());
+			this.OnFilterChanged(this.acceptedTagSet);
 		}
 		this.RefreshTint();
-		if (this.dropIncorrectOnFilterChange && this.storage != null && this.storage.items != null)
+		if (!this.dropIncorrectOnFilterChange || this.storage == null || this.storage.items == null)
 		{
-			List<GameObject> list = new List<GameObject>();
-			foreach (GameObject gameObject in this.storage.items)
+			return;
+		}
+		for (int i = this.storage.items.Count - 1; i >= 0; i--)
+		{
+			GameObject gameObject = this.storage.items[i];
+			if (!(gameObject == null))
 			{
-				if (!(gameObject == null))
+				KPrefabID component = gameObject.GetComponent<KPrefabID>();
+				if (!this.acceptedTagSet.Contains(component.PrefabTag))
 				{
-					KPrefabID component = gameObject.GetComponent<KPrefabID>();
-					bool flag = false;
-					foreach (Tag tag in this.acceptedTags)
-					{
-						if (component.Tags.Contains(tag))
-						{
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						list.Add(gameObject);
-					}
+					this.storage.Drop(gameObject, true);
 				}
-			}
-			foreach (GameObject gameObject2 in list)
-			{
-				this.storage.Drop(gameObject2, true);
 			}
 		}
 	}
@@ -202,8 +195,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	public string GetTagsAsStatus(int maxDisplays = 6)
 	{
 		string text = "Tags:\n";
-		List<Tag> list = new List<Tag>(this.acceptedTags);
-		list.Intersect<Tag>(this.storage.storageFilters);
+		List<Tag> list = new List<Tag>(this.storage.storageFilters);
+		list.Intersect<Tag>(this.acceptedTagSet);
 		for (int i = 0; i < Mathf.Min(list.Count, maxDisplays); i++)
 		{
 			text += list[i].ProperName();
@@ -226,7 +219,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	private void RefreshTint()
 	{
-		bool flag = this.acceptedTags != null && this.acceptedTags.Count != 0;
+		bool flag = this.acceptedTagSet != null && this.acceptedTagSet.Count != 0;
 		base.GetComponent<KBatchedAnimController>().TintColour = (flag ? this.filterTint : this.noFilterTint);
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);
 	}
@@ -253,16 +246,29 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	public bool showUserMenu = true;
 
+	public TreeFilterable.UISideScreenHeight uiHeight = TreeFilterable.UISideScreenHeight.Tall;
+
 	public bool filterByStorageCategoriesOnSpawn = true;
 
 	[SerializeField]
 	[Serialize]
+	[Obsolete("Deprecated, use acceptedTagSet")]
 	private List<Tag> acceptedTags = new List<Tag>();
 
-	public Action<Tag[]> OnFilterChanged;
+	[SerializeField]
+	[Serialize]
+	private HashSet<Tag> acceptedTagSet = new HashSet<Tag>();
+
+	public Action<HashSet<Tag>> OnFilterChanged;
 
 	private static readonly EventSystem.IntraObjectHandler<TreeFilterable> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<TreeFilterable>(delegate(TreeFilterable component, object data)
 	{
 		component.OnCopySettings(data);
 	});
+
+	public enum UISideScreenHeight
+	{
+		Short,
+		Tall
+	}
 }

@@ -50,10 +50,10 @@ public class IceCooledFanConfig : IBuildingConfig
 		iceCooledFan.consumptionTag = GameTags.IceOre;
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = GameTags.IceOre;
+		manualDeliveryKG.RequestedItemTag = GameTags.IceOre;
 		manualDeliveryKG.capacity = this.ICE_CAPACITY;
 		manualDeliveryKG.refillMass = this.ICE_CAPACITY * 0.2f;
-		manualDeliveryKG.minimumMass = 10f;
+		manualDeliveryKG.MinimumMass = 10f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		go.AddOrGet<IceCooledFanWorkable>().overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_icefan_kanim") };
 	}

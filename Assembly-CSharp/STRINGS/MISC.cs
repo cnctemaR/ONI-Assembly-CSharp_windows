@@ -83,6 +83,8 @@ namespace STRINGS
 
 			public static LocString CRUSHABLE = "Crushable";
 
+			public static LocString CROPSEEDS = "Crop Seeds";
+
 			public static LocString BAGABLECREATURE = "Critter";
 
 			public static LocString SWIMMINGCREATURE = "Aquatic Critter";
@@ -292,6 +294,13 @@ namespace STRINGS
 
 		public class STATUSITEMS
 		{
+			public class ATTENTIONREQUIRED
+			{
+				public static LocString NAME = "Attention Required!";
+
+				public static LocString TOOLTIP = "Something in my colony needs to be attended to";
+			}
+
 			public class SUBLIMATIONBLOCKED
 			{
 				public static LocString NAME = "{SubElement} emission blocked";
@@ -593,7 +602,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Dormant";
 
-				public static LocString TOOLTIP = "This geyser's geoactivity has halted" + UI.HORIZONTAL_BR_RULE + "It won't erupt again for some time";
+				public static LocString TOOLTIP = "This geyser's geoactivity has halted\n\nIt won't erupt again for some time";
+			}
+
+			public class SPICEDFOOD
+			{
+				public static LocString NAME = "Seasoned";
+
+				public static LocString TOOLTIP = "This food has been improved with spice from the " + BUILDINGS.PREFABS.SPICEGRINDER.NAME;
 			}
 
 			public class PICKUPABLEUNREACHABLE
@@ -644,8 +660,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Critter",
 					UI.PST_KEYWORD,
-					UI.HORIZONTAL_BR_RULE,
-					"Only Duplicants with the ",
+					"\n\nOnly Duplicants with the ",
 					DUPLICANTS.ROLES.RANCHER.NAME,
 					" Skill can catch critters without traps"
 				});
@@ -1308,7 +1323,7 @@ namespace STRINGS
 				{
 					"My colony is not producing any new ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
-					UI.HORIZONTAL_BR_RULE,
+					"\n\n",
 					UI.FormatAsLink("Oxygen Diffusers", "MINERALDEOXIDIZER"),
 					" can be built from the ",
 					UI.FormatAsBuildMenuTab("Oxygen Tab", global::Action.Plan2)
@@ -1323,9 +1338,7 @@ namespace STRINGS
 				{
 					"My colony is consuming more ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
-					" than it is producing, and will run out air if I do not increase production.\n\nI should check my existing oxygen production buildings to ensure they're operating correctly",
-					UI.HORIZONTAL_BR_RULE,
-					"• ",
+					" than it is producing, and will run out air if I do not increase production.\n\nI should check my existing oxygen production buildings to ensure they're operating correctly\n\n• ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
 					" produced last cycle: {EmittingRate}\n• Consumed last cycle: {ConsumptionRate}"
 				});
@@ -1346,9 +1359,7 @@ namespace STRINGS
 				{
 					"The colony's ",
 					UI.FormatAsLink("Food", "FOOD"),
-					" reserves are low:",
-					UI.HORIZONTAL_BR_RULE,
-					"    • {0} are currently available\n    • {1} is being consumed per cycle\n\n",
+					" reserves are low:\n\n    • {0} are currently available\n    • {1} is being consumed per cycle\n\n",
 					UI.FormatAsLink("Microbe Mushers", "MICROBEMUSHER"),
 					" can be built from the ",
 					UI.FormatAsBuildMenuTab("Food Tab", global::Action.Plan4)
@@ -1359,28 +1370,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No " + UI.FormatAsLink("Sick Bay", "DOCTORSTATION") + " built";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"There is nowhere for sick Duplicants receive medical care",
-					UI.HORIZONTAL_BR_RULE,
-					UI.FormatAsLink("Sick Bays", "DOCTORSTATION"),
-					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8)
-				});
+				public static LocString TOOLTIP = "There is nowhere for sick Duplicants receive medical care\n\n" + UI.FormatAsLink("Sick Bays", "DOCTORSTATION") + " can be built from the " + UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8);
 			}
 
 			public class NEEDTOILET
 			{
 				public static LocString NAME = "No " + UI.FormatAsLink("Outhouse", "OUTHOUSE") + " built";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"My Duplicants have nowhere to relieve themselves",
-					UI.HORIZONTAL_BR_RULE,
-					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
-					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5)
-				});
+				public static LocString TOOLTIP = "My Duplicants have nowhere to relieve themselves\n\n" + UI.FormatAsLink("Outhouses", "OUTHOUSE") + " can be built from the " + UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5);
 			}
 
 			public class NEEDFOOD
@@ -1391,8 +1388,7 @@ namespace STRINGS
 				{
 					"The colony will exhaust their supplies without a new ",
 					UI.FormatAsLink("Food", "FOOD"),
-					" source",
-					UI.HORIZONTAL_BR_RULE,
+					" source\n\n",
 					UI.FormatAsLink("Microbe Mushers", "MICROBEMUSHER"),
 					" can be built from the ",
 					UI.FormatAsBuildMenuTab("Food Tab", global::Action.Plan4)
@@ -1406,8 +1402,7 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					UI.FormatAsLink("Germs", "DISEASE"),
-					" are spreading in the colony because my Duplicants have nowhere to clean up",
-					UI.HORIZONTAL_BR_RULE,
+					" are spreading in the colony because my Duplicants have nowhere to clean up\n\n",
 					UI.FormatAsLink("Wash Basins", "WASHBASIN"),
 					" can be built from the ",
 					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8)
@@ -1418,14 +1413,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No " + UI.FormatAsLink("Cots", "COT") + " built";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"My Duplicants would appreciate a place to sleep",
-					UI.HORIZONTAL_BR_RULE,
-					UI.FormatAsLink("Cots", "COTS"),
-					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Furniture Tab", global::Action.Plan9)
-				});
+				public static LocString TOOLTIP = "My Duplicants would appreciate a place to sleep\n\n" + UI.FormatAsLink("Cots", "COTS") + " can be built from the " + UI.FormatAsBuildMenuTab("Furniture Tab", global::Action.Plan9);
 			}
 
 			public class NEEDENERGYSOURCE
@@ -1435,8 +1423,7 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					UI.FormatAsLink("Power", "POWER"),
-					" is required to operate electrical buildings",
-					UI.HORIZONTAL_BR_RULE,
+					" is required to operate electrical buildings\n\n",
 					UI.FormatAsLink("Manual Generators", "MANUALGENERATOR"),
 					" and ",
 					UI.FormatAsLink("Wire", "WIRE"),

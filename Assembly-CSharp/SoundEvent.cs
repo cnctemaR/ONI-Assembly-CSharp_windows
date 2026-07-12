@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using FMOD.Studio;
+using FMODUnity;
 using UnityEngine;
 
 [DebuggerDisplay("{Name}")]
@@ -194,9 +195,14 @@ public class SoundEvent : AnimEvent
 		return vector;
 	}
 
+	public static FMOD.Studio.EventInstance BeginOneShot(EventReference event_ref, Vector3 pos, float volume = 1f, bool objectIsSelectedAndVisible = false)
+	{
+		return KFMOD.BeginOneShot(event_ref, SoundEvent.GetCameraScaledPosition(pos, objectIsSelectedAndVisible), volume);
+	}
+
 	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos, float volume = 1f, bool objectIsSelectedAndVisible = false)
 	{
-		return KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos, objectIsSelectedAndVisible), volume);
+		return SoundEvent.BeginOneShot(RuntimeManager.PathToEventReference(ev), pos, volume, false);
 	}
 
 	public static bool EndOneShot(FMOD.Studio.EventInstance instance)
@@ -204,18 +210,23 @@ public class SoundEvent : AnimEvent
 		return KFMOD.EndOneShot(instance);
 	}
 
-	public static bool PlayOneShot(string sound, Vector3 sound_pos, float volume = 1f)
+	public static bool PlayOneShot(EventReference event_ref, Vector3 sound_pos, float volume = 1f)
 	{
 		bool flag = false;
-		if (!string.IsNullOrEmpty(sound))
+		if (!event_ref.IsNull)
 		{
-			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, sound_pos, volume, false);
+			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(event_ref, sound_pos, volume, false);
 			if (eventInstance.isValid())
 			{
 				flag = SoundEvent.EndOneShot(eventInstance);
 			}
 		}
 		return flag;
+	}
+
+	public static bool PlayOneShot(string sound, Vector3 sound_pos, float volume = 1f)
+	{
+		return SoundEvent.PlayOneShot(RuntimeManager.PathToEventReference(sound), sound_pos, volume);
 	}
 
 	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues, float volume = 1f, bool objectIsSelectedAndVisible = false)
@@ -252,7 +263,7 @@ public class SoundEvent : AnimEvent
 
 	protected static bool IsLowPrioritySound(string sound)
 	{
-		return sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
+		return sound != null && Camera.main != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
 	}
 
 	protected void PrintSoundDebug(string anim_name, string sound, string sound_name, Vector3 sound_pos)

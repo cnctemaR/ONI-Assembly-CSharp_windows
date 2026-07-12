@@ -30,36 +30,32 @@ public class RanchStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RanchStation, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RanchStationType, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<LogicOperationalController>();
 		RanchStation.Def def = go.AddOrGetDef<RanchStation.Def>();
-		def.isCreatureEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !creature_go.GetComponent<Effects>().HasEffect("Ranched");
-		def.onRanchCompleteCb = delegate(GameObject creature_go)
+		def.IsCritterEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !creature_go.GetComponent<Effects>().HasEffect("Ranched");
+		def.OnRanchCompleteCb = delegate(GameObject creature_go)
 		{
-			RanchStation.Instance targetRanchStation = creature_go.GetSMI<RanchableMonitor.Instance>().targetRanchStation;
+			RanchStation.Instance targetRanchStation = creature_go.GetSMI<RanchableMonitor.Instance>().TargetRanchStation;
 			RancherChore.RancherChoreStates.Instance smi2 = targetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>();
 			GameObject gameObject = targetRanchStation.GetSMI<RancherChore.RancherChoreStates.Instance>().sm.rancher.Get(smi2);
 			float num = 1f + gameObject.GetAttributes().Get(Db.Get().Attributes.Ranching.Id).GetTotalValue() * 0.1f;
 			creature_go.GetComponent<Effects>().Add("Ranched", true).timeRemaining *= num;
 		};
-		def.ranchedPreAnim = "grooming_pre";
-		def.ranchedLoopAnim = "grooming_loop";
-		def.ranchedPstAnim = "grooming_pst";
-		def.worktime = 12f;
-		def.getTargetRanchCell = delegate(RanchStation.Instance smi)
+		def.RanchedPreAnim = "grooming_pre";
+		def.RanchedLoopAnim = "grooming_loop";
+		def.RanchedPstAnim = "grooming_pst";
+		def.WorkTime = 12f;
+		def.GetTargetRanchCell = delegate(RanchStation.Instance smi)
 		{
 			int num2 = Grid.InvalidCell;
 			if (!smi.IsNullOrStopped())
 			{
 				num2 = Grid.CellRight(Grid.PosToCell(smi.transform.GetPosition()));
-				if (!smi.targetRanchable.IsNullOrStopped() && smi.targetRanchable.HasTag(GameTags.Creatures.Flyer))
-				{
-					num2 = Grid.CellAbove(num2);
-				}
 			}
 			return num2;
 		};

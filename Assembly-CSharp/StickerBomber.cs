@@ -52,7 +52,7 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 		private class StickerBombReactable : Reactable
 		{
 			public StickerBombReactable(GameObject gameObject, StickerBomber.Instance stickerBomber)
-				: base(gameObject, "StickerBombReactable", Db.Get().ChoreTypes.Build, 2, 1, false, 0f, 0f, float.PositiveInfinity)
+				: base(gameObject, "StickerBombReactable", Db.Get().ChoreTypes.Build, 2, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
 			{
 				this.preventChoreInterruption = true;
 				this.stickerBomber = stickerBomber;
@@ -138,6 +138,9 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 					pooledQueue.Recycle();
 					return random;
 				}
+				pooledList.Recycle();
+				pooledList2.Recycle();
+				pooledQueue.Recycle();
 				return 0;
 			}
 

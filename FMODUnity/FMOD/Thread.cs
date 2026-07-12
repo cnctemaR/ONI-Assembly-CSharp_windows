@@ -7,11 +7,6 @@ namespace FMOD
 	{
 		public static RESULT SetAttributes(THREAD_TYPE type, THREAD_AFFINITY affinity = THREAD_AFFINITY.GROUP_DEFAULT, THREAD_PRIORITY priority = THREAD_PRIORITY.DEFAULT, THREAD_STACK_SIZE stacksize = THREAD_STACK_SIZE.DEFAULT)
 		{
-			if ((affinity & THREAD_AFFINITY.GROUP_DEFAULT) != THREAD_AFFINITY.CORE_ALL)
-			{
-				affinity &= ~THREAD_AFFINITY.GROUP_DEFAULT;
-				affinity |= (THREAD_AFFINITY)(-9223372036854775808L);
-			}
 			return Thread.FMOD5_Thread_SetAttributes(type, affinity, priority, stacksize);
 		}
 

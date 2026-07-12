@@ -310,14 +310,13 @@ public abstract class StateMachine
 			{
 				return false;
 			}
-			for (int i = 0; i < currentState.branch.Length; i++)
+			bool flag = state == currentState;
+			int num = 0;
+			while (!flag && num < currentState.branch.Length && !(flag = state == currentState.branch[num]))
 			{
-				if (state == currentState.branch[i])
-				{
-					return true;
-				}
+				num++;
 			}
-			return false;
+			return flag;
 		}
 
 		public void ScheduleGoTo(float time, StateMachine.BaseState state)
@@ -442,22 +441,20 @@ public abstract class StateMachine
 			}
 			this.defaultState = null;
 			this.events = null;
-			if (this.transitions != null)
+			int num = 0;
+			while (this.transitions != null && num < this.transitions.Count)
 			{
-				for (int i = 0; i < this.transitions.Count; i++)
-				{
-					this.transitions[i].Clear();
-				}
+				this.transitions[num].Clear();
+				num++;
 			}
 			this.transitions = null;
-			this.parameterTransitions = null;
 			this.enterActions = null;
 			this.exitActions = null;
 			if (this.branch != null)
 			{
-				for (int j = 0; j < this.branch.Length; j++)
+				for (int i = 0; i < this.branch.Length; i++)
 				{
-					this.branch[j].FreeResources();
+					this.branch[i].FreeResources();
 				}
 			}
 			this.branch = null;
@@ -490,8 +487,6 @@ public abstract class StateMachine
 
 		public List<StateMachine.BaseTransition> transitions;
 
-		public List<StateMachine.ParameterTransition> parameterTransitions;
-
 		public List<StateMachine.UpdateAction> updateActions;
 
 		public List<StateMachine.Action> enterActions;
@@ -505,11 +500,25 @@ public abstract class StateMachine
 
 	public class BaseTransition
 	{
-		public BaseTransition(string name, StateMachine.BaseState source_state, StateMachine.BaseState target_state)
+		public BaseTransition(int idx, string name, StateMachine.BaseState source_state, StateMachine.BaseState target_state)
 		{
+			this.idx = idx;
 			this.name = name;
 			this.sourceState = source_state;
 			this.targetState = target_state;
+		}
+
+		public virtual void Evaluate(StateMachine.Instance smi)
+		{
+		}
+
+		public virtual StateMachine.BaseTransition.Context Register(StateMachine.Instance smi)
+		{
+			return new StateMachine.BaseTransition.Context(this);
+		}
+
+		public virtual void Unregister(StateMachine.Instance smi, StateMachine.BaseTransition.Context context)
+		{
 		}
 
 		public void Clear()
@@ -527,11 +536,26 @@ public abstract class StateMachine
 			this.targetState = null;
 		}
 
+		public int idx;
+
 		public string name;
 
 		public StateMachine.BaseState sourceState;
 
 		public StateMachine.BaseState targetState;
+
+		public struct Context
+		{
+			public Context(StateMachine.BaseTransition transition)
+			{
+				this.idx = transition.idx;
+				this.handlerId = 0;
+			}
+
+			public int idx;
+
+			public int handlerId;
+		}
 	}
 
 	public struct UpdateAction
@@ -560,8 +584,12 @@ public abstract class StateMachine
 		public object callback;
 	}
 
-	public class ParameterTransition
+	public class ParameterTransition : StateMachine.BaseTransition
 	{
+		public ParameterTransition(int idx, string name, StateMachine.BaseState source_state, StateMachine.BaseState target_state)
+			: base(idx, name, source_state, target_state)
+		{
+		}
 	}
 
 	public abstract class Parameter

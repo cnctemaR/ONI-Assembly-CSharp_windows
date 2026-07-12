@@ -33,7 +33,7 @@ public class StatusItemGroup
 				return this.items[i];
 			}
 		}
-		return default(StatusItemGroup.Entry);
+		return StatusItemGroup.Entry.EmptyEntry;
 	}
 
 	public Guid SetStatusItem(StatusItemCategory category, StatusItem item, object data = null)
@@ -90,11 +90,11 @@ public class StatusItemGroup
 		return false;
 	}
 
-	public bool HasStatusItemID(StatusItem status_item)
+	public bool HasStatusItemID(string status_item_id)
 	{
 		for (int i = 0; i < this.items.Count; i++)
 		{
-			if (this.items[i].item.Id == status_item.Id)
+			if (this.items[i].item.Id == status_item_id)
 			{
 				return true;
 			}
@@ -124,7 +124,7 @@ public class StatusItemGroup
 		StatusItemGroup.Entry entry = new StatusItemGroup.Entry(item, category, data);
 		if (item.shouldNotify)
 		{
-			entry.notification = new Notification(item.notificationText, item.notificationType, new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip), item, false, 0f, item.notificationClickCallback, data, null, true);
+			entry.notification = new Notification(item.notificationText, item.notificationType, new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip), item, false, 0f, item.notificationClickCallback, data, null, true, false);
 			this.gameObject.AddOrGet<Notifier>().Add(entry.notification, "");
 		}
 		if (item.ShouldShowIcon())
@@ -146,11 +146,22 @@ public class StatusItemGroup
 		{
 			throw new ArgumentException(status_item.Name + " allows multiple instances of itself to be active so it must be released via an instance handle");
 		}
-		for (int i = 0; i < this.items.Count; i++)
+		int i = 0;
+		while (i < this.items.Count)
 		{
 			if (this.items[i].item.Id == status_item.Id)
 			{
-				return this.RemoveStatusItem(this.items[i].id, immediate);
+				Guid id = this.items[i].id;
+				if (id == Guid.Empty)
+				{
+					return id;
+				}
+				this.RemoveStatusItemInternal(id, i, immediate);
+				return id;
+			}
+			else
+			{
+				i++;
 			}
 		}
 		return Guid.Empty;
@@ -164,27 +175,31 @@ public class StatusItemGroup
 		}
 		for (int i = 0; i < this.items.Count; i++)
 		{
-			StatusItemGroup.Entry entry = this.items[i];
-			if (entry.id == guid)
+			if (this.items[i].id == guid)
 			{
-				StatusItemGroup.Entry entry2 = this.items[i];
-				this.items.RemoveAt(i);
-				if (entry2.notification != null)
-				{
-					this.gameObject.GetComponent<Notifier>().Remove(entry2.notification);
-				}
-				if (entry.item.ShouldShowIcon() && Game.Instance != null)
-				{
-					Game.Instance.RemoveStatusItem(this.gameObject.transform, entry2.item);
-				}
-				if (this.OnRemoveStatusItem != null)
-				{
-					this.OnRemoveStatusItem(entry2, immediate);
-				}
+				this.RemoveStatusItemInternal(guid, i, immediate);
 				return guid;
 			}
 		}
 		return Guid.Empty;
+	}
+
+	private void RemoveStatusItemInternal(Guid guid, int itemIdx, bool immediate)
+	{
+		StatusItemGroup.Entry entry = this.items[itemIdx];
+		this.items.RemoveAt(itemIdx);
+		if (entry.notification != null)
+		{
+			this.gameObject.GetComponent<Notifier>().Remove(entry.notification);
+		}
+		if (entry.item.ShouldShowIcon() && Game.Instance != null)
+		{
+			Game.Instance.RemoveStatusItem(this.gameObject.transform, entry.item);
+		}
+		if (this.OnRemoveStatusItem != null)
+		{
+			this.OnRemoveStatusItem(entry, immediate);
+		}
 	}
 
 	private static string OnToolTip(List<Notification> notifications, object data)
@@ -261,6 +276,11 @@ public class StatusItemGroup
 		{
 			this.item.OnClick(this.data);
 		}
+
+		public static StatusItemGroup.Entry EmptyEntry = new StatusItemGroup.Entry
+		{
+			id = Guid.Empty
+		};
 
 		public Guid id;
 

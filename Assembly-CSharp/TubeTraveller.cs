@@ -5,7 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Instance>, OxygenBreather.IGasProvider
+public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Instance>
 {
 	public void InitModifiers()
 	{
@@ -16,6 +16,8 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 		this.immunities.Add(Db.Get().effects.Get("SoakingWet"));
 		this.immunities.Add(Db.Get().effects.Get("WetFeet"));
 		this.immunities.Add(Db.Get().effects.Get("PoppedEarDrums"));
+		this.immunities.Add(Db.Get().effects.Get("MinorIrritation"));
+		this.immunities.Add(Db.Get().effects.Get("MajorIrritation"));
 	}
 
 	public override void InitializeStates(out StateMachine.BaseState default_state)
@@ -35,7 +37,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 
 	public bool ConsumeGas(OxygenBreather oxygen_breather, float amount)
 	{
-		return true;
+		return false;
 	}
 
 	public bool ShouldEmitCO2()
@@ -114,59 +116,66 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 			this.reservations.Clear();
 		}
 
+		public void ApplyEnteringTubeEffects()
+		{
+			Effects component = base.GetComponent<Effects>();
+			Attributes attributes = base.gameObject.GetAttributes();
+			base.gameObject.AddTag(GameTags.InTransitTube);
+			string name = GameTags.InTransitTube.Name;
+			foreach (Effect effect in base.sm.immunities)
+			{
+				component.AddImmunity(effect, name, true);
+			}
+			foreach (AttributeModifier attributeModifier in base.sm.modifiers)
+			{
+				attributes.Add(attributeModifier);
+			}
+			CreatureSimTemperatureTransfer component2 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+			if (component2 != null)
+			{
+				component2.RefreshRegistration();
+			}
+		}
+
+		public void ClearAllEffects()
+		{
+			Effects component = base.GetComponent<Effects>();
+			Attributes attributes = base.gameObject.GetAttributes();
+			base.gameObject.RemoveTag(GameTags.InTransitTube);
+			string name = GameTags.InTransitTube.Name;
+			foreach (Effect effect in base.sm.immunities)
+			{
+				component.RemoveImmunity(effect, name);
+			}
+			foreach (AttributeModifier attributeModifier in base.sm.modifiers)
+			{
+				attributes.Remove(attributeModifier);
+			}
+			CreatureSimTemperatureTransfer component2 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+			if (component2 != null)
+			{
+				component2.RefreshRegistration();
+			}
+		}
+
 		public void OnTubeTransition(bool nowInTube)
 		{
 			if (nowInTube != this.inTube)
 			{
 				this.inTube = nowInTube;
-				Effects component = base.GetComponent<Effects>();
-				Attributes attributes = base.gameObject.GetAttributes();
+				base.GetComponent<Effects>();
+				base.gameObject.GetAttributes();
 				if (nowInTube)
 				{
-					this.hadSuitTank = base.HasTag(GameTags.HasSuitTank);
-					if (!this.hadSuitTank)
-					{
-						base.GetComponent<OxygenBreather>().SetGasProvider(base.sm);
-					}
-					foreach (Effect effect in base.sm.immunities)
-					{
-						component.AddImmunity(effect);
-					}
-					using (List<AttributeModifier>.Enumerator enumerator2 = base.sm.modifiers.GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
-						{
-							AttributeModifier attributeModifier = enumerator2.Current;
-							attributes.Add(attributeModifier);
-						}
-						goto IL_0167;
-					}
+					this.ApplyEnteringTubeEffects();
+					return;
 				}
-				if (!this.hadSuitTank)
-				{
-					base.GetComponent<OxygenBreather>().SetGasProvider(new GasBreatherFromWorldProvider());
-				}
-				foreach (Effect effect2 in base.sm.immunities)
-				{
-					component.RemoveImmunity(effect2);
-				}
-				foreach (AttributeModifier attributeModifier2 in base.sm.modifiers)
-				{
-					attributes.Remove(attributeModifier2);
-				}
-				IL_0167:
-				CreatureSimTemperatureTransfer component2 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
-				if (component2 != null)
-				{
-					component2.RefreshRegistration();
-				}
+				this.ClearAllEffects();
 			}
 		}
 
 		private List<TravelTubeEntrance> reservations = new List<TravelTubeEntrance>();
 
-		private bool inTube;
-
-		private bool hadSuitTank;
+		public bool inTube;
 	}
 }

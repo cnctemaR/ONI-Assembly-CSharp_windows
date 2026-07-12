@@ -14,7 +14,7 @@ public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 		public StatesInstance(MoveToSafetyChore master, GameObject mover)
 			: base(master)
 		{
-			base.sm.mover.Set(mover, base.smi);
+			base.sm.mover.Set(mover, base.smi, false);
 			this.sensor = base.sm.mover.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>();
 			this.targetCell = this.sensor.GetSensorCell();
 		}

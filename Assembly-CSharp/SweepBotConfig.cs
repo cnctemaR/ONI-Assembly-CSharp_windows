@@ -24,6 +24,7 @@ public class SweepBotConfig : IEntityConfig
 		gameObject.GetComponent<KBatchedAnimController>().isMovable = true;
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
 		kprefabID.AddTag(GameTags.Creature, false);
+		kprefabID.AddTag(GameTags.Robot, false);
 		gameObject.AddComponent<Pickupable>();
 		gameObject.AddOrGet<Clearable>().isClearable = false;
 		Trait trait = Db.Get().CreateTrait("SweepBotBaseTrait", this.name, this.name, null, false, null, true, true);
@@ -92,7 +93,7 @@ public class SweepBotConfig : IEntityConfig
 	public void OnSpawn(GameObject inst)
 	{
 		StorageUnloadMonitor.Instance smi = inst.GetSMI<StorageUnloadMonitor.Instance>();
-		smi.sm.internalStorage.Set(inst.GetComponents<Storage>()[1], smi);
+		smi.sm.internalStorage.Set(inst.GetComponents<Storage>()[1], smi, false);
 		inst.GetComponent<OrnamentReceptacle>();
 		inst.GetSMI<CreatureFallMonitor.Instance>().anim = "idle_loop";
 	}

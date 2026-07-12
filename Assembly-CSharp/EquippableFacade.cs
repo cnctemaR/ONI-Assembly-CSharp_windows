@@ -7,7 +7,7 @@ public class EquippableFacade : KMonoBehaviour
 	{
 		EquippableFacade equippableFacade = equippable.gameObject.AddOrGet<EquippableFacade>();
 		equippableFacade.FacadeID = facadeID;
-		equippableFacade.BuildOverride = Db.Get().EquippableFacades.Get(facadeID).BuildOverride;
+		equippableFacade.BuildOverride = Db.GetEquippableFacades().Get(facadeID).BuildOverride;
 		equippableFacade.ApplyAnimOverride();
 	}
 
@@ -37,7 +37,7 @@ public class EquippableFacade : KMonoBehaviour
 		{
 			return;
 		}
-		base.GetComponent<KBatchedAnimController>().SwapAnims(new KAnimFile[] { Db.Get().EquippableFacades.Get(this.FacadeID).AnimFile });
+		base.GetComponent<KBatchedAnimController>().SwapAnims(new KAnimFile[] { Db.GetEquippableFacades().Get(this.FacadeID).AnimFile });
 	}
 
 	private void OverrideName()

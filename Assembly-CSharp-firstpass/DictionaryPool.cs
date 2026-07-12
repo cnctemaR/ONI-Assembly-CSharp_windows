@@ -23,11 +23,16 @@ public static class DictionaryPool<KeyType, ObjectType, PoolIdentifier>
 	private static ContainerPool<DictionaryPool<KeyType, ObjectType, PoolIdentifier>.PooledDictionary, PoolIdentifier> pool = new ContainerPool<DictionaryPool<KeyType, ObjectType, PoolIdentifier>.PooledDictionary, PoolIdentifier>();
 
 	[DebuggerDisplay("Count={Count}")]
-	public class PooledDictionary : Dictionary<KeyType, ObjectType>
+	public class PooledDictionary : Dictionary<KeyType, ObjectType>, IDisposable
 	{
 		public void Recycle()
 		{
 			DictionaryPool<KeyType, ObjectType, PoolIdentifier>.Free(this);
+		}
+
+		public void Dispose()
+		{
+			this.Recycle();
 		}
 	}
 }

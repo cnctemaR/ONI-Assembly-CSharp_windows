@@ -17,14 +17,25 @@ namespace Klei.AI
 
 		protected override void OnSpawn()
 		{
+			if (this.saveLoadImmunities != null)
+			{
+				foreach (Effects.SaveLoadImmunities saveLoadImmunities in this.saveLoadImmunities)
+				{
+					if (Db.Get().effects.Exists(saveLoadImmunities.effectID))
+					{
+						Effect effect = Db.Get().effects.Get(saveLoadImmunities.effectID);
+						this.AddImmunity(effect, saveLoadImmunities.giverID, true);
+					}
+				}
+			}
 			if (this.saveLoadEffects != null)
 			{
 				foreach (Effects.SaveLoadEffect saveLoadEffect in this.saveLoadEffects)
 				{
 					if (Db.Get().effects.Exists(saveLoadEffect.id))
 					{
-						Effect effect = Db.Get().effects.Get(saveLoadEffect.id);
-						EffectInstance effectInstance = this.Add(effect, true);
+						Effect effect2 = Db.Get().effects.Get(saveLoadEffect.id);
+						EffectInstance effectInstance = this.Add(effect2, true);
 						if (effectInstance != null)
 						{
 							effectInstance.timeRemaining = saveLoadEffect.timeRemaining;
@@ -68,9 +79,24 @@ namespace Klei.AI
 			return this.Add(effect, should_save);
 		}
 
+		public bool HasImmunityTo(Effect effect)
+		{
+			using (List<Effects.EffectImmunity>.Enumerator enumerator = this.effectImmunites.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.effect == effect)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		public EffectInstance Add(Effect effect, bool should_save)
 		{
-			if (this.effectImmunites.Contains(effect))
+			if (this.HasImmunityTo(effect))
 			{
 				return null;
 			}
@@ -203,14 +229,38 @@ namespace Klei.AI
 			}
 		}
 
-		public void AddImmunity(Effect effect)
+		public void AddImmunity(Effect effect, string giverID, bool shouldSave = true)
 		{
-			this.effectImmunites.Add(effect);
+			if (giverID != null)
+			{
+				foreach (Effects.EffectImmunity effectImmunity in this.effectImmunites)
+				{
+					if (effectImmunity.giverID == giverID && effectImmunity.effect == effect)
+					{
+						return;
+					}
+				}
+			}
+			Effects.EffectImmunity effectImmunity2 = new Effects.EffectImmunity(effect, giverID, shouldSave);
+			this.effectImmunites.Add(effectImmunity2);
 		}
 
-		public void RemoveImmunity(Effect effect)
+		public void RemoveImmunity(Effect effect, string ID)
 		{
-			this.effectImmunites.Remove(effect);
+			Effects.EffectImmunity effectImmunity = default(Effects.EffectImmunity);
+			bool flag = false;
+			foreach (Effects.EffectImmunity effectImmunity2 in this.effectImmunites)
+			{
+				if (effectImmunity2.effect == effect && (ID == null || ID == effectImmunity2.giverID))
+				{
+					effectImmunity = effectImmunity2;
+					flag = true;
+				}
+			}
+			if (flag)
+			{
+				this.effectImmunites.Remove(effectImmunity);
+			}
 		}
 
 		[OnSerializing]
@@ -231,6 +281,39 @@ namespace Klei.AI
 				}
 			}
 			this.saveLoadEffects = list.ToArray();
+			List<Effects.SaveLoadImmunities> list2 = new List<Effects.SaveLoadImmunities>();
+			foreach (Effects.EffectImmunity effectImmunity in this.effectImmunites)
+			{
+				if (effectImmunity.shouldSave)
+				{
+					Effect effect = effectImmunity.effect;
+					Effects.SaveLoadImmunities saveLoadImmunities = new Effects.SaveLoadImmunities
+					{
+						effectID = effect.Id,
+						giverID = effectImmunity.giverID,
+						saved = true
+					};
+					list2.Add(saveLoadImmunities);
+				}
+			}
+			this.saveLoadImmunities = list2.ToArray();
+		}
+
+		public List<Effects.SaveLoadImmunities> GetAllImmunitiesForSerialization()
+		{
+			List<Effects.SaveLoadImmunities> list = new List<Effects.SaveLoadImmunities>();
+			foreach (Effects.EffectImmunity effectImmunity in this.effectImmunites)
+			{
+				Effect effect = effectImmunity.effect;
+				Effects.SaveLoadImmunities saveLoadImmunities = new Effects.SaveLoadImmunities
+				{
+					effectID = effect.Id,
+					giverID = effectImmunity.giverID,
+					saved = effectImmunity.shouldSave
+				};
+				list.Add(saveLoadImmunities);
+			}
+			return list;
 		}
 
 		public List<Effects.SaveLoadEffect> GetAllEffectsForSerialization()
@@ -269,11 +352,41 @@ namespace Klei.AI
 		[Serialize]
 		private Effects.SaveLoadEffect[] saveLoadEffects;
 
+		[Serialize]
+		private Effects.SaveLoadImmunities[] saveLoadImmunities;
+
 		private List<EffectInstance> effects = new List<EffectInstance>();
 
 		private List<EffectInstance> effectsThatExpire = new List<EffectInstance>();
 
-		private List<Effect> effectImmunites = new List<Effect>();
+		private List<Effects.EffectImmunity> effectImmunites = new List<Effects.EffectImmunity>();
+
+		[Serializable]
+		public struct EffectImmunity
+		{
+			public EffectImmunity(Effect e, string id, bool save = true)
+			{
+				this.giverID = id;
+				this.effect = e;
+				this.shouldSave = save;
+			}
+
+			public string giverID;
+
+			public Effect effect;
+
+			public bool shouldSave;
+		}
+
+		[Serializable]
+		public struct SaveLoadImmunities
+		{
+			public string giverID;
+
+			public string effectID;
+
+			public bool saved;
+		}
 
 		[Serializable]
 		public struct SaveLoadEffect

@@ -467,7 +467,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private IEnumerator Timer(float time, global::System.Action revert)
 	{
-		yield return new WaitForSeconds(time);
+		yield return SequenceUtil.WaitForSeconds(time);
 		if (this.confirmDialog != null)
 		{
 			this.confirmDialog.Deactivate();

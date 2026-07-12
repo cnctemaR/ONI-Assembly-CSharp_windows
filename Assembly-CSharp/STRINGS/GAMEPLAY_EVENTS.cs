@@ -125,7 +125,7 @@ namespace STRINGS
 
 			public class CRYOFRIEND
 			{
-				public static LocString NAME = "A Frozen Friend";
+				public static LocString NAME = "New Event: A Frozen Friend";
 
 				public static LocString DESCRIPTION = string.Concat(new string[]
 				{
@@ -141,7 +141,7 @@ namespace STRINGS
 
 			public class WARPWORLDREVEAL
 			{
-				public static LocString NAME = "Personnel Teleporter";
+				public static LocString NAME = "New Event: Personnel Teleporter";
 
 				public static LocString DESCRIPTION = "I've discovered a functioning teleportation device with a pre-programmed destination.\n\nIt appears to go to another " + UI.CLUSTERMAP.PLANETOID + ", and I'm fairly certain there's a return device on the other end.\n\nI could send a Duplicant through safely if I desired.";
 
@@ -150,7 +150,7 @@ namespace STRINGS
 
 			public class ARTIFACT_REVEAL
 			{
-				public static LocString NAME = "Artifact Analyzed";
+				public static LocString NAME = "New Event: Artifact Analyzed";
 
 				public static LocString DESCRIPTION = "An artifact from a past civilization was analyzed.\n\n{desc}";
 

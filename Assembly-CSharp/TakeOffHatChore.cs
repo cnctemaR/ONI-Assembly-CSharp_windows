@@ -14,7 +14,7 @@ public class TakeOffHatChore : Chore<TakeOffHatChore.StatesInstance>
 		public StatesInstance(TakeOffHatChore master, GameObject duplicant)
 			: base(master)
 		{
-			base.sm.duplicant.Set(duplicant, base.smi);
+			base.sm.duplicant.Set(duplicant, base.smi, false);
 		}
 	}
 

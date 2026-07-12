@@ -138,7 +138,7 @@ public class RocketEngineCluster : StateMachineComponent<RocketEngineCluster.Sta
 			int num = Grid.PosToCell(base.smi.master.gameObject.transform.GetPosition() + base.smi.master.animController.Offset);
 			if (Grid.AreCellsInSameWorld(num, this.pad_cell))
 			{
-				SimMessages.EmitMass(num, (byte)ElementLoader.GetElementIndex(base.smi.master.exhaustElement), dt * base.smi.master.exhaustEmitRate, base.smi.master.exhaustTemperature, base.smi.master.exhaustDiseaseIdx, base.smi.master.exhaustDiseaseCount, -1);
+				SimMessages.EmitMass(num, ElementLoader.GetElementIndex(base.smi.master.exhaustElement), dt * base.smi.master.exhaustEmitRate, base.smi.master.exhaustTemperature, base.smi.master.exhaustDiseaseIdx, base.smi.master.exhaustDiseaseCount, -1);
 			}
 			if (base.smi.master.emitRadiation)
 			{

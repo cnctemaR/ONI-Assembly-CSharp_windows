@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FMODUnityResonance
 {
@@ -25,30 +26,41 @@ namespace FMODUnityResonance
 		{
 			Gizmos.color = Color.yellow;
 			Gizmos.matrix = base.transform.localToWorldMatrix;
-			Gizmos.DrawWireCube(Vector3.zero, this.size);
+			Gizmos.DrawWireCube(Vector3.zero, this.Size);
 		}
 
-		public FmodResonanceAudioRoom.SurfaceMaterial leftWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
+		[FormerlySerializedAs("leftWall")]
+		public FmodResonanceAudioRoom.SurfaceMaterial LeftWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
 
-		public FmodResonanceAudioRoom.SurfaceMaterial rightWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
+		[FormerlySerializedAs("rightWall")]
+		public FmodResonanceAudioRoom.SurfaceMaterial RightWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
 
-		public FmodResonanceAudioRoom.SurfaceMaterial floor = FmodResonanceAudioRoom.SurfaceMaterial.ParquetOnConcrete;
+		[FormerlySerializedAs("floor")]
+		public FmodResonanceAudioRoom.SurfaceMaterial Floor = FmodResonanceAudioRoom.SurfaceMaterial.ParquetOnConcrete;
 
-		public FmodResonanceAudioRoom.SurfaceMaterial ceiling = FmodResonanceAudioRoom.SurfaceMaterial.PlasterRough;
+		[FormerlySerializedAs("ceiling")]
+		public FmodResonanceAudioRoom.SurfaceMaterial Ceiling = FmodResonanceAudioRoom.SurfaceMaterial.PlasterRough;
 
-		public FmodResonanceAudioRoom.SurfaceMaterial backWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
+		[FormerlySerializedAs("backWall")]
+		public FmodResonanceAudioRoom.SurfaceMaterial BackWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
 
-		public FmodResonanceAudioRoom.SurfaceMaterial frontWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
+		[FormerlySerializedAs("frontWall")]
+		public FmodResonanceAudioRoom.SurfaceMaterial FrontWall = FmodResonanceAudioRoom.SurfaceMaterial.ConcreteBlockCoarse;
 
-		public float reflectivity = 1f;
+		[FormerlySerializedAs("reflectivity")]
+		public float Reflectivity = 1f;
 
-		public float reverbGainDb;
+		[FormerlySerializedAs("reverbGainDb")]
+		public float ReverbGainDb;
 
-		public float reverbBrightness;
+		[FormerlySerializedAs("reverbBrightness")]
+		public float ReverbBrightness;
 
-		public float reverbTime = 1f;
+		[FormerlySerializedAs("reverbTime")]
+		public float ReverbTime = 1f;
 
-		public Vector3 size = Vector3.one;
+		[FormerlySerializedAs("size")]
+		public Vector3 Size = Vector3.one;
 
 		public enum SurfaceMaterial
 		{

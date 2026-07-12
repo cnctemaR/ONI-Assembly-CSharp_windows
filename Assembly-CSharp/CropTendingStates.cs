@@ -140,7 +140,7 @@ public class CropTendingStates : GameStateMachine<CropTendingStates, CropTending
 			}
 		}
 		GameObject gameObject = ((crop != null) ? crop.gameObject : null);
-		smi.sm.targetCrop.Set(gameObject, smi);
+		smi.sm.targetCrop.Set(gameObject, smi, false);
 		smi.moveCell = num;
 	}
 

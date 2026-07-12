@@ -120,6 +120,11 @@ namespace FMOD.Studio
 			return EventInstance.FMOD_Studio_EventInstance_GetChannelGroup(this.handle, out group.handle);
 		}
 
+		public RESULT getMinMaxDistance(out float min, out float max)
+		{
+			return EventInstance.FMOD_Studio_EventInstance_GetMinMaxDistance(this.handle, out min, out max);
+		}
+
 		public RESULT release()
 		{
 			return EventInstance.FMOD_Studio_EventInstance_Release(this.handle);
@@ -144,6 +149,16 @@ namespace FMOD.Studio
 		public RESULT setParameterByID(PARAMETER_ID id, float value, bool ignoreseekspeed = false)
 		{
 			return EventInstance.FMOD_Studio_EventInstance_SetParameterByID(this.handle, id, value, ignoreseekspeed);
+		}
+
+		public RESULT setParameterByIDWithLabel(PARAMETER_ID id, string label, bool ignoreseekspeed = false)
+		{
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = EventInstance.FMOD_Studio_EventInstance_SetParameterByIDWithLabel(this.handle, id, freeHelper.byteFromStringUTF8(label), ignoreseekspeed);
+			}
+			return result;
 		}
 
 		public RESULT setParametersByIDs(PARAMETER_ID[] ids, float[] values, int count, bool ignoreseekspeed = false)
@@ -177,9 +192,22 @@ namespace FMOD.Studio
 			return result;
 		}
 
-		public RESULT triggerCue()
+		public RESULT setParameterByNameWithLabel(string name, string label, bool ignoreseekspeed = false)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_TriggerCue(this.handle);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				using (StringHelper.ThreadSafeEncoding freeHelper2 = StringHelper.GetFreeHelper())
+				{
+					result = EventInstance.FMOD_Studio_EventInstance_SetParameterByNameWithLabel(this.handle, freeHelper.byteFromStringUTF8(name), freeHelper2.byteFromStringUTF8(label), ignoreseekspeed);
+				}
+			}
+			return result;
+		}
+
+		public RESULT keyOff()
+		{
+			return EventInstance.FMOD_Studio_EventInstance_KeyOff(this.handle);
 		}
 
 		public RESULT setCallback(EVENT_CALLBACK callback, EVENT_CALLBACK_TYPE callbackmask = EVENT_CALLBACK_TYPE.ALL)
@@ -280,6 +308,9 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventInstance_GetChannelGroup(IntPtr _event, out IntPtr group);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_GetMinMaxDistance(IntPtr _event, out float min, out float max);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_Release(IntPtr _event);
 
 		[DllImport("fmodstudio")]
@@ -292,16 +323,22 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventInstance_SetParameterByName(IntPtr _event, byte[] name, float value, bool ignoreseekspeed);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_SetParameterByNameWithLabel(IntPtr _event, byte[] name, byte[] label, bool ignoreseekspeed);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_GetParameterByID(IntPtr _event, PARAMETER_ID id, out float value, out float finalvalue);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetParameterByID(IntPtr _event, PARAMETER_ID id, float value, bool ignoreseekspeed);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_SetParameterByIDWithLabel(IntPtr _event, PARAMETER_ID id, byte[] label, bool ignoreseekspeed);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetParametersByIDs(IntPtr _event, PARAMETER_ID[] ids, float[] values, int count, bool ignoreseekspeed);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventInstance_TriggerCue(IntPtr _event);
+		private static extern RESULT FMOD_Studio_EventInstance_KeyOff(IntPtr _event);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetCallback(IntPtr _event, EVENT_CALLBACK callback, EVENT_CALLBACK_TYPE callbackmask);

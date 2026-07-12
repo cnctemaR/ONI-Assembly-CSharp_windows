@@ -49,13 +49,13 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			global::Debug.LogError("EATCHORE null smi.sm.ediblesource");
 			return;
 		}
-		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi);
+		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi, false);
 		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs");
 		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
 		float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
 		KCrashReporter.Assert(num > 0f, "EatChore is requesting an invalid amount of food");
-		base.smi.sm.requestedfoodunits.Set(num, base.smi);
-		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.requestedfoodunits.Set(num, base.smi, false);
+		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 
@@ -109,7 +109,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			Grid.Reserved[num] = true;
 			GameObject gameObject = ChoreHelpers.CreateLocator("EatLocator", vector);
-			base.sm.locator.Set(gameObject, this);
+			base.sm.locator.Set(gameObject, this, false);
 			this.locatorCell = num;
 		}
 

@@ -243,11 +243,11 @@ public class EntityTemplates
 		prefab.AddOrGetDef<HappinessMonitor.Def>();
 		Tag prefabTag = prefab.GetComponent<KPrefabID>().PrefabTag;
 		WildnessMonitor.Def def = prefab.AddOrGetDef<WildnessMonitor.Def>();
-		def.wildEffect = new Effect("Wild" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, global::STRINGS.CREATURES.MODIFIERS.WILD.TOOLTIP, 0f, true, true, false, null, 0f, null, "");
+		def.wildEffect = new Effect("Wild" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, global::STRINGS.CREATURES.MODIFIERS.WILD.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, 0.008333334f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
 		def.wildEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, 25f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, false, false, true));
 		def.wildEffect.Add(new AttributeModifier(Db.Get().Amounts.ScaleGrowth.deltaAttribute.Id, -0.75f, global::STRINGS.CREATURES.MODIFIERS.WILD.NAME, true, false, true));
-		def.tameEffect = new Effect("Tame" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, global::STRINGS.CREATURES.MODIFIERS.TAME.TOOLTIP, 0f, true, true, false, null, 0f, null, "");
+		def.tameEffect = new Effect("Tame" + prefabTag.Name, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, global::STRINGS.CREATURES.MODIFIERS.TAME.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		def.tameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -1f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
 		def.tameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, 100f, global::STRINGS.CREATURES.MODIFIERS.TAME.NAME, false, false, true));
 		prefab.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = space_required_per_creature;
@@ -465,6 +465,7 @@ public class EntityTemplates
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		KPrefabID kprefabID = gameObject.AddOrGet<KPrefabID>();
 		kprefabID.PrefabTag = element.tag;
+		kprefabID.InitializeTags(false);
 		if (additionalTags != null)
 		{
 			foreach (Tag tag in additionalTags)
@@ -575,8 +576,8 @@ public class EntityTemplates
 			manualDeliveryKG.RequestedItemTag = consumeInfo.tag;
 			manualDeliveryKG.capacity = consumeInfo.massConsumptionRate * 600f * 3f;
 			manualDeliveryKG.refillMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
-			manualDeliveryKG.minimumMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
-			manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+			manualDeliveryKG.MinimumMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.operationalRequirement = Operational.State.Functional;
 			manualDeliveryKG.choreTypeIDHash = idHash;
 		}
 		KPrefabID component = template.GetComponent<KPrefabID>();
@@ -609,8 +610,8 @@ public class EntityTemplates
 			manualDeliveryKG.RequestedItemTag = consumeInfo.tag;
 			manualDeliveryKG.capacity = consumeInfo.massConsumptionRate * 600f * 3f;
 			manualDeliveryKG.refillMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
-			manualDeliveryKG.minimumMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
-			manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+			manualDeliveryKG.MinimumMass = consumeInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.operationalRequirement = Operational.State.Functional;
 			manualDeliveryKG.choreTypeIDHash = idHash;
 		}
 		IrrigationMonitor.Def def = template.AddOrGetDef<IrrigationMonitor.Def>();
@@ -667,10 +668,12 @@ public class EntityTemplates
 		MutantPlant component2 = plant.GetComponent<MutantPlant>();
 		if (component2 != null)
 		{
-			gameObject.AddOrGet<MutantPlant>().SpeciesID = component2.SpeciesID;
-			gameObject2.AddOrGet<MutantPlant>().SpeciesID = component2.SpeciesID;
+			MutantPlant mutantPlant = gameObject.AddOrGet<MutantPlant>();
+			MutantPlant mutantPlant2 = gameObject2.AddOrGet<MutantPlant>();
+			mutantPlant.SpeciesID = component2.SpeciesID;
+			mutantPlant2.SpeciesID = component2.SpeciesID;
 		}
-		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
+		Assets.AddPrefab(component);
 		plant.AddOrGet<SeedProducer>().Configure(id, productionType, numberOfSeeds);
 		return gameObject;
 	}

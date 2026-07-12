@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [AddComponentMenu("KMonoBehaviour/Plugins/KScreen")]
-public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
+public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
 	public string handlerName
 	{
@@ -108,6 +108,18 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		{
 			this.pointerExitActions(eventData);
 		}
+	}
+
+	public virtual void OnDrag(PointerEventData eventData)
+	{
+	}
+
+	public virtual void OnBeginDrag(PointerEventData eventData)
+	{
+	}
+
+	public virtual void OnEndDrag(PointerEventData eventData)
+	{
 	}
 
 	protected override void OnSpawn()

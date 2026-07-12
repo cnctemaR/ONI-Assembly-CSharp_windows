@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using FMOD;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareUnityMappings(Settings settings)
+		public override void DeclareRuntimePlatforms(Settings settings)
 		{
 			settings.DeclareRuntimePlatform(RuntimePlatform.OSXEditor, this);
 			settings.DeclareRuntimePlatform(RuntimePlatform.WindowsEditor, this);
@@ -59,5 +60,27 @@ namespace FMODUnity
 			Platform.PropertyAccessors.RealChannelCount.Set(this, 256);
 			Platform.PropertyAccessors.VirtualChannelCount.Set(this, 1024);
 		}
+
+		public override List<CodecChannelCount> DefaultCodecChannels
+		{
+			get
+			{
+				return PlatformPlayInEditor.staticCodecChannels;
+			}
+		}
+
+		private static List<CodecChannelCount> staticCodecChannels = new List<CodecChannelCount>
+		{
+			new CodecChannelCount
+			{
+				format = CodecType.FADPCM,
+				channels = 0
+			},
+			new CodecChannelCount
+			{
+				format = CodecType.Vorbis,
+				channels = 256
+			}
+		};
 	}
 }

@@ -29,7 +29,7 @@ public class VirtualCursorOverlayFix : MonoBehaviour
 			this.screenSpaceCamera.enabled = true;
 			if (!this.screenSpaceOverlayImage.enabled && ShowCursor)
 			{
-				yield return new WaitForSecondsRealtime(0.1f);
+				yield return SequenceUtil.WaitForSecondsRealtime(0.1f);
 			}
 			this.actualCursor.enabled = ShowCursor;
 			this.screenSpaceOverlayImage.enabled = ShowCursor;

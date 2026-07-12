@@ -35,6 +35,21 @@ public class Db : EntityModifierSet
 		return Db._Instance;
 	}
 
+	public static ArtableStages GetArtableStages()
+	{
+		return Db.Get().ArtableStages;
+	}
+
+	public static EquippableFacades GetEquippableFacades()
+	{
+		return Db.Get().EquippableFacades;
+	}
+
+	public static StickerBombs GetStickerBombs()
+	{
+		return Db.Get().StickerBombs;
+	}
+
 	public override void Initialize()
 	{
 		base.Initialize();
@@ -45,7 +60,9 @@ public class Db : EntityModifierSet
 		this.Faces = new Faces();
 		this.Shirts = new Shirts();
 		this.Expressions = new Expressions(this.Root);
+		this.Emotes = new Emotes(this.Root);
 		this.Thoughts = new Thoughts(this.Root);
+		this.Dreams = new Dreams(this.Root);
 		this.Deaths = new Deaths(this.Root);
 		this.StatusItemCategories = new StatusItemCategories(this.Root);
 		this.TechTreeTitles = new TechTreeTitles(this.Root);
@@ -76,15 +93,20 @@ public class Db : EntityModifierSet
 		this.ChoreTypes = new ChoreTypes(this.Root);
 		this.GameplayEvents = new GameplayEvents(this.Root);
 		this.GameplaySeasons = new GameplaySeasons(this.Root);
+		this.Stories = new Stories(this.Root);
 		if (DlcManager.FeaturePlantMutationsEnabled())
 		{
 			this.PlantMutations = new PlantMutations(this.Root);
 		}
 		this.OrbitalTypeCategories = new OrbitalTypeCategories(this.Root);
+		this.ArtableStatuses = new ArtableStatuses(this.Root);
 		this.EquippableFacades = new EquippableFacades(this.Root);
-		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, 0f, null, "");
+		this.ArtableStages = new ArtableStages(this.Root);
+		this.StickerBombs = new StickerBombs(this.Root);
+		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
 		this.effects.Add(effect);
+		this.Spices = new Spices(this.Root);
 		this.CollectResources(this.Root, this.ResourceTable);
 	}
 
@@ -160,7 +182,11 @@ public class Db : EntityModifierSet
 
 	public Expressions Expressions;
 
+	public Emotes Emotes;
+
 	public Thoughts Thoughts;
+
+	public Dreams Dreams;
 
 	public BuildingStatusItems BuildingStatusItems;
 
@@ -208,6 +234,8 @@ public class Db : EntityModifierSet
 
 	public PlantMutations PlantMutations;
 
+	public Spices Spices;
+
 	public Techs Techs;
 
 	public TechTreeTitles TechTreeTitles;
@@ -215,6 +243,14 @@ public class Db : EntityModifierSet
 	public OrbitalTypeCategories OrbitalTypeCategories;
 
 	public EquippableFacades EquippableFacades;
+
+	public ArtableStages ArtableStages;
+
+	public StickerBombs StickerBombs;
+
+	public ArtableStatuses ArtableStatuses;
+
+	public Stories Stories;
 
 	[Serializable]
 	public class SlotInfo : Resource

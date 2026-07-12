@@ -163,7 +163,7 @@ public class MotdServerClient
 				}
 				else
 				{
-					text = "SimpleNetworkCache - " + wr.error;
+					text = "Failed to load image: " + CS$<>8__locals2.responseStruct.image_url + " SimpleNetworkCache - " + wr.error;
 				}
 				CS$<>8__locals2.CS$<>8__locals1.cb(CS$<>8__locals2.responseStruct, text);
 				wr.Dispose();

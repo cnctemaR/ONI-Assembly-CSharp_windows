@@ -7,12 +7,13 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity
 {
 	protected override void OnPrefabInit()
 	{
-		this.filteredStorage = new FilteredStorage(this, null, new Tag[] { GameTags.Compostable }, this, true, Db.Get().ChoreTypes.FoodFetch);
+		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.Compostable }, this, true, Db.Get().ChoreTypes.FoodFetch);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.GetComponent<KAnimControllerBase>().Play("off", KAnim.PlayMode.Once, 1f, 0f);
+		base.GetComponent<FoodStorage>().FilteredStorage = this.filteredStorage;
 		this.filteredStorage.FilterChanged();
 		this.UpdateLogicCircuit();
 		base.Subscribe<Refrigerator>(-905833192, Refrigerator.OnCopySettingsDelegate);

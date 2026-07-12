@@ -95,7 +95,7 @@ public class Diggable : Workable
 
 	private IEnumerator PeriodicUnstableFallingRecheck()
 	{
-		yield return new WaitForSeconds(2f);
+		yield return SequenceUtil.WaitForSeconds(2f);
 		this.OnSolidChanged(null);
 		yield break;
 	}

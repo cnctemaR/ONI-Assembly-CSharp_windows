@@ -536,7 +536,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private static void UpdateSolidDigAmount(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
-		int elementIndex = ElementLoader.GetElementIndex(SimHashes.Void);
+		ushort elementIndex = ElementLoader.GetElementIndex(SimHashes.Void);
 		for (int i = y0; i <= y1; i++)
 		{
 			int num = Grid.XYToCell(x0, i);
@@ -548,7 +548,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				byte b = 0;
 				byte b2 = 0;
 				byte b3 = 0;
-				if ((int)Grid.ElementIdx[j] != elementIndex)
+				if (Grid.ElementIdx[j] != elementIndex)
 				{
 					b3 = byte.MaxValue;
 				}

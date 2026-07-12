@@ -14,7 +14,7 @@ public class PutOnHatChore : Chore<PutOnHatChore.StatesInstance>
 		public StatesInstance(PutOnHatChore master, GameObject duplicant)
 			: base(master)
 		{
-			base.sm.duplicant.Set(duplicant, base.smi);
+			base.sm.duplicant.Set(duplicant, base.smi, false);
 		}
 	}
 

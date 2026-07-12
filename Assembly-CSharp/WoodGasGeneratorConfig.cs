@@ -43,7 +43,7 @@ public class WoodGasGeneratorConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = WoodLogConfig.TAG;
+		manualDeliveryKG.RequestedItemTag = WoodLogConfig.TAG;
 		manualDeliveryKG.capacity = 360f;
 		manualDeliveryKG.refillMass = 180f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;

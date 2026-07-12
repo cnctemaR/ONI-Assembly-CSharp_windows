@@ -205,9 +205,7 @@ public class Substance
 	[NonSerialized]
 	internal MaterialPropertyBlock propertyBlock;
 
-	[EventRef]
-	public string fallingStartSound;
+	public EventReference fallingStartSound;
 
-	[EventRef]
-	public string fallingStopSound;
+	public EventReference fallingStopSound;
 }

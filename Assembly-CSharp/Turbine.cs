@@ -327,8 +327,8 @@ public class Turbine : KMonoBehaviour
 				}
 				float num6 = Grid.Temperature[num4];
 				num2 = Mathf.Max(num2, num6);
-				byte b = Grid.ElementIdx[num4];
-				Element element = ElementLoader.elements[(int)b];
+				ushort num7 = Grid.ElementIdx[num4];
+				Element element = ElementLoader.elements[(int)num7];
 				if (element.IsLiquid || element.IsSolid)
 				{
 					this.isInputBlocked = true;
@@ -337,11 +337,11 @@ public class Turbine : KMonoBehaviour
 			this.isOutputBlocked = false;
 			for (int j = 0; j < base.master.destCells.Length; j++)
 			{
-				int num7 = base.master.destCells[j];
-				float num8 = Grid.Mass[num7];
-				num3 = Mathf.Min(num3, num8);
-				byte b2 = Grid.ElementIdx[num7];
-				Element element2 = ElementLoader.elements[(int)b2];
+				int num8 = base.master.destCells[j];
+				float num9 = Grid.Mass[num8];
+				num3 = Mathf.Min(num3, num9);
+				ushort num10 = Grid.ElementIdx[num8];
+				Element element2 = ElementLoader.elements[(int)num10];
 				if (element2.IsLiquid || element2.IsSolid)
 				{
 					this.isOutputBlocked = true;

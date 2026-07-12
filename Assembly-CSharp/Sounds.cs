@@ -39,36 +39,25 @@ public class Sounds : KMonoBehaviour
 
 	public FMODAsset[] OreSplashSounds;
 
-	[EventRef]
-	public string BlowUp_GenericMigrated;
+	public EventReference BlowUp_GenericMigrated;
 
-	[EventRef]
-	public string Build_GenericMigrated;
+	public EventReference Build_GenericMigrated;
 
-	[EventRef]
-	public string InUse_FabricatorMigrated;
+	public EventReference InUse_FabricatorMigrated;
 
-	[EventRef]
-	public string InUse_OxygenGeneratorMigrated;
+	public EventReference InUse_OxygenGeneratorMigrated;
 
-	[EventRef]
-	public string Place_OreOnSiteMigrated;
+	public EventReference Place_OreOnSiteMigrated;
 
-	[EventRef]
-	public string Footstep_rockMigrated;
+	public EventReference Footstep_rockMigrated;
 
-	[EventRef]
-	public string Ice_crackMigrated;
+	public EventReference Ice_crackMigrated;
 
-	[EventRef]
-	public string BuildingPowerOnMigrated;
+	public EventReference BuildingPowerOnMigrated;
 
-	[EventRef]
-	public string ElectricGridOverloadMigrated;
+	public EventReference ElectricGridOverloadMigrated;
 
-	[EventRef]
-	public string IngameMusicMigrated;
+	public EventReference IngameMusicMigrated;
 
-	[EventRef]
-	public string[] OreSplashSoundsMigrated;
+	public EventReference[] OreSplashSoundsMigrated;
 }

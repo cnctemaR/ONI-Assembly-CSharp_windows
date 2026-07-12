@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 using TUNING;
@@ -111,6 +112,16 @@ public class SpaceArtifact : KMonoBehaviour, IGameObjectEffectDescriptor
 			text = this.uniqueAnimNameFragment;
 		}
 		base.GetComponent<KBatchedAnimController>().Play(text, KAnim.PlayMode.Loop, 1f, 0f);
+	}
+
+	[OnDeserialized]
+	public void OnDeserialize()
+	{
+		Pickupable component = base.GetComponent<Pickupable>();
+		if (component != null)
+		{
+			component.deleteOffGrid = false;
+		}
 	}
 
 	public const string ID = "SpaceArtifact";

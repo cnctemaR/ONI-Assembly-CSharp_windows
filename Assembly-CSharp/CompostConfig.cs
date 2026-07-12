@@ -40,11 +40,11 @@ public class CompostConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(CompostConfig.COMPOST_TAG, 0.1f)
+			new ElementConverter.ConsumedElement(CompostConfig.COMPOST_TAG, 0.1f, true)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.1f, SimHashes.Dirt, 348.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.1f, SimHashes.Dirt, 348.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0, true)
 		};
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = 10f;
@@ -52,10 +52,10 @@ public class CompostConfig : IBuildingConfig
 		elementDropper.emitOffset = new Vector3(0.5f, 1f, 0f);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = CompostConfig.COMPOST_TAG;
+		manualDeliveryKG.RequestedItemTag = CompostConfig.COMPOST_TAG;
 		manualDeliveryKG.capacity = 300f;
 		manualDeliveryKG.refillMass = 60f;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FarmFetch.IdHash;
 		Prioritizable.AddRef(go);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;

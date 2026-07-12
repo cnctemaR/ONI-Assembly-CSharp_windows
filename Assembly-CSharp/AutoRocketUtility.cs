@@ -14,7 +14,7 @@ public static class AutoRocketUtility
 	{
 		GameObject gameObject = AutoRocketUtility.AddEngine(selectedPad);
 		GameObject oxidizerTank = AutoRocketUtility.AddOxidizerTank(gameObject);
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		AutoRocketUtility.AddOxidizer(oxidizerTank);
 		GameObject gameObject2 = AutoRocketUtility.AddPassengerModule(oxidizerTank);
 		AutoRocketUtility.AddDrillCone(AutoRocketUtility.AddSolidStorageModule(gameObject2));
@@ -25,13 +25,13 @@ public static class AutoRocketUtility
 		{
 			int num = max;
 			max = num - 1;
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 		}
 		WorldContainer interiorWorld = passengerModule.GetComponent<RocketModuleCluster>().CraftInterface.GetInteriorWorld();
 		RocketControlStation rocketControlStation = Components.RocketControlStations.GetWorldItems(interiorWorld.id, false)[0];
 		GameObject minion = AutoRocketUtility.AddPilot(rocketControlStation);
 		AutoRocketUtility.AddOxygen(rocketControlStation);
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		AutoRocketUtility.AssignCrew(minion, passengerModule);
 		yield break;
 	}

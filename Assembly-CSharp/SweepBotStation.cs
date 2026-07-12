@@ -35,7 +35,7 @@ public class SweepBotStation : KMonoBehaviour
 		else
 		{
 			StorageUnloadMonitor.Instance smi = this.sweepBot.Get().GetSMI<StorageUnloadMonitor.Instance>();
-			smi.sm.sweepLocker.Set(this.sweepStorage, smi);
+			smi.sm.sweepLocker.Set(this.sweepStorage, smi, false);
 			this.RefreshSweepBotSubscription();
 		}
 		this.UpdateMeter();
@@ -47,7 +47,7 @@ public class SweepBotStation : KMonoBehaviour
 		if (this.botMaterialStorage.FindFirstWithMass(GameTags.RefinedMetal, SweepBotConfig.MASS) == null)
 		{
 			FetchList2 fetchList = new FetchList2(this.botMaterialStorage, Db.Get().ChoreTypes.Fetch);
-			fetchList.Add(GameTags.RefinedMetal, null, null, SweepBotConfig.MASS, FetchOrder2.OperationalRequirement.None);
+			fetchList.Add(GameTags.RefinedMetal, null, SweepBotConfig.MASS, Operational.State.None);
 			fetchList.Submit(null, true);
 			return;
 		}
@@ -83,7 +83,7 @@ public class SweepBotStation : KMonoBehaviour
 			}
 			this.UpdateNameDisplay();
 			StorageUnloadMonitor.Instance smi = gameObject.GetSMI<StorageUnloadMonitor.Instance>();
-			smi.sm.sweepLocker.Set(this.sweepStorage, smi);
+			smi.sm.sweepLocker.Set(this.sweepStorage, smi, false);
 			this.sweepBot.Get().GetComponent<PrimaryElement>().ElementID = sweepBotMaterial;
 			this.RefreshSweepBotSubscription();
 			this.newSweepyHandle.ClearScheduler();

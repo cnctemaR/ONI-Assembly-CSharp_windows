@@ -4,7 +4,7 @@ namespace Klei.CustomSettings
 {
 	public class SettingLevel
 	{
-		public SettingLevel(string id, string label, string tooltip, int coordinate_offset = 0, object userdata = null)
+		public SettingLevel(string id, string label, string tooltip, long coordinate_offset = 0L, object userdata = null)
 		{
 			this.id = id;
 			this.label = label;
@@ -21,6 +21,6 @@ namespace Klei.CustomSettings
 
 		public object userdata { get; private set; }
 
-		public int coordinate_offset { get; private set; }
+		public long coordinate_offset { get; private set; }
 	}
 }

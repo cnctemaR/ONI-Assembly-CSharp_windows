@@ -421,28 +421,18 @@ public class Worker : KMonoBehaviour
 		{
 			return;
 		}
-		EmoteReactable emoteReactable = OneshotReactableLocator.CreateOneshotReactable(base.gameObject, 3f, "WorkCompleteAcknowledgement", Db.Get().ChoreTypes.Emote, "anim_clapcheer_kanim", 9, 5, 100f);
-		emoteReactable.AddStep(new EmoteReactable.EmoteStep
+		EmoteReactable emoteReactable = OneshotReactableLocator.CreateOneshotReactable(base.gameObject, 3f, "WorkCompleteAcknowledgement", Db.Get().ChoreTypes.Emote, 9, 5, 100f);
+		Emote clapCheer = Db.Get().Emotes.Minion.ClapCheer;
+		emoteReactable.SetEmote(clapCheer);
+		emoteReactable.RegisterEmoteStepCallbacks("clapcheer_pre", new Action<GameObject>(this.GetReactionEffect), null).RegisterEmoteStepCallbacks("clapcheer_pst", null, delegate(GameObject r)
 		{
-			anim = "clapcheer_pre",
-			startcb = new Action<GameObject>(this.GetReactionEffect)
-		}).AddStep(new EmoteReactable.EmoteStep
-		{
-			anim = "clapcheer_loop"
-		}).AddStep(new EmoteReactable.EmoteStep
-		{
-			anim = "clapcheer_pst",
-			finishcb = delegate(GameObject r)
-			{
-				r.Trigger(937885943, topic);
-			}
-		})
-			.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
+			r.Trigger(937885943, topic);
+		});
 		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
 		if (uisprite != null)
 		{
 			Thought thought = new Thought("Completion_" + topic, null, uisprite.first, "mode_satisfaction", "conversation_short", "bubble_conversation", SpeechMonitor.PREFIX_HAPPY, "", true, 4f);
-			emoteReactable.AddThought(thought);
+			emoteReactable.SetThought(thought);
 		}
 	}
 
@@ -454,13 +444,13 @@ public class Worker : KMonoBehaviour
 		}
 		if (this.passerbyReactable == null)
 		{
-			this.passerbyReactable = new EmoteReactable(base.gameObject, "WorkPasserbyAcknowledgement", Db.Get().ChoreTypes.Emote, "anim_react_thumbsup_kanim", 5, 5, 30f, 720f * TuningData<DupeGreetingManager.Tuning>.Get().greetingDelayMultiplier, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-			{
-				anim = "react",
-				startcb = new Action<GameObject>(this.GetReactionEffect)
-			}).AddThought(Db.Get().Thoughts.Encourage).AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor))
+			EmoteReactable emoteReactable = new EmoteReactable(base.gameObject, "WorkPasserbyAcknowledgement", Db.Get().ChoreTypes.Emote, 5, 5, 30f, 720f * TuningData<DupeGreetingManager.Tuning>.Get().greetingDelayMultiplier, float.PositiveInfinity, 0f);
+			Emote thumbsUp = Db.Get().Emotes.Minion.ThumbsUp;
+			emoteReactable.SetEmote(thumbsUp).SetThought(Db.Get().Thoughts.Encourage).AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor))
 				.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsFacingMe))
 				.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsntPartying));
+			emoteReactable.RegisterEmoteStepCallbacks("react", new Action<GameObject>(this.GetReactionEffect), null);
+			this.passerbyReactable = emoteReactable;
 		}
 	}
 

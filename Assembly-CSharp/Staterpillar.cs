@@ -9,25 +9,129 @@ public class Staterpillar : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.generatorElement = new List<Tag> { SimHashes.Creature.CreateTag() };
-		this.generatorDef = Assets.GetBuildingDef(StaterpillarGeneratorConfig.ID);
-		base.OnPrefabInit();
+		this.dummyElement = new List<Tag> { SimHashes.Unobtanium.CreateTag() };
+		this.connectorDef = Assets.GetBuildingDef(this.connectorDefId);
 	}
 
-	public void SpawnGenerator(int targetCell)
+	public void SpawnConnectorBuilding(int targetCell)
 	{
-		StaterpillarGenerator staterpillarGenerator = this.generatorRef.Get();
-		GameObject gameObject = null;
-		if (staterpillarGenerator != null)
+		if (this.conduitLayer == ObjectLayer.Wire)
 		{
-			gameObject = staterpillarGenerator.gameObject;
+			this.SpawnGenerator(targetCell);
+			return;
+		}
+		this.SpawnConduitConnector(targetCell);
+	}
+
+	public void DestroyOrphanedConnectorBuilding()
+	{
+		KPrefabID building = this.GetConnectorBuilding();
+		if (building != null)
+		{
+			this.connectorRef.Set(null);
+			this.cachedGenerator = null;
+			this.cachedConduitDispenser = null;
+			GameScheduler.Instance.ScheduleNextFrame("Destroy Staterpillar Connector building", delegate(object o)
+			{
+				if (building != null)
+				{
+					Util.KDestroyGameObject(building.gameObject);
+				}
+			}, null, null);
+		}
+	}
+
+	public void EnableConnector()
+	{
+		if (this.conduitLayer == ObjectLayer.Wire)
+		{
+			this.EnableGenerator();
+			return;
+		}
+		this.EnableConduitConnector();
+	}
+
+	public bool IsConnectorBuildingSpawned()
+	{
+		return this.GetConnectorBuilding() != null;
+	}
+
+	public bool IsConnected()
+	{
+		if (this.conduitLayer == ObjectLayer.Wire)
+		{
+			return this.GetGenerator().CircuitID != ushort.MaxValue;
+		}
+		return this.GetConduitDispenser().IsConnected;
+	}
+
+	public KPrefabID GetConnectorBuilding()
+	{
+		return this.connectorRef.Get();
+	}
+
+	private void SpawnConduitConnector(int targetCell)
+	{
+		if (this.GetConduitDispenser() == null)
+		{
+			GameObject gameObject = this.connectorDef.Build(targetCell, Orientation.R180, null, this.dummyElement, base.gameObject.GetComponent<PrimaryElement>().Temperature, true, -1f);
+			this.connectorRef = new Ref<KPrefabID>(gameObject.GetComponent<KPrefabID>());
+			gameObject.SetActive(true);
+			gameObject.GetComponent<BuildingCellVisualizer>().enabled = false;
+		}
+	}
+
+	private void EnableConduitConnector()
+	{
+		ConduitDispenser conduitDispenser = this.GetConduitDispenser();
+		conduitDispenser.GetComponent<BuildingCellVisualizer>().enabled = true;
+		conduitDispenser.storage = base.GetComponent<Storage>();
+		conduitDispenser.SetOnState(true);
+	}
+
+	public ConduitDispenser GetConduitDispenser()
+	{
+		if (this.cachedConduitDispenser == null)
+		{
+			KPrefabID kprefabID = this.connectorRef.Get();
+			if (kprefabID != null)
+			{
+				this.cachedConduitDispenser = kprefabID.GetComponent<ConduitDispenser>();
+			}
+		}
+		return this.cachedConduitDispenser;
+	}
+
+	private void DestroyOrphanedConduitDispenserBuilding()
+	{
+		ConduitDispenser dispenser = this.GetConduitDispenser();
+		if (dispenser != null)
+		{
+			this.connectorRef.Set(null);
+			GameScheduler.Instance.ScheduleNextFrame("Destroy Staterpillar Dispenser", delegate(object o)
+			{
+				if (dispenser != null)
+				{
+					Util.KDestroyGameObject(dispenser.gameObject);
+				}
+			}, null, null);
+		}
+	}
+
+	private void SpawnGenerator(int targetCell)
+	{
+		StaterpillarGenerator generator = this.GetGenerator();
+		GameObject gameObject = null;
+		if (generator != null)
+		{
+			gameObject = generator.gameObject;
 		}
 		if (!gameObject)
 		{
-			gameObject = this.generatorDef.Build(targetCell, Orientation.R180, null, this.generatorElement, base.gameObject.GetComponent<PrimaryElement>().Temperature, true, -1f);
+			gameObject = this.connectorDef.Build(targetCell, Orientation.R180, null, this.dummyElement, base.gameObject.GetComponent<PrimaryElement>().Temperature, true, -1f);
 			StaterpillarGenerator component = gameObject.GetComponent<StaterpillarGenerator>();
 			component.parent = new Ref<Staterpillar>(this);
-			this.generatorRef = new Ref<StaterpillarGenerator>(component);
+			this.connectorRef = new Ref<KPrefabID>(component.GetComponent<KPrefabID>());
 			gameObject.SetActive(true);
 			gameObject.GetComponent<BuildingCellVisualizer>().enabled = false;
 			component.enabled = false;
@@ -46,23 +150,15 @@ public class Staterpillar : KMonoBehaviour
 			float num = 1f;
 			if (calories0to <= 0f)
 			{
-				num = (flag ? 0.1f : 0f);
+				num = (flag ? 0.1f : 0.025f);
 			}
 			else if (calories0to <= 0.3f)
 			{
-				num = 0.25f;
-			}
-			else if (calories0to <= 0.6f)
-			{
 				num = 0.5f;
 			}
-			else if (calories0to <= 0.9f)
+			else if (calories0to <= 0.5f)
 			{
 				num = 0.75f;
-			}
-			if (flag2)
-			{
-				num *= 0.2f;
 			}
 			if (num < 1f)
 			{
@@ -81,50 +177,40 @@ public class Staterpillar : KMonoBehaviour
 		}
 	}
 
-	public bool IsConnected()
-	{
-		return this.GetGenerator().CircuitID != ushort.MaxValue;
-	}
-
-	public bool IsNotConnected()
-	{
-		return !this.IsConnected();
-	}
-
-	public void EnableGenerator()
+	private void EnableGenerator()
 	{
 		StaterpillarGenerator generator = this.GetGenerator();
 		generator.enabled = true;
 		generator.GetComponent<BuildingCellVisualizer>().enabled = true;
 	}
 
-	public void DestroyGenerator()
-	{
-		StaterpillarGenerator generator = this.GetGenerator();
-		if (generator != null)
-		{
-			this.generatorRef.Set(null);
-			GameScheduler.Instance.ScheduleNextFrame("Destroy Staterpillar Generator", delegate(object o)
-			{
-				if (generator != null)
-				{
-					Util.KDestroyGameObject(generator.gameObject);
-				}
-			}, null, null);
-		}
-	}
-
 	public StaterpillarGenerator GetGenerator()
 	{
-		return this.generatorRef.Get();
+		if (this.cachedGenerator == null)
+		{
+			KPrefabID kprefabID = this.connectorRef.Get();
+			if (kprefabID != null)
+			{
+				this.cachedGenerator = kprefabID.GetComponent<StaterpillarGenerator>();
+			}
+		}
+		return this.cachedGenerator;
 	}
 
+	public ObjectLayer conduitLayer;
+
+	public string connectorDefId;
+
+	private IList<Tag> dummyElement;
+
+	private BuildingDef connectorDef;
+
 	[Serialize]
-	private Ref<StaterpillarGenerator> generatorRef = new Ref<StaterpillarGenerator>();
+	private Ref<KPrefabID> connectorRef = new Ref<KPrefabID>();
 
 	private AttributeModifier wildMod = new AttributeModifier(Db.Get().Attributes.GeneratorOutput.Id, -75f, BUILDINGS.PREFABS.STATERPILLARGENERATOR.MODIFIERS.WILD, false, false, true);
 
-	private IList<Tag> generatorElement;
+	private ConduitDispenser cachedConduitDispenser;
 
-	private BuildingDef generatorDef;
+	private StaterpillarGenerator cachedGenerator;
 }

@@ -12,162 +12,209 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Miscellaneous Room";
 
+				public static LocString DESCRIPTION = "An enclosed space with plenty of potential and no dedicated use.";
+
 				public static LocString EFFECT = "- No effect";
 
-				public static LocString TOOLTIP = "This area has walls and doors but no dedicated use.";
+				public static LocString TOOLTIP = "This area has walls and doors but no dedicated use";
 			}
 
 			public class LATRINE
 			{
 				public static LocString NAME = "Latrine";
 
+				public static LocString DESCRIPTION = "It's a step up from doing one's business in full view of the rest of the colony.\n\nUsing a toilet in an enclosed room will improve Duplicants' Morale.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Using a toilet in an enclosed room will improve Duplicants' Morale.";
+				public static LocString TOOLTIP = "Using a toilet in an enclosed room will improve Duplicants' Morale";
 			}
 
 			public class PLUMBEDBATHROOM
 			{
 				public static LocString NAME = "Washroom";
 
+				public static LocString DESCRIPTION = "A sanctuary of personal hygiene.\n\nUsing a fully plumbed Washroom will improve Duplicants' Morale.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Using a fully plumbed Washroom will improve Duplicants' Morale.";
+				public static LocString TOOLTIP = "Using a fully plumbed Washroom will improve Duplicants' Morale";
 			}
 
 			public class BARRACKS
 			{
 				public static LocString NAME = "Barracks";
 
+				public static LocString DESCRIPTION = "A basic communal sleeping area for up-and-coming colonies.\n\nSleeping in Barracks will improve Duplicants' Morale.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Sleeping in Barracks will improve Duplicants' Morale.";
+				public static LocString TOOLTIP = "Sleeping in Barracks will improve Duplicants' Morale";
 			}
 
 			public class BEDROOM
 			{
 				public static LocString NAME = "Bedroom";
 
+				public static LocString DESCRIPTION = "A room full of things that greatly enhance quality of sleep for occupants.\n\nSleeping in a Bedroom will improve Duplicants' Morale.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Sleeping in a private Bedroom will improve Duplicants' Morale.";
+				public static LocString TOOLTIP = "Sleeping in a Bedroom will improve Duplicants' Morale";
 			}
 
 			public class MESSHALL
 			{
 				public static LocString NAME = "Mess Hall";
 
+				public static LocString DESCRIPTION = "A simple dining room setup that's easy to improve upon.\n\nEating at a mess table in a Mess Hall will increase Duplicants' Morale.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Eating at a Mess Table in a Mess Hall will improve Duplicants' Morale.";
+				public static LocString TOOLTIP = "Eating at a Mess Table in a Mess Hall will improve Duplicants' Morale";
+			}
+
+			public class KITCHEN
+			{
+				public static LocString NAME = "Kitchen";
+
+				public static LocString DESCRIPTION = "A cooking area equipped to take meals to the next level.\n\nAdding ingredients from a spice grinder to foods cooked on an electric grill or gas range provides a variety of positive benefits.";
+
+				public static LocString EFFECT = "- Enables Spice Grinder use";
+
+				public static LocString TOOLTIP = "Using a Spice Grinder in a Kitchen adds benefits to foods cooked on Electric Grill or Gas Range";
 			}
 
 			public class GREATHALL
 			{
 				public static LocString NAME = "Great Hall";
 
+				public static LocString DESCRIPTION = "A great place to eat, with great decor and great company.\n\nEating in a Great Hall will significantly improve Duplicants' Morale.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Eating in a Great Hall will significantly improve Duplicants' Morale.";
+				public static LocString TOOLTIP = "Eating in a Great Hall will significantly improve Duplicants' Morale";
 			}
 
 			public class HOSPITAL
 			{
 				public static LocString NAME = "Hospital";
 
+				public static LocString DESCRIPTION = "A dedicated medical facility that helps minimize recovery time.\n\nSick Duplicants assigned to medical buildings located within a Hospital are also less likely to spread Disease.";
+
 				public static LocString EFFECT = "- Quarantine sick Duplicants";
 
-				public static LocString TOOLTIP = "Sick Duplicants assigned to medical buildings located within a Hospital are less likely to spread Disease.";
+				public static LocString TOOLTIP = "Sick Duplicants assigned to medical buildings located within a Hospital are less likely to spread Disease";
 			}
 
 			public class MASSAGE_CLINIC
 			{
 				public static LocString NAME = "Massage Clinic";
 
+				public static LocString DESCRIPTION = "A soothing space with a very relaxing ambience, especially when well-decorated.\n\nReceiving massages at a Massage Clinic will significantly improve Stress reduction.";
+
 				public static LocString EFFECT = "- Massage stress relief bonus";
 
-				public static LocString TOOLTIP = "Receiving massages at a Massage Clinic will significantly improve Stress reduction.";
+				public static LocString TOOLTIP = "Receiving massages at a Massage Clinic will significantly improve Stress reduction";
 			}
 
 			public class POWER_PLANT
 			{
 				public static LocString NAME = "Power Plant";
 
+				public static LocString DESCRIPTION = "The perfect place for Duplicants to flex their Electrical Engineering skills.\n\nGenerators built within a Power Plant can be tuned up using power control stations to improve their power production.";
+
 				public static LocString EFFECT = "- Enables Power Control Station use";
 
-				public static LocString TOOLTIP = "Generators built within a Power Plant can be tuned up using Power Control Stations to improve their power production.";
+				public static LocString TOOLTIP = "Generators built within a Power Plant can be tuned up using Power Control Stations to improve their power production";
 			}
 
 			public class MACHINE_SHOP
 			{
 				public static LocString NAME = "Machine Shop";
 
+				public static LocString DESCRIPTION = "It smells like elbow grease.\n\nDuplicants working in a Machine Shop can maintain buildings and increase their production speed.";
+
 				public static LocString EFFECT = "- Increased fabrication efficiency";
 
-				public static LocString TOOLTIP = "Duplicants working in a Machine Shop can maintain buildings and increase their production speed.";
+				public static LocString TOOLTIP = "Duplicants working in a Machine Shop can maintain buildings and increase their production speed";
 			}
 
 			public class FARM
 			{
 				public static LocString NAME = "Greenhouse";
 
+				public static LocString DESCRIPTION = "An enclosed agricultural space best utilized by Duplicants with Crop Tending skills.\n\nCrops grown within a Greenhouse can be tended with Farm Station fertilizer to increase their growth speed.";
+
 				public static LocString EFFECT = "- Enables Farm Station use";
 
-				public static LocString TOOLTIP = "Crops grown within a Greenhouse can be tended with Farm Station fertilizer to increase their growth speed.";
+				public static LocString TOOLTIP = "Crops grown within a Greenhouse can be tended with Farm Station fertilizer to increase their growth speed";
 			}
 
 			public class CREATUREPEN
 			{
 				public static LocString NAME = "Stable";
 
+				public static LocString DESCRIPTION = "Critters don't mind it here, as long as things don't get too overcrowded.\n\nStabled critters can be tended at a Grooming Station to hasten their domestication and increase their production.";
+
 				public static LocString EFFECT = "- Enables Grooming Station use";
 
-				public static LocString TOOLTIP = "Stabled critters can be tended at a Grooming Station to hasten their domestication and increase their production.";
+				public static LocString TOOLTIP = "Stabled critters can be tended at a Grooming Station to hasten their domestication and increase their production";
 			}
 
 			public class REC_ROOM
 			{
 				public static LocString NAME = "Recreation Room";
 
+				public static LocString DESCRIPTION = "Where Duplicants go to mingle with off-duty peers and indulge in a little R&R.\n\nScheduled Downtime will further improve Morale for Duplicants visiting a Recreation Room.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Scheduled Downtime will further improve Morale for Duplicants visiting a Recreation Room.";
+				public static LocString TOOLTIP = "Scheduled Downtime will further improve Morale for Duplicants visiting a Recreation Room";
 			}
 
 			public class PARK
 			{
 				public static LocString NAME = "Park";
 
+				public static LocString DESCRIPTION = "A little greenery goes a long way.\n\nPassing through natural spaces throughout the day will raise the Morale of Duplicants.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "Passing through natural spaces throughout the day will raise the Morale of Duplicants.";
+				public static LocString TOOLTIP = "Passing through natural spaces throughout the day will raise the Morale of Duplicants";
 			}
 
 			public class NATURERESERVE
 			{
 				public static LocString NAME = "Nature Reserve";
 
+				public static LocString DESCRIPTION = "A lot of greenery goes an even longer way.\n\nPassing through a Nature Reserve will grant higher Morale bonuses to Duplicants than a Park.";
+
 				public static LocString EFFECT = "- Morale bonus";
 
-				public static LocString TOOLTIP = "A Nature Reserve will grant higher Morale bonuses to Duplicants than a Park.";
+				public static LocString TOOLTIP = "A Nature Reserve will grant higher Morale bonuses to Duplicants than a Park";
 			}
 
 			public class PRIVATE_BEDROOM
 			{
 				public static LocString NAME = "Private Bedroom";
 
+				public static LocString DESCRIPTION = "A comfortable, roommate-free retreat where tired Duplicants can get uninterrupted rest.\n\nDuplicants recover even more stamina while sleeping in a Private Bedroom than in Barracks.";
+
 				public static LocString EFFECT = "- Stamina recovery bonus";
 
-				public static LocString TOOLTIP = "Duplicants recover even more stamina while sleeping in a Private Bedroom than in Barracks.";
+				public static LocString TOOLTIP = "Duplicants recover even more stamina while sleeping in a Private Bedroom than in Barracks";
 			}
 
 			public class PRIVATE_BATHROOM
 			{
 				public static LocString NAME = "Private Bathroom";
 
+				public static LocString DESCRIPTION = "Finally, a place to truly be alone with one's thoughts.\n\nDuplicants relieve even more stress when using the toilet in a Private Bathroom than in a Latrine.";
+
 				public static LocString EFFECT = "- Stress relief bonus";
 
-				public static LocString TOOLTIP = "Duplicants relieve even more stress when using the toilet in a Private Bathroom than in a Latrine.";
+				public static LocString TOOLTIP = "Duplicants relieve even more stress when using the toilet in a Private Bathroom than in a Latrine";
 			}
 		}
 
@@ -300,6 +347,27 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires a single Grooming Station";
 			}
 
+			public class SPICE_STATION
+			{
+				public static LocString NAME = "Spice Grinder";
+
+				public static LocString DESCRIPTION = "Requires a single Spice Grinder";
+			}
+
+			public class COOK_TOP
+			{
+				public static LocString NAME = "Electric Grill or Gas Range";
+
+				public static LocString DESCRIPTION = "Requires a single Electric Grill or Gas Range";
+			}
+
+			public class REFRIGERATOR
+			{
+				public static LocString NAME = "Refrigerator";
+
+				public static LocString DESCRIPTION = "Requires a single Refrigerator";
+			}
+
 			public class REC_BUILDING
 			{
 				public static LocString NAME = "Recreational building";
@@ -354,6 +422,13 @@ namespace STRINGS
 				public static LocString NAME = "Mess Table";
 
 				public static LocString DESCRIPTION = "Requires a single Mess Table";
+			}
+
+			public class NO_MESS_STATION
+			{
+				public static LocString NAME = "No Mess Table";
+
+				public static LocString DESCRIPTION = "Cannot contain a Mess Table";
 			}
 
 			public class MESS_STATION_MULTIPLE

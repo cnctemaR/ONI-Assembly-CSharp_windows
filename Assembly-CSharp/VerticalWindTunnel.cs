@@ -49,7 +49,7 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 			VerticalWindTunnelWorkable verticalWindTunnelWorkable = gameObject.AddOrGet<VerticalWindTunnelWorkable>();
 			int player_index = i;
 			VerticalWindTunnelWorkable verticalWindTunnelWorkable2 = verticalWindTunnelWorkable;
-			verticalWindTunnelWorkable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(verticalWindTunnelWorkable2.OnWorkableEventCB, new Action<Workable.WorkableEvent>(delegate(Workable.WorkableEvent ev)
+			verticalWindTunnelWorkable2.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(verticalWindTunnelWorkable2.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(delegate(Workable workable, Workable.WorkableEvent ev)
 			{
 				this.OnWorkableEvent(player_index, ev);
 			}));
@@ -201,7 +201,7 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 		Building component = base.GetComponent<Building>();
 		Vector3 position = base.transform.GetPosition();
 		CellOffset cellOffset = (isTop ? new CellOffset(0, component.Def.HeightInCells + 1) : new CellOffset(0, 0));
-		SimMessages.AddRemoveSubstance(Grid.OffsetCell(Grid.XYToCell((int)position.x, (int)position.y), cellOffset), (int)info.removedElemIdx, CellEventLogger.Instance.ElementEmitted, info.mass, info.temperature, info.diseaseIdx, info.diseaseCount, true, -1);
+		SimMessages.AddRemoveSubstance(Grid.OffsetCell(Grid.XYToCell((int)position.x, (int)position.y), cellOffset), info.removedElemIdx, CellEventLogger.Instance.ElementEmitted, info.mass, info.temperature, info.diseaseIdx, info.diseaseCount, true, -1);
 	}
 
 	public void OnWorkableEvent(int player, Workable.WorkableEvent ev)
@@ -214,7 +214,7 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 		{
 			this.players.Remove(player);
 		}
-		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
+		base.smi.sm.playerCount.Set(this.players.Count, base.smi, false);
 	}
 
 	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)

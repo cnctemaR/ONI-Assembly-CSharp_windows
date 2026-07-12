@@ -9,14 +9,28 @@ namespace Klei.AI
 	[DebuggerDisplay("{Id}")]
 	public class Effect : Modifier
 	{
-		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emote_anim = null, float emote_cooldown = 0f, string stompGroup = null, string custom_icon = "")
+		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, Emote emote = null, float emote_cooldown = -1f, float max_initial_delay = 0f, string stompGroup = null, string custom_icon = "")
 			: base(id, name, description)
 		{
 			this.duration = duration;
 			this.showInUI = show_in_ui;
 			this.triggerFloatingText = trigger_floating_text;
 			this.isBad = is_bad;
-			this.emoteAnim = emote_anim;
+			this.emote = emote;
+			this.emoteCooldown = emote_cooldown;
+			this.maxInitialDelay = max_initial_delay;
+			this.stompGroup = stompGroup;
+			this.customIcon = custom_icon;
+		}
+
+		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emoteAnim, float emote_cooldown = -1f, string stompGroup = null, string custom_icon = "")
+			: base(id, name, description)
+		{
+			this.duration = duration;
+			this.showInUI = show_in_ui;
+			this.triggerFloatingText = trigger_floating_text;
+			this.isBad = is_bad;
+			this.emoteAnim = emoteAnim;
 			this.emoteCooldown = emote_cooldown;
 			this.stompGroup = stompGroup;
 			this.customIcon = custom_icon;
@@ -30,6 +44,12 @@ namespace Klei.AI
 		public override void RemoveFrom(Attributes attributes)
 		{
 			base.RemoveFrom(attributes);
+		}
+
+		public void SetEmote(Emote emote, float emoteCooldown = -1f)
+		{
+			this.emote = emote;
+			this.emoteCooldown = emoteCooldown;
 		}
 
 		public void AddEmotePrecondition(Reactable.ReactablePrecondition precon)
@@ -105,7 +125,11 @@ namespace Klei.AI
 
 		public string emoteAnim;
 
+		public Emote emote;
+
 		public float emoteCooldown;
+
+		public float maxInitialDelay;
 
 		public List<Reactable.ReactablePrecondition> emotePreconditions;
 

@@ -46,9 +46,9 @@ public class GeneticAnalysisStationConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
-		manualDeliveryKG.requestedItemTag = GameTags.UnidentifiedSeed;
+		manualDeliveryKG.RequestedItemTag = GameTags.UnidentifiedSeed;
 		manualDeliveryKG.refillMass = 1.1f;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.capacity = 5f;
 	}
 

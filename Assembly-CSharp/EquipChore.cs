@@ -6,8 +6,8 @@ public class EquipChore : Chore<EquipChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.Equip, equippable, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new EquipChore.StatesInstance(this);
-		base.smi.sm.equippable_source.Set(equippable.gameObject, base.smi);
-		base.smi.sm.requested_units.Set(1f, base.smi);
+		base.smi.sm.equippable_source.Set(equippable.gameObject, base.smi, false);
+		base.smi.sm.requested_units.Set(1f, base.smi, false);
 		this.showAvailabilityInHoverText = false;
 		Prioritizable.AddRef(equippable.gameObject);
 		Game.Instance.Trigger(1980521255, equippable.gameObject);
@@ -37,7 +37,7 @@ public class EquipChore : Chore<EquipChore.StatesInstance>
 			Debug.LogError("EquipChore null smi.sm.equippable_source");
 			return;
 		}
-		base.smi.sm.equipper.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.equipper.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 

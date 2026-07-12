@@ -182,8 +182,7 @@ public class KAnimBatchGroup
 			array[num + 5] = num2 + 3;
 		}
 		Vector3[] array2 = new Vector3[numQuads * 4];
-		Vector2[] array3 = new Vector2[numQuads * 4];
-		Vector4[] array4 = new Vector4[numQuads * 4];
+		Vector3[] array3 = new Vector3[numQuads * 4];
 		for (int j = 0; j < numQuads; j++)
 		{
 			int num3 = j * 4;
@@ -191,20 +190,16 @@ public class KAnimBatchGroup
 			array2[num3 + 1] = Vector3.zero;
 			array2[num3 + 2] = Vector3.zero;
 			array2[num3 + 3] = Vector3.zero;
-			Vector2 vector = new Vector2((float)(j / this.data.maxVisibleSymbols), (float)(this.data.maxVisibleSymbols - j % this.data.maxVisibleSymbols - 1));
-			array3[num3] = vector;
-			array3[num3 + 1] = vector;
-			array3[num3 + 2] = vector;
-			array3[num3 + 3] = vector;
-			array4[num3] = new Vector4(0f, (float)num3, (float)j);
-			array4[num3 + 1] = new Vector4(1f, (float)num3, (float)j);
-			array4[num3 + 2] = new Vector4(2f, (float)num3, (float)j);
-			array4[num3 + 3] = new Vector4(3f, (float)num3, (float)j);
+			int num4 = j / this.data.maxVisibleSymbols;
+			int num5 = this.data.maxVisibleSymbols - j % this.data.maxVisibleSymbols - 1;
+			array3[num3] = new Vector3((float)num4, (float)num5, 0f);
+			array3[num3 + 1] = new Vector3((float)num4, (float)num5, 1f);
+			array3[num3 + 2] = new Vector3((float)num4, (float)num5, 2f);
+			array3[num3 + 3] = new Vector3((float)num4, (float)num5, 3f);
 		}
 		mesh.name = "BatchGroup:" + this.batchID.ToString();
 		mesh.vertices = array2;
-		mesh.SetUVs(0, new List<Vector2>(array3));
-		mesh.SetUVs(1, new List<Vector4>(array4));
+		mesh.SetUVs(0, array3);
 		mesh.SetIndices(array, MeshTopology.Triangles, 0);
 		mesh.bounds = new Bounds(Vector3.zero, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue));
 		return mesh;

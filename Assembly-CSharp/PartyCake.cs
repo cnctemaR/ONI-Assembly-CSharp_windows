@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class PartyCake : GameStateMachine<PartyCake, PartyCake.StatesInstance, IStateMachineTarget, PartyCake.Def>
 {
@@ -16,7 +17,7 @@ public class PartyCake : GameStateMachine<PartyCake, PartyCake.StatesInstance, I
 
 	private static Chore CreateFetchChore(PartyCake.StatesInstance smi)
 	{
-		return new FetchChore(Db.Get().ChoreTypes.FarmFetch, smi.GetComponent<Storage>(), 10f, new Tag[] { "MushBar".ToTag() }, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.Functional, 0);
+		return new FetchChore(Db.Get().ChoreTypes.FarmFetch, smi.GetComponent<Storage>(), 10f, new HashSet<Tag> { "MushBar".ToTag() }, FetchChore.MatchCriteria.MatchID, Tag.Invalid, null, null, true, null, null, null, Operational.State.Functional, 0);
 	}
 
 	private static Chore CreateWorkChore(PartyCake.StatesInstance smi)

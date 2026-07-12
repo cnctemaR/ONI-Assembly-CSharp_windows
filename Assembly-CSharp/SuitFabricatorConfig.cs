@@ -133,12 +133,14 @@ public class SuitFabricatorConfig : IBuildingConfig
 		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SuitFabricator", array9, array10), array9, array10)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
-			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC,
-			nameDisplay = ComplexRecipe.RecipeNameDisplay.ResultWithIngredient,
+			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.REPAIR_WORN_DESC,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom,
 			fabricators = new List<Tag> { "SuitFabricator" },
 			requiredTech = Db.Get().TechItems.atmoSuit.parentTechId,
 			sortOrder = 2
 		};
+		AtmoSuitConfig.recipe.customName = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.REPAIR_WORN_RECIPE_NAME;
+		AtmoSuitConfig.recipe.ProductHasFacade = true;
 		ComplexRecipe.RecipeElement[] array11 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(SimHashes.Steel.ToString(), 200f),

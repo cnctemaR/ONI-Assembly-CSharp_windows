@@ -11,7 +11,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		base.OnPrefabInit();
 		this.fetches = new List<FetchOrder2>();
 		TreeFilterable component = base.GetComponent<TreeFilterable>();
-		component.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(component.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+		component.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(component.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 		base.GetComponent<Storage>().SetOffsets(this.deliveryOffsets);
 		Prioritizable.AddRef(base.gameObject);
 		if (CreatureDeliveryPoint.capacityStatusItem == null)
@@ -54,7 +54,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		this.RebalanceFetches();
 	}
 
-	private void OnFilterChanged(Tag[] tags)
+	private void OnFilterChanged(HashSet<Tag> tags)
 	{
 		this.ClearFetches();
 		this.RebalanceFetches();
@@ -93,7 +93,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	private void RebalanceFetches()
 	{
-		Tag[] tags = base.GetComponent<TreeFilterable>().GetTags();
+		HashSet<Tag> tags = base.GetComponent<TreeFilterable>().GetTags();
 		ChoreType creatureFetch = Db.Get().ChoreTypes.CreatureFetch;
 		Storage component = base.GetComponent<Storage>();
 		int num = this.creatureLimit - this.storedCreatureCount;
@@ -120,7 +120,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		}
 		if (num6 == 0 && this.fetches.Count < num)
 		{
-			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, this.requiredFetchTags, null, component, 1f, FetchOrder2.OperationalRequirement.Operational, 0);
+			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, FetchChore.MatchCriteria.MatchID, GameTags.Creatures.Deliverable, null, component, 1f, Operational.State.Operational, 0);
 			fetchOrder.Submit(new Action<FetchOrder2, Pickupable>(this.OnFetchComplete), false, new Action<FetchOrder2, Pickupable>(this.OnFetchBegun));
 			this.fetches.Add(fetchOrder);
 			num3++;
@@ -163,7 +163,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		base.smi.StopSM("OnCleanUp");
 		TreeFilterable component = base.GetComponent<TreeFilterable>();
-		component.OnFilterChanged = (Action<Tag[]>)Delegate.Remove(component.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+		component.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Remove(component.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 		base.OnCleanUp();
 	}
 
@@ -247,8 +247,6 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		component.RefreshCreatureCount(data);
 	});
-
-	private Tag[] requiredFetchTags = new Tag[] { GameTags.Creatures.Deliverable };
 
 	public class SMInstance : GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.GameInstance
 	{

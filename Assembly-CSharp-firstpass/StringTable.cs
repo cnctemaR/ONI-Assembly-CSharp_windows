@@ -55,9 +55,19 @@ public class StringTable
 		}
 	}
 
+	public void VisitEntries(StringTable.EntryVisitor visit)
+	{
+		foreach (KeyValuePair<int, StringEntry> keyValuePair in this.Entries)
+		{
+			visit(this.KeyNames[keyValuePair.Key], keyValuePair.Value.String);
+		}
+	}
+
 	private Dictionary<int, string> KeyNames = new Dictionary<int, string>();
 
 	private Dictionary<int, StringTable> SubTables = new Dictionary<int, StringTable>();
 
 	private Dictionary<int, StringEntry> Entries = new Dictionary<int, StringEntry>();
+
+	public delegate void EntryVisitor(string id, string value);
 }

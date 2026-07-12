@@ -13,12 +13,12 @@ namespace FMODUnity
 			}
 		}
 
-		public override void DeclareUnityMappings(Settings settings)
+		public override void DeclareRuntimePlatforms(Settings settings)
 		{
 		}
 
 		[SerializeField]
-		public string displayName;
+		private string displayName;
 
 		[SerializeField]
 		private Legacy.Platform legacyIdentifier;

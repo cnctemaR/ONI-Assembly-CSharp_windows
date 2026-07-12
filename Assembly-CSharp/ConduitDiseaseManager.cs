@@ -5,7 +5,7 @@ using Klei.AI.DiseaseGrowthRules;
 
 public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data>
 {
-	private static ElemGrowthInfo GetGrowthInfo(byte disease_idx, byte elem_idx)
+	private static ElemGrowthInfo GetGrowthInfo(byte disease_idx, ushort elem_idx)
 	{
 		ElemGrowthInfo elemGrowthInfo;
 		if (disease_idx != 255)
@@ -27,8 +27,8 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 
 	public HandleVector<int>.Handle Allocate(HandleVector<int>.Handle temperature_handle, ref ConduitFlow.ConduitContents contents)
 	{
-		byte b = (byte)ElementLoader.GetElementIndex(contents.element);
-		ConduitDiseaseManager.Data data = new ConduitDiseaseManager.Data(temperature_handle, b, contents.mass, contents.diseaseIdx, contents.diseaseCount);
+		ushort elementIndex = ElementLoader.GetElementIndex(contents.element);
+		ConduitDiseaseManager.Data data = new ConduitDiseaseManager.Data(temperature_handle, elementIndex, contents.mass, contents.diseaseIdx, contents.diseaseCount);
 		return base.Allocate(data);
 	}
 
@@ -39,8 +39,8 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 		if (contents.diseaseIdx != data.diseaseIdx)
 		{
 			data.diseaseIdx = contents.diseaseIdx;
-			byte b = (byte)ElementLoader.GetElementIndex(contents.element);
-			data.growthInfo = ConduitDiseaseManager.GetGrowthInfo(contents.diseaseIdx, b);
+			ushort elementIndex = ElementLoader.GetElementIndex(contents.element);
+			data.growthInfo = ConduitDiseaseManager.GetGrowthInfo(contents.diseaseIdx, elementIndex);
 		}
 		base.SetData(handle, data);
 	}
@@ -98,7 +98,7 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 
 	public struct Data
 	{
-		public Data(HandleVector<int>.Handle temperature_handle, byte elem_idx, float mass, byte disease_idx, int disease_count)
+		public Data(HandleVector<int>.Handle temperature_handle, ushort elem_idx, float mass, byte disease_idx, int disease_count)
 		{
 			this.diseaseIdx = disease_idx;
 			this.elemIdx = elem_idx;
@@ -111,7 +111,7 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 
 		public byte diseaseIdx;
 
-		public byte elemIdx;
+		public ushort elemIdx;
 
 		public int diseaseCount;
 

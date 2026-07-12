@@ -47,12 +47,12 @@ public class FoodFightChore : Chore<FoodFightChore.StatesInstance>
 			global::Debug.LogError("FOODFIGHTCHORE null smi.sm.ediblesource");
 			return;
 		}
-		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi);
+		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi, false);
 		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs");
 		float num = 0.5f;
 		KCrashReporter.Assert(num > 0f, "FoodFightChore is requesting an invalid amount of food");
-		base.smi.sm.requestedfoodunits.Set(num, base.smi);
-		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.requestedfoodunits.Set(num, base.smi, false);
+		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 	}
 
@@ -71,7 +71,7 @@ public class FoodFightChore : Chore<FoodFightChore.StatesInstance>
 		public StatesInstance(FoodFightChore master, GameObject locator)
 			: base(master)
 		{
-			base.sm.locator.Set(locator, base.smi);
+			base.sm.locator.Set(locator, base.smi, false);
 		}
 
 		public void UpdateAttackTarget()

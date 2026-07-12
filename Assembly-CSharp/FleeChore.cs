@@ -8,9 +8,9 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new FleeChore.StatesInstance(this);
-		base.smi.sm.self.Set(this.gameObject, base.smi);
+		base.smi.sm.self.Set(this.gameObject, base.smi, false);
 		this.nav = this.gameObject.GetComponent<Navigator>();
-		base.smi.sm.fleeFromTarget.Set(enemy, base.smi);
+		base.smi.sm.fleeFromTarget.Set(enemy, base.smi, false);
 	}
 
 	private bool isInFavoredDirection(int cell, int fleeFromCell)
@@ -84,7 +84,7 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 					smi.GoTo(this.cower);
 					return;
 				}
-				smi.sm.fleeToTarget.Set(smi.master.CreateLocator(Grid.CellToPos(num6)), smi);
+				smi.sm.fleeToTarget.Set(smi.master.CreateLocator(Grid.CellToPos(num6)), smi, false);
 				smi.sm.fleeToTarget.Get(smi).name = "FleeLocator";
 				if (num6 == num)
 				{

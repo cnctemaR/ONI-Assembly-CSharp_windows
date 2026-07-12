@@ -565,8 +565,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	private void DropExcessIngredients(Storage storage)
 	{
-		TagBits tagBits = default(TagBits);
-		tagBits.Or(ref this.keepAdditionalTags);
+		HashSet<Tag> hashSet = new HashSet<Tag>();
+		if (this.keepAdditionalTag != Tag.Invalid)
+		{
+			hashSet.Add(this.keepAdditionalTag);
+		}
 		for (int i = 0; i < this.recipe_list.Length; i++)
 		{
 			ComplexRecipe complexRecipe = this.recipe_list[i];
@@ -574,7 +577,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			{
 				foreach (ComplexRecipe.RecipeElement recipeElement in complexRecipe.ingredients)
 				{
-					tagBits.SetTag(recipeElement.material);
+					hashSet.Add(recipeElement.material);
 				}
 			}
 		}
@@ -587,7 +590,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				if (!(component == null) && (!this.keepExcessLiquids || !component.Element.IsLiquid))
 				{
 					KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
-					if (component2 && !component2.HasAnyTags(ref tagBits))
+					if (component2 && !hashSet.Contains(component2.PrefabID()))
 					{
 						storage.Drop(gameObject, true);
 					}
@@ -824,9 +827,8 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
 				FetchList2 fetchList2 = fetchList;
 				Tag key = keyValuePair.Key;
-				Tag[] array = null;
 				float value = keyValuePair.Value;
-				fetchList2.Add(key, array, this.ForbiddenTags, value, FetchOrder2.OperationalRequirement.None);
+				fetchList2.Add(key, this.ForbiddenTags, value, Operational.State.None);
 				fetchList.ShowStatusItem = false;
 				fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 				this.fetchListList.Add(fetchList);
@@ -919,10 +921,9 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			{
 				foreach (FetchOrder2 fetchOrder in fetchList.FetchOrders)
 				{
-					Tag[] array = fetchOrder.Tags;
-					for (int i = 0; i < array.Length; i++)
+					foreach (Tag tag in fetchOrder.Tags)
 					{
-						GameObject prefab = Assets.GetPrefab(array[i]);
+						GameObject prefab = Assets.GetPrefab(tag);
 						if (prefab != null && prefab.GetComponent<PlantableSeed>() != null)
 						{
 							fetchList.Cancel("MutantSeedTagChanged");
@@ -936,14 +937,13 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				this.fetchListList.Remove(fetchList2);
 				foreach (FetchOrder2 fetchOrder2 in fetchList2.FetchOrders)
 				{
-					foreach (Tag tag in fetchOrder2.Tags)
+					foreach (Tag tag2 in fetchOrder2.Tags)
 					{
 						FetchList2 fetchList3 = new FetchList2(this.inStorage, byHash);
 						FetchList2 fetchList4 = fetchList3;
-						Tag tag2 = tag;
-						Tag[] array2 = null;
+						Tag tag3 = tag2;
 						float totalAmount = fetchOrder2.TotalAmount;
-						fetchList4.Add(tag2, array2, this.ForbiddenTags, totalAmount, FetchOrder2.OperationalRequirement.None);
+						fetchList4.Add(tag3, this.ForbiddenTags, totalAmount, Operational.State.None);
 						fetchList3.ShowStatusItem = false;
 						fetchList3.Submit(new global::System.Action(this.OnFetchComplete), false);
 						this.fetchListList.Add(fetchList3);
@@ -961,6 +961,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		diseaseInfo.idx = 0;
 		float num = 0f;
 		float num2 = 0f;
+		string text = null;
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
 			num2 += recipeElement.amount;
@@ -969,6 +970,14 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		foreach (ComplexRecipe.RecipeElement recipeElement2 in recipe.ingredients)
 		{
 			float num3 = recipeElement2.amount / num2;
+			if (recipe.ProductHasFacade && text.IsNullOrWhiteSpace())
+			{
+				RepairableEquipment component = this.buildStorage.FindFirst(recipeElement2.material).GetComponent<RepairableEquipment>();
+				if (component != null)
+				{
+					text = component.facadeID;
+				}
+			}
 			if (recipeElement2.inheritElement)
 			{
 				element = this.buildStorage.FindFirst(recipeElement2.material).GetComponent<PrimaryElement>().Element;
@@ -992,10 +1001,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			GameObject gameObject = this.buildStorage.FindFirst(recipeElement3.material);
 			if (gameObject != null)
 			{
-				Edible component = gameObject.GetComponent<Edible>();
-				if (component)
+				Edible component2 = gameObject.GetComponent<Edible>();
+				if (component2)
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.CRAFTED_USED, "{0}", component.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component2.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.CRAFTED_USED, "{0}", component2.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
 				}
 			}
 			ComplexRecipe.RecipeElement.TemperatureOperation temperatureOperation = recipeElement3.temperatureOperation;
@@ -1015,22 +1024,30 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				GameObject gameObject2 = GameUtil.KInstantiate(Assets.GetPrefab(recipeElement3.material), Grid.SceneLayer.Ore, null, 0);
 				int num6 = Grid.PosToCell(this);
 				gameObject2.transform.SetPosition(Grid.CellToPosCCC(num6, Grid.SceneLayer.Ore) + this.outputOffset);
-				PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
-				component2.Units = recipeElement3.amount;
-				component2.Temperature = ((recipeElement3.temperatureOperation == ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature) ? num : this.heatedTemperature);
+				PrimaryElement component3 = gameObject2.GetComponent<PrimaryElement>();
+				component3.Units = recipeElement3.amount;
+				component3.Temperature = ((recipeElement3.temperatureOperation == ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature) ? num : this.heatedTemperature);
 				if (element != null)
 				{
-					component2.SetElement(element.id, false);
+					component3.SetElement(element.id, false);
+				}
+				if (recipe.ProductHasFacade && !text.IsNullOrWhiteSpace())
+				{
+					Equippable component4 = gameObject2.GetComponent<Equippable>();
+					if (component4 != null)
+					{
+						EquippableFacade.AddFacadeToEquippable(component4, text);
+					}
 				}
 				gameObject2.SetActive(true);
 				float num7 = recipeElement3.amount / recipe.TotalResultUnits();
-				component2.AddDisease(diseaseInfo.idx, Mathf.RoundToInt((float)diseaseInfo.count * num7), "ComplexFabricator.CompleteOrder");
+				component3.AddDisease(diseaseInfo.idx, Mathf.RoundToInt((float)diseaseInfo.count * num7), "ComplexFabricator.CompleteOrder");
 				if (!recipeElement3.facadeID.IsNullOrWhiteSpace())
 				{
-					Equippable component3 = gameObject2.GetComponent<Equippable>();
-					if (component3 != null)
+					Equippable component5 = gameObject2.GetComponent<Equippable>();
+					if (component5 != null)
 					{
-						EquippableFacade.AddFacadeToEquippable(component3, recipeElement3.facadeID);
+						EquippableFacade.AddFacadeToEquippable(component5, recipeElement3.facadeID);
 					}
 				}
 				gameObject2.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
@@ -1042,19 +1059,19 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			}
 			if (list.Count > 0)
 			{
-				SymbolOverrideController component4 = base.GetComponent<SymbolOverrideController>();
-				if (component4 != null)
+				SymbolOverrideController component6 = base.GetComponent<SymbolOverrideController>();
+				if (component6 != null)
 				{
 					KAnim.Build build = list[0].GetComponent<KBatchedAnimController>().AnimFiles[0].GetData().build;
 					KAnim.Build.Symbol symbol = build.GetSymbol(build.name);
 					if (symbol != null)
 					{
-						component4.TryRemoveSymbolOverride("output_tracker", 0);
-						component4.AddSymbolOverride("output_tracker", symbol, 0);
+						component6.TryRemoveSymbolOverride("output_tracker", 0);
+						component6.AddSymbolOverride("output_tracker", symbol, 0);
 					}
 					else
 					{
-						global::Debug.LogWarning(component4.name + " is missing symbol " + build.name);
+						global::Debug.LogWarning(component6.name + " is missing symbol " + build.name);
 					}
 				}
 			}
@@ -1157,7 +1174,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	public bool keepExcessLiquids;
 
-	public TagBits keepAdditionalTags;
+	public Tag keepAdditionalTag = Tag.Invalid;
 
 	public static int MAX_QUEUE_SIZE = 99;
 

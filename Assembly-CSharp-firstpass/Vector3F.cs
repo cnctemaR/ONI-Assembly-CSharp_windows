@@ -1,10 +1,38 @@
 ﻿using System;
 using System.Diagnostics;
 using UnityEngine;
+using YamlDotNet.Serialization;
 
 [DebuggerDisplay("{x}, {y}, {z}")]
 public struct Vector3F
 {
+	[YamlIgnore]
+	public float sqrMagnitude
+	{
+		get
+		{
+			return Mathf.Pow(this.x, 2f) + Mathf.Pow(this.y, 2f) + Mathf.Pow(this.z, 2f);
+		}
+	}
+
+	[YamlIgnore]
+	public float magnitude
+	{
+		get
+		{
+			return Mathf.Sqrt(this.sqrMagnitude);
+		}
+	}
+
+	[YamlIgnore]
+	public Vector3F normalized
+	{
+		get
+		{
+			return this / this.magnitude;
+		}
+	}
+
 	public Vector3F(float _x, float _y, float _z)
 	{
 		this.x = _x;

@@ -124,7 +124,7 @@ public class Gantry : Switch
 			this.logic = base.GetComponent<LogicPorts>();
 			base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 			base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
-			base.smi.sm.should_extend.Set(true, base.smi);
+			base.smi.sm.should_extend.Set(true, base.smi, false);
 		}
 
 		public bool IsAutomated()
@@ -176,10 +176,10 @@ public class Gantry : Switch
 			}
 			if (this.IsAutomated())
 			{
-				base.smi.sm.should_extend.Set(this.logic_on, base.smi);
+				base.smi.sm.should_extend.Set(this.logic_on, base.smi, false);
 				return;
 			}
-			base.smi.sm.should_extend.Set(this.manual_on, base.smi);
+			base.smi.sm.should_extend.Set(this.manual_on, base.smi, false);
 		}
 
 		private Operational operational;

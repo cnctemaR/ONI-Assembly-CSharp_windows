@@ -14,6 +14,12 @@ public class Activatable : Workable, ISidescreenButtonControl
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.activatedFlag = new Operational.Flag("activated", this.ActivationFlagType);
+	}
+
 	protected override void OnSpawn()
 	{
 		this.UpdateFlag();
@@ -26,6 +32,10 @@ public class Activatable : Workable, ISidescreenButtonControl
 	protected override void OnCompleteWork(Worker worker)
 	{
 		this.activated = true;
+		if (this.onActivate != null)
+		{
+			this.onActivate();
+		}
 		this.awaitingActivation = false;
 		this.UpdateFlag();
 		Prioritizable.RemoveRef(base.gameObject);
@@ -37,6 +47,10 @@ public class Activatable : Workable, ISidescreenButtonControl
 		base.GetComponent<Operational>().SetFlag(this.activatedFlag, this.activated);
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.DuplicantActivationRequired, !this.activated, null);
 		base.Trigger(-1909216579, this.IsActivated);
+		if (this.IsActivated && base.GetComponent<KSelectable>().IsSelected)
+		{
+			DetailsScreen.Instance.DeactivateSideContent();
+		}
 	}
 
 	private void CreateChore()
@@ -109,7 +123,9 @@ public class Activatable : Workable, ISidescreenButtonControl
 		return 20;
 	}
 
-	private Operational.Flag activatedFlag = new Operational.Flag("activated", Operational.Flag.Type.Requirement);
+	public Operational.Flag.Type ActivationFlagType;
+
+	private Operational.Flag activatedFlag;
 
 	[Serialize]
 	private bool activated;
@@ -120,4 +136,6 @@ public class Activatable : Workable, ISidescreenButtonControl
 	private Guid statusItem;
 
 	private Chore activateChore;
+
+	public global::System.Action onActivate;
 }

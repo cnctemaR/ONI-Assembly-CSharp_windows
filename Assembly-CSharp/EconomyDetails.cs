@@ -407,8 +407,8 @@ public class EconomyDetails
 			{
 				foreach (ElementConverter.ConsumedElement consumedElement in component2.consumedElements)
 				{
-					EconomyDetails.Resource resource = this.CreateResource(consumedElement.tag, this.massResourceType);
-					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource, -consumedElement.massConsumptionRate));
+					EconomyDetails.Resource resource = this.CreateResource(consumedElement.Tag, this.massResourceType);
+					transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource, -consumedElement.MassConsumptionRate));
 				}
 				if (component2.outputElements != null)
 				{

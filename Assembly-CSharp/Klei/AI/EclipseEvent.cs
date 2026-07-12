@@ -8,8 +8,8 @@ namespace Klei.AI
 		public EclipseEvent()
 			: base("EclipseEvent", 0, 0)
 		{
-			this.popupTitle = GAMEPLAY_EVENTS.EVENT_TYPES.ECLIPSE.NAME;
-			this.popupDescription = GAMEPLAY_EVENTS.EVENT_TYPES.ECLIPSE.DESCRIPTION;
+			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.ECLIPSE.NAME;
+			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.ECLIPSE.DESCRIPTION;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -36,7 +36,7 @@ namespace Klei.AI
 				default_state = this.planning;
 				base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 				this.planning.GoTo(this.eclipse);
-				this.eclipse.ToggleNotification((EclipseEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardEventNotification(this.GenerateEventPopupData(smi))).Enter(delegate(EclipseEvent.StatesInstance smi)
+				this.eclipse.ToggleNotification((EclipseEvent.StatesInstance smi) => EventInfoScreen.CreateNotification(this.GenerateEventPopupData(smi), null)).Enter(delegate(EclipseEvent.StatesInstance smi)
 				{
 					TimeOfDay.Instance.SetEclipse(true);
 				}).Exit(delegate(EclipseEvent.StatesInstance smi)
@@ -47,9 +47,9 @@ namespace Klei.AI
 				this.finished.ReturnSuccess();
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(EclipseEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(EclipseEvent.StatesInstance smi)
 			{
-				return new GameplayEventPopupData(smi.gameplayEvent)
+				return new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName)
 				{
 					location = GAMEPLAY_EVENTS.LOCATIONS.SUN,
 					whenDescription = GAMEPLAY_EVENTS.TIMES.NOW

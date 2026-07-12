@@ -214,7 +214,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 			num = 0f;
 		}
 		Extents extents = payload.GetExtents();
-		byte idx = payload.primaryElement.Element.idx;
+		ushort idx = payload.primaryElement.Element.idx;
 		SimMessages.ModifyBuildingHeatExchange(payload.simHandleCopy, extents, num, internalTemperature, def.ThermalConductivity, num2, operatingKilowatts, idx);
 	}
 
@@ -418,8 +418,8 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		float massForTemperatureModification = def.MassForTemperatureModification;
 		float operatingKilowatts = payload.OperatingKilowatts;
 		Extents extents = payload.GetExtents();
-		byte b = (byte)ElementLoader.elements.IndexOf(primaryElement.Element);
-		SimMessages.AddBuildingHeatExchange(extents, massForTemperatureModification, internalTemperature, def.ThermalConductivity, operatingKilowatts, b, handle2.index);
+		ushort idx = primaryElement.Element.idx;
+		SimMessages.AddBuildingHeatExchange(extents, massForTemperatureModification, internalTemperature, def.ThermalConductivity, operatingKilowatts, idx, handle2.index);
 		header.simHandle = payload.simHandleCopy;
 		base.SetData(handle, header, ref payload);
 	}

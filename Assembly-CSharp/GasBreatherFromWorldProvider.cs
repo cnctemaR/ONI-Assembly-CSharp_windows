@@ -9,6 +9,7 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 		this.safeCellMonitor = new SafeCellMonitor.Instance(oxygen_breather);
 		this.safeCellMonitor.StartSM();
 		this.oxygenBreather = oxygen_breather;
+		this.nav = this.oxygenBreather.GetComponent<Navigator>();
 	}
 
 	public void OnClearOxygenBreather(OxygenBreather oxygen_breather)
@@ -19,7 +20,7 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 
 	public bool ShouldEmitCO2()
 	{
-		return true;
+		return this.nav.CurrentNavType != NavType.Tube;
 	}
 
 	public bool ShouldStoreCO2()
@@ -29,13 +30,16 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 
 	public bool ConsumeGas(OxygenBreather oxygen_breather, float gas_consumed)
 	{
-		SimHashes getBreathableElement = oxygen_breather.GetBreathableElement;
-		if (getBreathableElement == SimHashes.Vacuum)
+		if (this.nav.CurrentNavType != NavType.Tube)
 		{
-			return false;
+			SimHashes getBreathableElement = oxygen_breather.GetBreathableElement;
+			if (getBreathableElement == SimHashes.Vacuum)
+			{
+				return false;
+			}
+			HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), this, "GasBreatherFromWorldProvider");
+			SimMessages.ConsumeMass(oxygen_breather.mouthCell, getBreathableElement, gas_consumed, 3, handle.index);
 		}
-		HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(GasBreatherFromWorldProvider.OnSimConsumeCallback), this, "GasBreatherFromWorldProvider");
-		SimMessages.ConsumeMass(oxygen_breather.mouthCell, getBreathableElement, gas_consumed, 3, handle.index);
 		return true;
 	}
 
@@ -65,4 +69,6 @@ public class GasBreatherFromWorldProvider : OxygenBreather.IGasProvider
 	private SafeCellMonitor.Instance safeCellMonitor;
 
 	private OxygenBreather oxygenBreather;
+
+	private Navigator nav;
 }

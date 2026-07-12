@@ -4,6 +4,16 @@ using UnityEngine;
 
 public abstract class Reactable
 {
+	public bool IsValid
+	{
+		get
+		{
+			return this.partitionerEntry.IsValid();
+		}
+	}
+
+	public float creationTime { get; private set; }
+
 	public bool IsReacting
 	{
 		get
@@ -12,21 +22,34 @@ public abstract class Reactable
 		}
 	}
 
-	public Reactable(GameObject gameObject, HashedString id, ChoreType chore_type, int range_width = 15, int range_height = 8, bool follow_transform = false, float min_reactable_time = 0f, float min_reactor_time = 0f, float max_trigger_time = float.PositiveInfinity)
+	public Reactable(GameObject gameObject, HashedString id, ChoreType chore_type, int range_width = 15, int range_height = 8, bool follow_transform = false, float globalCooldown = 0f, float localCooldown = 0f, float lifeSpan = float.PositiveInfinity, float max_initial_delay = 0f, ObjectLayer overrideLayer = ObjectLayer.NumLayers)
 	{
 		this.rangeHeight = range_height;
 		this.rangeWidth = range_width;
 		this.id = id;
 		this.gameObject = gameObject;
 		this.choreType = chore_type;
-		this.minReactableTime = min_reactable_time;
-		this.minReactorTime = min_reactor_time;
-		this.maxTriggerTime = max_trigger_time;
+		this.globalCooldown = globalCooldown;
+		this.localCooldown = localCooldown;
+		this.lifeSpan = lifeSpan;
+		this.initialDelay = ((max_initial_delay > 0f) ? global::UnityEngine.Random.Range(0f, max_initial_delay) : 0f);
 		this.creationTime = GameClock.Instance.GetTime();
-		this.UpdateLocation();
-		if (follow_transform)
+		ObjectLayer objectLayer = ((overrideLayer == ObjectLayer.NumLayers) ? this.reactionLayer : overrideLayer);
+		ReactionMonitor.Def def = gameObject.GetDef<ReactionMonitor.Def>();
+		if (overrideLayer != objectLayer && def != null)
 		{
-			this.transformId = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(gameObject.transform, new global::System.Action(this.UpdateLocation), "Reactable follow transform");
+			objectLayer = def.ReactionLayer;
+		}
+		this.reactionLayer = objectLayer;
+		this.Initialize(follow_transform);
+	}
+
+	public void Initialize(bool followTransform)
+	{
+		this.UpdateLocation();
+		if (followTransform)
+		{
+			this.transformId = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(this.gameObject.transform, new global::System.Action(this.UpdateLocation), "Reactable follow transform");
 		}
 	}
 
@@ -58,43 +81,34 @@ public abstract class Reactable
 
 	public bool CanBegin(GameObject reactor, Navigator.ActiveTransition transition)
 	{
-		if (GameClock.Instance.GetTime() - this.lastTriggerTime < this.minReactableTime)
+		float time = GameClock.Instance.GetTime();
+		float num = time - this.creationTime;
+		float num2 = time - this.lastTriggerTime;
+		if (num < this.initialDelay || num2 < this.globalCooldown)
 		{
 			return false;
 		}
 		ChoreConsumer component = reactor.GetComponent<ChoreConsumer>();
-		if (component == null)
+		Chore chore = ((component != null) ? component.choreDriver.GetCurrentChore() : null);
+		if (chore == null || this.choreType.priority <= chore.choreType.priority)
 		{
 			return false;
 		}
-		Chore currentChore = component.choreDriver.GetCurrentChore();
-		if (currentChore == null)
+		int num3 = 0;
+		while (this.additionalPreconditions != null && num3 < this.additionalPreconditions.Count)
 		{
-			return false;
-		}
-		if (this.choreType.priority <= currentChore.choreType.priority)
-		{
-			return false;
-		}
-		if (this.additionalPreconditions != null)
-		{
-			using (List<Reactable.ReactablePrecondition>.Enumerator enumerator = this.additionalPreconditions.GetEnumerator())
+			if (!this.additionalPreconditions[num3](reactor, transition))
 			{
-				while (enumerator.MoveNext())
-				{
-					if (!enumerator.Current(reactor, transition))
-					{
-						return false;
-					}
-				}
+				return false;
 			}
+			num3++;
 		}
 		return this.InternalCanBegin(reactor, transition);
 	}
 
 	public bool IsExpired()
 	{
-		return GameClock.Instance.GetTime() - this.creationTime > this.maxTriggerTime;
+		return GameClock.Instance.GetTime() - this.creationTime > this.lifeSpan;
 	}
 
 	public abstract bool InternalCanBegin(GameObject reactor, Navigator.ActiveTransition transition);
@@ -126,7 +140,7 @@ public abstract class Reactable
 		{
 			this.sourceCell = Grid.PosToCell(this.gameObject);
 			Extents extents = new Extents(Grid.PosToXY(this.gameObject.transform.GetPosition()).x - this.rangeWidth / 2, Grid.PosToXY(this.gameObject.transform.GetPosition()).y - this.rangeHeight / 2, this.rangeWidth, this.rangeHeight);
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("Reactable", this, extents, GameScenePartitioner.Instance.objectLayers[0], null);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("Reactable", this, extents, GameScenePartitioner.Instance.objectLayers[(int)this.reactionLayer], null);
 		}
 	}
 
@@ -138,6 +152,16 @@ public abstract class Reactable
 		}
 		this.additionalPreconditions.Add(precondition);
 		return this;
+	}
+
+	public void InsertPrecondition(int index, Reactable.ReactablePrecondition precondition)
+	{
+		if (this.additionalPreconditions == null)
+		{
+			this.additionalPreconditions = new List<Reactable.ReactablePrecondition>();
+		}
+		index = Math.Min(index, this.additionalPreconditions.Count);
+		this.additionalPreconditions.Insert(index, precondition);
 	}
 
 	private HandleVector<int>.Handle partitionerEntry;
@@ -156,15 +180,15 @@ public abstract class Reactable
 
 	private int transformId = -1;
 
-	public float minReactableTime;
+	public float globalCooldown;
 
-	public float minReactorTime;
+	public float localCooldown;
 
-	public float maxTriggerTime = float.PositiveInfinity;
+	public float lifeSpan = float.PositiveInfinity;
 
 	private float lastTriggerTime = -2.1474836E+09f;
 
-	private float creationTime;
+	private float initialDelay;
 
 	protected GameObject reactor;
 
@@ -173,6 +197,8 @@ public abstract class Reactable
 	protected LoggerFSS log;
 
 	private List<Reactable.ReactablePrecondition> additionalPreconditions;
+
+	private ObjectLayer reactionLayer;
 
 	public delegate bool ReactablePrecondition(GameObject go, Navigator.ActiveTransition transition);
 }

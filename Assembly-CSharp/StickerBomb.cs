@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Database;
 using KSerialization;
 using TUNING;
 using UnityEngine;
@@ -8,6 +10,15 @@ public class StickerBomb : StateMachineComponent<StickerBomb.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
+		if (this.stickerName.IsNullOrWhiteSpace())
+		{
+			global::Debug.LogError("Missing sticker db entry for " + this.stickerType);
+		}
+		else
+		{
+			DbStickerBomb dbStickerBomb = Db.GetStickerBombs().Get(this.stickerName);
+			base.GetComponent<KBatchedAnimController>().SwapAnims(new KAnimFile[] { dbStickerBomb.animFile });
+		}
 		this.cellOffsets = StickerBomb.BuildCellOffsets(base.transform.GetPosition());
 		base.smi.destroyTime = GameClock.Instance.GetTime() + TRAITS.JOY_REACTIONS.STICKER_BOMBER.STICKER_DURATION;
 		base.smi.StartSM();
@@ -15,6 +26,19 @@ public class StickerBomb : StateMachineComponent<StickerBomb.StatesInstance>
 		Extents extents2 = new Extents(extents.x - 1, extents.y - 1, extents.width + 2, extents.height + 2);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("StickerBomb.OnSpawn", base.gameObject, extents2, GameScenePartitioner.Instance.objectLayers[2], new Action<object>(this.OnFoundationCellChanged));
 		base.OnSpawn();
+	}
+
+	[OnDeserialized]
+	public void OnDeserialized()
+	{
+		if (this.stickerName.IsNullOrWhiteSpace() && !this.stickerType.IsNullOrWhiteSpace())
+		{
+			string[] array = this.stickerType.Split(new char[] { '_' });
+			if (array.Length == 2)
+			{
+				this.stickerName = array[1];
+			}
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -90,11 +114,17 @@ public class StickerBomb : StateMachineComponent<StickerBomb.StatesInstance>
 		{
 			newStickerType = "sticker";
 		}
-		this.stickerType = string.Format("{0}_{1}", newStickerType, TRAITS.JOY_REACTIONS.STICKER_BOMBER.STICKER_ANIMS.GetRandom<string>());
+		DbStickerBomb randomSticker = Db.GetStickerBombs().GetRandomSticker();
+		this.stickerName = randomSticker.Id;
+		this.stickerType = string.Format("{0}_{1}", newStickerType, randomSticker.stickerName);
+		base.GetComponent<KBatchedAnimController>().SwapAnims(new KAnimFile[] { randomSticker.animFile });
 	}
 
 	[Serialize]
 	public string stickerType;
+
+	[Serialize]
+	public string stickerName;
 
 	private HandleVector<int>.Handle partitionerEntry;
 

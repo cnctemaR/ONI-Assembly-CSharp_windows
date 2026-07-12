@@ -15,7 +15,7 @@ public class PartyChore : Chore<PartyChore.StatesInstance>, IWorkerPrioritizable
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		base.smi.sm.partyer.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.partyer.Set(context.consumerState.gameObject, base.smi, false);
 		base.Begin(context);
 		base.smi.sm.partyer.Get(base.smi).gameObject.AddTag(GameTags.Partying);
 	}

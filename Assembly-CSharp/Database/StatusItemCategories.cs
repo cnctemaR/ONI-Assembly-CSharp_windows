@@ -26,6 +26,7 @@ namespace Database
 			this.Yield = new StatusItemCategory("Yield", this, "Yield");
 			this.Heat = new StatusItemCategory("Heat", this, "Heat");
 			this.Stored = new StatusItemCategory("Stored", this, "Stored");
+			this.Ownable = new StatusItemCategory("Ownable", this, "Ownable");
 		}
 
 		public StatusItemCategory Main;
@@ -65,5 +66,7 @@ namespace Database
 		public StatusItemCategory Heat;
 
 		public StatusItemCategory Stored;
+
+		public StatusItemCategory Ownable;
 	}
 }

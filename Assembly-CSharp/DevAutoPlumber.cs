@@ -158,7 +158,7 @@ public class DevAutoPlumber
 				bool flag = false;
 				for (int i = 0; i < elementConverter.consumedElements.Length; i++)
 				{
-					if (elementConverter.consumedElements[i].tag == match.tag)
+					if (elementConverter.consumedElements[i].Tag == match.tag)
 					{
 						flag = true;
 						break;

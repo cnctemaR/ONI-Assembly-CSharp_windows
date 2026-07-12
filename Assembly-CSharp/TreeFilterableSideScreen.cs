@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TreeFilterableSideScreen : SideScreenContent
 {
@@ -36,6 +37,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 			}
 		}));
 		this.onlyAllowTransportItemsCheckBox.onClick = new global::System.Action(this.OnlyAllowTransportItemsClicked);
+		this.onlyAllowSpicedItemsCheckBox.onClick = new global::System.Action(this.OnlyAllowSpicedItemsClicked);
 	}
 
 	protected override void OnSpawn()
@@ -43,6 +45,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		base.OnSpawn();
 		this.allCheckBox.transform.parent.parent.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ALLBUTTONTOOLTIP);
 		this.onlyAllowTransportItemsCheckBox.transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ONLYALLOWTRANSPORTITEMSBUTTONTOOLTIP);
+		this.onlyAllowSpicedItemsCheckBox.transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.ONLYALLOWSPICEDITEMSBUTTONTOOLTIP);
 	}
 
 	private void UpdateAllCheckBoxVisualState()
@@ -81,6 +84,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 	private void OnlyAllowTransportItemsClicked()
 	{
 		this.storage.SetOnlyFetchMarkedItems(!this.storage.GetOnlyFetchMarkedItems());
+	}
+
+	private void OnlyAllowSpicedItemsClicked()
+	{
+		FoodStorage component = this.storage.GetComponent<FoodStorage>();
+		component.SpicedFoodOnly = !component.SpicedFoodOnly;
 	}
 
 	private TreeFilterableSideScreenRow.State GetAllCheckboxState()
@@ -188,10 +197,19 @@ public class TreeFilterableSideScreen : SideScreenContent
 			DetailsScreen.Instance.DeactivateSideContent();
 			return;
 		}
+		this.contentMask.GetComponent<LayoutElement>().minHeight = (float)((this.targetFilterable.uiHeight == TreeFilterable.UISideScreenHeight.Tall) ? 380 : 256);
 		this.storage = this.targetFilterable.GetComponent<Storage>();
 		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
+		this.storage.Subscribe(1163645216, new Action<object>(this.OnOnlySpicedItemsSettingChanged));
 		this.OnOnlyFetchMarkedItemsSettingChanged(null);
+		this.OnOnlySpicedItemsSettingChanged(null);
 		this.CreateCategories();
+		this.titlebar.SetActive(false);
+		if (this.storage.showSideScreenTitleBar)
+		{
+			this.titlebar.SetActive(true);
+			this.titlebar.GetComponentInChildren<LocText>().SetText(this.storage.GetProperName());
+		}
 	}
 
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
@@ -203,6 +221,18 @@ public class TreeFilterableSideScreen : SideScreenContent
 			return;
 		}
 		this.onlyallowTransportItemsRow.SetActive(false);
+	}
+
+	private void OnOnlySpicedItemsSettingChanged(object data)
+	{
+		FoodStorage component = this.storage.GetComponent<FoodStorage>();
+		if (component != null)
+		{
+			this.onlyallowSpicedItemsRow.SetActive(true);
+			this.onlyAllowSpicedItemsCheckBox.ChangeState(component.SpicedFoodOnly ? 1 : 0);
+			return;
+		}
+		this.onlyallowSpicedItemsRow.SetActive(false);
 	}
 
 	public bool IsTagAllowed(Tag tag)
@@ -292,6 +322,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		if (this.storage != null)
 		{
 			this.storage.Unsubscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
+			this.storage.Unsubscribe(1163645216, new Action<object>(this.OnOnlySpicedItemsSettingChanged));
 		}
 		this.rowPool.ClearAll();
 		this.elementPool.ClearAll();
@@ -308,6 +339,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 	private GameObject onlyallowTransportItemsRow;
 
 	[SerializeField]
+	private MultiToggle onlyAllowSpicedItemsCheckBox;
+
+	[SerializeField]
+	private GameObject onlyallowSpicedItemsRow;
+
+	[SerializeField]
 	private TreeFilterableSideScreenRow rowPrefab;
 
 	[SerializeField]
@@ -315,6 +352,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	[SerializeField]
 	private TreeFilterableSideScreenElement elementPrefab;
+
+	[SerializeField]
+	private GameObject titlebar;
+
+	[SerializeField]
+	private GameObject contentMask;
 
 	private GameObject target;
 

@@ -210,7 +210,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		typeof(CurrentJobConversation)
 	};
 
-	private static readonly List<Tag> invalidConvoTags = new List<Tag>
+	private static readonly Tag[] invalidConvoTags = new Tag[]
 	{
 		GameTags.Asleep,
 		GameTags.HoldingBreath,

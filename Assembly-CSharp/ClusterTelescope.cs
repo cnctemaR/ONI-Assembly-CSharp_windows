@@ -155,13 +155,13 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		protected override void OnSpawn()
 		{
 			base.OnSpawn();
-			this.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+			this.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnWorkableEvent));
 			this.m_fowManager = SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>();
 			base.SetWorkTime(float.PositiveInfinity);
 			this.overrideAnims = this.m_telescope.workableOverrideAnims;
 		}
 
-		private void OnWorkableEvent(Workable.WorkableEvent ev)
+		private void OnWorkableEvent(Workable workable, Workable.WorkableEvent ev)
 		{
 			Worker worker = base.worker;
 			if (worker == null)

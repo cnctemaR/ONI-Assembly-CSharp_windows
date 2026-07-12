@@ -14,14 +14,14 @@ public class EntombedChore : Chore<EntombedChore.StatesInstance>
 		public StatesInstance(EntombedChore master, GameObject entombable, string entombedAnimOverride)
 			: base(master)
 		{
-			base.sm.entombable.Set(entombable, base.smi);
+			base.sm.entombable.Set(entombable, base.smi, false);
 			this.entombedAnimOverride = entombedAnimOverride;
 		}
 
 		public void UpdateFaceEntombed()
 		{
 			int num = Grid.CellAbove(Grid.PosToCell(base.transform.GetPosition()));
-			base.sm.isFaceEntombed.Set(Grid.IsValidCell(num) && Grid.Solid[num], base.smi);
+			base.sm.isFaceEntombed.Set(Grid.IsValidCell(num) && Grid.Solid[num], base.smi, false);
 		}
 
 		public string entombedAnimOverride;

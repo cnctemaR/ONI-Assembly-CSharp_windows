@@ -230,8 +230,8 @@ public class ColonyDestinationAsteroidBeltData
 				}
 				foreach (string text in SettingsCache.GetRandomTraits(num, world))
 				{
-					WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
-					list.Add(cachedTrait);
+					WorldTrait cachedWorldTrait = SettingsCache.GetCachedWorldTrait(text, true);
+					list.Add(cachedWorldTrait);
 				}
 			}
 		}

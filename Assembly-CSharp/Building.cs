@@ -120,7 +120,7 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 	{
 		get
 		{
-			if (this.Def.AvailableFacades.Count > 0 && !this.description.IsNullOrWhiteSpace())
+			if (!this.description.IsNullOrWhiteSpace())
 			{
 				return this.description;
 			}

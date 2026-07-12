@@ -24,7 +24,7 @@ namespace Database
 				{
 					if (((MonumentPart)enumerator.Current).IsMonumentCompleted())
 					{
-						Game.Instance.unlocks.Unlock("thriving");
+						Game.Instance.unlocks.Unlock("thriving", true);
 						return true;
 					}
 				}

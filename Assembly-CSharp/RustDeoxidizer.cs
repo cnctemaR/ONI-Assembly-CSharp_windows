@@ -64,7 +64,7 @@ public class RustDeoxidizer : StateMachineComponent<RustDeoxidizer.StatesInstanc
 			this.waiting.Enter("Waiting", delegate(RustDeoxidizer.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
-			}).EventTransition(GameHashes.OnStorageChange, this.converting, (RustDeoxidizer.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
+			}).EventTransition(GameHashes.OnStorageChange, this.converting, (RustDeoxidizer.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting(false));
 			this.converting.Enter("Ready", delegate(RustDeoxidizer.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);

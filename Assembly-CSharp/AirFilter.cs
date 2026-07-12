@@ -8,12 +8,12 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IGameO
 {
 	public bool HasFilter()
 	{
-		return this.elementConverter.HasEnoughMass(this.filterTag);
+		return this.elementConverter.HasEnoughMass(this.filterTag, false);
 	}
 
 	public bool IsConvertable()
 	{
-		return this.elementConverter.HasEnoughMassToStartConverting();
+		return this.elementConverter.HasEnoughMassToStartConverting(false);
 	}
 
 	protected override void OnSpawn()

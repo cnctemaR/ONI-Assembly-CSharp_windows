@@ -16,7 +16,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		public StatesInstance(RecoverBreathChore master, GameObject recoverer)
 			: base(master)
 		{
-			base.sm.recoverer.Set(recoverer, base.smi);
+			base.sm.recoverer.Set(recoverer, base.smi, false);
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
 			float num = 3f;
 			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false, true);
@@ -25,7 +25,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		public void CreateLocator()
 		{
 			GameObject gameObject = ChoreHelpers.CreateLocator("RecoverBreathLocator", Vector3.zero);
-			base.sm.locator.Set(gameObject, this);
+			base.sm.locator.Set(gameObject, this, false);
 			this.UpdateLocator();
 		}
 

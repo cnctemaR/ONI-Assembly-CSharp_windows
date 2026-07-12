@@ -19,7 +19,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 		{
 			this.bladder = Db.Get().Amounts.Bladder.Lookup(worker);
 			this.bodyTemperature = Db.Get().Amounts.Temperature.Lookup(worker);
-			base.sm.worker.Set(worker, base.smi);
+			base.sm.worker.Set(worker, base.smi, false);
 		}
 
 		public bool IsDonePeeing()
@@ -45,7 +45,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 			}
 		}
 
-		public Notification stressfullyEmptyingBladder = new Notification(DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
+		public Notification stressfullyEmptyingBladder = new Notification(DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_NAME, NotificationType.Bad, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true, false);
 
 		public AmountInstance bladder;
 

@@ -122,11 +122,11 @@ public class PlanterSideScreen : ReceptacleSideScreen
 			num2 = Mathf.Max(num2 + num3, 24f);
 			le.minHeight = num2;
 			le.preferredHeight = num2;
-			yield return new WaitForEndOfFrame();
+			yield return SequenceUtil.WaitForEndOfFrame;
 		}
 		this.mutationPanelCollapsed = true;
 		this.activeAnimationRoutine = null;
-		yield return 0;
+		yield return SequenceUtil.WaitForNextFrame;
 		yield break;
 	}
 

@@ -72,7 +72,7 @@ public class MaskStation : StateMachineComponent<MaskStation.SMInstance>, IBasic
 	{
 		base.OnPrefabInit();
 		ChoreType choreType = Db.Get().ChoreTypes.Get(this.choreTypeID);
-		this.filteredStorage = new FilteredStorage(this, null, null, null, false, choreType);
+		this.filteredStorage = new FilteredStorage(this, null, null, false, choreType);
 	}
 
 	private List<GameObject> GetPossibleMaterials()
@@ -238,7 +238,7 @@ public class MaskStation : StateMachineComponent<MaskStation.SMInstance>, IBasic
 	private class OxygenMaskReactable : Reactable
 	{
 		public OxygenMaskReactable(MaskStation mask_station)
-			: base(mask_station.gameObject, "OxygenMask", Db.Get().ChoreTypes.SuitMarker, 1, 1, false, 0f, 0f, float.PositiveInfinity)
+			: base(mask_station.gameObject, "OxygenMask", Db.Get().ChoreTypes.SuitMarker, 1, 1, false, 0f, 0f, float.PositiveInfinity, 0f, ObjectLayer.NumLayers)
 		{
 			this.maskStation = mask_station;
 		}
@@ -322,7 +322,7 @@ public class MaskStation : StateMachineComponent<MaskStation.SMInstance>, IBasic
 				assignable.Unassign();
 				if (!flag2)
 				{
-					Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true);
+					Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null, true, false);
 					assignable.GetComponent<Notifier>().Add(notification, "");
 				}
 			}

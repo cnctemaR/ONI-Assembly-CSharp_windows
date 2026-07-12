@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
+using YamlDotNet.Serialization;
 
 [DebuggerDisplay("{x}, {y}")]
 public struct Vector2f
@@ -30,6 +31,33 @@ public struct Vector2f
 		}
 	}
 
+	[YamlIgnore]
+	public float sqrMagnitude
+	{
+		get
+		{
+			return Mathf.Pow(this.x, 2f) + Mathf.Pow(this.y, 2f);
+		}
+	}
+
+	[YamlIgnore]
+	public float magnitude
+	{
+		get
+		{
+			return Mathf.Sqrt(this.sqrMagnitude);
+		}
+	}
+
+	[YamlIgnore]
+	public Vector2f normalized
+	{
+		get
+		{
+			return this / this.magnitude;
+		}
+	}
+
 	public Vector2f(int a, int b)
 	{
 		this.x = (float)a;
@@ -46,6 +74,56 @@ public struct Vector2f
 	{
 		this.x = src.x;
 		this.y = src.y;
+	}
+
+	public static Vector2 operator +(Vector2f u, Vector2 v)
+	{
+		return new Vector2(u.x + v.x, u.y + v.y);
+	}
+
+	public static Vector2 operator +(Vector2 u, Vector2f v)
+	{
+		return new Vector2(u.x + v.x, u.y + v.y);
+	}
+
+	public static Vector2f operator +(Vector2f u, Vector2f v)
+	{
+		return new Vector2f(u.x + v.x, u.y + v.y);
+	}
+
+	public static Vector2f operator -(Vector2f u, Vector2f v)
+	{
+		return new Vector2f(u.x - v.x, u.y - v.y);
+	}
+
+	public static Vector2f operator *(Vector2f u, Vector2f v)
+	{
+		return new Vector2f(u.x * v.x, u.y * v.y);
+	}
+
+	public static Vector2f operator /(Vector2f u, Vector2f v)
+	{
+		return new Vector2f(u.x / v.x, u.y / v.y);
+	}
+
+	public static Vector2f operator *(Vector2f v, float s)
+	{
+		return new Vector2f(v.x * s, v.y * s);
+	}
+
+	public static Vector2f operator /(Vector2f v, float s)
+	{
+		return new Vector2f(v.x / s, v.y / s);
+	}
+
+	public static Vector2f operator +(Vector2f u, float scalar)
+	{
+		return new Vector2f(u.x + scalar, u.y + scalar);
+	}
+
+	public static Vector2f operator -(Vector2f u, float scalar)
+	{
+		return new Vector2f(u.x - scalar, u.y - scalar);
 	}
 
 	public static bool operator ==(Vector2f u, Vector2f v)

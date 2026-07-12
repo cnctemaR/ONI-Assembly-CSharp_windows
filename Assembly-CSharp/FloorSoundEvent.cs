@@ -71,7 +71,7 @@ public class FloorSoundEvent : SoundEvent
 				{
 					eventInstance2.setParameterByName("liquidDepth", num2, false);
 				}
-				if (behaviour.currentAnimFile != null && behaviour.currentAnimFile.Contains("anim_loco_walk"))
+				if (behaviour.controller.HasAnimationFile("anim_loco_walk_kanim"))
 				{
 					eventInstance2.setVolume(FloorSoundEvent.IDLE_WALKING_VOLUME_REDUCTION);
 				}

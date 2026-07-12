@@ -306,14 +306,9 @@ namespace FMOD
 			return FMOD.System.FMOD5_System_GetChannelsPlaying(this.handle, out channels, out realchannels);
 		}
 
-		public RESULT getCPUUsage(out float dsp, out float stream, out float geometry, out float update, out float total)
+		public RESULT getCPUUsage(out CPU_USAGE usage)
 		{
-			return FMOD.System.FMOD5_System_GetCPUUsage(this.handle, out dsp, out stream, out geometry, out update, out total);
-		}
-
-		public RESULT getCPUUsageEx(out float convolutionThread1, out float convolutionThread2)
-		{
-			return FMOD.System.FMOD5_System_GetCPUUsageEx(this.handle, out convolutionThread1, out convolutionThread2);
+			return FMOD.System.FMOD5_System_GetCPUUsage(this.handle, out usage);
 		}
 
 		public RESULT getFileUsage(out long sampleBytesRead, out long streamBytesRead, out long otherBytesRead)
@@ -440,7 +435,7 @@ namespace FMOD
 			return FMOD.System.FMOD5_System_GetMasterSoundGroup(this.handle, out soundgroup.handle);
 		}
 
-		public RESULT attachChannelGroupToPort(uint portType, ulong portIndex, ChannelGroup channelgroup, bool passThru = false)
+		public RESULT attachChannelGroupToPort(PORT_TYPE portType, ulong portIndex, ChannelGroup channelgroup, bool passThru = false)
 		{
 			return FMOD.System.FMOD5_System_AttachChannelGroupToPort(this.handle, portType, portIndex, channelgroup.handle, passThru);
 		}
@@ -739,10 +734,7 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_GetChannelsPlaying(IntPtr system, out int channels, out int realchannels);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_GetCPUUsage(IntPtr system, out float dsp, out float stream, out float geometry, out float update, out float total);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_GetCPUUsageEx(IntPtr system, out float convolutionThread1, out float convolutionThread2);
+		private static extern RESULT FMOD5_System_GetCPUUsage(IntPtr system, out CPU_USAGE usage);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_GetFileUsage(IntPtr system, out long sampleBytesRead, out long streamBytesRead, out long otherBytesRead);
@@ -793,7 +785,7 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_GetMasterSoundGroup(IntPtr system, out IntPtr soundgroup);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_AttachChannelGroupToPort(IntPtr system, uint portType, ulong portIndex, IntPtr channelgroup, bool passThru);
+		private static extern RESULT FMOD5_System_AttachChannelGroupToPort(IntPtr system, PORT_TYPE portType, ulong portIndex, IntPtr channelgroup, bool passThru);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_DetachChannelGroupFromPort(IntPtr system, IntPtr channelgroup);

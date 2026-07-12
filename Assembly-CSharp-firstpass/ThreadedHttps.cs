@@ -99,7 +99,7 @@ public class ThreadedHttps<T> where T : class, new()
 		{
 			return;
 		}
-		if (!this.updateThread.Join(TimeSpan.FromSeconds(2.0)))
+		if (this.updateThread != Thread.CurrentThread && !this.updateThread.Join(TimeSpan.FromSeconds(2.0)))
 		{
 			this.updateThread.Abort();
 		}

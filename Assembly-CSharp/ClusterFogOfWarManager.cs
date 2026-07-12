@@ -180,11 +180,12 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 
 		public void UpdateRevealedCellsFromDiscoveredWorlds()
 		{
+			int num = (DlcManager.IsExpansion1Active() ? 0 : 2);
 			foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
 			{
 				if (worldContainer.IsDiscovered && !DebugHandler.RevealFogOfWar)
 				{
-					this.RevealLocation(worldContainer.GetComponent<ClusterGridEntity>().Location, 0);
+					this.RevealLocation(worldContainer.GetComponent<ClusterGridEntity>().Location, num);
 				}
 			}
 		}

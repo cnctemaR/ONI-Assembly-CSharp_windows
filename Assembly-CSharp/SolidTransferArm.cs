@@ -38,7 +38,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.arm_go.SetActive(false);
 		this.arm_go.transform.parent = component.transform;
 		this.looping_sounds = this.arm_go.AddComponent<LoopingSounds>();
-		this.rotateSound = GlobalAssets.GetSound(this.rotateSound, false);
+		string sound = GlobalAssets.GetSound(this.rotateSoundName, false);
+		this.rotateSound = RuntimeManager.PathToEventReference(sound);
 		this.arm_go.AddComponent<KPrefabID>().PrefabTag = new Tag(text);
 		this.arm_anim_ctrl = this.arm_go.AddComponent<KBatchedAnimController>();
 		this.arm_anim_ctrl.AnimFiles = new KAnimFile[] { component.AnimFiles[0] };
@@ -123,7 +124,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			{
 				this.choreDriver.SetChore(context);
 				FetchChore fetchChore = context.chore as FetchChore;
-				this.storage.DropUnlessHasTags(fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, true, false);
+				this.storage.DropUnlessMatching(fetchChore);
 				this.arm_anim_ctrl.enabled = false;
 				this.arm_anim_ctrl.enabled = true;
 			}
@@ -205,9 +206,9 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		return prefabID.HasAnyTags(ref SolidTransferArm.tagBits) && this.IsCellReachable(storage_cell);
 	}
 
-	public void FindFetchTarget(Storage destination, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, float required_amount, ref Pickupable target)
+	public Pickupable FindFetchTarget(Storage destination, FetchChore chore)
 	{
-		target = FetchManager.FindFetchTarget(this.pickupables, destination, ref tag_bits, ref required_tags, ref forbid_tags, required_amount);
+		return FetchManager.FindFetchTarget(this.pickupables, destination, chore);
 	}
 
 	public void RenderEveryTick(float dt)
@@ -357,9 +358,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	[MyCmpReq]
 	private Operational operational;
 
-	[MyCmpGet]
-	private KSelectable selectable;
-
 	[MyCmpAdd]
 	private Storage storage;
 
@@ -383,8 +381,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	public static TagBits tagBits = new TagBits(STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.FOOD).Concat<Tag>(STORAGEFILTERS.PAYLOADS).ToArray<Tag>());
 
-	private Extents pickupableExtents;
-
 	private KBatchedAnimController arm_anim_ctrl;
 
 	private GameObject arm_go;
@@ -393,8 +389,9 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private bool rotateSoundPlaying;
 
-	[EventRef]
-	private string rotateSound = "TransferArm_rotate";
+	private string rotateSoundName = "TransferArm_rotate";
+
+	private EventReference rotateSound;
 
 	private KAnimLink link;
 

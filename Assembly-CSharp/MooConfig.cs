@@ -23,6 +23,7 @@ public class MooConfig : IEntityConfig
 		def.diet = diet;
 		def.minPoopSizeInCalories = MooConfig.MIN_POOP_SIZE_IN_CALORIES;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
+		gameObject.AddTag(GameTags.OriginalCreature);
 		return gameObject;
 	}
 

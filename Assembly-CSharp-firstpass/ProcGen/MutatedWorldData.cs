@@ -7,28 +7,31 @@ namespace ProcGen
 {
 	public class MutatedWorldData
 	{
-		public MutatedWorldData(World world, List<WorldTrait> traits)
+		public MutatedWorldData(World world, List<WorldTrait> worldTraits, List<WorldTrait> storyTraits)
 		{
 			this.world = SerializingCloner.Copy<World>(world);
-			if (traits == null)
+			this.worldTraits = new List<WorldTrait>();
+			if (worldTraits != null)
 			{
-				this.traits = new List<WorldTrait>();
+				this.worldTraits.AddRange(worldTraits);
 			}
-			else
+			this.storyTraits = new List<WorldTrait>();
+			if (storyTraits != null)
 			{
-				this.traits = new List<WorldTrait>(traits);
+				this.storyTraits.AddRange(storyTraits);
 			}
+			this.storyTraitCandidates = new List<WorldTrait>();
 			SettingsCache.CloneInToNewWorld(this);
-			this.ApplyTraits();
+			this.ApplyWorldTraits();
 			foreach (ElementBandConfiguration elementBandConfiguration in this.biomes.BiomeBackgroundElementBandConfigurations.Values)
 			{
 				elementBandConfiguration.ConvertBandSizeToMaxSize();
 			}
 		}
 
-		private void ApplyTraits()
+		private void ApplyWorldTraits()
 		{
-			foreach (WorldTrait worldTrait in this.traits)
+			foreach (WorldTrait worldTrait in this.worldTraits)
 			{
 				this.ApplyTrait(worldTrait);
 			}
@@ -85,7 +88,9 @@ namespace ProcGen
 
 		public World world;
 
-		public List<WorldTrait> traits;
+		public List<WorldTrait> worldTraits;
+
+		public List<WorldTrait> storyTraits;
 
 		public Dictionary<string, SubWorld> subworlds;
 
@@ -94,5 +99,7 @@ namespace ProcGen
 		public TerrainElementBandSettings biomes;
 
 		public MobSettings mobs;
+
+		public List<WorldTrait> storyTraitCandidates;
 	}
 }

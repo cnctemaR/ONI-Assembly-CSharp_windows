@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using Klei;
@@ -75,6 +74,12 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		{
 			this.DoAutoSave(this.cycle);
 		}
+		int num = Mathf.FloorToInt(this.timeSinceStartOfCycle - dt / 25f);
+		int num2 = Mathf.FloorToInt(this.timeSinceStartOfCycle / 25f);
+		if (num != num2)
+		{
+			base.Trigger(-1215042067, num2);
+		}
 	}
 
 	public float GetTimeSinceStartOfReport()
@@ -144,8 +149,8 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 			return;
 		}
 		day++;
-		this.newDayMetric[GameClock.NewCycleKey] = day;
-		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.newDayMetric, "DoAutoSave");
+		OniMetrics.LogEvent(OniMetrics.Event.EndOfCycle, GameClock.NewCycleKey, day);
+		OniMetrics.SendEvent(OniMetrics.Event.EndOfCycle, "DoAutoSave");
 		string text = SaveLoader.GetActiveSaveFilePath();
 		if (text == null)
 		{
@@ -196,10 +201,4 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 	private bool isNight;
 
 	public static readonly string NewCycleKey = "NewCycle";
-
-	private Dictionary<string, object> newDayMetric = new Dictionary<string, object> { 
-	{
-		GameClock.NewCycleKey,
-		null
-	} };
 }

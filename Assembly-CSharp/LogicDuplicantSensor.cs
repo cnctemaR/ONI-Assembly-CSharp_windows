@@ -128,7 +128,7 @@ public class LogicDuplicantSensor : Switch, ISim1000ms, ISim200ms
 
 	private bool IsPickupableRelevantToMyInterests(Pickupable pickupable)
 	{
-		return pickupable.KPrefabID.HasAnyTags(ref LogicDuplicantSensor.tagBits);
+		return pickupable.KPrefabID.HasTag(GameTags.DupeBrain);
 	}
 
 	private bool IsPickupableRelevantToMyInterestsAndReachable(Pickupable pickupable)
@@ -187,8 +187,6 @@ public class LogicDuplicantSensor : Switch, ISim1000ms, ISim200ms
 	private List<Pickupable> duplicants = new List<Pickupable>();
 
 	private HandleVector<int>.Handle pickupablesChangedEntry;
-
-	public static TagBits tagBits = new TagBits(new Tag[] { GameTags.DupeBrain });
 
 	private bool pickupablesDirty;
 

@@ -18,7 +18,7 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 		bool flag = (bool)data;
 		foreach (ManualDeliveryKG manualDeliveryKG in this.deliveryComponents)
 		{
-			Element element = ElementLoader.GetElement(manualDeliveryKG.requestedItemTag);
+			Element element = ElementLoader.GetElement(manualDeliveryKG.RequestedItemTag);
 			if (element != null && element.IsLiquid)
 			{
 				manualDeliveryKG.Pause(flag, "pipe connected");
@@ -51,7 +51,7 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 			default_state = this.off;
 			this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (WaterPurifier.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.on.PlayAnim("on").EventTransition(GameHashes.OperationalChanged, this.off, (WaterPurifier.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.on.waiting);
-			this.on.waiting.EventTransition(GameHashes.OnStorageChange, this.on.working_pre, (WaterPurifier.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
+			this.on.waiting.EventTransition(GameHashes.OnStorageChange, this.on.working_pre, (WaterPurifier.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting(false));
 			this.on.working_pre.PlayAnim("working_pre").OnAnimQueueComplete(this.on.working);
 			this.on.working.Enter(delegate(WaterPurifier.StatesInstance smi)
 			{

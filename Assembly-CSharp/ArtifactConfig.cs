@@ -118,6 +118,7 @@ public class ArtifactConfig : IMultiEntityConfig
 		spaceArtifact.uniqueAnimNameFragment = initial_anim;
 		spaceArtifact.artifactType = artifact_type;
 		gameObject.AddOrGet<KSelectable>();
+		gameObject.GetComponent<Pickupable>().deleteOffGrid = false;
 		gameObject.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject instance)
 		{
 			instance.GetComponent<SpaceArtifact>().SetArtifactTier(artifact_tier);

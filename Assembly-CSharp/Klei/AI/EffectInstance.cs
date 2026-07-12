@@ -17,7 +17,7 @@ namespace Klei.AI
 			if (effect.showInUI)
 			{
 				KSelectable component = base.gameObject.GetComponent<KSelectable>();
-				if (!component.GetStatusItemGroup().HasStatusItemID(this.statusItem))
+				if (!component.GetStatusItemGroup().HasStatusItem(this.statusItem))
 				{
 					component.AddStatusItem(this.statusItem, this);
 				}
@@ -26,41 +26,55 @@ namespace Klei.AI
 			{
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, effect.Name, game_object.transform, 1.5f, false);
 			}
+			if (effect.emote != null)
+			{
+				this.RegisterEmote(effect.emote, effect.emoteCooldown);
+			}
 			if (!string.IsNullOrEmpty(effect.emoteAnim))
 			{
-				ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
-				if (smi != null)
-				{
-					if (effect.emoteCooldown < 0f)
-					{
-						SelfEmoteReactable selfEmoteReactable = (SelfEmoteReactable)new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, 100000f, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-						{
-							anim = "react"
-						});
-						selfEmoteReactable.AddPrecondition(new Reactable.ReactablePrecondition(this.NotInATube));
-						if (effect.emotePreconditions != null)
-						{
-							foreach (Reactable.ReactablePrecondition reactablePrecondition in effect.emotePreconditions)
-							{
-								selfEmoteReactable.AddPrecondition(reactablePrecondition);
-							}
-						}
-						smi.AddOneshotReactable(selfEmoteReactable);
-						return;
-					}
-					this.reactable = new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, effect.emoteCooldown, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
-					{
-						anim = "react"
-					});
-					this.reactable.AddPrecondition(new Reactable.ReactablePrecondition(this.NotInATube));
-					if (effect.emotePreconditions != null)
-					{
-						foreach (Reactable.ReactablePrecondition reactablePrecondition2 in effect.emotePreconditions)
-						{
-							this.reactable.AddPrecondition(reactablePrecondition2);
-						}
-					}
-				}
+				this.RegisterEmote(effect.emoteAnim, effect.emoteCooldown);
+			}
+		}
+
+		public void RegisterEmote(string emoteAnim, float cooldown = -1f)
+		{
+			ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
+			if (smi == null)
+			{
+				return;
+			}
+			bool flag = cooldown < 0f;
+			float num = (flag ? 100000f : cooldown);
+			EmoteReactable emoteReactable = smi.AddSelfEmoteReactable(base.gameObject, this.effect.Name + "_Emote", emoteAnim, flag, Db.Get().ChoreTypes.Emote, num, 20f, float.NegativeInfinity, this.effect.maxInitialDelay, this.effect.emotePreconditions);
+			if (emoteReactable == null)
+			{
+				return;
+			}
+			emoteReactable.InsertPrecondition(0, new Reactable.ReactablePrecondition(this.NotInATube));
+			if (!flag)
+			{
+				this.reactable = emoteReactable;
+			}
+		}
+
+		public void RegisterEmote(Emote emote, float cooldown = -1f)
+		{
+			ReactionMonitor.Instance smi = base.gameObject.GetSMI<ReactionMonitor.Instance>();
+			if (smi == null)
+			{
+				return;
+			}
+			bool flag = cooldown < 0f;
+			float num = (flag ? 100000f : cooldown);
+			EmoteReactable emoteReactable = smi.AddSelfEmoteReactable(base.gameObject, this.effect.Name + "_Emote", emote, flag, Db.Get().ChoreTypes.Emote, num, 20f, float.NegativeInfinity, this.effect.maxInitialDelay, this.effect.emotePreconditions);
+			if (emoteReactable == null)
+			{
+				return;
+			}
+			emoteReactable.InsertPrecondition(0, new Reactable.ReactablePrecondition(this.NotInATube));
+			if (!flag)
+			{
+				this.reactable = emoteReactable;
 			}
 		}
 
@@ -134,6 +148,6 @@ namespace Klei.AI
 
 		public float timeRemaining;
 
-		public Reactable reactable;
+		public EmoteReactable reactable;
 	}
 }

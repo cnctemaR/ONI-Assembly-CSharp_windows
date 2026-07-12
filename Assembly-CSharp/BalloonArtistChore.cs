@@ -81,7 +81,7 @@ public class BalloonArtistChore : Chore<BalloonArtistChore.StatesInstance>, IWor
 			: base(master)
 		{
 			this.balloonArtist = balloonArtist;
-			base.sm.balloonArtist.Set(balloonArtist, base.smi);
+			base.sm.balloonArtist.Set(balloonArtist, base.smi, false);
 		}
 
 		public bool IsRecTime()

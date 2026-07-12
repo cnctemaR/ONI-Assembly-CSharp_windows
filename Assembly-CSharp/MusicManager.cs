@@ -40,12 +40,17 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
 			if (!songInfo.ev.isValid())
 			{
-				DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+				object[] array = new object[1];
+				int num = 0;
+				string text = "Failed to find FMOD event [";
+				EventReference eventReference = songInfo.fmodEvent;
+				array[num] = text + eventReference.ToString() + "]";
+				DebugUtil.LogWarningArgs(array);
 			}
-			int num = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
-			if (num != -1)
+			int num2 = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
+			if (num2 != -1)
 			{
-				songInfo.ev.setParameterByName("variation", (float)num, false);
+				songInfo.ev.setParameterByName("variation", (float)num2, false);
 			}
 			if (songInfo.dynamic)
 			{
@@ -73,23 +78,28 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
 			if (!songInfo.ev.isValid())
 			{
-				DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+				object[] array2 = new object[1];
+				int num3 = 0;
+				string text2 = "Failed to find FMOD event [";
+				EventReference eventReference = songInfo.fmodEvent;
+				array2[num3] = text2 + eventReference.ToString() + "]";
+				DebugUtil.LogWarningArgs(array2);
 			}
 			songInfo.ev.start();
 			songInfo.ev.release();
 			this.activeSongs[song_name] = songInfo;
 			return;
 		}
-		int num2 = 0;
-		foreach (string text in this.activeSongs.Keys)
+		int num4 = 0;
+		foreach (string text3 in this.activeSongs.Keys)
 		{
-			MusicManager.SongInfo songInfo3 = this.activeSongs[text];
-			if (!songInfo3.interruptsActiveMusic && songInfo3.priority > num2)
+			MusicManager.SongInfo songInfo3 = this.activeSongs[text3];
+			if (!songInfo3.interruptsActiveMusic && songInfo3.priority > num4)
 			{
-				num2 = songInfo3.priority;
+				num4 = songInfo3.priority;
 			}
 		}
-		if (songInfo.priority >= num2)
+		if (songInfo.priority >= num4)
 		{
 			for (int j = 0; j < list.Count; j++)
 			{
@@ -106,12 +116,17 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
 			if (!songInfo.ev.isValid())
 			{
-				DebugUtil.LogWarningArgs(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+				object[] array3 = new object[1];
+				int num5 = 0;
+				string text4 = "Failed to find FMOD event [";
+				EventReference eventReference = songInfo.fmodEvent;
+				array3[num5] = text4 + eventReference.ToString() + "]";
+				DebugUtil.LogWarningArgs(array3);
 			}
-			int num3 = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
-			if (num3 != -1)
+			int num6 = ((songInfo.numberOfVariations > 0) ? global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1) : (-1));
+			if (num6 != -1)
 			{
-				songInfo.ev.setParameterByName("variation", (float)num3, false);
+				songInfo.ev.setParameterByName("variation", (float)num6, false);
 			}
 			songInfo.ev.start();
 			this.activeSongs[song_name] = songInfo;
@@ -537,6 +552,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	protected override void OnPrefabInit()
 	{
 		MusicManager._instance = this;
+		this.ConfigureSongs();
 		this.fullSongPlaylist.ResetUnplayedSongs();
 		this.miniSongPlaylist.ResetUnplayedSongs();
 		this.nextMusicType = this.musicStyleOrder[this.musicTypeIterator];
@@ -553,59 +569,73 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		this.songMap.Clear();
 		foreach (MusicManager.DynamicSong dynamicSong in this.fullSongs)
 		{
-			string simpleSoundEventName = Assets.GetSimpleSoundEventName(dynamicSong.fmodEvent);
-			MusicManager.SongInfo songInfo = new MusicManager.SongInfo();
-			songInfo.fmodEvent = dynamicSong.fmodEvent;
-			songInfo.requiredDlcId = dynamicSong.requiredDlcId;
-			songInfo.priority = 100;
-			songInfo.interruptsActiveMusic = false;
-			songInfo.dynamic = true;
-			songInfo.useTimeOfDay = dynamicSong.useTimeOfDay;
-			songInfo.numberOfVariations = dynamicSong.numberOfVariations;
-			songInfo.musicKeySigniture = dynamicSong.musicKeySigniture;
-			songInfo.sfxAttenuationPercentage = this.dynamicMusicSFXAttenuationPercentage;
-			this.songMap[simpleSoundEventName] = songInfo;
-			this.fullSongPlaylist.songMap[simpleSoundEventName] = songInfo;
+			if (DlcManager.IsContentActive(dynamicSong.requiredDlcId))
+			{
+				string simpleSoundEventName = Assets.GetSimpleSoundEventName(dynamicSong.fmodEvent);
+				MusicManager.SongInfo songInfo = new MusicManager.SongInfo();
+				songInfo.fmodEvent = dynamicSong.fmodEvent;
+				songInfo.requiredDlcId = dynamicSong.requiredDlcId;
+				songInfo.priority = 100;
+				songInfo.interruptsActiveMusic = false;
+				songInfo.dynamic = true;
+				songInfo.useTimeOfDay = dynamicSong.useTimeOfDay;
+				songInfo.numberOfVariations = dynamicSong.numberOfVariations;
+				songInfo.musicKeySigniture = dynamicSong.musicKeySigniture;
+				songInfo.sfxAttenuationPercentage = this.dynamicMusicSFXAttenuationPercentage;
+				this.songMap[simpleSoundEventName] = songInfo;
+				this.fullSongPlaylist.songMap[simpleSoundEventName] = songInfo;
+			}
 		}
 		foreach (MusicManager.Minisong minisong in this.miniSongs)
 		{
-			string simpleSoundEventName2 = Assets.GetSimpleSoundEventName(minisong.fmodEvent);
-			MusicManager.SongInfo songInfo2 = new MusicManager.SongInfo();
-			songInfo2.fmodEvent = minisong.fmodEvent;
-			songInfo2.requiredDlcId = minisong.requiredDlcId;
-			songInfo2.priority = 100;
-			songInfo2.interruptsActiveMusic = false;
-			songInfo2.dynamic = true;
-			songInfo2.useTimeOfDay = false;
-			songInfo2.numberOfVariations = 5;
-			songInfo2.musicKeySigniture = minisong.musicKeySigniture;
-			songInfo2.sfxAttenuationPercentage = this.miniSongSFXAttenuationPercentage;
-			this.songMap[simpleSoundEventName2] = songInfo2;
-			this.miniSongPlaylist.songMap[simpleSoundEventName2] = songInfo2;
+			if (DlcManager.IsContentActive(minisong.requiredDlcId))
+			{
+				string simpleSoundEventName2 = Assets.GetSimpleSoundEventName(minisong.fmodEvent);
+				MusicManager.SongInfo songInfo2 = new MusicManager.SongInfo();
+				songInfo2.fmodEvent = minisong.fmodEvent;
+				songInfo2.requiredDlcId = minisong.requiredDlcId;
+				songInfo2.priority = 100;
+				songInfo2.interruptsActiveMusic = false;
+				songInfo2.dynamic = true;
+				songInfo2.useTimeOfDay = false;
+				songInfo2.numberOfVariations = 5;
+				songInfo2.musicKeySigniture = minisong.musicKeySigniture;
+				songInfo2.sfxAttenuationPercentage = this.miniSongSFXAttenuationPercentage;
+				this.songMap[simpleSoundEventName2] = songInfo2;
+				this.miniSongPlaylist.songMap[simpleSoundEventName2] = songInfo2;
+			}
 		}
 		foreach (MusicManager.Stinger stinger in this.stingers)
 		{
-			string simpleSoundEventName3 = Assets.GetSimpleSoundEventName(stinger.fmodEvent);
-			MusicManager.SongInfo songInfo3 = new MusicManager.SongInfo();
-			songInfo3.fmodEvent = stinger.fmodEvent;
-			songInfo3.priority = 100;
-			songInfo3.interruptsActiveMusic = true;
-			songInfo3.dynamic = false;
-			songInfo3.useTimeOfDay = false;
-			songInfo3.numberOfVariations = 0;
-			this.SongMap[simpleSoundEventName3] = songInfo3;
+			if (DlcManager.IsContentActive(stinger.requiredDlcId))
+			{
+				string simpleSoundEventName3 = Assets.GetSimpleSoundEventName(stinger.fmodEvent);
+				MusicManager.SongInfo songInfo3 = new MusicManager.SongInfo();
+				songInfo3.fmodEvent = stinger.fmodEvent;
+				songInfo3.priority = 100;
+				songInfo3.interruptsActiveMusic = true;
+				songInfo3.dynamic = false;
+				songInfo3.useTimeOfDay = false;
+				songInfo3.numberOfVariations = 0;
+				songInfo3.requiredDlcId = stinger.requiredDlcId;
+				this.SongMap[simpleSoundEventName3] = songInfo3;
+			}
 		}
-		foreach (MusicManager.SongInfo songInfo4 in this.menuSongs)
+		foreach (MusicManager.MenuSong menuSong in this.menuSongs)
 		{
-			string simpleSoundEventName4 = Assets.GetSimpleSoundEventName(songInfo4.fmodEvent);
-			MusicManager.SongInfo songInfo5 = new MusicManager.SongInfo();
-			songInfo5.fmodEvent = songInfo4.fmodEvent;
-			songInfo5.priority = 100;
-			songInfo5.interruptsActiveMusic = true;
-			songInfo5.dynamic = false;
-			songInfo5.useTimeOfDay = false;
-			songInfo5.numberOfVariations = 0;
-			this.SongMap[simpleSoundEventName4] = songInfo5;
+			if (DlcManager.IsContentActive(menuSong.requiredDlcId))
+			{
+				string simpleSoundEventName4 = Assets.GetSimpleSoundEventName(menuSong.fmodEvent);
+				MusicManager.SongInfo songInfo4 = new MusicManager.SongInfo();
+				songInfo4.fmodEvent = menuSong.fmodEvent;
+				songInfo4.priority = 100;
+				songInfo4.interruptsActiveMusic = true;
+				songInfo4.dynamic = false;
+				songInfo4.useTimeOfDay = false;
+				songInfo4.numberOfVariations = 0;
+				songInfo4.requiredDlcId = menuSong.requiredDlcId;
+				this.SongMap[simpleSoundEventName4] = songInfo4;
+			}
 		}
 	}
 
@@ -615,7 +645,6 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public void OnAfterDeserialize()
 	{
-		this.ConfigureSongs();
 	}
 
 	private void Log(string s)
@@ -647,7 +676,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	[Tooltip("Generally songs that don't play during gameplay, while a menu is open. For example, the ESC menu or the Starmap.")]
 	[SerializeField]
-	private MusicManager.SongInfo[] menuSongs;
+	private MusicManager.MenuSong[] menuSongs;
 
 	private Dictionary<string, MusicManager.SongInfo> songMap = new Dictionary<string, MusicManager.SongInfo>();
 
@@ -704,8 +733,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	[Serializable]
 	public class SongInfo
 	{
-		[EventRef]
-		public string fmodEvent;
+		public EventReference fmodEvent;
 
 		[NonSerialized]
 		public int priority;
@@ -748,8 +776,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	[Serializable]
 	public class DynamicSong
 	{
-		[EventRef]
-		public string fmodEvent;
+		public EventReference fmodEvent;
 
 		[Tooltip("Some songs are set up to have Morning, Daytime, Hook, and Intro sections. Toggle this ON if this song has those sections.")]
 		[SerializeField]
@@ -772,16 +799,29 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	[Serializable]
 	public class Stinger
 	{
-		[EventRef]
-		public string fmodEvent;
+		public EventReference fmodEvent;
+
+		[Tooltip("Should playback of this song be limited to an active DLC?")]
+		[SerializeField]
+		public string requiredDlcId = "";
+	}
+
+	[DebuggerDisplay("{fmodEvent}")]
+	[Serializable]
+	public class MenuSong
+	{
+		public EventReference fmodEvent;
+
+		[Tooltip("Should playback of this song be limited to an active DLC?")]
+		[SerializeField]
+		public string requiredDlcId = "";
 	}
 
 	[DebuggerDisplay("{fmodEvent}")]
 	[Serializable]
 	public class Minisong
 	{
-		[EventRef]
-		public string fmodEvent;
+		public EventReference fmodEvent;
 
 		[Tooltip("Some songs have different key signitures. Enter the key this music is in.")]
 		[SerializeField]
@@ -834,6 +874,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				}
 			}
 			this.lastSongPlayed = text;
+			global::Debug.Assert(this.songMap.ContainsKey(text), "Missing song " + text);
 			return Assets.GetSimpleSoundEventName(this.songMap[text].fmodEvent);
 		}
 

@@ -130,25 +130,29 @@ namespace TUNING
 
 		public class EGG_CHANCE_MODIFIERS
 		{
-			private static global::System.Action CreateDietaryModifier(string id, Tag eggTag, TagBits foodTags, float modifierPerCal)
+			private static global::System.Action CreateDietaryModifier(string id, Tag eggTag, HashSet<Tag> foodTags, float modifierPerCal)
 			{
+				Func<string, string> <>9__1;
 				FertilityModifier.FertilityModFn <>9__2;
 				return delegate
 				{
 					string text = CREATURES.FERTILITY_MODIFIERS.DIET.NAME;
 					string text2 = CREATURES.FERTILITY_MODIFIERS.DIET.DESC;
-					List<Tag> foodTagsActual = foodTags.GetTagsVerySlow();
 					ModifierSet modifierSet = Db.Get();
 					string id2 = id;
 					Tag eggTag2 = eggTag;
 					string text3 = text;
 					string text4 = text2;
-					Func<string, string> func = delegate(string descStr)
+					Func<string, string> func;
+					if ((func = <>9__1) == null)
 					{
-						string text5 = string.Join(", ", foodTagsActual.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
-						descStr = string.Format(descStr, text5);
-						return descStr;
-					};
+						func = (<>9__1 = delegate(string descStr)
+						{
+							string text5 = string.Join(", ", foodTags.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
+							descStr = string.Format(descStr, text5);
+							return descStr;
+						});
+					}
 					FertilityModifier.FertilityModFn fertilityModFn;
 					if ((fertilityModFn = <>9__2) == null)
 					{
@@ -157,8 +161,7 @@ namespace TUNING
 							inst.gameObject.Subscribe(-2038961714, delegate(object data)
 							{
 								CreatureCalorieMonitor.CaloriesConsumedEvent caloriesConsumedEvent = (CreatureCalorieMonitor.CaloriesConsumedEvent)data;
-								TagBits tagBits = new TagBits(caloriesConsumedEvent.tag);
-								if (foodTags.HasAny(ref tagBits))
+								if (foodTags.Contains(caloriesConsumedEvent.tag))
 								{
 									inst.AddBreedingChance(eggType, caloriesConsumedEvent.calories * modifierPerCal);
 								}
@@ -171,7 +174,7 @@ namespace TUNING
 
 			private static global::System.Action CreateDietaryModifier(string id, Tag eggTag, Tag foodTag, float modifierPerCal)
 			{
-				return CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier(id, eggTag, new TagBits(foodTag), modifierPerCal);
+				return CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier(id, eggTag, new HashSet<Tag> { foodTag }, modifierPerCal);
 			}
 
 			private static global::System.Action CreateNearbyCreatureModifier(string id, Tag eggTag, Tag nearbyCreature, float modifierPerSecond, bool alsoInvert)
@@ -233,7 +236,7 @@ namespace TUNING
 				};
 			}
 
-			private static global::System.Action CreateElementCreatureModifier(string id, Tag eggTag, Tag element, float modifierPerSecond, bool alsoInvert)
+			private static global::System.Action CreateElementCreatureModifier(string id, Tag eggTag, Tag element, float modifierPerSecond, bool alsoInvert, bool checkSubstantialLiquid, string tooltipOverride = null)
 			{
 				Func<string, string> <>9__1;
 				FertilityModifier.FertilityModFn <>9__2;
@@ -249,7 +252,14 @@ namespace TUNING
 					Func<string, string> func;
 					if ((func = <>9__1) == null)
 					{
-						func = (<>9__1 = (string descStr) => string.Format(descStr, ElementLoader.GetElement(element).name));
+						func = (<>9__1 = delegate(string descStr)
+						{
+							if (tooltipOverride == null)
+							{
+								return string.Format(descStr, ElementLoader.GetElement(element).name);
+							}
+							return tooltipOverride;
+						});
 					}
 					FertilityModifier.FertilityModFn fertilityModFn;
 					if ((fertilityModFn = <>9__2) == null)
@@ -269,7 +279,7 @@ namespace TUNING
 								{
 									return;
 								}
-								if (Grid.Element[num].tag == element && Grid.IsSubstantialLiquid(num, 0.35f))
+								if (Grid.Element[num].HasTag(element) && (!checkSubstantialLiquid || Grid.IsSubstantialLiquid(num, 0.35f)))
 								{
 									inst.AddBreedingChance(eggType, dt * modifierPerSecond);
 									return;
@@ -285,25 +295,29 @@ namespace TUNING
 				};
 			}
 
-			private static global::System.Action CreateCropTendedModifier(string id, Tag eggTag, TagBits cropTags, float modifierPerEvent)
+			private static global::System.Action CreateCropTendedModifier(string id, Tag eggTag, HashSet<Tag> cropTags, float modifierPerEvent)
 			{
+				Func<string, string> <>9__1;
 				FertilityModifier.FertilityModFn <>9__2;
 				return delegate
 				{
 					string text = CREATURES.FERTILITY_MODIFIERS.CROPTENDING.NAME;
 					string text2 = CREATURES.FERTILITY_MODIFIERS.CROPTENDING.DESC;
-					List<Tag> plantTagsActual = cropTags.GetTagsVerySlow();
 					ModifierSet modifierSet = Db.Get();
 					string id2 = id;
 					Tag eggTag2 = eggTag;
 					string text3 = text;
 					string text4 = text2;
-					Func<string, string> func = delegate(string descStr)
+					Func<string, string> func;
+					if ((func = <>9__1) == null)
 					{
-						string text5 = string.Join(", ", plantTagsActual.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
-						descStr = string.Format(descStr, text5);
-						return descStr;
-					};
+						func = (<>9__1 = delegate(string descStr)
+						{
+							string text5 = string.Join(", ", cropTags.Select<Tag, string>((Tag t) => t.ProperName()).ToArray<string>());
+							descStr = string.Format(descStr, text5);
+							return descStr;
+						});
+					}
 					FertilityModifier.FertilityModFn fertilityModFn;
 					if ((fertilityModFn = <>9__2) == null)
 					{
@@ -312,8 +326,7 @@ namespace TUNING
 							inst.gameObject.Subscribe(90606262, delegate(object data)
 							{
 								CropTendingStates.CropTendingEventData cropTendingEventData = (CropTendingStates.CropTendingEventData)data;
-								TagBits tagBits = new TagBits(cropTendingEventData.cropId);
-								if (cropTags.HasAny(ref tagBits))
+								if (cropTags.Contains(cropTendingEventData.cropId))
 								{
 									inst.AddBreedingChance(eggType, modifierPerEvent);
 								}
@@ -397,14 +410,16 @@ namespace TUNING
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("PacuCleaner", "PacuCleanerEgg".ToTag(), 243.15f, 278.15f, 8.333333E-05f, false),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("DreckoPlastic", "DreckoPlasticEgg".ToTag(), "BasicSingleHarvestPlant".ToTag(), 0.025f / DreckoTuning.STANDARD_CALORIES_PER_CYCLE),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("SquirrelHug", "SquirrelHugEgg".ToTag(), BasicFabricMaterialPlantConfig.ID.ToTag(), 0.025f / SquirrelTuning.STANDARD_CALORIES_PER_CYCLE),
-				CREATURES.EGG_CHANCE_MODIFIERS.CreateCropTendedModifier("DivergentWorm", "DivergentWormEgg".ToTag(), new TagBits(new Tag[]
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateCropTendedModifier("DivergentWorm", "DivergentWormEgg".ToTag(), new HashSet<Tag>
 				{
 					"WormPlant".ToTag(),
 					"SuperWormPlant".ToTag()
-				}), 0.05f / (float)DivergentTuning.TIMES_TENDED_PER_CYCLE_FOR_EVOLUTION),
-				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("PokeLumber", "CrabWoodEgg".ToTag(), SimHashes.Ethanol.CreateTag(), 0.00025f, true),
-				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("PokeFreshWater", "CrabFreshWaterEgg".ToTag(), SimHashes.Water.CreateTag(), 0.00025f, true),
-				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("MoleDelicacy", "MoleDelicacyEgg".ToTag(), MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MIN, MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MAX, 8.333333E-05f, false)
+				}, 0.05f / (float)DivergentTuning.TIMES_TENDED_PER_CYCLE_FOR_EVOLUTION),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("PokeLumber", "CrabWoodEgg".ToTag(), SimHashes.Ethanol.CreateTag(), 0.00025f, true, true, null),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("PokeFreshWater", "CrabFreshWaterEgg".ToTag(), SimHashes.Water.CreateTag(), 0.00025f, true, true, null),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("MoleDelicacy", "MoleDelicacyEgg".ToTag(), MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MIN, MoleDelicacyConfig.EGG_CHANCES_TEMPERATURE_MAX, 8.333333E-05f, false),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("StaterpillarGas", "StaterpillarGasEgg".ToTag(), GameTags.Unbreathable, 0.00025f, true, false, CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.UNBREATHABLE),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("StaterpillarLiquid", "StaterpillarLiquidEgg".ToTag(), GameTags.Liquid, 0.00025f, true, false, CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.LIQUID)
 			};
 		}
 	}

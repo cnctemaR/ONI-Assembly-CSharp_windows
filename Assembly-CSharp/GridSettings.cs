@@ -27,7 +27,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.Loudness = new float[Grid.CellCount];
 		Grid.GravitasFacility = new bool[Grid.CellCount];
 		Grid.WorldIdx = new byte[Grid.CellCount];
-		Grid.ObjectLayers = new Dictionary<int, GameObject>[42];
+		Grid.ObjectLayers = new Dictionary<int, GameObject>[43];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{
 			Grid.ObjectLayers[i] = new Dictionary<int, GameObject>();
@@ -77,12 +77,6 @@ public class GridSettings : KMonoBehaviour
 		Grid.OnReveal = null;
 		Grid.ResetNavMasksAndDetails();
 	}
-
-	public int GridWidthInCells;
-
-	public int GridHeightInCells;
-
-	public int SimChunkEdgeSize = 32;
 
 	public const float CellSizeInMeters = 1f;
 }

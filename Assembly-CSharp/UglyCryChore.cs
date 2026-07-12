@@ -17,7 +17,7 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 		public StatesInstance(UglyCryChore master, GameObject crier)
 			: base(master)
 		{
-			base.sm.crier.Set(crier, base.smi);
+			base.sm.crier.Set(crier, base.smi, false);
 			this.bodyTemperature = Db.Get().Amounts.Temperature.Lookup(crier);
 		}
 
@@ -46,7 +46,7 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 		{
 			default_state = this.cry;
 			base.Target(this.crier);
-			this.uglyCryingEffect = new Effect("UglyCrying", DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, DUPLICANTS.MODIFIERS.UGLY_CRYING.TOOLTIP, 0f, true, false, true, null, 0f, null, "");
+			this.uglyCryingEffect = new Effect("UglyCrying", DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, DUPLICANTS.MODIFIERS.UGLY_CRYING.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 			this.uglyCryingEffect.Add(new AttributeModifier(Db.Get().Attributes.Decor.Id, -30f, DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, false, false, true));
 			Db.Get().effects.Add(this.uglyCryingEffect);
 			this.cry.defaultState = this.cry.cry_pre.RemoveEffect("CryFace").ToggleAnims("anim_cry_kanim", 0f, "");

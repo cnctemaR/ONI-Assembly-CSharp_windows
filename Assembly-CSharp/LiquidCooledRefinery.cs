@@ -39,7 +39,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 	private void OnConduitUpdate(float dt)
 	{
 		bool flag = Game.Instance.liquidConduitFlow.GetContents(this.outputCell).mass > 0f;
-		this.smi.sm.outputBlocked.Set(flag, this.smi);
+		this.smi.sm.outputBlocked.Set(flag, this.smi, false);
 		this.operational.SetFlag(LiquidCooledRefinery.coolantOutputPipeEmpty, !flag);
 	}
 

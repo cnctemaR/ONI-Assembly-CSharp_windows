@@ -105,7 +105,7 @@ public class SaveUpgradeWarning : KMonoBehaviour
 
 	private IEnumerator SendAutomationWarningNotifications()
 	{
-		yield return new WaitForEndOfFrame();
+		yield return SequenceUtil.WaitForEndOfFrame;
 		if (Components.BuildingCompletes.Count == 0)
 		{
 			global::Debug.LogWarning("Could not send automation warnings because buildings have not yet loaded");

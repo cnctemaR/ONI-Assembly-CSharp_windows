@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using FMOD.Studio;
+using FMODUnity;
 using KSerialization;
 using UnityEngine;
 
@@ -159,17 +160,18 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IC
 
 	protected void PlayCircuitSound(string state)
 	{
-		string text = null;
+		EventReference eventReference;
 		if (state == "powered")
 		{
-			text = Sounds.Instance.BuildingPowerOnMigrated;
+			eventReference = Sounds.Instance.BuildingPowerOnMigrated;
 		}
 		else if (state == "overdraw")
 		{
-			text = Sounds.Instance.ElectricGridOverloadMigrated;
+			eventReference = Sounds.Instance.ElectricGridOverloadMigrated;
 		}
 		else
 		{
+			eventReference = default(EventReference);
 			global::Debug.Log("Invalid state for sound in EnergyConsumer.");
 		}
 		if (!CameraController.Instance.IsAudibleSound(base.transform.GetPosition()))
@@ -184,7 +186,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IC
 		float num2 = (Time.time - num) / this.soundDecayTime;
 		Vector3 position = base.transform.GetPosition();
 		position.z = 0f;
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(position, false), 1f);
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(eventReference, CameraController.Instance.GetVerticallyScaledPosition(position, false), 1f);
 		eventInstance.setParameterByName("timeSinceLast", num2, false);
 		KFMOD.EndOneShot(eventInstance);
 		this.lastTimeSoundPlayed[state] = Time.time;

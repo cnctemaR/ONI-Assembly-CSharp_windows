@@ -37,7 +37,7 @@ public class ShearingStationConfig : IBuildingConfig
 	{
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RanchStation, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RanchStationType, false);
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.CreaturePen.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
@@ -46,20 +46,20 @@ public class ShearingStationConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		RanchStation.Def def = go.AddOrGetDef<RanchStation.Def>();
-		def.isCreatureEligibleToBeRanchedCb = delegate(GameObject creature_go, RanchStation.Instance ranch_station_smi)
+		def.IsCritterEligibleToBeRanchedCb = delegate(GameObject creature_go, RanchStation.Instance ranch_station_smi)
 		{
 			IShearable smi = creature_go.GetSMI<IShearable>();
 			return smi != null && smi.IsFullyGrown();
 		};
-		def.onRanchCompleteCb = delegate(GameObject creature_go)
+		def.OnRanchCompleteCb = delegate(GameObject creature_go)
 		{
 			creature_go.GetSMI<IShearable>().Shear();
 		};
-		def.rancherInteractAnim = "anim_interacts_shearingstation_kanim";
-		def.worktime = 12f;
-		def.ranchedPreAnim = "shearing_pre";
-		def.ranchedLoopAnim = "shearing_loop";
-		def.ranchedPstAnim = "shearing_pst";
+		def.RancherInteractAnim = "anim_interacts_shearingstation_kanim";
+		def.WorkTime = 12f;
+		def.RanchedPreAnim = "shearing_pre";
+		def.RanchedLoopAnim = "shearing_loop";
+		def.RanchedPstAnim = "shearing_pst";
 		Prioritizable.AddRef(go);
 	}
 

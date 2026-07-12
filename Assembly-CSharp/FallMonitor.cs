@@ -173,7 +173,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			}
 			if (global::UnityEngine.Random.Range(0, 9) == 8)
 			{
-				new EmoteChore(base.master.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_react_floor_missing_kanim", new HashedString[] { "react" }, KAnim.PlayMode.Once, this.flipRecoverEmote);
+				new EmoteChore(base.master.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, Db.Get().Emotes.Minion.CloseCall_Fall, KAnim.PlayMode.Once, 1, this.flipRecoverEmote);
 			}
 		}
 
@@ -247,8 +247,8 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 					this.TeleportInWorld(num);
 				}
 			}
-			base.sm.isFalling.Set(flag, base.smi);
-			base.sm.isEntombed.Set(flag2, base.smi);
+			base.sm.isFalling.Set(flag, base.smi, false);
+			base.sm.isEntombed.Set(flag2, base.smi, false);
 		}
 
 		private void TeleportInWorld(int cell)

@@ -28,6 +28,10 @@ public class KBatchedAnimTracker : MonoBehaviour
 		this.controller.onAnimComplete += this.OnAnimStop;
 		this.controller.onLayerChanged += this.OnLayerChanged;
 		this.forceUpdate = true;
+		if (this.myAnim != null)
+		{
+			return;
+		}
 		this.myAnim = base.GetComponent<KBatchedAnimController>();
 	}
 
@@ -53,6 +57,12 @@ public class KBatchedAnimTracker : MonoBehaviour
 		{
 			base.enabled = false;
 		}
+	}
+
+	public void SetAnimControllers(KBatchedAnimController controller, KBatchedAnimController parentController)
+	{
+		this.myAnim = controller;
+		this.controller = parentController;
 	}
 
 	private void UpdateFrame()
@@ -139,10 +149,8 @@ public class KBatchedAnimTracker : MonoBehaviour
 		this.targetPoint.z = 0f;
 	}
 
-	[SerializeField]
 	public KBatchedAnimController controller;
 
-	[SerializeField]
 	public Vector3 offset = Vector3.zero;
 
 	public HashedString symbol;
@@ -167,5 +175,6 @@ public class KBatchedAnimTracker : MonoBehaviour
 
 	private Vector3 previousPosition;
 
+	[SerializeField]
 	private KBatchedAnimController myAnim;
 }

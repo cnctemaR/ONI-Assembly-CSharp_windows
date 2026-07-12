@@ -17,5 +17,7 @@ namespace FMOD.Studio
 		public PARAMETER_TYPE type;
 
 		public PARAMETER_FLAGS flags;
+
+		public GUID guid;
 	}
 }

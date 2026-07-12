@@ -270,34 +270,41 @@ public class NameDisplayScreen : KScreen
 			global::Debug.LogWarningFormat("CoolantBar added twice {0}", new object[] { component });
 			return;
 		}
-		else
+		else if (component is ThoughtGraph.Instance)
 		{
-			if (!(component is ThoughtGraph.Instance))
-			{
-				if (component is GameplayEventMonitor.Instance)
-				{
-					if (!entry.gameplayEventDisplay)
-					{
-						GameObject gameObject6 = Util.KInstantiateUI(EffectPrefabs.Instance.GameplayEventDisplay, entry.display_go, false);
-						entry.gameplayEventDisplay = gameObject6.GetComponent<HierarchyReferences>();
-						gameObject6.name = "Gameplay Event Display";
-						return;
-					}
-					global::Debug.LogWarningFormat("GameplayEventDisplay added twice {0}", new object[] { component });
-				}
-				return;
-			}
 			if (!entry.thoughtBubble)
 			{
-				GameObject gameObject7 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubble, entry.display_go, false);
-				entry.thoughtBubble = gameObject7.GetComponent<HierarchyReferences>();
-				gameObject7.name = "Thought Bubble";
-				GameObject gameObject8 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubbleConvo, entry.display_go, false);
-				entry.thoughtBubbleConvo = gameObject8.GetComponent<HierarchyReferences>();
-				gameObject8.name = "Thought Bubble Convo";
+				GameObject gameObject6 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubble, entry.display_go, false);
+				entry.thoughtBubble = gameObject6.GetComponent<HierarchyReferences>();
+				gameObject6.name = "Thought Bubble";
+				GameObject gameObject7 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubbleConvo, entry.display_go, false);
+				entry.thoughtBubbleConvo = gameObject7.GetComponent<HierarchyReferences>();
+				gameObject7.name = "Thought Bubble Convo";
 				return;
 			}
 			global::Debug.LogWarningFormat("ThoughtGraph added twice {0}", new object[] { component });
+			return;
+		}
+		else
+		{
+			if (!(component is GameplayEventMonitor.Instance))
+			{
+				if (component is Dreamer.Instance && !entry.dreamBubble)
+				{
+					GameObject gameObject8 = Util.KInstantiateUI(EffectPrefabs.Instance.DreamBubble, entry.display_go, false);
+					gameObject8.name = "Dream Bubble";
+					entry.dreamBubble = gameObject8.GetComponent<DreamBubble>();
+				}
+				return;
+			}
+			if (!entry.gameplayEventDisplay)
+			{
+				GameObject gameObject9 = Util.KInstantiateUI(EffectPrefabs.Instance.GameplayEventDisplay, entry.display_go, false);
+				entry.gameplayEventDisplay = gameObject9.GetComponent<HierarchyReferences>();
+				gameObject9.name = "Gameplay Event Display";
+				return;
+			}
+			global::Debug.LogWarningFormat("GameplayEventDisplay added twice {0}", new object[] { component });
 			return;
 		}
 	}
@@ -309,7 +316,7 @@ public class NameDisplayScreen : KScreen
 			return;
 		}
 		this.bindOnOverlayChange();
-		Camera mainCamera = Game.Instance.MainCamera;
+		Camera mainCamera = Game.MainCamera;
 		if (mainCamera == null)
 		{
 			return;
@@ -423,6 +430,40 @@ public class NameDisplayScreen : KScreen
 				componentInChildren.text = representedObject.GetComponent<RocketModule>().GetParentRocketName();
 			}
 		}
+	}
+
+	public void SetDream(GameObject minion_go, Dream dream)
+	{
+		NameDisplayScreen.Entry entry = this.GetEntry(minion_go);
+		if (entry == null || entry.dreamBubble == null)
+		{
+			return;
+		}
+		entry.dreamBubble.SetDream(dream);
+		entry.dreamBubble.GetComponent<KSelectable>().entityName = "Dreaming";
+		entry.dreamBubble.gameObject.SetActive(true);
+		entry.dreamBubble.SetVisibility(true);
+	}
+
+	public void StopDreaming(GameObject minion_go)
+	{
+		NameDisplayScreen.Entry entry = this.GetEntry(minion_go);
+		if (entry == null || entry.dreamBubble == null)
+		{
+			return;
+		}
+		entry.dreamBubble.StopDreaming();
+		entry.dreamBubble.gameObject.SetActive(false);
+	}
+
+	public void DreamTick(GameObject minion_go, float dt)
+	{
+		NameDisplayScreen.Entry entry = this.GetEntry(minion_go);
+		if (entry == null || entry.dreamBubble == null)
+		{
+			return;
+		}
+		entry.dreamBubble.Tick(dt);
 	}
 
 	public void SetThoughtBubbleDisplay(GameObject minion_go, bool bVisible, string hover_text, Sprite bubble_sprite, Sprite topic_sprite)
@@ -598,6 +639,8 @@ public class NameDisplayScreen : KScreen
 		public ProgressBar suitFuelBar;
 
 		public ProgressBar suitBatteryBar;
+
+		public DreamBubble dreamBubble;
 
 		public HierarchyReferences thoughtBubble;
 

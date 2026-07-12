@@ -122,7 +122,7 @@ public static class RoomConstraints
 	{
 		foreach (KPrefabID kprefabID in room.buildings)
 		{
-			if (kprefabID.HasTag(RoomConstraints.ConstraintTags.Bed) && !kprefabID.HasTag(RoomConstraints.ConstraintTags.LuxuryBed))
+			if (kprefabID.HasTag(RoomConstraints.ConstraintTags.BedType) && !kprefabID.HasTag(RoomConstraints.ConstraintTags.LuxuryBedType))
 			{
 				return false;
 			}
@@ -134,7 +134,7 @@ public static class RoomConstraints
 	{
 		foreach (KPrefabID kprefabID2 in room.buildings)
 		{
-			if (kprefabID2.HasTag(RoomConstraints.ConstraintTags.Toilet) && !kprefabID2.HasTag(RoomConstraints.ConstraintTags.FlushToilet))
+			if (kprefabID2.HasTag(RoomConstraints.ConstraintTags.ToiletType) && !kprefabID2.HasTag(RoomConstraints.ConstraintTags.FlushToiletType))
 			{
 				return false;
 			}
@@ -142,9 +142,21 @@ public static class RoomConstraints
 		return true;
 	}, 1, ROOMS.CRITERIA.NO_OUTHOUSES.NAME, ROOMS.CRITERIA.NO_OUTHOUSES.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint LUXURY_BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.LuxuryBed), null, 1, ROOMS.CRITERIA.LUXURY_BED_SINGLE.NAME, ROOMS.CRITERIA.LUXURY_BED_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint NO_MESS_STATION = new RoomConstraints.Constraint(null, delegate(Room room)
+	{
+		bool flag = false;
+		int num = 0;
+		while (!flag && num < room.buildings.Count)
+		{
+			flag = room.buildings[num].HasTag(RoomConstraints.ConstraintTags.MessTable);
+			num++;
+		}
+		return !flag;
+	}, 1, ROOMS.CRITERIA.NO_MESS_STATION.NAME, ROOMS.CRITERIA.NO_MESS_STATION.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.Bed) && !bc.HasTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint LUXURY_BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.LuxuryBedType), null, 1, ROOMS.CRITERIA.LUXURY_BED_SINGLE.NAME, ROOMS.CRITERIA.LUXURY_BED_SINGLE.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.BedType) && !bc.HasTag(RoomConstraints.ConstraintTags.Clinic), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint BUILDING_DECOR_POSITIVE = new RoomConstraints.Constraint(delegate(KPrefabID bc)
 	{
@@ -158,15 +170,19 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint POWER_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.PowerStation), null, 1, ROOMS.CRITERIA.POWER_STATION.NAME, ROOMS.CRITERIA.POWER_STATION.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint FARM_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.FarmStation), null, 1, ROOMS.CRITERIA.FARM_STATION.NAME, ROOMS.CRITERIA.FARM_STATION.DESCRIPTION, null);
+	public static RoomConstraints.Constraint FARM_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.FarmStationType), null, 1, ROOMS.CRITERIA.FARM_STATION.NAME, ROOMS.CRITERIA.FARM_STATION.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint RANCH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.RanchStation), null, 1, ROOMS.CRITERIA.RANCH_STATION.NAME, ROOMS.CRITERIA.RANCH_STATION.DESCRIPTION, null);
+	public static RoomConstraints.Constraint RANCH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.RanchStationType), null, 1, ROOMS.CRITERIA.RANCH_STATION.NAME, ROOMS.CRITERIA.RANCH_STATION.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint SPICE_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.SpiceStation), null, 1, ROOMS.CRITERIA.SPICE_STATION.NAME, ROOMS.CRITERIA.SPICE_STATION.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint COOK_TOP = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.CookTop), null, 1, ROOMS.CRITERIA.COOK_TOP.NAME, ROOMS.CRITERIA.COOK_TOP.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint REFRIGERATOR = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.Refrigerator), null, 1, ROOMS.CRITERIA.REFRIGERATOR.NAME, ROOMS.CRITERIA.REFRIGERATOR.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint REC_BUILDING = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.RecBuilding), null, 1, ROOMS.CRITERIA.REC_BUILDING.NAME, ROOMS.CRITERIA.REC_BUILDING.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint MACHINE_SHOP = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.MachineShop), null, 1, ROOMS.CRITERIA.MACHINE_SHOP.NAME, ROOMS.CRITERIA.MACHINE_SHOP.DESCRIPTION, null);
-
-	public static RoomConstraints.Constraint FOOD_BOX = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.FoodStorage), null, 1, ROOMS.CRITERIA.FOOD_BOX.NAME, ROOMS.CRITERIA.FOOD_BOX.DESCRIPTION, null);
+	public static RoomConstraints.Constraint MACHINE_SHOP = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.MachineShopType), null, 1, ROOMS.CRITERIA.MACHINE_SHOP.NAME, ROOMS.CRITERIA.MACHINE_SHOP.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint LIGHT = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
@@ -194,15 +210,13 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint DESTRESSING_BUILDING = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.DeStressingBuilding), null, 1, ROOMS.CRITERIA.DESTRESSING_BUILDING.NAME, ROOMS.CRITERIA.DESTRESSING_BUILDING.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint MASSAGE_TABLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.MassageTable), null, 1, ROOMS.CRITERIA.MASSAGE_TABLE.NAME, ROOMS.CRITERIA.MASSAGE_TABLE.DESCRIPTION, null);
+	public static RoomConstraints.Constraint MASSAGE_TABLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.IsPrefabID(RoomConstraints.ConstraintTags.MassageTable), null, 1, ROOMS.CRITERIA.MASSAGE_TABLE.NAME, ROOMS.CRITERIA.MASSAGE_TABLE.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint MESS_STATION_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.MessTable), null, 1, ROOMS.CRITERIA.MESS_STATION_SINGLE.NAME, ROOMS.CRITERIA.MESS_STATION_SINGLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.REC_BUILDING });
 
-	public static RoomConstraints.Constraint RESEARCH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.ResearchStation), null, 1, ROOMS.CRITERIA.RESEARCH_STATION.NAME, ROOMS.CRITERIA.RESEARCH_STATION.DESCRIPTION, null);
+	public static RoomConstraints.Constraint TOILET = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.ToiletType), null, 1, ROOMS.CRITERIA.TOILET.NAME, ROOMS.CRITERIA.TOILET.DESCRIPTION, null);
 
-	public static RoomConstraints.Constraint TOILET = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.Toilet), null, 1, ROOMS.CRITERIA.TOILET.NAME, ROOMS.CRITERIA.TOILET.DESCRIPTION, null);
-
-	public static RoomConstraints.Constraint FLUSH_TOILET = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.FlushToilet), null, 1, ROOMS.CRITERIA.FLUSH_TOILET.NAME, ROOMS.CRITERIA.FLUSH_TOILET.DESCRIPTION, null);
+	public static RoomConstraints.Constraint FLUSH_TOILET = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.FlushToiletType), null, 1, ROOMS.CRITERIA.FLUSH_TOILET.NAME, ROOMS.CRITERIA.FLUSH_TOILET.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint WASH_STATION = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.WashStation), null, 1, ROOMS.CRITERIA.WASH_STATION.NAME, ROOMS.CRITERIA.WASH_STATION.DESCRIPTION, null);
 
@@ -223,23 +237,23 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint WILDANIMALS = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		int num = 0;
+		int num2 = 0;
 		using (List<KPrefabID>.Enumerator enumerator5 = room.cavity.creatures.GetEnumerator())
 		{
 			while (enumerator5.MoveNext())
 			{
 				if (enumerator5.Current.HasTag(GameTags.Creatures.Wild))
 				{
-					num++;
+					num2++;
 				}
 			}
 		}
-		return num >= 2;
+		return num2 >= 2;
 	}, 1, ROOMS.CRITERIA.WILDANIMALS.NAME, ROOMS.CRITERIA.WILDANIMALS.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint WILDPLANT = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		int num2 = 0;
+		int num3 = 0;
 		foreach (KPrefabID kprefabID5 in room.cavity.plants)
 		{
 			if (kprefabID5 != null)
@@ -248,20 +262,20 @@ public static class RoomConstraints
 				ReceptacleMonitor component5 = kprefabID5.GetComponent<ReceptacleMonitor>();
 				if (component5 != null && !component5.Replanted)
 				{
-					num2++;
+					num3++;
 				}
 				else if (component4 != null)
 				{
-					num2++;
+					num3++;
 				}
 			}
 		}
-		return num2 >= 2;
+		return num3 >= 2;
 	}, 1, ROOMS.CRITERIA.WILDPLANT.NAME, ROOMS.CRITERIA.WILDPLANT.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint WILDPLANTS = new RoomConstraints.Constraint(null, delegate(Room room)
 	{
-		int num3 = 0;
+		int num4 = 0;
 		foreach (KPrefabID kprefabID6 in room.cavity.plants)
 		{
 			if (kprefabID6 != null)
@@ -270,32 +284,30 @@ public static class RoomConstraints
 				ReceptacleMonitor component7 = kprefabID6.GetComponent<ReceptacleMonitor>();
 				if (component7 != null && !component7.Replanted)
 				{
-					num3++;
+					num4++;
 				}
 				else if (component6 != null)
 				{
-					num3++;
+					num4++;
 				}
 			}
 		}
-		return num3 >= 4;
+		return num4 >= 4;
 	}, 1, ROOMS.CRITERIA.WILDPLANTS.NAME, ROOMS.CRITERIA.WILDPLANTS.DESCRIPTION, null);
 
 	public static class ConstraintTags
 	{
-		public static Tag Bed = "Bed".ToTag();
+		public static Tag BedType = "BedType".ToTag();
 
-		public static Tag LuxuryBed = "LuxuryBed".ToTag();
+		public static Tag LuxuryBedType = "LuxuryBedType".ToTag();
 
-		public static Tag Toilet = "Toilet".ToTag();
+		public static Tag ToiletType = "ToiletType".ToTag();
 
-		public static Tag FlushToilet = "FlushToilet".ToTag();
+		public static Tag FlushToiletType = "FlushToiletType".ToTag();
 
 		public static Tag MessTable = "MessTable".ToTag();
 
 		public static Tag Clinic = "Clinic".ToTag();
-
-		public static Tag FoodStorage = "FoodStorage".ToTag();
 
 		public static Tag WashStation = "WashStation".ToTag();
 
@@ -313,17 +325,21 @@ public static class RoomConstraints
 
 		public static Tag PowerStation = "PowerStation".ToTag();
 
-		public static Tag FarmStation = "FarmStation".ToTag();
+		public static Tag FarmStationType = "FarmStationType".ToTag();
 
 		public static Tag CreatureRelocator = "CreatureRelocator".ToTag();
 
-		public static Tag CreatureFeeder = "CreatureFeeder".ToTag();
+		public static Tag RanchStationType = "RanchStationType".ToTag();
 
-		public static Tag RanchStation = "RanchStation".ToTag();
+		public static Tag SpiceStation = "SpiceStation".ToTag();
+
+		public static Tag CookTop = "CookTop".ToTag();
+
+		public static Tag Refrigerator = "Refrigerator".ToTag();
 
 		public static Tag RecBuilding = "RecBuilding".ToTag();
 
-		public static Tag MachineShop = "MachineShop".ToTag();
+		public static Tag MachineShopType = "MachineShopType".ToTag();
 
 		public static Tag Park = "Park".ToTag();
 

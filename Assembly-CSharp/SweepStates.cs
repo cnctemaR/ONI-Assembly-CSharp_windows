@@ -9,7 +9,7 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		default_state = this.beginPatrol;
 		this.beginPatrol.Enter(delegate(SweepStates.Instance smi)
 		{
-			smi.sm.timeUntilBored.Set(30f, smi);
+			smi.sm.timeUntilBored.Set(30f, smi, false);
 			smi.GoTo(this.moving);
 			SweepStates.Instance smi2 = smi;
 			smi2.OnStop = (Action<string, StateMachine.Status>)Delegate.Combine(smi2.OnStop, new Action<string, StateMachine.Status>(delegate(string data, StateMachine.Status status)
@@ -21,11 +21,11 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		{
 		}).MoveTo((SweepStates.Instance smi) => this.GetNextCell(smi), this.pause, this.redirected, false).Update(delegate(SweepStates.Instance smi, float dt)
 		{
-			smi.sm.timeUntilBored.Set(smi.sm.timeUntilBored.Get(smi) - dt, smi);
+			smi.sm.timeUntilBored.Set(smi.sm.timeUntilBored.Get(smi) - dt, smi, false);
 			if (smi.sm.timeUntilBored.Get(smi) <= 0f)
 			{
-				smi.sm.bored.Set(true, smi);
-				smi.sm.timeUntilBored.Set(30f, smi);
+				smi.sm.bored.Set(true, smi, false);
+				smi.sm.timeUntilBored.Set(30f, smi, false);
 				smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("react_bored");
 			}
 			StorageUnloadMonitor.Instance smi3 = smi.master.gameObject.GetSMI<StorageUnloadMonitor.Instance>();
@@ -51,14 +51,14 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 			{
 				smi.Play("bump", KAnim.PlayMode.Once);
 			}
-			this.headingRight.Set(!this.headingRight.Get(smi), smi);
+			this.headingRight.Set(!this.headingRight.Get(smi), smi, false);
 		}).OnAnimQueueComplete(this.pause);
 		this.redirected.StopMoving().GoTo(this.emoteRedirected);
 		this.sweep.PlayAnim("pickup").ToggleEffect("BotSweeping").Enter(delegate(SweepStates.Instance smi)
 		{
 			this.StopMoveSound(smi);
-			smi.sm.bored.Set(false, smi);
-			smi.sm.timeUntilBored.Set(30f, smi);
+			smi.sm.bored.Set(false, smi, false);
+			smi.sm.timeUntilBored.Set(30f, smi, false);
 		})
 			.OnAnimQueueComplete(this.moving);
 		this.pause.Enter(delegate(SweepStates.Instance smi)
@@ -78,8 +78,8 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		this.mopping.PlayAnim("mop_pre", KAnim.PlayMode.Once).QueueAnim("mop_loop", true, null).ToggleEffect("BotMopping")
 			.Enter(delegate(SweepStates.Instance smi)
 			{
-				smi.sm.timeUntilBored.Set(30f, smi);
-				smi.sm.bored.Set(false, smi);
+				smi.sm.timeUntilBored.Set(30f, smi, false);
+				smi.sm.bored.Set(false, smi, false);
 				this.StopMoveSound(smi);
 			})
 			.Update(delegate(SweepStates.Instance smi, float dt)

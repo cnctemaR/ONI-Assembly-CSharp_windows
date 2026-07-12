@@ -37,6 +37,8 @@ namespace Klei
 			public bool isDiscovered;
 
 			public List<string> traits = new List<string>();
+
+			public List<string> storyTraits = new List<string>();
 		}
 
 		public enum POIType

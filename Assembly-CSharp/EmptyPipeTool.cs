@@ -17,7 +17,7 @@ public class EmptyPipeTool : FilteredDragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		for (int i = 0; i < 42; i++)
+		for (int i = 0; i < 43; i++)
 		{
 			if (base.IsActiveLayer((ObjectLayer)i))
 			{

@@ -97,7 +97,7 @@ namespace Klei.AI
 			string text = name;
 			NotificationType notificationType = ((disease.severity <= Sickness.Severity.Minor) ? NotificationType.BadMinor : NotificationType.Bad);
 			object sourceInfo = this.exposureInfo.sourceInfo;
-			this.notification = new Notification(text, notificationType, func, sourceInfo, true, 0f, null, null, null, true);
+			this.notification = new Notification(text, notificationType, func, sourceInfo, true, 0f, null, null, null, true, false);
 			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, "", (disease.severity <= Sickness.Severity.Minor) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (disease.severity <= Sickness.Severity.Minor) ? NotificationType.BadMinor : NotificationType.Bad, false, OverlayModes.None.ID, 129022, true, null);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveString);
 			if (this.smi != null)
@@ -184,7 +184,7 @@ namespace Klei.AI
 
 		public void SetPercentCured(float pct)
 		{
-			this.smi.sm.percentRecovered.Set(pct, this.smi);
+			this.smi.sm.percentRecovered.Set(pct, this.smi, false);
 		}
 
 		public void Cure()
@@ -246,7 +246,7 @@ namespace Klei.AI
 						base.sm.percentDied.Delta(num2, base.smi);
 						return;
 					}
-					base.sm.percentDied.Set(0f, base.smi);
+					base.sm.percentDied.Set(0f, base.smi, false);
 				}
 			}
 

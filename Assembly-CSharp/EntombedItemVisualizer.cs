@@ -13,7 +13,7 @@ public class EntombedItemVisualizer : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.entombedItemPool = new ObjectPool(new Func<GameObject>(this.InstantiateEntombedObject), 32);
+		this.entombedItemPool = new GameObjectPool(new Func<GameObject>(this.InstantiateEntombedObject), 32);
 	}
 
 	public bool AddItem(int cell)
@@ -94,7 +94,7 @@ public class EntombedItemVisualizer : KMonoBehaviour
 
 	private static readonly string[] EntombedVisualizerAnims = new string[] { "idle1", "idle2", "idle3", "idle4" };
 
-	private ObjectPool entombedItemPool;
+	private GameObjectPool entombedItemPool;
 
 	private Dictionary<int, EntombedItemVisualizer.Data> cellEntombedCounts = new Dictionary<int, EntombedItemVisualizer.Data>();
 

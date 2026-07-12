@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using FMOD.Studio;
+using FMODUnity;
 using UnityEngine;
 
 public class ConduitFlowVisualizer
 {
-	public ConduitFlowVisualizer(ConduitFlow flow_manager, Game.ConduitVisInfo vis_info, string overlay_sound, ConduitFlowVisualizer.Tuning tuning)
+	public ConduitFlowVisualizer(ConduitFlow flow_manager, Game.ConduitVisInfo vis_info, EventReference overlay_sound, ConduitFlowVisualizer.Tuning tuning)
 	{
 		this.flowManager = flow_manager;
 		this.visInfo = vis_info;
@@ -270,7 +271,7 @@ public class ConduitFlowVisualizer
 
 	private ConduitFlow flowManager;
 
-	private string overlaySound;
+	private EventReference overlaySound;
 
 	private bool showContents;
 

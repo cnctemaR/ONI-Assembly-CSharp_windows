@@ -1236,25 +1236,26 @@ public static class GameUtil
 					{
 						valid_cells.Add(floodFillInfo.cell);
 					}
+					int num = floodFillInfo.depth + 1;
 					queue.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellLeft(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
+						depth = num
 					});
 					queue.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellRight(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
+						depth = num
 					});
 					queue.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellAbove(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
+						depth = num
 					});
 					queue.Enqueue(new GameUtil.FloodFillInfo
 					{
 						cell = Grid.CellBelow(floodFillInfo.cell),
-						depth = floodFillInfo.depth + 1
+						depth = num
 					});
 				}
 			}
@@ -2221,6 +2222,17 @@ public static class GameUtil
 		return num;
 	}
 
+	public static string GetUnitTypeMassOrUnit(GameObject go)
+	{
+		string text = UI.UNITSUFFIXES.UNITS;
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		if (component != null)
+		{
+			text = (component.Tags.Contains(GameTags.Seed) ? UI.UNITSUFFIXES.UNITS : UI.UNITSUFFIXES.MASS.KILOGRAM);
+		}
+		return text;
+	}
+
 	public static string GetKeywordStyle(Tag tag)
 	{
 		Element element = ElementLoader.GetElement(tag);
@@ -2870,23 +2882,6 @@ public static class GameUtil
 				tagChangedEventData = new TagChangedEventData(tag, component2.HasTag(tag));
 			}
 			if (tagChangedEventData.tag == tag && tagChangedEventData.added)
-			{
-				callback(component, data);
-			}
-		});
-	}
-
-	public static EventSystem.IntraObjectHandler<T> CreateDoesntHaveTagHandler<T>(Tag tag, Action<T, object> callback) where T : KMonoBehaviour
-	{
-		return new EventSystem.IntraObjectHandler<T>(delegate(T component, object data)
-		{
-			TagChangedEventData tagChangedEventData = (TagChangedEventData)data;
-			if (tagChangedEventData.tag == Tag.Invalid)
-			{
-				KPrefabID component2 = component.GetComponent<KPrefabID>();
-				tagChangedEventData = new TagChangedEventData(tag, component2.HasTag(tag));
-			}
-			if (tagChangedEventData.tag == tag && !tagChangedEventData.added)
 			{
 				callback(component, data);
 			}

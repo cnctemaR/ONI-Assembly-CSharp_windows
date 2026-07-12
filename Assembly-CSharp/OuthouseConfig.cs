@@ -30,7 +30,7 @@ public class OuthouseConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Toilet, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.ToiletType, false);
 		Toilet toilet = go.AddOrGet<Toilet>();
 		toilet.maxFlushes = 15;
 		toilet.dirtUsedPerFlush = 13f;
@@ -53,12 +53,12 @@ public class OuthouseConfig : IBuildingConfig
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("Dirt");
+		manualDeliveryKG.RequestedItemTag = new Tag("Dirt");
 		manualDeliveryKG.capacity = 200f;
 		manualDeliveryKG.refillMass = 0.01f;
-		manualDeliveryKG.minimumMass = 200f;
+		manualDeliveryKG.MinimumMass = 200f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
-		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+		manualDeliveryKG.operationalRequirement = Operational.State.Functional;
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
 		ownable.canBePublic = true;

@@ -14,7 +14,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 		this.root.TagTransition(GameTags.Preserved, this.Preserved, false).TagTransition(GameTags.Entombed, this.Preserved, false);
 		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).Update(delegate(Rottable.Instance smi, float dt)
 		{
-			smi.sm.rotParameter.Set(smi.RotValue, smi);
+			smi.sm.rotParameter.Set(smi.RotValue, smi, false);
 		}, UpdateRate.SIM_1000ms, true)
 			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
 		this.Preserved.TagTransition(Rottable.PRESERVED_TAGS, this.Fresh, true).Enter("RefreshModifiers", delegate(Rottable.Instance smi)
@@ -28,7 +28,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.IsLTEZero)
 			.Update(delegate(Rottable.Instance smi, float dt)
 			{
-				smi.sm.rotParameter.Set(smi.RotValue, smi);
+				smi.sm.rotParameter.Set(smi.RotValue, smi, false);
 			}, UpdateRate.SIM_1000ms, false)
 			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, false);
 		this.Spoiled.Enter(delegate(Rottable.Instance smi)
@@ -308,7 +308,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			}
 			set
 			{
-				base.sm.rotParameter.Set(value, this);
+				base.sm.rotParameter.Set(value, this, false);
 				this.rotAmountInstance.SetValue(value);
 			}
 		}
@@ -348,7 +348,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			this.rotAmountInstance = amounts.Add(new AmountInstance(Db.Get().Amounts.Rot, master.gameObject));
 			this.rotAmountInstance.maxAttribute.Add(new AttributeModifier("Rot", def.spoilTime, null, false, false, true));
 			this.rotAmountInstance.SetValue(def.spoilTime);
-			base.sm.rotParameter.Set(this.rotAmountInstance.value, base.smi);
+			base.sm.rotParameter.Set(this.rotAmountInstance.value, base.smi, false);
 			if (Rottable.Instance.unrefrigeratedModifier == null)
 			{
 				Rottable.Instance.unrefrigeratedModifier = new AttributeModifier(this.rotAmountInstance.amount.Id, -0.7f, DUPLICANTS.MODIFIERS.ROTTEMPERATURE.UNREFRIGERATED, false, false, true);
@@ -417,7 +417,8 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 				return;
 			}
 			this.rotAmountInstance.deltaAttribute.ClearModifiers();
-			if (!base.GetComponent<KPrefabID>().HasAnyTags(Rottable.PRESERVED_TAGS))
+			KPrefabID component = base.GetComponent<KPrefabID>();
+			if (!component.HasAnyTags(Rottable.PRESERVED_TAGS))
 			{
 				Rottable.RotRefrigerationLevel rotRefrigerationLevel = Rottable.RefrigerationLevel(this);
 				if (rotRefrigerationLevel != Rottable.RotRefrigerationLevel.Refrigerated)
@@ -452,6 +453,10 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 					this.rotAmountInstance.deltaAttribute.Add(Rottable.Instance.sterileAtmosphereModifier);
 				}
 			}
+			if (component.HasTag(Db.Get().Spices.PreservingSpice.Id))
+			{
+				this.rotAmountInstance.deltaAttribute.Add(Db.Get().Spices.PreservingSpice.FoodModifier);
+			}
 			Rottable.SetStatusItems(this);
 		}
 
@@ -468,7 +473,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 					float num = component.Units * base.sm.rotParameter.Get(base.smi);
 					float num2 = primaryElement.Units * base.sm.rotParameter.Get(smi);
 					float num3 = (num + num2) / (component.Units + primaryElement.Units);
-					base.sm.rotParameter.Set(num3, base.smi);
+					base.sm.rotParameter.Set(num3, base.smi, false);
 				}
 			}
 		}

@@ -2,6 +2,7 @@
 using FMOD;
 using FMOD.Studio;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FMODUnity
 {
@@ -18,7 +19,7 @@ namespace FMODUnity
 
 		private RESULT Lookup()
 		{
-			return RuntimeManager.StudioSystem.getParameterDescriptionByName(this.parameter, out this.parameterDescription);
+			return RuntimeManager.StudioSystem.getParameterDescriptionByName(this.Parameter, out this.parameterDescription);
 		}
 
 		private void Awake()
@@ -39,22 +40,24 @@ namespace FMODUnity
 
 		public void TriggerParameters()
 		{
-			if (!string.IsNullOrEmpty(this.parameter))
+			if (!string.IsNullOrEmpty(this.Parameter))
 			{
-				RESULT result = RuntimeManager.StudioSystem.setParameterByID(this.parameterDescription.id, this.value, false);
+				RESULT result = RuntimeManager.StudioSystem.setParameterByID(this.parameterDescription.id, this.Value, false);
 				if (result != RESULT.OK)
 				{
-					global::UnityEngine.Debug.LogError(string.Format("[FMOD] StudioGlobalParameterTrigger failed to set parameter {0} : result = {1}", this.parameter, result));
+					RuntimeUtils.DebugLogError(string.Format("[FMOD] StudioGlobalParameterTrigger failed to set parameter {0} : result = {1}", this.Parameter, result));
 				}
 			}
 		}
 
 		[ParamRef]
-		public string parameter;
+		[FormerlySerializedAs("parameter")]
+		public string Parameter;
 
 		public EmitterGameEvent TriggerEvent;
 
-		public float value;
+		[FormerlySerializedAs("value")]
+		public float Value;
 
 		private PARAMETER_DESCRIPTION parameterDescription;
 	}

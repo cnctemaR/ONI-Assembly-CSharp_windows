@@ -14,8 +14,8 @@ namespace Klei.AI
 			this.targetPlantPrefab = targetPlantPrefab;
 			this.infectionDuration = infectionDuration;
 			this.incubationDuration = incubationDuration;
-			this.popupTitle = GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.NAME;
-			this.popupDescription = GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.DESCRIPTION;
+			this.title = GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.NAME;
+			this.description = GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.DESCRIPTION;
 		}
 
 		public override StateMachine.Instance GetSMI(GameplayEventManager manager, GameplayEventInstance eventInstance)
@@ -42,7 +42,7 @@ namespace Klei.AI
 				{
 					smi.InfectAPlant(true);
 				}).GoTo(this.running);
-				this.running.ToggleNotification((PlantBlightEvent.StatesInstance smi) => GameplayEventInstance.CreateStandardEventNotification(this.GenerateEventPopupData(smi))).EventHandlerTransition(GameHashes.Uprooted, this.finished, new Func<PlantBlightEvent.StatesInstance, object, bool>(this.NoBlightedPlants)).DefaultState(this.running.waiting)
+				this.running.ToggleNotification((PlantBlightEvent.StatesInstance smi) => EventInfoScreen.CreateNotification(this.GenerateEventPopupData(smi), null)).EventHandlerTransition(GameHashes.Uprooted, this.finished, new Func<PlantBlightEvent.StatesInstance, object, bool>(this.NoBlightedPlants)).DefaultState(this.running.waiting)
 					.OnSignal(this.doFinish, this.finished);
 				this.running.waiting.ParamTransition<float>(this.nextInfection, this.running.infect, (PlantBlightEvent.StatesInstance smi, float p) => p <= 0f).Update(delegate(PlantBlightEvent.StatesInstance smi, float dt)
 				{
@@ -55,20 +55,20 @@ namespace Klei.AI
 				this.finished.DoNotification((PlantBlightEvent.StatesInstance smi) => this.CreateSuccessNotification(smi, this.GenerateEventPopupData(smi))).ReturnSuccess();
 			}
 
-			public override GameplayEventPopupData GenerateEventPopupData(PlantBlightEvent.StatesInstance smi)
+			public override EventInfoData GenerateEventPopupData(PlantBlightEvent.StatesInstance smi)
 			{
-				GameplayEventPopupData gameplayEventPopupData = new GameplayEventPopupData(smi.gameplayEvent);
+				EventInfoData eventInfoData = new EventInfoData(smi.gameplayEvent.title, smi.gameplayEvent.description, smi.gameplayEvent.animFileName);
 				string text = smi.gameplayEvent.targetPlantPrefab.ToTag().ProperName();
-				gameplayEventPopupData.location = GAMEPLAY_EVENTS.LOCATIONS.COLONY_WIDE;
-				gameplayEventPopupData.whenDescription = GAMEPLAY_EVENTS.TIMES.NOW;
-				gameplayEventPopupData.SetTextParameter("plant", text);
-				return gameplayEventPopupData;
+				eventInfoData.location = GAMEPLAY_EVENTS.LOCATIONS.COLONY_WIDE;
+				eventInfoData.whenDescription = GAMEPLAY_EVENTS.TIMES.NOW;
+				eventInfoData.SetTextParameter("plant", text);
+				return eventInfoData;
 			}
 
-			private Notification CreateSuccessNotification(PlantBlightEvent.StatesInstance smi, GameplayEventPopupData eventPopupData)
+			private Notification CreateSuccessNotification(PlantBlightEvent.StatesInstance smi, EventInfoData eventInfoData)
 			{
 				string plantName = smi.gameplayEvent.targetPlantPrefab.ToTag().ProperName();
-				return new Notification(GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.SUCCESS.Replace("{plant}", plantName), NotificationType.Neutral, (List<Notification> list, object data) => GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.SUCCESS_TOOLTIP.Replace("{plant}", plantName), null, true, 0f, null, null, null, true);
+				return new Notification(GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.SUCCESS.Replace("{plant}", plantName), NotificationType.Neutral, (List<Notification> list, object data) => GAMEPLAY_EVENTS.EVENT_TYPES.PLANT_BLIGHT.SUCCESS_TOOLTIP.Replace("{plant}", plantName), null, true, 0f, null, null, null, true, false);
 			}
 
 			private bool NoBlightedPlants(PlantBlightEvent.StatesInstance smi, object obj)
@@ -170,7 +170,7 @@ namespace Klei.AI
 						}
 					}
 				}
-				base.sm.nextInfection.Set(base.smi.gameplayEvent.incubationDuration, this);
+				base.sm.nextInfection.Set(base.smi.gameplayEvent.incubationDuration, this, false);
 			}
 
 			[Serialize]

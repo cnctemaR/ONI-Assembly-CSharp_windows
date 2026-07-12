@@ -1993,6 +1993,27 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Hey! Do that into your elbow\n• Coughing fit was caused by " + DUPLICANTS.MODIFIERS.CONTAMINATEDLUNGS.NAME;
 			}
 
+			public class WEARING_PAJAMAS
+			{
+				public static LocString NAME = "Wearing " + UI.FormatAsLink("Pajamas", "SLEEP_CLINIC_PAJAMAS");
+
+				public static LocString TOOLTIP = "This Duplicant can now produce " + UI.FormatAsLink("Dream Journals", "DREAMJOURNAL") + " when sleeping";
+			}
+
+			public class DREAMING
+			{
+				public static LocString NAME = "Dreaming";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is adventuring through their own subconscious\n\nDreams are caused by wearing ",
+					UI.FormatAsLink("Pajamas", "SLEEP_CLINIC_PAJAMAS"),
+					"\n\n",
+					UI.FormatAsLink("Dream Journal", "DREAMJOURNAL"),
+					" will be ready in {time}"
+				});
+			}
+
 			public class SLEEPING
 			{
 				public static LocString NAME = "Sleeping";
@@ -2080,7 +2101,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{Role}: {Progress} Mastery";
 
-				public static LocString TOOLTIP = "This Duplicant is working as a <b>{Role}</b>" + UI.HORIZONTAL_BR_RULE + "They have <b>{Progress}</b> mastery of this job";
+				public static LocString TOOLTIP = "This Duplicant is working as a <b>{Role}</b>\n\nThey have <b>{Progress}</b> mastery of this job";
 			}
 
 			public class LOWOXYGEN
@@ -2109,7 +2130,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Incapacitated: {CauseOfIncapacitation}\nTime until death: {TimeUntilDeath}\n";
 
-				public static LocString TOOLTIP = "This Duplicant is near death!" + UI.HORIZONTAL_BR_RULE + "Assign them to a Triage Cot for rescue";
+				public static LocString TOOLTIP = "This Duplicant is near death!\n\nAssign them to a Triage Cot for rescue";
 
 				public static LocString NOTIFICATION_NAME = "Incapacitated";
 
@@ -2333,14 +2354,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Food Type Not Permitted";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant is not allowed to eat any of the ",
-					UI.FormatAsLink("Food", "FOOD"),
-					" in their reach",
-					UI.HORIZONTAL_BR_RULE,
-					"Enter the <color=#833A5FFF>CONSUMABLES</color> <color=#F44A47><b>[F]</b></color> to adjust their food permissions"
-				});
+				public static LocString TOOLTIP = "This Duplicant is not allowed to eat any of the " + UI.FormatAsLink("Food", "FOOD") + " in their reach\n\nEnter the <color=#833A5FFF>CONSUMABLES</color> <color=#F44A47><b>[F]</b></color> to adjust their food permissions";
 
 				public static LocString NOTIFICATION_NAME = "Unpermitted food";
 
@@ -2385,9 +2399,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This Duplicant is trying to keep their cool",
-					UI.HORIZONTAL_BR_RULE,
-					"Improve this Duplicant's ",
+					"This Duplicant is trying to keep their cool\n\nImprove this Duplicant's ",
 					UI.PRE_KEYWORD,
 					"Morale",
 					UI.PST_KEYWORD,
@@ -2401,9 +2413,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This Duplicant is consumed by hunger",
-					UI.HORIZONTAL_BR_RULE,
-					"Improve this Duplicant's ",
+					"This Duplicant is consumed by hunger\n\nImprove this Duplicant's ",
 					UI.PRE_KEYWORD,
 					"Morale",
 					UI.PST_KEYWORD,
@@ -2421,9 +2431,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This Duplicant is trying and failing to swallow their emotions",
-					UI.HORIZONTAL_BR_RULE,
-					"Improve this Duplicant's ",
+					"This Duplicant is trying and failing to swallow their emotions\n\nImprove this Duplicant's ",
 					UI.PRE_KEYWORD,
 					"Morale",
 					UI.PST_KEYWORD,
@@ -2437,9 +2445,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"Sort of like having butterflies in your stomach, except they're burps",
-					UI.HORIZONTAL_BR_RULE,
-					"Improve this Duplicant's ",
+					"Sort of like having butterflies in your stomach, except they're burps\n\nImprove this Duplicant's ",
 					UI.PRE_KEYWORD,
 					"Morale",
 					UI.PST_KEYWORD,
@@ -2453,9 +2459,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This Duplicant is fighting the urge to scream",
-					UI.HORIZONTAL_BR_RULE,
-					"Improve this Duplicant's ",
+					"This Duplicant is fighting the urge to scream\n\nImprove this Duplicant's ",
 					UI.PRE_KEYWORD,
 					"Morale",
 					UI.PST_KEYWORD,
@@ -2621,14 +2625,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Job";
 
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant does not have a Job Assignment",
-					UI.HORIZONTAL_BR_RULE,
-					"Enter the ",
-					UI.FormatAsManagementMenu("Jobs Panel", "[J]"),
-					" to view all available Jobs"
-				});
+				public static LocString TOOLTIP = "This Duplicant does not have a Job Assignment\n\nEnter the " + UI.FormatAsManagementMenu("Jobs Panel", "[J]") + " to view all available Jobs";
 			}
 
 			public class DROPPINGUNUSEDINVENTORY
@@ -2696,8 +2693,7 @@ namespace STRINGS
 				{
 					"There are no ",
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
-					" available for this Duplicant",
-					UI.HORIZONTAL_BR_RULE,
+					" available for this Duplicant\n\n",
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
 					" can be built from the ",
 					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5)
@@ -2710,9 +2706,7 @@ namespace STRINGS
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
 					" can be built from the ",
 					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5),
-					".",
-					UI.HORIZONTAL_BR_RULE,
-					"These Duplicants are in need of an ",
+					".\n\nThese Duplicants are in need of an ",
 					UI.FormatAsLink("Outhouse", "OUTHOUSE"),
 					":"
 				});
@@ -2733,8 +2727,7 @@ namespace STRINGS
 				{
 					"This poor Duplicant couldn't find an ",
 					UI.FormatAsLink("Outhouse", "OUTHOUSE"),
-					" in time and is super embarrassed",
-					UI.HORIZONTAL_BR_RULE,
+					" in time and is super embarrassed\n\n",
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
 					" can be built from the ",
 					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5)
@@ -2742,14 +2735,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "Made a mess";
 
-				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
-				{
-					"The ",
-					UI.FormatAsTool("Mop Tool", global::Action.Mop),
-					" can be used to clean up Duplicant-related \"spills\"",
-					UI.HORIZONTAL_BR_RULE,
-					"These Duplicants made messes that require cleaning up:\n"
-				});
+				public static LocString NOTIFICATION_TOOLTIP = "The " + UI.FormatAsTool("Mop Tool", global::Action.Mop) + " can be used to clean up Duplicant-related \"spills\"\n\nThese Duplicants made messes that require cleaning up:\n";
 			}
 
 			public class WASHINGHANDS
@@ -2781,8 +2767,7 @@ namespace STRINGS
 				{
 					"This Duplicant has unceremoniously hurled as the result of a ",
 					UI.FormatAsLink("Disease", "DISEASE"),
-					UI.HORIZONTAL_BR_RULE,
-					"Duplicant-related \"spills\" can be cleaned up using the ",
+					"\n\nDuplicant-related \"spills\" can be cleaned up using the ",
 					UI.PRE_KEYWORD,
 					"Mop Tool",
 					UI.PST_KEYWORD,
@@ -2796,9 +2781,7 @@ namespace STRINGS
 				{
 					"The ",
 					UI.FormatAsTool("Mop Tool", global::Action.Mop),
-					" can be used to clean up Duplicant-related \"spills\"",
-					UI.HORIZONTAL_BR_RULE,
-					"A ",
+					" can be used to clean up Duplicant-related \"spills\"\n\nA ",
 					UI.PRE_KEYWORD,
 					"Disease",
 					UI.PST_KEYWORD,
@@ -2816,9 +2799,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Stress",
 					UI.PST_KEYWORD,
-					" all over the floor",
-					UI.HORIZONTAL_BR_RULE,
-					"Duplicant-related \"spills\" can be cleaned up using the ",
+					" all over the floor\n\nDuplicant-related \"spills\" can be cleaned up using the ",
 					UI.PRE_KEYWORD,
 					"Mop Tool",
 					UI.PST_KEYWORD,
@@ -2832,9 +2813,7 @@ namespace STRINGS
 				{
 					"The ",
 					UI.FormatAsTool("Mop Tool", global::Action.Mop),
-					" can used to clean up Duplicant-related \"spills\"",
-					UI.HORIZONTAL_BR_RULE,
-					"These Duplicants became so ",
+					" can used to clean up Duplicant-related \"spills\"\n\nThese Duplicants became so ",
 					UI.PRE_KEYWORD,
 					"Stressed",
 					UI.PST_KEYWORD,
@@ -2852,9 +2831,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Radiation",
 					UI.PST_KEYWORD,
-					" poisoning.",
-					UI.HORIZONTAL_BR_RULE,
-					"Duplicant-related \"spills\" can be cleaned up using the ",
+					" poisoning.\n\nDuplicant-related \"spills\" can be cleaned up using the ",
 					UI.PRE_KEYWORD,
 					"Mop Tool",
 					UI.PST_KEYWORD,
@@ -2864,14 +2841,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "Radiation vomiting";
 
-				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
-				{
-					"The ",
-					UI.FormatAsTool("Mop Tool", global::Action.Mop),
-					" can clean up Duplicant-related \"spills\"",
-					UI.HORIZONTAL_BR_RULE,
-					" Radiation Sickness caused these Duplicants to throw up:"
-				});
+				public static LocString NOTIFICATION_TOOLTIP = "The " + UI.FormatAsTool("Mop Tool", global::Action.Mop) + " can clean up Duplicant-related \"spills\"\n\nRadiation Sickness caused these Duplicants to throw up:";
 			}
 
 			public class HASDISEASE
@@ -3307,6 +3277,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is refining <b>{Item}</b>";
 			}
 
+			public class SPICING
+			{
+				public static LocString NAME = "Spicing Food";
+
+				public static LocString TOOLTIP = "This Duplicant is applying spice to some Food";
+			}
+
 			public class CLEARING
 			{
 				public static LocString NAME = "Sweeping {Target}";
@@ -3528,7 +3505,7 @@ namespace STRINGS
 
 			public class STATUS_ITEM_TOOLTIP
 			{
-				public static LocString TEMPLATE = "{InfectionSource}{Duration}{Doctor}{Fatality}{Cures}{Bedrest}" + UI.HORIZONTAL_BR_RULE + "\n{Symptoms}";
+				public static LocString TEMPLATE = "{InfectionSource}{Duration}{Doctor}{Fatality}{Cures}{Bedrest}\n\n\n{Symptoms}";
 
 				public static LocString DESCRIPTOR = "<b>{0} {1}</b>\n";
 
@@ -3563,27 +3540,11 @@ namespace STRINGS
 
 				public static LocString DOCTOR_ADMINISTERED_BOOSTER = "Doctor Administered: Anytime";
 
-				public static LocString DOCTOR_ADMINISTERED_BOOSTER_TOOLTIP = string.Concat(new string[]
-				{
-					"Duplicants can receive this medicine at a {Station}, whether they are currently sick or not",
-					UI.HORIZONTAL_BR_RULE,
-					"They cannot give it to themselves and must receive it from a friend with ",
-					UI.PRE_KEYWORD,
-					"Doctoring Skills",
-					UI.PST_KEYWORD
-				});
+				public static LocString DOCTOR_ADMINISTERED_BOOSTER_TOOLTIP = "Duplicants can receive this medicine at a {Station}, whether they are currently sick or not\n\nThey cannot give it to themselves and must receive it from a friend with " + UI.PRE_KEYWORD + "Doctoring Skills" + UI.PST_KEYWORD;
 
 				public static LocString DOCTOR_ADMINISTERED_CURE = "Doctor Administered: Sick Only";
 
-				public static LocString DOCTOR_ADMINISTERED_CURE_TOOLTIP = string.Concat(new string[]
-				{
-					"Duplicants can receive this medicine at a {Station}, but only while they are sick",
-					UI.HORIZONTAL_BR_RULE,
-					"They cannot give it to themselves and must receive it from a friend with ",
-					UI.PRE_KEYWORD,
-					"Doctoring Skills",
-					UI.PST_KEYWORD
-				});
+				public static LocString DOCTOR_ADMINISTERED_CURE_TOOLTIP = "Duplicants can receive this medicine at a {Station}, but only while they are sick\n\nThey cannot give it to themselves and must receive it from a friend with " + UI.PRE_KEYWORD + "Doctoring Skills" + UI.PST_KEYWORD;
 
 				public static LocString BOOSTER = UI.FormatAsLink("Immune Booster", "IMMUNE SYSTEM");
 
@@ -3788,9 +3749,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Temperatures",
 						UI.PST_KEYWORD,
-						" between <b>{0}</b> and <b>{1}</b>",
-						UI.HORIZONTAL_BR_RULE,
-						"They thrive in ",
+						" between <b>{0}</b> and <b>{1}</b>\n\nThey thrive in ",
 						UI.PRE_KEYWORD,
 						"Temperatures",
 						UI.PST_KEYWORD,
@@ -3805,9 +3764,7 @@ namespace STRINGS
 						UI.PRE_KEYWORD,
 						"Germs",
 						UI.PST_KEYWORD,
-						" can survive between <b>{0}</b> and <b>{1}</b> of pressure",
-						UI.HORIZONTAL_BR_RULE,
-						"They thrive in pressures between <b>{2}</b> and <b>{3}</b>"
+						" can survive between <b>{0}</b> and <b>{1}</b> of pressure\n\nThey thrive in pressures between <b>{2}</b> and <b>{3}</b>"
 					});
 				}
 			}
@@ -3905,15 +3862,7 @@ namespace STRINGS
 
 				public static LocString DISEASE_SOURCE_DESCRIPTOR = "Currently infected with {2}.\n\nThis Duplicant will produce {1} when vomiting.";
 
-				public static LocString DISEASE_SOURCE_DESCRIPTOR_TOOLTIP = string.Concat(new string[]
-				{
-					"This Duplicant will vomit approximately every <b>{0}</b>",
-					UI.HORIZONTAL_BR_RULE,
-					"Each time they vomit, they will release <b>{1}</b> and lose ",
-					UI.PRE_KEYWORD,
-					"Calories",
-					UI.PST_KEYWORD
-				});
+				public static LocString DISEASE_SOURCE_DESCRIPTOR_TOOLTIP = "This Duplicant will vomit approximately every <b>{0}</b>\n\nEach time they vomit, they will release <b>{1}</b> and lose " + UI.PRE_KEYWORD + "Calories" + UI.PST_KEYWORD;
 			}
 
 			public class SLIMESICKNESS
@@ -3938,7 +3887,7 @@ namespace STRINGS
 
 				public static LocString DISEASE_SOURCE_DESCRIPTOR = "Currently infected with {2}.\n\nThis Duplicant will produce <b>{1}</b> when coughing.";
 
-				public static LocString DISEASE_SOURCE_DESCRIPTOR_TOOLTIP = "This Duplicant will cough approximately every <b>{0}</b>" + UI.HORIZONTAL_BR_RULE + "Each time they cough, they will release <b>{1}</b>";
+				public static LocString DISEASE_SOURCE_DESCRIPTOR_TOOLTIP = "This Duplicant will cough approximately every <b>{0}</b>\n\nEach time they cough, they will release <b>{1}</b>";
 			}
 
 			public class ZOMBIESICKNESS
@@ -4580,6 +4529,23 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is recovering " + UI.PRE_KEYWORD + "Stamina" + UI.PST_KEYWORD;
 			}
 
+			public class SLEEPCLINIC
+			{
+				public static LocString NAME = "Nodding Off";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is losing ",
+					UI.PRE_KEYWORD,
+					"Stamina",
+					UI.PST_KEYWORD,
+					" because of their ",
+					UI.PRE_KEYWORD,
+					"Pajamas",
+					UI.PST_KEYWORD
+				});
+			}
+
 			public class RESTFULSLEEP
 			{
 				public static LocString NAME = "Sleeping Peacefully";
@@ -4659,6 +4625,20 @@ namespace STRINGS
 				public static LocString NAME = "New Hope";
 
 				public static LocString TOOLTIP = "This Duplicant feels pretty optimistic about their new home";
+			}
+
+			public class MEGABRAINTANKBONUS
+			{
+				public static LocString NAME = "Maximum Aptitude";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is smarter and stronger than usual thanks to the ",
+					UI.PRE_KEYWORD,
+					"Somnium Synthesizer",
+					UI.PST_KEYWORD,
+					" "
+				});
 			}
 
 			public class PRICKLEFRUITDAMAGE
@@ -5208,20 +5188,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant recently received a hug from a friendly critter\n\nIt was so fluffy!";
 			}
 
-			public class SINGLEPLAYERARCADEPLAYING
-			{
-				public static LocString NAME = "Gaming";
-
-				public static LocString TOOLTIP = "This Duplicant is playing a video game\n\nIt looks like fun!";
-			}
-
-			public class PLAYEDSINGLEPLAYERARCADE
-			{
-				public static LocString NAME = "Played Single-Player Video Games";
-
-				public static LocString TOOLTIP = "This Duplicant recently played fun single-player video games\n\nScore!";
-			}
-
 			public class ARCADEPLAYING
 			{
 				public static LocString NAME = "Gaming";
@@ -5659,9 +5625,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Power",
 					UI.PST_KEYWORD,
-					" output efficiency",
-					UI.HORIZONTAL_BR_RULE,
-					"Applying this effect consumed one ",
+					" output efficiency\n\nApplying this effect consumed one ",
 					UI.PRE_KEYWORD,
 					ITEMS.INDUSTRIAL_PRODUCTS.POWER_STATION_TOOLS.NAME,
 					UI.PST_KEYWORD
@@ -5678,9 +5642,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Plant",
 					UI.PST_KEYWORD,
-					" to grow a little bit faster",
-					UI.HORIZONTAL_BR_RULE,
-					"Applying this effect consumed one dose of ",
+					" to grow a little bit faster\n\nApplying this effect consumed one dose of ",
 					UI.PRE_KEYWORD,
 					ITEMS.INDUSTRIAL_PRODUCTS.FARM_STATION_TOOLS.NAME,
 					UI.PST_KEYWORD
@@ -7715,8 +7677,7 @@ namespace STRINGS
 				UI.PRE_KEYWORD,
 				"Attribute",
 				UI.PST_KEYWORD,
-				UI.HORIZONTAL_BR_RULE,
-				"Duplicants develop higher expectations as their Expertise level increases"
+				"\n\nDuplicants develop higher expectations as their Expertise level increases"
 			});
 
 			public static LocString STORED_VALUE = "Stored value";
@@ -8963,6 +8924,11 @@ namespace STRINGS
 			public class SLEEPY
 			{
 				public static LocString TOOLTIP = "Sleepy";
+			}
+
+			public class DREAMY
+			{
+				public static LocString TOOLTIP = "Dreaming";
 			}
 
 			public class SUFFOCATING

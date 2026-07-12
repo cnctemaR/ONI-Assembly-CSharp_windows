@@ -364,17 +364,17 @@ public class SegmentedCreature : GameStateMachine<SegmentedCreature, SegmentedCr
 		{
 			if (base.smi.def.retractWhenStartingAnimNames.Contains(name))
 			{
-				base.smi.sm.isRetracted.Set(true, base.smi);
+				base.smi.sm.isRetracted.Set(true, base.smi, false);
 				return;
 			}
-			base.smi.sm.isRetracted.Set(false, base.smi);
+			base.smi.sm.isRetracted.Set(false, base.smi, false);
 		}
 
 		public void AnimComplete(HashedString name)
 		{
 			if (base.smi.def.retractWhenEndingAnimNames.Contains(name))
 			{
-				base.smi.sm.isRetracted.Set(true, base.smi);
+				base.smi.sm.isRetracted.Set(true, base.smi, false);
 			}
 		}
 

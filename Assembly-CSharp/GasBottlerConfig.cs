@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ public class GasBottlerConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.GASES;
 		storage.capacityKg = 25f;
 		storage.allowItemRemoval = false;
-		go.AddOrGet<DropAllWorkable>();
+		go.AddOrGet<DropAllWorkable>().removeTags = new List<Tag> { GameTags.GasSource };
 		GasBottler gasBottler = go.AddOrGet<GasBottler>();
 		gasBottler.storage = storage;
 		gasBottler.workTime = 9f;

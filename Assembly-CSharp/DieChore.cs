@@ -14,7 +14,7 @@ public class DieChore : Chore<DieChore.StatesInstance>
 		public StatesInstance(DieChore master, Death death)
 			: base(master)
 		{
-			base.sm.death.Set(death, base.smi);
+			base.sm.death.Set(death, base.smi, false);
 		}
 
 		public void PlayPreAnim()

@@ -67,6 +67,7 @@ public class JetSuitLockerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 
 	public const string ID = "JetSuitLocker";

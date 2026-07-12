@@ -3,7 +3,7 @@ using UnityEngine;
 
 public struct DiseaseContainer
 {
-	public DiseaseContainer(GameObject go, byte elemIdx)
+	public DiseaseContainer(GameObject go, ushort elemIdx)
 	{
 		this.elemIdx = elemIdx;
 		this.isContainer = go.GetComponent<IUserControlledCapacity>() != null && go.GetComponent<Storage>() != null;
@@ -35,7 +35,7 @@ public struct DiseaseContainer
 
 	public AutoDisinfectable autoDisinfectable;
 
-	public byte elemIdx;
+	public ushort elemIdx;
 
 	public bool isContainer;
 

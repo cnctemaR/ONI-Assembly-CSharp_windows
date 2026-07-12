@@ -19,7 +19,7 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 		this.normal.hugReady.passiveHug.ParamTransition<float>(this.wantsHugCooldownTimer, this.normal.hugReady.seekingHug, GameStateMachine<HugMonitor, HugMonitor.Instance, IStateMachineTarget, HugMonitor.Def>.IsLTEZero).Update(new Action<HugMonitor.Instance, float>(this.UpdateWantsHugCooldownTimer), UpdateRate.SIM_1000ms, false).ToggleStatusItem(CREATURES.STATUSITEMS.HUGMINIONWAITING.NAME, CREATURES.STATUSITEMS.HUGMINIONWAITING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main);
 		this.normal.hugReady.seekingHug.ToggleBehaviour(GameTags.Creatures.WantsAHug, (HugMonitor.Instance smi) => true, delegate(HugMonitor.Instance smi)
 		{
-			this.wantsHugCooldownTimer.Set(smi.def.hugFrenzyCooldownFailed, smi);
+			this.wantsHugCooldownTimer.Set(smi.def.hugFrenzyCooldownFailed, smi, false);
 			smi.GoTo(this.normal.hugReady.passiveHug);
 		});
 		this.hugFrenzy.ParamTransition<float>(this.hugFrenzyTimer, this.normal, (HugMonitor.Instance smi, float p) => p <= 0f && !smi.IsHugging()).Update(new Action<HugMonitor.Instance, float>(this.UpdateHugFrenzyTimer), UpdateRate.SIM_1000ms, false).ToggleEffect((HugMonitor.Instance smi) => smi.frenzyEffect)
@@ -33,7 +33,7 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 			.Exit(delegate(HugMonitor.Instance smi)
 			{
 				Util.KDestroyGameObject(smi.hugParticleFx);
-				this.wantsHugCooldownTimer.Set(smi.def.hugFrenzyCooldown, smi);
+				this.wantsHugCooldownTimer.Set(smi.def.hugFrenzyCooldown, smi, false);
 			});
 	}
 
@@ -118,17 +118,17 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 		{
 			this.frenzyEffect = Db.Get().effects.Get("HuggingFrenzy");
 			this.RefreshSearchTime();
-			base.smi.sm.wantsHugCooldownTimer.Set(global::UnityEngine.Random.Range(base.smi.def.hugFrenzyCooldownFailed, base.smi.def.hugFrenzyCooldown), base.smi);
+			base.smi.sm.wantsHugCooldownTimer.Set(global::UnityEngine.Random.Range(base.smi.def.hugFrenzyCooldownFailed, base.smi.def.hugFrenzyCooldown), base.smi, false);
 		}
 
 		private void RefreshSearchTime()
 		{
 			if (this.hugTarget == null)
 			{
-				base.smi.sm.hugEggCooldownTimer.Set(this.GetScanningInterval(), base.smi);
+				base.smi.sm.hugEggCooldownTimer.Set(this.GetScanningInterval(), base.smi, false);
 				return;
 			}
-			base.smi.sm.hugEggCooldownTimer.Set(this.GetHugInterval(), base.smi);
+			base.smi.sm.hugEggCooldownTimer.Set(this.GetHugInterval(), base.smi, false);
 		}
 
 		private float GetScanningInterval()
@@ -175,8 +175,8 @@ public class HugMonitor : GameStateMachine<HugMonitor, HugMonitor.Instance, ISta
 
 		public void EnterHuggingFrenzy()
 		{
-			base.smi.sm.hugFrenzyTimer.Set(base.smi.def.hugFrenzyDuration, base.smi);
-			base.smi.sm.hugEggCooldownTimer.Set(0f, base.smi);
+			base.smi.sm.hugFrenzyTimer.Set(base.smi.def.hugFrenzyDuration, base.smi, false);
+			base.smi.sm.hugEggCooldownTimer.Set(0f, base.smi, false);
 		}
 
 		private void FindEgg()

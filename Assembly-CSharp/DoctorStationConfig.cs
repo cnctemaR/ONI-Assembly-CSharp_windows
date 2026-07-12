@@ -36,12 +36,12 @@ public class DoctorStationConfig : IBuildingConfig
 		Tag supplyTagForStation = MedicineInfo.GetSupplyTagForStation("DoctorStation");
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = supplyTagForStation;
+		manualDeliveryKG.RequestedItemTag = supplyTagForStation;
 		manualDeliveryKG.capacity = 10f;
 		manualDeliveryKG.refillMass = 5f;
-		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.MinimumMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.DoctorFetch.IdHash;
-		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+		manualDeliveryKG.operationalRequirement = Operational.State.Functional;
 		DoctorStation doctorStation = go.AddOrGet<DoctorStation>();
 		doctorStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_treatment_chair_sick_kanim") };
 		doctorStation.workLayer = Grid.SceneLayer.BuildingFront;

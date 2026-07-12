@@ -107,7 +107,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		}
 		ConduitFlow liquidConduitFlow = Game.Instance.liquidConduitFlow;
 		bool flag = base.smi.master.requireOutput && liquidConduitFlow.GetContents(this.outputCell).mass > 0f && base.smi.HasContaminatedMass();
-		base.smi.sm.outputBlocked.Set(flag, base.smi);
+		base.smi.sm.outputBlocked.Set(flag, base.smi, false);
 	}
 
 	private MeterController fillMeter;

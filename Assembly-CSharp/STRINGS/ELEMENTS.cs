@@ -1572,6 +1572,20 @@ namespace STRINGS
 			public static LocString DESC = "Synthesis Gas is an artificial, unbreathable " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + ".\n\nIt can be converted into an efficient fuel.";
 		}
 
+		public class MOLTENSYNGAS
+		{
+			public static LocString NAME = UI.FormatAsLink("Molten Synthesis Gas", "SYNGAS");
+
+			public static LocString DESC = "Molten Synthesis Gas is an artificial, unbreathable " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + ".\n\nIt can be converted into an efficient fuel.";
+		}
+
+		public class SOLIDSYNGAS
+		{
+			public static LocString NAME = UI.FormatAsLink("Solid Synthesis Gas", "SYNGAS");
+
+			public static LocString DESC = "Solid Synthesis Gas is an artificial, unbreathable " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + ".\n\nIt can be converted into an efficient fuel.";
+		}
+
 		public class STEAM
 		{
 			public static LocString NAME = UI.FormatAsLink("Steam", "STEAM");

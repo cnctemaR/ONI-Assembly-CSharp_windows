@@ -830,8 +830,8 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					514967U,
-					28
+					525812U,
+					29
 				});
 			}
 			return false;
@@ -846,7 +846,7 @@ public class LoadScreen : KModalScreen
 					save.FileInfo.saveMajorVersion,
 					save.FileInfo.saveMinorVersion,
 					7,
-					28
+					29
 				});
 			}
 			return false;
@@ -869,7 +869,7 @@ public class LoadScreen : KModalScreen
 			}
 			else
 			{
-				DebugUtil.DevLogError("Failed to find cluster " + text + " including the scoped path, setting to default cluster name.");
+				DebugUtil.LogWarningArgs(new object[] { "Failed to find cluster " + text + " including the scoped path, setting to default cluster name." });
 				global::Debug.Log("ClusterCache: " + string.Join(",", SettingsCache.clusterLayouts.clusterCache.Keys));
 				text = WorldGenSettings.ClusterDefaultName;
 			}
@@ -1146,7 +1146,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 28) || header.buildVersion > 514967U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 29) || header.buildVersion > 525812U;
 	}
 
 	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
@@ -1225,15 +1225,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 514967U)
+		if (header.buildVersion > 525812U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 514967U.ToString();
+			text2 = 525812U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 28);
+			text2 = string.Format("v{0}.{1}", 7, 29);
 		}
 		if (!flag)
 		{

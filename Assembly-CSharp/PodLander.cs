@@ -80,7 +80,7 @@ public class PodLander : StateMachineComponent<PodLander.StatesInstance>, IGameO
 				int num2 = Grid.PosToCell(smi.master.gameObject.transform.GetPosition() + smi.master.GetComponent<KBatchedAnimController>().Offset);
 				if (Grid.IsValidCell(num2))
 				{
-					SimMessages.EmitMass(num2, (byte)ElementLoader.GetElementIndex(smi.master.exhaustElement), dt * smi.master.exhaustEmitRate, smi.master.exhaustTemperature, 0, 0, -1);
+					SimMessages.EmitMass(num2, ElementLoader.GetElementIndex(smi.master.exhaustElement), dt * smi.master.exhaustEmitRate, smi.master.exhaustTemperature, 0, 0, -1);
 				}
 				if (component.Offset.y <= 0f)
 				{

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -17,7 +18,7 @@ public class VideoWidget : KMonoBehaviour
 
 	private void Clicked()
 	{
-		VideoScreen.Instance.PlayVideo(this.clip, false, "", false);
+		VideoScreen.Instance.PlayVideo(this.clip, false, default(EventReference), false);
 		if (!string.IsNullOrEmpty(this.overlayName))
 		{
 			VideoScreen.Instance.SetOverlayText(this.overlayName, this.texts);
@@ -42,6 +43,7 @@ public class VideoWidget : KMonoBehaviour
 
 	private IEnumerator ConfigureThumbnail()
 	{
+		this.thumbnailPlayer.audioOutputMode = VideoAudioOutputMode.None;
 		this.thumbnailPlayer.clip = this.clip;
 		this.thumbnailPlayer.time = 0.0;
 		this.thumbnailPlayer.Play();

@@ -101,14 +101,14 @@ public class HighEnergyParticleSpawner : StateMachineComponent<HighEnergyParticl
 			float num2 = Grid.Radiation[num];
 			if (num2 != 0f && this.particleStorage.RemainingCapacity() > 0f)
 			{
-				base.smi.sm.isAbsorbingRadiation.Set(true, base.smi);
+				base.smi.sm.isAbsorbingRadiation.Set(true, base.smi, false);
 				this.recentPerSecondConsumptionRate = num2 / 600f;
 				this.particleStorage.Store(this.recentPerSecondConsumptionRate * this.radiationSampleRate * 0.1f);
 			}
 			else
 			{
 				this.recentPerSecondConsumptionRate = 0f;
-				base.smi.sm.isAbsorbingRadiation.Set(false, base.smi);
+				base.smi.sm.isAbsorbingRadiation.Set(false, base.smi, false);
 			}
 		}
 		this.progressMeterController.SetPositionPercent(this.GetProgressBarFillPercentage());

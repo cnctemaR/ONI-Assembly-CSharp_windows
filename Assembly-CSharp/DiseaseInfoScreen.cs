@@ -251,11 +251,11 @@ public class DiseaseInfoScreen : TargetScreen
 		return string.Format(text, name, this.GetFormattedHalfLife(halfLife));
 	}
 
-	private void BuildFactorsStrings(int diseaseCount, int elementIdx, int environmentCell, float environmentMass, float temperature, HashSet<Tag> tags, Disease disease, bool isCell = false)
+	private void BuildFactorsStrings(int diseaseCount, ushort elementIdx, int environmentCell, float environmentMass, float temperature, HashSet<Tag> tags, Disease disease, bool isCell = false)
 	{
 		this.currentGermsPanel.SetTitle(string.Format(UI.DETAILTABS.DISEASE.CURRENT_GERMS, disease.Name.ToUpper()));
 		this.currentGermsPanel.SetLabel("currentgerms", string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT, disease.Name, GameUtil.GetFormattedDiseaseAmount(diseaseCount, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT_TOOLTIP, GameUtil.GetFormattedDiseaseAmount(diseaseCount, GameUtil.TimeSlice.None)));
-		Element element = ElementLoader.elements[elementIdx];
+		Element element = ElementLoader.elements[(int)elementIdx];
 		CompositeGrowthRule growthRuleForElement = disease.GetGrowthRuleForElement(element);
 		float num = 1f;
 		if (tags != null && tags.Count > 0)
@@ -362,7 +362,7 @@ public class DiseaseInfoScreen : TargetScreen
 			Disease disease = Db.Get().Diseases[(int)component.DiseaseIdx];
 			int num = Grid.PosToCell(component.transform.GetPosition());
 			KPrefabID component2 = component.GetComponent<KPrefabID>();
-			this.BuildFactorsStrings(component.DiseaseCount, (int)component.Element.idx, num, component.Mass, component.Temperature, component2.Tags, disease, false);
+			this.BuildFactorsStrings(component.DiseaseCount, component.Element.idx, num, component.Mass, component.Temperature, component2.Tags, disease, false);
 			return true;
 		}
 		return false;
@@ -373,8 +373,7 @@ public class DiseaseInfoScreen : TargetScreen
 		if (cso.diseaseIdx != 255 && cso.diseaseCount > 0)
 		{
 			Disease disease = Db.Get().Diseases[(int)cso.diseaseIdx];
-			int idx = (int)cso.element.idx;
-			this.BuildFactorsStrings(cso.diseaseCount, idx, cso.SelectedCell, cso.Mass, cso.temperature, null, disease, true);
+			this.BuildFactorsStrings(cso.diseaseCount, cso.element.idx, cso.SelectedCell, cso.Mass, cso.temperature, null, disease, true);
 			return true;
 		}
 		return false;

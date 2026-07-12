@@ -66,11 +66,20 @@ public class NewGameSettingsPanel : KMonoBehaviour
 		{
 			newGameSettingWidget.Refresh();
 		}
+		if (this.OnRefresh != null)
+		{
+			this.OnRefresh();
+		}
 	}
 
 	public void ConsumeSettingsCode(string code)
 	{
 		this.settings.ParseAndApplySettingsCode(code);
+	}
+
+	public void ConsumeStoryTraitsCode(string code)
+	{
+		this.settings.ParseAndApplyStoryTraitSettingsCode(code);
 	}
 
 	public void SetSetting(SettingConfig setting, string level)
@@ -79,6 +88,11 @@ public class NewGameSettingsPanel : KMonoBehaviour
 	}
 
 	public string GetSetting(SettingConfig setting)
+	{
+		return this.settings.GetCurrentQualitySetting(setting).id;
+	}
+
+	public string GetSetting(string setting)
 	{
 		return this.settings.GetCurrentQualitySetting(setting).id;
 	}
@@ -112,4 +126,6 @@ public class NewGameSettingsPanel : KMonoBehaviour
 	private CustomGameSettings settings;
 
 	private List<NewGameSettingWidget> widgets;
+
+	public global::System.Action OnRefresh;
 }

@@ -88,10 +88,10 @@ public class SugarEngineConfig : IBuildingConfig
 		go.AddOrGet<CopyBuildingSettings>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = ElementLoader.FindElementByHash(SimHashes.Sucrose).tag;
+		manualDeliveryKG.RequestedItemTag = ElementLoader.FindElementByHash(SimHashes.Sucrose).tag;
 		manualDeliveryKG.refillMass = storage.capacityKg;
 		manualDeliveryKG.capacity = storage.capacityKg;
-		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
+		manualDeliveryKG.operationalRequirement = Operational.State.None;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		BuildingTemplates.ExtendBuildingToRocketModuleCluster(go, null, ROCKETRY.BURDEN.INSIGNIFICANT, (float)ROCKETRY.ENGINE_POWER.EARLY_WEAK, SugarEngineConfig.FUEL_EFFICIENCY);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)

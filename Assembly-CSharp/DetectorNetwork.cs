@@ -87,8 +87,8 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 		{
 			this.CheckForVisibility();
 			this.CheckForInterference();
-			base.sm.selfQuality.Set(this.GetDishQuality(), base.smi);
-			base.sm.networkQuality.Set(this.ComputeTotalDishQuality(), base.smi);
+			base.sm.selfQuality.Set(this.GetDishQuality(), base.smi, false);
+			base.sm.networkQuality.Set(this.ComputeTotalDishQuality(), base.smi, false);
 		}
 
 		private void CheckForVisibility()

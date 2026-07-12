@@ -15,8 +15,8 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		CO2Manager.instance = this;
 		this.prefab.gameObject.SetActive(false);
 		this.breathPrefab.SetActive(false);
-		this.co2Pool = new ObjectPool(new Func<GameObject>(this.InstantiateCO2), 16);
-		this.breathPool = new ObjectPool(new Func<GameObject>(this.InstantiateBreath), 16);
+		this.co2Pool = new GameObjectPool(new Func<GameObject>(this.InstantiateCO2), 16);
+		this.breathPool = new GameObjectPool(new Func<GameObject>(this.InstantiateBreath), 16);
 	}
 
 	private GameObject InstantiateCO2()
@@ -185,9 +185,9 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 
 	private List<CO2> co2Items = new List<CO2>();
 
-	private ObjectPool breathPool;
+	private GameObjectPool breathPool;
 
-	private ObjectPool co2Pool;
+	private GameObjectPool co2Pool;
 
 	public static CO2Manager instance;
 }

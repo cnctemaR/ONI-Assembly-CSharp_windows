@@ -5,7 +5,7 @@ namespace FMOD.Studio
 {
 	public struct Bus
 	{
-		public RESULT getID(out Guid id)
+		public RESULT getID(out GUID id)
 		{
 			return Bus.FMOD_Studio_Bus_GetID(this.handle, out id);
 		}
@@ -101,11 +101,21 @@ namespace FMOD.Studio
 			return Bus.FMOD_Studio_Bus_GetMemoryUsage(this.handle, out memoryusage);
 		}
 
+		public RESULT getPortIndex(out ulong index)
+		{
+			return Bus.FMOD_Studio_Bus_GetPortIndex(this.handle, out index);
+		}
+
+		public RESULT setPortIndex(ulong index)
+		{
+			return Bus.FMOD_Studio_Bus_SetPortIndex(this.handle, index);
+		}
+
 		[DllImport("fmodstudio")]
 		private static extern bool FMOD_Studio_Bus_IsValid(IntPtr bus);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bus_GetID(IntPtr bus, out Guid id);
+		private static extern RESULT FMOD_Studio_Bus_GetID(IntPtr bus, out GUID id);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_Bus_GetPath(IntPtr bus, IntPtr path, int size, out int retrieved);
@@ -145,6 +155,12 @@ namespace FMOD.Studio
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_Bus_GetMemoryUsage(IntPtr bus, out MEMORY_USAGE memoryusage);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_Bus_GetPortIndex(IntPtr bus, out ulong index);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_Bus_SetPortIndex(IntPtr bus, ulong index);
 
 		public Bus(IntPtr ptr)
 		{

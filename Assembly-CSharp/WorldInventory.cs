@@ -166,20 +166,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return hashSet.ToList<Pickupable>();
 	}
 
-	public List<Tag> GetPickupableTagsFromCategoryTag(Tag t)
-	{
-		List<Tag> list = new List<Tag>();
-		ICollection<Pickupable> pickupables = this.GetPickupables(t, false);
-		if (pickupables != null && pickupables.Count > 0)
-		{
-			foreach (Pickupable pickupable in pickupables)
-			{
-				list.AddRange(pickupable.KPrefabID.Tags);
-			}
-		}
-		return list;
-	}
-
 	public float GetAmount(Tag tag, bool includeRelatedWorlds)
 	{
 		float num;
@@ -325,9 +311,15 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 			DebugUtil.DevAssertArgs(categoryForEntity.IsValid, new object[] { component.name, "was found by worldinventory but doesn't have a category! Add it to the element definition." });
 			DiscoveredResources.Instance.Discover(tag, categoryForEntity);
 		}
+		HashSet<Pickupable> hashSet;
+		if (!this.Inventory.TryGetValue(tag, out hashSet))
+		{
+			hashSet = new HashSet<Pickupable>();
+			this.Inventory[tag] = hashSet;
+		}
+		hashSet.Add(component);
 		foreach (Tag tag2 in component2.Tags)
 		{
-			HashSet<Pickupable> hashSet;
 			if (!this.Inventory.TryGetValue(tag2, out hashSet))
 			{
 				hashSet = new HashSet<Pickupable>();
@@ -340,9 +332,14 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private void OnRemovedFetchable(object data)
 	{
 		Pickupable component = ((GameObject)data).GetComponent<Pickupable>();
-		foreach (Tag tag in component.GetComponent<KPrefabID>().Tags)
+		KPrefabID kprefabID = component.KPrefabID;
+		HashSet<Pickupable> hashSet;
+		if (this.Inventory.TryGetValue(kprefabID.PrefabTag, out hashSet))
 		{
-			HashSet<Pickupable> hashSet;
+			hashSet.Remove(component);
+		}
+		foreach (Tag tag in kprefabID.Tags)
+		{
 			if (this.Inventory.TryGetValue(tag, out hashSet))
 			{
 				hashSet.Remove(component);

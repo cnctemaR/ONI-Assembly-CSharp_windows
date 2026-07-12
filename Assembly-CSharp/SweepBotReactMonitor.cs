@@ -44,7 +44,7 @@ public class SweepBotReactMonitor : GameStateMachine<SweepBotReactMonitor, Sweep
 							if (pickupable.PrefabID() == "SweepBot" && num4 == num)
 							{
 								smi.master.gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("bump");
-								smi2.sm.headingRight.Set(!smi2.sm.headingRight.Get(smi2), smi2);
+								smi2.sm.headingRight.Set(!smi2.sm.headingRight.Get(smi2), smi2, false);
 								flag = true;
 							}
 							else if (pickupable.HasTag(GameTags.Creature))

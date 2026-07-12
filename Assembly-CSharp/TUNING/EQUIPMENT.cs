@@ -167,6 +167,8 @@ namespace TUNING
 
 			public static float CUSTOM_CLOTHING_FABTIME = 180f;
 
+			public static float CUSTOM_ATMOSUIT_FABTIME = 15f;
+
 			public static int CUSTOM_CLOTHING_MASS = EQUIPMENT.VESTS.WARM_VEST_MASS + 3;
 		}
 	}

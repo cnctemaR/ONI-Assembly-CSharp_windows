@@ -292,6 +292,7 @@ namespace Database
 			this.NeedPower = this.CreateStatusItem("NeedPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 			this.NotEnoughPower = this.CreateStatusItem("NotEnoughPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 			this.PowerLoopDetected = this.CreateStatusItem("PowerLoopDetected", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
+			this.DispenseRequested = this.CreateStatusItem("DispenseRequested", "BUILDING", "status_item_exclamation", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.NewDuplicantsAvailable = this.CreateStatusItem("NewDuplicantsAvailable", "BUILDING", "status_item_new_duplicants_available", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.NewDuplicantsAvailable.AddNotification(null, null, null);
 			this.NewDuplicantsAvailable.notificationClickCallback = delegate(object data)
@@ -1034,6 +1035,47 @@ namespace Database
 			this.BroadcasterOutOfRange = new StatusItem("BROADCASTEROUTOFRANGE", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.LosingRadbolts = new StatusItem("LOSINGRADBOLTS", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.FabricatorAcceptsMutantSeeds = new StatusItem("FABRICATORACCEPTSMUTANTSEEDS", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.NoSpiceSelected = new StatusItem("SPICEGRINDERNOSPICE", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
+			this.CreatureManipulatorWaiting = this.CreateStatusItem("CreatureManipulatorWaiting", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.CreatureManipulatorProgress = this.CreateStatusItem("CreatureManipulatorProgress", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.CreatureManipulatorProgress.resolveStringCallback = delegate(string str, object data)
+			{
+				GravitasCreatureManipulator.Instance instance = (GravitasCreatureManipulator.Instance)data;
+				return string.Format(str, instance.ScannedSpecies.Count, instance.def.numSpeciesToUnlockMorphMode);
+			};
+			this.CreatureManipulatorProgress.resolveTooltipCallback = delegate(string str, object data)
+			{
+				GravitasCreatureManipulator.Instance instance2 = (GravitasCreatureManipulator.Instance)data;
+				if (instance2.ScannedSpecies.Count == 0)
+				{
+					str = str + "\n • " + BUILDING.STATUSITEMS.CREATUREMANIPULATORPROGRESS.NO_DATA;
+				}
+				else
+				{
+					foreach (Tag tag in instance2.ScannedSpecies)
+					{
+						str = str + "\n • " + Strings.Get("STRINGS.CREATURES.FAMILY_PLURAL." + tag.ToString().ToUpper());
+					}
+				}
+				return str;
+			};
+			this.CreatureManipulatorMorphModeLocked = this.CreateStatusItem("CreatureManipulatorMorphModeLocked", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.CreatureManipulatorMorphMode = this.CreateStatusItem("CreatureManipulatorMorphMode", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.CreatureManipulatorWorking = this.CreateStatusItem("CreatureManipulatorWorking", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.MegaBrainTankActivationProgress = this.CreateStatusItem("MegaBrainTankActivationProgress", BUILDING.STATUSITEMS.MEGABRAINTANK.PROGRESS.PROGRESSIONRATE.NAME, BUILDING.STATUSITEMS.MEGABRAINTANK.PROGRESS.PROGRESSIONRATE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.MegaBrainNotEnoughOxygen = this.CreateStatusItem("MegaBrainNotEnoughOxygen", "BUILDING", "status_item_suit_locker_no_oxygen", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			this.MegaBrainTankActivationProgress.resolveStringCallback = delegate(string str, object data)
+			{
+				MegaBrainTank.StatesInstance statesInstance9 = (MegaBrainTank.StatesInstance)data;
+				return str.Replace("{ActivationProgress}", string.Format("{0}/{1}", statesInstance9.ActivationProgress, 25));
+			};
+			this.MegaBrainTankDreamAnalysis = this.CreateStatusItem("MegaBrainTankDreamAnalysis", BUILDING.STATUSITEMS.MEGABRAINTANK.PROGRESS.DREAMANALYSIS.NAME, BUILDING.STATUSITEMS.MEGABRAINTANK.PROGRESS.DREAMANALYSIS.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
+			this.MegaBrainTankDreamAnalysis.resolveStringCallback = delegate(string str, object data)
+			{
+				MegaBrainTank.StatesInstance statesInstance10 = (MegaBrainTank.StatesInstance)data;
+				return str.Replace("{TimeToComplete}", statesInstance10.TimeTilDigested.ToString());
+			};
+			this.MegaBrainTankComplete = this.CreateStatusItem("MegaBrainTankComplete", BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.NAME, BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -1098,6 +1140,8 @@ namespace Database
 		public StatusItem ConstructableDigUnreachable;
 
 		public StatusItem ConstructionUnreachable;
+
+		public StatusItem DispenseRequested;
 
 		public StatusItem NewDuplicantsAvailable;
 
@@ -1540,5 +1584,27 @@ namespace Database
 		public StatusItem LosingRadbolts;
 
 		public StatusItem FabricatorAcceptsMutantSeeds;
+
+		public StatusItem NoSpiceSelected;
+
+		public StatusItem CreatureManipulatorWaiting;
+
+		public StatusItem CreatureManipulatorProgress;
+
+		public StatusItem CreatureManipulatorMorphModeLocked;
+
+		public StatusItem CreatureManipulatorMorphMode;
+
+		public StatusItem CreatureManipulatorWorking;
+
+		public StatusItem MegaBrainNotEnoughOxygen;
+
+		public StatusItem MegaBrainTankActivationProgress;
+
+		public StatusItem MegaBrainTankDreamAnalysis;
+
+		public StatusItem MegaBrainTankAllDupesAreDead;
+
+		public StatusItem MegaBrainTankComplete;
 	}
 }

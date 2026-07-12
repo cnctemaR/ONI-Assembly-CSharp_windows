@@ -34,9 +34,31 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
-			this.InitializeTags(true);
+			DebugUtil.DevAssert(this.initialized, "This object is has not been initialized, Tags is not valid. Is it an inactive prefab?", null);
 			return this.tags;
 		}
+	}
+
+	public Tag PrefabID()
+	{
+		return this.PrefabTag;
+	}
+
+	public bool IsPrefabID(Tag prefab_id)
+	{
+		return this.PrefabTag == prefab_id;
+	}
+
+	public bool IsAnyPrefabID(Tag[] ids)
+	{
+		for (int i = 0; i < ids.Length; i++)
+		{
+			if (this.PrefabTag == ids[i])
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void CopyTags(KPrefabID other)
@@ -66,7 +88,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	private void ValidateTags()
 	{
 		DebugUtil.Assert(this.PrefabTag.IsValid);
-		global::Debug.Assert(this.tags.Contains(this.PrefabTag), string.Format("PrefabTag {0} is not contained in tags", this.PrefabTag));
 		foreach (Tag tag in this.serializedTags)
 		{
 			global::Debug.Assert(this.tags.Contains(tag), string.Format("serialized tag {0} is not contained in tags", tag));
@@ -78,11 +99,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		if (this.initialized && !force_initialize)
 		{
 			return;
-		}
-		DebugUtil.Assert(this.PrefabTag.IsValid);
-		if (this.tags.Add(this.PrefabTag))
-		{
-			this.dirtyTagBits = true;
 		}
 		foreach (Tag tag in this.serializedTags)
 		{
@@ -170,7 +186,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	public void AddTag(Tag tag, bool serialize = false)
 	{
 		DebugUtil.Assert(tag.IsValid);
-		if (this.Tags.Add(tag))
+		if (this.tags.Add(tag))
 		{
 			this.dirtyTagBits = true;
 			base.Trigger(-1582839653, new TagChangedEventData(tag, true));
@@ -183,7 +199,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public void RemoveTag(Tag tag)
 	{
-		if (this.Tags.Remove(tag))
+		if (this.tags.Remove(tag))
 		{
 			this.dirtyTagBits = true;
 			base.Trigger(-1582839653, new TagChangedEventData(tag, false));
@@ -203,15 +219,15 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasTag(Tag tag)
 	{
-		return this.Tags.Contains(tag);
+		return this.PrefabTag == tag || this.tags.Contains(tag);
 	}
 
 	public bool HasAnyTags(List<Tag> search_tags)
 	{
-		this.InitializeTags(false);
-		foreach (Tag tag in search_tags)
+		for (int i = 0; i < search_tags.Count; i++)
 		{
-			if (this.tags.Contains(tag))
+			Tag tag = search_tags[i];
+			if (this.PrefabTag == tag || this.tags.Contains(tag))
 			{
 				return true;
 			}
@@ -221,10 +237,9 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasAnyTags(Tag[] search_tags)
 	{
-		this.InitializeTags(false);
 		foreach (Tag tag in search_tags)
 		{
-			if (this.tags.Contains(tag))
+			if (this.PrefabTag == tag || this.tags.Contains(tag))
 			{
 				return true;
 			}
@@ -240,10 +255,10 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasAllTags(List<Tag> search_tags)
 	{
-		this.InitializeTags(false);
-		foreach (Tag tag in search_tags)
+		for (int i = 0; i < search_tags.Count; i++)
 		{
-			if (!this.tags.Contains(tag))
+			Tag tag = search_tags[i];
+			if (this.PrefabTag != tag && !this.tags.Contains(tag))
 			{
 				return false;
 			}
@@ -253,31 +268,14 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public bool HasAllTags(Tag[] search_tags)
 	{
-		this.InitializeTags(false);
 		foreach (Tag tag in search_tags)
 		{
-			if (!this.tags.Contains(tag))
+			if (this.PrefabTag != tag && !this.tags.Contains(tag))
 			{
 				return false;
 			}
 		}
 		return true;
-	}
-
-	public bool HasAllTags(ref TagBits search_tags)
-	{
-		this.UpdateTagBits();
-		return this.tagBits.HasAll(ref search_tags);
-	}
-
-	public bool HasAnyTags_AssumeLaundered(ref TagBits search_tags)
-	{
-		return this.tagBits.HasAny(ref search_tags);
-	}
-
-	public bool HasAllTags_AssumeLaundered(ref TagBits search_tags)
-	{
-		return this.tagBits.HasAll(ref search_tags);
 	}
 
 	public override bool Equals(object o)

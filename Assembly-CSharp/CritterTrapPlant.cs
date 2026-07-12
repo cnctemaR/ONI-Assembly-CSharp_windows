@@ -35,7 +35,7 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 
 	public Notification CreateDeathNotification()
 	{
-		return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, (List<Notification> notificationList, object data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.gameObject.GetProperName(), true, 0f, null, null, null, true);
+		return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, (List<Notification> notificationList, object data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.gameObject.GetProperName(), true, 0f, null, null, null, true, false);
 	}
 
 	[MyCmpReq]
@@ -126,14 +126,14 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 			{
 				smi.OnTrapTriggered(data);
 			})
+				.EventTransition(GameHashes.Wilt, this.trap.wilting, null)
 				.OnSignal(this.trapTriggered, this.trap.trigger)
 				.ParamTransition<bool>(this.hasEatenCreature, this.trap.digesting, GameStateMachine<CritterTrapPlant.States, CritterTrapPlant.StatesInstance, CritterTrapPlant, object>.IsTrue)
-				.PlayAnim("idle_open", KAnim.PlayMode.Loop)
-				.EventTransition(GameHashes.Wilt, this.trap.wilting, null);
+				.PlayAnim("idle_open", KAnim.PlayMode.Loop);
 			this.trap.trigger.PlayAnim("trap", KAnim.PlayMode.Once).Enter(delegate(CritterTrapPlant.StatesInstance smi)
 			{
 				smi.master.storage.ConsumeAllIgnoringDisease();
-				smi.sm.hasEatenCreature.Set(true, smi);
+				smi.sm.hasEatenCreature.Set(true, smi, false);
 			}).OnAnimQueueComplete(this.trap.digesting);
 			this.trap.digesting.PlayAnim("digesting_loop", KAnim.PlayMode.Loop).ToggleComponent<Growing>(false).EventTransition(GameHashes.Grow, this.fruiting.enter, (CritterTrapPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest())
 				.EventTransition(GameHashes.Wilt, this.trap.wilting, null)
@@ -178,7 +178,7 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 				smi.master.harvestable.SetCanBeHarvested(false);
 			}).Exit(delegate(CritterTrapPlant.StatesInstance smi)
 			{
-				smi.sm.hasEatenCreature.Set(false, smi);
+				smi.sm.hasEatenCreature.Set(false, smi, false);
 			})
 				.OnAnimQueueComplete(this.trap.open);
 			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead, null).Enter(delegate(CritterTrapPlant.StatesInstance smi)

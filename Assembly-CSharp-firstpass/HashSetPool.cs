@@ -23,11 +23,16 @@ public static class HashSetPool<ObjectType, PoolIdentifier>
 	private static ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier> pool = new ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier>();
 
 	[DebuggerDisplay("Count={Count}")]
-	public class PooledHashSet : HashSet<ObjectType>
+	public class PooledHashSet : HashSet<ObjectType>, IDisposable
 	{
 		public void Recycle()
 		{
 			HashSetPool<ObjectType, PoolIdentifier>.Free(this);
+		}
+
+		public void Dispose()
+		{
+			this.Recycle();
 		}
 	}
 }

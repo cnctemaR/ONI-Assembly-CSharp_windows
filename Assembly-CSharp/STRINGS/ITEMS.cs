@@ -745,7 +745,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Tonic Root", "GINGER");
 
-				public static LocString DESC = "A chewy, fibrous rhizome with a fiery aftertaste.\n\nIt relieves gassiness.";
+				public static LocString DESC = "A chewy, fibrous rhizome with a fiery aftertaste.";
 			}
 		}
 
@@ -1033,6 +1033,51 @@ namespace STRINGS
 					UI.FormatAsLink("Radbolt Reflector", "HIGHENERGYPARTICLEREDIRECTOR"),
 					"."
 				});
+			}
+		}
+
+		public class DREAMJOURNAL
+		{
+			public static LocString NAME = "Dream Journal";
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"A hand-scrawled account of ",
+				UI.FormatAsLink("Pajama", "SLEEP_CLINIC_PAJAMAS"),
+				"-induced dreams.\n\nCan be analyzed using a ",
+				UI.FormatAsLink("Somnium Synthesizer", "MEGABRAINTANK"),
+				"."
+			});
+		}
+
+		public class SPICES
+		{
+			public class MACHINERY_SPICE
+			{
+				public static LocString NAME = UI.FormatAsLink("Machinist Spice", "MACHINERY_SPICE");
+
+				public static LocString DESC = "Improves operating skills when ingested.";
+			}
+
+			public class PILOTING_SPICE
+			{
+				public static LocString NAME = UI.FormatAsLink("Rocketeer Spice", "PILOTING_SPICE");
+
+				public static LocString DESC = "Provides a boost to piloting abilities.";
+			}
+
+			public class PRESERVING_SPICE
+			{
+				public static LocString NAME = UI.FormatAsLink("Freshener Spice", "PRESERVING_SPICE");
+
+				public static LocString DESC = "Slows the rate of food decomposition.";
+			}
+
+			public class STRENGTH_SPICE
+			{
+				public static LocString NAME = UI.FormatAsLink("Brawny Spice", "STRENGTH_SPICE");
+
+				public static LocString DESC = "Strengthens even the weakest of muscles.";
 			}
 		}
 	}

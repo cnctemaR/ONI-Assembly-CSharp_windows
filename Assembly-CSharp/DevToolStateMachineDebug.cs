@@ -233,7 +233,6 @@ public class DevToolStateMachineDebug : DevTool
 		this.ShowParameters(state_machine_instance);
 		this.ShowEvents(state_machine_instance);
 		this.ShowTransitions(state_machine_instance);
-		this.ShowParameterTransitions(state_machine_instance);
 		this.ShowEnterActions(state_machine_instance);
 		this.ShowExitActions(state_machine_instance);
 		ImGui.Unindent();
@@ -288,37 +287,9 @@ public class DevToolStateMachineDebug : DevTool
 			StateMachine.BaseState state = currentState.GetState(i);
 			if (state.transitions != null)
 			{
-				foreach (StateMachine.BaseTransition baseTransition in state.transitions)
+				for (int j = 0; j < state.transitions.Count; j++)
 				{
-					string text = "(Stop)";
-					if (baseTransition.targetState != null)
-					{
-						text = baseTransition.targetState.name;
-					}
-					ImGui.Text(baseTransition.name + " -> " + text);
-				}
-			}
-		}
-		ImGui.Unindent();
-	}
-
-	private void ShowParameterTransitions(StateMachine.Instance state_machine_instance)
-	{
-		StateMachine.BaseState currentState = state_machine_instance.GetCurrentState();
-		ImGui.Text("ParamTransitions:");
-		if (currentState == null)
-		{
-			return;
-		}
-		ImGui.Indent();
-		for (int i = 0; i < currentState.GetStateCount(); i++)
-		{
-			StateMachine.BaseState state = currentState.GetState(i);
-			if (state.parameterTransitions != null)
-			{
-				foreach (StateMachine.ParameterTransition parameterTransition in state.parameterTransitions)
-				{
-					ImGui.Text(parameterTransition.ToString());
+					ImGui.Text(state.transitions[j].ToString());
 				}
 			}
 		}

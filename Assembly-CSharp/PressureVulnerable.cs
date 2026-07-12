@@ -60,8 +60,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		base.OnSpawn();
 		SlicedUpdaterSim1000ms<PressureVulnerable>.instance.RegisterUpdate1000ms(this);
 		this.cell = Grid.PosToCell(this);
-		base.smi.sm.pressure.Set(1f, base.smi);
-		base.smi.sm.safe_element.Set(this.testAreaElementSafe, base.smi);
+		base.smi.sm.pressure.Set(1f, base.smi, false);
+		base.smi.sm.safe_element.Set(this.testAreaElementSafe, base.smi, false);
 		base.smi.master.pressureAccumulator = Game.Instance.accumulators.Add("pressureAccumulator", this);
 		base.smi.master.elementAccumulator = Game.Instance.accumulators.Add("elementAccumulator", this);
 		base.smi.StartSM();
@@ -153,8 +153,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		this.displayPressureAmount.value = averageRate;
 		Game.Instance.accumulators.Accumulate(base.smi.master.elementAccumulator, this.testAreaElementSafe ? 1f : 0f);
 		bool flag = Game.Instance.accumulators.GetAverageRate(base.smi.master.elementAccumulator) > 0f;
-		base.smi.sm.safe_element.Set(flag, base.smi);
-		base.smi.sm.pressure.Set(averageRate, base.smi);
+		base.smi.sm.safe_element.Set(flag, base.smi, false);
+		base.smi.sm.pressure.Set(averageRate, base.smi, false);
 	}
 
 	public float GetExternalPressure()

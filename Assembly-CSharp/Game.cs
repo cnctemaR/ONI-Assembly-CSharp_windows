@@ -28,15 +28,15 @@ public class Game : KMonoBehaviour
 
 	public static Game Instance { get; private set; }
 
-	public Camera MainCamera
+	public static Camera MainCamera
 	{
 		get
 		{
-			if (this.m_CachedCamera == null)
+			if (Game.m_CachedCamera == null)
 			{
-				this.m_CachedCamera = Camera.main;
+				Game.m_CachedCamera = Camera.main;
 			}
-			return this.m_CachedCamera;
+			return Game.m_CachedCamera;
 		}
 	}
 
@@ -164,7 +164,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(514967U);
+		this.changelistsPlayedOn.Add(525812U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -249,7 +249,7 @@ public class Game : KMonoBehaviour
 			NewBaseScreen.SetInitialCamera();
 		}
 		TagManager.FillMissingProperNames();
-		CameraController.Instance.SetOrthographicsSize(20f);
+		CameraController.Instance.OrthographicSize = 20f;
 		if (SaveLoader.Instance.loadedFromSave)
 		{
 			this.baseAlreadyCreated = true;
@@ -913,7 +913,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 514967U;
+		uint num = 525812U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1032,7 +1032,7 @@ public class Game : KMonoBehaviour
 				};
 				return gameObject;
 			};
-			ObjectPool pool = new ObjectPool(func, this.fxSpawnData[fx_idx].initialCount);
+			GameObjectPool pool = new GameObjectPool(func, this.fxSpawnData[fx_idx].initialCount);
 			this.fxPools[(int)this.fxSpawnData[fx_idx].id] = pool;
 			this.fxSpawner[(int)this.fxSpawnData[fx_idx].id] = delegate(Vector3 pos, float rotation)
 			{
@@ -1124,14 +1124,15 @@ public class Game : KMonoBehaviour
 		gameSaveData.worldDetail = SaveLoader.Instance.clusterDetailSave;
 		gameSaveData.debugWasUsed = this.debugWasUsed;
 		gameSaveData.customGameSettings = CustomGameSettings.Instance;
+		gameSaveData.storySetings = StoryManager.Instance;
 		gameSaveData.autoPrioritizeRoles = this.autoPrioritizeRoles;
 		gameSaveData.advancedPersonalPriorities = this.advancedPersonalPriorities;
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(514967U))
+		if (!this.changelistsPlayedOn.Contains(525812U))
 		{
-			this.changelistsPlayedOn.Add(514967U);
+			this.changelistsPlayedOn.Add(525812U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1150,6 +1151,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = new WorldDetailSave();
 		gameSaveData.customGameSettings = CustomGameSettings.Instance;
+		gameSaveData.storySetings = StoryManager.Instance;
 		deserializer.Deserialize(gameSaveData);
 		this.gasConduitFlow = gameSaveData.gasConduitFlow;
 		this.liquidConduitFlow = gameSaveData.liquidConduitFlow;
@@ -1570,6 +1572,7 @@ public class Game : KMonoBehaviour
 		ColonyDiagnosticUtility.DestroyInstance();
 		DiscoveredResources.DestroyInstance();
 		ClusterMapSelectTool.DestroyInstance();
+		StoryManager.DestroyInstance();
 		Game.Instance = null;
 		Grid.OnReveal = null;
 		this.VisualTunerElement = null;
@@ -1612,7 +1615,7 @@ public class Game : KMonoBehaviour
 
 	public GameObject cameraControllerPrefab;
 
-	private Camera m_CachedCamera;
+	private static Camera m_CachedCamera = null;
 
 	public GameObject tempIntroScreenPrefab;
 
@@ -1811,7 +1814,7 @@ public class Game : KMonoBehaviour
 
 	private Dictionary<int, Action<Vector3, float>> fxSpawner = new Dictionary<int, Action<Vector3, float>>();
 
-	private Dictionary<int, ObjectPool> fxPools = new Dictionary<int, ObjectPool>();
+	private Dictionary<int, GameObjectPool> fxPools = new Dictionary<int, GameObjectPool>();
 
 	private Game.SavingPreCB activatePreCB;
 
@@ -2125,6 +2128,8 @@ public class Game : KMonoBehaviour
 		public WorldDetailSave worldDetail;
 
 		public CustomGameSettings customGameSettings;
+
+		public StoryManager storySetings;
 
 		public bool debugWasUsed;
 

@@ -48,5 +48,7 @@ namespace TUNING
 			GameTags.Breathable,
 			GameTags.Unbreathable
 		};
+
+		public static List<Tag> PAYLOADS = new List<Tag> { GameTags.RailGunPayloadEmptyable };
 	}
 }

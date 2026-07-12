@@ -69,6 +69,11 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 			GameObject targetGameObject = proxy.GetTargetGameObject();
 			return targetGameObject.GetComponent<KMonoBehaviour>().GetMyWorldId() == this.GetMyWorldId() || targetGameObject.IsMyParentWorld(base.gameObject);
 		});
+		this.autoassignmentPreconditions.Add(delegate(MinionAssignablesProxy proxy)
+		{
+			Operational component = base.GetComponent<Operational>();
+			return !(component != null) || component.IsOperational;
+		});
 	}
 
 	protected override void OnCleanUp()

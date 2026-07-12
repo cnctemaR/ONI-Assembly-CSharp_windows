@@ -9,6 +9,18 @@ public class HealthyGameMessageScreen : KMonoBehaviour
 		base.OnPrefabInit();
 		this.confirmButton.onClick += delegate
 		{
+			string @string = KPlayerPrefs.GetString("PlayShortOnLaunch", "");
+			if (!string.IsNullOrEmpty(MainMenu.Instance.IntroShortName) && @string != MainMenu.Instance.IntroShortName)
+			{
+				VideoScreen component = KScreenManager.AddChild(FrontEndManager.Instance.gameObject, ScreenPrefabs.Instance.VideoScreen.gameObject).GetComponent<VideoScreen>();
+				component.PlayVideo(Assets.GetVideo(MainMenu.Instance.IntroShortName), false, AudioMixerSnapshots.Get().MainMenuVideoPlayingSnapshot, false);
+				component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
+				{
+					KPlayerPrefs.SetString("PlayShortOnLaunch", MainMenu.Instance.IntroShortName);
+					global::UnityEngine.Object.Destroy(base.gameObject);
+				}));
+				return;
+			}
 			global::UnityEngine.Object.Destroy(base.gameObject);
 		};
 		this.confirmButton.gameObject.SetActive(false);

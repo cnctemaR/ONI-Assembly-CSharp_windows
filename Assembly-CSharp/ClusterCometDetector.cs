@@ -164,22 +164,25 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 			if (this.GetDetectorState() == ClusterCometDetector.Instance.ClusterCometDetectorState.Rocket && this.targetCraft != null)
 			{
 				Clustercraft clustercraft = this.targetCraft.Get();
-				ClusterTraveler component = clustercraft.GetComponent<ClusterTraveler>();
-				bool flag3 = false;
-				if (clustercraft.Status != Clustercraft.CraftStatus.Grounded)
+				if (!clustercraft.IsNullOrDestroyed())
 				{
-					bool flag4 = component.GetDestinationWorldID() == myWorldId;
-					bool flag5 = component.IsTraveling();
-					bool flag6 = clustercraft.HasResourcesToMove(1, Clustercraft.CombustionResource.All);
-					float num3 = component.TravelETA();
-					flag3 = (flag4 && flag5 && flag6 && num3 < detectTime) || (!flag5 && flag4 && clustercraft.Status == Clustercraft.CraftStatus.Landing);
-					if (!flag3)
+					ClusterTraveler component = clustercraft.GetComponent<ClusterTraveler>();
+					bool flag3 = false;
+					if (clustercraft.Status != Clustercraft.CraftStatus.Grounded)
 					{
-						ClusterGridEntity adjacentAsteroid = clustercraft.GetAdjacentAsteroid();
-						flag3 = ((adjacentAsteroid != null) ? ClusterUtil.GetAsteroidWorldIdAtLocation(adjacentAsteroid.Location) : ((int)ClusterManager.INVALID_WORLD_IDX)) == myWorldId && clustercraft.Status == Clustercraft.CraftStatus.Launching;
+						bool flag4 = component.GetDestinationWorldID() == myWorldId;
+						bool flag5 = component.IsTraveling();
+						bool flag6 = clustercraft.HasResourcesToMove(1, Clustercraft.CombustionResource.All);
+						float num3 = component.TravelETA();
+						flag3 = (flag4 && flag5 && flag6 && num3 < detectTime) || (!flag5 && flag4 && clustercraft.Status == Clustercraft.CraftStatus.Landing);
+						if (!flag3)
+						{
+							ClusterGridEntity adjacentAsteroid = clustercraft.GetAdjacentAsteroid();
+							flag3 = ((adjacentAsteroid != null) ? ClusterUtil.GetAsteroidWorldIdAtLocation(adjacentAsteroid.Location) : ((int)ClusterManager.INVALID_WORLD_IDX)) == myWorldId && clustercraft.Status == Clustercraft.CraftStatus.Launching;
+						}
 					}
+					this.UpdateDetectionState(flag3, expectedDetectionForState);
 				}
-				this.UpdateDetectionState(flag3, expectedDetectionForState);
 			}
 		}
 

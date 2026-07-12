@@ -30,10 +30,10 @@ namespace Database
 			minMax = new MathUtil.MinMax(100f, 400f);
 			this.MeteorShowerCopperEvent = base.Add(new MeteorShowerEvent(text3, num5, num6, new MathUtil.MinMax(300f, 1200f), minMax).AddMeteor(CopperCometConfig.ID, 1f).AddMeteor(RockCometConfig.ID, 1f));
 			string text4 = "MeteorShowerFullereneEvent";
-			float num7 = 80f;
-			float num8 = 0.33f;
+			float num7 = 30f;
+			float num8 = 0.66f;
 			minMax = new MathUtil.MinMax(80f, 80f);
-			this.MeteorShowerFullereneEvent = base.Add(new MeteorShowerEvent(text4, num7, num8, new MathUtil.MinMax(1f, 1f), minMax).AddMeteor(FullereneCometConfig.ID, 1f).AddMeteor(RockCometConfig.ID, 4f).AddMeteor(DustCometConfig.ID, 10f));
+			this.MeteorShowerFullereneEvent = base.Add(new MeteorShowerEvent(text4, num7, num8, new MathUtil.MinMax(1f, 1f), minMax).AddMeteor(FullereneCometConfig.ID, 6f).AddMeteor(RockCometConfig.ID, 1f).AddMeteor(DustCometConfig.ID, 1f));
 			string text5 = "MeteorShowerDustEvent";
 			float num9 = 9000f;
 			float num10 = 2f;

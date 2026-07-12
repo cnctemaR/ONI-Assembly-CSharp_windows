@@ -135,6 +135,9 @@ public class AudioMixerSnapshots : ScriptableObject
 	[EventRef]
 	public string MediumRocketInteriorReverbSnapshot;
 
+	[EventRef]
+	public string MainMenuVideoPlayingSnapshot;
+
 	[SerializeField]
 	[EventRef]
 	private string[] snapshots;

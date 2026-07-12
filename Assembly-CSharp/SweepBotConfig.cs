@@ -42,7 +42,7 @@ public class SweepBotConfig : IEntityConfig
 		def.batteryAmountId = Db.Get().Amounts.InternalBattery.Id;
 		def.canCharge = true;
 		def.lowBatteryWarningPercent = 0.5f;
-		gameObject.AddOrGetDef<SweetBotReactMonitor.Def>();
+		gameObject.AddOrGetDef<SweepBotReactMonitor.Def>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGetDef<SweepBotTrappedMonitor.Def>();
 		gameObject.AddOrGet<AnimEventHandler>();

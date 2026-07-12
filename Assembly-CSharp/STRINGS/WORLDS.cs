@@ -255,9 +255,9 @@ namespace STRINGS
 
 		public class MEDIUMSWAMPY
 		{
-			public static LocString NAME = "Mid-Sized Swampy Asteroid";
+			public static LocString NAME = "Stinko Swamp Asteroid";
 
-			public static LocString DESCRIPTION = "A large-ish, polluted swamp world.\n\n<smallcaps>Mid-sized Swampy Asteroids are full of swampy and marshy areas, but also contain a variety of other biomes diverse enough to keep a determined colony supplied with essentials.</smallcaps>";
+			public static LocString DESCRIPTION = "A large-ish, polluted swamp world.\n\n<smallcaps>Stinko Swamp Asteroids are full of swampy and marshy areas, but also contain a variety of other biomes diverse enough to keep a determined colony supplied with essentials.</smallcaps>";
 		}
 
 		public class MEDIUMSANDYSWAMP

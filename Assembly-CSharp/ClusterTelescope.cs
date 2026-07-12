@@ -171,30 +171,17 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			KPrefabID component = worker.GetComponent<KPrefabID>();
 			OxygenBreather component2 = worker.GetComponent<OxygenBreather>();
 			Attributes attributes = worker.GetAttributes();
-			if (ev != Workable.WorkableEvent.WorkStarted)
-			{
-				if (ev != Workable.WorkableEvent.WorkStopped)
-				{
-					return;
-				}
-				if (this.m_telescope.providesOxygen)
-				{
-					attributes.Remove(this.radiationShielding);
-					component2.SetGasProvider(this.workerGasProvider);
-					component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
-					component.RemoveTag(GameTags.Shaded);
-				}
-				Util.KDestroyGameObject(this.telescopeTargetMarker);
-				base.ShowProgressBar(false);
-			}
-			else
+			if (ev == Workable.WorkableEvent.WorkStarted)
 			{
 				base.ShowProgressBar(true);
-				this.telescopeTargetMarker = GameUtil.KInstantiate(Assets.GetPrefab("TelescopeTarget"), Grid.SceneLayer.Background, null, 0);
-				this.telescopeTargetMarker.SetActive(true);
 				this.progressBar.SetUpdateFunc(() => this.m_fowManager.GetRevealCompleteFraction(this.currentTarget));
 				this.currentTarget = this.m_telescope.GetAnalyzeTarget();
-				this.telescopeTargetMarker.GetComponent<TelescopeTarget>().Init(this.currentTarget);
+				if (!ClusterGrid.Instance.GetEntityOfLayerAtCell(this.currentTarget, EntityLayer.Telescope))
+				{
+					this.telescopeTargetMarker = GameUtil.KInstantiate(Assets.GetPrefab("TelescopeTarget"), Grid.SceneLayer.Background, null, 0);
+					this.telescopeTargetMarker.SetActive(true);
+					this.telescopeTargetMarker.GetComponent<TelescopeTarget>().Init(this.currentTarget);
+				}
 				if (this.m_telescope.providesOxygen)
 				{
 					attributes.Add(this.radiationShielding);
@@ -202,9 +189,28 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 					component2.SetGasProvider(this);
 					component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 					component.AddTag(GameTags.Shaded, false);
-					return;
 				}
+				base.GetComponent<Operational>().SetActive(true, false);
+				this.checkMarkerFrequency = global::UnityEngine.Random.Range(2f, 5f);
+				return;
 			}
+			if (ev != Workable.WorkableEvent.WorkStopped)
+			{
+				return;
+			}
+			if (this.m_telescope.providesOxygen)
+			{
+				attributes.Remove(this.radiationShielding);
+				component2.SetGasProvider(this.workerGasProvider);
+				component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
+				component.RemoveTag(GameTags.Shaded);
+			}
+			base.GetComponent<Operational>().SetActive(false, false);
+			if (this.telescopeTargetMarker != null)
+			{
+				Util.KDestroyGameObject(this.telescopeTargetMarker);
+			}
+			base.ShowProgressBar(false);
 		}
 
 		public override List<Descriptor> GetDescriptors(GameObject go)
@@ -220,11 +226,27 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		protected override bool OnWorkTick(Worker worker, float dt)
 		{
 			AxialI analyzeTarget = this.m_telescope.GetAnalyzeTarget();
+			bool flag = false;
 			if (analyzeTarget != this.currentTarget)
 			{
-				this.telescopeTargetMarker.GetComponent<TelescopeTarget>().Init(analyzeTarget);
+				if (this.telescopeTargetMarker)
+				{
+					this.telescopeTargetMarker.GetComponent<TelescopeTarget>().Init(analyzeTarget);
+				}
 				this.currentTarget = analyzeTarget;
+				flag = true;
 			}
+			if (!flag && this.checkMarkerTimer > this.checkMarkerFrequency)
+			{
+				this.checkMarkerTimer = 0f;
+				if (!this.telescopeTargetMarker && !ClusterGrid.Instance.GetEntityOfLayerAtCell(this.currentTarget, EntityLayer.Telescope))
+				{
+					this.telescopeTargetMarker = GameUtil.KInstantiate(Assets.GetPrefab("TelescopeTarget"), Grid.SceneLayer.Background, null, 0);
+					this.telescopeTargetMarker.SetActive(true);
+					this.telescopeTargetMarker.GetComponent<TelescopeTarget>().Init(this.currentTarget);
+				}
+			}
+			this.checkMarkerTimer += dt;
 			float num = ROCKETRY.CLUSTER_FOW.POINTS_TO_REVEAL / ROCKETRY.CLUSTER_FOW.DEFAULT_CYCLES_PER_REVEAL / 600f;
 			float num2 = dt * num;
 			this.m_fowManager.EarnRevealPointsForLocation(this.currentTarget, num2);
@@ -281,5 +303,9 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 		private Storage storage;
 
 		private AttributeModifier radiationShielding;
+
+		private float checkMarkerTimer;
+
+		private float checkMarkerFrequency = 1f;
 	}
 }

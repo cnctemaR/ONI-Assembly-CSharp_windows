@@ -76,9 +76,8 @@ public class ColonyDestinationAsteroidBeltData
 
 	public ColonyDestinationAsteroidBeltData(string staringWorldName, int seed, string clusterPath)
 	{
-		this.Scale = 1f;
-		this.TargetScale = 1f;
 		this.startWorld = SettingsCache.worlds.GetWorldData(staringWorldName);
+		this.Scale = (this.TargetScale = this.startWorld.iconScale);
 		this.worlds = new List<global::ProcGen.World>();
 		if (clusterPath != null)
 		{
@@ -187,7 +186,7 @@ public class ColonyDestinationAsteroidBeltData
 		return list;
 	}
 
-	public List<AsteroidDescriptor> GenerateTraitDescriptors(global::ProcGen.World singleWorld)
+	public List<AsteroidDescriptor> GenerateTraitDescriptors(global::ProcGen.World singleWorld, bool includeDefaultTrait = true)
 	{
 		List<AsteroidDescriptor> list = new List<AsteroidDescriptor>();
 		List<global::ProcGen.World> list2 = new List<global::ProcGen.World>();
@@ -204,7 +203,7 @@ public class ColonyDestinationAsteroidBeltData
 					string text = worldTrait.filePath.Substring(worldTrait.filePath.LastIndexOf("/") + 1);
 					list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(worldTrait.name), worldTrait.colorHex), Strings.Get(worldTrait.description), global::Util.ColorFromHex(worldTrait.colorHex), null, text));
 				}
-				if (worldTraits.Count == 0)
+				if (worldTraits.Count == 0 && includeDefaultTrait)
 				{
 					list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, Color.white, null, "NoTraits"));
 				}

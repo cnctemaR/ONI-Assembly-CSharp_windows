@@ -18,19 +18,20 @@ public class DigTool : DragTool
 	{
 		if (!Grid.Solid[cell])
 		{
-			foreach (Uprootable uprootable in Components.Uprootables.Items)
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			int num;
+			int num2;
+			Grid.CellToXY(cell, out num, out num2);
+			GameScenePartitioner.Instance.GatherEntries(num, num2, 1, 1, GameScenePartitioner.Instance.plants, pooledList);
+			if (pooledList.Count > 0)
 			{
-				if (Grid.PosToCell(uprootable.gameObject) == cell)
+				Uprootable component = (pooledList[0].obj as Component).GetComponent<Uprootable>();
+				if (component != null)
 				{
-					uprootable.MarkForUproot(true);
-					break;
-				}
-				OccupyArea area = uprootable.area;
-				if (area != null && area.CheckIsOccupying(cell))
-				{
-					uprootable.MarkForUproot(true);
+					component.MarkForUproot(true);
 				}
 			}
+			pooledList.Recycle();
 		}
 		if (DebugHandler.InstantBuildMode)
 		{
@@ -45,10 +46,10 @@ public class DigTool : DragTool
 			GameObject gameObject = DigTool.PlaceDig(cell, distFromOrigin);
 			if (gameObject != null)
 			{
-				Prioritizable component = gameObject.GetComponent<Prioritizable>();
-				if (component != null)
+				Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
+				if (component2 != null)
 				{
-					component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+					component2.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
 				}
 			}
 		}

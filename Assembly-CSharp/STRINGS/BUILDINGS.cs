@@ -288,7 +288,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Holds artifacts found in space.";
 
-				public static LocString EFFECT = "Allows Duplicants to store any artifacts they uncover during space missions.\n\nArtifacts become available to the colony upon the rocket's return.";
+				public static LocString EFFECT = "Allows Duplicants to store any artifacts they uncover during space missions.\n\nArtifacts become available to the colony upon the rocket's return. \n\nMust be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".";
 			}
 
 			public class CARGOBAY
@@ -306,7 +306,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Holds more than a regular cargo bay.";
 
-				public static LocString EFFECT = "Allows Duplicants to store most of the " + UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID") + " found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Allows Duplicants to store most of the ",
+					UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID"),
+					" found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class SOLIDCARGOBAYSMALL
@@ -315,7 +322,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Duplicants will fill cargo bays with any resources they find during space missions.";
 
-				public static LocString EFFECT = "Allows Duplicants to store some of the " + UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID") + " found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Allows Duplicants to store some of the ",
+					UI.FormatAsLink("Solid Materials", "ELEMENTS_SOLID"),
+					" found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\n Must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class SPECIALCARGOBAY
@@ -424,7 +438,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Allows Duplicants to boldly go where other Duplicants haven't been yet.";
 
-				public static LocString EFFECT = "Automatically analyzes adjacent space while on a voyage.";
+				public static LocString EFFECT = "Automatically analyzes adjacent space while on a voyage. \n\nMust be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".";
 			}
 
 			public class HABITATMODULESMALL
@@ -433,7 +447,7 @@ namespace STRINGS
 
 				public static LocString DESC = "One lucky Duplicant gets the best view from the whole rocket.";
 
-				public static LocString EFFECT = "Functions as a Command Module and a Nosecone.\n\nHolds one Duplicant traveller.\n\nOne Command Module may be installed per rocket.\n\nMust be built at the top of a rocket.";
+				public static LocString EFFECT = "Functions as a Command Module and a Nosecone.\n\nHolds one Duplicant traveller.\n\nOne Command Module may be installed per rocket.\n\nMust be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ". \n\nMust be built at the top of a rocket.";
 			}
 
 			public class HABITATMODULEMEDIUM
@@ -442,7 +456,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Duplicants can survive space travel inside this protective nosecone... Hopefully.";
 
-				public static LocString EFFECT = "Functions as a Command Module.\n\nHolds up to ten Duplicant travellers.\n\nOne Command Module may be installed per rocket.";
+				public static LocString EFFECT = "Functions as a Command Module.\n\nHolds up to ten Duplicant travellers.\n\nOne Command Module may be installed per rocket. \n\nEngine must be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".";
 			}
 
 			public class NOSECONEBASIC
@@ -451,7 +465,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Every rocket requires a nosecone to fly.";
 
-				public static LocString EFFECT = "Protects a rocket during takeoff and entry, enabling space travel.\n\nMust be built at the top of a rocket.";
+				public static LocString EFFECT = "Protects a rocket during takeoff and entry, enabling space travel.\n\nEngine must be built via " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ". \n\nMust be built at the top of a rocket.";
 			}
 
 			public class NOSECONEHARVEST
@@ -468,7 +482,9 @@ namespace STRINGS
 					UI.FormatAsLink("liquid", "ELEMENTS_LIQUID"),
 					" and ",
 					UI.FormatAsLink("solid", "ELEMENTS_SOLID"),
-					" resources from space.\n\nMust be built at the top of a rocket with ",
+					" resources from space.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\nMust be built at the top of a rocket with ",
 					UI.FormatAsLink("gas", "ELEMENTS_GAS"),
 					", ",
 					UI.FormatAsLink("liquid", "ELEMENTS_LIQUID"),
@@ -484,7 +500,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Rockets can be used to send Duplicants into space and retrieve rare resources.";
 
-				public static LocString EFFECT = "Uses pressurized " + UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE") + " to propel rockets for short range space exploration.\n\nCarbon Dioxide Engines are relatively fast engine for their size but with limited height restrictions.\n\nThe engine of a rocket must be built first before more rocket modules can be added.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Uses pressurized ",
+					UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
+					" to propel rockets for short range space exploration.\n\nCarbon Dioxide Engines are relatively fast engine for their size but with limited height restrictions.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\nOnce the engine has been built, more rocket modules can be added."
+				});
 			}
 
 			public class KEROSENEENGINE
@@ -493,7 +516,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Rockets can be used to send Duplicants into space and retrieve rare resources.";
 
-				public static LocString EFFECT = "Burns " + UI.FormatAsLink("Petroleum", "PETROLEUM") + " to propel rockets for mid-range space exploration.\n\nPetroleum Engines have generous height restrictions, ideal for hauling many modules.\n\nThe engine of a rocket must be built first before more rocket modules can be added.";
+				public static LocString EFFECT = "Burns " + UI.FormatAsLink("Petroleum", "PETROLEUM") + " to propel rockets for mid-range space exploration.\n\nPetroleum Engines have generous height restrictions, ideal for hauling many modules.\n\nThe engine must be built first before more rocket modules can be added.";
 			}
 
 			public class KEROSENEENGINECLUSTER
@@ -502,7 +525,14 @@ namespace STRINGS
 
 				public static LocString DESC = "More powerful rocket engines can propel heavier burdens.";
 
-				public static LocString EFFECT = "Burns " + UI.FormatAsLink("Petroleum", "PETROLEUM") + " to propel rockets for mid-range space exploration.\n\nPetroleum Engines have generous height restrictions, ideal for hauling many modules.\n\nThe engine of a rocket must be built first before more rocket modules can be added.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Burns ",
+					UI.FormatAsLink("Petroleum", "PETROLEUM"),
+					" to propel rockets for mid-range space exploration.\n\nPetroleum Engines have generous height restrictions, ideal for hauling many modules.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\nOnce the engine has been built, more rocket modules can be added."
+				});
 			}
 
 			public class KEROSENEENGINECLUSTERSMALL
@@ -517,7 +547,9 @@ namespace STRINGS
 					UI.FormatAsLink("Petroleum", "PETROLEUM"),
 					" to propel rockets for mid-range space exploration.\n\nSmall Petroleum Engines possess the same speed as a ",
 					UI.FormatAsLink("Petroleum Engines", "KEROSENEENGINE"),
-					" but have smaller height restrictions.\n\nThe engine of a rocket must be built first before more rocket modules can be added."
+					" but have smaller height restrictions.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\nOnce the engine has been built, more rocket modules can be added."
 				});
 			}
 
@@ -533,7 +565,7 @@ namespace STRINGS
 					UI.FormatAsLink("Liquid Hydrogen", "LIQUIDHYDROGEN"),
 					" to propel rockets for long-range space exploration.\n\nHydrogen Engines have the same generous height restrictions as ",
 					UI.FormatAsLink("Petroleum Engines", "KEROSENEENGINE"),
-					" but are slightly faster.\n\nThe engine of a rocket must be built first before more rocket modules can be added."
+					" but are slightly faster.\n\nThe engine must be built first before more rocket modules can be added."
 				});
 			}
 
@@ -549,7 +581,9 @@ namespace STRINGS
 					UI.FormatAsLink("Liquid Hydrogen", "LIQUIDHYDROGEN"),
 					" to propel rockets for long-range space exploration.\n\nHydrogen Engines have the same generous height restrictions as ",
 					UI.FormatAsLink("Petroleum Engines", "KEROSENEENGINE"),
-					" but are slightly faster.\n\nThe engine of a rocket must be built first before more rocket modules can be added."
+					" but are slightly faster.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					".\n\n Once the engine has been built, more rocket modules can be added."
 				});
 			}
 
@@ -565,7 +599,9 @@ namespace STRINGS
 					UI.FormatAsLink("Sucrose", "SUCROSE"),
 					" to propel rockets for short range space exploration.\n\nSugar Engines have higher height restrictions than ",
 					UI.FormatAsLink("Carbon Dioxide Engines", "CO2ENGINE"),
-					", but move slower.\n\nThe engine of a rocket must be built first before more rocket modules can be added."
+					", but move slower.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\nOnce the engine has been built, more rocket modules can be added."
 				});
 			}
 
@@ -581,7 +617,9 @@ namespace STRINGS
 					UI.FormatAsLink("Radbolts", "RADIATION"),
 					" into a reaction chamber to propel rockets for long-range space exploration.\n\nRadbolt Engines are faster than ",
 					UI.FormatAsLink("Hydrogen Engines", "HYDROGENENGINE"),
-					" but with a more restrictive height allowance.\n\nThe engine of a rocket must be built first before more rocket modules can be added."
+					" but with a more restrictive height allowance.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\nOnce the engine has been built, more rocket modules can be added."
 				});
 
 				public static LocString LOGIC_PORT_STORAGE = "Radbolt Storage";
@@ -597,7 +635,7 @@ namespace STRINGS
 
 				public static LocString DESC = "It's a generally good idea to pack some supplies when exploring unknown worlds.";
 
-				public static LocString EFFECT = "Delivers cargo to the surface of Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".";
+				public static LocString EFFECT = "Delivers cargo to the surface of Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ". \n\n Must be built via Rocket Platform.";
 			}
 
 			public class BATTERYMODULE
@@ -614,7 +652,7 @@ namespace STRINGS
 					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
 					".\n\nProvides stored power to ",
 					UI.FormatAsLink("Interior Rocket Outlets", "ROCKETINTERIORPOWERPLUG"),
-					".\n\nLoses charge over time."
+					".\n\nLoses charge over time. \n\nMust be built via Rocket Platform."
 				});
 			}
 
@@ -624,7 +662,7 @@ namespace STRINGS
 
 				public static LocString DESC = "That's one small step for Dupekind.";
 
-				public static LocString EFFECT = "Enables travel to Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".\n\nCan hold one Duplicant traveller.\n\nDeployment is available while in a Starmap hex adjacent to a Planetoid.";
+				public static LocString EFFECT = "Enables travel to Planetoids that do not yet have a " + BUILDINGS.PREFABS.LAUNCHPAD.NAME + ".\n\nCan hold one Duplicant traveller.\n\nDeployment is available while in a Starmap hex adjacent to a Planetoid. \n\n Must be built via Rocket Platform.";
 			}
 
 			public class SOLARPANELMODULE
@@ -639,7 +677,9 @@ namespace STRINGS
 					UI.FormatAsLink("Sunlight", "LIGHT"),
 					" into electrical ",
 					UI.FormatAsLink("Power", "POWER"),
-					" for use on rockets.\n\nMust be exposed to space."
+					" for use on rockets.\n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\n Must be exposed to space."
 				});
 			}
 
@@ -649,7 +689,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Rover can conduct explorations of planetoids that don't have rocket platforms built.";
 
-				public static LocString EFFECT = "Deploys one " + UI.FormatAsLink("Rover Bot", "SCOUT") + " for remote Planetoid exploration.\n\nDeployment is available while in a Starmap hex adjacent to a Planetoid.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Deploys one ",
+					UI.FormatAsLink("Rover Bot", "SCOUT"),
+					" for remote Planetoid exploration.\n\nDeployment is available while in a Starmap hex adjacent to a Planetoid. \n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class PIONEERLANDER
@@ -1084,7 +1131,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Storing additional fuel increases the distance a rocket can travel before returning.";
 
-				public static LocString EFFECT = "Stores the " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " fuel piped into it to supply rocket engines.\n\nThe stored fuel type is determined by the rocket engine it is built upon.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Stores the ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" fuel piped into it to supply rocket engines.\n\nThe stored fuel type is determined by the rocket engine it is built upon. \n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class LANDING_POD
@@ -1169,7 +1223,9 @@ namespace STRINGS
 					UI.FormatAsLink("Fertilizer", "Fertilizer"),
 					" and ",
 					UI.FormatAsLink("Oxylite", "OXYROCK"),
-					" for burning rocket fuels."
+					" for burning rocket fuels. \n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
 				});
 
 				public static LocString UI_FILTER_CATEGORY = "Accepted Oxidizers";
@@ -1192,7 +1248,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Solid oxidizers allows rocket fuel to be efficiently burned in the vacuum of space.";
 
-				public static LocString EFFECT = "Stores " + UI.FormatAsLink("Oxylite", "OXYROCK") + " and other oxidizers for burning rocket fuels.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Stores ",
+					UI.FormatAsLink("Oxylite", "OXYROCK"),
+					" and other oxidizers for burning rocket fuels.\n\n Must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 
 				public static LocString UI_FILTER_CATEGORY = "Accepted Oxidizers";
 			}
@@ -1212,7 +1275,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Liquid oxygen improves the thrust-to-mass ratio of rocket fuels.";
 
-				public static LocString EFFECT = "Stores " + UI.FormatAsLink("Liquid Oxygen", "LIQUIDOXYGEN") + " for burning rocket fuels.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Stores ",
+					UI.FormatAsLink("Liquid Oxygen", "LIQUIDOXYGEN"),
+					" for burning rocket fuels. \n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class LIQUIDCONDITIONER
@@ -1246,7 +1316,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Holds more than a regular cargo tank.";
 
-				public static LocString EFFECT = "Allows Duplicants to store most of the " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Allows Duplicants to store most of the ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.\n\n Must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class LIQUIDCARGOBAYSMALL
@@ -1255,7 +1332,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Duplicants will fill cargo tanks with whatever resources they find during space missions.";
 
-				public static LocString EFFECT = "Allows Duplicants to store some of the " + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + " resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Allows Duplicants to store some of the ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\nMust be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class LUXURYBED
@@ -1813,7 +1897,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Holds more than a typical gas cargo canister.";
 
-				public static LocString EFFECT = "Allows Duplicants to store most of the " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Allows Duplicants to store most of the ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.\n\n Must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class GASCARGOBAYSMALL
@@ -1822,7 +1913,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Duplicants fill cargo canisters with any resources they find during space missions.";
 
-				public static LocString EFFECT = "Allows Duplicants to store some of the " + UI.FormatAsLink("Gas", "ELEMENTS_GAS") + " resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Allows Duplicants to store some of the ",
+					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
+					" resources found during space missions.\n\nStored resources become available to the colony upon the rocket's return. \n\n Must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					"."
+				});
 			}
 
 			public class GASCONDUIT
@@ -1894,7 +1992,7 @@ namespace STRINGS
 
 				public static LocString DESC = "A platform from which rockets can be launched and on which they can land.";
 
-				public static LocString EFFECT = "Enables Rocket construction.\n\nAllows Rockets to launch from or land on the host Planetoid.\n\nAutomatically links up to " + BUILDINGS.PREFABS.MODULARLAUNCHPADPORT.NAME + UI.FormatAsLink("s", "MODULARLAUNCHPADPORTSOLID") + " built to either side of the platform.";
+				public static LocString EFFECT = "Precursor to construction of all other Rocket modules.\n\nAllows Rockets to launch from or land on the host Planetoid.\n\nAutomatically links up to " + BUILDINGS.PREFABS.MODULARLAUNCHPADPORT.NAME + UI.FormatAsLink("s", "MODULARLAUNCHPADPORTSOLID") + " built to either side of the platform.";
 
 				public static LocString LOGIC_PORT_READY = "Rocket Checklist";
 
@@ -4108,7 +4206,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Rockets can be used to send Duplicants into space and retrieve rare resources.";
 
-				public static LocString EFFECT = "Utilizes " + UI.FormatAsLink("Steam", "STEAM") + " to propel rockets for space exploration.\n\nThe engine of a rocket must be built first before more rocket modules may be added.";
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Utilizes ",
+					UI.FormatAsLink("Steam", "STEAM"),
+					" to propel rockets for space exploration.\n\nEngine must be built via ",
+					BUILDINGS.PREFABS.LAUNCHPAD.NAME,
+					". \n\nOnce the engine has been built, more rocket modules can be added."
+				});
 			}
 
 			public class SOLARPANEL
@@ -6665,8 +6770,6 @@ namespace STRINGS
 				public static LocString NAME = "Teleporter Transmitter";
 
 				public static LocString DESC = "The functional remnants of an intricate teleportation system.\n\nThis is the outgoing side, and has one pre-programmed destination.";
-
-				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 			}
 
 			public class WARPRECEIVER
@@ -6674,26 +6777,15 @@ namespace STRINGS
 				public static LocString NAME = "Teleporter Receiver";
 
 				public static LocString DESC = "The functional remnants of an intricate teleportation system.\n\nThis is the incoming side.";
-
-				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
-			}
-
-			public class TEMPORALTEARANALYZER
-			{
-				public static LocString NAME = "Temporal Tear Scanner";
-
-				public static LocString DESC = "Hard to say what this is for.\n\nWas it looking for something?";
-
-				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
 			}
 
 			public class TEMPORALTEAROPENER
 			{
 				public static LocString NAME = "Temporal Tear Opener";
 
-				public static LocString DESC = "R.I.P.\n\nLooks dangerous.";
+				public static LocString DESC = "Infinite possibilities, with a complimentary side of meteor showers.";
 
-				public static LocString EFFECT = "A strong door with a sophisticated genetic lock.";
+				public static LocString EFFECT = "A powerful mechanism capable of tearing through the fabric of reality.";
 
 				public class SIDESCREEN
 				{

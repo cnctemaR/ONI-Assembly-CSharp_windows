@@ -40,6 +40,7 @@ public class WarpConduitSenderConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		Prioritizable.AddRef(go);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Gravitas, false);
 		PrimaryElement component = go.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium, true);

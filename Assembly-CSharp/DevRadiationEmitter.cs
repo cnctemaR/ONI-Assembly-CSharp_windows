@@ -53,9 +53,9 @@ public class DevRadiationEmitter : KMonoBehaviour, ISingleSliderControl, ISlider
 		return this.radiationEmitter.emitRads;
 	}
 
-	public void SetSliderValue(float percent, int index)
+	public void SetSliderValue(float value, int index)
 	{
-		this.radiationEmitter.emitRads = this.GetSliderMax(index) * percent / 600f / 12f;
+		this.radiationEmitter.emitRads = value;
 		this.radiationEmitter.Refresh();
 	}
 

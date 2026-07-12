@@ -224,6 +224,11 @@ public class RocketModule : KMonoBehaviour
 		{
 			component9.SetLinkConnected(false);
 		}
+		PartialLightBlocking component10 = base.GetComponent<PartialLightBlocking>();
+		if (component10 != null)
+		{
+			component10.ClearLightBlocking();
+		}
 	}
 
 	public void RegisterComponents()
@@ -288,6 +293,11 @@ public class RocketModule : KMonoBehaviour
 		if (component8 != null)
 		{
 			component8.SetLinkConnected(true);
+		}
+		PartialLightBlocking component9 = base.GetComponent<PartialLightBlocking>();
+		if (component9 != null)
+		{
+			component9.SetLightBlocking();
 		}
 	}
 

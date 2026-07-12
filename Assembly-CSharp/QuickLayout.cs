@@ -6,10 +6,15 @@ public class QuickLayout : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Run(false);
+		this.ForceUpdate();
 	}
 
-	private void Update()
+	private void OnEnable()
+	{
+		this.ForceUpdate();
+	}
+
+	private void LateUpdate()
 	{
 		this.Run(false);
 	}
@@ -50,12 +55,42 @@ public class QuickLayout : KMonoBehaviour
 	public void Layout()
 	{
 		Vector3 vector = this._offset;
+		bool flag = false;
 		for (int i = 0; i < base.transform.childCount; i++)
 		{
 			if (base.transform.GetChild(i).gameObject.activeInHierarchy)
 			{
+				flag = true;
 				base.transform.GetChild(i).rectTransform().anchoredPosition = vector;
 				vector += (float)(this._elementSize + this._spacing) * this.GetDirectionVector();
+			}
+		}
+		if (this.driveParentRectSize != null)
+		{
+			if (!flag)
+			{
+				if (this._layoutDirection == QuickLayout.LayoutDirection.BottomToTop || this._layoutDirection == QuickLayout.LayoutDirection.TopToBottom)
+				{
+					this.driveParentRectSize.sizeDelta = new Vector2(Mathf.Abs(this.driveParentRectSize.sizeDelta.x), 0f);
+					return;
+				}
+				if (this._layoutDirection == QuickLayout.LayoutDirection.LeftToRight || this._layoutDirection == QuickLayout.LayoutDirection.LeftToRight)
+				{
+					this.driveParentRectSize.sizeDelta = new Vector2(0f, Mathf.Abs(this.driveParentRectSize.sizeDelta.y));
+					return;
+				}
+			}
+			else
+			{
+				if (this._layoutDirection == QuickLayout.LayoutDirection.BottomToTop || this._layoutDirection == QuickLayout.LayoutDirection.TopToBottom)
+				{
+					this.driveParentRectSize.sizeDelta = new Vector2(this.driveParentRectSize.sizeDelta.x, Mathf.Abs(vector.y));
+					return;
+				}
+				if (this._layoutDirection == QuickLayout.LayoutDirection.LeftToRight || this._layoutDirection == QuickLayout.LayoutDirection.LeftToRight)
+				{
+					this.driveParentRectSize.sizeDelta = new Vector2(Mathf.Abs(vector.x), this.driveParentRectSize.sizeDelta.y);
+				}
 			}
 		}
 	}
@@ -93,6 +128,9 @@ public class QuickLayout : KMonoBehaviour
 
 	[SerializeField]
 	private Vector2 offset;
+
+	[SerializeField]
+	private RectTransform driveParentRectSize;
 
 	private int _elementSize;
 

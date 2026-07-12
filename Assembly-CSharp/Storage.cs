@@ -75,6 +75,23 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return base.GetAnim(worker);
 	}
 
+	public override Vector3 GetTargetPoint()
+	{
+		Vector3 vector = base.GetTargetPoint();
+		if (this.useGunForDelivery && this.gunTargetOffset != Vector2.zero)
+		{
+			if (this.rotatable != null)
+			{
+				vector += this.rotatable.GetRotatedOffset(this.gunTargetOffset);
+			}
+			else
+			{
+				vector += new Vector3(this.gunTargetOffset.x, this.gunTargetOffset.y, 0f);
+			}
+		}
+		return vector;
+	}
+
 	public event global::System.Action OnStorageIncreased;
 
 	protected override void OnPrefabInit()
@@ -1394,6 +1411,11 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	public bool showUnreachableStatus;
 
 	public bool useWideOffsets;
+
+	[MyCmpGet]
+	private Rotatable rotatable;
+
+	public Vector2 gunTargetOffset;
 
 	public Storage.FetchCategory fetchCategory;
 

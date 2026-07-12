@@ -28,6 +28,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	{
 		base.SetWorkTime(1.5f);
 		this.equippable.OnAssign += this.RefreshChore;
+		Prioritizable.AddRef(base.gameObject);
 	}
 
 	private void CreateChore()
@@ -74,6 +75,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	{
 		this.workTimeRemaining = this.GetWorkTime();
 		base.OnStopWork(worker);
+		Prioritizable.RemoveRef(base.gameObject);
 	}
 
 	[MyCmpReq]

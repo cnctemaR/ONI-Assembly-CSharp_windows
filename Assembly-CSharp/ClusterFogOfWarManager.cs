@@ -88,6 +88,10 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 
 		public void RevealLocation(AxialI location, int radius = 0)
 		{
+			if (ClusterGrid.Instance.GetHiddenEntitiesOfLayerAtCell(location, EntityLayer.Asteroid).Count > 0 || ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(location, EntityLayer.Asteroid) != null)
+			{
+				radius = Mathf.Max(radius, 1);
+			}
 			bool flag = false;
 			foreach (AxialI axialI in AxialUtil.GetAllPointsWithinRadius(location, radius))
 			{
@@ -118,6 +122,7 @@ public class ClusterFogOfWarManager : GameStateMachine<ClusterFogOfWarManager, C
 			}
 			if (this.IsLocationRevealed(location))
 			{
+				this.RevealLocation(location, 0);
 				this.PeekLocation(location, 2);
 				Game.Instance.Trigger(-1991583975, location);
 			}

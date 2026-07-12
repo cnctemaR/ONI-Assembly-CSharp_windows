@@ -140,6 +140,10 @@ public class NotificationScreen : KScreen
 
 	private void AddNotification(Notification notification)
 	{
+		if (DebugHandler.NotificationsDisabled)
+		{
+			return;
+		}
 		this.notifications.Add(notification);
 		NotificationScreen.Entry entry = null;
 		this.entriesByMessage.TryGetValue(notification.titleText, out entry);
@@ -220,11 +224,11 @@ public class NotificationScreen : KScreen
 			case NotificationType.Bad:
 				reference3.color = this.badColor;
 				reference2.sprite = this.icon_bad;
-				goto IL_037C;
+				goto IL_0384;
 			case NotificationType.Tutorial:
 				reference3.color = this.warningColor;
 				reference2.sprite = this.icon_warning;
-				goto IL_037C;
+				goto IL_0384;
 			case NotificationType.Messages:
 			{
 				reference3.color = this.messageColor;
@@ -232,28 +236,28 @@ public class NotificationScreen : KScreen
 				MessageNotification messageNotification = notification as MessageNotification;
 				if (messageNotification == null)
 				{
-					goto IL_037C;
+					goto IL_0384;
 				}
 				TutorialMessage tutorialMessage = messageNotification.message as TutorialMessage;
 				if (tutorialMessage != null && !string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{
 					reference2.sprite = this.icon_video;
-					goto IL_037C;
+					goto IL_0384;
 				}
-				goto IL_037C;
+				goto IL_0384;
 			}
 			case NotificationType.DuplicantThreatening:
 				reference3.color = this.badColor;
 				reference2.sprite = this.icon_threatening;
-				goto IL_037C;
+				goto IL_0384;
 			case NotificationType.Event:
 				reference3.color = this.eventColor;
 				reference2.sprite = this.icon_event;
-				goto IL_037C;
+				goto IL_0384;
 			}
 			reference3.color = this.normalColor;
 			reference2.sprite = this.icon_normal;
-			IL_037C:
+			IL_0384:
 			reference2.color = reference3.color;
 			string text = "";
 			if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)

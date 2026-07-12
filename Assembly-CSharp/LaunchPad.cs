@@ -173,6 +173,7 @@ public class LaunchPad : KMonoBehaviour, ISim1000ms, IListableOption, IProcessCo
 		{
 			this.OnRocketBuildingChanged(gameObject);
 		}
+		base.Trigger(374403796, null);
 		return gameObject;
 	}
 

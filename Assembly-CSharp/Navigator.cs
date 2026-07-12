@@ -495,6 +495,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	[MyCmpAdd]
 	private Facing facing;
 
+	[MyCmpGet]
+	public AnimEventHandler animEventHandler;
+
 	public float defaultSpeed = 1f;
 
 	public TransitionDriver transitionDriver;

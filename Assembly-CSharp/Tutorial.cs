@@ -95,7 +95,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		{
 			PlanScreen.Instance.OpenCategoryByName("Food");
 		}, null, null, true);
-		item2.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodSourceExists);
+		item2.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodSourceExistsOnStartingWorld);
 		list4.Add(item2);
 		List<Tutorial.Item> list5 = list3;
 		Tutorial.Item item3 = new Tutorial.Item();
@@ -495,7 +495,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		return num / num2 <= 0.4f;
 	}
 
-	private bool FoodSourceExists()
+	private bool FoodSourceExistsOnStartingWorld()
 	{
 		using (List<ComplexFabricator>.Enumerator enumerator = Components.ComplexFabricators.Items.GetEnumerator())
 		{
@@ -507,7 +507,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 				}
 			}
 		}
-		return Components.PlantablePlots.Count > 0;
+		return Components.PlantablePlots.GetItems(ClusterManager.Instance.GetStartWorld().id).Count > 0;
 	}
 
 	private bool HygeneExists()

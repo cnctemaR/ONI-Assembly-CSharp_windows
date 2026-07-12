@@ -860,28 +860,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Data Bank";
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"Raw data that can be processed into ",
-					UI.PRE_KEYWORD,
-					"Interstellar Research",
-					UI.PST_KEYWORD,
-					" points."
-				});
+				public static LocString DESC = "Raw data that can be processed into " + UI.FormatAsLink("Interstellar Research", "RESEARCH") + " points.";
 			}
 
 			public class ORBITAL_RESEARCH_DATABANK
 			{
 				public static LocString NAME = "Data Bank";
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"Raw data that can be processed into ",
-					UI.PRE_KEYWORD,
-					"Data Analysis Research",
-					UI.PST_KEYWORD,
-					" points."
-				});
+				public static LocString DESC = "Raw Data that can be processed into " + UI.FormatAsLink("Data Analysis Research", "RESEARCH") + " points.";
 
 				public static LocString RECIPE_DESC = string.Concat(new string[]
 				{

@@ -9,9 +9,9 @@ public class LaunchInitializer : MonoBehaviour
 	{
 		if (!DlcManager.IsExpansion1Active())
 		{
-			return "U38";
+			return "U39";
 		}
-		return "U38";
+		return "U39";
 	}
 
 	private void Update()
@@ -75,9 +75,9 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	private const string BASE_BUILD_PREFIX = "U38";
+	private const string BASE_BUILD_PREFIX = "U39";
 
-	private const string EXPANSION1_BUILD_PREFIX = "U38";
+	private const string EXPANSION1_BUILD_PREFIX = "U39";
 
 	public GameObject[] SpawnPrefabs;
 

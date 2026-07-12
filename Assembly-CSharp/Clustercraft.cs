@@ -45,7 +45,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 
 	public override Sprite GetUISprite()
 	{
-		return Assets.GetSprite("ic_rocket");
+		return Def.GetUISprite(this.m_moduleInterface.GetPassengerModule().gameObject, "ui", false).first;
 	}
 
 	public override bool IsVisible
@@ -89,7 +89,7 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 	{
 		get
 		{
-			return this.EnginePower / this.TotalBurden * this.AutoPilotMultiplier;
+			return this.EnginePower / this.TotalBurden * this.AutoPilotMultiplier * this.PilotSkillMultiplier;
 		}
 	}
 
@@ -672,6 +672,10 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 
 	public void UpdateStatusItem()
 	{
+		if (ClusterGrid.Instance == null)
+		{
+			return;
+		}
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.mainStatusHandle != Guid.Empty)
 		{
@@ -878,6 +882,10 @@ public class Clustercraft : ClusterGridEntity, IClusterRange
 	[Serialize]
 	[Range(0f, 1f)]
 	public float AutoPilotMultiplier = 1f;
+
+	[Serialize]
+	[Range(0f, 2f)]
+	public float PilotSkillMultiplier = 1f;
 
 	[Serialize]
 	private bool m_launchRequested;

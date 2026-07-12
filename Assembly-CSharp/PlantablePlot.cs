@@ -154,7 +154,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		}
 		base.OnSpawn();
 		this.autoReplaceEntity = false;
-		Components.PlantablePlots.Add(this);
+		Components.PlantablePlots.Add(base.gameObject.GetMyWorldId(), this);
 		Prioritizable component = base.GetComponent<Prioritizable>();
 		component.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(component.onPriorityChanged, new Action<PrioritySetting>(this.SyncPriority));
 	}
@@ -176,7 +176,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		{
 			base.occupyingObject.Trigger(-216549700, null);
 		}
-		Components.PlantablePlots.Remove(this);
+		Components.PlantablePlots.Remove(base.gameObject.GetMyWorldId(), this);
 	}
 
 	protected override GameObject SpawnOccupyingObject(GameObject depositedEntity)
@@ -274,6 +274,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 	{
 		this.autoReplaceEntity = false;
 		this.requestedEntityTag = Tag.Invalid;
+		this.requestedEntityAdditionalFilterTag = Tag.Invalid;
 	}
 
 	public override void OrderRemoveOccupant()

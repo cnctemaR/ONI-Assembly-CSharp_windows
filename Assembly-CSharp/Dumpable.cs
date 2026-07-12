@@ -18,7 +18,7 @@ public class Dumpable : Workable
 		base.OnSpawn();
 		if (this.isMarkedForDumping)
 		{
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.CreateChore();
 		}
 		base.SetWorkTime(0.1f);
 	}
@@ -34,12 +34,22 @@ public class Dumpable : Workable
 		{
 			this.isMarkedForDumping = false;
 			this.chore.Cancel("Cancel Dumping!");
+			Prioritizable.RemoveRef(base.gameObject);
 			this.chore = null;
 			base.ShowProgressBar(false);
 			return;
 		}
 		this.isMarkedForDumping = true;
-		this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		this.CreateChore();
+	}
+
+	private void CreateChore()
+	{
+		if (this.chore == null)
+		{
+			Prioritizable.AddRef(base.gameObject);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		}
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -47,6 +57,7 @@ public class Dumpable : Workable
 		this.isMarkedForDumping = false;
 		this.chore = null;
 		this.Dump();
+		Prioritizable.RemoveRef(base.gameObject);
 	}
 
 	public void Dump()

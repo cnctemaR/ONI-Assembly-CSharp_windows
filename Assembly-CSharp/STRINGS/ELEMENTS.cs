@@ -1350,14 +1350,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Regolith", "REGOLITH");
 
-			public static LocString DESC = string.Concat(new string[]
-			{
-				"Regolith is a sandy substance composed of the various particles that collect atop terrestrial objects.\n\nIt is useful as a ",
-				UI.PRE_KEYWORD,
-				"Filtration Medium",
-				UI.PST_KEYWORD,
-				"."
-			});
+			public static LocString DESC = "Regolith is a sandy substance composed of the various particles that collect atop terrestrial objects.\n\nIt is useful as a " + UI.FormatAsLink("Filtration Medium", "REGOLITH") + ".";
 		}
 
 		public class SALTGAS
@@ -1399,14 +1392,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Sand", "SAND");
 
-			public static LocString DESC = string.Concat(new string[]
-			{
-				"Sand is a composite of granular rock.\n\nIt is useful as a ",
-				UI.PRE_KEYWORD,
-				"Filtration Medium",
-				UI.PST_KEYWORD,
-				"."
-			});
+			public static LocString DESC = "Sand is a composite of granular rock.\n\nIt is useful as a " + UI.FormatAsLink("Filtration Medium", "FILTER") + ".";
 		}
 
 		public class SANDCEMENT

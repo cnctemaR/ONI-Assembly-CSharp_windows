@@ -221,6 +221,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			this.fetchChore = null;
 		}
 		this.requestedEntityTag = Tag.Invalid;
+		this.requestedEntityAdditionalFilterTag = Tag.Invalid;
 		this.UpdateStatusItem();
 		this.SetPreview(Tag.Invalid, false);
 	}
@@ -304,6 +305,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		if (!this.autoReplaceEntity)
 		{
 			this.requestedEntityTag = Tag.Invalid;
+			this.requestedEntityAdditionalFilterTag = Tag.Invalid;
 		}
 		this.UpdateActive();
 		this.UpdateStatusItem();

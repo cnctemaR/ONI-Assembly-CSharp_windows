@@ -369,6 +369,7 @@ public class PlanterSideScreen : ReceptacleSideScreen
 	public override void SetTarget(GameObject target)
 	{
 		this.selectedDepositObjectTag = Tag.Invalid;
+		this.selectedDepositObjectAdditionalTag = Tag.Invalid;
 		base.SetTarget(target);
 		this.LoadTargetSubSpeciesRequest();
 		this.RefreshSubspeciesToggles();

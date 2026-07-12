@@ -3,13 +3,14 @@ using UnityEngine;
 
 public struct GravityComponent
 {
-	public GravityComponent(Transform transform, global::System.Action on_landed, Vector2 initial_velocity, bool land_on_fake_floors)
+	public GravityComponent(Transform transform, global::System.Action on_landed, Vector2 initial_velocity, bool land_on_fake_floors, bool mayLeaveWorld)
 	{
 		this.transform = transform;
 		this.elapsedTime = 0f;
 		this.velocity = initial_velocity;
 		this.onLanded = on_landed;
 		this.landOnFakeFloors = land_on_fake_floors;
+		this.mayLeaveWorld = mayLeaveWorld;
 		KCollider2D component = transform.GetComponent<KCollider2D>();
 		this.extents = GravityComponent.GetExtents(component);
 		this.bottomYOffset = GravityComponent.GetGroundOffset(component);
@@ -51,6 +52,8 @@ public struct GravityComponent
 	public global::System.Action onLanded;
 
 	public bool landOnFakeFloors;
+
+	public bool mayLeaveWorld;
 
 	public Vector2 extents;
 

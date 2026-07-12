@@ -2,7 +2,9 @@
 using KSerialization;
 using STRINGS;
 using TUNING;
+using UnityEngine;
 
+[RequireComponent(typeof(Prioritizable))]
 public class Demolishable : Workable
 {
 	public bool HasBeenDestroyed
@@ -27,7 +29,7 @@ public class Demolishable : Workable
 			{
 				return component2.OccupiedCellsOffsets;
 			}
-			Debug.Assert(false, "Ack! We put a Demolishable on something that's neither a Building nor OccupyArea!", this);
+			global::Debug.Assert(false, "Ack! We put a Demolishable on something that's neither a Building nor OccupyArea!", this);
 			return null;
 		}
 	}

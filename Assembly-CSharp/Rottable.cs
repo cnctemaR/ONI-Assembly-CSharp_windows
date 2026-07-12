@@ -12,7 +12,11 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 		default_state = this.Fresh;
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 		this.root.TagTransition(GameTags.Preserved, this.Preserved, false).TagTransition(GameTags.Entombed, this.Preserved, false);
-		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
+		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).Update(delegate(Rottable.Instance smi, float dt)
+		{
+			smi.sm.rotParameter.Set(smi.RotValue, smi);
+		}, UpdateRate.SIM_1000ms, true)
+			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, true);
 		this.Preserved.TagTransition(Rottable.PRESERVED_TAGS, this.Fresh, true).Enter("RefreshModifiers", delegate(Rottable.Instance smi)
 		{
 			smi.RefreshModifiers(0f);
@@ -22,6 +26,10 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			smi.GoTo(this.Stale);
 		});
 		this.Stale.ToggleStatusItem(Db.Get().CreatureStatusItems.Stale, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Fresh, (Rottable.Instance smi, float p) => p > smi.def.spoilTime - (smi.def.spoilTime - smi.def.staleTime)).ParamTransition<float>(this.rotParameter, this.Spoiled, GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.IsLTEZero)
+			.Update(delegate(Rottable.Instance smi, float dt)
+			{
+				smi.sm.rotParameter.Set(smi.RotValue, smi);
+			}, UpdateRate.SIM_1000ms, false)
 			.FastUpdate("Rot", Rottable.rotCB, UpdateRate.SIM_1000ms, false);
 		this.Spoiled.Enter(delegate(Rottable.Instance smi)
 		{
@@ -378,7 +386,6 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 
 		public void Rot(Rottable.Instance smi, float deltaTime)
 		{
-			smi.sm.rotParameter.Set(this.rotAmountInstance.value, smi);
 			this.RefreshModifiers(deltaTime);
 			if (smi.pickupable.storage != null)
 			{

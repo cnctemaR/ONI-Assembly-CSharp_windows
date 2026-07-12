@@ -31,10 +31,20 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		base.OnCleanUp();
 	}
 
+	private void ForceRevealLocation(AxialI location)
+	{
+		if (!ClusterGrid.Instance.IsCellVisible(location))
+		{
+			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(location, 0);
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.Subscribe<ClusterTraveler>(543433792, ClusterTraveler.ClusterDestinationChangedHandler);
 		this.UpdateAnimationTags();
+		this.RevalidatePath();
+		this.ForceRevealLocation(this.m_clusterGridEntity.Location);
 	}
 
 	private void OnClusterDestinationChanged(object data)
@@ -42,7 +52,10 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		if (this.m_destinationSelector.IsAtDestination())
 		{
 			this.m_movePotential = 0f;
-			this.CurrentPath.Clear();
+			if (this.CurrentPath != null)
+			{
+				this.CurrentPath.Clear();
+			}
 		}
 	}
 
@@ -141,6 +154,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		}
 		AxialI axialI = this.CurrentPath[0];
 		this.CurrentPath.RemoveAt(0);
+		this.ForceRevealLocation(axialI);
 		this.m_clusterGridEntity.Location = axialI;
 		this.UpdateAnimationTags();
 		return true;
@@ -174,7 +188,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 		this.m_clusterGridEntity.RemoveTag(GameTags.BallisticEntityMoving);
 	}
 
-	private void RevalidatePath()
+	public void RevalidatePath()
 	{
 		string reason;
 		if (this.HasCurrentPathChanged(out reason))

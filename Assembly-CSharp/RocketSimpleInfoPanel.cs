@@ -118,11 +118,16 @@ public class RocketSimpleInfoPanel : SimpleInfoPanel
 						}
 						num2++;
 						gameObject2.GetComponentInChildren<LocText>().text = text7;
-						gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
-						foreach (global::Tuple<string, TextStyleSetting> tuple in pooledList)
+						string text9 = "";
+						for (int i = 0; i < pooledList.Count; i++)
 						{
-							gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(tuple.first, tuple.second);
+							text9 += pooledList[i].first;
+							if (i != pooledList.Count - 1)
+							{
+								text9 += "\n";
+							}
 						}
+						gameObject2.GetComponentInChildren<ToolTip>().SetSimpleTooltip(text9);
 					}
 					pooledList.Recycle();
 				}

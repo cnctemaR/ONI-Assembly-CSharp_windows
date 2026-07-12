@@ -13,9 +13,8 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 		this.solidOutputCell = Grid.OffsetCell(Grid.PosToCell(this), this.solidPortInfo.offset);
 		this.solidDispenser = this.CreateSolidConduitDispenser(this.solidOutputCell, out this.solidNetworkItem);
 		this.deliveryComponents = base.GetComponents<ManualDeliveryKG>();
-		this.payloadStorage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interact_railgun_emptier_kanim") };
-		this.payloadStorage.useGunForDelivery = false;
-		this.payloadStorage.SetOffsets(RailGunPayloadOpener.delivery_offset);
+		this.payloadStorage.gunTargetOffset = new Vector2(-1f, 1.5f);
+		this.payloadMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_storage_target", "meter_storage", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		base.smi.StartSM();
 	}
 
@@ -92,8 +91,6 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 		return this.solidPortInfo.offset;
 	}
 
-	private static readonly CellOffset[] delivery_offset = new CellOffset[1];
-
 	public static float delivery_time = 10f;
 
 	[SerializeField]
@@ -129,6 +126,8 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 
 	private ManualDeliveryKG[] deliveryComponents;
 
+	private MeterController payloadMeter;
+
 	public class StatesInstance : GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener, object>.GameInstance
 	{
 		public StatesInstance(RailGunPayloadOpener master)
@@ -145,8 +144,6 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 		{
 			return base.smi.master.resourceStorage.MassStored() > 0f;
 		}
-
-		private FetchChore chore;
 	}
 
 	public class States : GameStateMachine<RailGunPayloadOpener.States, RailGunPayloadOpener.StatesInstance, RailGunPayloadOpener>
@@ -163,7 +160,11 @@ public class RailGunPayloadOpener : StateMachineComponent<RailGunPayloadOpener.S
 			this.operational.Enter(delegate(RailGunPayloadOpener.StatesInstance smi)
 			{
 				smi.GetComponent<ManualDeliveryKG>().Pause(false, "power");
-			}).EventTransition(GameHashes.OperationalFlagChanged, this.unoperational, (RailGunPayloadOpener.StatesInstance smi) => !smi.master.PowerOperationalChanged()).DefaultState(this.operational.idle);
+			}).EventTransition(GameHashes.OperationalFlagChanged, this.unoperational, (RailGunPayloadOpener.StatesInstance smi) => !smi.master.PowerOperationalChanged()).DefaultState(this.operational.idle)
+				.EventHandler(GameHashes.OnStorageChange, delegate(RailGunPayloadOpener.StatesInstance smi)
+				{
+					smi.master.payloadMeter.SetPositionPercent(Mathf.Clamp01((float)smi.master.payloadStorage.items.Count / smi.master.payloadStorage.capacityKg));
+				});
 			this.operational.idle.PlayAnim("on").EventTransition(GameHashes.OnStorageChange, this.operational.pre, (RailGunPayloadOpener.StatesInstance smi) => smi.HasPayload());
 			this.operational.pre.Enter(delegate(RailGunPayloadOpener.StatesInstance smi)
 			{

@@ -33,7 +33,7 @@ public class LeadSuitMonitor : GameStateMachine<LeadSuitMonitor, LeadSuitMonitor
 					attributes2.Remove(attributeModifier2);
 				}
 			}
-		}).TagTransition(GameTags.SuitBatteryOut, this.wearingSuit.noBattery, true);
+		}).TagTransition(GameTags.SuitBatteryOut, this.wearingSuit.hasBattery, true);
 	}
 
 	public static void CoolSuit(LeadSuitMonitor.Instance smi, float dt)

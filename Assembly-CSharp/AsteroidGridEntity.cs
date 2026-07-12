@@ -74,6 +74,10 @@ public class AsteroidGridEntity : ClusterGridEntity
 	{
 		Game.Instance.Subscribe(-1298331547, new Action<object>(this.OnClusterLocationChanged));
 		Game.Instance.Subscribe(-1991583975, new Action<object>(this.OnFogOfWarRevealed));
+		if (ClusterGrid.Instance.IsCellVisible(this.m_location))
+		{
+			SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(this.m_location, 1);
+		}
 		base.OnSpawn();
 	}
 

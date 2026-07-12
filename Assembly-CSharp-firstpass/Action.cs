@@ -244,6 +244,7 @@ public enum Action
 	SandboxRadsTool,
 	SandboxCritterTool,
 	SandboxCopyElement,
+	SandboxStressTool,
 	CinemaCamEnable,
 	CinemaPanLeft,
 	CinemaPanRight,

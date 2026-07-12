@@ -19,7 +19,7 @@ public class ClustercraftInteriorDoorConfig : IEntityConfig
 		float num = 400f;
 		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, text, text2, num, Assets.GetAnim("rocket_hatch_door_kanim"), "closed", Grid.SceneLayer.TileFront, 1, 2, tier, tier2, SimHashes.Creature, new List<Tag> { GameTags.Gravitas }, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, text, text2, num, Assets.GetAnim("rocket_hatch_door_kanim"), "closed", Grid.SceneLayer.TileMain, 1, 2, tier, tier2, SimHashes.Creature, new List<Tag> { GameTags.Gravitas }, 293f);
 		gameObject.AddTag(GameTags.NotRoomAssignable);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium, true);
@@ -27,9 +27,7 @@ public class ClustercraftInteriorDoorConfig : IEntityConfig
 		gameObject.AddOrGet<Operational>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Prioritizable>();
-		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
-		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;
-		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
+		gameObject.AddOrGet<KBatchedAnimController>().fgLayer = Grid.SceneLayer.InteriorWall;
 		gameObject.AddOrGet<ClustercraftInteriorDoor>();
 		gameObject.AddOrGet<AssignmentGroupController>().generateGroupOnStart = false;
 		gameObject.AddOrGet<NavTeleporter>().offset = new CellOffset(1, 0);
@@ -44,6 +42,26 @@ public class ClustercraftInteriorDoorConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
+		PrimaryElement component = inst.GetComponent<PrimaryElement>();
+		OccupyArea component2 = inst.GetComponent<OccupyArea>();
+		int num = Grid.PosToCell(inst);
+		CellOffset[] occupiedCellsOffsets = component2.OccupiedCellsOffsets;
+		int[] array = new int[occupiedCellsOffsets.Length];
+		for (int i = 0; i < occupiedCellsOffsets.Length; i++)
+		{
+			CellOffset cellOffset = occupiedCellsOffsets[i];
+			int num2 = Grid.OffsetCell(num, cellOffset);
+			array[i] = num2;
+		}
+		foreach (int num3 in array)
+		{
+			Grid.HasDoor[num3] = true;
+			SimMessages.SetCellProperties(num3, 8);
+			Grid.RenderedByWorld[num3] = false;
+			World.Instance.groundRenderer.MarkDirty(num3);
+			SimMessages.ReplaceAndDisplaceElement(num3, component.ElementID, CellEventLogger.Instance.DoorClose, component.Mass / 2f, component.Temperature, byte.MaxValue, 0, -1);
+			SimMessages.SetCellProperties(num3, 4);
+		}
 	}
 
 	public static string ID = "ClustercraftInteriorDoor";

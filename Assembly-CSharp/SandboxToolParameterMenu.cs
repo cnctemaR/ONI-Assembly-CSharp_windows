@@ -144,9 +144,14 @@ public class SandboxToolParameterMenu : KScreen
 		}));
 		Game.Instance.Subscribe(999382396, new Action<object>(this.OnTemperatureUnitChanged));
 		SandboxSettings sandboxSettings11 = this.settings;
-		sandboxSettings11.OnChangeAdditiveRadiation = (global::System.Action)Delegate.Combine(sandboxSettings11.OnChangeAdditiveRadiation, new global::System.Action(delegate
+		sandboxSettings11.OnChangeAdditiveStress = (global::System.Action)Delegate.Combine(sandboxSettings11.OnChangeAdditiveStress, new global::System.Action(delegate
 		{
-			this.radiationAdditiveSlider.SetValue(this.settings.GetFloatSetting("SandbosTools.RadiationAdditive"), false);
+			this.stressAdditiveSlider.SetValue(this.settings.GetFloatSetting("SandbosTools.StressAdditive"), false);
+		}));
+		SandboxSettings sandboxSettings12 = this.settings;
+		sandboxSettings12.OnChangeMoraleAdjustment = (global::System.Action)Delegate.Combine(sandboxSettings12.OnChangeMoraleAdjustment, new global::System.Action(delegate
+		{
+			this.moraleSlider.SetValue((float)this.settings.GetIntSetting("SandbosTools.MoraleAdjustment"), false);
 		}));
 	}
 
@@ -160,9 +165,10 @@ public class SandboxToolParameterMenu : KScreen
 		this.massSlider.row.SetActive(false);
 		this.temperatureAdditiveSlider.row.SetActive(false);
 		this.temperatureSlider.row.SetActive(false);
-		this.radiationAdditiveSlider.row.SetActive(false);
 		this.diseaseCountSlider.row.SetActive(false);
 		this.diseaseSelector.row.SetActive(false);
+		this.stressAdditiveSlider.row.SetActive(false);
+		this.moraleSlider.row.SetActive(false);
 	}
 
 	protected override void OnSpawn()
@@ -179,9 +185,10 @@ public class SandboxToolParameterMenu : KScreen
 		this.SpawnSlider(this.massSlider);
 		this.SpawnSlider(this.temperatureSlider);
 		this.SpawnSlider(this.temperatureAdditiveSlider);
-		this.SpawnSlider(this.radiationAdditiveSlider);
+		this.SpawnSlider(this.stressAdditiveSlider);
 		this.SpawnSelector(this.diseaseSelector);
 		this.SpawnSlider(this.diseaseCountSlider);
+		this.SpawnSlider(this.moraleSlider);
 		if (SandboxToolParameterMenu.instance == null)
 		{
 			SandboxToolParameterMenu.instance = this;
@@ -370,11 +377,12 @@ public class SandboxToolParameterMenu : KScreen
 			this.brushRadiusSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.BrushSize"), true);
 		}
 		this.massSlider.SetValue(this.settings.GetFloatSetting("SandboxTools.Mass"), true);
-		this.radiationAdditiveSlider.SetValue(this.settings.GetFloatSetting("SandbosTools.RadiationAdditive"), true);
+		this.stressAdditiveSlider.SetValue(this.settings.GetFloatSetting("SandbosTools.StressAdditive"), true);
 		this.RefreshTemperatureUnitDisplays();
 		this.temperatureSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.Temperature"), true), true);
 		this.temperatureAdditiveSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.TemperatureAdditive"), true), true);
 		this.diseaseCountSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.DiseaseCount"), true);
+		this.moraleSlider.SetValue((float)this.settings.GetIntSetting("SandbosTools.MoraleAdjustment"), true);
 	}
 
 	private void OnTemperatureUnitChanged(object unit)
@@ -755,9 +763,14 @@ public class SandboxToolParameterMenu : KScreen
 		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.TemperatureAdditive", GameUtil.GetTemperatureConvertedToKelvin(value));
 	}, 0);
 
-	public SandboxToolParameterMenu.SliderValue radiationAdditiveSlider = new SandboxToolParameterMenu.SliderValue(-100f, 1000f, "little", "lots", UI.UNITSUFFIXES.RADIATION.RADS, UI.SANDBOXTOOLS.SETTINGS.RADIATION_ADDITIVE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.RADIATION_ADDITIVE.NAME, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue stressAdditiveSlider = new SandboxToolParameterMenu.SliderValue(-10f, 10f, "little", "lots", UI.UNITSUFFIXES.PERCENT, UI.SANDBOXTOOLS.SETTINGS.STRESS_ADDITIVE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.STRESS_ADDITIVE.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.RadiationAdditive", value);
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.StressAdditive", value);
+	}, 0);
+
+	public SandboxToolParameterMenu.SliderValue moraleSlider = new SandboxToolParameterMenu.SliderValue(-25f, 25f, "little", "lots", UI.UNITSUFFIXES.UNITS, UI.SANDBOXTOOLS.SETTINGS.MORALE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.MORALE.NAME, delegate(float value)
+	{
+		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandbosTools.MoraleAdjustment", Mathf.RoundToInt(value));
 	}, 0);
 
 	public SandboxToolParameterMenu.SelectorValue diseaseSelector;

@@ -61,10 +61,10 @@ public class ArtifactPOIStates : GameStateMachine<ArtifactPOIStates, ArtifactPOI
 			if (this.numHarvests <= 0 && !string.IsNullOrEmpty(this.configuration.GetArtifactID()))
 			{
 				this.artifactToHarvest = this.configuration.GetArtifactID();
-				ArtifactSelector.Instance.ReserveArtifactID(this.artifactToHarvest);
+				ArtifactSelector.Instance.ReserveArtifactID(this.artifactToHarvest, ArtifactType.Any);
 				return;
 			}
-			this.artifactToHarvest = ArtifactSelector.Instance.GetUniqueArtifactID();
+			this.artifactToHarvest = ArtifactSelector.Instance.GetUniqueArtifactID(ArtifactType.Space);
 		}
 
 		public string GetArtifactToHarvest()
@@ -88,6 +88,11 @@ public class ArtifactPOIStates : GameStateMachine<ArtifactPOIStates, ArtifactPOI
 		{
 			float num = dt / this.configuration.GetRechargeTime();
 			this.DeltaPOICharge(num);
+		}
+
+		public float RechargeTimeRemaining()
+		{
+			return (float)Mathf.CeilToInt((this.configuration.GetRechargeTime() - this.configuration.GetRechargeTime() * this.poiCharge) / 600f) * 600f;
 		}
 
 		public void DeltaPOICharge(float delta)

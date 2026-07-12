@@ -7,7 +7,7 @@ namespace Database
 	{
 		public string victoryNISSnapshot { get; private set; }
 
-		public ColonyAchievement(string Id, string platformAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, string victorySnapshot = "", string icon = "")
+		public ColonyAchievement(string Id, string platformAchievementId, string Name, string description, bool isVictoryCondition, List<ColonyAchievementRequirement> requirementChecklist, string messageTitle = "", string messageBody = "", string videoDataName = "", string victoryLoopVideo = "", Action<KMonoBehaviour> VictorySequence = null, string victorySnapshot = "", string icon = "", string[] dlcIds = null)
 			: base(Id, Name)
 		{
 			this.Id = Id;
@@ -23,6 +23,11 @@ namespace Database
 			this.victorySequence = VictorySequence;
 			this.victoryNISSnapshot = (string.IsNullOrEmpty(victorySnapshot) ? AudioMixerSnapshots.Get().VictoryNISGenericSnapshot : victorySnapshot);
 			this.icon = icon;
+			this.dlcIds = dlcIds;
+			if (this.dlcIds == null)
+			{
+				this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+			}
 		}
 
 		public string description;
@@ -44,5 +49,7 @@ namespace Database
 		public List<ColonyAchievementRequirement> requirementChecklist = new List<ColonyAchievementRequirement>();
 
 		public Action<KMonoBehaviour> victorySequence;
+
+		public string[] dlcIds;
 	}
 }

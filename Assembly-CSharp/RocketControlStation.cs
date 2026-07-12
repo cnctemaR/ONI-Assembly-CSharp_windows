@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -27,7 +28,6 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 		Components.RocketControlStations.Add(this);
 		base.Subscribe<RocketControlStation>(-801688580, RocketControlStation.OnLogicValueChangedDelegate);
 		base.Subscribe<RocketControlStation>(1861523068, RocketControlStation.OnRocketRestrictionChanged);
-		this.CheckWireState();
 		this.UpdateRestrictionAnimSymbol(null);
 	}
 
@@ -43,7 +43,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 		{
 			if (this.IsLogicInputConnected())
 			{
-				return this.m_logicUsageRestrictionState == 1;
+				return this.m_logicUsageRestrictionState;
 			}
 			GameObject gameObject = base.smi.sm.clusterCraft.Get(base.smi);
 			return this.RestrictWhenGrounded && gameObject != null && gameObject.gameObject.HasTag(GameTags.RocketOnGround);
@@ -57,10 +57,12 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 
 	public void OnLogicValueChanged(object data)
 	{
-		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
-		if (logicValueChanged.portID == RocketControlStation.PORT_ID)
+		if (((LogicValueChanged)data).portID == RocketControlStation.PORT_ID)
 		{
-			this.m_logicUsageRestrictionState = logicValueChanged.newValue;
+			LogicCircuitNetwork network = this.GetNetwork();
+			int num = ((network != null) ? network.OutputValue : 1);
+			bool flag = LogicCircuitNetwork.IsBitActive(0, num);
+			this.m_logicUsageRestrictionState = flag;
 			base.Trigger(1861523068, null);
 		}
 	}
@@ -77,18 +79,6 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 	{
 		int portCell = base.GetComponent<LogicPorts>().GetPortCell(RocketControlStation.PORT_ID);
 		return Game.Instance.logicCircuitManager.GetNetworkForCell(portCell);
-	}
-
-	private LogicCircuitNetwork CheckWireState()
-	{
-		LogicCircuitNetwork network = this.GetNetwork();
-		int num = ((network != null) ? network.OutputValue : 1);
-		if (num != this.m_logicUsageRestrictionState)
-		{
-			this.m_logicUsageRestrictionState = num;
-			base.Trigger(1861523068, null);
-		}
-		return network;
 	}
 
 	private void UpdateRestrictionAnimSymbol(object o = null)
@@ -112,7 +102,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 	[Serialize]
 	public float TimeRemaining;
 
-	private int m_logicUsageRestrictionState;
+	private bool m_logicUsageRestrictionState;
 
 	[Serialize]
 	private bool m_restrictWhenGrounded;
@@ -141,12 +131,12 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 				this.clusterCraft.Get(smi).Subscribe(-1582839653, new Action<object>(smi.master.OnTagsChanged));
 			}).Target(this.masterTarget).Exit(delegate(RocketControlStation.StatesInstance smi)
 			{
-				this.SetRocketSpeed(smi, 0.5f);
+				this.SetRocketSpeedModifiers(smi, 0.5f, 1f);
 			});
 			this.unoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.operational, false);
 			this.operational.Enter(delegate(RocketControlStation.StatesInstance smi)
 			{
-				this.SetRocketSpeed(smi, 1f);
+				this.SetRocketSpeedModifiers(smi, 1f, smi.pilotSpeedMult);
 			}).PlayAnim("on").TagTransition(GameTags.Operational, this.unoperational, true)
 				.Transition(this.ready, new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.IsInFlight), UpdateRate.SIM_4000ms)
 				.Target(this.clusterCraft)
@@ -159,7 +149,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 				});
 			this.launch.Enter(delegate(RocketControlStation.StatesInstance smi)
 			{
-				this.SetRocketSpeed(smi, 1f);
+				this.SetRocketSpeedModifiers(smi, 1f, smi.pilotSpeedMult);
 			}).ToggleChore(new Func<RocketControlStation.StatesInstance, Chore>(this.CreateLaunchChore), this.operational).Transition(this.launch.fadein, new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.IsInFlight), UpdateRate.SIM_200ms)
 				.Target(this.clusterCraft)
 				.EventTransition(GameHashes.RocketRequestLaunch, this.operational, GameStateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Not(new StateMachine<RocketControlStation.States, RocketControlStation.StatesInstance, RocketControlStation, object>.Transition.ConditionCallback(this.RocketReadyForLaunch)))
@@ -176,7 +166,7 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 				.ParamTransition<float>(this.timeRemaining, this.ready, (RocketControlStation.StatesInstance smi, float p) => p <= 0f)
 				.Enter(delegate(RocketControlStation.StatesInstance smi)
 				{
-					this.SetRocketSpeed(smi, 1f);
+					this.SetRocketSpeedModifiers(smi, 1f, smi.pilotSpeedMult);
 				})
 				.Update("Decrement time", new Action<RocketControlStation.StatesInstance, float>(this.DecrementTime), UpdateRate.SIM_200ms, false)
 				.Exit(delegate(RocketControlStation.StatesInstance smi)
@@ -193,11 +183,11 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			this.ready.autopilot.PlayAnim("on_failed", KAnim.PlayMode.Loop).ToggleMainStatusItem(Db.Get().BuildingStatusItems.AutoPilotActive, null).WorkableStartTransition((RocketControlStation.StatesInstance smi) => smi.master.GetComponent<RocketControlStationIdleWorkable>(), this.ready.working)
 				.Enter(delegate(RocketControlStation.StatesInstance smi)
 				{
-					this.SetRocketSpeed(smi, 0.5f);
+					this.SetRocketSpeedModifiers(smi, 0.5f, smi.pilotSpeedMult);
 				});
 			this.ready.working.PlayAnim("working_pre").QueueAnim("working_loop", true, null).Enter(delegate(RocketControlStation.StatesInstance smi)
 			{
-				this.SetRocketSpeed(smi, 1f);
+				this.SetRocketSpeedModifiers(smi, 1f, smi.pilotSpeedMult);
 			})
 				.WorkableStopTransition((RocketControlStation.StatesInstance smi) => smi.master.GetComponent<RocketControlStationIdleWorkable>(), this.ready.idle);
 			this.ready.post.PlayAnim("working_pst").OnAnimQueueComplete(this.running).Exit(delegate(RocketControlStation.StatesInstance smi)
@@ -222,9 +212,10 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 			return ClusterManager.Instance.GetWorld(smi.GetMyWorldId()).gameObject.GetComponent<Clustercraft>().gameObject;
 		}
 
-		private void SetRocketSpeed(RocketControlStation.StatesInstance smi, float speed_multiplier)
+		private void SetRocketSpeedModifiers(RocketControlStation.StatesInstance smi, float autoPilotSpeedMultiplier, float pilotSkillMultiplier = 1f)
 		{
-			this.clusterCraft.Get(smi).GetComponent<Clustercraft>().AutoPilotMultiplier = speed_multiplier;
+			this.clusterCraft.Get(smi).GetComponent<Clustercraft>().AutoPilotMultiplier = autoPilotSpeedMultiplier;
+			this.clusterCraft.Get(smi).GetComponent<Clustercraft>().PilotSkillMultiplier = pilotSkillMultiplier;
 		}
 
 		private Chore CreateChore(RocketControlStation.StatesInstance smi)
@@ -307,5 +298,15 @@ public class RocketControlStation : StateMachineComponent<RocketControlStation.S
 		{
 			base.sm.LaunchRocket(this);
 		}
+
+		public void SetPilotSpeedMult(Worker pilot)
+		{
+			AttributeConverter pilotingSpeed = Db.Get().AttributeConverters.PilotingSpeed;
+			AttributeConverterInstance converter = pilot.GetComponent<AttributeConverters>().GetConverter(pilotingSpeed.Id);
+			float num = 1f + converter.Evaluate();
+			this.pilotSpeedMult = Mathf.Max(num, 0.1f);
+		}
+
+		public float pilotSpeedMult = 1f;
 	}
 }

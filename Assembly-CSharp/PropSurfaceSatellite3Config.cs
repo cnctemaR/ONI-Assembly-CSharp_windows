@@ -75,7 +75,7 @@ public class PropSurfaceSatellite3Config : IEntityConfig
 
 	private void OnLockerLooted(GameObject inst)
 	{
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(ArtifactSelector.Instance.GetUniqueArtifactID()), inst.transform.position);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(ArtifactSelector.Instance.GetUniqueArtifactID(ArtifactType.Any)), inst.transform.position);
 		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.TerrestrialArtifact, true);
 		gameObject.SetActive(true);
 	}

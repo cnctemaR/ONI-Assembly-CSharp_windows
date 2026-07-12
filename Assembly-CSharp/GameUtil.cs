@@ -295,6 +295,24 @@ public static class GameUtil
 		return f.ToString(format);
 	}
 
+	public static string GetFloatWithDecimalPoint(float f)
+	{
+		string text;
+		if (f == 0f)
+		{
+			text = "0";
+		}
+		else if (Mathf.Abs(f) < 1f)
+		{
+			text = "#,##0.#";
+		}
+		else
+		{
+			text = "#,###.#";
+		}
+		return GameUtil.FloatToString(f, text);
+	}
+
 	public static string GetStandardFloat(float f)
 	{
 		string text;
@@ -518,7 +536,7 @@ public static class GameUtil
 	{
 		string text = ((units == 1f) ? UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLE : UI.UNITSUFFIXES.HIGHENERGYPARTICLES.PARTRICLES);
 		units = GameUtil.ApplyTimeSlice(units, timeSlice);
-		return GameUtil.AddTimeSliceText(displayUnits ? (GameUtil.GetStandardFloat(units) + text) : GameUtil.GetStandardFloat(units), timeSlice);
+		return GameUtil.AddTimeSliceText(displayUnits ? (GameUtil.GetFloatWithDecimalPoint(units) + text) : GameUtil.GetFloatWithDecimalPoint(units), timeSlice);
 	}
 
 	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic, bool displayUnits = true)
@@ -2526,7 +2544,7 @@ public static class GameUtil
 			descriptor4.IncreaseIndent();
 			list.Add(descriptor4);
 		}
-		if (element.radiationAbsorptionFactor >= 0.8f)
+		if (Sim.IsRadiationEnabled() && element.radiationAbsorptionFactor >= 0.8f)
 		{
 			Descriptor descriptor5 = default(Descriptor);
 			descriptor5.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.EXCELLENT_RADIATION_SHIELD, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.EXCELLENT_RADIATION_SHIELD, element.name, element.radiationAbsorptionFactor), Descriptor.DescriptorType.Effect);

@@ -5,6 +5,7 @@ using System.Linq;
 using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class ClusterMapScreen : KScreen
 {
@@ -107,8 +108,28 @@ public class ClusterMapScreen : KScreen
 	{
 		if (!e.Consumed && (e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut)))
 		{
-			float num = Input.mouseScrollDelta.y * 25f;
-			this.m_targetZoomScale = Mathf.Clamp(this.m_targetZoomScale + num, 50f, 150f);
+			List<RaycastResult> list = new List<RaycastResult>();
+			PointerEventData pointerEventData = new PointerEventData(global::UnityEngine.EventSystems.EventSystem.current);
+			pointerEventData.position = KInputManager.GetMousePos();
+			global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
+			if (current != null)
+			{
+				current.RaycastAll(pointerEventData, list);
+				bool flag = false;
+				foreach (RaycastResult raycastResult in list)
+				{
+					if (!raycastResult.gameObject.transform.IsChildOf(base.transform))
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (!flag)
+				{
+					float num = Input.mouseScrollDelta.y * 25f;
+					this.m_targetZoomScale = Mathf.Clamp(this.m_targetZoomScale + num, 50f, 150f);
+				}
+			}
 		}
 		CameraController.Instance.ChangeWorldInput(e);
 		base.OnKeyDown(e);
@@ -277,10 +298,17 @@ public class ClusterMapScreen : KScreen
 			this.UpdateVis(null);
 			return;
 		}
-		if (this.m_cellVisByLocation.Count > 0 && ClusterGrid.Instance.cellContents[AxialI.ZERO].Count > 0)
+		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
+		if (activeWorld == null)
 		{
-			this.SelectHex(this.m_cellVisByLocation[AxialI.ZERO].GetComponent<ClusterMapHex>());
+			return;
 		}
+		ClusterGridEntity component = activeWorld.GetComponent<ClusterGridEntity>();
+		if (component == null)
+		{
+			return;
+		}
+		this.SelectEntity(component, false);
 	}
 
 	private void GenerateGridVis(out int minR, out int maxR, out int minQ, out int maxQ)
@@ -388,8 +416,10 @@ public class ClusterMapScreen : KScreen
 					ClusterNameDisplayScreen.Instance.AddNewEntry(clusterGridEntity);
 					ClusterMapVisualizer clusterMapVisualizer2 = global::UnityEngine.Object.Instantiate<ClusterMapVisualizer>(clusterMapVisualizer, gameObject.transform);
 					clusterMapVisualizer2.Init(clusterGridEntity, this.pathDrawer);
+					clusterMapVisualizer2.gameObject.SetActive(true);
 					this.m_gridEntityAnims.Add(clusterGridEntity, clusterMapVisualizer2);
 					this.m_gridEntityVis.Add(clusterGridEntity, clusterMapVisualizer2);
+					clusterGridEntity.positionDirty = false;
 					clusterGridEntity.Subscribe(1502190696, new Action<object>(this.RemoveDeletedEntities));
 				}
 			}
@@ -446,6 +476,12 @@ public class ClusterMapScreen : KScreen
 			keyValuePair.Value.Show(revealLevel);
 			bool flag = this.m_selectedEntity == keyValuePair.Key;
 			keyValuePair.Value.Select(flag);
+			if (keyValuePair.Key.positionDirty)
+			{
+				Vector3 position = ClusterGrid.Instance.GetPosition(keyValuePair.Key);
+				keyValuePair.Value.rectTransform().SetLocalPosition(position);
+				keyValuePair.Key.positionDirty = false;
+			}
 		}
 		if (this.m_selectedEntity != null && this.m_gridEntityVis.ContainsKey(this.m_selectedEntity))
 		{
@@ -638,14 +674,18 @@ public class ClusterMapScreen : KScreen
 
 	private ClusterGridEntity GetSelectorGridEntity(ClusterDestinationSelector selector)
 	{
-		ClusterGridEntity clusterGridEntity = selector.GetComponent<ClusterGridEntity>();
-		if (clusterGridEntity != null && ClusterGrid.Instance.IsVisible(clusterGridEntity))
+		ClusterGridEntity component = selector.GetComponent<ClusterGridEntity>();
+		if (component != null && ClusterGrid.Instance.IsVisible(component))
 		{
-			return clusterGridEntity;
+			return component;
 		}
-		clusterGridEntity = ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(selector.GetMyWorldLocation(), EntityLayer.Asteroid);
-		global::Debug.Assert(clusterGridEntity != null, string.Format("{0} has no grid entity and isn't located at a visible asteroid at {1}", selector, selector.GetMyWorldLocation()));
-		return clusterGridEntity;
+		ClusterGridEntity visibleEntityOfLayerAtCell = ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(selector.GetMyWorldLocation(), EntityLayer.Asteroid);
+		global::Debug.Assert(component != null || visibleEntityOfLayerAtCell != null, string.Format("{0} has no grid entity and isn't located at a visible asteroid at {1}", selector, selector.GetMyWorldLocation()));
+		if (visibleEntityOfLayerAtCell)
+		{
+			return visibleEntityOfLayerAtCell;
+		}
+		return component;
 	}
 
 	private void UpdateTearStatus()

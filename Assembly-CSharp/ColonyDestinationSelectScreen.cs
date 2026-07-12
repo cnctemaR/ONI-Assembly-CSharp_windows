@@ -5,6 +5,7 @@ using STRINGS;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class ColonyDestinationSelectScreen : NewGameFlowScreen
 {
@@ -37,6 +38,23 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.destinationMapPanel.Init();
 		CustomGameSettings.Instance.OnSettingChanged += this.SettingChanged;
 		this.ShuffleClicked();
+		this.ResizeLayout();
+	}
+
+	private void ResizeLayout()
+	{
+		Vector2 sizeDelta = this.destinationProperties.clusterDetailsButton.rectTransform().sizeDelta;
+		this.destinationProperties.clusterDetailsButton.rectTransform().sizeDelta = new Vector2(sizeDelta.x, (float)(DlcManager.FeatureClusterSpaceEnabled() ? 134 : 76));
+		Vector2 sizeDelta2 = this.worldsScrollPanel.rectTransform().sizeDelta;
+		Vector2 anchoredPosition = this.worldsScrollPanel.rectTransform().anchoredPosition;
+		if (!DlcManager.FeatureClusterSpaceEnabled())
+		{
+			this.worldsScrollPanel.rectTransform().anchoredPosition = new Vector2(anchoredPosition.x, anchoredPosition.y + 58f);
+		}
+		float num = (float)(DlcManager.FeatureClusterSpaceEnabled() ? 466 : 524);
+		LayoutRebuilder.ForceRebuildLayoutImmediate(base.gameObject.rectTransform());
+		num = Mathf.Min(num, this.destinationInfoPanel.sizeDelta.y - (float)(DlcManager.FeatureClusterSpaceEnabled() ? 134 : 76) - 22f);
+		this.worldsScrollPanel.rectTransform().sizeDelta = new Vector2(sizeDelta2.x, num);
 	}
 
 	protected override void OnCleanUp()
@@ -181,29 +199,34 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.destinationMapPanel.UpdateDisplayedClusters();
 		int num;
 		int.TryParse(setting2, out num);
-		ColonyDestinationAsteroidBeltData colonyDestinationAsteroidBeltData;
+		ColonyDestinationAsteroidBeltData cluster;
 		try
 		{
-			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectCluster(setting, num);
+			cluster = this.destinationMapPanel.SelectCluster(setting, num);
 		}
 		catch
 		{
 			string defaultAsteroid = this.destinationMapPanel.GetDefaultAsteroid();
 			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, defaultAsteroid);
-			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectCluster(defaultAsteroid, num);
+			cluster = this.destinationMapPanel.SelectCluster(defaultAsteroid, num);
 		}
 		if (DlcManager.IsContentActive("EXPANSION1_ID"))
 		{
 			this.destinationProperties.EnableClusterLocationLabels(true);
-			this.destinationProperties.RefreshAsteroidLines(colonyDestinationAsteroidBeltData, this.startLocationProperties);
+			this.destinationProperties.RefreshAsteroidLines(cluster, this.selectedLocationProperties);
 			this.destinationProperties.EnableClusterDetails(true);
-			this.destinationProperties.SetClusterDetailLabels(colonyDestinationAsteroidBeltData);
+			this.destinationProperties.SetClusterDetailLabels(cluster);
+			this.selectedLocationProperties.headerLabel.SetText(UI.FRONTEND.COLONYDESTINATIONSCREEN.SELECTED_CLUSTER_TRAITS_HEADER);
+			this.destinationProperties.clusterDetailsButton.onClick = delegate
+			{
+				this.destinationProperties.SelectWholeClusterDetails(cluster, this.selectedLocationProperties);
+			};
 			return;
 		}
 		this.destinationProperties.EnableClusterDetails(false);
 		this.destinationProperties.EnableClusterLocationLabels(false);
-		this.destinationProperties.SetParameterDescriptors(colonyDestinationAsteroidBeltData.GetParamDescriptors());
-		this.startLocationProperties.SetTraitDescriptors(colonyDestinationAsteroidBeltData.GetTraitDescriptors());
+		this.destinationProperties.SetParameterDescriptors(cluster.GetParamDescriptors());
+		this.selectedLocationProperties.SetTraitDescriptors(cluster.GetTraitDescriptors(), true);
 	}
 
 	private void OnAsteroidClicked(ColonyDestinationAsteroidBeltData cluster)
@@ -255,13 +278,27 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	private HierarchyReferences locationIcons;
 
 	[SerializeField]
+	private RectTransform worldsScrollPanel;
+
+	private const int DESTINATION_HEADER_BUTTON_HEIGHT_CLUSTER = 134;
+
+	private const int DESTINATION_HEADER_BUTTON_HEIGHT_BASE = 76;
+
+	private const int WORLDS_SCROLL_PANEL_HEIGHT_CLUSTER = 466;
+
+	private const int WORLDS_SCROLL_PANEL_HEIGHT_BASE = 524;
+
+	[SerializeField]
 	private AsteroidDescriptorPanel destinationProperties;
 
 	[SerializeField]
-	private AsteroidDescriptorPanel startLocationProperties;
+	private AsteroidDescriptorPanel selectedLocationProperties;
 
 	[SerializeField]
 	private TMP_InputField coordinate;
+
+	[SerializeField]
+	private RectTransform destinationInfoPanel;
 
 	[MyCmpReq]
 	private NewGameSettingsPanel newGameSettings;

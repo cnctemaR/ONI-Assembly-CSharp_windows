@@ -384,7 +384,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private List<Pickupable> pickupables = new List<Pickupable>();
 
-	public static TagBits tagBits = new TagBits(STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.FOOD).ToArray<Tag>());
+	public static TagBits tagBits = new TagBits(STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.FOOD).Concat<Tag>(STORAGEFILTERS.PAYLOADS).ToArray<Tag>());
 
 	private Extents pickupableExtents;
 

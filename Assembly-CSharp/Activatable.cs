@@ -17,12 +17,18 @@ public class Activatable : Workable, ISidescreenButtonControl
 	protected override void OnSpawn()
 	{
 		this.UpdateFlag();
+		if (this.awaitingActivation && this.activateChore == null)
+		{
+			this.CreateChore();
+		}
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
 		this.activated = true;
+		this.awaitingActivation = false;
 		this.UpdateFlag();
+		Prioritizable.RemoveRef(base.gameObject);
 		base.OnCompleteWork(worker);
 	}
 
@@ -39,6 +45,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 		{
 			return;
 		}
+		Prioritizable.AddRef(base.gameObject);
 		this.activateChore = new WorkChore<Activatable>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		if (!string.IsNullOrEmpty(this.requiredSkillPerk))
 		{
@@ -84,9 +91,12 @@ public class Activatable : Workable, ISidescreenButtonControl
 		if (this.activateChore == null)
 		{
 			this.CreateChore();
-			return;
 		}
-		this.CancelChore();
+		else
+		{
+			this.CancelChore();
+		}
+		this.awaitingActivation = this.activateChore != null;
 	}
 
 	public bool SidescreenButtonInteractable()
@@ -103,6 +113,9 @@ public class Activatable : Workable, ISidescreenButtonControl
 
 	[Serialize]
 	private bool activated;
+
+	[Serialize]
+	private bool awaitingActivation;
 
 	private Guid statusItem;
 

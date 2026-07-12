@@ -54,6 +54,7 @@ public class SolarPanelModuleConfig : IBuildingConfig
 		{
 			new BuildingAttachPoint.HardPoint(new CellOffset(0, 1), GameTags.Rocket, null)
 		};
+		go.AddComponent<PartialLightBlocking>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

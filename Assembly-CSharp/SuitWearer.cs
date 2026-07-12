@@ -48,6 +48,7 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 			}
 			bool flag = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
 			bool flag2 = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
+			bool flag3 = (this.navigator.flags & PathFinder.PotentialPath.Flags.HasOxygenMask) > PathFinder.PotentialPath.Flags.None;
 			for (int i = 0; i < path.nodes.Count - 1; i++)
 			{
 				int cell = path.nodes[i].cell;
@@ -55,35 +56,44 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 				PathFinder.PotentialPath.Flags flags2 = PathFinder.PotentialPath.Flags.None;
 				if (Grid.TryGetSuitMarkerFlags(cell, out flags, out flags2))
 				{
-					bool flag3 = (flags2 & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
-					bool flag4 = (flags2 & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
-					bool flag5 = flag2 || flag;
-					bool flag6 = flag3 == flag && flag4 == flag2;
-					bool flag7 = SuitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell, flags);
-					if (flag7 && !flag5)
+					bool flag4 = (flags2 & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
+					bool flag5 = (flags2 & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
+					bool flag6 = (flags2 & PathFinder.PotentialPath.Flags.HasOxygenMask) > PathFinder.PotentialPath.Flags.None;
+					bool flag7 = flag2 || flag || flag3;
+					bool flag8 = flag4 == flag && flag5 == flag2 && flag6 == flag3;
+					bool flag9 = SuitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell, flags);
+					if (flag9 && !flag7)
 					{
 						Grid.ReserveSuit(cell, this.prefabInstanceID, true);
 						this.suitReservations.Add(cell);
-						if (flag3)
+						if (flag4)
 						{
 							flag = true;
 						}
-						if (flag4)
+						if (flag5)
 						{
 							flag2 = true;
 						}
+						if (flag6)
+						{
+							flag3 = true;
+						}
 					}
-					else if (!flag7 && flag6 && Grid.HasEmptyLocker(cell, this.prefabInstanceID))
+					else if (!flag9 && flag8 && Grid.HasEmptyLocker(cell, this.prefabInstanceID))
 					{
 						Grid.ReserveEmptyLocker(cell, this.prefabInstanceID, true);
 						this.emptyLockerReservations.Add(cell);
-						if (flag3)
+						if (flag4)
 						{
 							flag = false;
 						}
-						if (flag4)
+						if (flag5)
 						{
 							flag2 = false;
+						}
+						if (flag6)
+						{
+							flag3 = false;
 						}
 					}
 				}

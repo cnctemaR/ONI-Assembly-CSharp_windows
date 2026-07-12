@@ -65,14 +65,24 @@ public class ClusterGrid
 
 	public ClusterGridEntity GetVisibleEntityOfLayerAtCell(AxialI cell, EntityLayer entityLayer)
 	{
-		return this.GetVisibleEntitiesAtCell(cell).Find((ClusterGridEntity x) => x.Layer == entityLayer);
+		return AxialUtil.GetRing(cell, 0).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetVisibleEntitiesAtCell)).FirstOrDefault<ClusterGridEntity>((ClusterGridEntity entity) => entity.Layer == entityLayer);
 	}
 
 	public ClusterGridEntity GetVisibleEntityOfLayerAtAdjacentCell(AxialI cell, EntityLayer entityLayer)
 	{
-		return (from entity in AxialUtil.GetRing(cell, 1).SelectMany<AxialI, ClusterGridEntity>((AxialI c) => this.GetVisibleEntitiesAtCell(c))
+		return AxialUtil.GetRing(cell, 1).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetVisibleEntitiesAtCell)).FirstOrDefault<ClusterGridEntity>((ClusterGridEntity entity) => entity.Layer == entityLayer);
+	}
+
+	public List<ClusterGridEntity> GetHiddenEntitiesOfLayerAtCell(AxialI cell, EntityLayer entityLayer)
+	{
+		return (from entity in AxialUtil.GetRing(cell, 0).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetHiddenEntitiesAtCell))
 			where entity.Layer == entityLayer
-			select entity).FirstOrDefault<ClusterGridEntity>();
+			select entity).ToList<ClusterGridEntity>();
+	}
+
+	public ClusterGridEntity GetEntityOfLayerAtCell(AxialI cell, EntityLayer entityLayer)
+	{
+		return AxialUtil.GetRing(cell, 0).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetEntitiesOnCell)).FirstOrDefault<ClusterGridEntity>((ClusterGridEntity entity) => entity.Layer == entityLayer);
 	}
 
 	public List<ClusterGridEntity> GetHiddenEntitiesAtCell(AxialI cell)
@@ -84,9 +94,14 @@ public class ClusterGrid
 		return new List<ClusterGridEntity>();
 	}
 
+	public List<ClusterGridEntity> GetNotVisibleEntitiesAtAdjacentCell(AxialI cell)
+	{
+		return AxialUtil.GetRing(cell, 1).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetHiddenEntitiesAtCell)).ToList<ClusterGridEntity>();
+	}
+
 	public List<ClusterGridEntity> GetNotVisibleEntitiesOfLayerAtAdjacentCell(AxialI cell, EntityLayer entityLayer)
 	{
-		return (from entity in AxialUtil.GetRing(cell, 1).SelectMany<AxialI, ClusterGridEntity>((AxialI c) => this.GetHiddenEntitiesAtCell(c))
+		return (from entity in AxialUtil.GetRing(cell, 1).SelectMany<AxialI, ClusterGridEntity>(new Func<AxialI, IEnumerable<ClusterGridEntity>>(this.GetHiddenEntitiesAtCell))
 			where entity.Layer == entityLayer
 			select entity).ToList<ClusterGridEntity>();
 	}
@@ -253,7 +268,7 @@ public class ClusterGrid
 
 	public List<AxialI> GetPath(AxialI start, AxialI end, ClusterDestinationSelector destination_selector, out string fail_reason)
 	{
-		ClusterGrid.<>c__DisplayClass35_0 CS$<>8__locals1;
+		ClusterGrid.<>c__DisplayClass38_0 CS$<>8__locals1;
 		CS$<>8__locals1.<>4__this = this;
 		CS$<>8__locals1.destination_selector = destination_selector;
 		CS$<>8__locals1.start = start;
@@ -297,7 +312,7 @@ public class ClusterGrid
 		CS$<>8__locals1.frontier.Add(CS$<>8__locals1.start);
 		while (!CS$<>8__locals1.frontier.Contains(CS$<>8__locals1.end) && CS$<>8__locals1.frontier.Count > 0)
 		{
-			this.<GetPath>g__ExpandFrontier|35_0(ref CS$<>8__locals1);
+			this.<GetPath>g__ExpandFrontier|38_0(ref CS$<>8__locals1);
 		}
 		if (CS$<>8__locals1.frontier.Contains(CS$<>8__locals1.end))
 		{
@@ -348,7 +363,7 @@ public class ClusterGrid
 	}
 
 	[CompilerGenerated]
-	private void <GetPath>g__ExpandFrontier|35_0(ref ClusterGrid.<>c__DisplayClass35_0 A_1)
+	private void <GetPath>g__ExpandFrontier|38_0(ref ClusterGrid.<>c__DisplayClass38_0 A_1)
 	{
 		A_1.buffer.Clear();
 		foreach (AxialI axialI in A_1.frontier)

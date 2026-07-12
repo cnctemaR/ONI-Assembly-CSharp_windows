@@ -74,6 +74,7 @@ public class HEPEngineConfig : IBuildingConfig
 		highEnergyParticleStorage.capacity = 4000f;
 		highEnergyParticleStorage.autoStore = true;
 		highEnergyParticleStorage.PORT_ID = "HEP_STORAGE";
+		highEnergyParticleStorage.showCapacityStatusItem = true;
 		go.AddOrGet<HEPFuelTank>().physicalFuelCapacity = 4000f;
 		RocketEngineCluster rocketEngineCluster = go.AddOrGet<RocketEngineCluster>();
 		rocketEngineCluster.maxModules = 4;

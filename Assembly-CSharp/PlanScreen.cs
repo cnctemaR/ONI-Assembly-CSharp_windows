@@ -248,6 +248,7 @@ public class PlanScreen : KIconToggleMenu
 	protected override void OnCmpEnable()
 	{
 		this.Refresh();
+		this.RefreshCopyBuildingButton(null);
 	}
 
 	protected override void OnCmpDisable()
@@ -264,6 +265,8 @@ public class PlanScreen : KIconToggleMenu
 			global::UnityEngine.Object.DestroyImmediate(keyValuePair.Value.gameObject);
 		}
 		this.ActiveToggles.Clear();
+		this.copyBuildingButton.gameObject.SetActive(false);
+		this.copyBuildingButton.GetComponent<MultiToggle>().ChangeState(0);
 	}
 
 	public void OnSelectBuilding(GameObject button_go, BuildingDef def)

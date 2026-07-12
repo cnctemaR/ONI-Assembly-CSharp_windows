@@ -1,46 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using Klei.CustomSettings;
 using STRINGS;
+using TUNING;
+using UnityEngine;
 
 public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMonitor.Instance>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
-		default_state = this.idle;
-		this.root.Update(new Action<RadiationMonitor.Instance, float>(RadiationMonitor.CheckRadiationLevel), UpdateRate.SIM_1000ms, false);
-		this.idle.DoNothing().ParamTransition<float>(this.radiationExposure, this.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
-			.ParamTransition<float>(this.radiationExposure, this.sick.major, RadiationMonitor.COMPARE_GTE_MAJOR)
-			.ParamTransition<float>(this.radiationExposure, this.sick.minor, RadiationMonitor.COMPARE_GTE_MINOR);
-		this.sick.ParamTransition<float>(this.radiationExposure, this.idle, RadiationMonitor.COMPARE_LT_MINOR).Enter(delegate(RadiationMonitor.Instance smi)
+		default_state = this.init;
+		this.init.Transition(null, (RadiationMonitor.Instance smi) => !Sim.IsRadiationEnabled(), UpdateRate.SIM_200ms).Transition(this.active, (RadiationMonitor.Instance smi) => Sim.IsRadiationEnabled(), UpdateRate.SIM_200ms);
+		this.active.Update(new Action<RadiationMonitor.Instance, float>(RadiationMonitor.CheckRadiationLevel), UpdateRate.SIM_1000ms, false).DefaultState(this.active.idle);
+		this.active.idle.DoNothing().ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
+			.ParamTransition<float>(this.radiationExposure, this.active.sick.major, RadiationMonitor.COMPARE_GTE_MAJOR)
+			.ParamTransition<float>(this.radiationExposure, this.active.sick.minor, RadiationMonitor.COMPARE_GTE_MINOR);
+		this.active.sick.ParamTransition<float>(this.radiationExposure, this.active.idle, RadiationMonitor.COMPARE_LT_MINOR).Enter(delegate(RadiationMonitor.Instance smi)
 		{
 			smi.sm.isSick.Set(true, smi);
 		}).Exit(delegate(RadiationMonitor.Instance smi)
 		{
 			smi.sm.isSick.Set(false, smi);
 		});
-		this.sick.minor.ToggleEffect("RadiationExposureMinor").ParamTransition<float>(this.radiationExposure, this.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
-			.ParamTransition<float>(this.radiationExposure, this.sick.major, RadiationMonitor.COMPARE_GTE_MAJOR)
+		this.active.sick.minor.ToggleEffect(RadiationMonitor.minorSicknessEffect).ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
+			.ParamTransition<float>(this.radiationExposure, this.active.sick.major, RadiationMonitor.COMPARE_GTE_MAJOR)
 			.ToggleAnims("anim_loco_radiation1_kanim", 4f, "")
 			.ToggleAnims("anim_idle_radiation1_kanim", 4f, "")
 			.ToggleExpression(Db.Get().Expressions.Radiation1, null)
-			.DefaultState(this.sick.minor.waiting);
-		this.sick.minor.reacting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.sick.minor.waiting);
-		this.sick.major.ToggleEffect("RadiationExposureMajor").ParamTransition<float>(this.radiationExposure, this.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
+			.DefaultState(this.active.sick.minor.waiting);
+		this.active.sick.minor.reacting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.active.sick.minor.waiting);
+		this.active.sick.major.ToggleEffect(RadiationMonitor.majorSicknessEffect).ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ParamTransition<float>(this.radiationExposure, this.active.sick.extreme, RadiationMonitor.COMPARE_GTE_EXTREME)
 			.ToggleAnims("anim_loco_radiation2_kanim", 4f, "")
 			.ToggleAnims("anim_idle_radiation2_kanim", 4f, "")
 			.ToggleExpression(Db.Get().Expressions.Radiation2, null)
-			.DefaultState(this.sick.major.waiting);
-		this.sick.major.waiting.ScheduleGoTo(120f, this.sick.major.vomiting);
-		this.sick.major.vomiting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.sick.major.waiting);
-		this.sick.extreme.ParamTransition<float>(this.radiationExposure, this.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ToggleEffect("RadiationExposureExtreme").ToggleAnims("anim_loco_radiation3_kanim", 4f, "")
+			.DefaultState(this.active.sick.major.waiting);
+		this.active.sick.major.waiting.ScheduleGoTo(120f, this.active.sick.major.vomiting);
+		this.active.sick.major.vomiting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.active.sick.major.waiting);
+		this.active.sick.extreme.ParamTransition<float>(this.radiationExposure, this.active.sick.deadly, RadiationMonitor.COMPARE_GTE_DEADLY).ToggleEffect(RadiationMonitor.extremeSicknessEffect).ToggleAnims("anim_loco_radiation3_kanim", 4f, "")
 			.ToggleAnims("anim_idle_radiation3_kanim", 4f, "")
 			.ToggleExpression(Db.Get().Expressions.Radiation3, null)
-			.DefaultState(this.sick.extreme.waiting);
-		this.sick.extreme.waiting.ScheduleGoTo(60f, this.sick.extreme.vomiting);
-		this.sick.extreme.vomiting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.sick.extreme.waiting);
-		this.sick.deadly.ToggleAnims("anim_loco_radiation4_kanim", 4f, "").ToggleAnims("anim_idle_radiation4_kanim", 4f, "").ToggleExpression(Db.Get().Expressions.Radiation4, null)
+			.DefaultState(this.active.sick.extreme.waiting);
+		this.active.sick.extreme.waiting.ScheduleGoTo(60f, this.active.sick.extreme.vomiting);
+		this.active.sick.extreme.vomiting.ToggleChore(new Func<RadiationMonitor.Instance, Chore>(this.CreateVomitChore), this.active.sick.extreme.waiting);
+		this.active.sick.deadly.ToggleAnims("anim_loco_radiation4_kanim", 4f, "").ToggleAnims("anim_idle_radiation4_kanim", 4f, "").ToggleExpression(Db.Get().Expressions.Radiation4, null)
 			.Enter(delegate(RadiationMonitor.Instance smi)
 			{
 				smi.GetComponent<Health>().Incapacitate(GameTags.RadiationSicknessIncapacitation);
@@ -68,11 +72,12 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 		int num = Grid.PosToCell(smi.gameObject);
 		if (Grid.IsValidCell(num))
 		{
-			float num2 = 1f - Db.Get().Attributes.RadiationResistance.Lookup(smi.gameObject).GetTotalValue();
+			float num2 = Mathf.Clamp01(1f - Db.Get().Attributes.RadiationResistance.Lookup(smi.gameObject).GetTotalValue());
 			float num3 = Grid.Radiation[num] * 1f * num2 / 600f * dt;
 			smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.RadiationBalance).ApplyDelta(num3);
-			smi.sm.currentExposurePerCycle.Set(num3 / dt * 600f, smi);
-			if (smi.sm.timeUntilNextExposureReact.Get(smi) <= 0f && num3 > 0.16666667f / dt)
+			float num4 = num3 / dt * 600f;
+			smi.sm.currentExposurePerCycle.Set(num4, smi);
+			if (smi.sm.timeUntilNextExposureReact.Get(smi) <= 0f && RadiationMonitor.COMPARE_REACT(smi, num4))
 			{
 				smi.sm.timeUntilNextExposureReact.Set(120f, smi);
 				ReactionMonitor.Instance smi2 = smi.master.gameObject.GetSMI<ReactionMonitor.Instance>();
@@ -100,8 +105,6 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 
 	public const float BASE_ABSORBTION_RATE = 1f;
 
-	public const float REACT_THRESHOLD = 0.16666667f;
-
 	public const float MIN_TIME_BETWEEN_EXPOSURE_REACTS = 120f;
 
 	public const float MIN_TIME_BETWEEN_SICK_REACTS = 60f;
@@ -120,19 +123,36 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 
 	public StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.FloatParameter timeUntilNextSickReact;
 
-	public GameStateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.State idle;
+	public static string minorSicknessEffect = "RadiationExposureMinor";
 
-	public RadiationMonitor.SickStates sick;
+	public static string majorSicknessEffect = "RadiationExposureMajor";
 
-	protected static StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_LT_MINOR = (RadiationMonitor.Instance smi, float p) => p < 100f;
+	public static string extremeSicknessEffect = "RadiationExposureExtreme";
 
-	protected static StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_MINOR = (RadiationMonitor.Instance smi, float p) => p >= 100f;
+	public GameStateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.State init;
 
-	protected static StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_MAJOR = (RadiationMonitor.Instance smi, float p) => p >= 300f;
+	public RadiationMonitor.ActiveStates active;
 
-	protected static StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_EXTREME = (RadiationMonitor.Instance smi, float p) => p >= 600f;
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_RECOVERY_IMMEDIATE = (RadiationMonitor.Instance smi, float p) => p > 100f * smi.difficultySettingMod / 2f;
 
-	protected static StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_DEADLY = (RadiationMonitor.Instance smi, float p) => p >= 900f;
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_REACT = (RadiationMonitor.Instance smi, float p) => p >= 133f * smi.difficultySettingMod;
+
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_LT_MINOR = (RadiationMonitor.Instance smi, float p) => p < 100f * smi.difficultySettingMod;
+
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_MINOR = (RadiationMonitor.Instance smi, float p) => p >= 100f * smi.difficultySettingMod;
+
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_MAJOR = (RadiationMonitor.Instance smi, float p) => p >= 300f * smi.difficultySettingMod;
+
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_EXTREME = (RadiationMonitor.Instance smi, float p) => p >= 600f * smi.difficultySettingMod;
+
+	public static readonly StateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.Parameter<float>.Callback COMPARE_GTE_DEADLY = (RadiationMonitor.Instance smi, float p) => p >= 900f * smi.difficultySettingMod;
+
+	public class ActiveStates : GameStateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.State
+	{
+		public GameStateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.State idle;
+
+		public RadiationMonitor.SickStates sick;
+	}
 
 	public class SickStates : GameStateMachine<RadiationMonitor, RadiationMonitor.Instance, IStateMachineTarget, object>.State
 	{
@@ -172,6 +192,37 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 			: base(master)
 		{
 			this.effects = base.GetComponent<Effects>();
+			if (Sim.IsRadiationEnabled())
+			{
+				SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.Radiation);
+				if (currentQualitySetting != null)
+				{
+					string id = currentQualitySetting.id;
+					if (id != null)
+					{
+						if (id == "Easiest")
+						{
+							this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.EASIEST;
+							return;
+						}
+						if (id == "Easier")
+						{
+							this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.EASIER;
+							return;
+						}
+						if (id == "Harder")
+						{
+							this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.HARDER;
+							return;
+						}
+						if (!(id == "Hardest"))
+						{
+							return;
+						}
+						this.difficultySettingMod = DUPLICANTSTATS.RADIATION_DIFFICULTY_MODIFIERS.HARDEST;
+					}
+				}
+			}
 		}
 
 		public Reactable GetReactable()
@@ -184,6 +235,30 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 			return emoteReactable;
 		}
 
+		public float SicknessSecondsRemaining()
+		{
+			return 600f * (Mathf.Max(0f, base.sm.radiationExposure.Get(base.smi) - 100f * this.difficultySettingMod) / 100f);
+		}
+
+		public string GetEffectStatusTooltip()
+		{
+			if (this.effects.HasEffect(RadiationMonitor.minorSicknessEffect))
+			{
+				return base.smi.master.gameObject.GetComponent<Effects>().Get(RadiationMonitor.minorSicknessEffect).statusItem.GetTooltip(this.effects.Get(RadiationMonitor.minorSicknessEffect));
+			}
+			if (this.effects.HasEffect(RadiationMonitor.majorSicknessEffect))
+			{
+				return base.smi.master.gameObject.GetComponent<Effects>().Get(RadiationMonitor.majorSicknessEffect).statusItem.GetTooltip(this.effects.Get(RadiationMonitor.majorSicknessEffect));
+			}
+			if (this.effects.HasEffect(RadiationMonitor.extremeSicknessEffect))
+			{
+				return base.smi.master.gameObject.GetComponent<Effects>().Get(RadiationMonitor.extremeSicknessEffect).statusItem.GetTooltip(this.effects.Get(RadiationMonitor.extremeSicknessEffect));
+			}
+			return DUPLICANTS.MODIFIERS.RADIATIONEXPOSUREDEADLY.TOOLTIP;
+		}
+
 		public Effects effects;
+
+		public float difficultySettingMod = 1f;
 	}
 }

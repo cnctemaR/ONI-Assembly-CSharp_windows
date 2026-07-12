@@ -50,6 +50,7 @@ public class DiamondPressConfig : IBuildingConfig
 		highEnergyParticleStorage.capacity = 2000f;
 		highEnergyParticleStorage.autoStore = true;
 		highEnergyParticleStorage.PORT_ID = "HEP_STORAGE";
+		highEnergyParticleStorage.showCapacityStatusItem = true;
 		Workable workable = go.AddOrGet<ComplexFabricatorWorkable>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
 		workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_diamond_press_kanim") };

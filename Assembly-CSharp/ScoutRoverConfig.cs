@@ -104,6 +104,7 @@ public class ScoutRoverConfig : IEntityConfig
 		gameObject.AddOrGet<Pickupable>().SetWorkTime(5f);
 		gameObject.AddOrGet<SnapOn>();
 		component.SetSymbolVisiblity("snapto_pivot", false);
+		component.SetSymbolVisiblity("snapto_radar", false);
 		return gameObject;
 	}
 
@@ -237,8 +238,8 @@ public class ScoutRoverConfig : IEntityConfig
 			gameObject2.AddOrGet<KPrefabID>().PrefabTag = new Tag(laserEffect.id);
 			KBatchedAnimTracker kbatchedAnimTracker = gameObject2.AddOrGet<KBatchedAnimTracker>();
 			kbatchedAnimTracker.controller = component;
-			kbatchedAnimTracker.symbol = new HashedString("scout_radar");
-			kbatchedAnimTracker.offset = new Vector3(195f, 0f, 0f);
+			kbatchedAnimTracker.symbol = new HashedString("snapto_radar");
+			kbatchedAnimTracker.offset = new Vector3(40f, 0f, 0f);
 			kbatchedAnimTracker.useTargetPoint = true;
 			KBatchedAnimController kbatchedAnimController = gameObject2.AddOrGet<KBatchedAnimController>();
 			kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(laserEffect.animFile) };

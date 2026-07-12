@@ -251,7 +251,7 @@ public class DiseaseInfoScreen : TargetScreen
 		return string.Format(text, name, this.GetFormattedHalfLife(halfLife));
 	}
 
-	private void BuildFactorsStrings(int diseaseCount, int elementIdx, int environmentCell, float environmentMass, float temperature, HashSet<Tag> tags, Disease disease)
+	private void BuildFactorsStrings(int diseaseCount, int elementIdx, int environmentCell, float environmentMass, float temperature, HashSet<Tag> tags, Disease disease, bool isCell = false)
 	{
 		this.currentGermsPanel.SetTitle(string.Format(UI.DETAILTABS.DISEASE.CURRENT_GERMS, disease.Name.ToUpper()));
 		this.currentGermsPanel.SetLabel("currentgerms", string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT, disease.Name, GameUtil.GetFormattedDiseaseAmount(diseaseCount, GameUtil.TimeSlice.None)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT_TOOLTIP, GameUtil.GetFormattedDiseaseAmount(diseaseCount, GameUtil.TimeSlice.None)));
@@ -308,28 +308,41 @@ public class DiseaseInfoScreen : TargetScreen
 		}
 		if (Grid.IsValidCell(environmentCell))
 		{
-			CompositeExposureRule exposureRuleForElement = disease.GetExposureRuleForElement(Grid.Element[environmentCell]);
-			if (exposureRuleForElement != null && exposureRuleForElement.populationHalfLife != float.PositiveInfinity)
+			if (!isCell)
 			{
-				if (exposureRuleForElement.GetHalfLifeForCount(diseaseCount) > 0f)
+				CompositeExposureRule exposureRuleForElement = disease.GetExposureRuleForElement(Grid.Element[environmentCell]);
+				if (exposureRuleForElement != null && exposureRuleForElement.populationHalfLife != float.PositiveInfinity)
 				{
-					this.currentGermsPanel.SetLabel("environment", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.TITLE, exposureRuleForElement.Name(), this.GetFormattedHalfLife(exposureRuleForElement.GetHalfLifeForCount(diseaseCount))), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.DIE_TOOLTIP);
+					if (exposureRuleForElement.GetHalfLifeForCount(diseaseCount) > 0f)
+					{
+						this.currentGermsPanel.SetLabel("environment", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.TITLE, exposureRuleForElement.Name(), this.GetFormattedHalfLife(exposureRuleForElement.GetHalfLifeForCount(diseaseCount))), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.DIE_TOOLTIP);
+					}
+					else
+					{
+						this.currentGermsPanel.SetLabel("environment", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.TITLE, exposureRuleForElement.Name(), this.GetFormattedHalfLife(exposureRuleForElement.GetHalfLifeForCount(diseaseCount))), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.GROW_TOOLTIP);
+					}
 				}
-				else
+			}
+			if (Sim.IsRadiationEnabled())
+			{
+				float num5 = Grid.Radiation[environmentCell];
+				if (num5 > 0f)
 				{
-					this.currentGermsPanel.SetLabel("environment", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.TITLE, exposureRuleForElement.Name(), this.GetFormattedHalfLife(exposureRuleForElement.GetHalfLifeForCount(diseaseCount))), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.GROW_TOOLTIP);
+					float num6 = disease.radiationKillRate * num5;
+					float num7 = (float)diseaseCount * 0.5f / num6;
+					this.currentGermsPanel.SetLabel("radiation", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RADIATION.TITLE, Mathf.RoundToInt(num5), this.GetFormattedHalfLife(num7)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RADIATION.DIE_TOOLTIP);
 				}
 			}
 		}
-		float num5 = disease.CalculateTemperatureHalfLife(temperature);
-		if (num5 != float.PositiveInfinity)
+		float num8 = disease.CalculateTemperatureHalfLife(temperature);
+		if (num8 != float.PositiveInfinity)
 		{
-			if (num5 > 0f)
+			if (num8 > 0f)
 			{
-				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.DIE_TOOLTIP);
+				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num8)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.DIE_TOOLTIP);
 				return;
 			}
-			this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num5)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP);
+			this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.GetFormattedHalfLife(num8)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP);
 		}
 	}
 
@@ -349,7 +362,7 @@ public class DiseaseInfoScreen : TargetScreen
 			Disease disease = Db.Get().Diseases[(int)component.DiseaseIdx];
 			int num = Grid.PosToCell(component.transform.GetPosition());
 			KPrefabID component2 = component.GetComponent<KPrefabID>();
-			this.BuildFactorsStrings(component.DiseaseCount, (int)component.Element.idx, num, component.Mass, component.Temperature, component2.Tags, disease);
+			this.BuildFactorsStrings(component.DiseaseCount, (int)component.Element.idx, num, component.Mass, component.Temperature, component2.Tags, disease, false);
 			return true;
 		}
 		return false;
@@ -361,7 +374,7 @@ public class DiseaseInfoScreen : TargetScreen
 		{
 			Disease disease = Db.Get().Diseases[(int)cso.diseaseIdx];
 			int idx = (int)cso.element.idx;
-			this.BuildFactorsStrings(cso.diseaseCount, idx, -1, cso.Mass, cso.temperature, null, disease);
+			this.BuildFactorsStrings(cso.diseaseCount, idx, cso.SelectedCell, cso.Mass, cso.temperature, null, disease, true);
 			return true;
 		}
 		return false;

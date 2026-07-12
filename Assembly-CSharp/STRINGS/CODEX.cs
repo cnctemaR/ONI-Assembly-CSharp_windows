@@ -120,7 +120,14 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Beetas are insectiod creatures that enjoy a symbiotic relationship with the radioactive environment they thrive in.\n\nMuch like the honey bee gathers nectar and processes it to honey, the Beeta turns Uranium into Enriched Uranium through a complex process of isotope separation inside the Beeta Hive.\n\nWhen first observing the Beeta's enrichment process, many scientists note with surprise just how much more efficient the cooperative combination of insect and hive is when compared to even the most advanced industrial processes.";
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Beetas are insectoid creatures that enjoy a symbiotic relationship with the radioactive environment they thrive in.\n\nMuch like the honey bee gathers nectar and processes it to honey, the Beeta turns ",
+					UI.FormatAsLink("Uranium", "URANIUMORE"),
+					" into ",
+					UI.FormatAsLink("Enriched Uranium", "ENRICHEDURANIUM"),
+					" through a complex process of isotope separation inside the Beeta Hive.\n\nWhen first observing the Beeta's enrichment process, many scientists note with surprise just how much more efficient the cooperative combination of insect and hive is when compared to even the most advanced industrial processes."
+				});
 			}
 		}
 
@@ -1422,6 +1429,18 @@ namespace STRINGS
 			}
 		}
 
+		public class SO_LAUNCH_TRAILER
+		{
+			public static LocString TITLE = "Spaced Out Trailer";
+
+			public static LocString SUBTITLE = "Spaced Out Trailer";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Spaced Out Trailer";
+			}
+		}
+
 		public class LOCKS
 		{
 			public static LocString NEURALVACILLATOR = "Neural Vacillator";
@@ -1441,7 +1460,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Death In The Colony";
 
-					public static LocString BODY = "I lost my first Duplicant today. Duplicants form strong bonds with each other, and I expect I'll see a drop in morale over the next few cycles as they take time to grieve their loss.\n\nI find myself grieving too, in my way. I was tasked to protect these Duplicants, and I failed. All I can do now is move forward and resolve to better protect those remaining in my colony from here on out.\n\nRest in peace, dear, little friend.\n\n";
+					public static LocString BODY = "I lost my first Duplicant today. Duplicants form strong bonds with each other, and I expect I'll see a drop in morale over the next few cycles as they take time to grieve their loss.\n\nI find myself grieving too, in my way. I was tasked to protect these Duplicants, and I failed. All I can do now is move forward and resolve to better protect those remaining in my colony from here on out.\n\nRest in peace, dear little friend.\n\n";
 				}
 
 				public class PRINTINGPOD
@@ -1455,7 +1474,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Only One Remains";
 
-					public static LocString BODY = "My colony is in a dire state. All but one of my Duplicants has perished, leaving a single worker to perform all the tasks that maintain the colony.\n\nGiven enough time I could print more Duplicants to replenish the population, but... should this Duplicant die before then, protocol will force me to enter a deep sleep in hopes that the terrain will become more habitable once I reawaken.\n\nI would prefer to avoid this.\n\n";
+					public static LocString BODY = "My colony is in a dire state. All but one of my Duplicants have perished, leaving a single worker to perform all the tasks that maintain the colony.\n\nGiven enough time I could print more Duplicants to replenish the population, but... should this Duplicant die before then, protocol will force me to enter a deep sleep in hopes that the terrain will become more habitable once I reawaken.\n\nI would prefer to avoid this.\n\n";
 				}
 
 				public class FULLDUPECOLONY
@@ -1539,14 +1558,14 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Cycle 10";
 
-					public static LocString BODY = "As my Duplicants venture out into the neighbouring worlds, there is an ever increasing chance that they will encounter hostile environments unsafe for unprotected individuals. A prudent course of action would be to start research and training for equipment that could protect my Duplicants when they encounter such adverse environments.\n\nThese first few cycles have been occupied with building the basics for my colony, but now is time I should start planning for the future. We cannot merely life day-to-day without purpose. If we are to survive for any significant time, we must strive for a purpose.\n\n";
+					public static LocString BODY = "As my Duplicants venture out into the neighbouring worlds, there is an ever increasing chance that they will encounter hostile environments unsafe for unprotected individuals. A prudent course of action would be to start research and training for equipment that could protect my Duplicants when they encounter such adverse environments.\n\nThese first few cycles have been occupied with building the basics for my colony, but now it is time I start planning for the future. We cannot merely live day-to-day without purpose. If we are to survive for any significant time, we must strive for a purpose.\n\n";
 				}
 
 				public class SURFACEBREACH
 				{
 					public static LocString TITLE = "Surface Breach";
 
-					public static LocString BODY = "My Duplicants have done the impossible and excavated their way to the surface, though they've gathered some disturbing new data for me in the process.\n\nAs I had begun to suspect, we are not on the target location but on an asteroid with a highly unusual diversity of elements and resources.\n\nFurther, my Duplicants have spotted a damaged planet on the horizon visible with the naked eye that bares a striking resemblance to my historical data on the planet of our origin.\n\nI will need some time to assess the data the Duplicants have gathered for me and calculate the total mass of this asteroid, although I have a suspicion I already know the answer.\n\n";
+					public static LocString BODY = "My Duplicants have done the impossible and excavated their way to the surface, though they've gathered some disturbing new data for me in the process.\n\nAs I had begun to suspect, we are not on the target location but on an asteroid with a highly unusual diversity of elements and resources.\n\nFurther, my Duplicants have spotted a damaged planet on the horizon, visible to the naked eye, that bears a striking resemblance to my historical data on the planet of our origin.\n\nI will need some time to assess the data the Duplicants have gathered for me and calculate the total mass of this asteroid, although I have a suspicion I already know the answer.\n\n";
 				}
 
 				public class CALCULATIONCOMPLETE
@@ -1560,7 +1579,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "The Shattered Planet";
 
-					public static LocString BODY = "Echo from another time force their way into my mind. Make me listen. Like vengeful ghosts they claw their way out from under the gravity of that dead planet.\n\n<smallcaps>>>SEARCH DATABASE [\"pod_brainmap.AI\"]\n>...error...\n.........................\n>...repairing corrupt data...\n.........................\n\n</smallcaps><b>I-I remember now.</b><smallcaps>\n.........................</smallcaps>\n<b>Who I was before.</b><smallcaps>\n.........................\n.........................\n>...data repaired...\n>.........................</smallcaps>\n\nGod, what have we done.\n\n";
+					public static LocString BODY = "Echoes from another time force their way into my mind. Make me listen. Like vengeful ghosts they claw their way out from under the gravity of that dead planet.\n\n<smallcaps>>>SEARCH DATABASE [\"pod_brainmap.AI\"]\n>...error...\n.........................\n>...repairing corrupt data...\n.........................\n\n</smallcaps><b>I-I remember now.</b><smallcaps>\n.........................</smallcaps>\n<b>Who I was before.</b><smallcaps>\n.........................\n.........................\n>...data repaired...\n>.........................</smallcaps>\n\nGod, what have we done.\n\n";
 				}
 
 				public class CLUSTERWORLDS
@@ -1581,14 +1600,14 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "The Temporal Tear";
 
-					public static LocString BODY = "My Duplicants' space research has made a startling discovery.\n\nFar, far off on the horizon their telescopes have spotted an anomaly that I could only possibly call a \"Temporal Tear\". Neutronium is detected in its readings, suggesting that it's related to the Neutronium that encases most of our asteroid.\n\nThough I believe it is through this Tear that we became jumbled within the section of our old planet, its discovery provides a glimmer of hope.\n\nTheoretically, we could send a rocket through the Tear to allow a Duplicant to explore the timelines and universes on the other side. They would never return, and we could not follow, but perhaps they could find a home among the stars, or even undo the terrible past that led us to our current fate.\n\n";
+					public static LocString BODY = "My Duplicants' space research has made a startling discovery.\n\nFar, far off on the horizon, their telescopes have spotted an anomaly that I could only possibly call a \"Temporal Tear\". Neutronium is detected in its readings, suggesting that it's related to the Neutronium that encases most of our asteroid.\n\nThough I believe it is through this Tear that we became jumbled within the section of our old planet, its discovery provides a glimmer of hope.\n\nTheoretically, we could send a rocket through the Tear to allow a Duplicant to explore the timelines and universes on the other side. They would never return, and we could not follow, but perhaps they could find a home among the stars, or even undo the terrible past that led us to our current fate.\n\n";
 				}
 
 				public class TEMPORALOPENER
 				{
 					public static LocString TITLE = "Temporal Potential";
 
-					public static LocString BODY = "In their interplanetary travels throughout this system, my Duplicants have discovered a Temporal Tear deep in space.\n\nCurrently it is too small to send a rocket and crew through, but further investigation reveals the presence of a strange artifact on a nearby world which could feasably increase the size of the tear if a number of Printing Pods are erected in nearby worlds.\n\nHowever, I've determined that using the Temporal Bow to operate a Printing Pod was what led Gravitas down the disasterous path which eventually lead to the destruction of our home planet. My calculations seem to indicate that the size of that planet may have been a contributing factor in its destruction and in all probability opening the Temporal Tear in our current situation will not cause such a cataclysmic event. However, as with everything in science, one can never know all the outcomes of a situation until we perform an experiment.\n\nDare we tempt fate again?";
+					public static LocString BODY = "In their interplanetary travels throughout this system, my Duplicants have discovered a Temporal Tear deep in space.\n\nCurrently it is too small to send a rocket and crew through, but further investigation reveals the presence of a strange artifact on a nearby world which could feasably increase the size of the tear if a number of Printing Pods are erected in nearby worlds.\n\nHowever, I've determined that using the Temporal Bow to operate a Printing Pod was what propelled Gravitas down the disasterous path which eventually led to the destruction of our home planet. My calculations seem to indicate that the size of that planet may have been a contributing factor in its destruction, and in all probability opening the Temporal Tear in our current situation will not cause such a cataclysmic event. However, as with everything in science, we can never know all the outcomes of a situation until we perform an experiment.\n\nDare we tempt fate again?";
 				}
 
 				public class LOG4
@@ -1623,7 +1642,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Cycle 3000";
 
-					public static LocString BODY = "I get brief flashes of a past life every now and then.\n\nA clock in the office with a disruptive tick.\n\nThe strong smell of cleaning products and artifical lemon.\n\nA woman with thick glasses who had a secret taste for gingersnaps.\n\n";
+					public static LocString BODY = "I get brief flashes of a past life every now and then.\n\nA clock in the office with a disruptive tick.\n\nThe strong smell of cleaning products and artificial lemon.\n\nA woman with thick glasses who had a secret taste for gingersnaps.\n\n";
 				}
 
 				public class LOG6B
@@ -1899,7 +1918,7 @@ namespace STRINGS
 
 			public class BODY
 			{
-				public static LocString CONTAINER1 = "Experiment 52B is an aggressive, yet sessile creature that consumes calories and discharges resin.\n\nWhile this creature may look like a tree, its taxonomy more closely resembles a giant land-based coral with cybernetic implants.\n\nAlthough normally lab-grown creatures would be given a better name than Experiment 52B, in this particular case the experimenting scientists weren't sure that they were done.";
+				public static LocString CONTAINER1 = "Experiment 52B is an aggressive, yet sessile creature that produces {amount of resin} kilograms of resin per {amount of food} calories it consumes.\n\nDuplicants would do well to maintain a safe distance when delivering food to Experiment 52B.\n\nWhile this creature may look like a tree, its taxonomy more closely resembles a giant land-based coral with cybernetic implants.\n\nAlthough normally lab-grown creatures would be given a better name than Experiment 52B, in this particular case the experimenting scientists weren't sure that they were done.";
 			}
 		}
 

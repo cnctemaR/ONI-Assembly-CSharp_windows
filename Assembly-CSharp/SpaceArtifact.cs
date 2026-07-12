@@ -127,5 +127,7 @@ public class SpaceArtifact : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public ArtifactTier artifactTier;
 
+	public ArtifactType artifactType;
+
 	public string uniqueAnimNameFragment;
 }

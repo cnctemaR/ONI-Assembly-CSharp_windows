@@ -10,6 +10,8 @@ namespace TUNING
 
 		public const float EXTRA_VOMIT_RECOVERY = 20f;
 
+		public const float REACT_THRESHOLD = 133f;
+
 		public class STANDARD_EMITTER
 		{
 			public const float STEADY_PULSE_RATE = 0.2f;

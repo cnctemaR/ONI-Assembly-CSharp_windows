@@ -48,7 +48,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			smi.MountPole();
 		})
 			.OnAnimQueueComplete(this.standing);
-		this.instorage.TagTransition(GameTags.Stored, this.instorage, true);
+		this.instorage.TagTransition(GameTags.Stored, this.standing, true);
 		this.entombed.DefaultState(this.entombed.recovering);
 		this.entombed.recovering.Enter("TryEntombedEscape", delegate(FallMonitor.Instance smi)
 		{
@@ -238,8 +238,9 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 				int num2 = Grid.CellAbove(num);
 				bool flag3 = Grid.IsValidCell(num);
 				bool flag4 = Grid.IsValidCell(num2);
-				bool flag5 = this.IsValidNavCell(num) && (!base.gameObject.HasTag(GameTags.Incapacitated) || (this.navigator.CurrentNavType != NavType.Ladder && this.navigator.CurrentNavType != NavType.Pole));
-				flag2 = (!flag5 && flag3 && Grid.Solid[num]) || (flag4 && Grid.Solid[num2]) || (flag3 && Grid.DupeImpassable[num]) || (flag4 && Grid.DupeImpassable[num2]);
+				bool flag5 = this.IsValidNavCell(num);
+				flag5 = flag5 && (!base.gameObject.HasTag(GameTags.Incapacitated) || (this.navigator.CurrentNavType != NavType.Ladder && this.navigator.CurrentNavType != NavType.Pole));
+				flag2 = (!flag5 && flag3 && Grid.Solid[num] && !Grid.DupePassable[num]) || (flag4 && Grid.Solid[num2] && !Grid.DupePassable[num2]) || (flag3 && Grid.DupeImpassable[num]) || (flag4 && Grid.DupeImpassable[num2]);
 				flag = !flag5 && !flag2;
 				if ((!flag3 && flag4) || Grid.WorldIdx[num] != Grid.WorldIdx[num2])
 				{

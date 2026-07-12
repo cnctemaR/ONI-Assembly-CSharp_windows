@@ -4655,6 +4655,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant sustained serious injuries that are impacting their work and well-being";
 			}
 
+			public class SANDBOXMORALEADJUSTMENT
+			{
+				public static LocString NAME = "Sandbox Morale Adjustment";
+
+				public static LocString TOOLTIP = "This Duplicant has had their Morale adjusted temporarily with the Sandbox Tools.";
+			}
+
 			public class ROTTEMPERATURE
 			{
 				public static LocString UNREFRIGERATED = "Unrefrigerated";
@@ -5710,6 +5717,13 @@ namespace STRINGS
 				public static LocString NAME = "Extreme Radiation Sickness";
 
 				public static LocString TOOLTIP = "Extreme Radiation exposure is hurting this Duplicant";
+			}
+
+			public class RADIATIONEXPOSUREDEADLY
+			{
+				public static LocString NAME = "Deadly Radiation Sickness";
+
+				public static LocString TOOLTIP = "Extreme Radiation exposure has incapacitated this Duplicant";
 			}
 
 			public class CHARGING
@@ -7886,6 +7900,10 @@ namespace STRINGS
 				public static LocString NAME = "Piloting";
 
 				public static LocString DESC = "Determines how long it takes a Duplicant to complete a space mission.";
+
+				public static LocString DLC1_DESC = "Determines how much of a speed bonus a Duplicant provides to a rocket they are piloting.";
+
+				public static LocString SPEED_MODIFIER = "{0} Rocket Speed";
 			}
 
 			public class QUALITYOFLIFE
@@ -8359,7 +8377,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Data Analysis Researcher", "SPACERESEARCH");
 
-				public static LocString DESCRIPTION = "Enables Duplicants to conduct research using the " + BUILDINGS.PREFABS.ORBITALRESEARCHCENTER.NAME;
+				public static LocString DESCRIPTION = "Enables Duplicants to conduct research using the " + BUILDINGS.PREFABS.DLC1COSMICRESEARCHCENTER.NAME;
 			}
 
 			public class JUNIOR_COOK

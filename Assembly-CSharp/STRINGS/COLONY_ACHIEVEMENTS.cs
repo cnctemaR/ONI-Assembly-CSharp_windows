@@ -18,6 +18,19 @@ namespace STRINGS
 
 		public static LocString PRE_VICTORY_MESSAGE_BODY = "IMPERATIVE ACHIEVED: {0}";
 
+		public static class DLC
+		{
+			public static LocString EXPANSION1 = string.Concat(new string[]
+			{
+				UI.PRE_KEYWORD,
+				"\n\n<i>",
+				UI.DLC1.NAME,
+				"</i>",
+				UI.PST_KEYWORD,
+				" DLC Achievement"
+			});
+		}
+
 		public class MISC_REQUIREMENTS
 		{
 			public static LocString WINCONDITION_LEAVE = "The Great Escape";
@@ -314,7 +327,7 @@ namespace STRINGS
 
 				public static LocString ANALYZE_SEED = "Analyze {0} mutant";
 
-				public static LocString GET_URANIUM_WITHOUT_STING = "Got uranium out of a beeta hive without getting stung";
+				public static LocString GET_URANIUM_WITHOUT_STING = "Got uranium out of a Beeta hive without getting stung";
 
 				public static LocString RADBOLT_TRAVEL = "Radbolts travelled: {0:n} m / {1:n} m";
 

@@ -18,7 +18,8 @@ public class CryoTankConfig : IEntityConfig
 		float num = 100f;
 		EffectorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER0;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("cryo_chamber_kanim"), "off", Grid.SceneLayer.Building, 1, 2, tier, tier2, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("cryo_chamber_kanim"), "off", Grid.SceneLayer.Building, 2, 3, tier, tier2, SimHashes.Creature, null, 293f);
+		gameObject.GetComponent<KAnimControllerBase>().SetFGLayer(Grid.SceneLayer.BuildingFront);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium, true);
 		component.Temperature = 294.15f;
@@ -26,8 +27,8 @@ public class CryoTankConfig : IEntityConfig
 		workable.synchronizeAnims = false;
 		workable.resetProgressOnStop = true;
 		CryoTank cryoTank = gameObject.AddOrGet<CryoTank>();
-		cryoTank.overrideAnim = "anim_interacts_clothingfactory_kanim";
-		cryoTank.dropOffset = new Vector2I(0, 1);
+		cryoTank.overrideAnim = "anim_interacts_cryo_activation_kanim";
+		cryoTank.dropOffset = new CellOffset(1, 0);
 		gameObject.AddOrGet<LoreBearer>();
 		gameObject.AddOrGet<Demolishable>().allowDemolition = false;
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };

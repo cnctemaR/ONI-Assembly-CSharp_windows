@@ -38,6 +38,7 @@ public class ScheduleScreen : KScreen
 			ManagementMenu.Instance.CloseAll();
 		};
 		ScheduleManager.Instance.onSchedulesChanged += this.OnSchedulesChanged;
+		Game.Instance.Subscribe(1983128072, new Action<object>(this.RefreshWidgetWorldData));
 	}
 
 	protected override void OnCleanUp()
@@ -110,6 +111,14 @@ public class ScheduleScreen : KScreen
 		foreach (Schedule schedule in schedules)
 		{
 			this.AddScheduleEntry(schedule);
+		}
+	}
+
+	private void RefreshWidgetWorldData(object data = null)
+	{
+		foreach (ScheduleScreenEntry scheduleScreenEntry in this.entries)
+		{
+			scheduleScreenEntry.RefreshWidgetWorldData();
 		}
 	}
 

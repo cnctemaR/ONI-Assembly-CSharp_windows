@@ -75,12 +75,31 @@ public class FactionAlignment : KMonoBehaviour
 
 	private void UpdateStatusItem()
 	{
+		this.TogglePrioritizable(this.targeted);
 		if (this.targeted)
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OrderAttack, null);
 			return;
 		}
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.OrderAttack, false);
+	}
+
+	private void TogglePrioritizable(bool enable)
+	{
+		Prioritizable component = base.GetComponent<Prioritizable>();
+		if (component == null)
+		{
+			return;
+		}
+		if (enable)
+		{
+			Prioritizable.AddRef(base.gameObject);
+			return;
+		}
+		if (component.IsPrioritizable())
+		{
+			Prioritizable.RemoveRef(base.gameObject);
+		}
 	}
 
 	public void SwitchAlignment(FactionManager.FactionID newAlignment)

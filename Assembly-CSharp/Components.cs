@@ -30,7 +30,7 @@ public class Components
 
 	public static Components.Cmps<Refinery> Refineries = new Components.Cmps<Refinery>();
 
-	public static Components.Cmps<PlantablePlot> PlantablePlots = new Components.Cmps<PlantablePlot>();
+	public static Components.CmpsByWorld<PlantablePlot> PlantablePlots = new Components.CmpsByWorld<PlantablePlot>();
 
 	public static Components.Cmps<Ladder> Ladders = new Components.Cmps<Ladder>();
 
@@ -246,10 +246,11 @@ public class Components
 			List<T> list = new List<T>();
 			foreach (T t in this.Items)
 			{
-				bool flag = (t as KMonoBehaviour).GetMyWorldId() == worldId;
+				KMonoBehaviour kmonoBehaviour = t as KMonoBehaviour;
+				bool flag = kmonoBehaviour.GetMyWorldId() == worldId;
 				if (!flag && checkChildWorlds)
 				{
-					WorldContainer myWorld = (t as KMonoBehaviour).GetMyWorld();
+					WorldContainer myWorld = kmonoBehaviour.GetMyWorld();
 					if (myWorld != null && myWorld.ParentWorldId == worldId)
 					{
 						flag = true;
@@ -296,5 +297,76 @@ public class Components
 		private Dictionary<T, HandleVector<int>.Handle> table;
 
 		private KCompactedVector<T> items;
+	}
+
+	public class CmpsByWorld<T>
+	{
+		public CmpsByWorld()
+		{
+			App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.Clear));
+			this.m_CmpsByWorld = new Dictionary<int, Components.Cmps<T>>();
+		}
+
+		public void Clear()
+		{
+			this.m_CmpsByWorld.Clear();
+		}
+
+		public Components.Cmps<T> CreateOrGetCmps(int worldId)
+		{
+			Components.Cmps<T> cmps;
+			if (!this.m_CmpsByWorld.TryGetValue(worldId, out cmps))
+			{
+				cmps = new Components.Cmps<T>();
+				this.m_CmpsByWorld[worldId] = cmps;
+			}
+			return cmps;
+		}
+
+		public void Add(int worldId, T cmp)
+		{
+			this.CreateOrGetCmps(worldId).Add(cmp);
+		}
+
+		public void Remove(int worldId, T cmp)
+		{
+			this.CreateOrGetCmps(worldId).Remove(cmp);
+		}
+
+		public void Register(int worldId, Action<T> on_add, Action<T> on_remove)
+		{
+			this.CreateOrGetCmps(worldId).Register(on_add, on_remove);
+		}
+
+		public void Unregister(int worldId, Action<T> on_add, Action<T> on_remove)
+		{
+			this.CreateOrGetCmps(worldId).Unregister(on_add, on_remove);
+		}
+
+		public List<T> GetItems(int worldId)
+		{
+			ClusterManager.Instance.GetWorld(worldId);
+			return this.CreateOrGetCmps(worldId).Items;
+		}
+
+		public IEnumerator GetWorldEnumerator(int worldId)
+		{
+			return this.CreateOrGetCmps(worldId).GetEnumerator();
+		}
+
+		public int GlobalCount
+		{
+			get
+			{
+				int num = 0;
+				foreach (KeyValuePair<int, Components.Cmps<T>> keyValuePair in this.m_CmpsByWorld)
+				{
+					num += this.m_CmpsByWorld.Count;
+				}
+				return num;
+			}
+		}
+
+		private Dictionary<int, Components.Cmps<T>> m_CmpsByWorld;
 	}
 }

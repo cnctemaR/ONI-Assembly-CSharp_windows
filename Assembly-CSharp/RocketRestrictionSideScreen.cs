@@ -21,18 +21,19 @@ public class RocketRestrictionSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject new_target)
 	{
-		if (new_target == null)
-		{
-			global::Debug.LogError("Invalid gameObject received");
-			return;
-		}
 		this.controlStation = new_target.GetComponent<RocketControlStation>();
-		if (this.controlStationLogicSubHandle != -1)
-		{
-			base.Unsubscribe(this.controlStationLogicSubHandle);
-		}
 		this.controlStationLogicSubHandle = this.controlStation.Subscribe(1861523068, new Action<object>(this.UpdateButtonStates));
 		this.UpdateButtonStates(null);
+	}
+
+	public override void ClearTarget()
+	{
+		if (this.controlStationLogicSubHandle != -1 && this.controlStation != null)
+		{
+			this.controlStation.Unsubscribe(this.controlStationLogicSubHandle);
+			this.controlStationLogicSubHandle = -1;
+		}
+		this.controlStation = null;
 	}
 
 	private void UpdateButtonStates(object data = null)

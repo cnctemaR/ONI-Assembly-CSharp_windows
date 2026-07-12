@@ -16,6 +16,8 @@ namespace ProcGen
 
 		public string asteroidIcon { get; private set; }
 
+		public float iconScale { get; private set; }
+
 		public bool disableWorldTraits { get; private set; }
 
 		public List<World.TraitRule> worldTraitRules { get; private set; }
@@ -67,6 +69,7 @@ namespace ProcGen
 			this.fixedTraits = new List<string>();
 			this.category = World.WorldCategory.Asteroid;
 			this.worldTraitScale = 1f;
+			this.iconScale = 1f;
 			this.worldTraitRules = new List<World.TraitRule>();
 			this.worldTraitRules.Add(new World.TraitRule(2, 4));
 		}

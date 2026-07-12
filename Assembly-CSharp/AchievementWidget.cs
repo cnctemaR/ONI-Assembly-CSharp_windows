@@ -180,6 +180,10 @@ public class AchievementWidget : KMonoBehaviour
 		{
 			tooltip.AddMultiStringTooltip(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.STATUS.EXPAND_TOOLTIP, null);
 		}
+		if (this.dlcAchievement)
+		{
+			tooltip.AddMultiStringTooltip(COLONY_ACHIEVEMENTS.DLC.EXPANSION1, null);
+		}
 	}
 
 	public void ShowProgress(ColonyAchievementStatus achievement)
@@ -491,4 +495,6 @@ public class AchievementWidget : KMonoBehaviour
 	private Sprite statusFailureIcon;
 
 	private int numRequirementsDisplayed;
+
+	public bool dlcAchievement;
 }

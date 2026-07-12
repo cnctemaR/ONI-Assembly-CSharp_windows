@@ -881,7 +881,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 487396U;
+		uint num = 489681U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1445,7 +1445,7 @@ public class Game : KMonoBehaviour
 		ChorePreconditions.DestroyInstance();
 		SandboxBrushTool.DestroyInstance();
 		SandboxHeatTool.DestroyInstance();
-		SandboxRadsTool.DestroyInstance();
+		SandboxStressTool.DestroyInstance();
 		SandboxCritterTool.DestroyInstance();
 		SandboxClearFloorTool.DestroyInstance();
 		GameScreenManager.DestroyInstance();

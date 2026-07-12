@@ -1,16 +1,10 @@
 ﻿using System;
 using Klei.AI;
-using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescreenButtonControl
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-	}
-
 	public string SidescreenButtonText
 	{
 		get
@@ -68,7 +62,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
 		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
-		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(base.gameObject), Grid.SceneLayer.Move);
+		Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(base.transform.position), this.dropOffset), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
 		new MinionStartingStats(false, null, "AncientKnowledge").Apply(gameObject);
@@ -79,17 +73,43 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		{
 			component.ForceAddSkillPoint();
 		}
-		if (this.opener != null)
+		base.smi.sm.defrostedDuplicant.Set(gameObject, base.smi);
+		gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+		ChoreProvider component2 = gameObject.GetComponent<ChoreProvider>();
+		if (component2 != null)
 		{
-			this.opener.GetComponent<Effects>().Add(Db.Get().effects.Get("CryoFriend"), true);
-			gameObject.GetComponent<Effects>().Add(Db.Get().effects.Get("CryoFriend"), true);
+			base.smi.defrostAnimChore = new EmoteChore(component2, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_cryo_chamber_kanim", new HashedString[] { "defrost", "defrost_exit" }, KAnim.PlayMode.Once, false);
+			Vector3 position = gameObject.transform.GetPosition();
+			position.z = Grid.GetLayerZ(Grid.SceneLayer.Gas);
+			gameObject.transform.SetPosition(position);
+			gameObject.GetMyWorld().SetDupeVisited();
+		}
+		SaveGame.Instance.GetComponent<ColonyAchievementTracker>().defrostedDuplicant = true;
+	}
+
+	public void ShowEventPopup()
+	{
+		GameObject gameObject = base.smi.sm.defrostedDuplicant.Get(base.smi);
+		if (this.opener != null && gameObject != null)
+		{
 			SimpleEvent.StatesInstance statesInstance = GameplayEventManager.Instance.StartNewEvent(Db.Get().GameplayEvents.CryoFriend, -1).smi as SimpleEvent.StatesInstance;
 			statesInstance.minions = new GameObject[] { gameObject, this.opener };
 			statesInstance.SetTextParameter("dupe", this.opener.GetProperName());
 			statesInstance.SetTextParameter("friend", gameObject.GetProperName());
 			statesInstance.ShowEventPopup(null);
 		}
-		SaveGame.Instance.GetComponent<ColonyAchievementTracker>().defrostedDuplicant = true;
+	}
+
+	public void Cheer()
+	{
+		GameObject gameObject = base.smi.sm.defrostedDuplicant.Get(base.smi);
+		if (this.opener != null && gameObject != null)
+		{
+			this.opener.GetComponent<Effects>().Add(Db.Get().effects.Get("CryoFriend"), true);
+			gameObject.GetComponent<Effects>().Add(Db.Get().effects.Get("CryoFriend"), true);
+			new EmoteChore(this.opener.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+			new EmoteChore(gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_cheer_kanim", new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" }, null);
+		}
 	}
 
 	private void OnClickOpen()
@@ -99,7 +119,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 
 	private void OnClickCancel()
 	{
-		this.CancelChore(null);
+		this.CancelActivateChore(null);
 	}
 
 	public void ActivateChore(object param = null)
@@ -111,11 +131,11 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		base.GetComponent<Workable>().SetWorkTime(1.5f);
 		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, delegate(Chore o)
 		{
-			this.CompleteChore();
+			this.CompleteActivateChore();
 		}, null, null, true, null, false, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
 	}
 
-	public void CancelChore(object param = null)
+	public void CancelActivateChore(object param = null)
 	{
 		if (this.chore == null)
 		{
@@ -125,7 +145,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 		this.chore = null;
 	}
 
-	private void CompleteChore()
+	private void CompleteActivateChore()
 	{
 		this.opener = this.chore.driver.gameObject;
 		base.smi.GoTo(base.smi.sm.open);
@@ -144,10 +164,7 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 
 	public string overrideAnim;
 
-	public Vector2I dropOffset = Vector2I.zero;
-
-	[Serialize]
-	private string[] contents;
+	public CellOffset dropOffset = CellOffset.none;
 
 	private GameObject opener;
 
@@ -159,6 +176,8 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 			: base(master)
 		{
 		}
+
+		public Chore defrostAnimChore;
 	}
 
 	public class States : GameStateMachine<CryoTank.States, CryoTank.StatesInstance, CryoTank>
@@ -178,9 +197,28 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 					}
 				}
 			});
-			this.open.PlayAnim("working").OnAnimQueueComplete(this.off).Exit(delegate(CryoTank.StatesInstance smi)
+			this.open.GoTo(this.defrost).Exit(delegate(CryoTank.StatesInstance smi)
 			{
 				smi.master.DropContents();
+			});
+			this.defrost.PlayAnim("defrost").OnAnimQueueComplete(this.defrostExit).Update(delegate(CryoTank.StatesInstance smi, float dt)
+			{
+				smi.sm.defrostedDuplicant.Get(smi).GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.BuildingUse);
+			}, UpdateRate.SIM_200ms, false)
+				.Exit(delegate(CryoTank.StatesInstance smi)
+				{
+					smi.master.ShowEventPopup();
+				});
+			this.defrostExit.PlayAnim("defrost_exit").Update(delegate(CryoTank.StatesInstance smi, float dt)
+			{
+				if (smi.defrostAnimChore == null || smi.defrostAnimChore.isComplete)
+				{
+					smi.GoTo(this.off);
+				}
+			}, UpdateRate.SIM_200ms, false).Exit(delegate(CryoTank.StatesInstance smi)
+			{
+				smi.sm.defrostedDuplicant.Get(smi).GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Move);
+				smi.master.Cheer();
 			});
 			this.off.PlayAnim("off").Enter(delegate(CryoTank.StatesInstance smi)
 			{
@@ -195,9 +233,15 @@ public class CryoTank : StateMachineComponent<CryoTank.StatesInstance>, ISidescr
 			});
 		}
 
+		public StateMachine<CryoTank.States, CryoTank.StatesInstance, CryoTank, object>.TargetParameter defrostedDuplicant;
+
 		public GameStateMachine<CryoTank.States, CryoTank.StatesInstance, CryoTank, object>.State closed;
 
 		public GameStateMachine<CryoTank.States, CryoTank.StatesInstance, CryoTank, object>.State open;
+
+		public GameStateMachine<CryoTank.States, CryoTank.StatesInstance, CryoTank, object>.State defrost;
+
+		public GameStateMachine<CryoTank.States, CryoTank.StatesInstance, CryoTank, object>.State defrostExit;
 
 		public GameStateMachine<CryoTank.States, CryoTank.StatesInstance, CryoTank, object>.State off;
 	}

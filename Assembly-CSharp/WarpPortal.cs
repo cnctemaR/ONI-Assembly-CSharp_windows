@@ -237,8 +237,14 @@ public class WarpPortal : Workable
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.idle;
-			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
+			default_state = this.root;
+			this.root.Enter(delegate(WarpPortal.WarpPortalSM.Instance smi)
+			{
+				if (smi.master.rechargeProgress != 0f)
+				{
+					smi.GoTo(this.recharging);
+				}
+			}).DefaultState(this.idle);
 			this.idle.PlayAnim("idle", KAnim.PlayMode.Loop).Enter(delegate(WarpPortal.WarpPortalSM.Instance smi)
 			{
 				smi.master.IsConsumed = false;
@@ -327,7 +333,7 @@ public class WarpPortal : Workable
 			{
 				if (base.master.worker != null)
 				{
-					return new Notification(MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.NAME.Replace("{dupe}", base.master.worker.name), NotificationType.Neutral, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.TOOLTIP.Replace("{dupe}", base.master.worker.name), null, false, 0f, null, null, base.master.worker.transform, true);
+					return new Notification(MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.NAME.Replace("{dupe}", base.master.worker.name), NotificationType.Neutral, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.WARP_PORTAL_DUPE_READY.TOOLTIP.Replace("{dupe}", base.master.worker.name), null, false, 0f, null, null, base.master.transform, true);
 				}
 				return null;
 			}

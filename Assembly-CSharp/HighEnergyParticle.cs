@@ -144,7 +144,7 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 		int num3 = 0;
 		Grid.CellToXY(num, out num2, out num3);
 		ListPool<ScenePartitionerEntry, HighEnergyParticle>.PooledList pooledList = ListPool<ScenePartitionerEntry, HighEnergyParticle>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(num2 - 1, num3 - 1, 2, 2, GameScenePartitioner.Instance.collisionLayer, pooledList);
+		GameScenePartitioner.Instance.GatherEntries(num2 - 1, num3 - 1, 3, 3, GameScenePartitioner.Instance.collisionLayer, pooledList);
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;

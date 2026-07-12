@@ -398,14 +398,14 @@ public class Worker : KMonoBehaviour
 
 	private void DetachAnimOverrides()
 	{
+		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+		if (this.kanimSynchronizer != null)
+		{
+			this.kanimSynchronizer.Remove(component);
+			this.kanimSynchronizer = null;
+		}
 		if (this.animInfo.overrideAnims != null)
 		{
-			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-			if (this.kanimSynchronizer != null)
-			{
-				this.kanimSynchronizer.Remove(component);
-				this.kanimSynchronizer = null;
-			}
 			for (int i = 0; i < this.animInfo.overrideAnims.Length; i++)
 			{
 				component.RemoveAnimOverrides(this.animInfo.overrideAnims[i]);

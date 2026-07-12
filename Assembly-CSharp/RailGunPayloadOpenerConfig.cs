@@ -50,9 +50,10 @@ public class RailGunPayloadOpenerConfig : IBuildingConfig
 		railGunPayloadOpener.gasPortInfo = this.gasOutputPort;
 		railGunPayloadOpener.solidPortInfo = this.solidOutputPort;
 		railGunPayloadOpener.payloadStorage = go.AddComponent<Storage>();
-		railGunPayloadOpener.payloadStorage.showInUI = false;
+		railGunPayloadOpener.payloadStorage.showInUI = true;
 		railGunPayloadOpener.payloadStorage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		railGunPayloadOpener.payloadStorage.storageFilters = new List<Tag> { GameTags.RailGunPayloadEmptyable };
+		railGunPayloadOpener.payloadStorage.capacityKg = 10f;
 		railGunPayloadOpener.resourceStorage = go.AddComponent<Storage>();
 		railGunPayloadOpener.resourceStorage.showInUI = true;
 		railGunPayloadOpener.resourceStorage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
@@ -63,7 +64,7 @@ public class RailGunPayloadOpenerConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(railGunPayloadOpener.payloadStorage);
 		manualDeliveryKG.requestedItemTag = GameTags.RailGunPayloadEmptyable;
-		manualDeliveryKG.capacity = 1f;
+		manualDeliveryKG.capacity = 10f;
 		manualDeliveryKG.refillMass = 1f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;

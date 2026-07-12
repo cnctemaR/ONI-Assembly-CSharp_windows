@@ -44,6 +44,7 @@ public class TemporalTearOpenerConfig : IBuildingConfig
 		highEnergyParticleStorage.autoStore = true;
 		highEnergyParticleStorage.capacity = 1000f;
 		highEnergyParticleStorage.PORT_ID = "HEP_STORAGE";
+		highEnergyParticleStorage.showCapacityStatusItem = true;
 		TemporalTearOpener.Def def = go.AddOrGetDef<TemporalTearOpener.Def>();
 		def.numParticlesToOpen = 10000f;
 		def.consumeRate = 5f;

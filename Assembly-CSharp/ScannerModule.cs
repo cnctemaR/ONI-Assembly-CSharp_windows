@@ -45,7 +45,7 @@ public class ScannerModule : GameStateMachine<ScannerModule, ScannerModule.Insta
 				ClusterFogOfWarManager.Instance smi = SaveGame.Instance.GetSMI<ClusterFogOfWarManager.Instance>();
 				AxialI location = component.Location;
 				smi.RevealLocation(location, base.def.scanRadius);
-				foreach (ClusterGridEntity clusterGridEntity in ClusterGrid.Instance.GetNotVisibleEntitiesOfLayerAtAdjacentCell(location, EntityLayer.Asteroid))
+				foreach (ClusterGridEntity clusterGridEntity in ClusterGrid.Instance.GetNotVisibleEntitiesAtAdjacentCell(location))
 				{
 					smi.RevealLocation(clusterGridEntity.Location, 0);
 				}
@@ -59,15 +59,25 @@ public class ScannerModule : GameStateMachine<ScannerModule, ScannerModule.Insta
 			{
 				bool flag = false;
 				ClusterDestinationSelector clusterDestinationSelector = craftInterface.GetClusterDestinationSelector();
+				bool canNavigateFogOfWar = clusterDestinationSelector.canNavigateFogOfWar;
 				foreach (Ref<RocketModuleCluster> @ref in craftInterface.ClusterModules)
 				{
-					if (@ref.Get() != null && @ref.Get().GetDef<ScannerModule.Def>() != null)
+					RocketModuleCluster rocketModuleCluster = @ref.Get();
+					if (((rocketModuleCluster != null) ? rocketModuleCluster.GetSMI<ScannerModule.Instance>() : null) != null)
 					{
 						flag = true;
 						break;
 					}
 				}
 				clusterDestinationSelector.canNavigateFogOfWar = flag;
+				if (canNavigateFogOfWar && !flag)
+				{
+					ClusterTraveler component = craftInterface.GetComponent<ClusterTraveler>();
+					if (component != null)
+					{
+						component.RevalidatePath();
+					}
+				}
 				craftInterface.GetComponent<Clustercraft>().Trigger(-688990705, null);
 			}
 		}

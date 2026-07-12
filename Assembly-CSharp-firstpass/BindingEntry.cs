@@ -24,6 +24,16 @@ public struct BindingEntry : IEquatable<BindingEntry>
 
 	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true, bool ignore_root_conflicts = false)
 	{
+		this = new BindingEntry(group, button, key_code, modifier, action, rebindable, ignore_root_conflicts, null);
+	}
+
+	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, string[] dlcIds)
+	{
+		this = new BindingEntry(group, button, key_code, modifier, action, true, false, dlcIds);
+	}
+
+	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable, bool ignore_root_conflicts, string[] dlcIds)
+	{
 		this.mGroup = group;
 		this.mButton = button;
 		this.mKeyCode = key_code;
@@ -31,6 +41,11 @@ public struct BindingEntry : IEquatable<BindingEntry>
 		this.mModifier = modifier;
 		this.mRebindable = rebindable;
 		this.mIgnoreRootConflics = ignore_root_conflicts;
+		this.dlcIds = dlcIds;
+		if (this.dlcIds == null)
+		{
+			this.dlcIds = DlcManager.AVAILABLE_ALL_VERSIONS;
+		}
 	}
 
 	public bool Equals(BindingEntry other)
@@ -76,6 +91,9 @@ public struct BindingEntry : IEquatable<BindingEntry>
 
 	[JsonIgnore]
 	public bool mIgnoreRootConflics;
+
+	[JsonIgnore]
+	public string[] dlcIds;
 
 	[JsonConverter(typeof(StringEnumConverter))]
 	public GamepadButton mButton;

@@ -25,6 +25,10 @@ public class Notifier : KMonoBehaviour
 		{
 			return;
 		}
+		if (DebugHandler.NotificationsDisabled)
+		{
+			return;
+		}
 		DebugUtil.DevAssert(notification != null, "Trying to add null notification. It's safe to continue playing, the notification won't be displayed.", null);
 		if (notification == null)
 		{

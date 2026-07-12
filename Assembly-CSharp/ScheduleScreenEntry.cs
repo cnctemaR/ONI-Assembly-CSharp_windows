@@ -107,6 +107,17 @@ public class ScheduleScreenEntry : KMonoBehaviour
 		return false;
 	}
 
+	public void RefreshWidgetWorldData()
+	{
+		foreach (ScheduleMinionWidget scheduleMinionWidget in this.minionWidgets)
+		{
+			if (!scheduleMinionWidget.IsNullOrDestroyed())
+			{
+				scheduleMinionWidget.RefreshWidgetWorldData();
+			}
+		}
+	}
+
 	private void OnNameChanged(string newName)
 	{
 		this.schedule.name = newName;
@@ -171,6 +182,10 @@ public class ScheduleScreenEntry : KMonoBehaviour
 				int num = dictionary[id];
 				dictionary[id] = num + 1;
 			}
+		}
+		if (this.noteEntryRight == null)
+		{
+			return;
 		}
 		ToolTip component = this.noteEntryRight.GetComponent<ToolTip>();
 		component.ClearMultiStringTooltip();

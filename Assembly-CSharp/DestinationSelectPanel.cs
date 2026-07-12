@@ -161,7 +161,9 @@ public class DestinationSelectPanel : KMonoBehaviour
 		for (int i = 0; i < this.clusterKeys.Count; i++)
 		{
 			float num = this.offset + (float)i * this.asteroidXSeparation;
-			this.GetAsteroid(this.clusterKeys[i], (i == this.selectedIndex) ? this.asteroidFocusScale : 1f).transform.SetLocalPosition(new Vector3(num, (i == this.selectedIndex) ? (5f + 10f * Mathf.Sin(Time.realtimeSinceStartup * 1f)) : 0f, 0f));
+			string text = this.clusterKeys[i];
+			float iconScale = this.asteroidData[text].GetStartWorld.iconScale;
+			this.GetAsteroid(text, (i == this.selectedIndex) ? (this.asteroidFocusScale * iconScale) : iconScale).transform.SetLocalPosition(new Vector3(num, (i == this.selectedIndex) ? (5f + 10f * Mathf.Sin(Time.realtimeSinceStartup * 1f)) : 0f, 0f));
 		}
 		this.EndAsteroidDrawing();
 	}

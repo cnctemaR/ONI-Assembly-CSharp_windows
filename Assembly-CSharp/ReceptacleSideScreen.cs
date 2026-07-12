@@ -437,6 +437,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		this.selectedEntityToggle = toggle;
 		this.entityPreviousSelectionMap[this.targetReceptacle] = this.entityToggles.IndexOf(toggle);
 		this.selectedDepositObjectTag = this.depositObjectMap[toggle].tag;
+		MutantPlant component = this.depositObjectMap[toggle].asset.GetComponent<MutantPlant>();
+		this.selectedDepositObjectAdditionalTag = (component ? component.SubSpeciesID : Tag.Invalid);
 		this.UpdateAvailableAmounts(null);
 		this.UpdateState(null);
 	}

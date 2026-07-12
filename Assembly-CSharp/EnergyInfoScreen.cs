@@ -76,6 +76,11 @@ public class EnergyInfoScreen : TargetScreen
 		{
 			num = circuitManager.GetCircuitID(component);
 		}
+		else if (this.selectedTarget.GetComponent<Wire>() != null)
+		{
+			int num2 = Grid.PosToCell(this.selectedTarget.transform.GetPosition());
+			num = Game.Instance.circuitManager.GetCircuitID(num2);
+		}
 		if (num != 65535)
 		{
 			this.overviewPanel.SetActive(true);
@@ -140,13 +145,13 @@ public class EnergyInfoScreen : TargetScreen
 							gameObject.GetComponent<LocText>().fontStyle = ((generator.gameObject == this.selectedTarget) ? FontStyles.Bold : FontStyles.Normal);
 						}
 					}
-					goto IL_050C;
+					goto IL_054A;
 				}
 			}
 			gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, "nogenerators");
 			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOGENERATORS;
 			gameObject.SetActive(true);
-			IL_050C:
+			IL_054A:
 			if (consumersOnCircuit.Count > 0 || transformersOnCircuit.Count > 0)
 			{
 				foreach (IEnergyConsumer energyConsumer in consumersOnCircuit)
@@ -160,13 +165,13 @@ public class EnergyInfoScreen : TargetScreen
 						IEnergyConsumer energyConsumer2 = enumerator4.Current;
 						this.AddConsumerInfo(energyConsumer2, gameObject);
 					}
-					goto IL_05C1;
+					goto IL_05FF;
 				}
 			}
 			gameObject = this.AddOrGetLabel(this.consumersLabels, this.consumersPanel, "noconsumers");
 			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOCONSUMERS;
 			gameObject.SetActive(true);
-			IL_05C1:
+			IL_05FF:
 			if (batteriesOnCircuit.Count > 0)
 			{
 				using (List<Battery>.Enumerator enumerator5 = batteriesOnCircuit.GetEnumerator())

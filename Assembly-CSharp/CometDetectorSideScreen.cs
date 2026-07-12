@@ -20,12 +20,12 @@ public class CometDetectorSideScreen : SideScreenContent
 		if (this.clusterDetector != null)
 		{
 			int num = 0;
-			this.SetClusterRow(num++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.COMETS, Assets.GetSprite("asteroid"), ClusterCometDetector.Instance.ClusterCometDetectorState.MeteorShower, null);
-			this.SetClusterRow(num++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.DUPEMADE, Assets.GetSprite("asteroid"), ClusterCometDetector.Instance.ClusterCometDetectorState.BallisticObject, null);
+			this.SetClusterRow(num++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.COMETS, Assets.GetSprite("meteors"), ClusterCometDetector.Instance.ClusterCometDetectorState.MeteorShower, null);
+			this.SetClusterRow(num++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.DUPEMADE, Assets.GetSprite("dupe_made_ballistics"), ClusterCometDetector.Instance.ClusterCometDetectorState.BallisticObject, null);
 			foreach (object obj in Components.Clustercrafts)
 			{
 				Clustercraft clustercraft = (Clustercraft)obj;
-				this.SetClusterRow(num++, clustercraft.Name, Assets.GetSprite("icon_category_rocketry"), ClusterCometDetector.Instance.ClusterCometDetectorState.Rocket, clustercraft);
+				this.SetClusterRow(num++, clustercraft.Name, Assets.GetSprite("rocket_landing"), ClusterCometDetector.Instance.ClusterCometDetectorState.Rocket, clustercraft);
 			}
 			for (int i = num; i < this.rowContainer.childCount; i++)
 			{
@@ -34,10 +34,10 @@ public class CometDetectorSideScreen : SideScreenContent
 			return;
 		}
 		int num2 = 0;
-		this.SetRow(num2++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.COMETS, Assets.GetSprite("asteroid"), null);
+		this.SetRow(num2++, UI.UISIDESCREENS.COMETDETECTORSIDESCREEN.COMETS, Assets.GetSprite("meteors"), null);
 		foreach (Spacecraft spacecraft in SpacecraftManager.instance.GetSpacecraft())
 		{
-			this.SetRow(num2++, spacecraft.GetRocketName(), Assets.GetSprite("icon_category_rocketry"), spacecraft.launchConditions);
+			this.SetRow(num2++, spacecraft.GetRocketName(), Assets.GetSprite("rocket_landing"), spacecraft.launchConditions);
 		}
 		for (int j = num2; j < this.rowContainer.childCount; j++)
 		{

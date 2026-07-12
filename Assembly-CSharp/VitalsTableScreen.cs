@@ -328,31 +328,61 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = minion as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				Sicknesses sicknesses = minionIdentity.GetComponent<MinionModifiers>().sicknesses;
-				if (sicknesses.IsInfected())
+				List<KeyValuePair<string, float>> list = new List<KeyValuePair<string, float>>();
+				foreach (SicknessInstance sicknessInstance in minionIdentity.GetComponent<MinionModifiers>().sicknesses)
 				{
-					string text = "";
-					if (sicknesses.Count > 1)
+					list.Add(new KeyValuePair<string, float>(sicknessInstance.modifier.Name, sicknessInstance.GetInfectedTimeRemaining()));
+				}
+				if (DlcManager.FeatureRadiationEnabled())
+				{
+					RadiationMonitor.Instance smi = minionIdentity.GetSMI<RadiationMonitor.Instance>();
+					if (smi != null && smi.sm.isSick.Get(smi))
+					{
+						Effects component = minionIdentity.GetComponent<Effects>();
+						string text;
+						if (component.HasEffect(RadiationMonitor.minorSicknessEffect))
+						{
+							text = Db.Get().effects.Get(RadiationMonitor.minorSicknessEffect).Name;
+						}
+						else if (component.HasEffect(RadiationMonitor.majorSicknessEffect))
+						{
+							text = Db.Get().effects.Get(RadiationMonitor.majorSicknessEffect).Name;
+						}
+						else if (component.HasEffect(RadiationMonitor.extremeSicknessEffect))
+						{
+							text = Db.Get().effects.Get(RadiationMonitor.extremeSicknessEffect).Name;
+						}
+						else
+						{
+							text = DUPLICANTS.MODIFIERS.RADIATIONEXPOSUREDEADLY.NAME;
+						}
+						list.Add(new KeyValuePair<string, float>(text, smi.SicknessSecondsRemaining()));
+					}
+				}
+				if (list.Count > 0)
+				{
+					string text2 = "";
+					if (list.Count > 1)
 					{
 						float num = 0f;
-						foreach (SicknessInstance sicknessInstance in sicknesses)
+						foreach (KeyValuePair<string, float> keyValuePair in list)
 						{
-							num = Mathf.Min(new float[] { sicknessInstance.GetInfectedTimeRemaining() });
+							num = Mathf.Min(new float[] { keyValuePair.Value });
 						}
-						text += string.Format(UI.VITALSSCREEN.MULTIPLE_SICKNESSES, GameUtil.GetFormattedCycles(num, "F1", false));
+						text2 += string.Format(UI.VITALSSCREEN.MULTIPLE_SICKNESSES, GameUtil.GetFormattedCycles(num, "F1", false));
 					}
 					else
 					{
-						foreach (SicknessInstance sicknessInstance2 in sicknesses)
+						foreach (KeyValuePair<string, float> keyValuePair2 in list)
 						{
-							if (!string.IsNullOrEmpty(text))
+							if (!string.IsNullOrEmpty(text2))
 							{
-								text += "\n";
+								text2 += "\n";
 							}
-							text += string.Format(UI.VITALSSCREEN.SICKNESS_REMAINING, sicknessInstance2.modifier.Name, GameUtil.GetFormattedCycles(sicknessInstance2.GetInfectedTimeRemaining(), "F1", false));
+							text2 += string.Format(UI.VITALSSCREEN.SICKNESS_REMAINING, keyValuePair2.Key, GameUtil.GetFormattedCycles(keyValuePair2.Value, "F1", false));
 						}
 					}
-					return text;
+					return text2;
 				}
 				return UI.VITALSSCREEN.NO_SICKNESSES;
 			}
@@ -383,24 +413,34 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = minion as MinionIdentity;
 			if (minionIdentity != null)
 			{
+				bool flag = false;
+				new List<KeyValuePair<string, float>>();
+				if (DlcManager.FeatureRadiationEnabled())
+				{
+					RadiationMonitor.Instance smi = minionIdentity.GetSMI<RadiationMonitor.Instance>();
+					if (smi != null && smi.sm.isSick.Get(smi))
+					{
+						tooltip.AddMultiStringTooltip(smi.GetEffectStatusTooltip(), null);
+						flag = true;
+					}
+				}
 				Sicknesses sicknesses = minionIdentity.GetComponent<MinionModifiers>().sicknesses;
 				if (sicknesses.IsInfected())
 				{
-					using (IEnumerator<SicknessInstance> enumerator = sicknesses.GetEnumerator())
+					flag = true;
+					foreach (SicknessInstance sicknessInstance in sicknesses)
 					{
-						while (enumerator.MoveNext())
-						{
-							SicknessInstance sicknessInstance = enumerator.Current;
-							tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
-							tooltip.AddMultiStringTooltip(sicknessInstance.modifier.Name, null);
-							StatusItem statusItem = sicknessInstance.GetStatusItem();
-							tooltip.AddMultiStringTooltip(statusItem.GetTooltip(sicknessInstance.ExposureInfo), null);
-						}
-						break;
+						tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
+						tooltip.AddMultiStringTooltip(sicknessInstance.modifier.Name, null);
+						StatusItem statusItem = sicknessInstance.GetStatusItem();
+						tooltip.AddMultiStringTooltip(statusItem.GetTooltip(sicknessInstance.ExposureInfo), null);
 					}
 				}
-				tooltip.AddMultiStringTooltip(UI.VITALSSCREEN.NO_SICKNESSES, null);
-				return;
+				if (!flag)
+				{
+					tooltip.AddMultiStringTooltip(UI.VITALSSCREEN.NO_SICKNESSES, null);
+					return;
+				}
 			}
 			break;
 		}

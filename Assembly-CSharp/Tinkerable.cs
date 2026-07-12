@@ -80,6 +80,12 @@ public class Tinkerable : Workable
 		base.Subscribe<Tinkerable>(-592767678, Tinkerable.OnOperationalChangedDelegate);
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		Prioritizable.AddRef(base.gameObject);
+	}
+
 	protected override void OnCleanUp()
 	{
 		this.UpdateMaterialReservation(false);
@@ -87,6 +93,7 @@ public class Tinkerable : Workable
 		{
 			this.updateHandle.ClearScheduler();
 		}
+		Prioritizable.RemoveRef(base.gameObject);
 		base.OnCleanUp();
 	}
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class HiveEatingStates : GameStateMachine<HiveEatingStates, HiveEatingStates.Instance, IStateMachineTarget, HiveEatingStates.Def>
@@ -8,13 +9,14 @@ public class HiveEatingStates : GameStateMachine<HiveEatingStates, HiveEatingSta
 	{
 		default_state = this.eating;
 		base.serializable = StateMachine.SerializeType.ParamsOnly;
-		this.eating.DefaultState(this.eating.pre).Enter(delegate(HiveEatingStates.Instance smi)
+		this.eating.ToggleStatusItem(CREATURES.STATUSITEMS.HIVE_DIGESTING.NAME, CREATURES.STATUSITEMS.HIVE_DIGESTING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, Db.Get().StatusItemCategories.Main).DefaultState(this.eating.pre).Enter(delegate(HiveEatingStates.Instance smi)
 		{
 			smi.TurnOn();
-		}).Exit(delegate(HiveEatingStates.Instance smi)
-		{
-			smi.TurnOff();
-		});
+		})
+			.Exit(delegate(HiveEatingStates.Instance smi)
+			{
+				smi.TurnOff();
+			});
 		this.eating.pre.PlayAnim("eating_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.eating.loop);
 		this.eating.loop.PlayAnim("eating_loop", KAnim.PlayMode.Loop).Update(delegate(HiveEatingStates.Instance smi, float dt)
 		{

@@ -455,7 +455,7 @@ namespace STRINGS
 
 				public static LocString NEVER = "Click to mute this diagnostic on the sidebar -  Current State: <b>Always Visible</b>";
 
-				public static LocString TUTORIAL_DISABLED = "Click to enable this diagnostic -  Current State: <b>Tutorial Disabled</b>";
+				public static LocString TUTORIAL_DISABLED = "Click to enable this diagnostic -  Current State: <b>Temporarily disabled</b>";
 			}
 		}
 
@@ -711,7 +711,7 @@ namespace STRINGS
 
 				public static LocString NORMAL = "    • Crops are being grown in sufficient quantity";
 
-				public static LocString NONE = "    • Colony has no farm plots";
+				public static LocString NONE = "    • No farm plots";
 
 				public static LocString NONE_PLANTED = "    • No crops planted";
 
@@ -2094,6 +2094,20 @@ namespace STRINGS
 					public static LocString TOOLTIP = "Adjust additive radiation";
 				}
 
+				public class STRESS_ADDITIVE
+				{
+					public static LocString NAME = "Reduce Stress";
+
+					public static LocString TOOLTIP = "Adjust stress reduction";
+				}
+
+				public class MORALE
+				{
+					public static LocString NAME = "Adjust Morale";
+
+					public static LocString TOOLTIP = "Bonus Morale adjustment";
+				}
+
 				public class MASS
 				{
 					public static LocString NAME = "Mass";
@@ -2171,6 +2185,13 @@ namespace STRINGS
 					public static LocString TOOLTIP = "Spawn critters, food, equipment, and other entities {Hotkey}";
 				}
 
+				public class STRESS
+				{
+					public static LocString NAME = "Stress";
+
+					public static LocString TOOLTIP = "Manage Duplicants' stress levels {Hotkey}";
+				}
+
 				public class CLEAR_FLOOR
 				{
 					public static LocString NAME = "Clear Debris";
@@ -2242,6 +2263,8 @@ namespace STRINGS
 					public static LocString INDUSTRIAL_PRODUCTS = "Industrial";
 
 					public static LocString COMETS = "Comets";
+
+					public static LocString ARTIFACTS = "Artifacts";
 				}
 			}
 
@@ -2715,6 +2738,59 @@ namespace STRINGS
 						}
 					}
 
+					public class RADIATION
+					{
+						public static LocString NAME = "Radiation";
+
+						public static LocString TOOLTIP = "Affects how much radiation a duplicant can be exposed to before they become sick, and how quickly a duplicant can recover from radiation exposure";
+
+						public static class LEVELS
+						{
+							public static class HARDEST
+							{
+								public static LocString NAME = "Hardest";
+
+								public static LocString TOOLTIP = "Duplicants get sick much sooner and recover from radiation exposure much slower";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Super Radiation (Highest Difficulty)";
+							}
+
+							public static class HARDER
+							{
+								public static LocString NAME = "Harder";
+
+								public static LocString TOOLTIP = "Duplicants get sick sooner and recover from radiation exposure slower";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Radiation Vulnerable (Difficulty Up)";
+							}
+
+							public static class DEFAULT
+							{
+								public static LocString NAME = "Default";
+
+								public static LocString TOOLTIP = "Default radiation settings";
+							}
+
+							public static class EASIER
+							{
+								public static LocString NAME = "Easier";
+
+								public static LocString TOOLTIP = "Duplicants can be exposed to much more radiation before they get sick and recover from radiation much exposure faster";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Radiation Shielded (Difficulty Down)";
+							}
+
+							public static class EASIEST
+							{
+								public static LocString NAME = "Easiest";
+
+								public static LocString TOOLTIP = "Duplicants are essentially invulnerable to radiation sickness, and recover from radiation exposure very quickly";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Radiation Protection (Lowest Difficulty)";
+							}
+						}
+					}
+
 					public class STRESS
 					{
 						public static LocString NAME = "Stress";
@@ -2922,6 +2998,8 @@ namespace STRINGS
 				public static LocString SINGLE_TRAIT = "1 Trait";
 
 				public static LocString TRAIT_COUNT = "{0} Traits";
+
+				public static LocString SELECTED_CLUSTER_TRAITS_HEADER = "Target Details";
 			}
 
 			public class MODESELECTSCREEN
@@ -2957,17 +3035,19 @@ namespace STRINGS
 			public class PATCHNOTESSCREEN
 			{
 				public static LocString OK_BUTTON = "OK";
+
+				public static LocString FULLPATCHNOTES_TOOLTIP = "View the full patch notes online";
 			}
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "BUFF AND SHINE";
+				public static LocString IMAGE_HEADER = "BLAST OFF!";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>BUFF AND SHINE UPDATE!</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>Significant changes to radiation and radbolt tuning.</indent>\n•<indent=20px>Added the new Radbolt Chamber building for storing radbolts.</indent>\n•<indent=20px>Restored the Space Scanner and Enclosed Telescope to Spaced Out!</indent>\n•<indent=20px>Bug fixes and polish work.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>BLAST OFF!</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>The Piloting Skill now affects Rocket speed.</indent>\n•<indent=20px>Solar Panel Modules now partially block light while grounded.</indent>\n•<indent=20px>Performance optimizations for farms, Sweepys and the dig tool.</indent>\n•<indent=20px>Lots of bug fixes and polish work.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -4237,7 +4317,7 @@ namespace STRINGS
 
 				public class ORBITAL_RESEARCH
 				{
-					public static LocString DESCRIPTION = BUILDINGS.PREFABS.ORBITALRESEARCHCENTER.NAME + " Usage";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.DLC1COSMICRESEARCHCENTER.NAME + " Usage";
 				}
 
 				public class CAN_STUDY_WORLD_OBJECTS
@@ -5345,7 +5425,7 @@ namespace STRINGS
 
 				public static LocString ARTIFACTS_AVAILABLE = "Available";
 
-				public static LocString ARTIFACTS_DEPLETED = "Collected";
+				public static LocString ARTIFACTS_DEPLETED = "Collected\nRecharge: {0}";
 			}
 
 			public class ROCKETS
@@ -5354,7 +5434,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Rocket Speed: ";
 
-					public static LocString TOOLTIP = "<b>Rocket Speed</b> is calculated by dividing <b>Engine Power</b> by <b>Burden</b>.\nRockets operating on autopilot will have a reduced speed.";
+					public static LocString TOOLTIP = "<b>Rocket Speed</b> is calculated by dividing <b>Engine Power</b> by <b>Burden</b>.\nRockets operating on autopilot will have a reduced speed.\nRocket speed can be further increased by the skill of the Duplicant flying the rocket.";
 				}
 
 				public class FUEL_REMAINING
@@ -6338,6 +6418,8 @@ namespace STRINGS
 				public static LocString DISEASE = UI.FormatAsLink("Disease", "DISEASE");
 
 				public static LocString SICKNESS = UI.FormatAsLink("Sickness", "SICKNESS");
+
+				public static LocString MEDIA = UI.FormatAsLink("Media", "MEDIA");
 			}
 		}
 
@@ -7584,7 +7666,7 @@ namespace STRINGS
 
 			public static LocString MULTIPLE_SICKNESSES = "Multiple diseases ({0})";
 
-			public static LocString SICKNESS_REMAINING = "{0} ({1})";
+			public static LocString SICKNESS_REMAINING = "{0}\n({1})";
 
 			public static LocString STRESS = "Stress";
 
@@ -8019,6 +8101,14 @@ namespace STRINGS
 				public static LocString BUTTON_OPEN = "Enter Tear";
 
 				public static LocString BUTTON_CLOSED = "Tear Closed";
+
+				public static LocString CONFIRM_POPUP_MESSAGE = "Are you sure you want to fire this?";
+
+				public static LocString CONFIRM_POPUP_CONFIRM = "Yes, I'm ready for a meteor shower.";
+
+				public static LocString CONFIRM_POPUP_CANCEL = "No, I need more time to prepare.";
+
+				public static LocString CONFIRM_POPUP_TITLE = "Temporal Tear Opener";
 			}
 
 			public class RAILGUNSIDESCREEN
@@ -10880,6 +10970,13 @@ namespace STRINGS
 					public static LocString HOVERACTION = "PAINT RADS";
 				}
 
+				public class STRESSTOOL
+				{
+					public static LocString NAME = "Happy Tool";
+
+					public static LocString HOVERACTION = "PAINT CALM";
+				}
+
 				public class SPAWNER
 				{
 					public static LocString NAME = "Spawner";
@@ -11561,6 +11658,13 @@ namespace STRINGS
 							public static LocString GROW_TOOLTIP = "Atmospheric pressure is causing germs to multiply";
 
 							public static LocString DIE_TOOLTIP = "Atmospheric pressure is causing germs to die off";
+						}
+
+						public class RADIATION
+						{
+							public static LocString TITLE = "    • Exposed to {0} Rads: {1}";
+
+							public static LocString DIE_TOOLTIP = "Radiation exposure is causing germs to die off";
 						}
 
 						public class DYING_OFF

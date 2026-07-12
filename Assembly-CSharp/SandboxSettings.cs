@@ -182,11 +182,16 @@ public class SandboxSettings
 			KPlayerPrefs.SetFloat("SandbosTools.TemperatureAdditive", val);
 			this.OnChangeAdditiveTemperature();
 		}, 5f);
-		this.AddFloatSetting("SandbosTools.RadiationAdditive", delegate(float val)
+		this.AddFloatSetting("SandbosTools.StressAdditive", delegate(float val)
 		{
-			KPlayerPrefs.SetFloat("SandbosTools.RadiationAdditive", val);
-			this.OnChangeAdditiveRadiation();
+			KPlayerPrefs.SetFloat("SandbosTools.StressAdditive", val);
+			this.OnChangeAdditiveStress();
 		}, 50f);
+		this.AddIntSetting("SandbosTools.MoraleAdjustment", delegate(int val)
+		{
+			KPlayerPrefs.SetInt("SandbosTools.MoraleAdjustment", val);
+			this.OnChangeMoraleAdjustment();
+		}, 50);
 	}
 
 	public void RestorePrefs()
@@ -235,7 +240,9 @@ public class SandboxSettings
 
 	public global::System.Action OnChangeAdditiveTemperature;
 
-	public global::System.Action OnChangeAdditiveRadiation;
+	public global::System.Action OnChangeAdditiveStress;
+
+	public global::System.Action OnChangeMoraleAdjustment;
 
 	public const string KEY_SELECTED_ENTITY = "SandboxTools.SelectedEntity";
 
@@ -257,7 +264,9 @@ public class SandboxSettings
 
 	public const string KEY_TEMPERATURE_ADDITIVE = "SandbosTools.TemperatureAdditive";
 
-	public const string KEY_RADIATION_ADDITIVE = "SandbosTools.RadiationAdditive";
+	public const string KEY_STRESS_ADDITIVE = "SandbosTools.StressAdditive";
+
+	public const string KEY_MORALE_ADJUSTMENT = "SandbosTools.MoraleAdjustment";
 
 	public class Setting<T>
 	{

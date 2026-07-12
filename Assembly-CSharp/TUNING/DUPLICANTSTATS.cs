@@ -979,8 +979,19 @@ namespace TUNING
 			public const float HIT_POINTS = 100f;
 
 			public const float RADIATION_RESISTANCE = 0f;
+		}
 
-			public const float RADIATION_RECOVERY = -0.16666667f;
+		public class RADIATION_DIFFICULTY_MODIFIERS
+		{
+			public static float HARDEST = 0.33f;
+
+			public static float HARDER = 0.66f;
+
+			public static float DEFAULT = 1f;
+
+			public static float EASIER = 2f;
+
+			public static float EASIEST = 100f;
 		}
 
 		public class RADIATION_EXPOSURE_LEVELS

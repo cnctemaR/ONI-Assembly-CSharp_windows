@@ -49,7 +49,7 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 				}
 			}
 		}
-		if (colonyDiagnostic.LatestResult.opinion == ColonyDiagnostic.DiagnosticResult.Opinion.Normal)
+		if (colonyDiagnostic == null || colonyDiagnostic.LatestResult.opinion == ColonyDiagnostic.DiagnosticResult.Opinion.Normal)
 		{
 			return "";
 		}
@@ -233,13 +233,6 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 			this.TryAddDiagnosticToWorldCollection(ref list, new FarmDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new EntombedDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new RocketsInOrbitDiagnostic(worldID));
-			for (int i = 0; i < Db.Get().ChoreGroups.Count; i++)
-			{
-				this.TryAddDiagnosticToWorldCollection(ref list, new ChoreGroupDiagnostic(worldID, Db.Get().ChoreGroups[i]));
-				this.TryAddDiagnosticToWorldCollection(ref list, new WorkTimeDiagnostic(worldID, Db.Get().ChoreGroups[i]));
-			}
-			this.TryAddDiagnosticToWorldCollection(ref list, new AllChoresDiagnostic(worldID));
-			this.TryAddDiagnosticToWorldCollection(ref list, new AllWorkTimeDiagnostic(worldID));
 		}
 		this.worldDiagnostics.Add(worldID, list);
 		foreach (ColonyDiagnostic colonyDiagnostic in list)

@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class DebugHandler : IInputHandler
 {
+	public static bool NotificationsDisabled { get; private set; }
+
 	public static bool enabled { get; private set; }
 
 	public DebugHandler()
@@ -80,6 +82,11 @@ public class DebugHandler : IInputHandler
 	public static void SetDebugEnabled(bool debugEnabled)
 	{
 		DebugHandler.enabled = debugEnabled;
+	}
+
+	public static void ToggleDisableNotifications()
+	{
+		DebugHandler.NotificationsDisabled = !DebugHandler.NotificationsDisabled;
 	}
 
 	public void OnKeyDown(KButtonEvent e)
@@ -161,6 +168,7 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.DebugInstantBuildMode))
 		{
 			DebugHandler.InstantBuildMode = !DebugHandler.InstantBuildMode;
+			Game.Instance.Trigger(1557339983, null);
 			if (Game.Instance == null)
 			{
 				return;
@@ -209,7 +217,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0B34;
+					goto IL_0B44;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -218,7 +226,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0B34;
+					goto IL_0B44;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -323,7 +331,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0B34;
+						goto IL_0B44;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -482,7 +490,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0B34:
+		IL_0B44:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

@@ -105,7 +105,11 @@ public class Telephone : StateMachineComponent<Telephone.StatesInstance>, IGameO
 				});
 			this.ready.idle.WorkableStartTransition((Telephone.StatesInstance smi) => smi.master.GetComponent<TelephoneCallerWorkable>(), this.ready.calling.dial).TagTransition(GameTags.TelephoneRinging, this.ready.ringing, false).PlayAnim("off");
 			this.ready.calling.ScheduleGoTo(15f, this.ready.talking.babbling);
-			this.ready.calling.dial.PlayAnim("on_pre").OnAnimQueueComplete(this.ready.calling.pre);
+			this.ready.calling.dial.PlayAnim("on_pre").OnAnimQueueComplete(this.ready.calling.animHack);
+			this.ready.calling.animHack.ScheduleActionNextFrame("animHack_delay", delegate(Telephone.StatesInstance smi)
+			{
+				smi.GoTo(this.ready.calling.pre);
+			});
 			this.ready.calling.pre.PlayAnim("on").Enter(delegate(Telephone.StatesInstance smi)
 			{
 				this.RingAllTelephones(smi);
@@ -256,6 +260,8 @@ public class Telephone : StateMachineComponent<Telephone.StatesInstance>, IGameO
 			public class CallingStates : GameStateMachine<Telephone.States, Telephone.StatesInstance, Telephone, object>.State
 			{
 				public GameStateMachine<Telephone.States, Telephone.StatesInstance, Telephone, object>.State dial;
+
+				public GameStateMachine<Telephone.States, Telephone.StatesInstance, Telephone, object>.State animHack;
 
 				public GameStateMachine<Telephone.States, Telephone.StatesInstance, Telephone, object>.State pre;
 

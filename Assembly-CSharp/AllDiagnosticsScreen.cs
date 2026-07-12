@@ -11,6 +11,26 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 	{
 		base.OnPrefabInit();
 		AllDiagnosticsScreen.Instance = this;
+		this.ConfigureDebugToggle();
+	}
+
+	private void ConfigureDebugToggle()
+	{
+		Game.Instance.Subscribe(1557339983, new Action<object>(this.DebugToggleRefresh));
+		MultiToggle toggle = this.debugNotificationToggleCotainer.GetComponentInChildren<MultiToggle>();
+		MultiToggle toggle2 = toggle;
+		toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
+		{
+			DebugHandler.ToggleDisableNotifications();
+			toggle.ChangeState(DebugHandler.NotificationsDisabled ? 1 : 0);
+		}));
+		this.DebugToggleRefresh(null);
+		toggle.ChangeState(DebugHandler.NotificationsDisabled ? 1 : 0);
+	}
+
+	private void DebugToggleRefresh(object data = null)
+	{
+		this.debugNotificationToggleCotainer.gameObject.SetActive(DebugHandler.InstantBuildMode);
 	}
 
 	protected override void OnSpawn()
@@ -128,7 +148,7 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 		{
 			list.Add(keyValuePair3.Key);
 		}
-		list.Sort((string a, string b) => ColonyDiagnosticUtility.Instance.GetDiagnosticName(a).CompareTo(ColonyDiagnosticUtility.Instance.GetDiagnosticName(b)));
+		list.Sort((string a, string b) => UI.StripLinkFormatting(ColonyDiagnosticUtility.Instance.GetDiagnosticName(a)).CompareTo(UI.StripLinkFormatting(ColonyDiagnosticUtility.Instance.GetDiagnosticName(b))));
 		foreach (string text in list)
 		{
 			this.diagnosticRows[text].transform.SetAsLastSibling();
@@ -436,4 +456,7 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 	public Dictionary<Tag, bool> currentlyDisplayedRows = new Dictionary<Tag, bool>();
 
 	public Dictionary<Tag, bool> subrowContainerOpen = new Dictionary<Tag, bool>();
+
+	[SerializeField]
+	private RectTransform debugNotificationToggleCotainer;
 }

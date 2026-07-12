@@ -24,7 +24,7 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		if (worker.GetAmounts().Get(Db.Get().Amounts.RadiationBalance).value > 0f)
+		if (Sim.IsRadiationEnabled() && worker.GetAmounts().Get(Db.Get().Amounts.RadiationBalance).value > 0f)
 		{
 			worker.gameObject.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, null);
 		}
@@ -37,27 +37,37 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 
 	protected override void OnStopWork(Worker worker)
 	{
-		worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
+		if (Sim.IsRadiationEnabled())
+		{
+			worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
+		}
 		base.OnStopWork(worker);
 	}
 
 	protected override void OnAbortWork(Worker worker)
 	{
-		worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
+		if (Sim.IsRadiationEnabled())
+		{
+			worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
+		}
 		base.OnAbortWork(worker);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Db.Get().Amounts.Bladder.Lookup(worker).SetValue(0f);
-		worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
-		AmountInstance amountInstance = Db.Get().Amounts.RadiationBalance.Lookup(worker);
-		float num = Math.Min(amountInstance.value, 100f);
-		if (num >= 1f)
+		if (Sim.IsRadiationEnabled())
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, Math.Floor((double)num).ToString() + UI.UNITSUFFIXES.RADIATION.RADS, worker.transform, Vector3.up * 2f, 1.5f, false, false);
+			worker.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.ExpellingRads, false);
+			AmountInstance amountInstance = Db.Get().Amounts.RadiationBalance.Lookup(worker);
+			RadiationMonitor.Instance smi = worker.GetSMI<RadiationMonitor.Instance>();
+			float num = Math.Min(amountInstance.value, 100f * smi.difficultySettingMod);
+			if (num >= 1f)
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, Math.Floor((double)num).ToString() + UI.UNITSUFFIXES.RADIATION.RADS, worker.transform, Vector3.up * 2f, 1.5f, false, false);
+			}
+			amountInstance.ApplyDelta(-num);
 		}
-		amountInstance.ApplyDelta(-num);
 		this.timesUsed++;
 		base.Trigger(-350347868, worker);
 		base.OnCompleteWork(worker);

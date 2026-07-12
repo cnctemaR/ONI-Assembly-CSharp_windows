@@ -148,7 +148,7 @@ namespace Database
 					Db.Get().SkillPerks.ExosuitDurability
 				}, new List<string> { this.Hauling1.Id }));
 			}
-			this.Suits1 = this.AddSkill(new Skill("Suits1", DUPLICANTS.ROLES.SUIT_EXPERT.NAME, DUPLICANTS.ROLES.SUIT_EXPERT.DESCRIPTION, "", 2, "hat_role_suits1", "skillbadge_role_suits3", Db.Get().SkillGroups.Suits.Id, new List<SkillPerk>
+			this.Suits1 = this.AddSkill(new Skill("Suits1", DUPLICANTS.ROLES.SUIT_EXPERT.NAME, DUPLICANTS.ROLES.SUIT_EXPERT.DESCRIPTION, "", 2, "hat_role_suits2", "skillbadge_role_suits3", Db.Get().SkillGroups.Suits.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.ExosuitExpertise,
 				Db.Get().SkillPerks.IncreaseAthleticsMedium

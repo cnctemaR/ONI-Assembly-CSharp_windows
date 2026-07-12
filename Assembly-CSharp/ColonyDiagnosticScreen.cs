@@ -346,6 +346,10 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 
 		public void TriggerVisualNotification()
 		{
+			if (DebugHandler.NotificationsDisabled)
+			{
+				return;
+			}
 			if (this.activeRoutine == null)
 			{
 				this.timeOfLastNotification = GameClock.Instance.GetTime();

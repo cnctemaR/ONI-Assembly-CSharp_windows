@@ -315,7 +315,10 @@ public class RetiredColonyInfoScreen : KModalScreen
 			{
 				gameObject.transform.SetAsFirstSibling();
 			}
+			bool flag = !DlcManager.IsValidForVanilla(colonyAchievement.dlcIds);
+			component.GetReference<KImage>("dlc_overlay").gameObject.SetActive(flag);
 			gameObject.GetComponent<MultiToggle>().ChangeState(2);
+			gameObject.GetComponent<AchievementWidget>().dlcAchievement = flag;
 			this.achievementEntries.Add(colonyAchievement.Id, gameObject);
 		}
 		this.UpdateAchievementData(null, null);

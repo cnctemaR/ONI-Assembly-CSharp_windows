@@ -50,8 +50,8 @@ public class MainMenu : KScreen
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14, this.normalButtonStyle));
 		this.RefreshResumeButton(false);
 		this.Button_ResumeGame.onClick += this.ResumeGame;
-		this.StartFEAudio();
 		this.SpawnVideoScreen();
+		this.StartFEAudio();
 		this.CheckPlayerPrefsCorruption();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
@@ -134,6 +134,11 @@ public class MainMenu : KScreen
 		if (e.Consumed)
 		{
 			return;
+		}
+		if (e.TryConsume(global::Action.DebugToggleUI))
+		{
+			this.m_screenshotMode = !this.m_screenshotMode;
+			this.uiCanvas.alpha = (this.m_screenshotMode ? 0f : 1f);
 		}
 		KKeyCode kkeyCode;
 		switch (this.m_cheatInputCounter)
@@ -414,7 +419,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 487396U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
+				if (header.buildVersion > 489681U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
 				{
 					flag = false;
 				}
@@ -598,6 +603,11 @@ public class MainMenu : KScreen
 
 	private GameObject GameSettingsScreen;
 
+	private bool m_screenshotMode;
+
+	[SerializeField]
+	private CanvasGroup uiCanvas;
+
 	[SerializeField]
 	private KButton buttonPrefab;
 
@@ -651,6 +661,9 @@ public class MainMenu : KScreen
 	[SerializeField]
 	private BuildWatermark buildWatermark;
 
+	[SerializeField]
+	public string IntroShortName;
+
 	private static bool HasAutoresumedOnce = false;
 
 	private bool refreshResumeButton = true;
@@ -658,6 +671,8 @@ public class MainMenu : KScreen
 	private int m_cheatInputCounter;
 
 	public const string AutoResumeSaveFileKey = "AutoResumeSaveFile";
+
+	public const string PLAY_SHORT_ON_LAUNCH = "PlayShortOnLaunch";
 
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 

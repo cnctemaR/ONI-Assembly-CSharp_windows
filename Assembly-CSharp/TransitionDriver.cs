@@ -211,6 +211,10 @@ public class TransitionDriver
 			{
 				component.Resume("move_handler");
 			}
+			if (navigator.animEventHandler != null)
+			{
+				navigator.animEventHandler.SetDirty();
+			}
 		}
 	}
 

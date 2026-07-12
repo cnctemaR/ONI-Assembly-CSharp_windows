@@ -143,7 +143,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 		KSelectable component = base.GetComponent<KSelectable>();
 		bool flag2 = !flag && !SpacecraftManager.instance.AreAllDestinationsAnalyzed();
 		component.ToggleStatusItem(Db.Get().BuildingStatusItems.NoApplicableAnalysisSelected, flag2, null);
-		this.operational.SetFlag(this.flag, flag);
+		this.operational.SetFlag(Telescope.flag, flag);
 		if (!flag && base.worker)
 		{
 			base.StopWork(base.worker, true);
@@ -220,5 +220,5 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffec
 
 	private Chore chore;
 
-	private Operational.Flag flag = new Operational.Flag("ValidTarget", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag flag = new Operational.Flag("ValidTarget", Operational.Flag.Type.Requirement);
 }

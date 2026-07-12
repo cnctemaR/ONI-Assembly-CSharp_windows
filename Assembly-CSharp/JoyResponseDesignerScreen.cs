@@ -22,7 +22,7 @@ public class JoyResponseDesignerScreen : KMonoBehaviour
 		{
 			minCellSize = 64f,
 			maxCellSize = 96f,
-			targetGridLayout = this.galleryGridContent.GetComponent<GridLayoutGroup>()
+			targetGridLayouts = this.galleryGridContent.GetComponents<GridLayoutGroup>().ToList<GridLayoutGroup>()
 		};
 		this.categoryRowPool = new UIPrefabLocalPool(this.categoryRowPrefab, this.categoryListContent.gameObject);
 		this.galleryGridItemPool = new UIPrefabLocalPool(this.galleryItemPrefab, this.galleryGridContent.gameObject);
@@ -236,9 +236,15 @@ public class JoyResponseDesignerScreen : KMonoBehaviour
 			}
 			Option<PermitResource> permitResource = balloonArtistFacadeTarget.GetPermitResource();
 			this.selectionHeaderLabel.SetText(balloonArtistFacadeTarget.GetName());
-			this.dioramaVis.SetMinion(this.Config.target.GetPersonality());
+			KleiPermitDioramaVis_JoyResponseBalloon kleiPermitDioramaVis_JoyResponseBalloon = this.dioramaVis;
+			JoyResponseScreenConfig joyResponseScreenConfig = this.Config;
+			kleiPermitDioramaVis_JoyResponseBalloon.SetMinion(joyResponseScreenConfig.target.GetPersonality());
 			this.dioramaVis.ConfigureWith(balloonArtistFacadeTarget.permit);
-			this.outfitDescriptionPanel.Refresh(permitResource.UnwrapOr(null, null), ClothingOutfitUtility.OutfitType.JoyResponse);
+			OutfitDescriptionPanel outfitDescriptionPanel = this.outfitDescriptionPanel;
+			PermitResource permitResource2 = permitResource.UnwrapOr(null, null);
+			ClothingOutfitUtility.OutfitType outfitType = ClothingOutfitUtility.OutfitType.JoyResponse;
+			joyResponseScreenConfig = this.Config;
+			outfitDescriptionPanel.Refresh(permitResource2, outfitType, joyResponseScreenConfig.target.GetPersonality());
 			Option<string> saveSelectionError = this.GetSaveSelectionError();
 			if (saveSelectionError.IsSome())
 			{

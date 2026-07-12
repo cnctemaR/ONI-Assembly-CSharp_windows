@@ -70,7 +70,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 	public void OnStore(object data)
 	{
 		Storage storage = data as Storage;
-		if (storage ? storage.GetComponent<Trap>() : null)
+		if (storage && (storage.GetComponent<Trap>() != null || storage.GetSMI<ReusableTrap.Instance>() != null))
 		{
 			base.gameObject.AddTag(GameTags.Trapped);
 			return;

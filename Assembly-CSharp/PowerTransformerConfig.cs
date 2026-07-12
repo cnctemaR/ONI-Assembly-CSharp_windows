@@ -24,8 +24,6 @@ public class PowerTransformerConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(-1, 1);
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);
 		buildingDef.ElectricalArrowOffset = new CellOffset(1, 0);
-		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
-		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.ExhaustKilowattsWhenActive = 0f;

@@ -23,18 +23,32 @@ public static class BaseMooConfig
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
+		gameObject.AddOrGetDef<BeckoningMonitor.Def>().caloriesPerCycle = MooTuning.WELLFED_CALORIES_PER_CYCLE;
 		gameObject.AddOrGet<LoopingSounds>();
-		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { SimHashes.BleachStone.CreateTag() };
+		gameObject.AddOrGet<Trappable>();
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
+		{
+			SimHashes.BleachStone.CreateTag(),
+			GameTags.Creatures.FlyersLure
+		};
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
 		gameObject.AddOrGetDef<RanchableMonitor.Def>();
 		gameObject.AddOrGetDef<FixedCapturableMonitor.Def>();
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new BaggedStates.Def(), true, -1)
+		MilkProductionMonitor.Def def = gameObject.AddOrGetDef<MilkProductionMonitor.Def>();
+		def.CaloriesPerCycle = MooTuning.WELLFED_CALORIES_PER_CYCLE;
+		def.Capacity = MooTuning.MILK_CAPACITY;
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new TrappedStates.Def(), true, -1)
+			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
 			.Add(new DrowningStates.Def(), true, -1)
 			.PushInterruptGroup()
+			.Add(new BeckonFromSpaceStates.Def
+			{
+				prefab = GassyMooCometConfig.ID
+			}, true, -1)
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new FixedCaptureStates.Def(), true, -1)
 			.Add(new RanchedStates.Def
@@ -42,6 +56,11 @@ public static class BaseMooConfig
 				WaitCellOffset = 2
 			}, true, -1)
 			.Add(new EatStates.Def(), true, -1)
+			.Add(new DrinkMilkStates.Def
+			{
+				shouldBeBehindMilkTank = false,
+				isGassyMoo = true
+			}, true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.PopInterruptGroup()
@@ -49,6 +68,7 @@ public static class BaseMooConfig
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseMooConfig.CustomIdleAnim)
 			}, true, -1);
+		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>().isGassyMoo = true;
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.MooSpecies, symbol_override_prefix);
 		return gameObject;
 	}

@@ -1601,6 +1601,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building needs to be emptied of " + UI.FormatAsLink("Salt", "SALT") + " to resume function";
 			}
 
+			public class MILKSEPARATORNEEDSEMPTYING
+			{
+				public static LocString NAME = "Requires Emptying";
+
+				public static LocString TOOLTIP = "This building needs to be emptied of " + UI.FormatAsLink("Brackwax", "MILKFAT") + " to resume function";
+			}
+
 			public class HABITATNEEDSEMPTYING
 			{
 				public static LocString NAME = "Requires Emptying";
@@ -2244,6 +2251,30 @@ namespace STRINGS
 					public static LocString NAME = "Fueled: {0}";
 
 					public static LocString TOOLTIP = "<b>{0}</b> fuel remaining";
+				}
+			}
+
+			public class CREATURE_REUSABLE_TRAP
+			{
+				public class NEEDS_ARMING
+				{
+					public static LocString NAME = "Waiting to be Armed";
+
+					public static LocString TOOLTIP = "Waiting for a Duplicant to arm this trap\n\nOnly Duplicants with the " + DUPLICANTS.ROLES.RANCHER.NAME + " skill can arm traps";
+				}
+
+				public class READY
+				{
+					public static LocString NAME = "Armed";
+
+					public static LocString TOOLTIP = "This trap has been armed and is ready to catch a " + UI.PRE_KEYWORD + "Critter" + UI.PST_KEYWORD;
+				}
+
+				public class SPRUNG
+				{
+					public static LocString NAME = "Sprung";
+
+					public static LocString TOOLTIP = "This trap has caught a {0}!";
 				}
 			}
 
@@ -3265,6 +3296,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Mission Control has given this rocket a {0} speed boost\n\n{1} remaining";
 			}
 
+			public class TRANSITTUBEENTRANCEWAXREADY
+			{
+				public static LocString NAME = "Smooth Ride Ready";
+
+				public static LocString TOOLTIP = "This building is stocked with speed-boosting " + ELEMENTS.MILKFAT.NAME + "\n\n{0} per use ({1} remaining)";
+			}
+
 			public class NOROCKETSTOMISSIONCONTROLBOOST
 			{
 				public static LocString NAME = "No Eligible Rockets in Range";
@@ -3617,6 +3655,20 @@ namespace STRINGS
 				public static LocString NAME = "No Spice Selected";
 
 				public static LocString TOOLTIP = "Select a recipe to begin fabrication";
+			}
+
+			public class SPICEGRINDERACCEPTSMUTANTSEEDS
+			{
+				public static LocString NAME = "Spice Grinder accepts mutant seeds";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This spice grinder is allowed to use ",
+					UI.PRE_KEYWORD,
+					"Mutant Seeds",
+					UI.PST_KEYWORD,
+					" as recipe ingredients"
+				});
 			}
 
 			public class MISSILELAUNCHER_NOSURFACESIGHT

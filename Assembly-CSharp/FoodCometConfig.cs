@@ -37,6 +37,7 @@ public class FoodCometConfig : IEntityConfig
 		gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
 		comet.EXHAUST_ELEMENT = SimHashes.Void;
 		gameObject.AddTag(GameTags.Comet);
+		gameObject.AddTag(GameTags.DeprecatedContent);
 		return gameObject;
 	}
 

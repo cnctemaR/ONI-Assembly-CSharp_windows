@@ -178,7 +178,7 @@ public class BeeForageStates : GameStateMachine<BeeForageStates, BeeForageStates
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
-			if (pickupable2 && pickupable2.GetComponent<ElementChunk>() && pickupable2.GetComponent<PrimaryElement>() && pickupable2.GetComponent<PrimaryElement>().Element == element && !pickupable2.HasTag(GameTags.Creatures.ReservedByCreature))
+			if (pickupable2 && pickupable2.GetComponent<ElementChunk>() && pickupable2.GetComponent<PrimaryElement>() && pickupable2.GetComponent<PrimaryElement>().Element == element && !pickupable2.KPrefabID.HasTag(GameTags.Creatures.ReservedByCreature))
 			{
 				int navigationCost = component.GetNavigationCost(Grid.PosToCell(pickupable2));
 				if (navigationCost != -1 && navigationCost < num)
@@ -188,6 +188,7 @@ public class BeeForageStates : GameStateMachine<BeeForageStates, BeeForageStates
 				}
 			}
 		}
+		pooledList.Recycle();
 		smi.forageTarget = pickupable;
 		smi.forageTarget_cell = (smi.forageTarget ? Grid.PosToCell(smi.forageTarget) : Grid.InvalidCell);
 		return smi.forageTarget != null;

@@ -47,7 +47,7 @@ public class MoveToLureStates : GameStateMachine<MoveToLureStates, MoveToLureSta
 		{
 			return null;
 		}
-		return targetLure.def.lurePoints;
+		return targetLure.LurePoints;
 	}
 
 	public GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State move;

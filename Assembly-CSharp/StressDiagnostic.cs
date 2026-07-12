@@ -23,7 +23,7 @@ public class StressDiagnostic : ColonyDiagnostic
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
 			TrackerTool.Instance.IsRocketInterior(base.worldID) ? UI.COLONY_DIAGNOSTICS.ROCKET : UI.CLUSTERMAP.PLANETOID_KEYWORD;
-			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+			diagnosticResult.Message = base.NO_MINIONS;
 		}
 		else
 		{

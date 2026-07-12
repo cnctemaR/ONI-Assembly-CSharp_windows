@@ -36,6 +36,7 @@ public class ContactConductivePipeBridgeConfig : IBuildingConfig
 		buildingDef.UseStructureTemperature = true;
 		buildingDef.ReplacementTags = new List<Tag>();
 		buildingDef.ReplacementTags.Add(GameTags.Pipes);
+		buildingDef.ThermalConductivity = 2f;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "ContactConductivePipeBridge");
 		return buildingDef;
 	}
@@ -44,23 +45,6 @@ public class ContactConductivePipeBridgeConfig : IBuildingConfig
 	{
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<StructureToStructureTemperature>();
-		Storage storage = go.AddOrGet<Storage>();
-		storage.allowItemRemoval = false;
-		storage.storageFilters = STORAGEFILTERS.LIQUIDS;
-		storage.capacityKg = 10f;
-		storage.showDescriptor = true;
-		List<Storage.StoredItemModifier> list = new List<Storage.StoredItemModifier>
-		{
-			Storage.StoredItemModifier.Hide,
-			Storage.StoredItemModifier.Seal,
-			Storage.StoredItemModifier.Insulate,
-			Storage.StoredItemModifier.Preserve
-		};
-		storage.SetDefaultStoredItemModifiers(list);
-		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
-		conduitConsumer.conduitType = ConduitType.Liquid;
-		conduitConsumer.capacityKG = storage.capacityKg;
-		conduitConsumer.alwaysConsume = true;
 		ContactConductivePipeBridge.Def def = go.AddOrGetDef<ContactConductivePipeBridge.Def>();
 		def.pumpKGRate = 10f;
 		def.type = ConduitType.Liquid;
@@ -68,7 +52,10 @@ public class ContactConductivePipeBridgeConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<RequireInputs>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<RequireOutputs>());
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitConsumer>());
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
 	}
 
 	public const float LIQUID_CAPACITY_KG = 10f;

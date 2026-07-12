@@ -7,10 +7,22 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.off;
-		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (CometDetector.Instance smi) => smi.GetComponent<Operational>().IsOperational).Update("Scan Sky", delegate(CometDetector.Instance smi, float dt)
+		base.serializable = StateMachine.SerializeType.ParamsOnly;
+		this.root.Enter(delegate(CometDetector.Instance smi)
 		{
-			smi.ScanSky(false);
-		}, UpdateRate.SIM_4000ms, false);
+			smi.UpdateDetectionState(this.lastIsTargetDetected.Get(smi), true);
+			smi.remainingSecondsToFreezeLogicSignal = 3f;
+		}).Update(delegate(CometDetector.Instance smi, float deltaSeconds)
+		{
+			smi.remainingSecondsToFreezeLogicSignal -= deltaSeconds;
+			if (smi.remainingSecondsToFreezeLogicSignal < 0f)
+			{
+				smi.remainingSecondsToFreezeLogicSignal = 0f;
+				return;
+			}
+			smi.SetLogicSignal(this.lastIsTargetDetected.Get(smi));
+		}, UpdateRate.SIM_200ms, false);
+		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (CometDetector.Instance smi) => smi.GetComponent<Operational>().IsOperational);
 		this.on.DefaultState(this.on.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.DetectorScanning, null).Enter("ToggleActive", delegate(CometDetector.Instance smi)
 		{
 			smi.GetComponent<Operational>().SetActive(true, false);
@@ -51,6 +63,8 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 	public GameStateMachine<CometDetector, CometDetector.Instance, IStateMachineTarget, CometDetector.Def>.State off;
 
 	public CometDetector.OnStates on;
+
+	public StateMachine<CometDetector, CometDetector.Instance, IStateMachineTarget, CometDetector.Def>.BoolParameter lastIsTargetDetected;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -135,6 +149,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 				option = SpaceScannerTarget.RocketBaseGame(launchConditionManager);
 			}
 			bool flag = option.IsSome() && Game.Instance.spaceScannerNetworkManager.IsTargetDetectedOnWorld(this.GetMyWorldId(), option.Unwrap());
+			base.smi.sm.lastIsTargetDetected.Set(flag, this, false);
 			this.UpdateDetectionState(flag, expectedDetectionForState);
 		}
 
@@ -157,6 +172,9 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 
 		[Serialize]
 		private Ref<LaunchConditionManager> targetCraft;
+
+		[NonSerialized]
+		public float remainingSecondsToFreezeLogicSignal;
 
 		private DetectorNetwork.Def detectorNetworkDef;
 

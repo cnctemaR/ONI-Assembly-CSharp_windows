@@ -152,7 +152,8 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		float averageRate = Game.Instance.accumulators.GetAverageRate(base.smi.master.pressureAccumulator);
 		this.displayPressureAmount.value = averageRate;
 		Game.Instance.accumulators.Accumulate(base.smi.master.elementAccumulator, this.testAreaElementSafe ? 1f : 0f);
-		bool flag = Game.Instance.accumulators.GetAverageRate(base.smi.master.elementAccumulator) > 0f;
+		float averageRate2 = Game.Instance.accumulators.GetAverageRate(base.smi.master.elementAccumulator);
+		bool flag = this.safe_atmospheres == null || this.safe_atmospheres.Count == 0 || averageRate2 > 0f;
 		base.smi.sm.safe_element.Set(flag, base.smi, false);
 		base.smi.sm.pressure.Set(averageRate, base.smi, false);
 	}

@@ -6,6 +6,7 @@ public struct BatchKey : IEquatable<BatchKey>
 	{
 		this._layer = controller.GetLayer();
 		this._groupID = controller.GetBatchGroupID(false);
+		this._groupIDOverride = controller.GetBatchGroupIDOverride();
 		this._materialType = controller.GetMaterialType();
 		this._z = controller.GetZ();
 		this._idx = KAnimBatchManager.ControllerToChunkXY(controller);
@@ -20,7 +21,7 @@ public struct BatchKey : IEquatable<BatchKey>
 
 	private void CalculateHash()
 	{
-		this._hash = this._z.GetHashCode() ^ this._layer ^ (int)this._materialType ^ this._groupID.HashValue ^ this._idx.GetHashCode();
+		this._hash = this._z.GetHashCode() ^ this._layer ^ (int)this._materialType ^ this._groupID.HashValue ^ this._groupIDOverride.HashValue ^ this._idx.GetHashCode();
 	}
 
 	public static BatchKey Create(KAnimConverter.IAnimConverter controller, Vector2I idx)
@@ -39,7 +40,7 @@ public struct BatchKey : IEquatable<BatchKey>
 
 	public bool Equals(BatchKey other)
 	{
-		return this._z == other._z && this._layer == other._layer && this._materialType == other._materialType && this._groupID == other._groupID && this._idx == other._idx;
+		return this._z == other._z && this._layer == other._layer && this._materialType == other._materialType && this._groupID == other._groupID && this._groupIDOverride == other._groupIDOverride && this._idx == other._idx;
 	}
 
 	public override int GetHashCode()
@@ -97,7 +98,7 @@ public struct BatchKey : IEquatable<BatchKey>
 
 	public override string ToString()
 	{
-		string[] array = new string[12];
+		string[] array = new string[14];
 		array[0] = "[";
 		int num = 1;
 		Vector2I vector2I = this.idx;
@@ -109,11 +110,13 @@ public struct BatchKey : IEquatable<BatchKey>
 		array[4] = "] [";
 		array[5] = this.groupID.HashValue.ToString();
 		array[6] = "] [";
-		array[7] = this.layer.ToString();
+		array[7] = this._groupIDOverride.HashValue.ToString();
 		array[8] = "] [";
-		array[9] = this.z.ToString();
-		array[10] = "]";
-		array[11] = this.materialType.ToString();
+		array[9] = this.layer.ToString();
+		array[10] = "] [";
+		array[11] = this.z.ToString();
+		array[12] = "]";
+		array[13] = this.materialType.ToString();
 		return string.Concat(array);
 	}
 
@@ -124,6 +127,8 @@ public struct BatchKey : IEquatable<BatchKey>
 	private KAnimBatchGroup.MaterialType _materialType;
 
 	private HashedString _groupID;
+
+	private HashedString _groupIDOverride;
 
 	private Vector2I _idx;
 

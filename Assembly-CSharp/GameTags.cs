@@ -444,6 +444,8 @@ public class GameTags
 
 	public static readonly Tag InTransitTube = TagManager.Create("InTransitTube");
 
+	public static readonly Tag TrapArmed = TagManager.Create("TrapArmed");
+
 	public static readonly Tag GeyserFeature = TagManager.Create("GeyserFeature");
 
 	public static readonly Tag Rocket = TagManager.Create("Rocket");
@@ -661,6 +663,8 @@ public class GameTags
 
 		public static readonly Tag WantsToEat = TagManager.Create("WantsToEat");
 
+		public static readonly Tag Behaviour_TryToDrinkMilkFromFeeder = TagManager.Create("Behaviour_TryToDrinkMilkFromFeeder");
+
 		public static readonly Tag WantsToGetRanched = TagManager.Create("WantsToGetRanched");
 
 		public static readonly Tag WantsToGetCaptured = TagManager.Create("WantsToGetCaptured");
@@ -689,6 +693,8 @@ public class GameTags
 
 		public static readonly Tag WantsToStore = TagManager.Create("WantsToStore");
 
+		public static readonly Tag WantsToBeckon = TagManager.Create("WantsToBeckon");
+
 		public static readonly Tag Flee = TagManager.Create("Flee");
 
 		public static readonly Tag Attack = TagManager.Create("Attack");
@@ -712,6 +718,8 @@ public class GameTags
 		public static readonly Tag Flyer = TagManager.Create("Flyer");
 
 		public static readonly Tag FishTrapLure = TagManager.Create("FishTrapLure");
+
+		public static readonly Tag FlyersLure = TagManager.Create("MasterLure");
 
 		public static readonly Tag Walker = TagManager.Create("Walker");
 
@@ -754,6 +762,8 @@ public class GameTags
 		public static readonly Tag Cleaning = TagManager.Create("Cleaning");
 
 		public static readonly Tag Unhappy = TagManager.Create("Unhappy");
+
+		public static readonly Tag RequiresMilking = TagManager.Create("RequiresMilking");
 
 		public static class Species
 		{

@@ -8,14 +8,6 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 	{
 		default_state = this.root;
 		this.root.Update(new Action<OvercrowdingMonitor.Instance, float>(OvercrowdingMonitor.UpdateState), UpdateRate.SIM_1000ms, true);
-		OvercrowdingMonitor.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-		OvercrowdingMonitor.futureOvercrowdedEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -1f, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, true, false, true));
-		OvercrowdingMonitor.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-		OvercrowdingMonitor.overcrowdedEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, true));
-		OvercrowdingMonitor.fishOvercrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.FISHTOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-		OvercrowdingMonitor.fishOvercrowdedEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, true));
-		OvercrowdingMonitor.stuckEffect = new Effect("Confined", CREATURES.MODIFIERS.CONFINED.NAME, CREATURES.MODIFIERS.CONFINED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-		OvercrowdingMonitor.stuckEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, CREATURES.MODIFIERS.CONFINED.NAME, false, false, true));
 	}
 
 	private static bool IsConfined(OvercrowdingMonitor.Instance smi)
@@ -35,6 +27,46 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			return num != 0 && smi.cavity.eggs.Count != 0 && smi.cavity.numCells / num < smi.def.spaceRequiredPerCreature;
 		}
 		return false;
+	}
+
+	private static int CalculateOvercrowdedModifer(OvercrowdingMonitor.Instance smi)
+	{
+		if (smi.def.spaceRequiredPerCreature == 0)
+		{
+			return 0;
+		}
+		if (smi.cavity == null)
+		{
+			return 0;
+		}
+		FishOvercrowdingMonitor.Instance smi2 = smi.GetSMI<FishOvercrowdingMonitor.Instance>();
+		if (smi2 != null)
+		{
+			int fishCount = smi2.fishCount;
+			if (fishCount <= 0)
+			{
+				return 0;
+			}
+			int num = smi2.cellCount / smi.def.spaceRequiredPerCreature;
+			if (num < smi.cavity.creatures.Count)
+			{
+				return -5 - (fishCount - (num + 1));
+			}
+			return 0;
+		}
+		else
+		{
+			if (smi.cavity.creatures.Count <= 1)
+			{
+				return 0;
+			}
+			int num2 = smi.cavity.numCells / smi.def.spaceRequiredPerCreature;
+			if (num2 < smi.cavity.creatures.Count)
+			{
+				return -5 - (smi.cavity.creatures.Count - (num2 + 1));
+			}
+			return 0;
+		}
 	}
 
 	private static bool IsOvercrowded(OvercrowdingMonitor.Instance smi)
@@ -63,13 +95,21 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		bool flag2 = OvercrowdingMonitor.IsOvercrowded(smi);
 		bool flag3 = !smi.isBaby && OvercrowdingMonitor.IsFutureOvercrowded(smi);
 		KPrefabID component = smi.gameObject.GetComponent<KPrefabID>();
-		Effect effect = (smi.isFish ? OvercrowdingMonitor.fishOvercrowdedEffect : OvercrowdingMonitor.overcrowdedEffect);
+		Effect effect = (smi.isFish ? smi.fishOvercrowdedEffect : smi.overcrowdedEffect);
 		component.SetTag(GameTags.Creatures.Confined, flag);
 		component.SetTag(GameTags.Creatures.Overcrowded, flag2);
 		component.SetTag(GameTags.Creatures.Expecting, flag3);
-		OvercrowdingMonitor.SetEffect(smi, OvercrowdingMonitor.stuckEffect, flag);
+		if (!smi.isFish)
+		{
+			smi.overcrowdedModifier.SetValue((float)OvercrowdingMonitor.CalculateOvercrowdedModifer(smi));
+		}
+		else
+		{
+			smi.fishOvercrowdedModifier.SetValue((float)OvercrowdingMonitor.CalculateOvercrowdedModifer(smi));
+		}
+		OvercrowdingMonitor.SetEffect(smi, smi.stuckEffect, flag);
 		OvercrowdingMonitor.SetEffect(smi, effect, !flag && flag2);
-		OvercrowdingMonitor.SetEffect(smi, OvercrowdingMonitor.futureOvercrowdedEffect, !flag && flag3);
+		OvercrowdingMonitor.SetEffect(smi, smi.futureOvercrowdedEffect, !flag && flag3);
 	}
 
 	private static void SetEffect(OvercrowdingMonitor.Instance smi, Effect effect, bool set)
@@ -119,14 +159,6 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	public const float OVERCROWDED_FERTILITY_DEBUFF = -1f;
 
-	public static Effect futureOvercrowdedEffect;
-
-	public static Effect overcrowdedEffect;
-
-	public static Effect fishOvercrowdedEffect;
-
-	public static Effect stuckEffect;
-
 	public class Def : StateMachine.BaseDef
 	{
 		public int spaceRequiredPerCreature;
@@ -141,6 +173,16 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			this.isBaby = def2 != null;
 			FishOvercrowdingMonitor.Def def3 = master.gameObject.GetDef<FishOvercrowdingMonitor.Def>();
 			this.isFish = def3 != null;
+			this.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
+			this.futureOvercrowdedEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -1f, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, true, false, true));
+			this.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
+			this.overcrowdedModifier = new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, false);
+			this.overcrowdedEffect.Add(this.overcrowdedModifier);
+			this.fishOvercrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.FISHTOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
+			this.fishOvercrowdedModifier = new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -5f, CREATURES.MODIFIERS.OVERCROWDED.NAME, false, false, false);
+			this.fishOvercrowdedEffect.Add(this.fishOvercrowdedModifier);
+			this.stuckEffect = new Effect("Confined", CREATURES.MODIFIERS.CONFINED.NAME, CREATURES.MODIFIERS.CONFINED.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
+			this.stuckEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, CREATURES.MODIFIERS.CONFINED.NAME, false, false, true));
 			OvercrowdingMonitor.UpdateState(this, 0f);
 		}
 
@@ -169,5 +211,17 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		public bool isBaby;
 
 		public bool isFish;
+
+		public Effect futureOvercrowdedEffect;
+
+		public Effect overcrowdedEffect;
+
+		public AttributeModifier overcrowdedModifier;
+
+		public Effect fishOvercrowdedEffect;
+
+		public AttributeModifier fishOvercrowdedModifier;
+
+		public Effect stuckEffect;
 	}
 }

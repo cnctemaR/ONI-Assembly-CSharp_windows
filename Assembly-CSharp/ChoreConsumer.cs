@@ -179,10 +179,6 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public bool FindNextChore(ref Chore.Precondition.Context out_context)
 	{
-		if (this.debug)
-		{
-			int num = 0 + 1;
-		}
 		this.preconditionSnapshot.Clear();
 		this.consumerState.Refresh();
 		if (this.consumerState.hasSolidTransferArm)
@@ -215,8 +211,8 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 					}
 					else
 					{
-						int num2 = Grid.PosToCell(fetchChore.gameObject);
-						if (this.consumerState.solidTransferArm.IsCellReachable(num2))
+						int num = Grid.PosToCell(fetchChore.gameObject);
+						if (this.consumerState.solidTransferArm.IsCellReachable(num))
 						{
 							fetchChore.CollectChoresFromGlobalChoreProvider(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
 						}
@@ -591,8 +587,6 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	private User user;
 
 	public global::System.Action choreRulesChanged;
-
-	public bool debug;
 
 	private List<ChoreProvider> providers = new List<ChoreProvider>();
 

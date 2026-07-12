@@ -214,6 +214,15 @@ public class WearableAccessorizer : KMonoBehaviour
 		this.UpdateVisibleSymbols(highestAccessory);
 	}
 
+	public void UpdateVisibleSymbols(ClothingOutfitUtility.OutfitType outfitType)
+	{
+		if (this.animController == null)
+		{
+			this.animController = base.GetComponent<KAnimControllerBase>();
+		}
+		this.UpdateVisibleSymbols(this.ConvertOutfitTypeToWearableType(outfitType));
+	}
+
 	private void UpdateVisibleSymbols(WearableAccessorizer.WearableType wearableType)
 	{
 		bool flag = wearableType == WearableAccessorizer.WearableType.Basic;
@@ -221,6 +230,8 @@ public class WearableAccessorizer : KMonoBehaviour
 		bool flag3 = false;
 		bool flag4 = false;
 		bool flag5 = true;
+		bool flag6 = wearableType == WearableAccessorizer.WearableType.Basic;
+		bool flag7 = wearableType == WearableAccessorizer.WearableType.Basic;
 		if (this.wearables.ContainsKey(wearableType))
 		{
 			List<KAnimHashedString> list = this.wearables[wearableType].BuildAnims.SelectMany<KAnimFile, KAnimHashedString>((KAnimFile x) => x.GetData().build.symbols.Select<KAnim.Build.Symbol, KAnimHashedString>((KAnim.Build.Symbol s) => s.hash)).ToList<KAnimHashedString>();
@@ -228,11 +239,15 @@ public class WearableAccessorizer : KMonoBehaviour
 			flag3 = list.Contains(Db.Get().AccessorySlots.Skirt.targetSymbolId);
 			flag4 = list.Contains(Db.Get().AccessorySlots.Necklace.targetSymbolId);
 			flag5 = list.Contains(Db.Get().AccessorySlots.ArmLower.targetSymbolId);
+			flag6 = list.Contains(Db.Get().AccessorySlots.Arm.targetSymbolId) || (wearableType != WearableAccessorizer.WearableType.Basic && !this.HasPermitCategoryItem(ClothingOutfitUtility.OutfitType.Clothing, PermitCategory.DupeTops));
+			flag7 = list.Contains(Db.Get().AccessorySlots.Leg.targetSymbolId) || (wearableType != WearableAccessorizer.WearableType.Basic && !this.HasPermitCategoryItem(ClothingOutfitUtility.OutfitType.Clothing, PermitCategory.DupeBottoms));
 		}
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Belt.targetSymbolId, flag);
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Necklace.targetSymbolId, flag4);
 		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.ArmLower.targetSymbolId, flag5);
-		WearableAccessorizer.SkirtAccessory(this.animController, flag3);
+		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Arm.targetSymbolId, flag6);
+		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Leg.targetSymbolId, flag7 && !flag3);
+		this.animController.SetSymbolVisiblity(Db.Get().AccessorySlots.Skirt.targetSymbolId, flag3);
 		WearableAccessorizer.UpdateHairBasedOnHat(this.animController, flag2);
 	}
 
@@ -485,6 +500,16 @@ public class WearableAccessorizer : KMonoBehaviour
 		{
 			this.customOutfitItems[outfit.Value.OutfitType].Add(new ResourceRef<ClothingItemResource>(clothingItemResource));
 		}
+	}
+
+	public bool HasPermitCategoryItem(ClothingOutfitUtility.OutfitType wearable_type, PermitCategory category)
+	{
+		bool flag = false;
+		if (this.customOutfitItems.ContainsKey(wearable_type))
+		{
+			flag = this.customOutfitItems[wearable_type].Exists((ResourceRef<ClothingItemResource> resource) => resource.Get().Category == category);
+		}
+		return flag;
 	}
 
 	[MyCmpReq]

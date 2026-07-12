@@ -359,7 +359,7 @@ public class AllDiagnosticsScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 					component.GetReference<Image>("Indicator").color = diagnostic.colors[diagnostic.LatestResult.opinion];
 					ToolTip reference = component.GetReference<ToolTip>("Tooltip");
 					reference.refreshWhileHovering = true;
-					reference.SetSimpleTooltip(Strings.Get(new StringKey("STRINGS.UI.COLONY_DIAGNOSTICS." + diagnostic.id.ToUpper() + ".TOOLTIP_NAME")) + "\n" + diagnostic.LatestResult.Message);
+					reference.SetSimpleTooltip(Strings.Get(new StringKey("STRINGS.UI.COLONY_DIAGNOSTICS." + diagnostic.id.ToUpper() + ".TOOLTIP_NAME")) + "\n" + diagnostic.LatestResult.GetFormattedMessage());
 				}
 				this.RefreshPinnedState(keyValuePair.Key);
 			}

@@ -4,6 +4,7 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
+		base.serializable = StateMachine.SerializeType.ParamsOnly;
 		default_state = this.off;
 		this.off.DoNothing();
 		this.on.Enter(new StateMachine<Lure, Lure.Instance, IStateMachineTarget, Lure.Def>.State.Callback(this.AddToScenePartitioner)).Exit(new StateMachine<Lure, Lure.Instance, IStateMachineTarget, Lure.Def>.State.Callback(this.RemoveFromScenePartitioner));
@@ -11,7 +12,7 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 
 	private void AddToScenePartitioner(Lure.Instance smi)
 	{
-		Extents extents = new Extents(Grid.PosToCell(smi.transform.GetPosition()), smi.def.radius);
+		Extents extents = new Extents(smi.cell, smi.def.radius);
 		smi.partitionerEntry = GameScenePartitioner.Instance.Add(this.name, smi, extents, GameScenePartitioner.Instance.lure, null);
 	}
 
@@ -26,7 +27,7 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 
 	public class Def : StateMachine.BaseDef
 	{
-		public CellOffset[] lurePoints = new CellOffset[1];
+		public CellOffset[] defaultLurePoints = new CellOffset[1];
 
 		public int radius = 50;
 
@@ -35,6 +36,34 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 
 	public new class Instance : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, Lure.Def>.GameInstance
 	{
+		public int cell
+		{
+			get
+			{
+				if (this._cell == -1)
+				{
+					this._cell = Grid.PosToCell(base.transform.GetPosition());
+				}
+				return this._cell;
+			}
+		}
+
+		public CellOffset[] LurePoints
+		{
+			get
+			{
+				if (this._lurePoints == null)
+				{
+					return base.def.defaultLurePoints;
+				}
+				return this._lurePoints;
+			}
+			set
+			{
+				this._lurePoints = value;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, Lure.Def def)
 			: base(master, def)
 		{
@@ -46,6 +75,21 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 			if (base.def.initialLures != null)
 			{
 				this.SetActiveLures(base.def.initialLures);
+			}
+		}
+
+		public void ChangeLureCellPosition(int newCell)
+		{
+			bool flag = base.IsInsideState(base.sm.on);
+			if (flag)
+			{
+				this.GoTo(base.sm.off);
+			}
+			this.LurePoints = new CellOffset[] { Grid.GetOffset(Grid.PosToCell(base.smi.transform.GetPosition()), newCell) };
+			this._cell = newCell;
+			if (flag)
+			{
+				this.GoTo(base.sm.on);
 			}
 		}
 
@@ -84,8 +128,12 @@ public class Lure : GameStateMachine<Lure, Lure.Instance, IStateMachineTarget, L
 			return false;
 		}
 
+		private int _cell = -1;
+
 		private Tag[] lures;
 
 		public HandleVector<int>.Handle partitionerEntry;
+
+		private CellOffset[] _lurePoints;
 	}
 }

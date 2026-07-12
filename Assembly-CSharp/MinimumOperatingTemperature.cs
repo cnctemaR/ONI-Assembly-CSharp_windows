@@ -81,7 +81,7 @@ public class MinimumOperatingTemperature : KMonoBehaviour, ISim200ms, IGameObjec
 
 	private float lastOffTime;
 
-	public static Operational.Flag warmEnoughFlag = new Operational.Flag("warm_enough", Operational.Flag.Type.Functional);
+	public static readonly Operational.Flag warmEnoughFlag = new Operational.Flag("warm_enough", Operational.Flag.Type.Functional);
 
 	private bool isWarm;
 

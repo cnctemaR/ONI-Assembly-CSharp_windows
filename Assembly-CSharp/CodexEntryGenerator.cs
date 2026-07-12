@@ -900,6 +900,11 @@ public static class CodexEntryGenerator
 					hashSet3.Add(new ElementUsage(tag6, component3.massConsumedPerUse, false));
 				}
 			}
+			if (prefab.IsPrefabID("Moo"))
+			{
+				hashSet2.Add(new ElementUsage("GasGrass", MooConfig.DAYS_PLANT_GROWTH_EATEN_PER_CYCLE, false));
+				hashSet3.Add(new ElementUsage(ElementLoader.FindElementByHash(SimHashes.Milk).tag, MooTuning.MILK_PER_CYCLE, false));
+			}
 			CodexEntryGenerator.ConversionEntry conversionEntry2 = new CodexEntryGenerator.ConversionEntry();
 			conversionEntry2.title = prefab.GetProperName();
 			conversionEntry2.prefab = prefab;

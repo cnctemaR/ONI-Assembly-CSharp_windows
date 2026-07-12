@@ -10,6 +10,7 @@ public class FishTrapConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FishTrap", 1, 2, "fishtrap_kanim", 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.PLASTICS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Floodable = false;
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 
@@ -28,7 +29,7 @@ public class FishTrapConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		Lure.Def def = go.AddOrGetDef<Lure.Def>();
-		def.lurePoints = new CellOffset[]
+		def.defaultLurePoints = new CellOffset[]
 		{
 			new CellOffset(0, 0)
 		};

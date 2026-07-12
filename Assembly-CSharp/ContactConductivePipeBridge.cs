@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePipeBridge, ContactConductivePipeBridge.Instance, IStateMachineTarget, ContactConductivePipeBridge.Def>
@@ -7,7 +7,8 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.noLiquid;
-		this.root.PlayAnim("on", KAnim.PlayMode.Loop).Update("", new Action<ContactConductivePipeBridge.Instance, float>(ContactConductivePipeBridge.Flow200ms), UpdateRate.SIM_200ms, false);
+		this.noLiquid.PlayAnim("off", KAnim.PlayMode.Once).ParamTransition<float>(this.noLiquidTimer, this.withLiquid, GameStateMachine<ContactConductivePipeBridge, ContactConductivePipeBridge.Instance, IStateMachineTarget, ContactConductivePipeBridge.Def>.IsGTZero);
+		this.withLiquid.Update(new Action<ContactConductivePipeBridge.Instance, float>(ContactConductivePipeBridge.ExpirationTimerUpdate), UpdateRate.SIM_200ms, false).PlayAnim("on", KAnim.PlayMode.Loop).ParamTransition<float>(this.noLiquidTimer, this.noLiquid, GameStateMachine<ContactConductivePipeBridge, ContactConductivePipeBridge.Instance, IStateMachineTarget, ContactConductivePipeBridge.Def>.IsLTEZero);
 	}
 
 	private static void ExpirationTimerUpdate(ContactConductivePipeBridge.Instance smi, float dt)
@@ -15,54 +16,6 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 		float num = smi.sm.noLiquidTimer.Get(smi);
 		num -= dt;
 		smi.sm.noLiquidTimer.Set(num, smi, false);
-	}
-
-	private static void Flow200ms(ContactConductivePipeBridge.Instance smi, float dt)
-	{
-		if (smi.storage != null && smi.storage.items.Count > 0)
-		{
-			ContactConductivePipeBridge.ExchangeStorageTemperatureWithBuilding200ms(smi, smi.storage, smi.building, smi.tag, dt);
-			List<GameObject> items = smi.storage.items;
-			for (int i = 0; i < items.Count; i++)
-			{
-				PrimaryElement component = items[i].GetComponent<PrimaryElement>();
-				if (component.Mass > 0f)
-				{
-					float num = ((smi.def.type == ConduitType.Liquid) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow).AddElement(smi.outputCell, component.ElementID, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount);
-					component.KeepZeroMassObject = true;
-					float num2 = num / component.Mass;
-					int num3 = (int)((float)component.DiseaseCount * num2);
-					component.Mass -= num;
-					component.ModifyDiseaseCount(-num3, "ContactConductivePipeBridge.Flow200ms");
-				}
-			}
-		}
-	}
-
-	private static void ExchangeStorageTemperatureWithBuilding200ms(ContactConductivePipeBridge.Instance smi, Storage storage, Building building, Tag tag, float dt)
-	{
-		List<GameObject> items = storage.items;
-		PrimaryElement component = building.GetComponent<PrimaryElement>();
-		float num = component.Element.thermalConductivity * building.Def.ThermalConductivity;
-		for (int i = 0; i < items.Count; i++)
-		{
-			PrimaryElement component2 = items[i].GetComponent<PrimaryElement>();
-			if (component2.Mass > 0f && component2.HasTag(tag))
-			{
-				PrimaryElement primaryElement = component2;
-				float num2 = primaryElement.Mass * primaryElement.Element.specificHeatCapacity;
-				float num3 = building.Def.MassForTemperatureModification * component.Element.specificHeatCapacity;
-				float temperature = component.Temperature;
-				float temperature2 = primaryElement.Temperature;
-				float finalContentTemperature = ContactConductivePipeBridge.GetFinalContentTemperature(ContactConductivePipeBridge.GetKilloJoulesTransfered(ContactConductivePipeBridge.CalculateMaxWattsTransfered(temperature, num, temperature2, primaryElement.Element.thermalConductivity), dt, temperature, num3, temperature2, num2), temperature, num3, temperature2, num2);
-				float finalBuildingTemperature = ContactConductivePipeBridge.GetFinalBuildingTemperature(temperature2, finalContentTemperature, num2, temperature, num3);
-				if ((finalBuildingTemperature >= 0f && finalBuildingTemperature <= 10000f) & (finalContentTemperature >= 0f && finalContentTemperature <= 10000f))
-				{
-					primaryElement.Temperature = finalContentTemperature;
-					component.Temperature = finalBuildingTemperature;
-				}
-			}
-		}
 	}
 
 	private static float CalculateMaxWattsTransfered(float buildingTemperature, float building_thermal_conductivity, float content_temperature, float content_thermal_conductivity)
@@ -151,29 +104,76 @@ public class ContactConductivePipeBridge : GameStateMachine<ContactConductivePip
 		public override void StartSM()
 		{
 			base.StartSM();
+			this.inputCell = this.building.GetUtilityInputCell();
 			this.outputCell = this.building.GetUtilityOutputCell();
 			this.structureHandle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
+			Conduit.GetFlowManager(this.type).AddConduitUpdater(new Action<float>(this.Flow), ConduitFlowPriority.Default);
 		}
 
 		protected override void OnCleanUp()
 		{
 			base.OnCleanUp();
-			this.storage.DropAll(false, false, default(Vector3), true, null);
+			Conduit.GetFlowManager(this.type).RemoveConduitUpdater(new Action<float>(this.Flow));
+		}
+
+		private void Flow(float dt)
+		{
+			ConduitFlow flowManager = Conduit.GetFlowManager(this.type);
+			if (flowManager.HasConduit(this.inputCell) && flowManager.HasConduit(this.outputCell))
+			{
+				ConduitFlow.ConduitContents contents = flowManager.GetContents(this.inputCell);
+				ConduitFlow.ConduitContents contents2 = flowManager.GetContents(this.outputCell);
+				float num = Mathf.Min(contents.mass, base.def.pumpKGRate * dt);
+				if (flowManager.CanMergeContents(contents, contents2, num))
+				{
+					base.smi.sm.noLiquidTimer.Set(1.5f, base.smi, false);
+					float amountAllowedForMerging = flowManager.GetAmountAllowedForMerging(contents, contents2, num);
+					if (amountAllowedForMerging > 0f)
+					{
+						float num2 = this.ExchangeStorageTemperatureWithBuilding(contents, amountAllowedForMerging, dt);
+						float num3 = ((base.def.type == ConduitType.Liquid) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow).AddElement(this.outputCell, contents.element, amountAllowedForMerging, num2, contents.diseaseIdx, contents.diseaseCount);
+						if (amountAllowedForMerging != num3)
+						{
+							global::Debug.Log("Mass Differs By: " + (amountAllowedForMerging - num3).ToString());
+						}
+						flowManager.RemoveElement(this.inputCell, num3);
+					}
+				}
+			}
+		}
+
+		private float ExchangeStorageTemperatureWithBuilding(ConduitFlow.ConduitContents content, float mass, float dt)
+		{
+			PrimaryElement component = this.building.GetComponent<PrimaryElement>();
+			float num = component.Element.thermalConductivity * this.building.Def.ThermalConductivity;
+			if (mass > 0f)
+			{
+				Element element = ElementLoader.FindElementByHash(content.element);
+				float num2 = mass * element.specificHeatCapacity;
+				float num3 = this.building.Def.MassForTemperatureModification * component.Element.specificHeatCapacity;
+				float temperature = component.Temperature;
+				float temperature2 = content.temperature;
+				float killoJoulesTransfered = ContactConductivePipeBridge.GetKilloJoulesTransfered(ContactConductivePipeBridge.CalculateMaxWattsTransfered(temperature, num, temperature2, element.thermalConductivity), dt, temperature, num3, temperature2, num2);
+				float finalContentTemperature = ContactConductivePipeBridge.GetFinalContentTemperature(killoJoulesTransfered, temperature, num3, temperature2, num2);
+				float finalBuildingTemperature = ContactConductivePipeBridge.GetFinalBuildingTemperature(temperature2, finalContentTemperature, num2, temperature, num3);
+				if ((finalBuildingTemperature >= 0f && finalBuildingTemperature <= 10000f) & (finalContentTemperature >= 0f && finalContentTemperature <= 10000f))
+				{
+					GameComps.StructureTemperatures.ProduceEnergy(base.smi.structureHandle, killoJoulesTransfered, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, Time.time);
+					return finalContentTemperature;
+				}
+			}
+			return 0f;
 		}
 
 		public ConduitType type = ConduitType.Liquid;
 
 		public HandleVector<int>.Handle structureHandle;
 
+		public int inputCell = -1;
+
 		public int outputCell = -1;
 
 		[MyCmpGet]
-		public Storage storage;
-
-		[MyCmpGet]
 		public Building building;
-
-		[MyCmpGet]
-		public ConduitDispenser conduitDispenser;
 	}
 }

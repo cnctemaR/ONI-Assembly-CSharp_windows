@@ -100,6 +100,22 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 	public class StatesInstance : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.GameInstance
 	{
+		public Tag RootChore_RequiredTag
+		{
+			get
+			{
+				return this.rootChore.requiredTag;
+			}
+		}
+
+		public bool RootChore_ValidateRequiredTagOnTagChange
+		{
+			get
+			{
+				return this.rootChore.validateRequiredTagOnTagChange;
+			}
+		}
+
 		public StatesInstance(FetchAreaChore master, Chore.Precondition.Context context)
 			: base(master)
 		{
@@ -659,7 +675,8 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.SetupFetch();
 			});
-			this.fetching.movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, this.fetching.pickup, this.fetching.fetchfail, null, NavigationTactics.ReduceTravelDistance);
+			this.fetching.movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, this.fetching.pickup, this.fetching.fetchfail, null, NavigationTactics.ReduceTravelDistance).Target(this.fetchTarget).EventHandlerTransition(GameHashes.TagsChanged, this.fetching.fetchfail, (FetchAreaChore.StatesInstance smi, object obj) => smi.RootChore_ValidateRequiredTagOnTagChange && smi.RootChore_RequiredTag.IsValid && !this.fetchTarget.Get(smi).HasTag(smi.RootChore_RequiredTag))
+				.Target(this.fetcher);
 			this.fetching.pickup.DoPickup(this.fetchTarget, this.fetchResultTarget, this.fetchAmount, this.fetching.fetchcomplete, this.fetching.fetchfail).Exit(delegate(FetchAreaChore.StatesInstance smi)
 			{
 				GameObject gameObject = smi.sm.fetchTarget.Get(smi);

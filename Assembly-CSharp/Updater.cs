@@ -48,13 +48,30 @@ public readonly struct Updater : IEnumerator
 		});
 	}
 
-	public static Updater While(Func<bool> fn)
+	public static Updater While(Func<bool> isTrueFn)
 	{
 		return new Updater(delegate(float dt)
 		{
-			if (!fn())
+			if (!isTrueFn())
 			{
 				return UpdaterResult.Complete;
+			}
+			return UpdaterResult.NotComplete;
+		});
+	}
+
+	public static Updater While(Func<bool> isTrueFn, Func<Updater> getUpdaterWhileNotTrueFn)
+	{
+		Updater whileNotTrueUpdater = Updater.None();
+		return new Updater(delegate(float dt)
+		{
+			if (whileNotTrueUpdater.Internal_Update(dt) == UpdaterResult.Complete)
+			{
+				if (!isTrueFn())
+				{
+					return UpdaterResult.Complete;
+				}
+				whileNotTrueUpdater = getUpdaterWhileNotTrueFn();
 			}
 			return UpdaterResult.NotComplete;
 		});
@@ -75,12 +92,12 @@ public readonly struct Updater : IEnumerator
 		int frame = 0;
 		return new Updater(delegate(float dt)
 		{
+			int frame2 = frame;
+			frame = frame2 + 1;
 			if (framesToWait <= frame)
 			{
 				return UpdaterResult.Complete;
 			}
-			int frame2 = frame;
-			frame = frame2 + 1;
 			return UpdaterResult.NotComplete;
 		});
 	}
@@ -90,11 +107,11 @@ public readonly struct Updater : IEnumerator
 		float currentSeconds = 0f;
 		return new Updater(delegate(float dt)
 		{
+			currentSeconds += dt;
 			if (secondsToWait <= currentSeconds)
 			{
 				return UpdaterResult.Complete;
 			}
-			currentSeconds += dt;
 			return UpdaterResult.NotComplete;
 		});
 	}
@@ -116,7 +133,7 @@ public readonly struct Updater : IEnumerator
 
 	public static Updater GenericEase<T>(Action<T> useFn, Func<T, T, float, T> interpolateFn, Easing.EasingFn easingFn, T from, T to, float duration)
 	{
-		Updater.<>c__DisplayClass17_0<T> CS$<>8__locals1 = new Updater.<>c__DisplayClass17_0<T>();
+		Updater.<>c__DisplayClass18_0<T> CS$<>8__locals1 = new Updater.<>c__DisplayClass18_0<T>();
 		CS$<>8__locals1.useFn = useFn;
 		CS$<>8__locals1.interpolateFn = interpolateFn;
 		CS$<>8__locals1.from = from;
@@ -255,7 +272,7 @@ public readonly struct Updater : IEnumerator
 
 	public static Promise RunRoutine(MonoBehaviour monoBehaviour, IEnumerator coroutine)
 	{
-		Updater.<>c__DisplayClass25_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass25_0();
+		Updater.<>c__DisplayClass26_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass26_0();
 		CS$<>8__locals1.coroutine = coroutine;
 		CS$<>8__locals1.willComplete = new Promise();
 		monoBehaviour.StartCoroutine(CS$<>8__locals1.<RunRoutine>g__Routine|0());
@@ -269,7 +286,7 @@ public readonly struct Updater : IEnumerator
 
 	public static Promise Run(MonoBehaviour monoBehaviour, Updater updater)
 	{
-		Updater.<>c__DisplayClass27_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass27_0();
+		Updater.<>c__DisplayClass28_0 CS$<>8__locals1 = new Updater.<>c__DisplayClass28_0();
 		CS$<>8__locals1.updater = updater;
 		CS$<>8__locals1.willComplete = new Promise();
 		monoBehaviour.StartCoroutine(CS$<>8__locals1.<Run>g__Routine|0());

@@ -32,7 +32,12 @@ public static class BaseLightBugConfig
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
 		gameObject.AddOrGet<LoopingSounds>();
-		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Phosphorite };
+		gameObject.AddOrGet<Trappable>();
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
+		{
+			GameTags.Phosphorite,
+			GameTags.Creatures.FlyersLure
+		};
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
@@ -73,6 +78,7 @@ public static class BaseLightBugConfig
 		}
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
+			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
@@ -83,10 +89,15 @@ public static class BaseLightBugConfig
 			.Add(new RanchedStates.Def(), !is_baby, -1)
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
+			.Add(new DrinkMilkStates.Def
+			{
+				shouldBeBehindMilkTank = true
+			}, true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
+		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.LightBugSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

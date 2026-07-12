@@ -30,7 +30,7 @@ public class CancellableMove : Cancellable
 		}
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		if (this.fetchChore == null)
+		if (this.fetchChore == null && this.movables[0].Get() != null && !this.movables[0].Get().gameObject.IsNullOrDestroyed())
 		{
 			this.fetchChore = new MovePickupableChore(this, this.movables[0].Get().gameObject, new Action<Chore>(this.OnChoreEnd));
 		}
@@ -47,20 +47,30 @@ public class CancellableMove : Cancellable
 		Prioritizable.RemoveRef(base.gameObject);
 	}
 
-	public void OnCancel()
+	public void CancelAll()
 	{
-		foreach (Ref<Movable> @ref in this.movables)
+		this.OnCancel(null);
+	}
+
+	public void OnCancel(Movable cancel_movable = null)
+	{
+		for (int i = this.movables.Count - 1; i >= 0; i--)
 		{
+			Ref<Movable> @ref = this.movables[i];
 			if (@ref != null)
 			{
-				@ref.Get().ClearMove();
+				Movable movable = @ref.Get();
+				if (cancel_movable == null || movable == cancel_movable)
+				{
+					movable.ClearMove();
+					this.movables.RemoveAt(i);
+				}
 			}
 		}
-		this.movables.Clear();
 		if (this.fetchChore != null)
 		{
 			this.fetchChore.Cancel("CancelMove");
-			if (this.fetchChore.driver == null)
+			if (this.fetchChore.driver == null && this.movables.Count <= 0)
 			{
 				Util.KDestroyGameObject(base.gameObject);
 			}
@@ -69,12 +79,12 @@ public class CancellableMove : Cancellable
 
 	protected override void OnCancel(object data)
 	{
-		this.OnCancel();
+		this.OnCancel(null);
 	}
 
 	private void OnRefreshUserMenu(object data)
 	{
-		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.PICKUPABLEMOVE.NAME_OFF, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.PICKUPABLEMOVE.TOOLTIP_OFF, true), 1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.PICKUPABLEMOVE.NAME_OFF, new global::System.Action(this.CancelAll), global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.PICKUPABLEMOVE.TOOLTIP_OFF, true), 1f);
 	}
 
 	public void SetMovable(Movable movable)
@@ -116,7 +126,7 @@ public class CancellableMove : Cancellable
 		if (this.movables.Count <= 0)
 		{
 			global::Debug.LogWarning("Pickupable " + moved.name + " has been destroyed and there are no more pickups to move. Cancel the chore");
-			this.OnCancel();
+			this.OnCancel(null);
 		}
 	}
 

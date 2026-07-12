@@ -83,13 +83,19 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 				{
 					smi.GoTo(this.holding.ditch);
 				});
-				KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
-				smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
-				smi.master.GetComponent<KAnimControllerBase>().AddAnimOverrides(anim, 0f);
+				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				{
+					KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
+					smi.master.GetComponent<KAnimControllerBase>().AddAnimOverrides(anim, 0f);
+				}
 			}).Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
-				KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
-				smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
+				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				{
+					KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
+				}
 			});
 			this.holding.pickup.Target(this.rescuer).PlayAnim("pickup").Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
@@ -100,8 +106,11 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 					this.rescuer.Get(smi).GetComponent<Storage>().Store(this.rescueTarget.Get(smi), false, false, true, false);
 					this.rescueTarget.Get(smi).transform.SetLocalPosition(Vector3.zero);
 					KBatchedAnimTracker component = this.rescueTarget.Get(smi).GetComponent<KBatchedAnimTracker>();
-					component.symbol = new HashedString("snapTo_pivot");
-					component.offset = new Vector3(0f, 0f, 1f);
+					if (component != null)
+					{
+						component.symbol = new HashedString("snapTo_pivot");
+						component.offset = new Vector3(0f, 0f, 1f);
+					}
 				})
 				.EventTransition(GameHashes.AnimQueueComplete, this.holding.delivering, null);
 			this.holding.delivering.InitializeStates(this.rescuer, this.deliverTarget, this.holding.deposit, this.holding.ditch, null, null).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)

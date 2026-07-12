@@ -45,10 +45,12 @@ public static class BaseOilFloaterConfig
 			{
 				inhaleSound = text
 			}, true, -1)
+			.Add(new DrinkMilkStates.Def(), true, -1)
 			.Add(new SameSpotPoopStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
+		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.OilFloaterSpecies, symbolOverridePrefix);
 		string text2 = "OilFloater_move_LP";
 		if (is_baby)

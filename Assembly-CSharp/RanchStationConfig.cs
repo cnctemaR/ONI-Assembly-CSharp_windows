@@ -62,7 +62,7 @@ public class RanchStationConfig : IBuildingConfig
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.CreaturePen.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
-		go.AddOrGet<SkillPerkMissingComplainer>().requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;
+		go.AddOrGet<SkillPerkMissingComplainer>().requiredSkillPerk = Db.Get().SkillPerks.CanUseRanchStation.Id;
 		Prioritizable.AddRef(go);
 	}
 

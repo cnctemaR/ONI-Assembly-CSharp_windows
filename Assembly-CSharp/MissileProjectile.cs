@@ -43,7 +43,13 @@ public class MissileProjectile : GameStateMachine<MissileProjectile, MissileProj
 
 	public class Def : StateMachine.BaseDef
 	{
+		public float MeteorDebrisMassModifier = 0.25f;
+
 		public float ExplosionRange = 2f;
+
+		public float debrisSpeed = 6f;
+
+		public float debrisMaxAngle = 40f;
 
 		public string explosionEffectAnim = "missile_explosion_kanim";
 	}
@@ -132,9 +138,117 @@ public class MissileProjectile : GameStateMachine<MissileProjectile, MissileProj
 		{
 			if (!base.smi.sm.meteorTarget.IsNullOrDestroyed())
 			{
+				this.SpawnMeteorResources(base.smi.sm.meteorTarget.Get(base.smi));
 				Util.KDestroyGameObject(base.smi.sm.meteorTarget.Get(base.smi));
 			}
 			this.Explode();
+		}
+
+		private void SpawnMeteorResources(Comet meteor)
+		{
+			PrimaryElement meteorPE = meteor.GetComponent<PrimaryElement>();
+			Element element = meteorPE.Element;
+			int num = meteor.GetMyWorldId();
+			if (num == 255 || num == -1)
+			{
+				WorldContainer worldFromPosition = ClusterManager.Instance.GetWorldFromPosition(meteor.transform.GetPosition() - Vector3.down * Grid.CellSizeInMeters);
+				num = ((worldFromPosition == null) ? num : worldFromPosition.id);
+			}
+			bool flag = Grid.IsValidCellInWorld(Grid.PosToCell(meteor.TargetPosition), num);
+			float num2 = meteor.ExplosionMass * base.def.MeteorDebrisMassModifier;
+			float num3 = meteor.AddTileMass * base.def.MeteorDebrisMassModifier;
+			int num_nonTiles_ores = meteor.GetRandomNumOres();
+			float num4 = ((num_nonTiles_ores > 0) ? (num2 / (float)num_nonTiles_ores) : 1f);
+			float temperature = meteor.GetRandomTemperatureForOres();
+			int num_tile_ores = meteor.addTiles;
+			float num5 = ((num_tile_ores > 0) ? (num3 / (float)num_tile_ores) : 1f);
+			Vector3 normalized = (meteor.TargetPosition - this.Position).normalized;
+			Vector2 vector = new Vector2(normalized.x, normalized.y);
+			new Vector2(vector.y, -vector.x);
+			Func<int, int, float, Vector3> func = delegate(int objectIndex, int objectCount, float maxAngleAllowed)
+			{
+				int num8 = ((objectCount % 2 == 0) ? objectCount : (objectCount - 1));
+				float num9 = maxAngleAllowed * 2f / (float)num8;
+				bool flag2 = objectIndex % 2 == 0;
+				float num10 = num9 * (float)Mathf.CeilToInt((float)objectIndex / 2f) * 0.017453292f * (float)(flag2 ? 1 : (-1));
+				Vector3 vector7 = new Vector3(Mathf.Cos(4.712389f + num10), Mathf.Sin(4.712389f + num10), 0f);
+				return vector7.normalized * this.def.debrisSpeed;
+			};
+			Action<Substance, float, Vector3> action = delegate(Substance substance, float mass, Vector3 velocity)
+			{
+				Vector3 vector8 = velocity.normalized * 0.75f;
+				vector8 += new Vector3(0f, 0.55f, 0f);
+				vector8 += this.Position;
+				GameObject gameObject = substance.SpawnResource(vector8, mass, temperature, meteorPE.DiseaseIdx, meteorPE.DiseaseCount / (num_nonTiles_ores + num_tile_ores), false, false, false);
+				if (GameComps.Fallers.Has(gameObject))
+				{
+					GameComps.Fallers.Remove(gameObject);
+				}
+				GameComps.Fallers.Add(gameObject, velocity);
+			};
+			Action<string, Vector3> action2 = delegate(string prefabName, Vector3 velocity)
+			{
+				Vector3 vector9 = velocity.normalized * 0.75f;
+				vector9 += new Vector3(0f, 0.55f, 0f);
+				vector9 += this.Position;
+				GameObject gameObject2 = Scenario.SpawnPrefab(Grid.PosToCell(vector9), 0, 0, prefabName, Grid.SceneLayer.Ore);
+				gameObject2.SetActive(true);
+				vector9.z = gameObject2.transform.position.z;
+				gameObject2.transform.position = vector9;
+				if (GameComps.Fallers.Has(gameObject2))
+				{
+					GameComps.Fallers.Remove(gameObject2);
+				}
+				GameComps.Fallers.Add(gameObject2, velocity);
+			};
+			Substance substance2 = element.substance;
+			if (flag)
+			{
+				int num6 = num_nonTiles_ores + num_tile_ores + ((meteor.lootOnDestroyedByMissile == null) ? 0 : meteor.lootOnDestroyedByMissile.Length);
+				for (int i = 0; i < num_nonTiles_ores; i++)
+				{
+					Vector3 vector2 = func(i, num6, base.def.debrisMaxAngle);
+					action(substance2, num4, vector2);
+				}
+				for (int j = 0; j < num_tile_ores; j++)
+				{
+					Vector3 vector3 = func(num_nonTiles_ores + j, num6, base.def.debrisMaxAngle);
+					action(substance2, num5, vector3);
+				}
+				if (meteor.lootOnDestroyedByMissile != null)
+				{
+					for (int k = 0; k < meteor.lootOnDestroyedByMissile.Length; k++)
+					{
+						Vector3 vector4 = func(num_nonTiles_ores + num_tile_ores + k, num6, base.def.debrisMaxAngle);
+						string text = meteor.lootOnDestroyedByMissile[k];
+						action2(text, vector4);
+					}
+					return;
+				}
+			}
+			else if (num != -1 && num != 255)
+			{
+				int num7 = Grid.PosToCell(meteor.TargetPosition);
+				Vector3 vector5 = meteor.TargetPosition;
+				Vector2 vector6 = meteor.GetMyWorld().WorldOffset;
+				while (!Grid.IsValidCellInWorld(num7, num) && vector5.y > vector6.y)
+				{
+					num7 = Grid.CellBelow(num7);
+					vector5 = Grid.CellToPos(num7);
+				}
+				if (vector5.y > vector6.y)
+				{
+					substance2.SpawnResource(vector5, num2 + num3, temperature, meteorPE.DiseaseIdx, meteorPE.DiseaseCount, false, false, false);
+					if (meteor.lootOnDestroyedByMissile != null)
+					{
+						for (int l = 0; l < meteor.lootOnDestroyedByMissile.Length; l++)
+						{
+							string text2 = meteor.lootOnDestroyedByMissile[l];
+							Scenario.SpawnPrefab(num7, 0, 0, text2, Grid.SceneLayer.Ore).SetActive(true);
+						}
+					}
+				}
+			}
 		}
 
 		private void Explode()

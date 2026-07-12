@@ -19,15 +19,16 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 		this.IsOpenForRanching = precondition;
 		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
 		base.AddPrecondition(this.IsOpenForRanching, rancher_station.GetSMI<RanchStation.Instance>());
-		base.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanUseRanchStation.Id);
+		SkillPerkMissingComplainer component = base.GetComponent<SkillPerkMissingComplainer>();
+		base.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, component.requiredSkillPerk);
 		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, rancher_station.GetComponent<Building>());
-		Operational component = rancher_station.GetComponent<Operational>();
-		base.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
-		Deconstructable component2 = rancher_station.GetComponent<Deconstructable>();
-		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
-		BuildingEnabledButton component3 = rancher_station.GetComponent<BuildingEnabledButton>();
-		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
+		Operational component2 = rancher_station.GetComponent<Operational>();
+		base.AddPrecondition(ChorePreconditions.instance.IsOperational, component2);
+		Deconstructable component3 = rancher_station.GetComponent<Deconstructable>();
+		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component3);
+		BuildingEnabledButton component4 = rancher_station.GetComponent<BuildingEnabledButton>();
+		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component4);
 		base.smi = new RancherChore.RancherChoreStates.Instance(rancher_station);
 		base.SetPrioritizable(rancher_station.GetComponent<Prioritizable>());
 	}
@@ -54,7 +55,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			base.Target(this.rancher);
 			this.root.Exit("TriggerRanchStationNoLongerAvailable", delegate(RancherChore.RancherChoreStates.Instance smi)
 			{
-				smi.TriggerRanchStationNoLongerAvailable();
+				smi.ranchStation.TriggerRanchStationNoLongerAvailable();
 			});
 			this.moveToRanch.MoveTo((RancherChore.RancherChoreStates.Instance smi) => Grid.PosToCell(smi.transform.GetPosition()), this.waitForAvailableRanchable, null, false);
 			this.waitForAvailableRanchable.Enter("FindRanchable", delegate(RancherChore.RancherChoreStates.Instance smi)
@@ -67,7 +68,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			this.ranchCritter.ScheduleGoTo(0.5f, this.ranchCritter.callForCritter).EventTransition(GameHashes.CreatureAbandonedRanchStation, this.waitForAvailableRanchable, null);
 			this.ranchCritter.callForCritter.ToggleAnims("anim_interacts_rancherstation_kanim", 0f, "").PlayAnim("calling_loop", KAnim.PlayMode.Loop).ScheduleActionNextFrame("TellCreatureRancherIsReady", delegate(RancherChore.RancherChoreStates.Instance smi)
 			{
-				smi.TellCreatureRancherIsReady();
+				smi.ranchStation.MessageRancherReady();
 			})
 				.Target(this.masterTarget)
 				.EventTransition(GameHashes.CreatureArrivedAtRanchStation, this.ranchCritter.working, null);
@@ -130,16 +131,6 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				}
 			}
 
-			public void TriggerRanchStationNoLongerAvailable()
-			{
-				this.ranchStation.TriggerRanchStationNoLongerAvailable();
-			}
-
-			public void TellCreatureRancherIsReady()
-			{
-				this.ranchStation.MessageRancherReady();
-			}
-
 			private const float WAIT_FOR_RANCHABLE_TIMEOUT = 2f;
 
 			public RanchStation.Instance ranchStation;
@@ -177,6 +168,15 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			this.critterAnimController = this.ranch.ActiveRanchable.AnimController;
 			this.critterAnimController.Play(this.ranch.def.RanchedPreAnim, KAnim.PlayMode.Once, 1f, 0f);
 			this.critterAnimController.Queue(this.ranch.def.RanchedLoopAnim, KAnim.PlayMode.Loop, 1f, 0f);
+		}
+
+		protected override bool OnWorkTick(Worker worker, float dt)
+		{
+			if (this.ranch.def.OnRanchWorkTick != null)
+			{
+				this.ranch.def.OnRanchWorkTick(this.ranch.ActiveRanchable.gameObject, dt, this);
+			}
+			return base.OnWorkTick(worker, dt);
 		}
 
 		public override void OnPendingCompleteWork(Worker work)

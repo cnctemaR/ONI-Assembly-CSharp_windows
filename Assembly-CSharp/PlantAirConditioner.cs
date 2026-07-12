@@ -13,15 +13,15 @@ public class PlantAirConditioner : AirConditioner
 
 	private void OnFertilized(object data)
 	{
-		this.operational.SetFlag(this.fertilizedFlag, true);
+		this.operational.SetFlag(PlantAirConditioner.fertilizedFlag, true);
 	}
 
 	private void OnUnfertilized(object data)
 	{
-		this.operational.SetFlag(this.fertilizedFlag, false);
+		this.operational.SetFlag(PlantAirConditioner.fertilizedFlag, false);
 	}
 
-	private Operational.Flag fertilizedFlag = new Operational.Flag("fertilized", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag fertilizedFlag = new Operational.Flag("fertilized", Operational.Flag.Type.Requirement);
 
 	private static readonly EventSystem.IntraObjectHandler<PlantAirConditioner> OnFertilizedDelegate = new EventSystem.IntraObjectHandler<PlantAirConditioner>(delegate(PlantAirConditioner component, object data)
 	{

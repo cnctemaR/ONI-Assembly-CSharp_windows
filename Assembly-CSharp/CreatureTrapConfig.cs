@@ -8,6 +8,8 @@ public class CreatureTrapConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("CreatureTrap", 2, 1, "creaturetrap_kanim", 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.PLASTICS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0, 0.2f);
+		buildingDef.Deprecated = true;
+		buildingDef.ShowInBuildMenu = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Floodable = false;
 		return buildingDef;

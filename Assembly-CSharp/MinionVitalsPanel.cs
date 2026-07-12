@@ -18,6 +18,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.Viability, null);
 		this.AddAmountLine(Db.Get().Amounts.PowerCharge, null);
 		this.AddAmountLine(Db.Get().Amounts.Fertility, null);
+		this.AddAmountLine(Db.Get().Amounts.Beckoning, null);
 		this.AddAmountLine(Db.Get().Amounts.Age, null);
 		this.AddAmountLine(Db.Get().Amounts.Stress, null);
 		this.AddAttributeLine(Db.Get().Attributes.QualityOfLife, null);
@@ -26,6 +27,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.Stamina, null);
 		this.AddAmountLine(Db.Get().Amounts.Calories, null);
 		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, null);
+		this.AddAmountLine(Db.Get().Amounts.MilkProduction, null);
 		this.AddAmountLine(Db.Get().Amounts.ElementGrowth, null);
 		this.AddAmountLine(Db.Get().Amounts.Temperature, null);
 		this.AddAmountLine(Db.Get().Amounts.Decor, null);

@@ -93,7 +93,7 @@ public class Movable : Workable
 	{
 		if (this.StorageProxy != null)
 		{
-			this.StorageProxy.GetComponent<CancellableMove>().OnCancel();
+			this.StorageProxy.GetComponent<CancellableMove>().OnCancel(this);
 		}
 	}
 
@@ -137,7 +137,7 @@ public class Movable : Workable
 
 	private void OnClickCancel()
 	{
-		this.StorageProxy.GetComponent<CancellableMove>().OnCancel();
+		this.StorageProxy.GetComponent<CancellableMove>().OnCancel(this);
 	}
 
 	private void OnRefreshUserMenu(object data)

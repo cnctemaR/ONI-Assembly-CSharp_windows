@@ -37,55 +37,35 @@ public static class ClothingOutfitUtility
 		}
 		string text2 = Path.Combine(text, ClothingOutfitUtility.OutfitFile_U47_to_Present);
 		string text3 = SerializableOutfitData.ToJsonString(SerializableOutfitData.ToJson(CustomClothingOutfits.Instance.Internal_GetOutfitData()));
-		bool flag = false;
-		try
-		{
-			using (FileStream fileStream = File.Open(text2, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
-			{
-				flag = true;
-				byte[] bytes = Encoding.UTF8.GetBytes(text3);
-				fileStream.Write(bytes, 0, bytes.Length);
-			}
-		}
-		catch (Exception)
-		{
-			DebugUtil.DevAssert(false, "SaveClothingOutfitData failed", null);
-		}
-		return flag;
+		return ClothingOutfitUtility.TryWriteTo(text2, text3);
 	}
 
 	public static void LoadClothingOutfitData(ClothingOutfits dbClothingOutfits)
 	{
-		SerializableOutfitData.Version2 version = null;
-		bool flag;
-		try
+		string text = ClothingOutfitUtility.GetPathToJsonFile(ClothingOutfitUtility.OutfitFile_U47_to_Present);
+		if (!File.Exists(text))
 		{
-			string text = Path.Combine(Util.RootFolder(), Util.GetKleiItemUserDataFolderName(), ClothingOutfitUtility.OutfitFile_U47_to_Present);
+			text = ClothingOutfitUtility.GetPathToJsonFile(ClothingOutfitUtility.OutfitFile_U44_to_U46);
 			if (!File.Exists(text))
 			{
-				text = Path.Combine(Util.RootFolder(), Util.GetKleiItemUserDataFolderName(), ClothingOutfitUtility.OutfitFile_U44_to_U46);
-				if (!File.Exists(text))
-				{
-					return;
-				}
+				return;
 			}
-			string text2;
-			using (FileStream fileStream = File.Open(text, FileMode.Open))
-			{
-				using (StreamReader streamReader = new StreamReader(fileStream, new UTF8Encoding(false, true)))
-				{
-					text2 = streamReader.ReadToEnd();
-				}
-			}
-			version = SerializableOutfitData.FromJson(JObject.Parse(text2));
-			flag = true;
 		}
-		catch
+		string text2;
+		if (!ClothingOutfitUtility.TryReadFrom(text, out text2))
 		{
-			flag = false;
-			DebugUtil.DevAssert(false, "LoadClothingOutfitData failed", null);
+			return;
 		}
-		if (!flag || version == null)
+		SerializableOutfitData.Version2 version = null;
+		try
+		{
+			version = SerializableOutfitData.FromJson(JObject.Parse(text2));
+		}
+		catch (Exception ex)
+		{
+			DebugUtil.DevAssert(false, "ClothingOutfitData Parse failed: " + ex.ToString(), null);
+		}
+		if (version == null)
 		{
 			return;
 		}
@@ -96,9 +76,10 @@ public static class ClothingOutfitUtility
 			keyValuePair.Deconstruct<string, SerializableOutfitData.Version2.CustomTemplateOutfitEntry>(out text3, out customTemplateOutfitEntry);
 			string text4 = text3;
 			SerializableOutfitData.Version2.CustomTemplateOutfitEntry customTemplateOutfitEntry2 = customTemplateOutfitEntry;
-			if (dbClothingOutfits.TryGet(text4) != null)
+			ClothingOutfitResource clothingOutfitResource = dbClothingOutfits.TryGet(text4);
+			if (clothingOutfitResource != null)
 			{
-				Debug.LogError(string.Format("User outfit data is trying to overwrite default {0}, outfitType is {1}", text4, customTemplateOutfitEntry2));
+				DebugUtil.LogWarningArgs(new object[] { string.Format("UserAuthored outfit with id \"{0}\" of type {1} conflicts with DatabaseAuthored outfit with id \"{2}\" of type {3}. This may result in weird behaviour with outfits.", new object[] { text4, customTemplateOutfitEntry2.outfitType, clothingOutfitResource.Id, clothingOutfitResource.outfitType }) });
 			}
 		}
 		List<string> list = new List<string>();
@@ -167,6 +148,52 @@ public static class ClothingOutfitUtility
 			}
 		}
 		CustomClothingOutfits.Instance.Internal_SetOutfitData(version);
+	}
+
+	public static string GetPathToJsonFile(string jsonFileName)
+	{
+		return Path.Combine(Util.RootFolder(), Util.GetKleiItemUserDataFolderName(), jsonFileName);
+	}
+
+	public static bool TryWriteTo(string path, string data)
+	{
+		bool flag = false;
+		try
+		{
+			using (FileStream fileStream = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+			{
+				byte[] bytes = Encoding.UTF8.GetBytes(data);
+				fileStream.Write(bytes, 0, bytes.Length);
+				flag = true;
+			}
+		}
+		catch (Exception ex)
+		{
+			DebugUtil.DevAssert(false, "ClothingOutfitData Write failed: " + ex.ToString(), null);
+		}
+		return flag;
+	}
+
+	public static bool TryReadFrom(string path, out string data)
+	{
+		data = null;
+		bool flag = false;
+		try
+		{
+			using (FileStream fileStream = File.Open(path, FileMode.Open))
+			{
+				using (StreamReader streamReader = new StreamReader(fileStream, new UTF8Encoding(false, true)))
+				{
+					data = streamReader.ReadToEnd();
+					flag = true;
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			DebugUtil.DevAssert(false, "ClothingOutfitData Load failed: " + ex.ToString(), null);
+		}
+		return flag;
 	}
 
 	public static readonly PermitCategory[] PERMIT_CATEGORIES_FOR_CLOTHING = new PermitCategory[]

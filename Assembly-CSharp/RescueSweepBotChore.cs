@@ -87,13 +87,19 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 			this.approachSweepBot.InitializeStates(this.rescuer, this.rescueTarget, this.holding.pickup, this.failure, Grid.DefaultOffset, null);
 			this.holding.Target(this.rescuer).Enter(delegate(RescueSweepBotChore.StatesInstance smi)
 			{
-				KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
-				this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
-				this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().AddAnimOverrides(anim, 0f);
+				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				{
+					KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+					this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
+					this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().AddAnimOverrides(anim, 0f);
+				}
 			}).Exit(delegate(RescueSweepBotChore.StatesInstance smi)
 			{
-				KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
-				this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
+				if (this.rescuer.Get(smi).gameObject.HasTag(GameTags.Minion))
+				{
+					KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+					this.rescuer.Get(smi).GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
+				}
 			});
 			this.holding.pickup.Target(this.rescuer).PlayAnim("pickup").Enter(delegate(RescueSweepBotChore.StatesInstance smi)
 			{
@@ -103,8 +109,11 @@ public class RescueSweepBotChore : Chore<RescueSweepBotChore.StatesInstance>
 					this.rescuer.Get(smi).GetComponent<Storage>().Store(this.rescueTarget.Get(smi), false, false, true, false);
 					this.rescueTarget.Get(smi).transform.SetLocalPosition(Vector3.zero);
 					KBatchedAnimTracker component = this.rescueTarget.Get(smi).GetComponent<KBatchedAnimTracker>();
-					component.symbol = new HashedString("snapTo_pivot");
-					component.offset = new Vector3(0f, 0f, 1f);
+					if (component != null)
+					{
+						component.symbol = new HashedString("snapTo_pivot");
+						component.offset = new Vector3(0f, 0f, 1f);
+					}
 				})
 				.EventTransition(GameHashes.AnimQueueComplete, this.holding.delivering, null);
 			this.holding.delivering.InitializeStates(this.rescuer, this.deliverTarget, this.holding.deposit, this.holding.ditch, null, null).Update(delegate(RescueSweepBotChore.StatesInstance smi, float dt)

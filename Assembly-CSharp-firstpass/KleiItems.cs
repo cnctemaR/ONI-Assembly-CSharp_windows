@@ -105,24 +105,24 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		return ThreadedHttps<KleiItems>.Instance.TimeToNextTick;
 	}
 
-	public static void AddRequestInventoryRefresh()
+	public static void AddRequestInventoryRefresh(KleiItems.ResponseCallback cb = null)
 	{
-		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.GetAllItems, null);
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.GetAllItems, null, cb);
 	}
 
-	public static void AddRequestItemOpened(ulong itemId)
+	public static void AddRequestItemOpened(ulong itemId, KleiItems.ResponseCallback cb = null)
 	{
-		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.SetItemOpened, itemId);
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.SetItemOpened, itemId, cb);
 	}
 
-	public static void AddRequestMysteryBoxOpened(ulong itemId)
+	public static void AddRequestMysteryBoxOpened(ulong itemId, KleiItems.ResponseCallback cb = null)
 	{
-		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.OpenMysteryBox, itemId);
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.OpenMysteryBox, itemId, cb);
 	}
 
-	public static void AddRequestTick()
+	public static void AddRequestTick(KleiItems.ResponseCallback cb = null)
 	{
-		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.Tick, null);
+		ThreadedHttps<KleiItems>.Instance.AddRequest(KleiItems.Request.RequestType.Tick, null, cb);
 	}
 
 	public static void AddInventoryRefreshCallback(KleiItems.InventoryRefreshCallback cb)
@@ -159,6 +159,10 @@ public class KleiItems : ThreadedHttps<KleiItems>
 					this.OnTickReply(this.Response);
 				}
 			}
+			else
+			{
+				this.HandleError(activeRequest, "NULL");
+			}
 			this.RequestStarted = false;
 			this.RequestCompleted = false;
 			this.ActiveRequest = default(KleiItems.Request);
@@ -179,7 +183,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 			}
 			else if (request.Type == KleiItems.Request.RequestType.SetItemOpened)
 			{
-				flag = this.RequestItemOpened((ulong)request.Data);
+				flag = this.RequestItemOpened((ulong)request.Data, request.Cb);
 			}
 			else if (request.Type == KleiItems.Request.RequestType.OpenMysteryBox)
 			{
@@ -198,7 +202,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.TimeToNextTick -= Time.unscaledDeltaTime;
 		if (this.TimeToNextTick <= 0f)
 		{
-			KleiItems.AddRequestTick();
+			KleiItems.AddRequestTick(null);
 			this.TimeToNextTick += 360f;
 		}
 	}
@@ -209,22 +213,22 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.TimeToNextTick = 360f;
 		KleiItems.InventoryData.AllItems = new List<KleiItems.Item>();
 		KleiItems.InventoryData.ItemsByType = new Dictionary<string, List<KleiItems.Item>>();
+		this.RetryCount = 0;
 	}
 
-	private void AddRequest(KleiItems.Request.RequestType type, object data)
+	private void AddRequest(KleiItems.Request.RequestType type, object data, KleiItems.ResponseCallback cb)
 	{
 		KleiItems.Request request;
 		request.Type = type;
 		request.Data = data;
-		if (!this.Requests.Contains(request))
-		{
-			this.Requests.Add(request);
-		}
+		request.Cb = cb;
+		this.Requests.Add(request);
 	}
 
 	private void StartHttpsRequest(string url)
 	{
 		this.LIVE_ENDPOINT = url;
+		this.quitOnError = false;
 		base.Start();
 	}
 
@@ -249,13 +253,30 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		this.EndHttpsRequest();
 	}
 
+	private void HandleSuccess(KleiItems.Request req)
+	{
+		if (req.Cb != null)
+		{
+			KleiItems.Result result;
+			result.Success = true;
+			req.Cb(result);
+		}
+	}
+
 	private void HandleError(KleiItems.Request req, string errorCode)
 	{
 		if (errorCode == "E_EXPIRED_TOKEN" || errorCode == "E_INVALID_TOKEN")
 		{
 			this.WaitForReAuthentication = true;
-			this.AddRequest(req.Type, req.Data);
+			this.AddRequest(req.Type, req.Data, req.Cb);
 			ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnAuthenticateComplete), true);
+			return;
+		}
+		if (req.Cb != null)
+		{
+			KleiItems.Result result;
+			result.Success = false;
+			req.Cb(result);
 		}
 	}
 
@@ -307,20 +328,17 @@ public class KleiItems : ThreadedHttps<KleiItems>
 				}
 			}
 			this.SaveInventoryCache();
-			using (List<KleiItems.InventoryRefreshCallback>.Enumerator enumerator = this.InventoryRefreshCbs.GetEnumerator())
+			foreach (KleiItems.InventoryRefreshCallback inventoryRefreshCallback in this.InventoryRefreshCbs)
 			{
-				while (enumerator.MoveNext())
-				{
-					KleiItems.InventoryRefreshCallback inventoryRefreshCallback = enumerator.Current;
-					inventoryRefreshCallback();
-				}
-				return;
+				inventoryRefreshCallback();
 			}
+			this.HandleSuccess(this.ActiveRequest);
+			return;
 		}
 		this.HandleError(this.ActiveRequest, inventoryReply.ErrorCode);
 	}
 
-	private bool RequestItemOpened(ulong itemId)
+	private bool RequestItemOpened(ulong itemId, KleiItems.ResponseCallback cb)
 	{
 		string kleiToken = KleiAccount.KleiToken;
 		if (string.IsNullOrEmpty(kleiToken))
@@ -343,7 +361,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		KleiItems.SetItemOpenedReply setItemOpenedReply = JsonConvert.DeserializeObject<KleiItems.SetItemOpenedReply>(response);
 		if (!setItemOpenedReply.Error)
 		{
-			KleiItems.AddRequestInventoryRefresh();
+			KleiItems.AddRequestInventoryRefresh(this.ActiveRequest.Cb);
 			return;
 		}
 		this.HandleError(this.ActiveRequest, setItemOpenedReply.ErrorCode);
@@ -372,7 +390,7 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		KleiItems.OpenMysteryBoxReply openMysteryBoxReply = JsonConvert.DeserializeObject<KleiItems.OpenMysteryBoxReply>(response);
 		if (!openMysteryBoxReply.Error)
 		{
-			KleiItems.AddRequestInventoryRefresh();
+			KleiItems.AddRequestInventoryRefresh(this.ActiveRequest.Cb);
 			return;
 		}
 		this.HandleError(this.ActiveRequest, openMysteryBoxReply.ErrorCode);
@@ -395,18 +413,17 @@ public class KleiItems : ThreadedHttps<KleiItems>
 	private void OnTickReply(string response)
 	{
 		KleiItems.TickReply tickReply = JsonConvert.DeserializeObject<KleiItems.TickReply>(response);
-		if (!tickReply.Error)
-		{
-			if (tickReply.GiftReceived)
-			{
-				KleiItems.AddRequestInventoryRefresh();
-				return;
-			}
-		}
-		else
+		if (tickReply.Error)
 		{
 			this.HandleError(this.ActiveRequest, tickReply.ErrorCode);
+			return;
 		}
+		if (tickReply.GiftReceived)
+		{
+			KleiItems.AddRequestInventoryRefresh(this.ActiveRequest.Cb);
+			return;
+		}
+		this.HandleSuccess(this.ActiveRequest);
 	}
 
 	private static uint hash(string s, uint seed = 0U)
@@ -444,7 +461,10 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		inventoryCache.items = new SortedDictionary<ulong, KleiItems.Item>();
 		foreach (KleiItems.Item item in KleiItems.InventoryData.AllItems)
 		{
-			inventoryCache.items[item.ItemId] = item;
+			if (item.IsOpened)
+			{
+				inventoryCache.items[item.ItemId] = item;
+			}
 		}
 		inventoryCache.checksum = KleiItems.hash(text, 0U);
 		foreach (KeyValuePair<ulong, KleiItems.Item> keyValuePair in inventoryCache.items)
@@ -549,6 +569,13 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public bool IsOpened;
 	}
 
+	public struct Result
+	{
+		public bool Success;
+	}
+
+	public delegate void ResponseCallback(KleiItems.Result r);
+
 	public delegate void InventoryRefreshCallback();
 
 	private struct Item
@@ -572,6 +599,8 @@ public class KleiItems : ThreadedHttps<KleiItems>
 		public KleiItems.Request.RequestType Type;
 
 		public object Data;
+
+		public KleiItems.ResponseCallback Cb;
 
 		public enum RequestType
 		{

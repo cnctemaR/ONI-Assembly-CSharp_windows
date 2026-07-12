@@ -101,13 +101,18 @@ public class FarmDiagnostic : ColonyDiagnostic
 
 	public override ColonyDiagnostic.DiagnosticResult Evaluate()
 	{
-		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.NO_MINIONS, null);
+		ColonyDiagnostic.DiagnosticResult diagnosticResult;
 		if (ColonyDiagnosticUtility.IgnoreRocketsWithNoCrewRequested(base.worldID, out diagnosticResult))
 		{
 			return diagnosticResult;
 		}
 		this.RefreshPlots();
-		return base.Evaluate();
+		diagnosticResult = base.Evaluate();
+		if (diagnosticResult.opinion == ColonyDiagnostic.DiagnosticResult.Opinion.Normal)
+		{
+			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.FARMDIAGNOSTIC.NORMAL;
+		}
+		return diagnosticResult;
 	}
 
 	private List<PlantablePlot> plots;

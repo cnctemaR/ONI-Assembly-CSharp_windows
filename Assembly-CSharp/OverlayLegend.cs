@@ -105,9 +105,12 @@ public class OverlayLegend : KScreen
 		if (overlayInfo.isProgrammaticallyPopulated)
 		{
 			this.PopulateGeneratedLegend(overlayInfo, false);
-			return;
 		}
-		this.PopulateOverlayInfoUnits(overlayInfo, false);
+		else
+		{
+			this.PopulateOverlayInfoUnits(overlayInfo, false);
+		}
+		this.ConfigureUIHeight();
 	}
 
 	public void SetLegend(OverlayModes.Mode mode, bool refreshing = false)
@@ -313,6 +316,19 @@ public class OverlayLegend : KScreen
 		this.filterMenu = null;
 	}
 
+	private void ConfigureUIHeight()
+	{
+		this.scrollRectLayout.enabled = false;
+		this.scrollRectLayout.GetComponent<VerticalLayoutGroup>().enabled = true;
+		LayoutRebuilder.ForceRebuildLayoutImmediate(base.gameObject.rectTransform());
+		this.scrollRectLayout.preferredWidth = this.scrollRectLayout.rectTransform().sizeDelta.x;
+		float y = this.scrollRectLayout.rectTransform().sizeDelta.y;
+		this.scrollRectLayout.preferredHeight = Mathf.Min(y, 512f);
+		this.scrollRectLayout.GetComponent<VerticalLayoutGroup>().enabled = false;
+		this.scrollRectLayout.enabled = true;
+		LayoutRebuilder.ForceRebuildLayoutImmediate(base.gameObject.rectTransform());
+	}
+
 	public static OverlayLegend Instance;
 
 	[SerializeField]
@@ -338,6 +354,9 @@ public class OverlayLegend : KScreen
 
 	[SerializeField]
 	private GameObject toolParameterMenuPrefab;
+
+	[SerializeField]
+	private LayoutElement scrollRectLayout;
 
 	private ToolParameterMenu filterMenu;
 

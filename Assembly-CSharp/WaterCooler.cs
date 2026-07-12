@@ -6,11 +6,29 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IApproachable, IGameObjectEffectDescriptor
+public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IApproachable, IGameObjectEffectDescriptor, FewOptionSideScreen.IFewOptionSideScreen
 {
+	public Tag ChosenBeverage
+	{
+		get
+		{
+			return this.chosenBeverage;
+		}
+		set
+		{
+			if (this.chosenBeverage != value)
+			{
+				this.chosenBeverage = value;
+				base.GetComponent<ManualDeliveryKG>().RequestedItemTag = this.chosenBeverage;
+				this.storage.DropAll(false, false, default(Vector3), true, null);
+			}
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		base.GetComponent<ManualDeliveryKG>().RequestedItemTag = this.chosenBeverage;
 		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, true);
@@ -52,7 +70,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		{
 			return;
 		}
-		float num = this.storage.GetMassAvailable(GameTags.Water);
+		float num = this.storage.GetMassAvailable(this.ChosenBeverage);
 		int num2 = 0;
 		for (int i = 0; i < this.socializeOffsets.Length; i++)
 		{
@@ -136,8 +154,37 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		Effect.AddModifierDescriptions(base.gameObject, list, "Socialized", true);
-		this.AddRequirementDesc(list, GameTags.Water, 1f);
+		foreach (global::Tuple<Tag, string> tuple in WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS)
+		{
+			this.AddRequirementDesc(list, tuple.first, 1f);
+		}
 		return list;
+	}
+
+	public FewOptionSideScreen.IFewOptionSideScreen.Option[] GetOptions()
+	{
+		Effect.CreateTooltip(Db.Get().effects.Get("DuplicantGotMilk"), true, "\n    • ", true);
+		FewOptionSideScreen.IFewOptionSideScreen.Option[] array = new FewOptionSideScreen.IFewOptionSideScreen.Option[WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS.Length];
+		for (int i = 0; i < array.Length; i++)
+		{
+			string text = Strings.Get("STRINGS.BUILDINGS.PREFABS.WATERCOOLER.OPTION_TOOLTIPS." + WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS[i].first.ToString().ToUpper());
+			if (!WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS[i].second.IsNullOrWhiteSpace())
+			{
+				text = text + "\n\n" + Effect.CreateTooltip(Db.Get().effects.Get(WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS[i].second), false, "\n    • ", true);
+			}
+			array[i] = new FewOptionSideScreen.IFewOptionSideScreen.Option(WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS[i].first, ElementLoader.GetElement(WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS[i].first).name, Def.GetUISprite(WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS[i].first, "ui", false), text);
+		}
+		return array;
+	}
+
+	public void OnOptionSelected(FewOptionSideScreen.IFewOptionSideScreen.Option option)
+	{
+		this.ChosenBeverage = option.tag;
+	}
+
+	public Tag GetSelectedOption()
+	{
+		return this.ChosenBeverage;
 	}
 
 	public const float DRINK_MASS = 1f;
@@ -172,6 +219,9 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 	private Storage storage;
 
 	public bool choresDirty;
+
+	[Serialize]
+	private Tag chosenBeverage = GameTags.Water;
 
 	private static readonly EventSystem.IntraObjectHandler<WaterCooler> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<WaterCooler>(delegate(WaterCooler component, object data)
 	{
@@ -230,7 +280,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 
 		public void StartMeter()
 		{
-			PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.Water, 0f);
+			PrimaryElement primaryElement = this.storage.FindFirstWithMass(base.smi.master.ChosenBeverage, 0f);
 			if (primaryElement == null)
 			{
 				return;
@@ -241,7 +291,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 
 		public bool HasMinimumMass()
 		{
-			return this.storage.GetMassAvailable(GameTags.Water) >= 1f;
+			return this.storage.GetMassAvailable(ElementLoader.GetElement(base.smi.master.ChosenBeverage).id) >= 1f;
 		}
 
 		private Storage storage;

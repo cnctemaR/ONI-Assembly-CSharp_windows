@@ -60,6 +60,7 @@ public class ShearingStationConfig : IBuildingConfig
 		def.RanchedPreAnim = "shearing_pre";
 		def.RanchedLoopAnim = "shearing_loop";
 		def.RanchedPstAnim = "shearing_pst";
+		go.AddOrGet<SkillPerkMissingComplainer>().requiredSkillPerk = Db.Get().SkillPerks.CanUseRanchStation.Id;
 		Prioritizable.AddRef(go);
 	}
 

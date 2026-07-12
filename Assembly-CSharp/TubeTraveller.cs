@@ -13,6 +13,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 		this.modifiers.Add(new AttributeModifier(Db.Get().Attributes.ThermalConductivityBarrier.Id, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_THERMAL_CONDUCTIVITY_BARRIER, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true));
 		this.modifiers.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_BLADDER, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true));
 		this.modifiers.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true));
+		this.waxSpeedBoostModifier = new AttributeModifier(Db.Get().Attributes.TransitTubeTravelSpeed.Id, 4.5f, global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, false, false, true);
 		this.immunities.Add(Db.Get().effects.Get("SoakingWet"));
 		this.immunities.Add(Db.Get().effects.Get("WetFeet"));
 		this.immunities.Add(Db.Get().effects.Get("PoppedEarDrums"));
@@ -53,6 +54,10 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 	private List<Effect> immunities = new List<Effect>();
 
 	private List<AttributeModifier> modifiers = new List<AttributeModifier>();
+
+	private AttributeModifier waxSpeedBoostModifier;
+
+	private const float WaxSpeedBoost = 0.25f;
 
 	public new class Instance : GameStateMachine<TubeTraveller, TubeTraveller.Instance, IStateMachineTarget, object>.GameInstance
 	{
@@ -130,6 +135,10 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 			{
 				attributes.Add(attributeModifier);
 			}
+			if (this.isWaxed)
+			{
+				attributes.Add(base.sm.waxSpeedBoostModifier);
+			}
 			CreatureSimTemperatureTransfer component2 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
 			if (component2 != null)
 			{
@@ -151,10 +160,27 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 			{
 				attributes.Remove(attributeModifier);
 			}
+			this.SetWaxState(false);
+			attributes.Remove(base.sm.waxSpeedBoostModifier);
 			CreatureSimTemperatureTransfer component2 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
 			if (component2 != null)
 			{
 				component2.RefreshRegistration();
+			}
+		}
+
+		public void SetWaxState(bool isWaxed)
+		{
+			this.isWaxed = isWaxed;
+			KSelectable component = base.GetComponent<KSelectable>();
+			if (component != null)
+			{
+				if (isWaxed)
+				{
+					component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.WaxedForTransitTube, 0.25f);
+					return;
+				}
+				component.RemoveStatusItem(Db.Get().DuplicantStatusItems.WaxedForTransitTube, false);
 			}
 		}
 
@@ -177,5 +203,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 		private List<TravelTubeEntrance> reservations = new List<TravelTubeEntrance>();
 
 		public bool inTube;
+
+		public bool isWaxed;
 	}
 }

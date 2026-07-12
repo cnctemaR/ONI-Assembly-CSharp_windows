@@ -13,7 +13,7 @@ public class PlayAnimsStates : GameStateMachine<PlayAnimsStates, PlayAnimsStates
 		{
 			smi.HandleTagsChanged(obj);
 		});
-		this.done.BehaviourComplete((PlayAnimsStates.Instance smi) => smi.def.tag, false);
+		this.done.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete((PlayAnimsStates.Instance smi) => smi.def.tag, false);
 	}
 
 	public GameStateMachine<PlayAnimsStates, PlayAnimsStates.Instance, IStateMachineTarget, PlayAnimsStates.Def>.State animating;

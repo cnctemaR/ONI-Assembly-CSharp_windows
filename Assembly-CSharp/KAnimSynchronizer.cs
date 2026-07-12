@@ -10,7 +10,7 @@ public class KAnimSynchronizer
 
 	private void Clear(KAnimControllerBase controller)
 	{
-		controller.Play(controller.defaultAnim, KAnim.PlayMode.Loop, 1f, 0f);
+		controller.Play("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Add(KAnimControllerBase controller)
@@ -26,7 +26,7 @@ public class KAnimSynchronizer
 
 	private void Clear(KAnimSynchronizedController controller)
 	{
-		controller.Play(controller.synchronizedController.defaultAnim, KAnim.PlayMode.Loop, 1f, 0f);
+		controller.Play("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void Add(KAnimSynchronizedController controller)

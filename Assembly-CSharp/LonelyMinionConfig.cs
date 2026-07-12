@@ -18,7 +18,7 @@ public class LonelyMinionConfig : IEntityConfig
 		gameObject.AddComponent<Storage>().doDiseaseTransfer = false;
 		gameObject.AddComponent<StateMachineController>();
 		LonelyMinion.Def def = gameObject.AddOrGetDef<LonelyMinion.Def>();
-		def.Personality = Db.Get().Personalities.Get(LonelyMinionConfig.MinionName);
+		def.Personality = Db.Get().Personalities.Get("JORGE");
 		def.Personality.Disabled = true;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.defaultAnim = "idle_default";
@@ -111,7 +111,7 @@ public class LonelyMinionConfig : IEntityConfig
 
 	public static readonly HashedString PARCEL_SNAPTO = "parcel_snapTo";
 
-	public static readonly string MinionName = "JORGE";
+	public const string PERSONALITY_ID = "JORGE";
 
-	public static readonly string BodyAnimFile = "body_lonelyminion_kanim";
+	public const string BODY_ANIM_FILE = "body_lonelyminion_kanim";
 }

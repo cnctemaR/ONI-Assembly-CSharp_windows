@@ -178,15 +178,28 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		{
 			return;
 		}
-		for (int i = this.storage.items.Count - 1; i >= 0; i--)
+		if (!this.filterAllStoragesOnBuilding)
 		{
-			GameObject gameObject = this.storage.items[i];
+			this.DropFilteredItemsFromTargetStorage(this.storage);
+			return;
+		}
+		foreach (Storage storage in base.GetComponents<Storage>())
+		{
+			this.DropFilteredItemsFromTargetStorage(storage);
+		}
+	}
+
+	private void DropFilteredItemsFromTargetStorage(Storage targetStorage)
+	{
+		for (int i = targetStorage.items.Count - 1; i >= 0; i--)
+		{
+			GameObject gameObject = targetStorage.items[i];
 			if (!(gameObject == null))
 			{
 				KPrefabID component = gameObject.GetComponent<KPrefabID>();
 				if (!this.acceptedTagSet.Contains(component.PrefabTag))
 				{
-					this.storage.Drop(gameObject, true);
+					targetStorage.Drop(gameObject, true);
 				}
 			}
 		}
@@ -245,6 +258,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	public bool autoSelectStoredOnLoad = true;
 
 	public bool showUserMenu = true;
+
+	public bool filterAllStoragesOnBuilding;
 
 	public TreeFilterable.UISideScreenHeight uiHeight = TreeFilterable.UISideScreenHeight.Tall;
 

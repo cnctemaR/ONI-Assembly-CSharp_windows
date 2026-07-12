@@ -443,6 +443,18 @@ namespace Database
 			this.LookingForFood = new StatusItem("LookingForFood", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.LookingForGas = new StatusItem("LookingForGas", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.LookingForLiquid = new StatusItem("LookingForLiquid", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.Beckoning = new StatusItem("Beckoning", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.BeckoningBlocked = new StatusItem("BeckoningBlocked", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022, null);
+			this.MilkProducer = new StatusItem("MilkProducer", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.MilkProducer.resolveStringCallback = delegate(string str, object data)
+			{
+				MilkProductionMonitor.Instance instance10 = (MilkProductionMonitor.Instance)data;
+				str = str.Replace("{amount}", GameUtil.GetFormattedMass(instance10.MilkPercentage, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			};
+			this.GettingRanched = new StatusItem("Getting_Ranched", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.GettingMilked = new StatusItem("Getting_Milked", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.MilkFull = new StatusItem("MilkFull", "CREATURES", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 		}
 
 		public StatusItem Dead;
@@ -580,5 +592,17 @@ namespace Database
 		public StatusItem LookingForGas;
 
 		public StatusItem LookingForLiquid;
+
+		public StatusItem Beckoning;
+
+		public StatusItem BeckoningBlocked;
+
+		public StatusItem MilkProducer;
+
+		public StatusItem MilkFull;
+
+		public StatusItem GettingRanched;
+
+		public StatusItem GettingMilked;
 	}
 }

@@ -20,7 +20,7 @@ public class IdleDiagnostic : ColonyDiagnostic
 		if (worldItems.Count == 0)
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
-			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+			diagnosticResult.Message = base.NO_MINIONS;
 		}
 		else
 		{

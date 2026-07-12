@@ -47,6 +47,7 @@ namespace Database
 						if (equippableFacadeInfo.defID != null)
 						{
 							this.resources.Add(new EquippableFacadeResource(equippableFacadeInfo.id, equippableFacadeInfo.name, equippableFacadeInfo.buildoverride, equippableFacadeInfo.defID, equippableFacadeInfo.animfile));
+							InventoryOrganization.subcategoryIdToPermitIdsMap["YAML"].Add(equippableFacadeInfo.id);
 						}
 					}
 				}

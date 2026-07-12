@@ -22,7 +22,7 @@ public class ToiletDiagnostic : ColonyDiagnostic
 		if (worldItems2.Count == 0)
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
-			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+			diagnosticResult.Message = base.NO_MINIONS;
 		}
 		else if (worldItems.Count == 0)
 		{
@@ -40,7 +40,7 @@ public class ToiletDiagnostic : ColonyDiagnostic
 		if (worldItems.Count == 0)
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
-			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+			diagnosticResult.Message = base.NO_MINIONS;
 		}
 		else
 		{
@@ -62,7 +62,7 @@ public class ToiletDiagnostic : ColonyDiagnostic
 		if (worldItems.Count == 0)
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
-			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+			diagnosticResult.Message = base.NO_MINIONS;
 		}
 		else
 		{
@@ -84,7 +84,7 @@ public class ToiletDiagnostic : ColonyDiagnostic
 
 	public override ColonyDiagnostic.DiagnosticResult Evaluate()
 	{
-		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.NO_MINIONS, null);
+		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, base.NO_MINIONS, null);
 		if (ColonyDiagnosticUtility.IgnoreRocketsWithNoCrewRequested(base.worldID, out diagnosticResult))
 		{
 			return diagnosticResult;

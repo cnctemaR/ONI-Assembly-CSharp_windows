@@ -353,6 +353,11 @@ namespace Klei.AI
 				return gameObject;
 			}
 
+			public float BombardTimeRemaining()
+			{
+				return Mathf.Min(base.sm.bombardTimeRemaining.Get(this), base.sm.runTimeRemaining.Get(this));
+			}
+
 			public float GetBombardOffTime()
 			{
 				float num = this.gameplayEvent.secondsBombardmentOff.Get();

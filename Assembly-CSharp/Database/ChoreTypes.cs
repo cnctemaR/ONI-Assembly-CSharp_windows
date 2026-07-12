@@ -138,6 +138,7 @@ namespace Database
 			this.LiquidCooledFan = this.Add("LiquidCooledFan", new string[] { "MachineOperating" }, "", new string[0], DUPLICANTS.CHORES.LIQUIDCOOLEDFAN.NAME, DUPLICANTS.CHORES.LIQUIDCOOLEDFAN.STATUS, DUPLICANTS.CHORES.LIQUIDCOOLEDFAN.TOOLTIP, false, 5000, null);
 			this.IceCooledFan = this.Add("IceCooledFan", new string[] { "MachineOperating" }, "", new string[0], DUPLICANTS.CHORES.ICECOOLEDFAN.NAME, DUPLICANTS.CHORES.ICECOOLEDFAN.STATUS, DUPLICANTS.CHORES.ICECOOLEDFAN.TOOLTIP, false, 5000, null);
 			this.Train = this.Add("Train", new string[] { "MachineOperating" }, "", new string[0], DUPLICANTS.CHORES.TRAIN.NAME, DUPLICANTS.CHORES.TRAIN.STATUS, DUPLICANTS.CHORES.TRAIN.TOOLTIP, false, 5000, null);
+			this.ProcessCritter = this.Add("ProcessCritter", new string[] { "Ranching" }, "", new string[0], DUPLICANTS.CHORES.PROCESSCRITTER.NAME, DUPLICANTS.CHORES.PROCESSCRITTER.STATUS, DUPLICANTS.CHORES.PROCESSCRITTER.TOOLTIP, false, 5000, null);
 			this.Cook = this.Add("Cook", new string[] { "Cook" }, "", new string[0], DUPLICANTS.CHORES.COOK.NAME, DUPLICANTS.CHORES.COOK.STATUS, DUPLICANTS.CHORES.COOK.TOOLTIP, false, 5000, null);
 			this.CookFetch = this.Add("CookFetch", new string[] { "Cook", "Hauling" }, "", new string[0], DUPLICANTS.CHORES.COOKFETCH.NAME, DUPLICANTS.CHORES.COOKFETCH.STATUS, DUPLICANTS.CHORES.COOKFETCH.TOOLTIP, false, 5000, null);
 			this.DoctorFetch = this.Add("DoctorFetch", new string[] { "MedicalAid", "Hauling" }, "", new string[0], DUPLICANTS.CHORES.DOCTORFETCH.NAME, DUPLICANTS.CHORES.DOCTORFETCH.STATUS, DUPLICANTS.CHORES.DOCTORFETCH.TOOLTIP, false, 5000, DUPLICANTS.CHORES.DOCTORFETCH.REPORT_NAME);
@@ -159,6 +160,7 @@ namespace Database
 			this.Fetch = this.Add("Fetch", new string[] { "Storage" }, "", new string[0], DUPLICANTS.CHORES.FETCH.NAME, DUPLICANTS.CHORES.FETCH.STATUS, DUPLICANTS.CHORES.FETCH.TOOLTIP, false, 5000, DUPLICANTS.CHORES.FETCH.REPORT_NAME);
 			this.StorageFetch = this.Add("StorageFetch", new string[] { "Storage" }, "", new string[0], DUPLICANTS.CHORES.STORAGEFETCH.NAME, DUPLICANTS.CHORES.STORAGEFETCH.STATUS, DUPLICANTS.CHORES.STORAGEFETCH.TOOLTIP, true, 5000, DUPLICANTS.CHORES.STORAGEFETCH.REPORT_NAME);
 			this.EquipmentFetch = this.Add("EquipmentFetch", new string[] { "Hauling" }, "", new string[0], DUPLICANTS.CHORES.EQUIPMENTFETCH.NAME, DUPLICANTS.CHORES.EQUIPMENTFETCH.STATUS, DUPLICANTS.CHORES.EQUIPMENTFETCH.TOOLTIP, false, 5000, DUPLICANTS.CHORES.EQUIPMENTFETCH.REPORT_NAME);
+			this.ArmTrap = this.Add("ArmTrap", new string[] { "Ranching" }, "", new string[0], DUPLICANTS.CHORES.ARMTRAP.NAME, DUPLICANTS.CHORES.ARMTRAP.STATUS, DUPLICANTS.CHORES.ARMTRAP.TOOLTIP, false, -1, null);
 			this.MoveToSafety = this.Add("MoveToSafety", new string[0], "MoveToSafety", new string[0], DUPLICANTS.CHORES.MOVETOSAFETY.NAME, DUPLICANTS.CHORES.MOVETOSAFETY.STATUS, DUPLICANTS.CHORES.MOVETOSAFETY.TOOLTIP, false, -1, null);
 			this.ReturnSuitIdle = this.Add("ReturnSuitIdle", new string[0], "", new string[0], DUPLICANTS.CHORES.RETURNSUIT.NAME, DUPLICANTS.CHORES.RETURNSUIT.STATUS, DUPLICANTS.CHORES.RETURNSUIT.TOOLTIP, false, -1, null);
 			this.Idle = this.Add("IdleChore", new string[0], "", new string[0], DUPLICANTS.CHORES.IDLE.NAME, DUPLICANTS.CHORES.IDLE.STATUS, DUPLICANTS.CHORES.IDLE.TOOLTIP, false, -1, null);
@@ -198,10 +200,10 @@ namespace Database
 					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Repair, this.Disinfect, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.IceCooledFan, this.SuitMarker,
 					this.Checkpoint, this.TravelTubeEntrance, this.WashHands, this.Recharge, this.ScrubOre, this.Ranch, this.MoveToSafety, this.Relocate, this.Research, this.Mop,
 					this.Toggle, this.Deconstruct, this.Demolish, this.Capture, this.EggSing, this.Art, this.GeneratePower, this.CropTend, this.PowerTinker, this.MachineTinker,
-					this.DropUnusedInventory, this.Harvest, this.Uproot, this.FarmingFabricate, this.PowerFabricate, this.Compound, this.Fabricate, this.Train, this.Cook, this.Build,
-					this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.StressEmote, this.Astronaut, this.EmptyDesalinator, this.FetchCritical, this.ResearchFetch, this.ExcavateFossil,
-					this.AnalyzeArtifact, this.AnalyzeSeed, this.CreatureFetch, this.RanchingFetch, this.Fetch, this.Transport, this.FarmFetch, this.BuildFetch, this.CookFetch, this.DoctorFetch,
-					this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.FoodFetch, this.StorageFetch, this.RepairFetch, this.EquipmentFetch
+					this.DropUnusedInventory, this.Harvest, this.Uproot, this.FarmingFabricate, this.PowerFabricate, this.Compound, this.Fabricate, this.Train, this.ProcessCritter, this.Cook,
+					this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.StressEmote, this.Astronaut, this.EmptyDesalinator, this.ArmTrap, this.FetchCritical,
+					this.ResearchFetch, this.ExcavateFossil, this.AnalyzeArtifact, this.AnalyzeSeed, this.CreatureFetch, this.RanchingFetch, this.Fetch, this.Transport, this.FarmFetch, this.BuildFetch,
+					this.CookFetch, this.DoctorFetch, this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.FoodFetch, this.StorageFetch, this.RepairFetch, this.EquipmentFetch
 				},
 				new ChoreType[] { this.ReturnSuitIdle, this.EmoteIdle },
 				new ChoreType[] { this.Idle }
@@ -370,6 +372,8 @@ namespace Database
 
 		public ChoreType EquipmentFetch;
 
+		public ChoreType ArmTrap;
+
 		public ChoreType Research;
 
 		public ChoreType AnalyzeArtifact;
@@ -415,6 +419,8 @@ namespace Database
 		public ChoreType Compound;
 
 		public ChoreType Cook;
+
+		public ChoreType ProcessCritter;
 
 		public ChoreType Train;
 

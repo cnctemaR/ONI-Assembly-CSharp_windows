@@ -104,8 +104,8 @@ namespace Database
 				}
 			}, new Dictionary<string, int>
 			{
-				{ "Moo", 1 },
-				{ "GasGrassSeed", 4 }
+				{ "Moo", 2 },
+				{ "GasGrassSeed", 12 }
 			}, Db.Get().ArtifactDropRates.Great, 256000000, 255982000, 30, true));
 			this.DustyMoon = base.Add(new SpaceDestinationType("DustyMoon", parent, UI.SPACEDESTINATIONS.DWARFPLANETS.DUSTYDWARF.NAME, UI.SPACEDESTINATIONS.DWARFPLANETS.DUSTYDWARF.DESCRIPTION, 64, "new_05", new Dictionary<SimHashes, MathUtil.MinMax>
 			{

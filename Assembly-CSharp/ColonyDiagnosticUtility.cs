@@ -77,7 +77,7 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 				}
 				else if (colonyDiagnostic.LatestResult.opinion < ColonyDiagnostic.DiagnosticResult.Opinion.Normal)
 				{
-					text = text + "\n" + colonyDiagnostic.LatestResult.Message;
+					text = text + "\n" + colonyDiagnostic.LatestResult.GetFormattedMessage();
 				}
 			}
 		}
@@ -238,6 +238,7 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 			this.TryAddDiagnosticToWorldCollection(ref list, new FarmDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new EntombedDiagnostic(worldID));
 			this.TryAddDiagnosticToWorldCollection(ref list, new RocketsInOrbitDiagnostic(worldID));
+			this.TryAddDiagnosticToWorldCollection(ref list, new MeteorDiagnostic(worldID));
 		}
 		this.worldDiagnostics.Add(worldID, list);
 		foreach (ColonyDiagnostic colonyDiagnostic in list)
@@ -283,7 +284,8 @@ public class ColonyDiagnosticUtility : KMonoBehaviour, ISim1000ms
 	public static bool IgnoreRocketsWithNoCrewRequested(int worldID, out ColonyDiagnostic.DiagnosticResult result)
 	{
 		WorldContainer world = ClusterManager.Instance.GetWorld(worldID);
-		result = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.NO_MINIONS, null);
+		string text = (world.IsModuleInterior ? UI.COLONY_DIAGNOSTICS.NO_MINIONS_ROCKET : UI.COLONY_DIAGNOSTICS.NO_MINIONS_PLANETOID);
+		result = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, text, null);
 		if (world.IsModuleInterior)
 		{
 			for (int i = 0; i < Components.Clustercrafts.Count; i++)

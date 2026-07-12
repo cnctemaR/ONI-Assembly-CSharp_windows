@@ -665,7 +665,7 @@ public class Pickupable : Workable, IHasSortOrder
 				if (this.carryAnimOverride != null && this.storage.GetComponent<Navigator>() != null)
 				{
 					this.lastCarrier = this.storage.GetComponent<KBatchedAnimController>();
-					if (this.lastCarrier != null)
+					if (this.lastCarrier != null && this.lastCarrier.HasTag(GameTags.Minion))
 					{
 						this.lastCarrier.AddAnimOverrides(this.carryAnimOverride, 0f);
 					}

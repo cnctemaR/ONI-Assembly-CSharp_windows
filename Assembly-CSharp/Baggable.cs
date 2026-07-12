@@ -34,7 +34,7 @@ public class Baggable : KMonoBehaviour
 		base.Subscribe<Baggable>(856640610, Baggable.OnStoreDelegate);
 		if (base.transform.parent != null)
 		{
-			if (base.transform.parent.GetComponent<Trap>() != null)
+			if (base.transform.parent.GetComponent<Trap>() != null || base.transform.parent.GetSMI<ReusableTrap.Instance>() != null)
 			{
 				base.GetComponent<KBatchedAnimController>().enabled = true;
 			}
@@ -63,7 +63,11 @@ public class Baggable : KMonoBehaviour
 		}
 		else
 		{
-			this.Free();
+			if (!this.keepWrangledNextTimeRemovedFromStorage)
+			{
+				this.Free();
+			}
+			this.keepWrangledNextTimeRemovedFromStorage = false;
 		}
 	}
 
@@ -107,6 +111,9 @@ public class Baggable : KMonoBehaviour
 
 	[Serialize]
 	public bool wrangled;
+
+	[Serialize]
+	public bool keepWrangledNextTimeRemovedFromStorage;
 
 	public bool useGunForPickup;
 

@@ -36,7 +36,7 @@ public class SuperProductiveFX : GameStateMachine<SuperProductiveFX, SuperProduc
 		public Instance(IStateMachineTarget master, Vector3 offset)
 			: base(master)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("productive_fx_kanim", master.gameObject.transform.GetPosition() + offset, master.gameObject.transform, true, Grid.SceneLayer.Front, false);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("productive_fx_kanim", master.gameObject.transform.GetPosition() + offset, master.gameObject.transform, true, Grid.SceneLayer.FXFront, false);
 			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi, false);
 		}
 

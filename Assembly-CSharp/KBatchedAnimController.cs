@@ -29,6 +29,14 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 	}
 
+	public bool IsMoving
+	{
+		get
+		{
+			return this.moving;
+		}
+	}
+
 	public KBatchedAnimController()
 	{
 		this.batchInstanceData = new KBatchedAnimInstanceData(this);
@@ -359,10 +367,24 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public HashedString batchGroupID { get; private set; }
 
+	public HashedString batchGroupIDOverride { get; private set; }
+
 	public HashedString GetBatchGroupID(bool isEditorWindow = false)
 	{
 		global::Debug.Assert(isEditorWindow || this.animFiles == null || this.animFiles.Length == 0 || (this.batchGroupID.IsValid && this.batchGroupID != KAnimBatchManager.NO_BATCH));
 		return this.batchGroupID;
+	}
+
+	public HashedString GetBatchGroupIDOverride()
+	{
+		return this.batchGroupIDOverride;
+	}
+
+	public void SetBatchGroupOverride(HashedString id)
+	{
+		this.batchGroupIDOverride = id;
+		this.DeRegister();
+		this.Register();
 	}
 
 	public int GetLayer()

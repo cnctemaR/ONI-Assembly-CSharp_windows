@@ -218,6 +218,19 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 			base.Subscribe(-1201923725, new Action<object>(this.OnHighlight));
 			this.MissileStorage.Subscribe(-1697596308, new Action<object>(this.OnStorage));
+			FlatTagFilterable component2 = base.smi.master.GetComponent<FlatTagFilterable>();
+			foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Comet))
+			{
+				if (!gameObject.HasTag(GameTags.DeprecatedContent))
+				{
+					if (!component2.tagOptions.Contains(gameObject.PrefabID()))
+					{
+						component2.tagOptions.Add(gameObject.PrefabID());
+						component2.selectedTags.Add(gameObject.PrefabID());
+					}
+					component2.selectedTags.Remove(GassyMooCometConfig.ID);
+				}
+			}
 		}
 
 		public override void StartSM()
@@ -311,7 +324,7 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 			float num = (float)MissileLauncher.Def.launchRange.y;
 			foreach (Comet comet in items)
 			{
-				if (!comet.IsNullOrDestroyed() && !comet.Targeted)
+				if (!comet.IsNullOrDestroyed() && !comet.Targeted && this.TargetFilter.selectedTags.Contains(comet.typeID))
 				{
 					Vector3 targetPosition = comet.TargetPosition;
 					float num2;
@@ -469,6 +482,9 @@ public class MissileLauncher : GameStateMachine<MissileLauncher, MissileLauncher
 
 		[MyCmpReq]
 		public KSelectable Selectable;
+
+		[MyCmpReq]
+		public FlatTagFilterable TargetFilter;
 
 		private Vector3 launchPosition;
 

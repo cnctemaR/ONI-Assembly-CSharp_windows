@@ -19,7 +19,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		{
 			minCellSize = 112f,
 			maxCellSize = 144f,
-			targetGridLayout = this.galleryGridContent.GetComponent<GridLayoutGroup>()
+			targetGridLayouts = this.galleryGridContent.GetComponents<GridLayoutGroup>().ToList<GridLayoutGroup>()
 		};
 		this.categoriesAndSearchBar.InitializeWith(this);
 		this.pickOutfitButton.onClick += this.OnClickPickOutfit;
@@ -66,7 +66,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(delegate
 		{
 			this.RefreshGallery();
-			this.outfitDescriptionPanel.Refresh(this.state.SelectedOutfitOpt, ClothingOutfitUtility.OutfitType.Clothing);
+			this.outfitDescriptionPanel.Refresh(this.state.SelectedOutfitOpt, ClothingOutfitUtility.OutfitType.Clothing, this.Config.minionPersonality);
 		});
 	}
 
@@ -107,7 +107,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			}
 			this.dioramaMinionOrMannequin.current.SetOutfit(this.state.CurrentOutfitType, this.state.SelectedOutfitOpt);
 			this.dioramaMinionOrMannequin.current.ReactToFullOutfitChange();
-			this.outfitDescriptionPanel.Refresh(this.state.SelectedOutfitOpt, this.state.CurrentOutfitType);
+			this.outfitDescriptionPanel.Refresh(this.state.SelectedOutfitOpt, this.state.CurrentOutfitType, this.Config.minionPersonality);
 			this.dioramaBG.sprite = KleiPermitDioramaVis.GetDioramaBackground(this.state.CurrentOutfitType);
 			this.pickOutfitButton.gameObject.SetActive(this.Config.isPickingOutfitForDupe);
 			OutfitBrowserScreenConfig outfitBrowserScreenConfig2 = this.Config;
@@ -329,16 +329,14 @@ public class OutfitBrowserScreen : KMonoBehaviour
 	{
 		GameObject spawn = this.galleryGridItemPool.Borrow();
 		GameObject gameObject = spawn.transform.GetChild(1).gameObject;
-		GameObject gameObject2 = spawn.transform.GetChild(2).gameObject;
-		GameObject isUnownedOverlayGO = spawn.transform.GetChild(3).gameObject;
+		GameObject isUnownedOverlayGO = spawn.transform.GetChild(2).gameObject;
 		gameObject.SetActive(true);
-		gameObject2.SetActive(false);
-		gameObject.GetComponentInChildren<UIMannequin>().SetOutfit(this.state.CurrentOutfitType, target);
-		if (!target.HasValue)
-		{
-			gameObject2.SetActive(true);
-			gameObject2.GetComponent<Image>().sprite = KleiItemsUI.GetNoneOutfitIcon();
-		}
+		bool flag = target.IsNone() || this.state.CurrentOutfitType == ClothingOutfitUtility.OutfitType.AtmoSuit;
+		UIMannequin componentInChildren = gameObject.GetComponentInChildren<UIMannequin>();
+		this.dioramaMinionOrMannequin.mannequin.shouldShowOutfitWithDefaultItems = flag;
+		componentInChildren.shouldShowOutfitWithDefaultItems = flag;
+		componentInChildren.personalityToUseForDefaultClothing = this.Config.minionPersonality;
+		componentInChildren.SetOutfit(this.state.CurrentOutfitType, target);
 		RectTransform component = gameObject.GetComponent<RectTransform>();
 		float num;
 		float num2;
@@ -386,7 +384,7 @@ public class OutfitBrowserScreen : KMonoBehaviour
 			}
 			if (!target.HasValue)
 			{
-				KleiItemsUI.ConfigureTooltipOn(spawn, KleiItemsUI.WrapAsToolTipTitle(UI.OUTFIT_NAME.NONE));
+				KleiItemsUI.ConfigureTooltipOn(spawn, KleiItemsUI.WrapAsToolTipTitle(KleiItemsUI.GetNoneOutfitName(this.state.CurrentOutfitType)));
 				isUnownedOverlayGO.SetActive(false);
 				return;
 			}

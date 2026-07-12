@@ -41,6 +41,18 @@ namespace Database
 			this.Add("AtmoSparkleBlue", new string[] { "AtmoHelmetSparkleBlue", "AtmoSuitSparkleBlue", "AtmoGlovesSparkleBlue", "AtmoBeltSparkleBlue", "AtmoShoesSparkleBlack" }, UI.OUTFITS.ATMOSUIT_SPARKLE_BLUE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
 			this.Add("AtmoSparkleGreen", new string[] { "AtmoHelmetSparkleGreen", "AtmoSuitSparkleGreen", "AtmoGlovesSparkleGreen", "AtmoBeltSparkleGreen", "AtmoShoesSparkleBlack" }, UI.OUTFITS.ATMOSUIT_SPARKLE_GREEN.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
 			this.Add("AtmoSparkleLavender", new string[] { "AtmoHelmetSparklePurple", "AtmoSuitSparkleLavender", "AtmoGlovesSparkleLavender", "AtmoBeltSparkleLavender", "AtmoShoesSparkleBlack" }, UI.OUTFITS.ATMOSUIT_SPARKLE_LAVENDER.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoConfetti", new string[] { "AtmoHelmetConfetti", "AtmoSuitConfetti", "AtmoGlovesGold", "AtmoBeltBasicGold", "AtmoShoesStealth" }, UI.OUTFITS.ATMOSUIT_CONFETTI.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("AtmoEggplant", new string[] { "AtmoHelmetEggplant", "AtmoSuitCrispEggplant", "AtmoGlovesEggplant", "AtmoBeltEggplant", "AtmoShoesEggplant" }, UI.OUTFITS.ATMOSUIT_BASIC_PURPLE.NAME, ClothingOutfitUtility.OutfitType.AtmoSuit);
+			this.Add("CanadianTuxedo", new string[] { "TopDenimBlue", "PantsJeans", "GlovesDenimBlue", "ShoesDenimBlue" }, UI.OUTFITS.CANUXTUX.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("Researcher", new string[] { "TopResearcher", "PantsResearch", "GlovesBasicBrownKhaki", "ShoesBasicGray" }, UI.OUTFITS.NERD.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("UndiesExec", new string[] { "TopUndershirtExecutive", "BottomBriefsExecutive" }, UI.OUTFITS.GONCHIES_STRAWBERRY.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("UndiesUnderling", new string[] { "TopUndershirtUnderling", "BottomBriefsUnderling" }, UI.OUTFITS.GONCHIES_SATSUMA.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("UndiesGroupthink", new string[] { "TopUndershirtGroupthink", "BottomBriefsGroupthink" }, UI.OUTFITS.GONCHIES_LEMON.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("UndiesStakeholder", new string[] { "TopUndershirtStakeholder", "BottomBriefsStakeholder" }, UI.OUTFITS.GONCHIES_LIME.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("UndiesAdmin", new string[] { "TopUndershirtAdmin", "BottomBriefsAdmin" }, UI.OUTFITS.GONCHIES_BLUEBERRY.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("UndiesBuzzword", new string[] { "TopUndershirtBuzzword", "BottomBriefsBuzzword" }, UI.OUTFITS.GONCHIES_GRAPE.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("UndiesSynergy", new string[] { "TopUndershirtSynergy", "BottomBriefsSynergy" }, UI.OUTFITS.GONCHIES_WATERMELON.NAME, ClothingOutfitUtility.OutfitType.Clothing);
+			this.Add("RebelGiOutfit", new string[] { "TopRebelGi", "PantsRebelGi", "GlovesCufflessBlack" }, UI.OUTFITS.REBELGI.NAME, ClothingOutfitUtility.OutfitType.Clothing);
 			ClothingOutfitUtility.LoadClothingOutfitData(this);
 		}
 

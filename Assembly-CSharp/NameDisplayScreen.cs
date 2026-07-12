@@ -30,6 +30,7 @@ public class NameDisplayScreen : KScreen
 			new global::System.Action(this.LateUpdatePart2)
 		};
 		this.BindOnOverlayChange();
+		this.worldChangeEventHandle = Game.Instance.Subscribe(1983128072, new Action<object>(this.OnActiveWorldChanged));
 	}
 
 	protected override void OnCleanUp()
@@ -40,6 +41,10 @@ public class NameDisplayScreen : KScreen
 			OverlayScreen instance = OverlayScreen.Instance;
 			instance.OnOverlayChanged = (Action<HashedString>)Delegate.Remove(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
 			this.isOverlayChangeBound = false;
+		}
+		if (Game.Instance != null)
+		{
+			Game.Instance.Unsubscribe(this.worldChangeEventHandle);
 		}
 	}
 
@@ -57,11 +62,27 @@ public class NameDisplayScreen : KScreen
 		}
 	}
 
+	private void OnActiveWorldChanged(object data)
+	{
+		foreach (NameDisplayScreen.Entry entry in this.entries)
+		{
+			this.ToggleLabelTextForActiveWorld(entry);
+		}
+	}
+
 	private void OnOverlayChanged(HashedString new_mode)
 	{
 		HashedString hashedString = this.lastKnownOverlayID;
 		this.lastKnownOverlayID = new_mode;
 		this.nameDisplayCanvas.enabled = this.lastKnownOverlayID == OverlayModes.None.ID;
+	}
+
+	private void ToggleLabelTextForActiveWorld(NameDisplayScreen.Entry entry)
+	{
+		if (entry.nameLabel != null)
+		{
+			entry.nameLabel.enabled = entry.world_go.GetMyWorldId() == ClusterManager.Instance.activeWorldId;
+		}
 	}
 
 	private void OnHealthAdded(Health health)
@@ -137,6 +158,7 @@ public class NameDisplayScreen : KScreen
 		GameObject gameObject = Util.KInstantiateUI(this.ShouldShowName(representedObject) ? this.nameAndBarsPrefab : this.barsPrefab, this.nameDisplayCanvas.gameObject, true);
 		entry.display_go = gameObject;
 		entry.display_go_rect = gameObject.GetComponent<RectTransform>();
+		entry.nameLabel = entry.display_go.GetComponentInChildren<LocText>();
 		if (this.worldSpace)
 		{
 			entry.display_go.transform.localScale = Vector3.one * 0.01f;
@@ -145,6 +167,7 @@ public class NameDisplayScreen : KScreen
 		entry.Name = representedObject.name;
 		entry.refs = gameObject.GetComponent<HierarchyReferences>();
 		this.entries.Add(entry);
+		this.ToggleLabelTextForActiveWorld(entry);
 		global::UnityEngine.Object component = representedObject.GetComponent<KSelectable>();
 		FactionAlignment component2 = representedObject.GetComponent<FactionAlignment>();
 		if (component != null)
@@ -377,7 +400,7 @@ public class NameDisplayScreen : KScreen
 		int count = this.entries.Count;
 		for (int i = 0; i < count; i++)
 		{
-			if (!(this.entries[i].world_go == null) && this.entries[i].world_go.HasTag(GameTags.Dead))
+			if (!(this.entries[i].world_go == null) && this.entries[i].world_go.HasTag(GameTags.Dead) && this.entries[i].bars_go.activeSelf)
 			{
 				this.entries[i].bars_go.SetActive(false);
 			}
@@ -409,13 +432,12 @@ public class NameDisplayScreen : KScreen
 		}
 		KSelectable component = representedObject.GetComponent<KSelectable>();
 		entry.display_go.name = component.GetProperName() + " character overlay";
-		LocText componentInChildren = entry.display_go.GetComponentInChildren<LocText>();
-		if (componentInChildren != null)
+		if (entry.nameLabel != null)
 		{
-			componentInChildren.text = component.GetProperName();
+			entry.nameLabel.text = component.GetProperName();
 			if (representedObject.GetComponent<RocketModule>() != null)
 			{
-				componentInChildren.text = representedObject.GetComponent<RocketModule>().GetParentRocketName();
+				entry.nameLabel.text = representedObject.GetComponent<RocketModule>().GetParentRocketName();
 			}
 		}
 	}
@@ -603,6 +625,8 @@ public class NameDisplayScreen : KScreen
 
 	private List<global::System.Action> lateUpdateSections = new List<global::System.Action>();
 
+	private int worldChangeEventHandle;
+
 	private bool isOverlayChangeBound;
 
 	private HashedString lastKnownOverlayID = OverlayModes.None.ID;
@@ -623,6 +647,8 @@ public class NameDisplayScreen : KScreen
 		public KAnimControllerBase world_go_anim_controller;
 
 		public RectTransform display_go_rect;
+
+		public LocText nameLabel;
 
 		public HealthBar healthBar;
 

@@ -79,7 +79,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 
 	public static Dictionary<Tag, SpiceGrinder.Option> SettingOptions = null;
 
-	public static Operational.Flag spiceSet = new Operational.Flag("spiceSet", Operational.Flag.Type.Functional);
+	public static readonly Operational.Flag spiceSet = new Operational.Flag("spiceSet", Operational.Flag.Type.Functional);
 
 	public GameStateMachine<SpiceGrinder, SpiceGrinder.StatesInstance, IStateMachineTarget, SpiceGrinder.Def>.State inoperational;
 
@@ -276,6 +276,19 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 			}
 		}
 
+		public bool AllowMutantSeeds
+		{
+			get
+			{
+				return this.allowMutantSeeds;
+			}
+			set
+			{
+				this.allowMutantSeeds = value;
+				this.ToggleMutantSeedFetches(this.allowMutantSeeds);
+			}
+		}
+
 		public StatesInstance(IStateMachineTarget master, SpiceGrinder.Def def)
 			: base(master, def)
 		{
@@ -292,6 +305,16 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 			this.UpdateFoodSymbol();
 			base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 			Prioritizable.AddRef(base.gameObject);
+			this.mutantSeedStatusItem = new StatusItem("SPICEGRINDERACCEPTSMUTANTSEEDS", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			if (this.AllowMutantSeeds)
+			{
+				KSelectable component = base.GetComponent<KSelectable>();
+				if (component != null)
+				{
+					component.AddStatusItem(this.mutantSeedStatusItem, null);
+				}
+			}
+			base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		}
 
 		protected override void OnCleanUp()
@@ -309,6 +332,76 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 			this.UpdateMeter();
 		}
 
+		private void OnRefreshUserMenu(object data)
+		{
+			if (DlcManager.FeatureRadiationEnabled())
+			{
+				Game.Instance.userMenu.AddButton(base.smi.gameObject, new KIconButtonMenu.ButtonInfo("action_switch_toggle", base.smi.AllowMutantSeeds ? UI.USERMENUACTIONS.ACCEPT_MUTANT_SEEDS.REJECT : UI.USERMENUACTIONS.ACCEPT_MUTANT_SEEDS.ACCEPT, delegate
+				{
+					base.smi.AllowMutantSeeds = !base.smi.AllowMutantSeeds;
+					this.OnRefreshUserMenu(base.smi);
+				}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.ACCEPT_MUTANT_SEEDS.TOOLTIP, true), 1f);
+			}
+		}
+
+		public void ToggleMutantSeedFetches(bool allow)
+		{
+			this.UpdateMutantSeedFetches();
+			if (allow)
+			{
+				this.seedStorage.storageFilters.Add(GameTags.MutatedSeed);
+				KSelectable component = base.GetComponent<KSelectable>();
+				if (component != null)
+				{
+					component.AddStatusItem(this.mutantSeedStatusItem, null);
+					return;
+				}
+			}
+			else
+			{
+				if (this.seedStorage.GetMassAvailable(GameTags.MutatedSeed) > 0f)
+				{
+					this.seedStorage.Drop(GameTags.MutatedSeed);
+				}
+				this.seedStorage.storageFilters.Remove(GameTags.MutatedSeed);
+				KSelectable component2 = base.GetComponent<KSelectable>();
+				if (component2 != null)
+				{
+					component2.RemoveStatusItem(this.mutantSeedStatusItem, false);
+				}
+			}
+		}
+
+		private void UpdateMutantSeedFetches()
+		{
+			if (this.SpiceFetches != null)
+			{
+				Tag[] array = new Tag[]
+				{
+					GameTags.Seed,
+					GameTags.CropSeed
+				};
+				for (int i = this.SpiceFetches.Length - 1; i >= 0; i--)
+				{
+					FetchChore fetchChore = this.SpiceFetches[i];
+					if (fetchChore != null)
+					{
+						using (HashSet<Tag>.Enumerator enumerator = this.SpiceFetches[i].tags.GetEnumerator())
+						{
+							while (enumerator.MoveNext())
+							{
+								if (Assets.GetPrefab(enumerator.Current).HasAnyTags(array))
+								{
+									fetchChore.Cancel("MutantSeedChanges");
+									this.SpiceFetches[i] = this.CreateFetchChore(fetchChore.tags, fetchChore.amount);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		private void OnCopySettings(object data)
 		{
 			SpiceGrinderWorkable component = ((GameObject)data).GetComponent<SpiceGrinderWorkable>();
@@ -318,6 +411,7 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 				SpiceGrinder.Option option;
 				SpiceGrinder.SettingOptions.TryGetValue(new Tag(component.Grinder.spiceHash), out option);
 				this.OnOptionSelected(option);
+				this.allowMutantSeeds = component.Grinder.AllowMutantSeeds;
 			}
 		}
 
@@ -415,7 +509,23 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 
 		private FetchChore CreateFetchChore(HashSet<Tag> ingredients, float amount)
 		{
-			return new FetchChore(Db.Get().ChoreTypes.CookFetch, this.seedStorage, Mathf.Clamp(amount, 1f, this.seedStorage.Capacity() - this.seedStorage.MassStored()), ingredients, FetchChore.MatchCriteria.MatchID, Tag.Invalid, null, null, true, new Action<Chore>(this.ClearFetchChore), null, null, Operational.State.Operational, 0);
+			float num = Mathf.Max(amount, 1f);
+			ChoreType cookFetch = Db.Get().ChoreTypes.CookFetch;
+			Storage storage = this.seedStorage;
+			float num2 = num;
+			FetchChore.MatchCriteria matchCriteria = FetchChore.MatchCriteria.MatchID;
+			Tag invalid = Tag.Invalid;
+			Action<Chore> action = new Action<Chore>(this.ClearFetchChore);
+			Tag[] array;
+			if (!this.AllowMutantSeeds)
+			{
+				(array = new Tag[1])[0] = GameTags.MutatedSeed;
+			}
+			else
+			{
+				array = null;
+			}
+			return new FetchChore(cookFetch, storage, num2, ingredients, matchCriteria, invalid, array, null, true, action, null, null, Operational.State.Operational, 0);
 		}
 
 		private void ClearFetchChore(Chore obj)
@@ -567,6 +677,11 @@ public class SpiceGrinder : GameStateMachine<SpiceGrinder, SpiceGrinder.StatesIn
 
 		private Guid missingResourceStatusItem = Guid.Empty;
 
+		private StatusItem mutantSeedStatusItem;
+
 		private FetchChore[] SpiceFetches;
+
+		[Serialize]
+		private bool allowMutantSeeds = true;
 	}
 }

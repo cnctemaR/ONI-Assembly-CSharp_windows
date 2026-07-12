@@ -97,6 +97,7 @@ public class FetchOrder2
 	private void SetFetchTask(float amount)
 	{
 		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.Criteria, this.RequiredTag, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
+		fetchChore.validateRequiredTagOnTagChange = this.validateRequiredTagOnTagChange;
 		this.Chores.Add(fetchChore);
 	}
 
@@ -266,6 +267,8 @@ public class FetchOrder2
 	public Action<FetchOrder2, Pickupable> OnComplete;
 
 	public Action<FetchOrder2, Pickupable> OnBegin;
+
+	public bool validateRequiredTagOnTagChange;
 
 	public List<FetchChore> Chores = new List<FetchChore>();
 

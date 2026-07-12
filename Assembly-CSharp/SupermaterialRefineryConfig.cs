@@ -81,53 +81,71 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 			complexRecipe2.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
 		}
 		float num5 = 0.15f;
-		float num6 = 0.05f;
-		float num7 = 1f - num6 - num5;
+		float num6 = 0.7f;
+		float num7 = 0.15f;
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(SimHashes.Isoresin.CreateTag(), 100f * num5),
-			new ComplexRecipe.RecipeElement(SimHashes.Katairite.CreateTag(), 100f * num7),
-			new ComplexRecipe.RecipeElement(BasicFabricConfig.ID.ToTag(), 100f * num6)
+			new ComplexRecipe.RecipeElement(SimHashes.TempConductorSolid.CreateTag(), 100f * num5),
+			new ComplexRecipe.RecipeElement(SimHashes.Polypropylene.CreateTag(), 100f * num6),
+			new ComplexRecipe.RecipeElement(SimHashes.MilkFat.CreateTag(), 100f * num7)
 		};
 		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(SimHashes.SuperInsulator.CreateTag(), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
+			new ComplexRecipe.RecipeElement(SimHashes.HardPolypropylene.CreateTag(), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
 		ComplexRecipe complexRecipe3 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SupermaterialRefinery", array5, array6), array5, array6);
 		complexRecipe3.time = 80f;
-		complexRecipe3.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.SUPERINSULATOR_RECIPE_DESCRIPTION;
+		complexRecipe3.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.HARDPLASTIC_RECIPE_DESCRIPTION;
 		complexRecipe3.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe3.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
-		float num8 = 0.05f;
+		float num8 = 0.15f;
+		float num9 = 0.05f;
+		float num10 = 1f - num9 - num8;
 		ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(SimHashes.Niobium.CreateTag(), 100f * num8),
-			new ComplexRecipe.RecipeElement(SimHashes.Tungsten.CreateTag(), 100f * (1f - num8))
+			new ComplexRecipe.RecipeElement(SimHashes.Isoresin.CreateTag(), 100f * num8),
+			new ComplexRecipe.RecipeElement(SimHashes.Katairite.CreateTag(), 100f * num10),
+			new ComplexRecipe.RecipeElement(BasicFabricConfig.ID.ToTag(), 100f * num9)
 		};
 		ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(SimHashes.TempConductorSolid.CreateTag(), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
+			new ComplexRecipe.RecipeElement(SimHashes.SuperInsulator.CreateTag(), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
 		ComplexRecipe complexRecipe4 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SupermaterialRefinery", array7, array8), array7, array8);
 		complexRecipe4.time = 80f;
-		complexRecipe4.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.TEMPCONDUCTORSOLID_RECIPE_DESCRIPTION;
+		complexRecipe4.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.SUPERINSULATOR_RECIPE_DESCRIPTION;
 		complexRecipe4.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe4.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
-		float num9 = 0.35f;
+		float num11 = 0.05f;
 		ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(SimHashes.Isoresin.CreateTag(), 100f * num9),
-			new ComplexRecipe.RecipeElement(SimHashes.Petroleum.CreateTag(), 100f * (1f - num9))
+			new ComplexRecipe.RecipeElement(SimHashes.Niobium.CreateTag(), 100f * num11),
+			new ComplexRecipe.RecipeElement(SimHashes.Tungsten.CreateTag(), 100f * (1f - num11))
 		};
 		ComplexRecipe.RecipeElement[] array10 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(SimHashes.ViscoGel.CreateTag(), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
+			new ComplexRecipe.RecipeElement(SimHashes.TempConductorSolid.CreateTag(), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
 		};
 		ComplexRecipe complexRecipe5 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SupermaterialRefinery", array9, array10), array9, array10);
 		complexRecipe5.time = 80f;
-		complexRecipe5.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.VISCOGEL_RECIPE_DESCRIPTION;
+		complexRecipe5.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.TEMPCONDUCTORSOLID_RECIPE_DESCRIPTION;
 		complexRecipe5.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe5.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
+		float num12 = 0.35f;
+		ComplexRecipe.RecipeElement[] array11 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(SimHashes.Isoresin.CreateTag(), 100f * num12),
+			new ComplexRecipe.RecipeElement(SimHashes.Petroleum.CreateTag(), 100f * (1f - num12))
+		};
+		ComplexRecipe.RecipeElement[] array12 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(SimHashes.ViscoGel.CreateTag(), 100f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, false)
+		};
+		ComplexRecipe complexRecipe6 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("SupermaterialRefinery", array11, array12), array11, array12);
+		complexRecipe6.time = 80f;
+		complexRecipe6.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.VISCOGEL_RECIPE_DESCRIPTION;
+		complexRecipe6.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
+		complexRecipe6.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

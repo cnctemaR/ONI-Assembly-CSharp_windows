@@ -18,7 +18,7 @@ public class RocketsInOrbitDiagnostic : ColonyDiagnostic
 	public ColonyDiagnostic.DiagnosticResult CheckOrbit()
 	{
 		AxialI myWorldLocation = ClusterManager.Instance.GetWorld(base.worldID).GetMyWorldLocation();
-		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.NO_MINIONS, null);
+		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, base.NO_MINIONS, null);
 		diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
 		this.numRocketsInOrbit = 0;
 		Clustercraft clustercraft = null;

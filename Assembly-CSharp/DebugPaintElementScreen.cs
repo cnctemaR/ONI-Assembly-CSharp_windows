@@ -292,14 +292,7 @@ public class DebugPaintElementScreen : KScreen
 	public void OnDiseaseCountChange()
 	{
 		int num;
-		try
-		{
-			num = Convert.ToInt32(this.diseaseCountInput.text);
-		}
-		catch
-		{
-			num = 0;
-		}
+		int.TryParse(this.diseaseCountInput.text, out num);
 		this.diseaseCount = num;
 	}
 

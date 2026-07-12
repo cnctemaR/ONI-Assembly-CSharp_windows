@@ -30,8 +30,10 @@ public class KleiItemDropScreen : KModalScreen
 
 	public override void Show(bool show = true)
 	{
+		this.serverRequestState.Reset();
 		if (!show)
 		{
+			this.animatedLoadingIcon.gameObject.SetActive(false);
 			if (this.activePresentationRoutine != null)
 			{
 				base.StopCoroutine(this.activePresentationRoutine);
@@ -99,8 +101,9 @@ public class KleiItemDropScreen : KModalScreen
 	public void PresentItem(KleiItems.ItemData item, bool firstItemPresentation)
 	{
 		this.userMessageLabel.SetText(UI.ITEM_DROP_SCREEN.THANKS_FOR_PLAYING);
-		this.giftRevealed = false;
 		this.giftAcknowledged = false;
+		this.serverRequestState.revealConfirmedByServer = false;
+		this.serverRequestState.revealRejectedByServer = false;
 		if (this.activePresentationRoutine != null)
 		{
 			base.StopCoroutine(this.activePresentationRoutine);
@@ -111,16 +114,33 @@ public class KleiItemDropScreen : KModalScreen
 		this.acceptButton.GetComponentInChildren<LocText>().SetText(UI.ITEM_DROP_SCREEN.PRINT_ITEM_BUTTON);
 		this.acceptButton.onClick += delegate
 		{
-			this.giftRevealed = true;
-			PermitItems.QueueRequestOpenOrUnboxItem(item);
+			this.serverRequestState.revealRequested = true;
+			PermitItems.QueueRequestOpenOrUnboxItem(item, new KleiItems.ResponseCallback(this.OnOpenItemRequestResponse));
 		};
 		this.acknowledgeButton.onClick += delegate
 		{
-			if (this.giftRevealed)
+			if (this.serverRequestState.revealConfirmedByServer)
 			{
 				this.giftAcknowledged = true;
 			}
 		};
+	}
+
+	public void OnOpenItemRequestResponse(KleiItems.Result result)
+	{
+		if (!this.serverRequestState.revealRequested)
+		{
+			return;
+		}
+		this.serverRequestState.revealRequested = false;
+		if (result.Success)
+		{
+			this.serverRequestState.revealRejectedByServer = false;
+			this.serverRequestState.revealConfirmedByServer = true;
+			return;
+		}
+		this.serverRequestState.revealRejectedByServer = true;
+		this.serverRequestState.revealConfirmedByServer = false;
 	}
 
 	public void PresentNoItemAvailablePrompt(bool firstItemPresentation)
@@ -253,88 +273,113 @@ public class KleiItemDropScreen : KModalScreen
 		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
 		yield return Updater.WaitForSeconds(1.25f);
 		yield return PresUtil.OffsetToAndFade(this.acceptButton.rectTransform(), animate_offset, 1f, 0.125f, Easing.ExpoOut);
-		yield return Updater.Until(() => this.giftRevealed);
+		yield return Updater.Until(() => this.serverRequestState.revealRequested);
 		yield return PresUtil.OffsetFromAndFade(this.acceptButton.rectTransform(), animate_offset, 0f, 0.125f, Easing.SmoothStep);
-		this.animatedPod.Play("additional_pre", KAnim.PlayMode.Once, 1f, 0f);
-		this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
-		yield return Updater.WaitForSeconds(1f);
-		DropScreenPresentationInfo dropScreenPresentationInfo;
-		dropScreenPresentationInfo.UseEquipmentVis = false;
-		dropScreenPresentationInfo.BuildOverride = null;
-		dropScreenPresentationInfo.Sprite = null;
-		string name = "";
-		string desc = "";
-		PermitRarity rarity = PermitRarity.Unknown;
-		string categoryString = "";
-		string text;
-		if (PermitItems.TryGetBoxInfo(item, out name, out desc, out text))
+		this.animatedLoadingIcon.gameObject.rectTransform().anchoredPosition = new Vector2(0f, -352f);
+		if (this.animatedLoadingIcon.GetComponent<CanvasGroup>() != null)
 		{
+			this.animatedLoadingIcon.GetComponent<CanvasGroup>().alpha = 1f;
+		}
+		yield return new WaitForSecondsRealtime(0.3f);
+		if (!this.serverRequestState.revealConfirmedByServer && !this.serverRequestState.revealRejectedByServer)
+		{
+			this.animatedLoadingIcon.gameObject.SetActive(true);
+			this.animatedLoadingIcon.Play("loading_rocket", KAnim.PlayMode.Loop, 1f, 0f);
+			yield return Updater.Until(() => this.serverRequestState.revealConfirmedByServer || this.serverRequestState.revealRejectedByServer);
+			yield return new WaitForSecondsRealtime(2f);
+			yield return PresUtil.OffsetFromAndFade(this.animatedLoadingIcon.gameObject.rectTransform(), new Vector2(0f, -512f), 0f, 0.25f, Easing.SmoothStep);
+			this.animatedLoadingIcon.gameObject.SetActive(false);
+		}
+		if (this.serverRequestState.revealRejectedByServer)
+		{
+			this.animatedPod.Play("idle", KAnim.PlayMode.Loop, 1f, 0f);
+			this.errorMessage.gameObject.SetActive(true);
+			yield return Updater.WaitForSeconds(3f);
+			this.errorMessage.gameObject.SetActive(false);
+		}
+		else if (this.serverRequestState.revealConfirmedByServer)
+		{
+			this.animatedPod.Play("additional_pre", KAnim.PlayMode.Once, 1f, 0f);
+			this.animatedPod.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
+			yield return Updater.WaitForSeconds(1f);
+			DropScreenPresentationInfo dropScreenPresentationInfo;
 			dropScreenPresentationInfo.UseEquipmentVis = false;
 			dropScreenPresentationInfo.BuildOverride = null;
-			dropScreenPresentationInfo.Sprite = Assets.GetSprite(text);
-			rarity = PermitRarity.Loyalty;
-		}
-		else
-		{
-			PermitResource permitResource = Db.Get().Permits.Get(item.Id);
-			dropScreenPresentationInfo.Sprite = permitResource.GetPermitPresentationInfo().sprite;
-			dropScreenPresentationInfo.UseEquipmentVis = permitResource.Category == PermitCategory.Equipment;
-			if (permitResource is EquippableFacadeResource)
+			dropScreenPresentationInfo.Sprite = null;
+			string name = "";
+			string desc = "";
+			PermitRarity rarity = PermitRarity.Unknown;
+			string categoryString = "";
+			string text;
+			if (PermitItems.TryGetBoxInfo(item, out name, out desc, out text))
 			{
-				dropScreenPresentationInfo.BuildOverride = (permitResource as EquippableFacadeResource).BuildOverride;
+				dropScreenPresentationInfo.UseEquipmentVis = false;
+				dropScreenPresentationInfo.BuildOverride = null;
+				dropScreenPresentationInfo.Sprite = Assets.GetSprite(text);
+				rarity = PermitRarity.Loyalty;
 			}
-			name = permitResource.Name;
-			desc = permitResource.Description;
-			rarity = permitResource.Rarity;
-			PermitCategory category = permitResource.Category;
-			if (category != PermitCategory.Building)
+			else
 			{
-				if (category != PermitCategory.Artwork)
+				PermitResource permitResource = Db.Get().Permits.Get(item.Id);
+				dropScreenPresentationInfo.Sprite = permitResource.GetPermitPresentationInfo().sprite;
+				dropScreenPresentationInfo.UseEquipmentVis = permitResource.Category == PermitCategory.Equipment;
+				if (permitResource is EquippableFacadeResource)
 				{
-					if (category != PermitCategory.JoyResponse)
+					dropScreenPresentationInfo.BuildOverride = (permitResource as EquippableFacadeResource).BuildOverride;
+				}
+				name = permitResource.Name;
+				desc = permitResource.Description;
+				rarity = permitResource.Rarity;
+				PermitCategory category = permitResource.Category;
+				if (category != PermitCategory.Building)
+				{
+					if (category != PermitCategory.Artwork)
 					{
-						categoryString = PermitCategories.GetDisplayName(permitResource.Category);
+						if (category != PermitCategory.JoyResponse)
+						{
+							categoryString = PermitCategories.GetDisplayName(permitResource.Category);
+						}
+						else
+						{
+							categoryString = PermitCategories.GetDisplayName(permitResource.Category);
+							if (permitResource is BalloonArtistFacadeResource)
+							{
+								categoryString = PermitCategories.GetDisplayName(permitResource.Category) + ": " + UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JOY_RESPONSES.BALLOON_ARTIST;
+							}
+						}
 					}
 					else
 					{
-						categoryString = PermitCategories.GetDisplayName(permitResource.Category);
-						if (permitResource is BalloonArtistFacadeResource)
-						{
-							categoryString = PermitCategories.GetDisplayName(permitResource.Category) + ": " + UI.KLEI_INVENTORY_SCREEN.CATEGORIES.JOY_RESPONSES.BALLOON_ARTIST;
-						}
+						categoryString = Assets.GetPrefab((permitResource as ArtableStage).prefabId).GetProperName();
 					}
 				}
 				else
 				{
-					categoryString = Assets.GetPrefab((permitResource as ArtableStage).prefabId).GetProperName();
+					categoryString = Assets.GetPrefab((permitResource as BuildingFacadeResource).PrefabID).GetProperName();
 				}
 			}
-			else
-			{
-				categoryString = Assets.GetPrefab((permitResource as BuildingFacadeResource).PrefabID).GetProperName();
-			}
+			this.permitVisualizer.ConfigureWith(dropScreenPresentationInfo);
+			yield return this.permitVisualizer.AnimateIn();
+			KFMOD.PlayUISoundWithLabeledParameter(GlobalAssets.GetSound("GiftItemDrop_Rarity", false), "GiftItemRarity", string.Format("{0}", rarity));
+			this.itemNameLabel.SetText(name);
+			this.itemDescriptionLabel.SetText(desc);
+			this.itemRarityLabel.SetText(rarity.GetLocStringName());
+			this.itemCategoryLabel.SetText(categoryString);
+			this.itemTextContainerPosition.SetOn(this.itemTextContainer);
+			yield return Updater.Parallel(new Updater[] { PresUtil.OffsetToAndFade(this.itemTextContainer.rectTransform(), animate_offset, 1f, 0.125f, Easing.CircInOut) });
+			yield return Updater.Until(() => this.giftAcknowledged);
+			this.animatedPod.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+			this.animatedPod.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
+			yield return Updater.Parallel(new Updater[] { PresUtil.OffsetFromAndFade(this.itemTextContainer.rectTransform(), animate_offset, 0f, 0.125f, Easing.CircInOut) });
+			this.itemNameLabel.SetText("");
+			this.itemDescriptionLabel.SetText("");
+			this.itemRarityLabel.SetText("");
+			this.itemCategoryLabel.SetText("");
+			yield return this.permitVisualizer.AnimateOut();
+			name = null;
+			desc = null;
+			categoryString = null;
 		}
-		this.permitVisualizer.ConfigureWith(dropScreenPresentationInfo);
-		yield return this.permitVisualizer.AnimateIn();
-		KFMOD.PlayUISoundWithLabeledParameter(GlobalAssets.GetSound("GiftItemDrop_Rarity", false), "GiftItemRarity", string.Format("{0}", rarity));
-		this.itemNameLabel.SetText(name);
-		this.itemDescriptionLabel.SetText(desc);
-		this.itemRarityLabel.SetText(rarity.GetLocStringName());
-		this.itemCategoryLabel.SetText(categoryString);
-		this.itemTextContainerPosition.SetOn(this.itemTextContainer);
-		yield return Updater.Parallel(new Updater[] { PresUtil.OffsetToAndFade(this.itemTextContainer.rectTransform(), animate_offset, 1f, 0.125f, Easing.CircInOut) });
-		yield return Updater.Until(() => this.giftAcknowledged);
-		this.animatedPod.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-		this.animatedPod.Queue("idle", KAnim.PlayMode.Loop, 1f, 0f);
-		yield return Updater.Parallel(new Updater[] { PresUtil.OffsetFromAndFade(this.itemTextContainer.rectTransform(), animate_offset, 0f, 0.125f, Easing.CircInOut) });
-		this.itemNameLabel.SetText("");
-		this.itemDescriptionLabel.SetText("");
-		this.itemRarityLabel.SetText("");
-		this.itemCategoryLabel.SetText("");
-		yield return this.permitVisualizer.AnimateOut();
-		name = null;
-		desc = null;
-		categoryString = null;
 		this.PresentNextUnopenedItem(false);
 		yield break;
 	}
@@ -384,11 +429,17 @@ public class KleiItemDropScreen : KModalScreen
 	private KButton acceptButton;
 
 	[SerializeField]
+	private KBatchedAnimController animatedLoadingIcon;
+
+	[SerializeField]
 	private KButton acknowledgeButton;
+
+	[SerializeField]
+	private LocText errorMessage;
 
 	private Coroutine activePresentationRoutine;
 
-	private bool giftRevealed;
+	private KleiItemDropScreen.ServerRequestState serverRequestState;
 
 	private bool giftAcknowledged;
 
@@ -403,4 +454,20 @@ public class KleiItemDropScreen : KModalScreen
 	private PrefabDefinedUIPosition acceptButtonPosition = new PrefabDefinedUIPosition();
 
 	private PrefabDefinedUIPosition itemTextContainerPosition = new PrefabDefinedUIPosition();
+
+	private struct ServerRequestState
+	{
+		public void Reset()
+		{
+			this.revealRequested = false;
+			this.revealConfirmedByServer = false;
+			this.revealRejectedByServer = false;
+		}
+
+		public bool revealRequested;
+
+		public bool revealConfirmedByServer;
+
+		public bool revealRejectedByServer;
+	}
 }

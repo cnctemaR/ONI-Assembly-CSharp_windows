@@ -1,5 +1,6 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
 public class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>
 {
@@ -14,14 +15,53 @@ public class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Insta
 			{
 				component.SetCurrentNavType(NavType.Floor);
 			}
-		}).ToggleTag(GameTags.Creatures.Deliverable).PlayAnim("trapped", KAnim.PlayMode.Loop)
+		}).ToggleTag(GameTags.Creatures.Deliverable).PlayAnim(new Func<TrappedStates.Instance, string>(TrappedStates.GetTrappedAnimName), KAnim.PlayMode.Loop)
 			.TagTransition(GameTags.Trapped, null, true);
 	}
+
+	public static string GetTrappedAnimName(TrappedStates.Instance smi)
+	{
+		string text = "trapped";
+		int num = Grid.PosToCell(smi.transform.GetPosition());
+		GameObject gameObject = Grid.Objects[num, 1];
+		if (gameObject != null)
+		{
+			if (gameObject.GetComponent<TrappedStates.ITrapStateAnimationInstructions>() != null)
+			{
+				string trappedAnimationName = gameObject.GetComponent<TrappedStates.ITrapStateAnimationInstructions>().GetTrappedAnimationName();
+				if (trappedAnimationName != null)
+				{
+					return trappedAnimationName;
+				}
+			}
+			if (gameObject.GetSMI<TrappedStates.ITrapStateAnimationInstructions>() != null)
+			{
+				string trappedAnimationName2 = gameObject.GetSMI<TrappedStates.ITrapStateAnimationInstructions>().GetTrappedAnimationName();
+				if (trappedAnimationName2 != null)
+				{
+					return trappedAnimationName2;
+				}
+			}
+		}
+		Trappable component = smi.gameObject.GetComponent<Trappable>();
+		if (component != null && component.HasTag(GameTags.Creatures.Swimmer) && Grid.IsValidCell(num) && !Grid.IsLiquid(num))
+		{
+			text = "trapped_onLand";
+		}
+		return text;
+	}
+
+	public const string DEFAULT_TRAPPED_ANIM_NAME = "trapped";
 
 	private GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>.State trapped;
 
 	public class Def : StateMachine.BaseDef
 	{
+	}
+
+	public interface ITrapStateAnimationInstructions
+	{
+		string GetTrappedAnimationName();
 	}
 
 	public new class Instance : GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>.GameInstance

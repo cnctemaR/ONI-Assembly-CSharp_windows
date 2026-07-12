@@ -6,7 +6,7 @@ public class GassyMooCometConfig : IEntityConfig
 {
 	public string[] GetDlcIds()
 	{
-		return DlcManager.AVAILABLE_EXPANSION1_ONLY;
+		return DlcManager.AVAILABLE_ALL_VERSIONS;
 	}
 
 	public GameObject CreatePrefab()
@@ -27,6 +27,7 @@ public class GassyMooCometConfig : IEntityConfig
 		gassyMooComet.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
 		gassyMooComet.addTiles = 0;
 		gassyMooComet.affectedByDifficulty = false;
+		gassyMooComet.lootOnDestroyedByMissile = new string[] { "Meat", "Meat", "Meat" };
 		gassyMooComet.destroyOnExplode = false;
 		gassyMooComet.craterPrefabs = new string[] { "Moo" };
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();

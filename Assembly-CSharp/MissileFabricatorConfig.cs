@@ -41,6 +41,7 @@ public class MissileFabricatorConfig : IBuildingConfig
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
 		complexFabricator.keepExcessLiquids = true;
+		complexFabricator.allowManualFluidDelivery = false;
 		Workable workable = go.AddOrGet<ComplexFabricatorWorkable>();
 		complexFabricator.duplicantOperated = true;
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);

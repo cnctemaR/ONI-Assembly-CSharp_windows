@@ -65,7 +65,7 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 		{
 			return Grid.LightIntensity[cell] == 0;
 		}
-		return Grid.LightIntensity[cell] > this.LightIntensityThreshold;
+		return Grid.LightIntensity[cell] >= this.LightIntensityThreshold;
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions

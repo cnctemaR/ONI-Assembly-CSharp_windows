@@ -165,7 +165,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(562984U);
+		this.changelistsPlayedOn.Add(567980U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
@@ -224,6 +224,7 @@ public class Game : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		global::Debug.Log("-- GAME --");
+		Game.BrainScheduler = base.GetComponent<BrainScheduler>();
 		PropertyTextures.FogOfWarScale = 0f;
 		if (CameraController.Instance != null)
 		{
@@ -914,7 +915,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 562984U;
+		uint num = 567980U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1126,14 +1127,15 @@ public class Game : KMonoBehaviour
 		gameSaveData.debugWasUsed = this.debugWasUsed;
 		gameSaveData.customGameSettings = CustomGameSettings.Instance;
 		gameSaveData.storySetings = StoryManager.Instance;
+		gameSaveData.spaceScannerNetworkManager = Game.Instance.spaceScannerNetworkManager;
 		gameSaveData.autoPrioritizeRoles = this.autoPrioritizeRoles;
 		gameSaveData.advancedPersonalPriorities = this.advancedPersonalPriorities;
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(562984U))
+		if (!this.changelistsPlayedOn.Contains(567980U))
 		{
-			this.changelistsPlayedOn.Add(562984U);
+			this.changelistsPlayedOn.Add(567980U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1153,6 +1155,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.worldDetail = new WorldDetailSave();
 		gameSaveData.customGameSettings = CustomGameSettings.Instance;
 		gameSaveData.storySetings = StoryManager.Instance;
+		gameSaveData.spaceScannerNetworkManager = Game.Instance.spaceScannerNetworkManager;
 		deserializer.Deserialize(gameSaveData);
 		this.gasConduitFlow = gameSaveData.gasConduitFlow;
 		this.liquidConduitFlow = gameSaveData.liquidConduitFlow;
@@ -1578,6 +1581,7 @@ public class Game : KMonoBehaviour
 		ClusterMapSelectTool.DestroyInstance();
 		StoryManager.DestroyInstance();
 		Game.Instance = null;
+		Game.BrainScheduler = null;
 		Grid.OnReveal = null;
 		this.VisualTunerElement = null;
 		Assets.ClearOnAddPrefab();
@@ -1626,6 +1630,8 @@ public class Game : KMonoBehaviour
 	public static int BlockSelectionLayerMask;
 
 	public static int PickupableLayer;
+
+	public static BrainScheduler BrainScheduler;
 
 	public Element VisualTunerElement;
 
@@ -2136,6 +2142,8 @@ public class Game : KMonoBehaviour
 		public CustomGameSettings customGameSettings;
 
 		public StoryManager storySetings;
+
+		public SpaceScannerNetworkManager spaceScannerNetworkManager;
 
 		public bool debugWasUsed;
 

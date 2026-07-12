@@ -253,6 +253,11 @@ public class LegacyModMain
 			{
 				id = SimHashes.TempConductorSolid,
 				overheatMod = 900f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.HardPolypropylene,
+				overheatMod = 900f
 			}
 		})
 		{

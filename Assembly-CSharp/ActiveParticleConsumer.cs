@@ -26,7 +26,7 @@ public class ActiveParticleConsumer : GameStateMachine<ActiveParticleConsumer, A
 		return smi.storage.Particles >= smi.def.minParticlesForOperational;
 	}
 
-	public static Operational.Flag canConsumeParticlesFlag = new Operational.Flag("canConsumeParticles", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag canConsumeParticlesFlag = new Operational.Flag("canConsumeParticles", Operational.Flag.Type.Requirement);
 
 	public GameStateMachine<ActiveParticleConsumer, ActiveParticleConsumer.Instance, IStateMachineTarget, ActiveParticleConsumer.Def>.State inoperational;
 

@@ -64,19 +64,24 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 		{
 			Storage storage = this.masterTarget.Get<Storage>(smi);
 			Worker worker = this.stateTarget.Get<Worker>(smi);
+			Tag tag = storage.items[0].PrefabID();
 			float num;
 			SimUtil.DiseaseInfo diseaseInfo;
 			float num2;
-			storage.ConsumeAndGetDisease(GameTags.Water, 1f, out num, out diseaseInfo, out num2);
+			storage.ConsumeAndGetDisease(tag, 1f, out num, out diseaseInfo, out num2);
 			GermExposureMonitor.Instance smi2 = worker.GetSMI<GermExposureMonitor.Instance>();
 			if (smi2 != null)
 			{
-				smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Sickness.InfectionVector.Digestion);
+				smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, tag, Sickness.InfectionVector.Digestion);
 			}
 			Effects component = worker.GetComponent<Effects>();
 			if (!string.IsNullOrEmpty(smi.master.trackingEffect))
 			{
 				component.Add(smi.master.trackingEffect, true);
+			}
+			if (tag == SimHashes.Milk.CreateTag())
+			{
+				component.Add("DuplicantGotMilk", true);
 			}
 		}
 

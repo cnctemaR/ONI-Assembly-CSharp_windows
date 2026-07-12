@@ -50,9 +50,14 @@ public class FlatTagFilterSideScreen : SideScreenContent
 					this.Refresh();
 				};
 				kvp.Value.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("Toggle").ChangeState(this.tagFilterable.selectedTags.Contains(kvp.Key) ? 1 : 0);
-				kvp.Value.SetActive(DiscoveredResources.Instance.IsDiscovered(kvp.Key));
+				kvp.Value.SetActive(!this.tagFilterable.displayOnlyDiscoveredTags || DiscoveredResources.Instance.IsDiscovered(kvp.Key));
 			}
 		}
+	}
+
+	public override string GetTitle()
+	{
+		return this.tagFilterable.gameObject.GetProperName();
 	}
 
 	private FlatTagFilterable tagFilterable;

@@ -16,7 +16,11 @@ public class PuftBleachstoneConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
 		gameObject = BasePuftConfig.SetupDiet(gameObject, SimHashes.ChlorineGas.CreateTag(), SimHashes.BleachStone.CreateTag(), PuftBleachstoneConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_2, null, 0f, PuftBleachstoneConfig.MIN_POOP_SIZE_IN_KG);
-		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { SimHashes.BleachStone.CreateTag() };
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
+		{
+			SimHashes.BleachStone.CreateTag(),
+			GameTags.Creatures.FlyersLure
+		};
 		return gameObject;
 	}
 

@@ -57,6 +57,7 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 		this.AddDiagnostic<PowerUseDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		this.AddDiagnostic<BatteryDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		this.AddDiagnostic<RocketsInOrbitDiagnostic>(world, this.contentContainer, this.diagnosticRows);
+		this.AddDiagnostic<MeteorDiagnostic>(world, this.contentContainer, this.diagnosticRows);
 		List<ColonyDiagnosticScreen.DiagnosticRow> list = new List<ColonyDiagnosticScreen.DiagnosticRow>();
 		foreach (ColonyDiagnosticScreen.DiagnosticRow diagnosticRow in this.diagnosticRows)
 		{
@@ -110,32 +111,21 @@ public class ColonyDiagnosticScreen : KScreen, ISim1000ms
 
 	public void RefreshAll()
 	{
-		string text = "";
 		foreach (ColonyDiagnosticScreen.DiagnosticRow diagnosticRow in this.diagnosticRows)
 		{
 			if (diagnosticRow.worldID == ClusterManager.Instance.activeWorldId)
 			{
-				this.UpdateDiagnosticRow(diagnosticRow, text);
+				this.UpdateDiagnosticRow(diagnosticRow);
 			}
 		}
 		ColonyDiagnosticScreen.SetIndication(ColonyDiagnosticUtility.Instance.GetWorldDiagnosticResult(ClusterManager.Instance.activeWorldId), this.rootIndicator);
-		this.header.GetComponent<ToolTip>().enabled = !string.IsNullOrEmpty(text);
-		this.header.GetComponent<ToolTip>().SetSimpleTooltip(text);
 		this.seeAllButton.GetComponentInChildren<LocText>().SetText(string.Format(UI.DIAGNOSTICS_SCREEN.SEE_ALL, AllDiagnosticsScreen.Instance.GetRowCount()));
 	}
 
-	private ColonyDiagnostic.DiagnosticResult.Opinion UpdateDiagnosticRow(ColonyDiagnosticScreen.DiagnosticRow row, string tooltipString)
+	private ColonyDiagnostic.DiagnosticResult.Opinion UpdateDiagnosticRow(ColonyDiagnosticScreen.DiagnosticRow row)
 	{
 		ColonyDiagnostic.DiagnosticResult.Opinion currentDisplayedResult = row.currentDisplayedResult;
 		bool activeInHierarchy = row.gameObject.activeInHierarchy;
-		if (row.diagnostic.LatestResult.opinion < ColonyDiagnostic.DiagnosticResult.Opinion.Normal)
-		{
-			if (!string.IsNullOrEmpty(tooltipString))
-			{
-				tooltipString += "\n";
-			}
-			tooltipString += row.diagnostic.LatestResult.Message;
-		}
 		if (ColonyDiagnosticUtility.Instance.IsDiagnosticTutorialDisabled(row.diagnostic.id))
 		{
 			this.SetRowActive(row, false);

@@ -432,7 +432,7 @@ namespace STRINGS
 
 		public static LocString CHANGEPERSECOND = "Change per second: {0}";
 
-		public static LocString CHANGEPERCYCLE = "Change per cycle: {0}";
+		public static LocString CHANGEPERCYCLE = "Total change per cycle: {0}";
 
 		public static LocString MODIFIER_ITEM_TEMPLATE = "    • {0}: {1}";
 
@@ -539,7 +539,9 @@ namespace STRINGS
 
 		public class COLONY_DIAGNOSTICS
 		{
-			public static LocString NO_MINIONS = "    • There are no Duplicants on this {0}";
+			public static LocString NO_MINIONS_PLANETOID = "    • There are no Duplicants on this planetoid";
+
+			public static LocString NO_MINIONS_ROCKET = "    • There are no Duplicants aboard this rocket";
 
 			public static LocString ROCKET = "rocket";
 
@@ -900,6 +902,22 @@ namespace STRINGS
 					public static LocString CHECKSICK = "Check sick";
 
 					public static LocString CHECKEXPOSED = "Check exposed";
+				}
+			}
+
+			public class METEORDIAGNOSTIC
+			{
+				public static LocString ALL_NAME = "Meteor Showers";
+
+				public static LocString TOOLTIP_NAME = "<b>Meteor Showers</b>";
+
+				public static LocString NORMAL = "    • No meteor showers in progress";
+
+				public static LocString SHOWER_UNDERWAY = "    • Meteor bombardment underway! {0} remaining";
+
+				public static class CRITERIA
+				{
+					public static LocString CHECKUNDERWAY = "Check meteor bombardment";
 				}
 			}
 
@@ -3464,13 +3482,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "JUNE 2023 QOL";
+				public static LocString IMAGE_HEADER = "SONG OF THE MOO";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>Significant changes to Space Scanner and telescopes.</indent>\n•<indent=20px>New category of cosmetic skins.</indent>\n•<indent=20px>New Move To tool for transporting objects.</indent>\n•<indent=20px>A strange new asteroid and Puft Atmo Suit skin for Klei Fest.</indent>\n•<indent=20px>Bug fixes and quality of life improvements.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "This update includes:\n\n•<indent=20px>Gassy Moos can be milked for a substance called Brackene.</indent>\n•<indent=20px>Several new Brackene related buildings.</indent>\n•<indent=20px>New Egg recipes and food tuning.</indent>\n•<indent=20px>A high temperature plastic called Plastium is craftable at the Molecular Forge.</indent>\n•<indent=20px>New cosmetic skins.</indent>\n•<indent=20px>Bug fixes and more.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -4642,6 +4660,120 @@ namespace STRINGS
 				}
 			}
 
+			public static class TOP_LEVEL_CATEGORIES
+			{
+				public static LocString UNRELEASED = "DEBUG UNRELEASED";
+
+				public static LocString CLOTHING_TOPS = "Tops & Onesies";
+
+				public static LocString CLOTHING_BOTTOMS = "Bottoms";
+
+				public static LocString CLOTHING_GLOVES = "Gloves";
+
+				public static LocString CLOTHING_SHOES = "Footwear";
+
+				public static LocString ATMOSUITS = "Atmo Suits";
+
+				public static LocString BUILDINGS = "Buildings";
+
+				public static LocString WALLPAPERS = "Wallpapers";
+
+				public static LocString ARTWORK = "Artwork";
+
+				public static LocString JOY_RESPONSES = "Joy Responses";
+			}
+
+			public static class SUBCATEGORIES
+			{
+				public static LocString UNRELEASED = "DEBUG UNRELEASED";
+
+				public static LocString UNCATEGORIZED = "BUG: UNCATEGORIZED";
+
+				public static LocString YAML = "YAML";
+
+				public static LocString DEFAULT = "Default";
+
+				public static LocString JOY_BALLOON = "Balloons";
+
+				public static LocString JOY_STICKER = "Stickers";
+
+				public static LocString PRIMO_GARB = "Primo Garb";
+
+				public static LocString CLOTHING_TOPS_BASIC = "Basic Shirts";
+
+				public static LocString CLOTHING_TOPS_TSHIRT = "Tees";
+
+				public static LocString CLOTHING_TOPS_JACKET = "Jackets";
+
+				public static LocString CLOTHING_TOPS_UNDERSHIRT = "Undershirts";
+
+				public static LocString CLOTHING_BOTTOMS_BASIC = "Basic Pants";
+
+				public static LocString CLOTHING_BOTTOMS_FANCY = "Fancy Pants";
+
+				public static LocString CLOTHING_BOTTOMS_SHORTS = "Shorts";
+
+				public static LocString CLOTHING_BOTTOMS_UNDERWEAR = "Underwear";
+
+				public static LocString CLOTHING_GLOVES_BASIC = "Basic Gloves";
+
+				public static LocString CLOTHING_GLOVES_SHORT = "Short Gloves";
+
+				public static LocString CLOTHING_GLOVES_PRINTS = "Specialty Gloves";
+
+				public static LocString CLOTHING_SHOES_BASIC = "Basic Shoes";
+
+				public static LocString CLOTHING_SHOE_SOCKS = "Socks";
+
+				public static LocString ATMOSUIT_HELMETS_BASIC = "Atmo Helmets";
+
+				public static LocString ATMOSUIT_HELMETS_FANCY = "Fancy Atmo Helmets";
+
+				public static LocString ATMOSUIT_BODIES_BASIC = "Atmo Suits";
+
+				public static LocString ATMOSUIT_BODIES_FANCY = "Fancy Atmo Suits";
+
+				public static LocString ATMOSUIT_GLOVES_BASIC = "Atmo Gloves";
+
+				public static LocString ATMOSUIT_GLOVES_FANCY = "Fancy Atmo Gloves";
+
+				public static LocString ATMOSUIT_BELTS_BASIC = "Atmo Belts";
+
+				public static LocString ATMOSUIT_BELTS_FANCY = "Fancy Atmo Belts";
+
+				public static LocString ATMOSUIT_SHOES_BASIC = "Atmo Boots";
+
+				public static LocString ATMOSUIT_SHOES_FANCY = "Fancy Atmo Boots";
+
+				public static LocString BUILDING_WALLPAPER_BASIC = "Solid Wallpapers";
+
+				public static LocString BUILDING_WALLPAPER_FANCY = "Geometric Wallpapers";
+
+				public static LocString BUILDING_WALLPAPER_PRINTS = "Patterned Wallpapers";
+
+				public static LocString BUILDING_CANVAS_STANDARD = "Standard Canvas";
+
+				public static LocString BUILDING_CANVAS_PORTRAIT = "Portrait Canvas";
+
+				public static LocString BUILDING_CANVAS_LANDSCAPE = "Landscape Canvas";
+
+				public static LocString BUILDING_SCULPTURE = "Sculptures";
+
+				public static LocString MONUMENT_PARTS = "Monuments";
+
+				public static LocString BUILDINGS_FLOWER_VASE = "Flower Pots";
+
+				public static LocString BUILDINGS_BED_COT = "Cots";
+
+				public static LocString BUILDINGS_BED_LUXURY = "Comfy Beds";
+
+				public static LocString BUILDING_CEILING_LIGHT = "Lights";
+
+				public static LocString BUILDINGS_INDUSTRIAL = "Industrial";
+
+				public static LocString BUILDINGS_RECREATION = "Recreation and Decor";
+			}
+
 			public static class COLUMN_HEADERS
 			{
 				public static LocString CATEGORY_HEADER = "BLUEPRINTS";
@@ -4665,6 +4797,8 @@ namespace STRINGS
 			public static LocString PRINT_ITEM_BUTTON = "PRINT";
 
 			public static LocString DISMISS_BUTTON = "DISMISS";
+
+			public static LocString ERROR_CANNOTLOADITEM = "Whoops! Something's gone wrong.";
 
 			public static class IN_GAME_BUTTON
 			{
@@ -5059,6 +5193,66 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Puft Atmo Outfit";
 			}
+
+			public class ATMOSUIT_CONFETTI
+			{
+				public static LocString NAME = "Confetti Atmo Outfit";
+			}
+
+			public class ATMOSUIT_BASIC_PURPLE
+			{
+				public static LocString NAME = "Eggplant Atmo Outfit";
+			}
+
+			public class CANUXTUX
+			{
+				public static LocString NAME = "Canadian Tuxedo Outfit";
+			}
+
+			public class GONCHIES_STRAWBERRY
+			{
+				public static LocString NAME = "Executive Undies Outfit";
+			}
+
+			public class GONCHIES_SATSUMA
+			{
+				public static LocString NAME = "Underling Undies Outfit";
+			}
+
+			public class GONCHIES_LEMON
+			{
+				public static LocString NAME = "Groupthink Undies Outfit";
+			}
+
+			public class GONCHIES_LIME
+			{
+				public static LocString NAME = "Stakeholder Undies Outfit";
+			}
+
+			public class GONCHIES_BLUEBERRY
+			{
+				public static LocString NAME = "Admin Undies Outfit";
+			}
+
+			public class GONCHIES_GRAPE
+			{
+				public static LocString NAME = "Buzzword Undies Outfit";
+			}
+
+			public class GONCHIES_WATERMELON
+			{
+				public static LocString NAME = "Synergy Undies Outfit";
+			}
+
+			public class NERD
+			{
+				public static LocString NAME = "Research Outfit";
+			}
+
+			public class REBELGI
+			{
+				public static LocString NAME = "Rebel Gi Outfit";
+			}
 		}
 
 		public class ROLES_SCREEN
@@ -5267,7 +5461,12 @@ namespace STRINGS
 
 				public class CAN_USE_RANCH_STATION
 				{
-					public static LocString DESCRIPTION = "Grooming Station Usage";
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.RANCHSTATION.NAME + " Usage";
+				}
+
+				public class CAN_USE_MILKING_STATION
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.MILKINGSTATION.NAME + " Usage";
 				}
 
 				public class CAN_POWER_TINKER
@@ -9396,6 +9595,11 @@ namespace STRINGS
 				}
 			}
 
+			public class FEWOPTIONSELECTIONSIDESCREEN
+			{
+				public static LocString TITLE = "Options";
+			}
+
 			public class LOGICBROADCASTCHANNELSIDESCREEN
 			{
 				public static LocString TITLE = "Channel Selector";
@@ -10569,7 +10773,14 @@ namespace STRINGS
 
 				public static LocString AUTOWRANGLE = "Auto-Wrangle Surplus";
 
-				public static LocString AUTOWRANGLE_TOOLTIP = "A Duplicant will automatically wrangle any critters that exceed the population limit or that do not belong in this stable\n\nDuplicants must possess the Critter Ranching Skill in order to wrangle critters";
+				public static LocString AUTOWRANGLE_TOOLTIP = string.Concat(new string[]
+				{
+					"A Duplicant will automatically wrangle any critters that exceed the population limit or that do not belong in this stable\n\nDuplicants must possess the ",
+					UI.PRE_KEYWORD,
+					"Critter Ranching",
+					UI.PST_KEYWORD,
+					" skill in order to wrangle critters"
+				});
 
 				public static LocString LIMIT_TOOLTIP = "Critters exceeding this population limit will automatically be wrangled:";
 
@@ -11019,6 +11230,20 @@ namespace STRINGS
 
 		public class USERMENUACTIONS
 		{
+			public class TRANSITTUBEWAX
+			{
+				public static LocString NAME = "Enable Smooth Ride";
+
+				public static LocString TOOLTIP = "Enables the use of " + ELEMENTS.MILKFAT.NAME + " to boost travel speed";
+			}
+
+			public class CANCELTRANSITTUBEWAX
+			{
+				public static LocString NAME = "Disable Smooth Ride";
+
+				public static LocString TOOLTIP = "Disables travel speed boost and refunds stored " + ELEMENTS.MILKFAT.NAME;
+			}
+
 			public class CLEANTOILET
 			{
 				public static LocString NAME = "Clean Toilet";
@@ -11959,6 +12184,15 @@ namespace STRINGS
 				public static LocString NAME = "Advanced";
 
 				public static LocString BUILDMENUTITLE = "Advanced";
+
+				public static LocString TOOLTIP = "";
+			}
+
+			public static class ORGANIC
+			{
+				public static LocString NAME = "Organic";
+
+				public static LocString BUILDMENUTITLE = "Organic";
 
 				public static LocString TOOLTIP = "";
 			}
@@ -14169,7 +14403,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Critter Ranching",
 					UI.PST_KEYWORD,
-					" Skill in order to wrangle critters"
+					" skill in order to wrangle critters"
 				});
 
 				public static LocString CAPTURE_METHOD_LURE = "This critter can be moved using an " + BUILDINGS.PREFABS.AIRBORNECREATURELURE.NAME;

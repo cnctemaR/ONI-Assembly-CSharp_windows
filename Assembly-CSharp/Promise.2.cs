@@ -3,6 +3,14 @@ using System.Collections;
 
 public class Promise<T> : IEnumerator
 {
+	public bool IsResolved
+	{
+		get
+		{
+			return this.promise.IsResolved;
+		}
+	}
+
 	public Promise(Action<Action<T>> fn)
 	{
 		fn(delegate(T value)

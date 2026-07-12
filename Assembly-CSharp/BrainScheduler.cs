@@ -64,6 +64,17 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		DebugUtil.Assert(flag);
 	}
 
+	public void PrioritizeBrain(Brain brain)
+	{
+		foreach (BrainScheduler.BrainGroup brainGroup in this.brainGroups)
+		{
+			if (brain.HasTag(brainGroup.tag))
+			{
+				brainGroup.PrioritizeBrain(brain);
+			}
+		}
+	}
+
 	public float GetEstimatedFrameTime()
 	{
 		return TuningData<BrainScheduler.Tuning>.Get().frameTime;
@@ -135,6 +146,17 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 				this.OnRemoveBrain(num, ref this.nextUpdateBrain);
 				this.OnRemoveBrain(num, ref this.nextPathProbeBrain);
 			}
+			if (this.priorityBrains.Contains(brain))
+			{
+				List<Brain> list = new List<Brain>(this.priorityBrains);
+				list.Remove(brain);
+				this.priorityBrains = new Queue<Brain>(list);
+			}
+		}
+
+		public void PrioritizeBrain(Brain brain)
+		{
+			this.priorityBrains.Enqueue(brain);
 		}
 
 		public int probeSize { get; private set; }
@@ -211,7 +233,6 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 
 		private void AsyncPathProbe()
 		{
-			int probeSize = this.probeSize;
 			this.pathProbeJob.Reset(null);
 			for (int num = 0; num != this.brains.Count; num++)
 			{
@@ -250,13 +271,21 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			while (num2 != this.brains.Count && num != 0)
 			{
 				this.ClampBrainIndex(ref this.nextUpdateBrain);
-				Brain brain = this.brains[this.nextUpdateBrain];
+				Brain brain;
+				if (this.priorityBrains.Count > 0)
+				{
+					brain = this.priorityBrains.Dequeue();
+				}
+				else
+				{
+					brain = this.brains[this.nextUpdateBrain];
+					this.IncrementBrainIndex(ref this.nextUpdateBrain);
+				}
 				if (brain.IsRunning())
 				{
 					brain.UpdateBrain();
 					num--;
 				}
-				this.IncrementBrainIndex(ref this.nextUpdateBrain);
 				num2++;
 			}
 		}
@@ -288,6 +317,8 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 		public abstract float LoadBalanceThreshold();
 
 		private List<Brain> brains = new List<Brain>();
+
+		private Queue<Brain> priorityBrains = new Queue<Brain>();
 
 		private string increaseLoadLabel;
 
@@ -404,7 +435,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 
 		public class Tuning : TuningData<BrainScheduler.CreatureBrainGroup.Tuning>
 		{
-			public int initialProbeCount = 1;
+			public int initialProbeCount = 5;
 
 			public int initialProbeSize = 1000;
 

@@ -240,7 +240,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 				if (!(gameObject == null))
 				{
 					int num = Grid.CellBelow(Grid.CellBelow(Grid.PosToCell(this.smi.transform.GetPosition())));
-					gameObject.transform.SetPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.BuildingBack));
+					gameObject.transform.SetPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.Ore));
 				}
 			}
 			if (this.botStorage.IsEmpty())

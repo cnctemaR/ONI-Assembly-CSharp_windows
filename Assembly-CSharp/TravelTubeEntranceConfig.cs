@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -31,8 +32,25 @@ public class TravelTubeEntranceConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		TravelTubeEntrance travelTubeEntrance = go.AddOrGet<TravelTubeEntrance>();
+		travelTubeEntrance.waxPerLaunch = 0.05f;
 		travelTubeEntrance.joulesPerLaunch = 10000f;
 		travelTubeEntrance.jouleCapacity = 40000f;
+		Storage storage = go.AddOrGet<Storage>();
+		storage.capacityKg = 10f;
+		List<Storage.StoredItemModifier> list = new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Seal,
+			Storage.StoredItemModifier.Insulate,
+			Storage.StoredItemModifier.Preserve
+		};
+		storage.SetDefaultStoredItemModifiers(list);
+		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
+		manualDeliveryKG.requestedItemTag = SimHashes.MilkFat.CreateTag();
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		manualDeliveryKG.capacity = storage.capacityKg;
+		manualDeliveryKG.refillMass = 0.05f;
+		manualDeliveryKG.SetStorage(storage);
 		go.AddOrGet<TravelTubeEntrance.Work>();
 		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGet<EnergyConsumerSelfSustaining>();
@@ -44,6 +62,10 @@ public class TravelTubeEntranceConfig : IBuildingConfig
 	}
 
 	public const string ID = "TravelTubeEntrance";
+
+	public const float WAX_PER_LAUNCH = 0.05f;
+
+	public const int STORAGE_WAX_LAUNCHECOUNT_CAPACITY = 200;
 
 	private const float JOULES_PER_LAUNCH = 10000f;
 

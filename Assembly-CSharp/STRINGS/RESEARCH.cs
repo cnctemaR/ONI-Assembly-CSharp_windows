@@ -295,6 +295,13 @@ namespace STRINGS
 				public static LocString DESC = "Useful techniques to manage critter populations in the colony.";
 			}
 
+			public class DAIRYOPERATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Brackene Flow", "DAIRYOPERATION");
+
+				public static LocString DESC = "Advanced production, processing and distribution of this fluid resource.";
+			}
+
 			public class FOODREPURPOSING
 			{
 				public static LocString NAME = UI.FormatAsLink("Food Repurposing", "FOODREPURPOSING");
@@ -305,7 +312,7 @@ namespace STRINGS
 					UI.FormatAsLink("Food", "FOOD"),
 					" into a ",
 					UI.FormatAsLink("Morale", "MORALE"),
-					" boosting slurry."
+					"-boosting slurry."
 				});
 			}
 

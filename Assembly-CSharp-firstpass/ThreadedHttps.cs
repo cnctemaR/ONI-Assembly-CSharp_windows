@@ -228,7 +228,7 @@ public class ThreadedHttps<T> where T : class, new()
 						break;
 					}
 					num++;
-					if (num > 3)
+					if (num > this.RetryCount)
 					{
 						text = string.Concat(new string[]
 						{
@@ -236,7 +236,7 @@ public class ThreadedHttps<T> where T : class, new()
 							" ",
 							this.serviceName,
 							": Max Retries (",
-							3.ToString(),
+							this.RetryCount.ToString(),
 							") reached. Disabling ",
 							this.serviceName,
 							"..."
@@ -388,7 +388,7 @@ public class ThreadedHttps<T> where T : class, new()
 
 	private bool certFail;
 
-	private const int retryCount = 3;
+	protected int RetryCount = 3;
 
 	protected Thread updateThread;
 

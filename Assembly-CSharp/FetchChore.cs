@@ -260,6 +260,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public int tagsHash;
 
+	public bool validateRequiredTagOnTagChange;
+
 	public Tag requiredTag;
 
 	public Tag[] forbiddenTags;

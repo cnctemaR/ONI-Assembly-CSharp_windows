@@ -79,4 +79,6 @@ public class CometDetectorConfig : IBuildingConfig
 	public const int SCAN_RADIUS = 15;
 
 	public static readonly SkyVisibilityInfo SKY_VISIBILITY_INFO = new SkyVisibilityInfo(new CellOffset(0, 0), 15, new CellOffset(0, 0), 15, 1);
+
+	public const float LOGIC_SIGNAL_DELAY_ON_LOAD = 3f;
 }

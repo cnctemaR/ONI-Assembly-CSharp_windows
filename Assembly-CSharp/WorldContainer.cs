@@ -545,21 +545,28 @@ public class WorldContainer : KMonoBehaviour
 			}
 		}
 		list.Sort((Vector2 v1, Vector2 v2) => WorldContainer.IsClockwise(v1, v2, pos));
-		this.overworldCell.poly = new Polygon(list);
+		Polygon polygon = new Polygon(list);
+		this.overworldCell.poly = polygon;
 		this.overworldCell.zoneType = SubWorld.ZoneType.RocketInterior;
 		this.overworldCell.tags = new TagSet { WorldGenTags.RocketInterior };
 		clusterDetailSave.overworldCells.Add(this.overworldCell);
-		Rect rect = new Rect(pos.x - num + 1f, pos.y - num2 + 1f, template.info.size.X, template.info.size.Y);
-		int num4 = (int)rect.yMin;
-		while ((float)num4 < rect.yMax)
+		for (int i = 0; i < this.worldSize.y; i++)
 		{
-			int num5 = (int)rect.xMin;
-			while ((float)num5 < rect.xMax)
+			for (int j = 0; j < this.worldSize.x; j++)
 			{
-				SimMessages.ModifyCellWorldZone(Grid.XYToCell(num5, num4), 0);
-				num5++;
+				Vector2I vector2I = new Vector2I(this.worldOffset.x + j, this.worldOffset.y + i);
+				int num4 = Grid.XYToCell(vector2I.x, vector2I.y);
+				if (polygon.Contains(new Vector2((float)vector2I.x, (float)vector2I.y)))
+				{
+					SimMessages.ModifyCellWorldZone(num4, 14);
+					global::World.Instance.zoneRenderData.worldZoneTypes[num4] = SubWorld.ZoneType.RocketInterior;
+				}
+				else
+				{
+					SimMessages.ModifyCellWorldZone(num4, 7);
+					global::World.Instance.zoneRenderData.worldZoneTypes[num4] = SubWorld.ZoneType.Space;
+				}
 			}
-			num4++;
 		}
 	}
 

@@ -76,7 +76,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		}
 		else if (flag2)
 		{
-			transition.speed = 18f;
+			transition.speed = this.GetTubeTravellingSpeedMultiplier(navigator);
 		}
 		else if (flag3)
 		{
@@ -119,6 +119,16 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		}
 	}
 
+	public float GetTubeTravellingSpeedMultiplier(Navigator navigator)
+	{
+		AttributeInstance attributeInstance = Db.Get().Attributes.TransitTubeTravelSpeed.Lookup(navigator.gameObject);
+		if (attributeInstance != null)
+		{
+			return attributeInstance.GetTotalValue();
+		}
+		return 18f;
+	}
+
 	public float GetMovementSpeedMultiplier(Navigator navigator)
 	{
 		float num = 1f;
@@ -138,8 +148,6 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 	private float startTime;
 
 	private float jetPackSpeed;
-
-	private const float tubeSpeed = 18f;
 
 	private const float downPoleSpeed = 15f;
 

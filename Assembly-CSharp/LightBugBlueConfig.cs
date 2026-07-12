@@ -26,7 +26,8 @@ public class LightBugBlueConfig : IEntityConfig
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
 		{
 			SimHashes.Phosphorite.CreateTag(),
-			SimHashes.Phosphorus.CreateTag()
+			SimHashes.Phosphorus.CreateTag(),
+			GameTags.Creatures.FlyersLure
 		};
 		return gameObject;
 	}

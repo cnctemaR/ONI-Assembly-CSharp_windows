@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Database;
 using STRINGS;
@@ -14,7 +15,7 @@ public class MinionBrowserScreen : KMonoBehaviour
 		{
 			minCellSize = 112f,
 			maxCellSize = 144f,
-			targetGridLayout = this.galleryGridContent.GetComponent<GridLayoutGroup>()
+			targetGridLayouts = this.galleryGridContent.GetComponents<GridLayoutGroup>().ToList<GridLayoutGroup>()
 		};
 		this.galleryGridItemPool = new UIPrefabLocalPool(this.gridItemPrefab, this.galleryGridContent.gameObject);
 	}
@@ -213,14 +214,14 @@ public class MinionBrowserScreen : KMonoBehaviour
 			case ClothingOutfitUtility.OutfitType.AtmoSuit:
 				this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(outfitType);
 				this.UIMinion.SetOutfit(outfitType, this.selectedOutfit);
-				this.outfitDescriptionPanel.Refresh(this.selectedOutfit, outfitType);
+				this.outfitDescriptionPanel.Refresh(this.selectedOutfit, outfitType, this.selectedGridItem.GetPersonality());
 				return;
 			case ClothingOutfitUtility.OutfitType.JoyResponse:
 			{
 				this.selectedOutfit = this.selectedGridItem.GetClothingOutfitTarget(ClothingOutfitUtility.OutfitType.Clothing);
 				this.UIMinion.SetOutfit(ClothingOutfitUtility.OutfitType.Clothing, this.selectedOutfit);
 				string text = this.selectedGridItem.GetJoyResponseOutfitTarget().ReadFacadeId().UnwrapOr(null, null);
-				this.outfitDescriptionPanel.Refresh((text != null) ? Db.Get().Permits.Get(text) : null, outfitType);
+				this.outfitDescriptionPanel.Refresh((text != null) ? Db.Get().Permits.Get(text) : null, outfitType, this.selectedGridItem.GetPersonality());
 				return;
 			}
 			default:

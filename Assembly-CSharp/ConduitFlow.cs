@@ -503,6 +503,16 @@ public class ConduitFlow : IConduitFlow
 		}
 	}
 
+	public float GetAmountAllowedForMerging(ConduitFlow.ConduitContents from, ConduitFlow.ConduitContents to, float massDesiredtoBeMoved)
+	{
+		return Mathf.Min(massDesiredtoBeMoved, this.MaxMass - to.mass);
+	}
+
+	public bool CanMergeContents(ConduitFlow.ConduitContents from, ConduitFlow.ConduitContents to, float massToMove)
+	{
+		return (from.element == to.element || to.element == SimHashes.Vacuum || massToMove <= 0f) && this.GetAmountAllowedForMerging(from, to, massToMove) > 0f;
+	}
+
 	public float AddElement(int cell_idx, SimHashes element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
 		if (this.grid[cell_idx].conduitIdx == -1)

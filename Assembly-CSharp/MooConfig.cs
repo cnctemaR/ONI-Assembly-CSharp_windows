@@ -14,7 +14,7 @@ public class MooConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, MooTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -MooTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, MooTuning.STANDARD_LIFESPAN, name, false, false, true));
 		Diet diet = new Diet(new Diet.Info[]
 		{
 			new Diet.Info(new HashSet<Tag> { "GasGrass".ToTag() }, MooConfig.POOP_ELEMENT, MooConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, MooConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f, false, true)
@@ -54,7 +54,7 @@ public class MooConfig : IEntityConfig
 
 	public static Tag POOP_ELEMENT = SimHashes.Methane.CreateTag();
 
-	private static float DAYS_PLANT_GROWTH_EATEN_PER_CYCLE = 2f;
+	public static readonly float DAYS_PLANT_GROWTH_EATEN_PER_CYCLE = 2f;
 
 	private static float CALORIES_PER_DAY_OF_PLANT_EATEN = MooTuning.STANDARD_CALORIES_PER_CYCLE / MooConfig.DAYS_PLANT_GROWTH_EATEN_PER_CYCLE;
 

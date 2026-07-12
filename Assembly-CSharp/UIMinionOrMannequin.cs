@@ -80,9 +80,9 @@ public class UIMinionOrMannequin : KMonoBehaviour
 		return MinionVoice.ByObject(this.current.SpawnedAvatar).UnwrapOr(MinionVoice.Random(), null);
 	}
 
-	private UIMinion minion;
+	public UIMinion minion;
 
-	private UIMannequin mannequin;
+	public UIMannequin mannequin;
 
 	public interface ITarget
 	{

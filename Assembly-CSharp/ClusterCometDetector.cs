@@ -7,10 +7,22 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.off;
-		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (ClusterCometDetector.Instance smi) => smi.GetComponent<Operational>().IsOperational).Update("Scan Sky", delegate(ClusterCometDetector.Instance smi, float dt)
+		base.serializable = StateMachine.SerializeType.ParamsOnly;
+		this.root.Enter(delegate(ClusterCometDetector.Instance smi)
 		{
-			smi.ScanSky(false);
-		}, UpdateRate.SIM_4000ms, false);
+			smi.UpdateDetectionState(this.lastIsTargetDetected.Get(smi), true);
+			smi.remainingSecondsToFreezeLogicSignal = 3f;
+		}).Update(delegate(ClusterCometDetector.Instance smi, float deltaSeconds)
+		{
+			smi.remainingSecondsToFreezeLogicSignal -= deltaSeconds;
+			if (smi.remainingSecondsToFreezeLogicSignal < 0f)
+			{
+				smi.remainingSecondsToFreezeLogicSignal = 0f;
+				return;
+			}
+			smi.SetLogicSignal(this.lastIsTargetDetected.Get(smi));
+		}, UpdateRate.SIM_200ms, false);
+		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (ClusterCometDetector.Instance smi) => smi.GetComponent<Operational>().IsOperational);
 		this.on.DefaultState(this.on.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.DetectorScanning, null).Enter("ToggleActive", delegate(ClusterCometDetector.Instance smi)
 		{
 			smi.GetComponent<Operational>().SetActive(true, false);
@@ -51,6 +63,8 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 	public GameStateMachine<ClusterCometDetector, ClusterCometDetector.Instance, IStateMachineTarget, ClusterCometDetector.Def>.State off;
 
 	public ClusterCometDetector.OnStates on;
+
+	public StateMachine<ClusterCometDetector, ClusterCometDetector.Instance, IStateMachineTarget, ClusterCometDetector.Def>.BoolParameter lastIsTargetDetected;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -142,6 +156,7 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 				throw new NotImplementedException();
 			}
 			bool flag = option.IsSome() && Game.Instance.spaceScannerNetworkManager.IsTargetDetectedOnWorld(this.GetMyWorldId(), option.Unwrap());
+			base.smi.sm.lastIsTargetDetected.Set(flag, this, false);
 			this.UpdateDetectionState(flag, expectedDetectionForState);
 		}
 
@@ -186,6 +201,9 @@ public class ClusterCometDetector : GameStateMachine<ClusterCometDetector, Clust
 
 		[Serialize]
 		private Ref<Clustercraft> targetCraft;
+
+		[NonSerialized]
+		public float remainingSecondsToFreezeLogicSignal;
 
 		private DetectorNetwork.Def detectorNetworkDef;
 

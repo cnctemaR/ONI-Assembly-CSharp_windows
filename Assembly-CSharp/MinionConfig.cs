@@ -521,6 +521,7 @@ public class MinionConfig : IEntityConfig
 		modifiers.initialAttributes.Add(Db.Get().Attributes.Sneezyness.Id);
 		modifiers.initialAttributes.Add(Db.Get().Attributes.RadiationResistance.Id);
 		modifiers.initialAttributes.Add(Db.Get().Attributes.RadiationRecovery.Id);
+		modifiers.initialAttributes.Add(Db.Get().Attributes.TransitTubeTravelSpeed.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.HitPoints.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Stamina.Id);
 		modifiers.initialAmounts.Add(Db.Get().Amounts.Calories.Id);
@@ -538,6 +539,7 @@ public class MinionConfig : IEntityConfig
 	public static void AddMinionTraits(string name, Modifiers modifiers)
 	{
 		Trait trait = Db.Get().CreateTrait(MinionConfig.MINION_BASE_TRAIT_ID, name, name, null, false, null, true, true);
+		trait.Add(new AttributeModifier(Db.Get().Attributes.TransitTubeTravelSpeed.Id, 18f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.AirConsumptionRate.Id, 0.1f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.MaxUnderwaterTravelCost.Id, 8f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, 0f, name, false, false, true));
@@ -585,6 +587,33 @@ public class MinionConfig : IEntityConfig
 		component.SetSymbolVisiblity("hand_paint", show_defaults);
 		component.SetSymbolVisiblity("necklace", false);
 		component.SetSymbolVisiblity("skirt", false);
+	}
+
+	public static void CopyVisibleSymbols(GameObject go, GameObject copy)
+	{
+		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
+		KBatchedAnimController component2 = copy.GetComponent<KBatchedAnimController>();
+		component.SetSymbolVisiblity("snapto_hat", component2.GetSymbolVisiblity("snapto_hat"));
+		component.SetSymbolVisiblity("snapTo_hat_hair", component2.GetSymbolVisiblity("snapTo_hat_hair"));
+		component.SetSymbolVisiblity("snapTo_hair", component2.GetSymbolVisiblity("snapTo_hair"));
+		component.SetSymbolVisiblity("snapTo_headfx", component2.GetSymbolVisiblity("snapTo_headfx"));
+		component.SetSymbolVisiblity("snapto_chest", component2.GetSymbolVisiblity("snapto_chest"));
+		component.SetSymbolVisiblity("snapto_neck", component2.GetSymbolVisiblity("snapto_neck"));
+		component.SetSymbolVisiblity("snapto_goggles", component2.GetSymbolVisiblity("snapto_goggles"));
+		component.SetSymbolVisiblity("snapto_pivot", component2.GetSymbolVisiblity("snapto_pivot"));
+		component.SetSymbolVisiblity("snapTo_rgtHand", component2.GetSymbolVisiblity("snapTo_rgtHand"));
+		component.SetSymbolVisiblity("neck", component2.GetSymbolVisiblity("neck"));
+		component.SetSymbolVisiblity("belt", component2.GetSymbolVisiblity("belt"));
+		component.SetSymbolVisiblity("pelvis", component2.GetSymbolVisiblity("pelvis"));
+		component.SetSymbolVisiblity("foot", component2.GetSymbolVisiblity("foot"));
+		component.SetSymbolVisiblity("leg", component2.GetSymbolVisiblity("leg"));
+		component.SetSymbolVisiblity("cuff", component2.GetSymbolVisiblity("cuff"));
+		component.SetSymbolVisiblity("arm_sleeve", component2.GetSymbolVisiblity("arm_sleeve"));
+		component.SetSymbolVisiblity("arm_lower_sleeve", component2.GetSymbolVisiblity("arm_lower_sleeve"));
+		component.SetSymbolVisiblity("torso", component2.GetSymbolVisiblity("torso"));
+		component.SetSymbolVisiblity("hand_paint", component2.GetSymbolVisiblity("hand_paint"));
+		component.SetSymbolVisiblity("necklace", component2.GetSymbolVisiblity("necklace"));
+		component.SetSymbolVisiblity("skirt", component2.GetSymbolVisiblity("skirt"));
 	}
 
 	public static string ID = "Minion";

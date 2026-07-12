@@ -822,6 +822,14 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreTypeIdHash);
 		foreach (KeyValuePair<Tag, float> keyValuePair in missingAmounts)
 		{
+			if (!this.allowManualFluidDelivery)
+			{
+				Element element = ElementLoader.GetElement(keyValuePair.Key);
+				if (element != null && (element.IsLiquid || element.IsGas))
+				{
+					continue;
+				}
+			}
 			if (keyValuePair.Value >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT && !this.HasPendingFetch(keyValuePair.Key))
 			{
 				FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
@@ -1167,6 +1175,9 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 
 	[SerializeField]
 	public bool storeProduced;
+
+	[SerializeField]
+	public bool allowManualFluidDelivery = true;
 
 	public ComplexFabricatorSideScreen.StyleSetting sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 

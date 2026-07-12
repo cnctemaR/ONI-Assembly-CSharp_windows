@@ -659,10 +659,9 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("RanchStation", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("ShearingStation", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("EggIncubator", global::Action.BuildMenuKeyI),
-				new BuildMenu.BuildingInfo("CreatureTrap", global::Action.BuildMenuKeyT),
-				new BuildMenu.BuildingInfo("FishTrap", global::Action.BuildMenuKeyA),
-				new BuildMenu.BuildingInfo("AirborneCreatureLure", global::Action.BuildMenuKeyL),
-				new BuildMenu.BuildingInfo("FlyingCreatureBait", global::Action.BuildMenuKeyB)
+				new BuildMenu.BuildingInfo("CreatureGroundTrap", global::Action.BuildMenuKeyT),
+				new BuildMenu.BuildingInfo("WaterTrap", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("CreatureAirTrap", global::Action.BuildMenuKeyL)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Health And Happiness"), "icon_category_medical", global::Action.Plan3, KKeyCode.None, new List<BuildMenu.DisplayInfo>

@@ -622,7 +622,7 @@ public class Global : MonoBehaviour
 			this.gotKleiUserID = false;
 			ThreadedHttps<KleiMetrics>.Instance.SetCallBacks(new global::System.Action(this.SetONIStaticSessionVariables), new Action<Dictionary<string, object>>(this.SetONIDynamicSessionVariables));
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
-			KleiItems.AddRequestInventoryRefresh();
+			KleiItems.AddRequestInventoryRefresh(null);
 		}
 		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTicks);
 		Localization.VerifyTranslationModSubscription(this.globalCanvas);
@@ -635,7 +635,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 562984U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 567980U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

@@ -398,7 +398,7 @@ public class RocketModule : KMonoBehaviour
 
 	public Dictionary<ProcessCondition.ProcessConditionType, List<ProcessCondition>> moduleConditions = new Dictionary<ProcessCondition.ProcessConditionType, List<ProcessCondition>>();
 
-	public static Operational.Flag landedFlag = new Operational.Flag("landed", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag landedFlag = new Operational.Flag("landed", Operational.Flag.Type.Requirement);
 
 	public bool operationalLandedRequired = true;
 

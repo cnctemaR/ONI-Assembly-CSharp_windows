@@ -49,6 +49,7 @@ public class BatteryDiagnostic : ColonyDiagnostic
 							}
 						}
 					}
+					diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.BATTERYDIAGNOSTIC.NONE;
 				}
 			}
 		}
@@ -89,7 +90,7 @@ public class BatteryDiagnostic : ColonyDiagnostic
 
 	public override ColonyDiagnostic.DiagnosticResult Evaluate()
 	{
-		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.NO_MINIONS, null);
+		ColonyDiagnostic.DiagnosticResult diagnosticResult;
 		if (ColonyDiagnosticUtility.IgnoreRocketsWithNoCrewRequested(base.worldID, out diagnosticResult))
 		{
 			return diagnosticResult;

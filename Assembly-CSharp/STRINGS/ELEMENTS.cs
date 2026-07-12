@@ -180,7 +180,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = UI.FormatAsLink("Algae", "ALGAE");
 
-			public static LocString DESC = "Algae is a cluster of non-motile, single-celled lifeforms.\n\nIt can be used to produce " + ELEMENTS.OXYGEN.NAME + " when used in a " + BUILDINGS.PREFABS.MINERALDEOXIDIZER.NAME;
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Algae is a cluster of non-motile, single-celled lifeforms.\n\nIt can be used to produce ",
+				ELEMENTS.OXYGEN.NAME,
+				" when used in an ",
+				BUILDINGS.PREFABS.MINERALDEOXIDIZER.NAME,
+				"."
+			});
 		}
 
 		public class ALUMINUMORE
@@ -266,11 +273,27 @@ namespace STRINGS
 
 			public static LocString DESC = string.Concat(new string[]
 			{
-				"Brine is a natural, highly concentrated solution of ",
+				"Brine Ice is a natural, highly concentrated solution of ",
 				UI.FormatAsLink("Salt", "SALT"),
 				" dissolved in ",
 				UI.FormatAsLink("Water", "WATER"),
-				".\n\nIt can be used in desalination processes, separating out usable salt."
+				" and frozen into a ",
+				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
+				" state.\n\nIt can be used in desalination processes, separating out usable salt."
+			});
+		}
+
+		public class MILKICE
+		{
+			public static LocString NAME = UI.FormatAsLink("Frozen Brackene", "MILKICE");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Frozen Brackene is ",
+				UI.FormatAsLink("Brackene", "MILK"),
+				" frozen into a ",
+				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
+				" state."
 			});
 		}
 
@@ -1026,6 +1049,34 @@ namespace STRINGS
 				" state.\n\nIt is useful in ",
 				UI.FormatAsLink("Power", "POWER"),
 				" production."
+			});
+		}
+
+		public class MILK
+		{
+			public static LocString NAME = UI.FormatAsLink("Brackene", "MILK");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Brackene is a sodium-rich ",
+				UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+				".\n\nIt is useful in ",
+				UI.FormatAsLink("Ranching", "RANCHING"),
+				"."
+			});
+		}
+
+		public class MILKFAT
+		{
+			public static LocString NAME = UI.FormatAsLink("Brackwax", "MILKFAT");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Brackwax is a ",
+				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
+				" byproduct of ",
+				UI.FormatAsLink("Brackene", "MILK"),
+				"."
 			});
 		}
 
@@ -1835,6 +1886,23 @@ namespace STRINGS
 			public static LocString DESC = "(C<sub>3</sub>H<sub>6</sub>)<sub>n</sub> " + ELEMENTS.POLYPROPYLENE.NAME + " is a thermoplastic polymer.\n\nIt is useful for constructing a variety of advanced buildings and equipment.";
 
 			public static LocString BUILD_DESC = "Buildings made of this " + ELEMENTS.POLYPROPYLENE.NAME + " have antiseptic properties";
+		}
+
+		public class HARDPOLYPROPYLENE
+		{
+			public static LocString NAME = UI.FormatAsLink("Plastium", "HARDPOLYPROPYLENE");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				ELEMENTS.HARDPOLYPROPYLENE.NAME,
+				" is an advanced thermoplastic polymer made from ",
+				UI.FormatAsLink("Thermium", "TEMPCONDUCTORSOLID"),
+				", ",
+				UI.FormatAsLink("Plastic", "POLYPROPYLENE"),
+				" and ",
+				UI.FormatAsLink("Brackwax", "MILKFAT"),
+				".\n\nIt is highly heat-resistant and suitable for use in space buildings."
+			});
 		}
 
 		public class NAPHTHA

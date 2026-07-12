@@ -756,6 +756,8 @@ namespace STRINGS
 					UI.FormatAsLink("Gas Grass", "GASGRASS"),
 					" and excrete ",
 					UI.FormatAsLink("Natural Gas", "METHANE"),
+					".\n\nWhen domesticated and fed, they can be milked for ",
+					ELEMENTS.MILK.NAME,
 					"."
 				});
 			}
@@ -2210,6 +2212,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This critter found something tasty";
 			}
 
+			public class DRINKINGMILK
+			{
+				public static LocString NAME = "Drinking";
+
+				public static LocString TOOLTIP = "This critter found a tasty beverage";
+			}
+
 			public class DIGESTING
 			{
 				public static LocString NAME = "Digesting";
@@ -2259,6 +2268,13 @@ namespace STRINGS
 				});
 			}
 
+			public class LOOKINGFORMILK
+			{
+				public static LocString NAME = "Seeking Brackene";
+
+				public static LocString TOOLTIP = "This critter is thirsty for " + UI.PRE_KEYWORD + "Brackene" + UI.PST_KEYWORD;
+			}
+
 			public class IDLE
 			{
 				public static LocString NAME = "Idle";
@@ -2285,6 +2301,13 @@ namespace STRINGS
 				public static LocString NAME = "Being Groomed";
 
 				public static LocString TOOLTIP = "This critter's going to look so good when they're done";
+			}
+
+			public class GETTING_MILKED
+			{
+				public static LocString NAME = "Being Milked";
+
+				public static LocString TOOLTIP = "This critter's going to be so relieved when they're done";
 			}
 
 			public class EXCITED_TO_BE_RANCHED
@@ -2656,6 +2679,13 @@ namespace STRINGS
 				public static LocString NAME = "Cleaning";
 
 				public static LocString TOOLTIP = "This critter is de-germ-ifying its liquid surroundings";
+			}
+
+			public class MILKPRODUCER
+			{
+				public static LocString NAME = "Producing Brackene {amount}";
+
+				public static LocString TOOLTIP = "This critter's internal tank is refilling itself";
 			}
 
 			public class NEEDSFERTILIZER
@@ -3299,6 +3329,41 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This building is busy analyzing genetic data from a recently scanned specimen\n\nRemaining: {timeleft}";
 			}
+
+			public class BECKONING
+			{
+				public static LocString NAME = "Mooing";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is inviting faraway friends to graze on this asteroid's abundant food supply\n\nA new ",
+					UI.PRE_KEYWORD,
+					"Gassy Moo",
+					UI.PST_KEYWORD,
+					" will soon arrive"
+				});
+			}
+
+			public class BECKONINGBLOCKED
+			{
+				public static LocString NAME = "Moo-ted";
+
+				public static LocString TOOLTIP = "This critter needs a clear view of space in order to invite a friend to this asteroid";
+			}
+
+			public class MILKFULL
+			{
+				public static LocString NAME = "Udderly Full";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is full of ",
+					UI.PRE_KEYWORD,
+					"Brackene",
+					UI.PST_KEYWORD,
+					" and ready to be milked"
+				});
+			}
 		}
 
 		public class STATS
@@ -3406,7 +3471,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Critter Ranching",
 					UI.PST_KEYWORD,
-					" Skill to care for critters"
+					" skill to care for critters"
 				});
 			}
 
@@ -3431,6 +3496,24 @@ namespace STRINGS
 					" is laid, ",
 					UI.PRE_KEYWORD,
 					"Reproduction",
+					UI.PST_KEYWORD,
+					" is rolled back to 0%"
+				});
+			}
+
+			public class BECKONING
+			{
+				public static LocString NAME = "Accu-moo-lation";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"At 100% ",
+					UI.PRE_KEYWORD,
+					"Accu-moo-lation",
+					UI.PST_KEYWORD,
+					", a Gassy Moo calls a friend to join them on this asteroid\n\nAfter the new Gassy Moo has landed, ",
+					UI.PRE_KEYWORD,
+					"Accu-moo-lation",
 					UI.PST_KEYWORD,
 					" is rolled back to 0%"
 				});
@@ -3513,6 +3596,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "The amount of time required for this critter to regrow its scales";
 			}
 
+			public class MILKPRODUCTION
+			{
+				public static LocString NAME = "Brackene Supply";
+
+				public static LocString TOOLTIP = "The amount of time required for this critter to replenish its natural reserves of " + UI.PRE_KEYWORD + "Brackene" + UI.PST_KEYWORD;
+			}
+
 			public class ELEMENTGROWTH
 			{
 				public static LocString NAME = "Quill Growth";
@@ -3569,6 +3659,24 @@ namespace STRINGS
 					"Critter's",
 					UI.PST_KEYWORD,
 					" scales will take to grow back."
+				});
+			}
+
+			public class MILKPRODUCTIONDELTA
+			{
+				public static LocString NAME = "Brackene Supply";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Determines how long this ",
+					UI.PRE_KEYWORD,
+					"Critter",
+					UI.PST_KEYWORD,
+					" takes to replenish its natural supply of ",
+					UI.PRE_KEYWORD,
+					"Brackene",
+					UI.PST_KEYWORD,
+					"."
 				});
 			}
 
@@ -3631,6 +3739,13 @@ namespace STRINGS
 					", and rot at zero percent"
 				});
 			}
+
+			public class BECKONINGDELTA
+			{
+				public static LocString NAME = "Accu-moo-lation";
+
+				public static LocString DESC = "Accu-moo-lation increases when this critter eats.";
+			}
 		}
 
 		public class MODIFIERS
@@ -3661,6 +3776,11 @@ namespace STRINGS
 				public static LocString NAME = "Base Incubation Rate";
 			}
 
+			public class BASE_PRODUCTION_RATE
+			{
+				public static LocString NAME = "Base production rate";
+			}
+
 			public class SCALE_GROWTH_RATE
 			{
 				public static LocString NAME = "Scale Regrowth Rate";
@@ -3685,7 +3805,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Critter Ranching",
 					UI.PST_KEYWORD,
-					" Skill to sing to eggs"
+					" skill to sing to eggs"
 				});
 			}
 
@@ -3724,6 +3844,20 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Environmental conditions are preventing this egg from developing\n\nIt will not hatch if current conditions continue";
 			}
 
+			public class GOTMILK
+			{
+				public static LocString NAME = "Hydrated";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter recently drank ",
+					UI.PRE_KEYWORD,
+					"Brackene",
+					UI.PST_KEYWORD,
+					"\n\nIt doesn't mind overcrowding quite as much right now"
+				});
+			}
+
 			public class RANCHED
 			{
 				public static LocString NAME = "Groomed";
@@ -3734,7 +3868,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Critter Ranching",
 					UI.PST_KEYWORD,
-					" Skill to care for critters"
+					" skill to care for critters"
 				});
 			}
 
@@ -3742,7 +3876,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Happy";
 
-				public static LocString TOOLTIP = "This critter's in high spirits because all of its needs are being met\n\nIt will produce more materials as a result";
+				public static LocString TOOLTIP = "This critter's in high spirits because its needs are being adequately met\n\nIt will produce more materials as a result";
 			}
 
 			public class UNHAPPY
@@ -3762,7 +3896,7 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Tame",
 					UI.PST_KEYWORD,
-					" because it ate from a feeder."
+					" because it ate from a feeder"
 				});
 			}
 
@@ -3875,6 +4009,20 @@ namespace STRINGS
 					"Plant",
 					UI.PST_KEYWORD,
 					", dramatically boosting growth"
+				});
+			}
+
+			public class MOOWELLFED
+			{
+				public static LocString NAME = "Welcoming Moo'd";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter's recent meal is boosting their ",
+					UI.PRE_KEYWORD,
+					"Brackene",
+					UI.PST_KEYWORD,
+					" supply and making them wish all their friends were here\n\nThey're thinking about calling a new Gassy Moo to this asteroid"
 				});
 			}
 		}

@@ -193,21 +193,22 @@ public class EventInfoScreen : KModalScreen
 		{
 			component.AnimFiles = new KAnimFile[] { animFile };
 		}
+		gameObject.SetActive(true);
 		if (minion != null)
 		{
-			SymbolOverrideController component2 = component.GetComponent<SymbolOverrideController>();
 			if (this.loadMinionFromPersonalities)
 			{
 				component.GetComponent<UIDupeSymbolOverride>().Apply(minion.GetComponent<MinionIdentity>());
 			}
 			else
 			{
+				SymbolOverrideController component2 = component.GetComponent<SymbolOverrideController>();
 				foreach (SymbolOverrideController.SymbolEntry symbolEntry in minion.GetComponent<SymbolOverrideController>().GetSymbolOverrides)
 				{
 					component2.AddSymbolOverride(symbolEntry.targetSymbol, symbolEntry.sourceSymbol, symbolEntry.priority);
 				}
 			}
-			MinionConfig.ConfigureSymbols(gameObject, true);
+			MinionConfig.CopyVisibleSymbols(gameObject, minion);
 		}
 		if (artifact != null)
 		{
@@ -226,7 +227,6 @@ public class EventInfoScreen : KModalScreen
 		{
 			gameObject.AddOrGet<KBatchedAnimTracker>().symbol = targetSymbol;
 		}
-		gameObject.SetActive(true);
 		component.Play(animName, KAnim.PlayMode.Loop, 1f, 0f);
 		component.animScale = this.baseCharacterScale;
 		return gameObject;

@@ -32,7 +32,6 @@ public class WaterCoolerConfig : IBuildingConfig
 		storage.capacityKg = 10f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.RequestedItemTag = GameTags.Water;
 		manualDeliveryKG.capacity = 10f;
 		manualDeliveryKG.refillMass = 9f;
 		manualDeliveryKG.MinimumMass = 1f;
@@ -49,4 +48,12 @@ public class WaterCoolerConfig : IBuildingConfig
 	}
 
 	public const string ID = "WaterCooler";
+
+	public static global::Tuple<Tag, string>[] BEVERAGE_CHOICE_OPTIONS = new global::Tuple<Tag, string>[]
+	{
+		new global::Tuple<Tag, string>(SimHashes.Water.CreateTag(), ""),
+		new global::Tuple<Tag, string>(SimHashes.Milk.CreateTag(), "DuplicantGotMilk")
+	};
+
+	public const string MilkEffectID = "DuplicantGotMilk";
 }

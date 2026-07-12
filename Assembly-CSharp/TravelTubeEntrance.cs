@@ -1,5 +1,8 @@
 ﻿using System;
+using Klei;
+using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -37,6 +40,48 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		}
 	}
 
+	public bool HasWaxForGreasyLaunch
+	{
+		get
+		{
+			return this.storage.GetAmountAvailable(SimHashes.MilkFat.CreateTag()) >= this.waxPerLaunch;
+		}
+	}
+
+	public int WaxLaunchesAvailable
+	{
+		get
+		{
+			return Mathf.FloorToInt(this.storage.GetAmountAvailable(SimHashes.MilkFat.CreateTag()) / this.waxPerLaunch);
+		}
+	}
+
+	private bool ShouldUseWaxLaunchAnimation
+	{
+		get
+		{
+			return this.deliverAndUseWax && this.HasWaxForGreasyLaunch;
+		}
+	}
+
+	public static void SetTravelerGleamEffect(TravelTubeEntrance.SMInstance smi)
+	{
+		TravelTubeEntrance.Work component = smi.GetComponent<TravelTubeEntrance.Work>();
+		if (component.worker != null)
+		{
+			component.worker.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("gleam", smi.master.ShouldUseWaxLaunchAnimation);
+		}
+	}
+
+	public static string GetLaunchAnimName(TravelTubeEntrance.SMInstance smi)
+	{
+		if (!smi.master.ShouldUseWaxLaunchAnimation)
+		{
+			return "working_pre";
+		}
+		return "wax";
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -46,6 +91,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.SetWaxUse(this.deliverAndUseWax);
 		int num = (int)base.transform.GetPosition().x;
 		int num2 = (int)base.transform.GetPosition().y + 2;
 		Extents extents = new Extents(num, num2, 1, 1);
@@ -53,11 +99,20 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.TubeConnectionsChanged(connections);
 		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[35], new Action<object>(this.TubeChanged));
 		base.Subscribe<TravelTubeEntrance>(-592767678, TravelTubeEntrance.OnOperationalChangedDelegate);
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
+		this.waxMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "wax_meter_target", "wax_meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		this.CreateNewWaitReactable();
 		Grid.RegisterTubeEntrance(Grid.PosToCell(this), Mathf.FloorToInt(this.availableJoules / this.joulesPerLaunch));
 		base.smi.StartSM();
+		this.UpdateWaxCharge();
 		this.UpdateCharge();
+		base.Subscribe<TravelTubeEntrance>(493375141, TravelTubeEntrance.OnRefreshUserMenuDelegate);
+	}
+
+	private void OnStorageChanged(object obj)
+	{
+		this.UpdateWaxCharge();
 	}
 
 	protected override void OnCleanUp()
@@ -71,6 +126,49 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.ClearWaitReactable();
 		GameScenePartitioner.Instance.Free(ref this.tubeChangedEntry);
 		base.OnCleanUp();
+	}
+
+	private void OnRefreshUserMenu(object data)
+	{
+		if (!this.deliverAndUseWax)
+		{
+			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_speed_up", UI.USERMENUACTIONS.TRANSITTUBEWAX.NAME, delegate
+			{
+				this.SetWaxUse(true);
+			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.TRANSITTUBEWAX.TOOLTIP, true), 1f);
+		}
+		else
+		{
+			Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_speed_up", UI.USERMENUACTIONS.CANCELTRANSITTUBEWAX.NAME, delegate
+			{
+				this.SetWaxUse(false);
+			}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CANCELTRANSITTUBEWAX.TOOLTIP, true), 1f);
+		}
+		KSelectable component = base.GetComponent<KSelectable>();
+		bool flag = this.deliverAndUseWax && this.WaxLaunchesAvailable > 0;
+		if (component != null)
+		{
+			if (flag)
+			{
+				component.AddStatusItem(Db.Get().BuildingStatusItems.TransitTubeEntranceWaxReady, this);
+				return;
+			}
+			component.RemoveStatusItem(Db.Get().BuildingStatusItems.TransitTubeEntranceWaxReady, false);
+		}
+	}
+
+	public void SetWaxUse(bool usingWax)
+	{
+		this.deliverAndUseWax = usingWax;
+		this.manualDelivery.AbortDelivery("Switching to new delivery request");
+		this.manualDelivery.capacity = (usingWax ? this.storage.capacityKg : 0f);
+		this.manualDelivery.refillMass = (usingWax ? this.waxPerLaunch : 0f);
+		this.manualDelivery.MinimumMass = (usingWax ? this.waxPerLaunch : 0f);
+		if (!usingWax)
+		{
+			this.storage.DropAll(false, false, default(Vector3), true, null);
+		}
+		this.OnRefreshUserMenu(null);
 	}
 
 	private void TubeChanged(object data)
@@ -172,7 +270,26 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		if (this.HasLaunchPower)
 		{
 			this.availableJoules -= this.joulesPerLaunch;
+			if (this.deliverAndUseWax && this.HasWaxForGreasyLaunch)
+			{
+				TubeTraveller.Instance smi = reactor.GetSMI<TubeTraveller.Instance>();
+				if (smi != null)
+				{
+					Tag tag = SimHashes.MilkFat.CreateTag();
+					float num;
+					SimUtil.DiseaseInfo diseaseInfo;
+					float num2;
+					this.storage.ConsumeAndGetDisease(tag, this.waxPerLaunch, out num, out diseaseInfo, out num2);
+					GermExposureMonitor.Instance smi2 = reactor.GetSMI<GermExposureMonitor.Instance>();
+					if (smi2 != null)
+					{
+						smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, tag, Sickness.InfectionVector.Contact);
+					}
+					smi.SetWaxState(true);
+				}
+			}
 			this.UpdateCharge();
+			this.UpdateWaxCharge();
 		}
 	}
 
@@ -223,6 +340,13 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.meter.SetPositionPercent(num);
 		this.energyConsumer.UpdatePoweredStatus();
 		Grid.SetTubeEntranceReservationCapacity(Grid.PosToCell(this), Mathf.FloorToInt(this.availableJoules / this.joulesPerLaunch));
+		this.OnRefreshUserMenu(null);
+	}
+
+	private void UpdateWaxCharge()
+	{
+		float num = Mathf.Clamp01(this.storage.MassStored() / this.storage.capacityKg);
+		this.waxMeter.SetPositionPercent(num);
 	}
 
 	private void UpdateConnectionStatus()
@@ -256,18 +380,33 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	[MyCmpReq]
 	private KSelectable selectable;
 
+	[MyCmpReq]
+	private Storage storage;
+
+	[MyCmpReq]
+	private ManualDeliveryKG manualDelivery;
+
 	public float jouleCapacity = 1f;
 
 	public float joulesPerLaunch = 1f;
 
+	public float waxPerLaunch;
+
 	[Serialize]
 	private float availableJoules;
 
+	[Serialize]
+	private bool deliverAndUseWax;
+
 	private TravelTube travelTube;
+
+	public const string WAX_LAUNCH_ANIM_NAME = "wax";
 
 	private TravelTubeEntrance.WaitReactable wait_reactable;
 
 	private MeterController meter;
+
+	private MeterController waxMeter;
 
 	private const int MAX_CHARGES = 3;
 
@@ -276,6 +415,11 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	private static readonly Operational.Flag tubeConnected = new Operational.Flag("tubeConnected", Operational.Flag.Type.Functional);
 
 	private HandleVector<int>.Handle tubeChangedEntry;
+
+	private static readonly EventSystem.IntraObjectHandler<TravelTubeEntrance> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<TravelTubeEntrance>(delegate(TravelTubeEntrance component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	private static readonly EventSystem.IntraObjectHandler<TravelTubeEntrance> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<TravelTubeEntrance>(delegate(TravelTubeEntrance component, object data)
 	{
@@ -387,7 +531,8 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			this.ready.DefaultState(this.ready.free).ToggleReactable((TravelTubeEntrance.SMInstance smi) => new TravelTubeEntrance.LaunchReactable(smi.master.GetComponent<TravelTubeEntrance.Work>(), smi.master.GetComponent<TravelTubeEntrance>())).ParamTransition<bool>(this.hasLaunchCharges, this.notready, (TravelTubeEntrance.SMInstance smi, bool hasLaunchCharges) => !hasLaunchCharges)
 				.TagTransition(GameTags.Operational, this.notoperational, true);
 			this.ready.free.PlayAnim("on").WorkableStartTransition((TravelTubeEntrance.SMInstance smi) => smi.GetComponent<TravelTubeEntrance.Work>(), this.ready.occupied);
-			this.ready.occupied.PlayAnim("working_pre").QueueAnim("working_loop", true, null).WorkableStopTransition((TravelTubeEntrance.SMInstance smi) => smi.GetComponent<TravelTubeEntrance.Work>(), this.ready.post);
+			this.ready.occupied.PlayAnim(new Func<TravelTubeEntrance.SMInstance, string>(TravelTubeEntrance.GetLaunchAnimName), KAnim.PlayMode.Once).QueueAnim("working_loop", true, null).Enter(new StateMachine<TravelTubeEntrance.States, TravelTubeEntrance.SMInstance, TravelTubeEntrance, object>.State.Callback(TravelTubeEntrance.SetTravelerGleamEffect))
+				.WorkableStopTransition((TravelTubeEntrance.SMInstance smi) => smi.GetComponent<TravelTubeEntrance.Work>(), this.ready.post);
 			this.ready.post.PlayAnim("working_pst").OnAnimQueueComplete(this.ready);
 		}
 
@@ -432,5 +577,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		{
 			base.SetWorkTime(1f);
 		}
+
+		public const string DEFAULT_LAUNCH_ANIM_NAME = "anim_interacts_tube_launcher_kanim";
 	}
 }

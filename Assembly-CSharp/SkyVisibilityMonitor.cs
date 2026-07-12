@@ -29,8 +29,6 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 
 	public class Def : StateMachine.BaseDef
 	{
-		public Operational.State AffectedOperationalState;
-
 		public SkyVisibilityInfo skyVisibilityInfo;
 	}
 
@@ -65,10 +63,6 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 		public Instance(IStateMachineTarget master, SkyVisibilityMonitor.Def def)
 			: base(master, def)
 		{
-			if (def.AffectedOperationalState != Operational.State.None)
-			{
-				this.skyVisibilityFlag = new Operational.Flag("sky visibility", Operational.Flag.GetFlagType(def.AffectedOperationalState));
-			}
 		}
 
 		public override void StartSM()
@@ -84,10 +78,7 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 			{
 				base.smi.GetComponent<KSelectable>().ToggleStatusItem(this.visibilityStatusItem, !this.HasSkyVisibility, this);
 			}
-			if (base.def.AffectedOperationalState != Operational.State.None)
-			{
-				base.smi.GetComponent<Operational>().SetFlag(this.skyVisibilityFlag, this.HasSkyVisibility);
-			}
+			base.smi.GetComponent<Operational>().SetFlag(SkyVisibilityMonitor.Instance.skyVisibilityFlag, this.HasSkyVisibility);
 			if (this.SkyVisibilityChanged != null)
 			{
 				this.SkyVisibilityChanged();
@@ -100,6 +91,6 @@ public class SkyVisibilityMonitor : GameStateMachine<SkyVisibilityMonitor, SkyVi
 
 		private StatusItem visibilityStatusItem;
 
-		private Operational.Flag skyVisibilityFlag;
+		private static readonly Operational.Flag skyVisibilityFlag = new Operational.Flag("sky visibility", Operational.Flag.Type.Requirement);
 	}
 }

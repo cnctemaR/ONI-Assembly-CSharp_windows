@@ -142,12 +142,12 @@ namespace TUNING
 			{ "FishDeliveryPoint", "ranching" },
 			{ "CreatureFeeder", "ranching" },
 			{ "FishFeeder", "ranching" },
+			{ "MilkFeeder", "ranching" },
 			{ "EggIncubator", "ranching" },
 			{ "EggCracker", "ranching" },
-			{ "CreatureTrap", "ranching" },
-			{ "FishTrap", "ranching" },
-			{ "AirborneCreatureLure", "ranching" },
-			{ "FlyingCreatureBait", "ranching" },
+			{ "CreatureGroundTrap", "ranching" },
+			{ "CreatureAirTrap", "ranching" },
+			{ "WaterTrap", "ranching" },
 			{ "Outhouse", "washroom" },
 			{ "FlushToilet", "washroom" },
 			{ "WallToilet", "washroom" },
@@ -217,15 +217,17 @@ namespace TUNING
 			},
 			{ "ModularLaunchpadPortGas", "buildmenuports" },
 			{ "ModularLaunchpadPortGasUnloader", "buildmenuports" },
-			{ "Compost", "materials" },
+			{ "Compost", "organic" },
+			{ "FertilizerMaker", "organic" },
+			{ "AlgaeDistillery", "organic" },
+			{ "EthanolDistillery", "organic" },
+			{ "SludgePress", "organic" },
+			{ "MilkFatSeparator", "organic" },
+			{ "MilkPress", "organic" },
 			{ "WaterPurifier", "materials" },
 			{ "Desalinator", "materials" },
-			{ "FertilizerMaker", "materials" },
-			{ "AlgaeDistillery", "materials" },
-			{ "EthanolDistillery", "materials" },
 			{ "RockCrusher", "materials" },
 			{ "Kiln", "materials" },
-			{ "SludgePress", "materials" },
 			{ "MetalRefinery", "materials" },
 			{ "GlassForge", "materials" },
 			{ "OilRefinery", "oil" },
@@ -233,6 +235,7 @@ namespace TUNING
 			{ "OxyliteRefinery", "advanced" },
 			{ "SupermaterialRefinery", "advanced" },
 			{ "DiamondPress", "advanced" },
+			{ "Chlorinator", "advanced" },
 			{ "WashBasin", "hygiene" },
 			{ "WashSink", "hygiene" },
 			{ "HandSanitizer", "hygiene" },
@@ -304,6 +307,7 @@ namespace TUNING
 			{ "RoleStation", "workstations" },
 			{ "RanchStation", "ranching" },
 			{ "ShearingStation", "ranching" },
+			{ "MilkingStation", "ranching" },
 			{ "FarmStation", "farming" },
 			{ "GeneticAnalysisStation", "farming" },
 			{ "CraftingTable", "manufacturing" },
@@ -546,7 +550,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
 				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "SpiceGrinder", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint",
-				"FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure", "FlyingCreatureBait"
+				"FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator", "EggCracker", "CreatureGroundTrap", "WaterTrap", "CreatureAirTrap"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
@@ -605,7 +609,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
 				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress", "MetalRefinery",
-				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "SupermaterialRefinery", "DiamondPress"
+				"GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "Chlorinator", "SupermaterialRefinery", "DiamondPress", "MilkFatSeparator", "MilkPress"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string>
 			{
@@ -657,8 +661,9 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
 				"ResearchCenter", "AdvancedResearchCenter", "NuclearResearchCenter", "OrbitalResearchCenter", "CosmicResearchCenter", "DLC1CosmicResearchCenter", "Telescope", "GeoTuner", "PowerControlStation", "FarmStation",
-				"GeneticAnalysisStation", "RanchStation", "ShearingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "MissileFabricator", "CraftingTable", "ClothingFabricator", "ClothingAlterationStation",
-				"SuitFabricator", "OxygenMaskMarker", "OxygenMaskLocker", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker", "AstronautTrainingCenter"
+				"GeneticAnalysisStation", "RanchStation", "ShearingStation", "MilkingStation", "RoleStation", "ResetSkillsStation", "ArtifactAnalysisStation", "MissileFabricator", "CraftingTable", "ClothingFabricator",
+				"ClothingAlterationStation", "SuitFabricator", "OxygenMaskMarker", "OxygenMaskLocker", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "LeadSuitMarker", "LeadSuitLocker",
+				"AstronautTrainingCenter"
 			}, ""),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{

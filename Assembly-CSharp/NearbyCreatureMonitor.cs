@@ -14,7 +14,7 @@ public class NearbyCreatureMonitor : GameStateMachine<NearbyCreatureMonitor, Nea
 
 	public new class Instance : GameStateMachine<NearbyCreatureMonitor, NearbyCreatureMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public event Action<float, List<KPrefabID>> OnUpdateNearbyCreatures;
+		public event Action<float, List<KPrefabID>, List<KPrefabID>> OnUpdateNearbyCreatures;
 
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -26,7 +26,7 @@ public class NearbyCreatureMonitor : GameStateMachine<NearbyCreatureMonitor, Nea
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(base.gameObject));
 			if (cavityForCell != null)
 			{
-				this.OnUpdateNearbyCreatures(dt, cavityForCell.creatures);
+				this.OnUpdateNearbyCreatures(dt, cavityForCell.creatures, cavityForCell.eggs);
 			}
 		}
 	}

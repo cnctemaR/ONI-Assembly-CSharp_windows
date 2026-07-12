@@ -707,6 +707,10 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	private void MakeWorldActive(GameObject go)
 	{
 		go.transform.parent = null;
+		if (this.dropOffset != Vector2.zero)
+		{
+			go.transform.Translate(this.dropOffset);
+		}
 		go.Trigger(856640610, null);
 		base.Trigger(-1697596308, go);
 		this.ApplyStoredItemModifiers(go, false, false);
@@ -1427,6 +1431,8 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	public bool showSideScreenTitleBar;
 
 	public bool useWideOffsets;
+
+	public Vector2 dropOffset = Vector2.zero;
 
 	[MyCmpGet]
 	private Rotatable rotatable;

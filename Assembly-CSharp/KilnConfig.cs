@@ -41,11 +41,11 @@ public class KilnConfig : IBuildingConfig
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
-		this.ConfgiureRecipes();
+		this.ConfigureRecipes();
 		Prioritizable.AddRef(go);
 	}
 
-	private void ConfgiureRecipes()
+	private void ConfigureRecipes()
 	{
 		Tag tag = SimHashes.Ceramic.CreateTag();
 		Tag tag2 = SimHashes.Clay.CreateTag();

@@ -675,7 +675,7 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					"\n\nOnly Duplicants with the ",
 					DUPLICANTS.ROLES.RANCHER.NAME,
-					" Skill can catch critters without traps"
+					" skill can catch critters without traps"
 				});
 			}
 

@@ -46,6 +46,8 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 		Game.Instance.unlocks.Unlock("story_trait_mega_brain_tank_initial", true);
 	}
 
+	public static readonly Operational.Flag activationCost = new Operational.Flag("brains restored", Operational.Flag.Type.Requirement);
+
 	[Serialize]
 	private bool introDisplayed;
 
@@ -76,8 +78,6 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 				this.StatBonus.Add(new AttributeModifier(text, ModifierSet.ConvertValue(num.Value, units.Value), DUPLICANTS.MODIFIERS.MEGABRAINTANKBONUS.NAME, false, false, true));
 			}
 		}
-
-		public Operational.Flag activationCost = new Operational.Flag("brains restored", Operational.Flag.Type.Requirement);
 
 		public MegaBrainTank.States.BrainState brain;
 
@@ -404,7 +404,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			this.brainHum = GlobalAssets.GetSound("MegaBrainTank_brain_wave_LP", false);
 			StoryManager.Instance.DiscoverStoryEvent(Db.Get().Stories.MegaBrainTank);
 			bool flag = base.sm.activeParam.Get(this);
-			this.Operational.SetFlag(base.sm.activationCost, flag);
+			this.Operational.SetFlag(MegaBrainTank.activationCost, flag);
 			float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
 			if (!flag)
 			{
@@ -598,7 +598,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			{
 				float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
 				this.timeTilDigested = unitsAvailable * 60f;
-				this.Operational.SetFlag(base.sm.activationCost, true);
+				this.Operational.SetFlag(MegaBrainTank.activationCost, true);
 				this.CompleteEvent();
 			}
 		}

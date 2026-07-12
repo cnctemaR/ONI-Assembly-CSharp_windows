@@ -361,8 +361,6 @@ public abstract class Chore
 
 	public Action<Chore> onCleanup;
 
-	public bool debug;
-
 	private List<Chore.PreconditionInstance> preconditions = new List<Chore.PreconditionInstance>();
 
 	private bool arePreconditionsDirty;
@@ -498,16 +496,6 @@ public abstract class Chore
 
 			public void RunPreconditions()
 			{
-				if (this.chore.debug)
-				{
-					int num = 0;
-					num++;
-					if (this.consumerState.consumer.debug)
-					{
-						num++;
-						Debugger.Break();
-					}
-				}
 				if (this.chore.arePreconditionsDirty)
 				{
 					this.chore.preconditions.Sort((Chore.PreconditionInstance x, Chore.PreconditionInstance y) => x.sortOrder.CompareTo(y.sortOrder));

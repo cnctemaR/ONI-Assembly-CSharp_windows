@@ -17,7 +17,6 @@ public class Activatable : Workable, ISidescreenButtonControl
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.activatedFlag = new Operational.Flag("activated", this.ActivationFlagType);
 	}
 
 	protected override void OnSpawn()
@@ -44,7 +43,7 @@ public class Activatable : Workable, ISidescreenButtonControl
 
 	private void UpdateFlag()
 	{
-		base.GetComponent<Operational>().SetFlag(this.activatedFlag, this.activated);
+		base.GetComponent<Operational>().SetFlag(this.Required ? Activatable.activatedFlagRequirement : Activatable.activatedFlagFunctional, this.activated);
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.DuplicantActivationRequired, !this.activated, null);
 		base.Trigger(-1909216579, this.IsActivated);
 	}
@@ -137,9 +136,11 @@ public class Activatable : Workable, ISidescreenButtonControl
 		return 20;
 	}
 
-	public Operational.Flag.Type ActivationFlagType;
+	public bool Required = true;
 
-	private Operational.Flag activatedFlag;
+	private static readonly Operational.Flag activatedFlagRequirement = new Operational.Flag("activated", Operational.Flag.Type.Requirement);
+
+	private static readonly Operational.Flag activatedFlagFunctional = new Operational.Flag("activated", Operational.Flag.Type.Functional);
 
 	[Serialize]
 	private bool activated;

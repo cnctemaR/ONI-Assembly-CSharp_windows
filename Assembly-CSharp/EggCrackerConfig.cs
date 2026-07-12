@@ -22,6 +22,7 @@ public class EggCrackerConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		return buildingDef;
 	}
 
@@ -46,6 +47,7 @@ public class EggCrackerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.AddOrGet<LogicOperationalController>();
 	}
 
 	public const string ID = "EggCracker";

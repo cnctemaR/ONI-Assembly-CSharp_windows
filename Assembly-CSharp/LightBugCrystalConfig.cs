@@ -21,7 +21,11 @@ public class LightBugCrystalConfig : IEntityConfig
 			TagManager.Create("CookedMeat"),
 			SimHashes.Diamond.CreateTag()
 		}, Tag.Invalid, LightBugCrystalConfig.CALORIES_PER_KG_OF_ORE);
-		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { SimHashes.Diamond.CreateTag() };
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
+		{
+			SimHashes.Diamond.CreateTag(),
+			GameTags.Creatures.FlyersLure
+		};
 		return gameObject;
 	}
 

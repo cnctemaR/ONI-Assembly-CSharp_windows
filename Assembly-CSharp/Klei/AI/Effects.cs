@@ -112,51 +112,53 @@ namespace Klei.AI
 			return this.Add(effect, should_save);
 		}
 
-		public EffectInstance Add(Effect effect, bool should_save)
+		public EffectInstance Add(Effect newEffect, bool should_save)
 		{
-			if (this.HasImmunityTo(effect))
+			if (this.HasImmunityTo(newEffect))
 			{
 				return null;
 			}
-			bool flag = true;
 			Traits component = base.GetComponent<Traits>();
-			if (component != null && component.IsEffectIgnored(effect))
+			if (component != null && component.IsEffectIgnored(newEffect))
 			{
-				flag = false;
+				return null;
 			}
-			if (flag)
+			Attributes attributes = this.GetAttributes();
+			EffectInstance effectInstance = this.Get(newEffect);
+			if (!string.IsNullOrEmpty(newEffect.stompGroup))
 			{
-				Attributes attributes = this.GetAttributes();
-				EffectInstance effectInstance = this.Get(effect);
-				if (!string.IsNullOrEmpty(effect.stompGroup))
+				for (int i = this.effects.Count - 1; i >= 0; i--)
 				{
-					for (int i = this.effects.Count - 1; i >= 0; i--)
+					if (this.effects[i] != effectInstance && !(this.effects[i].effect.stompGroup != newEffect.stompGroup) && this.effects[i].effect.stompPriority > newEffect.stompPriority)
 					{
-						if (this.effects[i] != effectInstance && this.effects[i].effect.stompGroup == effect.stompGroup)
-						{
-							this.Remove(this.effects[i].effect);
-						}
+						return null;
 					}
 				}
-				if (effectInstance == null)
+				for (int j = this.effects.Count - 1; j >= 0; j--)
 				{
-					effectInstance = new EffectInstance(base.gameObject, effect, should_save);
-					effect.AddTo(attributes);
-					this.effects.Add(effectInstance);
-					if (effect.duration > 0f)
+					if (this.effects[j] != effectInstance && !(this.effects[j].effect.stompGroup != newEffect.stompGroup) && this.effects[j].effect.stompPriority <= newEffect.stompPriority)
 					{
-						this.effectsThatExpire.Add(effectInstance);
-						if (this.effectsThatExpire.Count == 1)
-						{
-							SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
-						}
+						this.Remove(this.effects[j].effect);
 					}
-					base.Trigger(-1901442097, effect);
 				}
-				effectInstance.timeRemaining = effect.duration;
-				return effectInstance;
 			}
-			return null;
+			if (effectInstance == null)
+			{
+				effectInstance = new EffectInstance(base.gameObject, newEffect, should_save);
+				newEffect.AddTo(attributes);
+				this.effects.Add(effectInstance);
+				if (newEffect.duration > 0f)
+				{
+					this.effectsThatExpire.Add(effectInstance);
+					if (this.effectsThatExpire.Count == 1)
+					{
+						SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
+					}
+				}
+				base.Trigger(-1901442097, newEffect);
+			}
+			effectInstance.timeRemaining = newEffect.duration;
+			return effectInstance;
 		}
 
 		public void Remove(Effect effect)

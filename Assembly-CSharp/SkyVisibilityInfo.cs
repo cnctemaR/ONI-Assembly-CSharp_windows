@@ -25,8 +25,9 @@ public readonly struct SkyVisibilityInfo
 	public ValueTuple<bool, float> GetVisibilityOf(int buildingCenterCellId)
 	{
 		int num = 0;
-		num += SkyVisibilityInfo.ScanAndGetVisibleCellCount(Grid.OffsetCell(buildingCenterCellId, this.scanLeftOffset), -1, this.verticalStep, this.scanLeftCount);
-		num += SkyVisibilityInfo.ScanAndGetVisibleCellCount(Grid.OffsetCell(buildingCenterCellId, this.scanRightOffset), 1, this.verticalStep, this.scanRightCount);
+		WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[buildingCenterCellId]);
+		num += SkyVisibilityInfo.ScanAndGetVisibleCellCount(Grid.OffsetCell(buildingCenterCellId, this.scanLeftOffset), -1, this.verticalStep, this.scanLeftCount, world);
+		num += SkyVisibilityInfo.ScanAndGetVisibleCellCount(Grid.OffsetCell(buildingCenterCellId, this.scanRightOffset), 1, this.verticalStep, this.scanRightCount, world);
 		if (this.scanLeftOffset.x == this.scanRightOffset.x)
 		{
 			num = Mathf.Max(0, num - 1);
@@ -34,18 +35,18 @@ public readonly struct SkyVisibilityInfo
 		return new ValueTuple<bool, float>(num > 0, (float)num / (float)this.totalColumnsCount);
 	}
 
-	public void CollectVisibleCellsTo(HashSet<int> visibleCells, int buildingBottomLeftCellId)
+	public void CollectVisibleCellsTo(HashSet<int> visibleCells, int buildingBottomLeftCellId, WorldContainer originWorld)
 	{
-		SkyVisibilityInfo.ScanAndCollectVisibleCellsTo(visibleCells, Grid.OffsetCell(buildingBottomLeftCellId, this.scanLeftOffset), -1, this.verticalStep, this.scanLeftCount);
-		SkyVisibilityInfo.ScanAndCollectVisibleCellsTo(visibleCells, Grid.OffsetCell(buildingBottomLeftCellId, this.scanRightOffset), 1, this.verticalStep, this.scanRightCount);
+		SkyVisibilityInfo.ScanAndCollectVisibleCellsTo(visibleCells, Grid.OffsetCell(buildingBottomLeftCellId, this.scanLeftOffset), -1, this.verticalStep, this.scanLeftCount, originWorld);
+		SkyVisibilityInfo.ScanAndCollectVisibleCellsTo(visibleCells, Grid.OffsetCell(buildingBottomLeftCellId, this.scanRightOffset), 1, this.verticalStep, this.scanRightCount, originWorld);
 	}
 
-	private static void ScanAndCollectVisibleCellsTo(HashSet<int> visibleCells, int originCellId, int stepX, int stepY, int stepCountInclusive)
+	private static void ScanAndCollectVisibleCellsTo(HashSet<int> visibleCells, int originCellId, int stepX, int stepY, int stepCountInclusive, WorldContainer originWorld)
 	{
 		for (int i = 0; i <= stepCountInclusive; i++)
 		{
 			int num = Grid.OffsetCell(originCellId, i * stepX, i * stepY);
-			if (!SkyVisibilityInfo.IsVisible(num))
+			if (!SkyVisibilityInfo.IsVisible(num, originWorld))
 			{
 				break;
 			}
@@ -53,11 +54,11 @@ public readonly struct SkyVisibilityInfo
 		}
 	}
 
-	private static int ScanAndGetVisibleCellCount(int originCellId, int stepX, int stepY, int stepCountInclusive)
+	private static int ScanAndGetVisibleCellCount(int originCellId, int stepX, int stepY, int stepCountInclusive, WorldContainer originWorld)
 	{
 		for (int i = 0; i <= stepCountInclusive; i++)
 		{
-			if (!SkyVisibilityInfo.IsVisible(Grid.OffsetCell(originCellId, i * stepX, i * stepY)))
+			if (!SkyVisibilityInfo.IsVisible(Grid.OffsetCell(originCellId, i * stepX, i * stepY), originWorld))
 			{
 				return i;
 			}
@@ -65,7 +66,7 @@ public readonly struct SkyVisibilityInfo
 		return stepCountInclusive + 1;
 	}
 
-	public static bool IsVisible(int cellId)
+	public static bool IsVisible(int cellId, WorldContainer originWorld)
 	{
 		if (!Grid.IsValidCell(cellId))
 		{
@@ -76,7 +77,12 @@ public readonly struct SkyVisibilityInfo
 			return true;
 		}
 		WorldContainer world = ClusterManager.Instance.GetWorld((int)Grid.WorldIdx[cellId]);
-		return world != null && world.IsModuleInterior;
+		if (world != null && world.IsModuleInterior)
+		{
+			return true;
+		}
+		originWorld != world;
+		return false;
 	}
 
 	public readonly CellOffset scanLeftOffset;

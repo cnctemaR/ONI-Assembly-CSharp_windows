@@ -7,7 +7,7 @@ public class TrapTrigger : KMonoBehaviour
 	{
 		base.OnSpawn();
 		GameObject gameObject = base.gameObject;
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Trap", gameObject, Grid.PosToCell(gameObject), GameScenePartitioner.Instance.trapsLayer, new Action<object>(this.OnCreatureOnTrap));
+		this.SetTriggerCell(Grid.PosToCell(gameObject));
 		foreach (GameObject gameObject2 in this.storage.items)
 		{
 			this.SetStoredPosition(gameObject2);
@@ -19,17 +19,37 @@ public class TrapTrigger : KMonoBehaviour
 		}
 	}
 
-	private void SetStoredPosition(GameObject go)
+	public void SetTriggerCell(int cell)
 	{
+		HandleVector<int>.Handle handle = this.partitionerEntry;
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("Trap", base.gameObject, cell, GameScenePartitioner.Instance.trapsLayer, new Action<object>(this.OnCreatureOnTrap));
+	}
+
+	public void SetStoredPosition(GameObject go)
+	{
+		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(base.transform.GetPosition()), Grid.SceneLayer.BuildingBack);
-		vector.x += this.trappedOffset.x;
-		vector.y += this.trappedOffset.y;
+		if (this.addTrappedAnimationOffset)
+		{
+			vector.x += this.trappedOffset.x - component.Offset.x;
+			vector.y += this.trappedOffset.y - component.Offset.y;
+		}
+		else
+		{
+			vector.x += this.trappedOffset.x;
+			vector.y += this.trappedOffset.y;
+		}
 		go.transform.SetPosition(vector);
-		go.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.BuildingBack);
+		component.SetSceneLayer(Grid.SceneLayer.BuildingFront);
 	}
 
 	public void OnCreatureOnTrap(object data)
 	{
+		if (!base.enabled)
+		{
+			return;
+		}
 		if (!this.storage.IsEmpty())
 		{
 			return;
@@ -76,6 +96,8 @@ public class TrapTrigger : KMonoBehaviour
 	public Tag[] trappableCreatures;
 
 	public Vector2 trappedOffset = Vector2.zero;
+
+	public bool addTrappedAnimationOffset = true;
 
 	[MyCmpReq]
 	private Storage storage;

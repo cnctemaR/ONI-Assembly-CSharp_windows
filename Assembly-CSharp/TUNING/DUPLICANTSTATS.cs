@@ -965,6 +965,8 @@ namespace TUNING
 
 			public const float GUESSTIMATE_CALORIES_BURNED_PER_SECOND = -1666.6666f;
 
+			public const float TRANSIT_TUBE_TRAVEL_SPEED = 18f;
+
 			public const float OXYGEN_USED_PER_SECOND = 0.1f;
 
 			public const float OXYGEN_TO_CO2_CONVERSION = 0.02f;

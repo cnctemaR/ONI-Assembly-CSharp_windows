@@ -16,7 +16,7 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 			{
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, DUPLICANTS.TRAITS.SUPERPRODUCTIVE.NAME, smi.master.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 			}
-			smi.fx = new SuperProductiveFX.Instance(smi.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f));
+			smi.fx = new SuperProductiveFX.Instance(smi.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.FXFront)));
 			smi.fx.StartSM();
 		})
 			.Exit(delegate(SuperProductive.Instance smi)

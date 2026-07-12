@@ -639,7 +639,7 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					"\n\nDuplicants must possess the ",
 					DUPLICANTS.ROLES.RANCHER.NAME,
-					" Skill to sing to an egg"
+					" skill to sing to an egg"
 				});
 			}
 
@@ -1168,6 +1168,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is attempting to cool down the area";
 			}
 
+			public class PROCESSCRITTER
+			{
+				public static LocString NAME = "Process Critter";
+
+				public static LocString STATUS = "Going to process critter";
+
+				public static LocString TOOLTIP = "This Duplicant is processing " + UI.PRE_KEYWORD + "Critters" + UI.PST_KEYWORD;
+			}
+
 			public class COOK
 			{
 				public static LocString NAME = "Cook";
@@ -1354,6 +1363,15 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" site"
 				});
+			}
+
+			public class ARMTRAP
+			{
+				public static LocString NAME = "Arm Trap";
+
+				public static LocString STATUS = "Arming a trap";
+
+				public static LocString TOOLTIP = "This Duplicant is arming a trap";
 			}
 
 			public class FARMFETCH
@@ -1995,6 +2013,27 @@ namespace STRINGS
 
 		public class STATUSITEMS
 		{
+			public class WAXEDFORTRANSITTUBE
+			{
+				public static LocString NAME = "Smooth Rider";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant slapped on some ",
+					ELEMENTS.MILKFAT.NAME,
+					" before starting their commute\n\nThis boosts their ",
+					BUILDINGS.PREFABS.TRAVELTUBE.NAME,
+					" travel speed by {0}"
+				});
+			}
+
+			public class ARMINGTRAP
+			{
+				public static LocString NAME = "Arming trap";
+
+				public static LocString TOOLTIP = "This Duplicant is arming a trap";
+			}
+
 			public class GENERIC_DELIVER
 			{
 				public static LocString NAME = "Delivering resources to {Target}";
@@ -4318,6 +4357,20 @@ namespace STRINGS
 					"Ugly Crier",
 					UI.PST_KEYWORD,
 					" stress reaction"
+				});
+			}
+
+			public class DUPLICANTGOTMILK
+			{
+				public static LocString NAME = "Extra Hydrated";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant recently drank ",
+					UI.PRE_KEYWORD,
+					"Brackene",
+					UI.PST_KEYWORD,
+					". It's helping them relax"
 				});
 			}
 
@@ -7879,6 +7932,15 @@ namespace STRINGS
 				public static LocString DESC = "Determines a Duplicant's default runspeed.";
 
 				public static LocString SPEEDMODIFIER = "{0} Runspeed";
+			}
+
+			public class TRANSITTUBETRAVELSPEED
+			{
+				public static LocString NAME = "Transit Speed";
+
+				public static LocString DESC = "Determines a Duplicant's default " + BUILDINGS.PREFABS.TRAVELTUBE.NAME + " travel speed.";
+
+				public static LocString SPEEDMODIFIER = "{0} Transit Tube Travel Speed";
 			}
 
 			public class DOCTOREDLEVEL

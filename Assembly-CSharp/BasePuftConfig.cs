@@ -23,7 +23,12 @@ public static class BasePuftConfig
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
 		gameObject.AddOrGet<LoopingSounds>();
-		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.SlimeMold };
+		gameObject.AddOrGet<Trappable>();
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[]
+		{
+			GameTags.SlimeMold,
+			GameTags.Creatures.FlyersLure
+		};
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
 		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_idle", NOISE_POLLUTION.CREATURES.TIER2);
@@ -40,6 +45,7 @@ public static class BasePuftConfig
 		}
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
+			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
@@ -54,6 +60,10 @@ public static class BasePuftConfig
 			{
 				inhaleSound = text
 			}, true, -1)
+			.Add(new DrinkMilkStates.Def
+			{
+				shouldBeBehindMilkTank = !is_baby
+			}, true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.PopInterruptGroup()
@@ -61,6 +71,7 @@ public static class BasePuftConfig
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BasePuftConfig.CustomIdleAnim)
 			}, true, -1);
+		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PuftSpecies, symbol_override_prefix);
 		return gameObject;
 	}

@@ -234,7 +234,7 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 
 	public float displacementAmount_DescriptorOnly;
 
-	public static Operational.Flag validIntakeFlag = new Operational.Flag("valid_intake", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag validIntakeFlag = new Operational.Flag("valid_intake", Operational.Flag.Type.Requirement);
 
 	private bool invalidIntake;
 

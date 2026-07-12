@@ -72,8 +72,8 @@ public class PlanterSideScreen : ReceptacleSideScreen
 
 	protected override void ToggleClicked(ReceptacleToggle toggle)
 	{
-		base.ToggleClicked(toggle);
 		this.LoadTargetSubSpeciesRequest();
+		base.ToggleClicked(toggle);
 		this.UpdateState(null);
 	}
 

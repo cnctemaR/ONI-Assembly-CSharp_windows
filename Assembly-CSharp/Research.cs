@@ -38,7 +38,8 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		{
 			this.globalPointInventory = new ResearchPointInventory();
 		}
-		base.Subscribe<Research>(-1523247426, Research.OnRolesUpdatedDelegate);
+		this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.OnRolesUpdated));
+		this.OnRolesUpdated(null);
 		Components.ResearchCenters.OnAdd += new Action<IResearchCenter>(this.CheckResearchBuildings);
 		Components.ResearchCenters.OnRemove += new Action<IResearchCenter>(this.CheckResearchBuildings);
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
@@ -111,7 +112,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 	private void AddTechToQueue(Tech tech)
 	{
 		TechInstance orAdd = this.GetOrAdd(tech);
-		if (!orAdd.IsComplete())
+		if (!orAdd.IsComplete() && !this.queuedTech.Contains(orAdd))
 		{
 			this.queuedTech.Add(orAdd);
 		}
@@ -256,6 +257,10 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
+		if (Game.Instance != null && this.skillsUpdateHandle != -1)
+		{
+			Game.Instance.Unsubscribe(this.skillsUpdateHandle);
+		}
 		Components.ResearchCenters.OnAdd -= new Action<IResearchCenter>(this.CheckResearchBuildings);
 		Components.ResearchCenters.OnRemove -= new Action<IResearchCenter>(this.CheckResearchBuildings);
 		base.OnCleanUp();
@@ -330,17 +335,17 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	private void OnRolesUpdated(object data)
 	{
-		if (this.activeResearch == null || this.activeResearch.tech.costsByResearchTypeID.Count <= 1)
-		{
-			this.notifier.Remove(this.NoResearcherRole);
-			return;
-		}
-		if (!MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id, -1))
-		{
-			this.notifier.Add(this.NoResearcherRole, "");
-			return;
-		}
 		this.notifier.Remove(this.NoResearcherRole);
+		bool flag = false;
+		if (this.activeResearch != null && ((this.activeResearch.tech.costsByResearchTypeID.ContainsKey("advanced") && this.activeResearch.tech.costsByResearchTypeID["advanced"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowAdvancedResearch.Id, -1)) || (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("nuclear") && this.activeResearch.tech.costsByResearchTypeID["nuclear"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowNuclearResearch.Id, -1)) || (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("orbital") && this.activeResearch.tech.costsByResearchTypeID["orbital"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowOrbitalResearch.Id, -1)) || (this.activeResearch.tech.costsByResearchTypeID.ContainsKey("space") && this.activeResearch.tech.costsByResearchTypeID["space"] > 0f && !MinionResume.AnyMinionHasPerk(Db.Get().SkillPerks.AllowInterstellarResearch.Id, -1))))
+		{
+			flag = true;
+		}
+		if (flag)
+		{
+			this.NoResearcherRole.ToolTip = new Func<List<Notification>, object, string>(this.NoResearcherRoleTooltip);
+			this.notifier.Add(this.NoResearcherRole, "");
+		}
 	}
 
 	public string GetMissingResearchBuildingName()
@@ -410,6 +415,8 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	private List<IResearchCenter> researchCenterPrefabs = new List<IResearchCenter>();
 
+	protected int skillsUpdateHandle = -1;
+
 	public ResearchTypes researchTypes;
 
 	public bool UseGlobalPointInventory;
@@ -419,11 +426,6 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	private Research.SaveData saveData;
-
-	private static readonly EventSystem.IntraObjectHandler<Research> OnRolesUpdatedDelegate = new EventSystem.IntraObjectHandler<Research>(delegate(Research component, object data)
-	{
-		component.OnRolesUpdated(data);
-	});
 
 	private struct SaveData
 	{

@@ -29,6 +29,22 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 		IdleStates.MoveCellQuery moveCellQuery = new IdleStates.MoveCellQuery(component.CurrentNavType);
 		moveCellQuery.allowLiquid = smi.gameObject.HasTag(GameTags.Amphibious);
 		moveCellQuery.submerged = smi.gameObject.HasTag(GameTags.Creatures.Submerged);
+		int num = Grid.PosToCell(component);
+		if (component.CurrentNavType == NavType.Hover && CellSelectionObject.IsExposedToSpace(num))
+		{
+			int num2 = 0;
+			int num3 = num;
+			for (int i = 0; i < 10; i++)
+			{
+				num3 = Grid.CellBelow(num3);
+				if (!Grid.IsValidCell(num3) || Grid.IsSolidCell(num3) || !CellSelectionObject.IsExposedToSpace(num3))
+				{
+					break;
+				}
+				num2++;
+			}
+			moveCellQuery.lowerCellBias = num2 == 10;
+		}
 		component.RunQuery(moveCellQuery);
 		component.GoTo(moveCellQuery.GetResultCell(), null);
 	}
@@ -85,6 +101,8 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 
 		public bool submerged { get; set; }
 
+		public bool lowerCellBias { get; set; }
+
 		public MoveCellQuery(NavType navType)
 		{
 			this.navType = navType;
@@ -118,10 +136,21 @@ public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, ISta
 			{
 				return false;
 			}
-			this.targetCell = cell;
-			int num = this.maxIterations - 1;
-			this.maxIterations = num;
-			return num <= 0;
+			if (this.targetCell == Grid.InvalidCell || !this.lowerCellBias)
+			{
+				this.targetCell = cell;
+			}
+			else
+			{
+				int num = Grid.CellRow(this.targetCell);
+				if (Grid.CellRow(cell) < num)
+				{
+					this.targetCell = cell;
+				}
+			}
+			int num2 = this.maxIterations - 1;
+			this.maxIterations = num2;
+			return num2 <= 0;
 		}
 
 		public override int GetResultCell()

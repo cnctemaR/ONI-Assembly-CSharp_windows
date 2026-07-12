@@ -50,6 +50,7 @@ public class BaseStaterpillarConfig
 			.PushInterruptGroup()
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
+			.Add(new DrinkMilkStates.Def(), true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(inhaleDef, inhaleTag != Tag.Invalid, -1)
 			.Add(new ConduitSleepStates.Def(), true, -1)
@@ -60,6 +61,7 @@ public class BaseStaterpillarConfig
 			{
 				customIdleAnim = new IdleStates.Def.IdleAnimCallback(BaseStaterpillarConfig.CustomIdleAnim)
 			}, true, -1);
+		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.StaterpillarSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

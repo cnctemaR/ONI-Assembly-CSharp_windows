@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Klei.AI;
+using KSerialization;
 using UnityEngine;
 
+[Serialize]
+[SerializationConfig(MemberSerialization.OptIn)]
+[Serializable]
 public class SpaceScannerNetworkManager : ISim1000ms
 {
 	public Dictionary<int, SpaceScannerWorldData> DEBUG_GetWorldIdToDataMap()
@@ -36,7 +41,7 @@ public class SpaceScannerNetworkManager : ISim1000ms
 		SpaceScannerWorldData spaceScannerWorldData;
 		if (!this.worldIdToDataMap.TryGetValue(worldId, out spaceScannerWorldData))
 		{
-			spaceScannerWorldData = new SpaceScannerWorldData(ClusterManager.Instance.GetWorld(worldId));
+			spaceScannerWorldData = new SpaceScannerWorldData(worldId);
 			this.worldIdToDataMap[worldId] = spaceScannerWorldData;
 		}
 		return spaceScannerWorldData;
@@ -59,8 +64,8 @@ public class SpaceScannerNetworkManager : ISim1000ms
 
 	private static void UpdateNetworkQualityFor(SpaceScannerWorldData worldData)
 	{
-		float num = SpaceScannerNetworkManager.CalcWorldNetworkQuality(worldData.world);
-		foreach (object obj in Components.DetectorNetworks.CreateOrGetCmps(worldData.world.id))
+		float num = SpaceScannerNetworkManager.CalcWorldNetworkQuality(worldData.GetWorld());
+		foreach (object obj in Components.DetectorNetworks.CreateOrGetCmps(worldData.GetWorld().id))
 		{
 			((DetectorNetwork.Instance)obj).Internal_SetNetworkQuality(num);
 		}
@@ -121,17 +126,28 @@ public class SpaceScannerNetworkManager : ISim1000ms
 	private static bool IsDetectingAnyMeteorShower(SpaceScannerWorldData worldData)
 	{
 		SpaceScannerNetworkManager.meteorShowerInstances.Clear();
-		SaveGame.Instance.GetComponent<GameplayEventManager>().GetActiveEventsOfType<MeteorShowerEvent>(worldData.world.id, ref SpaceScannerNetworkManager.meteorShowerInstances);
+		SaveGame.Instance.GetComponent<GameplayEventManager>().GetActiveEventsOfType<MeteorShowerEvent>(worldData.GetWorld().id, ref SpaceScannerNetworkManager.meteorShowerInstances);
+		float detectTime = SpaceScannerNetworkManager.GetDetectTime(worldData, SpaceScannerTarget.MeteorShower());
+		MeteorShowerEvent.StatesInstance statesInstance = null;
 		float num = float.MaxValue;
 		foreach (GameplayEventInstance gameplayEventInstance in SpaceScannerNetworkManager.meteorShowerInstances)
 		{
-			MeteorShowerEvent.StatesInstance statesInstance = gameplayEventInstance.smi as MeteorShowerEvent.StatesInstance;
-			if (statesInstance != null)
+			MeteorShowerEvent.StatesInstance statesInstance2 = gameplayEventInstance.smi as MeteorShowerEvent.StatesInstance;
+			if (statesInstance2 != null)
 			{
-				num = Mathf.Min(num, statesInstance.TimeUntilNextShower());
+				float num2 = statesInstance2.TimeUntilNextShower();
+				if (num2 < num)
+				{
+					num = num2;
+					statesInstance = statesInstance2;
+				}
+				if (num2 <= detectTime)
+				{
+					worldData.scratchpad.lastDetectedMeteorShowers.Add(statesInstance2);
+				}
 			}
 		}
-		return num <= SpaceScannerNetworkManager.GetDetectTime(worldData, SpaceScannerTarget.MeteorShower());
+		return SpaceScannerNetworkManager.IsDetectedUsingStickyCheck<MeteorShowerEvent.StatesInstance>(statesInstance, num <= detectTime, worldData.scratchpad.lastDetectedMeteorShowers);
 	}
 
 	private static bool IsDetectingAnyBallisticObject(SpaceScannerWorldData worldData)
@@ -147,16 +163,7 @@ public class SpaceScannerNetworkManager : ISim1000ms
 	private static bool IsDetectingRocketBaseGame(SpaceScannerWorldData worldData, LaunchConditionManager rocket)
 	{
 		Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(rocket);
-		if (spacecraftFromLaunchConditionManager.IsNullOrDestroyed())
-		{
-			return false;
-		}
-		if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Destroyed)
-		{
-			return false;
-		}
-		Spacecraft.MissionState state = spacecraftFromLaunchConditionManager.state;
-		return state - Spacecraft.MissionState.Launching <= 3 && spacecraftFromLaunchConditionManager.GetTimeLeft() <= SpaceScannerNetworkManager.GetDetectTime(worldData, SpaceScannerTarget.RocketBaseGame(rocket));
+		return SpaceScannerNetworkManager.IsDetectedUsingStickyCheck<LaunchConditionManager>(rocket, SpaceScannerNetworkManager.<IsDetectingRocketBaseGame>g__IsDetected|12_0(worldData, spacecraftFromLaunchConditionManager, rocket), worldData.scratchpad.lastDetectedRocketsBaseGame);
 	}
 
 	private static bool IsDetectingRocketDlc1(SpaceScannerWorldData worldData, Clustercraft clustercraft)
@@ -169,7 +176,7 @@ public class SpaceScannerNetworkManager : ISim1000ms
 		bool flag = false;
 		if (clustercraft.Status != Clustercraft.CraftStatus.Grounded)
 		{
-			bool flag2 = component.GetDestinationWorldID() == worldData.world.id;
+			bool flag2 = component.GetDestinationWorldID() == worldData.GetWorld().id;
 			bool flag3 = component.IsTraveling();
 			bool flag4 = clustercraft.HasResourcesToMove(1, Clustercraft.CombustionResource.All);
 			float num = component.TravelETA();
@@ -177,10 +184,23 @@ public class SpaceScannerNetworkManager : ISim1000ms
 			if (!flag)
 			{
 				ClusterGridEntity adjacentAsteroid = clustercraft.GetAdjacentAsteroid();
-				flag = ((adjacentAsteroid != null) ? ClusterUtil.GetAsteroidWorldIdAtLocation(adjacentAsteroid.Location) : 255) == worldData.world.id && clustercraft.Status == Clustercraft.CraftStatus.Launching;
+				flag = ((adjacentAsteroid != null) ? ClusterUtil.GetAsteroidWorldIdAtLocation(adjacentAsteroid.Location) : 255) == worldData.GetWorld().id && clustercraft.Status == Clustercraft.CraftStatus.Launching;
 			}
 		}
-		return flag;
+		return SpaceScannerNetworkManager.IsDetectedUsingStickyCheck<Clustercraft>(clustercraft, flag, worldData.scratchpad.lastDetectedRocketsDLC1);
+	}
+
+	private static bool IsDetectedUsingStickyCheck<T>(T candidateTarget, bool isDetected, HashSet<T> existingDetections)
+	{
+		if (isDetected)
+		{
+			existingDetections.Add(candidateTarget);
+		}
+		else if (existingDetections.Contains(candidateTarget))
+		{
+			isDetected = true;
+		}
+		return isDetected;
 	}
 
 	private static float GetDetectTime(SpaceScannerWorldData worldData, SpaceScannerTarget target)
@@ -215,13 +235,16 @@ public class SpaceScannerNetworkManager : ISim1000ms
 				DetectorNetwork.Instance instance = (DetectorNetwork.Instance)obj;
 				if (instance.GetComponent<Operational>().IsOperational)
 				{
-					CometDetectorConfig.SKY_VISIBILITY_INFO.CollectVisibleCellsTo(pooledHashSet, Grid.PosToCell(instance.gameObject.transform.position));
+					CometDetectorConfig.SKY_VISIBILITY_INFO.CollectVisibleCellsTo(pooledHashSet, Grid.PosToCell(instance.gameObject.transform.position), world);
 				}
 			}
 			foreach (int num in pooledHashSet)
 			{
 				int num2 = Grid.CellToXY(num).x - world.WorldOffset.x;
-				array[num2] = true;
+				if (num2 >= 0 && num2 < world.Width)
+				{
+					array[num2] = true;
+				}
 			}
 		}
 		int num3 = 0;
@@ -237,12 +260,54 @@ public class SpaceScannerNetworkManager : ISim1000ms
 
 	private static void UpdateWorldDataScratchpads(Dictionary<int, SpaceScannerWorldData> worldIdToDataMap)
 	{
-		foreach (KeyValuePair<int, SpaceScannerWorldData> keyValuePair in worldIdToDataMap)
+		using (Dictionary<int, SpaceScannerWorldData>.Enumerator enumerator = worldIdToDataMap.GetEnumerator())
 		{
-			int num;
-			SpaceScannerWorldData spaceScannerWorldData;
-			keyValuePair.Deconstruct<int, SpaceScannerWorldData>(out num, out spaceScannerWorldData);
-			spaceScannerWorldData.scratchpad.Reset();
+			while (enumerator.MoveNext())
+			{
+				int num;
+				SpaceScannerWorldData spaceScannerWorldData;
+				enumerator.Current.Deconstruct<int, SpaceScannerWorldData>(out num, out spaceScannerWorldData);
+				SpaceScannerWorldData worldData = spaceScannerWorldData;
+				if (worldData.scratchpad == null)
+				{
+					worldData.scratchpad = new SpaceScannerWorldData.Scratchpad();
+				}
+				worldData.scratchpad.ballisticObjects.Clear();
+				worldData.scratchpad.lastDetectedMeteorShowers.RemoveWhere((MeteorShowerEvent.StatesInstance meteorShower) => meteorShower.IsNullOrDestroyed() || meteorShower.IsNullOrStopped() || 200f < meteorShower.TimeUntilNextShower());
+				worldData.scratchpad.lastDetectedRocketsBaseGame.RemoveWhere(delegate(LaunchConditionManager rocket)
+				{
+					if (rocket.IsNullOrDestroyed())
+					{
+						return true;
+					}
+					Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(rocket);
+					return spacecraftFromLaunchConditionManager.IsNullOrDestroyed() || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Destroyed || (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Underway && 200f < spacecraftFromLaunchConditionManager.GetTimeLeft()) || spacecraftFromLaunchConditionManager.GetTimeLeft() < 1f;
+				});
+				worldData.scratchpad.lastDetectedRocketsDLC1.RemoveWhere(delegate(Clustercraft clustercraft)
+				{
+					if (clustercraft.IsNullOrDestroyed())
+					{
+						return true;
+					}
+					ClusterTraveler component = clustercraft.GetComponent<ClusterTraveler>();
+					if (component.IsNullOrDestroyed())
+					{
+						return true;
+					}
+					if (component.IsTraveling())
+					{
+						if (component.GetDestinationWorldID() != worldData.worldId)
+						{
+							return true;
+						}
+						if (200f < component.TravelETA())
+						{
+							return true;
+						}
+					}
+					return component.TravelETA() < 1f;
+				});
+			}
 		}
 		if (Components.DetectorNetworks.GetWorldsIds().Count == 0)
 		{
@@ -259,6 +324,33 @@ public class SpaceScannerNetworkManager : ISim1000ms
 		}
 	}
 
+	[CompilerGenerated]
+	internal static bool <IsDetectingRocketBaseGame>g__IsDetected|12_0(SpaceScannerWorldData worldData, Spacecraft spacecraft, LaunchConditionManager rocket)
+	{
+		if (spacecraft.IsNullOrDestroyed())
+		{
+			return false;
+		}
+		if (spacecraft.state == Spacecraft.MissionState.Destroyed)
+		{
+			return false;
+		}
+		switch (spacecraft.state)
+		{
+		case Spacecraft.MissionState.Launching:
+		case Spacecraft.MissionState.WaitingToLand:
+		case Spacecraft.MissionState.Landing:
+			return true;
+		case Spacecraft.MissionState.Underway:
+			return spacecraft.GetTimeLeft() <= SpaceScannerNetworkManager.GetDetectTime(worldData, SpaceScannerTarget.RocketBaseGame(rocket));
+		case Spacecraft.MissionState.Destroyed:
+			return false;
+		default:
+			return false;
+		}
+	}
+
+	[Serialize]
 	private Dictionary<int, SpaceScannerWorldData> worldIdToDataMap = new Dictionary<int, SpaceScannerWorldData>();
 
 	private static List<GameplayEventInstance> meteorShowerInstances = new List<GameplayEventInstance>();

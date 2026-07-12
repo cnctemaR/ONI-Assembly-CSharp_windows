@@ -194,7 +194,7 @@ public class SaveLoader : KMonoBehaviour
 		{
 			DebugUtil.LogWarningArgs(new object[] { "Mod footprint of save file doesn't match current mod configuration" });
 		}
-		string text = "Mod Footprint:";
+		string text = string.Format("Mod Footprint ({0}):", saveFileRoot.active_mods.Count);
 		foreach (Label label in saveFileRoot.active_mods)
 		{
 			text = text + "\n  - " + label.title;
@@ -283,7 +283,7 @@ public class SaveLoader : KMonoBehaviour
 
 	private void LogActiveMods()
 	{
-		string text = "Active Mods:";
+		string text = string.Format("Active Mods ({0}):", Global.Instance.modManager.mods.Count);
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
 			if (mod.IsEnabledForActiveDlc())

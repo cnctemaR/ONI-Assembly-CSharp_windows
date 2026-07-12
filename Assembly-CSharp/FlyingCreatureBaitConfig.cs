@@ -8,6 +8,8 @@ public class FlyingCreatureBaitConfig : IBuildingConfig
 	{
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FlyingCreatureBait", 1, 2, "airborne_critter_bait_kanim", 10, 10f, new float[] { 50f, 10f }, new string[] { "Metal", "FlyingCritterEdible" }, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0, 0.2f);
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.Deprecated = true;
+		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
 
@@ -31,7 +33,7 @@ public class FlyingCreatureBaitConfig : IBuildingConfig
 		SymbolOverrideControllerUtil.AddToPrefab(go);
 		go.AddOrGet<SymbolOverrideController>().applySymbolOverridesEveryFrame = true;
 		Lure.Def def = go.AddOrGetDef<Lure.Def>();
-		def.lurePoints = new CellOffset[]
+		def.defaultLurePoints = new CellOffset[]
 		{
 			new CellOffset(0, 0)
 		};

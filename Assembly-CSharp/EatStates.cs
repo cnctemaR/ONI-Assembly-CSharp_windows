@@ -13,7 +13,7 @@ public class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStateM
 		this.eating.pre.QueueAnim("eat_pre", false, null).OnAnimQueueComplete(this.eating.loop);
 		this.eating.loop.Enter(new StateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>.State.Callback(EatStates.EatComplete)).QueueAnim("eat_loop", true, null).ScheduleGoTo(3f, this.eating.pst);
 		this.eating.pst.QueueAnim("eat_pst", false, null).OnAnimQueueComplete(this.behaviourcomplete);
-		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToEat, false);
+		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.WantsToEat, false);
 	}
 
 	private static void SetTarget(EatStates.Instance smi)

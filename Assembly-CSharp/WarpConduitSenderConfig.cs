@@ -28,6 +28,7 @@ public class WarpConduitSenderConfig : IBuildingConfig
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.DefaultAnimState = "idle";
 		buildingDef.CanMove = true;
+		buildingDef.Invincible = true;
 		return buildingDef;
 	}
 

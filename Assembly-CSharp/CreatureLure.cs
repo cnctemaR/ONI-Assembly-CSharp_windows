@@ -41,7 +41,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 	private void OnStorageChange(object data = null)
 	{
 		bool flag = this.baitStorage.GetAmountAvailable(this.activeBaitSetting) > 0f;
-		this.operational.SetFlag(this.baited, flag);
+		this.operational.SetFlag(CreatureLure.baited, flag);
 	}
 
 	public void ChangeBaitSetting(Tag baitSetting)
@@ -100,7 +100,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 
 	private Operational operational;
 
-	private Operational.Flag baited = new Operational.Flag("Baited", Operational.Flag.Type.Requirement);
+	private static readonly Operational.Flag baited = new Operational.Flag("Baited", Operational.Flag.Type.Requirement);
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;

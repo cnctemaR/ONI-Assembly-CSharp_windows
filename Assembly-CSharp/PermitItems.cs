@@ -54,7 +54,7 @@ public class PermitItems
 		return false;
 	}
 
-	public static void QueueRequestOpenOrUnboxItem(KleiItems.ItemData item)
+	public static void QueueRequestOpenOrUnboxItem(KleiItems.ItemData item, KleiItems.ResponseCallback cb)
 	{
 		DebugUtil.DevAssert(!item.IsOpened, "Can't open already opened item.", null);
 		if (item.IsOpened)
@@ -63,10 +63,10 @@ public class PermitItems
 		}
 		if (PermitItems.BoxSet.Contains(item.Id))
 		{
-			KleiItems.AddRequestMysteryBoxOpened(item.ItemId);
+			KleiItems.AddRequestMysteryBoxOpened(item.ItemId, cb);
 			return;
 		}
-		KleiItems.AddRequestItemOpened(item.ItemId);
+		KleiItems.AddRequestItemOpened(item.ItemId, cb);
 	}
 
 	private static PermitItems.ItemInfo[] ItemInfos = new PermitItems.ItemInfo[]
@@ -299,7 +299,71 @@ public class PermitItems
 		new PermitItems.ItemInfo("painting_tall_art_j", 238U, "CanvasTall_Good8"),
 		new PermitItems.ItemInfo("painting_tall_art_k", 239U, "CanvasTall_Good9"),
 		new PermitItems.ItemInfo("painting_wide_art_j", 240U, "CanvasWide_Good8"),
-		new PermitItems.ItemInfo("painting_wide_art_k", 241U, "CanvasWide_Good9")
+		new PermitItems.ItemInfo("painting_wide_art_k", 241U, "CanvasWide_Good9"),
+		new PermitItems.ItemInfo("top_denim_blue", 242U, "TopDenimBlue"),
+		new PermitItems.ItemInfo("top_undershirt_executive", 243U, "TopUndershirtExecutive"),
+		new PermitItems.ItemInfo("top_undershirt_underling", 244U, "TopUndershirtUnderling"),
+		new PermitItems.ItemInfo("top_undershirt_groupthink", 245U, "TopUndershirtGroupthink"),
+		new PermitItems.ItemInfo("top_undershirt_stakeholder", 246U, "TopUndershirtStakeholder"),
+		new PermitItems.ItemInfo("top_undershirt_admin", 247U, "TopUndershirtAdmin"),
+		new PermitItems.ItemInfo("top_undershirt_buzzword", 248U, "TopUndershirtBuzzword"),
+		new PermitItems.ItemInfo("top_undershirtshirt_synergy", 249U, "TopUndershirtSynergy"),
+		new PermitItems.ItemInfo("top_researcher", 250U, "TopResearcher"),
+		new PermitItems.ItemInfo("top_rebel_gi", 251U, "TopRebelGi"),
+		new PermitItems.ItemInfo("bottom_briefs_executive", 252U, "BottomBriefsExecutive"),
+		new PermitItems.ItemInfo("bottom_briefs_underling", 253U, "BottomBriefsUnderling"),
+		new PermitItems.ItemInfo("bottom_briefs_groupthink", 254U, "BottomBriefsGroupthink"),
+		new PermitItems.ItemInfo("bottom_briefs_stakeholder", 255U, "BottomBriefsStakeholder"),
+		new PermitItems.ItemInfo("bottom_briefs_admin", 256U, "BottomBriefsAdmin"),
+		new PermitItems.ItemInfo("bottom_briefs_buzzword", 257U, "BottomBriefsBuzzword"),
+		new PermitItems.ItemInfo("bottom_briefs_synergy", 258U, "BottomBriefsSynergy"),
+		new PermitItems.ItemInfo("pants_jeans", 259U, "PantsJeans"),
+		new PermitItems.ItemInfo("pants_rebel_gi", 260U, "PantsRebelGi"),
+		new PermitItems.ItemInfo("pants_research", 261U, "PantsResearch"),
+		new PermitItems.ItemInfo("shoes_basic_gray", 262U, "ShoesBasicGray"),
+		new PermitItems.ItemInfo("shoes_denim_blue", 263U, "ShoesDenimBlue"),
+		new PermitItems.ItemInfo("socks_legwarmers_blueberry", 264U, "SocksLegwarmersBlueberry"),
+		new PermitItems.ItemInfo("socks_legwarmers_grape", 265U, "SocksLegwarmersGrape"),
+		new PermitItems.ItemInfo("socks_legwarmers_lemon", 266U, "SocksLegwarmersLemon"),
+		new PermitItems.ItemInfo("socks_legwarmers_lime", 267U, "SocksLegwarmersLime"),
+		new PermitItems.ItemInfo("socks_legwarmers_satsuma", 268U, "SocksLegwarmersSatsuma"),
+		new PermitItems.ItemInfo("socks_legwarmers_strawberry", 269U, "SocksLegwarmersStrawberry"),
+		new PermitItems.ItemInfo("socks_legwarmers_watermelon", 270U, "SocksLegwarmersWatermelon"),
+		new PermitItems.ItemInfo("gloves_cuffless_black", 271U, "GlovesCufflessBlack"),
+		new PermitItems.ItemInfo("gloves_denim_blue", 272U, "GlovesDenimBlue"),
+		new PermitItems.ItemInfo("atmo_gloves_gold", 273U, "AtmoGlovesGold"),
+		new PermitItems.ItemInfo("atmo_gloves_eggplant", 274U, "AtmoGlovesEggplant"),
+		new PermitItems.ItemInfo("atmo_helmet_eggplant", 275U, "AtmoHelmetEggplant"),
+		new PermitItems.ItemInfo("atmo_helmet_confetti", 276U, "AtmoHelmetConfetti"),
+		new PermitItems.ItemInfo("atmo_shoes_stealth", 277U, "AtmoShoesStealth"),
+		new PermitItems.ItemInfo("atmo_shoes_eggplant", 278U, "AtmoShoesEggplant"),
+		new PermitItems.ItemInfo("atmosuit_crisp_eggplant", 279U, "AtmoSuitCrispEggplant"),
+		new PermitItems.ItemInfo("atmosuit_confetti", 280U, "AtmoSuitConfetti"),
+		new PermitItems.ItemInfo("atmo_belt_basic_gold", 281U, "AtmoBeltBasicGold"),
+		new PermitItems.ItemInfo("atmo_belt_eggplant", 282U, "AtmoBeltEggplant"),
+		new PermitItems.ItemInfo("item_pedestal_hand", 283U, "ItemPedestal_hand"),
+		new PermitItems.ItemInfo("massage_table_shiatsu", 284U, "MassageTable_shiatsu"),
+		new PermitItems.ItemInfo("rock_crusher_hands", 285U, "RockCrusher_hands"),
+		new PermitItems.ItemInfo("rock_crusher_teeth", 286U, "RockCrusher_teeth"),
+		new PermitItems.ItemInfo("water_cooler_round_body", 287U, "WaterCooler_round_body"),
+		new PermitItems.ItemInfo("walls_stripes_blue", 288U, "ExteriorWall_stripes_blue"),
+		new PermitItems.ItemInfo("walls_stripes_diagonal_blue", 289U, "ExteriorWall_stripes_diagonal_blue"),
+		new PermitItems.ItemInfo("walls_stripes_circle_blue", 290U, "ExteriorWall_stripes_circle_blue"),
+		new PermitItems.ItemInfo("walls_squares_red_deep_white", 291U, "ExteriorWall_squares_red_deep_white"),
+		new PermitItems.ItemInfo("walls_squares_orange_satsuma_white", 292U, "ExteriorWall_squares_orange_satsuma_white"),
+		new PermitItems.ItemInfo("walls_squares_yellow_lemon_white", 293U, "ExteriorWall_squares_yellow_lemon_white"),
+		new PermitItems.ItemInfo("walls_squares_green_kelly_white", 294U, "ExteriorWall_squares_green_kelly_white"),
+		new PermitItems.ItemInfo("walls_squares_blue_cobalt_white", 295U, "ExteriorWall_squares_blue_cobalt_white"),
+		new PermitItems.ItemInfo("walls_squares_pink_flamingo_white", 296U, "ExteriorWall_squares_pink_flamingo_white"),
+		new PermitItems.ItemInfo("walls_squares_grey_charcoal_white", 297U, "ExteriorWall_squares_grey_charcoal_white"),
+		new PermitItems.ItemInfo("canvas_good_13", 298U, "Canvas_Good13"),
+		new PermitItems.ItemInfo("canvas_wide_good_10", 299U, "CanvasWide_Good10"),
+		new PermitItems.ItemInfo("canvas_tall_good_11", 300U, "CanvasTall_Good11"),
+		new PermitItems.ItemInfo("sculpture_good_5", 301U, "Sculpture_Good5"),
+		new PermitItems.ItemInfo("small_sculpture_good_5", 302U, "SmallSculpture_Good5"),
+		new PermitItems.ItemInfo("small_sculpture_good_6", 303U, "SmallSculpture_Good6"),
+		new PermitItems.ItemInfo("metal_sculpture_good_5", 304U, "MetalSculpture_Good5"),
+		new PermitItems.ItemInfo("ice_sculpture_average_3", 305U, "IceSculpture_Average3")
 	};
 
 	private static Dictionary<string, PermitItems.ItemInfo> Mappings = PermitItems.ItemInfos.ToDictionary<PermitItems.ItemInfo, string>((PermitItems.ItemInfo x) => x.PermitId);
@@ -308,13 +372,13 @@ public class PermitItems
 
 	private static PermitItems.BoxInfo[] BoxInfos = new PermitItems.BoxInfo[]
 	{
-		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_a", "Shipment X", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 80U, "ONI_giftbox_u44_box_a"),
-		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_b", "Shipment Y", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 81U, "ONI_giftbox_u44_box_b"),
-		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_c", "Shipment Z", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 82U, "ONI_giftbox_u44_box_c"),
-		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_a", "Team Players Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 148U, "ONI_giftbox_u44_box_b"),
-		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_b", "Pizzazz Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 149U, "ONI_giftbox_u44_box_c"),
-		new PermitItems.BoxInfo("MYSTERYBOX_u46_box_a", "Superfruits Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 190U, "ONI_giftbox_u44_box_a"),
-		new PermitItems.BoxInfo("MYSTERYBOX_u47_klei_fest", EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.DESC, 196U, "ONI_box_puft_atmo_set")
+		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_a", "Shipment X", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 80U, "ONI_giftbox_u44_box_a", true),
+		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_b", "Shipment Y", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 81U, "ONI_giftbox_u44_box_b", true),
+		new PermitItems.BoxInfo("MYSTERYBOX_u44_box_c", "Shipment Z", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 82U, "ONI_giftbox_u44_box_c", true),
+		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_a", "Team Players Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 148U, "ONI_giftbox_u44_box_b", true),
+		new PermitItems.BoxInfo("MYSTERYBOX_u45_box_b", "Pizzazz Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 149U, "ONI_giftbox_u44_box_c", true),
+		new PermitItems.BoxInfo("MYSTERYBOX_u46_box_a", "Superfruits Crate", "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.", 190U, "ONI_giftbox_u44_box_a", true),
+		new PermitItems.BoxInfo("MYSTERYBOX_u47_klei_fest", EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.NAME, EQUIPMENT.PREFABS.ATMO_SUIT_SET.PUFT.DESC, 196U, "ONI_box_puft_atmo_set", false)
 	};
 
 	private const string MYSTERYBOX_U44_DESC = "Unaddressed packages have been discovered near the Printing Pod. They bear Gravitas logos, and trace amounts of Neutronium have been detected.";
@@ -345,13 +409,14 @@ public class PermitItems
 
 	private struct BoxInfo
 	{
-		public BoxInfo(string type, string name, string desc, uint id, string icon)
+		public BoxInfo(string type, string name, string desc, uint id, string icon, bool account_reward)
 		{
 			this.ItemType = type;
 			this.Name = name;
 			this.Description = desc;
 			this.TypeId = id;
 			this.IconName = icon;
+			this.AccountReward = account_reward;
 		}
 
 		public string ItemType;
@@ -363,5 +428,7 @@ public class PermitItems
 		public uint TypeId;
 
 		public string IconName;
+
+		public bool AccountReward;
 	}
 }

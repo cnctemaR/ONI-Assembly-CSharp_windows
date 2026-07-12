@@ -11,9 +11,9 @@ public class RoomMonitor : GameStateMachine<RoomMonitor, RoomMonitor.Instance>
 	private static void UpdateRoomType(RoomMonitor.Instance smi)
 	{
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(smi.master.gameObject);
-		if (roomOfGameObject != smi.sm.currentRoom)
+		if (roomOfGameObject != smi.currentRoom)
 		{
-			smi.sm.currentRoom = roomOfGameObject;
+			smi.currentRoom = roomOfGameObject;
 			if (roomOfGameObject != null)
 			{
 				roomOfGameObject.cavity.OnEnter(smi.master.gameObject);
@@ -21,21 +21,13 @@ public class RoomMonitor : GameStateMachine<RoomMonitor, RoomMonitor.Instance>
 		}
 	}
 
-	public Room currentRoom;
-
 	public new class Instance : GameStateMachine<RoomMonitor, RoomMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			this.navigator = base.GetComponent<Navigator>();
 		}
 
-		public Room GetCurrentRoomType()
-		{
-			return base.sm.currentRoom;
-		}
-
-		public Navigator navigator;
+		public Room currentRoom;
 	}
 }

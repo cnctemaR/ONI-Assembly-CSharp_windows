@@ -513,10 +513,6 @@ namespace ProcGenGame
 					exception = e
 				});
 			}
-			if (!flag)
-			{
-				KCrashReporter.ReportErrorDevNotification("WorldgenFailure", e.StackTrace, text + " - " + e.Message);
-			}
 		}
 
 		public void SetWorldSize(int width, int height)

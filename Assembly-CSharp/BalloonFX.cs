@@ -58,10 +58,12 @@ public class BalloonFX : GameStateMachine<BalloonFX, BalloonFX.Instance>
 				{
 					component.AddSymbolOverride("body", base.smi.sm.defaultAnim.GetData().build.GetSymbol("body"), 0);
 				}
+				this.balloonAnimController.SetBatchGroupOverride(HashedString.Invalid);
 			}
 			else
 			{
 				component.AddSymbolOverride("body", balloonOverride.symbol.Unwrap(), 0);
+				this.balloonAnimController.SetBatchGroupOverride(kanimFile.batchTag);
 			}
 			this.currentBodyOverrideSymbol = balloonOverride;
 		}

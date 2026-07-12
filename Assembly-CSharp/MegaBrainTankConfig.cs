@@ -57,7 +57,7 @@ public class MegaBrainTankConfig : IBuildingConfig
 		this.ConfigureJournalShelf(component);
 		Activatable activatable = go.AddOrGet<Activatable>();
 		activatable.SetWorkTime(5f);
-		activatable.ActivationFlagType = Operational.Flag.Type.Functional;
+		activatable.Required = false;
 		activatable.synchronizeAnims = false;
 		activatable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_remote_kanim") };
 		PrimaryElement component2 = go.GetComponent<PrimaryElement>();

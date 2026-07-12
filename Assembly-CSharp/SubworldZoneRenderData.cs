@@ -74,6 +74,7 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	{
 		byte[] array = new byte[Grid.WidthInCells * Grid.HeightInCells];
 		byte[] array2 = new byte[Grid.WidthInCells * Grid.HeightInCells * 3];
+		this.worldZoneTypes = new SubWorld.ZoneType[Grid.CellCount];
 		this.colourTex = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, TextureFormat.RGB24, false);
 		this.colourTex.name = "SubworldRegionColourData";
 		this.colourTex.filterMode = FilterMode.Bilinear;
@@ -91,12 +92,12 @@ public class SubworldZoneRenderData : KMonoBehaviour
 			array2[i * 3] = color.r;
 			array2[i * 3 + 1] = color.g;
 			array2[i * 3 + 2] = color.b;
+			this.worldZoneTypes[i] = SubWorld.ZoneType.Space;
 		}
 		this.colourTex.LoadRawTextureData(array2);
 		this.indexTex.LoadRawTextureData(array);
 		this.colourTex.Apply();
 		this.indexTex.Apply();
-		this.worldZoneTypes = new SubWorld.ZoneType[Grid.CellCount];
 		WorldDetailSave clusterDetailSave = SaveLoader.Instance.clusterDetailSave;
 		Vector2 zero = Vector2.zero;
 		for (int j = 0; j < clusterDetailSave.overworldCells.Count; j++)

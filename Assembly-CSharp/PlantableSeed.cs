@@ -105,7 +105,7 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 			return false;
 		}
 		TemperatureVulnerable component3 = prefab.GetComponent<TemperatureVulnerable>();
-		if (component3 != null && !component3.IsCellSafe(cell))
+		if (component3 != null && !component3.IsCellSafe(cell) && Grid.Element[cell].id != SimHashes.Vacuum)
 		{
 			return false;
 		}

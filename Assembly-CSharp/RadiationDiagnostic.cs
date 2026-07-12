@@ -38,7 +38,7 @@ public class RadiationDiagnostic : ColonyDiagnostic
 		if (worldItems.Count == 0)
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
-			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+			diagnosticResult.Message = base.NO_MINIONS;
 		}
 		else
 		{
@@ -65,7 +65,7 @@ public class RadiationDiagnostic : ColonyDiagnostic
 		if (worldItems.Count == 0)
 		{
 			diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;
-			diagnosticResult.Message = UI.COLONY_DIAGNOSTICS.NO_MINIONS;
+			diagnosticResult.Message = base.NO_MINIONS;
 			return diagnosticResult;
 		}
 		diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Normal;

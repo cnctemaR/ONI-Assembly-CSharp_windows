@@ -7,45 +7,32 @@ using UnityEngine.UI;
 
 public class OutfitDescriptionPanel : KMonoBehaviour
 {
-	public void Refresh(PermitResource permitResource, ClothingOutfitUtility.OutfitType outfitType)
+	public void Refresh(PermitResource permitResource, ClothingOutfitUtility.OutfitType outfitType, Option<Personality> personality)
 	{
 		if (permitResource != null)
 		{
-			this.Refresh(permitResource.Name, new string[] { permitResource.Id }, outfitType);
+			this.Refresh(permitResource.Name, new string[] { permitResource.Id }, outfitType, personality);
 			return;
 		}
-		this.Refresh(UI.OUTFIT_NAME.NONE, OutfitDescriptionPanel.NO_ITEMS, outfitType);
+		this.Refresh(UI.OUTFIT_NAME.NONE, OutfitDescriptionPanel.NO_ITEMS, outfitType, personality);
 	}
 
-	public void Refresh(Option<ClothingOutfitTarget> outfit, ClothingOutfitUtility.OutfitType outfitType)
+	public void Refresh(Option<ClothingOutfitTarget> outfit, ClothingOutfitUtility.OutfitType outfitType, Option<Personality> personality)
 	{
 		if (outfit.IsSome())
 		{
-			this.Refresh(outfit.Unwrap().ReadName(), outfit.Unwrap().ReadItems(), outfitType);
+			this.Refresh(outfit.Unwrap().ReadName(), outfit.Unwrap().ReadItems(), outfitType, personality);
 			return;
 		}
-		switch (outfitType)
-		{
-		case ClothingOutfitUtility.OutfitType.Clothing:
-			this.Refresh(UI.OUTFIT_NAME.NONE, OutfitDescriptionPanel.NO_ITEMS, outfitType);
-			return;
-		case ClothingOutfitUtility.OutfitType.JoyResponse:
-			this.Refresh(UI.OUTFIT_NAME.NONE_JOY_RESPONSE, OutfitDescriptionPanel.NO_ITEMS, outfitType);
-			return;
-		case ClothingOutfitUtility.OutfitType.AtmoSuit:
-			this.Refresh(UI.OUTFIT_NAME.NONE_ATMO_SUIT, OutfitDescriptionPanel.NO_ITEMS, outfitType);
-			return;
-		default:
-			return;
-		}
+		this.Refresh(KleiItemsUI.GetNoneOutfitName(outfitType), OutfitDescriptionPanel.NO_ITEMS, outfitType, personality);
 	}
 
-	public void Refresh(OutfitDesignerScreen_OutfitState outfitState)
+	public void Refresh(OutfitDesignerScreen_OutfitState outfitState, Option<Personality> personality)
 	{
-		this.Refresh(outfitState.name, outfitState.GetItems(), outfitState.outfitType);
+		this.Refresh(outfitState.name, outfitState.GetItems(), outfitState.outfitType, personality);
 	}
 
-	public void Refresh(string name, string[] itemIds, ClothingOutfitUtility.OutfitType outfitType)
+	public void Refresh(string outfitName, string[] outfitItemIds, ClothingOutfitUtility.OutfitType outfitType, Option<Personality> personality)
 	{
 		this.ClearItemDescRows();
 		using (DictionaryPool<PermitCategory, Option<PermitResource>, OutfitDescriptionPanel>.PooledDictionary pooledDictionary = PoolsFor<OutfitDescriptionPanel>.AllocateDict<PermitCategory, Option<PermitResource>>())
@@ -55,7 +42,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 				switch (outfitType)
 				{
 				case ClothingOutfitUtility.OutfitType.Clothing:
-					this.outfitNameLabel.SetText(name);
+					this.outfitNameLabel.SetText(outfitName);
 					this.outfitDescriptionLabel.gameObject.SetActive(false);
 					foreach (PermitCategory permitCategory in ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_CLOTHING)
 					{
@@ -63,25 +50,25 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 					}
 					break;
 				case ClothingOutfitUtility.OutfitType.JoyResponse:
-					if (itemIds != null && itemIds.Length != 0)
+					if (outfitItemIds != null && outfitItemIds.Length != 0)
 					{
-						if (Db.Get().Permits.BalloonArtistFacades.TryGet(itemIds[0]) != null)
+						if (Db.Get().Permits.BalloonArtistFacades.TryGet(outfitItemIds[0]) != null)
 						{
 							this.outfitDescriptionLabel.gameObject.SetActive(true);
 							string text = DUPLICANTS.TRAITS.BALLOONARTIST.NAME;
 							this.outfitNameLabel.SetText(text);
-							this.outfitDescriptionLabel.SetText(name);
+							this.outfitDescriptionLabel.SetText(outfitName);
 						}
 					}
 					else
 					{
-						this.outfitNameLabel.SetText(name);
+						this.outfitNameLabel.SetText(outfitName);
 						this.outfitDescriptionLabel.gameObject.SetActive(false);
 					}
 					pooledDictionary.Add(PermitCategory.JoyResponse, Option.None);
 					break;
 				case ClothingOutfitUtility.OutfitType.AtmoSuit:
-					this.outfitNameLabel.SetText(name);
+					this.outfitNameLabel.SetText(outfitName);
 					this.outfitDescriptionLabel.gameObject.SetActive(false);
 					foreach (PermitCategory permitCategory2 in ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_ATMO_SUITS)
 					{
@@ -89,7 +76,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 					}
 					break;
 				}
-				foreach (string text2 in itemIds)
+				foreach (string text2 in outfitItemIds)
 				{
 					PermitResource permitResource = Db.Get().Permits.Get(text2);
 					Option<PermitResource> option;
@@ -115,7 +102,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 					}
 					else
 					{
-						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory4), KleiItemsUI.GetNoneClothingItemStrings(permitCategory4).Item1, null, 1f);
+						this.AddItemDescRow(KleiItemsUI.GetNoneClothingItemIcon(permitCategory4, personality), KleiItemsUI.GetNoneClothingItemStrings(permitCategory4).Item1, null, 1f);
 					}
 				}
 				foreach (PermitResource permitResource2 in pooledList)
@@ -125,7 +112,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 				}
 			}
 		}
-		bool flag = ClothingOutfitTarget.DoesContainNonOwnedItems(itemIds);
+		bool flag = ClothingOutfitTarget.DoesContainNonOwnedItems(outfitItemIds);
 		this.usesUnownedItemsLabel.transform.SetAsLastSibling();
 		if (!flag)
 		{
@@ -138,7 +125,7 @@ public class OutfitDescriptionPanel : KMonoBehaviour
 		}
 		KleiItemsStatusRefresher.AddOrGetListener(this).OnRefreshUI(delegate
 		{
-			this.Refresh(name, itemIds, outfitType);
+			this.Refresh(outfitName, outfitItemIds, outfitType, personality);
 		});
 	}
 

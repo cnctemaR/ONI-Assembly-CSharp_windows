@@ -183,6 +183,39 @@ public static class MathUtil
 		}
 	}
 
+	public struct MinMaxInt
+	{
+		public int min { readonly get; private set; }
+
+		public int max { readonly get; private set; }
+
+		public MinMaxInt(int min, int max)
+		{
+			this.min = min;
+			this.max = max;
+		}
+
+		public int Get(SeededRandom rnd)
+		{
+			return rnd.RandomRange(this.min, this.max);
+		}
+
+		public int Get()
+		{
+			return global::UnityEngine.Random.Range(this.min, this.max);
+		}
+
+		public int Lerp(float t)
+		{
+			return Mathf.RoundToInt(Mathf.Lerp((float)this.min, (float)this.max, t));
+		}
+
+		public override string ToString()
+		{
+			return string.Format("[{0}:{1}]", this.min, this.max);
+		}
+	}
+
 	public class Pair<T, U>
 	{
 		public Pair()

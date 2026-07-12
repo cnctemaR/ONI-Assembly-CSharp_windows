@@ -44,6 +44,7 @@ public class SatelliteCometConfig : IEntityConfig
 		gameObject.AddOrGet<KCircleCollider2D>().radius = 0.5f;
 		gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1f);
 		gameObject.AddTag(GameTags.Comet);
+		gameObject.AddTag(GameTags.DeprecatedContent);
 		return gameObject;
 	}
 

@@ -443,6 +443,13 @@ namespace Database
 				return str.Replace("{time}", GameUtil.GetFormattedTime(clinicDreamable.WorkTimeRemaining, "F0"));
 			};
 			this.FossilHunt_WorkerExcavating = this.CreateStatusItem("FossilHunt_WorkerExcavating", DUPLICANTS.STATUSITEMS.FOSSILHUNT.WORKEREXCAVATING.NAME, DUPLICANTS.STATUSITEMS.FOSSILHUNT.WORKEREXCAVATING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
+			this.ArmingTrap = this.CreateStatusItem("ArmingTrap", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.WaxedForTransitTube = this.CreateStatusItem("WaxedForTransitTube", "DUPLICANTS", "action_speed_up", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.WaxedForTransitTube.resolveTooltipCallback = delegate(string str, object data)
+			{
+				float num8 = (float)data * 100f;
+				return str.Replace("{0}", GameUtil.GetFormattedPercent(num8, GameUtil.TimeSlice.None));
+			};
 			this.JoyResponse_HasBalloon = this.CreateStatusItem("JoyResponse_HasBalloon", DUPLICANTS.MODIFIERS.HASBALLOON.NAME, DUPLICANTS.MODIFIERS.HASBALLOON.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HasBalloon.resolveTooltipCallback = delegate(string str, object data)
 			{
@@ -677,6 +684,10 @@ namespace Database
 		public StatusItem Meteorphile;
 
 		public StatusItem FossilHunt_WorkerExcavating;
+
+		public StatusItem ArmingTrap;
+
+		public StatusItem WaxedForTransitTube;
 
 		private const int NONE_OVERLAY = 0;
 	}

@@ -9,6 +9,8 @@ public class KAnimConverter
 
 		HashedString GetBatchGroupID(bool isEditorWindow = false);
 
+		HashedString GetBatchGroupIDOverride();
+
 		KAnimBatch GetBatch();
 
 		void SetBatch(KAnimBatch id);

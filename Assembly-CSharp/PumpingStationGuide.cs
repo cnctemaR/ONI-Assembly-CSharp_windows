@@ -13,6 +13,14 @@ public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
 		this.RefreshDepthAvailable();
 	}
 
+	public void RefreshPosition()
+	{
+		if (this.guideController != null && this.guideController.IsMoving)
+		{
+			this.guideController.SetDirty();
+		}
+	}
+
 	private void RefreshTint()
 	{
 		this.guideController.TintColour = this.parentController.TintColour;
@@ -43,6 +51,7 @@ public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
 
 	public void RenderEveryTick(float dt)
 	{
+		this.RefreshPosition();
 		this.RefreshTint();
 		this.RefreshDepthAvailable();
 	}

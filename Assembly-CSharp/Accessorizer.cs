@@ -25,7 +25,7 @@ public class Accessorizer : KMonoBehaviour
 	private void OnDeserialized()
 	{
 		MinionIdentity component = base.GetComponent<MinionIdentity>();
-		if (this.clothingItems.Count > 0 || (component != null && component.nameStringKey == LonelyMinionConfig.MinionName) || SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 30))
+		if (this.clothingItems.Count > 0 || (component != null && component.nameStringKey == "JORGE") || SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 30))
 		{
 			if (component != null)
 			{
@@ -135,7 +135,7 @@ public class Accessorizer : KMonoBehaviour
 					}
 					else if (accessorySlot == Db.Get().AccessorySlots.Neck)
 					{
-						accessory = accessorySlot.Lookup("neck");
+						accessory = accessorySlot.Lookup(bodyData.neck);
 					}
 					else if (accessorySlot == Db.Get().AccessorySlots.Pelvis)
 					{

@@ -10,6 +10,7 @@ public abstract class ColonyDiagnostic : ISim4000ms
 		this.worldID = worldID;
 		this.name = name;
 		this.id = base.GetType().Name;
+		this.IsWorldModuleInterior = ClusterManager.Instance.GetWorld(worldID).IsModuleInterior;
 		this.colors = new Dictionary<ColonyDiagnostic.DiagnosticResult.Opinion, Color>();
 		this.colors.Add(ColonyDiagnostic.DiagnosticResult.Opinion.DuplicantThreatening, Constants.NEGATIVE_COLOR);
 		this.colors.Add(ColonyDiagnostic.DiagnosticResult.Opinion.Bad, Constants.NEGATIVE_COLOR);
@@ -23,6 +24,8 @@ public abstract class ColonyDiagnostic : ISim4000ms
 	}
 
 	public int worldID { get; protected set; }
+
+	public bool IsWorldModuleInterior { get; private set; }
 
 	public virtual string[] GetDlcIds()
 	{
@@ -84,13 +87,15 @@ public abstract class ColonyDiagnostic : ISim4000ms
 	public virtual ColonyDiagnostic.DiagnosticResult Evaluate()
 	{
 		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, "", null);
+		bool flag = false;
 		foreach (KeyValuePair<string, DiagnosticCriterion> keyValuePair in this.criteria)
 		{
 			if (ColonyDiagnosticUtility.Instance.IsCriteriaEnabled(this.worldID, this.id, keyValuePair.Key))
 			{
 				ColonyDiagnostic.DiagnosticResult diagnosticResult2 = keyValuePair.Value.Evaluate();
-				if (diagnosticResult2.opinion < diagnosticResult.opinion)
+				if (diagnosticResult2.opinion < diagnosticResult.opinion || (!flag && diagnosticResult2.opinion == ColonyDiagnostic.DiagnosticResult.Opinion.Normal))
 				{
+					flag = true;
 					diagnosticResult.opinion = diagnosticResult2.opinion;
 					diagnosticResult.Message = diagnosticResult2.Message;
 					diagnosticResult.clickThroughTarget = diagnosticResult2.clickThroughTarget;
@@ -103,6 +108,14 @@ public abstract class ColonyDiagnostic : ISim4000ms
 	public void SetResult(ColonyDiagnostic.DiagnosticResult result)
 	{
 		this.LatestResult = result;
+	}
+
+	protected string NO_MINIONS
+	{
+		get
+		{
+			return this.IsWorldModuleInterior ? UI.COLONY_DIAGNOSTICS.NO_MINIONS_ROCKET : UI.COLONY_DIAGNOSTICS.NO_MINIONS_PLANETOID;
+		}
 	}
 
 	public string name;
@@ -142,61 +155,66 @@ public abstract class ColonyDiagnostic : ISim4000ms
 		{
 			get
 			{
-				switch (this.opinion)
-				{
-				case ColonyDiagnostic.DiagnosticResult.Opinion.Bad:
-					return string.Concat(new string[]
-					{
-						"<color=",
-						Constants.NEGATIVE_COLOR_STR,
-						">",
-						this.message,
-						"</color>"
-					});
-				case ColonyDiagnostic.DiagnosticResult.Opinion.Warning:
-					return string.Concat(new string[]
-					{
-						"<color=",
-						Constants.NEGATIVE_COLOR_STR,
-						">",
-						this.message,
-						"</color>"
-					});
-				case ColonyDiagnostic.DiagnosticResult.Opinion.Concern:
-					return string.Concat(new string[]
-					{
-						"<color=",
-						Constants.WARNING_COLOR_STR,
-						">",
-						this.message,
-						"</color>"
-					});
-				case ColonyDiagnostic.DiagnosticResult.Opinion.Suggestion:
-				case ColonyDiagnostic.DiagnosticResult.Opinion.Normal:
-					return string.Concat(new string[]
-					{
-						"<color=",
-						Constants.WHITE_COLOR_STR,
-						">",
-						this.message,
-						"</color>"
-					});
-				case ColonyDiagnostic.DiagnosticResult.Opinion.Good:
-					return string.Concat(new string[]
-					{
-						"<color=",
-						Constants.POSITIVE_COLOR_STR,
-						">",
-						this.message,
-						"</color>"
-					});
-				}
 				return this.message;
 			}
 			set
 			{
 				this.message = value;
 			}
+		}
+
+		public string GetFormattedMessage()
+		{
+			switch (this.opinion)
+			{
+			case ColonyDiagnostic.DiagnosticResult.Opinion.Bad:
+				return string.Concat(new string[]
+				{
+					"<color=",
+					Constants.NEGATIVE_COLOR_STR,
+					">",
+					this.message,
+					"</color>"
+				});
+			case ColonyDiagnostic.DiagnosticResult.Opinion.Warning:
+				return string.Concat(new string[]
+				{
+					"<color=",
+					Constants.NEGATIVE_COLOR_STR,
+					">",
+					this.message,
+					"</color>"
+				});
+			case ColonyDiagnostic.DiagnosticResult.Opinion.Concern:
+				return string.Concat(new string[]
+				{
+					"<color=",
+					Constants.WARNING_COLOR_STR,
+					">",
+					this.message,
+					"</color>"
+				});
+			case ColonyDiagnostic.DiagnosticResult.Opinion.Suggestion:
+			case ColonyDiagnostic.DiagnosticResult.Opinion.Normal:
+				return string.Concat(new string[]
+				{
+					"<color=",
+					Constants.WHITE_COLOR_STR,
+					">",
+					this.message,
+					"</color>"
+				});
+			case ColonyDiagnostic.DiagnosticResult.Opinion.Good:
+				return string.Concat(new string[]
+				{
+					"<color=",
+					Constants.POSITIVE_COLOR_STR,
+					">",
+					this.message,
+					"</color>"
+				});
+			}
+			return this.message;
 		}
 
 		public ColonyDiagnostic.DiagnosticResult.Opinion opinion;

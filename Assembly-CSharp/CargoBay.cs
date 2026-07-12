@@ -86,6 +86,7 @@ public class CargoBay : KMonoBehaviour
 						Baggable component2 = gameObject2.GetComponent<Baggable>();
 						if (component2 != null)
 						{
+							component2.keepWrangledNextTimeRemovedFromStorage = true;
 							component2.SetWrangled();
 						}
 					}

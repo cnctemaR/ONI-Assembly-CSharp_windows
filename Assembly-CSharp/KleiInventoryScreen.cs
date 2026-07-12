@@ -10,7 +10,7 @@ public class KleiInventoryScreen : KModalScreen
 {
 	private PermitResource SelectedPermit { get; set; }
 
-	private PermitCategory SelectedCategory { get; set; }
+	private string SelectedCategoryId { get; set; }
 
 	protected override void OnPrefabInit()
 	{
@@ -24,8 +24,10 @@ public class KleiInventoryScreen : KModalScreen
 		{
 			minCellSize = 64f,
 			maxCellSize = 96f,
-			targetGridLayout = this.galleryGridContent.GetComponent<GridLayoutGroup>()
+			targetGridLayouts = new List<GridLayoutGroup>()
 		};
+		this.galleryGridLayouter.overrideParentForSizeReference = this.galleryGridContent;
+		InventoryOrganization.Initialize();
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -56,7 +58,7 @@ public class KleiInventoryScreen : KModalScreen
 			this.categoryListContent.GetComponent<RectTransform>().offsetMax = new Vector2(0f, 0f);
 			this.PopulateCategories();
 			this.PopulateGallery();
-			this.SelectCategory(PermitCategory.Building);
+			this.SelectCategory("BUILDINGS");
 		}
 	}
 
@@ -95,42 +97,34 @@ public class KleiInventoryScreen : KModalScreen
 
 	public void PopulateCategories()
 	{
-		foreach (KeyValuePair<PermitCategory, MultiToggle> keyValuePair in this.categoryToggles)
+		foreach (KeyValuePair<string, MultiToggle> keyValuePair in this.categoryToggles)
 		{
 			global::UnityEngine.Object.Destroy(keyValuePair.Value.gameObject);
 		}
 		this.categoryToggles.Clear();
-		this.emptyCategories.Clear();
-		this.AddPermitCategory(PermitCategory.Building);
-		this.AddPermitCategory(PermitCategory.Artwork);
-		this.AddPermitCategory(PermitCategory.DupeTops);
-		this.AddPermitCategory(PermitCategory.DupeBottoms);
-		this.AddPermitCategory(PermitCategory.DupeGloves);
-		this.AddPermitCategory(PermitCategory.DupeShoes);
-		this.AddPermitCategory(PermitCategory.JoyResponse);
-		this.AddPermitCategory(PermitCategory.AtmoSuitHelmet);
-		this.AddPermitCategory(PermitCategory.AtmoSuitBody);
-		this.AddPermitCategory(PermitCategory.AtmoSuitGloves);
-		this.AddPermitCategory(PermitCategory.AtmoSuitBelt);
-		this.AddPermitCategory(PermitCategory.AtmoSuitShoes);
-	}
-
-	private void AddPermitCategory(PermitCategory permitCategory)
-	{
-		GameObject gameObject = Util.KInstantiateUI(this.categoryRowPrefab, this.categoryListContent.gameObject, true);
-		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-		component.GetReference<LocText>("Label").SetText(PermitCategories.GetUppercaseDisplayName(permitCategory));
-		component.GetReference<Image>("Icon").sprite = Assets.GetSprite(PermitCategories.GetIconName(permitCategory));
-		MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
-		MultiToggle multiToggle = component2;
-		multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnMouseOverToggle));
-		component2.onClick = delegate
+		using (Dictionary<string, List<string>>.Enumerator enumerator2 = InventoryOrganization.categoryIdToSubcategoryIdsMap.GetEnumerator())
 		{
-			this.SelectCategory(permitCategory);
-		};
-		this.categoryToggles.Add(permitCategory, component2);
-		this.emptyCategories.Add(permitCategory, true);
-		this.SetCatogoryClickUISound(permitCategory, component2);
+			while (enumerator2.MoveNext())
+			{
+				string text;
+				List<string> list;
+				enumerator2.Current.Deconstruct<string, List<string>>(out text, out list);
+				string categoryId = text;
+				GameObject gameObject = Util.KInstantiateUI(this.categoryRowPrefab, this.categoryListContent.gameObject, true);
+				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+				component.GetReference<LocText>("Label").SetText(InventoryOrganization.GetCategoryName(categoryId));
+				component.GetReference<Image>("Icon").sprite = InventoryOrganization.categoryIdToIconMap[categoryId];
+				MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
+				MultiToggle multiToggle = component2;
+				multiToggle.onEnter = (global::System.Action)Delegate.Combine(multiToggle.onEnter, new global::System.Action(this.OnMouseOverToggle));
+				component2.onClick = delegate
+				{
+					this.SelectCategory(categoryId);
+				};
+				this.categoryToggles.Add(categoryId, component2);
+				this.SetCatogoryClickUISound(categoryId, component2);
+			}
+		}
 	}
 
 	public void PopulateGallery()
@@ -143,11 +137,52 @@ public class KleiInventoryScreen : KModalScreen
 		this.galleryGridLayouter.ImmediateSizeGridToScreenResolution();
 		foreach (PermitResource permitResource in Db.Get().Permits.resources)
 		{
-			if ((permitResource.Rarity != PermitRarity.Universal || permitResource.Category == PermitCategory.AtmoSuitHelmet || permitResource.Category == PermitCategory.AtmoSuitBody || permitResource.Category == PermitCategory.AtmoSuitGloves || permitResource.Category == PermitCategory.AtmoSuitBelt || permitResource.Category == PermitCategory.AtmoSuitShoes) && !permitResource.Id.StartsWith("visonly_"))
+			if (!permitResource.Id.StartsWith("visonly_"))
 			{
 				this.AddItemToGallery(permitResource);
 			}
 		}
+		this.subcategories.Sort((KleiInventoryUISubcategory a, KleiInventoryUISubcategory b) => InventoryOrganization.subcategoryIdToPresentationDataMap[a.subcategoryID].sortKey.CompareTo(InventoryOrganization.subcategoryIdToPresentationDataMap[b.subcategoryID].sortKey));
+		foreach (KleiInventoryUISubcategory kleiInventoryUISubcategory in this.subcategories)
+		{
+			kleiInventoryUISubcategory.gameObject.transform.SetAsLastSibling();
+		}
+		this.CollectSubcategoryGridLayouts();
+		this.CloseSubcategory("UNCATEGORIZED");
+	}
+
+	private void CloseSubcategory(string subcategoryID)
+	{
+		KleiInventoryUISubcategory kleiInventoryUISubcategory = this.subcategories.Find((KleiInventoryUISubcategory match) => match.subcategoryID == subcategoryID);
+		if (kleiInventoryUISubcategory != null)
+		{
+			kleiInventoryUISubcategory.ToggleOpen(false);
+		}
+	}
+
+	private void AddItemToSubcategoryUIContainer(GameObject itemButton, string subcategoryId)
+	{
+		KleiInventoryUISubcategory kleiInventoryUISubcategory = this.subcategories.Find((KleiInventoryUISubcategory match) => match.subcategoryID == subcategoryId);
+		if (kleiInventoryUISubcategory == null)
+		{
+			kleiInventoryUISubcategory = Util.KInstantiateUI(this.subcategoryPrefab, this.galleryGridContent.gameObject, true).GetComponent<KleiInventoryUISubcategory>();
+			kleiInventoryUISubcategory.subcategoryID = subcategoryId;
+			this.subcategories.Add(kleiInventoryUISubcategory);
+			kleiInventoryUISubcategory.SetIdentity(InventoryOrganization.GetSubcategoryName(subcategoryId), InventoryOrganization.subcategoryIdToPresentationDataMap[subcategoryId].icon);
+		}
+		itemButton.transform.SetParent(kleiInventoryUISubcategory.gridLayout.transform);
+	}
+
+	private void CollectSubcategoryGridLayouts()
+	{
+		this.galleryGridLayouter.OnSizeGridComplete = null;
+		foreach (KleiInventoryUISubcategory kleiInventoryUISubcategory in this.subcategories)
+		{
+			this.galleryGridLayouter.targetGridLayouts.Add(kleiInventoryUISubcategory.gridLayout);
+			GridLayouter gridLayouter = this.galleryGridLayouter;
+			gridLayouter.OnSizeGridComplete = (global::System.Action)Delegate.Combine(gridLayouter.OnSizeGridComplete, new global::System.Action(kleiInventoryUISubcategory.RefreshDisplay));
+		}
+		this.galleryGridLayouter.RequestGridResize();
 	}
 
 	private void AddItemToGallery(PermitResource permit)
@@ -157,8 +192,8 @@ public class KleiInventoryScreen : KModalScreen
 			return;
 		}
 		PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
-		this.emptyCategories[permit.Category] = false;
 		GameObject availableGridButton = this.GetAvailableGridButton();
+		this.AddItemToSubcategoryUIContainer(availableGridButton, InventoryOrganization.GetPermitSubcategory(permit));
 		HierarchyReferences component = availableGridButton.GetComponent<HierarchyReferences>();
 		Image reference = component.GetReference<Image>("Icon");
 		LocText reference2 = component.GetReference<LocText>("OwnedCountLabel");
@@ -188,14 +223,14 @@ public class KleiInventoryScreen : KModalScreen
 		KleiItemsUI.ConfigureTooltipOn(availableGridButton, KleiItemsUI.GetTooltipStringFor(permit));
 	}
 
-	public void SelectCategory(PermitCategory category)
+	public void SelectCategory(string categoryId)
 	{
-		if (this.emptyCategories[category])
+		if (InventoryOrganization.categoryIdToIsEmptyMap[categoryId])
 		{
 			return;
 		}
-		this.SelectedCategory = category;
-		this.galleryHeaderLabel.SetText(PermitCategories.GetDisplayName(category));
+		this.SelectedCategoryId = categoryId;
+		this.galleryHeaderLabel.SetText(InventoryOrganization.GetCategoryName(categoryId));
 		this.RefreshCategories();
 		this.SelectDefaultCategoryItem();
 	}
@@ -204,7 +239,7 @@ public class KleiInventoryScreen : KModalScreen
 	{
 		foreach (KeyValuePair<PermitResource, MultiToggle> keyValuePair in this.galleryGridButtons)
 		{
-			if (keyValuePair.Key.Category == this.SelectedCategory)
+			if (InventoryOrganization.categoryIdToSubcategoryIdsMap[this.SelectedCategoryId].Contains(InventoryOrganization.GetPermitSubcategory(keyValuePair.Key)))
 			{
 				this.SelectItem(keyValuePair.Key);
 				return;
@@ -229,7 +264,12 @@ public class KleiInventoryScreen : KModalScreen
 			keyValuePair.Deconstruct<PermitResource, MultiToggle>(out permitResource, out multiToggle);
 			PermitResource permitResource2 = permitResource;
 			MultiToggle multiToggle2 = multiToggle;
-			multiToggle2.gameObject.SetActive(permitResource2.Category == this.SelectedCategory);
+			string permitSubcategory = InventoryOrganization.GetPermitSubcategory(permitResource2);
+			bool flag = permitSubcategory == "UNCATEGORIZED" || InventoryOrganization.categoryIdToSubcategoryIdsMap[this.SelectedCategoryId].Contains(permitSubcategory);
+			if (multiToggle2.gameObject.activeSelf != flag)
+			{
+				multiToggle2.gameObject.SetActive(flag);
+			}
 			multiToggle2.ChangeState((permitResource2 == this.SelectedPermit) ? 1 : 0);
 			HierarchyReferences component = multiToggle2.gameObject.GetComponent<HierarchyReferences>();
 			LocText reference = component.GetReference<LocText>("OwnedCountLabel");
@@ -247,20 +287,24 @@ public class KleiInventoryScreen : KModalScreen
 				reference2.gameObject.SetActive(false);
 			}
 		}
+		foreach (KleiInventoryUISubcategory kleiInventoryUISubcategory in this.subcategories)
+		{
+			kleiInventoryUISubcategory.RefreshDisplay();
+		}
 	}
 
 	private void RefreshCategories()
 	{
-		foreach (KeyValuePair<PermitCategory, MultiToggle> keyValuePair in this.categoryToggles)
+		foreach (KeyValuePair<string, MultiToggle> keyValuePair in this.categoryToggles)
 		{
-			PermitCategory key = keyValuePair.Key;
-			if (this.emptyCategories[key])
+			keyValuePair.Value.ChangeState((keyValuePair.Key == this.SelectedCategoryId) ? 1 : 0);
+			if (InventoryOrganization.categoryIdToIsEmptyMap[keyValuePair.Key])
 			{
 				keyValuePair.Value.ChangeState(2);
 			}
 			else
 			{
-				keyValuePair.Value.ChangeState((key == this.SelectedCategory) ? 1 : 0);
+				keyValuePair.Value.ChangeState((keyValuePair.Key == this.SelectedCategoryId) ? 1 : 0);
 			}
 		}
 	}
@@ -303,9 +347,9 @@ public class KleiInventoryScreen : KModalScreen
 		this.selectionOwnedCount.SetText(KleiItemsUI.WrapWithColor(UI.KLEI_INVENTORY_SCREEN.ITEM_PLAYER_OWN_NONE, KleiItemsUI.TEXT_COLOR__PERMIT_NOT_OWNED));
 	}
 
-	private void SetCatogoryClickUISound(PermitCategory category, MultiToggle toggle)
+	private void SetCatogoryClickUISound(string categoryID, MultiToggle toggle)
 	{
-		if (!this.categoryToggles.ContainsKey(category))
+		if (!this.categoryToggles.ContainsKey(categoryID))
 		{
 			toggle.states[1].on_click_override_sound_path = "";
 			toggle.states[0].on_click_override_sound_path = "";
@@ -482,7 +526,7 @@ public class KleiInventoryScreen : KModalScreen
 				return "HUD";
 			}
 			ArtableStage artableStage = (ArtableStage)permit;
-			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|49_0<Sculpture>(buildingDef3))
+			if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|53_0<Sculpture>(buildingDef3))
 			{
 				if (buildingDef3.PrefabID == "IceSculpture")
 				{
@@ -490,7 +534,7 @@ public class KleiInventoryScreen : KModalScreen
 				}
 				return "sculpture";
 			}
-			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|49_0<Painting>(buildingDef3))
+			else if (KleiInventoryScreen.<GetFacadeItemSoundName>g__Has|53_0<Painting>(buildingDef3))
 			{
 				return "painting";
 			}
@@ -508,7 +552,7 @@ public class KleiInventoryScreen : KModalScreen
 	}
 
 	[CompilerGenerated]
-	internal static bool <GetFacadeItemSoundName>g__Has|49_0<T>(BuildingDef buildingDef) where T : Component
+	internal static bool <GetFacadeItemSoundName>g__Has|53_0<T>(BuildingDef buildingDef) where T : Component
 	{
 		return !buildingDef.BuildingComplete.GetComponent<T>().IsNullOrDestroyed();
 	}
@@ -524,9 +568,7 @@ public class KleiInventoryScreen : KModalScreen
 	[SerializeField]
 	private GameObject categoryRowPrefab;
 
-	private Dictionary<PermitCategory, MultiToggle> categoryToggles = new Dictionary<PermitCategory, MultiToggle>();
-
-	private Dictionary<PermitCategory, bool> emptyCategories = new Dictionary<PermitCategory, bool>();
+	private Dictionary<string, MultiToggle> categoryToggles = new Dictionary<string, MultiToggle>();
 
 	[Header("ItemGalleryColumn")]
 	[SerializeField]
@@ -538,7 +580,15 @@ public class KleiInventoryScreen : KModalScreen
 	[SerializeField]
 	private GameObject gridItemPrefab;
 
+	[SerializeField]
+	private GameObject subcategoryPrefab;
+
+	[SerializeField]
+	private GameObject itemDummyPrefab;
+
 	private Dictionary<PermitResource, MultiToggle> galleryGridButtons = new Dictionary<PermitResource, MultiToggle>();
+
+	private List<KleiInventoryUISubcategory> subcategories = new List<KleiInventoryUISubcategory>();
 
 	private List<GameObject> recycledGalleryGridButtons = new List<GameObject>();
 

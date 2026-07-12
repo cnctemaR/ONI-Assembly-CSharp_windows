@@ -49,7 +49,11 @@ namespace Database
 				Db.Get().SkillPerks.CanUseRanchStation,
 				Db.Get().SkillPerks.IncreaseRanchingSmall
 			}, new List<string> { this.Farming1.Id }));
-			this.Ranching2 = this.AddSkill(new Skill("Ranching2", DUPLICANTS.ROLES.SENIOR_RANCHER.NAME, DUPLICANTS.ROLES.SENIOR_RANCHER.DESCRIPTION, "", 2, "hat_role_rancher2", "skillbadge_role_rancher2", Db.Get().SkillGroups.Ranching.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseRanchingMedium }, new List<string> { this.Ranching1.Id }));
+			this.Ranching2 = this.AddSkill(new Skill("Ranching2", DUPLICANTS.ROLES.SENIOR_RANCHER.NAME, DUPLICANTS.ROLES.SENIOR_RANCHER.DESCRIPTION, "", 2, "hat_role_rancher2", "skillbadge_role_rancher2", Db.Get().SkillGroups.Ranching.Id, new List<SkillPerk>
+			{
+				Db.Get().SkillPerks.CanUseMilkingStation,
+				Db.Get().SkillPerks.IncreaseRanchingMedium
+			}, new List<string> { this.Ranching1.Id }));
 			this.Researching1 = this.AddSkill(new Skill("Researching1", DUPLICANTS.ROLES.JUNIOR_RESEARCHER.NAME, DUPLICANTS.ROLES.JUNIOR_RESEARCHER.DESCRIPTION, "", 0, "hat_role_research1", "skillbadge_role_research1", Db.Get().SkillGroups.Research.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseLearningSmall,

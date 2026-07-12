@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using Database;
 using STRINGS;
 using TMPro;
@@ -23,16 +23,19 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		base.OnPrefabInit();
 		global::Debug.Assert(this.categoryRowPrefab.transform.parent == this.categoryListContent.transform);
 		global::Debug.Assert(this.gridItemPrefab.transform.parent == this.galleryGridContent.transform);
+		global::Debug.Assert(this.subcategoryUiPrefab.transform.parent == this.galleryGridContent.transform);
 		this.categoryRowPrefab.SetActive(false);
 		this.gridItemPrefab.SetActive(false);
 		this.galleryGridLayouter = new GridLayouter
 		{
 			minCellSize = 64f,
 			maxCellSize = 96f,
-			targetGridLayout = this.galleryGridContent.GetComponent<GridLayoutGroup>()
+			targetGridLayouts = this.galleryGridContent.GetComponents<GridLayoutGroup>().ToList<GridLayoutGroup>()
 		};
+		this.galleryGridLayouter.overrideParentForSizeReference = this.galleryGridContent;
 		this.categoryRowPool = new UIPrefabLocalPool(this.categoryRowPrefab, this.categoryListContent.gameObject);
 		this.galleryGridItemPool = new UIPrefabLocalPool(this.gridItemPrefab, this.galleryGridContent.gameObject);
+		this.subcategoryUiPool = new UIPrefabLocalPool(this.subcategoryUiPrefab, this.galleryGridContent.gameObject);
 		if (OutfitDesignerScreen.outfitTypeToCategoriesDict == null)
 		{
 			Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]> dictionary = new Dictionary<ClothingOutfitUtility.OutfitType, PermitCategory[]>();
@@ -40,6 +43,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 			dictionary[ClothingOutfitUtility.OutfitType.AtmoSuit] = ClothingOutfitUtility.PERMIT_CATEGORIES_FOR_ATMO_SUITS;
 			OutfitDesignerScreen.outfitTypeToCategoriesDict = dictionary;
 		}
+		InventoryOrganization.Initialize();
 	}
 
 	private void Update()
@@ -194,22 +198,32 @@ public class OutfitDesignerScreen : KMonoBehaviour
 				{
 					this.primaryButton.isInteractable = false;
 					this.primaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_READONLY);
+					if (this.outfitState.DoesContainNonOwnedItems())
+					{
+						this.secondaryButton.isInteractable = false;
+						this.secondaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);
+						return;
+					}
 					this.secondaryButton.isInteractable = true;
 					this.secondaryButton.gameObject.AddOrGet<ToolTip>().ClearMultiStringTooltip();
 					return;
 				}
-				if (this.outfitState.DoesContainNonOwnedItems())
+				else
 				{
-					this.primaryButton.isInteractable = false;
-					this.primaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);
-					this.secondaryButton.isInteractable = false;
-					this.secondaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);
+					if (this.outfitState.DoesContainNonOwnedItems())
+					{
+						this.primaryButton.isInteractable = false;
+						this.primaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);
+						this.secondaryButton.isInteractable = false;
+						this.secondaryButton.gameObject.AddOrGet<ToolTip>().SetSimpleTooltip(UI.OUTFIT_DESIGNER_SCREEN.OUTFIT_TEMPLATE.TOOLTIP_SAVE_ERROR_LOCKED);
+						return;
+					}
+					this.primaryButton.isInteractable = true;
+					this.primaryButton.gameObject.AddOrGet<ToolTip>().ClearMultiStringTooltip();
+					this.secondaryButton.isInteractable = true;
+					this.secondaryButton.gameObject.AddOrGet<ToolTip>().ClearMultiStringTooltip();
 					return;
 				}
-				this.primaryButton.isInteractable = true;
-				this.primaryButton.gameObject.AddOrGet<ToolTip>().ClearMultiStringTooltip();
-				this.secondaryButton.isInteractable = true;
-				this.secondaryButton.gameObject.AddOrGet<ToolTip>().ClearMultiStringTooltip();
 			}));
 		}
 		this.UpdateSaveButtons();
@@ -218,7 +232,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	private void RefreshOutfitState()
 	{
 		this.selectionHeaderLabel.text = this.outfitState.name;
-		this.outfitDescriptionPanel.Refresh(this.outfitState);
+		this.outfitDescriptionPanel.Refresh(this.outfitState, this.Config.minionPersonality);
 		this.UpdateSaveButtons();
 	}
 
@@ -237,7 +251,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		PermitCategory[] array = OutfitDesignerScreen.outfitTypeToCategoriesDict[this.outfitState.outfitType];
 		for (int i = 0; i < array.Length; i++)
 		{
-			OutfitDesignerScreen.<>c__DisplayClass45_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass45_0();
+			OutfitDesignerScreen.<>c__DisplayClass47_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass47_0();
 			CS$<>8__locals1.<>4__this = this;
 			CS$<>8__locals1.permitCategory = array[i];
 			GameObject gameObject = this.categoryRowPool.Borrow();
@@ -284,16 +298,39 @@ public class OutfitDesignerScreen : KMonoBehaviour
 
 	public void PopulateGallery()
 	{
+		OutfitDesignerScreen.<>c__DisplayClass51_0 CS$<>8__locals1 = new OutfitDesignerScreen.<>c__DisplayClass51_0();
+		CS$<>8__locals1.<>4__this = this;
 		this.RefreshGalleryFn = null;
 		this.galleryGridItemPool.ReturnAll();
-		this.<PopulateGallery>g__AddGridIconForPermit|49_0(null);
+		this.subcategoryUiPool.ReturnAll();
+		this.galleryGridLayouter.targetGridLayouts.Clear();
+		this.galleryGridLayouter.OnSizeGridComplete = null;
+		CS$<>8__locals1.onFirstDisplayCategoryDecided = new Promise<KleiInventoryUISubcategory>();
+		CS$<>8__locals1.<PopulateGallery>g__AddGridIconForPermit|0(null);
 		foreach (ClothingItemResource clothingItemResource in Db.Get().Permits.ClothingItems.resources)
 		{
 			if (clothingItemResource.Category == this.SelectedCategory && clothingItemResource.outfitType == this.Config.sourceTarget.OutfitType && !clothingItemResource.Id.StartsWith("visonly_"))
 			{
-				this.<PopulateGallery>g__AddGridIconForPermit|49_0(clothingItemResource);
+				CS$<>8__locals1.<PopulateGallery>g__AddGridIconForPermit|0(clothingItemResource);
 			}
 		}
+		foreach (GameObject gameObject3 in this.subcategoryUiPool.GetBorrowedObjects().StableSort<GameObject>(Comparer<GameObject>.Create(delegate(GameObject a, GameObject b)
+		{
+			KleiInventoryUISubcategory component = a.GetComponent<KleiInventoryUISubcategory>();
+			KleiInventoryUISubcategory component2 = b.GetComponent<KleiInventoryUISubcategory>();
+			int sortKey = InventoryOrganization.subcategoryIdToPresentationDataMap[component.subcategoryID].sortKey;
+			int sortKey2 = InventoryOrganization.subcategoryIdToPresentationDataMap[component2.subcategoryID].sortKey;
+			return sortKey.CompareTo(sortKey2);
+		})))
+		{
+			gameObject3.transform.SetAsLastSibling();
+		}
+		GameObject gameObject2 = this.subcategoryUiPool.GetBorrowedObjects().FirstOrDefault<GameObject>((GameObject gameObject) => gameObject.GetComponent<KleiInventoryUISubcategory>().IsOpen);
+		if (gameObject2 != null)
+		{
+			CS$<>8__locals1.onFirstDisplayCategoryDecided.Resolve(gameObject2.GetComponent<KleiInventoryUISubcategory>());
+		}
+		this.galleryGridLayouter.RequestGridResize();
 		this.RefreshGallery();
 	}
 
@@ -319,7 +356,7 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		this.outfitState.SetItemForCategory(this.SelectedCategory, option);
 		this.minionOrMannequin.current.SetOutfit(this.outfitState);
 		this.minionOrMannequin.current.ReactToClothingItemChange(this.SelectedCategory);
-		this.outfitDescriptionPanel.Refresh(this.outfitState);
+		this.outfitDescriptionPanel.Refresh(this.outfitState, this.Config.minionPersonality);
 		this.dioramaBG.sprite = KleiPermitDioramaVis.GetDioramaBackground(this.SelectedCategory);
 	}
 
@@ -540,43 +577,6 @@ public class OutfitDesignerScreen : KMonoBehaviour
 		KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Mouseover", false));
 	}
 
-	[CompilerGenerated]
-	private void <PopulateGallery>g__AddGridIconForPermit|49_0(PermitResource permit)
-	{
-		GameObject gameObject = this.galleryGridItemPool.Borrow();
-		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-		Image reference = component.GetReference<Image>("Icon");
-		MultiToggle toggle = gameObject.GetComponent<MultiToggle>();
-		Image isUnownedOverlay = component.GetReference<Image>("IsUnownedOverlay");
-		if (permit == null)
-		{
-			reference.sprite = KleiItemsUI.GetNoneClothingItemIcon(this.SelectedCategory);
-			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetNoneTooltipStringFor(this.SelectedCategory));
-			isUnownedOverlay.gameObject.SetActive(false);
-		}
-		else
-		{
-			PermitPresentationInfo permitPresentationInfo = permit.GetPermitPresentationInfo();
-			reference.sprite = permitPresentationInfo.sprite;
-			KleiItemsUI.ConfigureTooltipOn(gameObject, KleiItemsUI.GetTooltipStringFor(permit));
-			this.RefreshGalleryFn = (global::System.Action)Delegate.Combine(this.RefreshGalleryFn, new global::System.Action(delegate
-			{
-				isUnownedOverlay.gameObject.SetActive(!permit.IsUnlocked());
-			}));
-		}
-		MultiToggle toggle2 = toggle;
-		toggle2.onEnter = (global::System.Action)Delegate.Combine(toggle2.onEnter, new global::System.Action(this.OnMouseOverToggle));
-		toggle.onClick = delegate
-		{
-			this.SelectPermit(permit);
-		};
-		this.RefreshGalleryFn = (global::System.Action)Delegate.Combine(this.RefreshGalleryFn, new global::System.Action(delegate
-		{
-			toggle.ChangeState((permit == this.SelectedPermit) ? 1 : 0);
-		}));
-		this.SetItemClickUISound(permit, toggle);
-	}
-
 	[Header("CategoryColumn")]
 	[SerializeField]
 	private RectTransform categoryListContent;
@@ -594,7 +594,12 @@ public class OutfitDesignerScreen : KMonoBehaviour
 	private RectTransform galleryGridContent;
 
 	[SerializeField]
+	private GameObject subcategoryUiPrefab;
+
+	[SerializeField]
 	private GameObject gridItemPrefab;
+
+	private UIPrefabLocalPool subcategoryUiPool;
 
 	private UIPrefabLocalPool galleryGridItemPool;
 

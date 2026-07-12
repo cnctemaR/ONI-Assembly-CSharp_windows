@@ -64,6 +64,16 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 		{
 			amountInstance3.hide = flag;
 		}
+		AmountInstance amountInstance4 = Db.Get().Amounts.MilkProduction.Lookup(smi.gameObject);
+		if (amountInstance4 != null)
+		{
+			amountInstance4.hide = flag;
+		}
+		AmountInstance amountInstance5 = Db.Get().Amounts.Beckoning.Lookup(smi.gameObject);
+		if (amountInstance5 != null)
+		{
+			amountInstance5.hide = flag;
+		}
 	}
 
 	public GameStateMachine<WildnessMonitor, WildnessMonitor.Instance, IStateMachineTarget, WildnessMonitor.Def>.State wild;

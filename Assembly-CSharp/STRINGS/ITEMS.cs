@@ -330,6 +330,38 @@ namespace STRINGS
 				public static LocString RECIPEDESC = "Edible roughage from a " + UI.FormatAsLink("Waterweed", "SEALETTUCE") + ".";
 			}
 
+			public class PASTA
+			{
+				public static LocString NAME = UI.FormatAsLink("Pasta", "PASTA");
+
+				public static LocString DESC = "pasta made from egg and wheat";
+
+				public static LocString RECIPEDESC = "pasta made from egg and wheat";
+			}
+
+			public class PANCAKES
+			{
+				public static LocString NAME = UI.FormatAsLink("Soufflé Pancakes", "PANCAKES");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Sweet discs made from ",
+					UI.FormatAsLink("Raw Egg", "RAWEGG"),
+					" and ",
+					UI.FormatAsLink("Sleet Wheat Grain", "COLDWHEATSEED"),
+					".\n\nThey're so thick!"
+				});
+
+				public static LocString RECIPEDESC = string.Concat(new string[]
+				{
+					"Sweet discs made from ",
+					UI.FormatAsLink("Raw Egg", "RAWEGG"),
+					" and ",
+					UI.FormatAsLink("Sleet Wheat Grain", "COLDWHEATSEED"),
+					"."
+				});
+			}
+
 			public class OILFLOATEREGG
 			{
 				public static LocString NAME = CREATURES.SPECIES.OILFLOATER.EGG_NAME;
@@ -729,6 +761,31 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Nosh Bean", "BEANPLANTSEED");
 
 				public static LocString DESC = "An inedible bean that can be processed into delicious foods.";
+			}
+
+			public class QUICHE
+			{
+				public static LocString NAME = UI.FormatAsLink("Mushroom Quiche", "QUICHE");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					UI.FormatAsLink("Omelette", "COOKEDEGG"),
+					", ",
+					UI.FormatAsLink("Fried Mushroom", "FRIEDMUSHROOM"),
+					" and ",
+					UI.FormatAsLink("Lettuce", "LETTUCE"),
+					" piled onto a yummy crust.\n\nSomehow, it's both soggy <i>and</i> crispy."
+				});
+
+				public static LocString RECIPEDESC = string.Concat(new string[]
+				{
+					UI.FormatAsLink("Omelette", "COOKEDEGG"),
+					", ",
+					UI.FormatAsLink("Fried Mushroom", "FRIEDMUSHROOM"),
+					" and ",
+					UI.FormatAsLink("Lettuce", "LETTUCE"),
+					" piled onto a yummy crust."
+				});
 			}
 		}
 

@@ -99,7 +99,6 @@ public class DevToolChoreDebugger : DevTool
 		{
 			return;
 		}
-		this.columns["BP"] = chore.debug;
 		this.columns["Id"] = chore.id.ToString();
 		this.columns["Class"] = chore.GetType().ToString().Replace("`1", "");
 		this.columns["Type"] = chore.choreType.Id;
@@ -121,16 +120,10 @@ public class DevToolChoreDebugger : DevTool
 		int num = this.rowIndex;
 		this.rowIndex = num + 1;
 		ImGui.PushID(string.Format(text5, num));
-		int i = 0;
-		ImGui.PushID("debug");
-		ImGui.TableSetColumnIndex(i++);
-		ImGui.Checkbox("", ref chore.debug);
-		ImGui.PopID();
-		while (i < this.columns.Count)
+		for (int i = 0; i < this.columns.Count; i++)
 		{
 			ImGui.TableSetColumnIndex(i);
 			ImGui.Text(this.columns[i].ToString());
-			i++;
 		}
 		ImGui.PopID();
 	}

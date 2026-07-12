@@ -63,10 +63,15 @@ public static class BaseHatchConfig
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.WantsToEnterBurrow, false, "hide", global::STRINGS.CREATURES.STATUSITEMS.BURROWING.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWING.TOOLTIP), flag, -1)
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
+			.Add(new DrinkMilkStates.Def
+			{
+				shouldBeBehindMilkTank = is_baby
+			}, true, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
+		gameObject.AddOrGetDef<DrinkMilkMonitor.Def>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.HatchSpecies, symbolOverridePrefix);
 		return gameObject;
 	}

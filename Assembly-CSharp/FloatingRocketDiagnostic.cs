@@ -18,7 +18,7 @@ public class FloatingRocketDiagnostic : ColonyDiagnostic
 	{
 		WorldContainer world = ClusterManager.Instance.GetWorld(base.worldID);
 		Clustercraft component = world.gameObject.GetComponent<Clustercraft>();
-		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, UI.COLONY_DIAGNOSTICS.NO_MINIONS, null);
+		ColonyDiagnostic.DiagnosticResult diagnosticResult = new ColonyDiagnostic.DiagnosticResult(ColonyDiagnostic.DiagnosticResult.Opinion.Normal, base.NO_MINIONS, null);
 		if (ColonyDiagnosticUtility.IgnoreRocketsWithNoCrewRequested(base.worldID, out diagnosticResult))
 		{
 			return diagnosticResult;

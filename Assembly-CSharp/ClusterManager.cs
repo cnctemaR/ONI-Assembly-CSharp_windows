@@ -510,7 +510,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 				}
 				craft_go.GetComponent<CraftModuleInterface>().TriggerEventOnCraftAndRocket(GameHashes.RocketInteriorComplete, null);
 			});
-			craft_go.AddComponent<OrbitalMechanics>().CreateOrbitalObject(Db.Get().OrbitalTypeCategories.landed.Id);
+			craft_go.AddOrGet<OrbitalMechanics>().CreateOrbitalObject(Db.Get().OrbitalTypeCategories.landed.Id);
 			base.Trigger(-1280433810, worldContainer.id);
 			return worldContainer;
 		}
@@ -537,6 +537,11 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 			{
 				this.SetActiveWorld(craft_go.GetComponent<WorldContainer>().ParentWorldId);
 			}
+		}
+		OrbitalMechanics component = craft_go.GetComponent<OrbitalMechanics>();
+		if (!component.IsNullOrDestroyed())
+		{
+			global::UnityEngine.Object.Destroy(component);
 		}
 		Vector3 spawn_pos = door.transform.position;
 		world.EjectAllDupes(spawn_pos);

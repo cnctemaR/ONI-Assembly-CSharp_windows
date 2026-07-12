@@ -253,9 +253,12 @@ public class SaveLoadRoot : KMonoBehaviour
 					int num5;
 					if (component != null && (num5 = component.m_optionalComponentTypeNames.IndexOf(text)) != -1)
 					{
-						global::Debug.Assert(num3 == 0 && num4 == 0, string.Format("Implementation does not support multiple components with optional components, type {0}, {1}, {2}", text, num3, num4));
+						DebugUtil.DevAssert(num3 == 0 && num4 == 0, string.Format("Implementation does not support multiple components with optional components, type {0}, {1}, {2}. Using only the first one and skipping the rest.", text, num3, num4), null);
 						Type type2 = Type.GetType(component.m_optionalComponentTypeNames[num5]);
-						kmonoBehaviour = (KMonoBehaviour)gameObject.AddComponent(type2);
+						if (gameObject.GetComponent(type2) == null)
+						{
+							kmonoBehaviour = (KMonoBehaviour)gameObject.AddComponent(type2);
+						}
 					}
 				}
 				if (kmonoBehaviour == null)

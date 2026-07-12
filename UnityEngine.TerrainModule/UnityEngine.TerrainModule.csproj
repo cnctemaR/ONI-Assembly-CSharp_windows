@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{16CDC59D-8DB2-42C6-AE69-32A335398B8E}</ProjectGuid>
+    <ProjectGuid>{F8C85DAD-7A70-4E40-AF21-636F52E5D048}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.TerrainModule</RootNamespace>
     <AssemblyName>UnityEngine.TerrainModule</AssemblyName>
@@ -40,11 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{16CDC59D-8DB2-42C6-AE69-32A335398B72}</Project>
+      <Project>{F8C85DAD-7A70-4E40-AF21-636F52E5D02C}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{16CDC59D-8DB2-42C6-AE69-32A335398B88}</Project>
+      <Project>{F8C85DAD-7A70-4E40-AF21-636F52E5D042}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

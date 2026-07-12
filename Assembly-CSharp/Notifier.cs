@@ -69,7 +69,10 @@ public class Notifier : KMonoBehaviour
 		{
 			notification.Notifier = null;
 		}
-		NotificationManager.Instance.RemoveNotification(notification);
+		if (NotificationManager.Instance != null)
+		{
+			NotificationManager.Instance.RemoveNotification(notification);
+		}
 	}
 
 	[MyCmpGet]

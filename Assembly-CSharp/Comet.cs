@@ -76,6 +76,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 	[ContextMenu("Explode")]
 	private void Explode(Vector3 pos, int cell, int prev_cell, Element element)
 	{
+		int world = (int)Grid.WorldIdx[cell];
 		this.PlayImpactSound(pos);
 		Vector3 vector = pos;
 		vector.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront2);
@@ -112,7 +113,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 			for (int j = -num2; j <= num2; j++)
 			{
 				int num3 = Grid.OffsetCell(cell, j, i);
-				if (Grid.IsValidCell(num3) && !this.destroyedCells.Contains(num3))
+				if (Grid.IsValidCellInWorld(num3, world) && !this.destroyedCells.Contains(num3))
 				{
 					float num4 = (1f - (float)Mathf.Abs(j) / (float)num2) * (1f - (float)Mathf.Abs(i) / (float)num2);
 					if (num4 > 0f)
@@ -140,7 +141,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		}
 		if (this.addTiles > 0)
 		{
-			float depthOfElement = (float)this.GetDepthOfElement(cell, element);
+			float depthOfElement = (float)this.GetDepthOfElement(cell, element, world);
 			float num7 = 1f;
 			float num8 = (depthOfElement - (float)this.addTilesMinHeight) / (float)(this.addTilesMaxHeight - this.addTilesMinHeight);
 			if (!float.IsNaN(num8))
@@ -173,7 +174,8 @@ public class Comet : KMonoBehaviour, ISim33ms
 				cell = Grid.OffsetCell(prev_cell, new CellOffset(num11, 0)),
 				depth = 0
 			});
-			GameUtil.FloodFillConditional(pooledQueue, new Func<int, bool>(this.SpawnTilesCellTest), pooledHashSet2, pooledHashSet, 10);
+			Func<int, bool> func = (int cell) => Grid.IsValidCellInWorld(cell, world) && !Grid.Solid[cell];
+			GameUtil.FloodFillConditional(pooledQueue, func, pooledHashSet2, pooledHashSet, 10);
 			float num12 = ((num9 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
 			int num13 = this.addDiseaseCount / num9;
 			if (element.HasTag(GameTags.Unstable))
@@ -191,7 +193,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 						component.Spawn(num14, element, num12, num6, byte.MaxValue, 0);
 						num9--;
 					}
-					goto IL_05A6;
+					goto IL_05CD;
 				}
 			}
 			foreach (int num15 in pooledHashSet)
@@ -203,7 +205,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 				SimMessages.AddRemoveSubstance(num15, element.id, CellEventLogger.Instance.ElementEmitted, num12, num6, this.diseaseIdx, num13, true, -1);
 				num9--;
 			}
-			IL_05A6:
+			IL_05CD:
 			pooledHashSet.Recycle();
 			pooledHashSet2.Recycle();
 			pooledQueue.Recycle();
@@ -225,21 +227,16 @@ public class Comet : KMonoBehaviour, ISim33ms
 		}
 	}
 
-	private int GetDepthOfElement(int cell, Element element)
+	private int GetDepthOfElement(int cell, Element element, int world)
 	{
 		int num = 0;
 		int num2 = Grid.CellBelow(cell);
-		while (Grid.IsValidCell(num2) && Grid.Element[num2] == element)
+		while (Grid.IsValidCellInWorld(num2, world) && Grid.Element[num2] == element)
 		{
 			num++;
 			num2 = Grid.CellBelow(num2);
 		}
 		return num;
-	}
-
-	private bool SpawnTilesCellTest(int cell)
-	{
-		return Grid.IsValidCell(cell) && !Grid.Solid[cell];
 	}
 
 	[ContextMenu("DamageTiles")]

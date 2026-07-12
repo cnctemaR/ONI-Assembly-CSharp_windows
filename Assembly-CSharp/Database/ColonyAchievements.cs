@@ -232,22 +232,22 @@ namespace Database
 				{
 					new LandOnAllWorlds()
 				}, "", "", "", "", null, "", "land_on_all_worlds"));
-				this.RadicalTrip = base.Add(new ColonyAchievement("RadicalTrip", "RADICAL_TRIP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+				this.RadicalTrip = base.Add(new ColonyAchievement("RadicalTrip", "RADICAL_TRIP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.RADICAL_TRIP_DESCRIPTION, 10), false, new List<ColonyAchievementRequirement>
 				{
 					new RadBoltTravelDistance(10000)
-				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				}, "", "", "", "", null, "", "radical_trip"));
 				this.SweeterThanHoney = base.Add(new ColonyAchievement("SweeterThanHoney", "SWEETER_THAN_HONEY", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SWEETER_THAN_HONEY_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 				{
 					new HarvestAHiveWithoutBeingStung()
-				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				}, "", "", "", "", null, "", "sweeter_than_honey"));
 				this.SurviveInARocket = base.Add(new ColonyAchievement("SurviveInARocket", "SURVIVE_IN_A_ROCKET", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_IN_A_ROCKET_DESCRIPTION, 10, 25), false, new List<ColonyAchievementRequirement>
 				{
 					new SurviveARocketWithMinimumMorale(25f, 10)
-				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				}, "", "", "", "", null, "", "survive_a_rocket"));
 				this.RunAReactor = base.Add(new ColonyAchievement("RunAReactor", "REACTOR_USAGE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.REACTOR_USAGE_DESCRIPTION, 5), false, new List<ColonyAchievementRequirement>
 				{
 					new RunReactorForXDays(5)
-				}, "", "", "", "", null, "", "land_on_all_worlds"));
+				}, "", "", "", "", null, "", "thats_rad"));
 			}
 		}
 

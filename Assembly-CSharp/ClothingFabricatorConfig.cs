@@ -54,7 +54,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Warm_Vest".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		WarmVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array, array2), array, array2, 0)
+		WarmVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array, array2), array, array2)
 		{
 			time = global::TUNING.EQUIPMENT.VESTS.WARM_VEST_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.WARM_VEST.RECIPE_DESC,
@@ -70,7 +70,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Cool_Vest".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		CoolVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array3, array4), array3, array4, 0)
+		CoolVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array3, array4), array3, array4)
 		{
 			time = global::TUNING.EQUIPMENT.VESTS.COOL_VEST_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.COOL_VEST.RECIPE_DESC,
@@ -86,7 +86,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Funky_Vest".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		FunkyVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array5, array6), array5, array6, 0)
+		FunkyVestConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array5, array6), array5, array6)
 		{
 			time = global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.FUNKY_VEST.RECIPE_DESC,

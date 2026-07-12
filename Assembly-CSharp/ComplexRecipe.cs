@@ -13,13 +13,24 @@ public class ComplexRecipe
 		}
 	}
 
-	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP = 0)
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results)
 	{
 		this.id = id;
 		this.ingredients = ingredients;
 		this.results = results;
-		this.consumedHEP = consumedHEP;
 		ComplexRecipeManager.Get().Add(this);
+	}
+
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP, int producedHEP)
+		: this(id, ingredients, results)
+	{
+		this.consumedHEP = consumedHEP;
+		this.producedHEP = producedHEP;
+	}
+
+	public ComplexRecipe(string id, ComplexRecipe.RecipeElement[] ingredients, ComplexRecipe.RecipeElement[] results, int consumedHEP)
+		: this(id, ingredients, results, consumedHEP, 0)
+	{
 	}
 
 	public float TotalResultUnits()
@@ -106,6 +117,19 @@ public class ComplexRecipe
 				});
 			}
 			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_COMPOSITE, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName(), this.results[1].material.ProperName());
+		case ComplexRecipe.RecipeNameDisplay.HEP:
+			if (includeAmounts)
+			{
+				return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_HEP_INCLUDE_AMOUNTS, new object[]
+				{
+					this.ingredients[0].material.ProperName(),
+					this.results[1].material.ProperName(),
+					this.ingredients[0].amount,
+					this.producedHEP,
+					this.results[1].amount
+				});
+			}
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO_HEP, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
 		}
 		if (includeAmounts)
 		{
@@ -126,6 +150,8 @@ public class ComplexRecipe
 
 	public int consumedHEP;
 
+	public int producedHEP;
+
 	public ComplexRecipe.RecipeNameDisplay nameDisplay;
 
 	public string description;
@@ -142,7 +168,8 @@ public class ComplexRecipe
 		Result,
 		IngredientToResult,
 		ResultWithIngredient,
-		Composite
+		Composite,
+		HEP
 	}
 
 	public class RecipeElement

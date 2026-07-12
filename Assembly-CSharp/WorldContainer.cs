@@ -287,7 +287,7 @@ public class WorldContainer : KMonoBehaviour
 
 	public string GetRandomName()
 	{
-		return GameUtil.GenerateRandomWorldName(this.nameTable);
+		return GameUtil.GenerateRandomWorldName(this.nameTables);
 	}
 
 	public void SetID(int id)
@@ -530,7 +530,7 @@ public class WorldContainer : KMonoBehaviour
 			this.isDiscovered = world.isStartingWorld;
 			this.isStartWorld = world.isStartingWorld;
 			this.worldName = world.Settings.world.filePath;
-			this.nameTable = world.Settings.world.nameTable;
+			this.nameTables = world.Settings.world.nameTables;
 			this.worldDescription = world.Settings.world.description;
 			this.worldType = world.Settings.world.name;
 			this.isModuleInterior = world.Settings.world.moduleInterior;
@@ -1015,7 +1015,7 @@ public class WorldContainer : KMonoBehaviour
 	public string worldName;
 
 	[Serialize]
-	public string nameTable;
+	public string[] nameTables;
 
 	[Serialize]
 	public string worldType;

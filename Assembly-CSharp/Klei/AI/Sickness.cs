@@ -44,7 +44,7 @@ namespace Klei.AI
 			this.sicknessDuration = sickness_duration;
 			this.recoveryEffect = recovery_effect;
 			this.descriptiveSymptoms = new StringKey("STRINGS.DUPLICANTS.DISEASES." + id.ToUpper() + ".DESCRIPTIVE_SYMPTOMS");
-			this.cureSpeedBase = new Attribute(id + "CureSpeed", false, Attribute.Display.Normal, false, 0f, null, null, null);
+			this.cureSpeedBase = new Attribute(id + "CureSpeed", false, Attribute.Display.Normal, false, 0f, null, null, null, null);
 			this.cureSpeedBase.BaseValue = 1f;
 			this.cureSpeedBase.SetFormatter(new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None));
 			Db.Get().Attributes.Add(this.cureSpeedBase);

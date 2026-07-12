@@ -106,7 +106,8 @@ public class CritterTrapPlant : StateMachineComponent<CritterTrapPlant.StatesIns
 
 		public bool ShouldVentGas()
 		{
-			return base.smi.master.storage.FindPrimaryElement(base.smi.master.outputElement).Mass >= base.smi.master.gasVentThreshold;
+			PrimaryElement primaryElement = base.smi.master.storage.FindPrimaryElement(base.smi.master.outputElement);
+			return !(primaryElement == null) && primaryElement.Mass >= base.smi.master.gasVentThreshold;
 		}
 	}
 

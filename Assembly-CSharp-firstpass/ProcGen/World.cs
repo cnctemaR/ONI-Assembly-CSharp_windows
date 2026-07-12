@@ -12,7 +12,7 @@ namespace ProcGen
 
 		public string description { get; private set; }
 
-		public string nameTable { get; private set; }
+		public string[] nameTables { get; private set; }
 
 		public string asteroidIcon { get; private set; }
 
@@ -104,7 +104,7 @@ namespace ProcGen
 				usedSubworldFiles.Remove(this.startSubworldName);
 				if (usedSubworldFiles.Count > 0)
 				{
-					DebugUtil.LogWarningArgs(new object[] { "World " + this.name + ": defines subworldNames that are not used in unknownCellsAllowedSubworlds: \n" + string.Join(", ", usedSubworldFiles) });
+					DebugUtil.LogWarningArgs(new object[] { "World " + this.filePath + ": defines subworldNames that are not used in unknownCellsAllowedSubworlds: \n" + string.Join(", ", usedSubworldFiles) });
 				}
 			}
 			if (this.worldTraitRules != null)
@@ -199,6 +199,7 @@ namespace ProcGen
 				this.allowedCellsFilter = new List<World.AllowedCellsFilter>();
 				this.allowDuplicates = false;
 				this.useRelaxedFiltering = false;
+				this.overrideOffset = Vector2I.zero;
 			}
 
 			public string ruleId { get; private set; }
@@ -220,6 +221,8 @@ namespace ProcGen
 			public bool allowExtremeTemperatureOverlap { get; private set; }
 
 			public bool useRelaxedFiltering { get; private set; }
+
+			public Vector2I overrideOffset { get; set; }
 
 			public List<World.AllowedCellsFilter> allowedCellsFilter { get; private set; }
 

@@ -59,7 +59,7 @@ public class CraftingTableConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Oxygen_Mask".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array, array2), array, array2, 0)
+		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array, array2), array, array2)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.OXYMASK_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.RECIPE_DESC,
@@ -75,7 +75,7 @@ public class CraftingTableConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Oxygen_Mask".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array3, array4), array3, array4, 0)
+		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array3, array4), array3, array4)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.OXYMASK_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.RECIPE_DESC,
@@ -91,7 +91,7 @@ public class CraftingTableConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Oxygen_Mask".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array5, array6), array5, array6, 0)
+		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array5, array6), array5, array6)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.OXYMASK_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.RECIPE_DESC,
@@ -109,7 +109,7 @@ public class CraftingTableConfig : IBuildingConfig
 			{
 				new ComplexRecipe.RecipeElement("Oxygen_Mask".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 			};
-			AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array7, array8), array7, array8, 0)
+			AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array7, array8), array7, array8)
 			{
 				time = (float)global::TUNING.EQUIPMENT.SUITS.OXYMASK_FABTIME,
 				description = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.RECIPE_DESC,
@@ -126,7 +126,7 @@ public class CraftingTableConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement("Oxygen_Mask".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array9, array10), array9, array10, 0)
+		AtmoSuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array9, array10), array9, array10)
 		{
 			time = (float)global::TUNING.EQUIPMENT.SUITS.OXYMASK_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.RECIPE_DESC,

@@ -187,6 +187,10 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 							image.sprite = uisprite.first;
 							image.color = uisprite.second;
 						}
+						else if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.HEP)
+						{
+							image.sprite = this.radboltSprite;
+						}
 						else
 						{
 							image.sprite = uisprite2.first;
@@ -428,6 +432,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 
 	[SerializeField]
 	private Sprite elementPlaceholderSpr;
+
+	[SerializeField]
+	public Sprite radboltSprite;
 
 	private KToggle selectedToggle;
 

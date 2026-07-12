@@ -9,7 +9,7 @@ public class RetiredColonyData
 	{
 	}
 
-	public RetiredColonyData(string colonyName, int cycleCount, string date, string[] achievements, MinionAssignablesProxy[] minions, BuildingComplete[] buildingCompletes, string startWorld, List<global::Tuple<string, string>> worldIdentities)
+	public RetiredColonyData(string colonyName, int cycleCount, string date, string[] achievements, MinionAssignablesProxy[] minions, BuildingComplete[] buildingCompletes, string startWorld, Dictionary<string, string> worldIdentities)
 	{
 		this.colonyName = colonyName;
 		this.cycleCount = cycleCount;
@@ -239,7 +239,7 @@ public class RetiredColonyData
 
 	public RetiredColonyData.RetiredColonyStatistic[] Stats { get; set; }
 
-	public List<global::Tuple<string, string>> worldIdentities { get; set; }
+	public Dictionary<string, string> worldIdentities { get; set; }
 
 	public string startWorld { get; set; }
 

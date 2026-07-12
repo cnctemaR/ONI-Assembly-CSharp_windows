@@ -2871,7 +2871,7 @@ namespace STRINGS
 
 				public static LocString GENTLE_ZONE = "Habitable Zone";
 
-				public static LocString DETAILS = "Location Details";
+				public static LocString DETAILS = "Destination Details";
 
 				public static LocString START_SITE = "Immediate Surroundings";
 
@@ -2886,6 +2886,20 @@ namespace STRINGS
 				public static LocString SHUFFLE = "Shuffle";
 
 				public static LocString SHUFFLETOOLTIP = "Reroll World Seed\n\nThis will shuffle the layout of your world and the geographical traits listed below";
+
+				public static LocString HEADER_ASTEROID_STARTING = "Starting Asteroid";
+
+				public static LocString HEADER_ASTEROID_NEARBY = "Nearby Asteroids";
+
+				public static LocString HEADER_ASTEROID_DISTANT = "Distant Asteroids";
+
+				public static LocString TRAITS_HEADER = "World Traits";
+
+				public static LocString NO_TRAITS = "No Traits";
+
+				public static LocString SINGLE_TRAIT = "1 Trait";
+
+				public static LocString TRAIT_COUNT = "{0} Traits";
 			}
 
 			public class MODESELECTSCREEN
@@ -2925,13 +2939,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "UNEXPLAINED TRAITS";
+				public static LocString IMAGE_HEADER = "RAD NEW WORLDS";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>UNEXPLAINED TRAITS UPDATE</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>New world traits added to world generation system and old traits made compatible with Spaced Out!</indent>\n•<indent=20px>New traits related to space travel and radiation added for Duplicants.</indent>\n•<indent=20px>Added Spaced Out! specific Achievements.</indent>\n•<indent=20px>Changes and improvements to codex categories.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "Welcome to the <b>RAD NEW WORLDS UPDATE!</b>\n\n<b><i>Spaced Out!</i></b>\n•<indent=20px>Several new clusters options are available in both the Classic and Spaced Out! style categories. </indent>\n•<indent=20px>New Manual Radbolt Generator and Radiation Lamp buildings.</indent>\n•<indent=20px>Major revisions to Cosmic Research to allow for more ways of gathering research data.</indent>\n•<indent=20px>Bug fixes</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -7191,6 +7205,8 @@ namespace STRINGS
 
 				public static LocString DESC = "{rads} per cycle ({description})";
 
+				public static LocString SHIELDING_DESC = "Radiation Blocking: {radiationAbsorptionFactor}";
+
 				public static LocString HOVERTITLE = "RADIATION";
 
 				public class RANGES
@@ -8017,7 +8033,7 @@ namespace STRINGS
 				{
 					public static LocString DESC = "Swap this rocket module with the one above";
 
-					public static LocString INVALID = "No module above may be swapped";
+					public static LocString INVALID = "No module above may be swapped.\n\n    • A module above may be unable to have modules placed above it.\n    • A module above may be unable to fit into the space below it.\n    • This module may be unable to fit into the space above it.";
 				}
 
 				public class BUTTONVIEWINTERIOR
@@ -8042,7 +8058,7 @@ namespace STRINGS
 				{
 					public static LocString DESC = "Swap this rocket module with the one below";
 
-					public static LocString INVALID = "No module below may be swapped";
+					public static LocString INVALID = "No module below may be swapped.\n\n    • A module below may be unable to have modules placed below it.\n    • A module below may be unable to fit into the space above it.\n    • This module may be unable to fit into the space below it.";
 				}
 
 				public class BUTTONCHANGEMODULE
@@ -8761,6 +8777,8 @@ namespace STRINGS
 
 				public static LocString RECIPE_FROM_TO_COMPOSITE = "{0} to {1} and {2}";
 
+				public static LocString RECIPE_FROM_TO_HEP = "{0} to " + UI.FormatAsLink("Radbolts", "RADIATION") + " and {1}";
+
 				public static LocString RECIPE_SIMPLE_INCLUDE_AMOUNTS = "{0} {1}";
 
 				public static LocString RECIPE_FROM_TO_INCLUDE_AMOUNTS = "{2} {0} to {3} {1}";
@@ -8768,6 +8786,8 @@ namespace STRINGS
 				public static LocString RECIPE_WITH_INCLUDE_AMOUNTS = "{3} {1} ({2} {0})";
 
 				public static LocString RECIPE_FROM_TO_COMPOSITE_INCLUDE_AMOUNTS = "{3} {0} to {4} {1} and {5} {2}";
+
+				public static LocString RECIPE_FROM_TO_HEP_INCLUDE_AMOUNTS = "{2} {0} to {3} " + UI.FormatAsLink("Radbolts", "RADIATION") + " and {4} {1}";
 			}
 
 			public class SEALEDDOORSIDESCREEN
@@ -11163,6 +11183,8 @@ namespace STRINGS
 				public static LocString GROUPNAME_CLUSTER_POI = "POINT OF INTEREST";
 
 				public static LocString NO_GEYSERS = "No geysers detected";
+
+				public static LocString UNKNOWN_GEYSERS = "Unknown Geysers ({num})";
 			}
 
 			public class DETAILS
@@ -11192,6 +11214,13 @@ namespace STRINGS
 				public static LocString CONTENTS_DISEASED = "\n • {0}";
 
 				public static LocString NET_STRESS = "<b>Today's Net Stress: {0}%</b>";
+
+				public class RADIATIONABSORPTIONFACTOR
+				{
+					public static LocString NAME = "Radiation Blocking: {0}";
+
+					public static LocString TOOLTIP = "This object will block approximately {0} of radiation.";
+				}
 			}
 
 			public class PERSONALITY

@@ -332,13 +332,17 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		}
 		else if (mode == OverlayModes.Radiation.ID)
 		{
+			flag2 = true;
 			if (flag3)
 			{
 				text += UI.OVERLAYS.RADIATION.DESC.Replace("{rads}", GameUtil.GetFormattedRads(Grid.Radiation[num], GameUtil.TimeSlice.None)).Replace("{description}", GameUtil.GetRadiationDescription(Grid.Radiation[num]));
+				string text9 = UI.OVERLAYS.RADIATION.SHIELDING_DESC.Replace("{radiationAbsorptionFactor}", GameUtil.GetFormattedPercent(GameUtil.GetRadiationAbsorptionPercentage(num) * 100f, GameUtil.TimeSlice.None));
 				hoverTextDrawer.BeginShadowBar(false);
 				hoverTextDrawer.DrawText(UI.OVERLAYS.RADIATION.HOVERTITLE, this.Styles_Title.Standard);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawText(text, this.Styles_BodyText.Standard);
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawText(text9, this.Styles_BodyText.Standard);
 				hoverTextDrawer.EndShadowBar();
 			}
 		}
@@ -356,15 +360,15 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					int num4;
 					if (flag5)
 					{
-						string text9 = (port.displayCustomName ? port.description : UI.LOGIC_PORTS.PORT_INPUT_DEFAULT_NAME.text);
+						string text10 = (port.displayCustomName ? port.description : UI.LOGIC_PORTS.PORT_INPUT_DEFAULT_NAME.text);
 						num4 = component2.GetInputValue(port.id);
-						hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_INPUT_HOVER_FMT.Replace("{Port}", text9.ToUpper()).Replace("{Name}", kselectable2.GetProperName().ToUpper()), this.Styles_Title.Standard);
+						hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_INPUT_HOVER_FMT.Replace("{Port}", text10.ToUpper()).Replace("{Name}", kselectable2.GetProperName().ToUpper()), this.Styles_Title.Standard);
 					}
 					else
 					{
-						string text10 = (port.displayCustomName ? port.description : UI.LOGIC_PORTS.PORT_OUTPUT_DEFAULT_NAME.text);
+						string text11 = (port.displayCustomName ? port.description : UI.LOGIC_PORTS.PORT_OUTPUT_DEFAULT_NAME.text);
 						num4 = component2.GetOutputValue(port.id);
-						hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_OUTPUT_HOVER_FMT.Replace("{Port}", text10.ToUpper()).Replace("{Name}", kselectable2.GetProperName().ToUpper()), this.Styles_Title.Standard);
+						hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_OUTPUT_HOVER_FMT.Replace("{Port}", text11.ToUpper()).Replace("{Name}", kselectable2.GetProperName().ToUpper()), this.Styles_Title.Standard);
 					}
 					hoverTextDrawer.NewLine(26);
 					TextStyleSetting textStyleSetting;
@@ -457,19 +461,19 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					}
 					num5++;
 					hoverTextDrawer.BeginShadowBar(flag7);
-					string text11 = GameUtil.GetUnitFormattedName(this.overlayValidHoverObjects[k].gameObject, true);
+					string text12 = GameUtil.GetUnitFormattedName(this.overlayValidHoverObjects[k].gameObject, true);
 					if (component4 != null && kselectable3.GetComponent<Building>() != null)
 					{
-						text11 = StringFormatter.Replace(StringFormatter.Replace(UI.TOOLS.GENERIC.BUILDING_HOVER_NAME_FMT, "{Name}", text11), "{Element}", component4.Element.nameUpperCase);
+						text12 = StringFormatter.Replace(StringFormatter.Replace(UI.TOOLS.GENERIC.BUILDING_HOVER_NAME_FMT, "{Name}", text12), "{Element}", component4.Element.nameUpperCase);
 					}
-					hoverTextDrawer.DrawText(text11, this.Styles_Title.Standard);
+					hoverTextDrawer.DrawText(text12, this.Styles_Title.Standard);
 					bool flag8 = false;
-					string text12 = UI.OVERLAYS.DISEASE.NO_DISEASE;
+					string text13 = UI.OVERLAYS.DISEASE.NO_DISEASE;
 					if (flag)
 					{
 						if (component4 != null && component4.DiseaseIdx != 255)
 						{
-							text12 = GameUtil.GetFormattedDisease(component4.DiseaseIdx, component4.DiseaseCount, true);
+							text13 = GameUtil.GetFormattedDisease(component4.DiseaseIdx, component4.DiseaseCount, true);
 						}
 						flag8 = true;
 						Storage component5 = kselectable3.GetComponent<Storage>();
@@ -484,7 +488,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 									PrimaryElement component6 = gameObject2.GetComponent<PrimaryElement>();
 									if (component6.DiseaseIdx != 255)
 									{
-										text12 += string.Format(UI.OVERLAYS.DISEASE.CONTAINER_FORMAT, gameObject2.GetComponent<KSelectable>().GetProperName(), GameUtil.GetFormattedDisease(component6.DiseaseIdx, component6.DiseaseCount, true));
+										text13 += string.Format(UI.OVERLAYS.DISEASE.CONTAINER_FORMAT, gameObject2.GetComponent<KSelectable>().GetProperName(), GameUtil.GetFormattedDisease(component6.DiseaseIdx, component6.DiseaseCount, true));
 									}
 								}
 							}
@@ -494,7 +498,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					{
 						hoverTextDrawer.NewLine(26);
 						hoverTextDrawer.DrawIcon(this.iconDash, 18);
-						hoverTextDrawer.DrawText(text12, this.Styles_Values.Property.Standard);
+						hoverTextDrawer.DrawText(text13, this.Styles_Values.Property.Standard);
 					}
 					int num6 = 0;
 					foreach (StatusItemGroup.Entry entry in this.overlayValidHoverObjects[k].GetStatusItemGroup())
@@ -645,8 +649,8 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					formattedTemperature = GameUtil.GetFormattedTemperature(Grid.Temperature[num], GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 					this.cachedTemperatureString = formattedTemperature;
 				}
-				string text13 = ((element2.specificHeatCapacity == 0f) ? "N/A" : formattedTemperature);
-				hoverTextDrawer.DrawText(text13, this.Styles_BodyText.Standard);
+				string text14 = ((element2.specificHeatCapacity == 0f) ? "N/A" : formattedTemperature);
+				hoverTextDrawer.DrawText(text14, this.Styles_BodyText.Standard);
 			}
 			if (CellSelectionObject.IsExposedToSpace(num))
 			{
@@ -667,31 +671,31 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				float num10 = Grid.AccumulatedFlow[num] / 3f;
 				string elementNameByElementHash = GameUtil.GetElementNameByElementHash(element.id);
 				string elementNameByElementHash2 = GameUtil.GetElementNameByElementHash(element.sublimateId);
-				string text14 = BUILDING.STATUSITEMS.EMITTINGGASAVG.NAME;
-				text14 = text14.Replace("{FlowRate}", GameUtil.GetFormattedMass(num10, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-				text14 = text14.Replace("{Element}", elementNameByElementHash2);
+				string text15 = BUILDING.STATUSITEMS.EMITTINGGASAVG.NAME;
+				text15 = text15.Replace("{FlowRate}", GameUtil.GetFormattedMass(num10, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				text15 = text15.Replace("{Element}", elementNameByElementHash2);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
-				hoverTextDrawer.DrawText(text14, this.Styles_BodyText.Standard);
+				hoverTextDrawer.DrawText(text15, this.Styles_BodyText.Standard);
 				bool flag14;
 				bool flag15;
 				GameUtil.IsEmissionBlocked(num, out flag14, out flag15);
-				string text15 = null;
+				string text16 = null;
 				if (flag14)
 				{
-					text15 = MISC.STATUSITEMS.SUBLIMATIONBLOCKED.NAME;
+					text16 = MISC.STATUSITEMS.SUBLIMATIONBLOCKED.NAME;
 				}
 				else if (flag15)
 				{
-					text15 = MISC.STATUSITEMS.SUBLIMATIONOVERPRESSURE.NAME;
+					text16 = MISC.STATUSITEMS.SUBLIMATIONOVERPRESSURE.NAME;
 				}
-				if (text15 != null)
+				if (text16 != null)
 				{
-					text15 = text15.Replace("{Element}", elementNameByElementHash);
-					text15 = text15.Replace("{SubElement}", elementNameByElementHash2);
+					text16 = text16.Replace("{Element}", elementNameByElementHash);
+					text16 = text16.Replace("{SubElement}", elementNameByElementHash2);
 					hoverTextDrawer.NewLine(26);
 					hoverTextDrawer.DrawIcon(this.iconDash, 18);
-					hoverTextDrawer.DrawText(text15, this.Styles_BodyText.Standard);
+					hoverTextDrawer.DrawText(text16, this.Styles_BodyText.Standard);
 				}
 			}
 			hoverTextDrawer.EndShadowBar();

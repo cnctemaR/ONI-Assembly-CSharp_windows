@@ -1509,6 +1509,8 @@ public class BuildingDef : Def
 
 	public bool RequiresPowerInput;
 
+	public bool AddLogicPowerPort = true;
+
 	public bool RequiresPowerOutput;
 
 	public bool UseWhitePowerOutputConnectorColour;

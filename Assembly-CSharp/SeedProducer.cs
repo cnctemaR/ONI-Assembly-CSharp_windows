@@ -52,7 +52,12 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			component4.Units = (float)units;
 			base.Trigger(472291861, gameObject.GetComponent<PlantableSeed>());
 			gameObject.SetActive(true);
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
+			string text = gameObject.GetProperName();
+			if (component != null)
+			{
+				text = component.GetSubSpeciesInfo().GetNameWithMutations(text, component.IsIdentified, false);
+			}
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, text, gameObject.transform, 1.5f, false);
 			return gameObject;
 		}
 		return null;

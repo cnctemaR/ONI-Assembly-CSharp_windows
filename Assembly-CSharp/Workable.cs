@@ -194,13 +194,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			if (base.gameObject.GetComponent<KSelectable>() != null && base.gameObject.GetComponent<KSelectable>().IsSelected && this.worker.gameObject.GetComponent<LoopingSounds>() != null)
 			{
 				this.worker.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
-				return;
 			}
-			if (this.worker.gameObject.GetComponent<KSelectable>() != null && this.worker.gameObject.GetComponent<KSelectable>().IsSelected && base.gameObject.GetComponent<LoopingSounds>() != null)
+			else if (this.worker.gameObject.GetComponent<KSelectable>() != null && this.worker.gameObject.GetComponent<KSelectable>().IsSelected && base.gameObject.GetComponent<LoopingSounds>() != null)
 			{
 				base.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(true);
 			}
 		}
+		base.gameObject.Trigger(853695848, this);
 	}
 
 	public bool WorkTick(Worker worker, float dt)
@@ -321,6 +321,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			workerToStop.gameObject.GetComponent<LoopingSounds>().UpdateObjectSelection(false);
 		}
 		this.worker = null;
+		base.gameObject.Trigger(679550494, this);
 		this.UpdateStatusItem(null);
 	}
 
@@ -351,6 +352,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 		this.workTimeRemaining = this.GetWorkTime();
 		this.ShowProgressBar(false);
+		base.gameObject.Trigger(-2011693419, this);
 	}
 
 	public void SetReportType(ReportManager.ReportType report_type)

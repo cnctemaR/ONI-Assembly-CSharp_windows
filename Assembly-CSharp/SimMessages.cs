@@ -496,6 +496,7 @@ public static class SimMessages
 			disease.temperatureHalfLives.Write(binaryWriter);
 			disease.pressureRange.Write(binaryWriter);
 			disease.pressureHalfLives.Write(binaryWriter);
+			binaryWriter.Write(disease.radiationKillRate);
 			for (int j = 0; j < elements.Count; j++)
 			{
 				ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[j];

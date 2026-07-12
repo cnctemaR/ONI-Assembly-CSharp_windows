@@ -114,17 +114,19 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 	public static Rottable.RotRefrigerationLevel RefrigerationLevel(IRottable rottable)
 	{
 		int num = Grid.PosToCell(rottable.gameObject);
+		Rottable.Instance smi = rottable.gameObject.GetSMI<Rottable.Instance>();
+		PrimaryElement component = rottable.gameObject.GetComponent<PrimaryElement>();
+		float num2 = component.Temperature;
+		bool flag = false;
 		if (!Grid.IsValidCell(num))
 		{
-			return Rottable.RotRefrigerationLevel.Normal;
+			if (!smi.IsRottableInSpace())
+			{
+				return Rottable.RotRefrigerationLevel.Normal;
+			}
+			flag = true;
 		}
-		PrimaryElement component = rottable.gameObject.GetComponent<PrimaryElement>();
-		float num2;
-		if (Grid.Element[num].id == SimHashes.Vacuum)
-		{
-			num2 = component.Temperature;
-		}
-		else
+		if (!flag && Grid.Element[num].id != SimHashes.Vacuum)
 		{
 			num2 = Mathf.Min(Grid.Temperature[num], component.Temperature);
 		}
@@ -143,35 +145,46 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 	{
 		int num = Grid.PosToCell(rottable.gameObject);
 		int num2 = Grid.CellAbove(num);
-		SimHashes id = Grid.Element[num].id;
-		Rottable.RotAtmosphereQuality rotAtmosphereQuality = Rottable.RotAtmosphereQuality.Normal;
-		Rottable.AtmosphereModifier.TryGetValue((int)id, out rotAtmosphereQuality);
-		Rottable.RotAtmosphereQuality rotAtmosphereQuality2 = Rottable.RotAtmosphereQuality.Normal;
-		if (Grid.IsValidCell(num2))
+		if (!Grid.IsValidCell(num))
 		{
-			SimHashes id2 = Grid.Element[num2].id;
-			if (!Rottable.AtmosphereModifier.TryGetValue((int)id2, out rotAtmosphereQuality2))
+			if (rottable.gameObject.GetSMI<Rottable.Instance>().IsRottableInSpace())
 			{
-				rotAtmosphereQuality2 = rotAtmosphereQuality;
+				return Rottable.RotAtmosphereQuality.Sterilizing;
 			}
+			return Rottable.RotAtmosphereQuality.Normal;
 		}
 		else
 		{
-			rotAtmosphereQuality2 = rotAtmosphereQuality;
+			SimHashes id = Grid.Element[num].id;
+			Rottable.RotAtmosphereQuality rotAtmosphereQuality = Rottable.RotAtmosphereQuality.Normal;
+			Rottable.AtmosphereModifier.TryGetValue((int)id, out rotAtmosphereQuality);
+			Rottable.RotAtmosphereQuality rotAtmosphereQuality2 = Rottable.RotAtmosphereQuality.Normal;
+			if (Grid.IsValidCell(num2))
+			{
+				SimHashes id2 = Grid.Element[num2].id;
+				if (!Rottable.AtmosphereModifier.TryGetValue((int)id2, out rotAtmosphereQuality2))
+				{
+					rotAtmosphereQuality2 = rotAtmosphereQuality;
+				}
+			}
+			else
+			{
+				rotAtmosphereQuality2 = rotAtmosphereQuality;
+			}
+			if (rotAtmosphereQuality == rotAtmosphereQuality2)
+			{
+				return rotAtmosphereQuality;
+			}
+			if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Contaminating || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Contaminating)
+			{
+				return Rottable.RotAtmosphereQuality.Contaminating;
+			}
+			if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Normal || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Normal)
+			{
+				return Rottable.RotAtmosphereQuality.Normal;
+			}
+			return Rottable.RotAtmosphereQuality.Sterilizing;
 		}
-		if (rotAtmosphereQuality == rotAtmosphereQuality2)
-		{
-			return rotAtmosphereQuality;
-		}
-		if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Contaminating || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Contaminating)
-		{
-			return Rottable.RotAtmosphereQuality.Contaminating;
-		}
-		if (rotAtmosphereQuality == Rottable.RotAtmosphereQuality.Normal || rotAtmosphereQuality2 == Rottable.RotAtmosphereQuality.Normal)
-		{
-			return Rottable.RotAtmosphereQuality.Normal;
-		}
-		return Rottable.RotAtmosphereQuality.Sterilizing;
 	}
 
 	public StateMachine<Rottable, Rottable.Instance, IStateMachineTarget, Rottable.Def>.FloatParameter rotParameter;
@@ -373,13 +386,26 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			}
 		}
 
+		public bool IsRottableInSpace()
+		{
+			if (base.gameObject.GetMyWorld() == null)
+			{
+				Pickupable component = base.GetComponent<Pickupable>();
+				if (component != null && component.storage && (component.storage.GetComponent<RocketModuleCluster>() || component.storage.GetComponent<ClusterTraveler>()))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void RefreshModifiers(float dt)
 		{
 			if (this.GetMaster().isNull)
 			{
 				return;
 			}
-			if (!Grid.IsValidCell(Grid.PosToCell(base.gameObject)))
+			if (!Grid.IsValidCell(Grid.PosToCell(base.gameObject)) && !this.IsRottableInSpace())
 			{
 				return;
 			}

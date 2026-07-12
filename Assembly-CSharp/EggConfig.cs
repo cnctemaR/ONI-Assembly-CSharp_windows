@@ -35,7 +35,7 @@ public class EggConfig
 		};
 		string text2 = ComplexRecipeManager.MakeObsoleteRecipeID(id, "RawEgg");
 		string text3 = ComplexRecipeManager.MakeRecipeID("EggCracker", array, array2);
-		ComplexRecipe complexRecipe = new ComplexRecipe(text3, array, array2, 0);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text3, array, array2);
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, name, text);
 		complexRecipe.fabricators = new List<Tag> { "EggCracker" };
 		complexRecipe.time = 5f;

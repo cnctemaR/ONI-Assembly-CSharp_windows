@@ -17,6 +17,7 @@ public class AnimEventHandler : KMonoBehaviour
 			}
 		}
 		this.baseOffset = this.animCollider.offset;
+		this.instanceIndex = AnimEventHandler.InstanceSequence++;
 	}
 
 	public HashedString GetContext()
@@ -54,6 +55,12 @@ public class AnimEventHandler : KMonoBehaviour
 
 	public void LateUpdate()
 	{
+		int num = Time.frameCount % 3;
+		int num2 = this.instanceIndex % 3;
+		if (num != num2)
+		{
+			return;
+		}
 		Vector3 pivotSymbolPosition = this.controller.GetPivotSymbolPosition();
 		Vector3 vector = this.navigator.NavGrid.GetNavTypeData(this.navigator.CurrentNavType).animControllerOffset;
 		this.animCollider.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - base.transform.GetPosition().x - vector.x, this.baseOffset.y + pivotSymbolPosition.y - base.transform.GetPosition().y + vector.y);
@@ -73,6 +80,10 @@ public class AnimEventHandler : KMonoBehaviour
 	public Vector2 baseOffset;
 
 	private HashedString context;
+
+	private int instanceIndex;
+
+	private static int InstanceSequence;
 
 	private delegate void SetPos(Vector3 pos);
 }

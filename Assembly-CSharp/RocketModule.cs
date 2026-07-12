@@ -163,7 +163,6 @@ public class RocketModule : KMonoBehaviour
 
 	public void DeregisterComponents()
 	{
-		int num = Grid.PosToCell(this);
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.IsSelectable = false;
 		if (SelectTool.Instance.selected == component)
@@ -208,7 +207,7 @@ public class RocketModule : KMonoBehaviour
 		BuildingComplete component6 = base.GetComponent<BuildingComplete>();
 		if (component6 != null)
 		{
-			component6.UpdatePosition(num);
+			component6.UpdatePosition();
 		}
 		Workable component7 = base.GetComponent<Workable>();
 		if (component7 != null)
@@ -218,7 +217,7 @@ public class RocketModule : KMonoBehaviour
 		Structure component8 = base.GetComponent<Structure>();
 		if (component8 != null)
 		{
-			component8.UpdatePosition(num);
+			component8.UpdatePosition();
 		}
 		WireUtilitySemiVirtualNetworkLink component9 = base.GetComponent<WireUtilitySemiVirtualNetworkLink>();
 		if (component9 != null)
@@ -229,7 +228,6 @@ public class RocketModule : KMonoBehaviour
 
 	public void RegisterComponents()
 	{
-		int num = Grid.PosToCell(this);
 		base.GetComponent<KSelectable>().IsSelectable = true;
 		Deconstructable component = base.GetComponent<Deconstructable>();
 		if (component != null)
@@ -274,7 +272,7 @@ public class RocketModule : KMonoBehaviour
 		BuildingComplete component5 = base.GetComponent<BuildingComplete>();
 		if (component5 != null)
 		{
-			component5.UpdatePosition(num);
+			component5.UpdatePosition();
 		}
 		Workable component6 = base.GetComponent<Workable>();
 		if (component6 != null)
@@ -284,7 +282,7 @@ public class RocketModule : KMonoBehaviour
 		Structure component7 = base.GetComponent<Structure>();
 		if (component7 != null)
 		{
-			component7.UpdatePosition(num);
+			component7.UpdatePosition();
 		}
 		WireUtilitySemiVirtualNetworkLink component8 = base.GetComponent<WireUtilitySemiVirtualNetworkLink>();
 		if (component8 != null)

@@ -19,7 +19,14 @@ public class FilterPlantConfig : IEntityConfig
 		float num = 2f;
 		EffectorValues tier = DECOR.PENALTY.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("cactus_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 348.15f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 253.15f, 293.15f, 383.15f, 443.15f, null, true, 0f, 0.15f, SimHashes.Water.ToString(), true, true, true, true, 2400f, 0f, 220f, "FilterPlantOriginal", global::STRINGS.CREATURES.SPECIES.FILTERPLANT.NAME);
+		GameObject gameObject2 = gameObject;
+		float num2 = 253.15f;
+		float num3 = 293.15f;
+		float num4 = 383.15f;
+		float num5 = 443.15f;
+		string text4 = SimHashes.Water.ToString();
+		string text5 = global::STRINGS.CREATURES.SPECIES.FILTERPLANT.NAME;
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.Oxygen }, true, 0f, 0.025f, text4, true, true, true, true, 2400f, 0f, 220f, "FilterPlantOriginal", text5);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -38,11 +45,6 @@ public class FilterPlantConfig : IEntityConfig
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<SaltPlant>();
-		gameObject.AddOrGet<PressureVulnerable>().Configure(0.025f, 0f, 10f, 30f, new SimHashes[] { SimHashes.Oxygen });
-		gameObject.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
-		{
-			inst.GetComponent<PressureVulnerable>().safe_atmospheres.Add(ElementLoader.FindElementByHash(SimHashes.Oxygen));
-		};
 		ElementConsumer elementConsumer = gameObject.AddOrGet<ElementConsumer>();
 		elementConsumer.showInStatusPanel = true;
 		elementConsumer.showDescriptor = true;

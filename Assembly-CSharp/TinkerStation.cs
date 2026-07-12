@@ -127,7 +127,7 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 
 	private void UpdateChore()
 	{
-		if (this.operational.IsOperational && this.ToolsRequested() && this.HasMaterial())
+		if (this.operational.IsOperational && (this.ToolsRequested() || this.alwaysTinker) && this.HasMaterial())
 		{
 			if (this.chore == null)
 			{
@@ -206,6 +206,8 @@ public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
 	public bool useFilteredStorage;
 
 	protected FilteredStorage filteredStorage;
+
+	public bool alwaysTinker;
 
 	public float massPerTinker;
 

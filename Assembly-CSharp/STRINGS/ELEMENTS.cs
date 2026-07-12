@@ -16,6 +16,8 @@ namespace STRINGS
 
 		public static LocString THERMALPROPERTIES = "\nSpecific Heat Capacity: {SPECIFIC_HEAT_CAPACITY}\nThermal Conductivity: {THERMAL_CONDUCTIVITY}";
 
+		public static LocString RADIATIONPROPERTIES = "Radiation Absorption Factor: {0}\nRadiation Emission/1000kg: {1}";
+
 		public static LocString ELEMENTPROPERTIES = "Properties: {0}";
 
 		public class STATE
@@ -44,6 +46,8 @@ namespace STRINGS
 			public static LocString LOW_SPECIFIC_HEAT_CAPACITY = UI.FormatAsLink("Thermally Reactive", "HEAT");
 
 			public static LocString HIGH_SPECIFIC_HEAT_CAPACITY = UI.FormatAsLink("Slow Heating", "HEAT");
+
+			public static LocString EXCELLENT_RADIATION_SHIELD = UI.FormatAsLink("Excellent Radiation Shield", "RADIATION");
 
 			public class TOOLTIP
 			{
@@ -117,6 +121,18 @@ namespace STRINGS
 					"Temperature",
 					UI.PST_KEYWORD,
 					", and therefore heat and cool slowly\n\nSpecific Heat Capacity: {1} DTU to raise 1g by 1K"
+				});
+
+				public static LocString EXCELLENT_RADIATION_SHIELD = string.Concat(new string[]
+				{
+					UI.PRE_KEYWORD,
+					"Excellent Radiation Shield",
+					UI.PST_KEYWORD,
+					" radiation has a hard time passing through materials with a high ",
+					UI.PRE_KEYWORD,
+					"Radiation Absorption Factor",
+					UI.PST_KEYWORD,
+					" value. \n\nRadiation Absorption Factor: {1}"
 				});
 			}
 		}

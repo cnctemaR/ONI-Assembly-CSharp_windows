@@ -626,6 +626,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("ResearchCenter", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("AdvancedResearchCenter", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("CosmicResearchCenter", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("DLC1CosmicResearchCenter", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("NuclearResearchCenter", global::Action.BuildMenuKeyN),
 				new BuildMenu.BuildingInfo("Telescope", global::Action.BuildMenuKeyT)
 			})
@@ -691,7 +692,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("DiningTable", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("FloorLamp", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("CeilingLight", global::Action.BuildMenuKeyT),
-				new BuildMenu.BuildingInfo("SunLamp", global::Action.BuildMenuKeyS)
+				new BuildMenu.BuildingInfo("SunLamp", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("RadiationLight", global::Action.BuildMenuKeyR)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Decor"), "icon_category_furniture", global::Action.BuildCategoryDecor, KKeyCode.D, new List<BuildMenu.BuildingInfo>
 			{

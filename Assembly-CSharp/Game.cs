@@ -846,7 +846,8 @@ public class Game : KMonoBehaviour
 		WorldContainer activeWorld = ClusterManager.Instance.activeWorld;
 		Vector2I worldOffset = activeWorld.WorldOffset;
 		Vector2I worldSize = activeWorld.WorldSize;
-		Shader.SetGlobalVector("_WsToCcs", new Vector4(vector.x / (float)(worldSize.x + worldOffset.x), vector.y / (float)(worldSize.y + worldOffset.y), (vector2.x - vector.x) / (float)(worldSize.x + worldOffset.x), (vector2.y - vector.y) / (float)(worldSize.y + worldOffset.y)));
+		Vector4 vector3 = new Vector4((vector.x - (float)worldOffset.x) / (float)worldSize.x, (vector.y - (float)worldOffset.y) / (float)worldSize.y, (vector2.x - vector.x) / (float)worldSize.x, (vector2.y - vector.y) / (float)worldSize.y);
+		Shader.SetGlobalVector("_WsToCcs", vector3);
 		if (this.drawStatusItems)
 		{
 			this.statusItemRenderer.RenderEveryTick();
@@ -880,7 +881,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 481873U;
+		uint num = 483844U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);

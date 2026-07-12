@@ -232,9 +232,9 @@ public class HighEnergyParticle : StateMachineComponent<HighEnergyParticle.State
 		}
 		if (num != num2)
 		{
-			this.payload -= 1f;
+			this.payload -= 0.1f;
 			byte index = Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id);
-			int num3 = Mathf.FloorToInt(499.99997f);
+			int num3 = Mathf.FloorToInt(50f);
 			SimMessages.ModifyDiseaseOnCell(num2, index, num3);
 		}
 		if (this.payload <= 0f)

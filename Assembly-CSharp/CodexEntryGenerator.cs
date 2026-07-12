@@ -47,11 +47,14 @@ public static class CodexEntryGenerator
 					dictionary2.Add(codexEntry.id, codexEntry);
 				}
 			}
-			CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text3), Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2.ToUpper() + ".NAME"), dictionary2, null, true, true, null);
-			categoryEntry.parentId = "BUILDINGS";
-			categoryEntry.category = "BUILDINGS";
-			categoryEntry.icon = Assets.GetSprite(PlanScreen.IconNameMap[text2]);
-			dictionary.Add(text3, categoryEntry);
+			if (dictionary2.Count != 0)
+			{
+				CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text3), Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2.ToUpper() + ".NAME"), dictionary2, null, true, true, null);
+				categoryEntry.parentId = "BUILDINGS";
+				categoryEntry.category = "BUILDINGS";
+				categoryEntry.icon = Assets.GetSprite(PlanScreen.IconNameMap[text2]);
+				dictionary.Add(text3, categoryEntry);
+			}
 		}
 		CodexEntryGenerator.PopulateCategoryEntries(dictionary);
 		return dictionary;
@@ -939,38 +942,43 @@ public static class CodexEntryGenerator
 		codexEntry2.parentId = text;
 		codexEntry2.category = text;
 		dictionary.Add(text9, codexEntry2);
-		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite("ui_elements-other", "ui", false);
-		var anon = new <>f__AnonymousType1<Tag, bool, bool>[]
+		Sprite sprite = Assets.GetSprite("ui_elements_classes");
+		var anon = new <>f__AnonymousType1<Tag, bool, bool, string>[]
 		{
 			new
 			{
 				tag = GameTags.IceOre,
 				checkPrefabs = false,
-				solidOnly = false
+				solidOnly = false,
+				spriteName = "ui_ice"
 			},
 			new
 			{
 				tag = GameTags.RefinedMetal,
 				checkPrefabs = false,
-				solidOnly = true
+				solidOnly = true,
+				spriteName = "ui_refined_metal"
 			},
 			new
 			{
 				tag = GameTags.Filter,
 				checkPrefabs = false,
-				solidOnly = false
+				solidOnly = false,
+				spriteName = "ui_filtration_medium"
 			},
 			new
 			{
 				tag = GameTags.Compostable,
 				checkPrefabs = true,
-				solidOnly = false
+				solidOnly = false,
+				spriteName = "ui_compostable"
 			},
 			new
 			{
 				tag = GameTags.CombustibleLiquid,
 				checkPrefabs = false,
-				solidOnly = false
+				solidOnly = false,
+				spriteName = "ui_combustible_liquids"
 			}
 		};
 		Dictionary<string, CodexEntry> dictionary7 = new Dictionary<string, CodexEntry>();
@@ -983,6 +991,12 @@ public static class CodexEntryGenerator
 			string text12 = Strings.Get("STRINGS.MISC.TAGS." + text11.ToUpper());
 			List<ContentContainer> list2 = new List<ContentContainer>();
 			CodexEntryGenerator.GenerateTitleContainers(text12, list2);
+			list2.Add(new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexSpacer(),
+				new CodexText(Strings.Get("STRINGS.MISC.TAGS." + text11.ToUpper() + "_DESC"), CodexTextStyle.Body),
+				new CodexSpacer()
+			}, ContentContainer.ContentLayout.Vertical));
 			List<ICodexWidget> list3 = new List<ICodexWidget>();
 			if (anon3.checkPrefabs)
 			{
@@ -996,22 +1010,21 @@ public static class CodexEntryGenerator
 							list3.Add(new CodexIndentedLabelWithIcon(gameObject5.GetProperName(), CodexTextStyle.Body, Def.GetUISprite(gameObject5, "ui", false)));
 						}
 					}
-					goto IL_08E9;
+					goto IL_0955;
 				}
-				goto IL_081E;
+				goto IL_088A;
 			}
-			goto IL_081E;
-			IL_08E9:
+			goto IL_088A;
+			IL_0955:
 			list2.Add(new ContentContainer(list3, ContentContainer.ContentLayout.GridTwoColumn));
 			CodexEntry codexEntry3 = new CodexEntry(text6, list2, text12);
 			codexEntry3.parentId = text6;
-			codexEntry3.icon = uisprite.first;
-			codexEntry3.iconColor = uisprite.second;
+			codexEntry3.icon = Assets.GetSprite(anon3.spriteName);
 			CodexCache.AddEntry(CodexCache.FormatLinkID(text11), codexEntry3, null);
 			dictionary7.Add(text11, codexEntry3);
 			i++;
 			continue;
-			IL_081E:
+			IL_088A:
 			foreach (Element element2 in ElementLoader.elements)
 			{
 				if (!element2.disabled && (!anon3.solidOnly || element2.IsSolid))
@@ -1032,9 +1045,9 @@ public static class CodexEntryGenerator
 					}
 				}
 			}
-			goto IL_08E9;
+			goto IL_0955;
 		}
-		codexEntry2 = CodexEntryGenerator.GenerateCategoryEntry(text6, UI.CODEX.CATEGORYNAMES.ELEMENTSCLASSES, dictionary7, uisprite.first, true, true, null);
+		codexEntry2 = CodexEntryGenerator.GenerateCategoryEntry(text6, UI.CODEX.CATEGORYNAMES.ELEMENTSCLASSES, dictionary7, sprite, true, true, null);
 		codexEntry2.parentId = text;
 		codexEntry2.category = text;
 		dictionary.Add(text6, codexEntry2);
@@ -1094,7 +1107,7 @@ public static class CodexEntryGenerator
 		for (int i = 0; i < 20; i++)
 		{
 			TutorialMessage tutorialMessage = (TutorialMessage)Tutorial.Instance.TutorialMessage((Tutorial.TutorialMessages)i, false);
-			if (tutorialMessage != null)
+			if (tutorialMessage != null && DlcManager.IsDlcListValidForCurrentContent(tutorialMessage.DLCIDs))
 			{
 				if (!string.IsNullOrEmpty(tutorialMessage.videoClipId))
 				{

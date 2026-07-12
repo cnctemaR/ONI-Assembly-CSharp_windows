@@ -565,16 +565,32 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 			}
 			this.geyserRows[tag].SetActive(true);
 		}
-		Tag tag2 = "NoGeysers";
-		if (!this.geyserRows.ContainsKey(tag2))
+		int count = SaveGame.Instance.worldGenSpawner.GetSpawnersWithTag("GeyserGeneric", worldContainer.id, false).Count;
+		if (count > 0)
 		{
-			this.geyserRows.Add(tag2, global::Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
-			HierarchyReferences component3 = this.geyserRows[tag2].GetComponent<HierarchyReferences>();
-			component3.GetReference<Image>("Icon").sprite = Assets.GetSprite("icon_action_cancel");
-			component3.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.NO_GEYSERS);
-			component3.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+			global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite("GeyserGeneric", "ui", false);
+			Tag tag2 = "GeyserGeneric";
+			if (!this.geyserRows.ContainsKey(tag2))
+			{
+				this.geyserRows.Add(tag2, global::Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
+				HierarchyReferences component3 = this.geyserRows[tag2].GetComponent<HierarchyReferences>();
+				component3.GetReference<Image>("Icon").sprite = uisprite2.first;
+				component3.GetReference<Image>("Icon").color = uisprite2.second;
+				component3.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.UNKNOWN_GEYSERS.Replace("{num}", count.ToString()));
+				component3.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+			}
+			this.geyserRows[tag2].SetActive(true);
 		}
-		this.geyserRows[tag2].gameObject.SetActive(list.Count == 0);
+		Tag tag3 = "NoGeysers";
+		if (!this.geyserRows.ContainsKey(tag3))
+		{
+			this.geyserRows.Add(tag3, global::Util.KInstantiateUI(this.iconLabelRow, this.worldGeysersPanel.Content.gameObject, true));
+			HierarchyReferences component4 = this.geyserRows[tag3].GetComponent<HierarchyReferences>();
+			component4.GetReference<Image>("Icon").sprite = Assets.GetSprite("icon_action_cancel");
+			component4.GetReference<LocText>("NameLabel").SetText(UI.DETAILTABS.SIMPLEINFO.NO_GEYSERS);
+			component4.GetReference<LocText>("ValueLabel").gameObject.SetActive(false);
+		}
+		this.geyserRows[tag3].gameObject.SetActive(list.Count == 0);
 		List<string> worldTraitIds = worldContainer.WorldTraitIds;
 		if (worldTraitIds != null)
 		{

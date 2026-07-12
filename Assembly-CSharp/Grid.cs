@@ -536,6 +536,11 @@ public class Grid
 		return cell >= 0 && cell < Grid.CellCount;
 	}
 
+	public static bool IsValidCellInWorld(int cell, int world)
+	{
+		return cell >= 0 && cell < Grid.CellCount && (int)Grid.WorldIdx[cell] == world;
+	}
+
 	public static bool IsActiveWorld(int cell)
 	{
 		return ClusterManager.Instance != null && ClusterManager.Instance.activeWorldId == (int)Grid.WorldIdx[cell];

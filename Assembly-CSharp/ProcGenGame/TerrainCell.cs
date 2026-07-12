@@ -976,7 +976,12 @@ namespace ProcGenGame
 
 		public int DistanceToTag(Tag tag)
 		{
-			return this.distancesToTags[tag];
+			int num;
+			if (!this.distancesToTags.TryGetValue(tag, out num))
+			{
+				DebugUtil.DevLogError(string.Format("DistanceToTag could not find tag '{0}', did forget to include a start template?", tag));
+			}
+			return num;
 		}
 
 		public bool IsSafeToSpawnFeatureTemplate(Tag additionalTag)

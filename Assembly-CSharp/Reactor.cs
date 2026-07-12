@@ -103,6 +103,7 @@ public class Reactor : StateMachineComponent<Reactor.StatesInstance>, IGameObjec
 		{
 			this.fuelDelivery.refillMass = -1f;
 			this.fuelDeliveryEnabled = false;
+			this.fuelDelivery.AbortDelivery("AutomationDisabled");
 			return;
 		}
 		if (num == 1 && (!this.fuelDeliveryEnabled || onLoad))

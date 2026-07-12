@@ -29,10 +29,23 @@ public class LogicHEPSensor : Switch, ISaveLoadable, IThresholdSwitch, ISimEvery
 		this.UpdateLogicCircuit();
 		this.UpdateVisualState(true);
 		this.wasOn = this.switchedOn;
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		logicCircuitManager.onLogicTick = (global::System.Action)Delegate.Combine(logicCircuitManager.onLogicTick, new global::System.Action(this.LogicTick));
+	}
+
+	protected override void OnCleanUp()
+	{
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		logicCircuitManager.onLogicTick = (global::System.Action)Delegate.Remove(logicCircuitManager.onLogicTick, new global::System.Action(this.LogicTick));
+		base.OnCleanUp();
 	}
 
 	public void SimEveryTick(float dt)
 	{
+		if (this.waitForLogicTick)
+		{
+			return;
+		}
 		Vector2I vector2I = Grid.CellToXY(Grid.PosToCell(this));
 		ListPool<ScenePartitionerEntry, LogicHEPSensor>.PooledList pooledList = ListPool<ScenePartitionerEntry, LogicHEPSensor>.Allocate();
 		GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.collisionLayer, pooledList);
@@ -48,10 +61,16 @@ public class LogicHEPSensor : Switch, ISaveLoadable, IThresholdSwitch, ISimEvery
 		pooledList.Recycle();
 		this.foundPayload = num;
 		bool flag = (this.activateOnHigherThan && num > this.thresholdPayload) || (!this.activateOnHigherThan && num < this.thresholdPayload);
-		if (base.IsSwitchedOn != flag)
+		if (flag != this.switchedOn)
 		{
-			this.Toggle();
+			this.waitForLogicTick = true;
 		}
+		this.SetState(flag);
+	}
+
+	private void LogicTick()
+	{
+		this.waitForLogicTick = false;
 	}
 
 	private void OnSwitchToggled(bool toggled_on)
@@ -237,6 +256,8 @@ public class LogicHEPSensor : Switch, ISaveLoadable, IThresholdSwitch, ISimEvery
 	private readonly float maxPayload = 500f;
 
 	private float foundPayload;
+
+	private bool waitForLogicTick;
 
 	private bool wasOn;
 

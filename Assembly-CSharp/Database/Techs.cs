@@ -150,7 +150,7 @@ namespace Database
 			new Tech("FineDining", new List<string> { "CookingStation", "EggCracker", "DiningTable", "FarmTile" }, this, null);
 			new Tech("FoodRepurposing", new List<string> { "Juicer" }, this, null);
 			new Tech("FinerDining", new List<string> { "GourmetCookingStation" }, this, null);
-			new Tech("Agriculture", new List<string> { "FarmStation", "FertilizerMaker", "Refrigerator", "HydroponicFarm", "ParkSign" }, this, null);
+			new Tech("Agriculture", new List<string> { "FarmStation", "FertilizerMaker", "Refrigerator", "HydroponicFarm", "ParkSign", "RadiationLight" }, this, null);
 			new Tech("Ranching", new List<string> { "RanchStation", "CreatureDeliveryPoint", "ShearingStation", "CreatureFeeder", "FlyingCreatureBait", "FishDeliveryPoint", "FishFeeder" }, this, null);
 			new Tech("AnimalControl", new List<string>
 			{
@@ -264,9 +264,10 @@ namespace Database
 				"OrbitalCargoModule",
 				RocketControlStationConfig.ID
 			}, this, null);
-			new Tech("CrashPlan", new List<string> { "OrbitalResearchPoint", "PioneerModule", "OrbitalResearchCenter" }, this, null);
+			new Tech("CrashPlan", new List<string> { "OrbitalResearchPoint", "PioneerModule", "OrbitalResearchCenter", "DLC1CosmicResearchCenter" }, this, null);
 			new Tech("DurableLifeSupport", new List<string> { "NoseconeBasic", "HabitatModuleMedium", "ArtifactAnalysisStation", "ArtifactCargoBay" }, this, null);
-			new Tech("NuclearResearch", new List<string> { "DeltaResearchPoint", "NuclearResearchCenter", "HighEnergyParticleSpawner", "HighEnergyParticleRedirector" }, this, null);
+			new Tech("NuclearResearch", new List<string> { "DeltaResearchPoint", "NuclearResearchCenter", "ManualHighEnergyParticleSpawner" }, this, null);
+			new Tech("AdvancedNuclearResearch", new List<string> { "HighEnergyParticleSpawner", "HighEnergyParticleRedirector" }, this, null);
 			new Tech("NuclearPropulsion", new List<string> { "HEPEngine" }, this, null);
 			new Tech("NotificationSystems", new List<string>
 			{

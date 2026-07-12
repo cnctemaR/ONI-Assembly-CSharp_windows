@@ -29,7 +29,9 @@ public class PropSurfaceSatellite3Config : IEntityConfig
 		SetLocker setLocker = gameObject.AddOrGet<SetLocker>();
 		setLocker.overrideAnim = "anim_interacts_clothingfactory_kanim";
 		setLocker.dropOffset = new Vector2I(0, 1);
+		setLocker.numDataBanks = new int[] { 4, 9 };
 		gameObject.AddOrGet<LoreBearer>();
+		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}
 
@@ -74,7 +76,7 @@ public class PropSurfaceSatellite3Config : IEntityConfig
 	private void OnLockerLooted(GameObject inst)
 	{
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(ArtifactSelector.Instance.GetUniqueArtifactID()), inst.transform.position);
-		gameObject.AddTag(GameTags.TerrestrialArtifact);
+		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.TerrestrialArtifact, true);
 		gameObject.SetActive(true);
 	}
 

@@ -32,6 +32,15 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 			Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, this.contents[i], Grid.SceneLayer.Front).SetActive(true);
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab(this.contents[i].ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
 		}
+		if (DlcManager.IsExpansion1Active() && this.numDataBanks.Length >= 2)
+		{
+			int num = global::UnityEngine.Random.Range(this.numDataBanks[0], this.numDataBanks[1]);
+			for (int j = 0; j <= num; j++)
+			{
+				Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), this.dropOffset.x, this.dropOffset.y, "OrbitalResearchDatabank", Grid.SceneLayer.Front).SetActive(true);
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, Assets.GetPrefab("OrbitalResearchDatabank".ToTag()).GetProperName(), base.smi.master.transform, 1.5f, false);
+			}
+		}
 		base.gameObject.Trigger(-372600542, this);
 	}
 
@@ -124,6 +133,8 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>, ISides
 	public string overrideAnim;
 
 	public Vector2I dropOffset = Vector2I.zero;
+
+	public int[] numDataBanks;
 
 	[Serialize]
 	private string[] contents;

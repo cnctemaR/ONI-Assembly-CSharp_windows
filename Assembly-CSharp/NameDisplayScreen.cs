@@ -23,6 +23,59 @@ public class NameDisplayScreen : KScreen
 		UIRegistry.nameDisplayScreen = this;
 		Components.Health.Register(new Action<Health>(this.OnHealthAdded), null);
 		Components.Equipment.Register(new Action<Equipment>(this.OnEquipmentAdded), null);
+		this.updateSectionIndex = 0;
+		this.lateUpdateSections = new List<global::System.Action>
+		{
+			new global::System.Action(this.LateUpdatePart0),
+			new global::System.Action(this.LateUpdatePart1),
+			new global::System.Action(this.LateUpdatePart2)
+		};
+		this.bindOnOverlayChange();
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		if (this.isOverlayChangeBound && OverlayScreen.Instance != null)
+		{
+			OverlayScreen instance = OverlayScreen.Instance;
+			instance.OnOverlayChanged = (Action<HashedString>)Delegate.Remove(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
+			this.isOverlayChangeBound = false;
+		}
+	}
+
+	private void bindOnOverlayChange()
+	{
+		if (this.isOverlayChangeBound)
+		{
+			return;
+		}
+		if (OverlayScreen.Instance != null)
+		{
+			OverlayScreen instance = OverlayScreen.Instance;
+			instance.OnOverlayChanged = (Action<HashedString>)Delegate.Combine(instance.OnOverlayChanged, new Action<HashedString>(this.OnOverlayChanged));
+			this.isOverlayChangeBound = true;
+		}
+	}
+
+	private void OnOverlayChanged(HashedString new_mode)
+	{
+		HashedString hashedString = this.lastKnownOverlayID;
+		this.lastKnownOverlayID = new_mode;
+		if (hashedString != OverlayModes.None.ID && new_mode != OverlayModes.None.ID)
+		{
+			return;
+		}
+		bool flag = new_mode == OverlayModes.None.ID;
+		int count = this.entries.Count;
+		for (int i = 0; i < count; i++)
+		{
+			NameDisplayScreen.Entry entry = this.entries[i];
+			if (!(entry.world_go == null))
+			{
+				entry.display_go.SetActive(flag);
+			}
+		}
 	}
 
 	private void OnHealthAdded(Health health)
@@ -94,8 +147,10 @@ public class NameDisplayScreen : KScreen
 	{
 		NameDisplayScreen.Entry entry = new NameDisplayScreen.Entry();
 		entry.world_go = representedObject;
+		entry.world_go_anim_controller = representedObject.GetComponent<KAnimControllerBase>();
 		GameObject gameObject = Util.KInstantiateUI(this.ShouldShowName(representedObject) ? this.nameAndBarsPrefab : this.barsPrefab, base.gameObject, true);
 		entry.display_go = gameObject;
+		entry.display_go_rect = gameObject.GetComponent<RectTransform>();
 		if (this.worldSpace)
 		{
 			entry.display_go.transform.localScale = Vector3.one * 0.01f;
@@ -254,63 +309,101 @@ public class NameDisplayScreen : KScreen
 		{
 			return;
 		}
-		HashedString hashedString = OverlayModes.None.ID;
-		if (OverlayScreen.Instance != null)
+		this.bindOnOverlayChange();
+		Camera main = Camera.main;
+		if (main == null)
 		{
-			hashedString = OverlayScreen.Instance.GetMode();
+			return;
 		}
-		bool flag = !(Camera.main == null) && Camera.main.orthographicSize < this.HideDistance && hashedString == OverlayModes.None.ID;
+		if (this.lastKnownOverlayID != OverlayModes.None.ID)
+		{
+			return;
+		}
+		int count = this.entries.Count;
+		this.LateUpdatePos(main.orthographicSize < this.HideDistance);
+		this.lateUpdateSections[this.updateSectionIndex]();
+		this.updateSectionIndex = (this.updateSectionIndex + 1) % this.lateUpdateSections.Count;
+	}
+
+	private void LateUpdatePos(bool visibleToZoom)
+	{
+		CameraController instance = CameraController.Instance;
+		Transform followTarget = instance.followTarget;
+		int count = this.entries.Count;
+		for (int i = 0; i < count; i++)
+		{
+			NameDisplayScreen.Entry entry = this.entries[i];
+			GameObject world_go = entry.world_go;
+			if (!(world_go == null))
+			{
+				Vector3 vector = world_go.transform.GetPosition();
+				if (visibleToZoom && CameraController.Instance.IsVisiblePos(vector))
+				{
+					if (instance != null && followTarget == world_go.transform)
+					{
+						vector = instance.followTargetPos;
+					}
+					else if (entry.world_go_anim_controller != null)
+					{
+						vector = entry.world_go_anim_controller.GetWorldPivot();
+					}
+					entry.display_go_rect.anchoredPosition = (this.worldSpace ? vector : base.WorldToScreen(vector));
+					entry.display_go.SetActive(true);
+				}
+				else if (entry.display_go.activeSelf)
+				{
+					entry.display_go.SetActive(false);
+				}
+			}
+		}
+	}
+
+	private void LateUpdatePart0()
+	{
 		int num = this.entries.Count;
 		int i = 0;
 		while (i < num)
 		{
-			if (this.entries[i].world_go != null)
-			{
-				Vector3 vector = this.entries[i].world_go.transform.GetPosition();
-				if (flag && CameraController.Instance.IsVisiblePos(vector))
-				{
-					RectTransform component = this.entries[i].display_go.GetComponent<RectTransform>();
-					if (CameraController.Instance != null && CameraController.Instance.followTarget == this.entries[i].world_go.transform)
-					{
-						vector = CameraController.Instance.followTargetPos;
-					}
-					else
-					{
-						KAnimControllerBase component2 = this.entries[i].world_go.GetComponent<KAnimControllerBase>();
-						if (component2 != null)
-						{
-							vector = component2.GetWorldPivot();
-						}
-					}
-					component.anchoredPosition = (this.worldSpace ? vector : base.WorldToScreen(vector));
-					this.entries[i].display_go.SetActive(true);
-				}
-				else if (this.entries[i].display_go.activeSelf)
-				{
-					this.entries[i].display_go.SetActive(false);
-				}
-				if (this.entries[i].world_go.HasTag(GameTags.Dead))
-				{
-					this.entries[i].bars_go.SetActive(false);
-				}
-				if (this.entries[i].bars_go != null)
-				{
-					this.entries[i].bars_go.GetComponentsInChildren<KCollider2D>(false, this.workingList);
-					foreach (KCollider2D kcollider2D in this.workingList)
-					{
-						kcollider2D.MarkDirty(false);
-					}
-				}
-				i++;
-			}
-			else
+			if (this.entries[i].world_go == null)
 			{
 				global::UnityEngine.Object.Destroy(this.entries[i].display_go);
 				num--;
 				this.entries[i] = this.entries[num];
 			}
+			else
+			{
+				i++;
+			}
 		}
 		this.entries.RemoveRange(num, this.entries.Count - num);
+	}
+
+	private void LateUpdatePart1()
+	{
+		int count = this.entries.Count;
+		for (int i = 0; i < count; i++)
+		{
+			if (!(this.entries[i].world_go == null) && this.entries[i].world_go.HasTag(GameTags.Dead))
+			{
+				this.entries[i].bars_go.SetActive(false);
+			}
+		}
+	}
+
+	private void LateUpdatePart2()
+	{
+		int count = this.entries.Count;
+		for (int i = 0; i < count; i++)
+		{
+			if (this.entries[i].bars_go != null)
+			{
+				this.entries[i].bars_go.GetComponentsInChildren<KCollider2D>(false, this.workingList);
+				foreach (KCollider2D kcollider2D in this.workingList)
+				{
+					kcollider2D.MarkDirty(false);
+				}
+			}
+		}
 	}
 
 	public void UpdateName(GameObject representedObject)
@@ -472,6 +565,14 @@ public class NameDisplayScreen : KScreen
 
 	public bool worldSpace = true;
 
+	private int updateSectionIndex;
+
+	private List<global::System.Action> lateUpdateSections = new List<global::System.Action>();
+
+	private bool isOverlayChangeBound;
+
+	private HashedString lastKnownOverlayID = OverlayModes.None.ID;
+
 	private List<KCollider2D> workingList = new List<KCollider2D>();
 
 	[Serializable]
@@ -484,6 +585,10 @@ public class NameDisplayScreen : KScreen
 		public GameObject display_go;
 
 		public GameObject bars_go;
+
+		public KAnimControllerBase world_go_anim_controller;
+
+		public RectTransform display_go_rect;
 
 		public HealthBar healthBar;
 

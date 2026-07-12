@@ -56,8 +56,15 @@ public class SelectedRecipeQueueScreen : KScreen
 		this.selectedRecipe = recipe;
 		this.recipeName.text = recipe.GetUIName(false);
 		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite((recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient) ? recipe.ingredients[0].material : recipe.results[0].material, "ui", false);
-		this.recipeIcon.sprite = uisprite.first;
-		this.recipeIcon.color = uisprite.second;
+		if (recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.HEP)
+		{
+			this.recipeIcon.sprite = owner.radboltSprite;
+		}
+		else
+		{
+			this.recipeIcon.sprite = uisprite.first;
+			this.recipeIcon.color = uisprite.second;
+		}
 		this.RefreshIngredientDescriptors();
 		this.RefreshResultDescriptors();
 		this.RefreshQueueCountDisplay();
@@ -94,6 +101,10 @@ public class SelectedRecipeQueueScreen : KScreen
 	public List<Descriptor> GetResultDescriptions(ComplexRecipe recipe)
 	{
 		List<Descriptor> list = new List<Descriptor>();
+		if (recipe.producedHEP > 0)
+		{
+			list.Add(new Descriptor(string.Format("<b>{0}</b>: {1}", UI.FormatAsLink(ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, "HEP"), recipe.producedHEP), string.Format("<b>{0}</b>: {1}", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, recipe.producedHEP), Descriptor.DescriptorType.Requirement, false));
+		}
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.results)
 		{
 			GameObject prefab = Assets.GetPrefab(recipeElement.material);
@@ -142,7 +153,7 @@ public class SelectedRecipeQueueScreen : KScreen
 		if (recipe.consumedHEP > 0)
 		{
 			HighEnergyParticleStorage component = this.target.GetComponent<HighEnergyParticleStorage>();
-			list.Add(new Descriptor(string.Format("<b>{0}</b>: {1} / {2}", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, component.Particles, recipe.consumedHEP), string.Format("<b>{0}</b>: {1} / {2}", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, component.Particles, recipe.consumedHEP), Descriptor.DescriptorType.Requirement, false));
+			list.Add(new Descriptor(string.Format("<b>{0}</b>: {1} / {2}", UI.FormatAsLink(ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, "HEP"), component.Particles, recipe.consumedHEP), string.Format("<b>{0}</b>: {1} / {2}", ITEMS.RADIATION.HIGHENERGYPARITCLE.NAME, component.Particles, recipe.consumedHEP), Descriptor.DescriptorType.Requirement, false));
 		}
 		return list;
 	}

@@ -20,14 +20,15 @@ public class NewBaseScreen : KScreen
 
 	public static Vector2I SetInitialCamera()
 	{
-		Vector2I baseStartPos = SaveLoader.Instance.cachedGSD.baseStartPos;
-		Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.OffsetCell(0, baseStartPos.x, baseStartPos.y), 0, -2), Grid.SceneLayer.Background);
+		Vector2I vector2I = SaveLoader.Instance.cachedGSD.baseStartPos;
+		vector2I += ClusterManager.Instance.GetStartWorld().WorldOffset;
+		Vector3 vector = Grid.CellToPosCCC(Grid.OffsetCell(Grid.OffsetCell(0, vector2I.x, vector2I.y), 0, -2), Grid.SceneLayer.Background);
 		CameraController.Instance.SetMaxOrthographicSize(40f);
 		CameraController.Instance.SnapTo(vector);
 		CameraController.Instance.SetTargetPos(vector, 20f, false);
 		CameraController.Instance.SetOrthographicsSize(40f);
 		CameraSaveData.valid = false;
-		return baseStartPos;
+		return vector2I;
 	}
 
 	protected override void OnActivate()
@@ -93,10 +94,10 @@ public class NewBaseScreen : KScreen
 	private void Final()
 	{
 		SpeedControlScreen.Instance.Unpause(false);
-		Telepad telepad = global::UnityEngine.Object.FindObjectOfType<Telepad>();
+		GameObject telepad = GameUtil.GetTelepad(ClusterManager.Instance.GetStartWorld().id);
 		if (telepad)
 		{
-			this.SpawnMinions(Grid.PosToCell(telepad.gameObject));
+			this.SpawnMinions(Grid.PosToCell(telepad));
 		}
 		Game.Instance.baseAlreadyCreated = true;
 		this.Deactivate();

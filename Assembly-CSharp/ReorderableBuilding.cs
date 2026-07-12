@@ -434,20 +434,34 @@ public class ReorderableBuilding : KMonoBehaviour
 		return true;
 	}
 
-	public bool CanSwapUp()
+	public bool CanSwapUp(bool alsoCheckAboveCanSwapDown = true)
 	{
 		BuildingAttachPoint component = base.GetComponent<BuildingAttachPoint>();
-		return !(component == null) && !(base.GetComponent<AttachableBuilding>() == null) && !(base.GetComponent<RocketEngineCluster>() != null) && !(component.points[0].attachedBuilding == null) && !(component.points[0].attachedBuilding.GetComponent<BuildingAttachPoint>() == null) && !component.points[0].attachedBuilding.HasTag(GameTags.NoseRocketModule);
+		if (component == null)
+		{
+			return false;
+		}
+		if (base.GetComponent<AttachableBuilding>() == null || base.GetComponent<RocketEngineCluster>() != null)
+		{
+			return false;
+		}
+		AttachableBuilding attachedBuilding = component.points[0].attachedBuilding;
+		return !(attachedBuilding == null) && !(attachedBuilding.GetComponent<BuildingAttachPoint>() == null) && !attachedBuilding.HasTag(GameTags.NoseRocketModule) && this.CanMoveVertically(attachedBuilding.GetComponent<Building>().Def.HeightInCells, attachedBuilding.gameObject) && (!alsoCheckAboveCanSwapDown || attachedBuilding.GetComponent<ReorderableBuilding>().CanSwapDown(false));
 	}
 
-	public bool CanSwapDown()
+	public bool CanSwapDown(bool alsoCheckBelowCanSwapUp = true)
 	{
 		if (base.gameObject.HasTag(GameTags.NoseRocketModule))
 		{
 			return false;
 		}
 		AttachableBuilding component = base.GetComponent<AttachableBuilding>();
-		return !(component == null) && !(component.GetAttachedTo() == null) && !(base.GetComponent<BuildingAttachPoint>() == null) && !(component.GetAttachedTo().GetComponent<AttachableBuilding>() == null) && !(component.GetAttachedTo().GetComponent<RocketEngineCluster>() != null);
+		if (component == null)
+		{
+			return false;
+		}
+		BuildingAttachPoint attachedTo = component.GetAttachedTo();
+		return !(attachedTo == null) && !(base.GetComponent<BuildingAttachPoint>() == null) && !(attachedTo.GetComponent<AttachableBuilding>() == null) && !(attachedTo.GetComponent<RocketEngineCluster>() != null) && this.CanMoveVertically(attachedTo.GetComponent<Building>().Def.HeightInCells * -1, attachedTo.gameObject) && (!alsoCheckBelowCanSwapUp || attachedTo.GetComponent<ReorderableBuilding>().CanSwapUp(false));
 	}
 
 	public void ShowReorderArm(bool show)

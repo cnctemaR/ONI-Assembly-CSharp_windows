@@ -25,7 +25,7 @@ public class AdvancedCureConfig : IEntityConfig
 			new ComplexRecipe.RecipeElement("AdvancedCure", 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
 		string text = "Apothecary";
-		AdvancedCureConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID(text, array, array2), array, array2, 0)
+		AdvancedCureConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID(text, array, array2), array, array2)
 		{
 			time = 200f,
 			description = ITEMS.PILLS.ADVANCEDCURE.RECIPEDESC,

@@ -12,6 +12,8 @@ namespace ProcGen
 
 		public int buffer { get; set; }
 
+		public WorldPlacement.LocationType locationType { get; set; }
+
 		public int x { get; private set; }
 
 		public int y { get; private set; }
@@ -26,6 +28,7 @@ namespace ProcGen
 		{
 			this.allowedRings = new MinMaxI(0, 9999);
 			this.buffer = 2;
+			this.locationType = WorldPlacement.LocationType.Cluster;
 		}
 
 		public void SetPosition(Vector2I pos)
@@ -38,6 +41,13 @@ namespace ProcGen
 		{
 			this.width = size.X;
 			this.height = size.Y;
+		}
+
+		public enum LocationType
+		{
+			Cluster,
+			Startworld,
+			InnerCluster
 		}
 	}
 }

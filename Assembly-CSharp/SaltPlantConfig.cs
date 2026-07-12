@@ -20,7 +20,14 @@ public class SaltPlantConfig : IEntityConfig
 		EffectorValues tier = DECOR.PENALTY.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("saltplant_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, new List<Tag> { GameTags.Hanging }, 258.15f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 2);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 198.15f, 248.15f, 323.15f, 393.15f, null, true, 0f, 0.15f, SimHashes.Salt.ToString(), true, true, true, true, 2400f, 0f, 740f, "SaltPlantOriginal", global::STRINGS.CREATURES.SPECIES.SALTPLANT.NAME);
+		GameObject gameObject2 = gameObject;
+		float num2 = 198.15f;
+		float num3 = 248.15f;
+		float num4 = 323.15f;
+		float num5 = 393.15f;
+		string text4 = SimHashes.Salt.ToString();
+		string text5 = global::STRINGS.CREATURES.SPECIES.SALTPLANT.NAME;
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.ChlorineGas }, true, 0f, 0.025f, text4, true, true, true, true, 2400f, 0f, 740f, "SaltPlantOriginal", text5);
 		gameObject.AddOrGet<SaltPlant>();
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
@@ -30,11 +37,6 @@ public class SaltPlantConfig : IEntityConfig
 				massConsumptionRate = 0.011666667f
 			}
 		});
-		gameObject.AddOrGet<PressureVulnerable>().Configure(0.025f, 0f, 10f, 30f, new SimHashes[] { SimHashes.ChlorineGas });
-		gameObject.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
-		{
-			inst.GetComponent<PressureVulnerable>().safe_atmospheres.Add(ElementLoader.FindElementByHash(SimHashes.ChlorineGas));
-		};
 		Storage storage = gameObject.AddOrGet<Storage>();
 		storage.showInUI = false;
 		storage.capacityKg = 1f;

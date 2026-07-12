@@ -272,13 +272,18 @@ public class SuitMarker : KMonoBehaviour
 			int x = transition.navGridTransition.x;
 			if (x == 0)
 			{
-				return false;
+				return this.IsRocketDoorExitEquip(new_reactor, transition);
 			}
 			if (new_reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit))
 			{
 				return (x >= 0 || !this.suitMarker.isRotated) && (x <= 0 || this.suitMarker.isRotated);
 			}
 			return (x <= 0 || !this.suitMarker.isRotated) && (x >= 0 || this.suitMarker.isRotated) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), new_reactor.GetComponent<KPrefabID>().InstanceID);
+		}
+
+		private bool IsRocketDoorExitEquip(GameObject new_reactor, Navigator.ActiveTransition transition)
+		{
+			return new_reactor.GetMyWorld().IsModuleInterior && !new_reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit) && (transition.end == NavType.Teleport || transition.start == NavType.Teleport) && Grid.HasSuit(Grid.PosToCell(this.suitMarker), new_reactor.GetComponent<KPrefabID>().InstanceID);
 		}
 
 		protected override void InternalBegin()

@@ -184,21 +184,31 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		ColonyDestinationAsteroidBeltData colonyDestinationAsteroidBeltData;
 		try
 		{
-			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectAsteroid(setting, num);
+			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectCluster(setting, num);
 		}
 		catch
 		{
 			string defaultAsteroid = this.destinationMapPanel.GetDefaultAsteroid();
 			this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, defaultAsteroid);
-			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectAsteroid(defaultAsteroid, num);
+			colonyDestinationAsteroidBeltData = this.destinationMapPanel.SelectCluster(defaultAsteroid, num);
 		}
-		this.destinationProperties.SetDescriptors(colonyDestinationAsteroidBeltData.GetParamDescriptors());
-		this.startLocationProperties.SetDescriptors(colonyDestinationAsteroidBeltData.GetTraitDescriptors());
+		if (DlcManager.IsContentActive("EXPANSION1_ID"))
+		{
+			this.destinationProperties.EnableClusterLocationLabels(true);
+			this.destinationProperties.RefreshAsteroidLines(colonyDestinationAsteroidBeltData, this.startLocationProperties);
+			this.destinationProperties.EnableClusterDetails(true);
+			this.destinationProperties.SetClusterDetailLabels(colonyDestinationAsteroidBeltData);
+			return;
+		}
+		this.destinationProperties.EnableClusterDetails(false);
+		this.destinationProperties.EnableClusterLocationLabels(false);
+		this.destinationProperties.SetParameterDescriptors(colonyDestinationAsteroidBeltData.GetParamDescriptors());
+		this.startLocationProperties.SetTraitDescriptors(colonyDestinationAsteroidBeltData.GetTraitDescriptors());
 	}
 
-	private void OnAsteroidClicked(ColonyDestinationAsteroidBeltData asteroid)
+	private void OnAsteroidClicked(ColonyDestinationAsteroidBeltData cluster)
 	{
-		this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, asteroid.beltPath);
+		this.newGameSettings.SetSetting(CustomGameSettingConfigs.ClusterLayout, cluster.beltPath);
 		this.ShuffleClicked();
 	}
 

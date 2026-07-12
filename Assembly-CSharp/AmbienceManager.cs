@@ -86,6 +86,7 @@ public class AmbienceManager : KMonoBehaviour
 		{
 			this.tileCount = 0;
 			this.averageTemperature = 0f;
+			this.averageRadiation = 0f;
 		}
 
 		public void UpdatePercentage(int cell_count)
@@ -96,6 +97,13 @@ public class AmbienceManager : KMonoBehaviour
 		public void UpdateAverageTemperature()
 		{
 			this.averageTemperature /= (float)this.tileCount;
+			this.soundEvent.setParameterByName("averageTemperature", this.averageTemperature, false);
+		}
+
+		public void UpdateAverageRadiation()
+		{
+			this.averageRadiation = ((this.tileCount > 0) ? (this.averageRadiation / (float)this.tileCount) : 0f);
+			this.soundEvent.setParameterByName("averageRadiation", this.averageRadiation, false);
 		}
 
 		public void UpdateParameters(Vector3 emitter_position)
@@ -107,7 +115,6 @@ public class AmbienceManager : KMonoBehaviour
 			Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
 			this.soundEvent.set3DAttributes(vector.To3DAttributes());
 			this.soundEvent.setParameterByName("tilePercentage", this.tilePercentage, false);
-			this.soundEvent.setParameterByName("averageTemperature", this.averageTemperature, false);
 		}
 
 		public int CompareTo(AmbienceManager.Layer layer)
@@ -160,6 +167,8 @@ public class AmbienceManager : KMonoBehaviour
 
 		private const string AVERAGE_TEMPERATURE_ID = "averageTemperature";
 
+		private const string AVERAGE_RADIATION_ID = "averageRadiation";
+
 		public string sound;
 
 		public string oneShotSound;
@@ -175,6 +184,8 @@ public class AmbienceManager : KMonoBehaviour
 		private EventInstance soundEvent;
 
 		public float averageTemperature;
+
+		public float averageRadiation;
 	}
 
 	[Serializable]
@@ -199,6 +210,9 @@ public class AmbienceManager : KMonoBehaviour
 
 		[EventRef]
 		public string facilitySound;
+
+		[EventRef]
+		public string radiationSound;
 	}
 
 	public class Quadrant
@@ -215,6 +229,8 @@ public class AmbienceManager : KMonoBehaviour
 			this.facilityLayer = new AmbienceManager.Layer(def.facilitySound, null);
 			this.allLayers.Add(this.facilityLayer);
 			this.loopingLayers.Add(this.facilityLayer);
+			this.radiationLayer = new AmbienceManager.Layer(def.radiationSound, null);
+			this.allLayers.Add(this.radiationLayer);
 			for (int i = 0; i < 4; i++)
 			{
 				this.gasLayers[i] = new AmbienceManager.Layer(def.gasSounds[i], null);
@@ -326,6 +342,11 @@ public class AmbienceManager : KMonoBehaviour
 											}
 										}
 									}
+									if (Grid.Radiation[num] > 0f)
+									{
+										this.radiationLayer.averageRadiation += Grid.Radiation[num];
+										this.radiationLayer.tileCount++;
+									}
 								}
 								else
 								{
@@ -359,6 +380,9 @@ public class AmbienceManager : KMonoBehaviour
 					layer.Stop();
 				}
 			}
+			this.radiationLayer.Start(emitter_position);
+			this.radiationLayer.UpdateAverageRadiation();
+			this.radiationLayer.UpdateParameters(emitter_position);
 			this.oneShotLayers.Sort();
 			for (int n = 0; n < AmbienceManager.Quadrant.activeSolidLayerCount; n++)
 			{
@@ -382,6 +406,8 @@ public class AmbienceManager : KMonoBehaviour
 		public AmbienceManager.Layer spaceLayer;
 
 		public AmbienceManager.Layer facilityLayer;
+
+		public AmbienceManager.Layer radiationLayer;
 
 		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[16];
 

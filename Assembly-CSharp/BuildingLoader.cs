@@ -170,7 +170,7 @@ public class BuildingLoader : KMonoBehaviour
 		BuildingLoader.UpdateComponentRequirement<Vent>(gameObject, false);
 		bool flag = def.BuildingComplete.GetComponent<AnimTileable>() != null;
 		BuildingLoader.UpdateComponentRequirement<AnimTileable>(gameObject, flag);
-		if (def.RequiresPowerInput)
+		if (def.RequiresPowerInput && def.AddLogicPowerPort)
 		{
 			GeneratedBuildings.RegisterSingleLogicInputPort(gameObject);
 		}
@@ -256,7 +256,7 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			go.AddComponent<Structure>();
 		}
-		if (def.RequiresPowerInput)
+		if (def.RequiresPowerInput && def.AddLogicPowerPort)
 		{
 			GeneratedBuildings.RegisterSingleLogicInputPort(go);
 			go.AddOrGet<LogicOperationalController>();
@@ -306,7 +306,7 @@ public class BuildingLoader : KMonoBehaviour
 		{
 			global::UnityEngine.Object.DestroyImmediate(component2);
 		}
-		if (def.RequiresPowerInput)
+		if (def.RequiresPowerInput && def.AddLogicPowerPort)
 		{
 			GeneratedBuildings.RegisterSingleLogicInputPort(gameObject);
 		}

@@ -83,7 +83,7 @@ public class MetalRefineryConfig : IBuildingConfig
 					};
 					string text = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element.tag);
 					string text2 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array, array2);
-					ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2, 0);
+					ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
 					complexRecipe.time = 40f;
 					complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name);
 					complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
@@ -105,7 +105,7 @@ public class MetalRefineryConfig : IBuildingConfig
 		};
 		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element2.tag);
 		string text4 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array3, array4);
-		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4, 0);
+		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
 		complexRecipe2.time = 40f;
 		complexRecipe2.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Steel).name, ElementLoader.FindElementByHash(SimHashes.Iron).name);

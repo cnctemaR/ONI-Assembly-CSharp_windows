@@ -19,7 +19,7 @@ namespace Klei.AI
 			}
 		}
 
-		public Disease(string id, byte strength, Disease.RangeInfo temperature_range, Disease.RangeInfo temperature_half_lives, Disease.RangeInfo pressure_range, Disease.RangeInfo pressure_half_lives, bool statsOnly)
+		public Disease(string id, byte strength, Disease.RangeInfo temperature_range, Disease.RangeInfo temperature_half_lives, Disease.RangeInfo pressure_range, Disease.RangeInfo pressure_half_lives, float radiation_kill_rate, bool statsOnly)
 			: base(id, null, null)
 		{
 			this.name = new StringKey("STRINGS.DUPLICANTS.DISEASES." + id.ToUpper() + ".NAME");
@@ -28,6 +28,7 @@ namespace Klei.AI
 			this.temperatureHalfLives = temperature_half_lives;
 			this.pressureRange = pressure_range;
 			this.pressureHalfLives = pressure_half_lives;
+			this.radiationKillRate = radiation_kill_rate;
 			this.PopulateElemGrowthInfo();
 			this.ApplyRules();
 			if (!statsOnly)
@@ -43,7 +44,7 @@ namespace Klei.AI
 				Db.Get().Attributes.Add(attribute);
 				Db.Get().Attributes.Add(attribute2);
 				Db.Get().Attributes.Add(this.amountDeltaAttribute);
-				this.cureSpeedBase = new Attribute(id + "CureSpeed", false, Attribute.Display.Normal, false, 0f, null, null, null);
+				this.cureSpeedBase = new Attribute(id + "CureSpeed", false, Attribute.Display.Normal, false, 0f, null, null, null, null);
 				this.cureSpeedBase.BaseValue = 1f;
 				this.cureSpeedBase.SetFormatter(new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None));
 				Db.Get().Attributes.Add(this.cureSpeedBase);
@@ -407,6 +408,8 @@ namespace Klei.AI
 		public string overlayColourName;
 
 		public string overlayLegendHovertext;
+
+		public float radiationKillRate;
 
 		public Amount amount;
 

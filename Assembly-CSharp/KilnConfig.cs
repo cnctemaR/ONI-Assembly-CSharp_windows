@@ -63,7 +63,7 @@ public class KilnConfig : IBuildingConfig
 		};
 		string text = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag);
 		string text2 = ComplexRecipeManager.MakeRecipeID("Kiln", array, array2);
-		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2, 0);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Clay).name, ElementLoader.FindElementByHash(SimHashes.Ceramic).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("Kiln") };
@@ -80,7 +80,7 @@ public class KilnConfig : IBuildingConfig
 		};
 		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("Kiln", tag4);
 		string text4 = ComplexRecipeManager.MakeRecipeID("Kiln", array3, array4);
-		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4, 0);
+		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
 		complexRecipe2.time = 40f;
 		complexRecipe2.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Carbon).name, ElementLoader.FindElementByHash(SimHashes.RefinedCarbon).name);
 		complexRecipe2.fabricators = new List<Tag> { TagManager.Create("Kiln") };

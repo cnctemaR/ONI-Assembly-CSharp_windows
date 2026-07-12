@@ -48,9 +48,9 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	{
 		int num = 0;
 		int num2 = 0;
-		foreach (object obj in Components.Brains)
+		foreach (Brain brain in Components.Brains.GetWorldItems(this.worldId, false))
 		{
-			CreatureBrain creatureBrain = obj as CreatureBrain;
+			CreatureBrain creatureBrain = brain as CreatureBrain;
 			if (creatureBrain != null)
 			{
 				if (creatureBrain.HasTag(GameTags.Creatures.Wild))
@@ -65,11 +65,27 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 				}
 			}
 		}
-		foreach (Spacecraft spacecraft in SpacecraftManager.instance.GetSpacecraft())
+		if (DlcManager.IsExpansion1Active())
 		{
-			if (spacecraft.state != Spacecraft.MissionState.Grounded && spacecraft.state != Spacecraft.MissionState.Destroyed)
+			WorldContainer component = base.GetComponent<WorldContainer>();
+			if (component != null && component.IsModuleInterior)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.RocketsInFlight, 1f, spacecraft.rocketName, null);
+				Clustercraft clustercraft = component.GetComponent<ClusterGridEntity>() as Clustercraft;
+				if (clustercraft != null && clustercraft.Status != Clustercraft.CraftStatus.Grounded)
+				{
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.RocketsInFlight, 1f, clustercraft.Name, null);
+					return;
+				}
+			}
+		}
+		else
+		{
+			foreach (Spacecraft spacecraft in SpacecraftManager.instance.GetSpacecraft())
+			{
+				if (spacecraft.state != Spacecraft.MissionState.Grounded && spacecraft.state != Spacecraft.MissionState.Destroyed)
+				{
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.RocketsInFlight, 1f, spacecraft.rocketName, null);
+				}
 			}
 		}
 	}

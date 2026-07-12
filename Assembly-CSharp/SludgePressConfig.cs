@@ -77,7 +77,7 @@ public class SludgePressConfig : IBuildingConfig
 			}
 			string text = ComplexRecipeManager.MakeObsoleteRecipeID("SludgePress", element.tag);
 			string text2 = ComplexRecipeManager.MakeRecipeID("SludgePress", array, array2);
-			ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2, 0);
+			ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
 			complexRecipe.time = 20f;
 			complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.SLUDGEPRESS.RECIPE_DESCRIPTION, element.name);
 			complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Composite;

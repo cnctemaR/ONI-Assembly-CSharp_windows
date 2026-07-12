@@ -241,7 +241,7 @@ public class Timelapser : KMonoBehaviour
 		}
 		if (world.IsStartWorld)
 		{
-			GameObject telepad = GameUtil.GetTelepad(0);
+			GameObject telepad = GameUtil.GetTelepad(world.id);
 			if (telepad == null)
 			{
 				global::Debug.Log("No telepad present, aborting screenshot.");
@@ -258,13 +258,13 @@ public class Timelapser : KMonoBehaviour
 		RenderTexture active = RenderTexture.active;
 		RenderTexture.active = this.bufferRenderTexture;
 		CameraController.Instance.RenderForTimelapser(ref this.bufferRenderTexture);
-		this.WriteToPng(this.bufferRenderTexture, world.GetComponent<ClusterGridEntity>().Name);
+		this.WriteToPng(this.bufferRenderTexture, world_id);
 		CameraController.Instance.SetOrthographicsSize(this.camSize);
 		CameraController.Instance.SetPosition(this.camPosition);
 		RenderTexture.active = active;
 	}
 
-	public void WriteToPng(RenderTexture renderTex, string world_name = "")
+	public void WriteToPng(RenderTexture renderTex, int world_id = -1)
 	{
 		Texture2D texture2D = new Texture2D(renderTex.width, renderTex.height, TextureFormat.ARGB32, false);
 		texture2D.ReadPixels(new Rect(0f, 0f, (float)renderTex.width, (float)renderTex.height), 0, 0);
@@ -289,14 +289,15 @@ public class Timelapser : KMonoBehaviour
 				Directory.CreateDirectory(text3);
 			}
 			string text4 = text3;
-			if (!world_name.IsNullOrWhiteSpace())
+			if (world_id >= 0)
 			{
-				text4 = Path.Combine(text4, world_name);
+				string name = ClusterManager.Instance.GetWorld(world_id).GetComponent<ClusterGridEntity>().Name;
+				text4 = Path.Combine(text4, world_id.ToString("D5"));
 				if (!Directory.Exists(text4))
 				{
 					Directory.CreateDirectory(text4);
 				}
-				text4 = Path.Combine(text4, world_name);
+				text4 = Path.Combine(text4, name);
 			}
 			else
 			{

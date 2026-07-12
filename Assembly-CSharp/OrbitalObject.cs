@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 {
-	public void Init(string orbit_data_name, WorldContainer orbiting_world)
+	public void Init(string orbit_data_name, WorldContainer orbiting_world, List<Ref<OrbitalObject>> orbiting_obj)
 	{
 		OrbitalData orbitalData = Db.Get().OrbitalTypeCategories.Get(orbit_data_name);
 		if (orbiting_world != null)
@@ -22,7 +23,7 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		this.animFilename = orbitalData.animFile;
 		this.initialAnim = this.GetInitialAnim(orbitalData);
 		this.angle = this.GetAngle(orbitalData);
-		this.timeoffset = global::UnityEngine.Random.Range(0f, 600f);
+		this.timeoffset = this.GetTimeOffset(orbiting_obj);
 		this.orbitalDBId = orbitalData.Id;
 	}
 
@@ -36,7 +37,7 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		kbatchedAnimController.initialAnim = this.initialAnim;
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(this.animFilename) };
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
-		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
+		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
 	}
 
 	public void RenderEveryTick(float dt)
@@ -56,7 +57,7 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		base.gameObject.transform.SetPosition(vector2);
 		if (this.orbitData.periodInCycles > 0f)
 		{
-			base.gameObject.transform.localScale = Vector3.one * (Camera.main.orthographicSize / this.orbitData.distance);
+			base.gameObject.transform.localScale = Vector3.one * (CameraController.Instance.baseCamera.orthographicSize / this.orbitData.distance);
 		}
 		else
 		{
@@ -74,7 +75,7 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		if (this.orbitData.periodInCycles > 0f)
 		{
 			float num = this.orbitData.periodInCycles * 600f;
-			float num2 = ((time + this.timeoffset) / num - (float)((int)((time + this.timeoffset) / num))) * 2f * 3.1415927f;
+			float num2 = ((time + (float)this.timeoffset) / num - (float)((int)((time + (float)this.timeoffset) / num))) * 2f * 3.1415927f;
 			float num3 = 0.5f * this.orbitData.radiusScale * (float)this.world.WorldSize.x;
 			Vector3 vector = new Vector3(Mathf.Cos(num2), 0f, Mathf.Sin(num2));
 			behind = vector.z > this.orbitData.behindZ;
@@ -118,6 +119,24 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 		return global::UnityEngine.Random.Range(data.minAngle, data.maxAngle);
 	}
 
+	private int GetTimeOffset(List<Ref<OrbitalObject>> orbiting_obj)
+	{
+		List<int> list = new List<int>();
+		foreach (Ref<OrbitalObject> @ref in orbiting_obj)
+		{
+			if (@ref.Get().world == this.world)
+			{
+				list.Add(@ref.Get().timeoffset);
+			}
+		}
+		int num = global::UnityEngine.Random.Range(0, 600);
+		while (list.Contains(num))
+		{
+			num = global::UnityEngine.Random.Range(0, 600);
+		}
+		return num;
+	}
+
 	private WorldContainer world;
 
 	private OrbitalData orbitData;
@@ -138,7 +157,7 @@ public class OrbitalObject : KMonoBehaviour, IRenderEveryTick
 	private float angle;
 
 	[Serialize]
-	private float timeoffset;
+	public int timeoffset;
 
 	[Serialize]
 	public string orbitalDBId;

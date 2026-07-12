@@ -157,45 +157,12 @@ public class FuelTank : KMonoBehaviour, IUserControlledCapacity, IFuelTank
 
 	public void DEBUG_FillTank()
 	{
-		if (DlcManager.FeatureClusterSpaceEnabled())
-		{
-			RocketEngineCluster rocketEngineCluster = null;
-			foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
-			{
-				rocketEngineCluster = gameObject.GetComponent<RocketEngineCluster>();
-				if (rocketEngineCluster != null && rocketEngineCluster.mainEngine)
-				{
-					break;
-				}
-			}
-			if (!(rocketEngineCluster != null))
-			{
-				global::Debug.LogWarning("Fuel tank couldn't find rocket engine");
-				return;
-			}
-			Element element = ElementLoader.GetElement(rocketEngineCluster.fuelTag);
-			if (element.IsLiquid)
-			{
-				this.storage.AddLiquid(element.id, this.targetFillMass - this.storage.MassStored(), element.defaultValues.temperature, 0, 0, false, true);
-				return;
-			}
-			if (element.IsGas)
-			{
-				this.storage.AddGasChunk(element.id, this.targetFillMass - this.storage.MassStored(), element.defaultValues.temperature, 0, 0, false, true);
-				return;
-			}
-			if (element.IsSolid)
-			{
-				this.storage.AddOre(element.id, this.targetFillMass - this.storage.MassStored(), element.defaultValues.temperature, 0, 0, false, true);
-				return;
-			}
-		}
-		else
+		if (!DlcManager.FeatureClusterSpaceEnabled())
 		{
 			RocketEngine rocketEngine = null;
-			foreach (GameObject gameObject2 in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
+			foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
 			{
-				rocketEngine = gameObject2.GetComponent<RocketEngine>();
+				rocketEngine = gameObject.GetComponent<RocketEngine>();
 				if (rocketEngine != null && rocketEngine.mainEngine)
 				{
 					break;
@@ -203,20 +170,20 @@ public class FuelTank : KMonoBehaviour, IUserControlledCapacity, IFuelTank
 			}
 			if (rocketEngine != null)
 			{
-				Element element2 = ElementLoader.GetElement(rocketEngine.fuelTag);
-				if (element2.IsLiquid)
+				Element element = ElementLoader.GetElement(rocketEngine.fuelTag);
+				if (element.IsLiquid)
 				{
-					this.storage.AddLiquid(element2.id, this.targetFillMass - this.storage.MassStored(), element2.defaultValues.temperature, 0, 0, false, true);
+					this.storage.AddLiquid(element.id, this.targetFillMass - this.storage.MassStored(), element.defaultValues.temperature, 0, 0, false, true);
 					return;
 				}
-				if (element2.IsGas)
+				if (element.IsGas)
 				{
-					this.storage.AddGasChunk(element2.id, this.targetFillMass - this.storage.MassStored(), element2.defaultValues.temperature, 0, 0, false, true);
+					this.storage.AddGasChunk(element.id, this.targetFillMass - this.storage.MassStored(), element.defaultValues.temperature, 0, 0, false, true);
 					return;
 				}
-				if (element2.IsSolid)
+				if (element.IsSolid)
 				{
-					this.storage.AddOre(element2.id, this.targetFillMass - this.storage.MassStored(), element2.defaultValues.temperature, 0, 0, false, true);
+					this.storage.AddOre(element.id, this.targetFillMass - this.storage.MassStored(), element.defaultValues.temperature, 0, 0, false, true);
 					return;
 				}
 			}
@@ -224,7 +191,36 @@ public class FuelTank : KMonoBehaviour, IUserControlledCapacity, IFuelTank
 			{
 				global::Debug.LogWarning("Fuel tank couldn't find rocket engine");
 			}
+			return;
 		}
+		RocketEngineCluster rocketEngineCluster = null;
+		foreach (GameObject gameObject2 in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
+		{
+			rocketEngineCluster = gameObject2.GetComponent<RocketEngineCluster>();
+			if (rocketEngineCluster != null && rocketEngineCluster.mainEngine)
+			{
+				break;
+			}
+		}
+		if (rocketEngineCluster != null)
+		{
+			Element element2 = ElementLoader.GetElement(rocketEngineCluster.fuelTag);
+			if (element2.IsLiquid)
+			{
+				this.storage.AddLiquid(element2.id, this.targetFillMass - this.storage.MassStored(), element2.defaultValues.temperature, 0, 0, false, true);
+			}
+			else if (element2.IsGas)
+			{
+				this.storage.AddGasChunk(element2.id, this.targetFillMass - this.storage.MassStored(), element2.defaultValues.temperature, 0, 0, false, true);
+			}
+			else if (element2.IsSolid)
+			{
+				this.storage.AddOre(element2.id, this.targetFillMass - this.storage.MassStored(), element2.defaultValues.temperature, 0, 0, false, true);
+			}
+			rocketEngineCluster.GetComponent<RocketModuleCluster>().CraftInterface.GetComponent<Clustercraft>().UpdateStatusItem();
+			return;
+		}
+		global::Debug.LogWarning("Fuel tank couldn't find rocket engine");
 	}
 
 	public Storage storage;

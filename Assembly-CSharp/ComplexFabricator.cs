@@ -937,6 +937,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 				}
 			}
 		}
+		if (recipe.producedHEP > 0)
+		{
+			base.GetComponent<HighEnergyParticleStorage>().Store((float)recipe.producedHEP);
+		}
 		return list;
 	}
 

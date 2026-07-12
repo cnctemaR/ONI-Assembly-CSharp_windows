@@ -114,7 +114,7 @@ public class WattsonMessage : KScreen
 		};
 		this.dialog.GetComponent<KScreen>().Show(false);
 		this.startFade = false;
-		GameObject telepad = GameUtil.GetTelepad(0);
+		GameObject telepad = GameUtil.GetTelepad(ClusterManager.Instance.GetStartWorld().id);
 		if (telepad != null)
 		{
 			KAnimControllerBase kac = telepad.GetComponent<KAnimControllerBase>();

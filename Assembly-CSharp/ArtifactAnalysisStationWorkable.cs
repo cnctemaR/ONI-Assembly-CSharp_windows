@@ -118,6 +118,11 @@ public class ArtifactAnalysisStationWorkable : Workable
 		{
 			GameUtil.KInstantiate(Assets.GetPrefab("GeneShufflerRecharge"), this.statesInstance.master.transform.position + this.finishedArtifactDropOffset, Grid.SceneLayer.Ore, null, 0).SetActive(true);
 		}
+		int num = Mathf.FloorToInt(artifact.GetArtifactTier().payloadDropChance * 20f);
+		for (int i = 0; i < num; i++)
+		{
+			GameUtil.KInstantiate(Assets.GetPrefab("OrbitalResearchDatabank"), this.statesInstance.master.transform.position + this.finishedArtifactDropOffset, Grid.SceneLayer.Ore, null, 0).SetActive(true);
+		}
 		this.nextYeildRoll = global::UnityEngine.Random.Range(0f, 1f);
 	}
 

@@ -6,18 +6,26 @@ public class QuickLayout : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Run();
+		this.Run(false);
 	}
 
 	private void Update()
 	{
-		this.Run();
+		this.Run(false);
 	}
 
-	private void Run()
+	public void ForceUpdate()
 	{
-		bool flag = false || this._elementSize != this.elementSize || this._spacing != this.spacing || this._layoutDirection != this.layoutDirection || this._offset != this.offset;
-		if (flag)
+		this.Run(true);
+	}
+
+	private void Run(bool forceUpdate = false)
+	{
+		forceUpdate = forceUpdate || this._elementSize != this.elementSize;
+		forceUpdate = forceUpdate || this._spacing != this.spacing;
+		forceUpdate = forceUpdate || this._layoutDirection != this.layoutDirection;
+		forceUpdate = forceUpdate || this._offset != this.offset;
+		if (forceUpdate)
 		{
 			this._elementSize = this.elementSize;
 			this._spacing = this.spacing;
@@ -32,7 +40,7 @@ public class QuickLayout : KMonoBehaviour
 				num++;
 			}
 		}
-		if (num != this.oldActiveChildCount || flag)
+		if (num != this.oldActiveChildCount || forceUpdate)
 		{
 			this.Layout();
 			this.oldActiveChildCount = num;

@@ -105,12 +105,10 @@ public class KCrashReporter : MonoBehaviour
 		}
 		if (msg != null && msg.StartsWith("Failed to load cursor"))
 		{
-			KCrashReporter.ReportErrorDevNotification("Cursor load failed", Environment.StackTrace, string.Format("LogType: '{0}' message='{1}'", type, msg));
 			return;
 		}
 		if (msg != null && msg.StartsWith("Failed to save a temporary cursor"))
 		{
-			KCrashReporter.ReportErrorDevNotification("Cursor save failed", Environment.StackTrace, string.Format("LogType: '{0}' message='{1}'", type, msg));
 			return;
 		}
 		if (type == LogType.Exception)
@@ -410,7 +408,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 481873;
+			error.build = 483844;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;

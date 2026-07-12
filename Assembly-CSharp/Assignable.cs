@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
+using UnityEngine;
 
 public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 {
@@ -63,7 +64,11 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		{
 			this.Assign(Game.Instance.assignmentManager.assignment_groups["public"]);
 		}
-		this.assignmentPreconditions.Add((MinionAssignablesProxy proxy) => !(proxy.GetTargetGameObject().GetComponent<KMonoBehaviour>().GetMyWorld() != this.GetMyWorld()));
+		this.assignmentPreconditions.Add(delegate(MinionAssignablesProxy proxy)
+		{
+			GameObject targetGameObject = proxy.GetTargetGameObject();
+			return targetGameObject.GetComponent<KMonoBehaviour>().GetMyWorldId() == this.GetMyWorldId() || targetGameObject.IsMyParentWorld(base.gameObject);
+		});
 	}
 
 	protected override void OnCleanUp()
@@ -124,14 +129,14 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 
 	public bool IsAssignedTo(IAssignableIdentity identity)
 	{
-		Debug.Assert(identity != null, "IsAssignedTo identity is null");
+		global::Debug.Assert(identity != null, "IsAssignedTo identity is null");
 		Ownables soleOwner = identity.GetSoleOwner();
-		Debug.Assert(soleOwner != null, "IsAssignedTo identity sole owner is null");
+		global::Debug.Assert(soleOwner != null, "IsAssignedTo identity sole owner is null");
 		if (this.assignee != null)
 		{
 			foreach (Ownables ownables in this.assignee.GetOwners())
 			{
-				Debug.Assert(ownables, "Assignable owners list contained null");
+				global::Debug.Assert(ownables, "Assignable owners list contained null");
 				if (ownables.gameObject == soleOwner.gameObject)
 				{
 					return true;

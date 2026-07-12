@@ -64,7 +64,7 @@ public class GlassForgeConfig : IBuildingConfig
 		};
 		string text = ComplexRecipeManager.MakeObsoleteRecipeID("GlassForge", array[0].material);
 		string text2 = ComplexRecipeManager.MakeRecipeID("GlassForge", array, array2);
-		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2, 0);
+		ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
 		complexRecipe.time = 40f;
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.GLASSFORGE.RECIPE_DESCRIPTION, ElementLoader.GetElement(array2[0].material).name, ElementLoader.GetElement(array[0].material).name);

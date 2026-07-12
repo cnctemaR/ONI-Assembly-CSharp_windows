@@ -30,6 +30,7 @@ public class GeneShufflerConfig : IEntityConfig
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Ownable>();
 		gameObject.AddOrGet<Prioritizable>();
+		gameObject.AddOrGet<Demolishable>();
 		Storage storage = gameObject.AddOrGet<Storage>();
 		storage.dropOnLoad = true;
 		ManualDeliveryKG manualDeliveryKG = gameObject.AddOrGet<ManualDeliveryKG>();

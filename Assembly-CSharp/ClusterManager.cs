@@ -147,11 +147,16 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 	{
 		this.m_numRings = clusterLayout.numRings;
 		this.m_grid = new ClusterGrid(this.m_numRings);
+		AxialI axialI = AxialI.ZERO;
 		foreach (WorldGen worldGen in clusterLayout.worlds)
 		{
 			int id = this.CreateAsteroidWorldContainer(worldGen).id;
 			Vector2I position = worldGen.GetPosition();
 			Vector2I vector2I = position + worldGen.GetSize();
+			if (worldGen.isStartingWorld)
+			{
+				axialI = worldGen.GetClusterLocation();
+			}
 			for (int i = position.y; i < vector2I.y; i++)
 			{
 				for (int j = position.x; j < vector2I.x; j++)
@@ -166,7 +171,7 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 				this.activeWorldIdx = id;
 			}
 		}
-		this.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(AxialI.ZERO, 1);
+		this.GetSMI<ClusterFogOfWarManager.Instance>().RevealLocation(axialI, 1);
 		this.m_clusterPOIsManager.PopulatePOIsFromWorldGen(clusterLayout);
 	}
 
@@ -201,7 +206,6 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 		if (world != null)
 		{
 			AxialI clusterLocation = world.GetClusterLocation();
-			global::Debug.Assert(clusterLocation != AxialI.ZERO || world.isStartingWorld, "Only starting world should be at zero");
 			component2.Init(component.GetRandomName(), clusterLocation, world.Settings.world.asteroidIcon);
 		}
 		else

@@ -8,6 +8,26 @@ using UnityEngine;
 [EntityConfigOrder(1)]
 public class HatchMetalConfig : IEntityConfig
 {
+	public static TagBits METAL_ORE_TAGS
+	{
+		get
+		{
+			TagBits tagBits = new TagBits(new Tag[]
+			{
+				SimHashes.Cuprite.CreateTag(),
+				SimHashes.GoldAmalgam.CreateTag(),
+				SimHashes.IronOre.CreateTag(),
+				SimHashes.Wolframite.CreateTag(),
+				SimHashes.AluminumOre.CreateTag()
+			});
+			if (ElementLoader.FindElementByHash(SimHashes.Cobaltite) != null)
+			{
+				tagBits.SetTag(SimHashes.Cobaltite.CreateTag());
+			}
+			return tagBits;
+		}
+	}
+
 	public static GameObject CreateHatch(string id, string name, string desc, string anim_file, bool is_baby)
 	{
 		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseHatchConfig.BaseHatch(id, name, desc, anim_file, "HatchMetalBaseTrait", is_baby, "mtl_"), HatchTuning.PEN_SIZE_PER_CREATURE);
@@ -51,12 +71,4 @@ public class HatchMetalConfig : IEntityConfig
 	private static float MIN_POOP_SIZE_IN_KG = 10f;
 
 	public static int EGG_SORT_ORDER = HatchConfig.EGG_SORT_ORDER + 3;
-
-	public static readonly TagBits METAL_ORE_TAGS = new TagBits(new Tag[]
-	{
-		SimHashes.Cuprite.CreateTag(),
-		SimHashes.GoldAmalgam.CreateTag(),
-		SimHashes.IronOre.CreateTag(),
-		SimHashes.Wolframite.CreateTag()
-	});
 }

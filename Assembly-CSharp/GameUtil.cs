@@ -982,6 +982,29 @@ public static class GameUtil
 		return hashSet;
 	}
 
+	public static float GetRadiationAbsorptionPercentage(int cell)
+	{
+		return GameUtil.GetRadiationAbsorptionPercentage(Grid.Element[cell], Grid.Mass[cell], Grid.IsSolidCell(cell) && (Grid.Properties[cell] & 128) == 128);
+	}
+
+	public static float GetRadiationAbsorptionPercentage(Element elem, float mass, bool isConstructed)
+	{
+		float num = 2000f;
+		float num2 = 0.3f;
+		float num3 = 0.7f;
+		float num4 = 0.8f;
+		float num5;
+		if (isConstructed)
+		{
+			num5 = elem.radiationAbsorptionFactor * num4;
+		}
+		else
+		{
+			num5 = elem.radiationAbsorptionFactor * num2 + mass / num * elem.radiationAbsorptionFactor * num3;
+		}
+		return Mathf.Clamp(num5, 0f, 1f);
+	}
+
 	public static HashSet<int> FloodCollectCells(int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null, bool clearOversizedResults = true)
 	{
 		HashSet<int> hashSet = new HashSet<int>();
@@ -1651,7 +1674,11 @@ public static class GameUtil
 		{
 			if (minionIdentity.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 			{
-				num = Mathf.Max(num, Db.Get().Amounts.Stress.Lookup(minionIdentity).value);
+				AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(minionIdentity);
+				if (amountInstance != null)
+				{
+					num = Mathf.Max(num, amountInstance.value);
+				}
 			}
 		}
 		return num;
@@ -2014,7 +2041,7 @@ public static class GameUtil
 		GameObject gameObject = GameUtil.GetTelepad(ClusterManager.Instance.activeWorldId);
 		if (gameObject == null)
 		{
-			gameObject = GameUtil.GetTelepad(0);
+			gameObject = GameUtil.GetTelepad(ClusterManager.Instance.GetStartWorld().id);
 		}
 		return gameObject;
 	}
@@ -2286,20 +2313,25 @@ public static class GameUtil
 			.Replace("{Suffix}", text3);
 	}
 
-	public static string GenerateRandomWorldName(string worldType)
+	public static string GenerateRandomWorldName(string[] nameTables)
 	{
-		if (string.IsNullOrEmpty(worldType))
+		if (nameTables == null)
 		{
-			global::Debug.LogWarning("No name table provided to generate world name. Using GENERIC");
-			worldType = "GENERIC";
+			global::Debug.LogWarning("No name tables provided to generate world name. Using GENERIC");
+			nameTables = new string[] { "GENERIC" };
 		}
-		string text = GameUtil.RandomValueFromSeparatedString(Strings.Get("STRINGS.NAMEGEN.WORLD.ROOTS." + worldType.ToUpper()), "\n");
-		if (string.IsNullOrEmpty(text))
+		string text = "";
+		foreach (string text2 in nameTables)
 		{
-			text = GameUtil.RandomValueFromSeparatedString(Strings.Get(NAMEGEN.WORLD.ROOTS.GENERIC), "\n");
+			text += Strings.Get("STRINGS.NAMEGEN.WORLD.ROOTS." + text2.ToUpper());
 		}
-		string text2 = GameUtil.RandomValueFromSeparatedString(NAMEGEN.WORLD.SUFFIXES.GENERICLIST, "\n");
-		return text + text2;
+		string text3 = GameUtil.RandomValueFromSeparatedString(text, "\n");
+		if (string.IsNullOrEmpty(text3))
+		{
+			text3 = GameUtil.RandomValueFromSeparatedString(Strings.Get(NAMEGEN.WORLD.ROOTS.GENERIC), "\n");
+		}
+		string text4 = GameUtil.RandomValueFromSeparatedString(NAMEGEN.WORLD.SUFFIXES.GENERICLIST, "\n");
+		return text3 + text4;
 	}
 
 	public static float GetThermalComfort(int cell, float tolerance = -0.08368001f)
@@ -2493,6 +2525,13 @@ public static class GameUtil
 			descriptor4.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.HIGH_SPECIFIC_HEAT_CAPACITY, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.HIGH_SPECIFIC_HEAT_CAPACITY, element.name, element.specificHeatCapacity * 1f), Descriptor.DescriptorType.Effect);
 			descriptor4.IncreaseIndent();
 			list.Add(descriptor4);
+		}
+		if (element.radiationAbsorptionFactor >= 0.8f)
+		{
+			Descriptor descriptor5 = default(Descriptor);
+			descriptor5.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.EXCELLENT_RADIATION_SHIELD, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.EXCELLENT_RADIATION_SHIELD, element.name, element.radiationAbsorptionFactor), Descriptor.DescriptorType.Effect);
+			descriptor5.IncreaseIndent();
+			list.Add(descriptor5);
 		}
 		return list;
 	}

@@ -58,6 +58,14 @@ public class ColonyDestinationAsteroidBeltData
 
 	public List<global::ProcGen.World> worlds { get; private set; }
 
+	public ClusterLayout Layout
+	{
+		get
+		{
+			return this.cluster;
+		}
+	}
+
 	public global::ProcGen.World GetStartWorld
 	{
 		get
@@ -133,21 +141,21 @@ public class ColonyDestinationAsteroidBeltData
 		List<AsteroidDescriptor> list = new List<AsteroidDescriptor>();
 		if (this.cluster != null && DlcManager.FeatureClusterSpaceEnabled())
 		{
-			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.CLUSTERNAME, Strings.Get(this.cluster.name)), Strings.Get(this.cluster.description), null));
+			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.CLUSTERNAME, Strings.Get(this.cluster.name)), Strings.Get(this.cluster.description), Color.white, null));
 		}
-		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.PLANETNAME, this.startWorldName), null, null));
-		list.Add(new AsteroidDescriptor(Strings.Get(this.startWorld.description), null, null));
+		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.PLANETNAME, this.startWorldName), null, Color.white, null));
+		list.Add(new AsteroidDescriptor(Strings.Get(this.startWorld.description), null, Color.white, null));
 		if (DlcManager.FeatureClusterSpaceEnabled())
 		{
-			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.MOONNAMES, Array.Empty<object>()), null, null));
+			list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.MOONNAMES, Array.Empty<object>()), null, Color.white, null));
 			foreach (global::ProcGen.World world in this.worlds)
 			{
-				list.Add(new AsteroidDescriptor(string.Format("{0}", Strings.Get(world.name)), Strings.Get(world.description), null));
+				list.Add(new AsteroidDescriptor(string.Format("{0}", Strings.Get(world.name)), Strings.Get(world.description), Color.white, null));
 			}
 		}
 		int num = Mathf.Clamp(this.difficulty, 0, ColonyDestinationAsteroidBeltData.survivalOptions.Count - 1);
 		global::Tuple<string, string, string> tuple = ColonyDestinationAsteroidBeltData.survivalOptions[num];
-		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.TITLE, tuple.first, tuple.third), null, null));
+		list.Add(new AsteroidDescriptor(string.Format(WORLDS.SURVIVAL_CHANCE.TITLE, tuple.first, tuple.third), null, Color.white, null));
 		return list;
 	}
 
@@ -164,17 +172,74 @@ public class ColonyDestinationAsteroidBeltData
 			List<string> randomTraits = SettingsCache.GetRandomTraits(num, world);
 			if (DlcManager.IsExpansion1Active())
 			{
-				list.Add(new AsteroidDescriptor("", null, null));
-				list.Add(new AsteroidDescriptor(string.Format("<b>{0}</b>", Strings.Get(world.name)), null, null));
+				list.Add(new AsteroidDescriptor("", null, Color.white, null));
+				list.Add(new AsteroidDescriptor(string.Format("<b>{0}</b>", Strings.Get(world.name)), null, Color.white, null));
 			}
 			foreach (string text in randomTraits)
 			{
 				WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
-				list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(cachedTrait.name), cachedTrait.colorHex), Strings.Get(cachedTrait.description), null));
+				list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(cachedTrait.name), cachedTrait.colorHex), Strings.Get(cachedTrait.description), global::Util.ColorFromHex(cachedTrait.colorHex), null));
 			}
 			if (randomTraits.Count == 0)
 			{
-				list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, null));
+				list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, Color.white, null));
+			}
+			if (num > 0)
+			{
+				num++;
+			}
+		}
+		return list;
+	}
+
+	public List<AsteroidDescriptor> GenerateTraitDescriptors(global::ProcGen.World singleWorld)
+	{
+		List<AsteroidDescriptor> list = new List<AsteroidDescriptor>();
+		List<global::ProcGen.World> list2 = new List<global::ProcGen.World>();
+		list2.Add(this.startWorld);
+		list2.AddRange(this.worlds);
+		int num = this.seed;
+		for (int i = 0; i < list2.Count; i++)
+		{
+			if (list2[i] == singleWorld)
+			{
+				global::ProcGen.World world = list2[i];
+				List<string> randomTraits = SettingsCache.GetRandomTraits(num, world);
+				foreach (string text in randomTraits)
+				{
+					WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
+					list.Add(new AsteroidDescriptor(string.Format("<color=#{1}>{0}</color>", Strings.Get(cachedTrait.name), cachedTrait.colorHex), Strings.Get(cachedTrait.description), global::Util.ColorFromHex(cachedTrait.colorHex), null));
+				}
+				if (randomTraits.Count == 0)
+				{
+					list.Add(new AsteroidDescriptor(WORLD_TRAITS.NO_TRAITS.NAME, WORLD_TRAITS.NO_TRAITS.DESCRIPTION, Color.white, null));
+				}
+			}
+			if (num > 0)
+			{
+				num++;
+			}
+		}
+		return list;
+	}
+
+	public List<WorldTrait> GetWorldTraits(global::ProcGen.World singleWorld)
+	{
+		List<WorldTrait> list = new List<WorldTrait>();
+		List<global::ProcGen.World> list2 = new List<global::ProcGen.World>();
+		list2.Add(this.startWorld);
+		list2.AddRange(this.worlds);
+		int num = this.seed;
+		for (int i = 0; i < list2.Count; i++)
+		{
+			if (list2[i] == singleWorld)
+			{
+				global::ProcGen.World world = list2[i];
+				foreach (string text in SettingsCache.GetRandomTraits(num, world))
+				{
+					WorldTrait cachedTrait = SettingsCache.GetCachedTrait(text, true);
+					list.Add(cachedTrait);
+				}
 			}
 			if (num > 0)
 			{
@@ -192,7 +257,7 @@ public class ColonyDestinationAsteroidBeltData
 
 	private List<AsteroidDescriptor> traitDescriptors = new List<AsteroidDescriptor>();
 
-	private static List<global::Tuple<string, string, string>> survivalOptions = new List<global::Tuple<string, string, string>>
+	public static List<global::Tuple<string, string, string>> survivalOptions = new List<global::Tuple<string, string, string>>
 	{
 		new global::Tuple<string, string, string>(WORLDS.SURVIVAL_CHANCE.MOSTHOSPITABLE, "", "D2F40C"),
 		new global::Tuple<string, string, string>(WORLDS.SURVIVAL_CHANCE.VERYHIGH, "", "7DE419"),

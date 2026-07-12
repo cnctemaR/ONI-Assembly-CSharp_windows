@@ -11,12 +11,12 @@ public class MinionStartingStats : ITelepadDeliverable
 	{
 		if (is_starter_minion)
 		{
-			int num = global::UnityEngine.Random.Range(0, 29);
-			this.personality = Db.Get().Personalities[num];
+			int num = global::UnityEngine.Random.Range(0, Db.Get().Personalities.GetStartingPersonalities().Count);
+			this.personality = Db.Get().Personalities.GetStartingPersonalities()[num];
 		}
 		else
 		{
-			int num2 = global::UnityEngine.Random.Range(0, 35);
+			int num2 = global::UnityEngine.Random.Range(0, Db.Get().Personalities.Count);
 			this.personality = Db.Get().Personalities[num2];
 		}
 		this.voiceIdx = global::UnityEngine.Random.Range(0, 4);

@@ -110,6 +110,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		}
 	}
 
+	private void OnCleanup()
+	{
+		Global.Instance.GetInputManager().usedMenus.Remove(this);
+	}
+
 	private void LateUpdate()
 	{
 		if (this.queueStopDrag)
@@ -287,17 +292,36 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		{
 			return;
 		}
-		if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
+		if (!KInputManager.currentControllerIsGamepad)
 		{
-			this.activeTool.OnLeftClickUp(this.GetCursorPos());
+			if (e.TryConsume(global::Action.MouseLeft) || e.TryConsume(global::Action.ShiftMouseLeft))
+			{
+				this.activeTool.OnLeftClickUp(this.GetCursorPos());
+				return;
+			}
+			if (e.IsAction(global::Action.MouseRight))
+			{
+				this.activeTool.OnRightClickUp(this.GetCursorPos());
+				return;
+			}
+			this.activeTool.OnKeyUp(e);
 			return;
 		}
-		if (e.IsAction(global::Action.MouseRight))
+		else
 		{
-			this.activeTool.OnRightClickUp(this.GetCursorPos());
+			if (e.IsAction(global::Action.MouseLeft) || e.IsAction(global::Action.ShiftMouseLeft))
+			{
+				this.activeTool.OnLeftClickUp(this.GetCursorPos());
+				return;
+			}
+			if (e.IsAction(global::Action.MouseRight))
+			{
+				this.activeTool.OnRightClickUp(this.GetCursorPos());
+				return;
+			}
+			this.activeTool.OnKeyUp(e);
 			return;
 		}
-		this.activeTool.OnKeyUp(e);
 	}
 
 	public bool ConsumeIfNotDragging(KButtonEvent e, global::Action action)

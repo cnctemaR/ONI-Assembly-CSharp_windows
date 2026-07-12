@@ -37,6 +37,14 @@ public static class DebugUtil
 		}
 	}
 
+	public static void AssertArgs(bool test, params object[] objs)
+	{
+		if (!test)
+		{
+			global::Debug.LogError(DebugUtil.BuildString(objs));
+		}
+	}
+
 	public static string BuildString(object[] objs)
 	{
 		string text = "";
@@ -66,6 +74,12 @@ public static class DebugUtil
 		{
 			global::Debug.LogWarning(DebugUtil.BuildString(objs));
 		}
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	public static void AssertEditorOnlyArgs(bool test, params object[] objs)
+	{
+		global::Debug.Assert(test, DebugUtil.BuildString(objs));
 	}
 
 	public static void DevAssertArgsWithStack(bool test, params object[] objs)

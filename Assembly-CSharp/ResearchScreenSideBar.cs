@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -15,8 +14,8 @@ public class ResearchScreenSideBar : KScreen
 		this.RefreshCategoriesContentExpanded();
 		this.RefreshWidgets();
 		this.searchBox.onValueChanged.AddListener(new UnityAction<string>(this.UpdateCurrentSearch));
-		TMP_InputField tmp_InputField = this.searchBox;
-		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
+		KInputTextField kinputTextField = this.searchBox;
+		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
 			base.isEditing = true;
 		}));
@@ -114,12 +113,15 @@ public class ResearchScreenSideBar : KScreen
 				{
 					return;
 				}
-				if (e.TryConsume(global::Action.ZoomIn))
+				if (!KInputManager.currentControllerIsGamepad)
 				{
+					if (e.TryConsume(global::Action.ZoomIn))
+					{
+						return;
+					}
+					e.TryConsume(global::Action.ZoomOut);
 					return;
 				}
-				e.TryConsume(global::Action.ZoomOut);
-				return;
 			}
 		}
 	}
@@ -480,7 +482,7 @@ public class ResearchScreenSideBar : KScreen
 
 	[Header("Other references")]
 	[SerializeField]
-	private TMP_InputField searchBox;
+	private KInputTextField searchBox;
 
 	[SerializeField]
 	private MultiToggle allFilter;

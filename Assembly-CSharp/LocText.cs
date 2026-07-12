@@ -2,6 +2,7 @@
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class LocText : TextMeshProUGUI
 {
@@ -52,6 +53,7 @@ public class LocText : TextMeshProUGUI
 		}
 		this.text = Localization.Fixup(this.text);
 		base.isRightToLeftText = Localization.IsRightToLeft;
+		KInputManager.InputChange.AddListener(new UnityAction(this.RefreshText));
 		SetTextStyleSetting setTextStyleSetting = base.gameObject.GetComponent<SetTextStyleSetting>();
 		if (setTextStyleSetting == null)
 		{
@@ -99,11 +101,68 @@ public class LocText : TextMeshProUGUI
 
 	private string FilterInput(string input)
 	{
+		if (input != null)
+		{
+			string text = LocText.ParseText(input);
+			if (text != input)
+			{
+				this.originalString = input;
+			}
+			else
+			{
+				this.originalString = string.Empty;
+			}
+			input = text;
+		}
 		if (this.AllowLinks)
 		{
 			return LocText.ModifyLinkStrings(input);
 		}
 		return input;
+	}
+
+	public static string ParseText(string input)
+	{
+		if (input.Contains("{Hotkey/"))
+		{
+			string[] array = input.Split(new char[] { '{', '}' });
+			if (array.Length >= 3)
+			{
+				string text = string.Empty;
+				for (int i = 0; i < array.Length; i++)
+				{
+					if (i % 2 == 0)
+					{
+						text += array[i];
+					}
+					else
+					{
+						string text2 = array[i].Split(new char[] { '/' })[1];
+						for (int j = 0; j < 273; j++)
+						{
+							global::Action action = (global::Action)j;
+							string text3 = action.ToString();
+							if (text2 == text3)
+							{
+								text += GameUtil.ReplaceHotkeyString("{Hotkey}", (global::Action)j);
+								break;
+							}
+						}
+					}
+				}
+				input = text;
+				return text;
+			}
+		}
+		return input;
+	}
+
+	private void RefreshText()
+	{
+		if (this.originalString != string.Empty)
+		{
+			this.SetText(this.originalString);
+		}
 	}
 
 	protected override void GenerateTextMesh()
@@ -165,6 +224,8 @@ public class LocText : TextMeshProUGUI
 	public bool staticLayout;
 
 	private TextLinkHandler textLinkHandler;
+
+	private string originalString = string.Empty;
 
 	[SerializeField]
 	private bool allowLinksInternal;

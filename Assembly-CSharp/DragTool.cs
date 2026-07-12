@@ -77,7 +77,10 @@ public class DragTool : InterfaceTool
 		this.dragging = true;
 		this.downPos = cursor_pos;
 		this.previousCursorPos = cursor_pos;
-		KScreenManager.Instance.SetEventSystemEnabled(false);
+		if (!KInputManager.currentControllerIsGamepad)
+		{
+			KScreenManager.Instance.SetEventSystemEnabled(false);
+		}
 		this.hasFocus = true;
 		if (this.areaVisualizerTextPrefab != null)
 		{

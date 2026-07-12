@@ -51,6 +51,7 @@ public class RadiationLight : StateMachineComponent<RadiationLight.StatesInstanc
 			}
 			this.ToggleEmitter(false);
 			smi.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target" });
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Radiation, true);
 		}
 
 		public void ToggleEmitter(bool on)

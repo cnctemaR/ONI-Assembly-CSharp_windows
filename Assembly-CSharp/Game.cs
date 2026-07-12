@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using FMOD.Studio;
@@ -150,6 +151,38 @@ public class Game : KMonoBehaviour
 		this.ediblesManager = base.gameObject.AddComponent<EdiblesManager>();
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
+		this.changelistsPlayedOn = new List<uint>();
+		this.changelistsPlayedOn.Add(496912U);
+		try
+		{
+			TimeZoneInfo timeZoneInfo = null;
+			if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer)
+			{
+				timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+			}
+			else if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
+			{
+				timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("America/Vancouver");
+			}
+			else if (Application.platform == RuntimePlatform.LinuxEditor || Application.platform == RuntimePlatform.LinuxPlayer)
+			{
+				timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("America/Vancouver");
+			}
+			if (timeZoneInfo != null)
+			{
+				this.dateGenerated = TimeZoneInfo.ConvertTime(global::System.DateTime.UtcNow, timeZoneInfo).ToString("F", CultureInfo.GetCultureInfo("en-US"));
+			}
+			else
+			{
+				this.dateGenerated = "Missing timezone for platform " + Application.platform.ToString();
+				KCrashReporter.ReportErrorDevNotification("Timezone Data incorrect", Environment.StackTrace, this.dateGenerated);
+			}
+		}
+		catch (Exception ex)
+		{
+			this.dateGenerated = "Failed to get timezone for platform " + Application.platform.ToString() + ": " + ex.Message;
+			KCrashReporter.ReportErrorDevNotification("Timezone Data incorrect", Environment.StackTrace, this.dateGenerated);
+		}
 	}
 
 	public void SetGameStarted()
@@ -302,7 +335,7 @@ public class Game : KMonoBehaviour
 			MusicManager.instance.PlaySong("Music_FrontEnd", false);
 			return;
 		}
-		MusicManager.instance.StopSong("Music_FrontEnd", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 	}
 
 	private Player SpawnPlayer()
@@ -314,9 +347,25 @@ public class Game : KMonoBehaviour
 		component.ScreenManager.StartScreen(ScreenPrefabs.Instance.ToolTipScreen.gameObject, null, GameScreenManager.UIRenderTarget.HoverTextScreen);
 		this.cameraController = global::Util.KInstantiate(this.cameraControllerPrefab, null, null).GetComponent<CameraController>();
 		component.CameraController = this.cameraController;
-		KInputHandler.Add(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController, 1);
+		if (KInputManager.currentController != null)
+		{
+			KInputHandler.Add(KInputManager.currentController, this.cameraController, 1);
+		}
+		else
+		{
+			KInputHandler.Add(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController, 1);
+		}
+		Global.Instance.GetInputManager().usedMenus.Add(this.cameraController);
 		this.playerController = component.GetComponent<PlayerController>();
-		KInputHandler.Add(Global.Instance.GetInputManager().GetDefaultController(), this.playerController, 20);
+		if (KInputManager.currentController != null)
+		{
+			KInputHandler.Add(KInputManager.currentController, this.playerController, 20);
+		}
+		else
+		{
+			KInputHandler.Add(Global.Instance.GetInputManager().GetDefaultController(), this.playerController, 20);
+		}
+		Global.Instance.GetInputManager().usedMenus.Add(this.playerController);
 		return component;
 	}
 
@@ -881,7 +930,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 494396U;
+		uint num = 496912U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1096,6 +1145,12 @@ public class Game : KMonoBehaviour
 		gameSaveData.advancedPersonalPriorities = this.advancedPersonalPriorities;
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
+		gameSaveData.dateGenerated = this.dateGenerated;
+		if (!this.changelistsPlayedOn.Contains(496912U))
+		{
+			this.changelistsPlayedOn.Add(496912U);
+		}
+		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
 		{
 			this.OnSave(gameSaveData);
@@ -1118,6 +1173,15 @@ public class Game : KMonoBehaviour
 		this.debugWasUsed = gameSaveData.debugWasUsed;
 		this.autoPrioritizeRoles = gameSaveData.autoPrioritizeRoles;
 		this.advancedPersonalPriorities = gameSaveData.advancedPersonalPriorities;
+		this.dateGenerated = gameSaveData.dateGenerated;
+		this.changelistsPlayedOn = gameSaveData.changelistsPlayedOn ?? new List<uint>();
+		if (gameSaveData.dateGenerated.IsNullOrWhiteSpace())
+		{
+			this.dateGenerated = "Before U41 (Feb 2022)";
+		}
+		DebugUtil.LogArgs(new object[] { "SAVEINFO" });
+		DebugUtil.LogArgs(new object[] { " - Generated: " + this.dateGenerated });
+		DebugUtil.LogArgs(new object[] { " - Played on: " + string.Join<uint>(", ", this.changelistsPlayedOn) });
 		this.savedInfo = gameSaveData.savedInfo;
 		this.savedInfo.InitializeEmptyVariables();
 		CustomGameSettings.Instance.Print();
@@ -1263,10 +1327,10 @@ public class Game : KMonoBehaviour
 		{
 			SteamUGCService.Instance.enabled = false;
 		}
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
 		if (MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
 		{
-			MusicManager.instance.StopSong("Music_FrontEnd", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 		}
 		MainMenu.Instance.StopMainMenuMusic();
 	}
@@ -1298,7 +1362,7 @@ public class Game : KMonoBehaviour
 		{
 			loopingSoundManager.StopAllSounds();
 		}
-		MusicManager.instance.KillAllSongs(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.KillAllSongs(STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.StopPersistentSnapshots();
 		foreach (List<SaveLoadRoot> list in SaveLoader.Instance.saveManager.GetLists().Values)
 		{
@@ -1666,6 +1730,10 @@ public class Game : KMonoBehaviour
 	private bool hasFirstSimTickRun;
 
 	private float simDt;
+
+	public string dateGenerated;
+
+	public List<uint> changelistsPlayedOn;
 
 	[SerializeField]
 	public Game.ConduitVisInfo liquidConduitVisInfo;
@@ -2069,6 +2137,10 @@ public class Game : KMonoBehaviour
 		public bool advancedPersonalPriorities;
 
 		public Game.SavedInfo savedInfo;
+
+		public string dateGenerated;
+
+		public List<uint> changelistsPlayedOn;
 	}
 
 	public delegate void CansaveCB();

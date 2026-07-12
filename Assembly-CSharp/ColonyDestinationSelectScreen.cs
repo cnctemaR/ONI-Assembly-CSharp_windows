@@ -2,7 +2,6 @@
 using Klei.CustomSettings;
 using ProcGen;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -17,8 +16,8 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		this.launchButton.onClick += this.LaunchClicked;
 		this.shuffleButton.onClick += this.ShuffleClicked;
 		this.destinationMapPanel.OnAsteroidClicked += this.OnAsteroidClicked;
-		TMP_InputField tmp_InputField = this.coordinate;
-		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(this.CoordinateEditStarted));
+		KInputTextField kinputTextField = this.coordinate;
+		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(this.CoordinateEditStarted));
 		this.coordinate.onEndEdit.AddListener(new UnityAction<string>(this.CoordinateEditFinished));
 		if (this.locationIcons != null)
 		{
@@ -249,7 +248,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 		{
 			this.destinationMapPanel.ScrollRight();
 		}
-		else if (this.customSettings.activeSelf && !e.Consumed && e.TryConsume(global::Action.Escape))
+		else if (this.customSettings.activeSelf && !e.Consumed && (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight)))
 		{
 			this.CustomizeClose();
 		}
@@ -295,7 +294,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 	private AsteroidDescriptorPanel selectedLocationProperties;
 
 	[SerializeField]
-	private TMP_InputField coordinate;
+	private KInputTextField coordinate;
 
 	[SerializeField]
 	private RectTransform destinationInfoPanel;

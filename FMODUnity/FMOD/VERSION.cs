@@ -4,7 +4,7 @@ namespace FMOD
 {
 	public class VERSION
 	{
-		public const int number = 131333;
+		public const int number = 131348;
 
 		public const string dll = "fmodstudio";
 

@@ -412,7 +412,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Harvest Pending";
 
-				public static LocString TOOLTIP = "Use the " + UI.FormatAsTool("Harvest Tool", "[Y]") + " to mark this plant for harvest";
+				public static LocString TOOLTIP = "Use the " + UI.FormatAsTool("Harvest Tool", global::Action.Harvest) + " to mark this plant for harvest";
 			}
 
 			public class GROWINGBRANCHES
@@ -735,18 +735,28 @@ namespace STRINGS
 
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
-					"• The ",
-					UI.FormatAsHotkey("[WASD]"),
-					" keys pan my view and the ",
-					UI.FormatAsHotkey("[MOUSE WHEEL]"),
-					" zooms it in and out.\n\n• ",
-					UI.FormatAsHotkey("[H]"),
+					"• I can use ",
+					UI.FormatAsHotKey(global::Action.CinemaPanLeft),
+					" and ",
+					UI.FormatAsHotKey(global::Action.CinemaPanRight),
+					"to pan my view left and right, and ",
+					UI.FormatAsHotKey(global::Action.CinemaPanUp),
+					"and ",
+					UI.FormatAsHotKey(global::Action.CinemaPanDown),
+					"to pan up and down.\n\n• ",
+					UI.FormatAsHotKey(global::Action.CinemaZoomIn),
+					" lets me zoom in, and ",
+					UI.FormatAsHotKey(global::Action.CinemaZoomOut),
+					"zooms out.\n\n• ",
+					UI.FormatAsHotKey(global::Action.CameraHome),
 					" returns my view to the Printing Pod.\n\n• I can speed or slow my perception of time using the top left corner buttons, or by pressing ",
-					UI.FormatAsHotkey("[TAB]"),
-					", while pressing ",
-					UI.FormatAsHotkey("[SPACE]"),
+					UI.FormatAsHotKey(global::Action.SpeedUp),
+					"or ",
+					UI.FormatAsHotKey(global::Action.SlowDown),
+					". Pressing ",
+					UI.FormatAsHotKey(global::Action.TogglePause),
 					" will pause the flow of time entirely.\n\n• I'll keep records of everything I discover in my personal DATABASE ",
-					UI.FormatAsHotkey("[U]"),
+					UI.FormatAsHotKey(global::Action.ManageDatabase),
 					" to refer back to if I forget anything important."
 				});
 
@@ -769,7 +779,7 @@ namespace STRINGS
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
 					"I can use the ",
-					UI.FormatAsTool("Dig Tool", "[G]"),
+					UI.FormatAsTool("Dig Tool", global::Action.Dig),
 					" and the ",
 					UI.FormatAsBuildMenuTab("Build Menu"),
 					" in the lower left of the screen to begin planning my first construction tasks.\n\nOnce I've placed a few errands my Duplicants will automatically get to work, without me needing to direct them individually."
@@ -805,7 +815,7 @@ namespace STRINGS
 					"Duplicants always perform errands in order of highest to lowest priority. They will harvest ",
 					UI.FormatAsLink("Food", "FOOD"),
 					" before they build, for example, or always build new structures before they mine materials.\n\nI can open the ",
-					UI.FormatAsManagementMenu("Priorities Screen", "[L]"),
+					UI.FormatAsManagementMenu("Priorities Screen", global::Action.ManagePriorities),
 					" to set which Errand Types Duplicants may or may not perform, or to specialize skilled Duplicants for particular Errand Types."
 				});
 
@@ -826,7 +836,7 @@ namespace STRINGS
 					".\n\nDuplicants will also be ",
 					UI.FormatAsLink("Stressed", "STRESS"),
 					" by walking through Polluted Water, so I should have my Duplicants clean up spills by clicking and dragging the ",
-					UI.FormatAsTool("Mop Tool", "[M]")
+					UI.FormatAsTool("Mop Tool", global::Action.Mop)
 				});
 
 				public static LocString TOOLTIP = "Notes on handling polluted materials";
@@ -848,13 +858,13 @@ namespace STRINGS
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
 					"Duplicants will choose where to work based on the priority of the errands that I give them. I can open the ",
-					UI.FormatAsManagementMenu("Priorities Screen", "[L]"),
+					UI.FormatAsManagementMenu("Priorities Screen", global::Action.ManagePriorities),
 					" to set their ",
 					UI.PRE_KEYWORD,
 					"Duplicant Priorities",
 					UI.PST_KEYWORD,
 					", and the ",
-					UI.FormatAsTool("Priority Tool", "[P]"),
+					UI.FormatAsTool("Priority Tool", global::Action.Prioritize),
 					" to fine tune ",
 					UI.PRE_KEYWORD,
 					"Building Priority",
@@ -874,7 +884,7 @@ namespace STRINGS
 					"By building a ",
 					UI.FormatAsLink("Pitcher Pump", "LIQUIDPUMPINGSTATION"),
 					" from the ",
-					UI.FormatAsBuildMenuTab("Plumbing Tab", "[5]"),
+					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5),
 					" over a pool of liquid, my Duplicants will be able to bottle it up and manually deliver it wherever it needs to go."
 				});
 
@@ -885,7 +895,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Tutorial: Scheduling";
 
-				public static LocString MESSAGEBODY = "My Duplicants will only eat, sleep, work, or bathe during the times I allot for such activities.\n\nTo make the best use of their time, I can open the " + UI.FormatAsManagementMenu("Schedule Tab", "[PERIOD KEY]") + " to adjust the colony's schedule and plan how they should utilize their day.";
+				public static LocString MESSAGEBODY = "My Duplicants will only eat, sleep, work, or bathe during the times I allot for such activities.\n\nTo make the best use of their time, I can open the " + UI.FormatAsManagementMenu("Schedule Tab", global::Action.ManageSchedule) + " to adjust the colony's schedule and plan how they should utilize their day.";
 
 				public static LocString TOOLTIP = "Notes on scheduling my Duplicants' time";
 			}
@@ -905,7 +915,7 @@ namespace STRINGS
 					" affect my Duplicants' internal body temperature and cause undue ",
 					UI.FormatAsLink("Stress", "STRESS"),
 					".\n\nOpening the ",
-					UI.FormatAsOverlay("Temperature Overlay", "[F3]"),
+					UI.FormatAsOverlay("Temperature Overlay", global::Action.Overlay3),
 					" and checking the <b>Thermal Tolerance</b> box allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
 				});
 			}
@@ -935,10 +945,10 @@ namespace STRINGS
 					" can cause ",
 					UI.FormatAsLink("Disease", "DISEASE"),
 					" in my Duplicants. I can use the ",
-					UI.FormatAsOverlay("Germ Overlay", "[F9]"),
+					UI.FormatAsOverlay("Germ Overlay", global::Action.Overlay9),
 					" to view all germ concentrations in my colony, and even detect the sources spawning them.\n\nBuilding Wash Basins from the ",
-					UI.FormatAsBuildMenuTab("Medicine Tab", "[8]"),
-					" by colony toilets will tell my Duplicants they need to wash up."
+					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8),
+					" near colony toilets will tell my Duplicants they need to wash up."
 				});
 			}
 
@@ -1022,10 +1032,10 @@ namespace STRINGS
 					" energy that can be toxic to my Duplicants.\n\nI can use the ",
 					UI.FormatAsOverlay("Radiation Overlay"),
 					" ",
-					UI.FormatAsHotkey("[L-SHIFT + F4]"),
+					UI.FormatAsHotKey(global::Action.Overlay15),
 					" to check the scope of the Radiation field. Building thick walls around radiation emitters will dampen the field and protect my Duplicants from getting ",
 					UI.FormatAsLink("Radiation Sickness", "RADIATIONSICKNESS"),
-					"."
+					" ."
 				});
 			}
 
@@ -1038,7 +1048,7 @@ namespace STRINGS
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
 					"Building a rocket first requires constructing a ",
-					UI.FormatAsLink("Rocket Platform", "LAUNCHPLATFORM"),
+					UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
 					" and adding modules from the menu. All components of the Rocket Checklist will need to be complete before being capable of launching.\n\nA ",
 					UI.FormatAsLink("Telescope", "TELESCOPE"),
 					" needs to be built on the surface of a Planetoid in order to use the ",
@@ -1046,7 +1056,7 @@ namespace STRINGS
 					"Starmap Screen",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[Z]"),
+					UI.FormatAsHotKey(global::Action.ManageStarmap),
 					" to see and set course for new destinations."
 				});
 			}
@@ -1066,7 +1076,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on managing electricity";
 
-				public static LocString MESSAGEBODY = "Generators are considered \"Producers\" of Power, while the various buildings and machines in the colony are considered \"Consumers\". Each Consumer will pull a certain wattage from the power circuit it is connected to, which can be checked at any time by clicking the building and going to the Energy Tab.\n\nI can use the Power Overlay " + UI.FormatAsHotkey("[F2]") + " to quickly check the status of all my circuits. If the Consumers are taking more wattage than the Generators are creating, the Batteries will drain and there will be brownouts.\n\nAdditionally, if the Consumers are pulling more wattage through the Wires than the Wires can handle, they will overload and burn out. To correct both these situations, I will need to reorganize my Consumers onto separate circuits.";
+				public static LocString MESSAGEBODY = "Generators are considered \"Producers\" of Power, while the various buildings and machines in the colony are considered \"Consumers\". Each Consumer will pull a certain wattage from the power circuit it is connected to, which can be checked at any time by clicking the building and going to the Energy Tab.\n\nI can use the Power Overlay " + UI.FormatAsHotKey(global::Action.Overlay2) + " to quickly check the status of all my circuits. If the Consumers are taking more wattage than the Generators are creating, the Batteries will drain and there will be brownouts.\n\nAdditionally, if the Consumers are pulling more wattage through the Wires than the Wires can handle, they will overload and burn out. To correct both these situations, I will need to reorganize my Consumers onto separate circuits.";
 			}
 
 			public class DIGGING
@@ -1075,7 +1085,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on buried riches";
 
-				public static LocString MESSAGEBODY = "Everything a colony needs to get going is found in the ground. Instructing Duplicants to dig out areas means we can find food, mine resources to build infrastructure, and clear space for the colony to grow. I can access the Dig Tool with " + UI.FormatAsHotkey("[G]") + ", which allows me to select the area where I want my Duplicants to dig.\n\nDuplicants will need to gain the Superhard Digging skill to mine Abyssalite and the Superduperhard Digging skill to mine Diamond and Obsidian. Without the proper skills, these materials will be undiggable.";
+				public static LocString MESSAGEBODY = "Everything a colony needs to get going is found in the ground. Instructing Duplicants to dig out areas means we can find food, mine resources to build infrastructure, and clear space for the colony to grow. I can access the Dig Tool with " + UI.FormatAsHotKey(global::Action.Dig) + ", which allows me to select the area where I want my Duplicants to dig.\n\nDuplicants will need to gain the Superhard Digging skill to mine Abyssalite and the Superduperhard Digging skill to mine Diamond and Obsidian. Without the proper skills, these materials will be undiggable.";
 			}
 
 			public class INSULATION
@@ -1084,7 +1094,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on effective temperature management";
 
-				public static LocString MESSAGEBODY = "The temperature of an environment can have positive or negative effects on the well-being of my Duplicants, as well as the plants and critters in my colony. Selecting " + UI.FormatAsHotkey("[F3]") + " will open the Temperature Overlay where I can check for any hot or cold spots.\n\nI can use a Utility building like an Ice-E Fan or a Space Heater to make an area colder or warmer. However, I will have limited success changing the temperature of a room unless I build the area with insulating tiles to prevent cold or warm air from escaping.";
+				public static LocString MESSAGEBODY = "The temperature of an environment can have positive or negative effects on the well-being of my Duplicants, as well as the plants and critters in my colony. Selecting " + UI.FormatAsHotKey(global::Action.Overlay3) + " will open the Temperature Overlay where I can check for any hot or cold spots.\n\nI can use a Utility building like an Ice-E Fan or a Space Heater to make an area colder or warmer. However, I will have limited success changing the temperature of a room unless I build the area with insulating tiles to prevent cold or warm air from escaping.";
 			}
 
 			public class PLUMBING
@@ -1093,7 +1103,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Notes on connecting buildings with pipes";
 
-				public static LocString MESSAGEBODY = "When connecting pipes it is useful to have the Plumbing Overlay " + UI.FormatAsHotkey("[F6]") + " selected. Each building which requires plumbing must have their Building Intake connected to the Output Pipe from a source such as a Liquid Pump. Liquid Pumps must be submerged in liquid and attached to a power source to function.\n\nBuildings often output contaminated water which must flow out of the building through piping from the Output Pipe. The water can then be expelled through a Liquid Vent, or filtered through a Liquid Filter for reuse.";
+				public static LocString MESSAGEBODY = "When connecting pipes it is useful to have the Plumbing Overlay " + UI.FormatAsHotKey(global::Action.Overlay6) + " selected. Each building which requires plumbing must have their Building Intake connected to the Output Pipe from a source such as a Liquid Pump. Liquid Pumps must be submerged in liquid and attached to a power source to function.\n\nBuildings often output contaminated water which must flow out of the building through piping from the Output Pipe. The water can then be expelled through a Liquid Vent, or filtered through a Liquid Filter for reuse.";
 			}
 
 			public class NEW_AUTOMATION_WARNING
@@ -1266,7 +1276,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Oxygen Diffusers", "MINERALDEOXIDIZER"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Oxygen Tab", "[2]")
+					UI.FormatAsBuildMenuTab("Oxygen Tab", global::Action.Plan2)
 				});
 			}
 
@@ -1306,7 +1316,7 @@ namespace STRINGS
 					"    • {0} are currently available\n    • {1} is being consumed per cycle\n\n",
 					UI.FormatAsLink("Microbe Mushers", "MICROBEMUSHER"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Food Tab", "[4]")
+					UI.FormatAsBuildMenuTab("Food Tab", global::Action.Plan4)
 				});
 			}
 
@@ -1320,7 +1330,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Sick Bays", "DOCTORSTATION"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Medicine Tab", "[8]")
+					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8)
 				});
 			}
 
@@ -1334,7 +1344,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Plumbing Tab", "[5]")
+					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5)
 				});
 			}
 
@@ -1350,7 +1360,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Microbe Mushers", "MICROBEMUSHER"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Food Tab", "[4]")
+					UI.FormatAsBuildMenuTab("Food Tab", global::Action.Plan4)
 				});
 			}
 
@@ -1365,7 +1375,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Wash Basins", "WASHBASIN"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Medicine Tab", "[8]")
+					UI.FormatAsBuildMenuTab("Medicine Tab", global::Action.Plan8)
 				});
 			}
 
@@ -1379,7 +1389,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Cots", "COTS"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Furniture Tab", "[9]")
+					UI.FormatAsBuildMenuTab("Furniture Tab", global::Action.Plan9)
 				});
 			}
 
@@ -1592,7 +1602,7 @@ namespace STRINGS
 					"Starmap Screen",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[Z]"),
+					UI.FormatAsHotKey(global::Action.ManageStarmap),
 					" to reassign rocket paths"
 				});
 			}
@@ -1612,7 +1622,7 @@ namespace STRINGS
 					"Schedule Screen",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[PERIOD KEY]"),
+					UI.FormatAsHotKey(global::Action.ManageSchedule),
 					" to change blocks or assignments"
 				});
 			}

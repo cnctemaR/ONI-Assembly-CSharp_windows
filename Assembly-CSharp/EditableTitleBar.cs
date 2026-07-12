@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -179,7 +178,7 @@ public class EditableTitleBar : TitleBar
 
 	public KButton randomNameButton;
 
-	public TMP_InputField inputField;
+	public KInputTextField inputField;
 
 	private Coroutine postEndEdit;
 

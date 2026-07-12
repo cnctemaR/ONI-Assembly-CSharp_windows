@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class KInputManager
 {
@@ -85,10 +86,26 @@ public class KInputManager
 		{
 			return KInputManager.lockedMousePos;
 		}
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			return KInputManager.virtualCursorPos;
+		}
 		return Input.mousePosition;
 	}
 
 	protected List<KInputController> mControllers = new List<KInputController>();
+
+	public static SteamInputInterpreter steamInputInterpreter = new SteamInputInterpreter();
+
+	public static Vector3F virtualCursorPos;
+
+	public static bool currentControllerIsGamepad;
+
+	public static KInputController prevController;
+
+	public static KInputController currentController;
+
+	public static UnityEvent InputChange = new UnityEvent();
 
 	public static bool isMousePosLocked;
 

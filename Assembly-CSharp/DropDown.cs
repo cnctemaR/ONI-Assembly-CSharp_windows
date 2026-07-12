@@ -65,7 +65,7 @@ public class DropDown : KMonoBehaviour
 		{
 			return;
 		}
-		if (!Input.GetMouseButtonDown(0) && Input.GetAxis("Mouse ScrollWheel") == 0f)
+		if (!Input.GetMouseButtonDown(0) && Input.GetAxis("Mouse ScrollWheel") == 0f && !KInputManager.steamInputInterpreter.GetSteamInputActionIsDown(global::Action.MouseLeft))
 		{
 			return;
 		}

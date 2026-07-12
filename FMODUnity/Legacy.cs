@@ -71,6 +71,8 @@ namespace FMODUnity
 				return "UWP";
 			case Legacy.Platform.Switch:
 				return "Switch";
+			case Legacy.Platform.WebGL:
+				return "WebGL";
 			case Legacy.Platform.Stadia:
 				return "Stadia";
 			}
@@ -129,6 +131,7 @@ namespace FMODUnity
 			case Legacy.Platform.Mac:
 			case Legacy.Platform.Linux:
 			case Legacy.Platform.UWP:
+			case Legacy.Platform.WebGL:
 				return Legacy.Platform.Desktop;
 			case Legacy.Platform.XboxOne:
 			case Legacy.Platform.PS4:

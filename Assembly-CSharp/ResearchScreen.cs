@@ -68,7 +68,7 @@ public class ResearchScreen : KModalScreen
 		{
 			this.isDragging = true;
 		}
-		if (this.isDragging && !Input.GetMouseButton(0) && !Input.GetMouseButton(1))
+		if (this.isDragging && !this.leftMouseDown && !this.rightMouseDown)
 		{
 			this.leftMouseDown = false;
 			this.rightMouseDown = false;
@@ -99,46 +99,52 @@ public class ResearchScreen : KModalScreen
 		{
 			this.keyPanDelta -= Vector2.right * Time.unscaledDeltaTime * num2;
 		}
-		Vector2 vector4 = new Vector2(Mathf.Lerp(0f, this.keyPanDelta.x, Time.unscaledDeltaTime * this.keyPanEasing), Mathf.Lerp(0f, this.keyPanDelta.y, Time.unscaledDeltaTime * this.keyPanEasing));
-		this.keyPanDelta -= vector4;
-		Vector2 vector5 = Vector2.zero;
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			Vector2 vector4 = KInputManager.steamInputInterpreter.GetSteamCameraMovement();
+			vector4 *= -1f;
+			this.keyPanDelta = vector4 * Time.unscaledDeltaTime * num2 * 5f;
+		}
+		Vector2 vector5 = new Vector2(Mathf.Lerp(0f, this.keyPanDelta.x, Time.unscaledDeltaTime * this.keyPanEasing), Mathf.Lerp(0f, this.keyPanDelta.y, Time.unscaledDeltaTime * this.keyPanEasing));
+		this.keyPanDelta -= vector5;
+		Vector2 vector6 = Vector2.zero;
 		if (this.isDragging)
 		{
-			Vector2 vector6 = KInputManager.GetMousePos() - this.dragLastPosition;
-			vector5 += vector6;
+			Vector2 vector7 = KInputManager.GetMousePos() - this.dragLastPosition;
+			vector6 += vector7;
 			this.dragLastPosition = KInputManager.GetMousePos();
-			this.dragInteria = Vector2.ClampMagnitude(this.dragInteria + vector6, 400f);
+			this.dragInteria = Vector2.ClampMagnitude(this.dragInteria + vector7, 400f);
 		}
 		this.dragInteria *= Mathf.Max(0f, 1f - Time.unscaledDeltaTime * 4f);
-		Vector2 vector7 = anchoredPosition + vector + this.keyPanDelta + vector5;
+		Vector2 vector8 = anchoredPosition + vector + this.keyPanDelta + vector6;
 		if (!this.isDragging)
 		{
 			Vector2 size = base.GetComponent<RectTransform>().rect.size;
-			Vector2 vector8 = new Vector2((-component.rect.size.x / 2f - 250f) * this.currentZoom, -250f * this.currentZoom);
-			Vector2 vector9 = new Vector2(250f * this.currentZoom, (component.rect.size.y + 250f) * this.currentZoom - size.y);
-			Vector2 vector10 = new Vector2(Mathf.Clamp(vector7.x, vector8.x, vector9.x), Mathf.Clamp(vector7.y, vector8.y, vector9.y));
-			this.forceTargetPosition = new Vector2(Mathf.Clamp(this.forceTargetPosition.x, vector8.x, vector9.x), Mathf.Clamp(this.forceTargetPosition.y, vector8.y, vector9.y));
-			Vector2 vector11 = vector10 + this.dragInteria - vector7;
+			Vector2 vector9 = new Vector2((-component.rect.size.x / 2f - 250f) * this.currentZoom, -250f * this.currentZoom);
+			Vector2 vector10 = new Vector2(250f * this.currentZoom, (component.rect.size.y + 250f) * this.currentZoom - size.y);
+			Vector2 vector11 = new Vector2(Mathf.Clamp(vector8.x, vector9.x, vector10.x), Mathf.Clamp(vector8.y, vector9.y, vector10.y));
+			this.forceTargetPosition = new Vector2(Mathf.Clamp(this.forceTargetPosition.x, vector9.x, vector10.x), Mathf.Clamp(this.forceTargetPosition.y, vector9.y, vector10.y));
+			Vector2 vector12 = vector11 + this.dragInteria - vector8;
 			if (!this.panLeft && !this.panRight && !this.panUp && !this.panDown)
 			{
-				vector7 += vector11 * this.edgeClampFactor * Time.unscaledDeltaTime;
+				vector8 += vector12 * this.edgeClampFactor * Time.unscaledDeltaTime;
 			}
 			else
 			{
-				vector7 += vector11;
-				if (vector11.x < 0f)
+				vector8 += vector12;
+				if (vector12.x < 0f)
 				{
 					this.keyPanDelta.x = Mathf.Min(0f, this.keyPanDelta.x);
 				}
-				if (vector11.x > 0f)
+				if (vector12.x > 0f)
 				{
 					this.keyPanDelta.x = Mathf.Max(0f, this.keyPanDelta.x);
 				}
-				if (vector11.y < 0f)
+				if (vector12.y < 0f)
 				{
 					this.keyPanDelta.y = Mathf.Min(0f, this.keyPanDelta.y);
 				}
-				if (vector11.y > 0f)
+				if (vector12.y > 0f)
 				{
 					this.keyPanDelta.y = Mathf.Max(0f, this.keyPanDelta.y);
 				}
@@ -146,13 +152,13 @@ public class ResearchScreen : KModalScreen
 		}
 		if (this.zoomingToTarget)
 		{
-			vector7 = Vector2.Lerp(vector7, this.forceTargetPosition, Time.unscaledDeltaTime * 4f);
-			if (Vector3.Distance(vector7, this.forceTargetPosition) < 1f || this.isDragging || this.panLeft || this.panRight || this.panUp || this.panDown)
+			vector8 = Vector2.Lerp(vector8, this.forceTargetPosition, Time.unscaledDeltaTime * 4f);
+			if (Vector3.Distance(vector8, this.forceTargetPosition) < 1f || this.isDragging || this.panLeft || this.panRight || this.panUp || this.panDown)
 			{
 				this.zoomingToTarget = false;
 			}
 		}
-		component.anchoredPosition = vector7;
+		component.anchoredPosition = vector8;
 	}
 
 	protected override void OnSpawn()

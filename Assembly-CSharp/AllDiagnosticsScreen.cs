@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,8 +51,8 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 		{
 			this.SearchFilter(value);
 		});
-		TMP_InputField tmp_InputField = this.searchInputField;
-		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
+		KInputTextField kinputTextField = this.searchInputField;
+		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
 			base.isEditing = true;
 		}));
@@ -359,7 +358,6 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 	{
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.diagnosticRows)
 		{
-			DebugUtil.DevAssert(this.subrowContainerOpen.ContainsKey(keyValuePair.Key), "AllDiagnosticsScreen subrowContainerOpen does not contain key " + keyValuePair.Key + " - it should have been added in SpawnRows", null);
 			HierarchyReferences component = keyValuePair.Value.GetComponent<HierarchyReferences>();
 			component.GetReference<MultiToggle>("SubrowToggle").ChangeState((!this.subrowContainerOpen[keyValuePair.Key]) ? 0 : 1);
 			component.GetReference<RectTransform>("SubRows").gameObject.SetActive(this.subrowContainerOpen[keyValuePair.Key]);
@@ -446,7 +444,7 @@ public class AllDiagnosticsScreen : KScreen, ISim4000ms, ISim1000ms
 	public bool allowRefresh = true;
 
 	[SerializeField]
-	private TMP_InputField searchInputField;
+	private KInputTextField searchInputField;
 
 	[SerializeField]
 	private KButton clearSearchButton;

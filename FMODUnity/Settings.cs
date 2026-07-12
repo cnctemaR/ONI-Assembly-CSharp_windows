@@ -102,17 +102,46 @@ namespace FMODUnity
 
 		public Platform FindPlatform(string identifier)
 		{
-			Platform platform;
-			this.Platforms.TryGetValue(identifier, out platform);
-			return platform;
+			foreach (Platform platform in this.Platforms)
+			{
+				if (platform.Identifier == identifier)
+				{
+					return platform;
+				}
+			}
+			return null;
+		}
+
+		public bool PlatformExists(string identifier)
+		{
+			return this.FindPlatform(identifier) != null;
 		}
 
 		public void ForEachPlatform(Action<Platform> action)
 		{
-			foreach (Platform platform in this.Platforms.Values)
+			foreach (Platform platform in this.Platforms)
 			{
 				action(platform);
 			}
+		}
+
+		public IEnumerable<Platform> EnumeratePlatforms()
+		{
+			return this.Platforms;
+		}
+
+		private void AddPlatform(Platform platform)
+		{
+			if (this.PlatformExists(platform.Identifier))
+			{
+				throw new ArgumentException(string.Format("Duplicate platform identifier: {0}", platform.Identifier));
+			}
+			this.Platforms.Add(platform);
+		}
+
+		public void RemovePlatform(string identifier)
+		{
+			this.Platforms.RemoveAll((Platform p) => p.Identifier == identifier);
 		}
 
 		public Platform DefaultPlatform
@@ -153,7 +182,7 @@ namespace FMODUnity
 		{
 			if (!string.IsNullOrEmpty(platform.ParentIdentifier))
 			{
-				platform.Parent = this.FindPlatform(platform.ParentIdentifier);
+				this.SetPlatformParent(platform, this.FindPlatform(platform.ParentIdentifier));
 			}
 		}
 
@@ -203,6 +232,11 @@ namespace FMODUnity
 			this.LinkPlatformToParent(platform);
 		}
 
+		public void SetPlatformParent(Platform platform, Platform newParent)
+		{
+			platform.Parent = newParent;
+		}
+
 		public static void AddPlatformTemplate<T>(string identifier) where T : Platform
 		{
 			Settings.platformTemplates.Add(new Settings.PlatformTemplate
@@ -222,30 +256,48 @@ namespace FMODUnity
 
 		private void OnEnable()
 		{
+			if (this.hasLoaded)
+			{
+				return;
+			}
+			this.hasLoaded = true;
 			this.PopulatePlatformsFromAsset();
-			this.defaultPlatform = this.Platforms.Values.FirstOrDefault<Platform>((Platform platform) => platform is PlatformDefault);
-			this.playInEditorPlatform = this.Platforms.Values.FirstOrDefault<Platform>((Platform platform) => platform is PlatformPlayInEditor);
+			this.defaultPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformDefault);
+			this.playInEditorPlatform = this.Platforms.FirstOrDefault<Platform>((Platform platform) => platform is PlatformPlayInEditor);
 			this.ForEachPlatform(new Action<Platform>(this.LinkPlatform));
 		}
 
 		private void PopulatePlatformsFromAsset()
 		{
+			this.Platforms.Clear();
 			foreach (Platform platform in Resources.LoadAll<Platform>("FMODStudioSettings"))
 			{
-				if (this.FindPlatform(platform.Identifier) == null)
+				Platform platform2 = this.FindPlatform(platform.Identifier);
+				if (platform2 != null)
+				{
+					Platform platform3;
+					if (platform.Active && !platform2.Active)
+					{
+						this.RemovePlatform(platform2.Identifier);
+						platform3 = platform2;
+						platform2 = null;
+					}
+					else
+					{
+						platform3 = platform;
+					}
+					global::UnityEngine.Debug.LogWarningFormat("FMOD: Cleaning up duplicate platform: ID  = {0}, name = '{1}', type = {2}", new object[]
+					{
+						platform3.Identifier,
+						platform3.DisplayName,
+						platform3.GetType().Name
+					});
+					global::UnityEngine.Object.DestroyImmediate(platform3, true);
+				}
+				if (platform2 == null)
 				{
 					platform.EnsurePropertiesAreValid();
-					this.Platforms.Add(platform.Identifier, platform);
-				}
-				else
-				{
-					global::UnityEngine.Debug.LogWarningFormat("Duplicate platform found in {0}: ID  = {1}, name = '{2}', type = {3}", new object[]
-					{
-						"FMODStudioSettings",
-						platform.Identifier,
-						platform.DisplayName,
-						platform.GetType().Name
-					});
+					this.AddPlatform(platform);
 				}
 			}
 		}
@@ -270,6 +322,16 @@ namespace FMODUnity
 
 		[SerializeField]
 		public string SourceBankPathUnformatted;
+
+		[SerializeField]
+		public int BankRefreshCooldown = 5;
+
+		[SerializeField]
+		public bool ShowBankRefreshWindow = true;
+
+		public const int BankRefreshPrompt = -1;
+
+		public const int BankRefreshManual = -2;
 
 		[SerializeField]
 		public bool AutomaticEventLoading;
@@ -343,7 +405,26 @@ namespace FMODUnity
 		[SerializeField]
 		public MeterChannelOrderingType MeterChannelOrdering;
 
-		private Dictionary<string, Platform> Platforms = new Dictionary<string, Platform>();
+		[SerializeField]
+		public bool StopEventsOutsideMaxDistance;
+
+		[SerializeField]
+		public bool BoltUnitOptionsBuildPending;
+
+		[SerializeField]
+		public bool EnableErrorCallback;
+
+		[SerializeField]
+		public Settings.SharedLibraryUpdateStages SharedLibraryUpdateStage;
+
+		[SerializeField]
+		public double SharedLibraryTimeSinceStart;
+
+		[SerializeField]
+		public bool HideSetupWizard;
+
+		[SerializeField]
+		private List<Platform> Platforms = new List<Platform>();
 
 		private Dictionary<RuntimePlatform, List<Platform>> PlatformForRuntimePlatform = new Dictionary<RuntimePlatform, List<Platform>>();
 
@@ -354,6 +435,16 @@ namespace FMODUnity
 		private Platform playInEditorPlatform;
 
 		private static List<Settings.PlatformTemplate> platformTemplates = new List<Settings.PlatformTemplate>();
+
+		[NonSerialized]
+		private bool hasLoaded;
+
+		public enum SharedLibraryUpdateStages
+		{
+			DisableExistingLibraries,
+			RestartUnity,
+			CopyNewLibraries
+		}
 
 		private struct PlatformTemplate
 		{

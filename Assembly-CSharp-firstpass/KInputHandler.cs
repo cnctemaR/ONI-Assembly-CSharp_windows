@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class KInputHandler
 {
+	public KInputController currentController
+	{
+		get
+		{
+			return this.mController;
+		}
+	}
+
 	public KInputHandler(IInputHandler obj, KInputController controller)
 		: this(obj)
 	{
@@ -28,7 +36,35 @@ public class KInputHandler
 		}
 	}
 
-	private void SetController(KInputController controller)
+	public int HandleChildCount()
+	{
+		if (this.mChildren == null)
+		{
+			return 0;
+		}
+		return this.mChildren.Count;
+	}
+
+	public void TransferHandles(KInputHandler to)
+	{
+		if (this.mChildren != null && to.mChildren != null)
+		{
+			for (int i = 0; i < this.mChildren.Count; i++)
+			{
+				if (!to.mChildren.Contains(this.mChildren[i]))
+				{
+					to.mChildren.Add(new KInputHandler.HandlerInfo
+					{
+						priority = this.mChildren[i].priority,
+						handler = this.mChildren[i].handler
+					});
+					to.mChildren.Sort((KInputHandler.HandlerInfo a, KInputHandler.HandlerInfo b) => b.priority.CompareTo(a.priority));
+				}
+			}
+		}
+	}
+
+	public void SetController(KInputController controller)
 	{
 		this.mController = controller;
 		if (this.mChildren != null)
@@ -37,6 +73,7 @@ public class KInputHandler
 			{
 				handlerInfo.handler.SetController(controller);
 			}
+			this.mChildren.Sort((KInputHandler.HandlerInfo a, KInputHandler.HandlerInfo b) => b.priority.CompareTo(a.priority));
 		}
 	}
 
@@ -199,6 +236,11 @@ public class KInputHandler
 	public bool IsActive(global::Action action)
 	{
 		return this.mController != null && this.mController.IsActive(action);
+	}
+
+	public bool UsesController(IInputHandler handlerToCheck, KInputController conToCheck)
+	{
+		return handlerToCheck.inputHandler.mController == conToCheck;
 	}
 
 	public float GetAxis(Axis axis)

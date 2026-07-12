@@ -27,7 +27,7 @@ public class MetricsOptionsScreen : KModalScreen
 		};
 		this.descriptionButton.onClick.AddListener(delegate
 		{
-			Application.OpenURL("https://www.kleientertainment.com/privacy-policy");
+			App.OpenWebURL("https://www.kleientertainment.com/privacy-policy");
 		});
 	}
 

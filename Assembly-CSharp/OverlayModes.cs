@@ -1151,7 +1151,7 @@ public abstract class OverlayModes
 			logicCircuitManager.onElemAdded = (Action<ILogicUIElement>)Delegate.Remove(logicCircuitManager.onElemAdded, new Action<ILogicUIElement>(this.OnUIElemAdded));
 			LogicCircuitManager logicCircuitManager2 = Game.Instance.logicCircuitManager;
 			logicCircuitManager2.onElemRemoved = (Action<ILogicUIElement>)Delegate.Remove(logicCircuitManager2.onElemRemoved, new Action<ILogicUIElement>(this.OnUIElemRemoved));
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterLogicOn, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterLogicOn, STOP_MODE.ALLOWFADEOUT);
 			foreach (SaveLoadRoot saveLoadRoot in this.gameObjTargets)
 			{
 				float defaultDepth = OverlayModes.Mode.GetDefaultDepth(saveLoadRoot);
@@ -2895,7 +2895,7 @@ public abstract class OverlayModes
 
 		public override void Disable()
 		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterRadiationOn, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().TechFilterRadiationOn, STOP_MODE.ALLOWFADEOUT);
 		}
 
 		public static readonly HashedString ID = "Radiation";

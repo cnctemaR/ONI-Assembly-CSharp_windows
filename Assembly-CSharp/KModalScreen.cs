@@ -122,7 +122,7 @@ public class KModalScreen : KScreen
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 		}
-		if (!e.Consumed && e.TryConsume(global::Action.Escape))
+		if (!e.Consumed && (e.TryConsume(global::Action.Escape) || (e.TryConsume(global::Action.MouseRight) && this.canBackoutWithRightClick)))
 		{
 			this.Deactivate();
 		}
@@ -139,6 +139,9 @@ public class KModalScreen : KScreen
 	private bool shown;
 
 	public bool pause = true;
+
+	[Tooltip("Only used for main menu")]
+	public bool canBackoutWithRightClick;
 
 	private RectTransform backgroundRectTransform;
 }

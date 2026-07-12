@@ -163,6 +163,21 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item7.minTimeToNotify = 1f;
 		item7.lastNotifyTime = 0f;
 		list10.Add(item7);
+		DiscoveredResources.Instance.OnDiscover += this.OnDiscover;
+	}
+
+	protected override void OnCleanUp()
+	{
+		DiscoveredResources.Instance.OnDiscover -= this.OnDiscover;
+	}
+
+	private void OnDiscover(Tag category_tag, Tag tag)
+	{
+		Element element = ElementLoader.FindElementByHash(SimHashes.UraniumOre);
+		if (element != null && tag == element.tag)
+		{
+			this.TutorialMessage(Tutorial.TutorialMessages.TM_Radiation, true);
+		}
 	}
 
 	public Message TutorialMessage(Tutorial.TutorialMessages tm, bool queueMessage = true)
@@ -232,10 +247,10 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Radiation, MISC.NOTIFICATIONS.RADIATION.NAME, MISC.NOTIFICATIONS.RADIATION.MESSAGEBODY, MISC.NOTIFICATIONS.RADIATION.TOOLTIP, null, null, null, "icon_category_radiation", DlcManager.AVAILABLE_EXPANSION1_ONLY);
 			break;
 		}
-		global::Debug.Assert(message != null || flag, string.Format("No Tutorial message: {0}", tm.ToString()));
+		DebugUtil.AssertArgs(message != null || flag, new object[] { "No tutorial message:", tm });
 		if (queueMessage)
 		{
-			global::Debug.Assert(!flag, "Attempted to queue deprecated Tutorial Message " + tm.ToString());
+			DebugUtil.AssertArgs(!flag, new object[] { "Attempted to queue deprecated Tutorial Message", tm });
 			if (!this.tutorialMessagesRemaining.Contains(tm))
 			{
 				return null;

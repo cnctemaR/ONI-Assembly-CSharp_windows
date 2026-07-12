@@ -154,7 +154,7 @@ namespace FMOD
 		{
 			IntPtr intPtr;
 			RESULT result = DSP.FMOD5_DSP_GetParameterInfo(this.handle, index, out intPtr);
-			desc = Marshal.PtrToStructure<DSP_PARAMETER_DESC>(intPtr);
+			desc = (DSP_PARAMETER_DESC)MarshalHelper.PtrToStructure(intPtr, typeof(DSP_PARAMETER_DESC));
 			return result;
 		}
 

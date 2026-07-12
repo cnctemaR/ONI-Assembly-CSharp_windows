@@ -145,7 +145,7 @@ namespace STRINGS
 					"Decor",
 					UI.PST_KEYWORD,
 					" lower than their expectations\n\nOpen the ",
-					UI.FormatAsOverlay("Decor Overlay", "[F8]"),
+					UI.FormatAsOverlay("Decor Overlay", global::Action.Overlay8),
 					" to view current ",
 					UI.PRE_KEYWORD,
 					"Decor",
@@ -178,7 +178,7 @@ namespace STRINGS
 					"Radiation",
 					UI.PST_KEYWORD,
 					" and recover when using the toilet\n\nOpen the ",
-					UI.FormatAsOverlay("Radiation Overlay", "[L-SHIFT + F4]"),
+					UI.FormatAsOverlay("Radiation Overlay", global::Action.Overlay15),
 					" to view current ",
 					UI.PRE_KEYWORD,
 					"Rad",
@@ -193,7 +193,7 @@ namespace STRINGS
 					"Radiation",
 					UI.PST_KEYWORD,
 					" and recover when using the toilet\n\nOpen the ",
-					UI.FormatAsOverlay("Radiation Overlay", "[L-SHIFT + F4]"),
+					UI.FormatAsOverlay("Radiation Overlay", global::Action.Overlay15),
 					" to view current ",
 					UI.PRE_KEYWORD,
 					"Rad",
@@ -2629,7 +2629,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Plumbing Tab", "[5]")
+					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5)
 				});
 
 				public static LocString NOTIFICATION_NAME = "No Outhouses built";
@@ -2638,7 +2638,7 @@ namespace STRINGS
 				{
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Plumbing Tab", "[5]"),
+					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5),
 					".",
 					UI.HORIZONTAL_BR_RULE,
 					"These Duplicants are in need of an ",
@@ -2666,7 +2666,7 @@ namespace STRINGS
 					UI.HORIZONTAL_BR_RULE,
 					UI.FormatAsLink("Outhouses", "OUTHOUSE"),
 					" can be built from the ",
-					UI.FormatAsBuildMenuTab("Plumbing Tab", "[5]")
+					UI.FormatAsBuildMenuTab("Plumbing Tab", global::Action.Plan5)
 				});
 
 				public static LocString NOTIFICATION_NAME = "Made a mess";
@@ -2674,7 +2674,7 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
 				{
 					"The ",
-					UI.FormatAsTool("Mop Tool", "[M]"),
+					UI.FormatAsTool("Mop Tool", global::Action.Mop),
 					" can be used to clean up Duplicant-related \"spills\"",
 					UI.HORIZONTAL_BR_RULE,
 					"These Duplicants made messes that require cleaning up:\n"
@@ -2716,7 +2716,7 @@ namespace STRINGS
 					"Mop Tool",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[M]")
+					UI.FormatAsHotKey(global::Action.Mop)
 				});
 
 				public static LocString NOTIFICATION_NAME = "Throwing up";
@@ -2724,7 +2724,7 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
 				{
 					"The ",
-					UI.FormatAsTool("Mop Tool", "[M]"),
+					UI.FormatAsTool("Mop Tool", global::Action.Mop),
 					" can be used to clean up Duplicant-related \"spills\"",
 					UI.HORIZONTAL_BR_RULE,
 					"A ",
@@ -2752,7 +2752,7 @@ namespace STRINGS
 					"Mop Tool",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[M]")
+					UI.FormatAsHotKey(global::Action.Mop)
 				});
 
 				public static LocString NOTIFICATION_NAME = "Stress vomiting";
@@ -2760,7 +2760,7 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
 				{
 					"The ",
-					UI.FormatAsTool("Mop Tool", "[M]"),
+					UI.FormatAsTool("Mop Tool", global::Action.Mop),
 					" can used to clean up Duplicant-related \"spills\"",
 					UI.HORIZONTAL_BR_RULE,
 					"These Duplicants became so ",
@@ -2777,12 +2777,18 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This Duplicant is sick due to Radiation poisoning. Duplicant-related \"spills\" can be cleaned up using the ",
+					"This Duplicant is sick due to ",
+					UI.PRE_KEYWORD,
+					"Radiation",
+					UI.PST_KEYWORD,
+					" poisoning.",
+					UI.HORIZONTAL_BR_RULE,
+					"Duplicant-related \"spills\" can be cleaned up using the ",
 					UI.PRE_KEYWORD,
 					"Mop Tool",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[M]")
+					UI.FormatAsHotKey(global::Action.Mop)
 				});
 
 				public static LocString NOTIFICATION_NAME = "Radiation vomiting";
@@ -2790,7 +2796,7 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
 				{
 					"The ",
-					UI.FormatAsTool("Mop Tool", "[M]"),
+					UI.FormatAsTool("Mop Tool", global::Action.Mop),
 					" can clean up Duplicant-related \"spills\"",
 					UI.HORIZONTAL_BR_RULE,
 					"Radiation sickness caused these Duplicants to throw up:"
@@ -7674,7 +7680,7 @@ namespace STRINGS
 					"Radiation",
 					UI.PST_KEYWORD,
 					" and recover at very slow rates\n\nOpen the ",
-					UI.FormatAsOverlay("Radiation Overlay", "[L-SHIFT + F4]"),
+					UI.FormatAsOverlay("Radiation Overlay", global::Action.Overlay15),
 					" to view current ",
 					UI.PRE_KEYWORD,
 					"Rad",

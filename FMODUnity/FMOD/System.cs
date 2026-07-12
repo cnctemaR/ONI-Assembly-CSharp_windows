@@ -94,13 +94,13 @@ namespace FMOD
 
 		public RESULT setAdvancedSettings(ref ADVANCEDSETTINGS settings)
 		{
-			settings.cbSize = Marshal.SizeOf<ADVANCEDSETTINGS>(settings);
+			settings.cbSize = MarshalHelper.SizeOf(typeof(ADVANCEDSETTINGS));
 			return FMOD.System.FMOD5_System_SetAdvancedSettings(this.handle, ref settings);
 		}
 
 		public RESULT getAdvancedSettings(ref ADVANCEDSETTINGS settings)
 		{
-			settings.cbSize = Marshal.SizeOf<ADVANCEDSETTINGS>(settings);
+			settings.cbSize = MarshalHelper.SizeOf(typeof(ADVANCEDSETTINGS));
 			return FMOD.System.FMOD5_System_GetAdvancedSettings(this.handle, ref settings);
 		}
 
@@ -344,7 +344,7 @@ namespace FMOD
 		public RESULT createSound(string name, MODE mode, out Sound sound)
 		{
 			CREATESOUNDEXINFO createsoundexinfo = default(CREATESOUNDEXINFO);
-			createsoundexinfo.cbsize = Marshal.SizeOf<CREATESOUNDEXINFO>(createsoundexinfo);
+			createsoundexinfo.cbsize = MarshalHelper.SizeOf(typeof(CREATESOUNDEXINFO));
 			return this.createSound(name, mode, ref createsoundexinfo, out sound);
 		}
 
@@ -371,7 +371,7 @@ namespace FMOD
 		public RESULT createStream(string name, MODE mode, out Sound sound)
 		{
 			CREATESOUNDEXINFO createsoundexinfo = default(CREATESOUNDEXINFO);
-			createsoundexinfo.cbsize = Marshal.SizeOf<CREATESOUNDEXINFO>(createsoundexinfo);
+			createsoundexinfo.cbsize = MarshalHelper.SizeOf(typeof(CREATESOUNDEXINFO));
 			return this.createStream(name, mode, ref createsoundexinfo, out sound);
 		}
 

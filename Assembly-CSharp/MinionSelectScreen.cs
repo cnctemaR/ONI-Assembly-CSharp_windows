@@ -66,9 +66,9 @@ public class MinionSelectScreen : CharacterSelectionController
 	protected override void OnProceed()
 	{
 		global::Util.KInstantiateUI(this.newBasePrefab.gameObject, GameScreenManager.Instance.ssOverlayCanvas, false);
-		MusicManager.instance.StopSong("Music_FrontEnd", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().NewBaseSetupSnapshot);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot, STOP_MODE.ALLOWFADEOUT);
 		this.selectedDeliverables.Clear();
 		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in this.containers)
 		{

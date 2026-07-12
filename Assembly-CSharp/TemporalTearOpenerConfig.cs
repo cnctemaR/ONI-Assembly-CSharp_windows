@@ -14,7 +14,7 @@ public class TemporalTearOpenerConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "TemporalTearOpener";
-		int num = 5;
+		int num = 3;
 		int num2 = 4;
 		string text2 = "temporal_tear_opener_kanim";
 		int num3 = 100;

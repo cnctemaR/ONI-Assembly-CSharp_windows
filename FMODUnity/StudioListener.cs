@@ -34,7 +34,12 @@ namespace FMODUnity
 				RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.rigidBody, this.attenuationObject);
 				return;
 			}
-			RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.rigidBody2D, this.attenuationObject);
+			if (this.rigidBody2D)
+			{
+				RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.rigidBody2D, this.attenuationObject);
+				return;
+			}
+			RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.attenuationObject);
 		}
 
 		private Rigidbody rigidBody;

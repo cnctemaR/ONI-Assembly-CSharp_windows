@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using FMOD.Studio;
 using UnityEngine;
@@ -24,7 +25,27 @@ namespace FMODUnity
 			}
 		}
 
-		private void Start()
+		public bool IsActive { get; private set; }
+
+		public float MaxDistance
+		{
+			get
+			{
+				if (this.OverrideAttenuation)
+				{
+					return this.OverrideMaxDistance;
+				}
+				if (!this.eventDescription.isValid())
+				{
+					this.Lookup();
+				}
+				float num;
+				this.eventDescription.getMaximumDistance(out num);
+				return num;
+			}
+		}
+
+		protected override void Start()
 		{
 			RuntimeUtils.EnforceLibraryOrder();
 			if (this.Preload)
@@ -48,7 +69,7 @@ namespace FMODUnity
 			this.isQuitting = true;
 		}
 
-		private void OnDestroy()
+		protected override void OnDestroy()
 		{
 			if (!this.isQuitting)
 			{
@@ -62,6 +83,7 @@ namespace FMODUnity
 						this.instance.clearHandle();
 					}
 				}
+				RuntimeManager.DeregisterActiveEmitter(this);
 				if (this.Preload)
 				{
 					this.eventDescription.unloadSampleData();
@@ -105,6 +127,7 @@ namespace FMODUnity
 			{
 				return;
 			}
+			this.cachedParams.Clear();
 			if (!this.eventDescription.isValid())
 			{
 				this.Lookup();
@@ -115,6 +138,18 @@ namespace FMODUnity
 			}
 			bool flag;
 			this.eventDescription.is3D(out flag);
+			this.IsActive = true;
+			if (flag && !this.isOneshot && Settings.Instance.StopEventsOutsideMaxDistance)
+			{
+				RuntimeManager.RegisterActiveEmitter(this);
+				RuntimeManager.UpdateActiveEmitter(this, true);
+				return;
+			}
+			this.PlayInstance();
+		}
+
+		public void PlayInstance()
+		{
 			if (!this.instance.isValid())
 			{
 				this.instance.clearHandle();
@@ -124,29 +159,40 @@ namespace FMODUnity
 				this.instance.release();
 				this.instance.clearHandle();
 			}
+			bool flag;
+			this.eventDescription.is3D(out flag);
 			if (!this.instance.isValid())
 			{
 				this.eventDescription.createInstance(out this.instance);
 				if (flag)
 				{
-					Rigidbody component = base.GetComponent<Rigidbody>();
-					Rigidbody2D component2 = base.GetComponent<Rigidbody2D>();
-					Transform component3 = base.GetComponent<Transform>();
-					if (component)
+					Transform component = base.GetComponent<Transform>();
+					if (base.GetComponent<Rigidbody>())
 					{
-						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component));
-						RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component);
+						Rigidbody component2 = base.GetComponent<Rigidbody>();
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component2));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component, component2);
+					}
+					else if (base.GetComponent<Rigidbody2D>())
+					{
+						Rigidbody2D component3 = base.GetComponent<Rigidbody2D>();
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component3));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component, component3);
 					}
 					else
 					{
-						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component2));
-						RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component2);
+						this.instance.set3DAttributes(base.gameObject.To3DAttributes());
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component);
 					}
 				}
 			}
 			foreach (ParamRef paramRef in this.Params)
 			{
 				this.instance.setParameterByID(paramRef.ID, paramRef.Value, false);
+			}
+			foreach (ParamRef paramRef2 in this.cachedParams)
+			{
+				this.instance.setParameterByID(paramRef2.ID, paramRef2.Value, false);
 			}
 			if (flag && this.OverrideAttenuation)
 			{
@@ -159,9 +205,21 @@ namespace FMODUnity
 
 		public void Stop()
 		{
+			RuntimeManager.DeregisterActiveEmitter(this);
+			this.IsActive = false;
+			this.cachedParams.Clear();
+			this.StopInstance();
+		}
+
+		public void StopInstance()
+		{
+			if (this.TriggerOnce && this.hasTriggered)
+			{
+				RuntimeManager.DeregisterActiveEmitter(this);
+			}
 			if (this.instance.isValid())
 			{
-				this.instance.stop(this.AllowFadeout ? FMOD.Studio.STOP_MODE.ALLOWFADEOUT : FMOD.Studio.STOP_MODE.IMMEDIATE);
+				this.instance.stop(this.AllowFadeout ? STOP_MODE.ALLOWFADEOUT : STOP_MODE.IMMEDIATE);
 				this.instance.release();
 				this.instance.clearHandle();
 			}
@@ -169,6 +227,20 @@ namespace FMODUnity
 
 		public void SetParameter(string name, float value, bool ignoreseekspeed = false)
 		{
+			if (Settings.Instance.StopEventsOutsideMaxDistance && this.IsActive)
+			{
+				ParamRef paramRef = this.cachedParams.Find((ParamRef x) => x.Name == name);
+				if (paramRef == null)
+				{
+					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
+					this.eventDescription.getParameterDescriptionByName(name, out parameter_DESCRIPTION);
+					paramRef = new ParamRef();
+					paramRef.ID = parameter_DESCRIPTION.id;
+					paramRef.Name = parameter_DESCRIPTION.name;
+					this.cachedParams.Add(paramRef);
+				}
+				paramRef.Value = value;
+			}
 			if (this.instance.isValid())
 			{
 				this.instance.setParameterByName(name, value, ignoreseekspeed);
@@ -177,6 +249,20 @@ namespace FMODUnity
 
 		public void SetParameter(PARAMETER_ID id, float value, bool ignoreseekspeed = false)
 		{
+			if (Settings.Instance.StopEventsOutsideMaxDistance && this.IsActive)
+			{
+				ParamRef paramRef = this.cachedParams.Find((ParamRef x) => x.ID.Equals(id));
+				if (paramRef == null)
+				{
+					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
+					this.eventDescription.getParameterDescriptionByID(id, out parameter_DESCRIPTION);
+					paramRef = new ParamRef();
+					paramRef.ID = parameter_DESCRIPTION.id;
+					paramRef.Name = parameter_DESCRIPTION.name;
+					this.cachedParams.Add(paramRef);
+				}
+				paramRef.Value = value;
+			}
 			if (this.instance.isValid())
 			{
 				this.instance.setParameterByID(id, value, ignoreseekspeed);
@@ -224,6 +310,8 @@ namespace FMODUnity
 		private bool isQuitting;
 
 		private bool isOneshot;
+
+		private List<ParamRef> cachedParams = new List<ParamRef>();
 
 		private const string SnapshotString = "snapshot";
 	}

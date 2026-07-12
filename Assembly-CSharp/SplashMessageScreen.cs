@@ -12,12 +12,12 @@ public class SplashMessageScreen : KMonoBehaviour
 		base.OnPrefabInit();
 		this.forumButton.onClick += delegate
 		{
-			Application.OpenURL("https://forums.kleientertainment.com/forums/forum/118-oxygen-not-included/");
+			App.OpenWebURL("https://forums.kleientertainment.com/forums/forum/118-oxygen-not-included/");
 		};
 		this.confirmButton.onClick += delegate
 		{
 			base.gameObject.SetActive(false);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWelcomeScreenSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWelcomeScreenSnapshot, STOP_MODE.ALLOWFADEOUT);
 		};
 		this.bodyText.text = UI.DEVELOPMENTBUILDS.ALPHA.LOADING.BODY;
 	}

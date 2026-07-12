@@ -28,6 +28,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 	protected override void OnCleanUp()
 	{
 		Components.ClusterTravelers.Remove(this);
+		Game.Instance.Unsubscribe(-1991583975, new Action<object>(this.OnClusterFogOfWarRevealed));
 		base.OnCleanUp();
 	}
 
@@ -42,9 +43,21 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.Subscribe<ClusterTraveler>(543433792, ClusterTraveler.ClusterDestinationChangedHandler);
+		Game.Instance.Subscribe(-1991583975, new Action<object>(this.OnClusterFogOfWarRevealed));
 		this.UpdateAnimationTags();
+		this.MarkPathDirty();
 		this.RevalidatePath();
 		this.ForceRevealLocation(this.m_clusterGridEntity.Location);
+	}
+
+	private void MarkPathDirty()
+	{
+		this.m_isPathDirty = true;
+	}
+
+	private void OnClusterFogOfWarRevealed(object data)
+	{
+		this.MarkPathDirty();
 	}
 
 	private void OnClusterDestinationChanged(object data)
@@ -57,6 +70,7 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 				this.CurrentPath.Clear();
 			}
 		}
+		this.MarkPathDirty();
 	}
 
 	public int GetDestinationWorldID()
@@ -191,29 +205,42 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 	public void RevalidatePath()
 	{
 		string reason;
-		if (this.HasCurrentPathChanged(out reason))
+		List<AxialI> list;
+		if (this.HasCurrentPathChanged(out reason, out list))
 		{
-			this.m_destinationSelector.SetDestination(this.m_destinationSelector.GetMyWorldLocation());
-			string message = MISC.NOTIFICATIONS.BADROCKETPATH.TOOLTIP;
-			Notification notification = new Notification(MISC.NOTIFICATIONS.BADROCKETPATH.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => message + notificationList.ReduceMessages(false) + "\n\n" + reason, null, true, 0f, null, null, null, true);
-			base.GetComponent<Notifier>().Add(notification, "");
+			if (this.stopAndNotifyWhenPathChanges)
+			{
+				this.m_destinationSelector.SetDestination(this.m_destinationSelector.GetMyWorldLocation());
+				string message = MISC.NOTIFICATIONS.BADROCKETPATH.TOOLTIP;
+				Notification notification = new Notification(MISC.NOTIFICATIONS.BADROCKETPATH.NAME, NotificationType.BadMinor, (List<Notification> notificationList, object data) => message + notificationList.ReduceMessages(false) + "\n\n" + reason, null, true, 0f, null, null, null, true);
+				base.GetComponent<Notifier>().Add(notification, "");
+				return;
+			}
+			this.m_cachedPath = list;
 		}
 	}
 
-	private bool HasCurrentPathChanged(out string reason)
+	private bool HasCurrentPathChanged(out string reason, out List<AxialI> updatedPath)
 	{
-		List<AxialI> path = ClusterGrid.Instance.GetPath(this.m_clusterGridEntity.Location, this.m_cachedPathDestination, this.m_destinationSelector, out reason);
-		if (path == null)
+		if (!this.m_isPathDirty)
+		{
+			reason = null;
+			updatedPath = null;
+			return false;
+		}
+		this.m_isPathDirty = false;
+		updatedPath = ClusterGrid.Instance.GetPath(this.m_clusterGridEntity.Location, this.m_cachedPathDestination, this.m_destinationSelector, out reason);
+		if (updatedPath == null)
 		{
 			return true;
 		}
-		if (path.Count != this.m_cachedPath.Count)
+		if (updatedPath.Count != this.m_cachedPath.Count)
 		{
 			return true;
 		}
 		for (int i = 0; i < this.m_cachedPath.Count; i++)
 		{
-			if (this.m_cachedPath[i] != path[i])
+			if (this.m_cachedPath[i] != updatedPath[i])
 			{
 				return true;
 			}
@@ -247,6 +274,10 @@ public class ClusterTraveler : KMonoBehaviour, ISim200ms
 	private AxialI m_cachedPathDestination;
 
 	private List<AxialI> m_cachedPath;
+
+	private bool m_isPathDirty;
+
+	public bool stopAndNotifyWhenPathChanges;
 
 	private static EventSystem.IntraObjectHandler<ClusterTraveler> ClusterDestinationChangedHandler = new EventSystem.IntraObjectHandler<ClusterTraveler>(delegate(ClusterTraveler cmp, object data)
 	{

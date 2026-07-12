@@ -21,6 +21,18 @@ public class AmbienceManager : KMonoBehaviour
 		}
 	}
 
+	protected override void OnForcedCleanUp()
+	{
+		AmbienceManager.Quadrant[] array = this.quadrants;
+		for (int i = 0; i < array.Length; i++)
+		{
+			foreach (AmbienceManager.Layer layer in array[i].GetAllLayers())
+			{
+				layer.Stop();
+			}
+		}
+	}
+
 	private void LateUpdate()
 	{
 		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
@@ -229,7 +241,8 @@ public class AmbienceManager : KMonoBehaviour
 			this.facilityLayer = new AmbienceManager.Layer(def.facilitySound, null);
 			this.allLayers.Add(this.facilityLayer);
 			this.loopingLayers.Add(this.facilityLayer);
-			if (Sim.IsRadiationEnabled())
+			this.m_isRadiationEnabled = Sim.IsRadiationEnabled();
+			if (this.m_isRadiationEnabled)
 			{
 				this.radiationLayer = new AmbienceManager.Layer(def.radiationSound, null);
 				this.allLayers.Add(this.radiationLayer);
@@ -383,7 +396,7 @@ public class AmbienceManager : KMonoBehaviour
 					layer.Stop();
 				}
 			}
-			if (Sim.IsRadiationEnabled())
+			if (this.m_isRadiationEnabled)
 			{
 				this.radiationLayer.Start(emitter_position);
 				this.radiationLayer.UpdateAverageRadiation();
@@ -397,6 +410,11 @@ public class AmbienceManager : KMonoBehaviour
 					this.oneShotLayers[n].Start(emitter_position);
 				}
 			}
+		}
+
+		public List<AmbienceManager.Layer> GetAllLayers()
+		{
+			return this.allLayers;
 		}
 
 		public string name;
@@ -428,6 +446,8 @@ public class AmbienceManager : KMonoBehaviour
 		public static int activeSolidLayerCount = 2;
 
 		public int totalTileCount;
+
+		private bool m_isRadiationEnabled;
 
 		private AmbienceManager.Quadrant.SolidTimer[] solidTimers;
 

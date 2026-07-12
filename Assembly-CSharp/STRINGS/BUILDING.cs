@@ -777,9 +777,7 @@ namespace STRINGS
 					" beneath this building to regain function",
 					UI.HORIZONTAL_BR_RULE,
 					"Tile can be found in the ",
-					UI.FormatAsBuildMenuTab("Base Tab"),
-					" ",
-					UI.FormatAsHotkey("[1]"),
+					UI.FormatAsBuildMenuTab("Base Tab", global::Action.Plan1),
 					" of the Build Menu"
 				});
 			}
@@ -910,9 +908,7 @@ namespace STRINGS
 					"Material cannot be fed onto this Conveyor system for transport",
 					UI.HORIZONTAL_BR_RULE,
 					"Enter the ",
-					UI.FormatAsBuildMenuTab("Shipping Tab"),
-					" ",
-					UI.FormatAsHotkey("[7]"),
+					UI.FormatAsBuildMenuTab("Shipping Tab", global::Action.Plan13),
 					" of the Build Menu to build and connect a ",
 					UI.PRE_KEYWORD,
 					"Conveyor Loader",
@@ -929,9 +925,7 @@ namespace STRINGS
 					"Material cannot be offloaded from this Conveyor system and will backup the rails",
 					UI.HORIZONTAL_BR_RULE,
 					"Enter the ",
-					UI.FormatAsBuildMenuTab("Shipping Tab"),
-					" ",
-					UI.FormatAsHotkey("[7]"),
+					UI.FormatAsBuildMenuTab("Shipping Tab", global::Action.Plan13),
 					" of the Build Menu to build and connect a ",
 					UI.PRE_KEYWORD,
 					"Conveyor Receptacle",
@@ -1037,7 +1031,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "New Printables are available";
 
-				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod " + UI.FormatAsHotkey("[H]") + " is ready to print a new Duplicant or care package.\nI'll need to select a blueprint:";
+				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod " + UI.FormatAsHotKey(global::Action.Plan1) + " is ready to print a new Duplicant or care package.\nI'll need to select a blueprint:";
 			}
 
 			public class NOAPPLICABLERESEARCHSELECTED
@@ -1072,7 +1066,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Analysis Focus Selected";
 
-				public static LocString TOOLTIP = "Select an unknown destination from the " + UI.FormatAsManagementMenu("Starmap", "[Z]") + " to begin analysis";
+				public static LocString TOOLTIP = "Select an unknown destination from the " + UI.FormatAsManagementMenu("Starmap", global::Action.ManageStarmap) + " to begin analysis";
 
 				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Telescope", "TELESCOPE") + " idle";
 
@@ -1244,7 +1238,7 @@ namespace STRINGS
 					"Enable Building",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[ENTER]"),
+					UI.FormatAsHotKey(global::Action.ToggleEnabled),
 					" to resume its use"
 				});
 			}
@@ -1361,7 +1355,7 @@ namespace STRINGS
 					"Open the ",
 					UI.FormatAsOverlay("Radiation Overlay"),
 					" ",
-					UI.FormatAsHotkey("[L-SHIFT + F4]"),
+					UI.FormatAsHotKey(global::Action.Overlay15),
 					" to view this building's radiation port"
 				});
 			}
@@ -1556,7 +1550,7 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"Open the ",
-					UI.FormatAsManagementMenu("Research Tree", "[R]"),
+					UI.FormatAsManagementMenu("Research Tree", global::Action.ManageResearch),
 					" to select a new ",
 					UI.FormatAsLink("Research", "TECH"),
 					" project"
@@ -1567,7 +1561,7 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
 				{
 					"Open the ",
-					UI.FormatAsManagementMenu("Research Tree", "[R]"),
+					UI.FormatAsManagementMenu("Research Tree", global::Action.ManageResearch),
 					" to select a new ",
 					UI.FormatAsLink("Research", "TECH"),
 					" project"
@@ -1583,9 +1577,9 @@ namespace STRINGS
 					"Select a ",
 					UI.FormatAsLink("Research", "TECH"),
 					" project in the ",
-					UI.FormatAsManagementMenu("Research Tree", "{Hotkey}"),
+					UI.FormatAsManagementMenu("Research Tree", global::Action.ManageResearch),
 					" or a Destination in the ",
-					UI.FormatAsManagementMenu("Starmap", "[Z]")
+					UI.FormatAsManagementMenu("Starmap", global::Action.ManageStarmap)
 				});
 
 				public static LocString NOTIFICATION_NAME = "No " + UI.FormatAsLink("Research Focus", "TECH") + " or Starmap destination selected";
@@ -1633,7 +1627,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Emitting Light";
 
-				public static LocString TOOLTIP = "Open the " + UI.FormatAsOverlay("Light Overlay", "[{LightGridOverlay}]") + " to view this light's visibility radius";
+				public static LocString TOOLTIP = "Open the " + UI.FormatAsOverlay("Light Overlay", global::Action.Overlay5) + " to view this light's visibility radius";
 			}
 
 			public class RATIONBOXCONTENTS
@@ -2040,7 +2034,7 @@ namespace STRINGS
 					"Enable Building",
 					UI.PST_KEYWORD,
 					" ",
-					UI.FormatAsHotkey("[ENTER]"),
+					UI.FormatAsHotKey(global::Action.ToggleEnabled),
 					" to resume use"
 				});
 			}
@@ -2260,7 +2254,7 @@ namespace STRINGS
 					"{Skills} Skill required to operate",
 					UI.HORIZONTAL_BR_RULE,
 					"Open the ",
-					UI.FormatAsManagementMenu("Skills Panel", "[J]"),
+					UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills),
 					" to teach {Skills} to a Duplicant"
 				});
 			}
@@ -2492,7 +2486,7 @@ namespace STRINGS
 					"Room",
 					UI.PST_KEYWORD,
 					" for full functionality\n\nOpen the ",
-					UI.FormatAsOverlay("Room Overlay", "[F11]"),
+					UI.FormatAsOverlay("Room Overlay", global::Action.Overlay11),
 					" to view full ",
 					UI.PRE_KEYWORD,
 					"Room",
@@ -2508,7 +2502,7 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"This building must be built inside a {0} for full functionality\n\nOpen the ",
-					UI.FormatAsOverlay("Room Overlay", "[F11]"),
+					UI.FormatAsOverlay("Room Overlay", global::Action.Overlay11),
 					" to view full ",
 					UI.PRE_KEYWORD,
 					"Room",
@@ -2524,7 +2518,7 @@ namespace STRINGS
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
 					"It is recommended to build this building inside a {0}\n\nOpen the ",
-					UI.FormatAsOverlay("Room Overlay", "[F11]"),
+					UI.FormatAsOverlay("Room Overlay", global::Action.Overlay11),
 					" to view full ",
 					UI.PRE_KEYWORD,
 					"Room",

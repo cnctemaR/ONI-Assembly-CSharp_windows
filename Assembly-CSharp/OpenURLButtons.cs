@@ -57,7 +57,7 @@ public class OpenURLButtons : KMonoBehaviour
 
 	public void OpenURL(string URL)
 	{
-		Application.OpenURL(URL);
+		App.OpenWebURL(URL);
 	}
 
 	public void OpenPlatformURL(string URL)
@@ -67,12 +67,12 @@ public class OpenURLButtons : KMonoBehaviour
 			DistributionPlatform.Inst.GetAuthTicket(delegate(byte[] ticket)
 			{
 				string text2 = string.Concat(Array.ConvertAll<byte, string>(ticket, (byte x) => x.ToString("X2")));
-				Application.OpenURL(URL.Replace("{SteamID}", DistributionPlatform.Inst.LocalUser.Id.ToInt64().ToString()).Replace("{SteamTicket}", text2));
+				App.OpenWebURL(URL.Replace("{SteamID}", DistributionPlatform.Inst.LocalUser.Id.ToInt64().ToString()).Replace("{SteamTicket}", text2));
 			});
 			return;
 		}
 		string text = URL.Replace("{SteamID}", "").Replace("{SteamTicket}", "");
-		Application.OpenURL("https://accounts.klei.com/login?goto={gotoUrl}".Replace("{gotoUrl}", WebUtility.HtmlEncode(text)));
+		App.OpenWebURL("https://accounts.klei.com/login?goto={gotoUrl}".Replace("{gotoUrl}", WebUtility.HtmlEncode(text)));
 	}
 
 	public GameObject buttonPrefab;

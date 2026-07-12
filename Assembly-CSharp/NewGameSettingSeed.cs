@@ -1,6 +1,5 @@
 ﻿using System;
 using Klei.CustomSettings;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -100,7 +99,7 @@ public class NewGameSettingSeed : NewGameSettingWidget
 	private ToolTip ToolTip;
 
 	[SerializeField]
-	private TMP_InputField Input;
+	private KInputTextField Input;
 
 	[SerializeField]
 	private KButton RandomizeButton;

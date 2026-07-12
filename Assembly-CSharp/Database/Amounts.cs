@@ -68,18 +68,19 @@ namespace Database
 		{
 			string text = Strings.Get(string.Format("{1}.STATS.{0}.NAME", id.ToUpper(), string_root.ToUpper()));
 			string text2 = Strings.Get(string.Format("{1}.STATS.{0}.TOOLTIP", id.ToUpper(), string_root.ToUpper()));
+			Klei.AI.Attribute.Display display = (show_in_ui ? Klei.AI.Attribute.Display.Normal : Klei.AI.Attribute.Display.Never);
 			string text3 = id + "Min";
 			StringEntry stringEntry;
 			string text4 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.NAME", text3.ToUpper(), string_root)), out stringEntry) ? stringEntry.String : ("Minimum" + text));
 			StringEntry stringEntry2;
 			string text5 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.DESC", text3.ToUpper(), string_root)), out stringEntry2) ? stringEntry2.String : ("Minimum" + text));
-			Klei.AI.Attribute attribute = new Klei.AI.Attribute(id + "Min", text4, "", text5, min, Klei.AI.Attribute.Display.Normal, false, null, null, uiFullColourSprite);
+			Klei.AI.Attribute attribute = new Klei.AI.Attribute(id + "Min", text4, "", text5, min, display, false, null, null, uiFullColourSprite);
 			string text6 = id + "Max";
 			StringEntry stringEntry3;
 			string text7 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.NAME", text6.ToUpper(), string_root)), out stringEntry3) ? stringEntry3.String : ("Maximum" + text));
 			StringEntry stringEntry4;
 			string text8 = (Strings.TryGet(new StringKey(string.Format("{1}.ATTRIBUTES.{0}.DESC", text6.ToUpper(), string_root)), out stringEntry4) ? stringEntry4.String : ("Maximum" + text));
-			Klei.AI.Attribute attribute2 = new Klei.AI.Attribute(id + "Max", text7, "", text8, max, Klei.AI.Attribute.Display.Normal, false, null, null, uiFullColourSprite);
+			Klei.AI.Attribute attribute2 = new Klei.AI.Attribute(id + "Max", text7, "", text8, max, display, false, null, null, uiFullColourSprite);
 			string text9 = id + "Delta";
 			string text10 = Strings.Get(string.Format("{1}.ATTRIBUTES.{0}.NAME", text9.ToUpper(), string_root));
 			string text11 = Strings.Get(string.Format("{1}.ATTRIBUTES.{0}.DESC", text9.ToUpper(), string_root));

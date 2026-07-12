@@ -52,7 +52,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 
 	private void BeginDrag()
 	{
-		this.dragStartPos = Input.mousePosition;
+		this.dragStartPos = KInputManager.GetMousePos();
 		this.dragLastPos = this.dragStartPos;
 		this.isDragging = true;
 		KFMOD.PlayUISound(GlobalAssets.GetSound("DestinationSelect_Scroll_Start", false));
@@ -60,7 +60,7 @@ public class DestinationSelectPanel : KMonoBehaviour
 
 	private void Drag()
 	{
-		Vector2 vector = Input.mousePosition;
+		Vector2 vector = KInputManager.GetMousePos();
 		float num = vector.x - this.dragLastPos.x;
 		this.dragLastPos = vector;
 		this.offset += num;

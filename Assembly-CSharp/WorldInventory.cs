@@ -217,6 +217,37 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return num;
 	}
 
+	public float GetAmountWithoutTag(Tag tag, bool includeRelatedWorlds = false, Tag[] forbiddenTags = null)
+	{
+		if (forbiddenTags == null)
+		{
+			return this.GetAmount(tag, includeRelatedWorlds);
+		}
+		float num = 0f;
+		ICollection<Pickupable> collection;
+		if (!includeRelatedWorlds)
+		{
+			collection = this.GetPickupables(tag, false);
+		}
+		else
+		{
+			ICollection<Pickupable> pickupablesFromRelatedWorlds = ClusterUtil.GetPickupablesFromRelatedWorlds(this, tag);
+			collection = pickupablesFromRelatedWorlds;
+		}
+		ICollection<Pickupable> collection2 = collection;
+		if (collection2 != null)
+		{
+			foreach (Pickupable pickupable in collection2)
+			{
+				if (pickupable != null && !pickupable.HasTag(GameTags.StoredPrivate) && !pickupable.HasAnyTags(forbiddenTags))
+				{
+					num += pickupable.TotalAmount;
+				}
+			}
+		}
+		return num;
+	}
+
 	private void Update()
 	{
 		int num = 0;

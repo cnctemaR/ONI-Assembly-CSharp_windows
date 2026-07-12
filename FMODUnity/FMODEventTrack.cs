@@ -1,25 +1,32 @@
 ﻿using System;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
-[TrackColor(0.066f, 0.134f, 0.244f)]
-[TrackClipType(typeof(FMODEventPlayable))]
-[TrackBindingType(typeof(GameObject))]
-public class FMODEventTrack : TrackAsset
+namespace FMODUnity
 {
-	public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
+	[TrackColor(0.066f, 0.134f, 0.244f)]
+	[TrackClipType(typeof(FMODEventPlayable))]
+	[TrackBindingType(typeof(GameObject))]
+	[DisplayName("FMOD/Event Track")]
+	public class FMODEventTrack : TrackAsset
 	{
-		GameObject gameObject = go.GetComponent<PlayableDirector>().GetGenericBinding(this) as GameObject;
-		foreach (TimelineClip timelineClip in base.GetClips())
+		public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
 		{
-			FMODEventPlayable fmodeventPlayable = timelineClip.asset as FMODEventPlayable;
-			if (fmodeventPlayable)
+			GameObject gameObject = go.GetComponent<PlayableDirector>().GetGenericBinding(this) as GameObject;
+			foreach (TimelineClip timelineClip in base.GetClips())
 			{
-				fmodeventPlayable.TrackTargetObject = gameObject;
-				fmodeventPlayable.OwningClip = timelineClip;
+				FMODEventPlayable fmodeventPlayable = timelineClip.asset as FMODEventPlayable;
+				if (fmodeventPlayable)
+				{
+					fmodeventPlayable.TrackTargetObject = gameObject;
+					fmodeventPlayable.OwningClip = timelineClip;
+				}
 			}
+			return ScriptPlayable<FMODEventMixerBehaviour>.Create(graph, this.template, inputCount);
 		}
-		return ScriptPlayable<FMODEventMixerBehaviour>.Create(graph, inputCount);
+
+		public FMODEventMixerBehaviour template = new FMODEventMixerBehaviour();
 	}
 }

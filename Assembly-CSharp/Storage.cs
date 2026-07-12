@@ -1082,6 +1082,24 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		return num;
 	}
 
+	public float GetAmountAvailable(Tag tag, Tag[] forbiddenTags = null)
+	{
+		if (forbiddenTags == null)
+		{
+			return this.GetAmountAvailable(tag);
+		}
+		float num = 0f;
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			GameObject gameObject = this.items[i];
+			if (gameObject != null && gameObject.HasTag(tag) && !gameObject.HasAnyTags(forbiddenTags))
+			{
+				num += gameObject.GetComponent<PrimaryElement>().Units;
+			}
+		}
+		return num;
+	}
+
 	public float GetUnitsAvailable(Tag tag)
 	{
 		float num = 0f;

@@ -28,6 +28,7 @@ public class HEPBattery : GameStateMachine<HEPBattery, HEPBattery.Instance, ISta
 	{
 		smi.UpdateDecayStatusItem(true);
 		smi.UpdateMeter(null);
+		smi.operational.SetActive(smi.particleStorage.Particles > 0f, false);
 		smi.launcherTimer += dt;
 		if (smi.launcherTimer < smi.def.minLaunchInterval || !smi.AllowSpawnParticles)
 		{

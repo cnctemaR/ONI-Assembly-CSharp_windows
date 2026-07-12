@@ -154,12 +154,17 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected void SetCursor(Texture2D new_cursor, Vector2 offset, CursorMode mode)
 	{
-		if (new_cursor != InterfaceTool.activeCursor)
+		if (new_cursor != InterfaceTool.activeCursor && new_cursor != null)
 		{
 			InterfaceTool.activeCursor = new_cursor;
 			try
 			{
 				Cursor.SetCursor(new_cursor, offset, mode);
+				VirtualInputModule virtualInputModule = global::UnityEngine.Object.FindObjectOfType<VirtualInputModule>(true);
+				if (virtualInputModule != null)
+				{
+					virtualInputModule.SetCursor(new_cursor);
+				}
 			}
 			catch (Exception ex)
 			{

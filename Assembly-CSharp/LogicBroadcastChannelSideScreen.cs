@@ -38,12 +38,16 @@ public class LogicBroadcastChannelSideScreen : SideScreenContent
 		foreach (object obj in Components.LogicBroadcasters)
 		{
 			LogicBroadcaster logicBroadcaster = (LogicBroadcaster)obj;
-			GameObject gameObject = Util.KInstantiateUI(this.rowPrefab, this.listContainer, false);
-			gameObject.gameObject.name = logicBroadcaster.gameObject.GetProperName();
-			global::Debug.Assert(!this.broadcasterRows.ContainsKey(logicBroadcaster), "Adding two of the same broadcaster to LogicBroadcastChannelSideScreen UI: " + logicBroadcaster.gameObject.GetProperName());
-			this.broadcasterRows.Add(logicBroadcaster, gameObject);
-			gameObject.SetActive(true);
+			if (!logicBroadcaster.IsNullOrDestroyed())
+			{
+				GameObject gameObject = Util.KInstantiateUI(this.rowPrefab, this.listContainer, false);
+				gameObject.gameObject.name = logicBroadcaster.gameObject.GetProperName();
+				global::Debug.Assert(!this.broadcasterRows.ContainsKey(logicBroadcaster), "Adding two of the same broadcaster to LogicBroadcastChannelSideScreen UI: " + logicBroadcaster.gameObject.GetProperName());
+				this.broadcasterRows.Add(logicBroadcaster, gameObject);
+				gameObject.SetActive(true);
+			}
 		}
+		this.noChannelRow.SetActive(Components.LogicBroadcasters.Count == 0);
 		this.Refresh();
 	}
 
@@ -81,6 +85,9 @@ public class LogicBroadcastChannelSideScreen : SideScreenContent
 
 	[SerializeField]
 	private LocText headerLabel;
+
+	[SerializeField]
+	private GameObject noChannelRow;
 
 	private Dictionary<LogicBroadcaster, GameObject> broadcasterRows = new Dictionary<LogicBroadcaster, GameObject>();
 

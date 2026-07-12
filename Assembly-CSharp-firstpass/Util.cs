@@ -5,7 +5,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using KSerialization;
-using TMPro;
 using UnityEngine;
 
 public static class Util
@@ -358,7 +357,7 @@ public static class Util
 		return true;
 	}
 
-	public static void ScrubInputField(TMP_InputField inputField, bool isPath = false, bool allowNewLine = false)
+	public static void ScrubInputField(KInputTextField inputField, bool isPath = false, bool allowNewLine = false)
 	{
 		for (int i = inputField.text.Length - 1; i >= 0; i--)
 		{

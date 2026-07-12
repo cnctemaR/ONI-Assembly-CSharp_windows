@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class GameInputManager : KInputManager
 {
@@ -18,7 +19,7 @@ public class GameInputManager : KInputManager
 		KInputController kinputController = new KInputController(true);
 		foreach (BindingEntry bindingEntry in GameInputMapping.GetBindingEntries())
 		{
-			kinputController.Bind(BindingEntry.GetGamepadKeyCode(gamepad_index, bindingEntry.mButton), Modifier.None, bindingEntry.mAction);
+			kinputController.Bind(bindingEntry.mKeyCode, Modifier.None, bindingEntry.mAction);
 		}
 		base.AddController(kinputController);
 		return kinputController;
@@ -29,6 +30,11 @@ public class GameInputManager : KInputManager
 		GameInputMapping.SetDefaultKeyBindings(default_keybindings);
 		GameInputMapping.LoadBindings();
 		this.AddKeyboardMouseController();
+		KInputManager.steamInputInterpreter.OnEnable();
+		if (KInputManager.steamInputInterpreter.NumOfISteamInputs > 0)
+		{
+			this.AddGamepadController(base.GetControllerCount());
+		}
 	}
 
 	public void RebindControls()
@@ -42,12 +48,32 @@ public class GameInputManager : KInputManager
 			}
 			kinputController.HandleCancelInput();
 		}
+		KInputManager.InputChange.Invoke();
 	}
 
 	public override void Update()
 	{
 		if (KInputManager.isFocused)
 		{
+			KInputManager.steamInputInterpreter.Update();
+			if (KInputManager.steamInputInterpreter.NumOfISteamInputs > 0 && base.GetControllerCount() <= 1)
+			{
+				this.AddGamepadController(base.GetControllerCount());
+			}
+			else if (KInputManager.steamInputInterpreter.NumOfISteamInputs < 1 && KInputManager.currentControllerIsGamepad)
+			{
+				KInputManager.currentControllerIsGamepad = false;
+				KInputManager.InputChange.Invoke();
+			}
+			int num = 0;
+			while (num < this.mControllers.Count && num + 1 < this.mControllers.Count)
+			{
+				if (this.mControllers[num].inputHandler.HandleChildCount() != this.mControllers[num + 1].inputHandler.HandleChildCount())
+				{
+					this.mControllers[num].inputHandler.TransferHandles(this.mControllers[num + 1].inputHandler);
+				}
+				num++;
+			}
 			base.Update();
 		}
 	}
@@ -56,4 +82,6 @@ public class GameInputManager : KInputManager
 	{
 		base.OnApplicationFocus(focusStatus);
 	}
+
+	public List<IInputHandler> usedMenus = new List<IInputHandler>();
 }

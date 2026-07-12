@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,13 +23,13 @@ public class DebugPaintElementScreen : KScreen
 		this.inputFields.Add(this.temperatureInput);
 		this.inputFields.Add(this.diseaseCountInput);
 		this.inputFields.Add(this.filterInput);
-		foreach (TMP_InputField tmp_InputField in this.inputFields)
+		foreach (KInputTextField kinputTextField in this.inputFields)
 		{
-			tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
+			kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 			{
 				base.isEditing = true;
 			}));
-			tmp_InputField.onEndEdit.AddListener(delegate(string value)
+			kinputTextField.onEndEdit.AddListener(delegate(string value)
 			{
 				base.isEditing = false;
 			});
@@ -355,16 +354,16 @@ public class DebugPaintElementScreen : KScreen
 
 	[Header("Value Inputs")]
 	[SerializeField]
-	private TMP_InputField massPressureInput;
+	private KInputTextField massPressureInput;
 
 	[SerializeField]
-	private TMP_InputField temperatureInput;
+	private KInputTextField temperatureInput;
 
 	[SerializeField]
-	private TMP_InputField diseaseCountInput;
+	private KInputTextField diseaseCountInput;
 
 	[SerializeField]
-	private TMP_InputField filterInput;
+	private KInputTextField filterInput;
 
 	[Header("Tool Buttons")]
 	[SerializeField]
@@ -401,7 +400,7 @@ public class DebugPaintElementScreen : KScreen
 
 	public Toggle paintAllowFOWReveal;
 
-	private List<TMP_InputField> inputFields = new List<TMP_InputField>();
+	private List<KInputTextField> inputFields = new List<KInputTextField>();
 
 	private List<string> options_list = new List<string>();
 

@@ -1,0 +1,12 @@
+﻿using System;
+
+namespace Steamworks
+{
+	public enum EFloatingGamepadTextInputMode
+	{
+		k_EFloatingGamepadTextInputModeModeSingleLine,
+		k_EFloatingGamepadTextInputModeModeMultipleLines,
+		k_EFloatingGamepadTextInputModeModeEmail,
+		k_EFloatingGamepadTextInputModeModeNumeric
+	}
+}

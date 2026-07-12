@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using FMOD.Studio;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -33,6 +32,11 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void ToggleClusterFX()
 	{
 		this.ignoreClusterFX = !this.ignoreClusterFX;
+	}
+
+	private void OnCleanup()
+	{
+		Global.Instance.GetInputManager().usedMenus.Remove(this);
 	}
 
 	public int cameraActiveCluster
@@ -276,7 +280,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			newWorldCallback();
 		}
 		ManagementMenu.Instance.CloseAll();
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ActiveBaseChangeSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ActiveBaseChangeSnapshot, STOP_MODE.ALLOWFADEOUT);
 		yield return base.StartCoroutine(this.FadeWithBlack(false, 1f, 0f, 3f));
 		yield break;
 	}
@@ -317,7 +321,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			return false;
 		}
 		bool flag = false;
-		if (current.currentSelectedGameObject != null && (current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null || current.currentSelectedGameObject.GetComponent<InputField>() != null))
+		if (current.currentSelectedGameObject != null && (current.currentSelectedGameObject.GetComponent<KInputTextField>() != null || current.currentSelectedGameObject.GetComponent<InputField>() != null))
 		{
 			flag = true;
 		}
@@ -972,10 +976,21 @@ public class CameraController : KMonoBehaviour, IInputHandler
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
-			Vector3 vector8 = new Vector3(Mathf.Lerp(0f, this.keyPanDelta.x, this.smoothDt * this.keyPanningEasing), Mathf.Lerp(0f, this.keyPanDelta.y, this.smoothDt * this.keyPanningEasing), 0f);
-			this.keyPanDelta -= vector8;
-			vector7.x += vector8.x;
-			vector7.y += vector8.y;
+			if (KInputManager.currentControllerIsGamepad)
+			{
+				Vector2 vector8 = num2 * KInputManager.steamInputInterpreter.GetSteamCameraMovement();
+				if (Mathf.Abs(vector8.x) > Mathf.Epsilon || Mathf.Abs(vector8.y) > Mathf.Epsilon)
+				{
+					this.ClearFollowTarget();
+					this.isTargetPosSet = false;
+					this.overrideZoomSpeed = 0f;
+				}
+				this.keyPanDelta += new Vector3(vector8.x, vector8.y, 0f);
+			}
+			Vector3 vector9 = new Vector3(Mathf.Lerp(0f, this.keyPanDelta.x, this.smoothDt * this.keyPanningEasing), Mathf.Lerp(0f, this.keyPanDelta.y, this.smoothDt * this.keyPanningEasing), 0f);
+			this.keyPanDelta -= vector9;
+			vector7.x += vector9.x;
+			vector7.y += vector9.y;
 		}
 		if (this.followTarget != null)
 		{

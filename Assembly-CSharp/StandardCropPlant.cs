@@ -42,6 +42,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		return string.Format(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP, text);
 	}
 
+	private const int WILT_LEVELS = 3;
+
 	[MyCmpReq]
 	private Crop crop;
 
@@ -74,6 +76,19 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 
 	public class AnimSet
 	{
+		public string GetWiltLevel(int level)
+		{
+			if (this.m_wilt == null)
+			{
+				this.m_wilt = new string[3];
+				for (int i = 0; i < 3; i++)
+				{
+					this.m_wilt[i] = this.wilt_base + (i + 1).ToString();
+				}
+			}
+			return this.m_wilt[level - 1];
+		}
+
 		public string grow;
 
 		public string grow_pst;
@@ -85,6 +100,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		public string harvest;
 
 		public string waning;
+
+		private string[] m_wilt;
 	}
 
 	public class States : GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant>
@@ -168,20 +185,20 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		private static string GetWiltAnim(StandardCropPlant.StatesInstance smi)
 		{
 			float num = smi.master.growing.PercentOfCurrentHarvest();
-			string text;
+			int num2;
 			if (num < 0.75f)
 			{
-				text = "1";
+				num2 = 1;
 			}
 			else if (num < 1f)
 			{
-				text = "2";
+				num2 = 2;
 			}
 			else
 			{
-				text = "3";
+				num2 = 3;
 			}
-			return smi.master.anims.wilt_base + text;
+			return smi.master.anims.GetWiltLevel(num2);
 		}
 
 		private static void RefreshPositionPercent(StandardCropPlant.StatesInstance smi, float dt)

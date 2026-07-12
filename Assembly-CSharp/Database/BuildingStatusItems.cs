@@ -30,7 +30,7 @@ namespace Database
 			this.AssignedTo.resolveStringCallback = delegate(string str, object data)
 			{
 				IAssignableIdentity assignee = ((Assignable)data).assignee;
-				if (assignee != null)
+				if (!assignee.IsNullOrDestroyed())
 				{
 					string properName = assignee.GetProperName();
 					str = str.Replace("{Assignee}", properName);
@@ -41,7 +41,7 @@ namespace Database
 			this.AssignedToRoom.resolveStringCallback = delegate(string str, object data)
 			{
 				IAssignableIdentity assignee2 = ((Assignable)data).assignee;
-				if (assignee2 != null)
+				if (!assignee2.IsNullOrDestroyed())
 				{
 					string properName2 = assignee2.GetProperName();
 					str = str.Replace("{Assignee}", properName2);
@@ -185,7 +185,7 @@ namespace Database
 				RoomType roomType = Db.Get().RoomTypes.Get((string)data);
 				if (roomType != null)
 				{
-					return string.Format(str, roomType.Name);
+					return str.Replace("{0}", roomType.Name);
 				}
 				return str;
 			};

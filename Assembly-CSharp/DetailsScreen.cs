@@ -333,7 +333,7 @@ public class DetailsScreen : KTabMenu
 				}
 			});
 		}
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenHalfEffect, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenHalfEffect, STOP_MODE.ALLOWFADEOUT);
 		this.sideScreen.SetActive(false);
 	}
 
@@ -352,7 +352,7 @@ public class DetailsScreen : KTabMenu
 		string text = "";
 		global::Debug.Assert(this.target != null, "Details Screen has no target");
 		KSelectable component = this.target.GetComponent<KSelectable>();
-		global::Debug.Assert(component != null, string.Format("Details Screen target is not a KSelectable {0}", this.target));
+		DebugUtil.AssertArgs(component != null, new object[] { "Details Screen target is not a KSelectable", this.target });
 		CellSelectionObject component2 = component.GetComponent<CellSelectionObject>();
 		BuildingUnderConstruction component3 = component.GetComponent<BuildingUnderConstruction>();
 		CreatureBrain component4 = component.GetComponent<CreatureBrain>();

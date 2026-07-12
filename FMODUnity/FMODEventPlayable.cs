@@ -1,77 +1,87 @@
 ﻿using System;
+using System.Collections.Generic;
 using FMOD.Studio;
-using FMODUnity;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
-[Serializable]
-public class FMODEventPlayable : PlayableAsset, ITimelineClipAsset
+namespace FMODUnity
 {
-	public GameObject TrackTargetObject { get; set; }
-
-	public override double duration
+	[Serializable]
+	public class FMODEventPlayable : PlayableAsset, ITimelineClipAsset
 	{
-		get
+		public GameObject TrackTargetObject { get; set; }
+
+		public override double duration
 		{
-			if (this.eventName == null)
+			get
 			{
-				return base.duration;
+				if (this.eventName == null)
+				{
+					return base.duration;
+				}
+				return (double)this.eventLength;
 			}
-			return (double)this.eventLength;
 		}
-	}
 
-	public ClipCaps clipCaps
-	{
-		get
+		public ClipCaps clipCaps
 		{
-			return ClipCaps.None;
-		}
-	}
-
-	public TimelineClip OwningClip { get; set; }
-
-	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
-	{
-		if (!this.cachedParameters && !string.IsNullOrEmpty(this.eventName))
-		{
-			EventDescription eventDescription;
-			RuntimeManager.StudioSystem.getEvent(this.eventName, out eventDescription);
-			for (int i = 0; i < this.parameters.Length; i++)
+			get
 			{
-				PARAMETER_DESCRIPTION parameter_DESCRIPTION;
-				eventDescription.getParameterDescriptionByName(this.parameters[i].Name, out parameter_DESCRIPTION);
-				this.parameters[i].ID = parameter_DESCRIPTION.id;
+				return ClipCaps.None;
 			}
-			this.cachedParameters = true;
 		}
-		ScriptPlayable<FMODEventPlayableBehavior> scriptPlayable = ScriptPlayable<FMODEventPlayableBehavior>.Create(graph, this.template, 0);
-		this.behavior = scriptPlayable.GetBehaviour();
-		this.behavior.TrackTargetObject = this.TrackTargetObject;
-		this.behavior.eventName = this.eventName;
-		this.behavior.stopType = this.stopType;
-		this.behavior.parameters = this.parameters;
-		this.behavior.OwningClip = this.OwningClip;
-		return scriptPlayable;
+
+		public TimelineClip OwningClip { get; set; }
+
+		public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
+		{
+			if (!this.cachedParameters && !string.IsNullOrEmpty(this.eventName))
+			{
+				EventDescription eventDescription;
+				RuntimeManager.StudioSystem.getEvent(this.eventName, out eventDescription);
+				for (int i = 0; i < this.parameters.Length; i++)
+				{
+					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
+					eventDescription.getParameterDescriptionByName(this.parameters[i].Name, out parameter_DESCRIPTION);
+					this.parameters[i].ID = parameter_DESCRIPTION.id;
+				}
+				List<ParameterAutomationLink> parameterLinks = this.template.parameterLinks;
+				for (int j = 0; j < parameterLinks.Count; j++)
+				{
+					PARAMETER_DESCRIPTION parameter_DESCRIPTION2;
+					eventDescription.getParameterDescriptionByName(parameterLinks[j].Name, out parameter_DESCRIPTION2);
+					parameterLinks[j].ID = parameter_DESCRIPTION2.id;
+				}
+				this.cachedParameters = true;
+			}
+			ScriptPlayable<FMODEventPlayableBehavior> scriptPlayable = ScriptPlayable<FMODEventPlayableBehavior>.Create(graph, this.template, 0);
+			this.behavior = scriptPlayable.GetBehaviour();
+			this.behavior.TrackTargetObject = this.TrackTargetObject;
+			this.behavior.eventName = this.eventName;
+			this.behavior.stopType = this.stopType;
+			this.behavior.parameters = this.parameters;
+			this.behavior.OwningClip = this.OwningClip;
+			return scriptPlayable;
+		}
+
+		public FMODEventPlayableBehavior template = new FMODEventPlayableBehavior();
+
+		public float eventLength;
+
+		private FMODEventPlayableBehavior behavior;
+
+		[EventRef]
+		[SerializeField]
+		public string eventName;
+
+		[SerializeField]
+		public STOP_MODE stopType;
+
+		[SerializeField]
+		public ParamRef[] parameters = new ParamRef[0];
+
+		[NonSerialized]
+		public bool cachedParameters;
 	}
-
-	public FMODEventPlayableBehavior template = new FMODEventPlayableBehavior();
-
-	public float eventLength;
-
-	private FMODEventPlayableBehavior behavior;
-
-	[EventRef]
-	[SerializeField]
-	public string eventName;
-
-	[SerializeField]
-	public global::STOP_MODE stopType;
-
-	[SerializeField]
-	public ParamRef[] parameters = new ParamRef[0];
-
-	[NonSerialized]
-	public bool cachedParameters;
 }

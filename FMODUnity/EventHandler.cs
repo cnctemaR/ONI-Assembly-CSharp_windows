@@ -5,6 +5,16 @@ namespace FMODUnity
 {
 	public abstract class EventHandler : MonoBehaviour
 	{
+		protected virtual void Start()
+		{
+			this.HandleGameEvent(EmitterGameEvent.ObjectStart);
+		}
+
+		protected virtual void OnDestroy()
+		{
+			this.HandleGameEvent(EmitterGameEvent.ObjectDestroy);
+		}
+
 		private void OnEnable()
 		{
 			this.HandleGameEvent(EmitterGameEvent.ObjectEnable);

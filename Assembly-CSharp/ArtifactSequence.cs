@@ -18,7 +18,7 @@ public static class ArtifactSequence
 			SpeedControlScreen.Instance.Pause(false);
 		}
 		CameraController.Instance.SetWorldInteractive(false);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(Db.Get().ColonyAchievements.CollectedArtifacts.victoryNISSnapshot);
 		MusicManager.instance.PlaySong("Music_Victory_02_NIS", false);
 		GameObject cameraTaget = null;
@@ -151,8 +151,8 @@ public static class ArtifactSequence
 		}
 		List<SpaceArtifact>.Enumerator enumerator3 = default(List<SpaceArtifact>.Enumerator);
 		CameraController.Instance.FadeOut(1f, 1f);
-		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.CollectedArtifacts.victoryNISSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(Db.Get().ColonyAchievements.CollectedArtifacts.victoryNISSnapshot, STOP_MODE.ALLOWFADEOUT);
 		yield return new WaitForSecondsRealtime(2f);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
@@ -169,8 +169,8 @@ public static class ArtifactSequence
 			CameraController.Instance.SetWorldInteractive(true);
 			CameraController.Instance.SetOverrideZoomSpeed(1f);
 			HoverTextScreen.Instance.Show(true);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryCinematicSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryCinematicSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot, STOP_MODE.ALLOWFADEOUT);
 			RootMenu.Instance.canTogglePauseScreen = true;
 		}));
 		yield break;

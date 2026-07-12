@@ -68,6 +68,10 @@ public class MutantPlant : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			this.analyzed = true;
 		}
+		if (!this.IsOriginal)
+		{
+			this.AddTag(GameTags.MutatedSeed);
+		}
 		this.AddTag(this.SubSpeciesID);
 		Components.MutantPlants.Add(this);
 		base.OnSpawn();

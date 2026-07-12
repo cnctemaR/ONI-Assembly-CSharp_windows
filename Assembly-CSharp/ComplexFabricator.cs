@@ -18,6 +18,30 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		}
 	}
 
+	public bool ForbidMutantSeeds
+	{
+		get
+		{
+			return this.forbidMutantSeeds;
+		}
+		set
+		{
+			this.forbidMutantSeeds = value;
+		}
+	}
+
+	public Tag[] ForbiddenTags
+	{
+		get
+		{
+			if (!this.forbidMutantSeeds)
+			{
+				return null;
+			}
+			return this.forbiddenMutantTags;
+		}
+	}
+
 	public int CurrentOrderIdx
 	{
 		get
@@ -756,7 +780,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			if (keyValuePair.Value >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT && !this.HasPendingFetch(keyValuePair.Key))
 			{
 				FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
-				fetchList.Add(keyValuePair.Key, null, null, keyValuePair.Value, FetchOrder2.OperationalRequirement.None);
+				FetchList2 fetchList2 = fetchList;
+				Tag key = keyValuePair.Key;
+				Tag[] array = null;
+				float value = keyValuePair.Value;
+				fetchList2.Add(key, array, this.ForbiddenTags, value, FetchOrder2.OperationalRequirement.None);
 				fetchList.ShowStatusItem = false;
 				fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 				this.fetchListList.Add(fetchList);
@@ -1057,6 +1085,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	private float orderProgress;
 
 	private List<int> openOrderCounts = new List<int>();
+
+	[Serialize]
+	private bool forbidMutantSeeds;
+
+	private Tag[] forbiddenMutantTags = new Tag[] { GameTags.MutatedSeed };
 
 	private bool queueDirty = true;
 

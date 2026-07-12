@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class OverlayMenu : KIconToggleMenu
 {
@@ -18,6 +19,8 @@ public class OverlayMenu : KIconToggleMenu
 		base.Setup(this.overlayToggleInfos);
 		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
+		this.inputChangeReceiver = (UnityAction)Delegate.Combine(this.inputChangeReceiver, new UnityAction(this.Refresh));
+		KInputManager.InputChange.AddListener(this.inputChangeReceiver);
 		base.onSelect += this.OnToggleSelect;
 	}
 
@@ -43,6 +46,7 @@ public class OverlayMenu : KIconToggleMenu
 		{
 			OverlayMenu.OverlayToggleInfo overlayToggleInfo = (OverlayMenu.OverlayToggleInfo)toggleInfo;
 			toggleInfo.toggle.gameObject.SetActive(overlayToggleInfo.IsUnlocked());
+			toggleInfo.tooltip = GameUtil.ReplaceHotkeyString(overlayToggleInfo.originalToolTipText, toggleInfo.hotKey);
 		}
 	}
 
@@ -144,6 +148,8 @@ public class OverlayMenu : KIconToggleMenu
 
 	private List<KIconToggleMenu.ToggleInfo> overlayToggleInfos;
 
+	private UnityAction inputChangeReceiver;
+
 	private class OverlayToggleGroup : KIconToggleMenu.ToggleInfo
 	{
 		public OverlayToggleGroup(string text, string icon_name, List<OverlayMenu.OverlayToggleInfo> toggle_group, string required_tech_item = "", global::Action hot_key = global::Action.NumActions, string tooltip = "", string tooltip_header = "")
@@ -173,8 +179,10 @@ public class OverlayMenu : KIconToggleMenu
 	private class OverlayToggleInfo : KIconToggleMenu.ToggleInfo
 	{
 		public OverlayToggleInfo(string text, string icon_name, HashedString sim_view, string required_tech_item = "", global::Action hotKey = global::Action.NumActions, string tooltip = "", string tooltip_header = "")
-			: base(text, icon_name, null, hotKey, GameUtil.ReplaceHotkeyString(tooltip, hotKey), tooltip_header)
+			: base(text, icon_name, null, hotKey, tooltip, tooltip_header)
 		{
+			this.originalToolTipText = tooltip;
+			tooltip = GameUtil.ReplaceHotkeyString(tooltip, hotKey);
 			this.simView = sim_view;
 			this.requiredTechItem = required_tech_item;
 		}
@@ -187,5 +195,7 @@ public class OverlayMenu : KIconToggleMenu
 		public HashedString simView;
 
 		public string requiredTechItem;
+
+		public string originalToolTipText;
 	}
 }

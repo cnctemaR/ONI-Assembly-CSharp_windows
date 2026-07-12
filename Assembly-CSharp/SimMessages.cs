@@ -139,7 +139,6 @@ public static class SimMessages
 
 	public unsafe static void ModifyRadiationEmitter(int sim_handle, int game_cell, short emitRadiusX, short emitRadiusY, float emitRads, float emitRate, float emitSpeed, float emitDirection, float emitAngle, RadiationEmitter.RadiationEmitterType emitType)
 	{
-		Debug.Assert(Grid.IsValidCell(game_cell));
 		if (!Grid.IsValidCell(game_cell))
 		{
 			return;

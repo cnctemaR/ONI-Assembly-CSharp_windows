@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 public class KInputField : KScreen
 {
-	public TMP_InputField field
+	public KInputTextField field
 	{
 		get
 		{
@@ -20,8 +19,8 @@ public class KInputField : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		TMP_InputField tmp_InputField = this.inputField;
-		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(this.OnEditStart));
+		KInputTextField kinputTextField = this.inputField;
+		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(this.OnEditStart));
 		this.inputField.onEndEdit.AddListener(delegate
 		{
 			this.OnEditEnd(this.inputField.text);
@@ -82,5 +81,5 @@ public class KInputField : KScreen
 	}
 
 	[SerializeField]
-	private TMP_InputField inputField;
+	private KInputTextField inputField;
 }

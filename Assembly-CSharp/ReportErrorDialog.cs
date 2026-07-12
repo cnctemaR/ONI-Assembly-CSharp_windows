@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using KMod;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 
 public class ReportErrorDialog : MonoBehaviour
@@ -167,7 +166,7 @@ public class ReportErrorDialog : MonoBehaviour
 
 	private global::System.Action continueAction;
 
-	public TMP_InputField messageInputField;
+	public KInputTextField messageInputField;
 
 	public GameObject referenceMessage;
 

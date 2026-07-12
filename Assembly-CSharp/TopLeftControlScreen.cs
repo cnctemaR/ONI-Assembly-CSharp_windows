@@ -1,6 +1,7 @@
 ﻿using System;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class TopLeftControlScreen : KScreen
 {
@@ -14,6 +15,7 @@ public class TopLeftControlScreen : KScreen
 		base.OnActivate();
 		TopLeftControlScreen.Instance = this;
 		this.RefreshName();
+		KInputManager.InputChange.AddListener(new UnityAction(this.ResetToolTip));
 		this.UpdateSandboxToggleState();
 		MultiToggle sandboxToggle = this.SandboxToggle;
 		sandboxToggle.onClick = (global::System.Action)Delegate.Combine(sandboxToggle.onClick, new global::System.Action(this.OnClickSandboxToggle));
@@ -29,6 +31,16 @@ public class TopLeftControlScreen : KScreen
 		{
 			this.locText.text = SaveGame.Instance.BaseName;
 		}
+	}
+
+	public void ResetToolTip()
+	{
+		if (this.CheckSandboxModeLocked())
+		{
+			this.SandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_LOCKED, global::Action.ToggleSandboxTools));
+			return;
+		}
+		this.SandboxToggle.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.SANDBOX_TOGGLE.TOOLTIP_UNLOCKED, global::Action.ToggleSandboxTools));
 	}
 
 	public void UpdateSandboxToggleState()

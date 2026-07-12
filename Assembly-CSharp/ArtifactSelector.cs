@@ -35,6 +35,36 @@ public class ArtifactSelector : KMonoBehaviour
 		this.placedArtifacts.Add(ArtifactType.Any, new List<string>());
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		int num = 0;
+		int num2 = 0;
+		foreach (string text in this.analyzedArtifatIDs)
+		{
+			ArtifactType artifactType = this.GetArtifactType(text);
+			if (artifactType != ArtifactType.Space)
+			{
+				if (artifactType == ArtifactType.Terrestrial)
+				{
+					num++;
+				}
+			}
+			else
+			{
+				num2++;
+			}
+		}
+		if (num > this.analyzedArtifactCount)
+		{
+			this.analyzedArtifactCount = num;
+		}
+		if (num2 > this.analyzedSpaceArtifactCount)
+		{
+			this.analyzedSpaceArtifactCount = num2;
+		}
+	}
+
 	public bool RecordArtifactAnalyzed(string id)
 	{
 		if (this.analyzedArtifatIDs.Contains(id))
@@ -92,6 +122,19 @@ public class ArtifactSelector : KMonoBehaviour
 			DebugUtil.Assert(true, string.Format("Tried to add {0} to placedArtifacts but it already exists in the list!", artifactID));
 		}
 		this.placedArtifacts[artifactType].Add(artifactID);
+	}
+
+	public ArtifactType GetArtifactType(string artifactID)
+	{
+		if (this.placedArtifacts[ArtifactType.Terrestrial].Contains(artifactID))
+		{
+			return ArtifactType.Terrestrial;
+		}
+		if (this.placedArtifacts[ArtifactType.Space].Contains(artifactID))
+		{
+			return ArtifactType.Space;
+		}
+		return ArtifactType.Any;
 	}
 
 	public static ArtifactSelector Instance;

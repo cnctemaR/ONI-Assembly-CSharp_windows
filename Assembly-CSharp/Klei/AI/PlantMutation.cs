@@ -175,8 +175,11 @@ namespace Klei.AI
 				{
 					attribute = Db.Get().PlantAttributes.Get(attributeModifier.AttributeId);
 				}
-				stringBuilder.Append(DUPLICANTS.TRAITS.TRAIT_DESCRIPTION_LIST_ENTRY);
-				stringBuilder.Append(string.Format(DUPLICANTS.TRAITS.ATTRIBUTE_MODIFIERS, attribute.Name, attributeModifier.GetFormattedString()));
+				if (attribute.ShowInUI != Attribute.Display.Never)
+				{
+					stringBuilder.Append(DUPLICANTS.TRAITS.TRAIT_DESCRIPTION_LIST_ENTRY);
+					stringBuilder.Append(string.Format(DUPLICANTS.TRAITS.ATTRIBUTE_MODIFIERS, attribute.Name, attributeModifier.GetFormattedString()));
+				}
 			}
 			if (this.bonusCropID != null)
 			{

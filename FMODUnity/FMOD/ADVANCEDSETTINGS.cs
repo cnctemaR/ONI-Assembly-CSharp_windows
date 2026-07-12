@@ -45,5 +45,7 @@ namespace FMOD
 		public uint randomSeed;
 
 		public int maxConvolutionThreads;
+
+		public int maxOpusCodecs;
 	}
 }

@@ -134,16 +134,47 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		{
 			e.Consumed = true;
 		}
-		if (this.mouseOver && this.ConsumeMouseScroll && !e.Consumed && !e.TryConsume(global::Action.ZoomIn))
+		if (this.mouseOver && this.ConsumeMouseScroll)
 		{
-			e.TryConsume(global::Action.ZoomOut);
+			if (KInputManager.currentControllerIsGamepad && !e.Consumed)
+			{
+				foreach (KScrollRect kscrollRect in base.GetComponentsInChildren<KScrollRect>())
+				{
+					Vector2 vector = kscrollRect.rectTransform().InverseTransformPoint(KInputManager.GetMousePos());
+					if (kscrollRect.rectTransform().rect.Contains(vector))
+					{
+						kscrollRect.mouseIsOver = true;
+					}
+					else
+					{
+						kscrollRect.mouseIsOver = false;
+					}
+					kscrollRect.OnKeyDown(e);
+					if (e.Consumed)
+					{
+						break;
+					}
+				}
+			}
+			if (!e.Consumed && !e.TryConsume(global::Action.ZoomIn))
+			{
+				e.TryConsume(global::Action.ZoomOut);
+			}
 		}
 		if (!e.Consumed)
 		{
-			KScrollRect[] componentsInChildren = base.GetComponentsInChildren<KScrollRect>();
-			for (int i = 0; i < componentsInChildren.Length; i++)
+			foreach (KScrollRect kscrollRect2 in base.GetComponentsInChildren<KScrollRect>())
 			{
-				componentsInChildren[i].OnKeyDown(e);
+				Vector2 vector2 = kscrollRect2.rectTransform().InverseTransformPoint(KInputManager.GetMousePos());
+				if (kscrollRect2.rectTransform().rect.Contains(vector2))
+				{
+					kscrollRect2.mouseIsOver = true;
+				}
+				else
+				{
+					kscrollRect2.mouseIsOver = false;
+				}
+				kscrollRect2.OnKeyDown(e);
 				if (e.Consumed)
 				{
 					break;

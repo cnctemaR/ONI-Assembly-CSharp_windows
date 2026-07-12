@@ -75,7 +75,7 @@ public class GameplayEventInfoScreen : KModalScreen
 
 	public override void Deactivate()
 	{
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().EventPopupSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().EventPopupSnapshot, STOP_MODE.ALLOWFADEOUT);
 		base.Deactivate();
 	}
 

@@ -25,6 +25,11 @@ namespace FMODUnity
 
 		public override string GetBankFolder()
 		{
+			return PlatformAndroid.StaticGetBankFolder();
+		}
+
+		public static string StaticGetBankFolder()
+		{
 			if (!Settings.Instance.AndroidUseOBB)
 			{
 				return "file:///android_asset";

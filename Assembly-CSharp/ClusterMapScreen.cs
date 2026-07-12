@@ -106,7 +106,7 @@ public class ClusterMapScreen : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed && (e.TryConsume(global::Action.ZoomIn) || e.TryConsume(global::Action.ZoomOut)))
+		if (!e.Consumed && (e.IsAction(global::Action.ZoomIn) || e.IsAction(global::Action.ZoomOut)))
 		{
 			List<RaycastResult> list = new List<RaycastResult>();
 			PointerEventData pointerEventData = new PointerEventData(global::UnityEngine.EventSystems.EventSystem.current);
@@ -126,8 +126,22 @@ public class ClusterMapScreen : KScreen
 				}
 				if (!flag)
 				{
-					float num = Input.mouseScrollDelta.y * 25f;
+					float num;
+					if (KInputManager.currentControllerIsGamepad)
+					{
+						num = 25f;
+						num *= (float)(e.IsAction(global::Action.ZoomIn) ? 1 : (-1));
+					}
+					else
+					{
+						num = Input.mouseScrollDelta.y * 25f;
+					}
 					this.m_targetZoomScale = Mathf.Clamp(this.m_targetZoomScale + num, 50f, 150f);
+					e.TryConsume(global::Action.ZoomIn);
+					if (!e.Consumed)
+					{
+						e.TryConsume(global::Action.ZoomOut);
+					}
 				}
 			}
 		}
@@ -214,10 +228,10 @@ public class ClusterMapScreen : KScreen
 		SelectTool.Instance.Activate();
 		this.SetShowingNonClusterMapHud(true);
 		CameraController.Instance.DisableUserCameraControl = false;
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUStarmapNotPausedSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUStarmapNotPausedSnapshot, STOP_MODE.ALLOWFADEOUT);
 		if (MusicManager.instance.SongIsPlaying("Music_Starmap"))
 		{
-			MusicManager.instance.StopSong("Music_Starmap", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_Starmap", true, STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 
@@ -289,6 +303,14 @@ public class ClusterMapScreen : KScreen
 	private void OnNewTelescopeTarget(object data = null)
 	{
 		this.UpdateVis(null);
+	}
+
+	private void Update()
+	{
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			this.mapScrollRect.AnalogUpdate(KInputManager.steamInputInterpreter.GetSteamCameraMovement());
+		}
 	}
 
 	private void TrySelectDefault()

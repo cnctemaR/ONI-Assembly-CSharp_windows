@@ -6,7 +6,6 @@ using FMOD.Studio;
 using ProcGen;
 using ProcGenGame;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -135,6 +134,19 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.canvasRef.pixelPerfect = false;
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.Consumed)
+		{
+			return;
+		}
+		if (e.TryConsume(global::Action.MouseRight))
+		{
+			this.Show(false);
+		}
+		base.OnKeyDown(e);
+	}
+
 	private void GetCanvasRef()
 	{
 		if (base.transform.parent.GetComponent<Canvas>() != null)
@@ -177,7 +189,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 			{
 				if (MusicManager.instance.SongIsPlaying("Music_Victory_03_StoryAndSummary"))
 				{
-					MusicManager.instance.StopSong("Music_Victory_03_StoryAndSummary", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+					MusicManager.instance.StopSong("Music_Victory_03_StoryAndSummary", true, STOP_MODE.ALLOWFADEOUT);
 				}
 			}
 			else
@@ -908,7 +920,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private GameObject victoryAchievementsPrefab;
 
 	[SerializeField]
-	private TMP_InputField achievementSearch;
+	private KInputTextField achievementSearch;
 
 	[SerializeField]
 	private KButton clearAchievementSearchButton;
@@ -959,7 +971,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private GameObject colonyButtonPrefab;
 
 	[SerializeField]
-	private TMP_InputField explorerSearch;
+	private KInputTextField explorerSearch;
 
 	[SerializeField]
 	private KButton clearExplorerSearchButton;

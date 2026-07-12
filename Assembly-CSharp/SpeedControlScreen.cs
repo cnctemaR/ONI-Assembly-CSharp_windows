@@ -3,6 +3,7 @@ using System.Collections;
 using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class SpeedControlScreen : KScreen
@@ -60,6 +61,7 @@ public class SpeedControlScreen : KScreen
 		{
 			this.TogglePause(true);
 		};
+		KInputManager.InputChange.AddListener(new UnityAction(this.ResetToolTip));
 	}
 
 	protected override void OnSpawn()
@@ -129,6 +131,24 @@ public class SpeedControlScreen : KScreen
 		this.Pause(playsound);
 	}
 
+	public void ResetToolTip()
+	{
+		this.speedButtonWidget_slow.GetComponent<ToolTip>().ClearMultiStringTooltip();
+		this.speedButtonWidget_medium.GetComponent<ToolTip>().ClearMultiStringTooltip();
+		this.speedButtonWidget_fast.GetComponent<ToolTip>().ClearMultiStringTooltip();
+		this.speedButtonWidget_slow.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.SPEEDBUTTON_SLOW, global::Action.CycleSpeed), this.TooltipTextStyle);
+		this.speedButtonWidget_medium.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.SPEEDBUTTON_MEDIUM, global::Action.CycleSpeed), this.TooltipTextStyle);
+		this.speedButtonWidget_fast.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.SPEEDBUTTON_FAST, global::Action.CycleSpeed), this.TooltipTextStyle);
+		if (this.pauseButton.isOn)
+		{
+			this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
+			this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.UNPAUSE, global::Action.TogglePause), this.TooltipTextStyle);
+			return;
+		}
+		this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
+		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.PAUSE, global::Action.TogglePause), this.TooltipTextStyle);
+	}
+
 	public void Pause(bool playSound = true)
 	{
 		this.pauseCount++;
@@ -164,7 +184,7 @@ public class SpeedControlScreen : KScreen
 					SoundListenerController.Instance.SetLoopingVolume(1f);
 				}
 			}
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, STOP_MODE.ALLOWFADEOUT);
 			MusicManager.instance.SetDynamicMusicUnpaused();
 			this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
 			this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.PAUSE, global::Action.TogglePause), this.TooltipTextStyle);

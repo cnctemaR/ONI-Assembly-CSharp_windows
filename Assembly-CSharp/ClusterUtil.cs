@@ -62,7 +62,7 @@ public static class ClusterUtil
 			return component.Location;
 		}
 		WorldContainer myWorld = gameObject.GetMyWorld();
-		global::Debug.Assert(myWorld != null, string.Format("GetMyWorldLocation called on object with no world: {0}", gameObject));
+		DebugUtil.DevAssertArgs(myWorld != null, new object[] { "GetMyWorldLocation called on object with no world", gameObject });
 		return myWorld.GetComponent<ClusterGridEntity>().Location;
 	}
 

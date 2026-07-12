@@ -89,7 +89,7 @@ public class KButton : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler
 	{
 		if (this.interactable)
 		{
-			if (this.onClick != null)
+			if (this.onClick != null && btn != KKeyCode.Mouse1)
 			{
 				this.onClick();
 			}

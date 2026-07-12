@@ -16,7 +16,7 @@ namespace FMODUnity
 		{
 			get
 			{
-				return "Play In Editor Settings";
+				return "Editor";
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace FMODUnity
 			string text = instance.SourceBankPath;
 			if (instance.HasPlatforms)
 			{
-				text = Path.Combine(text, base.BuildDirectory);
+				text = RuntimeUtils.GetCommonPlatformPath(Path.Combine(text, base.BuildDirectory));
 			}
 			return text;
 		}

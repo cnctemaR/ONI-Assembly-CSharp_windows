@@ -15,6 +15,11 @@ namespace STRINGS
 			return "<b>" + text + "</b> " + UI.FormatAsHotkey(hotkey);
 		}
 
+		public static string FormatAsBuildMenuTab(string text, global::Action a)
+		{
+			return "<b>" + text + "</b> " + UI.FormatAsHotKey(a);
+		}
+
 		public static string FormatAsOverlay(string text)
 		{
 			return "<b>" + text + "</b>";
@@ -23,6 +28,11 @@ namespace STRINGS
 		public static string FormatAsOverlay(string text, string hotkey)
 		{
 			return "<b>" + text + "</b> " + UI.FormatAsHotkey(hotkey);
+		}
+
+		public static string FormatAsOverlay(string text, global::Action a)
+		{
+			return "<b>" + text + "</b> " + UI.FormatAsHotKey(a);
 		}
 
 		public static string FormatAsManagementMenu(string text)
@@ -35,6 +45,11 @@ namespace STRINGS
 			return "<b>" + text + "</b> " + UI.FormatAsHotkey(hotkey);
 		}
 
+		public static string FormatAsManagementMenu(string text, global::Action a)
+		{
+			return "<b>" + text + "</b> " + UI.FormatAsHotKey(a);
+		}
+
 		public static string FormatAsKeyWord(string text)
 		{
 			return UI.PRE_KEYWORD + text + UI.PST_KEYWORD;
@@ -45,9 +60,19 @@ namespace STRINGS
 			return "<b><color=#F44A4A>" + text + "</b></color>";
 		}
 
+		public static string FormatAsHotKey(global::Action a)
+		{
+			return "{Hotkey/" + a.ToString() + "}";
+		}
+
 		public static string FormatAsTool(string text, string hotkey)
 		{
 			return "<b>" + text + "</b> " + UI.FormatAsHotkey(hotkey);
+		}
+
+		public static string FormatAsTool(string text, global::Action a)
+		{
+			return "<b>" + text + "</b> " + UI.FormatAsHotKey(a);
 		}
 
 		public static string FormatAsLink(string text, string linkID)
@@ -3045,7 +3070,7 @@ namespace STRINGS
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "This minor update includes:\n\n•<indent=20px>Better mod management and mod uploading for WeGame users.</indent>\n•<indent=20px>Fixes for issues causing Linux users to see different worldgen results than other platforms.</indent>\n•<indent=20px>Numerous crash and bug fixes.</indent>\n\n   Check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "This minor update includes:\n\n•<indent=20px>Better controller support for Steam users.</indent>\n•<indent=20px>Steam Deck compatibility.</indent>\n•<indent=20px>Minor UI changes to accommodate smaller displays and resolutions.</indent>\n•<indent=20px>Numerous crash and bug fixes.</indent>\n\n   Check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 
@@ -4146,9 +4171,7 @@ namespace STRINGS
 				"Printing Pod",
 				UI.PST_KEYWORD,
 				" can be found in the ",
-				UI.FormatAsBuildMenuTab("Stations Tab"),
-				" ",
-				UI.FormatAsHotkey("[0]"),
+				UI.FormatAsBuildMenuTab("Base Tab", global::Action.Plan1),
 				" of the Build Menu"
 			});
 
@@ -4994,7 +5017,7 @@ namespace STRINGS
 				"Building Priorities",
 				UI.PST_KEYWORD,
 				" set by the ",
-				UI.FormatAsTool("Priority Tool", "[P]")
+				UI.FormatAsTool("Priority Tool", global::Action.Prioritize)
 			});
 
 			public static LocString MANAGEMENTMENU_CONSUMABLES = "Manage my Duplicants' diets and medications {Hotkey}";
@@ -5010,9 +5033,7 @@ namespace STRINGS
 				"The ",
 				BUILDINGS.PREFABS.RESEARCHCENTER.NAME,
 				" can be found in the ",
-				UI.FormatAsBuildMenuTab("Stations Tab"),
-				" ",
-				UI.FormatAsHotkey("[0]"),
+				UI.FormatAsBuildMenuTab("Stations Tab", global::Action.Plan10),
 				" of the Build Menu"
 			});
 
@@ -5031,9 +5052,18 @@ namespace STRINGS
 				"The ",
 				BUILDINGS.PREFABS.TELESCOPE.NAME,
 				" can be found in the ",
-				UI.FormatAsBuildMenuTab("Stations Tab"),
-				" ",
-				UI.FormatAsHotkey("[0]"),
+				UI.FormatAsBuildMenuTab("Stations Tab", global::Action.Plan10),
+				" of the Build Menu"
+			});
+
+			public static LocString MANAGEMENTMENU_REQUIRES_TELESCOPE_CLUSTER = string.Concat(new string[]
+			{
+				"Build a Telescope to unlock this menu",
+				UI.HORIZONTAL_BR_RULE,
+				"The ",
+				BUILDINGS.PREFABS.TELESCOPE.NAME,
+				" can be found in the ",
+				UI.FormatAsBuildMenuTab("Rocketry Tab", global::Action.Plan14),
 				" of the Build Menu"
 			});
 
@@ -5046,9 +5076,7 @@ namespace STRINGS
 				"The ",
 				BUILDINGS.PREFABS.HEADQUARTERSCOMPLETE.NAME,
 				" can be found in the ",
-				UI.FormatAsBuildMenuTab("Base Tab"),
-				" ",
-				UI.FormatAsHotkey("[0]"),
+				UI.FormatAsBuildMenuTab("Base Tab", global::Action.Plan1),
 				" of the Build Menu"
 			});
 
@@ -5118,7 +5146,7 @@ namespace STRINGS
 				"Duplicant Priorities",
 				UI.PST_KEYWORD,
 				" ",
-				UI.FormatAsHotkey("[L]"),
+				UI.FormatAsHotKey(global::Action.ManagePriorities),
 				" are calculated <i>before</i> the ",
 				UI.PRE_KEYWORD,
 				"Building Priorities",
@@ -5130,7 +5158,7 @@ namespace STRINGS
 
 			public static LocString CANCELDECONSTRUCTIONBUTTON = "Cancel queued orders or deconstruct existing buildings {Hotkey}";
 
-			public static LocString HELP_ROTATE_KEY = "Press " + UI.FormatAsHotkey("[{Key}]") + " to Rotate";
+			public static LocString HELP_ROTATE_KEY = "Press " + UI.FormatAsHotKey(global::Action.RotateBuilding) + " to Rotate";
 
 			public static LocString HELP_BUILDLOCATION_INVALID_CELL = "Invalid Cell";
 
@@ -6963,7 +6991,7 @@ namespace STRINGS
 						"<b>Fully Grown</b>\nThese plants have reached maturation",
 						UI.HORIZONTAL_BR_RULE,
 						"Select the ",
-						UI.FormatAsTool("Harvest Tool", "[Y]"),
+						UI.FormatAsTool("Harvest Tool", global::Action.Harvest),
 						" to batch harvest"
 					});
 				}
@@ -7549,7 +7577,7 @@ namespace STRINGS
 				" set by the ",
 				UI.FormatAsLink("Priority Tool", "PRIORITIES"),
 				" ",
-				UI.FormatAsHotkey("[P]")
+				UI.FormatAsHotKey(global::Action.ManagePriorities)
 			});
 
 			public static LocString HEADER_DETAILS_TOOLTIP = "{Description}\n\nAffected errands: {ChoreList}";
@@ -8024,7 +8052,7 @@ namespace STRINGS
 				"Duplicant Priorities",
 				UI.PST_KEYWORD,
 				" ",
-				UI.FormatAsHotkey("[L]"),
+				UI.FormatAsHotKey(global::Action.ManagePriorities),
 				UI.HORIZONTAL_BR_RULE,
 				"They will then choose one ",
 				UI.PRE_KEYWORD,
@@ -8137,7 +8165,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Telescope Configuration";
 
-				public static LocString NO_SELECTED_ANALYSIS_TARGET = "No analysis focus selected\nOpen the " + UI.FormatAsManagementMenu("Starmap", "[Z]") + " to selected a focus";
+				public static LocString NO_SELECTED_ANALYSIS_TARGET = "No analysis focus selected\nOpen the " + UI.FormatAsManagementMenu("Starmap", global::Action.ManageStarmap) + " to selected a focus";
 
 				public static LocString ANALYSIS_TARGET_SELECTED = "Object focus selected\nAnalysis underway";
 
@@ -8169,7 +8197,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Launcher Configuration";
 
-				public static LocString NO_SELECTED_LAUNCH_TARGET = "No destination selected\nOpen the " + UI.FormatAsManagementMenu("Starmap", "[Z]") + " to set a course";
+				public static LocString NO_SELECTED_LAUNCH_TARGET = "No destination selected\nOpen the " + UI.FormatAsManagementMenu("Starmap", global::Action.ManageStarmap) + " to set a course";
 
 				public static LocString LAUNCH_TARGET_SELECTED = "Launcher destination {0} set";
 
@@ -8455,6 +8483,10 @@ namespace STRINGS
 				public static LocString IN_RANGE = "In Range";
 
 				public static LocString OUT_OF_RANGE = "Out of Range";
+
+				public static LocString NO_SENDERS = "No Channels Available.";
+
+				public static LocString NO_SENDERS_DESC = "Build a " + BUILDINGS.PREFABS.LOGICINTERASTEROIDSENDER.NAME + " to transmit a signal.";
 			}
 
 			public class CONDITIONLISTSIDESCREEN
@@ -8509,6 +8541,14 @@ namespace STRINGS
 				public static LocString RECIPE_QUEUE = "Order Production Quantity:";
 
 				public static LocString RECIPE_FOREVER = "Forever";
+
+				public static LocString INGREDIENTS = "<b>Ingredients:</b>";
+
+				public static LocString RECIPE_EFFECTS = "<b>Effects:</b>";
+
+				public static LocString ALLOW_MUTANT_SEED_INGREDIENTS = "Building accepts mutant seeds";
+
+				public static LocString ALLOW_MUTANT_SEED_INGREDIENTS_TOOLTIP = "Toggle whether Duplicants will deliver mutant seed species to this building as recipe ingredients.";
 
 				public class TOOLTIPS
 				{
@@ -10232,7 +10272,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Select Research";
 
-				public static LocString TOOLTIP = "Choose a technology from the " + UI.FormatAsManagementMenu("Research Tree", "[R]");
+				public static LocString TOOLTIP = "Choose a technology from the " + UI.FormatAsManagementMenu("Research Tree", global::Action.ManageResearch);
 			}
 
 			public class RELOCATE
@@ -11491,9 +11531,7 @@ namespace STRINGS
 						UI.HORIZONTAL_BR_RULE,
 						BUILDINGS.PREFABS.RESETSKILLSSTATION.NAME,
 						"s can be built from the ",
-						UI.FormatAsBuildMenuTab("Stations Tab"),
-						" ",
-						UI.FormatAsHotkey("[0]"),
+						UI.FormatAsBuildMenuTab("Stations Tab", global::Action.Plan10),
 						" to completely reset a Duplicant's learned ",
 						UI.PRE_KEYWORD,
 						"Skills",
@@ -12724,7 +12762,7 @@ namespace STRINGS
 					"This critter can be captured",
 					UI.HORIZONTAL_BR_RULE,
 					"Mark critters for capture using the ",
-					UI.FormatAsTool("Wrangle Tool", "[N]"),
+					UI.FormatAsTool("Wrangle Tool", global::Action.Capture),
 					"\n\nDuplicants must possess the ",
 					UI.PRE_KEYWORD,
 					"Critter Ranching",

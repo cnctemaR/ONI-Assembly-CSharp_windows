@@ -83,7 +83,6 @@ public class HighEnergyParticleStorage : KMonoBehaviour, IStorage
 	public float Store(float amount)
 	{
 		float num = Mathf.Min(amount, this.RemainingCapacity());
-		DebugUtil.Assert(num >= 0f, string.Format("Storing negative amount ({0}) of particles", num));
 		this.DeltaParticles(num);
 		return num;
 	}

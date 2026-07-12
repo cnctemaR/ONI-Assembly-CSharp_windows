@@ -61,18 +61,22 @@ public class ArtifactHarvestModule : GameStateMachine<ArtifactHarvestModule, Art
 			if ((poiatCurrentLocation.GetComponent<ArtifactPOIClusterGridEntity>() || poiatCurrentLocation.GetComponent<HarvestablePOIClusterGridEntity>()) && !smi.IsNullOrDestroyed())
 			{
 				bool flag = false;
-				GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(smi.GetArtifactToHarvest()), base.transform.position);
-				gameObject.SetActive(true);
-				this.receptacle.ForceDeposit(gameObject);
-				this.storage.Store(gameObject, false, false, true, false);
-				smi.HarvestArtifact();
-				if (smi.configuration.DestroyOnHarvest())
+				string artifactToHarvest = smi.GetArtifactToHarvest();
+				if (artifactToHarvest != null)
 				{
-					flag = true;
-				}
-				if (flag)
-				{
-					poiatCurrentLocation.gameObject.DeleteObject();
+					GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(artifactToHarvest), base.transform.position);
+					gameObject.SetActive(true);
+					this.receptacle.ForceDeposit(gameObject);
+					this.storage.Store(gameObject, false, false, true, false);
+					smi.HarvestArtifact();
+					if (smi.configuration.DestroyOnHarvest())
+					{
+						flag = true;
+					}
+					if (flag)
+					{
+						poiatCurrentLocation.gameObject.DeleteObject();
+					}
 				}
 			}
 		}

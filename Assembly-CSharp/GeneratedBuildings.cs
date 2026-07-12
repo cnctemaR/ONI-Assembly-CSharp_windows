@@ -30,7 +30,22 @@ public class GeneratedBuildings
 		}
 		foreach (PlanScreen.PlanInfo planInfo in BUILDINGS.PLANORDER)
 		{
-			planInfo.data.RemoveAll((string prefabId) => Assets.GetBuildingDef(prefabId) == null);
+			List<string> list2 = new List<string>();
+			foreach (KeyValuePair<string, string> keyValuePair in planInfo.buildingAndSubcategoryData)
+			{
+				if (Assets.GetBuildingDef(keyValuePair.Key) == null)
+				{
+					list2.Add(keyValuePair.Key);
+				}
+			}
+			using (List<string>.Enumerator enumerator4 = list2.GetEnumerator())
+			{
+				while (enumerator4.MoveNext())
+				{
+					string entry = enumerator4.Current;
+					planInfo.buildingAndSubcategoryData.RemoveAll((KeyValuePair<string, string> match) => match.Key == entry);
+				}
+			}
 		}
 	}
 

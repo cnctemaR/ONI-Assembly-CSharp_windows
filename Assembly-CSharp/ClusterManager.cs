@@ -588,8 +588,8 @@ public class ClusterManager : KMonoBehaviour, ISaveLoadable
 
 	public void UpdateWorldReverbSnapshot(int worldId)
 	{
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SmallRocketInteriorReverbSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MediumRocketInteriorReverbSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SmallRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MediumRocketInteriorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
 		WorldContainer world = this.GetWorld(worldId);
 		if (world.IsModuleInterior)
 		{

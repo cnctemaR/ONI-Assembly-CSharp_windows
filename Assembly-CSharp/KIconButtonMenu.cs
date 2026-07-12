@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -18,6 +19,28 @@ public class KIconButtonMenu : KScreen
 		if (this.activateOnSpawn)
 		{
 			this.RefreshButtons();
+		}
+	}
+
+	public void RefreshButtonTooltip()
+	{
+		for (int i = 0; i < this.buttons.Count; i++)
+		{
+			KIconButtonMenu.ButtonInfo buttonInfo = this.buttons[i];
+			if (buttonInfo.buttonGo == null || buttonInfo == null)
+			{
+				return;
+			}
+			ToolTip componentInChildren = buttonInfo.buttonGo.GetComponentInChildren<ToolTip>();
+			if (buttonInfo.text != null && buttonInfo.text != "" && componentInChildren != null)
+			{
+				componentInChildren.toolTip = buttonInfo.GetTooltipText();
+				LocText componentInChildren2 = buttonInfo.buttonGo.GetComponentInChildren<LocText>();
+				if (componentInChildren2 != null)
+				{
+					componentInChildren2.text = buttonInfo.text;
+				}
+			}
 		}
 	}
 
@@ -287,6 +310,8 @@ public class KIconButtonMenu : KScreen
 
 	[SerializeField]
 	public TextStyleSetting ToggleToolTipTextStyleSetting;
+
+	private UnityAction inputChangeReceiver;
 
 	protected GameObject go;
 

@@ -120,6 +120,11 @@ namespace FMOD.Studio
 			return EventDescription.FMOD_Studio_EventDescription_Is3D(this.handle, out is3D);
 		}
 
+		public RESULT isDopplerEnabled(out bool doppler)
+		{
+			return EventDescription.FMOD_Studio_EventDescription_IsDopplerEnabled(this.handle, out doppler);
+		}
+
 		public RESULT hasCue(out bool cue)
 		{
 			return EventDescription.FMOD_Studio_EventDescription_HasCue(this.handle, out cue);
@@ -256,6 +261,9 @@ namespace FMOD.Studio
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_Is3D(IntPtr eventdescription, out bool is3D);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventDescription_IsDopplerEnabled(IntPtr eventdescription, out bool doppler);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_HasCue(IntPtr eventdescription, out bool cue);

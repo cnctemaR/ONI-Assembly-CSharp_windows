@@ -120,6 +120,7 @@ public enum Action
 	ManageDatabase,
 	ManageSkills,
 	ManageStarmap,
+	ManageDiagnostics,
 	Overlay1,
 	Overlay2,
 	Overlay3,
@@ -270,5 +271,9 @@ public enum Action
 	SwitchActiveWorld9,
 	SwitchActiveWorld10,
 	DebugSpawnMinionAtmoSuit,
+	BuildMenuUp,
+	BuildMenuDown,
+	BuildMenuLeft,
+	BuildMenuRight,
 	NumActions
 }

@@ -14,7 +14,7 @@ public class ModsScreen : KModalScreen
 		this.closeButton.onClick += this.Exit;
 		global::System.Action action = delegate
 		{
-			Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140");
+			App.OpenWebURL("http://steamcommunity.com/workshop/browse/?appid=457140");
 		};
 		this.workshopButton.onClick += action;
 		this.UpdateToggleAllButton();

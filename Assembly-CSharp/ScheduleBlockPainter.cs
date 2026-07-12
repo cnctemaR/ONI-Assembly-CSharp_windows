@@ -23,7 +23,7 @@ public class ScheduleBlockPainter : KMonoBehaviour
 
 	private void Transmit()
 	{
-		float num = (base.transform.InverseTransformPoint(Input.mousePosition).x - this.rectTransform.rect.x) / this.rectTransform.rect.width;
+		float num = (base.transform.InverseTransformPoint(KInputManager.GetMousePos()).x - this.rectTransform.rect.x) / this.rectTransform.rect.width;
 		this.blockPaintHandler(num);
 	}
 

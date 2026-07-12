@@ -98,7 +98,9 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private void RefreshWorldMinionIdentities()
 	{
-		this.worldLiveMinionIdentities = Components.LiveMinionIdentities.GetWorldItems(ClusterManager.Instance.activeWorldId, false);
+		this.worldLiveMinionIdentities = new List<MinionIdentity>(from x in Components.LiveMinionIdentities.GetWorldItems(ClusterManager.Instance.activeWorldId, false)
+			where !x.IsNullOrDestroyed()
+			select x);
 	}
 
 	private List<MinionIdentity> GetWorldMinionIdentities()
@@ -152,21 +154,24 @@ public class MeterScreen : KScreen, IRender1000ms
 				this.cachedCalories = num;
 			}
 		}
-		this.rationsSpark.GetComponentInChildren<SparkLayer>().SetColor(((float)this.cachedCalories > (float)Components.LiveMinionIdentities.GetWorldItems(ClusterManager.Instance.activeWorldId, false).Count * 1000000f) ? Constants.NEUTRAL_COLOR : Constants.NEGATIVE_COLOR);
+		this.rationsSpark.GetComponentInChildren<SparkLayer>().SetColor(((float)this.cachedCalories > (float)this.GetWorldMinionIdentities().Count * 1000000f) ? Constants.NEUTRAL_COLOR : Constants.NEGATIVE_COLOR);
 		this.rationsSpark.GetComponentInChildren<LineLayer>().RefreshLine(TrackerTool.Instance.GetWorldTracker<KCalTracker>(ClusterManager.Instance.activeWorldId).ChartableData(600f), "kcal");
 	}
 
 	private IList<MinionIdentity> GetStressedMinions()
 	{
 		Amount stress_amount = Db.Get().Amounts.Stress;
-		return new List<MinionIdentity>(this.GetWorldMinionIdentities()).OrderByDescending<MinionIdentity, float>((MinionIdentity x) => stress_amount.Lookup(x).value).ToList<MinionIdentity>();
+		return (from x in new List<MinionIdentity>(this.GetWorldMinionIdentities())
+			where !x.IsNullOrDestroyed()
+			orderby stress_amount.Lookup(x).value descending
+			select x).ToList<MinionIdentity>();
 	}
 
 	private string OnStressTooltip()
 	{
-		float maxSressInActiveWorld = GameUtil.GetMaxSressInActiveWorld();
+		float maxStressInActiveWorld = GameUtil.GetMaxStressInActiveWorld();
 		this.StressTooltip.ClearMultiStringTooltip();
-		this.StressTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_AVGSTRESS, Mathf.Round(maxSressInActiveWorld).ToString() + "%"), this.ToolTipStyle_Header);
+		this.StressTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_AVGSTRESS, Mathf.Round(maxStressInActiveWorld).ToString() + "%"), this.ToolTipStyle_Header);
 		Amount stress = Db.Get().Amounts.Stress;
 		IList<MinionIdentity> stressedMinions = this.GetStressedMinions();
 		for (int i = 0; i < stressedMinions.Count; i++)
@@ -187,21 +192,24 @@ public class MeterScreen : KScreen, IRender1000ms
 		for (int i = 0; i < worldMinionIdentities.Count; i++)
 		{
 			MinionIdentity minionIdentity = worldMinionIdentities[i];
-			string text = minionIdentity.GetComponent<KSelectable>().GetName();
-			Sicknesses sicknesses = minionIdentity.GetComponent<MinionModifiers>().sicknesses;
-			if (sicknesses.IsInfected())
+			if (!minionIdentity.IsNullOrDestroyed())
 			{
-				text += " (";
-				int num2 = 0;
-				foreach (SicknessInstance sicknessInstance in sicknesses)
+				string text = minionIdentity.GetComponent<KSelectable>().GetName();
+				Sicknesses sicknesses = minionIdentity.GetComponent<MinionModifiers>().sicknesses;
+				if (sicknesses.IsInfected())
 				{
-					text = text + ((num2 > 0) ? ", " : "") + sicknessInstance.modifier.Name;
-					num2++;
+					text += " (";
+					int num2 = 0;
+					foreach (SicknessInstance sicknessInstance in sicknesses)
+					{
+						text = text + ((num2 > 0) ? ", " : "") + sicknessInstance.modifier.Name;
+						num2++;
+					}
+					text += ")";
 				}
-				text += ")";
+				bool flag = i == this.immunityDisplayInfo.selectedIndex;
+				this.AddToolTipLine(this.SickTooltip, text, flag);
 			}
-			bool flag = i == this.immunityDisplayInfo.selectedIndex;
-			this.AddToolTipLine(this.SickTooltip, text, flag);
 		}
 		return "";
 	}
@@ -209,14 +217,11 @@ public class MeterScreen : KScreen, IRender1000ms
 	private int CountSickDupes()
 	{
 		int num = 0;
-		using (List<MinionIdentity>.Enumerator enumerator = this.GetWorldMinionIdentities().GetEnumerator())
+		foreach (MinionIdentity minionIdentity in this.GetWorldMinionIdentities())
 		{
-			while (enumerator.MoveNext())
+			if (!minionIdentity.IsNullOrDestroyed() && minionIdentity.GetComponent<MinionModifiers>().sicknesses.IsInfected())
 			{
-				if (enumerator.Current.GetComponent<MinionModifiers>().sicknesses.IsInfected())
-				{
-					num++;
-				}
+				num++;
 			}
 		}
 		return num;
@@ -268,8 +273,8 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private void RefreshStress()
 	{
-		float maxSressInActiveWorld = GameUtil.GetMaxSressInActiveWorld();
-		this.StressText.text = Mathf.Round(maxSressInActiveWorld).ToString();
+		float maxStressInActiveWorld = GameUtil.GetMaxStressInActiveWorld();
+		this.StressText.text = Mathf.Round(maxStressInActiveWorld).ToString();
 		WorldTracker worldTracker = TrackerTool.Instance.GetWorldTracker<StressTracker>(ClusterManager.Instance.activeWorldId);
 		this.stressSpark.GetComponentInChildren<SparkLayer>().SetColor((worldTracker.GetCurrentValue() >= STRESS.ACTING_OUT_RESET) ? Constants.NEGATIVE_COLOR : Constants.NEUTRAL_COLOR);
 		this.stressSpark.GetComponentInChildren<LineLayer>().RefreshLine(worldTracker.ChartableData(600f), "stressData");

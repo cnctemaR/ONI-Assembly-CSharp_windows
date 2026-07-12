@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -39,6 +40,7 @@ public class ToolMenu : KScreen
 	{
 		base.OnCleanUp();
 		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnOverlayChanged));
+		Game.Instance.Unsubscribe(this.refreshScaleHandle);
 	}
 
 	private void OnOverlayChanged(object overlay_data)
@@ -74,8 +76,46 @@ public class ToolMenu : KScreen
 		this.ChooseCollection(null, true);
 		this.priorityScreen.gameObject.SetActive(false);
 		this.ToggleSandboxUI(null);
+		this.inputChangeReceiver = (UnityAction)Delegate.Combine(this.inputChangeReceiver, new UnityAction(this.OnInputChange));
+		KInputManager.InputChange.AddListener(this.inputChangeReceiver);
 		Game.Instance.Subscribe(-1948169901, new Action<object>(this.ToggleSandboxUI));
 		this.ResetToolDisplayPlane();
+		this.refreshScaleHandle = Game.Instance.Subscribe(-442024484, new Action<object>(this.RefreshScale));
+		this.RefreshScale(null);
+	}
+
+	private void RefreshScale(object data = null)
+	{
+		int num = 14;
+		int num2 = 16;
+		foreach (ToolMenu.ToolCollection toolCollection in this.sandboxTools)
+		{
+			LocText componentInChildren = toolCollection.toggle.GetComponentInChildren<LocText>();
+			if (componentInChildren != null)
+			{
+				componentInChildren.fontSize = (float)(ScreenResolutionMonitor.UsingGamepadUIMode() ? num2 : num);
+			}
+		}
+		foreach (ToolMenu.ToolCollection toolCollection2 in this.basicTools)
+		{
+			LocText componentInChildren2 = toolCollection2.toggle.GetComponentInChildren<LocText>();
+			if (componentInChildren2 != null)
+			{
+				componentInChildren2.fontSize = (float)(ScreenResolutionMonitor.UsingGamepadUIMode() ? num2 : num);
+			}
+		}
+	}
+
+	public void OnInputChange()
+	{
+		this.rows.ForEach(delegate(List<ToolMenu.ToolCollection> row)
+		{
+			this.BuildRowToggles(row);
+		});
+		this.rows.ForEach(delegate(List<ToolMenu.ToolCollection> row)
+		{
+			this.BuildToolToggles(row);
+		});
 	}
 
 	private void ResetToolDisplayPlane()
@@ -646,6 +686,7 @@ public class ToolMenu : KScreen
 					if (row[i].tools.Count == 1)
 					{
 						string text = GameUtil.ReplaceHotkeyString(row[i].tools[0].tooltip, row[i].tools[0].hotkey);
+						component2.ClearMultiStringTooltip();
 						component2.AddMultiStringTooltip(text, this.ToggleToolTipTextStyleSetting);
 					}
 					else
@@ -655,6 +696,7 @@ public class ToolMenu : KScreen
 						{
 							text2 = GameUtil.ReplaceHotkeyString(text2, row[i].hotkey);
 						}
+						component2.ClearMultiStringTooltip();
 						component2.AddMultiStringTooltip(text2, this.ToggleToolTipTextStyleSetting);
 					}
 				}
@@ -690,6 +732,7 @@ public class ToolMenu : KScreen
 					if (component2)
 					{
 						string text = ((toolCollection.tools.Count > 1) ? GameUtil.ReplaceHotkeyString(toolCollection.tools[j].tooltip, toolCollection.hotkey, toolCollection.tools[j].hotkey) : GameUtil.ReplaceHotkeyString(toolCollection.tools[j].tooltip, toolCollection.tools[j].hotkey));
+						component2.ClearMultiStringTooltip();
 						component2.AddMultiStringTooltip(text, this.ToggleToolTipTextStyleSetting);
 					}
 				}
@@ -792,6 +835,10 @@ public class ToolMenu : KScreen
 	private HashSet<global::Action> boundRootActions = new HashSet<global::Action>();
 
 	private HashSet<global::Action> boundSubgroupActions = new HashSet<global::Action>();
+
+	private UnityAction inputChangeReceiver;
+
+	private int refreshScaleHandle = -1;
 
 	[SerializeField]
 	public TextStyleSetting ToggleToolTipTextStyleSetting;

@@ -12,7 +12,7 @@ public class DecorDisplayer : StandardAmountDisplayer
 
 	public override string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None));
+		string text = string.Format(LocText.ParseText(master.description), this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None));
 		int num = Grid.PosToCell(instance.gameObject);
 		if (Grid.IsValidCell(num))
 		{

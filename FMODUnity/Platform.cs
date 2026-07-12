@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace FMODUnity
 {
-	public abstract class Platform : ScriptableObject, IComparable<Platform>
+	public abstract class Platform : ScriptableObject
 	{
 		public string Identifier
 		{
@@ -110,7 +110,7 @@ namespace FMODUnity
 		{
 			if (this.StaticPlugins.Count > 0)
 			{
-				global::UnityEngine.Debug.LogWarningFormat("{0} static plugins specified, but static plugins are only supported on the IL2CPP scripting backend", new object[] { this.StaticPlugins.Count });
+				global::UnityEngine.Debug.LogWarningFormat("FMOD: {0} static plugins specified, but static plugins are only supported on the IL2CPP scripting backend", new object[] { this.StaticPlugins.Count });
 			}
 		}
 
@@ -161,25 +161,6 @@ namespace FMODUnity
 			}
 		}
 
-		public float DisplaySortOrder
-		{
-			get
-			{
-				return this.displaySortOrder;
-			}
-			set
-			{
-				if (this.displaySortOrder != value)
-				{
-					this.displaySortOrder = value;
-					if (this.Parent != null)
-					{
-						this.Parent.children.Sort();
-					}
-				}
-			}
-		}
-
 		public bool IsLiveUpdateEnabled
 		{
 			get
@@ -196,15 +177,6 @@ namespace FMODUnity
 			}
 		}
 
-		public int CompareTo(Platform other)
-		{
-			if (other == null)
-			{
-				return 1;
-			}
-			return this.DisplaySortOrder.CompareTo(other.DisplaySortOrder);
-		}
-
 		public bool Active
 		{
 			get
@@ -217,7 +189,7 @@ namespace FMODUnity
 		{
 			get
 			{
-				return this.active && (this.Properties.LiveUpdate.HasValue || this.Properties.Overlay.HasValue || this.Properties.Logging.HasValue || this.Properties.SampleRate.HasValue || this.Properties.BuildDirectory.HasValue || this.Properties.SpeakerMode.HasValue || this.Properties.VirtualChannelCount.HasValue || this.Properties.RealChannelCount.HasValue || this.Properties.DSPBufferLength.HasValue || this.Properties.DSPBufferCount.HasValue || this.Properties.Plugins.HasValue || this.Properties.StaticPlugins.HasValue);
+				return this.active && (this.Properties.LiveUpdate.HasValue || this.Properties.LiveUpdatePort.HasValue || this.Properties.Overlay.HasValue || this.Properties.Logging.HasValue || this.Properties.SampleRate.HasValue || this.Properties.BuildDirectory.HasValue || this.Properties.SpeakerMode.HasValue || this.Properties.VirtualChannelCount.HasValue || this.Properties.RealChannelCount.HasValue || this.Properties.DSPBufferLength.HasValue || this.Properties.DSPBufferCount.HasValue || this.Properties.Plugins.HasValue || this.Properties.StaticPlugins.HasValue);
 			}
 		}
 
@@ -226,6 +198,14 @@ namespace FMODUnity
 			get
 			{
 				return Platform.PropertyAccessors.LiveUpdate.Get(this);
+			}
+		}
+
+		public int LiveUpdatePort
+		{
+			get
+			{
+				return Platform.PropertyAccessors.LiveUpdatePort.Get(this);
 			}
 		}
 
@@ -325,39 +305,6 @@ namespace FMODUnity
 			}
 		}
 
-		public Platform Parent
-		{
-			get
-			{
-				return this.parent;
-			}
-			set
-			{
-				if (value != this.parent)
-				{
-					if (this.parent != null)
-					{
-						this.parent.children.Remove(this);
-					}
-					this.parent = value;
-					if (this.parent != null)
-					{
-						this.parent.children.Add(this);
-						this.parent.children.Sort();
-					}
-					this.ParentIdentifier = ((this.parent != null) ? this.parent.Identifier : null);
-				}
-			}
-		}
-
-		public List<Platform> Children
-		{
-			get
-			{
-				return this.children;
-			}
-		}
-
 		public bool InheritsFrom(Platform platform)
 		{
 			return platform == this || (this.Parent != null && this.Parent.InheritsFrom(platform));
@@ -372,18 +319,45 @@ namespace FMODUnity
 			return OUTPUTTYPE.AUTODETECT;
 		}
 
+		public virtual List<ThreadAffinityGroup> DefaultThreadAffinities
+		{
+			get
+			{
+				return Platform.StaticThreadAffinities;
+			}
+		}
+
+		public IEnumerable<ThreadAffinityGroup> ThreadAffinities
+		{
+			get
+			{
+				if (this.threadAffinities.HasValue)
+				{
+					return this.threadAffinities.Value;
+				}
+				return this.DefaultThreadAffinities;
+			}
+		}
+
+		public Platform.PropertyThreadAffinityList ThreadAffinitiesProperty
+		{
+			get
+			{
+				return this.threadAffinities;
+			}
+		}
+
 		[SerializeField]
 		private string identifier;
 
 		public const float DefaultPriority = 0f;
 
-		public const string RegisterStaticPluginsFunctionName = "FMOD_Unity_RegisterStaticPlugins";
+		public const string RegisterStaticPluginsClassName = "StaticPluginManager";
+
+		public const string RegisterStaticPluginsFunctionName = "Register";
 
 		[SerializeField]
 		private string parentIdentifier;
-
-		[SerializeField]
-		private float displaySortOrder;
 
 		[SerializeField]
 		private bool active;
@@ -392,13 +366,15 @@ namespace FMODUnity
 		protected Platform.PropertyStorage Properties = new Platform.PropertyStorage();
 
 		[NonSerialized]
-		private Platform parent;
-
-		[NonSerialized]
-		private readonly List<Platform> children = new List<Platform>();
+		public Platform Parent;
 
 		[SerializeField]
 		public string outputType;
+
+		private static List<ThreadAffinityGroup> StaticThreadAffinities = new List<ThreadAffinityGroup>();
+
+		[SerializeField]
+		private Platform.PropertyThreadAffinityList threadAffinities = new Platform.PropertyThreadAffinityList();
 
 		public class Property<T>
 		{
@@ -437,7 +413,14 @@ namespace FMODUnity
 		{
 		}
 
-		public struct PropertyAccessor<T>
+		public interface PropertyOverrideControl
+		{
+			bool HasValue(Platform platform);
+
+			void Clear(Platform platform);
+		}
+
+		public struct PropertyAccessor<T> : Platform.PropertyOverrideControl
 		{
 			public PropertyAccessor(Func<Platform.PropertyStorage, Platform.Property<T>> getter, T defaultValue)
 			{
@@ -490,6 +473,8 @@ namespace FMODUnity
 		{
 			public Platform.PropertyBool LiveUpdate = new Platform.PropertyBool();
 
+			public Platform.PropertyInt LiveUpdatePort = new Platform.PropertyInt();
+
 			public Platform.PropertyBool Overlay = new Platform.PropertyBool();
 
 			public Platform.PropertyBool Logging = new Platform.PropertyBool();
@@ -519,6 +504,8 @@ namespace FMODUnity
 		{
 			public static readonly Platform.PropertyAccessor<TriStateBool> LiveUpdate = new Platform.PropertyAccessor<TriStateBool>((Platform.PropertyStorage properties) => properties.LiveUpdate, TriStateBool.Disabled);
 
+			public static readonly Platform.PropertyAccessor<int> LiveUpdatePort = new Platform.PropertyAccessor<int>((Platform.PropertyStorage properties) => properties.LiveUpdatePort, 9264);
+
 			public static readonly Platform.PropertyAccessor<TriStateBool> Overlay = new Platform.PropertyAccessor<TriStateBool>((Platform.PropertyStorage properties) => properties.Overlay, TriStateBool.Disabled);
 
 			public static readonly Platform.PropertyAccessor<TriStateBool> Logging = new Platform.PropertyAccessor<TriStateBool>((Platform.PropertyStorage properties) => properties.Logging, TriStateBool.Disabled);
@@ -542,6 +529,11 @@ namespace FMODUnity
 			public static readonly Platform.PropertyAccessor<List<string>> StaticPlugins = new Platform.PropertyAccessor<List<string>>((Platform.PropertyStorage properties) => properties.StaticPlugins, null);
 
 			public static readonly Platform.PropertyAccessor<PlatformCallbackHandler> CallbackHandler = new Platform.PropertyAccessor<PlatformCallbackHandler>((Platform.PropertyStorage properties) => properties.CallbackHandler, null);
+		}
+
+		[Serializable]
+		public class PropertyThreadAffinityList : Platform.Property<List<ThreadAffinityGroup>>
+		{
 		}
 	}
 }

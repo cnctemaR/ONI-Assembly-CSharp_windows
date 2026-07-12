@@ -15,4 +15,17 @@ public abstract class NewGameFlowScreen : KModalScreen
 	{
 		this.OnNavigateForward();
 	}
+
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.Consumed)
+		{
+			return;
+		}
+		if (e.TryConsume(global::Action.MouseRight))
+		{
+			this.NavigateBackward();
+		}
+		base.OnKeyDown(e);
+	}
 }

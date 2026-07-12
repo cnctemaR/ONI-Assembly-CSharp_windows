@@ -14,18 +14,11 @@ namespace STRINGS
 
 			public static LocString NO_RESEARCHER_SKILL = "No Researchers assigned";
 
-			public static LocString NO_RESEARCHER_SKILL_TOOLTIP = "The selected research focus requires {ResearchType} to complete\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", "[J]") + " and teach a Duplicant the {ResearchType} Skill to use this building";
+			public static LocString NO_RESEARCHER_SKILL_TOOLTIP = "The selected research focus requires {ResearchType} to complete\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills) + " and teach a Duplicant the {ResearchType} Skill to use this building";
 
 			public static LocString MISSING_RESEARCH_STATION = "Missing Research Station";
 
-			public static LocString MISSING_RESEARCH_STATION_TOOLTIP = string.Concat(new string[]
-			{
-				"The selected research focus requires a {0} to perform\n\nOpen the ",
-				UI.FormatAsBuildMenuTab("Stations Tab"),
-				" ",
-				UI.FormatAsHotkey("[0]"),
-				" of the Build Menu to construct one"
-			});
+			public static LocString MISSING_RESEARCH_STATION_TOOLTIP = "The selected research focus requires a {0} to perform\n\nOpen the " + UI.FormatAsBuildMenuTab("Stations Tab", global::Action.Plan10) + " of the Build Menu to construct one";
 
 			public static class DLC
 			{

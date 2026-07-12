@@ -45,6 +45,11 @@ namespace FMODUnity
 			};
 		}
 
+		public static ATTRIBUTES_3D To3DAttributes(this GameObject go)
+		{
+			return go.transform.To3DAttributes();
+		}
+
 		public static ATTRIBUTES_3D To3DAttributes(Transform transform, Rigidbody rigidbody = null)
 		{
 			ATTRIBUTES_3D attributes_3D = transform.To3DAttributes();
@@ -55,7 +60,7 @@ namespace FMODUnity
 			return attributes_3D;
 		}
 
-		public static ATTRIBUTES_3D To3DAttributes(GameObject go, Rigidbody rigidbody = null)
+		public static ATTRIBUTES_3D To3DAttributes(GameObject go, Rigidbody rigidbody)
 		{
 			ATTRIBUTES_3D attributes_3D = go.transform.To3DAttributes();
 			if (rigidbody)
@@ -93,6 +98,76 @@ namespace FMODUnity
 			return attributes_3D;
 		}
 
+		public static THREAD_TYPE ToFMODThreadType(ThreadType threadType)
+		{
+			switch (threadType)
+			{
+			case ThreadType.Mixer:
+				return THREAD_TYPE.MIXER;
+			case ThreadType.Feeder:
+				return THREAD_TYPE.FEEDER;
+			case ThreadType.Stream:
+				return THREAD_TYPE.STREAM;
+			case ThreadType.File:
+				return THREAD_TYPE.FILE;
+			case ThreadType.Nonblocking:
+				return THREAD_TYPE.NONBLOCKING;
+			case ThreadType.Record:
+				return THREAD_TYPE.RECORD;
+			case ThreadType.Geometry:
+				return THREAD_TYPE.GEOMETRY;
+			case ThreadType.Profiler:
+				return THREAD_TYPE.PROFILER;
+			case ThreadType.Studio_Update:
+				return THREAD_TYPE.STUDIO_UPDATE;
+			case ThreadType.Studio_Load_Bank:
+				return THREAD_TYPE.STUDIO_LOAD_BANK;
+			case ThreadType.Studio_Load_Sample:
+				return THREAD_TYPE.STUDIO_LOAD_SAMPLE;
+			case ThreadType.Convolution_1:
+				return THREAD_TYPE.CONVOLUTION1;
+			case ThreadType.Convolution_2:
+				return THREAD_TYPE.CONVOLUTION2;
+			default:
+				throw new ArgumentException("Unrecognised thread type '" + threadType.ToString() + "'");
+			}
+		}
+
+		public static string DisplayName(this ThreadType thread)
+		{
+			return thread.ToString().Replace('_', ' ');
+		}
+
+		public static THREAD_AFFINITY ToFMODThreadAffinity(ThreadAffinity affinity)
+		{
+			THREAD_AFFINITY thread_AFFINITY = THREAD_AFFINITY.CORE_ALL;
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core0, THREAD_AFFINITY.CORE_0, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core1, THREAD_AFFINITY.CORE_1, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core2, THREAD_AFFINITY.CORE_2, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core3, THREAD_AFFINITY.CORE_3, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core4, THREAD_AFFINITY.CORE_4, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core5, THREAD_AFFINITY.CORE_5, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core6, THREAD_AFFINITY.CORE_6, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core7, THREAD_AFFINITY.CORE_7, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core8, THREAD_AFFINITY.CORE_8, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core9, THREAD_AFFINITY.CORE_9, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core10, THREAD_AFFINITY.CORE_10, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core11, THREAD_AFFINITY.CORE_11, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core12, THREAD_AFFINITY.CORE_12, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core13, THREAD_AFFINITY.CORE_13, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core14, THREAD_AFFINITY.CORE_14, ref thread_AFFINITY);
+			RuntimeUtils.SetFMODAffinityBit(affinity, ThreadAffinity.Core15, THREAD_AFFINITY.CORE_15, ref thread_AFFINITY);
+			return thread_AFFINITY;
+		}
+
+		private static void SetFMODAffinityBit(ThreadAffinity affinity, ThreadAffinity mask, THREAD_AFFINITY fmodMask, ref THREAD_AFFINITY fmodAffinity)
+		{
+			if ((affinity & mask) != ThreadAffinity.Any)
+			{
+				fmodAffinity |= fmodMask;
+			}
+		}
+
 		public static void EnforceLibraryOrder()
 		{
 			int num;
@@ -100,18 +175,6 @@ namespace FMODUnity
 			Memory.GetStats(out num, out num2, true);
 			Guid guid;
 			Util.parseID("", out guid);
-		}
-
-		public static void SetThreadAffinity(Action<RESULT, string> reportResult)
-		{
-			RESULT result = Thread.SetAttributes(THREAD_TYPE.MIXER, THREAD_AFFINITY.CORE_2, THREAD_PRIORITY.DEFAULT, THREAD_STACK_SIZE.DEFAULT);
-			reportResult(result, "FMOD.Thread.SetAttributes(Mixer)");
-			result = Thread.SetAttributes(THREAD_TYPE.STUDIO_UPDATE, THREAD_AFFINITY.CORE_4, THREAD_PRIORITY.DEFAULT, THREAD_STACK_SIZE.DEFAULT);
-			reportResult(result, "FMOD.Thread.SetAttributes(Update)");
-			result = Thread.SetAttributes(THREAD_TYPE.STUDIO_LOAD_BANK, THREAD_AFFINITY.CORE_4, THREAD_PRIORITY.DEFAULT, THREAD_STACK_SIZE.DEFAULT);
-			reportResult(result, "FMOD.Thread.SetAttributes(Load_Bank)");
-			result = Thread.SetAttributes(THREAD_TYPE.STUDIO_LOAD_SAMPLE, THREAD_AFFINITY.CORE_4, THREAD_PRIORITY.DEFAULT, THREAD_STACK_SIZE.DEFAULT);
-			reportResult(result, "FMOD.Thread.SetAttributes(Load_Sample)");
 		}
 	}
 }

@@ -12,8 +12,7 @@ namespace FMOD.Studio
 
 		public RESULT getVolume(out float volume)
 		{
-			float num;
-			return this.getVolume(out volume, out num);
+			return EventInstance.FMOD_Studio_EventInstance_GetVolume(this.handle, out volume, IntPtr.Zero);
 		}
 
 		public RESULT getVolume(out float volume, out float finalvolume)
@@ -28,8 +27,7 @@ namespace FMOD.Studio
 
 		public RESULT getPitch(out float pitch)
 		{
-			float num;
-			return this.getPitch(out pitch, out num);
+			return EventInstance.FMOD_Studio_EventInstance_GetPitch(this.handle, out pitch, IntPtr.Zero);
 		}
 
 		public RESULT getPitch(out float pitch, out float finalpitch)
@@ -216,10 +214,16 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventInstance_GetDescription(IntPtr _event, out IntPtr description);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_GetVolume(IntPtr _event, out float volume, IntPtr zero);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_GetVolume(IntPtr _event, out float volume, out float finalvolume);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetVolume(IntPtr _event, float volume);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_GetPitch(IntPtr _event, out float pitch, IntPtr zero);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_GetPitch(IntPtr _event, out float pitch, out float finalpitch);

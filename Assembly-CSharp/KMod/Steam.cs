@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Steamworks;
 using STRINGS;
-using UnityEngine;
 
 namespace KMod
 {
@@ -44,7 +43,7 @@ namespace KMod
 			label.title = header.title;
 			return new Mod(label, header.staticID, header.description, zipFile, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_STEAM_SUBSCRIPTION, delegate
 			{
-				Application.OpenURL("https://steamcommunity.com/sharedfiles/filedetails/?id=" + steamModID);
+				App.OpenWebURL("https://steamcommunity.com/sharedfiles/filedetails/?id=" + steamModID);
 			});
 		}
 

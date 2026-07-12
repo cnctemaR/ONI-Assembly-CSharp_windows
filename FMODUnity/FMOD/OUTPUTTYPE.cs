@@ -23,6 +23,7 @@ namespace FMOD
 		NNAUDIO,
 		WINSONIC,
 		AAUDIO,
+		AUDIOWORKLET,
 		MAX
 	}
 }

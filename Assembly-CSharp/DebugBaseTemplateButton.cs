@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Klei.AI;
 using TemplateClasses;
-using TMPro;
 using UnityEngine;
 
 public class DebugBaseTemplateButton : KScreen
@@ -21,8 +20,8 @@ public class DebugBaseTemplateButton : KScreen
 		base.gameObject.SetActive(false);
 		this.SetupLocText();
 		base.ConsumeMouseScroll = true;
-		TMP_InputField tmp_InputField = this.nameField;
-		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
+		KInputTextField kinputTextField = this.nameField;
+		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
 			base.isEditing = true;
 		}));
@@ -632,7 +631,7 @@ public class DebugBaseTemplateButton : KScreen
 
 	public TemplateContainer moveAsset;
 
-	public TMP_InputField nameField;
+	public KInputTextField nameField;
 
 	private string SaveName = "enter_template_name";
 

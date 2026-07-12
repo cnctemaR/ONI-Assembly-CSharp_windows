@@ -2426,7 +2426,7 @@ namespace STRINGS
 			public static LocString PARAGRAPH_1 = string.Concat(new string[]
 			{
 				"Building a rocket first requires constructing a ",
-				UI.FormatAsLink("Rocket Platform", "LAUNCHPLATFORM"),
+				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
 				" and adding modules from the menu. All rockets will require an engine, a nosecone and a Command Module piloted by a Duplicant possessing the ",
 				UI.FormatAsLink("Rocket Piloting", "ASTRONAUTTRAINEE"),
 				" skill or higher. Note that the ",
@@ -2445,7 +2445,7 @@ namespace STRINGS
 				" in orbit around a Planetoid, and ",
 				UI.FormatAsLink("Cartographic Module", "SCANNERMODULE"),
 				" attached to a rocket can also reveal places on a Starmap.\n\nAlways check engine fuel to determine if your rocket can reach its destination, keeping in mind rockets can only land on Plantoids with a ",
-				UI.FormatAsLink("Rocket Platform", "LAUNCHPLATFORM"),
+				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
 				" on it although some modules like ",
 				UI.FormatAsLink("Rover's Modules", "SCOUTMODULE"),
 				" and ",
@@ -2464,7 +2464,7 @@ namespace STRINGS
 				", and ",
 				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
 				" conduits.\n\nPlanetoids not connected through Supply Teleporters can use rockets to transport goods, either by landing on a ",
-				UI.FormatAsLink("Rocket Platform", "LAUNCHPLATFORM"),
+				UI.FormatAsLink("Rocket Platform", "LAUNCHPAD"),
 				" or a ",
 				UI.FormatAsLink("Orbital Cargo Module", "ORBITALCARGOMODULE"),
 				" deployed from a rocket in orbit. Additionally, the ",
@@ -2671,7 +2671,7 @@ namespace STRINGS
 				"Duplicants prioritize their errands based on several factors. Some of these can be adjusted to affect errand choice, but some errands (such as seeking breathable ",
 				UI.FormatAsLink("Oxygen", "OXYGEN"),
 				") are so important that they cannot be delayed. Errand priority can primarily be controlled by Errand Type prioritization, and then can be further fine-tuned by the ",
-				UI.FormatAsTool("Priority Tool", "[P]"),
+				UI.FormatAsTool("Priority Tool", global::Action.Prioritize),
 				".\n\n"
 			});
 
@@ -2681,7 +2681,7 @@ namespace STRINGS
 
 			public static LocString HEADER_3 = "Priority Tool";
 
-			public static LocString PARAGRAPH_3 = "The priority of errands can often be modified using the " + UI.FormatAsTool("Priority tool", "[P]") + ". The values applied by this tool are always less influential than the Errand Type priorities described above. If two errands with equal Errand Type Priority are available to a Duplicant, they will choose the errand with a higher priority setting as applied by the tool.\n\n";
+			public static LocString PARAGRAPH_3 = "The priority of errands can often be modified using the " + UI.FormatAsTool("Priority tool", global::Action.Prioritize) + ". The values applied by this tool are always less influential than the Errand Type priorities described above. If two errands with equal Errand Type Priority are available to a Duplicant, they will choose the errand with a higher priority setting as applied by the tool.\n\n";
 		}
 
 		public class RADIATION

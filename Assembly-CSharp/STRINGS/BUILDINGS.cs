@@ -2364,7 +2364,7 @@ namespace STRINGS
 					UI.FormatAsLink("Radiation", "RADIATION"),
 					" for Radbolt production.\n\nGenerates a massive amount of ",
 					UI.FormatAsLink("Heat", "HEAT"),
-					"."
+					". Overheating will result in an explosive meltdown."
 				});
 
 				public static LocString LOGIC_PORT = "Fuel Delivery Control";

@@ -9,12 +9,17 @@ public static class ModUtil
 {
 	public static void AddBuildingToPlanScreen(HashedString category, string building_id)
 	{
+		ModUtil.AddBuildingToPlanScreen(category, building_id, "uncategorized");
+	}
+
+	public static void AddBuildingToPlanScreen(HashedString category, string building_id, string subcategoryID)
+	{
 		int num = BUILDINGS.PLANORDER.FindIndex((PlanScreen.PlanInfo x) => x.category == category);
 		if (num < 0)
 		{
 			return;
 		}
-		((ICollection<string>)BUILDINGS.PLANORDER[num].data).Add(building_id);
+		BUILDINGS.PLANORDER[num].buildingAndSubcategoryData.Add(new KeyValuePair<string, string>(building_id, subcategoryID));
 	}
 
 	public static void AddBuildingToHotkeyBuildMenu(HashedString category, string building_id, global::Action hotkey)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class UserMenuScreen : KIconButtonMenu
 {
@@ -17,6 +18,7 @@ public class UserMenuScreen : KIconButtonMenu
 	{
 		base.OnSpawn();
 		Game.Instance.Subscribe(1980521255, new Action<object>(this.OnUIRefresh));
+		KInputManager.InputChange.AddListener(new UnityAction(base.RefreshButtonTooltip));
 	}
 
 	public void SetSelected(GameObject go)

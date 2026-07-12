@@ -25,7 +25,7 @@ public class KInputController : IInputHandler
 		this.IsGamepad = is_gamepad;
 		this.mAxis = new float[4];
 		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[268];
+		this.mActionState = new bool[273];
 		this.mScrollState = new bool[2];
 		this.inputHandler = new KInputHandler(this, this);
 	}
@@ -58,6 +58,19 @@ public class KInputController : IInputHandler
 			}
 		}
 		KButtonEvent kbuttonEvent = new KButtonEvent(this, inputEventType, mActionFlags);
+		this.mEvents.Add(kbuttonEvent);
+		KInputManager.SetUserActive();
+	}
+
+	public void QueueControllerEvent(global::Action action, bool is_down)
+	{
+		if (!KInputManager.isFocused)
+		{
+			return;
+		}
+		InputEventType inputEventType = (is_down ? InputEventType.KeyDown : InputEventType.KeyUp);
+		this.mActionState[(int)action] = is_down;
+		KButtonEvent kbuttonEvent = new KButtonEvent(this, inputEventType, action);
 		this.mEvents.Add(kbuttonEvent);
 		KInputManager.SetUserActive();
 	}
@@ -182,6 +195,23 @@ public class KInputController : IInputHandler
 					}
 				}
 			}
+			return;
+		}
+		this.UpdateScrollStates();
+		this.UpdateAxis();
+		this.UpdateModifiers();
+		if (!KInputManager.currentControllerIsGamepad)
+		{
+			KInputManager.steamInputInterpreter.GetSteamCursorMovement();
+		}
+		for (int j = 0; j < 273; j++)
+		{
+			global::Action action = (global::Action)j;
+			bool steamInputActionIsDown = KInputManager.steamInputInterpreter.GetSteamInputActionIsDown(action);
+			if (this.mActionState[j] != steamInputActionIsDown)
+			{
+				this.QueueControllerEvent(action, steamInputActionIsDown);
+			}
 		}
 	}
 
@@ -190,7 +220,14 @@ public class KInputController : IInputHandler
 		foreach (KInputEvent kinputEvent in this.mEvents)
 		{
 			this.inputHandler.HandleEvent(kinputEvent);
+			KInputManager.currentController = kinputEvent.Controller;
+			KInputManager.currentControllerIsGamepad = kinputEvent.Controller.IsGamepad;
 		}
+		if (KInputManager.currentController != KInputManager.prevController)
+		{
+			KInputManager.InputChange.Invoke();
+		}
+		KInputManager.prevController = KInputManager.currentController;
 		this.mEvents.Clear();
 	}
 
@@ -304,7 +341,7 @@ public class KInputController : IInputHandler
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[268];
+			this.mActionFlags = new bool[273];
 		}
 
 		public KKeyCode mKeyCode;

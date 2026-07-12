@@ -14,7 +14,7 @@ namespace FMODUnity
 		{
 			get
 			{
-				return "Default Settings";
+				return "Default";
 			}
 		}
 

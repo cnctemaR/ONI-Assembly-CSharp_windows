@@ -69,19 +69,26 @@ public class ArtifactPOIStates : GameStateMachine<ArtifactPOIStates, ArtifactPOI
 
 		public string GetArtifactToHarvest()
 		{
-			if (string.IsNullOrEmpty(this.artifactToHarvest))
+			if (this.CanHarvestArtifact())
 			{
-				this.PickNewArtifactToHarvest();
+				if (string.IsNullOrEmpty(this.artifactToHarvest))
+				{
+					this.PickNewArtifactToHarvest();
+				}
+				return this.artifactToHarvest;
 			}
-			return this.artifactToHarvest;
+			return null;
 		}
 
 		public void HarvestArtifact()
 		{
-			this.numHarvests++;
-			this.poiCharge = 0f;
-			this.artifactToHarvest = null;
-			this.PickNewArtifactToHarvest();
+			if (this.CanHarvestArtifact())
+			{
+				this.numHarvests++;
+				this.poiCharge = 0f;
+				this.artifactToHarvest = null;
+				this.PickNewArtifactToHarvest();
+			}
 		}
 
 		public void RechargePOI(float dt)

@@ -247,9 +247,8 @@ public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IEleme
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.inoperational;
-			this.root.ToggleRecurringChore((OilWellCap.StatesInstance smi) => smi.master.CreateWorkChore(), null);
 			this.inoperational.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.operational, new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsOperational));
-			this.operational.DefaultState(this.operational.idle);
+			this.operational.ToggleRecurringChore((OilWellCap.StatesInstance smi) => smi.master.CreateWorkChore(), null).DefaultState(this.operational.idle);
 			this.operational.idle.PlayAnim("off").ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.operational.overpressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsGTEOne)
 				.ParamTransition<bool>(this.working, this.operational.releasing_pressure, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.IsTrue)
 				.EventTransition(GameHashes.OperationalChanged, this.inoperational, GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Not(new StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.Transition.ConditionCallback(this.IsOperational)))

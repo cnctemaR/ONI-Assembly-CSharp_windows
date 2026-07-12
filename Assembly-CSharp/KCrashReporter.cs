@@ -408,7 +408,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 494396;
+			error.build = 496912;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -529,7 +529,7 @@ public class KCrashReporter : MonoBehaviour
 
 	private static string dataRoot;
 
-	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame", "Trying to add Text (LocText) for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", "Texture has out of range width / height" };
+	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame", "Trying to add Text (LocText) for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", "Texture has out of range width / height", "<I> Failed to get cursor position:\r\nSuccess.\r\n" };
 
 	private static HashSet<int> previouslyReportedDevNotifications;
 

@@ -190,7 +190,7 @@ public class RocketModuleSideScreen : SideScreenContent
 		{
 			if (myWorld.id != (int)ClusterManager.INVALID_WORLD_IDX)
 			{
-				AudioMixer.instance.Stop(component2.interiorReverbSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+				AudioMixer.instance.Stop(component2.interiorReverbSnapshot, STOP_MODE.ALLOWFADEOUT);
 				ClusterManager.Instance.SetActiveWorld(myWorld.id);
 			}
 		}

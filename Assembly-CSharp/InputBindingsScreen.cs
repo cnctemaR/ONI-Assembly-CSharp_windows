@@ -307,6 +307,7 @@ public class InputBindingsScreen : KModalScreen
 			if (bindingEntry2.mRebindable && bindingEntry2.mAction == this.actionToRebind)
 			{
 				BindingEntry duplicatedBinding = this.GetDuplicatedBinding(this.screens[this.activeScreen], bindingEntry);
+				bindingEntry.mButton = GameInputMapping.KeyBindings[i].mButton;
 				GameInputMapping.KeyBindings[i] = bindingEntry;
 				this.activeButton.GetComponentInChildren<LocText>().text = this.GetBindingText(bindingEntry);
 				if (duplicatedBinding.mAction != global::Action.Invalid && duplicatedBinding.mAction != this.actionToRebind)

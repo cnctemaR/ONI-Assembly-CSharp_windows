@@ -12,7 +12,7 @@ public class Personality : Resource
 		}
 	}
 
-	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description)
+	public Personality(string name_string_key, string name, string Gender, string PersonalityType, string StressTrait, string JoyTrait, string StickerType, string CongenitalTrait, int headShape, int mouth, int neck, int eyes, int hair, int body, string description, bool isStartingMinion)
 		: base(name, name)
 	{
 		this.nameStringKey = name_string_key;
@@ -29,6 +29,7 @@ public class Personality : Resource
 		this.eyes = eyes;
 		this.hair = hair;
 		this.body = body;
+		this.startingMinion = isStartingMinion;
 	}
 
 	public string GetDescription()
@@ -79,6 +80,8 @@ public class Personality : Resource
 	public string congenitaltrait;
 
 	public string unformattedDescription;
+
+	public bool startingMinion;
 
 	public class StartingAttribute
 	{

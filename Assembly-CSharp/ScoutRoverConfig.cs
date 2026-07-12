@@ -9,7 +9,7 @@ public class ScoutRoverConfig : IEntityConfig
 {
 	public static GameObject CreateScout(string id, string name, string desc, string anim_file)
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, 100f, true, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, 100f, true, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, SimHashes.Creature, new List<Tag> { GameTags.Experimental }, 293f);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.isMovable = true;
 		gameObject.AddOrGet<Modifiers>();

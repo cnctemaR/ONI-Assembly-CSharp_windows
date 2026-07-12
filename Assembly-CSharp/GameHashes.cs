@@ -410,5 +410,7 @@ public enum GameHashes
 	RocketSelfDestructRequested = -1061799784,
 	RocketExploded = -1311384361,
 	ModuleLanderLanded = 1591811118,
-	PartyLineJoined = 564760259
+	PartyLineJoined = 564760259,
+	ScreenResolutionChanged = 445618876,
+	GamepadUIModeChanged = -442024484
 }

@@ -111,7 +111,7 @@ public class MainMenu : KScreen
 				}
 				this.motdImageButton.onClick.AddListener(delegate
 				{
-					Application.OpenURL(response.image_link_url);
+					App.OpenWebURL(response.image_link_url);
 				});
 				return;
 			}
@@ -419,7 +419,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 494396U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
+				if (header.buildVersion > 496912U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 28)
 				{
 					flag = false;
 				}
@@ -477,7 +477,7 @@ public class MainMenu : KScreen
 	public void StartFEAudio()
 	{
 		AudioMixer.instance.Reset();
-		MusicManager.instance.KillAllSongs(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.KillAllSongs(STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndSnapshot);
 		if (!AudioMixer.instance.SnapshotIsActive(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot))
 		{
@@ -494,7 +494,7 @@ public class MainMenu : KScreen
 	{
 		if (this.ambientLoop.isValid())
 		{
-			this.ambientLoop.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			this.ambientLoop.stop(STOP_MODE.ALLOWFADEOUT);
 			this.ambientLoop.release();
 			this.ambientLoop.clearHandle();
 		}
@@ -504,8 +504,8 @@ public class MainMenu : KScreen
 	{
 		if (MusicManager.instance.SongIsPlaying(this.menuMusicEventName))
 		{
-			MusicManager.instance.StopSong(this.menuMusicEventName, true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong(this.menuMusicEventName, true, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 
@@ -515,7 +515,7 @@ public class MainMenu : KScreen
 		{
 			global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO, delegate
 			{
-				Application.OpenURL("http://support.kleientertainment.com/customer/en/portal/articles/2947881-no-audio-when-playing-oxygen-not-included");
+				App.OpenWebURL("http://support.kleientertainment.com/customer/en/portal/articles/2947881-no-audio-when-playing-oxygen-not-included");
 			}, null, null, null, GlobalResources.Instance().sadDupeAudio);
 		}
 	}

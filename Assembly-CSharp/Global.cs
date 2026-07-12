@@ -20,7 +20,7 @@ public class Global : MonoBehaviour
 	{
 		List<BindingEntry> list = new List<BindingEntry>
 		{
-			new BindingEntry(null, GamepadButton.NumButtons, KKeyCode.Escape, Modifier.None, global::Action.Escape, false, false),
+			new BindingEntry(null, GamepadButton.Start, KKeyCode.Escape, Modifier.None, global::Action.Escape, false, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.W, Modifier.None, global::Action.PanUp, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.S, Modifier.None, global::Action.PanDown, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.PanLeft, true, false),
@@ -49,9 +49,9 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.X, Modifier.None, global::Action.BuildingDeconstruct, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Tab, Modifier.None, global::Action.CycleSpeed, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.H, Modifier.None, global::Action.CameraHome, true, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Mouse0, Modifier.None, global::Action.MouseLeft, false, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Mouse0, Modifier.Shift, global::Action.ShiftMouseLeft, false, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Mouse1, Modifier.None, global::Action.MouseRight, false, false),
+			new BindingEntry("Root", GamepadButton.A, KKeyCode.Mouse0, Modifier.None, global::Action.MouseLeft, false, false),
+			new BindingEntry("Root", GamepadButton.A, KKeyCode.Mouse0, Modifier.Shift, global::Action.ShiftMouseLeft, false, false),
+			new BindingEntry("Root", GamepadButton.B, KKeyCode.Mouse1, Modifier.None, global::Action.MouseRight, false, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Mouse2, Modifier.None, global::Action.MouseMiddle, false, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Alpha1, Modifier.None, global::Action.Plan1, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.None, global::Action.Plan2, true, false),
@@ -68,8 +68,8 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Minus, Modifier.Shift, global::Action.Plan13, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Equals, Modifier.Shift, global::Action.Plan14, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.B, Modifier.None, global::Action.CopyBuilding, true, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.MouseScrollUp, Modifier.None, global::Action.ZoomIn, true, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.MouseScrollDown, Modifier.None, global::Action.ZoomOut, true, false),
+			new BindingEntry("Root", GamepadButton.RT, KKeyCode.MouseScrollUp, Modifier.None, global::Action.ZoomIn, true, false),
+			new BindingEntry("Root", GamepadButton.LT, KKeyCode.MouseScrollDown, Modifier.None, global::Action.ZoomOut, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F1, Modifier.None, global::Action.Overlay1, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F2, Modifier.None, global::Action.Overlay2, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F3, Modifier.None, global::Action.Overlay3, true, false),
@@ -87,7 +87,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F4, Modifier.Shift, global::Action.Overlay15, DlcManager.AVAILABLE_EXPANSION1_ONLY),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadPlus, Modifier.None, global::Action.SpeedUp, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadMinus, Modifier.None, global::Action.SlowDown, true, false),
-			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Space, Modifier.None, global::Action.TogglePause, true, false),
+			new BindingEntry("Root", GamepadButton.Back, KKeyCode.Space, Modifier.None, global::Action.TogglePause, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha1, Modifier.Ctrl, global::Action.SetUserNav1, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.Ctrl, global::Action.SetUserNav2, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha3, Modifier.Ctrl, global::Action.SetUserNav3, true, false),
@@ -593,7 +593,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 494396U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 496912U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

@@ -17,7 +17,7 @@ public static class EnterTemporalTearSequence
 			SpeedControlScreen.Instance.Pause(false);
 		}
 		CameraController.Instance.SetWorldInteractive(false);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryMessageSnapshot, STOP_MODE.ALLOWFADEOUT);
 		CameraController.Instance.FadeOut(1f, 1f);
 		yield return new WaitForSecondsRealtime(3f);
 		ManagementMenu.Instance.CloseAll();
@@ -88,7 +88,7 @@ public static class EnterTemporalTearSequence
 		}
 		IEnumerator enumerator2 = null;
 		cameraTaget = null;
-		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_Victory_02_NIS", true, STOP_MODE.ALLOWFADEOUT);
 		yield return new WaitForSecondsRealtime(2f);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		if (!SpeedControlScreen.Instance.IsPaused)
@@ -105,8 +105,8 @@ public static class EnterTemporalTearSequence
 			CameraController.Instance.SetWorldInteractive(true);
 			HoverTextScreen.Instance.Show(true);
 			CameraController.Instance.SetOverrideZoomSpeed(1f);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryCinematicSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().VictoryCinematicSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MuteDynamicMusicSnapshot, STOP_MODE.ALLOWFADEOUT);
 			RootMenu.Instance.canTogglePauseScreen = true;
 		}));
 		yield break;

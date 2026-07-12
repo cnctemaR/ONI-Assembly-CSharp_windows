@@ -324,7 +324,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 	{
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
-			if (this.targetFab.GetMyWorld().worldInventory.GetAmount(recipeElement.material, true) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material) >= recipeElement.amount)
+			if (this.targetFab.GetMyWorld().worldInventory.GetAmountWithoutTag(recipeElement.material, true, this.targetFab.ForbiddenTags) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material, this.targetFab.ForbiddenTags) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material, this.targetFab.ForbiddenTags) >= recipeElement.amount)
 			{
 				return true;
 			}
@@ -337,9 +337,10 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		bool flag = true;
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
-			if (this.targetFab.GetMyWorld().worldInventory.GetAmount(recipeElement.material, true) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
+			if (this.targetFab.GetMyWorld().worldInventory.GetAmountWithoutTag(recipeElement.material, true, this.targetFab.ForbiddenTags) + this.targetFab.inStorage.GetAmountAvailable(recipeElement.material, this.targetFab.ForbiddenTags) + this.targetFab.buildStorage.GetAmountAvailable(recipeElement.material, this.targetFab.ForbiddenTags) < recipeElement.amount)
 			{
 				flag = false;
+				break;
 			}
 		}
 		return flag;

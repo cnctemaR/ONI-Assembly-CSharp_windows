@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ManagementMenu : KIconToggleMenu
 {
@@ -148,12 +149,15 @@ public class ManagementMenu : KIconToggleMenu
 		this.PauseMenuButton.onClick += this.OnPauseMenuClicked;
 		this.PauseMenuButton.transform.SetAsLastSibling();
 		this.PauseMenuButton.GetComponent<ToolTip>().toolTip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_PAUSEMENU, global::Action.Escape);
+		this.inputChangeReceiver = (UnityAction)Delegate.Combine(this.inputChangeReceiver, new UnityAction(this.OnInputChanged));
+		KInputManager.InputChange.AddListener(this.inputChangeReceiver);
 		Components.ResearchCenters.OnAdd += new Action<IResearchCenter>(this.CheckResearch);
 		Components.ResearchCenters.OnRemove += new Action<IResearchCenter>(this.CheckResearch);
 		Components.RoleStations.OnAdd += new Action<RoleStation>(this.CheckSkills);
 		Components.RoleStations.OnRemove += new Action<RoleStation>(this.CheckSkills);
 		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckResearch));
 		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckSkills));
+		Game.Instance.Subscribe(445618876, new Action<object>(this.OnResolutionChanged));
 		if (!DlcManager.FeatureClusterSpaceEnabled())
 		{
 			Components.Telescopes.OnAdd += new Action<Telescope>(this.CheckStarmap);
@@ -171,6 +175,7 @@ public class ManagementMenu : KIconToggleMenu
 			ktoggle.soundPlayer.toggle_widget_sound_events[0].PlaySound = false;
 			ktoggle.soundPlayer.toggle_widget_sound_events[1].PlaySound = false;
 		}
+		this.OnResolutionChanged(null);
 	}
 
 	protected override void OnSpawn()
@@ -179,6 +184,38 @@ public class ManagementMenu : KIconToggleMenu
 		this.mutuallyExclusiveScreens.Add(AllResourcesScreen.Instance);
 		this.mutuallyExclusiveScreens.Add(AllDiagnosticsScreen.Instance);
 		this.OnNotificationsChanged();
+	}
+
+	private void OnInputChanged()
+	{
+		this.PauseMenuButton.GetComponent<ToolTip>().toolTip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_PAUSEMENU, global::Action.Escape);
+		this.consumablesInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, this.consumablesInfo.hotKey);
+		this.vitalsInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_VITALS, this.vitalsInfo.hotKey);
+		this.researchInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, this.researchInfo.hotKey);
+		this.jobsInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_JOBS, this.jobsInfo.hotKey);
+		this.skillsInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, this.skillsInfo.hotKey);
+		this.starmapInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, this.starmapInfo.hotKey);
+		this.clusterMapInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, this.clusterMapInfo.hotKey);
+		this.scheduleInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_SCHEDULE, this.scheduleInfo.hotKey);
+		this.reportsInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, this.reportsInfo.hotKey);
+		this.codexInfo.tooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_CODEX, this.codexInfo.hotKey);
+	}
+
+	private void OnResolutionChanged(object data = null)
+	{
+		bool flag = (float)Screen.width < 1300f;
+		foreach (KToggle ktoggle in this.toggles)
+		{
+			HierarchyReferences component = ktoggle.GetComponent<HierarchyReferences>();
+			if (!(component == null))
+			{
+				RectTransform reference = component.GetReference<RectTransform>("TextContainer");
+				if (!(reference == null))
+				{
+					reference.gameObject.SetActive(!flag);
+				}
+			}
+		}
 	}
 
 	private void OnNotificationsChanged()
@@ -395,7 +432,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		this.activeScreen.screen.Show(false);
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, STOP_MODE.ALLOWFADEOUT);
 		this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
 		this.activeScreen = null;
 		screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
@@ -514,6 +551,8 @@ public class ManagementMenu : KIconToggleMenu
 		}
 	}
 
+	private const float UI_WIDTH_COMPRESS_THRESHOLD = 1300f;
+
 	[MyCmpReq]
 	public ManagementMenuNotificationDisplayer notificationDisplayer;
 
@@ -572,6 +611,8 @@ public class ManagementMenu : KIconToggleMenu
 	private ManagementMenu.ManagementMenuToggleInfo clusterMapInfo;
 
 	private ManagementMenu.ManagementMenuToggleInfo skillsInfo;
+
+	private UnityAction inputChangeReceiver;
 
 	private Dictionary<ManagementMenu.ManagementMenuToggleInfo, ManagementMenu.ScreenData> ScreenInfoMatch = new Dictionary<ManagementMenu.ManagementMenuToggleInfo, ManagementMenu.ScreenData>();
 

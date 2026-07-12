@@ -12,6 +12,14 @@ namespace FMODUnity
 	[AddComponentMenu("")]
 	public class RuntimeManager : MonoBehaviour
 	{
+		public static bool IsMuted
+		{
+			get
+			{
+				return RuntimeManager.Instance.isMuted;
+			}
+		}
+
 		[MonoPInvokeCallback(typeof(DEBUG_CALLBACK))]
 		private static RESULT DEBUG_CALLBACK(DEBUG_FLAGS flags, IntPtr filePtr, int line, IntPtr funcPtr, IntPtr messagePtr)
 		{
@@ -33,6 +41,25 @@ namespace FMODUnity
 			return RESULT.OK;
 		}
 
+		[MonoPInvokeCallback(typeof(global::FMOD.SYSTEM_CALLBACK))]
+		private static RESULT ERROR_CALLBACK(IntPtr system, global::FMOD.SYSTEM_CALLBACK_TYPE type, IntPtr commanddata1, IntPtr commanddata2, IntPtr userdata)
+		{
+			ERRORCALLBACK_INFO errorcallback_INFO = (ERRORCALLBACK_INFO)MarshalHelper.PtrToStructure(commanddata1, typeof(ERRORCALLBACK_INFO));
+			if ((errorcallback_INFO.instancetype == ERRORCALLBACK_INSTANCETYPE.CHANNEL || errorcallback_INFO.instancetype == ERRORCALLBACK_INSTANCETYPE.CHANNELCONTROL) && errorcallback_INFO.result == RESULT.ERR_INVALID_HANDLE)
+			{
+				return RESULT.OK;
+			}
+			global::UnityEngine.Debug.LogError(string.Format("[FMOD] {0}({1}) returned {2} for {3} (0x{4}).", new object[]
+			{
+				errorcallback_INFO.functionname,
+				errorcallback_INFO.functionparams,
+				errorcallback_INFO.result,
+				errorcallback_INFO.instancetype,
+				errorcallback_INFO.instance.ToString("X")
+			}));
+			return RESULT.OK;
+		}
+
 		private static RuntimeManager Instance
 		{
 			get
@@ -44,19 +71,10 @@ namespace FMODUnity
 				if (RuntimeManager.instance == null)
 				{
 					RESULT result = RESULT.OK;
-					RuntimeManager[] array = global::UnityEngine.Object.FindObjectsOfType(typeof(RuntimeManager)) as RuntimeManager[];
-					foreach (RuntimeManager runtimeManager in array)
+					RuntimeManager[] array = Resources.FindObjectsOfTypeAll<RuntimeManager>();
+					for (int i = 0; i < array.Length; i++)
 					{
-						if (array != null)
-						{
-							if (runtimeManager.cachedPointers[0] != 0L)
-							{
-								RuntimeManager.instance = runtimeManager;
-								RuntimeManager.instance.studioSystem.handle = (IntPtr)RuntimeManager.instance.cachedPointers[0];
-								RuntimeManager.instance.coreSystem.handle = (IntPtr)RuntimeManager.instance.cachedPointers[1];
-							}
-							global::UnityEngine.Object.DestroyImmediate(runtimeManager);
-						}
+						global::UnityEngine.Object.DestroyImmediate(array[i].gameObject);
 					}
 					GameObject gameObject = new GameObject("FMOD.UnityIntegration.RuntimeManager");
 					RuntimeManager.instance = gameObject.AddComponent<RuntimeManager>();
@@ -108,12 +126,17 @@ namespace FMODUnity
 		{
 			if (result != RESULT.OK)
 			{
-				if (this.studioSystem.isValid())
-				{
-					this.studioSystem.release();
-					this.studioSystem.clearHandle();
-				}
+				this.ReleaseStudioSystem();
 				throw new SystemNotInitializedException(result, cause);
+			}
+		}
+
+		private void ReleaseStudioSystem()
+		{
+			if (this.studioSystem.isValid())
+			{
+				this.studioSystem.release();
+				this.studioSystem.clearHandle();
 			}
 		}
 
@@ -132,12 +155,13 @@ namespace FMODUnity
 			global::FMOD.ADVANCEDSETTINGS advancedsettings = default(global::FMOD.ADVANCEDSETTINGS);
 			advancedsettings.randomSeed = (uint)DateTime.UtcNow.Ticks;
 			advancedsettings.maxVorbisCodecs = num;
+			RuntimeManager.SetThreadAffinities(this.currentPlatform);
 			this.currentPlatform.PreSystemCreate(new Action<RESULT, string>(this.CheckInitResult));
 			global::FMOD.Studio.INITFLAGS initflags = global::FMOD.Studio.INITFLAGS.DEFERRED_CALLBACKS;
 			if (this.currentPlatform.IsLiveUpdateEnabled)
 			{
 				initflags |= global::FMOD.Studio.INITFLAGS.LIVEUPDATE;
-				advancedsettings.profilePort = settings.LiveUpdatePort;
+				advancedsettings.profilePort = (ushort)this.currentPlatform.LiveUpdatePort;
 			}
 			for (;;)
 			{
@@ -158,12 +182,18 @@ namespace FMODUnity
 				}
 				result2 = this.coreSystem.setAdvancedSettings(ref advancedsettings);
 				this.CheckInitResult(result2, "FMOD.System.setAdvancedSettings");
-				if (!string.IsNullOrEmpty(Settings.Instance.EncryptionKey))
+				if (settings.EnableErrorCallback)
+				{
+					this.errorCallback = new global::FMOD.SYSTEM_CALLBACK(RuntimeManager.ERROR_CALLBACK);
+					result2 = this.coreSystem.setCallback(this.errorCallback, global::FMOD.SYSTEM_CALLBACK_TYPE.ERROR);
+					this.CheckInitResult(result2, "FMOD.System.setCallback");
+				}
+				if (!string.IsNullOrEmpty(settings.EncryptionKey))
 				{
 					result2 = this.studioSystem.setAdvancedSettings(default(global::FMOD.Studio.ADVANCEDSETTINGS), Settings.Instance.EncryptionKey);
 					this.CheckInitResult(result2, "FMOD.Studio.System.setAdvancedSettings");
 				}
-				if (Settings.Instance.EnableMemoryTracking)
+				if (settings.EnableMemoryTracking)
 				{
 					initflags |= global::FMOD.Studio.INITFLAGS.MEMORY_TRACKING;
 				}
@@ -202,6 +232,19 @@ namespace FMODUnity
 			this.currentPlatform.LoadPlugins(this.coreSystem, new Action<RESULT, string>(this.CheckInitResult));
 			this.LoadBanks(settings);
 			return result;
+		}
+
+		private static void SetThreadAffinities(Platform platform)
+		{
+			foreach (ThreadAffinityGroup threadAffinityGroup in platform.ThreadAffinities)
+			{
+				foreach (ThreadType threadType in threadAffinityGroup.threads)
+				{
+					THREAD_TYPE thread_TYPE = RuntimeUtils.ToFMODThreadType(threadType);
+					THREAD_AFFINITY thread_AFFINITY = RuntimeUtils.ToFMODThreadAffinity(threadAffinityGroup.affinity);
+					Thread.SetAttributes(thread_TYPE, thread_AFFINITY, THREAD_PRIORITY.DEFAULT, THREAD_STACK_SIZE.DEFAULT);
+				}
+			}
 		}
 
 		public static int AddListener(StudioListener listener)
@@ -272,22 +315,34 @@ namespace FMODUnity
 				{
 					this.listenerWarningIssued = true;
 				}
-				for (int i = 0; i < this.attachedInstances.Count; i++)
+				for (int i = 0; i < this.activeEmitters.Count; i++)
+				{
+					RuntimeManager.UpdateActiveEmitter(this.activeEmitters[i], false);
+				}
+				for (int j = 0; j < this.attachedInstances.Count; j++)
 				{
 					PLAYBACK_STATE playback_STATE = PLAYBACK_STATE.STOPPED;
-					this.attachedInstances[i].instance.getPlaybackState(out playback_STATE);
-					if (!this.attachedInstances[i].instance.isValid() || playback_STATE == PLAYBACK_STATE.STOPPED || this.attachedInstances[i].transform == null)
+					if (this.attachedInstances[j].instance.isValid())
 					{
-						this.attachedInstances.RemoveAt(i);
-						i--;
+						this.attachedInstances[j].instance.getPlaybackState(out playback_STATE);
 					}
-					else if (this.attachedInstances[i].rigidBody)
+					if (playback_STATE == PLAYBACK_STATE.STOPPED || this.attachedInstances[j].transform == null)
 					{
-						this.attachedInstances[i].instance.set3DAttributes(RuntimeUtils.To3DAttributes(this.attachedInstances[i].transform, this.attachedInstances[i].rigidBody));
+						this.attachedInstances[j] = this.attachedInstances[this.attachedInstances.Count - 1];
+						this.attachedInstances.RemoveAt(this.attachedInstances.Count - 1);
+						j--;
+					}
+					else if (this.attachedInstances[j].rigidBody)
+					{
+						this.attachedInstances[j].instance.set3DAttributes(RuntimeUtils.To3DAttributes(this.attachedInstances[j].transform, this.attachedInstances[j].rigidBody));
+					}
+					else if (this.attachedInstances[j].rigidBody2D)
+					{
+						this.attachedInstances[j].instance.set3DAttributes(RuntimeUtils.To3DAttributes(this.attachedInstances[j].transform, this.attachedInstances[j].rigidBody2D));
 					}
 					else
 					{
-						this.attachedInstances[i].instance.set3DAttributes(RuntimeUtils.To3DAttributes(this.attachedInstances[i].transform, this.attachedInstances[i].rigidBody2D));
+						this.attachedInstances[j].instance.set3DAttributes(this.attachedInstances[j].transform.To3DAttributes());
 					}
 				}
 				if (this.isOverlayEnabled)
@@ -308,6 +363,54 @@ namespace FMODUnity
 				}
 				this.studioSystem.update();
 			}
+		}
+
+		public static void RegisterActiveEmitter(StudioEventEmitter emitter)
+		{
+			if (!RuntimeManager.Instance.activeEmitters.Contains(emitter))
+			{
+				RuntimeManager.Instance.activeEmitters.Add(emitter);
+			}
+		}
+
+		public static void DeregisterActiveEmitter(StudioEventEmitter emitter)
+		{
+			RuntimeManager.Instance.activeEmitters.Remove(emitter);
+		}
+
+		public static void UpdateActiveEmitter(StudioEventEmitter emitter, bool force = false)
+		{
+			bool flag = false;
+			for (int i = 0; i < RuntimeManager.Listeners.Count; i++)
+			{
+				if (Vector3.Distance(emitter.transform.position, RuntimeManager.Listeners[i].transform.position) <= emitter.MaxDistance)
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (force || flag != emitter.IsPlaying())
+			{
+				if (flag)
+				{
+					emitter.PlayInstance();
+					return;
+				}
+				emitter.StopInstance();
+			}
+		}
+
+		public static void AttachInstanceToGameObject(EventInstance instance, Transform transform)
+		{
+			RuntimeManager.AttachedInstance attachedInstance = RuntimeManager.Instance.attachedInstances.Find((RuntimeManager.AttachedInstance x) => x.instance.handle == instance.handle);
+			if (attachedInstance == null)
+			{
+				attachedInstance = new RuntimeManager.AttachedInstance();
+				RuntimeManager.Instance.attachedInstances.Add(attachedInstance);
+			}
+			instance.set3DAttributes(transform.To3DAttributes());
+			attachedInstance.transform = transform;
+			attachedInstance.instance = instance;
 		}
 
 		public static void AttachInstanceToGameObject(EventInstance instance, Transform transform, Rigidbody rigidBody)
@@ -336,7 +439,6 @@ namespace FMODUnity
 			attachedInstance.transform = transform;
 			attachedInstance.instance = instance;
 			attachedInstance.rigidBody2D = rigidBody2D;
-			attachedInstance.rigidBody = null;
 		}
 
 		public static void DetachInstanceFromGameObject(EventInstance instance)
@@ -346,7 +448,8 @@ namespace FMODUnity
 			{
 				if (runtimeManager.attachedInstances[i].instance.handle == instance.handle)
 				{
-					runtimeManager.attachedInstances.RemoveAt(i);
+					runtimeManager.attachedInstances[i] = runtimeManager.attachedInstances[runtimeManager.attachedInstances.Count - 1];
+					runtimeManager.attachedInstances.RemoveAt(runtimeManager.attachedInstances.Count - 1);
 					return;
 				}
 			}
@@ -395,14 +498,13 @@ namespace FMODUnity
 					this.coreSystem.getChannelsPlaying(out num3, out num4);
 					stringBuilder.AppendFormat("CHANNELS: real = {0}, total = {1}\n", num4, num3);
 					DSP_METERING_INFO dsp_METERING_INFO;
-					DSP_METERING_INFO dsp_METERING_INFO2;
-					this.mixerHead.getMeteringInfo(out dsp_METERING_INFO, out dsp_METERING_INFO2);
+					this.mixerHead.getMeteringInfo(IntPtr.Zero, out dsp_METERING_INFO);
 					float num5 = 0f;
-					for (int i = 0; i < (int)dsp_METERING_INFO2.numchannels; i++)
+					for (int i = 0; i < (int)dsp_METERING_INFO.numchannels; i++)
 					{
-						num5 += dsp_METERING_INFO2.rmslevel[i] * dsp_METERING_INFO2.rmslevel[i];
+						num5 += dsp_METERING_INFO.rmslevel[i] * dsp_METERING_INFO.rmslevel[i];
 					}
-					num5 = Mathf.Sqrt(num5 / (float)dsp_METERING_INFO2.numchannels);
+					num5 = Mathf.Sqrt(num5 / (float)dsp_METERING_INFO.numchannels);
 					float num6 = ((num5 > 0f) ? (20f * Mathf.Log10(num5 * Mathf.Sqrt(2f))) : (-80f));
 					if (num6 > 10f)
 					{
@@ -417,19 +519,10 @@ namespace FMODUnity
 			GUI.DragWindow();
 		}
 
-		private void OnDisable()
-		{
-			this.cachedPointers[0] = (long)this.studioSystem.handle;
-			this.cachedPointers[1] = (long)this.coreSystem.handle;
-		}
-
 		private void OnDestroy()
 		{
-			if (this.studioSystem.isValid())
-			{
-				this.studioSystem.release();
-				this.studioSystem.clearHandle();
-			}
+			this.coreSystem.setCallback(null, (global::FMOD.SYSTEM_CALLBACK_TYPE)0U);
+			this.ReleaseStudioSystem();
 			RuntimeManager.initException = null;
 			RuntimeManager.instance = null;
 		}
@@ -458,15 +551,35 @@ namespace FMODUnity
 					loadedBank.Bank.loadSampleData();
 				}
 				RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank);
-				return;
 			}
-			if (loadResult == RESULT.ERR_EVENT_ALREADY_LOADED)
+			else
 			{
-				loadedBank.RefCount = 2;
-				RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank);
-				return;
+				if (loadResult != RESULT.ERR_EVENT_ALREADY_LOADED)
+				{
+					throw new BankLoadException(bankPath, loadResult);
+				}
+				global::UnityEngine.Debug.LogWarningFormat("[FMOD] Unable to load {0} - bank already loaded. This may occur when attempting to load another localized bank before the first is unloaded, or if a bank has been loaded via the API.", new object[] { bankName });
 			}
-			throw new BankLoadException(bankPath, loadResult);
+			this.ExecuteSampleLoadRequestsIfReady();
+		}
+
+		private void ExecuteSampleLoadRequestsIfReady()
+		{
+			if (this.sampleLoadRequests.Count > 0)
+			{
+				foreach (string text in this.sampleLoadRequests)
+				{
+					if (!this.loadedBanks.ContainsKey(text))
+					{
+						return;
+					}
+				}
+				foreach (string text2 in this.sampleLoadRequests)
+				{
+					this.CheckInitResult(this.loadedBanks[text2].Bank.loadSampleData(), string.Format("Loading sample data for bank: {0}", text2));
+				}
+				this.sampleLoadRequests.Clear();
+			}
 		}
 
 		public static void LoadBank(string bankName, bool loadSamples = false)
@@ -485,7 +598,7 @@ namespace FMODUnity
 			string text = RuntimeManager.Instance.currentPlatform.GetBankFolder();
 			if (!string.IsNullOrEmpty(Settings.Instance.TargetSubFolder))
 			{
-				text = Path.Combine(text, Settings.Instance.TargetSubFolder);
+				text = RuntimeUtils.GetCommonPlatformPath(Path.Combine(text, Settings.Instance.TargetSubFolder));
 			}
 			string text2;
 			if (Path.GetExtension(bankName) != ".bank")
@@ -532,8 +645,7 @@ namespace FMODUnity
 				{
 					if (result == RESULT.ERR_EVENT_ALREADY_LOADED)
 					{
-						loadedBank2.RefCount = 2;
-						RuntimeManager.Instance.loadedBanks.Add(name, loadedBank2);
+						global::UnityEngine.Debug.LogWarningFormat("[FMOD] Unable to load {0} - bank already loaded. This may occur when attempting to load another localized bank before the first is unloaded, or if a bank has been loaded via the API.", new object[] { name });
 						return;
 					}
 					throw new BankLoadException(name, result);
@@ -545,39 +657,60 @@ namespace FMODUnity
 		{
 			if (fmodSettings.ImportType == ImportType.StreamingAssets)
 			{
+				if (fmodSettings.AutomaticSampleLoading)
+				{
+					this.sampleLoadRequests.AddRange(this.BanksToLoad(fmodSettings));
+				}
 				try
 				{
-					switch (fmodSettings.BankLoadType)
+					foreach (string text in this.BanksToLoad(fmodSettings))
 					{
-					case BankLoadType.All:
-						foreach (string text in fmodSettings.MasterBanks)
-						{
-							RuntimeManager.LoadBank(text + ".strings", fmodSettings.AutomaticSampleLoading);
-							RuntimeManager.LoadBank(text, fmodSettings.AutomaticSampleLoading);
-						}
-						foreach (string text2 in fmodSettings.Banks)
-						{
-							RuntimeManager.LoadBank(text2, fmodSettings.AutomaticSampleLoading);
-						}
-						RuntimeManager.WaitForAllLoads();
-						break;
-					case BankLoadType.Specified:
-						foreach (string text3 in fmodSettings.BanksToLoad)
-						{
-							if (!string.IsNullOrEmpty(text3))
-							{
-								RuntimeManager.LoadBank(text3, fmodSettings.AutomaticSampleLoading);
-							}
-						}
-						RuntimeManager.WaitForAllLoads();
-						break;
+						RuntimeManager.LoadBank(text, false);
 					}
+					RuntimeManager.WaitForAllLoads();
 				}
 				catch (BankLoadException ex)
 				{
 					global::UnityEngine.Debug.LogException(ex);
 				}
 			}
+		}
+
+		private IEnumerable<string> BanksToLoad(Settings fmodSettings)
+		{
+			switch (fmodSettings.BankLoadType)
+			{
+			case BankLoadType.All:
+			{
+				foreach (string masterBankFileName in fmodSettings.MasterBanks)
+				{
+					yield return masterBankFileName + ".strings";
+					yield return masterBankFileName;
+					masterBankFileName = null;
+				}
+				List<string>.Enumerator enumerator = default(List<string>.Enumerator);
+				foreach (string text in fmodSettings.Banks)
+				{
+					yield return text;
+				}
+				enumerator = default(List<string>.Enumerator);
+				break;
+			}
+			case BankLoadType.Specified:
+			{
+				foreach (string text2 in fmodSettings.BanksToLoad)
+				{
+					if (!string.IsNullOrEmpty(text2))
+					{
+						yield return text2;
+					}
+				}
+				List<string>.Enumerator enumerator = default(List<string>.Enumerator);
+				break;
+			}
+			}
+			yield break;
+			yield break;
 		}
 
 		public static void UnloadBank(string bankName)
@@ -590,6 +723,7 @@ namespace FMODUnity
 				{
 					loadedBank.Bank.unload();
 					RuntimeManager.Instance.loadedBanks.Remove(bankName);
+					RuntimeManager.Instance.sampleLoadRequests.Remove(bankName);
 					return;
 				}
 				RuntimeManager.Instance.loadedBanks[bankName] = loadedBank;
@@ -724,54 +858,49 @@ namespace FMODUnity
 			return eventDescription;
 		}
 
-		public static void SetListenerLocation(GameObject gameObject, Rigidbody rigidBody = null, GameObject attenuationObject = null)
+		public static void SetListenerLocation(GameObject gameObject, Rigidbody rigidBody, GameObject attenuationObject = null)
 		{
-			RuntimeManager.SetListenerLocation3D(0, gameObject.transform, rigidBody, attenuationObject);
+			RuntimeManager.SetListenerLocation(0, gameObject, rigidBody, attenuationObject);
+		}
+
+		public static void SetListenerLocation(int listenerIndex, GameObject gameObject, Rigidbody rigidBody, GameObject attenuationObject = null)
+		{
+			if (attenuationObject)
+			{
+				RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, RuntimeUtils.To3DAttributes(gameObject.transform, rigidBody), attenuationObject.transform.position.ToFMODVector());
+				return;
+			}
+			RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, RuntimeUtils.To3DAttributes(gameObject.transform, rigidBody));
 		}
 
 		public static void SetListenerLocation(GameObject gameObject, Rigidbody2D rigidBody2D, GameObject attenuationObject = null)
 		{
-			RuntimeManager.SetListenerLocation2D(0, gameObject.transform, rigidBody2D, attenuationObject);
-		}
-
-		public static void SetListenerLocation(Transform transform, GameObject attenuationObject = null)
-		{
-			RuntimeManager.SetListenerLocation3D(0, transform, null, attenuationObject);
-		}
-
-		public static void SetListenerLocation(int listenerIndex, GameObject gameObject, Rigidbody rigidBody = null, GameObject attenuationObject = null)
-		{
-			RuntimeManager.SetListenerLocation3D(listenerIndex, gameObject.transform, rigidBody, attenuationObject);
+			RuntimeManager.SetListenerLocation(0, gameObject, rigidBody2D, attenuationObject);
 		}
 
 		public static void SetListenerLocation(int listenerIndex, GameObject gameObject, Rigidbody2D rigidBody2D, GameObject attenuationObject = null)
 		{
-			RuntimeManager.SetListenerLocation2D(listenerIndex, gameObject.transform, rigidBody2D, attenuationObject);
+			if (attenuationObject)
+			{
+				RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, RuntimeUtils.To3DAttributes(gameObject.transform, rigidBody2D), attenuationObject.transform.position.ToFMODVector());
+				return;
+			}
+			RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, RuntimeUtils.To3DAttributes(gameObject.transform, rigidBody2D));
 		}
 
-		public static void SetListenerLocation(int listenerIndex, Transform transform, GameObject attenuationObject = null)
+		public static void SetListenerLocation(GameObject gameObject, GameObject attenuationObject = null)
 		{
-			RuntimeManager.SetListenerLocation3D(0, transform, null, attenuationObject);
+			RuntimeManager.SetListenerLocation(0, gameObject, attenuationObject);
 		}
 
-		private static void SetListenerLocation3D(int listenerIndex, Transform transform, Rigidbody rigidBody = null, GameObject attenuationObject = null)
+		public static void SetListenerLocation(int listenerIndex, GameObject gameObject, GameObject attenuationObject = null)
 		{
 			if (attenuationObject)
 			{
-				RuntimeManager.Instance.studioSystem.setListenerAttributes(0, RuntimeUtils.To3DAttributes(transform, rigidBody), attenuationObject.transform.position.ToFMODVector());
+				RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, gameObject.transform.To3DAttributes(), attenuationObject.transform.position.ToFMODVector());
 				return;
 			}
-			RuntimeManager.Instance.studioSystem.setListenerAttributes(0, RuntimeUtils.To3DAttributes(transform, rigidBody));
-		}
-
-		private static void SetListenerLocation2D(int listenerIndex, Transform transform, Rigidbody2D rigidBody = null, GameObject attenuationObject = null)
-		{
-			if (attenuationObject)
-			{
-				RuntimeManager.Instance.studioSystem.setListenerAttributes(0, RuntimeUtils.To3DAttributes(transform, rigidBody), attenuationObject.transform.position.ToFMODVector());
-				return;
-			}
-			RuntimeManager.Instance.studioSystem.setListenerAttributes(0, RuntimeUtils.To3DAttributes(transform, rigidBody));
+			RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, gameObject.transform.To3DAttributes());
 		}
 
 		public static Bus GetBus(string path)
@@ -805,10 +934,16 @@ namespace FMODUnity
 
 		public static void MuteAllEvents(bool muted)
 		{
+			RuntimeManager.Instance.isMuted = muted;
+			RuntimeManager.ApplyMuteState();
+		}
+
+		private static void ApplyMuteState()
+		{
 			Bus bus;
 			if (RuntimeManager.HasBanksLoaded && RuntimeManager.StudioSystem.getBus("bus:/", out bus) == RESULT.OK)
 			{
-				bus.setMute(muted);
+				bus.setMute(RuntimeManager.Instance.isMuted);
 			}
 		}
 
@@ -839,18 +974,25 @@ namespace FMODUnity
 
 		private Platform currentPlatform;
 
+		private DEBUG_CALLBACK debugCallback;
+
+		private global::FMOD.SYSTEM_CALLBACK errorCallback;
+
+		private bool isMuted;
+
 		private global::FMOD.Studio.System studioSystem;
 
 		private global::FMOD.System coreSystem;
 
 		private DSP mixerHead;
 
-		[SerializeField]
-		private long[] cachedPointers = new long[2];
-
 		private Dictionary<string, RuntimeManager.LoadedBank> loadedBanks = new Dictionary<string, RuntimeManager.LoadedBank>();
 
+		private List<string> sampleLoadRequests = new List<string>();
+
 		private Dictionary<Guid, EventDescription> cachedDescriptions = new Dictionary<Guid, EventDescription>(new RuntimeManager.GuidComparer());
+
+		private List<StudioEventEmitter> activeEmitters = new List<StudioEventEmitter>();
 
 		private List<RuntimeManager.AttachedInstance> attachedInstances = new List<RuntimeManager.AttachedInstance>(128);
 
@@ -865,6 +1007,8 @@ namespace FMODUnity
 		private string lastDebugText;
 
 		private float lastDebugUpdate;
+
+		public const string BankStubPrefix = "bank stub:";
 
 		public static List<StudioListener> Listeners = new List<StudioListener>();
 

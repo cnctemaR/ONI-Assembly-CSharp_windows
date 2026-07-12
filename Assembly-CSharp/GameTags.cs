@@ -489,6 +489,8 @@ public class GameTags
 
 	public static readonly Tag FarmingMaterial = TagManager.Create("FarmingMaterial");
 
+	public static readonly Tag MutatedSeed = TagManager.Create("MutatedSeed");
+
 	public static readonly Tag OverlayInFrontOfConduits = TagManager.Create("OverlayFrontLayer");
 
 	public static readonly Tag OverlayBehindConduits = TagManager.Create("OverlayBackLayer");

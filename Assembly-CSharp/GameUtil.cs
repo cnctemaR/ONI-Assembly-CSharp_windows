@@ -1398,17 +1398,44 @@ public static class GameUtil
 
 	public static string AppendHotkeyString(string template, global::Action action)
 	{
-		return template + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]");
+		string text;
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			text = template + UI.FormatAsHotkey(GameUtil.GetActionString(action));
+		}
+		else
+		{
+			text = template + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]");
+		}
+		return text;
 	}
 
 	public static string ReplaceHotkeyString(string template, global::Action action)
 	{
-		return template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]"));
+		string text;
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			text = template.Replace("{Hotkey}", UI.FormatAsHotkey(GameUtil.GetActionString(action)));
+		}
+		else
+		{
+			text = template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]"));
+		}
+		return text;
 	}
 
 	public static string ReplaceHotkeyString(string template, global::Action action1, global::Action action2)
 	{
-		return template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action1) + "]") + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action2) + "]"));
+		string text;
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			text = template.Replace("{Hotkey}", UI.FormatAsHotkey(GameUtil.GetActionString(action1)) + UI.FormatAsHotkey(GameUtil.GetActionString(action2)));
+		}
+		else
+		{
+			text = template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action1) + "]") + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action2) + "]"));
+		}
+		return text;
 	}
 
 	public static string GetKeycodeLocalized(KKeyCode key_code)
@@ -1608,6 +1635,10 @@ public static class GameUtil
 		}
 		BindingEntry bindingEntry = GameUtil.ActionToBinding(action);
 		KKeyCode mKeyCode = bindingEntry.mKeyCode;
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			return KInputManager.steamInputInterpreter.GetActionGlyph(action);
+		}
 		if (bindingEntry.mModifier == global::Modifier.None)
 		{
 			return GameUtil.GetKeycodeLocalized(mKeyCode).ToUpper();
@@ -1681,7 +1712,7 @@ public static class GameUtil
 		GameUtil.GetNonSolidCells(num, num2, cells, num - radius, num2 - radius, num + radius, num2 + radius);
 	}
 
-	public static float GetMaxSressInActiveWorld()
+	public static float GetMaxStressInActiveWorld()
 	{
 		if (Components.LiveMinionIdentities.Count <= 0)
 		{
@@ -1690,7 +1721,7 @@ public static class GameUtil
 		float num = 0f;
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
-			if (minionIdentity.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
+			if (!minionIdentity.IsNullOrDestroyed() && minionIdentity.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 			{
 				AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(minionIdentity);
 				if (amountInstance != null)
@@ -1712,7 +1743,7 @@ public static class GameUtil
 		int num2 = 0;
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
-			if (minionIdentity.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
+			if (!minionIdentity.IsNullOrDestroyed() && minionIdentity.GetMyWorldId() == ClusterManager.Instance.activeWorldId)
 			{
 				num += Db.Get().Amounts.Stress.Lookup(minionIdentity).value;
 				num2++;

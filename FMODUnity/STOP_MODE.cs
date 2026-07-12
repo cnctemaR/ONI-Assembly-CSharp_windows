@@ -1,8 +1,11 @@
 ﻿using System;
 
-public enum STOP_MODE
+namespace FMODUnity
 {
-	AllowFadeout,
-	Immediate,
-	None
+	public enum STOP_MODE
+	{
+		AllowFadeout,
+		Immediate,
+		None
+	}
 }

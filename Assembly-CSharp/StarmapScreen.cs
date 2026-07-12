@@ -147,8 +147,8 @@ public class StarmapScreen : KModalScreen
 		}
 		else
 		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUStarmapSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-			MusicManager.instance.StopSong("Music_Starmap", true, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUStarmapSnapshot, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_Starmap", true, STOP_MODE.ALLOWFADEOUT);
 		}
 		this.OnSelectableChanged((SelectTool.Instance.selected == null) ? null : SelectTool.Instance.selected.gameObject);
 		this.forceScrollDown = true;

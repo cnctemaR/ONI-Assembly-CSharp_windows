@@ -13,6 +13,7 @@ public class NuclearResearchCenter : StateMachineComponent<NuclearResearchCenter
 		base.Subscribe<NuclearResearchCenter>(-1837862626, NuclearResearchCenter.OnStorageChangeDelegate);
 		this.RefreshMeter();
 		base.smi.StartSM();
+		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Radiation, true);
 	}
 
 	protected override void OnCleanUp()
@@ -177,7 +178,15 @@ public class NuclearResearchCenter : StateMachineComponent<NuclearResearchCenter
 			Worker worker = context.consumerState.worker;
 			float num2 = Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
 			TechInstance activeResearch = Research.Instance.GetActiveResearch();
-			return num2 > num && activeResearch.PercentageCompleteResearchType(context.chore.gameObject.GetSMI<NuclearResearchCenter.StatesInstance>().master.researchTypeID) < 1f;
+			if (activeResearch != null)
+			{
+				NuclearResearchCenter.StatesInstance smi = context.chore.gameObject.GetSMI<NuclearResearchCenter.StatesInstance>();
+				if (smi != null)
+				{
+					return num2 > num && activeResearch.PercentageCompleteResearchType(smi.master.researchTypeID) < 1f;
+				}
+			}
+			return false;
 		}
 
 		private WorkChore<NuclearResearchCenterWorkable> chore;

@@ -54,7 +54,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 
 	public void Refresh()
 	{
-		if (this.assignableIdentity == null)
+		if (this.assignableIdentity.IsNullOrDestroyed())
 		{
 			return;
 		}

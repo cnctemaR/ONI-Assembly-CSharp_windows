@@ -52,7 +52,12 @@ public class FoodDiagnostic : ColonyDiagnostic
 				diagnosticResult.opinion = ColonyDiagnostic.DiagnosticResult.Opinion.Concern;
 				float currentValue = this.tracker.GetCurrentValue();
 				float num2 = (float)Components.LiveMinionIdentities.GetWorldItems(base.worldID, false).Count * -1000000f;
-				diagnosticResult.Message = string.Format(MISC.NOTIFICATIONS.FOODLOW.TOOLTIP, GameUtil.GetFormattedCalories(currentValue, GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories(Mathf.Abs(num2), GameUtil.TimeSlice.None, true));
+				string formattedCalories = GameUtil.GetFormattedCalories(currentValue, GameUtil.TimeSlice.None, true);
+				string formattedCalories2 = GameUtil.GetFormattedCalories(Mathf.Abs(num2), GameUtil.TimeSlice.None, true);
+				string text = MISC.NOTIFICATIONS.FOODLOW.TOOLTIP;
+				text = text.Replace("{0}", formattedCalories);
+				text = text.Replace("{1}", formattedCalories2);
+				diagnosticResult.Message = text;
 			}
 		}
 		return diagnosticResult;

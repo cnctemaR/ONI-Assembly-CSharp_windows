@@ -40,7 +40,7 @@ public class ProgressBar : KMonoBehaviour
 		int myWorldId = base.gameObject.GetMyWorldId();
 		bool flag = this.lastVisibilityValue;
 		flag &= !this.hasBeenInitialize || myWorldId == ClusterManager.Instance.activeWorldId;
-		flag &= !this.autoHide || OverlayScreen.Instance == null || OverlayScreen.Instance.GetMode() == OverlayModes.None.ID;
+		flag &= !this.autoHide || SimDebugView.Instance == null || SimDebugView.Instance.GetMode() == OverlayModes.None.ID;
 		base.gameObject.SetActive(flag);
 		if (this.updatePercentFull == null || this.updatePercentFull.Target.IsNullOrDestroyed())
 		{
@@ -55,7 +55,7 @@ public class ProgressBar : KMonoBehaviour
 		if (this.autoHide)
 		{
 			this.overlayUpdateHandle = Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
-			if (OverlayScreen.Instance != null && OverlayScreen.Instance.GetMode() != OverlayModes.None.ID)
+			if (SimDebugView.Instance != null && SimDebugView.Instance.GetMode() != OverlayModes.None.ID)
 			{
 				base.gameObject.SetActive(false);
 			}

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B6A8B87A-8ED2-4A36-836D-C5601AAFC48D}</ProjectGuid>
+    <ProjectGuid>{76F6919F-881B-4CF2-8EAB-9B1DE5392189}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.AIModule</RootNamespace>
     <AssemblyName>UnityEngine.AIModule</AssemblyName>
@@ -51,11 +51,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC496}</Project>
+      <Project>{76F6919F-881B-4CF2-8EAB-9B1DE5392192}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{B6A8B87A-8ED2-4A36-836D-C5601AAFC4AC}</Project>
+      <Project>{76F6919F-881B-4CF2-8EAB-9B1DE53921A8}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

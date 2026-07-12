@@ -167,9 +167,9 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			}).Transition(this.alive.fruiting.fruiting_idle, GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Not(new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Transition.ConditionCallback(this.IsOld)), UpdateRate.SIM_4000ms);
 			this.alive.harvest.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.harvest, KAnim.PlayMode.Once).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
-				if (GameScheduler.Instance != null && smi.master != null)
+				if (smi.master != null)
 				{
-					GameScheduler.Instance.Schedule("SpawnFruit", 0.2f, new Action<object>(smi.master.crop.SpawnConfiguredFruit), null, null);
+					smi.master.crop.SpawnConfiguredFruit(null);
 				}
 				if (smi.master.harvestable != null)
 				{

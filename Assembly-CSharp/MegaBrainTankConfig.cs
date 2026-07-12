@@ -77,6 +77,7 @@ public class MegaBrainTankConfig : IBuildingConfig
 		manualDeliveryKG.operationalRequirement = Operational.State.Functional;
 		manualDeliveryKG.ShowStatusItem = false;
 		manualDeliveryKG.RoundFetchAmountToInt = true;
+		manualDeliveryKG.FillToCapacity = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.consumptionRate = 10f;
 		conduitConsumer.forceAlwaysSatisfied = true;

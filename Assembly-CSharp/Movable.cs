@@ -64,18 +64,26 @@ public class Movable : Workable
 	{
 		if (this.isMarkedForMove)
 		{
-			int num = Grid.PosToCell(this.pickupable);
-			int num2 = Grid.PosToCell(this.StorageProxy);
-			if (num != num2)
+			if (this.StorageProxy != null)
 			{
-				bool flag = MinionGroupProber.Get().IsReachable(num, OffsetGroups.Standard) && MinionGroupProber.Get().IsReachable(num2, OffsetGroups.Standard);
-				if (this.pickupable.HasTag(GameTags.Creatures.Confined))
+				int num = Grid.PosToCell(this.pickupable);
+				int num2 = Grid.PosToCell(this.StorageProxy);
+				if (num != num2)
 				{
-					flag = false;
+					bool flag = MinionGroupProber.Get().IsReachable(num, OffsetGroups.Standard) && MinionGroupProber.Get().IsReachable(num2, OffsetGroups.Standard);
+					if (this.pickupable.HasTag(GameTags.Creatures.Confined))
+					{
+						flag = false;
+					}
+					KSelectable component = base.GetComponent<KSelectable>();
+					this.pendingMoveGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MarkedForMove, this.pendingMoveGuid, flag, this);
+					this.storageUnreachableGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MoveStorageUnreachable, this.storageUnreachableGuid, !flag, this);
+					return;
 				}
-				KSelectable component = base.GetComponent<KSelectable>();
-				this.pendingMoveGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MarkedForMove, this.pendingMoveGuid, flag, this);
-				this.storageUnreachableGuid = component.ToggleStatusItem(Db.Get().MiscStatusItems.MoveStorageUnreachable, this.storageUnreachableGuid, !flag, this);
+			}
+			else
+			{
+				this.ClearMove();
 			}
 		}
 	}
@@ -152,7 +160,10 @@ public class Movable : Workable
 
 	private void OnClickCancel()
 	{
-		this.StorageProxy.GetComponent<CancellableMove>().OnCancel(this);
+		if (this.StorageProxy != null)
+		{
+			this.StorageProxy.GetComponent<CancellableMove>().OnCancel(this);
+		}
 	}
 
 	private void OnRefreshUserMenu(object data)

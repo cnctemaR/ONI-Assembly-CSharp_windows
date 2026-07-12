@@ -998,7 +998,7 @@ namespace STRINGS
 
 		public class CREATURE_DESCRIPTORS
 		{
-			public static LocString MAXAGE = "This critter's typical " + UI.FormatAsLink("Life Span", "CREATURES::GUIDE::FERTILITY") + " is <b>{0}</b>.";
+			public static LocString MAXAGE = "This critter's typical " + UI.FormatAsLink("Life Span", "CREATURES::GUIDE::FERTILITY") + " is <b>{0} cycles</b>.";
 
 			public static LocString OVERCROWDING = UI.FormatAsLink("Overcrowded", "CREATURES::GUIDE::MOOD") + " when a room has less than <b>{0} cells</b> of space for each critter.";
 

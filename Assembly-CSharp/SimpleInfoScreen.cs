@@ -331,8 +331,8 @@ public class SimpleInfoScreen : TargetScreen, ISim4000ms, ISim1000ms
 		{
 			this.vitalsPanel.gameObject.SetActive(false);
 		}
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(target, true);
-		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(target, true);
+		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(component4 ? component4.Def.BuildingComplete : target, true);
+		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(component4 ? component4.Def.BuildingComplete : target, true);
 		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors, false);
 		bool flag = gameObjectEffects.Count > 0;
 		this.effectsContent.gameObject.SetActive(flag);

@@ -113,6 +113,7 @@ public class CancellableMove : Cancellable
 
 	public bool IsDeliveryComplete()
 	{
+		this.ValidateMovables();
 		return this.movables.Count <= 0;
 	}
 
@@ -133,12 +134,32 @@ public class CancellableMove : Cancellable
 
 	public GameObject GetNextTarget()
 	{
-		this.movables.RemoveAll((Ref<Movable> movable) => movable.Get() == null || Grid.PosToCell(movable.Get()) == Grid.PosToCell(this));
+		this.ValidateMovables();
 		if (this.movables.Count > 0)
 		{
 			return this.movables[0].Get().gameObject;
 		}
 		return null;
+	}
+
+	private void ValidateMovables()
+	{
+		for (int i = this.movables.Count - 1; i >= 0; i--)
+		{
+			if (this.movables[i] == null)
+			{
+				this.movables.RemoveAt(i);
+			}
+			else
+			{
+				Movable movable = this.movables[i].Get();
+				if (movable != null && Grid.PosToCell(movable) == Grid.PosToCell(this))
+				{
+					movable.ClearMove();
+					this.movables.RemoveAt(i);
+				}
+			}
+		}
 	}
 
 	[Serialize]

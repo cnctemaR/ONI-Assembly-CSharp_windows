@@ -168,6 +168,10 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		if (this.RoundFetchAmountToInt)
 		{
 			num = (float)((int)num);
+			if (num < 0.1f)
+			{
+				return;
+			}
 		}
 		ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
 		this.fetchList = new FetchList2(this.storage, byHash);

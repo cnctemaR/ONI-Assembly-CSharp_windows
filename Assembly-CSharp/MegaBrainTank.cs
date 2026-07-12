@@ -20,6 +20,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 		base.Subscribe(-1503271301, new Action<object>(this.OnBuildingSelect));
 		base.GetComponent<Activatable>().SetWorkTime(5f);
 		base.smi.JournalDelivery.refillMass = 25f;
+		base.smi.JournalDelivery.FillToCapacity = true;
 	}
 
 	protected override void OnCleanUp()
@@ -55,51 +56,61 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			base.serializable = StateMachine.SerializeType.ParamsOnly;
-			default_state = this.dormant;
-			if (StoryManager.Instance.CheckState(StoryInstance.State.COMPLETE, Db.Get().Stories.MegaBrainTank))
+			default_state = this.root;
+			this.root.Enter(delegate(MegaBrainTank.StatesInstance smi)
 			{
-				default_state = this.idle;
-			}
-			this.dormant.Enter(delegate(MegaBrainTank.StatesInstance smi)
+				if (!StoryManager.Instance.CheckState(StoryInstance.State.COMPLETE, Db.Get().Stories.MegaBrainTank))
+				{
+					smi.GoTo(this.common.dormant);
+					return;
+				}
+				if (smi.IsHungry)
+				{
+					smi.GoTo(this.common.idle);
+					return;
+				}
+				smi.GoTo(this.common.active);
+			});
+			this.common.Update(delegate(MegaBrainTank.StatesInstance smi, float dt)
+			{
+				smi.IncrementMeter(dt);
+				if (smi.UnitsFromLastStore != 0)
+				{
+					smi.ShelveJournals(dt);
+				}
+				bool flag = smi.ElementConverter.HasEnoughMass(GameTags.Oxygen, true);
+				smi.Selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.MegaBrainNotEnoughOxygen, !flag, null);
+			}, UpdateRate.SIM_33ms, false);
+			this.common.dormant.Enter(delegate(MegaBrainTank.StatesInstance smi)
 			{
 				smi.SetBonusActive(false);
 				smi.ElementConverter.SetAllConsumedActive(false);
-				smi.Selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankDreamAnalysis, false);
 				smi.ElementConverter.SetConsumedElementActive(DreamJournalConfig.ID, false);
+				smi.Selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankDreamAnalysis, false);
 				smi.master.GetComponent<Light2D>().enabled = false;
 			}).Exit(delegate(MegaBrainTank.StatesInstance smi)
 			{
 				smi.ElementConverter.SetConsumedElementActive(DreamJournalConfig.ID, true);
+				smi.ElementConverter.SetConsumedElementActive(GameTags.Oxygen, true);
 				RequireInputs component = smi.GetComponent<RequireInputs>();
 				component.requireConduitHasMass = true;
 				component.visualizeRequirements = RequireInputs.Requirements.All;
 			}).Update(delegate(MegaBrainTank.StatesInstance smi, float dt)
 			{
-				MegaBrainTank.States.CommonUpdate(smi, dt);
 				smi.ActivateBrains(dt);
 			}, UpdateRate.SIM_33ms, false)
-				.OnSignal(this.storyTraitCompleted, this.idle);
-			this.idle.Enter(delegate(MegaBrainTank.StatesInstance smi)
+				.OnSignal(this.storyTraitCompleted, this.common.active);
+			this.common.idle.Enter(delegate(MegaBrainTank.StatesInstance smi)
 			{
 				smi.CleanTank(false);
-				bool flag = smi.ElementConverter.HasEnoughMass(GameTags.Oxygen, true);
-				smi.Selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.MegaBrainNotEnoughOxygen, !flag, null);
-				smi.Selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankDreamAnalysis, false);
-				smi.master.GetComponent<Light2D>().enabled = false;
-			}).Update(delegate(MegaBrainTank.StatesInstance smi, float dt)
-			{
-				MegaBrainTank.States.CommonUpdate(smi, dt);
-			}, UpdateRate.SIM_33ms, false).UpdateTransition(this.active, (MegaBrainTank.StatesInstance smi, float _) => !smi.IsHungry && smi.gameObject.GetComponent<Operational>().enabled, UpdateRate.SIM_33ms, false);
-			this.active.Enter(delegate(MegaBrainTank.StatesInstance smi)
+			}).UpdateTransition(this.common.active, (MegaBrainTank.StatesInstance smi, float _) => !smi.IsHungry && smi.gameObject.GetComponent<Operational>().enabled, UpdateRate.SIM_1000ms, false);
+			this.common.active.Enter(delegate(MegaBrainTank.StatesInstance smi)
 			{
 				smi.CleanTank(true);
-				smi.Selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MegaBrainNotEnoughOxygen, false);
-				smi.master.GetComponent<Light2D>().enabled = true;
 			}).Update(delegate(MegaBrainTank.StatesInstance smi, float dt)
 			{
-				MegaBrainTank.States.CommonUpdate(smi, dt);
 				smi.Digest(dt);
-			}, UpdateRate.SIM_33ms, false).UpdateTransition(this.idle, (MegaBrainTank.StatesInstance smi, float _) => smi.IsHungry || !smi.gameObject.GetComponent<Operational>().enabled, UpdateRate.SIM_33ms, false);
+			}, UpdateRate.SIM_33ms, false).UpdateTransition(this.common.idle, (MegaBrainTank.StatesInstance smi, float _) => smi.IsHungry || !smi.gameObject.GetComponent<Operational>().enabled, UpdateRate.SIM_1000ms, false);
 			this.StatBonus = new Effect("MegaBrainTankBonus", DUPLICANTS.MODIFIERS.MEGABRAINTANKBONUS.NAME, DUPLICANTS.MODIFIERS.MEGABRAINTANKBONUS.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 			object[,] stat_BONUSES = MegaBrainTankConfig.STAT_BONUSES;
 			int length = stat_BONUSES.GetLength(0);
@@ -112,26 +123,20 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			}
 		}
 
-		private static void CommonUpdate(MegaBrainTank.StatesInstance smi, float dt)
-		{
-			smi.IncrementMeter(dt);
-			if (smi.UnitsFromLastStore != 0)
-			{
-				smi.ShelveJournals(dt);
-			}
-			bool flag = smi.ElementConverter.HasEnoughMass(GameTags.Oxygen, true);
-			smi.Selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.MegaBrainNotEnoughOxygen, !flag, null);
-		}
-
-		public GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.State dormant;
-
-		public GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.State idle;
-
-		public GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.State active;
+		public MegaBrainTank.States.CommonState common;
 
 		public StateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.Signal storyTraitCompleted;
 
 		public Effect StatBonus;
+
+		public class CommonState : GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.State
+		{
+			public GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.State dormant;
+
+			public GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.State idle;
+
+			public GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.State active;
+		}
 	}
 
 	public class StatesInstance : GameStateMachine<MegaBrainTank.States, MegaBrainTank.StatesInstance, MegaBrainTank, object>.GameInstance
@@ -231,7 +236,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			this.brainHum = GlobalAssets.GetSound("MegaBrainTank_brain_wave_LP", false);
 			StoryManager.Instance.DiscoverStoryEvent(Db.Get().Stories.MegaBrainTank);
 			float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
-			if (this.GetCurrentState() == base.sm.dormant)
+			if (this.GetCurrentState() == base.sm.common.dormant)
 			{
 				this.meterFill = (this.targetProgress = unitsAvailable / 25f);
 				this.meter.SetPositionPercent(this.meterFill);
@@ -279,7 +284,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 		{
 			Effects component = id.GetComponent<Effects>();
 			MegaBrainTank.StatesInstance.minionEffects.Add(component);
-			if (this.GetCurrentState() == base.sm.active)
+			if (this.GetCurrentState() == base.sm.common.active)
 			{
 				component.Add(base.sm.StatBonus, false);
 			}
@@ -313,7 +318,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 				this.StoreJournals();
 				return;
 			}
-			if ((anim == base.smi.CurrentActivationAnim || anim == MegaBrainTankConfig.ACTIVATE_ALL) && this.GetCurrentState() != base.sm.idle)
+			if ((anim == base.smi.CurrentActivationAnim || anim == MegaBrainTankConfig.ACTIVATE_ALL) && this.GetCurrentState() != base.sm.common.idle)
 			{
 				this.CompleteBrainActivation();
 			}
@@ -335,7 +340,12 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			{
 				return;
 			}
-			Pickupable component = smi.sm.deliveryObject.Get(smi).GetComponent<Pickupable>();
+			GameObject gameObject = smi.sm.deliveryObject.Get(smi);
+			if (gameObject == null)
+			{
+				return;
+			}
+			Pickupable component = gameObject.GetComponent<Pickupable>();
 			this.UnitsFromLastStore = (short)component.PrimaryElement.Units;
 			float num = Mathf.Clamp01(component.PrimaryElement.Units / 5f);
 			this.BrainStorage.SetWorkTime(num * this.BrainStorage.storageWorkTime);
@@ -445,8 +455,12 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 		public void CleanTank(bool active)
 		{
 			this.SetBonusActive(active);
+			base.GetComponent<Light2D>().enabled = active;
 			this.Selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankDreamAnalysis, active, this);
 			this.ElementConverter.SetAllConsumedActive(active);
+			this.BrainController.ClearQueue();
+			float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
+			this.timeTilDigested = unitsAvailable * 60f;
 			if (active)
 			{
 				this.nextActiveBrain = 5;

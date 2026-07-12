@@ -155,6 +155,11 @@ public class MainMenu : KScreen
 			{
 				App.OpenWebURL(DLC2_URL);
 			}));
+			bool flag = DlcManager.GetOwnedDLCIds().Contains("DLC2_ID");
+			this.DLC2WishlistAd.gameObject.SetActive(!flag);
+			bool flag2 = DlcManager.IsContentSubscribed("DLC2_ID");
+			this.DLC2OwnedCheckmark.gameObject.SetActive(flag2);
+			this.DLC2OwnedCheckmark.gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.MAINMENU.DLC.CONTENT_ACTIVE_TOOLTIP);
 		}
 	}
 
@@ -476,7 +481,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 622222U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 34)
+				if (header.buildVersion > 622509U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 34)
 				{
 					flag = false;
 				}
@@ -710,6 +715,12 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	private Image logoDLC2;
+
+	[SerializeField]
+	private GameObject DLC2WishlistAd;
+
+	[SerializeField]
+	private GameObject DLC2OwnedCheckmark;
 
 	private KButton lockerButton;
 

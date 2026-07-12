@@ -3543,7 +3543,7 @@ namespace STRINGS
 
 				public static LocString RESUMEBUTTON_BASENAME = "{0}: Cycle {1}";
 
-				public static LocString WISHLIST_AD = "Wishlist now";
+				public static LocString WISHLIST_AD = "Available now";
 
 				public class DLC
 				{
@@ -3557,13 +3557,17 @@ namespace STRINGS
 
 					public static LocString DEACTIVATE_EXPANSION1 = "DEACTIVATE DLC";
 
-					public static LocString DEACTIVATE_EXPANSION1_TOOLTIP = "Click to deactivate the <i>Spaced Out!</i> DLC";
+					public static LocString DEACTIVATE_EXPANSION1_TOOLTIP = "This DLC is enabled\nClick to deactivate the <i>Spaced Out!</i> DLC";
 
 					public static LocString DEACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to activate the <i>Oxygen Not Included</i> base game.";
 
 					public static LocString DEACTIVATE_EXPANSION1_RAIL_DESC = "<i>Spaced Out!</i> will be deactivated the next time you launch the game. The game will now close.";
 
 					public static LocString AD_DLC1 = "Spaced Out! DLC";
+
+					public static LocString CONTENT_INSTALLED_LABEL = "Installed";
+
+					public static LocString CONTENT_ACTIVE_TOOLTIP = "This DLC is enabled\nFind it in the destination selection screen when starting a new game, or in the Load Game screen for existing DLC-enabled saves";
 				}
 			}
 
@@ -3688,6 +3692,8 @@ namespace STRINGS
 				public static LocString NOSWEAT_TITLE = "NO SWEAT";
 
 				public static LocString NOSWEAT_DESC = "When disaster strikes (and it inevitably will), take a deep breath and stay calm. You have ample time to find a solution.";
+
+				public static LocString ACTIVE_CONTENT_HEADER = "ACTIVE CONTENT PACKS";
 			}
 
 			public class CLUSTERCATEGORYSELECTSCREEN

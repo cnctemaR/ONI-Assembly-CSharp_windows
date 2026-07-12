@@ -612,11 +612,19 @@ namespace STRINGS
 
 					public static LocString STORAGE_TEMPERATURE_TOOLTIP = string.Concat(new string[]
 					{
-						"The average temperature of liquids stored in this building is {Temp}\n\nThe initial ",
+						"The average ",
 						UI.PRE_KEYWORD,
 						"Temperature",
 						UI.PST_KEYWORD,
-						" of input liquid affects the materials emitted"
+						" of ",
+						UI.PRE_KEYWORD,
+						"Liquids",
+						UI.PST_KEYWORD,
+						" stored in this building is {Temp}\n\nThe initial input ",
+						UI.PRE_KEYWORD,
+						"Temperature",
+						UI.PST_KEYWORD,
+						" determines the type of materials emitted"
 					});
 
 					public static LocString CANNOT_PUSH_NO_CONNECTED_NAME = "No Geo Vents Connected";

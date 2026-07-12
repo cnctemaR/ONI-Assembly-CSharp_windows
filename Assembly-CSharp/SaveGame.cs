@@ -83,7 +83,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, originalSaveFileName, SaveLoader.Instance.GameInfo.clusterId, SaveLoader.Instance.GameInfo.worldTraits, SaveLoader.Instance.GameInfo.colonyGuid, DlcManager.GetHighestActiveDlcId(), this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 526946U;
+		header.buildVersion = 531371U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);

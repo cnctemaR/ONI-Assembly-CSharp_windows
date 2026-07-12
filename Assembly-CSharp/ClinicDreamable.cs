@@ -69,6 +69,10 @@ public class ClinicDreamable : Workable
 		{
 			return;
 		}
+		if (minionAssignablesProxy.target is StoredMinionIdentity)
+		{
+			return;
+		}
 		GameObject targetGameObject = minionAssignablesProxy.GetTargetGameObject();
 		this.effects = targetGameObject.GetComponent<Effects>();
 		this.dreamer = targetGameObject.GetComponent<ChoreDriver>();

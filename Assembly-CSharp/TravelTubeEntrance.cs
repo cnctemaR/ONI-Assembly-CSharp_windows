@@ -290,7 +290,6 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			: base(workable, "LaunchReactable", Db.Get().ChoreTypes.TravelTubeEntrance, WorkableReactable.AllowedDirection.Any)
 		{
 			this.entrance = entrance;
-			this.localCooldown = 2f;
 		}
 
 		public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
@@ -298,7 +297,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			if (base.InternalCanBegin(new_reactor, transition))
 			{
 				Navigator component = new_reactor.GetComponent<Navigator>();
-				return component && this.entrance.HasChargeSlotReserved(component);
+				return this.entrance.HasChargeSlotReserved(component);
 			}
 			return false;
 		}

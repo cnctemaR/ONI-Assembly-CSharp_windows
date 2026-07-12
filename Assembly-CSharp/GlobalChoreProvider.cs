@@ -168,7 +168,7 @@ public class GlobalChoreProvider : ChoreProvider, IRender200ms
 				for (int j = 0; j < list.Count; j++)
 				{
 					FetchChore fetchChore = list[j];
-					if (fetchChore.choreType == storageFetch || fetchChore.choreType == foodFetch)
+					if ((fetchChore.choreType == storageFetch || fetchChore.choreType == foodFetch) && fetchChore.destination)
 					{
 						int num = Grid.PosToCell(fetchChore.destination);
 						if (MinionGroupProber.Get().IsReachable(num, fetchChore.destination.GetOffsets(num)))

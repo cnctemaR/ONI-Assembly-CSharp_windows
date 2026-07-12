@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{51CACB19-84B0-48DC-A7F0-0B3656BEBB63}</ProjectGuid>
+    <ProjectGuid>{DBB3AB6E-1D8D-4424-8E66-6431932B1FA2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.ServiceModel.Internals</AssemblyName>
@@ -104,15 +104,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{51CACB19-84B0-48DC-A7F0-0B3656BEBB58}</Project>
+      <Project>{DBB3AB6E-1D8D-4424-8E66-6431932B1F97}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{51CACB19-84B0-48DC-A7F0-0B3656BEBB65}</Project>
+      <Project>{DBB3AB6E-1D8D-4424-8E66-6431932B1FA4}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{51CACB19-84B0-48DC-A7F0-0B3656BEBB5D}</Project>
+      <Project>{DBB3AB6E-1D8D-4424-8E66-6431932B1F9C}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

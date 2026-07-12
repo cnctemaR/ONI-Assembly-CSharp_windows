@@ -14,14 +14,36 @@ public static class ModUtil
 
 	public static void AddBuildingToPlanScreen(HashedString category, string building_id, string subcategoryID)
 	{
+		ModUtil.AddBuildingToPlanScreen(category, building_id, subcategoryID, null, ModUtil.BuildingOrdering.After);
+	}
+
+	public static void AddBuildingToPlanScreen(HashedString category, string building_id, string subcategoryID, string relativeBuildingId, ModUtil.BuildingOrdering ordering = ModUtil.BuildingOrdering.After)
+	{
 		int num = BUILDINGS.PLANORDER.FindIndex((PlanScreen.PlanInfo x) => x.category == category);
 		if (num < 0)
 		{
+			global::Debug.LogWarning(string.Format("Mod: Unable to add '{0}' as category '{1}' does not exist", building_id, category));
 			return;
 		}
-		BUILDINGS.PLANORDER[num].buildingAndSubcategoryData.Add(new KeyValuePair<string, string>(building_id, subcategoryID));
+		List<KeyValuePair<string, string>> buildingAndSubcategoryData = BUILDINGS.PLANORDER[num].buildingAndSubcategoryData;
+		KeyValuePair<string, string> keyValuePair = new KeyValuePair<string, string>(building_id, subcategoryID);
+		if (relativeBuildingId == null)
+		{
+			buildingAndSubcategoryData.Add(keyValuePair);
+			return;
+		}
+		int num2 = buildingAndSubcategoryData.FindIndex((KeyValuePair<string, string> x) => x.Key == relativeBuildingId);
+		if (num2 == -1)
+		{
+			buildingAndSubcategoryData.Add(keyValuePair);
+			global::Debug.LogWarning(string.Concat(new string[] { "Mod: Building '", relativeBuildingId, "' doesn't exist, inserting '", building_id, "' at the end of the list instead" }));
+			return;
+		}
+		int num3 = ((ordering == ModUtil.BuildingOrdering.After) ? (num2 + 1) : Mathf.Max(num2 - 1, 0));
+		buildingAndSubcategoryData.Insert(num3, keyValuePair);
 	}
 
+	[Obsolete("Use PlanScreen instead")]
 	public static void AddBuildingToHotkeyBuildMenu(HashedString category, string building_id, global::Action hotkey)
 	{
 		BuildMenu.DisplayInfo info = BuildMenu.OrderedBuildings.GetInfo(category);
@@ -89,5 +111,11 @@ public static class ModUtil
 	{
 		Localization.RegisterForTranslation(locstring_tree_root);
 		Localization.GenerateStringsTemplate(locstring_tree_root, Path.Combine(Manager.GetDirectory(), "strings_templates"));
+	}
+
+	public enum BuildingOrdering
+	{
+		Before,
+		After
 	}
 }

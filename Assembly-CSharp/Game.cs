@@ -152,37 +152,8 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(496912U);
-		try
-		{
-			TimeZoneInfo timeZoneInfo = null;
-			if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer)
-			{
-				timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-			}
-			else if (Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer)
-			{
-				timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("America/Vancouver");
-			}
-			else if (Application.platform == RuntimePlatform.LinuxEditor || Application.platform == RuntimePlatform.LinuxPlayer)
-			{
-				timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("America/Vancouver");
-			}
-			if (timeZoneInfo != null)
-			{
-				this.dateGenerated = TimeZoneInfo.ConvertTime(global::System.DateTime.UtcNow, timeZoneInfo).ToString("F", CultureInfo.GetCultureInfo("en-US"));
-			}
-			else
-			{
-				this.dateGenerated = "Missing timezone for platform " + Application.platform.ToString();
-				KCrashReporter.ReportErrorDevNotification("Timezone Data incorrect", Environment.StackTrace, this.dateGenerated);
-			}
-		}
-		catch (Exception ex)
-		{
-			this.dateGenerated = "Failed to get timezone for platform " + Application.platform.ToString() + ": " + ex.Message;
-			KCrashReporter.ReportErrorDevNotification("Timezone Data incorrect", Environment.StackTrace, this.dateGenerated);
-		}
+		this.changelistsPlayedOn.Add(497575U);
+		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 	}
 
 	public void SetGameStarted()
@@ -930,7 +901,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 496912U;
+		uint num = 497575U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1146,9 +1117,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(496912U))
+		if (!this.changelistsPlayedOn.Contains(497575U))
 		{
-			this.changelistsPlayedOn.Add(496912U);
+			this.changelistsPlayedOn.Add(497575U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)

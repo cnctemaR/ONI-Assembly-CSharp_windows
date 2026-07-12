@@ -13,7 +13,6 @@ namespace Database
 				Personality personality = new Personality(personalityInfo.Name.ToUpper(), Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.Gender.ToUpper(), personalityInfo.PersonalityType, personalityInfo.StressTrait, personalityInfo.JoyTrait, personalityInfo.StickerType, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())), personalityInfo.ValidStarter);
 				base.Add(personality);
 			}
-			this.m_startingPersonalities = this.resources.FindAll((Personality x) => x.startingMinion);
 		}
 
 		private void AddTrait(Personality personality, string trait_name)
@@ -38,10 +37,8 @@ namespace Database
 
 		public List<Personality> GetStartingPersonalities()
 		{
-			return this.m_startingPersonalities;
+			return this.resources.FindAll((Personality x) => x.startingMinion);
 		}
-
-		private List<Personality> m_startingPersonalities;
 
 		public class PersonalityLoader : AsyncCsvLoader<Personalities.PersonalityLoader, Personalities.PersonalityInfo>
 		{

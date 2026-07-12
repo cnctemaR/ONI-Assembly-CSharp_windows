@@ -10598,6 +10598,15 @@ namespace STRINGS
 
 				public static LocString TOOLTIP_CANCEL = "Cancel activation of this building";
 			}
+
+			public class ACCEPT_MUTANT_SEEDS
+			{
+				public static LocString ACCEPT = "Allow Mutants";
+
+				public static LocString REJECT = "Forbid Mutants";
+
+				public static LocString TOOLTIP = "Toggle whether or not this building will accept mutant seeds for recipes that could use them.";
+			}
 		}
 
 		public class BUILDCATEGORIES

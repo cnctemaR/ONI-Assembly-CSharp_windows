@@ -493,6 +493,13 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings are entombed and need to be dug out:";
 			}
 
+			public class FABRICATORACCEPTSMUTANTSEEDS
+			{
+				public static LocString NAME = "Fabricator accepts mutant seeds";
+
+				public static LocString TOOLTIP = "This fabricator is allowed to use mutant seeds as recipe ingredients.";
+			}
+
 			public class INVALIDPORTOVERLAP
 			{
 				public static LocString NAME = "Invalid Port Overlap";

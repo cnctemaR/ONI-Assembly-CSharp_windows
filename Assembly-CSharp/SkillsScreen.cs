@@ -416,6 +416,10 @@ public class SkillsScreen : KModalScreen
 			}
 			this.linesPending = false;
 		}
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			this.scrollRect.AnalogUpdate(KInputManager.steamInputInterpreter.GetSteamCameraMovement());
+		}
 	}
 
 	private void RefreshSkillWidgets()

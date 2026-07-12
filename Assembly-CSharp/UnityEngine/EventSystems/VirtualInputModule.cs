@@ -388,6 +388,10 @@ namespace UnityEngine.EventSystems
 
 		protected void ProcessMouseEvent(int id)
 		{
+			if (this.mouseMovementOnly)
+			{
+				return;
+			}
 			PointerInputModule.MouseState mousePointerEventData = this.GetMousePointerEventData(id);
 			PointerInputModule.MouseButtonEventData eventData = mousePointerEventData.GetButtonState(PointerEventData.InputButton.Left).eventData;
 			this.ProcessControllerPress(eventData, true);
@@ -758,6 +762,8 @@ namespace UnityEngine.EventSystems
 		private Vector2 m_LastMousePosition;
 
 		private Vector2 m_MousePosition;
+
+		public bool mouseMovementOnly;
 
 		[SerializeField]
 		private RectTransform m_VirtualCursor;

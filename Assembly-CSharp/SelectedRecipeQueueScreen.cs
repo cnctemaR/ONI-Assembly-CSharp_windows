@@ -47,12 +47,6 @@ public class SelectedRecipeQueueScreen : KScreen
 			base.isEditing = true;
 			KScreenManager.Instance.RefreshStack();
 		};
-		MultiToggle multiToggle = this.buildingAllowMutantSeedsCheckbox;
-		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
-		{
-			this.target.ForbidMutantSeeds = !this.target.ForbidMutantSeeds;
-			this.buildingAllowMutantSeedsCheckbox.ChangeState(this.target.ForbidMutantSeeds ? 0 : 1);
-		}));
 	}
 
 	public void SetRecipe(ComplexFabricatorSideScreen owner, ComplexFabricator target, ComplexRecipe recipe)
@@ -71,25 +65,9 @@ public class SelectedRecipeQueueScreen : KScreen
 			this.recipeIcon.sprite = uisprite.first;
 			this.recipeIcon.color = uisprite.second;
 		}
-		this.RefreshMutantSeedCheckbox();
 		this.RefreshIngredientDescriptors();
 		this.RefreshResultDescriptors();
 		this.RefreshQueueCountDisplay();
-	}
-
-	private void RefreshMutantSeedCheckbox()
-	{
-		this.buildingAllowMutantSeedsCheckbox.ChangeState(this.target.ForbidMutantSeeds ? 0 : 1);
-		ComplexRecipe.RecipeElement[] ingredients = this.selectedRecipe.ingredients;
-		for (int i = 0; i < ingredients.Length; i++)
-		{
-			GameObject prefab = Assets.GetPrefab(ingredients[i].material);
-			if (prefab != null && prefab.GetComponent<PlantableSeed>() != null)
-			{
-				break;
-			}
-		}
-		this.buildingGlobalRecipeFilters.SetActive(false);
 	}
 
 	private void RefreshQueueCountDisplay()
@@ -239,8 +217,6 @@ public class SelectedRecipeQueueScreen : KScreen
 	public MultiToggle IncrementButton;
 
 	public KButton InfiniteButton;
-
-	public MultiToggle buildingAllowMutantSeedsCheckbox;
 
 	public GameObject InfiniteIcon;
 

@@ -726,6 +726,7 @@ public class PlanScreen : KIconToggleMenu
 				num++;
 			}
 		}
+		this.RefreshScale(null);
 	}
 
 	private void ConfigurePanelSize()
@@ -1354,6 +1355,7 @@ public class PlanScreen : KIconToggleMenu
 
 		public bool hideIfNotResearched;
 
+		[Obsolete("Modders: Use ModUtil.AddBuildingToPlanScreen")]
 		public List<string> data;
 
 		public List<KeyValuePair<string, string>> buildingAndSubcategoryData;

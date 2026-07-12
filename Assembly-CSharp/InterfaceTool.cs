@@ -160,10 +160,9 @@ public class InterfaceTool : KMonoBehaviour
 			try
 			{
 				Cursor.SetCursor(new_cursor, offset, mode);
-				VirtualInputModule virtualInputModule = global::UnityEngine.Object.FindObjectOfType<VirtualInputModule>(true);
-				if (virtualInputModule != null)
+				if (PlayerController.Instance.vim != null)
 				{
-					virtualInputModule.SetCursor(new_cursor);
+					PlayerController.Instance.vim.SetCursor(new_cursor);
 				}
 			}
 			catch (Exception ex)

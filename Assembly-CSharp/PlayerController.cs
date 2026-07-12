@@ -34,6 +34,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	protected override void OnPrefabInit()
 	{
 		PlayerController.Instance = this;
+		this.vim = global::UnityEngine.Object.FindObjectOfType<VirtualInputModule>(true);
 		for (int i = 0; i < this.tools.Length; i++)
 		{
 			if (DlcManager.IsDlcListValidForCurrentContent(this.tools[i].DlcIDs))
@@ -356,6 +357,8 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	public InterfaceTool[] tools;
 
 	private InterfaceTool activeTool;
+
+	public VirtualInputModule vim;
 
 	private bool DebugHidingCursor;
 

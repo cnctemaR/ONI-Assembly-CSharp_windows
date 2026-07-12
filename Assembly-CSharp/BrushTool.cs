@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BrushTool : InterfaceTool
 {
@@ -50,6 +51,10 @@ public class BrushTool : InterfaceTool
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		KScreenManager.Instance.SetEventSystemEnabled(true);
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = false;
+		}
 		base.OnDeactivateTool(new_tool);
 	}
 
@@ -92,7 +97,14 @@ public class BrushTool : InterfaceTool
 		cursor_pos -= this.placementPivot;
 		this.dragging = true;
 		this.downPos = cursor_pos;
-		KScreenManager.Instance.SetEventSystemEnabled(false);
+		if (!KInputManager.currentControllerIsGamepad)
+		{
+			KScreenManager.Instance.SetEventSystemEnabled(false);
+		}
+		else
+		{
+			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = true;
+		}
 		this.Paint();
 	}
 
@@ -100,6 +112,10 @@ public class BrushTool : InterfaceTool
 	{
 		cursor_pos -= this.placementPivot;
 		KScreenManager.Instance.SetEventSystemEnabled(true);
+		if (KInputManager.currentControllerIsGamepad)
+		{
+			(global::UnityEngine.EventSystems.EventSystem.current.currentInputModule as VirtualInputModule).mouseMovementOnly = false;
+		}
 		if (!this.dragging)
 		{
 			return;

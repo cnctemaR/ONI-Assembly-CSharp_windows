@@ -593,7 +593,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 496912U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 497575U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

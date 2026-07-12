@@ -42,9 +42,26 @@ public class GeneratedBuildings
 			{
 				while (enumerator4.MoveNext())
 				{
-					string entry = enumerator4.Current;
-					planInfo.buildingAndSubcategoryData.RemoveAll((KeyValuePair<string, string> match) => match.Key == entry);
+					string entry2 = enumerator4.Current;
+					planInfo.buildingAndSubcategoryData.RemoveAll((KeyValuePair<string, string> match) => match.Key == entry2);
 				}
+			}
+			List<string> list3 = new List<string>();
+			using (List<string>.Enumerator enumerator4 = planInfo.data.GetEnumerator())
+			{
+				while (enumerator4.MoveNext())
+				{
+					string entry = enumerator4.Current;
+					if (planInfo.buildingAndSubcategoryData.FindIndex((KeyValuePair<string, string> x) => x.Key == entry) == -1 && Assets.GetBuildingDef(entry) != null)
+					{
+						global::Debug.LogWarning("Mod: Building '" + entry + "' was not added properly to PlanInfo, use ModUtil.AddBuildingToPlanScreen instead.");
+						list3.Add(entry);
+					}
+				}
+			}
+			foreach (string text in list3)
+			{
+				ModUtil.AddBuildingToPlanScreen(planInfo.category, text, "uncategorized");
 			}
 		}
 	}

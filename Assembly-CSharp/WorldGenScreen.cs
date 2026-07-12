@@ -54,6 +54,10 @@ public class WorldGenScreen : NewGameFlowScreen
 		{
 			e.TryConsume(global::Action.Escape);
 		}
+		if (!e.Consumed)
+		{
+			e.TryConsume(global::Action.MouseRight);
+		}
 		base.OnKeyDown(e);
 	}
 

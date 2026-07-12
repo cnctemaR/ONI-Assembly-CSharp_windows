@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{0C0F84BA-2760-4B82-BEDE-FEA7C5D7EBB0}</ProjectGuid>
+    <ProjectGuid>{B4CE6748-3CA7-47DA-BE05-9CC2D0FFEAFC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Analytics</RootNamespace>
     <AssemblyName>UnityEngine.PerformanceReportingModule</AssemblyName>
@@ -19,7 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{0C0F84BA-2760-4B82-BEDE-FEA7C5D7EBB6}</Project>
+      <Project>{B4CE6748-3CA7-47DA-BE05-9CC2D0FFEB02}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

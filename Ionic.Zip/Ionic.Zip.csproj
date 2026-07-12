@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{0C0F84BA-2760-4B82-BEDE-FEA7C5D7EB82}</ProjectGuid>
+    <ProjectGuid>{B4CE6748-3CA7-47DA-BE05-9CC2D0FFEACE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Ionic</RootNamespace>
     <AssemblyName>Ionic.Zip</AssemblyName>

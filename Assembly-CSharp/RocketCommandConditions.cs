@@ -6,7 +6,7 @@ public class RocketCommandConditions : KMonoBehaviour
 	{
 		base.OnSpawn();
 		RocketModule component = base.GetComponent<RocketModule>();
-		this.reachable = (ConditionDestinationReachable)component.AddModuleCondition(ProcessCondition.ProcessConditionType.RocketFlight, new ConditionDestinationReachable(base.GetComponent<RocketModule>()));
+		this.reachable = (ConditionDestinationReachable)component.AddModuleCondition(ProcessCondition.ProcessConditionType.RocketPrep, new ConditionDestinationReachable(base.GetComponent<RocketModule>()));
 		this.allModulesComplete = (ConditionAllModulesComplete)component.AddModuleCondition(ProcessCondition.ProcessConditionType.RocketPrep, new ConditionAllModulesComplete(base.GetComponent<ILaunchableRocket>()));
 		if (base.GetComponent<ILaunchableRocket>().registerType == LaunchableRocketRegisterType.Spacecraft)
 		{

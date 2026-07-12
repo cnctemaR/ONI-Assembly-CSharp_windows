@@ -25,16 +25,44 @@ public class PinnedResourcesPanel : KScreen, IRender1000ms
 		MultiToggle component3 = this.clearNewButton.GetComponent<MultiToggle>();
 		component3.onClick = (global::System.Action)Delegate.Combine(component3.onClick, new global::System.Action(delegate
 		{
-			foreach (KeyValuePair<Tag, GameObject> keyValuePair in this.rows)
-			{
-				if (keyValuePair.Value.activeSelf && DiscoveredResources.Instance.newDiscoveries.ContainsKey(keyValuePair.Key))
-				{
-					DiscoveredResources.Instance.newDiscoveries.Remove(keyValuePair.Key);
-				}
-			}
+			this.ClearAllNew();
 		}));
+		this.clearAllButton.onClick += delegate
+		{
+			this.ClearAllNew();
+			this.UnPinAll();
+			this.Refresh();
+		};
 		AllResourcesScreen.Instance.Init();
 		this.Refresh();
+	}
+
+	public void ClearExcessiveNewItems()
+	{
+		if (DiscoveredResources.Instance.CheckAllDiscoveredAreNew())
+		{
+			DiscoveredResources.Instance.newDiscoveries.Clear();
+		}
+	}
+
+	private void ClearAllNew()
+	{
+		foreach (KeyValuePair<Tag, GameObject> keyValuePair in this.rows)
+		{
+			if (keyValuePair.Value.activeSelf && DiscoveredResources.Instance.newDiscoveries.ContainsKey(keyValuePair.Key))
+			{
+				DiscoveredResources.Instance.newDiscoveries.Remove(keyValuePair.Key);
+			}
+		}
+	}
+
+	private void UnPinAll()
+	{
+		WorldInventory worldInventory = ClusterManager.Instance.GetWorld(ClusterManager.Instance.activeWorldId).worldInventory;
+		foreach (KeyValuePair<Tag, GameObject> keyValuePair in this.rows)
+		{
+			worldInventory.pinnedResources.Remove(keyValuePair.Key);
+		}
 	}
 
 	public void Populate(object data = null)
@@ -293,6 +321,8 @@ public class PinnedResourcesPanel : KScreen, IRender1000ms
 	public MultiToggle headerButton;
 
 	public MultiToggle clearNewButton;
+
+	public KButton clearAllButton;
 
 	public MultiToggle seeAllButton;
 

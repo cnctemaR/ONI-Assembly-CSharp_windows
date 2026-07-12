@@ -127,7 +127,7 @@ namespace KMod
 				global::Debug.LogWarning(string.Format("{0}: File source does not appear to be valid, skipping. ({1})", this.label, this.label.install_path));
 				return;
 			}
-			KModHeader header = KModUtil.GetHeader(this.file_source, this.label.defaultStaticID, this.label.title, this.description);
+			KModHeader header = KModUtil.GetHeader(this.file_source, this.label.defaultStaticID, this.label.title, this.description, this.IsDev);
 			if (this.label.title != header.title)
 			{
 				global::Debug.Log(string.Concat(new string[]
@@ -257,7 +257,7 @@ namespace KMod
 					}
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 471618L
+						where (long)v.info.minimumSupportedBuild <= 471883L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion2 == null)
@@ -294,7 +294,11 @@ namespace KMod
 				this.ModDevLogError(string.Format("\t{0}: Failed to read {1} in folder '{2}', skipping", this.label, "mod_info.yaml", text));
 				return null;
 			}
-			Mod.PackagedModInfo packagedModInfo = YamlIO.Parse<Mod.PackagedModInfo>(text2, default(FileHandle), null, null);
+			YamlIO.ErrorHandler errorHandler = delegate(YamlIO.Error e, bool force_warning)
+			{
+				YamlIO.LogError(e, !this.IsDev);
+			};
+			Mod.PackagedModInfo packagedModInfo = YamlIO.Parse<Mod.PackagedModInfo>(text2, default(FileHandle), errorHandler, null);
 			if (packagedModInfo == null)
 			{
 				this.ModDevLogError(string.Format("\t{0}: Failed to parse {1} in folder '{2}', text is {3}", new object[] { this.label, "mod_info.yaml", text, text2 }));

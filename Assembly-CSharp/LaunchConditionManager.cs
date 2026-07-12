@@ -153,10 +153,6 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 					}
 				}
 			}
-			if (this.launchable.registerType == LaunchableRocketRegisterType.Spacecraft)
-			{
-				return this.CheckAbleToFly();
-			}
 		}
 		return true;
 	}

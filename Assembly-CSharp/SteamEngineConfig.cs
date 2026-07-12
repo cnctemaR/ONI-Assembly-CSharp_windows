@@ -21,11 +21,11 @@ public class SteamEngineConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER7;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -35,7 +35,6 @@ public class SteamEngineConfig : IBuildingConfig
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = true;
-		buildingDef.Cancellable = false;
 		return buildingDef;
 	}
 
@@ -89,9 +88,6 @@ public class SteamEngineConfig : IBuildingConfig
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_steam_engine_bg_kanim", false);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
-		{
-		};
 	}
 
 	public const string ID = "SteamEngine";

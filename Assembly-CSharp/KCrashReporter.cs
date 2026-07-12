@@ -324,7 +324,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		string text8;
+		string text7;
 		using (WebClient webClient = new WebClient())
 		{
 			webClient.Encoding = Encoding.UTF8;
@@ -342,8 +342,8 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = LaunchInitializer.BuildPrefix() + "-" + 471618U.ToString();
-				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
+				string buildText = BuildWatermark.GetBuildText();
+				stack_trace = string.Format("No stack trace {0}\n\n{1}", buildText, msg);
 			}
 			List<string> list = new List<string>();
 			if (KCrashReporter.debugWasUsed)
@@ -356,18 +356,18 @@ public class KCrashReporter : MonoBehaviour
 			}
 			list.Add(msg);
 			string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug", "Output:LogError", "DebugUtil:Assert", "System.Array", "System.Collections", "KCrashReporter.Assert", "No stack trace." };
-			foreach (string text4 in stack_trace.Split(new char[] { '\n' }))
+			foreach (string text3 in stack_trace.Split(new char[] { '\n' }))
 			{
 				if (list.Count >= 5)
 				{
 					break;
 				}
-				if (!string.IsNullOrEmpty(text4))
+				if (!string.IsNullOrEmpty(text3))
 				{
 					bool flag = false;
-					foreach (string text5 in array)
+					foreach (string text4 in array)
 					{
-						if (text4.StartsWith(text5))
+						if (text3.StartsWith(text4))
 						{
 							flag = true;
 							break;
@@ -375,7 +375,7 @@ public class KCrashReporter : MonoBehaviour
 					}
 					if (!flag)
 					{
-						list.Add(text4);
+						list.Add(text3);
 					}
 				}
 			}
@@ -385,7 +385,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			else
 			{
-				userMessage = "[" + BuildWatermark.GetBuildText() + "] " + userMessage;
+				userMessage = "[" + BuildWatermark.GetBuildText() + "]" + userMessage;
 				if (!string.IsNullOrEmpty(save_file_hash))
 				{
 					userMessage = userMessage + "\nsave_hash: " + save_file_hash;
@@ -399,7 +399,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 471618;
+			error.build = 471883;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -411,13 +411,13 @@ public class KCrashReporter : MonoBehaviour
 			{
 				error.steam64_verified = DistributionPlatform.Inst.LocalUser.Id.ToInt64();
 			}
-			string text6 = JsonConvert.SerializeObject(error);
-			string text7 = "";
+			string text5 = JsonConvert.SerializeObject(error);
+			string text6 = "";
 			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
 			global::Debug.Log("Submitting crash:");
 			try
 			{
-				webClient.UploadStringAsync(uri, text6);
+				webClient.UploadStringAsync(uri, text5);
 			}
 			catch (Exception ex)
 			{
@@ -427,11 +427,11 @@ public class KCrashReporter : MonoBehaviour
 			{
 				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR, null, null, null, null, null, null, null, null);
 			}
-			text8 = text7;
+			text7 = text6;
 		}
 		if (KCrashReporter.onCrashReported != null)
 		{
-			KCrashReporter.onCrashReported(text8);
+			KCrashReporter.onCrashReported(text7);
 		}
 	}
 

@@ -20,11 +20,11 @@ public class HydrogenEngineConfig : IBuildingConfig
 		float[] engine_MASS_LARGE = BUILDINGS.ROCKETRY_MASS_KG.ENGINE_MASS_LARGE;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, engine_MASS_LARGE, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -32,7 +32,6 @@ public class HydrogenEngineConfig : IBuildingConfig
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = true;
-		buildingDef.Cancellable = false;
 		return buildingDef;
 	}
 
@@ -64,9 +63,6 @@ public class HydrogenEngineConfig : IBuildingConfig
 		rocketEngine.exhaustElement = SimHashes.Steam;
 		rocketEngine.exhaustTemperature = 2000f;
 		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_hydrogen_engine_bg_kanim", false);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
-		{
-		};
 	}
 
 	public const string ID = "HydrogenEngine";

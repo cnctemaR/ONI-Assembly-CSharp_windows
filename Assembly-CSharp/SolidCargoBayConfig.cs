@@ -24,11 +24,11 @@ public class SolidCargoBayConfig : IBuildingConfig
 			SimHashes.Steel.ToString()
 		};
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, cargo_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.Invincible = true;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
@@ -37,7 +37,6 @@ public class SolidCargoBayConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.CanMove = true;
-		buildingDef.Cancellable = false;
 		buildingDef.OutputConduitType = ConduitType.Solid;
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 3);
 		return buildingDef;

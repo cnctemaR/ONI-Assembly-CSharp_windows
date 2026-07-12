@@ -407,7 +407,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 471618U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 25)
+				if (header.buildVersion > 471883U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 25)
 				{
 					flag = false;
 				}
@@ -465,6 +465,7 @@ public class MainMenu : KScreen
 	public void StartFEAudio()
 	{
 		AudioMixer.instance.Reset();
+		MusicManager.instance.KillAllSongs(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndSnapshot);
 		if (!AudioMixer.instance.SnapshotIsActive(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot))
 		{

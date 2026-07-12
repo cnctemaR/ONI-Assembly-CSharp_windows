@@ -19,17 +19,25 @@ public class BuildWatermark : KScreen
 
 	public static string GetBuildText()
 	{
-		string text = LaunchInitializer.BuildPrefix() + "-";
+		string text = (DistributionPlatform.Initialized ? (LaunchInitializer.BuildPrefix() + "-") : "??-");
 		if (Application.isEditor)
 		{
 			text += "<EDITOR>";
 		}
 		else
 		{
-			text += 471618U.ToString();
+			text += 471883U.ToString();
+			if (DistributionPlatform.Initialized)
+			{
+				text = text + "-" + DlcManager.GetActiveContentLetters();
+			}
+			else
+			{
+				text += "-?";
+			}
 			if (DebugHandler.enabled)
 			{
-				text += "-D";
+				text += "D";
 			}
 		}
 		return text;

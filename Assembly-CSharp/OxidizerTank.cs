@@ -114,6 +114,14 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (this.discoverResourcesOnSpawn != null)
+		{
+			foreach (SimHashes simHashes in this.discoverResourcesOnSpawn)
+			{
+				Element element = ElementLoader.FindElementByHash(simHashes);
+				DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
+			}
+		}
 		base.GetComponent<KBatchedAnimController>().Play("grounded", KAnim.PlayMode.Loop, 1f, 0f);
 		RocketModuleCluster component = base.GetComponent<RocketModuleCluster>();
 		if (component != null)
@@ -222,6 +230,8 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 
 	[Serialize]
 	public float targetFillMass;
+
+	public List<SimHashes> discoverResourcesOnSpawn;
 
 	[SerializeField]
 	private Tag[] oxidizerTypes;

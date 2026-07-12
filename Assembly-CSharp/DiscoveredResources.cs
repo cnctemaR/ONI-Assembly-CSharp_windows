@@ -62,6 +62,18 @@ public class DiscoveredResources : KMonoBehaviour, ISaveLoadable, ISim4000ms
 		}
 	}
 
+	public bool CheckAllDiscoveredAreNew()
+	{
+		foreach (Tag tag in this.Discovered)
+		{
+			if (!this.newDiscoveries.ContainsKey(tag))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private void DiscoverCategory(Tag category_tag, Tag item_tag)
 	{
 		HashSet<Tag> hashSet;

@@ -6,14 +6,18 @@ namespace KMod
 {
 	public class KModUtil
 	{
-		public static KModHeader GetHeader(IFileSource file_source, string defaultStaticID, string defaultTitle, string defaultDescription)
+		public static KModHeader GetHeader(IFileSource file_source, string defaultStaticID, string defaultTitle, string defaultDescription, bool devMod)
 		{
 			string text = "mod.yaml";
 			string text2 = file_source.Read(text);
+			YamlIO.ErrorHandler errorHandler = delegate(YamlIO.Error e, bool force_warning)
+			{
+				YamlIO.LogError(e, !devMod);
+			};
 			KModHeader kmodHeader = ((!string.IsNullOrEmpty(text2)) ? YamlIO.Parse<KModHeader>(text2, new FileHandle
 			{
 				full_path = Path.Combine(file_source.GetRoot(), text)
-			}, null, null) : null);
+			}, errorHandler, null) : null);
 			if (kmodHeader == null)
 			{
 				kmodHeader = new KModHeader

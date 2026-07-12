@@ -7,7 +7,7 @@ public class DistributionPlatform : MonoBehaviour
 	{
 		get
 		{
-			return DistributionPlatform.Impl.Initialized;
+			return DistributionPlatform.Impl != null && DistributionPlatform.Impl.Initialized;
 		}
 	}
 

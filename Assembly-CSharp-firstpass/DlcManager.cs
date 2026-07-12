@@ -70,14 +70,7 @@ public class DlcManager
 
 	public static void ToggleDLC(string id)
 	{
-		if (Application.isEditor || DistributionPlatform.Inst.IsDLCPurchased(id))
-		{
-			DlcManager.SetContentSettingEnabled(id, !DlcManager.IsContentSettingEnabled(id));
-			if (App.instance)
-			{
-				App.instance.Restart();
-			}
-		}
+		DlcManager.SetContentSettingEnabled(id, !DlcManager.IsContentSettingEnabled(id));
 	}
 
 	public static bool IsContentActive(string dlcId)
@@ -152,14 +145,73 @@ public class DlcManager
 		return list;
 	}
 
+	public static List<string> GetActiveDLCIds()
+	{
+		List<string> list = new List<string>();
+		for (int i = DlcManager.RELEASE_ORDER.Count - 1; i >= 0; i--)
+		{
+			string text = DlcManager.RELEASE_ORDER[i];
+			if (!DlcManager.IsVanillaId(text) && DlcManager.IsContentActive(text))
+			{
+				list.Add(text);
+			}
+		}
+		return list;
+	}
+
+	public static string GetContentLetter(string dlcId)
+	{
+		if (dlcId != null)
+		{
+			if (dlcId != null && dlcId.Length == 0)
+			{
+				return "B";
+			}
+			if (dlcId == "EXPANSION1_ID")
+			{
+				return "S";
+			}
+		}
+		global::Debug.LogError("No content letter exists for " + dlcId);
+		return null;
+	}
+
+	public static string GetActiveContentLetters()
+	{
+		if (DlcManager.IsPureVanilla())
+		{
+			return DlcManager.GetContentLetter("");
+		}
+		string text = "";
+		for (int i = 0; i < DlcManager.RELEASE_ORDER.Count; i++)
+		{
+			string text2 = DlcManager.RELEASE_ORDER[i];
+			if (!DlcManager.IsVanillaId(text2) && DlcManager.IsContentActive(text2))
+			{
+				text += DlcManager.GetContentLetter(text2);
+			}
+		}
+		return text;
+	}
+
 	private static void SetContentSettingEnabled(string dlcId, bool enabled)
 	{
 		global::Debug.Assert(dlcId != "", "There is no KPlayerPrefs value for vanilla - it is always enabled");
+		bool flag = Application.isEditor || DistributionPlatform.Inst.IsDLCPurchased(dlcId);
+		if (enabled && !flag)
+		{
+			return;
+		}
+		KPlayerPrefs.SetInt(dlcId + ".ENABLED", enabled ? 1 : 0);
 		if (enabled && !DlcManager.CheckPlatformSubscription(dlcId))
 		{
 			DistributionPlatform.Inst.ToggleDLCSubscription(dlcId);
+			return;
 		}
-		KPlayerPrefs.SetInt(dlcId + ".ENABLED", enabled ? 1 : 0);
+		if (App.instance)
+		{
+			App.instance.Restart();
+		}
 	}
 
 	public static bool IsPureVanilla()
@@ -175,12 +227,6 @@ public class DlcManager
 	public static bool IsExpansion1Active()
 	{
 		return DlcManager.IsContentActive("EXPANSION1_ID");
-	}
-
-	public static void SetExpansion1Enabled(bool active)
-	{
-		global::Debug.Assert(!active || DlcManager.CheckPlatformSubscription("EXPANSION1_ID"), "Cannot set Expansion1 active if it isn't installed");
-		DlcManager.SetContentSettingEnabled("EXPANSION1_ID", active);
 	}
 
 	public static bool FeatureRadiationEnabled()

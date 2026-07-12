@@ -801,7 +801,7 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					471618U,
+					471883U,
 					25
 				});
 			}
@@ -1110,7 +1110,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 25) || header.buildVersion > 471618U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 25) || header.buildVersion > 471883U;
 	}
 
 	private static bool IsSaveFromCurrentDLC(SaveGame.GameInfo gameInfo, out string saveDlcName)
@@ -1163,9 +1163,8 @@ public class LoadScreen : KModalScreen
 			string text = (DlcManager.IsVanillaId(this.selectedSave.dlcId) ? UI.FRONTEND.LOADSCREEN.VANILLA_RESTART : UI.FRONTEND.LOADSCREEN.EXPANSION1_RESTART);
 			this.ConfirmDoAction(text, delegate
 			{
-				DlcManager.SetExpansion1Enabled(!DlcManager.IsExpansion1Active());
 				KPlayerPrefs.SetString("AutoResumeSaveFile", this.selectedSave.filename);
-				App.instance.Restart();
+				DlcManager.ToggleDLC("EXPANSION1_ID");
 			});
 			return;
 		}
@@ -1190,10 +1189,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 471618U)
+		if (header.buildVersion > 471883U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 471618U.ToString();
+			text2 = 471883U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{

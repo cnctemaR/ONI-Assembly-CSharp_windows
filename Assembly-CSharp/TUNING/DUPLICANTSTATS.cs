@@ -320,14 +320,15 @@ namespace TUNING
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_UNCOMMON,
 				dlcId = "",
-				mutuallyExclusiveTraits = new List<string> { "CantBuild" }
+				mutuallyExclusiveTraits = new List<string> { "ConstructionUp", "CantBuild" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "RanchingDown",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
-				dlcId = ""
+				dlcId = "",
+				mutuallyExclusiveTraits = new List<string> { "ConstructionUp", "CantBuild" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -357,7 +358,7 @@ namespace TUNING
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_COMMON,
 				dlcId = "",
-				mutuallyExclusiveTraits = new List<string> { "CantCook" }
+				mutuallyExclusiveTraits = new List<string> { "Foodie", "CantCook" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -372,7 +373,7 @@ namespace TUNING
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_RARE,
 				dlcId = "",
-				mutuallyExclusiveTraits = new List<string> { "CantDig" }
+				mutuallyExclusiveTraits = new List<string> { "MoleHands", "CantDig" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -380,7 +381,7 @@ namespace TUNING
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_RARE,
 				dlcId = "",
-				mutuallyExclusiveTraits = new List<string> { "CantResearch" }
+				mutuallyExclusiveTraits = new List<string> { "FastLearner", "CantResearch" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{

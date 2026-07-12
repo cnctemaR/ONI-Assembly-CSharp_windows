@@ -227,6 +227,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 					if (this.worldId == ClusterManager.Instance.activeWorldId)
 					{
 						this.hasValidCount = true;
+						PinnedResourcesPanel.Instance.ClearExcessiveNewItems();
 						PinnedResourcesPanel.Instance.Refresh();
 					}
 				}

@@ -22,11 +22,11 @@ public class CommandModuleConfig : IBuildingConfig
 		float[] command_MODULE_MASS = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.COMMAND_MODULE_MASS;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, command_MODULE_MASS, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
-		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -34,7 +34,6 @@ public class CommandModuleConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.CanMove = true;
-		buildingDef.Cancellable = false;
 		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort("TriggerLaunch", new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH_INACTIVE, false, false) };
 		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort("LaunchReady", new CellOffset(0, 2), global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY_INACTIVE, false, false) };
 		return buildingDef;

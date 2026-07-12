@@ -22,12 +22,12 @@ public class OxidizerTankConfig : IBuildingConfig
 		float[] fuel_TANK_DRY_MASS = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_DRY_MASS;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, fuel_TANK_DRY_MASS, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.DefaultAnimState = "grounded";
-		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
@@ -35,8 +35,6 @@ public class OxidizerTankConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.CanMove = true;
-		buildingDef.Cancellable = false;
-		buildingDef.ShowInBuildMenu = !DlcManager.FeatureClusterSpaceEnabled();
 		return buildingDef;
 	}
 
@@ -49,6 +47,7 @@ public class OxidizerTankConfig : IBuildingConfig
 		};
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -64,14 +63,17 @@ public class OxidizerTankConfig : IBuildingConfig
 		FlatTagFilterable flatTagFilterable = go.AddOrGet<FlatTagFilterable>();
 		flatTagFilterable.tagOptions = new List<Tag> { SimHashes.OxyRock.CreateTag() };
 		flatTagFilterable.headerText = global::STRINGS.BUILDINGS.PREFABS.OXIDIZERTANK.UI_FILTER_CATEGORY;
+		flatTagFilterable.selectedTags.Add(SimHashes.OxyRock.CreateTag());
 		OxidizerTank oxidizerTank = go.AddOrGet<OxidizerTank>();
 		oxidizerTank.consumeOnLand = !DlcManager.FeatureClusterSpaceEnabled();
 		oxidizerTank.storage = storage;
 		oxidizerTank.supportsMultipleOxidizers = true;
 		oxidizerTank.maxFillMass = 2700f;
 		oxidizerTank.targetFillMass = 2700f;
+		oxidizerTank.discoverResourcesOnSpawn = new List<SimHashes> { SimHashes.OxyRock };
 		go.AddOrGet<CopyBuildingSettings>();
 		go.AddOrGet<DropToUserCapacity>();
+		go.AddOrGet<Prioritizable>();
 		BuildingTemplates.ExtendBuildingToRocketModule(go, "rocket_oxidizer_tank_bg_kanim", false);
 	}
 

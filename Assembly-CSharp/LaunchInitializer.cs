@@ -27,12 +27,12 @@ public class LaunchInitializer : MonoBehaviour
 		GraphicsOptionsScreen.SetSettingsFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
 		global::Debug.Log("Current date: " + global::System.DateTime.Now.ToString());
-		global::Debug.Log("release Build: " + 471618U.ToString());
+		global::Debug.Log("release Build: " + BuildWatermark.GetBuildText());
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		DistributionPlatform.Initialize();
 		global::Debug.Log("DistributionPlatform initialized.");
-		global::Debug.Log("release Build: " + LaunchInitializer.BuildPrefix() + "-" + 471618U.ToString());
+		global::Debug.Log("release Build: " + BuildWatermark.GetBuildText());
 		global::Debug.Log(string.Format("EXPANSION1 installed: {0}  active: {1}", DlcManager.IsExpansion1Installed(), DlcManager.IsExpansion1Active()));
 		KFMOD.Initialize();
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)

@@ -319,8 +319,8 @@ public class Global : MonoBehaviour
 		Singleton<KBatchedAnimUpdater>.CreateInstance();
 		Localization.Initialize();
 		this.modManager.Load(Content.Translation);
-		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local));
-		this.modManager.distribution_platforms.Add(new Local("Dev", Label.DistributionPlatform.Dev));
+		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local, false));
+		this.modManager.distribution_platforms.Add(new Local("Dev", Label.DistributionPlatform.Dev, true));
 		this.mainThread = Thread.CurrentThread;
 		KProfiler.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
@@ -590,7 +590,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 471618U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 471883U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

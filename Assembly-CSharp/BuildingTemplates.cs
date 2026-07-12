@@ -144,10 +144,6 @@ public class BuildingTemplates
 			template.AddOrGet<VerticalModuleTiler>();
 		}
 		GameObject buildingUnderConstruction = def.BuildingUnderConstruction;
-		if (def.Cancellable)
-		{
-			global::Debug.LogError(def.Name + " Def should be marked 'Cancellable = false' as they implment their own cancel logic in ReorderableBuilding");
-		}
 		if (clusterRocket)
 		{
 			buildingUnderConstruction.AddOrGet<RocketModuleCluster>();
@@ -184,6 +180,10 @@ public class BuildingTemplates
 		DebugUtil.Assert(Array.IndexOf<string>(def.RequiredDlcIds, "EXPANSION1_ID") != -1, "Only expansion1 rocket engines should be expanded to Cluster Modules.");
 		template.AddOrGet<ReorderableBuilding>();
 		buildingUnderConstruction.AddOrGet<ReorderableBuilding>();
+		if (def.Cancellable)
+		{
+			global::Debug.LogError(def.Name + " Def should be marked 'Cancellable = false' as they implement their own cancel logic in ReorderableBuilding");
+		}
 		template.GetComponent<ReorderableBuilding>().buildConditions.Add(new ResearchCompleted());
 		template.GetComponent<ReorderableBuilding>().buildConditions.Add(new MaterialsAvailable());
 		template.GetComponent<ReorderableBuilding>().buildConditions.Add(new PlaceSpaceAvailable());

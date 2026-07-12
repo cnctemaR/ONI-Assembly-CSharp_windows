@@ -17,7 +17,7 @@ namespace KMod
 			return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), this.folder));
 		}
 
-		private void Subscribe(string directoryName, long timestamp, IFileSource file_source)
+		private void Subscribe(string directoryName, long timestamp, IFileSource file_source, bool isDevMod)
 		{
 			Label label = new Label
 			{
@@ -26,7 +26,7 @@ namespace KMod
 				version = (long)directoryName.GetHashCode(),
 				title = directoryName
 			};
-			KModHeader header = KModUtil.GetHeader(file_source, label.defaultStaticID, directoryName, directoryName);
+			KModHeader header = KModUtil.GetHeader(file_source, label.defaultStaticID, directoryName, directoryName, isDevMod);
 			label.title = header.title;
 			Mod mod = new Mod(label, header.staticID, header.description, file_source, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_LOCAL_MOD, delegate
 			{
@@ -39,7 +39,7 @@ namespace KMod
 			Global.Instance.modManager.Subscribe(mod, this);
 		}
 
-		public Local(string folder, Label.DistributionPlatform distribution_platform)
+		public Local(string folder, Label.DistributionPlatform distribution_platform, bool isDevFolder)
 		{
 			this.folder = folder;
 			this.distribution_platform = distribution_platform;
@@ -51,7 +51,7 @@ namespace KMod
 			foreach (DirectoryInfo directoryInfo2 in directoryInfo.GetDirectories())
 			{
 				string name = directoryInfo2.Name;
-				this.Subscribe(name, directoryInfo2.LastWriteTime.ToFileTime(), new Directory(directoryInfo2.FullName));
+				this.Subscribe(name, directoryInfo2.LastWriteTime.ToFileTime(), new Directory(directoryInfo2.FullName), isDevFolder);
 			}
 		}
 	}

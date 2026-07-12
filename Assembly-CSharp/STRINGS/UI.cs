@@ -7766,6 +7766,8 @@ namespace STRINGS
 
 			public static LocString CLEAR_NEW_RESOURCES = "Clear New";
 
+			public static LocString CLEAR_ALL = "Unpin all resources";
+
 			public static LocString SEE_ALL = "+ See All ({0})";
 
 			public static LocString NEW_TAG = "NEW";
